@@ -1,6 +1,6 @@
 
 import web
-from tornado.template import Template, Loader
+from web.tornado.template import Template, Loader
 import config 
 import json
 import sys
