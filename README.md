@@ -11,10 +11,11 @@ xnote是一个基于webapp的笔记系统，提供类似于wiki的资料管理�
 
 ## 开发框架
 
-- webpy
+- webpy (修改版)
 - tornado template
 - cherrypy (webpy依赖的httpserver)
+- sqlite3 (Python自带文件型数据库，不支持并发)
 
 ## 协议
 
-Apache License (tornado)
+- Apache License (tornado)
