@@ -46,7 +46,7 @@ def main():
     global app
     global basic_urls
 
-    port = "8080"
+    port = config.PORT
 
     basic_urls = [
             "/", "MainHandler",
