@@ -3,7 +3,6 @@ from __future__ import print_function
 import sys, os
 import urllib
 import posixpath
-import time
 
 from . import webapi as web
 from . import net
@@ -27,8 +26,6 @@ try:
     from io import BytesIO
 except ImportError:
     from StringIO import BytesIO
-
-import pdb
 
 __all__ = ["runsimple"]
 
@@ -237,92 +234,23 @@ class StaticApp(SimpleHTTPRequestHandler):
         self.status = str(int(status)) + " " + msg
 
     def send_header(self, name, value):
-        for kv in self.headers:
-            if kv[0] == name:
-                self.headers.remove(kv)
         self.headers.append((name, value))
-
-    def get_header(self, name):
-        for key, value in self.headers:
-            if name == key:
-                return value
 
     def end_headers(self):
         pass
 
     def log_message(*a): pass
 
-
-    def get_date_str(self):
-        return time.strftime('%Y-%m-%d %H:%M:%S')
-
-    def send_range(self, f, block_size):
-        total_size = self._m_total_size;
-        http_range = self._m_http_range;
-        start      = self.range_start
-        end        = self.range_end
-        f.seek(start)
-        buf = f.read(block_size)
-        f.close()
-        self.send_header("Content-Range", "bytes %s-%s/%s" % (start, start+len(buf)-1, total_size))
-        self.send_header("Content-Length", str(len(buf)))
-        # self.send_header("Content-Type", "application/octet-stream")
-        self.send_response(206,"Partial Content")
-        # self.send_response(200, "OK")
-        self.start_response(self.status, self.headers)
-
-        content_range = self.get_header("Content-Range")
-        content_length = str(len(buf))
-        print("%s - - [%s]" % (self.client_address, self.get_date_str()))
-        print("  - - HTTP_RANGE", http_range)
-        print("  - - Content-Range", content_range)
-        print("  - - Content-Length", content_length)
-        return buf
-
-    def send_fixed_range(self, f, block_size):
-        total_size = self._m_total_size;
-        http_range = self._m_http_range;
-        start      = self.range_start
-        end        = self.range_end
-        f.seek(start)
-
-        content_range = "bytes %s-%s/%s" % (start, end, total_size)
-        content_length = str(end - start + 1)
-        print("%s - - [%s]" % (self.client_address, self.get_date_str()))
-        print("  - - HTTP_RANGE", http_range)
-        print("  - - Content-Range", content_range)
-        print("  - - Content-Length", content_length)
-
-        self.send_header("Content-Range", content_range)
-        self.send_header("Content-Length", content_length)
-        # self.send_header("Content-Type", "application/octet-stream")
-        self.send_response(206,"Partial Content")
-        # self.send_response(200, "OK")
-        self.start_response(self.status, self.headers)
-
-        while start <= end:
-            rest_size = end - start + 1
-            size = block_size
-            if rest_size < block_size:
-                size = rest_size
-            buf = f.read(size)
-            start += size
-            yield buf
-
     def __iter__(self):
         environ = self.environ
 
         self.path = environ.get('PATH_INFO', '')
-        # marked
-        # print (type(self.path))
-        # print (os.stat(self.path))
-        # it words well in python alone, the bug should be cherrypy
         self.client_address = environ.get('REMOTE_ADDR','-'), \
                               environ.get('REMOTE_PORT','-')
         self.command = environ.get('REQUEST_METHOD', '-')
 
         self.wfile = BytesIO() # for capturing error
-        
+
         try:
             path = self.translate_path(self.path)
             etag = '"%s"' % os.path.getmtime(path)
@@ -335,51 +263,11 @@ class StaticApp(SimpleHTTPRequestHandler):
         except OSError:
             pass # Probably a 404
 
-        http_continue = False
-        self._m_http_range = ""
-        http_range = environ.get("HTTP_RANGE")
-        if http_range is not None:
-            http_range = http_range.lower()
-            self._m_http_range = http_range
-            range_list = http_range.split("bytes=")
-            if len(range_list) == 2:
-                range_list = range_list[1]
-                try:
-                    start, end = range_list.split('-')
-                    start = int(start)
-                    if end != "":
-                        end = int(end)
-                    self.range_start = start
-                    self.range_end   = end
-                    http_continue = True
-                except Exception as e:
-                    http_continue = False
-
         f = self.send_head()
-        if f:
-            # block_size = 16 * 1024
-            # block_size = 4 * 1024 # 5M/S
-            # block_size = 256 * 1024 # 9M/S
-            total_size = int(self.get_header("Content-Length"))
-            self._m_total_size = total_size
-            
-            block_size = 64 * 1024 # 10M/S
-            if http_continue:
-                if self.range_end != "":
-                    for buf in self.send_fixed_range(f, block_size):
-                        yield buf
-                    f.close()
-                    raise StopIteration()
-                buf = self.send_range(f, block_size)
-                yield buf
-                raise StopIteration()
+        self.start_response(self.status, self.headers)
 
-            self.start_response(self.status, self.headers)
-            # if total_size > 10 * 1024 ** 2:
-            #     buf = f.read(block_size)
-            #     print ("%s - - [%s] " % (self.client_address, self.get_date_str()), "first chunk")
-            #     yield buf
-            #     raise StopIteration()
+        if f:
+            block_size = 16 * 1024
             while True:
                 buf = f.read(block_size)
                 if not buf:

@@ -1,6 +1,7 @@
 import web
 import os, socket, sys
 from BaseHandler import BaseHandler, reload_template
+from model.WikiHandler import WikiHandler
 from FileDB import FileService
 import functools
 from util import fsutil
@@ -47,12 +48,18 @@ def main():
     global basic_urls
 
     port = config.PORT
+    
+    var_env = dict()
 
     basic_urls = [
             "/", "MainHandler",
             "/db", "DBHandler",
             "/net", "NetHandler",
+            "/wiki/(.*)", "WikiHandler",
         ]
+        
+    var_env["MainHandler"] = MainHandler
+    var_env["WikiHandler"] = WikiHandler
 
 
     os.environ["PORT"] = port
@@ -65,9 +72,9 @@ def main():
     config.set("host", "%s:%s" % (ip_list[0], port))
 
     # I can reload the system by myself
-    app = web.application(list(), globals(), autoreload=False)
+    app = web.application(list(), var_env, autoreload=False)
 
-    m = ModelManager(app, globals(), basic_urls)
+    m = ModelManager(app, var_env, basic_urls)
     m.load_model_dir()
 
     def stop_callback():
