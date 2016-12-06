@@ -1,0 +1,185 @@
+{% extends master.html %}
+
+{% block head %}
+<script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
+<script type="text/javascript" src="/static/lib/marked/marked.js"></script>
+<style>
+.CodeMirror {
+    width: 60rem;
+    font-size:16px;
+    height: auto;
+}
+
+#markdown-input {
+    font-family: monospace;
+}
+
+li {
+    margin-bottom: 0.5em;
+}
+
+</style>
+{% end %}
+
+{% block body %}
+    <div style="">
+    
+    <h3>
+        <span id="fileId" style="display:none;">{{filename}}</span>
+    </h3>
+
+    <span id="result" style="color:green"></span>
+    
+    </div>
+    
+    <hr/>
+
+    <div>
+
+        <div>
+        </div>
+    </div>
+
+    <form action="/file/update" method="POST">
+        <div class="">
+
+            <div style="padding-top:20px;">
+                <div id="epiceditor" class="row">
+                    <div id="markdown-input-div" class="col-md-6">
+                        <textarea id="markdown-input" class="form-control" name="content" rows=50>{{?content}}</textarea>
+                    </div>
+
+                    <div id="markdown-output-div" class="col-md-12">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+<div style="float:left;width:100%;">
+
+<script>
+    function switchRename() {
+        if ($("#renameDiv").css("display") == "none") {
+            $("#oldName").hide();
+            $("#renameDiv").css("display", "block");
+            $("#newName").val($("#oldName").html());
+        } else {
+            $("#oldName").show();
+            $("#renameDiv").css("display", "none");
+        }
+    }
+
+        
+    // autosize textarea rows
+    
+
+    function edit() {
+        $("#markdown-input-div").removeClass("hide");
+        $("#markdown-output-div").removeClass("col-md-12").addClass("col-md-6");
+        var height = Math.max(500, $("#markdown-output-div").height());
+        $("#markdown-input").css({height:height+"px"});
+    }
+    
+    function preview() {
+        if (!$("#markdown-input-div").hasClass("hide")) {
+            $("#markdown-input-div").addClass("hide");
+            $("#markdown-output-div").removeClass("col-md-6").addClass("col-md-12");
+        }
+    }
+    
+    function renameFile() {
+        var fileId = $("#fileId").text();
+        var oldName = $("#oldName").html();
+        var newName = $("#newName").val();
+        if (newName) {
+            $.post("/file/update", {
+                option: "rename",
+                fileId: fileId,
+                newName: newName
+            }, function (msg) {
+                var result = JSON.parse(msg);
+                if (result.success)
+                {
+                    switchRename();
+                    window.location.reload();
+                } else {
+                    alert("修改失败, " + result.msg);
+                }
+            })
+        }
+    }
+
+        function escape(html, encode) {
+          return html
+            .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function highlight_csv (code) {
+            try {
+                // var csv = new CSV(code);
+                var rows = CSV.parse(code);
+                // console.log(rows);
+                var table = $("<table>");
+                for (var i = 0; i < rows.length; i++) {
+                    var col = rows[i];
+                    var tr = $("<tr>");
+                    for (var j = 0; j < col.length; j++) {
+                        var td = $("<td>").html(col[j]);
+                        tr.append(td);
+                    }
+                    table.append(tr);
+                }
+                console.log(table);
+                window.csv_table = table;
+                return "<table class='table'>" + table.html() + "</table>";
+            } catch (e) {
+                console.log(e);
+                return escape(code);
+            }
+
+        }
+
+        function highlight (code, lang) {
+            console.log(code, lang);
+            if (lang) {
+                lang = lang.toUpperCase();
+            }
+            if (lang == "CSV") {
+                return highlight_csv(code);
+            } else if (lang=="EXCEL") {
+                code = code.replace(/\t/gi, ",");
+                // some \t may be replaced by four space
+                code = code.replace(/ {4}/gi, ',');
+                console.log(code);
+                return highlight_csv(code);
+            } else {
+                return escape(code);
+            }
+        }
+
+        // set marked code highlight function
+        marked.defaults.highlight = highlight;
+
+    $(function () {
+        var old_content = $("#markdown-input-div").val();
+        setInterval(function () {
+            var input = $("#markdown-input").val();
+            // not modified
+            if (input == old_content) {
+                return;
+            }
+            old_content = input;
+            
+            $("#markdown-output-div").html(marked.parse(input));
+        }, 200);
+        preview();
+    })
+</script>
+
+{% end %}
