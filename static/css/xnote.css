@@ -1,0 +1,195 @@
+
+
+pre {
+    background: #eee;
+    padding: 0.5em;
+    border: 1px solid #ddd;
+}
+
+a {
+    font-size: 15px;
+    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
+}
+
+a:hover {
+    background-color: LightGrey;
+}
+
+p,li,a {
+    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
+}
+
+h1,h2,h3 {
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Helvetica, STKaiti, SimSun, serif
+}
+
+blockquote {
+    font-style: italic;
+}
+
+.menu-selected {
+    background: #0088cc;
+    color: #fff;
+}
+
+.nav-sidebar {
+    /*position: fixed;*/
+}
+
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+  color: #fff;
+  background-color: #428bca;
+}
+
+.xnote-main {
+    /*padding-left: 10%;*/
+    /*padding-right: 10%;*/
+    width: 80%;
+}
+
+.hide {
+    display: none;
+}
+
+.tool-div {
+    font-size: medium;
+}
+
+.tool-div a {
+    font-size: medium;
+    color: blue;
+}
+
+.tool-description {
+    font-size: small;
+    padding-top: 3px;
+}
+
+.note {
+    float: inherit;
+}
+
+.note-head {
+    font-size: 20px;
+}
+
+.note-name {
+    /*font-size: 20px;*/
+}
+
+.note-name a {
+    font-size: medium;
+    color: blue;
+}
+
+.note-content-short {
+    font-size: small;
+    word-break: break-all;
+}
+
+.note-last-visit-time {
+    padding-left: 2px;
+    padding-top: 2px;
+    font-size: small;
+    color: green;
+}
+
+.note-related {
+    font-size: 6px;
+    padding-left: 5px;
+    color: red;
+    display: none;
+}
+.note-visited-cnt {
+    float: right;
+    font-size: small;
+}
+
+.xnote-menu {
+    padding-left:0;
+}
+
+li.menu-item {
+    float: left;
+    display: block;
+    padding-left: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.col-md-1 {
+    float: left;
+    width: 8.3%;
+    /*min-width: 200px;*/
+}
+
+.col-md-2 {
+    float: left;
+    width: 16.7%;
+}
+
+.col-md-4 {
+    float:left;
+    width: 33.3%;
+}
+
+.col-md-6 {
+    float: left;
+    width: 50%;
+}
+
+.col-md-8 {
+    float: left;
+    width: 66.7%;
+}
+
+.col-md-10 {
+    float: left;
+    width: 83.3%;
+}
+
+.col-md-11 {
+    float: left;
+    width: 91.7%;
+}
+
+.col-md-12 {
+    float: left;
+    width: 100%;
+}
+
+.form-control {
+    width: 100%;
+}
+
+
+table {
+ font-family: verdana,arial,sans-serif;
+ font-size:14px;
+ color:#333333;
+ border-width: 1px;
+ border-color: #666666;
+ border-collapse: collapse;
+}
+table th {
+ border-width: 1px;
+ padding: 8px;
+ border-style: solid;
+ border-color: #666666;
+ background-color: #dedede;
+}
+table td {
+ border-width: 1px;
+ padding: 8px;
+ border-style: solid;
+ border-color: #666666;
+ background-color: #ffffff;
+}
+
+/** color **/
+
+.red {
+    color:red;
+}
