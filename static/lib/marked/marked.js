@@ -881,8 +881,8 @@ Renderer.prototype.link = function(href, title, text) {
       return '';
     }
   }
-  // var out = '<a href="' + href + '"';
-  var out = '<a href="' + href + '" target="_blank" ';
+  var out = '<a href="' + href + '"';
+  // var out = '<a href="' + href + '" target="_blank" ';
   if (title) {
     out += ' title="' + title + '"';
   }

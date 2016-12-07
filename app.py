@@ -1,4 +1,5 @@
 import web
+import web.xtemplate as xtemplate
 import os, socket, sys
 from BaseHandler import BaseHandler, reload_template
 from model.WikiHandler import WikiHandler
@@ -42,7 +43,11 @@ def get_ip_list(blacklist = []):
 
     return ip_list
 
-
+def main_render_hook(kw):
+    """ Main hook for template engine """
+    kw["full_search"] = False
+    
+    
 def main():
     global app
     global basic_urls
@@ -73,6 +78,8 @@ def main():
 
     # I can reload the system by myself
     app = web.application(list(), var_env, autoreload=False)
+    
+    xtemplate.add_render_hook(main_render_hook)
 
     m = ModelManager(app, var_env, basic_urls)
     m.load_model_dir()
