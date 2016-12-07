@@ -42,8 +42,13 @@ li {
         
     {% if type == "dir" %}
         <div>
-            {% for childpath in children %}
-                <li><a href="/wiki{{childpath}}">{{ os.path.basename(childpath) }}</a></li>
+            {% for child in children %}
+                <li style="padding-top:6px;">
+                    {% if child.type == "dir" %}
+                        <img src="/static/img/folder.gif"/>
+                    {% end %}
+                    <a href="/wiki{{child.path}}">{{ child.name }}</a>
+                </li>
             {% end %}
         </div>
     {% elif type == "file" %}

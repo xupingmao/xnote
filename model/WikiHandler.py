@@ -5,6 +5,23 @@ from urllib.parse import quote, unquote
 
 WIKI_PATH = "static/wiki/"
 
+class FileItem:
+
+    def __init__(self, parent, name, currentdir):
+        if parent.endswith("/"):
+            self.path = parent + name
+        else:
+            self.path = parent + "/" + name
+        self.name = name
+        fspath = os.path.join(currentdir, name)
+        if os.path.isdir(fspath):
+            self.type = "dir"
+            self.key = "0" + name
+        else:
+            self.type = "name"
+            self.key = "1" + name
+        
+
 class WikiHandler:
 
     def GET(self, name):
@@ -21,10 +38,8 @@ class WikiHandler:
             children = []
             parent = name
             for child in os.listdir(path):
-                if parent.endswith("/"):
-                    children.append(parent + child)
-                else:
-                    children.append(parent + "/" + child)
+                children.append(FileItem(parent, child, path))
+            children.sort(key = lambda item: item.key)
         else:
             type = "file"
             content = fsutil.readfile(path)
