@@ -205,8 +205,11 @@ class MyStaticApp(SimpleHTTPRequestHandler):
                 yield buf
             f.close()
         else:
-            value = self.wfile.getvalue()
-            yield value
+            # f is None, redirect, @see http.server
+            # value = self.wfile.getvalue()
+            # yield value
+            self.start_response(self.status, self.headers)
+            raise StopIteration()
 
 def is_stared(path):
     return config.has_config("STARED_DIRS", path)
@@ -245,6 +248,8 @@ class MyFileSystemApp(MyStaticApp):
         path = os.path.sep.join(words)
         if trailing_slash:
             path += '/'
+        if os.name == "posix":
+            path = "/" + path
         return path
 
     def list_directory(self, path):
