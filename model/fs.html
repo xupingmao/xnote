@@ -1,0 +1,61 @@
+{% extends master.html %}
+
+{% block head %}
+
+<style type="text/css">
+    .fs-dir {
+        
+    }
+
+    .fs-file {
+
+    }
+</style>
+
+{% end %}
+
+{% block body %}
+
+<div>
+    <form action="/file_upload" enctype="multipart/form-data" method="POST">
+        <input name="dirname" style="display:none;" value="{{current_path}}"/>
+        <input type="file" name="file"/>
+        <button>上传</button>
+    </form>
+<!--     <a href="/system/protect?path={{current_path}}">转换</a> -->
+    
+    {% if is_stared(current_path) %}
+        <a href="/system/star?op=cancel&path={{current_path}}">取消收藏</a>
+    {% else %}
+        <a href="/system/star?path={{current_path}}">收藏</a>
+    {% end %}
+</div>
+
+<hr/>
+
+<div>
+
+<ul>
+
+<li style="padding-top:6px;"><a href="/fs/{{parent_path}}/">上一级目录</a></li>
+
+{% for filename in filelist %}
+    {% set filepath = current_path + filename %}
+    <li style="padding-top:6px;">
+    {% if os.path.isdir(filepath) %}
+        {% set filepath = filepath + "/" %}
+        <img src="/static/img/folder.gif"/>
+        <a href="/fs/{{filepath}}" class="fs-dir">{{filename}}</a>
+    {% else %}
+        <a href="/fs/{{filepath}}" class="fs-file">{{filename}}</a>
+    {% end %}
+    </li>
+{% end %}
+
+</ul>
+
+<hr/>
+
+</div>
+
+{% end %}

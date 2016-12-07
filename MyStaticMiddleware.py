@@ -280,7 +280,7 @@ class MyFileSystemApp(MyStaticApp):
         kw["current_path"] = path
         kw["parent_path"] = parent_path
 
-        content = render_template("filesystem.html", **kw)
+        content = render_template("fs.html", **kw)
         displaypath = html.escape(displaypath)
         enc = "utf-8"
         encoded = content

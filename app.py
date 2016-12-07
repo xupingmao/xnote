@@ -2,7 +2,7 @@ import web
 import web.xtemplate as xtemplate
 import os, socket, sys
 from BaseHandler import BaseHandler, reload_template
-from model.WikiHandler import WikiHandler
+from model.wiki import WikiHandler
 from FileDB import FileService
 import functools
 from util import fsutil
