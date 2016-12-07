@@ -135,7 +135,8 @@ function opendir() {
 $(function () {
     var ip = $("#server_ip").val()
     var port = $("#server_port").val()
-    var url = format("http://{}:{}", ip, port);
+    // var url = format("http://{}:{}", ip, port);
+    var url = "http://" + ip + ":" + port;
     $("#qrcode").qrcode(url);
     function updateTime () {
         $("#currentDate").html(new Date().toString("yyyy-MM-dd HH:mm:ss"));
