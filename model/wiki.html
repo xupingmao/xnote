@@ -23,11 +23,7 @@ li {
 
 {% block body %}
     <div style="">
-    
-    <h3>
-        <span id="fileId" style="display:none;">{{filename}}</span>
-    </h3>
-
+ 
     <span id="result" style="color:green"></span>
     
     </div>
@@ -39,24 +35,32 @@ li {
         <div>
         </div>
     </div>
+    
+        <div>
+            <h3>上级目录: <a href="/wiki{{parent}}">{{parent}}</a></h3>
+        </div>
+        
+    {% if type == "dir" %}
+        <div>
+            {% for childpath in children %}
+                <li><a href="/wiki{{childpath}}">{{ os.path.basename(childpath) }}</a></li>
+            {% end %}
+        </div>
+    {% elif type == "file" %}
+        <div style="padding-top:20px;">
+            <div id="epiceditor" class="row">
+                <div id="markdown-input-div" class="col-md-6">
+                    <textarea id="markdown-input" class="form-control" name="content" rows=50>{{?content}}</textarea>
+                </div>
 
-    <form action="/file/update" method="POST">
-        <div class="">
+                <div id="markdown-output-div" class="col-md-12">
 
-            <div style="padding-top:20px;">
-                <div id="epiceditor" class="row">
-                    <div id="markdown-input-div" class="col-md-6">
-                        <textarea id="markdown-input" class="form-control" name="content" rows=50>{{?content}}</textarea>
-                    </div>
-
-                    <div id="markdown-output-div" class="col-md-12">
-
-                    </div>
                 </div>
             </div>
         </div>
-    </form>
-
+    {% end %}
+    
+    
 <div style="float:left;width:100%;">
 
 <script>

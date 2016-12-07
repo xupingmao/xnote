@@ -234,7 +234,11 @@ class StaticApp(SimpleHTTPRequestHandler):
         self.status = str(int(status)) + " " + msg
 
     def send_header(self, name, value):
-        self.headers.append((name, value))
+        # According to PEP 3333, when using Python 3, the response status
+        # and headers must be bytes masquerading as unicode; that is, they
+        # must be of type "str" but are restricted to code points in the
+        # "latin-1" set.
+        self.headers.append((name, str(value)))
 
     def end_headers(self):
         pass
