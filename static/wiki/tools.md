@@ -24,5 +24,9 @@
 - [JavaScript控制台 TODO]
 - [Python控制台]
 
+# web开发工具
+
+- [POST工具](/tools/static/archive/POST.html)
+
 # 其他
 - [图形学入门-光线处理](/static/archive/计算机图形学/图形学入门-光线处理.html)
