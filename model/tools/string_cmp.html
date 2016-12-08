@@ -1,0 +1,148 @@
+{% extends ../master.html %}
+
+{% block head %}
+
+<style type="text/css">
+    .left {
+        float: left;
+        width: 50%;
+    }
+    .right {
+        float: left;
+        width: 50%;
+    }
+
+    .left textarea, .right textarea {
+        width: 100%;
+        font-family: monospace;
+    }
+
+    .result {
+        width: 100%;
+    }
+
+    del {
+    text-decoration: none;
+    color: #b30000;
+    background: #fadad7;
+    }
+    ins {
+        background: #eaf2c2;
+        color: #406619;
+        text-decoration: none;
+    }
+    .source {
+        position: absolute;
+        right: 1%;
+        top: .2em;
+    }
+
+    [contentEditable] {
+        background: #F9F9F9;
+        border-color: #BBB #D9D9D9 #DDD;
+        border-radius: 4px;
+        -webkit-user-modify: read-write-plaintext-only;
+        outline: none;
+    }
+    [contentEditable]:focus {
+        background: #FFF;
+        border-color: #6699cc;
+        box-shadow: 0 0 4px #2175c9;
+    }
+
+    @-moz-document url-prefix() {
+        body {
+            height: 99%; /* Hide scroll bar in Firefox */
+        }
+    }
+
+</style>
+
+<script type="text/javascript" src="/static/lib/jsdiff/diff.js"></script>
+{% end %}
+
+{% block body %}
+
+<div id="settings">
+    <h2>Diff</h2>
+    <label><input type="radio" name="diff_type" value="diffChars" checked> Chars</label>
+    <label><input type="radio" name="diff_type" value="diffWords"> Words</label>
+    <label><input type="radio" name="diff_type" value="diffLines"> Lines</label>
+</div>
+
+<div>
+<div class="left">
+<textarea rows=15 id="left_text"></textarea>
+</div>
+
+<div class="right">
+<textarea rows=15 id="right_text"></textarea>
+</div>
+</div>
+
+<h2>比较结果</h2>
+<pre class="result" id="cmp_result">
+
+</pre>
+
+<script type="text/javascript">
+var a = document.getElementById('left_text');
+var b = document.getElementById('right_text');
+var result = document.getElementById('cmp_result');
+
+function changed() {
+    var diff = JsDiff[window.diffType](a.value, b.value);
+    var fragment = document.createDocumentFragment();
+    for (var i=0; i < diff.length; i++) {
+
+        if (diff[i].added && diff[i + 1] && diff[i + 1].removed) {
+            var swap = diff[i];
+            diff[i] = diff[i + 1];
+            diff[i + 1] = swap;
+        }
+
+        var node;
+        if (diff[i].removed) {
+            node = document.createElement('del');
+            node.appendChild(document.createTextNode(diff[i].value));
+        } else if (diff[i].added) {
+            node = document.createElement('ins');
+            node.appendChild(document.createTextNode(diff[i].value));
+        } else {
+            node = document.createTextNode(diff[i].value);
+        }
+        fragment.appendChild(node);
+    }
+
+    result.innerHTML = '';
+    result.appendChild(fragment);
+}
+
+window.onload = function() {
+    onDiffTypeChange(document.querySelector('#settings [name="diff_type"]:checked'));
+    changed();
+};
+
+a.onpaste = a.onchange =
+b.onpaste = b.onchange = changed;
+
+if ('oninput' in a) {
+    a.oninput = b.oninput = changed;
+} else {
+    a.onkeyup = b.onkeyup = changed;
+}
+
+function onDiffTypeChange(radio) {
+    window.diffType = radio.value;
+    document.title = "Diff " + radio.value.slice(4);
+}
+
+var radio = document.getElementsByName('diff_type');
+for (var i = 0; i < radio.length; i++) {
+    radio[i].onchange = function(e) {
+        onDiffTypeChange(e.target);
+        changed();
+    }
+}
+</script>
+{% end %}

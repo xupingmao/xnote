@@ -1,0 +1,31 @@
+{% extends ../master.html %}
+
+{% block head %}
+    <!-- <link rel="stylesheet" href="/css/table.css"/> -->
+    <script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
+{% end %}
+
+{% block body %}
+
+    <div>
+        <div>输入</div>
+        <textarea id="qrcode_input" cols=60 rows=5></textarea>
+        <button id="generate">生成</button>
+    </div>
+   
+    <div id="qrcode"></div>
+
+
+    <script>
+    $(function () {
+        $("#generate").click(function () {
+            var key = $("#qrcode_input").val();
+            if (key) {
+                $("#qrcode").html("");
+                $("#qrcode").qrcode(key);
+            }    
+        });
+    });
+    </script>
+
+{% end %}

@@ -1,0 +1,47 @@
+<script type="text/javascript" src="/js/Lexer.js"></script>
+<script>
+
+/**
+ name ::= [a-zA-Z_$][a-zA-Z_$0-9]*;
+ number ::= [0-9]+\.?[0-9]*;
+ 
+ list ::= '[' null | (expr {',' expr}) ']'
+ class_expr ::= 'class' name '{' defination '}'
+ defination ::= name '=' expr
+ expr ::= item '(' args ')'
+         | item [+-*\/^%] item
+         | '(' expr ')'
+ item ::= name | number | string ;
+ 
+ class Person {
+    def name = 'Jhon';
+    
+    def love ( person ) {
+        println ( name , 'loves' , person )
+    }
+    
+    def say ( msg ) {
+        println ( msg );
+    }
+ }
+ 
+ def p = Person('John');
+ p.love('Kate');
+*/
+ 
+var nameReg = /^[a-zA-Z_][a-zA-Z0-9_]*/;
+var numReg = /^[0-9]+\.?[0-9]*/;
+var strReg = /^"(\\"|[^"])*"/;
+var opReg = /^[\+\-\*\/\;=]/;
+
+var testString = " var name = 1230.34; \nprint(\"hello,\\\"world\"); z == x; j >= 20";
+var lexer = new Lexer();
+var tokens = lexer.parse(testString);
+
+for (var i = 0; i < tokens.length; i++) {
+    var token = tokens[i];
+    document.write(token);
+    document.write('<br/>');
+}
+
+</script>

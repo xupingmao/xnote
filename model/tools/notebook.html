@@ -1,0 +1,126 @@
+{% extends master.html %}
+
+{% block head %}
+
+<style type="text/css">
+    .note {
+        width: 200px;
+        float: left;
+        margin-left: 20px;
+        padding-top: 20px;
+        padding-left: 5px;
+        padding-right: 5px;
+        background: #50CCCC;
+        cursor: pointer;
+        opacity: 0.7;
+    }
+    .note:hover {
+        opacity: 1;
+    }
+    .note-title {
+        background: #CCCC50;
+        padding-left: 20px;
+        font-style: bold;
+    }
+    .note-title-edit {
+        background: #CCCC50;
+        padding-left: 0px;
+        font-style: bold;
+    }
+    .note-title-edit input {
+        width: 100%;
+    }
+    .note-content {
+        font-family: monospace;
+    }
+    .note-content-pre {
+        font-family: monospace;
+    }
+    .note-content-textarea {
+        width: 100%;
+    }
+
+    #notebook {
+        padding-top: 20px;
+    }
+</style>
+
+{% end %}
+
+{% block body %}
+
+<div class="note">
+    <div class="note-title-edit">
+        <div><input type="text" id="note-title" name="note-title" placeholder="标题" /></div>
+    </div>
+    <div class="note-content">
+        <textarea id="note-content" class="note-content-textarea" rows=6></textarea>
+    </div>
+
+    <div class="input-group">
+        <button onclick="addNote()">添加</button>
+    </div>
+
+</div>
+
+<div id="notebook">
+
+</div>
+
+<script type="text/javascript">
+
+$(function () {
+    var __notes = {};
+
+
+    function addNote() {
+        var title = $("#note-title").val();
+        var content = $("#note-content").val();
+        if (noteExists(title)) {
+            alert(title + "已存在");
+            return;
+        }
+        var note = addNoteElement(title, content);
+        recordTitle(title, note);
+    }
+
+    function recordTitle(title, note) {
+        __notes[title] = note;
+    }
+
+    function noteExists(title) {
+        return (title in __notes);
+    }
+
+    function createNote(title, content) {
+        var div = $("<div>").addClass("note");
+        var titleEle = $("<div>").addClass("note-title").text(title);
+        var contentEle  = $("<div>").addClass("note-content")
+            .append($("<pre>").addClass("note-content-pre").text(content));
+        var removeDiv = $("<div>").addClass("note-remove-div")
+            .append($("<button>").addClass("note-remove-btn").text("删除").attr("title", title));
+        div.append(titleEle).append(contentEle).append(removeDiv);
+        registerRemoveBtn();
+        return div;
+    }
+
+    function addNoteElement(title, content) {
+        var note = createNote(title, content);
+        $("#notebook").append(note);
+        return note;
+    }
+    function registerRemoveBtn() {
+        $(".note-remove-btn").click(function () {
+            var title = $(this).attr("title");
+            alert("delete " + title);
+            $(this).remove(); // TODO
+        });
+    }
+    registerRemoveBtn();
+
+    window.addNote = addNote;
+});
+
+</script>
+
+{% end %}
