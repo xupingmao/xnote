@@ -4,7 +4,16 @@
 '''
 
 from .tornado.template import Template, Loader
-_loader = Loader("model")
+
+from util import dateutil
+
+TEMPLATE_DIR = "model"
+NAMESPACE    = dict(
+    format_date = dateutil.format_date,
+    format_time = dateutil.format_time
+)    
+
+_loader = Loader(TEMPLATE_DIR, namespace = NAMESPACE)
 _hooks = []
 
 def set_loader_namespace(namespace):
@@ -20,4 +29,12 @@ def render(template_name, **kw):
         hook(nkw)
     nkw.update(kw)
     return _loader.load(template_name).generate(**nkw)
+
     
+def get_code(name):
+    return _loader.load(name).code
+    
+    
+def reload():
+    global _loader
+    _loader = Loader(TEMPLATE_DIR, namespace = NAMESPACE)
