@@ -219,6 +219,7 @@ def get_filesystem_kw():
     kw = {}
     kw["os"] = os
     kw["is_stared"] = is_stared
+    kw["search_type"] = "fs"
     return kw
 
 class MyFileSystemApp(MyStaticApp):

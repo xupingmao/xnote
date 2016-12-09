@@ -6,7 +6,8 @@ from model.wiki import WikiHandler
 from FileDB import FileService
 import functools
 from util import fsutil
-from urllib.parse import unquote
+from xutils import *
+
 import json
 import time
 import config
@@ -46,6 +47,7 @@ def get_ip_list(blacklist = []):
 def main_render_hook(kw):
     """ Main hook for template engine """
     kw["full_search"] = False
+    kw["search_type"] = "normal"
     
     
 def main():

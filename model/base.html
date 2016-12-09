@@ -24,6 +24,7 @@
           <li class="menu-item"><a href="/wiki/tools.md">工具</a></li>
           <li class="menu-item"><a href="/fs/D:/">文件</a></li>
           <li class="menu-item"><a href="/">提醒</a></li>
+          <li class="menu-item"><a href="/wiki/">wiki</a></li>
           <!-- <li class="menu-item"><a href="/">联系人</a></li> -->
           <!-- <li class="menu-item"><a href="/image/index">图片</a></li> -->
           <li class="menu-item"><a href="/system/sys">系统</a></li>
@@ -41,7 +42,7 @@
             <div class="col-md-12">
               <form method="GET" action="{{?action,'/search/search'}}">
                   <div class="input-group" style="float:left;width:100%">
-                  {% if full_search %}
+                  {% if search_type =="full" %}
                       <input type="checkbox" name="full_search" checked/>
                   {% else %}
                       <input type="checkbox" name="full_search" />

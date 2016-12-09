@@ -1,13 +1,17 @@
-
 import web
+from web.py3helpers import PY2
 from web.tornado.template import Template, Loader
 import config 
 import json
 import sys
 import traceback
 from io import BytesIO
-from urllib.parse import quote
-from urllib.request import urlopen
+
+if PY2:
+    from urllib import quote, urlopen
+else:
+    from urllib.parse import quote
+    from urllib.request import urlopen
 import os
 import logging
 

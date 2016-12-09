@@ -1,7 +1,7 @@
 from web.xtemplate import render
 import os
 from util import fsutil
-from urllib.parse import quote, unquote
+from xutils import *
 
 WIKI_PATH = "static/wiki/"
 

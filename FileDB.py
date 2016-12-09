@@ -15,7 +15,7 @@ import config
 
 from util import dateutil
 from threading import Thread
-from queue import Queue
+# from queue import Queue
 
 def getMilliSecond():
     t = time.time()
