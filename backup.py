@@ -7,6 +7,8 @@ import config
 import re
 import time
 
+import xutils
+
 class T:
     pass
 
@@ -72,6 +74,7 @@ def backup_db():
 
 def chk_backup():
     backup_dir = config.get("BACKUP_DIR")
+    xutils.create_dir(backup_dir)
     files = os.listdir(backup_dir)
     sorted_files = sorted(files)
     logutil.info("sorted backup files: {}", sorted_files)

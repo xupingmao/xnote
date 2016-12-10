@@ -46,6 +46,10 @@ def get_file_size(path, format=True):
     return st.st_size
     
     
+def create_dir(dirname):
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    
 #################################################################
 ##   DateTime Utilities
 #################################################################
