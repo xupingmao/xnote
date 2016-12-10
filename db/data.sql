@@ -9,9 +9,9 @@ parent_id int default 0, -- for hierarchical filesystem
 children text, -- children
 bin blob, -- for binary data
 size long,
-mtime long, -- seconds
-atime long, -- seconds
-ctime long, -- seconds
+-- mtime long, -- seconds
+-- atime long, -- seconds
+-- ctime long, -- seconds
 smtime text,
 satime text,
 sctime text,
