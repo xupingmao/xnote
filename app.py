@@ -78,6 +78,10 @@ def main():
     global basic_urls
 
     port = config.PORT
+    print("PORT is", os.environ.get("POST"))
+    
+    if not os.environ.get("PORT"):
+        os.environ["PORT"] = port
     
     var_env = dict()
 
@@ -90,9 +94,6 @@ def main():
         
     var_env["MainHandler"] = MainHandler
     var_env["WikiHandler"] = WikiHandler
-
-
-    os.environ["PORT"] = port
 
     ip_blacklist = config.get("IP_BLACK_LIST")
     ip_list = get_ip_list(blacklist = ip_blacklist) # virtual box host
