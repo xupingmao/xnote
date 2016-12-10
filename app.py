@@ -2,7 +2,6 @@ import web
 import web.xtemplate as xtemplate
 import os, socket, sys
 from BaseHandler import BaseHandler, reload_template
-from model.wiki import WikiHandler
 from FileDB import FileService
 import functools
 from util import fsutil
@@ -24,7 +23,8 @@ from web.httpserver import StaticApp
 from MyStaticMiddleware import MyStaticMiddleware
 from ModelManager import ModelManager
 
-        
+from model.wiki import WikiHandler
+
 class MainHandler(BaseHandler):
     def get(self):
         raise web.seeother("/index")
@@ -50,6 +50,29 @@ def main_render_hook(kw):
     kw["search_type"] = "normal"
     
     
+def xhandler(urlpattern):
+    """decorator for handler"""
+
+    def _xhandler(func):
+        global app
+        def __xhandler(*args, **kw):
+            return func(*args, **kw)
+
+        name = func.__module__ + "." + func.__name__
+        app.add_mapping(urlpattern, name)
+        app.fvars[name] = __xhandler
+        print("add_mapping: %s, %s" % (urlpattern, name))
+        return __xhandler
+    return _xhandler
+
+def add_builtin(name, func):
+    if isinstance(__builtins__, dict):
+        __builtins__[name] = func
+    else:
+        setattr(__builtins__, name, func)
+
+add_builtin("xhandler", xhandler)
+
 def main():
     global app
     global basic_urls

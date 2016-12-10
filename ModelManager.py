@@ -1,3 +1,4 @@
+# encoding:utf-8
 import config
 import os
 import sys
@@ -7,7 +8,6 @@ from copy import copy
 from BaseHandler import Storage, reload_template
 
 class WebModel:
-
     def __init__(self):
         self.name = ""
         self.url = ""
@@ -21,7 +21,7 @@ class WebModel:
             self.name = self.url
         self.searchkey = self.name + self.url + self.searchkey + self.description
         self.description = "[工具]" + self.description
-
+        
 class ModelManager:
 
     def __init__(self, app, vars, mapping):

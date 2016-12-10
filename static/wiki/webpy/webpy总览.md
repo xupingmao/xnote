@@ -8,13 +8,13 @@
 - debugerror.py （异常调试页面，可以通过设置debug参数关闭）
 - form.py
 - http.py
-- httpserver.py
+- httpserver.py  (服务器适配层)
 - net.py
-- py3helper.py
-- session.py
-- template.py
-- test.py
-- utils.py
+- py3helpers.py (Python3 兼容层)
+- session.py (session支持)
+- template.py (webpy模板)
+- test.py (用于测试，忽略)
+- utils.py (webpy工具类)
 - webapi.py
 - webopenid.py
 - wsgi.py

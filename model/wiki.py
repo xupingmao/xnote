@@ -1,7 +1,6 @@
 from web.xtemplate import render
 import os
-from util import fsutil
-from xutils import *
+import xutils
 
 WIKI_PATH = "static/wiki/"
 
@@ -24,8 +23,9 @@ class FileItem:
 
 class WikiHandler:
 
+    #@xhandler(r"/wiki/(.*)")
     def GET(self, name):
-        name = unquote(name)
+        name = xutils.unquote(name)
         path = os.path.join(WIKI_PATH, name)
         
         if name == "":
@@ -42,7 +42,7 @@ class WikiHandler:
             children.sort(key = lambda item: item.key)
         else:
             type = "file"
-            content = fsutil.readfile(path)
+            content = xutils.readfile(path)
             children = None
         
         parent = os.path.dirname(name)

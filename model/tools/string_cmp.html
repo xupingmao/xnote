@@ -1,4 +1,4 @@
-{% extends ../master.html %}
+{% extends ../base.html %}
 
 {% block head %}
 
@@ -65,9 +65,9 @@
 
 <div id="settings">
     <h2>Diff</h2>
-    <label><input type="radio" name="diff_type" value="diffChars" checked> Chars</label>
+    <label><input type="radio" name="diff_type" value="diffChars"> Chars</label>
     <label><input type="radio" name="diff_type" value="diffWords"> Words</label>
-    <label><input type="radio" name="diff_type" value="diffLines"> Lines</label>
+    <label><input type="radio" name="diff_type" value="diffLines" checked> Lines</label>
 </div>
 
 <div>

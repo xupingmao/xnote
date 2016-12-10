@@ -23,6 +23,9 @@ from util import osutil
 from util import dbutil
 from util import netutil
 
+import web.xtemplate as xtemplate
+from web.xtemplate import render as xtemplate_render
+
 import FileDB
 
 _loader = Loader("template")
@@ -97,11 +100,10 @@ def get_template_namespace():
     return namespace
 
 def reload_template():
-    global _loader
-    _loader = Loader("model", namespace=get_template_namespace())
+    xtemplate.reload()
 
 def get_template_code(name):
-    return _loader.load(name).code
+    return xtemplate.get_code(name)
 
 def parse_json_obj(obj):
     if isinstance(obj, dict):
@@ -131,7 +133,7 @@ is_iter = lambda x: x and hasattr(x, '__next__')
 
 
 def render_template(template_name, **kw):
-    return _loader.load(template_name).generate(**kw)
+    return xtemplate.render(template_name, **kw)
 
 class BaseHandler():
 
@@ -192,7 +194,7 @@ class BaseHandler():
         if self._args is not None:
             self._args.update(kw)
             kw = self._args
-        text = _loader.load(template_name).generate(**kw)
+        text = xtemplate_render(template_name, **kw);
         self._response = text
         return text
 

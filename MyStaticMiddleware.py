@@ -25,8 +25,8 @@ except ImportError:
     from StringIO import BytesIO
 
 import pdb
-import html
 import io
+import xutils
 from BaseHandler import *
 import config
 
@@ -287,7 +287,7 @@ class MyFileSystemApp(MyStaticApp):
         kw["parent_path"] = parent_path
 
         content = render_template("fs.html", **kw)
-        displaypath = html.escape(displaypath)
+        displaypath = xutils.html_escape(displaypath)
         enc = "utf-8"
         encoded = content
         f = io.BytesIO()
