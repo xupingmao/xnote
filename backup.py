@@ -68,6 +68,8 @@ def backup_db():
     now = time.strftime("%Y%m%d")
     dbname = "data.{}.db".format(now)
     dbpath = config.get("DB_PATH")
+    if not os.path.exists(dbpath):
+        return
     backup_dir = config.get("BACKUP_DIR")
     newdbpath = os.path.join(backup_dir, dbname)
     fsutil.copy(dbpath, newdbpath)
