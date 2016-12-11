@@ -1,9 +1,9 @@
-from BaseHandler import *
+from web import xtemplate
 
-class handler(BaseHandler):
+class handler:
 
-    def default_request(self):
-        self.render()
+    def GET(self):
+        return xtemplate.render("tools/color.html")
 
 name = "颜色"
 description="常用颜色"

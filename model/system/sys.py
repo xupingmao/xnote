@@ -12,6 +12,7 @@ import socket
 import backup
 import os
 import autoreload
+from web import xtemplate
 
 def get_memory_usage():
     try:
@@ -75,7 +76,14 @@ def get_code_lines():
 
 
                 
-class SysHandler(BaseHandler):
+class SysHandler:
+
+    def GET(self):
+        return xtemplate.render("system/sys.html", 
+            backup = backup.get_info(),
+            server_ip = get_local_ip(config.get("ip_list")),
+            port = config.get("port")
+        )
 
     def opendirRequest(self):
         name = self.get_argument("name")
