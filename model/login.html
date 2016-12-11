@@ -1,0 +1,21 @@
+{% extends master.html %}
+
+{% block head %}
+    <link rel="stylesheet" href="/css/table.css"/>
+{% end %}
+
+{% block body %}
+    <div>
+		<form method="POST">
+			<table>
+			<tr>
+				<td>Name</td><td><input name="name" value="{{name}}"/></td>
+			</tr>
+			<tr>
+				<td>Pasword</td><td><input type="password" name="password" value="{{password}}"/></td>
+			</tr>
+			</table>
+			<button>Login</button>
+		</form>
+	</div>
+{% end %}

@@ -25,7 +25,7 @@ from ModelManager import ModelManager
 
 class MainHandler(BaseHandler):
     def get(self):
-        raise web.seeother("/index")
+        raise web.seeother("/wiki/")
 
 def get_ip_list(blacklist = []):
     localIp = socket.gethostbyname(socket.gethostname())
@@ -47,29 +47,10 @@ def main_render_hook(kw):
     kw["full_search"] = False
     kw["search_type"] = "normal"
     
+
+def notfound():
+    raise web.notfound(xtemplate.render("notfound.html"))
     
-def xhandler(urlpattern):
-    """decorator for handler"""
-
-    def _xhandler(func):
-        global app
-        def __xhandler(*args, **kw):
-            return func(*args, **kw)
-
-        name = func.__module__ + "." + func.__name__
-        app.add_mapping(urlpattern, name)
-        app.fvars[name] = __xhandler
-        print("add_mapping: %s, %s" % (urlpattern, name))
-        return __xhandler
-    return _xhandler
-
-def add_builtin(name, func):
-    if isinstance(__builtins__, dict):
-        __builtins__[name] = func
-    else:
-        setattr(__builtins__, name, func)
-
-add_builtin("xhandler", xhandler)
 
 def main():
     global app
@@ -85,8 +66,6 @@ def main():
 
     basic_urls = [
             "/", "MainHandler",
-            "/db", "DBHandler",
-            "/net", "NetHandler",
         ]
         
     var_env["MainHandler"] = MainHandler
@@ -101,6 +80,10 @@ def main():
     # I can reload the system by myself
     app = web.application(list(), var_env, autoreload=False)
     
+    # set 404 page
+    app.notfound = notfound
+    
+    # add render hook
     xtemplate.add_render_hook(main_render_hook)
 
     m = ModelManager(app, var_env, basic_urls)

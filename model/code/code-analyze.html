@@ -1,0 +1,53 @@
+{% extends ../master.html %}
+
+{% block head %}
+<style>
+.code-analyze-name {
+    color: green;
+}
+.code-analyze-line {
+    color: blue;
+    padding-left: 10px;
+    margin-left: 10px;
+    white-space: pre;
+}
+</style>
+{% end %}
+
+{% block body %}
+
+<div>
+    <form action="">
+        <p>路  径:<textarea name="path" cols=100>{{?path}}</textarea></p>
+        <p>关键字:<textarea name="key" cols=100>{{?key}}</textarea></p>
+        <p>文件名:<textarea name="filename" cols=100>{{?filename}}</textarea>
+        <p><button>查询</button></p>
+    </form>
+</div>
+
+
+{{?error}}
+
+{% if "files" in globals() %}
+{% for file in files %}
+
+<div class="row">
+    <div class="code-analyze-name">
+        <a href="/code/view_source?path={{file.name}}&key={{key}}" target="_blank">{{file.name}}</a>
+    </div>
+    <div>
+
+        {% for line in file.result %}
+            <div>
+                <code class="code-analyze-line">{{line}}</code>
+            </div>
+        {% end %}
+
+    </div>
+    <br/>
+</div>
+
+{% end %}
+{% end %}
+<script type="text/javascript">$("#menu-analyze").addClass("active");</script>
+{% end %}

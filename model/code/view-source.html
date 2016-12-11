@@ -1,0 +1,22 @@
+{% extends ../master.html %}
+
+{% block head %}
+<style type="text/css">
+
+.search-key {
+    background-color: #FF8000;
+    color: #000;
+}
+
+</style>
+{% end %}
+
+{% block body %}
+
+<div>
+    <p style="color:red">{{?error}}</p>
+</div>
+<pre>{%raw ?content%}</pre>
+
+<script type="text/javascript">$("#menu-analyze").addClass("active");</script>
+{% end %}

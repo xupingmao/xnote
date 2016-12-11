@@ -22,7 +22,7 @@ class FileItem:
         
 
 class handler:
-    __url__ = r"/wiki/(.*)"
+    __url__ = r"/wiki/?(.*)"
     
     def GET(self, name):
         name = xutils.unquote(name)
