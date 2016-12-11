@@ -38,9 +38,12 @@ def get_seconds(date = None):
     st = time.strptime(date, '%Y-%m-%d %H:%M:%S')
     return time.mktime(st)
 
-def before(days=None, month=None):
+def before(days=None, month=None, format=False):
     if days is not None:
-        return time.time() - days * _DAY
+        fasttime = time.time() - days * _DAY
+        if format:
+            return format_time(fasttime)
+        return fasttime
     return None
 
 def getyyyyMMdd(seconds=None):

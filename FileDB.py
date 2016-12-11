@@ -394,8 +394,8 @@ class FileService:
         self._db.execute(sql)
         
     def updateContent(self, id, content):
-        sql = "update file set content = %s,size=%s,mtime = %d, smtime='%s' where id = %s" \
-            % (to_sqlite_obj(content), len(content), dateutil.get_seconds(), dateutil.format_time(), id)
+        sql = "update file set content = %s,size=%s, smtime='%s' where id = %s" \
+            % (to_sqlite_obj(content), len(content), dateutil.format_time(), id)
         self._db.execute(sql)
 
     def getByName(self, name):
@@ -454,7 +454,8 @@ class FileService:
         return [FileDO.fromDict(item, option="physically_delete") for item in list]
 
     def get_recent_modified(self, days):
-        list = self._db.execute("select * from file where mtime > %s AND is_deleted != 1 order by mtime desc" % dateutil.before(days=int(days)))
+        list = self._db.execute("select * from file where smtime > %s AND is_deleted != 1 order by smtime desc" 
+            % dateutil.before(days=int(days), format=True))
         return [FileDO.fromDict(item) for item in list]
 
     def get_recent_created(self, days):
@@ -562,14 +563,14 @@ def search_name(words):
     like_list = []
     for word in words:
         like_list.append('related like %s ' % repr('%' + word.upper() + '%'))
-    sql = "select * from file where %s and is_deleted != 1 order by atime desc limit 1000" % (" AND ".join(like_list))
+    sql = "select * from file where %s and is_deleted != 1 order by satime desc limit 1000" % (" AND ".join(like_list))
     db = FileDB()
     all = db.execute(sql)
     return [FileDO.fromDict(item) for item in all]
 
 def get_recent_visit(count):
     db = FileDB()
-    all = db.execute("select * from file where is_deleted != 1 and not (related like '%%HIDE%%') order by atime desc limit %s" % count)
+    all = db.execute("select * from file where is_deleted != 1 and not (related like '%%HIDE%%') order by satime desc limit %s" % count)
     return [FileDO.fromDict(item) for item in all]
 
 def update(where = None, **kw):
