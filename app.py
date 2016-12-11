@@ -20,8 +20,8 @@ import backup
 from autoreload import AutoReloadThread
 
 from web.httpserver import StaticApp
-from MyStaticMiddleware import MyStaticMiddleware
-from ModelManager import ModelManager
+from mystatic import MyStaticMiddleware
+from handlermanager import ModelManager
 
 class MainHandler(BaseHandler):
     def get(self):
