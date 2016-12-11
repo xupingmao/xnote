@@ -10,7 +10,8 @@ class handler:
         target = args["target"]
 
         print("USER[%s] PSWD[%s]" % (name, pswd))
-        if name == "xpm" and pswd == "xlg":
+        # FIXME prevent hack
+        if name == "admin" and pswd == "123456":
             web.setcookie("xuser", "admin", expires=10 * 24 * 3600)
             web.seeother(target)
             return
