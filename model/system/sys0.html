@@ -1,0 +1,175 @@
+{% extends ../master.html %}
+
+{% block head %}
+    <link rel="stylesheet" href="/static/css/table.css"/>
+
+    <style type="text/css">
+        .barcode {
+            /*float: left;*/
+        }
+
+        .main-sys-info {
+
+        }
+    </style>
+{% end %}
+
+{% block body %}
+<script type="text/javascript" src="/static/lib/datejs/date.min.js"></script>
+<script type="text/javascript" src="/static/lib/string-format/string-format.min.js"></script>
+<script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
+
+<input class="hide" id="server_ip" value="{{?server_ip}}" />
+<input class="hide" id="server_port" value="{{?port}}"/>
+<div class="row">
+    <div class="barcode col-md-12">
+        <p>{{?ip_list}} : 端口{{?port}}</p>
+        <p>扫码登录 {{?server_ip}}:{{?port}}</p>
+        <div id="qrcode"></div>
+    </div>
+
+    <div style="float:left;width:100%; height:30px"></div>
+
+    <div>
+        <a href="/system/reload">重新加载模块</a>
+    </div>
+
+    <div style="float:left;width:100%; height:30px"></div>
+
+    <div class="main-sys-info col-md-12">
+        <table class="table">
+            <tr>
+                <th>项目</th>
+                <th>值</th>
+            </tr>
+            
+            <tr>
+                <td>当前时间</td>
+                <td id="currentDate"></td>
+            </tr>
+
+            <tr>
+                <td>启动时间</td>
+                <td>{{?start_time}}</td>
+            </tr>
+            <tr>
+                <td>系统占用内存</td>
+                <td>{{?memory_usage}}</td>
+            </tr>
+
+            <tr>
+                <td><a href="/system/thread_info">线程信息</a></td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td>系统目录</td>
+                <td>
+                    <p id="sysPath">{{?sys_path}}</p>
+                    <p><a href='/open?path={{?sys_path}}' target="_blank">打开目录</a> </p>
+                </td>
+            </tr>
+            <tr>
+                <td>hostName</td>
+                <td>{{?hostname}}</td>
+            </tr>
+
+            <tr>
+                <td>Local IP</td>
+                <td>{{?local_ip}}</td>
+            </tr>
+
+            <tr>
+                <td>Ex IP</td>
+                <td>{{?ex_ip}}</td>
+            </tr>
+
+            <tr>
+                <td>数据库</td>
+                <td> <p> 路径 {{?db_path}} <a href="/system/download_db">下载DB</a></p> 
+                     <p> 大小 {{?db_size}} <a href="/system/db_struct">DB结构</a></p>
+                     <p> 数量 {{?record_size}} </p> 
+                </td>
+            </tr>
+            <tr>
+                <td>系统规模</td>
+                <td>{{?code_lines}} 行</td>
+            </tr>
+
+            <tr>
+                <td>备份</td>
+                <td>
+                    {% if backup.path %}
+                    <p>文件路径 {{?backup.path}}</p>
+                    <p>备份时间 {{?backup.mtime}}</p>
+                    <p>备份大小 {{?backup.size}}</p>
+                    <p> <a href="/static/xnote.zip">下载</a>
+                    {% end %}
+
+                    <button id="rebackup"> 重新备份 </button>
+                    <button id="export"> 导出纯净版 </button>
+                    </p>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+$("#menu-sys").addClass("active");
+function opendir() {
+    // console.log("opendir")
+    var dirname = $("#sysPath").html();
+    var data = {
+        path : dirname
+    };
+    $.post("/file?option=openDirectory", 
+        data,
+        function (data) {
+            var obj = JSON.parse(data);
+            console.log(obj);
+    });
+}
+
+$(function () {
+    var ip = $("#server_ip").val()
+    var port = $("#server_port").val()
+    // var url = format("http://{}:{}", ip, port);
+    var url = "http://" + ip + ":" + port;
+    $("#qrcode").qrcode(url);
+    function updateTime () {
+        $("#currentDate").html(new Date().toString("yyyy-MM-dd HH:mm:ss"));
+        setTimeout(updateTime, 1000);
+    }
+
+    updateTime();
+
+    $("#rebackup").click(function () {
+        $.post("/system/sys?option=backup", {}, function (data) {
+            var r = JSON.parse(data);
+            if (r.success) {
+                // alert("备份完成");
+                window.location.reload();
+            } else {
+                alert(format("备份失败, 原因: {}", r.msg));
+            }
+        });
+    })
+
+    $("#export").click(function () {
+        $.post("/system/sys?option=export", {}, function (data) {
+            var r = JSON.parse(data);
+            if (r.success) {
+                window.location.reload();
+            } else {
+                alert(format("备份失败, 原因: {}", r.msg));
+            }
+        });
+    });
+})
+
+
+
+</script>
+{% end %}

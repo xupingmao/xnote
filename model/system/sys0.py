@@ -112,6 +112,33 @@ class SysHandler(BaseHandler):
         raise web.seeother("/system/sys")
 
     def default_request(self):
+        # if not hasattr(SysHandler, "_env"):
+        #     self.env = env = {}
+        #     env['ip_list'] = config.get("ip_list")
+        #     env["ip_blacklist"] = config.get("ip_blacklist")
+        #     env['port'] = config.get("port")
+        #     env["start_time"] = dateutil.getTime(config.get("start_time"))
+        #     filepath = FileService.instance().get_path()
+        #     filesize = os.stat(filepath).st_size
+        #     env["sys_path"] = config.WORKING_DIR
+        #     hostname = socket.gethostname()
+        #     env["hostname"] = hostname
+        #     name, aliaslist, iplist = socket.gethostbyname_ex(hostname)
+
+        #     env["local_ip"] = socket.gethostbyname(hostname)
+        #     env["server_ip"] = get_local_ip(config.get("ip_list"))
+        #     env["ex_ip"] = iplist
+        #     # env["table"] = FileService.getService().getTableDefine("file")
+        #     env["code_lines"] = get_code_lines()
+        # else:
+        #     env = getattr(SysHandler, "_env")
+        # env["db_path"] = filepath
+        # env["record_size"] = FileService.instance().count()
+        # env["db_size"] = fsutil.formatSize(filesize)
+        # env["memory_usage"] = get_memory_usage()
+        # env['backup'] = backup.get_info()
+
+        # self.render(**env)
         self.render(backup = backup.get_info(),
             server_ip = get_local_ip(config.get("ip_list")),
             port = config.get("port")
