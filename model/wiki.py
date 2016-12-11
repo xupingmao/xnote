@@ -21,9 +21,9 @@ class FileItem:
             self.key = "1" + name
         
 
-class WikiHandler:
-
-    #@xhandler(r"/wiki/(.*)")
+class handler:
+    __url__ = r"/wiki/(.*)"
+    
     def GET(self, name):
         name = xutils.unquote(name)
         path = os.path.join(WIKI_PATH, name)

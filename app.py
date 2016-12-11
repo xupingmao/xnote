@@ -23,8 +23,6 @@ from web.httpserver import StaticApp
 from MyStaticMiddleware import MyStaticMiddleware
 from ModelManager import ModelManager
 
-from model.wiki import WikiHandler
-
 class MainHandler(BaseHandler):
     def get(self):
         raise web.seeother("/index")
@@ -89,11 +87,9 @@ def main():
             "/", "MainHandler",
             "/db", "DBHandler",
             "/net", "NetHandler",
-            "/wiki/(.*)", "WikiHandler",
         ]
         
     var_env["MainHandler"] = MainHandler
-    var_env["WikiHandler"] = WikiHandler
 
     ip_blacklist = config.get("IP_BLACK_LIST")
     ip_list = get_ip_list(blacklist = ip_blacklist) # virtual box host
@@ -108,11 +104,11 @@ def main():
     xtemplate.add_render_hook(main_render_hook)
 
     m = ModelManager(app, var_env, basic_urls)
-    m.load_model_dir()
+    m.reload()
 
     def stop_callback():
         # app.stop()
-        m.load_model_dir()
+        m.reload()
         autoreload_thread.clear_watched_files()
         # autoreload_thread.watch_dir("template")
         autoreload_thread.watch_recursive_dir("model")
