@@ -6,8 +6,8 @@
 - browser.py      （用于测试webpy的浏览器）
 - db.py （数据库接口封装）
 - debugerror.py （异常调试页面，可以通过设置debug参数关闭）
-- form.py
-- http.py
+- form.py (HTML表单相关)
+- http.py 
 - httpserver.py  (服务器适配层)
 - net.py
 - py3helpers.py (Python3 兼容层)

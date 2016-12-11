@@ -78,3 +78,10 @@ def html_escape(s, quote=True):
         s = s.replace('"', "&quot;")
         s = s.replace('\'', "&#x27;")
     return s
+    
+#################################################################
+##   Platform/OS Utilities, Python 2 do not have this file
+#################################################################
+
+def is_windows():
+    return os.name == "nt"
