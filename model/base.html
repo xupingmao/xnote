@@ -9,6 +9,7 @@
     <script src="/static/lib/jquery/jquery-2.2.3.min.js"></script>
     {% block head %} {% end %}
     
+    <!-- base.html -->
 </head>
 
     <body style="margin: 0">
@@ -17,7 +18,9 @@
           <li class="menu-item"><a href="/index">资料</a></li>
           <!-- <li class="menu-item"><a href="/file/group?type=date">博客</a></li> -->
           <li class="menu-item"><a href="/wiki/tools.md">工具</a></li>
+          {% if is_admin %}
           <li class="menu-item"><a href="/fs/">文件</a></li>
+          {% end %}
           <li class="menu-item"><a href="/">提醒</a></li>
           <li class="menu-item"><a href="/wiki/">wiki</a></li>
           <!-- <li class="menu-item"><a href="/">联系人</a></li> -->

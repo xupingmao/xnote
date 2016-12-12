@@ -46,6 +46,7 @@ def main_render_hook(kw):
     """ Main hook for template engine """
     kw["full_search"] = False
     kw["search_type"] = "normal"
+    kw["is_admin"] = config.IS_ADMIN
     
 
 def notfound():

@@ -79,6 +79,8 @@ def html_escape(s, quote=True):
         s = s.replace('\'', "&#x27;")
     return s
     
+from web.tornado.escape import xhtml_escape
+    
 #################################################################
 ##   Platform/OS Utilities, Python 2 do not have this file
 #################################################################

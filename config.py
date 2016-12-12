@@ -3,7 +3,7 @@ import os
 
 # WEBDIR = os.path.join("D:\\", "xnote", "xshell", "network", "webroot");
 
-PORT = "1234"
+PORT = "8080"
 
 WORKING_DIR = os.path.dirname(__file__)
 
@@ -16,6 +16,8 @@ PLUGINS_DIR = os.path.join(WORKING_DIR, "plugins")
 DB_PATH = os.path.join(WORKING_DIR, "db", "data.db")
 
 BACKUP_DIR = os.path.join(WORKING_DIR, "backup")
+
+IS_ADMIN = False
 
 IP_BLACK_LIST = ["192.168.56.1"] # this is vbox ip
 

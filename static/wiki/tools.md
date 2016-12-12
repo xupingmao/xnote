@@ -1,16 +1,18 @@
 # 系统工具
 - [系统信息](/system/sys)
-- [颜色](/tools/color.html)
 - [查看template代码](/system/template_cache)
 - [sql工具](/system/sql)
 
-- [上传文件](/tool?path=/static/upload)
-- [C盘](/fs/C:/)
-- [D盘](/fs/D:/)
+<!-- [上传文件](/tool?path=/static/upload) -->
+
+<!-- [C盘](/fs/C:/) -->
+<!-- [D盘](/fs/D:/) -->
 
 <!-- [同步DB](/sync/syncdb) -->
 
 # 开发工具
+
+- [颜色表](/tools/color.html)
 - [字符串比较](/tools/string_cmp.html)
 - [字符串工具](/static/archive/文本工具/字符串工具.html)
 - [字符串排序](/static/archive/字符串排序.html)

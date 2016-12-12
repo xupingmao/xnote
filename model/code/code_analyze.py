@@ -1,5 +1,5 @@
 from BaseHandler import *
-from web.tornado.escape import xhtml_escape
+from xutils import xhtml_escape
 
 CODE_EXT_LIST = (".java", 
                  ".c",
