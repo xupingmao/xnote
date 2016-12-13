@@ -39,10 +39,11 @@ class MyStaticApp(SimpleHTTPRequestHandler):
         self.start_response = start_response
 
     def send_response(self, status, msg=""):
-        #the int(status) call is needed because in Py3 status is an enum.IntEnum and we need the integer behind
         self.status = str(int(status)) + " " + msg
 
     def send_header(self, name, value):
+        #the int(status) call is needed because in Py3 status is an enum.IntEnum and we need the integer behind
+        value = str(value)
         for kv in self.headers:
             if kv[0] == name:
                 self.headers.remove(kv)
@@ -151,8 +152,8 @@ class MyStaticApp(SimpleHTTPRequestHandler):
         except OSError:
             pass # Probably a 404
 
-        for k in environ:
-            print(k, environ.get(k))
+        # for k in environ:
+        #    print(k, environ.get(k))
 
         http_continue = False
         self._m_http_range = ""
@@ -251,6 +252,7 @@ class MyFileSystemApp(MyStaticApp):
             path += '/'
         if os.name == "posix":
             path = "/" + path
+        print("PATH:", path)
         return path
 
     def list_directory(self, path):
@@ -286,7 +288,7 @@ class MyFileSystemApp(MyStaticApp):
         kw["current_path"] = path
         kw["parent_path"] = parent_path
 
-        content = render_template("fs.html", **kw)
+        content = render_template("fs/fs.html", **kw)
         displaypath = xutils.html_escape(displaypath)
         enc = "utf-8"
         encoded = content
@@ -311,6 +313,10 @@ class MyStaticMiddleware:
         path = self.normpath(path)
 
         if path.startswith("/fs/"):
+            if path == "/fs/" and xutils.is_windows():
+                # can not use web.seeother here
+                # handle to webpy handler
+                return self.app(environ, start_response)
             return MyFileSystemApp(environ, start_response)
         elif path.startswith("/static/"):
             return MyStaticApp(environ, start_response)

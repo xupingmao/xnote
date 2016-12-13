@@ -1,7 +1,8 @@
 from web.xtemplate import render, reload
 import web
+import autoreload
 
 class handler:
     def GET(self):
-        reload()
+        autoreload.reload()
         raise web.seeother("/system/sys")

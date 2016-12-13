@@ -4,6 +4,8 @@ import xutils
 
 class handler(BaseHandler):
 
+    __url__ = r"/fs/"
+
     def execute(self):
         if xutils.is_windows():
             raise web.seeother("/fs/D:/")

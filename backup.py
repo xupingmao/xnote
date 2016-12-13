@@ -20,6 +20,8 @@ _zipname = "xnote.zip"
 
 _dest_path = os.path.join(_dirname, "static", _zipname)
 
+_MAX_BACKUP_COUNT = 10
+
 def zip_xnote(nameblacklist = [_zipname]):
     dirname = os.path.dirname(__file__)
     fp = open(_dest_path, "w")
@@ -80,7 +82,7 @@ def chk_backup():
     files = os.listdir(backup_dir)
     sorted_files = sorted(files)
     logutil.info("sorted backup files: {}", sorted_files)
-    if len(sorted_files) > 3:
+    if len(sorted_files) > _MAX_BACKUP_COUNT:
         target = sorted_files[0]
         fsutil.remove(os.path.join(backup_dir, target))
         logutil.warn("remove file {}", target)
