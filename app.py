@@ -44,9 +44,9 @@ def get_ip_list(blacklist = []):
 
 def main_render_hook(kw):
     """ Main hook for template engine """
-    kw["full_search"] = False
-    kw["search_type"] = "normal"
-    kw["is_admin"] = config.IS_ADMIN
+    kw["_full_search"] = False
+    kw["_search_type"] = "normal"
+    kw["_is_admin"] = config.IS_ADMIN
     
 
 def notfound():

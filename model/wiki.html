@@ -27,9 +27,6 @@ li {
     <span id="result" style="color:green"></span>
     
     </div>
-    
-    <hr/>
-
     <div>
 
         <div>
@@ -37,7 +34,12 @@ li {
     </div>
     
         <div>
-            <h3>上级目录: <a href="/wiki{{parent}}">{{parent}}</a></h3>
+            <h3>
+                <a href="/wiki/">Home</a>
+                {% for path in wikilist %}
+                / <a href="/wiki{{path}}">{{ os.path.basename(path) }}</a>
+                {% end %}
+            </h3>
         </div>
         
     {% if type == "dir" %}

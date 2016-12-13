@@ -21,6 +21,19 @@ class FileItem:
             self.key = "1" + name
         
 
+def get_path_list(path):
+    pathes = path.split("/")
+    last = None
+    pathlist = []
+    for vpath in pathes:
+        if vpath == "":
+            continue
+        if last is not None:
+            vpath = last + "/" + vpath
+        pathlist.append(vpath)
+        last = vpath
+    return pathlist
+
 class handler:
     __url__ = r"/wiki/?(.*)"
     
@@ -38,6 +51,8 @@ class handler:
             children = []
             parent = name
             for child in os.listdir(path):
+                if child.startswith("_"):
+                    continue
                 children.append(FileItem(parent, child, path))
             children.sort(key = lambda item: item.key)
         else:
@@ -54,6 +69,7 @@ class handler:
             os = os,
             parent = parent,
             parentname = parentname,
+            wikilist = get_path_list(name),
             name = os.path.basename(name), 
             children = children,
             content = content,

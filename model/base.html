@@ -18,14 +18,14 @@
           <li class="menu-item"><a href="/index">资料</a></li>
           <!-- <li class="menu-item"><a href="/file/group?type=date">博客</a></li> -->
           <li class="menu-item"><a href="/wiki/tools.md">工具</a></li>
-          {% if is_admin %}
-          <li class="menu-item"><a href="/fs/">文件</a></li>
-          {% end %}
           <li class="menu-item"><a href="/">提醒</a></li>
           <li class="menu-item"><a href="/wiki/">wiki</a></li>
           <!-- <li class="menu-item"><a href="/">联系人</a></li> -->
           <!-- <li class="menu-item"><a href="/image/index">图片</a></li> -->
+          {% if _is_admin %}
+          <li class="menu-item"><a href="/fs/">文件</a></li>
           <li class="menu-item"><a href="/system/sys">系统</a></li>
+          {% end %}
       </div>
       <div class="col-md-1" style="height: 10px;"></div>
       <div class="col-md-10">
@@ -40,7 +40,7 @@
             <div class="col-md-12">
               <form method="GET" action="{{?action,'/search/search'}}">
                   <div class="input-group" style="float:left;width:100%">
-                  {% if search_type =="full" %}
+                  {% if _search_type =="full" %}
                       <input type="checkbox" name="full_search" checked/>
                   {% else %}
                       <input type="checkbox" name="full_search" />
