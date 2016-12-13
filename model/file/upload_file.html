@@ -1,0 +1,34 @@
+{% extends ../base.html %}
+
+{% block head %}
+
+<style type="text/css">
+    .fs-dir {
+        
+    }
+
+    .fs-file {
+
+    }
+</style>
+
+{% end %}
+
+{% block body %}
+
+<div>
+<form action="/file/upload_file" enctype="multipart/form-data" method="POST">
+<input type="file" name="file"/>
+<button>上传</button>
+</form>
+</div>
+
+<hr/>
+
+<div>
+文件名：{{filepath}}
+</div>
+<div>
+![{{filename}}](/{{filepath}})
+</div>
+{% end %}

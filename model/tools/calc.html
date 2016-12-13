@@ -1,0 +1,232 @@
+{% extends ../base.html %}
+
+{% block head %}
+<!--[if IE]><script type="text/javascript" src="excanvas.js"></script><![endif]-->
+<style>
+/* font used for calc input */
+.input_class {
+ font-family: monospace;
+ font-size: 13pt;
+}
+
+#calc_input {
+ width:500px;
+ background-color: rgb(230, 230, 255);
+ border-width: 1px;
+ border-style: solid;
+ border-color: black;
+}
+/* used to get the size of the font */
+.calc_output_class {
+ font-family: monospace;
+ font-size: 10pt;
+}
+#calc_output {
+ height:300px;
+ background-color: rgb(230, 230, 255);
+ overflow: auto;
+}
+.log_user {
+ color: black;
+}
+.log_result {
+ color: blue;
+}
+
+#error_msg {
+ font-family: sans-serif;
+ font-size: 12pt;
+ background-color: rgb(255, 0, 0);
+ color: white;
+ padding-left: 10px;
+ padding-right: 10px;
+}
+
+/* var window */
+#var_list {
+ height:300px;
+ font-family: monospace;
+ font-size: 10pt;
+ background-color: rgb(230, 230, 255);
+ border-width: 0px;
+ border-style: none;
+ border-color: black;
+ overflow: auto;
+}
+
+/* help window */
+
+#help_output {
+ width:400px;
+ height:300px;
+ font-size: 10pt;
+ background-color: rgb(230, 230, 255);
+ border-width: 0px;
+ border-style: none;
+ border-color: black;
+ overflow: auto;
+}
+
+.help_cmd {
+ font-family:mono;
+ font-size:10pt;
+ vertical-align:top;
+ white-space:nowrap;
+}
+.help_line {
+ font-size:10pt;
+ vertical-align:top;
+}
+
+/* help: user typed input */
+.h_in {
+ font-family:mono;
+ color:black;
+ padding-left:4ex;
+ margin-top: 3px;
+ white-space: pre;
+}
+
+/* help: calculator result */
+.h_res {
+ font-family:mono;
+ color:blue;
+ padding-left:6ex;
+ margin-top: 3px;
+ white-space: pre;
+}
+
+.faq_q {
+ font-size:12pt;
+ font-style: italic;
+}
+
+.faq_a {
+ font-size:10pt;
+ padding-bottom: 10px;
+}
+
+/* plot window */
+
+#plot_tab {
+ height:300px;
+ background-color: rgb(230, 230, 255);
+}
+
+.plot_caption {
+ font-family: monospace;
+ font-size:8pt;
+}
+#plot_caption_y {
+ text-align: right;
+}
+
+#logo {
+ font-family: sans;
+ font-size:17pt;
+ font-weight: bold;
+ color: #ffb10b;
+}
+#logo2 {
+ font-size:9pt;
+}
+.wtitle {
+ font-size:10pt;
+ font-weight: bold;
+ background-color: rgb(180, 180, 255);
+}
+.button {
+ font-size:10pt;
+ font-weight: bold;
+ background-color: rgb(210, 210, 255);
+ text-decoration: none;
+ padding-left: 5px;
+ padding-right: 5px;
+}
+
+#footer {
+ font-size: 8pt;
+ font-family: Verdana;
+ text-align: center;
+ margin-top: 30px;
+ color: #808080;
+}
+</style>
+
+{% end %}
+
+{% block body %}
+
+<table width="900">
+<tr>
+<td>
+<span id="logo">NumCalc.com</span><br>
+<span id="logo2">The Scientific Web Calculator<span>
+<td align="right">
+</tr>
+</table>
+
+<table>
+<tr class="wtitle">
+<td>
+  <table style="width:500px">
+  <tr>
+  <td class="wtitle" id="buttons">
+  <a class="button" id="but_results" href="javascript:change_tab('results');" >Results</a>
+  <a class="button" id="but_plot" href="javascript:change_tab('plot');" >Plot</a>
+  <a class="button" id="but_variables" href="javascript:change_tab('variables');" >Variables</a>
+  <td style="text-align:right;font-size:8pt;">
+  Angles: 
+  <input type="radio" id="angle_mode_rad" name="angle_mode" value="rad" onclick="calc_set_angle_mode('rad'); adjustFocus();"/>Rad
+  <input type="radio" id="angle_mode_deg" name="angle_mode" value="deg" onclick="calc_set_angle_mode('deg'); adjustFocus();"/>Deg
+  <br>
+  Output Format:
+  <input type="radio" id="output_mode_frac" name="output_mode" value="frac" onclick="calc_set_output_mode(COUT_MODE_FRAC); adjustFocus();"/>Fraction
+  <input type="radio" id="output_mode_real" name="output_mode" value="real" onclick="calc_set_output_mode(COUT_MODE_REAL); adjustFocus();"/>Real
+  <input type="radio" id="output_mode_hexa" name="output_mode" value="hexa" onclick="calc_set_output_mode(COUT_MODE_HEXA); adjustFocus();"/>Hexa
+  </table>
+
+<td class="wtitle">
+Help:
+<a class="button" id="but_contextual" href="javascript:change_help_tab('contextual');" >Contextual</a>
+<a class="button" id="but_tutorial" href="javascript:change_help_tab('tutorial');" >Tutorial</a>
+<a class="button" id="but_reference" href="javascript:change_help_tab('reference');" >Reference</a>
+<a class="button" id="but_units" href="javascript:change_help_tab('units');" >Units</a>
+<a class="button" id="but_faq" href="javascript:change_help_tab('faq');" >FAQ</a>
+</tr>
+
+<tr valign="top">
+<td>
+<div id="calc_output" class="calc_output_class">
+</div>
+<div id="plot_tab" style="display:none;">
+<table>
+<tr valign="top"><td><div id="plot_caption_y" class="plot_caption">
+<td>
+<canvas id="plot_output" width=400 height=250 onmousemove="plot_mouse_move(event);" onmouseout="plot_mouse_out();"></canvas>
+<div id="plot_caption_x" class="plot_caption"></div>
+<div id="plot_pos"></div>
+</table>
+</div>
+<div id="var_list" style="display:none;">
+</div>
+
+<td>
+<div id="help_output">
+</div>
+<tr>
+<td>
+<input id="calc_input" class="input_class" type="text" value="" onkeydown="return input_event(event);"><br>
+<span id="calc_error_pos"></span>
+<br>
+<span id="charw1" class="input_class"></span><span id="charw2" class="input_class">&nbsp;</span>
+<span id="ocharw1" class="calc_output_class"></span><span id="ocharw2" class="calc_output_class">&nbsp;</span>
+<div id="plot_caption_cw" class="plot_caption"></div>
+
+</table>
+<div id="footer">
+Copyright &#169; 2008 Fabrice Bellard.
+</div>
+<script type="text/javascript" src="/static/js/calc.js" charset="ISO-8859-1"></script>
+
+{% end %}

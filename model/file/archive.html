@@ -1,0 +1,27 @@
+{% extends ../base.html %}
+
+{% block body %}
+
+<div>
+
+<div>
+<h2>{{record.name}}</h2>
+</div>
+<form>
+    <div>
+    <input name="id" class="hide" value="{{id}}"/>
+    <input name="name" value="{{name}}"/>
+    <button>搜索</button>
+    </div>
+</form>
+</div>
+
+<div>
+{% for file in filelist %}
+    <div>
+    <a href="/file/archive?id={{id}}&parent_id={{file.id}}">[归档到这里]</a><span>{{file.name}}</span>
+    </div>
+{% end %}
+</div>
+
+{% end %}

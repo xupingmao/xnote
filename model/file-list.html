@@ -1,0 +1,150 @@
+{% extends master.html %}
+
+{% block head %}
+    <!-- <link rel="stylesheet" href="/css/table.css"/> -->
+    <link rel="stylesheet" type="text/css" href="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.css"/>
+
+<style>
+
+.tool-div {
+    font-size: medium;
+}
+
+.tool-div a {
+    font-size: medium;
+    color: blue;
+}
+
+.tool-description {
+    font-size: small;
+    padding-top: 3px;
+}
+
+.note {
+    float: inherit;
+}
+
+.note-head {
+    font-size: 20px;
+}
+
+.note-name {
+    /*font-size: 20px;*/
+}
+
+.note-name a {
+    font-size: medium;
+    color: blue;
+}
+
+.note-content-short {
+    font-size: small;
+    word-break: break-all;
+}
+
+.note-last-visit-time {
+    padding-left: 2px;
+    padding-top: 2px;
+    font-size: small;
+    color: green;
+}
+
+.note-related {
+    font-size: 6px;
+    padding-left: 5px;
+    color: red;
+    display: none;
+}
+.note-visited-cnt {
+    float: right;
+    font-size: small;
+}
+
+</style>
+{% end %}
+
+{% block body %}
+    <div class="">
+       <a href="/file/add?key={{?key}}">增加资料</a>
+   </div>
+   <br/>
+   <script type="text/javascript">$("#menu-file").addClass("active");</script>
+
+   <!-- Tools -->
+
+   {% if "tools" in globals() and len(tools) > 0 %}
+   <div>
+        {% for tool in tools %}
+            <div class="tool-div">
+                <div class="tool-name">
+                    <a href="{{tool.url}}">{{tool.name}}</a>
+                </div>
+                <div class="tool-description">
+                    {{tool.description}}
+                </div>
+            </div>
+            <hr/>
+        {% end %}
+    </div>
+   {% end %}
+
+   <!-- Files -->
+   <div class="">
+    {% if len(files) > 0 %}
+        {% for i, file in enumerate(files) %}
+            <div class="note">
+                <div class="note-visited-cnt">访问指数:{{file.visited_cnt}}</div>
+                <div class="note-name">
+                    <a href="/file/edit?id={{file.id}}">{{file.name}}</a>
+                </div>
+                <div class="note-content-short">{{file.content[:100]}}</div>
+                <div class="note-last-visit-time">最近访问:{{file.satime}}</div>
+                <div class="note-related">
+                    <input type="text" data-role="tagsinput" value="{{file.related}}"/>
+                </div>
+                <div class="note-option">
+                </div> 
+                <hr/>
+            </div>
+        {% end %}
+        
+<!--     </table>
+ -->
+    {% end %}
+
+    <!-- matched rules -->
+    {% if "search_result" in globals() and search_result is not None %}
+        {% for rule in search_result %}
+            {% if hasattr(rule, "html") %}
+                {% raw rule.html %}
+            {% end %}
+        {% end %}
+    {% end %}
+
+    <!-- matched rules end -->
+
+
+</div>
+{% if "page" in globals() %}
+    <p><span>Total {{?pages}}</span>
+        <input id="targetPage"/> <button onclick="goToPage()">GO</button>
+        {% if page > 1 %}
+        <a href="/file?option=list&page={{page-1}}">Prev</a>
+        {% end %}
+        <a href="/file?option=list&page={{page}}"><span style="background:blue;color:white">{{page}}</span></a>
+        {% if page < pages %}
+        <a href="/file?option=list&page={{page+1}}">Next</a>
+        {% end %}
+    </p>
+{% end %}
+    <script>
+        function goToPage() {
+            var value = $('#targetPage').val();
+            location.href = '/file?option=list&page=' + (value);
+        }
+    </script>
+
+<script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
+<script type="text/javascript" src="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
+
+{% end %}

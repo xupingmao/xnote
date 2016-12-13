@@ -1,0 +1,17 @@
+
+{% for i, file in enumerate(filelist) %}
+    <div class="note">
+        <div class="note-visited-cnt">访问指数:{{file.visited_cnt}}</div>
+        <div class="note-name">
+            <a href="/file/edit?id={{file.id}}">{{file.name}}</a>
+        </div>
+        <div class="note-content-short">{{file.content[:100]}}</div>
+        <div class="note-last-visit-time">最近访问:{{file.satime}}</div>
+        <div class="note-related">
+            <input type="text" data-role="tagsinput" value="{{file.related}}"/>
+        </div>
+        <div class="note-option">
+        </div> 
+        <br/>
+    </div>
+{% end %}

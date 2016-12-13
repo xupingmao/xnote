@@ -17,8 +17,8 @@
 - [字符串工具](/static/archive/文本工具/字符串工具.html)
 - [字符串排序](/static/archive/字符串排序.html)
 - [时间工具](/tools/datetime.html)
-- [计算器](/static/archive/计算器.html)
-- [高级计算器](/static/archive/calc/index.html)
+<!-- [计算器](/static/archive/计算器.html) -->
+- [高级计算器](/tools/calc.html)
 - [json格式化工具](/static/archive/json-editor.html)
 - [二维码工具](/tools/barcode.html)
 - [补发神器](/static/archive/补发神器.html)

@@ -1,0 +1,255 @@
+{% extends base.html %}
+
+{% block head %}
+<!-- <script src="/lib/CodeMirror/codemirror.js"></script>
+<script src="/lib/CodeMirror/mode/javascript/javascript.js"></script> -->
+<!-- <script src="/lib/CodeMirror/mode/markdown/markdown.js"></script> -->
+<!-- <script src="/js/string.js"></script>
+<script src="/js/array.js"></script> -->
+<link rel="stylesheet" type="text/css" href="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.css">
+<script type="text/javascript" src="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
+<script src="/static/js/TagEditor.js"></script>
+<script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
+<script type="text/javascript" src="/static/lib/string-format/0.5.0/string-format.min.js"></script>
+<script type="text/javascript" src="/static/lib/marked/marked.js"></script>
+<style>
+.CodeMirror {
+    width: 60rem;
+    font-size:16px;
+    height: auto;
+}
+
+#markdown-input {
+    font-family: monospace;
+}
+
+li {
+    margin-bottom: 0.5em;
+}
+
+</style>
+{% end %}
+
+{% block body %}
+    <div style="">
+    
+    <h3>
+        <span id="fileId" style="display:none;">{{file.id}}</span>
+        <div style="display:none" id="renameDiv">
+            <span><input id="newName"> </input></span> 
+            <button onclick="renameFile()">重命名</button>
+        </div>
+        <div>
+            <p><a id="oldName" href="javascript:switchRename()" style="color:blue">{{file.name}}</a></p>
+            <p style="font-size:10px;">创建时间:{{file.sctime}} 修改时间:{{file.smtime}}</p>
+        <div>
+    </h3>
+
+    {% include file/tags.html %}
+
+    <span id="result" style="color:green"></span>
+    
+    </div>
+    
+    <hr/>
+
+    <div>
+
+        <div>
+            {% if globals().get("download_csv") %} 
+                <form action="/file_edit" method="POST" enctype="multipart/form-data">
+
+                    <a href="/file_edit?option=download&id={{file.id}}">下载CSV</a> 
+                    <input type="file" name="file" style="display: inline;"/>
+                    <input type="text" name="option" value="upload" class="hide"/>
+                    <input name="id" class="hide" value="{{file.id}}"/>
+                    <button>上传</button>
+                </form>
+            {% end %}
+        </div>
+    </div>
+
+    <form action="/file/update" method="POST">
+        <div class="">
+            <div class="">
+                <button class="btn btn-primary">更新</button>
+                <input type="button" class="btn btn-primary" onclick="edit()" value="编辑" />
+                <input type="button" class="btn btn-primary" onclick="preview()" value="预览" />
+                <a href="/file/upload_file" target="_blank">上传图片</a>
+                <input style="display:none" name="option" value="updateContent"/>
+                <input style="display:none" name="id" value="{{file.id}}"/>
+
+                <input type="button" class="red" onclick="delLink()" value="删除" />
+            </div>
+
+            <div style="padding-top:20px;">
+                <div id="epiceditor" class="row">
+                    <div id="markdown-input-div" class="col-md-6">
+                        <textarea id="markdown-input" class="form-control" name="content" rows=50>{{?content}}</textarea>
+                    </div>
+
+                    <div id="markdown-output-div" class="col-md-12">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+<div style="float:left;width:100%;">
+{% if 'children' in globals() %}
+
+{% if len(children) > 0 %}
+    <h1>子页面</h1>
+    <hr/>
+{% end %}
+
+<ul>
+{% for child in children %}
+    <li>
+    [{{format_date(child.ctime)}}] <a href="/file/edit?id={{child.id}}">{{child.name}}</a>
+    </li>
+{% end %}
+</ul>
+</div>
+{% end %}
+
+<script>
+    function switchRename() {
+        if ($("#renameDiv").css("display") == "none") {
+            $("#oldName").hide();
+            $("#renameDiv").css("display", "block");
+            $("#newName").val($("#oldName").html());
+        } else {
+            $("#oldName").show();
+            $("#renameDiv").css("display", "none");
+        }
+    }
+
+    
+    function delLink() {
+        var r = confirm("确认删除 {{file.name}}?");
+        if (r) {
+            location.href="/file/update?option=del&id={{file.id}}";
+        }
+    }
+
+        
+    // autosize textarea rows
+    
+    var related = "{{file.related}}";
+    var textContainer = document.getElementById("fileContent");
+    function adjustRows(ele) {
+        var text = ele.innerHTML;
+        var rows = text.count('\n');
+        ele.rows = rows + 10;
+    }
+
+    function edit() {
+        $("#markdown-input-div").removeClass("hide");
+        $("#markdown-output-div").removeClass("col-md-12").addClass("col-md-6");
+        var height = Math.max(500, $("#markdown-output-div").height());
+        $("#markdown-input").css({height:height+"px"});
+    }
+    
+    function preview() {
+        if (!$("#markdown-input-div").hasClass("hide")) {
+            $("#markdown-input-div").addClass("hide");
+            $("#markdown-output-div").removeClass("col-md-6").addClass("col-md-12");
+        }
+    }
+    
+    function renameFile() {
+        var fileId = $("#fileId").text();
+        var oldName = $("#oldName").html();
+        var newName = $("#newName").val();
+        if (newName) {
+            $.post("/file/update", {
+                option: "rename",
+                fileId: fileId,
+                newName: newName
+            }, function (msg) {
+                var result = JSON.parse(msg);
+                if (result.success)
+                {
+                    switchRename();
+                    window.location.reload();
+                } else {
+                    alert("修改失败, " + result.msg);
+                }
+            })
+        }
+    }
+
+        function escape(html, encode) {
+          return html
+            .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function highlight_csv (code) {
+            try {
+                // var csv = new CSV(code);
+                var rows = CSV.parse(code);
+                // console.log(rows);
+                var table = $("<table>");
+                for (var i = 0; i < rows.length; i++) {
+                    var col = rows[i];
+                    var tr = $("<tr>");
+                    for (var j = 0; j < col.length; j++) {
+                        var td = $("<td>").html(col[j]);
+                        tr.append(td);
+                    }
+                    table.append(tr);
+                }
+                console.log(table);
+                window.csv_table = table;
+                return "<table class='table'>" + table.html() + "</table>";
+            } catch (e) {
+                console.log(e);
+                return escape(code);
+            }
+
+        }
+
+        function highlight (code, lang) {
+            console.log(code, lang);
+            if (lang) {
+                lang = lang.toUpperCase();
+            }
+            if (lang == "CSV") {
+                return highlight_csv(code);
+            } else if (lang=="EXCEL") {
+                code = code.replace(/\t/gi, ",");
+                // some \t may be replaced by four space
+                code = code.replace(/ {4}/gi, ',');
+                console.log(code);
+                return highlight_csv(code);
+            } else {
+                return escape(code);
+            }
+        }
+
+        // set marked code highlight function
+        marked.defaults.highlight = highlight;
+
+    $(function () {
+        var old_content = $("#markdown-input-div").val();
+        setInterval(function () {
+            var input = $("#markdown-input").val();
+            // not modified
+            if (input == old_content) {
+                return;
+            }
+            old_content = input;
+            
+            $("#markdown-output-div").html(marked.parse(input));
+        }, 200);
+        preview();
+    })
+</script>
+
+{% end %}

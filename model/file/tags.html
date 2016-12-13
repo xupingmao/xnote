@@ -1,0 +1,91 @@
+<!--     <div>
+        <input id="oldTags" style="display:none" value="{{file.related}}"/> 
+        <span>标签: </span><input type="text" id="tagsInput" class="tags"/>
+        <div style="display:none" id="newTagsDiv">
+            <input id="newTags" style="width:500px;"/>
+            <button onclick="updateRelated()">更新</button>
+        </div>
+        <div id="tagsUpdateDiv" style="color:green;display:none;">success</div>
+    </div> -->
+
+    <script type="text/javascript">
+$(function () {
+
+
+    function editRelated () {
+        if ($("#newTagsDiv").css("display") == "none") {
+            $("#newTags").val($("#oldTags").html());
+            $("#newTagsDiv").show();
+        } else {
+            $("#newTagsDiv").hide();
+        }
+    }
+  
+    var chineseComma = String.fromCharCode(65292);
+        
+    function updateRelated() {
+        var text = $("#newTags").val();
+        tags = text.toUpperCase();
+        var result = ajaxGet("/file/update?option=updateRelated&id={{file.id}}&value="+tags, function (result) {
+            // alert(result);
+            var resultObj = JSON.parse(result);
+            if (resultObj.success) {
+                var resultSpan = document.getElementById("result");
+                resultSpan.innerHTML = "success!";
+                setTimeout(function () {
+                    resultSpan.innerHTML = "";
+                    $("#oldTags").html(tags);
+                    editRelated();
+                }, 1000);
+            } else {
+                alert("update fail, e = " + result.msg);
+            }
+        }, function (e) { alert ("send message failed!!!"); })
+    }
+
+    $("#menu-file").addClass("active");
+    $("#tagsInput").tagsinput({
+        confirmKeys: [13, 44, 65292, 124], // 65292 is chinese comma
+        itemText: function (item) {
+            // console.log(item);
+            return item.toUpperCase();
+        }
+    });
+
+    var oldTags = $("#oldTags").val() || "";
+
+    var tagList = oldTags.split("|");
+    for (var i = 0; i < tagList.length; i++) {
+        $("#tagsInput").tagsinput("add", tagList[i]);
+    }
+
+    function updateTags(tags, callback) {
+        $.get("/file/update?option=updateRelated&id={{file.id}}&value="+tags, function (data) {
+            var result = JSON.parse(data);
+            console.log(data);
+            if (result.success) {
+                if (callback) {
+                    callback();
+                }
+                $("#tagsUpdateDiv").fadeIn(200).fadeOut(500);
+            }
+        });
+    }
+
+    window.updateTags = updateTags;
+
+    $("#tagsInput").on("itemAdded", function (event) {
+        var items = $("#tagsInput").tagsinput("items");
+        var tags = items.join(",");
+        updateTags(tags);
+    })
+
+    $("#tagsInput").on("itemRemoved", function (event) {
+        // alert("removed");
+        var items = $("#tagsInput").tagsinput("items");
+        var tags = items.join(",");
+        updateTags(tags);
+    })
+})
+
+    </script>
