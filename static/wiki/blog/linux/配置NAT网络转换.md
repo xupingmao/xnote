@@ -1,3 +1,7 @@
+## 问题摘要
+
+- NAT配置会改变TCP包
+
 Quick-Tip: Linux NAT in Four Steps using iptables
 By Frank Wiles
 
