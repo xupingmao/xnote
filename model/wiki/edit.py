@@ -1,8 +1,23 @@
 from web.xtemplate import render
 import os
 import xutils
+import web
 
 WIKI_PATH = "static/wiki/"
+
+def get_path_list(path):
+    pathes = path.split("/")
+    last = None
+    pathlist = []
+    for vpath in pathes:
+        if vpath == "":
+            continue
+        if last is not None:
+            vpath = last + "/" + vpath
+        pathlist.append(vpath)
+        last = vpath
+    return pathlist
+
 
 class FileItem:
 
@@ -21,24 +36,24 @@ class FileItem:
             self.key = "1" + name
         
 
-def get_path_list(path):
-    pathes = path.split("/")
-    last = None
-    pathlist = []
-    for vpath in pathes:
-        if vpath == "":
-            continue
-        if last is not None:
-            vpath = last + "/" + vpath
-        pathlist.append(vpath)
-        last = vpath
-    return pathlist
-
+        
+       
 class handler:
-    __url__ = r"/wiki/?(.*)"
+    __url__ = r"/wiki/edit/(.*)"
+    
+    
+    def POST(self, path):
+        path = xutils.unquote(path)
+        content = web.input(content=None).get("content")
+        print(path, content)
+        realpath = os.path.join(WIKI_PATH, path)
+        xutils.backupfile(realpath)
+        xutils.savefile(realpath, content)
+        raise web.seeother("/wiki/edit/" + path)
     
     def GET(self, name):
         name = xutils.unquote(name)
+        origin_name = name
         path = os.path.join(WIKI_PATH, name)
         
         if name == "":
@@ -65,12 +80,12 @@ class handler:
         if parentname=="":
             parentname="/"
             
-        return render("wiki.html", 
+        return render("wiki/edit.html", 
             os = os,
             parent = parent,
             parentname = parentname,
             wikilist = get_path_list(name),
-            name = os.path.basename(name), 
+            name = origin_name,
             children = children,
             content = content,
             type = type)

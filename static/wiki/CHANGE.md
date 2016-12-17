@@ -1,34 +1,43 @@
-# xnote��ʷ
+# xnote历史
+
+
+## 2016/12/17
+
+- wiki的编辑功能，仅admin可以使用
+
 
 ## 2016/12/10
 
-- ʹ��װ��������̳еķ�ʽ
+- 使用装饰器代替继承的方式
 
 ## 2016/12/05
 
-- �������룬�ύ��github
-- ������wiki����
-- ���п�ܵĴ������ϵ�webĿ¼��
+- 整理代码，提交到github
+- 新增了wiki功能
+- 所有框架的代码整合到web目录下
+
 
 ## 2016/07
+- 更换成webpy框架，但是保留tornado的模板功能
+- webpy的代码简单，可读性更强
 
-- ������webpy��ܣ����Ǳ���tornado��ģ�幦��
-- webpy�Ĵ���򵥣��ɶ��Ը�ǿ
 
 ## 2016/06/?
 
-- ����ȫ���������ݿ�(sqlite)
-- markdown�༭��(marked)
+- 数据全部存入数据库(sqlite)
+- markdown编辑器(marked)
 
 ## 2015/12/?
 
-- ����ʹ��web��������
-- ʹ��tornado���
-- ���ݿ�洢����+�ļ��洢
+- 考虑使用web技术开发
+- 使用tornado框架
+- 数据库存储索引+文件存储
 
 ## 2015/08/12
 
-- ��ʼ��˼�������xnote
-- ʹ��Python/Tkinter�����˵�һ��
+
+- 开始构思单机版的xnote
+
+- 使用Python/Tkinter开发了第一版
 
 

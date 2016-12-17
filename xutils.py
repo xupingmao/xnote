@@ -27,6 +27,23 @@ def readfile(path, mode = "r"):
         fp.close()
         return content
         
+def savefile(path, content):
+    import codecs
+    fp = open(path, mode="wb")
+    buf = codecs.encode(content, "utf-8")
+    fp.write(buf)
+    fp.close()
+    return content
+    
+def backupfile(path):
+    if os.path.exists(path):
+        parent = os.path.dirname(path)
+        name   = os.path.basename(path)
+        newname = name + ".bak"
+        newpath = os.path.join(parent, newname)
+        import shutil
+        shutil.copyfile(path, newpath)
+        
 def get_pretty_file_size(path = None, size = None):
     if not size:
         size = os.stat(path).st_size
