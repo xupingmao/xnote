@@ -362,6 +362,9 @@ class MyStaticMiddleware:
                 # can not use web.seeother here
                 # handle to webpy handler
                 return self.app(environ, start_response)
+            # load env as webpy
+            web.ctx.clear()
+            web.ctx.env = environ
             return MyFileSystemApp(environ, start_response)
         elif path.startswith("/static/"):
             return MyStaticApp(environ, start_response)
