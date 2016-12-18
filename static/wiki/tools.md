@@ -1,34 +1,31 @@
-# ÏµÍ³¹¤¾ß
-- [ÏµÍ³ĞÅÏ¢](/system/sys)
-- [²é¿´template´úÂë](/system/template_cache)
-- [sql¹¤¾ß](/system/sql)
+# ç³»ç»Ÿå·¥å…·
+- [ç³»ç»Ÿä¿¡æ¯](/system/sys)
+- [æŸ¥çœ‹templateä»£ç ](/system/template_cache)
+<!-- [sqlå·¥å…·](/system/sql) -->
 
-<!-- [ÉÏ´«ÎÄ¼ş](/tool?path=/static/upload) -->
+<!-- [ä¸Šä¼ æ–‡ä»¶](/tool?path=/static/upload) -->
 
-<!-- [CÅÌ](/fs/C:/) -->
-<!-- [DÅÌ](/fs/D:/) -->
+<!-- [Cç›˜](/fs/C:/) -->
+<!-- [Dç›˜](/fs/D:/) -->
 
-<!-- [Í¬²½DB](/sync/syncdb) -->
+<!-- [åŒæ­¥DB](/sync/syncdb) -->
 
-# ¿ª·¢¹¤¾ß
+# å¼€å‘å·¥å…·
 
-- [ÑÕÉ«±í](/tools/color.html)
-- [×Ö·û´®±È½Ï](/tools/string_cmp.html)
-- [×Ö·û´®¹¤¾ß](/static/archive/ÎÄ±¾¹¤¾ß/×Ö·û´®¹¤¾ß.html)
-- [×Ö·û´®ÅÅĞò](/static/archive/×Ö·û´®ÅÅĞò.html)
-- [Ê±¼ä¹¤¾ß](/tools/datetime.html)
-<!-- [¼ÆËãÆ÷](/static/archive/¼ÆËãÆ÷.html) -->
-- [¸ß¼¶¼ÆËãÆ÷](/tools/calc.html)
-- [json¸ñÊ½»¯¹¤¾ß](/static/archive/json-editor.html)
-- [¶şÎ¬Âë¹¤¾ß](/tools/barcode.html)
-- [²¹·¢ÉñÆ÷](/static/archive/²¹·¢ÉñÆ÷.html)
+- [é¢œè‰²è¡¨](/tools/color.html)
+- [å­—ç¬¦ä¸²æ¯”è¾ƒ](/tools/string_cmp.html)
+- [å­—ç¬¦ä¸²å·¥å…·](/static/archive/æ–‡æœ¬å·¥å…·/å­—ç¬¦ä¸²å·¥å…·.html)
+- [å­—ç¬¦ä¸²æ’åº](/static/archive/å­—ç¬¦ä¸²æ’åº.html)
+- [æ—¶é—´å·¥å…·](/tools/datetime.html)
+<!-- [è®¡ç®—å™¨](/static/archive/è®¡ç®—å™¨.html) -->
+- [é«˜çº§è®¡ç®—å™¨](/tools/calc.html)
+- [jsonæ ¼å¼åŒ–å·¥å…·](/static/archive/json-editor.html)
+- [äºŒç»´ç å·¥å…·](/tools/barcode.html)
+- [è¡¥å‘ç¥å™¨](/static/archive/è¡¥å‘ç¥å™¨.html)
 - [lua.vm.js](/static/archive/lua.vm.js/repl.html)
-- [JavaScript¿ØÖÆÌ¨ TODO]
-- [Python¿ØÖÆÌ¨]
+- [JavaScriptæ§åˆ¶å° TODO]
+- [Pythonæ§åˆ¶å°]
 
-# web¿ª·¢¹¤¾ß
+# webå¼€å‘å·¥å…·
 
-- [POST¹¤¾ß](/tools/static/archive/POST.html)
-
-# ÆäËû
-- [Í¼ĞÎÑ§ÈëÃÅ-¹âÏß´¦Àí](/static/archive/¼ÆËã»úÍ¼ĞÎÑ§/Í¼ĞÎÑ§ÈëÃÅ-¹âÏß´¦Àí.html)
+- [POSTå·¥å…·](/tools/static/archive/POST.html)

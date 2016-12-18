@@ -1,0 +1,80 @@
+{% extends master.html %}
+
+{% block head %}
+    <link rel="stylesheet" href="/css/table.css"/>
+{% end %}
+
+{% block body %}
+
+    <a href="/task?option=edit">新任务</a>
+
+    <hr/>
+
+    <table class="table">
+        <tr>
+            <th>
+                任务名称
+            </th>
+            <th>
+                内容
+            </th>
+            <th>
+                操作
+            </th>
+        </tr>
+        {% for task in tasks %}
+        <tr>
+        <td>
+            <a href="/task?option=edit&name={{task['name']}}">{{task['name']}}</a></p>
+        </td>
+
+        <td>
+            <pre style="height:50px;">{{task['content']}}</pre>
+        </td>
+
+        <td>
+            <a href="javascript:deleteTask('{{task['name']}}')">删除</a>
+            <a href="javascript:finishTask('{{task['name']}}')">完成</a>
+        </td>
+        </tr>
+        {% end %}
+
+    </table>
+
+<script>
+    $("#menu-task").addClass("active");
+    function deleteTask (name) {
+        var conf = confirm("delete " + name + "?");
+        if (conf) {
+            // ajax delete.
+            // redirect
+            ajaxGet("/task?option=del&name=" + name, function (responseText) {
+                // body...
+                var obj = JSON.parse(responseText);
+                if (obj.success) {
+                    location.href="/task";
+                } else {
+                    alert("delete fail, result=" + obj.msg);
+                }
+            });
+        }
+    }
+
+    function finishTask (name) {
+        var conf = confirm("确认完成【" + name + "】?");
+        if (conf) {
+            // ajax delete.
+            // redirect
+            ajaxGet("/task?option=finish&name=" + name, function (responseText) {
+                var obj = JSON.parse(responseText);
+                // body...
+                if (obj.success) {
+                    location.href="/task";
+                } else {
+                    alert("finish fail, result=" + obj.msg);
+                }
+            });
+        }
+    }
+</script>
+{% end %}

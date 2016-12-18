@@ -1,0 +1,534 @@
+{% extends ../base.html %}
+{% block head %}
+    <script src="/static/js/array.js"></script>
+    <script type="text/javascript" src="/static/js/Lexer.js"></script>
+{% end %}
+
+{% block body %}
+<script>
+
+function getRadioValue(name) {
+    var radios = document.getElementsByName(name);
+    for (var i = 0; i < radios.length; i++) {
+        var radio = radios[i];
+        if (radio.checked) return radio.value;
+    }
+    return undefined;
+}
+
+function to_array(inputStr, option) {
+    var seperator = option.getSeperator()
+    var lines = inputStr.split(seperator);
+    var lineStr = "";
+
+    var quote = option.getQuote();
+    var unique = select('#unique').checked;
+    items = [];
+
+    lines.each(function (index, item) {
+        if (item.trim) {
+            item = item.trim();
+        }
+        if (item) {   
+            if (option.isUpperCase()) {
+                item = item.toUpperCase();
+            }
+            if (option.isLowerCase()) {
+                item = item.toLowerCase();
+            }
+            if (unique && items.indexOf(item) != -1) {
+                return null;
+            } else {
+                items.push(item);
+                lineStr += quote + item + quote + ",";
+            }
+        }
+    });
+    if (lineStr[lineStr.length-1]==',') {
+        lineStr = lineStr.substring(0, lineStr.length-1);
+    }
+    return lineStr;
+}
+
+function to_multiline(inputStr, option) {
+    var list = inputStr.split('\n');
+    var quote = option.getQuote();
+    var str = '';
+    for (var i = 0; i < list.length; i++) {
+        var line = list[i];
+        str += quote + line + '\\n' + quote;
+        if (i < list.length-1) {
+            str += '+\n';
+        }
+    }
+    return str;
+}
+
+String.prototype.count = function (dst) {
+    var count = 0;
+    var start = 0;
+    var index = -1;
+    while ((index = this.indexOf(dst, start)) != -1) {
+        count += 1;
+        start = index + 1;
+    }
+    return count;
+}
+
+function str_info(inputStr, option) {
+    var length = inputStr.length;
+    var spaceCount = inputStr.count(" ");
+
+    var info = "length=" + length;
+    info += "\n" + "spaceCount=" + spaceCount;
+    return info;
+}
+
+function to_enum(inputStr, option) {
+    var list = inputStr.split('\n');
+    var info = "";
+    var index = 0;
+    var maxlength = 0;
+    for (var i = 0; i < list.length; i++) {
+        var line = list[i];
+        if (line.length > maxlength) {
+            maxlength = line.length;
+        }
+    }
+    for (var i = 0; i < list.length;i++) {
+        var line = list[i];
+        line = line.trim();
+        if (line == "") continue;
+        line = line.toUpperCase();
+        // require string.js
+        line += ' '.repeat(maxlength-line.length);
+        info += line + " = " + index + "\n";
+        index++;
+    }
+    return info;
+}
+
+function to_uniq (inputStr, option) {
+    var list = inputStr.split('\n');
+    var info = "";
+    var index = 0;
+    var maxlength = 0;
+    var map = {};
+    for (var i = 0; i < list.length;i++) {
+        var line = list[i];
+        line = line.trim();
+        if (line == "") continue;
+        map[line] = 1;
+    }
+
+    for (var k in map) {
+        info += k + "\n";
+    }
+
+    return info;
+}
+
+function get_ip(inputStr, option) {
+    var reg = /\d+\.\d+\.\d+\.\d+/g;
+    var info = "";
+    var list = inputStr.match(reg);
+    if (!list) {
+        return "";
+    }
+    for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        info += item + "\n";
+    }
+    return info;
+}
+
+function listToMultiLine(inputStr, option) {
+    var tokens = readTokens(inputStr);
+    var result = "";
+    for (var i = 0; i < tokens.length; i++) {
+        var item = tokens[i];
+        if (item.type == 'string') {
+            result += item.value + "\n";
+        }
+    }
+    return result;
+}
+
+function get_first_word(inputStr, option) {
+    var list = inputStr.split('\n');
+    var info = "";
+    var index = 0;
+    var maxlength = 0;
+    for (var i = 0; i < list.length;i++) {
+        var line = list[i];
+        line = line.trim();
+        if (line == "") continue;
+        line = line.split(' ')[0];
+        info += line + '\n'
+    }
+    return info;
+}
+
+
+function splitWords (string) {
+    var rawWords = string.split(/[ \t\r\n]/);
+    var words = [];
+    for (var i = 0; i < rawWords.length; i++) {
+        var item = rawWords[i];
+        item = item.trim();
+        if (item != "") {
+            words.push(item);
+        }
+    };
+    return words;
+}
+
+
+function gen_markdown_table (inputStr, opt) {
+    
+    inputStr = inputStr.replace("\r", "");
+    var lines = inputStr.split("\n");
+
+    var isFirstLine = true;
+    var result = "";
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var words = splitWords(line);
+        if (words.length == 0) {
+            continue;
+        }
+        if (isFirstLine) {
+            result += "|" + words.join("|") + "|";
+            result += "\n";
+            var cols = [];
+            for (var i = 0; i < words.length; i++) {
+                cols.push("--")
+            };
+            result += "|" + cols.join("|") + "|\n";
+            isFirstLine = false;
+        } else {
+            result += "|" + words.join("|") + "|\n";
+        }
+    };
+    return result;
+}
+
+
+
+/**
+
+  type funcname '(' args ')'
+
+  type: name *
+
+  funcname : name
+
+  args : type name? ',' 
+
+ */
+
+function CFunction () {
+    this.name = "";
+    this.args = "";
+    this.ret = "";
+    this.struct = "";
+    this.type = "";
+}
+
+CFunction.prototype.toString = function () {
+    if (this.name == "") return "";
+    var name = this.name;
+    if (this.struct != "") {
+        name = this.struct + "_" + this.name;
+    }
+    var self = this.type;
+    if (self != "") {
+        self += " *self, ";
+    }
+    return this.ret + " " + this.name + "(" + self + this.args + ")" + this.tail;
+}
+
+CFunction.prototype.toFunctionPointer = function (instance) {
+    return this.ret + " (*" + this.name + ")(" + instance + " *self, " + this.args + ")" + this.tail;
+}
+
+function CStruct () {
+    this.name = "";
+}
+
+CStruct.prototype.toString = function () {
+    var funcListStr = "";
+    for (var i = 0; i < this.funcList.length; i++) {
+        var func = this.funcList[i];
+        funcListStr += "  " + func.toFunctionPointer(this.type) + "\n";
+    }
+    var typeDef = "typedef struct _" + this.type + "{\n" +
+        "  struct _" + this.name + " *prototype;\n} " + this.type + ";\n\n";
+    var protoDef = "typedef struct _" + this.name + "{\n" + 
+        funcListStr + "} " + this.name + ";\n\n";
+    return typeDef + protoDef;
+}
+
+
+function parse_func(inputStr, option) {
+    var list = inputStr.split('\n');
+    var quote = option.getQuote();
+    var str = '';
+    var lexer = new Lexer();
+    var funcList = [];
+    var struct = "";
+    var structDef = undefined;
+
+    for (var i = 0; i < list.length; i++) {
+        var line = list[i].trim();
+        if (line == "") continue;
+
+        var tokens = lexer.parse(line);
+        console.log(tokens);
+        var stack = [];
+        var func = new CFunction();
+        func.struct = struct;
+        for (var j = 0; j < tokens.length; j++) {
+            var token = tokens[j];
+            if (token.type == "name" && token.value == "prototype") {
+                try {
+                    struct = tokens[j+1].value;
+                    structDef = new CStruct();
+                    structDef.name = struct;
+                } catch (e) {
+                    str += e;
+                }
+            }
+            if (token.type == "name" && token.value == "type") {
+                try {
+                    structDef.type = tokens[j+1].value;
+                } catch (e) {
+                    str += e;
+                }
+            }
+            if (token.type == "op" && token.value == "(") {
+                func.name = stack.pop();
+                func.ret = stack.join(" ");
+                stack = [];
+            } else if (token.type == "op" && token.value == ")") {
+                func.args = stack.join(" ");
+                stack = [];
+            } else {
+                stack.push(token.value);
+            }
+        }
+        func.tail = stack.join("");
+        if (func.name != "") {
+            funcList.push(func);
+        }
+        if (structDef != undefined) {
+            func.type = structDef.type;
+        }
+        console.log(func);
+        str += func + "\n";
+    }
+    if (structDef != undefined) {
+        structDef.funcList = funcList;
+        console.log(funcList);
+        str = structDef + str;
+    }
+    return str;
+}
+
+
+
+/**
+
+  type funcname '(' args ')'
+
+  type: name *
+
+  funcname : name
+
+  args : type name? ',' 
+
+ */
+
+function JavaFunc () {
+    this.name = "";
+    this.args = "";
+    this.ret = "";
+    this.struct = "";
+    this.type = "";
+}
+
+JavaFunc.prototype.toString = function () {
+    if (this.name == "") return "";
+    var name = this.name;
+    if (this.struct != "") {
+        name = this.struct + "_" + this.name;
+    }
+    var self = this.type;
+    if (self != "") {
+        self += " *self, ";
+    }
+    return this.ret + " " + this.name + "(" + self + this.args + ")" + this.tail;
+}
+
+JavaFunc.prototype.toFunctionPointer = function (instance) {
+    return this.ret + " (*" + this.name + ")(" + instance + " *self, " + this.args + ")" + this.tail;
+}
+
+function remove_quote(inputStr, option) {
+    var str = eval("t = " + inputStr);
+    return str;
+}
+
+function parse_java_func(inputStr, option) {
+    var list = inputStr.split('\n');
+    var quote = option.getQuote();
+    var str = '';
+    var lexer = new Lexer();
+    var funcList = [];
+    var struct = "";
+    var structDef = undefined;
+
+    for (var i = 0; i < list.length; i++) {
+        var line = list[i].trim();
+        if (line == "") continue;
+
+        var tokens = lexer.parse(line);
+        console.log(tokens);
+
+        var first = tokens[0];
+        var second = tokens[1];
+        if (first.type == "name" && first.value == "public") {
+            if (second && second.type == "name" && second.value == "class") {
+                continue;
+            }
+            if (line.endsWith("{")) {
+                line = line.substring(0, line.length-1);
+            }
+            str += line + ";" + "\n";
+        }
+    }
+    if (structDef != undefined) {
+        structDef.funcList = funcList;
+        console.log(funcList);
+        str = structDef + str;
+    }
+    return str;
+}
+</script>
+<div class="container col-md-6">
+    <textarea id="input" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
+</div>
+<div class="container col-md-6">
+    <textarea id="output" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
+</div>
+
+<div class="container">
+    <p>分割符<select id="seperator">
+        <option value="\n">换行</option>
+        <option value=",">逗号</option>
+        <option value=";">分号</option>
+        <option value=" ">空格</option>
+    </select></p>
+    <p>引号
+        <input type="radio" name="quote" value="0" checked />双引号
+        <input type="radio" name="quote" value="1"/>单引号
+        <input type="radio" name="quote" value="2"/>无
+    </p>
+    <p>过滤重复<input type="checkbox" id="unique"/></p>
+    <p>
+        转换成大写
+        <input type="radio" name="case" value="0" checked />普通
+        <input type="radio" name="case" value="upper"/>大写
+        <input type="radio" name="case" value="lower"/>小写
+    </p>
+    <p>
+        转换方式
+        <select id="option">
+            <option value="to_array">转成数组</option>
+            <option value="to_multiline">转成多行字符串</option>
+            <option value="str_info">字符串信息</option>
+            <option value="to_enum">转换成枚举</option>
+            <option value="get_first_word">获取第一个单词</option>
+            <option value="to_uniq">去重</option>
+            <option value="get_ip">提取IP</option>
+            <option value="listToMultiLine">去引号</option>
+            <option value="parse_func">解析C语言函数定义</option>
+            <option value="parse_java_func">提取Java方法声明</option>
+            <option value="gen_markdown_table">转为markdown表格</option>
+            <option value="remove_quote">去引号</option>
+        </select>
+    </p>
+    <p><button onclick="execute()">转换</button></p>
+</div>
+
+<div class="col-md-12" id="error" style="color:red">
+</div>
+        
+<script>
+
+    function select(ident) {
+        if (ident[0]=='#') {
+            return document.getElementById(ident.substring(1));
+        }
+        if (ident[0]=='.') {
+            return document.getElementsByClassName(ident.substring(1));
+        }
+    }
+
+    function output(str) {
+        document.getElementById("output").innerHTML = str;
+    }
+    
+    function getInput() {
+        return document.getElementById("input").value;
+    }
+    
+    function Option () {
+        this.getInstance = function () {
+            return new Option();
+        }
+        
+        this.getQuote = function () {
+            var value = getRadioValue("quote");
+            if (value == "0") return '"';
+            else if (value == "1") return "'";
+            return "";
+        }
+
+        this.getSeperator = function () {
+            var value = select("#seperator").value;
+            if (value == "\\n") return "\n";
+            return value;
+        }
+        
+        function getCase() {
+            return getRadioValue("case");
+        }
+        
+        this.isUpperCase = function () {
+            return getCase() == "upper";
+        }
+
+        this.isLowerCase = function () {
+            return getCase() == "lower";
+        }
+
+    }
+
+    function execute() {
+        var option = select('#option').value;
+        console.log(option);
+        var input = getInput();
+        try {
+            $("#error").html("");
+            var str = window[option](input, new Option());
+            output(str);
+        } catch (e) {
+            $("#error").html(e);
+        }
+        
+    }
+</script>
+
+{% end %}
