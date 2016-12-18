@@ -313,7 +313,8 @@ class MyFileSystemApp(MyStaticApp):
             self.send_error(404, "No permission to list directory")
             return None
         list.sort(key=lambda a: a.lower())
-        list.sort(key=lambda a: os.path.isfile(os.path.join(path,a)))
+        # Fix, some `file` in *nix is not file either directory.
+        list.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
         r = []
         try:
             displaypath = urllib.parse.unquote(self.path,
