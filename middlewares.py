@@ -58,6 +58,50 @@ class MyStaticApp(SimpleHTTPRequestHandler):
         pass
 
     def log_message(*a): pass
+    
+    
+    def send_head(self):
+        """Common code for GET and HEAD commands.
+
+        This sends the response code and MIME headers.
+
+        Return value is either a file object (which has to be copied
+        to the outputfile by the caller unless the command was HEAD,
+        and must be closed by the caller under all circumstances), or
+        None, in which case the caller has nothing further to do.
+
+        """
+        path = self.translate_path(self.path)
+        f = None
+        if os.path.isdir(path):
+            parts = urllib.parse.urlsplit(self.path)
+            if not parts.path.endswith('/'):
+                # redirect browser - doing basically what apache does
+                self.send_response(301)
+                new_parts = (parts[0], parts[1], parts[2] + '/',
+                             parts[3], parts[4])
+                new_url = urllib.parse.urlunsplit(new_parts)
+                self.send_header("Location", new_url)
+                self.end_headers()
+                return None
+            return self.list_directory(path)
+        ctype = self.guess_type(path)
+        try:
+            f = open(path, 'rb')
+        except OSError:
+            self.send_error(404, "File not found")
+            return None
+        try:
+            self.send_response(200)
+            self.send_header("Content-type", ctype)
+            fs = os.fstat(f.fileno())
+            self.send_header("Content-Length", str(fs[6]))
+            self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+            self.end_headers()
+            return f
+        except:
+            f.close()
+            raise
 
 
     def get_date_str(self):

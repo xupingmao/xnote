@@ -1,9 +1,9 @@
-{% extends ../master.html %}
+{% extends ../base.html %}
 
 {% block head %}
 <style>
-.code-analyze-name {
-    color: green;
+.code-analyze-name a {
+    color: #FF5000;
 }
 .code-analyze-line {
     color: blue;
@@ -18,7 +18,6 @@ table td {
 {% end %}
 
 {% block body %}
-
 <div>
     <form action="">
         <table>
@@ -34,6 +33,14 @@ table td {
             <td>文件名</td>
             <td><textarea name="filename" cols=100>{{?filename}}</textarea></td>
         </tr>
+        <tr>
+            <td>忽略大小写</td>
+            <td><input type="checkbox" name="ignore_case" {% if ignore_case == "on" %} checked {% end %}/></td>
+        </tr>
+        <tr>
+            <td>递归搜索</td>
+            <td><input type="checkbox" name="recursive" {% if recursive == "on" %} checked {% end %}/></td>
+        </tr>
         </table>
         <p><button>查询</button></p>
     </form>
@@ -42,10 +49,10 @@ table td {
 
 {{?error}}
 
-{% if "files" in globals() %}
 {% for file in files %}
 
 <div class="row">
+    <div style="float:right;">匹配数: {{len(file.result)}}</div>
     <div class="code-analyze-name">
         <a href="/code/view_source?path={{file.name}}&key={{key}}" target="_blank">{{file.name}}</a>
     </div>
@@ -62,6 +69,4 @@ table td {
 </div>
 
 {% end %}
-{% end %}
-<script type="text/javascript">$("#menu-analyze").addClass("active");</script>
 {% end %}

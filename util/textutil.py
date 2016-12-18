@@ -111,7 +111,7 @@ def split_words(text):
         words.remove('')
     return words
 
-def find(text, key, show_line=False):
+def find(text, key, show_line=False, ignore_case=True):
     """ find key in text, return a list
 
     >>> find('hello,world', 'hello')
@@ -131,11 +131,15 @@ def find(text, key, show_line=False):
         keys = [key]
     else:
         keys = key
-
-    for i in range(len(keys)):
-        keys[i] = keys[i].lower()
+    if ignore_case:
+        for i in range(len(keys)):
+            keys[i] = keys[i].lower()
     for line in text.split("\n"):
-        if contains(line.lower(), keys):
+        if ignore_case:
+            target = line.lower()
+        else:
+            target = line
+        if contains(target, keys):
             if show_line:
                 result.append("%04d:%s" % (lineno, line))
             else:

@@ -63,8 +63,8 @@
             </div>
             <div class="row">
               <a href="/">Home</a>
-              {% for path in pathlist %}
-                / <a href="/file/edit?id={{path.id}}">{{path.name}}</a>
+              {% for _path0 in pathlist %}
+                / <a href="/file/edit?id={{_path0.id}}">{{_path0.name}}</a>
               {% end %}
               
             </div>
