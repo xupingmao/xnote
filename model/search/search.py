@@ -105,9 +105,9 @@ class handler(BaseHandler):
 
             search_result = []
 
-            rule1 = self.py_execute(key)
-            if rule1 is not None:
-                search_result.append(rule1)
+            #rule1 = self.py_execute(key)
+            #if rule1 is not None:
+            #    search_result.append(rule1)
 
             # if len(files) == 0:
             #     event.fire("search-miss", words)
