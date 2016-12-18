@@ -49,7 +49,7 @@ class handler:
         realpath = os.path.join(WIKI_PATH, path)
         xutils.backupfile(realpath)
         xutils.savefile(realpath, content)
-        raise web.seeother("/wiki/edit/" + path)
+        raise web.seeother("/wiki/edit/" + xutils.quote(path))
     
     def GET(self, name):
         name = xutils.unquote(name)
