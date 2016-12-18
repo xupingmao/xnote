@@ -56,11 +56,11 @@ class CodeAnalyzeHandler(BaseHandler):
                 path = path.strip()
                 key  = key.strip()
                 filename = filename.strip()
-                self.render("code/code-analyze.html", files = self.search_files(path, key, filename))
+                self.render("code/code_analyze.html", files = self.search_files(path, key, filename))
             else:
-                self.render("code/code-analyze.html")
+                self.render("code/code_analyze.html")
         except Exception as e:
-            self.render("code/code-analyze.html", error = e)
+            self.render("code/code_analyze.html", error = e)
 
 handler = CodeAnalyzeHandler
 

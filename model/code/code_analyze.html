@@ -11,6 +11,9 @@
     margin-left: 10px;
     white-space: pre;
 }
+table td {
+    border:none;
+}
 </style>
 {% end %}
 
@@ -18,9 +21,20 @@
 
 <div>
     <form action="">
-        <p>路  径:<textarea name="path" cols=100>{{?path}}</textarea></p>
-        <p>关键字:<textarea name="key" cols=100>{{?key}}</textarea></p>
-        <p>文件名:<textarea name="filename" cols=100>{{?filename}}</textarea>
+        <table>
+        <tr>
+            <td>路径</td>
+            <td><textarea name="path" cols=100>{{?path}}</textarea></td>
+        </tr>
+        <tr>
+            <td>关键字</td>
+            <td><textarea name="key" cols=100>{{?key}}</textarea></td>
+        </tr>
+        <tr>
+            <td>文件名</td>
+            <td><textarea name="filename" cols=100>{{?filename}}</textarea></td>
+        </tr>
+        </table>
         <p><button>查询</button></p>
     </form>
 </div>
