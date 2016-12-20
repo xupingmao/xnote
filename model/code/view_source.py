@@ -15,8 +15,8 @@ class ViewSourceHandler(BaseHandler):
                     content = xhtml_escape(content)
                     key     = xhtml_escape(key)
                     content = textutil.replace(content, key, htmlutil.span("?", "search-key"), ignore_case=True, use_template=True)
-                self.render("code/view-source.html", content = content)
+                self.render("code/view-source.html", content = content, lines = content.count("\n") + 1)
             except Exception as e:
-                self.render("code/view-source.html", error = e)
+                self.render("code/view-source.html", error = e, lines = 0)
 
 handler = ViewSourceHandler

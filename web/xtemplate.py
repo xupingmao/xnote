@@ -1,3 +1,5 @@
+#coding=utf-8
+
 '''
     Tornado template wrapper
     @since 2016/12/05
@@ -29,6 +31,15 @@ def render(template_name, **kw):
         hook(nkw)
     nkw.update(kw)
     return _loader.load(template_name).generate(**nkw)
+
+def render_text(text, **kw):
+    nkw = {}
+    for hook in _hooks:
+        hook(nkw)
+    nkw.update(kw)
+    # TODO 需要优化
+    template = Template(text, name="<string>", loader=_loader)
+    return template.generate(**nkw)
 
     
 def get_code(name):

@@ -14,7 +14,7 @@
 
 - [颜色表](/tools/color.html)
 - [字符串比较](/tools/string_cmp.html)
-- [字符串工具](/static/archive/文本工具/字符串工具.html)
+- [字符串工具](/tools/string.html)
 - [字符串排序](/static/archive/字符串排序.html)
 - [时间工具](/tools/datetime.html)
 <!-- [计算器](/static/archive/计算器.html) -->
