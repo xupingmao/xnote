@@ -83,10 +83,13 @@ class ModelManager:
 
     def load_model(self, module, name):
         if hasattr(module, "handler"):
+            handler = module.handler
             clz = name.replace(".", "_")
             self.vars[clz] = module.handler
             if hasattr(module.handler, "__url__"):
                 url = module.handler.__url__
+            elif hasattr(handler, "__xurl__"):
+                url = handler.__xurl__
             else:
                 url = self.get_url(name)
             self.add_mapping(url, clz)
