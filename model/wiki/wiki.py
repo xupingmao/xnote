@@ -13,10 +13,10 @@ def check_resource(path):
     _,ext = os.path.splitext(path)
     if ext in (".png", ".jpg"):
         pathlist = path.split("/")
-        pathlist = filter(lambda name: xutils.quote(name), pathlist)
+        pathlist = map(lambda name: xutils.quote(name), pathlist)
         uri = "/" + "/".join(pathlist)
-        print(uri)
-        raise web.seeother("/" + "/".join(pathlist))
+        # print(uri)
+        raise web.seeother(uri)
     return False
 
 class FileItem:
