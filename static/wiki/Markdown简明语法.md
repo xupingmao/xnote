@@ -37,15 +37,18 @@ markdown是一种流行的简洁强大的网页编辑格式
 图片
 
 ```
-
+![简介](Tulips.png)
 ```
+![简介](Tulips.jpg)
 
 ---
 链接
 
 ```
-
+[百度](http://www.baidu.com)
 ```
+[百度](http://www.baidu.com)
+
 
 ---
 ## 表格

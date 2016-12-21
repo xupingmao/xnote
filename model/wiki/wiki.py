@@ -1,8 +1,23 @@
 from web.xtemplate import render
 import os
 import xutils
+import web
 
 WIKI_PATH = "static/wiki/"
+
+HIDE_EXT_LIST = [
+    ".bak"
+]
+
+def check_resource(path):
+    _,ext = os.path.splitext(path)
+    if ext in (".png", ".jpg"):
+        pathlist = path.split("/")
+        pathlist = filter(lambda name: xutils.quote(name), pathlist)
+        uri = "/" + "/".join(pathlist)
+        print(uri)
+        raise web.seeother("/" + "/".join(pathlist))
+    return False
 
 class FileItem:
 
@@ -52,15 +67,20 @@ class handler:
             children = []
             parent = name
             for child in os.listdir(path):
+                _, ext = os.path.splitext(child)
                 if child.startswith("_"):
                     continue
-                if child.endswith(".bak"):
+                if ext in HIDE_EXT_LIST:
                     continue
                 children.append(FileItem(parent, child, path))
             children.sort(key = lambda item: item.key)
         else:
+            check_resource(path)
             type = "file"
             content = xutils.readfile(path)
+            _, ext = os.path.splitext(path)
+            if ext == ".csv" and not content.startswith("```csv"):
+                content = "```csv\n" + content + "\n```"
             children = None
         
         parent = os.path.dirname(name)

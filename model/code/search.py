@@ -13,7 +13,10 @@ CODE_EXT_LIST = (".java",
                  ".py",
                  ".json",
                  ".text",
-                 ".xsd")
+                 ".xsd",
+                 ".proto",
+                 ".lua",
+                 ".rb")
 def contains(self, words):
     """
     >>> contains("abc is good", "abc")
