@@ -1,4 +1,7 @@
-# 登录MySQL
+# 目录
+
+
+## 登录MySQL
 
 ```
 # 本地
@@ -8,7 +11,7 @@ mysql -uroot -h host -p
 # input password
 ```
 
-# 查看变量
+## 查看变量
 
 ```
 show variables

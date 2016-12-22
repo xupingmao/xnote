@@ -5,6 +5,7 @@ from BaseHandler import BaseHandler, reload_template
 from FileDB import FileService
 import functools
 from util import fsutil
+import xutils
 from xutils import *
 
 import json
@@ -54,6 +55,11 @@ def notfound():
     raise web.notfound(xtemplate.render("notfound.html"))
     
 
+def check_db():
+    if not os.path.exists(config.DB_PATH):
+        xutils.touch(config.DB_PATH)
+        sql = xutils.readfile(config.SQL_PATH)
+
 def main():
     global app
     global basic_urls
@@ -87,6 +93,9 @@ def main():
     
     # add render hook
     xtemplate.add_render_hook(main_render_hook)
+    
+    # check database
+    check_db()
 
     m = ModelManager(app, var_env, basic_urls)
     m.reload()

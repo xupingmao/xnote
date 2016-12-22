@@ -67,6 +67,11 @@ def get_file_size(path, format=True):
 def create_dir(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
+
+def touch(path):
+    if not os.path.exists(path):
+        with open(path, "wb") as fp:
+            pass
     
 #################################################################
 ##   DateTime Utilities
