@@ -267,6 +267,15 @@ def get_filesystem_kw():
     kw["search_type"] = "fs"
     return kw
 
+def getpathlist(path):
+    pathsplit = path.split("/")
+    pathlist = []
+    for i in range(len(pathsplit)):
+        path = "/".join(pathsplit[:i])
+        if "" != os.path.basename(path):
+            pathlist.append(path)
+    return pathlist
+
 class MyFileSystemApp(MyStaticApp):
 
     def translate_path(self, path):
@@ -330,6 +339,7 @@ class MyFileSystemApp(MyStaticApp):
         kw = get_filesystem_kw()
         kw["filelist"] = list
         kw["path"] = path
+        kw["fspathlist"] = getpathlist(path)
         kw["current_path"] = path
         kw["parent_path"] = parent_path
 

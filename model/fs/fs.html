@@ -39,7 +39,14 @@
 
 <ul>
 
-<li style="padding-top:6px;"><a href="/fs/{{parent_path}}/">上一级目录</a></li>
+<div>
+<a href="/fs/">Home</a> /
+{% for _path in fspathlist %}
+    <a href="/fs/{{_path}}">{{os.path.basename(_path) }}</a> / 
+{% end %}
+</div>
+
+<!-- <li style="padding-top:6px;"><a href="/fs/{{parent_path}}/">上一级目录</a></li> -->
 
 {% for filename in filelist %}
     {% set filepath = current_path + filename %}
