@@ -1,0 +1,48 @@
+{% extends ../base.html %}
+
+{% block body %}
+
+<div class="col-md-6">
+    <textarea id="input" class="col-md-12" rows=10></textarea>
+</div>
+
+<div class="col-md-6">
+    <textarea id="output" class="col-md-12" rows=10></textarea>
+</div>
+
+<div>
+    <button onclick="hexToStr()">Hex->Str</button>
+    <button onclick="strToHex()">Str->Hex</button>
+</div>
+
+<script>
+
+var charCodeOfA = 'a'.charCodeAt(0);
+var hexOffset = charCodeOfA - 10;
+
+function hexToDigit(c) {
+    if (c >= 'a') {
+        return c.charCodeAt(0) - hexOffset;
+    } else {
+        return c - '0';
+    }
+}
+function hexToStr() {
+    var text = $("#input").val();
+    var outstr = "";
+    var byteArray = [];
+    var charArray = [];
+    for (var i = 0; i < text.length; i+=2) {
+        var a = hexToDigit(text[i]);
+        var b = hexToDigit(text[i+1]);
+        var byteVal = (a << 4) + b;
+        var charVal = String.fromCharCode(byteVal);
+        // console.log(a,b,byteVal);
+        byteArray.push(byteVal);
+        charArray.push(charVal);
+    }
+    // TODO check utf-8
+    $("#output").val(charArray.join(""));
+}
+</script>
+{% end %}

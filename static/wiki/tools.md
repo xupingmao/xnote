@@ -21,6 +21,7 @@
 - [高级计算器](/tools/calc.html)
 - [json格式化工具](/static/archive/json-editor.html)
 - [二维码工具](/tools/barcode.html)
+- [Hex工具](/tools/hex.html)
 - [补发神器](/static/archive/补发神器.html)
 - [lua.vm.js](/static/archive/lua.vm.js/repl.html)
 - [JavaScript控制台 TODO]
