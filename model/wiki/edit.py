@@ -47,7 +47,7 @@ class handler:
         content = web.input(content=None).get("content")
         print(path, content)
         realpath = os.path.join(WIKI_PATH, path)
-        xutils.backupfile(realpath)
+        xutils.backupfile(realpath, rename=True)
         xutils.savefile(realpath, content)
         raise web.seeother("/wiki/" + xutils.quote(path))
     

@@ -5,6 +5,9 @@
 
 <!-- [同步DB](/sync/syncdb) -->
 
+# 日常工具
+- [搜索对比](/tools/search_compare.html)
+
 # 编解码工具
 - [二维码工具](/tools/barcode.html)
 - [base64](/tools/base64.html)

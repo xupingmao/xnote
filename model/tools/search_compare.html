@@ -1,0 +1,42 @@
+{% extends ../base.html %}
+
+{% block head %}
+<style type="text/css">
+	iframe {
+		width: 100%;
+		height: 100%;
+	}
+</style>
+{% end %}
+
+{% block body %}
+
+<div class="col-md-12">
+	<textarea id="mykey" class="col-md-12"></textarea>
+	<button onclick="search()">搜索</button>
+</div>
+
+<div class="col-md-12">
+	<div class="col-md-6">
+		<iframe id="baidu" src="https://www.baidu.com"></iframe>
+	</div>
+	<div class="col-md-6">
+		<iframe id="bing" src="http://cn.bing.com/"></iframe>
+	</div>
+<!-- 	<div class="col-md-6">
+		<iframe src="https://www.google.com"></iframe>
+	</div> -->
+</div>
+
+<script type="text/javascript">
+
+function search() {
+	var key = $("#mykey").val();
+	console.log(key);
+	$("#baidu").attr("src", "http://www.baidu.com/s?wd=" + key);
+	$("#bing").attr("src", "http://cn.bing.com/search?q="+key);
+}
+
+</script>
+
+{% end %}

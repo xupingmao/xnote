@@ -35,13 +35,14 @@ def savefile(path, content):
     fp.close()
     return content
     
-def backupfile(path, backup_dir = None):
+def backupfile(path, backup_dir = None, rename=False):
     if os.path.exists(path):
         if backup_dir is None:
             backup_dir = os.path.dirname(path)
         name   = os.path.basename(path)
         newname = name + ".bak"
         newpath = os.path.join(backup_dir, newname)
+        # need to handle case that bakup file exists
         import shutil
         shutil.copyfile(path, newpath)
         
