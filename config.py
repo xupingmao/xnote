@@ -3,7 +3,7 @@ import os
 
 # WEBDIR = os.path.join("D:\\", "xnote", "xshell", "network", "webroot");
 
-PORT = "8080"
+PORT = "1234"
 
 WORKING_DIR = os.path.dirname(__file__)
 
@@ -13,11 +13,12 @@ UPLOAD_DIR = os.path.join(WORKING_DIR, "static", "upload")
 
 PLUGINS_DIR = os.path.join(WORKING_DIR, "plugins")
 
-DB_PATH = os.path.join(WORKING_DIR, "db", "data.db")
+DB_PATH  = os.path.join(WORKING_DIR, "db", "data.db")
+SQL_PATH = os.path.join(WORKING_DIR, "db", "data.sql")
 
 BACKUP_DIR = os.path.join(WORKING_DIR, "backup")
 
-IS_ADMIN = False
+IS_ADMIN = True
 
 IP_BLACK_LIST = ["192.168.56.1"] # this is vbox ip
 

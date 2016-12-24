@@ -10,9 +10,14 @@
     <textarea id="output" class="col-md-12" rows=10></textarea>
 </div>
 
-<div>
+<div class="col-md-12">
     <button onclick="hexToStr()">Hex->Str</button>
     <button onclick="strToHex()">Str->Hex</button>
+    <button onclick="numToHex()">Number->Hex</button>
+    <button onclick="hexToNum()">Hex->Number</button>
+</div>
+
+<div id="error" class="col-md-12" style="color:red;">
 </div>
 
 <script>
@@ -21,13 +26,15 @@ var charCodeOfA = 'a'.charCodeAt(0);
 var hexOffset = charCodeOfA - 10;
 
 function hexToDigit(c) {
-    if (c >= 'a') {
+    if (c >= 'a' && c <= 'f') {
         return c.charCodeAt(0) - hexOffset;
-    } else {
+    } else if (c >= '0' && c <='9') {
         return c - '0';
+    } else {
+        throw "invalid hex char: " + c;
     }
 }
-function hexToStr() {
+function _hexToStr() {
     var text = $("#input").val();
     var outstr = "";
     var byteArray = [];
@@ -43,6 +50,16 @@ function hexToStr() {
     }
     // TODO check utf-8
     $("#output").val(charArray.join(""));
+}
+
+function hexToStr() {
+    try {
+        return _hexToStr();
+    } catch (e) {
+        $("#error").text(e);
+    } finally {
+    
+    }
 }
 </script>
 {% end %}

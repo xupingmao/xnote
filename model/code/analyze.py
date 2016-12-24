@@ -128,7 +128,7 @@ class CodeAnalyzeHandler(BaseHandler):
         except Exception as e:
             error = e
         finally:
-            self.render("code/search.html", 
+            self.render("code/analyze.html", 
                 files = files,
                 path = path,
                 ignore_case = ignore_case)

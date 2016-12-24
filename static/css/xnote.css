@@ -130,9 +130,19 @@ li.menu-item {
     width: 16.7%;
 }
 
+.col-md-3 {
+    float: left;
+    width: 25%;
+}
+
 .col-md-4 {
     float:left;
     width: 33.3%;
+}
+
+.col-md-5 {
+    float: left;
+    width: 41.7%;
 }
 
 .col-md-6 {
@@ -140,9 +150,19 @@ li.menu-item {
     width: 50%;
 }
 
+.col-md-7 {
+    float: left;
+    width: 58.3%;
+}
+
 .col-md-8 {
     float: left;
     width: 66.7%;
+}
+
+.col-md-9 {
+    float: left;
+    width: 75%;
 }
 
 .col-md-10 {

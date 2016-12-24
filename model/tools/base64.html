@@ -1,0 +1,32 @@
+{% extends ../base.html %}
+
+{% block head %}
+<script src="/static/lib/base64.js"></script>
+{% end %}
+{% block body %}
+
+<div class="col-md-6">
+<label>Input</label>
+<textarea id="input" class="col-md-12" rows=10></textarea>
+</div>
+
+<div class="col-md-6">
+<label>Output</label>
+<textarea id="output" class="col-md-12" rows=10></textarea>
+</div>
+
+<div class="col-md-12">
+    <button onclick="base64Encode()">Encode</button>
+    <button onclick="base64Decode()">Decode</button>
+</div>
+
+<script>
+function base64Encode() {
+    $("#output").val(btoa($("#input").val()));
+}
+
+function base64Decode() {
+    $("#output").val(atob($("#input").val()));
+}
+</script>
+{% end %}

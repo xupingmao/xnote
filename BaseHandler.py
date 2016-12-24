@@ -161,7 +161,7 @@ class BaseHandler():
 
     def GET(self):
         # check login information
-        self.check_login()
+        # self.check_login()
         self._response = None
         self._input = web.input()
         self._args = None

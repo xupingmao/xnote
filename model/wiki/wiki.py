@@ -74,7 +74,7 @@ class handler:
                     continue
                 children.append(FileItem(parent, child, path))
             children.sort(key = lambda item: item.key)
-        else:
+        elif os.path.isfile(path):
             check_resource(path)
             type = "file"
             content = xutils.readfile(path)
@@ -82,6 +82,10 @@ class handler:
             if ext == ".csv" and not content.startswith("```csv"):
                 content = "```csv\n" + content + "\n```"
             children = None
+        else:
+            # file not exists or not readable
+            children = None
+            content = None
         
         parent = os.path.dirname(name)
         parentname = os.path.basename(parent)

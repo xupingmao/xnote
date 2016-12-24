@@ -22,7 +22,6 @@
         <input type="file" name="file"/>
         <button>上传</button>
     </form>
-<!--     <a href="/system/protect?path={{current_path}}">转换</a> -->
     
     {% if is_stared(current_path) %}
         <a href="/system/star?op=cancel&path={{current_path}}">取消收藏</a>
@@ -30,21 +29,21 @@
         <a href="/system/star?path={{current_path}}">收藏</a>
     {% end %}
     
-    <a href="/code/search?path={{current_path}}">搜索</a>
+    <a href="/code/analyze?path={{current_path}}">分析</a>
 </div>
 
 <hr/>
 
 <div>
 
-<ul>
-
-<div>
+<div style="background: lightgreen;">
 <a href="/fs/">Home</a> /
 {% for _path in fspathlist %}
     <a href="/fs/{{_path}}">{{os.path.basename(_path) }}</a> / 
 {% end %}
 </div>
+
+<ul>
 
 <!-- <li style="padding-top:6px;"><a href="/fs/{{parent_path}}/">上一级目录</a></li> -->
 
