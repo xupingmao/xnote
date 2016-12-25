@@ -85,7 +85,8 @@ class handler:
         else:
             # file not exists or not readable
             children = None
-            content = None
+            content = "File \"%s\" not exists" % origin_name
+            type = "file"
         
         parent = os.path.dirname(name)
         parentname = os.path.basename(parent)
