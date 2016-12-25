@@ -11,7 +11,7 @@ class handler(BaseHandler):
 
         if parent_id is not None:
             FileDB.update(where = "id=%s" % id, parent_id = parent_id)
-            raise web.seeother("/file_edit?id=%s" % id)
+            raise web.seeother("/file/edit?id=%s" % id)
 
         if name != "" and name != None:
             filelist = FileDB.search_name(name)

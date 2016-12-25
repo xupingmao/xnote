@@ -1,0 +1,51 @@
+{% extends ../base.html %}
+
+{% block body %}
+
+<div class="col-md-12">
+<form method="POST">
+    <table>
+        <tr>
+            <td>路径</td>
+            <td><textarea cols="100">{{path}}</textarea></td>
+        </tr>
+        <tr>
+            <td>递归</td>
+            <td><input type="checkbox" name="recursive" {% if recursive == "on" %} checked {% end %}/></td>
+        </tr>
+        <tr>
+            <td>类型</td>
+            <td>
+                <select name="type">
+                    {% for _type in typedict %}
+                        <option value="{{_type}}" {% if type == _type %} selected {% end %}>{{_type}}</option>
+                    {% end %}
+                </select>
+            </td>
+        </tr>
+    </table>
+    <button>统计</button>
+</form>
+</div>
+
+<table>
+<tr>
+<th>文件名</th>
+<th>行数</th>
+<th>有效行数</th>
+<th>空白行数</th>
+</tr>
+
+{% for info in line_infos %}
+
+    <tr>
+        <td>{{info.fname}}</td>
+        <td>{{info.lines}}</td>
+        <td>{{info.validlines}}</td>
+        <td>{{info.blanklines}}</td>
+    </tr>
+
+{% end %}
+</table>
+
+{% end %}

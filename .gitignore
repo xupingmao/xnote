@@ -2,3 +2,15 @@
 __pycache__
 *.pyc
 *.bak
+*.zip
+*.bak
+/static/exe
+/static/logs
+/bs4/
+/web/bs4/
+/static/upload/
+/static/js/webos/
+/static/lib/jsoneditor/
+/static/lib/My97DatePicker/
+/static/img/
+/static/deprecated/
