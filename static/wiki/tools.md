@@ -12,6 +12,7 @@
 - [二维码工具](/tools/barcode.html)
 - [base64](/tools/base64.html)
 - [Hex工具](/tools/hex.html)
+- TODO 编解码序列,仿照shell的管道，可以选择多个编解码方法串联
 
 # 开发工具
 
