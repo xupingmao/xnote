@@ -11,7 +11,7 @@
 </div>
 
 <div class="col-md-12">
-    <button onclick="hexToStr()">Hex->Str</button>
+    <button onclick="hexToAscii()">Hex->Ascii</button>
     <button onclick="strToHex()">Str->Hex</button>
     <button onclick="numToHex()">Number->Hex</button>
     <button onclick="hexToNum()">Hex->Number</button>
@@ -25,6 +25,23 @@
 var charCodeOfA = 'a'.charCodeAt(0);
 var hexOffset = charCodeOfA - 10;
 
+var HEX_TO_NUM_MAP = {
+    "0":0, '1':1, '2':2, '3':3,
+    '4':4, '5':5, '6':6, '7':7,
+    '8':8, '9':9, '0':0,
+    'a':10, 'b':11, 'c':12, 'd':13,
+    'e':14, 'f':15,
+    // 'A':10, 'B':11, 'C':12, 'D':13,
+    // 'E':14, 'F':15
+};
+
+var NUM_TO_HEX_MAP = {};
+
+for (var key in HEX_TO_NUM_MAP) {
+    var value = HEX_TO_NUM_MAP[key];
+    NUM_TO_HEX_MAP[value] = key;
+}
+
 function hexToDigit(c) {
     if (c >= 'a' && c <= 'f') {
         return c.charCodeAt(0) - hexOffset;
@@ -34,7 +51,27 @@ function hexToDigit(c) {
         throw "invalid hex char: " + c;
     }
 }
-function _hexToStr() {
+
+function digitToHex(numVal) {
+    return NUM_TO_HEX_MAP[numVal];
+}
+
+function byteToHex(byteVal) {
+    return digitToHex(byteVal >> 4) + digitToHex(byteVal & 0xf);
+}
+
+function safeWrapper(func) {
+    try {
+        return func();
+    } catch (e) {
+        $("#error").text(e);
+    } finally {
+    
+    }
+}
+
+function hexToAscii() {
+    return safeWrapper(function () {
     var text = $("#input").val();
     var outstr = "";
     var byteArray = [];
@@ -50,16 +87,41 @@ function _hexToStr() {
     }
     // TODO check utf-8
     $("#output").val(charArray.join(""));
+});
 }
 
-function hexToStr() {
-    try {
-        return _hexToStr();
-    } catch (e) {
-        $("#error").text(e);
-    } finally {
-    
-    }
+function strToHex() {
+    return safeWrapper(function () {
+        var text = $("#input").val();
+        var outstr = "";
+        var byteArray = [];
+        for (var i = 0; i < text.length; i++) {
+            var charCode = text.charCodeAt(i);
+            if (charCode < 0xff) {
+                byteArray.push(byteToHex(charCode));
+            } else {
+                // Unicode is build with a short value
+                byteArray.push(byteToHex(charCode>>8));
+                byteArray.push(byteToHex(charCode&0xff));
+            }
+        }
+        // TODO check utf-8
+        $("#output").val(byteArray.join(""));
+    })
+}
+
+function numToHex() {
+    return safeWrapper(function () {
+        var text = $("#input").val();
+        var numVal = parseInt(text);
+        var hexStr = "";
+        while (numVal > 0) {
+            var byteVal = numVal & 0xf;
+            numVal = numVal >> 4;
+            hexStr = digitToHex(byteVal) + hexStr;
+        }
+        $("#output").val("0x" + hexStr);
+    });
 }
 </script>
 {% end %}
