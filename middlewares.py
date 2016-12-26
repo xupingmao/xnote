@@ -343,6 +343,10 @@ class MyFileSystemApp(MyStaticApp):
         kw["current_path"] = path
         kw["parent_path"] = parent_path
 
+        # handle home
+        home = path.split("/")[0]
+        kw["home"] = home
+
         content = render_template("fs/fs.html", **kw)
         displaypath = xutils.html_escape(displaypath)
         enc = "utf-8"

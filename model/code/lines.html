@@ -34,6 +34,7 @@
 <th>行数</th>
 <th>有效行数</th>
 <th>空白行数</th>
+<th>查看</th>
 </tr>
 
 {% for info in line_infos %}
@@ -43,6 +44,7 @@
         <td>{{info.lines}}</td>
         <td>{{info.validlines}}</td>
         <td>{{info.blanklines}}</td>
+        <td><a target="_blank" href="/code/view_source?path={{info.fname}}">查看</a></td>
     </tr>
 
 {% end %}

@@ -18,7 +18,7 @@
 </div>
 <div class="col-md-12">
 <pre style="float:left; width: 50px;">{% for l in range(lines) %}{{"%04d\n" % l}}{% end %}</pre>
-<pre class="col-md-11">{%raw ?content%}</pre>
+<pre class="col-md-11">{{ content }}</pre>
 </div>
 
 <script type="text/javascript">$("#menu-analyze").addClass("active");</script>
