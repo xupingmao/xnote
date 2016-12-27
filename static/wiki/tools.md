@@ -17,7 +17,7 @@
 # 开发工具
 
 - [颜色表](/tools/color.html)
-- [字符串比较](/tools/string_cmp.html)
+- [diff工具](/tools/js_diff.html)
 - [字符串工具](/tools/string.html)
 - [字符串排序](/static/archive/字符串排序.html)
 - [时间工具](/tools/datetime.html)

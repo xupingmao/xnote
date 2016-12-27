@@ -18,7 +18,7 @@ def get_memory_usage():
     try:
         if osutil.iswindows():
             pid = os.getpid()
-            mem_usage = os.popen("tasklist | findstr %s" % pid).read()
+            mem_usage = os.popen("tasklist /FI \"PID eq %s\"" % pid).read()
             words = textutil.split_words(mem_usage)
             return words[-2] + " K"
         else:

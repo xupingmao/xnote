@@ -71,6 +71,7 @@ def get_line_infos(path, recursive=False, type=None):
         blanklines = total_blanks)
 
     line_infos.insert(0, total)
+    line_infos.sort(key = lambda info: -info.lines)
     return line_infos
 
 
@@ -91,7 +92,7 @@ class handler:
             **args)
             
     def POST(self):
-        args = web.input(path=None, recursive=None, type=None)
+        args = web.input(_method="POST")
 
         path = args.path
         recursive = args.recursive

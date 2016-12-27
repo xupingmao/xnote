@@ -23,7 +23,7 @@
 @rem E Light yellow
 @rem F Light white
 
-@color B
+@rem @color B
 
 @date /T
 @time /T

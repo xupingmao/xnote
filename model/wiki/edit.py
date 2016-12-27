@@ -44,9 +44,22 @@ class handler:
     
     def POST(self, path):
         path = xutils.unquote(path)
-        content = web.input(content=None).get("content")
+        params = web.input(content=None)
+        content = params.get("content")
+        new_name = params.get("new_name")
+        old_name = params.get("old_name")
+        if new_name!=old_name:
+            print("rename %s to %s" % (old_name, new_name))
+            dirname = os.path.dirname(path)
+            realdirname = os.path.join(WIKI_PATH, dirname)
+            oldpath = os.path.join(realdirname, old_name)
+            newpath = os.path.join(realdirname, new_name)
+            os.rename(oldpath, newpath)
+            realpath = newpath
+            path = dirname + "/" + new_name
+        else:
+            realpath = os.path.join(WIKI_PATH, path)
         print(path, content)
-        realpath = os.path.join(WIKI_PATH, path)
         xutils.backupfile(realpath, rename=True)
         xutils.savefile(realpath, content)
         raise web.seeother("/wiki/" + xutils.quote(path))
@@ -86,6 +99,7 @@ class handler:
             parentname = parentname,
             wikilist = get_path_list(name),
             name = origin_name,
+            basename = os.path.basename(name),
             children = children,
             content = content,
             type = type)
