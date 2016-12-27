@@ -3,7 +3,9 @@
 {% block body %}
 
 <div class="col-md-12">
-<form method="POST">
+<!-- POST会被GET参数覆盖 -->
+<form method="GET">
+    <input type="text" name="count" class="hide" value="on">
     <table>
         <tr>
             <td>路径</td>
@@ -13,6 +15,11 @@
             <td>递归</td>
             <td><input type="checkbox" name="recursive" {% if recursive == "on" %} checked {% end %}/></td>
         </tr>
+        <tr>
+            <td>黑名单</td>
+            <td>
+                <textarea name="blacklist" cols=100></textarea>
+            </td>
         <tr>
             <td>类型</td>
             <td>

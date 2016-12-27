@@ -78,17 +78,23 @@ def get_line_infos(path, recursive=False, type=None):
 class handler:
 
     def GET(self):
-        args = web.input(path=None, recursive=None, type=None)
+        args = web.input(path=None, recursive=None, type=None, count=None)
 
         path = args.path
         recursive = args.recursive
         type = args.type
+        count = args.count
         typedict = CODE_EXT_DICT
+        
+        if count=="on":
+            line_infos = get_line_infos(path, 
+                recursive = recursive=="on", type = type)
+
 
         # return xtemplate.render("code/lines.html", **locals())
         return xtemplate.render("code/lines.html", 
             typedict = typedict,
-            line_infos = [],
+            line_infos = line_infos,
             **args)
             
     def POST(self):
