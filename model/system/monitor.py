@@ -17,9 +17,9 @@ class task:
 
     def reload_logger(self):
         if self.logger is not None:
-            self.logger.close()
+            self.logger.handlers[0].close()
 
-        logger = logging.getLogger()
+        logger = logging.Logger(name="monitor")
         logger.setLevel(logging.INFO)
         fname = "log/monitor-%s.log" % (time.strftime("%Y-%m-%d"))
         handler = logging.FileHandler(fname)

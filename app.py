@@ -111,6 +111,7 @@ def main():
     autoreload_thread = AutoReloadThread(stop_callback)
     autoreload_thread.watch_recursive_dir("model")
     autoreload_thread.start()
+    m.run_task()
 
     # check database backup
     backup.chk_backup()
