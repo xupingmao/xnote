@@ -3,9 +3,12 @@ import config
 import os
 import sys
 import traceback
+import time
+
 from util import textutil
 from copy import copy
 from BaseHandler import Storage, reload_template
+from threading import Thread
 
 class WebModel:
     def __init__(self):
@@ -30,6 +33,7 @@ class ModelManager:
         self.mapping = copy(mapping)
         self.vars = vars
         self.search_dict = {}
+        self.task_dict = {}
         self.model_list = []
         self.black_list = ["__pycache__"]
         self.debug = True
@@ -74,6 +78,7 @@ class ModelManager:
                     rootmod = __import__(modname)
                     mod = self.get_mod(rootmod, modname)
                     self.load_model(mod, modname)
+                    self.load_task(mod, modname)
             except Exception as e:
                 ex_type, ex, tb = sys.exc_info()
                 print("Fail to load module '%s'" % filename)
@@ -109,6 +114,14 @@ class ModelManager:
             if self.debug:
                 print("Load mapping (%s, %s)" % (url, module.__name__))
 
+    def load_task(self, module, name):
+        if hasattr(module, "task"):
+            task = module.task
+            if hasattr(task, "__xtaskname__"):
+                taskname = task.__xtaskname__
+                self.task_dict[taskname] = task()
+                print("Load task (%s,%s)" % (taskname, module.__name__))
+
     def get_mapping(self):
         return self.mapping
 
@@ -125,3 +138,34 @@ class ModelManager:
             if textutil.contains(m.searchkey, words):
                 result.append(Storage(name=m.name, url=m.url, description = m.description))
         return result
+
+    def run_task(self):
+        def run():
+            intervals = 0
+            while True:
+                # print("intervals=", intervals)
+                # 避免被Python转成大数
+                if intervals >= 1000000:
+                    intervals = 0
+                for taskname in self.task_dict:
+                    task = self.task_dict[taskname]
+                    if intervals % task.__xinterval__ == 0:
+                        newthread = TaskThread(task)
+                        newthread.start()
+                time.sleep(1)
+                intervals+=1
+        thread = TaskThread(run)
+        thread.start()
+
+
+class TaskThread(Thread):
+    """docstring for TaskThread"""
+    def __init__(self, func, *args):
+        super(TaskThread, self).__init__()
+        # 守护线程，防止卡死
+        self.setDaemon(True)
+        self.func = func
+        self.args = args
+        
+    def run(self):
+        self.func(*self.args)
