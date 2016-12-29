@@ -5,6 +5,7 @@ import time
 import os
 import xutils
 import logging
+import json
 from web import xtemplate
 
 try:
@@ -60,12 +61,14 @@ class task:
             data["rss"] = mem_info.rss # Resident set size 进程占用的内存
             data["vms"] = mem_info.vms # 虚拟内存
 
+            data["cpu_percent"] = p.cpu_percent()
+
         elif xutils.is_windows():
             mem_usage = os.popen("tasklist /FI \"PID eq %s\" /FO csv" % os.getpid()).read()
             str_list = mem_usage.split("\n")
             data["task"] = str_list[1]
 
-        self.logger.info(str(data))
+        self.logger.info(json.dumps(data))
 
 
 class handler:
