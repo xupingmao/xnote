@@ -7,8 +7,13 @@ import xutils
 import logging
 from web import xtemplate
 
+try:
+    import psutil
+except ImportError as e:
+    psutil = None
+
 class task:
-    __xinterval__ = 5
+    __xinterval__ = 10
     __xtaskname__ = "test"
 
     def __init__(self):
@@ -42,10 +47,26 @@ class task:
         if fname != self.prev_fname:
             self.reload_logger()
 
-        if xutils.is_windows():
-            mem_usage = os.popen("tasklist /FI \"PID eq %s\"" % os.getpid()).read()
+        data = {}
+
+        if psutil:
+            percent_list = psutil.cpu_percent(interval=1, percpu=True)
+            mem = psutil.virtual_memory()
+            data["cpu"] = percent_list
+            data["mem_used"] = mem.used
+
+            p = psutil.Process(pid=os.getpid())
+            mem_info = p.memory_info()
+            data["rss"] = mem_info.rss # Resident set size 进程占用的内存
+            data["vms"] = mem_info.vms # 虚拟内存
+
+        elif xutils.is_windows():
+            mem_usage = os.popen("tasklist /FI \"PID eq %s\" /FO csv" % os.getpid()).read()
             str_list = mem_usage.split("\n")
-            self.logger.info(str_list[3])
+            data["task"] = str_list[1]
+
+        self.logger.info(str(data))
+
 
 class handler:
 

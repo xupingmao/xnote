@@ -89,6 +89,8 @@ class handler:
         if count=="on":
             line_infos = get_line_infos(path, 
                 recursive = recursive=="on", type = type)
+        else:
+            line_infos = []
 
 
         # return xtemplate.render("code/lines.html", **locals())

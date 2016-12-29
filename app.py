@@ -22,7 +22,7 @@ from autoreload import AutoReloadThread
 
 from web.httpserver import StaticApp
 from middlewares import MyStaticMiddleware
-from handlermanager import ModelManager
+from xmanager import ModelManager
 
 class MainHandler(BaseHandler):
     def get(self):
