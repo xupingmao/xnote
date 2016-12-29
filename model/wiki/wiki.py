@@ -61,6 +61,9 @@ class handler:
             name = "/"
         else:
             name = "/" + name
+
+        is_book = False
+
         if os.path.isdir(path):
             type = "dir"
             content = None
@@ -71,6 +74,9 @@ class handler:
                 if child.startswith("_"):
                     continue
                 if ext in HIDE_EXT_LIST:
+                    continue
+                if child == "index.md":
+                    is_book = True
                     continue
                 children.append(FileItem(parent, child, path))
             children.sort(key = lambda item: item.key)
@@ -101,4 +107,5 @@ class handler:
             name = origin_name,
             children = children,
             content = content,
-            type = type)
+            type = type,
+            is_book = is_book)

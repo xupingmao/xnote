@@ -20,9 +20,22 @@
 
 ## data()
 
-- 返回原始的请求数据
+- 返回原始的请求数据(str/byte?)
 
 ## debug(*args)
 
 - ```Prints a prettyprinted version of `args` to stderr.```
 - 打印调试信息
+
+## setcookie
+
+```
+def setcookie(name, value, expires='', domain=None,
+              secure=False, httponly=False, path=None)
+```
+
+## cookies
+
+```
+def cookies(*requireds, **defaults)
+```

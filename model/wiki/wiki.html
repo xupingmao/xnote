@@ -49,6 +49,16 @@
         </div>
         
     {% if type == "dir" %}
+
+        {% if is_book %}
+
+        <div>
+            <a href="/wiki/{{name}}/index.md">目录</a>
+            <hr/>
+        </div>
+
+        {% end %}
+
         <div>
             {% for child in children %}
                 <li style="padding-top:6px;">
