@@ -162,18 +162,18 @@
                     }
                     table.append(tr);
                 }
-                console.log(table);
+                // console.log(table);
                 window.csv_table = table;
                 return "<table class='table'>" + table.html() + "</table>";
             } catch (e) {
-                console.log(e);
+                // console.log(e);
                 return escape(code);
             }
 
         }
 
         function highlight (code, lang) {
-            console.log(code, lang);
+            // console.log(code, lang);
             if (lang) {
                 lang = lang.toUpperCase();
             }
@@ -183,7 +183,7 @@
                 code = code.replace(/\t/gi, ",");
                 // some \t may be replaced by four space
                 code = code.replace(/ {4}/gi, ',');
-                console.log(code);
+                // console.log(code);
                 return highlight_csv(code);
             } else {
                 return escape(code);

@@ -61,6 +61,7 @@ class task:
             data["rss"] = mem_info.rss # Resident set size 进程占用的内存
             data["vms"] = mem_info.vms # 虚拟内存
 
+            # windows下面CPU使用率始终是0，应该是获取不到
             data["cpu_percent"] = p.cpu_percent()
 
         elif xutils.is_windows():
