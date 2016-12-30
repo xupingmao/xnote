@@ -62,7 +62,7 @@ class handler:
         else:
             name = "/" + name
 
-        is_book = False
+        has_readme = False
 
         if os.path.isdir(path):
             type = "dir"
@@ -75,9 +75,10 @@ class handler:
                     continue
                 if ext in HIDE_EXT_LIST:
                     continue
-                if child == "index.md":
-                    is_book = True
-                    continue
+                # if child.lower() in ["index.md", "readme.md"]:
+                #     has_readme = True
+                #     content = xutils.readfile(os.path.join(path, child))
+                #     continue
                 children.append(FileItem(parent, child, path))
             children.sort(key = lambda item: item.key)
         elif os.path.isfile(path):
@@ -108,4 +109,4 @@ class handler:
             children = children,
             content = content,
             type = type,
-            is_book = is_book)
+            has_readme = has_readme)

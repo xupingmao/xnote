@@ -49,16 +49,6 @@
         </div>
         
     {% if type == "dir" %}
-
-        {% if is_book %}
-
-        <div>
-            <a href="/wiki/{{name}}/index.md">目录</a>
-            <hr/>
-        </div>
-
-        {% end %}
-
         <div>
             {% for child in children %}
                 <li style="padding-top:6px;">
@@ -69,7 +59,9 @@
                 </li>
             {% end %}
         </div>
-    {% elif type == "file" %}
+    {% end %}
+    
+    {% if type == "file" or has_readme %}
         <div style="padding-top:20px;">
             <div id="epiceditor" class="row">
                 <div id="markdown-input-div" class="col-md-6">
