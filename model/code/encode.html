@@ -1,0 +1,44 @@
+{% extends ../base.html %}
+
+{% block body %}
+
+
+<div class="col-md-12">
+<form id="form" method="POST">
+    <input type="text" id="type" name="type" class="hide" value="null">
+    <table>
+        <tr>
+            <td>路径</td>
+            <td><textarea cols="100" name="path">{{path}}</textarea></td>
+        </tr>
+        <tr>
+            <td>密码</td>
+            <td><textarea cols="100" name="password">{{password}}</textarea></td>
+        </tr>
+    </table>
+    <input type="button" onclick="encode_list()" value="加密" />
+    <input type="button" onclick="decode_list()" value="解密" />
+</form>
+</div>
+
+<div class="col-md-12">
+    {% for file in filelist %}
+        <div class="col-md-12" style="padding-top: 6px;">
+            {% if file.type == "dir" %}<img src="/static/img/folder.gif"/> {% end %}
+            {{file.name}}
+        </div>
+    {% end %}
+</div>
+
+<script type="text/javascript">
+    function encode_list() {
+        $("#type").val("encode");
+        $("#form").submit();
+    }
+
+    function decode_list() {
+        $("#type").val("decode");
+        $("#form").submit();
+    }
+</script>
+{% end %}

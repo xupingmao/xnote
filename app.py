@@ -1,3 +1,4 @@
+# encoding=utf-8
 import web
 import web.xtemplate as xtemplate
 import os, socket, sys
@@ -56,6 +57,7 @@ def notfound():
     
 
 def check_db():
+    xutils.makedirs(config.DB_DIR)
     if not os.path.exists(config.DB_PATH):
         xutils.touch(config.DB_PATH)
         sql = xutils.readfile(config.SQL_PATH)

@@ -43,13 +43,13 @@
 {% end %}
 </div>
 
-<ul>
+<div class="col-md-12">
 
 <!-- <li style="padding-top:6px;"><a href="/fs/{{parent_path}}/">上一级目录</a></li> -->
 
 {% for filename in filelist %}
     {% set filepath = current_path + filename %}
-    <li style="padding-top:6px;">
+    <div class="col-md-12" style="padding-top: 6px;">
     {% if os.path.isdir(filepath) %}
         {% set filepath = filepath + "/" %}
         <img src="/static/img/folder.gif"/>
@@ -60,10 +60,10 @@
             <a href="javascript:void()" style="color: red;">[删除]</a>
         </div> -->
     {% end %}
-    </li>
+    </div>
 {% end %}
 
-</ul>
+</div>
 
 <hr/>
 

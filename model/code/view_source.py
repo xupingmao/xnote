@@ -1,6 +1,8 @@
 from BaseHandler import *
 from web.tornado.escape import xhtml_escape
 
+import xutils
+
 class ViewSourceHandler(BaseHandler):
 
     def default_request(self):
@@ -10,9 +12,9 @@ class ViewSourceHandler(BaseHandler):
             self.render("code/view-source.html", error = "path is empty")
         else:
             try:
-                content = fsutil.readfile(path)
+                content = xutils.readfile(path)
                 if key != "":
-                    content = xhtml_escape(content)
+                    content = xutils.html_escape(content)
                     key     = xhtml_escape(key)
                     content = textutil.replace(content, key, htmlutil.span("?", "search-key"), ignore_case=True, use_template=True)
                 self.render("code/view-source.html", content = content, lines = content.count("\n") + 1)

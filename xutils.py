@@ -1,3 +1,4 @@
+# encoding=utf-8
 # utilities for xnote
 import sys
 import os
@@ -15,19 +16,23 @@ else:
 ##   File System Utilities
 #################################################################
 def readfile(path, mode = "r"):
-    ''' read file '''
-    try:
-        fp = open(path, encoding="utf-8")
-        content = fp.read()
-        fp.close()
-        return content
-    except:
-        fp = open(path, encoding="gbk")
-        content = fp.read()
-        fp.close()
-        return content
+    '''
+    读取文件，尝试多种编码，编码别名参考标准库Lib/encodings/aliases.py
+        utf-8 是一种边长编码，兼容ASCII
+        gbk 是一种双字节编码，全称《汉字内码扩展规范》，兼容GB2312
+        latin_1 是iso-8859-1的别名，单字节编码，兼容ASCII
+    '''
+    for encoding in ["utf-8", "gbk", "mbcs", "latin_1"]:
+        try:
+            fp = open(path, encoding=encoding)
+            content = fp.read()
+            fp.close()
+            return content
+        except:
+            pass
+    raise Exception("can not read file %s" % path)
         
-def savefile(path, content):
+def savetofile(path, content):
     import codecs
     fp = open(path, mode="wb")
     buf = codecs.encode(content, "utf-8")
