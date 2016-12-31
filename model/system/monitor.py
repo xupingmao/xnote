@@ -55,6 +55,7 @@ class task:
             mem = psutil.virtual_memory()
             data["cpu"] = percent_list
             data["mem_used"] = mem.used
+            data["mem_total"] = mem.total
 
             p = psutil.Process(pid=os.getpid())
             mem_info = p.memory_info()
