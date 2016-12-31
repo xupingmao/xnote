@@ -65,7 +65,7 @@ def get_file_size(path, format=True):
     return st.st_size
     
     
-def create_dir(dirname):
+def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 

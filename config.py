@@ -10,8 +10,8 @@ WORKING_DIR = os.path.dirname(__file__)
 WEBDIR = os.path.join(WORKING_DIR, "static")
 
 UPLOAD_DIR = os.path.join(WORKING_DIR, "static", "upload")
-
 PLUGINS_DIR = os.path.join(WORKING_DIR, "plugins")
+LOG_DIR = os.path.join(WORKING_DIR, "log")
 
 DB_PATH  = os.path.join(WORKING_DIR, "db", "data.db")
 SQL_PATH = os.path.join(WORKING_DIR, "db", "data.sql")
