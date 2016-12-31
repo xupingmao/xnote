@@ -3,7 +3,7 @@ import os
 
 # WEBDIR = os.path.join("D:\\", "xnote", "xshell", "network", "webroot");
 
-PORT = "1234"
+PORT = "8080"
 
 WORKING_DIR = os.path.dirname(__file__)
 
@@ -62,3 +62,5 @@ def has_config(key, subkey = None):
         return True
     return subkey in group_value
     
+def has(key):
+    return has_config(key)

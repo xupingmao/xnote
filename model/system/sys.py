@@ -74,14 +74,32 @@ def get_code_lines():
     total_lines += _get_code_lines(os.path.join(dirname, "model"))
     return total_lines
 
+def get_ip_list(blacklist = []):
+    localIp = socket.gethostbyname(socket.gethostname())
+    print("localIP:%s" % localIp)
+    name, aliaslist, ipList = socket.gethostbyname_ex(socket.gethostname())
+    ip_list = []
 
+    for ip in ipList:
+        if ip in blacklist:
+            continue
+        if ip != localIp:
+           print("external IP:%s"%ip)
+        ip_list.append(ip)
+
+    return ip_list
+
+def get_server_ip():
+    blacklist = config.get("IP_BLACK_LIST")
+    ip_list = get_ip_list(blacklist)
+    return ip_list[0]
                 
 class SysHandler:
 
     def GET(self):
         return xtemplate.render("system/sys.html", 
             backup = backup.get_info(),
-            server_ip = get_local_ip(config.get("ip_list")),
+            server_ip = get_server_ip(),
             port = config.get("port")
         )
 

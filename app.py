@@ -72,19 +72,12 @@ def main():
     
     var_env = dict()
 
-    basic_urls = [
-            "/", "MainHandler",
-        ]
-        
+    basic_urls = ["/", "MainHandler"]
     var_env["MainHandler"] = MainHandler
 
-    ip_blacklist = config.get("IP_BLACK_LIST")
-    ip_list = get_ip_list(blacklist = ip_blacklist) # virtual box host
-    config.set("ip_list", ip_list)
+    config.set("host", "localhost")
     config.set("port", port)
     config.set("start_time", time.time())
-    config.set("host", "%s:%s" % (ip_list[0], port))
-
     # I can reload the system by myself
     app = web.application(list(), var_env, autoreload=False)
     

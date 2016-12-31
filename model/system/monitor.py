@@ -75,7 +75,7 @@ class task:
 class handler:
 
     def GET(self):
-        pass
+        return xtemplate.render("system/monitor.html")
 
 
     def POST(self):
