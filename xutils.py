@@ -40,6 +40,8 @@ def savetofile(path, content):
     fp.close()
     return content
     
+savefile = savetofile
+
 def backupfile(path, backup_dir = None, rename=False):
     if os.path.exists(path):
         if backup_dir is None:
