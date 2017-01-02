@@ -81,7 +81,7 @@ class ModelManager:
                     self.load_task(mod, modname)
             except Exception as e:
                 ex_type, ex, tb = sys.exc_info()
-                print("Fail to load module '%s'" % filename)
+                print("Fail to load module '%s'" % filepath)
                 print("Model traceback (most recent call last):")
                 traceback.print_tb(tb)
                 print(ex)

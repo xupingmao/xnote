@@ -820,9 +820,9 @@ Renderer.prototype.listitem = function(text) {
   // return '<li>' + text + '</li>\n';
   // TODO 使用marked扩展接口
   if (/^\[\]/.test(text)) {
-    return '<li><input type="checkbox"/>' + text.substring(2) + '</li>\n';
+    return '<li><input type="checkbox" disabled="true"/>' + text.substring(2) + '</li>\n';
   } else if (/^\[[Xx]\]/.test(text)) {
-    return '<li><input type="checkbox" checked/>' + text.substring(3) + '</li>\n';
+    return '<li><input type="checkbox" checked disabled="true"/>' + text.substring(3) + '</li>\n';
   } else {
     return '<li>' + text + '</li>\n';
   }

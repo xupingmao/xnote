@@ -26,8 +26,7 @@
 - [json格式化工具](/static/archive/json-editor.html)
 <!-- [补发神器](/static/archive/补发神器.html)-->
 - [lua.vm.js](/static/archive/lua.vm.js/repl.html)
-
-- [JavaScript控制台 TODO]
+- [JavaScript控制台](/tools/jsconsole.html)
 - [Python控制台]
 
 # web开发工具

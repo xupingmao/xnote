@@ -1,0 +1,44 @@
+{% extends ../base.html %}
+
+{% block body %}
+
+<div class="col-md-12">
+    <h3>说明</h3>
+    <p>本工具完全基于浏览器</p>
+    <p>使用<code>print(msg)</code>或者<code>println(msg)</code>输出结果</p>
+</div>
+
+<div class="col-md-6">
+    <h3>Input</h3>
+    <textarea id="input" class="col-md-12" rows="20"></textarea>
+    <button onclick="run()">Run</button>
+</div>
+<div class="col-md-6">
+    <h3>Output</h3>
+    <pre id="output" class="col-md-12"></pre>
+    <div id="error" class="col-md-12" style="color: red;"></div>
+</div>
+
+<script type="text/javascript">
+    function print(msg) {
+        $("#output").text($("#output").text() + msg);
+    }
+    function println(msg) {
+        print(msg+"\n")
+    }
+    function run() {
+        var input = $("#input").val();
+        // eval接受一个参数string,eval会改变window对象
+        // eval(string)
+        try {
+            $("#error").text("");
+            $("#output").text("");
+            var output = eval(input);
+            // $("#output").text(output);
+        } catch (e) {
+            $("#error").text(e);
+        }
+    }
+</script>
+
+{% end %}

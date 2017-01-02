@@ -119,6 +119,10 @@ li.menu-item {
     padding-bottom: 5px;
 }
 
+li.menu-item a {
+    text-decoration: none; 
+}
+
 .col-md-1 {
     float: left;
     width: 8.3%;
