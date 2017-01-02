@@ -72,11 +72,29 @@ class task:
 
         self.logger.info(json.dumps(data))
 
+def format_size(size):
+    if size < 1024:
+        return '%s B' % size
+    elif size < 1024 **2:
+        return '%.2f K' % (float(size) / 1024)
+    elif size < 1024 ** 3:
+        return '%.2f M' % (float(size) / 1024 ** 2)
+    else:
+        return '%.2f G' % (float(size) / 1024 ** 3)
 
 class handler:
 
     def GET(self):
-        return xtemplate.render("system/monitor.html")
+        mem_used = None
+        if psutil:
+            p = psutil.Process(pid=os.getpid())
+            mem_info = p.memory_info()
+            mem_used = mem_info.rss
+        elif xutils.is_windows():
+            mem_usage = os.popen("tasklist /FI \"PID eq %s\" /FO csv" % os.getpid()).read()
+            str_list = mem_usage.split("\n")
+            mem_used = str_list[1]
+        return xtemplate.render("system/monitor.html", mem_used = format_size(mem_used))
 
 
     def POST(self):
