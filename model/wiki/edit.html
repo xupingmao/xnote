@@ -32,7 +32,7 @@
             <h3>
                 <a href="/wiki/">Home</a>
                 {% for path in wikilist %}
-                / <a href="/wiki{{path}}">{{ os.path.basename(path) }}</a>
+                / <a href="/wiki/{{path}}">{{ os.path.basename(path) }}</a>
                 {% end %}
             </h3>
         </div>
