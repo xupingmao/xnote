@@ -16,7 +16,8 @@ CODE_EXT_LIST = (".java",
                  ".xsd",
                  ".proto",
                  ".lua",
-                 ".rb")
+                 ".rb",
+                 ".csv")
 def contains(self, words):
     """
     >>> contains("abc is good", "abc")
