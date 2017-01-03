@@ -6,6 +6,7 @@ import os
 import xutils
 import logging
 import json
+import threading
 from web import xtemplate
 
 try:
@@ -88,6 +89,7 @@ class handler:
         mem_used = 0
         sys_mem_used = 0
         sys_mem_total = 0
+        thread_cnt = 0
         if psutil:
             p = psutil.Process(pid=os.getpid())
             mem_info = p.memory_info()
@@ -99,10 +101,12 @@ class handler:
             mem_usage = os.popen("tasklist /FI \"PID eq %s\" /FO csv" % os.getpid()).read()
             str_list = mem_usage.split("\n")
             mem_used = str_list[1]
+        thread_cnt = len(threading.enumerate())
         return xtemplate.render("system/monitor.html", 
             mem_used = format_size(mem_used),
             sys_mem_used = format_size(sys_mem_used),
-            sys_mem_total = format_size(sys_mem_total))
+            sys_mem_total = format_size(sys_mem_total),
+            thread_cnt = thread_cnt)
 
 
     def POST(self):

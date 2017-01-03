@@ -4,9 +4,9 @@ webpy是一个反框架的框架(anti-framework framework)
 
 ## 主要文件
 
-- [application.py](_application.md)  （程序框架）
+- [application.py](application.md)  （程序框架）
 - browser.py      （用于测试webpy的浏览器）
-- db.py （数据库接口封装）
+- [db.py](db.md)
 - debugerror.py （异常调试页面，可以通过设置debug参数关闭）
 - form.py (HTML表单相关)
 - http.py 

@@ -32,6 +32,16 @@
     function println(msg) {
         print(msg+"\n")
     }
+
+    function dir(obj) {
+        println("[");
+        for (var key in obj) {
+            var value = obj[key];
+            println("  " + key + ":" + typeof(value));
+        }
+        println("]");
+    }
+
     function run() {
         var input = $("#input").val();
         // eval接受一个参数string,eval会改变window对象
