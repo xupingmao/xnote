@@ -25,9 +25,12 @@
 - [高级计算器](/tools/calc.html)
 - [json格式化工具](/static/archive/json-editor.html)
 <!-- [补发神器](/static/archive/补发神器.html)-->
+
+# 在线解释器
 - [lua.vm.js](/static/archive/lua.vm.js/repl.html)
 - [JavaScript控制台](/tools/jsconsole.html)
 - [Python控制台]
+- [TCC](/tools/tcc.html)
 
 # web开发工具
 

@@ -75,8 +75,14 @@ class ModelManager:
                     if modname in sys.modules:
                         print("del %s" % modname)
                         del sys.modules[modname] # reload module
-                    rootmod = __import__(modname)
-                    mod = self.get_mod(rootmod, modname)
+                    # Py3: __import__(name, globals=None, locals=None, fromlist=(), level=0)
+                    # Py2: __import__(name, globals={}, locals={}, fromlist=[], level=-1)
+                    # fromlist不为空(任意真值*-*)可以得到子模块,比如__import__("os.path", fromlist=1)返回<module "ntpath" ...>
+                    # 参考Python源码import.c即可
+                    # <code>has_from = PyObject_IsTrue(fromlist);</code>实际上是个Bool值
+                    # level=0表示绝对路径，-1是默认的
+                    mod = __import__(modname, fromlist=1, level=0)
+                    # mod = self.get_mod(rootmod, modname)
                     self.load_model(mod, modname)
                     self.load_task(mod, modname)
             except Exception as e:
