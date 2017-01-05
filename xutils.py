@@ -7,10 +7,28 @@ PY2 = sys.version_info[0] == 2
 
 if PY2:
     from urllib import quote, unquote, urlopen
+    # from commands import getstatusoutput
 else:
     from urllib.parse import quote, unquote
     from urllib.request import urlopen
+    from subprocess import getstatusoutput
 
+# 关于Py2的getstatusoutput，实际上是对os.popen的封装
+# 而Py3中的getstatusoutput则是对subprocess.Popen的封装
+# Py2的getstatusoutput, 注意原来的windows下不能正确运行，但是下面改进版的可以运行
+
+if PY2:
+    def getstatusoutput(cmd):
+        ## Return (status, output) of executing cmd in a shell.
+        import os
+        # old
+        # pipe = os.popen('{ ' + cmd + '; } 2>&1', 'r')
+        pipe = os.popen(cmd + ' 2>&1', 'r')
+        text = pipe.read()
+        sts = pipe.close()
+        if sts is None: sts = 0
+        if text[-1:] == '\n': text = text[:-1]
+        return sts, text
     
 #################################################################
 ##   File System Utilities
