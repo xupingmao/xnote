@@ -32,7 +32,7 @@
         <div>
             {% if _is_admin and type == "file" %}
             <div style="float:right;">
-                <a href="/wiki/edit/{{name}}">[编辑]</a>
+                <a href="/wiki/{{name}}?op=edit">[编辑]</a>
             </div>
             {% elif _is_admin and type == "dir" %}
             <div style="float:right;">
