@@ -62,8 +62,9 @@ def check_db():
         xutils.touch(config.DB_PATH)
         sql = xutils.readfile(config.SQL_PATH)
 
-def check_log():
+def check_dirs():
     xutils.makedirs(config.LOG_DIR)
+    xutils.makedirs("tmp")
         
 def main():
     global app
@@ -94,7 +95,7 @@ def main():
     
     # check database
     check_db()
-    check_log()
+    check_dirs()
 
     m = ModelManager(app, var_env, basic_urls)
     m.reload()

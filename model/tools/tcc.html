@@ -1,0 +1,25 @@
+{% extends ../base.html %}
+
+{% block head %}
+
+<link rel="stylesheet" href="/static/lib/codemirror/codemirror.min.css">
+<script src="/static/lib/codemirror/codemirror.min.js"></script>
+
+{% end %}
+
+{% block body %}
+
+<form method="POST">
+<div class="col-md-12">
+    <textarea id="editor" class="col-md-12" rows="20" name="code">{{code}}</textarea>
+    <button>Run</button>
+    <textarea class="col-md-12" rows="5">{{output}}</textarea>
+</div>
+
+<script>
+  var editor = CodeMirror.fromTextArea($("#editor")[0], {
+    lineNumbers: true
+  });
+</script>
+
+{% end %}
