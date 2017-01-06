@@ -23,6 +23,7 @@ if PY2:
         import os
         # old
         # pipe = os.popen('{ ' + cmd + '; } 2>&1', 'r')
+        # 这样修改有一个缺点就是执行多个命令的时候只能获取最后一个命令的输出
         pipe = os.popen(cmd + ' 2>&1', 'r')
         text = pipe.read()
         sts = pipe.close()

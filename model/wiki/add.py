@@ -42,7 +42,7 @@ class handler:
         name = params.name
         type = params.type
         target = params.target
-        if not name.endswith(".md"):
+        if type == "file" and not name.endswith(".md"):
             name+=".md"
         path = os.path.join(WIKI_PATH, target, name)
         if os.path.exists(path):
