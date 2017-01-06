@@ -3,7 +3,7 @@ import os
 
 # WEBDIR = os.path.join("D:\\", "xnote", "xshell", "network", "webroot");
 
-PORT = "8080"
+PORT = "1234"
 
 WORKING_DIR = os.path.dirname(__file__)
 
