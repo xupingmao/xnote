@@ -454,7 +454,7 @@ class FileService:
         return [FileDO.fromDict(item, option="physically_delete") for item in list]
 
     def get_recent_modified(self, days):
-        list = self._db.execute("select * from file where smtime > %s AND is_deleted != 1 order by smtime desc" 
+        list = self._db.execute("select * from file where smtime > '%s' AND is_deleted != 1 order by smtime desc" 
             % dateutil.before(days=int(days), format=True))
         return [FileDO.fromDict(item) for item in list]
 
