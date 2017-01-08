@@ -59,7 +59,7 @@ class handler:
 
         if os.path.exists(namefile):
             # 防止重复加密导致信息丢失
-            bakname = "xnote-index-%s.json" % time.time()
+            bakname = "xnote-index-%s.json" % time.strftime("%Y_%m_%d_%H_%M_%S")
             os.rename(namefile, os.path.join(path, bakname))
 
         rename_dict = {}

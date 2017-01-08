@@ -7,6 +7,7 @@ import xutils
 import logging
 import json
 import threading
+import sys
 from web import xtemplate
 
 try:

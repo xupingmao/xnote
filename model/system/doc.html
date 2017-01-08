@@ -1,0 +1,25 @@
+{% extends ../base.html %}
+
+{% block body %}
+
+<div class="col-md-12">
+{% if doc_info is not None %}
+    <h2>模块: {{doc_info.name}}</h2>
+
+    <pre>{{doc_info.doc}}</pre>
+
+    <h2>方法</h2>
+
+    {% for func in doc_info.functions %}
+
+    <div>
+        <span>{{func[0]}}</span>
+        <pre>{{func[1]}}</pre>
+    </div>
+
+    {% end %}
+
+{% end %}
+</div>
+
+{% end %}

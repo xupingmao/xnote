@@ -1,5 +1,10 @@
+# encoding=utf-8
 from BaseHandler import *
 import threading
+
+__doc__ = """
+展示系统使用的线程信息
+"""
 
 class handler(BaseHandler):
 

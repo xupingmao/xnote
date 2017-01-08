@@ -1,0 +1,26 @@
+{% extends ../base.html %}
+
+{% block body %}
+
+    <div class="col-md-12">
+        <p><a href="/system/sys">System</a> / 监控</p>
+    </div>
+
+    <div class="col-md-12">
+    <table>
+        <tr>
+            <th>操作</th>
+            <th>模块名</th>
+            <th>描述</th>
+        </tr>
+    {% for mod in modules %}
+        <tr>
+            <td><a href="/system/doc?name={{mod.name}}">文档</a></td>
+            <td>{{mod.sysname}}</td>
+            <td>{{mod.info}}</td>
+        </tr>
+    {% end %}
+    </table>
+    </div>
+
+{% end %}
