@@ -75,7 +75,7 @@ def code_find(text, key, show_line=False, ignore_case=True):
     return result
 
 
-class CodeAnalyzeHandler(BaseHandler):
+class handler(BaseHandler):
     """analyze code"""
 
     def search_files(self, path, key, filename, ignore_case = False, recursive = True):
@@ -133,8 +133,6 @@ class CodeAnalyzeHandler(BaseHandler):
                 files = files,
                 path = path,
                 ignore_case = ignore_case)
-
-handler = CodeAnalyzeHandler
 
 searchkey = "code,代码分析工具"
 

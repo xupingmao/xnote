@@ -54,6 +54,12 @@ table td {
 
 {{?error}}
 
+{% if len(files) > 0 %}
+<div class="col-md-12">
+    匹配文件数: {{len(files)}}
+</div>
+{% end %}
+
 {% for file in files %}
 
 <div class="row">
