@@ -523,7 +523,7 @@ class FileService:
 def get_category(limit = None):
     db = get_db()
     if limit is None:
-        sql = "select * from file where is_deleted != 1 and parent_id = 0 and related not like '%%hide%%' order by ctime desc"
+        sql = "select * from file where is_deleted != 1 and parent_id = 0 and related not like '%%hide%%' order by sctime desc"
     else:
         sql = "select * from file where is_deleted != 1 and parent_id = 0 and related not like '%%hide%%' order by name desc limit %s" % limit
     all = db.execute(sql)

@@ -6,6 +6,7 @@ from BaseHandler import BaseHandler, reload_template
 from FileDB import FileService
 import functools
 from util import fsutil
+from util import dbutil
 import xutils
 from xutils import *
 
@@ -59,8 +60,9 @@ def notfound():
 def check_db():
     xutils.makedirs(config.DB_DIR)
     if not os.path.exists(config.DB_PATH):
-        xutils.touch(config.DB_PATH)
+        # xutils.touch(config.DB_PATH)
         sql = xutils.readfile(config.SQL_PATH)
+        dbutil.execute(config.DB_PATH, sql)
 
 def check_dirs():
     xutils.makedirs(config.LOG_DIR)

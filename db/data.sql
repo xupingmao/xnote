@@ -1,13 +1,13 @@
 
--- Since 2016-??
-create table file if not exists (
+-- Since 2016/06
+create table if not exists `file` (
 id integer primary key autoincrement,
 name text,
 content text,
 path text, -- for local file
 parent_id int default 0, -- for hierarchical filesystem
 children text, -- children
-bin blob, -- for binary data
+-- bin blob, -- for binary data
 size long,
 -- mtime long, -- seconds
 -- atime long, -- seconds
@@ -22,6 +22,5 @@ is_deleted int default 0);
 
 
 -- ÐÂÔö×Ö¶Î²Ù×÷
-
 -- Now 2016-12-04
 

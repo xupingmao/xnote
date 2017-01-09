@@ -9,6 +9,7 @@ from util import textutil
 from copy import copy
 from BaseHandler import Storage, reload_template
 from threading import Thread
+from queue import Queue
 
 class WebModel:
     def __init__(self):
@@ -146,6 +147,9 @@ class ModelManager:
         return result
 
     def run_task(self):
+
+        # worker_thread = WorkerThread()
+
         def run():
             intervals = 0
             while True:
@@ -156,12 +160,12 @@ class ModelManager:
                 for taskname in self.task_dict:
                     task = self.task_dict[taskname]
                     if intervals % task.__xinterval__ == 0:
-                        newthread = TaskThread(task)
-                        newthread.start()
+                        # worker_thread.add_task(task)
+                        task()
                 time.sleep(1)
                 intervals+=1
-        thread = TaskThread(run)
-        thread.start()
+        chk_thread = TaskThread(run)
+        chk_thread.start()
 
 
 class TaskThread(Thread):
@@ -175,3 +179,24 @@ class TaskThread(Thread):
         
     def run(self):
         self.func(*self.args)
+
+class WorkerThread(Thread):
+    """docstring for WorkerThread"""
+    def __init__(self):
+        super(WorkerThread, self).__init__()
+        self.setDaemon(True)
+        self._task_queue = Queue()
+
+    def run(self):
+        while True:
+            if len(self._task_queue) > 0:
+                task = self._task_queue.get()
+                try:
+                    task()
+                except Exception as e:
+                    pass
+            else:
+                time.sleep(0.1)
+
+    def add_task(self, task):
+        self._task_queue.put(task)

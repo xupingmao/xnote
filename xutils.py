@@ -2,6 +2,7 @@
 # utilities for xnote
 import sys
 import os
+import traceback
 
 PY2 = sys.version_info[0] == 2
 
@@ -30,6 +31,15 @@ if PY2:
         if sts is None: sts = 0
         if text[-1:] == '\n': text = text[:-1]
         return sts, text
+
+#################################################################
+
+
+def print_stacktrace():
+    ex_type, ex, tb = sys.exc_info()
+    print(ex)
+    traceback.print_tb(tb)
+
     
 #################################################################
 ##   File System Utilities
