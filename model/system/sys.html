@@ -30,12 +30,18 @@
         <p><a href="/system/reload">重新加载模块</a></p>
         <p><a href="/system/monitor">机器运行状态</a></p>
         <p><a href="/system/modules_info">模块信息</a></p>
-        <p><a href="/system/command?name=open_xnote_dir" target="_blank">打开目录</a>
         <!-- <p><a href="/system/shutdown">关闭计算机</a></p> -->
     </div>
 
     <div style="float:left;width:100%; height:30px"></div>
 
+</div>
+
+<div class="col-md-12">
+<h2>命令列表</h2>
+{% for shell_path in shell_list %}
+    <p><a href="/system/command?path={{shell_path}}" target="_blank">{{os.path.basename(shell_path)}}</a></p>
+{% end %}
 </div>
 
 <script type="text/javascript">

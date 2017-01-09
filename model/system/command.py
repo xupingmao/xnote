@@ -1,6 +1,7 @@
 # encoding=utf-8
 import web
 import os
+import xutils
 
 class handler:
 
@@ -10,8 +11,7 @@ class handler:
     }
     def GET(self):
         args = web.input()
-        name = args.name
-        command_list = self.command_list
-        if name in command_list:
-            os.popen(command_list[name])
+        path = args.path
+        command = xutils.readfile(path)
+        os.popen(command)
         return "<script>window.close()</script>"

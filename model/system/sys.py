@@ -97,10 +97,18 @@ def get_server_ip():
 class SysHandler:
 
     def GET(self):
+        shell_list = []
+        dirname = os.path.dirname(__file__)
+        for fname in os.listdir(dirname):
+            fpath = os.path.join(dirname, fname)
+            if os.path.isfile(fpath) and fpath.endswith(".bat"):
+                shell_list.append(fpath)
         return xtemplate.render("system/sys.html", 
             backup = backup.get_info(),
             server_ip = get_server_ip(),
-            port = config.get("port")
+            port = config.get("port"),
+            shell_list = shell_list,
+            os = os
         )
 
     def opendirRequest(self):
