@@ -67,6 +67,7 @@ def check_db():
 def check_dirs():
     xutils.makedirs(config.LOG_DIR)
     xutils.makedirs("tmp")
+    xutils.makedirs("script")
         
 def main():
     global app

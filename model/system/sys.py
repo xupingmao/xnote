@@ -98,7 +98,7 @@ class SysHandler:
 
     def GET(self):
         shell_list = []
-        dirname = os.path.dirname(__file__)
+        dirname = "script"
         for fname in os.listdir(dirname):
             fpath = os.path.join(dirname, fname)
             if os.path.isfile(fpath) and fpath.endswith(".bat"):
