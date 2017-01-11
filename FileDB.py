@@ -604,6 +604,13 @@ def insert(file):
         file.mtime = dateutil.get_seconds()
         file.smtime = dateutil.format_time(file.mtime)
 
+    if hasattr(file, "atime"):
+        delattr(file, "atime")
+    if hasattr(file, "ctime"):
+        delattr(file, "ctime")
+    if hasattr(file, "mtime"):
+        delattr(file, "mtime")
+
     values = [build_sql_row(file, k) for k in file]
     sql = "insert into file (%s) values (%s)" % (','.join(file), ",".join(values))
     print(sql)

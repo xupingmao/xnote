@@ -36,7 +36,7 @@ class AutoReloadThread(Thread):
         global _callbacks
         Thread.__init__(self)
         self.setDaemon(True)
-        self.interval = 0.1
+        self.interval = 0.5
         self.watch_dirs = []
 
         for callback in callbacks:

@@ -19,6 +19,9 @@ class handler:
         # subprocess执行命令不能换行
         # os.popen可以执行系统命令
         # os.popen就是subprocess.Popen的封装
-        os.popen("start %s" % path)
+        if path.endswith(".bat"):
+            os.popen("start %s" % path)
+        else:
+            os.popen(path)
         # os.popen(command)
         return "<script>window.close()</script>"
