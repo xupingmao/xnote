@@ -34,6 +34,10 @@
     }
 
     function dir(obj) {
+        println("type:" + typeof(obj));
+        println("toString:" + obj.toString());
+        println("=================================================");
+
         println("[");
         for (var key in obj) {
             var value = obj[key];
