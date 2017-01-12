@@ -8,7 +8,7 @@
 <script src="/js/array.js"></script> -->
 <link rel="stylesheet" type="text/css" href="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.css">
 <script type="text/javascript" src="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
-<script src="/static/js/TagEditor.js"></script>
+<!-- <script src="/static/js/TagEditor.js"></script> -->
 <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
 <script type="text/javascript" src="/static/lib/string-format/0.5.0/string-format.min.js"></script>
 <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
@@ -103,7 +103,7 @@
 <ul>
 {% for child in children %}
     <li>
-    [{{format_date(child.ctime)}}] <a href="/file/edit?id={{child.id}}">{{child.name}}</a>
+    [{{child.sctime}}] <a href="/file/edit?id={{child.id}}">{{child.name}}</a>
     </li>
 {% end %}
 </ul>

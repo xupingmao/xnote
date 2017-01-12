@@ -371,8 +371,8 @@ class FileService:
         self._db.execute(sql)
         
     def visitById(self, id):
-        sql = "update file set visited_cnt = visited_cnt + 1, atime=%d, satime='%s' where id = %s and visited_cnt < %s" % \
-            (dateutil.get_seconds(), dateutil.format_time(), id, MAX_VISITED_CNT)
+        sql = "update file set visited_cnt = visited_cnt + 1, satime='%s' where id = %s and visited_cnt < %s" % \
+            (dateutil.format_time(), id, MAX_VISITED_CNT)
         self._db.execute(sql)
         
     def update(self, file, *names):
@@ -531,7 +531,7 @@ def get_category(limit = None):
 
 def get_children_by_id(id):
     db = get_db()
-    all = db.execute("select * from file where is_deleted != 1 and parent_id = %s order by ctime desc" % id)
+    all = db.execute("select * from file where is_deleted != 1 and parent_id = %s order by sctime desc" % id)
     return [FileDO.fromDict(item) for item in all]
 
 def get_by_id(id, db=None):
