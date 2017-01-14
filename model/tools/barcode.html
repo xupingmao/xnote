@@ -3,6 +3,7 @@
 {% block head %}
     <!-- <link rel="stylesheet" href="/css/table.css"/> -->
     <script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
+    <script type="text/javascript" src="/static/lib/utf.js"></script>
 {% end %}
 
 {% block body %}
@@ -20,6 +21,7 @@
     $(function () {
         $("#generate").click(function () {
             var key = $("#qrcode_input").val();
+            key = utf16to8(key);
             if (key) {
                 $("#qrcode").html("");
                 $("#qrcode").qrcode(key);

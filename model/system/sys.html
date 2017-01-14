@@ -16,11 +16,10 @@
 <script type="text/javascript" src="/static/lib/string-format/string-format.min.js"></script>
 <script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
 
-<input class="hide" id="server_ip" value="{{?server_ip}}" />
-<input class="hide" id="server_port" value="{{?port}}"/>
+<input class="hide" id="addr" value="{{?addr}}" />
 <div class="row">
     <div class="barcode col-md-12">
-        <p>扫码登录 {{?server_ip}}:{{?port}}</p>
+        <p>地址 {{?addr}} <a href="javascript:switchQrCode()">二维码</a></p>
         <div id="qrcode"></div>
     </div>
 
@@ -48,10 +47,12 @@
 $("#menu-sys").addClass("active");
 
 $(function () {
-    var ip = $("#server_ip").val()
-    var port = $("#server_port").val()
+
+    $("#qrcode").hide();
+
+    var addr = $("#addr").val();
     // var url = format("http://{}:{}", ip, port);
-    var url = "http://" + ip + ":" + port;
+    var url = "http://" + addr;
     $("#qrcode").qrcode(url);
     function updateTime () {
         $("#currentDate").html(new Date().toString("yyyy-MM-dd HH:mm:ss"));
@@ -84,6 +85,13 @@ $(function () {
     });
 })
 
+function switchQrCode() {
+    if ($("#qrcode").css("display") == "none") {
+        $("#qrcode").show();
+    } else {
+        $("#qrcode").hide();
+    }
+}
 
 
 </script>

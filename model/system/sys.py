@@ -103,10 +103,12 @@ class SysHandler:
             fpath = os.path.join(dirname, fname)
             if os.path.isfile(fpath) and fpath.endswith(".bat"):
                 shell_list.append(fpath)
+        addr = get_server_ip() + ":" + config.get("port")
         return xtemplate.render("system/sys.html", 
             backup = backup.get_info(),
-            server_ip = get_server_ip(),
-            port = config.get("port"),
+            # server_ip = get_server_ip(),
+            # port = config.get("port"),
+            addr = addr,
             shell_list = shell_list,
             os = os
         )
@@ -146,9 +148,9 @@ class SysHandler:
         raise web.seeother("/system/sys")
 
     def default_request(self):
+        addr = get_local_ip(config.get("ip_list")) + ":" + config.get("port")
         self.render(backup = backup.get_info(),
-            server_ip = get_local_ip(config.get("ip_list")),
-            port = config.get("port")
+            addr = addr
         )
         
 handler = SysHandler
