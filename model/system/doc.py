@@ -17,6 +17,7 @@ class DocInfo:
         attr_dict = mod.__dict__
         for attr in attr_dict:
             value = attr_dict[attr]
+            # 通过__module__判断是否时本模块的函数
             if hasattr(value, "__call__"):
                 functions.append([attr, value.__doc__])
 

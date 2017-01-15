@@ -1,6 +1,5 @@
-
-'''Based on sqlite3
-'''
+# encoding=utf-8
+'''Based on sqlite3'''
 
 
 import sqlite3
@@ -377,7 +376,8 @@ class FileService:
         
     def update(self, file, *names):
         id = file.id;
-        file.mtime = dateutil.get_seconds()
+        # file.mtime = dateutil.get_seconds()
+        file.smtime = dateutil.format_time()
         if file.visited_cnt < MAX_VISITED_CNT:
             file.visited_cnt += 1
         if len(names) > 0:

@@ -217,7 +217,7 @@ class FileHandler(BaseHandler):
             else:
                 old_record.related = old_record.related.replace(old_name_upper, new_name_upper);
             old_record.name = newName
-            self._service.update(old_record, "name", "related")
+            self._service.update(old_record, "name", "related", "smtime")
             return Result(True)
 
     def defaultRequest(self):

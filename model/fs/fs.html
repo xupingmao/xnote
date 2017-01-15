@@ -61,9 +61,9 @@
             <a href="javascript:void()" style="color: red;">[删除]</a>
         </div> -->
         
-    {% if filepath.endswith(".md") %}
+    {% if filepath.endswith((".md", ".csv")) %}
         <div style="float: right; color: red;">
-            <a href="/wiki/{{filepath}}?op=edit">[编辑]</a>
+            <a href="/wiki/{{filepath}}">[编辑]</a>
         </div>
     {% end %}
 

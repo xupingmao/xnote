@@ -21,7 +21,7 @@ class handler(BaseHandler):
         try:
             if name != '':
                 f = FileDB.insert(file)
-                raise web.seeother("/file_edit?name=%s" % quote(name))
+                raise web.seeother("/file/edit?name=%s" % quote(name))
         except Exception as e:
             error = e
         self.render("file/add.html", key = "", name = key, tags = tags, error=error)
