@@ -1,3 +1,4 @@
+# encoding=utf-8
 from web.xtemplate import render
 import os
 import xutils
@@ -58,7 +59,8 @@ class handler:
             realpath = newpath
             path = dirname + "/" + new_name
         else:
-            realpath = os.path.join(WIKI_PATH, path)
+            # realpath = os.path.join(WIKI_PATH, path)
+            realpath = path
         print(path, content)
         xutils.backupfile(realpath, rename=True)
         xutils.savefile(realpath, content)
@@ -66,8 +68,8 @@ class handler:
     
     def GET(self, name):
         name = xutils.unquote(name)
+        path = name
         origin_name = name
-        path = os.path.join(WIKI_PATH, name)
         
         if name == "":
             name = "/"

@@ -56,9 +56,17 @@
         <a href="/fs/{{filepath}}" class="fs-dir">{{filename}}</a>
     {% else %}
         <a href="/fs/{{filepath}}" class="fs-file">{{filename}}</a>
+        
 <!--         <div style="float: right; color: red;">
             <a href="javascript:void()" style="color: red;">[删除]</a>
         </div> -->
+        
+    {% if filepath.endswith(".md") %}
+        <div style="float: right; color: red;">
+            <a href="/wiki/{{filepath}}?op=edit">[编辑]</a>
+        </div>
+    {% end %}
+
     {% end %}
     </div>
 {% end %}

@@ -1,3 +1,4 @@
+# encoding=utf-8
 from web.xtemplate import render
 import os
 import xutils
@@ -61,6 +62,7 @@ class handler:
             return self.edit_GET(name)
 
         origin_name = name
+        # os.path.join(路径, 绝对路径) = 绝对路径
         path = os.path.join(WIKI_PATH, name)
         
         if name == "":
@@ -106,7 +108,7 @@ class handler:
         if parentname=="":
             parentname="/"
             
-        return render("wiki/wiki.html", 
+        return render("fs/wiki.html", 
             os = os,
             parent = parent,
             parentname = parentname,
@@ -171,7 +173,7 @@ class handler:
         if parentname=="":
             parentname="/"
             
-        return render("wiki/edit.html", 
+        return render("fs/edit.html", 
             os = os,
             parent = parent,
             parentname = parentname,
