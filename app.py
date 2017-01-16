@@ -1,4 +1,8 @@
 # encoding=utf-8
+import sys
+
+sys.path.insert(0, "lib")
+
 import web
 import web.xtemplate as xtemplate
 import os, socket, sys

@@ -5,7 +5,7 @@
     @since 2016/12/05
 '''
 
-from .tornado.template import Template, Loader
+from tornado.template import Template, Loader
 
 from util import dateutil
 

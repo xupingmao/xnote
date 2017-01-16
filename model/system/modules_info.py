@@ -32,5 +32,6 @@ class handler(object):
     
     def GET(self):
         return xtemplate.render("system/modules_info.html", 
-            modules = query_modules())
+            modules = query_modules(),
+            sys = sys)
         

@@ -134,7 +134,8 @@ class FileHandler(BaseHandler):
         id = self.get_argument("id")
         file = self._service.getById(id)
         self._service.delById(id)
-        raise web.seeother("/file/edit?id=" + str(file.parent_id))
+        # raise web.seeother("/file/edit?id=" + str(file.parent_id))
+        raise web.seeother("/file/recent_edit")
         
     def updateRequest(self):
         id = self.get_argument("id")
