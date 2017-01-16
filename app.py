@@ -1,7 +1,7 @@
 # encoding=utf-8
 import sys
-
-sys.path.insert(0, "lib")
+# insert after working dir
+sys.path.insert(1, "lib")
 
 import web
 import web.xtemplate as xtemplate
