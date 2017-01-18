@@ -27,6 +27,25 @@
 {% end %}
 
 {% block body %}
+
+    <!--
+            {% if 'pathlist' in globals() %}
+            <div style="float:right;">
+              <a href="/file/archive?id={{id}}">[重新归档]</a>
+              <a href="/file/add_child?parent_id={{id}}">[添加子页面]</a>
+            </div>
+            <div class="row">
+              <a href="/file/group">Home</a>
+              {% for _path0 in pathlist %}
+                / <a href="/file/edit?id={{_path0.id}}">{{_path0.name}}</a>
+              {% end %}
+              
+            </div>
+            {% end %}
+    -->
+
+    {% include "header.html" %}
+
     <div style="">
     
     <h3>

@@ -1,0 +1,26 @@
+   
+    <div class="col-md-12">
+      <form method="GET" action="{{?action,'/search/search'}}">
+          <div class="input-group" style="float:left;width:100%">
+          {% if _search_type =="full" %}
+              <input type="checkbox" name="full_search" checked/>
+          {% else %}
+              <input type="checkbox" name="full_search" />
+          {% end %} 全文搜索
+          </div>
+          
+          <div class="input-group" style="float:left;width:100%;padding-bottom:5px;">
+              <input type="text" id="key" name="key" value="{{?key}}" placeholder="Search for" style="height:2em;"/>
+              <button style="">Search</button>
+          </div>
+
+      </form>
+    </div>
+
+    <div class="">
+        <a href="/file/group">分类</a>
+        <a href="/file/add?key={{?key}}">增加资料</a>
+        <a href="/file/recent_edit">最近编辑</a>
+        <a href="/file/recent_visit">最近访问</a>
+   </div>
+

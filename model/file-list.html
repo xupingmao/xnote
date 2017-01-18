@@ -47,6 +47,7 @@
     word-break: break-all;
 }
 
+.note-last-modify-time,
 .note-last-visit-time {
     padding-left: 2px;
     padding-top: 2px;
@@ -69,12 +70,7 @@
 {% end %}
 
 {% block body %}
-    <div class="">
-        <a href="/file/group">分类</a>
-        <a href="/file/add?key={{?key}}">增加资料</a>
-        <a href="/file/recent_edit">最近编辑</a>
-        <a href="/file/recent_visit">最近访问</a>
-   </div>
+    {% include "file/header.html" %}
    <br/>
    <script type="text/javascript">$("#menu-file").addClass("active");</script>
 
@@ -107,6 +103,7 @@
                 </div>
                 <div class="note-content-short">{{file.content[:100]}}</div>
                 <div class="note-last-visit-time">最近访问:{{file.satime}}</div>
+                <!-- <div class="note-last-modify-time">最近编辑:{{file.smtime}}</div> -->
                 <div class="note-related">
                     <input type="text" data-role="tagsinput" value="{{file.related}}"/>
                 </div>
@@ -118,17 +115,6 @@
 <!--     </table>
  -->
     {% end %}
-
-    <!-- matched rules -->
-    {% if "search_result" in globals() and search_result is not None %}
-        {% for rule in search_result %}
-            {% if hasattr(rule, "html") %}
-                {% raw rule.html %}
-            {% end %}
-        {% end %}
-    {% end %}
-
-    <!-- matched rules end -->
 
 
 </div>
