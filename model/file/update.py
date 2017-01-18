@@ -1,7 +1,7 @@
 #coding:utf-8
 from BaseHandler import *
 from FileDB import *
-from web.tornado.escape import *
+from tornado.escape import *
 import math
 import os
 import json

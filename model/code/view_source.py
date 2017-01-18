@@ -1,5 +1,5 @@
 from BaseHandler import *
-from web.tornado.escape import xhtml_escape
+from tornado.escape import xhtml_escape
 
 import xutils
 
