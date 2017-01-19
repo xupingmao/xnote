@@ -15,11 +15,11 @@ class handler:
             web.setcookie("xuser", "admin", expires=10 * 24 * 3600)
             web.seeother(target)
             return
-        return render_template("login.html", name=name, password=pswd)
+        return render_template("login.html", name=name, password=pswd, _has_login=True)
 
 
     def GET(self):
         args = web.input(name="", password="")
         name = args["name"]
         pswd = args["password"]
-        return render_template("login.html", name = name, password=pswd)
+        return render_template("login.html", name = name, password=pswd, _has_login=True)

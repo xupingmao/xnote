@@ -55,6 +55,7 @@ def main_render_hook(kw):
     kw["_search_type"] = "normal"
     # TODO prevent hack
     kw["_is_admin"] = config.IS_ADMIN or web.cookies().get("xuser") == "admin"
+    kw["_has_login"] = web.cookies().get("xuser") == "admin"
     
 
 def notfound():
