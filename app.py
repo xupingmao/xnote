@@ -32,7 +32,7 @@ from xmanager import ModelManager
 
 class MainHandler(BaseHandler):
     def get(self):
-        raise web.seeother("/wiki/")
+        raise web.seeother("/file/recent_edit")
 
 def get_ip_list(blacklist = []):
     localIp = socket.gethostbyname(socket.gethostname())

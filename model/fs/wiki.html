@@ -3,6 +3,7 @@
 {% block head %}
 <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
 <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
+<script type="text/javascript" src="/static/js/marked-ext.js"></script>
 <style>
 .CodeMirror {
     width: 60rem;
@@ -130,61 +131,6 @@
         }
     }
 
-        function escape(html, encode) {
-          return html
-            .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
-
-        function highlight_csv (code) {
-            try {
-                // var csv = new CSV(code);
-                var rows = CSV.parse(code);
-                // console.log(rows);
-                var table = $("<table>");
-                for (var i = 0; i < rows.length; i++) {
-                    var col = rows[i];
-                    var tr = $("<tr>");
-                    for (var j = 0; j < col.length; j++) {
-                        var td = $("<td>").html(col[j]);
-                        tr.append(td);
-                    }
-                    table.append(tr);
-                }
-                // console.log(table);
-                window.csv_table = table;
-                return "<table class='table'>" + table.html() + "</table>";
-            } catch (e) {
-                // console.log(e);
-                return escape(code);
-            }
-
-        }
-
-        function highlight (code, lang) {
-            // console.log(code, lang);
-            if (lang) {
-                lang = lang.toUpperCase();
-            }
-            if (lang == "CSV") {
-                return highlight_csv(code);
-            } else if (lang=="EXCEL") {
-                code = code.replace(/\t/gi, ",");
-                // some \t may be replaced by four space
-                code = code.replace(/ {4}/gi, ',');
-                // console.log(code);
-                return highlight_csv(code);
-            } else {
-                return escape(code);
-            }
-        }
-
-        // set marked code highlight function
-        marked.defaults.highlight = highlight;
-
     $(function () {
         var old_content = $("#markdown-input-div").val();
         setInterval(function () {
@@ -195,6 +141,7 @@
             }
             old_content = input;
             
+            marked.showMenu = false;
             $("#markdown-output-div").html(marked.parse(input));
         }, 200);
         preview();
