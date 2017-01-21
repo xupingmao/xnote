@@ -124,8 +124,8 @@ class ModelManager:
     def load_task(self, module, name):
         if hasattr(module, "task"):
             task = module.task
-            if hasattr(task, "__xtaskname__"):
-                taskname = task.__xtaskname__
+            if hasattr(task, "taskname"):
+                taskname = task.taskname
                 self.task_dict[taskname] = task()
                 print("Load task (%s,%s)" % (taskname, module.__name__))
 
@@ -159,9 +159,13 @@ class ModelManager:
                     intervals = 0
                 for taskname in self.task_dict:
                     task = self.task_dict[taskname]
-                    if intervals % task.__xinterval__ == 0:
+                    if intervals % task.interval == 0:
+                        # TODO 需要优化成异步执行
                         # worker_thread.add_task(task)
-                        task()
+                        try:
+                            task()
+                        except Exception as e:
+                            print("run task [%s] failed, %s" % (taskname, e))
                 time.sleep(1)
                 intervals+=1
         chk_thread = TaskThread(run)

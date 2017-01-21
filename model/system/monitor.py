@@ -18,11 +18,14 @@ except ImportError as e:
 
 class task:
     __xinterval__ = 10
-    __xtaskname__ = "test"
+    __xtaskname__ = "monitor"
+
+    interval = 10
+    taskname = "monitor"
 
     def __init__(self):
         self.logger = logging.Logger(name="monitor")
-        handler = TimedRotatingFileHandler("log/monitor.log")
+        handler = TimedRotatingFileHandler("log/monitor.log", when="d")
         handler.setFormatter(logging.Formatter(fmt="%(asctime)s,%(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
         self.logger.addHandler(handler)
 
