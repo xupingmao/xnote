@@ -283,10 +283,14 @@ def full_search(context, words):
     """ full search the files """
     if not isinstance(words, list):
         words = [words]
-    like_list = []
+    content_like_list = []
+    # name_like_list = []
     for word in words:
-        like_list.append('content like %s ' % repr('%' + word.upper() + '%'))
-    sql = "select * from file where %s and is_deleted != 1 limit 1000" % (" AND ".join(like_list))
+        content_like_list.append('content like %s ' % repr('%' + word.upper() + '%'))
+    # for word in words:
+    #     name_like_list.append("related like %s " % repr("%" + word.upper() + '%'))
+    sql = "select * from file where (%s) and is_deleted != 1 limit 1000" \
+        % " AND ".join(content_like_list)
     all = FileDB().execute(sql)
     context["files"] = [FileDO.fromDict(item) for item in all]
     return all

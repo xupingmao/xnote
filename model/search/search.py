@@ -77,9 +77,21 @@ class handler(BaseHandler):
             context = {}
             context["key"] = key
             context["search_result"] = []
+            name_results = FileDB.search_name(words)
             FileDB.full_search(context, words)
             # files = self._service.search(words)
-            files = context['files']
+            content_results = context['files']
+
+            nameset = set()
+            for item in name_results:
+                nameset.add(item.name)
+
+            files = name_results
+
+            for item in content_results:
+                if item.name not in nameset:
+                    files.append(item)
+
         self.render("file-list.html", key = key, 
             files = files, count=len(files), full_search="on")
 
@@ -88,11 +100,12 @@ class handler(BaseHandler):
     def default_request(self):
         key = self.get_argument("key", None)
         full_search = self.get_argument("full_search", None)
-        if full_search == "on":
-            return self.full_search();
+        # if full_search == "on":
+        #     return self.full_search();
         if key is None or key == "":
             raise web.seeother("/")
         else:
+            return self.full_search()
             words = textutil.split_words(key)
             context = {}
             context["key"] = key
