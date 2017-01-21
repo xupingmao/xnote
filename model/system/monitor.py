@@ -5,6 +5,7 @@ import time
 import os
 import xutils
 import logging
+from logging.handlers import TimedRotatingFileHandler
 import json
 import threading
 import sys
@@ -20,8 +21,10 @@ class task:
     __xtaskname__ = "test"
 
     def __init__(self):
-        self.logger = None
-        self.reload_logger()
+        self.logger = logging.Logger(name="monitor")
+        handler = TimedRotatingFileHandler("log/monitor.log")
+        handler.setFormatter(logging.Formatter(fmt="%(asctime)s,%(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+        self.logger.addHandler(handler)
 
     def reload_logger(self):
         if self.logger is not None:
@@ -46,10 +49,6 @@ class task:
         """
         You need catch exception by yourself
         """
-        fname = "log/monitor-%s.log" % (time.strftime("%Y-%m-%d"))
-        if fname != self.prev_fname:
-            self.reload_logger()
-
         data = {}
 
         if psutil:

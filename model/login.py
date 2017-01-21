@@ -13,8 +13,9 @@ class handler:
         # FIXME prevent hack
         if name == "admin" and pswd == "123456":
             web.setcookie("xuser", "admin", expires=10 * 24 * 3600)
-            web.seeother(target)
-            return
+            if target is None:
+                raise web.seeother("/")
+            raise web.seeother(target)
         return render_template("login.html", name=name, password=pswd, _has_login=True)
 
 
