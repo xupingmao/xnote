@@ -5,9 +5,6 @@ import xutils
 class task:
 
     # 30秒检查一次
-    __xinterval__ = 30
-    __xtaskname__ = "time_reporter"
-
     interval = 30
     taskname = "time_reporter"
 
@@ -17,6 +14,6 @@ class task:
             return
         # 检查时间
         msg = "现在时间是%s时%s分" % (tm.tm_hour, tm.tm_min)
-        output = xutils.getstatusoutput("start script/speak.vbs %s" % msg)
+        output = xutils.getstatusoutput("call script\\speak.vbs %s" % msg)
         if output[0] != 0:
             print(output)

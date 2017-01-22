@@ -15,9 +15,11 @@ else:
 try:
     from urllib import parse as urlparse
     from urllib.parse import unquote
+    from urllib.parse import quote
 except ImportError:
     import urlparse
     from urllib import unquote
+    from urllib import quote
 
 try:
     from io import BytesIO
@@ -97,6 +99,8 @@ class MyStaticApp(SimpleHTTPRequestHandler):
             fs = os.fstat(f.fileno())
             self.send_header("Content-Length", str(fs[6]))
             self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+            # self.send_header("Content-Disposition", self._filename)
+            self.send_header("Content-Disposition", "attachment;filename=" + quote(self._filename))
             self.end_headers()
             return f
         except:
@@ -107,31 +111,6 @@ class MyStaticApp(SimpleHTTPRequestHandler):
     def get_date_str(self):
         return time.strftime('%Y-%m-%d %H:%M:%S')
 
-    def send_range(self, f, block_size):
-        total_size = self._m_total_size;
-        http_range = self._m_http_range;
-        start      = self.range_start
-        end        = self.range_end
-        f.seek(start)
-        buf = f.read(block_size)
-        f.close()
-        self.send_header("Content-Range", "bytes %s-%s/%s" % (start, start+len(buf)-1, total_size))
-        self.send_header("Content-Length", str(len(buf)))
-        self.send_header("Accept-Ranges", "bytes")
-        self.send_header("Content-Disposition", self._filename)
-        # self.send_header("Content-Type", "application/octet-stream")
-        self.send_response(206,"Partial Content")
-        # self.send_response(200, "OK")
-        self.start_response(self.status, self.headers)
-
-        content_range = self.get_header("Content-Range")
-        content_length = str(len(buf))
-        print("%s - - [%s]" % (self.client_address, self.get_date_str()))
-        print("  - - HTTP_RANGE", http_range)
-        print("  - - Content-Range", content_range)
-        print("  - - Content-Length", content_length)
-        # print("  - - Content-Disposition", self._filename)
-        return buf
 
     def send_fixed_range(self, f, block_size):
         total_size = self._m_total_size;
@@ -151,6 +130,7 @@ class MyStaticApp(SimpleHTTPRequestHandler):
         self.send_header("Content-Range", content_range)
         self.send_header("Content-Length", content_length)
         self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Disposition", "attachment; filename=\"{}\"; filename*=utf-8" % quote(self._filename))
         # self.send_header("Content-Disposition", self._filename)
         # self.send_header("Content-Type", "application/octet-stream")
         self.send_response(206,"Partial Content")
