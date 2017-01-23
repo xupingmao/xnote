@@ -1,3 +1,4 @@
+# encoding=utf-8
 import zipfile
 import os
 from util import dateutil
@@ -12,7 +13,7 @@ import xutils
 class T:
     pass
 
-_black_list = [".zip", ".pyc", ".pdf", "__pycache__"]
+_black_list = [".zip", ".pyc", ".pdf", "__pycache__", ".git"]
 
 _dirname = os.path.dirname(__file__)
 
@@ -32,7 +33,7 @@ def zip_xnote(nameblacklist = [_zipname]):
             if fname in nameblacklist:
                 continue
             name, ext = os.path.splitext(fname)
-            if ext in _black_list or ext in nameblacklist:
+            if ext in _black_list or fname in nameblacklist:
                 continue
             path = os.path.join(root, fname)
             try:

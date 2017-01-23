@@ -1,4 +1,6 @@
+# encoding=utf-8
 from BaseHandler import *
+from FileDB import FileDO
 
 """FileDB cache"""
 import copy
@@ -48,6 +50,37 @@ class FileFilter:
                 result.append(copy.copy(file))
         return result
 
+def do_search(words, key=None):
+    context = {}
+    context["key"] = key
+    context["search_result"] = []
+    name_results = FileDB.search_name(words)
+    FileDB.full_search(context, words)
+    # files = self._service.search(words)
+    content_results = context['files']
+
+    nameset = set()
+    for item in name_results:
+        nameset.add(item.name)
+
+    files = name_results
+
+    for item in content_results:
+        if item.name not in nameset:
+            files.append(item)
+    return files
+
+def do_calc(words, key):
+    exp = " ".join(words[1:])
+    try:
+        value = eval(exp)
+        f = FileDO("计算结果")
+        f.content = str(value)
+        return [f]
+    except Exception as e:
+        print(e)
+        return []
+
 class handler(BaseHandler):
 
     def search_models(self, words):
@@ -68,29 +101,17 @@ class handler(BaseHandler):
 
 
     def full_search(self):
-        key = self.get_argument("key", "")
+        key = self.get_argument("key", "").strip()
         if key is None or key == "":
             result = {}
             files = []
         else:
             words = textutil.split_words(key)
-            context = {}
-            context["key"] = key
-            context["search_result"] = []
-            name_results = FileDB.search_name(words)
-            FileDB.full_search(context, words)
-            # files = self._service.search(words)
-            content_results = context['files']
-
-            nameset = set()
-            for item in name_results:
-                nameset.add(item.name)
-
-            files = name_results
-
-            for item in content_results:
-                if item.name not in nameset:
-                    files.append(item)
+            op = words[0]
+            if op == "calc":
+                files = do_calc(words, key)
+            else:
+                files = do_search(words, key)
 
         self.render("file-list.html", key = key, 
             files = files, count=len(files), full_search="on")
