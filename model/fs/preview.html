@@ -1,0 +1,56 @@
+{% extends ../base.html %}
+
+{% block head %}
+
+<style type="text/css">
+    .fs-dir {
+        
+    }
+
+    .fs-file {
+
+    }
+</style>
+
+{% end %}
+
+{% block body %}
+<hr/>
+
+<div>
+
+<div class="col-md-12">
+
+{% for filename in filelist %}
+    {% set filepath = dirname + "/" + filename %}
+    <div class="col-md-12" style="padding-top: 6px;">
+    {% if os.path.isdir(filepath) %}
+        {% set filepath = filepath + "/" %}
+        <img src="/static/img/folder.gif"/>
+        <a href="/fs/{{filepath}}" class="fs-dir">{{filename}}</a>
+    {% else %}
+        <a href="/fs/{{filepath}}" class="fs-file">{{filename}}
+            <img style="width:50%; " src="/fs/{{filepath}}"/>
+        </a>
+        
+<!--         <div style="float: right; color: red;">
+            <a href="javascript:void()" style="color: red;">[删除]</a>
+        </div> -->
+        
+    {% if filepath.endswith((".md", ".csv")) %}
+        <div style="float: right; color: red;">
+            <a href="/wiki/{{filepath}}">[编辑]</a>
+        </div>
+    {% end %}
+
+    {% end %}
+    </div>
+{% end %}
+
+</div>
+
+<hr/>
+
+</div>
+
+{% end %}

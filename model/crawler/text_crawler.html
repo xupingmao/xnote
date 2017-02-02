@@ -1,0 +1,51 @@
+{% extends ../master.html %}
+
+{% block head %}
+<style>
+.crawler-img-div {
+    float: left;
+}
+.crawler-img-div img {
+    width:200px;
+}
+.crawler-link-div {
+    float: left;
+    width: 200px;
+}
+</style>
+{% end %}
+
+{% block body %}
+
+{% init imgs = [] %}
+{% init links = [] %}
+{% init texts = [] %}
+{% init content = "" %}
+
+<form request="get">
+    <label>URL</label>
+    <textarea type="text" name="url" cols="80">{{?url}}</textarea>
+    <button>查询</button>
+</form>
+
+<div class="md-12">
+{% for text in texts %}
+    <div class="md-12">{{text}}</div>
+    <hr/>
+{% end %}
+</div>
+
+<div style="float:inherit">
+{% for link in links %}
+    <div class="crawler-link-div"><a href="{{link.attrs.get('href')}}" target="_blank">{{link.get_text()}}</a></div>
+{% end %}
+</div>
+
+
+<div style="float:inherit">
+<pre>
+{%raw content %}
+</pre>
+</div>
+
+{% end %}

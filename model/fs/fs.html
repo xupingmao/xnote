@@ -10,6 +10,9 @@
     .fs-file {
 
     }
+    table td {
+        border: none;
+    }
 </style>
 
 {% end %}
@@ -30,6 +33,7 @@
     {% end %}
     
     <a href="/code/analyze?path={{current_path}}">分析</a>
+    <a href="/fs_preview?path={{current_path}}">预览</a>
 </div>
 
 <hr/>
@@ -47,31 +51,35 @@
 
 <!-- <li style="padding-top:6px;"><a href="/fs/{{parent_path}}/">上一级目录</a></li> -->
 
+<table class="col-md-12">
 {% for filename in filelist %}
-    {% set filepath = current_path + filename %}
-    <div class="col-md-12" style="padding-top: 6px;">
-    {% if os.path.isdir(filepath) %}
-        {% set filepath = filepath + "/" %}
-        <img src="/static/img/folder.gif"/>
-        <a href="/fs/{{filepath}}" class="fs-dir">{{filename}}</a>
-    {% else %}
-        <a href="/fs/{{filepath}}" class="fs-file">{{filename}}</a>
-        
-<!--         <div style="float: right; color: red;">
-            <a href="javascript:void()" style="color: red;">[删除]</a>
-        </div> -->
-        
-    {% if filepath.endswith((".md", ".csv")) %}
-        <div style="float: right; color: red;">
-            <a href="/wiki/{{filepath}}">[编辑]</a>
-        </div>
-    {% end %}
+    <tr>
+        {% set filepath = current_path + filename %}
+        <td>
+        <!-- <div class="col-md-12" style="padding-top: 6px;"> -->
+        {% if os.path.isdir(filepath) %}
+            {% set filepath = filepath + "/" %}
+            <img src="/static/img/folder.gif"/>
+            <a href="/fs/{{filepath}}" class="fs-dir">{{filename}}</a>
+        {% else %}
+            <a href="/fs/{{filepath}}" class="fs-file">{{filename}}</a>
+            
+        {% end %}
+        </td>
 
-    {% end %}
-    </div>
+        <td>
+            {{get_file_size(filepath)}}
+        </td>
+
+        <td>
+            {% if filepath.endswith((".md", ".csv")) %}
+                <a href="/wiki/{{filepath}}">[编辑]</a>
+            {% end %}
+        </td>
 {% end %}
+</table>
 
-</div>
+<!-- </div> -->
 
 <hr/>
 

@@ -1,6 +1,6 @@
 # encoding=utf-8
 import sys
-import web.xtemplate as xtemplate
+import xtemplate
 
 class ModuleInfo:
 

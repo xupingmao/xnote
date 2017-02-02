@@ -1,3 +1,4 @@
+# encoding=utf-8
 import sys, os
 import urllib
 import posixpath
@@ -71,7 +72,7 @@ class MyStaticApp(SimpleHTTPRequestHandler):
         to the outputfile by the caller unless the command was HEAD,
         and must be closed by the caller under all circumstances), or
         None, in which case the caller has nothing further to do.
-
+        这里处理的是HTTP 200 OK的返回
         """
         path = self.translate_path(self.path)
         f = None
@@ -100,7 +101,8 @@ class MyStaticApp(SimpleHTTPRequestHandler):
             self.send_header("Content-Length", str(fs[6]))
             self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
             # self.send_header("Content-Disposition", self._filename)
-            self.send_header("Content-Disposition", "attachment;filename=" + quote(self._filename))
+            # 中文(CJK)encode有问题
+            # self.send_header("Content-Disposition", "attachment;filename=" + quote(self._filename))
             self.end_headers()
             return f
         except:
@@ -130,7 +132,8 @@ class MyStaticApp(SimpleHTTPRequestHandler):
         self.send_header("Content-Range", content_range)
         self.send_header("Content-Length", content_length)
         self.send_header("Accept-Ranges", "bytes")
-        self.send_header("Content-Disposition", "attachment; filename=\"{}\"; filename*=utf-8" % quote(self._filename))
+        # 中文(CJK)encode有问题
+        # self.send_header("Content-Disposition", "attachment; filename=\"{}\"; filename*=utf-8" % quote(self._filename))
         # self.send_header("Content-Disposition", self._filename)
         # self.send_header("Content-Type", "application/octet-stream")
         self.send_response(206,"Partial Content")
@@ -256,6 +259,12 @@ def getpathlist(path):
             pathlist.append(path)
     return pathlist
 
+def get_file_size(filepath):
+    st = os.stat(filepath)
+    if st and st.st_size > 0:
+        return xutils.get_pretty_file_size(None, size=st.st_size)
+    return "-"
+
 class MyFileSystemApp(MyStaticApp):
 
     def translate_path(self, path):
@@ -322,6 +331,7 @@ class MyFileSystemApp(MyStaticApp):
         kw["fspathlist"] = getpathlist(path)
         kw["current_path"] = path
         kw["parent_path"] = parent_path
+        kw["get_file_size"] = get_file_size
 
         # handle home
         home = path.split("/")[0]

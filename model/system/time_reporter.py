@@ -9,7 +9,9 @@ class task:
     taskname = "time_reporter"
 
     def __call__(self):
+        return
         tm = time.localtime()
+        # Windows XP不支持中文语音
         if tm.tm_min % 10 != 0:
             return
         # 检查时间

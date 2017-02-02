@@ -22,6 +22,9 @@ class handler:
         name = xutils.unquote(name)
         if name=="tcc.html":
             return self.tcc()
+        elif name=="sql.html":
+            from . import sql
+            return sql.handler().GET()
         return xtemplate.render("tools/" + name)
 
     def POST(self, name):

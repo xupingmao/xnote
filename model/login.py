@@ -1,5 +1,5 @@
+# encoding=utf-8
 from BaseHandler import *
-
 
 class handler:
 
@@ -11,8 +11,8 @@ class handler:
 
         print("USER[%s] PSWD[%s]" % (name, pswd))
         # FIXME prevent hack
-        if name == "admin" and pswd == "123456":
-            web.setcookie("xuser", "admin", expires=10 * 24 * 3600)
+        if name == "admin" and pswd == "xyz123":
+            web.setcookie("xuser", "admin", expires= 24 * 3600)
             if target is None:
                 raise web.seeother("/")
             raise web.seeother(target)

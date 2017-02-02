@@ -1,9 +1,9 @@
    
 <div class="col-md-12" style="padding-top: 20px;">
-  <form method="GET" action="{{?action,'/search/search'}}">
+  <form id="search_form" method="GET" action="{{?action,'/search/search'}}">
       <div class="input-group" style="float:left;width:100%;padding-bottom:5px;height: 50px;">
-          <input type="text" id="key" name="key" value="{{?key}}" placeholder="Search for" style="height:100%;padding-left: 20px;"/>
-          <button style="height: 100%;background: #355380; color: #fff; border: none;">Search</button>
+          <input type="text" id="key" name="key" value="{{?key}}" placeholder="输入指令或搜索关键字" style="height:100%;padding-left: 20px;min-width:50%;max-width:75%;"/>
+          <button style="height: 100%;background: #355380; color: #fff; border: none;max-width:25%;">Search</button>
       </div>
 
   </form>
@@ -16,3 +16,38 @@
         <a href="/file/recent_visit">最近访问</a>
    </div>
 
+<script type="text/javascript">
+
+$(function () {
+  $("#key").focus();
+  // $("#key").val("");
+  var key = $("#key").val();
+  $("#key").val(key);
+  // 不开启自动提交
+  return;
+  // change事件必须要改变焦点才会触发
+  // TODO 根据当前的工作模式选择输入方式
+  $("#key").bind("keyup", function (event) {
+    var newKey = $("#key").val();
+    console.log("key="+newKey);
+    console.log(event);
+    var keyCode = event.keyCode;
+    switch (keyCode) {
+      // shift
+      case 16: return;
+    }
+    (function (oldKey) {
+      setTimeout(function () {
+        var keyValue = $("#key").val();
+        if (keyValue == "") {
+          return;
+        }
+        // 没有再编辑
+        if (keyValue == oldKey) {
+          $("#search_form").submit();
+        }
+      }, 1000);
+    }) (newKey);
+  });
+});
+</script>

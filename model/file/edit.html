@@ -88,15 +88,17 @@
     <form action="/file/update" method="POST">
         <div class="">
             <div class="">
-                <button class="btn btn-primary">更新</button>
                 <input type="button" class="btn btn-primary" onclick="edit()" value="编辑" />
                 <input type="button" class="btn btn-primary" onclick="medit()" value="移动编辑" />
-                <input type="button" class="btn btn-primary" onclick="preview()" value="预览" />
-                <a href="/file/upload_file" target="_blank">上传图片</a>
-                <input style="display:none" name="option" value="updateContent"/>
-                <input style="display:none" name="id" value="{{file.id}}"/>
+                <div id="edit-div">
+                    <button class="btn btn-primary">更新</button>
+                    <input type="button" class="btn btn-primary" onclick="preview()" value="预览" />
+                    <a href="/file/upload_file" target="_blank">上传图片</a>
+                    <input style="display:none" name="option" value="updateContent"/>
+                    <input style="display:none" name="id" value="{{file.id}}"/>
 
-                <input type="button" class="red" onclick="delLink()" value="删除" />
+                    <input type="button" class="red" onclick="delLink()" value="删除" />
+                </div>
             </div>
 
             <div style="padding-top:20px;">
@@ -167,6 +169,7 @@
         $("#markdown-output-div").removeClass("col-md-12").addClass("col-md-6");
         var height = Math.max(500, $("#markdown-output-div").height());
         $("#markdown-input").css({height:height+"px"});
+        $("#edit-div").show();
     }
 
     function medit() {
@@ -174,12 +177,14 @@
         $("#markdown-output-div").removeClass("col-md-12").addClass("hide");
         var height = Math.max(500, $("#markdown-output-div").height());
         $("#markdown-input").css({height:height+"px"});
+        $("#edit-div").show();
     }
     
     function preview() {
         if (!$("#markdown-input-div").hasClass("hide")) {
             $("#markdown-input-div").addClass("hide");
             $("#markdown-output-div").removeClass("hide").removeClass("col-md-6").addClass("col-md-12");
+            $("#edit-div").hide();
         }
     }
     

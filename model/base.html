@@ -13,7 +13,7 @@
 </head>
 
     <body style="margin: 0">
-      <div class="xnote-menu col-md-12" style="display: block;/*position: fixed*/;background: #ccc;">
+      <div class="xnote-menu col-md-12" style="display: block;/*position: fixed*/;background: #333;">
           <!-- <li class="menu-item"><a href="/file/group">首页</a></li> -->
           
           <!-- <li class="menu-item"><a href="/file/group?type=date">博客</a></li> -->
@@ -25,11 +25,11 @@
           <!-- <li class="menu-item"><a href="/image/index">图片</a></li> -->
           {% if _is_admin %}
             <li class="menu-item"><a href="/file/recent_edit">资料</a></li>
-            <li class="menu-item"><a href="/fs/">文件</a></li>
+            <!-- <li class="menu-item"><a href="/fs/">文件</a></li> -->
             <li class="menu-item"><a href="/system/sys">系统</a></li>
+            <li class="menu-item"><a href="/">任务</a></li>
+            <li class="menu-item"><a href="/wiki/tools.md">功能</a></li>
           {% end %}
-
-          <li class="menu-item"><a href="/wiki/tools.md">工具</a></li>
 
           {% if not _has_login %}
             <li class="menu-item"><a href="/login">登陆</a></li>

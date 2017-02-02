@@ -102,6 +102,8 @@ class ModelManager:
                 url = module.handler.__url__
             elif hasattr(handler, "__xurl__"):
                 url = handler.__xurl__
+            elif hasattr(handler, "xurl"):
+                url = handler.xurl
             else:
                 url = self.get_url(name)
             self.add_mapping(url, clz)

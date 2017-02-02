@@ -1,6 +1,9 @@
 # encoding=utf-8
 from BaseHandler import *
 from FileDB import FileDO
+import re
+import os
+import xutils
 
 """FileDB cache"""
 import copy
@@ -51,24 +54,25 @@ class FileFilter:
         return result
 
 def do_search(words, key=None):
-    context = {}
-    context["key"] = key
-    context["search_result"] = []
+
+    translates = find_translate(words[0])
+    tools = find_tools(words[0])
+
     name_results = FileDB.search_name(words)
-    FileDB.full_search(context, words)
+    # FileDB.full_search(context, words)
     # files = self._service.search(words)
-    content_results = context['files']
+    content_results = FileDB.full_search(words)
 
     nameset = set()
     for item in name_results:
         nameset.add(item.name)
 
-    files = name_results
+    files = translates + tools + name_results
 
     for item in content_results:
         if item.name not in nameset:
             files.append(item)
-    return files
+    return files[:20]
 
 def do_calc(words, key):
     exp = " ".join(words[1:])
@@ -81,7 +85,49 @@ def do_calc(words, key):
         print(e)
         return []
 
+def do_calc2(words, key):
+    exp = key
+    try:
+        value = eval(exp)
+        f = FileDO("计算结果")
+        f.content = str(value)
+        return [f]
+    except Exception as e:
+        print(e)
+        return []
+
+def find_tools(name):
+    tools_path = "model/tools"
+    files = []
+    for filename in os.listdir(tools_path):
+        if filename.endswith(".html") and name in filename:
+            f = FileDO("工具 - " + filename)
+            f.url = "/tools/" + filename
+            f.content = filename
+            files.append(f)
+    return files
+
+def find_translate(word):
+    sql = "select * from dictTB where en=?"
+    dicts = xutils.db_execute("db/dictionary.db", sql, (word,))
+    files = []
+    for f0 in dicts:
+        f = FileDO("翻译 - " + f0["en"])
+        f.content = f0["cn"]
+        f.raw = f0["cn"].replace("\\n", "\n")
+        files.append(f)
+    return files
+
+def do_tools(words, key):
+    name = words[1]
+    return find_tools(name)
+
 class handler(BaseHandler):
+    mappings = (
+        r"search.*", do_search,
+        r"calc.*", do_calc,
+        r".*[0-9]+.*", do_calc2,
+    )
 
     def search_models(self, words):
         modelManager = config.get("modelManager")
@@ -89,32 +135,35 @@ class handler(BaseHandler):
             return modelManager.search(words)
         return []
 
-    def py_execute(self, exp):
-
-        try:
-            value = eval(exp)
-            rule = Storage()
-            rule.html = "<p>计算结果: %s</p>" % value
-            return rule
-        except Exception as e:
-            print_exception(e)
+    def _match(self, key):
+        for i in range(0, len(self.mappings), 2):
+            pattern = self.mappings[i]
+            func = self.mappings[i+1]
+            if re.match(pattern, key):
+                return func
+        return None
 
 
-    def full_search(self):
-        key = self.get_argument("key", "").strip()
+    def full_search(self, key):
         if key is None or key == "":
-            result = {}
             files = []
         else:
             words = textutil.split_words(key)
             op = words[0]
-            if op == "calc":
-                files = do_calc(words, key)
+            func = self._match(key)
+            if func:
+                files = func(words, key)
             else:
                 files = do_search(words, key)
+        return files
+        # self.render("file-list.html", key = key, 
+        #     files = files, count=len(files), full_search="on")
 
-        self.render("file-list.html", key = key, 
-            files = files, count=len(files), full_search="on")
+    def json_request(self):
+        key = self.get_argument("key", "").strip()
+        if key == "":
+            raise web.seeother("/")
+        return self.full_search(key)
 
 
     """ search files by name and tags """
@@ -126,29 +175,9 @@ class handler(BaseHandler):
         if key is None or key == "":
             raise web.seeother("/")
         else:
-            return self.full_search()
-            words = textutil.split_words(key)
-            context = {}
-            context["key"] = key
-            context["search_result"] = []
-            # result = event.fire_with_context("search", context, words)
-            # files = self._service.search(words)
-            tools = self.search_models(words)
-            # context["search_result"].insert(0, link_rule)
-            files = FileDB.search_name(words)
-
-            search_result = []
-
-            #rule1 = self.py_execute(key)
-            #if rule1 is not None:
-            #    search_result.append(rule1)
-
-            # if len(files) == 0:
-            #     event.fire("search-miss", words)
+            files = self.full_search(key)
         self.render("file-list.html", key = key, 
-            files = files, count=len(files), 
-            tools = tools,
-            search_result = search_result)
+            files = files, count=len(files))
 
 name = "搜索"
 description = "xnote搜索，可以搜索笔记、工具"

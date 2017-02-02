@@ -1,0 +1,33 @@
+{% extends ../base.html %}
+
+{% block body %}
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td>User Agent</td>
+        <td id="userAgent"></td>
+    </tr>
+    <tr>
+        <td>AppName</td>
+        <td id="appName"></td>
+    </tr>
+    <tr>
+        <td>AppVersion</td>
+        <td id="appVersion"></td>
+    </tr>
+    <tr>
+        <td>Vendor</td>
+        <td id="vendor"></td>
+    </tr>
+</div>
+
+<script type="text/javascript">
+$("#userAgent").html(navigator.userAgent);
+$("#appName").html(navigator.appName);
+$("#appVersion").html(navigator.appVersion);
+$("#vendor").html(navigator.vendor);
+</script>
+{% end %}

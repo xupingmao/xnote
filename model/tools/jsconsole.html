@@ -26,16 +26,30 @@
 </div>
 
 <script type="text/javascript">
+    function isBasicType(obj) {
+        var typeName = typeof(obj);
+        // 不能随便换行
+        return typeName == "string" || typeName == "number" || typeName == "boolean"
+    }
     function print(msg) {
         $("#output").text($("#output").text() + msg);
     }
     function println(msg) {
+        if (msg==undefined) {
+            msg="";
+        }
         print(msg+"\n")
     }
 
     function dir(obj) {
         println("type:" + typeof(obj));
         println("toString:" + obj.toString());
+
+        if (isBasicType(obj)) {
+            println();
+            return;
+        }
+
         println("=================================================");
 
         println("[");
@@ -44,6 +58,7 @@
             println("  " + key + ":" + typeof(value));
         }
         println("]");
+        println();
     }
 
     function run() {

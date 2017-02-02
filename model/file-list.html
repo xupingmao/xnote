@@ -94,15 +94,19 @@
 
    <!-- Files -->
    <div class="">
-    {% if len(files) > 0 %}
         {% for i, file in enumerate(files) %}
             <div class="note">
                 <div class="note-visited-cnt">访问指数:{{file.visited_cnt}}</div>
                 <div class="note-name">
-                    <a href="/file/edit?id={{file.id}}">{{file.name}}</a>
+                    <a href="{{file.url}}">{{file.name}}</a>
                 </div>
-                <div class="note-content-short">{{file.content[:100]}}</div>
-                <div class="note-last-visit-time">最近访问:{{file.satime}}</div>
+                
+                {% if "raw" in file %}
+                    <pre>{{ file.raw }}</pre>
+                {% else %}
+                    <div class="note-content-short">{{file.content[:100]}}</div>
+                {% end %}
+                    <div class="note-last-visit-time">最近访问:{{file.satime}}</div>
                 <!-- <div class="note-last-modify-time">最近编辑:{{file.smtime}}</div> -->
                 <div class="note-related">
                     <input type="text" data-role="tagsinput" value="{{file.related}}"/>
@@ -111,13 +115,8 @@
                 </div> 
             </div>
         {% end %}
-        
-<!--     </table>
- -->
-    {% end %}
-
-
-</div>
+    </div>
+    
 {% if "page" in globals() %}
     <p><span>Total {{?pages}}</span>
         <input id="targetPage"/> <button onclick="goToPage()">GO</button>

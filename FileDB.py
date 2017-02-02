@@ -175,6 +175,7 @@ class FileDO(dict):
             file.content = ""
         if option:
             file.option = option
+        file.url = "/file/edit?id={}".format(dict["id"])
         return file
         
     def setBase(self, base):
@@ -279,7 +280,7 @@ def static_search(context, words):
     """search file, sqlite do not support call between different threads"""
     return FileService().smart_search(context, words)
 
-def full_search(context, words):
+def full_search(words):
     """ full search the files """
     if not isinstance(words, list):
         words = [words]
@@ -292,8 +293,8 @@ def full_search(context, words):
     sql = "select * from file where (%s) and is_deleted != 1 limit 1000" \
         % " AND ".join(content_like_list)
     all = FileDB().execute(sql)
-    context["files"] = [FileDO.fromDict(item) for item in all]
-    return all
+    return [FileDO.fromDict(item) for item in all]
+    # context["files"] = [FileDO.fromDict(item) for item in all]
 
 def build_sql_row(obj, k):
     v = getattr(obj, k)
@@ -561,13 +562,15 @@ def get_vpath(record):
     pathlist.reverse()
     return pathlist
 
-def search_name(words):
+def search_name(words, limit=None):
     if not isinstance(words, list):
         words = [words]
     like_list = []
     for word in words:
-        like_list.append('related like %s ' % repr('%' + word.upper() + '%'))
+        like_list.append('name like %s ' % repr('%' + word.upper() + '%'))
     sql = "select * from file where %s and is_deleted != 1 order by satime desc limit 1000" % (" AND ".join(like_list))
+    if limit:
+        sql += " limit {}".format(limit)
     db = FileDB()
     all = db.execute(sql)
     return [FileDO.fromDict(item) for item in all]

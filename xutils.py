@@ -3,6 +3,7 @@
 import sys
 import os
 import traceback
+import sqlite3
 
 PY2 = sys.version_info[0] == 2
 
@@ -82,8 +83,8 @@ def backupfile(path, backup_dir = None, rename=False):
         import shutil
         shutil.copyfile(path, newpath)
         
-def get_pretty_file_size(path = None, size = None):
-    if not size:
+def get_pretty_file_size(path = None, size = 0):
+    if size == 0:
         size = os.stat(path).st_size
     if size < 1024:
         return '%s B' % size
@@ -110,6 +111,30 @@ def touch(path):
         with open(path, "wb") as fp:
             pass
     
+
+def db_execute(path, sql, args = None):
+    db = sqlite3.connect(path)
+    cursorobj = db.cursor()
+    kv_result = []
+    try:
+        if args is None:
+            cursorobj.execute(sql)
+        else:
+            cursorobj.execute(sql, args)
+        result = cursorobj.fetchall()
+        db.commit()
+        for single in result:
+            resultMap = {}
+            for i, desc in enumerate(cursorobj.description):
+                name = desc[0]
+                resultMap[name] = single[i]
+            kv_result.append(resultMap)
+
+    except Exception as e:
+        raise e
+    finally:
+        db.close()
+    return kv_result
 #################################################################
 ##   DateTime Utilities
 #################################################################
