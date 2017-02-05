@@ -4,6 +4,7 @@ __pycache__
 *.bak
 *.zip
 *.bak
+.DS_Store
 /static/exe
 /static/logs
 /bs4/
@@ -16,3 +17,7 @@ __pycache__
 /static/deprecated/
 /static/wiki/公会战
 /static/wiki/运维
+/static/archive/
+/log/
+/tmp/
+/model/sync

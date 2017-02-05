@@ -23,8 +23,8 @@ from util import osutil
 from util import dbutil
 from util import netutil
 
-import web.xtemplate as xtemplate
-from web.xtemplate import render as xtemplate_render
+import xtemplate
+from xtemplate import render as xtemplate_render
 
 import FileDB
 

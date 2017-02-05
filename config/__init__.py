@@ -1,9 +1,11 @@
+# encoding=utf-8
 '''system configuration'''
 import os
 
 # WEBDIR = os.path.join("D:\\", "xnote", "xshell", "network", "webroot");
 
 PORT = "1234"
+# PORT = "8787"
 
 CONFIG_DIR = os.path.dirname(__file__)
 
@@ -21,7 +23,7 @@ SQL_PATH = os.path.join(WORKING_DIR, "db", "data.sql")
 
 BACKUP_DIR = os.path.join(WORKING_DIR, "backup")
 
-IS_ADMIN = True
+IS_ADMIN = False
 
 IP_BLACK_LIST = ["192.168.56.1"] # this is vbox ip
 
@@ -67,3 +69,4 @@ def has_config(key, subkey = None):
     
 def has(key):
     return has_config(key)
+

@@ -91,16 +91,17 @@ def do_calc2(words, key):
         value = eval(exp)
         f = FileDO("计算结果")
         f.content = str(value)
-        return [f]
+        return [f] + do_search(words, key)
     except Exception as e:
         print(e)
-        return []
+        return do_search(words, key)
 
 def find_tools(name):
     tools_path = "model/tools"
     files = []
     for filename in os.listdir(tools_path):
-        if filename.endswith(".html") and name in filename:
+        _filename, ext = os.path.splitext(filename)
+        if filename.endswith(".html") and name in _filename:
             f = FileDO("工具 - " + filename)
             f.url = "/tools/" + filename
             f.content = filename

@@ -1,7 +1,7 @@
 # encoding=utf-8
 from BaseHandler import *
 from FileDB import FileService
-from web import xtemplate
+import xtemplate
 import xutils
 
 

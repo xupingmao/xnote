@@ -66,7 +66,7 @@
     }
     myRenderer.heading = function (text, level, raw) {
         var id = raw.replace(/ /g, '-');
-        this.headings.push([raw, id]);
+        this.headings.push({text:raw, link:id, level:level});
         return '<h'
             + level
             + ' id="'
@@ -101,12 +101,16 @@
         var menuText = "<h1>目录</h1>";
         for (var i = 0; i < myRenderer.headings.length; i++) {
             var heading = myRenderer.headings[i];
-            var text = heading[0];
-            var link = heading[1];
-            menuText += '<li><a href="#link">text</a></li>'.replace(/link|text/g, function (match, index) {
+            var text = heading.text;
+            var link = heading.link;
+            var level = heading.level;
+            var margin_left = level * 10 + "px";
+            menuText += '<li><a href="#link" style="margin-left:mleft">text</a></li>'.replace(/mleft|link|text/g, function (match, index) {
                 // console.log(match, index);
                 if (match == "link") {
                     return link;
+                } else if (match == "mleft") {
+                    return margin_left;
                 } else {
                     return text;
                 }

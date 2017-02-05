@@ -2,7 +2,7 @@
 import web
 import os
 
-from web import xtemplate
+import xtemplate
 from xutils import *
 
 # 这里也是提供一个render_text的示例

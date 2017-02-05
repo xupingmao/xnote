@@ -285,15 +285,12 @@ class MyFileSystemApp(MyStaticApp):
         except UnicodeDecodeError:
             path = urllib.parse.unquote(path)
         path = posixpath.normpath(path)
-        words = path.split('/')
-        words = filter(None, words)
-        words = list(words)
-        del words[0] # delete `/fs/`
-        path = os.path.sep.join(words)
+        # words = path.split('/')
+        # del words[0] # delete `/fs/`
         if trailing_slash:
             path += '/'
-        if os.name == "posix":
-            path = "/" + path
+        path = path[4:] # remove /fs-
+        # path = os.path.sep.join(words)
         print("PATH:", path)
         return path
 
@@ -353,7 +350,7 @@ class MyFileSystemApp(MyStaticApp):
 
 class MyStaticMiddleware:
     """WSGI middleware for serving static files."""
-    def __init__(self, app, prefix='/fs/'):
+    def __init__(self, app, prefix='/fs-'):
         self.app = app
         self.prefix = prefix
         
@@ -361,8 +358,8 @@ class MyStaticMiddleware:
         path = environ.get('PATH_INFO', '')
         path = self.normpath(path)
 
-        if path.startswith("/fs/"):
-            if path == "/fs/" and xutils.is_windows():
+        if path.startswith("/fs-"):
+            if path == "/fs-":
                 # can not use web.seeother here
                 # handle to webpy handler
                 return self.app(environ, start_response)

@@ -1,4 +1,4 @@
-from web.xtemplate import render, reload
+from xtemplate import render, reload
 import web
 import autoreload
 

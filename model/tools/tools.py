@@ -1,6 +1,6 @@
 # encoding=utf-8
 
-from web import xtemplate
+import xtemplate
 import xutils
 import web
 import os
@@ -16,7 +16,7 @@ int main(int argc, char* argv) {
 """
 
 class handler:
-    __xurl__ = "/tools/(.*)"
+    xurl = "/tools/(.*)"
     
     def GET(self, name):
         name = xutils.unquote(name)
