@@ -20,7 +20,7 @@
 {% block body %}
 
 <div>
-    <form action="/fs_upload" enctype="multipart/form-data" method="POST">
+    <form action="/fs_upload" enctype="multipart/form-data" method="POST" style="padding-top:20px;">
         <input name="dirname" style="display:none;" value="{{current_path}}"/>
         <input type="file" name="file"/>
         <button>上传</button>

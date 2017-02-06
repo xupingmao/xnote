@@ -69,7 +69,7 @@ def get_info():
 
 def backup_db():
     now = time.strftime("%Y%m%d")
-    dbname = "data.{}.db".format(now)
+    dbname = "data.db.{}".format(now)
     dbpath = config.get("DB_PATH")
     if not os.path.exists(dbpath):
         return
@@ -85,13 +85,14 @@ def chk_backup():
     logutil.info("sorted backup files: {}", sorted_files)
     if len(sorted_files) > _MAX_BACKUP_COUNT:
         target = sorted_files[0]
-        fsutil.remove(os.path.join(backup_dir, target))
-        logutil.warn("remove file {}", target)
+        target_path = os.path.join(backup_dir, target)
+        fsutil.remove(target_path)
+        logutil.warn("remove file {}", target_path)
     if len(sorted_files) == 0:
         backup_db()
     else:
         lastfile = sorted_files[-1]
-        p = re.compile(r"data\.(\d+)\.db")
+        p = re.compile(r"data\.db\.(\d+)")
         m = p.match(lastfile)
         if m:
             data = m.groups()[0]
@@ -102,6 +103,11 @@ def chk_backup():
             if now - seconds > 3600 * 24 * 10:
                 backup_db()
         else:
-            fsutil.remove(os.path.join(backup_dir, lastfile))
-            logutil.warn("not valid db backup file, remove {}", lastfile)
+            # 先创建一个再删除
+            backup_db()
+            lastfile_path = os.path.join(backup_dir, lastfile)
+            fsutil.remove(lastfile_path)
+            logutil.warn("not valid db backup file, remove {}", lastfile_path)
+
+
     

@@ -60,6 +60,12 @@ class MyStaticApp(SimpleHTTPRequestHandler):
     def end_headers(self):
         pass
 
+    def send_error(self, code, message = None):
+        self.send_response(code, message)
+        self.send_header('Connection', 'close')
+        self.send_header('Content-Type', 'text/html')
+        self.end_headers()
+
     def log_message(*a): pass
     
     
@@ -176,7 +182,7 @@ class MyStaticApp(SimpleHTTPRequestHandler):
                     self.send_response(304, "Not Modified")
                     self.start_response(self.status, self.headers)
                     raise StopIteration()
-        except OSError:
+        except OSError as e:
             pass # Probably a 404
 
         # for k in environ:
@@ -237,7 +243,8 @@ class MyStaticApp(SimpleHTTPRequestHandler):
             # value = self.wfile.getvalue()
             # yield value
             self.start_response(self.status, self.headers)
-            raise StopIteration()
+            # raise StopIteration()
+            yield self.status
 
 def is_stared(path):
     return config.has_config("STARED_DIRS", path)

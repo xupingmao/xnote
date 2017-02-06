@@ -1,34 +1,16 @@
-{% extends ../base.html %}
-
-{% block head %}
-
-<style type="text/css">
-    .fs-dir {
-        
-    }
-
-    .fs-file {
-
-    }
-</style>
-
-{% end %}
-
-{% block body %}
-
+<html>
+<head>
+</head>
+<body style="margin:0;margin-top:10px;">
 <div>
 <form action="/file/upload_file" enctype="multipart/form-data" method="POST">
 <input type="file" name="file"/>
-<button>上传</button>
+<button>上传图片</button>
 </form>
 </div>
-
-<hr/>
-
 <div>
-文件名：{{filepath}}
-</div>
-<div>
+{% if filename != "" %}
 ![{{filename}}](/{{filepath}})
-</div>
 {% end %}
+</div>
+</body>

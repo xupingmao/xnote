@@ -99,6 +99,7 @@
             return outtext;
         }
         var menuText = "<h1>目录</h1>";
+        menuText+="<ul>";
         for (var i = 0; i < myRenderer.headings.length; i++) {
             var heading = myRenderer.headings[i];
             var text = heading.text;
@@ -116,6 +117,7 @@
                 }
             });
         }
+        menuText+="</ul>";
         outtext = menuText + outtext;
         return outtext;
     }
