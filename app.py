@@ -4,7 +4,7 @@ import sys
 sys.path.insert(1, "lib")
 
 import web
-import web.xtemplate as xtemplate
+import xtemplate
 import os, socket, sys
 from BaseHandler import BaseHandler, reload_template
 from FileDB import FileService
@@ -47,16 +47,7 @@ def get_ip_list(blacklist = []):
            print("external IP:%s"%ip)
         ip_list.append(ip)
 
-    return ip_list
-
-def main_render_hook(kw):
-    """ Main hook for template engine """
-    kw["_full_search"] = False
-    kw["_search_type"] = "normal"
-    # TODO prevent hack
-    kw["_is_admin"] = config.IS_ADMIN or web.cookies().get("xuser") == "admin"
-    kw["_has_login"] = web.cookies().get("xuser") == "admin"
-    
+    return ip_list  
 
 def notfound():
     raise web.notfound(xtemplate.render("notfound.html"))
@@ -97,9 +88,6 @@ def main():
     
     # set 404 page
     app.notfound = notfound
-    
-    # add render hook
-    xtemplate.add_render_hook(main_render_hook)
     
     # check database
     check_db()

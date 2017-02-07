@@ -2,7 +2,7 @@
 
 import sys
 import web
-import web.xtemplate as xtemplate
+import xtemplate
 
 class DocInfo:
 

@@ -1,7 +1,7 @@
 # encoding=utf-8
 
 import web
-import web.xtemplate as xtemplate
+import xtemplate
 import FileDB
 
 class handler:

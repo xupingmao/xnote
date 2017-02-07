@@ -23,11 +23,11 @@
           <!-- <li class="menu-item"><a href="/wiki/">wiki</a></li> -->
           <!-- <li class="menu-item"><a href="/">联系人</a></li> -->
           <!-- <li class="menu-item"><a href="/image/index">图片</a></li> -->
-          {% if _is_admin %}
+          {% if _has_login %}
             <li class="menu-item"><a href="/file/recent_edit">资料</a></li>
             <!-- <li class="menu-item"><a href="/fs/">文件</a></li> -->
             <li class="menu-item"><a href="/system/sys">系统</a></li>
-            <li class="menu-item"><a href="/">任务</a></li>
+            <li class="menu-item"><a href="/tools/date.html">任务</a></li>
             <li class="menu-item"><a href="/wiki/tools.md">功能</a></li>
           {% end %}
 
@@ -61,5 +61,9 @@
             </div>
         </div> <!-- Main Part End -->
         <div class="col-md-1"></div>
+        <!-- 干掉小广告，https才是最终解决方案 -->
+        <script type="text/javascript">
+        // setTimeout(function () {$("iframe").remove();}, 500);
+        </script>
     </body>
 </html>

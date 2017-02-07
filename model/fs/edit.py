@@ -1,5 +1,5 @@
 # encoding=utf-8
-from web.xtemplate import render
+from xtemplate import render
 import os
 import xutils
 import web

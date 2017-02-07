@@ -1,0 +1,96 @@
+{% extends ../base.html %}
+
+{% block body %}
+
+<video id="video" width="640" height="480" autoplay class="hide"></video>
+<canvas id="canvas" width="640" height="480"></canvas>
+<br/>
+<button id="snap">截图</button>
+<br/>
+<canvas id="canvas_static_pic" width="640" height="480" class="hide"></canvas>
+<img id="canvas2img" class="hide" width="640" height="480"/>
+<br/>
+<button id="close">关闭</button>
+<script type="text/javascript">
+    window.addEventListener("DOMContentLoaded", function() {
+    // Grab elements, create settings, etc.
+    var canvas = document.getElementById("canvas"),
+        context = canvas.getContext("2d"),
+        canvas_static_pic = document.getElementById('canvas_static_pic'),
+        context2 = canvas_static_pic.getContext('2d'),
+        video = document.getElementById("video"),
+        videoObj = { "video": true },
+        errBack = function(error) {
+            console.log("Video capture error: ", error.code); 
+        };
+
+    function updateVideo() {
+        updateImage(context, video, 640, 480);
+    }
+
+    video.addEventListener('play', function() {
+        window.playInterval = setInterval(updateVideo, 20);
+    }, false)
+
+    video.addEventListener('pause', function() {
+        window.clearInterval(window.playInterval);
+    }, false);
+    video.addEventListener('ended', function() {
+        window.clearInterval(window.playInterval);
+    }, false);
+
+    // Put video listeners into place
+    if (navigator.mediaDevices) {
+        navigator.mediaDevices.getUserMedia(videoObj)
+        .then(function (stream) {
+            video.src = window.URL.createObjectURL(stream);
+            video.play();
+        }).catch(function(error) {});
+    } else if(navigator.getUserMedia) { // Standard
+        navigator.getUserMedia(videoObj, function(stream) {
+            video.src = stream;
+            video.play();
+        }, errBack);
+    } else if(navigator.webkitGetUserMedia) { // WebKit-prefixed
+        navigator.webkitGetUserMedia(videoObj, function(stream){
+            video.src = window.webkitURL.createObjectURL(stream);
+            video.play();
+        }, errBack);
+    } else if(navigator.mozGetUserMedia) { // Firefox-prefixed
+        navigator.mozGetUserMedia(videoObj, function(stream){
+            video.src = window.URL.createObjectURL(stream);
+            video.play();
+        }, errBack);
+    }
+
+    // Trigger photo take
+    document.getElementById("snap").addEventListener("click", function() {
+        // $("#canvas_static_pic").removeClass("hidden");
+        $("#canvas2img").show()
+        updateImage(context2, video, 640, 480);
+        var img = $("#canvas2img")[0];
+        img.src = canvas_static_pic.toDataURL("image/png");
+    });
+
+    document.getElementById('close').addEventListener("click", function(){
+        // $("#canvas_static_pic").addClass("hidden");
+        $("#canvas2img").hide();
+    });
+
+    // $("#download").click(function(){
+    //     var image = new Image();
+    //     image.src = canvas_static_pic.toDataURL("image/png");
+    //     window.location.href = "image/octet-stream" + image.src;
+    // });
+}, false);
+
+function updateImage(ctx, video, width, height) {
+    ctx.translate(width, 0);
+    ctx.scale(-1,1); 
+    ctx.drawImage(video, 0, 0, width, height); 
+    ctx.scale(-1,1); 
+    ctx.translate(-width, 0);
+}
+
+</script>
+{% end %}

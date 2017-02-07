@@ -1,6 +1,6 @@
 import os
 import web
-import web.xtemplate as xtemplate
+import xtemplate
 import xutils
 import re
 

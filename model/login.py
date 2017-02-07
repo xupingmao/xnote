@@ -1,6 +1,8 @@
 # encoding=utf-8
 from BaseHandler import *
 
+import xauth
+
 class handler:
 
     def POST(self):
@@ -10,17 +12,36 @@ class handler:
         target = args["target"]
 
         print("USER[%s] PSWD[%s]" % (name, pswd))
-        # FIXME prevent hack
-        if name == "admin" and pswd == "xyz123":
-            web.setcookie("xuser", "admin", expires= 24 * 3600)
-            if target is None:
-                raise web.seeother("/")
-            raise web.seeother(target)
-        return render_template("login.html", name=name, password=pswd, _has_login=True)
+
+        users = xauth.get_users()
+
+        error = ""
+        if name in users:
+            user = users[name]
+            if pswd == user["password"]:
+                web.setcookie("xuser", name, expires= 24 * 3600)                
+                if target is None:
+                    raise web.seeother("/")
+                raise web.seeother(target)
+            else:
+                error = "password error"
+        else:
+            error = "user not exists"
+        return render_template("login.html", 
+            name=name, 
+            password=pswd,
+            _has_login=True,
+            error = error)
 
 
     def GET(self):
         args = web.input(name="", password="")
         name = args["name"]
         pswd = args["password"]
-        return render_template("login.html", name = name, password=pswd, _has_login=True)
+        return render_template("login.html", 
+            name = name, 
+            password=pswd, 
+            _has_login=True,
+            error = "")
+
+

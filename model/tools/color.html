@@ -4,12 +4,12 @@
     <style>
         .common-color-div div {
             float: left;
-            width: 300px;
+            width: 25%;
         }
 
         #other-color-div div {
             float: left;
-            width: 300px;
+            width: 25%;
         }
     </style>
 {% end %}
@@ -83,7 +83,7 @@ function process() {
     for (var i = 0; i < pElements.length; i++) {
         var item = pElements[i];
         var content = item.innerHTML;
-        console.log(item.innerHTML);
+        // console.log(item.innerHTML);
         item.innerHTML = "";
         var startIdx = content.indexOf('#');
         var color = content.substring(0, 7);
@@ -115,7 +115,7 @@ function process() {
 }
 
 document.onreadystatechange = function () {
-    console.log(document.readyState);
+    // console.log(document.readyState);
     if (document.readyState == "complete") {
         var other = document.getElementById('other');
         var colors = ["00", "50", "80", "CC", "FF"];

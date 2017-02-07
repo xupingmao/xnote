@@ -1,21 +1,38 @@
 {% extends base.html %}
 
 {% block head %}
-    <link rel="stylesheet" href="/css/table.css"/>
+    <style>
+    	table {
+    		width: 100%;
+    	}
+    	tr td {
+    		border: none;
+    	}
+    	input {
+    		width: 100%;
+    		min-width: 200px;
+       	}
+       	input {
+       		padding: 12px 24px;
+       	}
+       	input[type=submit] {
+       		padding: 12px 24px;
+       		border: none;
+       		background-color: lightblue;
+       	}
+    	input[type=submit]:hover {
+    		background-color: #27A9E3;
+    	}
+    </style>
 {% end %}
 
 {% block body %}
-    <div>
+    <div style="width:30%; min-width:200px; padding-top:20px; margin:0 auto;">
 		<form method="POST">
-			<table>
-			<tr>
-				<td>Name</td><td><input name="name" value="{{name}}"/></td>
-			</tr>
-			<tr>
-				<td>Pasword</td><td><input type="password" name="password" value="{{password}}"/></td>
-			</tr>
-			</table>
-			<input type="submit" value="Login"/>
+			<input name="name" value="{{name}}" placeholder="Name"/>
+			<input type="password" name="password" value="{{password}}" placeholder="Password"/>
+			<input type="submit" value="Login" style="width:100%;margin-top:20px;"/>
+      <label style="width:100%; color:red">{{error}}</label>
 		</form>
 	</div>
 {% end %}

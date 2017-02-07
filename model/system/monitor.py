@@ -10,7 +10,7 @@ import json
 import threading
 import sys
 import re
-from web import xtemplate
+import xtemplate
 
 try:
     import psutil
@@ -19,7 +19,7 @@ except ImportError as e:
 
 class task:
 
-    interval = 10
+    interval = 30
     taskname = "monitor"
 
     def __init__(self):

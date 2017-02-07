@@ -12,7 +12,7 @@ import socket
 import backup
 import os
 import autoreload
-from web import xtemplate
+import xtemplate
 
 def get_memory_usage():
     try:
@@ -110,7 +110,8 @@ class SysHandler:
             # port = config.get("port"),
             addr = addr,
             shell_list = shell_list,
-            os = os
+            os = os,
+            user = web.cookies().xuser
         )
 
     def opendirRequest(self):

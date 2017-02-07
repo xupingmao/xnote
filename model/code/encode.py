@@ -6,7 +6,7 @@ import base64
 import json
 import time
 import xutils
-import web.xtemplate as xtemplate
+import xtemplate
 
 class FileItem(object):
     """docstring for FileItem"""
