@@ -267,10 +267,13 @@ def getpathlist(path):
     return pathlist
 
 def get_file_size(filepath):
-    st = os.stat(filepath)
-    if st and st.st_size > 0:
-        return xutils.get_pretty_file_size(None, size=st.st_size)
-    return "-"
+    try:
+        st = os.stat(filepath)
+        if st and st.st_size > 0:
+            return xutils.get_pretty_file_size(None, size=st.st_size)
+        return "-"
+    except OSError as e:
+        return "-"
 
 class MyFileSystemApp(MyStaticApp):
 
