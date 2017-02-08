@@ -1,0 +1,411 @@
+{% extends ../base.html %}
+{% block head %}
+    <script src="/static/js/array.js"></script>
+    <script type="text/javascript" src="/static/js/Lexer.js"></script>
+{% end %}
+
+{% block body %}
+<script>
+
+function toCamel(name) {
+	return name.replace(/_\w/g, function(m) {
+		return m[1].toUpperCase();
+	})
+}
+
+function bashformat(fmt, data) {
+	var reg = /\$(\w+)/gi;
+	return fmt.replace(reg, function (part) {
+		var key = part.substring(1);
+		if (key in data) {
+			return data[key];
+		}
+		return part;
+	});
+}
+
+function getRadioValue(name) {
+    var radios = document.getElementsByName(name);
+    for (var i = 0; i < radios.length; i++) {
+        var radio = radios[i];
+        if (radio.checked) return radio.value;
+    }
+    return undefined;
+}
+
+function to_array(inputStr, option) {
+    var seperator = option.getSeperator()
+    var lines = inputStr.split(seperator);
+    var lineStr = "";
+
+    var quote = option.getQuote();
+    var unique = select('#unique').checked;
+    items = [];
+
+    lines.each(function (index, item) {
+        if (item.trim) {
+            item = item.trim();
+        }
+        if (item) {   
+            if (option.isUpperCase()) {
+                item = item.toUpperCase();
+            }
+            if (option.isLowerCase()) {
+                item = item.toLowerCase();
+            }
+            if (unique && items.indexOf(item) != -1) {
+                return null;
+            } else {
+                items.push(item);
+                lineStr += quote + item + quote + ",";
+            }
+        }
+    });
+    if (lineStr[lineStr.length-1]==',') {
+        lineStr = lineStr.substring(0, lineStr.length-1);
+    }
+    return lineStr;
+}
+
+function to_multiline(inputStr, option) {
+    var list = inputStr.split('\n');
+    var quote = option.getQuote();
+    var str = '';
+    for (var i = 0; i < list.length; i++) {
+        var line = list[i];
+        str += quote + line + '\\n' + quote;
+        if (i < list.length-1) {
+            str += '+\n';
+        }
+    }
+    return str;
+}
+
+String.prototype.count = function (dst) {
+    var count = 0;
+    var start = 0;
+    var index = -1;
+    while ((index = this.indexOf(dst, start)) != -1) {
+        count += 1;
+        start = index + 1;
+    }
+    return count;
+}
+
+function str_info(inputStr, option) {
+    var length = inputStr.length;
+    var spaceCount = inputStr.count(" ");
+
+    var info = "length=" + length;
+    info += "\n" + "spaceCount=" + spaceCount;
+    return info;
+}
+
+function to_enum(inputStr, option) {
+    var list = inputStr.split('\n');
+    var info = "";
+    var index = 0;
+    var maxlength = 0;
+    for (var i = 0; i < list.length; i++) {
+        var line = list[i];
+        if (line.length > maxlength) {
+            maxlength = line.length;
+        }
+    }
+    for (var i = 0; i < list.length;i++) {
+        var line = list[i];
+        line = line.trim();
+        if (line == "") continue;
+        line = line.toUpperCase();
+        // require string.js
+        line += ' '.repeat(maxlength-line.length);
+        info += line + " = " + index + "\n";
+        index++;
+    }
+    return info;
+}
+
+function to_uniq (inputStr, option) {
+    var list = inputStr.split('\n');
+    var info = "";
+    var index = 0;
+    var maxlength = 0;
+    var map = {};
+    for (var i = 0; i < list.length;i++) {
+        var line = list[i];
+        line = line.trim();
+        if (line == "") continue;
+        map[line] = 1;
+    }
+
+    for (var k in map) {
+        info += k + "\n";
+    }
+
+    return info;
+}
+
+function get_ip(inputStr, option) {
+    var reg = /\d+\.\d+\.\d+\.\d+/g;
+    var info = "";
+    var list = inputStr.match(reg);
+    if (!list) {
+        return "";
+    }
+    for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        info += item + "\n";
+    }
+    return info;
+}
+
+function listToMultiLine(inputStr, option) {
+    var tokens = readTokens(inputStr);
+    var result = "";
+    for (var i = 0; i < tokens.length; i++) {
+        var item = tokens[i];
+        if (item.type == 'string') {
+            result += item.value + "\n";
+        }
+    }
+    return result;
+}
+
+function get_first_word(inputStr, option) {
+    var list = inputStr.split('\n');
+    var info = "";
+    var index = 0;
+    var maxlength = 0;
+    for (var i = 0; i < list.length;i++) {
+        var line = list[i];
+        line = line.trim();
+        if (line == "") continue;
+        line = line.split(' ')[0];
+        info += line + '\n'
+    }
+    return info;
+}
+
+
+function splitWords (string) {
+    var rawWords = string.split(/[ \t\r\n]/);
+    var words = [];
+    for (var i = 0; i < rawWords.length; i++) {
+        var item = rawWords[i];
+        item = item.trim();
+        if (item != "") {
+            words.push(item);
+        }
+    };
+    return words;
+}
+
+
+function gen_markdown_table (inputStr, opt) {
+    
+    inputStr = inputStr.replace("\r", "");
+    var lines = inputStr.split("\n");
+
+    var isFirstLine = true;
+    var result = "";
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var words = splitWords(line);
+        if (words.length == 0) {
+            continue;
+        }
+        if (isFirstLine) {
+            result += "|" + words.join("|") + "|";
+            result += "\n";
+            var cols = [];
+            for (var i = 0; i < words.length; i++) {
+                cols.push("--")
+            };
+            result += "|" + cols.join("|") + "|\n";
+            isFirstLine = false;
+        } else {
+            result += "|" + words.join("|") + "|\n";
+        }
+    };
+    return result;
+}
+
+
+
+function CStruct () {
+    this.name = "";
+}
+
+CStruct.prototype.toString = function () {
+    var funcListStr = "";
+    for (var i = 0; i < this.funcList.length; i++) {
+        var func = this.funcList[i];
+        funcListStr += "  " + func.toFunctionPointer(this.type) + "\n";
+    }
+    var typeDef = "typedef struct _" + this.type + "{\n" +
+        "  struct _" + this.name + " *prototype;\n} " + this.type + ";\n\n";
+    var protoDef = "typedef struct _" + this.name + "{\n" + 
+        funcListStr + "} " + this.name + ";\n\n";
+    return typeDef + protoDef;
+}
+
+
+
+function remove_quote(inputStr, option) {
+    var str = eval("t = " + inputStr);
+    return str;
+}
+
+function gen_protobuf_dao(inputStr, option) {
+	var lexer = new Lexer();
+	var tokens = lexer.parse(inputStr);
+	var out = "";
+	for (var i = 0; i < tokens.length; i+=2) {
+		var name = tokens[i].value;
+		var type = tokens[i+1].value;
+		var vars = {
+		type: type,
+		origin_name: name,
+		name: toCamel(name),
+		get: toCamel("get_" + name),
+		set: toCamel("set_" + name)
+		};
+		var defines1 = bashformat("@Column(name = \"$origin_name\")\npublic $type $get() {\n return data.$get();\n}\n",
+		vars);
+		var defines2 = bashformat("public void $set($type $name){\n data.$set($name);\n}\n", vars);
+		out += defines1 + defines2;
+	}
+	return out;
+}
+
+function gen_getset(inputStr, option) {
+	var lexer = new Lexer();
+	var tokens = lexer.parse(inputStr);
+	var out = "";
+	for (var i = 0; i < tokens.length; i+=2) {
+		var name = tokens[i].value;
+		var type = tokens[i+1].value;
+		var vars = {
+		type: type,
+		origin_name: name,
+		name: toCamel(name),
+		get: toCamel("get_" + name),
+		set: toCamel("set_" + name)
+		};
+		var defines1 = bashformat("public $type $get() {\n return this.$name;\n}\n",
+		vars);
+		var defines2 = bashformat("public void $set($type $name){\n this.$name = $name;\n}\n", vars);
+		out += defines1 + defines2;
+	}
+	return out;
+}
+
+</script>
+<div class="container col-md-6">
+    <textarea id="input" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
+</div>
+<div class="container col-md-6">
+    <textarea id="output" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
+</div>
+
+<div class="container">
+    <p>分割符<select id="seperator">
+        <option value="\n">换行</option>
+        <option value=",">逗号</option>
+        <option value=";">分号</option>
+        <option value=" ">空格</option>
+    </select></p>
+    <p>引号
+        <input type="radio" name="quote" value="0" checked />双引号
+        <input type="radio" name="quote" value="1"/>单引号
+        <input type="radio" name="quote" value="2"/>无
+    </p>
+    <p>过滤重复<input type="checkbox" id="unique"/></p>
+    <p>
+        转换成大写
+        <input type="radio" name="case" value="0" checked />普通
+        <input type="radio" name="case" value="upper"/>大写
+        <input type="radio" name="case" value="lower"/>小写
+    </p>
+    <p>
+        转换方式
+        <select id="option">
+            <option value="gen_protobuf_dao">Java ProtoBuf Dao</option>
+            <option value="gen_getset">Java getter/setter</option>
+        </select>
+    </p>
+
+    <p><button onclick="execute()">转换</button></p>
+</div>
+
+<div class="col-md-12" id="error" style="color:red">
+</div>
+        
+<script>
+
+    function select(ident) {
+        if (ident[0]=='#') {
+            return document.getElementById(ident.substring(1));
+        }
+        if (ident[0]=='.') {
+            return document.getElementsByClassName(ident.substring(1));
+        }
+    }
+
+    function output(str) {
+        document.getElementById("output").innerHTML = str;
+    }
+    
+    function getInput() {
+        return document.getElementById("input").value;
+    }
+    
+    function Option () {
+        this.getInstance = function () {
+            return new Option();
+        }
+        
+        this.getQuote = function () {
+            var value = getRadioValue("quote");
+            if (value == "0") return '"';
+            else if (value == "1") return "'";
+            return "";
+        }
+
+        this.getSeperator = function () {
+            var value = select("#seperator").value;
+            if (value == "\\n") return "\n";
+            return value;
+        }
+        
+        function getCase() {
+            return getRadioValue("case");
+        }
+        
+        this.isUpperCase = function () {
+            return getCase() == "upper";
+        }
+
+        this.isLowerCase = function () {
+            return getCase() == "lower";
+        }
+
+    }
+
+    function execute() {
+        var option = select('#option').value;
+        console.log(option);
+        var input = getInput();
+        try {
+            $("#error").html("");
+            var str = window[option](input, new Option());
+            output(str);
+        } catch (e) {
+            $("#error").html(e);
+        }
+        
+    }
+</script>
+
+{% end %}
