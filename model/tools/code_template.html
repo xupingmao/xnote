@@ -279,10 +279,12 @@ function gen_protobuf_dao(inputStr, option) {
 	return out;
 }
 
-function gen_getset(inputStr, option) {
+function gen_pojo(inputStr, option) {
 	var lexer = new Lexer();
 	var tokens = lexer.parse(inputStr);
 	var out = "";
+    var declare_list = [];
+
 	for (var i = 0; i < tokens.length; i+=2) {
 		var name = tokens[i].value;
 		var type = tokens[i+1].value;
@@ -293,12 +295,15 @@ function gen_getset(inputStr, option) {
 		get: toCamel("get_" + name),
 		set: toCamel("set_" + name)
 		};
+        var decl = bashformat("private $type $name;", vars);
 		var defines1 = bashformat("public $type $get() {\n return this.$name;\n}\n",
 		vars);
 		var defines2 = bashformat("public void $set($type $name){\n this.$name = $name;\n}\n", vars);
+        
+        declare_list.push(decl);
 		out += defines1 + defines2;
 	}
-	return out;
+	return declare_list.join("\n") + "\n" + out;
 }
 
 </script>
@@ -332,7 +337,7 @@ function gen_getset(inputStr, option) {
         转换方式
         <select id="option">
             <option value="gen_protobuf_dao">Java ProtoBuf Dao</option>
-            <option value="gen_getset">Java getter/setter</option>
+            <option value="gen_pojo">Java POJO</option>
         </select>
     </p>
 
