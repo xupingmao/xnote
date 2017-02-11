@@ -32,6 +32,7 @@ import io
 import xutils
 from BaseHandler import *
 import config
+import xauth
 
 
 class MyStaticApp(SimpleHTTPRequestHandler):
@@ -158,6 +159,16 @@ class MyStaticApp(SimpleHTTPRequestHandler):
             yield buf
 
     def __iter__(self):
+        self.wfile = BytesIO() # for capturing error
+
+
+        # 检查权限
+        user = xauth.get_current_user()
+        if user is None or user["name"] != "admin":
+            self.send_error(404, "No permission")
+            self.start_response(self.status, self.headers)
+            yield self.status
+
         environ = self.environ
 
         self.path = environ.get('PATH_INFO', '')
@@ -168,8 +179,6 @@ class MyStaticApp(SimpleHTTPRequestHandler):
         self.client_address = environ.get('REMOTE_ADDR','-'), \
                               environ.get('REMOTE_PORT','-')
         self.command = environ.get('REQUEST_METHOD', '-')
-
-        self.wfile = BytesIO() # for capturing error
         
         try:
             path = self.translate_path(self.path)

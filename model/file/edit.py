@@ -1,5 +1,6 @@
 from BaseHandler import *
 from FileDB import FileService
+import xauth
 
 def date2str(d):
     ct = time.gmtime(d / 1000)
@@ -57,11 +58,14 @@ class handler(BaseFileHandler):
             service.updateContent(id, content)
         raise web.seeother("/file/edit?id=" + id)
 
-    def updateContentRequest(self):
-        id = self.get_argument("id")
-        content = self.get_argument("content")
-        service = FileService.instance()
-        file = service.getById(int(id))
-        assert file is not None
-        service.updateContent(id, content)
-        raise web.seeother("/file/edit?id=" + id)
+    # def updateContentRequest(self):
+    #     id = self.get_argument("id")
+    #     content = self.get_argument("content")
+    #     markdown = self.get_argument("markdown")
+    #     service = FileService.instance()
+    #     file = service.getById(int(id))
+    #     assert file is not None
+    #     print("markdown", markdown)
+    #     service.updateContent(id, content)
+    #     raise web.seeother("/file/edit?id=" + id)
+

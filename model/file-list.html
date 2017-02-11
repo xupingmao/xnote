@@ -74,24 +74,6 @@
    <br/>
    <script type="text/javascript">$("#menu-file").addClass("active");</script>
 
-   <!-- Tools -->
-
-   {% if "tools" in globals() and len(tools) > 0 %}
-   <div>
-        {% for tool in tools %}
-            <div class="tool-div">
-                <div class="tool-name">
-                    <a href="{{tool.url}}">{{tool.name}}</a>
-                </div>
-                <div class="tool-description">
-                    {{tool.description}}
-                </div>
-            </div>
-            <hr/>
-        {% end %}
-    </div>
-   {% end %}
-
    <!-- Files -->
    <div class="">
         {% for i, file in enumerate(files) %}

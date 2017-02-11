@@ -26,6 +26,10 @@ class WebModel:
         self.searchkey = self.name + self.url + self.searchkey + self.description
         self.description = "[工具]" + self.description
         
+
+def log(msg):
+    print(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
+
 class ModelManager:
 
     def __init__(self, app, vars, mapping):
@@ -74,7 +78,7 @@ class ModelManager:
                 if os.path.isfile(filepath) and ext == ".py":
                     modname = parent + "." + name
                     if modname in sys.modules:
-                        print("del %s" % modname)
+                        log("del %s" % modname)
                         del sys.modules[modname] # reload module
                     # Py3: __import__(name, globals=None, locals=None, fromlist=(), level=0)
                     # Py2: __import__(name, globals={}, locals={}, fromlist=[], level=-1)
@@ -88,12 +92,18 @@ class ModelManager:
                     self.load_task(mod, modname)
             except Exception as e:
                 ex_type, ex, tb = sys.exc_info()
-                print("Fail to load module '%s'" % filepath)
-                print("Model traceback (most recent call last):")
+                log("Fail to load module '%s'" % filepath)
+                log("Model traceback (most recent call last):")
                 traceback.print_tb(tb)
-                print(ex)
+                log(ex)
 
     def load_model(self, module, name):
+        if hasattr(module, "xurls"):
+            xurls = module.xurls
+            for i in range(0, len(xurls), 2):
+                url = xurls[i]
+                handler = xurls[i+1]
+                self.add_mapping(url, handler)
         if hasattr(module, "handler"):
             handler = module.handler
             clz = name.replace(".", "_")
@@ -120,8 +130,6 @@ class ModelManager:
                 wm.description = module.description
             wm.init()
             self.model_list.append(wm)
-            if self.debug:
-                print("Load mapping (%s, %s)" % (url, module.__name__))
 
     def load_task(self, module, name):
         if hasattr(module, "task"):
@@ -129,7 +137,7 @@ class ModelManager:
             if hasattr(task, "taskname"):
                 taskname = task.taskname
                 self.task_dict[taskname] = task()
-                print("Load task (%s,%s)" % (taskname, module.__name__))
+                log("Load task (%s,%s)" % (taskname, module.__name__))
 
     def get_mapping(self):
         return self.mapping
@@ -137,6 +145,7 @@ class ModelManager:
     def add_mapping(self, url, clzname):
         self.mapping.append(url)
         self.mapping.append(clzname)
+        log("Load mapping (%s, %s)" % (url, clzname))
 
     def add_search_key(self, url, key):
         self.search_dict[key] = url

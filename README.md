@@ -27,6 +27,10 @@ xnote是一个基于webapp的笔记系统，提供类似于wiki的资料管理�
 - 自动搜索model目录下的Python文件中的handler
 - 可以通过继承约定或者设置`xurl`属性来配置路由
 - debug模式下自动侦测文件修改并重新加载
+- model目录下的模块使用全局变量task声明定时任务,taskname是任务名称,interval是触发频率，单位是秒
+
+## 配置
+- config/users.ini 用户配置，管理员可以添加账户，不支持注册
 
 ## 协议
 

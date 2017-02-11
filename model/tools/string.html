@@ -7,6 +7,12 @@
 {% block body %}
 <script>
 
+function toCamel(name) {
+    return name.replace(/_\w/g, function(m) {
+        return m[1].toUpperCase();
+    })
+}
+
 function getRadioValue(name) {
     var radios = document.getElementsByName(name);
     for (var i = 0; i < radios.length; i++) {
@@ -49,6 +55,18 @@ function to_array(inputStr, option) {
     }
     return lineStr;
 }
+
+function bashformat(fmt, data) {
+    var reg = /\$(\w+)/gi;
+    return fmt.replace(reg, function (part) {
+        var key = part.substring(1);
+        if (key in data) {
+            return data[key];
+        }
+        return part;
+    });
+}
+
 
 function to_multiline(inputStr, option) {
     var list = inputStr.split('\n');
@@ -415,6 +433,28 @@ function parse_java_func(inputStr, option) {
     }
     return str;
 }
+
+function to_dao(inputStr, option) {
+    var lexer = new Lexer();
+    var tokens = lexer.parse(inputStr);
+    var out = "";
+    for (var i = 0; i < tokens.length; i+=2) {
+        var name = tokens[i].value;
+        var type = tokens[i+1].value;
+        var vars = {
+                type: type, 
+                origin_name: name,
+                name: toCamel(name), 
+                get: toCamel("get_" + name), 
+                set: toCamel("set_" + name)
+            };
+        var defines1 = bashformat("@Column(\"$origin_name\")\npublic $type $get() {\n    return this.$name;\n}\n", 
+           vars);
+        var defines2 = bashformat("public void $set($type $name){\n    this.$name=$name;\n}\n", vars);
+        out += defines1 + defines2;
+    }
+    return out;
+}
 </script>
 <div class="container col-md-6">
     <textarea id="input" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
@@ -457,6 +497,7 @@ function parse_java_func(inputStr, option) {
             <option value="parse_java_func">提取Java方法声明</option>
             <option value="gen_markdown_table">转为markdown表格</option>
             <option value="remove_quote">去引号</option>
+            <option value="to_dao">转换成DAO</option>
         </select>
     </p>
     <p><button onclick="execute()">转换</button></p>

@@ -114,7 +114,8 @@ blockquote {
 li.menu-item {
     float: left;
     display: block;
-    padding-left: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
 }
@@ -122,6 +123,14 @@ li.menu-item {
 li.menu-item a {
     text-decoration: none; 
     color: #fff;
+}
+
+li.menu-item a:hover {
+    background-color: inherit;
+}
+
+li.menu-item:hover {
+    background-color: #777;
 }
 
 .col-md-1 {

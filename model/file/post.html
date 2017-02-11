@@ -1,0 +1,42 @@
+{% extends ../base.html %}
+
+{% block head %}
+<style type="text/css">
+img {
+    max-width: 100%;
+}
+</style>
+{% end %}
+
+{% block body %}
+
+{% if op == "view" %}
+    <p>{{file["name"]}}
+        <a href="/file/post/edit?id={{file.id}}" style="float:right">编辑</a>
+    </p>
+    <pre>{% raw file["content"] %}</pre>
+{% else %}
+    <form method="POST" enctype="multipart/form-data">
+        <p>
+            <input name="name" type="text" value="{{file.name}}">
+            {% if file.groups == "*" %}
+                <input name="public" type="checkbox" checked>
+            {% else %}
+                <input name="public" type="checkbox">
+            {% end %}
+            所有人可见
+            <a href="/file/post?id={{file.id}}" style="float:right">预览</a>
+        </p>
+
+    
+        <div>
+            <input type="file" name="file"/>
+            <button>上传图片</button>
+        </div>
+
+        <textarea name="content" style="width:100%;margin-top:10px;" rows=20>{{file.content}}</textarea>
+        <button>保存</button>
+    </form>
+{% end %}
+
+{% end %}

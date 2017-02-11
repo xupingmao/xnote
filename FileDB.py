@@ -175,7 +175,10 @@ class FileDO(dict):
             file.content = ""
         if option:
             file.option = option
-        file.url = "/file/edit?id={}".format(dict["id"])
+        if file.type == "post":
+            file.url = "/file/post?id={}".format(dict["id"])
+        else:
+            file.url = "/file/edit?id={}".format(dict["id"])
         return file
         
     def setBase(self, base):
@@ -398,9 +401,15 @@ class FileService:
         sql = "update file set %s = %s where id = %s" % (key, to_sqlite_obj(value), id)
         self._db.execute(sql)
         
-    def updateContent(self, id, content):
-        sql = "update file set content = %s,size=%s, smtime='%s' where id = %s" \
-            % (to_sqlite_obj(content), len(content), dateutil.format_time(), id)
+    def updateContent(self, id, content, user_name=None):
+        if user_name is None:
+            sql = "update file set content = %s,size=%s, smtime='%s' where id = %s" \
+                % (to_sqlite_obj(content), len(content), dateutil.format_time(), id)
+        else:
+            # 这个字段还在考虑中是否添加
+            # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
+            sql = "update file set content = %s,size=%s,smtime='%s',modifier='%s' where id=%s"\
+                % (to_sqlite_obj(content), len(content), dateutil.format_time(), user_name, id)
         self._db.execute(sql)
 
     def getByName(self, name):

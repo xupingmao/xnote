@@ -1,5 +1,7 @@
 # encoding=utf-8
 
+import web
+
 try:
     from ConfigParser import ConfigParser
 except ImportError as e:
@@ -22,6 +24,7 @@ def get_users():
     for name in names:
         options = cf.options(name)
         user = _users[name] = {}
+        user["name"] = name
         for option in options:
             user[option] = cf.get(name, option)
         print(name, user)
@@ -34,4 +37,7 @@ def get_user(name):
 def get_user_password(name):
     users = get_users()
     return users[name]["password"]
+
+def get_current_user():
+    return get_user(web.cookies().get("xuser"))
 

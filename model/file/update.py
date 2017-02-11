@@ -9,6 +9,8 @@ import base64
 from config import *
 from urllib.parse import quote
 
+import xutils
+
 
 DIR_NAME = WORKING_DIR
 
@@ -61,6 +63,22 @@ class LinkHandler(BaseHandler):
             self.redirect("/file?option=search&key=" + name)
         else:
             self.redirect("/")
+
+def updateContent(id, content, user_name=None, type=None):
+    if user_name is None:
+        sql = "update file set content = %s,size=%s, smtime='%s'" \
+            % (to_sqlite_obj(content), len(content), dateutil.format_time())
+    else:
+        # 这个字段还在考虑中是否添加
+        # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
+        sql = "update file set content = %s,size=%s,smtime='%s',modifier='%s"\
+            % (to_sqlite_obj(content), len(content), dateutil.format_time(), user_name)
+    if type:
+        sql += ", type='%s'" % type
+    sql += " where id=%s" % id
+
+    xutils.db_execute("db/data.db", sql)
+
     
 class FileHandler(BaseHandler):
     
@@ -166,7 +184,7 @@ class FileHandler(BaseHandler):
         content = self.get_argument("content")
         file = self._service.getById(int(id))
         assert file is not None
-        self._service.updateContent(id, content)
+        updateContent(id, content)
         raise web.seeother("/file/edit?id=" + id)
         
         

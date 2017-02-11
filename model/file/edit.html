@@ -87,8 +87,10 @@
     <form action="/file/update" method="POST">
         <div class="">
             <div class="">
-                <input type="button" class="btn btn-primary" onclick="edit()" value="编辑" />
-                <input type="button" class="btn btn-primary" onclick="medit()" value="移动编辑" />
+                <div id="edit-btns">
+                    <input type="button" class="btn btn-primary" onclick="edit()" value="编辑" />
+                    <input type="button" class="btn btn-primary" onclick="medit()" value="移动编辑" />
+                </div>
                 <div id="edit-div">
                     <button class="btn btn-primary">更新</button>
                     <input type="button" class="btn btn-primary" onclick="preview()" value="预览" />
@@ -98,7 +100,7 @@
 
                     <input type="button" class="red" onclick="delLink()" value="删除" />
                     <div class="col-md-12">
-                        <iframe src="/file/upload_file" style="border:none;width:100%;"></iframe>
+                        <iframe src="/file/upload_file" style="border:none;width:100%;height:5em;"></iframe>
                     </div>
                 </div>
             </div>
@@ -172,6 +174,7 @@
         var height = Math.max(500, $("#markdown-output-div").height());
         $("#markdown-input").css({height:height+"px"});
         $("#edit-div").show();
+        $("#edit-btns").hide();
     }
 
     function medit() {
@@ -180,6 +183,7 @@
         var height = Math.max(500, $("#markdown-output-div").height());
         $("#markdown-input").css({height:height+"px"});
         $("#edit-div").show();
+        $("#edit-btns").hide();
     }
     
     function preview() {
@@ -187,6 +191,7 @@
             $("#markdown-input-div").addClass("hide");
             $("#markdown-output-div").removeClass("hide").removeClass("col-md-6").addClass("col-md-12");
             $("#edit-div").hide();
+            $("#edit-btns").show();
         }
     }
     
@@ -214,6 +219,17 @@
         // set marked code highlight function
         // marked.defaults.highlight = highlight;
 
+        function escape(html, encode) {
+          return html
+            .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/\n/g, '<br/>')
+            .replace(/ /g, '&nbsp;');
+        }
+
     $(function () {
         var old_content = $("#markdown-input-div").val();
         setInterval(function () {
@@ -227,7 +243,7 @@
             }
             old_content = input;
             var outtext = marked.parse(input);
-            $("#markdown-output-div").html(outtext);
+            $("#markdown-output-div").html(outtext); 
         }, 200);
         preview();
     })

@@ -22,7 +22,9 @@ sctime text,
 related text,
 -- type text default 'text', this is not a requirement, related can do it's work
 visited_cnt int default 0,
-is_deleted int default 0);
+is_deleted int default 0,
+creator text,
+groups text);
 
 
 -- 当前时间
