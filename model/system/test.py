@@ -1,6 +1,6 @@
 
-class handler:
-    __url__ = "/test"
-    
+class handler:    
     def GET(self):
         return "success"
+
+xurls = ("/test", handler)

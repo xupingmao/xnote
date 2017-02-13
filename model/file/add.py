@@ -10,7 +10,7 @@ class handler(BaseHandler):
         name = self.get_argument("name", "")
         tags = self.get_argument("tags", "")
         key  = self.get_argument("key", "")
-        type = self.get_argument("type", "md")
+        type = self.get_argument("type", "post")
 
         file = FileDO(name)
         file.atime = dateutil.get_seconds()
@@ -23,12 +23,17 @@ class handler(BaseHandler):
         file.groups = file.creator
         file.parent_id = 0
         file.type = type
+        file.content = ""
         error = ""
         try:
             if name != '':
                 f = FileDB.insert(file)
                 inserted = FileDB.get_by_name(name)
-                raise web.seeother("/file/edit?id=%s" % inserted.id)
+                if type == "post":
+                    raise web.seeother("/file/post?id={}".format(inserted.id))
+                else:
+                    raise web.seeother("/file/edit?id=%s" % inserted.id)
         except Exception as e:
             error = e
         self.render("file/add.html", key = "", name = key, tags = tags, error=error)
+

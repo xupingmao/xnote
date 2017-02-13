@@ -5,11 +5,16 @@ import re
 import os
 import xutils
 
+import web.db as db
+
 """FileDB cache"""
 import copy
 
 def file_dict(id, name, related):
     return dict(id = id, name = name, related = related)
+
+def get_file_db():
+    return db.SqliteDB(db="db/data.db")
 
 class FileFilter:
 
