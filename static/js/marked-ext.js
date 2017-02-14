@@ -54,7 +54,6 @@
 
     var myRenderer = new marked.Renderer();
     myRenderer.headings = []
-    myRenderer.highlight = highlight;
     myRenderer.listitem = function (text) {
         if (/^\[\]/.test(text)) {
             return '<li><input type="checkbox" disabled="true"/>' + text.substring(2) + '</li>\n';
@@ -83,12 +82,13 @@
 
     }
     marked.setOptions({
-        renderer: myRenderer
+        renderer: myRenderer,
+        highlight: highlight
     });
     var oldParse = marked.parse;
 
     marked.showMenu = true;
-    
+
     marked.parse = function (text) {
         if (!marked.showMenu) {
             return oldParse(text);
