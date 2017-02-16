@@ -17,7 +17,7 @@ try:
 except ImportError as e:
     psutil = None
 
-class task:
+class task1:
 
     interval = 30
     taskname = "monitor"
