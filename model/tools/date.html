@@ -26,6 +26,7 @@
   line-height: 36px;
   text-align:center;
   border-bottom: 1px solid #ddd;
+  font-weight: bold;
 }
  
 /**
@@ -43,6 +44,20 @@
   border-right: 8px solid #999;
   border-bottom: 6px solid transparent;
   cursor: pointer;
+}
+
+.calendar .prev-month2 {
+  float: left;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: lighter;
+}
+
+.calendar .next-month2 {
+  float: right;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: lighter;
 }
  
 /**
@@ -150,9 +165,9 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
  
     // 设置标题盒子中的html
     titleBox.className = 'calendar-title-box';
-    titleBox.innerHTML = "<span class='prev-month' id='prevMonth'></span>" +
+    titleBox.innerHTML = "<span class='prev-month2' id='prevMonth'>上个月</span>" +
       "<span class='calendar-title' id='calendarTitle'></span>" +
-      "<span id='nextMonth' class='next-month'></span>";
+      "<span id='nextMonth' class='next-month2'>下个月</span>";
     calendar.appendChild(titleBox);    // 添加到calendar div中
  
     // 设置表格区的html结构

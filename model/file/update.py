@@ -284,11 +284,6 @@ class FileHandler(BaseHandler):
             fout.close()
         raise web.seeother("/tool?path=/static/upload")
 
-
-
-    def management_request(self):
-        self.render("file-management.html")
-
     def deleted_list_request(self):
         self.render("file-list.html", files = self._service.get_deleted_list())
 
@@ -312,3 +307,4 @@ class FileHandler(BaseHandler):
         self.render("db-struct.html", file_struct = file_struct)
         
 handler = FileHandler
+

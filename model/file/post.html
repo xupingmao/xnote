@@ -10,11 +10,25 @@ img {
 
 {% block body %}
 
+    {% include "header.html" %}
+
 {% if op == "view" %}
-    <p>{{file["name"]}}
-        <a href="/file/post/edit?id={{file.id}}" style="float:right">编辑</a>
+    <p><h2 id="name">{{file["name"]}}</h2>
+        <a href="/file/post/edit?id={{file.id}}">编辑</a>
     </p>
-    <pre>{% raw file["content"] %}</pre>
+    <hr/>
+    <div style="font-family:monospace;">{% raw file["content"] %}</div>
+    <br/>
+    <a href="javascript:deleteConfirm()">删除</a>
+    <script type="text/javascript">
+    function deleteConfirm () {
+        var name = $("#name").text();
+        var conf = confirm("确认删除 " + name + " 吗?");
+        if (conf) {
+            window.location.href = "/file/post/del?id={{file.id}}";
+        }
+    }
+    </script>
 {% else %}
     <form method="POST" enctype="multipart/form-data">
         <p>
@@ -34,7 +48,7 @@ img {
             <button>上传图片</button>
         </div>
 
-        <textarea name="content" style="width:100%;margin-top:10px;" rows=20>{{file.content}}</textarea>
+        <textarea name="content" style="width:100%;margin-top:10px;font-family:monospace;" rows={{rows}}>{{file.content}}</textarea>
         <button>保存</button>
     </form>
 {% end %}

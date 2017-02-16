@@ -7,7 +7,7 @@ class handler:
 
     def POST(self):
         args = web.input(name="", password="", target=None)
-        name = args["name"]
+        name = args["username"]
         pswd = args["password"]
         target = args["target"]
 
@@ -28,18 +28,18 @@ class handler:
         else:
             error = "user not exists"
         return render_template("login.html", 
-            name=name, 
+            username=name, 
             password=pswd,
             _has_login=True,
             error = error)
 
 
     def GET(self):
-        args = web.input(name="", password="")
-        name = args["name"]
+        args = web.input(username="", password="")
+        name = args["username"]
         pswd = args["password"]
         return render_template("login.html", 
-            name = name, 
+            username = name, 
             password=pswd, 
             _has_login=True,
             error = "")
