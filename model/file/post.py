@@ -30,7 +30,7 @@ class PostView(object):
             file.content = file.content.replace("\n", "<br/>")
             file.content = file.content.replace("[img&nbsp;", "<p style=\"text-align:center;\"><img ")
             file.content = file.content.replace("img]", "></p>")
-            file.content = re.sub(r"https?://[\w\d\-\.\/]+", '<a href="\\g<0>">\\g<0></a>', file.content)
+            file.content = re.sub(r"https?://[^\s]+", '<a href="\\g<0>">\\g<0></a>', file.content)
 
         return xtemplate.render("file/post.html",
             op = "view",
