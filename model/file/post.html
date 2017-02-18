@@ -13,11 +13,14 @@ img {
     {% include "header.html" %}
 
 {% if op == "view" %}
-    <p><h2 id="name">{{file["name"]}}</h2>
+    <h2 id="name">{{file["name"]}}</h2>
+
+    <p>
+        <span>{{file.smtime}}</span>
         <a href="/file/post/edit?id={{file.id}}">编辑</a>
     </p>
     <hr/>
-    <div style="font-family:monospace;">{% raw file["content"] %}</div>
+    <div style="font-family:monospace;word-wrap: break-word;">{% raw file["content"] %}</div>
     <br/>
     <a href="javascript:deleteConfirm()">删除</a>
     <script type="text/javascript">

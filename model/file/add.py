@@ -1,3 +1,5 @@
+import time
+
 from BaseHandler import *
 import FileDB
 from FileDB import FileDO
@@ -11,6 +13,9 @@ class handler(BaseHandler):
         tags = self.get_argument("tags", "")
         key  = self.get_argument("key", "")
         type = self.get_argument("type", "post")
+
+        if key == "":
+            key = time.strftime("%Y-%m-%d")
 
         file = FileDO(name)
         file.atime = dateutil.get_seconds()
