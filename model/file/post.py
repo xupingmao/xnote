@@ -27,6 +27,7 @@ class PostView(object):
         if file.content != None:
             file.content = xutils.html_escape(file.content, quote=False);
             file.content = file.content.replace(" ", "&nbsp;")
+            file.content = file.content.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
             file.content = file.content.replace("\n", "<br/>")
             file.content = file.content.replace("[img&nbsp;", "<p style=\"text-align:center;\"><img ")
             file.content = file.content.replace("img]", "></p>")
