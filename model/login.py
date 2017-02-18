@@ -1,4 +1,6 @@
 # encoding=utf-8
+import hashlib
+
 from BaseHandler import *
 
 import xauth
@@ -19,7 +21,10 @@ class handler:
         if name in users:
             user = users[name]
             if pswd == user["password"]:
-                web.setcookie("xuser", name, expires= 24 * 3600)                
+                web.setcookie("xuser", name, expires= 24 * 3600)
+                pswd_md5 = hashlib.md5()
+                pswd_md5.update(pswd.encode("utf-8"))
+                web.setcookie("xpass", pswd_md5.hexdigest(), expires=24*3600)
                 if target is None:
                     raise web.seeother("/")
                 raise web.seeother(target)
