@@ -28,8 +28,8 @@ class PostView(object):
             file.content = xutils.html_escape(file.content, quote=False);
             file.content = file.content.replace(" ", "&nbsp;")
             file.content = file.content.replace("\n", "<br/>")
-            file.content = file.content.replace("[img&nbsp;", "<img ")
-            file.content = file.content.replace("img]", ">")
+            file.content = file.content.replace("[img&nbsp;", "<p style=\"text-align:center;\"><img ")
+            file.content = file.content.replace("img]", "></p>")
             file.content = re.sub(r"https?://[\w\d\-\.\/]+", '<a href="\\g<0>">\\g<0></a>', file.content)
 
         return xtemplate.render("file/post.html",
@@ -51,7 +51,7 @@ class PostEdit:
         id = int(args.id)
         file_db = get_file_db()
         file = file_db.select("file", where={"id": id})[0]
-        rows = file.content.count("\n")+2
+        rows = file.content.count("\n")+5
         rows = max(rows, 20)
         return xtemplate.render("file/post.html", 
             op="eidt", 

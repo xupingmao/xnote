@@ -16,6 +16,7 @@ size long,
 -- mtime long, -- seconds
 -- atime long, -- seconds
 -- ctime long, -- seconds
+type text,
 smtime text,
 satime text,
 sctime text,
