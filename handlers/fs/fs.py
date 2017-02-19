@@ -6,7 +6,7 @@ import web
 
 from BaseHandler import *
 import xutils
-
+import xauth
 
 class handler(BaseHandler):
 
@@ -163,12 +163,16 @@ class FileSystemHandler:
     def GET(self, path):
         path = xutils.unquote(path)
         print("Load Path:", path)
+        user = xauth.get_current_user()
+        if user is None or user["name"] != "admin":
+            web.status = "404 No permission"
+            return "No permission"
         if os.path.isdir(path):
             return self.list_directory(path)
         elif os.path.isfile(path):
             return self.read_file(path)
         else:
-            return path
+            return "Not Readable %s" % path
 
 name = "文件系统"
 description = "下载和上传文件"
