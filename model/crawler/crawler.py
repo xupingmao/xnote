@@ -1,6 +1,11 @@
-from BaseHandler import *
-from bs4 import BeautifulSoup
+# encoding:utf-8
 
+try:
+    from BaseHandler import *
+    from bs4 import BeautifulSoup
+except ImportError as e:
+    pass
+    
 def fetchpage(url):
     bytes = urlopen(url).read()
     try:
