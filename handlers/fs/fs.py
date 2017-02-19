@@ -81,6 +81,8 @@ class FileSystemHandler:
 
         # handle home
         home = path.split("/")[0]
+        if home[-1] != '/':
+            home+='/'
         kw["home"] = home
         return xtemplate.render("fs/fs.html", **kw)
 
