@@ -30,6 +30,11 @@ def get_users():
         print(name, user)
     return _users
 
+def refresh_users():
+    global _users
+    _users = None
+    return get_users()
+
 def get_user(name):
     users = get_users()
     return users.get(name)

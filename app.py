@@ -27,9 +27,6 @@ from web.httpserver import StaticApp
 from middlewares import MyStaticMiddleware
 from xmanager import ModelManager
 
-class MainHandler:
-    def GET(self):
-        raise web.seeother("/file/recent_edit")
 
 def get_ip_list(blacklist = []):
     localIp = socket.gethostbyname(socket.gethostname())
@@ -73,10 +70,8 @@ def main():
         os.environ["PORT"] = port
     
     var_env = dict()
-
-    basic_urls = ["/", "MainHandler"]
-    var_env["MainHandler"] = MainHandler
-
+    basic_urls = []
+    
     config.set("host", "localhost")
     config.set("port", port)
     config.set("start_time", time.time())

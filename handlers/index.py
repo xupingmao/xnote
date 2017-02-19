@@ -1,4 +1,5 @@
-from BaseHandler import *
+# encoding=utf-8
+from handlers.xhandlers import *
 import FileDB
 
 class handler(BaseHandler):
@@ -11,3 +12,10 @@ class handler(BaseHandler):
             )
 
 searchable = False
+
+class Home:
+
+    def GET(self):
+        raise web.seeother("/file/recent_edit")
+
+xurls = ("/", Home, "/index", handler)

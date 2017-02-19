@@ -1,4 +1,4 @@
-from BaseHandler import *
+from handlers.xhandlers import *
 from FileDB import FileService
 import xauth
 
@@ -47,16 +47,6 @@ class handler(BaseFileHandler):
         web.ctx.headers.append(("Content-Type", 'application/octet-stream'))
         web.ctx.headers.append(("Content-Disposition", "attachment; filename=%s.csv" % quote(file.name)))
         return content
-
-    def upload_request(self):
-        x = web.input(file = {})
-        id = self.get_argument("id")
-        if 'file' in x:
-            content = try_decode(x.file.file.read())
-            content = "```CSV\n" + content + "```"
-            service = FileService.instance()
-            service.updateContent(id, content)
-        raise web.seeother("/file/edit?id=" + id)
 
     # def updateContentRequest(self):
     #     id = self.get_argument("id")
