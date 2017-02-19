@@ -43,7 +43,7 @@
 <div style="background: lightgreen;">
 <a href="/fs-{{home}}">Home</a> /
 {% for _path in fspathlist %}
-    <a href="/fs-{{_path}}">{{os.path.basename(_path) }}</a> / 
+    <a href="/fs/{{_path}}">{{os.path.basename(_path) }}</a> / 
 {% end %}
 </div>
 
@@ -60,9 +60,9 @@
         {% if os.path.isdir(filepath) %}
             {% set filepath = filepath + "/" %}
             <img src="/static/img/folder.gif"/>
-            <a href="/fs-{{filepath}}" class="fs-dir">{{filename}}</a>
+            <a href="/fs/{{filepath}}" class="fs-dir">{{filename}}</a>
         {% else %}
-            <a href="/fs-{{filepath}}" class="fs-file">{{filename}}</a>
+            <a href="/fs/{{filepath}}" class="fs-file">{{filename}}</a>
             
         {% end %}
         </td>

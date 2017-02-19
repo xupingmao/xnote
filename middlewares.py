@@ -29,9 +29,10 @@ except ImportError:
 
 import pdb
 import io
-import xutils
-from BaseHandler import *
+
 import config
+import xutils
+import xtemplate
 import xauth
 
 
@@ -353,7 +354,7 @@ class MyFileSystemApp(MyStaticApp):
         home = path.split("/")[0]
         kw["home"] = home
 
-        content = render_template("fs/fs.html", **kw)
+        content = xtemplate.render("fs/fs.html", **kw)
         displaypath = xutils.html_escape(displaypath)
         enc = "utf-8"
         encoded = content
