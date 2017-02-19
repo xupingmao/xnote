@@ -29,7 +29,7 @@ def get_file_size(filepath):
         return "-"
     except OSError as e:
         return "-"
-        
+
 def get_filesystem_kw():
     """return filesystem utils"""
     kw = {}
@@ -39,6 +39,8 @@ def get_filesystem_kw():
     return kw
 
 def getpathlist(path):
+    if not path.endswith("/"):
+        path += "/"
     pathsplit = path.split("/")
     pathlist = []
     for i in range(len(pathsplit)):
@@ -47,7 +49,7 @@ def getpathlist(path):
             pathlist.append(path)
     return pathlist
 
-class FsTest:
+class FileSystemHandler:
 
     content_type_dict = {
         ""    : 'application/octet-stream', # Default
@@ -169,4 +171,4 @@ class FsTest:
 name = "文件系统"
 description = "下载和上传文件"
 
-xurls = (r"/fs-", handler, r"/fs/(.*)", FsTest)
+xurls = (r"/fs-", handler, r"/fs/(.*)", FileSystemHandler)
