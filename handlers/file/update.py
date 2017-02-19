@@ -66,12 +66,12 @@ class LinkHandler(BaseHandler):
 
 def updateContent(id, content, user_name=None, type=None):
     if user_name is None:
-        sql = "update file set content = %s,size=%s, smtime='%s'" \
+        sql = "update file set type='md', content = %s,size=%s, smtime='%s'" \
             % (to_sqlite_obj(content), len(content), dateutil.format_time())
     else:
         # 这个字段还在考虑中是否添加
         # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
-        sql = "update file set content = %s,size=%s,smtime='%s',modifier='%s"\
+        sql = "update file set type = 'md', content = %s,size=%s,smtime='%s',modifier='%s"\
             % (to_sqlite_obj(content), len(content), dateutil.format_time(), user_name)
     if type:
         sql += ", type='%s'" % type
