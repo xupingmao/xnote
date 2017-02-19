@@ -12,7 +12,7 @@ from util import dateutil
 
 import config
 
-TEMPLATE_DIR = "model"
+TEMPLATE_DIR = config.HANDLERS_DIR
 NAMESPACE    = dict(
     format_date = dateutil.format_date,
     format_time = dateutil.format_time

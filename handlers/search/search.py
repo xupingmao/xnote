@@ -102,7 +102,7 @@ def do_calc2(words, key):
         return do_search(words, key)
 
 def find_tools(name):
-    tools_path = "model/tools"
+    tools_path = config.TOOLS_DIR
     files = []
     for filename in os.listdir(tools_path):
         _filename, ext = os.path.splitext(filename)

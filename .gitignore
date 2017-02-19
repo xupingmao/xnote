@@ -4,6 +4,7 @@ __pycache__
 *.bak
 *.zip
 *.bak
+*.csv
 .DS_Store
 /static/exe
 /static/logs
@@ -22,3 +23,7 @@ __pycache__
 /log/
 /tmp/
 /model/sync
+/static2/
+/backup/
+/script/
+/config/users.ini

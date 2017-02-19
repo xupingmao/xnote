@@ -47,7 +47,7 @@ class ModelManager:
         self.mapping = list()
         self.model_list = list()
         
-        self.load_model_dir("model")
+        self.load_model_dir(config.HANDLERS_DIR)
         
         self.mapping += self.basic_mapping
         reload_template()
@@ -66,7 +66,7 @@ class ModelManager:
         del namelist[0]
         return "/" + "/".join(namelist)
         
-    def load_model_dir(self, parent = "model"):
+    def load_model_dir(self, parent = config.HANDLERS_DIR):
         dirname = parent.replace(".", "/")
         for filename in os.listdir(dirname):
             try:

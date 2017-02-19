@@ -1,0 +1,20 @@
+{% extends ../master.html %}
+
+{% block body %}
+
+<div>
+
+    <form method="POST">
+        <label class="col-md-2">Host</label>
+        <input name="url" value="{{url}}"/>
+        <br/>
+        <button>同步数据库</button>
+    </form>
+
+</div>
+
+<div>
+{{error}}
+</div>
+
+{% end %}

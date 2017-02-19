@@ -256,3 +256,5 @@ class BaseFileHandler(BaseHandler):
             pathlist = FileDB.get_vpath(record)
             kw['pathlist'] = pathlist
         BaseHandler.render(self, template, **kw)
+
+

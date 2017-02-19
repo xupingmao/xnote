@@ -6,9 +6,6 @@ sys.path.insert(1, "lib")
 import web
 import xtemplate
 import os, socket, sys
-from BaseHandler import BaseHandler, reload_template
-from FileDB import FileService
-import functools
 from util import fsutil
 from util import dbutil
 import xutils
@@ -30,8 +27,8 @@ from web.httpserver import StaticApp
 from middlewares import MyStaticMiddleware
 from xmanager import ModelManager
 
-class MainHandler(BaseHandler):
-    def get(self):
+class MainHandler:
+    def GET(self):
         raise web.seeother("/file/recent_edit")
 
 def get_ip_list(blacklist = []):
@@ -101,11 +98,11 @@ def main():
         m.reload()
         autoreload_thread.clear_watched_files()
         # autoreload_thread.watch_dir("template")
-        autoreload_thread.watch_recursive_dir("model")
+        autoreload_thread.watch_recursive_dir(config.HANDLERS_DIR)
 
     # autoreload just reload models
     autoreload_thread = AutoReloadThread(stop_callback)
-    autoreload_thread.watch_recursive_dir("model")
+    autoreload_thread.watch_recursive_dir(config.HANDLERS_DIR)
     autoreload_thread.start()
     m.run_task()
 

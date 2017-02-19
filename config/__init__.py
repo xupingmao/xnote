@@ -7,20 +7,19 @@ import os
 PORT = "1234"
 # PORT = "8787"
 
+# 处理器目录
+HANDLERS_DIR = "handlers"
+# 工具目录
+TOOLS_DIR = "handlers/tools"
 CONFIG_DIR = os.path.dirname(__file__)
-
 WORKING_DIR = os.path.dirname(CONFIG_DIR)
-
 WEBDIR = os.path.join(WORKING_DIR, "static")
-
 UPLOAD_DIR = os.path.join(WORKING_DIR, "static", "upload")
 PLUGINS_DIR = os.path.join(WORKING_DIR, "plugins")
 LOG_DIR = os.path.join(WORKING_DIR, "log")
 DB_DIR  = os.path.join(WORKING_DIR, "db")
-
 DB_PATH  = os.path.join(WORKING_DIR, "db", "data.db")
 SQL_PATH = os.path.join(WORKING_DIR, "db", "data.sql")
-
 BACKUP_DIR = os.path.join(WORKING_DIR, "backup")
 
 IS_ADMIN = False
