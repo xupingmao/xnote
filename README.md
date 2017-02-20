@@ -42,9 +42,17 @@ xurls = ("/test", handler)
 - `handlers`目录下的模块使用全局变量task声明定时任务,taskname是任务名称,interval是触发频率，单位是秒
 - 支持文件断点续传
 
-## 配置
+## 配置运行
 - config/users.ini 用户配置，管理员可以添加账户，不支持注册
-- 启动服务器`python app.py`, 默认1234端口
+
+```
+; 用户名
+[admin]
+; 密码
+password=123456
+```
+
+- 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 即可
 
 ## 协议
 
