@@ -1,5 +1,5 @@
 # encoding=utf-8
-
+import os
 import web
 
 try:
@@ -11,24 +11,36 @@ except ImportError as e:
 _users = None
 
 
+def read_users_from_ini(path):
+    users = {}
+    if not os.path.exists(path):
+        return users
+    cf = ConfigParser()
+    cf.read(path, encoding="utf-8")
+    names = cf.sections()
+    for name in names:
+        options = cf.options(name)
+        user = users[name] = {}
+        user["name"] = name
+        for option in options:
+            user[option] = cf.get(name, option)
+        print(name, user)
+    return users
+
 def get_users():
     global _users
 
     if _users is not None:
         return _users
 
-    _users = {}
-    cf = ConfigParser()
-    cf.read("config/users.ini")
-    names = cf.sections()
-    for name in names:
-        options = cf.options(name)
-        user = _users[name] = {}
-        user["name"] = name
-        for option in options:
-            user[option] = cf.get(name, option)
-        print(name, user)
+    defaults = read_users_from_ini("config/users.default.ini")
+    customs  = read_users_from_ini("config/users.ini")
+
+    _users = defaults
+    _users.update(customs)
+    
     return _users
+
 
 def refresh_users():
     global _users

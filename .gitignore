@@ -3,7 +3,6 @@ __pycache__
 *.pyc
 *.bak
 *.zip
-*.bak
 *.csv
 .DS_Store
 /static/exe
@@ -16,8 +15,6 @@ __pycache__
 /static/lib/My97DatePicker/
 /static/img/
 /static/deprecated/
-/static/wiki/公会战
-/static/wiki/运维
 /static/wiki/
 /static/archive/
 /log/
