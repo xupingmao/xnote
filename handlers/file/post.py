@@ -40,11 +40,14 @@ class PostView(object):
 class PostEdit:
     def create_file_name(self, filename):
         date = dateutil.format_date(fmt="%Y/%m")
-        newfilename = "static/img/" + date + "/" + filename
+        origin_filename = "static/img/" + date + "/" + filename
         fsutil.check_create_dirs("static/img/"+date)
+        fileindex = 1
+        newfilename = origin_filename
         while os.path.exists(newfilename):
-            name, ext = os.path.splitext(newfilename)
-            newfilename = name + "1" + ext
+            name, ext = os.path.splitext(origin_filename)
+            newfilename = name + str(fileindex) + ext
+            fileindex+=1
         return newfilename
 
     def GET(self):

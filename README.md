@@ -44,6 +44,7 @@ xurls = ("/test", handler)
 
 ## 配置
 - config/users.ini 用户配置，管理员可以添加账户，不支持注册
+- 启动服务器`python app.py`, 默认1234端口
 
 ## 协议
 
