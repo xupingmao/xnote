@@ -55,6 +55,9 @@ class FileSystemHandler:
         ""    : 'application/octet-stream', # Default
         '.mp4': 'video/mp4',
         '.jpg': 'image/jpeg',
+        ".avi": "video/avi",
+        '.html': 'text/html',
+        '.py' : 'text/plain',
     }
 
     def list_directory(self, path):
@@ -120,10 +123,11 @@ class FileSystemHandler:
                         rest -= readsize
                         readsize = min(rest, blocksize)
             except Exception as e:
-                return self.read_all(path, blocksize)
+                # yield最好不要和return混用
+                yield self.read_all(path, blocksize)
         else:
             # 处理不了，返回所有的数据
-            return self.read_all(path, blocksize)
+            yield self.read_all(path, blocksize)
 
     def read_all(self, path, blocksize):
         with open(path, "rb") as fp:
@@ -144,7 +148,6 @@ class FileSystemHandler:
             mime_type = self.content_type_dict['']
 
         web.header("Content-Type", mime_type)
-        client_etag = "None"
 
         if etag == client_etag:
             web.ctx.status = "304 Not Modified"
@@ -162,7 +165,8 @@ class FileSystemHandler:
 
     def GET(self, path):
         path = xutils.unquote(path)
-        print("Load Path:", path)
+        # TODO 有编码错误
+        # print("Load Path:", path)
         user = xauth.get_current_user()
         if user is None or user["name"] != "admin":
             web.status = "404 No permission"
