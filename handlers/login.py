@@ -1,8 +1,5 @@
 # encoding=utf-8
 import hashlib
-
-from BaseHandler import *
-
 import xauth
 
 class handler:

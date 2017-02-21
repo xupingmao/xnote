@@ -1,7 +1,7 @@
 @rem xnote start program
 @rem CMD do not support unicode
 
-@title=xnote
+@title Xnote Server
 
 @rem set color
 @rem color [background] foreground

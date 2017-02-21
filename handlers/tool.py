@@ -1,5 +1,5 @@
 from web.utils import Storage
-from BaseHandler import *
+from handlers.xhandlers import *
 import posixpath
 import functools
 

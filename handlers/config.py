@@ -1,4 +1,4 @@
-from BaseHandler import *
+from handlers.xhandlers import *
 
 def obj_str(obj):
     if isinstance(obj, list):
