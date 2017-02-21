@@ -20,8 +20,17 @@ class DocInfo:
         for attr in attr_dict:
             value = attr_dict[attr]
             # 通过__module__判断是否时本模块的函数
-            if hasattr(value, "__call__"):
-                functions.append([attr + str(inspect.signature(value)), value.__doc__])
+            # isroutine判断是否是函数或者方法
+            if inspect.isroutine(value):
+                argspec = ''
+                try:
+                    signature = inspect.signature(value)
+                except (ValueError, TypeError):
+                    signature = None
+                if signature:
+                    argspec = str(signature)
+                functions.append([attr + argspec, value.__doc__])
+            # TODO 处理类的文档，参考pydoc
 
 class handler(object):
 

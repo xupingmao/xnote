@@ -1,3 +1,10 @@
+# encoding=utf-8
+"""Xnote自动加载
+
+autoreload会自动搜索指定目录下的文件
+一旦修改时间发生变化会立即触发回调函数
+"""
+
 from threading import Thread
 import time
 import subprocess
