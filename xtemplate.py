@@ -11,6 +11,7 @@ from tornado.template import Template, Loader
 from util import dateutil
 
 import config
+import xauth
 
 TEMPLATE_DIR = config.HANDLERS_DIR
 NAMESPACE    = dict(
@@ -33,8 +34,8 @@ def pre_render(kw):
     kw["_full_search"] = False
     kw["_search_type"] = "normal"
     # TODO prevent hack
-    kw["_is_admin"] = config.IS_ADMIN or web.cookies().get("xuser") == "admin"
-    kw["_has_login"] = web.cookies().get("xuser") != None
+    kw["_is_admin"] = xauth.is_admin()
+    kw["_has_login"] = xauth.has_login()
     
 def render(template_name, **kw):
     nkw = {}

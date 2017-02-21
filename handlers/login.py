@@ -1,6 +1,8 @@
 # encoding=utf-8
+import web
 import hashlib
 import xauth
+import xtemplate
 
 class handler:
 
@@ -29,7 +31,7 @@ class handler:
                 error = "password error"
         else:
             error = "user not exists"
-        return render_template("login.html", 
+        return xtemplate.render("login.html", 
             username=name, 
             password=pswd,
             _has_login=True,
@@ -40,7 +42,7 @@ class handler:
         args = web.input(username="", password="")
         name = args["username"]
         pswd = args["password"]
-        return render_template("login.html", 
+        return xtemplate.render("login.html", 
             username = name, 
             password=pswd, 
             _has_login=True,

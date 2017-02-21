@@ -1,6 +1,9 @@
 # encoding=utf-8
 import os
+import hashlib
 import web
+
+import config
 
 try:
     from ConfigParser import ConfigParser
@@ -58,3 +61,24 @@ def get_user_password(name):
 def get_current_user():
     return get_user(web.cookies().get("xuser"))
 
+
+def get_md5_hex(pswd):
+    pswd_md5 = hashlib.md5()
+    pswd_md5.update(pswd.encode("utf-8"))
+    return pswd_md5.hexdigest()
+
+def has_login(name=None):
+    """验证是否登陆
+
+    如果``name``指定,则只能该用户名通过验证
+    """
+    name_in_cookie = web.cookies().get("xuser")
+    pswd_in_cookie = web.cookies().get("xpass")
+
+    if name is not None and name_in_cookie != name:
+        return False
+    name = name_in_cookie
+    return get_md5_hex(get_user_password(name)) == pswd_in_cookie
+
+def is_admin():
+    return config.IS_ADMIN or has_login("admin")

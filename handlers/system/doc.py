@@ -1,6 +1,8 @@
 # encoding=utf-8
 
 import sys
+import inspect
+
 import web
 import xtemplate
 
@@ -19,7 +21,7 @@ class DocInfo:
             value = attr_dict[attr]
             # 通过__module__判断是否时本模块的函数
             if hasattr(value, "__call__"):
-                functions.append([attr, value.__doc__])
+                functions.append([attr + str(inspect.signature(value)), value.__doc__])
 
 class handler(object):
 
