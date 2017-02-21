@@ -78,7 +78,13 @@ def has_login(name=None):
     if name is not None and name_in_cookie != name:
         return False
     name = name_in_cookie
-    return get_md5_hex(get_user_password(name)) == pswd_in_cookie
+    if name == "" or name is None:
+        return False
+    user = get_user(name)
+    if user is None:
+        return False
+
+    return get_md5_hex(user["password"]) == pswd_in_cookie
 
 def is_admin():
     return config.IS_ADMIN or has_login("admin")
