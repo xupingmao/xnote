@@ -72,6 +72,8 @@ class FileSystemHandler:
         path2 = path.replace("\\", "/")
         if path2.endswith("/"):
             path2 = path[:-1]
+        if not path.endswith("/"):
+            path = path+"/"
         parent_path = os.path.dirname(path2).replace("\\", "/") # fix windows file sep
         path = path.replace("\\", "/")
         kw = get_filesystem_kw()
