@@ -22,15 +22,26 @@ class DocInfo:
             # 通过__module__判断是否时本模块的函数
             # isroutine判断是否是函数或者方法
             if inspect.isroutine(value):
-                argspec = ''
-                try:
-                    signature = inspect.signature(value)
-                except (ValueError, TypeError):
-                    signature = None
-                if signature:
-                    argspec = str(signature)
-                functions.append([attr + argspec, value.__doc__])
+                functions.append([attr + getargspec(value), value.__doc__])
+            elif inspect.isclass(value):
+                do_class(functions, name, value)
             # TODO 处理类的文档，参考pydoc
+
+def getargspec(value):
+    argspec = ''
+    try:
+        signature = inspect.signature(value)
+    except (ValueError, TypeError):
+        signature = None
+    if signature:
+        argspec = str(signature)
+    return argspec
+
+def do_class(functions, name, clz):
+    for attr in clz.__dict__:
+        value = clz.__dict__[attr]
+        if inspect.isroutine(value):
+            functions.append([name+"."+attr+getargspec(value), value.__doc__])
 
 class handler(object):
 
