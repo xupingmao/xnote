@@ -98,17 +98,26 @@ class SysHandler:
 
     def GET(self):
         shell_list = []
-        dirname = "script"
+        dirname = "scripts"
         for fname in os.listdir(dirname):
             fpath = os.path.join(dirname, fname)
             if os.path.isfile(fpath) and fpath.endswith(".bat"):
                 shell_list.append(fpath)
         addr = get_server_ip() + ":" + config.get("port")
+
+        cmd_list = [];
+        cmd_list.append(Storage(name="重新加载模块", url="/system/reload"))
+        cmd_list.append(Storage(name="机器运行状态", url="/system/monitor"))
+        cmd_list.append(Storage(name="模块信息", url="/system/modules_info"))
+        cmd_list.append(Storage(name="备份", url="/system/backup_info"))
+        cmd_list.append(Storage(name="任务管理", url="/system/crontab"))
+
         return xtemplate.render("system/sys.html", 
             backup = backup.get_info(),
             # server_ip = get_server_ip(),
             # port = config.get("port"),
             addr = addr,
+            cmd_list = cmd_list,
             shell_list = shell_list,
             os = os,
             user = web.cookies().xuser

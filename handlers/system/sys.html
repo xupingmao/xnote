@@ -9,6 +9,14 @@
         .main-sys-info {
 
         }
+
+        .sys-cmd-no {
+            width: 10%;
+            max-width: 100px;
+        }
+        .sys-cmd {
+            width: 70%;
+        }
     </style>
 {% end %}
 
@@ -23,24 +31,29 @@
         <p>地址 <a href="http://{{?addr}}">http://{{?addr}}</a> <a href="javascript:switchQrCode()">二维码</a></p>
         <div id="qrcode"></div>
     </div>
-    <div>
-        <p><a href="/system/reload">重新加载模块</a></p>
-        <p><a href="/system/monitor">机器运行状态</a></p>
-        <p><a href="/system/modules_info">模块信息</a></p>
-        <p><a href="/system/backup_info">备份</a></p>
-        <p><a href="/system/crontab">任务管理</a></p>
-        <!-- <p><a href="/system/shutdown">关闭计算机</a></p> -->
-    </div>
+    <table class="col-md-12">
+        <tr>
+            <th class="sys-cmd-no">NO</th>
+            <th class="sys-cmd">命令</th>
+            <th>备注</th>
+        </tr>
+        {% for i, cmd in enumerate(cmd_list) %}
+        <tr>
+            <td class="sys-cmd-no">{{i+1}}</td>
+            <td class="sys-cmd"><a href="{{cmd.url}}">{{cmd.name}}</a></td>
+            <td></td>
+        </tr>
+        {% end %}
 
-    <div style="float:left;width:100%; height:30px"></div>
+        {% for i, shell_path in enumerate(shell_list) %}
+        <tr>
+            <td class="sys-cmd-no">{{i+len(cmd_list)+1}}</td>
+            <td class="sys-cmd"><a href="/system/command?path={{shell_path}}" target="_blank">{{os.path.basename(shell_path)}}</a></td>
+            <td>系统脚本</td>
+        </tr>
+        {% end %}
 
-</div>
-
-<div class="col-md-12">
-<h2>命令列表</h2>
-{% for shell_path in shell_list %}
-    <p><a href="/system/command?path={{shell_path}}" target="_blank">{{os.path.basename(shell_path)}}</a></p>
-{% end %}
+    </table>
 </div>
 
 <script type="text/javascript">
