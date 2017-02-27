@@ -120,7 +120,8 @@ class SysHandler:
             cmd_list = cmd_list,
             shell_list = shell_list,
             os = os,
-            user = web.cookies().xuser
+            user = web.cookies().xuser,
+            mem_used = get_memory_usage()
         )
 
     def opendirRequest(self):
