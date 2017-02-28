@@ -315,33 +315,30 @@ function gen_pojo(inputStr, option) {
 </div>
 
 <div class="container">
-    <p>分割符<select id="seperator">
-        <option value="\n">换行</option>
-        <option value=",">逗号</option>
-        <option value=";">分号</option>
-        <option value=" ">空格</option>
-    </select></p>
-    <p>引号
-        <input type="radio" name="quote" value="0" checked />双引号
-        <input type="radio" name="quote" value="1"/>单引号
-        <input type="radio" name="quote" value="2"/>无
-    </p>
-    <p>过滤重复<input type="checkbox" id="unique"/></p>
-    <p>
-        转换成大写
-        <input type="radio" name="case" value="0" checked />普通
-        <input type="radio" name="case" value="upper"/>大写
-        <input type="radio" name="case" value="lower"/>小写
-    </p>
     <p>
         转换方式
         <select id="option">
-            <option value="gen_protobuf_dao">Java ProtoBuf Dao</option>
             <option value="gen_pojo">Java POJO</option>
+            <option value="gen_protobuf_dao">Java ProtoBuf Dao</option>
+            <!-- <option value="to_underscore">转为下划线风格</option> -->
         </select>
     </p>
 
     <p><button onclick="execute()">转换</button></p>
+</div>
+
+<div class="col-md-12">
+    <h2>使用说明</h2>
+    <table> 
+        <tr>
+            <th>类型</th>
+            <th>语法</th>
+        </tr>
+        <tr>
+            <td>POJO</td>
+            <td><code>(name type)*</code> </td>
+        </tr>
+    </table>
 </div>
 
 <div class="col-md-12" id="error" style="color:red">
