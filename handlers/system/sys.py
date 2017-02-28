@@ -9,7 +9,7 @@ import os
 from FileDB import FileService
 import json
 import socket
-import backup
+import handlers.backup as backup
 import os
 import autoreload
 import xtemplate

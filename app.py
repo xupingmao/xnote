@@ -19,7 +19,6 @@ import posixpath
 import socket
 import logging
 import traceback
-import backup
 
 from autoreload import AutoReloadThread
 
@@ -57,7 +56,7 @@ def check_db():
 def check_dirs():
     xutils.makedirs(config.LOG_DIR)
     xutils.makedirs("tmp")
-    xutils.makedirs("script")
+    xutils.makedirs("scripts")
         
 def main():
     global app
@@ -85,12 +84,12 @@ def main():
     check_db()
     check_dirs()
 
-    m = ModelManager(app, var_env, basic_urls)
-    m.reload()
+    mgr = ModelManager(app, var_env, basic_urls)
+    mgr.reload()
 
     def stop_callback():
         # app.stop()
-        m.reload()
+        mgr.reload()
         autoreload_thread.clear_watched_files()
         # autoreload_thread.watch_dir("template")
         autoreload_thread.watch_recursive_dir(config.HANDLERS_DIR)
@@ -99,10 +98,7 @@ def main():
     autoreload_thread = AutoReloadThread(stop_callback)
     autoreload_thread.watch_recursive_dir(config.HANDLERS_DIR)
     autoreload_thread.start()
-    m.run_task()
-
-    # check database backup
-    backup.chk_backup()
+    mgr.run_task()
 
     app.run(MyStaticMiddleware)
 

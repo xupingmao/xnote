@@ -15,7 +15,7 @@ class T:
 
 _black_list = [".zip", ".pyc", ".pdf", "__pycache__", ".git"]
 
-_dirname = os.path.dirname(__file__)
+_dirname = "./"
 
 _zipname = "xnote.zip"
 
@@ -24,7 +24,7 @@ _dest_path = os.path.join(_dirname, "static", _zipname)
 _MAX_BACKUP_COUNT = 10
 
 def zip_xnote(nameblacklist = [_zipname]):
-    dirname = os.path.dirname(__file__)
+    dirname = "./"
     fp = open(_dest_path, "w")
     fp.close()
     zf = zipfile.ZipFile(_dest_path, "w")
@@ -109,5 +109,5 @@ def chk_backup():
             fsutil.remove(lastfile_path)
             logutil.warn("not valid db backup file, remove {}", lastfile_path)
 
-
+chk_backup()
     

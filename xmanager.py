@@ -7,9 +7,10 @@ import time
 
 from util import textutil
 from copy import copy
-from BaseHandler import Storage, reload_template
 from threading import Thread
 from queue import Queue
+
+import xtemplate
 
 class WebModel:
     def __init__(self):
@@ -31,6 +32,10 @@ def log(msg):
     print(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
 
 class ModelManager:
+    """模块管理器
+    
+    启动时自动加载`handlers`目录下的处理器和定时任务
+    """
 
     def __init__(self, app, vars, mapping):
         self.app = app # webpy app
@@ -44,14 +49,14 @@ class ModelManager:
         self.debug = True
     
     def reload(self):
+        """重启所有的模块"""
         self.mapping = list()
-        self.model_list = list()
-        
+        self.model_list = list()        
         self.load_model_dir(config.HANDLERS_DIR)
         
         self.mapping += self.basic_mapping
-        reload_template()
         self.app.init_mapping(self.mapping)
+        xtemplate.reload()
         
     def get_mod(self, module, name):
         namelist = name.split(".")
