@@ -3,7 +3,9 @@
 {% block head %}
 
 <link rel="stylesheet" href="/static/lib/codemirror/codemirror.min.css">
-<script src="/static/lib/codemirror/codemirror.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
+<script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
 
 {% end %}
 
@@ -12,14 +14,30 @@
 <form method="POST">
 <div class="col-md-12">
     <textarea id="editor" class="col-md-12" rows="20" name="code">{{code}}</textarea>
-    <button>Run</button>
-    <textarea class="col-md-12" rows="5">{{output}}</textarea>
+    <button id="run">Run</button>
+    <textarea id="output" class="col-md-12" rows="5">{{output}}</textarea>
 </div>
+</form>
 
 <script>
+$(function () {
   var editor = CodeMirror.fromTextArea($("#editor")[0], {
-    lineNumbers: true
+    lineNumbers: true,
+    mode: "text/x-c",
+    theme:"monokai"
   });
+
+  // $("#run").click(function () {
+  //   $.post("/tools/tcc.html", 
+  //       {json:true, code: $("#editor").text()}, 
+  //       function (result) {
+  //           var json = JSON.parse(result);
+  //           var status = json.status;
+  //           var output = json.output;
+  //           $("#output").text(output + "\nexit:" + status);
+  //   })
+  // })
+});
 </script>
 
 {% end %}

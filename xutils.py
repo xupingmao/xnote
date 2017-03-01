@@ -4,6 +4,7 @@ import sys
 import os
 import traceback
 import sqlite3
+import json
 
 PY2 = sys.version_info[0] == 2
 
@@ -144,6 +145,9 @@ def db_execute(path, sql, args = None):
 #################################################################
 ##   Str Utilities
 #################################################################
+
+def json_str(**kw):
+    return json.dumps(kw)
 
 
 #################################################################

@@ -20,14 +20,18 @@ int main(int argc, char* argv) {
 
 class TccHandler:
     def GET(self):
-        args = web.input(code=None)
+        args = web.input(code=None, json=None)
         code = args.code
+        json = args.json
         output = ""
         if code is None:
             code = C_TEMPLATE
         else:
             xutils.savetofile("tmp\\temp.c", code)
             status, output = xutils.getstatusoutput("D:\\tcc\\tcc.exe -run tmp\\temp.c")
+
+            if json == "true":
+                return xutils.json_str(status=status, output=output)
         return xtemplate.render("tools/tcc.html", 
             code = code,
             output = output)
