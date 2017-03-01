@@ -36,4 +36,4 @@
 @echo Use Python Location: %PY_EXE%
 call %PY_EXE% app.py
 
-pause
+exit
