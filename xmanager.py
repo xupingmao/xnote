@@ -109,7 +109,8 @@ class ModelManager:
                 url = xurls[i]
                 handler = xurls[i+1]
                 self.add_mapping(url, handler)
-        if hasattr(module, "handler"):
+        # xurls拥有最高优先级
+        elif hasattr(module, "handler"):
             handler = module.handler
             clz = name.replace(".", "_")
             self.vars[clz] = module.handler

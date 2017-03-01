@@ -49,7 +49,10 @@ class AutoReloadThread(Thread):
         for callback in callbacks:
             _callbacks.append(callback)
 
-    def watch_dir(self, dir):
+    def watch_dir(self, dir, recursive=False):
+        if recursive:
+            self.watch_recursive_dir(dir)
+            return
         self.watch_dirs.append(dir)
         _check_watch_dirs(self.watch_dirs)
 

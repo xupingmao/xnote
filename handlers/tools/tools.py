@@ -5,6 +5,8 @@ import xutils
 import web
 import os
 
+from . import sql
+
 C_TEMPLATE = """
 #include <stdio.h>
 #include <string.h>
@@ -15,22 +17,8 @@ int main(int argc, char* argv) {
 }
 """
 
-class handler:
-    xurl = "/tools/(.*)"
-    
-    def GET(self, name):
-        name = xutils.unquote(name)
-        if name=="tcc.html":
-            return self.tcc()
-        elif name=="sql.html":
-            from . import sql
-            return sql.handler().GET()
-        return xtemplate.render("tools/" + name)
-
-    def POST(self, name):
-        return self.GET(name)
-        
-    def tcc(self):
+class TccHandler:
+    def GET(self):
         args = web.input(code=None)
         code = args.code
         output = ""
@@ -42,3 +30,22 @@ class handler:
         return xtemplate.render("tools/tcc.html", 
             code = code,
             output = output)
+            
+    def POST(self):
+        return self.GET()
+    
+
+class handler:
+    
+    def GET(self, name):
+        name = xutils.unquote(name)
+        return xtemplate.render("tools/" + name)
+
+    def POST(self, name):
+        return self.GET(name)
+        
+            
+xurls = ("/tools/tcc.html", TccHandler,
+         "/tools/sql.html", sql.handler,
+         "/tools/(.*)", handler)
+         
