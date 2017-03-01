@@ -1,16 +1,18 @@
-from BaseHandler import *
+import web
+import xtemplate
 
-class handler(BaseHandler):
+class handler:
 
-    def default_request(self):
-        name = self.get_argument("name", "")
+    def GET(self):
+        name = web.input(name="").name
         if name == "":
-            self.render("system/template_cache.html")
+            return xtemplate.render("system/template_cache.html", name=name)
         else:
+            if not name.endswith(".html"):
+                name += ".html"
             try:
-                code = get_template_code(name)
+                code = xtemplate.get_code(name)
             except:
                 code = ""
-            self.render("system/template_cache.html", code=code)
+            return xtemplate.render("system/template_cache.html", code=code, name=name)
 
-searchkey = "模板代码|inspect_template"

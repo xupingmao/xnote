@@ -1,5 +1,19 @@
 {% extends ../base.html %}
 
+{% block head %}
+<script src="/static/lib/codemirror/codemirror.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/codemirror.min.css">
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<script type="text/javascript" src="/static/lib/codemirror/mode/sql.min.js"></script>
+<style>
+.CodeMirror {
+    width: 60rem;
+    font-size:16px;
+    height: 300px;
+}
+</style>
+{% end %}
+
 {% block body %}
 
 <div class="col-md-12">
@@ -16,7 +30,7 @@
     </select>
     </p>
 
-<textarea name="sql" style="width:100%;" rows = 6>{{sql}}</textarea>
+<textarea id="editor" name="sql" style="width:100%;" rows = 6>{{sql}}</textarea>
 <button>Run</button>
 </form>
 </div>
@@ -49,5 +63,16 @@
 <div style="color:red;">
 {{error}}
 </div>
+
+<script type="text/javascript">
+$(function () {
+    var editor = $("#editor")[0];
+    var codeMirror = CodeMirror.fromTextArea(editor, {
+        lineNumbers:true,
+        mode: "text/x-sql",
+        theme:"monokai"
+    });
+})
+</script>
 
 {% end %}
