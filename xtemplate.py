@@ -36,6 +36,7 @@ def pre_render(kw):
     # TODO prevent hack
     kw["_is_admin"] = xauth.is_admin()
     kw["_has_login"] = xauth.has_login()
+    kw["_user"] = xauth.get_current_user()
     
 def render(template_name, **kw):
     nkw = {}

@@ -35,6 +35,10 @@
           {% else %}
             <li class="menu-item"><a href="/logout">登出</a></li>
           {% end %}
+
+          {% if _has_login %}
+          	<span style="float: right;color: #fff;padding-top: 5px; padding-bottom: 5px;">Welcome,{{_user["name"]}}</span>
+          {% end %}
       </div>
       <div class="col-md-1" style="height: 100%;"></div>
       <div class="col-md-10">
