@@ -19,7 +19,7 @@
     <tr>
         <td>{{index+1}}</td>
         <td>{{user.name}}</td>
-        <td>{{user.password}}</td>
+        <td>{% if "admin" == user.name %} ****** {% else %} {{user.password}} {% end %}</td>
         <td></td>
     </tr>
     {% end %}
