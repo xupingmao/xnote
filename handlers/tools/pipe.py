@@ -55,7 +55,7 @@ class handler:
 
     def POST(self):
         # 处理上传文件
-        # 必须初始化成{}
+        # 必须初始化成{}, 查看web.utils.storify, 不是dict会仅仅取值
         args = web.input(file={})
         file = args.file
 

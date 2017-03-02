@@ -1,9 +1,12 @@
+# encoding=utf-8
 import time
 from BaseHandler import *
 
 class handler(BaseHandler):
 
     def create_file_name(self, filename):
+        # TODO 使用锁 threading.Lock
+        # 可以使用with语句或者注解来简化
         date = dateutil.format_date(fmt="%Y/%m")
         origin_filename = "static/img/" + date + "/" + filename
         fsutil.check_create_dirs("static/img/"+date)
@@ -19,15 +22,15 @@ class handler(BaseHandler):
         x = web.input(file = {})
         filepath = ""
         filename = ""
-        if x is not None and "file" in x:
-            if not hasattr(x.file, "filename") or x.file.filename == "":
-                self.render("file/upload_file.html", filepath = filepath, filename = filename)
-                return
-            filename = x.file.filename
-            filepath = self.create_file_name(x.file.filename)
-            fout = open(filepath, "wb")
+        file = x.file
+
+        if not hasattr(file, "filename") or file.filename == "":
+            self.render("file/upload_file.html", filepath = filepath, filename = filename)
+            return
+        filename = file.filename
+        filepath = self.create_file_name(file.filename)
+        with open(filepath, "wb") as fout:
             # fout.write(x.file.file.read())
-            for chunk in x.file.file:
+            for chunk in file.file:
                 fout.write(chunk)
-            fout.close()
         self.render("file/upload_file.html", filepath = filepath, filename = filename)

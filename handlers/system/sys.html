@@ -21,12 +21,12 @@
 {% end %}
 
 {% block body %}
+<link rel="stylesheet" type="text/css" href="/static/css/xtable.css">
 <script type="text/javascript" src="/static/lib/string-format/string-format.min.js"></script>
 <script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
 
 <input class="hide" id="addr" value="{{?addr}}" />
 <div class="row">
-    <p>你好, {{user}}</p>
     <p>使用内存 {{mem_used}}</p>
     <div class="barcode col-md-12">
         <p>地址 <a href="http://{{?addr}}">http://{{?addr}}</a> <a href="javascript:switchQrCode()">二维码</a></p>
