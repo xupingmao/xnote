@@ -66,6 +66,7 @@ xurls = ("/test", handler)
 - debug模式下自动侦测文件修改并重新加载
 - 支持文件断点续传
 - 使用响应式布局（其实是偷懒）
+- 用户权限，通过Python的装饰器语法，比较方便修改和扩展(见xauth.login_required)
 
 ## 配置运行
 - config/users.ini 用户配置，管理员可以添加账户，不支持注册

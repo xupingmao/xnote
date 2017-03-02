@@ -120,3 +120,14 @@ def has_login(name=None):
 def is_admin():
     return config.IS_ADMIN or has_login("admin")
 
+def login_required(user_name=None):
+    """管理员验证装饰器"""
+    def _login_required(func):
+        def new_func(*args, **kw):
+            if not has_login(user_name):
+                raise web.unauthorized("No Permission!")
+            ret = func(*args, **kw)
+            return ret
+        return new_func
+    return _login_required
+
