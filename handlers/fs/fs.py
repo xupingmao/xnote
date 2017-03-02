@@ -51,11 +51,13 @@ def getpathlist(path):
 
 class FileSystemHandler:
 
-    content_type_dict = {
+    mime_types = {
         ""    : 'application/octet-stream', # Default
         '.mp4': 'video/mp4',
         '.jpg': 'image/jpeg',
-        ".avi": "video/avi",
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.avi': 'video/avi',
         '.html': 'text/html',
         '.py' : 'text/plain',
     }
@@ -145,9 +147,9 @@ class FileSystemHandler:
         web.header("Etag", etag)
 
         name, ext = os.path.splitext(path)
-        mime_type = self.content_type_dict.get(ext.lower())
+        mime_type = self.mime_types.get(ext.lower())
         if mime_type is None:
-            mime_type = self.content_type_dict['']
+            mime_type = self.mime_types['']
 
         web.header("Content-Type", mime_type)
 
