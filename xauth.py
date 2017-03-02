@@ -1,14 +1,17 @@
 # encoding=utf-8
 import os
 import hashlib
-import web
+import copy
 
+import web
 import config
 
 try:
     from ConfigParser import ConfigParser
 except ImportError as e:
     from configparser import ConfigParser
+
+from web.utils import Storage
 
 # 用户配置
 _users = None
@@ -23,14 +26,33 @@ def read_users_from_ini(path):
     names = cf.sections()
     for name in names:
         options = cf.options(name)
-        user = users[name] = {}
+        user = users[name] = Storage()
         user["name"] = name
         for option in options:
             user[option] = cf.get(name, option)
         print(name, user)
     return users
 
-def get_users():
+def save_to_ini():
+    """保存到配置文件"""
+    global _users
+    if _users is None:
+        return
+    # 先强制同步一次
+    _get_users()
+    cf = ConfigParser()
+    for name in _users:
+        user = _users[name]
+        cf.add_section(name)
+        cf.set(name, "password", user.password)
+    with open("config/users.ini", "w") as fp:
+        cf.write(fp)
+
+    _users = None
+    _get_users()
+
+def _get_users():
+    """获取用户，内部接口"""
     global _users
 
     if _users is not None:
@@ -44,28 +66,37 @@ def get_users():
     
     return _users
 
+def get_users():
+    """获取所有用户，返回一个深度拷贝版本"""
+    return copy.deepcopy(_get_users())
+
 
 def refresh_users():
     global _users
     _users = None
-    return get_users()
+    return _get_users()
 
 def get_user(name):
-    users = get_users()
+    users = _get_users()
     return users.get(name)
 
 def get_user_password(name):
-    users = get_users()
+    users = _get_users()
     return users[name]["password"]
 
 def get_current_user():
     return get_user(web.cookies().get("xuser"))
 
-
 def get_md5_hex(pswd):
     pswd_md5 = hashlib.md5()
     pswd_md5.update(pswd.encode("utf-8"))
     return pswd_md5.hexdigest()
+
+def add_user(name, password):
+    users = _get_users()
+    user = Storage(name=name, password=password)
+    users[name] = user
+    save_to_ini()
 
 def has_login(name=None):
     """验证是否登陆
@@ -88,3 +119,4 @@ def has_login(name=None):
 
 def is_admin():
     return config.IS_ADMIN or has_login("admin")
+

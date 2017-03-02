@@ -224,6 +224,14 @@ table td {
  background-color: #ffffff;
 }
 
+.table th{
+    border-color: #ccc;
+}
+
+.table td {
+    border-color: #ccc;
+}
+
 /** color **/
 
 .red {

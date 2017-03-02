@@ -21,7 +21,6 @@
 {% end %}
 
 {% block body %}
-<link rel="stylesheet" type="text/css" href="/static/css/xtable.css">
 <script type="text/javascript" src="/static/lib/string-format/string-format.min.js"></script>
 <script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
 
@@ -32,7 +31,7 @@
         <p>地址 <a href="http://{{?addr}}">http://{{?addr}}</a> <a href="javascript:switchQrCode()">二维码</a></p>
         <div id="qrcode"></div>
     </div>
-    <table class="col-md-12">
+    <table class="col-md-12 table">
         <tr>
             <th class="sys-cmd-no">NO</th>
             <th class="sys-cmd">命令</th>

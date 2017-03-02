@@ -1,0 +1,36 @@
+{% extends ../base.html %}
+
+{% block body %}
+
+<div class="col-md-12">&nbsp;</div>
+
+<form method="POST">
+<table class="table col-md-12">
+
+    <tr>
+        <th>编号</th>
+        <th>用户名</th>
+        <th>密码</th>
+        <th>操作</th>
+    </tr>
+
+    {% for index, name in enumerate(sorted(user_dict)) %}
+    {% set user = user_dict[name] %}
+    <tr>
+        <td>{{index+1}}</td>
+        <td>{{user.name}}</td>
+        <td>{{user.password}}</td>
+        <td></td>
+    </tr>
+    {% end %}
+
+    <tr>
+        <td>{{index+2}}</td>
+        <td><input type="text" name="name"></td>
+        <td><input type="text" name="password"></td>
+        <td><input type="submit" value="添加"></td>
+    </tr>
+</table>
+</form>
+
+{% end %}

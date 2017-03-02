@@ -110,6 +110,7 @@ class SysHandler:
         cmd_list.append(Storage(name="机器运行状态", url="/system/monitor"))
         cmd_list.append(Storage(name="模块信息", url="/system/modules_info"))
         cmd_list.append(Storage(name="备份", url="/system/backup_info"))
+        cmd_list.append(Storage(name="用户管理", url="/system/user_admin"))
         cmd_list.append(Storage(name="任务管理", url="/system/crontab"))
 
         return xtemplate.render("system/sys.html", 
