@@ -5,6 +5,7 @@ import os
 import traceback
 import sqlite3
 import json
+import time
 
 PY2 = sys.version_info[0] == 2
 
@@ -144,7 +145,12 @@ def db_execute(path, sql, args = None):
 ##   DateTime Utilities
 #################################################################
 
-
+def format_time(seconds=None):
+    if seconds == None:
+        return time.strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        st = time.localtime(seconds)
+        return time.strftime('%Y-%m-%d %H:%M:%S', st)
 
 #################################################################
 ##   Str Utilities

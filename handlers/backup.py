@@ -110,4 +110,9 @@ def chk_backup():
             logutil.warn("not valid db backup file, remove {}", lastfile_path)
 
 chk_backup()
+
+class handler:
+    def GET(self):
+        chk_backup()
+        return "OK"
     

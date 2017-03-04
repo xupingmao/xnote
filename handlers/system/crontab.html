@@ -13,7 +13,7 @@
         <th>执行间隔</th>
         <th>操作</th>
     </tr>
-    {% set index = 0 %}
+    {% set index = -1 %}
     {% for index, name in enumerate(sorted(task_dict)) %}
     {% set task = task_dict[name] %}
     <tr>

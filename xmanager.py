@@ -171,24 +171,26 @@ class ModelManager:
         # worker_thread = WorkerThread()
 
         def run():
-            intervals = 0
             while True:
-                # print("intervals=", intervals)
-                # 避免被Python转成大数
-                if intervals >= 1000000:
-                    intervals = 0
+                current = time.time()
+                
                 for taskname in self.task_dict:
                     task = self.task_dict[taskname]
-                    if intervals % task.interval == 0:
+                    if not hasattr(task, "next_time"):
+                        task.next_time = current
+                    if current >= task.next_time:
                         # TODO 需要优化成异步执行
                         # worker_thread.add_task(task)
                         try:
                             # task()
+                            log("run task [%s]" % task.url)
                             self.app.request(task.url)
                         except Exception as e:
-                            print("run task [%s] failed, %s" % (taskname, e))
+                            log("run task [%s] failed, %s" % (taskname, e))
+                        finally:
+                            task.next_time = current + task.interval
+                            
                 time.sleep(1)
-                intervals+=1
         chk_thread = TaskThread(run)
         chk_thread.start()
         

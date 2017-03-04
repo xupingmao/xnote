@@ -14,7 +14,7 @@
         <th>操作</th>
     </tr>
     
-    {% set index = 0 %}
+    {% set index = -1 %}
     {% for index, name in enumerate(sorted(user_dict)) %}
     {% set user = user_dict[name] %}
     <tr>

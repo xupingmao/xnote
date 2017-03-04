@@ -3,10 +3,11 @@
 {% block body %}
 
 <div class="col-md-12">
+&nbsp;
 <!-- POST会被GET参数覆盖 -->
 <form method="GET">
     <input type="text" name="count" class="hide" value="on">
-    <table>
+    <table class="table">
         <tr>
             <td>路径</td>
             <td><textarea cols="100" name="path">{{path}}</textarea></td>
@@ -36,7 +37,7 @@
 </form>
 </div>
 
-<table>
+<table class="table">
 <tr>
 <th>文件名</th>
 <th>行数</th>
