@@ -4,13 +4,16 @@ import os
 import sys
 import traceback
 import time
+import copy
 
 from util import textutil
-from copy import copy
 from threading import Thread
 from queue import Queue
 
+from xutils import ConfigParser
+from xutils import Storage
 import xtemplate
+
 
 class WebModel:
     def __init__(self):
@@ -40,7 +43,7 @@ class ModelManager:
     def __init__(self, app, vars, mapping):
         self.app = app # webpy app
         self.basic_mapping = mapping # webpy mapping
-        self.mapping = copy(mapping)
+        self.mapping = copy.copy(mapping)
         self.vars = vars
         self.search_dict = {}
         self.task_dict = {}
@@ -94,7 +97,7 @@ class ModelManager:
                     mod = __import__(modname, fromlist=1, level=0)
                     # mod = self.get_mod(rootmod, modname)
                     self.load_model(mod, modname)
-                    self.load_task(mod, modname)
+                    # self.load_task(mod, modname)
             except Exception as e:
                 ex_type, ex, tb = sys.exc_info()
                 log("Fail to load module '%s'" % filepath)
@@ -164,7 +167,7 @@ class ModelManager:
         return result
 
     def run_task(self):
-
+        """执行定时任务"""
         # worker_thread = WorkerThread()
 
         def run():
@@ -180,13 +183,55 @@ class ModelManager:
                         # TODO 需要优化成异步执行
                         # worker_thread.add_task(task)
                         try:
-                            task()
+                            # task()
+                            self.app.request(task.url)
                         except Exception as e:
                             print("run task [%s] failed, %s" % (taskname, e))
                 time.sleep(1)
                 intervals+=1
         chk_thread = TaskThread(run)
         chk_thread.start()
+        
+    def add_task(self, url, interval):
+        if self._add_task(url, interval):
+            self.save_tasks()
+        
+    def _add_task(self, url, interval):
+        try:
+            interval = int(interval)
+            self.task_dict[url] = Storage(url = url, interval = interval)
+            return True
+        except Exception as e:
+            print("Add task %s failed, %s" % (url, e))
+            return False
+        
+    def load_tasks(self):
+        users = {}
+        path = "config/tasks.ini"
+        if not os.path.exists(path):
+            return users
+        cf = ConfigParser()
+        cf.read(path, encoding="utf-8")
+        for section in cf.sections():
+            url = cf.get(section, "url")
+            interval = cf.get(section, "interval")
+            self._add_task(url, interval)
+            
+    def save_tasks(self):
+        """保存到配置文件"""
+        cf = ConfigParser()
+        for index, name in enumerate(sorted(self.task_dict)):
+            task = self.task_dict[name]
+            section = "task" + str(index)
+            cf.add_section(section)
+            cf.set(section, "url", task.url)
+            cf.set(section, "interval", str(task.interval))
+            
+        with open("config/tasks.ini", "w") as fp:
+            cf.write(fp)
+        
+    def get_task_dict(self):
+        return copy.deepcopy(self.task_dict)
 
 
 class TaskThread(Thread):
@@ -221,3 +266,15 @@ class WorkerThread(Thread):
 
     def add_task(self, task):
         self._task_queue.put(task)
+        
+_manager = None        
+def init(app, vars, mapping):
+    global _manager
+    _manager = ModelManager(app, vars, mapping)
+    return _manager
+    
+def instance():
+    global _manager
+    return _manager
+    
+    

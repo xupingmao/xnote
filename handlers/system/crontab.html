@@ -9,26 +9,25 @@
 
     <tr>
         <th>编号</th>
-        <th>用户名</th>
-        <th>密码</th>
+        <th>任务名</th>
+        <th>执行间隔</th>
         <th>操作</th>
     </tr>
-    
     {% set index = 0 %}
-    {% for index, name in enumerate(sorted(user_dict)) %}
-    {% set user = user_dict[name] %}
+    {% for index, name in enumerate(sorted(task_dict)) %}
+    {% set task = task_dict[name] %}
     <tr>
         <td>{{index+1}}</td>
-        <td>{{user.name}}</td>
-        <td>{% if "admin" == user.name %} ****** {% else %} {{user.password}} {% end %}</td>
+        <td>{{task.url}}</td>
+        <td>{{task.interval}}</td>
         <td></td>
     </tr>
     {% end %}
 
     <tr>
         <td>{{index+2}}</td>
-        <td><input type="text" name="name"></td>
-        <td><input type="text" name="password"></td>
+        <td><input type="text" name="url"></td>
+        <td><input type="text" name="interval"></td>
         <td><input type="submit" value="添加"></td>
     </tr>
 </table>

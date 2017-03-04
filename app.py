@@ -24,7 +24,8 @@ from autoreload import AutoReloadThread
 
 from web.httpserver import StaticApp
 from middlewares import MyStaticMiddleware
-from xmanager import ModelManager
+
+import xmanager
 
 
 def get_ip_list(blacklist = []):
@@ -58,6 +59,7 @@ def check_dirs():
     xutils.makedirs("tmp")
     xutils.makedirs("scripts")
         
+        
 def main():
     global app
     global basic_urls
@@ -84,8 +86,9 @@ def main():
     check_db()
     check_dirs()
 
-    mgr = ModelManager(app, var_env, basic_urls)
+    mgr = xmanager.init(app, var_env, basic_urls)
     mgr.reload()
+    mgr.load_tasks()
 
     def stop_callback():
         # app.stop()

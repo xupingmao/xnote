@@ -10,11 +10,13 @@ PY2 = sys.version_info[0] == 2
 
 if PY2:
     from urllib import quote, unquote, urlopen
+    from ConfigParser import ConfigParser
     # from commands import getstatusoutput
 else:
     from urllib.parse import quote, unquote
     from urllib.request import urlopen
     from subprocess import getstatusoutput
+    from configparser import ConfigParser
 
 # 关于Py2的getstatusoutput，实际上是对os.popen的封装
 # 而Py3中的getstatusoutput则是对subprocess.Popen的封装
@@ -34,6 +36,8 @@ if PY2:
         if text[-1:] == '\n': text = text[:-1]
         return sts, text
 
+        
+from web.utils import Storage
 #################################################################
 
 

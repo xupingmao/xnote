@@ -6,11 +6,7 @@ import copy
 import web
 import config
 
-try:
-    from ConfigParser import ConfigParser
-except ImportError as e:
-    from configparser import ConfigParser
-
+from xutils import ConfigParser
 from web.utils import Storage
 
 # 用户配置
