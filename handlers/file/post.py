@@ -33,6 +33,9 @@ class PostView(object):
             file.content = file.content.replace("img]", "></p>")
             file.content = re.sub(r"https?://[^\s]+", '<a href="\\g<0>">\\g<0></a>', file.content)
 
+        # 统计访问次数，不考虑并发
+        file_db.update("file", where={"id": id}, visited_cnt=file.visited_cnt+1)
+
         return xtemplate.render("file/post.html",
             op = "view",
             file = file)

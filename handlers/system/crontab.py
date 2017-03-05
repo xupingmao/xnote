@@ -22,7 +22,7 @@ class handler:
     @xauth.login_required("admin")
     def POST(self):
         args = web.input()
-        url = args.url
+        url = args.url.strip()
         interval = int(args.interval)
         xmanager.instance().add_task(url, interval)
         return self.GET()
