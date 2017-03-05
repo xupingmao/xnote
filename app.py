@@ -62,7 +62,6 @@ def check_dirs():
         
 def main():
     global app
-    global basic_urls
 
     port = config.PORT
     print("PORT is", os.environ.get("POST"))
@@ -71,7 +70,6 @@ def main():
         os.environ["PORT"] = port
     
     var_env = dict()
-    basic_urls = []
     
     config.set("host", "localhost")
     config.set("port", port)
@@ -86,7 +84,7 @@ def main():
     check_db()
     check_dirs()
 
-    mgr = xmanager.init(app, var_env, basic_urls)
+    mgr = xmanager.init(app, var_env)
     mgr.reload()
     mgr.load_tasks()
 

@@ -53,10 +53,10 @@ class FileSystemHandler:
 
     mime_types = {
         ""    : 'application/octet-stream', # Default
-        '.mp4': 'video/mp4',
         '.jpg': 'image/jpeg',
         '.png': 'image/png',
         '.gif': 'image/gif',
+        '.mp4': 'video/mp4',
         '.avi': 'video/avi',
         '.html': 'text/html',
         '.py' : 'text/plain',

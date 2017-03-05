@@ -11,8 +11,11 @@ TASKLIST_CONF = "config/tasklist.ini"
 
 class handler:
     def GET(self):
+        delurl = web.input(delurl=None).delurl
+        if delurl is not None:
+            xmanager.instance().del_task(delurl)
+
         task_dict = xmanager.instance().get_task_dict()
-        
         return xtemplate.render("system/crontab.html", 
             task_dict = task_dict)
     

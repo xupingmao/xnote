@@ -40,10 +40,14 @@ class ModelManager:
     启动时自动加载`handlers`目录下的处理器和定时任务
     """
 
-    def __init__(self, app, vars, mapping):
+    def __init__(self, app, vars, mapping = None):
         self.app = app # webpy app
-        self.basic_mapping = mapping # webpy mapping
-        self.mapping = copy.copy(mapping)
+        if mapping is None:
+            self.basic_mapping = [] # webpy mapping
+            self.mapping = []
+        else:
+            self.basic_mapping = mapping
+            self.mapping = copy.copy(mapping)
         self.vars = vars
         self.search_dict = {}
         self.task_dict = {}
@@ -197,7 +201,12 @@ class ModelManager:
     def add_task(self, url, interval):
         if self._add_task(url, interval):
             self.save_tasks()
-        
+
+    def del_task(self, url):
+        if url in self.task_dict:
+            del self.task_dict[url]
+            self.save_tasks()
+            
     def _add_task(self, url, interval):
         try:
             interval = int(interval)
@@ -239,7 +248,7 @@ class ModelManager:
 class TaskThread(Thread):
     """docstring for TaskThread"""
     def __init__(self, func, *args):
-        super(TaskThread, self).__init__()
+        super(TaskThread, self).__init__(name="Xnote Task Thread")
         # 守护线程，防止卡死
         self.setDaemon(True)
         self.func = func
@@ -270,9 +279,9 @@ class WorkerThread(Thread):
         self._task_queue.put(task)
         
 _manager = None        
-def init(app, vars, mapping):
+def init(app, vars):
     global _manager
-    _manager = ModelManager(app, vars, mapping)
+    _manager = ModelManager(app, vars)
     return _manager
     
 def instance():
