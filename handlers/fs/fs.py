@@ -49,6 +49,10 @@ def getpathlist(path):
             pathlist.append(path)
     return pathlist
 
+def print_env():
+    for key in web.ctx.env:
+        print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
+
 class FileSystemHandler:
 
     mime_types = {
@@ -134,6 +138,8 @@ class FileSystemHandler:
             yield self.read_all(path, blocksize)
 
     def read_all(self, path, blocksize):
+        total_size = os.stat(path).st_size
+        web.header("Content-Length", total_size)
         with open(path, "rb") as fp:
             block = fp.read(blocksize)
             while block:
@@ -160,6 +166,7 @@ class FileSystemHandler:
             http_range = environ.get("HTTP_RANGE")
             print(" ==> HTTP_RANGE", http_range)
             blocksize = 64 * 1024;
+            # print_env()
 
             if http_range is not None:
                 return self.read_range(path, http_range, blocksize)
