@@ -26,12 +26,17 @@ class PostView(object):
         file = file_db.select("file", where={"id": id})[0]
         if file.content != None:
             file.content = xutils.html_escape(file.content, quote=False);
-            file.content = file.content.replace(" ", "&nbsp;")
+            # file.content = file.content.replace(" ", "&nbsp;")
+            file.content = re.sub(r"https?://[^\s]+", '<a href="\\g<0>">\\g<0></a>', file.content)
             file.content = file.content.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
             file.content = file.content.replace("\n", "<br/>")
-            file.content = file.content.replace("[img&nbsp;", "<p style=\"text-align:center;\"><img ")
+            # 处理图片
+            file.content = file.content.replace("[img", "<p style=\"text-align:center;\"><img")
             file.content = file.content.replace("img]", "></p>")
-            file.content = re.sub(r"https?://[^\s]+", '<a href="\\g<0>">\\g<0></a>', file.content)
+            # 处理空格
+            file.content = file.content.replace(" ", "&nbsp;")
+            # 允许安全的HTML标签
+            file.content = re.sub(r"\<(a|img|p)&nbsp;", "<\\g<1> ", file.content)
 
         # 统计访问次数，不考虑并发
         file_db.update("file", where={"id": id}, visited_cnt=file.visited_cnt+1)
