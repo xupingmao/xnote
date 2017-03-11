@@ -46,7 +46,10 @@ xurls = ("/test", handler)
 # 放在handlers目录下面，然后访问浏览器localhost:1234/test就会看到success
 ```
 
-- `handlers/tasks`是定时任务, TODO
+- `handlers/tasks`是定时任务, 需要在任务管理功能中增加服务地址，设置执行周期，如下图（分别是备份和系统监控的定时任务)
+
+![定时任务](static/img/定时任务配置.png)
+
 - `handlers/tools`目录下是开发工具，可以通过搜索功能定位
 - `scripts/`目录下是系统脚本,直接与操作系统交互
 
@@ -70,14 +73,6 @@ xurls = ("/test", handler)
 
 ## 配置运行
 - config/users.ini 用户配置，管理员可以添加账户，不支持注册
-
-```
-; 用户名
-[admin]
-; 密码
-password=123456
-```
-
 - 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 即可
 
 ## 协议

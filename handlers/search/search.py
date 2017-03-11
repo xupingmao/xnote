@@ -1,14 +1,16 @@
 # encoding=utf-8
-from BaseHandler import *
-from FileDB import FileDO
 import re
 import os
-import xutils
+import sys
+import copy
 
+import web
+import xutils
+from FileDB import FileDO
+from handlers.xhandlers import *
 import web.db as db
 
 """FileDB cache"""
-import copy
 
 def file_dict(id, name, related):
     return dict(id = id, name = name, related = related)
@@ -59,9 +61,13 @@ class FileFilter:
         return result
 
 def do_search(words, key=None):
+    files = []
 
-    translates = find_translate(words[0])
-    tools = find_tools(words[0])
+    if len(words) == 1:
+        translates = find_translate(words[0])
+        tools = find_tools(words[0])
+        pydocs = find_py_docs(words[0])
+        files += translates + tools + pydocs
 
     name_results = FileDB.search_name(words)
     # FileDB.full_search(context, words)
@@ -72,12 +78,21 @@ def do_search(words, key=None):
     for item in name_results:
         nameset.add(item.name)
 
-    files = translates + tools + name_results
+    files += name_results
 
     for item in content_results:
         if item.name not in nameset:
             files.append(item)
     return files[:20]
+
+def find_py_docs(name):
+    """搜索Python文档"""
+    if name in sys.modules:
+        item = FileDO("Python Document - %s" % name)
+        item.url = "/system/doc?name=%s" % name
+        item.content = ""
+        return [item]
+    return []
 
 def do_calc(words, key):
     exp = " ".join(words[1:])
@@ -90,7 +105,7 @@ def do_calc(words, key):
         print(e)
         return []
 
-def do_calc2(words, key):
+def try_calc(words, key):
     exp = key
     try:
         value = eval(exp)
@@ -102,6 +117,7 @@ def do_calc2(words, key):
         return do_search(words, key)
 
 def find_tools(name):
+    """查找`handlers/tools/`目录下的工具"""
     tools_path = config.TOOLS_DIR
     files = []
     for filename in os.listdir(tools_path):
@@ -135,7 +151,7 @@ class handler(BaseHandler):
     mappings = (
         r"search.*", do_search,
         r"calc.*", do_calc,
-        r".*[0-9]+.*", do_calc2,
+        r".*[0-9]+.*", try_calc,
     )
 
     def search_models(self, words):

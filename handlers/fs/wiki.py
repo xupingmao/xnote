@@ -4,7 +4,7 @@ import os
 import xutils
 import web
 
-WIKI_PATH = "static/wiki/"
+WIKI_PATH = "./"
 
 HIDE_EXT_LIST = [
     ".bak"
@@ -100,7 +100,7 @@ class handler:
         else:
             # file not exists or not readable
             children = None
-            content = "File \"%s\" not exists" % origin_name
+            content = "File \"%s\" does not exists" % origin_name
             type = "file"
         
         parent = os.path.dirname(name)
