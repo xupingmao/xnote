@@ -1,3 +1,4 @@
+# encoding=utf-8
 import sqlite3
 import os
 
@@ -5,7 +6,7 @@ import os
 # @desc db utilties
 # @author xupingmao
 # @email 578749341@qq.com
-# @date 2015-11-02 20:09:44
+# @since 2015-11-02 20:09:44
 ###########################################################
 
 def search_escape(text):

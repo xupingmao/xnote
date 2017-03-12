@@ -1,6 +1,6 @@
 # encoding=utf-8
 import time
-from BaseHandler import *
+from handlers.base import *
 
 class handler(BaseHandler):
 

@@ -7,6 +7,7 @@ import os
 
 from . import sql
 from . import pipe
+from . import notebook
 
 C_TEMPLATE = """
 #include <stdio.h>
@@ -53,5 +54,6 @@ class handler:
 xurls = ("/tools/tcc.html", TccHandler,
          "/tools/sql.html", sql.handler,
          "/tools/pipe.html", pipe.handler,
+         "/tools/notebook", notebook.handler,
          "/tools/(.*)", handler)
          

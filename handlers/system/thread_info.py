@@ -1,5 +1,5 @@
 # encoding=utf-8
-from BaseHandler import *
+from handlers.base import *
 import threading
 
 __doc__ = """

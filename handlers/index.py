@@ -1,5 +1,5 @@
 # encoding=utf-8
-from handlers.xhandlers import *
+from handlers.base import *
 import FileDB
 
 class handler(BaseHandler):

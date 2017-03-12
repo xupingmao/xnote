@@ -1,4 +1,4 @@
-from BaseHandler import *
+from handlers.base import *
 from tornado.escape import xhtml_escape
 
 import xutils

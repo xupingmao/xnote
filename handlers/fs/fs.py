@@ -3,8 +3,7 @@
 import os
 
 import web
-
-from BaseHandler import *
+from handlers.base import *
 import xutils
 import xauth
 

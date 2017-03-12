@@ -1,4 +1,6 @@
-from BaseHandler import *
+# encoding=utf-8
+
+from handlers.base import *
 from xutils import xhtml_escape
 
 CODE_EXT_LIST = (".java", 
@@ -20,25 +22,43 @@ CODE_EXT_LIST = (".java",
                  ".csv")
 def contains(self, words):
     """
-    >>> contains("abc is good", "abc")
+    >>> contains("abc is good", ["abc"])
     True
-    >>> contains("you are right", "rig")
+    >>> contains("you are right", ["rig"])
     True
     >>> contains("hello,world,yep", ["hello", "yep"])
     True
     """
-    if isinstance(words, str):
-        return words in self
-    elif isinstance(words, list):
-        for word in words:
-            if word not in self:
-                return False
-        return True
-    else:
-        raise Exception("not matched type")
+    if len(words) == 0:
+        return False
+    for word in words:
+        if word not in self:
+            return False
+    return True
+
+def contians_any(text, words):
+    if len(words) == 0:
+        return False
+
+    for word in words:
+        if word in text:
+            return True
+    return False
+
         
+def to_list(key):
+    """转换成list
+    >>> to_list("1 2 3")
+    ['1', '2', '3']
+    >>> to_list("1  3 4")
+    ['1', '3', '4']
+    """
+    if key == "" or key == None:
+        return []
+    keys = key.split(" ")
+    return list(filter(lambda x: x != "", keys))
         
-def code_find(text, key, show_line=False, ignore_case=True):
+def code_find(text, key, blacklist_str, show_line=False, ignore_case=True):
     """ find key in text, return a list
 
     >>> find('hello,world', 'hello')
@@ -54,10 +74,9 @@ def code_find(text, key, show_line=False, ignore_case=True):
     lineno = 1
     if key == "":
         return result
-    if not isinstance(key, list):
-        keys = [key]
-    else:
-        keys = key
+    keys = to_list(key)
+    blacklist = to_list(blacklist_str)
+
     if ignore_case:
         for i in range(len(keys)):
             keys[i] = keys[i].lower()
@@ -66,7 +85,7 @@ def code_find(text, key, show_line=False, ignore_case=True):
             target = line.lower()
         else:
             target = line
-        if contains(target, keys):
+        if contains(target, keys) and not contians_any(target, blacklist):
             if show_line:
                 result.append("%04d:%s" % (lineno, line))
             else:
@@ -78,7 +97,8 @@ def code_find(text, key, show_line=False, ignore_case=True):
 class handler(BaseHandler):
     """analyze code"""
 
-    def search_files(self, path, key, filename, ignore_case = False, recursive = True):
+    def search_files(self, path, key, blacklist_str, filename, 
+            ignore_case = False, recursive = True):
         if key is None or key == "":
             return []
         if not os.path.isdir(path):
@@ -100,7 +120,8 @@ class handler(BaseHandler):
                     content = fsutil.readfile(fpath)
                 except Exception as e:
                     result_list.append(Storage(name=fpath, result=["read file fail, e=%s" % e]))
-                result = code_find(content, key, show_line = True, ignore_case=ignore_case)
+                result = code_find(content, key, blacklist_str, 
+                    show_line = True, ignore_case=ignore_case)
                 if key != "" and len(result) == 0:
                     # key do not match
                     continue
@@ -115,6 +136,7 @@ class handler(BaseHandler):
         recursive   = self.get_argument("recursive", "")
         path = self.get_argument("path", "")
         key  = self.get_argument("key", "")
+        blacklist = self.get_argument("blacklist", "")
         filename = self.get_argument("filename", "")
         error = ""
         files = []
@@ -122,8 +144,9 @@ class handler(BaseHandler):
             if path != "":
                 path = path.strip()
                 key  = key.strip()
+                blacklist = blacklist.strip()
                 filename = filename.strip()
-                files = self.search_files(path, key, filename, 
+                files = self.search_files(path, key, blacklist, filename, 
                     ignore_case = ignore_case == "on", 
                     recursive = recursive == "on");
         except Exception as e:

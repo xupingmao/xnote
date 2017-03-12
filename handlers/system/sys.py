@@ -1,5 +1,5 @@
 from io import StringIO
-from BaseHandler import *
+from handlers.base import *
 from config import *
 import config
 import codecs

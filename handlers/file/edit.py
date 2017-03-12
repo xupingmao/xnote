@@ -1,4 +1,4 @@
-from handlers.xhandlers import *
+from handlers.base import *
 from FileDB import FileService
 import xauth
 

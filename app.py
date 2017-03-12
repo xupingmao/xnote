@@ -23,8 +23,6 @@ import traceback
 from autoreload import AutoReloadThread
 
 from web.httpserver import StaticApp
-from middlewares import MyStaticMiddleware
-
 import xmanager
 
 
@@ -101,7 +99,7 @@ def main():
     autoreload_thread.start()
     mgr.run_task()
 
-    app.run(MyStaticMiddleware)
+    app.run()
 
 if __name__ == '__main__':
     main()

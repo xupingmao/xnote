@@ -7,7 +7,7 @@ import copy
 import web
 import xutils
 from FileDB import FileDO
-from handlers.xhandlers import *
+from handlers.base import *
 import web.db as db
 
 """FileDB cache"""

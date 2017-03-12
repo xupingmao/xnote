@@ -1,8 +1,8 @@
 #coding=utf-8
 
 '''
-    Tornado template wrapper
-    @since 2016/12/05
+Tornado template wrapper
+@since 2016/12/05
 '''
 
 import web
@@ -19,7 +19,6 @@ NAMESPACE    = dict(
     format_time = dateutil.format_time
 )    
 
-_loader = Loader(TEMPLATE_DIR, namespace = NAMESPACE)
 _hooks = []
 
 def set_loader_namespace(namespace):
@@ -60,3 +59,5 @@ def get_code(name):
 def reload():
     global _loader
     _loader = Loader(TEMPLATE_DIR, namespace = NAMESPACE)
+    
+reload()

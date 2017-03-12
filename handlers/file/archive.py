@@ -1,4 +1,4 @@
-from BaseHandler import *
+from handlers.base import *
 
 class handler(BaseHandler):
 

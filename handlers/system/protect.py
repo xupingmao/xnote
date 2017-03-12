@@ -1,4 +1,4 @@
-from BaseHandler import *
+from handlers.base import *
 from io import StringIO
 from io import BytesIO
 import re

@@ -1,5 +1,5 @@
 #coding:utf-8
-from BaseHandler import *
+from handlers.base import *
 from FileDB import *
 from tornado.escape import *
 import math

@@ -1,4 +1,4 @@
-from handlers.xhandlers import *
+from handlers.base import *
 import FileDB
 import sqlite3
 import os

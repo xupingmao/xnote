@@ -1,3 +1,4 @@
+# encoding=utf-8
 import codecs
 import os
 import platform
@@ -104,9 +105,6 @@ def getReadableSize(size):
         return '%.2f G' % (float(size) / 1024 ** 3)
 
 def format_size(size):
-    return formatSize(size)
-    
-def formatSize(size):
     if size < 1024:
         return '%s B' % size
     elif size < 1024 **2:
@@ -116,6 +114,8 @@ def formatSize(size):
     else:
         return '%.2f G' % (float(size) / 1024 ** 3)
 
+formatSize = format_size
+        
 def renameFile(srcname, dstname):
     destDirName = os.path.dirname(dstname)
     if not os.path.exists(destDirName):

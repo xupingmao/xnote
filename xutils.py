@@ -1,5 +1,11 @@
 # encoding=utf-8
-# utilities for xnote
+
+"""
+utilities for xnote
+xutils是暴露出去的统一接口
+如果是一个人开发，可以直接写在这个文件中,
+如果是团队开发，依然建议通过xutils暴露统一接口，其他的utils由xutils导入
+"""
 import sys
 import os
 import traceback
@@ -43,6 +49,7 @@ from web.utils import Storage
 
 
 def print_stacktrace():
+    """打印系统异常堆栈"""
     ex_type, ex, tb = sys.exc_info()
     print(ex)
     traceback.print_tb(tb)

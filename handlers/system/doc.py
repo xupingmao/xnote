@@ -17,7 +17,7 @@ class DocInfo:
         self.doc = mod.__doc__
 
         attr_dict = mod.__dict__
-        for attr in attr_dict:
+        for attr in sorted(attr_dict):
             value = attr_dict[attr]
             # 通过__module__判断是否时本模块的函数
             # isroutine判断是否是函数或者方法

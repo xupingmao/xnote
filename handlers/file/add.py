@@ -1,6 +1,6 @@
 import time
 
-from BaseHandler import *
+from handlers.base import *
 import FileDB
 from FileDB import FileDO
 
@@ -36,6 +36,8 @@ class handler(BaseHandler):
                 inserted = FileDB.get_by_name(name)
                 if type == "post":
                     raise web.seeother("/file/post?id={}".format(inserted.id))
+                elif type == "table":
+                    raise web.seeother("/file/table?id={}".format(inserted.id))
                 else:
                     raise web.seeother("/file/edit?id=%s" % inserted.id)
         except Exception as e:

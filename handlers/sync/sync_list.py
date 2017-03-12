@@ -1,4 +1,4 @@
-from BaseHandler import *
+from handlers.base import *
 import config
 import hashlib
 from urllib.request import urlopen
