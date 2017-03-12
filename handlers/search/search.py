@@ -130,10 +130,11 @@ def find_tools(name):
     return files
 
 def find_translate(word):
+    word = word.lower()
     path = "db/dictionary.db"
     if not os.path.exists(path):
         return []
-    sql = "select * from dictTB where en=?"
+    sql = "select * from dictTB where LOWER(en)=?"
     dicts = xutils.db_execute(path, sql, (word,))
     files = []
     for f0 in dicts:

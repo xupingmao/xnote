@@ -258,3 +258,15 @@ class BaseFileHandler(BaseHandler):
         BaseHandler.render(self, template, **kw)
 
 
+def get_upload_img_path(filename):
+    """生成上传文件名"""
+    date = dateutil.format_date(fmt="%Y/%m")
+    origin_filename = "static/img/" + date + "/" + filename
+    fsutil.check_create_dirs("static/img/"+date)
+    fileindex = 1
+    newfilename = origin_filename
+    while os.path.exists(newfilename):
+        name, ext = os.path.splitext(origin_filename)
+        newfilename = "{}({}){}".format(name, fileindex, ext)
+        fileindex+=1
+    return newfilename

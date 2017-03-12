@@ -10,6 +10,7 @@ import web.db as db
 
 import xutils
 
+from handlers.base import get_upload_img_path
 from util import dateutil
 from util import fsutil
 
@@ -46,17 +47,6 @@ class PostView(object):
             file = file)
 
 class PostEdit:
-    def create_file_name(self, filename):
-        date = dateutil.format_date(fmt="%Y/%m")
-        origin_filename = "static/img/" + date + "/" + filename
-        fsutil.check_create_dirs("static/img/"+date)
-        fileindex = 1
-        newfilename = origin_filename
-        while os.path.exists(newfilename):
-            name, ext = os.path.splitext(origin_filename)
-            newfilename = name + str(fileindex) + ext
-            fileindex+=1
-        return newfilename
 
     def GET(self):
         args = web.input()
@@ -87,7 +77,7 @@ class PostEdit:
             file.groups = file.creator
         if hasattr(args.file, "filename") and args.file.filename!="":
             filename = args.file.filename
-            filepath = self.create_file_name(args.file.filename)
+            filepath = get_upload_img_path(args.file.filename)
             fout = open(filepath, "wb")
             # fout.write(x.file.file.read())
             for chunk in args.file.file:
