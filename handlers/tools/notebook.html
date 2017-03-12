@@ -49,12 +49,10 @@
 
 {% block body %}
 
+<div class="col-md-12">&nbsp;</div>
 <div class="note">
-    <div class="note-title-edit">
-        <div><input type="text" id="note-title" name="note-title" placeholder="标题" /></div>
-    </div>
     <div class="note-content">
-        <textarea id="note-content" class="note-content-textarea" rows=6></textarea>
+        <textarea id="note-content" class="note-content-textarea" rows=6 placeholder="内容"></textarea>
     </div>
 
     <div class="input-group">
@@ -76,12 +74,17 @@ $(function () {
     function addNote() {
         var title = $("#note-title").val();
         var content = $("#note-content").val();
-        if (noteExists(title)) {
-            alert(title + "已存在");
-            return;
-        }
-        var note = addNoteElement(title, content);
-        recordTitle(title, note);
+        // if (noteExists(title)) {
+        //     alert(title + "已存在");
+        //     return;
+        // }
+
+        $.post("/tools/notebook", {"op": "add", "content": content}, 
+            function (data) {
+                console.log(data);
+                var note = addNoteElement(title, content);
+                recordTitle(title, note);
+        });
     }
 
     function recordTitle(title, note) {
@@ -99,6 +102,7 @@ $(function () {
             .append($("<pre>").addClass("note-content-pre").text(content));
         var removeDiv = $("<div>").addClass("note-remove-div")
             .append($("<button>").addClass("note-remove-btn").text("删除").attr("title", title));
+        removeDiv.attr("content", content);
         div.append(titleEle).append(contentEle).append(removeDiv);
         registerRemoveBtn();
         return div;
@@ -111,7 +115,7 @@ $(function () {
     }
     function registerRemoveBtn() {
         $(".note-remove-btn").click(function () {
-            var title = $(this).attr("title");
+            var title = $(this).attr("content");
             alert("delete " + title);
             $(this).remove(); // TODO
         });
