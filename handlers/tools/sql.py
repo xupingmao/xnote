@@ -1,9 +1,36 @@
+# encoding=utf-8
 from handlers.base import *
-import FileDB
 import sqlite3
 import os
 import xutils
 
+from collections import OrderedDict
+
+def db_execute(path, sql, args = None):
+    """需要保持字段的顺序"""
+    db = sqlite3.connect(path)
+    cursorobj = db.cursor()
+    kv_result = []
+    try:
+        if args is None:
+            cursorobj.execute(sql)
+        else:
+            cursorobj.execute(sql, args)
+        result = cursorobj.fetchall()
+        db.commit()
+        for single in result:
+            # 保持字段顺序
+            resultMap = OrderedDict()
+            for i, desc in enumerate(cursorobj.description):
+                name = desc[0]
+                resultMap[name] = single[i]
+            kv_result.append(resultMap)
+
+    except Exception as e:
+        raise e
+    finally:
+        db.close()
+    return kv_result
 
 class handler(BaseHandler):
 
@@ -16,7 +43,7 @@ class handler(BaseHandler):
             # TODO execute sql
             try:
                 realpath = os.path.join("db", path)
-                result_list = xutils.db_execute(realpath, sql)
+                result_list = db_execute(realpath, sql)
             except Exception as e:
                 error = e
         path_list = []

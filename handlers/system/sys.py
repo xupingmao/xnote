@@ -6,7 +6,6 @@ import codecs
 import time
 import functools
 import os
-from FileDB import FileService
 import json
 import socket
 import handlers.backup as backup
@@ -67,7 +66,6 @@ def get_code_lines():
     total_lines += _get_code_lines("app.py")
     total_lines += _get_code_lines("autoreload.py")
     total_lines += _get_code_lines("backup.py")
-    total_lines += _get_code_lines("FileDB.py")
     total_lines += _get_code_lines("ModelManager.py")
     total_lines += _get_code_lines("MyStaticMiddleware.py")
     total_lines += _get_code_lines(os.path.join(dirname, "util"))

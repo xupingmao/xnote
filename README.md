@@ -70,6 +70,7 @@ xurls = ("/test", handler)
 - 支持文件断点续传
 - 使用响应式布局（其实是偷懒）
 - 用户权限，通过Python的装饰器语法，比较方便修改和扩展(见xauth.login_required)
+- 数据库结构无缝升级(xtables.py)
 
 ## 配置运行
 - config/users.ini 用户配置，管理员可以添加账户，不支持注册

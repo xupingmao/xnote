@@ -22,7 +22,7 @@ import traceback
 
 from autoreload import AutoReloadThread
 
-from web.httpserver import StaticApp
+import xtables
 import xmanager
 
 
