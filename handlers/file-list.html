@@ -107,22 +107,22 @@
     
 {% if "page" in globals() %}
     <p><span>Total {{?pages}}</span>
-        <input id="targetPage"/> <button onclick="goToPage()">GO</button>
+        <input id="targetPage" value="{{page}}"/> <button onclick="goToPage()">GO</button>
         {% if page > 1 %}
-        <a href="/file?option=list&page={{page-1}}">Prev</a>
+        <a href="{{page_url}}{{page-1}}">Prev</a>
         {% end %}
-        <a href="/file?option=list&page={{page}}"><span style="background:blue;color:white">{{page}}</span></a>
+        <a href="#"><span style="background:blue;color:white">{{page}}</span></a>
         {% if page < pages %}
-        <a href="/file?option=list&page={{page+1}}">Next</a>
+        <a href="{{page_url}}{{page+1}}">Next</a>
         {% end %}
     </p>
-{% end %}
     <script>
         function goToPage() {
             var value = $('#targetPage').val();
-            location.href = '/file?option=list&page=' + (value);
+            location.href = '{{page_url}}' + (value);
         }
     </script>
+{% end %}
 
 <script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
 <script type="text/javascript" src="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
