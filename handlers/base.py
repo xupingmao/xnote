@@ -1,3 +1,28 @@
+# encoding=utf-8
+
+"""xnote的handle类的基类
+
+尝试提供以下功能
+ - 权限控制
+ - 参数注入
+ - 结果封装
+ - 渲染结果json+页面非侵入式切换
+ - 性能统计
+
+相比较之下，直接写一个类来完成webpy的处理器，优点有:
+ - 参数控制更简单，webpy也很简单，但是需要web.input()，相比之前self.get_argument(key, default_value)更简单实用，
+    而且可以把参数回写到结果中，这个很实用
+ - 结果控制多样化，当然，webpy可以通过拦截器来实现
+ - 自动定位模板位置(使用子类的__file__)，webpy需要使用拦截器
+
+正确的使用继承能够减少很多代码量，可以参考tornado的RequestHandler设计
+
+本项目最初是使用tornado框架的，当时我准备写一个文件下载的功能，由于tornado对异步特性不了解，经常爆出finish called twice错误，
+而且由于tornado的异步特性，问题久久不能定位，后面尝试了webpy，很轻松的实现了这个功能，同时也想全方位的掌握一个web服务器，
+webpy实现优雅直观，所以最终选择了webpy来开发
+
+"""
+
 import web
 from web.py3helpers import PY2
 from tornado.template import Template, Loader
@@ -6,6 +31,8 @@ import json
 import sys
 import traceback
 from io import BytesIO
+
+from web.utils import Storage
 
 if PY2:
     from urllib import quote, urlopen
@@ -35,61 +62,6 @@ def print_exception(e):
     ex_type, ex, tb = sys.exc_info()
     print(ex)
     traceback.print_tb(tb)
-
-class Undefined:
-
-    def __getattr__(self, key):
-        return self
-
-    def __setattr__(self, key):
-        raise AttributeError(key)
-
-    def __repr__(self):
-        return "undefined"
-
-    def __str__(self):
-        return "undefined"
-
-class Storage(dict):
-    """
-    A Storage object is like a dictionary except `obj.foo` can be used
-    in addition to `obj['foo']`.
-    
-        >>> o = storage(a=1)
-        >>> o.a
-        1
-        >>> o['a']
-        1
-        >>> o.a = 2
-        >>> o['a']
-        2
-        >>> del o.a
-        >>> o.a
-        Traceback (most recent call last):
-            ...
-        AttributeError: 'a'
-    
-    """
-
-    undefined = Undefined()
-
-    def __getattr__(self, key): 
-        try:
-            return self[key]
-        except KeyError as k:
-            return Storage.undefined
-    
-    def __setattr__(self, key, value): 
-        self[key] = value
-    
-    def __delattr__(self, key):
-        try:
-            del self[key]
-        except KeyError as k:
-            raise AttributeError(k)
-    
-    def __repr__(self):     
-        return '<Storage ' + dict.__repr__(self) + '>'
 
 def get_template_namespace():
     namespace = {}
@@ -135,8 +107,17 @@ def render_template(template_name, **kw):
 
 class BaseHandler():
 
-    def get(self):
+    """Xnote处理器基类"""
+
+    def initialize(self):
+        """初始化操作，在处理请求前执行"""
+        pass
+
+    def do_get(self):
+        self.initialize()
         func = None
+
+        # TODO 下面待优化
         option = self.get_argument("option", "default")
         attr = option + "_request"
         if hasattr(self, "execute"):
@@ -163,7 +144,7 @@ class BaseHandler():
         self._response = None
         self._input = web.input()
         self._args = None
-        ret = self.get()
+        ret = self.do_get()
         if self._response is not None:
             return self._response
         return ret
@@ -185,6 +166,7 @@ class BaseHandler():
         return self.template_name
 
     def render(self, *nargs, **kw):
+        """渲染到页面, 不指定template会默认渲染Python文件同名的html文件"""
         if len(nargs) == 0:
             template_name = self.get_template_name()
         else:
@@ -211,9 +193,6 @@ class BaseHandler():
                 v = args[1]
         self._args[key] = v
         return v
-
-    def post(self):
-        self.get()
 
     def redirect(self, url):
         raise web.seeother(quote(url))

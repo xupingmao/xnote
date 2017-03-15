@@ -81,13 +81,13 @@ def updateContent(id, content, user_name=None, type=None):
 
     
 class FileHandler(BaseHandler):
-    
-    def get(self):
+
+
+    def initialize(self):
         self._service = FileService.instance()
-        BaseHandler.get(self)
         
-    def post(self):
-        self.get()
+    def POST(self):
+        self.GET()
         
     def writeRequest(self):
         pass
