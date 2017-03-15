@@ -98,6 +98,11 @@
                 </div> 
             </div>
         {% end %}
+
+        {% if len(files) < 5 and key != "" %}
+            {# TODO 移动端优化 #}
+            <iframe frameborder=0 style="width:100%;height: 1000px;" id="baidu" src="https://www.baidu.com/s?wd={{key}}"></iframe>
+        {% end %}
     </div>
     
 {% if "page" in globals() %}

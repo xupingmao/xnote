@@ -63,7 +63,7 @@ class SqliteTableManager:
 
 TableManager = SqliteTableManager
 
-def init_test_db():
+def init_table_test():
     TEST_DB = "db/test.db"
     manager = TableManager("db/test.db", "test")
 
@@ -77,7 +77,7 @@ def init_test_db():
     # import sys
     # sys.exit(0)
 
-def init_file_db():
+def init_table_file():
     manager = TableManager("db/data.db", "file")
     manager.add_column("name", "text", "")
     manager.add_column("content", "text", "")
@@ -93,5 +93,12 @@ def init_file_db():
     manager.add_column("groups", "text", "")
     manager.close()
 
+def init_table_tag():
+    manager = TableManager("db/data.db", "file_tag")
+    manager.add_column("name", "text", "")
+    manager.add_column("file_id", "integer", 0)
+    manager.close()
+
 # init_test_db()
-init_file_db()
+init_table_file()
+# init_table_tag()

@@ -1,8 +1,12 @@
+# encoding=utf-8
+
 from handlers.base import *
 from collections import OrderedDict
 
 import http.client
 import socket, ssl
+import re
+
 from urllib.request import Request, build_opener, HTTPSHandler, UnknownHandler
 from urllib.request import HTTPHandler, HTTPDefaultErrorHandler, HTTPRedirectHandler
 from urllib.request import FTPHandler, FileHandler, HTTPErrorProcessor
@@ -75,18 +79,23 @@ def urlopen(url, data=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
     return opener.open(url, data, timeout)
 
 def do_http(method, addr, url, headers):
+    print(addr, url)
     cl = HTTPConnection(addr)
     cl.request(method, url, None, headers = headers)
-    resp = cl.getresponse().read()
-    cl.close()
-    try:
-        print(resp.decode("utf-8"))
-    except:
-        print(resp.decode("gbk"))
-    finally:
-        print(resp)
-        return resp
-    return resp
+    head = None
+    with cl.getresponse() as resp:
+        # try:
+        #     print(resp.decode("utf-8"))
+        # except:
+        #     print(resp.decode("gbk"))
+        # finally:
+        #     print(resp)
+        if head:
+            head = resp.read(1024*8)
+            index = head.find("\r\n\r\n")
+            yield head[index+4:]
+        else:
+            yield resp.read(1024)
 
 def putheader(headers, header_name, wsgi_name):
     if wsgi_name in web.ctx.environ:
@@ -113,14 +122,23 @@ def putheader(headers, header_name, wsgi_name):
 
 # start()
 
-class handler(BaseHandler):
 
-    def default_request(self):
-        url = web.ctx.environ["REQUEST_URI"]
+def get_host(url):
+    # TODO 处理端口号
+    return re.findall(r"https?://([^\s\?]+)", url)[0]
+
+class handler:
+
+    def GET(self):
+        # url = web.ctx.environ["REQUEST_URI"]
+        url = web.input().url
         # print(web.ctx)
         # print(web.ctx.environ)
         method = web.ctx.method
-        host   = web.ctx.host
+        # host   = web.ctx.host
+
+        host = get_host(url)
+
         # print(url, method, host)
         # print(web.ctx.environ["HTTP_USER_AGENT"])
         headers = OrderedDict()
@@ -131,7 +149,7 @@ class handler(BaseHandler):
         # bytes = urlopen(req).read()
         # bytes = opener.open(req)
         # print(bytes)
-        print(web.ctx.environ)
+        # print(web.ctx.environ)
         # headers["Content-Type"] = "application/x-www-form-urlencoded"
         headers["Host"] = host
         headers["Connection"]   = "Keep-Alive"
@@ -143,7 +161,7 @@ class handler(BaseHandler):
         putheader(headers, "Accept-Language", "HTTP_ACCEPT_LANGUAGE")
         putheader(headers, "Cookie", "HTTP_COOKIE")
 
-
+        web.header("Content-Type", "text/html")
         req = Request(url, headers = headers)
         # return urlopen(url).read()
         return do_http(method, host, url, headers)

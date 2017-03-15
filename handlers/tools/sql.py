@@ -3,6 +3,7 @@ from handlers.base import *
 import sqlite3
 import os
 import xutils
+import xauth
 
 from collections import OrderedDict
 
@@ -34,6 +35,7 @@ def db_execute(path, sql, args = None):
 
 class handler(BaseHandler):
 
+    @xauth.login_required("admin")
     def execute(self):
         sql = self.get_argument("sql", "")
         path = self.get_argument("path", "")
