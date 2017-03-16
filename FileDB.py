@@ -1,6 +1,11 @@
 # encoding=utf-8
-'''Based on sqlite3'''
+"""数据库`file`表的主要操作函数集合
 
+由于一直修改，中间经过多个版本，没有花时间优化，目前结构比较混乱
+
+TODO 移除该文件，所有操作放在`handlers/file`目录下，作为资料功能的一部分而不是全局的
+
+"""
 
 import sqlite3
 import os
@@ -16,23 +21,17 @@ from util import dateutil
 from threading import Thread
 # from queue import Queue
 
+
+MAX_VISITED_CNT = 200
+
+from xutils import readfile, savetofile
+readFile = readfile
+writeFile = savetofile
+
 def getMilliSecond():
     t = time.time()
     ms = t - int(t)
     return '%03d' % int(ms*1000)
-    
-def readFile(path):
-    fp = open(path, encoding="utf-8")
-    content = fp.read()
-    fp.close()
-    return content
-    
-def writeFile(path, content):
-    fp = open(path, "wb")
-    buffer = codecs.encode(content, "utf-8")
-    fp.write(buffer)
-    fp.close()
-    return content
     
 def getRandomPath():
     return time.strftime("%Y/%m/%d-%H%M%S")+"-"+getMilliSecond()
@@ -46,7 +45,7 @@ def to_sqlite_obj(text):
     text = text.replace("'", "''")
     return "'" + text + "'"
     
-MAX_VISITED_CNT = 200
+
 
 class FileRelationOptionError(Exception):
     def __init__(self, msg):

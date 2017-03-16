@@ -85,7 +85,7 @@ class PostEdit:
             fout.close()
             file.content = file.content + "\n[img src=\"/{}\"img]".format(filepath)
 
-        file_db.update("file", where={"id": id}, vars=["content"], **file)
+        file_db.update("file", where={"id": id}, vars=None, **file)
         raise web.seeother("/file/post?id={}".format(id))
         
 class PostDel:

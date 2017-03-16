@@ -20,9 +20,9 @@ xnote是一个基于webapp的笔记系统，提供类似于wiki的资料管理�
 
 ### 开发框架/软件库
 
-- webpy (修改版)
-- tornado template
+- webpy
 - cherrypy (webpy依赖的httpserver)
+- tornado template(修改版)
 - sqlite3 (Python自带文件型数据库，不支持多线程操作)
 - psutil(可选，采集系统运行数据)
 
@@ -48,7 +48,7 @@ xurls = ("/test", handler)
 
 - `handlers/tasks`是定时任务, 需要在任务管理功能中增加服务地址，设置执行周期，如下图（分别是备份和系统监控的定时任务)
 
-![定时任务](static/img/定时任务配置.png)
+![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/static/img/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE.PNG)
 
 - `handlers/tools`目录下是开发工具，可以通过搜索功能定位
 - `scripts/`目录下是系统脚本,直接与操作系统交互
@@ -60,10 +60,12 @@ xurls = ("/test", handler)
 - 计算简单的数学公式
 
 ### 集成的工具
-- 文件浏览器(localhost:1234/fs/,目前仅限admin)
+- 可以在根目录下自行添加tools.md文件,使用admin用户登陆后可以直接在xnote上编辑
+- 文件浏览器(比如localhost:1234/fs/D:/,目前仅限admin，支持一些简单的工具，比如代码内容搜索，wiki编辑)
 - 编解码工具(base64,二维码)
+- 二维码生成器(barcode)
 - 文本比较工具(jsdiff)
-- 代码模板
+- 代码模板(code_template)
 
 ### 其他
 - debug模式下自动侦测文件修改并重新加载
@@ -71,6 +73,7 @@ xurls = ("/test", handler)
 - 使用响应式布局（其实是偷懒）
 - 用户权限，通过Python的装饰器语法，比较方便修改和扩展(见xauth.login_required)
 - 数据库结构无缝升级(xtables.py)
+- 图标，是的我自己做了一个很丑的图标，寓意天圆地方(不要纠结倒过来了)
 
 ## 配置运行
 - config/users.ini 用户配置，管理员可以添加账户，不支持注册

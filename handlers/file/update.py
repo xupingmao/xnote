@@ -1,4 +1,8 @@
 #coding:utf-8
+"""Markdown文档更新的处理器
+
+TODO 整理废弃的无用代码
+"""
 from handlers.base import *
 from FileDB import *
 from tornado.escape import *
@@ -85,12 +89,6 @@ class FileHandler(BaseHandler):
 
     def initialize(self):
         self._service = FileService.instance()
-        
-    def POST(self):
-        self.GET()
-        
-    def writeRequest(self):
-        pass
         
     def find(self):
         service = self._service
@@ -180,6 +178,7 @@ class FileHandler(BaseHandler):
             self.write(json_encode(r))
             
     def updateContentRequest(self):
+        """这里是更新内容的处理"""
         id = self.get_argument("id")
         content = self.get_argument("content")
         file = self._service.getById(int(id))
@@ -259,18 +258,6 @@ class FileHandler(BaseHandler):
 
     def console_request(self):
         self.render("file-console.html")
-
-    # def upload_request(self):
-    #     fsutil.check_create_dirs(UPLOAD_DIR)
-    #     file_meta_list = self.request.files['file']
-    #     # upload_type = self.get_argument("upload_type", None)
-    #     for meta in file_meta_list:
-    #         filename = meta['filename']
-    #         filepath = os.path.join(UPLOAD_DIR, filename)
-    #         with open(filepath, "wb") as up:
-    #             up.write(meta['body'])
-    #         raise web.seeother("/tool#/tools/upload/")
-    #     return raise web.seeother("/tool")
 
     def upload_request(self):
         x = web.input(file = {})

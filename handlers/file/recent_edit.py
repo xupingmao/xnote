@@ -9,7 +9,7 @@ def execute(sql):
     return xutils.db_execute("db/data.db", sql)
 
 # 待优化
-def get_recent_modified(days, page=1):
+def get_recent_modified(days, page=1, pagesize=20):
     user = xauth.get_current_user()
     if user is None:
         return []
@@ -21,7 +21,7 @@ def get_recent_modified(days, page=1):
     else:
         sql = "select * from file where smtime > '%s' AND is_deleted != 1 AND (groups='%s' OR groups='*') order by smtime desc"\
         % (dateutil.before(days=int(days), format=True), user_name)
-    sql += " LIMIT %s, 20" % page
+    sql += " LIMIT %s, 20" % ((page-1) * pagesize)
     list = execute(sql)
         
     return [FileDO.fromDict(item) for item in list]
@@ -31,7 +31,7 @@ def get_pages():
 
 class handler(BaseHandler):
     """show recent modified files"""
-    def default_request(self):
+    def execute(self):
         s_days = self.get_argument("days", 30)
         page = int(self.get_argument("page", 1))
         page = max(1, page)

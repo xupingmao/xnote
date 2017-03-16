@@ -216,19 +216,19 @@
             })
         }
     }
-        // set marked code highlight function
-        // marked.defaults.highlight = highlight;
+    // set marked code highlight function
+    // marked.defaults.highlight = highlight;
 
-        function escape(html, encode) {
-          return html
-            .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;')
-            .replace(/\n/g, '<br/>')
-            .replace(/ /g, '&nbsp;');
-        }
+    function escape(html, encode) {
+      return html
+        .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\n/g, '<br/>')
+        .replace(/ /g, '&nbsp;');
+    }
 
     $(function () {
         var old_content = $("#markdown-input-div").val();
