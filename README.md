@@ -28,9 +28,12 @@ xnote是一个基于webapp的笔记系统，提供类似于wiki的资料管理�
 
 ### 前端
 
-- jquery
+- jquery(当然^_^)
 - marked(markdown解析器)
 - qrcode 二维码生成器
+- csv.js
+- jsdiff
+- codemirror
 
 ## 功能结构
 
@@ -61,8 +64,8 @@ xurls = ("/test", handler)
 
 ### 集成的工具
 - 可以在根目录下自行添加tools.md文件,使用admin用户登陆后可以直接在xnote上编辑
-- 文件浏览器(比如localhost:1234/fs/D:/,目前仅限admin，支持一些简单的工具，比如代码内容搜索，wiki编辑)
-- 编解码工具(base64,二维码)
+- 文件浏览器，局域网内传输数据再也不需要数据线啦(地址如localhost:1234/fs/D:/,目前仅限admin，支持一些简单的工具，比如代码内容搜索，wiki编辑)
+- 编解码工具(base64,16进制等等)
 - 二维码生成器(barcode)
 - 文本比较工具(jsdiff)
 - 代码模板(code_template)
