@@ -53,12 +53,14 @@ class ModelManager:
         self.task_dict = {}
         self.model_list = []
         self.black_list = ["__pycache__"]
+        self.failed_mods = []
         self.debug = True
     
     def reload(self):
         """重启所有的模块"""
         self.mapping = list()
-        self.model_list = list()        
+        self.model_list = list()
+        self.failed_mods = []
         self.load_model_dir(config.HANDLERS_DIR)
         
         self.mapping += self.basic_mapping
@@ -103,11 +105,20 @@ class ModelManager:
                     self.load_model(mod, modname)
                     # self.load_task(mod, modname)
             except Exception as e:
+                self.failed_mods.append([filepath, e])
                 ex_type, ex, tb = sys.exc_info()
                 log("Fail to load module '%s'" % filepath)
                 log("Model traceback (most recent call last):")
                 traceback.print_tb(tb)
                 log(ex)
+
+        self.report_failed()
+
+    def report_failed(self):
+        if len(self.failed_mods) == 0:
+            return
+        for info in self.failed_mods:
+            log("Failed info: %s" % info)
 
     def load_model(self, module, name):
         if hasattr(module, "xurls"):
