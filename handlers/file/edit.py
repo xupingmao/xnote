@@ -77,10 +77,12 @@ def updateContent(id, content, user_name=None, type=None):
 
     xutils.db_execute("db/data.db", sql)
 
+def result(success = True, msg=None):
+    return {"success": success, "result": None, "msg": msg}
 
 class UpdateHandler(BaseHandler):
 
-    def execute(self):
+    def default_request(self):
         service = FileService.instance()
         id = self.get_argument("id")
         content = self.get_argument("content")
@@ -88,6 +90,28 @@ class UpdateHandler(BaseHandler):
         assert file is not None
         updateContent(id, content)
         raise web.seeother("/file/edit?id=" + id)
+
+    def rename_request(self):
+        service = FileService.instance()
+        fileId = self.get_argument("fileId")
+        newName = self.get_argument("newName")
+        record = service.getByName(newName)
+        old_record = service.getById(fileId)
+        if old_record is None:
+            return result(False, "file with ID %s do not exists" % fileId)
+        elif record is not None:
+            return result(False, "file %s already exists!" % repr(newName))
+        else:
+            old_name = old_record.name
+            old_name_upper = old_name.upper()
+            new_name_upper = newName.upper()
+            if old_name_upper not in old_record.related and new_name_upper not in old_record.related:
+                old_record.related += "," + newName
+            else:
+                old_record.related = old_record.related.replace(old_name_upper, new_name_upper);
+            old_record.name = newName
+            service.update(old_record, "name", "related", "smtime")
+            return result(True)
 
 
 xurls = ("/file/edit", handler, "/file/update", UpdateHandler)
