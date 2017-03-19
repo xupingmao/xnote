@@ -2,6 +2,7 @@
 from handlers.base import *
 from FileDB import *
 
+import config
 import xauth
 import xutils
 
@@ -9,7 +10,7 @@ def execute(sql):
     return xutils.db_execute("db/data.db", sql)
 
 # 待优化
-def get_recent_modified(days, page=1, pagesize=20):
+def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
     user = xauth.get_current_user()
     if user is None:
         return []
@@ -21,7 +22,7 @@ def get_recent_modified(days, page=1, pagesize=20):
     else:
         sql = "select * from file where smtime > '%s' AND is_deleted != 1 AND (groups='%s' OR groups='*') order by smtime desc"\
         % (dateutil.before(days=int(days), format=True), user_name)
-    sql += " LIMIT %s, 20" % ((page-1) * pagesize)
+    sql += " LIMIT %s, %s" % ((page-1) * pagesize, pagesize)
     list = execute(sql)
         
     return [FileDO.fromDict(item) for item in list]

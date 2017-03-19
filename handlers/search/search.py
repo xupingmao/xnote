@@ -283,7 +283,7 @@ class handler(BaseHandler):
         full_search = self.get_argument("full_search", None)
         page = self.get_argument("page", 1)
         self.get_argument("page_url", "/search/search?key=%s&page=" % key)
-        pagesize = 20
+        pagesize = config.PAGE_SIZE
 
         if key is None or key == "":
             raise web.seeother("/")
