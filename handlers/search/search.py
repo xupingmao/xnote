@@ -59,7 +59,7 @@ class MemStore(web.session.DiskStore):
         return json.loads(session_data.decode("utf-8"))
 
     def clear_timeout_items(self):
-        for key in self.item_cache:
+        for key in list(self.item_cache.keys()):
             self.has_key(key)
 
     def has_key(self, key):
