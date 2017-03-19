@@ -82,7 +82,7 @@ def result(success = True, msg=None):
 
 class UpdateHandler(BaseHandler):
 
-    def default_request(self):
+    def update_content_request(self):
         service = FileService.instance()
         id = self.get_argument("id")
         content = self.get_argument("content")
