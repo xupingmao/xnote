@@ -72,9 +72,8 @@
 
         <div>
             {% if globals().get("download_csv") %} 
-                <form action="/file_edit" method="POST" enctype="multipart/form-data">
-
-                    <a href="/file_edit?option=download&id={{file.id}}">下载CSV</a> 
+                <form action="/file/edit" method="POST" enctype="multipart/form-data">
+                    <a href="/file/edit?option=download&id={{file.id}}">下载CSV</a> 
                     <input type="file" name="file" style="display: inline;"/>
                     <input type="text" name="option" value="upload" class="hide"/>
                     <input name="id" class="hide" value="{{file.id}}"/>
@@ -94,7 +93,6 @@
                 <div id="edit-div">
                     <button class="btn btn-primary">更新</button>
                     <input type="button" class="btn btn-primary" onclick="preview()" value="预览" />
-                    <!-- <a href="/file/upload_file" target="_blank">上传图片</a> -->
                     <input style="display:none" name="option" value="updateContent"/>
                     <input style="display:none" name="id" value="{{file.id}}"/>
 

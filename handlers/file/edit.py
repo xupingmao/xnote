@@ -1,6 +1,9 @@
 from handlers.base import *
 from FileDB import FileService
 import xauth
+import xutils
+
+import web.db as db
 
 def date2str(d):
     ct = time.gmtime(d / 1000)
@@ -13,9 +16,12 @@ def try_decode(bytes):
     except:
         return bytes.decode("gbk")
 
-class handler(BaseFileHandler):
+def get_file_db():
+    return db.SqliteDB(db="db/data.db")
 
-    def default_request(self):
+class handler(BaseHandler):
+
+    def execute(self):
         service = FileService.instance()
         id = self.get_argument("id", None)
         name = self.get_argument("name", None)
@@ -30,8 +36,7 @@ class handler(BaseFileHandler):
         if file is None:
             raise web.notfound()
         download_csv = file.related != None and "CODE-CSV" in file.related
-        self.render("file/edit.html", 
-            file=file, 
+        self.render(file=file, 
             content = file.get_content(), 
             date2str=date2str,
             download_csv = download_csv, 
@@ -48,14 +53,41 @@ class handler(BaseFileHandler):
         web.ctx.headers.append(("Content-Disposition", "attachment; filename=%s.csv" % quote(file.name)))
         return content
 
-    # def updateContentRequest(self):
-    #     id = self.get_argument("id")
-    #     content = self.get_argument("content")
-    #     markdown = self.get_argument("markdown")
-    #     service = FileService.instance()
-    #     file = service.getById(int(id))
-    #     assert file is not None
-    #     print("markdown", markdown)
-    #     service.updateContent(id, content)
-    #     raise web.seeother("/file/edit?id=" + id)
+def sqlite_escape(text):
+    if text is None:
+        return "NULL"
+    if not (isinstance(text, str)):
+        return repr(text)
+    # text = text.replace('\\', '\\')
+    text = text.replace("'", "''")
+    return "'" + text + "'"
 
+def updateContent(id, content, user_name=None, type=None):
+    if user_name is None:
+        sql = "update file set type='md', content = %s,size=%s, smtime='%s'" \
+            % (sqlite_escape(content), len(content), dateutil.format_time())
+    else:
+        # 这个字段还在考虑中是否添加
+        # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
+        sql = "update file set type = 'md', content = %s,size=%s,smtime='%s',modifier='%s"\
+            % (sqlite_escape(content), len(content), dateutil.format_time(), user_name)
+    if type:
+        sql += ", type='%s'" % type
+    sql += " where id=%s" % id
+
+    xutils.db_execute("db/data.db", sql)
+
+
+class UpdateHandler(BaseHandler):
+
+    def execute(self):
+        service = FileService.instance()
+        id = self.get_argument("id")
+        content = self.get_argument("content")
+        file = service.getById(int(id))
+        assert file is not None
+        updateContent(id, content)
+        raise web.seeother("/file/edit?id=" + id)
+
+
+xurls = ("/file/edit", handler, "/file/update", UpdateHandler)
