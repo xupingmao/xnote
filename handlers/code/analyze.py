@@ -152,8 +152,7 @@ class handler(BaseHandler):
         except Exception as e:
             error = e
         finally:
-            self.render("code/analyze.html", 
-                files = files,
+            self.render(files = files,
                 path = path,
                 ignore_case = ignore_case)
 

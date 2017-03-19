@@ -83,6 +83,8 @@ class handler:
         for index, file in enumerate(filelist):
             if file.name.endswith(".json"):
                 continue
+            if file.name not in rename_dict:
+                continue
             newname = rename_dict[file.name]
             newname = base64.b64decode(newname.encode("utf-8")).decode("utf-8")
             newpath = os.path.join(path, newname)

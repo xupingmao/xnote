@@ -58,7 +58,7 @@ import FileDB
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 
-def print_exception(e):
+def print_exception():
     ex_type, ex, tb = sys.exc_info()
     print(ex)
     traceback.print_tb(tb)
@@ -142,7 +142,6 @@ class BaseHandler():
         # check login information
         # self.check_login()
         self._response = None
-        self._input = web.input()
         self._args = None
         ret = self.do_get()
         if self._response is not None:
@@ -179,46 +178,34 @@ class BaseHandler():
         return text
 
     def get_argument(self, *args):
+        """获取参数, 必须使用可变参数*args,不然没法知道调用方参数个数
+        - 1个参数，没有结果抛出异常
+        - 2个参数，没有结果使用默认结果
+        """
         key = args[0]
         if self._args is None:
-            self._args = {}
+            self._args = web.input()
 
         if len(args) == 1:
-            value = self._input[key]
+            value = self._args[key]
             self._args[key] = value
             return value
         else:
-            v = self._input.get(key)
-            if v is None:
-                v = args[1]
-        self._args[key] = v
-        return v
+            value = self._args.get(key)
+            if value is None:
+                value = args[1]
+            if isinstance(args[1], int):
+                value = int(value)
+        self._args[key] = value
+        return value
 
     def redirect(self, url):
         raise web.seeother(quote(url))
 
-    def check_login(self):
-        user = web.cookies().get("xuser")
-        if user != "admin":
-            url = web.ctx.environ.get('PATH_INFO','-')
-            raise web.seeother("/login?target="+url)
+    def clear_cookie(self, key):
+        """清除cookie"""
+        web.setcookie(key, "", expires=-1)
 
-        
-    def get_current_user(self):
-        # print self.request.uri
-        try:
-            user = self.get_secure_cookie("user")
-            return user
-        except Exception as e:
-            ex_type, ex, tb = sys.exc_info()
-            traceback.print_tb(tb)
-            self.clear_cookie("user")
-            return None
-        #if not user:
-            #self.redirect("/login?ret_url="+self.request.uri)
-        # globals()["user"] = user
-        # self.ui['user'] = user
-        # return user
 
 class BaseFileHandler(BaseHandler):
 
