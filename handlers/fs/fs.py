@@ -61,9 +61,28 @@ class FileSystemHandler:
         '.gif': 'image/gif',
         '.mp4': 'video/mp4',
         '.avi': 'video/avi',
-        '.html': 'text/html',
-        '.py' : 'text/plain',
+        '.html': 'text/html; charset=utf-8',
+        '.py' : 'text/plain; charset=utf-8',
+        '.txt': 'text/plain; charset=utf-8',
     }
+
+    encodings = {
+        # 二进制传输的编码格式
+    }
+
+    def handle_content_type(self, ext):
+        """Content-Type设置"""
+        mime_type = self.mime_types.get(ext.lower())
+        if mime_type is None:
+            mime_type = self.mime_types['']
+
+        web.header("Content-Type", mime_type)
+
+    def handle_content_encoding(self, ext):
+        """Content-Encoding设置，这里应该是二进制编码格式
+        """
+        if ext in self.encodings:
+            web.header("Content-Encoding", self.encodings[ext])
 
     def list_directory(self, path):
         try:
@@ -152,11 +171,8 @@ class FileSystemHandler:
         web.header("Etag", etag)
 
         name, ext = os.path.splitext(path)
-        mime_type = self.mime_types.get(ext.lower())
-        if mime_type is None:
-            mime_type = self.mime_types['']
-
-        web.header("Content-Type", mime_type)
+        self.handle_content_type(ext)
+        # self.handle_content_encoding(ext)
 
         if etag == client_etag:
             web.ctx.status = "304 Not Modified"
@@ -173,14 +189,11 @@ class FileSystemHandler:
                 return self.read_all(path, blocksize)            
 
 
+    @xauth.login_required("admin")
     def GET(self, path):
         path = xutils.unquote(path)
         # TODO 有编码错误
         # print("Load Path:", path)
-        user = xauth.get_current_user()
-        if user is None or user["name"] != "admin":
-            web.status = "404 No permission"
-            return "No permission"
         if os.path.isdir(path):
             return self.list_directory(path)
         elif os.path.isfile(path):
