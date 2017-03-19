@@ -98,14 +98,23 @@
                 </div> 
             </div>
         {% end %}
-
-        {% if len(files) < 5 and key != "" %}
-            {# TODO 移动端优化 #}
-            <iframe frameborder=0 style="width:100%;height: 1000px;" id="baidu" src="https://www.baidu.com/s?wd={{key}}"></iframe>
-        {% end %}
     </div>
     
 {% if "page" in globals() %}
+    {% if page == 1 and len(files) < 5 and key != "" %}
+        {# TODO 移动端优化 #}
+        <div class="note">
+            <div class="note-name">
+                结果太少?看看搜索引擎的结果吧~
+            </div>
+            <div class="note-content-short">
+                <br/>
+                <a href="https://www.baidu.com/s?wd={{key}}" target="_blank">百度</a>
+                <a href="https://www.google.com/#q={{key}}" target="_blank">谷歌</a>
+            </div>
+        </div>
+    {% end %}
+
     <p><span>Total {{?pages}}</span>
         <input id="targetPage" value="{{page}}"/> <button onclick="goToPage()">GO</button>
         {% if page > 1 %}
