@@ -28,7 +28,7 @@ def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
     return [FileDO.fromDict(item) for item in list]
 
 def get_pages():
-    return execute("SELECT COUNT(*) as count FROM file")[0].get("count")
+    return execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0")[0].get("count")
 
 class handler(BaseHandler):
     """show recent modified files"""
@@ -37,7 +37,7 @@ class handler(BaseHandler):
         page = int(self.get_argument("page", 1))
         page = max(1, page)
         days = int(s_days)
-        files = get_recent_modified(days)
+        files = get_recent_modified(days, page)
         pages = get_pages()
         self.render("file-list.html", files = files[:20], key = "", 
             page = page, pages = pages, page_url="/file/recent_edit?page=")

@@ -1,29 +1,36 @@
-# encoding=utf-8
+# -*- coding:utf-8 -*-  
+# Created by xupingmao on 2017/03
+# 
 
+"""Description here"""
 import web
 
 import xauth
 import xtemplate
 import xmanager
 
+from handlers.base import BaseHandler
+
 
 TASKLIST_CONF = "config/tasklist.ini"
 
-class handler:
-    def GET(self):
-        delurl = web.input(delurl=None).delurl
-        if delurl is not None:
-            xmanager.instance().del_task(delurl)
+class handler(BaseHandler):
 
-        task_dict = xmanager.instance().get_task_dict()
-        return xtemplate.render("system/crontab.html", 
-            task_dict = task_dict)
+    @xauth.login_required("admin")
+    def default_request(self):
+        self.task_dict = xmanager.instance().get_task_dict()
+        self.render(task_dict = self.task_dict)
+
+    @xauth.login_required("admin")
+    def del_request(self):
+        url = self.get_argument("url")
+        xmanager.instance().del_task(url)
+        return self.default_request()
     
     @xauth.login_required("admin")
-    def POST(self):
-        args = web.input()
-        url = args.url.strip()
-        interval = int(args.interval)
+    def add_request(self):
+        url = self.get_argument("url")
+        interval = self.get_argument("interval", 10)
         xmanager.instance().add_task(url, interval)
-        return self.GET()
+        self.default_request()
 

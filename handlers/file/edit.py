@@ -1,3 +1,6 @@
+# encoding=utf-8
+# Created by xupingmao on 2016/12
+
 from handlers.base import *
 from FileDB import FileService
 import xauth

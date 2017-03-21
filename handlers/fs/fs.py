@@ -1,5 +1,11 @@
-# encoding=utf-8
+# -*- coding:utf-8 -*-  
+# Created by xupingmao on 2017/03
+# 
 
+"""文件服务
+- 目录
+- 大文件下载
+"""
 import os
 
 import web

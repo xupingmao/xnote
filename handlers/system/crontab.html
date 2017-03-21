@@ -4,7 +4,8 @@
 
 <h3>任务管理</h3>
 
-<form method="POST">
+<form method="GET">
+<input class="hide" name="option" value="add"/>
 <table class="table col-md-12">
 
     <tr>
@@ -20,7 +21,7 @@
         <td>{{index+1}}</td>
         <td>{{task.url}}</td>
         <td>{{task.interval}}</td>
-        <td><a href="/system/crontab?delurl={{task.url}}">删除</a></td>
+        <td><a href="/system/crontab?option=del&url={{task.url}}">删除</a></td>
     </tr>
     {% end %}
 

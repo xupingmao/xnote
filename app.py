@@ -84,7 +84,6 @@ def main():
 
     mgr = xmanager.init(app, var_env)
     mgr.reload()
-    mgr.load_tasks()
 
     def stop_callback():
         # app.stop()

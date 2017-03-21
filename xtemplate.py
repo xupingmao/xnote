@@ -2,7 +2,7 @@
 
 '''
 Tornado template wrapper
-@since 2016/12/05
+Created by xupingmao on 2016/12/05
 '''
 
 import web
@@ -36,7 +36,10 @@ def pre_render(kw):
     kw["_is_admin"] = xauth.is_admin()
     kw["_has_login"] = xauth.has_login()
     kw["_user"] = xauth.get_current_user()
-    
+    # kw["_notice_list"] = ["Hello", "Just Try"]
+    # TODO 处理首页公告
+    kw["_notice_list"] = []
+
 def render(template_name, **kw):
     nkw = {}
     pre_render(nkw)

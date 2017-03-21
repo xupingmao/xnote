@@ -1,4 +1,8 @@
-# encoding=utf-8
+# -*- coding:utf-8 -*-  
+# Created by xupingmao on 2017/03/15
+# 
+
+"""Xnote的数据库配置"""
 
 import sqlite3
 

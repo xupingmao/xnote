@@ -55,6 +55,7 @@ class ModelManager:
         self.black_list = ["__pycache__"]
         self.failed_mods = []
         self.debug = True
+        self.task_manager = TaskManager(app)
     
     def reload(self):
         """重启所有的模块"""
@@ -182,18 +183,54 @@ class ModelManager:
         return result
 
     def run_task(self):
+        self.task_manager.run_task()
+
+    def add_task(self, task, interval):
+        self.task_manager.add_task(task, interval)
+
+    def del_task(self, task):
+        self.task_manager.del_task(task)
+
+    def get_task_dict(self):
+        return self.task_manager.get_task_dict()
+
+
+
+class TaskManager:
+    """任务管理器"""
+    def __init__(self, app):
+        self.task_dict = {}
+        self.app = app
+
+
+    def match(self, task, tm=None):
+        """是否符合运行条件"""
+        if tm is None:
+            tm = time.localtime()
+        if hasattr(task, "interval"):
+            """定时任务"""
+            current = time.time()
+            if not hasattr(task, "next_time"):
+                task.next_time = current
+            if current >= task.next_time:
+                task.next_time = current + task.interval
+                return True
+            return False
+        return str(task.second) == str(tm.tm_sec)
+
+    def run_task(self):
         """执行定时任务"""
         # worker_thread = WorkerThread()
+        self.load_tasks()
 
         def run():
             while True:
-                current = time.time()
+                # 获取分
+                tm = time.localtime()
                 
                 for taskname in self.task_dict:
                     task = self.task_dict[taskname]
-                    if not hasattr(task, "next_time"):
-                        task.next_time = current
-                    if current >= task.next_time:
+                    if self.match(task, tm):
                         # TODO 需要优化成异步执行
                         # worker_thread.add_task(task)
                         try:
@@ -203,9 +240,9 @@ class ModelManager:
                         except Exception as e:
                             log("run task [%s] failed, %s" % (taskname, e))
                         finally:
-                            task.next_time = current + task.interval
-                            
-                time.sleep(1)
+                            pass
+                # 等待下一个分钟
+                time.sleep(60 - tm.tm_sec % 60)
         chk_thread = TaskThread(run)
         chk_thread.start()
         

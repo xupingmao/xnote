@@ -1,5 +1,8 @@
-# encoding=utf-8
-# filename post.py
+# -*- coding:utf-8 -*-  
+# Created by xupingmao on 2017/03
+# 
+
+"""Description here"""
 
 import os
 import re
@@ -62,6 +65,7 @@ class PostEdit:
 
     def POST(self):
         # 一定要加file={}
+        # 参考web.utils.storify
         args = web.input(file={}, public=None)
         id = int(args.id)
         file_db = get_file_db()
