@@ -233,6 +233,7 @@ def get_upload_img_path(filename):
     newfilename = origin_filename
     while os.path.exists(newfilename):
         name, ext = os.path.splitext(origin_filename)
-        newfilename = "{}({}){}".format(name, fileindex, ext)
+        # 使用下划线，括号会使marked.js解析图片url失败
+        newfilename = "{}_{}{}".format(name, fileindex, ext)
         fileindex+=1
     return newfilename

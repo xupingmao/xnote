@@ -81,6 +81,15 @@
             + '>\n';
 
     }
+    // 重写img
+    myRenderer.image = function(href, title, text) {
+      var out = '<img src="' + href + '" alt="' + text + '" style="max-width:100%;"';
+      if (title) {
+        out += ' title="' + title + '"';
+      }
+      out += this.options.xhtml ? '/>' : '>';
+      return out;
+    };
     marked.setOptions({
         renderer: myRenderer,
         highlight: highlight
