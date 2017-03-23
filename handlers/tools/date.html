@@ -99,7 +99,7 @@
  
 /* 本月 文字颜色 */
 .currentMonth {
-  color: #999;
+  /*color: #999;*/
 }
  
 /* 其他月颜色 */
@@ -133,6 +133,17 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
 */
 
 (function(){
+
+  /**
+   * 常量, 节日列表
+   */
+  HOLIDAY_MAP = {
+    "02-14": "情人节",
+    "03-05": "惊蛰",
+    "03-08": "妇女节",
+    "03-20": "春分",
+    "04-01": "愚人节",
+  }
   /*
    * 用于记录日期，显示的时候，根据dateObj中的日期的年月显示
    */
@@ -201,6 +212,22 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     // 添加到calendar div中
     calendar.appendChild(bodyBox);
   }
+
+  /**
+   * 获取日期信息
+   */
+  function getDateInfoHTML(date) {
+    var html = date.getDate()
+    var monthDay = getMonthDayStr(date);
+    // console.log(monthDay);
+    var holiday = HOLIDAY_MAP[monthDay];
+    if (holiday) {
+      return html + "<p>" + holiday + "</p>"
+    } else {
+      // 保持对齐
+      return html + "<p>&nbsp;</p>"
+    }
+  }
  
   /**
    * 表格中显示数据，并设置类名
@@ -222,7 +249,8 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     for(var i = 0; i < _tds.length; i++) {
       var _thisDay = new Date(_year, _month - 1, i + 1 - _firstDay.getDay());
       var _thisDayStr = getDateStr(_thisDay);
-      _tds[i].innerText = _thisDay.getDate();
+      _tds[i].innerHTML = getDateInfoHTML(_thisDay);
+
       //_tds[i].data = _thisDayStr;
       _tds[i].setAttribute('data', _thisDayStr);
       if(_thisDayStr == getDateStr(new Date())) {    // 当前天
@@ -293,6 +321,18 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     _month = (_month > 9) ? ("" + _month) : ("0" + _month);
     _d = (_d > 9) ? ("" + _d) : ("0" + _d);
     return _year + _month + _d;
+  }
+
+  /**
+   * 获取月日, 格式如03-02
+   */
+  function getMonthDayStr(date) {
+    var _month = date.getMonth() + 1;    // 月从0开始计数
+    var _d = date.getDate();
+     
+    _month = (_month > 9) ? ("" + _month) : ("0" + _month);
+    _d = (_d > 9) ? ("" + _d) : ("0" + _d);
+    return _month + '-' + _d;
   }
 })();
 

@@ -1,3 +1,8 @@
+# -*- coding:utf-8 -*-  
+# Created by xupingmao on 2016/10
+# 
+
+"""Description here"""
 from io import StringIO
 from handlers.base import *
 from config import *
@@ -106,10 +111,11 @@ class SysHandler:
         cmd_list = [];
         cmd_list.append(Storage(name="重新加载模块", url="/system/reload"))
         cmd_list.append(Storage(name="机器运行状态", url="/system/monitor"))
-        cmd_list.append(Storage(name="模块信息", url="/system/modules_info"))
+        cmd_list.append(Storage(name="模块信息(pydoc)", url="/system/modules_info"))
         cmd_list.append(Storage(name="备份", url="/system/backup_info"))
         cmd_list.append(Storage(name="用户管理", url="/system/user_admin"))
         cmd_list.append(Storage(name="任务管理", url="/system/crontab"))
+        cmd_list.append(Storage(name="首页提醒管理", url="/system/notice_admin"))
 
         return xtemplate.render("system/sys.html", 
             backup = backup.get_info(),
