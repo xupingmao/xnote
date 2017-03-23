@@ -115,9 +115,13 @@ class FileSystemHandler:
         kw["get_file_size"] = get_file_size
 
         # handle home
-        home = path.split("/")[0]
-        if home[-1] != '/':
-            home+='/'
+        if path[0] != "/":
+            home = path.split("/")[0]
+            if home[-1] != '/':
+                home+='/'
+        else:
+            # 类Unix系统
+            home = "/"
         kw["home"] = home
         return xtemplate.render("fs/fs.html", **kw)
 

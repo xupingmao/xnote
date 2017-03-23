@@ -39,6 +39,7 @@
 
 <table class="table">
 <tr>
+<th>编号</th>
 <th>文件名</th>
 <th>行数</th>
 <th>有效行数</th>
@@ -46,9 +47,10 @@
 <th>查看</th>
 </tr>
 
-{% for info in line_infos %}
+{% for index, info in enumerate(line_infos) %}
 
     <tr>
+        <td>{{index+1}}</td>
         <td>{{info.fname}}</td>
         <td>{{info.lines}}</td>
         <td>{{info.validlines}}</td>
