@@ -78,17 +78,21 @@ def get_code_lines():
     return total_lines
 
 def get_ip_list(blacklist = []):
-    localIp = socket.gethostbyname(socket.gethostname())
-    print("localIP:%s" % localIp)
-    name, aliaslist, ipList = socket.gethostbyname_ex(socket.gethostname())
-    ip_list = []
+    try:
+        localIp = socket.gethostbyname(socket.gethostname())
+        print("localIP:%s" % localIp)
+        name, aliaslist, ipList = socket.gethostbyname_ex(socket.gethostname())
+        ip_list = []
 
-    for ip in ipList:
-        if ip in blacklist:
-            continue
-        if ip != localIp:
-           print("external IP:%s"%ip)
-        ip_list.append(ip)
+        for ip in ipList:
+            if ip in blacklist:
+                continue
+            if ip != localIp:
+               print("external IP:%s"%ip)
+            ip_list.append(ip)
+    except Exception as e:
+        print_exception()
+        ip_list = ["localhost"]
 
     return ip_list
 
