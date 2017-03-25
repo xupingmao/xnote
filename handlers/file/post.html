@@ -1,4 +1,4 @@
-{% extends ../base.html %}
+{% extends base.html %}
 
 {% block head %}
 <style type="text/css">
@@ -10,7 +10,7 @@ img {
 
 {% block body %}
 
-    {% include "header.html" %}
+    {% include "file/header.html" %}
 
 {% if op == "view" %}
     <h2 id="name">{{file["name"]}}</h2>

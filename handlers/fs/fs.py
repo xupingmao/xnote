@@ -58,6 +58,25 @@ def print_env():
     for key in web.ctx.env:
         print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
 
+
+def get_win_drives():
+    """获取Windows系统的驱动器列表"""
+    try:
+        import ctypes
+        import sys
+        lp_buf = ctypes.create_string_buffer(100)
+        ctypes.windll.kernel32.GetLogicalDriveStringsA(ctypes.sizeof(lp_buf), lp_buf)
+        drives_str = lp_buf.raw.decode(sys.getdefaultencoding())
+        drives_list = drives_str.split("\x00")
+        drives_list = list(filter(lambda x:len(x) > 0, drives_list))
+        return drives_list
+    except Exception as e:
+        raise
+    else:
+        pass
+    finally:
+        pass
+
 class FileSystemHandler:
 
     mime_types = {
