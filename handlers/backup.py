@@ -1,4 +1,7 @@
 # encoding=utf-8
+"""备份相关，需要添加到定时任务中，参考system/crontab
+
+"""
 import zipfile
 import os
 from util import dateutil
@@ -69,7 +72,7 @@ def get_info():
 
 def backup_db():
     now = time.strftime("%Y%m%d")
-    dbname = "data.db.{}".format(now)
+    dbname = "data.{}.db".format(now)
     dbpath = config.get("DB_PATH")
     if not os.path.exists(dbpath):
         return
@@ -92,7 +95,7 @@ def chk_backup():
         backup_db()
     else:
         lastfile = sorted_files[-1]
-        p = re.compile(r"data\.db\.(\d+)")
+        p = re.compile(r"data\.(\d+)\.db")
         m = p.match(lastfile)
         if m:
             data = m.groups()[0]
@@ -112,6 +115,7 @@ def chk_backup():
 chk_backup()
 
 class handler:
+    """触发备份事件"""
     def GET(self):
         chk_backup()
         return "OK"

@@ -53,4 +53,4 @@ class handler(object):
         if name is not None:
             doc_info = DocInfo(name)
 
-        return xtemplate.render("system/doc.html", doc_info = doc_info)
+        return xtemplate.render("system/document.html", doc_info = doc_info)
