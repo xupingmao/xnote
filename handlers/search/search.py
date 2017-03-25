@@ -279,13 +279,12 @@ class handler(BaseHandler):
 
     def execute(self):
         """search files by name and content"""
-        key = self.get_argument("key", None)
-        full_search = self.get_argument("full_search", None)
+        key = self.get_argument("key", "")
         page = self.get_argument("page", 1)
         self.get_argument("page_url", "/search/search?key=%s&page=" % key)
         pagesize = config.PAGE_SIZE
 
-        if key is None or key == "":
+        if key == "":
             raise web.seeother("/")
         # app 为None，不用全局使用session
         store = MemStore()

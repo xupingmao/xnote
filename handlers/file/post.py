@@ -75,6 +75,7 @@ class PostEdit:
         file.name = args.name
         file.type = "post"
         file.size = len(file.content)
+        file.version = file.version + 1
         if args.public == "on":
             file.groups = "*"
         else:

@@ -26,11 +26,11 @@ class handler(BaseHandler):
 
     def execute(self):
         service = FileService.instance()
-        id = self.get_argument("id", None)
-        name = self.get_argument("name", None)
-        if id is None and name is None:
+        id = self.get_argument("id", "")
+        name = self.get_argument("name", "")
+        if id == "" and name == "":
             raise HTTPError(504)
-        if id is not None:
+        if id != "":
             id = int(id)
             service.visitById(id)
             file = service.getById(id)

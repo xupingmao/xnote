@@ -177,25 +177,26 @@ class BaseHandler():
         self._response = text
         return text
 
-    def get_argument(self, *args):
-        """获取参数, 必须使用可变参数*args,不然没法知道调用方参数个数
+    def get_argument(self, key, default_value=None, strip=False):
+        """获取参数, 默认值不允许为None
+        ~~必须使用可变参数*args, 不然没法知道调用方参数个数，因为默认值可能为None~~
         - 1个参数，没有结果抛出异常
         - 2个参数，没有结果使用默认结果
         """
-        key = args[0]
         if self._args is None:
             self._args = web.input()
 
-        if len(args) == 1:
+        if default_value == None:
             value = self._args[key]
             self._args[key] = value
-            return value
         else:
             value = self._args.get(key)
             if value is None:
-                value = args[1]
-            if isinstance(args[1], int):
+                value = default_value
+            if isinstance(default_value, int):
                 value = int(value)
+        if strip and isinstance(value, str):
+            value = value.strip()
         self._args[key] = value
         return value
 
@@ -210,7 +211,7 @@ class BaseHandler():
 class BaseFileHandler(BaseHandler):
 
     def render(self, template, **kw):
-        id = self.get_argument("id", None)
+        id = self.get_argument("id", "")
         name = self.get_argument("name", "")
         if id is not None and id != "":
             record   = FileDB.get_by_id(id)
