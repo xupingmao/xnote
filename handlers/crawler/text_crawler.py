@@ -1,5 +1,5 @@
 try:
-    from BaseHandler import *
+    from handlers.base import *
     from bs4 import BeautifulSoup
 except ImportError as e:
     pass

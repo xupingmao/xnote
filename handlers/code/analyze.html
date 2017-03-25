@@ -28,7 +28,7 @@ table td {
             <td><textarea name="path" cols=100>{{?path}}</textarea></td>
         </tr>
         <tr>
-            <td>包含关键字</td>
+            <td>包含关键字<br/>(同一行)</td>
             <td><textarea name="key" cols=100>{{?key}}</textarea></td>
         </tr>
         <tr>
@@ -38,6 +38,10 @@ table td {
         <tr>
             <td>文件名</td>
             <td><textarea name="filename" cols=100>{{?filename}}</textarea></td>
+        </tr>
+        <tr>
+            <td>排除文件夹</td>
+            <td><textarea name="blacklist_dir" cols=100>{{blacklist_dir}}</textarea>
         </tr>
         <tr>
             <td>忽略大小写</td>
@@ -50,8 +54,9 @@ table td {
         </table>
         <div>
             <button>查询</button>
-            <a href="/code/lines?path={{path}}">统计</a>
-            <a href="/code/encode?path={{path}}">加密</a>
+            <a href="/code/lines?path={{path}}" target="_blank">统计</a>
+            <a href="/code/encode?path={{path}}" target="_blank">加密</a>
+            <a href="/code/duplicate?path={{path}}" target="_blank">重复文件</a>
         </div>
     </form>
 </div>

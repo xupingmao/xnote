@@ -1,25 +1,32 @@
 # encoding=utf-8
 
+import re
+
 from handlers.base import *
 from xutils import xhtml_escape
 
-CODE_EXT_LIST = (".java", 
-                 ".c",
+CODE_EXT_LIST = (".java",  # Java
+                 ".c",     # C语言
                  ".h",
-                 ".cpp",
+                 ".cpp",   # C++
                  ".hpp",
-                 ".vm",
-                 ".html",
-                 ".xml",
-                 ".js",
-                 ".py",
-                 ".json",
-                 ".text",
+                 ".vm",    # velocity
+                 ".html",  # HTML
+                 ".htm",
+                 ".js",    
+                 ".json", 
+                 ".css", 
+                 ".xml",   # XML
                  ".xsd",
-                 ".proto",
-                 ".lua",
-                 ".rb",
-                 ".csv")
+                 ".csv",   # csv table
+                 ".proto", # proto buf
+                 ".py",    # Python
+                 ".txt",   # Text
+                 ".lua",   # Lua
+                 ".rb",    # Ruby
+                 ".go",    # Go
+                 ".m",     # Objective-C, Matlab
+                 )
 def contains(self, words):
     """
     >>> contains("abc is good", ["abc"])
@@ -97,8 +104,14 @@ def code_find(text, key, blacklist_str, show_line=False, ignore_case=True):
 class handler(BaseHandler):
     """analyze code"""
 
+    def should_skip(self, path):
+        for pattern in self.blacklist_dir:
+            if pattern.match(path):
+                return True
+        return False
+
     def search_files(self, path, key, blacklist_str, filename, 
-            ignore_case = False, recursive = True):
+            ignore_case = False, recursive = True, **kw):
         if key is None or key == "":
             return []
         if not os.path.isdir(path):
@@ -113,6 +126,8 @@ class handler(BaseHandler):
                     # pass mac os temp files
                     continue
                 fpath = os.path.join(root, fname)
+                if self.should_skip(fpath):
+                    continue
                 if filename != "" and not textutil.like(fname, filename):
                     # filename do not match
                     continue
@@ -138,6 +153,18 @@ class handler(BaseHandler):
         key  = self.get_argument("key", "")
         blacklist = self.get_argument("blacklist", "")
         filename = self.get_argument("filename", "")
+        blacklist_dir = self.get_argument("blacklist_dir", "")
+        # 每个请求都是新的handler对象来处理
+        self.blacklist_dir = []
+        
+        for item in blacklist_dir.split(","):
+            item = item.strip()
+            item = os.path.join(path, item)
+            item = '^' + item.replace("*", ".*") + '$'
+            print(item)
+            self.blacklist_dir.append(re.compile(item))
+
+
         error = ""
         files = []
         try:

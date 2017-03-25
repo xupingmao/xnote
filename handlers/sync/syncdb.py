@@ -1,4 +1,4 @@
-from BaseHandler import *
+from handlers.base import *
 from FileDB import FileService
 from web.db import SqliteDB
 

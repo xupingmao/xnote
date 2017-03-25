@@ -12,6 +12,7 @@ import traceback
 import sqlite3
 import json
 import time
+import platform
 
 PY2 = sys.version_info[0] == 2
 
@@ -193,3 +194,8 @@ from tornado.escape import xhtml_escape
 
 def is_windows():
     return os.name == "nt"
+
+def is_mac():
+    return platform.system() == "Darwin"
+
+

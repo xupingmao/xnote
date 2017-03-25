@@ -28,7 +28,13 @@ def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
     return [FileDO.fromDict(item) for item in list]
 
 def get_pages():
-    return execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0")[0].get("count")
+    if xauth.get_current_user() == None:
+        return 0
+    user_name = xauth.get_current_user().get("name")
+    if user_name == "admin":
+        return execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 ")[0].get("count")
+    else:
+        return execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 AND (groups='%s' OR groups = '*')" % user_name)[0].get("count")
 
 class handler(BaseHandler):
     """show recent modified files"""

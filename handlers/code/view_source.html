@@ -1,4 +1,5 @@
-{% extends ../base.html %}
+{# 如果render使用了绝对路径，那么extends后面也必须是全局的 #}
+{% extends base.html %}
 
 {% block head %}
 <style type="text/css">

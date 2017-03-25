@@ -22,13 +22,18 @@ CODE_EXT_DICT = {
 
 class LinesInfo(object):
     """docstring for LinesInfo"""
-    def __init__(self, fname, lines = 0, comments = 0, blanklines = 0):
+    def __init__(self, fname, lines = 0, comments = 0, blanklines = 0, root = None):
         super(LinesInfo, self).__init__()
         self.fname = fname
         self.lines = lines
         self.comments = comments
         self.blanklines = blanklines
         self.validlines = lines - blanklines
+        self.display_name = fname
+        if root:
+            self.root = root
+            if self.fname.startswith(root):
+                self.display_name = self.fname[len(root):]
 
 
 def get_line_infos(path, recursive=False, type=None, skip_func = lambda fname: False):
@@ -64,7 +69,7 @@ def get_line_infos(path, recursive=False, type=None, skip_func = lambda fname: F
                 if line == "":
                     blanklines+=1
             line_infos.append(LinesInfo(fpath, lines, 
-                blanklines = blanklines))
+                blanklines = blanklines, root=path))
         if not recursive:
             break
 

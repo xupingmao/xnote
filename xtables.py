@@ -95,8 +95,11 @@ def init_table_file():
     manager.add_column("is_deleted", "int", 0)
     manager.add_column("creator", "text", "")
     manager.add_column("groups", "text", "")
+    manager.add_column("parent_id", "int", 0)
     # MD5用来校验更新前数据是否变化
     manager.add_column("md5", "text", "")
+    # 修改次数
+    manager.add_column("version", "int", 0)
     manager.close()
 
 def init_table_tag():

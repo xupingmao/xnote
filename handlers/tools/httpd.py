@@ -16,22 +16,23 @@ PORT = 8080
 HOST = '30.15.53.146'
 PORT = 1234
 
-localIp = socket.gethostbyname(socket.gethostname())
-HOST = localIp 
-ipList = socket.gethostbyname_ex(socket.gethostname())
-realIpList = []
-for ipl in ipList[:]:
-    if not isinstance(ipl, list):
-        pass
-    elif len(ipl)==0:
-        pass
-    else:
-        realIpList = ipl
-for i in ipList:
-    if i != localIp:
-       print("external IP:%s"%i)
+def init():
+    localIp = socket.gethostbyname(socket.gethostname())
+    HOST = localIp 
+    ipList = socket.gethostbyname_ex(socket.gethostname())
+    realIpList = []
+    for ipl in ipList[:]:
+        if not isinstance(ipl, list):
+            pass
+        elif len(ipl)==0:
+            pass
+        else:
+            realIpList = ipl
+    for i in ipList:
+        if i != localIp:
+           print("external IP:%s"%i)
 
-HOST = realIpList[0]
+    HOST = realIpList[0]
 
 #Read index.html, put into HTTP response data
 index_content = '''
