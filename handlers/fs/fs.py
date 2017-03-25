@@ -125,6 +125,12 @@ class FileSystemHandler:
         kw["home"] = home
         return xtemplate.render("fs/fs.html", **kw)
 
+    def list_root(self):
+        if xutils.is_windows():
+            raise web.seeother("/fs/C:/")
+        else:
+            raise web.seeother("/fs//")
+
     def read_range(self, path, http_range, blocksize):
         range_list = http_range.split("bytes=")
         if len(range_list) == 2:
@@ -204,6 +210,8 @@ class FileSystemHandler:
         path = xutils.unquote(path)
         # TODO 有编码错误
         # print("Load Path:", path)
+        if path == "":
+            return self.list_root()
         if os.path.isdir(path):
             return self.list_directory(path)
         elif os.path.isfile(path):

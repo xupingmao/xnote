@@ -113,6 +113,7 @@ class SysHandler:
         addr = get_server_ip() + ":" + config.get("port")
 
         cmd_list = [];
+        cmd_list.append(Storage(name="文件浏览器", url="/fs/"))
         cmd_list.append(Storage(name="重新加载模块", url="/system/reload"))
         cmd_list.append(Storage(name="机器运行状态", url="/system/monitor"))
         cmd_list.append(Storage(name="模块信息(pydoc)", url="/system/modules_info"))
