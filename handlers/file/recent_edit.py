@@ -20,8 +20,8 @@ def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
         # % dateutil.before(days=int(days), format=True)
         sql = "select * from file where is_deleted != 1 order by smtime desc"
     else:
-        sql = "select * from file where smtime > '%s' AND is_deleted != 1 AND (groups='%s' OR groups='*') order by smtime desc"\
-        % (dateutil.before(days=int(days), format=True), user_name)
+        sql = "select * from file where is_deleted != 1 AND (groups='%s' OR groups='*') order by smtime desc"\
+        % user_name
     sql += " LIMIT %s, %s" % ((page-1) * pagesize, pagesize)
     list = execute(sql)
         
