@@ -11,6 +11,7 @@
     padding-left: 10px;
     margin-left: 10px;
     white-space: pre;
+    cursor: hand;
 }
 table td {
     border:none;
@@ -70,7 +71,7 @@ table td {
 </div>
 {% end %}
 
-{% for file in files %}
+{% for index1, file in enumerate(files) %}
 
 <div class="row">
     <div style="float:right;">匹配数: {{len(file.result)}}</div>
@@ -80,14 +81,36 @@ table td {
     <div>
 
         {% for line in file.result %}
+            {% set around_id = "%s-%s" % (index1, line.lineno) %}
             <div>
-                <code class="code-analyze-line">{{line}}</code>
+                <code class="code-analyze-line" onclick="toggle('#{{around_id}}')">{{"%4d" % line.lineno}}{{line.text}}</code>
+                <pre id="{{around_id}}" class="hide">{{line.around_text}}</pre>
             </div>
         {% end %}
 
     </div>
     <br/>
 </div>
+
+<script type="text/javascript">
+    function toggle(id) {
+        if ($(id).hasClass("hide")) {
+            $(id).removeClass("hide");
+        } else {
+            $(id).addClass("hide");
+        }
+    }
+
+    function toggle1(id) {
+        if ($(id+"-prev").hasClass("hide")) {
+            $(id+"-prev").removeClass("hide");
+            $(id+"-next").removeClass("hide");
+        } else {
+            $(id+"-prev").addClass("hide");
+            $(id+"-next").addClass("hide");
+        }
+    }
+</script>
 
 {% end %}
 {% end %}

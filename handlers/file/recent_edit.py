@@ -13,7 +13,7 @@ def execute(sql):
 def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
     user = xauth.get_current_user()
     if user is None:
-        return []
+        raise web.seeother("/login")
     user_name = user["name"]
     if user_name == "admin":
         # sql = "select * from file where smtime > '%s' AND is_deleted != 1 order by smtime desc"\

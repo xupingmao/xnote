@@ -25,15 +25,7 @@
         <input type="file" name="file"/>
         <button>上传</button>
     </form>
-    
-    {% if is_stared(current_path) %}
-        <a href="/system/star?op=cancel&path={{current_path}}">取消收藏</a>
-    {% else %}
-        <a href="/system/star?path={{current_path}}">收藏</a>
-    {% end %}
-    
     <a href="/code/analyze?path={{current_path}}">分析</a>
-    <a href="/fs_preview?path={{current_path}}">预览</a>
 </div>
 
 <hr/>

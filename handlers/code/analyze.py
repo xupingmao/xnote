@@ -27,13 +27,13 @@ CODE_EXT_LIST = (".java",  # Java
                  ".go",    # Go
                  ".m",     # Objective-C, Matlab
                  )
-def contains(self, words):
+def contains_all(self, words):
     """
-    >>> contains("abc is good", ["abc"])
+    >>> contains_all("abc is good", ["abc"])
     True
-    >>> contains("you are right", ["rig"])
+    >>> contains_all("you are right", ["rig"])
     True
-    >>> contains("hello,world,yep", ["hello", "yep"])
+    >>> contains_all("hello,world,yep", ["hello", "yep"])
     True
     """
     if len(words) == 0:
@@ -65,13 +65,35 @@ def to_list(key):
     keys = key.split(" ")
     return list(filter(lambda x: x != "", keys))
         
-def code_find(text, key, blacklist_str, show_line=False, ignore_case=True):
+class LineInfo:
+    """匹配行的信息"""
+    around_lines = 10
+    def __init__(self, lineno, text, lines=None):
+        self.lineno = lineno
+        self.text = text
+        if lines:
+            index = self.lineno-1
+            num = self.around_lines
+            # 负数会转成尾部索引
+            begin = max(0, index-num)
+            self.around_text = "\n".join(lines[begin:index+num])
+            # self.around_text_prev = "\n    ".join(lines[index-num:index])
+            # self.around_text_next = "\n    ".join(lines[index+1:index+num])
+        else:
+            self.around_text = ""
+            self.around_text_prev = ""
+            self.around_text_next = ""
+
+    def __str__(self):
+        return "%04d:%s" % (self.lineno, self.text)
+
+def code_find(text, key, blacklist_str="", ignore_case=True):
     """ find key in text, return a list
 
     >>> find('hello,world', 'hello')
-    ['hello,world']
+    ['0001:hello,world']
 
-    >>> find('hell1,world\\nhello,kid', 'hello', True)
+    >>> find('hell1,world\\nhello,kid', 'hello')
     ['0002:hello,kid']
     
     >>> find("yes", "")
@@ -87,31 +109,59 @@ def code_find(text, key, blacklist_str, show_line=False, ignore_case=True):
     if ignore_case:
         for i in range(len(keys)):
             keys[i] = keys[i].lower()
-    for line in text.split("\n"):
+    lines = text.split("\n")
+    for line in lines:
         if ignore_case:
             target = line.lower()
         else:
             target = line
-        if contains(target, keys) and not contians_any(target, blacklist):
-            if show_line:
-                result.append("%04d:%s" % (lineno, line))
-            else:
-                result.append(line)
+        if contains_all(target, keys) and not contians_any(target, blacklist):
+            result.append(LineInfo(lineno, line, lines))
         lineno += 1
     return result
 
+class FileSearch:
+    """文件搜索"""
+    def __init__(self, path):
+        self.path = path
+        self.ignore_case = False
+        self.recursive = False
 
-class handler(BaseHandler):
-    """analyze code"""
+    def set_exclude_dirs(self, blacklist_dir):
+        path = self.path
+        self.exclude_dirs = []
+        if blacklist_dir != "":
+            for item in blacklist_dir.split(","):
+                item = item.strip()
+                item = os.path.join(path, item)
+                item = '^' + item.replace("*", ".*") + '$'
+                print(item)
+                self.exclude_dirs.append(re.compile(item))
 
-    def should_skip(self, path):
-        for pattern in self.blacklist_dir:
-            if pattern.match(path):
+    def should_skip(self, root, fname, filename):
+        name, ext = os.path.splitext(fname)
+        # 过滤黑名单
+        if ext not in CODE_EXT_LIST:
+            return True
+
+        # 过滤Mac临时文件
+        if fname.startswith("._"):
+            return True
+
+        fpath = os.path.join(root, fname)
+        for pattern in self.exclude_dirs:
+            if pattern.match(root):
                 return True
+
+        if filename != "" and not textutil.like(fname, filename):
+            # filename do not match
+            return True
         return False
 
-    def search_files(self, path, key, blacklist_str, filename, 
-            ignore_case = False, recursive = True, **kw):
+    def search_files(self, path, key, blacklist_str, filename, **kw):
+        ignore_case = self.ignore_case
+        recursive = self.recursive
+
         if key is None or key == "":
             return []
         if not os.path.isdir(path):
@@ -119,24 +169,17 @@ class handler(BaseHandler):
         result_list = []
         for root, dirs, files in os.walk(path):
             for fname in files:
-                name, ext = os.path.splitext(fname)
-                if ext not in CODE_EXT_LIST:
-                    continue
-                if fname.startswith("._"):
-                    # pass mac os temp files
-                    continue
-                fpath = os.path.join(root, fname)
-                if self.should_skip(fpath):
-                    continue
-                if filename != "" and not textutil.like(fname, filename):
-                    # filename do not match
+                # 匹配文件名，过滤黑名单
+                if self.should_skip(root, fname, filename):
                     continue
                 try:
+                    fpath = os.path.join(root, fname)
                     content = fsutil.readfile(fpath)
                 except Exception as e:
                     result_list.append(Storage(name=fpath, result=["read file fail, e=%s" % e]))
+                # 查找结果
                 result = code_find(content, key, blacklist_str, 
-                    show_line = True, ignore_case=ignore_case)
+                    ignore_case=ignore_case)
                 if key != "" and len(result) == 0:
                     # key do not match
                     continue
@@ -146,36 +189,31 @@ class handler(BaseHandler):
                 break
         return result_list
 
+
+class handler(BaseHandler):
+    """analyze code"""
     def default_request(self):
         ignore_case = self.get_argument("ignore_case", "")
         recursive   = self.get_argument("recursive", "")
-        path = self.get_argument("path", "")
-        key  = self.get_argument("key", "")
-        blacklist = self.get_argument("blacklist", "")
-        filename = self.get_argument("filename", "")
+        path = self.get_argument("path", "", strip=True)
+        key  = self.get_argument("key", "", strip=True)
+        blacklist = self.get_argument("blacklist", "", strip=True)
+        filename = self.get_argument("filename", "", strip=True)
         blacklist_dir = self.get_argument("blacklist_dir", "")
-        # 每个请求都是新的handler对象来处理
-        self.blacklist_dir = []
-        
-        for item in blacklist_dir.split(","):
-            item = item.strip()
-            item = os.path.join(path, item)
-            item = '^' + item.replace("*", ".*") + '$'
-            print(item)
-            self.blacklist_dir.append(re.compile(item))
 
+        # print(path, blacklist, blacklist_dir, filename)
+        file_search = FileSearch(path)
+        file_search.set_exclude_dirs(blacklist_dir)
+        if ignore_case == "on":
+            file_search.ignore_case = True
+        if recursive == "on":
+            file_search.recursive = True
 
         error = ""
         files = []
         try:
             if path != "":
-                path = path.strip()
-                key  = key.strip()
-                blacklist = blacklist.strip()
-                filename = filename.strip()
-                files = self.search_files(path, key, blacklist, filename, 
-                    ignore_case = ignore_case == "on", 
-                    recursive = recursive == "on");
+                files = file_search.search_files(path, key, blacklist, filename);
         except Exception as e:
             error = e
         finally:

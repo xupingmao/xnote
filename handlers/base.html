@@ -49,17 +49,13 @@
       </div>
       <div class="col-md-1" style="height: 100%;"></div>
       <div class="col-md-10">
-          {% if _has_login %}
-            <div class="row">
-               {% block body %} {% end %}
-            </div>
-          {% else %}
-            <h3>请登录!</h3>
-          {% end %}
-            <!-- Footer -->
-            <div>
-                <div class="col-md-12" style="height:50px;"/>
-            </div>
+          <div class="row">
+             {% block body %} {% end %}
+          </div>
+          <!-- Footer -->
+          <div>
+              <div class="col-md-12" style="height:50px;"/>
+          </div>
         </div> <!-- Main Part End -->
         <div class="col-md-1"></div>
         <!-- 干掉小广告，https才是最终解决方案 -->

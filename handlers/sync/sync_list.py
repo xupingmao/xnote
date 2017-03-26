@@ -136,7 +136,7 @@ class handler(BaseHandler):
             db_diff_list = compute_db_diff(db_diff_list)
         else:
             db_diff_list = []
-        self.render("sync-list.html", diff_list = diff, 
+        self.render(diff_list = diff, 
             db_diff_list = db_diff_list, url = url,
             quote = quote)
         # return get_system_info()

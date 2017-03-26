@@ -2,8 +2,6 @@
 '''system configuration'''
 import os
 
-# WEBDIR = os.path.join("D:\\", "xnote", "xshell", "network", "webroot");
-
 PORT = "1234"
 # PORT = "8787"
 
