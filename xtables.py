@@ -87,16 +87,23 @@ def init_table_file():
     manager.add_column("content", "text", "")
     manager.add_column("size", "long", 0)
     manager.add_column("type", "text", "")
+    # 创建时间ctime
     manager.add_column("sctime", "text", "")
+    # 修改时间mtime
     manager.add_column("smtime", "text", "")
+    # 访问时间atime
     manager.add_column("satime", "text", "")
     manager.add_column("related", "text", "")
+    # 访问次数
     manager.add_column("visited_cnt", "int", 0)
     manager.add_column("is_deleted", "int", 0)
+    # 创建者
     manager.add_column("creator", "text", "")
+    # 修改者
+    manager.add_column("modifier", "text", "")
     manager.add_column("groups", "text", "")
     manager.add_column("parent_id", "int", 0)
-    # MD5用来校验更新前数据是否变化
+    # MD5
     manager.add_column("md5", "text", "")
     # 修改次数
     manager.add_column("version", "int", 0)
@@ -104,8 +111,10 @@ def init_table_file():
 
 def init_table_tag():
     manager = TableManager("db/data.db", "file_tag")
+    # 标签名
     manager.add_column("name", "text", "")
-    manager.add_column("file_id", "integer", 0)
+    # 标签ID
+    manager.add_column("file_id", "int", 0)
     manager.close()
 
 # init_test_db()
