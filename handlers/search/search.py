@@ -10,6 +10,7 @@ import math
 
 import web
 import xutils
+import xauth
 from FileDB import FileDO
 from handlers.base import *
 import web.db as db
@@ -277,6 +278,7 @@ class handler(BaseHandler):
         return self.full_search(key)
 
 
+    @xauth.login_required()
     def execute(self):
         """search files by name and content"""
         key = self.get_argument("key", "")
