@@ -57,8 +57,22 @@ class ModelManager:
         self.debug = True
         self.task_manager = TaskManager(app)
     
+    def reload_module(self, name):
+        try:
+            print("del", name)
+            del sys.modules[name]
+            __import__(name)
+            print("reimport", name)
+        except Exception as e:
+            pass
+        finally:
+            pass
+
     def reload(self):
         """重启所有的模块"""
+        self.reload_module("xtemplate")
+        self.reload_module("xauth")
+        self.reload_module("xutils")
         self.mapping = list()
         self.model_list = list()
         self.failed_mods = []

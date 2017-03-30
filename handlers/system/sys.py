@@ -18,6 +18,7 @@ import os
 import autoreload
 import xtemplate
 import xutils
+import xauth
 
 def get_memory_usage():
     try:
@@ -107,6 +108,7 @@ def get_server_ip():
                 
 class SysHandler:
 
+    @xauth.login_required()
     def GET(self):
         shell_list = []
         dirname = "scripts"

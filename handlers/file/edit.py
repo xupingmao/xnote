@@ -24,6 +24,7 @@ def get_file_db():
 
 class handler(BaseHandler):
 
+    @xauth.login_required()
     def execute(self):
         service = FileService.instance()
         id = self.get_argument("id", "")
