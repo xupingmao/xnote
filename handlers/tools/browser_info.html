@@ -22,6 +22,10 @@
         <td>Vendor</td>
         <td id="vendor"></td>
     </tr>
+    <tr>
+        <td>Screen</td>
+        <td id="screen"></td>
+    </tr>
 </div>
 
 <script type="text/javascript">
@@ -29,5 +33,6 @@ $("#userAgent").html(navigator.userAgent);
 $("#appName").html(navigator.appName);
 $("#appVersion").html(navigator.appVersion);
 $("#vendor").html(navigator.vendor);
+$("#screen").html("screen.width:"+screen.width+",screen.height:"+screen.height);
 </script>
 {% end %}
