@@ -2,8 +2,8 @@
 
 {% block head %}
 <!-- <script src="/lib/CodeMirror/codemirror.js"></script>
-<script src="/lib/CodeMirror/mode/javascript/javascript.js"></script> -->
-<!-- <script src="/lib/CodeMirror/mode/markdown/markdown.js"></script> -->
+<script src="/lib/CodeMirror/mode/javascript/javascript.js"></script>
+<script src="/lib/CodeMirror/mode/markdown/markdown.js"></script> -->
 <!-- <script src="/js/string.js"></script>
 <script src="/js/array.js"></script> -->
 <!-- <link rel="stylesheet" type="text/css" href="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.css">
@@ -95,6 +95,7 @@
                     <input type="button" class="btn btn-primary" onclick="preview()" value="预览" />
                     <input style="display:none" name="option" value="update_content"/>
                     <input style="display:none" name="id" value="{{file.id}}"/>
+                    <input type="text" name="version" value="{{file.version}}" class="hide"/>
 
                     <input type="button" class="red" onclick="delLink()" value="删除" />
                     <div class="col-md-12">

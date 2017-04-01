@@ -4,7 +4,7 @@
 Tornado template wrapper
 Created by xupingmao on 2016/12/05
 '''
-
+import json
 import web
 
 from tornado.template import Template, Loader
@@ -20,6 +20,23 @@ NAMESPACE    = dict(
 )    
 
 _hooks = []
+
+MENU_LIST = [
+    
+    dict(title = "资料", children = [
+        dict(name="最近编辑", url="/file/recent_edit"),
+    ]),
+
+    dict(title = "系统", children = [
+        dict(name="系统", url="/system/sys")
+    ]),
+
+    dict(title = "功能", children = [
+        dict(name="日历", url="/tools/date.html"),
+        dict(name="功能列表", url="/wiki/tools.md"),
+    ])
+
+]
 
 
 class XnoteLoader(Loader):
@@ -67,9 +84,17 @@ def pre_render(kw):
     kw["_notice_list"] = []
     # print(web.ctx.env)
     kw["_user_agent"] = web.ctx.env.get("HTTP_USER_AGENT")
+    kw["_menu_list"] = MENU_LIST
 
+
+def encode_json(obj):
+    if hasattr(obj, "__call__"):
+        return "function"
+    return obj
 
 def render(template_name, **kw):
+    if "_json" in kw:
+        return json.dumps(kw, default=encode_json)
     nkw = {}
     pre_render(nkw)
     nkw.update(kw)

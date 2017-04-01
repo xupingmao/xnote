@@ -34,7 +34,6 @@ class handler:
         return xtemplate.render("login.html", 
             username=name, 
             password=pswd,
-            _has_login=True,
             error = error)
 
 
@@ -45,7 +44,6 @@ class handler:
         return xtemplate.render("login.html", 
             username = name, 
             password=pswd, 
-            _has_login=True,
             error = "")
 
 

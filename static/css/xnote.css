@@ -135,6 +135,28 @@ li.menu-item:hover {
     background-color: #777;
 }
 
+p.menu-header {
+    background-color: #ffd0a0;
+    color: black;
+}
+
+p.menu-item a {
+    text-decoration: none;
+    cursor: hand;
+    width: 100%;
+    color: inherit;
+    background-color: inherit;
+}
+
+p.menu-item {
+    margin: 0.5em;
+}
+
+p.menu-item:hover {
+    background-color: blue;
+    color: white;
+}
+
 .col-md-1 {
     float: left;
     width: 8.3%;

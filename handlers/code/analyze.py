@@ -193,8 +193,8 @@ class FileSearch:
 class handler(BaseHandler):
     """analyze code"""
     def default_request(self):
-        ignore_case = self.get_argument("ignore_case", "")
-        recursive   = self.get_argument("recursive", "")
+        ignore_case = self.get_argument("ignore_case", "on")
+        recursive   = self.get_argument("recursive", "on")
         path = self.get_argument("path", "", strip=True)
         key  = self.get_argument("key", "", strip=True)
         blacklist = self.get_argument("blacklist", "", strip=True)

@@ -67,13 +67,14 @@ def sqlite_escape(text):
     return "'" + text + "'"
 
 def updateContent(id, content, user_name=None, type=None):
+    # TODO 修改version
     if user_name is None:
-        sql = "update file set type='md', content = %s,size=%s, smtime='%s'" \
+        sql = "update file set type='md', content = %s,size=%s, smtime='%s', version=version+1" \
             % (sqlite_escape(content), len(content), dateutil.format_time())
     else:
         # 这个字段还在考虑中是否添加
         # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
-        sql = "update file set type = 'md', content = %s,size=%s,smtime='%s',modifier='%s"\
+        sql = "update file set type = 'md', content = %s,size=%s,smtime='%s',modifier='%s', version=version+1"\
             % (sqlite_escape(content), len(content), dateutil.format_time(), user_name)
     if type:
         sql += ", type='%s'" % type
@@ -114,6 +115,7 @@ class UpdateHandler(BaseHandler):
             else:
                 old_record.related = old_record.related.replace(old_name_upper, new_name_upper);
             old_record.name = newName
+            old_record.version = old_record.version + 1
             service.update(old_record, "name", "related", "smtime")
             return result(True)
 
