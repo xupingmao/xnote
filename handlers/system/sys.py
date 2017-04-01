@@ -119,6 +119,7 @@ class SysHandler:
         addr = get_server_ip() + ":" + config.get("port")
 
         cmd_list = [];
+        cmd_list.append(Storage(name="切换导航栏样式", url="/system/switch_nav"))
         cmd_list.append(Storage(name="文件浏览器", url="/fs/"))
         cmd_list.append(Storage(name="重新加载模块", url="/system/reload"))
         cmd_list.append(Storage(name="机器运行状态", url="/system/monitor"))

@@ -37,6 +37,14 @@ PARTNER_HOST_LIST = [
 # max file size to sync or backup
 MAX_FILE_SIZE = 10 * 1024 ** 2
 
+
+
+## 变量
+
+# 导航栏位置
+nav_position = "top"
+
+
 _config = {}
 
 """
@@ -71,3 +79,20 @@ def has_config(key, subkey = None):
 def has(key):
     return has_config(key)
 
+class XConfig:
+    """配置管理器"""
+
+    def __init__(self, fname):
+        self.fname = fname
+
+    def load(self):
+        pass
+
+    def getvalue(self, section, key, type=None):
+        pass
+
+    def setvalue(self, section, key, value):
+        pass
+
+    def save(self):
+        pass
