@@ -175,7 +175,7 @@ def find_py_docs(name):
     """搜索Python文档"""
     if name in sys.modules:
         item = FileDO("Python Document - %s" % name)
-        item.url = "/system/doc?name=%s" % name
+        item.url = "/system/document?name=%s" % name
         item.content = ""
         return [item]
     return []
