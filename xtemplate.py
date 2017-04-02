@@ -84,7 +84,7 @@ def pre_render(kw):
     kw["_notice_list"] = []
     # print(web.ctx.env)
     kw["_user_agent"] = web.ctx.env.get("HTTP_USER_AGENT")
-    kw["_nav_position"] = config.nav_position
+    kw["_nav_position"] = web.cookies(nav_position="top").nav_position
     kw["_menu_list"] = MENU_LIST
 
 
