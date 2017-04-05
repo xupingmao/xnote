@@ -146,6 +146,40 @@ class FileFilter:
                 result.append(copy.copy(file))
         return result
 
+def search_name(words, groups=None):
+    if not isinstance(words, list):
+        words = [words]
+    like_list = []
+    for word in words:
+        like_list.append('name like %s ' % repr('%' + word.upper() + '%'))
+    sql = "select * from file where %s AND is_deleted != 1" % (" AND ".join(like_list))
+    if groups and groups != "admin":
+        sql += " AND (groups = '*' OR groups = '%s')" % groups
+    sql += " order by satime desc limit 1000";
+    print("search name:", sql)
+    all = xutils.db_execute("db/data.db", sql)
+    return [FileDO.fromDict(item) for item in all]
+
+def full_search(words, groups=None):
+    """ full search the files """
+    if not isinstance(words, list):
+        words = [words]
+    content_like_list = []
+    # name_like_list = []
+    for word in words:
+        content_like_list.append('content like %s ' % repr('%' + word.upper() + '%'))
+    # for word in words:
+    #     name_like_list.append("related like %s " % repr("%" + word.upper() + '%'))
+    sql = "select * from file where (%s) and is_deleted != 1" \
+        % " AND ".join(content_like_list)
+
+    if groups and groups != "admin":
+        sql += " AND (groups = '*' OR groups = '%s')" % groups
+    sql += " order by satime desc limit 1000";
+    print("full search:", sql)
+    all = xutils.db_execute("db/data.db", sql)
+    return [FileDO.fromDict(item) for item in all]
+
 def do_search(words, key=None):
     files = []
 
@@ -155,10 +189,10 @@ def do_search(words, key=None):
         pydocs = find_py_docs(words[0])
         files += translates + tools + pydocs
 
-    name_results = FileDB.search_name(words)
+    name_results = search_name(words, xauth.get_current_user().get("name"))
     # FileDB.full_search(context, words)
     # files = self._service.search(words)
-    content_results = FileDB.full_search(words)
+    content_results = full_search(words, xauth.get_current_user().get("name"))
 
     nameset = set()
     for item in name_results:

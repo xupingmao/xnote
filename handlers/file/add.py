@@ -1,3 +1,8 @@
+# -*- coding:utf-8 -*-  
+# Created by xupingmao on 2017
+# 
+
+"""Description here"""
 import time
 
 from handlers.base import *
@@ -25,7 +30,8 @@ class handler(BaseHandler):
         file.ctime = dateutil.get_seconds()
         file.sctime = dateutil.format_time()
         file.creator = xauth.get_current_user()["name"]
-        file.groups = file.creator
+        # 默认是公开的
+        file.groups = "*"
         file.parent_id = 0
         file.type = type
         file.content = ""

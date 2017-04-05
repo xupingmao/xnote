@@ -66,7 +66,7 @@ class PostEdit:
     def POST(self):
         # 一定要加file={}
         # 参考web.utils.storify
-        args = web.input(file={}, public=None)
+        args = web.input(file={}, public="on")
         id = int(args.id)
         file_db = get_file_db()
         file = file_db.select("file", where={"id": id})[0]
