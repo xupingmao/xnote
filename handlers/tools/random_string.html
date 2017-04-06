@@ -1,0 +1,55 @@
+{% extends base.html %}
+
+{% block body %}
+
+<h2>随机字符串生成器</h2>
+
+长度<input id="length" value="100"/>
+<ul>
+<li><input id="digit" type="checkbox" value="1234567890">1234567890</li>
+<li><input id="lowerAlphabet" type="checkbox" value="abcdefghijklmnopqrstuvwxyz">a-z</li>
+<li><input id="upperAlphabet" type="checkbox" value="ABCDEFGHIJKLMNOPQRSTUVWXYZ">A-Z</li>
+<li>其他<br/><textarea id="others" style="width:50%;"></textarea></li>
+</ul>
+
+<div>
+    <input type="button" onclick="generate()" value="生成"/>
+</div>
+
+<textarea id="out" style="width: 100%;" rows=20></textarea>
+
+
+<script type="text/javascript">
+    function generate() {
+        var dict = $("#others").val();
+        
+        if ($("#digit")[0].checked) {
+            dict += $("#digit").val();
+        }
+
+        if ($("#lowerAlphabet")[0].checked) {
+            dict += $("#lowerAlphabet").val();
+        }
+
+        if ($("#upperAlphabet")[0].checked) {
+            dict += $("#upperAlphabet").val();
+        }
+
+        var dictLength = dict.length;
+
+
+        var length = parseInt($("#length").val());
+        var out = "";
+        for (var i = 0; i < length; i++) {
+            var randomIndex = parseInt(Math.random() * dictLength -1);
+            if (randomIndex < 0) {
+                randomIndex = 0;
+            }
+            console.log(dict, randomIndex);
+            out += dict[randomIndex];
+        }
+        $("#out").val(out);
+    }
+</script>
+
+{% end %}
