@@ -66,7 +66,7 @@ def sqlite_escape(text):
     text = text.replace("'", "''")
     return "'" + text + "'"
 
-def updateContent(id, content, user_name=None, type=None):
+def updateContent(id, content, user_name=None, type=None, groups=None):
     # TODO 修改version
     if user_name is None:
         sql = "update file set type='md', content = %s,size=%s, smtime='%s', version=version+1" \
@@ -78,6 +78,8 @@ def updateContent(id, content, user_name=None, type=None):
             % (sqlite_escape(content), len(content), dateutil.format_time(), user_name)
     if type:
         sql += ", type='%s'" % type
+    if groups:
+        sql += ", groups = '%s'" % groups
     sql += " where id=%s" % id
 
     xutils.db_execute("db/data.db", sql)
@@ -88,12 +90,17 @@ def result(success = True, msg=None):
 class UpdateHandler(BaseHandler):
 
     def update_content_request(self):
+        is_public = self.get_argument("public", "")
         service = FileService.instance()
         id = self.get_argument("id")
         content = self.get_argument("content")
         file = service.getById(int(id))
         assert file is not None
-        updateContent(id, content)
+
+        if is_public == "on":
+            updateContent(id, content, groups = '*')
+        else:
+            updateContent(id, content, groups = xauth.get_current_user().name)
         raise web.seeother("/file/edit?id=" + id)
 
     def rename_request(self):
