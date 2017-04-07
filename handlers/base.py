@@ -227,6 +227,7 @@ class BaseFileHandler(BaseHandler):
 
 def get_upload_img_path(filename):
     """生成上传文件名"""
+    filename = filename.replace(" ", "_")
     date = dateutil.format_date(fmt="%Y/%m")
     origin_filename = "static/img/" + date + "/" + filename
     fsutil.check_create_dirs("static/img/"+date)
