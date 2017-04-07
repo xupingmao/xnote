@@ -317,6 +317,7 @@ class handler(BaseHandler):
         """search files by name and content"""
         key = self.get_argument("key", "")
         page = self.get_argument("page", 1)
+        user_name = xauth.get_current_user().get("name")
         self.get_argument("page_url", "/search/search?key=%s&page=" % key)
         pagesize = config.PAGE_SIZE
 
@@ -324,7 +325,7 @@ class handler(BaseHandler):
             raise web.seeother("/")
         # app 为None，不用全局使用session
         store = MemStore()
-        store_key = "s_" + key
+        store_key = "s_" + user_name + "-" + key
         print("STORE KEY: ", store_key)
         if store.has_key(store_key):
             print("HIT %s" % store_key)
