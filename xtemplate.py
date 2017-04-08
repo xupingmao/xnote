@@ -4,6 +4,7 @@
 Tornado template wrapper
 Created by xupingmao on 2016/12/05
 '''
+import os
 import json
 import web
 
@@ -12,6 +13,8 @@ from util import dateutil
 
 import config
 import xauth
+
+from xutils import ConfigParser
 
 TEMPLATE_DIR = config.HANDLERS_DIR
 NAMESPACE    = dict(
@@ -25,6 +28,7 @@ MENU_LIST = [
     
     dict(title = "资料", children = [
         dict(name="最近编辑", url="/file/recent_edit"),
+        dict(name="周报", url="/search/search?key=周报"),
     ]),
 
     dict(title = "系统", children = [
@@ -32,11 +36,45 @@ MENU_LIST = [
     ]),
 
     dict(title = "功能", children = [
+        dict(name="Index", url="/wiki/tools.md"),
         dict(name="日历", url="/tools/date.html"),
-        dict(name="功能列表", url="/wiki/tools.md"),
     ])
 
 ]
+
+def load_menu_properties():
+    """加载导航栏配置"""
+    if os.path.exists("config/menu.ini"):
+        path = "config/menu.ini"
+    else:
+        path = "config/menu.default.ini"
+
+    menu_list = [];
+    # menu_config = config.Properties(path)
+    # for title in menu_config.get_properties():
+    #     group = dict(title=title)
+    #     group["children"] = []
+    #     children = menu_config.get_properties()[title]
+    #     for item in children:
+    #         url = children[item]
+    #         group["children"].append(dict(name=item, url=url))
+    #     menu_list.append(group)
+
+    cf = ConfigParser()
+    cf.read(path, encoding="utf-8")
+    names = cf.sections()
+    for name in names:
+        group = dict(title = name)
+        options = cf.options(name)
+        group["children"] = []
+        for option in options:
+            url = cf.get(name, option)
+            group["children"].append(dict(name=option, url=url))
+        menu_list.append(group)
+
+    global MENU_LIST
+    MENU_LIST = menu_list
+
 
 
 class XnoteLoader(Loader):
@@ -84,7 +122,7 @@ def pre_render(kw):
     kw["_notice_list"] = []
     # print(web.ctx.env)
     kw["_user_agent"] = web.ctx.env.get("HTTP_USER_AGENT")
-    kw["_nav_position"] = web.cookies(nav_position="top").nav_position
+    kw["_nav_position"] = web.cookies(nav_position="left").nav_position
     kw["_menu_list"] = MENU_LIST
 
 
@@ -117,5 +155,6 @@ def get_code(name):
 def reload():
     global _loader
     _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
+    load_menu_properties()
     
 reload()

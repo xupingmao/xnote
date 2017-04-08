@@ -40,9 +40,6 @@ def get_ip_list(blacklist = []):
         ip_list.append(ip)
 
     return ip_list  
-
-def notfound():
-    raise web.notfound(xtemplate.render("notfound.html"))
     
 
 def check_db():
@@ -74,9 +71,6 @@ def main():
     config.set("start_time", time.time())
     # I can reload the system by myself
     app = web.application(list(), var_env, autoreload=False)
-    
-    # set 404 page
-    app.notfound = notfound
     
     # check database
     check_db()

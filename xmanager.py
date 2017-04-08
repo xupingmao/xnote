@@ -6,6 +6,8 @@ import traceback
 import time
 import copy
 
+import web
+
 from util import textutil
 from threading import Thread
 from queue import Queue
@@ -14,6 +16,10 @@ from xutils import ConfigParser
 from xutils import Storage
 import xtemplate
 
+
+def notfound():
+    import xtemplate
+    raise web.notfound(xtemplate.render("notfound.html"))
 
 class WebModel:
     def __init__(self):
@@ -83,6 +89,9 @@ class ModelManager:
         self.mapping += self.basic_mapping
         self.app.init_mapping(self.mapping)
         xtemplate.reload()
+
+        # set 404 page
+        self.app.notfound = notfound
         
     def get_mod(self, module, name):
         namelist = name.split(".")
