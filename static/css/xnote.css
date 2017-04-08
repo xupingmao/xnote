@@ -2,7 +2,7 @@ body {
     background-color: #f0f0f0;
 }
 
-pre {
+.marked-pre {
     background: #eee;
     padding: 0.5em;
     border: 1px solid #ddd;

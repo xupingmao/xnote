@@ -57,6 +57,30 @@ class handler(BaseHandler):
         web.ctx.headers.append(("Content-Disposition", "attachment; filename=%s.csv" % quote(file.name)))
         return content
 
+class MarkdownEdit(BaseHandler):
+
+    @xauth.login_required()
+    def default_request(self):
+        service = FileService.instance()
+        id = self.get_argument("id", "")
+        name = self.get_argument("name", "")
+        if id == "" and name == "":
+            raise HTTPError(504)
+        if id != "":
+            id = int(id)
+            service.visitById(id)
+            file = service.getById(id)
+        elif name is not None:
+            file = service.getByName(name)
+        if file is None:
+            raise web.notfound()
+        download_csv = file.related != None and "CODE-CSV" in file.related
+        self.render("file/markdown_edit.html", file=file, 
+            content = file.get_content(), 
+            date2str=date2str,
+            download_csv = download_csv, 
+            children = FileDB.get_children_by_id(file.id))
+
 def sqlite_escape(text):
     if text is None:
         return "NULL"
@@ -127,4 +151,7 @@ class UpdateHandler(BaseHandler):
             return result(True)
 
 
-xurls = ("/file/edit", handler, "/file/update", UpdateHandler)
+xurls = ("/file/edit", handler, 
+        "/file/markdown", handler,
+        "/file/markdown/edit", MarkdownEdit,
+        "/file/update", UpdateHandler)
