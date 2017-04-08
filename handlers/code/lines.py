@@ -8,7 +8,8 @@ CODE_EXT_LIST = [
     ".c", ".cpp", ".h",
     ".java", ".xml",
     ".js", ".py", ".lua", ".rb",
-    ".html", ".css"
+    ".html", ".css",
+    ".php",
 ]
 
 CODE_EXT_DICT = {
@@ -18,6 +19,7 @@ CODE_EXT_DICT = {
     "Lua": [".lua"],
     "Ruby": [".rb"],
     "Java": [".java"],
+    "Php": [".php"],
 }
 
 class LinesInfo(object):

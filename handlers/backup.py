@@ -112,8 +112,6 @@ def chk_backup():
             fsutil.remove(lastfile_path)
             logutil.warn("not valid db backup file, remove {}", lastfile_path)
 
-chk_backup()
-
 class handler:
     """触发备份事件"""
     def GET(self):

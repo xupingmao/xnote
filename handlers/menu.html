@@ -41,28 +41,32 @@
   <div>
       <div class="col-md-12" style="height:50px;"></div>
   </div>
-</div> 
+</div>
 
 {% else %}
 
 <div class="col-md-12">
+
   <div class="col-md-2">
-  <!-- background-color: #fff8e8; -->
       <div id="menu" style="margin-left: 0; margin-right: 1em; padding-top:20px; padding-bottom: 20px;">
+      <ul id="nav-left">
       {% if _has_login %}
 
           {% for item in _menu_list %}
-            <p class="menu-header">{{item['title']}}</p>
+            <hr/>
+            <li class="nav-header">{{item['title']}}</li>
             {% for link in item['children'] %}
-              <p class="menu-item"><a href="{{link['url']}}">{{link["name"]}}</a></p>
+              <li class="nav-item"><a href="{{link['url']}}">{{link["name"]}}</a></li>
             {% end %}
           {% end %}
-          <p class="menu-header">用户</p>
-          <p class="menu-item"><a href="/logout">登出</a></p>
+          <hr/>
+          <li class="nav-header">用户</li>
+          <li class="nav-item"><a href="/logout">登出</a></li>
       {% else %}
-          <p class="menu-header">用户</p>
-          <p class="menu-item"><a href="/login">登录</a></p>
+          <li class="nav-header">用户</li>
+          <li class="nav-item"><a href="/login">登录</a></li>
       {% end %}
+      </ul>
       </div>
   </div>
 

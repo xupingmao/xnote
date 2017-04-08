@@ -135,28 +135,6 @@ li.menu-item:hover {
     background-color: #777;
 }
 
-p.menu-header {
-    background-color: #ffd0a0;
-    color: black;
-}
-
-p.menu-item a {
-    text-decoration: none;
-    cursor: hand;
-    width: 100%;
-    color: inherit;
-    background-color: inherit;
-}
-
-p.menu-item {
-    margin: 0.5em;
-}
-
-p.menu-item:hover {
-    background-color: blue;
-    color: white;
-}
-
 .col-md-1 {
     float: left;
     width: 8.3%;
@@ -217,6 +195,20 @@ p.menu-item:hover {
     float: left;
     width: 100%;
 }
+
+.col-md-offset-12 {  margin-left: 100%;}
+.col-md-offset-11 {  margin-left: 91.66666666666666%;}
+.col-md-offset-10 {  margin-left: 83.33333333333334%;}
+.col-md-offset-9 {  margin-left: 75%;}
+.col-md-offset-8 {  margin-left: 66.66666666666666%;}
+.col-md-offset-7 {  margin-left: 58.333333333333336%;}
+.col-md-offset-6 {  margin-left: 50%;}
+.col-md-offset-5 {  margin-left: 41.66666666666667%;}
+.col-md-offset-4 {  margin-left: 33.33333333333333%;}
+.col-md-offset-3 {  margin-left: 25%;}
+.col-md-offset-2 {  margin-left: 16.666666666666664%;}
+.col-md-offset-1 {  margin-left: 8.333333333333332%;}
+.col-md-offset-0 {  margin-left: 0;}
 
 .form-control {
     width: 100%;

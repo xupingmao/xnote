@@ -73,11 +73,13 @@ class ModelManager:
         self.reload_module("xtemplate")
         self.reload_module("xauth")
         self.reload_module("xutils")
+        self.reload_module("xtables")
         self.mapping = list()
         self.model_list = list()
         self.failed_mods = []
         self.load_model_dir(config.HANDLERS_DIR)
         
+        import xtemplate
         self.mapping += self.basic_mapping
         self.app.init_mapping(self.mapping)
         xtemplate.reload()
