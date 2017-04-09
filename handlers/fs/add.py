@@ -27,8 +27,7 @@ html = """
 {% end %}
 """
 
-
-WIKI_PATH = "static/wiki/"
+WIKI_PATH = ""
 
 class handler:
     
@@ -53,3 +52,5 @@ class handler:
             # dir
             path = os.makedirs(path)
         raise web.seeother("/wiki/" + quote(target))
+        
+xurls = ("/wiki/add", handler)

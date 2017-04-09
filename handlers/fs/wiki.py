@@ -163,6 +163,10 @@ class handler:
                     continue
                 children.append(FileItem(parent, child, path))
             children.sort(key = lambda item: item.key)
+        elif not os.path.exists(path):
+            type = "file"
+            content = ""
+            children = None
         else:
             type = "file"
             content = xutils.readfile(path)

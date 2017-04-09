@@ -83,7 +83,7 @@ xurls = ("/test", handler)
 
 ## 配置运行
 - config/users.ini 用户配置，管理员可以添加账户，不支持注册
-- config/menu.ini 导航菜单配置
+- config/menu.ini 导航菜单配置，可以在系统页面编辑菜单配置
 - 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 即可
 
 ## 协议

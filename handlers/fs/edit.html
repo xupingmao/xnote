@@ -1,8 +1,17 @@
 {% extends base.html %}
 
 {% block head %}
+<script src="/static/lib/codemirror/codemirror.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/codemirror.min.css">
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
+
+<link rel="stylesheet" type="text/css" href="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.css">
+<script type="text/javascript" src="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
 <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
 <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
+<script type="text/javascript" src="/static/js/marked-ext.js"></script>
+
 <style>
 .CodeMirror {
     width: 60rem;
@@ -91,6 +100,25 @@
         $("#markdown-output-div").removeClass("col-md-12").addClass("col-md-6");
         var height = Math.max(500, $("#markdown-output-div").height());
         $("#markdown-input").css({height:height+"px"});
+        $("#edit-div").show();
+        $("#edit-btns").hide();
+
+        var editor = $("#markdown-input")[0];
+        var codeMirror = CodeMirror.fromTextArea(editor, {
+            lineNumbers:true,
+            mode: "text/x-markdown",
+            // theme:"xq-light",
+            theme: "monokai",
+            lineWrapping: true,
+            fixedGutter: true,
+        });
+        codeMirror.on("update", function (codeMirror, changeObj) {
+            console.log("update");
+            $("#markdown-input").val(codeMirror.doc.getValue());
+        })
+        window.codeMirror = codeMirror;
+        // setSize(width, height);
+        codeMirror.setSize("auto", height);
     }
     
     function preview() {
@@ -156,20 +184,25 @@
         marked.defaults.highlight = highlight;
 
     $(function () {
-        var old_content = $("#markdown-input-div").val();
-        setInterval(function () {
+        var old_content = "";
+
+        function repaint() {
             var input = $("#markdown-input").val();
             // not modified
             if (input == old_content) {
                 return;
             }
+            if ($("#markdown-output-div").hasClass("hide")) {
+                return;
+            }
             old_content = input;
-            
-            $("#markdown-output-div").html(marked.parse(input));
-            var height = Math.max(500, $("#markdown-output-div").height());
-            $("#markdown-input").css({height:height+"px"});
-        }, 200);
+            var outtext = marked.parse(input);
+            $("#markdown-output-div").html(outtext); 
+        }
+        repaint();
         edit();
+        
+        setInterval(repaint, 200);
     })
 </script>
 

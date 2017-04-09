@@ -128,6 +128,7 @@ class SysHandler:
         cmd_list.append(Storage(name="用户管理", url="/system/user_admin"))
         cmd_list.append(Storage(name="任务管理", url="/system/crontab"))
         cmd_list.append(Storage(name="首页提醒管理", url="/system/notice_admin"))
+        cmd_list.append(Storage(name="菜单配置", url="/wiki/config/menu.ini?op=edit"))
 
         return xtemplate.render("system/sys.html", 
             backup = backup.get_info(),
