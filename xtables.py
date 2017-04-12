@@ -115,6 +115,8 @@ def init_table_tag():
     manager.add_column("name", "text", "")
     # 标签ID
     manager.add_column("file_id", "int", 0)
+    # 权限控制
+    manager.add_column("groups", "text", "")
     manager.close()
 
 # init_test_db()

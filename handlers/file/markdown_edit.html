@@ -151,7 +151,7 @@
         var editor = $("#markdown-input")[0];
         var codeMirror = CodeMirror.fromTextArea(editor, {
             lineNumbers:true,
-            mode: "text/x-markdown",
+            mode: { name: "text/x-markdown", fencedCodeBlocks: true},
             // theme:"xq-light",
             theme: "monokai",
             lineWrapping: true,

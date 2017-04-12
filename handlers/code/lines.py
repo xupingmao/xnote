@@ -1,8 +1,12 @@
+# encoding=utf-8
+
 import os
 import web
 import xtemplate
 import xutils
 import re
+
+from collections import OrderedDict
 
 CODE_EXT_LIST = [
     ".c", ".cpp", ".h",
@@ -12,15 +16,16 @@ CODE_EXT_LIST = [
     ".php",
 ]
 
-CODE_EXT_DICT = {
+CODE_EXT_DICT = OrderedDict({
     "Python": [".py"],
-    "web": [".html", ".htm", ".js", ".css"],
+    "Python(web)": [".py", ".html"],
+    "Web前端": [".html", ".htm", ".js", ".css"],
     "C/C++": [".c", ".h", ".cpp", ".hpp"],
     "Lua": [".lua"],
     "Ruby": [".rb"],
     "Java": [".java"],
     "Php": [".php"],
-}
+})
 
 class LinesInfo(object):
     """docstring for LinesInfo"""
