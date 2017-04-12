@@ -150,6 +150,12 @@ class UpdateHandler(BaseHandler):
             service.update(old_record, "name", "related", "smtime")
             return result(True)
 
+    def del_request(self):
+        id = int(self.get_argument("id"))
+        db = get_file_db()
+        db.update("file", where={"id":id}, vars=None, is_deleted=1)
+        raise web.seeother("/file/recent_edit")
+
 
 xurls = ("/file/edit", handler, 
         "/file/markdown", handler,
