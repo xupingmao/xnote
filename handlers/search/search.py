@@ -65,14 +65,14 @@ class MemStore(web.session.DiskStore):
 
     def has_key(self, key):
         # 判断key是否存在
-        print(self.item_cache)
+        # print(self.item_cache)
         if key in self.item_cache:
             item = self.item_cache[key]
             if item.timeout > time.time():
                 return True
             else:
                 # 清除失效的缓存
-                print("DEL %s" % key)
+                # print("DEL %s" % key)
                 del self.item_cache[key]
                 return False
         return False
@@ -326,9 +326,9 @@ class handler(BaseHandler):
         # app 为None，不用全局使用session
         store = MemStore()
         store_key = "s_" + user_name + "-" + key
-        print("STORE KEY: ", store_key)
+        # print("STORE KEY: ", store_key)
         if store.has_key(store_key):
-            print("HIT %s" % store_key)
+            # print("HIT %s" % store_key)
             files = store[store_key]
         else:
             files = self.full_search(key)
