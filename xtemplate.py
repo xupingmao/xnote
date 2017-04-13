@@ -132,7 +132,7 @@ def encode_json(obj):
     return obj
 
 def render(template_name, **kw):
-    if "_json" in kw:
+    if web.input().get("_json") == "true":
         return json.dumps(kw, default=encode_json)
     nkw = {}
     pre_render(nkw)

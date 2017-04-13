@@ -167,6 +167,13 @@ def format_time(seconds=None):
 def json_str(**kw):
     return json.dumps(kw)
 
+def decode_bytes(bytes):
+    for encoding in ["utf-8", "gbk", "mbcs", "latin_1"]:
+        try:
+            return bytes.decode(encoding)
+        except:
+            pass
+    return None
 
 #################################################################
 ##   Html Utilities, Python 2 do not have this file
