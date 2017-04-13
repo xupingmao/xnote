@@ -59,7 +59,6 @@ def main():
     global app
 
     port = config.PORT
-    print("PORT is", os.environ.get("POST"))
     
     if not os.environ.get("PORT"):
         os.environ["PORT"] = port
