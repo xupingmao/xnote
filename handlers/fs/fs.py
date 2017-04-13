@@ -111,12 +111,15 @@ class FileSystemHandler:
 
     def list_directory(self, path):
         try:
-            list = os.listdir(path)
+            filelist = os.listdir(path)
         except OSError:
             return "No permission to list directory"
-        list.sort(key=lambda a: a.lower())
+        filelist.sort(key=lambda a: a.lower())
         # Fix, some `file` in *nix is not file either directory.
-        list.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
+        filelist.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
+
+        # Fix bad filenames
+        filelist = list(map(lambda x: xutils.decode_bytes(x.encode("utf-8", errors='surrogateescape')), filelist))
 
         path2 = path.replace("\\", "/")
         if path2.endswith("/"):
@@ -126,7 +129,7 @@ class FileSystemHandler:
         parent_path = os.path.dirname(path2).replace("\\", "/") # fix windows file sep
         path = path.replace("\\", "/")
         kw = get_filesystem_kw()
-        kw["filelist"] = list
+        kw["filelist"] = filelist
         kw["path"] = path
         kw["fspathlist"] = getpathlist(path)
         kw["current_path"] = path

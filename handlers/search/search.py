@@ -78,7 +78,7 @@ class MemStore(web.session.DiskStore):
         return False
 
     def load_from_file(self, key):
-        print("hit cache %s" % key)
+        # print("hit cache %s" % key)
         files = self[key].data
         for i, f in enumerate(files):
             f = FileDO.fromDict(f)
@@ -156,7 +156,7 @@ def search_name(words, groups=None):
     if groups and groups != "admin":
         sql += " AND (groups = '*' OR groups = '%s')" % groups
     sql += " order by satime desc limit 1000";
-    print("search name:", sql)
+    # print("search name:", sql)
     all = xutils.db_execute("db/data.db", sql)
     return [FileDO.fromDict(item) for item in all]
 
@@ -176,7 +176,7 @@ def full_search(words, groups=None):
     if groups and groups != "admin":
         sql += " AND (groups = '*' OR groups = '%s')" % groups
     sql += " order by satime desc limit 1000";
-    print("full search:", sql)
+    # print("full search:", sql)
     all = xutils.db_execute("db/data.db", sql)
     return [FileDO.fromDict(item) for item in all]
 
