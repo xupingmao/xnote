@@ -115,11 +115,12 @@ class FileSystemHandler:
         except OSError:
             return "No permission to list directory"
         filelist.sort(key=lambda a: a.lower())
-        # Fix, some `file` in *nix is not file either directory.
-        filelist.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
 
         # Fix bad filenames
         filelist = list(map(lambda x: xutils.decode_bytes(x.encode("utf-8", errors='surrogateescape')), filelist))
+
+        # Fix, some `file` in *nix is not file either directory.
+        filelist.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
 
         path2 = path.replace("\\", "/")
         if path2.endswith("/"):
