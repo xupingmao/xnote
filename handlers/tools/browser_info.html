@@ -26,6 +26,14 @@
         <td>Screen</td>
         <td id="screen"></td>
     </tr>
+    <tr>
+        <td>getUserMedia</td>
+        <td id="getUserMedia"></td>
+    </tr>
+    <tr>
+        <td>RTCPeerConnection</td>
+        <td id="RTCPeerConnection"></td>
+    </tr>
 </div>
 
 <script type="text/javascript">
@@ -34,5 +42,7 @@ $("#appName").html(navigator.appName);
 $("#appVersion").html(navigator.appVersion);
 $("#vendor").html(navigator.vendor);
 $("#screen").html("screen.width:"+screen.width+",screen.height:"+screen.height);
+$("#getUserMedia").html(getUserMedia != undefined);
+$("#RTCPeerConnection").html(RTCPeerConnection != undefined);
 </script>
 {% end %}
