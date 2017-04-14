@@ -121,7 +121,7 @@ def login_required(user_name=None):
     def _login_required(func):
         def new_func(*args, **kw):
             if not has_login(user_name):
-                raise web.unauthorized("No Permission!")
+                raise web.seeother("/unauthorized")
             ret = func(*args, **kw)
             return ret
         return new_func

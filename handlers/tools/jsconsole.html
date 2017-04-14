@@ -1,5 +1,26 @@
 {% extends base.html %}
 
+{% block head %}
+<script src="/static/lib/codemirror/codemirror.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/codemirror.min.css">
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<script type="text/javascript" src="/static/lib/codemirror/mode/javascript.js"></script>
+<style>
+.CodeMirror {
+    width: 100%;
+    font-size:16px;
+    height: auto;
+}
+
+#markdown-input {
+    position: relative;
+    font-family: monospace;
+}
+
+</style>
+{% end %}
+
+
 {% block body %}
 
 <div class="col-md-12">
@@ -26,6 +47,26 @@
 </div>
 
 <script type="text/javascript">
+
+$(function () {
+    var editor = $("#input")[0];
+    var codeMirror = CodeMirror.fromTextArea(editor, {
+        lineNumbers:true,
+        mode: { name: "text/javascript", fencedCodeBlocks: true},
+        // theme:"xq-light",
+        theme: "monokai",
+        lineWrapping: true,
+        fixedGutter: true,
+    });
+    codeMirror.on("update", function (codeMirror, changeObj) {
+        console.log("update");
+        $("#input").val(codeMirror.doc.getValue());
+    })
+    window.codeMirror = codeMirror;
+    // setSize(width, height);
+    codeMirror.setSize("auto", 20 * 20);
+})
+
     function isBasicType(obj) {
         var typeName = typeof(obj);
         // 不能随便换行

@@ -24,3 +24,5 @@ __pycache__
 /backup/
 /script/
 /config/users.ini
+/config/menu.ini
+tools.md

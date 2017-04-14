@@ -11,11 +11,144 @@ import math
 import web
 import xutils
 import xauth
-from FileDB import FileDO
 from handlers.base import *
 import web.db as db
 
+
 """FileDB cache"""
+
+
+class FileDO(dict):
+    """This class behaves like both object and dict"""
+    def __init__(self, name):
+        self.id = None
+        self.related = ''
+        if isinstance(name, list) or isinstance(name, tuple):
+            self.name = name[0]
+            self.addRelatedNames(name)
+        else:
+            self.name = name
+            self.addRelatedName(name)
+        # self.path = getRandomPath()
+        self.size = 0
+        t = dateutil.get_seconds()
+        self.mtime = t
+        self.atime = t
+        self.ctime = t
+        # self.status = 0
+        self.visited_cnt = 0
+
+    # def __getitem__(self, key):
+    #     return getattr(self, key)
+
+    # def __setitem__(self, key, value):
+    #     setattr(self, key, value)
+    
+    def __getattr__(self, key): 
+        try:
+            return self[key]
+        except KeyError as k:
+            # raise AttributeError(k)
+            return None
+    
+    def __setattr__(self, key, value): 
+        self[key] = value
+
+    def __delattr__(self, key):
+        try:
+            del self[key]
+        except KeyError as k:
+            raise AttributeError(k)
+    
+    def addRelatedName(self, name):
+        name = name.upper()
+        if self.related == '':
+            self.related = ',%s,' % name
+            return
+        if name == '':
+            return
+        tag = ',%s,' % name
+        if tag in self.related:
+            return
+        self.related += name + ','
+        
+    def delRelatedName(self, name):
+        name = name.upper()
+        if name == self.name.upper():
+            raise FileRelationOptionError("can not remove itself from related!!!")
+        names = self.related.split(',')
+        names.remove(name)
+        self.related = ','.join(names)
+        
+    def addRelatedNames(self, names):
+        for name in names:
+            self.addRelatedName(name)
+        
+    def save(self):
+        if self.id is None:
+            FileService.getService().insert(self)
+        else:
+            FileService.getService().update(self)
+            
+    def fixRelated(self):
+        ''' this is a deprecated function '''
+        related = self.related
+        self.related = related.upper()
+        name = self.name.upper()
+        if name not in self.related:
+            self.addRelatedName(name)
+        if self.related[0] != ',':
+            self.related = ',' + self.related
+        if self.related[-1] != ',':
+            self.related += ','
+        if related != self.related:
+            self.save()
+            
+    def fromDict(dict, option=None):
+        """build fileDO from dict"""
+        name = dict['name']
+        file = FileDO(name)
+        for key in dict:
+            file[key] = dict[key]
+            # setattr(file, key, dict[key])
+        if hasattr(file, "content") and file.content is None:
+            file.content = ""
+        if option:
+            file.option = option
+        if file.type == "post":
+            file.url = "/file/post?id={}".format(dict["id"])
+        else:
+            file.url = "/file/edit?id={}".format(dict["id"])
+        return file
+        
+    def setBase(self, base):
+        self.base = base
+        
+    def get_content(self):
+        if self.content is None:
+            self.content = ""
+        if "CODE-" in self.related and not self.content.startswith("```"):
+            m = re.match(r".*CODE-([A-Z]*)", self.related)
+            codename = ""
+            if m:
+                codename = m.groups()[0]
+            return "```%s\n%s\n```" % (codename, self.content)
+        return self.content
+
+        # abspath = os.path.join(self.base, self.path)
+        # if not os.path.isfile(abspath):
+        #     return ""
+        # return readFile(abspath)
+        
+    def writeContent(self, content):
+        # abspath = os.path.join(self.base, self.path)
+        # dirname = os.path.dirname(abspath)
+        # basename = os.path.basename(abspath)
+        # # print(dirname, abspath, self.base, self.path)
+        # if not os.path.exists(dirname):
+        #     os.makedirs(dirname)
+        # writeFile(abspath, content)
+        raise Exception("not implemented")
 
 
 class StoreItem:

@@ -19,11 +19,11 @@ CODE_EXT_LIST = [
 CODE_EXT_DICT = OrderedDict({
     "Python": [".py"],
     "Python(web)": [".py", ".html"],
+    "Java": [".java"],
     "Web前端": [".html", ".htm", ".js", ".css"],
     "C/C++": [".c", ".h", ".cpp", ".hpp"],
     "Lua": [".lua"],
     "Ruby": [".rb"],
-    "Java": [".java"],
     "Php": [".php"],
 })
 
