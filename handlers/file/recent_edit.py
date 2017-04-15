@@ -7,7 +7,7 @@ import xauth
 import xutils
 
 def execute(sql):
-    return xutils.db_execute("db/data.db", sql)
+    return xutils.db_execute(config.DB_PATH, sql)
 
 # 待优化
 def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):

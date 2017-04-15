@@ -10,6 +10,7 @@ import math
 
 import web
 import xutils
+import config
 import xauth
 from handlers.base import *
 import web.db as db
@@ -235,7 +236,7 @@ def file_dict(id, name, related):
     return dict(id = id, name = name, related = related)
 
 def get_file_db():
-    return db.SqliteDB(db="db/data.db")
+    return db.SqliteDB(db=config.DB_PATH)
 
 class FileFilter:
 
@@ -290,7 +291,7 @@ def search_name(words, groups=None):
         sql += " AND (groups = '*' OR groups = '%s')" % groups
     sql += " order by satime desc limit 1000";
     # print("search name:", sql)
-    all = xutils.db_execute("db/data.db", sql)
+    all = xutils.db_execute(config.DB_PATH, sql)
     return [FileDO.fromDict(item) for item in all]
 
 def full_search(words, groups=None):
@@ -310,7 +311,7 @@ def full_search(words, groups=None):
         sql += " AND (groups = '*' OR groups = '%s')" % groups
     sql += " order by satime desc limit 1000";
     # print("full search:", sql)
-    all = xutils.db_execute("db/data.db", sql)
+    all = xutils.db_execute(config.DB_PATH, sql)
     return [FileDO.fromDict(item) for item in all]
 
 def do_search(words, key=None):

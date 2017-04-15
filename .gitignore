@@ -17,6 +17,7 @@ __pycache__
 /static/deprecated/
 /static/wiki/
 /static/archive/
+/data/
 /log/
 /tmp/
 /model/sync

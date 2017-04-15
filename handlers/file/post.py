@@ -12,13 +12,14 @@ import xtemplate
 import web.db as db
 
 import xutils
+import config
 
 from handlers.base import get_upload_img_path
 from util import dateutil
 from util import fsutil
 
 def get_file_db():
-    return db.SqliteDB(db="db/data.db")
+    return db.SqliteDB(db=config.DB_PATH)
 
 class PostView(object):
     """docstring for handler"""
@@ -82,13 +83,13 @@ class PostEdit:
             file.groups = file.creator
         if hasattr(args.file, "filename") and args.file.filename!="":
             filename = args.file.filename
-            filepath = get_upload_img_path(args.file.filename)
+            filepath, webpath = get_upload_img_path(args.file.filename)
             fout = open(filepath, "wb")
             # fout.write(x.file.file.read())
             for chunk in args.file.file:
                 fout.write(chunk)
             fout.close()
-            file.content = file.content + "\n[img src=\"/{}\"img]".format(filepath)
+            file.content = file.content + "\n[img src=\"{}\"img]".format(webpath)
 
         file_db.update("file", where={"id": id}, vars=None, **file)
         raise web.seeother("/file/post?id={}".format(id))

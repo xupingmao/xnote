@@ -2,6 +2,8 @@
 
 import re
 
+import xutils
+
 from handlers.base import *
 from xutils import xhtml_escape
 
@@ -171,12 +173,16 @@ class FileSearch:
             for fname in files:
                 # 匹配文件名，过滤黑名单
                 if self.should_skip(root, fname, filename):
+                    # print("skip", fname)
                     continue
                 try:
                     fpath = os.path.join(root, fname)
-                    content = fsutil.readfile(fpath)
+                    content = xutils.readfile(fpath)
                 except Exception as e:
-                    result_list.append(Storage(name=fpath, result=["read file fail, e=%s" % e]))
+                    print("exception")
+                    result_list.append(Storage(name=fpath, 
+                        result=[LineInfo(-1, "read file fail, e=%s" % e, None)]))
+                    continue
                 # 查找结果
                 result = code_find(content, key, blacklist_str, 
                     ignore_case=ignore_case)

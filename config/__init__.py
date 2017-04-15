@@ -17,9 +17,16 @@ WEBDIR = os.path.join(WORKING_DIR, "static")
 UPLOAD_DIR = os.path.join(WORKING_DIR, "static", "upload")
 PLUGINS_DIR = os.path.join(WORKING_DIR, "plugins")
 LOG_DIR = os.path.join(WORKING_DIR, "log")
+
+
+# 用户数据的地址
+
+DATA_PATH = os.path.join(WORKING_DIR, "data")
+
 DB_DIR  = os.path.join(WORKING_DIR, "db")
-DB_PATH  = os.path.join(WORKING_DIR, "db", "data.db")
-SQL_PATH = os.path.join(WORKING_DIR, "db", "data.sql")
+# 数据库地址
+DB_PATH  = os.path.join(DATA_PATH, "data.db")
+
 BACKUP_DIR = os.path.join(WORKING_DIR, "backup")
 
 IS_ADMIN = False

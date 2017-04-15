@@ -43,13 +43,15 @@ def get_ip_list(blacklist = []):
     
 
 def check_db():
-    xutils.makedirs(config.DB_DIR)
-    if not os.path.exists(config.DB_PATH):
-        # xutils.touch(config.DB_PATH)
-        sql = xutils.readfile(config.SQL_PATH)
-        dbutil.execute(config.DB_PATH, sql)
+    xtables.init()
+    # xutils.makedirs(config.DB_DIR)
+    # if not os.path.exists(config.DB_PATH):
+    #     # xutils.touch(config.DB_PATH)
+    #     sql = xutils.readfile(config.SQL_PATH)
+    #     dbutil.execute(config.DB_PATH, sql)
 
 def check_dirs():
+    xutils.makedirs(config.DATA_PATH)
     xutils.makedirs(config.LOG_DIR)
     xutils.makedirs("tmp")
     xutils.makedirs("scripts")
@@ -71,9 +73,9 @@ def main():
     # I can reload the system by myself
     app = web.application(list(), var_env, autoreload=False)
     
-    # check database
-    check_db()
+    # check directories
     check_dirs()
+    check_db()
 
     mgr = xmanager.init(app, var_env)
     mgr.reload()

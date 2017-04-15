@@ -14,9 +14,9 @@ class handler(BaseHandler):
             self.render("file/upload_file.html", filepath = filepath, filename = filename)
             return
         filename = file.filename
-        filepath = get_upload_img_path(file.filename)
+        filepath, webpath = get_upload_img_path(file.filename)
         with open(filepath, "wb") as fout:
             # fout.write(x.file.file.read())
             for chunk in file.file:
                 fout.write(chunk)
-        self.render("file/upload_file.html", filepath = filepath, filename = filename)
+        self.render("file/upload_file.html", filepath = webpath, filename = filename)

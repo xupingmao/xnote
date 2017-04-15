@@ -5,6 +5,7 @@ from handlers.base import *
 from FileDB import FileService
 import xauth
 import xutils
+import config
 
 import web.db as db
 
@@ -20,7 +21,7 @@ def try_decode(bytes):
         return bytes.decode("gbk")
 
 def get_file_db():
-    return db.SqliteDB(db="db/data.db")
+    return db.SqliteDB(db=config.DB_PATH)
 
 class handler(BaseHandler):
 
@@ -106,7 +107,7 @@ def updateContent(id, content, user_name=None, type=None, groups=None):
         sql += ", groups = '%s'" % groups
     sql += " where id=%s" % id
 
-    xutils.db_execute("db/data.db", sql)
+    xutils.db_execute(config.DB_PATH, sql)
 
 def result(success = True, msg=None):
     return {"success": success, "result": None, "msg": msg}

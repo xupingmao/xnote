@@ -6,6 +6,8 @@
 
 import sqlite3
 
+import config
+
 
 class SqliteTableManager:
     """检查数据库字段，如果不存在就自动创建"""
@@ -82,7 +84,7 @@ def init_table_test():
     # sys.exit(0)
 
 def init_table_file():
-    manager = TableManager("db/data.db", "file")
+    manager = TableManager(config.DB_PATH, "file")
     manager.add_column("name", "text", "")
     manager.add_column("content", "text", "")
     manager.add_column("size", "long", 0)
@@ -110,7 +112,7 @@ def init_table_file():
     manager.close()
 
 def init_table_tag():
-    manager = TableManager("db/data.db", "file_tag")
+    manager = TableManager(config.DB_PATH, "file_tag")
     # 标签名
     manager.add_column("name", "text", "")
     # 标签ID
@@ -119,6 +121,8 @@ def init_table_tag():
     manager.add_column("groups", "text", "")
     manager.close()
 
-# init_test_db()
-init_table_file()
-# init_table_tag()
+def init():
+    # init_test_db()
+    init_table_file()
+    init_table_tag()
+

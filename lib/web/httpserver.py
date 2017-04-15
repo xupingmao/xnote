@@ -1,3 +1,4 @@
+# encoding=utf-8
 from __future__ import print_function
 
 import sys, os
@@ -292,7 +293,10 @@ class StaticMiddleware:
         path = environ.get('PATH_INFO', '')
         path = self.normpath(path)
 
-        if path.startswith(self.prefix):
+        if path.startswith("/static/img/"):
+            # 图片资源兼容特殊处理
+            return self.app(environ, start_response)
+        elif path.startswith(self.prefix):
             return StaticApp(environ, start_response)
         else:
             return self.app(environ, start_response)

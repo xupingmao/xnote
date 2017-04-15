@@ -228,14 +228,20 @@ class BaseFileHandler(BaseHandler):
 def get_upload_img_path(filename):
     """生成上传文件名"""
     filename = filename.replace(" ", "_")
+    basename, ext = os.path.splitext(filename)
     date = dateutil.format_date(fmt="%Y/%m")
-    origin_filename = "static/img/" + date + "/" + filename
-    fsutil.check_create_dirs("static/img/"+date)
+    dirname = config.DATA_PATH + "/img/" + date + "/"
+    webpath = "/data/img/" + date + "/" + filename
+
+    origin_filename = dirname + filename
+    fsutil.check_create_dirs(dirname)
     fileindex = 1
     newfilename = origin_filename
     while os.path.exists(newfilename):
         name, ext = os.path.splitext(origin_filename)
         # 使用下划线，括号会使marked.js解析图片url失败
         newfilename = "{}_{}{}".format(name, fileindex, ext)
+        webpath = "/data/img/{}/{}_{}{}".format(date, basename, fileindex, ext)
         fileindex+=1
-    return newfilename
+    return newfilename, webpath
+

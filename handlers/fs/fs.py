@@ -7,6 +7,7 @@
 - 大文件下载
 """
 import os
+import mimetypes
 
 import web
 from handlers.base import *
@@ -95,11 +96,14 @@ class FileSystemHandler:
         # 二进制传输的编码格式
     }
 
-    def handle_content_type(self, ext):
+    def handle_content_type(self, path):
         """Content-Type设置"""
-        mime_type = self.mime_types.get(ext.lower())
+        mime_type, mime_encoding = mimetypes.guess_type(path)
         if mime_type is None:
-            mime_type = self.mime_types['']
+            name, ext = os.path.splitext(path)
+            mime_type = self.mime_types.get(ext.lower())
+            if mime_type is None:
+                mime_type = self.mime_types['']
 
         web.header("Content-Type", mime_type)
 
@@ -116,10 +120,11 @@ class FileSystemHandler:
             return "No permission to list directory"
         filelist.sort(key=lambda a: a.lower())
 
-        # Fix bad filenames
-        filelist = list(map(lambda x: xutils.decode_bytes(x.encode("utf-8", errors='surrogateescape')), filelist))
+        # SAE上遇到中文出错
+        # Fix bad filenames，修改不生效
+        # filelist = list(map(lambda x: xutils.decode_bytes(x.encode("utf-8", errors='surrogateescape')), filelist))
 
-        # Fix, some `file` in *nix is not file either directory.
+        # Fix, some `file` in *nix is not file either directory. os.stat方法报错
         filelist.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
 
         path2 = path.replace("\\", "/")
@@ -209,8 +214,7 @@ class FileSystemHandler:
         client_etag = environ.get('HTTP_IF_NONE_MATCH')
         web.header("Etag", etag)
 
-        name, ext = os.path.splitext(path)
-        self.handle_content_type(ext)
+        self.handle_content_type(path)
         # self.handle_content_encoding(ext)
 
         if etag == client_etag:
@@ -228,9 +232,13 @@ class FileSystemHandler:
                 return self.read_all(path, blocksize)            
 
 
-    @xauth.login_required("admin")
+    # @xauth.login_required("admin")
     def GET(self, path):
         path = xutils.unquote(path)
+        if path.startswith("img"):
+            path = "./data/" + path
+        else:
+            xauth.check_login("admin")
         # TODO 有编码错误
         # print("Load Path:", path)
         if path == "":
@@ -245,4 +253,9 @@ class FileSystemHandler:
 name = "文件系统"
 description = "下载和上传文件"
 
-xurls = (r"/fs-", handler, r"/fs/(.*)", FileSystemHandler)
+xurls = (r"/fs-", handler, 
+    r"/fs/(.*)", FileSystemHandler,
+    r"/static/(.*)", FileSystemHandler,
+    r"/data/(.*)", FileSystemHandler)
+
+
