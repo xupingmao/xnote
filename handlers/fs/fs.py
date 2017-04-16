@@ -236,7 +236,11 @@ class FileSystemHandler:
     def GET(self, path):
         path = xutils.unquote(path)
         if path.startswith("img"):
-            path = "./data/" + path
+            newpath = "./data/" + path
+            if not os.path.exists(newpath):
+                # 兼容static目录数据
+                newpath = "./static/" + path
+            path = newpath
         else:
             xauth.check_login("admin")
         # TODO 有编码错误
