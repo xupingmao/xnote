@@ -57,6 +57,8 @@ class PostEdit:
         id = int(args.id)
         file_db = get_file_db()
         file = file_db.select("file", where={"id": id})[0]
+        if file.content == None:
+            file.content = ""
         rows = file.content.count("\n")+5
         rows = max(rows, 20)
         return xtemplate.render("file/post.html", 
