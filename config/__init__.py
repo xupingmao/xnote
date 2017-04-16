@@ -27,7 +27,7 @@ DB_DIR  = os.path.join(WORKING_DIR, "db")
 # 数据库地址
 DB_PATH  = os.path.join(DATA_PATH, "data.db")
 
-BACKUP_DIR = os.path.join(WORKING_DIR, "backup")
+BACKUP_DIR = os.path.join(DATA_PATH, "backup")
 
 IS_ADMIN = False
 
