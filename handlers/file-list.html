@@ -82,6 +82,7 @@
                 <div class="note-visited-cnt">访问指数:{{file.visited_cnt}}</div>
                 <div class="note-name">
                     <a href="{{file.url}}">{{file.name}}</a>
+                    {% if file.groups == "*" %}<span class="tag">公开</span>{% end %}
                 </div>
                 
                 {% if "raw" in file %}
