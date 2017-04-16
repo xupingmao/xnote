@@ -22,8 +22,7 @@ PS：我觉得IDE是一个非常伟大的创新，大大提高了程序员编码
 
 ### 开发框架/软件库
 
-- webpy
-- cherrypy (webpy依赖的httpserver)
+- webpy(修改版)
 - tornado template(修改版)
 - sqlite3 (Python自带文件型数据库，不支持多线程操作)
 - psutil(可选，采集系统运行数据)

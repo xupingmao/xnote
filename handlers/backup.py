@@ -24,7 +24,11 @@ _zipname = "xnote.zip"
 
 _dest_path = os.path.join(_dirname, "static", _zipname)
 
+# 是否移除旧备份
+_remove_old = False
 _MAX_BACKUP_COUNT = 10
+# 一个月备份一次
+_BACKUP_INTERVAL = 30 * 3600 * 24
 
 def zip_xnote(nameblacklist = [_zipname]):
     dirname = "./"
@@ -86,7 +90,7 @@ def chk_backup():
     files = os.listdir(backup_dir)
     sorted_files = sorted(files)
     logutil.info("sorted backup files: {}", sorted_files)
-    if len(sorted_files) > _MAX_BACKUP_COUNT:
+    if _remove_old and len(sorted_files) > _MAX_BACKUP_COUNT:
         target = sorted_files[0]
         target_path = os.path.join(backup_dir, target)
         fsutil.remove(target_path)
@@ -103,7 +107,7 @@ def chk_backup():
             seconds = time.mktime(tm_time)
             now = time.time()
             # backup every 10 days.
-            if now - seconds > 3600 * 24 * 10:
+            if now - seconds > _BACKUP_INTERVAL:
                 backup_db()
         else:
             # 先创建一个再删除
@@ -118,3 +122,5 @@ class handler:
         chk_backup()
         return "OK"
     
+chk_backup()
+
