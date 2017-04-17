@@ -81,9 +81,9 @@ def get_code_lines():
 
 def get_ip_list(blacklist = []):
     try:
-        if xutils.is_mac():
+        # if xutils.is_mac():
             # Mac获取不到
-            return "127.0.0.1"
+            # return ["127.0.0.1"]
         localIp = socket.gethostbyname(socket.gethostname())
         print("localIP:%s" % localIp)
         name, aliaslist, ipList = socket.gethostbyname_ex(socket.gethostname())
