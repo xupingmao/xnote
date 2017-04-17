@@ -1,7 +1,8 @@
 # encoding=utf-8
-from FileDB import FileService
 import xtemplate
 import xutils
+
+from . import dao
 
 
 def date2str(d):
@@ -14,8 +15,8 @@ class handler:
 
     def GET(self, name):
         name = xutils.unquote(name)
-        file = FileDB.get_by_name(name)
-        return xtemplate.render("file/edit.html",
+        file = dao.get_by_name(name)
+        return xtemplate.render("file/markdown.html",
             file = file,
             content = file.content,
             date2str = date2str,

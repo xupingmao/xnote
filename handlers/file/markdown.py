@@ -2,12 +2,13 @@
 # Created by xupingmao on 2016/12
 
 from handlers.base import *
-from FileDB import FileService
 import xauth
 import xutils
 import config
 
 import web.db as db
+from . import dao
+from FileDB import FileService
 
 def date2str(d):
     ct = time.gmtime(d / 1000)
@@ -45,7 +46,7 @@ class handler(BaseHandler):
             content = file.get_content(), 
             date2str=date2str,
             download_csv = download_csv, 
-            children = FileDB.get_children_by_id(file.id))
+            children = dao.get_children_by_id(file.id))
 
     def download_request(self):
         service = FileService.instance()
@@ -80,7 +81,7 @@ class MarkdownEdit(BaseHandler):
             content = file.get_content(), 
             date2str=date2str,
             download_csv = download_csv, 
-            children = FileDB.get_children_by_id(file.id))
+            children = dao.get_children_by_id(file.id))
 
 def sqlite_escape(text):
     if text is None:

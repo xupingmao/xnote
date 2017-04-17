@@ -1,6 +1,6 @@
 #coding:utf-8
 from handlers.base import *
-from FileDB import *
+from .dao import *
 
 import config
 import xauth

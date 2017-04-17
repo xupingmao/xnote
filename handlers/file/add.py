@@ -6,8 +6,8 @@
 import time
 
 from handlers.base import *
-import FileDB
-from FileDB import FileDO
+from .dao import FileDO
+from . import dao
 
 import xauth
 
@@ -38,8 +38,11 @@ class handler(BaseHandler):
         error = ""
         try:
             if name != '':
-                f = FileDB.insert(file)
-                inserted = FileDB.get_by_name(name)
+                f = dao.get_by_name(name)
+                if f != None:
+                    raise Exception("%s 已存在" % name)
+                f = dao.insert(file)
+                inserted = dao.get_by_name(name)
                 if type == "post":
                     raise web.seeother("/file/post?id={}".format(inserted.id))
                 elif type == "table":
