@@ -67,6 +67,18 @@
     font-size: small;
 }
 
+.tag {
+    font-size: small;
+    background-color: green;
+    color: white;
+}
+
+.red-tag {
+    font-size: small;
+    background-color: red;
+    color: white;
+}
+
 </style>
 {% end %}
 
@@ -82,7 +94,11 @@
                 <div class="note-visited-cnt">访问指数:{{file.visited_cnt}}</div>
                 <div class="note-name">
                     <a href="{{file.url}}">{{file.name}}</a>
-                    {% if file.groups == "*" %}<span class="tag">公开</span>{% end %}
+                    {% if file.groups == "*" %}
+                        <span class="tag">公开</span>
+                    {% else %}
+                        <span class="red-tag">{{file.groups}}</span>
+                    {% end %}
                 </div>
                 
                 {% if "raw" in file %}
@@ -116,12 +132,12 @@
         </div>
     {% end %}
 
-    <p><span>Total {{?pages}}</span>
+    <p>
         <input id="targetPage" value="{{page}}"/> <button onclick="goToPage()">GO</button>
         {% if page > 1 %}
         <a href="{{page_url}}{{page-1}}">Prev</a>
         {% end %}
-        <a href="#"><span style="background:blue;color:white">{{page}}</span></a>
+        <a href="#"><span style="background:blue;color:white">{{page}} / {{?pages}}</span></a>
         {% if page < pages %}
         <a href="{{page_url}}{{page+1}}">Next</a>
         {% end %}

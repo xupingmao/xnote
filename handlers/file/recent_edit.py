@@ -1,4 +1,6 @@
 #coding:utf-8
+import math
+
 from handlers.base import *
 from .dao import *
 
@@ -27,7 +29,7 @@ def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
         
     return [FileDO.fromDict(item) for item in list]
 
-def get_pages():
+def count_files():
     if xauth.get_current_user() == None:
         return 0
     user_name = xauth.get_current_user().get("name")
@@ -44,9 +46,9 @@ class handler(BaseHandler):
         page = max(1, page)
         days = int(s_days)
         files = get_recent_modified(days, page)
-        pages = get_pages()
+        count = count_files()
         self.render("file-list.html", files = files[:20], key = "", 
-            page = page, pages = pages, page_url="/file/recent_edit?page=")
+            page = page, pages = math.ceil(count / config.PAGE_SIZE), page_url="/file/recent_edit?page=")
 
     def json_request(self):
         s_days = self.get_argument("days", 7)
