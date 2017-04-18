@@ -126,7 +126,7 @@ class UpdateHandler(BaseHandler):
         if is_public == "on":
             updateContent(id, content, groups = '*')
         else:
-            updateContent(id, content, groups = xauth.get_current_user().name)
+            updateContent(id, content, groups = file.creator)
         raise web.seeother("/file/edit?id=" + id)
 
     def rename_request(self):
