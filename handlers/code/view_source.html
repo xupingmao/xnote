@@ -17,8 +17,8 @@
     <p style="color:red">{{?error}}</p>
 </div>
 <div class="col-md-12">
-<pre class="marked-pre" style="float:left; width: 50px;">{% for l in range(1, lines+1) %}{{"%04d\n" % l}}{% end %}</pre>
-<pre class="col-md-11 marked-pre">{{ content }}&nbsp;</pre>
+<pre class="col-md-1 marked-pre">{% for l in range(1, lines+1) %}{{"%04d\n" % l}}{% end %}</pre>
+<pre class="col-md-10 marked-pre">{{ content }}&nbsp;</pre>
 </div>
 
 {# TODO 需要处理下搜索的高亮 #}

@@ -16,9 +16,6 @@ from handlers.base import *
 import web.db as db
 
 
-"""FileDB cache"""
-
-
 class FileDO(dict):
     """This class behaves like both object and dict"""
     def __init__(self, name):
@@ -324,7 +321,6 @@ def do_search(words, key=None):
         files += translates + tools + pydocs
 
     name_results = search_name(words, xauth.get_current_user().get("name"))
-    # FileDB.full_search(context, words)
     # files = self._service.search(words)
     content_results = full_search(words, xauth.get_current_user().get("name"))
 

@@ -96,7 +96,7 @@
                     <a href="{{file.url}}">{{file.name}}</a>
                     {% if file.groups == "*" %}
                         <span class="tag">公开</span>
-                    {% else %}
+                    {% elif file.groups != None %}
                         <span class="red-tag">{{file.groups}}</span>
                     {% end %}
                 </div>
@@ -133,7 +133,7 @@
     {% end %}
 
     <p>
-        <input id="targetPage" value="{{page}}"/> <button onclick="goToPage()">GO</button>
+        <input id="targetPage" value="{{page}}" style="width:3em;"/> <button onclick="goToPage()">GO</button>
         {% if page > 1 %}
         <a href="{{page_url}}{{page-1}}">Prev</a>
         {% end %}
