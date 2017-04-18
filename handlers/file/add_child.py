@@ -1,6 +1,6 @@
 from handlers.base import *
 from .dao import FileDO
-import dao
+from . import dao
 
 class handler(BaseHandler):
 
