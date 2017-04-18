@@ -1,6 +1,6 @@
 from handlers.base import *
-import FileDB
-from FileDB import FileDO
+from .dao import FileDO
+import dao
 
 class handler(BaseHandler):
 
@@ -21,8 +21,8 @@ class handler(BaseHandler):
         error = ""
         try:
             if name != '':
-                FileDB.insert(file)
-                record = FileDB.get_by_name(name)
+                dao.insert(file)
+                record = dao.get_by_name(name)
                 raise web.seeother("/file/edit?id=%s" % record.id)
         except Exception as e:
             error = e

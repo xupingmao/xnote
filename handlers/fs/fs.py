@@ -231,18 +231,7 @@ class FileSystemHandler:
             else:
                 return self.read_all(path, blocksize)            
 
-
-    # @xauth.login_required("admin")
-    def GET(self, path):
-        path = xutils.unquote(path)
-        if path.startswith("img"):
-            newpath = "./data/" + path
-            if not os.path.exists(newpath):
-                # 兼容static目录数据
-                newpath = "./static/" + path
-            path = newpath
-        else:
-            xauth.check_login("admin")
+    def handle_get(self, path):
         # TODO 有编码错误
         # print("Load Path:", path)
         if path == "":
@@ -254,12 +243,30 @@ class FileSystemHandler:
         else:
             return "Not Readable %s" % path
 
+    @xauth.login_required("admin")
+    def GET(self, path):
+        path = xutils.unquote(path)
+        return self.handle_get(path)
+        
+
+class StaticFileHandler(FileSystemHandler):
+    """外置数据的静态文件支持"""
+    def GET(self, path):
+        path = xutils.unquote(path)
+        newpath = "./data/" + path
+        if not os.path.exists(newpath):
+            # 兼容static目录数据
+            newpath = "./static/" + path
+        path = newpath
+        return self.handle_get(path)
+
 name = "文件系统"
 description = "下载和上传文件"
 
 xurls = (r"/fs-", handler, 
     r"/fs/(.*)", FileSystemHandler,
-    r"/static/(.*)", FileSystemHandler,
-    r"/data/(.*)", FileSystemHandler)
+    r"/static/(.*)", StaticFileHandler,
+    r"/data/(.*)", StaticFileHandler,
+    r"/app/(.*)", StaticFileHandler)
 
 

@@ -112,6 +112,7 @@ def init_table_file():
     manager.close()
 
 def init_table_tag():
+    # 2017/04/18
     manager = TableManager(config.DB_PATH, "file_tag")
     # 标签名
     manager.add_column("name", "text", "")

@@ -1,8 +1,9 @@
+# encoding=utf-8
+# 没什么用
 from handlers.base import *
 import config
 import hashlib
 from urllib.request import urlopen
-from FileDB import *
 
 WORKING_DIR = config.WORKING_DIR
 

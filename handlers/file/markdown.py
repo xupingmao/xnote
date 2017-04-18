@@ -8,7 +8,6 @@ import config
 
 import web.db as db
 from . import dao
-from FileDB import FileService
 
 def date2str(d):
     ct = time.gmtime(d / 1000)
@@ -28,17 +27,16 @@ class handler(BaseHandler):
 
     @xauth.login_required()
     def execute(self):
-        service = FileService.instance()
         id = self.get_argument("id", "")
         name = self.get_argument("name", "")
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
             id = int(id)
-            service.visitById(id)
-            file = service.getById(id)
+            dao.visit_by_id(id)
+            file = dao.get_by_id(id)
         elif name is not None:
-            file = service.getByName(name)
+            file = dao.get_by_name(name)
         if file is None:
             raise web.notfound()
         download_csv = file.related != None and "CODE-CSV" in file.related
@@ -49,9 +47,8 @@ class handler(BaseHandler):
             children = dao.get_children_by_id(file.id))
 
     def download_request(self):
-        service = FileService.instance()
         id = self.get_argument("id")
-        file = service.getById(id)
+        file = dao.get_by_id(id)
         content = file.get_content()
         if content.startswith("```CSV"):
             content = content[7:-3] # remove \n
@@ -63,17 +60,16 @@ class MarkdownEdit(BaseHandler):
 
     @xauth.login_required()
     def default_request(self):
-        service = FileService.instance()
         id = self.get_argument("id", "")
         name = self.get_argument("name", "")
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
             id = int(id)
-            service.visitById(id)
-            file = service.getById(id)
+            dao.visit_by_id(id)
+            file = dao.get_by_id(id)
         elif name is not None:
-            file = service.getByName(name)
+            file = dao.get_by_name(name)
         if file is None:
             raise web.notfound()
         download_csv = file.related != None and "CODE-CSV" in file.related
@@ -117,10 +113,9 @@ class UpdateHandler(BaseHandler):
 
     def update_content_request(self):
         is_public = self.get_argument("public", "")
-        service = FileService.instance()
         id = self.get_argument("id")
         content = self.get_argument("content")
-        file = service.getById(int(id))
+        file = dao.get_by_id(int(id))
         assert file is not None
 
         if is_public == "on":
@@ -130,11 +125,10 @@ class UpdateHandler(BaseHandler):
         raise web.seeother("/file/edit?id=" + id)
 
     def rename_request(self):
-        service = FileService.instance()
         fileId = self.get_argument("fileId")
         newName = self.get_argument("newName")
-        record = service.getByName(newName)
-        old_record = service.getById(fileId)
+        record = dao.get_by_name(newName)
+        old_record = dao.get_by_id(fileId)
         if old_record is None:
             return result(False, "file with ID %s do not exists" % fileId)
         elif record is not None:
@@ -149,7 +143,7 @@ class UpdateHandler(BaseHandler):
                 old_record.related = old_record.related.replace(old_name_upper, new_name_upper);
             old_record.name = newName
             old_record.version = old_record.version + 1
-            service.update(old_record, "name", "related", "smtime")
+            dao.update_fields(old_record, "name", "related", "smtime")
             return result(True)
 
     def del_request(self):
@@ -163,3 +157,4 @@ xurls = ("/file/edit", handler,
         "/file/markdown", handler,
         "/file/markdown/edit", MarkdownEdit,
         "/file/update", UpdateHandler)
+

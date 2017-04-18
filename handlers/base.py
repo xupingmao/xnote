@@ -53,8 +53,6 @@ from util import netutil
 import xtemplate
 from xtemplate import render as xtemplate_render
 
-import FileDB
-
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 
@@ -206,23 +204,6 @@ class BaseHandler():
     def clear_cookie(self, key):
         """清除cookie"""
         web.setcookie(key, "", expires=-1)
-
-
-class BaseFileHandler(BaseHandler):
-
-    def render(self, template, **kw):
-        id = self.get_argument("id", "")
-        name = self.get_argument("name", "")
-        if id is not None and id != "":
-            record   = FileDB.get_by_id(id)
-            pathlist = FileDB.get_vpath(record)
-            # kw.update("pathlist", pathlist)
-            kw["pathlist"] = pathlist
-        elif name != "":
-            record  = FileDB.get_by_name(name)
-            pathlist = FileDB.get_vpath(record)
-            kw['pathlist'] = pathlist
-        BaseHandler.render(self, template, **kw)
 
 
 def get_upload_img_path(filename):

@@ -1,5 +1,6 @@
+# encoding=utf-8
+# 数据库需要修改，不过目前没用到
 from handlers.base import *
-from FileDB import FileService
 from web.db import SqliteDB
 
 searchable = False

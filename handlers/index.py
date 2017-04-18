@@ -1,14 +1,14 @@
 # encoding=utf-8
 from handlers.base import *
-import FileDB
+from handlers.file import dao
 
 class handler(BaseHandler):
 
     def execute(self):
         self.id = 0
         self.render(
-            recentlist=FileDB.get_recent_visit(7), 
-            category=FileDB.get_category(),
+            recentlist=dao.get_recent_visit(7), 
+            category=dao.get_category(),
             )
 
 searchable = False
