@@ -250,9 +250,19 @@ class FileSystemHandler:
         
 
 class StaticFileHandler(FileSystemHandler):
+    allowed_prefix = ["img", "app"]
+
+    def is_path_allowed(self, path):
+        for prefix in self.allowed_prefix:
+            if path.startswith(prefix):
+                return True
+        return False
+
     """外置数据的静态文件支持"""
     def GET(self, path):
         path = xutils.unquote(path)
+        if not self.is_path_allowed(path):
+            xauth.check_login("admin")
         newpath = "./data/" + path
         if not os.path.exists(newpath):
             # 兼容static目录数据
