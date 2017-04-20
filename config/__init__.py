@@ -24,10 +24,7 @@ LOG_DIR = os.path.join(WORKING_DIR, "log")
 DATA_PATH = os.path.join(WORKING_DIR, "data")
 
 DB_DIR  = os.path.join(WORKING_DIR, "db")
-# 数据库地址
-DB_PATH  = os.path.join(DATA_PATH, "data.db")
 
-BACKUP_DIR = os.path.join(DATA_PATH, "backup")
 
 IS_ADMIN = False
 
@@ -73,6 +70,20 @@ def get(name, default=None):
 
 def set(name, value):
     _config[name] = value
+
+def set_data_path(path):
+    global DATA_PATH
+    global DB_PATH
+    global BACKUP_DIR
+
+    DATA_PATH = path
+    # 数据库地址
+    DB_PATH  = os.path.join(DATA_PATH, "data.db")
+    # 备份数据地址
+    BACKUP_DIR = os.path.join(DATA_PATH, "backup")
+
+# 初始化默认的Data目录
+set_data_path(DATA_PATH)
 
 def get_config():
     return _config
