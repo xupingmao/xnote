@@ -76,5 +76,5 @@ def tcp_mapping(remote_ip, remote_port, local_ip, local_port):
 
 # 主函数
 if __name__ == '__main__':
-    tcp_mapping("127.0.0.1", 1080, "0.0.0.0", 1081)
+    tcp_mapping("127.0.0.1", 1234, "0.0.0.0", 1081)
 
