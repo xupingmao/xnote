@@ -6,7 +6,7 @@
 由于sqlite是单线程，所以直接使用方法操作
 如果是MySQL等数据库，使用 threadeddict 来操作，直接用webpy的ctx
 """
-
+import re
 import sqlite3
 
 import web.db as db
