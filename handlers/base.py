@@ -32,6 +32,7 @@ import sys
 import traceback
 from io import BytesIO
 
+import web
 from web.utils import Storage
 
 if PY2:
@@ -55,6 +56,17 @@ from xtemplate import render as xtemplate_render
 
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
+
+
+def get_argument(key, default_value=None):
+    _input = web.ctx.get("_xnote.input")
+    if _input == None:
+        _input = web.input()
+        web.ctx["_xnote.input"] = _input
+    value = _input.get(key)
+    if value is None:
+        return default_value
+    return value
 
 def print_exception():
     ex_type, ex, tb = sys.exc_info()

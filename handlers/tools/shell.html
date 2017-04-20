@@ -1,0 +1,49 @@
+{% extends base.html %}
+
+{% block head %}
+
+<link rel="stylesheet" href="/static/lib/codemirror/codemirror.min.css">
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
+<script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
+
+{% end %}
+
+{% block body %}
+
+
+{% init code = "" %}
+{% init output = "" %}
+
+<div class="col-md-11 top-offset-1">
+    <textarea id="editor" class="col-md-12" rows="20" id="code">{{code}}</textarea>
+    <input type="button" value="Run" id="run"/>
+    <textarea id="output" class="col-md-12" rows="5">{{output}}</textarea>
+</div>
+
+<script>
+$(function () {
+  var editor = CodeMirror.fromTextArea($("#editor")[0], {
+    lineNumbers: true,
+    mode: "text/x-sh",
+    theme:"monokai"
+  });
+  editor.on("update", function (codeMirror, changeObj) {
+    console.log("update");
+    $("#editor").val(codeMirror.doc.getValue());
+})
+
+    $("#run").click(function() {
+        $("#output").val("");
+        var code = $("#editor").val();
+        $.post("/system/run_cmd", {type:"shell", code:code}, 
+            function (data, status) {
+                // alert(status);
+                $("#output").val(data);
+            })
+    })
+});
+
+</script>
+
+{% end %}
