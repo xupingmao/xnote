@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/20
-# TCP映射
+# TCP代理转发
 
 import socket
 import threading
@@ -10,7 +10,7 @@ PKT_BUFF_SIZE = 2048
 
 # 调试日志封装
 def send_log(content):
-    print(content)
+    print(threading.current_thread().name, content)
 
 # 单向流数据传递
 def tcp_mapping_worker(conn_receiver, conn_sender):
@@ -37,8 +37,6 @@ def tcp_mapping_worker(conn_receiver, conn_sender):
     conn_receiver.close()
     conn_sender.close()
 
-    return
-
 # 端口映射请求处理
 def tcp_mapping_request(local_conn, remote_ip, remote_port):
     remote_conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,6 +48,7 @@ def tcp_mapping_request(local_conn, remote_ip, remote_port):
         send_log('Error: Unable to connect to the remote server.')
         return
 
+    # 并发的处理Request和Response，提高转发效率
     threading.Thread(target=tcp_mapping_worker, args=(local_conn, remote_conn)).start()
     threading.Thread(target=tcp_mapping_worker, args=(remote_conn, local_conn)).start()
 
