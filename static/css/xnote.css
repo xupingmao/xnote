@@ -210,6 +210,9 @@ li.menu-item:hover {
 .col-md-offset-1 {  margin-left: 8.333333333333332%;}
 .col-md-offset-0 {  margin-left: 0;}
 
+.top-offset-1 { margin-top: 1em; }
+.top-offset-2 { margin-top: 2em; }
+
 .form-control {
     width: 100%;
 }
