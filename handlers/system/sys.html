@@ -44,7 +44,7 @@
         {% for i, shell_path in enumerate(shell_list) %}
         <tr>
             <td class="sys-cmd-no">{{i+len(cmd_list)+1}}</td>
-            <td class="sys-cmd"><a href="/system/command?path={{shell_path}}" target="_blank">{{os.path.basename(shell_path)}}</a></td>
+            <td class="sys-cmd"><a href='javascript:runCommand({{repr(shell_path)}})'>{{shell_path}}</a></td>
             <td>系统脚本</td>
         </tr>
         {% end %}
@@ -83,6 +83,13 @@ function switchQrCode() {
     } else {
         $("#qrcode").hide();
     }
+}
+
+function runCommand(path) {
+    // alert("runCommand "+ path);
+    $.get("/system/command", {path: path}, function(data, status) {
+        alert(data);
+    })
 }
 
 
