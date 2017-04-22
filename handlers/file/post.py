@@ -14,7 +14,7 @@ import web.db as db
 import xutils
 import config
 
-from handlers.base import get_upload_img_path
+from handlers.base import get_upload_file_path
 from util import dateutil
 from util import fsutil
 
@@ -85,7 +85,7 @@ class PostEdit:
             file.groups = file.creator
         if hasattr(args.file, "filename") and args.file.filename!="":
             filename = args.file.filename
-            filepath, webpath = get_upload_img_path(args.file.filename)
+            filepath, webpath = get_upload_file_path(args.file.filename)
             fout = open(filepath, "wb")
             # fout.write(x.file.file.read())
             for chunk in args.file.file:

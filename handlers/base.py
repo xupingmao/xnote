@@ -218,23 +218,32 @@ class BaseHandler():
         web.setcookie(key, "", expires=-1)
 
 
-def get_upload_img_path(filename):
+def get_upload_file_path(filename, data_dir="/files", _test_exists = 0):
     """生成上传文件名"""
     filename = filename.replace(" ", "_")
     basename, ext = os.path.splitext(filename)
     date = dateutil.format_date(fmt="%Y/%m")
-    dirname = config.DATA_PATH + "/img/" + date + "/"
-    webpath = "/data/img/" + date + "/" + filename
+    dirname = config.DATA_PATH + data_dir + "/" + date + "/"
 
     origin_filename = dirname + filename
     fsutil.check_create_dirs(dirname)
     fileindex = 1
+    
     newfilename = origin_filename
-    while os.path.exists(newfilename):
-        name, ext = os.path.splitext(origin_filename)
+    webpath = "/data{}/{}/{}".format(data_dir, date, filename)
+
+    while _test_exists or os.path.exists(newfilename):
+        name, ext = os.path.splitext(filename)
         # 使用下划线，括号会使marked.js解析图片url失败
-        newfilename = "{}_{}{}".format(name, fileindex, ext)
-        webpath = "/data/img/{}/{}_{}{}".format(date, basename, fileindex, ext)
+        temp_filename = "{}_{}{}".format(name, fileindex, ext)
+        newfilename = dirname + temp_filename
+        webpath = "/data{}/{}/{}".format(data_dir, date, temp_filename)
         fileindex+=1
+
+        if _test_exists:
+            _test_exists-=1
+
     return newfilename, webpath
 
+def get_upload_img_path(filename):
+    return get_upload_file_path(filename, "/img")

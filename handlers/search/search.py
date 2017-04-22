@@ -381,7 +381,7 @@ def find_tools(name):
 
 def find_translate(word):
     word = word.lower()
-    path = "db/dictionary.db"
+    path = os.path.join(config.DATA_PATH,"dictionary.db")
     if not os.path.exists(path):
         return []
     sql = "select * from dictTB where LOWER(en)=?"

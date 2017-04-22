@@ -250,7 +250,7 @@ class FileSystemHandler:
         
 
 class StaticFileHandler(FileSystemHandler):
-    allowed_prefix = ["img", "app"]
+    allowed_prefix = ["img", "app", "files"]
 
     def is_path_allowed(self, path):
         for prefix in self.allowed_prefix:
