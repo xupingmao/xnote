@@ -1,0 +1,163 @@
+{% extends base.html %}
+
+{% block head %}
+<script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
+{% end %}
+
+{% block body %}
+
+<div id="app" class="top-offset-1">
+  {# `{{!` 用来转义 #}
+  <h2>{{! message }}</h2>
+
+  <h3>声明式渲染</h3>
+  {# title中间不能有`-` #}
+  <div v-bind:title="bindmessage">
+    鼠标悬停几秒钟查看此处动态绑定的提示信息！
+  </div>
+
+  <h3>条件与循环</h3>
+  <h4>v-if v-else-if v-else</h4>
+  <p v-if="seen">现在你看到我了</p>
+  <p v-else-if="Math.random() > 0.4"> Math.random() > 0.4 </p>
+  <p v-else>看不到我</p>
+
+  <h4>v-for</h4>
+  <ol>
+    <li v-for="file in files">
+        {{! file }}
+    </li>
+  </ol>
+
+  <ul>
+    <li v-for="(file, index) in files">
+        {{! index }} - {{! file }}
+    </li>
+  </ul>
+
+ <ul>
+    <li v-for="(value, key, index) in person">
+        {{! index }} - {{! key}} = {{! value }}
+    </li>
+  </ul>
+
+  <ul>
+    <span v-for="n in 10">{{! n }} , </span>
+  </ul>
+
+  <h3>处理用户输入</h3>
+  <h4>v-on</h4>
+  <button v-on:click="reverseMessage">逆转消息</button>
+
+  <h4>v-model</h4>
+  <input v-model="message"/>
+
+  <h3>其他模板语法</h3>
+  <h4>v-once</h4>
+  <span v-once>This will never change: {{!message}}</span>
+
+  <h4>v-html</h4>
+  <div v-html="rawHtml"></div>
+
+  <h4>v-bind:id</h4>
+
+  <h4>参数绑定</h4>
+  <a v-bind:href="url">Baidu</a>
+
+  <h4>JavaScript 表达式</h4>
+  <div> {{! message + " >>>" }} </div>
+
+  <h4>修饰符</h4>
+  <form v-on:submit.prevent="onSubmit">
+      <button>submit</button>
+  </form>
+
+  <h4>过滤器</h4>
+  {{! message | toUpperCase }}
+
+  <h4>过滤器串联</h4>
+  {{! message | toUpperCase | length }}
+
+  <h4>过滤器加参数</h4>
+  {{! message | appendStr('arg2', 'arg3') }}
+
+  <h4>v-bind:href缩写:href</h4>
+  <a v-bind:href="url">Baidu</a>
+  <a :href="url">Baidu</a>
+
+  <h4>v-on:click缩写@click</h4>
+  <button @click="onShortClick">Click Me</button>
+
+</div>
+
+<script type="text/javascript">
+var app = new Vue({
+    el: "#app",
+    data: {
+        message: "Hello, Vue!",
+        files: ["file1", "file2"],
+        person: {
+            name:"Jhon",
+            age: 20,
+        },
+        bindmessage: "页面加载于 " + new Date(),
+        seen: false,
+        rawHtml: "{{!message}}",
+        url: "https://www.baidu.com",
+    },
+    methods: {
+        reverseMessage: function () {
+            this.message = this.message.split('').reverse().join('');
+        },
+        onSubmit: function () {
+            alert("submit");
+        },
+        onShortClick: function() {
+            alert("Click缩写");
+        }
+    },
+    filters: {
+        toUpperCase: function (value) {
+            if (!value) return ''
+            value = value.toString()
+            return value.toUpperCase();
+        },
+        length: function (value) {
+            if (!value) return 0;
+            return value.length;
+        },
+        appendStr: function (arg1, arg2, arg3) {
+            return arg1 + arg2 + arg3;
+        }
+    },
+    // 生命周期
+    beforeCreated: function () {
+
+    },
+
+    created: function () {
+
+    },
+
+    beforeMount: function () {
+        // 编译完成 
+    },
+
+    mounted: function () {
+        // 模型加载完毕， 渲染之前
+    },
+
+    beforeDestroy: function () {
+
+    },
+
+    destroyed: function () {
+        //
+    }
+})
+
+app.files.push("pushed file");
+
+</script>
+
+{% end %}

@@ -5,7 +5,6 @@
 """Xnote的数据库配置"""
 
 import sqlite3
-
 import config
 
 
@@ -88,23 +87,33 @@ def init_table_file():
     manager.add_column("name", "text", "")
     manager.add_column("content", "text", "")
     manager.add_column("size", "long", 0)
+    # 类型, markdown, post, mailist, file
+    # 类型为file时，content值为文件的web路径
     manager.add_column("type", "text", "")
+    
+    # 关联关系
+    # 上级目录
+    manager.add_column("parent_id", "int", 0)
+    manager.add_column("related", "text", "")
+
+    # 统计相关
+    # 访问次数
     # 创建时间ctime
     manager.add_column("sctime", "text", "")
     # 修改时间mtime
     manager.add_column("smtime", "text", "")
     # 访问时间atime
     manager.add_column("satime", "text", "")
-    manager.add_column("related", "text", "")
-    # 访问次数
     manager.add_column("visited_cnt", "int", 0)
     manager.add_column("is_deleted", "int", 0)
+
+    # 权限相关
     # 创建者
     manager.add_column("creator", "text", "")
     # 修改者
     manager.add_column("modifier", "text", "")
     manager.add_column("groups", "text", "")
-    manager.add_column("parent_id", "int", 0)
+    
     # MD5
     manager.add_column("md5", "text", "")
     # 修改次数
