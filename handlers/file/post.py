@@ -31,6 +31,8 @@ class PostView(object):
         file = file_db.select("file", where={"id": id})[0]
         if file.content != None:
             file.content = xutils.html_escape(file.content, quote=False);
+            # \xad (Soft hyphen), 用来处理断句的
+            file.content = file.content.replace('\xad', '\n')
             # file.content = file.content.replace(" ", "&nbsp;")
             file.content = re.sub(r"https?://[^\s]+", '<a href="\\g<0>">\\g<0></a>', file.content)
             file.content = file.content.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
@@ -59,6 +61,7 @@ class PostEdit:
         file = file_db.select("file", where={"id": id})[0]
         if file.content == None:
             file.content = ""
+        file.content = file.content.replace('\xad', '\n')
         rows = file.content.count("\n")+5
         rows = max(rows, 20)
         return xtemplate.render("file/post.html", 
