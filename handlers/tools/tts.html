@@ -1,0 +1,31 @@
+{% extends base.html %}
+
+{% block head %}
+<script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
+{% end %}
+
+{% block body %}
+
+<div id="app" class="top-offset-1">
+    <h2>输入阅读内容</h2>
+    <textarea class="col-md-12" rows=20 v-model="content"></textarea>
+    <button v-on:click="readText">Read</button>
+</div>
+
+<script type="text/javascript">
+var app = new Vue({
+    el: "#app",
+    data: {
+        content: ""
+    },
+    methods: {
+        readText: function () {
+            $.post("/system/tts", {content: this.content}, function (data, status) {
+                // do noting
+            })
+        }
+    }
+})
+</script>
+
+{% end %}
