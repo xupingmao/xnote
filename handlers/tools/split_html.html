@@ -2,20 +2,20 @@
 
 {% block body %}
 
+{% init address = "" %}
+{% init images = [] %}
+{% init scripts = [] %}
+{% init texts = [] %}
+
 <div class="rol-md-12 top-offset-1">
     <form method="POST" enctype="multipart/form-data">
         <h2>长传文件或者填写网址</h2>
         <p><input type="file" name="file" /></p>
-        <p>网址<input type="text" name="address" style="width: 50em;" /></p>
+        <p>网址<input type="text" name="address" style="width: 50em;" value="{{address}}" /></p>
         <p>下载资源<input type="checkbox" name="download_res"/></p>
         <input type="submit" value="Submit"/>
     </form>
 </div>
-
-
-{% init images = [] %}
-{% init scripts = [] %}
-{% init texts = [] %}
 
 <h2>Images</h2>
 <textarea rows=20 class="col-md-12">
