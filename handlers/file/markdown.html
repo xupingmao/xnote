@@ -15,26 +15,14 @@
     font-family: monospace;
 }
 
+.small {
+    font-size: small;
+}
+
 </style>
 {% end %}
 
 {% block body %}
-
-    <!--
-            {% if 'pathlist' in globals() %}
-            <div style="float:right;">
-              <a href="/file/archive?id={{id}}">[重新归档]</a>
-              <a href="/file/add_child?parent_id={{id}}">[添加子页面]</a>
-            </div>
-            <div class="row">
-              <a href="/file/group">Home</a>
-              {% for _path0 in pathlist %}
-                / <a href="/file/edit?id={{_path0.id}}">{{_path0.name}}</a>
-              {% end %}
-              
-            </div>
-            {% end %}
-    -->
 
     {% include "file/header.html" %}
 
@@ -48,7 +36,8 @@
         </div>
         <div>
             <p><a id="oldName" href="javascript:switchRename()" style="color:blue">{{file.name}}</a></p>
-            <p style="font-size:small;">创建时间:{{file.sctime}} 修改时间:{{file.smtime}}</p>
+            <p class="small">创建时间:{{file.sctime}}</p>
+            <p class="small">修改时间:{{file.smtime}}</p>
         <div>
     </h3>
 
@@ -79,23 +68,8 @@
         <div class="">
             <div class="">
                 <div id="edit-btns">
-                    <input type="button" class="btn btn-primary" onclick="edit()" value="编辑" />
-                    <input type="button" class="btn btn-primary" onclick="medit()" value="移动编辑" />
-                </div>
-                <div id="edit-div">
-                    <input type="submit" value="更新"/>
-                    <input type="button" class="btn btn-primary" onclick="preview()" value="预览" />
-                    <input type="checkbox" name="public" {% if file.groups == '*' %} checked="true" {% end %}>所有人可见
-
-
-                    <input style="display:none" name="option" value="update_content"/>
-                    <input style="display:none" name="id" value="{{file.id}}"/>
-                    <input type="text" name="version" value="{{file.version}}" class="hide"/>
-
-                    <input type="button" class="red" onclick="delLink()" value="删除" />
-                    <div class="col-md-12">
-                        <iframe src="/file/upload_file" style="border:none;width:100%;height:5em;"></iframe>
-                    </div>
+                    <a href="/file/markdown/edit?id={{file.id}}">编辑</a>
+                    <a href="javascript:medit()">移动编辑</a>
                 </div>
             </div>
 

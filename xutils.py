@@ -171,6 +171,7 @@ def db_execute(path, sql, args = None):
         else:
             cursorobj.execute(sql, args)
         result = cursorobj.fetchall()
+        # result.rowcount
         db.commit()
         for single in result:
             resultMap = {}
@@ -240,4 +241,9 @@ def is_windows():
 def is_mac():
     return platform.system() == "Darwin"
 
+def http_get(url):
+    stream = urlopen(url)
+    return decode_bytes(stream.read())
+
+    
 
