@@ -111,7 +111,7 @@ def result(success = True, msg=None):
 
 class UpdateHandler(BaseHandler):
 
-    def update_content_request(self):
+    def default_request(self):
         is_public = self.get_argument("public", "")
         id = self.get_argument("id")
         content = self.get_argument("content")

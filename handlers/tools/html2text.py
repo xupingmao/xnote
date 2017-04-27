@@ -911,6 +911,7 @@ def main():
 
     wrapwrite(h.handle(data))
 
+import web
 from handlers.base import BaseHandler
 import xutils
 class handler(BaseHandler):
@@ -919,7 +920,9 @@ class handler(BaseHandler):
         h = HTML2Text(baseurl = url)
         data = xutils.http_get(url)
         text = h.handle(data)
-        return dict(text=text)
+        # return dict(text=text)
+        web.header("Content-Type", "text/plain; charset=utf-8")
+        return text
 
 
 if __name__ == "__main__":

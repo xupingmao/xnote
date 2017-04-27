@@ -40,6 +40,7 @@ class handler(BaseHandler):
             if name != '':
                 f = dao.get_by_name(name)
                 if f != None:
+                    key = name
                     raise Exception("%s 已存在" % name)
                 f = dao.insert(file)
                 inserted = dao.get_by_name(name)
