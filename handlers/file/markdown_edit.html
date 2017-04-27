@@ -77,8 +77,6 @@
                     <input type="button" class="btn btn-primary" onclick="preview()" value="预览" />
                     <input type="checkbox" name="public" {% if file.groups == '*' %} checked="true" {% end %}>所有人可见
 
-
-                    <input style="display:none" name="option" value="update_content"/>
                     <input style="display:none" name="id" value="{{file.id}}"/>
                     <input type="text" name="version" value="{{file.version}}" class="hide"/>
 
