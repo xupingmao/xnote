@@ -18,7 +18,7 @@
 </div>
 
 <h2>Images</h2>
-<textarea rows=20 class="col-md-12">
+<textarea rows={{len(images)+2}} class="col-md-12">
 {% for image in images %}{{image}}
 {% end %}
 </textarea>
@@ -28,13 +28,13 @@
 {% end %} -->
 
 <h2>Scripts</h2>
-<textarea rows="20" class="col-md-12">
+<textarea rows="{{len(scripts)+2}}" class="col-md-12">
 {% for script in scripts%}{{script}}
 {% end %}
 </textarea>
 
 <h2>Texts</h2>
-<textarea rows="20" class="col-md-12">
+<textarea rows="30" class="col-md-12">
 {% for text in texts%}{{text}}
 {% end %}
 </textarea>

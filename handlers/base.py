@@ -59,6 +59,8 @@ logger.addHandler(logging.StreamHandler())
 
 
 def get_argument(key, default_value=None):
+    if isinstance(default_value, dict):
+        return web.input(**{key: default_value}).get(key)
     _input = web.ctx.get("_xnote.input")
     if _input == None:
         _input = web.input()

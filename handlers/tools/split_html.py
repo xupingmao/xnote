@@ -5,6 +5,7 @@ import web
 import xtemplate
 import xutils
 from bs4 import BeautifulSoup
+from html2text import HTML2Text
 
 def get_addr(src, host):
     if src is None:
@@ -80,7 +81,11 @@ class handler:
         csses  = soup.find_all("link")
         scripts = soup.find_all("script")
         # texts = soup.find_all(["p", "span", "div", "h1", "h2", "h3", "h4"])
-        texts = [soup.get_text()]
+
+        h = HTML2Text(baseurl = address)
+        text = h.handle(html)
+
+        texts = [text]
 
         images = get_addr_list(images)
         scripts = get_addr_list(scripts)
