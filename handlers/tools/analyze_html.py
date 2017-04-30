@@ -76,6 +76,10 @@ class handler:
         print("Read html, filename={}, length={}".format(filename, len(html)))
 
         soup = BeautifulSoup(html, "html.parser")
+
+        # import pdb
+        # pdb.set_trace()
+
         images = soup.find_all("img")
         links  = soup.find_all("a")
         csses  = soup.find_all("link")
@@ -94,7 +98,7 @@ class handler:
         if download_res:
             download_res_list(images, filename)
 
-        return xtemplate.render("tools/split_html.html",
+        return xtemplate.render("tools/analyze_html.html",
             images = images,
             links = links,
             csses = csses,

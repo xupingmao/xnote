@@ -8,7 +8,7 @@ import os
 from . import sql
 from . import pipe
 from . import notebook
-from . import split_html
+from . import analyze_html
 
 C_TEMPLATE = """
 #include <stdio.h>
@@ -56,6 +56,6 @@ xurls = ("/tools/tcc.html", TccHandler,
          "/tools/sql.html", sql.handler,
          "/tools/pipe.html", pipe.handler,
          "/tools/notebook", notebook.handler,
-         "/tools/split_html.html", split_html.handler,
+         "/tools/analyze_html.html", analyze_html.handler,
          "/tools/(.*)", handler)
          
