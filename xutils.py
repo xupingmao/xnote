@@ -13,6 +13,7 @@ import sqlite3
 import json
 import time
 import platform
+import re
 
 PY2 = sys.version_info[0] == 2
 
@@ -44,8 +45,10 @@ if PY2:
         if text[-1:] == '\n': text = text[:-1]
         return sts, text
 
-        
+
+from tornado.escape import xhtml_escape        
 from web.utils import Storage
+
 #################################################################
 
 
@@ -228,8 +231,21 @@ def html_escape(s, quote=True):
         s = s.replace('"', "&quot;")
         s = s.replace('\'', "&#x27;")
     return s
-    
-from tornado.escape import xhtml_escape
+
+def quote_unicode(url):
+    def quote_char(c):
+        # ASCII 范围 [0-127]
+        if c <= 127:
+            return chr(c)
+        return '%%%02X' % c
+
+    bytes = url.encode("utf-8")
+    return ''.join([quote_char(c) for c in bytes])
+
+    # def urlencode(matched):
+    #     text = matched.group()
+    #     return quote(text)
+    # return re.sub(r"[\u4e00-\u9fa5]+", urlencode, url)
     
 #################################################################
 ##   Platform/OS Utilities, Python 2 do not have this file

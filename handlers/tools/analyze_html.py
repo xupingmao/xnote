@@ -15,6 +15,7 @@ def get_addr(src, host):
     return src
 
 def readhttp(address):
+    address = xutils.quote_unicode(address)
     bytes = xutils.urlopen(address).read()
     return xutils.decode_bytes(bytes)
 
@@ -45,6 +46,7 @@ def download_res_list(reslist, dirname):
 
     for res in reslist:
         print("Download", res)
+        res = xutils.quote_unicode(res)
         bytes = xutils.urlopen(res).read()
         name = get_res_name(res)
         path = os.path.join(dirname, name)
