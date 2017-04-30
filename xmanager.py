@@ -1,21 +1,60 @@
 # encoding:utf-8
-import config
+"""Xnote 模块管理器
+ - 加载并注册模块
+"""
 import os
 import sys
 import traceback
 import time
 import copy
-
-import web
-
-from util import textutil
 from threading import Thread
 from queue import Queue
 
-from xutils import ConfigParser
-from xutils import Storage
+import web
+import config
 import xtemplate
 
+from util import textutil
+
+from xutils import ConfigParser
+from xutils import Storage
+
+
+def wrapped_handler(handler_clz):
+    if not isinstance(handler_clz, type):
+        return handler_clz
+
+    class WrappedHandler:
+        """ 默认的handler装饰器
+        1. 装饰器相对于继承来说，性能略差一些，但是更加安全，父类的方法不会被子类所覆盖
+        2. 为什么不用Python的装饰器语法
+           1. 作为一个通用的封装，所有子类必须通过这层安全过滤
+           2. 子类不用引入额外的模块
+        """
+        def __init__(self):
+            self.target = handler_clz()
+
+        def GET(self, *args):
+            return self.target.GET(*args)
+
+        def POST(self, *args):
+            return self.target.POST(*args)
+
+        def search_priority(self):
+            return 0
+
+        def search_match(self, input):
+            if hasattr(self.target, "search_match"):
+                return self.search_match(input)
+            return False
+
+        def search(self, *args):
+            """ 如果子类实现了搜索接口，通过该方法调用 """
+            if hasattr(self.target, "search"):
+                return self.search(*args)
+            return None
+
+    return WrappedHandler
 
 def notfound():
     import xtemplate
@@ -166,7 +205,7 @@ class ModelManager:
                 url = handler.xurl
             else:
                 url = self.get_url(name)
-            self.add_mapping(url, clz)
+            self.add_mapping(url, handler)
             if hasattr(module, "searchable"):
                 if not module.searchable:
                     return
@@ -192,10 +231,10 @@ class ModelManager:
     def get_mapping(self):
         return self.mapping
 
-    def add_mapping(self, url, clzname):
+    def add_mapping(self, url, handler):
         self.mapping.append(url)
-        self.mapping.append(clzname)
-        log("Load mapping (%s, %s)" % (url, clzname))
+        self.mapping.append(wrapped_handler(handler))
+        log("Load mapping (%s, %s)" % (url, handler))
 
     def add_search_key(self, url, key):
         self.search_dict[key] = url

@@ -57,7 +57,7 @@ def isempty(str):
 class handler:
 
     def GET(self):
-        return xtemplate.render("tools/split_html.html")
+        return xtemplate.render("tools/analyze_html.html")
 
     def POST(self):
         args = web.input(file={}, download_res="off")
