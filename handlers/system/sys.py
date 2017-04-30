@@ -112,10 +112,11 @@ class SysHandler:
     def GET(self):
         shell_list = []
         dirname = "scripts"
-        for fname in os.listdir(dirname):
-            fpath = os.path.join(dirname, fname)
-            if os.path.isfile(fpath) and fpath.endswith(".bat"):
-                shell_list.append(fpath)
+        if os.path.exists(dirname):
+            for fname in os.listdir(dirname):
+                fpath = os.path.join(dirname, fname)
+                if os.path.isfile(fpath) and fpath.endswith(".bat"):
+                    shell_list.append(fpath)
         addr = get_server_ip() + ":" + config.get("port")
 
         cmd_list = [];

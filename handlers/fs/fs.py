@@ -90,6 +90,7 @@ class FileSystemHandler:
         '.html': 'text/html; charset=utf-8',
         '.py' : 'text/plain; charset=utf-8',
         '.txt': 'text/plain; charset=utf-8',
+        '.md' : 'text/plain; charset=utf-8',
     }
 
     encodings = {
@@ -98,12 +99,12 @@ class FileSystemHandler:
 
     def handle_content_type(self, path):
         """Content-Type设置"""
-        mime_type, mime_encoding = mimetypes.guess_type(path)
+        name, ext = os.path.splitext(path)
+        mime_type = self.mime_types.get(ext.lower())
         if mime_type is None:
-            name, ext = os.path.splitext(path)
-            mime_type = self.mime_types.get(ext.lower())
-            if mime_type is None:
-                mime_type = self.mime_types['']
+            mime_type, mime_encoding = mimetypes.guess_type(path)
+        if mime_type is None:
+            mime_type = self.mime_types['']
 
         web.header("Content-Type", mime_type)
 
