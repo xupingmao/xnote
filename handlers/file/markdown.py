@@ -20,9 +20,6 @@ def try_decode(bytes):
     except:
         return bytes.decode("gbk")
 
-def get_file_db():
-    return db.SqliteDB(db=config.DB_PATH)
-
 class handler(BaseHandler):
 
     @xauth.login_required()
@@ -88,24 +85,6 @@ def sqlite_escape(text):
     text = text.replace("'", "''")
     return "'" + text + "'"
 
-def updateContent(id, content, user_name=None, type=None, groups=None):
-    # TODO 修改version
-    if user_name is None:
-        sql = "update file set type='md', content = %s,size=%s, smtime='%s', version=version+1" \
-            % (sqlite_escape(content), len(content), dateutil.format_time())
-    else:
-        # 这个字段还在考虑中是否添加
-        # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
-        sql = "update file set type = 'md', content = %s,size=%s,smtime='%s',modifier='%s', version=version+1"\
-            % (sqlite_escape(content), len(content), dateutil.format_time(), user_name)
-    if type:
-        sql += ", type='%s'" % type
-    if groups:
-        sql += ", groups = '%s'" % groups
-    sql += " where id=%s" % id
-
-    xutils.db_execute(config.DB_PATH, sql)
-
 def result(success = True, msg=None):
     return {"success": success, "result": None, "msg": msg}
 
@@ -113,43 +92,55 @@ class UpdateHandler(BaseHandler):
 
     def default_request(self):
         is_public = self.get_argument("public", "")
-        id = self.get_argument("id")
+        id = self.get_argument("id", type=int)
+
         content = self.get_argument("content")
-        file = dao.get_by_id(int(id))
+        version = self.get_argument("version", type=int)
+
+        file = dao.get_by_id(id)
         assert file is not None
 
+        # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
+        # 所以权限只能是创建者而不是修改者
+        groups = file.creator
         if is_public == "on":
-            updateContent(id, content, groups = '*')
+            groups = "*"
+        
+        rowcount = dao.update(where = dict(id=id, version=version), 
+            content=content, type="md", size=len(content))
+        if rowcount > 0:
+            raise web.seeother("/file/edit?id=" + str(id))
         else:
-            updateContent(id, content, groups = file.creator)
-        raise web.seeother("/file/edit?id=" + id)
+            # 传递旧的content
+            cur_version = file.version
+            file.content = content
+            file.version = version
+            return self.render("file/markdown_edit.html", file=file, 
+            content = content, 
+            date2str=date2str,
+            children = dao.get_children_by_id(file.id),
+            error = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
 
     def rename_request(self):
         fileId = self.get_argument("fileId")
         newName = self.get_argument("newName")
         record = dao.get_by_name(newName)
+
+        fileId = int(fileId)
         old_record = dao.get_by_id(fileId)
+
         if old_record is None:
             return result(False, "file with ID %s do not exists" % fileId)
         elif record is not None:
             return result(False, "file %s already exists!" % repr(newName))
         else:
-            old_name = old_record.name
-            old_name_upper = old_name.upper()
-            new_name_upper = newName.upper()
-            if old_name_upper not in old_record.related and new_name_upper not in old_record.related:
-                old_record.related += "," + newName
-            else:
-                old_record.related = old_record.related.replace(old_name_upper, new_name_upper);
-            old_record.name = newName
-            old_record.version = old_record.version + 1
-            dao.update_fields(old_record, "name", "related", "smtime")
-            return result(True)
+            # 修改名称不用乐观锁
+            rowcount = dao.update(where= dict(id = fileId), name = newName)
+            return result(rowcount > 0)
 
     def del_request(self):
         id = int(self.get_argument("id"))
-        db = get_file_db()
-        db.update("file", where={"id":id}, vars=None, is_deleted=1)
+        dao.update(where=dict(id=id), is_deleted=1)
         raise web.seeother("/file/recent_edit")
 
 

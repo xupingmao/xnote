@@ -58,7 +58,7 @@ logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 
 
-def get_argument(key, default_value=None):
+def get_argument(key, default_value=None, type = None, strip=False):
     if isinstance(default_value, dict):
         return web.input(**{key: default_value}).get(key)
     _input = web.ctx.get("_xnote.input")
@@ -68,6 +68,10 @@ def get_argument(key, default_value=None):
     value = _input.get(key)
     if value is None:
         return default_value
+    if type != None:
+        value = type(value)
+    if strip and isinstance(value, str):
+        value = value.strip()
     return value
 
 def print_exception():
@@ -189,28 +193,13 @@ class BaseHandler():
         self._response = text
         return text
 
-    def get_argument(self, key, default_value=None, strip=False):
+    def get_argument(self, key, default_value=None, type = None, strip=False):
         """获取参数, 默认值不允许为None
         ~~必须使用可变参数*args, 不然没法知道调用方参数个数，因为默认值可能为None~~
         - 1个参数，没有结果抛出异常
         - 2个参数，没有结果使用默认结果
         """
-        if self._args is None:
-            self._args = web.input()
-
-        if default_value == None:
-            value = self._args[key]
-            self._args[key] = value
-        else:
-            value = self._args.get(key)
-            if value is None:
-                value = default_value
-            if isinstance(default_value, int):
-                value = int(value)
-        if strip and isinstance(value, str):
-            value = value.strip()
-        self._args[key] = value
-        return value
+        return get_argument(key, default_value, type = type, strip = strip)
 
     def redirect(self, url):
         raise web.seeother(quote(url))

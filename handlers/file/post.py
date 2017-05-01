@@ -18,8 +18,7 @@ from handlers.base import get_upload_file_path
 from util import dateutil
 from util import fsutil
 
-def get_file_db():
-    return db.SqliteDB(db=config.DB_PATH)
+from . import dao
 
 class PostView(object):
     """docstring for handler"""
@@ -27,8 +26,7 @@ class PostView(object):
     def GET(self):
         args = web.input()
         id = int(args.id)
-        file_db = get_file_db()
-        file = file_db.select("file", where={"id": id})[0]
+        file = dao.find_by_id(id)
         if file.content != None:
             file.content = xutils.html_escape(file.content, quote=False);
             # \xad (Soft hyphen), 用来处理断句的
@@ -46,7 +44,7 @@ class PostView(object):
             file.content = re.sub(r"\<(a|img|p)&nbsp;", "<\\g<1> ", file.content)
 
         # 统计访问次数，不考虑并发
-        file_db.update("file", where={"id": id}, visited_cnt=file.visited_cnt+1)
+        dao.visit_by_id(id)
 
         return xtemplate.render("file/post.html",
             op = "view",
@@ -57,15 +55,14 @@ class PostEdit:
     def GET(self):
         args = web.input()
         id = int(args.id)
-        file_db = get_file_db()
-        file = file_db.select("file", where={"id": id})[0]
+        file = dao.find_by_id(id)
         if file.content == None:
             file.content = ""
         file.content = file.content.replace('\xad', '\n')
         rows = file.content.count("\n")+5
         rows = max(rows, 20)
         return xtemplate.render("file/post.html", 
-            op="eidt", 
+            op="edit", 
             file=file,
             rows = rows)
 
@@ -74,18 +71,14 @@ class PostEdit:
         # 参考web.utils.storify
         args = web.input(file={}, public="off")
         id = int(args.id)
-        file_db = get_file_db()
-        file = file_db.select("file", where={"id": id})[0]
-        file.content = args.content
-        file.smtime = dateutil.format_time()
-        file.name = args.name
-        file.type = "post"
-        file.size = len(file.content)
-        file.version = file.version + 1
+        file = dao.find_by_id(id)
+        version = int(args.version)
+
+        content = args.content
+        groups = file.creator
         if args.public == "on":
-            file.groups = "*"
-        else:
-            file.groups = file.creator
+            groups = "*"
+
         if hasattr(args.file, "filename") and args.file.filename!="":
             filename = args.file.filename
             filepath, webpath = get_upload_file_path(args.file.filename)
@@ -94,17 +87,32 @@ class PostEdit:
             for chunk in args.file.file:
                 fout.write(chunk)
             fout.close()
-            file.content = file.content + "\n[img src=\"{}\"img]".format(webpath)
+            content = content + "\n[img src=\"{}\"img]".format(webpath)
 
-        file_db.update("file", where={"id": id}, vars=None, **file)
-        raise web.seeother("/file/post?id={}".format(id))
+        rowcount = dao.update(where=dict(id=id, version=version), 
+            groups = groups, type="post", size=len(content), content=content)
+        if rowcount > 0:
+            raise web.seeother("/file/post?id={}".format(id))
+        else:
+            cur_version = file.version
+            file.content = content
+            file.version = version
+            
+            rows = content.count("\n")+5
+            rows = max(rows, 20)
+
+            return xtemplate.render("file/post.html",
+                op = "edit",
+                error="version冲突,version={},最新version={}".format(version, cur_version),
+                file=file,
+                rows=rows)
+
         
 class PostDel:
     def GET(self):
         args = web.input()
         id = int(args.id)
-        file_db = get_file_db()
-        file_db.delete("file", where={"id": id})
+        dao.delete_by_id(id)
         raise web.seeother("/")
 
 xurls = ("/file/post", PostView, 

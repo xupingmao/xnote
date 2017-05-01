@@ -20,10 +20,12 @@ def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
     if user_name == "admin":
         # sql = "select * from file where smtime > '%s' AND is_deleted != 1 order by smtime desc"\
         # % dateutil.before(days=int(days), format=True)
-        sql = "select * from file where is_deleted != 1 order by smtime desc"
+        sql = "select * from file where is_deleted != 1"
     else:
-        sql = "select * from file where is_deleted != 1 AND (groups='%s' OR groups='*') order by smtime desc"\
-        % user_name
+        # sql = "select * from file where is_deleted != 1 AND (groups='%s' OR groups='*') order by smtime desc" % user_name
+        sql = "select * from file where is_deleted != 1 AND groups = '%s'" % user_name
+
+    sql += " ORDER BY smtime DESC"
     sql += " LIMIT %s, %s" % ((page-1) * pagesize, pagesize)
     list = execute(sql)
         
@@ -34,9 +36,12 @@ def count_files():
         return 0
     user_name = xauth.get_current_user().get("name")
     if user_name == "admin":
-        return execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 ")[0].get("count")
+        count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 ")[0].get("count")
     else:
-        return execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 AND (groups='%s' OR groups = '*')" % user_name)[0].get("count")
+        count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 AND groups='%s'" % user_name)[0].get("count")
+    if count == 0:
+        return 1
+    return count
 
 class handler(BaseHandler):
     """show recent modified files"""

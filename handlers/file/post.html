@@ -5,10 +5,19 @@
 img {
     max-width: 100%;
 }
+
+.alert {
+    color: red;
+    background-color: #FFCCCC;
+    width: initial;
+}
+
 </style>
 {% end %}
 
 {% block body %}
+
+    {% init error = "" %}
 
     {% include "file/header.html" %}
 
@@ -33,7 +42,9 @@ img {
     }
     </script>
 {% else %}
+    <div class="alert">{{error}}</div>
     <form method="POST" enctype="multipart/form-data">
+        <input name="version" value="{{file.version}}" class="hide">
         <p>
             <input name="name" type="text" value="{{file.name}}">
             {% if file.groups == "*" %}

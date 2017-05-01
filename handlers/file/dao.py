@@ -19,6 +19,8 @@ from xutils import readfile, savetofile
 readFile = readfile
 writeFile = savetofile
 
+DB_PATH = config.DB_PATH
+
 
 class FileDO(dict):
     """This class behaves like both object and dict"""
@@ -196,7 +198,7 @@ def get_children_by_id(id):
     all = db.execute("select * from file where is_deleted != 1 and parent_id = %s order by sctime desc" % id)
     return [FileDO.fromDict(item) for item in all]
 
-def get_by_id(id, db=None):
+def find_by_id(id, db=None):
     sql = "select * from file where id = %s" % id
     if db is None:
         db = FileDB();
@@ -204,6 +206,8 @@ def get_by_id(id, db=None):
     if len(result) is 0:
         return None
     return FileDO.fromDict(result[0])
+
+get_by_id = find_by_id
 
 def get_vpath(record):
     pathlist = []
@@ -242,27 +246,17 @@ def get_recent_visit(count):
     all = db.execute("select * from file where is_deleted != 1 and not (related like '%%HIDE%%') order by satime desc limit %s" % count)
     return [FileDO.fromDict(item) for item in all]
 
-def update(where = None, **kw):
-    db = FileDB()
-    values = [ '%s = %s' % (k, to_sqlite_obj(kw[k])) for k in kw]
-    sql = "update file set %s where %s" % (','.join(values), where)
-    return db.execute(sql)
+def update(where, **kw):
+    db = get_file_db()
+    kw["smtime"] = dateutil.format_time()
+    # 处理乐观锁
+    version = where.get("version")
+    if version:
+        kw["version"] = version + 1
+    return db.update("file", where, vars=None, **kw)
 
-def update_fields(file, *names):
-    id = file.id;
-    # file.mtime = dateutil.get_seconds()
-    file.smtime = dateutil.format_time()
-    if file.visited_cnt < MAX_VISITED_CNT:
-        file.visited_cnt += 1
-    if len(names) > 0:
-        keys = names
-    else:
-        keys = [k for k in file if k != 'id']
-    
-    values = [ '%s = %s' % (k, build_sql_row(file, k)) for k in keys]
-    sql = "update file set %s where id = %s" % (','.join(values), file.id)
-    return get_db().execute(sql)
-
+def delete_by_id(id):
+    update(where=dict(id=id), is_deleted=1)
 
 def get_by_name(name):
     sql = "select * from file where name = %s and is_deleted != 1" % to_sqlite_obj(name)

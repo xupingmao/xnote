@@ -25,10 +25,19 @@
     font-family: monospace;
 }
 
+.alert {
+    color: red;
+    background-color: #FFCCCC;
+    width: initial;
+}
+
 </style>
 {% end %}
 
 {% block body %}
+    
+    {% init error = "" %}
+    {% init download_csv = False %}
 
     {% include "file/header.html" %}
 
@@ -37,13 +46,13 @@
     <h3>
         <span id="fileId" style="display:none;">{{file.id}}</span>
         <div style="display:none" id="renameDiv">
-            <span><input id="newName"> </input></span> 
+            <span><input id="newName"> </span> 
             <button onclick="renameFile()">重命名</button>
         </div>
         <div>
             <p><a id="oldName" href="javascript:switchRename()" style="color:blue">{{file.name}}</a></p>
             <p style="font-size:10px;">创建时间:{{file.sctime}} 修改时间:{{file.smtime}}</p>
-        <div>
+        </div>
     </h3>
 
     {% include file/tags.html %}
@@ -57,7 +66,7 @@
     <div>
 
         <div>
-            {% if globals().get("download_csv") %} 
+            {% if download_csv %} 
                 <form action="/file/edit" method="POST" enctype="multipart/form-data">
                     <a href="/file/edit?option=download&id={{file.id}}">下载CSV</a> 
                     <input type="file" name="file" style="display: inline;"/>
@@ -67,6 +76,10 @@
                 </form>
             {% end %}
         </div>
+    </div>
+
+    <div class="alert">
+    {{error}}
     </div>
 
     <form action="/file/update" method="POST">
