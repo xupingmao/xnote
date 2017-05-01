@@ -446,7 +446,7 @@ class handler(BaseHandler):
     def execute(self):
         """search files by name and content"""
         key = self.get_argument("key", "")
-        page = self.get_argument("page", 1)
+        page = self.get_argument("page", 1, type = int)
         user_name = xauth.get_current_user().get("name")
         self.get_argument("page_url", "/search/search?key=%s&page=" % key)
         pagesize = config.PAGE_SIZE
@@ -462,7 +462,7 @@ class handler(BaseHandler):
             files = store[store_key]
         else:
             files = self.full_search(key)
-            store[store_key] = files
+            # store[store_key] = files
 
         count = len(files)
         pagestart = (page-1) * pagesize

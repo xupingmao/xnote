@@ -67,9 +67,11 @@ def get_argument(key, default_value=None, type = None, strip=False):
         web.ctx["_xnote.input"] = _input
     value = _input.get(key)
     if value is None:
+        _input[key] = default_value
         return default_value
     if type != None:
         value = type(value)
+        _input[key] = value
     if strip and isinstance(value, str):
         value = value.strip()
     return value
@@ -186,9 +188,11 @@ class BaseHandler():
             template_name = self.get_template_name()
         else:
             template_name = nargs[0]
-        if self._args is not None:
-            self._args.update(kw)
-            kw = self._args
+        _args = web.ctx.get("_xnote.input")
+
+        if _args is not None:
+            _args.update(kw)
+            kw = _args
         text = xtemplate_render(template_name, **kw);
         self._response = text
         return text

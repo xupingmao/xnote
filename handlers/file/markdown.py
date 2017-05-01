@@ -107,7 +107,7 @@ class UpdateHandler(BaseHandler):
             groups = "*"
         
         rowcount = dao.update(where = dict(id=id, version=version), 
-            content=content, type="md", size=len(content))
+            content=content, type="md", size=len(content), groups = groups)
         if rowcount > 0:
             raise web.seeother("/file/edit?id=" + str(id))
         else:
