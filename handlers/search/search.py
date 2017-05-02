@@ -282,11 +282,11 @@ def search_name(words, groups=None):
         words = [words]
     like_list = []
     for word in words:
-        like_list.append('name like %s ' % repr('%' + word.upper() + '%'))
-    sql = "select * from file where %s AND is_deleted != 1" % (" AND ".join(like_list))
+        like_list.append('name LIKE %s ' % repr('%' + word.upper() + '%'))
+    sql = "SELECT * from file WHERE %s AND is_deleted != 1" % (" AND ".join(like_list))
     if groups and groups != "admin":
         sql += " AND (groups = '*' OR groups = '%s')" % groups
-    sql += " order by satime desc limit 1000";
+    sql += " ORDER BY name DESC LIMIT 1000";
     # print("search name:", sql)
     all = xutils.db_execute(config.DB_PATH, sql)
     return [FileDO.fromDict(item) for item in all]
