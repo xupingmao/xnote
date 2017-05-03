@@ -1,5 +1,15 @@
 {% extends base.html %}
 
+{% block head %}
+<style type="text/css">
+  .date {
+    color: green;
+    font-size: small;
+  }
+</style>
+
+{% end %}
+
 {% block body %}
 
   {% init recent_created = [] %}
@@ -13,7 +23,7 @@
 
   <h2>最近修改</h2>
   {% for file in recent_modified %}
-    <p> {{to_date(file.sctime)}} <a href="{{file.url}}">{{file.name}}</a>
+    <p> {{to_date(file.smtime)}} <a href="{{file.url}}">{{file.name}}</a>
   {% end %}
 
 {% end %}
