@@ -1,0 +1,19 @@
+{% extends base.html %}
+
+{% block body %}
+
+  {% init recent_created = [] %}
+  {% init recent_modified = [] %}
+
+  <h2>最近添加</h2>
+
+  {% for file in recent_created %}
+    <p> {{to_date(file.sctime)}} <a href="{{file.url}}">{{file.name}}</a>
+  {% end %}
+
+  <h2>最近修改</h2>
+  {% for file in recent_modified %}
+    <p> {{to_date(file.sctime)}} <a href="{{file.url}}">{{file.name}}</a>
+  {% end %}
+
+{% end %}

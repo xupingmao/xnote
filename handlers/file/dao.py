@@ -198,7 +198,7 @@ def get_children_by_id(id):
     all = db.execute("select * from file where is_deleted != 1 and parent_id = %s order by sctime desc" % id)
     return [FileDO.fromDict(item) for item in all]
 
-def find_by_id(id, db=None):
+def get_by_id(id, db=None):
     sql = "select * from file where id = %s" % id
     if db is None:
         db = FileDB();
@@ -206,8 +206,6 @@ def find_by_id(id, db=None):
     if len(result) is 0:
         return None
     return FileDO.fromDict(result[0])
-
-get_by_id = find_by_id
 
 def get_vpath(record):
     pathlist = []
@@ -244,6 +242,16 @@ def visit_by_id(id):
 def get_recent_visit(count):
     db = FileDB()
     all = db.execute("select * from file where is_deleted != 1 and not (related like '%%HIDE%%') order by satime desc limit %s" % count)
+    return [FileDO.fromDict(item) for item in all]
+
+def get_recent_created(count):
+    db = FileDB()
+    all = db.execute("SELECT * FROM file WHERE is_deleted != 1 ORDER BY sctime DESC LIMIT %s" % count)
+    return [FileDO.fromDict(item) for item in all]
+
+def get_recent_modified(count):
+    db = FileDB()
+    all = db.execute("SELECT * FROM file WHERE is_deleted != 1 ORDER BY smtime DESC LIMIT %s" % count)
     return [FileDO.fromDict(item) for item in all]
 
 def update(where, **kw):

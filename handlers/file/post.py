@@ -26,7 +26,7 @@ class PostView(object):
     def GET(self):
         args = web.input()
         id = int(args.id)
-        file = dao.find_by_id(id)
+        file = dao.get_by_id(id)
         if file.content != None:
             file.content = xutils.html_escape(file.content, quote=False);
             # \xad (Soft hyphen), 用来处理断句的
@@ -55,7 +55,7 @@ class PostEdit:
     def GET(self):
         args = web.input()
         id = int(args.id)
-        file = dao.find_by_id(id)
+        file = dao.get_by_id(id)
         if file.content == None:
             file.content = ""
         file.content = file.content.replace('\xad', '\n')
@@ -71,7 +71,7 @@ class PostEdit:
         # 参考web.utils.storify
         args = web.input(file={}, public="off")
         id = int(args.id)
-        file = dao.find_by_id(id)
+        file = dao.get_by_id(id)
         version = int(args.version)
 
         content = args.content
