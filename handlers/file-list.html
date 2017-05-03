@@ -106,7 +106,9 @@
                 {% else %}
                     <div class="note-content-short">{{file.content[:100]}}</div>
                 {% end %}
+                {% if file.smtime != None %}
                     <div class="note-last-visit-time">最近编辑:{{file.smtime}}</div>
+                {% end %}
                 <!-- <div class="note-last-modify-time">最近编辑:{{file.smtime}}</div> -->
                 <div class="note-related">
                     <input type="text" data-role="tagsinput" value="{{file.related}}"/>
