@@ -135,8 +135,12 @@ def render(template_name, **kw):
     nkw = {}
     pre_render(nkw)
     nkw.update(kw)
+    _input = web.input()
 
-    if web.input().get("_json") == "true":
+    if _input.get("_type") == "json":
+        return json.dumps(kw, default=encode_json)
+    # deprecated
+    if _input.get("_json") == "true":
         return json.dumps(kw, default=encode_json)
     return _loader.load(template_name).generate(**nkw)
 
