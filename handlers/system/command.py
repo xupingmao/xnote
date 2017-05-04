@@ -3,6 +3,7 @@ import web
 import os
 import xutils
 import subprocess
+import xauth
 
 class handler:
 
@@ -10,6 +11,8 @@ class handler:
         "open_xnote_dir": "explorer .",
         "shutdown": "shutdown /s /t 60",
     }
+
+    @xauth.login_required("admin")
     def GET(self):
         args = web.input()
         path = args.path
@@ -26,3 +29,9 @@ class handler:
             os.popen(path)
         # os.popen(command)
         return "success"
+
+    @xauth.login_required("admin")
+    def POST(self):
+        input_str = web.data().decode("utf-8")
+        # input_str = web.data()
+        return os.popen(input_str).read()

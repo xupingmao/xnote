@@ -1,0 +1,42 @@
+{% extends base.html %}
+
+{% block head %}
+<style>
+    #console {
+        width:60em;
+        height:50em;
+        background: black;
+    }
+    .console_text {
+        color:#fff;
+        font-family: consolas;
+        font-size:1em;
+    }
+    #cursor {
+        margin: 0px;
+        padding: 0px;
+        background: blue;
+        font-size: 1em;
+    }
+</style>
+{% end %}
+
+{% block body %}
+
+<h2 class="top-offset-1">在线终端</h2>
+<div id="console" class="top-offset-1"></div>
+<script src="/static/js/webos/console.js"></script>
+
+<script type="text/javascript">
+    new WebOSConsole("console", {cols:100, rows:40}, function (inputStr, response) {
+        // 使用
+        $.post("/system/command", inputStr, function (data, status) {
+            response(data);
+        }).fail(function (data) {
+            console.log(data)
+            response("Fail to read response from server");
+        });
+    }).start();
+</script>
+
+{% end %}
