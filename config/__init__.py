@@ -1,8 +1,9 @@
 # encoding=utf-8
 '''system configuration'''
 import os
-
 from collections import OrderedDict
+
+import xutils
 
 PORT = "1234"
 # PORT = "8787"
@@ -77,6 +78,7 @@ def set_data_path(path):
     global BACKUP_DIR
     global APP_DIR
 
+    xutils.makedirs(path)
     DATA_PATH = path
     # 数据库地址
     DB_PATH  = os.path.join(DATA_PATH, "data.db")

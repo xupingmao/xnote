@@ -1,29 +1,25 @@
 # encoding=utf-8
-import sys
-# insert after working dir
-sys.path.insert(1, "lib")
-
-import web
-import xtemplate
 import os, socket, sys
-from util import fsutil
-from util import dbutil
-import xutils
-from xutils import *
-
 import json
 import time
-import config
 import webbrowser
 import posixpath
 import socket
 import logging
 import traceback
+import argparse
 
-from autoreload import AutoReloadThread
+# insert after working dir
+sys.path.insert(1, "lib")
 
+import web
+import xutils
+import config
 import xtables
 import xmanager
+
+from xutils import *
+from autoreload import AutoReloadThread
 
 
 def get_ip_list(blacklist = []):
@@ -44,18 +40,17 @@ def get_ip_list(blacklist = []):
 
 def check_db():
     xtables.init()
-    # xutils.makedirs(config.DB_DIR)
-    # if not os.path.exists(config.DB_PATH):
-    #     # xutils.touch(config.DB_PATH)
-    #     sql = xutils.readfile(config.SQL_PATH)
-    #     dbutil.execute(config.DB_PATH, sql)
 
 def check_dirs():
     xutils.makedirs(config.DATA_PATH)
     xutils.makedirs(config.LOG_DIR)
     xutils.makedirs("tmp")
-    xutils.makedirs("scripts")
         
+def handle_data_dir():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data", default="./data")
+    args = parser.parse_args(sys.argv[1:])
+    config.set_data_path(args.data)
         
 def main():
     global app
@@ -64,6 +59,9 @@ def main():
     
     if not os.environ.get("PORT"):
         os.environ["PORT"] = port
+
+    # 处理Data目录
+    handle_data_dir()
     
     var_env = dict()
     
@@ -85,11 +83,11 @@ def main():
         mgr.reload()
         autoreload_thread.clear_watched_files()
         # autoreload_thread.watch_dir("template")
-        autoreload_thread.watch_recursive_dir(config.HANDLERS_DIR)
+        autoreload_thread.watch_dir(config.HANDLERS_DIR, recursive=True)
 
     # autoreload just reload models
     autoreload_thread = AutoReloadThread(stop_callback)
-    autoreload_thread.watch_recursive_dir(config.HANDLERS_DIR)
+    autoreload_thread.watch_dir(config.HANDLERS_DIR, recursive=True)
     autoreload_thread.start()
     mgr.run_task()
 
