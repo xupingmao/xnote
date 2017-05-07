@@ -1,5 +1,13 @@
 {% extends base.html %}
 
+{% block head %}
+<style type="text/css">
+    .error-div {
+        color:red;
+    }
+</style>
+{% end %}
+
 {% block body %}
 
 {% init app_list = [] %}
@@ -19,6 +27,8 @@
     {% end %}
 </table>
 </div>
+
+<div class="error-div">{{error}}</div>
 
 <div class="top-offset-1">
 <form enctype="multipart/form-data" method="POST">

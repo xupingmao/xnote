@@ -21,7 +21,7 @@ class FileInfo:
 
 class handler:
 
-    def GET(self):
+    def GET(self, error=""):
         parent = config.APP_DIR
         xutils.makedirs(parent)
         app_list = []
@@ -30,7 +30,7 @@ class handler:
             if fname.endswith(".zip"):
                 app_list.append(FileInfo(fname, parent))
         return xtemplate.render("system/upload_app.html", 
-            app_list = app_list)
+            app_list = app_list, error = error)
 
     def POST(self):
         file = web.input(file={}).file
@@ -45,12 +45,16 @@ class handler:
 
         basename, ext = os.path.splitext(filename)
         app_dir = os.path.join(parent, basename)
+        error = ""
 
-        # 删除旧文件
-        if os.path.exists(app_dir):
-            xutils.remove(app_dir)
-        # mode只有'r', 'w', 'a'
-        zf = zipfile.ZipFile(filepath, "r")
-        zf.extractall(app_dir)
-        return self.GET()
+        try:
+            # 删除旧文件
+            if os.path.exists(app_dir):
+                xutils.remove(app_dir)
+            # mode只有'r', 'w', 'a'
+            zf = zipfile.ZipFile(filepath, "r")
+            zf.extractall(app_dir)
+        except Exception as e:
+            error = str(e)
+        return self.GET(error)
 
