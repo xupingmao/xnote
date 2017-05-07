@@ -16,16 +16,15 @@ CODE_EXT_LIST = [
     ".php",
 ]
 
-CODE_EXT_DICT = OrderedDict({
-    "Python": [".py"],
-    "Python(web)": [".py", ".html"],
-    "Java": [".java"],
-    "Web前端": [".html", ".htm", ".js", ".css"],
-    "C/C++": [".c", ".h", ".cpp", ".hpp"],
-    "Lua": [".lua"],
-    "Ruby": [".rb"],
-    "Php": [".php"],
-})
+CODE_EXT_DICT = OrderedDict()
+CODE_EXT_DICT["Python"]      = [".py"]
+CODE_EXT_DICT["Python(web)"] = [".py", ".html"]
+CODE_EXT_DICT["Java"]        = [".java"]
+CODE_EXT_DICT["Web前端"]     = [".html", ".htm", ".js", ".css"],
+CODE_EXT_DICT["C/C++"]       = [".c", ".h", ".cpp", ".hpp"],
+CODE_EXT_DICT["Lua"]         = [".lua"]
+CODE_EXT_DICT["Ruby"]        = [".rb"],
+CODE_EXT_DICT["Php"]         = [".php"]
 
 class LinesInfo(object):
     """docstring for LinesInfo"""
