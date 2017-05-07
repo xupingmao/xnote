@@ -37,9 +37,14 @@ class handler(BaseHandler):
         if file is None:
             raise web.notfound()
         download_csv = file.related != None and "CODE-CSV" in file.related
+
+        user_name = xauth.get_current_user()["name"]
+        can_edit = (file.creator == user_name) or (user_name == "admin")
+
         self.render(file=file, 
             content = file.get_content(), 
             date2str=date2str,
+            can_edit = can_edit,
             download_csv = download_csv, 
             children = dao.get_children_by_id(file.id))
 

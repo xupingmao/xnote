@@ -23,7 +23,7 @@
 {% end %}
 
 {% block body %}
-
+    {% init can_edit = False %}
     {% include "file/header.html" %}
 
     <div style="">
@@ -66,6 +66,7 @@
 
     <form action="/file/update" method="POST">
         <div class="">
+            {% if can_edit %}
             <div class="">
                 <div id="edit-div">
                     <a href="/file/markdown/edit?id={{file.id}}">编辑</a>
@@ -78,6 +79,7 @@
                     <input onclick="preview()" type="button" value="预览"/>
                 </div>
             </div>
+            {% end %}
 
             <div style="padding-top:20px;">
                 <div id="epiceditor" class="row">
