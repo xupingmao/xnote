@@ -27,8 +27,8 @@ _dest_path = os.path.join(_dirname, "static", _zipname)
 # 是否移除旧备份
 _remove_old = False
 _MAX_BACKUP_COUNT = 10
-# 一个月备份一次
-_BACKUP_INTERVAL = 30 * 3600 * 24
+# 10天备份一次
+_BACKUP_INTERVAL = 10 * 3600 * 24
 
 def zip_xnote(nameblacklist = [_zipname]):
     dirname = "./"
