@@ -22,8 +22,9 @@ def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
         # % dateutil.before(days=int(days), format=True)
         sql = "select * from file where is_deleted != 1"
     else:
-        # sql = "select * from file where is_deleted != 1 AND (groups='%s' OR groups='*') order by smtime desc" % user_name
         sql = "select * from file where is_deleted != 1 AND groups = '%s'" % user_name
+
+    sql = "select * from file where is_deleted != 1 AND groups = '%s'" % user_name
 
     sql += " ORDER BY smtime DESC"
     sql += " LIMIT %s, %s" % ((page-1) * pagesize, pagesize)
@@ -35,10 +36,11 @@ def count_files():
     if xauth.get_current_user() == None:
         return 0
     user_name = xauth.get_current_user().get("name")
-    if user_name == "admin":
-        count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 ")[0].get("count")
-    else:
-        count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 AND groups='%s'" % user_name)[0].get("count")
+    # if user_name == "admin":
+    #     count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 ")[0].get("count")
+    # else:
+    #     count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 AND groups='%s'" % user_name)[0].get("count")
+    count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 AND groups='%s'" % user_name)[0].get("count")
     if count == 0:
         return 1
     return count
@@ -53,7 +55,7 @@ class handler(BaseHandler):
         files = get_recent_modified(days, page)
         count = count_files()
         self.render("file-list.html", files = files[:20], key = "", 
-            page = page, pages = math.ceil(count / config.PAGE_SIZE), page_url="/file/recent_edit?page=")
+            page = page, count = count, page_url="/file/recent_edit?page=")
 
     def json_request(self):
         s_days = self.get_argument("days", 7)

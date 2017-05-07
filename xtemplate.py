@@ -7,6 +7,7 @@ Created by xupingmao on 2016/12/05
 import os
 import json
 import web
+import math
 
 from tornado.template import Template, Loader
 from util import dateutil
@@ -111,6 +112,7 @@ def add_render_hook(hook):
 
 def pre_render(kw):
     """ Main hook for template engine """
+    kw["math"] = math
     kw["_full_search"] = False
     kw["_search_type"] = "normal"
     # TODO prevent hack

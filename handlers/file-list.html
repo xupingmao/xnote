@@ -120,6 +120,7 @@
     </div>
     
 {% if "page" in globals() %}
+    {% set pages = math.ceil(count/10) %}
     {% if page == 1 and len(files) < 5 and key != "" %}
         {# TODO 移动端优化 #}
         <div class="note">

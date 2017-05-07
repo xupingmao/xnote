@@ -468,7 +468,6 @@ class handler(BaseHandler):
         pagestart = (page-1) * pagesize
         files = files[pagestart:pagestart+pagesize]
 
-        self.get_argument("pages", math.ceil(count / pagesize))
         return self.render("file-list.html", files = files, count = count)
 
 name = "搜索"
