@@ -3,6 +3,7 @@
 import web
 import xauth
 import xtemplate
+import xmanager
 
 class handler:
     """用户管理"""
@@ -22,4 +23,6 @@ class handler:
         xauth.add_user(name, password)
         added = xauth.get_user(name)
         print(" -- User -- ", added)
+        # 先暴力解决
+        xmanager.reload()
         return self.GET()

@@ -400,4 +400,6 @@ def instance():
     global _manager
     return _manager
     
-    
+def reload():
+    _manager.reload()
+
