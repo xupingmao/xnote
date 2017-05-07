@@ -14,6 +14,7 @@ import json
 import time
 import platform
 import re
+import shutil
 
 PY2 = sys.version_info[0] == 2
 
@@ -157,6 +158,14 @@ def get_file_size(path, format=True):
 def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
+
+def remove(path):
+    if not os.path.exists(path):
+        return
+    if os.path.isfile(path):
+        os.remove(path)
+    elif os.path.isdir(path):
+        shutil.rmtree(path)
 
 def touch(path):
     if not os.path.exists(path):

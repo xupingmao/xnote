@@ -278,6 +278,6 @@ xurls = (r"/fs-", handler,
     r"/fs/(.*)", FileSystemHandler,
     r"/static/(.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
-    r"/app/(.*)", StaticFileHandler)
+    r"/(app/.*)", StaticFileHandler)
 
 
