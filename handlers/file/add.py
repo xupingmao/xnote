@@ -30,8 +30,8 @@ class handler(BaseHandler):
         file.ctime = dateutil.get_seconds()
         file.sctime = dateutil.format_time()
         file.creator = xauth.get_current_user()["name"]
-        # 默认是公开的
-        file.groups = "*"
+        # 默认私有
+        file.groups = file.creator
         file.parent_id = 0
         file.type = type
         file.content = ""

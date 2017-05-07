@@ -47,6 +47,8 @@ def count_files():
 
 class handler(BaseHandler):
     """show recent modified files"""
+
+    @xauth.login_required()
     def execute(self):
         s_days = self.get_argument("days", 30)
         page = int(self.get_argument("page", 1))

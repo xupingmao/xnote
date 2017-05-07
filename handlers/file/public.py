@@ -5,7 +5,7 @@
 """Description here"""
 
 import xtemplate
-
+import xauth
 import handlers.base as base
 from xutils import Storage
 from . import dao
@@ -21,6 +21,7 @@ def get_recent_modified(limit, page=0):
 
 class handler:
 
+    @xauth.login_required()
     def GET(self):
         page = base.get_argument("page", 1, type=int)
         recent = get_recent_modified(10, page-1)

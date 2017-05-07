@@ -113,7 +113,6 @@ def add_render_hook(hook):
 def pre_render(kw):
     """ Main hook for template engine """
     kw["math"] = math
-    kw["_full_search"] = False
     kw["_search_type"] = "normal"
     # TODO prevent hack
     kw["_is_admin"] = xauth.is_admin()

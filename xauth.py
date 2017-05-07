@@ -32,8 +32,6 @@ def read_users_from_ini(path):
 def save_to_ini():
     """保存到配置文件"""
     global _users
-    if _users is None:
-        return
     # 先强制同步一次
     _get_users()
     cf = ConfigParser()
@@ -43,14 +41,15 @@ def save_to_ini():
         cf.set(name, "password", user.password)
     with open("config/users.ini", "w") as fp:
         cf.write(fp)
+        fp.flush()
 
-    _users = None
-    _get_users()
+    refresh_users()
 
 def _get_users():
     """获取用户，内部接口"""
     global _users
 
+    # 有并发风险
     if _users is not None:
         return _users
 
@@ -70,6 +69,7 @@ def get_users():
 def refresh_users():
     global _users
     _users = None
+    print("refresh users")
     return _get_users()
 
 def get_user(name):
@@ -95,6 +95,7 @@ def add_user(name, password):
     save_to_ini()
 
 def has_login(name=None):
+    # import threading
     """验证是否登陆
 
     如果``name``指定,则只能该用户名通过验证
@@ -102,12 +103,15 @@ def has_login(name=None):
     name_in_cookie = web.cookies().get("xuser")
     pswd_in_cookie = web.cookies().get("xpass")
 
+    # TODO 不同地方调用结果不一致
+    # print(name, name_in_cookie)
     if name is not None and name_in_cookie != name:
         return False
     name = name_in_cookie
     if name == "" or name is None:
         return False
     user = get_user(name)
+    # print(threading.current_thread().name, " -- User --", user)
     if user is None:
         return False
 
