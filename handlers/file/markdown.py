@@ -41,7 +41,9 @@ class handler(BaseHandler):
         user_name = xauth.get_current_user()["name"]
         can_edit = (file.creator == user_name) or (user_name == "admin")
 
-        self.render(file=file, 
+        self.render("file/view.html",
+            file=file, 
+            file_type = "md",
             content = file.get_content(), 
             date2str=date2str,
             can_edit = can_edit,
@@ -101,6 +103,7 @@ class UpdateHandler(BaseHandler):
 
         content = self.get_argument("content")
         version = self.get_argument("version", type=int)
+        file_type = self.get_argument("type")
 
         file = dao.get_by_id(id)
         assert file is not None
@@ -112,19 +115,22 @@ class UpdateHandler(BaseHandler):
             groups = "*"
         
         rowcount = dao.update(where = dict(id=id, version=version), 
-            content=content, type="md", size=len(content), groups = groups)
+            content=content, type=file_type, size=len(content), groups = groups)
         if rowcount > 0:
-            raise web.seeother("/file/edit?id=" + str(id))
+            if file_type == "md":
+                raise web.seeother("/file/edit?id=" + str(id))
+            elif file_type == "post":
+                raise web.seeother("/file/post?id=" + str(id))
         else:
             # 传递旧的content
             cur_version = file.version
             file.content = content
             file.version = version
-            return self.render("file/markdown_edit.html", file=file, 
-            content = content, 
-            date2str=date2str,
-            children = dao.get_children_by_id(file.id),
-            error = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
+            return self.render("file/view.html", file=file, 
+                content = content, 
+                date2str=date2str,
+                children = dao.get_children_by_id(file.id),
+                error = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
 
     def rename_request(self):
         fileId = self.get_argument("fileId")

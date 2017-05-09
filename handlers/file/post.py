@@ -46,9 +46,10 @@ class PostView(object):
         # 统计访问次数，不考虑并发
         dao.visit_by_id(id)
 
-        return xtemplate.render("file/post.html",
+        return xtemplate.render("file/view.html",
             op = "view",
-            file = file)
+            file = file,
+            file_type = "post")
 
 class PostEdit:
 
@@ -61,10 +62,11 @@ class PostEdit:
         file.content = file.content.replace('\xad', '\n')
         rows = file.content.count("\n")+5
         rows = max(rows, 20)
-        return xtemplate.render("file/post.html", 
+        return xtemplate.render("file/view.html", 
             op="edit", 
             file=file,
-            rows = rows)
+            rows = rows,
+            file_type = "post")
 
     def POST(self):
         # 一定要加file={}

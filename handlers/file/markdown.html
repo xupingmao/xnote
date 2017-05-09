@@ -1,28 +1,4 @@
-{% extends base.html %}
-
-{% block head %}
-<script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
-<script type="text/javascript" src="/static/lib/marked/marked.js"></script>
-<script type="text/javascript" src="/static/js/marked-ext.js"></script>
-<style>
-.CodeMirror {
-    width: 60rem;
-    font-size:16px;
-    height: auto;
-}
-
-#markdown-input {
-    font-family: monospace;
-}
-
-.small {
-    font-size: small;
-}
-
-</style>
-{% end %}
-
-{% block body %}
+{% if file_type == "md" %}
     {% init can_edit = False %}
     {% include "file/header.html" %}
 

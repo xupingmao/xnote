@@ -1,0 +1,45 @@
+{% extends base.html %}
+
+{% block head %}
+<script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
+<script type="text/javascript" src="/static/lib/marked/marked.js"></script>
+<script type="text/javascript" src="/static/js/marked-ext.js"></script>
+<style>
+.CodeMirror {
+    width: 60rem;
+    font-size:16px;
+    height: auto;
+}
+
+#markdown-input {
+    font-family: monospace;
+}
+
+.small {
+    font-size: small;
+}
+
+img {
+    max-width: 100%;
+}
+
+.alert {
+    color: red;
+    background-color: #FFCCCC;
+    width: initial;
+}
+
+</style>
+{% end %}
+
+
+{% block body %}
+    {% init file_type = "md" %}
+
+    {% comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 %}
+
+    {% include "file/markdown.html" %}
+    {% include "file/post.html" %}
+
+{% end %}
+

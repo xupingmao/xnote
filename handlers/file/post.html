@@ -1,21 +1,4 @@
-{% extends base.html %}
-
-{% block head %}
-<style type="text/css">
-img {
-    max-width: 100%;
-}
-
-.alert {
-    color: red;
-    background-color: #FFCCCC;
-    width: initial;
-}
-
-</style>
-{% end %}
-
-{% block body %}
+{% if file_type == "post" %}
 
     {% init error = "" %}
 
@@ -45,6 +28,7 @@ img {
     <div class="alert">{{error}}</div>
     <form method="POST" enctype="multipart/form-data">
         <input name="version" value="{{file.version}}" class="hide">
+        <input name="type" value="post" class="hide"/>
         <p>
             <input name="name" type="text" value="{{file.name}}">
             {% if file.groups == "*" %}
