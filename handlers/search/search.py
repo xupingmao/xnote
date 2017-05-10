@@ -372,9 +372,11 @@ def find_tools(name):
     files = []
     for filename in os.listdir(tools_path):
         _filename, ext = os.path.splitext(filename)
-        if filename.endswith(".html") and name in _filename:
-            f = FileDO("工具 - " + filename)
-            f.url = "/tools/" + filename
+        if _filename in files:
+            continue
+        if filename.endswith((".html", ".py")) and name in _filename:
+            f = FileDO("工具 - " + _filename)
+            f.url = "/tools/" + _filename
             f.content = filename
             files.append(f)
     return files
