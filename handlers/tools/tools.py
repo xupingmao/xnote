@@ -46,6 +46,8 @@ class handler:
     
     def GET(self, name):
         name = xutils.unquote(name)
+        if not name.endswith(".html"):
+            name += ".html"
         return xtemplate.render("tools/" + name)
 
     def POST(self, name):

@@ -4,7 +4,7 @@
 <style>
     #console {
         width:60em;
-        height:50em;
+        height:30em;
         background: black;
     }
     .console_text {
@@ -19,16 +19,20 @@
         font-size: 1em;
     }
 </style>
+
+<link rel="stylesheet" type="text/css" href="/static/lib/jquery.terminal/jquery.terminal-1.3.1.min.css">
 {% end %}
 
 {% block body %}
 
 <h2 class="top-offset-1">在线终端</h2>
 <div id="console" class="top-offset-1"></div>
-<script src="/static/js/webos/console.js"></script>
+<!-- <script src="/static/js/webos/console.js"></script> -->
 
-<script type="text/javascript">
-    new WebOSConsole("console", {cols:100, rows:40}, function (inputStr, response) {
+<script type="text/javascript" src="/static/lib/jquery.terminal/jquery.terminal-1.3.1.min.js"></script>
+
+<!-- <script type="text/javascript">
+    new WebOSConsole("console", {cols:100, rows:40}, function (inputStr, term) {
         // 使用
         $.post("/system/command", inputStr, function (data, status) {
             response(data);
@@ -37,6 +41,19 @@
             response("Fail to read response from server");
         });
     }).start();
+</script> -->
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#console").terminal(function(command, term) {
+            $.post("/system/command", command, function (data, status) {
+                term.echo(data);
+            })
+        }).fail(function (data) {
+            console.log(data);
+            term.exception("failed"+data, "error");
+        })
+    })
 </script>
 
 {% end %}
