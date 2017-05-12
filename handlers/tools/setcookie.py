@@ -63,8 +63,11 @@ class handler:
 
     def POST(self):
         cookie = web.input().cookie
+        cookie = cookie.rstrip()
+        # Cookie格式 Set-Cookie: value[; expires=date][; domain=domain][; path=path][; secure]
         # expires设置失效时间，不设置只在本次连接中生效
         # Path设置生效路径，不加端口号会隔离
+        # 多个cookie需要使用多个Set-Cookie首部
         web.header("Set-Cookie", cookie + "; expires="+get_gmt_time() + "; Path=/")
         # dd = json.loads(cookie)
         # for key in dd:

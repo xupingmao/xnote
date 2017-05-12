@@ -251,7 +251,7 @@ class FileSystemHandler:
         
 
 class StaticFileHandler(FileSystemHandler):
-    allowed_prefix = ["img", "app", "files"]
+    allowed_prefix = ["img", "app", "files", "tmp"]
 
     def is_path_allowed(self, path):
         for prefix in self.allowed_prefix:
@@ -278,6 +278,7 @@ xurls = (r"/fs-", handler,
     r"/fs/(.*)", FileSystemHandler,
     r"/static/(.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
-    r"/(app/.*)", StaticFileHandler)
+    r"/(app/.*)", StaticFileHandler,
+    r"/(tmp/.*)", StaticFileHandler)
 
 
