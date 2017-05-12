@@ -25,21 +25,6 @@
     
     <hr/>
 
-    <div>
-
-        <div>
-            {% if globals().get("download_csv") %} 
-                <form action="/file/edit" method="POST" enctype="multipart/form-data">
-                    <a href="/file/edit?option=download&id={{file.id}}">下载CSV</a> 
-                    <input type="file" name="file" style="display: inline;"/>
-                    <input type="text" name="option" value="upload" class="hide"/>
-                    <input name="id" class="hide" value="{{file.id}}"/>
-                    <button>上传</button>
-                </form>
-            {% end %}
-        </div>
-    </div>
-
     <form action="/file/update" method="POST">
         <div class="">
             {% if can_edit %}
@@ -47,6 +32,7 @@
                 <div id="edit-div">
                     <a href="/file/markdown/edit?id={{file.id}}">编辑</a>
                     <a href="javascript:medit()">移动编辑</a>
+                    <a href="/file/share?id={{file.id}}">分享</a>
                 </div>
                 <div id="update-div" class="hide">
                     <input name="id" value="{{file.id}}" class="hide"/>

@@ -51,7 +51,6 @@ def get_path_list(path):
     return pathlist
 
 class handler:
-    __url__ = r"/wiki/?(.*)"
     
     def GET(self, name):
         name = xutils.unquote(name)
@@ -73,6 +72,7 @@ class handler:
         has_readme = False
 
         if os.path.isdir(path):
+            return "Directory Not Readable"
             type = "dir"
             content = None
             children = []
@@ -187,3 +187,15 @@ class handler:
             children = children,
             content = content,
             type = type)
+
+# Deprecated
+class ReadOnlyHandler:
+
+    def GET(self, path):
+        realpath = os.path.join(config.TMP_DIR, path)
+        content  = xutils.readfile(realpath)
+        return xtemplate.render("fs/wiki.html", 
+            os = os, content = content, type="file")
+
+xurls = (r"/wiki/?(.*)", handler)
+
