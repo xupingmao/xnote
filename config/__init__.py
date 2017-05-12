@@ -1,5 +1,9 @@
 # encoding=utf-8
-'''system configuration'''
+'''
+system configuration
+约定目录叫 XXX_DIR
+文件叫 XXX_PATH
+'''
 import os
 from collections import OrderedDict
 
@@ -77,15 +81,19 @@ def set_data_path(path):
     global DB_PATH
     global BACKUP_DIR
     global APP_DIR
+    global TMP_DIR
 
     xutils.makedirs(path)
     DATA_PATH = path
     # 数据库地址
-    DB_PATH  = os.path.join(DATA_PATH, "data.db")
+    DB_PATH    = os.path.join(DATA_PATH, "data.db")
     # 备份数据地址
     BACKUP_DIR = os.path.join(DATA_PATH, "backup")
     # APP地址
-    APP_DIR = os.path.join(DATA_PATH, "app")
+    APP_DIR    = os.path.join(DATA_PATH, "app")
+    TMP_DIR    = os.path.join(DATA_PATH, "tmp")
+
+    xutils.makedirs(TMP_DIR)
 
 # 初始化默认的Data目录
 set_data_path(DATA_PATH)

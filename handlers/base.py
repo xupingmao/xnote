@@ -52,29 +52,14 @@ from util import dbutil
 from util import netutil
 
 import xtemplate
+import xutils
 from xtemplate import render as xtemplate_render
 
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 
 
-def get_argument(key, default_value=None, type = None, strip=False):
-    if isinstance(default_value, dict):
-        return web.input(**{key: default_value}).get(key)
-    _input = web.ctx.get("_xnote.input")
-    if _input == None:
-        _input = web.input()
-        web.ctx["_xnote.input"] = _input
-    value = _input.get(key)
-    if value is None:
-        _input[key] = default_value
-        return default_value
-    if type != None:
-        value = type(value)
-        _input[key] = value
-    if strip and isinstance(value, str):
-        value = value.strip()
-    return value
+get_argument = xutils.get_argument
 
 def print_exception():
     ex_type, ex, tb = sys.exc_info()

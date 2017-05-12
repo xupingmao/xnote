@@ -15,6 +15,7 @@ import time
 import platform
 import re
 import shutil
+import web
 
 PY2 = sys.version_info[0] == 2
 
@@ -272,3 +273,24 @@ def http_get(url):
 
     
 
+
+#################################################################
+##   Web.py Utilities web.py工具类的封装
+#################################################################
+def get_argument(key, default_value=None, type = None, strip=False):
+    if isinstance(default_value, dict):
+        return web.input(**{key: default_value}).get(key)
+    _input = web.ctx.get("_xnote.input")
+    if _input == None:
+        _input = web.input()
+        web.ctx["_xnote.input"] = _input
+    value = _input.get(key)
+    if value is None:
+        _input[key] = default_value
+        return default_value
+    if type != None:
+        value = type(value)
+        _input[key] = value
+    if strip and isinstance(value, str):
+        value = value.strip()
+    return value
