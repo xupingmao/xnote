@@ -93,6 +93,41 @@ function gen_protobuf_dao(inputStr, option) {
 }
 
 /**
+ * 生成JPA的实体
+ * @param {string} inputStr
+ * @param {object} option
+ */
+function gen_jpa_entity(inputStr, option) {
+    var lexer = new Lexer();
+    var tokens = lexer.parse(inputStr);
+    var out = "";
+    var inputStrComment = "";
+    inputStrComment += "/** \n";
+    inputStrComment += inputStr;
+    inputStrComment += "\n**/\n\n";
+
+    var declare_list = ["@Id"];
+    for (var i = 0; i < tokens.length; i+=2) {
+        var name = tokens[i].value;
+        var type = tokens[i+1].value;
+        var vars = {
+        type: type,
+        origin_name: name,
+        name: toCamel(name),
+        get: toCamel("get_" + name),
+        set: toCamel("set_" + name)
+        };
+        var decl = bashformat("@Column(name = \"$origin_name\")\nprivate $type $name;\n", vars);
+        var defines1 = bashformat("\npublic $type $get() {\n return this.$name;\n}\n",
+        vars);
+        var defines2 = bashformat("public void $set($type $name){\n this.$name = $name;\n}\n", vars);
+
+        declare_list.push(decl);
+        out += defines1 + defines2;
+    }
+    return inputStrComment + declare_list.join("\n") + "\n" + out;
+}
+/**
  * @param {string} inputStr
  * @param {object} option
  * @param {function} callback
@@ -181,6 +216,7 @@ function gen_java_to_string(inputStr, option) {
         <select id="option">
             <option value="gen_pojo">Java POJO</option>
             <option value="gen_protobuf_dao">Java ProtoBuf Dao</option>
+            <option value="gen_jpa_entity">JPA Entity</option>
             <option value="gen_java_to_string">Java toString</option>
             <!-- <option value="to_underscore">转为下划线风格</option> -->
         </select>
