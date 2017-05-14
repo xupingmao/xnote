@@ -63,21 +63,6 @@
     
     <hr/>
 
-    <div>
-
-        <div>
-            {% if download_csv %} 
-                <form action="/file/edit" method="POST" enctype="multipart/form-data">
-                    <a href="/file/edit?option=download&id={{file.id}}">下载CSV</a> 
-                    <input type="file" name="file" style="display: inline;"/>
-                    <input type="text" name="option" value="upload" class="hide"/>
-                    <input name="id" class="hide" value="{{file.id}}"/>
-                    <button>上传</button>
-                </form>
-            {% end %}
-        </div>
-    </div>
-
     <div class="alert">
     {{error}}
     </div>
@@ -96,7 +81,7 @@
 
                     <input type="button" class="red" onclick="delLink()" value="删除" />
                     <div class="col-md-12">
-                        <iframe src="/file/upload_file" style="border:none;width:100%;height:5em;"></iframe>
+                        <iframe src="/file/upload_file" style="border:none;width:100%;height:5rem 5em;"></iframe>
                     </div>
                 </div>
             </div>

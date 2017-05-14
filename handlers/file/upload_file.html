@@ -1,4 +1,6 @@
-<html>
+<!DOCTYPE html>
+<meta charset="utf-8">
+<!-- <html>
 <meta charset="utf-8">
 <head>
 </head>
@@ -6,7 +8,7 @@
 <div>
 <form action="/file/upload_file" enctype="multipart/form-data" method="POST">
 <input type="file" name="file"/>
-<input type="submit" value="上传图片"/>
+<input type="submit" value="上传文件"/>
 </form>
 </div>
 <div>
@@ -14,4 +16,82 @@
     {% if is_img %}!{% end %}[{{filename}}]({{filepath}})
 {% end %}
 </div>
+</body> -->
+
+
+<html>
+<head>
+    <title>Upload Files using XMLHttpRequest - Minimal</title>
+
+    <script type="text/javascript">
+      function fileSelected() {
+        return;
+        var file = document.getElementById('fileToUpload').files[0];
+        if (file) {
+          var fileSize = 0;
+          if (file.size > 1024 * 1024)
+            fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
+          else
+            fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
+
+          document.getElementById('fileName').innerHTML = 'Name: ' + file.name;
+          document.getElementById('fileSize').innerHTML = 'Size: ' + fileSize;
+          document.getElementById('fileType').innerHTML = 'Type: ' + file.type;
+        }
+      }
+
+      function uploadFile() {
+        var fd = new FormData();
+        fd.append("file", document.getElementById('fileToUpload').files[0]);
+        fd.append("type", "html5")
+        var xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener("progress", uploadProgress, false);
+        xhr.addEventListener("load", uploadComplete, false);
+        xhr.addEventListener("error", uploadFailed, false);
+        xhr.addEventListener("abort", uploadCanceled, false);
+        xhr.open("POST", "/file/upload_file");
+        xhr.send(fd);
+      }
+
+      function uploadProgress(evt) {
+        if (evt.lengthComputable) {
+          var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+          document.getElementById('progressNumber').innerHTML = "进度: " + percentComplete.toString() + '%';
+        }
+        else {
+          document.getElementById('progressNumber').innerHTML = 'unable to compute';
+        }
+      }
+
+      function uploadComplete(evt) {
+        /* This event is raised when the server send back a response */
+        // alert(evt.target.responseText);
+        var responseText = evt.target.responseText;
+        var data = JSON.parse(responseText);
+        document.getElementById("resultLink").innerHTML = "链接: " + data.link;
+      }
+
+      function uploadFailed(evt) {
+        alert("There was an error attempting to upload the file.");
+      }
+
+      function uploadCanceled(evt) {
+        alert("The upload has been canceled by the user or the browser dropped the connection.");
+      }
+    </script>
+</head>
+<body>
+<form id="form1" enctype="multipart/form-data" method="POST" action="/file/upload_file">
+    <div class="row">
+        <input type="file" name="file" id="fileToUpload" onchange="fileSelected();"/>
+        <input type="button" onclick="uploadFile()" value="上传文件" />
+    </div>
+    <div id="fileName"></div>
+    <div id="fileSize"></div>
+    <div id="fileType"></div>
+
+    <div id="progressNumber"></div>
+    <div id="resultLink"></div>
+</form>
+
 </body>
