@@ -117,10 +117,7 @@ class UpdateHandler(BaseHandler):
         rowcount = dao.update(where = dict(id=id, version=version), 
             content=content, type=file_type, size=len(content), groups = groups)
         if rowcount > 0:
-            if file_type == "md":
-                raise web.seeother("/file/edit?id=" + str(id))
-            elif file_type == "post":
-                raise web.seeother("/file/post?id=" + str(id))
+            raise web.seeother("/file/view?id=" + str(id))
         else:
             # 传递旧的content
             cur_version = file.version
@@ -157,6 +154,7 @@ class UpdateHandler(BaseHandler):
 
 xurls = ("/file/edit", handler, 
         "/file/markdown", handler,
+        "/file/view", handler,
         "/file/markdown/edit", MarkdownEdit,
         "/file/update", UpdateHandler)
 
