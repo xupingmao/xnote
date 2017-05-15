@@ -6,12 +6,8 @@
     
     <h3>
         <span id="fileId" style="display:none;">{{file.id}}</span>
-        <div style="display:none" id="renameDiv">
-            <span><input id="newName"> </input></span> 
-            <button onclick="renameFile()">重命名</button>
-        </div>
         <div>
-            <p><a id="oldName" href="javascript:switchRename()" style="color:blue">{{file.name}}</a></p>
+            <h2>{{file.name}}</h2>
             <p class="small">创建时间:{{file.sctime}}</p>
             <p class="small">修改时间:{{file.smtime}}</p>
         <div>

@@ -81,16 +81,17 @@ def get_win_drives():
 class FileSystemHandler:
 
     mime_types = {
-        ""    : 'application/octet-stream', # Default
-        '.jpg': 'image/jpeg',
-        '.png': 'image/png',
-        '.gif': 'image/gif',
-        '.mp4': 'video/mp4',
-        '.avi': 'video/avi',
+        ""     : 'application/octet-stream', # Default
+        '.jpg' : 'image/jpeg',
+        '.png' : 'image/png',
+        '.gif' : 'image/gif',
+        '.webp': 'image/webp',
+        '.mp4' : 'video/mp4',
+        '.avi' : 'video/avi',
         '.html': 'text/html; charset=utf-8',
-        '.py' : 'text/plain; charset=utf-8',
-        '.txt': 'text/plain; charset=utf-8',
-        '.md' : 'text/plain; charset=utf-8',
+        '.py'  : 'text/plain; charset=utf-8',
+        '.txt' : 'text/plain; charset=utf-8',
+        '.md'  : 'text/plain; charset=utf-8',
     }
 
     encodings = {
