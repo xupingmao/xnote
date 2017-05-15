@@ -75,6 +75,7 @@ class PostEdit:
         id = int(args.id)
         file = dao.get_by_id(id)
         version = int(args.version)
+        name    = xutils.get_argument("name")
 
         content = args.content
         groups = file.creator
@@ -92,7 +93,7 @@ class PostEdit:
             content = content + "\n[img src=\"{}\"img]".format(webpath)
 
         rowcount = dao.update(where=dict(id=id, version=version), 
-            groups = groups, type="post", size=len(content), content=content)
+            groups = groups, type="post", size=len(content), content=content, name=name)
         if rowcount > 0:
             raise web.seeother("/file/post?id={}".format(id))
         else:

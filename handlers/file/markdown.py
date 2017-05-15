@@ -64,8 +64,8 @@ class MarkdownEdit(BaseHandler):
 
     @xauth.login_required()
     def default_request(self):
-        id = self.get_argument("id", "")
-        name = self.get_argument("name", "")
+        id   = xutils.get_argument("id", "")
+        name = xutils.get_argument("name", "")
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
@@ -98,12 +98,12 @@ def result(success = True, msg=None):
 class UpdateHandler(BaseHandler):
 
     def default_request(self):
-        is_public = self.get_argument("public", "")
-        id = self.get_argument("id", type=int)
-
-        content = self.get_argument("content")
-        version = self.get_argument("version", type=int)
-        file_type = self.get_argument("type")
+        is_public = xutils.get_argument("public", "")
+        id        = xutils.get_argument("id", type=int)
+        content   = xutils.get_argument("content")
+        version   = xutils.get_argument("version", type=int)
+        file_type = xutils.get_argument("type")
+        name      = xutils.get_argument("name", "")
 
         file = dao.get_by_id(id)
         assert file is not None
@@ -113,9 +113,14 @@ class UpdateHandler(BaseHandler):
         groups = file.creator
         if is_public == "on":
             groups = "*"
-        
-        rowcount = dao.update(where = dict(id=id, version=version), 
-            content=content, type=file_type, size=len(content), groups = groups)
+        update_kw = dict(content=content, 
+                type=file_type, 
+                size=len(content), 
+                groups = groups);
+
+        if name != "" and name != None:
+            update_kw["name"] = name
+        rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
             raise web.seeother("/file/view?id=" + str(id))
         else:
