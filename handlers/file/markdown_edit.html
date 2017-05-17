@@ -133,14 +133,8 @@
         ele.rows = rows + 10;
     }
 
-    function edit() {
-        $("#markdown-input-div").removeClass("hide");
-        $("#markdown-output-div").removeClass("col-md-12").addClass("col-md-6");
+    function initCodeMirror() {
         var height = Math.max(500, $("#markdown-output-div").height());
-        $("#markdown-input").css({height:height+"px"});
-        $("#edit-div").show();
-        $("#edit-btns").hide();
-
         var editor = $("#markdown-input")[0];
         var codeMirror = CodeMirror.fromTextArea(editor, {
             lineNumbers:true,
@@ -159,13 +153,30 @@
         codeMirror.setSize("auto", height);
     }
 
-    function medit() {
+    function edit() {
+        if (document.body.clientWidth < 500) {
+            mobileEdit();
+            return;
+        }
+        $("#markdown-input-div").removeClass("hide");
+        $("#markdown-output-div").removeClass("col-md-12").addClass("col-md-6");
+        var height = Math.max(500, $("#markdown-output-div").height());
+        $("#markdown-input").css({height:height+"px"});
+        $("#edit-div").show();
+        $("#edit-btns").hide();
+
+        initCodeMirror();
+    }
+
+    function mobileEdit() {
         $("#markdown-input-div").removeClass("hide").addClass("col-md-12");
         $("#markdown-output-div").removeClass("col-md-12").addClass("hide");
         var height = Math.max(500, $("#markdown-output-div").height());
         $("#markdown-input").css({height:height+"px"});
         $("#edit-div").show();
         $("#edit-btns").hide();
+
+        initCodeMirror();
     }
     
     function preview() {

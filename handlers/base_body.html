@@ -4,16 +4,10 @@
 {% if _nav_position == "top" %}
 
   <div class="xnote-menu col-md-12" style="display: block;/*position: fixed*/;background: #333;">
-      <!-- <li class="menu-item"><a href="/">提醒</a></li> -->
-      <!-- 使用资料构建统一的格式 -->
-      <!-- <li class="menu-item"><a href="/wiki/">wiki</a></li> -->
-      <!-- <li class="menu-item"><a href="/">联系人</a></li> -->
-      <!-- <li class="menu-item"><a href="/image/index">图片</a></li> -->
       <div class="col-md-1" style="height:1em;"></div>
       <div class="col-md-10">
       {% if _has_login %}
         <li class="menu-item"><a href="/file/recent_edit">资料</a></li>
-        <!-- <li class="menu-item"><a href="/fs/">文件</a></li> -->
         <li class="menu-item"><a href="/system/sys">系统</a></li>
         <li class="menu-item"><a href="/tools/date.html">日历</a></li>
         <li class="menu-item"><a href="/wiki/tools.md">功能</a></li>
