@@ -6,6 +6,7 @@
         color:red;
     }
 </style>
+<script type="text/javascript" src="/static/js/upload.js"></script>
 {% end %}
 
 {% block body %}
@@ -32,9 +33,17 @@
 
 <div class="top-offset-1">
 <form enctype="multipart/form-data" method="POST">
-    <input type="file" name="file"/>
-    <input type="submit" value="上传app包"/>
+    <input type="file" name="file" id="fileId"/>
+    <input type="button" value="上传app包" id="submitId"/>
+    <span id="progressNumber"></span>
+    <div id="resultLink"></div>
 </form>
 </div>
+
+<script type="text/javascript">
+    $("#submitId").on("click", function () {
+        uploadFile("fileId", "file", "/system/upload_app");
+    })
+</script>
 
 {% end %}

@@ -25,9 +25,7 @@ class handler(BaseHandler):
         type = xutils.get_argument("type", "normal")
         filepath = ""
         filename = ""
-
-        print_env()
-
+        # print_env()
         if not hasattr(file, "filename") or file.filename == "":
             self.render("file/upload_file.html", filepath = filepath, filename = filename)
             return
