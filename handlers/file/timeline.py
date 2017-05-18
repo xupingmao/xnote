@@ -23,6 +23,8 @@ class handler:
         for row in rows:
             date = re.match(r"\d+\-\d+", row.sctime).group(0)
             row.url = "/file/view?id={}".format(row.id);
+            # 优化数据大小
+            row.content = ""
             if date not in result:
                 result[date] = []
             result[date].append(row)
