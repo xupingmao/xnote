@@ -1,0 +1,30 @@
+# -*- coding:utf-8 -*-  
+# Created by xupingmao on 2017/05/18
+# 
+
+"""Description here"""
+import re
+
+import xauth
+import xutils
+from . import dao
+
+class handler:
+
+    @xauth.login_required()
+    def GET(self):
+        db = dao.get_file_db()
+        last_month = xutils.days_before(30, format=True)
+        user_name  = xauth.get_current_user()["name"]
+        rows = db.query("SELECT * FROM file WHERE creator = $creator"
+            + " AND sctime >= $ctime ORDER BY sctime DESC", 
+            dict(creator=user_name, ctime=last_month))
+        result = dict()
+        for row in rows:
+            date = re.match(r"\d+\-\d+", row.sctime).group(0)
+            row.url = "/file/view?id={}".format(row.id);
+            if date not in result:
+                result[date] = []
+            result[date].append(row)
+
+        return xutils.json_str(**result)
