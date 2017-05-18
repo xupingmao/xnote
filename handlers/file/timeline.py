@@ -13,8 +13,9 @@ class handler:
 
     @xauth.login_required()
     def GET(self):
+        days = xutils.get_argument("days", 30, type=int)
         db = dao.get_file_db()
-        last_month = xutils.days_before(30, format=True)
+        last_month = xutils.days_before(days, format=True)
         user_name  = xauth.get_current_user()["name"]
         rows = db.query("SELECT * FROM file WHERE creator = $creator"
             + " AND sctime >= $ctime ORDER BY sctime DESC", 

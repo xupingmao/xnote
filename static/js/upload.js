@@ -21,14 +21,22 @@
      * @param fileButtonId
      * @param fileName
      * @param uploadUrl
+     * @param successCallback
      */
-    function uploadFile(fileButtonId, fileName, uploadUrl) {
+    function uploadFile(fileButtonId, fileName, uploadUrl, successCallback) {
         var fd = new FormData();
         fd.append(fileName, document.getElementById(fileButtonId).files[0]);
         fd.append("type", "html5")
         var xhr = new XMLHttpRequest();
         xhr.upload.addEventListener("progress", uploadProgress, false);
-        xhr.addEventListener("load", uploadComplete, false);
+        
+        var _onComplete = uploadComplete;
+
+        if (successCallback) {
+            _onComplete = successCallback;
+        }
+
+        xhr.addEventListener("load", _onComplete, false);
         xhr.addEventListener("error", uploadFailed, false);
         xhr.addEventListener("abort", uploadCanceled, false);
         xhr.open("POST", uploadUrl);
