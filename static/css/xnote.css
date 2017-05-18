@@ -122,6 +122,16 @@ li.menu-item {
     padding-bottom: 5px;
 }
 
+li.menu-active {
+    padding-bottom: 3px;
+    border-style: solid;
+    border-color: #99cc33;
+    border-top: 0px;
+    border-left: 0px;
+    border-right: 0px;
+    border-bottom-width: 2px;
+}
+
 li.menu-item a {
     text-decoration: none; 
     color: #fff;
