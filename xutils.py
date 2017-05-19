@@ -209,6 +209,13 @@ def format_time(seconds=None):
         st = time.localtime(seconds)
         return time.strftime('%Y-%m-%d %H:%M:%S', st)
 
+def days_before(days, format=False):
+    seconds = time.time()
+    seconds -= days * 3600 * 24
+    if format:
+        return format_time(seconds)
+    return time.localtime(seconds)
+
 #################################################################
 ##   Str Utilities
 #################################################################

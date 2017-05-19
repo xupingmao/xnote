@@ -42,7 +42,16 @@
 
 <script type="text/javascript">
     $("#submitId").on("click", function () {
-        uploadFile("fileId", "file", "/system/upload_app");
+        uploadFile("fileId", "file", "/system/upload_app", function (evt) {
+            /* This event is raised when the server send back a response */
+            // alert(evt.target.responseText);
+            var responseText = evt.target.responseText;
+            document.getElementById("resultLink").innerHTML = "上传成功";
+
+            setTimeout(function () {
+                location.reload();
+            }, 500)
+        });
     })
 </script>
 

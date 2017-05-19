@@ -37,6 +37,10 @@ class handler:
         filename = file.filename
         parent = config.APP_DIR
 
+        basename, ext = os.path.splitext(filename)
+        if ext != ".zip":
+            return self.GET("Expect zip file!")
+
         filepath = os.path.join(parent, filename)
         with open(filepath, "wb") as fp:
             for chunk in file.file:
