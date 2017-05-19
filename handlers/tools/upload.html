@@ -1,33 +1,30 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<!-- <html>
-<meta charset="utf-8">
-<head>
-</head>
-<body style="margin:0;margin-top:10px;">
-<div>
-<form action="/file/upload_file" enctype="multipart/form-data" method="POST">
-<input type="file" name="file"/>
-<input type="submit" value="上传文件"/>
-</form>
-</div>
-<div>
-{% if filename != "" %}
-    {% if is_img %}!{% end %}[{{filename}}]({{filepath}})
-{% end %}
-</div>
-</body> -->
-
 
 <html>
 <head>
     <title>Upload Files using XMLHttpRequest - Minimal</title>
 
+    <style type="text/css">
+      .file-area {
+        background-color: #FFCCCC;
+        /*height: 2em;*/
+        width: 100%;
+        text-align: center;
+        padding: 5px;
+        padding-bottom: 5px;
+      }
+      .file-area-dragenter {
+        background-color: #99CC00;
+      }
+    </style>
+    <script type="text/javascript" src="/static/lib/jquery.min.js"></script>
+
     <script type="text/javascript">
 
-      function uploadFile() {
+      function uploadFile(file) {
         var fd = new FormData();
-        fd.append("file", document.getElementById('fileToUpload').files[0]);
+        fd.append("file", file);
         fd.append("type", "html5")
         var xhr = new XMLHttpRequest();
         xhr.upload.addEventListener("progress", uploadProgress, false);
@@ -63,19 +60,58 @@
       function uploadCanceled(evt) {
         alert("The upload has been canceled by the user or the browser dropped the connection.");
       }
+
+      $(function () {
+        function onDropFile(e) {
+          e.preventDefault();
+          console.log(e);
+          var files = [];
+          if (e.dataTransfer) {
+            files = e.dataTransfer.files;
+          } else if (e.originalEvent) {
+            files = e.originalEvent.dataTransfer.files;
+          }
+          if (files.length > 0) {
+            uploadFile(files[0]);
+          }
+        }
+
+        function onDragEnter(e) {
+          // console.log("drag enter", e);
+          console.log($(e.target));
+          e.preventDefault();
+          $(e.target).addClass("file-area-dragenter");
+        }
+
+        function onDragLeave(e) {
+          // console.log("drag leave", e);
+          e.preventDefault();
+          $(e.target).removeClass("file-area-dragenter");
+        }
+
+        function onDragOver(e) {
+          e.preventDefault();
+        }
+        $(".file-area").on("drop", onDropFile);
+        $(".file-area").on("dragenter", onDragEnter);
+        $(".file-area").on("dragleave", onDragLeave);
+        $(".file-area").on("dragover", onDragOver);
+
+        if (typeof(Worker) !== undefined) {
+          $("#uploadBtn").remove();
+        }
+      })
+
     </script>
 </head>
 <body>
 <form id="form1" enctype="multipart/form-data" method="POST" action="/file/upload_file">
     <div class="row">
-        <input type="file" name="file" id="fileToUpload"/>
-        <input type="button" onclick="uploadFile()" value="上传文件" />
+        <div id="fileToUpload" class="file-area">拖拽文件到此处上传</div>
+        <input id="uploadBtn" type="button" onclick="uploadFile()" value="上传文件" />
         <span id="progressNumber"></span>
         
     </div>
-<!--     <div id="fileName"></div>
-    <div id="fileSize"></div>
-    <div id="fileType"></div> -->
     <div id="resultLink"></div>
 </form>
 

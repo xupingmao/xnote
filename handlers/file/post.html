@@ -12,7 +12,7 @@
         <a href="/file/post/edit?id={{file.id}}">编辑</a>
     </p>
     <hr/>
-    <div style="font-family:Consolas,monospace;word-wrap: break-word;">{% raw file["content"] %}</div>
+    <div class="x-code-block">{% raw file["content"] %}</div>
     <br/>
     <a href="javascript:deleteConfirm()">删除</a>
     <script type="text/javascript">

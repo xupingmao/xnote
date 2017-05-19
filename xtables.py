@@ -116,7 +116,7 @@ def init_table_file():
     
     # MD5
     manager.add_column("md5", "text", "")
-    # 修改次数
+    # 修改版本
     manager.add_column("version", "int", 0)
     manager.close()
 
