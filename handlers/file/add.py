@@ -10,31 +10,34 @@ from .dao import FileDO
 from . import dao
 
 import xauth
+import xutils
 
 class handler(BaseHandler):
 
     def execute(self):
-        name = self.get_argument("name", "")
-        tags = self.get_argument("tags", "")
-        key  = self.get_argument("key", "")
-        type = self.get_argument("type", "post")
+        name = xutils.get_argument("name", "")
+        tags = xutils.get_argument("tags", "")
+        key  = xutils.get_argument("key", "")
+        type = xutils.get_argument("type", "post")
+        parent_id = xutils.get_argument("parent_id", 0, type=int)
 
         if key == "":
             key = time.strftime("%Y-%m-%d")
 
         file = FileDO(name)
-        file.atime = dateutil.get_seconds()
-        file.satime = dateutil.format_time()
-        file.mtime = dateutil.get_seconds()
-        file.smtime = dateutil.format_time()
-        file.ctime = dateutil.get_seconds()
-        file.sctime = dateutil.format_time()
+        file.atime   = dateutil.get_seconds()
+        file.satime  = dateutil.format_time()
+        file.mtime   = dateutil.get_seconds()
+        file.smtime  = dateutil.format_time()
+        file.ctime   = dateutil.get_seconds()
+        file.sctime  = dateutil.format_time()
         file.creator = xauth.get_current_user()["name"]
         # 默认私有
-        file.groups = file.creator
-        file.parent_id = 0
-        file.type = type
-        file.content = ""
+        file.groups    = file.creator
+        file.parent_id = parent_id
+        file.type      = type
+        file.content   = ""
+
         error = ""
         try:
             if name != '':
@@ -44,12 +47,7 @@ class handler(BaseHandler):
                     raise Exception("%s 已存在" % name)
                 f = dao.insert(file)
                 inserted = dao.get_by_name(name)
-                if type == "post":
-                    raise web.seeother("/file/post?id={}".format(inserted.id))
-                elif type == "table":
-                    raise web.seeother("/file/table?id={}".format(inserted.id))
-                else:
-                    raise web.seeother("/file/edit?id=%s" % inserted.id)
+                raise web.seeother("/file/view?id={}".format(inserted.id))
         except Exception as e:
             error = e
         self.render("file/add.html", key = "", name = key, tags = tags, error=error)

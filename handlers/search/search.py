@@ -370,13 +370,16 @@ def find_tools(name):
     """查找`handlers/tools/`目录下的工具"""
     tools_path = config.TOOLS_DIR
     files = []
+    basename_set = set()
     for filename in os.listdir(tools_path):
         _filename, ext = os.path.splitext(filename)
-        if _filename in files:
-            continue
-        if filename.endswith((".html", ".py")) and name in _filename:
-            f = FileDO("工具 - " + _filename)
-            f.url = "/tools/" + _filename
+        if ext in (".html", ".py"):
+            basename_set.add(_filename)
+
+    for filename in basename_set:
+        if name in filename:
+            f = FileDO("工具 - " + filename)
+            f.url = "/tools/" + filename
             f.content = filename
             files.append(f)
     return files

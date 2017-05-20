@@ -3,23 +3,28 @@
 {% block body %}
 
     <div class="col-md-12">
-        <p><a href="/system/sys">System</a> / 监控</p>
-        <p>搜索路径 {{sys.path}}</p>
+        <h2>模块信息</h2>
+        <h3>sys.path</h3>
+        <ul>
+            {% for p in sys.path %}
+                <li>{{p}}</li>
+            {% end %}
+        </ul>
         <p>模块数 {{len(modules)}} </p>
     </div>
 
     <div class="col-md-12">
-    <table>
+    <table class="table col-md-12">
         <tr>
-            <th>操作</th>
+            <th>编号</th>
             <th>模块名</th>
-            <th>描述</th>
+            <!-- <th>描述</th> -->
         </tr>
-    {% for mod in modules %}
+    {% for index, mod in enumerate(modules) %}
         <tr>
-            <td><a href="/system/document?name={{mod.name}}">文档</a></td>
-            <td>{{mod.sysname}}</td>
-            <td>{{mod.info}}</td>
+            <td>{{index}}</td>
+            <td><a href="/system/document?name={{mod.name}}">{{mod.sysname}}</a></td>
+            <!-- <td>{{mod.info}}</td> -->
         </tr>
     {% end %}
     </table>

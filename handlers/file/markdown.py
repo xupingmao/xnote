@@ -43,7 +43,6 @@ class handler(BaseHandler):
 
         self.render("file/view.html",
             file=file, 
-            file_type = "md",
             content = file.get_content(), 
             date2str=date2str,
             can_edit = can_edit,

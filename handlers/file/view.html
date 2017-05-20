@@ -44,12 +44,16 @@ img {
 
 
 {% block body %}
+    {% set file_type = file.type %}
     {% init file_type = "md" %}
 
+    {% include "file/header.html" %}
+    
     {% comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 %}
 
     {% include "file/markdown.html" %}
     {% include "file/post.html" %}
+    {% include "file/folder.html" %}
 
 {% end %}
 

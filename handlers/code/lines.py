@@ -9,11 +9,10 @@ import re
 from collections import OrderedDict
 
 CODE_EXT_LIST = [
-    ".c", ".cpp", ".h",
-    ".java", ".xml",
-    ".js", ".py", ".lua", ".rb",
-    ".html", ".css",
-    ".php",
+    ".c",    ".cpp", ".h",       # C 
+    ".java", 
+    ".js",   ".py",  ".lua", ".rb", ".php", # Scripts
+    ".html", ".css", ".xml",         # xml/css
 ]
 
 CODE_EXT_DICT = OrderedDict()
@@ -65,10 +64,12 @@ def get_line_infos(path, recursive=False, type=None, skip_func = lambda fname: F
                 continue
             try:
                 text = xutils.readfile(fpath)
+                if len(text) == 0:
+                    continue
             except:
                 line_infos.append(LinesInfo(fpath))
                 continue
-            lines = text.count("\n")
+            lines = text.count("\n") + 1  # 换行符数量+1，最后一行有效
             blanklines = 0
             for line in text.split("\n"):
                 line = line.strip()
