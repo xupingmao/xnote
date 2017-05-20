@@ -34,6 +34,10 @@
         <td>RTCPeerConnection</td>
         <td id="checkRTCPeerConnection"></td>
     </tr>
+    <tr>
+        <td>Worker</td>
+        <td id="checkWorker"></td>
+    </tr>
 </div>
 
 <script type="text/javascript">
@@ -44,5 +48,6 @@ $("#vendor").html(navigator.vendor);
 $("#screen").html("screen.width:"+screen.width+",screen.height:"+screen.height);
 $("#checkGetUserMedia").html(navigator.getUserMedia ? navigator.getUserMedia.toString() : undefined);
 $("#checkRTCPeerConnection").html(window.RTCPeerConnection ? window.RTCPeerConnection.toString() : undefined);
+$("#checkWorker").html(typeof Worker);
 </script>
 {% end %}
