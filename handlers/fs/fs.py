@@ -39,12 +39,62 @@ def get_file_size(filepath):
 def get_filesystem_kw():
     """return filesystem utils"""
     kw = {}
-    kw["os"] = os
-    kw["is_stared"] = is_stared
-    kw["search_type"] = "fs"
+    kw["os"]            = os
+    kw["is_stared"]     = is_stared
+    kw["search_type"]   = "fs"
+    kw["get_file_size"] = get_file_size
     return kw
 
+def get_parent_path(path):
+    path2 = path.replace("\\", "/")
+    if path2.endswith("/"):
+        path2 = path[:-1]
+    if not path.endswith("/"):
+        path = path+"/"
+    return os.path.dirname(path2).replace("\\", "/") # fix windows file sep
+
+class FileItem(xutils.Storage):
+
+    def __init__(self, path):
+        # Fix ending
+        # if os.path.isdir(path) and not path.endswith("/"):
+        #     path = path + "/"
+        self.path = path
+        self.name = os.path.basename(path)
+        self.size = get_file_size(path)
+
+        # 处理Windows盘符
+        if path.endswith(":"):
+            self.name = path
+
+        if os.path.isfile(path):
+            self.type = "file"
+        else:
+            self.type = "dir"
+            self.path += "/"
+        
+
 def getpathlist(path):
+    path   = path.replace("\\", "/")
+    pathes = path.split("/")
+    last = None
+    pathlist = []
+    for vpath in pathes:
+        if vpath == "":
+            continue
+        if last is not None:
+            vpath = last + "/" + vpath
+        pathlist.append(FileItem(vpath))
+        last = vpath
+    return pathlist
+
+def list_abs_dir(path):
+    # pathlist = []
+    # for item in os.listdir(path):
+    #     pathlist.append(os.path.join(path, item))
+    return [os.path.join(path, item) for item in os.listdir(path)]
+
+def getpathlist2(path):
     if not path.endswith("/"):
         path += "/"
     pathsplit = path.split("/")
@@ -52,7 +102,8 @@ def getpathlist(path):
     for i in range(len(pathsplit)):
         path = "/".join(pathsplit[:i])
         if "" != os.path.basename(path):
-            pathlist.append(path)
+            # pathlist.append(path)
+            pathlist.append(FileItem(path))
     return pathlist
 
 def print_env():
@@ -70,9 +121,14 @@ def get_win_drives():
         drives_str = lp_buf.raw.decode(sys.getdefaultencoding())
         drives_list = drives_str.split("\x00")
         drives_list = list(filter(lambda x:len(x) > 0, drives_list))
-        return drives_list
+        filelist = []
+        for item in drives_list:
+            if item.endswith("\\"):
+                item = item[:-1]
+            filelist.append(item)
+        return filelist
     except Exception as e:
-        raise
+        return ["C:"]
     else:
         pass
     finally:
@@ -117,49 +173,35 @@ class FileSystemHandler:
 
     def list_directory(self, path):
         try:
-            filelist = os.listdir(path)
+            if xutils.is_windows() and path == "/":
+                # return self.list_win_drives()
+                filelist = get_win_drives()
+            else:
+                filelist = list_abs_dir(path)
         except OSError:
             return "No permission to list directory"
+
+        # filelist中路径均不带/
+        # 排序：文件夹优先，按字母顺序排列
         filelist.sort(key=lambda a: a.lower())
+        filelist.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
+        filelist = [FileItem(item) for item in filelist]
 
         # SAE上遇到中文出错
         # Fix bad filenames，修改不生效
         # filelist = list(map(lambda x: xutils.decode_bytes(x.encode("utf-8", errors='surrogateescape')), filelist))
 
         # Fix, some `file` in *nix is not file either directory. os.stat方法报错
-        filelist.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
-
-        path2 = path.replace("\\", "/")
-        if path2.endswith("/"):
-            path2 = path[:-1]
-        if not path.endswith("/"):
-            path = path+"/"
-        parent_path = os.path.dirname(path2).replace("\\", "/") # fix windows file sep
         path = path.replace("\\", "/")
-        kw = get_filesystem_kw()
-        kw["filelist"] = filelist
-        kw["path"] = path
-        kw["fspathlist"] = getpathlist(path)
-        kw["current_path"] = path
-        kw["parent_path"] = parent_path
-        kw["get_file_size"] = get_file_size
-
-        # handle home
-        if path[0] != "/":
-            home = path.split("/")[0]
-            if home[-1] != '/':
-                home+='/'
-        else:
-            # 类Unix系统
-            home = "/"
-        kw["home"] = home
+        kw   = get_filesystem_kw()
+        kw["filelist"]     = filelist
+        kw["path"]         = path
+        kw["fspathlist"]   = getpathlist(path)
+        
         return xtemplate.render("fs/fs.html", **kw)
 
     def list_root(self):
-        if xutils.is_windows():
-            raise web.seeother("/fs/C:/")
-        else:
-            raise web.seeother("/fs//")
+        raise web.seeother("/fs//")
 
     def read_range(self, path, http_range, blocksize):
         range_list = http_range.split("bytes=")
@@ -234,7 +276,7 @@ class FileSystemHandler:
                 return self.read_all(path, blocksize)            
 
     def handle_get(self, path):
-        # TODO 有编码错误
+        # TODO SAE上有编码错误
         # print("Load Path:", path)
         if path == "":
             return self.list_root()
@@ -270,6 +312,9 @@ class StaticFileHandler(FileSystemHandler):
             # 兼容static目录数据
             newpath = "./static/" + path
         path = newpath
+        if not os.path.isfile(path):
+            # 静态文件不允许访问文件夹
+            return "Not Readable %s" % path
         return self.handle_get(path)
 
 name = "文件系统"

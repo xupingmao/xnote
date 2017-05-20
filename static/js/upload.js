@@ -57,7 +57,7 @@
         /* This event is raised when the server send back a response */
         // alert(evt.target.responseText);
         var responseText = evt.target.responseText;
-        document.getElementById("resultLink").innerHTML = "上传成功";
+        document.getElementById("progressNumber").innerHTML = "上传成功";
     }
 
     function uploadFailed(evt) {

@@ -106,6 +106,13 @@
 .currentMonth {
   /*color: #999;*/
 }
+
+td.currentMonth:hover {
+  /*border: 3px solid #6C9;*/
+  cursor: pointer;
+  background-color: #9c9;
+  color: #fff;
+}
  
 /* 其他月颜色 */
 .otherMonth{
@@ -126,7 +133,7 @@
 <div id="calendar" class="calendar">
 </div>
 <div id="notes">
-
+  <h4>事件</h4>
 </div>
 
 <script type="text/javascript">
@@ -163,6 +170,12 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     "09-10": "教师节",
     "10-01": "国庆节",
   }
+
+  var getHolidayInfo = function (date) {
+    var monthDay = getMonthDayStr(date);
+    return HOLIDAY_MAP[monthDay];
+  }
+
   /*
    * 用于记录日期，显示的时候，根据dateObj中的日期的年月显示
    */
@@ -237,10 +250,9 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
    */
   function getDateInfoHTML(date) {
     var html = '<div class="date-info">' + date.getDate() + '</div>';
-    var monthDay = getMonthDayStr(date);
     // console.log(monthDay);
     // return html;
-    var holiday = HOLIDAY_MAP[monthDay];
+    var holiday = getHolidayInfo(date);
     if (holiday) {
       if (holiday.length > 3) {
         holiday = holiday.substr(0,2) + "..";
@@ -277,7 +289,7 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
       //_tds[i].data = _thisDayStr;
       _tds[i].setAttribute('data', _thisDayStr);
       if(_thisDayStr == getDateStr(new Date())) {    // 当前天
-        _tds[i].className = 'currentDay';
+        _tds[i].className = 'currentMonth currentDay';
       }else if(_thisDayStr.substr(0, 6) == getDateStr(_firstDay).substr(0, 6)) {
         _tds[i].className = 'currentMonth';  // 当前月
       }else {    // 其他月

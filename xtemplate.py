@@ -8,6 +8,7 @@ import os
 import json
 import web
 import math
+import inspect
 
 from tornado.template import Template, Loader
 from util import dateutil
@@ -130,7 +131,9 @@ def pre_render(kw):
 
 def encode_json(obj):
     if hasattr(obj, "__call__"):
-        return "function"
+        return str(obj)
+    elif inspect.ismodule(obj):
+        return str(obj)
     return obj
 
 def render(template_name, **kw):
@@ -140,9 +143,6 @@ def render(template_name, **kw):
     _input = web.input()
 
     if _input.get("_type") == "json":
-        return json.dumps(kw, default=encode_json)
-    # deprecated
-    if _input.get("_json") == "true":
         return json.dumps(kw, default=encode_json)
     return _loader.load(template_name).generate(**nkw)
 

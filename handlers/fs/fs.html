@@ -21,11 +21,11 @@
 
 <div>
     <form action="/fs_upload" enctype="multipart/form-data" method="POST" style="padding-top:20px;">
-        <input name="dirname" style="display:none;" value="{{current_path}}"/>
+        <input name="dirname" style="display:none;" value="{{path}}"/>
         <input type="file" name="file"/>
         <input type="submit" value="上传"/>
     </form>
-    <a href="/code/analyze?path={{current_path}}">分析</a>
+    <a href="/code/analyze?path={{path}}">分析</a>
 </div>
 
 <hr/>
@@ -33,39 +33,36 @@
 <div>
 
 <div style="background: lightgreen;">
-<a href="/fs/{{home}}">Home</a> /
-{% for _path in fspathlist %}
-    <a href="/fs/{{_path}}">{{os.path.basename(_path) }}</a> / 
+<a href="/fs//">Home</a> /
+{% for item in fspathlist %}
+    <a href="/fs/{{ item.path }}">{{ item.name }}</a> / 
 {% end %}
 </div>
 
 <div class="col-md-12">
 
-<!-- <li style="padding-top:6px;"><a href="/fs/{{parent_path}}/">上一级目录</a></li> -->
+<!-- <li style="padding-top:6px;"><a href="{{path}}/..">上一级目录</a></li> -->
 
 <table class="col-md-12">
-{% for filename in filelist %}
+{% for item in filelist %}
     <tr>
-        {% set filepath = current_path + filename %}
         <td>
         <!-- <div class="col-md-12" style="padding-top: 6px;"> -->
-        {% if os.path.isdir(filepath) %}
-            {% set filepath = filepath + "/" %}
+        {% if item.type == "dir" %}
             <img src="/static/img/folder.gif"/>
-            <a href="/fs/{{filepath}}" class="fs-dir">{{filename}}</a>
+            <a href="/fs/{{item.path}}" class="fs-dir">{{item.name}}</a>
         {% else %}
-            <a href="/fs/{{filepath}}" class="fs-file">{{filename}}</a>
-            
+            <a href="/fs/{{item.path}}" class="fs-file">{{item.name}}</a>
         {% end %}
         </td>
 
         <td>
-            {{get_file_size(filepath)}}
+            {{item.size}}
         </td>
 
         <td>
-            {% if filepath.endswith((".md", ".csv")) %}
-                <a href="/wiki/{{filepath}}">[编辑]</a>
+            {% if item.path.endswith((".md", ".csv")) %}
+                <a href="/wiki/{{item.path}}">[编辑]</a>
             {% end %}
         </td>
 {% end %}
