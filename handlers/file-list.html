@@ -69,12 +69,18 @@
     font-size: small;
     background-color: green;
     color: white;
+    border-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 .red-tag {
     font-size: small;
     background-color: red;
     color: white;
+    border-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 .x-page-link {
@@ -103,21 +109,25 @@
                 <div class="note-visited-cnt">访问指数:{{file.visited_cnt}}</div>
                 <div class="note-name">
                     <a href="{{file.url}}">{{file.name}}</a>
-                    {% if file.groups == "*" %}
-                        <span class="tag">公开</span>
-                    {% elif file.groups != None %}
-                        <span class="red-tag">{{file.groups}}</span>
-                    {% end %}
+                    
                 </div>
                 
                 {% if "raw" in file %}
                     <pre>{{ file.raw }}</pre>
-                {% else %}
-                    <!-- <div class="note-content-short">{{file.content[:100]}}</div> -->
                 {% end %}
-                {% if file.smtime != None %}
-                    <div class="note-last-visit-time">最近编辑:{{file.smtime}}</div>
-                {% end %}
+
+                <div>
+                    {% if file.groups == "*" %}
+                        <span class="tag">公开</span>
+                    {% elif file.groups != None %}
+                        <span class="tag">{{file.groups}}</span>
+                    {% end %}
+
+                    {% if file.smtime != None %}
+                        <span class="note-last-visit-time">最近编辑:{{file.smtime}}</span>
+                    {% end %}
+                </div>
+
                 <!-- <div class="note-last-modify-time">最近编辑:{{file.smtime}}</div> -->
                 <div class="note-related">
                     <input type="text" data-role="tagsinput" value="{{file.related}}"/>
