@@ -24,7 +24,8 @@ $(function () {
   var editor = CodeMirror.fromTextArea($("#editor")[0], {
     lineNumbers: true,
     mode: "text/x-c",
-    theme:"monokai"
+    theme:"monokai",
+    indentUnit:4,
   });
 
   // $("#run").click(function () {

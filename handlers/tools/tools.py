@@ -16,6 +16,7 @@ C_TEMPLATE = """
 #include <stdlib.h>
 
 int main(int argc, char* argv) {
+    printf("hello,world!");
     return 0;
 }
 """
@@ -54,10 +55,12 @@ class handler:
         return self.GET(name)
         
             
-xurls = ("/tools/tcc.html", TccHandler,
-         "/tools/sql.html", sql.handler,
-         "/tools/pipe.html", pipe.handler,
-         "/tools/notebook", notebook.handler,
-         "/tools/analyze_html.html", analyze_html.handler,
-         "/tools/(.*)", handler)
+xurls = (r"/tools/tcc\.html", TccHandler,
+         r"/tools/tcc", TccHandler,
+         r"/tools/sql\.html", sql.handler,
+         r"/tools/sql", sql.handler,
+         r"/tools/pipe\.html", pipe.handler,
+         r"/tools/notebook", notebook.handler,
+         r"/tools/analyze_html\.html", analyze_html.handler,
+         r"/tools/(.*)", handler)
          

@@ -83,6 +83,11 @@ def get_user_password(name):
 def get_current_user():
     return get_user(web.cookies().get("xuser"))
 
+def get_current_role():
+    """获取当前用户的角色"""
+    user = get_current_user()
+    return user.get("name")
+
 def get_md5_hex(pswd):
     pswd_md5 = hashlib.md5()
     pswd_md5.update(pswd.encode("utf-8"))
