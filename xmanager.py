@@ -7,6 +7,7 @@ import sys
 import traceback
 import time
 import copy
+import json
 from threading import Thread
 from queue import Queue
 
@@ -35,7 +36,12 @@ def wrapped_handler(handler_clz):
             self.target = handler_clz()
 
         def GET(self, *args):
-            return self.target.GET(*args)
+            result = self.target.GET(*args)
+            if isinstance(result, list):
+                return json.dumps(result)
+            elif isinstance(result, dict):
+                return json.dumps(result)
+            return result
 
         def POST(self, *args):
             return self.target.POST(*args)

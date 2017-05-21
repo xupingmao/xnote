@@ -315,4 +315,12 @@ function WebOSConsole(id, opt, callback) {
             this.state = 1;
         }
     }
+
+    /**
+     * 显示字符
+     * @param {string} message
+     */
+    WebOSConsole.prototype.echo = function(message) {
+        this.writeline(message);
+    }
 }

@@ -16,6 +16,8 @@ searchable = False
 class Home:
 
     def GET(self):
+        # return xtemplate.render("home.html")
         raise web.seeother("/file/recent_edit")
 
 xurls = ("/", Home, "/index", handler)
+

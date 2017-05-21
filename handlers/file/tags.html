@@ -1,16 +1,59 @@
-<!--     <div>
-        <input id="oldTags" style="display:none" value="{{file.related}}"/> 
-        <span>标签: </span><input type="text" id="tagsInput" class="tags"/>
-        <div style="display:none" id="newTagsDiv">
-            <input id="newTags" style="width:500px;"/>
-            <button onclick="updateRelated()">更新</button>
-        </div>
-        <div id="tagsUpdateDiv" style="color:green;display:none;">success</div>
-    </div> -->
+<div>创建于 {{file.sctime}} </div>
+<div>
+标签: 
+<span id="tags-span">
+</span>
 
-    <script type="text/javascript">
+<span id="edit-tags-span" style="display: none;">
+    <input id="tagEditText" type="text" value="" />(多个标签用空格隔开)<button id="tagEditBtn">确认</button>
+</span>
+
+<a id="toggleFileTagsEditor" href="javascript:toggleFileTagsEditor()">编辑</a>
+</div>
+
+<script type="text/javascript">
+
+function initTags() {
+    $.get("/file/tag/{{file.id}}", function(data, status) {
+        var tagsList = [];
+        var response = JSON.parse(data);
+        var tags = response.data;
+        $("#tags-span").html("");
+        tags.forEach(function (element, index) {
+            $("#tags-span").append($("<span>").addClass("tag-span").text(element.name));
+            tagsList.push(element.name);
+        })
+        $("#tagEditText").val(tagsList.join(" "));
+    }).fail(function (text) {
+
+    })
+}
+
+function toggleFileTagsEditor() {
+    // alert("hello");
+    var div = $("#edit-tags-span");
+    if (div.css("display") == "none") {
+        $("#tags-span").hide();
+        $("#edit-tags-span").show(200);
+        $("#toggleFileTagsEditor").text("取消")
+    } else {
+        $("#edit-tags-span").hide(200);
+        $("#tags-span").show();
+        $("#toggleFileTagsEditor").text("编辑")
+    }
+}
+
+$("#tagEditBtn").on("click", function() {
+    $.post("/file/tag/add", {file_id: {{file.id}}, tags: $("#tagEditText").val()}, 
+        function(data, status) {
+            // alert(data);
+            toggleFileTagsEditor();
+            initTags();
+    })
+})
+
 $(function () {
-
+    initTags();
     return;
 
     function editRelated () {

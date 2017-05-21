@@ -98,7 +98,7 @@
 {% end %}
 
 {% block body %}
-    {% include "file/header.html" %}
+    {% include "search.html" %}
    <br/>
    <script type="text/javascript">$("#menu-file").addClass("active");</script>
 
@@ -127,8 +127,6 @@
                         <span class="note-last-visit-time">最近编辑:{{file.smtime}}</span>
                     {% end %}
                 </div>
-
-                <!-- <div class="note-last-modify-time">最近编辑:{{file.smtime}}</div> -->
                 <div class="note-related">
                     <input type="text" data-role="tagsinput" value="{{file.related}}"/>
                 </div>
@@ -139,6 +137,7 @@
     </div>
     
 {% if "page" in globals() %}
+    {% init key = "" %}
     {% set pages = math.ceil(count/10) %}
     {% if key != "" %}
         {# TODO 移动端优化 #}

@@ -264,3 +264,22 @@ table td {
 .red {
     color:red;
 }
+
+.tag {
+    font-size: small;
+    background-color: green;
+    color: white;
+    border-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.tag-span {
+    font-size: small;
+    background-color: green;
+    color: white;
+    border-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-left: 3px;
+}
