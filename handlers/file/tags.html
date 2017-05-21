@@ -20,7 +20,14 @@ function initTags() {
         var tags = response.data;
         $("#tags-span").html("");
         tags.forEach(function (element, index) {
-            $("#tags-span").append($("<span>").addClass("tag-span").text(element.name));
+            var span = $("<span>");
+            var link = $("<a>");
+            link.addClass("tag-link");
+            link.text(element.name);
+            link.attr("href", "/file/tagname/"+element.name);
+            span.addClass("tag-span");
+            span.append(link);
+            $("#tags-span").append(span);
             tagsList.push(element.name);
         })
         $("#tagEditText").val(tagsList.join(" "));

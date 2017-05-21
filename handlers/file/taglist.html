@@ -1,0 +1,13 @@
+{% extends base.html %}
+
+{% block body %}
+    {% include search.html %}
+
+    <div class="top-offset-1">
+    {% for tag_info in tag_list %}
+        <span class="tag-span">
+            <a class="tag-link" href="/file/tagname/{{tag_info.name}}">{{tag_info.name}} {{tag_info.amount}}</a>
+        </span>
+    {% end %}
+    </div>
+{% end %}

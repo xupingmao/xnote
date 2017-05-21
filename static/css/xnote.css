@@ -283,3 +283,12 @@ table td {
     padding-right: 2px;
     margin-left: 3px;
 }
+
+.tag-link {
+    text-decoration: none;
+    color: white;
+}
+.tag-link:hover {
+    background-color: initial;
+    text-decoration: underline;
+}
