@@ -7,6 +7,8 @@
 import sqlite3
 import config
 
+DEFAULT_DB_PATH     = config.DB_PATH
+DEFAULT_LOG_DB_PATH = os.path.join(config.DATA_DIR, "log.db")
 
 class SqliteTableManager:
     """检查数据库字段，如果不存在就自动创建"""
@@ -14,7 +16,7 @@ class SqliteTableManager:
         self.filename = filename
         self.tablename = tablename
         self.db = sqlite3.connect(filename)
-        sql = "CREATE TABLE IF NOT EXISTS `%s` (id integer primary key autoincrement);" % tablename
+        sql = "CREATE TABLE IF NOT EXISTS `%s` (id bigint primary key autoincrement);" % tablename
         self.execute(sql)
 
     def execute(self, sql):
@@ -83,7 +85,7 @@ def init_table_test():
     # sys.exit(0)
 
 def init_table_file():
-    manager = TableManager(config.DB_PATH, "file")
+    manager = TableManager(DEFAULT_DB_PATH, "file")
     manager.add_column("name", "text", "")
     manager.add_column("content", "text", "")
     manager.add_column("size", "long", 0)
@@ -122,14 +124,20 @@ def init_table_file():
 
 def init_table_tag():
     # 2017/04/18
-    manager = TableManager(config.DB_PATH, "file_tag")
+    manager = TableManager(DEFAULT_DB_PATH, "file_tag")
     # 标签名
-    manager.add_column("name", "text", "")
+    manager.add_column("name",    "text", "")
     # 标签ID
     manager.add_column("file_id", "int", 0)
     # 权限控制
-    manager.add_column("groups", "text", "")
+    manager.add_column("groups",  "text", "")
     manager.close()
+
+def init_table_log():
+    # 2017/05/21
+    manager = TableManager(DEFAULT_LOG_DB_PATH, "xnote_log")
+    manager.add_column("tag",      "text", "")
+    manager.add_column("operator", "text", "")
 
 def init():
     # init_test_db()

@@ -27,6 +27,7 @@ LOG_DIR = os.path.join(WORKING_DIR, "log")
 # 用户数据的地址
 
 DATA_PATH = os.path.join(WORKING_DIR, "data")
+DATA_DIR  = DATA_PATH
 
 DB_DIR  = os.path.join(WORKING_DIR, "db")
 
@@ -78,6 +79,7 @@ def set(name, value):
 
 def set_data_path(path):
     global DATA_PATH
+    global DATA_DIR
     global DB_PATH
     global BACKUP_DIR
     global APP_DIR
@@ -85,6 +87,7 @@ def set_data_path(path):
 
     xutils.makedirs(path)
     DATA_PATH = path
+    DATA_DIR  = path
     # 数据库地址
     DB_PATH    = os.path.join(DATA_PATH, "data.db")
     # 备份数据地址
