@@ -10,7 +10,6 @@ __pycache__
 /bs4/
 /web/bs4/
 /static/upload/
-/static/js/webos/
 /static/lib/jsoneditor/
 /static/lib/My97DatePicker/
 /static/img/
@@ -22,6 +21,7 @@ __pycache__
 /tmp/
 /model/sync
 /static2/
+/scripts2/
 /backup/
 /script/
 /config/users.ini
