@@ -4,6 +4,7 @@
 from . import dao
 import xutils
 import xtemplate
+import xauth
 
 class TagHandler:
     
@@ -38,23 +39,28 @@ class AddTagHandler:
 
 class TagNameHandler:
 
+    @xauth.login_required()
     def GET(self, tagname):
         tagname = xutils.unquote(tagname)
         db = dao.get_file_db()
         offset = xutils.get_argument("offset", 0, type=int)
         limit  = xutils.get_argument("limit", 10, type=int)
+        groups = ["*", xauth.get_current_user().get("name")]
         # tag_list = db.select("file_tag", where="UPPER(name) = $name", vars=dict(name=tagname.upper()))
-        files = db.query("SELECT f.* FROM file f, file_tag ft ON ft.file_id = f.id WHERE UPPER(ft.name) = $name ORDER BY f.sctime DESC LIMIT $offset, $limit", 
-            vars=dict(name=tagname.upper(), offset=offset, limit=limit))
+        files = db.query("SELECT f.* FROM file f, file_tag ft ON ft.file_id = f.id WHERE UPPER(ft.name) = $name AND f.groups IN $groups ORDER BY f.sctime DESC LIMIT $offset, $limit", 
+            vars=dict(name=tagname.upper(), offset=offset, limit=limit, groups=groups))
         files = [dao.FileDO.fromDict(f) for f in files]
         return xtemplate.render("file-list.html", files=files)
         # return dict(code="", message="", data=list(tag_list))
 
 class TagListHandler:
 
+    @xauth.login_required()
     def GET(self):
         db = dao.get_file_db()
-        tag_list = db.query("SELECT name, COUNT(*) AS amount FROM file_tag GROUP BY name")
+        groups = ["*", xauth.get_current_user().get("name")]
+        tag_list = db.query("SELECT name, COUNT(*) AS amount FROM file_tag WHERE groups IN $groups GROUP BY name", 
+            vars = dict(groups = groups))
         return xtemplate.render("file/taglist.html", tag_list = list(tag_list))
         # return dict(code="", message="", data=tag_list)
 
