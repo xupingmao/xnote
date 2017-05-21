@@ -96,7 +96,11 @@ def get_line_infos(path, recursive=False, type=None, skip_func = lambda fname: F
 class handler:
 
     def GET(self):
-        args = web.input(path=None, recursive="on", type=None, count=None, blacklist="")
+        args = web.input(path=None, 
+            recursive="off", 
+            type=None, 
+            count=None, 
+            blacklist="")
 
         path = args.path
         recursive = args.recursive

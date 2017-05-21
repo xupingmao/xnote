@@ -66,19 +66,32 @@ def to_list(key):
         return []
     keys = key.split(" ")
     return list(filter(lambda x: x != "", keys))
+
+
+def get_pretty_around_text(lines, current, limit):
+    around_lines = []
+    start = max(current - limit, 0)
+    stop  = min(current + limit, len(lines))
+    for i in range(start, stop):
+        if i == current:
+            around_lines.append(">>>>  %s" % lines[i])
+        else:
+            around_lines.append("%04d  %s" % (i, lines[i]))
+    return "\n".join(around_lines)
+
         
 class LineInfo:
     """匹配行的信息"""
-    around_lines = 10
+    around_lines_num = 10
     def __init__(self, lineno, text, lines=None):
         self.lineno = lineno
         self.text = text
         if lines:
             index = self.lineno-1
-            num = self.around_lines
+            num = self.around_lines_num
             # 负数会转成尾部索引
             begin = max(0, index-num)
-            self.around_text = "\n".join(lines[begin:index+num])
+            self.around_text = get_pretty_around_text(lines, index, self.around_lines_num)
             # self.around_text_prev = "\n    ".join(lines[index-num:index])
             # self.around_text_next = "\n    ".join(lines[index+1:index+num])
         else:
@@ -201,10 +214,10 @@ class handler(BaseHandler):
     def default_request(self):
         ignore_case = self.get_argument("ignore_case", "on")
         recursive   = self.get_argument("recursive", "on")
-        path = self.get_argument("path", "", strip=True)
-        key  = self.get_argument("key", "", strip=True)
-        blacklist = self.get_argument("blacklist", "", strip=True)
-        filename = self.get_argument("filename", "", strip=True)
+        path        = self.get_argument("path", "", strip=True)
+        key         = self.get_argument("key", "", strip=True)
+        blacklist   = self.get_argument("blacklist", "", strip=True)
+        filename    = self.get_argument("filename", "", strip=True)
         blacklist_dir = self.get_argument("blacklist_dir", "")
 
         # print(path, blacklist, blacklist_dir, filename)
@@ -225,7 +238,8 @@ class handler(BaseHandler):
         finally:
             self.render(files = files,
                 path = path,
-                ignore_case = ignore_case)
+                ignore_case = ignore_case,
+                error = error)
 
 searchkey = "code,代码分析工具"
 

@@ -12,11 +12,16 @@ import xutils
 
 class handler(BaseHandler):
     def default_request(self):
-        url = self.get_argument("url")
-        h = HTML2Text(baseurl = url)
-        data = xutils.http_get(url)
-        text = h.handle(data)
-        # return dict(text=text)
+        try:
+            url = xutils.get_argument("url")
+            if url is None or url == "":
+                raise Exception("url为空")
+            h = HTML2Text(baseurl = url)
+            data = xutils.http_get(url)
+            text = h.handle(data)
+            # return dict(text=text)
+        except Exception as e:
+            text = "错误:" + str(e)
         web.header("Content-Type", "text/plain; charset=utf-8")
         return text
 

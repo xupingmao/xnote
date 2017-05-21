@@ -349,7 +349,7 @@ def do_calc(words, key):
     try:
         value = eval(exp)
         f = FileDO("计算结果")
-        f.content = str(value)
+        f.raw = str(value)
         return [f]
     except Exception as e:
         print(e)
@@ -360,7 +360,7 @@ def try_calc(words, key):
     try:
         value = eval(exp)
         f = FileDO("计算结果")
-        f.content = str(value)
+        f.raw = str(value)
         return [f] + do_search(words, key)
     except Exception as e:
         print(e)
