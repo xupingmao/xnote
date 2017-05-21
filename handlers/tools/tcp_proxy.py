@@ -69,6 +69,7 @@ def tcp_mapping_request(local_conn, remote_ip, remote_port):
     remote_conn.close()
 
 # 端口映射函数
+# (local_ip, local_port) 是监听地址
 def tcp_mapping(remote_ip, remote_port, local_ip, local_port):
     local_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 设置socket重用
@@ -97,5 +98,5 @@ def tcp_mapping(remote_ip, remote_port, local_ip, local_port):
 # 主函数
 if __name__ == '__main__':
     # tcp_mapping("127.0.0.1", 1234, "0.0.0.0", 1081)
-    tcp_mapping("127.0.0.1", 1080, "0.0.0.0", 1081)
+    tcp_mapping("127.0.0.1", 8080, "0.0.0.0", 1081)
 
