@@ -3,7 +3,6 @@
 import re
 
 import xutils
-
 from handlers.base import *
 from xutils import xhtml_escape
 
@@ -29,6 +28,9 @@ CODE_EXT_LIST = (".java",  # Java
                  ".go",    # Go
                  ".m",     # Objective-C, Matlab
                  )
+
+# TODO 对于小文件可以尝试当成文本文件来处理
+
 def contains_all(self, words):
     """
     >>> contains_all("abc is good", ["abc"])
@@ -74,9 +76,9 @@ def get_pretty_around_text(lines, current, limit):
     stop  = min(current + limit, len(lines))
     for i in range(start, stop):
         if i == current:
-            around_lines.append(">>>>  %s" % lines[i])
+            around_lines.append(">>>>>>  %s" % lines[i])
         else:
-            around_lines.append("%04d  %s" % (i, lines[i]))
+            around_lines.append("  %04d  %s" % (i, lines[i]))
     return "\n".join(around_lines)
 
         

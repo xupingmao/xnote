@@ -9,11 +9,14 @@ import config
 
 class SqliteTableManager:
     """检查数据库字段，如果不存在就自动创建"""
-    def __init__(self, filename, tablename):
+    def __init__(self, filename, tablename, pkName=None, pkType=None):
         self.filename = filename
         self.tablename = tablename
         self.db = sqlite3.connect(filename)
-        sql = "CREATE TABLE IF NOT EXISTS `%s` (id bigint primary key autoincrement);" % tablename
+        if pkName is None:
+            sql = "CREATE TABLE IF NOT EXISTS `%s` (id bigint primary key autoincrement);" % tablename
+        else:
+            sql = "CREATE TABLE IF NOT EXISTS `%s` (`%s` %s primary key);" % (tablename, pkName, pkType)
         self.execute(sql)
 
     def execute(self, sql):
@@ -121,7 +124,7 @@ def init_table_file():
 
 def init_table_tag():
     # 2017/04/18
-    manager = TableManager(config.DB_PATH, "file_tag")
+    manager = TableManager(config.DB_PATH, "file_tag", "id", "text")
     # 标签名
     manager.add_column("name",    "text", "")
     # 标签ID

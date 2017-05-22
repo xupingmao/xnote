@@ -1,0 +1,97 @@
+{% extends base.html %}
+
+{% block head %}
+<style type="text/css">
+    .chat-box {
+        background-color: #CCFF99;
+        padding: 1em;
+        padding: 1rem;
+        height: 60%;
+        overflow-y: scroll;
+    }
+
+    .chat-msg-div {
+        margin-top: 1rem;
+    }
+
+    .chat-msg {
+        background-color: #99CCFF;
+        padding: 0.3em;
+        padding: 0.3rem;
+        margin-top: 0.1rem;
+        border-radius: 0.3rem;
+    }
+
+    .input-box {
+        /*position: relative;*/
+        /*left: 0;*/
+        /*right: 0;*/
+        width: calc(100% - 4rem);
+    }
+
+    .send-button {
+        float: right;
+        width: 4rem;
+    }
+
+</style>
+{% end %}
+
+{% block body %}
+<script src="/static/lib/vue/vue-2.2.6.min.js"></script>
+
+<div id="app">
+    <h2>{{! title }}</h2>
+    <div class="chat-box">
+        聊天框
+        <div class="chat-msg-div" v-for="message in messageList">
+            <span class="chat-msg">
+                {{! message.content }}
+            </span>
+        </div>
+    </div>
+    <div>
+        <input type="text" class="input-box" v-model="input" @keyup.enter="sendMessage()"/>
+        <input type="button" name="" class="send-button" value="发送" @click="sendMessage()">
+    </div>
+</div>
+
+<script type="text/javascript">
+    function newMessage(content) {
+        return {"content": content}
+    }
+    var app = new Vue({
+        el: "#app",
+        data: {
+            title: "聊天室",
+            message: "Hello, Vue!",
+            messageList: [newMessage("m1"), newMessage("m2"), newMessage("今天天气不错啊")],
+            files: ["file1", "file2"],
+            person: {
+                name:"Jhon",
+                age: 20,
+            },
+            bindmessage: "页面加载于 " + new Date(),
+            seen: false,
+            rawHtml: "{{!message}}",
+            url: "https://www.baidu.com",
+            input: "",
+        },
+        methods: {
+            sendMessage: function () {
+                if (this.input == "") {
+                    return;
+                }
+                var msg = newMessage(this.input);
+                this.messageList.push(msg);
+                this.input = "";
+                $(".input-box").focus();
+                setTimeout(function () {
+                    $(".chat-box").scrollTop($(".chat-box")[0].scrollHeight);
+                }, 200);
+            }
+        }
+    });
+</script>
+
+{% end %}
