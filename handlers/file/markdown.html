@@ -4,7 +4,8 @@
     <div style="">
     
     <span id="fileId" style="display:none;">{{file.id}}</span>
-    <h2>{{file.name}}</h2>
+    <h2>{{file.name}} <a href="/file/markdown/edit?id={{file.id}}">[编辑]</a>
+                    <a href="/file/share?id={{file.id}}">[分享]</a></h2>
 
     {% include file/tags.html %}
 
@@ -18,11 +19,6 @@
         <div class="">
             {% if can_edit %}
             <div class="">
-                <div id="edit-div">
-                    <a href="/file/markdown/edit?id={{file.id}}">编辑</a>
-                    <!-- <a href="javascript:medit()">移动编辑</a> -->
-                    <a href="/file/share?id={{file.id}}">分享</a>
-                </div>
                 <div id="update-div" class="hide">
                     <input name="id" value="{{file.id}}" class="hide"/>
                     <input name="version" value="{{file.version}}" class="hide"/>

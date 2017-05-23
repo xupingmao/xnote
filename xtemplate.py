@@ -114,7 +114,6 @@ def add_render_hook(hook):
 def pre_render(kw):
     """ Main hook for template engine """
     kw["math"] = math
-    kw["_search_type"] = "normal"
     # TODO prevent hack
     kw["_is_admin"] = xauth.is_admin()
     kw["_has_login"] = xauth.has_login()
@@ -127,6 +126,8 @@ def pre_render(kw):
     # kw["_nav_position"] = web.cookies(nav_position="top").nav_position
     kw["_nav_position"] = "top"
     kw["_menu_list"] = MENU_LIST
+    # 用于渲染其他组件
+    kw["_render"] = render
 
 
 def encode_json(obj):

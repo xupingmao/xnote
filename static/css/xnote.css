@@ -292,3 +292,97 @@ table td {
     background-color: initial;
     text-decoration: underline;
 }
+
+
+/** file-list样式 **/
+.tool-div {
+    font-size: medium;
+}
+
+.tool-div a {
+    font-size: medium;
+    color: blue;
+}
+
+.tool-description {
+    font-size: small;
+    padding-top: 3px;
+}
+.note {
+    float: inherit;
+    border: solid 1px;
+    border-color: #ccc;
+    background-color: #fff;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.note-head {
+    font-size: 20px;
+}
+
+.note-name {
+    /*font-size: 20px;*/
+}
+
+.note-name a {
+    font-size: medium;
+    color: blue;
+}
+
+.note-content-short {
+    font-size: small;
+    word-break: break-all;
+}
+
+.note-last-modify-time,
+.note-last-visit-time {
+    padding-left: 2px;
+    padding-top: 2px;
+    font-size: small;
+    color: green;
+}
+
+.note-related {
+    font-size: 6px;
+    padding-left: 5px;
+    color: red;
+    display: none;
+}
+.note-visited-cnt {
+    float: right;
+    font-size: small;
+}
+
+.tag {
+    font-size: small;
+    background-color: green;
+    color: white;
+    border-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.red-tag {
+    font-size: small;
+    background-color: red;
+    color: white;
+    border-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.x-page-link {
+    border: 1px solid #ccc;
+    text-decoration: none;
+    /*padding:2px;*/
+    padding-left: 5px;
+    padding-right: 5px;
+    color: #000;
+}
+.x-page-active {
+    background-color: red;
+}
+
+/** file-list样式 END **/
+

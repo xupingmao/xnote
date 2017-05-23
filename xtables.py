@@ -16,6 +16,7 @@ class SqliteTableManager:
         if pkName is None:
             sql = "CREATE TABLE IF NOT EXISTS `%s` (id bigint primary key autoincrement);" % tablename
         else:
+            # sqlite允许主键重复，允许空值
             sql = "CREATE TABLE IF NOT EXISTS `%s` (`%s` %s primary key);" % (tablename, pkName, pkType)
         self.execute(sql)
 
