@@ -33,6 +33,8 @@ DB_DIR  = os.path.join(WORKING_DIR, "db")
 
 
 IS_ADMIN = False
+# 测试用的flag
+IS_TEST  = False
 
 # 资料相关
 # 分页数量

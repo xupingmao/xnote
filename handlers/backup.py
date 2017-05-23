@@ -122,5 +122,5 @@ class handler:
         chk_backup()
         return "OK"
     
-chk_backup()
+# chk_backup()
 

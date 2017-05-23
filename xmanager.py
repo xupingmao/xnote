@@ -106,14 +106,17 @@ class ModelManager:
         self.black_list = ["__pycache__"]
         self.failed_mods = []
         self.debug = True
+        self.report_loading = False
         self.task_manager = TaskManager(app)
     
     def reload_module(self, name):
         try:
-            print("del", name)
+            if self.report_loading:
+                log("del " + name)
             del sys.modules[name]
             __import__(name)
-            print("reimport", name)
+            if self.report_loading:
+                log("reimport " + name)
         except Exception as e:
             pass
         finally:
@@ -163,7 +166,8 @@ class ModelManager:
                 if os.path.isfile(filepath) and ext == ".py":
                     modname = parent + "." + name
                     if modname in sys.modules:
-                        log("del %s" % modname)
+                        if self.report_loading:
+                            log("del %s" % modname)
                         del sys.modules[modname] # reload module
                     # Py3: __import__(name, globals=None, locals=None, fromlist=(), level=0)
                     # Py2: __import__(name, globals={}, locals={}, fromlist=[], level=-1)
@@ -186,8 +190,6 @@ class ModelManager:
         self.report_failed()
 
     def report_failed(self):
-        if len(self.failed_mods) == 0:
-            return
         for info in self.failed_mods:
             log("Failed info: %s" % info)
 
@@ -240,7 +242,8 @@ class ModelManager:
     def add_mapping(self, url, handler):
         self.mapping.append(url)
         self.mapping.append(wrapped_handler(handler))
-        log("Load mapping (%s, %s)" % (url, handler))
+        if self.report_loading:
+            log("Load mapping (%s, %s)" % (url, handler))
 
     def add_search_key(self, url, key):
         self.search_dict[key] = url
