@@ -8,8 +8,10 @@ import xmanager
 import xutils
 import xtemplate
 import config
+import xtables
 
 def init():
+    xtables.init()
     config.IS_TEST = True
     var_env = dict()
     app = web.application(list(), var_env, autoreload=False)
