@@ -28,6 +28,7 @@ LOG_DIR = os.path.join(WORKING_DIR, "log")
 
 DATA_PATH = os.path.join(WORKING_DIR, "data")
 DATA_DIR  = DATA_PATH
+SCRIPTS_DIR = os.path.join(DATA_DIR, "scripts")
 
 DB_DIR  = os.path.join(WORKING_DIR, "db")
 
@@ -86,6 +87,7 @@ def set_data_path(path):
     global BACKUP_DIR
     global APP_DIR
     global TMP_DIR
+    global SCRIPTS_DIR
 
     xutils.makedirs(path)
     DATA_PATH = path
@@ -95,10 +97,12 @@ def set_data_path(path):
     # 备份数据地址
     BACKUP_DIR = os.path.join(DATA_PATH, "backup")
     # APP地址
-    APP_DIR    = os.path.join(DATA_PATH, "app")
-    TMP_DIR    = os.path.join(DATA_PATH, "tmp")
+    APP_DIR     = os.path.join(DATA_PATH, "app")
+    TMP_DIR     = os.path.join(DATA_PATH, "tmp")
+    SCRIPTS_DIR = os.path.join(DATA_DIR, "scripts")
 
     xutils.makedirs(TMP_DIR)
+    xutils.makedirs(SCRIPTS_DIR)
 
 # 初始化默认的Data目录
 set_data_path(DATA_PATH)

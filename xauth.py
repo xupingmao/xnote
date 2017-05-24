@@ -26,7 +26,7 @@ def read_users_from_ini(path):
         user["name"] = name
         for option in options:
             user[option] = cf.get(name, option)
-        print(name, user)
+        # print(name, user)
     return users
 
 def save_to_ini():
