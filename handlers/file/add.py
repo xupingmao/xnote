@@ -49,6 +49,7 @@ class handler(BaseHandler):
                 inserted = dao.get_by_name(name)
                 raise web.seeother("/file/view?id={}".format(inserted.id))
         except Exception as e:
+            xutils.print_stacktrace()
             error = e
         self.render("file/add.html", key = "", name = key, tags = tags, error=error)
 
