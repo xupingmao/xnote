@@ -1,4 +1,6 @@
 # encoding=utf-8
+import sys
+sys.path.insert(1, "lib")
 
 import unittest
 import json
@@ -47,6 +49,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual("C:/", item0.path)
         self.assertEqual("C:/data/", item1.path)
         self.assertEqual("C:/data/name/", item2.path)
+
 
 
 
