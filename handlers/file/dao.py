@@ -299,7 +299,6 @@ def insert(file):
 
     values = [build_sql_row(file, k) for k in file]
     sql = "insert into file (%s) values (%s)" % (','.join(file), ",".join(values))
-    print(sql)
     # print(sql)
     return get_db().execute(sql)
         
