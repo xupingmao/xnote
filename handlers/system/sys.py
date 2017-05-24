@@ -133,6 +133,8 @@ class SysHandler:
             cmd_list.append(Storage(name="定时任务管理", url="/system/crontab"))
             cmd_list.append(Storage(name="首页提醒管理", url="/system/notice_admin"))
             cmd_list.append(Storage(name="App包上传", url="/system/upload_app"))
+            cmd_list.append(Storage(name="脚本管理", url="/system/script_admin"))
+            cmd_list.append(Storage(name="系统变量管理", url="/system/sys_var_admin"))
 
         if not xauth.is_admin():
             shell_list = []

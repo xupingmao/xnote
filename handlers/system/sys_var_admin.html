@@ -1,0 +1,32 @@
+{% extends base.html %}
+
+{% block body %}
+
+<h2>用户管理</h2>
+
+<div class="col-md-12">&nbsp;</div>
+
+<form method="POST">
+<table class="table col-md-12">
+
+    <tr>
+        <th>编号</th>
+        <th>变量名</th>
+        <th>值</th>
+        <th>操作</th>
+    </tr>
+    
+    {% set index = -1 %}
+    {% for index, name in enumerate(sorted(sys_var_dict)) %}
+    <tr>
+        <td>{{index+1}}</td>
+        <td>{{name}}</td>
+        <td><input type="text" name="{{name}}" value="{{sys_var_dict[name]}}" /></td>
+        <td></td>
+    </tr>
+    {% end %}
+</table>
+    <button>更新</button>
+</form>
+
+{% end %}
