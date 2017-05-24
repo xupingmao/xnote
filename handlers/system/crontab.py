@@ -8,6 +8,8 @@ import web
 import xauth
 import xtemplate
 import xmanager
+import xtables
+import xutils
 
 from handlers.base import BaseHandler
 
@@ -24,13 +26,24 @@ class handler(BaseHandler):
     @xauth.login_required("admin")
     def del_request(self):
         url = self.get_argument("url")
-        xmanager.instance().del_task(url)
+        xtables.get_schedule_table().delete(where=dict(url=url))
+        xmanager.instance().load_tasks()
         return self.default_request()
     
     @xauth.login_required("admin")
     def add_request(self):
-        url = self.get_argument("url")
-        interval = self.get_argument("interval", 10)
-        xmanager.instance().add_task(url, interval)
+        url      = xutils.get_argument("url")
+        interval = xutils.get_argument("interval", 10, type=int)
+
+        db  = xtables.get_schedule_table()
+        rows = db.select(where="url=$url", vars=dict(url=url))
+        result = rows.first()
+        if result is None:
+            db.insert(url=url, interval=interval, 
+                ctime=xutils.format_time(), mtime=xutils.format_time())
+        else:
+            db.update(where=dict(url=url), interval=interval, mtime=xutils.format_time())
+
+        xmanager.instance().load_tasks()
         self.default_request()
 

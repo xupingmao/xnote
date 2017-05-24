@@ -6,6 +6,7 @@
 
 import sqlite3
 import config
+import web.db as db
 
 class SqliteTableManager:
     """检查数据库字段，如果不存在就自动创建"""
@@ -135,14 +136,65 @@ def init_table_tag():
     manager.add_column("groups",  "text", "")
     manager.close()
 
+def init_table_schedule():
+    # 2017/05/24
+    # task是计划任务
+    # Job是已经触发的任务
+    manager = TableManager(config.DB_PATH, "schedule")
+    manager.add_column("url", "text", "")
+    manager.add_column("interval", "integer", 60)
+    manager.add_column("ctime", "text", "")
+    manager.add_column("mtime", "text", "")
+
 def init_table_log():
     # 2017/05/21
     manager = TableManager(config.LOG_PATH, "xnote_log")
     manager.add_column("tag",      "text", "")
     manager.add_column("operator", "text", "")
 
+def init_table_user():
+    # 2017/05/21
+    manager = TableManager(config.DB_PATH, "user")
+    manager.add_column("name",     "text", "")
+    manager.add_column("password", "text", "")
+    manager.add_column("ctime",    "text", "")
+
+class DBWrapper:
+    """ 基于web.db的装饰器 """
+    def __init__(self, dbpath, tablename):
+        self.tablename = tablename
+        self.dbpath = dbpath
+        self.db = db.SqliteDB(db=dbpath)
+
+    def insert(self, *args, **kw):
+        return self.db.insert(self.tablename, *args, **kw)
+
+    def select(self, *args, **kw):
+        return self.db.select(self.tablename, *args, **kw)
+
+    def query(self, *args, **kw):
+        return self.db.query(self.tablename, *args, **kw)
+
+    def update(self, *args, **kw):
+        return self.db.update(self.tablename, *args, **kw)
+
+    def delete(self, *args, **kw):
+        return self.db.delete(self.tablename, *args, **kw)
+
+def get_schedule_table():
+    return DBWrapper(config.DB_PATH, "schedule")
+
+def get_user_table():
+    return DBWrapper(config.DB_PATH, "user")
+
+
 def init():
     # init_test_db()
+    init_table_user()
     init_table_file()
     init_table_tag()
+    init_table_schedule()
+
+
+
 

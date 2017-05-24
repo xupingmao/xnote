@@ -14,6 +14,8 @@ from queue import Queue
 import web
 import config
 import xtemplate
+import xtables
+import xutils
 
 from util import textutil
 
@@ -261,8 +263,8 @@ class ModelManager:
     def add_task(self, task, interval):
         self.task_manager.add_task(task, interval)
 
-    def del_task(self, task):
-        self.task_manager.del_task(task)
+    def load_tasks(self):
+        self.task_manager.load_tasks()
 
     def get_task_dict(self):
         return self.task_manager.get_task_dict()
@@ -324,9 +326,7 @@ class TaskManager:
             self.save_tasks()
 
     def del_task(self, url):
-        if url in self.task_dict:
-            del self.task_dict[url]
-            self.save_tasks()
+        self.load_tasks()
             
     def _add_task(self, url, interval):
         try:
@@ -338,29 +338,46 @@ class TaskManager:
             return False
         
     def load_tasks(self):
-        users = {}
-        path = "config/tasks.ini"
-        if not os.path.exists(path):
-            return users
-        cf = ConfigParser()
-        cf.read(path, encoding="utf-8")
-        for section in cf.sections():
-            url = cf.get(section, "url")
-            interval = cf.get(section, "interval")
-            self._add_task(url, interval)
+        schedule = xtables.get_schedule_table()
+        tasks = schedule.select()
+        self.task_dict = {}
+        for task in tasks:
+            self._add_task(task.url, task.interval)
+
+        # users = {}
+        # path = "config/tasks.ini"
+        # if not os.path.exists(path):
+        #     return users
+        # cf = ConfigParser()
+        # cf.read(path, encoding="utf-8")
+        # for section in cf.sections():
+        #     url = cf.get(section, "url")
+        #     interval = cf.get(section, "interval")
+        #     self._add_task(url, interval)
             
     def save_tasks(self):
+        self.load_tasks()
+        # schedule = xtables.get_schedule_table()
+        # for name in self.task_dict:
+        #     task = self.task_dict[name]
+        #     rows = schedule.select(where=dict(url=task.url))
+        #     if rows.first() is None:
+        #         schedule.insert(url=task.url, interval=task.interval, ctime=xutils.format_time(), mtime=xutils.format_time())
+        #     else:
+        #         schedule.update(where="url=$url", vars=dict(url=task.url), interval=task.interval, mtime=xutils.format_time())
+
+
         """保存到配置文件"""
-        cf = ConfigParser()
-        for index, name in enumerate(sorted(self.task_dict)):
-            task = self.task_dict[name]
-            section = "task" + str(index)
-            cf.add_section(section)
-            cf.set(section, "url", task.url)
-            cf.set(section, "interval", str(task.interval))
+        # cf = ConfigParser()
+        # for index, name in enumerate(sorted(self.task_dict)):
+        #     task = self.task_dict[name]
+        #     section = "task" + str(index)
+        #     cf.add_section(section)
+        #     cf.set(section, "url", task.url)
+        #     cf.set(section, "interval", str(task.interval))
             
-        with open("config/tasks.ini", "w") as fp:
-            cf.write(fp)
+        # with open("config/tasks.ini", "w") as fp:
+        #     cf.write(fp)
         
     def get_task_dict(self):
         return copy.deepcopy(self.task_dict)
