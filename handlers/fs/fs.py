@@ -77,7 +77,10 @@ class FileItem(xutils.Storage):
 def getpathlist(path):
     path   = path.replace("\\", "/")
     pathes = path.split("/")
-    last = None
+    if path[0] == "/":
+        last = ""
+    else:
+        last = None
     pathlist = []
     for vpath in pathes:
         if vpath == "":

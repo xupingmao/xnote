@@ -37,3 +37,17 @@ class TestMain(unittest.TestCase):
         files = json.loads(json_value)["files"]
         print("files=%s" % len(files))
 
+    def test_fs(self):
+        import handlers.fs.fs as fs
+        item0, item1 = fs.getpathlist("/fs/test/")
+        self.assertEqual("/fs/", item0.path)
+        self.assertEqual("/fs/test/", item1.path)
+
+        item0, item1, item2 = fs.getpathlist("C:/data/name/")
+        self.assertEqual("C:/", item0.path)
+        self.assertEqual("C:/data/", item1.path)
+        self.assertEqual("C:/data/name/", item2.path)
+
+
+
+
