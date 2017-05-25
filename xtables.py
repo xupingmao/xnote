@@ -22,10 +22,11 @@ class SqliteTableManager:
             sql = "CREATE TABLE IF NOT EXISTS `%s` (`%s` %s primary key);" % (tablename, pkName, pkType)
         self.execute(sql)
 
-    def execute(self, sql):
+    def execute(self, sql, silent=False):
         cursorobj = self.db.cursor()
         try:
-            print(sql)
+            if not silent:
+                print(sql)
             cursorobj.execute(sql)
             kv_result = []
             result = cursorobj.fetchall()
@@ -50,7 +51,7 @@ class SqliteTableManager:
         sql = "ALTER TABLE `%s` ADD COLUMN `%s` %s" % (self.tablename, colname, coltype)
 
         # MySQL 使用 DESC [表名]
-        columns = self.execute("pragma table_info('%s')" % self.tablename)
+        columns = self.execute("pragma table_info('%s')" % self.tablename, silent=True)
         # print(columns.description)
         # description结构
         # ()
@@ -171,6 +172,9 @@ class DBWrapper:
 
     def select(self, *args, **kw):
         return self.db.select(self.tablename, *args, **kw)
+
+    def select_one(self, *args, **kw):
+        return self.db.select(self.tablename, *args, **kw).first()
 
     def query(self, *args, **kw):
         return self.db.query(self.tablename, *args, **kw)

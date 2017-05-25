@@ -5,6 +5,8 @@ import copy
 
 import web
 import config
+import xtables
+import xutils
 
 from xutils import ConfigParser
 from web.utils import Storage
@@ -12,38 +14,6 @@ from web.utils import Storage
 # 用户配置
 _users = None
 
-
-def read_users_from_ini(path):
-    users = {}
-    if not os.path.exists(path):
-        return users
-    cf = ConfigParser()
-    cf.read(path, encoding="utf-8")
-    names = cf.sections()
-    for name in names:
-        options = cf.options(name)
-        user = users[name] = Storage()
-        user["name"] = name
-        for option in options:
-            user[option] = cf.get(name, option)
-        # print(name, user)
-    return users
-
-def save_to_ini():
-    """保存到配置文件"""
-    global _users
-    # 先强制同步一次
-    _get_users()
-    cf = ConfigParser()
-    for name in _users:
-        user = _users[name]
-        cf.add_section(name)
-        cf.set(name, "password", user.password)
-    with open("config/users.ini", "w") as fp:
-        cf.write(fp)
-        fp.flush()
-
-    refresh_users()
 
 def _get_users():
     """获取用户，内部接口"""
@@ -53,11 +23,19 @@ def _get_users():
     if _users is not None:
         return _users
 
-    defaults = read_users_from_ini("config/users.default.ini")
-    customs  = read_users_from_ini("config/users.ini")
+    # defaults = read_users_from_ini("config/users.default.ini")
+    # customs  = read_users_from_ini("config/users.ini")
+    db = xtables.get_user_table()
+    db_users = db.select()
+    db_users = list(db_users)
 
-    _users = defaults
-    _users.update(customs)
+    _users = {}
+    _users["admin"] = Storage(name="admin", password="123456")
+
+    print(db_users)
+
+    for user in db_users:
+        _users[user.name] = user
     
     return _users
 
@@ -101,7 +79,12 @@ def add_user(name, password):
     users = _get_users()
     user = Storage(name=name, password=password)
     users[name] = user
-    save_to_ini()
+    db = xtables.get_user_table()
+    exist = db.select_one(where=dict(name=name))
+    if exist is None:
+        db.insert(name=name,password=password,ctime=xutils.format_time())
+    else:
+        db.update(where=dict(name=name), password=password)
 
 def has_login(name=None):
     # import threading
