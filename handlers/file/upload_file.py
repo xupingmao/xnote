@@ -44,3 +44,6 @@ class handler(BaseHandler):
             filepath = webpath, 
             filename = filename, 
             is_img=is_img(filename))
+
+
+        
