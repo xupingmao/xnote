@@ -50,6 +50,14 @@ class TestMain(unittest.TestCase):
         self.assertEqual("C:/data/", item1.path)
         self.assertEqual("C:/data/name/", item2.path)
 
+    def test_fs_request(self):
+        json_data = app.request("/fs/?_type=json")
+        # print(data)
+
+    def test_sys(self):
+        json_data = app.request("/system/sys")
+
+
 
 
 
