@@ -67,6 +67,7 @@ class FileItem(xutils.Storage):
         if path.endswith(":"):
             self.name = path
 
+        self.name = unquote(self.name)
         if os.path.isfile(path):
             self.type = "file"
         else:
