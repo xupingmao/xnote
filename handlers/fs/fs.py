@@ -294,6 +294,7 @@ class FileSystemHandler:
     @xauth.login_required("admin")
     def GET(self, path):
         if not os.path.exists(path):
+            # /fs/ 文件名来源是文件系统提供的，尝试unquote不会出现问题
             path = xutils.unquote(path)
         return self.handle_get(path)
         
@@ -313,7 +314,7 @@ class StaticFileHandler(FileSystemHandler):
         if not self.is_path_allowed(path):
             xauth.check_login("admin")
         data_prefix = config.DATA_DIR
-        newpath = os.path.join(data_prefix, name)
+        newpath = os.path.join(data_prefix, path)
         # if not os.path.exists(newpath):
             # 尝试使用unquote之后的文件名, check也会报错
             # unquote_path = xutils.unquote(path)
