@@ -314,10 +314,10 @@ class StaticFileHandler(FileSystemHandler):
             xauth.check_login("admin")
         data_prefix = config.DATA_DIR
         newpath = os.path.join(data_prefix, name)
-        if not os.path.exists(newpath):
-            # 尝试使用unquote之后的文件名
-            unquote_path = xutils.unquote(path)
-            newpath = os.path.join(data_prefix, unquote_path) 
+        # if not os.path.exists(newpath):
+            # 尝试使用unquote之后的文件名, check也会报错
+            # unquote_path = xutils.unquote(path)
+            # newpath = os.path.join(data_prefix, unquote_path) 
         if not os.path.exists(newpath):
             # 兼容static目录数据
             newpath = "./static/" + path
