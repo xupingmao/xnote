@@ -29,7 +29,8 @@ def get_memory_usage():
             return words[-2] + " K"
         else:
             pid = os.getpid()
-            mem_usage = os.popen("ps -p %s -o rss" % pid).read()
+            with os.popen("ps -p %s -o rss" % pid) as fp:
+                mem_usage = fp.read()
             words = textutil.split_words(mem_usage)
             v = int(words[-1]) * 1024
             return fsutil.format_size(v)
@@ -147,7 +148,7 @@ class SysHandler:
             cmd_list = cmd_list,
             shell_list = shell_list,
             os = os,
-            user = web.cookies().xuser,
+            user = xauth.get_current_user(),
             mem_used = get_memory_usage()
         )
 

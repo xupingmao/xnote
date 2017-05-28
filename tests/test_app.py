@@ -15,6 +15,7 @@ import xtables
 def init():
     xtables.init()
     config.IS_TEST = True
+    config.port = "1234"
     var_env = dict()
     app = web.application(list(), var_env, autoreload=False)
     mgr = xmanager.init(app, var_env)
@@ -39,7 +40,7 @@ class TestMain(unittest.TestCase):
         files = json.loads(json_value)["files"]
         print("files=%s" % len(files))
 
-    def test_fs(self):
+    def test_fs_func(self):
         import handlers.fs.fs as fs
         item0, item1 = fs.getpathlist("/fs/test/")
         self.assertEqual("/fs/", item0.path)
@@ -50,12 +51,39 @@ class TestMain(unittest.TestCase):
         self.assertEqual("C:/data/", item1.path)
         self.assertEqual("C:/data/name/", item2.path)
 
-    def test_fs_request(self):
-        json_data = app.request("/fs/?_type=json")
-        # print(data)
+    def check_200(self, url):
+        response = app.request(url)
+        self.assertEqual("200 OK", response.status)
+
+    def check_303(self, url):
+        response = app.request(url)
+        self.assertEqual("303 See Other", response.status)
+
+    def check_404(self, url):
+        response = app.request(url)
+        self.assertEqual("404 Not Found", response.status)
+
+    def test_file(self):
+        self.check_200("/file/recent_edit")
+
+    def test_fs(self):
+        self.check_200("/fs//")
+        self.check_200("/fs//?_type=json")
+        self.check_200("/data/data.db")
 
     def test_sys(self):
-        json_data = app.request("/system/sys")
+        self.check_200("/system/sys")
+        self.check_200("/system/user_admin")
+        self.check_200("/system/sys_var_admin")
+        self.check_200("/system/crontab")
+
+    def test_tools(self):
+        self.check_200("/tools/sql")
+        self.check_200("/tools/color")
+
+    def test_notfound(self):
+        self.check_404("/nosuchfile")
+
 
 
 

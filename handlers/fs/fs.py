@@ -293,7 +293,8 @@ class FileSystemHandler:
 
     @xauth.login_required("admin")
     def GET(self, path):
-        path = xutils.unquote(path)
+        if not os.path.exists(path):
+            path = xutils.unquote(path)
         return self.handle_get(path)
         
 
@@ -308,10 +309,15 @@ class StaticFileHandler(FileSystemHandler):
 
     """外置数据的静态文件支持"""
     def GET(self, path):
-        path = xutils.unquote(path)
+        # path = xutils.unquote(path)
         if not self.is_path_allowed(path):
             xauth.check_login("admin")
-        newpath = "./data/" + path
+        data_prefix = config.DATA_DIR
+        newpath = os.path.join(data_prefix, name)
+        if not os.path.exists(newpath):
+            # 尝试使用unquote之后的文件名
+            unquote_path = xutils.unquote(path)
+            newpath = os.path.join(data_prefix, unquote_path) 
         if not os.path.exists(newpath):
             # 兼容static目录数据
             newpath = "./static/" + path
