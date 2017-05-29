@@ -163,6 +163,13 @@ def init_table_user():
     manager.add_column("password", "text", "")
     manager.add_column("ctime",    "text", "")
 
+def init_table_message():
+    # 2017/05/29
+    manager = TableManager(config.DB_PATH, "message")
+    manager.add_column("ctime", "text", "")
+    manager.add_column("user",  "text", "")
+    manager.add_column("content", "text", "")
+
 class DBWrapper:
     """ 基于web.db的装饰器 """
     def __init__(self, dbpath, tablename):
@@ -188,11 +195,17 @@ class DBWrapper:
     def delete(self, *args, **kw):
         return self.db.delete(self.tablename, *args, **kw)
 
+def get_file_table():
+    return DBWrapper(config.DB_PATH, "file")
+
 def get_schedule_table():
     return DBWrapper(config.DB_PATH, "schedule")
 
 def get_user_table():
     return DBWrapper(config.DB_PATH, "user")
+
+def get_message_table():
+    return DBWrapper(config.DB_PATH, "message")
 
 
 def init():
@@ -201,6 +214,7 @@ def init():
     init_table_file()
     init_table_tag()
     init_table_schedule()
+    init_table_message()
 
 
 

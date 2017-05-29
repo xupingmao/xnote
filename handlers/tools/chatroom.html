@@ -14,6 +14,12 @@
         margin-top: 1rem;
     }
 
+    .chat-avatar {
+        padding: 5px;
+        background-color: #FFCCCC;
+        color: black;
+        margin-right: 5px;
+    }
     .chat-msg {
         background-color: #99CCFF;
         padding: 0.3em;
@@ -43,8 +49,10 @@
 <div id="app">
     <h2>{{! title }}</h2>
     <div class="chat-box">
-        聊天框
         <div class="chat-msg-div" v-for="message in messageList">
+            <span class="chat-avatar">
+                {{! message.user }}
+            </span>
             <span class="chat-msg">
                 {{! message.content }}
             </span>
@@ -57,16 +65,16 @@
 </div>
 
 <script type="text/javascript">
-    function newMessage(content) {
-        return {"content": content}
+    function newMessage(content, user) {
+        return {"content": content, user:user}
     }
+
     var app = new Vue({
         el: "#app",
         data: {
             title: "聊天室",
             message: "Hello, Vue!",
-            messageList: [newMessage("m1"), newMessage("m2"), newMessage("今天天气不错啊")],
-            files: ["file1", "file2"],
+            messageList: [newMessage("Welcome to chatroom")],
             person: {
                 name:"Jhon",
                 age: 20,
@@ -78,20 +86,49 @@
             input: "",
         },
         methods: {
+
+            refreshMessage: function () {
+                var self = this;
+                $.get("/file/chatroom/list", function (respText) {
+                    var data = JSON.parse(respText);
+                    if (data.code == "success") {
+                        var messageList = [];
+                        data.data.forEach(function (item, index) {
+                            // console.log(item, index);
+                            messageList.push(item);
+                        })
+                        self.messageList = messageList;
+                    }
+                })
+            },
+
             sendMessage: function () {
                 if (this.input == "") {
                     return;
                 }
-                var msg = newMessage(this.input);
-                this.messageList.push(msg);
-                this.input = "";
-                $(".input-box").focus();
-                setTimeout(function () {
-                    $(".chat-box").scrollTop($(".chat-box")[0].scrollHeight);
-                }, 200);
+                var self = this;
+                $.post("/file/chatroom/add", {content:self.input}, function (respText) {
+                    var data = JSON.parse(respText);
+                    if (data.code == "success") {
+                        var msg = data.data;
+                        self.messageList.push(msg);
+                        self.input = "";
+                        $(".input-box").focus();
+                        setTimeout(function () {
+                            $(".chat-box").scrollTop($(".chat-box")[0].scrollHeight);
+                        }, 200);
+                    } else {
+                        alert(data.message);
+                    }
+                    
+                }).fail(function (data) {
+
+                })
             }
         }
     });
+
+    app.refreshMessage();
 </script>
 
 {% end %}

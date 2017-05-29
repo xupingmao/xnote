@@ -27,6 +27,13 @@ def wrapped_handler(handler_clz):
     if not isinstance(handler_clz, type):
         return handler_clz
 
+    def wrapper_result(result):
+        if isinstance(result, list):
+            return json.dumps(result)
+        elif isinstance(result, dict):
+            return json.dumps(result)
+        return result
+
     class WrappedHandler:
         """ 默认的handler装饰器
         1. 装饰器相对于继承来说，性能略差一些，但是更加安全，父类的方法不会被子类所覆盖
@@ -38,15 +45,11 @@ def wrapped_handler(handler_clz):
             self.target = handler_clz()
 
         def GET(self, *args):
-            result = self.target.GET(*args)
-            if isinstance(result, list):
-                return json.dumps(result)
-            elif isinstance(result, dict):
-                return json.dumps(result)
-            return result
+            return wrapper_result(self.target.GET(*args))
+            
 
         def POST(self, *args):
-            return self.target.POST(*args)
+            return wrapper_result(self.target.POST(*args))
 
         def search_priority(self):
             return 0
