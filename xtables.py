@@ -142,10 +142,13 @@ def init_table_schedule():
     # task是计划任务
     # Job是已经触发的任务
     manager = TableManager(config.DB_PATH, "schedule")
-    manager.add_column("url", "text", "")
-    manager.add_column("interval", "integer", 60)
-    manager.add_column("ctime", "text", "")
-    manager.add_column("mtime", "text", "")
+    manager.add_column("url",         "text", "")
+    manager.add_column("interval",    "integer", 60)
+    manager.add_column("ctime",       "text", "")
+    manager.add_column("mtime",       "text", "")
+    manager.add_column("repeat_type", "text", "interval")
+    manager.add_column("pattern",     "text", "00:00")
+
 
 def init_table_log():
     # 2017/05/21

@@ -283,6 +283,8 @@ class TaskManager:
         if tm is None:
             tm = time.localtime()
         if hasattr(task, "interval"):
+            if task.interval < 0:
+                return False
             """定时任务"""
             current = time.time()
             if not hasattr(task, "next_time"):
@@ -328,10 +330,10 @@ class TaskManager:
     def del_task(self, url):
         self.load_tasks()
             
-    def _add_task(self, url, interval):
+    def _add_task(self, task):
+        url = task.url
         try:
-            interval = int(interval)
-            self.task_dict[url] = Storage(url = url, interval = interval)
+            self.task_dict[task.url] = task
             return True
         except Exception as e:
             print("Add task %s failed, %s" % (url, e))
@@ -339,10 +341,10 @@ class TaskManager:
         
     def load_tasks(self):
         schedule = xtables.get_schedule_table()
-        tasks = schedule.select()
+        tasks = schedule.select(order="ctime DESC")
         self.task_dict = {}
         for task in tasks:
-            self._add_task(task.url, task.interval)
+            self._add_task(task)
 
         # users = {}
         # path = "config/tasks.ini"

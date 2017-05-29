@@ -18,5 +18,6 @@ class handler(BaseHandler):
         try:
             voice.Speak(content)
         finally:
-            voice.Release()
+            # 报异常
+            # voice.Release()
             return "OK"
