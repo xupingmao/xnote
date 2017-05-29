@@ -121,13 +121,13 @@ class SysHandler:
         addr = get_server_ip() + ":" + config.get("port")
 
         cmd_list = [];
-        cmd_list.append(Storage(name="切换导航栏样式", url="/system/switch_nav"))
+        # cmd_list.append(Storage(name="切换导航栏样式", url="/system/switch_nav"))
+        cmd_list.append(Storage(name="模块信息(pydoc)", url="/system/modules_info"))
 
         if xauth.is_admin():
             cmd_list.append(Storage(name="文件浏览器", url="/fs/"))
             cmd_list.append(Storage(name="重新加载模块", url="/system/reload"))
             cmd_list.append(Storage(name="机器运行状态", url="/system/monitor"))
-            cmd_list.append(Storage(name="模块信息(pydoc)", url="/system/modules_info"))
             cmd_list.append(Storage(name="Template代码", url="/system/template_cache"))
             cmd_list.append(Storage(name="备份", url="/system/backup_info"))
             cmd_list.append(Storage(name="用户管理", url="/system/user_admin"))

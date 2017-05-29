@@ -1,6 +1,14 @@
 # encoding=utf-8
 import xtemplate
 import web
+import zipfile
+import os
+from util import dateutil
+from util import fsutil
+import config
+import re
+import time
+import xutils
 
 html = """{% extends base.html %}
 
@@ -14,16 +22,6 @@ html = """{% extends base.html %}
 {% end %}
 """
 
-import zipfile
-import os
-from util import dateutil
-from util import fsutil
-from util import logutil
-import config
-import re
-import time
-
-import xutils
 
 class T:
     pass
@@ -32,14 +30,15 @@ _black_list = [".zip", ".pyc", ".pdf", "__pycache__", ".git"]
 
 _dirname = "./"
 
-_zipname = "xnote.zip"
+ZIPNAME = "xnote.zip"
 
-_dest_path = os.path.join("static", _zipname)
+_dest_path = os.path.join("static", ZIPNAME)
 
 _MAX_BACKUP_COUNT = 10
 
-def zip_xnote(nameblacklist = [_zipname]):
+def zip_xnote(nameblacklist = [ZIPNAME]):
     dirname = _dirname
+    # 创建目标文件
     fp = open(_dest_path, "w")
     fp.close()
     zf = zipfile.ZipFile(_dest_path, "w")
@@ -65,7 +64,7 @@ def zip_xnote(nameblacklist = [_zipname]):
     zf.close()
 
 def zip_new_xnote():
-    zip_xnote([_zipname, "data.db", "log", "backup", ".exe", 
+    zip_xnote([ZIPNAME, "data.db", "log", "backup", ".exe",
         "02", "01", "09", "10", "11", "12"])
 
 def get_info():
@@ -73,7 +72,7 @@ def get_info():
     info.path = _dest_path
 
     if os.path.exists(_dest_path):
-        info.name = _zipname
+        info.name = ZIPNAME
         info.path = _dest_path
         st = os.stat(_dest_path)
         info.mtime = dateutil.format_time(st.st_mtime)
@@ -85,11 +84,12 @@ def get_info():
         info.size = None
     return info
 
+
 def backup_code():
     zip_new_xnote()
 
-class handler:
 
+class handler:
     def GET(self):
         op = web.input(op=None).op
         if op == "backup":
