@@ -15,7 +15,7 @@ def execute(sql):
 def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
     user = xauth.get_current_user()
     if user is None:
-        raise web.seeother("//login")
+        raise web.seeother("/login")
     user_name = user["name"]
     if user_name == "admin":
         # sql = "select * from file where smtime > '%s' AND is_deleted != 1 order by smtime desc"\
@@ -57,7 +57,7 @@ class handler(BaseHandler):
         files = get_recent_modified(days, page)
         count = count_files()
         self.render("file-list.html", files = files[:20], key = "", 
-            page = page, count = count, page_url="//file/recent_edit?page=")
+            page = page, count = count, page_url="/file/recent_edit?page=")
 
     def json_request(self):
         s_days = self.get_argument("days", 7)
