@@ -21,7 +21,7 @@ class handler(BaseHandler):
     @xauth.login_required("admin")
     def default_request(self):
         self.task_dict = xmanager.instance().get_task_dict()
-        self.render(task_dict = self.task_dict)
+        self.render("system/crontab.html", task_dict = self.task_dict)
 
     @xauth.login_required("admin")
     def del_request(self):
