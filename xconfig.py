@@ -15,22 +15,21 @@ PORT = "1234"
 # 处理器目录
 HANDLERS_DIR = "handlers"
 # 工具目录
-TOOLS_DIR = "handlers/tools"
-CONFIG_DIR = os.path.dirname(__file__)
-WORKING_DIR = os.path.dirname(CONFIG_DIR)
-WEBDIR = os.path.join(WORKING_DIR, "static")
-UPLOAD_DIR = os.path.join(WORKING_DIR, "static", "upload")
+TOOLS_DIR   = "handlers/tools"
+WORKING_DIR = os.path.dirname(__file__)
+WEBDIR      = os.path.join(WORKING_DIR, "static")
+UPLOAD_DIR  = os.path.join(WORKING_DIR, "static", "upload")
 PLUGINS_DIR = os.path.join(WORKING_DIR, "plugins")
-LOG_DIR = os.path.join(WORKING_DIR, "log")
+LOG_DIR     = os.path.join(WORKING_DIR, "log")
 
 
 # 用户数据的地址
 
-DATA_PATH = os.path.join(WORKING_DIR, "data")
-DATA_DIR  = DATA_PATH
+DATA_PATH   = os.path.join(WORKING_DIR, "data")
+DATA_DIR    = DATA_PATH
 SCRIPTS_DIR = os.path.join(DATA_DIR, "scripts")
-
-DB_DIR  = os.path.join(WORKING_DIR, "db")
+DB_DIR      = os.path.join(WORKING_DIR, "db")
+CONFIG_DIR  = os.path.join(DATA_DIR, "config")
 
 
 IS_ADMIN = False
@@ -88,6 +87,8 @@ def set_data_path(path):
     global APP_DIR
     global TMP_DIR
     global SCRIPTS_DIR
+    global CODE_ZIP
+    global DATA_ZIP
 
     xutils.makedirs(path)
     DATA_PATH = path
@@ -100,6 +101,8 @@ def set_data_path(path):
     APP_DIR     = os.path.join(DATA_PATH, "app")
     TMP_DIR     = os.path.join(DATA_PATH, "tmp")
     SCRIPTS_DIR = os.path.join(DATA_DIR, "scripts")
+    CODE_ZIP    = os.path.join(DATA_DIR, "code.zip")
+    DATA_ZIP    = os.path.join(DATA_DIR, "data.zip")
 
     xutils.makedirs(TMP_DIR)
     xutils.makedirs(SCRIPTS_DIR)

@@ -17,6 +17,8 @@ import re
 import shutil
 import web
 
+from util.ziputil import *
+
 PY2 = sys.version_info[0] == 2
 
 if PY2:

@@ -119,7 +119,7 @@ class SysHandler:
                 fpath = os.path.join(dirname, fname)
                 if os.path.isfile(fpath) and fpath.endswith(".bat"):
                     shell_list.append(fpath)
-        addr = get_server_ip() + ":" + config.get("port")
+        addr = get_server_ip() + ":" + config.get("PORT")
 
         cmd_list = [];
         # cmd_list.append(Storage(name="切换导航栏样式", url="/system/switch_nav"))

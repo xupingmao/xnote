@@ -81,6 +81,9 @@ class TestMain(unittest.TestCase):
         self.check_200("/tools/sql")
         self.check_200("/tools/color")
 
+    def test_backup_info(self):
+        self.check_200("/system/backup_info")
+
     def test_notfound(self):
         self.check_404("/nosuchfile")
 

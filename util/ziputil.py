@@ -18,41 +18,53 @@ def quote_unicode(url):
     return ''.join([quote_char(c) for c in bytes])
 
 
-def walk_dir(dirname, skip_hidden=True):
+def walk_dir(dirname, skip_hidden=True, excluded=[]):
     dirs = []
     files = []
     for name in os.listdir(dirname):
         path = os.path.join(dirname, name)
         if skip_hidden and name.startswith("."):
             continue
+        abspath = os.path.abspath(path)
+        if abspath in excluded:
+            # print("skip", name)
+            continue
         if os.path.isdir(path):
             dirs.append(name)
-            yield from walk_dir(path, skip_hidden)
+            # yield from 是Python3语法
+            # yield from walk_dir(path, skip_hidden)
+            for x in walk_dir(path, skip_hidden, excluded):
+                yield x
         elif os.path.isfile(path) or os.path.islink(path):
             files.append(name)
     yield dirname, dirs, files
 
+def get_abs_path_list(dirname, pathlist):
+    newpathlist = []
+    for path in pathlist:
+        fullpath = os.path.join(dirname, path)
+        newpathlist.append(os.path.abspath(fullpath))
+    return newpathlist
 
 
-def zip_dir(inputDir, outputFile, skip_hidden=True):
+def zip_dir(input_dir, outpath, skip_hidden=True, excluded=[]):
     # 创建目标文件
-    absroot = os.path.abspath(outputFile)
+    absroot = os.path.abspath(outpath)
     # print(absroot)
-    with open(outputFile, "w"):
+    with open(outpath, "w"):
         pass
-    zf = zipfile.ZipFile(outputFile, "w")
+    zf = zipfile.ZipFile(outpath, "w")
 
-    for root, dirs, files in walk_dir(inputDir):
+    for root, dirs, files in walk_dir(input_dir, 
+            skip_hidden=skip_hidden, excluded=get_abs_path_list(input_dir, excluded)):
         for name in files:
-            if skip_hidden and name.startswith("."):
-                continue
             path = os.path.join(root, name)
             abspath = os.path.abspath(path)
             if abspath == absroot:
                 # 跳过目标文件自身
                 # print("Skip file", abspath)
                 continue
-            arcname = path[len(inputDir):]
+            arcname = path[len(input_dir):]
             zf.write(path, quote_unicode(arcname))
     zf.close()
 

@@ -1,30 +1,40 @@
 # encoding=utf-8
-import xtemplate
-import web
 import zipfile
 import os
-from util import dateutil
-from util import fsutil
-import config
 import re
 import time
+
+import web
+import xconfig
+import xtemplate
 import xutils
+from util import dateutil
+from util import fsutil
 
 html = """{% extends base.html %}
 
 {% block body %}
-    <p>路径 {{info.path}} </p>
-    <p>备份时间 {{info.mtime}}</p>
-    <p>大小 {{info.size}}</p>
-    <p> <a href="/static/xnote.zip">下载</a>
-    <p><a href="/system/backup_info?op=backup">重新备份</a></p>
-    <p><a href="/system/backup_info?op=backup_code">只备份代码</a></p>
+    <h2>备份</h2>
+    <table class="table">
+        <tr>
+            <th>备份名称</th>
+            <th>备份路径</th>
+            <th>备份时间</th>
+            <th>备份大小</th>
+            <th>操作</th>
+        <tr>
+        {% for info in infolist %}
+        <tr>
+            <td><a href="/fs/{{info.path}}">{{info.name}}</a></td>
+            <td>{{info.path}}</td>
+            <td>{{info.mtime}}</td>
+            <td>{{info.size}}</td>
+            <td><a href="/system/backup_info?op=backup_code">备份</a></td>
+        </tr>
+        {% end %}
+    </table>
 {% end %}
 """
-
-
-class T:
-    pass
 
 _black_list = [".zip", ".pyc", ".pdf", "__pycache__", ".git"]
 
@@ -55,7 +65,7 @@ def zip_xnote(nameblacklist = [ZIPNAME]):
             path = os.path.join(root, fname)
             try:
                 st = os.stat(path)
-                if st.st_size > config.MAX_FILE_SIZE:
+                if st.st_size > xconfig.MAX_FILE_SIZE:
                     continue
             except:
                 continue
@@ -67,26 +77,35 @@ def zip_new_xnote():
     zip_xnote([ZIPNAME, "data.db", "log", "backup", ".exe",
         "02", "01", "09", "10", "11", "12"])
 
-def get_info():
-    info = T()
-    info.path = _dest_path
 
-    if os.path.exists(_dest_path):
-        info.name = ZIPNAME
-        info.path = _dest_path
-        st = os.stat(_dest_path)
-        info.mtime = dateutil.format_time(st.st_mtime)
-        info.size = fsutil.format_size(st.st_size)
-    else:
-        info.name = None
-        info.path = None
-        info.mtime = None
-        info.size = None
-    return info
+class FileInfo:
 
+    def __init__(self, name, path):
+        self.name = name
+        self.path = path
+        info = self
+
+        if os.path.exists(path):
+            info.path = path
+            st = os.stat(path)
+            info.mtime = dateutil.format_time(st.st_mtime)
+            info.size = fsutil.format_size(st.st_size)
+        else:
+            info.path = None
+            info.mtime = None
+            info.size = None
 
 def backup_code():
-    zip_new_xnote()
+    # zip_new_xnote()
+    dirname = "./"
+    dest_path = xconfig.CODE_ZIP
+    xutils.zip_dir(dirname, dest_path, excluded=["data", "tmp", "log", ".git"])
+
+def backup_data():
+    dirname = xconfig.DATA_DIR
+    dest_path = os.path.join(dirname, "data.zip")
+    xutils.zip_dir(dirname, dest_path, excluded=["data.db", 
+        "dictionary.db", "app", "backup", "tmp"])
 
 
 class handler:
@@ -96,4 +115,11 @@ class handler:
             zip_xnote()
         elif op == "backup_code":
             backup_code()
-        return xtemplate.render_text(html, info = get_info())
+        elif op == "backup_data":
+            backup_data()
+        else:
+            infolist = []
+            infolist.append(FileInfo("代码", xconfig.CODE_ZIP))
+            infolist.append(FileInfo("数据", xconfig.DATA_ZIP))
+            return xtemplate.render_text(html, infolist=infolist)
+        raise web.seeother("/system/backup_info")
