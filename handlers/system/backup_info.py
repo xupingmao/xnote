@@ -29,7 +29,7 @@ html = """{% extends base.html %}
             <td>{{info.path}}</td>
             <td>{{info.mtime}}</td>
             <td>{{info.size}}</td>
-            <td><a href="/system/backup_info?op=backup_code">备份</a></td>
+            <td><a href="/system/backup_info?op={{info.op}}">备份</a></td>
         </tr>
         {% end %}
     </table>
@@ -80,9 +80,10 @@ def zip_new_xnote():
 
 class FileInfo:
 
-    def __init__(self, name, path):
+    def __init__(self, name, path, op):
         self.name = name
         self.path = path
+        self.op   = op
         info = self
 
         if os.path.exists(path):
@@ -119,7 +120,7 @@ class handler:
             backup_data()
         else:
             infolist = []
-            infolist.append(FileInfo("代码", xconfig.CODE_ZIP))
-            infolist.append(FileInfo("数据", xconfig.DATA_ZIP))
+            infolist.append(FileInfo("代码", xconfig.CODE_ZIP, "backup_code"))
+            infolist.append(FileInfo("数据", xconfig.DATA_ZIP, "backup_data"))
             return xtemplate.render_text(html, infolist=infolist)
         raise web.seeother("/system/backup_info")
