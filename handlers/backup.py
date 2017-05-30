@@ -7,11 +7,13 @@ import os
 from util import dateutil
 from util import fsutil
 from util import logutil
-import config
+import xconfig
 import re
 import time
 
 import xutils
+
+config = xconfig
 
 class T:
     pass

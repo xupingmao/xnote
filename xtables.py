@@ -5,8 +5,10 @@
 """Xnote的数据库配置"""
 
 import sqlite3
-import config
+import xconfig
 import web.db as db
+
+config = xconfig
 
 class SqliteTableManager:
     """检查数据库字段，如果不存在就自动创建"""

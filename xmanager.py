@@ -12,7 +12,7 @@ from threading import Thread
 from queue import Queue
 
 import web
-import config
+import xconfig
 import xtemplate
 import xtables
 import xutils
@@ -22,6 +22,7 @@ from util import textutil
 from xutils import ConfigParser
 from xutils import Storage
 
+config = xconfig
 
 def wrapped_handler(handler_clz):
     if not isinstance(handler_clz, type):

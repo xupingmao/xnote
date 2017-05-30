@@ -9,13 +9,13 @@ import web
 import xmanager
 import xutils
 import xtemplate
-import config
+import xconfig
 import xtables
 
 def init():
     xtables.init()
-    config.IS_TEST = True
-    config.port = "1234"
+    xconfig.IS_TEST = True
+    xconfig.port = "1234"
     var_env = dict()
     app = web.application(list(), var_env, autoreload=False)
     mgr = xmanager.init(app, var_env)

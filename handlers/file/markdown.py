@@ -4,10 +4,12 @@
 from handlers.base import *
 import xauth
 import xutils
-import config
+import xconfig
 
 import web.db as db
 from . import dao
+
+config = xconfig
 
 def date2str(d):
     ct = time.gmtime(d / 1000)

@@ -14,13 +14,14 @@ sys.path.insert(1, "lib")
 
 import web
 import xutils
-import config
+import xconfig
 import xtables
 import xmanager
 
 from xutils import *
 from autoreload import AutoReloadThread
 
+config = xconfig
 
 def get_ip_list(blacklist = []):
     localIp = socket.gethostbyname(socket.gethostname())

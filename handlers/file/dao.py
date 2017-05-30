@@ -10,15 +10,17 @@ import re
 import sqlite3
 
 import web.db as db
+import xconfig
+
+from xutils import readfile, savetofile
 from util import dateutil
-import config
 
 MAX_VISITED_CNT = 200
 
-from xutils import readfile, savetofile
 readFile = readfile
 writeFile = savetofile
 
+config  = xconfig
 DB_PATH = config.DB_PATH
 
 

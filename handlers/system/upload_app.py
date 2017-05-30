@@ -5,11 +5,14 @@
 """Description here"""
 
 import os
+import zipfile
+
 import web
 import xutils
-import config
+import xconfig
 import xtemplate
-import zipfile
+
+config = xconfig
 
 class FileInfo:
 

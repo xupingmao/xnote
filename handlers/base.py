@@ -26,7 +26,7 @@ webpy实现优雅直观，所以最终选择了webpy来开发
 import web
 from web.py3helpers import PY2
 from tornado.template import Template, Loader
-import config 
+import xconfig 
 import json
 import sys
 import traceback
@@ -54,6 +54,8 @@ from util import netutil
 import xtemplate
 import xutils
 from xtemplate import render as xtemplate_render
+
+config = xconfig
 
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())

@@ -5,8 +5,8 @@
 """Description here"""
 from io import StringIO
 from handlers.base import *
-from config import *
-import config
+from xconfig import *
+import xconfig
 import codecs
 import time
 import functools
@@ -19,6 +19,8 @@ import autoreload
 import xtemplate
 import xutils
 import xauth
+
+config = xconfig
 
 def get_memory_usage():
     try:

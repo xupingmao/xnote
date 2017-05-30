@@ -13,12 +13,12 @@ import inspect
 from tornado.template import Template, Loader
 from util import dateutil
 
-import config
+import xconfig
 import xauth
 
 from xutils import ConfigParser
 
-TEMPLATE_DIR = config.HANDLERS_DIR
+TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE    = dict(
     format_date = dateutil.format_date,
     format_time = dateutil.format_time
@@ -112,7 +112,7 @@ def add_render_hook(hook):
     _hooks.append(hook)
 
 def get_user_agent():
-    if config.IS_TEST:
+    if xconfig.IS_TEST:
         return ""
     return web.ctx.env.get("HTTP_USER_AGENT")
 

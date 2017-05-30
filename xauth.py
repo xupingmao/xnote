@@ -4,13 +4,14 @@ import hashlib
 import copy
 
 import web
-import config
+import xconfig
 import xtables
 import xutils
 
 from xutils import ConfigParser
 from web.utils import Storage
 
+config = xconfig
 # 用户配置
 _users = None
 

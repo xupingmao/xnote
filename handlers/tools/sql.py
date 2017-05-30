@@ -4,9 +4,10 @@ import sqlite3
 import os
 import xutils
 import xauth
-import config
-
+import xconfig
 from collections import OrderedDict
+
+config = xconfig
 
 def db_execute(path, sql, args = None):
     """需要保持字段的顺序"""

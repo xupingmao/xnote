@@ -4,9 +4,12 @@ import math
 from handlers.base import *
 from .dao import *
 
-import config
+import xconfig
 import xauth
 import xutils
+
+# 兼容旧代码
+config = xconfig
 
 def execute(sql):
     return xutils.db_execute(config.DB_PATH, sql)

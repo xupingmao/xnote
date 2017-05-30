@@ -5,7 +5,6 @@
 """切换菜单样式"""
 
 import web
-import config
 
 class handler:
     """docstring for handler"""

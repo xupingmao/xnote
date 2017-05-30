@@ -10,11 +10,12 @@ import math
 
 import web
 import xutils
-import config
+import xconfig
 import xauth
 from handlers.base import *
 import web.db as db
 
+config = xconfig
 
 class FileDO(dict):
     """This class behaves like both object and dict"""

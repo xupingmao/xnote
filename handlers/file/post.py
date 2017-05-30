@@ -12,13 +12,15 @@ import xtemplate
 import web.db as db
 
 import xutils
-import config
+import xconfig
 
 from handlers.base import get_upload_file_path
 from util import dateutil
 from util import fsutil
 
 from . import dao
+
+config = xconfig
 
 class PostView(object):
     """docstring for handler"""
