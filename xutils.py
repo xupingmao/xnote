@@ -52,6 +52,7 @@ if PY2:
 
 from tornado.escape import xhtml_escape        
 from web.utils import Storage
+from web.utils import safestr, safeunicode
 
 #################################################################
 

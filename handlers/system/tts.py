@@ -10,8 +10,7 @@ from handlers.base import BaseHandler
 class handler(BaseHandler):
 
     def default_request(self):
-        content = self.get_argument("content")
-        # print(content)
+        content = xutils.get_argument("content")
         import comtypes.client as cc
         # dynamic=True不生成静态的Python代码
         voice = cc.CreateObject("SAPI.SpVoice", dynamic=True)

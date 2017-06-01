@@ -9,6 +9,7 @@ from . import sql
 from . import pipe
 from . import notebook
 from . import analyze_html
+from . import zip
 
 C_TEMPLATE = """
 #include <stdio.h>
@@ -62,5 +63,6 @@ xurls = (r"/tools/tcc\.html", TccHandler,
          r"/tools/pipe\.html", pipe.handler,
          r"/tools/notebook", notebook.handler,
          r"/tools/analyze_html\.html", analyze_html.handler,
+         r"/tools/zip", zip.handler,
          r"/tools/(.*)", handler)
          

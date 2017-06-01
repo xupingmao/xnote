@@ -8,7 +8,7 @@ import traceback
 import time
 import copy
 import json
-from threading import Thread
+from threading import Thread, Timer
 from queue import Queue
 
 import web
@@ -317,7 +317,11 @@ class TaskManager:
                         try:
                             # task()
                             log("run task [%s]" % task.url)
-                            self.app.request(task.url)
+                            # self.app.request(task.url)
+                            func = self.app.request
+                            # Python3 中的_thread模块不被推荐使用
+                            timer = Timer(0, func, args = (task.url,))
+                            timer.start()
                         except Exception as e:
                             log("run task [%s] failed, %s" % (taskname, e))
                         finally:
