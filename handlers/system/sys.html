@@ -41,15 +41,6 @@
             <td></td>
         </tr>
         {% end %}
-
-        {% for i, shell_path in enumerate(shell_list) %}
-        <tr>
-            <td class="sys-cmd-no">{{i+len(cmd_list)+1}}</td>
-            <td class="sys-cmd"><a href='javascript:runCommand({{repr(shell_path)}})'>{{shell_path}}</a></td>
-            <td>系统脚本</td>
-        </tr>
-        {% end %}
-
     </table>
 
     <div class="barcode col-md-12" style="margin:0 auto; text-align: center;">

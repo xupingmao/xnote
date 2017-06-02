@@ -129,6 +129,7 @@ class SysHandler:
 
         if xauth.is_admin():
             cmd_list.append(Storage(name="文件浏览器", url="/fs/"))
+            cmd_list.append(Storage(name="脚本管理", url="/system/script_admin"))
             cmd_list.append(Storage(name="重新加载模块", url="/system/reload"))
             cmd_list.append(Storage(name="机器运行状态", url="/system/monitor"))
             cmd_list.append(Storage(name="Template代码", url="/system/template_cache"))
@@ -137,11 +138,7 @@ class SysHandler:
             cmd_list.append(Storage(name="定时任务管理", url="/system/crontab"))
             cmd_list.append(Storage(name="首页提醒管理", url="/system/notice_admin"))
             cmd_list.append(Storage(name="App包上传", url="/system/upload_app"))
-            cmd_list.append(Storage(name="脚本管理", url="/system/script_admin"))
             cmd_list.append(Storage(name="系统变量管理", url="/system/sys_var_admin"))
-
-        if not xauth.is_admin():
-            shell_list = []
 
         return xtemplate.render("system/sys.html", 
             backup = backup.get_info(),
@@ -149,7 +146,6 @@ class SysHandler:
             # port = config.get("port"),
             addr = addr,
             cmd_list = cmd_list,
-            shell_list = shell_list,
             os = os,
             user = xauth.get_current_user(),
             mem_used = get_memory_usage()

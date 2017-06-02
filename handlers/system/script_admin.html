@@ -1,0 +1,97 @@
+{% extends base.html %}
+
+{% block head %}
+
+<link rel="stylesheet" href="/static/lib/codemirror/codemirror.min.css">
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
+<script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
+<script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
+
+{% end %}
+
+{% block body %}
+
+{% init shell_list = [] %}
+{% set  index = 1 %}
+{% init op = "list" %}
+
+<h2><a href="/system/script_admin">脚本管理</a></h2>
+
+{% if op == "edit" %}
+    {# 编辑 #}
+    <form method="POST" action="/system/script_admin/save">
+        <div class="col-md-12">
+            <input type="text" name="name" value="{{name}}" class="hide">
+            <textarea id="editor" class="col-md-12" rows="20" name="content">{{content}}</textarea>
+            <button id="save">Save</button>
+            <input type="button" scriptName="{{name}}" class="executeScript" value="执行"/>
+        </div>
+    </form>
+
+    <script>
+        $(function () {
+          var editor = CodeMirror.fromTextArea($("#editor")[0], {
+            lineNumbers: true,
+            mode: "text/x-sh",
+            theme:"monokai",
+            indentUnit:4,
+          });
+        });
+    </script>
+
+{% else %}
+    {% comment 列表 %}
+    <form method="POST">
+    <input type="text" name="op" value="add" class="hide"/>
+    <table class="table col-md-12">
+        <tr>
+            <th>编号</th>
+            <th>文件名</th>
+            <th>操作</th>
+        </tr>
+
+        {% for script in shell_list %}
+            <tr>
+                <td>{{index}}</td>
+                <td>{{script}}</td>
+                <td>
+                    <input type="button" value="执行" class="executeScript" scriptName="{{script}}"/> 
+                    <input type="button" value="删除" class="deleteScript red" scriptName="{{script}}"/>
+                    <a href="/system/script_admin?op=edit&name={{script}}">编辑</a> 
+                </td>
+            </tr>
+            {% set index = index + 1 %}
+        {% end %}
+        <tr>
+            <td>{{index}}</td>
+            <td><input type="text" name="name"/></td>
+            <td><button>添加</button></td>
+        </tr>
+    </table>
+    </form>
+{% end %}
+
+<script type="text/javascript">
+    $(".executeScript").on("click", function(event) {
+        var scriptName = $(event.target).attr("scriptName")
+        // console.log(event);
+        // console.log($(event.target).attr("scriptName"))
+        $.post("/system/script_admin/execute?name=" + scriptName, function (data) {
+
+        });
+    })
+
+    $(".deleteScript").on("click", function(event) {
+        var scriptName = $(event.target).attr("scriptName")
+        var check = confirm("确认删除 " + scriptName + " ?")
+        if (check) {        
+            $.post("/system/script_admin/delete?name=" + scriptName, function (data) {
+                location.reload();
+            });
+        }
+    })
+</script>
+
+{% end %}
+

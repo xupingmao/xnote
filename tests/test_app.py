@@ -87,6 +87,11 @@ class TestMain(unittest.TestCase):
     def test_notfound(self):
         self.check_404("/nosuchfile")
 
+    def test_script_admin(self):
+        self.check_200("/system/script_admin")
+
+
+
 
 
 

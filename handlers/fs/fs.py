@@ -73,6 +73,14 @@ class FileItem(xutils.Storage):
         else:
             self.type = "dir"
             self.path += "/"
+
+    # sort方法重写__lt__即可
+    def __lt__(self, other):
+        if self.type == "dir" and other.type == "file":
+            return True
+        if self.type == "file" and other.type == "dir":
+            return False
+        return self.name < other.name
         
 
 def getpathlist(path):
@@ -188,9 +196,10 @@ class FileSystemHandler:
 
         # filelist中路径均不带/
         # 排序：文件夹优先，按字母顺序排列
-        filelist.sort(key=lambda a: a.lower())
-        filelist.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
+        # filelist.sort(key=lambda a: a.lower())
+        # filelist.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
         filelist = [FileItem(item) for item in filelist]
+        filelist.sort()
 
         # SAE上遇到中文出错
         # Fix bad filenames，修改不生效
@@ -301,7 +310,7 @@ class FileSystemHandler:
         
 
 class StaticFileHandler(FileSystemHandler):
-    allowed_prefix = ["img", "app", "files", "tmp"]
+    allowed_prefix = ["img", "app", "files", "tmp", "scripts"]
 
     def is_path_allowed(self, path):
         for prefix in self.allowed_prefix:
