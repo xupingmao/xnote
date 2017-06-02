@@ -43,6 +43,7 @@ class ExecuteHandler:
         name = xutils.get_argument("name")
         dirname = xconfig.SCRIPTS_DIR
         path = os.path.join(dirname, name)
+        path = os.path.abspath(path)
         if name.endswith(".command"):
             # Mac os Script
             os.system("chmod +x " + path)

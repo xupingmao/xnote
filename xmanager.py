@@ -286,7 +286,7 @@ class TaskManager:
         """是否符合运行条件"""
         if tm is None:
             tm = time.localtime()
-        if hasattr(task, "interval"):
+        if task.repeat_type == "interval":
             if task.interval < 0:
                 return False
             """定时任务"""
@@ -297,7 +297,14 @@ class TaskManager:
                 task.next_time = current + task.interval
                 return True
             return False
-        return str(task.second) == str(tm.tm_sec)
+            # return str(task.second) == str(tm.tm_sec)
+        elif task.repeat_type == "day":
+            time_str = "%02d:%02d:%02d" % (tm.tm_hour, tm.tm_min, tm.tm_sec)
+            # print("check day", time_str, task.pattern)
+            if time_str == task.pattern:
+                return True
+            return False
+        return False
 
     def run_task(self):
         """执行定时任务"""

@@ -34,13 +34,16 @@ class handler(BaseHandler):
     def add_request(self):
         url      = xutils.get_argument("url")
         # interval = xutils.get_argument("interval", 10, type=int)
-        repeat_type = xutils.get_argument("repeat_type", "second")
+        repeat_type = xutils.get_argument("repeat_type", "day")
         pattern     = xutils.get_argument("pattern")
 
         if repeat_type == "interval":
             interval = int(pattern)
         else:
             interval = -1
+            if pattern.count(":") == 1:
+                # 如果是分钟默认加上秒
+                pattern = pattern + ":00"
 
         db  = xtables.get_schedule_table()
         rows = db.select(where="url=$url", vars=dict(url=url))

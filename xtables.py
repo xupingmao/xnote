@@ -149,7 +149,7 @@ def init_table_schedule():
     manager.add_column("ctime",       "text", "")
     manager.add_column("mtime",       "text", "")
     manager.add_column("repeat_type", "text", "interval")
-    manager.add_column("pattern",     "text", "00:00")
+    manager.add_column("pattern",     "text", "00:00:00")
 
 
 def init_table_log():
