@@ -52,6 +52,8 @@ class ExecuteHandler:
             os.system("start %s" % path)
         elif path.endswith(".sh"):
             os.system("chmod +x " + path)
+        elif path.endswith(".vbs"):
+            os.system("start %s" % path)
             # TODO linux怎么处理?
         return dict(code="success", message="")
 
@@ -72,7 +74,7 @@ class handler:
         if os.path.exists(dirname):
             for fname in os.listdir(dirname):
                 fpath = os.path.join(dirname, fname)
-                if os.path.isfile(fpath) and fpath.endswith((".bat", ".sh", ".command")):
+                if os.path.isfile(fpath) and fpath.endswith((".bat", ".vbs", ".sh", ".command")):
                     shell_list.append(fname)
         shell_list.sort()
         return xtemplate.render("system/script_admin.html", 
