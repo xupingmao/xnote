@@ -270,40 +270,29 @@ class ModelManager:
     def load_tasks(self):
         self.task_manager.load_tasks()
 
-    def get_task_dict(self):
-        return self.task_manager.get_task_dict()
+    def get_task_list(self):
+        return self.task_manager.get_task_list()
 
 
 
 class TaskManager:
-    """任务管理器"""
+    """定时任务管理器，仿照crontab"""
     def __init__(self, app):
-        self.task_dict = {}
+        self.task_list = []
         self.app = app
 
+    def _match(self, current, pattern):
+        return str(current) == pattern or pattern == "*"
 
     def match(self, task, tm=None):
         """是否符合运行条件"""
         if tm is None:
             tm = time.localtime()
-        if task.repeat_type == "interval":
-            if task.interval < 0:
-                return False
-            """定时任务"""
-            current = time.time()
-            if not hasattr(task, "next_time"):
-                task.next_time = current
-            if current >= task.next_time:
-                task.next_time = current + task.interval
-                return True
-            return False
-            # return str(task.second) == str(tm.tm_sec)
-        elif task.repeat_type == "day":
-            time_str = "%02d:%02d:%02d" % (tm.tm_hour, tm.tm_min, tm.tm_sec)
-            # print("check day", time_str, task.pattern)
-            if time_str == task.pattern:
-                return True
-            return False
+
+        if self._match(tm.tm_wday, task.tm_wday) \
+                and self._match(tm.tm_hour, task.tm_hour) \
+                and self._match(tm.tm_min, task.tm_min):
+            return True
         return False
 
     def run_task(self):
@@ -316,10 +305,8 @@ class TaskManager:
                 # 获取分
                 tm = time.localtime()
                 
-                for taskname in self.task_dict:
-                    task = self.task_dict[taskname]
+                for task in self.task_list:
                     if self.match(task, tm):
-                        # TODO 需要优化成异步执行
                         # worker_thread.add_task(task)
                         try:
                             # task()
@@ -330,7 +317,7 @@ class TaskManager:
                             timer = Timer(0, func, args = (task.url,))
                             timer.start()
                         except Exception as e:
-                            log("run task [%s] failed, %s" % (taskname, e))
+                            log("run task [%s] failed, %s" % (task.url, e))
                         finally:
                             pass
                 # 等待下一个分钟
@@ -348,7 +335,7 @@ class TaskManager:
     def _add_task(self, task):
         url = task.url
         try:
-            self.task_dict[task.url] = task
+            self.task_list.append(task)
             return True
         except Exception as e:
             print("Add task %s failed, %s" % (url, e))
@@ -357,9 +344,7 @@ class TaskManager:
     def load_tasks(self):
         schedule = xtables.get_schedule_table()
         tasks = schedule.select(order="ctime DESC")
-        self.task_dict = {}
-        for task in tasks:
-            self._add_task(task)
+        self.task_list = list(tasks)
 
         # users = {}
         # path = "config/tasks.ini"
@@ -396,8 +381,8 @@ class TaskManager:
         # with open("config/tasks.ini", "w") as fp:
         #     cf.write(fp)
         
-    def get_task_dict(self):
-        return copy.deepcopy(self.task_dict)
+    def get_task_list(self):
+        return copy.deepcopy(self.task_list)
 
 
 class TaskThread(Thread):

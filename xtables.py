@@ -71,6 +71,12 @@ class SqliteTableManager:
             sql += " NOT NULL"
         self.execute(sql)
 
+    def drop_column(self, colname):
+        # sql = "ALTER TABLE `%s` DROP COLUMN `%s`" % (self.tablename, colname)
+        # sqlite不支持 DROP COLUMN 得使用中间表
+        # TODO
+        pass
+
     def close(self):
         self.db.close()
 
@@ -145,11 +151,14 @@ def init_table_schedule():
     # Job是已经触发的任务
     manager = TableManager(config.DB_PATH, "schedule")
     manager.add_column("url",         "text", "")
-    manager.add_column("interval",    "integer", 60)
+    # manager.add_column("interval",    "integer", 60)
     manager.add_column("ctime",       "text", "")
     manager.add_column("mtime",       "text", "")
-    manager.add_column("repeat_type", "text", "interval")
-    manager.add_column("pattern",     "text", "00:00:00")
+    # manager.add_column("repeat_type", "text", "interval")
+    # manager.add_column("pattern",     "text", "00:00:00")
+    manager.add_column("tm_wday", "text", "")  # Week Day
+    manager.add_column("tm_hour", "text", "")
+    manager.add_column("tm_min",  "text", "")
 
 
 def init_table_log():

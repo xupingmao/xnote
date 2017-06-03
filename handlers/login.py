@@ -12,7 +12,7 @@ class handler:
         pswd = args["password"]
         target = args["target"]
 
-        print("USER[%s] PSWD[%s]" % (name, pswd))
+        # print("USER[%s] PSWD[%s]" % (name, pswd))
 
         users = xauth.get_users()
 

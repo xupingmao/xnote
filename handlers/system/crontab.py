@@ -14,24 +14,43 @@ import xutils
 from handlers.base import BaseHandler
 
 
-TASKLIST_CONF = "config/tasklist.ini"
-
 class handler(BaseHandler):
 
     @xauth.login_required("admin")
     def default_request(self):
-        self.task_dict = xmanager.instance().get_task_dict()
-        self.render("system/crontab.html", task_dict = self.task_dict)
+        self.task_list = xmanager.instance().get_task_list()
+        self.render("system/crontab.html", task_list = self.task_list)
 
     @xauth.login_required("admin")
     def del_request(self):
-        url = self.get_argument("url")
-        xtables.get_schedule_table().delete(where=dict(url=url))
+        # url = self.get_argument("url")
+        id = xutils.get_argument("id", type=int)
+        xtables.get_schedule_table().delete(where=dict(id=id))
+        xmanager.instance().load_tasks()
+        raise web.seeother("/system/crontab")
+
+    @xauth.login_required("admin")
+    def add_request(self):
+        url = xutils.get_argument("url")
+        tm_wday = xutils.get_argument("tm_wday")
+        tm_hour = xutils.get_argument("tm_hour")
+        tm_min  = xutils.get_argument("tm_min")
+
+        if url == "":
+            raise web.seeother("/system/crontab")
+
+        db  = xtables.get_schedule_table()
+        db.insert(url=url,
+            ctime=xutils.format_time(),
+            mtime=xutils.format_time(),
+            tm_wday=tm_wday,
+            tm_hour=tm_hour,
+            tm_min=tm_min)
         xmanager.instance().load_tasks()
         raise web.seeother("/system/crontab")
     
     @xauth.login_required("admin")
-    def add_request(self):
+    def add_request_old(self):
         url      = xutils.get_argument("url")
         # interval = xutils.get_argument("interval", 10, type=int)
         repeat_type = xutils.get_argument("repeat_type", "day")

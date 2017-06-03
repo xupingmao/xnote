@@ -12,31 +12,50 @@
 
     <tr>
         <th>编号</th>
-        <th>重复</th>
         <th>任务URL(如/test)</th>
-        <th>执行表达式</th>
+        <th>周</th>
+        <th>小时</th>
+        <th>分</th>
         <th>操作</th>
     </tr>
     {% set index = -1 %}
-    {% for index, name in enumerate(sorted(task_dict)) %}
-    {% set task = task_dict[name] %}
+    {% for index, task in enumerate(task_list) %}
+    {% set name = task.url %}
     <tr>
         <td>{{index+1}}</td>
-        <td>{{ REPEAT_TYPE_DICT.get(task.repeat_type) }}</td>
         <td>{{task.url}}</td>
-        <td>{{task.pattern}}</td>
-        <td><a href="/system/crontab?option=del&url={{task.url}}">删除</a></td>
+        <td>{{task.tm_wday}}</td>
+        <td>{{task.tm_hour}}</td>
+        <td>{{task.tm_min}}</td>
+        <td><a href="/system/crontab?option=del&id={{task.id}}">删除</a></td>
     </tr>
     {% end %}
 
     <tr>
         <td>{{index+2}}</td>
-        <td><select name="repeat_type">
-            <option value="interval">间隔秒</option>
-            <option value="day">每天</option>
-        </select></td>
         <td><input type="text" name="url"></td>
-        <td><input type="text" name="pattern"></td>
+        <td><select name="tm_wday">
+            <option value="*">每天</option>
+            {% for wday in range(1, 8) %}
+            <option value="{{wday}}">{{wday}}</option>
+            {% end %}
+        </select></td>
+        <td>
+            <select name="tm_hour">
+                <option value="*">每小时</option>
+                {% for hour in range(24) %}
+                <option value="{{hour}}">{{hour}}</option>
+                {% end %}
+            </select>
+        </td>
+        <td>
+            <select name="tm_min">
+                <option value="*">每分钟</option>
+                {% for tm_min in range(60) %}
+                <option value="{{tm_min}}">{{tm_min}}</option>
+                {% end %}
+            </select>
+        </td>
         <td><input type="submit" value="添加"></td>
     </tr>
 </table>
