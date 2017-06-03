@@ -32,6 +32,7 @@ class handler(BaseHandler):
     @xauth.login_required("admin")
     def add_request(self):
         url = xutils.get_argument("url")
+        url = xutils.quote_unicode(url)
         tm_wday = xutils.get_argument("tm_wday")
         tm_hour = xutils.get_argument("tm_hour")
         tm_min  = xutils.get_argument("tm_min")
