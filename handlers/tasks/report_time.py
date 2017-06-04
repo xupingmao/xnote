@@ -23,10 +23,11 @@ class handler(BaseHandler):
             if tm.tm_hour >= 23:
                 msg += "夜深了，请注意休息"
             voice.Speak(msg)
-            voice.Release()
+            # voice.Release()
+            return dict(code="success", message="")
         except Exception as e:
-            raise
+            return dict(code="fail", message=str(e))
         else:
             pass
         finally:
-            return "OK"
+            pass

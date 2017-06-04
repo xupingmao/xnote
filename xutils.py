@@ -63,6 +63,10 @@ def print_stacktrace():
     print(ex)
     traceback.print_tb(tb)
 
+def print_web_ctx_env():
+    for key in web.ctx.env:
+        print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
+
 
 class SilentStorage(dict):
     """

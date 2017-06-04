@@ -1,16 +1,20 @@
 # encoding=utf-8
 import web
 import hashlib
+
+import xutils
 import xauth
 import xtemplate
 
 class handler:
 
     def POST(self):
-        args = web.input(name="", password="", target=None)
-        name = args["username"]
-        pswd = args["password"]
-        target = args["target"]
+        name = xutils.get_argument("username")
+        pswd = xutils.get_argument("password")
+        target = xutils.get_argument("target")
+
+        # xutils.print_web_ctx_env()
+        # print(web.input())
 
         # print("USER[%s] PSWD[%s]" % (name, pswd))
 
