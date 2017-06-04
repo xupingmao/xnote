@@ -90,6 +90,9 @@ class TestMain(unittest.TestCase):
     def test_script_admin(self):
         self.check_200("/system/script_admin")
 
+    def test_report_time(self):
+        self.check_200("/tasks/report_time")
+
 
 
 

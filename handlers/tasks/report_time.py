@@ -15,7 +15,13 @@ class handler(BaseHandler):
             # dynamic=True不生成静态的Python代码
             voice = cc.CreateObject("SAPI.SpVoice", dynamic=True)
             tm = time.localtime()
+            if tm.tm_hour >= 0 and tm.tm_hour <= 6:
+                return False
+            if tm.tm_hour == 7 and tm.tm_min < 30:
+                return False
             msg = "现在时间是%s时%s分" % (tm.tm_hour, tm.tm_min)
+            if tm.tm_hour >= 23:
+                msg += "夜深了，请注意休息"
             voice.Speak(msg)
             voice.Release()
         except Exception as e:

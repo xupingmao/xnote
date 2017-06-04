@@ -2,7 +2,7 @@
 
 {% block body %}
 
-<h3>任务管理</h3>
+<h3>定时任务管理</h3>
 
 {% set REPEAT_TYPE_DICT = dict(interval="间隔秒", day="每天") %}
 
@@ -24,9 +24,9 @@
     <tr>
         <td>{{index+1}}</td>
         <td><div style="word-wrap: break-word; width: 300px;">{{task.url}}</div></td>
-        <td>{{task.tm_wday}}</td>
-        <td>{{task.tm_hour}}</td>
-        <td>{{task.tm_min}}</td>
+        <td>{% if task.tm_wday == "*" %}每天{% else %}{{task.tm_wday}}{% end %}</td>
+        <td>{% if task.tm_hour == "*" %}每小时{% else %}{{task.tm_hour}}{% end %}</td>
+        <td>{% if task.tm_min  == "*" %}每分钟{% else %}{{task.tm_min}} {% end %}</td>
         <td><a href="/system/crontab?option=del&id={{task.id}}">删除</a></td>
     </tr>
     {% end %}

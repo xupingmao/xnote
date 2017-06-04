@@ -24,6 +24,8 @@ PS：我觉得IDE是一个非常伟大的创新，大大提高了程序员编码
 
 ### 开发框架/软件库
 
+具体版本见`requirements.txt`
+
 - webpy(修改版)
 - tornado template(修改版)
 - sqlite3 (Python自带文件型数据库，不支持多线程操作)
@@ -83,7 +85,7 @@ xurls = ("/test", handler)
 ![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/static/img/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE.PNG)
 
 - `handlers/tools`目录下是开发工具，可以通过搜索功能定位
-- `scripts/`目录下是系统脚本,直接与操作系统交互
+- `$DATA_DIR/scripts/`目录下是系统脚本,直接与操作系统交互
 
 ### 搜索
 - 笔记搜索
@@ -108,8 +110,7 @@ xurls = ("/test", handler)
 - 图标，是的我自己做了一个很丑的图标，寓意天圆地方
 
 ## 配置运行
-- config/users.ini 用户配置，管理员可以添加账户，不支持注册
-- config/menu.ini 导航菜单配置，可以在系统页面编辑菜单配置
+- 无需额外配置，初始化的管理员账号是admin/123456
 - 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 即可
 
 ## 协议
