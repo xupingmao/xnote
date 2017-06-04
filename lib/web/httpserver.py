@@ -164,7 +164,7 @@ def runsimple(func, server_address=("0.0.0.0", 8080)):
     [cp]: http://www.cherrypy.org
     """
     global server
-    func = StaticMiddleware(func)
+    # func = StaticMiddleware(func)
     func = LogMiddleware(func)
     
     server = WSGIServer(server_address, func)

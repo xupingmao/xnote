@@ -36,6 +36,7 @@ class TestMain(unittest.TestCase):
         value = app.request("/test").data
         self.assertEqual(b"success", value)
 
+
     def test_recent_files(self):
         value = app.request("/file/recent_edit?_type=json").data
         json_value = value.decode("utf-8")
@@ -64,6 +65,11 @@ class TestMain(unittest.TestCase):
     def check_404(self, url):
         response = app.request(url)
         self.assertEqual("404 Not Found", response.status)
+
+    def test_static_files(self):
+        self.check_200("/static/lib/jquery.js")
+        # 禁止直接访问目录
+        self.check_404("/static/")
 
     def test_file(self):
         self.check_200("/file/recent_edit")

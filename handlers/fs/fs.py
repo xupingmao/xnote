@@ -168,7 +168,7 @@ class FileSystemHandler:
     }
 
     def handle_content_type(self, path):
-        """Content-Type设置"""
+        """Content-Type设置, 优先级从高到低依次是：自定义配置、系统配置、默认配置"""
         name, ext = os.path.splitext(path)
         mime_type = self.mime_types.get(ext.lower())
         if mime_type is None:
@@ -310,7 +310,7 @@ class FileSystemHandler:
         
 
 class StaticFileHandler(FileSystemHandler):
-    allowed_prefix = ["img", "app", "files", "tmp", "scripts"]
+    allowed_prefix = ["static", "img", "app", "files", "tmp", "scripts"]
 
     def is_path_allowed(self, path):
         for prefix in self.allowed_prefix:
@@ -324,17 +324,18 @@ class StaticFileHandler(FileSystemHandler):
         if not self.is_path_allowed(path):
             xauth.check_login("admin")
         data_prefix = config.DATA_DIR
-        newpath = os.path.join(data_prefix, path)
-        # if not os.path.exists(newpath):
-            # 尝试使用unquote之后的文件名, check也会报错
-            # unquote_path = xutils.unquote(path)
-            # newpath = os.path.join(data_prefix, unquote_path) 
-        if not os.path.exists(newpath):
+        if not path.startswith("static"):
+            newpath = os.path.join(data_prefix, path)
+        else:
+            newpath = path
             # 兼容static目录数据
-            newpath = "./static/" + path
+            if not os.path.exists(newpath):
+                # len("static/") = 7
+                newpath = os.path.join(data_prefix, newpath[7:])
         path = newpath
         if not os.path.isfile(path):
             # 静态文件不允许访问文件夹
+            web.ctx.status = "404 Not Found"
             return "Not Readable %s" % path
         return self.handle_get(path)
 
@@ -343,7 +344,7 @@ description = "下载和上传文件"
 
 xurls = (r"/fs-", handler, 
     r"/fs/(.*)", FileSystemHandler,
-    r"/static/(.*)", StaticFileHandler,
+    r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
     r"/(app/.*)", StaticFileHandler,
     r"/(tmp/.*)", StaticFileHandler)
