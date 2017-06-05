@@ -14,7 +14,7 @@ from util import fsutil
 html = """{% extends base.html %}
 
 {% block body %}
-    <h2>备份</h2>
+    <h2>备份管理</h2>
     <table class="table">
         <tr>
             <th>备份名称</th>
@@ -105,8 +105,8 @@ def backup_code():
 def backup_data():
     dirname = xconfig.DATA_DIR
     dest_path = os.path.join(dirname, "data.zip")
-    xutils.zip_dir(dirname, dest_path, excluded=["data.db", 
-        "dictionary.db", "app", "backup", "tmp"])
+    xutils.zip_dir(dirname, dest_path, excluded=["data.db", "code.zip",
+        "dictionary.db", "app", "backup", "tmp", "log"])
 
 
 class handler:

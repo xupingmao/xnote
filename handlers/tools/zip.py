@@ -16,8 +16,12 @@ html = """
 <h2>压缩文件</h2>
 <form method="POST">
 <div class="col-md-12">
-    <textarea class="col-md-12" name="dirname"></textarea>
-    <textarea class="col-md-12" name="destname"></textarea>
+    <div>
+        目录路径<textarea class="col-md-12" name="dirname"></textarea>
+    </div>
+    <div>
+        目标文件名<textarea class="col-md-12" name="destname"></textarea>
+    </div>
     <button>压缩</button>
 </div>
 </form>

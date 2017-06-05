@@ -133,7 +133,7 @@ class SysHandler:
             cmd_list.append(Storage(name="重新加载模块", url="/system/reload"))
             cmd_list.append(Storage(name="机器运行状态", url="/system/monitor"))
             cmd_list.append(Storage(name="Template代码", url="/system/template_cache"))
-            cmd_list.append(Storage(name="备份", url="/system/backup_info"))
+            cmd_list.append(Storage(name="备份管理", url="/system/backup_info"))
             cmd_list.append(Storage(name="用户管理", url="/system/user_admin"))
             cmd_list.append(Storage(name="定时任务管理", url="/system/crontab"))
             cmd_list.append(Storage(name="首页提醒管理", url="/system/notice_admin"))

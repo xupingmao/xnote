@@ -19,9 +19,12 @@ class handler(BaseHandler):
                 return False
             if tm.tm_hour == 7 and tm.tm_min < 30:
                 return False
-            msg = "现在时间是%s时%s分" % (tm.tm_hour, tm.tm_min)
+            if tm.tm_min == 0:
+                msg = "现在时间是%s点整" % tm.tm_hour
+            else:
+                msg = "现在时间是%s点%s分" % (tm.tm_hour, tm.tm_min)
             if tm.tm_hour >= 23:
-                msg += "夜深了，请注意休息"
+                msg += "，夜深了，请注意休息"
             voice.Speak(msg)
             # voice.Release()
             return dict(code="success", message="")
