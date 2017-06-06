@@ -24,6 +24,13 @@ class SqliteTableManager:
             sql = "CREATE TABLE IF NOT EXISTS `%s` (`%s` %s primary key);" % (tablename, pkName, pkType)
         self.execute(sql)
 
+    def __enter__(self, *args, **kw):
+        SqliteTableManager.__init__(self, *args, **kw)
+        return self
+
+    def __exit__(self):
+        self.close()
+
     def execute(self, sql, silent=False):
         cursorobj = self.db.cursor()
         try:
@@ -98,9 +105,11 @@ def init_table_test():
 
 def init_table_file():
     manager = TableManager(config.DB_PATH, "file")
-    manager.add_column("name", "text", "")
+    manager.add_column("name",    "text", "")
     manager.add_column("content", "text", "")
-    manager.add_column("size", "long", 0)
+    manager.add_column("size",    "long", 0)
+    # 修改版本
+    manager.add_column("version",  "int", 0)
     # 类型, markdown, post, mailist, file
     # 类型为file时，content值为文件的web路径
     manager.add_column("type", "text", "")
@@ -130,8 +139,8 @@ def init_table_file():
     
     # MD5
     manager.add_column("md5", "text", "")
-    # 修改版本
-    manager.add_column("version", "int", 0)
+    # 展示优先级，用于收藏等标记
+    manager.add_column("priority", "int", 0)
     manager.close()
 
 def init_table_tag():
@@ -159,6 +168,7 @@ def init_table_schedule():
     manager.add_column("tm_wday", "text", "")  # Week Day
     manager.add_column("tm_hour", "text", "")
     manager.add_column("tm_min",  "text", "")
+    manager.close()
 
 
 def init_table_log():
@@ -166,6 +176,7 @@ def init_table_log():
     manager = TableManager(config.LOG_PATH, "xnote_log")
     manager.add_column("tag",      "text", "")
     manager.add_column("operator", "text", "")
+    manager.close()
 
 def init_table_user():
     # 2017/05/21
@@ -173,6 +184,7 @@ def init_table_user():
     manager.add_column("name",     "text", "")
     manager.add_column("password", "text", "")
     manager.add_column("ctime",    "text", "")
+    manager.close()
 
 def init_table_message():
     # 2017/05/29
@@ -180,6 +192,7 @@ def init_table_message():
     manager.add_column("ctime", "text", "")
     manager.add_column("user",  "text", "")
     manager.add_column("content", "text", "")
+    manager.close()
 
 class DBWrapper:
     """ 基于web.db的装饰器 """

@@ -97,6 +97,15 @@ def sqlite_escape(text):
 def result(success = True, msg=None):
     return {"success": success, "result": None, "msg": msg}
 
+def is_img(filename):
+    name, ext = os.path.splitext(filename)
+    return ext.lower() in (".gif", ".png", ".jpg", ".jpeg", ".bmp")
+
+def get_link(filename, webpath):
+    if is_img(filename):
+        return "![%s](%s)" % (filename, webpath)
+    return "[%s](%s)" % (filename, webpath)
+
 class UpdateHandler(BaseHandler):
 
     def default_request(self):
@@ -106,6 +115,7 @@ class UpdateHandler(BaseHandler):
         version   = xutils.get_argument("version", type=int)
         file_type = xutils.get_argument("type")
         name      = xutils.get_argument("name", "")
+        upload_file  = xutils.get_argument("file", {})
 
         file = dao.get_by_id(id)
         assert file is not None
@@ -122,9 +132,27 @@ class UpdateHandler(BaseHandler):
 
         if name != "" and name != None:
             update_kw["name"] = name
+
+        # import pdb
+        # pdb.set_trace()
+        # print(upload_file)
+
+        # 处理文件上传
+        if hasattr(upload_file, "filename") and upload_file.filename != "":
+            filename = upload_file.filename
+            filepath, webpath = get_upload_file_path(xutils.quote(filename))
+            with open(filepath, "wb") as fout:
+                for chunk in upload_file.file:
+                    fout.write(chunk)
+            link = get_link(filename, webpath)
+            update_kw["content"] = content + "\n" + link
+
         rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
-            raise web.seeother("/file/view?id=" + str(id))
+            if upload_file != None:
+                raise web.seeother("/file/markdown/edit?id=" + str(id))
+            else:
+                raise web.seeother("/file/view?id=" + str(id))
         else:
             # 传递旧的content
             cur_version = file.version

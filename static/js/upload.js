@@ -36,6 +36,10 @@
             _onComplete = successCallback;
         }
 
+        function wrapper(event) {
+            
+        }
+
         xhr.addEventListener("load", _onComplete, false);
         xhr.addEventListener("error", uploadFailed, false);
         xhr.addEventListener("abort", uploadCanceled, false);
@@ -44,12 +48,18 @@
     }
 
     function uploadProgress(evt) {
+        var elements = document.getElementsByClassName("upload-progress");
+        if (elements.length > 0) {
+            var element = elements[0];
+        } else {
+            return;
+        }
         if (evt.lengthComputable) {
             var percentComplete = Math.round(evt.loaded * 100 / evt.total);
-            document.getElementById('progressNumber').innerHTML = "进度: " + percentComplete.toString() + '%';
+            element.innerHTML = "进度: " + percentComplete.toString() + '%';
         }
         else {
-            document.getElementById('progressNumber').innerHTML = 'unable to compute';
+            element.innerHTML = 'unable to compute';
         }
     }
 
