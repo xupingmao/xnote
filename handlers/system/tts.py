@@ -11,12 +11,16 @@ class handler(BaseHandler):
 
     def default_request(self):
         content = xutils.get_argument("content")
-        import comtypes.client as cc
-        # dynamic=True不生成静态的Python代码
-        voice = cc.CreateObject("SAPI.SpVoice", dynamic=True)
         try:
+            import comtypes.client as cc
+            # dynamic=True不生成静态的Python代码
+            voice = cc.CreateObject("SAPI.SpVoice", dynamic=True)
             voice.Speak(content)
+            return dict(code="success")
+        except Exception as e:
+            return dict(code="fail", message=str(e))
         finally:
             # 报异常
             # voice.Release()
-            return "OK"
+            # return "OK"
+            pass

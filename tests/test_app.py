@@ -102,6 +102,8 @@ class TestMain(unittest.TestCase):
     def test_report_time(self):
         self.check_200("/tasks/report_time")
 
+    def test_tts(self):
+        self.check_200("/system/tts?content=测试")
 
 
 

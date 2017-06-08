@@ -19,6 +19,8 @@ class handler(BaseHandler):
     @xauth.login_required("admin")
     def default_request(self):
         self.task_list = xmanager.instance().get_task_list()
+        for task in self.task_list:
+            task.url = xutils.unquote(task.url)
         self.render("system/crontab.html", task_list = self.task_list)
 
     @xauth.login_required("admin")
