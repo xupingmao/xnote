@@ -5,7 +5,9 @@
 </span>
 
 <span id="edit-tags-span" style="display: none;">
-    <input id="tagEditText" type="text" value="" /><a href="/help?name=tag">帮助</a><button id="tagEditBtn">确认</button>
+    <input id="tagEditText" type="text" value="" />
+    <!-- <a href="/help?name=tag">帮助</a> -->
+    <button id="tagEditBtn">确认</button>
 </span>
 
 <a id="toggleFileTagsEditor" href="javascript:toggleFileTagsEditor()">编辑</a>
@@ -50,14 +52,25 @@ function toggleFileTagsEditor() {
     }
 }
 
-$("#tagEditBtn").on("click", function() {
+function postTagAdd() {
     $.post("/file/tag/add", {file_id: {{file.id}}, tags: $("#tagEditText").val()}, 
         function(data, status) {
             // alert(data);
             toggleFileTagsEditor();
             initTags();
     })
+}
+
+$("#tagEditBtn").on("click", function() {
+    postTagAdd();
 })
+
+$("#tagEditText").on("keyup", function (e) {
+    console.log(e);
+    if (e.which == 13) {
+        postTagAdd();
+    }
+});
 
 $(function () {
     initTags();

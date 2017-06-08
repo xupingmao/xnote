@@ -20,7 +20,8 @@ def init():
     xconfig.port = "1234"
     var_env = dict()
     app = web.application(list(), var_env, autoreload=False)
-    mgr = xmanager.init(app, var_env)
+    last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
+    mgr = xmanager.init(app, var_env, last_mapping=last_mapping)
     mgr.reload()
     return app
 

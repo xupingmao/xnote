@@ -31,9 +31,10 @@ def _get_users():
     db_users = list(db_users)
 
     _users = {}
+    # 默认的账号
     _users["admin"] = Storage(name="admin", password="123456")
 
-    print(db_users)
+    # print(db_users)
 
     for user in db_users:
         _users[user.name] = user
@@ -53,7 +54,7 @@ def refresh_users():
 
 def get_user(name):
     users = _get_users()
-    if config.IS_TEST:
+    if xconfig.IS_TEST:
         return users.get("admin")
     return users.get(name)
 
@@ -62,7 +63,7 @@ def get_user_password(name):
     return users[name]["password"]
 
 def get_current_user():
-    if config.IS_TEST:
+    if xconfig.IS_TEST:
         return get_user("admin")
     return get_user(web.cookies().get("xuser"))
 
@@ -74,6 +75,12 @@ def get_current_role():
 def get_md5_hex(pswd):
     pswd_md5 = hashlib.md5()
     pswd_md5.update(pswd.encode("utf-8"))
+    return pswd_md5.hexdigest()
+
+def get_password_md5(passwd):
+    passwd = passwd + xutils.format_date()
+    pswd_md5 = hashlib.md5()
+    pswd_md5.update(passwd.encode("utf-8"))
     return pswd_md5.hexdigest()
 
 def add_user(name, password):
@@ -110,7 +117,8 @@ def has_login(name=None):
     if user is None:
         return False
 
-    return get_md5_hex(user["password"]) == pswd_in_cookie
+    password_md5 = get_password_md5(user["password"])
+    return password_md5 == pswd_in_cookie
 
 def is_admin():
     return config.IS_ADMIN or has_login("admin")

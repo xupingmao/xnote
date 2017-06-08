@@ -97,7 +97,7 @@ class ModelManager:
     启动时自动加载`handlers`目录下的处理器和定时任务
     """
 
-    def __init__(self, app, vars, mapping = None):
+    def __init__(self, app, vars, mapping = None, last_mapping=None):
         self.app = app # webpy app
         if mapping is None:
             self.basic_mapping = [] # webpy mapping
@@ -105,6 +105,12 @@ class ModelManager:
         else:
             self.basic_mapping = mapping
             self.mapping = copy.copy(mapping)
+
+        if last_mapping is None:
+            self.last_mapping = []
+        else:
+            self.last_mapping = last_mapping
+
         self.vars = vars
         self.search_dict = {}
         self.task_dict = {}
@@ -130,6 +136,7 @@ class ModelManager:
 
     def reload(self):
         """重启所有的模块"""
+        
         self.reload_module("xtemplate")
         self.reload_module("xauth")
         self.reload_module("xutils")
@@ -139,9 +146,11 @@ class ModelManager:
         self.failed_mods = []
         self.load_model_dir(config.HANDLERS_DIR)
         
-        import xtemplate
         self.mapping += self.basic_mapping
+        self.mapping += self.last_mapping
         self.app.init_mapping(self.mapping)
+        
+        import xtemplate
         xtemplate.reload()
 
         # set 404 page
@@ -419,9 +428,9 @@ class WorkerThread(Thread):
         self._task_queue.put(task)
         
 _manager = None        
-def init(app, vars):
+def init(app, vars, last_mapping=None):
     global _manager
-    _manager = ModelManager(app, vars)
+    _manager = ModelManager(app, vars, last_mapping = last_mapping)
     return _manager
     
 def instance():

@@ -76,7 +76,10 @@ def main():
     check_dirs()
     check_db()
 
-    mgr = xmanager.init(app, var_env)
+    # 最后的mapping，用于匹配优先级较低的处理器
+    last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
+
+    mgr = xmanager.init(app, var_env, last_mapping = last_mapping)
     mgr.reload()
 
     def stop_callback():

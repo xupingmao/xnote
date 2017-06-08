@@ -83,7 +83,7 @@ table td {
         {% for line in file.result %}
             {% set around_id = "%s-%s" % (index1, line.lineno) %}
             <div>
-                <code class="code-analyze-line" onclick="toggle('#{{around_id}}')">{{"%4d" % line.lineno}}{{line.text}}</code>
+                <code class="code-analyze-line" onclick="toggle('#{{around_id}}')">{{"%4d " % line.lineno}}{{line.text}}</code>
                 <pre id="{{around_id}}" class="hide marked-pre">{{line.around_text}}</pre>
             </div>
         {% end %}

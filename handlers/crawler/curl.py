@@ -1,3 +1,4 @@
+# encoding=utf-8
 from handlers.base import *
 from urllib.request import urlopen
 

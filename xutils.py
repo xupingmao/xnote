@@ -216,6 +216,20 @@ def format_time(seconds=None):
         st = time.localtime(seconds)
         return time.strftime('%Y-%m-%d %H:%M:%S', st)
 
+def format_date(seconds=None):
+    if seconds is None:
+        return time.strftime('%Y-%m-%d')
+    else:
+        st = time.localtime(seconds)
+        return time.strftime('%Y-%m-%d', st)
+
+def format_datetime(seconds=None):
+    if seconds == None:
+        return time.strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        st = time.localtime(seconds)
+        return time.strftime('%Y-%m-%d %H:%M:%S', st)
+
 def days_before(days, format=False):
     seconds = time.time()
     seconds -= days * 3600 * 24

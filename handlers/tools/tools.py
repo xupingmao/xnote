@@ -5,11 +5,8 @@ import xutils
 import web
 import os
 
-from . import sql
 from . import pipe
 from . import notebook
-from . import analyze_html
-from . import zip
 
 C_TEMPLATE = """
 #include <stdio.h>
@@ -56,13 +53,5 @@ class handler:
         return self.GET(name)
         
             
-xurls = (r"/tools/tcc\.html", TccHandler,
-         r"/tools/tcc", TccHandler,
-         r"/tools/sql\.html", sql.handler,
-         r"/tools/sql", sql.handler,
-         r"/tools/pipe\.html", pipe.handler,
-         r"/tools/notebook", notebook.handler,
-         r"/tools/analyze_html\.html", analyze_html.handler,
-         r"/tools/zip", zip.handler,
-         r"/tools/(.*)", handler)
+xurls = (r"/tools/tcc", TccHandler)
          

@@ -149,7 +149,7 @@ class UpdateHandler(BaseHandler):
 
         rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
-            if upload_file != None:
+            if upload_file != None and upload_file.filename != "":
                 raise web.seeother("/file/markdown/edit?id=" + str(id))
             else:
                 raise web.seeother("/file/view?id=" + str(id))
