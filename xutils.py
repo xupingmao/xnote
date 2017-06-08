@@ -299,7 +299,20 @@ def http_get(url):
     stream = urlopen(url)
     return decode_bytes(stream.read())
 
-    
+def mac_say(msg):
+    os.system("say %s" % msg)
+
+def windows_say(msg):
+    import comtypes.client as cc
+    # dynamic=True不生成静态的Python代码
+    voice = cc.CreateObject("SAPI.SpVoice", dynamic=True)
+    voice.Speak(msg)
+
+def say(msg):
+    if is_windows():
+        windows_say(msg)
+    elif is_mac():
+        mac_say()
 
 
 #################################################################
