@@ -312,7 +312,7 @@ def say(msg):
     if is_windows():
         windows_say(msg)
     elif is_mac():
-        mac_say()
+        mac_say(msg)
 
 
 #################################################################

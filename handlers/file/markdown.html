@@ -4,8 +4,15 @@
     <div style="">
     
     <span id="fileId" style="display:none;">{{file.id}}</span>
-    <h2>{{file.name}} <a href="/file/markdown/edit?id={{file.id}}">[编辑]</a>
-                    <a href="/file/share?id={{file.id}}">[分享]</a></h2>
+    <h2>{{file.name}} 
+        <a href="/file/markdown/edit?id={{file.id}}">[编辑]</a>
+        <a href="/file/share?id={{file.id}}">[分享]</a>
+        {% if file.priority > 0 %}
+            <a href="/file/{{file.id}}/downvote">[取消置顶]</a>
+        {% else %}
+            <a href="/file/{{file.id}}/upvote">[置顶]</a>
+        {% end %}
+    </h2>
 
     {% include file/tags.html %}
 

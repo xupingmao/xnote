@@ -169,3 +169,6 @@ class handler:
         # for key in headers:
         #     print("%s = %s" % (key, headers[key]))
         # return do_http(method, host, url, headers)
+
+if __name__ == '__main__':
+    main()

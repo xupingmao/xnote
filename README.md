@@ -26,15 +26,15 @@ PS：我觉得IDE是一个非常伟大的创新，大大提高了程序员编码
 
 具体版本见`requirements.txt`
 
-- webpy(修改版)
-- tornado template(修改版)
+- webpy(修改版，xnote内置)
+- tornado template(修改版，xnote内置)
 - sqlite3 (Python自带文件型数据库，不支持多线程操作)
 - psutil(可选，采集系统运行数据)
 - comtypes(可选，用于调用微软语音API)
 
 ### 前端
 
-- jquery(当然^_^)
+- jquery
 - marked(markdown解析器)
 - qrcode 二维码生成器
 - csv.js
@@ -61,7 +61,7 @@ xnote
 |-- xtables.py    # 数据库表结构
 |-- xtemplate.py   # view渲染接口
 |-- xutils.py     # 工具类统一入口
-|-- autoreload.py   # 监控文件变更自动reload
+|-- autoreload.py   # 监控文件变更自动reload，主要用于调试，生产环境可以关闭
 
 ```
 

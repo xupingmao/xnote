@@ -5,6 +5,7 @@ from handlers.base import *
 import xauth
 import xutils
 import xconfig
+import xtables
 
 import web.db as db
 from . import dao
@@ -186,10 +187,28 @@ class UpdateHandler(BaseHandler):
         dao.update(where=dict(id=id), is_deleted=1)
         raise web.seeother("/file/recent_edit")
 
+class Upvote:
+
+    def GET(self, id):
+        id = int(id)
+        db = xtables.get_file_table()
+        file = db.select_one(where=dict(id=int(id)))
+        db.update(priority=1, where=dict(id=id))
+        raise web.seeother("/file/view?id=%s" % id)
+
+class Downvote:
+    def GET(self, id):
+        id = int(id)
+        db = xtables.get_file_table()
+        file = db.select_one(where=dict(id=int(id)))
+        db.update(priority=0, where=dict(id=id))
+        raise web.seeother("/file/view?id=%s" % id)
 
 xurls = ("/file/edit", handler, 
         "/file/markdown", handler,
         "/file/view", handler,
         "/file/markdown/edit", MarkdownEdit,
-        "/file/update", UpdateHandler)
+        "/file/update", UpdateHandler,
+        r"/file/(.*)/upvote", Upvote,
+        r"/file/(.*)/downvote", Downvote)
 

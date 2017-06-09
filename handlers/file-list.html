@@ -74,6 +74,10 @@
     padding-right: 2px;
 }
 
+.red-bg {
+    background-color: red;
+}
+
 .red-tag {
     font-size: small;
     background-color: red;
@@ -117,6 +121,9 @@
                 {% end %}
 
                 <div>
+                    {% if hasattr(file, "priority") and file.priority is not None and file.priority > 0 %}
+                        <span class="tag red-bg">置顶</span>
+                    {% end %}
                     {% if file.groups == "*" %}
                         <span class="tag">公开</span>
                     {% elif file.groups != None %}
