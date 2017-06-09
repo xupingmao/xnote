@@ -406,8 +406,8 @@ def do_tools(words, key):
 
 class handler(BaseHandler):
     mappings = (
-        r"search.*", do_search,
-        r"calc.*", do_calc,
+        r"search.*",   do_search,
+        r"calc.*",     do_calc,
         r".*[0-9]+.*", try_calc,
     )
 
@@ -451,9 +451,9 @@ class handler(BaseHandler):
     @xauth.login_required()
     def execute(self):
         """search files by name and content"""
-        key = self.get_argument("key", "")
+        key  = self.get_argument("key", "")
         page = self.get_argument("page", 1, type = int)
-        user_name = xauth.get_current_user().get("name")
+        user_name = xauth.get_current_role()
         self.get_argument("page_url", "/search/search?key=%s&page=" % key)
         pagesize = config.PAGE_SIZE
 

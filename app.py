@@ -44,8 +44,8 @@ def check_db():
 
 def check_dirs():
     xutils.makedirs(config.DATA_PATH)
-    xutils.makedirs(config.LOG_DIR)
-    xutils.makedirs("tmp")
+    # xutils.makedirs(config.LOG_DIR)
+    # xutils.makedirs("tmp")
         
 def handle_data_dir():
     parser = argparse.ArgumentParser()
