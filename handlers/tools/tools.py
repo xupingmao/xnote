@@ -1,9 +1,9 @@
 # encoding=utf-8
-
+import os
+import web
 import xtemplate
 import xutils
-import web
-import os
+import xconfig
 
 from . import pipe
 from . import notebook
@@ -28,8 +28,9 @@ class TccHandler:
         if code is None:
             code = C_TEMPLATE
         else:
-            xutils.savetofile("tmp\\temp.c", code)
-            status, output = xutils.getstatusoutput("D:\\tcc\\tcc.exe -run tmp\\temp.c")
+            path = os.path.join(xconfig.TMP_DIR, "temp.c")
+            xutils.savetofile(path, code)
+            status, output = xutils.getstatusoutput("D:\\tcc\\tcc.exe -run %s" % path)
 
             if json == "true":
                 return xutils.json_str(status=status, output=output)
