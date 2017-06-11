@@ -304,6 +304,10 @@ class TaskManager:
         # worker_thread = WorkerThread()
         self.load_tasks()
 
+        def request_url(url):
+            quoted_url = xutils.quote_unicode(url)
+            return self.app.request(url)
+
         def run():
             while True:
                 # 获取分
@@ -316,14 +320,13 @@ class TaskManager:
                         try:
                             # task()
                             log("run task [%s]" % task.url)
-                            # self.app.request(task.url)
-                            func = self.app.request
                             # Python3 中的_thread模块不被推荐使用
-                            timer = Timer(0, func, args = (task.url,))
+                            timer = Timer(0, request_url, args = (task.url,))
                             timer.start()
                             if task.tm_wday == "no-repeat":
-                                # 优化成delete?
-                                xtables.get_schedule_table().update(active=0, where=dict(id=task.id))
+                                # 一次性任务直接删除
+                                # xtables.get_schedule_table().update(active=0, where=dict(id=task.id))
+                                xtables.get_schedule_table().delete(where=dict(id=task.id))
                                 need_reload = True
                         except Exception as e:
                             log("run task [%s] failed, %s" % (task.url, e))
@@ -354,7 +357,7 @@ class TaskManager:
         
     def load_tasks(self):
         schedule = xtables.get_schedule_table()
-        tasks = schedule.select(where="active=1", order="ctime DESC")
+        tasks = schedule.select(order="ctime DESC")
         self.task_list = list(tasks)
 
         # users = {}

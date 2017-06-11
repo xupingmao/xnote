@@ -8,6 +8,7 @@ import os
 import sys
 import time
 
+import xauth
 import xutils
 import xconfig
 import xtables
@@ -17,8 +18,10 @@ SearchResult = xutils.SearchResult
 
 
 def search(delay_mins, message):
+    if not xauth.is_admin():
+        return []
     db = xtables.get_schedule_table()
-    url = xutils.quote_unicode("/tasks/alert/" + message)
+    url = "/tasks/alert/" + message
 
     millis = time.time() + int(delay_mins) * 60
     tm = time.localtime(millis)
