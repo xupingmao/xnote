@@ -55,17 +55,17 @@ class TestMain(unittest.TestCase):
         self.assertEqual("C:/data/", item1.path)
         self.assertEqual("C:/data/name/", item2.path)
 
-    def check_OK(self, url):
-        response = app.request(url)
+    def check_OK(self, *args, **kw):
+        response = app.request(*args, **kw)
         status = response.status
         self.assertEqual(True, status == "200 OK" or status == "303 See Other")
 
-    def check_200(self, url):
-        response = app.request(url)
+    def check_200(self, *args, **kw):
+        response = app.request(*args, **kw)
         self.assertEqual("200 OK", response.status)
 
-    def check_303(self, url):
-        response = app.request(url)
+    def check_303(self, *args, **kw):
+        response = app.request(*args, **kw)
         self.assertEqual("303 See Other", response.status)
 
     def check_404(self, url):
