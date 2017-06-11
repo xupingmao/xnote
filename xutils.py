@@ -102,6 +102,25 @@ class SilentStorage(dict):
         return '<SilentStorage ' + dict.__repr__(self) + '>'
 
 
+class SearchResult(dict):
+
+    def __init__(self):
+        self.url = "#"
+
+    def __getattr__(self, key): 
+        try:
+            return self[key]
+        except KeyError as k:
+            return None
+    
+    def __setattr__(self, key, value): 
+        self[key] = value
+
+    def __delattr__(self, key):
+        try:
+            del self[key]
+        except KeyError as k:
+            raise AttributeError(k)
     
 #################################################################
 ##   File System Utilities

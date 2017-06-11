@@ -23,7 +23,15 @@
     <tr>
         <td>{{index+1}}</td>
         <td><div style="word-wrap: break-word; width: 300px;">{{task.url}}</div></td>
-        <td>{% if task.tm_wday == "*" %}每天{% else %}{{task.tm_wday}}{% end %}</td>
+        <td>
+            {% if task.tm_wday == "*" %}
+                每天
+            {% elif task.tm_wday == "no-repeat" %}
+                一次性
+            {% else %}
+                {{task.tm_wday}}
+            {% end %}
+        </td>
         <td>{% if task.tm_hour == "*" %}每小时{% else %}{{task.tm_hour}}{% end %}</td>
         <td>{% if task.tm_min  == "*" %}每分钟{% else %}{{task.tm_min}} {% end %}</td>
         <td><a href="/system/crontab?option=del&id={{task.id}}">删除</a></td>
@@ -35,6 +43,7 @@
         <td><input type="text" name="url"></td>
         <td><select name="tm_wday">
             <option value="*">每天</option>
+            <option value="no-repeat">一次性</option>
             {% for wday in range(1, 8) %}
             <option value="{{wday}}">{{wday}}</option>
             {% end %}

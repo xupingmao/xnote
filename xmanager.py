@@ -18,7 +18,6 @@ import xtables
 import xutils
 
 from util import textutil
-
 from xutils import ConfigParser
 from xutils import Storage
 
@@ -279,10 +278,6 @@ class ModelManager:
     def get_task_list(self):
         return self.task_manager.get_task_list()
 
-    def add_search_handler(self, pattern, handler):
-        pass
-
-
 
 class TaskManager:
     """定时任务管理器，仿照crontab"""
@@ -291,7 +286,7 @@ class TaskManager:
         self.app = app
 
     def _match(self, current, pattern):
-        return str(current) == pattern or pattern == "*"
+        return str(current) == pattern or pattern == "*" or pattern == "no-repeat"
 
     def match(self, task, tm=None):
         """是否符合运行条件"""
@@ -313,6 +308,7 @@ class TaskManager:
             while True:
                 # 获取分
                 tm = time.localtime()
+                need_reload = False
                 
                 for task in self.task_list:
                     if self.match(task, tm):
@@ -325,10 +321,16 @@ class TaskManager:
                             # Python3 中的_thread模块不被推荐使用
                             timer = Timer(0, func, args = (task.url,))
                             timer.start()
+                            if task.tm_wday == "no-repeat":
+                                # 优化成delete?
+                                xtables.get_schedule_table().update(active=0, where=dict(id=task.id))
+                                need_reload = True
                         except Exception as e:
                             log("run task [%s] failed, %s" % (task.url, e))
                         finally:
                             pass
+                if need_reload:
+                    self.load_tasks()
                 # 等待下一个分钟
                 time.sleep(60 - tm.tm_sec % 60)
         chk_thread = TaskThread(run)
@@ -352,7 +354,7 @@ class TaskManager:
         
     def load_tasks(self):
         schedule = xtables.get_schedule_table()
-        tasks = schedule.select(order="ctime DESC")
+        tasks = schedule.select(where="active=1", order="ctime DESC")
         self.task_list = list(tasks)
 
         # users = {}
@@ -440,3 +442,5 @@ def instance():
 def reload():
     _manager.reload()
 
+def load_tasks():
+    _manager.load_tasks()

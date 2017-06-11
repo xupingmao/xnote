@@ -166,9 +166,11 @@ def init_table_schedule():
     manager.add_column("mtime",       "text", "")
     # manager.add_column("repeat_type", "text", "interval")
     # manager.add_column("pattern",     "text", "00:00:00")
-    manager.add_column("tm_wday", "text", "")  # Week Day
+    manager.add_column("tm_wday", "text", "")  # Week Day no-repeat 一次性任务
     manager.add_column("tm_hour", "text", "")
     manager.add_column("tm_min",  "text", "")
+    # 任务是否生效，用于一次性活动
+    manager.add_column("active", "int", 1)
     manager.close()
 
 
