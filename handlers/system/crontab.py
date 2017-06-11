@@ -30,27 +30,6 @@ class handler(BaseHandler):
         xtables.get_schedule_table().delete(where=dict(id=id))
         xmanager.instance().load_tasks()
         raise web.seeother("/system/crontab")
-
-    @xauth.login_required("admin")
-    def add_request(self):
-        url = xutils.get_argument("url")
-        url = xutils.quote_unicode(url)
-        tm_wday = xutils.get_argument("tm_wday")
-        tm_hour = xutils.get_argument("tm_hour")
-        tm_min  = xutils.get_argument("tm_min")
-
-        if url == "":
-            raise web.seeother("/system/crontab")
-
-        db  = xtables.get_schedule_table()
-        db.insert(url=url,
-            ctime=xutils.format_time(),
-            mtime=xutils.format_time(),
-            tm_wday=tm_wday,
-            tm_hour=tm_hour,
-            tm_min=tm_min)
-        xmanager.instance().load_tasks()
-        raise web.seeother("/system/crontab")
     
     @xauth.login_required("admin")
     def add_request_old(self):
@@ -87,3 +66,27 @@ class handler(BaseHandler):
         xmanager.instance().load_tasks()
         raise web.seeother("/system/crontab")
 
+class AddHandler:
+    @xauth.login_required("admin")
+    def POST(self):
+        url = xutils.get_argument("url")
+        url = xutils.quote_unicode(url)
+        tm_wday = xutils.get_argument("tm_wday")
+        tm_hour = xutils.get_argument("tm_hour")
+        tm_min  = xutils.get_argument("tm_min")
+
+        if url == "":
+            raise web.seeother("/system/crontab")
+
+        db  = xtables.get_schedule_table()
+        db.insert(url=url,
+            ctime=xutils.format_time(),
+            mtime=xutils.format_time(),
+            tm_wday=tm_wday,
+            tm_hour=tm_hour,
+            tm_min=tm_min)
+        xmanager.instance().load_tasks()
+        raise web.seeother("/system/crontab")
+
+xurls=(r"/system/crontab",     handler, 
+       r"/system/crontab/add", AddHandler)

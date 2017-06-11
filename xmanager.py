@@ -273,14 +273,14 @@ class ModelManager:
     def run_task(self):
         self.task_manager.run_task()
 
-    def add_task(self, task, interval):
-        self.task_manager.add_task(task, interval)
-
     def load_tasks(self):
         self.task_manager.load_tasks()
 
     def get_task_list(self):
         return self.task_manager.get_task_list()
+
+    def add_search_handler(self, pattern, handler):
+        pass
 
 
 

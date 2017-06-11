@@ -6,8 +6,7 @@
 
 {% set REPEAT_TYPE_DICT = dict(interval="间隔秒", day="每天") %}
 
-<form method="GET">
-<input class="hide" name="option" value="add"/>
+<form method="POST" action="/system/crontab/add">
 <table class="table col-md-12">
 
     <tr>

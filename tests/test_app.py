@@ -55,6 +55,11 @@ class TestMain(unittest.TestCase):
         self.assertEqual("C:/data/", item1.path)
         self.assertEqual("C:/data/name/", item2.path)
 
+    def check_OK(self, url):
+        response = app.request(url)
+        status = response.status
+        self.assertEqual(True, status == "200 OK" or status == "303 See Other")
+
     def check_200(self, url):
         response = app.request(url)
         self.assertEqual("200 OK", response.status)
@@ -105,10 +110,9 @@ class TestMain(unittest.TestCase):
     def test_tts(self):
         self.check_200("/system/tts?content=测试")
 
-
-
-
-
-
-
+    def test_task(self):
+        self.check_200("/system/crontab")
+        self.check_OK("/system/crontab/add", method="POST", data=dict(url="test", tm_wday="*", tm_hour="*", tm_min="*"))
+        sched = xtables.get_schedule_table().select_one(where=dict(url="test"))
+        self.check_OK("/system/crontab?option=del&id={}".format(sched.id))
 

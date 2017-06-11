@@ -12,7 +12,6 @@ class AddHandler:
     def POST(self):
         content = xutils.get_argument("content")
         user    = xauth.get_current_user()
-        print("add content", content)
         # chatlist.append(content)
         db = xtables.get_message_table()
         db.insert(user=user.get("name"), 
