@@ -5,9 +5,6 @@ import xtemplate
 import xutils
 import xconfig
 
-from . import pipe
-from . import notebook
-
 C_TEMPLATE = """
 #include <stdio.h>
 #include <string.h>

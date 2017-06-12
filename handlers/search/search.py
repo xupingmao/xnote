@@ -24,7 +24,7 @@ def load_mapping(pattern, func_str):
         mod, func_name = func_str.rsplit('.', 1)
         mod = __import__(mod, None, None, [''])
         func = getattr(mod, func_name)
-        _mappings.append(pattern)
+        _mappings.append(r"^%s\Z" % pattern)
         _mappings.append(func)
     except Exception as e:
         xutils.print_stacktrace()
@@ -184,3 +184,6 @@ load_mapping(r"([^ ]*)",      "handlers.search.translate.search")
 load_mapping(r"([^ ]*)",      "handlers.search.tools.search")
 load_mapping(r"(.*)",         "handlers.search.file.search")
 load_mapping(r"(\d+)分钟后提醒我?(.*)", "handlers.search.reminder.search")
+
+xurls = (r"/search/search", handler, r"/search", handler)
+

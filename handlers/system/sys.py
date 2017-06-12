@@ -23,6 +23,12 @@ import xauth
 config = xconfig
 
 def get_memory_usage():
+    # 先尝试psutil
+    try:
+        pass
+    except Exception as e:
+        pass
+
     try:
         if osutil.iswindows():
             pid = os.getpid()

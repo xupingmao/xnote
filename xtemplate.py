@@ -149,7 +149,7 @@ def render(template_name, **kw):
     _input = web.input()
 
     if _input.get("_type") == "json":
-        return json.dumps(kw, default=encode_json)
+        return json.dumps(nkw, default=encode_json)
     return _loader.load(template_name).generate(**nkw)
 
 def render_text(text, **kw):
