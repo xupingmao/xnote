@@ -319,7 +319,9 @@ def http_get(url):
     return decode_bytes(stream.read())
 
 def mac_say(msg):
-    os.system("say %s" % msg)
+    msglist = re.split(r"[,.;?!():，。？！；： ]", msg)
+    for m in msglist:
+        os.system("say %s" % m)
 
 def windows_say(msg):
     import comtypes.client as cc
