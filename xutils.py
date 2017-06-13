@@ -321,6 +321,9 @@ def http_get(url):
 def mac_say(msg):
     msglist = re.split(r"[,.;?!():，。？！；： ]", msg)
     for m in msglist:
+        m = m.strip()
+        if m == "":
+            continue
         os.system("say %s" % m)
 
 def windows_say(msg):

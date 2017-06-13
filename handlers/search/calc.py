@@ -3,10 +3,14 @@
 # 
 
 """Description here"""
+import re
 import xmanager
 import xutils
 
 SearchResult = xutils.SearchResult
+
+def safe_check(expression):
+    return r"^[0-9+\-*\/% \(\)\~]*\Z"
 
 def do_calc(expression):
     exp = expression

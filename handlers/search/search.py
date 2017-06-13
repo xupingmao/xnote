@@ -137,7 +137,8 @@ class handler(BaseHandler):
             if m:
                 try:
                     results = func(*m.groups())
-                    files += results
+                    if results is not None:
+                        files += results
                 except Exception as e:
                     xutils.print_stacktrace()
         return files
@@ -182,6 +183,7 @@ load_mapping(r"(.*[0-9]+.*)", "handlers.search.calc.try_calc")
 load_mapping(r"(.*)",         "handlers.search.pydoc.search")
 load_mapping(r"([^ ]*)",      "handlers.search.translate.search")
 load_mapping(r"([^ ]*)",      "handlers.search.tools.search")
+load_mapping(r"([^ ]*)",      "handlers.search.scripts.search")
 load_mapping(r"(.*)",         "handlers.search.file.search")
 load_mapping(r"(\d+)分钟后提醒我?(.*)", "handlers.search.reminder.search")
 

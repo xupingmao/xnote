@@ -15,6 +15,7 @@ class handler(BaseHandler):
             xutils.say(content)
             return dict(code="success")
         except Exception as e:
+            xutils.print_stacktrace()
             return dict(code="fail", message=str(e))
         finally:
             # 报异常
