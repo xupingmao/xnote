@@ -78,7 +78,41 @@
         alert("The upload has been canceled by the user or the browser dropped the connection.");
     }
 
+    
+
+    function uploadWithFileReader(files) {
+        var reader = new FileReader();
+        reader.onload = function (event) {
+            console.log(event);
+            var result = event.target.result;
+
+            // console.log(result.length)
+            console.log(event.target.result);
+            console.log(result.byteLength);
+        }
+
+        reader.readAsArrayBuffer(files[0]);
+        // var fd = new FormData();
+        // fd.append(fileName, document.getElementById(fileButtonId).files[0]);
+        // fd.append("type", "html5")
+        // var xhr = new XMLHttpRequest();
+        // xhr.upload.addEventListener("progress", uploadProgress, false);
+        
+        // var _onComplete = uploadComplete;
+
+        // if (successCallback) {
+        //     _onComplete = successCallback;
+        // }
+
+        // xhr.addEventListener("load", _onComplete, false);
+        // xhr.addEventListener("error", uploadFailed, false);
+        // xhr.addEventListener("abort", uploadCanceled, false);
+        // xhr.open("POST", uploadUrl);
+        // xhr.send(fd);
+    }
+
     // 导出上传接口
     window.uploadFile = uploadFile;
+    window.uploadWithFileReader = uploadWithFileReader;
 
 })(window);

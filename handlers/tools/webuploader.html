@@ -1,0 +1,21 @@
+{% extends base.html %}
+
+{% block head %}
+    <script type="text/javascript" src="/static/js/upload.js"></script>
+{% end %}
+
+{% block body %}
+    
+<div class="row">
+    <input type="file" name="file" id="fileToUpload"/>
+    <input type="button" class="btn" id="upload-btn" value="上传文件" />
+</div>
+
+<script type="text/javascript">
+$("#fileToUpload").on("change", function (e) {
+    var files = $("#fileToUpload")[0].files;
+    uploadWithFileReader(files);
+})
+</script>
+
+{% end %}
