@@ -72,9 +72,9 @@ class TagListHandler:
         db = dao.get_file_db()
         user_name = xauth.get_current_role()
         if user_name == "admin":
-            sql = "SELECT name, COUNT(*) AS amount FROM file_tag GROUP BY name ORDER BY name";
+            sql = "SELECT name, COUNT(*) AS amount FROM file_tag GROUP BY name ORDER BY amount DESC, name ASC";
         else:
-            sql = "SELECT name, COUNT(*) AS amount FROM file_tag WHERE groups in $groups GROUP BY name ORDER BY name";
+            sql = "SELECT name, COUNT(*) AS amount FROM file_tag WHERE groups in $groups GROUP BY name ORDER BY amount DESC, name ASC";
         groups = ["*", user_name]
         tag_list = db.query(sql, vars = dict(groups = groups))
         return xtemplate.render("file/taglist.html", tag_list = list(tag_list))

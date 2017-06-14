@@ -15,5 +15,6 @@ def search(name):
             result.name = "脚本 - " + fname
             result.raw  = "搜索到可执行脚本 - " + fname
             result.url  = "/system/script_admin?op=edit&name=%s" % fname
+            result.command = "/system/script_admin/execute?name=%s" % fname
             results.append(result)
     return results

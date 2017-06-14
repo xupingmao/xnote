@@ -44,10 +44,11 @@ class ExecuteHandler:
         dirname = xconfig.SCRIPTS_DIR
         path = os.path.join(dirname, name)
         path = os.path.abspath(path)
+        ret  = 0
         if name.endswith(".command"):
             # Mac os Script
             os.system("chmod +x " + path)
-            os.system("open " + path)
+            ret = os.system("open " + path)
         elif path.endswith(".bat"):
             os.system("start %s" % path)
         elif path.endswith(".sh"):
@@ -55,7 +56,7 @@ class ExecuteHandler:
         elif path.endswith(".vbs"):
             os.system("start %s" % path)
             # TODO linux怎么处理?
-        return dict(code="success", message="")
+        return dict(code="success", message="", ret=ret)
 
 class handler:
 

@@ -116,8 +116,14 @@
                     
                 </div>
                 
-                {% if "raw" in file %}
+                {% if file.raw != None %}
                     <pre>{{ file.raw }}</pre>
+                {% end %}
+
+                {# 快捷命令 #}
+                {% if file.command != None %}
+                    <input type="button" class="btn execute-btn" value="执行" href="{{file.command}}"/>
+                    <span class="execute-result"></span>
                 {% end %}
 
                 <div>
@@ -184,6 +190,13 @@
             var value = $('#targetPage').val();
             location.href = '{{page_url}}' + (value);
         }
+        $(".execute-btn").on("click", function (e) {
+            console.log(e);
+            var href = $(e.target).attr("href");
+            $.get(href, function (responseText) {
+                $(".execute-result").text(responseText);
+            });
+        })
     </script>
 {% end %}
 
