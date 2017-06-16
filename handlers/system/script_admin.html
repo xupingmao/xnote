@@ -24,8 +24,8 @@
         <div class="col-md-12">
             <input type="text" name="name" value="{{name}}" class="hide">
             <textarea id="editor" class="col-md-12" rows="20" name="content">{{content}}</textarea>
-            <button id="save">Save</button>
-            <input type="button" scriptName="{{name}}" class="executeScript" value="执行"/>
+            <button id="save" class="btn">Save</button>
+            <input type="button" scriptName="{{name}}" class="executeScript btn" value="执行"/>
         </div>
     </form>
 
@@ -54,8 +54,8 @@
             <tr>
                 <td>{{index}}</td>
                 <td>
-                    <input type="button" value="执行" class="executeScript" scriptName="{{script}}"/> 
-                    <input type="button" value="删除" class="deleteScript red" scriptName="{{script}}"/>
+                    <input type="button" value="执行" class="executeScript btn" scriptName="{{script}}"/> 
+                    <input type="button" value="删除" class="deleteScript btn btn-danger" scriptName="{{script}}"/>
                     <a href="/system/script_admin?op=edit&name={{script}}">{{script}}</a>
                 </td>
             </tr>

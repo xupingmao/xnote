@@ -2,12 +2,11 @@
 
 {% block body %}
 
-    <h2>监控</h2>
+    <h2><a href="/system/monitor">系统状态</a></h2>
 
     <!-- TODO d3.js 展示内存和CPU日志 -->
 
     <div class="col-md-12">
-        <p>内存占用: {{mem_used}}</p>
         <p>系统内存占用: {{sys_mem_used}} / {{sys_mem_total}}</p>
         <p>线程总数: {{thread_cnt}} <a href="/system/thread_info">详情</a></p>
     </div>

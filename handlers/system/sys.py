@@ -22,30 +22,6 @@ import xauth
 
 config = xconfig
 
-def get_memory_usage():
-    # 先尝试psutil
-    try:
-        pass
-    except Exception as e:
-        pass
-
-    try:
-        if osutil.iswindows():
-            pid = os.getpid()
-            with os.popen("tasklist /FI \"PID eq %s\"" % pid) as fp:
-                mem_usage = fp.read()
-            words = textutil.split_words(mem_usage)
-            return words[-2] + " K"
-        else:
-            pid = os.getpid()
-            with os.popen("ps -p %s -o rss" % pid) as fp:
-                mem_usage = fp.read()
-            words = textutil.split_words(mem_usage)
-            v = int(words[-1]) * 1024
-            return fsutil.format_size(v)
-    except Exception as e:
-        return None
-
 def get_local_ip(iplist):
     for ip in iplist:
         if ip != "localhost":
@@ -134,10 +110,10 @@ class SysHandler:
         cmd_list.append(Storage(name="模块信息(pydoc)", url="/system/modules_info"))
 
         if xauth.is_admin():
+            cmd_list.append(Storage(name="系统运行状态", url="/system/monitor"))
             cmd_list.append(Storage(name="文件浏览器", url="/fs/"))
             cmd_list.append(Storage(name="脚本管理", url="/system/script_admin"))
             cmd_list.append(Storage(name="重新加载模块", url="/system/reload"))
-            cmd_list.append(Storage(name="机器运行状态", url="/system/monitor"))
             cmd_list.append(Storage(name="Template代码", url="/system/template_cache"))
             cmd_list.append(Storage(name="备份管理", url="/system/backup_info"))
             cmd_list.append(Storage(name="用户管理", url="/system/user_admin"))
@@ -153,8 +129,7 @@ class SysHandler:
             addr = addr,
             cmd_list = cmd_list,
             os = os,
-            user = xauth.get_current_user(),
-            mem_used = get_memory_usage()
+            user = xauth.get_current_user()
         )
 
     def opendirRequest(self):
