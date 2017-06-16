@@ -198,6 +198,18 @@ def touch(path):
     if not os.path.exists(path):
         with open(path, "wb") as fp:
             pass
+
+def get_relative_path(path, parent):
+    path1 = os.path.abspath(path)
+    parent1 = os.path.abspath(parent)
+    # abpath之后最后没有/
+    # 比如
+    # ./                 -> /users/xxx
+    # ./test/hello.html  -> /users/xxx/test/hello.html
+    # 相减的结果是       -> /test/hello.html
+    # 需要除去第一个/
+    relative_path = path1[len(parent1):]
+    return relative_path.replace("\\", "/")[1:]
     
 
 def db_execute(path, sql, args = None):

@@ -37,8 +37,7 @@ class LinesInfo(object):
         self.display_name = fname
         if root:
             self.root = root
-            if self.fname.startswith(root):
-                self.display_name = self.fname[len(root):]
+            self.display_name = xutils.get_relative_path(fname, root)
 
 
 def get_line_infos(path, recursive=False, type=None, skip_func = lambda fname: False):
@@ -57,7 +56,8 @@ def get_line_infos(path, recursive=False, type=None, skip_func = lambda fname: F
         #     continue
         for fname in files:
             fpath = os.path.join(root, fname)
-            if skip_func(fpath):
+            relative_path = xutils.get_relative_path(fpath, path)
+            if skip_func(relative_path):
                 continue
             _, ext = os.path.splitext(fname)
             if ext not in ext_list:
@@ -116,11 +116,10 @@ class handler:
         patterns = []
         for item in blacklist:
             item = item.strip()
-            item = os.path.join(path, item)
             item = '^' + item.replace("*", ".*") + '$'
             patterns.append(re.compile(item))
 
-        print(patterns)
+        # print(patterns)
 
         def skip_func(fpath):
             for p in patterns:

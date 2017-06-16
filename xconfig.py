@@ -5,6 +5,7 @@ system configuration
 文件叫 XXX_PATH
 '''
 import os
+import time
 from collections import OrderedDict
 
 import xutils
@@ -31,10 +32,13 @@ SCRIPTS_DIR = os.path.join(DATA_DIR, "scripts")
 DB_DIR      = os.path.join(WORKING_DIR, "db")
 CONFIG_DIR  = os.path.join(DATA_DIR, "config")
 
+# 其他标记
 
 IS_ADMIN = False
 # 测试用的flag
 IS_TEST  = False
+# 静音停止时间
+MUTE_END_TIME = None
 
 # 资料相关
 # 分页数量
@@ -198,3 +202,7 @@ class Properties(object):
 
 # navigation = Properties("config/navigation.default.properties")
 # print(navigation.get_properties())
+
+
+def is_mute():
+    return MUTE_END_TIME is not None and time.time() < MUTE_END_TIME

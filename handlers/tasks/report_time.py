@@ -7,10 +7,13 @@
 import os
 import time
 import xutils
+import xconfig
 
 class handler:
 
     def GET(self):
+        if xconfig.is_mute():
+            return dict(code="fail", message="mute")
         try:
             tm = time.localtime()
             if tm.tm_hour >= 0 and tm.tm_hour <= 6:

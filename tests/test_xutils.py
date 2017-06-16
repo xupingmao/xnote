@@ -43,3 +43,19 @@ class TestMain(unittest.TestCase):
         self.assertEqual("1", result.a)
         self.assertEqual("/data", result.data)
         self.assertEqual(True, result.test)
+
+    def test_get_relative_path(self):
+        path   = "./test/test.html"
+        parent = "./"
+        relative_path = xutils.get_relative_path(path, parent)
+        self.assertEqual("test/test.html", relative_path)
+
+        path   = "./test.html"
+        parent = "./"
+        relative_path = xutils.get_relative_path(path, parent)
+        self.assertEqual("test.html", relative_path)
+
+        path = "./test/test.html"
+        parent = "./test"
+        relative_path = xutils.get_relative_path(path, parent)
+        self.assertEqual("test.html", relative_path)

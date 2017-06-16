@@ -178,14 +178,16 @@ class handler(BaseHandler):
 
         return self.render("file-list.html", files = files, count = count)
 
-load_mapping(r"calc(.*)",     "handlers.search.calc.do_calc")
-load_mapping(r"(.*[0-9]+.*)", "handlers.search.calc.try_calc")
-load_mapping(r"(.*)",         "handlers.search.pydoc.search")
-load_mapping(r"([^ ]*)",      "handlers.search.translate.search")
-load_mapping(r"([^ ]*)",      "handlers.search.tools.search")
-load_mapping(r"([^ ]*)",      "handlers.search.scripts.search")
-load_mapping(r"(.*)",         "handlers.search.file.search")
+load_mapping(r"calc(.*)",               "handlers.search.calc.do_calc")
+load_mapping(r"(.*[0-9]+.*)",           "handlers.search.calc.try_calc")
+load_mapping(r"(.*)",                   "handlers.search.pydoc.search")
+load_mapping(r"([^ ]*)",                "handlers.search.translate.search")
+load_mapping(r"([^ ]*)",                "handlers.search.tools.search")
+load_mapping(r"([^ ]*)",                "handlers.search.scripts.search")
+load_mapping(r"(.*)",                   "handlers.search.file.search")
 load_mapping(r"(\d+)分钟后提醒我?(.*)", "handlers.search.reminder.search")
+load_mapping(r"静音(.*)",               "handlers.search.mute.search")
+load_mapping(r"取消静音",               "handlers.search.mute.cancel")
 
 xurls = (r"/search/search", handler, r"/search", handler)
 

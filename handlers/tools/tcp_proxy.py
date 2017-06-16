@@ -1,7 +1,7 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/20
 # TCP代理转发
-
+from __future__ import print_function
 import socket
 import threading
 
@@ -72,9 +72,11 @@ def tcp_mapping_request(local_conn, remote_ip, remote_port):
 # (local_ip, local_port) 是监听地址
 def tcp_mapping(remote_ip, remote_port, local_ip, local_port):
     local_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # 设置socket重用
-    local_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    local_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    # 设置socket重用, Windows下没有部分选项
+    if hasattr(socket, "SO_REUSEADDR"):
+        local_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    if hasattr(socket, "SO_REUSEPORT"):
+        local_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     
     local_server.bind((local_ip, local_port))
     local_server.listen(20)
