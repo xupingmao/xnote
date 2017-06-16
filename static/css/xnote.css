@@ -53,6 +53,31 @@ blockquote {
     font-style: italic;
 }
 
+table {
+    font-family: verdana,arial,sans-serif;
+    font-size:14px;
+    color:#333333;
+    border-width: 1px;
+    border-color: #666666;
+    border-collapse: collapse;
+}
+table th {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #dedede;
+}
+table td {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #ffffff;
+}
+
+/** 标签样式结束 **/
+
 .menu-selected {
     background: #0088cc;
     color: #fff;
@@ -169,6 +194,8 @@ li.menu-item:hover {
     background-color: #777;
 }
 
+/** 宽度样式 **/
+
 .col-md-1 {
     float: left;
     width: 8.3%;
@@ -249,30 +276,6 @@ li.menu-item:hover {
 
 .form-control {
     width: 100%;
-}
-
-
-table {
- font-family: verdana,arial,sans-serif;
- font-size:14px;
- color:#333333;
- border-width: 1px;
- border-color: #666666;
- border-collapse: collapse;
-}
-table th {
- border-width: 1px;
- padding: 8px;
- border-style: solid;
- border-color: #666666;
- background-color: #dedede;
-}
-table td {
- border-width: 1px;
- padding: 8px;
- border-style: solid;
- border-color: #666666;
- background-color: #ffffff;
 }
 
 .table th{
@@ -410,3 +413,14 @@ table td {
 
 /** file-list样式 END **/
 
+.green-text {
+    color: #0f0;
+}
+
+.red-text {
+    color: #f00;
+}
+
+.blue-text {
+    color: #00f;
+}

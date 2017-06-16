@@ -108,9 +108,13 @@
 
    <!-- Files -->
    <div class="">
+        <div id="execute-result" style="color: #009933;">
+        </div>
         {% for i, file in enumerate(files) %}
             <div class="note">
-                <div class="note-visited-cnt">访问指数:{{file.visited_cnt}}</div>
+                {% if file.visited_cnt != None %}
+                    <div class="note-visited-cnt">访问指数:{{file.visited_cnt}}</div>
+                {% end %}
                 <div class="note-name">
                     <a href="{{file.url}}">{{file.name}}</a>
                     
@@ -123,7 +127,6 @@
                 {# 快捷命令 #}
                 {% if file.command != None %}
                     <input type="button" class="btn execute-btn" value="执行" href="{{file.command}}"/>
-                    <span class="execute-result"></span>
                 {% end %}
 
                 <div>
@@ -194,7 +197,7 @@
             console.log(e);
             var href = $(e.target).attr("href");
             $.get(href, function (responseText) {
-                $(".execute-result").text(responseText);
+                $("#execute-result").text(responseText);
             });
         })
     </script>
