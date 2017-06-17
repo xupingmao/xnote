@@ -36,15 +36,6 @@
         <div>
         </div>
     </div>
-    
-        <div>
-            <h3>
-                <a href="/wiki/">Home</a>
-                {% for path in wikilist %}
-                / <a href="/wiki/{{path}}">{{ os.path.basename(path) }}</a>
-                {% end %}
-            </h3>
-        </div>
         
     {% if type == "dir" %}
         <div>
@@ -58,11 +49,13 @@
             {% end %}
         </div>
     {% elif type == "file" %}
+        <h3>{{basename}}</h3>
         <form method="POST">
-        <div>
+            <button>保存</button>
+<!--         <div>
             <input type="text" class="hide" name="old_name" value="{{basename}}"/>
-            <input type="text" name="new_name" value="{{basename}}"/><button>保存</button>
-        </div>
+            <input type="text" name="new_name" value="{{basename}}"/>
+        </div> -->
         <div style="padding-top:20px;">
             <div id="epiceditor" class="row">
                 <div id="markdown-input-div" class="col-md-6">

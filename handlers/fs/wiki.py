@@ -177,7 +177,7 @@ class handler:
         if parentname=="":
             parentname="/"
             
-        return render("fs/edit.html", 
+        return render("fs/wiki_edit.html", 
             os = os,
             parent = parent,
             parentname = parentname,

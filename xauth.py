@@ -121,7 +121,7 @@ def has_login(name=None):
     return password_md5 == pswd_in_cookie
 
 def is_admin():
-    return config.IS_ADMIN or has_login("admin")
+    return config.IS_TEST or has_login("admin")
 
 def check_login(user_name=None):
     if not has_login(user_name):
