@@ -26,6 +26,7 @@ class handler:
         if len(elements) > 0:
             weather = elements[0]
             message = weather.attrs["value"]
+            message = message.replace("/", "至")
             xutils.say("%s %s" % (city_name, message))
             return dict(code="success", data=message)
         else:
