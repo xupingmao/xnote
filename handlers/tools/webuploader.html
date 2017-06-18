@@ -38,8 +38,12 @@ var uploader = WebUploader.create({
     // 默认5M
     // chunkSize: 1024 * 1024 * 5,
     chunkSize: 1024 * 1024 * 1,
+    // 重试次数
+    chunkRetry: 10,
     // 文件上传域的name
     fileVal: "file",
+    // 不开启并发
+    threads: 1,
 
     // 只允许选择图片文件。
     // accept: {
