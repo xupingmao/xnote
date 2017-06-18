@@ -3,7 +3,7 @@
 <script type="text/javascript" src="/static/lib/utf.js"></script>
 {% end %}
 {% block body %}
-<div class="col-md-12">&nbsp;</div>
+<h3>Hex转换器</h3>
 <div class="col-md-6">
     <textarea id="input" class="col-md-12" rows=10></textarea>
 </div>
@@ -71,6 +71,7 @@ function byteToHex2(byteVal) {
 
 function safeWrapper(func) {
     try {
+        $("#error").text("");
         return func();
     } catch (e) {
         $("#error").text(e);

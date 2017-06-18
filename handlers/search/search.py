@@ -184,10 +184,11 @@ load_mapping(r"(.*)",                   "handlers.search.pydoc.search")
 load_mapping(r"([^ ]*)",                "handlers.search.translate.search")
 load_mapping(r"([^ ]*)",                "handlers.search.tools.search")
 load_mapping(r"([^ ]*)",                "handlers.search.scripts.search")
-load_mapping(r"(.*)",                   "handlers.search.file.search")
+load_mapping(r"([^ ]*)",                "handlers.search.tasks.search")
 load_mapping(r"(\d+)分钟后提醒我?(.*)", "handlers.search.reminder.search")
 load_mapping(r"静音(.*)",               "handlers.search.mute.search")
 load_mapping(r"取消静音",               "handlers.search.mute.cancel")
+load_mapping(r"(.*)",                   "handlers.search.file.search")
 
 xurls = (r"/search/search", handler, r"/search", handler)
 
