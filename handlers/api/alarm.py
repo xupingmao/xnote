@@ -8,8 +8,6 @@ import time
 import xutils
 
 class handler:
-    
-
     def GET(self, msg):
         msg = xutils.unquote(msg)
         for i in range(3):
@@ -17,4 +15,7 @@ class handler:
             time.sleep(5)
         return dict(code="success")
 
-xurls = (r"/tasks/alert/(.*)", handler)
+xurls = (
+    r"/api/alarm/(.*)", handler,
+    r"/api/alert/(.*)", handler
+)
