@@ -54,39 +54,49 @@ class handler:
 
     def encode_filelist(self, path):
         filelist = getfilelist(path)
+        # namefile = os.path.join(path, "xnote-index.json")
 
-        namefile = os.path.join(path, "xnote-index.json")
-
-        if os.path.exists(namefile):
+        # if os.path.exists(namefile):
             # 防止重复加密导致信息丢失
-            bakname = "xnote-index-%s.json" % time.strftime("%Y_%m_%d_%H_%M_%S")
-            os.rename(namefile, os.path.join(path, bakname))
+            # bakname = "xnote-index-%s.json" % time.strftime("%Y_%m_%d_%H_%M_%S")
+            # os.rename(namefile, os.path.join(path, bakname))
 
         rename_dict = {}
         for index, file in enumerate(filelist):
-            newname = "%03d" % index
-            if file.name.endswith(".json"):
+            if file.type == "dir":
                 continue
+            if file.name.endswith(".xenc"):
+                continue
+            newname = base64.urlsafe_b64encode(file.name.encode("utf-8")).decode("utf-8") + ".xenc"
             newpath = os.path.join(path, newname)
             os.rename(file.path, newpath)
-            rename_dict[newname] = base64.b64encode(file.name.encode("utf-8")).decode("utf-8")
-        text = json.dumps(rename_dict)
-        namefile = os.path.join(path, "xnote-index.json")
-        xutils.savetofile(namefile, text)
+        #     if file.name.endswith(".json"):
+        #         continue
+        #     newpath = os.path.join(path, newname)
+        #     os.rename(file.path, newpath)
+        #     rename_dict[newname] = base64.b64encode(file.name.encode("utf-8")).decode("utf-8")
+        # text = json.dumps(rename_dict)
+        # namefile = os.path.join(path, "xnote-index.json")
+        # xutils.savetofile(namefile, text)
 
     def decode_filelist(self, path):
-        namefile = os.path.join(path, "xnote-index.json")
-        text = xutils.readfile(namefile)
-        rename_dict = json.loads(text)
+        # namefile = os.path.join(path, "xnote-index.json")
+        # text = xutils.readfile(namefile)
+        # rename_dict = json.loads(text)
+        # for key in rename_dict:
+        #     newname = rename_dict[key]
+        #     newname = base64.b64decode(newname.encode("utf-8")).decode("utf-8")
+        #     print(newname)
 
         filelist = getfilelist(path)
         for index, file in enumerate(filelist):
-            if file.name.endswith(".json"):
+            if file.type == "dir":
                 continue
-            if file.name not in rename_dict:
+            if not file.name.endswith(".xenc"):
                 continue
-            newname = rename_dict[file.name]
-            newname = base64.b64decode(newname.encode("utf-8")).decode("utf-8")
+            name = file.name[:-5]
+            newname = base64.urlsafe_b64decode(name.encode("utf-8")).decode("utf-8")
+            # print(newname)
             newpath = os.path.join(path, newname)
             os.rename(file.path, newpath)
 

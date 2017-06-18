@@ -55,7 +55,7 @@ xnote
 |   |-- system/  # 系统功能目录
 |   |-- file/   # 资料目录
 |   |-- tools/   # 工具目录
-|   |-- tasks/   # 定时任务
+|   |-- api/    # 系统接口，返回JSON格式，供页面、定时任务、搜索调用
 |   |-- ...     # 其他目录
 |-- tests/       # 测试用例
 |-- app.py      # 程序入口
@@ -69,27 +69,26 @@ xnote
 
 ```
 
+### 扩展
 
-## 功能结构
-
-- 自动搜索`handlers`目录下的Python文件中的handler，可以通过继承约定或者设置`xurls`属性来配置路由，下面是一个例子
+在handlers目录下添加python程序，比如test.py
 
 ```py
-# 最简单的handler
 class handler:    
     def GET(self):
         return "success"
-
+# 如果配置了xurls全局变量，xnote会注册指定的url pattern否则按照相对handlers的路径注册
 xurls = ("/test", handler)
-# 放在handlers目录下面，然后访问浏览器localhost:1234/test就会看到success
+# 启动xnote，访问浏览器localhost:1234/test就会看到success
 ```
 
-- `handlers/tasks`是定时任务, 需要在任务管理功能中增加服务地址，设置执行周期，如下图（分别是备份和系统监控的定时任务)
 
-![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/static/img/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE.PNG)
+## 功能结构
 
-- `handlers/tools`目录下是开发工具，可以通过搜索功能定位
-- `$DATA_DIR/scripts/`目录下是系统脚本,直接与操作系统交互
+### 文档管理
+- Markdown编辑器
+- 文档标签
+- 搜索
 
 ### 搜索
 - 笔记搜索
@@ -97,6 +96,7 @@ xurls = ("/test", handler)
 - 翻译（由于版权问题，数据库未上传）
 - 计算简单的数学公式
 - 添加语音提醒，比如 {30|数字}分钟后提醒我{读书},那么30分钟后就会听到电脑姐姐的温馨提醒了^_^
+
 
 ### 集成的工具
 - 文件浏览器
@@ -106,6 +106,15 @@ xurls = ("/test", handler)
 - 代码模板(code\_template)
 - 语音播报
 - 天气信息抓取(中国天气网数据)
+
+
+### 定时任务
+- 通过配置页面设置要调用的URL和时间匹配规则即可
+
+![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/static/img/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE.PNG)
+
+- `handlers/tools`目录下是开发工具，可以通过搜索功能定位
+- `$DATA_DIR/scripts/`目录下是系统脚本,直接与操作系统交互
 
 ### 其他
 - debug模式下自动侦测文件修改并重新加载

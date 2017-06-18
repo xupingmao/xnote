@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
+# Copyright (c) 2017
 # 
-
 """Description here"""
 
 import os
