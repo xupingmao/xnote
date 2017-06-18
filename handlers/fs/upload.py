@@ -2,6 +2,7 @@
 
 import os
 import web
+import xconfig
 import xutils
 from xutils import quote
 
@@ -26,7 +27,42 @@ class UploadHandler:
 
 class RangeUploadHandler:
 
-    def POST(self):
-        pass
+    def merge_files(self, dirname, filename, chunks):
+        dest_path = os.path.join(dirname, filename)
+        with open(dest_path, "wb") as fp:
+            for chunk in range(chunks):
+                tmp_path = os.path.join(dirname, filename)
+                tmp_path = "%s_%d.part" % (tmp_path, chunk)
+                if not os.path.exists(tmp_path):
+                    raise Exception("upload file broken")
+                with open(tmp_path, "rb") as tmp_fp:
+                    fp.write(tmp_fp.read())
+                xutils.remove(tmp_path)
 
-xurls = ("/fs_upload", UploadHandler, "/fs/upload/range", RangeUploadHandler)
+
+    def POST(self):
+        # xutils.print_web_ctx_env()
+        chunk = xutils.get_argument("chunk", 0, type=int)
+        chunks = xutils.get_argument("chunks", 1, type=int)
+        file = xutils.get_argument("file", {})
+        dirname = xutils.get_argument("dirname", xconfig.DATA_DIR)
+        print(file.__dict__)
+        print("%d/%d" % (chunk, chunks))
+        if hasattr(file, "filename"):
+            # print(" - - %-20s = %s" % ("filename", file.filename))
+            tmp_name = "%s_%d.part" % (file.filename, chunk)
+            tmp_path = os.path.join(dirname, tmp_name)
+            with open(tmp_path, "wb") as fp:
+                for file_chunk in file.file:
+                    fp.write(file_chunk)
+        else:
+            return dict(code="fail", message="require file")
+        if chunk+1==chunks:
+            self.merge_files(dirname, file.filename, chunks)
+        return dict(code="success")
+
+xurls = (
+    # 和文件系统的/fs/冲突了
+    r"/fs_upload", UploadHandler, 
+    r"/fs_upload/range", RangeUploadHandler
+)

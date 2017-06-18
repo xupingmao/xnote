@@ -109,6 +109,12 @@ def backup_data():
         "dictionary.db", "app", "backup", "tmp", "log"])
 
 
+def backup_files():
+    dirname = xconfig.DATA_DIR
+    dest_path = os.path.join(dirname, "files.zip")
+    dirname2 = os.path.join(dirname, "files")
+    xutils.zip_dir(dirname2, dest_path)
+
 class handler:
     def GET(self):
         op = web.input(op=None).op
@@ -118,9 +124,12 @@ class handler:
             backup_code()
         elif op == "backup_data":
             backup_data()
+        elif op == "files":
+            backup_files()
         else:
             infolist = []
             infolist.append(FileInfo("代码", xconfig.CODE_ZIP, "backup_code"))
             infolist.append(FileInfo("数据", xconfig.DATA_ZIP, "backup_data"))
+            infolist.append(FileInfo("资源文件", os.path.join(xconfig.DATA_DIR, "files.zip"), "files"))
             return xtemplate.render_text(html, infolist=infolist)
         raise web.seeother("/system/backup_info")

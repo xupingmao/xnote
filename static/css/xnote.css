@@ -414,7 +414,12 @@ li.menu-item:hover {
 /** file-list样式 END **/
 
 .green-text {
-    color: #0f0;
+    color: green;
+}
+
+.green-bg {
+    color: #fff;
+    background-color: green;
 }
 
 .red-text {

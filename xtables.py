@@ -3,7 +3,7 @@
 # 
 
 """Xnote的数据库配置"""
-
+import os
 import sqlite3
 import xconfig
 import web.db as db
@@ -184,9 +184,11 @@ def init_table_log():
 def init_table_user():
     # 2017/05/21
     manager = TableManager(config.DB_PATH, "user")
-    manager.add_column("name",     "text", "")
-    manager.add_column("password", "text", "")
-    manager.add_column("ctime",    "text", "")
+    manager.add_column("name",       "text", "")
+    manager.add_column("password",   "text", "")
+    # 额外的访问权限
+    manager.add_column("privileges", "text", "")
+    manager.add_column("ctime",      "text", "")
     manager.close()
 
 def init_table_message():
@@ -195,6 +197,17 @@ def init_table_message():
     manager.add_column("ctime", "text", "")
     manager.add_column("user",  "text", "")
     manager.add_column("content", "text", "")
+    manager.close()
+
+def init_table_record():
+    # 日志库和主库隔离开
+    dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
+    manager = TableManager(dbpath, "record")
+    manager.add_column("ctime", "text", "")
+    manager.add_column("type",  "text", "")
+    # 自己把所有条件都组装到key里
+    manager.add_column("key",  "text", "")
+    manager.add_column("value", "text", "")
     manager.close()
 
 class DBWrapper:
@@ -234,6 +247,10 @@ def get_user_table():
 def get_message_table():
     return DBWrapper(config.DB_PATH, "message")
 
+def get_record_table():
+    dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
+    return DBWrapper(dbpath, "record")
+
 
 def init():
     # init_test_db()
@@ -242,6 +259,7 @@ def init():
     init_table_tag()
     init_table_schedule()
     init_table_message()
+    init_table_record()
 
 
 
