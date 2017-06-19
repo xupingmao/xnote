@@ -46,11 +46,13 @@ class RangeUploadHandler:
         chunks = xutils.get_argument("chunks", 1, type=int)
         file = xutils.get_argument("file", {})
         dirname = xutils.get_argument("dirname", xconfig.DATA_DIR)
-        print(file.__dict__)
-        print("%d/%d" % (chunk, chunks))
+        # print(file.__dict__)
+        # print("%d/%d" % (chunk, chunks))
+        filename = None
         if hasattr(file, "filename"):
             # print(" - - %-20s = %s" % ("filename", file.filename))
-            tmp_name = "%s_%d.part" % (file.filename, chunk)
+            filename = xutils.quote(file.filename)
+            tmp_name = "%s_%d.part" % (filename, chunk)
             tmp_path = os.path.join(dirname, tmp_name)
             with open(tmp_path, "wb") as fp:
                 for file_chunk in file.file:
@@ -58,7 +60,7 @@ class RangeUploadHandler:
         else:
             return dict(code="fail", message="require file")
         if chunk+1==chunks:
-            self.merge_files(dirname, file.filename, chunks)
+            self.merge_files(dirname, filename, chunks)
         return dict(code="success")
 
 xurls = (

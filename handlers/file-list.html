@@ -197,7 +197,10 @@
             console.log(e);
             var href = $(e.target).attr("href");
             $.get(href, function (responseText) {
-                $("#execute-result").text(responseText);
+                console.log(responseText);
+                var obj = JSON.parse(responseText);
+                console.log(obj)
+                $("#execute-result").text(JSON.stringify(obj));
             });
         })
     </script>

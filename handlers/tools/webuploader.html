@@ -4,6 +4,14 @@
 
     <link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
     <script type="text/javascript" src="/static/lib/webuploader/webuploader-0.1.5.min.js"></script>
+<style type="text/css">
+    .progress {
+        background-color: white;
+    }
+    .progress span {
+        background-color: green;
+    }
+</style>
 {% end %}
 
 {% block body %}
@@ -37,7 +45,7 @@ var uploader = WebUploader.create({
     chunked: true,
     // 默认5M
     // chunkSize: 1024 * 1024 * 5,
-    chunkSize: 1024 * 1024 * 1,
+    chunkSize: 1024 * 1024 * 2,
     // 重试次数
     chunkRetry: 10,
     // 文件上传域的name
