@@ -6,21 +6,25 @@
     <script type="text/javascript" src="/static/lib/webuploader/webuploader-0.1.5.min.js"></script>
 <style type="text/css">
     .progress {
-        background-color: white;
+        background-color: #ffcccc;
+        height: 20px;
     }
     .progress span {
+        display: block;
         background-color: green;
+        color: #fff;
+        height: 100%;
     }
 </style>
 {% end %}
 
 {% block body %}
-<h3>Web Uploader示例</h3>
+<h3>大文件上传</h3>
 <!--dom结构部分-->
 <div id="uploader-demo">
     <!--用来存放item-->
     <div id="fileList" class="uploader-list"></div>
-    <div id="filePicker">选择图片</div>
+    <div id="filePicker">选择文件</div>
 </div>
 
 <script type="text/javascript">
@@ -105,6 +109,7 @@ uploader.on( 'uploadProgress', function( file, percentage ) {
     }
 
     $percent.css( 'width', percentage * 100 + '%' );
+    $percent.text( (percentage * 100).toFixed(2) + '%');
 });
 
 uploader.on( 'uploadBeforeSend', function (object, data, headers) {
