@@ -33,5 +33,6 @@ def search(name):
             result = SearchResult()
             result.name = "系统接口 - " + task_name
             result.command = "/api/%s" % task_command
+            result.url = result.command
             results.append(result)
     return results
