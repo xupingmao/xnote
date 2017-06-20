@@ -1,8 +1,62 @@
 {% extends base.html %}
 
+{% block head %}
+
+<style type="text/css">
+    #log {
+        width: 100%;
+        height: 280px;
+        background-color: #99cccc;
+    }
+    .line {
+        color: #fff;
+    }
+</style>
+{% end %}
+
 {% block body %}
 
+<h3>语音识别</h3>
+<div id="log">
+
+</div>
+
 <script type="text/javascript">
+
+Date.prototype.format = function(fmt) {         
+    var o = {         
+    "M+" : this.getMonth()+1, //月份         
+    "d+" : this.getDate(), //日         
+    "h+" : this.getHours()%12 == 0 ? 12 : this.getHours()%12, //小时         
+    "H+" : this.getHours(), //小时         
+    "m+" : this.getMinutes(), //分         
+    "s+" : this.getSeconds(), //秒         
+    "q+" : Math.floor((this.getMonth()+3)/3), //季度         
+    "S" : this.getMilliseconds() //毫秒         
+    };         
+    var week = {         
+    "0" : "/u65e5",         
+    "1" : "/u4e00",         
+    "2" : "/u4e8c",         
+    "3" : "/u4e09",         
+    "4" : "/u56db",         
+    "5" : "/u4e94",         
+    "6" : "/u516d"        
+    };         
+    if(/(y+)/.test(fmt)){         
+        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));         
+    }         
+    if(/(E+)/.test(fmt)){         
+        fmt=fmt.replace(RegExp.$1, ((RegExp.$1.length>1) ? (RegExp.$1.length>2 ? "/u661f/u671f" : "/u5468") : "")+week[this.getDay()+""]);         
+    }         
+    for(var k in o){         
+        if(new RegExp("("+ k +")").test(fmt)){         
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));         
+        }         
+    }         
+    return fmt;         
+}   
+
 if (typeof webkitSpeechRecognition == "function") {
     window.SpeechRecognition = webkitSpeechRecognition;
     window.SpeechGrammarList = webkitSpeechGrammarList;
@@ -20,8 +74,30 @@ if (typeof SpeechRecognition == "function") {
 
     recognition.start();
     console.log("started");
+
+    function restart() {
+        recognition.start();
+    }
     recognition.onresult = function (event) {
         console.log(event);
+        var results = event.results;
+        if (results.length > 0) {
+            var word = results[0][0].transcript;
+            console.log("[Speak] " + word);
+
+            var logInfo = (new Date()).format("HH:mm:ss") + " " + word;
+            $("#log").append($("<p>")
+                .addClass("line")
+                    .text(logInfo));
+        }
+        // recognition.start();
+        // event.target.start();
+        // setTimeout(restart, 500);
+    }
+
+    recognition.onend = function (event) {
+        console.log(event);
+        setTimeout(restart, 500);
     }
 } else {
     alert("不支持语音识别 SpeechRecognition ")
