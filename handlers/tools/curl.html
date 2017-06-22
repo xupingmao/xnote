@@ -1,0 +1,39 @@
+{% extends base.html %}
+
+{% block body %}
+
+{% init url = "" %}
+{% init body = "" %}
+
+<h3>Curl</h3>
+
+<form method="GET">
+
+<div>
+<div class="col-md-12">URL</div>
+<textarea name="url" rows=1 class="col-md-10" >{{url}}</textarea>
+<select name="method">
+    <option vlaue="POST">POST</option>
+    <option value="GET">GET</option>
+</select>
+<select name="content_type">
+    <option value="application/json">JSON</option>
+</select>
+</div>
+
+<div>
+<div class="col-md-12">Cookie</div>
+<textarea name="cookie" class="col-md-12" rows=5>{{cookie}}</textarea>
+</div>
+
+<div>
+<div class="col-md-12">Body</div>
+<textarea name="body" class="col-md-12" rows=20>{{body}}</textarea>
+</div>
+<button>查询</button>
+</form>
+
+<pre>
+    {{response}}
+</pre>
+{% end %}

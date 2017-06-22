@@ -14,6 +14,9 @@ from urllib.request import DataHandler, OpenerDirector, install_opener
 
 from http.client import HTTPConnection
 
+import xutils
+import xtemplate
+
 _opener = None
 
 def build_opener(*handlers):
@@ -78,10 +81,10 @@ def urlopen(url, data=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
         opener = _opener
     return opener.open(url, data, timeout)
 
-def do_http(method, addr, url, headers):
+def do_http(method, addr, url, headers, data):
     print(addr, url)
     cl = HTTPConnection(addr)
-    cl.request(method, url, None, headers = headers)
+    cl.request(method, url, data, headers = headers)
     head = None
     with cl.getresponse() as resp:
         # try:
@@ -125,16 +128,28 @@ def putheader(headers, header_name, wsgi_name):
 
 def get_host(url):
     # TODO 处理端口号
-    return re.findall(r"https?://([^\s\?]+)", url)[0]
+    return re.findall(r"https?://([^\s\?/]+)", url)[0]
 
 class handler:
 
     def GET(self):
         # url = web.ctx.environ["REQUEST_URI"]
-        url = web.input().url
+        url = xutils.get_argument("url")
+        body = xutils.get_argument("body")
+        method = xutils.get_argument("method")
+        content_type = xutils.get_argument("content_type")
+        cookie = xutils.get_argument("cookie") or ""
+
+        # print(url, body)
+
+        if url is None:
+            return xtemplate.render("tools/curl.html")
+
+
+        # return xtemplate.render("tools/curl.html", url=url, body=body)
         # print(web.ctx)
         # print(web.ctx.environ)
-        method = web.ctx.method
+        # method = web.ctx.method
         # host   = web.ctx.host
 
         host = get_host(url)
@@ -154,17 +169,22 @@ class handler:
         headers["Host"] = host
         headers["Connection"]   = "Keep-Alive"
         headers["Cache-Control"] = "max-age=0"
+        headers["Content-Type"] = content_type
+        headers["Cookie"] = cookie
+        print(cookie)
     
         putheader(headers, "User-Agent", "HTTP_USER_AGENT")        
         putheader(headers, "Accept", "HTTP_ACCEPT")
         putheader(headers, "Accept-Encoding", "HTTP_ACCEPT_ENCODING")
         putheader(headers, "Accept-Language", "HTTP_ACCEPT_LANGUAGE")
-        putheader(headers, "Cookie", "HTTP_COOKIE")
+        # putheader(headers, "Cookie", "HTTP_COOKIE")
 
-        web.header("Content-Type", "text/html")
+        # web.header("Content-Type", content_type)
         req = Request(url, headers = headers)
         # return urlopen(url).read()
-        return do_http(method, host, url, headers)
+        response = b''.join(do_http(method, host, url, headers, data=body))
+
+        return xtemplate.render("tools/curl.html", url=url, method=method, body=body, response=response, cookie=cookie)
         # return urlopen(req).read()
         # for key in headers:
         #     print("%s = %s" % (key, headers[key]))
