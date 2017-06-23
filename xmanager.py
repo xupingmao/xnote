@@ -259,16 +259,6 @@ class ModelManager:
         if self.report_loading:
             log("Load mapping (%s, %s)" % (url, handler))
 
-    def add_search_key(self, url, key):
-        self.search_dict[key] = url
-
-    def search(self, words):
-        result = []
-        for m in self.model_list:
-            if textutil.contains(m.searchkey, words):
-                result.append(Storage(name=m.name, url=m.url, description = m.description))
-        return result
-
     def run_task(self):
         self.task_manager.run_task()
 
@@ -357,43 +347,11 @@ class TaskManager:
         
     def load_tasks(self):
         schedule = xtables.get_schedule_table()
-        tasks = schedule.select(order="ctime DESC")
+        tasks = schedule.select(order="url")
         self.task_list = list(tasks)
-
-        # users = {}
-        # path = "config/tasks.ini"
-        # if not os.path.exists(path):
-        #     return users
-        # cf = ConfigParser()
-        # cf.read(path, encoding="utf-8")
-        # for section in cf.sections():
-        #     url = cf.get(section, "url")
-        #     interval = cf.get(section, "interval")
-        #     self._add_task(url, interval)
             
     def save_tasks(self):
         self.load_tasks()
-        # schedule = xtables.get_schedule_table()
-        # for name in self.task_dict:
-        #     task = self.task_dict[name]
-        #     rows = schedule.select(where=dict(url=task.url))
-        #     if rows.first() is None:
-        #         schedule.insert(url=task.url, interval=task.interval, ctime=xutils.format_time(), mtime=xutils.format_time())
-        #     else:
-        #         schedule.update(where="url=$url", vars=dict(url=task.url), interval=task.interval, mtime=xutils.format_time())
-
-
-        """保存到配置文件"""
-        # cf = ConfigParser()
-        # for index, name in enumerate(sorted(self.task_dict)):
-        #     task = self.task_dict[name]
-        #     section = "task" + str(index)
-        #     cf.add_section(section)
-        #     cf.set(section, "url", task.url)
-        #     cf.set(section, "interval", str(task.interval))
-            
-        # with open("config/tasks.ini", "w") as fp:
-        #     cf.write(fp)
         
     def get_task_list(self):
         return copy.deepcopy(self.task_list)

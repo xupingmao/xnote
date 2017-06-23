@@ -204,6 +204,8 @@ def init_table_record():
     dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
     manager = TableManager(dbpath, "record")
     manager.add_column("ctime", "text", "")
+    # 添加单独的日期，方便统计用，尽量减少SQL函数的使用
+    manager.add_column("cdate", "text", "")
     manager.add_column("type",  "text", "")
     # 自己把所有条件都组装到key里
     manager.add_column("key",  "text", "")

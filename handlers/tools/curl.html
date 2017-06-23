@@ -13,8 +13,8 @@
 <div class="col-md-12">URL</div>
 <textarea name="url" rows=1 class="col-md-10" >{{url}}</textarea>
 <select name="method">
-    <option vlaue="POST">POST</option>
-    <option value="GET">GET</option>
+    {% if method == "POST" %} <option vlaue="POST">POST</option>
+    {% elif method == "GET" %} <option value="GET">GET</option> {% end %}
 </select>
 <select name="content_type">
     <option value="application/json">JSON</option>
@@ -27,7 +27,7 @@
 </div>
 
 <div>
-<div class="col-md-12">Body</div>
+<div class="col-md-12">Data</div>
 <textarea name="body" class="col-md-12" rows=20>{{body}}</textarea>
 </div>
 <button>查询</button>
