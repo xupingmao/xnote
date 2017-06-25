@@ -120,6 +120,10 @@ class TestMain(unittest.TestCase):
         self.check_200("/search?key=测试")
         self.check_200("/search/search?key=测试")
 
+    def test_http_headers(self):
+        data = app.request("/api/http_headers", headers=dict(X_TEST=True)).data
+        self.assertEqual(True, b"HTTP_X_TEST" in data)
+
 
 
 
