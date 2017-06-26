@@ -4,15 +4,20 @@
 
 """Description here"""
 
+import re
 import time
 import xconfig
 import xutils
 
-def search(muteLast):
-    if muteLast == "":
-        last = 3
+def search(mute_last):
+    if mute_last == "":
+        last = 3 * 60
+    elif mute_last.endswith("小时"):
+        pattern = r"(\d+)"
+        match = re.match(pattern, mute_last).group(0)
+        last = int(match) * 60
 
-    xconfig.MUTE_END_TIME = time.time() + last * 60 * 60
+    xconfig.MUTE_END_TIME = time.time() + last * 60
     result = xutils.SearchResult()
     result.name = "命令 - 静音"
     result.raw  = "静音到 %s" % xutils.format_time(xconfig.MUTE_END_TIME)
