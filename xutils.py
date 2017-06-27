@@ -11,6 +11,7 @@ import os
 import traceback
 import sqlite3
 import json
+import base64
 import time
 import platform
 import re
@@ -300,6 +301,12 @@ def html_escape(s, quote=True):
         s = s.replace('"', "&quot;")
         s = s.replace('\'', "&#x27;")
     return s
+
+def urlsafe_b64encode(text):
+    return base64.urlsafe_b64encode(text.encode("utf-8")).decode("utf-8")
+
+def urlsafe_b64decode(text):
+    return base64.urlsafe_b64decode(text.encode("utf-8")).decode("utf-8")
 
 def quote_unicode(url):
     def quote_char(c):
