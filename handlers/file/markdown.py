@@ -44,6 +44,10 @@ class handler(BaseHandler):
         user_name = xauth.get_current_user()["name"]
         can_edit = (file.creator == user_name) or (user_name == "admin")
 
+        role = xauth.get_current_role()
+        if role != "admin" and file.groups != '*' and file.groups != role:
+            raise web.seeother("/unauthorized")
+
         self.render("file/view.html",
             file=file, 
             file_type = "md",

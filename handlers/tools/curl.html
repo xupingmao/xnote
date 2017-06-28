@@ -4,36 +4,44 @@
 
 {% init url = "" %}
 {% init body = "" %}
+{% init method = "GET" %}
+{% init cookie = "" %}
+{% init response = "" %}
 
-<h3>Curl</h3>
+<h2>cURL模拟器</h2>
 
 <form method="GET">
 
-<div>
-<div class="col-md-12">URL</div>
+<div class="col-md-12">
+<h3>URL</h3>
 <textarea name="url" rows=1 class="col-md-10" >{{url}}</textarea>
 <select name="method">
-    {% if method == "POST" %} <option vlaue="POST">POST</option>
-    {% elif method == "GET" %} <option value="GET">GET</option> {% end %}
+    <option vlaue="POST" {% if method == "POST" %} selected="true" {% end %} >POST</option>
+    <option value="GET" {% if method == "GET" %} selected="true" {% end %}>GET</option>
 </select>
 <select name="content_type">
     <option value="application/json">JSON</option>
+    <option value="application/x-www-form-urlencoded">urlencoded</option>
 </select>
 </div>
 
-<div>
-<div class="col-md-12">Cookie</div>
+<div class="col-md-12">
+<h3>Cookie</h3>
 <textarea name="cookie" class="col-md-12" rows=5>{{cookie}}</textarea>
 </div>
 
-<div>
-<div class="col-md-12">Data</div>
-<textarea name="body" class="col-md-12" rows=20>{{body}}</textarea>
+<div class="col-md-12">
+<h3>Data</h3>
+<textarea name="body" class="col-md-12" rows=10>{{body}}</textarea>
 </div>
 <button>查询</button>
 </form>
 
-<pre>
-    {{response}}
-</pre>
+<h3>Response</h3>
+<textarea class="col-md-12" rows=10>{{response}}</textarea>
+
+<h3>Response Headers</h3>
+<pre>{% for header in response_headers %}{{":".join(header)}}
+{%end%}</pre>
+
 {% end %}

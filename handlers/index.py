@@ -19,5 +19,20 @@ class Home:
         # return xtemplate.render("home.html")
         raise web.seeother("/file/recent_edit")
 
-xurls = ("/", Home, "/index", handler)
+class Unauthorized():
+    html = """
+{% extends base.html %}
+{% block body %}
+    <h3>抱歉,您没有访问的权限</h3>
+{% end %}
+    """
+    def GET(self):
+        web.ctx.status = "401 Unauthorized"
+        return xtemplate.render_text(self.html)
+
+xurls = (
+    r"/", Home, 
+    r"/index", handler,
+    r"/unauthorized", Unauthorized
+)
 

@@ -65,7 +65,10 @@ def get_user_password(name):
 def get_current_user():
     if xconfig.IS_TEST:
         return get_user("admin")
-    return get_user(web.cookies().get("xuser"))
+    xuser = web.cookies().get("xuser")
+    if xuser is None:
+        return None
+    return get_user(xuser)
 
 def get_current_role():
     """获取当前用户的角色"""
@@ -124,8 +127,15 @@ def is_admin():
     return config.IS_TEST or has_login("admin")
 
 def check_login(user_name=None):
-    if not has_login(user_name):
-        raise web.seeother("/unauthorized")
+    user = get_current_user()
+    if user_name is None:
+        if user is None:
+            raise web.seeother("/login")
+    else:
+        if user is None:
+            raise web.seeother("/login")
+        elif user["name"] != "admin" and user["name"] != user_name:
+            raise web.seeother("/unauthorized")
 
 def login_required(user_name=None):
     """管理员验证装饰器"""

@@ -6,6 +6,7 @@
 {% if doc_info is not None %}
     <h2>模块: {{doc_info.name}}</h2>
 
+    <p>位于 <a href="/code/view_source?path={{doc_info.file}}">{{doc_info.file}}</a></p>
     <pre>{{doc_info.doc}}</pre>
 
     <h2>方法</h2>

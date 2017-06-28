@@ -15,6 +15,9 @@ class DocInfo:
         self.mod = mod
         self.functions = functions
         self.doc = mod.__doc__
+        self.file = ""
+        if hasattr(mod, "__file__"):
+            self.file = mod.__file__
 
         attr_dict = mod.__dict__
         for attr in sorted(attr_dict):

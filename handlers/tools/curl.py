@@ -6,6 +6,8 @@ from collections import OrderedDict
 import http.client
 import socket, ssl
 import re
+import io
+import gzip
 
 from urllib.request import Request, build_opener, HTTPSHandler, UnknownHandler
 from urllib.request import HTTPHandler, HTTPDefaultErrorHandler, HTTPRedirectHandler
@@ -18,6 +20,14 @@ import xutils
 import xtemplate
 
 _opener = None
+
+def splithost(url):
+    """splithost('//host[:port]/path') --> 'host[:port]', '/path'."""
+    pattern = re.compile('^(http:|https:)?//([^/?]*)(.*)$')
+    match = pattern.match(url)
+    if match: return match.group(2, 3)
+    return None, url
+
 
 def build_opener(*handlers):
     """Create an opener object from a list of handlers.
@@ -55,6 +65,7 @@ def build_opener(*handlers):
         opener.add_handler(h)
     return opener
 
+# 从urllib.request中拷贝而来
 def urlopen(url, data=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
             *, cafile=None, capath=None, cadefault=False, context=None):
     global _opener
@@ -81,50 +92,33 @@ def urlopen(url, data=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
         opener = _opener
     return opener.open(url, data, timeout)
 
-def do_http(method, addr, url, headers, data):
-    print(addr, url)
-    cl = HTTPConnection(addr)
-    cl.request(method, url, data, headers = headers)
-    head = None
-    with cl.getresponse() as resp:
-        # try:
-        #     print(resp.decode("utf-8"))
-        # except:
-        #     print(resp.decode("gbk"))
-        # finally:
-        #     print(resp)
-        if head:
-            head = resp.read(1024*8)
-            index = head.find("\r\n\r\n")
-            yield head[index+4:]
-        else:
-            yield resp.read(1024)
+
+def proxy(method, fullurl, data="", headers=None):
+    host, url = splithost(fullurl)
+    con = HTTPConnection(host, timeout=10)
+    try:
+        # HTTPConnection.request(method, url[, body[, headers]])
+        headers = {}
+        headers["Content-Type"] = "text/html"
+        headers["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36"
+        headers["Content-Length"] = len(data)
+
+        headers.update(headers)
+        # 设置Cookie
+        # headers["Set-Cookie"] = ""
+        con.request(method, url, data, headers)
+        resp = con.getresponse()
+        # byte buffer
+        result = resp.read()
+        return result
+    except Exception as e:
+        raise e
+    finally:
+        con.close()
 
 def putheader(headers, header_name, wsgi_name):
     if wsgi_name in web.ctx.environ:
         headers[header_name] = web.ctx.environ[wsgi_name]
-
-# from web.wsgiserver import wsgiserver
-
-# def proxy_app(environ, start_response):
-#     status = '200 OK'
-#     response_headers = [('Content-type','text/plain')]
-#     start_response(status, response_headers)
-#     return ['Hello world!']
-
-
-
-# def start():
-#     global server
-#     if server is not None:
-#         server.stop()
-#     server = wsgiserver.CherryPyWSGIServer(
-#                 ('0.0.0.0', 8070), proxy_app,
-#                 server_name='www.cherrypy.example')
-#     server.start() 
-
-# start()
-
 
 def get_host(url):
     # TODO 处理端口号
@@ -132,7 +126,29 @@ def get_host(url):
 
 class handler:
 
+    # 使用低级API访问HTTP，可以任意设置header，data等
+    # 但是返回结果也需要自己处理
+    def do_http(self, method, addr, url, headers, data):
+        cl = HTTPConnection(addr)
+        cl.request(method, url, data, headers = headers)
+        head = None
+        buf = None
+        with cl.getresponse() as resp:
+            self.response_headers = resp.getheaders()
+            content_type = resp.getheader("Content-Type")
+            content_encoding = resp.getheader("Content-Encoding")
+            buf = resp.read()
+            if content_encoding == "gzip":
+                fileobj = io.BytesIO(buf)
+                gzip_f = gzip.GzipFile(fileobj=fileobj, mode="rb")
+                content = gzip_f.read()
+                return content
+            elif content_encoding != None:
+                raise Exception("暂不支持%s编码" % content_encoding)
+            return buf
+
     def GET(self):
+        self.response_headers = []
         # url = web.ctx.environ["REQUEST_URI"]
         url = xutils.get_argument("url")
         body = xutils.get_argument("body")
@@ -140,38 +156,23 @@ class handler:
         content_type = xutils.get_argument("content_type")
         cookie = xutils.get_argument("cookie") or ""
 
-        # print(url, body)
-
         if url is None:
             return xtemplate.render("tools/curl.html")
 
-
-        # return xtemplate.render("tools/curl.html", url=url, body=body)
-        # print(web.ctx)
-        # print(web.ctx.environ)
-        # method = web.ctx.method
-        # host   = web.ctx.host
+        if not url.startswith("http"):
+            url = "http://" + url
 
         host = get_host(url)
 
         # print(url, method, host)
         # print(web.ctx.environ["HTTP_USER_AGENT"])
         headers = OrderedDict()
-        # return urlopen(url, context = headers)
-        # input("wait")
-        # req = Request(url, None, headers)
-        # opener = build_opener(HTTPSHandler())
-        # bytes = urlopen(req).read()
-        # bytes = opener.open(req)
-        # print(bytes)
-        # print(web.ctx.environ)
-        # headers["Content-Type"] = "application/x-www-form-urlencoded"
-        headers["Host"] = host
-        headers["Connection"]   = "Keep-Alive"
+        headers["Connection"]    = "Keep-Alive"
         headers["Cache-Control"] = "max-age=0"
-        headers["Content-Type"] = content_type
+        headers["Content-Type"]  = content_type
+        headers["Host"]   = host
         headers["Cookie"] = cookie
-        print(cookie)
+        # print(cookie)
     
         putheader(headers, "User-Agent", "HTTP_USER_AGENT")        
         putheader(headers, "Accept", "HTTP_ACCEPT")
@@ -179,16 +180,22 @@ class handler:
         putheader(headers, "Accept-Language", "HTTP_ACCEPT_LANGUAGE")
         # putheader(headers, "Cookie", "HTTP_COOKIE")
 
-        # web.header("Content-Type", content_type)
-        req = Request(url, headers = headers)
-        # return urlopen(url).read()
-        response = b''.join(do_http(method, host, url, headers, data=body))
+        try:
+            # response = b''.join(list(self.do_http(method, host, url, headers, data=body)))
+            buf = self.do_http(method, host, url, headers, data=body)
+            if isinstance(buf, bytes):
+                response = xutils.decode_bytes(buf)
+            else:
+                response = buf
+            # byte 0x8b in position 1 usually signals that the data stream is gzipped
+        except Exception as e:
+            response = str(e)
 
-        return xtemplate.render("tools/curl.html", url=url, method=method, body=body, response=response, cookie=cookie)
-        # return urlopen(req).read()
-        # for key in headers:
-        #     print("%s = %s" % (key, headers[key]))
-        # return do_http(method, host, url, headers)
+        return xtemplate.render("tools/curl.html", url=url, 
+            method=method, body=body, 
+            response=response, cookie=cookie,
+            response_headers = self.response_headers)
+
 
 if __name__ == '__main__':
     main()

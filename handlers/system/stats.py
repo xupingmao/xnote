@@ -6,6 +6,10 @@ import xutils
 
 def save_ip(real_ip):
     if real_ip is not None:
+        # 跳过内网
+        # A类和C类
+        if real_ip.startswith("10.") or real_ip.startswith("192.168"):
+            return
         db = xtables.get_record_table()
         record = db.select_one(where=dict(type="ip", key=real_ip, cdate=xutils.format_date()))
         if record is None:
