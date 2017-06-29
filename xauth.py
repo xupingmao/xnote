@@ -68,7 +68,9 @@ def get_current_user():
     xuser = web.cookies().get("xuser")
     if xuser is None:
         return None
-    return get_user(xuser)
+    if has_login(xuser):
+        return get_user(xuser)
+    return None
 
 def get_current_role():
     """获取当前用户的角色"""
@@ -127,15 +129,11 @@ def is_admin():
     return config.IS_TEST or has_login("admin")
 
 def check_login(user_name=None):
-    user = get_current_user()
-    if user_name is None:
-        if user is None:
-            raise web.seeother("/login")
-    else:
-        if user is None:
-            raise web.seeother("/login")
-        elif user["name"] != "admin" and user["name"] != user_name:
-            raise web.seeother("/unauthorized")
+    if has_login(user_name):
+        return
+    elif has_login():
+        raise web.seeother("/unauthorized")
+    raise web.seeother("/login")
 
 def login_required(user_name=None):
     """管理员验证装饰器"""
