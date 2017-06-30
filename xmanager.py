@@ -10,6 +10,10 @@ import copy
 import json
 from threading import Thread, Timer
 from queue import Queue
+try:
+    import cProfile as profile
+except ImportError:
+    import profile
 
 import web
 import xconfig
@@ -18,7 +22,6 @@ import xtables
 import xutils
 
 from util import textutil
-from xutils import ConfigParser
 from xutils import Storage
 
 config = xconfig
@@ -45,7 +48,13 @@ def wrapped_handler(handler_clz):
             self.target = handler_clz()
 
         def GET(self, *args):
-            return wrapper_result(self.target.GET(*args))
+            if xconfig.OPEN_PROFILE:
+                def profile_wrapper(*args):
+                    self.response = wrapper_result(self.target.GET(*args))
+                profile.runctx("profile_wrapper(*args)", globals(), locals())
+                return self.response
+            else:
+                return wrapper_result(self.target.GET(*args))
             
 
         def POST(self, *args):
@@ -140,8 +149,8 @@ class ModelManager:
         self.reload_module("xauth")
         self.reload_module("xutils")
         self.reload_module("xtables")
-        self.mapping = list()
-        self.model_list = list()
+        self.mapping     = []
+        self.model_list  = []
         self.failed_mods = []
         self.load_model_dir(config.HANDLERS_DIR)
         

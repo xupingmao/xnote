@@ -11,6 +11,7 @@ import sqlite3
 
 import web.db as db
 import xconfig
+import xtables
 
 from xutils import readfile, savetofile
 from util import dateutil

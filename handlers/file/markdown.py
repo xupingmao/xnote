@@ -1,5 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2016/12
+import profile
 
 from handlers.base import *
 import xauth

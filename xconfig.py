@@ -34,9 +34,10 @@ CONFIG_DIR  = os.path.join(DATA_DIR, "config")
 
 # 其他标记
 
-IS_ADMIN = False
-# 测试用的flag
+# 测试用的flag,开启会拥有admin权限
 IS_TEST  = False
+# 开启性能分析
+OPEN_PROFILE = False
 # 静音停止时间
 MUTE_END_TIME = None
 
