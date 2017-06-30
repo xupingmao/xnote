@@ -10,10 +10,6 @@ import copy
 import json
 from threading import Thread, Timer
 from queue import Queue
-try:
-    import cProfile as profile
-except ImportError:
-    import profile
 
 import web
 import xconfig
@@ -48,13 +44,14 @@ def wrapped_handler(handler_clz):
             self.target = handler_clz()
 
         def GET(self, *args):
-            if xconfig.OPEN_PROFILE:
-                def profile_wrapper(*args):
-                    self.response = wrapper_result(self.target.GET(*args))
-                profile.runctx("profile_wrapper(*args)", globals(), locals())
-                return self.response
-            else:
-                return wrapper_result(self.target.GET(*args))
+            # if xconfig.OPEN_PROFILE:
+            #     def profile_wrapper(*args):
+            #         self.response = wrapper_result(self.target.GET(*args))
+            #     profile.runctx("profile_wrapper(*args)", globals(), locals())
+            #     return self.response
+            # else:
+            #     return wrapper_result(self.target.GET(*args))
+            return wrapper_result(self.target.GET(*args))
             
 
         def POST(self, *args):
@@ -414,3 +411,7 @@ def reload():
 
 def load_tasks():
     _manager.load_tasks()
+
+def request(*args, **kw):
+    global _manager
+    return _manager.app.request(*args, **kw)
