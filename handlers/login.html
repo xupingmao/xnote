@@ -9,27 +9,30 @@
     		border: none;
     	}
     	input {
-    		width: 100%;
-    		min-width: 200px;
-       	}
-       	input {
-       		padding: 12px 24px;
-       	}
-       	input[type=submit] {
-       		padding: 12px 24px;
-       		border: none;
-       		background-color: lightblue;
-       	}
+  		  width: 100%;
+  		  min-width: 200px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+     	}
+     	input[type=submit] {
+        padding: 12px 24px;
+     		border: none;
+     		background-color: lightblue;
+     	}
     	input[type=submit]:hover {
     		background-color: #27A9E3;
     	}
+      .input-header {
+        padding-top: 3px;
+        size: 14px;
+      }
     </style>
 {% end %}
 
 {% block body %}
     <div style="width:30%; min-width:200px; padding-top:15%; margin:0 auto;">
 		<form method="POST">
-			<input name="username" value="{{username}}" placeholder="Name"/>
+			<input name="username" value="{{username}}" placeholder="Account"/>
 			<input type="password" name="password" value="{{password}}" placeholder="Password"/>
 			<input type="submit" value="Login" style="width:100%;margin-top:20px;"/>
       <label style="width:100%; color:red">{{error}}</label>

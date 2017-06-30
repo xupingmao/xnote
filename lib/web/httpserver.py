@@ -4,6 +4,7 @@ from __future__ import print_function
 import sys, os
 import urllib
 import posixpath
+import time
 
 from . import webapi as web
 from . import net
@@ -312,7 +313,7 @@ class LogMiddleware:
     """WSGI middleware for logging the status."""
     def __init__(self, app):
         self.app = app
-        self.format = '%s - - [%s] "%s %s %s" - %s'
+        self.format = '%s - - [%s] "%s %s %s" - %s %s ms'
     
         f = BytesIO()
         
@@ -324,22 +325,27 @@ class LogMiddleware:
         self.log_date_time_string = BaseHTTPRequestHandler(FakeSocket(), None, None).log_date_time_string
         
     def __call__(self, environ, start_response):
+        start_time = time.time()
         def xstart_response(status, response_headers, *args):
             out = start_response(status, response_headers, *args)
-            self.log(status, environ)
+            self.log(status, environ, time.time() - start_time)
             return out
 
         return self.app(environ, xstart_response)
              
-    def log(self, status, environ):
+    def log(self, status, environ, cost_time):
         outfile = environ.get('wsgi.errors', web.debug)
         req = environ.get('PATH_INFO', '_')
         protocol = environ.get('ACTUAL_SERVER_PROTOCOL', '-')
         method = environ.get('REQUEST_METHOD', '-')
-        host = "%s:%s" % (environ.get('REMOTE_ADDR','-'), 
-                          environ.get('REMOTE_PORT','-'))
+        x_forwarded_for = environ.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for is not None:
+            host = x_forwarded_for.split(",")[0]
+        else:
+            host = "%s:%s" % (environ.get('REMOTE_ADDR','-'), 
+                              environ.get('REMOTE_PORT','-'))
 
         time = self.log_date_time_string()
 
-        msg = self.format % (host, time, protocol, method, req, status)
+        msg = self.format % (host, time, protocol, method, req, status, int(1000 * cost_time))
         print(utils.safestr(msg), file=outfile)
