@@ -89,7 +89,7 @@ class MarkdownEdit(BaseHandler):
             content = file.get_content(), 
             date2str=date2str,
             download_csv = download_csv, 
-            children = dao.get_children_by_id(file.id))
+            children = [])
 
 def sqlite_escape(text):
     if text is None:
@@ -167,7 +167,7 @@ class UpdateHandler(BaseHandler):
             return self.render("file/view.html", file=file, 
                 content = content, 
                 date2str=date2str,
-                children = dao.get_children_by_id(file.id),
+                children = [],
                 error = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
 
     def rename_request(self):
