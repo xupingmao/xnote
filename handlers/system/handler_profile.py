@@ -47,13 +47,14 @@ def runctx(statement, globals, locals):
         return get_stats(prof)
 
 class handler:
-
     def profile(self, url):
-        def request_url():
+        headers = web.ctx.env
+        data = web.data()
+        def request_url(url, headers, data):
             quoted_url = xutils.quote_unicode(url)
-            self.stats = runctx("xmanager.request(url)", globals(), locals())
+            self.stats = runctx("xmanager.request(url, method='GET',env=headers, data=data)", globals(), locals())
         # 新开一个线程，不然会破坏原来的上下文
-        timer = threading.Timer(0, request_url)
+        timer = threading.Timer(0, request_url, args=(url, headers, data))
         timer.start()
         timer.join()
         return self.stats
