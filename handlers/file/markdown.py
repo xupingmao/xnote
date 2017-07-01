@@ -56,7 +56,7 @@ class handler(BaseHandler):
             date2str=date2str,
             can_edit = can_edit,
             download_csv = download_csv, 
-            children = dao.get_children_by_id(file.id))
+            children = [])
 
     def download_request(self):
         id = self.get_argument("id")
