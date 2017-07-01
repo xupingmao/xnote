@@ -5,6 +5,7 @@
 """Xnote的数据库配置"""
 import os
 import sqlite3
+import xutils
 import xconfig
 import web.db as db
 
@@ -236,6 +237,10 @@ class DBWrapper:
 
     def delete(self, *args, **kw):
         return self.db.delete(self.tablename, *args, **kw)
+
+    def execute(self, sql):
+        # 不建议使用
+        return xutils.db_execute(self.dbpath, sql)
 
 def get_file_table():
     return DBWrapper(config.DB_PATH, "file")

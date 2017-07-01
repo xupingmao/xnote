@@ -307,7 +307,7 @@ def insert(file):
         
 
 def get_db():
-    return FileDB()
+    return xtables.get_file_table()
 
 class FileDB:
 
