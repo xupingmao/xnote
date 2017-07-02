@@ -2,6 +2,7 @@
 
 import os
 import web
+import xauth
 import xconfig
 import xutils
 from xutils import quote
@@ -40,6 +41,7 @@ class RangeUploadHandler:
                 xutils.remove(tmp_path)
 
 
+    @xauth.login_required()
     def POST(self):
         # xutils.print_web_ctx_env()
         chunk = xutils.get_argument("chunk", 0, type=int)
@@ -52,6 +54,7 @@ class RangeUploadHandler:
         if hasattr(file, "filename"):
             # print(" - - %-20s = %s" % ("filename", file.filename))
             filename = xutils.quote(file.filename)
+            filename = xauth.get_current_name() + '_' + filename
             tmp_name = "%s_%d.part" % (filename, chunk)
             tmp_path = os.path.join(dirname, tmp_name)
             with open(tmp_path, "wb") as fp:

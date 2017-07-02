@@ -72,6 +72,11 @@ def get_current_user():
         return get_user(xuser)
     return None
 
+def get_current_name():
+    """获取当前用户名"""
+    user = get_current_user()
+    return user.get("name")
+
 def get_current_role():
     """获取当前用户的角色"""
     user = get_current_user()
