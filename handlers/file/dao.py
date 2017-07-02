@@ -198,11 +198,11 @@ def get_category(limit = None):
 
 def get_children_by_id(id):
     db = get_db()
-    all = db.execute("select * from file where is_deleted != 1 and parent_id = %s order by sctime desc" % id)
+    all = db.execute("SELECT * from file where parent_id = %s AND is_deleted != 1 order by sctime desc" % id)
     return [FileDO.fromDict(item) for item in all]
 
 def get_by_id(id, db=None):
-    sql = "select * from file where id = %s" % id
+    sql = "SELECT * from file where id = %s" % id
     if db is None:
         db = FileDB();
     result = db.execute(sql)

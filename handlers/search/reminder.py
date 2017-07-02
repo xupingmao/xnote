@@ -21,7 +21,7 @@ def search(delay_mins, message):
     if not xauth.is_admin():
         return []
     db = xtables.get_schedule_table()
-    url = "/tasks/alert/" + message
+    url = "/api/alarm/" + message
 
     millis = time.time() + int(delay_mins) * 60
     tm = time.localtime(millis)
