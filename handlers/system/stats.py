@@ -11,7 +11,7 @@ def save_ip(real_ip):
         real_ip = real_ip.split(",")[0]
         # 跳过内网
         # A类和C类
-        if real_ip.startswith("10.") or real_ip.startswith("192.168"):
+        if real_ip.startswith("10.") or real_ip.startswith("192.168") or real_ip == "127.0.0.1":
             return
         db = xtables.get_record_table()
         record = db.select_one(where=dict(type="ip", key=real_ip, cdate=xutils.format_date()))

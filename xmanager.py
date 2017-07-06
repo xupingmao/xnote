@@ -26,7 +26,7 @@ def wrapped_handler(handler_clz):
     if not isinstance(handler_clz, type):
         return handler_clz
 
-    def wrapper_result(result):
+    def wrap(result):
         if isinstance(result, list):
             return json.dumps(result)
         elif isinstance(result, dict):
@@ -51,11 +51,11 @@ def wrapped_handler(handler_clz):
             #     return self.response
             # else:
             #     return wrapper_result(self.target.GET(*args))
-            return wrapper_result(self.target.GET(*args))
+            return wrap(self.target.GET(*args))
             
 
         def POST(self, *args):
-            return wrapper_result(self.target.POST(*args))
+            return wrap(self.target.POST(*args))
 
         def search_priority(self):
             return 0

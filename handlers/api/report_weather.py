@@ -9,6 +9,7 @@ from urllib import request
 from bs4 import BeautifulSoup
 import xutils
 import xtables
+import xconfig
 
 class handler:
 
@@ -21,7 +22,6 @@ class handler:
         db = xtables.get_record_table()
         record = db.select_one(where="type='weather' AND DATE(ctime)=$date_str AND key=$key", 
             vars=dict(date_str=xutils.format_date(), key=city_name))
-
         if record is not None:
             message = record.value
         else:
@@ -45,7 +45,8 @@ class handler:
                 )
 
         if message is not None:
-            xutils.say("%s %s" % (city_name, message))
+            if not xconfig.is_mute():
+                xutils.say("%s %s" % (city_name, message))
             return dict(code="success", data=message)
         else:
             return dict(code="fail", message="结果为空")

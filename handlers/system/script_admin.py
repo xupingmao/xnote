@@ -10,6 +10,21 @@ import xutils
 import xconfig
 import xtemplate
 
+
+SCRIPT_EXT_LIST = (
+    ".bat", 
+    ".vbs", 
+    ".sh", 
+    ".command"
+)
+
+def get_default_shell_ext():
+    if xutils.is_mac():
+        return ".command"
+    elif xutils.is_windows():
+        return ".bat"
+    return ".sh"
+
 class SaveHandler:
 
     @xauth.login_required("admin")
@@ -75,7 +90,7 @@ class handler:
         if os.path.exists(dirname):
             for fname in os.listdir(dirname):
                 fpath = os.path.join(dirname, fname)
-                if os.path.isfile(fpath) and fpath.endswith((".bat", ".vbs", ".sh", ".command")):
+                if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_LIST):
                     shell_list.append(fname)
         shell_list.sort()
         return xtemplate.render("system/script_admin.html", 
@@ -90,8 +105,12 @@ class handler:
         name = xutils.get_argument("name", "")
         dirname = xconfig.SCRIPTS_DIR
         path = os.path.join(dirname, name)
-        print(op, name)
+        # print(op, name)
+        basename, ext = os.path.splitext(name)
         if op == "add" and name != "":
+            if ext not in SCRIPT_EXT_LIST:
+                name = basename + get_default_shell_ext()
+                path = os.path.join(dirname, name)
             with open(path, "wb") as fp:
                 pass
         elif op == "save":
