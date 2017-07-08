@@ -54,7 +54,7 @@ class RangeUploadHandler:
         if hasattr(file, "filename"):
             # print(" - - %-20s = %s" % ("filename", file.filename))
             filename = xutils.quote(file.filename)
-            filename = xauth.get_current_name() + '_' + filename
+            # filename = xauth.get_current_name() + '_' + filename
             tmp_name = "%s_%d.part" % (filename, chunk)
             tmp_path = os.path.join(dirname, tmp_name)
             with open(tmp_path, "wb") as fp:

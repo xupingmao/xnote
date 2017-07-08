@@ -32,8 +32,8 @@ class handler:
             fpath = os.path.join(parent, fname)
             if fname.endswith(".zip"):
                 app_list.append(FileInfo(fname, parent))
-        return xtemplate.render("system/upload_app.html", 
-            app_list = app_list, error = error)
+        return xtemplate.render("system/app_admin.html", 
+            app_list = app_list, error = error, upload_path=os.path.abspath(xconfig.APP_DIR))
 
     def POST(self):
         file = web.input(file={}).file
@@ -64,4 +64,34 @@ class handler:
         except Exception as e:
             error = str(e)
         return self.GET(error)
+
+class UnzipApp:
+    def GET(self):
+        parent = xconfig.APP_DIR
+        name = xutils.get_argument("name")
+        if name == "" or name is None:
+            raise web.seeother("/system/app_admin")
+        basename, ext = os.path.splitext(name)
+        if ext != ".zip":
+            raise web.seeother("/system/app_admin?error=EXPECT_ZIP")
+        app_dir = os.path.join(parent, basename)
+        filepath = os.path.join(parent, name)
+        error = ""
+        try:
+            # 删除旧文件
+            if os.path.exists(app_dir):
+                xutils.remove(app_dir)
+            # mode只有'r', 'w', 'a'
+            zf = zipfile.ZipFile(filepath, "r")
+            zf.extractall(app_dir)
+        except Exception as e:
+            error = str(e)
+        raise web.seeother("/system/app_admin?error="+error)
+
+xurls = (
+    r"/system/upload_app", handler,
+    r"/system/app_admin", handler,
+    r"/system/app_admin/unzip", UnzipApp,
+)
+
 

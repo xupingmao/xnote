@@ -1,31 +1,49 @@
 {% extends base.html %}
 
 {% block head %}
+<script type="text/javascript" src="/static/js/upload.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
+<script type="text/javascript" src="/static/lib/webuploader/webuploader-0.1.5.min.js"></script>
+
 <style type="text/css">
     .error-div {
         color:red;
     }
+    .progress {
+        background-color: #ffcccc;
+        height: 20px;
+    }
+    .progress span {
+        display: block;
+        background-color: green;
+        color: #fff;
+        height: 100%;
+    }
 </style>
-<script type="text/javascript" src="/static/js/upload.js"></script>
+
 {% end %}
 
 {% block body %}
 
+{% init upload_path = "" %}
 {% init app_list = [] %}
 
 <h2 class="top-offset-1">App包上传</h2>
+<p><a href="/tools/webuploader#{{upload_path}}">上传到app路径</a>
 <div class="top-offset-1">
 <table class="table col-md-12 top-offset-1">
     <tr>
         <th>编号</th>
         <th>包名</th>
         <th>大小</th>
+        <th>操作</th>
     </tr>
     {% for index, app in enumerate(app_list) %}
         <tr>
             <td>{{index+1}}</td>
             <td><a href="/app/{{app.app_name}}/index.html">{{app.app_name}}</a></td>
             <td>{{app.size}}</td>
+            <td><a href="/system/app_admin/unzip?name={{app.app_name}}.zip">解压</a></td>
         </tr>
     {% end %}
 </table>
@@ -33,28 +51,13 @@
 
 <div class="error-div">{{error}}</div>
 
-<div class="top-offset-1">
+<!-- <div class="top-offset-1">
 <form enctype="multipart/form-data" method="POST">
     <input type="file" name="file" id="fileId"/>
     <input type="button" class="btn" value="上传app包" id="submitId"/>
     <span id="progressNumber"></span>
     <div id="resultLink"></div>
 </form>
-</div>
-
-<script type="text/javascript">
-    $("#submitId").on("click", function () {
-        uploadFile("fileId", "file", "/system/upload_app", function (evt) {
-            /* This event is raised when the server send back a response */
-            // alert(evt.target.responseText);
-            var responseText = evt.target.responseText;
-            document.getElementById("resultLink").innerHTML = "上传成功";
-
-            setTimeout(function () {
-                location.reload();
-            }, 500)
-        });
-    })
-</script>
+</div> -->
 
 {% end %}
