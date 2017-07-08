@@ -36,7 +36,11 @@
     </tr>
     <tr>
         <td>Worker</td>
-        <td id="checkWorker"></td>
+        <td id="checkWorker" type-name="Worker" class="check-item"></td>
+    </tr>
+    <tr>
+        <td>FileReader</td>
+        <td type-name="FileReader" class="check-item"></td>
     </tr>
 </div>
 
@@ -48,6 +52,13 @@ $("#vendor").html(navigator.vendor);
 $("#screen").html("screen.width:"+screen.width+",screen.height:"+screen.height);
 $("#checkGetUserMedia").html(navigator.getUserMedia ? navigator.getUserMedia.toString() : undefined);
 $("#checkRTCPeerConnection").html(window.RTCPeerConnection ? window.RTCPeerConnection.toString() : undefined);
-$("#checkWorker").html(typeof Worker);
+$(document).ready(function () {
+    $(".check-item").each(function (index) {
+        var typeName = $(this).attr("type-name");
+        console.log(index + ":" + typeName);
+        console.log(window[typeName]);
+        $(this).html(typeof window[typeName]);
+    })
+})
 </script>
 {% end %}

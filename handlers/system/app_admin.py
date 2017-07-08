@@ -71,6 +71,8 @@ class UnzipApp:
         name = xutils.get_argument("name")
         if name == "" or name is None:
             raise web.seeother("/system/app_admin")
+        # name = xutils.unquote(name)
+        name = xutils.quote_unicode(name)
         basename, ext = os.path.splitext(name)
         if ext != ".zip":
             raise web.seeother("/system/app_admin?error=EXPECT_ZIP")

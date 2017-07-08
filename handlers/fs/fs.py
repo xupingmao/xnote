@@ -164,6 +164,7 @@ class FileSystemHandler:
         '.sh'  : 'text/plain; charset=utf-8',
         '.txt' : 'text/plain; charset=utf-8',
         '.md'  : 'text/plain; charset=utf-8',
+        '.ini' : 'text/plain; charset=utf-8',
     }
 
     encodings = {

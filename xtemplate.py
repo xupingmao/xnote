@@ -165,6 +165,9 @@ def render_text(text, **kw):
     
 def get_code(name):
     return _loader.load(name).code
+
+def get_templates():
+    return _loader.templates.copy()
     
     
 def reload():
