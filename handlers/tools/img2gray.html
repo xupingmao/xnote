@@ -1,0 +1,132 @@
+{% extends base.html %}
+
+{% block body %}
+
+<h3>图片灰度化</h3>
+
+<input type="file" onchange="handleFiles(this.files)" />
+<div>
+<input id="larger" type="button" value="放大"/>
+<input id="smaller" type="button" value="缩小"/>
+大小<label id="scale"></label>
+</div>
+
+<div>
+<input id="rotateLeft" type="button" value="左旋转"/>
+</div>
+
+<canvas id="myCanvas" style="border:none;"></canvas>
+<div>
+<img id="imageSource" src="" class="col-md-12">
+</div>
+<script type="text/javascript">
+function getImgNaturalDimensions(img, callback) {
+    var nWidth, nHeight
+    if (img.naturalWidth) { // 现代浏览器
+        nWidth = img.naturalWidth
+        nHeight = img.naturalHeight
+    } else { // IE6/7/8
+        var imgae = new Image()
+        image.src = img.src
+        image.onload = function() {
+            callback(image.width, image.height)
+        }
+    }
+    return [nWidth, nHeight]
+}
+
+function convert2Gray(canvasData) {
+    // gray filter    
+    for ( var x = 0; x < canvasData.width; x++) {    
+        for ( var y = 0; y < canvasData.height; y++) {    
+
+            // Index of the pixel in the array    
+            var idx = (x + y * canvasData.width) * 4;    
+            var r = canvasData.data[idx + 0];    
+            var g = canvasData.data[idx + 1];    
+            var b = canvasData.data[idx + 2];    
+                
+            // calculate gray scale value    
+            var gray = .299 * r + .587 * g + .114 * b;    
+                
+            // assign gray scale value    
+            canvasData.data[idx + 0] = gray; // Red channel    
+            canvasData.data[idx + 1] = gray; // Green channel    
+            canvasData.data[idx + 2] = gray; // Blue channel    
+            canvasData.data[idx + 3] = 255; // Alpha channel    
+                
+            // add black border    
+            if(x < 8 || y < 8 || x > (canvasData.width - 8) || y > (canvasData.height - 8))     
+            {    
+                canvasData.data[idx + 0] = 0;    
+                canvasData.data[idx + 1] = 0;    
+                canvasData.data[idx + 2] = 0;    
+            }    
+        }    
+    }    
+    return canvasData;
+}
+
+// 缩放比例
+var canvasScale = 1.0;
+var canvasRotate = 0;
+// var imageNatureWidth = 0;
+// var imageNatureHeight = 0;
+function repaint() {
+    $("#scale").text(canvasScale);
+    var canvas = document.getElementById("myCanvas");    
+    var image = document.getElementById("imageSource");    
+
+    // var clientWidth = document.body.width;
+    // var clientHeight = clientWidth * 3 / 4;
+    image.crossOrigin = "Anonymous";
+    
+
+    // get 2D render object    
+    var context = canvas.getContext("2d");
+
+    canvas.width  = image.width * canvasScale;    
+    canvas.height = image.height * canvasScale;
+
+    context.rotate(window.canvasRotate * Math.PI / 180);
+    context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, canvas.width, canvas.height);      
+     
+    
+    // 不能使用跨域图片，否则不能获取图片数据
+    var canvasData = context.getImageData(0, 0, canvas.width, canvas.height);    
+    // alert(canvasData.width.toString());    
+    // alert(canvasData.height.toString());    
+    canvasData = convert2Gray(canvasData);
+    context.putImageData(canvasData, 0, 0); // at coords 0,0    
+};    
+
+function handleFiles(files) {
+    if (files && files.length > 0) {
+        var imageFile = files[0];
+        var url = window.URL.createObjectURL(imageFile);
+        console.log(url);
+        $("#imageSource").attr("src", url);
+        $("#imageSource").on("load", function () {
+            repaint();
+        })
+    }
+}
+
+$("#larger").on("click", function() {
+    window.canvasScale += 0.1;
+    repaint();
+})
+$("#smaller").on("click", function() {
+    window.canvasScale -= 0.1;
+    repaint();
+});
+
+$("#rotateLeft").on("click", function() {
+    window.canvasRotate += 90;
+    if (window.canvasRotate == 360) {
+        window.canvasRotate = 0;
+    }
+    repaint();
+})
+</script>
+{% end %}
