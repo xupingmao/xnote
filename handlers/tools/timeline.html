@@ -32,11 +32,22 @@ img {
 .site-header {
   text-align: center;
   padding: 40px 0;
-
 }
+
 .site-header__title {
   font-size: 36px;
   color: #fff;
+}
+
+.site-footer {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.site-footer__title, .site-footer__title a {
+  font-size: 36px;
+  color: #fff;
+  cursor: pointer;
 }
 
 /* _wrapper.css */
@@ -258,7 +269,16 @@ img {
   </div>
 </section>
 
+<header class="site-footer">
+  <div class="wrapper">
+    <h1 id="loadMore" class="site-footer__title">加载更多</h1>
+  </div>
+</header>
+
 <script>
+  // 全局变量
+  var QUERY_LIMIT = 20;
+
     var itemList = {
         "2016": []
     }
@@ -294,16 +314,39 @@ img {
         }
     });
 
-    $.get("/file/timeline?_type=json", function (data, status) {
-        var resp = JSON.parse(data);
-        app.itemList = [];
-        for (var key in resp) {
-          console.log(key, resp);
+    app.itemList = [];
+    window.offset = 0;
+
+    function loadMore() {
+      $.get("/file/timeline?_type=json", 
+        { 
+          offset: window.offset,
+          limit : QUERY_LIMIT
+        }, 
+        function (data, status) {
+          if (data == "{}") {
+            alert("没有更多了");
+            return;
+          }
+          var resp = JSON.parse(data);
+          // app.itemList = [];
+          for (var key in resp) {
+            console.log(key, resp);
             var files = resp[key];
+            window.offset += files.length;
             app.itemList.push({title: key, files: files});
-        }
-//        app.itemList = resp;
-    });
+          }
+  //        app.itemList = resp;
+          // window.offset = app.itemList.length;
+      });
+    }
+
+
+    $("#loadMore").on("click", function() {
+      loadMore();
+    })
+
+    loadMore();
 
 </script>
 

@@ -13,13 +13,15 @@ class handler:
 
     @xauth.login_required()
     def GET(self):
-        days = xutils.get_argument("days", 30, type=int)
+        # days = xutils.get_argument("days", 30, type=int)
+        offset = xutils.get_argument("offset", 0, type=int)
+        limit  = xutils.get_argument("limit", 20, type=int)
         db = dao.get_file_db()
-        last_month = xutils.days_before(days, format=True)
+        # last_month = xutils.days_before(days, format=True)
         user_name  = xauth.get_current_user()["name"]
         rows = db.query("SELECT * FROM file WHERE creator = $creator"
-            + " AND sctime >= $ctime ORDER BY sctime DESC", 
-            dict(creator=user_name, ctime=last_month))
+            + " ORDER BY sctime DESC LIMIT $offset, $limit", 
+            dict(creator=user_name, offset=offset, limit=limit))
         result = dict()
         for row in rows:
             date = re.match(r"\d+\-\d+", row.sctime).group(0)

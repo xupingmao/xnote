@@ -22,7 +22,7 @@ class handler(BaseHandler):
         parent_id = xutils.get_argument("parent_id", 0, type=int)
 
         if key == "":
-            key = time.strftime("%Y-%m-%d")
+            key = time.strftime("%Y.%m.%d")
 
         file = FileDO(name)
         file.atime   = dateutil.get_seconds()
