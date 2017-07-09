@@ -1,0 +1,101 @@
+{% extends base.html %}
+
+{% block body %}
+
+<script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
+
+<div id="app">
+    <div class="col-md-12 top-offset-1">
+        <input type="file" name="file" id="file" value="选择图片" onchange="handleFiles(this.files)">
+
+        默认使用4x4的帧图 Icon宽度 <input v-model="actorWidth"/> Icon高度 <input v-model="actorHeight"/>
+
+        <div>{{! update() }}</div>
+    </div>
+
+    <div id="inputImageDiv" class="col-md-12">
+    </div>
+
+    <div class="col-md-12 top-offset-1">
+        <canvas id="canvas"></canvas>
+    </div>
+
+</div>
+<script type="text/javascript">
+
+var app = new Vue({
+    el: "#app",
+    data: {
+        actorWidth: 64,
+        actorHeight: 64,
+    },
+    methods: {
+        update: function () {
+            repaint();
+        }
+    },
+    filters: {
+        toUpperCase: function (value) {
+            if (!value) return ''
+            value = value.toString()
+            return value.toUpperCase();
+        },
+        length: function (value) {
+            if (!value) return 0;
+            return value.length;
+        },
+        appendStr: function (arg1, arg2, arg3) {
+            return arg1 + arg2 + arg3;
+        }
+    },
+})
+
+function repaint() {
+    if (!app) {
+        return;
+    }
+    var img = document.getElementById("inputImage");
+    var canvas = document.getElementById('canvas');
+    canvas.width  = app.actorWidth * 4;
+    canvas.height = app.actorHeight * 4;
+    var ctx = canvas.getContext('2d');
+    var cols = 4;
+    var rows = 4;
+    for (var j = 0; j < rows; j++) {
+        for (var i = 0; i < cols; i++) {
+            var width = app.actorWidth;
+            var height = app.actorHeight;
+            var x = width * i;
+            var y = height * j;
+            ctx.drawImage(img, x, y, width, height);
+        }
+    }
+}
+
+function handleFiles(files) {  
+    if(files.length) {  
+        var file = files[0];  
+        var reader = new FileReader();  
+    
+        var img = $("<img>");
+        var url = window.URL.createObjectURL(file)
+        console.log(url);
+        img.attr("id", "inputImage");
+        img.attr("src", url);
+        img.hide();
+        
+        // Clear div 
+        $("#inputImageDiv").html("");
+        $("#inputImageDiv").append(img);
+
+        img[0].onload = function()  {  
+            // document.getElementById("filecontent").innerHTML = this.result;  
+            console.log(img[0]);
+            repaint();
+        };  
+        // reader.readAsDataURL();
+    }  
+  }  
+</script>
+
+{% end %}
