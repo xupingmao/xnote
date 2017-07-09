@@ -45,6 +45,8 @@ class handler:
         name = xutils.unquote(name)
         if not name.endswith(".html"):
             name += ".html"
+        # Chrome下面 tools/timeline不能正常渲染
+        web.header("Content-Type", "text/html")
         return xtemplate.render("tools/" + name)
 
     def POST(self, name):
