@@ -317,6 +317,17 @@ img {
     app.itemList = [];
     window.offset = 0;
 
+    function mergeFiles(list, key, files) {
+      for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        if (item.title == key) {
+          item.files = item.files.concat(files);
+          return;
+        }
+      }
+      list.push({title: key, files: files});
+    }
+
     function loadMore() {
       $.get("/file/timeline?_type=json", 
         { 
@@ -334,8 +345,12 @@ img {
             console.log(key, resp);
             var files = resp[key];
             window.offset += files.length;
-            app.itemList.push({title: key, files: files});
+            mergeFiles(app.itemList, key, files);
+            // app.itemList.push({title: key, files: files});
           }
+          app.itemList.sort(function (a, b) {
+            return a.title < b.title;
+          })
   //        app.itemList = resp;
           // window.offset = app.itemList.length;
       });

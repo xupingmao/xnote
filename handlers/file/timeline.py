@@ -33,3 +33,33 @@ class handler:
             result[date].append(row)
 
         return xutils.json_str(**result)
+
+class DateTimeline:
+    @xauth.login_required()
+    def GET(self):
+        year  = xutils.get_argument("year")
+        month = xutils.get_argument("month")
+        if len(month) == 1:
+            month = "0" + month
+        db = dao.get_file_db()
+        user_name  = xauth.get_current_user()["name"]
+        rows = db.query("SELECT * FROM file WHERE creator = $creator AND sctime LIKE $ctime"
+            + " ORDER BY sctime DESC", 
+            dict(creator=user_name, ctime="%s-%s%%" % (year, month)))
+        result = dict()
+        for row in rows:
+            date = re.match(r"\d+\-\d+", row.sctime).group(0)
+            row.url = "/file/view?id={}".format(row.id);
+            # 优化数据大小
+            row.content = ""
+            if date not in result:
+                result[date] = []
+            result[date].append(row)
+
+        return xutils.json_str(**result)
+
+xurls = (
+    r"/file/timeline", handler,
+    r"/file/timeline/month", DateTimeline
+)
+
