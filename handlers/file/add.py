@@ -3,22 +3,25 @@
 # 
 
 """Description here"""
+import web
 import time
-
-from handlers.base import *
 from .dao import FileDO
 from . import dao
-
+from util import dateutil
 import xauth
 import xutils
+import xtemplate
+import xtables
 
-class handler(BaseHandler):
+class AddHandler:
 
-    def execute(self):
+    def POST(self):
         name = xutils.get_argument("name", "")
         tags = xutils.get_argument("tags", "")
         key  = xutils.get_argument("key", "")
-        type = xutils.get_argument("type", "post")
+        content = xutils.get_argument("content", "")
+        type    = xutils.get_argument("type", "post")
+        _type   = xutils.get_argument("_type", "")
         parent_id = xutils.get_argument("parent_id", 0, type=int)
 
         if key == "":
@@ -36,8 +39,9 @@ class handler(BaseHandler):
         file.groups    = file.creator
         file.parent_id = parent_id
         file.type      = type
-        file.content   = ""
+        file.content   = content
 
+        code = "fail"
         error = ""
         try:
             if name != '':
@@ -47,9 +51,38 @@ class handler(BaseHandler):
                     raise Exception("%s 已存在" % name)
                 f = dao.insert(file)
                 inserted = dao.get_by_name(name)
+                if _type == "json":
+                    return dict(code="success", id=inserted.id)
                 raise web.seeother("/file/view?id={}".format(inserted.id))
         except Exception as e:
             xutils.print_stacktrace()
-            error = e
-        self.render("file/add.html", key = "", name = key, tags = tags, error=error)
+            error = str(e)
+        return xtemplate.render("file/add.html", key = "", 
+            name = key, tags = tags, error=error,
+            message = error,
+            code = code)
+
+    def GET(self):
+        return self.POST()
+
+class RemoveHandler:
+    # 物理删除
+    def GET(self):
+        id = xutils.get_argument("id", "")
+        if id == "":
+            return dict(code="fail", message="ID为空")
+        db = xtables.get_file_table()
+        file = db.select_one(where=dict(id=int(id)))
+        if file is None:
+            return dict(code="fail", message="文件不存在")
+        db.delete(where=dict(id=int(id)))
+        return dict(code="success")
+    def POST(self):
+        return self.GET()
+
+xurls = (
+    r"/file/add", AddHandler,
+    r"/file/remove", RemoveHandler
+)
+
 

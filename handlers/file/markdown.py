@@ -8,7 +8,6 @@ import xutils
 import xconfig
 import xtables
 
-import web.db as db
 from . import dao
 
 config = xconfig

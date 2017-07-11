@@ -27,6 +27,13 @@ def init():
 
 app = init()
 
+def json_request(*args, **kw):
+    global app
+    kw["_type"] = "json"
+    ret = app.request(*args, **kw)
+    data = ret.data
+    return json.loads(data)
+
 class TestMain(unittest.TestCase):
 
     def test_render_text(self):
@@ -79,6 +86,12 @@ class TestMain(unittest.TestCase):
 
     def test_file(self):
         self.check_200("/file/recent_edit")
+        file = json_request("/file/add", method="POST", 
+            data=dict(name="xnote-unit-test", content="hello", _type="json"))
+        id = file["id"]
+        self.check_OK("/file/view?id=" + str(id))
+        json_request("/file/remove?id=" + str(id))
+
 
     def test_fs(self):
         self.check_200("/fs//")

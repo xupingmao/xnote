@@ -33,10 +33,32 @@
 {% end %}
 </textarea>
 
-<h2>Texts</h2>
-<textarea rows="30" class="col-md-12">
+<h2>Markdown 文本</h2>
+<div>
+    资料名:<input id="savedName">
+    <input type="button" id="saveToDbBtn" class="btn" value="保存到资料库">
+</div>
+<textarea rows="30" class="col-md-12" id="content">
 {% for text in texts%}{{text}}
 {% end %}
 </textarea>
+
+<script type="text/javascript">
+$("#saveToDbBtn").on("click", function () {
+    var name = $("#savedName").val();
+    var content = $("#content").val();
+    $.post("/file/add", 
+        {"_type": "json", "name": name, "content": content, "type": "markdown"}, 
+        function (responseText) {
+            console.log(responseText);
+            var data = JSON.parse(responseText);
+            if (data.code == "success") {
+                alert("添加成功");
+            } else {
+                alert(data.message);
+            }
+    })
+})
+</script>
 
 {% end %}
