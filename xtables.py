@@ -118,8 +118,8 @@ def init_table_file():
     # 关联关系
     # 上级目录
     manager.add_column("parent_id", "int", 0)
-    # 使用file_tag表
-    # manager.add_column("related", "text", "")
+    # 使用file_tag表,兼容老代码
+    manager.add_column("related", "text", "")
 
     # 统计相关
     # 访问次数
