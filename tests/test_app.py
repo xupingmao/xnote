@@ -32,7 +32,7 @@ def json_request(*args, **kw):
     kw["_type"] = "json"
     ret = app.request(*args, **kw)
     data = ret.data
-    return json.loads(data)
+    return json.loads(data.decode("utf-8"))
 
 class TestMain(unittest.TestCase):
 
