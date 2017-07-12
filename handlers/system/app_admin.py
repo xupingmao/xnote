@@ -17,9 +17,10 @@ config = xconfig
 class FileInfo:
 
     def __init__(self, name, parent):
-        self.name = name
+        self.name = xutils.unquote(name)
         self.path = os.path.join(parent, name)
         self.app_name, ext = os.path.splitext(name)
+        self.app_name = xutils.unquote(self.app_name)
         self.size = xutils.get_file_size(self.path)
 
 class handler:
