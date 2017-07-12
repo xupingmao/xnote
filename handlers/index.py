@@ -2,6 +2,14 @@
 from handlers.base import *
 from handlers.file import dao
 
+index_html = """
+{% extends base.html %}
+
+{% block body %}
+<h3>Welcome to Xnote!</h3>
+{% end %}
+"""
+
 class handler(BaseHandler):
 
     def execute(self):
@@ -17,7 +25,8 @@ class Home:
 
     def GET(self):
         # return xtemplate.render("home.html")
-        raise web.seeother("/file/recent_edit")
+        # raise web.seeother("/file/recent_edit")
+        return xtemplate.render_text(index_html)
 
 class Unauthorized():
     html = """
