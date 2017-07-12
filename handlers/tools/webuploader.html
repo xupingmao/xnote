@@ -15,6 +15,15 @@
         color: #fff;
         height: 100%;
     }
+    #dropArea {
+        width: 100%;
+        height: 100px;
+        border: 3px dashed silver;
+        line-height: 100px;
+        text-align: center;
+        font-size: 36px;
+        color: #d3d3d3;
+    }
 </style>
 {% end %}
 
@@ -26,6 +35,8 @@
     <!--用来存放item-->
     <div id="fileList" class="uploader-list"></div>
     <div id="filePicker">选择文件</div>
+
+    <div id="dropArea">把文件拖拽到此区域</div>
 </div>
 
 <script type="text/javascript">
@@ -121,7 +132,7 @@ uploader.on( 'uploadBeforeSend', function (object, data, headers) {
 // 文件上传成功，给item添加成功class, 用样式标记上传成功。
 uploader.on( 'uploadSuccess', function( file ) {
     $( '#'+file.id ).addClass('upload-state-done');
-    $( '#'+file.id + "-result" ).text("上传完成!!!");
+    $( '#'+file.id + "-result" ).text("上传完成");
 });
 
 // 文件上传失败，显示上传出错。
@@ -141,6 +152,32 @@ uploader.on( 'uploadError', function( file ) {
 uploader.on( 'uploadComplete', function( file ) {
     $( '#'+file.id ).find('.progress').remove();
 });
+
+// 必须先禁用所有的拖拽默认行为
+$(document).on("dragenter", function (event) {
+    event.preventDefault();
+})
+$(document).on("dragleave", function (event) {
+    event.preventDefault();
+})
+$(document).on("drop", function (event) {
+    event.preventDefault();
+})
+$(document).on("dragover", function (event) {
+    event.preventDefault();
+})
+
+$("#dropArea").on("drop", function (event) {
+    console.log(event);
+    event.preventDefault(); //取消默认浏览器拖拽效果 
+    var originalEvent = event.originalEvent;
+    var fileList = originalEvent.dataTransfer.files; //获取文件对象 
+    console.log(fileList);
+    if (fileList && fileList.length > 0) {
+        uploader.addFile(fileList);
+    }
+});
+
 
 </script>
 
