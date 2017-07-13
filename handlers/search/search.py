@@ -178,8 +178,7 @@ class handler(BaseHandler):
 
         return self.render("file-list.html", files = files, count = count)
 
-load_mapping(r"calc(.*)",               "handlers.search.calc.do_calc")
-load_mapping(r"(.*[0-9]+.*)",           "handlers.search.calc.try_calc")
+load_mapping(r"(.*[0-9]+.*)",           "handlers.search.calc.do_calc")
 load_mapping(r"(.*)",                   "handlers.search.pydoc.search")
 load_mapping(r"([^ ]*)",                "handlers.search.translate.search")
 load_mapping(r"翻译\s+([^ ]+)",        "handlers.search.translate.zh2en")

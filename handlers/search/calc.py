@@ -10,10 +10,20 @@ import xutils
 SearchResult = xutils.SearchResult
 
 def safe_check(expression):
-    return r"^[0-9+\-*\/% \(\)\~]*\Z"
+    p = re.compile(r"^[0-9+\-*\/% \(\)\~]*\Z")
+    m = p.match(expression)
+    # print(m.group())
+    if m.group():
+        return m.group()
+    return None
 
 def do_calc(expression):
-    exp = expression
+    if expression.startswith("calc"):
+        expression = expression[4:]
+    expression = expression.strip()
+    exp = safe_check(expression)
+    if exp is None:
+        return
     try:
         value = eval(exp)
         f = SearchResult()
@@ -24,22 +34,6 @@ def do_calc(expression):
     except Exception as e:
         print(e)
         return []
-
-def try_calc(expression):
-    exp = expression
-    try:
-        value = eval(exp)
-        f = SearchResult()
-        f.name = "计算结果"
-        f.raw = str(value)
-        return [f]
-    except Exception as e:
-        print(e)
-        return []
-
-def handle_calc(expression):
-    print(expression)
-    return []
 
 # xmanager.register_search_func(r"calc(.*)", do_calc)
 # xmanager.register_search_func(r"(.*[0-9]+.*)", try_calc)

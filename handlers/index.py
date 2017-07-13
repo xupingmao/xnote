@@ -2,11 +2,9 @@
 from handlers.base import *
 from handlers.file import dao
 
-index_html = """
-{% extends base.html %}
-
+index_html = """{% extends base.html %}
 {% block body %}
-<h3>Welcome to Xnote!</h3>
+<h1 style="text-align:center;">Welcome to Xnote!</h1>
 {% end %}
 """
 
@@ -24,9 +22,9 @@ searchable = False
 class Home:
 
     def GET(self):
-        # return xtemplate.render("home.html")
+        return xtemplate.render("home.html")
         # raise web.seeother("/file/recent_edit")
-        return xtemplate.render_text(index_html)
+        # return xtemplate.render_text(index_html)
 
 class Unauthorized():
     html = """

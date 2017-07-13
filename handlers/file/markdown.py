@@ -208,11 +208,13 @@ class Downvote:
         db.update(priority=0, where=dict(id=id))
         raise web.seeother("/file/view?id=%s" % id)
 
-xurls = ("/file/edit", handler, 
-        "/file/markdown", handler,
-        "/file/view", handler,
-        "/file/markdown/edit", MarkdownEdit,
-        "/file/update", UpdateHandler,
-        r"/file/(.*)/upvote", Upvote,
-        r"/file/(.*)/downvote", Downvote)
+xurls = (
+    r"/file/edit", handler, 
+    r"/file/markdown", handler,
+    r"/file/view", handler,
+    r"/file/markdown/edit", MarkdownEdit,
+    r"/file/update", UpdateHandler,
+    r"/file/(\d+)/upvote", Upvote,
+    r"/file/(\d+)/downvote", Downvote
+)
 

@@ -15,6 +15,7 @@ import xtables
 
 class AddHandler:
 
+    @xauth.login_required()
     def POST(self):
         name = xutils.get_argument("name", "")
         tags = xutils.get_argument("tags", "")
@@ -34,7 +35,7 @@ class AddHandler:
         file.smtime  = dateutil.format_time()
         file.ctime   = dateutil.get_seconds()
         file.sctime  = dateutil.format_time()
-        file.creator = xauth.get_current_user()["name"]
+        file.creator = xauth.get_current_name()
         # 默认私有
         file.groups    = file.creator
         file.parent_id = parent_id

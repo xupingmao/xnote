@@ -119,9 +119,11 @@ class handler:
             xutils.savetofile(path, content)
         raise web.seeother("/system/script_admin")
 
-xurls = (r"/system/script_admin", handler,
-        r"/system/script_admin/save", SaveHandler,
-        r"/system/script_admin/execute", ExecuteHandler,
-        r"/system/script_admin/delete", DeleteHandler)
+xurls = (
+    r"/system/script_admin", handler,
+    r"/system/script_admin/save", SaveHandler,
+    r"/system/script_admin/execute", ExecuteHandler,
+    r"/system/script_admin/delete", DeleteHandler
+)
 
 
