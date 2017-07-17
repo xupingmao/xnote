@@ -73,9 +73,8 @@
 
     <form action="/file/update" enctype="multipart/form-data" method="POST">
         <div class="col-md-12">
-            <input type="checkbox" name="public" {% if file.groups == '*' %} checked="true" {% end %}>所有人可见
-            <input type="submit" class="btn btn-primary" value="更新"/>
-            <input type="button" class="btn btn-danger" onclick="delLink()" value="删除" />
+            <input type="button" id="insertCode" class="btn" value="插入代码"/> 
+            
             <input type="file" id="file" name="file"/>
             <input type="submit" id="uploadBtn" value="插入文件" />
             <span class="upload-progress"></span>
@@ -100,6 +99,12 @@
 
                     </div>
                 </div>
+            </div>
+
+            <div class="col-md-12">
+                <input type="checkbox" name="public" {% if file.groups == '*' %} checked="true" {% end %}>所有人可见
+                <input type="submit" class="btn btn-primary" value="更新"/>
+                <input type="button" class="btn btn-danger" onclick="delLink()" value="删除" />
             </div>
         </div>
     </form>
@@ -273,6 +278,11 @@
         edit();
         
         setInterval(repaint, 200);
+
+        $("#insertCode").on("click", function () {
+            var cur = codeMirror.getCursor();
+            codeMirror.replaceRange("```  ```", cur, cur, "");
+        })
     })
 </script>
 

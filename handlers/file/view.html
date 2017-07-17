@@ -45,6 +45,7 @@ img {
 
 {% block body %}
     {% init file_type = "md" %}
+    {% set file_type = file.type %}
 
     {% include "search.html" %}
     
