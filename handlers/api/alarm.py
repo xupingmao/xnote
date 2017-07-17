@@ -9,6 +9,8 @@ import xutils
 
 class handler:
     def GET(self, msg):
+        if xconfig.is_mute():
+            return dict(code="fail", message="mute")
         msg = xutils.unquote(msg)
         for i in range(3):
             xutils.say(msg)
