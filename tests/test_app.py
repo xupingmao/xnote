@@ -123,6 +123,9 @@ class TestMain(unittest.TestCase):
     def test_tts(self):
         self.check_200("/system/tts?content=测试")
 
+    def test_alarm(self):
+        self.check_200("/api/alarm/test")
+
     def test_task(self):
         self.check_200("/system/crontab")
         self.check_OK("/system/crontab/add", method="POST", data=dict(url="test", tm_wday="*", tm_hour="*", tm_min="*"))

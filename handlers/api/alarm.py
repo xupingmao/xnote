@@ -6,6 +6,7 @@
 
 import time
 import xutils
+import xconfig
 
 class handler:
     def GET(self, msg):
