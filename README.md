@@ -26,6 +26,54 @@ PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代�
 
 - Python 3
 
+## 配置运行
+- 安装依赖的软件包```python -m pip install -r requirements.txt```
+- 无需额外配置，初始化的管理员账号是admin/123456
+- 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 即可
+
+## 功能结构
+
+### 文档管理
+- Markdown编辑器
+- 文档标签
+- 搜索
+- 分享，可以把资料生成一个临时链接分享给朋友
+
+### 搜索
+- 笔记搜索
+- 工具搜索，搜索`handlers/tools/`目录下的工具
+- 翻译（由于版权问题，数据库未上传）
+- 计算简单的数学公式
+- 添加语音提醒，比如 {30|数字}分钟后提醒我{读书},那么30分钟后就会听到电脑姐姐的温馨提醒了^_^
+
+
+### 集成的工具
+- 文件管理器
+- 编解码工具(base64,16进制等等)
+- 二维码生成器(barcode)
+- 文本比较工具(jsdiff)
+- 代码模板(code\_template)
+- 语音播报
+- 天气信息抓取(中国天气网数据)
+- 脚本管理器
+
+
+### 定时任务
+- 通过配置页面设置要调用的URL和时间匹配规则即可
+
+![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/static/image/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE.PNG)
+
+- `handlers/tools`目录下是开发工具，可以通过搜索功能定位
+- `$DATA_DIR/scripts/`目录下是系统脚本,直接与操作系统交互
+
+### 其他特性
+- debug模式下自动侦测文件修改并重新加载
+- 支持文件下载断点续传,发生网络故障后不用重新下载
+- 使用响应式布局
+- 用户权限，通过Python的装饰器语法，比较方便修改和扩展(见xauth.login_required)
+- 数据库结构自动更新(xtables.py)
+- 图标，是的我自己做了一个很丑的图标，寓意天圆地方
+
 ### 开发框架/软件库
 
 具体版本见`requirements.txt`
@@ -82,53 +130,6 @@ xurls = ("/test", handler)
 # 启动xnote，访问浏览器localhost:1234/test就会看到success
 ```
 
-
-## 功能结构
-
-### 文档管理
-- Markdown编辑器
-- 文档标签
-- 搜索
-- 分享，可以把资料生成一个临时链接分享给朋友
-
-### 搜索
-- 笔记搜索
-- 工具搜索，搜索`handlers/tools/`目录下的工具
-- 翻译（由于版权问题，数据库未上传）
-- 计算简单的数学公式
-- 添加语音提醒，比如 {30|数字}分钟后提醒我{读书},那么30分钟后就会听到电脑姐姐的温馨提醒了^_^
-
-
-### 集成的工具
-- 文件管理器
-- 编解码工具(base64,16进制等等)
-- 二维码生成器(barcode)
-- 文本比较工具(jsdiff)
-- 代码模板(code\_template)
-- 语音播报
-- 天气信息抓取(中国天气网数据)
-
-
-### 定时任务
-- 通过配置页面设置要调用的URL和时间匹配规则即可
-
-![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/static/img/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE.PNG)
-
-- `handlers/tools`目录下是开发工具，可以通过搜索功能定位
-- `$DATA_DIR/scripts/`目录下是系统脚本,直接与操作系统交互
-
-### 其他
-- debug模式下自动侦测文件修改并重新加载
-- 支持文件下载断点续传
-- 使用响应式布局
-- 用户权限，通过Python的装饰器语法，比较方便修改和扩展(见xauth.login_required)
-- 数据库结构全自动更新(xtables.py)
-- 图标，是的我自己做了一个很丑的图标，寓意天圆地方
-
-## 配置运行
-- 安装依赖的软件包```python -m pip install -r requirements.txt```
-- 无需额外配置，初始化的管理员账号是admin/123456
-- 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 即可
 
 ## 协议
 
