@@ -48,7 +48,7 @@ $("#saveToDbBtn").on("click", function () {
     var name = $("#savedName").val();
     var content = $("#content").val();
     $.post("/file/add", 
-        {"_type": "json", "name": name, "content": content, "type": "markdown"}, 
+        {"_type": "json", "name": name, "content": content, "type": "md"}, 
         function (responseText) {
             console.log(responseText);
             var data = JSON.parse(responseText);

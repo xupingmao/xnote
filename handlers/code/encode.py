@@ -87,7 +87,7 @@ class handler:
         #     newname = rename_dict[key]
         #     newname = base64.b64decode(newname.encode("utf-8")).decode("utf-8")
         #     print(newname)
-
+        errors = []
         filelist = getfilelist(path)
         for index, file in enumerate(filelist):
             if file.type == "dir":
@@ -98,7 +98,12 @@ class handler:
             newname = base64.urlsafe_b64decode(name.encode("utf-8")).decode("utf-8")
             # print(newname)
             newpath = os.path.join(path, newname)
-            os.rename(file.path, newpath)
+            try:
+                os.rename(file.path, newpath)
+            except Exception as e:
+                errors.append(str(e))
+        if len(errors) > 0:
+            raise Exception(errors)
 
 
     def POST(self):
