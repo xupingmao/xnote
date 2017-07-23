@@ -10,9 +10,11 @@ import os
 import mimetypes
 
 import web
-from handlers.base import *
 import xutils
 import xauth
+from handlers.base import *
+from xutils import FileItem
+
 
 class handler(BaseHandler):
 
@@ -52,56 +54,6 @@ def get_parent_path(path):
     if not path.endswith("/"):
         path = path+"/"
     return os.path.dirname(path2).replace("\\", "/") # fix windows file sep
-
-class FileItem(xutils.Storage):
-
-    def __init__(self, path):
-        # Fix ending
-        # if os.path.isdir(path) and not path.endswith("/"):
-        #     path = path + "/"
-        self.path = path
-        self.name = os.path.basename(path)
-        self.size = get_file_size(path)
-
-        # 处理Windows盘符
-        if path.endswith(":"):
-            self.name = path
-
-        self.name = xutils.unquote(self.name)
-        if os.path.isfile(path):
-            self.type = "file"
-            name, ext = os.path.splitext(self.name)
-            if ext == ".xenc":
-                self.name = xutils.urlsafe_b64decode(name)
-        else:
-            self.type = "dir"
-            self.path += "/"
-
-    # sort方法重写__lt__即可
-    def __lt__(self, other):
-        if self.type == "dir" and other.type == "file":
-            return True
-        if self.type == "file" and other.type == "dir":
-            return False
-        return self.name < other.name
-        
-
-def getpathlist(path):
-    path   = path.replace("\\", "/")
-    pathes = path.split("/")
-    if path[0] == "/":
-        last = ""
-    else:
-        last = None
-    pathlist = []
-    for vpath in pathes:
-        if vpath == "":
-            continue
-        if last is not None:
-            vpath = last + "/" + vpath
-        pathlist.append(FileItem(vpath))
-        last = vpath
-    return pathlist
 
 def list_abs_dir(path):
     # pathlist = []
@@ -218,7 +170,7 @@ class FileSystemHandler:
         kw   = get_filesystem_kw()
         kw["filelist"]     = filelist
         kw["path"]         = path
-        kw["fspathlist"]   = getpathlist(path)
+        kw["fspathlist"]   = xutils.splitpath(path)
         
         return xtemplate.render("fs/fs.html", **kw)
 

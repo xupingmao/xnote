@@ -36,6 +36,10 @@ else:
 # 而Py3中的getstatusoutput则是对subprocess.Popen的封装
 # Py2的getstatusoutput, 注意原来的windows下不能正确运行，但是下面改进版的可以运行
 
+from util.dateutil import *
+from util.netutil  import *
+from util.fsutil   import *
+
 if PY2:
     def getstatusoutput(cmd):
         ## Return (status, output) of executing cmd in a shell.
@@ -199,19 +203,6 @@ def touch(path):
     if not os.path.exists(path):
         with open(path, "wb") as fp:
             pass
-
-def get_relative_path(path, parent):
-    path1 = os.path.abspath(path)
-    parent1 = os.path.abspath(parent)
-    # abpath之后最后没有/
-    # 比如
-    # ./                 -> /users/xxx
-    # ./test/hello.html  -> /users/xxx/test/hello.html
-    # 相减的结果是       -> /test/hello.html
-    # 需要除去第一个/
-    relative_path = path1[len(parent1):]
-    return relative_path.replace("\\", "/")[1:]
-    
 
 def db_execute(path, sql, args = None):
     db = sqlite3.connect(path)

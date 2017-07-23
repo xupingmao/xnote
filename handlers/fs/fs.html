@@ -13,11 +13,19 @@
     table td {
         border: none;
     }
+    .left {
+        float: left;
+    }
+    .right {
+        float: right;
+    }
 </style>
 
 {% end %}
 
 {% block body %}
+
+{% init find_key = "" %}
 
 <div>
     <form action="/fs_upload" enctype="multipart/form-data" method="POST" style="padding-top:20px;">
@@ -26,8 +34,21 @@
         <input type="submit" value="上传"/>
         <a href="/tools/webuploader#{{path}}">上传大文件</a>
     </form>
-    <a href="/code/analyze?path={{path}}">分析</a>
-    <a href="/tools/zip?dirname={{path}}">压缩</a>
+</div>
+
+<div class="col-md-12">
+    <div class="left">
+        <a href="/code/analyze?path={{path}}">分析</a>
+        <a href="/tools/zip?dirname={{path}}">压缩</a>
+    </div>
+
+    <form action="/fs/find">
+    <div class="right">
+        <input class="hide" name="path" value="{{path}}">
+        <input name = "find_key" type="text" value="{{find_key}}">
+        <input type="submit" value="Find File"/>
+    </div>
+    </form>
 </div>
 
 <hr/>

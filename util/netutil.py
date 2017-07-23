@@ -1,5 +1,6 @@
-
+# encoding=utf-8
 import os
+from http.client import HTTPConnection
 
 def get_path(web_root, web_path):
     if web_path[0] == "/":
@@ -24,3 +25,23 @@ def get_host(url):
     head = words[0]
     body = words[1]
     return head + "://" + body[:body.find("/")]
+
+# 使用低级API访问HTTP，可以任意设置header，data等
+def do_http(self, method, addr, url, headers, data):
+    cl = HTTPConnection(addr)
+    cl.request(method, url, data, headers = headers)
+    head = None
+    buf = None
+    with cl.getresponse() as resp:
+        self.response_headers = resp.getheaders()
+        content_type = resp.getheader("Content-Type")
+        content_encoding = resp.getheader("Content-Encoding")
+        buf = resp.read()
+        if content_encoding == "gzip":
+            fileobj = io.BytesIO(buf)
+            gzip_f = gzip.GzipFile(fileobj=fileobj, mode="rb")
+            content = gzip_f.read()
+            return content
+        elif content_encoding != None:
+            raise Exception("暂不支持%s编码" % content_encoding)
+        return buf

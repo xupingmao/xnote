@@ -52,12 +52,11 @@ class TestMain(unittest.TestCase):
         print("files=%s" % len(files))
 
     def test_fs_func(self):
-        import handlers.fs.fs as fs
-        item0, item1 = fs.getpathlist("/fs/test/")
+        item0, item1 = xutils.splitpath("/fs/test/")
         self.assertEqual("/fs/", item0.path)
         self.assertEqual("/fs/test/", item1.path)
 
-        item0, item1, item2 = fs.getpathlist("C:/data/name/")
+        item0, item1, item2 = xutils.splitpath("C:/data/name/")
         self.assertEqual("C:/", item0.path)
         self.assertEqual("C:/data/", item1.path)
         self.assertEqual("C:/data/name/", item2.path)
@@ -124,7 +123,7 @@ class TestMain(unittest.TestCase):
         self.check_200("/system/tts?content=测试")
 
     def test_alarm(self):
-        self.check_200("/api/alarm/test")
+        self.check_200("/api/alarm/test?repeat=1")
 
     def test_task(self):
         self.check_200("/system/crontab")

@@ -59,3 +59,10 @@ class TestMain(unittest.TestCase):
         parent = "./test"
         relative_path = xutils.get_relative_path(path, parent)
         self.assertEqual("test.html", relative_path)
+
+    def test_splitpath(self):
+        path = "/root/test"
+        pathlist = xutils.splitpath(path)
+        self.assertEqual(2, len(pathlist))
+
+        

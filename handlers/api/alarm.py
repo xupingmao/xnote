@@ -10,10 +10,12 @@ import xconfig
 
 class handler:
     def GET(self, msg):
+        repeat = xutils.get_argument("repeat", 3, type=int)
+        repeat = min(10, repeat)
         if xconfig.is_mute():
             return dict(code="fail", message="mute")
         msg = xutils.unquote(msg)
-        for i in range(3):
+        for i in range(repeat):
             xutils.say(msg)
             time.sleep(5)
         return dict(code="success")
