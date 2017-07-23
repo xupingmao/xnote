@@ -10,6 +10,10 @@
     .fs-file {
 
     }
+    .fs-image {
+        width: 180px;
+        /*height: 90px;*/
+    }
     table td {
         border: none;
     }
@@ -70,12 +74,14 @@
 {% for item in filelist %}
     <tr>
         <td>
-        <!-- <div class="col-md-12" style="padding-top: 6px;"> -->
         {% if item.type == "dir" %}
             <img src="/static/img/folder.gif"/>
             <a href="/fs/{{item.path}}" class="fs-dir">{{item.name}}</a>
         {% else %}
             <a href="/fs/{{item.path}}" class="fs-file">{{item.name}}</a>
+            {% if item.name.endswith((".jpg", "png", "gif", "jpeg")) %}
+                <div><img src="/fs/{{item.path}}" class="fs-image" alt="{{item.name}}"/></div>
+            {% end %}
         {% end %}
         </td>
 

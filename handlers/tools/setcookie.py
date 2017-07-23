@@ -9,17 +9,8 @@ import xtemplate
 
 """
 
-html = """
-<!DOCTYPE HTML>
-<html>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <head>
-        <title>Set-Cookie</title>
-        <link rel="stylesheet" href="/static/css/xnote.css"/>
-        <script src="/static/lib/jquery/jquery-2.2.3.min.js"></script>
-    </head>
-
-    <body>
+html = """{% extends base.html %}
+{% block body %}
         {% init cookie = "" %}
         <form class="col-md-12" method="POST">
             <h2>Cookie</h2>
@@ -32,9 +23,7 @@ html = """
                 $("#cookie").html(document.cookie);
             });
         </script>   
-    </body>
-
-</html>
+{% end %}
 """
 
 html2 = """
@@ -68,7 +57,15 @@ class handler:
         # expires设置失效时间，不设置只在本次连接中生效
         # Path设置生效路径，不加端口号会隔离
         # 多个cookie需要使用多个Set-Cookie首部
-        web.header("Set-Cookie", cookie + "; expires="+get_gmt_time() + "; Path=/")
+        # web.header("Set-Cookie", cookie + "; expires="+get_gmt_time() + "; Path=/")
+        cookies = cookie.split(";")
+        for ck in cookies:
+            ck = ck.strip()
+            parts = ck.split('=')
+            if len(parts) == 2:
+                key, value = parts
+                web.setcookie(key, value, expires = 24 * 3600)
+
         # dd = json.loads(cookie)
         # for key in dd:
             # web.header("Set-Cookie", cookie)

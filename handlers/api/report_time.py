@@ -25,6 +25,7 @@ class handler:
             else:
                 msg = "现在时间是%s点%s分" % (tm.tm_hour, tm.tm_min)
             if tm.tm_hour >= 23:
+                return False
                 msg += "，夜深了，请注意休息"
             xutils.say(msg)
             # voice.Release()
