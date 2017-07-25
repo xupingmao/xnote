@@ -21,7 +21,7 @@ def tcp_mapping_worker(conn_receiver, conn_sender):
         try:
             data = conn_receiver.recv(PKT_BUFF_SIZE)
         except Exception as e:
-            send_log('Event: Connection closed. Thread Count: ', len(threading.enumerate()), e)
+            send_log('Event: Connection closed. Thread Count:', len(threading.enumerate()), "Error:", e)
             break
 
         if not data:
@@ -68,37 +68,53 @@ def tcp_mapping_request(local_conn, remote_ip, remote_port):
     local_conn.close()
     remote_conn.close()
 
-# 端口映射函数
-# (local_ip, local_port) 是监听地址
-def tcp_mapping(remote_ip, remote_port, local_ip, local_port):
-    local_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # 设置socket重用, Windows下没有部分选项
-    if hasattr(socket, "SO_REUSEADDR"):
-        local_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    if hasattr(socket, "SO_REUSEPORT"):
-        local_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-    
-    local_server.bind((local_ip, local_port))
-    local_server.listen(20)
+class ProxyServer:
 
-    send_log('Event: Starting mapping service on ' + local_ip + ':' + str(local_port) + ' ...')
+    def __init__(self, remote_ip, remote_port, local_ip, local_port):
+        self.remote_ip = remote_ip
+        self.remote_port = remote_port
+        self.local_ip = local_ip
+        self.local_port = local_port
+        self.running = False
 
-    while True:
-        try:
-            (local_conn, local_addr) = local_server.accept()
-        except (KeyboardInterrupt, Exception):
-            # KeyboardInterrupt 不能立即关闭
-            local_server.close()
-            send_log('Event: Stop mapping service.')
-            break
-        # 使用线程池优化
-        threading.Thread(target=tcp_mapping_request, args=(local_conn, remote_ip, remote_port)).start()
+        # 端口映射函数
+    # (local_ip, local_port) 是监听地址
+    def tcp_mapping(self, remote_ip, remote_port, local_ip, local_port):
+        local_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # 设置socket重用, Windows下没有部分选项
+        if hasattr(socket, "SO_REUSEADDR"):
+            local_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if hasattr(socket, "SO_REUSEPORT"):
+            local_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        
+        local_server.bind((local_ip, local_port))
+        local_server.listen(20)
 
-        send_log('Event: Receive mapping request from %s:%d.' % local_addr)
+        send_log('Event: Starting mapping service on ' + local_ip + ':' + str(local_port) + ' ...')
 
+        while self.running:
+            try:
+                (local_conn, local_addr) = local_server.accept()
+            except (KeyboardInterrupt, Exception):
+                # KeyboardInterrupt 不能立即关闭
+                local_server.close()
+                send_log('Event: Stop mapping service.')
+                break
+            # 使用线程池优化
+            threading.Thread(target=tcp_mapping_request, args=(local_conn, remote_ip, remote_port)).start()
+
+            send_log('Event: Receive mapping request from %s:%d.' % local_addr)
+
+    def start(self):
+        self.running = True
+        self.tcp_mapping(self.remote_ip, self.remote_port, self.local_ip, self.local_port)
+
+    def stop(self):
+        self.running = False
 
 # 主函数
 if __name__ == '__main__':
     # tcp_mapping("127.0.0.1", 1234, "0.0.0.0", 1081)
-    tcp_mapping("127.0.0.1", 8080, "0.0.0.0", 1081)
+    server = ProxyServer("127.0.0.1", 8080, "0.0.0.0", 1081)
+    server.start()
 
