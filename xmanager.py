@@ -213,12 +213,18 @@ class ModelManager:
         for info in self.failed_mods:
             log("Failed info: %s" % info)
 
-    def load_model(self, module, name):
+    def load_model(self, module, modname):
+        name = modname
+        modpath = "/".join(modname.split(".")[1:-1])
+        if not modpath.startswith("/"):
+            modpath = "/" + modpath
         if hasattr(module, "xurls"):
             xurls = module.xurls
             for i in range(0, len(xurls), 2):
                 url = xurls[i]
                 handler = xurls[i+1]
+                if not url.startswith(modpath):
+                    log("WARN: url %r is invalid, parent is %r" % (url, modpath))
                 self.add_mapping(url, handler)
         # xurls拥有最高优先级
         elif hasattr(module, "handler"):

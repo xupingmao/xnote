@@ -31,19 +31,20 @@
 
 {% init find_key = "" %}
 
-<div>
+<div class="hide">
     <form action="/fs_upload" enctype="multipart/form-data" method="POST" style="padding-top:20px;">
         <input name="dirname" style="display:none;" value="{{path}}"/>
         <input type="file" name="file"/>
         <input type="submit" value="上传"/>
-        <a href="/tools/webuploader#{{path}}">上传大文件</a>
     </form>
 </div>
 
-<div class="col-md-12">
+<div class="col-md-12 top-offset-1">
     <div class="left">
+        <input type="button" class="btn" value="预览图片" id="previewImg"/>
         <a href="/code/analyze?path={{path}}">分析</a>
         <a href="/tools/zip?dirname={{path}}">压缩</a>
+        <a href="/tools/webuploader#{{path}}">上传大文件</a>
     </div>
 
     <form action="/fs/find">
@@ -80,7 +81,8 @@
         {% else %}
             <a href="/fs/{{item.path}}" class="fs-file">{{item.name}}</a>
             {% if item.name.endswith((".jpg", "png", "gif", "jpeg")) %}
-                <div><img src="/fs/{{item.path}}" class="fs-image" alt="{{item.name}}"/></div>
+                <!-- <div><img src="/fs/{{item.path}}" class="fs-image" alt="{{item.name}}"/></div> -->
+                <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>
             {% end %}
         {% end %}
         </td>
@@ -96,11 +98,26 @@
         </td>
 {% end %}
 </table>
-
-<!-- </div> -->
-
 <hr/>
 
 </div>
+
+<script type="text/javascript">
+    $("#previewImg").on("click", function (target) {
+        var self = this;
+        var value = $(self).val();
+        if (value == "预览图片") {
+            $(".fs-image-div").each(function (index, target) {
+                var img = $("<img>").attr("src", $(target).attr("img-src")).addClass("fs-image");
+                $(target).append(img);
+            })
+            $(self).val("取消预览");
+        } else {
+            $(".fs-image").remove();
+            $(self).val("预览图片");
+        }
+        
+    })
+</script>
 
 {% end %}
