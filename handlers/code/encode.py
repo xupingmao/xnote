@@ -65,9 +65,9 @@ class handler:
         for index, file in enumerate(filelist):
             if file.type == "dir":
                 continue
-            if file.name.endswith(".xenc"):
+            newname = xutils.encode_name(file.name)
+            if newname == file.name:
                 continue
-            newname = base64.urlsafe_b64encode(file.name.encode("utf-8")).decode("utf-8") + ".xenc"
             newpath = os.path.join(path, newname)
             os.rename(file.path, newpath)
         #     if file.name.endswith(".json"):
@@ -92,10 +92,9 @@ class handler:
         for index, file in enumerate(filelist):
             if file.type == "dir":
                 continue
-            if not file.name.endswith(".xenc"):
+            newname = xutils.decode_name(file.name)
+            if newname == file.name:
                 continue
-            name = file.name[:-5]
-            newname = base64.urlsafe_b64decode(name.encode("utf-8")).decode("utf-8")
             # print(newname)
             newpath = os.path.join(path, newname)
             try:
