@@ -125,11 +125,8 @@ class FileSystemHandler:
 
     def handle_content_type(self, path):
         """Content-Type设置, 优先级从高到低依次是：自定义配置、系统配置、默认配置"""
+        path = xutils.decode_name(path)
         name, ext = os.path.splitext(path)
-        if ext == ".xenc":
-            name = os.path.basename(name)
-            path = xutils.urlsafe_b64decode(name)
-            name, ext = os.path.splitext(path)
         mime_type = self.mime_types.get(ext.lower())
         if mime_type is None:
             mime_type, mime_encoding = mimetypes.guess_type(path)

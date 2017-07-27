@@ -3,6 +3,7 @@ import codecs
 import os
 import platform
 import xutils
+import base64
 
 from . import logutil
 from web.utils import Storage
@@ -177,9 +178,7 @@ class FileItem(Storage):
         self.name = xutils.unquote(self.name)
         if os.path.isfile(path):
             self.type = "file"
-            name, ext = os.path.splitext(self.name)
-            if ext == ".xenc":
-                self.name = xutils.urlsafe_b64decode(name)
+            self.name = decode_name(self.name)
         else:
             self.type = "dir"
             self.path += "/"
@@ -209,3 +208,18 @@ def splitpath(path):
         pathlist.append(FileItem(vpath))
         last = vpath
     return pathlist
+
+def decode_name(name):
+    dirname = os.path.dirname(name)
+    basename = os.path.basename(name)
+    namepart, ext = os.path.splitext(basename)
+    if ext in (".xenc", ".x0"):
+        basename = base64.urlsafe_b64decode(namepart.encode("utf-8")).decode("utf-8")
+        return os.path.join(dirname, basename)
+    return name
+
+def encode_name(name):
+    namepart, ext = os.path.splitext(name)
+    if ext in (".xenc", ".x0"):
+        return name
+    return base64.urlsafe_b64encode(name.encode("utf-8")).decode("utf-8") + ".x0"
