@@ -1,5 +1,15 @@
 {% extends base.html %}
 
+{% block head %}
+<style type="text/css">
+    .doc-detail {
+        background: #ccccff;
+        border: solid 1px;
+        padding: 2px;
+    }
+</style>
+{% end %}
+
 {% block body %}
 
 <div class="col-md-12">
@@ -7,7 +17,7 @@
     <h2>模块: {{doc_info.name}}</h2>
 
     <p>位于 <a href="/code/view_source?path={{doc_info.file}}">{{doc_info.file}}</a></p>
-    <pre>{{doc_info.doc}}</pre>
+    <pre class="doc-detail">{{doc_info.doc}}</pre>
 
     <h2>方法</h2>
 
@@ -15,7 +25,7 @@
 
     <div>
         <span>{{func[0]}}</span>
-        <pre>{{func[1]}}</pre>
+        <pre class="doc-detail">{{func[1]}}</pre>
     </div>
 
     {% end %}
