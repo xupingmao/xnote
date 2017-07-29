@@ -1,7 +1,9 @@
 # encoding=utf-8
-import sys
+import six
+import xutils
 import xtemplate
 
+sys = xutils.sys
 class ModuleInfo:
 
     def __init__(self, mod, sysname):
@@ -22,10 +24,14 @@ class ModuleInfo:
 
 def query_modules():
     modules = []
-    for modname in sys.modules:
+    for modname in sys.modules.copy():
         module = sys.modules[modname]
-        mod = ModuleInfo(module, modname)
-        modules.append(mod)
+        if module != None:
+            mod = ModuleInfo(module, modname)
+            modules.append(mod)
+        else:
+            # Py2中出现这种情况
+            six.print_("%s is None" % modname)
     return sorted(modules)
 
 class handler(object):

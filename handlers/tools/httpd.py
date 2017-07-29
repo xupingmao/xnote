@@ -8,9 +8,10 @@ import time
 import codecs
 import socket
 import logging
-from urllib.parse import unquote
+import six
 
-from io import StringIO
+unquote = six.moves.urllib.parse.unquote
+StringIO = six.moves.StringIO
 
 PORT = 8080
 HOST = '30.15.53.146'

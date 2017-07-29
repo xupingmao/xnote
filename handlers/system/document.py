@@ -1,10 +1,12 @@
 # encoding=utf-8
 
-import sys
 import inspect
 
 import web
+import xutils
 import xtemplate
+
+sys = xutils.sys
 
 class DocInfo:
 
@@ -18,6 +20,9 @@ class DocInfo:
         self.file = ""
         if hasattr(mod, "__file__"):
             self.file = mod.__file__
+            # process with Py2
+            if self.file.endswith(".pyc"):
+                self.file = self.file[:-1]
 
         attr_dict = mod.__dict__
         for attr in sorted(attr_dict):
@@ -34,7 +39,7 @@ def getargspec(value):
     argspec = ''
     try:
         signature = inspect.signature(value)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, AttributeError):
         signature = None
     if signature:
         argspec = str(signature)

@@ -136,6 +136,11 @@ def pre_render(kw):
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
 
+    # render input
+    _input = web.ctx.get("_xnote.input")
+    if _input is not None:
+        kw.update(_input)
+
 
 def encode_json(obj):
     if hasattr(obj, "__call__"):

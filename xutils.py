@@ -151,15 +151,22 @@ def readfile(path, mode = "r"):
         gbk 是一种双字节编码，全称《汉字内码扩展规范》，兼容GB2312
         latin_1 是iso-8859-1的别名，单字节编码，兼容ASCII
     '''
+    last_err = None
     for encoding in ["utf-8", "gbk", "mbcs", "latin_1"]:
         try:
-            fp = open(path, encoding=encoding)
-            content = fp.read()
-            fp.close()
-            return content
-        except:
-            pass
-    raise Exception("can not read file %s" % path)
+            if PY2:
+                fp = open(path)
+                content = fp.read()
+                fp.close()
+                return content.decode(encoding)
+            else:
+                fp = open(path, encoding=encoding)
+                content = fp.read()
+                fp.close()
+                return content
+        except Exception as e:
+            last_err = e
+    raise Exception("can not read file %s" % path, last_err)
         
 def savetofile(path, content):
     import codecs
