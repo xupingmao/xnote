@@ -1,10 +1,10 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/24
 # 系统脚本管理
-
+from __future__ import print_function
 import os
 import web
-
+import six
 import xauth
 import xutils
 import xconfig
@@ -64,12 +64,15 @@ class ExecuteHandler:
             # Mac os Script
             os.system("chmod +x " + path)
             ret = os.system("open " + path)
-        elif path.endswith(".bat"):
-            os.system("start %s" % path)
+        elif path.endswith((".bat", ".vbs")):
+            cmd = xutils.u("start %s") % path
+            if six.PY2:
+                # Python2 import当前目录优先
+                encoding = xutils.sys.getfilesystemencoding()
+                cmd = cmd.encode(encoding)
+            os.system(cmd)
         elif path.endswith(".sh"):
             os.system("chmod +x " + path)
-        elif path.endswith(".vbs"):
-            os.system("start %s" % path)
             # TODO linux怎么处理?
         return dict(code="success", message="", ret=ret)
 

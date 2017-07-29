@@ -22,9 +22,10 @@ PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代�
 - [github](https://github.com/xupingmao/xnote)
 - [码云](https://git.oschina.net/xupingmao/xnote)
 
-## 环境依赖
+## Python版本
 
 - Python 3
+- Python 2.7 (部分支持)
 
 ## 配置运行
 - 安装依赖的软件包```python -m pip install -r requirements.txt```

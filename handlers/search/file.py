@@ -5,7 +5,7 @@
 """Description here"""
 
 import sys
-
+import six
 import xutils
 import xauth
 import xmanager
@@ -16,7 +16,15 @@ from util import textutil
 SearchResult = xutils.SearchResult
 config = xconfig
 
-
+def to_sqlite_obj(text):
+    if text is None:
+        return "NULL"
+    if not isinstance(text, six.string_types):
+        return repr(text)
+    # text = text.replace('\\', '\\')
+    text = text.replace("'", "''")
+    return "'" + text + "'"
+    
 class FileDO(dict):
     """This class behaves like both object and dict"""
     def __init__(self, name):
@@ -97,6 +105,7 @@ class FileDO(dict):
         if related != self.related:
             self.save()
             
+    @staticmethod
     def fromDict(dict, option=None):
         """build fileDO from dict"""
         name = dict['name']
@@ -183,7 +192,7 @@ def search_name(words, groups=None):
         words = [words]
     like_list = []
     for word in words:
-        like_list.append('name LIKE %s ' % repr('%' + word.upper() + '%'))
+        like_list.append('name LIKE %s ' % to_sqlite_obj('%' + word.upper() + '%'))
     sql = "SELECT * from file WHERE %s AND is_deleted != 1" % (" AND ".join(like_list))
     if groups and groups != "admin":
         sql += " AND (groups = '*' OR groups = '%s')" % groups
@@ -199,7 +208,7 @@ def full_search(words, groups=None):
     content_like_list = []
     # name_like_list = []
     for word in words:
-        content_like_list.append('content like %s ' % repr('%' + word.upper() + '%'))
+        content_like_list.append('content like %s ' % to_sqlite_obj('%' + word.upper() + '%'))
     # for word in words:
     #     name_like_list.append("related like %s " % repr("%" + word.upper() + '%'))
     sql = "SELECT * FROM file WHERE (%s) AND is_deleted != 1" \

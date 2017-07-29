@@ -7,6 +7,7 @@ import json
 import base64 
 import time
 import math
+import six
 import web
 import xutils
 import xconfig
@@ -22,7 +23,8 @@ def load_mapping(pattern, func_str):
     global _mappings
     try:
         mod, func_name = func_str.rsplit('.', 1)
-        mod = __import__(mod, None, None, [''])
+        # mod = __import__(mod, None, None, [''])
+        mod = six._import_module(mod)
         func = getattr(mod, func_name)
         _mappings.append(r"^%s\Z" % pattern)
         _mappings.append(func)

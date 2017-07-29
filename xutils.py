@@ -16,6 +16,7 @@ import time
 import platform
 import re
 import shutil
+import six
 import web
 
 from util.ziputil import *
@@ -26,11 +27,24 @@ if PY2:
     from urllib import quote, unquote, urlopen
     from ConfigParser import ConfigParser
     # from commands import getstatusoutput
+
+    def u(s, encoding="utf-8"):
+        if isinstance(s, str):
+            return s.decode(encoding)
+        return str(s)
+
+    def listdir(dirname):
+        names = list(os.listdir(dirname))
+        encoding = sys.getfilesystemencoding()
+        return [newname.decode(encoding) for newname in names]
 else:
     from urllib.parse import quote, unquote
     from urllib.request import urlopen
     from subprocess import getstatusoutput
     from configparser import ConfigParser
+
+    u = str
+    listdir = os.listdir
 
 # 关于Py2的getstatusoutput，实际上是对os.popen的封装
 # 而Py3中的getstatusoutput则是对subprocess.Popen的封装
@@ -307,7 +321,10 @@ def quote_unicode(url):
         return '%%%02X' % c
 
     bytes = url.encode("utf-8")
-    return ''.join([quote_char(c) for c in bytes])
+    if six.PY2:
+        return ''.join([quote_char(ord(c)) for c in bytes])
+    else:
+        return ''.join([quote_char(c) for c in bytes])
 
     # def urlencode(matched):
     #     text = matched.group()
