@@ -67,7 +67,7 @@ def build_opener(*handlers):
 
 # 从urllib.request中拷贝而来
 def urlopen(url, data=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
-            *, cafile=None, capath=None, cadefault=False, context=None):
+            cafile=None, capath=None, cadefault=False, context=None):
     global _opener
     if cafile or capath or cadefault:
         if context is not None:

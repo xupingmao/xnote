@@ -174,6 +174,6 @@ def get_templates():
 def reload():
     global _loader
     _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
-    load_menu_properties()
+    # load_menu_properties()
     
 reload()

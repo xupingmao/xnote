@@ -8,7 +8,7 @@
 """
 import re
 import sqlite3
-
+import six
 import web.db as db
 import xconfig
 import xtables
@@ -99,6 +99,7 @@ class FileDO(dict):
         if related != self.related:
             self.save()
             
+    @staticmethod
     def fromDict(dict, option=None):
         """build fileDO from dict"""
         name = dict['name']
@@ -144,7 +145,7 @@ def getRandomPath():
 def to_sqlite_obj(text):
     if text is None:
         return "NULL"
-    if not (isinstance(text, str)):
+    if not isinstance(text, six.string_types):
         return repr(text)
     # text = text.replace('\\', '\\')
     text = text.replace("'", "''")
@@ -271,6 +272,7 @@ def delete_by_id(id):
 
 def get_by_name(name):
     sql = "select * from file where name = %s and is_deleted != 1" % to_sqlite_obj(name)
+    # print(sql)
     result = get_db().execute(sql)
     if len(result) is 0:
         return None
@@ -302,7 +304,6 @@ def insert(file):
 
     values = [build_sql_row(file, k) for k in file]
     sql = "insert into file (%s) values (%s)" % (','.join(file), ",".join(values))
-    # print(sql)
     return get_db().execute(sql)
         
 

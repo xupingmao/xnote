@@ -13,7 +13,6 @@ import functools
 import os
 import json
 import socket
-import handlers.backup as backup
 import os
 import autoreload
 import xtemplate
@@ -123,9 +122,6 @@ class SysHandler:
             cmd_list.append(Storage(name="系统变量管理", url="/system/sys_var_admin"))
 
         return xtemplate.render("system/sys.html", 
-            backup = backup.get_info(),
-            # server_ip = get_server_ip(),
-            # port = config.get("port"),
             addr = addr,
             cmd_list = cmd_list,
             os = os,

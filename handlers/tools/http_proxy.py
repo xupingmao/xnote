@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/03/19
-
+from __future__ import print_function
 import socket
 import sys
 import threading

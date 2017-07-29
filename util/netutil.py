@@ -1,6 +1,10 @@
 # encoding=utf-8
 import os
-from http.client import HTTPConnection
+
+try:
+    from http.client import HTTPConnection
+except ImportError as e:
+    pass
 
 def get_path(web_root, web_path):
     if web_path[0] == "/":

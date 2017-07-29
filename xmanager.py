@@ -8,8 +8,15 @@ import traceback
 import time
 import copy
 import json
+import six
+
 from threading import Thread, Timer
-from queue import Queue
+
+try:
+    from queue import Queue
+except ImportError:
+    from Queue import Queue
+
 
 import web
 import xconfig
@@ -195,7 +202,9 @@ class ModelManager:
                     # 参考Python源码import.c即可
                     # <code>has_from = PyObject_IsTrue(fromlist);</code>实际上是个Bool值
                     # level=0表示绝对路径，-1是默认的
-                    mod = __import__(modname, fromlist=1, level=0)
+                    # mod = __import__(modname, fromlist=1, level=0)
+                    # six的这种方式也不错
+                    mod = six._import_module(modname)
                     # mod = self.get_mod(rootmod, modname)
                     self.load_model(mod, modname)
                     # self.load_task(mod, modname)
@@ -224,7 +233,7 @@ class ModelManager:
                 url = xurls[i]
                 handler = xurls[i+1]
                 if not url.startswith(modpath):
-                    log("WARN: url %r is invalid, parent is %r" % (url, modpath))
+                    log("WARN: pattern %r is invalid, should starts with %r" % (url, modpath))
                 self.add_mapping(url, handler)
         # xurls拥有最高优先级
         elif hasattr(module, "handler"):
