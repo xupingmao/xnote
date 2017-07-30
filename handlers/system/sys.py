@@ -109,7 +109,7 @@ class SysHandler:
         cmd_list.append(Storage(name="模块信息(pydoc)", url="/system/modules_info"))
 
         if xauth.is_admin():
-            cmd_list.append(Storage(name="系统运行状态", url="/system/monitor"))
+            cmd_list.append(Storage(name="系统信息", url="/system/monitor"))
             cmd_list.append(Storage(name="文件浏览器", url="/fs/"))
             cmd_list.append(Storage(name="脚本管理", url="/system/script_admin"))
             cmd_list.append(Storage(name="重新加载模块", url="/system/reload"))

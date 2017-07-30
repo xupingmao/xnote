@@ -299,11 +299,13 @@ class StaticFileHandler(FileSystemHandler):
 name = "文件系统"
 description = "下载和上传文件"
 
-xurls = (r"/fs-", handler, 
+xurls = (
+    r"/fs-", handler, 
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
     r"/(app/.*)", StaticFileHandler,
-    r"/(tmp/.*)", StaticFileHandler)
+    r"/(tmp/.*)", StaticFileHandler
+)
 
 

@@ -73,6 +73,7 @@
 
 <table class="col-md-12">
 {% for item in filelist %}
+    {% if not item.name.startswith("._") %}
     <tr>
         <td>
         {% if item.type == "dir" %}
@@ -80,7 +81,7 @@
             <a href="/fs/{{item.path}}" class="fs-dir">{{item.name}}</a>
         {% else %}
             <a href="/fs/{{item.path}}" class="fs-file">{{item.name}}</a>
-            {% if item.name.endswith((".jpg", "png", "gif", "jpeg")) %}
+            {% if item.name.lower().endswith((".jpg", "png", "gif", "jpeg")) %}
                 <!-- <div><img src="/fs/{{item.path}}" class="fs-image" alt="{{item.name}}"/></div> -->
                 <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>
             {% end %}
@@ -96,6 +97,8 @@
                 <a href="/wiki/{{item.path}}">[编辑]</a>
             {% end %}
         </td>
+    </tr>
+    {% end %}
 {% end %}
 </table>
 <hr/>
