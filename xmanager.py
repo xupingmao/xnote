@@ -101,7 +101,7 @@ class WebModel:
         
 
 def log(msg):
-    print(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
+    six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
 
 class ModelManager:
     """模块管理器
@@ -132,6 +132,7 @@ class ModelManager:
         self.debug = True
         self.report_loading = False
         self.task_manager = TaskManager(app)
+        self.blacklist = ("handlers.experiment")
     
     def reload_module(self, name):
         try:
@@ -196,6 +197,8 @@ class ModelManager:
                         if self.report_loading:
                             log("del %s" % modname)
                         del sys.modules[modname] # reload module
+                    if modname.startswith(self.blacklist):
+                        continue
                     # Py3: __import__(name, globals=None, locals=None, fromlist=(), level=0)
                     # Py2: __import__(name, globals={}, locals={}, fromlist=[], level=-1)
                     # fromlist不为空(任意真值*-*)可以得到子模块,比如__import__("os.path", fromlist=1)返回<module "ntpath" ...>

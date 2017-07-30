@@ -183,7 +183,7 @@ class handler(BaseHandler):
 load_mapping(r"(.*[0-9]+.*)",           "handlers.search.calc.do_calc")
 load_mapping(r"(.*)",                   "handlers.search.pydoc.search")
 load_mapping(r"([^ ]*)",                "handlers.search.translate.search")
-load_mapping(r"翻译\s+([^ ]+)",        "handlers.search.translate.zh2en")
+load_mapping(r"翻译\s+([^ ]+)",         "handlers.search.translate.zh2en")
 load_mapping(r"([^ ]*)",                "handlers.search.tools.search")
 load_mapping(r"([^ ]*)",                "handlers.search.scripts.search")
 load_mapping(r"([^ ]*)",                "handlers.search.api.search")

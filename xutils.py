@@ -361,10 +361,13 @@ def mac_say(msg):
         os.system("say %s" % m)
 
 def windows_say(msg):
-    import comtypes.client as cc
-    # dynamic=True不生成静态的Python代码
-    voice = cc.CreateObject("SAPI.SpVoice", dynamic=True)
-    voice.Speak(msg)
+    try:
+        import comtypes.client as cc
+        # dynamic=True不生成静态的Python代码
+        voice = cc.CreateObject("SAPI.SpVoice", dynamic=True)
+        voice.Speak(msg)
+    except:
+        pass
 
 def say(msg):
     if is_windows():

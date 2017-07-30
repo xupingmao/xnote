@@ -7,8 +7,20 @@
     <!-- TODO d3.js 展示内存和CPU日志 -->
 
     <div class="col-md-12">
-        <p>系统内存占用: {{sys_mem_used}} / {{sys_mem_total}}</p>
-        <p>线程总数: {{thread_cnt}} <a href="/system/thread_info">详情</a></p>
+    <table>
+        <tr>
+            <td>系统内存占用</td>
+            <td>{{sys_mem_used}} / {{sys_mem_total}}</td>
+        </tr>
+        <tr>
+            <td>线程总数</td>
+            <td>{{thread_cnt}}<a href="/system/thread_info">详情</a></td>
+        </tr>
+        <tr>
+            <td>Python版本</td>
+            <td>{{python_version}}</td>
+        </tr>
+    </table>
     </div>
 
 {% end %}

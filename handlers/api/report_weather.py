@@ -5,7 +5,7 @@
 """Description here"""
 
 import re
-from urllib import request
+import six
 from bs4 import BeautifulSoup
 import xutils
 import xtables
@@ -16,6 +16,7 @@ class handler:
     def GET(self):
         city_code = xutils.get_argument("city_code", "101020100")
         city_name = xutils.get_argument("city_name", "上海")
+        city_name = xutils.u(city_name)
 
         message = None
 
@@ -26,9 +27,9 @@ class handler:
             message = record.value
         else:
             url = "http://www.weather.com.cn/weather1d/%s.shtml" % city_code
-            html = request.urlopen(url).read()
+            html = six.moves.urllib.request.urlopen(url).read()
             if html == b"<!-- empty -->":
-                return dict(code="fail", message="city_code错误")
+                return dict(code="fail", message=xutils.u("city_code错误"))
             soup = BeautifulSoup(html, "html.parser")
             elements = soup.find_all(id="hidden_title")
             # print(elements)
@@ -37,7 +38,7 @@ class handler:
             if len(elements) > 0:
                 weather = elements[0]
                 message = weather.attrs["value"]
-                message = message.replace("/", "至")
+                message = message.replace("/", xutils.u("至"))
                 db.insert(ctime=xutils.format_datetime(), 
                     type="weather",
                     key=city_name,

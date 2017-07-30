@@ -8,7 +8,6 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 import json
 import threading
-import sys
 import re
 import xtemplate
 
@@ -16,6 +15,8 @@ try:
     import psutil
 except ImportError as e:
     psutil = None
+
+sys = xutils.sys
 
 def format_size(size):
     if size < 1024:
@@ -80,6 +81,7 @@ class handler:
         return xtemplate.render("system/monitor.html", 
             sys_mem_used = formated_mem_size,
             sys_mem_total = format_size(sys_mem_total),
+            python_version = sys.version,
             thread_cnt = thread_cnt)
 
 

@@ -2,19 +2,18 @@
 
 from handlers.base import *
 from collections import OrderedDict
-
-import http.client
+import six
 import socket, ssl
 import re
 import io
 import gzip
 
-from urllib.request import Request, build_opener, HTTPSHandler, UnknownHandler
-from urllib.request import HTTPHandler, HTTPDefaultErrorHandler, HTTPRedirectHandler
-from urllib.request import FTPHandler, FileHandler, HTTPErrorProcessor
-from urllib.request import DataHandler, OpenerDirector, install_opener
-
-from http.client import HTTPConnection
+# from urllib.request import Request, build_opener, HTTPSHandler, UnknownHandler
+# from urllib.request import HTTPHandler, HTTPDefaultErrorHandler, HTTPRedirectHandler
+# from urllib.request import FTPHandler, FileHandler, HTTPErrorProcessor
+# from urllib.request import DataHandler, OpenerDirector, install_opener
+# import http.client
+# from http.client import HTTPConnection
 
 import xutils
 import xtemplate
@@ -129,23 +128,31 @@ class handler:
     # 使用低级API访问HTTP，可以任意设置header，data等
     # 但是返回结果也需要自己处理
     def do_http(self, method, addr, url, headers, data):
-        cl = HTTPConnection(addr)
+        cl = six.moves.http_client.HTTPConnection(addr)
         cl.request(method, url, data, headers = headers)
         head = None
         buf = None
-        with cl.getresponse() as resp:
-            self.response_headers = resp.getheaders()
-            content_type = resp.getheader("Content-Type")
-            content_encoding = resp.getheader("Content-Encoding")
+        content_encoding = None
+
+        if six.PY2:
+            resp = cl.getresponse()
             buf = resp.read()
-            if content_encoding == "gzip":
-                fileobj = io.BytesIO(buf)
-                gzip_f = gzip.GzipFile(fileobj=fileobj, mode="rb")
-                content = gzip_f.read()
-                return content
-            elif content_encoding != None:
-                raise Exception("暂不支持%s编码" % content_encoding)
-            return buf
+            resp.close()
+        else:
+            with cl.getresponse() as resp:
+                self.response_headers = resp.getheaders()
+                content_type = resp.getheader("Content-Type")
+                content_encoding = resp.getheader("Content-Encoding")
+                buf = resp.read()
+
+        if content_encoding == "gzip":
+            fileobj = io.BytesIO(buf)
+            gzip_f = gzip.GzipFile(fileobj=fileobj, mode="rb")
+            content = gzip_f.read()
+            return content
+        elif content_encoding != None:
+            raise Exception("暂不支持%s编码" % content_encoding)
+        return buf
 
     def GET(self):
         self.response_headers = []

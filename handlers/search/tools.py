@@ -6,6 +6,7 @@
 
 import os
 import sys
+import six
 import xmanager
 import xconfig
 import xutils
@@ -14,7 +15,8 @@ SearchResult = xutils.SearchResult
 
 
 def search(name):
-    """查找`handlers/tools/`目录下的工具"""
+    # six.print_(xconfig)
+    # 查找`handlers/tools/`目录下的工具
     tools_path = xconfig.TOOLS_DIR
     files = []
     basename_set = set()
@@ -32,4 +34,3 @@ def search(name):
             files.append(f)
     return files
 
-# xmanager.register_search_func(r"(.*)", find_tools)
