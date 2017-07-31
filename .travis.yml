@@ -1,5 +1,6 @@
 language: python
 python:
+  - "2.7"
   # 3.2测试不通过
   # - "3.2"
   - "3.3"

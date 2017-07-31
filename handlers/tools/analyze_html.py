@@ -1,5 +1,6 @@
 # encoding=utf-8
 # created by xupingmao on 2017/04/22
+from __future__ import print_function
 import os
 import web
 import xtemplate
@@ -62,51 +63,56 @@ class handler:
         return xtemplate.render("tools/analyze_html.html")
 
     def POST(self):
-        args = web.input(file={}, download_res="off")
-        file = args.file
-        download_res = args.download_res == "on"
-        address = args.address
+        try:
+            args = web.input(file={}, download_res="off")
+            file = args.file
+            download_res = args.download_res == "on"
+            address = xutils.get_argument("address", "")
 
-        filename = file.filename
+            filename = file.filename
 
-        if not isempty(address):
-            html = readhttp(address)
-        else:
-            html = ""
-            for chunk in file.file:
-                html += chunk.decode("utf-8")
-        print("Read html, filename={}, length={}".format(filename, len(html)))
+            if not isempty(address):
+                html = readhttp(address)
+            else:
+                html = ""
+                for chunk in file.file:
+                    html += chunk.decode("utf-8")
+            print("Read html, filename={}, length={}".format(filename, len(html)))
 
-        soup = BeautifulSoup(html, "html.parser")
+            soup = BeautifulSoup(html, "html.parser")
 
-        # import pdb
-        # pdb.set_trace()
+            # import pdb
+            # pdb.set_trace()
 
-        images = soup.find_all("img")
-        links  = soup.find_all("a")
-        csses  = soup.find_all("link")
-        scripts = soup.find_all("script")
-        # texts = soup.find_all(["p", "span", "div", "h1", "h2", "h3", "h4"])
+            images = soup.find_all("img")
+            links  = soup.find_all("a")
+            csses  = soup.find_all("link")
+            scripts = soup.find_all("script")
+            # texts = soup.find_all(["p", "span", "div", "h1", "h2", "h3", "h4"])
 
-        h = HTML2Text(baseurl = address)
-        text = h.handle(html)
+            h = HTML2Text(baseurl = address)
+            text = h.handle(html)
 
-        texts = [text]
+            texts = [text]
 
-        images = get_addr_list(images)
-        scripts = get_addr_list(scripts)
-        # texts = get_text_list(texts)
+            images = get_addr_list(images)
+            scripts = get_addr_list(scripts)
+            # texts = get_text_list(texts)
 
-        if download_res:
-            download_res_list(images, filename)
+            if download_res:
+                download_res_list(images, filename)
 
-        return xtemplate.render("tools/analyze_html.html",
-            images = images,
-            links = links,
-            csses = csses,
-            scripts = scripts,
-            texts = texts,
-            address = address)
+            return xtemplate.render("tools/analyze_html.html",
+                images = images,
+                links = links,
+                csses = csses,
+                scripts = scripts,
+                texts = texts,
+                address = address)
+        except Exception as e:
+            xutils.print_stacktrace()
+            return xtemplate.render("tools/analyze_html.html",
+                error = str(e))
 
 
 

@@ -2,6 +2,7 @@
 
 {% block body %}
 
+{% init error = "" %}
 {% init address = "" %}
 {% init images = [] %}
 {% init scripts = [] %}
@@ -12,10 +13,12 @@
         <h2>上传文件或者填写网址</h2>
         <p><input type="file" name="file" /></p>
         <p>网址<input type="text" name="address" style="width: 50em;" value="{{address}}" /></p>
-        <p>下载资源<input type="checkbox" name="download_res"/></p>
+        <!-- <p>下载资源<input type="checkbox" name="download_res"/></p> -->
         <input type="submit" value="Submit"/>
     </form>
 </div>
+
+<div style="color:red;">{{error}}</div>
 
 <h2>Images</h2>
 <textarea rows={{len(images)+2}} class="col-md-12">

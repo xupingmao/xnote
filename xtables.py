@@ -193,6 +193,7 @@ def init_table_user():
     manager.close()
 
 def init_table_message():
+    # 用来存储比较短的消息
     # 2017/05/29
     manager = TableManager(config.DB_PATH, "message")
     manager.add_column("ctime", "text", "")

@@ -120,6 +120,7 @@ class SysHandler:
             cmd_list.append(Storage(name="首页提醒管理", url="/system/notice_admin"))
             cmd_list.append(Storage(name="App包管理", url="/system/app_admin"))
             cmd_list.append(Storage(name="系统变量管理", url="/system/sys_var_admin"))
+            cmd_list.append(Storage(name="剪切板", url="/tools/chatroom"))
 
         return xtemplate.render("system/sys.html", 
             addr = addr,

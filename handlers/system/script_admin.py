@@ -10,6 +10,8 @@ import xutils
 import xconfig
 import xtemplate
 
+from xutils import u
+
 
 SCRIPT_EXT_LIST = (
     ".bat", 
@@ -62,10 +64,10 @@ class ExecuteHandler:
         ret  = 0
         if name.endswith(".command"):
             # Mac os Script
-            os.system("chmod +x " + path)
-            ret = os.system("open " + path)
+            xutils.system("chmod +x " + path)
+            ret = xutils.system("open " + path)
         elif path.endswith((".bat", ".vbs")):
-            cmd = xutils.u("start %s") % path
+            cmd = u("start %s") % path
             if six.PY2:
                 # Python2 import当前目录优先
                 encoding = xutils.sys.getfilesystemencoding()

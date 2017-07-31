@@ -18,6 +18,7 @@ import re
 import shutil
 import six
 import web
+import xconfig
 
 from util.ziputil import *
 
@@ -31,6 +32,8 @@ if PY2:
     def u(s, encoding="utf-8"):
         if isinstance(s, str):
             return s.decode(encoding)
+        elif isinstance(s, unicode):
+            return s
         return str(s)
 
     def listdir(dirname):
@@ -342,6 +345,14 @@ def quote_unicode(url):
 ##   Platform/OS Utilities, Python 2 do not have this file
 #################################################################
 
+
+def system(cmd):
+    if PY2:
+        encoding = sys.getfilesystemencoding()
+        os.system(cmd.encode(encoding))
+    else:
+        os.system(cmd)
+
 def is_windows():
     return os.name == "nt"
 
@@ -358,7 +369,8 @@ def mac_say(msg):
         m = m.strip()
         if m == "":
             continue
-        os.system("say %s" % m)
+        cmd = u("say %s") % m
+        os.system(cmd.encode("utf-8"))
 
 def windows_say(msg):
     try:
@@ -370,6 +382,8 @@ def windows_say(msg):
         pass
 
 def say(msg):
+    if xconfig.IS_TEST:
+        return
     if is_windows():
         windows_say(msg)
     elif is_mac():

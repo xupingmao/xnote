@@ -85,6 +85,7 @@ class TestMain(unittest.TestCase):
 
     def test_file(self):
         self.check_200("/file/recent_edit")
+        json_request("/file/remove?name=xnote-unit-test")
         file = json_request("/file/add", method="POST", 
             data=dict(name="xnote-unit-test", content="hello", _type="json"))
         id = file["id"]

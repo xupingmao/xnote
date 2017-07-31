@@ -8,8 +8,6 @@ import os
 import time
 from collections import OrderedDict
 
-import xutils
-
 PORT = "1234"
 # PORT = "8787"
 
@@ -66,6 +64,11 @@ nav_position = "top"
 
 _config = {}
 
+
+def makedirs(dirname):
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
 """
 - host ip:port
 - 
@@ -95,7 +98,7 @@ def set_data_path(path):
     global CODE_ZIP
     global DATA_ZIP
 
-    xutils.makedirs(path)
+    makedirs(path)
     DATA_PATH = path
     DATA_DIR  = path
     # 数据库地址
@@ -109,8 +112,8 @@ def set_data_path(path):
     CODE_ZIP    = os.path.join(DATA_DIR, "code.zip")
     DATA_ZIP    = os.path.join(DATA_DIR, "data.zip")
 
-    xutils.makedirs(TMP_DIR)
-    xutils.makedirs(SCRIPTS_DIR)
+    makedirs(TMP_DIR)
+    makedirs(SCRIPTS_DIR)
 
 # 初始化默认的Data目录
 set_data_path(DATA_PATH)

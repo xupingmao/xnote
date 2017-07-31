@@ -67,17 +67,33 @@ class AddHandler:
         return self.POST()
 
 class RemoveHandler:
-    # 物理删除
-    def GET(self):
-        id = xutils.get_argument("id", "")
-        if id == "":
-            return dict(code="fail", message="ID为空")
+    def remove_by_id(self, id):
         db = xtables.get_file_table()
         file = db.select_one(where=dict(id=int(id)))
         if file is None:
             return dict(code="fail", message="文件不存在")
         db.delete(where=dict(id=int(id)))
         return dict(code="success")
+
+    def remove_by_name(self, name):
+        db = xtables.get_file_table()
+        file = db.select_one(where=dict(name=name))
+        if file is None:
+            return dict(code="success")
+        db.delete(where=dict(id=file.id))
+        return dict(code="success")
+
+    # 物理删除
+    @xauth.login_required("admin")
+    def GET(self):
+        id = xutils.get_argument("id", "")
+        name = xutils.get_argument("name", "")
+        if id == "" and name == "":
+            return dict(code="fail", message="id,name至少一个不为空")
+        if id != "":
+            return self.remove_by_id(int(id))
+        return self.remove_by_name(name)
+        
     def POST(self):
         return self.GET()
 

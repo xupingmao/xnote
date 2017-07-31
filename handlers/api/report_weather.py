@@ -11,6 +11,8 @@ import xutils
 import xtables
 import xconfig
 
+from xutils import u
+
 class handler:
 
     def GET(self):
@@ -29,7 +31,7 @@ class handler:
             url = "http://www.weather.com.cn/weather1d/%s.shtml" % city_code
             html = six.moves.urllib.request.urlopen(url).read()
             if html == b"<!-- empty -->":
-                return dict(code="fail", message=xutils.u("city_code错误"))
+                return dict(code="fail", message=u("city_code错误"))
             soup = BeautifulSoup(html, "html.parser")
             elements = soup.find_all(id="hidden_title")
             # print(elements)
@@ -38,16 +40,19 @@ class handler:
             if len(elements) > 0:
                 weather = elements[0]
                 message = weather.attrs["value"]
-                message = message.replace("/", xutils.u("至"))
+                message = message.replace("/", u("至"))
                 db.insert(ctime=xutils.format_datetime(), 
+                    cdate=xutils.format_date(),
                     type="weather",
                     key=city_name,
                     value=message
                 )
 
         if message is not None:
+            message = u(message)
             if not xconfig.is_mute():
                 xutils.say("%s %s" % (city_name, message))
+            # six.print_(type(message), message)
             return dict(code="success", data=message)
         else:
             return dict(code="fail", message="结果为空")
