@@ -42,6 +42,7 @@
 <div class="col-md-12 top-offset-1">
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
+        <input type="button" class="btn" value="添加文件夹" id="addDirectory"/>
         <a href="/code/analyze?path={{path}}">分析</a>
         <a href="/tools/zip?dirname={{path}}">压缩</a>
         <a href="/tools/webuploader#{{path}}">上传大文件</a>
@@ -118,8 +119,24 @@
         } else {
             $(".fs-image").remove();
             $(self).val("预览图片");
+        }  
+    })
+    $("#addDirectory").on("click", function (target) {
+        var dirname = prompt("新建文件夹");
+        if (dirname && dirname != "") {
+            $.post("/fs/add_dir", {path: "{{path}}", dirname: dirname}, function (respText) {
+                console.log(respText);
+                var data = JSON.parse(respText);
+                if (data.code == "success") {
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            }).fail(function (data) {
+                console.log(data);
+                alert(data);
+            })
         }
-        
     })
 </script>
 

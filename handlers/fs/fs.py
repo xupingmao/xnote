@@ -296,11 +296,29 @@ class StaticFileHandler(FileSystemHandler):
             return "Not Readable %s" % path
         return self.handle_get(path)
 
+class AddDirHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        path = xutils.get_argument("path", "")
+        dirname = xutils.get_argument("dirname", "")
+        if path == "":
+            return dict(code="fail", message="path is empty")
+        newpath = os.path.join(path, dirname)
+        try:
+            os.makedirs(newpath)
+            return dict(code="success")
+        except Exception as e:
+            xutils.print_stacktrace()
+            return dict(code="fail", message=str(e))
+
+
 name = "文件系统"
 description = "下载和上传文件"
 
 xurls = (
     r"/fs-", handler, 
+    r"/fs/add_dir", AddDirHandler,
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
