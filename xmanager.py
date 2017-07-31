@@ -2,12 +2,14 @@
 """Xnote 模块管理器
  - 加载并注册模块
 """
+from __future__ import print_function
 import os
 import sys
 import traceback
 import time
 import copy
 import json
+import inspect
 import six
 
 from threading import Thread, Timer
@@ -30,7 +32,10 @@ from xutils import Storage
 config = xconfig
 
 def wrapped_handler(handler_clz):
-    if not isinstance(handler_clz, type):
+    # Py2 自定义类不是type类型
+    # if not isinstance(handler_clz, type):
+    #     return handler_clz
+    if not inspect.isclass(handler_clz):
         return handler_clz
 
     def wrap(result):

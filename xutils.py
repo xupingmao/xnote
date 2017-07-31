@@ -330,10 +330,11 @@ def quote_unicode(url):
             return chr(c)
         return '%%%02X' % c
 
-    bytes = url.encode("utf-8")
     if six.PY2:
+        bytes = url
         return ''.join([quote_char(ord(c)) for c in bytes])
     else:
+        bytes = url.encode("utf-8")
         return ''.join([quote_char(c) for c in bytes])
 
     # def urlencode(matched):
