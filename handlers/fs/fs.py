@@ -304,6 +304,7 @@ class AddDirHandler:
         dirname = xutils.get_argument("dirname", "")
         if path == "":
             return dict(code="fail", message="path is empty")
+        dirname = xutils.quote_unicode(dirname)
         newpath = os.path.join(path, dirname)
         try:
             os.makedirs(newpath)
