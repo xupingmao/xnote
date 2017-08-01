@@ -121,6 +121,7 @@ xnote
 
 ### 整体层次
 
+![架构图](https://git.oschina.net/xupingmao/xnote/raw/master/static/image/architecture.svg)
 
 ### 扩展
 
