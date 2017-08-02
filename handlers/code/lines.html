@@ -56,7 +56,7 @@
         <td>{{info.lines}}</td>
         <td>{{info.validlines}}</td>
         <td>{{info.blanklines}}</td>
-        <td><a target="_blank" href="/code/view_source?path={{info.fname}}">查看</a></td>
+        <td>{% if info.fname %}<a target="_blank" href="/code/view_source?path={{info.fname}}">查看</a>{%end%}</td>
     </tr>
 
 {% end %}

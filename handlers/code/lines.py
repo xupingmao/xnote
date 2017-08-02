@@ -19,8 +19,8 @@ CODE_EXT_DICT = OrderedDict()
 CODE_EXT_DICT["Python"]      = [".py"]
 CODE_EXT_DICT["Python(web)"] = [".py", ".html"]
 CODE_EXT_DICT["Java"]        = [".java"]
-CODE_EXT_DICT["Web前端"]     = [".html", ".htm", ".js", ".css"],
-CODE_EXT_DICT["C/C++"]       = [".c", ".h", ".cpp", ".hpp"],
+CODE_EXT_DICT["Web前端"]     = [".html", ".htm", ".js", ".css"]
+CODE_EXT_DICT["C/C++"]       = [".c", ".h", ".cpp", ".hpp"]
 CODE_EXT_DICT["Lua"]         = [".lua"]
 CODE_EXT_DICT["Ruby"]        = [".rb"],
 CODE_EXT_DICT["Php"]         = [".php"]
@@ -87,6 +87,7 @@ def get_line_infos(path, recursive=False, type=None, skip_func = lambda fname: F
         total_blanks += info.blanklines
     total = LinesInfo("Total", total_lines, 
         blanklines = total_blanks)
+    total.fname = None
 
     line_infos.insert(0, total)
     line_infos.sort(key = lambda info: -info.lines)
@@ -118,8 +119,6 @@ class handler:
             item = item.strip()
             item = '^' + item.replace("*", ".*") + '$'
             patterns.append(re.compile(item))
-
-        # print(patterns)
 
         def skip_func(fpath):
             for p in patterns:
