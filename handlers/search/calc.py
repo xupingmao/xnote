@@ -10,7 +10,7 @@ import xutils
 SearchResult = xutils.SearchResult
 
 def safe_check(expression):
-    p = re.compile(r"^[0-9+\-*\/% \(\)\~]*\Z")
+    p = re.compile(r"^[.0-9+\-*\/% \(\)\~]*\Z")
     m = p.match(expression)
     # print(m.group())
     if m.group():
