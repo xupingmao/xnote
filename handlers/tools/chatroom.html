@@ -33,7 +33,7 @@
         /*position: relative;*/
         /*left: 0;*/
         /*right: 0;*/
-        width: calc(100% - 4rem);
+        width: calc(100% - 5rem);
     }
 
     .send-button {
@@ -129,7 +129,13 @@
         }
     });
 
-    app.refreshMessage();
+    // app.refreshMessage();
+    function loop() {
+        console.log("refresh");
+        app.refreshMessage();
+        setTimeout(loop, 2000);
+    }
+    loop();
 </script>
 
 {% end %}

@@ -107,6 +107,7 @@ class SysHandler:
         cmd_list = [];
         # cmd_list.append(Storage(name="切换导航栏样式", url="/system/switch_nav"))
         cmd_list.append(Storage(name="模块信息(pydoc)", url="/system/modules_info"))
+        cmd_list.append(Storage(name="聊天室", url="/tools/chatroom"))
 
         if xauth.is_admin():
             cmd_list.append(Storage(name="系统信息", url="/system/monitor"))
@@ -120,7 +121,6 @@ class SysHandler:
             cmd_list.append(Storage(name="首页提醒管理", url="/system/notice_admin"))
             cmd_list.append(Storage(name="App包管理", url="/system/app_admin"))
             cmd_list.append(Storage(name="系统变量管理", url="/system/sys_var_admin"))
-            cmd_list.append(Storage(name="剪切板", url="/tools/chatroom"))
 
         return xtemplate.render("system/sys.html", 
             addr = addr,
