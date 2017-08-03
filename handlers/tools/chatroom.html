@@ -75,17 +75,9 @@
             </div>
         </div>
     </div>
-    <div class="chat-box hide">
-        <div class="chat-msg-div" v-for="message in messageList">
-            <p><span class="chat-avatar">{{! message.user }}</span> {{!message.content}}</p>
-        </div>
-    </div>
-    <div class="hide">
-        <input type="text" class="input-box" v-model="input" @keyup.enter="sendMessage()"/>
-        <input type="button" name="" class="send-button" value="发送" @click="sendMessage()">
-    </div>
     <div class="col-md-12">
-        <textarea class="input-box" v-model="input" @keyup.enter="sendMessage()"></textarea>
+        <!-- <textarea class="input-box" v-model="input" @keyup.enter="sendMessage()"></textarea> -->
+        <input type="text" class="input-box" v-model="input" @keyup.enter="sendMessage()"/>
         <input type="button" name="" class="send-button btn" value="发送" @click="sendMessage()">
     </div>
 </div>
