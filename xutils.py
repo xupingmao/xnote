@@ -324,6 +324,15 @@ def urlsafe_b64decode(text):
     return base64.urlsafe_b64decode(text.encode("utf-8")).decode("utf-8")
 
 def quote_unicode(url):
+    # python的quote会quote大部分字符，包括ASCII符号
+    # JavaScript的encodeURI
+    # encodeURI 会替换所有的字符，但不包括以下字符，即使它们具有适当的UTF-8转义序列：
+    #    类型  包含
+    #    保留字符    ; , / ? : @ & = + $
+    #    非转义的字符  字母 数字 - _ . ! ~ * ' ( )
+    #    数字符号    #
+    # 根据最新的RFC3986，方括号[]也是非转义字符
+    # JavaScript的encodeURIComponent会编码+,&,=等字符
     def quote_char(c):
         # ASCII 范围 [0-127]
         if c <= 127:

@@ -135,20 +135,23 @@ function hex2num(hex) {
     return num;
 }
 
-String.prototype.startsWith = String.prototype.startsWith || function (starts) {
-    throw ("not implemented");
+
+function stringStartsWith(chars) {
+    return this.indexOf(chars) === 0;
 }
+
+String.prototype.startsWith = String.prototype.startsWith || stringStartsWith;
 
 String.prototype.endsWith = String.prototype.endsWith || function (ends) {
     
     function _StrEndsWith(str, ends) {
-        var str = this;
-        for (var i = ends.length-1, j = str.length - 1; i >= 0; i--, j--) {
-            if (str[j] != ends[i]) {
-                return false;
-            }
-        }
-        return true;
+        return str.lastIndexOf(ends) === (str.length - ends.length);
+        // for (var i = ends.length-1, j = str.length - 1; i >= 0; i--, j--) {
+        //     if (str[j] != ends[i]) {
+        //         return false;
+        //     }
+        // }
+        // return true;
     } 
         
     if (!ends instanceof Array){

@@ -48,12 +48,13 @@ class RangeUploadHandler:
         chunks = xutils.get_argument("chunks", 1, type=int)
         file = xutils.get_argument("file", {})
         dirname = xutils.get_argument("dirname", xconfig.DATA_DIR)
+        dirname = dirname.replace("$DATA", xconfig.DATA_DIR)
         # print(file.__dict__)
         # print("%d/%d" % (chunk, chunks))
         filename = None
         if hasattr(file, "filename"):
             # print(" - - %-20s = %s" % ("filename", file.filename))
-            filename = xutils.quote(file.filename)
+            filename = xutils.quote_unicode(file.filename)
             # filename = xauth.get_current_name() + '_' + filename
             tmp_name = "%s_%d.part" % (filename, chunk)
             tmp_path = os.path.join(dirname, tmp_name)
