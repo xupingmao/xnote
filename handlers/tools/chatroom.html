@@ -3,6 +3,9 @@
 {% block head %}
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"/>
 <style type="text/css">
+/*    ::selection {
+        background: white;
+    }*/
     .chat-box {
         background-color: #CCFF99;
         padding: 1em;
@@ -15,6 +18,12 @@
         margin-top: 1rem;
         float: left;
         width: 100%;
+
+/*        border-width: 1px;
+        border-style: solid;
+        border-color: #ccc;
+        padding: 1px;*/
+
     }
 
     .chat-avatar {
@@ -39,7 +48,7 @@
         padding-left: 0.5rem;
         border-width: 5px;
         border-radius: 5px;
-        background-color: #99CCFF;
+        /*background-color: #99CCFF;*/
     }
 
     .input-box {
@@ -107,7 +116,7 @@
 
             refreshMessage: function () {
                 var self = this;
-                $.get("/file/chatroom/list", function (respText) {
+                $.get("/file/message/list", function (respText) {
                     var data = JSON.parse(respText);
                     if (data.code == "success") {
                         var messageList = [];
@@ -125,7 +134,7 @@
                     return;
                 }
                 var self = this;
-                $.post("/file/chatroom/add", {content:self.input}, function (respText) {
+                $.post("/file/message/add", {content:self.input}, function (respText) {
                     var data = JSON.parse(respText);
                     if (data.code == "success") {
                         var msg = data.data;

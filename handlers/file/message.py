@@ -2,7 +2,7 @@
 # Created by xupingmao on 2017/05/29
 # 
 
-"""聊天室"""
+"""短消息"""
 import xutils
 import xtables
 import xauth
@@ -27,6 +27,6 @@ class ListHandler:
         chatlist.reverse()
         return dict(code="success", message="", data=chatlist)
 
-xurls=( "/file/chatroom/add", AddHandler,
-        "/file/chatroom/list", ListHandler)
+xurls=( "/file/message/add", AddHandler,
+        "/file/message/list", ListHandler)
 
