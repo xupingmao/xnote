@@ -335,6 +335,9 @@ def quote_unicode(url):
     # JavaScript的encodeURIComponent会编码+,&,=等字符
     def quote_char(c):
         # ASCII 范围 [0-127]
+        # 处理空格 ' '
+        if c == 32: 
+            return '%20'
         if c <= 127:
             return chr(c)
         return '%%%02X' % c
