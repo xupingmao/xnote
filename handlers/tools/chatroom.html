@@ -11,7 +11,7 @@
         padding: 1em;
         padding: 1rem;
         /*height: 60%; body高度为0，不生效*/
-        height: 400px;
+        height: 300px;
         overflow-y: scroll;
     }
 
@@ -104,6 +104,12 @@
         return {"content": content, user:user}
     }
 
+    function scrollToBottom() {
+        setTimeout(function () {
+            $(".chat-box").scrollTop($(".chat-box")[0].scrollHeight);
+        }, 200);
+    }
+
     var app = new Vue({
         el: "#app",
         data: {
@@ -149,9 +155,7 @@
                         self.messageList.push(msg);
                         self.input = "";
                         $(".input-box").focus();
-                        setTimeout(function () {
-                            $(".chat-box").scrollTop($(".chat-box")[0].scrollHeight);
-                        }, 200);
+                        scrollToBottom();
                     } else {
                         alert(data.message);
                     }
@@ -170,6 +174,8 @@
         setTimeout(loop, 10000);
     }
     loop();
+    scrollToBottom();
+
 </script>
 
 {% end %}

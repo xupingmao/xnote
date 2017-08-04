@@ -188,6 +188,8 @@ def like(text, pattern):
     >>> like("what", "n*")
     False
     """
+
+    # TODO 处理`,`
     re_pattern = pattern.replace("?", ".?")
     re_pattern = re_pattern.replace("*", ".*?")
     m = re.match(re_pattern, text)

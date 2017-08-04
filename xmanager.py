@@ -325,6 +325,11 @@ class TaskManager:
 
         def request_url(url):
             quoted_url = xutils.quote_unicode(url)
+            if quoted_url.startswith(("http://", "https://")):
+                # 处理外部HTTP请求
+                response = xutils.urlopen(quoted_url).read()
+                log("Request %r success" % quoted_url)
+                return response
             return self.app.request(url)
 
         def run():

@@ -75,6 +75,8 @@ def get_current_user():
 def get_current_name():
     """获取当前用户名"""
     user = get_current_user()
+    if user is None:
+        return None
     return user.get("name")
 
 def get_current_role():
