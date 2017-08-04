@@ -1,4 +1,4 @@
-
+# encoding=utf-8
 
 __doc__ = """Methods for text operation"""
 
