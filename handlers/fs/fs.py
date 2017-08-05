@@ -8,7 +8,7 @@
 """
 import os
 import mimetypes
-
+import time
 import web
 import xutils
 import xauth
@@ -188,7 +188,6 @@ class FileSystemHandler:
                 else:
                     range_end  = total_size-1
                     web.header("Content-Length", total_size)
-
                 content_range = "bytes %s-%s/%s" % (range_start, range_end, total_size)
                 # 设置HTTP响应状态
                 web.ctx.status = "206 Partial Content"
@@ -204,10 +203,12 @@ class FileSystemHandler:
                     rest = range_end - range_start + 1
                     readsize = min(rest, blocksize)
                     while readsize > 0:
+                        # print("%s send %s K" % (time.ctime(), readsize))
                         yield fp.read(readsize)
                         rest -= readsize
                         readsize = min(rest, blocksize)
             except Exception as e:
+                xutils.print_stacktrace()
                 # yield最好不要和return混用
                 yield self.read_all(path, blocksize)
         else:
@@ -220,6 +221,7 @@ class FileSystemHandler:
         with open(path, "rb") as fp:
             block = fp.read(blocksize)
             while block:
+                # print("%s Read %s K" % (time.ctime(), blocksize))
                 yield block
                 block = fp.read(blocksize)
 
