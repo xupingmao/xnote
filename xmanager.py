@@ -5,6 +5,7 @@
 from __future__ import print_function
 import os
 import sys
+import gc
 import traceback
 import time
 import copy
@@ -331,6 +332,20 @@ class TaskManager:
                 response = xutils.urlopen(quoted_url).read()
                 log("Request %r success" % quoted_url)
                 return response
+            elif quoted_url.startswith("script://"):
+                name = quoted_url[len("script://"):]
+                path = os.path.join(xconfig.SCRIPTS_DIR, name)
+                code = xutils.readfile(path)
+                globals_copy = {}
+                before_count = len(gc.get_objects())
+                # exec(code, globals, locals) locals的作用是为了把修改传递回来
+                ret = six.exec_(code, globals_copy)
+                del globals_copy
+                # 执行一次GC防止内存不够
+                gc.collect()
+                after_count = len(gc.get_objects())
+                print("gc.objects_count %s -> %s" % (before_count, after_count))
+                return ret
             cookie = xauth.get_admin_cookie()
             return self.app.request(url, headers=dict(COOKIE=cookie))
 

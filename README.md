@@ -61,6 +61,9 @@ PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代�
 
 ### 定时任务
 - 通过配置页面设置要调用的URL和时间匹配规则即可
+- 定时任务按照`{protocol}://{URL}`规则配置，protocol缺省值为local,也就是xnote自身的handler，有效的protocol如下
+ - `http`, `https` 外部的网络请求
+ - `script` 执行位于`$DATA/scripts`目录下的自定义Python脚本
 
 ![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/static/image/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE.PNG)
 
