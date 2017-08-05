@@ -25,6 +25,7 @@ import xconfig
 import xtemplate
 import xtables
 import xutils
+import xauth
 
 from util import textutil
 from xutils import Storage
@@ -330,7 +331,8 @@ class TaskManager:
                 response = xutils.urlopen(quoted_url).read()
                 log("Request %r success" % quoted_url)
                 return response
-            return self.app.request(url)
+            cookie = xauth.get_admin_cookie()
+            return self.app.request(url, headers=dict(COOKIE=cookie))
 
         def run():
             while True:

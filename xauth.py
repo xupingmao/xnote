@@ -95,6 +95,10 @@ def get_password_md5(passwd):
     pswd_md5.update(passwd.encode("utf-8"))
     return pswd_md5.hexdigest()
 
+def get_admin_cookie():
+    password = get_user_password("admin")
+    return "xuser=admin; xpass=%s;" % get_password_md5(password)
+
 def add_user(name, password):
     users = _get_users()
     user = Storage(name=name, password=password)
