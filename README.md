@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/xupingmao/xnote.svg?branch=master)](https://travis-ci.org/xupingmao/xnote)
 
-xnote是一个基于Python的PIM(Personal Information Management)系统，提供内容管理系统以及常用的工具集成环境(主要是开发工具)
+xnote是一个基于Python的PIM(Personal Information Management)系统，提供内容管理系统以及常用的工具集成环境
 
 作为一名程序猿，对我来说，有两件事情让我觉得非常重要，一是知识经验的积累，二是集成的工具，前者帮我出谋划策，而后者则能为我攻城略地。现在前者已经得到了很好的改善，有很多好用的工具可以用来记笔记，管理文档。对于后者，我们确实有很多很好的工具，但是也往往不能很好的满足一些特殊的开发需求，所以很多程序员都是使用脚本语言自己临时写小工具。除此之外，管理大量的软件也是个麻烦事，软件之间互不联通，执行一些批量操作人工成本不小。所以我准备做一款工具来满足自己的需求，它应该有如下特征
 
@@ -15,7 +15,7 @@ xnote是一个基于Python的PIM(Personal Information Management)系统，提供
 
 PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代豪杰sublime text, Idea Intellij等等)，他们拥有无限扩展的可能。xnote也会朝着可自由扩展方向前进
 
-注意：本项目主要是个人使用，不考虑并发性能，界面设计上面也不会花太多的精力
+注意：本项目主要目标人群是个人，目前多用户场景考虑不多，并发支持有限
 
 -----
 ## 项目地址
