@@ -3,6 +3,7 @@
 # 系统脚本管理
 from __future__ import print_function
 import os
+import gc
 import web
 import six
 import xauth
@@ -11,6 +12,7 @@ import xconfig
 import xtemplate
 
 from xutils import u
+sys = xutils.sys
 
 SCRIPT_EXT_LIST = (
     ".bat", 
@@ -65,8 +67,16 @@ class ExecuteHandler:
         if name.endswith(".py"):
             # 方便获取xnote内部信息，同时防止开启过多Python进程
             code = xutils.readfile(path)
+            globals_copy = {}
+
+            before_count = len(gc.get_objects())
             # exec(code, globals, locals) locals的作用是为了把修改传递回来
-            ret = six.exec_(code, globals())
+            ret = six.exec_(code, globals_copy)
+            del globals_copy
+            # 执行一次GC防止内存不够
+            gc.collect()
+            after_count = len(gc.get_objects())
+            print("gc.objects_count %s -> %s" % (before_count, after_count))
         elif name.endswith(".command"):
             # Mac os Script
             xutils.system("chmod +x " + path)
