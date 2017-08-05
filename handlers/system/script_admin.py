@@ -12,12 +12,12 @@ import xtemplate
 
 from xutils import u
 
-
 SCRIPT_EXT_LIST = (
     ".bat", 
     ".vbs", 
     ".sh", 
-    ".command"
+    ".command",
+    ".py"
 )
 
 def get_default_shell_ext():
@@ -62,7 +62,12 @@ class ExecuteHandler:
         path = os.path.join(dirname, name)
         path = os.path.abspath(path)
         ret  = 0
-        if name.endswith(".command"):
+        if name.endswith(".py"):
+            # 方便获取xnote内部信息，同时防止开启过多Python进程
+            code = xutils.readfile(path)
+            # exec(code, globals, locals) locals的作用是为了把修改传递回来
+            ret = six.exec_(code, globals())
+        elif name.endswith(".command"):
             # Mac os Script
             xutils.system("chmod +x " + path)
             ret = xutils.system("open " + path)

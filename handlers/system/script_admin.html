@@ -7,6 +7,7 @@
 <script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
+<script type="text/javascript" src="/static/lib/codemirror/mode/python.js"></script>
 
 {% end %}
 
@@ -31,12 +32,18 @@
 
     <script>
         $(function () {
-          var editor = CodeMirror.fromTextArea($("#editor")[0], {
-            lineNumbers: true,
-            mode: "text/x-sh",
-            theme:"monokai",
-            indentUnit:4,
-          });
+
+            var mode = "text/x-sh";
+            var name = $("input[name=name]").val();
+            if (name.endsWith(".py")) {
+                mode = "text/x-python";
+            }
+            var editor = CodeMirror.fromTextArea($("#editor")[0], {
+                lineNumbers: true,
+                mode: mode,
+                theme:"monokai",
+                indentUnit:4,
+            });
         });
     </script>
 
