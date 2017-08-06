@@ -19,7 +19,7 @@ def check_network_health():
 
 class handler:
     def GET(self):
-        for i in range(1, 11):
+        for i in range(1, 31):
             if not check_network_health():
                 xutils.say("网络连接异常,重试第%s次" % i)
             else:
