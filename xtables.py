@@ -190,6 +190,7 @@ def init_table_user():
     # 额外的访问权限
     manager.add_column("privileges", "text", "")
     manager.add_column("ctime",      "text", "")
+    manager.add_column("mtime",      "text", "")
     manager.close()
 
 def init_table_message():

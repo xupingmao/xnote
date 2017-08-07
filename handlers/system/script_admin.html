@@ -51,6 +51,9 @@
     {% comment 列表 %}
     <form method="POST">
     <input type="text" name="op" value="add" class="hide"/>
+    脚本名称<input type="text" name="name"/><button>添加</button>
+    </form>
+
     <table class="table col-md-12">
         <tr>
             <th>编号</th>
@@ -68,12 +71,8 @@
             </tr>
             {% set index = index + 1 %}
         {% end %}
-        <tr>
-            <td>{{index}}</td>
-            <td><input type="text" name="name"/><button>添加</button></td>
-        </tr>
     </table>
-    </form>
+    
 {% end %}
 
 <script type="text/javascript">

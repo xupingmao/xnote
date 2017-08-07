@@ -90,7 +90,9 @@ def get_md5_hex(pswd):
     return pswd_md5.hexdigest()
 
 def get_password_md5(passwd):
-    passwd = passwd + xutils.format_date()
+    # 加上日期防止cookie泄露意义不大
+    # 考虑使用session失效检测或者定时提醒更新密码
+    # passwd = passwd + xutils.format_date()
     pswd_md5 = hashlib.md5()
     pswd_md5.update(passwd.encode("utf-8"))
     return pswd_md5.hexdigest()
@@ -106,9 +108,9 @@ def add_user(name, password):
     db = xtables.get_user_table()
     exist = db.select_one(where=dict(name=name))
     if exist is None:
-        db.insert(name=name,password=password,ctime=xutils.format_time())
+        db.insert(name=name,password=password,ctime=xutils.format_time(),mtime=xutils.format_time())
     else:
-        db.update(where=dict(name=name), password=password)
+        db.update(where=dict(name=name), password=password,mtime=xutils.format_time())
 
 def has_login(name=None):
     # import threading
@@ -144,7 +146,8 @@ def check_login(user_name=None):
         return
     elif has_login():
         raise web.seeother("/unauthorized")
-    raise web.seeother("/login")
+    path = web.ctx.path
+    raise web.seeother("/login?target=" + xutils.quote_unicode(path))
 
 def login_required(user_name=None):
     """管理员验证装饰器"""
