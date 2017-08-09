@@ -13,6 +13,7 @@
 
 {% block body %}
 
+{% init error = "" %}
 {% init shell_list = [] %}
 {% set  index = 1 %}
 {% init op = "list" %}
@@ -49,6 +50,9 @@
 
 {% else %}
     {% comment 列表 %}
+
+    <div class="error">{{error}}</div>
+
     <form method="POST">
     <input type="text" name="op" value="add" class="hide"/>
     脚本名称<input type="text" name="name"/><button>添加</button>

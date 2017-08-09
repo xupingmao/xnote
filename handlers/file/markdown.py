@@ -7,7 +7,7 @@ import xauth
 import xutils
 import xconfig
 import xtables
-
+from web import HTTPError
 from . import dao
 
 config = xconfig

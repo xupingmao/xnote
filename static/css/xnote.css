@@ -429,3 +429,7 @@ li.menu-item:hover {
 .blue-text {
     color: #00f;
 }
+
+.error {
+    color: red;
+}

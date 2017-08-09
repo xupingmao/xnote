@@ -99,6 +99,7 @@ class handler:
     def GET(self):
         op = xutils.get_argument("op")
         name = xutils.get_argument("name", "")
+        error = xutils.get_argument("error", "")
         dirname = xconfig.SCRIPTS_DIR
 
         content = ""
@@ -117,7 +118,8 @@ class handler:
             op = op,
             name = name,
             content = content,
-            shell_list = shell_list)
+            shell_list = shell_list,
+            error = error)
 
     @xauth.login_required("admin")
     def POST(self):
@@ -131,6 +133,8 @@ class handler:
             if ext not in SCRIPT_EXT_LIST:
                 name = basename + get_default_shell_ext()
                 path = os.path.join(dirname, name)
+            if os.path.exists(path):
+                raise web.seeother(xutils.quote_unicode("/system/script_admin?error=%r已存在" % name))
             with open(path, "wb") as fp:
                 pass
         elif op == "save":

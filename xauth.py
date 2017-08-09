@@ -146,8 +146,9 @@ def check_login(user_name=None):
         return
     elif has_login():
         raise web.seeother("/unauthorized")
+    # FIXME 应该是URL
     path = web.ctx.path
-    raise web.seeother("/login?target=" + xutils.quote_unicode(path))
+    raise web.seeother("/login?target=" + xutils.encode_uri_component(path))
 
 def login_required(user_name=None):
     """管理员验证装饰器"""

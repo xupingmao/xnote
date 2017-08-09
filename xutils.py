@@ -323,6 +323,12 @@ def urlsafe_b64encode(text):
 def urlsafe_b64decode(text):
     return base64.urlsafe_b64decode(text.encode("utf-8")).decode("utf-8")
 
+def encode_uri_component(url):
+    quoted = quote_unicode(url)
+    quoted = quoted.replace("?", "%3F")
+    quoted = quoted.replace("&", "%26")
+    return quoted
+
 def quote_unicode(url):
     # python的quote会quote大部分字符，包括ASCII符号
     # JavaScript的encodeURI
