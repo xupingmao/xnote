@@ -135,6 +135,10 @@ class TestMain(unittest.TestCase):
         sched = xtables.get_schedule_table().select_one(where=dict(url="test"))
         self.check_OK("/system/crontab?option=del&id={}".format(sched.id))
 
+        self.check_OK("/system/crontab/add", method="POST", data=dict(script_url="script://test.py", tm_wday="1", tm_hour="*", tm_min="*"))
+        sched2 = xtables.get_schedule_table().select_one(where=dict(url="script://test.py"))
+        self.check_OK("/system/crontab/remove?id={}".format(sched2.id))
+
     def test_search(self):
         self.check_200("/search?key=测试")
         self.check_200("/search/search?key=测试")

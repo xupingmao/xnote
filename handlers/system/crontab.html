@@ -22,7 +22,15 @@
     {% set name = task.url %}
     <tr>
         <td>{{index+1}}</td>
-        <td><div style="word-wrap: break-word; width: 300px;">{{task.url}}</div></td>
+        <td>
+            <div style="word-wrap: break-word; width: 300px;">
+                {% if  hasattr(task, "script_name") %}
+                    <a href="/system/script_admin/edit?name={{task.script_name}}">{{task.url}}</a>
+                {% else %}
+                    {{task.url}}
+                {% end %}
+            </div>
+        </td>
         <td>
             {% if task.tm_wday == "*" %}
                 每天
@@ -34,13 +42,20 @@
         </td>
         <td>{% if task.tm_hour == "*" %}每小时{% else %}{{task.tm_hour}}{% end %}</td>
         <td>{% if task.tm_min  == "*" %}每分钟{% else %}{{task.tm_min}} {% end %}</td>
-        <td><a href="/system/crontab?option=del&id={{task.id}}">删除</a></td>
+        <td><a href="/system/crontab/remove?id={{task.id}}">删除</a></td>
     </tr>
     {% end %}
 
     <tr>
-        <td>{{index+2}}</td>
-        <td><input type="text" name="url"></td>
+        <td>{{index+3}}</td>
+        <td>
+            任务脚本:<select name="script_url">
+                {% for script_name in scripts %}
+                    <option value="script://{{script_name}}">{{script_name}}</option>
+                {% end %}
+            </select><br/>
+            或者任务链接:<input type="text" name="url">
+        </td>
         <td><select name="tm_wday">
             <option value="*">每天</option>
             <option value="no-repeat">一次性</option>
@@ -66,6 +81,7 @@
         </td>
         <td><input type="submit" value="添加"></td>
     </tr>
+
 </table>
 </form>
 

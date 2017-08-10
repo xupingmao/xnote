@@ -39,7 +39,7 @@ class SaveHandler:
         path = os.path.join(dirname, name)
         content = content.replace("\r", "")
         xutils.savetofile(path, content)
-        raise web.seeother("/system/script_admin?op=edit&name="+xutils.quote(name))
+        raise web.seeother("/system/script_admin/edit?name="+xutils.quote(name))
 
 class DeleteHandler:
 
@@ -143,8 +143,26 @@ class handler:
             xutils.savetofile(path, content)
         raise web.seeother("/system/script_admin")
 
+class EditHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        op = xutils.get_argument("op")
+        name = xutils.get_argument("name", "")
+        error = xutils.get_argument("error", "")
+        dirname = xconfig.SCRIPTS_DIR
+        content = xutils.readfile(os.path.join(dirname, name))
+
+        return xtemplate.render("system/script_admin.html", 
+            op = "edit",
+            name = name,
+            content = content,
+            shell_list = [],
+            error = error)
+
 xurls = (
     r"/system/script_admin", handler,
+    r"/system/script_admin/edit", EditHandler,
     r"/system/script_admin/save", SaveHandler,
     r"/system/script_admin/execute", ExecuteHandler,
     r"/system/script_admin/delete", DeleteHandler
