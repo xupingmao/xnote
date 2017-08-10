@@ -66,13 +66,16 @@ def to_list(key):
     """
     if key == "" or key == None:
         return []
+    if key[0] == '"' and key[-1] == '"':
+        return [key[1:-1]]
     keys = key.split(" ")
     return list(filter(lambda x: x != "", keys))
 
 
 def get_pretty_around_text(lines, current, limit):
     around_lines = []
-    start = max(current - limit, 0)
+    # start = max(current - limit, 0)
+    start = max(current, 0)
     stop  = min(current + limit, len(lines))
     for i in range(start, stop):
         if i == current:
@@ -84,7 +87,7 @@ def get_pretty_around_text(lines, current, limit):
         
 class LineInfo:
     """匹配行的信息"""
-    around_lines_num = 10
+    around_lines_num = 100
     def __init__(self, lineno, text, lines=None):
         self.lineno = lineno
         self.text = text
@@ -214,8 +217,8 @@ class FileSearch:
 class handler(BaseHandler):
     """analyze code"""
     def default_request(self):
-        ignore_case = self.get_argument("ignore_case", "on")
-        recursive   = self.get_argument("recursive", "on")
+        ignore_case = self.get_argument("ignore_case", "off")
+        recursive   = self.get_argument("recursive", "off")
         path        = self.get_argument("path", "", strip=True)
         key         = self.get_argument("key", "", strip=True)
         blacklist   = self.get_argument("blacklist", "", strip=True)

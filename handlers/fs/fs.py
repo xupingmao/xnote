@@ -239,11 +239,11 @@ class FileSystemHandler:
             return b'' # 其实webpy已经通过yield空bytes来避免None
         else:
             http_range = environ.get("HTTP_RANGE")
-            print(" ==> HTTP_RANGE", http_range)
             blocksize = 64 * 1024;
             # print_env()
 
             if http_range is not None:
+                print(" ==> HTTP_RANGE", http_range)
                 return self.read_range(path, http_range, blocksize)
             else:
                 return self.read_all(path, blocksize)            

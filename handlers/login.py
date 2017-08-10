@@ -24,9 +24,9 @@ class handler:
         if name in users:
             user = users[name]
             if pswd == user["password"]:
-                web.setcookie("xuser", name, expires= 24 * 3600 * 2)
+                web.setcookie("xuser", name, expires= 24*3600*30)
                 pswd_md5 = xauth.get_password_md5(pswd)
-                web.setcookie("xpass", pswd_md5, expires=24*3600*2)
+                web.setcookie("xpass", pswd_md5, expires=24*3600*30)
                 if target is None:
                     raise web.seeother("/")
                 raise web.seeother(target)
