@@ -41,12 +41,40 @@
         </tr>
         {% end %}
     </table>
+</div>
 
-    <div class="barcode col-md-12" style="margin:0 auto; text-align: center;">
-        <p>地址 <a href="http://{{?addr}}">http://{{?addr}}</a> </p>
-        <div id="qrcode"></div>
-    </div>
+{% if _is_admin %}
+<div class="col-md-12">
 
+{% set debug_tools = [
+    {"name": "系统信息",        "url": "/system/monitor"},
+    {"name": "备份管理",        "url": "/system/backup_info"},
+    {"name":"系统template缓存", "url":"/system/template_cache"}, 
+    {"name":"系统变量",         "url": "/system/sys_var_admin"},
+    {"name":"重新加载模块",     "url": "/system/reload"},
+] %}
+
+<h3>调试工具</h3>
+    <table class="col-md-12 table">
+        <tr>
+            <th class="sys-cmd-no">编号</th>
+            <th class="sys-cmd">命令</th>
+            <th>备注</th>
+        </tr>
+        {% for i, cmd in enumerate(debug_tools) %}
+        <tr>
+            <td class="sys-cmd-no">{{i+1}}</td>
+            <td class="sys-cmd"><a href="{{cmd['url']}}">{{cmd['name']}}</a></td>
+            <td></td>
+        </tr>
+        {% end %}
+    </table>
+</div>
+{% end %}
+
+<div class="barcode col-md-12" style="margin:0 auto; text-align: center;">
+    <p>地址 <a href="http://{{?addr}}">http://{{?addr}}</a> </p>
+    <div id="qrcode"></div>
 </div>
 
 <script type="text/javascript">

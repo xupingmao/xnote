@@ -53,8 +53,8 @@
                 {% for script_name in scripts %}
                     <option value="script://{{script_name}}">{{script_name}}</option>
                 {% end %}
-            </select><br/>
-            或者任务链接:<input type="text" name="url">
+            </select>
+            <!-- <br/>或者任务链接:<input type="text" name="url"> -->
         </td>
         <td><select name="tm_wday">
             <option value="*">每天</option>
@@ -81,8 +81,11 @@
         </td>
         <td><input type="submit" value="添加"></td>
     </tr>
-
 </table>
 </form>
+
+<div>
+    <a href="/system/script_admin">脚本管理</a>
+</div>
 
 {% end %}

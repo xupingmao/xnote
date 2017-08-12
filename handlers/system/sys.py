@@ -110,16 +110,12 @@ class SysHandler:
         cmd_list.append(Storage(name="聊天室", url="/tools/chatroom"))
 
         if xauth.is_admin():
-            cmd_list.append(Storage(name="系统信息", url="/system/monitor"))
             cmd_list.append(Storage(name="文件浏览器", url="/fs/"))
             cmd_list.append(Storage(name="脚本管理", url="/system/script_admin"))
-            cmd_list.append(Storage(name="重新加载模块", url="/system/reload"))
-            cmd_list.append(Storage(name="Template代码", url="/system/template_cache"))
-            cmd_list.append(Storage(name="备份管理", url="/system/backup_info"))
-            cmd_list.append(Storage(name="用户管理", url="/system/user_admin"))
             cmd_list.append(Storage(name="定时任务管理", url="/system/crontab"))
+            cmd_list.append(Storage(name="用户管理", url="/system/user_admin"))
             cmd_list.append(Storage(name="App包管理", url="/system/app_admin"))
-            cmd_list.append(Storage(name="系统变量管理", url="/system/sys_var_admin"))
+            cmd_list.append(Storage(name="代码模板", url="/tools/code_template"))
 
         return xtemplate.render("system/sys.html", 
             addr = addr,

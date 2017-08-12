@@ -35,6 +35,7 @@ class handler(BaseHandler):
                 fpath = os.path.join(dirname, fname)
                 if os.path.isfile(fpath) and fpath.endswith(".py"):
                     scripts.append(fname)
+        scripts.sort()
         self.render("system/crontab.html", task_list = self.task_list, scripts=scripts)
 
     @xauth.login_required("admin")

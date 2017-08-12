@@ -459,4 +459,6 @@ def load_tasks():
 
 def request(*args, **kw):
     global _manager
+    # request参数如下
+    # localpart='/', method='GET', data=None, host="0.0.0.0:8080", headers=None, https=False, **kw
     return _manager.app.request(*args, **kw)
