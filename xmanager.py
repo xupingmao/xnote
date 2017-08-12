@@ -339,9 +339,10 @@ class TaskManager:
                 globals_copy = {}
                 before_count = len(gc.get_objects())
                 # exec(code, globals, locals) locals的作用是为了把修改传递回来
+                # 使用缓存?
                 ret = six.exec_(code, globals_copy)
                 del globals_copy
-                # 执行一次GC防止内存不够
+                # 执行一次GC防止内存膨胀
                 gc.collect()
                 after_count = len(gc.get_objects())
                 print("gc.objects_count %s -> %s" % (before_count, after_count))

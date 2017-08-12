@@ -49,12 +49,16 @@
     <tr>
         <td>{{index+3}}</td>
         <td>
-            任务脚本:<select name="script_url">
+            <select id="url_type">
+                <option value="script">脚本</option>
+                <option value="url">URL</option>
+            </select>
+            <select name="script_url">
                 {% for script_name in scripts %}
                     <option value="script://{{script_name}}">{{script_name}}</option>
                 {% end %}
             </select>
-            <!-- <br/>或者任务链接:<input type="text" name="url"> -->
+            <input type="text" name="url" class="hide">
         </td>
         <td><select name="tm_wday">
             <option value="*">每天</option>
@@ -87,5 +91,20 @@
 <div>
     <a href="/system/script_admin">脚本管理</a>
 </div>
+
+<script type="text/javascript">
+    $("#url_type").on("change", function (event) {
+        console.log(event);
+        var target = event.target;
+        var value = $(target).val();
+        if (value == "script") {
+            $("select[name=script_url]").show();
+            $("input[name=url]").val("").hide();
+        } else {
+            $("input[name=url]").show();
+            $("select[name=script_url]").val("").hide();
+        }
+    })
+</script>
 
 {% end %}
