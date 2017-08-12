@@ -31,7 +31,7 @@ PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代�
 - 安装依赖的软件包```python -m pip install -r requirements.txt```
 - 无需额外配置，初始化的管理员账号是admin/123456
 - 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 即可
-- 本项目可以直接运行在新浪云应用SAE上面，还没注册SAE的同学可以用下面注册码注册（求云豆~) http://t.cn/RX2al0O 
+- 本项目可以直接运行在新浪云应用SAE上面
 
 ## 功能结构
 
