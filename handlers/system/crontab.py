@@ -14,6 +14,7 @@ import xconfig
 
 from handlers.base import BaseHandler
 
+SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
 
 class handler(BaseHandler):
 
@@ -33,7 +34,7 @@ class handler(BaseHandler):
         if os.path.exists(dirname):
             for fname in os.listdir(dirname):
                 fpath = os.path.join(dirname, fname)
-                if os.path.isfile(fpath) and fpath.endswith(".py"):
+                if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_TUPLE):
                     scripts.append(fname)
         scripts.sort()
         self.render("system/crontab.html", task_list = self.task_list, scripts=scripts)

@@ -15,6 +15,7 @@ import base64
 import time
 import platform
 import re
+import gc
 import shutil
 import six
 import web
@@ -407,6 +408,42 @@ def say(msg):
         windows_say(msg)
     elif is_mac():
         mac_say(msg)
+
+
+def exec_script(name):
+    """执行script目录下的脚本"""
+    dirname = xconfig.SCRIPTS_DIR
+    path = os.path.join(dirname, name)
+    path = os.path.abspath(path)
+    ret  = 0
+    if name.endswith(".py"):
+        # 方便获取xnote内部信息，同时防止开启过多Python进程
+        code = xutils.readfile(path)
+        globals_copy = {}
+        before_count = len(gc.get_objects())
+        # exec(code, globals, locals) locals的作用是为了把修改传递回来
+        ret = six.exec_(code, globals_copy)
+        del globals_copy
+        # 执行一次GC防止内存膨胀
+        gc.collect()
+        after_count = len(gc.get_objects())
+        print("gc.objects_count %s -> %s" % (before_count, after_count))
+    elif name.endswith(".command"):
+        # Mac os Script
+        xutils.system("chmod +x " + path)
+        ret = xutils.system("open " + path)
+    elif path.endswith((".bat", ".vbs")):
+        cmd = u("start %s") % path
+        if six.PY2:
+            # Python2 import当前目录优先
+            encoding = sys.getfilesystemencoding()
+            cmd = cmd.encode(encoding)
+        os.system(cmd)
+    elif path.endswith(".sh"):
+        os.system("chmod +x " + path)
+        os.system(path)
+        # TODO linux怎么处理?
+    return ret
 
 
 #################################################################
