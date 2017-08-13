@@ -332,8 +332,8 @@ class TaskManager:
                 response = xutils.urlopen(quoted_url).read()
                 log("Request %r success" % quoted_url)
                 return response
-            elif quoted_url.startswith("script://"):
-                name = quoted_url[len("script://"):]
+            elif url.startswith("script://"):
+                name = url[len("script://"):]
                 return xutils.exec_script(name)
             cookie = xauth.get_admin_cookie()
             return self.app.request(url, headers=dict(COOKIE=cookie))
