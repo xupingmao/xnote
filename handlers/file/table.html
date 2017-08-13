@@ -1,0 +1,92 @@
+{% if file_type == "table" %}
+
+
+
+<div id="app">
+    <h3>
+        <input v-model="fileName" />
+    </h3>
+    {% include file/tags.html %}
+    <table class="table">
+        <tr>
+            <th></th>
+            <th v-for="title in titles">{{!title}}</th>
+            <th>
+                <input v-model="newColumn">
+                <input type="button" value="添加" v-on:click="addColumn"/>
+            </th>
+        </tr>
+        <tr v-for="(row,i) in rows">
+            <th><input type="button" class="btn btn-danger" value="删除" v-on:click="delRow(i)"/></th>
+            <td v-for="(cell,j) in row">
+                <textarea v-model="rows[i][j]"></textarea>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+
+    <input type="button" class="btn" v-on:click="save" value="保存">
+    <input type="button" class="btn" v-on:click="insertRow" value="添加一行">
+</div>
+
+<script type="text/javascript">
+var app = new Vue({
+    el: "#app",
+    data: {
+        newColumn:"",
+        fileName:"",
+        titles:[],
+        rows : [
+        ]
+    },
+    methods: {
+        addColumn: function () {
+            if (this.newColumn != "") {
+                this.titles.push(this.newColumn);
+                for (var i = 0; i < this.rows.length; i++) {
+                    var row = this.rows[i];
+                    row.push("");
+                }
+                this.newColumn = "";
+            }
+        },
+
+        save: function() {
+            var data = {titles: this.titles, rows: this.rows};
+            var dataStr = JSON.stringify(data);
+            console.log(dataStr);
+            $.post("/file/table/save", 
+                    {
+                        id: getUrlParams()["id"], 
+                        content: dataStr,
+                        name: this.fileName
+                    }, function (response) {
+                console.log(response);
+                location.reload();
+            })
+        },
+
+        insertRow: function () {
+            var row = new Array(this.titles.length);
+            this.rows.push(row);
+        },
+
+        delRow: function (index) {
+            this.rows.splice(index,1);
+        }
+    }
+});
+
+$(function() {
+    $.get("/file/table?id=" + getUrlParams()["id"], function (data) {
+        console.log(data);
+        var parsedData = JSON.parse(data);
+        var content = parsedData.content;
+        var data = JSON.parse(content);
+        app.fileName = parsedData.name;
+        app.titles = data.titles || [];
+        app.rows = data.rows || [];
+    })
+})
+</script>
+{% end %}
