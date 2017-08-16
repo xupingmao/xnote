@@ -1,6 +1,17 @@
 {% extends base.html %}
 
+
 {% block head %}
+
+
+<link rel="stylesheet" href="/static/lib/codemirror/codemirror.min.css">
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
+<script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
+<script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
+<script type="text/javascript" src="/static/lib/codemirror/mode/python.js"></script>
+<script type="text/javascript" src="/static/lib/codemirror/mode/javascript.js"></script>
+
 <style type="text/css">
 
 .search-key {
@@ -16,12 +27,32 @@
 <div>
     <p style="color:red">{{?error}}</p>
 </div>
+<textarea id="content" class="hide">{{content}}</textarea>
 <div class="col-md-12">
-<pre class="col-md-1 marked-pre">{% for l in range(1, lines+1) %}{{"%04d\n" % l}}{% end %}</pre>
-<pre class="col-md-10 marked-pre">{{ content }}&nbsp;</pre>
+<pre class="col-md-1 marked-pre hide">{% for l in range(1, lines+1) %}{{"%04d\n" % l}}{% end %}</pre>
+<pre class="col-md-10 marked-pre hide">{{ content }}&nbsp;</pre>
+<textarea id="editor">{{content}}</textarea>
 </div>
 
 {# TODO 需要处理下搜索的高亮 #}
 
-<script type="text/javascript">$("#menu-analyze").addClass("active");</script>
+<script type="text/javascript">
+    $(function () {
+
+        var mode = "text/x-sh";
+        var name = getUrlParams().path;
+        if (name.endsWith(".py")) {
+            mode = "text/x-python";
+        } else if (name.endsWith(".js")) {
+            mode = "text/javascript";
+        }
+        var editor = CodeMirror.fromTextArea($("#editor")[0], {
+            lineNumbers: true,
+            mode: mode,
+            theme:"monokai",
+            indentUnit:4,
+        });
+        editor.setSize("auto", 500);
+    });
+</script>
 {% end %}
