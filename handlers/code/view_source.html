@@ -45,6 +45,8 @@
             mode = "text/x-python";
         } else if (name.endsWith(".js")) {
             mode = "text/javascript";
+        } else if (name.endsWith(".c")) {
+            mode = "text/x-c";
         }
         var editor = CodeMirror.fromTextArea($("#editor")[0], {
             lineNumbers: true,

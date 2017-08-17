@@ -33,7 +33,10 @@ class TableSave:
         name = xutils.get_argument("name")
         db = xtables.get_file_table()
         # record = db.select_one(where={"id": id})
-        db.update(where={"id":id}, content=content,name=name)
+        if name != "":
+            db.update(where={"id":id}, content=content,name=name)
+        else:
+            db.update(where={"id":id}, content=content)
         return dict(code="success")
 
 xurls = (

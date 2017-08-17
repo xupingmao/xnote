@@ -10,16 +10,19 @@
     <table class="table">
         <tr>
             <th></th>
-            <th v-for="title in titles">{{!title}}</th>
+            <th>No</th>
+            <th v-for="(title, i) in titles">
+                <input v-model="titles[i]" />
             <th>
                 <input v-model="newColumn">
                 <input type="button" value="添加" v-on:click="addColumn"/>
             </th>
         </tr>
         <tr v-for="(row,i) in rows">
-            <th><input type="button" class="btn btn-danger" value="删除" v-on:click="delRow(i)"/></th>
+            <th><input type="button" class="btn btn-danger" value="X" v-on:click="delRow(i)"/></th>
+            <th>{{!i+1}}</th>
             <td v-for="(cell,j) in row">
-                <textarea v-model="rows[i][j]"></textarea>
+                <input v-model="rows[i][j]"/>
             </td>
             <td></td>
         </tr>
@@ -36,8 +39,7 @@ var app = new Vue({
         newColumn:"",
         fileName:"",
         titles:[],
-        rows : [
-        ]
+        rows : []
     },
     methods: {
         addColumn: function () {
@@ -82,10 +84,12 @@ $(function() {
         console.log(data);
         var parsedData = JSON.parse(data);
         var content = parsedData.content;
-        var data = JSON.parse(content);
+        if (content != "") {
+            var data = JSON.parse(content);
+            app.titles = data.titles || [];
+            app.rows = data.rows || [];
+        }
         app.fileName = parsedData.name;
-        app.titles = data.titles || [];
-        app.rows = data.rows || [];
     })
 })
 </script>
