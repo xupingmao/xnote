@@ -37,7 +37,7 @@
             {% elif task.tm_wday == "no-repeat" %}
                 一次性
             {% else %}
-                {{task.tm_wday}}
+                星期{{task.tm_wday}}
             {% end %}
         </td>
         <td>{% if task.tm_hour == "*" %}每小时{% else %}{{task.tm_hour}}{% end %}</td>
@@ -64,7 +64,7 @@
             <option value="*">每天</option>
             <option value="no-repeat">一次性</option>
             {% for wday in range(1, 8) %}
-            <option value="{{wday}}">{{wday}}</option>
+            <option value="{{wday}}">星期{{wday}}</option>
             {% end %}
         </select></td>
         <td>

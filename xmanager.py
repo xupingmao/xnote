@@ -314,7 +314,7 @@ class TaskManager:
         if tm is None:
             tm = time.localtime()
 
-        if self._match(tm.tm_wday, task.tm_wday) \
+        if self._match(tm.tm_wday+1, task.tm_wday) \
                 and self._match(tm.tm_hour, task.tm_hour) \
                 and self._match(tm.tm_min, task.tm_min):
             return True
