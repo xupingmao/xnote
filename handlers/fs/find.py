@@ -38,7 +38,10 @@ class handler:
         path = xutils.get_argument("path")
         find_key = xutils.get_argument("find_key")
         path_name = os.path.join(path, find_key)
-        plist = limited_glob(path_name)
+        if find_key == "":
+            plist = []
+        else:
+            plist = limited_glob(path_name)
         # plist = glob.glob(path_name)
         # plist += glob.glob(os.path.join(path, quoted_key))
         # print(path, find_key)
