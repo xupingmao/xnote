@@ -189,6 +189,7 @@ load_mapping(r"([^ ]*)",                "handlers.search.scripts.search")
 load_mapping(r"([^ ]*)",                "handlers.search.api.search")
 load_mapping(r"(\d+)分钟后提醒我?(.*)", "handlers.search.reminder.search")
 load_mapping(r"静音(.*)",               "handlers.search.mute.search")
+load_mapping(r"mute(.*)",               "handlers.search.mute.search")
 load_mapping(r"取消静音",               "handlers.search.mute.cancel")
 load_mapping(r"(.*)",                   "handlers.search.file.search")
 
