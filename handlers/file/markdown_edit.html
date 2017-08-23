@@ -51,7 +51,6 @@
     
     {% init error = "" %}
     {% init download_csv = False %}
-    {% include "search.html" %} 
 
     <div style="">
         <h3>
@@ -293,7 +292,7 @@
 
         $("#insertCode").on("click", function () {
             var cur = codeMirror.getCursor();
-            codeMirror.replaceRange("```\n\n```", cur, cur, "");
+            codeMirror.replaceRange("```\n[代码]\n```", cur, cur, "");
         })
     })
 </script>

@@ -57,6 +57,8 @@
     myRenderer.listitem = function (text) {
         if (/^\[\]/.test(text)) {
             return '<li><input type="checkbox" disabled="true"/>' + text.substring(2) + '</li>\n';
+        } else if (/^\[ \]/.test(text)) {
+            return '<li><input type="checkbox" disabled="true"/>' + text.substring(3) + '</li>\n';
         } else if (/^\[[Xx]\]/.test(text)) {
             return '<li><input type="checkbox" checked disabled="true"/>' + text.substring(3) + '</li>\n';
         } else {
