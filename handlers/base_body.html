@@ -1,7 +1,7 @@
 {# 菜单 #}
 
 
-<div class="xnote-menu col-md-12" style="display: block;/*position: fixed*/;background: #333;">
+<div class="xnote-menu col-md-12" style="display: block;position: fixed;z-index:1000;background: #333;">
     <div class="col-md-1">&nbsp;</div>
     <div class="col-md-10">
     {% if _has_login %}
@@ -25,6 +25,7 @@
     </div>
 </div>
 <div class="col-md-10 col-md-offset-1">
+  <div class="col-md-12" style="height: 50px"></div>
   <div class="row">
      {% block body %} {% end %}
   </div>
