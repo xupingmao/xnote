@@ -81,6 +81,10 @@ class TestMain(unittest.TestCase):
         response = app.request(url)
         self.assertEqual("404 Not Found", response.status)
 
+    def check_status(self, status, *args, **kw):
+        response = app.request(*args, **kw)
+        self.assertEqual(status, response.status)
+
     def test_static_files(self):
         self.check_200("/static/lib/jquery.js")
         # 禁止直接访问目录
@@ -100,6 +104,12 @@ class TestMain(unittest.TestCase):
         self.check_200("/fs//")
         self.check_200("/fs//?_type=json")
         self.check_200("/data/data.db")
+
+    def test_fs_partial_content(self):
+        response = app.request("/data/data.db", headers=dict(RANGE="bytes=1-100"))
+        self.assertEqual("206 Partial Content", response.status)
+        self.assertEqual("bytes", response.headers["Accept-Ranges"])
+        self.assertEqual(True, "Content-Range" in response.headers)
 
     def test_sys(self):
         self.check_200("/system/sys")
