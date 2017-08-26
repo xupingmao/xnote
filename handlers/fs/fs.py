@@ -195,10 +195,10 @@ class FileSystemHandler:
                 web.header("Accept-Ranges", "bytes")
                 web.header("Content-Range", content_range)
 
-                print(" <== Content-Range:%s" % content_range)
-                
+                xutils.trace("<== Content-Range:%s" % content_range)
                 # 发送数据
-                with open(path, "rb") as fp:
+                fp = open(path, "rb")
+                try:
                     fp.seek(range_start)
                     rest = range_end - range_start + 1
                     readsize = min(rest, blocksize)
@@ -207,7 +207,12 @@ class FileSystemHandler:
                         yield fp.read(readsize)
                         rest -= readsize
                         readsize = min(rest, blocksize)
+                finally:
+                    # 基本上和with等价，这里打印出来
+                    xutils.trace("close %s" % path)
+                    fp.close()
             except Exception as e:
+                # 其他未知异常
                 xutils.print_stacktrace()
                 # yield最好不要和return混用
                 yield self.read_all(path, blocksize)
@@ -243,7 +248,7 @@ class FileSystemHandler:
             # print_env()
 
             if http_range is not None:
-                print(" ==> HTTP_RANGE", http_range)
+                xutils.trace("==> HTTP_RANGE {}", http_range)
                 return self.read_range(path, http_range, blocksize)
             else:
                 return self.read_all(path, blocksize)            
