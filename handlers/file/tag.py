@@ -53,7 +53,7 @@ class TagNameHandler:
             count_sql = "SELECT COUNT(1) AS amount FROM file_tag WHERE UPPER(name) = $name"
             sql = "SELECT f.* FROM file f, file_tag ft ON ft.file_id = f.id WHERE UPPER(ft.name) = $name ORDER BY f.sctime DESC LIMIT $offset, $limit"
         else:
-            count_sql = "SELECT COUNT(1) FROM file_tag WHERE UPPER(name) = $name AND groups IN $groups"
+            count_sql = "SELECT COUNT(1) AS amount FROM file_tag WHERE UPPER(name) = $name AND groups IN $groups"
             sql = "SELECT f.* FROM file f, file_tag ft ON ft.file_id = f.id WHERE UPPER(ft.name) = $name AND f.groups IN $groups ORDER BY f.sctime DESC LIMIT $offset, $limit"
         groups = ["*", role]
         # tag_list = db.select("file_tag", where="UPPER(name) = $name", vars=dict(name=tagname.upper()))
