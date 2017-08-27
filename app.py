@@ -43,7 +43,7 @@ def check_db():
     xtables.init()
 
 def check_dirs():
-    xutils.makedirs(config.DATA_PATH)
+    xutils.makedirs(xconfig.DATA_PATH)
     # xutils.makedirs(config.LOG_DIR)
     # xutils.makedirs("tmp")
         
@@ -56,7 +56,7 @@ def handle_args():
     args = parser.parse_args(sys.argv[1:])
 
     # 处理Data目录
-    config.set_data_path(args.data)
+    xconfig.set_data_path(args.data)
 
     # 延迟加载，避免定时任务重复执行
     delay = int(args.delay)
@@ -65,7 +65,7 @@ def handle_args():
     # 启动提醒
     if args.ringtone == "yes":
         xutils.say("系统启动")
-        
+
 def main():
     global app
 

@@ -9,6 +9,14 @@
 <script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/python.js"></script>
 
+<style type="text/css">
+    #result {
+        border: 1px solid #ccc;
+        padding: 4px;
+        background-color: #9cc;
+    }
+</style>
+
 {% end %}
 
 {% block body %}
@@ -24,15 +32,22 @@
 </div>
 
 {% if op == "edit" %}
+    <h3>{{name}}</h3>
     {# 编辑 #}
     <form method="POST" action="/system/script_admin/save">
         <div class="col-md-12">
             <input type="text" name="name" value="{{name}}" class="hide">
-            <textarea id="editor" class="col-md-12" name="content">{{content}}</textarea>
+            <textarea id="editor" class="col-md-12" name="content" rows=10>{{content}}</textarea>
             <button id="save" class="btn">Save</button>
             <input type="button" scriptName="{{name}}" class="executeScript btn" value="执行"/>
         </div>
     </form>
+
+    <div class="col-md-12">
+        结果
+        <pre id="result" class="col-md-12">
+        </pre>
+    </div>
 
     <script>
         $(function () {
@@ -87,8 +102,9 @@
         var scriptName = $(event.target).attr("scriptName")
         // console.log(event);
         // console.log($(event.target).attr("scriptName"))
-        $.post("/system/script_admin/execute?name=" + scriptName, function (data) {
-
+        $.post("/system/script_admin/execute?name=" + scriptName, function (responseText) {
+            var data = JSON.parse(responseText);
+            $("#result").text(data.data);
         });
     })
 

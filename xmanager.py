@@ -13,7 +13,7 @@ import json
 import inspect
 import six
 
-from threading import Thread, Timer
+from threading import Thread, Timer, current_thread
 
 try:
     from queue import Queue
@@ -32,6 +32,35 @@ from util import textutil
 from xutils import Storage
 
 config = xconfig
+
+class MyStdout:
+
+    def __init__(self, stdout):
+        self.stdout = stdout
+        self.result_dict = dict()
+
+    def write(self, value):
+        result = self.result_dict.get(current_thread())
+        if result != None:
+            result.append(value)
+        return self.stdout.write(value)
+
+    def writelines(self, lines):
+        return self.stdout.writelines(lines)
+
+    def flush(self):
+        return self.stdout.flush()
+
+    def close(self):
+        return self.stdout.close()
+
+    def record(self):
+        self.result_dict[current_thread()] = []
+
+    def pop_record(self):
+        result = self.result_dict.pop(current_thread(), [])
+        return "".join(result)
+
 
 def wrapped_handler(handler_clz):
     # Py2 自定义类不是type类型
@@ -140,6 +169,10 @@ class ModelManager:
         self.report_loading = False
         self.task_manager = TaskManager(app)
         self.blacklist = ("handlers.experiment")
+
+        # stdout装饰器，方便读取print内容
+        if not isinstance(sys.stdout, MyStdout):
+            sys.stdout = MyStdout(sys.stdout)
     
     def reload_module(self, name):
         try:

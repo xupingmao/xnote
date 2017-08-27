@@ -61,7 +61,7 @@ class ExecuteHandler:
     def POST(self):
         name = xutils.get_argument("name")
         ret = xutils.exec_script(name)
-        return dict(code="success", message="", ret=ret)
+        return dict(code="success", message="", data=ret)
 
 class handler:
 

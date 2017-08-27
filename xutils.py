@@ -84,8 +84,9 @@ from web.utils import safestr, safeunicode
 def print_stacktrace():
     """打印系统异常堆栈"""
     ex_type, ex, tb = sys.exc_info()
-    print(ex)
-    traceback.print_tb(tb)
+    # print(ex)
+    # traceback.print_tb(tb)
+    print(traceback.format_exc())
 
 def print_web_ctx_env():
     for key in web.ctx.env:
@@ -440,17 +441,23 @@ def exec_script(name):
     path = os.path.abspath(path)
     ret  = 0
     if name.endswith(".py"):
-        # 方便获取xnote内部信息，同时防止开启过多Python进程
-        code = xutils.readfile(path)
-        globals_copy = {}
-        before_count = len(gc.get_objects())
-        # exec(code, globals, locals) locals的作用是为了把修改传递回来
-        ret = six.exec_(code, globals_copy)
-        del globals_copy
-        # 执行一次GC防止内存膨胀
-        gc.collect()
-        after_count = len(gc.get_objects())
-        print("gc.objects_count %s -> %s" % (before_count, after_count))
+        try:
+            # 方便获取xnote内部信息，同时防止开启过多Python进程
+            code = xutils.readfile(path)
+            globals_copy = {"__name__": "__main__"}
+            before_count = len(gc.get_objects())
+            # exec(code, globals, locals) locals的作用是为了把修改传递回来
+            sys.stdout.record()
+            ret = six.exec_(code, globals_copy)
+            del globals_copy
+            # 执行一次GC防止内存膨胀
+            gc.collect()
+            after_count = len(gc.get_objects())
+            ret = sys.stdout.pop_record()
+            print("gc.objects_count %s -> %s" % (before_count, after_count))
+        except:
+            print_stacktrace()
+            ret = sys.stdout.pop_record()
     elif name.endswith(".command"):
         # Mac os Script
         xutils.system("chmod +x " + path)
