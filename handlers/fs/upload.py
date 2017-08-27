@@ -18,7 +18,7 @@ class UploadHandler:
             if x.file.filename == "":
                 raise web.seeother("//fs/%s" % quote(dirname))
             xutils.makedirs(dirname)
-            filename = xutils.quote(x.file.filename)
+            filename = xutils.quote(os.path.basename(x.file.filename))
             filepath = os.path.join(dirname, filename)
             with open(filepath, "wb") as fout:
                 # fout.write(x.file.file.read())
@@ -54,7 +54,9 @@ class RangeUploadHandler:
         filename = None
         if hasattr(file, "filename"):
             # print(" - - %-20s = %s" % ("filename", file.filename))
-            filename = xutils.quote_unicode(file.filename)
+            xutils.log("recv {}", file.filename)
+            filename = os.path.basename(file.filename)
+            filename = xutils.quote_unicode(filename)
             # filename = xauth.get_current_name() + '_' + filename
             tmp_name = "%s_%d.part" % (filename, chunk)
             tmp_path = os.path.join(dirname, tmp_name)
