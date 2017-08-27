@@ -47,23 +47,34 @@ def check_dirs():
     # xutils.makedirs(config.LOG_DIR)
     # xutils.makedirs("tmp")
         
-def handle_data_dir():
+def handle_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="./data")
+    parser.add_argument("--delay", default="0")
+    parser.add_argument("--ringtone", default="no")
+
     args = parser.parse_args(sys.argv[1:])
+
+    # 处理Data目录
     config.set_data_path(args.data)
+
+    # 延迟加载，避免定时任务重复执行
+    delay = int(args.delay)
+    time.sleep(delay)
+
+    # 启动提醒
+    if args.ringtone == "yes":
+        xutils.say("系统启动")
         
 def main():
     global app
 
     port = config.PORT
-    
     if not os.environ.get("PORT"):
         os.environ["PORT"] = port
 
-    # 处理Data目录
-    handle_data_dir()
-    
+    handle_args()   
+
     var_env = dict()
     
     config.set("host", "localhost")
