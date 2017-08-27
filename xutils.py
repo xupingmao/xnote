@@ -396,12 +396,23 @@ def http_get(url):
     return decode_bytes(stream.read())
 
 def mac_say(msg):
-    msglist = re.split(r"[,.;?!():，。？！；： ]", msg)
+    def escape(str):
+        new_str_list = ['"']
+        for c in str:
+            if c != '"':
+                new_str_list.append(c)
+            else:
+                new_str_list.append('\\"')
+        new_str_list.append('"')
+        return ''.join(new_str_list)
+
+    msglist = re.split(r"[,.;?!():，。？！；：\n]", msg)
     for m in msglist:
         m = m.strip()
         if m == "":
             continue
-        cmd = u("say %s") % m
+        cmd = u("say %s") % escape(m)
+        trace(cmd)
         os.system(cmd.encode("utf-8"))
 
 def windows_say(msg):

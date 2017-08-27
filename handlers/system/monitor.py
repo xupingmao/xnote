@@ -3,6 +3,7 @@
 import web
 import time
 import os
+import platform
 import xutils
 import logging
 from logging.handlers import TimedRotatingFileHandler
@@ -82,6 +83,8 @@ class handler:
             sys_mem_used = formated_mem_size,
             sys_mem_total = format_size(sys_mem_total),
             python_version = sys.version,
+            sys_version = platform.version(),
+            processor = platform.processor(),
             thread_cnt = thread_cnt)
 
 
