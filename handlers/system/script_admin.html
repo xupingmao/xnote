@@ -18,7 +18,10 @@
 {% set  index = 1 %}
 {% init op = "list" %}
 
-<h2><a href="/system/script_admin">脚本管理</a></h2>
+<div>
+    <a href="/system/script_admin">脚本管理</a>|
+    <a href="/system/crontab">定时任务管理</a>|
+</div>
 
 {% if op == "edit" %}
     {# 编辑 #}
@@ -77,8 +80,6 @@
             {% set index = index + 1 %}
         {% end %}
     </table>
-    
-    <a href="/system/crontab">定时任务管理</a>
 {% end %}
 
 <script type="text/javascript">

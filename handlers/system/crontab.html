@@ -2,7 +2,10 @@
 
 {% block body %}
 
-<h3>定时任务管理</h3>
+<div>
+    <a href="/system/script_admin">脚本管理</a>|
+    <a href="/system/crontab">定时任务管理</a>|
+</div>
 
 {% set REPEAT_TYPE_DICT = dict(interval="间隔秒", day="每天") %}
 
@@ -87,10 +90,6 @@
     </tr>
 </table>
 </form>
-
-<div>
-    <a href="/system/script_admin">脚本管理</a>
-</div>
 
 <script type="text/javascript">
     $("#url_type").on("change", function (event) {
