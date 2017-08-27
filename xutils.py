@@ -9,6 +9,7 @@ xutils是暴露出去的统一接口
 import sys
 import os
 import traceback
+import inspect
 import sqlite3
 import json
 import base64
@@ -365,6 +366,17 @@ def quote_unicode(url):
 ##   Platform/OS Utilities, Python 2 do not have this file
 #################################################################
 
+def log(fmt, *argv):
+    message = fmt.format(argv)
+    f_back = inspect.currentframe().f_back
+    f_code = f_back.f_code
+    f_modname = f_back.f_globals.get("__name__")
+    f_name = f_code.co_name
+    f_lineno = f_back.f_lineno
+    print("%s %s.%s:%s %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), f_modname, f_name, f_lineno, message))
+
+def trace(fmt, *argv):
+    print("   ", fmt.format(*argv))
 
 def system(cmd):
     if PY2:

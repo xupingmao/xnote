@@ -28,7 +28,7 @@
     <form method="POST" action="/system/script_admin/save">
         <div class="col-md-12">
             <input type="text" name="name" value="{{name}}" class="hide">
-            <textarea id="editor" class="col-md-12" rows="20" name="content">{{content}}</textarea>
+            <textarea id="editor" class="col-md-12" name="content">{{content}}</textarea>
             <button id="save" class="btn">Save</button>
             <input type="button" scriptName="{{name}}" class="executeScript btn" value="执行"/>
         </div>
@@ -48,7 +48,7 @@
                 theme:"monokai",
                 indentUnit:4,
             });
-            editor.setSize("auto", 500);
+            editor.setSize("auto", "auto");
         });
     </script>
 
