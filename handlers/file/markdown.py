@@ -144,6 +144,7 @@ class UpdateHandler(BaseHandler):
         # 处理文件上传
         if hasattr(upload_file, "filename") and upload_file.filename != "":
             filename = upload_file.filename
+            filename = filename.replace("\\", "/")
             filename = os.path.basename(filename)
             filepath, webpath = get_upload_file_path(xutils.quote(filename))
             with open(filepath, "wb") as fout:
