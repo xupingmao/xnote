@@ -204,3 +204,33 @@ def byte2str(buf):
             return buf.decode(encoding)
         except:
             pass
+
+def edit_distance0(a, b, la, lb, cache=None, replace_step=1):
+    # 典型的可以使用动态规划，为了可读性，依旧保持原来的递归求解结构
+    # 对于这种纯粹的函数，提供装饰器或者在虚拟机进行优化更方便理解
+    if cache[la][lb] >= 0:
+        return cache[la][lb]
+    if la == 0:
+        ret = lb
+    elif lb == 0:
+        ret = la
+    elif a[la-1] == b[lb-1]:
+        ret = edit_distance0(a, b, la-1, lb-1, cache, replace_step)
+    else:
+        # a删除一个字符a[la-1]
+        d1 = edit_distance0(a, b, la-1, lb, cache, replace_step) + 1
+        # a插入一个字符b[lb-1]
+        d2 = edit_distance0(a, b, la, lb-1, cache, replace_step) + 1
+        # 替换最后一个字符
+        d3 = edit_distance0(a, b, la-1, lb-1, cache, replace_step) + replace_step
+        ret = min(d1, d2, d3)
+    cache[la][lb]=ret
+    return ret
+
+def edit_distance(a,b,replace_step=1):
+    """最小编辑距离算法"""
+    cache = [[-1 for i in range(len(b)+1)] for i in range(len(a)+1)]
+    return edit_distance0(a,b,len(a),len(b),cache,replace_step)
+
+
+

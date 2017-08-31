@@ -23,6 +23,7 @@ import web
 import xconfig
 
 from util.ziputil import *
+from util.textutil import edit_distance
 
 PY2 = sys.version_info[0] == 2
 

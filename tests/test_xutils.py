@@ -74,4 +74,11 @@ class TestMain(unittest.TestCase):
         self.assertEqual("YS50eHQ=.x0", xutils.encode_name("a.txt"))
         self.assertEqual("YS50eHQ=.x0", xutils.encode_name("YS50eHQ=.x0"))
 
+    def test_edit_distance(self):
+        self.assertEqual(1, xutils.edit_distance("abcd","abc"))
+        self.assertEqual(2, xutils.edit_distance("abcd", "ab"))
+        self.assertEqual(3, xutils.edit_distance("abc", "def"))
+        self.assertEqual(3, xutils.edit_distance("kkabcd", "abc"))
+
+
         

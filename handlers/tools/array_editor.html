@@ -1,0 +1,62 @@
+<html>
+    <meta charset="utf-8"/>
+    <head>
+        <script type="text/javascript" src="/static/lib/jquery.js"></script>
+        <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
+        <link rel="stylesheet" href="/static/css/xnote.css"/>
+        <style type="text/css">
+            .map-bar {
+                width: 1.5rem;
+            }
+            table td {
+                padding: 0px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <!-- <h2>Z = (100+ {{!yRatio}} * (y - 100)) - (4 + {{!xRatio}} * (x - 4)) </h2> -->
+            <p>x宽度<input v-model="width"> y高度<input v-model="height"></p>
+            <table class="table">
+                <tr>
+                    <td></td>
+                    <td v-for="x in parseInt(width)">{{!x}}</td>
+                </tr>
+                <tr v-for="y in parseInt(height)">
+                    <td>{{!y}}</td>
+                    <td v-for="x in parseInt(width)" v-on:click="switchColor($event)">
+                        <input type="text" class="map-bar"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <script type="text/javascript">
+            var app = new Vue({
+                el: "#app",
+                data: {
+                    xRatio:0.8,
+                    yRatio:0.4,
+                    width: 20,
+                    height:20,
+                },
+                methods: {
+                    getZ: function (x, y) {
+                        return (100+ this.yRatio * (y-100)) /  (4 + this.xRatio * (x-4));
+                    },
+                    switchColor: function (event) {
+                        var el = event.currentTarget;
+                        var bg = $(el).css("background-color");
+                        console.log(bg);
+                        if (bg=="rgb(255, 0, 0)") {
+                            $(el).css({"background-color":"white"});
+                        } else {
+                            $(el).css({"background-color":"red"});
+                        }
+                    }
+                }
+            })
+        </script>
+
+    </body>
+</html>
