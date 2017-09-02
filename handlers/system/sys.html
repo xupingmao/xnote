@@ -17,6 +17,14 @@
         .sys-cmd {
             width: 70%;
         }
+        h3 {
+            background: #ccf;
+            padding: 5px;
+        }
+        a {
+            text-decoration: none;
+            color: #08c;
+        }
     </style>
 {% end %}
 
@@ -27,6 +35,27 @@
 <input class="hide" id="addr" value="{{?addr}}" />
 <div class="row">
     <p>您好,{{_user["name"]}}</p>
+</div>
+
+<div class="barcode col-md-12" style="margin:0 auto; text-align: center;">
+    <p>地址 <a href="http://{{?addr}}">http://{{?addr}}</a> </p>
+    <div id="qrcode"></div>
+</div>
+
+
+<div class="col-md-12">
+    <h3>常用命令</h3>
+    <div class="col-md-12">
+        {% for cmd in cmd_list %}
+        <div class="col-md-4">
+            <a href="{{cmd.url}}">{{cmd.name}}</a>
+        </div>
+        {% end %}
+    </div>
+</div>
+
+<!--
+<div class="col-md-12">
     <table class="col-md-12 table">
         <tr>
             <th class="sys-cmd-no">编号</th>
@@ -42,41 +71,47 @@
         {% end %}
     </table>
 </div>
+-->
 
-{% if _is_admin %}
-<div class="col-md-12">
-
-{% set debug_tools = [
-    {"name": "系统信息",        "url": "/system/monitor"},
-    {"name": "备份管理",        "url": "/system/backup_info"},
-    {"name":"template缓存", "url":"/system/template_cache"}, 
-    {"name":"系统变量",         "url": "/system/sys_var_admin"},
-    {"name":"重新加载模块",     "url": "/system/reload"},
-    {"name":"静音",             "url": "/search/search?key=mute"},
+{% set img_tools = [
+    ("帧图合并", "/tools/img_merge"),
+    ("图片拆分", "/tools/img_split"),
 ] %}
 
-<h3>调试工具</h3>
-    <table class="col-md-12 table">
-        <tr>
-            <th class="sys-cmd-no">编号</th>
-            <th class="sys-cmd">命令</th>
-            <th>备注</th>
-        </tr>
-        {% for i, cmd in enumerate(debug_tools) %}
-        <tr>
-            <td class="sys-cmd-no">{{i+1}}</td>
-            <td class="sys-cmd"><a href="{{cmd['url']}}">{{cmd['name']}}</a></td>
-            <td></td>
-        </tr>
+<div class="col-md-12 top-offset-1">
+    <h3>图片处理工具</h3>
+    <div class="col-md-12">
+        {% for name, link in img_tools %}
+        <div class="col-md-4">
+            <a href="{{link}}">{{name}}</a>
+        </div>
         {% end %}
-    </table>
+    </div>
 </div>
-{% end %}
 
-<div class="barcode col-md-12" style="margin:0 auto; text-align: center;">
-    <p>地址 <a href="http://{{?addr}}">http://{{?addr}}</a> </p>
-    <div id="qrcode"></div>
+{% if _is_admin %}
+
+{% set debug_tools = [
+    ("系统信息","/system/monitor"),
+    ("备份管理",     "/system/backup_info"),
+    ("template缓存", "/system/template_cache"),
+    ("系统变量",     "/system/sys_var_admin"),
+    ("重新加载模块", "/system/reload"),
+    ("静音",         "/search/search?key=mute"),
+] %}
+
+<div class="col-md-12 top-offset-1">
+    <h3>图片处理工具</h3>
+    <div class="col-md-12">
+        {% for name, link in debug_tools %}
+        <div class="col-md-4">
+            <a href="{{link}}">{{name}}</a>
+        </div>
+        {% end %}
+    </div>
 </div>
+
+{% end %}
 
 <script type="text/javascript">
 $("#menu-sys").addClass("active");

@@ -1,0 +1,179 @@
+{% extends base.html %}
+
+{% block body %}
+
+<script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
+
+<h3>图片合并</h3>
+<pre>点击画布上的方块可以选择图片填充，选择多个图片依次水平往后填充</pre>
+<div id="app">
+    <div class="col-md-12 top-offset-1">
+        <input type="file" name="file" id="file" value="选择图片" onchange="handleFiles(this.files)" class="hide" multiple="multiple">
+    </div>
+
+    <div class="col-md-12">
+        <p>
+        列数<input type="text" id="cols" value="4">
+        行数<input type="text" id="rows" value="4">
+        </p>
+        <p>
+        每帧宽度<input type="text" id="width" value="64">
+        每帧高度<input type="text" id="height" value="64">
+        </p>
+        <p>
+            <button id="createCanvasBtn">创建画布</button>
+            <button id="toggleResult">预览</button>
+        </p>
+    </div>
+
+    <div id="inputImageDiv" class="col-md-12">
+    </div>
+
+    <div id="canvasContainer" class="col-md-12 top-offset-1">
+        <canvas id="canvas"></canvas>
+        <canvas id="realCanvas" class="hide"></canvas>
+    </div>
+
+</div>
+<script type="text/javascript">
+
+function repaint(images) {
+    if (images.length == 0) {
+        return;
+    }
+    var cols = parseInt($("#cols").val());
+    var rows = parseInt($("#rows").val());
+    var canvas = document.getElementById('canvas');
+    var first = images[0];
+
+    var width = first.width;
+    var height = first.height;
+    canvas.width  = cols * first.width;
+    canvas.height = rows * first.height;
+    var ctx = canvas.getContext('2d');
+    for (var j = 0; j < rows; j++) {
+        for (var i = 0; i < cols; i++) {
+            var index = i * cols + j * rows;
+            var img = images[index];
+            var x = width * i;
+            var y = height * j;
+            ctx.drawImage(img, x, y, width, height);
+        }
+    }
+}
+
+function handleFiles(files) {
+    var event = window.canvasClickEvents.pop();
+    var startX = event[0];
+    var startY = event[1];
+    if(files.length) {  
+        var handled = 0;
+        var fileLength = files.length;
+        var images = [];
+        
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];  
+            var reader = new FileReader();  
+            var img = $("<img>");
+            var url = window.URL.createObjectURL(file)
+            console.log(url);
+            (function (url, index) {            
+                var img = new Image();
+                img.src = url;
+                img.onload = function(event)  {  
+                    // document.getElementById("filecontent").innerHTML = this.result;  
+                    var img = event.target;
+                    console.log(event);
+                    console.log(img);
+                    ctx.drawImage(img, 0, 0, img.width, img.height, 
+                        startX + index * getFrameWidth(), startY, getFrameWidth(), getFrameHeight());
+                    realCtx.drawImage(img, 0, 0, img.width, img.height, 
+                        startX + index * getFrameWidth(), startY, getFrameWidth(), getFrameHeight());
+                };  
+            })(url, i);
+            // reader.readAsDataURL();
+        }
+    }
+  }  
+
+function getFrameWidth () {
+    return parseInt($("#width").val());
+}
+
+function getFrameHeight () {
+    return parseInt($("#height").val());
+}
+
+function alignFloor(value, alignment) {
+    return parseInt(value / alignment) * alignment;
+}
+
+$("#createCanvasBtn").on("click", function() {
+    var cols = parseInt($("#cols").val());
+    var rows = parseInt($("#rows").val());
+    var width = parseInt($("#width").val());
+    var height = parseInt($("#height").val());
+
+    var canvas = $('#canvas')[0];
+    canvas.width = width * cols;
+    canvas.height = height * rows;
+
+    var realCanvas = $("#realCanvas")[0];
+    realCanvas.width = canvas.width;
+    realCanvas.height = canvas.height;
+
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = "#ccf";
+    ctx.fillRect(0,0,canvas.width, canvas.height);
+
+    for (var i = 1; i < cols; i++) {
+        ctx.fillStyle = "#cf8";
+        ctx.moveTo(width*i, 0);
+        ctx.lineTo(width*i, canvas.height);
+        ctx.stroke();
+    }
+
+    for (var i = 1; i < rows; i++) {
+        ctx.fillStyle = "#cf8";
+        ctx.moveTo(0, height * i);
+        ctx.lineTo(canvas.width, height*i);
+        ctx.stroke();
+    }
+
+    window.ctx = ctx;
+    window.realCtx = realCanvas.getContext("2d");
+    window.canvasClickEvents = [];
+})
+
+$("#canvas").on("click", function (event) {
+    console.log(event);
+    var x = event.offsetX;
+    var y = event.offsetY;
+    var canvas = $('#canvas')[0];
+
+    x = alignFloor(x, getFrameWidth());
+    y = alignFloor(y, getFrameHeight());
+
+    window.canvasClickEvents.push([x,y]);
+    $("#file").click();
+})
+
+$("#toggleResult").on("click", function (event) {
+    if ($("#realCanvas").hasClass("hide")) {
+        $("#realCanvas").removeClass("hide");
+        $("#canvas").addClass("hide");
+        $("#toggleResult").val("编辑");
+    } else {
+        $("#canvas").removeClass("hide");
+        $("#realCanvas").addClass("hide");
+        $("#toggleResult").val("预览");
+    }
+});
+
+$(function() {
+    window.canvasClickEvents = [];
+    $("#createCanvasBtn").click();
+})
+</script>
+
+{% end %}
