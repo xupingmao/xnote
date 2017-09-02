@@ -151,6 +151,19 @@ xurls = ("/test", handler)
 # 启动xnote，访问浏览器localhost:1234/test就会看到success
 ```
 
+## 运行截图
+
+PC端主要截图
+
+![截图03](https://git.oschina.net/xupingmao/xnote/raw/master/static/image/screenshot03.png)
+
+移动端主要截图
+
+![截图01](https://git.oschina.net/xupingmao/xnote/raw/master/static/image/screenshot01.png)
+
+文件浏览器截图
+
+![截图02](https://git.oschina.net/xupingmao/xnote/raw/master/static/image/screenshot02.png)
 
 ## 协议
 
