@@ -52,11 +52,14 @@ def handle_args():
     parser.add_argument("--data", default="./data")
     parser.add_argument("--delay", default="0")
     parser.add_argument("--ringtone", default="no")
+    parser.add_argument("--port", default="1234")
 
     args = parser.parse_args(sys.argv[1:])
 
     # 处理Data目录
     xconfig.set_data_path(args.data)
+    # 端口号
+    xconfig.PORT = args.port
 
     # 延迟加载，避免定时任务重复执行
     delay = int(args.delay)
@@ -69,11 +72,10 @@ def handle_args():
 def main():
     global app
 
+    handle_args()
     port = config.PORT
     if not os.environ.get("PORT"):
         os.environ["PORT"] = port
-
-    handle_args()   
 
     var_env = dict()
     
