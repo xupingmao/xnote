@@ -47,7 +47,11 @@ class handler:
             name += ".html"
         # Chrome下面 tools/timeline不能正常渲染
         web.header("Content-Type", "text/html")
-        return xtemplate.render("tools/" + name)
+        fpath = os.path.join(xconfig.HANDLERS_DIR, "tools", name)
+        if os.path.exists(fpath):
+            return xtemplate.render("tools/" + name)
+        else:
+            raise web.notfound()
 
     def POST(self, name):
         return self.GET(name)

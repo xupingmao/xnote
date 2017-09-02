@@ -162,11 +162,11 @@ $("#toggleResult").on("click", function (event) {
     if ($("#realCanvas").hasClass("hide")) {
         $("#realCanvas").removeClass("hide");
         $("#canvas").addClass("hide");
-        $("#toggleResult").val("编辑");
+        $("#toggleResult").text("编辑");
     } else {
         $("#canvas").removeClass("hide");
         $("#realCanvas").addClass("hide");
-        $("#toggleResult").val("预览");
+        $("#toggleResult").text("预览");
     }
 });
 

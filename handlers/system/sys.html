@@ -44,7 +44,7 @@
 
 
 <div class="col-md-12">
-    <h3>常用命令</h3>
+    <h3>常用工具</h3>
     <div class="col-md-12">
         {% for cmd in cmd_list %}
         <div class="col-md-4">
@@ -53,25 +53,6 @@
         {% end %}
     </div>
 </div>
-
-<!--
-<div class="col-md-12">
-    <table class="col-md-12 table">
-        <tr>
-            <th class="sys-cmd-no">编号</th>
-            <th class="sys-cmd">命令</th>
-            <th>备注</th>
-        </tr>
-        {% for i, cmd in enumerate(cmd_list) %}
-        <tr>
-            <td class="sys-cmd-no">{{i+1}}</td>
-            <td class="sys-cmd"><a href="{{cmd.url}}">{{cmd.name}}</a></td>
-            <td></td>
-        </tr>
-        {% end %}
-    </table>
-</div>
--->
 
 {% set img_tools = [
     ("帧图合并", "/tools/img_merge"),
@@ -101,7 +82,7 @@
 ] %}
 
 <div class="col-md-12 top-offset-1">
-    <h3>图片处理工具</h3>
+    <h3>系统调试工具</h3>
     <div class="col-md-12">
         {% for name, link in debug_tools %}
         <div class="col-md-4">
