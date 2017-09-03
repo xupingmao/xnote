@@ -167,6 +167,7 @@ class ModelManager:
         self.failed_mods = []
         self.debug = True
         self.report_loading = False
+        self.report_unload = True
         self.task_manager = TaskManager(app)
         self.blacklist = ("handlers.experiment")
 
@@ -176,7 +177,7 @@ class ModelManager:
     
     def reload_module(self, name):
         try:
-            if self.report_loading:
+            if self.report_unload:
                 log("del " + name)
             del sys.modules[name]
             __import__(name)
@@ -234,7 +235,7 @@ class ModelManager:
                 if os.path.isfile(filepath) and ext == ".py":
                     modname = parent + "." + name
                     if modname in sys.modules:
-                        if self.report_loading:
+                        if self.report_unload:
                             log("del %s" % modname)
                         del sys.modules[modname] # reload module
                     if modname.startswith(self.blacklist):

@@ -369,7 +369,7 @@ def quote_unicode(url):
 #################################################################
 
 def log(fmt, *argv):
-    message = fmt.format(argv)
+    message = fmt.format(*argv)
     f_back = inspect.currentframe().f_back
     f_code = f_back.f_code
     f_modname = f_back.f_globals.get("__name__")

@@ -11,12 +11,13 @@ symbol指音标
 
 """
 
-import sys
+import re
 import os
-
 import xutils
 import xmanager
 import xconfig
+
+from xutils import u
 
 SearchResult = xutils.SearchResult
 
@@ -24,7 +25,7 @@ def wrap_results(dicts, origin_key):
     files = []
     for f0 in dicts:
         f = SearchResult()
-        f.name = "翻译 - " + f0[origin_key]
+        f.name = u("翻译 - ") + u(f0[origin_key])
         # f.content = f0["cn"]
         f.raw = f0["en"] + "\n"
         f.raw += f0["cn"].replace("\\n", "\n")
@@ -32,6 +33,7 @@ def wrap_results(dicts, origin_key):
     return files
 
 def search(word):
+    """英汉翻译"""
     word = word.lower()
     path = os.path.join(xconfig.DATA_PATH, "dictionary.db")
     if not os.path.exists(path):

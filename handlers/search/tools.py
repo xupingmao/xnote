@@ -13,7 +13,6 @@ import xutils
 
 SearchResult = xutils.SearchResult
 
-
 def search(name):
     # six.print_(xconfig)
     # 查找`handlers/tools/`目录下的工具

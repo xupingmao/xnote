@@ -13,7 +13,8 @@ import xutils
 import xconfig
 import xauth
 import xmanager
-from handlers.base import *
+import xtemplate
+from util import textutil
 
 config = xconfig
 
@@ -112,7 +113,7 @@ class MemStore(web.session.DiskStore):
         values = list(map(map_func , files))
         self[store_key] = values 
 
-class handler(BaseHandler):
+class handler:
 
     def _match(self, key):
         global _mappings
@@ -131,7 +132,6 @@ class handler(BaseHandler):
         mappings = _mappings
         words = textutil.split_words(key)
         files = []
-
         for i in range(0, len(mappings), 2):
             pattern = mappings[i]
             func = mappings[i+1]
@@ -146,15 +146,17 @@ class handler(BaseHandler):
         return files
 
     def json_request(self):
-        key = self.get_argument("key", "").strip()
+        key = xutils.get_argument("key", "").strip()
         if key == "":
             raise web.seeother("/")
         return self.full_search(key)
 
 
     @xauth.login_required()
-    def execute(self):
+    def GET(self):
         """search files by name and content"""
+        if not mappings_loaded:
+            load_mappings()
         key  = xutils.get_argument("key", "")
         page = xutils.get_argument("page", 1, type = int)
         user_name = xauth.get_current_role()
@@ -178,20 +180,24 @@ class handler(BaseHandler):
         pagestart = (page-1) * pagesize
         files = files[pagestart:pagestart+pagesize]
 
-        return self.render("file-list.html", files = files, count = count)
+        return xtemplate.render("file-list.html", files = files, count = count)
 
-load_mapping(r"(.*[0-9]+.*)",           "handlers.search.calc.do_calc")
-load_mapping(r"(.*)",                   "handlers.search.pydoc.search")
-load_mapping(r"([^ ]*)",                "handlers.search.translate.search")
-load_mapping(r"翻译\s+([^ ]+)",         "handlers.search.translate.zh2en")
-load_mapping(r"([^ ]*)",                "handlers.search.tools.search")
-load_mapping(r"([^ ]*)",                "handlers.search.scripts.search")
-load_mapping(r"([^ ]*)",                "handlers.search.api.search")
-load_mapping(r"(\d+)分钟后提醒我?(.*)", "handlers.search.reminder.search")
-load_mapping(r"静音(.*)",               "handlers.search.mute.search")
-load_mapping(r"mute(.*)",               "handlers.search.mute.search")
-load_mapping(r"取消静音",               "handlers.search.mute.cancel")
-load_mapping(r"(.*)",                   "handlers.search.file.search")
+mappings_loaded = False
+def load_mappings():
+    global mappings_loaded
+    load_mapping(r"(.*[0-9]+.*)",           "handlers.search.calc.do_calc")
+    load_mapping(r"(.*)",                   "handlers.search.pydoc.search")
+    load_mapping(r"([^ ]*)",                "handlers.search.translate.search")
+    load_mapping(r"翻译\s+([^ ]+)",         "handlers.search.translate.zh2en")
+    load_mapping(r"([^ ]*)",                "handlers.search.tools.search")
+    load_mapping(r"([^ ]*)",                "handlers.search.scripts.search")
+    load_mapping(r"([^ ]*)",                "handlers.search.api.search")
+    load_mapping(r"(\d+)分钟后提醒我?(.*)", "handlers.search.reminder.search")
+    load_mapping(r"静音(.*)",               "handlers.search.mute.search")
+    load_mapping(r"mute(.*)",               "handlers.search.mute.search")
+    load_mapping(r"取消静音",               "handlers.search.mute.cancel")
+    load_mapping(r"(.*)",                   "handlers.search.file.search")
+    mappings_loaded = True
 
 xurls = (r"/search/search", handler, r"/search", handler)
 

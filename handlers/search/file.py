@@ -225,8 +225,8 @@ def search(expression):
     words = textutil.split_words(expression)
     files = []
 
-    name_results = search_name(words, xauth.get_current_user().get("name"))
-    content_results = full_search(words, xauth.get_current_user().get("name"))
+    name_results = search_name(words, xauth.get_current_name())
+    content_results = full_search(words, xauth.get_current_name())
 
     nameset = set()
     for item in name_results:
