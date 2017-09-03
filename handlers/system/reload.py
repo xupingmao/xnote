@@ -8,4 +8,4 @@ class handler:
     @xauth.login_required("admin")
     def GET(self):
         autoreload.reload()
-        raise web.seeother("/system/sys")
+        raise web.seeother("/system/index")
