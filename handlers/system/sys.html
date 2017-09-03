@@ -42,37 +42,16 @@
     <div id="qrcode"></div>
 </div>
 
-
-<div class="col-md-12">
-    <h3>常用工具</h3>
-    <div class="col-md-12">
-        {% for cmd in cmd_list %}
-        <div class="col-md-4">
-            <a href="{{cmd.url}}">{{cmd.name}}</a>
-        </div>
-        {% end %}
-    </div>
-</div>
-
-{% set img_tools = [
-    ("帧图合并", "/tools/img_merge"),
-    ("图片拆分", "/tools/img_split"),
-] %}
-
-<div class="col-md-12 top-offset-1">
-    <h3>图片处理工具</h3>
-    <div class="col-md-12">
-        {% for name, link in img_tools %}
-        <div class="col-md-4">
-            <a href="{{link}}">{{name}}</a>
-        </div>
-        {% end %}
-    </div>
-</div>
-
 {% if _is_admin %}
 
 {% set debug_tools = [
+    ("文件浏览器", "/fs/"),
+    ("脚本管理",   "/system/script_admin"),
+    ("定时任务管理",   "/system/crontab"),
+
+    ("用户管理", "/system/user_admin"),
+    ("App管理", "/system/app_admin"),
+
     ("系统信息","/system/monitor"),
     ("备份管理",     "/system/backup_info"),
     ("template缓存", "/system/template_cache"),
@@ -82,7 +61,7 @@
 ] %}
 
 <div class="col-md-12 top-offset-1">
-    <h3>系统调试工具</h3>
+    <h3>系统管理工具</h3>
     <div class="col-md-12">
         {% for name, link in debug_tools %}
         <div class="col-md-4">
@@ -91,7 +70,44 @@
         {% end %}
     </div>
 </div>
+{% end %}
 
+{% set favorite_tools = [
+    ("Python文档", "/system/modules_info"),
+    ("聊天室", "/tools/chatroom"),
+    ("代码模板", "/tools/code_template"),
+    ("浏览器信息", "/tools/browser_info"),
+] %}
+
+{% set img_tools = [
+    ("帧图合并", "/tools/img_merge"),
+    ("图片拆分", "/tools/img_split"),
+    ("图像灰度化", "/tools/img2gray"),
+] %}
+
+{% set code_tools = [
+    ("base64", "/tools/base64"),
+    ("二维码", "/tools/barcode"),
+    ("Hex", "/tools/hex"),
+] %}
+
+{% set tools_list = [
+    ("常用工具", favorite_tools),
+    ("图片处理工具", img_tools),
+    ("编解码工具", code_tools),
+] %}
+
+{% for category, tools in tools_list %}
+<div class="col-md-12 top-offset-1">
+    <h3>{{category}}</h3>
+    <div class="col-md-12">
+        {% for name, link in tools %}
+        <div class="col-md-4">
+            <a href="{{link}}">{{name}}</a>
+        </div>
+        {% end %}
+    </div>
+</div>
 {% end %}
 
 <script type="text/javascript">

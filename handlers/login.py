@@ -16,7 +16,7 @@ class handler:
         # xutils.print_web_ctx_env()
         # print(web.input())
 
-        # print("USER[%s] PSWD[%s]" % (name, pswd))
+        xutils.log("USER[%s] PSWD[%s]" % (name, pswd))
 
         users = xauth.get_users()
 

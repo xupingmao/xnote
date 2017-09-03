@@ -5,7 +5,10 @@
 <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
 <h3>图片合并</h3>
-<pre>点击画布上的方块可以选择图片填充，选择多个图片依次水平往后填充</pre>
+<div class="col-md-12">
+    点击画布上的方块可以选择图片填充，选择多个图片依次水平往后填充
+<br/>编辑完成之后点击预览按钮可以获取去除背景和方格的图片
+</div>
 <div id="app">
     <div class="col-md-12 top-offset-1">
         <input type="file" name="file" id="file" value="选择图片" onchange="handleFiles(this.files)" class="hide" multiple="multiple">

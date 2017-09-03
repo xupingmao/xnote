@@ -103,23 +103,8 @@ class SysHandler:
                 if os.path.isfile(fpath) and fpath.endswith(".bat"):
                     shell_list.append(fpath)
         addr = get_server_ip() + ":" + config.get("PORT")
-
-        cmd_list = [];
-        # cmd_list.append(Storage(name="切换导航栏样式", url="/system/switch_nav"))
-        cmd_list.append(Storage(name="模块信息(pydoc)", url="/system/modules_info"))
-        cmd_list.append(Storage(name="聊天室", url="/tools/chatroom"))
-
-        if xauth.is_admin():
-            cmd_list.append(Storage(name="文件浏览器", url="/fs/"))
-            cmd_list.append(Storage(name="脚本管理", url="/system/script_admin"))
-            cmd_list.append(Storage(name="定时任务管理", url="/system/crontab"))
-            cmd_list.append(Storage(name="用户管理", url="/system/user_admin"))
-            cmd_list.append(Storage(name="App包管理", url="/system/app_admin"))
-            cmd_list.append(Storage(name="代码模板", url="/tools/code_template"))
-
         return xtemplate.render("system/sys.html", 
             addr = addr,
-            cmd_list = cmd_list,
             os = os,
             user = xauth.get_current_user()
         )
