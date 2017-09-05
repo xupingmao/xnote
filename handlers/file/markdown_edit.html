@@ -63,9 +63,7 @@
                 <a id="oldName" href="javascript:switchRename()" style="color:blue">{{file.name}}</a>
             </div>
         </h3>
-
         {% include file/tags.html %}
-
         <span id="result" style="color:green"></span>
     </div>
     
@@ -92,7 +90,7 @@
             </div>
 
             <div class="top-offset-1" style="padding-top:20px;">
-                <div id="epiceditor" class="row">
+                <div id="editor" class="col-md-12" style="height: auto; overflow-y: scroll;">
                     <div id="markdown-input-div" class="col-md-6 top-offset-1">
                         <textarea id="markdown-input" class="form-control" name="content" rows=50>{{?content}}</textarea>
                     </div>

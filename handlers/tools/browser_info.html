@@ -36,11 +36,15 @@
     </tr>
     <tr>
         <td>Worker</td>
-        <td id="checkWorker" type-name="Worker" class="check-item"></td>
+        <td id="checkWorker" type-name="Worker" class="check-support"></td>
     </tr>
     <tr>
         <td>FileReader</td>
-        <td type-name="FileReader" class="check-item"></td>
+        <td type-name="FileReader" class="check-support"></td>
+    </tr>
+    <tr>
+        <td>WebSocket</td>
+        <td type-name="WebSocket" class="check-support"></td>
     </tr>
 </div>
 
@@ -57,7 +61,17 @@ $(document).ready(function () {
         var typeName = $(this).attr("type-name");
         console.log(index + ":" + typeName);
         console.log(window[typeName]);
-        $(this).html(typeof window[typeName]);
+        if (typeof window[typeName]) {
+            $(this).html(window[typeName].toString());
+        }
+    })
+    $(".check-support").each(function (index) {
+        var typeName = $(this).attr("type-name");
+        console.log(index + ":" + typeName);
+        console.log(window[typeName]);
+        if (typeof window[typeName]) {
+            $(this).html("Support");
+        }
     })
 })
 </script>

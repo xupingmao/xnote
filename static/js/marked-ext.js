@@ -54,20 +54,35 @@
 
     var myRenderer = new marked.Renderer();
     myRenderer.headings = []
-    myRenderer.listitem = function (text) {
+
+    function processCheckbox(text) {
+        var result = {};
         if (/^\[\]/.test(text)) {
-            return '<li><input type="checkbox" disabled="true"/>' + text.substring(2) + '</li>\n';
+            result.checkbox = '<input type="checkbox" disabled="true"/>';
+            result.text = text.substring(2);
         } else if (/^\[ \]/.test(text)) {
-            return '<li><input type="checkbox" disabled="true"/>' + text.substring(3) + '</li>\n';
+            result.checkbox = '<input type="checkbox" disabled="true"/>';
+            result.text = text.substring(3);
         } else if (/^\[[Xx]\]/.test(text)) {
-            return '<li><input type="checkbox" checked disabled="true"/>' + text.substring(3) + '</li>\n';
+            result.checkbox = '<input type="checkbox" checked disabled="true"/>';
+            // result.checkbox = '<img src="/static/image/checked.png" style="height:1.5rem;">';
+            result.text = text.substring(3);
         } else {
-            return '<li>' + text + '</li>\n';
+            result.checkbox = '';
+            result.text = text;
         }
+        return result;
+    }
+
+    myRenderer.listitem = function (text) {
+        var result = processCheckbox(text);
+        return '<li>' + result.checkbox + result.text + '</li>\n';
     }
     myRenderer.heading = function (text, level, raw) {
         var id = raw.replace(/ /g, '-');
         this.headings.push({text:raw, link:id, level:level});
+        var checkboxResult = processCheckbox(text);
+
         return '<h'
             + level
             + ' id="'
@@ -77,7 +92,8 @@
             + id
             // + '">'
             + '" class="marked-heading">'
-            + text
+            + checkboxResult.checkbox
+            + checkboxResult.text
             + '</h'
             + level
             + '>\n';
