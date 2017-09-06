@@ -1,7 +1,5 @@
-{% if file_type == "post" %}
-
-    {% init op = "view" %}
-    {% init error = "" %}
+{% init op = "view" %}
+{% init error = "" %}
 
 {% if op == "view" %}
     <h2 id="name">{{file["name"]}} <a href="/file/post/edit?id={{file.id}}">[编辑]</a></h2>
@@ -47,6 +45,4 @@
             <button>保存</button>
         </div>
     </form>
-{% end %}
-
 {% end %}

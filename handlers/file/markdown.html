@@ -1,8 +1,6 @@
-{% if file_type == "md" or file_type == "text" %}
-    {% init can_edit = False %}
+{% init can_edit = False %}
 
-    <div style="">
-    
+<div style="">    
     <span id="fileId" style="display:none;">{{file.id}}</span>
     <h2>{{file.name}} 
         <a href="/file/markdown/edit?id={{file.id}}">[编辑]</a>
@@ -17,8 +15,7 @@
     {% include file/tags.html %}
 
     <span id="result" style="color:green"></span>
-    
-    </div>
+</div>
     
     <hr/>
 
@@ -170,11 +167,37 @@
             old_content = input;
             var outtext = marked.parse(input);
             $("#markdown-output-div").html(outtext); 
+            // 尽量多用原生CSS实现布局和交互
+            // registerScrollEvent();
         }, 200);
         preview();
     })
+
+    function registerScrollEvent() {    
+        $("a").each(function (index, element) {
+            // console.log(element);
+            var href = $(element).attr("href");
+            if (href && href[0] == '#') {
+                console.log("register " + element);
+                $(element).on("click", function (event) {
+                    var element = document.getElementById(this.hash.slice(1));
+                    // 形如 [x]-name 的ID不能用JQuery获取
+                    var $target = $(element);
+                    if ($target.length) {
+                        var targetOffset = $target.offset().top;
+                        $('html,body').animate({
+                            scrollTop: targetOffset-50
+                        },
+                        500);
+                        return false;
+                    }
+                })
+            }
+        })
+    }
+
+
 </script>
 
 <!-- GROUPS: {{file.groups}} -->
 <!-- MD5: {{file.md5}} -->
-{% end %}
