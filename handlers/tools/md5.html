@@ -1,0 +1,28 @@
+{% extends base.html %}
+
+{% block head %}
+<script src="/static/lib/md5.js"></script>
+{% end %}
+{% block body %}
+
+<div class="col-md-6">
+<label>Input</label>
+<textarea id="input" class="col-md-12" rows=10></textarea>
+</div>
+
+<div class="col-md-6">
+<label>Output</label>
+<textarea id="output" class="col-md-12" rows=10></textarea>
+</div>
+
+<div class="col-md-12">
+    <button onclick="md5Encode()">Encode</button>
+</div>
+
+<script>
+function md5Encode() {
+    $("#output").val(MD5($("#input").val()));
+}
+
+</script>
+{% end %}

@@ -241,7 +241,7 @@ class DBWrapper:
         return self.db.delete(self.tablename, *args, **kw)
 
     def execute(self, sql):
-        # 不建议使用
+        # 不建议使用，尽量使用query
         return xutils.db_execute(self.dbpath, sql)
 
 def get_file_table():
