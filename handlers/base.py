@@ -110,7 +110,7 @@ is_iter = lambda x: x and hasattr(x, '__next__')
 def render_template(template_name, **kw):
     return xtemplate.render(template_name, **kw)
 
-class BaseHandler():
+class BaseHandler(object):
 
     """Xnote处理器基类"""
 
@@ -165,7 +165,8 @@ class BaseHandler():
             return self.template_name
         module = type(self).__module__
         path = sys.modules[module].__file__
-        path = path[:-3] # remove .py
+        # path = path[:-3] # remove .py
+        path = os.path.splitext(path)[0]
         self.template_name = path + ".html"
         return self.template_name
 
