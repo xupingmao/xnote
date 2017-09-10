@@ -38,8 +38,11 @@
 </div>
 
 <div class="barcode col-md-12" style="margin:0 auto; text-align: center;">
-    <p>地址 <a href="http://{{?addr}}">http://{{?addr}}</a> </p>
-    <div id="qrcode"></div>
+    <p>
+        地址 <a href="http://{{?addr}}">http://{{?addr}}</a>
+        <input type="button" id="toggleBarCode" class="btn" value="二维码">
+    </p>
+    <div id="qrcode" class="hide"></div>
 </div>
 
 {% if _is_admin %}
@@ -139,6 +142,8 @@ function switchQrCode() {
         $("#qrcode").hide();
     }
 }
+
+$("#toggleBarCode").on("click", switchQrCode);
 
 function runCommand(path) {
     // alert("runCommand "+ path);

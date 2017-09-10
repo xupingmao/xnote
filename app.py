@@ -53,6 +53,7 @@ def handle_args():
     parser.add_argument("--delay", default="0")
     parser.add_argument("--ringtone", default="no")
     parser.add_argument("--port", default="1234")
+    parser.add_argument("--webbrowser", default="no")
 
     args = parser.parse_args(sys.argv[1:])
 
@@ -68,6 +69,8 @@ def handle_args():
     # 启动提醒
     if args.ringtone == "yes":
         xutils.say("系统启动")
+    if args.webbrowser == "yes":
+        webbrowser.open("http://localhost:1234/")
 
 def main():
     global app

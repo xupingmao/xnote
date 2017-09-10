@@ -34,6 +34,6 @@
 @if exist C:\Python35\Python.exe set PY_EXE=C:\Python35\Python.exe
 
 @echo Use Python Location: %PY_EXE%
-call %PY_EXE% app.py %*
+call %PY_EXE% app.py --webbrowser yes %*
 
 exit
