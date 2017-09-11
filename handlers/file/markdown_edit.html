@@ -80,8 +80,8 @@
             <span class="upload-progress"></span>
         </div>
         
-        <div class="">
-            <div class="">
+        <div class="col-md-12">
+            <div class="col-md-12">
                 <div id="edit-div">
                     <input style="display:none" name="id" value="{{file.id}}"/>
                     <input type="text" name="version" value="{{file.version}}" class="hide"/>
@@ -161,6 +161,11 @@
         }
         var height = Math.max(500, $("#markdown-output-div").height());
         var editor = $("#markdown-input")[0];
+
+        if ($("#markdown-input").text() == "") {
+            $("#markdown-input").text("\n\n\n\n\n");
+        }
+
         var codeMirror = CodeMirror.fromTextArea(editor, {
             lineNumbers:true,
             mode: { name: "text/x-markdown", fencedCodeBlocks: true},

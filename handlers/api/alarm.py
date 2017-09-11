@@ -9,9 +9,12 @@ import xutils
 import xconfig
 
 class handler:
-    def GET(self, msg):
-        repeat = xutils.get_argument("repeat", 3, type=int)
+    def GET(self, msg=None):
+        repeat  = xutils.get_argument("repeat", 1, type=int)
+        content = xutils.get_argument("content")
         repeat = min(10, repeat)
+        if msg is None:
+            msg = content
         if xconfig.is_mute():
             return dict(code="fail", message="mute")
         msg = xutils.unquote(msg)
@@ -22,5 +25,6 @@ class handler:
 
 xurls = (
     r"/api/alarm/(.*)", handler,
-    r"/api/alert/(.*)", handler
+    r"/api/alert/(.*)", handler,
+    r"/api/alarm", handler,
 )
