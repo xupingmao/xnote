@@ -95,15 +95,16 @@ class ProxyServer:
         while self.running:
             try:
                 (local_conn, local_addr) = local_server.accept()
-            except (KeyboardInterrupt, Exception):
+                # 使用线程池优化
+                threading.Thread(target=tcp_mapping_request, args=(local_conn, remote_ip, remote_port)).start()
+                send_log('Event: Receive mapping request from %s:%d.' % local_addr)
+            except KeyboardInterrupt:
                 # KeyboardInterrupt 不能立即关闭
                 local_server.close()
                 send_log('Event: Stop mapping service.')
                 break
-            # 使用线程池优化
-            threading.Thread(target=tcp_mapping_request, args=(local_conn, remote_ip, remote_port)).start()
-
-            send_log('Event: Receive mapping request from %s:%d.' % local_addr)
+            except Exception as e:
+                send_log("Event: Unknown exception", e);
 
     def start(self):
         self.running = True
@@ -115,6 +116,7 @@ class ProxyServer:
 # 主函数
 if __name__ == '__main__':
     # tcp_mapping("127.0.0.1", 1234, "0.0.0.0", 1081)
-    server = ProxyServer("127.0.0.1", 8080, "0.0.0.0", 1081)
+    # TODO 使用参数构建
+    server = ProxyServer("127.0.0.1", 1080, "0.0.0.0", 1081)
     server.start()
 

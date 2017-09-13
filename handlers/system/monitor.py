@@ -11,6 +11,7 @@ import json
 import threading
 import re
 import xtemplate
+import xconfig
 
 try:
     import psutil
@@ -85,7 +86,8 @@ class handler:
             python_version = sys.version,
             sys_version = platform.version(),
             processor = platform.processor(),
-            thread_cnt = thread_cnt)
+            thread_cnt = thread_cnt,
+            start_time = xconfig.get("start_time"))
 
 
     def POST(self):

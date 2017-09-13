@@ -84,7 +84,7 @@ def main():
     
     config.set("host", "localhost")
     config.set("port", port)
-    config.set("start_time", time.time())
+    config.set("start_time", xutils.format_datetime())
     # I can reload the system by myself
     app = web.application(list(), var_env, autoreload=False)
     

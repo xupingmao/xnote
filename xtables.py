@@ -25,11 +25,10 @@ class SqliteTableManager:
             sql = "CREATE TABLE IF NOT EXISTS `%s` (`%s` %s primary key);" % (tablename, pkName, pkType)
         self.execute(sql)
 
-    def __enter__(self, *args, **kw):
-        SqliteTableManager.__init__(self, *args, **kw)
+    def __enter__(self):
         return self
 
-    def __exit__(self):
+    def __exit__(self, type, value, traceback):
         self.close()
 
     def execute(self, sql, silent=False):
@@ -92,128 +91,119 @@ TableManager = SqliteTableManager
 
 def init_table_test():
     TEST_DB = "db/test.db"
-    manager = TableManager("db/test.db", "test")
-
-    manager.add_column("id1", "integer", 0)
-    manager.add_column("int_value", "int", 0)
-    manager.add_column("float_value", "float")
-    manager.add_column("text_value", "text", "")
-    manager.add_column("name", "text", "test")
-    manager.add_column("check", "text", "aaa'bbb")
-    manager.close()
+    with TableManager("db/test.db", "test") as manager:
+        manager.add_column("id1", "integer", 0)
+        manager.add_column("int_value", "int", 0)
+        manager.add_column("float_value", "float")
+        manager.add_column("text_value", "text", "")
+        manager.add_column("name", "text", "test")
+        manager.add_column("check", "text", "aaa'bbb")
     # import sys
     # sys.exit(0)
 
 def init_table_file():
-    manager = TableManager(config.DB_PATH, "file")
-    manager.add_column("name",    "text", "")
-    manager.add_column("content", "text", "")
-    manager.add_column("size",    "long", 0)
-    # 修改版本
-    manager.add_column("version",  "int", 0)
-    # 类型, markdown, post, mailist, file
-    # 类型为file时，content值为文件的web路径
-    manager.add_column("type", "text", "")
-    
-    # 关联关系
-    # 上级目录
-    manager.add_column("parent_id", "int", 0)
-    # 使用file_tag表,兼容老代码
-    manager.add_column("related", "text", "")
+    with TableManager(config.DB_PATH, "file") as manager:
+        manager.add_column("name",    "text", "")
+        manager.add_column("content", "text", "")
+        manager.add_column("size",    "long", 0)
+        # 修改版本
+        manager.add_column("version",  "int", 0)
+        # 类型, markdown, post, mailist, file
+        # 类型为file时，content值为文件的web路径
+        manager.add_column("type", "text", "")
+        
+        # 关联关系
+        # 上级目录
+        manager.add_column("parent_id", "int", 0)
+        # 使用file_tag表,兼容老代码
+        manager.add_column("related", "text", "")
 
-    # 统计相关
-    # 访问次数
-    # 创建时间ctime
-    manager.add_column("sctime", "text", "")
-    # 修改时间mtime
-    manager.add_column("smtime", "text", "")
-    # 访问时间atime
-    manager.add_column("satime", "text", "")
-    manager.add_column("visited_cnt", "int", 0)
-    manager.add_column("is_deleted", "int", 0)
+        # 统计相关
+        # 访问次数
+        # 创建时间ctime
+        manager.add_column("sctime", "text", "")
+        # 修改时间mtime
+        manager.add_column("smtime", "text", "")
+        # 访问时间atime
+        manager.add_column("satime", "text", "")
+        manager.add_column("visited_cnt", "int", 0)
+        manager.add_column("is_deleted", "int", 0)
 
-    # 权限相关
-    # 创建者
-    manager.add_column("creator", "text", "")
-    # 修改者
-    manager.add_column("modifier", "text", "")
-    manager.add_column("groups", "text", "")
-    
-    # MD5
-    manager.add_column("md5", "text", "")
-    # 展示优先级，用于收藏等标记
-    manager.add_column("priority", "int", 0)
-    manager.close()
+        # 权限相关
+        # 创建者
+        manager.add_column("creator", "text", "")
+        # 修改者
+        manager.add_column("modifier", "text", "")
+        manager.add_column("groups", "text", "")
+        
+        # MD5
+        manager.add_column("md5", "text", "")
+        # 展示优先级，用于收藏等标记
+        manager.add_column("priority", "int", 0)
 
 def init_table_tag():
     # 2017/04/18
-    manager = TableManager(config.DB_PATH, "file_tag", "id", "text")
-    # 标签名
-    manager.add_column("name",    "text", "")
-    # 标签ID
-    manager.add_column("file_id", "int", 0)
-    # 权限控制
-    manager.add_column("groups",  "text", "")
-    manager.close()
+    with TableManager(config.DB_PATH, "file_tag", "id", "text") as manager:
+        # 标签名
+        manager.add_column("name",    "text", "")
+        # 标签ID
+        manager.add_column("file_id", "int", 0)
+        # 权限控制
+        manager.add_column("groups",  "text", "")
 
 def init_table_schedule():
     # 2017/05/24
     # task是计划任务
     # Job是已经触发的任务
-    manager = TableManager(config.DB_PATH, "schedule")
-    manager.add_column("url",         "text", "")
-    # manager.add_column("interval",    "integer", 60)
-    manager.add_column("ctime",       "text", "")
-    manager.add_column("mtime",       "text", "")
-    # manager.add_column("repeat_type", "text", "interval")
-    # manager.add_column("pattern",     "text", "00:00:00")
-    manager.add_column("tm_wday", "text", "")  # Week Day no-repeat 一次性任务
-    manager.add_column("tm_hour", "text", "")
-    manager.add_column("tm_min",  "text", "")
-    # 任务是否生效，用于一次性活动
-    manager.add_column("active", "int", 1)
-    manager.close()
+    with TableManager(config.DB_PATH, "schedule") as manager:
+        manager.add_column("url",         "text", "")
+        # manager.add_column("interval",    "integer", 60)
+        manager.add_column("ctime",       "text", "")
+        manager.add_column("mtime",       "text", "")
+        # manager.add_column("repeat_type", "text", "interval")
+        # manager.add_column("pattern",     "text", "00:00:00")
+        manager.add_column("tm_wday", "text", "")  # Week Day no-repeat 一次性任务
+        manager.add_column("tm_hour", "text", "")
+        manager.add_column("tm_min",  "text", "")
+        # 任务是否生效，用于一次性活动
+        manager.add_column("active", "int", 1)
 
 
 def init_table_log():
     # 2017/05/21
-    manager = TableManager(config.LOG_PATH, "xnote_log")
-    manager.add_column("tag",      "text", "")
-    manager.add_column("operator", "text", "")
-    manager.close()
+    with TableManager(config.LOG_PATH, "xnote_log") as manager:
+        manager.add_column("tag",      "text", "")
+        manager.add_column("operator", "text", "")
 
 def init_table_user():
     # 2017/05/21
-    manager = TableManager(config.DB_PATH, "user")
-    manager.add_column("name",       "text", "")
-    manager.add_column("password",   "text", "")
-    # 额外的访问权限
-    manager.add_column("privileges", "text", "")
-    manager.add_column("ctime",      "text", "")
-    manager.add_column("mtime",      "text", "")
-    manager.close()
+    with TableManager(config.DB_PATH, "user") as manager:
+        manager.add_column("name",       "text", "")
+        manager.add_column("password",   "text", "")
+        # 额外的访问权限
+        manager.add_column("privileges", "text", "")
+        manager.add_column("ctime",      "text", "")
+        manager.add_column("mtime",      "text", "")
 
 def init_table_message():
     # 用来存储比较短的消息
     # 2017/05/29
-    manager = TableManager(config.DB_PATH, "message")
-    manager.add_column("ctime", "text", "")
-    manager.add_column("user",  "text", "")
-    manager.add_column("content", "text", "")
-    manager.close()
+    with TableManager(config.DB_PATH, "message") as manager:
+        manager.add_column("ctime", "text", "")
+        manager.add_column("user",  "text", "")
+        manager.add_column("content", "text", "")
 
 def init_table_record():
     # 日志库和主库隔离开
     dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
-    manager = TableManager(dbpath, "record")
-    manager.add_column("ctime", "text", "")
-    # 添加单独的日期，方便统计用，尽量减少SQL函数的使用
-    manager.add_column("cdate", "text", "")
-    manager.add_column("type",  "text", "")
-    # 自己把所有条件都组装到key里
-    manager.add_column("key",  "text", "")
-    manager.add_column("value", "text", "")
-    manager.close()
+    with TableManager(dbpath, "record") as manager:
+        manager.add_column("ctime", "text", "")
+        # 添加单独的日期，方便统计用，尽量减少SQL函数的使用
+        manager.add_column("cdate", "text", "")
+        manager.add_column("type",  "text", "")
+        # 自己把所有条件都组装到key里
+        manager.add_column("key",  "text", "")
+        manager.add_column("value", "text", "")
 
 class DBWrapper:
     """ 基于web.db的装饰器 """
