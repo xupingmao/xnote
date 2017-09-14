@@ -2,20 +2,42 @@
 
 {% block body %}
 
-<h3>图片灰度化</h3>
+<h3>图片处理</h3>
 
 <div class="col-md-12">
     <input id="file" type="file" onchange="handleFiles(this.files)" class="hide" />
     <input type="button" id="selectBtn" class="btn" value="选择图片"/>
-    <input class="btn" id="rotateLeft" type="button" value="左旋转"/>
+    <input class="btn" id="rotateClockwise" type="button" value="顺时针旋转"/>
     <input id="larger" type="button" class="btn" value="放大"/>
     <input id="smaller" type="button" class="btn" value="缩小"/>
-    大小<label id="scale"></label>
+    <div class="col-md-12 top-offset-1">
+    <table class="table">
+        <tr>
+            <th>大小</th>
+            <th>缩放</th>
+            <th>灰度化</th>
+            <th>旋转</th>
+        </tr>
+        <tr>
+            <td id="imgSize"></td>
+            <td id="scale"></td>
+            <td>灰度化<input type="checkbox" id="gray" ></td>
+            <td id="rotate"></td>
+        </tr>
+    </table>
+    </div>
 </div>
 
-
-<canvas id="myCanvas"></canvas>
+<div class="col-md-12 top-offset-1">
+    <canvas id="myCanvas"></canvas>
+</div>
 <script type="text/javascript">
+// 转换配置
+var convertOpt = {};
+
+convertOpt.gray = false;
+convertOpt.rotate = 0;
+
 function getImgNaturalDimensions(img, callback) {
     var nWidth, nHeight
     if (img.naturalWidth) { // 现代浏览器
@@ -71,7 +93,7 @@ var canvasRotate = 0;
 // var imageNatureWidth = 0;
 // var imageNatureHeight = 0;
 function repaint() {
-    $("#scale").text(canvasScale.toFixed(2));
+    convertOpt.gray = $("#gray")[0].checked;
     var canvas = document.getElementById("myCanvas");    
     var image = window.inputImage;
     // var image = document.getElementById("imageSource");    
@@ -80,23 +102,44 @@ function repaint() {
     // var clientHeight = clientWidth * 3 / 4;
     // image.crossOrigin = "Anonymous";
     
-
+    var resize = false;
     // get 2D render object    
     var context = canvas.getContext("2d");
 
     canvas.width  = image.width * canvasScale;    
     canvas.height = image.height * canvasScale;
 
-    context.rotate(window.canvasRotate * Math.PI / 180);
-    context.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);      
+    if (window.canvasRotate % 180 != 0) {
+        canvas.width = image.height * canvasScale;
+        canvas.height = image.width * canvasScale;
+        resize = true;
+    }
+
+    var arc = window.canvasRotate * Math.PI / 180;
+    context.translate(canvas.width/2, canvas.height/2);
+    context.rotate(arc);
+
+    if (resize) {
+        context.drawImage(image, 0, 0, image.width, image.height, -canvas.height/2, -canvas.width/2, canvas.height, canvas.width);  
+    } else {
+        context.drawImage(image, 0, 0, image.width, image.height, -canvas.width/2, -canvas.height/2, canvas.width, canvas.height);  
+    }
+    
      
     
-    // 不能使用跨域图片，否则不能获取图片数据
-    var canvasData = context.getImageData(0, 0, canvas.width, canvas.height);    
-    // alert(canvasData.width.toString());    
-    // alert(canvasData.height.toString());    
-    canvasData = convert2Gray(canvasData);
-    context.putImageData(canvasData, 0, 0); // at coords 0,0    
+    context.translate(0,0);
+    if (convertOpt.gray) {    
+        // 不能使用跨域图片，否则不能获取图片数据
+        var canvasData = context.getImageData(0, 0, canvas.width, canvas.height);    
+        // alert(canvasData.width.toString());    
+        // alert(canvasData.height.toString());    
+        canvasData = convert2Gray(canvasData);
+        context.putImageData(canvasData, 0, 0); // at coords 0,0   
+    }
+
+    $("#rotate").text(convertOpt.rotate);
+    $("#scale").text(canvasScale.toFixed(2));
+    $("#imgSize").text(inputImage.width+"x"+inputImage.height);
 };    
 
 function handleFiles(files) {
@@ -122,15 +165,19 @@ $("#smaller").on("click", function() {
     repaint();
 });
 
-$("#rotateLeft").on("click", function() {
+$("#rotateClockwise").on("click", function() {
     window.canvasRotate += 90;
     if (window.canvasRotate == 360) {
         window.canvasRotate = 0;
     }
+    convertOpt.rotate = canvasRotate;
     repaint();
 })
 $("#selectBtn").on("click", function () {
     $("#file").click();
+})
+$("#gray").on("change", function() {
+    repaint();
 })
 </script>
 {% end %}
