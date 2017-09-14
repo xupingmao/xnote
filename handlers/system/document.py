@@ -30,9 +30,13 @@ class DocInfo:
             # 通过__module__判断是否时本模块的函数
             # isroutine判断是否是函数或者方法
             if inspect.isroutine(value):
+                value_mod = inspect.getmodule(value)
+                if value_mod != mod:
+                    # 跳过非本模块的方法
+                    continue
                 functions.append([attr + getargspec(value), value.__doc__])
             elif inspect.isclass(value):
-                do_class(functions, name, value)
+                do_class(functions, name + '.' + attr, value)
             # TODO 处理类的文档，参考pydoc
 
 def getargspec(value):

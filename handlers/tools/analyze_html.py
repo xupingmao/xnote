@@ -2,6 +2,7 @@
 # created by xupingmao on 2017/04/22
 from __future__ import print_function
 import os
+import urllib.request
 import web
 import xtemplate
 import xutils
@@ -17,7 +18,14 @@ def get_addr(src, host):
 
 def readhttp(address):
     address = xutils.quote_unicode(address)
-    bytes = xutils.urlopen(address).read()
+    req = urllib.request.Request(
+                    address, 
+                    data=None, 
+                    headers={
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+                    }
+                )
+    bytes = xutils.urlopen(req).read()
     return xutils.decode_bytes(bytes)
 
 def get_addr_list(images, host=None):

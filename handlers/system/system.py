@@ -103,7 +103,7 @@ class SysHandler:
                 if os.path.isfile(fpath) and fpath.endswith(".bat"):
                     shell_list.append(fpath)
         addr = get_server_ip() + ":" + config.get("PORT")
-        return xtemplate.render("system/index.html", 
+        return xtemplate.render("system/system.html", 
             addr = addr,
             os = os,
             user = xauth.get_current_user()
@@ -156,5 +156,6 @@ description = "展示系统的内存使用、监听地址、数据库大小等�
 
 xurls = (
     r"/system/sys",   SysHandler,
-    r"/system/index", SysHandler
+    r"/system/index", SysHandler,
+    r"/system/system", SysHandler,
 )

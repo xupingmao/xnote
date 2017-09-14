@@ -121,7 +121,12 @@ class EditHandler:
         name = xutils.get_argument("name", "")
         error = xutils.get_argument("error", "")
         dirname = xconfig.SCRIPTS_DIR
-        content = xutils.readfile(os.path.join(dirname, name))
+
+        path = os.path.join(dirname, name)
+        if not os.path.exists(path):
+            content = ""
+        else:
+            content = xutils.readfile(path)
 
         return xtemplate.render("system/script_admin.html", 
             op = "edit",
@@ -133,6 +138,7 @@ class EditHandler:
 xurls = (
     r"/system/script_admin", handler,
     r"/system/script_admin/edit", EditHandler,
+    r"/system/script/edit", EditHandler,
     r"/system/script_admin/save", SaveHandler,
     r"/system/script_admin/execute", ExecuteHandler,
     r"/system/script_admin/delete", DeleteHandler

@@ -13,11 +13,14 @@ config = xconfig
 
 class SqliteTableManager:
     """检查数据库字段，如果不存在就自动创建"""
-    def __init__(self, filename, tablename, pkName=None, pkType=None):
+    def __init__(self, filename, tablename, pkName=None, pkType=None, no_pk=False):
         self.filename = filename
         self.tablename = tablename
         self.db = sqlite3.connect(filename)
-        if pkName is None:
+        if no_pk:
+            # 没有主键，创建一个占位符
+            sql = "CREATE TABLE IF NOT EXISTS `%s` (dummy int);" % tablename
+        elif pkName is None:
             # 只有integer允许AUTOINCREMENT
             sql = "CREATE TABLE IF NOT EXISTS `%s` (id integer primary key autoincrement);" % tablename
         else:
@@ -143,7 +146,7 @@ def init_table_file():
 
 def init_table_tag():
     # 2017/04/18
-    with TableManager(config.DB_PATH, "file_tag", "id", "text") as manager:
+    with TableManager(config.DB_PATH, "file_tag", no_pk=True) as manager:
         # 标签名
         manager.add_column("name",    "text", "")
         # 标签ID
