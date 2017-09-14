@@ -4,6 +4,7 @@
 from __future__ import print_function
 import socket
 import threading
+import sys
 
 # Note For best match with hardware and network realities, 
 # the value of bufsize should be a relatively small power of 2, for example, 4096.
@@ -14,6 +15,7 @@ TIMEOUT = 5.0
 # 调试日志封装
 def send_log(*content):
     print(threading.current_thread().name, *content)
+    # sys.stdout.flush()
 
 # 单向流数据传递
 def tcp_mapping_worker(conn_receiver, conn_sender):
@@ -24,16 +26,16 @@ def tcp_mapping_worker(conn_receiver, conn_sender):
             send_log('Event: Connection closed. Thread Count:', len(threading.enumerate()), "Error:", e)
             break
 
-        if not data:
-            send_log('Info: No more data is received.')
-            break
+        if data:
+            try:
+                conn_sender.sendall(data)
+            except Exception:
+                send_log('Error: Failed sending data.')
+                break
 
-        try:
-            conn_sender.sendall(data)
-        except Exception:
-            send_log('Error: Failed sending data.')
+        if not data or (len(data) < PKT_BUFF_SIZE):
+            send_log('Info: No more data is received from %s.' % conn_receiver.getpeername())
             break
-
         # send_log('Info: Mapping data > %s ' % repr(data))
         send_log('Info: Mapping > %s -> %s > %d bytes.' % (conn_receiver.getpeername(), conn_sender.getpeername(), len(data)))
 
