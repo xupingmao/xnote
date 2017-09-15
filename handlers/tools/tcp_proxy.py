@@ -12,10 +12,15 @@ import sys
 PKT_BUFF_SIZE = 4096
 TIMEOUT = 5.0
 
+lock = threading.RLock()
 # 调试日志封装
 def send_log(*content):
-    print(threading.current_thread().name, *content)
-    # sys.stdout.flush()
+    try:
+        lock.acquire()
+        print(threading.current_thread().name, *content)
+        # sys.stdout.flush()
+    finally:
+        lock.release()
 
 # 单向流数据传递
 def tcp_mapping_worker(conn_receiver, conn_sender):
@@ -33,11 +38,16 @@ def tcp_mapping_worker(conn_receiver, conn_sender):
                 send_log('Error: Failed sending data.')
                 break
 
-        if not data or (len(data) < PKT_BUFF_SIZE):
-            send_log('Info: No more data is received from %s.' % conn_receiver.getpeername())
+        if not data:
+            send_log('Info: No more data is received from %s:%s.' % conn_receiver.getpeername())
             break
         # send_log('Info: Mapping data > %s ' % repr(data))
         send_log('Info: Mapping > %s -> %s > %d bytes.' % (conn_receiver.getpeername(), conn_sender.getpeername(), len(data)))
+
+        # 可能 con_sender.send 之后还能从 con_receiver 读取，所以只能等待超时，不能根据收到的packet大小判断
+        # if len(data) < PKT_BUFF_SIZE:
+        #     send_log('Info: No more data is received from %s:%s.' % conn_receiver.getpeername())
+        #     break
 
 # 端口映射请求处理
 def tcp_mapping_request(local_conn, remote_ip, remote_port):
@@ -115,10 +125,26 @@ class ProxyServer:
     def stop(self):
         self.running = False
 
+def usage():
+    print("usage:")
+    print("  %s " % sys.argv[0])
+    print("  %s local_port remote_ip remote_port" % sys.argv[0])
+
 # 主函数
 if __name__ == '__main__':
     # tcp_mapping("127.0.0.1", 1234, "0.0.0.0", 1081)
     # TODO 使用参数构建
-    server = ProxyServer("127.0.0.1", 1080, "0.0.0.0", 1081)
+    if len(sys.argv) == 4:
+        local_port = int(sys.argv[1])
+        remote_ip = sys.argv[2]
+        remote_port = int(sys.argv[3])
+    elif len(sys.argv) == 1:
+        local_port = 1081
+        remote_ip = "127.0.0.1"
+        remote_port = 1080
+    else:
+        usage()
+        sys.exit(0)
+    server = ProxyServer(remote_ip, remote_port, "0.0.0.0", local_port)
     server.start()
 
