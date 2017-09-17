@@ -87,11 +87,10 @@ class PostEdit:
         if hasattr(args.file, "filename") and args.file.filename!="":
             filename = args.file.filename
             filepath, webpath = get_upload_file_path(args.file.filename)
-            fout = open(filepath, "wb")
-            # fout.write(x.file.file.read())
-            for chunk in args.file.file:
-                fout.write(chunk)
-            fout.close()
+            with open(filepath, "wb") as fout:
+                # fout.write(x.file.file.read())
+                for chunk in args.file.file:
+                    fout.write(chunk)
             content = content + "\n[img src=\"{}\"img]".format(webpath)
 
         rowcount = dao.update(where=dict(id=id, version=version), 

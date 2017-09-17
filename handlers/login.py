@@ -9,18 +9,18 @@ import xtemplate
 class handler:
 
     def POST(self):
-        name = xutils.get_argument("username")
-        pswd = xutils.get_argument("password")
+        name = xutils.get_argument("username", "")
+        pswd = xutils.get_argument("password", "")
         target = xutils.get_argument("target")
 
         # xutils.print_web_ctx_env()
         # print(web.input())
-
         xutils.log("USER[%s] PSWD[%s]" % (name, pswd))
 
         users = xauth.get_users()
-
         error = ""
+        if name == "":
+            pass
         if name in users:
             user = users[name]
             if pswd == user["password"]:
@@ -41,12 +41,6 @@ class handler:
 
 
     def GET(self):
-        args = web.input(username="", password="")
-        name = args["username"]
-        pswd = args["password"]
-        return xtemplate.render("login.html", 
-            username = name, 
-            password=pswd, 
-            error = "")
+        return self.POST()
 
 

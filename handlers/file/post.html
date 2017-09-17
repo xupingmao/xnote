@@ -8,7 +8,7 @@
     <hr/>
     <div class="x-code-block">{% raw file["content"] %}</div>
     <br/>
-    <a href="javascript:deleteConfirm()">删除</a>
+    <a href="javascript:deleteConfirm()" class="btn btn-danger">删除</a>
     <script type="text/javascript">
     function deleteConfirm () {
         var name = $("#name").text();
@@ -35,14 +35,14 @@
         </p>
 
     
-        <div>
+        <div class="col-md-12">
             <input type="file" name="file"/>
             <button>上传图片</button>
         </div>
-
-        <textarea name="content" style="width:100%;margin-top:10px;font-family:monospace;" rows={{rows}}>{{file.content}}</textarea>
-        <div class="col-md-12 bottom-fixed-pannel">
+        <div class="col-md-12">
             <button>保存</button>
         </div>
+
+        <textarea name="content" style="width:100%;margin-top:10px;font-family:monospace;" rows={{rows}}>{{file.content}}</textarea>
     </form>
 {% end %}
