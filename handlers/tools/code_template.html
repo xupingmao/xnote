@@ -16,6 +16,12 @@ function toCamel(name) {
 	})
 }
 
+function toUnderscore(name) {
+    return name.replace(/[a-z][A-Z]/g, function(m) {
+        return m[0]+"_"+m[1].toLowerCase();
+    });
+}
+
 function bashformat(fmt, data) {
 	var reg = /\$(\w+)/gi;
 	return fmt.replace(reg, function (part) {
@@ -205,6 +211,22 @@ function gen_java_to_string(inputStr, option) {
         + "return sb.toString();";
 }
 
+function gen_java_converter(inputStr, option) {
+    var lexer = new Lexer();
+    var tokens = lexer.parse(inputStr);
+    var source = tokens[0].value;
+    var target = tokens[1].value;
+    var code = "";
+    for (var i = 2; i < tokens.length; i++) {
+        var name = tokens[i].value;
+        var getName = toCamel("get_" + name);
+        var setName = toCamel("set_" + name);
+        code += bashformat("$target.$setName($source.$getName());\n", 
+            {source:source, target:target, getName:getName, setName:setName});
+    }
+    return code;
+}
+
 </script>
 <div class="container col-md-6">
     <textarea id="input" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
@@ -221,6 +243,7 @@ function gen_java_to_string(inputStr, option) {
             <option value="gen_protobuf_dao">Java ProtoBuf Dao</option>
             <option value="gen_jpa_entity">JPA Entity</option>
             <option value="gen_java_to_string">Java toString</option>
+            <option value="gen_java_converter">Java Converter</option>
             <!-- <option value="to_underscore">转为下划线风格</option> -->
         </select>
     </p>
@@ -245,6 +268,11 @@ function gen_java_to_string(inputStr, option) {
             <td>toString</td>
             <td><code>(name)*</code> </td>
             <td><code>user_name</br>age</code></td>
+        </tr>
+        <tr>
+            <td>Java Converter</td>
+            <td><code>source target (field)*</code></td>
+            <td><code>source target name age address</code></td>
         </tr>
     </table>
 </div>

@@ -55,9 +55,12 @@ class MyStdout:
         return self.stdout.close()
 
     def record(self):
+        # 这里检测TTL
         self.result_dict[current_thread()] = []
 
     def pop_record(self):
+        # 非线程池模式下必须pop_record，不然会有内存泄漏的危险
+        # 考虑引入TTL检测机制
         result = self.result_dict.pop(current_thread(), [])
         return "".join(result)
 
