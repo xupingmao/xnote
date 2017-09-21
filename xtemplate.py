@@ -120,14 +120,12 @@ def get_user_agent():
 def pre_render(kw):
     """ Main hook for template engine """
     kw["math"] = math
-    # TODO prevent hack
     kw["_is_admin"]  = xauth.is_admin()
     kw["_has_login"] = xauth.has_login()
     kw["_user"]      = xauth.get_current_user()
     kw["_user_agent"] = get_user_agent()
-    # kw["_notice_list"] = ["Hello", "Just Try"]
-    # TODO 处理首页公告
-    kw["_notice_list"] = []
+    # 处理首页公告
+    kw["_top_notice"] = None
     # print(web.ctx.env)
     # kw["_nav_position"] = web.cookies(nav_position="top").nav_position
     kw["_nav_position"] = "top"

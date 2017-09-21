@@ -2,6 +2,15 @@
 
 
 <div class="xnote-menu col-md-12" style="display: block;position: fixed;z-index:1000;background: #333;">
+
+    {# 公告内容，只显示一条数据，由链接跳转到列表 #}
+    {% if _top_notice != None %}
+    <div class="col-md-12" style="background-color: #ffc;">
+      <span class="col-md-1">&nbsp;</span>
+      <span>{{_top_notice}}</span>
+    </div>
+    {% end %}
+
     <div class="col-md-1">&nbsp;</div>
     <div class="col-md-10">
     {% if _has_login %}
@@ -17,11 +26,6 @@
       <li class="menu-item"><a href="/logout">登出</a></li>
     {% end %}
 
-    <!--
-    {% if _has_login and _user != None %}
-      <span style="float: right;color: #fff;padding-top: 5px; padding-bottom: 5px;">Welcome,{{_user["name"]}}</span>
-    {% end %}
-    -->
     </div>
 </div>
 <div class="col-md-12">
