@@ -7,4 +7,4 @@
 class handler(object):
     
     def GET(self):
-        raise Exception("For Development")
+        raise Exception("For Development Test")

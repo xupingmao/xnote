@@ -1,1 +1,1 @@
-web: python app.py --data /data
+web: python app.py --data /data --debug no

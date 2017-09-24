@@ -54,6 +54,7 @@ def handle_args():
     parser.add_argument("--ringtone", default="no")
     parser.add_argument("--port", default="1234")
     parser.add_argument("--webbrowser", default="no")
+    parser.add_argument("--debug", default="yes")
 
     args = parser.parse_args(sys.argv[1:])
 
@@ -71,6 +72,10 @@ def handle_args():
         xutils.say("系统启动")
     if args.webbrowser == "yes":
         xconfig.OPEN_IN_BROWSER = True
+    if args.debug == "yes":
+        xconfig.DEBUG = True
+    else:
+        web.config.debug = False
 
 def main():
     global app

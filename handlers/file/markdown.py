@@ -25,23 +25,26 @@ def try_decode(bytes):
 
 class handler(BaseHandler):
 
-    @xauth.login_required()
     def execute(self):
-        id = self.get_argument("id", "")
-        name = self.get_argument("name", "")
+        id   = xutils.get_argument("id", "")
+        name = xutils.get_argument("name", "")
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
             id = int(id)
-            dao.visit_by_id(id)
             file = dao.get_by_id(id)
         elif name is not None:
             file = dao.get_by_name(name)
         if file is None:
             raise web.notfound()
+        
+        if file.groups != "*" and xauth.get_current_user() is None:
+            return xauth.redirect_to_login()
+
+        dao.visit_by_id(id)
         download_csv = file.related != None and "CODE-CSV" in file.related
 
-        user_name = xauth.get_current_user()["name"]
+        user_name = xauth.get_current_name()
         can_edit = (file.creator == user_name) or (user_name == "admin")
 
         role = xauth.get_current_role()
@@ -195,6 +198,7 @@ class UpdateHandler(BaseHandler):
 
 class Upvote:
 
+    @xauth.login_required()
     def GET(self, id):
         id = int(id)
         db = xtables.get_file_table()
@@ -203,6 +207,7 @@ class Upvote:
         raise web.seeother("/file/view?id=%s" % id)
 
 class Downvote:
+    @xauth.login_required()
     def GET(self, id):
         id = int(id)
         db = xtables.get_file_table()

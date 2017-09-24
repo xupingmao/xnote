@@ -82,6 +82,8 @@ def get_current_name():
 def get_current_role():
     """获取当前用户的角色"""
     user = get_current_user()
+    if user is None:
+        return None
     return user.get("name")
 
 def get_md5_hex(pswd):
@@ -147,7 +149,10 @@ def check_login(user_name=None):
     elif has_login():
         raise web.seeother("/unauthorized")
     # FIXME 应该是URL
-    path = web.ctx.path
+    redirect_to_login()
+
+def redirect_to_login():
+    path = web.ctx.fullpath
     raise web.seeother("/login?target=" + xutils.encode_uri_component(path))
 
 def login_required(user_name=None):

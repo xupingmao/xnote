@@ -3,10 +3,6 @@ body {
     font-family: "Open Sans Light",Helvetica,arial,sans-serif;
 }
 
-* {
-    -webkit-appearance: none;
-}
-
 .marked-pre {
     background: #eee;
     padding: 0.5em;
@@ -24,6 +20,7 @@ a:hover {
 
 /** 不能指定input[type=button]不然会覆盖其他class样式 **/
 .btn, [type=submit], [type=button], button {
+    -webkit-appearance: none; /* 消除IOS默认的按钮样式 */
     background-color: #337ab7;
     border-color: #2e6da4;
     border: 1px solid transparent;

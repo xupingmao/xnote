@@ -3,8 +3,17 @@
 <div style="">    
     <span id="fileId" style="display:none;">{{file.id}}</span>
     <h2>{{file.name}} 
-        <a href="/file/markdown/edit?id={{file.id}}">[编辑]</a>
-        <a href="/file/share?id={{file.id}}">[分享]</a>
+        
+        {% if _has_login %}
+            <a href="/file/markdown/edit?id={{file.id}}">[编辑]</a>
+        {% end %}
+        
+        {% if file.groups == "*" %}
+            <a href="/file/share/cancel?id={{file.id}}">[取消分享]</a>
+        {% else %}
+            <a href="/file/share?id={{file.id}}">[分享]</a>
+        {% end %}
+
         {% if file.priority > 0 %}
             <a href="/file/{{file.id}}/downvote">[取消置顶]</a>
         {% else %}

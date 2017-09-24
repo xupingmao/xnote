@@ -8,6 +8,7 @@ import os
 import time
 from collections import OrderedDict
 
+DEBUG = True
 PORT = "1234"
 # PORT = "8787"
 
