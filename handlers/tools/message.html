@@ -1,0 +1,326 @@
+{% extends base.html %}
+
+{% block head %}
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"/>
+
+<script type="text/javascript" src="/static/js/string.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
+<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
+
+<style type="text/css">
+/*    ::selection {
+        background: white;
+    }*/
+    .chat-box {
+        /*background-color: #CCFF99;*/
+    }
+
+    .chat-msg-div {
+        margin-top: 1rem;
+        float: left;
+        width: 100%;
+    }
+
+    .chat-avatar {
+        color: green;
+    }
+    .chat-msg {
+        /*background-color: #99CCFF;*/
+        padding: 0.3em;
+        padding: 0.3rem;
+        margin-top: 0.1rem;
+        float: left;
+        width: calc(100% - 6em);
+    }
+    .chat-msg-content {
+        padding-left: 0.5rem;
+        border-width: 5px;
+        border-radius: 5px;
+        /*background-color: #99CCFF;*/
+    }
+    .chat-msg-img {
+        width: 180px;
+    }
+    .chat-msg-time {
+        /*text-align: center;*/
+        color: #888;
+        margin: 0;
+        font-size: 10px;
+    }
+
+    .input-box {
+        /*position: relative;*/
+        /*left: 0;*/
+        /*right: 0;*/
+        /*width: calc(100% - 5rem);*/
+        width: 100%;
+    }
+
+    .send-button {
+        float: left;
+        width: 4rem;
+        margin-top: 0.5rem;
+        margin-right: 0.5rem;
+    }
+
+</style>
+{% end %}
+
+{% block body %}
+<script src="/static/lib/vue/vue-2.2.6.min.js"></script>
+
+<div id="app" class="col-md-12">
+    <h2>{{! title }}</h2>
+
+    <div class="input-div col-md-12">
+        <textarea class="col-md-12 input-box" v-model="input" rows=3></textarea>
+        <input type="button" name="" class="send-button btn" value="发送" @click="sendMessage()">
+        <input type="file" id="filePicker" name="" class="hide" />
+        <input type="button" id="filePickerBtn" name="" class="send-button btn" value="上传文件"/>
+        <div id="uploadProgress" style="float: right;" ></div>
+    </div>
+
+    <div class="chat-box col-md-12">
+        <div class="chat-msg-div" v-for="message in messageList">
+            <div class="chat-avatar col-md-12">
+                {{! message.user }}
+            </div>
+            <div class="chat-msg">
+                <div v-if="message.link">
+                    <a v-bind:href="message.link">{{! message.link }}</a>
+                </div>
+                <div v-else-if="message.imgSrc">
+                    <a v-bind:href="message.imgSrc">
+                        <img v-bind:src="message.imgSrc" class="chat-msg-img"/>
+                    </a>
+                </div>
+                <div v-else class="chat-msg-content">
+                    {{! message.content }}
+                </div>
+            </div>
+            
+            <div class="col-md-12">
+                <p class="chat-msg-time">{{! message.ctime }}</p>
+                <hr/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function newMessage(content, user) {
+        return {"content": content, user:user}
+    }
+
+    function wrapMessage(message) {
+        var content = message.content;
+        if (content.startsWith("file://")) {
+            var length = "file://".length;
+            var path = content.substr(length);
+            var lowerPath = path.toLowerCase();
+            if (lowerPath.endsWith(".jpg") || lowerPath.endsWith(".jpeg") || 
+                    lowerPath.endsWith(".png") || lowerPath.endsWith(".gif")) {
+                message.imgSrc = path;
+            } else {
+                message.link = path;
+            }
+        }
+        return message;
+    }
+
+    var app = new Vue({
+        el: "#app",
+        data: {
+            title: "留言板",
+            message: "Hello, Vue!",
+            messageList: [newMessage("Welcome to chatroom")],
+            person: {
+                name:"Jhon",
+                age: 20,
+            },
+            bindmessage: "页面加载于 " + new Date(),
+            seen: false,
+            rawHtml: "{{!message}}",
+            url: "https://www.baidu.com",
+            input: "",
+        },
+        methods: {
+
+            refreshMessage: function () {
+                var self = this;
+                $.get("/file/message/list?order=desc&pagesize=10", function (respText) {
+                    var data = respText;
+                    if (data.code == "success") {
+                        var messageList = [];
+                        data.data.forEach(function (item, index) {
+                            // console.log(item, index);
+                            messageList.push(wrapMessage(item));
+                        })
+                        messageList.reverse();
+                        self.messageList = messageList;
+                    }
+                })
+            },
+
+            sendMessage: function () {
+                if (this.input == "") {
+                    return;
+                }
+                var self = this;
+                $.post("/file/message/add", {content:self.input}, function (respText) {
+                    var data = respText;
+                    if (data.code == "success") {
+                        var msg = wrapMessage(data.data);
+                        self.messageList.push(msg);
+                        self.input = "";
+                        $(".input-box").focus();
+                    } else {
+                        alert(data.message);
+                    }
+                    app.refreshMessage();
+                }).fail(function (data) {
+
+                })
+            }
+        }
+    });
+
+    app.refreshMessage();
+// 文件上传
+var BASE_URL = "/static/lib/webuploader"
+// 初始化Web Uploader
+var uploader = WebUploader.create({
+
+    // 选完文件后，是否自动上传。
+    auto: true,
+
+    // swf文件路径
+    swf: BASE_URL + '/Uploader.swf',
+
+    // 文件接收服务端。
+    server: '/fs_upload/range',
+
+    // 选择文件的按钮。可选。
+    // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+    pick: '#filePicker',
+
+    // 需要分片
+    chunked: true,
+    // 默认5M
+    // chunkSize: 1024 * 1024 * 5,
+    chunkSize: 1024 * 1024 * 5,
+    // 重试次数
+    chunkRetry: 10,
+    // 文件上传域的name
+    fileVal: "file",
+    // 不开启并发
+    threads: 1,
+});
+
+// 当有文件添加进来的时候
+uploader.on( 'fileQueued', function( file ) {
+    var $li = $(
+            '<div id="' + file.id + '" class="file-item thumbnail">' +
+                '<img>' +
+                '<div class="info">' + file.name +
+                '<span class="finished-tag" id="' + file.id + '-result"></span>' + 
+                 '</div>' +
+            '</div>'
+            ),
+        $img = $li.find('img');
+
+    $list = $("#fileList");
+    // $list为容器jQuery实例
+    $list.append( $li );
+
+    // 创建缩略图
+    // 如果为非图片文件，可以不用调用此方法。
+    // thumbnailWidth x thumbnailHeight 为 100 x 100
+    var thumbnailWidth = 100;
+    var thumbnailHeight = 100;
+    uploader.makeThumb( file, function( error, src ) {
+        if ( error ) {
+            $img.replaceWith('<span>不能预览</span>');
+            return;
+        }
+
+        $img.attr( 'src', src );
+    }, thumbnailWidth, thumbnailHeight );
+});
+
+
+// 文件上传过程中创建进度条实时显示。
+uploader.on( 'uploadProgress', function( file, percentage ) {
+    var $li = $( '#uploadProgress' ),
+    $percent = $li.find('.progress span');
+
+    // 避免重复创建
+    if ( !$percent.length ) {
+        $percent = $('<div class="progress"><span></span></div>')
+                .appendTo( $li )
+                .find('span');
+    }
+
+    $percent.css( 'width', percentage * 100 + '%' );
+    $percent.text( (percentage * 100).toFixed(2) + '%');
+});
+
+uploader.on( 'uploadBeforeSend', function (object, data, headers) {
+    $( '#uploadProgress' ).find('.progress').remove();
+    data.dirname = "$DATA/tmp/";
+})
+
+// 文件上传成功，给item添加成功class, 用样式标记上传成功。
+uploader.on( 'uploadSuccess', function( file ) {
+    $( '#uploadProgress' ).find('.progress').remove();
+    var $li = $( '#uploadProgress' );
+    $('<div class="progress"><span>上传完成</span></div>')
+                .appendTo( $li )
+                .find('span');
+});
+
+// 文件上传失败，显示上传出错。
+uploader.on( 'uploadError', function( file ) {
+    var $li = $( '#'+file.id ),
+        $error = $li.find('div.error');
+
+    // 避免重复创建
+    if ( !$error.length ) {
+        $error = $('<div class="error"></div>').appendTo( $li );
+    }
+
+    $error.text('上传失败');
+});
+
+// 完成上传完了，成功或者失败，先删除进度条。
+uploader.on( 'uploadComplete', function( file ) {
+    var content = 'file:///tmp/$name'.replace(/\$name/g, file.name);
+    $.post("/file/message/add", {content:content}, function (respText) {
+        var data = respText;
+        if (data.code == "success") {
+            app.refreshMessage();
+        } else {
+            alert(data.message);
+        }
+    }).fail(function (data) {
+
+    })
+});
+
+$("#filePickerBtn").on("click", function (event) {
+    console.log("select file button click");
+    $("#filePicker").click();
+})
+
+$("#filePicker").on("change", function (event) {
+    console.log(event);
+    var fileList = event.target.files; //获取文件对象 
+    console.log(fileList);
+    if (fileList && fileList.length > 0) {
+        uploader.addFile(fileList);
+    }
+});
+
+</script>
+
+{% end %}
