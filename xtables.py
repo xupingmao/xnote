@@ -225,7 +225,13 @@ class DBWrapper:
         return self.db.select(self.tablename, *args, **kw).first()
 
     def query(self, *args, **kw):
-        return self.db.query(self.tablename, *args, **kw)
+        return self.db.query(*args, **kw)
+
+    def count(self, where=None):
+        sql = "SELECT COUNT(1) AS amount FROM %s" % self.tablename
+        if where:
+            sql += " WHERE %s" % where
+        return self.db.query(sql).first().amount
 
     def update(self, *args, **kw):
         return self.db.update(self.tablename, *args, **kw)

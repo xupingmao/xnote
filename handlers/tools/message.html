@@ -30,7 +30,7 @@
         padding: 0.3rem;
         margin-top: 0.1rem;
         float: left;
-        width: calc(100% - 6em);
+        /*width: calc(100% - 6em);*/
     }
     .chat-msg-content {
         padding-left: 0.5rem;
@@ -100,10 +100,19 @@
             </div>
             
             <div class="col-md-12">
-                <p class="chat-msg-time">{{! message.ctime }}</p>
+                <p class="chat-msg-time">{{! message.ctime }} <a style="font-size: 10px;" v-if="message.user==current_user" v-bind:msg-id="message.id" href="#" @click="deleteMessage($event)">删除</a> </p>
                 <hr/>
             </div>
         </div>
+    </div>
+
+    <div class="col-md-12">
+        <p>
+            <a class="x-page-link" href="#">共{{!page_max}}页</a> 
+            <a v-if="page > 1" class="x-page-link" v-bind:href="page_prev_url">上一页</a>
+            <a class="x-page-link x-page-active" href="#">{{!page}}</a>
+            <a v-if="page < page_max" class="x-page-link" v-bind:href="page_next_url">下一页</a>
+        </p>
     </div>
 </div>
 
@@ -143,13 +152,25 @@
             rawHtml: "{{!message}}",
             url: "https://www.baidu.com",
             input: "",
+            page_max: 2,
+            page: 1,
+            page_url: "/tools/message?pagesize=10&page=",
+            page_next_url:"#",
+            page_prev_url:"#",
+            current_user:"",
         },
         methods: {
 
             refreshMessage: function () {
                 var self = this;
-                $.get("/file/message/list?order=desc&pagesize=10", function (respText) {
+                var page = getUrlParams().page || 1;
+                app.page = page;
+                app.page_next_url = app.page_url + (parseInt(page)+1);
+                app.page_prev_url = app.page_url + (page-1);
+                $.get("/file/message/list", {pagesize:10,page:page}, function (respText) {
                     var data = respText;
+                    app.page_max = data.page_max;
+                    app.current_user = data.current_user;
                     if (data.code == "success") {
                         var messageList = [];
                         data.data.forEach(function (item, index) {
@@ -180,6 +201,19 @@
                     app.refreshMessage();
                 }).fail(function (data) {
 
+                })
+            },
+
+            deleteMessage: function (event) {
+                var el = event.currentTarget;
+                var self = this;
+                var id = $(el).attr("msg-id");
+                $.post("/file/message/remove", {id: id}, function (resp) {
+                    if (resp.code == "success") {
+                        app.refreshMessage();
+                    } else {
+                        alert(data.message);
+                    }
                 })
             }
         }

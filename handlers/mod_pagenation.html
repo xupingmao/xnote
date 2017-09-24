@@ -1,0 +1,18 @@
+<p>
+    <!--
+    <input id="targetPage" value="{{page}}" style="width:3em;"/> <button onclick="goToPage()">GO</button>
+    -->
+    <a class="x-page-link" href="#">共{{page_max}}页</a> 
+    {% if page > 1 %}
+    <a class="x-page-link" href="{{page_url}}{{page-1}}">上一页</a>
+    {% end %}
+    
+    <a class="x-page-link x-page-active" href="#">{{page}}</a>
+    <!--
+    <a href="#"><span style="background:blue;color:white">{{page}} / {{?pages}}</span></a>
+    -->
+    
+    {% if page < page_max %}
+    <a class="x-page-link" href="{{page_url}}{{page+1}}">下一页</a>
+    {% end %}
+</p>

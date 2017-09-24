@@ -3,6 +3,7 @@ var getUrlParams = function()
 {
     var params = {};
     var url = window.location.href;
+    url = url.split("#")[0];
     var idx = url.indexOf("?");
     if(idx > 0)
     {

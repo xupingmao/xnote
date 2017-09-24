@@ -154,7 +154,7 @@
     
 {% if "page" in globals() %}
     {% init key = "" %}
-    {% set pages = math.ceil(count/10) %}
+    {% set page_max = math.ceil(count/10) %}
     {% if key != "" %}
         {# TODO 移动端优化 #}
         <div class="note col-md-12">
@@ -170,24 +170,7 @@
         </div>
     {% end %}
 
-    <p>
-        <!--
-        <input id="targetPage" value="{{page}}" style="width:3em;"/> <button onclick="goToPage()">GO</button>
-        -->
-        <a class="x-page-link" href="#">共{{pages}}页</a> 
-        {% if page > 1 %}
-        <a class="x-page-link" href="{{page_url}}{{page-1}}">上一页</a>
-        {% end %}
-        
-        <a class="x-page-link x-page-active" href="#">{{page}}</a>
-        <!--
-        <a href="#"><span style="background:blue;color:white">{{page}} / {{?pages}}</span></a>
-        -->
-        
-        {% if page < pages %}
-        <a class="x-page-link" href="{{page_url}}{{page+1}}">下一页</a>
-        {% end %}
-    </p>
+    {% include mod_pagenation.html %}
     <script>
         function goToPage() {
             var value = $('#targetPage').val();
