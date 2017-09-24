@@ -16,18 +16,15 @@ def execute(sql):
 
 # 待优化
 def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
-    user = xauth.get_current_user()
-    if user is None:
-        raise web.seeother("/login")
-    user_name = user["name"]
-    if user_name == "admin":
-        # sql = "select * from file where smtime > '%s' AND is_deleted != 1 order by smtime desc"\
-        # % dateutil.before(days=int(days), format=True)
-        sql = "select * from file where is_deleted != 1"
-    else:
-        sql = "select * from file where is_deleted != 1 AND groups = '%s'" % user_name
+    user_name = xauth.get_current_name()
+    # if user_name == "admin":
+    #     # sql = "select * from file where smtime > '%s' AND is_deleted != 1 order by smtime desc"\
+    #     # % dateutil.before(days=int(days), format=True)
+    #     sql = "select * from file where is_deleted != 1"
+    # else:
+    #     sql = "select * from file where is_deleted != 1 AND groups = '%s'" % user_name
 
-    sql = "select * from file where is_deleted != 1 AND groups = '%s'" % user_name
+    sql = "select * from file where is_deleted != 1 AND creator = '%s'" % user_name
 
     sql += " ORDER BY priority DESC, smtime DESC"
     sql += " LIMIT %s, %s" % ((page-1) * pagesize, pagesize)
