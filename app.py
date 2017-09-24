@@ -70,7 +70,7 @@ def handle_args():
     if args.ringtone == "yes":
         xutils.say("系统启动")
     if args.webbrowser == "yes":
-        webbrowser.open("http://localhost:1234/")
+        xconfig.OPEN_IN_BROWSER = True
 
 def main():
     global app
@@ -111,6 +111,8 @@ def main():
     autoreload_thread.start()
     mgr.run_task()
 
+    if xconfig.OPEN_IN_BROWSER:
+        webbrowser.open("http://localhost:1234/")
     app.run()
 
 if __name__ == '__main__':

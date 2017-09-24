@@ -38,6 +38,8 @@ IS_TEST  = False
 OPEN_PROFILE = False
 # 静音停止时间
 MUTE_END_TIME = None
+# 打开浏览器
+OPEN_IN_BROWSER = False
 
 # 资料相关
 # 分页数量

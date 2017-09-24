@@ -3,6 +3,10 @@ body {
     font-family: "Open Sans Light",Helvetica,arial,sans-serif;
 }
 
+* {
+    -webkit-appearance: none;
+}
+
 .marked-pre {
     background: #eee;
     padding: 0.5em;
@@ -18,7 +22,8 @@ a:hover {
     background-color: LightGrey;
 }
 
-.btn, [type=submit], button {
+/** 不能指定input[type=button]不然会覆盖其他class样式 **/
+.btn, [type=submit], [type=button], button {
     background-color: #337ab7;
     border-color: #2e6da4;
     border: 1px solid transparent;
@@ -26,7 +31,7 @@ a:hover {
     border-radius: 1px;
 }
 
-.btn:hover, button:hover, [type=submit]:hover {
+.btn:hover, button:hover, [type=submit]:hover, [type=button]:hover {
     color: #fff;
     background-color: #286090;
     border-color: #204d74;

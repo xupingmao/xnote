@@ -100,7 +100,7 @@
             </div>
             
             <div class="col-md-12">
-                <p class="chat-msg-time">{{! message.ctime }} <a style="font-size: 10px;" v-if="message.user==current_user" v-bind:msg-id="message.id" href="#" @click="deleteMessage($event)">删除</a> </p>
+                <p class="chat-msg-time">{{! message.ctime }} <a style="font-size: 10px;" v-if="message.user==current_user" v-bind:msg-id="message.id" href="javascript:void(0)" @click="deleteMessage($event)">删除</a> </p>
                 <hr/>
             </div>
         </div>
