@@ -290,6 +290,7 @@ String.prototype.repeat = function (count) {
 // 4.4.10 Array.prototype.slice (start, end)
 // 4.4.11 Array.prototype.sort (comparefn)
 // 4.4.12 Array.prototype.splice (start, deleteCount [ , item1 [ , item2 [ , … ] ] ] )
+//        arr.splice(2,0,item) ==> arr.insert(2, item)
 // 4.4.13 Array.prototype.unshift ( [ item1 [ , item2 [ , … ] ] ] )
 // 4.4.14 Array.prototype.indexOf ( searchElement [ , fromIndex ] )
 // 4.4.15 Array.prototype.lastIndexOf ( searchElement [ , fromIndex ] )

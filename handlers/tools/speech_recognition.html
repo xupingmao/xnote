@@ -3,22 +3,24 @@
 {% block head %}
 
 <style type="text/css">
-    #log {
-        width: 100%;
-        height: 280px;
-        background-color: #99cccc;
-    }
     .line {
         color: #fff;
     }
 </style>
+<script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
+
 {% end %}
 
 {% block body %}
 
 <h3>语音识别</h3>
-<div id="log">
-
+<div id="app" class="col-md-12">
+    <div id="log" class="col-md-12">
+        <p v-for="log, index in logList">
+            <span>{{! log.time }}</span>
+            <span>{{! log.message }}</span>
+        </p>
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -84,11 +86,11 @@ if (typeof SpeechRecognition == "function") {
         if (results.length > 0) {
             var word = results[0][0].transcript;
             console.log("[Speak] " + word);
+            app.logList.splice(0, 0, newMessage(word));
 
-            var logInfo = (new Date()).format("HH:mm:ss") + " " + word;
-            $("#log").append($("<p>")
-                .addClass("line")
-                    .text(logInfo));
+            if (app.logList.length > 20) {
+                app.logList.pop();
+            }
         }
         // recognition.start();
         // event.target.start();
@@ -101,6 +103,17 @@ if (typeof SpeechRecognition == "function") {
     }
 } else {
     alert("不支持语音识别 SpeechRecognition ")
+}
+
+var app = new Vue({
+    el: "#app",
+    data : {
+        logList: []
+    }
+});
+
+function newMessage(word) {
+    return {time: new Date().format("HH:mm:ss"), message: word};
 }
 </script>
 {% end %}
