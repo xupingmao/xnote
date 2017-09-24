@@ -23,8 +23,9 @@ class AddHandler:
 class ListHandler:
 
     def GET(self):
+        pagesize = xutils.get_argument("pagesize", 20, type=int)
         db = xtables.get_message_table()
-        chatlist = list(db.select(order="ctime DESC", limit=20))
+        chatlist = list(db.select(order="ctime DESC", limit=pagesize))
         chatlist.reverse()
         return dict(code="success", message="", data=chatlist)
 

@@ -339,14 +339,20 @@ img {
             alert("没有更多了");
             return;
           }
-          var resp = JSON.parse(data);
+          var resp = data;
           // app.itemList = [];
+          var count = 0;
           for (var key in resp) {
             console.log(key, resp);
             var files = resp[key];
             window.offset += files.length;
             mergeFiles(app.itemList, key, files);
+            count++;
             // app.itemList.push({title: key, files: files});
+          }
+          if (count == 0) {
+            alert("没有更多了");
+            return;
           }
           app.itemList.sort(function (a, b) {
             return a.title < b.title;

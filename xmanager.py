@@ -74,8 +74,10 @@ def wrapped_handler(handler_clz):
 
     def wrap(result):
         if isinstance(result, list):
+            web.header("Content-Type", "application/json")
             return json.dumps(result)
         elif isinstance(result, dict):
+            web.header("Content-Type", "application/json")
             return json.dumps(result)
         return result
 

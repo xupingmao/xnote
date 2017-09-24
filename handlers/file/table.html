@@ -79,7 +79,7 @@ var app = new Vue({
 $(function() {
     $.get("/file/table?id=" + getUrlParams()["id"], function (data) {
         console.log(data);
-        var parsedData = JSON.parse(data);
+        var parsedData = data;
         var content = parsedData.content;
         if (content != "") {
             var data = JSON.parse(content);

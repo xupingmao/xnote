@@ -140,7 +140,7 @@
         uploadFile("file", "file", "/file/upload_file?_type=json", function (evt) {
             // 处理上传成功
             var responseText = evt.target.responseText;
-            var result = JSON.parse(responseText);
+            var result = responseText;
             console.log(result);
             var link = result.link;
             // alert(result);   
@@ -250,9 +250,9 @@
                 fileId: fileId,
                 newName: newName
             }, function (msg) {
-                var result = JSON.parse(msg);
-                if (result.success)
-                {
+                console.log(msg);
+                var result = msg;
+                if (result.success) {
                     switchRename();
                     window.location.reload();
                 } else {

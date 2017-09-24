@@ -23,7 +23,7 @@ a:hover {
     border-color: #2e6da4;
     border: 1px solid transparent;
     color: #fff;
-    border-radius: 3px;
+    border-radius: 1px;
 }
 
 .btn:hover, button:hover, [type=submit]:hover {

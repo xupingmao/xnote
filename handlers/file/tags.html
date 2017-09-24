@@ -18,7 +18,7 @@
 function initTags() {
     $.get("/file/tag/{{file.id}}", function(data, status) {
         var tagsList = [];
-        var response = JSON.parse(data);
+        var response = data;
         var tags = response.data;
         $("#tags-span").html("");
         tags.forEach(function (element, index) {
@@ -92,7 +92,7 @@ $(function () {
         tags = text.toUpperCase();
         var result = ajaxGet("/file/update?option=updateRelated&id={{file.id}}&value="+tags, function (result) {
             // alert(result);
-            var resultObj = JSON.parse(result);
+            var resultObj = result;
             if (resultObj.success) {
                 var resultSpan = document.getElementById("result");
                 resultSpan.innerHTML = "success!";
@@ -125,7 +125,7 @@ $(function () {
 
     function updateTags(tags, callback) {
         $.get("/file/update?option=updateRelated&id={{file.id}}&value="+tags, function (data) {
-            var result = JSON.parse(data);
+            var result = data;
             console.log(data);
             if (result.success) {
                 if (callback) {

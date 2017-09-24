@@ -129,7 +129,7 @@
         if (dirname && dirname != "") {
             $.post("/fs/add_dir", {path: "{{path}}", dirname: dirname}, function (respText) {
                 console.log(respText);
-                var data = JSON.parse(respText);
+                var data = respText;
                 if (data.code == "success") {
                     window.location.reload();
                 } else {

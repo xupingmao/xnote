@@ -31,8 +31,7 @@ class handler:
             if date not in result:
                 result[date] = []
             result[date].append(row)
-
-        return xutils.json_str(**result)
+        return result
 
 class DateTimeline:
     @xauth.login_required()
@@ -55,8 +54,7 @@ class DateTimeline:
             if date not in result:
                 result[date] = []
             result[date].append(row)
-
-        return xutils.json_str(**result)
+        return result
 
 xurls = (
     r"/file/timeline", handler,

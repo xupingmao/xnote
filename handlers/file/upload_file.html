@@ -52,7 +52,7 @@
         /* This event is raised when the server send back a response */
         // alert(evt.target.responseText);
         var responseText = evt.target.responseText;
-        var data = JSON.parse(responseText);
+        var data = responseText;
         document.getElementById("resultLink").innerHTML = "链接: " + data.link;
       }
 

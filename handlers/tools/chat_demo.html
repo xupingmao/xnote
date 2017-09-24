@@ -1,0 +1,61 @@
+{% extends base.html %}
+
+{% block body %}
+
+<pre id="chatroom" class="col-md-12">
+<h3>聊天室</h3>
+</pre>
+
+<input id="message" type="text"><button id="send">Send</button>
+
+<script type="text/javascript">
+
+function log(message) {
+  console.log(message);
+  $("#chatroom").append($("<p>").text(message));
+}
+
+var userId = getUrlParams().userId;
+var target = getUrlParams().target;
+
+var ws = new WebSocket('ws://127.0.0.1:8089/chat?target=' + target + "&userId=" + userId);
+// var ws = new WebSocket('ws://127.0.0.1:8089/chat?target=' + target);
+// var ws = new WebSocket('ws://127.0.0.1:8089/chat');
+
+ws.onopen = function(evt) {
+  // console.log('Connection open ...');
+  log("Connection open ...");
+  ws.send('Hello WebSockets!');
+};
+
+ws.onmessage = function(evt) {
+  log('Received Message: ' + evt.data);
+  // ws.close();
+};
+
+ws.onclose = function(evt) {
+  log('Connection closed.');
+};
+
+function loop() {
+    if (ws.readyState == WebSocket.OPEN) {    
+        var result = ws.send("Check " + new Date());
+        console.log("Send check from client");
+    }
+    setTimeout(loop, 1000);
+}
+$("#send").on("click", function (evt) {
+  var value = $("#message").val();
+  if (value) {
+    console.log("Send " + value);
+    ws.send(value);
+    // log("Send Message:" + value);
+  }
+});
+$("#message").on("keydown", function (evt) {
+
+});
+// loop();
+</script>
+
+{% end %}

@@ -155,7 +155,7 @@ def render(template_name, **kw):
     _input = web.input()
 
     if _input.get("_type") == "json":
-        # TODO 重新设置Content-Type
+        web.header("Content-Type", "application/json")
         return json.dumps(nkw, default=encode_json)
     return _loader.load(template_name).generate(**nkw)
 

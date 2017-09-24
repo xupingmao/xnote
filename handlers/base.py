@@ -132,16 +132,8 @@ class BaseHandler(object):
         if func is None:
             func = getattr(self, option + "Request")
         ret = func()
-        if isinstance(ret, dict) or isinstance(ret, list):
-            self.write(json.dumps(ret))
-        elif isinstance(ret, str):
+        if ret is not None:
             self.write(ret)
-        elif isinstance(ret, bytes):
-            return ret
-        elif ret is None:
-            pass
-        else:
-            self.write(str(ret))
 
     def GET(self):
         # check login information
@@ -203,7 +195,7 @@ class BaseHandler(object):
 
 def get_upload_file_path(filename, data_dir="/files", _test_exists = 0):
     """生成上传文件名"""
-    filename = filename.replace(" ", "_")
+    filename = xutils.get_safe_file_name(filename)
     basename, ext = os.path.splitext(filename)
     date = dateutil.format_date(fmt="%Y/%m")
     dirname = config.DATA_PATH + data_dir + "/" + date + "/"
@@ -230,3 +222,4 @@ def get_upload_file_path(filename, data_dir="/files", _test_exists = 0):
 
 def get_upload_img_path(filename):
     return get_upload_file_path(filename, "/img")
+

@@ -54,7 +54,7 @@ $("#saveToDbBtn").on("click", function () {
         {"_type": "json", "name": name, "content": content, "type": "md"}, 
         function (responseText) {
             console.log(responseText);
-            var data = JSON.parse(responseText);
+            var data = responseText;
             if (data.code == "success") {
                 alert("添加成功");
             } else {

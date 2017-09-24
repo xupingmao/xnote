@@ -128,7 +128,7 @@
                 fileId: fileId,
                 newName: newName
             }, function (msg) {
-                var result = JSON.parse(msg);
+                var result = msg;
                 if (result.success)
                 {
                     switchRename();

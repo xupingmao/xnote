@@ -167,7 +167,7 @@
             refreshMessage: function () {
                 var self = this;
                 $.get("/file/message/list", function (respText) {
-                    var data = JSON.parse(respText);
+                    var data = respText;
                     if (data.code == "success") {
                         var messageList = [];
                         data.data.forEach(function (item, index) {
@@ -185,7 +185,7 @@
                 }
                 var self = this;
                 $.post("/file/message/add", {content:self.input}, function (respText) {
-                    var data = JSON.parse(respText);
+                    var data = respText;
                     if (data.code == "success") {
                         var msg = wrapMessage(data.data);
                         self.messageList.push(msg);
@@ -322,7 +322,7 @@ uploader.on( 'uploadError', function( file ) {
 uploader.on( 'uploadComplete', function( file ) {
     var content = 'file:///tmp/$name'.replace(/\$name/g, file.name);
     $.post("/file/message/add", {content:content}, function (respText) {
-        var data = JSON.parse(respText);
+        var data = respText;
         if (data.code == "success") {
             app.refreshMessage();
         } else {

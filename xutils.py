@@ -364,6 +364,11 @@ def quote_unicode(url):
     #     return quote(text)
     # return re.sub(r"[\u4e00-\u9fa5]+", urlencode, url)
     
+
+def get_safe_file_name(filename):
+    filename = filename.replace(" ", "_")
+    return quote_unicode(filename)
+
 #################################################################
 ##   Platform/OS Utilities, Python 2 do not have this file
 #################################################################

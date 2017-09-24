@@ -103,7 +103,7 @@
         // console.log(event);
         // console.log($(event.target).attr("scriptName"))
         $.post("/system/script_admin/execute?name=" + scriptName, function (responseText) {
-            var data = JSON.parse(responseText);
+            var data = responseText;
             $("#result").text(data.data);
         });
     })
