@@ -93,7 +93,8 @@ class Redirect(HTTPError):
             if absolute:
                 home = ctx.realhome
             else:
-                home = ctx.home
+                # home = ctx.home
+                home = ctx.homepath
             newloc = home + newloc
 
         headers = {

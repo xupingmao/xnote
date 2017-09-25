@@ -194,7 +194,9 @@ def WSGIServer(server_address, wsgi_app):
         'pyopenssl': 'web.wsgiserver.ssl_pyopenssl.pyOpenSSLAdapter',
     }
     
-    server = wsgiserver.CherryPyWSGIServer(server_address, wsgi_app, server_name="localhost")
+    server = wsgiserver.CherryPyWSGIServer(server_address, wsgi_app, 
+        numthreads=web.config.get("minthreads", 10),
+        server_name="localhost")
         
     def create_ssl_adapter(cert, key):
         # wsgiserver tries to import submodules as cherrypy.wsgiserver.foo.

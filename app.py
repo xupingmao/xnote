@@ -55,6 +55,7 @@ def handle_args():
     parser.add_argument("--port", default="1234")
     parser.add_argument("--webbrowser", default="no")
     parser.add_argument("--debug", default="yes")
+    parser.add_argument("--minthreads", default="10")
 
     args = parser.parse_args(sys.argv[1:])
 
@@ -76,6 +77,10 @@ def handle_args():
         xconfig.DEBUG = True
     else:
         web.config.debug = False
+
+    xconfig.minthreads = int(args.minthreads)
+    web.config.minthreads = xconfig.minthreads
+
 
 def main():
     global app

@@ -10,6 +10,7 @@ from collections import OrderedDict
 
 DEBUG = True
 PORT = "1234"
+minthreads = 10
 # PORT = "8787"
 
 # 处理器目录

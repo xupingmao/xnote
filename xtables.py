@@ -213,6 +213,7 @@ class DBWrapper:
     def __init__(self, dbpath, tablename):
         self.tablename = tablename
         self.dbpath = dbpath
+        # SqliteDB 使用了threadlocal来实现，线程池模式下不用释放
         self.db = db.SqliteDB(db=dbpath)
 
     def insert(self, *args, **kw):
