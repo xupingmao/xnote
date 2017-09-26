@@ -20,7 +20,7 @@ class handler:
     def GET(self):
         id = xutils.get_argument("id", type=int)
         db = xtables.get_file_table()
-        db.update(groups="*", where=dict(id=id, creator=xauth.get_current_name()))
+        db.update(is_public=1, where=dict(id=id, creator=xauth.get_current_name()))
         raise web.seeother("/file/view?id=%s"%id)
 
     def GET_old(self):
@@ -38,7 +38,7 @@ class UnshareHandler:
     def GET(self):
         id = xutils.get_argument("id", type=int)
         db = xtables.get_file_table()
-        db.update(groups=xauth.get_current_name(), 
+        db.update(is_public=0, 
             where=dict(id=id, creator=xauth.get_current_name()))
         raise web.seeother("/file/view?id=%s"%id)
 

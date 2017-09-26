@@ -38,7 +38,7 @@ class handler(BaseHandler):
         if file is None:
             raise web.notfound()
         
-        if file.groups != "*" and xauth.get_current_user() is None:
+        if not file.is_public and xauth.get_current_user() is None:
             return xauth.redirect_to_login()
 
         dao.visit_by_id(id)
@@ -115,6 +115,7 @@ def get_link(filename, webpath):
 
 class UpdateHandler(BaseHandler):
 
+    @xauth.login_required()
     def default_request(self):
         is_public = xutils.get_argument("public", "")
         id        = xutils.get_argument("id", type=int)
@@ -129,13 +130,12 @@ class UpdateHandler(BaseHandler):
 
         # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
         # 所以权限只能是创建者而不是修改者
-        groups = file.creator
-        if is_public == "on":
-            groups = "*"
+        # groups = file.creator
+        # if is_public == "on":
+        #     groups = "*"
         update_kw = dict(content=content, 
                 type=file_type, 
-                size=len(content), 
-                groups = groups);
+                size=len(content));
 
         if name != "" and name != None:
             update_kw["name"] = name
