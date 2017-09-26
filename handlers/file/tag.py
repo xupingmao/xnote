@@ -13,7 +13,7 @@ class TagHandler:
         file = dao.get_by_id(id)
         db   = dao.get_file_db()
 
-        file_tags = db.select("file_tag", where=dict(file_id=id,groups=file.groups))
+        file_tags = db.select("file_tag", where=dict(file_id=id))
         return dict(code="", message="", data=list(file_tags))
 
 class AddTagHandler:
@@ -25,7 +25,7 @@ class AddTagHandler:
         file = dao.get_by_id(id)
         db   = dao.get_file_db()
         # 先删除所有的tag，再增加
-        db.delete("file_tag", where=dict(file_id=id, groups=file.groups))
+        db.delete("file_tag", where=dict(file_id=id))
         added = set()
         for tag in tags:
             if tag == "":
@@ -34,7 +34,7 @@ class AddTagHandler:
                 continue
             added.add(tag)
             # t = TagEntity(id, tag, "*")
-            db.insert("file_tag", file_id=id, name=tag, groups=file.groups)
+            db.insert("file_tag", file_id=id, name=tag)
         return dict(code="", message="", data="OK")
 
 class TagNameHandler:
@@ -47,7 +47,8 @@ class TagNameHandler:
         limit  = xutils.get_argument("limit", 10, type=int)
         offset = (page-1) * limit
 
-        role = xauth.get_current_role()
+        # role = xauth.get_current_role()
+        role = "admin"
 
         if role == "admin":
             count_sql = "SELECT COUNT(1) AS amount FROM file_tag WHERE UPPER(name) = $name"
@@ -71,11 +72,13 @@ class TagListHandler:
     def GET(self):
         db = dao.get_file_db()
         user_name = xauth.get_current_role()
-        if user_name == "admin":
-            sql = "SELECT name, COUNT(*) AS amount FROM file_tag GROUP BY name ORDER BY amount DESC, name ASC";
-        else:
-            sql = "SELECT name, COUNT(*) AS amount FROM file_tag WHERE groups in $groups GROUP BY name ORDER BY amount DESC, name ASC";
+        # if user_name == "admin":
+        #     sql = "SELECT name, COUNT(*) AS amount FROM file_tag GROUP BY name ORDER BY amount DESC, name ASC";
+        # else:
+        #     sql = "SELECT name, COUNT(*) AS amount FROM file_tag WHERE groups in $groups GROUP BY name ORDER BY amount DESC, name ASC";
         groups = ["*", user_name]
+        sql = "SELECT name, COUNT(*) AS amount FROM file_tag GROUP BY name ORDER BY amount DESC, name ASC";
+
         tag_list = db.query(sql, vars = dict(groups = groups))
         return xtemplate.render("file/taglist.html", tag_list = list(tag_list))
         # return dict(code="", message="", data=tag_list)

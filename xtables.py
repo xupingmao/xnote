@@ -130,13 +130,17 @@ def init_table_file():
         # 访问时间atime
         manager.add_column("satime", "text", "")
         manager.add_column("visited_cnt", "int", 0)
+        # 逻辑删除标记
         manager.add_column("is_deleted", "int", 0)
+        # 是否公开
+        manager.add_column("is_public", "int", 0)
 
         # 权限相关
         # 创建者
         manager.add_column("creator", "text", "")
         # 修改者
         manager.add_column("modifier", "text", "")
+        # 权限组
         manager.add_column("groups", "text", "")
         
         # MD5
@@ -151,7 +155,7 @@ def init_table_tag():
         manager.add_column("name",    "text", "")
         # 标签ID
         manager.add_column("file_id", "int", 0)
-        # 权限控制
+        # 权限控制，标签不做用户区分, groups字段暂时废弃
         manager.add_column("groups",  "text", "")
 
 def init_table_schedule():
