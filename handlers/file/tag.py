@@ -5,15 +5,14 @@ from . import dao
 import xutils
 import xtemplate
 import xauth
+import xtables
 
 class TagHandler:
     
     def GET(self, id):
         id   = int(id)
-        file = dao.get_by_id(id)
-        db   = dao.get_file_db()
-
-        file_tags = db.select("file_tag", where=dict(file_id=id))
+        db   = xtables.get_file_tag_table()
+        file_tags = db.select(where=dict(file_id=id))
         return dict(code="", message="", data=list(file_tags))
 
 class AddTagHandler:
@@ -24,6 +23,7 @@ class AddTagHandler:
         tags = tags_str.split(" ")
         file = dao.get_by_id(id)
         db   = dao.get_file_db()
+        file_db = xtables.get_file_table()
         # 先删除所有的tag，再增加
         db.delete("file_tag", where=dict(file_id=id))
         added = set()
@@ -35,6 +35,7 @@ class AddTagHandler:
             added.add(tag)
             # t = TagEntity(id, tag, "*")
             db.insert("file_tag", file_id=id, name=tag)
+        file_db.update(related=tags_str, where=dict(id=id))
         return dict(code="", message="", data="OK")
 
 class TagNameHandler:

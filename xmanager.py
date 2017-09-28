@@ -194,12 +194,7 @@ class ModelManager:
             pass
 
     def reload(self):
-        """重启所有的模块"""
-        
-        self.reload_module("xtemplate")
-        self.reload_module("xauth")
-        self.reload_module("xutils")
-        self.reload_module("xtables")
+        """重启所有的模块, 不包括核心模块"""
         self.mapping     = []
         self.model_list  = []
         self.failed_mods = []

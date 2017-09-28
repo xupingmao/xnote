@@ -118,7 +118,7 @@ def init_table_file():
         # 关联关系
         # 上级目录
         manager.add_column("parent_id", "int", 0)
-        # 使用file_tag表,兼容老代码
+        # 使用file_tag表,兼容老代码,这里作为一个关键词存储，支持搜索
         manager.add_column("related", "text", "")
 
         # 统计相关
@@ -250,6 +250,9 @@ class DBWrapper:
 
 def get_file_table():
     return DBWrapper(config.DB_PATH, "file")
+
+def get_file_tag_table():
+    return DBWrapper(config.DB_PATH, "file_tag")
 
 def get_schedule_table():
     return DBWrapper(config.DB_PATH, "schedule")
