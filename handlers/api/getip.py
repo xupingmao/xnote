@@ -17,3 +17,4 @@ class handler:
         yield web.ctx.env.get("HTTP_X_FORWARDED_FOR")
         yield "\nRemote Addr: "
         yield web.ctx.env.get("REMOTE_ADDR")
+        yield "\n"
