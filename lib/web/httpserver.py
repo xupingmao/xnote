@@ -337,7 +337,11 @@ class LogMiddleware:
              
     def log(self, status, environ, cost_time):
         outfile = environ.get('wsgi.errors', web.debug)
-        req = environ.get('PATH_INFO', '_')
+        # req = environ.get('PATH_INFO', '_')
+        req = environ.get('PATH_INFO', '_') 
+        query_string = environ.get("QUERY_STRING", '')
+        if query_string != '':
+            req += '?' + query_string
         protocol = environ.get('ACTUAL_SERVER_PROTOCOL', '-')
         method = environ.get('REQUEST_METHOD', '-')
         x_forwarded_for = environ.get("HTTP_X_FORWARDED_FOR")

@@ -1,28 +1,8 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<!-- <html>
-<meta charset="utf-8">
-<head>
-</head>
-<body style="margin:0;margin-top:10px;">
-<div>
-<form action="/file/upload_file" enctype="multipart/form-data" method="POST">
-<input type="file" name="file"/>
-<input type="submit" value="上传文件"/>
-</form>
-</div>
-<div>
-{% if filename != "" %}
-    {% if is_img %}!{% end %}[{{filename}}]({{filepath}})
-{% end %}
-</div>
-</body> -->
-
-
 <html>
 <head>
     <title>Upload Files using XMLHttpRequest - Minimal</title>
-
     <script type="text/javascript">
 
       function uploadFile() {
@@ -52,8 +32,8 @@
         /* This event is raised when the server send back a response */
         // alert(evt.target.responseText);
         var responseText = evt.target.responseText;
-        var data = responseText;
-        document.getElementById("resultLink").innerHTML = "链接: " + data.link;
+        var data = JSON.parse(responseText)
+        document.getElementById("resultLink").innerHTML = data.link;
       }
 
       function uploadFailed(evt) {
@@ -68,8 +48,8 @@
 <body>
 <form id="form1" enctype="multipart/form-data" method="POST" action="/file/upload_file">
     <div class="row">
-        <input type="file" name="file" id="fileToUpload"/>
-        <input type="button" onclick="uploadFile()" value="上传文件" />
+        <input type="file" name="file" class="btn" id="fileToUpload"/>
+        <input type="button" class="btn" onclick="uploadFile()" value="上传文件" />
         <span id="progressNumber"></span>
         
     </div>

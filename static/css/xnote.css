@@ -26,6 +26,7 @@ a:hover {
     border: 1px solid transparent;
     color: #fff;
     border-radius: 1px;
+    text-decoration: none;
 }
 
 .btn:hover, button:hover, [type=submit]:hover, [type=button]:hover {
@@ -275,6 +276,8 @@ li.menu-item:hover {
 
 .top-offset-1 { margin-top: 1em; }
 .top-offset-2 { margin-top: 2em; }
+
+.bottom-offset-1 { margin-bottom: 1em; }
 
 .form-control {
     width: 100%;

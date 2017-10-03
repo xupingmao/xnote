@@ -39,7 +39,7 @@
     </form>
 </div>
 
-<div class="col-md-12 top-offset-1">
+<div class="col-md-12 top-offset-1" style="padding-bottom: 5px;">
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
         <input type="button" class="btn" value="添加文件夹" id="addDirectory"/>
@@ -94,8 +94,8 @@
         </td>
 
         <td>
-            {% if item.path.endswith((".md", ".csv")) %}
-                <a href="/wiki/{{item.path}}">[编辑]</a>
+            {% if can_edit(item.path) %}
+                <a href="/code/view_source?path={{item.path}}">[编辑]</a>
             {% end %}
         </td>
     </tr>

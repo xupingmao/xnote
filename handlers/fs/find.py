@@ -5,6 +5,8 @@ import glob
 import xutils
 import xtemplate
 
+from fnmatch import fnmatch
+
 def limited_glob(pattern, limit = 256):
     dirname = os.path.dirname(pattern)
     pattern = os.path.basename(pattern)
@@ -29,6 +31,35 @@ def _limited_glob(dirname, pattern, result, limit):
             return result
     return result
 
+def find_with_fnmatch0(path, key, limit=200):
+    result_dirs = []
+    result_files = []
+    key = key.lower()
+    count = 0
+    for root, dirs, files in os.walk(path):
+        for f in dirs:
+            abspath = os.path.join(root, f)
+            if fnmatch(abspath.lower(), key):
+                result_dirs.append(abspath)
+                count+=1
+                if count >= limit:
+                    break
+        for f in files:
+            abspath = os.path.join(root, f)
+            if fnmatch(abspath.lower(), key):
+                result_files.append(abspath)
+                count+=1
+                if count >= limit:
+                    break
+    return result_dirs + result_files
+
+def find_with_fnmatch(path, key):
+    result = []
+    quoted_key = xutils.quote_unicode(key)
+    if key != quoted_key:
+        result = find_with_fnmatch0(path, quoted_key)
+    return result + find_with_fnmatch0(path, key)
+
 class handler:
 
     def GET(self):
@@ -37,12 +68,15 @@ class handler:
     def POST(self):
         path = xutils.get_argument("path")
         find_key = xutils.get_argument("find_key")
+        find_type = xutils.get_argument("type")
         find_key = "*" + find_key + "*"
         path_name = os.path.join(path, find_key)
         if find_key == "":
             plist = []
-        else:
+        elif find_type == "glob":
             plist = limited_glob(path_name)
+        else:
+            plist = find_with_fnmatch(path, find_key)
         # plist = glob.glob(path_name)
         # plist += glob.glob(os.path.join(path, quoted_key))
         # print(path, find_key)

@@ -38,6 +38,10 @@ def get_file_size(filepath):
     except OSError as e:
         return "-"
 
+def can_edit(filename):
+    name, ext = os.path.splitext(filename)
+    return ext in (".md", ".csv", ".properties", ".java")
+
 def get_filesystem_kw():
     """return filesystem utils"""
     kw = {}
@@ -45,6 +49,7 @@ def get_filesystem_kw():
     kw["is_stared"]     = is_stared
     kw["search_type"]   = "fs"
     kw["get_file_size"] = get_file_size
+    kw["can_edit"] = can_edit
     return kw
 
 def get_parent_path(path):
@@ -168,7 +173,7 @@ class FileSystemHandler:
         kw["filelist"]     = filelist
         kw["path"]         = path
         kw["fspathlist"]   = xutils.splitpath(path)
-        
+
         return xtemplate.render("fs/fs.html", **kw)
 
     def list_root(self):

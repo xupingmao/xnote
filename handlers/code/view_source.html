@@ -24,15 +24,26 @@
 
 {% block body %}
 
-<div>
+<h3>{{?name}}</h3>
+<div class="col-md-12">
     <p style="color:red">{{?error}}</p>
 </div>
 <textarea id="content" class="hide">{{content}}</textarea>
+<form method="POST" action="/code/view_source/update">
 <div class="col-md-12">
-<pre class="col-md-1 marked-pre hide">{% for l in range(1, lines+1) %}{{"%04d\n" % l}}{% end %}</pre>
-<pre class="col-md-10 marked-pre hide">{{ content }}&nbsp;</pre>
-<textarea id="editor">{{content}}</textarea>
+    <div class="col-md-12 bottom-offset-1">
+        <input type="submit" value="保存">
+    </div>
+    <!--
+    <pre class="col-md-1 marked-pre hide">{% for l in range(1, lines+1) %}{{"%04d\n" % l}}{% end %}</pre>
+    <pre class="col-md-10 marked-pre hide">{{ content }}&nbsp;</pre>
+    -->
+    <input name="path" class="hide" value="{{path}}"/>
+    <div class="col-md-12">
+        <textarea name="content" id="editor">{{content}}</textarea>
+    </div>
 </div>
+</form>
 
 {# TODO 需要处理下搜索的高亮 #}
 
@@ -54,6 +65,10 @@
             theme:"monokai",
             indentUnit:4,
         });
+        editor.on("update", function (codeMirror, changeObj) {
+            console.log("update");
+            $("#editor").val(codeMirror.doc.getValue());
+        })
         editor.setSize("auto", "auto");
     });
 </script>
