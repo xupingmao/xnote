@@ -16,6 +16,7 @@ from util import dateutil
 
 import xconfig
 import xauth
+import xutils
 
 from xutils import ConfigParser
 
@@ -132,6 +133,7 @@ def pre_render(kw):
     kw["_menu_list"]    = MENU_LIST
     # 用于渲染其他组件
     kw["_render"] = render
+    kw["xutils"]  = xutils
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
 

@@ -398,6 +398,10 @@ def is_windows():
 def is_mac():
     return platform.system() == "Darwin"
 
+def is_editable(filename):
+    name, ext = os.path.splitext(filename)
+    return ext in (".md", ".csv", ".properties", ".java")
+
 def http_get(url):
     stream = urlopen(url)
     return decode_bytes(stream.read())

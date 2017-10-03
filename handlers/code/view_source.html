@@ -58,6 +58,8 @@
             mode = "text/javascript";
         } else if (name.endsWith(".c")) {
             mode = "text/x-c";
+        } else if (name.endsWith(".java")) {
+            mode = "text/x-java";
         }
         var editor = CodeMirror.fromTextArea($("#editor")[0], {
             lineNumbers: true,

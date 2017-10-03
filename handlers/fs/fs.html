@@ -94,7 +94,7 @@
         </td>
 
         <td>
-            {% if can_edit(item.path) %}
+            {% if xutils.is_editable(item.path) %}
                 <a href="/code/view_source?path={{item.path}}">[编辑]</a>
             {% end %}
         </td>

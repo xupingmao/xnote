@@ -51,6 +51,8 @@ def find_with_fnmatch0(path, key, limit=200):
                 count+=1
                 if count >= limit:
                     break
+        if count >= limit:
+            break
     return result_dirs + result_files
 
 def find_with_fnmatch(path, key):
