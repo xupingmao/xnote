@@ -12,7 +12,17 @@
                 <pre>{{ file.raw }}</pre>
             {% end %}
 
+            {# 快捷命令 #}
+            {% if file.command != None %}
+                <input type="button" class="btn execute-btn" value="执行" href="{{file.command}}"/>
+            {% end %}
+
+
+
             <div>
+                {% if hasattr(file, "priority") and file.priority is not None and file.priority > 0 %}
+                    <span class="tag red-bg">置顶</span>
+                {% end %}
                 {% if file.is_public %}
                     <span class="tag">公开</span>
                 {% elif file.groups != None %}
@@ -73,5 +83,14 @@
             var value = $('#targetPage').val();
             location.href = '{{page_url}}' + (value);
         }
+        $(".execute-btn").on("click", function (e) {
+            console.log(e);
+            var href = $(e.target).attr("href");
+            $.get(href, function (responseText) {
+                var obj = responseText;
+                console.log(obj)
+                $("#execute-result").text(JSON.stringify(obj));
+            });
+        })
     </script>
 {% end %}

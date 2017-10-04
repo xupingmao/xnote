@@ -343,6 +343,7 @@ li.menu-item:hover {
     background-color: #fff;
     padding: 10px;
     margin-bottom: 10px;
+    width: 100%;
 }
 
 .note-head {
@@ -421,6 +422,10 @@ li.menu-item:hover {
 .green-bg {
     color: #fff;
     background-color: green;
+}
+
+.red-bg {
+    background-color: red;
 }
 
 .red-text {
