@@ -1,5 +1,5 @@
 
-<div class="">
+<div>
     {% for i, file in enumerate(files) %}
         <div class="note">
             <div class="note-visited-cnt">访问指数:{{file.visited_cnt}}</div>
@@ -13,7 +13,7 @@
             {% end %}
 
             <div>
-                {% if file.groups == "*" %}
+                {% if file.is_public %}
                     <span class="tag">公开</span>
                 {% elif file.groups != None %}
                     <span class="tag">{{file.groups}}</span>
