@@ -50,6 +50,9 @@ class AddHandler:
                 if f != None:
                     key = name
                     raise Exception("%s 已存在" % name)
+                # 分组提前
+                if file.type == "group":
+                    file.priority = 1
                 f = dao.insert(file)
                 inserted = dao.get_by_name(name)
                 if _type == "json":

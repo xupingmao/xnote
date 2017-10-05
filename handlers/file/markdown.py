@@ -26,6 +26,7 @@ def try_decode(bytes):
 class handler(BaseHandler):
 
     def get_pathlist(self, db, file, pathlist):
+        # TODO LIMIT
         if file is None:
             return pathlist
         pathlist.insert(0, file)
@@ -64,7 +65,7 @@ class handler(BaseHandler):
 
         files = []
         if file.type == "group":
-            files = db.select(where=dict(parent_id=file.id))
+            files = db.select(where=dict(parent_id=file.id), order="priority DESC")
 
         self.render("file/view.html",
             file=file, 

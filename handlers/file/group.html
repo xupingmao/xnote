@@ -10,7 +10,8 @@
                     <img src="/static/image/note.gif"/>
                 {% end %}
                 <a href="/file/view?id={{item.id}}">{{item.name}}</a>
-                <div style="font-size: 12px;"> <span class="tag">{{item.groups}}</span>{{item.smtime}} </div>
+                {% if item.type == "group" %}/{% end %}
+                <div style="font-size: 12px;"><span class="tag">{{item.groups}}</span>&nbsp;{{item.smtime}} </div>
             </td>
             <td><a href="/file/archive?id={{item.id}}">移动</a></td>
         </tr>
