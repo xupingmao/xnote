@@ -188,11 +188,14 @@ def get_file_db():
     return db.SqliteDB(db=config.DB_PATH)
 
 
-def get_category(limit = None):
+def get_category(name = None, limit = None):
     db = get_db()
     if limit is None:
         limit = 200
-    sql = "SELECT * from file where is_deleted != 1 and parent_id = 0 order by name desc limit %s" % limit
+    sql = "SELECT * from file where is_deleted != 1 and parent_id = 0 "
+    if name is not None:
+        sql += " AND groups = %r" % name
+    sql += " order by sctime desc limit %s" % limit
     all = db.execute(sql)
     return [FileDO.fromDict(item) for item in all]
 

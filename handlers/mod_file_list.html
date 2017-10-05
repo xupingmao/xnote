@@ -2,7 +2,7 @@
 <div>
     {% for i, file in enumerate(files) %}
         <div class="note">
-            <div class="note-visited-cnt">访问指数:{{file.visited_cnt}}</div>
+            <div class="note-visited-cnt">访问指数:{{file.visited_cnt}} <a href="/file/archive?id={{file.id}}">移动</a></div>
             <div class="note-name">
                 <a href="{{file.url}}">{{file.name}}</a>
                 
