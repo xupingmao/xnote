@@ -1,21 +1,23 @@
-from handlers.base import *
+# encoding=utf-8
+import web
+import xtemplate
+import xutils
+
 from . import dao
 
-class handler(BaseHandler):
+class handler:
 
-    def execute(self):
-        id = int(self.get_argument("id"))
-        name = self.get_argument("name", "")
-        parent_id = self.get_argument("parent_id", -1)
-
+    def GET(self):
+        id = int(xutils.get_argument("id"))
+        name = xutils.get_argument("name", "")
+        parent_id = xutils.get_argument("parent_id", "")
         record = dao.get_by_id(id)
-
-        if parent_id > 0:
-            dao.update(where = "id=%s" % id, parent_id = parent_id)
-            raise web.seeother("/file/edit?id=%s" % id)
+        if parent_id != "":
+            dao.update(where=dict(id=id), parent_id = parent_id)
+            raise web.seeother("/file/view?id=%s" % id)
 
         if name != "" and name != None:
-            filelist = dao.search_name(name)
+            filelist = dao.search_name(name, file_type="group")
             newlist = []
             for f in filelist:
                 if f.id == id:
@@ -25,4 +27,4 @@ class handler(BaseHandler):
             filelist = newlist
         else:
             filelist = []
-        self.render("file/archive.html", record = record, filelist = filelist)
+        return xtemplate.render("file/archive.html", record = record, filelist = filelist)

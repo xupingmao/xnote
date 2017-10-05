@@ -1,11 +1,19 @@
-{% extends base.html %}
-
-{% body %}
-
-<!-- 最近30天 -->
-
-<!-- 最近6个月 -->
-
-<!-- 所有年份 -->
-
-{% end %}
+{% init files = [] %}
+<div class="col-md-12">
+    <table class="col-md-12 table">
+    {% for i, item in enumerate(files) %}
+        <tr>
+            <td>
+                {% if item.type == "group" %}
+                    <img src="/static/image/folder.gif"/>
+                {% else %}
+                    <img src="/static/image/note.gif"/>
+                {% end %}
+                <a href="/file/view?id={{item.id}}">{{item.name}}</a>
+                <div style="font-size: 12px;"> {{item.smtime}} </div>
+            </td>
+            <td><a href="/file/archive?id={{item.id}}">褰掓。</a></td>
+        </tr>
+    {% end %}
+    </table>
+</div>

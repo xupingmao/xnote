@@ -644,10 +644,8 @@ class _Expression(_Node):
                 default_value = values[1]
             else:
                 default_value = "''"
-            writer.write_line("try:", self.line)
-            writer.write_line(" _tt_tmp=%s" % name, self.line)
-            writer.write_line("except:", self.line)
-            writer.write_line(" _tt_tmp=%s" % default_value, self.line)
+            writer.write_line("try:_tt_tmp=%s" % name, self.line)
+            writer.write_line("except:_tt_tmp=%s" % default_value, self.line)
             # writer.write_line("_tt_tmp = get_value(globals(), %r)" % namelist, self.line)
             # writer.write_line("if %r in globals():" % name, self.line)
             # writer.write_line(" _tt_tmp = %s" % name, self.line)

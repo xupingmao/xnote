@@ -191,9 +191,8 @@ def get_file_db():
 def get_category(limit = None):
     db = get_db()
     if limit is None:
-        sql = "select * from file where is_deleted != 1 and parent_id = 0 and related not like '%%hide%%' order by sctime desc"
-    else:
-        sql = "select * from file where is_deleted != 1 and parent_id = 0 and related not like '%%hide%%' order by name desc limit %s" % limit
+        limit = 200
+    sql = "SELECT * from file where is_deleted != 1 and parent_id = 0 order by name desc limit %s" % limit
     all = db.execute(sql)
     return [FileDO.fromDict(item) for item in all]
 
@@ -225,15 +224,19 @@ def get_vpath(record):
     pathlist.reverse()
     return pathlist
 
-def search_name(words, limit=None):
+def search_name(words, limit=None, file_type=None):
     if not isinstance(words, list):
         words = [words]
     like_list = []
     for word in words:
         like_list.append('name like %s ' % repr('%' + word.upper() + '%'))
-    sql = "select * from file where %s and is_deleted != 1 order by satime desc limit 1000" % (" AND ".join(like_list))
-    if limit:
-        sql += " limit {}".format(limit)
+    sql = "SELECT * from file WHERE %s and is_deleted != 1 " % (" AND ".join(like_list))
+    if file_type != None:
+        sql += " AND type = %r" % file_type
+    sql += " ORDER BY satime DESC"
+    if not limit:
+        limit = 200
+    sql += " LIMIT {}".format(limit)
     db = FileDB()
     all = db.execute(sql)
     return [FileDO.fromDict(item) for item in all]

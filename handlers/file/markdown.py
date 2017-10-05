@@ -25,6 +25,16 @@ def try_decode(bytes):
 
 class handler(BaseHandler):
 
+    def get_pathlist(self, db, file, pathlist):
+        if file is None:
+            return pathlist
+        pathlist.insert(0, file)
+        if file.parent_id == 0:
+            return pathlist
+        else:
+            file = db.select_one(where=dict(id=file.parent_id))
+            return self.get_pathlist(db, file, pathlist)
+
     def execute(self):
         id   = xutils.get_argument("id", "")
         name = xutils.get_argument("name", "")
@@ -41,9 +51,10 @@ class handler(BaseHandler):
         if not file.is_public and xauth.get_current_user() is None:
             return xauth.redirect_to_login()
 
-        dao.visit_by_id(id)
-        download_csv = file.related != None and "CODE-CSV" in file.related
+        db = xtables.get_file_table()
+        pathlist = self.get_pathlist(db, file, [])
 
+        # dao.visit_by_id(id)
         user_name = xauth.get_current_name()
         can_edit = (file.creator == user_name) or (user_name == "admin")
 
@@ -51,13 +62,17 @@ class handler(BaseHandler):
         if role != "admin" and file.groups != '*' and file.groups != role:
             raise web.seeother("/unauthorized")
 
+        files = []
+        if file.type == "group":
+            files = db.select(where=dict(parent_id=file.id))
+
         self.render("file/view.html",
             file=file, 
             content = file.get_content(), 
             date2str=date2str,
             can_edit = can_edit,
-            download_csv = download_csv, 
-            children = [])
+            pathlist = pathlist,
+            files = files)
 
     def download_request(self):
         id = self.get_argument("id")

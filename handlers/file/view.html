@@ -55,24 +55,45 @@ img {
     margin-top: -50px;
 }
 
+.pathlist {
+    background-color: lightgreen;
+    padding:3px;
+}
+
+table td {
+    border: none;
+}
+
 </style>
 {% end %}
 
 
 {% block body %}
     {% init file_type = "md" %}
-    {% set file_type = file.type %}
+    {% init pathlist = [] %}
+    {% init file = None %}
+
+    {% if file != None %}
+        {% set globals()['file_type'] = file.type %}
+    {% end %}
 
     {% include "search.html" %}
     
+    <div class="col-md-12 pathlist">
+        <a href="/file/group">Home</a> /
+        {% for item in pathlist %}
+            <a href="/file/view?id={{item.id}}">{{ item.name }}</a> / 
+        {% end %}
+    </div>
+
     {% comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 %}
 
     {% if file_type == "md" or file_type == "text" %}
         {% include "file/markdown.html" %}
     {% elif file_type == "table" %}
         {% include "file/table.html" %}
-    {% elif file_type == "folder" %}
-        {% include "file/folder.html" %}
+    {% elif file_type == "group" %}
+        {% include "file/group.html" %}
     {% else %}
         {% include "file/post.html" %}
     {% end %}

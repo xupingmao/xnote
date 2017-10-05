@@ -497,7 +497,7 @@ def get_argument(key, default_value=None, type = None, strip=False):
         _input = web.input()
         web.ctx["_xnote.input"] = _input
     value = _input.get(key)
-    if value is None:
+    if value is None or value == "":
         _input[key] = default_value
         return default_value
     if type != None:
