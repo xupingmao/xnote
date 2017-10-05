@@ -187,6 +187,16 @@ class RowDesc:
 def get_file_db():
     return db.SqliteDB(db=config.DB_PATH)
 
+def get_pathlist(db, file):
+    pathlist = []
+    # TODO LIMIT
+    while file is not None:
+        pathlist.insert(0, file)
+        if file.parent_id == 0:
+            break
+        else:
+            file = db.select_one(where=dict(id=file.parent_id))
+    return pathlist
 
 def get_category(name = None, limit = None):
     db = get_db()

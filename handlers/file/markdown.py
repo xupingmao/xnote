@@ -25,17 +25,6 @@ def try_decode(bytes):
 
 class handler(BaseHandler):
 
-    def get_pathlist(self, db, file, pathlist):
-        # TODO LIMIT
-        if file is None:
-            return pathlist
-        pathlist.insert(0, file)
-        if file.parent_id == 0:
-            return pathlist
-        else:
-            file = db.select_one(where=dict(id=file.parent_id))
-            return self.get_pathlist(db, file, pathlist)
-
     def execute(self):
         id   = xutils.get_argument("id", "")
         name = xutils.get_argument("name", "")
@@ -53,9 +42,9 @@ class handler(BaseHandler):
             return xauth.redirect_to_login()
 
         db = xtables.get_file_table()
-        pathlist = self.get_pathlist(db, file, [])
+        pathlist = dao.get_pathlist(db, file)
 
-        # dao.visit_by_id(id)
+        dao.visit_by_id(id)
         user_name = xauth.get_current_name()
         can_edit = (file.creator == user_name) or (user_name == "admin")
 
@@ -65,7 +54,7 @@ class handler(BaseHandler):
 
         files = []
         if file.type == "group":
-            files = db.select(where=dict(parent_id=file.id), order="priority DESC")
+            files = db.select(where=dict(parent_id=file.id), order="priority DESC, sctime DESC")
 
         self.render("file/view.html",
             file=file, 

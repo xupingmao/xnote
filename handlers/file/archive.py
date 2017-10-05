@@ -2,7 +2,7 @@
 import web
 import xtemplate
 import xutils
-
+import xtables
 from . import dao
 
 class handler:
@@ -12,9 +12,10 @@ class handler:
         name = xutils.get_argument("name", "")
         parent_id = xutils.get_argument("parent_id", "")
         record = dao.get_by_id(id)
+        pathlist = dao.get_pathlist(xtables.get_file_table(), record)
         if parent_id != "":
             dao.update(where=dict(id=id), parent_id = parent_id)
-            raise web.seeother("/file/view?id=%s" % id)
+            raise web.seeother("/file/view?id=%s" % parent_id)
 
         if name != "" and name != None:
             filelist = dao.search_name(name, file_type="group")
@@ -27,7 +28,7 @@ class handler:
             filelist = newlist
         else:
             filelist = []
-        return xtemplate.render("file/archive.html", record = record, filelist = filelist)
+        return xtemplate.render("file/archive.html", record = record, pathlist=pathlist, filelist = filelist)
 
 class ChangeType:
     
