@@ -5,13 +5,18 @@
 <div>
 
 <div>
-<h2>{{record.name}}</h2>
+    <h3>资料整理 <<{{record.name}}>></h3>
+    <p>修改类型
+        <a class="btn" href="/file/archive/change_type?id={{id}}&type=group">转为分组</a>
+        <a class="btn" href="/file/archive/change_type?id={{id}}&type=md">转为MD</a>
+    </p>
 </div>
 <form>
     <div>
-    <input name="id" class="hide" value="{{id}}"/>
-    <input name="name" value="{{name}}"/>
-    <button>搜索</button>
+        移动到
+        <input name="id" class="hide" value="{{id}}"/>
+        <input name="name" value="{{name}}"/>
+        <button>搜索</button>
     </div>
 </form>
 </div>

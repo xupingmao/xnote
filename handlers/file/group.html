@@ -11,9 +11,9 @@
                 {% end %}
                 <a href="/file/view?id={{item.id}}">{{item.name}}</a>
                 {% if item.type == "group" %}/{% end %}
-                <div style="font-size: 12px;"><span class="tag">{{item.groups}}</span>&nbsp;{{item.smtime}} </div>
+                <div style="font-size: 12px;"><span class="tag">{{item.groups}}</span>&nbsp;{{item.sctime}} </div>
             </td>
-            <td><a href="/file/archive?id={{item.id}}">移动</a></td>
+            <td><a href="/file/archive?id={{item.id}}">整理</a></td>
         </tr>
     {% end %}
     </table>

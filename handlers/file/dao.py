@@ -195,7 +195,7 @@ def get_category(name = None, limit = None):
     sql = "SELECT * from file where is_deleted != 1 and parent_id = 0 "
     if name is not None:
         sql += " AND groups = %r" % name
-    sql += " ORDER BY sctime DESC, priority DESC limit %s" % limit
+    sql += " ORDER BY priority DESC, sctime DESC limit %s" % limit
     all = db.execute(sql)
     return [FileDO.fromDict(item) for item in all]
 

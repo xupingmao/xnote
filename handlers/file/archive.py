@@ -28,3 +28,17 @@ class handler:
         else:
             filelist = []
         return xtemplate.render("file/archive.html", record = record, filelist = filelist)
+
+class ChangeType:
+    
+    def GET(self):
+        type = xutils.get_argument("type")
+        id = xutils.get_argument("id")
+        dao.update(where=dict(id=id), type=type)
+        raise web.seeother("/file/view?id=%s"%id)
+        
+
+xurls = (
+    r"/file/archive", handler,
+    r"/file/archive/change_type", ChangeType
+)
