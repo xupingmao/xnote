@@ -202,7 +202,7 @@ def get_category(name = None, limit = None):
     db = get_db()
     if limit is None:
         limit = 200
-    sql = "SELECT * from file where is_deleted != 1 and parent_id = 0 "
+    sql = "SELECT * from file where is_deleted != 1 and parent_id = 0 AND type = 'group' "
     if name is not None:
         sql += " AND groups = %r" % name
     sql += " ORDER BY priority DESC, sctime DESC limit %s" % limit

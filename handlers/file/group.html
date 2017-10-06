@@ -1,6 +1,18 @@
 {% init files = [] %}
+{% init pseudo_groups = False %}
 <div class="col-md-12">
     <table class="col-md-12 table">
+
+    {% if pseudo_groups %}
+        <tr>
+            <td>
+                <img src="/static/image/folder.gif">
+                <a href="/file/group/ungrouped">未分类</a> /
+            </td>
+            <td></td>
+        </tr>
+    {% end %}
+
     {% for i, item in enumerate(files) %}
         <tr>
             <td>

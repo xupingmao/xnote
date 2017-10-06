@@ -237,6 +237,7 @@ def db_execute(path, sql, args = None):
     cursorobj = db.cursor()
     kv_result = []
     try:
+        print(sql)
         if args is None:
             cursorobj.execute(sql)
         else:
@@ -245,7 +246,7 @@ def db_execute(path, sql, args = None):
         # result.rowcount
         db.commit()
         for single in result:
-            resultMap = {}
+            resultMap = Storage()
             for i, desc in enumerate(cursorobj.description):
                 name = desc[0]
                 resultMap[name] = single[i]
