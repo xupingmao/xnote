@@ -1,6 +1,7 @@
 # encoding=utf-8
 # Created by xupingmao on 2016/12
 import profile
+import math
 
 from handlers.base import *
 import xauth
@@ -28,6 +29,7 @@ class handler(BaseHandler):
     def execute(self):
         id   = xutils.get_argument("id", "")
         name = xutils.get_argument("name", "")
+        page = xutils.get_argument("page", 1, type=int)
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
@@ -53,8 +55,13 @@ class handler(BaseHandler):
             raise web.seeother("/unauthorized")
 
         files = []
+        amount = 0
         if file.type == "group":
-            files = db.select(where=dict(parent_id=file.id), order="priority DESC, sctime DESC")
+            amount = db.count(where="parent_id=%s" % file.id)
+            files = db.select(where=dict(parent_id=file.id), 
+                order="priority DESC, sctime DESC", 
+                limit=10, 
+                offset=(page-1)*10)
 
         self.render("file/view.html",
             file=file, 
@@ -62,6 +69,9 @@ class handler(BaseHandler):
             date2str=date2str,
             can_edit = can_edit,
             pathlist = pathlist,
+            page_max = math.ceil(amount/10),
+            page = page,
+            page_url = "/file/view?id=%s&page=" % id,
             files = files)
 
     def download_request(self):

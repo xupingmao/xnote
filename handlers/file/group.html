@@ -31,6 +31,9 @@
     </table>
 </div>
 
+{% if "page" in globals() %}
+    {% include mod_pagenation.html %}
+{% end %}
 <script type="text/javascript">
 function rename(id) {
     var newName = prompt("新名称");

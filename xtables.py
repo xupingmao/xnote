@@ -244,9 +244,9 @@ class DBWrapper:
     def delete(self, *args, **kw):
         return self.db.delete(self.tablename, *args, **kw)
 
-    def execute(self, sql):
+    def execute(self, sql, args=None):
         # 不建议使用，尽量使用query
-        return xutils.db_execute(self.dbpath, sql)
+        return xutils.db_execute(self.dbpath, sql, args)
 
 def get_file_table():
     return DBWrapper(config.DB_PATH, "file")
