@@ -214,11 +214,18 @@ def init_table_record():
 
 class DBWrapper:
     """ 基于web.db的装饰器 """
+
+    _pool = dict()
+
     def __init__(self, dbpath, tablename):
         self.tablename = tablename
         self.dbpath = dbpath
-        # SqliteDB 使用了threadlocal来实现，线程池模式下不用释放
-        self.db = db.SqliteDB(db=dbpath)
+        # SqliteDB 使用了threadlocal来实现，是线程安全的，使用全局单实例即可
+        _db = DBWrapper._pool.get(dbpath)
+        if _db is None:
+            _db = db.SqliteDB(db=dbpath)
+            DBWrapper._pool[dbpath] = _db
+        self.db = _db
 
     def insert(self, *args, **kw):
         return self.db.insert(self.tablename, *args, **kw)

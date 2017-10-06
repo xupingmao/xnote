@@ -208,7 +208,7 @@ def get_category(name = None, limit = None):
     if name is not None:
         sql += " AND groups = %r" % name
     sql += " ORDER BY priority DESC, sctime DESC limit %s" % limit
-    all = db.execute(sql)
+    all = db.query(sql)
     return [FileDO.fromDict(item) for item in all]
 
 def get_children_by_id(id):
