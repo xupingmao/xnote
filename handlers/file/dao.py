@@ -62,6 +62,8 @@ class FileDO(dict):
             raise AttributeError(k)
     
     def addRelatedName(self, name):
+        if name is None:
+            return
         name = name.upper()
         if self.related == '':
             self.related = ',%s,' % name

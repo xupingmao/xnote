@@ -226,6 +226,8 @@ class RenameHandler:
     def POST(self):
         id = xutils.get_argument("id")
         name = xutils.get_argument("name")
+        if name == "" or name is None:
+            return dict(code="fail", data="名称为空")
         db = xtables.get_file_table()
         file = db.select_one(where=dict(name=name))
         if file is not None:

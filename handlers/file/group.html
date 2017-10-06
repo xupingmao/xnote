@@ -19,7 +19,6 @@
                 {% if item.type == "group" %}
                     <img src="/static/image/folder.gif"/>
                 {% else %}
-                    <img src="/static/image/note.gif"/>
                 {% end %}
                 <a href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
                 {% if item.type == "group" %}/{% end %}
@@ -35,7 +34,8 @@
 <script type="text/javascript">
 function rename(id) {
     var newName = prompt("新名称");
-    if (newName != "") {
+    console.log(newName);
+    if (newName != "" && newName != null) {
         $.post("/file/rename", {id:id, name:newName}, function (resp) {
             var code = resp.code;
             if (code != "success") {
