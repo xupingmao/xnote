@@ -220,8 +220,22 @@ class Downvote:
         db.update(priority=0, where=dict(id=id))
         raise web.seeother("/file/view?id=%s" % id)
 
+class RenameHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        id = xutils.get_argument("id")
+        name = xutils.get_argument("name")
+        db = xtables.get_file_table()
+        file = db.select_one(where=dict(name=name))
+        if file is not None:
+            return dict(code="fail", data="%r已存在" % name)
+        db.update(where=dict(id=id), name=name)
+        return dict(code="success")
+
 xurls = (
     r"/file/edit", handler, 
+    r"/file/rename", RenameHandler,
     r"/file/markdown", handler,
     r"/file/view", handler,
     r"/file/markdown/edit", MarkdownEdit,

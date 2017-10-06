@@ -21,8 +21,9 @@
                 {% else %}
                     <img src="/static/image/note.gif"/>
                 {% end %}
-                <a href="/file/view?id={{item.id}}">{{item.name}}</a>
+                <a href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
                 {% if item.type == "group" %}/{% end %}
+                <a class="hover" href="javascript:rename({{item.id}})">重命名</a>
                 <div style="font-size: 12px;"><span class="tag">{{item.groups}}</span>&nbsp;{{item.sctime}} </div>
             </td>
             <td><a href="/file/archive?id={{item.id}}">整理</a></td>
@@ -30,3 +31,19 @@
     {% end %}
     </table>
 </div>
+
+<script type="text/javascript">
+function rename(id) {
+    var newName = prompt("新名称");
+    if (newName != "") {
+        $.post("/file/rename", {id:id, name:newName}, function (resp) {
+            var code = resp.code;
+            if (code != "success") {
+                alert(resp.data);
+            } else {
+                $("#file-"+id).text(newName);
+            }
+        })
+    }
+}
+</script>

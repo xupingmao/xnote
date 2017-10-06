@@ -28,7 +28,7 @@ class handler:
                     newlist.append(f)
             filelist = newlist
         else:
-            filelist = db.select(where=dict(type="group",is_deleted=0))
+            filelist = db.select(where=dict(type="group",is_deleted=0), limit=200, order="name DESC")
         return xtemplate.render("file/archive.html", record = record, pathlist=pathlist, filelist = filelist)
 
 class ChangeType:
