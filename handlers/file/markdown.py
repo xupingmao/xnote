@@ -26,6 +26,7 @@ def try_decode(bytes):
 
 class handler(BaseHandler):
 
+    @xutils.profile()
     def execute(self):
         id   = xutils.get_argument("id", "")
         name = xutils.get_argument("name", "")

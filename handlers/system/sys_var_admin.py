@@ -35,5 +35,4 @@ class handler:
 
         # 先暴力解决
         xmanager.reload()
-        xtables.init()
         raise web.seeother("/system/sys_var_admin")

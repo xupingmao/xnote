@@ -18,6 +18,7 @@ import platform
 import re
 import gc
 import shutil
+import profile as pf
 import six
 import web
 import xconfig
@@ -81,6 +82,18 @@ from web.utils import safestr, safeunicode
 
 #################################################################
 
+def profile():
+    def run(func):
+        def run2(*args, **kw):
+            if xconfig.OPEN_PROFILE:
+                vars = locals()
+                vars["_f"] = func
+                vars["_args"] = args
+                vars["_kw"] = kw
+                return pf.runctx("_f(*_args, **_kw)", globals(), vars)
+            return func(*args, **kw)
+        return run2
+    return run
 
 def print_stacktrace():
     """打印系统异常堆栈"""
