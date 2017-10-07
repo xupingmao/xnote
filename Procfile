@@ -1,1 +1,1 @@
-web: python app.py --data /data --debug no
+web: python app.py --data /data --debug no > /data/stdout.log
