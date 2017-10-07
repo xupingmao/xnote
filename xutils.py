@@ -90,7 +90,7 @@ def profile():
                 vars["_f"] = func
                 vars["_args"] = args
                 vars["_kw"] = kw
-                return pf.runctx("_f(*_args, **_kw)", globals(), vars)
+                return pf.runctx("_f(*_args, **_kw)", globals(), vars, sort="time")
             return func(*args, **kw)
         return run2
     return run
