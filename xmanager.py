@@ -40,7 +40,7 @@ class MyStdout:
         self.stdout = stdout
         self.result_dict = dict()
         self.outfile = web.debug
-        self.logfile = open("./stdout.log", "w")
+        # self.logfile = open("./stdout.log", "w")
 
     def write(self, value):
         result = self.result_dict.get(current_thread())
@@ -48,7 +48,7 @@ class MyStdout:
             result.append(value)
         # return self.stdout.write(value)
         print(value, file=self.outfile, end="")
-        print(value, file=self.logfile, end="")
+        # print(value, file=self.logfile, end="")
 
     def writelines(self, lines):
         return self.stdout.writelines(lines)
