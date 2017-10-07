@@ -2,12 +2,14 @@
 # Created by xupingmao on 2016/12
 import profile
 import math
+import re
 
 from handlers.base import *
 import xauth
 import xutils
 import xconfig
 import xtables
+import xtemplate
 from web import HTTPError
 from . import dao
 
@@ -24,10 +26,10 @@ def try_decode(bytes):
     except:
         return bytes.decode("gbk")
 
-class handler(BaseHandler):
+class handler:
 
     # @xutils.profile()
-    def execute(self):
+    def GET(self):
         id   = xutils.get_argument("id", "")
         name = xutils.get_argument("name", "")
         page = xutils.get_argument("page", 1, type=int)
@@ -63,8 +65,23 @@ class handler(BaseHandler):
                 order="priority DESC, sctime DESC", 
                 limit=10, 
                 offset=(page-1)*10)
+        elif file.type == "post":
+            file.content = xutils.html_escape(file.content, quote=False);
+            # \xad (Soft hyphen), 用来处理断句的
+            file.content = file.content.replace('\xad', '\n')
+            # file.content = file.content.replace(" ", "&nbsp;")
+            file.content = re.sub(r"https?://[^\s]+", '<a href="\\g<0>">\\g<0></a>', file.content)
+            file.content = file.content.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
+            file.content = file.content.replace("\n", "<br/>")
+            # 处理图片
+            file.content = file.content.replace("[img", "<p style=\"text-align:center;\"><img")
+            file.content = file.content.replace("img]", "></p>")
+            # 处理空格
+            file.content = file.content.replace(" ", "&nbsp;")
+            # 允许安全的HTML标签
+            file.content = re.sub(r"\<(a|img|p)&nbsp;", "<\\g<1> ", file.content)
 
-        self.render("file/view.html",
+        return xtemplate.render("file/view.html",
             file=file, 
             content = file.get_content(), 
             date2str=date2str,

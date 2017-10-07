@@ -96,7 +96,7 @@ class PostEdit:
         rowcount = dao.update(where=dict(id=id, version=version), 
             groups = groups, type="post", size=len(content), content=content, name=name)
         if rowcount > 0:
-            raise web.seeother("/file/post?id={}".format(id))
+            raise web.seeother("/file/view?id={}".format(id))
         else:
             cur_version = file.version
             file.content = content

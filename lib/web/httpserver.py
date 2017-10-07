@@ -315,7 +315,7 @@ class StaticMiddleware:
 class LogMiddleware:
     """WSGI middleware for logging the status."""
 
-    PROFILE_SET = set(["/file/view"])
+    PROFILE_SET = set()
 
     def __init__(self, app):
         self.app = app
