@@ -48,8 +48,6 @@ class handler:
 
         db = xtables.get_file_table()
         pathlist = dao.get_pathlist(db, file)
-
-        dao.visit_by_id(id)
         user_name = xauth.get_current_name()
         can_edit = (file.creator == user_name) or (user_name == "admin")
 
@@ -80,7 +78,9 @@ class handler:
             file.content = file.content.replace(" ", "&nbsp;")
             # 允许安全的HTML标签
             file.content = re.sub(r"\<(a|img|p)&nbsp;", "<\\g<1> ", file.content)
-
+            dao.visit_by_id(id)
+        else:
+            dao.visit_by_id(id)
         return xtemplate.render("file/view.html",
             file=file, 
             content = file.get_content(), 

@@ -32,5 +32,6 @@ class handler:
         save_ip(web.ctx.env.get("HTTP_X_FORWARDED_FOR"))
         save_ip(web.ctx.env.get("REMOTE_ADDR"))
         
+        web.header("Cache-Control", "max-age=3600")
         web.header("Content-Type", "application/javascript")
         return "/** stats **/"
