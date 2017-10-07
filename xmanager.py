@@ -38,12 +38,14 @@ class MyStdout:
     def __init__(self, stdout):
         self.stdout = stdout
         self.result_dict = dict()
+        self.outfile = web.debug
 
     def write(self, value):
         result = self.result_dict.get(current_thread())
         if result != None:
             result.append(value)
-        return self.stdout.write(value)
+        # return self.stdout.write(value)
+        print(value, file=self.outfile, end="")
 
     def writelines(self, lines):
         return self.stdout.writelines(lines)

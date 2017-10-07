@@ -5,6 +5,7 @@ __pycache__
 *.zip
 *.csv
 *.class
+*.log
 .DS_Store
 /static/exe
 /static/logs
