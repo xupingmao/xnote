@@ -86,11 +86,12 @@ def profile():
     def run(func):
         def run2(*args, **kw):
             if xconfig.OPEN_PROFILE:
-                vars = locals()
+                vars = dict()
                 vars["_f"] = func
                 vars["_args"] = args
                 vars["_kw"] = kw
-                return pf.runctx("_f(*_args, **_kw)", globals(), vars, sort="time")
+                pf.runctx("r=_f(*_args, **_kw)", globals(), vars, sort="time")
+                return vars["r"]
             return func(*args, **kw)
         return run2
     return run

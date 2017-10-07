@@ -5,6 +5,7 @@ import sys, os
 import urllib
 import posixpath
 import time
+import profile
 
 from . import webapi as web
 from . import net
@@ -313,6 +314,9 @@ class StaticMiddleware:
     
 class LogMiddleware:
     """WSGI middleware for logging the status."""
+
+    PROFILE_SET = set(["/file/view"])
+
     def __init__(self, app):
         self.app = app
         self.format = '%s - - [%s] "%s %s %s" - %s %s ms'
@@ -326,14 +330,22 @@ class LogMiddleware:
         # take log_date_time_string method from BaseHTTPRequestHandler
         self.log_date_time_string = BaseHTTPRequestHandler(FakeSocket(), None, None).log_date_time_string
         
-    def __call__(self, environ, start_response):
+    def invoke_app(self, environ, start_response):
         start_time = time.time()
         def xstart_response(status, response_headers, *args):
             out = start_response(status, response_headers, *args)
             self.log(status, environ, time.time() - start_time)
             return out
-
         return self.app(environ, xstart_response)
+
+    def __call__(self, environ, start_response):
+        path = environ.get('PATH_INFO', '_')
+        if path in LogMiddleware.PROFILE_SET:
+            vars = dict(f=self.invoke_app, environ=environ, start_response=start_response)
+            profile.runctx("r=f(environ, start_response)", globals(), vars, sort="time")
+            return vars["r"]
+        else:
+            return self.invoke_app(environ, start_response)
              
     def log(self, status, environ, cost_time):
         outfile = environ.get('wsgi.errors', web.debug)

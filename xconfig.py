@@ -38,6 +38,7 @@ CONFIG_DIR  = os.path.join(DATA_DIR, "config")
 IS_TEST  = False
 # 开启性能分析
 OPEN_PROFILE = False
+PROFILE_PATH_SET = set(["/file/view"])
 # 静音停止时间
 MUTE_END_TIME = None
 # 打开浏览器

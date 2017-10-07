@@ -10,6 +10,7 @@ import traceback
 import time
 import copy
 import json
+import profile
 import inspect
 import six
 
@@ -96,13 +97,11 @@ def wrapped_handler(handler_clz):
             self.target = handler_clz()
 
         def GET(self, *args):
-            # if xconfig.OPEN_PROFILE:
-            #     def profile_wrapper(*args):
-            #         self.response = wrapper_result(self.target.GET(*args))
-            #     profile.runctx("profile_wrapper(*args)", globals(), locals())
-            #     return self.response
-            # else:
-            #     return wrapper_result(self.target.GET(*args))
+            # path_info = web.ctx.path
+            # if path_info in xconfig.PROFILE_PATH_SET:
+            #     vars = dict(f = self.target.GET, args=args)
+            #     profile.runctx("r=f(*args)", globals(), vars, sort="time")
+            #     return vars["r"]
             return wrap(self.target.GET(*args))
             
 
