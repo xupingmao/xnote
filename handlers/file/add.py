@@ -75,7 +75,11 @@ class RemoveHandler:
         file = db.select_one(where=dict(id=int(id)))
         if file is None:
             return dict(code="fail", message="文件不存在")
-        db.delete(where=dict(id=int(id)))
+        if file.type == "group":
+            children_count = db.count(where="parent_id=%s AND is_deleted=0"%id)
+            if children_count > 0:
+                return dict(code="fail", message="分组不为空")
+        db.update(is_deleted=1, where=dict(id=int(id)))
         return dict(code="success")
 
     def remove_by_name(self, name):
@@ -83,7 +87,7 @@ class RemoveHandler:
         file = db.select_one(where=dict(name=name))
         if file is None:
             return dict(code="success")
-        db.delete(where=dict(id=file.id))
+        db.update(is_deleted=1, where=dict(id=file.id))
         return dict(code="success")
 
     # 物理删除

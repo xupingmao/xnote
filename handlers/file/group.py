@@ -7,6 +7,13 @@ import xtables
 import xauth
 
 from . import dao
+from xutils import Storage
+
+class PathNode:
+
+    def __init__(self, name):
+        self.name = name
+        self.id = 0
 
 class handler:
 
@@ -34,14 +41,33 @@ class Ungrouped:
         amount = db.execute(count_sql)[0].amount
 
         return xtemplate.render("file/view.html",
+            pathlist=[PathNode("未分类")],
             file_type="group",
             files = files,
             page = page,
             page_max = math.ceil(amount / 10),
             page_url="/file/group/ungrouped?page=")
 
+class RemovedHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        page = xutils.get_argument("page", 1, type=int)
+        db = xtables.get_file_table()
+        files = db.select(where="is_deleted=1", order="sctime DESC", offset=(page-1)*10, limit=10)
+        amount = db.count(where="is_deleted=1")
+
+        return xtemplate.render("file/view.html",
+            pathlist=[PathNode("回收站")],
+            file_type="group",
+            files = files,
+            page = page,
+            page_max = math.ceil(amount / 10),
+            page_url="/file/group/removed?page=")
 
 xurls = (
     r"/file/group", handler,
     r"/file/group/ungrouped", Ungrouped,
+    r"/file/group/removed", RemovedHandler
 )
+

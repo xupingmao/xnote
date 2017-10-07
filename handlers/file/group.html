@@ -11,6 +11,13 @@
             </td>
             <td></td>
         </tr>
+        <tr>
+            <td>
+                <img src="/static/image/folder.gif">
+                <a href="/file/group/removed">回收站</a> /
+            </td>
+            <td></td>
+        </tr>
     {% end %}
 
     {% for i, item in enumerate(files) %}
@@ -23,6 +30,9 @@
                 <a href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
                 {% if item.type == "group" %}/{% end %}
                 <a class="hover" href="javascript:rename({{item.id}})">重命名</a>
+                {% if _is_admin %}
+                    <a class="hover" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>
+                {% end %}
                 <div style="font-size: 12px;"><span class="tag">{{item.groups}}</span>&nbsp;{{item.sctime}} </div>
             </td>
             <td><a href="/file/archive?id={{item.id}}">整理</a></td>
@@ -42,9 +52,23 @@ function rename(id) {
         $.post("/file/rename", {id:id, name:newName}, function (resp) {
             var code = resp.code;
             if (code != "success") {
-                alert(resp.data);
+                alert(resp.message);
             } else {
                 $("#file-"+id).text(newName);
+            }
+        })
+    }
+}
+
+function remove(id, name) {
+    var confirmed = confirm("确定删除'" + name + "'?");
+    if (confirmed) {
+        $.post("/file/remove", {id:id}, function (resp) {
+            var code = resp.code;
+            if (code != "success") {
+                alert(resp.message);
+            } else {
+                window.location.reload();
             }
         })
     }

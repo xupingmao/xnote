@@ -58,8 +58,8 @@ class handler:
         files = []
         amount = 0
         if file.type == "group":
-            amount = db.count(where="parent_id=%s" % file.id)
-            files = db.select(where=dict(parent_id=file.id), 
+            amount = db.count(where="parent_id=%s AND is_deleted=0" % file.id)
+            files = db.select(where=dict(parent_id=file.id, is_deleted=0), 
                 order="priority DESC, sctime DESC", 
                 limit=10, 
                 offset=(page-1)*10)
@@ -255,11 +255,11 @@ class RenameHandler:
         id = xutils.get_argument("id")
         name = xutils.get_argument("name")
         if name == "" or name is None:
-            return dict(code="fail", data="名称为空")
+            return dict(code="fail", message="名称为空")
         db = xtables.get_file_table()
         file = db.select_one(where=dict(name=name))
         if file is not None:
-            return dict(code="fail", data="%r已存在" % name)
+            return dict(code="fail", message="%r已存在" % name)
         db.update(where=dict(id=id), name=name)
         return dict(code="success")
 
