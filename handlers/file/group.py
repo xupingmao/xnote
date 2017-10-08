@@ -48,6 +48,28 @@ class Ungrouped:
             page_max = math.ceil(amount / 10),
             page_url="/file/group/ungrouped?page=")
 
+class MoveHandler:
+    
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id", "", type=int)
+        parent_id = xutils.get_argument("parent_id", "", type=int)
+        db = xtables.get_file_table()
+        db.update(parent_id=parent_id, where=dict(id=id))
+        return dict(code="success")
+
+    def POST(self):
+        return self.GET()
+        
+class ListHandler:
+
+    def GET(self):
+        id = xutils.get_argument("id", "", type=int)
+        sql = "SELECT id, name FROM file WHERE type = 'group' AND is_deleted = 0 LIMIT 200"
+        data = xtables.get_file_table().query(sql)
+        web.header("Content-Type", "text/html; charset=utf-8")
+        return xtemplate.render("file/group_list.html", id=id, filelist=data)
+
 class RemovedHandler:
 
     @xauth.login_required()
@@ -68,6 +90,8 @@ class RemovedHandler:
 xurls = (
     r"/file/group", handler,
     r"/file/group/ungrouped", Ungrouped,
-    r"/file/group/removed", RemovedHandler
+    r"/file/group/removed", RemovedHandler,
+    r"/file/group/list", ListHandler,
+    r"/file/group/move", MoveHandler,
 )
 

@@ -1,0 +1,7 @@
+<div>
+{% for file in filelist %}
+    <div>
+    <a href="javascript:moveTo({{id}}, {{file.id}})">[移动到这里]</a><span>{{file.name}}</span>
+    </div>
+{% end %}
+</div>
