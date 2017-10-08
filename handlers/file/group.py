@@ -65,7 +65,7 @@ class ListHandler:
 
     def GET(self):
         id = xutils.get_argument("id", "", type=int)
-        sql = "SELECT id, name FROM file WHERE type = 'group' AND is_deleted = 0 LIMIT 200"
+        sql = "SELECT id, name FROM file WHERE type = 'group' AND is_deleted = 0 ORDER BY name DESC LIMIT 200"
         data = xtables.get_file_table().query(sql)
         web.header("Content-Type", "text/html; charset=utf-8")
         return xtemplate.render("file/group_list.html", id=id, filelist=data)

@@ -1,7 +1,5 @@
 <div>
 {% for file in filelist %}
-    <div>
-    <a href="javascript:moveTo({{id}}, {{file.id}})">[移动到这里]</a><span>{{file.name}}</span>
-    </div>
+    <a href="javascript:moveTo({{id}}, {{file.id}})"><span>{{file.name}}</span></a>
 {% end %}
 </div>

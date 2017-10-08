@@ -32,7 +32,7 @@
                 {% if _is_admin %}
                     <a class="hover" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>
                 {% end %}
-                <a class="hover" href="javascript:move({{item.id}})">移动</a>
+                <a class="hover" href="javascript:move({{item.id}})">移动到</a>
                 <div style="font-size: 12px;"><span class="tag">{{item.groups}}</span>&nbsp;{{item.sctime}} </div>
                 <div class="move-div" id="move-{{item.id}}"></div>
             </td>
