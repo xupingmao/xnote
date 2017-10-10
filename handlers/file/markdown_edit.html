@@ -47,6 +47,10 @@
 #editor-area {
     margin-top: 80px;
 }
+#autosaveResult {
+    color: green;
+    font-size: small;
+}
 </style>
 {% end %}
 
@@ -70,6 +74,7 @@
                 </div>
                 <div>
                     <a id="oldName" href="javascript:switchRename()" style="color:blue">{{file.name}}</a>
+                    <span id="autosaveResult" class="hide">自动保存成功</span>
                 </div>
             </h3>
             <span id="result" style="color:green"></span>
@@ -178,7 +183,7 @@
             fixedGutter: true,
         });
         codeMirror.on("update", function (codeMirror, changeObj) {
-            console.log("update");
+            // console.log("update");
             $("#markdown-input").val(codeMirror.doc.getValue());
         })
         window.codeMirror = codeMirror;
@@ -276,25 +281,42 @@
     }
 
     $(document).ready(function () {
-        var old_content = "";
+        var oldContent = "";
+        var lastSaved = $("#markdown-input").val();
+        var fileId = $("#fileId").text();
 
         function repaint() {
             var input = $("#markdown-input").val();
             // not modified
-            if (input == old_content) {
+            if (input == oldContent) {
                 return;
             }
             if ($("#markdown-output-div").hasClass("hide")) {
                 return;
             }
-            old_content = input;
+            oldContent = input;
             var outtext = marked.parse(input);
             $("#markdown-output-div").html(outtext); 
         }
+
+        function autoSave() {
+            var input = $("#markdown-input").val();
+            // not modified
+            if (input == lastSaved) {
+                return;
+            }
+            lastSaved = input;
+            $.post("/file/autosave", {id:fileId, content:input}, function (resp) {
+                console.log(resp);
+                $("#autosaveResult").show().fadeOut(1000);
+            })
+        }
+
         repaint();
         edit();
         
         setInterval(repaint, 200);
+        setInterval(autoSave, 1000*30);
 
         $("#insertCode").on("click", function () {
             var cur = codeMirror.getCursor();
