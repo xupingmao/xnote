@@ -263,6 +263,17 @@ class RenameHandler:
         db.update(where=dict(id=id), name=name)
         return dict(code="success")
 
+class AutosaveHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        content = xutils.get_argument("content", "")
+        id = xutils.get_argument("id", "0", type=int)
+        name = xauth.get_current_name()
+        db = xtables.get_file_table()
+        db.update(content=content, size=len(content), where=dict(id=id, creator=name))
+        return dict(code="success")
+        
 xurls = (
     r"/file/edit", handler, 
     r"/file/rename", RenameHandler,
@@ -270,6 +281,7 @@ xurls = (
     r"/file/view", handler,
     r"/file/markdown/edit", MarkdownEdit,
     r"/file/update", UpdateHandler,
+    r"/file/autosave", AutosaveHandler,
     r"/file/(\d+)/upvote", Upvote,
     r"/file/(\d+)/downvote", Downvote
 )
