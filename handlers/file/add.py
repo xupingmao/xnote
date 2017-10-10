@@ -79,7 +79,8 @@ class RemoveHandler:
             children_count = db.count(where="parent_id=%s AND is_deleted=0"%id)
             if children_count > 0:
                 return dict(code="fail", message="分组不为空")
-        db.update(is_deleted=1, where=dict(id=int(id)))
+        db.update(is_deleted=1, smtime=dateutil.format_time(), where=dict(id=int(id)))
+        db.delete(where="is_deleted=1 AND smtime < $date", vars=dict(date=dateutil.before(days=30,format=True)))
         return dict(code="success")
 
     def remove_by_name(self, name):

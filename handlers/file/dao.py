@@ -193,6 +193,7 @@ def get_pathlist(db, file):
     pathlist = []
     # TODO LIMIT
     while file is not None:
+        file.url = "/file/view?id=%s" % file.id
         pathlist.insert(0, file)
         if file.parent_id == 0:
             break

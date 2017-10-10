@@ -11,9 +11,9 @@ from xutils import Storage
 
 class PathNode:
 
-    def __init__(self, name):
+    def __init__(self, name, url):
         self.name = name
-        self.id = 0
+        self.url = url
 
 class handler:
 
@@ -41,7 +41,7 @@ class Ungrouped:
         amount = db.execute(count_sql)[0].amount
 
         return xtemplate.render("file/view.html",
-            pathlist=[PathNode("未分类")],
+            pathlist=[PathNode("未分类", "/file/group/ungrouped")],
             file_type="group",
             files = files,
             page = page,
@@ -80,7 +80,7 @@ class RemovedHandler:
         amount = db.count(where="is_deleted=1")
 
         return xtemplate.render("file/view.html",
-            pathlist=[PathNode("回收站")],
+            pathlist=[PathNode("回收站", "/file/group/removed")],
             file_type="group",
             files = files,
             page = page,
