@@ -218,13 +218,12 @@ def get_children_by_id(id):
     return [FileDO.fromDict(item) for item in all]
 
 def get_by_id(id, db=None):
-    sql = "SELECT * from file where id = %s" % id
     if db is None:
-        db = FileDB();
-    result = db.execute(sql)
-    if len(result) is 0:
-        return None
-    return FileDO.fromDict(result[0])
+        db = get_db()
+    first = db.select_one(where=dict(id=id))
+    if first is not None:
+        return FileDO.fromDict(first)
+    return None
 
 def get_vpath(record):
     pathlist = []

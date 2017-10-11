@@ -130,7 +130,6 @@ def pre_render(kw):
     # print(web.ctx.env)
     # kw["_nav_position"] = web.cookies(nav_position="top").nav_position
     kw["_nav_position"] = "top"
-    kw["_menu_list"]    = MENU_LIST
     # 用于渲染其他组件
     kw["_render"] = render
     kw["xutils"]  = xutils
@@ -145,9 +144,9 @@ def pre_render(kw):
 
 def encode_json(obj):
     if hasattr(obj, "__call__"):
-        return str(obj)
+        return "<function>"
     elif inspect.ismodule(obj):
-        return str(obj)
+        return "<module>"
     return obj
 
 def render(template_name, **kw):
