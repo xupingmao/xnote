@@ -271,8 +271,17 @@ class AutosaveHandler:
         id = xutils.get_argument("id", "0", type=int)
         name = xauth.get_current_name()
         db = xtables.get_file_table()
-        db.update(content=content, size=len(content), where=dict(id=id, creator=name))
-        return dict(code="success")
+        where = None
+        if xauth.is_admin():
+            where=dict(id=id)
+        else:
+            where=dict(id=id, creator=name)
+        rowcount = db.update(content=content, size=len(content), smtime=xutils.format_datetime(), 
+            where=where)
+        if rowcount > 0:
+            return dict(code="success")
+        else:
+            return dict(code="fail")
         
 xurls = (
     r"/file/edit", handler, 
