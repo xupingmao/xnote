@@ -226,8 +226,8 @@ class FakeDB():
         return None
 
     def query(self, *args, **kw):
-        return None
-        
+        from web.utils import IterBetter
+        return IterBetter(iter([]))
 
 class DBWrapper:
     """ 基于web.db的装饰器 """
@@ -259,10 +259,13 @@ class DBWrapper:
     def query(self, *args, **kw):
         return self.db.query(*args, **kw)
 
-    def count(self, where=None):
-        sql = "SELECT COUNT(1) AS amount FROM %s" % self.tablename
-        if where:
-            sql += " WHERE %s" % where
+    def count(self, where=None, sql = None):
+        if sqlite3 is None:
+            return 0
+        if sql is None:
+            sql = "SELECT COUNT(1) AS amount FROM %s" % self.tablename
+            if where:
+                sql += " WHERE %s" % where
         return self.db.query(sql).first().amount
 
     def update(self, *args, **kw):

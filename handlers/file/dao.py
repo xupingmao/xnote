@@ -7,15 +7,16 @@
 如果是MySQL等数据库，使用 threadeddict 来操作，直接用webpy的ctx
 """
 import re
-import sqlite3
 import six
 import web.db as db
 import xconfig
 import xtables
+import xutils
 
 from xutils import readfile, savetofile
 from util import dateutil
 
+sqlite3 = xutils.sqlite3
 MAX_VISITED_CNT = 200
 
 readFile = readfile

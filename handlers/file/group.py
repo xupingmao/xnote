@@ -34,11 +34,11 @@ class Ungrouped:
         page = xutils.get_argument("page", 1, type=int)
         db = xtables.get_file_table()
 
-        sql = "SELECT a.* FROM file a LEFT JOIN file b ON a.parent_id = b.id WHERE a.is_deleted = 0 AND a.type != 'group' AND (b.id is null OR b.type != 'group') LIMIT ?, ?"
-        files = db.execute(sql, ((page-1)*10, 10))
+        sql = "SELECT a.* FROM file a LEFT JOIN file b ON a.parent_id = b.id WHERE a.is_deleted = 0 AND a.type != 'group' AND (b.id is null OR b.type != 'group') LIMIT %s,%s"
+        files = db.query(sql % ((page-1)*10, 10))
         
         count_sql = "SELECT COUNT(1) AS amount FROM file a LEFT JOIN file b ON a.parent_id = b.id WHERE a.is_deleted = 0 AND a.type != 'group' AND (b.id is null OR b.type != 'group')"
-        amount = db.execute(count_sql)[0].amount
+        amount = db.count(sql = count_sql)
 
         return xtemplate.render("file/view.html",
             pathlist=[PathNode("未分类", "/file/group/ungrouped")],

@@ -190,7 +190,14 @@ class FileItem(Storage):
         if self.type == "file" and other.type == "dir":
             return False
         return self.name < other.name
-        
+
+    # 兼容Python2
+    def __cmp__(self, other):
+        if self.type == other.type:
+            return cmp(self.name, other.name)
+        if self.type == "dir":
+            return -1
+        return 1
 
 def splitpath(path):
     path   = path.replace("\\", "/")

@@ -7,12 +7,13 @@ from .dao import *
 import xconfig
 import xauth
 import xutils
+import xtables
 
 # 兼容旧代码
 config = xconfig
 
 def execute(sql):
-    return xutils.db_execute(config.DB_PATH, sql)
+    return xtables.get_file_table().query(sql)
 
 # 待优化
 def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
@@ -40,7 +41,8 @@ def count_files():
     #     count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 ")[0].get("count")
     # else:
     #     count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 AND groups='%s'" % user_name)[0].get("count")
-    count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 AND groups='%s'" % user_name)[0].get("count")
+    db = xtables.get_file_table()
+    count = db.count("is_deleted = 0 AND groups='%s'" % user_name)
     if count == 0:
         return 1
     return count
