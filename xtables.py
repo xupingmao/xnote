@@ -4,10 +4,11 @@
 
 """Xnote的数据库配置"""
 import os
-import sqlite3
 import xutils
 import xconfig
 import web.db as db
+
+sqlite3 = xutils.sqlite3
 
 config = xconfig
 
@@ -212,6 +213,22 @@ def init_table_record():
         manager.add_column("key",  "text", "")
         manager.add_column("value", "text", "")
 
+class FakeDB():
+
+    def select(self, *args, **kw):
+        from web.utils import IterBetter
+        return IterBetter(iter([]))
+
+    def update(self, *args, **kw):
+        return 0
+
+    def insert(self, *args, **kw):
+        return None
+
+    def query(self, *args, **kw):
+        return None
+        
+
 class DBWrapper:
     """ 基于web.db的装饰器 """
 
@@ -223,7 +240,10 @@ class DBWrapper:
         # SqliteDB 使用了threadlocal来实现，是线程安全的，使用全局单实例即可
         _db = DBWrapper._pool.get(dbpath)
         if _db is None:
-            _db = db.SqliteDB(db=dbpath)
+            if sqlite3 is not None:
+                _db = db.SqliteDB(db=dbpath)
+            else:
+                _db = FakeDB()
             DBWrapper._pool[dbpath] = _db
         self.db = _db
 
@@ -276,6 +296,8 @@ def get_record_table():
 
 
 def init():
+    if sqlite3 is None:
+        return
     # init_test_db()
     init_table_user()
     init_table_file()

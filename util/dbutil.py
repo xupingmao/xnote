@@ -1,7 +1,11 @@
 # encoding=utf-8
-import sqlite3
-import os
 
+import os
+try:
+    import sqlite3
+except ImportError:
+    sqlite3 = None
+    
 ###########################################################
 # @desc db utilties
 # @author xupingmao

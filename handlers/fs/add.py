@@ -53,4 +53,6 @@ class handler:
             path = os.makedirs(path)
         raise web.seeother("/wiki/" + quote(target))
         
-xurls = ("/wiki/add", handler)
+xurls = (
+    r"/wiki/add", handler
+)

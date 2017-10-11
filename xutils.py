@@ -10,7 +10,6 @@ import sys
 import os
 import traceback
 import inspect
-import sqlite3
 import json
 import base64
 import time
@@ -25,6 +24,11 @@ import xconfig
 
 from util.ziputil import *
 from util.textutil import edit_distance
+
+try:
+    import sqlite3
+except ImportError:
+    sqlite3 = None # jython
 
 PY2 = sys.version_info[0] == 2
 

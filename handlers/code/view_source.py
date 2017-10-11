@@ -28,6 +28,7 @@ class ViewSourceHandler:
                 #     key     = xhtml_escape(key)
                 #     content = textutil.replace(content, key, htmlutil.span("?", "search-key"), ignore_case=True, use_template=True)
                 return xtemplate.render(template_name, 
+                    pathlist = xutils.splitpath(path),
                     name = os.path.basename(path), 
                     path = path,
                     content = content, lines = content.count("\n")+1)

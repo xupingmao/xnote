@@ -11,6 +11,7 @@
 <script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/python.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/javascript.js"></script>
+<script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
 
 <style type="text/css">
 
@@ -23,8 +24,15 @@
 {% end %}
 
 {% block body %}
+{% init pathlist = [] %}
 
-<h3>{{?name}}</h3>
+<div style="background: lightgreen;">
+<a href="/fs//">Home</a> /
+{% for item in pathlist %}
+    <a href="/fs/{{ item.path }}">{{ item.name }}</a> / 
+{% end %}
+</div>
+
 <div class="col-md-12">
     <p style="color:red">{{?error}}</p>
 </div>
@@ -60,6 +68,8 @@
             mode = "text/x-c";
         } else if (name.endsWith(".java")) {
             mode = "text/x-java";
+        } else if (name.endsWith(".md")) {
+            mode = "text/x-markdown";
         }
         var editor = CodeMirror.fromTextArea($("#editor")[0], {
             lineNumbers: true,
