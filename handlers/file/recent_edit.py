@@ -26,7 +26,7 @@ def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
 
     sql = "select * from file where is_deleted != 1 AND creator = '%s'" % user_name
 
-    sql += " ORDER BY priority DESC, smtime DESC"
+    sql += " ORDER BY smtime DESC"
     sql += " LIMIT %s, %s" % ((page-1) * pagesize, pagesize)
     list = execute(sql)
         
@@ -56,8 +56,13 @@ class handler(BaseHandler):
         days = int(s_days)
         files = get_recent_modified(days, page)
         count = count_files()
-        self.render("file-list.html", files = files[:20], key = "", 
-            page = page, count = count, page_url="/file/recent_edit?page=")
+        self.render("file/view.html", 
+            pathlist = [Storage(name="最近编辑", url="/file/recent_edit")],
+            file_type = "group",
+            files = files[:20], 
+            page = page, 
+            page_max = math.ceil(count/config.PAGE_SIZE), 
+            page_url="/file/recent_edit?page=")
 
     def json_request(self):
         s_days = self.get_argument("days", 7)
