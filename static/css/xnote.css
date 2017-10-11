@@ -14,6 +14,12 @@ a {
     font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
 }
 
+.x-center {
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
 a:hover {
     background-color: LightGrey;
 }
