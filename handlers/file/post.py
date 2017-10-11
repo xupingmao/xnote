@@ -62,6 +62,7 @@ class PostEdit:
         if file.content == None:
             file.content = ""
         file.content = file.content.replace('\xad', '\n')
+        file.content = file.content.replace("\n", "<br/>")
         rows = file.content.count("\n")+5
         rows = max(rows, 20)
         return xtemplate.render("file/view.html", 
