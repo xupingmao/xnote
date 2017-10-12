@@ -17,7 +17,7 @@
     <form method="POST" enctype="multipart/form-data">
         <input name="version" value="{{file.version}}" class="hide">
         <input name="type" value="post" class="hide"/>
-        <p>
+<!--         <p>
             <input name="name" type="text" value="{{file.name}}">
             {% if file.groups == "*" %}
                 <input name="public" type="checkbox" checked>
@@ -25,8 +25,8 @@
                 <input name="public" type="checkbox">
             {% end %}
             所有人可见
-            <a href="/file/view?id={{file.id}}" style="float:right">预览</a>
-        </p>
+            
+        </p> -->
 
     
 <!--         <div class="col-md-12">
@@ -40,12 +40,15 @@
         <!-- <textarea name="content" style="width:100%;margin-top:10px;font-family:monospace;" rows={{rows}}>{{file.content}}</textarea> -->
 
         <div id="toolbar" style="border:1px solid #ccc;background-color: #f1f1f1;"></div>
-        <div id="editor" style="height: 500px;border:1px solid #ccc;border-top: none;">
+        <div id="editor" style="height: 400px;border:1px solid #ccc;border-top: none;">
             {%raw file.content%}
         </div>
     </form>
 
-    <input id="saveBtn" type="button" value="保存">
+    <div style="margin-top: 5px;">
+        <input id="saveBtn" type="button" value="保存">
+        <a href="/file/view?id={{file.id}}">预览</a>
+    </div>
 
 
     <script type="text/javascript">

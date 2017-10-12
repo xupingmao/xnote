@@ -38,19 +38,22 @@
 
 #submit-div {
     background-color: white; 
-    position: fixed; 
-    padding-bottom: 5px; 
-    padding-top:25px; 
     top: 0px; 
     z-index: 100
 }
 #editor-area {
-    margin-top: 80px;
+    height: 400px;
+    overflow: scroll;
 }
 #autosaveResult {
     color: green;
     font-size: small;
 }
+
+.pathlist {
+    background-color: lightgreen;
+}
+
 </style>
 {% end %}
 
@@ -63,7 +66,7 @@
     </div>
 
     <div class="col-md-12">
-    <form id="mainFrame" action="/file/update" enctype="multipart/form-data" method="POST">
+    <form id="mainFrame" action="/file/update" enctype="multipart/form-data" method="POST" class="col-md-12">
         <div class="col-md-12" id="submit-div">
             <h3>
                 <span id="fileId" class="hide">{{file.id}}</span>
@@ -71,11 +74,19 @@
                     <span><input id="newName"> </span> 
                     <button onclick="renameFile()">重命名</button>
                 </div>
-                <div>
-                    <a id="oldName" href="javascript:switchRename()" style="color:blue">{{file.name}}</a>
-                    <span id="autosaveResult" class="hide">自动保存成功</span>
-                </div>
+                
             </h3>
+            <div class="col-md-12">
+                <!-- <a id="oldName" href="javascript:switchRename()" style="color:blue">{{file.name}}</a> -->
+                
+                <div class="col-md-12 pathlist">
+                    <a href="/file/group">Home</a> /
+                    {% for item in pathlist %}
+                        <a href="{{item.url}}">{{ item.name }}</a> /
+                    {% end %}
+                </div>
+            </div>
+
             <span id="result" style="color:green"></span>
             <div class="col-md-12">
                 <input type="submit" class="btn btn-primary" value="更新"/>
@@ -85,6 +96,7 @@
                 <input type="button" class="btn btn-primary" onclick="togglePreview(this)" value="预览"/>
                 <input type="button" class="btn btn-danger" onclick="delLink()" value="删除" />
                 <span class="upload-progress"></span>
+                <span id="autosaveResult" class="hide">自动保存成功</span>
             </div>
             
         </div>

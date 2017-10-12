@@ -107,7 +107,9 @@ class MarkdownEdit(BaseHandler):
         if file is None:
             raise web.notfound()
         download_csv = file.related != None and "CODE-CSV" in file.related
+        db = xtables.get_file_table()
         self.render("file/markdown_edit.html", file=file, 
+            pathlist = dao.get_pathlist(db, file),
             content = file.get_content(), 
             date2str=date2str,
             download_csv = download_csv, 

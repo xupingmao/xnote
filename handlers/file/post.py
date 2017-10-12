@@ -13,6 +13,7 @@ import web.db as db
 
 import xutils
 import xconfig
+import xtables
 
 from handlers.base import get_upload_file_path
 from util import dateutil
@@ -59,6 +60,7 @@ class PostEdit:
         args = web.input()
         id = int(args.id)
         file = dao.get_by_id(id)
+        db = xtables.get_file_table()
         if file.content == None:
             file.content = ""
         file.content = file.content.replace('\xad', '\n')
@@ -66,6 +68,8 @@ class PostEdit:
         rows = file.content.count("\n")+5
         rows = max(rows, 20)
         return xtemplate.render("file/view.html", 
+            show_search_div=False,
+            pathlist=dao.get_pathlist(db, file),
             op="edit", 
             file=file,
             rows = rows,
