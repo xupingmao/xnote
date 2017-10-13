@@ -42,8 +42,10 @@
     z-index: 100
 }
 #editor-area {
+    border: 1px solid #ccc;
     height: 400px;
-    overflow: scroll;
+    overflow-y: scroll;
+    box-sizing: border-box;
 }
 #autosaveResult {
     color: green;
@@ -86,9 +88,10 @@
                     {% end %}
                 </div>
             </div>
-
+        </div>
+        <div class="col-md-12">
             <span id="result" style="color:green"></span>
-            <div class="col-md-12">
+            <div class="col-md-12" style="border:1px solid #ccc; border-bottom: none;box-sizing: border-box;">
                 <input type="submit" class="btn btn-primary" value="更新"/>
                 <input type="button" id="insertCode" class="btn" value="代码"/> 
                 <input type="file" id="file" name="file" class="hide" />
@@ -98,26 +101,25 @@
                 <span class="upload-progress"></span>
                 <span id="autosaveResult" class="hide">自动保存成功</span>
             </div>
-            
-        </div>
         
-        <div class="col-md-12" id="editor-area">
-            <div class="col-md-12">
-                <div id="edit-div">
-                    <input style="display:none" name="id" value="{{file.id}}"/>
-                    <input type="text" name="version" value="{{file.version}}" class="hide"/>
-                    <input type="text" name="type" value="md" class="hide"/>
-                </div>
-            </div>
-
-            <div class="top-offset-1">
-                <div id="editor" class="col-md-12" style="height: auto; ">
-                    <div id="markdown-input-div" class="col-md-6 top-offset-1">
-                        <textarea id="markdown-input" class="form-control" name="content" rows=50>{{?content}}</textarea>
+            <div class="col-md-12" id="editor-area">
+                <div class="col-md-12">
+                    <div id="edit-div">
+                        <input style="display:none" name="id" value="{{file.id}}"/>
+                        <input type="text" name="version" value="{{file.version}}" class="hide"/>
+                        <input type="text" name="type" value="md" class="hide"/>
                     </div>
+                </div>
 
-                    <div id="markdown-output-div" class="col-md-12">
+                <div class="col-md-12">
+                    <div id="editor" class="col-md-12" style="height: auto; ">
+                        <div id="markdown-input-div" class="col-md-6">
+                            <textarea id="markdown-input" class="form-control" name="content" rows=50>{{?content}}</textarea>
+                        </div>
 
+                        <div id="markdown-output-div" class="col-md-12">
+
+                        </div>
                     </div>
                 </div>
             </div>
