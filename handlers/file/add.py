@@ -49,7 +49,7 @@ class AddHandler:
                 f = dao.get_by_name(name)
                 if f != None:
                     key = name
-                    raise Exception("%s 已存在" % name)
+                    raise Exception(u"%s 已存在" % name)
                 # 分组提前
                 if file.type == "group":
                     file.priority = 1

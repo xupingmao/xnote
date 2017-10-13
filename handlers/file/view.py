@@ -64,7 +64,7 @@ class handler:
                 limit=10, 
                 offset=(page-1)*10)
         elif file.type == "post":
-            file.content = file.content.replace('\xad', '\n')
+            file.content = file.content.replace(u'\xad', '\n')
             file.content = file.content.replace("\n", "<br/>")
             dao.visit_by_id(id)
         else:
