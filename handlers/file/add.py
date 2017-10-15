@@ -58,6 +58,8 @@ class AddHandler:
                 if _type == "json":
                     return dict(code="success", id=inserted.id)
                 raise web.seeother("/file/view?id={}".format(inserted.id))
+        except web.HTTPError as e1:
+            raise e1
         except Exception as e:
             xutils.print_stacktrace()
             error = str(e)

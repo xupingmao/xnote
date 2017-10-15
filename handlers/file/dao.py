@@ -226,6 +226,12 @@ def get_by_id(id, db=None):
         return FileDO.fromDict(first)
     return None
 
+def get_by_name(name):
+    result = get_db().select_one(where=dict(name=name, is_deleted=0))
+    if result is None:
+        return None
+    return FileDO.fromDict(result)
+
 def get_vpath(record):
     pathlist = []
     current = record
@@ -291,14 +297,6 @@ def update(where, **kw):
 def delete_by_id(id):
     update(where=dict(id=id), is_deleted=1)
 
-def get_by_name(name):
-    sql = "select * from file where name = %s and is_deleted != 1" % to_sqlite_obj(name)
-    # print(sql)
-    result = get_db().execute(sql)
-    if len(result) is 0:
-        return None
-    return FileDO.fromDict(result[0])
-
 def insert(file):
     name = file.name
     f = get_by_name(name)
@@ -323,9 +321,9 @@ def insert(file):
     if hasattr(file, "mtime"):
         delattr(file, "mtime")
 
-    values = [build_sql_row(file, k) for k in file]
-    sql = "insert into file (%s) values (%s)" % (','.join(file), ",".join(values))
-    return get_db().execute(sql)
+    # values = [build_sql_row(file, k) for k in file]
+    # sql = "insert into file (%s) values (%s)" % (','.join(file), ",".join(values))
+    return get_db().insert(**file)
         
 
 def get_db():

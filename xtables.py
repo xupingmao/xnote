@@ -164,7 +164,7 @@ def init_table_tag():
 def init_table_schedule():
     # 2017/05/24
     # task是计划任务
-    # Job是已经触发的任务
+    # Job是已经触发的任务,倾向于一次性的
     with TableManager(config.DB_PATH, "schedule") as manager:
         manager.add_column("url",         "text", "")
         # manager.add_column("interval",    "integer", 60)
@@ -177,6 +177,7 @@ def init_table_schedule():
         manager.add_column("tm_min",  "text", "")
         # 任务是否生效，用于一次性活动
         manager.add_column("active", "int", 1)
+        manager.add_column("creator", "text", "")
 
 
 def init_table_log():
