@@ -7,15 +7,29 @@
         <tr>
             <td>
                 <img src="/static/image/folder.gif">
+                <a href="/file/group/bookmark">收藏</a> /
+            </td>
+        </tr>
+
+<!--         <tr>
+            <td>
+                <img src="/static/image/folder.gif">
+                <a href="/file/group/bookmark">备忘录</a> /
+            </td>
+        </tr> -->
+
+        <tr>
+            <td>
+                <img src="/static/image/folder.gif">
                 <a href="/file/group/ungrouped">未分类</a> /
             </td>
         </tr>
-        <tr>
+<!--         <tr>
             <td>
                 <img src="/static/image/folder.gif">
                 <a href="/file/group/removed">回收站</a> /
             </td>
-        </tr>
+        </tr> -->
         <tr>
             <td>
                 <img src="/static/image/folder.gif">
@@ -38,7 +52,10 @@
                     <a class="hover" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>
                 {% end %}
                 <a class="hover" href="javascript:move({{item.id}})">移动到</a>
-                <div style="font-size: 12px;"><span class="tag">{{item.groups}}</span>&nbsp;{{item.sctime}} </div>
+                <div style="font-size: 12px;">
+                    <span class="tag">{{item.groups}}</span>
+                    {{item.smtime}}
+                </div>
                 <div class="move-div" id="move-{{item.id}}"></div>
             </td>
         </tr>

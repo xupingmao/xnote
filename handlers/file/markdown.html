@@ -12,10 +12,10 @@
                 <a href="/file/share?id={{file.id}}">[分享]</a>
             {% end %}
 
-            {% if file.priority > 0 %}
-                <a href="/file/{{file.id}}/downvote">[取消置顶]</a>
+            {% if file.is_marked > 0 %}
+                <a href="/file/unmark?id={{file.id}}">[取消收藏]</a>
             {% else %}
-                <a href="/file/{{file.id}}/upvote">[置顶]</a>
+                <a href="/file/mark?id={{file.id}}">[收藏]</a>
             {% end %}
         {% end %}
     </h2>

@@ -135,6 +135,8 @@ def init_table_file():
         manager.add_column("is_deleted", "int", 0)
         # 是否公开
         manager.add_column("is_public", "int", 0)
+        # 是否标记
+        manager.add_column("is_marked", "int", 0)
 
         # 权限相关
         # 创建者

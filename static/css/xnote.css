@@ -396,6 +396,7 @@ li.menu-item:hover {
     border-radius: 2px;
     padding-left: 2px;
     padding-right: 2px;
+    margin-right: 2px;
 }
 
 .red-tag {

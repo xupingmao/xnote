@@ -322,12 +322,19 @@ class AddDirHandler:
             xutils.print_stacktrace()
             return dict(code="fail", message=str(e))
 
+class DataDirHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        datapath = os.path.abspath(xconfig.DATA_DIR)
+        raise web.seeother("/fs/%s" % datapath)
 
 name = "文件系统"
 description = "下载和上传文件"
 
 xurls = (
     r"/fs-", handler, 
+    r"/fs_data", DataDirHandler,
     r"/fs/add_dir", AddDirHandler,
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,

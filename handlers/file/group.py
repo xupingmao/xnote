@@ -5,9 +5,12 @@ import xutils
 import xtemplate
 import xtables
 import xauth
+import xconfig
 
 from . import dao
 from xutils import Storage
+
+PAGE_SIZE = xconfig.PAGE_SIZE
 
 class PathNode:
 
@@ -34,7 +37,7 @@ class Ungrouped:
         page = xutils.get_argument("page", 1, type=int)
         db = xtables.get_file_table()
 
-        sql = "SELECT a.* FROM file a LEFT JOIN file b ON a.parent_id = b.id WHERE a.is_deleted = 0 AND a.type != 'group' AND (b.id is null OR b.type != 'group') ORDER BY sctime DESC LIMIT %s,%s"
+        sql = "SELECT a.* FROM file a LEFT JOIN file b ON a.parent_id = b.id WHERE a.is_deleted = 0 AND a.type != 'group' AND (b.id is null OR b.type != 'group') ORDER BY smtime DESC LIMIT %s,%s"
         files = db.query(sql % ((page-1)*10, 10))
         
         count_sql = "SELECT COUNT(1) AS amount FROM file a LEFT JOIN file b ON a.parent_id = b.id WHERE a.is_deleted = 0 AND a.type != 'group' AND (b.id is null OR b.type != 'group')"
@@ -87,11 +90,51 @@ class RemovedHandler:
             page_max = math.ceil(amount / 10),
             page_url="/file/group/removed?page=")
 
+class RecentCreatedHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        page = xutils.get_argument("page", 1, type=int)
+        page = max(1, page)
+        db = xtables.get_file_table()
+        where = "is_deleted=0 AND creator=%r" % xauth.get_current_name()
+        files = db.select(where=where, order="sctime DESC", offset=page*PAGE_SIZE,limit=PAGE_SIZE)
+        count = db.count(where=where)
+        return xtemplate.render("file/view.html", 
+            pathlist = [Storage(name="最近创建", url="/file/group/recent_created")],
+            file_type = "group",
+            files = files,
+            page = page, 
+            page_max = math.ceil(count/PAGE_SIZE), 
+            page_url="/file/recent_edit?page=")
+
+class BookmarkHandler:
+    
+    @xauth.login_required()
+    def GET(self):
+        page = xutils.get_argument("page", 1, type=int)
+        page = max(1, page)
+        db = xtables.get_file_table()
+        where = "is_deleted=0 AND is_marked=1 AND creator=%r" % xauth.get_current_name()
+        files = db.select(where=where, order="sctime DESC", offset=(page-1)*PAGE_SIZE,limit=PAGE_SIZE)
+        count = db.count(where=where)
+        return xtemplate.render("file/view.html", 
+            pathlist = [Storage(name="收藏", url="/file/group/bookmark")],
+            file_type = "group",
+            files = files,
+            page = page, 
+            page_max = math.ceil(count/PAGE_SIZE), 
+            page_url="/file/group/bookmark?page=")
+
+        
+
 xurls = (
     r"/file/group", handler,
     r"/file/group/ungrouped", Ungrouped,
     r"/file/group/removed", RemovedHandler,
     r"/file/group/list", ListHandler,
     r"/file/group/move", MoveHandler,
+    r"/file/group/bookmark", BookmarkHandler,
+    r"/file/group/recent_created", RecentCreatedHandler,
 )
 

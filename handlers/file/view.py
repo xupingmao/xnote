@@ -272,6 +272,21 @@ class AutosaveHandler:
             return dict(code="success")
         else:
             return dict(code="fail")
+
+class MarkHandler:
+
+    def GET(self):
+        id = xutils.get_argument("id")
+        db = xtables.get_file_table()
+        db.update(is_marked=1, where=dict(id=id))
+        raise web.seeother("/file/view?id=%s"%id)
+
+class UnmarkHandler:
+    def GET(self):
+        id = xutils.get_argument("id")
+        db = xtables.get_file_table()
+        db.update(is_marked=0, where=dict(id=id))
+        raise web.seeother("/file/view?id=%s"%id)
         
 xurls = (
     r"/file/edit", handler, 
@@ -282,6 +297,8 @@ xurls = (
     r"/file/update", UpdateHandler,
     r"/file/autosave", AutosaveHandler,
     r"/file/(\d+)/upvote", Upvote,
-    r"/file/(\d+)/downvote", Downvote
+    r"/file/(\d+)/downvote", Downvote,
+    r"/file/mark", MarkHandler,
+    r"/file/unmark", UnmarkHandler,
 )
 
