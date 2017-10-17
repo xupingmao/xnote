@@ -193,7 +193,7 @@ class BaseHandler(object):
         web.setcookie(key, "", expires=-1)
 
 
-def get_upload_file_path(filename, data_dir="/files", _test_exists = 0):
+def get_upload_file_path(filename, data_dir="/files", _test_exists = 0, prefix=""):
     """生成上传文件名"""
     filename = xutils.get_safe_file_name(filename)
     basename, ext = os.path.splitext(filename)
@@ -203,7 +203,12 @@ def get_upload_file_path(filename, data_dir="/files", _test_exists = 0):
     origin_filename = dirname + filename
     fsutil.check_create_dirs(dirname)
     fileindex = 1
-    
+
+    if prefix != "" and prefix != None:
+        filename = prefix + "_" + filename
+        webpath = "/data{}/{}/{}".format(data_dir, date, filename)
+        return dirname + filename, webpath
+
     newfilename = origin_filename
     webpath = "/data{}/{}/{}".format(data_dir, date, filename)
 

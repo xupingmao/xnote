@@ -1,6 +1,7 @@
 {% extends base.html %}
 
 {% block body %}
+<div>
 <table>
     <tr>
         <th>Name</th>
@@ -27,6 +28,10 @@
         <td id="screen"></td>
     </tr>
     <tr>
+        <td>InnerSize</td>
+        <td id="innerSize"></td>
+    </tr>
+    <tr>
         <td>getUserMedia</td>
         <td id="checkGetUserMedia"></td>
     </tr>
@@ -46,6 +51,7 @@
         <td>WebSocket</td>
         <td type-name="WebSocket" class="check-support"></td>
     </tr>
+</table>
 </div>
 
 <script type="text/javascript">
@@ -53,7 +59,7 @@ $("#userAgent").html(navigator.userAgent);
 $("#appName").html(navigator.appName);
 $("#appVersion").html(navigator.appVersion);
 $("#vendor").html(navigator.vendor);
-$("#screen").html("screen.width:"+screen.width+",screen.height:"+screen.height);
+$("#screen").html(screen.width+"x"+screen.height);
 $("#checkGetUserMedia").html(navigator.getUserMedia ? navigator.getUserMedia.toString() : undefined);
 $("#checkRTCPeerConnection").html(window.RTCPeerConnection ? window.RTCPeerConnection.toString() : undefined);
 $(document).ready(function () {
@@ -74,5 +80,6 @@ $(document).ready(function () {
         }
     })
 })
+$("#innerSize").text(window.innerWidth + "x" + window.innerHeight);
 </script>
 {% end %}

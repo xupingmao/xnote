@@ -96,7 +96,7 @@
                 <input type="button" id="insertCode" class="btn" value="代码"/> 
                 <input type="file" id="file" name="file" class="hide" />
                 <input type="button" id="uploadBtn" class="btn" value="文件" />
-                <input type="button" class="btn btn-primary" onclick="togglePreview(this)" value="预览"/>
+                <input type="button" class="btn btn-primary" onclick="togglePreview(this)" value="关闭预览"/>
                 <input type="button" class="btn btn-danger" onclick="delLink()" value="删除" />
                 <span class="upload-progress"></span>
                 <span id="autosaveResult" class="hide">自动保存成功</span>
@@ -148,22 +148,30 @@
         }
     }
 
-    $("#uploadBtn").on("click", function () {
-        $("#file").click();
-        $("#file").on("change", function () {
-            $("#mainFrame").submit();
-        })
-        return;
-        uploadFile("file", "file", "/file/upload_file?_type=json", function (evt) {
+    function codeInsert(code) {
+        var cur = codeMirror.getCursor();
+        if (cur == null || cur == undefined) {
+            var index = codeMirror.doc.getValue().length;
+            cur = codeMirror.posFromIndex(index);
+        }
+        codeMirror.replaceRange(code, cur, cur, "");
+    }
+
+    $("#file").on("change", function () {
+        // $("#mainFrame").submit();
+        uploadFile("file", "/file/upload_file?prefix={{file.id}}", function (evt) {
             // 处理上传成功
             var responseText = evt.target.responseText;
-            var result = responseText;
+            var result = JSON.parse(responseText);
             console.log(result);
             var link = result.link;
             // alert(result);   
-            var text = codeMirror.doc.getValue() + "\n" + link;
-            codeMirror.doc.setValue(text);
+            codeInsert(link);
         })
+    })
+
+    $("#uploadBtn").on("click", function () {
+        $("#file").click();
     })
 
         
@@ -245,6 +253,16 @@
     }
     
     function togglePreview(target) {
+        if ($("#markdown-input-div").hasClass("col-md-6")) {
+            $("#markdown-input-div").removeClass("col-md-6").addClass("col-md-12");
+            $("#markdown-output-div").addClass("hide");
+            $(target).val("预览");
+        } else {
+            $("#markdown-input-div").addClass("col-md-6").removeClass("col-md-12");
+            $("#markdown-output-div").removeClass("hide");
+            $(target).val("关闭预览");
+        }
+        return;
         if (!$("#markdown-input-div").hasClass("hide")) {
             $("#markdown-input-div").addClass("hide");
             $("#markdown-output-div").removeClass("hide").removeClass("col-md-6").addClass("col-md-12");
@@ -330,11 +348,16 @@
         edit();
         
         setInterval(repaint, 200);
-        setInterval(autoSave, 1000*10);
+        setInterval(autoSave, 1000*30);
 
         $("#insertCode").on("click", function () {
-            var cur = codeMirror.getCursor();
-            codeMirror.replaceRange("```\n[代码]\n```", cur, cur, "");
+            
+            var selection = codeMirror.getSelection();
+            if (selection != "" && selection != null) {
+                codeMirror.replaceSelection("```\n" + selection + "\n```");
+            } else {
+                codeInsert("```\n[代码]\n```");
+            }
         })
     })
 </script>

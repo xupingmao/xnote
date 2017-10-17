@@ -1,6 +1,8 @@
 (function (window) {
     // check whether browser support HTML5 file API
 
+    var uploaded = {};
+
     if (!window.FileReader) {
         return;
     }
@@ -23,17 +25,24 @@
      * @param uploadUrl
      * @param successCallback
      */
-    function uploadFile(fileButtonId, fileName, uploadUrl, successCallback) {
+    function uploadFile(fileButtonId, uploadUrl, successCallback) {
+        var files = document.getElementById(fileButtonId).files;
+        if (files == undefined || files.length == 0) {
+            return;
+        }
         var fd = new FormData();
-        fd.append(fileName, document.getElementById(fileButtonId).files[0]);
+        fd.append("file", files[0]);
         fd.append("type", "html5")
         var xhr = new XMLHttpRequest();
         xhr.upload.addEventListener("progress", uploadProgress, false);
         
-        var _onComplete = uploadComplete;
-
-        if (successCallback) {
-            _onComplete = successCallback;
+        var _onComplete = function (evt) {
+            console.log(evt);
+            if (successCallback) {
+                successCallback(evt);
+            } else {
+                uploadComplete(evt);
+            }
         }
 
         function wrapper(event) {
@@ -66,6 +75,7 @@
     function uploadComplete(evt) {
         /* This event is raised when the server send back a response */
         // alert(evt.target.responseText);
+        console.log(evt);
         var responseText = evt.target.responseText;
         document.getElementById("progressNumber").innerHTML = "上传成功";
     }
