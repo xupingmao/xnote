@@ -55,7 +55,10 @@
         <div class="col-md-1"></div>
         <!-- 干掉小广告，https才是最终解决方案 -->
         <script type="text/javascript">
-        // setTimeout(function () {$("iframe").remove();}, 500);
+          $(".link-btn").click(function () {
+              var link = $(this).attr("href");
+              window.location.href = link;
+          })
         </script>
     </body>
 </html>

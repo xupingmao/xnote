@@ -106,9 +106,11 @@ img {
         {% include "file/table.html" %}
     {% elif file_type == "group" %}
         {% include "file/group.html" %}
+    {% elif file_type == "memo" %}
+        {% include "file/memo.html" %}
     {% else %}
         {% include "file/post.html" %}
     {% end %}
-
+    
 {% end %}
 

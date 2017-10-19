@@ -163,21 +163,17 @@ class UpdateHandler(BaseHandler):
         if name != "" and name != None:
             update_kw["name"] = name
 
-        # import pdb
-        # pdb.set_trace()
-        # print(upload_file)
-
-        # 处理文件上传
-        if hasattr(upload_file, "filename") and upload_file.filename != "":
-            filename = upload_file.filename
-            filename = filename.replace("\\", "/")
-            filename = os.path.basename(filename)
-            filepath, webpath = get_upload_file_path(xutils.quote(filename))
-            with open(filepath, "wb") as fout:
-                for chunk in upload_file.file:
-                    fout.write(chunk)
-            link = get_link(filename, webpath)
-            update_kw["content"] = content + "\n" + link
+        # 处理文件上传,不再处理文件，由JS提交
+        # if hasattr(upload_file, "filename") and upload_file.filename != "":
+        #     filename = upload_file.filename
+        #     filename = filename.replace("\\", "/")
+        #     filename = os.path.basename(filename)
+        #     filepath, webpath = get_upload_file_path(xutils.quote(filename))
+        #     with open(filepath, "wb") as fout:
+        #         for chunk in upload_file.file:
+        #             fout.write(chunk)
+        #     link = get_link(filename, webpath)
+        #     update_kw["content"] = content + "\n" + link
 
         rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:

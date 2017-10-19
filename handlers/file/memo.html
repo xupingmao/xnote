@@ -1,0 +1,21 @@
+<div class="col-md-12">
+    <table id="fileTable" class="col-md-12 table">
+
+    {% for i, item in enumerate(files) %}
+        <tr>
+            <td>{{i+1}}</td>
+            <td>
+                <a href="{{item.id}}">{{item.name}}</a>
+                <div>{{item}}</div>
+            </td>
+            <td>
+                <input class="link-btn" type="button" value="编辑" href="/file/mem/edit?id={{item.id}}" />
+            </td>
+        </tr>
+    {% end %}
+    </table>
+</div>
+
+<div class="col-md-12 top-offset-1">
+    <input class="link-btn" type="button" value="添加" href="/file/memo/add" />
+</div>

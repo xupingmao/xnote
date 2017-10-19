@@ -126,7 +126,15 @@ class BookmarkHandler:
             page_max = math.ceil(count/PAGE_SIZE), 
             page_url="/file/group/bookmark?page=")
 
-        
+
+class MemoHandler:
+    def GET(self):
+        db = xtables.get_schedule_table()
+        files = db.select()
+        return xtemplate.render("file/view.html", 
+            pathlist = [PathNode("备忘录", "/file/group/memo")],
+            file_type = "memo",
+            files = files)
 
 xurls = (
     r"/file/group", handler,
@@ -136,5 +144,6 @@ xurls = (
     r"/file/group/move", MoveHandler,
     r"/file/group/bookmark", BookmarkHandler,
     r"/file/group/recent_created", RecentCreatedHandler,
+    r"/file/group/memo", MemoHandler,
 )
 

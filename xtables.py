@@ -166,6 +166,7 @@ def init_table_schedule():
     # task是计划任务
     # Job是已经触发的任务,倾向于一次性的
     with TableManager(config.DB_PATH, "schedule") as manager:
+        manager.add_column("name", "text", "")
         manager.add_column("url",         "text", "")
         # manager.add_column("interval",    "integer", 60)
         manager.add_column("ctime",       "text", "")

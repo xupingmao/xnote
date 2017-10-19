@@ -11,12 +11,14 @@
             </td>
         </tr>
 
-<!--         <tr>
+        {% if _is_admin %}
+        <tr>
             <td>
                 <img src="/static/image/folder.gif">
-                <a href="/file/group/bookmark">备忘录</a> /
+                <a href="/file/group/memo">备忘录</a> /
             </td>
-        </tr> -->
+        </tr>
+        {% end %}
 
         <tr>
             <td>
