@@ -303,7 +303,10 @@ class MemoSaveHandler:
         tm_hour = xutils.get_argument("tm_hour")
         tm_min  = xutils.get_argument("tm_min")
         message = xutils.get_argument("message")
-
+        sound_value = xutils.get_argument("sound")
+        webpage_value = xutils.get_argument("webpage")
+        sound = 1 if sound_value == "on" else 0
+        webpage = 1 if webpage_value == "on" else 0
 
         db = xtables.get_schedule_table()
         if id == "" or id is None:
@@ -312,7 +315,9 @@ class MemoSaveHandler:
                 tm_wday = tm_wday,
                 tm_hour = tm_hour,
                 tm_min = tm_min,
-                message = message)
+                message = message,
+                sound = sound,
+                webpage = webpage)
         else:
             id = int(id)
             db.update(where=dict(id=id), name=name, url=url, 
@@ -320,7 +325,9 @@ class MemoSaveHandler:
                 tm_wday = tm_wday,
                 tm_hour = tm_hour,
                 tm_min = tm_min,
-                message = message)
+                message = message,
+                sound = sound,
+                webpage = webpage)
         xmanager.load_tasks()
         raise web.seeother("/file/group/memo")
 

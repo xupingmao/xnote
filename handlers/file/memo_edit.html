@@ -49,8 +49,8 @@
         <tr>
             <td>提醒方式</td>
             <td>
-                <input type="checkbox" name="webpage">网页
-                <input type="checkbox" name="sound">声音
+                <input type="checkbox" name="webpage" {% if item.webpage == 1 %} checked {% end %}>网页
+                <input type="checkbox" name="sound" {% if item.sound == 1 %} checked {% end %}>声音
             </td>
         </tr>
         <tr>

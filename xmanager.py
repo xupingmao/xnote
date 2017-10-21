@@ -362,7 +362,9 @@ class TaskManager:
         # worker_thread = WorkerThread()
         self.load_tasks()
 
-        def request_url(url):
+        def request_url(task):
+            url = task.url
+            if url is None: url = ""
             quoted_url = xutils.quote_unicode(url)
             if quoted_url.startswith(("http://", "https://")):
                 # 处理外部HTTP请求
@@ -372,6 +374,8 @@ class TaskManager:
             elif url.startswith("script://"):
                 name = url[len("script://"):]
                 return xutils.exec_script(name)
+            if task.sound > 0:
+                xutils.say(task.message)
             cookie = xauth.get_admin_cookie()
             return self.app.request(url, headers=dict(COOKIE=cookie))
 
@@ -388,7 +392,7 @@ class TaskManager:
                             # task()
                             log("run task [%s]" % task.url)
                             # Python3 中的_thread模块不被推荐使用
-                            timer = Timer(0, request_url, args = (task.url,))
+                            timer = Timer(0, request_url, args = (task,))
                             timer.start()
                             if task.tm_wday == "no-repeat":
                                 # 一次性任务直接删除
