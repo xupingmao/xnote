@@ -181,8 +181,8 @@ def init_table_schedule():
         manager.add_column("creator", "text", "")
         # 2017.10.21
         manager.add_column("message", "text", "") # 提醒消息
-        message.add_column("sound", "int", 0) # 是否语音提醒
-        message.add_column("webpage", "int", 0) # 是否网页提醒
+        manager.add_column("sound", "int", 0) # 是否语音提醒
+        manager.add_column("webpage", "int", 0) # 是否网页提醒
 
 
 def init_table_log():

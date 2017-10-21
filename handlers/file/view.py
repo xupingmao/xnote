@@ -302,6 +302,7 @@ class MemoSaveHandler:
         tm_wday = xutils.get_argument("tm_wday")
         tm_hour = xutils.get_argument("tm_hour")
         tm_min  = xutils.get_argument("tm_min")
+        message = xutils.get_argument("message")
 
 
         db = xtables.get_schedule_table()
@@ -310,14 +311,16 @@ class MemoSaveHandler:
                 ctime=xutils.format_datetime(),
                 tm_wday = tm_wday,
                 tm_hour = tm_hour,
-                tm_min = tm_min)
+                tm_min = tm_min,
+                message = message)
         else:
             id = int(id)
             db.update(where=dict(id=id), name=name, url=url, 
                 mtime=xutils.format_datetime(),
                 tm_wday = tm_wday,
                 tm_hour = tm_hour,
-                tm_min = tm_min)
+                tm_min = tm_min,
+                message = message)
         xmanager.load_tasks()
         raise web.seeother("/file/group/memo")
 
