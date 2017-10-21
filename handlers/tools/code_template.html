@@ -258,21 +258,32 @@ function gen_java_converter(inputStr, option) {
             <th>类型</th>
             <th>语法</th>
             <th>示例</th>
+            <th>输出</th>
         </tr>
         <tr>
             <td>POJO</td>
             <td><code>(name type)*</code> </td>
             <td><code>user_name String</br>age int</code></td>
+            <td><pre>
+public String getUserName() { 
+  return this.userName; 
+}
+public void setUserName(String userName) {
+  this.userName = userName; 
+}
+            </pre></td>
         </tr>
         <tr>
             <td>toString</td>
             <td><code>(name)*</code> </td>
             <td><code>user_name</br>age</code></td>
+            <td></td>
         </tr>
         <tr>
             <td>Java Converter</td>
             <td><code>source target (field)*</code></td>
             <td><code>source target name age address</code></td>
+            <td></td>
         </tr>
     </table>
 </div>

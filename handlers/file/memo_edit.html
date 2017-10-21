@@ -1,9 +1,67 @@
-{% extends base.html %}
+{% init item = xutils.KindObject("") %}
+<div class="x-dialog x-dialog-remote" style="height: 400px;" id="memoEditBox">
+    <form action="/file/memo/save" method="POST">
+    <input class="hide" name="id" value="{{item.id}}">
+    <div class="x-dialog-title">编辑 <input type="button" class="x-dialog-close" value="关闭"/></div>
+    <table class="no-border" style="margin: 0 auto; width: 100%;">
+        <tr>
+            <td>标题</td>
+            <td><input type="text" name="name" value={{item.name}}></td>
+        </tr>
+        <tr>
+            <td>触发链接</td>
+            <td><input type="text" name="url" value="{{item.url}}"></td>
+        </tr>
+        <tr>
+            <td>周</td>
+            <td>
+                <select name="tm_wday" value="{{item.tm_wday}}">
+                    <option value="*">每天</option>
+                    <option value="no-repeat">一次性</option>
+                    {% for wday in range(1, 8) %}
+                    <option value="{{wday}}">星期{{wday}}</option>
+                    {% end %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>时间</td>
+            <td>
+                小时:<select name="tm_hour" value="{{item.tm_hour}}">
+                    <option value="*">每小时</option>
+                    {% for hour in range(24) %}
+                    <option value="{{hour}}">{{hour}}</option>
+                    {% end %}
+                </select>
+                分钟:<select name="tm_min" value="{{item.tm_min}}">
+                    <option value="*">每分钟</option>
+                    {% for tm_min in range(60) %}
+                    <option value="{{tm_min}}">{{tm_min}}</option>
+                    {% end %}
+                </select>
+            </td>
+        </tr>
 
-{% block body %}
+        <tr>
+            <td>信息</td>
+            <td><textarea class="col-md-12"></textarea></td>
+        </tr>
+        <tr>
+            <td>提醒方式</td>
+            <td>
+                <input type="checkbox" name="webpage">网页
+                <input type="checkbox" name="sound">声音
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <input type="submit" value="确认">&nbsp;
+                <input type="button" class="btn-danger x-dialog-cancel" value="取消">
+            </td>
+        </tr>
 
-<div>
-    <input type="text" placeholder="name"/>
+    </table>
+    </form>
 </div>
 
-{% end %}

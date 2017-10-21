@@ -112,9 +112,9 @@ def print_web_ctx_env():
         print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
 
 
-class SilentStorage(dict):
+class KindObject(dict):
     """
-    A Storage will not raise AttributeError
+    A 'Kind' Object that do not raise AttributeError
     A Storage object is like a dictionary except `obj.foo` can be used
     in addition to `obj['foo']`.
     
@@ -127,11 +127,15 @@ class SilentStorage(dict):
         >>> o['a']
         2
     """
+    def __init__(self, default_value=None, **kw):
+        self.default_value = default_value
+        super(KindObject, self).__init__(**kw)
+
     def __getattr__(self, key): 
         try:
             return self[key]
         except KeyError as k:
-            return None
+            return self.default_value
     
     def __setattr__(self, key, value): 
         self[key] = value
@@ -143,7 +147,7 @@ class SilentStorage(dict):
             raise AttributeError(k)
     
     def __repr__(self):     
-        return '<SilentStorage ' + dict.__repr__(self) + '>'
+        return '<KindObject ' + dict.__repr__(self) + '>'
 
 
 class SearchResult(dict):

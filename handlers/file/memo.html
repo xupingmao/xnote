@@ -5,11 +5,20 @@
         <tr>
             <td>{{i+1}}</td>
             <td>
-                <a href="{{item.id}}">{{item.name}}</a>
-                <div>{{item}}</div>
+                {{item.display_name}}
+                <div>
+                    {% if item.tm_wday == "*" %} 每天 {% else %} {{item.tm_wday}} {% end %}
+                    {% if item.tm_hour == "*" %} 每小时 {% else %} {{item.tm_hour}}时 {% end %}
+                    {% if item.tm_min == "*" %} 每分钟 {% else %} {{item.tm_min}}分 {% end %}
+                </div>
             </td>
             <td>
-                <input class="link-btn" type="button" value="编辑" href="/file/mem/edit?id={{item.id}}" />
+                <div style="width: 100px;">
+                    <input class="dialog-btn" type="button" value="编辑" 
+                        dialog-url="/file/memo/edit?id={{item.id}}" 
+                        href="/file/memo/edit?id={{item.id}}" />
+                    <input type="button" class="link-btn btn-danger" value="删除" href="/file/memo/remove?id={{item.id}}" confirm-message="确认删除 {{item.display_name}} ?">
+                </div>
             </td>
         </tr>
     {% end %}
@@ -17,5 +26,8 @@
 </div>
 
 <div class="col-md-12 top-offset-1">
-    <input class="link-btn" type="button" value="添加" href="/file/memo/add" />
+    <input class="dialog-btn" type="button" value="添加" dialog-url="/file/memo/edit" />
 </div>
+
+<div class="x-dialog-background"></div>
+

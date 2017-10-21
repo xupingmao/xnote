@@ -128,9 +128,15 @@ class BookmarkHandler:
 
 
 class MemoHandler:
+
+    @xauth.login_required("admin")
     def GET(self):
         db = xtables.get_schedule_table()
         files = db.select()
+        def set_display_name(file):
+            file.display_name = file.name if file.name != "" else file.url
+            return file
+        files = list(map(set_display_name, files))
         return xtemplate.render("file/view.html", 
             pathlist = [PathNode("备忘录", "/file/group/memo")],
             file_type = "memo",

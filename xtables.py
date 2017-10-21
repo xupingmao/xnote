@@ -179,6 +179,10 @@ def init_table_schedule():
         # 任务是否生效，用于一次性活动
         manager.add_column("active", "int", 1)
         manager.add_column("creator", "text", "")
+        # 2017.10.21
+        manager.add_column("message", "text", "") # 提醒消息
+        message.add_column("sound", "int", 0) # 是否语音提醒
+        message.add_column("webpage", "int", 0) # 是否网页提醒
 
 
 def init_table_log():

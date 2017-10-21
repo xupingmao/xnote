@@ -10,6 +10,7 @@ import xutils
 import xconfig
 import xtables
 import xtemplate
+import xmanager
 from web import HTTPError
 from . import dao
 
@@ -283,11 +284,61 @@ class UnmarkHandler:
         db = xtables.get_file_table()
         db.update(is_marked=0, where=dict(id=id))
         raise web.seeother("/file/view?id=%s"%id)
+
+class MemoEditHandler:
+
+    def GET(self):
+        id = xutils.get_argument("id", type=int)
+        sched = xtables.get_schedule_table().select_one(where=dict(id=id))
+        return xtemplate.render("file/memo_edit.html", item = sched)
         
+class MemoSaveHandler:
+    
+    @xauth.login_required("admin")
+    def POST(self):
+        id = xutils.get_argument("id")
+        name = xutils.get_argument("name")
+        url  = xutils.get_argument("url")
+        tm_wday = xutils.get_argument("tm_wday")
+        tm_hour = xutils.get_argument("tm_hour")
+        tm_min  = xutils.get_argument("tm_min")
+
+
+        db = xtables.get_schedule_table()
+        if id == "" or id is None:
+            db.insert(name=name, url=url, mtime=xutils.format_datetime(), 
+                ctime=xutils.format_datetime(),
+                tm_wday = tm_wday,
+                tm_hour = tm_hour,
+                tm_min = tm_min)
+        else:
+            id = int(id)
+            db.update(where=dict(id=id), name=name, url=url, 
+                mtime=xutils.format_datetime(),
+                tm_wday = tm_wday,
+                tm_hour = tm_hour,
+                tm_min = tm_min)
+        xmanager.load_tasks()
+        raise web.seeother("/file/group/memo")
+
+class MemoRemoveHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        id = xutils.get_argument("id", type=int)
+        db = xtables.get_schedule_table()
+        db.delete(where=dict(id=id))
+        xmanager.load_tasks()
+        raise web.seeother("/file/group/memo")
+        
+
 xurls = (
     r"/file/edit", handler, 
     r"/file/rename", RenameHandler,
     r"/file/markdown", handler,
+    r"/file/memo/edit", MemoEditHandler,
+    r"/file/memo/save", MemoSaveHandler,
+    r"/file/memo/remove", MemoRemoveHandler,
     r"/file/view", handler,
     r"/file/markdown/edit", MarkdownEdit,
     r"/file/update", UpdateHandler,

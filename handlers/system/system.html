@@ -33,13 +33,10 @@
 <script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
 
 <input class="hide" id="addr" value="{{?addr}}" />
-<div class="row">
-    <p>您好,{{_user["name"]}}</p>
-</div>
 
 <div class="barcode col-md-12" style="margin:0 auto; text-align: center;">
     <p>
-        地址 <a href="http://{{?addr}}">http://{{?addr}}</a>
+        Hello, {{_user["name"]}}! 地址 <a href="http://{{?addr}}">http://{{?addr}}</a>
         <input type="button" id="toggleBarCode" class="btn" value="二维码">
     </p>
     <div id="qrcode" class="hide"></div>

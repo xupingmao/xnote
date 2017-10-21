@@ -314,21 +314,21 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
       }
     }
     // 显示当月添加的资料
-    $.get("/file/timeline/month", {year: _year, month: _month}, function (responseText) {
-      var data = responseText;
-      $("#file-history").html("");
-      for (var key in data) {
-        var files = data[key];
-        for (var i = 0; i < files.length; i ++) {
-          var file = files[i];
-          console.log(file);
-          var p = $("<p>");
-          p.append($("<span>").text(file.sctime).addClass("date-prefix"));
-          p.append($("<a>").attr("href", file.url).text(file.name));
-          $("#file-history").append(p);
-        }
-      }
-    })
+    // $.get("/file/timeline/month", {year: _year, month: _month}, function (responseText) {
+    //   var data = responseText;
+    //   $("#file-history").html("");
+    //   for (var key in data) {
+    //     var files = data[key];
+    //     for (var i = 0; i < files.length; i ++) {
+    //       var file = files[i];
+    //       console.log(file);
+    //       var p = $("<p>");
+    //       p.append($("<span>").text(file.sctime).addClass("date-prefix"));
+    //       p.append($("<a>").attr("href", file.url).text(file.name));
+    //       $("#file-history").append(p);
+    //     }
+    //   }
+    // })
   }
  
   /**
