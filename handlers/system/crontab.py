@@ -22,6 +22,7 @@ class handler(BaseHandler):
     def default_request(self):
         self.task_list = xmanager.instance().get_task_list()
         for task in self.task_list:
+            if task.url is None: task.url = ""
             task.url = xutils.unquote(task.url)
             parts = task.url.split("://")
             if len(parts) == 2:
