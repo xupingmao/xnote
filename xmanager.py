@@ -459,14 +459,12 @@ class WorkerThread(Thread):
 
     def run(self):
         while True:
-            if len(self._task_queue) > 0:
-                task = self._task_queue.get()
-                try:
-                    task()
-                except Exception as e:
-                    pass
-            else:
-                time.sleep(0.1)
+            # queue是block模式
+            task = self._task_queue.get()
+            try:
+                task()
+            except Exception as e:
+                pass
 
     def add_task(self, task):
         self._task_queue.put(task)
