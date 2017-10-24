@@ -7,3 +7,16 @@
     </div>
 
 </div>
+
+<script type="text/javascript">
+    
+function moveTo(selfId, parentId) {
+    $.post("/file/group/move", 
+        {id:selfId, parent_id: parentId}, 
+        function (resp){
+            console.log(resp);
+            window.location.reload();
+    });
+}
+
+</script>

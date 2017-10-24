@@ -1,8 +1,13 @@
 
 <div>
     {% for i, file in enumerate(files) %}
-        <div class="note">
-            <div class="note-visited-cnt">访问指数:{{file.visited_cnt}} <a href="/file/archive?id={{file.id}}">整理</a></div>
+    <div class="note"> 
+        <div class="note-body">
+            <div class="note-visited-cnt">
+                {% if file.id != None %}
+                <input type="button" class="dialog-btn" dialog-url="/file/group/list?id={{file.id}}" value="整理" >
+                {% end %}
+            </div>
             <div class="note-name">
                 {% if file.type == "group" %}
                     <img src="/static/image/folder.gif"/>
@@ -41,6 +46,7 @@
             <div class="note-option">
             </div> 
         </div>
+    </div>
     {% end %}
 </div>
 
@@ -50,14 +56,16 @@
     {% if key != "" %}
         {# TODO 移动端优化 #}
         <div class="note">
-            <div class="note-name">
-                没找到结果?看看搜索引擎的结果吧~
-            </div>
-            <div class="note-content-short">
-                <br/>
-                <a href="https://www.baidu.com/s?wd={{key}}" target="_blank">百度</a>
-                <a href="https://www.google.com/search?q={{key}}" target="_blank">谷歌</a>
-                <a href="https://www.bing.com/search?q={{key}}" target="_blank">必应</a>
+            <div class="note-body">
+                <div class="note-name">
+                    没找到结果?看看搜索引擎的结果吧~
+                </div>
+                <div class="note-content-short">
+                    <br/>
+                    <a href="https://www.baidu.com/s?wd={{key}}" target="_blank">百度</a>
+                    <a href="https://www.google.com/search?q={{key}}" target="_blank">谷歌</a>
+                    <a href="https://www.bing.com/search?q={{key}}" target="_blank">必应</a>
+                </div>
             </div>
         </div>
     {% end %}

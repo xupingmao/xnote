@@ -346,10 +346,13 @@ li.menu-item:hover {
     float: inherit;
     border: solid 1px;
     border-color: #ccc;
+    box-sizing: border-box; 
     background-color: #fff;
-    padding: 10px;
     margin-bottom: 10px;
     width: 100%;
+}
+.note-body {
+    padding: 10px;
 }
 
 .note-head {
@@ -445,6 +448,23 @@ li.menu-item:hover {
 
 .error {
     color: red;
+}
+
+.x-dialog {
+    display: none;
+    position: fixed;
+    margin: 0 auto;
+    top: 80px;
+    background-color: #fff;
+    z-index: 100;
+}
+
+.x-dialog-title {
+    margin: 0 auto;
+    width: 100%;
+    background-color: #337ab7;
+    color: #fff;
+    text-align: center;
 }
 
 .x-dialog-background {
