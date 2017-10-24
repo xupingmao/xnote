@@ -18,7 +18,7 @@ def quote_unicode(url):
     return ''.join([quote_char(c) for c in bytes])
 
 
-def walk_dir(dirname, skip_hidden=True, excluded=[]):
+def walk_dir(dirname, skip_hidden=True, filter = None, excluded=[]):
     dirs = []
     files = []
     for name in os.listdir(dirname):
@@ -33,9 +33,11 @@ def walk_dir(dirname, skip_hidden=True, excluded=[]):
             dirs.append(name)
             # yield from 是Python3语法
             # yield from walk_dir(path, skip_hidden)
-            for x in walk_dir(path, skip_hidden, excluded):
+            for x in walk_dir(path, skip_hidden, filter, excluded):
                 yield x
         elif os.path.isfile(path) or os.path.islink(path):
+            if filter is not None and not filter(path):
+                continue
             files.append(name)
     yield dirname, dirs, files
 
@@ -47,7 +49,7 @@ def get_abs_path_list(dirname, pathlist):
     return newpathlist
 
 
-def zip_dir(input_dir, outpath, skip_hidden=True, excluded=[]):
+def zip_dir(input_dir, outpath, skip_hidden=True, filter=None, excluded=[]):
     # 创建目标文件
     absroot = os.path.abspath(outpath)
     # print(absroot)
@@ -55,8 +57,9 @@ def zip_dir(input_dir, outpath, skip_hidden=True, excluded=[]):
         pass
     zf = zipfile.ZipFile(outpath, "w")
 
-    for root, dirs, files in walk_dir(input_dir, 
-            skip_hidden=skip_hidden, excluded=get_abs_path_list(input_dir, excluded)):
+    for root, dirs, files in walk_dir(input_dir,
+            skip_hidden=skip_hidden, filter=filter,
+            excluded=get_abs_path_list(input_dir, excluded)):
         for name in files:
             path = os.path.join(root, name)
             abspath = os.path.abspath(path)

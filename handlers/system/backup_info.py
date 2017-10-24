@@ -100,7 +100,7 @@ def backup_code():
     # zip_new_xnote()
     dirname = "./"
     dest_path = xconfig.CODE_ZIP
-    xutils.zip_dir(dirname, dest_path, excluded=["data", "tmp", "log", ".git"])
+    xutils.zip_dir(dirname, dest_path, filter = lambda x: x.endswith((".py", ".html", ".js", ".css")))
 
 def backup_data():
     dirname = xconfig.DATA_DIR
