@@ -1,5 +1,9 @@
-<div>
-{% for file in filelist %}
-    <a href="javascript:moveTo({{id}}, {{file.id}})"><span>{{file.name}}</span></a>
-{% end %}
+<div class="x-dialog x-dialog-remote" style="height: 400px;">
+    <div class="x-dialog-title">移动分组 <input type="button" class="x-dialog-close" value="关闭"/></div>
+    <div>
+    {% for file in filelist %}
+        <a href="javascript:moveTo({{id}}, {{file.id}})"><span>{{file.name}}</span></a>
+    {% end %}
+    </div>
+
 </div>

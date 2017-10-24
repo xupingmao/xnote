@@ -1,4 +1,4 @@
-# xnote
+# Note-X
 
 [![Build Status](https://travis-ci.org/xupingmao/xnote.svg?branch=master)](https://travis-ci.org/xupingmao/xnote)
 
@@ -11,9 +11,9 @@ xnote是一个基于Python的PIM(Personal Information Management)系统，提供
 - 强化搜索功能，部分功能直接可以通过搜索框使用(优化输入输出)
 - BS架构、跨平台，既可以在云端使用(使用webapp的模式)，也能运行在本地作为系统增强软件
  
-笔记的目的是管理知识，xnote最终目标也是管理个人生活工作中的数据和知识.
+笔记的目的是管理知识，NoteX最终目标也是管理个人生活工作中的数据和知识.
 
-PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代豪杰sublime text, Idea Intellij等等)，他们拥有无限扩展的可能。xnote也会朝着可自由扩展方向前进
+PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代豪杰sublime text, Idea Intellij等等)，他们拥有无限扩展的可能。NoteX也会朝着可自由扩展方向前进
 
 注意：本项目主要目标人群是个人，目前多用户场景考虑不多，并发支持有限
 
@@ -52,7 +52,7 @@ PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代�
 - 工具搜索，搜索`handlers/tools/`目录下的工具
 - 翻译（由于版权问题，数据库未上传，可以自己使用相关数据库修改翻译代码）
 - 计算简单的数学公式
-- 添加语音提醒，比如 {30|数字}分钟后提醒我{读书},那么30分钟后就会听到电脑姐姐的温馨提醒了^_^
+- 添加语音提醒，比如 {30|数字}分钟后提醒我{读书},那么30分钟后就会听到电脑姐姐的温馨提醒了^\_^
 
 
 ### 集成的工具
