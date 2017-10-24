@@ -115,12 +115,13 @@
                 var img = $("<img>").attr("src", $(target).attr("img-src")).addClass("fs-image");
                 $(target).append(img);
                 img.on("load", function (event) {
-                    $(target).append($("<span>").text(img[0].naturalWidth + "*" + img[0].naturalHeight));
+                    $(target).append($("<span class='fs-image-size'>").text(img[0].naturalWidth + "*" + img[0].naturalHeight));
                 });
             })
             $(self).val("取消预览");
         } else {
             $(".fs-image").remove();
+            $(".fs-image-size").remove();
             $(self).val("预览图片");
         }  
     })
