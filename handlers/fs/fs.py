@@ -12,6 +12,7 @@ import time
 import web
 import xutils
 import xauth
+import xconfig
 from handlers.base import *
 from xutils import FileItem
 
@@ -232,7 +233,8 @@ class FileSystemHandler:
 
     def read_file(self, path):
         # 强制缓存
-        web.header("Cache-Control", "max-age=3600")
+        if not xconfig.DEBUG:
+            web.header("Cache-Control", "max-age=3600")
 
         environ = web.ctx.environ
         etag = '"%s"' % os.path.getmtime(path)

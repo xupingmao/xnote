@@ -8,7 +8,7 @@ import os
 import time
 from collections import OrderedDict
 
-DEBUG = True
+DEBUG = False
 PORT = "1234"
 minthreads = 10
 # PORT = "8787"

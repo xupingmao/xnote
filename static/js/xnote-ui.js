@@ -29,6 +29,18 @@ var XUI = function (window) {
       }
   })
 
+  // 点击prompt按钮
+  $(".prompt-btn").click(function () {
+      var action = $(this).attr("action");
+      var message = $(this).attr("message");
+      var message = prompt(message);
+      if (message != "" && message) {
+          $.get(action + encodeURIComponent(message), function () {
+              window.location.reload();
+          })
+      }
+  })
+
   // 点击激活对话框的按钮
   $(".dialog-btn").click(function () {
     var dialogUrl = $(this).attr("dialog-url");

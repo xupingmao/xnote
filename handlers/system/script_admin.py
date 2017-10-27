@@ -75,6 +75,15 @@ class handler:
         content = ""
         if op == "edit":
             content = xutils.readfile(os.path.join(dirname, name))
+        if op == "add" and name != "":
+            basename, ext = os.path.splitext(name)
+            if ext not in SCRIPT_EXT_LIST:
+                name = basename + get_default_shell_ext()
+                path = os.path.join(dirname, name)
+            if os.path.exists(path):
+                raise web.seeother(xutils.quote_unicode("/system/script_admin?error=%r已存在" % name))
+            with open(path, "wb") as fp:
+                pass
 
         shell_list = []
         

@@ -26,10 +26,10 @@
 {% set  index = 1 %}
 {% init op = "list" %}
 
-<div>
-    <a href="/system/script_admin">脚本管理</a>|
-    <a href="/system/crontab">定时任务管理</a>|
-</div>
+{% if op != "edit" %}
+<button class="prompt-btn" action="/system/script_admin?op=add&name=" message="添加新脚本">添加</button>
+{% end %}
+<a href="/system/script_admin">脚本管理</a>
 
 {% if op == "edit" %}
     <h3>{{name}}</h3>
@@ -71,13 +71,7 @@
     {% comment 列表 %}
 
     <div class="error">{{error}}</div>
-
-    <form method="POST">
-    <input type="text" name="op" value="add" class="hide"/>
-    脚本名称<input type="text" name="name"/><button>添加</button>
-    </form>
-
-    <table class="table col-md-12">
+    <table class="table col-md-12 top-offset-1">
         <tr>
             <th>编号</th>
             <th>文件名</th>
