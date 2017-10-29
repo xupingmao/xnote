@@ -3,6 +3,7 @@
 <html>
 <head>
     <title>Upload Files using XMLHttpRequest - Minimal</title>
+    <link rel="stylesheet" href="/static/css/xnote.css"/>
     <script type="text/javascript">
 
       function uploadFile() {
@@ -48,14 +49,11 @@
 <body>
 <form id="form1" enctype="multipart/form-data" method="POST" action="/file/upload_file">
     <div class="row">
-        <input type="file" name="file" class="btn" id="fileToUpload"/>
+        <input type="file" name="file" class="" id="fileToUpload"/>
         <input type="button" class="btn" onclick="uploadFile()" value="上传文件" />
         <span id="progressNumber"></span>
         
     </div>
-<!--     <div id="fileName"></div>
-    <div id="fileSize"></div>
-    <div id="fileType"></div> -->
     <div id="resultLink"></div>
 </form>
 

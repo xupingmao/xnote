@@ -46,5 +46,8 @@ class handler:
             filename = filename, 
             is_img=is_img(filename))
 
+    def GET(self):
+        return self.POST()
+
 
         
