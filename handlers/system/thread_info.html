@@ -2,24 +2,23 @@
 {% block body %}
 
 <h2><a href="/system/monitor">系统状态</a></h2>
-<div class="col-md-12">&nbsp;
-<table class="table" border="border:#ff6600 1px solid">
-    <tr>
-        <th>编号</th>
-        <th>Name</th>
-        <th>is_alive</th>
-        <th>属性</th>
-    </tr>
-{% for idx,thread in enumerate(thread_list) %}
-    <tr>       
-        <td>{{idx+1}}</td>
-        <td>{{thread.getName()}}</td> 
-        <td>{{thread.is_alive()}}</td>
-        <td>{{thread.__dict__}}</td>
-    </tr>
-{% end %}
-
-</table>
+<div class="col-md-12">
+    <table class="table" border="border:#ff6600 1px solid">
+        <tr>
+            <th>编号</th>
+            <th>Name</th>
+            <th>is_alive</th>
+            <th>属性</th>
+        </tr>
+    {% for idx,thread in enumerate(thread_list) %}
+        <tr>       
+            <td>{{idx+1}}</td>
+            <td>{{thread.getName()}}</td> 
+            <td>{{thread.is_alive()}}</td>
+            <td>{{thread.__dict__}}</td>
+        </tr>
+    {% end %}
+    </table>
 </div>
 
 {% end %}

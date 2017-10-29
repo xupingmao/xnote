@@ -5,10 +5,22 @@
 {% end %}
 
 {% block body %}
-    {% include "search.html" %}
-   <br/>
-   <script type="text/javascript">$("#menu-file").addClass("active");</script>
-   {% include "mod_file_list.html" %}
+<div class="col-md-12" style="padding-bottom: 5px;">
+    <form action="/search">
+      <div style="float: left;">
+          <input name = "key" type="text" value="{{?key}}" style="width: 300px;" placeholder="输入指令或搜索关键字">
+          <input type="submit" value="搜索"/>
+      </div>
+      <div class="col-md-12 hide">
+        <input type="checkbox" name="title" value="on">标题
+        <input type="checkbox" name="content">内容
+        <input type="checkbox" name="tools">工具
+      </div>
+    </form>
+</div>
+
+
+{% include "mod_file_list.html" %}
 
 <script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
 <script type="text/javascript" src="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>

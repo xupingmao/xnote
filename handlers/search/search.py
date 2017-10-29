@@ -158,6 +158,8 @@ class handler:
         if not mappings_loaded:
             load_mappings()
         key  = xutils.get_argument("key", "")
+        title = xutils.get_argument("title", "")
+        content = xutils.get_argument("content", "")
         page = xutils.get_argument("page", 1, type = int)
         user_name = xauth.get_current_role()
         xutils.get_argument("page_url", "/search/search?key=%s&page=" % key)
@@ -199,5 +201,8 @@ def load_mappings():
     load_mapping(r"(.*)",                   "handlers.search.file.search")
     mappings_loaded = True
 
-xurls = (r"/search/search", handler, r"/search", handler)
+xurls = (
+    r"/search/search", handler, 
+    r"/search", handler
+)
 

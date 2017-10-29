@@ -20,6 +20,7 @@ class ViewSourceHandler:
         if path == "":
             return xtemplate.render(template_name, error = "path is empty")
         else:
+            error = ""
             try:
                 content = xutils.readfile(path)
                 # 使用JavaScript来处理搜索关键字高亮问题
@@ -34,7 +35,8 @@ class ViewSourceHandler:
                     content = content, lines = content.count("\n")+1)
             except Exception as e:
                 xutils.print_stacktrace()
-            return xtemplate.render(template_name, error = e, lines = 0, content="")
+                error = e
+            return xtemplate.render(template_name, error = error, lines = 0, content="")
 
 
 class UpdateHandler(object):

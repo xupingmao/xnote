@@ -15,6 +15,16 @@ var XUI = function (window) {
     });
   }
 
+  function initCheckbox() {
+    $("input[type=checkbox]").each(function (index, ele) {
+      var self = $(ele);
+      var value = self.attr("value");
+      if (value == "on") {
+        self.attr("checked", "checked");
+      }
+    })
+  }
+
   // 点击跳转链接的按钮
   $(".link-btn").click(function () {
       var link = $(this).attr("href");
@@ -101,6 +111,7 @@ var XUI = function (window) {
 
   function initElementProcessors() {
     initSelect();
+    initCheckbox();
   }
 
   initElementProcessors();

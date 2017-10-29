@@ -95,7 +95,7 @@
 
         <td>
             {% if xutils.is_editable(item.path) %}
-                <a href="/code/view_source?path={{item.path}}">[编辑]</a>
+                <a href="/code/view_source?path={{url_escape(item.path)}}">[编辑]</a>
             {% end %}
         </td>
     </tr>
