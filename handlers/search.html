@@ -1,3 +1,4 @@
+{% init file_id = "" %}
 <div class="col-md-12" style="padding-bottom: 5px;">
     <form action="/search">
       <div style="float: right;">
@@ -9,7 +10,8 @@
     {% if _has_login %}
     <div class="left" style="float: left;">
         <input type="button" class="link-btn" value="新建" message="资料名" action="" href="/file/add"/>
-        <input type="button" class="prompt-btn" value="新建组" message="分组名" action=""/>
+        <input type="button" class="prompt-btn" value="新建组" message="分组名" 
+          action="/file/add?type=group&parent_id={{file_id}}&name="/>
     </div>
     {% end %}
 

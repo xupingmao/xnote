@@ -99,6 +99,7 @@ img {
 
     {% if file != None %}
         {% set globals()['file_type'] = file.type %}
+        {% set globals()['file_id'] = file.id %}
     {% end %}
 
     {% if show_search_div %}
