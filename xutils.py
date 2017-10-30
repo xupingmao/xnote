@@ -423,7 +423,17 @@ def is_mac():
 
 def is_editable(filename):
     name, ext = os.path.splitext(filename)
-    return ext in (".md", ".csv", ".properties", ".java")
+    return ext in (
+        ".md", 
+        ".csv", 
+        ".properties", 
+        ".java", 
+        ".c",
+        ".cpp",
+        ".h",
+        ".hpp",
+        ".gradle"
+    )
 
 def http_get(url):
     stream = urlopen(url)
