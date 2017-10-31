@@ -28,13 +28,9 @@ def _get_users():
     # customs  = read_users_from_ini("config/users.ini")
     db = xtables.get_user_table()
     db_users = db.select()
-    db_users = list(db_users)
-
     _users = {}
     # 默认的账号
     _users["admin"] = Storage(name="admin", password="123456")
-
-    # print(db_users)
 
     for user in db_users:
         _users[user.name] = user
@@ -148,7 +144,7 @@ def check_login(user_name=None):
         return
     elif has_login():
         raise web.seeother("/unauthorized")
-    # FIXME 应该是URL
+    # 跳转到登陆URL
     redirect_to_login()
 
 def redirect_to_login():

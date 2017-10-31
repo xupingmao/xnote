@@ -39,6 +39,9 @@ def json_request(*args, **kw):
 
 class TestMain(unittest.TestCase):
 
+    def test_xtables(self):
+        xtables.init_table_test()
+
     def test_render_text(self):
         value = xtemplate.render_text("Hello,{{name}}", name="World")
         self.assertEqual(b"Hello,World", value)

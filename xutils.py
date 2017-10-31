@@ -100,12 +100,14 @@ def profile():
         return run2
     return run
 
-def print_stacktrace():
+def print_exc():
     """打印系统异常堆栈"""
     ex_type, ex, tb = sys.exc_info()
     # print(ex)
     # traceback.print_tb(tb)
     print(traceback.format_exc())
+
+print_stacktrace = print_exc
 
 def print_web_ctx_env():
     for key in web.ctx.env:

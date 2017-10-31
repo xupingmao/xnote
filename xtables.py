@@ -82,6 +82,16 @@ class SqliteTableManager:
             sql += " NOT NULL"
         self.execute(sql)
 
+    def add_index(self, colname, is_unique = False):
+        # sqlite的索引和table是一个级别的schema
+        sql = "CREATE INDEX idx_%s_%s ON `%s` (`%s`)" % (self.tablename, colname, self.tablename, colname)
+        try:
+            self.execute(sql)
+        except sqlite3.OperationalError:
+            pass
+        except Exception:
+            xutils.print_exc()
+
     def drop_column(self, colname):
         # sql = "ALTER TABLE `%s` DROP COLUMN `%s`" % (self.tablename, colname)
         # sqlite不支持 DROP COLUMN 得使用中间表
@@ -94,16 +104,15 @@ class SqliteTableManager:
 TableManager = SqliteTableManager
 
 def init_table_test():
-    TEST_DB = "db/test.db"
-    with TableManager("db/test.db", "test") as manager:
+    path = os.path.join(xconfig.DATA_DIR, "test.db")
+    with TableManager(path, "test") as manager:
         manager.add_column("id1", "integer", 0)
         manager.add_column("int_value", "int", 0)
         manager.add_column("float_value", "float")
         manager.add_column("text_value", "text", "")
         manager.add_column("name", "text", "test")
         manager.add_column("check", "text", "aaa'bbb")
-    # import sys
-    # sys.exit(0)
+        manager.add_index("check")
 
 def init_table_file():
     with TableManager(config.DB_PATH, "file") as manager:
@@ -308,15 +317,13 @@ def get_record_table():
 
 def init():
     if sqlite3 is None:
+        # Jython
         return
-    # init_test_db()
+    # init_table_test()
     init_table_user()
     init_table_file()
     init_table_tag()
     init_table_schedule()
     init_table_message()
     init_table_record()
-
-
-
 
