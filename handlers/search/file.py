@@ -10,6 +10,7 @@ import xutils
 import xauth
 import xmanager
 import xconfig
+import xtables
 
 from util import textutil
 
@@ -195,7 +196,7 @@ def search_name(words, groups=None):
         sql += " AND (groups = '*' OR groups = '%s')" % groups
     sql += " ORDER BY satime DESC LIMIT 1000";
     # print("search name:", sql)
-    all = xutils.db_execute(config.DB_PATH, sql)
+    all = xtables.get_file_table().query(sql)
     return [FileDO.fromDict(item) for item in all]
 
 def full_search(words, groups=None):
@@ -215,16 +216,18 @@ def full_search(words, groups=None):
         sql += " AND (groups = '*' OR groups = '%s')" % groups
     sql += " order by satime desc limit 1000";
     # print("full search:", sql)
-    all = xutils.db_execute(config.DB_PATH, sql)
+    all = xtables.get_file_table().query(sql)
     return [FileDO.fromDict(item) for item in all]
 
 def search(expression):
     words = textutil.split_words(expression)
     files = []
-
+    search_content = xutils.get_argument("content")
+    if search_content == "on":
+        content_results = full_search(words, xauth.get_current_name())
+    else:
+        content_results = []
     name_results = search_name(words, xauth.get_current_name())
-    content_results = full_search(words, xauth.get_current_name())
-
     nameset = set()
     for item in name_results:
         nameset.add(item.name)

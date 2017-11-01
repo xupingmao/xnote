@@ -18,7 +18,7 @@ var XUI = function (window) {
   function initCheckbox() {
     $("input[type=checkbox]").each(function (index, ele) {
       var self = $(ele);
-      var value = self.attr("value");
+      var value = self.attr("default-value");
       if (value == "on") {
         self.attr("checked", "checked");
       }

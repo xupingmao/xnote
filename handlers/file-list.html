@@ -11,10 +11,8 @@
           <input name = "key" type="text" value="{{?key}}" style="width: 300px;" placeholder="输入指令或搜索关键字">
           <input type="submit" value="搜索"/>
       </div>
-      <div class="col-md-12 hide">
-        <input type="checkbox" name="title" value="on">标题
-        <input type="checkbox" name="content">内容
-        <input type="checkbox" name="tools">工具
+      <div class="col-md-12">
+        <input type="checkbox" name="content" default-value="{{?content}}">全文搜索
       </div>
     </form>
 </div>

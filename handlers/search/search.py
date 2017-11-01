@@ -182,7 +182,11 @@ class handler:
         pagestart = (page-1) * pagesize
         files = files[pagestart:pagestart+pagesize]
 
-        return xtemplate.render("file-list.html", files = files, count = count)
+        return xtemplate.render("file-list.html", 
+            files = files, 
+            count = count,
+            title = title,
+            content = content)
 
 mappings_loaded = False
 def load_mappings():
