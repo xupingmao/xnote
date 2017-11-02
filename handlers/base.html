@@ -2,7 +2,7 @@
 <html><head>
 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0,user-scalable=0"/>
 
 <title>Xnote</title>
 <style>
@@ -121,9 +121,6 @@ a { text-decoration: none; }
 <div class="navMenubox">
   <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: 100%; height: 100%;">
   <div id="slimtest1" style="overflow: hidden; width: 100%; height: 100%;">
-<!--     <div class="navMenu-top">
-      <div id="mini" style=""><i class="fa fa-bars fa-2x"></i></div>
-    </div> -->
     <ul class="navMenu">
       <li> 
         <a href="javascript:;" class="afinve" id="navFile"> 
@@ -131,22 +128,11 @@ a { text-decoration: none; }
             <span class="arrow"></span>
         </a>
         <ul class="sub-menu">
-          <li><a href="/file/add?nav=navFile"><span>新建</span></a></li>
-          <li><a href="/file/group/bookmark?nav=navFile"><span>收藏</span></a></li>
+          <li><a href="/file/add"><span>新建</span></a></li>
+          <li><a href="/file/group/bookmark"><span>收藏</span></a></li>
           <li><a href="/file/group"><span>分组</span></a></li>
-          <li><a href="/file/recent_edit?nav=navFile"><span>最近编辑</span></a></li>
-          <li><a href="/file/group/memo?nav=navFile"><span>备忘录</span></a></li>
-          <li>
-            <a href="javascript:;" class="afinve">
-              <span>个人信息</span><span class="arrow"></span>
-            </a>
-            <ul class="sub-menu">
-              <li><a href="javascript:;"><span>我的个人资料</span></a></li>
-              <li><a href="javascript:;"><span>我的日历</span></a></li>
-              <li><a href="javascript:;"><span>我的收件箱</span></a></li>
-              <li><a href="javascript:;"><span>我的任务</span></a></li>
-            </ul>
-          </li>
+          <li><a href="/file/recent_edit"><span>最近编辑</span></a></li>
+          <li><a href="/file/group/memo"><span>备忘录</span></a></li>
         </ul>
       </li>
 
@@ -247,7 +233,7 @@ $(function() {
 
   if (window.innerWidth < 600) {
     // 移动端
-    $(".navMenubox").animate({
+    $(".navMenubox").css({
       "margin-left": "-220px"
     });
   }
@@ -273,7 +259,9 @@ $(function() {
   if (/\/file\/.*/.test(pathname)) {
     expandMenu($("#navFile"));
   }
-  if (/\/system\/.*/.test(pathname) || /\/fs.*/.test(pathname)) {
+  if (/\/system\/.*/.test(pathname) 
+      || /\/fs.*/.test(pathname) 
+      || /\/tools\/.*/.test(pathname)) {
     expandMenu($("#navSystem"));
   }
 });
