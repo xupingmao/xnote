@@ -163,8 +163,11 @@ a { text-decoration: none; }
           </a> 
 
           <ul class="sub-menu">
-              <li><a href="/system/system?nav=navSystem"><span>系统</span></a></li>
-              <li><a href="/system/script_admin?nav=navSystem"><span>脚本</span></a></li>
+              <li><a href="/system/system"><span>系统</span></a></li>
+              {%if _is_admin %}
+              <li><a href="/fs_data"><span>文件浏览器</span></a></li>
+              <li><a href="/system/script_admin"><span>脚本</span></a></li>
+              {% end %}
           </ul>
 
       </li>
@@ -265,9 +268,13 @@ $(function() {
     }
   }
   window.toggleMenu = toggleMenu;
-  var params = getUrlParams();
-  if (params.nav) {
-    expandMenu($("#" + params.nav));
+
+  var pathname = location.pathname;
+  if (/\/file\/.*/.test(pathname)) {
+    expandMenu($("#navFile"));
+  }
+  if (/\/system\/.*/.test(pathname) || /\/fs.*/.test(pathname)) {
+    expandMenu($("#navSystem"));
   }
 });
 </script>
