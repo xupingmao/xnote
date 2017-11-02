@@ -109,7 +109,7 @@ a { text-decoration: none; }
 <link rel="bookmark" href="/static/favicon.ico"/>
 <link rel="stylesheet" href="/static/css/xnote.css"/>
 <link rel="stylesheet" href="/static/css/font-awesome.min.css"/>
-<script src="/static/lib/jquery/jquery-2.2.3.min.js"></script>
+<script src="/static/lib/jquery/jquery-1.12.4.min.js"></script>
 <script type="text/javascript" src="/static/js/utils.js"></script>
 <script type="text/javascript" src="/system/stats"></script>
 <script type="text/javascript" src="/static/js/xnote-ui.js"></script>
@@ -156,6 +156,18 @@ a { text-decoration: none; }
           <a href="/tools/date" class="afinve">
             <span>日历</span>
           </a> 
+      </li>
+
+      <li>
+        {% if not _has_login %}
+          <a href="/login" class="afinve">
+            <span>登陆</span>
+          </a> 
+        {% else %}
+          <a href="/logout" class="afinve">
+            <span style="color: red;">登出</span>
+          </a> 
+        {% end %}
       </li>
 
       <!--
