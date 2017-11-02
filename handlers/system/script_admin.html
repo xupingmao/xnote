@@ -29,8 +29,6 @@
 {% if op != "edit" %}
 <button class="prompt-btn" action="/system/script_admin?op=add&name=" message="添加新脚本">添加</button>
 {% end %}
-<a href="/system/script_admin">脚本管理</a>
-
 {% if op == "edit" %}
     <h3>{{name}}</h3>
     {# 编辑 #}

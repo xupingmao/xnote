@@ -1,101 +1,275 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0,user-scalable=0"/>
-    <title>Xnote</title>
-    <link rel="shortcut icon" href="/static/favicon.ico"/>
-    <link rel="bookmark" href="/static/favicon.ico"/>
-    <link rel="stylesheet" href="/static/css/xnote.css"/>
-    <script src="/static/lib/jquery/jquery-2.2.3.min.js"></script>
-    <script type="text/javascript" src="/static/js/utils.js"></script>
-    <script type="text/javascript" src="/system/stats"></script>
-    <script type="text/javascript" src="/static/js/xnote-ui.js"></script>
-    <style type="text/css">
+<html><head>
 
-      body {
-      }
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-      #nav-left {
-        margin-left: 0px;
-        padding-left: 2px;
-      }
+<title>Xnote</title>
+<style>
+body, html { height: 100%; background: #F2F2F2; overflow: hidden; }
 
-      li.nav-header {
-          /* background-color: #ffd0a0; */
-          /* color: black;*/
-          list-style-type: none;
-      }
+#navMenubox, .navMenu, .sub-menu {
+  margin: 0;
+  padding: 0;
+}
 
-      li.nav-item {
-          list-style-type: none;
-      }
+body { 
+  font: 14px "微软雅黑", "FontAwesome", "Arial Narrow", HELVETICA; 
+  -webkit-text-size-adjust: 100%; 
+  margin: 0; 
+  padding: 0;
+}
 
-      li.nav-item a {
-          /* text-decoration: none; */
-          /* cursor: hand; */
-          /* width: 100%; */
-          /* color: blue; */
-          font-size: small;
-          text-decoration: none;
-          background-color: inherit;
-      }
+li { list-style: none }
+a { text-decoration: none; }
+/* navMenu */
+.navMenubox { 
+  width: 220px;
+  background: #1c2229; 
+  height:100%; 
+  float: left;
+}
+.navMenu-top { padding: 10px; color: #fff; border-bottom: 1px solid rgba(255,255,255,.1) }
 
-      li.nav-item a:hover {
-        text-decoration: underline;
-      }
+.navMenu> li { 
+    display: block; 
+    margin: 0; 
+    padding: 0; 
+    border: 0px; 
+}
 
-      .base-footer {
-        float: left;
-        width: 100%;
-        margin-top: 20px;
-      }
+.navMenu>li>a { 
+    display: block;
+    overflow: hidden; 
+    padding-left: 0px; 
+    line-height: 40px; 
+    color: #ABB1B7; 
+    transition: all .3s; 
+    position: relative; 
+    text-decoration: none; 
+    font-size: 17px; 
+    border-top: 1px solid #222932; 
+    border-bottom: 2px solid #191e24; 
+    padding-left: 15px;
+}
 
-    </style>
-    {% block head %} {% end %}
-    
-    <!-- base.html -->
+.navMenu > li:nth-of-type(1)> a { border-top: 1px solid transparent; }
+.navMenu > li:last-child > a { border-bottom: 1px solid transparent; }
+.navMenu>li>a>i { font-size: 20px; float: left; font-style: normal; margin: 0 5px; }
+
+.navMenu li a .arrow:before { 
+    display: block; 
+    float: right; 
+    margin-top: 1px; 
+    margin-right: 15px; 
+    display: inline; 
+    font-size: 16px; 
+    font-family: Arial, Helvetica, sans-serif;
+    /* font-family: FontAwesome; */
+    height: auto; 
+    /* content: "\f105"; */
+    content: "+";
+    font-weight: 300; 
+    text-shadow: none; 
+}
+
+.navMenu li a .arrow.open:before { 
+    float: right; 
+    margin-top: 1px; 
+    margin-right: 15px; 
+    display: inline; /* font-family: FontAwesome;*/ 
+    height: auto; 
+    font-size: 16px; 
+    /* content: "\f107"; */
+    content: "-";
+    font-weight: 300; 
+    text-shadow: none; 
+}
+
+.navMenu>li>a.active, .navMenu>li>a:hover { 
+  color: #FFF; 
+  background: #12181b; 
+}
+.navMenu>li>ul.sub-menu, .navMenu>li>ul.sub-menu>li>ul.sub-menu { display: none; list-style: none; clear: both; margin: 8px 0px 0px 10px; padding-bottom: 5px; }
+.navMenu>li.active > ul.sub-menu, .navMenu>li>ul.sub-menu>li.active >ul.sub-menu { }
+.navMenu>li>ul.sub-menu li { background: none; margin: 0px; padding: 0px; }
+.navMenu>li>ul.sub-menu li>a { display: block; font-size: 16px; line-height: 36px; padding-left: 20px; color: #ABB1B7; clear: both; }
+.navMenu>li>ul.sub-menu li>a.active, .navMenu>li>ul.sub-menu li>a:hover, .navMenu>li>ul.sub-menu>li.active >a { color: #FFF; background: #12181b; }
+
+/**
+.icon_1:before { content: "\f0ac";}
+.icon_2:before { content: "\f0ac";}
+.icon_3:before { content: "\f0ac";}
+*/
+
+#toggleMenuBtn {
+    padding: 3px;
+    border-style: solid;
+    background: lightblue;
+}
+
+/*---------------------*/
+</style>
+
+  <link rel="shortcut icon" href="/static/favicon.ico"/>
+  <link rel="bookmark" href="/static/favicon.ico"/>
+  <link rel="stylesheet" href="/static/css/xnote.css"/>
+  <script src="/static/lib/jquery/jquery-2.2.3.min.js"></script>
+  <script type="text/javascript" src="/static/js/utils.js"></script>
+  <script type="text/javascript" src="/system/stats"></script>
+  <script type="text/javascript" src="/static/js/xnote-ui.js"></script>
+
+  {% block head %} {% end %}
+
 </head>
-    <body style="margin: 0">
-        {# 菜单 #}
-        <div class="xnote-menu col-md-12" style="display: block;position: fixed;z-index:1000;background: #333;">
+<body style="">
+<div class="navMenubox">
+  <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: 100%; height: 100%;">
+  <div id="slimtest1" style="overflow: hidden; width: 100%; height: 100%;">
+    <div class="navMenu-top">
+      <div id="mini" style=""><i class="fa fa-bars fa-2x"></i></div>
+    </div>
+    <ul class="navMenu">
+      <li> 
+        <a href="javascript:;" class="afinve" id="navFile"> 
+            <i class="icon_1"></i>
+            <span class="">资料</span>
+            <span class="arrow"></span>
+        </a>
+        <ul class="sub-menu">
+          <li><a href="/file/add?nav=navFile"><span>新建</span></a></li>
+          <li><a href="/file/group/bookmark?nav=navFile"><span>收藏</span></a></li>
+          <li><a href="/file/recent_edit?nav=navFile"><span>最近编辑</span></a></li>
+          <li><a href="/file/group/memo?nav=navFile"><span>备忘录</span></a></li>
+          <li>
+            <a href="javascript:;" class="afinve">
+              <span>个人信息</span><span class="arrow"></span>
+            </a>
+            <ul class="sub-menu">
+              <li><a href="javascript:;"><span>我的个人资料</span></a></li>
+              <li><a href="javascript:;"><span>我的日历</span></a></li>
+              <li><a href="javascript:;"><span>我的收件箱</span></a></li>
+              <li><a href="javascript:;"><span>我的任务</span></a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
 
-            {# 公告内容，只显示一条数据，由链接跳转到列表 #}
-            {% if _top_notice != None %}
-            <div class="x-center" style="background-color: #ffc;">
-              <span>{{_top_notice}}</span>
-            </div>
-            {% end %}
+      <li>
+          <a href="javascript:;" class="afinve" id="navSystem">
+            <i class="my-icon nav-icon icon_2"></i>
+            <span>系统</span>
+            <span class="arrow"></span>
+          </a> 
 
-            <div class="x-center">
-            {% if _has_login %}
-              <li class="menu-item"><a href="/file/group">资料</a></li>
-              <li class="menu-item"><a href="/system/index">系统</a></li>
-              <li class="menu-item"><a href="/tools/date.html">日历</a></li>
-              <!-- <li class="menu-item"><a href="/wiki/tools.md">功能</a></li> -->
-            {% end %}
+          <ul class="sub-menu">
+              <li><a href="/system/system?nav=navSystem"><span>系统</span></a></li>
+              <li><a href="/system/script_admin?nav=navSystem"><span>脚本</span></a></li>
+          </ul>
 
-            {% if not _has_login %}
-              <li class="menu-item"><a href="/login">登陆</a></li>
-            {% else %}
-              <li class="menu-item"><a href="/logout">登出</a></li>
-            {% end %}
+      </li>
 
-            </div>
-        </div>
-        <div class="col-md-12">
-          <div class="x-center">
-            <div class="col-md-12" style="height: 50px"></div>
-            <div class="col-md-12 base-body">
-               {% block body %} {% end %}
-            </div>
-            <!-- Footer -->
-            <div class="base-footer">
-              <div style="height: 50px;"></div>
-            </div>
-          </div>
-        </div>
-        <!-- Main Part End -->
-        <div class="x-dialog-background"></div>
-    </body>
+      <li>
+          <a href="/tools/date" class="afinve">
+            <i class="my-icon nav-icon icon_2"></i>
+            <span>日历</span>
+          </a> 
+      </li>
+
+      <!--
+      <li> <a href="javascript:;" class="afinve"> <i class="icon_3"></i> <span class="nav-text">统计报表</span> <span class="arrow"></span> </a>
+        <ul class="sub-menu">
+          <li><a href="javascript:;" class="afinve"><span>报表01</span></a></li>
+          <li><a href="javascript:;"><span>报表02</span></a></li>
+          <li> <a href="javascript:;" class="afinve"><span>打印</span><span class="arrow"></span></a>
+            <ul class="sub-menu">
+              <li><a href="javascript:;"><span>结算表01</span></a></li>
+            </ul>
+          </li>
+          <li> <a href="javascript:;" class="afinve"><span>数据查询</span><span class="arrow"></span></a>
+            <ul class="sub-menu">
+              <li><a href="javascript:;"><span>查询01</span></a></li>
+              <li> <a href="javascript:;" class="afinve"><span>报账明细</span><span class="arrow"></span></a>
+                <ul class="sub-menu">
+                  <li><a href="javascript:;"><span>报账明细1</span></a></li>
+                  <li> <a href="javascript:;" class="afinve"><span>汇总表</span><span class="arrow"></span></a>
+                    <ul class="sub-menu">
+                      <li><a href="javascript:;"><span>汇总表1</span></a></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    -->
+    </ul>
+  </div>
+  
+  <div class="slimScrollBar" style="background: rgb(180, 181, 181); width: 6px; position: absolute; top: 0px; opacity: 0.51; display: none; border-radius: 7px; z-index: 99; right: 0px; height: 267px;"></div><div class="slimScrollRail" style="width: 6px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(227, 227, 228); opacity: 0.5; z-index: 90; right: 0px;"></div></div>
+</div>
+
+<div class="main" style="width:auto; height:100%; overflow: scroll;">
+    <div style="width:100%;background-color:#ccc;">
+        <button id="toggleMenuBtn" onclick="toggleMenu()">菜单</button>
+    </div>
+
+    {% block body %} {% end %}
+
+</div>
+<script>
+$(function() {
+  function expandMenu(ele) {
+    var parent = ele.parent().parent(); //获取当前页签的父级的父级
+    var labeul = ele.parent("li").find(">ul");
+    if (ele.parent().hasClass('open') == false) {
+      //展开未展开
+      parent.find('ul').slideUp(300);
+      parent.find("li").removeClass("open");
+      parent.find('li a').removeClass("active").find(".arrow").removeClass("open");
+      ele.parent("li").addClass("open").find(labeul).slideDown(300);
+      ele.addClass("active").find(".arrow").addClass("open")
+    } else {
+      ele.parent("li").removeClass("open").find(labeul).slideUp(300);
+      if (ele.parent().find("ul").length > 0) {
+        ele.removeClass("active").find(".arrow").removeClass("open");
+      } else {
+        ele.addClass("active");
+      }
+    }
+  }
+  // nav收缩展开
+  $('.navMenu li a').on('click',
+    function() {
+      expandMenu($(this));
+  });
+
+  if (window.innerWidth < 600) {
+    // 移动端
+    $(".navMenubox").animate({
+      "margin-left": "-220px"
+    });
+  }
+
+  function toggleMenu() {
+    var marginLeft = $(".navMenubox").css("margin-left");
+    if (marginLeft == "0px") {
+      $(".navMenubox").animate({
+        "margin-left": "-220px"
+      });
+    } else {
+      $(".navMenubox").animate({
+        "margin-left": "0px"
+      });
+    }
+  }
+  window.toggleMenu = toggleMenu;
+  var params = getUrlParams();
+  if (params.nav) {
+    expandMenu($("#" + params.nav));
+  }
+});
+</script>
+</body>
 </html>

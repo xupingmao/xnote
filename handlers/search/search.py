@@ -166,7 +166,7 @@ class handler:
         pagesize = config.PAGE_SIZE
 
         if key == "" or key == None:
-            raise web.seeother("/")
+            return xtemplate.render("file-list.html", files=[], count=0)
         # app 为None，不用全局使用session
         store = MemStore()
         store_key = "s_" + user_name + "-" + key
