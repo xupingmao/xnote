@@ -20,12 +20,13 @@ PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代�
 -----
 ## 项目地址
 - [github](https://github.com/xupingmao/xnote)
-- [码云](https://git.oschina.net/xupingmao/xnote)
+- [码云](https://gitee.com/xupingmao/xnote)
 
 ## Python版本
 
 - Python 3.x
 - Python 2.7
+- Jython（缺乏sqlite支持）
 
 ## 配置运行
 - 安装依赖的软件包```python -m pip install -r requirements.txt```
@@ -54,7 +55,7 @@ PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代�
  - `http`, `https` 外部的网络请求
  - `script` 执行位于`$DATA/scripts`目录下的自定义Python脚本
 
-![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/static/image/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE.PNG)
+![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE.PNG)
 
 - `handlers/tools`目录下是开发工具，可以通过搜索功能定位
 - `$DATA_DIR/scripts/`目录下是系统脚本,直接与操作系统交互
@@ -139,7 +140,7 @@ xnote
 
 ### 层次架构
 
-![架构图](https://git.oschina.net/xupingmao/xnote/raw/master/static/image/architecture.svg)
+![架构图](https://gitee.com/xupingmao/xnote/raw/master/static/image/architecture.svg)
 
 ### 扩展
 
@@ -158,15 +159,15 @@ xurls = ("/test", handler)
 
 PC端主要截图
 
-![截图03](https://git.oschina.net/xupingmao/xnote/raw/master/static/image/screenshot03.png)
+![截图03](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_web.png)
 
 移动端主要截图
 
-![截图01](https://git.oschina.net/xupingmao/xnote/raw/master/static/image/screenshot01.png)
+![截图01](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/screenshot01.png)
 
 文件浏览器截图
 
-![截图02](https://git.oschina.net/xupingmao/xnote/raw/master/static/image/screenshot02.png)
+![截图02](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/screenshot02.png)
 
 ## 协议
 
