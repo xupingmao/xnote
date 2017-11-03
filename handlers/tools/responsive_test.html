@@ -7,8 +7,9 @@
 <div class="col-md-12">
     <input id="url" style="width: 300px;">
     <select id="size">
-        <option value="middle">1366x768</option>
-        <option value="small">360x640</option>
+        <option value="360x476">360x476</option>
+        <option value="360x640">360x640</option>
+        <option value="1366x768">1366x768</option>
     </select>
     <button id="renderBtn">展示</button>
 </div>
@@ -19,11 +20,10 @@
 <script type="text/javascript">
 $("#renderBtn").on("click", function () {
     var size = $("#size").val();
-    if (size == "middle") {
-        $("#frame").css({width: "1366px", height: "768px"});
-    } else if (size == "small") {
-        $("#frame").css({width: "360px", height: "640px"});
-    }
+    var arr = size.split("x");
+    var width = arr[0];
+    var height = arr[1];
+    $("#frame").css({width: width+"px", height: height+"px"});
     $("#frame").attr("src", $("#url").val());
 })
 </script>
