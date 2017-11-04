@@ -24,7 +24,9 @@ body {
   padding: 0;
 }
 
-li { list-style: none }
+.navMenu> li, .sub-menu> li { 
+  list-style: none 
+}
 a { text-decoration: none; }
 /* navMenu */
 .navMenubox { 
@@ -170,7 +172,9 @@ a { text-decoration: none; }
           <li><a href="/file/group/bookmark"><span>收藏</span></a></li>
           <li><a href="/file/group"><span>分组</span></a></li>
           <li><a href="/file/recent_edit"><span>最近更新</span></a></li>
+          {%if _is_admin %}
           <li><a href="/file/group/memo"><span>备忘录</span></a></li>
+          {% end %}
           <li><a href="/search/search"><span>搜索</span></a></li>
         </ul>
       </li>
@@ -187,8 +191,8 @@ a { text-decoration: none; }
               <li><a href="/fs_data"><span>文件浏览器</span></a></li>
               <li><a href="/system/script_admin"><span>脚本</span></a></li>
               {% end %}
+              <li><a href="/system/reset_password"><span style="color: red;">重置密码</span></a></li>
           </ul>
-
       </li>
 
       <li>
