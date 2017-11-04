@@ -16,10 +16,8 @@
             <td>周</td>
             <td>
                 <select name="tm_wday" value="{{item.tm_wday}}">
-                    <option value="*">每天</option>
-                    <option value="no-repeat">一次性</option>
-                    {% for wday in range(1, 8) %}
-                    <option value="{{wday}}">星期{{wday}}</option>
+                    {% for wday in sorted(xutils.wday_map) %}
+                    <option value="{{wday}}">{{xutils.wday_map[wday]}}</option>
                     {% end %}
                 </select>
             </td>

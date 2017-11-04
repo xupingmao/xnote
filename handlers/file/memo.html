@@ -1,13 +1,12 @@
 <div class="col-md-12">
     <table id="fileTable" class="col-md-12 table">
-
     {% for i, item in enumerate(files) %}
         <tr>
             <td>{{i+1}}</td>
             <td>
                 {{item.display_name}}
                 <div>
-                    {% if item.tm_wday == "*" %} 每天 {% else %} {{item.tm_wday}} {% end %}
+                    {{xutils.wday_map[item.tm_wday]}}
                     {% if item.tm_hour == "*" %} 每小时 {% else %} {{item.tm_hour}}时 {% end %}
                     {% if item.tm_min == "*" %} 每分钟 {% else %} {{item.tm_min}}分 {% end %}
                 </div>

@@ -2,6 +2,9 @@
 
 {% block head %}
 
+<link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
+<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
+
 <style type="text/css">
     .fs-dir {
         
@@ -23,6 +26,38 @@
     .right {
         float: right;
     }
+        
+    /* 上传文件样式 */
+    .progress {
+        background-color: #ffcccc;
+        height: 20px;
+    }
+    .progress span {
+        display: block;
+        background-color: green;
+        color: #fff;
+        height: 100%;
+    }
+    #dropArea {
+        float: left;
+        width: 100%;
+        height: 80px;
+        line-height: 80px;
+        border: 3px dashed silver;
+        text-align: center;
+        font-size: 36px;
+        color: #d3d3d3;
+        cursor: pointer;
+        box-sizing: border-box;
+    }
+    .finished-tag {
+        color: #fff;
+        background-color: green;
+        border-width: 3px;
+        border-radius: 3px;
+        margin-left: 5px;
+    }
+
 </style>
 
 {% end %}
@@ -30,14 +65,6 @@
 {% block body %}
 
 {% init find_key = "" %}
-
-<div class="hide">
-    <form action="/fs_upload" enctype="multipart/form-data" method="POST" style="padding-top:20px;">
-        <input name="dirname" style="display:none;" value="{{path}}"/>
-        <input type="file" name="file"/>
-        <input type="submit" value="上传"/>
-    </form>
-</div>
 
 <div class="col-md-12" style="padding-bottom: 5px;">
     <form action="/fs/find">
@@ -51,11 +78,21 @@
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
         <input type="button" class="btn" value="添加文件夹" id="addDirectory"/>
-        <a href="/tools/webuploader#{{path}}">上传</a>
         <a href="/code/analyze?path={{path}}">分析</a>
         <a href="/tools/zip?dirname={{path}}">压缩</a>
     </div>
 </div>
+
+<!-- 文件上传区域 -->
+<div id="uploader-demo">
+    <!--用来存放item-->
+    <div id="fileList" class="uploader-list"></div>
+    <div id="filePicker" class="hide">选择文件</div>
+
+    <div id="dropArea">点击或拖拽上传文件</div>
+</div>
+
+
 
 <hr/>
 
@@ -142,6 +179,149 @@
             })
         }
     })
+</script>
+
+
+<!-- 文件上传逻辑 -->
+<script type="text/javascript">
+var BASE_URL = "/static/lib/webuploader"
+$("#target-path").text(location.hash.substr(1)).attr("href", "/fs/" + location.hash.substr(1));
+// 初始化Web Uploader
+var uploader = WebUploader.create({
+
+    // 选完文件后，是否自动上传。
+    auto: true,
+
+    // swf文件路径
+    swf: BASE_URL + '/Uploader.swf',
+
+    // 文件接收服务端。
+    server: '/fs_upload/range',
+
+    // 选择文件的按钮。可选。
+    // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+    pick: '#filePicker',
+
+    // 需要分片
+    chunked: true,
+    // 默认5M
+    // chunkSize: 1024 * 1024 * 5,
+    chunkSize: 1024 * 1024 * 5,
+    // 重试次数
+    chunkRetry: 10,
+    // 文件上传域的name
+    fileVal: "file",
+    // 不开启并发
+    threads: 1
+});
+
+// 当有文件添加进来的时候
+uploader.on( 'fileQueued', function( file ) {
+    var $li = $(
+            '<div id="' + file.id + '" class="file-item thumbnail">' +
+                '<img>' +
+                '<div class="info">' + file.name +
+                '<span class="finished-tag" id="' + file.id + '-result"></span>' + 
+                 '</div>' +
+            '</div>'
+            ),
+        $img = $li.find('img');
+
+    $list = $("#fileList");
+    // $list为容器jQuery实例
+    $list.append( $li );
+
+    // 创建缩略图
+    // 如果为非图片文件，可以不用调用此方法。
+    // thumbnailWidth x thumbnailHeight 为 100 x 100
+    var thumbnailWidth = 100;
+    var thumbnailHeight = 100;
+    uploader.makeThumb( file, function( error, src ) {
+        if ( error ) {
+            $img.replaceWith('<span>不能预览</span>');
+            return;
+        }
+
+        $img.attr( 'src', src );
+    }, thumbnailWidth, thumbnailHeight );
+});
+
+// 文件上传过程中创建进度条实时显示。
+uploader.on( 'uploadProgress', function( file, percentage ) {
+    var $li = $( '#'+file.id ),
+        $percent = $li.find('.progress span');
+
+    // 避免重复创建
+    if ( !$percent.length ) {
+        $percent = $('<p class="progress"><span></span></p>')
+                .appendTo( $li )
+                .find('span');
+    }
+
+    $percent.css( 'width', percentage * 100 + '%' );
+    $percent.text( (percentage * 100).toFixed(2) + '%');
+});
+
+uploader.on( 'uploadBeforeSend', function (object, data, headers) {
+    data.dirname = location.hash.substr(1);
+})
+
+// 文件上传成功，给item添加成功class, 用样式标记上传成功。
+uploader.on( 'uploadSuccess', function( file ) {
+    $( '#'+file.id ).addClass('upload-state-done');
+    $( '#'+file.id + "-result" ).text("上传完成");
+});
+
+// 文件上传失败，显示上传出错。
+uploader.on( 'uploadError', function( file ) {
+    var $li = $( '#'+file.id ),
+        $error = $li.find('div.error');
+
+    // 避免重复创建
+    if ( !$error.length ) {
+        $error = $('<div class="error"></div>').appendTo( $li );
+    }
+
+    $error.text('上传失败');
+});
+
+// 完成上传完了，成功或者失败，先删除进度条。
+uploader.on( 'uploadComplete', function( file ) {
+    $( '#'+file.id ).find('.progress').remove();
+});
+
+// 必须先禁用所有的拖拽默认行为
+$(document).on("dragenter", function (event) {
+    event.preventDefault();
+})
+$(document).on("dragleave", function (event) {
+    event.preventDefault();
+})
+$(document).on("drop", function (event) {
+    event.preventDefault();
+})
+$(document).on("dragover", function (event) {
+    event.preventDefault();
+})
+
+$("#dropArea").on("drop", function (event) {
+    console.log(event);
+    event.preventDefault(); //取消默认浏览器拖拽效果 
+    var originalEvent = event.originalEvent;
+    var fileList = originalEvent.dataTransfer.files; //获取文件对象 
+    console.log(fileList);
+    if (fileList && fileList.length > 0) {
+        uploader.addFile(fileList);
+    }
+});
+
+$("#dropArea").on("click", function (event) {
+    console.log(event);
+    event.preventDefault(); //取消默认浏览器拖拽效果 
+    $("[name=file]").click();
+})
+
+
 </script>
 
 {% end %}
