@@ -13,7 +13,7 @@ def safe_check(expression):
     p = re.compile(r"^[.0-9+\-*\/% \(\)\~]*\Z")
     m = p.match(expression)
     # print(m.group())
-    if m.group():
+    if m is not None and m.group():
         return m.group()
     return None
 

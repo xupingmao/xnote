@@ -116,7 +116,7 @@ class BookmarkHandler:
         page = max(1, page)
         db = xtables.get_file_table()
         where = "is_deleted=0 AND is_marked=1 AND creator=%r" % xauth.get_current_name()
-        files = db.select(where=where, order="sctime DESC", offset=(page-1)*PAGE_SIZE,limit=PAGE_SIZE)
+        files = db.select(where=where, order="smtime DESC", offset=(page-1)*PAGE_SIZE,limit=PAGE_SIZE)
         count = db.count(where=where)
         return xtemplate.render("file/view.html", 
             pathlist = [Storage(name="收藏", url="/file/group/bookmark")],

@@ -359,7 +359,8 @@ class TaskManager:
 
     def run_task(self):
         """执行定时任务"""
-        # worker_thread = WorkerThread()
+        worker_thread = WorkerThread()
+        worker_thread.start()
         self.load_tasks()
 
         def request_url(task):
@@ -383,30 +384,25 @@ class TaskManager:
             while True:
                 # 获取分
                 tm = time.localtime()
-                need_reload = False
-                
                 for task in self.task_list:
                     if self.match(task, tm):
-                        # worker_thread.add_task(task)
+                        worker_thread.put_task(request_url, args=(task,))
                         try:
-                            # task()
                             log("run task [%s]" % task.url)
-                            # Python3 中的_thread模块不被推荐使用
-                            timer = Timer(0, request_url, args = (task,))
-                            timer.start()
                             if task.tm_wday == "no-repeat":
                                 # 一次性任务直接删除
                                 # xtables.get_schedule_table().update(active=0, where=dict(id=task.id))
                                 xtables.get_schedule_table().delete(where=dict(id=task.id))
-                                need_reload = True
+                                self.load_tasks()
                         except Exception as e:
                             log("run task [%s] failed, %s" % (task.url, e))
                         finally:
                             pass
-                if need_reload:
-                    self.load_tasks()
+                tm = time.localtime()
                 # 等待下一个分钟
-                time.sleep(60 - tm.tm_sec % 60)
+                sleep_sec = 60 - tm.tm_sec % 60
+                if sleep_sec > 0:
+                    time.sleep(sleep_sec)
         chk_thread = TaskThread(run)
         chk_thread.start()
         
@@ -451,7 +447,7 @@ class TaskThread(Thread):
         self.func(*self.args)
 
 class WorkerThread(Thread):
-    """docstring for WorkerThread"""
+    """执行任务队列的线程"""
     def __init__(self):
         super(WorkerThread, self).__init__()
         self.setDaemon(True)
@@ -460,14 +456,14 @@ class WorkerThread(Thread):
     def run(self):
         while True:
             # queue是block模式
-            task = self._task_queue.get()
+            func, args = self._task_queue.get()
             try:
-                task()
+                func(*args)
             except Exception as e:
-                pass
+                xutils.print_exc()
 
-    def add_task(self, task):
-        self._task_queue.put(task)
+    def put_task(self, task, args):
+        self._task_queue.put([task, args])
         
 _manager = None        
 def init(app, vars, last_mapping=None):
