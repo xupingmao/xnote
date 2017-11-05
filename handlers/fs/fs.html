@@ -78,6 +78,7 @@
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
         <input type="button" class="btn" value="添加文件夹" id="addDirectory"/>
+        <input type="button" class="btn" value="打开" id="openDirectory"/>
         <a href="/code/analyze?path={{path}}">分析</a>
         <a href="/tools/zip?dirname={{path}}">压缩</a>
     </div>
@@ -178,6 +179,9 @@
                 alert(data);
             })
         }
+    })
+    $("#openDirectory").on("click", function () {
+        $.post("/tools/open", {path: "{{path}}"});
     })
 </script>
 

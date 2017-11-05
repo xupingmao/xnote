@@ -1,17 +1,25 @@
-from handlers.base import *
+# encoding=utf-8
+import os
+import xutils
+import xauth
 
-class OpenHandler(BaseHandler):
+class handler:
     
-    def default_request(self):
-        path = self.get_argument("path")
+    @xauth.login_required("admin")
+    def GET(self):
+        path = xutils.get_argument("path")
         if os.path.isdir(path):
-            if osutil.iswindows():
+            path = '"%s"' % path
+            if xutils.is_windows():
+                path = path.replace("/", "\\")
                 cmd = "explorer %s" % path
-            elif osutil.ismac():
+            elif xutils.is_mac():
                 cmd = "find %s" % path
         else:
             cmd = path
+        print(cmd)
         os.popen(cmd)
         return "<html><script>window.close()</script></html>"
 
-handler = OpenHandler
+    def POST(self):
+        return self.GET()

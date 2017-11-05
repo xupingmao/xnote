@@ -15,7 +15,7 @@ xnote是一个基于Python的PIM(Personal Information Management)系统，提供
 
 PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代豪杰sublime text, Idea Intellij等等)，他们拥有无限扩展的可能。Xnote也会朝着可自由扩展方向前进
 
-注意：本项目主要目标人群是个人，目前多用户场景考虑不多，并发支持有限
+PPS：本项目主要目标人群是个人，目前多用户场景考虑不多，并发支持有限
 
 -----
 ## 项目地址
@@ -55,7 +55,7 @@ PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代�
  - `http`, `https` 外部的网络请求
  - `script` 执行位于`$DATA/scripts`目录下的自定义Python脚本
 
-![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE.PNG)
+![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/task_web.PNG)
 
 - `handlers/tools`目录下是开发工具，可以通过搜索功能定位
 - `$DATA_DIR/scripts/`目录下是系统脚本,直接与操作系统交互
@@ -163,7 +163,7 @@ PC端主要截图
 
 移动端主要截图
 
-![截图01](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/screenshot01.png)
+![截图01](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_mobile.png)
 
 文件浏览器截图
 
