@@ -6,6 +6,7 @@ import xtemplate
 import xtables
 import xauth
 import xconfig
+import xmanager
 
 from . import dao
 from xutils import Storage
@@ -132,7 +133,8 @@ class MemoHandler:
     @xauth.login_required("admin")
     def GET(self):
         db = xtables.get_schedule_table()
-        files = db.select()
+        # files = db.select()
+        files = xmanager.get_task_list()
         def set_display_name(file):
             file.display_name = file.name if file.name != "" else file.url
             return file

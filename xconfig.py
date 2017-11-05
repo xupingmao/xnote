@@ -25,7 +25,6 @@ LOG_DIR     = os.path.join(WORKING_DIR, "log")
 
 
 # 用户数据的地址
-
 DATA_PATH   = os.path.join(WORKING_DIR, "data")
 DATA_DIR    = DATA_PATH
 SCRIPTS_DIR = os.path.join(DATA_DIR, "scripts")
@@ -69,11 +68,43 @@ nav_position = "top"
 
 _config = {}
 
-
 def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
+def set_data_path(path):
+    """初始化默认的Data目录,启动时必须调用"""
+    global DATA_PATH
+    global DATA_DIR
+    global DB_PATH
+    global BACKUP_DIR
+    global APP_DIR
+    global TMP_DIR
+    global SCRIPTS_DIR
+    global CODE_ZIP
+    global DATA_ZIP
+    global DUSTBIN_DIR
+
+    makedirs(path)
+    DATA_PATH = path
+    DATA_DIR  = path
+    # 数据库地址
+    DB_PATH    = os.path.join(DATA_PATH, "data.db")
+    # 备份数据地址
+    BACKUP_DIR = os.path.join(DATA_PATH, "backup")
+    # APP地址
+    APP_DIR      = os.path.join(DATA_PATH, "app")
+    TMP_DIR      = os.path.join(DATA_PATH, "tmp")
+    SCRIPTS_DIR  = os.path.join(DATA_DIR, "scripts")
+    CODE_ZIP     = os.path.join(DATA_DIR, "code.zip")
+    DATA_ZIP     = os.path.join(DATA_DIR, "data.zip")
+    DUSTBIN_DIR  = os.path.join(DATA_DIR, "dustbin")
+
+    makedirs(TMP_DIR)
+    makedirs(SCRIPTS_DIR)
+    makedirs(DUSTBIN_DIR)
+
+set_data_path(DATA_DIR)
 """
 - host ip:port
 - 
@@ -91,37 +122,6 @@ def get(name, default=None):
 
 def set(name, value):
     _config[name] = value
-
-def set_data_path(path):
-    global DATA_PATH
-    global DATA_DIR
-    global DB_PATH
-    global BACKUP_DIR
-    global APP_DIR
-    global TMP_DIR
-    global SCRIPTS_DIR
-    global CODE_ZIP
-    global DATA_ZIP
-
-    makedirs(path)
-    DATA_PATH = path
-    DATA_DIR  = path
-    # 数据库地址
-    DB_PATH    = os.path.join(DATA_PATH, "data.db")
-    # 备份数据地址
-    BACKUP_DIR = os.path.join(DATA_PATH, "backup")
-    # APP地址
-    APP_DIR     = os.path.join(DATA_PATH, "app")
-    TMP_DIR     = os.path.join(DATA_PATH, "tmp")
-    SCRIPTS_DIR = os.path.join(DATA_DIR, "scripts")
-    CODE_ZIP    = os.path.join(DATA_DIR, "code.zip")
-    DATA_ZIP    = os.path.join(DATA_DIR, "data.zip")
-
-    makedirs(TMP_DIR)
-    makedirs(SCRIPTS_DIR)
-
-# 初始化默认的Data目录
-set_data_path(DATA_PATH)
 
 def get_config():
     return _config

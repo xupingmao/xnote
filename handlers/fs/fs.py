@@ -324,6 +324,19 @@ class AddDirHandler:
             xutils.print_stacktrace()
             return dict(code="fail", message=str(e))
 
+class RemoveHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        path = xutils.get_argument("path")
+        try:
+            xutils.remove(path)
+            return dict(code="success")
+        except Exception as e:
+            xutils.print_exc()
+            return dict(code="fail", message=str(e))
+
+
 class DataDirHandler:
 
     @xauth.login_required("admin")
@@ -337,7 +350,8 @@ description = "下载和上传文件"
 xurls = (
     r"/fs-", handler, 
     r"/fs_data", DataDirHandler,
-    r"/fs/add_dir", AddDirHandler,
+    r"/fs_api/add_dir", AddDirHandler,
+    r"/fs_api/remove", RemoveHandler,
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,

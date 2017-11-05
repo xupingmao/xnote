@@ -26,6 +26,9 @@
     .right {
         float: right;
     }
+    .checkboxTd {
+        width: 20px;
+    }
         
     /* 上传文件样式 */
     .progress {
@@ -77,11 +80,15 @@
 
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
-        <input type="button" class="btn" value="添加文件夹" id="addDirectory"/>
         <input type="button" class="btn" value="打开" id="openDirectory"/>
         <a href="/code/analyze?path={{path}}">分析</a>
         <a href="/tools/zip?dirname={{path}}">压缩</a>
     </div>
+</div>
+
+<div class="col-md-12">
+    <input type="button" class="btn" value="添加文件夹" id="addDirectory"/>
+    <input type="button" class="btn-danger" value="删除" id="deleteFile"/>
 </div>
 
 <!-- 文件上传区域 -->
@@ -114,6 +121,7 @@
 {% for item in filelist %}
     {% if not item.name.startswith("._") %}
     <tr>
+        <td class="checkboxTd"><input type="checkbox" data-path="{{item.path}}" data-name="{{item.name}}"></td>
         <td>
         {% if item.type == "dir" %}
             <img src="/static/image/folder.gif"/>
@@ -130,7 +138,7 @@
         <td>
             {{item.size}}
         </td>
-
+        
         <td>
             {% if xutils.is_editable(item.path) %}
                 <a href="/code/view_source?path={{url_escape(item.path)}}">[编辑]</a>
@@ -166,7 +174,7 @@
     $("#addDirectory").on("click", function (target) {
         var dirname = prompt("新建文件夹");
         if (dirname && dirname != "") {
-            $.post("/fs/add_dir", {path: "{{path}}", dirname: dirname}, function (respText) {
+            $.post("/fs_api/add_dir", {path: "{{path}}", dirname: dirname}, function (respText) {
                 console.log(respText);
                 var data = respText;
                 if (data.code == "success") {
@@ -182,6 +190,30 @@
     })
     $("#openDirectory").on("click", function () {
         $.post("/tools/open", {path: "{{path}}"});
+    });
+    $("#deleteFile").on("click", function () {
+        var checked = $(".checkboxTd :checked");
+        if (checked.length == 0) {
+            alert("请选择文件");
+        } else if (checked.length > 1) {
+            alert("不支持批量删除");
+        } else {
+            var name = checked.attr("data-name");
+            var path = checked.attr("data-path");
+            var conf = confirm("确认删除 '%s' ?".format(name));
+            if (conf) {
+                $.post("/fs_api/remove", {path: path}, function (resp) {
+                    if (resp.code == "success") {
+                        location.reload();
+                    } else {
+                        alert("删除失败, %s".format(resp.message));
+                    }
+                }).fail(function (resp) {
+                    console.log(resp);
+                    alert("删除失败");
+                })
+            }
+        }
     })
 </script>
 
@@ -267,7 +299,7 @@ uploader.on( 'uploadProgress', function( file, percentage ) {
 });
 
 uploader.on( 'uploadBeforeSend', function (object, data, headers) {
-    data.dirname = location.hash.substr(1);
+    data.dirname = "{{path}}"
 })
 
 // 文件上传成功，给item添加成功class, 用样式标记上传成功。

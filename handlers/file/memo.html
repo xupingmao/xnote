@@ -13,10 +13,12 @@
             </td>
             <td>
                 <div style="width: 100px;">
+                    {% if item.id %}
                     <input class="dialog-btn" type="button" value="编辑" 
                         dialog-url="/file/memo/edit?id={{item.id}}" 
                         href="/file/memo/edit?id={{item.id}}" />
                     <input type="button" class="link-btn btn-danger" value="删除" href="/file/memo/remove?id={{item.id}}" confirm-message="确认删除 {{item.display_name}} ?">
+                    {% end %}
                 </div>
             </td>
         </tr>

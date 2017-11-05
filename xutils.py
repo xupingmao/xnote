@@ -260,9 +260,19 @@ def remove(path):
     if not os.path.exists(path):
         return
     if os.path.isfile(path):
-        os.remove(path)
+        dirname = os.path.dirname(path)
+        dirname = os.path.abspath(dirname)
+        dustbin = os.path.abspath(xconfig.DUSTBIN_DIR)
+        if dirname == dustbin:
+            os.remove(path)
+        else:
+            name = os.path.basename(path)
+            destpath = os.path.join(xconfig.DUSTBIN_DIR, "%s_%s" % (time.strftime("%Y%m%d"), name))
+            os.rename(path, destpath)
+        # os.remove(path)
     elif os.path.isdir(path):
-        shutil.rmtree(path)
+        # shutil.rmtree(path)
+        os.removedirs(path)
 
 def touch(path):
     if not os.path.exists(path):

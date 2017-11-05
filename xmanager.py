@@ -426,6 +426,11 @@ class TaskManager:
         schedule = xtables.get_schedule_table()
         tasks = schedule.select(order="url")
         self.task_list = list(tasks)
+        # 系统默认的任务
+        backup_task = xutils.Storage(name="[系统]备份", url="/system/backup", 
+            tm_wday="*", tm_hour="0", tm_min="0", 
+            message="", sound=0, webpage=0, id=None)
+        self.task_list.append(backup_task)
             
     def save_tasks(self):
         self.load_tasks()
@@ -480,6 +485,9 @@ def reload():
 
 def load_tasks():
     _manager.load_tasks()
+
+def get_task_list():
+    return _manager.get_task_list()
 
 def request(*args, **kw):
     global _manager

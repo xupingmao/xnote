@@ -41,11 +41,6 @@ def get_ip_list(blacklist = []):
 
 def check_db():
     xtables.init()
-
-def check_dirs():
-    xutils.makedirs(xconfig.DATA_PATH)
-    # xutils.makedirs(config.LOG_DIR)
-    # xutils.makedirs("tmp")
         
 def handle_args():
     parser = argparse.ArgumentParser()
@@ -98,8 +93,6 @@ def main():
     # I can reload the system by myself
     app = web.application(list(), var_env, autoreload=False)
     
-    # check directories
-    check_dirs()
     check_db()
 
     # 最后的mapping，用于匹配优先级较低的处理器
