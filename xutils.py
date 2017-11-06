@@ -262,12 +262,12 @@ def remove(path):
     if os.path.isfile(path):
         dirname = os.path.dirname(path)
         dirname = os.path.abspath(dirname)
-        dustbin = os.path.abspath(xconfig.DUSTBIN_DIR)
+        dustbin = os.path.abspath(xconfig.TRASH_DIR)
         if dirname == dustbin:
             os.remove(path)
         else:
             name = os.path.basename(path)
-            destpath = os.path.join(xconfig.DUSTBIN_DIR, "%s_%s" % (time.strftime("%Y%m%d"), name))
+            destpath = os.path.join(dustbin, "%s_%s" % (time.strftime("%Y%m%d"), name))
             os.rename(path, destpath)
         # os.remove(path)
     elif os.path.isdir(path):

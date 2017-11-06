@@ -60,6 +60,12 @@ class ExecuteHandler:
     @xauth.login_required("admin")
     def POST(self):
         name = xutils.get_argument("name")
+        content = xutils.get_argument("content")
+        if content != "" and content != None:
+            dirname = xconfig.SCRIPTS_DIR
+            path = os.path.join(dirname, name)
+            content = content.replace("\r", "")
+            xutils.savetofile(path, content)
         ret = xutils.exec_script(name)
         return dict(code="success", message="", data=ret)
 

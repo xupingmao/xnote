@@ -40,6 +40,7 @@ var XUI = function (window) {
   })
 
   // 点击prompt按钮
+  // <input type="button" class="prompt-btn" action="/rename?name=" message="重命名为" value="重命名">
   $(".prompt-btn").click(function () {
       var action = $(this).attr("action");
       var message = $(this).attr("message");

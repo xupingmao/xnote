@@ -62,6 +62,10 @@
                 indentUnit:4,
             });
             editor.setSize("auto", "auto");
+            editor.on("update", function (codeMirror, changeObj) {
+            // console.log("update");
+            $("#editor").val(codeMirror.doc.getValue());
+        })
         });
     </script>
 
@@ -92,6 +96,7 @@
 <script type="text/javascript">
     $(".executeScript").on("click", function(event) {
         var scriptName = $(event.target).attr("scriptName")
+        var content = $("[name=content]").val();
         // console.log(event);
         // console.log($(event.target).attr("scriptName"))
         $.post("/system/script_admin/execute?name=" + scriptName, function (responseText) {

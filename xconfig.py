@@ -83,7 +83,7 @@ def set_data_path(path):
     global SCRIPTS_DIR
     global CODE_ZIP
     global DATA_ZIP
-    global DUSTBIN_DIR
+    global TRASH_DIR
 
     makedirs(path)
     DATA_PATH = path
@@ -98,11 +98,11 @@ def set_data_path(path):
     SCRIPTS_DIR  = os.path.join(DATA_DIR, "scripts")
     CODE_ZIP     = os.path.join(DATA_DIR, "code.zip")
     DATA_ZIP     = os.path.join(DATA_DIR, "data.zip")
-    DUSTBIN_DIR  = os.path.join(DATA_DIR, "dustbin")
+    TRASH_DIR  = os.path.join(DATA_DIR, "trash")
 
     makedirs(TMP_DIR)
     makedirs(SCRIPTS_DIR)
-    makedirs(DUSTBIN_DIR)
+    makedirs(TRASH_DIR)
 
 set_data_path(DATA_DIR)
 """

@@ -14,7 +14,7 @@ class handler:
                 path = path.replace("/", "\\")
                 cmd = "explorer %s" % path
             elif xutils.is_mac():
-                cmd = "find %s" % path
+                cmd = "open %s" % path
         else:
             cmd = path
         print(cmd)

@@ -250,6 +250,9 @@ class RenameHandler:
         db.update(where=dict(id=id), name=name)
         return dict(code="success")
 
+    def GET(self):
+        return self.POST()
+
 class AutosaveHandler:
 
     @xauth.login_required()
