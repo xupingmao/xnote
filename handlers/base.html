@@ -8,8 +8,7 @@
 <style>
 body, html { 
   height: 100%; 
-  /* background: #F2F2F2; */
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 #navMenubox, .navMenu, .sub-menu {
@@ -28,12 +27,36 @@ body {
   list-style: none 
 }
 a { text-decoration: none; }
+
+
+.header {
+  width: 100%;
+  background-color: #eee;
+  position: fixed;
+  left: 0px;
+  top: 0px;
+}
+
 /* navMenu */
 .navMenubox { 
   width: 220px;
   background: #1c2229; 
   height:100%; 
   float: left;
+  padding-top: 28px;
+}
+
+.main {
+  padding-top: 28px;
+  width: auto;
+  height: 100%;
+  overflow: auto;
+}
+
+.footer {
+  float: left;
+  width: 100%;
+  height: 50px;
 }
 
 @media screen and (max-width: 600px) {
@@ -131,12 +154,6 @@ a { text-decoration: none; }
     background: lightblue;
 }
 
-.footer {
-  float: left;
-  width: 100%;
-  height: 50px;
-}
-
 /*---------------------*/
 </style>
 
@@ -152,16 +169,15 @@ a { text-decoration: none; }
   {% block head %} {% end %}
 
 </head>
-<body style="">
-<div class="header" style="width:100%;background-color:#eee;">
+<body>
+<div class="header">
   <div class="toggleMenu" style="margin-left: 15px; cursor: pointer;">
   <i class="fa fa-bars fa-2x"></i>
   </div>
 </div>
 
 <div class="navMenubox">
-  <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: 100%; height: 100%;">
-  <div id="slimtest1" style="overflow: hidden; width: 100%; height: 100%;">
+  <div style="overflow: hidden; width: 100%; height: 100%;">
     <ul class="navMenu">
       <li> 
         <a href="javascript:;" class="afinve" id="navFile"> 
@@ -215,15 +231,13 @@ a { text-decoration: none; }
         {% end %}
       </li>
     </ul>
-    <div style="position: absolute; bottom: 50px; left: 10px; color: #fff; ">
+    <div id="poweredBy" style="position: absolute; bottom: 50px; left: 10px; color: #fff; ">
       Powered by <a style="color: #fff; text-decoration: underline;" href="https://gitee.com/xupingmao/xnote">Xnote</a>
     </div>
   </div>
-  
-  <div class="slimScrollBar" style="background: rgb(180, 181, 181); width: 6px; position: absolute; top: 0px; opacity: 0.51; display: none; border-radius: 7px; z-index: 99; right: 0px; height: 267px;"></div><div class="slimScrollRail" style="width: 6px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(227, 227, 228); opacity: 0.5; z-index: 90; right: 0px;"></div></div>
 </div>
 
-<div class="main" style="width:auto; height:100%; overflow: auto;">
+<div class="main">
   {% block body %} {% end %}
   <div class="footer"></div>
 </div>
@@ -261,15 +275,26 @@ $(function() {
       expandMenu($(this), 300);
   });
 
+
+  function showSideBar() {
+    $(".navMenubox").animate({"margin-left": "0px"});
+    $("#poweredBy").show();
+  }
+
+  function hideSideBar() {
+    $(".navMenubox").animate({"margin-left": "-220px"});
+    $("#poweredBy").hide();
+  }
+
   function checkResize() {
     if ($(".navMenubox").is(":animated")) {
       return;
     }
     if (window.innerWidth < 700) {
       // 移动端，兼容下不支持@media的浏览器 
-      $(".navMenubox").animate({"margin-left": "-220px"});
+      hideSideBar();
     } else {
-      $(".navMenubox").animate({"margin-left": "0px"});
+      showSideBar();
     }
   }
 
@@ -278,13 +303,9 @@ $(function() {
   function toggleMenu() {
     var marginLeft = $(".navMenubox").css("margin-left");
     if (marginLeft == "0px") {
-      $(".navMenubox").animate({
-        "margin-left": "-220px"
-      });
+      hideSideBar();
     } else {
-      $(".navMenubox").animate({
-        "margin-left": "0px"
-      });
+      showSideBar();
     }
   }
 
