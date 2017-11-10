@@ -180,6 +180,14 @@ a { text-decoration: none; }
         </ul>
       </li>
 
+      {% if _is_admin %}
+      <li>
+          <a href="/fs_data" class="afinve">
+            <span>文件</span>
+          </a> 
+      </li>
+      {% end %}
+
       <li>
           <a href="javascript:;" class="afinve" id="navSystem">
             <span>系统</span>
@@ -189,16 +197,10 @@ a { text-decoration: none; }
           <ul class="sub-menu">
               <li><a href="/system/system"><span>系统</span></a></li>
               {%if _is_admin %}
-              <li><a href="/fs_data"><span>文件浏览器</span></a></li>
               <li><a href="/system/script_admin"><span>脚本</span></a></li>
               {% end %}
+              <li><a href="/tools/date"><span>日历</span></a></li>
           </ul>
-      </li>
-
-      <li>
-          <a href="/tools/date" class="afinve">
-            <span>日历</span>
-          </a> 
       </li>
 
       <li>
@@ -212,35 +214,6 @@ a { text-decoration: none; }
           </a> 
         {% end %}
       </li>
-
-      <!--
-      <li> <a href="javascript:;" class="afinve"> <i class="icon_3"></i> <span class="nav-text">统计报表</span> <span class="arrow"></span> </a>
-        <ul class="sub-menu">
-          <li><a href="javascript:;" class="afinve"><span>报表01</span></a></li>
-          <li><a href="javascript:;"><span>报表02</span></a></li>
-          <li> <a href="javascript:;" class="afinve"><span>打印</span><span class="arrow"></span></a>
-            <ul class="sub-menu">
-              <li><a href="javascript:;"><span>结算表01</span></a></li>
-            </ul>
-          </li>
-          <li> <a href="javascript:;" class="afinve"><span>数据查询</span><span class="arrow"></span></a>
-            <ul class="sub-menu">
-              <li><a href="javascript:;"><span>查询01</span></a></li>
-              <li> <a href="javascript:;" class="afinve"><span>报账明细</span><span class="arrow"></span></a>
-                <ul class="sub-menu">
-                  <li><a href="javascript:;"><span>报账明细1</span></a></li>
-                  <li> <a href="javascript:;" class="afinve"><span>汇总表</span><span class="arrow"></span></a>
-                    <ul class="sub-menu">
-                      <li><a href="javascript:;"><span>汇总表1</span></a></li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-    -->
     </ul>
     <div style="position: absolute; bottom: 50px; left: 10px; color: #fff; ">
       Powered by <a style="color: #fff; text-decoration: underline;" href="https://gitee.com/xupingmao/xnote">Xnote</a>
@@ -250,15 +223,8 @@ a { text-decoration: none; }
   <div class="slimScrollBar" style="background: rgb(180, 181, 181); width: 6px; position: absolute; top: 0px; opacity: 0.51; display: none; border-radius: 7px; z-index: 99; right: 0px; height: 267px;"></div><div class="slimScrollRail" style="width: 6px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(227, 227, 228); opacity: 0.5; z-index: 90; right: 0px;"></div></div>
 </div>
 
-<div class="main" style="width:auto; height:100%; overflow: scroll;">
-<!--     <div style="width:100%;background-color:#ccc;">
-      <div class="toggleMenu" style="margin-left: 15px; cursor: pointer;">
-      <i class="fa fa-bars fa-2x"></i>
-      </div>
-    </div>
- -->      
+<div class="main" style="width:auto; height:100%; overflow: auto;">
   {% block body %} {% end %}
-
   <div class="footer"></div>
 </div>
 <!-- Main Part End -->
@@ -332,7 +298,6 @@ $(function() {
     expandMenu($("#navFile"));
   }
   if (/\/system\/.*/.test(pathname) 
-      || /\/fs.*/.test(pathname) 
       || /\/tools\/.*/.test(pathname)) {
     expandMenu($("#navSystem"));
   }
