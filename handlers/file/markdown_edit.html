@@ -93,7 +93,7 @@
             <span id="result" style="color:green"></span>
             <div class="col-md-12" style="border:1px solid #ccc; border-bottom: none;box-sizing: border-box;">
                 <input type="submit" class="btn btn-primary" value="更新"/>
-                <input type="button" class="prompt-btn" action="/file/rename?id={{file.id}}&name=" message="重命名为" value="重命名">
+                <input type="button" class="prompt-btn" action="/file/rename?id={{file.id}}&name=" message="重命名为" default-value="{{file.name}}" value="重命名">
                 <input type="button" id="insertCode" class="btn" value="代码"/> 
                 <input type="file" id="file" name="file" class="hide" />
                 <input type="button" id="uploadBtn" class="btn" value="文件" />

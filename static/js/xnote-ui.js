@@ -44,7 +44,8 @@ var XUI = function (window) {
   $(".prompt-btn").click(function () {
       var action = $(this).attr("action");
       var message = $(this).attr("message");
-      var message = prompt(message);
+      var defaultValue = $(this).attr("default-value");
+      var message = prompt(message, defaultValue);
       if (message != "" && message) {
           $.get(action + encodeURIComponent(message), function () {
               window.location.reload();
