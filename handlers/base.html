@@ -179,6 +179,11 @@ a { text-decoration: none; }
 <div class="navMenubox">
   <div style="overflow: hidden; width: 100%; height: 100%;">
     <ul class="navMenu">
+      <li>
+        <a href="/search/search">
+            <span>搜索</span>
+        </a> 
+      </li>
       <li> 
         <a href="javascript:;" class="afinve" id="navFile"> 
             <span class="">资料</span>
@@ -191,7 +196,6 @@ a { text-decoration: none; }
           {%if _is_admin %}
           <li><a href="/file/group/memo"><span>备忘录</span></a></li>
           {% end %}
-          <li><a href="/search/search"><span>搜索</span></a></li>
         </ul>
       </li>
 
@@ -313,8 +317,7 @@ $(function() {
   });
 
   var pathname = location.pathname;
-  if (/\/file\/.*/.test(pathname)
-      || /\/search\/.*/.test(pathname)) {
+  if (/\/file\/.*/.test(pathname)) {
     expandMenu($("#navFile"));
   }
   if (/\/system\/.*/.test(pathname) 

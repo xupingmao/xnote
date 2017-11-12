@@ -1,20 +1,45 @@
 {% extends base.html %}
 
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.css"/>
+<style type="text/css">
+  .input-group {
+    float:left;
+    width:100%;
+    padding-bottom:5px;
+    height: 50px;
+  }
+
+  .searchInput {
+    height:100%;
+    padding-left: 20px;
+    width:75%;
+    max-width: 500px;
+    box-sizing: border-box;
+  }
+
+  .searchBtn {
+    height: 100%;
+    background: #355380; 
+    color: #fff; 
+    border: none;
+    border-radius:0px;
+    max-width:25%;
+  }
+</style>
 {% end %}
 
 {% block body %}
-<div class="col-md-12" style="padding-bottom: 5px;">
-    <form action="/search">
-      <div style="float: left;">
-          <input name = "key" type="text" value="{{?key}}" style="width: 300px;" placeholder="输入指令或搜索关键字">
-          <input type="submit" value="搜索"/>
+
+<div class="col-md-12" style="padding-top: 20px;">
+  <form id="search_form" method="GET" action="{{?action,'/search/search'}}">
+      <div class="input-group">
+          <input type="text" id="key" name="key" class="searchInput" value="{{?key}}" placeholder="输入指令或搜索关键字" />
+          <button class="searchBtn">Search</button>
       </div>
       <div class="col-md-12">
         <input type="checkbox" name="content" default-value="{{?content}}">全文搜索
       </div>
-    </form>
+  </form>
 </div>
 
 
