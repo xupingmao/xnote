@@ -123,7 +123,10 @@ def pre_render(kw):
     kw["math"] = math
     kw["_is_admin"]  = xauth.is_admin()
     kw["_has_login"] = xauth.has_login()
-    kw["_user"]      = xauth.get_current_user()
+    user_name = xauth.get_current_name()
+    if user_name is None:
+        user_name = ""
+    kw["_user_name"] = user_name
     kw["_user_agent"] = get_user_agent()
     # 处理首页公告
     kw["_top_notice"] = None

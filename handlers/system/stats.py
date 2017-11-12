@@ -1,7 +1,9 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/23
-# Last Modified on 2017/06/28
+# Last Modified on 2017/11/12
+import time
 import web
+import xauth
 import xtables
 import xutils
 
@@ -22,12 +24,25 @@ def save_ip(real_ip):
             db.update(value=int(record.value)+1, where=dict(id=record.id))
 
 SCRIPT = """
-
-if (navigator.geolocation) {
+if (navigator.geolocation && window.xuser != "") {
     navigator.geolocation.getCurrentPosition(function (pos) {
         console.log(pos);
-        if (pos) {
-            // alert(JSON.stringify(pos));
+        if (pos && pos.coords) {
+            // JSON.stringify 无效
+            var latitude = pos.coords.latitude;
+            var longitude = pos.coords.longitude;
+            var accuracy = pos.coords.accuracy;
+
+            var coords = {
+                latitude: latitude, 
+                longitude:longitude, 
+                accuracy: accuracy,
+                heading: pos.coords.heading,
+                speed: pos.coords.speed,
+                altitude: pos.coords.altitude,
+                altitudeAccuracy: pos.coords.altitudeAccuracy
+            };
+            $.post("/system/stats/location", {coords: JSON.stringify(coords)});
         }
     });
 }
@@ -42,10 +57,43 @@ class handler:
         # X-Forwarded-For: client, proxy1, proxy2
         # 而X-Real-IP目前不属于任何标准
         # See https://imququ.com/post/x-forwarded-for-header-in-http.html
-        save_ip(web.ctx.env.get("HTTP_X_FORWARDED_FOR"))
-        save_ip(web.ctx.env.get("REMOTE_ADDR"))
+        # save_ip(web.ctx.env.get("HTTP_X_FORWARDED_FOR"))
+        # save_ip(web.ctx.env.get("REMOTE_ADDR"))
         
-        web.header("Cache-Control", "max-age=600")
-        web.header("Content-Type", "application/javascript")
-        return SCRIPT
+        # web.header("Cache-Control", "max-age=600")
+        environ = web.ctx.environ
 
+        web.header("Content-Type", "application/javascript")
+        client_etag = environ.get('HTTP_IF_NONE_MATCH')
+
+        if client_etag == None or client_etag == "":
+            client_etag_val = 0
+        else:
+            client_etag_val = float(client_etag)
+
+        if time.time() - client_etag_val > 600:
+            # 采集数据时间区间
+            save_ip(web.ctx.env.get("HTTP_X_FORWARDED_FOR"))
+            save_ip(web.ctx.env.get("REMOTE_ADDR"))
+            content = SCRIPT
+        else:
+            content = "/* empty */"
+        web.header("Etag", time.time())
+        return content
+
+class LocationHandler:
+
+    def POST(self):
+        coords = xutils.get_argument("coords")
+        print(coords)
+        if coords != "null":
+            db = xtables.get_record_table()
+            db.insert(type="location", key=xauth.get_current_name(), cdate=xutils.format_date(), 
+                ctime=xutils.format_datetime(), value=coords)
+        return "{}"
+
+
+xurls = (
+    r"/system/stats", handler,
+    r"/system/stats/location", LocationHandler
+)

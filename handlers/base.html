@@ -65,7 +65,11 @@ a { text-decoration: none; }
     }
 }
 
-.navMenu-top { padding: 10px; color: #fff; border-bottom: 1px solid rgba(255,255,255,.1) }
+.navMenu-top { 
+  padding: 10px; 
+  color: #fff; 
+  border-bottom: 1px solid rgba(255,255,255,.1) 
+}
 
 .navMenu> li { 
     display: block; 
@@ -90,9 +94,18 @@ a { text-decoration: none; }
     padding-left: 15px;
 }
 
-.navMenu > li:nth-of-type(1)> a { border-top: 1px solid transparent; }
-.navMenu > li:last-child > a { border-bottom: 1px solid transparent; }
-.navMenu>li>a>i { font-size: 20px; float: left; font-style: normal; margin: 0 5px; }
+.navMenu > li:nth-of-type(1)> a { 
+  border-top: 1px solid transparent; 
+}
+.navMenu > li:last-child > a { 
+  border-bottom: 1px solid transparent; 
+}
+.navMenu>li>a>i { 
+  font-size: 20px; 
+  float: left; 
+  font-style: normal; 
+  margin: 0 5px; 
+}
 
 .navMenu li a .arrow:before { 
     display: block; 
@@ -162,6 +175,9 @@ a { text-decoration: none; }
 <link rel="stylesheet" href="/static/css/xnote.css"/>
 <link rel="stylesheet" href="/static/css/font-awesome.min.css"/>
 <script src="/static/lib/jquery/jquery-1.12.4.min.js"></script>
+<script type="text/javascript">
+  window.xuser = "{{_user_name}}";
+</script>
 <script type="text/javascript" src="/static/js/utils.js"></script>
 <script type="text/javascript" src="/system/stats"></script>
 <script type="text/javascript" src="/static/js/xnote-ui.js"></script>

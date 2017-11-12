@@ -102,6 +102,13 @@ class TestMain(unittest.TestCase):
         self.check_OK("/file/view?id=" + str(id))
         json_request("/file/remove?id=" + str(id))
 
+    def test_group(self):
+        self.check_200("/file/group")
+        self.check_200("/file/group/memo")
+        self.check_200("/file/group/ungrouped")
+        self.check_200("/file/group/bookmark")
+        self.check_200("/file/recent_edit")
+
 
     def test_fs(self):
         self.check_200("/fs//")
@@ -119,6 +126,8 @@ class TestMain(unittest.TestCase):
         self.check_200("/system/user_admin")
         self.check_200("/system/sys_var_admin")
         self.check_200("/system/crontab")
+        self.check_200("/system/stats")
+        self.check_200("/system/stats/location", method="POST")
 
     def test_tools(self):
         self.check_200("/tools/sql")
