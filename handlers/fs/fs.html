@@ -88,6 +88,8 @@
 
 <div class="col-md-12">
     <input type="button" class="btn" value="添加文件夹" id="addDirectory"/>
+    <input type="button" class="btn" value="重命名" id="renameBtn" 
+        message="重命名为">
     <input type="button" class="btn-danger" value="删除" id="deleteFile"/>
 </div>
 
@@ -211,6 +213,33 @@
                 }).fail(function (resp) {
                     console.log(resp);
                     alert("删除失败");
+                })
+            }
+        }
+    });
+
+    $("#renameBtn").on("click", function () {
+        var checked = $(".checkboxTd :checked");
+        if (checked.length == 0) {
+            alert("请选择文件");
+        } else if (checked.length > 1) {
+            alert("不支持批量重命名");
+        } else {
+            var name = checked.attr("data-name");
+            var dirname = "{{path}}";
+            var new_name = prompt("重命名为", name);
+            if (new_name) {
+                $.post("/fs_api/rename", 
+                    {dirname: dirname, old_name: name, new_name: new_name}, 
+                    function (resp) {
+                        if (resp.code == "success") {
+                            location.reload();
+                        } else {
+                            alert("重命名失败, %s".format(resp.message));
+                        }
+                }).fail(function (resp) {
+                    console.log(resp);
+                    alert("重命名失败");
                 })
             }
         }

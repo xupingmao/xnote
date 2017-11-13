@@ -336,6 +336,17 @@ class RemoveHandler:
             xutils.print_exc()
             return dict(code="fail", message=str(e))
 
+class RenameHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        dirname  = xutils.get_argument("dirname")
+        old_name = xutils.get_argument("old_name")
+        new_name = xutils.get_argument("new_name")
+        old_path = os.path.join(dirname, old_name)
+        new_path = os.path.join(dirname, new_name)
+        os.rename(old_path, new_path)
+        return dict(code="success")
 
 class DataDirHandler:
 
@@ -352,6 +363,7 @@ xurls = (
     r"/fs_data", DataDirHandler,
     r"/fs_api/add_dir", AddDirHandler,
     r"/fs_api/remove", RemoveHandler,
+    r"/fs_api/rename", RenameHandler,
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
