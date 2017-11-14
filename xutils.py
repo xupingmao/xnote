@@ -457,6 +457,7 @@ def is_editable(filename):
         ".cpp",
         ".h",
         ".hpp",
+        ".py",
         ".gradle"
     )
 
