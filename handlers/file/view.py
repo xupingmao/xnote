@@ -34,6 +34,7 @@ class handler:
         id   = xutils.get_argument("id", "")
         name = xutils.get_argument("name", "")
         page = xutils.get_argument("page", 1, type=int)
+        pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
@@ -62,21 +63,26 @@ class handler:
             amount = db.count(where="parent_id=%s AND is_deleted=0" % file.id)
             files = db.select(where=dict(parent_id=file.id, is_deleted=0), 
                 order="priority DESC, sctime DESC", 
-                limit=10, 
-                offset=(page-1)*10)
-        elif file.type == "post":
-            file.content = file.content.replace(u'\xad', '\n')
-            file.content = file.content.replace("\n", "<br/>")
+                limit=pagesize, 
+                offset=(page-1)*pagesize)
+            content = file.get_content()
+        elif file.type == "md" or file.type == "text":
             dao.visit_by_id(id)
+            content = file.get_content()
         else:
+            content = file.content
+            content = content.replace(u'\xad', '\n')
+            content = content.replace("\n", "<br/>")
+            if file.data != "" and file.data != None:
+                content = file.data
+            file.content = content
             dao.visit_by_id(id)
         return xtemplate.render("file/view.html",
             file=file, 
-            content = file.get_content(), 
             date2str=date2str,
             can_edit = can_edit,
             pathlist = pathlist,
-            page_max = math.ceil(amount/10),
+            page_max = math.ceil(amount/pagesize),
             page = page,
             page_url = "/file/view?id=%s&page=" % id,
             files = files)
@@ -259,6 +265,7 @@ class AutosaveHandler:
     def POST(self):
         content = xutils.get_argument("content", "")
         id = xutils.get_argument("id", "0", type=int)
+        type = xutils.get_argument("type")
         name = xauth.get_current_name()
         db = xtables.get_file_table()
         where = None
@@ -266,8 +273,17 @@ class AutosaveHandler:
             where=dict(id=id)
         else:
             where=dict(id=id, creator=name)
-        rowcount = db.update(content=content, size=len(content), smtime=xutils.format_datetime(), 
+        kw = dict(size=len(content), smtime=xutils.format_datetime(), 
             where=where)
+        if type == "html":
+            kw["data"] = content
+            kw["content"] = content
+            if xutils.bs4 is not None:
+                soup = xutils.bs4.BeautifulSoup(content, "html.parser")
+                kw["content"] = soup.get_text()
+        else:
+            kw["content"] = content
+        rowcount = db.update(**kw)
         if rowcount > 0:
             return dict(code="success")
         else:
@@ -344,6 +360,10 @@ class MemoRemoveHandler:
         xmanager.load_tasks()
         raise web.seeother("/file/group/memo")
         
+class LibraryHandler:
+
+    def GET(self):
+        return xtemplate.render("file/library.html")
 
 xurls = (
     r"/file/edit", handler, 
@@ -360,5 +380,6 @@ xurls = (
     r"/file/(\d+)/downvote", Downvote,
     r"/file/mark", MarkHandler,
     r"/file/unmark", UnmarkHandler,
+    r"/file/library", LibraryHandler
 )
 

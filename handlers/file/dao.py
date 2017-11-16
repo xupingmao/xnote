@@ -110,7 +110,7 @@ class FileDO(dict):
         for key in dict:
             file[key] = dict[key]
             # setattr(file, key, dict[key])
-        if hasattr(file, "content") and file.content is None:
+        if file.get("content", None) is None:
             file.content = ""
         if option:
             file.option = option

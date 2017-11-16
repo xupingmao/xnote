@@ -15,4 +15,7 @@
     {% if page < page_max %}
     <a class="x-page-link" href="{{page_url}}{{page+1}}">下一页</a>
     {% end %}
+    <span>分页大小</span>
+    <a class="x-page-size" href="{{page_url}}{{page}}&pagesize=20">20</a>
+    <a class="x-page-size" href="{{page_url}}{{page}}&pagesize=50">50</a>
 </p>

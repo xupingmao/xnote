@@ -117,7 +117,10 @@ def init_table_test():
 def init_table_file():
     with TableManager(config.DB_PATH, "file") as manager:
         manager.add_column("name",    "text", "")
+        # 纯文本，用于搜索
         manager.add_column("content", "text", "")
+        # 原始的数据，比如带标签的HTML，还有图片等的base64数据
+        manager.add_column("data", "text", "")
         manager.add_column("size",    "long", 0)
         # 修改版本
         manager.add_column("version",  "int", 0)
@@ -168,7 +171,7 @@ def init_table_tag():
         # 标签ID
         manager.add_column("file_id", "int", 0)
         # 权限控制，标签不做用户区分, groups字段暂时废弃
-        manager.add_column("groups",  "text", "")
+        # manager.add_column("groups",  "text", "")
 
 def init_table_schedule():
     # 2017/05/24

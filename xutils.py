@@ -30,6 +30,11 @@ try:
 except ImportError:
     sqlite3 = None # jython
 
+try:
+    import bs4
+except ImportError:
+    bs4 = None
+
 PY2 = sys.version_info[0] == 2
 
 if PY2:

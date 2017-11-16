@@ -45,7 +45,7 @@ OPEN_IN_BROWSER = False
 
 # 资料相关
 # 分页数量
-PAGE_SIZE = 10
+PAGE_SIZE = 20
 
 IP_BLACK_LIST = ["192.168.56.1"] # this is vbox ip
 

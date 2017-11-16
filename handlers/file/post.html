@@ -8,7 +8,7 @@
     {% include "file/tags.html" %}
     <hr/>
     <div id="editor">
-        {% raw file["content"] %}
+        {% raw file.content %}
     </div>
     <br/>
     <!-- <a href="javascript:deleteConfirm()" class="btn btn-danger">删除</a> -->
@@ -46,7 +46,7 @@
 
     <div style="margin-top: 5px;">
         <input id="saveBtn" type="button" value="保存">
-        <a href="/file/view?id={{file.id}}">预览</a>
+        <input type="button" class="link-btn" href="/file/view?id={{file.id}}" value="预览">
     </div>
 
 
@@ -60,12 +60,13 @@
     }
 
     var editor = new wangEditor('#toolbar', "#editor");
+    editor.customConfig.uploadImgShowBase64 = true   // 使用 base64 保存图片
     editor.create();
     editor.txt.html($("#content").text())
 
     $("#saveBtn").click(function () {
         var content = editor.txt.html();
-        $.post("/file/autosave", {id:{{file.id}}, content:content}, function (resp) {
+        $.post("/file/autosave?type=html", {id:{{file.id}}, content:content}, function (resp) {
             console.log(resp);
             if (resp.code == "success") {
                 window.location.reload();
