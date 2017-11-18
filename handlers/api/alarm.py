@@ -10,7 +10,7 @@ import xconfig
 
 class handler:
     def GET(self, msg=None):
-        repeat  = xutils.get_argument("repeat", 1, type=int)
+        repeat  = xutils.get_argument("repeat", 3, type=int)
         content = xutils.get_argument("content")
         repeat = min(10, repeat)
         if msg is None:
@@ -20,7 +20,7 @@ class handler:
         msg = xutils.unquote(msg)
         for i in range(repeat):
             xutils.say(msg)
-            time.sleep(5)
+            time.sleep(2)
         return dict(code="success")
 
 xurls = (

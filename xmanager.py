@@ -228,6 +228,8 @@ class ModelManager:
         
     def load_model_dir(self, parent = config.HANDLERS_DIR):
         dirname = parent.replace(".", "/")
+        if not os.path.exists(dirname):
+            return
         for filename in os.listdir(dirname):
             try:
                 filepath = os.path.join(dirname, filename)

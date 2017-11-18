@@ -204,25 +204,22 @@ def readfile(path, mode = "r"):
     for encoding in ["utf-8", "gbk", "mbcs", "latin_1"]:
         try:
             if PY2:
-                fp = open(path)
-                content = fp.read()
-                fp.close()
-                return content.decode(encoding)
+                with open(path) as fp:
+                    content = fp.read()
+                    return content.decode(encoding)
             else:
-                fp = open(path, encoding=encoding)
-                content = fp.read()
-                fp.close()
-                return content
+                with open(path, encoding=encoding) as fp:
+                    content = fp.read()
+                    return content
         except Exception as e:
             last_err = e
     raise Exception("can not read file %s" % path, last_err)
         
 def savetofile(path, content):
     import codecs
-    fp = open(path, mode="wb")
-    buf = codecs.encode(content, "utf-8")
-    fp.write(buf)
-    fp.close()
+    with open(path, mode="wb") as fp:
+        buf = codecs.encode(content, "utf-8")
+        fp.write(buf)
     return content
     
 savefile = savetofile

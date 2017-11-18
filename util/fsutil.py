@@ -41,16 +41,6 @@ def readRawFile(path):
         buf = fp.read(1024)
     fp.close()
 
-def writeFile(path, content):
-    fp = open(path, "wb")
-    buffer = codecs.encode(content, "utf-8")
-    fp.write(buffer)
-    fp.close()
-    return content
-
-def writefile(path, content):
-    return writeFile(path, content)
-
 def writebytes(path, bytes):
     dirname = os.path.dirname(path)
     check_create_dirs(dirname)

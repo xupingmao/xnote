@@ -20,7 +20,6 @@ sqlite3 = xutils.sqlite3
 MAX_VISITED_CNT = 200
 
 readFile = readfile
-writeFile = savetofile
 
 config  = xconfig
 DB_PATH = config.DB_PATH
