@@ -80,26 +80,29 @@
 
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
-        <input type="button" class="btn" value="打开" id="openDirectory"/>
         <input type="button" class="btn" value="添加文件夹" id="addDirectory"/>
         <input type="button" class="btn" value="重命名" id="renameBtn" 
             message="重命名为">
         <input type="button" class="btn-danger" value="删除" id="deleteFile"/>
-        <a href="/code/analyze?path={{path}}">分析</a>
-        <a href="/tools/zip?dirname={{path}}">压缩</a>
+        <input id="showMoreOptsBtn" type="button" class="btn" value="更多"/>
     </div>
 </div>
 
 
-<!-- 文件上传区域 -->
-<div id="uploader-demo">
-    <!--用来存放item-->
-    <div id="fileList" class="uploader-list"></div>
-    <div id="filePicker" class="hide">选择文件</div>
-
-    <div id="dropArea">点击或拖拽上传文件</div>
+<div id="moreOpts" class="hide">
+    <div>
+        <input type="button" class="btn" value="打开文件管理器" id="openDirectory"/>
+        <input type="button" class="link-btn" href="/code/analyze?path={{path}}" value="分析"/>
+        <input type="button" class="link-btn" href="/tools/zip?dirname={{path}}" value="压缩"/>
+    </div>
+    <!-- 文件上传区域 -->
+    <div id="uploader-demo">
+        <!--用来存放item-->
+        <div id="fileList" class="uploader-list"></div>
+        <div id="filePicker" class="hide">选择文件</div>
+        <div id="dropArea">点击或拖拽上传文件</div>
+    </div>
 </div>
-
 
 
 <hr/>
@@ -241,6 +244,9 @@
                 })
             }
         }
+    });
+    $("#showMoreOptsBtn").click(function (event) {
+        $("#moreOpts").toggle(200);
     })
 </script>
 

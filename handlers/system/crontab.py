@@ -16,12 +16,12 @@ from handlers.base import BaseHandler
 
 SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
 
-class handler(BaseHandler):
+class handler:
 
     @xauth.login_required("admin")
-    def default_request(self):
-        self.task_list = xmanager.instance().get_task_list()
-        for task in self.task_list:
+    def GET(self):
+        task_list = xmanager.get_task_list()
+        for task in task_list:
             if task.url is None: task.url = ""
             task.url = xutils.unquote(task.url)
             parts = task.url.split("://")
@@ -38,16 +38,14 @@ class handler(BaseHandler):
                 if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_TUPLE):
                     scripts.append(fname)
         scripts.sort()
-        self.render("system/crontab.html", task_list = self.task_list, scripts=scripts)
 
-    @xauth.login_required("admin")
-    def del_request(self):
-        # url = self.get_argument("url")
-        id = xutils.get_argument("id", type=int)
-        xtables.get_schedule_table().delete(where=dict(id=id))
-        xmanager.instance().load_tasks()
-        raise web.seeother("/system/crontab")
-    
+        def set_display_name(file):
+            file.display_name = file.name if file.name != "" else file.url
+            return file
+        task_list = list(map(set_display_name, task_list))
+        return xtemplate.render("system/crontab.html", task_list = task_list, scripts=scripts)
+
+
     @xauth.login_required("admin")
     def add_request_old(self):
         url      = xutils.get_argument("url")
@@ -115,7 +113,7 @@ class RemoveHandler:
     def POST(self):
         id = xutils.get_argument("id", type=int)
         xtables.get_schedule_table().delete(where=dict(id=id))
-        xmanager.instance().load_tasks()
+        xmanager.load_tasks()
         raise web.seeother("/system/crontab")
 
     def GET(self):

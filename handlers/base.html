@@ -209,9 +209,6 @@ a { text-decoration: none; }
           <li><a href="/file/group/bookmark">收藏</a></li>
           <li><a href="/file/group"><span>分组</span></a></li>
           <li><a href="/file/recent_edit"><span>最近更新</span></a></li>
-          {%if _is_admin %}
-          <li><a href="/file/group/memo"><span>备忘录</span></a></li>
-          {% end %}
           <!-- <li><a href="/file/library">图书馆</a></li> -->
         </ul>
       </li>
@@ -234,6 +231,7 @@ a { text-decoration: none; }
               <li><a href="/system/system"><span>系统</span></a></li>
               {%if _is_admin %}
               <li><a href="/system/script_admin"><span>脚本</span></a></li>
+              <li><a href="/system/crontab">定时任务</a></li>
               {% end %}
               <li><a href="/tools/date"><span>日历</span></a></li>
           </ul>

@@ -102,6 +102,15 @@ class TestMain(unittest.TestCase):
         self.check_OK("/file/view?id=" + str(id))
         json_request("/file/remove?id=" + str(id))
 
+    def test_file_editor_md(self):
+        json_request("/file/remove?name=xnote-md-test")
+        file = json_request("/file/add", method="POST",
+            data=dict(name="xnote-md-test", type="md", content="hello markdown", _type="json"))
+        id = file["id"]
+        file = json_request("/file/view?id=%s&_type=json" % id).get("file")
+        self.assertEqual("md", file["type"])
+        json_request("/file/remove?id=%s" % id)
+
     def test_group(self):
         self.check_200("/file/group")
         self.check_200("/file/group/memo")

@@ -348,7 +348,7 @@ class MemoSaveHandler:
                 sound = sound,
                 webpage = webpage)
         xmanager.load_tasks()
-        raise web.seeother("/file/group/memo")
+        raise web.seeother("/system/crontab")
 
 class MemoRemoveHandler:
 

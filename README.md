@@ -49,7 +49,7 @@ PPS：本项目主要目标人群是个人，目前多用户场景考虑不多�
 - 分享，可以把资料生成一个临时链接分享给朋友
 
 
-### 定时任务（备忘录）
+### 定时任务
 - 通过配置页面设置要调用的URL和时间匹配规则即可
 - 定时任务按照`{protocol}://{URL}`规则配置，protocol缺省值为local,也就是xnote自身的handler，有效的protocol如下
  - `http`, `https` 外部的网络请求
@@ -100,7 +100,7 @@ PPS：本项目主要目标人群是个人，目前多用户场景考虑不多�
 
 - webpy(修改版，xnote内置)
 - tornado template(修改版，xnote内置)
-- sqlite3 (Python自带文件型数据库，不支持多线程操作)
+- sqlite3 (Python自带文件型数据库)
 - psutil(可选，采集系统运行数据)
 - comtypes(可选，用于调用微软语音API)
 
