@@ -28,10 +28,26 @@ class ListHandler:
         page = xutils.get_argument("page", 1, type=int)
         offset = (page-1) * pagesize
         db = xtables.get_message_table()
-        chatlist = list(db.select(order="ctime DESC", limit=pagesize, offset=offset))
+        chatlist = list(db.select(order="status ASC, ctime DESC", limit=pagesize, offset=offset))
         chatlist.reverse()
         page_max = math.ceil(db.count() / pagesize)
         return dict(code="success", message="", data=chatlist, page_max=page_max, current_user=xauth.get_current_name())
+
+class FinishMessage:
+
+    def POST(self):
+        id = xutils.get_argument("id")
+        if id == "":
+            return
+        db = xtables.get_message_table()
+        msg = db.select_one(where=dict(id=id))
+        if msg is None:
+            return dict(code="fail", message="data not exists")
+        if msg.user != xauth.get_current_name():
+            return dict(code="fail", message="no permission")
+        db.update(status=1, where=dict(id=id))
+        return dict(code="success")
+        
 
 class RemoveHandler:
 
@@ -52,6 +68,7 @@ class RemoveHandler:
 xurls=(
     "/file/message/add", AddHandler,
     "/file/message/remove", RemoveHandler,
+    "/file/message/finish", FinishMessage,
     "/file/message/list", ListHandler
 )
 

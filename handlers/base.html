@@ -232,6 +232,7 @@ a { text-decoration: none; }
               {%if _is_admin %}
               <li><a href="/system/script_admin"><span>脚本</span></a></li>
               <li><a href="/system/crontab">定时任务</a></li>
+              <li><a href="/tools/message">消息</a></li>
               {% end %}
               <li><a href="/tools/date"><span>日历</span></a></li>
           </ul>
@@ -340,9 +341,9 @@ $(function() {
     expandMenu($("#navSystem"));
   }
 
-  $(window).resize(function () {
-    checkResize();
-  });
+  // $(window).resize(function () {
+  //   checkResize();
+  // });
 });
 </script>
 </body>

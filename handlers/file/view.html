@@ -94,7 +94,7 @@ img {
     {% init file_type = "md" %}
     {% init pathlist = [] %}
     {% init file = None %}
-    {% init show_search_div = True %}
+    {% init show_search_div = False %}
 
     {% if file != None %}
         {% set globals()['file_type'] = file.type %}

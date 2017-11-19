@@ -264,8 +264,7 @@ def search_name(words, limit=None, file_type=None):
 
 def visit_by_id(id):
     db = get_db()
-    # return db.update(satime=dateutil.format_time(), visited_cnt=visited_cnt+1, where=dict(id=id))
-    sql = "update file set visited_cnt = visited_cnt + 1, satime='%s' where id = %s and visited_cnt < %s" % \
+    sql = "UPDATE file SET visited_cnt = visited_cnt + 1, satime='%s' where id = %s and visited_cnt < %s" % \
         (dateutil.format_time(), id, MAX_VISITED_CNT)
     return db.query(sql)
 

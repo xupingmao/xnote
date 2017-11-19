@@ -22,8 +22,14 @@
     }
 
     .chat-avatar {
-        color: green;
+        color: #2092d9;
     }
+
+    .finished-tag {
+        color: #fff;
+        background-color: green;
+    }
+
     .chat-msg {
         /*background-color: #99CCFF;*/
         padding: 0.3em;
@@ -84,6 +90,8 @@
         <div class="chat-msg-div" v-for="message in messageList">
             <div class="chat-avatar col-md-12">
                 {{! message.user }}
+                <span class="tag-span" v-if="message.status==1">已完成</span>
+                <span class="tag-span" style="background-color: #f90" v-if="message.status==0">进行中</span>
             </div>
             <div class="chat-msg">
                 <div v-if="message.link">
@@ -94,13 +102,15 @@
                         <img v-bind:src="message.imgSrc" class="chat-msg-img"/>
                     </a>
                 </div>
-                <div v-else class="chat-msg-content">
-                    {{! message.content }}
+                <div v-else class="chat-msg-content" v-html="message.content">
                 </div>
             </div>
             
             <div class="col-md-12">
-                <p class="chat-msg-time">{{! message.ctime }} <a style="font-size: 10px;" v-if="message.user==current_user" v-bind:msg-id="message.id" href="javascript:void(0)" @click="deleteMessage($event)">删除</a> </p>
+                <p class="chat-msg-time">{{! message.ctime }} 
+                    <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" href="javascript:void(0)" @click="deleteMessage($event)">删除</a> 
+                    <a class="smallText" v-if="message.user==current_user && message.status==0" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
+                </p>
                 <hr/>
             </div>
         </div>
@@ -117,8 +127,8 @@
 </div>
 
 <script type="text/javascript">
-    function newMessage(content, user) {
-        return {"content": content, user:user}
+    function newMessage(content, user, status) {
+        return {"content": content, user:user, status:status}
     }
 
     function wrapMessage(message) {
@@ -133,6 +143,10 @@
             } else {
                 message.link = path;
             }
+        } else {
+            content = content.replace(/(https*:\/\/[^ \t\r\n]+)/gi, '<a href="$1">$1</a>');
+            content = content.replace(/\n/gi, "<br>");
+            message.content = content;
         }
         return message;
     }
@@ -140,7 +154,7 @@
     var app = new Vue({
         el: "#app",
         data: {
-            title: "留言板",
+            title: "消息",
             message: "Hello, Vue!",
             messageList: [newMessage("Welcome to chatroom")],
             person: {
@@ -215,6 +229,19 @@
                         alert(data.message);
                     }
                 })
+            },
+
+            finishMessage: function (event) {
+                var el = event.currentTarget;
+                var self = this;
+                var id = $(el).attr("msg-id");
+                $.post("/file/message/finish", {id: id}, function (resp) {
+                    if (resp.code == "success") {
+                        app.refreshMessage();
+                    } else {
+                        alert(data.message);
+                    }
+                });
             }
         }
     });

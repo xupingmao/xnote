@@ -27,7 +27,7 @@ def try_decode(bytes):
     except:
         return bytes.decode("gbk")
 
-class handler:
+class ViewHandler:
 
     # @xutils.profile()
     def GET(self):
@@ -83,6 +83,7 @@ class handler:
             can_edit = can_edit,
             pathlist = pathlist,
             page_max = math.ceil(amount/pagesize),
+            show_search_div = True,
             page = page,
             page_url = "/file/view?id=%s&page=" % id,
             files = files)
@@ -366,13 +367,13 @@ class LibraryHandler:
         return xtemplate.render("file/library.html")
 
 xurls = (
-    r"/file/edit", handler, 
+    r"/file/edit", ViewHandler, 
     r"/file/rename", RenameHandler,
-    r"/file/markdown", handler,
+    r"/file/markdown", ViewHandler,
     r"/file/memo/edit", MemoEditHandler,
     r"/file/memo/save", MemoSaveHandler,
     r"/file/memo/remove", MemoRemoveHandler,
-    r"/file/view", handler,
+    r"/file/view", ViewHandler,
     r"/file/markdown/edit", MarkdownEdit,
     r"/file/update", UpdateHandler,
     r"/file/autosave", AutosaveHandler,

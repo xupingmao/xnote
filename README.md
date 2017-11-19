@@ -13,7 +13,7 @@ xnote是一个基于Python的PIM(Personal Information Management)系统，提供
  
 笔记的目的是管理知识，Xnote最终目标也是管理个人生活工作中的数据和知识.
 
-PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，当代豪杰sublime text, Idea Intellij等等)，他们拥有无限扩展的可能。Xnote也会朝着可自由扩展方向前进
+PS：个人非常喜欢插件式架构软件（比如上古神器Emacs，现在鼎鼎大名的sublime text, Idea Intellij等等)，他们拥有无限扩展的可能。Xnote也会朝着可自由扩展方向前进
 
 PPS：本项目主要目标人群是个人，目前多用户场景考虑不多，并发支持有限
 
@@ -21,6 +21,12 @@ PPS：本项目主要目标人群是个人，目前多用户场景考虑不多�
 ## 项目地址
 - [github](https://github.com/xupingmao/xnote)
 - [码云](https://gitee.com/xupingmao/xnote)
+
+### 关于版本
+
+- master版本是开发版本，稳定版本可以下载tag版本，相对来说比较稳定。
+- 目前的大版本是1.0版本，小版本暂时3个月左右迭代一次，质量主要通过自动化测试保证，小版本开发完之后，如果运行一段时间没有明显BUG我会创建一个新的Tag分支。
+- 升级过程中尽量向前兼容，大部分的数据库结构变更可以自动执行，不兼容的地方将会在Release Log中加以说明。
 
 ## Python版本
 

@@ -214,12 +214,18 @@ def init_table_user():
         manager.add_column("mtime",      "text", "")
 
 def init_table_message():
-    # 用来存储比较短的消息
+    # 用来存储比较短的消息,消息和资料库的主要区别是消息存储较短的单一信息
+    # 而且消息不允许修改
     # 2017/05/29
     with TableManager(config.DB_PATH, "message") as manager:
         manager.add_column("ctime", "text", "")
         manager.add_column("user",  "text", "")
+        # 当前的类型包括 留言 日程提醒
+        manager.add_column("type",  "text", "")
+        # 消息的状态 0初始状态 1已完成
+        manager.add_column("status", "int", 0)
         manager.add_column("content", "text", "")
+        manager.add_index("type")
 
 def init_table_record():
     # 日志库和主库隔离开

@@ -19,13 +19,14 @@ class PathNode:
         self.name = name
         self.url = url
 
-class handler:
+class FileListHandler:
 
     @xauth.login_required()
     def GET(self):
         return xtemplate.render("file/view.html",
             file_type="group",
             pseudo_groups=True,
+            show_search_div=True,
             files=dao.get_category(xauth.get_current_name()))
 
     def POST(self):
@@ -65,7 +66,7 @@ class MoveHandler:
     def POST(self):
         return self.GET()
         
-class ListHandler:
+class GroupListHandler:
 
     def GET(self):
         id = xutils.get_argument("id", "", type=int)
@@ -145,10 +146,10 @@ class MemoHandler:
             files = files)
 
 xurls = (
-    r"/file/group", handler,
+    r"/file/group", FileListHandler,
     r"/file/group/ungrouped", Ungrouped,
     r"/file/group/removed", RemovedHandler,
-    r"/file/group/list", ListHandler,
+    r"/file/group/list", GroupListHandler,
     r"/file/group/move", MoveHandler,
     r"/file/group/bookmark", BookmarkHandler,
     r"/file/group/recent_created", RecentCreatedHandler,
