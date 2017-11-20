@@ -219,10 +219,11 @@ def init_table_message():
     # 2017/05/29
     with TableManager(config.DB_PATH, "message") as manager:
         manager.add_column("ctime", "text", "")
+        manager.add_column("mtime", "text", "")
         manager.add_column("user",  "text", "")
         # 当前的类型包括 留言 日程提醒
         manager.add_column("type",  "text", "")
-        # 消息的状态 0初始状态 1已完成
+        # 消息的状态 0初始状态 100已完成
         manager.add_column("status", "int", 0)
         manager.add_column("content", "text", "")
         manager.add_index("type")

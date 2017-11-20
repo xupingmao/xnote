@@ -60,6 +60,7 @@
         /*right: 0;*/
         /*width: calc(100% - 5rem);*/
         width: 100%;
+        box-sizing: border-box;
     }
 
     .send-button {
@@ -67,6 +68,21 @@
         width: 4rem;
         margin-top: 0.5rem;
         margin-right: 0.5rem;
+    }
+
+    .tab {
+        float: left;
+        padding: 2px;
+        cursor: pointer;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        color: #ccc;
+    }
+    .tab:hover {
+        color: #000;
+    }
+    .tab-link-active {
+        color: #000;
     }
 
 </style>
@@ -77,10 +93,15 @@
 
 <div id="app" class="col-md-12">
     <h2>{{! title }}</h2>
+    <div class="col-md-12">
+        <a class="tab tab-link" href="/tools/message?status=created">处理中</a>
+        <a class="tab tab-link" href="/tools/message?status=done">已处理</a>
+        <a class="tab tab-link" href="/tools/message?status=all">全部</a>
+    </div>
 
     <div class="input-div col-md-12">
         <textarea class="col-md-12 input-box" v-model="input" rows=3></textarea>
-        <input type="button" name="" class="send-button btn" value="发送" @click="sendMessage()">
+        <input type="button" name="" class="send-button btn" value="添加" @click="sendMessage()">
         <input type="file" id="filePicker" name="" class="hide" />
         <input type="button" id="filePickerBtn" name="" class="send-button btn" value="上传文件"/>
         <div id="uploadProgress" style="float: right;" ></div>
@@ -90,7 +111,7 @@
         <div class="chat-msg-div" v-for="message in messageList">
             <div class="chat-avatar col-md-12">
                 {{! message.user }}
-                <span class="tag-span" v-if="message.status==1">已完成</span>
+                <span class="tag-span" v-if="message.status==100">已完成</span>
                 <span class="tag-span" style="background-color: #f90" v-if="message.status==0">进行中</span>
             </div>
             <div class="chat-msg">
@@ -109,7 +130,7 @@
             <div class="col-md-12">
                 <p class="chat-msg-time">{{! message.ctime }} 
                     <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" href="javascript:void(0)" @click="deleteMessage($event)">删除</a> 
-                    <a class="smallText" v-if="message.user==current_user && message.status==0" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
+                    <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
                 </p>
                 <hr/>
             </div>
@@ -172,8 +193,13 @@
             page_next_url:"#",
             page_prev_url:"#",
             current_user:"",
+            status: "",
         },
         methods: {
+
+            init: function () {
+                this.status = getUrlParams().status;
+            },
 
             refreshMessage: function () {
                 var self = this;
@@ -181,7 +207,7 @@
                 app.page = page;
                 app.page_next_url = app.page_url + (parseInt(page)+1);
                 app.page_prev_url = app.page_url + (page-1);
-                $.get("/file/message/list", {pagesize:10,page:page}, function (respText) {
+                $.get("/file/message/list", {pagesize:10,page:page,status:self.status}, function (respText) {
                     var data = respText;
                     app.page_max = data.page_max;
                     app.current_user = data.current_user;
@@ -246,6 +272,7 @@
         }
     });
 
+    app.init();
     app.refreshMessage();
 // 文件上传
 var BASE_URL = "/static/lib/webuploader"

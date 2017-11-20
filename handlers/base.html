@@ -213,6 +213,10 @@ a { text-decoration: none; }
         </ul>
       </li>
 
+      {% if _has_login %}
+      <li><a href="/tools/message?status=created">消息</a></li>
+      {% end %}
+
       {% if _is_admin %}
       <li>
           <a href="/fs_data" class="afinve">
@@ -232,7 +236,6 @@ a { text-decoration: none; }
               {%if _is_admin %}
               <li><a href="/system/script_admin"><span>脚本</span></a></li>
               <li><a href="/system/crontab">定时任务</a></li>
-              <li><a href="/tools/message">消息</a></li>
               {% end %}
               <li><a href="/tools/date"><span>日历</span></a></li>
           </ul>
@@ -336,8 +339,9 @@ $(function() {
   if (/\/file\/.*/.test(pathname)) {
     expandMenu($("#navFile"));
   }
-  if (/\/system\/.*/.test(pathname) 
-      || /\/tools\/.*/.test(pathname)) {
+  if (pathname != "/tools/message"
+      && (/\/system\/.*/.test(pathname) 
+      || /\/tools\/.*/.test(pathname))) {
     expandMenu($("#navSystem"));
   }
 

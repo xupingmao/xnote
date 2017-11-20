@@ -260,7 +260,7 @@ class RenameHandler:
     def GET(self):
         return self.POST()
 
-class AutosaveHandler:
+class FileSaveHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -376,7 +376,8 @@ xurls = (
     r"/file/view", ViewHandler,
     r"/file/markdown/edit", MarkdownEdit,
     r"/file/update", UpdateHandler,
-    r"/file/autosave", AutosaveHandler,
+    r"/file/save", FileSaveHandler,
+    r"/file/autosave", FileSaveHandler,
     r"/file/(\d+)/upvote", Upvote,
     r"/file/(\d+)/downvote", Downvote,
     r"/file/mark", MarkHandler,

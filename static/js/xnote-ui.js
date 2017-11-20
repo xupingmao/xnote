@@ -68,7 +68,19 @@ var XUI = function (window) {
         $(".x-dialog-close, .x-dialog-cancel").on("click", function () { hideDialog(); });
       })
     }
-  })
+  });
+
+  // 类似tab的超链接
+  function initTabLink() {
+    $(".tab-link").each(function (index, ele) {
+      var link = $(ele).attr("href");
+      var fullpath = location.href;
+      console.log(link, fullpath);
+      if (fullpath.indexOf(link) >= 0) {
+        $(ele).addClass("tab-link-active");
+      }
+    });
+  }
   
   // 对话框相关
   function initDialog() {
@@ -114,6 +126,7 @@ var XUI = function (window) {
   function initElementProcessors() {
     initSelect();
     initCheckbox();
+    initTabLink();
   }
 
   initElementProcessors();

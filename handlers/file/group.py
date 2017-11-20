@@ -38,9 +38,10 @@ class Ungrouped:
     def GET(self):
         page = xutils.get_argument("page", 1, type=int)
         db = xtables.get_file_table()
+        pagesize = xconfig.PAGE_SIZE
 
         sql = "SELECT a.* FROM file a LEFT JOIN file b ON a.parent_id = b.id WHERE a.is_deleted = 0 AND a.type != 'group' AND (b.id is null OR b.type != 'group') ORDER BY smtime DESC LIMIT %s,%s"
-        files = db.query(sql % ((page-1)*10, 10))
+        files = db.query(sql % ((page-1)*pagesize, pagesize))
         
         count_sql = "SELECT COUNT(1) AS amount FROM file a LEFT JOIN file b ON a.parent_id = b.id WHERE a.is_deleted = 0 AND a.type != 'group' AND (b.id is null OR b.type != 'group')"
         amount = db.count(sql = count_sql)
@@ -50,7 +51,7 @@ class Ungrouped:
             file_type="group",
             files = files,
             page = page,
-            page_max = math.ceil(amount / 10),
+            page_max = math.ceil(amount / pagesize),
             page_url="/file/group/ungrouped?page=")
 
 class MoveHandler:
