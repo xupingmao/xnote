@@ -39,7 +39,7 @@ a { text-decoration: none; }
 
 /* navMenu */
 .navMenubox { 
-  width: 220px;
+  width: 200px;
   background: #1c2229; 
   height:100%; 
   float: left;
@@ -60,9 +60,15 @@ a { text-decoration: none; }
 }
 
 @media screen and (max-width: 600px) {
-    .navMenubox {
-      margin-left: -220px;
-    }
+  .navMenubox {
+    margin-left: -200px;
+  }
+}
+
+@media screen and (min-width: 600px) {
+  .navMenubox {
+    margin-left: 0px;
+  }
 }
 
 .navMenu-top { 
@@ -76,19 +82,19 @@ a { text-decoration: none; }
     margin: 0; 
     padding: 0; 
     border: 0px; 
-    width: 220px;
+    width: 200px;
 }
 
 .navMenu>li>a { 
     display: block;
     overflow: hidden; 
     padding-left: 0px; 
-    line-height: 40px; 
+    line-height: 30px; 
     color: #ABB1B7; 
     transition: all .3s; 
     position: relative; 
     text-decoration: none; 
-    font-size: 17px; 
+    font-size: 16px; 
     border-top: 1px solid #222932; 
     border-bottom: 2px solid #191e24; 
     padding-left: 15px;
@@ -101,7 +107,7 @@ a { text-decoration: none; }
   border-bottom: 1px solid transparent; 
 }
 .navMenu>li>a>i { 
-  font-size: 20px; 
+  font-size: 16px; 
   float: left; 
   font-style: normal; 
   margin: 0 5px; 
@@ -153,7 +159,7 @@ a { text-decoration: none; }
 .navMenu>li>ul.sub-menu li>a { 
     display: block; 
     font-size: 16px; 
-    line-height: 36px; 
+    line-height: 30px; 
     padding-left: 20px; 
     color: #ABB1B7; 
     clear: both; 
@@ -214,7 +220,7 @@ a { text-decoration: none; }
       </li>
 
       {% if _has_login %}
-      <li><a href="/tools/message?status=created">消息</a></li>
+      <li><a href="/tools/message?status=created">清单</a></li>
       {% end %}
 
       {% if _is_admin %}
@@ -304,7 +310,7 @@ $(function() {
   }
 
   function hideSideBar() {
-    $(".navMenubox").animate({"margin-left": "-220px"});
+    $(".navMenubox").animate({"margin-left": "-200px"});
     $("#poweredBy").hide();
   }
 

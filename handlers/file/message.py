@@ -61,6 +61,7 @@ class FinishMessage:
 
 class RemoveHandler:
 
+    @xauth.login_required()
     def POST(self):
         id = xutils.get_argument("id")
         if id == "":
@@ -75,9 +76,21 @@ class RemoveHandler:
         db.delete(where=dict(id=id))
         return dict(code="success")
 
+class UpdateHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        id = xutils.get_argument("id")
+        content = xutils.get_argument("content")
+        user_name = xauth.get_current_name()
+        db = xtables.get_message_table()
+        db.update(content = content, mtime = xutils.format_datetime(), where=dict(id=id, user=user_name))
+        return dict(code="success")
+
 xurls=(
     "/file/message/add", AddHandler,
     "/file/message/remove", RemoveHandler,
+    "/file/message/update", UpdateHandler,
     "/file/message/finish", FinishMessage,
     "/file/message/list", ListHandler
 )

@@ -36,7 +36,7 @@
         padding: 0.3rem;
         margin-top: 0.1rem;
         float: left;
-        /*width: calc(100% - 6em);*/
+        box-sizing: border-box;
     }
     .chat-msg-content {
         padding-left: 0.5rem;
@@ -92,7 +92,6 @@
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
 <div id="app" class="col-md-12">
-    <h2>{{! title }}</h2>
     <div class="col-md-12">
         <a class="tab tab-link" href="/tools/message?status=created">处理中</a>
         <a class="tab tab-link" href="/tools/message?status=done">已处理</a>
@@ -100,10 +99,10 @@
     </div>
 
     <div class="input-div col-md-12">
-        <textarea class="col-md-12 input-box" v-model="input" rows=3></textarea>
+        <textarea class="col-md-12 input-box" v-model="input" rows=4></textarea>
         <input type="button" name="" class="send-button btn" value="添加" @click="sendMessage()">
-        <input type="file" id="filePicker" name="" class="hide" />
-        <input type="button" id="filePickerBtn" name="" class="send-button btn" value="上传文件"/>
+        <input type="file" id="filePicker" class="hide" />
+        <input type="button" id="filePickerBtn" class="send-button btn" value="上传文件"/>
         <div id="uploadProgress" style="float: right;" ></div>
     </div>
 
@@ -114,8 +113,13 @@
                 <span class="tag-span" v-if="message.status==100">已完成</span>
                 <span class="tag-span" style="background-color: #f90" v-if="message.status==0">进行中</span>
             </div>
-            <div class="chat-msg">
-                <div v-if="message.link">
+            <div class="chat-msg col-md-12">
+                <template v-if="message.editable">
+                    <textarea class="input-box col-md-12" rows=4 v-model="message.content"></textarea>
+                    <input type="button" value="更新" v-on:click="updateMessage(message)">
+                    <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel">
+                </template>
+                <div v-else-if="message.link">
                     <a v-bind:href="message.link">{{! message.link }}</a>
                 </div>
                 <div v-else-if="message.imgSrc">
@@ -123,14 +127,14 @@
                         <img v-bind:src="message.imgSrc" class="chat-msg-img"/>
                     </a>
                 </div>
-                <div v-else class="chat-msg-content" v-html="message.content">
+                <div v-else class="chat-msg-content" v-html="message.html">
                 </div>
-            </div>
-            
+            </div>            
             <div class="col-md-12">
                 <p class="chat-msg-time">{{! message.ctime }} 
-                    <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" href="javascript:void(0)" @click="deleteMessage($event)">删除</a> 
                     <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
+                    <a class="smallText" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
+                    <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" style="color: red;" @click="deleteMessage($event)">删除</a> 
                 </p>
                 <hr/>
             </div>
@@ -153,6 +157,7 @@
     }
 
     function wrapMessage(message) {
+        message.editable = false;
         var content = message.content;
         if (content.startsWith("file://")) {
             var length = "file://".length;
@@ -165,9 +170,9 @@
                 message.link = path;
             }
         } else {
-            content = content.replace(/(https*:\/\/[^ \t\r\n]+)/gi, '<a href="$1">$1</a>');
-            content = content.replace(/\n/gi, "<br>");
-            message.content = content;
+            var html = content.replace(/(https*:\/\/[^ \t\r\n]+)/gi, '<a href="$1">$1</a>');
+            html = html.replace(/\n/gi, "<br>");
+            message.html = html;
         }
         return message;
     }
@@ -199,6 +204,7 @@
 
             init: function () {
                 this.status = getUrlParams().status;
+                this.page_url = "/tools/message?status=%s&pagesize=10&page=".format(this.status);
             },
 
             refreshMessage: function () {
@@ -248,13 +254,17 @@
                 var el = event.currentTarget;
                 var self = this;
                 var id = $(el).attr("msg-id");
-                $.post("/file/message/remove", {id: id}, function (resp) {
-                    if (resp.code == "success") {
-                        app.refreshMessage();
-                    } else {
-                        alert(data.message);
-                    }
-                })
+                var content = $(el).attr("msg-content");
+                var check = confirm("确认删除 '%s' ?".format(content));
+                if (check) {                
+                    $.post("/file/message/remove", {id: id}, function (resp) {
+                        if (resp.code == "success") {
+                            app.refreshMessage();
+                        } else {
+                            alert(data.message);
+                        }
+                    });
+                }
             },
 
             finishMessage: function (event) {
@@ -268,6 +278,13 @@
                         alert(data.message);
                     }
                 });
+            },
+
+            updateMessage: function (message) {
+                $.post("/file/message/update", message, function (resp) {
+                    console.log(resp);
+                    app.refreshMessage();
+                })
             }
         }
     });

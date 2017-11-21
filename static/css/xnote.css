@@ -50,6 +50,10 @@ a:hover {
     background-color: red;
 }
 
+.btn-cancel {
+    background-color: red;
+}
+
 p,li,a {
     font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
 }
