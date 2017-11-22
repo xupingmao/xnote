@@ -47,7 +47,7 @@ class ViewHandler:
         
         if not file.is_public and xauth.get_current_user() is None:
             return xauth.redirect_to_login()
-
+        show_search_div = False
         db = xtables.get_file_table()
         pathlist = dao.get_pathlist(db, file)
         user_name = xauth.get_current_name()
@@ -66,6 +66,7 @@ class ViewHandler:
                 limit=pagesize, 
                 offset=(page-1)*pagesize)
             content = file.get_content()
+            show_search_div = True
         elif file.type == "md" or file.type == "text":
             dao.visit_by_id(id)
             content = file.get_content()
@@ -83,7 +84,7 @@ class ViewHandler:
             can_edit = can_edit,
             pathlist = pathlist,
             page_max = math.ceil(amount/pagesize),
-            show_search_div = True,
+            show_search_div = show_search_div,
             page = page,
             page_url = "/file/view?id=%s&page=" % id,
             files = files)
