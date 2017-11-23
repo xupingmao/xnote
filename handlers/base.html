@@ -124,7 +124,7 @@ a { text-decoration: none; }
     /* font-family: FontAwesome; */
     height: auto; 
     /* content: "\f105"; */
-    content: "+";
+    /*content: "+";*/
     font-weight: 300; 
     text-shadow: none; 
 }
@@ -147,7 +147,6 @@ a { text-decoration: none; }
   background: #12181b; 
 }
 .navMenu>li>ul.sub-menu, .navMenu>li>ul.sub-menu>li>ul.sub-menu { 
-  display: none; 
   list-style: none; 
   clear: both; 
   margin: 8px 0px 0px 10px; 
@@ -201,46 +200,31 @@ a { text-decoration: none; }
 <div class="navMenubox">
   <div style="overflow: hidden; width: 100%; height: 100%;">
     <ul class="navMenu">
-      <li>
-        <a href="/search/search">
-            <span>搜索</span>
-        </a> 
-      </li>
-      <li> 
-        <a href="javascript:;" class="afinve" id="navFile"> 
-            <span class="">知识</span>
-            <span class="arrow"></span>
-        </a>
-        <ul class="sub-menu">
-          <li><a href="/file/group/bookmark">收藏</a></li>
-          <li><a href="/file/group"><span>分组</span></a></li>
-          <li><a href="/file/recent_edit"><span>最近更新</span></a></li>
-          <!-- <li><a href="/file/library">图书馆</a></li> -->
-        </ul>
-      </li>
-
+      <li><a href="/search/search">搜索</a> </li>
+      <li><a href="/file/group"><span>资料分组</span></a></li>
+      <li><a href="/file/group/bookmark">我的收藏</a></li>
+      <li><a href="/file/recent_edit"><span>最近更新</span></a></li>
+      <!-- <li><a href="/file/library">图书馆</a></li> -->
       {% if _has_login %}
-      <li><a href="/tools/message?status=created">清单</a></li>
+      <li><a href="/tools/message?status=created">任务清单</a></li>
       {% end %}
 
       {% if _is_admin %}
       <li>
-          <a href="/fs_data" class="afinve">
-            <span>文件</span>
-          </a> 
+          <a href="/fs_data" class="afinve">文件管理</a> 
       </li>
       {% end %}
 
       <li>
           <a href="javascript:;" class="afinve" id="navSystem">
-            <span>系统</span>
+            <span>系统功能</span>
             <span class="arrow"></span>
           </a> 
 
           <ul class="sub-menu">
-              <li><a href="/system/system"><span>系统</span></a></li>
+              <li><a href="/system/system">功能列表</a></li>
               {%if _is_admin %}
-              <li><a href="/system/script_admin"><span>脚本</span></a></li>
+              <li><a href="/system/script_admin">脚本管理</a></li>
               <li><a href="/system/crontab">定时任务</a></li>
               {% end %}
               <li><a href="/tools/date"><span>日历</span></a></li>
@@ -276,6 +260,8 @@ a { text-decoration: none; }
 
 $(function() {
   function expandMenu(ele, delay) {
+    // 禁用
+    return;
     if (delay == undefined) {
       delay = 0;
     }
