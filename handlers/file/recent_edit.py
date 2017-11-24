@@ -19,14 +19,14 @@ def execute(sql):
 def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
     user_name = xauth.get_current_name()
     # if user_name == "admin":
-    #     # sql = "select * from file where smtime > '%s' AND is_deleted != 1 order by smtime desc"\
+    #     # sql = "select * from file where mtime > '%s' AND is_deleted != 1 order by mtime desc"\
     #     # % dateutil.before(days=int(days), format=True)
     #     sql = "select * from file where is_deleted != 1"
     # else:
     #     sql = "select * from file where is_deleted != 1 AND groups = '%s'" % user_name
 
     sql = "select * from file where is_deleted = 0 AND creator = '%s'" % user_name
-    sql += " ORDER BY smtime DESC"
+    sql += " ORDER BY mtime DESC"
     sql += " LIMIT %s, %s" % ((page-1) * pagesize, pagesize)
     list = execute(sql)
         

@@ -20,11 +20,11 @@ class handler:
         # last_month = xutils.days_before(days, format=True)
         user_name  = xauth.get_current_user()["name"]
         rows = db.query("SELECT * FROM file WHERE creator = $creator AND is_deleted=0"
-            + " ORDER BY sctime DESC LIMIT $offset, $limit", 
+            + " ORDER BY ctime DESC LIMIT $offset, $limit", 
             dict(creator=user_name, offset=offset, limit=limit))
         result = dict()
         for row in rows:
-            date = re.match(r"\d+\-\d+", row.sctime).group(0)
+            date = re.match(r"\d+\-\d+", row.ctime).group(0)
             row.url = "/file/view?id={}".format(row.id);
             # 优化数据大小
             row.content = ""
@@ -42,12 +42,12 @@ class DateTimeline:
             month = "0" + month
         db = dao.get_file_db()
         user_name  = xauth.get_current_user()["name"]
-        rows = db.query("SELECT * FROM file WHERE creator = $creator AND sctime LIKE $ctime AND is_deleted=0"
-            + " ORDER BY sctime DESC", 
+        rows = db.query("SELECT * FROM file WHERE creator = $creator AND ctime LIKE $ctime AND is_deleted=0"
+            + " ORDER BY ctime DESC", 
             dict(creator=user_name, ctime="%s-%s%%" % (year, month)))
         result = dict()
         for row in rows:
-            date = re.match(r"\d+\-\d+", row.sctime).group(0)
+            date = re.match(r"\d+\-\d+", row.ctime).group(0)
             row.url = "/file/view?id={}".format(row.id);
             # 优化数据大小
             row.content = ""

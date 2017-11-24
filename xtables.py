@@ -137,11 +137,11 @@ def init_table_file():
         # 统计相关
         # 访问次数
         # 创建时间ctime
-        manager.add_column("sctime", "text", "")
+        manager.add_column("ctime", "text", "")
         # 修改时间mtime
-        manager.add_column("smtime", "text", "")
+        manager.add_column("mtime", "text", "")
         # 访问时间atime
-        manager.add_column("satime", "text", "")
+        manager.add_column("atime", "text", "")
         manager.add_column("visited_cnt", "int", 0)
         # 逻辑删除标记
         manager.add_column("is_deleted", "int", 0)
@@ -157,9 +157,6 @@ def init_table_file():
         manager.add_column("modifier", "text", "")
         # 权限组
         manager.add_column("groups", "text", "")
-        
-        # MD5
-        manager.add_column("md5", "text", "")
         # 展示优先级，用于收藏等标记
         manager.add_column("priority", "int", 0)
 

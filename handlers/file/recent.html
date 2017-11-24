@@ -18,12 +18,12 @@
   <h2>最近添加</h2>
 
   {% for file in recent_created %}
-    <p> {{to_date(file.sctime)}} <a href="{{file.url}}">{{file.name}}</a>
+    <p> {{to_date(file.ctime)}} <a href="{{file.url}}">{{file.name}}</a>
   {% end %}
 
   <h2>最近修改</h2>
   {% for file in recent_modified %}
-    <p> {{to_date(file.smtime)}} <a href="{{file.url}}">{{file.name}}</a>
+    <p> {{to_date(file.mtime)}} <a href="{{file.url}}">{{file.name}}</a>
   {% end %}
 
 {% end %}

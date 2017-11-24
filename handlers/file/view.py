@@ -62,7 +62,7 @@ class ViewHandler:
         if file.type == "group":
             amount = db.count(where="parent_id=%s AND is_deleted=0" % file.id)
             files = db.select(where=dict(parent_id=file.id, is_deleted=0), 
-                order="priority DESC, sctime DESC", 
+                order="priority DESC, ctime DESC", 
                 limit=pagesize, 
                 offset=(page-1)*pagesize)
             content = file.get_content()
@@ -275,7 +275,7 @@ class FileSaveHandler:
             where=dict(id=id)
         else:
             where=dict(id=id, creator=name)
-        kw = dict(size=len(content), smtime=xutils.format_datetime(), 
+        kw = dict(size=len(content), mtime=xutils.format_datetime(), 
             where=where)
         if type == "html":
             kw["data"] = content

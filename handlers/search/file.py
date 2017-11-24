@@ -194,7 +194,7 @@ def search_name(words, groups=None):
     sql = "SELECT * from file WHERE %s AND is_deleted != 1" % (" AND ".join(like_list))
     if groups and groups != "admin":
         sql += " AND (groups = '*' OR groups = '%s')" % groups
-    sql += " ORDER BY satime DESC LIMIT 1000";
+    sql += " ORDER BY atime DESC LIMIT 1000";
     # print("search name:", sql)
     all = xtables.get_file_table().query(sql)
     return [FileDO.fromDict(item) for item in all]
@@ -214,7 +214,7 @@ def full_search(words, groups=None):
 
     if groups and groups != "admin":
         sql += " AND (groups = '*' OR groups = '%s')" % groups
-    sql += " order by satime desc limit 1000";
+    sql += " order by atime desc limit 1000";
     # print("full search:", sql)
     all = xtables.get_file_table().query(sql)
     return [FileDO.fromDict(item) for item in all]

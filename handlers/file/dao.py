@@ -208,13 +208,13 @@ def get_category(name = None, limit = None):
     sql = "SELECT * from file where is_deleted != 1 and parent_id = 0 AND type = 'group' "
     if name is not None:
         sql += " AND groups = %r" % name
-    sql += " ORDER BY priority DESC, sctime DESC limit %s" % limit
+    sql += " ORDER BY priority DESC, ctime DESC limit %s" % limit
     all = db.query(sql)
     return [FileDO.fromDict(item) for item in all]
 
 def get_children_by_id(id):
     db = get_db()
-    all = db.execute("SELECT * from file where parent_id = %s AND is_deleted != 1 order by sctime desc" % id)
+    all = db.execute("SELECT * from file where parent_id = %s AND is_deleted != 1 order by ctime desc" % id)
     return [FileDO.fromDict(item) for item in all]
 
 def get_by_id(id, db=None):
@@ -254,7 +254,7 @@ def search_name(words, limit=None, file_type=None):
     sql = "SELECT * from file WHERE %s and is_deleted != 1 " % (" AND ".join(like_list))
     if file_type != None:
         sql += " AND type = %r" % file_type
-    sql += " ORDER BY satime DESC"
+    sql += " ORDER BY atime DESC"
     if not limit:
         limit = 200
     sql += " LIMIT {}".format(limit)
@@ -264,28 +264,28 @@ def search_name(words, limit=None, file_type=None):
 
 def visit_by_id(id):
     db = get_db()
-    sql = "UPDATE file SET visited_cnt = visited_cnt + 1, satime='%s' where id = %s and visited_cnt < %s" % \
+    sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime='%s' where id = %s and visited_cnt < %s" % \
         (dateutil.format_time(), id, MAX_VISITED_CNT)
     return db.query(sql)
 
 def get_recent_visit(count):
     db = FileDB()
-    all = db.execute("select * from file where is_deleted != 1 and not (related like '%%HIDE%%') order by satime desc limit %s" % count)
+    all = db.execute("select * from file where is_deleted != 1 and not (related like '%%HIDE%%') order by atime desc limit %s" % count)
     return [FileDO.fromDict(item) for item in all]
 
 def get_recent_created(count):
     db = FileDB()
-    all = db.execute("SELECT * FROM file WHERE is_deleted != 1 ORDER BY sctime DESC LIMIT %s" % count)
+    all = db.execute("SELECT * FROM file WHERE is_deleted != 1 ORDER BY ctime DESC LIMIT %s" % count)
     return [FileDO.fromDict(item) for item in all]
 
 def get_recent_modified(count):
     db = FileDB()
-    all = db.execute("SELECT * FROM file WHERE is_deleted != 1 ORDER BY smtime DESC LIMIT %s" % count)
+    all = db.execute("SELECT * FROM file WHERE is_deleted != 1 ORDER BY mtime DESC LIMIT %s" % count)
     return [FileDO.fromDict(item) for item in all]
 
 def update(where, **kw):
     db = get_file_db()
-    kw["smtime"] = dateutil.format_time()
+    kw["mtime"] = dateutil.format_time()
     # 处理乐观锁
     version = where.get("version")
     if version:
@@ -302,25 +302,6 @@ def insert(file):
         raise FileExistsError(name)
     if not hasattr(file, "is_deleted"):
         file.is_deleted = 0
-    if not hasattr(file, "ctime"):
-        file.ctime = dateutil.get_seconds()
-        file.sctime = dateutil.format_time(file.ctime)
-    if not hasattr(file, "atime"):
-        file.atime = dateutil.get_seconds()
-        file.satime = dateutil.format_time(file.atime)
-    if not hasattr(file, "mtime"):
-        file.mtime = dateutil.get_seconds()
-        file.smtime = dateutil.format_time(file.mtime)
-
-    if hasattr(file, "atime"):
-        delattr(file, "atime")
-    if hasattr(file, "ctime"):
-        delattr(file, "ctime")
-    if hasattr(file, "mtime"):
-        delattr(file, "mtime")
-
-    # values = [build_sql_row(file, k) for k in file]
-    # sql = "insert into file (%s) values (%s)" % (','.join(file), ",".join(values))
     return get_db().insert(**file)
         
 
