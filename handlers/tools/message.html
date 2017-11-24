@@ -115,7 +115,7 @@
             </div>
             <div class="chat-msg col-md-12">
                 <template v-if="message.editable">
-                    <textarea class="input-box col-md-12" rows=4 v-model="message.content"></textarea>
+                    <textarea class="input-box col-md-12" v-bind:rows="message.content.count('\n')" v-model="message.content"></textarea>
                     <input type="button" value="更新" v-on:click="updateMessage(message)">
                     <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel">
                 </template>
@@ -194,7 +194,7 @@
             input: "",
             page_max: 2,
             page: 1,
-            page_url: "/tools/message?pagesize=10&page=",
+            page_url: "/tools/message?pagesize=20&page=",
             page_next_url:"#",
             page_prev_url:"#",
             current_user:"",
@@ -204,7 +204,7 @@
 
             init: function () {
                 this.status = getUrlParams().status;
-                this.page_url = "/tools/message?status=%s&pagesize=10&page=".format(this.status);
+                this.page_url = "/tools/message?status=%s&pagesize=20&page=".format(this.status);
             },
 
             refreshMessage: function () {
@@ -213,7 +213,7 @@
                 app.page = page;
                 app.page_next_url = app.page_url + (parseInt(page)+1);
                 app.page_prev_url = app.page_url + (page-1);
-                $.get("/file/message/list", {pagesize:10,page:page,status:self.status}, function (respText) {
+                $.get("/file/message/list", {pagesize:20,page:page,status:self.status}, function (respText) {
                     var data = respText;
                     app.page_max = data.page_max;
                     app.current_user = data.current_user;

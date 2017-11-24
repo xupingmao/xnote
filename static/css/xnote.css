@@ -347,7 +347,7 @@ li.menu-item:hover {
     padding-top: 3px;
 }
 .note {
-    float: inherit;
+    float: left;
     border: solid 1px;
     border-color: #ccc;
     box-sizing: border-box; 
