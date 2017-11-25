@@ -61,8 +61,9 @@ class ViewHandler:
         files = []
         amount = 0
         if file.type == "group":
-            amount = db.count(where="parent_id=%s AND is_deleted=0" % file.id)
-            files = db.select(where=dict(parent_id=file.id, is_deleted=0), 
+            amount = db.count(where="parent_id=$id AND is_deleted=0 AND creator=$creator", 
+                vars=dict(id=file.id, creator=user_name))
+            files = db.select(where=dict(parent_id=file.id, is_deleted=0, creator=user_name), 
                 order="priority DESC, ctime DESC", 
                 limit=pagesize, 
                 offset=(page-1)*pagesize)

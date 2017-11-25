@@ -41,19 +41,24 @@ class Ungrouped:
         user_name = xauth.get_current_name()
         pagesize = xconfig.PAGE_SIZE
 
+        vars = dict()
+        vars["name"] = user_name
+        vars["offset"] = (page-1) * pagesize
+        vars["limit"] = pagesize
+
         sql = """SELECT a.* FROM file a LEFT JOIN file b ON a.parent_id = b.id 
             WHERE a.is_deleted = 0 
                 AND a.type != 'group' 
-                AND a.creator = '%s' AND (b.id is null OR b.type != 'group') 
-            ORDER BY mtime DESC LIMIT %s,%s""" % (user_name, (page-1) * pagesize, pagesize)
-        files = db.query(sql)
+                AND a.creator = $name AND (b.id is null OR b.type != 'group') 
+            ORDER BY mtime DESC LIMIT $offset, $limit"""
+        files = db.query(sql, vars=vars)
         
         count_sql = """SELECT COUNT(1) AS amount FROM file a LEFT JOIN file b ON a.parent_id = b.id 
             WHERE a.is_deleted = 0 
                 AND a.type != 'group' 
-                AND a.creator = '%s'
-                AND (b.id is null OR b.type != 'group')""" % user_name
-        amount = db.count(sql = count_sql)
+                AND a.creator = $name
+                AND (b.id is null OR b.type != 'group')"""
+        amount = db.count(sql = count_sql, vars = vars)
 
         return xtemplate.render("file/view.html",
             pathlist=[PathNode("未分类", "/file/group/ungrouped")],
@@ -80,8 +85,8 @@ class GroupListHandler:
 
     def GET(self):
         id = xutils.get_argument("id", "", type=int)
-        sql = "SELECT id, name FROM file WHERE type = 'group' AND is_deleted = 0 ORDER BY name DESC LIMIT 200"
-        data = xtables.get_file_table().query(sql)
+        sql = "SELECT id, name FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name DESC LIMIT 200"
+        data = xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name()))
         web.header("Content-Type", "text/html; charset=utf-8")
         return xtemplate.render("file/group_list.html", id=id, filelist=data)
 

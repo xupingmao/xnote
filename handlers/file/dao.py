@@ -203,13 +203,17 @@ def get_pathlist(db, file):
 
 def get_category(name = None, limit = None):
     db = get_db()
+    vars = dict()
+
     if limit is None:
         limit = 200
-    sql = "SELECT * from file where is_deleted != 1 and parent_id = 0 AND type = 'group' "
+    sql = "SELECT * FROM file WHERE is_deleted != 1 AND parent_id = 0 AND type = 'group'"
     if name is not None:
-        sql += " AND groups = %r" % name
-    sql += " ORDER BY priority DESC, ctime DESC limit %s" % limit
-    all = db.query(sql)
+        sql += " AND creator = $creator"
+        vars["creator"] = name
+    sql += " ORDER BY priority DESC, ctime DESC LIMIT $limit"
+    vars["limit"] = limit
+    all = db.query(sql, vars=vars)
     return [FileDO.fromDict(item) for item in all]
 
 def get_children_by_id(id):

@@ -289,14 +289,14 @@ class DBWrapper:
     def query(self, *args, **kw):
         return self.db.query(*args, **kw)
 
-    def count(self, where=None, sql = None):
+    def count(self, where=None, sql = None, vars = None):
         if sqlite3 is None:
             return 0
         if sql is None:
             sql = "SELECT COUNT(1) AS amount FROM %s" % self.tablename
             if where:
                 sql += " WHERE %s" % where
-        return self.db.query(sql).first().amount
+        return self.db.query(sql, vars = vars).first().amount
 
     def update(self, *args, **kw):
         return self.db.update(self.tablename, *args, **kw)
