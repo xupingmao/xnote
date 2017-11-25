@@ -30,6 +30,8 @@ app = init()
 
 def json_request(*args, **kw):
     global app
+    if "data" in kw:
+        kw["data"]["_type"] = "json"
     kw["_type"] = "json"
     ret = app.request(*args, **kw)
     data = ret.data
@@ -49,7 +51,6 @@ class TestMain(unittest.TestCase):
     def test_render(self):
         value = app.request("/test").data
         self.assertEqual(b"success", value)
-
 
     def test_recent_files(self):
         value = app.request("/file/recent_edit?_type=json").data
@@ -97,7 +98,7 @@ class TestMain(unittest.TestCase):
         self.check_200("/file/recent_edit")
         json_request("/file/remove?name=xnote-unit-test")
         file = json_request("/file/add", method="POST", 
-            data=dict(name="xnote-unit-test", content="hello", _type="json"))
+            data=dict(name="xnote-unit-test", content="hello"))
         id = file["id"]
         self.check_OK("/file/view?id=" + str(id))
         json_request("/file/remove?id=" + str(id))
@@ -105,10 +106,24 @@ class TestMain(unittest.TestCase):
     def test_file_editor_md(self):
         json_request("/file/remove?name=xnote-md-test")
         file = json_request("/file/add", method="POST",
-            data=dict(name="xnote-md-test", type="md", content="hello markdown", _type="json"))
+            data=dict(name="xnote-md-test", type="md", content="hello markdown"))
         id = file["id"]
         file = json_request("/file/view?id=%s&_type=json" % id).get("file")
         self.assertEqual("md", file["type"])
+        self.assertEqual("hello markdown", file["content"])
+        json_request("/file/remove?id=%s" % id)
+
+    def test_file_editor_html(self):
+        json_request("/file/remove?name=xnote-html-test")
+        file = json_request("/file/add", method="POST",
+            data=dict(name="xnote-html-test", type="html"))
+        id = file["id"]
+        json_request("/file/save", method="POST", data=dict(id=id, type="html", data="<p>hello</p>"))
+        file = json_request("/file/view?id=%s&_type=json" % id).get("file")
+        self.assertEqual("html", file["type"])
+        self.assertEqual("<p>hello</p>", file["data"])
+        if xutils.bs4 != None:
+            self.assertEqual("hello", file["content"])
         json_request("/file/remove?id=%s" % id)
 
     def test_group(self):
@@ -164,7 +179,7 @@ class TestMain(unittest.TestCase):
         self.check_200("/system/crontab")
         self.check_OK("/system/crontab/add", method="POST", data=dict(url="test", tm_wday="*", tm_hour="*", tm_min="*"))
         sched = xtables.get_schedule_table().select_one(where=dict(url="test"))
-        self.check_OK("/system/crontab?option=del&id={}".format(sched.id))
+        self.check_OK("/system/crontab/remove?id={}".format(sched.id))
 
         self.check_OK("/system/crontab/add", method="POST", data=dict(script_url="script://test.py", tm_wday="1", tm_hour="*", tm_min="*"))
         sched2 = xtables.get_schedule_table().select_one(where=dict(url="script://test.py"))
@@ -178,7 +193,14 @@ class TestMain(unittest.TestCase):
         data = app.request("/api/http_headers", headers=dict(X_TEST=True)).data
         self.assertEqual(True, b"HTTP_X_TEST" in data)
 
+    def test_message_add(self):
+        response = json_request("/file/message/add", method="POST", data=dict(content="Xnote测试"))
+        self.assertEqual("success", response.get("code"))
+        data = response.get("data")
+        self.assertEqual("Xnote测试", data.get("content"))
+        json_request("/file/message/remove", method="POST", data=dict(id=data.get("id")))
 
-
+    def test_message_list(self):
+        json_request("/file/message/list")
 
 

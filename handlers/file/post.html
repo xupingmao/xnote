@@ -3,41 +3,21 @@
 
 <script type="text/javascript" src="/static/lib/wangEditor/wangEditor-3.0.10.min.js"></script>
 {% if op == "view" %}
-    <h2 id="name">{{file["name"]}} <a href="/file/post/edit?id={{file.id}}">[编辑]</a></h2>
+    <h2 id="name">{{file["name"]}} <a href="/file/view?id={{file.id}}&op=edit">[编辑]</a></h2>
 
     {% include "file/tags.html" %}
     <hr/>
     <div id="editor">
-        {% raw file.content %}
+        {% raw file.data %}
     </div>
     <br/>
-    <!-- <a href="javascript:deleteConfirm()" class="btn btn-danger">删除</a> -->
 {% else %}
+    {% set rows = file.data.count('\n') %}
     <div class="alert">{{error}}</div>
     <form method="POST" enctype="multipart/form-data">
         <input name="version" value="{{file.version}}" class="hide">
-        <input name="type" value="post" class="hide"/>
-<!--         <p>
-            <input name="name" type="text" value="{{file.name}}">
-            {% if file.groups == "*" %}
-                <input name="public" type="checkbox" checked>
-            {% else %}
-                <input name="public" type="checkbox">
-            {% end %}
-            所有人可见
-            
-        </p> -->
-
-    
-<!--         <div class="col-md-12">
-            <input type="file" name="file"/>
-            <button>上传图片</button>
-        </div>
-        <div class="col-md-12">
-            <button>保存</button>
-        </div> -->
-
-        <textarea id="content" name="content" style="width:100%;margin-top:10px;font-family:monospace;" rows={{rows}} class="hide">{{file.content}}</textarea>
+        <input name="type" value="html" class="hide"/>
+        <textarea id="data" name="data" style="width:100%;margin-top:10px;font-family:monospace;" rows={{rows}} class="hide">{{file.data}}</textarea>
 
         <div id="toolbar" style="border:1px solid #ccc;background-color: #f1f1f1;"></div>
         <div id="editor" style="height: 400px;border:1px solid #ccc;border-top: none;">
@@ -62,11 +42,11 @@
     var editor = new wangEditor('#toolbar', "#editor");
     editor.customConfig.uploadImgShowBase64 = true   // 使用 base64 保存图片
     editor.create();
-    editor.txt.html($("#content").text())
+    editor.txt.html($("#data").text())
 
     $("#saveBtn").click(function () {
-        var content = editor.txt.html();
-        $.post("/file/autosave?type=html", {id:{{file.id}}, content:content}, function (resp) {
+        var data = editor.txt.html();
+        $.post("/file/autosave?type=html", {id:{{file.id}}, data:data}, function (resp) {
             console.log(resp);
             if (resp.code == "success") {
                 window.location.reload();

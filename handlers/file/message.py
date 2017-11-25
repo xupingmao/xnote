@@ -17,10 +17,10 @@ class AddHandler:
         # chatlist.append(content)
         db = xtables.get_message_table()
         ctime = xutils.format_time()
-        db.insert(user=user.get("name"), 
+        inserted_id = db.insert(user=user.get("name"), 
             ctime=ctime, 
             content=content)
-        return dict(code="success", message="", data=dict(user=user.get("name"), content=content, ctime=ctime))
+        return dict(code="success", data=dict(id=inserted_id, content=content, ctime=ctime))
 
 class ListHandler:
 

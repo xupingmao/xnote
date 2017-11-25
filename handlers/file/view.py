@@ -35,6 +35,7 @@ class ViewHandler:
         name = xutils.get_argument("name", "")
         page = xutils.get_argument("page", 1, type=int)
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
+        op   = xutils.get_argument("op", "view")
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
@@ -73,13 +74,15 @@ class ViewHandler:
         else:
             content = file.content
             content = content.replace(u'\xad', '\n')
-            content = content.replace("\n", "<br/>")
-            if file.data != "" and file.data != None:
-                content = file.data
-            file.content = content
+            content = content.replace(u'\n', '<br/>')
+            file.data = file.data.replace(u"\xad", "\n")
+            file.data = file.data.replace(u'\n', '<br/>')
+            if file.data == None or file.data == "":
+                file.data = content
             dao.visit_by_id(id)
         return xtemplate.render("file/view.html",
             file=file, 
+            op=op,
             date2str=date2str,
             can_edit = can_edit,
             pathlist = pathlist,
@@ -89,20 +92,10 @@ class ViewHandler:
             page_url = "/file/view?id=%s&page=" % id,
             files = files)
 
-    def download_request(self):
-        id = self.get_argument("id")
-        file = dao.get_by_id(id)
-        content = file.get_content()
-        if content.startswith("```CSV"):
-            content = content[7:-3] # remove \n
-        web.ctx.headers.append(("Content-Type", 'application/octet-stream'))
-        web.ctx.headers.append(("Content-Disposition", "attachment; filename=%s.csv" % quote(file.name)))
-        return content
-
-class MarkdownEdit(BaseHandler):
+class MarkdownEdit:
 
     @xauth.login_required()
-    def default_request(self):
+    def GET(self):
         id   = xutils.get_argument("id", "")
         name = xutils.get_argument("name", "")
         if id == "" and name == "":
@@ -117,12 +110,10 @@ class MarkdownEdit(BaseHandler):
             raise web.notfound()
         download_csv = file.related != None and "CODE-CSV" in file.related
         db = xtables.get_file_table()
-        self.render("file/markdown_edit.html", file=file, 
+        return xtemplate.render("file/markdown_edit.html", file=file, 
             pathlist = dao.get_pathlist(db, file),
             content = file.get_content(), 
-            date2str=date2str,
-            download_csv = download_csv, 
-            children = [])
+            date2str=date2str)
 
 def sqlite_escape(text):
     if text is None:
@@ -162,9 +153,6 @@ class UpdateHandler(BaseHandler):
 
         # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
         # 所以权限只能是创建者而不是修改者
-        # groups = file.creator
-        # if is_public == "on":
-        #     groups = "*"
         update_kw = dict(content=content, 
                 type=file_type, 
                 size=len(content));
@@ -172,18 +160,7 @@ class UpdateHandler(BaseHandler):
         if name != "" and name != None:
             update_kw["name"] = name
 
-        # 处理文件上传,不再处理文件，由JS提交
-        # if hasattr(upload_file, "filename") and upload_file.filename != "":
-        #     filename = upload_file.filename
-        #     filename = filename.replace("\\", "/")
-        #     filename = os.path.basename(filename)
-        #     filepath, webpath = get_upload_file_path(xutils.quote(filename))
-        #     with open(filepath, "wb") as fout:
-        #         for chunk in upload_file.file:
-        #             fout.write(chunk)
-        #     link = get_link(filename, webpath)
-        #     update_kw["content"] = content + "\n" + link
-
+        # 不再处理文件，由JS提交
         rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
             # raise web.seeother("/file/markdown/edit?id=" + str(id))
@@ -266,6 +243,7 @@ class FileSaveHandler:
     @xauth.login_required()
     def POST(self):
         content = xutils.get_argument("content", "")
+        data    = xutils.get_argument("data", "")
         id = xutils.get_argument("id", "0", type=int)
         type = xutils.get_argument("type")
         name = xauth.get_current_name()
@@ -278,11 +256,11 @@ class FileSaveHandler:
         kw = dict(size=len(content), mtime=xutils.format_datetime(), 
             where=where)
         if type == "html":
-            kw["data"] = content
-            kw["content"] = content
+            kw["data"] = data
+            kw["content"] = data
             if xutils.bs4 is not None:
-                soup = xutils.bs4.BeautifulSoup(content, "html.parser")
-                kw["content"] = soup.get_text()
+                soup = xutils.bs4.BeautifulSoup(data, "html.parser")
+                kw["content"] = soup.get_text(separator=" ")
         else:
             kw["content"] = content
         rowcount = db.update(**kw)
@@ -369,13 +347,8 @@ class LibraryHandler:
 
 xurls = (
     r"/file/edit", ViewHandler, 
-    r"/file/rename", RenameHandler,
-    r"/file/markdown", ViewHandler,
-    r"/file/memo/edit", MemoEditHandler,
-    r"/file/memo/save", MemoSaveHandler,
-    r"/file/memo/remove", MemoRemoveHandler,
     r"/file/view", ViewHandler,
-    r"/file/markdown/edit", MarkdownEdit,
+    r"/file/rename", RenameHandler,
     r"/file/update", UpdateHandler,
     r"/file/save", FileSaveHandler,
     r"/file/autosave", FileSaveHandler,
@@ -383,6 +356,12 @@ xurls = (
     r"/file/(\d+)/downvote", Downvote,
     r"/file/mark", MarkHandler,
     r"/file/unmark", UnmarkHandler,
+    
+    r"/file/markdown", ViewHandler,
+    r"/file/memo/edit", MemoEditHandler,
+    r"/file/memo/save", MemoSaveHandler,
+    r"/file/memo/remove", MemoRemoveHandler,
+    r"/file/markdown/edit", MarkdownEdit,
     r"/file/library", LibraryHandler
 )
 

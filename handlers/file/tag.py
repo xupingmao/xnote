@@ -20,21 +20,24 @@ class AddTagHandler:
     def POST(self):
         id   = xutils.get_argument("file_id", type=int)
         tags_str = xutils.get_argument("tags")
-        tags = tags_str.split(" ")
+        new_tags = set(tags_str.split(" "))
         file = dao.get_by_id(id)
         db   = dao.get_file_db()
         file_db = xtables.get_file_table()
         # 先删除所有的tag，再增加
-        db.delete("file_tag", where=dict(file_id=id))
-        added = set()
-        for tag in tags:
-            if tag == "":
-                continue
-            if tag in added:
-                continue
-            added.add(tag)
-            # t = TagEntity(id, tag, "*")
-            db.insert("file_tag", file_id=id, name=tag)
+        tag_db = xtables.get_file_tag_table()
+        old_tags = tag_db.select(where=dict(file_id=id))
+        old_tags = set([v.name for v in old_tags])
+
+        to_delete = old_tags - new_tags
+        to_add = new_tags - old_tags
+
+        for item in to_delete:
+            tag_db.delete(where=dict(name=item, file_id=id))
+        for item in to_add:
+            if item == "": continue
+            tag_db.insert(name=item, file_id=id)
+
         file_db.update(related=tags_str, where=dict(id=id))
         return dict(code="", message="", data="OK")
 

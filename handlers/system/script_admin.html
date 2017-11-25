@@ -26,6 +26,11 @@
 {% set  index = 1 %}
 {% init op = "list" %}
 
+<div class="col-md-12">
+    <a href="/system/script_admin" class="tab-link">脚本</a>
+    <a href="/system/crontab" class="tab-link">定时任务</a>
+</div>
+
 {% if op != "edit" %}
 <button class="prompt-btn" action="/system/script_admin?op=add&name=" message="添加新脚本">添加</button>
 {% end %}
@@ -71,7 +76,6 @@
 
 {% else %}
     {% comment 列表 %}
-
     <div class="error">{{error}}</div>
     <table class="table col-md-12 top-offset-1">
         <tr>

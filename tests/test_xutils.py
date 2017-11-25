@@ -80,5 +80,12 @@ class TestMain(unittest.TestCase):
         self.assertEqual(3, xutils.edit_distance("abc", "def"))
         self.assertEqual(3, xutils.edit_distance("kkabcd", "abc"))
 
+    def test_bs4(self):
+        html = "<p>hello<p><p>world</p>"
+        if xutils.bs4 is not None:
+            soup = xutils.bs4.BeautifulSoup(html, "html.parser")
+            text = soup.get_text(separator=" ")
+            self.assertEqual("hello world", text)
+
 
         
