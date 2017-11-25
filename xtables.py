@@ -84,13 +84,19 @@ class SqliteTableManager:
 
     def add_index(self, colname, is_unique = False):
         # sqlite的索引和table是一个级别的schema
-        sql = "CREATE INDEX idx_%s_%s ON `%s` (`%s`)" % (self.tablename, colname, self.tablename, colname)
+        sql = "CREATE INDEX IF NOT EXISTS idx_%s_%s ON `%s` (`%s`)" % (self.tablename, colname, self.tablename, colname)
         try:
             self.execute(sql)
-        except sqlite3.OperationalError:
-            pass
         except Exception:
             xutils.print_exc()
+
+    def drop_index(self, col_name):
+        sql = "DROP INDEX idx_%s_%s" % (self.tablename, col_name)
+        try:
+            self.execute(sql)
+        except Exception:
+            xutils.print_exc()
+
 
     def drop_column(self, colname):
         # sql = "ALTER TABLE `%s` DROP COLUMN `%s`" % (self.tablename, colname)
@@ -212,7 +218,7 @@ def init_table_user():
 
 def init_table_message():
     # 用来存储比较短的消息,消息和资料库的主要区别是消息存储较短的单一信息
-    # 而且消息不允许修改
+    # 消息支持状态
     # 2017/05/29
     with TableManager(config.DB_PATH, "message") as manager:
         manager.add_column("ctime", "text", "")
