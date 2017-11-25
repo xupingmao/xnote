@@ -85,7 +85,6 @@ class LocationHandler:
 
     def POST(self):
         coords = xutils.get_argument("coords")
-        print(coords)
         if coords != "null":
             db = xtables.get_record_table()
             db.insert(type="location", key=xauth.get_current_name(), cdate=xutils.format_date(), 

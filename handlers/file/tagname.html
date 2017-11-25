@@ -1,7 +1,6 @@
 {% extends base.html %}
 
 {% block body %}
-    {% include search.html %}
     <h2>标签: {{tagname}}</h2>
     {% raw _render("mod_file_list.html", files=files, count=count, page=page, page_url="/file/tagname/"+tagname+"?page=") %}
 {% end %}
