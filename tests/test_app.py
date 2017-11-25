@@ -15,6 +15,8 @@ import xtemplate
 import xconfig
 import xtables
 
+from xutils import u
+
 def init():
     xtables.init()
     xconfig.IS_TEST = True
@@ -194,10 +196,12 @@ class TestMain(unittest.TestCase):
         self.assertEqual(True, b"HTTP_X_TEST" in data)
 
     def test_message_add(self):
+        # Py2: webpy会自动把str对象转成unicode对象，data参数传unicode反而会有问题
         response = json_request("/file/message/add", method="POST", data=dict(content="Xnote测试"))
         self.assertEqual("success", response.get("code"))
         data = response.get("data")
-        self.assertEqual("Xnote测试", data.get("content"))
+        # Py2: 判断的时候必须使用unicode
+        self.assertEqual(u"Xnote测试", data.get("content"))
         json_request("/file/message/remove", method="POST", data=dict(id=data.get("id")))
 
     def test_message_list(self):
