@@ -127,7 +127,7 @@ class handler:
         return None, None
 
 
-    def full_search(self, key):
+    def full_search(self, key, offset, limit):
         global _mappings
         mappings = _mappings
         words = textutil.split_words(key)
@@ -149,7 +149,7 @@ class handler:
         key = xutils.get_argument("key", "").strip()
         if key == "":
             raise web.seeother("/")
-        return self.full_search(key)
+        return self.full_search(key, offset, limit)
 
 
     @xauth.login_required()
@@ -164,6 +164,8 @@ class handler:
         user_name = xauth.get_current_role()
         xutils.get_argument("page_url", "/search/search?key=%s&content=%s&page=" % (key, content))
         pagesize = config.PAGE_SIZE
+        offset = (page-1) * pagesize
+        limit  = pagesize
 
         if key == "" or key == None:
             return xtemplate.render("file-list.html", files=[], count=0)
@@ -175,13 +177,11 @@ class handler:
             # print("HIT %s" % store_key)
             files = store[store_key]
         else:
-            files = self.full_search(key)
+            files = self.full_search(key, offset, pagesize)
             # store[store_key] = files
-
+        # TODO 待优化
+        files = files[offset:offset+limit]
         count = len(files)
-        pagestart = (page-1) * pagesize
-        files = files[pagestart:pagestart+pagesize]
-
         return xtemplate.render("file-list.html", 
             files = files, 
             count = count,
