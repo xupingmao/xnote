@@ -81,7 +81,7 @@ class TagListHandler:
         # else:
         #     sql = "SELECT name, COUNT(*) AS amount FROM file_tag WHERE groups in $groups GROUP BY name ORDER BY amount DESC, name ASC";
         groups = ["*", user_name]
-        sql = "SELECT name, COUNT(*) AS amount FROM file_tag GROUP BY name ORDER BY amount DESC, name ASC";
+        sql = "SELECT UPPER(name) AS name, COUNT(*) AS amount FROM file_tag GROUP BY UPPER(name) ORDER BY amount DESC, name ASC";
 
         tag_list = db.query(sql, vars = dict(groups = groups))
         return xtemplate.render("file/taglist.html", tag_list = list(tag_list))

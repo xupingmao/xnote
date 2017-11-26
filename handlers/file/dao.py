@@ -113,10 +113,7 @@ class FileDO(dict):
             file.content = ""
         if option:
             file.option = option
-        if file.type == "post":
-            file.url = "/file/post?id={}".format(dict["id"])
-        else:
-            file.url = "/file/edit?id={}".format(dict["id"])
+        file.url = "/file/view?id={}".format(dict["id"])
         return file
         
     def setBase(self, base):

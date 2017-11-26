@@ -35,7 +35,7 @@
         var name = $("#name").text();
         var conf = confirm("确认删除 " + name + " 吗?");
         if (conf) {
-            window.location.href = "/file/post/del?id={{file.id}}";
+            window.location.href = "/file/remove?id={{file.id}}";
         }
     }
 
