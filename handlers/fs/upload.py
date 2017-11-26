@@ -38,7 +38,7 @@ class RangeUploadHandler:
                     raise Exception("upload file broken")
                 with open(tmp_path, "rb") as tmp_fp:
                     fp.write(tmp_fp.read())
-                xutils.remove(tmp_path)
+                xutils.remove(tmp_path, True)
 
 
     @xauth.login_required()

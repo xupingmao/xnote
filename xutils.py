@@ -258,10 +258,13 @@ def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-def remove(path):
+def remove(path, hard = False):
     if not os.path.exists(path):
         return
     if os.path.isfile(path):
+        if hard:
+            os.remove(path)
+            return
         dirname = os.path.dirname(path)
         dirname = os.path.abspath(dirname)
         dustbin = os.path.abspath(xconfig.TRASH_DIR)
