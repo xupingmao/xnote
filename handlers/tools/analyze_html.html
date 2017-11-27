@@ -56,7 +56,7 @@ $("#saveToDbBtn").on("click", function () {
             console.log(responseText);
             var data = responseText;
             if (data.code == "success") {
-                alert("添加成功");
+                location.href = "/file/view?id=" + data.id;
             } else {
                 alert(data.message);
             }

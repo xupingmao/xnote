@@ -26,6 +26,8 @@ def do_calc(expression):
         return
     try:
         value = eval(exp)
+        if str(value) == exp:
+            return None
         f = SearchResult()
         f.url = "#"
         f.name = "计算结果"
