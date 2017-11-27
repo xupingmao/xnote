@@ -233,7 +233,7 @@ a { text-decoration: none; }
         {% end %}
       </li>
     </ul>
-    <div id="poweredBy" style="position: absolute; bottom: 50px; left: 10px; color: #fff; ">
+    <div id="poweredBy" style="position: absolute; bottom: 50px; left: 10px; color: #fff; display: none;">
       Powered by <a style="color: #fff; text-decoration: underline;" href="https://gitee.com/xupingmao/xnote">Xnote</a>
     </div>
   </div>
@@ -302,7 +302,9 @@ $(function() {
     }
   }
 
-  // checkResize();
+  if (window.innerWidth > 600) {
+    $("#poweredBy").show();
+  }
 
   function toggleMenu() {
     var marginLeft = $(".navMenubox").css("margin-left");
