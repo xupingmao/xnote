@@ -125,7 +125,7 @@ class RecentCreatedHandler:
             page_max = math.ceil(count/PAGE_SIZE), 
             page_url="/file/recent_edit?page=")
 
-class BookmarkHandler:
+class MarkedHandler:
     
     @xauth.login_required()
     def GET(self):
@@ -136,12 +136,12 @@ class BookmarkHandler:
         files = db.select(where=where, order="mtime DESC", offset=(page-1)*PAGE_SIZE,limit=PAGE_SIZE)
         count = db.count(where=where)
         return xtemplate.render("file/view.html", 
-            pathlist = [Storage(name="收藏", url="/file/group/bookmark")],
+            pathlist = [Storage(name="收藏", url="/file/group/marked")],
             file_type = "group",
             files = files,
             page = page, 
             page_max = math.ceil(count/PAGE_SIZE), 
-            page_url="/file/group/bookmark?page=")
+            page_url="/file/group/marked?page=")
 
 
 class MemoHandler:
@@ -166,7 +166,8 @@ xurls = (
     r"/file/group/removed", RemovedHandler,
     r"/file/group/list", GroupListHandler,
     r"/file/group/move", MoveHandler,
-    r"/file/group/bookmark", BookmarkHandler,
+    r"/file/group/bookmark", MarkedHandler,
+    r"/file/group/marked", MarkedHandler,
     r"/file/group/recent_created", RecentCreatedHandler,
     r"/file/group/memo", MemoHandler,
 )
