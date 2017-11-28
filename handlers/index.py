@@ -22,7 +22,7 @@ searchable = False
 class Home:
 
     def GET(self):
-        return xtemplate.render("search-list.html", files = [])
+        return xtemplate.render("search-result.html", files = [])
         # raise web.seeother("/file/recent_edit")
         # return xtemplate.render_text(index_html)
 
