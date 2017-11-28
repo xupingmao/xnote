@@ -100,7 +100,7 @@
             </div>
             <div class="chat-msg col-md-12">
                 <template v-if="message.editable">
-                    <textarea class="input-box col-md-12" v-bind:rows="message.content.count('\n')" v-model="message.content"></textarea>
+                    <textarea class="input-box col-md-12" v-bind:rows="message.content.count('\n')+2" v-model="message.content"></textarea>
                     <input type="button" value="更新" v-on:click="updateMessage(message)">
                     <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel">
                 </template>
