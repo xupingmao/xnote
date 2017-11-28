@@ -25,8 +25,9 @@ def load_mapping(pattern, func_str):
     try:
         mod, func_name = func_str.rsplit('.', 1)
         # mod = __import__(mod, None, None, [''])
-        mod = six._import_module(mod)
+        mod = six._import_module("handlers.search." + mod)
         func = getattr(mod, func_name)
+        func.modfunc = func_str
         _mappings.append(r"^%s\Z" % pattern)
         _mappings.append(func)
     except Exception as e:
@@ -115,6 +116,8 @@ class MemStore(web.session.DiskStore):
 
 class handler:
 
+    store = MemStore()
+
     def _match(self, key):
         global _mappings
         mappings = _mappings
@@ -138,6 +141,7 @@ class handler:
             m = re.match(pattern, key)
             if m:
                 try:
+                    print("  >>> ", func.modfunc)
                     results = func(*m.groups())
                     if results is not None:
                         files += results
@@ -170,7 +174,7 @@ class handler:
         if key == "" or key == None:
             return xtemplate.render("search-result.html", files=[], count=0)
         # app 为None，不用全局使用session
-        store = MemStore()
+        store = self.store
         store_key = "s_" + user_name + "-" + key
         # print("STORE KEY: ", store_key)
         if store.has_key(store_key):
@@ -191,18 +195,18 @@ class handler:
 mappings_loaded = False
 def load_mappings():
     global mappings_loaded
-    load_mapping(r"(.*[0-9]+.*)",           "handlers.search.calc.do_calc")
-    load_mapping(r"(.*)",                   "handlers.search.pydoc.search")
-    load_mapping(r"([^ ]*)",                "handlers.search.translate.search")
-    load_mapping(r"翻译\s+([^ ]+)",         "handlers.search.translate.zh2en")
-    load_mapping(r"([^ ]*)",                "handlers.search.tools.search")
-    load_mapping(r"([^ ]*)",                "handlers.search.scripts.search")
-    load_mapping(r"([^ ]*)",                "handlers.search.api.search")
-    load_mapping(r"(\d+)分钟后提醒我?(.*)", "handlers.search.reminder.search")
-    load_mapping(r"静音(.*)",               "handlers.search.mute.search")
-    load_mapping(r"mute(.*)",               "handlers.search.mute.search")
-    load_mapping(r"取消静音",               "handlers.search.mute.cancel")
-    load_mapping(r"(.*)",                   "handlers.search.file.search")
+    load_mapping(r"(.*[0-9]+.*)",           "calc.do_calc")
+    load_mapping(r"([a-zA-Z0-9\.]*)",       "pydoc.search")
+    load_mapping(r"([a-zA-Z\-]*)",          "translate.search")
+    load_mapping(r"翻译\s+([^ ]+)",         "translate.zh2en")
+    load_mapping(r"([^ ]*)",                "tools.search")
+    load_mapping(r"([^ ]*)",                "scripts.search")
+    load_mapping(r"([^ ]*)",                "api.search")
+    load_mapping(r"(\d+)分钟后提醒我?(.*)", "reminder.search")
+    load_mapping(r"静音(.*)",               "mute.search")
+    load_mapping(r"mute(.*)",               "mute.search")
+    load_mapping(r"取消静音",               "mute.cancel")
+    load_mapping(r"(.*)",                   "file.search")
     mappings_loaded = True
 
 xurls = (
