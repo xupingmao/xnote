@@ -99,7 +99,7 @@ class handler:
             # texts = soup.find_all(["p", "span", "div", "h1", "h2", "h3", "h4"])
 
             h = HTML2Text(baseurl = address)
-            text = h.handle(html)
+            text = "From %s\n\n" % address + h.handle(html)
 
             texts = [text]
 

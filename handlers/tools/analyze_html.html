@@ -1,5 +1,15 @@
 {% extends base.html %}
 
+{% block head %}
+
+<style type="text/css">
+    .content {
+        width: 90%;
+        float: none;
+    }
+</style>
+{% end %}
+
 {% block body %}
 
 {% init error = "" %}
@@ -20,8 +30,18 @@
 
 <div style="color:red;">{{error}}</div>
 
+<h2>Markdown 文本</h2>
+<div>
+    资料名:<input id="savedName">
+    <input type="button" id="saveToDbBtn" class="btn" value="保存到资料库">
+</div>
+<textarea rows="30" class="content" id="content">
+{% for text in texts%}{{text}}
+{% end %}
+</textarea>
+
 <h2>Images</h2>
-<textarea rows={{len(images)+2}} class="col-md-12">
+<textarea rows={{len(images)+2}} class="content">
 {% for image in images %}{{image}}
 {% end %}
 </textarea>
@@ -31,18 +51,8 @@
 {% end %} -->
 
 <h2>Scripts</h2>
-<textarea rows="{{len(scripts)+2}}" class="col-md-12">
+<textarea rows="{{len(scripts)+2}}" class="content">
 {% for script in scripts%}{{script}}
-{% end %}
-</textarea>
-
-<h2>Markdown 文本</h2>
-<div>
-    资料名:<input id="savedName">
-    <input type="button" id="saveToDbBtn" class="btn" value="保存到资料库">
-</div>
-<textarea rows="30" class="col-md-12" id="content">
-{% for text in texts%}{{text}}
 {% end %}
 </textarea>
 
