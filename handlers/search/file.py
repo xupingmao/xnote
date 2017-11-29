@@ -191,7 +191,7 @@ def search_name(words, groups=None):
     like_list = []
     for word in words:
         like_list.append('name LIKE %s ' % to_sqlite_obj('%' + word.upper() + '%'))
-    sql = "SELECT name, id, ctime, mtime, type from file WHERE %s AND is_deleted != 1" % (" AND ".join(like_list))
+    sql = "SELECT name, id, ctime, mtime, type, creator from file WHERE %s AND is_deleted != 1" % (" AND ".join(like_list))
     if groups and groups != "admin":
         sql += " AND (groups = '*' OR groups = '%s')" % groups
     sql += " ORDER BY atime DESC LIMIT 1000";
@@ -209,7 +209,7 @@ def full_search(words, groups=None):
         content_like_list.append('content like %s ' % to_sqlite_obj('%' + word.upper() + '%'))
     # for word in words:
     #     name_like_list.append("related like %s " % repr("%" + word.upper() + '%'))
-    sql = "SELECT id, name, ctime, mtime, type FROM file WHERE (%s) AND is_deleted != 1" \
+    sql = "SELECT id, name, ctime, mtime, type, creator FROM file WHERE (%s) AND is_deleted != 1" \
         % " AND ".join(content_like_list)
 
     if groups and groups != "admin":

@@ -32,8 +32,8 @@
                 {% end %}
                 {% if file.is_public %}
                     <span class="tag">公开</span>
-                {% elif file.groups != None %}
-                    <span class="tag">{{file.groups}}</span>
+                {% elif file.creator != None %}
+                    <span class="tag">{{file.creator}}</span>
                 {% end %}
 
                 {% if file.mtime != None %}
