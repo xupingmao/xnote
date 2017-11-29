@@ -172,7 +172,7 @@ class handler:
         limit  = pagesize
 
         if key == "" or key == None:
-            return xtemplate.render("search-result.html", files=[], count=0)
+            return xtemplate.render("search_result.html", files=[], count=0)
         # app 为None，不用全局使用session
         store = self.store
         store_key = "s_" + user_name + "-" + key
@@ -186,7 +186,7 @@ class handler:
         # TODO 待优化
         files = files[offset:offset+limit]
         count = len(files)
-        return xtemplate.render("search-result.html", 
+        return xtemplate.render("search_result.html", 
             files = files, 
             count = count,
             title = title,

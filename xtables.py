@@ -226,7 +226,8 @@ def init_table_message():
         manager.add_column("user",  "text", "")
         # 当前的类型包括 留言 日程提醒
         manager.add_column("type",  "text", "")
-        # 消息的状态 0初始状态 100已完成
+        # 用一个状态可以拍成一排
+        # 消息的状态 0初始状态（紧急） 50（非紧急minor，慎重考虑） 100已完成
         manager.add_column("status", "int", 0)
         manager.add_column("content", "text", "")
         manager.add_index("type")
