@@ -73,6 +73,18 @@
         </div>
     {% end %}
 
-    {% set page_max = pages %}
-    {% include mod_pagenation.html %}
+{% set page_max = pages %}
+{% include mod_pagenation.html %}
+<script>
+    $(".execute-btn").on("click", function (e) {
+        console.log(e);
+        var href = $(e.target).attr("href");
+        $.get(href, function (responseText) {
+            var obj = responseText;
+            console.log(obj)
+            $("#execute-result").text(JSON.stringify(obj));
+        });
+    })
+</script>
+
 {% end %}
