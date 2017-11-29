@@ -80,7 +80,7 @@
 
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
-        <input type="button" class="btn" value="添加文件夹" id="addDirectory"/>
+        <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
         <input type="button" class="btn" value="重命名" id="renameBtn" 
             message="重命名为">
         <input type="button" class="btn-danger" value="删除" id="deleteFile"/>
@@ -93,6 +93,7 @@
     <div>
         <input type="button" class="btn" value="打开文件管理器" id="openDirectory"/>
         <input type="button" class="link-btn" href="/code/analyze?path={{path}}&recursive=on" value="高级搜索"/>
+        <input type="button" class="link-btn" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
         <input type="button" class="link-btn" href="/tools/zip?dirname={{path}}" value="压缩"/>
         <input type="button" class="link-btn" href="/code/encode?path={{path}}" value="文件名加密"/>
     </div>
