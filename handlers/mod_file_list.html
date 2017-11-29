@@ -73,37 +73,6 @@
         </div>
     {% end %}
 
-    <p>
-        <!--
-        <input id="targetPage" value="{{page}}" style="width:3em;"/> <button onclick="goToPage()">GO</button>
-        -->
-        <a class="x-page-link" href="#">共{{pages}}页</a> 
-        {% if page > 1 %}
-        <a class="x-page-link" href="{{page_url}}{{page-1}}">上一页</a>
-        {% end %}
-        
-        <a class="x-page-link x-page-active" href="#">{{page}}</a>
-        <!--
-        <a href="#"><span style="background:blue;color:white">{{page}} / {{?pages}}</span></a>
-        -->
-        
-        {% if page < pages %}
-        <a class="x-page-link" href="{{page_url}}{{page+1}}">下一页</a>
-        {% end %}
-    </p>
-    <script>
-        function goToPage() {
-            var value = $('#targetPage').val();
-            location.href = '{{page_url}}' + (value);
-        }
-        $(".execute-btn").on("click", function (e) {
-            console.log(e);
-            var href = $(e.target).attr("href");
-            $.get(href, function (responseText) {
-                var obj = responseText;
-                console.log(obj)
-                $("#execute-result").text(JSON.stringify(obj));
-            });
-        })
-    </script>
+    {% set page_max = pages %}
+    {% include mod_pagenation.html %}
 {% end %}

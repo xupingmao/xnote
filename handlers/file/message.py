@@ -40,8 +40,9 @@ class ListHandler:
         kw += " AND user = %r" % user_name
         chatlist = list(db.select(where=kw, order="status ASC, ctime DESC", limit=pagesize, offset=offset))
         chatlist.reverse()
-        page_max = math.ceil(db.count(where=kw) / pagesize)
-        return dict(code="success", message="", data=chatlist, page_max=page_max, current_user=xauth.get_current_name())
+        amount = db.count(where=kw)
+        page_max = math.ceil(amount / pagesize)
+        return dict(code="success", message="", data=chatlist, amount=amount, page_max=page_max, current_user=xauth.get_current_name())
 
 class FinishMessage:
 
