@@ -188,7 +188,11 @@ xurls = ("/test", handler)
 
 知识库
 
-![知识库](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_editor.png)
+![知识库](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_editor.PNG)
+
+任务清单
+
+![清单](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_list.PNG)
 
 搜索
 
