@@ -30,7 +30,7 @@ def _get_users():
     db_users = db.select()
     _users = {}
     # 默认的账号
-    _users["admin"] = Storage(name="admin", password="123456")
+    _users["admin"] = Storage(name="admin", password="123456", mtime="")
 
     for user in db_users:
         _users[user.name] = user
@@ -100,15 +100,13 @@ def get_admin_cookie():
     return "xuser=admin; xpass=%s;" % get_password_md5(password)
 
 def add_user(name, password):
-    users = _get_users()
-    user = Storage(name=name, password=password)
-    users[name] = user
     db = xtables.get_user_table()
     exist = db.select_one(where=dict(name=name))
     if exist is None:
         db.insert(name=name,password=password,ctime=xutils.format_time(),mtime=xutils.format_time())
     else:
         db.update(where=dict(name=name), password=password,mtime=xutils.format_time())
+    refresh_users()
 
 def has_login(name=None):
     # import threading
@@ -118,8 +116,9 @@ def has_login(name=None):
     """
     if config.IS_TEST:
         return True
-    name_in_cookie = web.cookies().get("xuser")
-    pswd_in_cookie = web.cookies().get("xpass")
+    cookies = web.cookies()
+    name_in_cookie = cookies.get("xuser")
+    pswd_in_cookie = cookies.get("xpass")
 
     # TODO 不同地方调用结果不一致
     # print(name, name_in_cookie)

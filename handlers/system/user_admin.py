@@ -10,8 +10,6 @@ class handler:
     @xauth.login_required("admin")
     def GET(self):
         user_dict = xauth.get_users()
-        test = xauth.get_user("test")
-        print(" -- User -- ", test)
         return xtemplate.render("system/user_admin.html", 
             user_dict=user_dict)
 

@@ -10,7 +10,13 @@
         </tr>
         <tr>
             <td>触发链接</td>
-            <td><input type="text" name="url" value="{{item.url}}"></td>
+            <td>
+                <select name="url" value="{{item.url}}">
+                {% for script_name in links %}
+                    <option value="{{script_name}}">{{script_name}}</option>
+                {% end %}
+                </select>
+            </td>
         </tr>
         <tr>
             <td>周</td>

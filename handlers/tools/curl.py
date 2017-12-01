@@ -168,7 +168,7 @@ class handler:
 
         if not url.startswith("http"):
             url = "http://" + url
-
+        url = xutils.quote_unicode(url)
         host = get_host(url)
 
         # print(url, method, host)

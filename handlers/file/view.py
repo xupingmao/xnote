@@ -285,12 +285,29 @@ class UnmarkHandler:
         db.update(is_marked=0, where=dict(id=id))
         raise web.seeother("/file/view?id=%s"%id)
 
+def get_cron_links():
+    SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
+    dirname = xconfig.SCRIPTS_DIR
+    links = []
+    API_PATH = os.path.join(xconfig.HANDLERS_DIR, "api")
+    for fname in os.listdir(API_PATH):
+        fpath = os.path.join(API_PATH, fname)
+        name, ext = os.path.splitext(fname)
+        if os.path.isfile(fpath) and ext == ".py":
+            links.append("/api/" + name)
+    if os.path.exists(dirname):
+        for fname in os.listdir(dirname):
+            fpath = os.path.join(dirname, fname)
+            if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_TUPLE):
+                links.append("script://" + fname)
+    return links
+
 class MemoEditHandler:
 
     def GET(self):
         id = xutils.get_argument("id", type=int)
         sched = xtables.get_schedule_table().select_one(where=dict(id=id))
-        return xtemplate.render("file/memo_edit.html", item = sched)
+        return xtemplate.render("file/memo_edit.html", item = sched, links = get_cron_links())
         
 class MemoSaveHandler:
     
