@@ -5,7 +5,7 @@
         <div class="note-body">
             <div class="note-visited-cnt">
                 {% if file.id != None %}
-                <input type="button" class="dialog-btn" dialog-url="/file/group/list?id={{file.id}}" value="整理" >
+                <input type="button" class="dialog-btn" dialog-url="/file/group/list?id={{file.id}}&filetype=xml" value="移动到" >
                 {% end %}
             </div>
             <div class="note-name">
@@ -52,7 +52,6 @@
 
 {% if "page" in globals() %}
     {% init key = "" %}
-    {% set pages = math.ceil(count/10) %}
     {% if key != "" %}
         {# TODO 移动端优化 #}
         <div class="note">
@@ -73,7 +72,6 @@
         </div>
     {% end %}
 
-{% set page_max = pages %}
 {% include mod_pagenation.html %}
 <script>
     $(".execute-btn").on("click", function (e) {

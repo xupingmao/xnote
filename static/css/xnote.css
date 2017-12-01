@@ -322,6 +322,21 @@ li.menu-item:hover {
     margin-left: 3px;
 }
 
+.tag-span-light {
+    border: 1px solid #ccc;
+    background-color: #cf9;
+    padding: 5px;
+    color: #000;
+    margin: 2px;
+    display: block;
+    float: left;
+}
+
+.tag-span-light a {
+    color: #000;
+}
+
+
 .tag-link {
     text-decoration: none;
     color: white;
