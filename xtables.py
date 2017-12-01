@@ -166,6 +166,7 @@ def init_table_file():
         manager.add_column("groups", "text", "")
         # 展示优先级，用于收藏等标记
         manager.add_column("priority", "int", 0)
+        manager.add_index("parent_id")
 
 def init_table_tag():
     # 2017/04/18
@@ -243,6 +244,15 @@ def init_table_record():
         manager.add_column("type",  "text", "")
         # 自己把所有条件都组装到key里
         manager.add_column("key",  "text", "")
+        manager.add_column("value", "text", "")
+
+def init_table_storage():
+    dbpath = os.path.join(xconfig.DATA_DIR, "data.db")
+    with TableManager(dbpath, "storage") as manager:
+        manager.add_column("ctime", "text", "")
+        manager.add_column("mtime", "text", "")
+        manager.add_column("user",  "text", "")
+        manager.add_column("key",   "text", "")
         manager.add_column("value", "text", "")
 
 class FakeDB():

@@ -330,6 +330,7 @@ li.menu-item:hover {
     margin: 2px;
     display: block;
     float: left;
+    line-height: 20px;
 }
 
 .tag-span-light a {
