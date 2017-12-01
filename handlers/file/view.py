@@ -64,7 +64,7 @@ class ViewHandler:
             amount = db.count(where="parent_id=$id AND is_deleted=0 AND creator=$creator", 
                 vars=dict(id=file.id, creator=user_name))
             files = db.select(where=dict(parent_id=file.id, is_deleted=0, creator=user_name), 
-                order="priority DESC, ctime DESC", 
+                order="priority DESC, mtime DESC", 
                 limit=pagesize, 
                 offset=(page-1)*pagesize)
             content = file.get_content()
@@ -293,7 +293,7 @@ def get_cron_links():
     for fname in os.listdir(API_PATH):
         fpath = os.path.join(API_PATH, fname)
         name, ext = os.path.splitext(fname)
-        if os.path.isfile(fpath) and ext == ".py":
+        if name != "__init__" and os.path.isfile(fpath) and ext == ".py":
             links.append("/api/" + name)
     if os.path.exists(dirname):
         for fname in os.listdir(dirname):

@@ -21,15 +21,18 @@ def search(delay_mins, message):
     if not xauth.is_admin():
         return []
     db = xtables.get_schedule_table()
-    url = "/api/alarm/" + message
+    url = "/api/alarm"
 
     millis = time.time() + int(delay_mins) * 60
     tm = time.localtime(millis)
     tm_wday = "no-repeat"
     tm_hour = tm.tm_hour
     tm_min  = tm.tm_min
+    name = "[提醒] %s" % message
 
-    db.insert(url=url,
+    db.insert(name=name,
+            url=url,
+            message=message,
             ctime=xutils.format_time(),
             mtime=xutils.format_time(),
             tm_wday=tm_wday,
@@ -41,5 +44,6 @@ def search(delay_mins, message):
     result = SearchResult()
     result.name = "提醒"
     result.raw = "提醒创建成功，将于%s提醒 %s" % (xutils.format_time(millis), message)
+    result.url = "/system/crontab"
     return [result]
 
