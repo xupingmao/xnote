@@ -73,23 +73,16 @@ creator, modifier, groups, priority from file_20171124;
 
 ## 功能结构
 
-### 文档管理
+### 知识库
 - Markdown编辑器，可视化编辑器
 - 文档分组、标签
 - 搜索
 - 分享，可以把资料生成一个临时链接分享给朋友
 
 
-### 定时任务
-- 通过配置页面设置要调用的URL和时间匹配规则即可
-- 定时任务按照`{protocol}://{URL}`规则配置，protocol缺省值为local,也就是xnote自身的handler，有效的protocol如下
- - `http`, `https` 外部的网络请求
- - `script` 执行位于`$DATA/scripts`目录下的自定义Python脚本
-
-![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/task_web.PNG)
-
-- `handlers/tools`目录下是开发工具，可以通过搜索功能定位
-- `$DATA_DIR/scripts/`目录下是系统脚本,直接与操作系统交互
+### 日程管理
+- 任务清单功能，类似于微博的形式，可以写文字或者上传图片文件等、目前有进行中和完成两个状态
+- 日历，日程提醒功能考虑中
 
 ### 搜索
 - 笔记搜索
@@ -104,6 +97,12 @@ creator, modifier, groups, priority from file_20171124;
 - 文件上传下载
 - 代码搜索
 - 代码行统计
+
+### 定时任务
+- 通过配置页面设置执行的脚本和时间匹配规则即可
+- 可选的任务包括`handlers/api`目录下的系统API以及`scripts`目录下的自定义脚本
+- 自定义脚本支持Python脚本和面向操作系统的原生脚本，包括类Unix的shell脚本和Windows的BAT脚本
+
  
 ### 其他工具
 - Python文档(pydoc)
@@ -114,7 +113,6 @@ creator, modifier, groups, priority from file_20171124;
 - 语音播报（基于操作系统自带语音助手）
 - 天气信息抓取(中国天气网数据)
 - 脚本管理器
-- 留言板，支持文本、图片、文件，可以用作网络剪切板
 
 ### 其他特性
 - debug模式下自动侦测文件修改并重新加载
@@ -188,17 +186,18 @@ xurls = ("/test", handler)
 
 ## 运行截图
 
-PC端主要截图
+知识库
 
-![截图03](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_web.png)
+![知识库](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_editor.png)
 
-移动端主要截图
+搜索
 
-![截图01](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_mobile.png)
+![截图03](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_search.png)
 
-文件浏览器截图
+定时任务
 
-![截图02](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/screenshot02.png)
+![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/task_web.PNG)
+
 
 ## 协议
 
