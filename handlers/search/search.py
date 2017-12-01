@@ -184,12 +184,12 @@ class handler:
             files = self.full_search(key, offset, pagesize)
             # store[store_key] = files
         # TODO 待优化
-        files = files[offset:offset+limit]
         count = len(files)
+        files = files[offset:offset+limit]
         return xtemplate.render("search_result.html", 
             files = files, 
-            count = count,
             title = title,
+            page_max = math.ceil(count/pagesize),
             content = content)
 
 mappings_loaded = False

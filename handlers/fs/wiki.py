@@ -1,8 +1,9 @@
 # encoding=utf-8
-from xtemplate import render
 import os
-import xutils
 import web
+import xutils
+import xauth
+from xtemplate import render
 
 WIKI_PATH = "./"
 
@@ -52,25 +53,21 @@ def get_path_list(path):
 
 class handler:
     
+    @xauth.login_required("admin")
     def GET(self, name):
         name = xutils.unquote(name)
-
-        args = web.input(op=None)
-
-        if args.op == "edit":
+        op   = xutils.get_argument("op")
+        path = xutils.get_argument("path")
+        if op == "edit":
             return self.edit_GET(name)
 
         origin_name = name
-        # os.path.join(路径, 绝对路径) = 绝对路径
-        path = os.path.join(WIKI_PATH, name)
-        
         if name == "":
             name = "/"
         else:
             name = "/" + name
 
         has_readme = False
-
         if os.path.isdir(path):
             return "Directory Not Readable"
             type = "dir"
@@ -110,6 +107,7 @@ class handler:
             
         return render("fs/wiki.html", 
             os = os,
+            path = path,
             parent = parent,
             parentname = parentname,
             wikilist = get_path_list(name),

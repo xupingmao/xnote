@@ -41,6 +41,9 @@
 <div class="col-md-12">
     <div class="col-md-12 bottom-offset-1">
         <input type="submit" value="保存">
+        {% if path.endswith(".md") %}
+        <input type="button" class="link-btn" href="/wiki?path={{path}}" value="预览">
+        {% end %}
     </div>
     <!--
     <pre class="col-md-1 marked-pre hide">{% for l in range(1, lines+1) %}{{"%04d\n" % l}}{% end %}</pre>

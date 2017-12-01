@@ -77,14 +77,37 @@ img {
     border: none;
 }
 
-.note-td a {
+.note-td a:hover {
+    text-decoration: underline;
+}
 
+.note-td:hover {
+    background-color: #eee;
 }
 
 #uploadIframe {
     border: none;
     width: 100%;
     height: 60px;
+}
+
+.group-div {
+    width: 200px;
+    background-color: #fff;
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    float: left;
+}
+.group-div:hover {
+    background-color: #ccc;
+}
+.group-div a {
+    color: #000;
+}
+.children-count {
+    float: right;
 }
 
 </style>
@@ -96,6 +119,7 @@ img {
     {% init pathlist = [] %}
     {% init file = None %}
     {% init show_search_div = False %}
+    {% init show_path_list = True %}
 
     {% if file != None %}
         {% set globals()['file_type'] = file.type %}
@@ -106,12 +130,14 @@ img {
         {% include "search.html" %}
     {% end %}
     
+    {% if show_path_list %}
     <div class="col-md-12 pathlist">
         <a href="/file/group">Home</a> /
         {% for item in pathlist %}
             <a href="{{item.url}}">{{ item.name }}</a> /
         {% end %}
     </div>
+    {% end %}
 
     {% comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 %}
 
@@ -123,6 +149,8 @@ img {
         {% include "file/group.html" %}
     {% elif file_type == "memo" %}
         {% include "file/memo.html" %}
+    {% elif file_type == "group_list" %}
+        {% include "file/group_list.html" %}
     {% else %}
         {% include "file/post.html" %}
     {% end %}

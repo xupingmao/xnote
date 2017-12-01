@@ -8,15 +8,6 @@ index_html = """{% extends base.html %}
 {% end %}
 """
 
-class handler(BaseHandler):
-
-    def execute(self):
-        self.id = 0
-        self.render(
-            recentlist=dao.get_recent_visit(7), 
-            category=dao.get_category(),
-            )
-
 searchable = False
 
 class Home:
@@ -39,7 +30,7 @@ class Unauthorized():
 
 xurls = (
     r"/", Home, 
-    r"/index", handler,
+    r"/index", Home,
     r"/unauthorized", Unauthorized
 )
 

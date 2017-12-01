@@ -5,7 +5,7 @@
 
     {% if pseudo_groups %}
         <tr>
-            <td>
+            <td class="note-td">
                 <img src="/static/image/folder.gif">
                 <a href="/file/group/ungrouped">未分类</a> /
             </td>
@@ -22,22 +22,25 @@
     {% for i, item in enumerate(files) %}
         <tr>
             <td class="note-td">
+                <div class="children-count">
+                    {{item.size}}
+                </div>
                 {% if item.type == "group" %}
                     <img src="/static/image/folder.gif"/>
                 {% else %}
                 {% end %}
                 <a href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
-                {% if item.type == "group" %}/{% end %}
                 <a class="hover" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
                 {% if _is_admin %}
                     <a class="hover" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>
                 {% end %}
-                <a class="hover dialog-btn" dialog-url="/file/group/list?id={{item.id}}" href="javascript:void({{item.id}})">移动到</a>
+                {% if item.type != "group" %}
+                <a class="hover dialog-btn" dialog-url="/file/group?id={{item.id}}&filetype=xml" href="javascript:void({{item.id}})">移动到</a>
+                {% end %}
                 <div style="font-size: 12px;">
                     <span class="tag">{{item.creator}}</span>
                     {{item.mtime}}
                 </div>
-                <div class="move-div" id="move-{{item.id}}"></div>
             </td>
         </tr>
     {% end %}
@@ -77,12 +80,6 @@ function remove(id, name) {
     }
 }
 
-function move(id) {
-    $(".move-div").html("");
-    $.get("/file/group/list?id="+id, function (text) {
-        $("#move-"+id).html(text);
-    });
-}
 function moveTo(selfId, parentId) {
     $.post("/file/group/move", 
         {id:selfId, parent_id: parentId}, 

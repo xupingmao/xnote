@@ -20,26 +20,18 @@
 
 {% block body %}
     <div style="">
- 
-    <span id="result" style="color:green"></span>
-    
+        <span id="result" style="color:green"></span>
     </div>
         <div>
             <div style="float:left;margin-top: 1em;" class="col-md-12">
             {% if _is_admin and type == "file" %}
-                <a href="/wiki/{{name}}?op=edit">[编辑]</a>
+                <a href="/code/view_source?path={{path}}">[编辑]</a>
             {% elif _is_admin and type == "dir" %}
                 <a href="/wiki/add?type=file&target={{name}}">[添加文件]</a>
                 <a href="/wiki/add?type=dir&target={{name}}">[添加目录]</a>
             {% end %}
             </div>
-<!--             <h3>
-                <a href="/wiki/">Home</a>
-                {% for path in wikilist %}
-                / <a href="/wiki/{{path}}">{{ os.path.basename(path) }}</a>
-                {% end %}
-            </h3>
- -->        </div>
+        </div>
         
     {% if type == "dir" %}
         <div>
