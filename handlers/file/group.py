@@ -19,19 +19,6 @@ class PathNode:
         self.name = name
         self.url = url
 
-class FileListHandler:
-
-    @xauth.login_required()
-    def GET(self):
-        return xtemplate.render("file/view.html",
-            file_type="group",
-            pseudo_groups=True,
-            show_search_div=True,
-            files=dao.get_category(xauth.get_current_name()))
-
-    def POST(self):
-        pass
-
 class Ungrouped:
 
     @xauth.login_required()
@@ -75,7 +62,12 @@ class MoveHandler:
         id = xutils.get_argument("id", "", type=int)
         parent_id = xutils.get_argument("parent_id", "", type=int)
         db = xtables.get_file_table()
+        file = db.select_one(where=dict(id=id))
+        if file is None:
+            return dict(code="fail", message="file not exists")
         db.update(parent_id=parent_id, where=dict(id=id))
+        dao.update_children_count(file.parent_id, db=db)
+        dao.update_children_count(parent_id, db=db)
         return dict(code="success")
 
     def POST(self):
@@ -85,10 +77,18 @@ class GroupListHandler:
 
     def GET(self):
         id = xutils.get_argument("id", "", type=int)
-        sql = "SELECT id, name FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name DESC LIMIT 200"
+        filetype = xutils.get_argument("filetype", "")
+        sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
         data = xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name()))
-        web.header("Content-Type", "text/html; charset=utf-8")
-        return xtemplate.render("file/group_list.html", id=id, filelist=data)
+        if filetype == "xml":
+            web.header("Content-Type", "text/html; charset=utf-8")
+            return xtemplate.render("file/group_list.html", id=id, filelist=data, file_type="group")
+        else:
+            return xtemplate.render("file/view.html",
+                file_type="group",
+                pseudo_groups=True,
+                show_search_div = True,
+                files=data)
 
 class RemovedHandler:
 
@@ -161,7 +161,7 @@ class MemoHandler:
             files = files)
 
 xurls = (
-    r"/file/group", FileListHandler,
+    r"/file/group", GroupListHandler,
     r"/file/group/ungrouped", Ungrouped,
     r"/file/group/removed", RemovedHandler,
     r"/file/group/list", GroupListHandler,

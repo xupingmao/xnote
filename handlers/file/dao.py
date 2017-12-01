@@ -184,7 +184,7 @@ class RowDesc:
 
 
 def get_file_db():
-    return db.SqliteDB(db=config.DB_PATH)
+    return xtables.get_file_table()
 
 def get_pathlist(db, file):
     pathlist = []
@@ -198,35 +198,17 @@ def get_pathlist(db, file):
             file = db.select_one(where=dict(id=file.parent_id))
     return pathlist
 
-def get_category(name = None, limit = None):
-    db = get_db()
-    vars = dict()
-
-    if limit is None:
-        limit = 200
-    sql = "SELECT * FROM file WHERE is_deleted != 1 AND parent_id = 0 AND type = 'group'"
-    if name is not None:
-        sql += " AND creator = $creator"
-        vars["creator"] = name
-    sql += " ORDER BY priority DESC, ctime DESC LIMIT $limit"
-    vars["limit"] = limit
-    all = db.query(sql, vars=vars)
-    return [FileDO.fromDict(item) for item in all]
-
-def get_children_by_id(id):
-    db = get_db()
-    all = db.execute("SELECT * from file where parent_id = %s AND is_deleted != 1 order by ctime desc" % id)
-    return [FileDO.fromDict(item) for item in all]
-
 def get_by_id(id, db=None):
     if db is None:
-        db = get_db()
+        db = get_file_db()
     first = db.select_one(where=dict(id=id))
     if first is not None:
         return FileDO.fromDict(first)
     return None
 
-def get_by_name(name):
+def get_by_name(name, db=None):
+    if db is None:
+        db = get_file_db()
     result = get_db().select_one(where=dict(name=name, is_deleted=0))
     if result is None:
         return None
@@ -263,8 +245,7 @@ def search_name(words, limit=None, file_type=None):
     all = db.execute(sql)
     return [FileDO.fromDict(item) for item in all]
 
-def visit_by_id(id):
-    db = get_db()
+def visit_by_id(id, db = None):
     sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime='%s' where id = %s and visited_cnt < %s" % \
         (dateutil.format_time(), id, MAX_VISITED_CNT)
     return db.query(sql)
@@ -293,6 +274,14 @@ def update(where, **kw):
         kw["version"] = version + 1
     return db.update("file", where, vars=None, **kw)
 
+def update_children_count(parent_id, db=None):
+    if parent_id is None or parent_id == "":
+        return
+    if db is None:
+        db = get_file_db()
+    group_count = db.count(where="parent_id=$parent_id AND is_deleted=0", vars=dict(parent_id=parent_id))
+    db.update(size=group_count, where=dict(id=parent_id))
+
 def delete_by_id(id):
     update(where=dict(id=id), is_deleted=1)
 
@@ -307,7 +296,7 @@ def insert(file):
         
 
 def get_db():
-    return xtables.get_file_table()
+    return get_file_db()
 
 class FileDB:
 

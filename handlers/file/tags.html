@@ -54,8 +54,8 @@ function toggleFileTagsEditor() {
     }
 }
 
-function postTagAdd() {
-    $.post("/file/tag/add", {file_id: {{file.id}}, tags: $("#tagEditText").val()}, 
+function postTagUpdate() {
+    $.post("/file/tag/update", {file_id: {{file.id}}, tags: $("#tagEditText").val()}, 
         function(data, status) {
             // alert(data);
             toggleFileTagsEditor();
@@ -64,13 +64,13 @@ function postTagAdd() {
 }
 
 $("#tagEditBtn").on("click", function() {
-    postTagAdd();
+    postTagUpdate();
 })
 
 $("#tagEditText").on("keyup", function (e) {
     console.log(e);
     if (e.which == 13) {
-        postTagAdd();
+        postTagUpdate();
     }
 });
 

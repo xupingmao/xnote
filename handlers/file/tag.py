@@ -15,17 +15,22 @@ class TagHandler:
         file_tags = db.select(where=dict(file_id=id))
         return dict(code="", message="", data=list(file_tags))
 
-class AddTagHandler:
+class UpdateTagHandler:
 
+    @xauth.login_required()
     def POST(self):
         id   = xutils.get_argument("file_id", type=int)
         tags_str = xutils.get_argument("tags")
+
+        tag_db = xtables.get_file_tag_table()
+        if tags_str is None or tags_str == "":
+            tag_db.delete(where=dict(file_id=id))
+            return dict(code="success")
         new_tags = set(tags_str.split(" "))
         file = dao.get_by_id(id)
         db   = dao.get_file_db()
         file_db = xtables.get_file_table()
-        # 先删除所有的tag，再增加
-        tag_db = xtables.get_file_tag_table()
+        # 求出两个差集进行运算
         old_tags = tag_db.select(where=dict(file_id=id))
         old_tags = set([v.name for v in old_tags])
 
@@ -40,6 +45,9 @@ class AddTagHandler:
 
         file_db.update(related=tags_str, where=dict(id=id))
         return dict(code="", message="", data="OK")
+
+    def GET(self):
+        return self.POST()
 
 class TagNameHandler:
 
@@ -88,7 +96,7 @@ class TagListHandler:
         # return dict(code="", message="", data=tag_list)
 
 xurls = (r"/file/tag/(\d+)", TagHandler,
-         r"/file/tag/add", AddTagHandler,
+         r"/file/tag/update", UpdateTagHandler,
          r"/file/tagname/(.*)", TagNameHandler,
          r"/file/taglist", TagListHandler)
 

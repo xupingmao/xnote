@@ -36,20 +36,21 @@ class ViewHandler:
         page = xutils.get_argument("page", 1, type=int)
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         op   = xutils.get_argument("op", "view")
+        db   = xtables.get_file_table()
+
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
             id = int(id)
-            file = dao.get_by_id(id)
+            file = dao.get_by_id(id, db=db)
         elif name is not None:
-            file = dao.get_by_name(name)
+            file = dao.get_by_name(name, db=db)
         if file is None:
             raise web.notfound()
         
         if not file.is_public and xauth.get_current_user() is None:
             return xauth.redirect_to_login()
         show_search_div = False
-        db = xtables.get_file_table()
         pathlist = dao.get_pathlist(db, file)
         user_name = xauth.get_current_name()
         can_edit = (file.creator == user_name) or (user_name == "admin")
@@ -70,7 +71,7 @@ class ViewHandler:
             content = file.get_content()
             show_search_div = True
         elif file.type == "md" or file.type == "text":
-            dao.visit_by_id(id)
+            dao.visit_by_id(id, db)
             content = file.get_content()
         else:
             content = file.content
@@ -80,7 +81,7 @@ class ViewHandler:
             file.data = file.data.replace(u'\n', '<br/>')
             if file.data == None or file.data == "":
                 file.data = content
-            dao.visit_by_id(id)
+            dao.visit_by_id(id, db)
         return xtemplate.render("file/view.html",
             file=file, 
             op=op,
@@ -261,9 +262,12 @@ class FileSaveHandler:
             kw["content"] = data
             if xutils.bs4 is not None:
                 soup = xutils.bs4.BeautifulSoup(data, "html.parser")
-                kw["content"] = soup.get_text(separator=" ")
+                content = soup.get_text(separator=" ")
+                kw["content"] = content
+            kw["size"] = len(content)
         else:
             kw["content"] = content
+            kw["size"] = len(content)
         rowcount = db.update(**kw)
         if rowcount > 0:
             return dict(code="success")

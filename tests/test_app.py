@@ -207,4 +207,9 @@ class TestMain(unittest.TestCase):
     def test_message_list(self):
         json_request("/file/message/list")
 
+    def test_tag(self):
+        json_request("/file/tag/update", method="POST", data=dict(file_id=0, tags="ABC DEF"))
+        json_request("/file/tag/0")
+        json_request("/file/tag/update", method="POST", data=dict(file_id=0, tags=""))
+
 

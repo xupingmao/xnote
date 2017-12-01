@@ -38,23 +38,26 @@ class AddHandler:
         file.parent_id = parent_id
         file.type      = type
         file.content   = content
+        file.size      = len(content)
 
         code = "fail"
         error = ""
         try:
+            db = xtables.get_file_table()
             if name != '':
-                f = dao.get_by_name(name)
+                f = db.select_one(where=dict(name=name,is_deleted=0))
                 if f != None:
                     key = name
                     raise Exception(u"%s 已存在" % name)
                 # 分组提前
                 if file.type == "group":
                     file.priority = 1
-                f = dao.insert(file)
-                inserted = dao.get_by_name(name)
+                inserted_id = db.insert(**file)                
+                # 更新分组下面页面的数量
+                dao.update_children_count(parent_id, db = db)
                 if _type == "json":
-                    return dict(code="success", id=inserted.id)
-                raise web.seeother("/file/view?id={}".format(inserted.id))
+                    return dict(code="success", id=inserted_id)
+                raise web.seeother("/file/view?id={}".format(inserted_id))
         except web.HTTPError as e1:
             raise e1
         except Exception as e:

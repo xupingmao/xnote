@@ -127,6 +127,7 @@ def init_table_file():
         manager.add_column("content", "text", "")
         # 原始的数据，比如带标签的HTML，还有图片等的base64数据
         manager.add_column("data", "text", "")
+        # 文本内容长度或者子页面数量
         manager.add_column("size",    "long", 0)
         # 修改版本
         manager.add_column("version",  "int", 0)
