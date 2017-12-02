@@ -272,7 +272,7 @@ def update(where, **kw):
     version = where.get("version")
     if version:
         kw["version"] = version + 1
-    return db.update("file", where, vars=None, **kw)
+    return db.update(where = where, vars=None, **kw)
 
 def update_children_count(parent_id, db=None):
     if parent_id is None or parent_id == "":

@@ -100,18 +100,18 @@ class MarkdownEdit:
     def GET(self):
         id   = xutils.get_argument("id", "")
         name = xutils.get_argument("name", "")
+        db = xtables.get_file_table()
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
             id = int(id)
-            dao.visit_by_id(id)
-            file = dao.get_by_id(id)
+            dao.visit_by_id(id, db=db)
+            file = dao.get_by_id(id, db=db)
         elif name is not None:
-            file = dao.get_by_name(name)
+            file = dao.get_by_name(name, db=db)
         if file is None:
             raise web.notfound()
         download_csv = file.related != None and "CODE-CSV" in file.related
-        db = xtables.get_file_table()
         return xtemplate.render("file/markdown_edit.html", file=file, 
             pathlist = dao.get_pathlist(db, file),
             content = file.get_content(), 
