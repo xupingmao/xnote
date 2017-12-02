@@ -7,9 +7,6 @@
 <!-- <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/xq-light.css">
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/eclipse.css"> -->
 <script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
-
-<link rel="stylesheet" type="text/css" href="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.css">
-<script type="text/javascript" src="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
 <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
 <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
 <script type="text/javascript" src="/static/js/upload.js"></script>
@@ -117,7 +114,7 @@
                 <div class="col-md-12">
                     <div id="editor" class="col-md-12" style="height: auto; ">
                         <div id="markdown-input-div" class="col-md-6">
-                            <textarea id="markdown-input" class="form-control" name="content" rows=50>{{?content}}</textarea>
+                            <textarea id="markdown-input" class="form-control" name="content" rows=50>{{file.content}}</textarea>
                         </div>
 
                         <div id="markdown-output-div" class="col-md-12">

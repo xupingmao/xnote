@@ -29,13 +29,11 @@ def try_decode(bytes):
 
 class ViewHandler:
 
-    # @xutils.profile()
-    def GET(self):
+    def GET(self, op):
         id   = xutils.get_argument("id", "")
         name = xutils.get_argument("name", "")
         page = xutils.get_argument("page", 1, type=int)
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
-        op   = xutils.get_argument("op", "view")
         db   = xtables.get_file_table()
 
         if id == "" and name == "":
@@ -59,8 +57,11 @@ class ViewHandler:
         if role != "admin" and file.groups != '*' and file.groups != role:
             raise web.seeother("/unauthorized")
 
+        # 定义一些变量
         files = []
         amount = 0
+        template_name = "file/view.html"
+
         if file.type == "group":
             amount = db.count(where="parent_id=$id AND is_deleted=0 AND creator=$creator", 
                 vars=dict(id=file.id, creator=user_name))
@@ -73,6 +74,8 @@ class ViewHandler:
         elif file.type == "md" or file.type == "text":
             dao.visit_by_id(id, db)
             content = file.get_content()
+            if op == "edit":
+                template_name = "file/markdown_edit.html"
         else:
             content = file.content
             content = content.replace(u'\xad', '\n')
@@ -82,7 +85,8 @@ class ViewHandler:
             if file.data == None or file.data == "":
                 file.data = content
             dao.visit_by_id(id, db)
-        return xtemplate.render("file/view.html",
+        
+        return xtemplate.render(template_name,
             file=file, 
             op=op,
             date2str=date2str,
@@ -93,29 +97,6 @@ class ViewHandler:
             page = page,
             page_url = "/file/view?id=%s&page=" % id,
             files = files)
-
-class MarkdownEdit:
-
-    @xauth.login_required()
-    def GET(self):
-        id   = xutils.get_argument("id", "")
-        name = xutils.get_argument("name", "")
-        db = xtables.get_file_table()
-        if id == "" and name == "":
-            raise HTTPError(504)
-        if id != "":
-            id = int(id)
-            dao.visit_by_id(id, db=db)
-            file = dao.get_by_id(id, db=db)
-        elif name is not None:
-            file = dao.get_by_name(name, db=db)
-        if file is None:
-            raise web.notfound()
-        download_csv = file.related != None and "CODE-CSV" in file.related
-        return xtemplate.render("file/markdown_edit.html", file=file, 
-            pathlist = dao.get_pathlist(db, file),
-            content = file.get_content(), 
-            date2str=date2str)
 
 def sqlite_escape(text):
     if text is None:
@@ -368,8 +349,7 @@ class LibraryHandler:
         return xtemplate.render("file/library.html")
 
 xurls = (
-    r"/file/edit", ViewHandler, 
-    r"/file/view", ViewHandler,
+    r"/file/(edit|view)", ViewHandler, 
     r"/file/rename", RenameHandler,
     r"/file/update", UpdateHandler,
     r"/file/save", FileSaveHandler,
@@ -383,7 +363,6 @@ xurls = (
     r"/file/memo/edit", MemoEditHandler,
     r"/file/memo/save", MemoSaveHandler,
     r"/file/memo/remove", MemoRemoveHandler,
-    r"/file/markdown/edit", MarkdownEdit,
     r"/file/library", LibraryHandler
 )
 

@@ -3,7 +3,7 @@
 
 <script type="text/javascript" src="/static/lib/wangEditor/wangEditor-3.0.10.min.js"></script>
 {% if op == "view" %}
-    <h2 id="name">{{file["name"]}} <a href="/file/view?id={{file.id}}&op=edit">[编辑]</a></h2>
+    <h2 id="name">{{file["name"]}} <a href="/file/edit?id={{file.id}}">[编辑]</a></h2>
 
     {% include "file/tags.html" %}
     <hr/>

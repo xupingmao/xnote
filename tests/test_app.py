@@ -113,6 +113,7 @@ class TestMain(unittest.TestCase):
         file = json_request("/file/view?id=%s&_type=json" % id).get("file")
         self.assertEqual("md", file["type"])
         self.assertEqual("hello markdown", file["content"])
+        self.check_200("/file/edit?id=%s"%id)
         json_request("/file/remove?id=%s" % id)
 
     def test_file_editor_html(self):
@@ -126,6 +127,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual("<p>hello</p>", file["data"])
         if xutils.bs4 != None:
             self.assertEqual("hello", file["content"])
+        self.check_200("/file/edit?id=%s"%id)
         json_request("/file/remove?id=%s" % id)
 
     def test_group(self):
