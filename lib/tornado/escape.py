@@ -202,7 +202,8 @@ def utf8(value):
         raise TypeError(
             "Expected bytes, unicode, or None; got %r" % type(value)
         )
-    return value.encode("utf-8")
+    # surrogateescape是使用ascii的系统decode非ascii的结果
+    return value.encode("utf-8", "surrogateescape")
 
 _TO_UNICODE_TYPES = (unicode_type, type(None))
 
