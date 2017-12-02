@@ -506,6 +506,9 @@ def say(msg):
         windows_say(msg)
     elif is_mac():
         mac_say(msg)
+    else:
+        # 防止调用语音API的程序没有正确处理循环
+        time.sleep(1)
 
 
 def exec_script(name):

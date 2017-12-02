@@ -15,11 +15,15 @@
     var path = getUrlParams().path;
     var _from = getUrlParams().from;
     var autoForward = false;
+    var readLength = 500;
 
     $("#backLink").attr("href", _from);
 
     function readbook(read, forward) {
-        $.get("/api/readbook", {path: path, read: read, forward: forward, length: 500}, function (resp) {
+        $.get("/api/readbook", {path: path, read: "false", forward: "false", length: readLength}, function (resp) {
+            $("#content").text(resp.data);
+        });
+        $.get("/api/readbook", {path: path, read: read, forward: forward, length: readLength}, function (resp) {
             var text = resp.data;
             $("#content").text(text);
             if (autoForward) {
