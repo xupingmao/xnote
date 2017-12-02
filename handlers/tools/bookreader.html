@@ -3,10 +3,10 @@
 {% block body %}
 
 <a id="backLink">返回目录</a>
-<div class="col-md-12">
-    <button id="read">阅读</button>
-    <button id="forward">下一页</button>
-    <button id="backward">上一页</button>
+<div class="col-md-12" style="text-align: center;">
+    <button id="backward" style="float: left;">上一页</button>
+    <span style="text-align: center;"><button id="read">阅读</button></span>
+    <button id="forward" style="float: right;">下一页</button>
 </div>
 
 <div class="col-md-12" id="content"></div>
@@ -19,26 +19,40 @@
 
     $("#backLink").attr("href", _from);
 
-    function readbook(read, forward) {
-        $.get("/api/readbook", {path: path, read: "false", forward: "false", length: readLength}, function (resp) {
-            $("#content").text(resp.data);
-        });
-        $.get("/api/readbook", {path: path, read: read, forward: forward, length: readLength}, function (resp) {
+    function readbook(direction, read) {
+        $.get("/api/readbook", {path: path, read: "false", direction: direction, length: readLength}, function (resp) {
             var text = resp.data;
+            // 显示阅读内容
             $("#content").text(text);
-            if (autoForward) {
-                setTimeout(function () {
-                    readbook(read, forward);
-                }, 0);
-            }
+            // 先前进，再读这一章节
+            if (read == "true") {
+                // read 永远是当前章节
+                $.get("/api/readbook", {path: path, read: "true", direction: "current", length: readLength}, function (resp) {
+                    if (autoForward) {
+                        setTimeout(function () {
+                            readbook("forward", read);
+                        })
+                    }
+                });
+            } 
         })
     }
     $("#read").click(function () {
         autoForward = true;
-        readbook("true", "true", true);
-    })
+        readbook("current", "true");
+    });
 
-    readbook("false", "false");
+    $("#forward").click(function () {
+        autoForward = false;
+        readbook("forward", "false");
+    });
+
+    $("#backward").click(function () {
+        autoForward = false;
+        readbook("backward", "false")
+    });
+
+    readbook("current", "false");
 </script>
 
 {% end %}
