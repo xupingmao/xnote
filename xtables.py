@@ -167,6 +167,7 @@ def init_table_file():
         # 展示优先级，用于收藏等标记
         manager.add_column("priority", "int", 0)
         manager.add_index("parent_id")
+        manager.add_index("type")
 
 def init_table_tag():
     # 2017/04/18
