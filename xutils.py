@@ -463,6 +463,7 @@ def is_editable(filename):
         ".h",
         ".hpp",
         ".py",
+        ".lua",
         ".gradle"
     )
 

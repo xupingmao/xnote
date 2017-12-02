@@ -46,13 +46,14 @@ class handler(BaseHandler):
         if sql != "" and path != "":
             # TODO execute sql
             try:
-                realpath = os.path.join(config.DATA_PATH, path)
+                realpath = path
                 result_list = db_execute(realpath, sql)
             except Exception as e:
                 error = e
         path_list = []
         for p in os.listdir(config.DATA_PATH):
             if p.endswith(".db"):
+                p = os.path.join(xconfig.DATA_DIR, p)
                 path_list.append(p)
         if len(result_list) > 0:
             keys = result_list[0].keys()

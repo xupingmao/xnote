@@ -157,6 +157,8 @@ class FileItem(Storage):
         self.path = path
         self.name = os.path.basename(path)
         self.size = get_file_size(path)
+        _, self.ext = os.path.splitext(path)
+        self.ext = self.ext.lower()
 
         if parent != None:
             self.name = get_relative_path(path, parent)

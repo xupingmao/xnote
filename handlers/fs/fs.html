@@ -133,25 +133,25 @@
             <a href="/fs/{{item.path}}" class="fs-dir">{{item.name}}</a>
         {% else %}
             <a href="/fs/{{item.path}}" class="fs-file">{{item.name}}</a>
-            {% if item.name.lower().endswith((".jpg", "png", "gif", "jpeg")) %}
-                <!-- <div><img src="/fs/{{item.path}}" class="fs-image" alt="{{item.name}}"/></div> -->
+            {% if item.ext in (".jpg", ".png", ".gif", ".jpeg") %}
                 <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>
             {% end %}
 
-            {% if item.name.lower().endswith(".txt") %}
+            {% if item.ext == ".txt" %}
                 <input type="button" class="link-btn" href="/tools/bookreader?path={{item.path}}&from=/fs/{{path}}" value="阅读"/>
+            {% end %}
+
+            {% if item.ext == ".db" %}
+                <input type="button" class="link-btn" href="/tools/sql?path={{item.path}}&from=/fs/{{path}}" value="查看">
+            {% end %}
+
+            {% if xutils.is_editable(item.path) %}
+                <input type="button" class="link-btn" href="/code/view_source?path={{url_escape(item.path)}}" value="编辑">
             {% end %}
         {% end %}
         </td>
-
         <td>
             {{item.size}}
-        </td>
-        
-        <td>
-            {% if xutils.is_editable(item.path) %}
-                <a href="/code/view_source?path={{url_escape(item.path)}}">[编辑]</a>
-            {% end %}
         </td>
     </tr>
     {% end %}
