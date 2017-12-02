@@ -137,6 +137,10 @@
                 <!-- <div><img src="/fs/{{item.path}}" class="fs-image" alt="{{item.name}}"/></div> -->
                 <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>
             {% end %}
+
+            {% if item.name.lower().endswith(".txt") %}
+                <input type="button" class="link-btn" href="/tools/bookreader?path={{item.path}}&from=/fs/{{path}}" value="阅读"/>
+            {% end %}
         {% end %}
         </td>
 

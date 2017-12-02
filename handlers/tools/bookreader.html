@@ -1,0 +1,40 @@
+{% extends base.html %}
+
+{% block body %}
+
+<a id="backLink">返回目录</a>
+<div class="col-md-12">
+    <button id="read">阅读</button>
+    <button id="forward">下一页</button>
+    <button id="backward">上一页</button>
+</div>
+
+<div class="col-md-12" id="content"></div>
+
+<script type="text/javascript">
+    var path = getUrlParams().path;
+    var _from = getUrlParams().from;
+    var autoForward = false;
+
+    $("#backLink").attr("href", _from);
+
+    function readbook(read, forward) {
+        $.get("/api/readbook", {path: path, read: read, forward: forward, length: 500}, function (resp) {
+            var text = resp.data;
+            $("#content").text(text);
+            if (autoForward) {
+                setTimeout(function () {
+                    readbook(read, forward);
+                }, 0);
+            }
+        })
+    }
+    $("#read").click(function () {
+        autoForward = true;
+        readbook("true", "true", true);
+    })
+
+    readbook("false", "false");
+</script>
+
+{% end %}
