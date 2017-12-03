@@ -9,13 +9,14 @@
     <button id="forward" style="float: right;">下一页</button>
 </div>
 
+<div class="col-md-12" id="progress"></div>
 <div class="col-md-12" id="content"></div>
 
 <script type="text/javascript">
     var path = getUrlParams().path;
     var _from = getUrlParams().from;
     var autoForward = false;
-    var readLength = 500;
+    var readLength = 1000;
 
     $("#backLink").attr("href", _from);
 
@@ -23,7 +24,12 @@
         $.get("/api/readbook", {path: path, read: "false", direction: direction, length: readLength}, function (resp) {
             var text = resp.data;
             // 显示阅读内容
-            $("#content").text(text);
+            text = text.replace("<", "&lt;");
+            text = text.replace(">", "&gt;");
+            text = text.replace(" ", "&nbsp;");
+            text = text.replace("\n", "<br>");
+            $("#content").html(text);
+            $("#progress").text((resp.current/resp.size*100).toFixed(2) + "%");
             // 先前进，再读这一章节
             if (read == "true") {
                 // read 永远是当前章节

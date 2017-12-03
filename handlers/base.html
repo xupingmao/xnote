@@ -87,7 +87,7 @@ a { text-decoration: none; }
 }
 
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 700px) {
   /** Mobile **/
   .navMenubox {
     display: none;
@@ -99,13 +99,6 @@ a { text-decoration: none; }
 
   .main {
     margin-left: 0px;
-  }
-}
-
-@media screen and (min-width: 601px) {
-  /** Desktop **/
-  .navMenuTop {
-    display: none;
   }
 }
 
@@ -349,10 +342,6 @@ $(function() {
     } else {
       showSideBar();
     }
-  }
-
-  if (window.innerWidth > 600) {
-    $("#poweredBy").show();
   }
 
   function toggleMenu() {
