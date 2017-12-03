@@ -57,6 +57,10 @@ a { text-decoration: none; }
   text-align: center;
 }
 
+.navMenuTop h1 {
+  font-family: "monospace Consolas";
+}
+
 .navMenuTop ul {
   text-align: center;
   line-height: 30px;
@@ -235,9 +239,9 @@ a { text-decoration: none; }
   <ul>
     <li><a href="/file/group">知识库</a></li>
     {% if _has_login %}
-    <li><a href="/tools/message?status=created">计划</a></li>
+    <li><a href="/tools/message?status=created">消息</a></li>
     {% end %}
-    <li><a href="/system/index">功能</a></li>
+    <li><a href="/system/index">系统</a></li>
     <li><a href="/wiki?path=./README.md">关于</a></li>
   </ul>
 </div>

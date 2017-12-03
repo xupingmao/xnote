@@ -35,8 +35,8 @@
 <input class="hide" id="addr" value="{{?addr}}" />
 
 <div class="barcode col-md-12" style="margin:0 auto; text-align: center;">
-    <p>
-        Hello, {{_user_name}}! 地址 <a href="http://{{?addr}}">http://{{?addr}}</a>
+    <p>Hello, {{_user_name}}! </p>
+    <p>地址 <a href="http://{{?addr}}">http://{{?addr}}</a>
         <input type="button" id="toggleBarCode" class="btn" value="二维码">
     </p>
     <div id="qrcode" class="hide"></div>
@@ -58,8 +58,8 @@
     ("系统变量",     "/system/sys_var_admin"),
     ("重新加载模块", "/system/reload"),
     ("静音",         "/search/search?key=mute"),
-    ("资料库状态",    "/file/summary"),
     ("标签云",  "/file/taglist"),
+    ("Python Shell", "/system/script/edit?name=test.py"),
 ] %}
 
 <div class="col-md-12 top-offset-1">
@@ -76,7 +76,6 @@
 
 {% set favorite_tools = [
     ("Python文档", "/system/modules_info"),
-    ("Python Shell", "/system/script/edit?name=test.py"),
     ("消息", "/tools/message"),
     ("代码模板", "/tools/code_template"),
     ("浏览器信息", "/tools/browser_info"),
