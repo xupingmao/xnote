@@ -24,9 +24,9 @@ class handler:
     def seek_page(self, fp, bookmark, pagesize):
         # 缓存
         mod = 20
-        page = bookmark.get("page", 1)
+        page = bookmark.get("page", 0)
         # cache = bookmark.get("cache", {})
-        startpage = 0
+        startpage = 1
 
         if page < 0:
             page = 0
@@ -40,12 +40,10 @@ class handler:
         else:
             startpage = 0
 
-        for i in range(int(startpage), page-1):
-            # cache[page] = fp.tell()
+        for i in range(int(startpage), page):
             fp.read(pagesize)
         if page % mod == 0:
             bookmark["page_%s" % page] = fp.tell()
-        # bookmark["cache"] = cache
 
     @xauth.login_required("admin")
     def GET(self):
@@ -53,8 +51,8 @@ class handler:
         length  = 1000
         read    = xutils.get_argument("read", "false")
         direction = xutils.get_argument("direction", "forward")
-        page    = xutils.get_argument("page", 1, type=int)
         encoding = "utf-8"
+        page     = 0
 
         if not os.path.exists(path):
             path = xutils.quote_unicode(path)
@@ -68,7 +66,7 @@ class handler:
                     bookmark = dict()
             except:
                 pass
-        page = bookmark.get("page", 1)
+        page = bookmark.get("page", 0)
         size = xutils.get_file_size(path, format=False)
 
         with open(path, encoding=encoding) as fp:
@@ -77,6 +75,8 @@ class handler:
                 page = page - 1
             if direction == "forward":
                 page = page + 1
+            if page < 0:
+                page = 0
             bookmark["page"] = page
             self.seek_page(fp, bookmark, length)
             current = fp.tell()
