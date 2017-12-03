@@ -6,9 +6,7 @@
 
 <title>Xnote</title>
 <style>
-body, html { 
-  height: 100%; 
-  overflow: hidden;
+body, html {
 }
 
 #navMenubox, .navMenu, .sub-menu {
@@ -43,34 +41,71 @@ a { text-decoration: none; }
   background: #1c2229; 
   height:100%; 
   float: left;
-  padding-top: 28px;
+  padding-top: 10px;
+  position: fixed;
 }
 
+.navMenuTop {
+  background-color: #9cc;
+  display: none;
+}
+
+.navMenuTop * {
+  margin: 0px;
+  padding: 0px;
+  color: black;
+  text-align: center;
+}
+
+.navMenuTop ul {
+  text-align: center;
+  line-height: 30px;
+  width: 100%;
+}
+
+.navMenuTop li {
+  display: inline;
+  padding: 5px;
+}
+
+
 .main {
-  padding-top: 38px;
+  padding-top: 10px;
   padding-left: 10px;
   padding-right: 10px;
   width: auto;
   height: 100%;
   overflow: auto;
   box-sizing: border-box;
+  margin-left: 200px;
 }
 
 .footer {
   float: left;
   width: 100%;
-  height: 50px;
+  height: 100px;
 }
 
+
 @media screen and (max-width: 600px) {
+  /** Mobile **/
   .navMenubox {
-    margin-left: -200px;
+    display: none;
+  }
+
+  .navMenuTop {
+    display: block;
+  }
+
+  .main {
+    margin-left: 0px;
   }
 }
 
 @media screen and (min-width: 601px) {
-  .navMenubox {
-    margin-left: 0px;
+  /** Desktop **/
+  .navMenuTop {
+    display: none;
   }
 }
 
@@ -196,8 +231,22 @@ a { text-decoration: none; }
 <body>
 <div class="header">
   <div class="toggleMenu" style="margin-left: 15px; cursor: pointer;">
-  <i class="fa fa-bars fa-2x"></i>
+  <!-- <i class="fa fa-bars fa-2x"></i> -->
   </div>
+</div>
+
+<div class="navMenuTop">
+  <div>
+    <h1>Xnote</h1>
+  </div>
+  <ul>
+    <li><a href="/file/group">知识库</a></li>
+    {% if _has_login %}
+    <li><a href="/tools/message?status=created">计划</a></li>
+    {% end %}
+    <li><a href="/system/index">功能</a></li>
+    <li><a href="/wiki?path=./README.md">关于</a></li>
+  </ul>
 </div>
 
 <div class="navMenubox">
@@ -233,7 +282,7 @@ a { text-decoration: none; }
         {% end %}
       </li>
     </ul>
-    <div id="poweredBy" style="position: absolute; bottom: 50px; left: 10px; color: #fff; display: none;">
+    <div id="poweredBy" style="position: absolute; bottom: 50px; left: 10px; color: #fff;">
       Powered by <a style="color: #fff; text-decoration: underline;" href="https://gitee.com/xupingmao/xnote">Xnote</a>
     </div>
   </div>

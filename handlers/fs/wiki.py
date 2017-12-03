@@ -53,7 +53,6 @@ def get_path_list(path):
 
 class handler:
     
-    @xauth.login_required("admin")
     def GET(self, name):
         name = xutils.unquote(name)
         op   = xutils.get_argument("op")
