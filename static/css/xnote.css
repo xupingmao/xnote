@@ -7,6 +7,8 @@ body {
     background: #eee;
     padding: 0.5em;
     border: 1px solid #ddd;
+    word-wrap: break-word;
+    white-space: pre-wrap;
 }
 
 a {
