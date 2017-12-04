@@ -20,7 +20,7 @@ var app = new Vue({
     },
     methods: {
         readText: function () {
-            $.post("/system/tts", {content: this.content}, function (data, status) {
+            $.post("/api/tts", {content: this.content}, function (data, status) {
                 // do noting
             })
         }

@@ -11,7 +11,7 @@ import xconfig
 class handler:
     def GET(self, msg=None):
         repeat  = xutils.get_argument("repeat", 3, type=int)
-        content = xutils.get_argument("q")
+        content = xutils.get_argument("content")
         repeat = min(10, repeat)
         if msg is None:
             msg = content

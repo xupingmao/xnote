@@ -5,11 +5,12 @@
 """Text To Speach"""
 
 import xutils
-from handlers.base import BaseHandler
+import xauth
 
-class handler(BaseHandler):
+class handler:
 
-    def default_request(self):
+    @xauth.login_required("admin")
+    def GET(self):
         content = xutils.get_argument("content")
         try:
             xutils.say(content)
@@ -22,3 +23,7 @@ class handler(BaseHandler):
             # voice.Release()
             # return "OK"
             pass
+
+    def POST(self):
+        return self.GET()
+

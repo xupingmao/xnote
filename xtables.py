@@ -168,6 +168,7 @@ def init_table_file():
         manager.add_column("priority", "int", 0)
         manager.add_index("parent_id")
         manager.add_index("type")
+        manager.add_index("mtime")
 
 def init_table_tag():
     # 2017/04/18
@@ -234,6 +235,7 @@ def init_table_message():
         manager.add_column("status", "int", 0)
         manager.add_column("content", "text", "")
         manager.add_index("type")
+        manager.add_index("status")
 
 def init_table_record():
     # 日志库和主库隔离开

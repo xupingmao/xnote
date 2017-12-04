@@ -67,8 +67,10 @@ def isempty(str):
 
 class handler:
 
+    template_path = "tools/html_importer.html"
+
     def GET(self):
-        return xtemplate.render("tools/analyze_html.html")
+        return xtemplate.render(self.template_path)
 
     def POST(self):
         try:
@@ -76,8 +78,8 @@ class handler:
             file = args.file
             download_res = args.download_res == "on"
             address = xutils.get_argument("address", "")
-
             filename = file.filename
+            plain_text = ""
 
             if not isempty(address):
                 html = readhttp(address)
@@ -86,11 +88,12 @@ class handler:
                 for chunk in file.file:
                     html += chunk.decode("utf-8")
             print("Read html, filename={}, length={}".format(filename, len(html)))
-
             soup = BeautifulSoup(html, "html.parser")
 
-            # import pdb
-            # pdb.set_trace()
+            element_list = soup.find_all(["p","pre","h1","h2","h3","h4","li","lo"])
+            for element in element_list:
+                plain_text += " " + element.get_text()
+            # .get_text(separator=" ")
 
             images = soup.find_all("img")
             links  = soup.find_all("a")
@@ -110,16 +113,17 @@ class handler:
             if download_res:
                 download_res_list(images, filename)
 
-            return xtemplate.render("tools/analyze_html.html",
+            return xtemplate.render(self.template_path,
                 images = images,
                 links = links,
                 csses = csses,
                 scripts = scripts,
                 texts = texts,
-                address = address)
+                address = address,
+                plain_text = plain_text)
         except Exception as e:
             xutils.print_stacktrace()
-            return xtemplate.render("tools/analyze_html.html",
+            return xtemplate.render(self.template_path,
                 error = str(e))
 
 
