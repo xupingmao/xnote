@@ -6,12 +6,14 @@
 
 import os
 import sys
+import re
 import six
 import xmanager
 import xconfig
 import xutils
 
 SearchResult = xutils.SearchResult
+url_pattern = re.compile(r"(http|https)://[^ ]+")
 
 def search(name):
     # six.print_(xconfig)
@@ -31,5 +33,10 @@ def search(name):
             f.url = "/tools/" + filename
             f.content = filename
             files.append(f)
+    if url_pattern.match(name):
+        f = SearchResult()
+        f.name = "分析网页资源 - " + name
+        f.url = "/tools/html_importer?url=" + name
+        files.append(f)
     return files
 

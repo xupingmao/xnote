@@ -65,12 +65,36 @@ def download_res_list(reslist, dirname):
 def isempty(str):
     return str==None or len(str) == 0
 
+def bs_get_text(result, element, blacklist=None):
+    if blacklist is None:
+        blacklist = []
+    if element.name in blacklist:
+        return
+    result.append(element.get_text(recursive=False))
+    for child in element.children:
+        get_text(result, child, blacklist)
+
+def clean_whitespace(text):
+    buf = xutils.StringIO()
+    buf.seek(0)
+    whitespace = " \t\r\n\b"
+    prev = "\0"
+    for c in text:
+        if c in whitespace and prev in whitespace:
+            prev = c
+            continue
+        prev = c
+        buf.write(c)
+    buf.seek(0)
+    return buf.read()
+
 class handler:
 
     template_path = "tools/html_importer.html"
 
     def GET(self):
-        return xtemplate.render(self.template_path)
+        address = xutils.get_argument("url")
+        return xtemplate.render(self.template_path, address = address)
 
     def POST(self):
         try:
@@ -89,11 +113,11 @@ class handler:
                     html += chunk.decode("utf-8")
             print("Read html, filename={}, length={}".format(filename, len(html)))
             soup = BeautifulSoup(html, "html.parser")
-
-            element_list = soup.find_all(["p","pre","h1","h2","h3","h4","li","lo"])
+            element_list = soup.find_all(["script", "style"])
             for element in element_list:
-                plain_text += " " + element.get_text()
-            # .get_text(separator=" ")
+                element.extract()
+            plain_text = soup.get_text(separator=" ")
+            plain_text = clean_whitespace(plain_text)
 
             images = soup.find_all("img")
             links  = soup.find_all("a")

@@ -41,6 +41,7 @@
 </textarea>
 
 <h2>纯文本</h2>
+<div><button id="readText">阅读</button></div>
 <textarea rows="30" class="content" id="plainText">{{?plain_text}}</textarea>
 
 <h2>Images</h2>
@@ -74,6 +75,12 @@ $("#saveToDbBtn").on("click", function () {
                 alert(data.message);
             }
     })
+});
+
+$("#readText").click(function () {
+    $.post("/api/tts", {content: $("#plainText").text()}, function (resp) {
+
+    });
 })
 </script>
 

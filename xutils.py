@@ -40,6 +40,7 @@ PY2 = sys.version_info[0] == 2
 if PY2:
     from urllib import quote, unquote, urlopen
     from ConfigParser import ConfigParser
+    from StringIO import StringIO
     # from commands import getstatusoutput
 
     def u(s, encoding="utf-8"):
@@ -58,6 +59,7 @@ else:
     from urllib.request import urlopen
     from subprocess import getstatusoutput
     from configparser import ConfigParser
+    from io import StringIO
 
     u = str
     listdir = os.listdir
