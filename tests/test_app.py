@@ -174,7 +174,7 @@ class TestMain(unittest.TestCase):
         self.check_200("/api/report_time")
 
     def test_tts(self):
-        self.check_200("/system/tts?content=测试")
+        self.check_200("/api/tts?content=测试")
 
     def test_alarm(self):
         self.check_200("/api/alarm/test?repeat=1")
