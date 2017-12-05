@@ -4,13 +4,19 @@
 
 <a id="backLink">返回目录</a>
 <div class="col-md-12" style="text-align: center;">
-    <button id="backward" style="float: left;">上一页</button>
-    <span style="text-align: center;"><button id="read">阅读</button></span>
-    <button id="forward" style="float: right;">下一页</button>
+    <button class="backward" style="float: left;">上一页</button>
+    <span style="text-align: center;"><button class="read">阅读</button></span>
+    <button class="forward" style="float: right;">下一页</button>
 </div>
 
 <div class="col-md-12" id="progress"></div>
 <div class="col-md-12" id="content"></div>
+
+<div class="col-md-12" style="text-align: center;">
+    <button class="backward" style="float: left;">上一页</button>
+    <button class="forward" style="float: right;">下一页</button>
+</div>
+
 
 <script type="text/javascript">
     var path = getUrlParams().path;
@@ -43,17 +49,17 @@
             } 
         })
     }
-    $("#read").click(function () {
+    $(".read").click(function () {
         autoForward = true;
         readbook("current", "true");
     });
 
-    $("#forward").click(function () {
+    $(".forward").click(function () {
         autoForward = false;
         readbook("forward", "false");
     });
 
-    $("#backward").click(function () {
+    $(".backward").click(function () {
         autoForward = false;
         readbook("backward", "false")
     });

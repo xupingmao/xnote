@@ -1,20 +1,21 @@
 {% init file_id = "" %}
-<div class="col-md-12" style="padding-bottom: 5px;">
-    <form action="/search">
-      <div style="float: right;">
-          <input name = "key" type="text" value="{{?key}}" placeholder="输入指令或搜索关键字">
-          <input type="submit" value="搜索"/>
-      </div>
-    </form>
 
+<div class="col-md-12">
+  <form id="search_form" method="GET" action="{{?action,'/search/search'}}">
+      <div class="input-group">
+          <input type="text" id="key" name="key" class="searchInput" value="{{?key}}" placeholder="输入指令或搜索关键字" />
+          <button class="searchBtn">搜&nbsp;索</button>
+      </div>
+  </form>
+</div>
+<div class="col-md-12" style="padding-bottom: 5px;">
     {% if _has_login %}
     <div class="left" style="float: left;">
         <input type="button" class="link-btn" value="新建" message="资料名" action="" href="/file/add?parent_id={{file_id}}"/>
         <input type="button" class="prompt-btn" value="新建组" message="分组名" 
-          action="/file/add?type=group&parent_id={{file_id}}&name="/>
+        action="/file/add?type=group&parent_id={{file_id}}&name="/>
     </div>
     {% end %}
-
 </div>
 
 <script type="text/javascript">

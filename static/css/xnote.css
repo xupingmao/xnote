@@ -537,3 +537,36 @@ li.menu-item:hover {
 .tab-link-active {
     color: #000;
 }
+
+.input-group {
+    float:left;
+    width:100%;
+    padding-bottom:5px;
+    height: 40px;
+    max-width: 500px;
+}
+
+.searchInput {
+    float: left;
+    height:100%;
+    padding-left: 20px;
+    /*width:75%;*/
+    width: 100%;
+    max-width: 500px;
+    box-sizing: border-box;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.searchBtn {
+    float: left;
+    right: 10px;
+    background: #355380; 
+    color: #fff; 
+    border: none;
+    border-radius:0px;
+    /*max-width:25%;*/
+    width: 40px;
+    height: 40px;
+    margin-left: -40px;
+}

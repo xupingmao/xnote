@@ -1,37 +1,7 @@
 {% extends base.html %}
-
-{% block head %}
-<style type="text/css">
-  .input-group {
-    float:left;
-    width:100%;
-    padding-bottom:5px;
-    height: 40px;
-  }
-
-  .searchInput {
-    height:100%;
-    padding-left: 20px;
-    width:75%;
-    max-width: 500px;
-    box-sizing: border-box;
-    outline: none;
-  }
-
-  .searchBtn {
-    height: 100%;
-    background: #355380; 
-    color: #fff; 
-    border: none;
-    border-radius:0px;
-    max-width:25%;
-  }
-</style>
-{% end %}
-
 {% block body %}
 
-<div class="col-md-12" style="padding-top: 20px;">
+<div class="col-md-12">
   <form id="search_form" method="GET" action="{{?action,'/search/search'}}">
       <div class="input-group">
           <input type="text" id="key" name="key" class="searchInput" value="{{?key}}" placeholder="输入指令或搜索关键字" />
@@ -47,6 +17,5 @@
 {% include "mod_file_list.html" %}
 
 <script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
-<script type="text/javascript" src="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
 
 {% end %}
