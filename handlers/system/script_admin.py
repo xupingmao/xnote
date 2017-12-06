@@ -82,6 +82,7 @@ class handler:
         if op == "edit":
             content = xutils.readfile(os.path.join(dirname, name))
         if op == "add" and name != "":
+            path = os.path.join(dirname, name)
             basename, ext = os.path.splitext(name)
             if ext not in SCRIPT_EXT_LIST:
                 name = basename + get_default_shell_ext()

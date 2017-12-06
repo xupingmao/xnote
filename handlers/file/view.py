@@ -275,11 +275,19 @@ def get_cron_links():
     dirname = xconfig.SCRIPTS_DIR
     links = []
     API_PATH = os.path.join(xconfig.HANDLERS_DIR, "api")
+    TOOLS_DIR = xconfig.TOOLS_DIR
     for fname in os.listdir(API_PATH):
         fpath = os.path.join(API_PATH, fname)
         name, ext = os.path.splitext(fname)
         if name != "__init__" and os.path.isfile(fpath) and ext == ".py":
             links.append("/api/" + name)
+
+    for fname in os.listdir(TOOLS_DIR):
+        fpath = os.path.join(TOOLS_DIR, fname)
+        name, ext = os.path.splitext(fname)
+        if name != "__init__" and os.path.isfile(fpath) and ext == ".py":
+            links.append("/tools/" + name)
+
     if os.path.exists(dirname):
         for fname in os.listdir(dirname):
             fpath = os.path.join(dirname, fname)

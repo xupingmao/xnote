@@ -95,9 +95,9 @@ def get_password_md5(passwd):
     pswd_md5.update(passwd.encode("utf-8"))
     return pswd_md5.hexdigest()
 
-def get_admin_cookie():
-    password = get_user_password("admin")
-    return "xuser=admin; xpass=%s;" % get_password_md5(password)
+def get_user_cookie(name):
+    password = get_user_password(name)
+    return "xuser=%s; xpass=%s;" % (name, get_password_md5(password))
 
 def add_user(name, password):
     db = xtables.get_user_table()

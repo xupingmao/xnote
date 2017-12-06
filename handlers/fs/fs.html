@@ -148,6 +148,10 @@
             {% if xutils.is_editable(item.path) %}
                 <input type="button" class="link-btn" href="/code/view_source?path={{url_escape(item.path)}}" value="编辑">
             {% end %}
+
+            {% if item.ext == ".md" %}
+                <input type="button" class="link-btn" href="/wiki?path={{item.path}}" value="预览">
+            {% end %}
         {% end %}
         </td>
         <td>

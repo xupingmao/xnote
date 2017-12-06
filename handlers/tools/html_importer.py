@@ -4,8 +4,14 @@ from __future__ import print_function
 import os
 import urllib.request
 import web
+import time
 import xtemplate
 import xutils
+import xauth
+import xmanager
+import xtables
+import xconfig
+from threading import Timer
 from bs4 import BeautifulSoup
 from html2text import HTML2Text
 
@@ -94,15 +100,22 @@ class handler:
 
     def GET(self):
         address = xutils.get_argument("url")
-        return xtemplate.render(self.template_path, address = address)
+        save  = xutils.get_argument("save")
+        if save != "" and save != None:
+            return self.POST()
+        return xtemplate.render(self.template_path, address=address, url=address)
 
+    @xauth.login_required()
     def POST(self):
         try:
-            args = web.input(file={}, download_res="off")
-            file = args.file
-            download_res = args.download_res == "on"
-            address = xutils.get_argument("address", "")
-            filename = file.filename
+            file = xutils.get_argument("file", {})
+            download_res = False            
+            address = xutils.get_argument("url", "")
+            name    = xutils.get_argument("name", "")
+            filename = ""
+
+            if hasattr(file, "filename"):
+                filename = file.filename
             plain_text = ""
 
             if not isempty(address):
@@ -111,6 +124,7 @@ class handler:
                 html = ""
                 for chunk in file.file:
                     html += chunk.decode("utf-8")
+
             print("Read html, filename={}, length={}".format(filename, len(html)))
             soup = BeautifulSoup(html, "html.parser")
             element_list = soup.find_all(["script", "style"])
@@ -137,6 +151,20 @@ class handler:
             if download_res:
                 download_res_list(images, filename)
 
+            if name != "" and name != None:
+                name = "%s_%s.md" % (name, time.strftime("%Y%m%d_%H%M%S"))
+                path = os.path.join(xconfig.TMP_DIR, name)
+                xutils.savetofile(path, text)
+                print("save file %s" % path)
+
+            if False:
+                user_name = xauth.get_current_name()
+                def save():
+                    xmanager.request("/file/add", method="POST", 
+                        data=dict(name=name, content=text, type="md"),
+                        headers=dict(COOKIE=xauth.get_user_cookie(user_name)))
+                Timer(1, save).start()
+
             return xtemplate.render(self.template_path,
                 images = images,
                 links = links,
@@ -144,6 +172,7 @@ class handler:
                 scripts = scripts,
                 texts = texts,
                 address = address,
+                url = address,
                 plain_text = plain_text)
         except Exception as e:
             xutils.print_stacktrace()

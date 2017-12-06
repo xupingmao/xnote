@@ -50,6 +50,7 @@ def get_mem_info():
         # mem_used = int(str_list[1])
         formated_mem_size = mem_list[-1]
     else:
+        # ps -C -p 10538
         formated_mem_size = ""
     return xutils.Storage(used = sys_mem_used, total = sys_mem_total)
 
