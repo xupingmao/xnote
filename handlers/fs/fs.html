@@ -74,14 +74,6 @@
         background-color: #eee;
     }
 
-    .file-option {
-        color: #bbb;
-    }
-    .file-option:hover {
-        color: #000;
-        background: none;
-    }
-
 </style>
 
 {% end %}
@@ -159,19 +151,19 @@
             {% end %}
 
             {% if item.ext == ".txt" %}
-                <a class="file-option" href="/tools/bookreader?path={{item.path}}&from=/fs/{{path}}">阅读</a>
+                <a class="item-option" href="/tools/bookreader?path={{item.path}}&from=/fs/{{path}}">阅读</a>
             {% end %}
 
             {% if item.ext == ".db" %}
-                <a class="file-option" href="/tools/sql?path={{item.path}}&from=/fs/{{path}}">查看</a>
+                <a class="item-option" href="/tools/sql?path={{item.path}}&from=/fs/{{path}}">查看</a>
             {% end %}
 
             {% if xutils.is_editable(item.path) %}
-                <a class="file-option" href="/code/view_source?path={{url_escape(item.path)}}">编辑</a>
+                <a class="item-option" href="/code/view_source?path={{url_escape(item.path)}}">编辑</a>
             {% end %}
 
             {% if item.ext == ".md" %}
-                <a class="file-option" href="/wiki?path={{item.path}}">预览</a>
+                <a class="item-option" href="/wiki?path={{item.path}}">预览</a>
             {% end %}
         {% end %}
         </td>

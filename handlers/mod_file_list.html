@@ -5,7 +5,7 @@
         <div class="note-body">
             <div class="note-visited-cnt">
                 {% if file.id != None %}
-                <input type="button" class="dialog-btn" dialog-url="/file/group/list?id={{file.id}}&filetype=xml" value="移动到" >
+                <a class="item-option dialog-btn" dialog-url="/file/group/list?id={{file.id}}&filetype=xml">移动到</a>
                 {% end %}
             </div>
             <div class="note-name">

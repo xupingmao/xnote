@@ -569,3 +569,13 @@ li.menu-item:hover {
     height: 40px;
     margin-left: -40px;
 }
+
+.item-option {
+    color: #aaa;
+    cursor: pointer;
+}
+.item-option:hover {
+    color: #000;
+    background: none;
+    text-decoration: underline;
+}

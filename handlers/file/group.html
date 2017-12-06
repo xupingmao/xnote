@@ -23,12 +23,12 @@
                 {% else %}
                 {% end %}
                 <a href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
-                <a class="hover" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
+                <a class="item-option" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
                 {% if _is_admin %}
-                    <a class="hover" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>
+                    <a class="item-option" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>
                 {% end %}
                 {% if item.type != "group" %}
-                <a class="hover dialog-btn" dialog-url="/file/group?id={{item.id}}&filetype=xml" href="javascript:void({{item.id}})">移动到</a>
+                <a class="item-option dialog-btn" dialog-url="/file/group?id={{item.id}}&filetype=xml" href="javascript:void({{item.id}})">移动到</a>
                 {% end %}
                 <div style="font-size: 12px;">
                     <span class="tag">{{item.creator}}</span>
