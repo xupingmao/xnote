@@ -17,6 +17,11 @@
         width: 180px;
         /*height: 90px;*/
     }
+    .fs-path {
+        padding: 5px;
+        box-sizing: border-box;
+        background-color: #eee;
+    }
     table td {
         border: none;
     }
@@ -59,6 +64,22 @@
         border-width: 3px;
         border-radius: 3px;
         margin-left: 5px;
+    }
+
+    tr:hover td {
+        background: none;
+    }
+
+    tr:hover {
+        background-color: #eee;
+    }
+
+    .file-option {
+        color: #bbb;
+    }
+    .file-option:hover {
+        color: #000;
+        background: none;
     }
 
 </style>
@@ -111,7 +132,7 @@
 
 <div>
 
-<div style="background: lightgreen;">
+<div class="fs-path">
 <a href="/fs//">Home</a> /
 {% for item in fspathlist %}
     <a href="/fs/{{ item.path }}">{{ item.name }}</a> / 
@@ -138,19 +159,19 @@
             {% end %}
 
             {% if item.ext == ".txt" %}
-                <input type="button" class="link-btn" href="/tools/bookreader?path={{item.path}}&from=/fs/{{path}}" value="阅读"/>
+                <a class="file-option" href="/tools/bookreader?path={{item.path}}&from=/fs/{{path}}">阅读</a>
             {% end %}
 
             {% if item.ext == ".db" %}
-                <input type="button" class="link-btn" href="/tools/sql?path={{item.path}}&from=/fs/{{path}}" value="查看">
+                <a class="file-option" href="/tools/sql?path={{item.path}}&from=/fs/{{path}}">查看</a>
             {% end %}
 
             {% if xutils.is_editable(item.path) %}
-                <input type="button" class="link-btn" href="/code/view_source?path={{url_escape(item.path)}}" value="编辑">
+                <a class="file-option" href="/code/view_source?path={{url_escape(item.path)}}">编辑</a>
             {% end %}
 
             {% if item.ext == ".md" %}
-                <input type="button" class="link-btn" href="/wiki?path={{item.path}}" value="预览">
+                <a class="file-option" href="/wiki?path={{item.path}}">预览</a>
             {% end %}
         {% end %}
         </td>
