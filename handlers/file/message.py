@@ -44,20 +44,31 @@ class ListHandler:
         page_max = math.ceil(amount / pagesize)
         return dict(code="success", message="", data=chatlist, amount=amount, page_max=page_max, current_user=xauth.get_current_name())
 
+def update_message(id, status):
+    db = xtables.get_message_table()
+    msg = db.select_one(where=dict(id=id))
+    if msg is None:
+        return dict(code="fail", message="data not exists")
+    if msg.user != xauth.get_current_name():
+        return dict(code="fail", message="no permission")
+    db.update(status=status, mtime=xutils.format_datetime(), where=dict(id=id))
+    return dict(code="success")
+
 class FinishMessage:
 
     def POST(self):
         id = xutils.get_argument("id")
         if id == "":
             return
-        db = xtables.get_message_table()
-        msg = db.select_one(where=dict(id=id))
-        if msg is None:
-            return dict(code="fail", message="data not exists")
-        if msg.user != xauth.get_current_name():
-            return dict(code="fail", message="no permission")
-        db.update(status=100, mtime=xutils.format_datetime(), where=dict(id=id))
-        return dict(code="success")
+        return update_message(id, 100)
+
+class OpenMessage:
+
+    def POST(self):
+        id = xutils.get_argument("id")
+        if id == "":
+            return
+        return update_message(id, 0)
         
 
 class RemoveHandler:
@@ -93,6 +104,7 @@ xurls=(
     "/file/message/remove", RemoveHandler,
     "/file/message/update", UpdateHandler,
     "/file/message/finish", FinishMessage,
+    "/file/message/open", OpenMessage,
     "/file/message/list", ListHandler
 )
 

@@ -119,6 +119,7 @@
             <div class="col-md-12">
                 <p class="chat-msg-time">{{! message.ctime }} 
                     <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
+                    <a class="smallText" v-if="message.status==100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">重做</a>
                     <a class="smallText" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
                     <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" style="color: red;" @click="deleteMessage($event)">删除</a> 
                 </p>
@@ -258,6 +259,19 @@
                 var self = this;
                 var id = $(el).attr("msg-id");
                 $.post("/file/message/finish", {id: id}, function (resp) {
+                    if (resp.code == "success") {
+                        app.refreshMessage();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            },
+
+            openMessage: function (event) {
+                var el = event.currentTarget;
+                var self = this;
+                var id = $(el).attr("msg-id");
+                $.post("/file/message/open", {id: id}, function (resp) {
                     if (resp.code == "success") {
                         app.refreshMessage();
                     } else {
