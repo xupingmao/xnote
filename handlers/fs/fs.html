@@ -108,7 +108,6 @@
         <input type="button" class="link-btn" href="/code/analyze?path={{path}}&recursive=on" value="高级搜索"/>
         <input type="button" class="link-btn" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
         <input type="button" class="link-btn" href="/tools/zip?dirname={{path}}" value="压缩"/>
-        <input type="button" class="link-btn" href="/code/encode?path={{path}}" value="文件名加密"/>
     </div>
     <!-- 文件上传区域 -->
     <div id="uploader-demo">
@@ -381,6 +380,10 @@ uploader.on( 'uploadError', function( file ) {
 uploader.on( 'uploadComplete', function( file ) {
     $( '#'+file.id ).find('.progress').remove();
 });
+
+uploader.on( 'error', function (file) {
+    alert("未知错误" + file);
+})
 
 // 必须先禁用所有的拖拽默认行为
 $(document).on("dragenter", function (event) {
