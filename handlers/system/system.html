@@ -60,6 +60,7 @@
     ("静音",         "/search/search?key=mute"),
     ("标签云",  "/file/taglist"),
     ("Python Shell", "/system/script/edit?name=test.py"),
+    ("消息", "/tools/message"),
 ] %}
 
 <div class="col-md-12 top-offset-1">
@@ -74,12 +75,12 @@
 </div>
 {% end %}
 
-{% set favorite_tools = [
+{% set dev_tools = [
     ("Python文档", "/system/modules_info"),
-    ("消息", "/tools/message"),
     ("代码模板", "/tools/code_template"),
     ("浏览器信息", "/tools/browser_info"),
     ("文本对比", "/tools/js_diff"),
+    ("字符串转换", "/tools/string"),
 ] %}
 
 {% set img_tools = [
@@ -96,7 +97,7 @@
 ] %}
 
 {% set tools_list = [
-    ("常用工具", favorite_tools),
+    ("开发工具", dev_tools),
     ("图片处理工具", img_tools),
     ("编解码工具", code_tools),
 ] %}
