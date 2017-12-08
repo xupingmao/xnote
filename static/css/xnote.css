@@ -23,7 +23,7 @@ a {
 }
 
 a:hover {
-    background-color: LightGrey;
+    text-decoration: underline;
 }
 
 /** 不能指定input[type=button]不然会覆盖其他class样式 **/

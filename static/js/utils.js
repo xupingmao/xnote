@@ -18,6 +18,10 @@ var getUrlParams = function()
     return params;
 };
 
+var getUrlParam = function (key) {
+    return getUrlParams()[key];
+}
+
 
 //////////////////////////////////////////////////////
 // String 增强

@@ -18,14 +18,22 @@
 
     <script>
     $(function () {
-        $("#generate").click(function () {
+        function showBarCode() {
             var key = $("#qrcode_input").val();
             key = utf16to8(key);
             if (key) {
                 $("#qrcode").html("");
                 $("#qrcode").qrcode(key);
             }    
+        }
+
+        $("#generate").click(function () {
+            showBarCode();
         });
+
+        var content = getUrlParam("content");
+        $("#qrcode_input").text(content);
+        showBarCode();
     });
     </script>
 

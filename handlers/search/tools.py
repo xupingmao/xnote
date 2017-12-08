@@ -38,5 +38,10 @@ def search(name):
         f.name = "分析网页资源 - " + name
         f.url = "/tools/html_importer?url=" + name
         files.append(f)
+
+        f = SearchResult()
+        f.name = "二维码"
+        f.url = "/tools/barcode?content=" + name
+        files.append(f)
     return files
 
