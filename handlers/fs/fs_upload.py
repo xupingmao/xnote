@@ -47,16 +47,23 @@ class RangeUploadHandler:
         chunk = xutils.get_argument("chunk", 0, type=int)
         chunks = xutils.get_argument("chunks", 1, type=int)
         file = xutils.get_argument("file", {})
+        prefix = xutils.get_argument("prefix", "")
         dirname = xutils.get_argument("dirname", xconfig.DATA_DIR)
         dirname = dirname.replace("$DATA", xconfig.DATA_DIR)
         # print(file.__dict__)
         # print("%d/%d" % (chunk, chunks))
         filename = None
+        webpath  = ""
         if hasattr(file, "filename"):
             # print(" - - %-20s = %s" % ("filename", file.filename))
             xutils.log("recv {}", file.filename)
             filename = os.path.basename(file.filename)
             filename = xutils.quote_unicode(filename)
+            if dirname == "auto":
+                filepath, webpath = xutils.get_upload_file_path(filename, replace_exists=True, prefix=prefix)
+                dirname  = os.path.dirname(filepath)
+                filename = os.path.basename(filepath)
+
             # filename = xauth.get_current_name() + '_' + filename
             tmp_name = "%s_%d.part" % (filename, chunk)
             tmp_path = os.path.join(dirname, tmp_name)
@@ -67,7 +74,7 @@ class RangeUploadHandler:
             return dict(code="fail", message="require file")
         if chunk+1==chunks:
             self.merge_files(dirname, filename, chunks)
-        return dict(code="success")
+        return dict(code="success", webpath=webpath)
 
 xurls = (
     # 和文件系统的/fs/冲突了

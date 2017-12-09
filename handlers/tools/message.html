@@ -372,16 +372,18 @@ uploader.on( 'uploadProgress', function( file, percentage ) {
 
 uploader.on( 'uploadBeforeSend', function (object, data, headers) {
     $( '#uploadProgress' ).find('.progress').remove();
-    data.dirname = "$DATA/tmp/";
+    data.dirname = "auto";
+    data.prefix = "msg";
 })
 
 // 文件上传成功，给item添加成功class, 用样式标记上传成功。
-uploader.on( 'uploadSuccess', function( file ) {
+uploader.on( 'uploadSuccess', function( file, resp) {
     $( '#uploadProgress' ).find('.progress').remove();
     var $li = $( '#uploadProgress' );
     $('<div class="progress"><span>上传完成</span></div>')
                 .appendTo( $li )
                 .find('span');
+    file.webpath = resp.webpath;
 });
 
 // 文件上传失败，显示上传出错。
@@ -399,7 +401,8 @@ uploader.on( 'uploadError', function( file ) {
 
 // 完成上传完了，成功或者失败，先删除进度条。
 uploader.on( 'uploadComplete', function( file ) {
-    var content = 'file:///tmp/$name'.replace(/\$name/g, file.name);
+    var webpath = file.webpath;
+    var content = 'file://$name'.replace(/\$name/g, file.webpath);
     $.post("/file/message/add", {content:content}, function (respText) {
         var data = respText;
         if (data.code == "success") {

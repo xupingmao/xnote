@@ -320,6 +320,33 @@ def search_path(path, key):
         result = search_path0(path, quoted_key)
     return result + search_path0(path, key)
 
+def get_upload_file_path(filename, data_dir="/files", replace_exists = False, prefix=""):
+    """生成上传文件名"""
+    filename = get_safe_file_name(filename)
+    basename, ext = os.path.splitext(filename)
+    date = time.strftime("%Y/%m")
+    dirname = xconfig.DATA_PATH + data_dir + "/" + date + "/"
+
+    origin_filename = dirname + filename
+    makedirs(dirname)
+    fileindex = 1
+
+    if prefix != "" and prefix != None:
+        filename = prefix + "_" + filename
+        webpath = "/data{}/{}/{}".format(data_dir, date, filename)
+        return dirname + filename, webpath
+    newfilepath = origin_filename
+    webpath = "/data{}/{}/{}".format(data_dir, date, filename)
+
+    while not replace_exists and os.path.exists(newfilepath):
+        name, ext = os.path.splitext(filename)
+        # 使用下划线，括号会使marked.js解析图片url失败
+        temp_filename = "{}_{}{}".format(name, fileindex, ext)
+        newfilepath = dirname + temp_filename
+        webpath = "/data{}/{}/{}".format(data_dir, date, temp_filename)
+        fileindex+=1
+    return newfilepath, webpath
+
 ### DB Utilities
 
 def db_execute(path, sql, args = None):
