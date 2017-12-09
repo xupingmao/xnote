@@ -174,8 +174,10 @@ class KindObject(dict):
 
 class SearchResult(dict):
 
-    def __init__(self):
-        self.url = "#"
+    def __init__(self, name=None, url=None, raw=None):
+        self.name = name
+        self.url = url
+        self.raw = raw
 
     def __getattr__(self, key): 
         try:
@@ -576,3 +578,36 @@ def get_argument(key, default_value=None, type = None, strip=False):
     if strip and isinstance(value, str):
         value = value.strip()
     return value
+
+
+#################################################################
+##   Cache
+#################################################################
+
+class CacheObj:
+    def __init__(self, value, expire):
+        self.value = value
+        self.expire = expire
+        self.expire_time = time.time() + expire
+
+    def is_alive(self):
+        return time.time() < self.expire_time
+
+_cache = dict()
+def cache(prefix, expire=600):
+    """缓存的装饰器，尚未完成"""
+    def deco(func):
+        def inner_deco(*args):
+            key = "%s-%s" % (prefix, args)
+            obj = _cache.get(key)
+            if obj != None and obj.is_alive():
+                return obj.value
+            if obj != None and not obj.is_alive():
+                del _cache[key]
+            # TODO 处理一次缓存后没被访问的对象，使用一个队列
+            value = func(*args)
+            _cache[key] = CacheObj(value, expire)
+            return value
+        return inner_deco
+    return deco
+

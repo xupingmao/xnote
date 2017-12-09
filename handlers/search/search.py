@@ -203,6 +203,7 @@ def load_mappings():
     load_mapping(r"([^ ]*)",                "scripts.search")
     load_mapping(r"([^ ]*)",                "api.search")
     load_mapping(r"(\d+)分钟后提醒我?(.*)", "reminder.search")
+    load_mapping(r"(上午|下午)(.*)提醒我?(.*)", "reminder.by_time")
     load_mapping(r"静音(.*)",               "mute.search")
     load_mapping(r"mute(.*)",               "mute.search")
     load_mapping(r"取消静音",               "mute.cancel")

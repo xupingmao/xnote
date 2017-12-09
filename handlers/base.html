@@ -43,11 +43,11 @@ a { text-decoration: none; }
   float: left;
   padding-top: 10px;
   position: fixed;
+  display: none;
 }
 
 .navMenuTop {
   background-color: #9cc;
-  display: none;
 }
 
 .navMenuTop * {
@@ -81,7 +81,7 @@ a { text-decoration: none; }
   height: 100%;
   overflow: auto;
   box-sizing: border-box;
-  margin-left: 200px;
+  margin-left: 0px;
 }
 
 .footer {
@@ -90,19 +90,18 @@ a { text-decoration: none; }
   height: 100px;
 }
 
-
-@media screen and (max-width: 700px) {
-  /** Mobile **/
+@media screen and (min-width: 700px) {
+  /** Desktop **/
   .navMenubox {
-    display: none;
-  }
-
-  .navMenuTop {
     display: block;
   }
 
+  .navMenuTop {
+    display: none;
+  }
+
   .main {
-    margin-left: 0px;
+    margin-left: 200px;
   }
 }
 

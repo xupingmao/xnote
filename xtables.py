@@ -237,6 +237,13 @@ def init_table_message():
         manager.add_index("type")
         manager.add_index("status")
 
+def init_table_bookmark():
+    # 2017/12/09
+    with TableManager(xconfig.DB_PATH, "bookmark") as manager:
+        manager.add_column("user", "text", "")
+        manager.add_column("name", "text", "")
+        manager.add_column("link", "text", "")
+
 def init_table_record():
     # 日志库和主库隔离开
     dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
@@ -353,5 +360,6 @@ def init():
     init_table_tag()
     init_table_schedule()
     init_table_message()
+    # 非核心结构记录各种日志数据
     init_table_record()
 

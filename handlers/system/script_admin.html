@@ -79,20 +79,17 @@
     <div class="error">{{error}}</div>
     <table class="table col-md-12 top-offset-1">
         <tr>
-            <th>编号</th>
             <th>文件名</th>
         </tr>
 
         {% for script in shell_list %}
             <tr>
-                <td>{{index}}</td>
                 <td>
                     <input type="button" value="执行" class="executeScript btn" scriptName="{{script}}"/> 
                     <input type="button" value="删除" class="deleteScript btn btn-danger" scriptName="{{script}}"/>
                     <a href="/system/script_admin/edit?name={{script}}">{{script}}</a>
                 </td>
             </tr>
-            {% set index = index + 1 %}
         {% end %}
     </table>
 {% end %}
