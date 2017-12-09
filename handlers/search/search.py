@@ -20,7 +20,7 @@ config = xconfig
 
 _mappings = []
 
-def load_mapping(pattern, func_str):
+def add_rule(pattern, func_str):
     global _mappings
     try:
         mod, func_name = func_str.rsplit('.', 1)
@@ -138,6 +138,7 @@ class handler:
         for i in range(0, len(mappings), 2):
             pattern = mappings[i]
             func = mappings[i+1]
+            # re.match内部已经实现了缓存
             m = re.match(pattern, key)
             if m:
                 try:
@@ -159,8 +160,8 @@ class handler:
     @xauth.login_required()
     def GET(self):
         """search files by name and content"""
-        if not mappings_loaded:
-            load_mappings()
+        if not rules_loaded:
+            load_rules()
         key  = xutils.get_argument("key", "")
         title = xutils.get_argument("title", "")
         content = xutils.get_argument("content", "")
@@ -192,23 +193,23 @@ class handler:
             page_max = math.ceil(count/pagesize),
             content = content)
 
-mappings_loaded = False
-def load_mappings():
-    global mappings_loaded
-    load_mapping(r"(.*[0-9]+.*)",           "calc.do_calc")
-    load_mapping(r"([a-zA-Z0-9\.]*)",       "pydoc.search")
-    load_mapping(r"([a-zA-Z\-]*)",          "translate.search")
-    load_mapping(r"翻译\s+([^ ]+)",         "translate.zh2en")
-    load_mapping(r"([^ ]*)",                "tools.search")
-    load_mapping(r"([^ ]*)",                "scripts.search")
-    load_mapping(r"([^ ]*)",                "api.search")
-    load_mapping(r"(\d+)分钟后提醒我?(.*)", "reminder.search")
-    load_mapping(r"(上午|下午)(.*)提醒我?(.*)", "reminder.by_time")
-    load_mapping(r"静音(.*)",               "mute.search")
-    load_mapping(r"mute(.*)",               "mute.search")
-    load_mapping(r"取消静音",               "mute.cancel")
-    load_mapping(r"(.*)",                   "file.search")
-    mappings_loaded = True
+rules_loaded = False
+def load_rules():
+    global rules_loaded
+    add_rule(r"(.*[0-9]+.*)",           "calc.do_calc")
+    add_rule(r"([a-zA-Z0-9\.]*)",       "pydoc.search")
+    add_rule(r"([a-zA-Z\-]*)",          "translate.search")
+    add_rule(r"翻译\s+([^ ]+)",         "translate.zh2en")
+    add_rule(r"([^ ]*)",                "tools.search")
+    add_rule(r"([^ ]*)",                "scripts.search")
+    add_rule(r"([^ ]*)",                "api.search")
+    add_rule(r"(\d+)分钟后提醒我?(.*)", "reminder.search")
+    add_rule(r"(上午|下午)(.*)提醒我?(.*)", "reminder.by_time")
+    add_rule(r"静音(.*)",               "mute.search")
+    add_rule(r"mute(.*)",               "mute.search")
+    add_rule(r"取消静音",               "mute.cancel")
+    add_rule(r"(.*)",                   "file.search")
+    rules_loaded = True
 
 xurls = (
     r"/search/search", handler, 

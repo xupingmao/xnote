@@ -15,7 +15,7 @@
                 <a href="{{file.url}}">{{file.name}}</a>
             </div>
             
-            {% if "raw" in file %}
+            {% if "raw" in file and file.raw != None %}
                 <pre>{{ file.raw }}</pre>
             {% end %}
 

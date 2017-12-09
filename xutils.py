@@ -22,6 +22,7 @@ import six
 import web
 import xconfig
 
+from fnmatch import fnmatch
 from util.ziputil import *
 from util.textutil import edit_distance
 
@@ -287,6 +288,39 @@ def touch(path):
     if not os.path.exists(path):
         with open(path, "wb") as fp:
             pass
+
+def search_path0(path, key, limit=200):
+    result_dirs = []
+    result_files = []
+    key = key.lower()
+    count = 0
+    for root, dirs, files in os.walk(path):
+        for f in dirs:
+            abspath = os.path.join(root, f)
+            if fnmatch(abspath.lower(), key):
+                result_dirs.append(abspath)
+                count+=1
+                if count >= limit:
+                    break
+        for f in files:
+            abspath = os.path.join(root, f)
+            if fnmatch(abspath.lower(), key):
+                result_files.append(abspath)
+                count+=1
+                if count >= limit:
+                    break
+        if count >= limit:
+            break
+    return result_dirs + result_files
+
+def search_path(path, key):
+    result = []
+    quoted_key = quote_unicode(key)
+    if key != quoted_key:
+        result = search_path0(path, quoted_key)
+    return result + search_path0(path, key)
+
+### DB Utilities
 
 def db_execute(path, sql, args = None):
     db = sqlite3.connect(path)
