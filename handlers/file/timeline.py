@@ -19,7 +19,7 @@ class handler:
         db = dao.get_file_db()
         # last_month = xutils.days_before(days, format=True)
         user_name  = xauth.get_current_user()["name"]
-        rows = db.query("SELECT * FROM file WHERE creator = $creator AND is_deleted=0"
+        rows = db.query("SELECT id, type, name, creator, ctime, mtime, size FROM file WHERE creator = $creator AND is_deleted=0"
             + " ORDER BY ctime DESC LIMIT $offset, $limit", 
             dict(creator=user_name, offset=offset, limit=limit))
         result = dict()
@@ -42,7 +42,7 @@ class DateTimeline:
             month = "0" + month
         db = dao.get_file_db()
         user_name  = xauth.get_current_user()["name"]
-        rows = db.query("SELECT * FROM file WHERE creator = $creator AND ctime LIKE $ctime AND is_deleted=0"
+        rows = db.query("SELECT id, type, name, creator, ctime, mtime, size FROM file WHERE creator = $creator AND ctime LIKE $ctime AND is_deleted=0"
             + " ORDER BY ctime DESC", 
             dict(creator=user_name, ctime="%s-%s%%" % (year, month)))
         result = dict()

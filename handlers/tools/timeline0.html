@@ -1,6 +1,18 @@
-﻿{% extends base.html %}
-{% block head %}
-<style>
+﻿<!DOCTYPE html>
+<html>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<head>
+  <title>Xnote时光轴</title>
+<style type="text/css">
+
+@import url('https://fonts.googleapis.com/css?family=Nunito:300,400,700');
+
+/* _variables.css */
+
+/* _mixins.css */
+
+/* _global.css */
+
 * {
   box-sizing: border-box;
 }
@@ -38,13 +50,17 @@ img {
   cursor: pointer;
 }
 
+/* _wrapper.css */
 .wrapper {
   padding-left: 18px;
   padding-right: 18px;
+  max-width: 1236px;
   margin-left: auto;
   margin-right: auto;
 }
 
+
+/* _timeline.css */
 .timeline {
   position: relative;
   margin: 30px auto;
@@ -59,6 +75,12 @@ img {
   width: 4px;
   height: 100%;
   background-color: #8d94b1;
+}
+@media (min-width: 800px){
+  .timeline::before{
+    left: 50%;
+    margin-left: -2px;
+  }
 }
 .timeline__item {
   margin-bottom: 100px;
@@ -75,6 +97,11 @@ img {
 .timeline__item:nth-child(2n) .timeline__item__content::before {
   content: '';
   right: 40%;
+}
+@media (min-width: 800px){
+  .timeline__item:nth-child(2n) .timeline__item__content::before{
+    left: inherit;
+  }
 }
 .timeline__item:nth-child(2n) .timeline__item__content__date {
   background-color: #b292c5;
@@ -128,7 +155,16 @@ img {
   -webkit-transition: all .3s ease-out;
   transition: all .3s ease-out;
 }
-
+@media (min-width: 800px){
+  .timeline__item__station{
+    left: 50%;
+    margin-left: -30px;
+    width: 60px;
+    height: 60px;
+    padding: 15px;
+    border-width: 6px;
+  }
+}
 .timeline__item__content {
   width: 80%;
   background: #fff;
@@ -137,6 +173,13 @@ img {
   float: right;
   -webkit-transition: all .3s ease-out;
   transition: all .3s ease-out;
+}
+@media (min-width: 800px){
+  .timeline__item__content{
+    width: 40%;
+    float: inherit;
+    padding: 30px 40px;
+  }
 }
 .timeline__item__content::before {
   content: '';
@@ -149,6 +192,14 @@ img {
   z-index: -1;
   -webkit-transition: all .3s ease-out;
   transition: all .3s ease-out;
+}
+@media (min-width: 800px){
+  .timeline__item__content::before{
+    left: 40%;
+    top: 30px;
+    height: 4px;
+    margin-top: -2px;
+  }
 }
 .timeline__item__content__date {
   margin: 0;
@@ -169,6 +220,12 @@ img {
   font-weight: 300;
   color: #65adb7;
 }
+@media (min-width: 800px){
+  .timeline__item__content__description{
+    font-size: 19px;
+    line-height: 28px;
+  }
+}
 
 /* _site-footer.css */
 .site-footer {
@@ -184,24 +241,27 @@ img {
   color: #8287a9;
 }
 </style>
-{% end %}
 
-{% block body %}
+</head>
+
+<body>
+<script src="/static/lib/jquery.js"></script>
+<script src="/static/lib/jquery.waypoints.min.js"></script>
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
 <header class="site-header">
   <div class="wrapper">
-    <h1 class="site-header__title">知识库时光轴</h1>
+    <h1 class="site-header__title">资料时间表</h1>
   </div>
 </header>
 
 <section class="timeline">
   <div id="app" class="wrapper">
-    <div class="timeline__item" v-for="item in itemList">
+    <div class="timeline__item timeline__item--0" v-for="item in itemList">
       <div class="timeline__item__station"></div>
       <div class="timeline__item__content">
-        <h2>{{!item.title}}</h2>
-        <p v-for="file in item.files">
+        <h2 class="timeline__item__content__date">{{!item.title}}</h2>
+        <p class="timeline__item__content__description" v-for="file in item.files">
           <a v-bind:href="file.url">{{!file.name}}</a>
         </p>
       </div>
@@ -211,7 +271,7 @@ img {
 
 <header class="site-footer">
   <div class="wrapper">
-    <a id="loadMore" href="javascript:void(0)">加载更多</a>
+    <h1 id="loadMore" class="site-footer__title">加载更多</h1>
   </div>
 </header>
 
@@ -310,4 +370,8 @@ img {
     loadMore();
 
 </script>
-{% end %}
+
+</body>
+
+</html>
+

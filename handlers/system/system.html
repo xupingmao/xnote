@@ -58,7 +58,6 @@
     ("系统变量",     "/system/sys_var_admin"),
     ("重新加载模块", "/system/reload"),
     ("静音",         "/search/search?key=mute"),
-    ("标签云",  "/file/taglist"),
     ("Python Shell", "/system/script/edit?name=test.py"),
     ("消息", "/tools/message"),
 ] %}
@@ -74,6 +73,11 @@
     </div>
 </div>
 {% end %}
+
+{% set database_tools = [
+    ("标签云", "/file/taglist"),
+    ("时光轴", "/tools/timeline"),
+] %}
 
 {% set dev_tools = [
     ("Python文档", "/system/modules_info"),
@@ -97,6 +101,7 @@
 ] %}
 
 {% set tools_list = [
+    ("知识库", database_tools),
     ("开发工具", dev_tools),
     ("图片处理工具", img_tools),
     ("编解码工具", code_tools),
