@@ -30,10 +30,10 @@
         $.get("/api/readbook", {path: path, read: "false", direction: direction, length: readLength}, function (resp) {
             var text = resp.data;
             // 显示阅读内容
-            text = text.replace("<", "&lt;");
-            text = text.replace(">", "&gt;");
-            text = text.replace(" ", "&nbsp;");
-            text = text.replace("\n", "<br>");
+            text = text.replace(/\</gi, "&lt;");
+            text = text.replace(/\>/gi, "&gt;");
+            text = text.replace(/ /gi, "&nbsp;");
+            text = text.replace(/\n/gi, "<br>");
             $("#content").html(text);
             $("#progress").text((resp.current/resp.size*100).toFixed(2) + "%");
             // 先前进，再读这一章节
