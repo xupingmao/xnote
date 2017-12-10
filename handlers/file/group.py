@@ -132,9 +132,10 @@ class MarkedHandler:
         page = xutils.get_argument("page", 1, type=int)
         page = max(1, page)
         db = xtables.get_file_table()
-        where = "is_deleted=0 AND is_marked=1 AND creator=%r" % xauth.get_current_name()
-        files = db.select(where=where, order="mtime DESC", offset=(page-1)*PAGE_SIZE,limit=PAGE_SIZE)
-        count = db.count(where=where)
+        vars = dict(creator=xauth.get_current_name())
+        where = "is_deleted=0 AND is_marked=1 AND creator=$creator"
+        files = db.select(where=where, order="mtime DESC", vars=vars, offset=(page-1)*PAGE_SIZE,limit=PAGE_SIZE)
+        count = db.count(where=where, vars=vars)
         return xtemplate.render("file/view.html", 
             pathlist = [Storage(name="收藏", url="/file/group/marked")],
             file_type = "group",

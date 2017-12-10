@@ -37,10 +37,11 @@ class ListHandler:
             kw = "status = 100"
         else:
             kw = "1=1"
-        kw += " AND user = %r" % user_name
-        chatlist = list(db.select(where=kw, order="status ASC, ctime DESC", limit=pagesize, offset=offset))
+        kw += " AND user = $user"
+        vars = dict(user=xauth.get_current_name())
+        chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))
         chatlist.reverse()
-        amount = db.count(where=kw)
+        amount = db.count(where=kw, vars=vars)
         page_max = math.ceil(amount / pagesize)
         return dict(code="success", message="", data=chatlist, amount=amount, page_max=page_max, current_user=xauth.get_current_name())
 

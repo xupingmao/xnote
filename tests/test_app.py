@@ -132,7 +132,6 @@ class TestMain(unittest.TestCase):
 
     def test_group(self):
         self.check_200("/file/group")
-        self.check_200("/file/group/memo")
         self.check_200("/file/group/ungrouped")
         self.check_200("/file/group/bookmark")
         self.check_200("/file/recent_edit")
