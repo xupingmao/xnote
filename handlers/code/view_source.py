@@ -22,6 +22,7 @@ class ViewSourceHandler:
         else:
             error = ""
             try:
+                path = xutils.get_real_path(path)
                 content = xutils.readfile(path)
                 # 使用JavaScript来处理搜索关键字高亮问题
                 # if key != "":

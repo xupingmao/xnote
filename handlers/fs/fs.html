@@ -82,15 +82,16 @@
 
 {% init find_key = "" %}
 
+{% set search_category = "fs" %}
+
 <div class="col-md-12" style="padding-bottom: 5px;">
     <form action="/fs/find">
-    <div class="right">
-        <input class="hide" name="path" value="{{path}}">
-        <input name = "find_key" type="text" value="{{find_key}}">
-        <input type="submit" value="Find"/>
-    </div>
+        <div class="right">
+            <input class="hide" name="path" value="{{path}}">
+            <input name = "find_key" type="text" value="{{find_key}}">
+            <input type="submit" value="Find"/>
+        </div>
     </form>
-
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
         <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
@@ -145,7 +146,7 @@
             <a href="/fs/{{item.path}}" class="fs-dir">{{item.name}}</a>
         {% else %}
             <a href="/fs/{{item.path}}" class="fs-file">{{item.name}}</a>
-            {% if item.ext in (".jpg", ".png", ".gif", ".jpeg") %}
+            {% if item.ext in (".jpg", ".png", ".gif", ".jpeg", ".bmp", ".ico") %}
                 <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>
             {% end %}
 
@@ -161,7 +162,7 @@
                 <a class="item-option" href="/code/view_source?path={{url_escape(item.path)}}">编辑</a>
             {% end %}
 
-            {% if item.ext == ".md" %}
+            {% if item.ext in (".md", ".csv") %}
                 <a class="item-option" href="/wiki?path={{item.path}}">预览</a>
             {% end %}
         {% end %}

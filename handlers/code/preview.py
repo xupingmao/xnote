@@ -53,10 +53,11 @@ def get_path_list(path):
 
 class handler:
     
-    def GET(self, name):
+    def GET(self, name=""):
         name = xutils.unquote(name)
         op   = xutils.get_argument("op")
         path = xutils.get_argument("path")
+        print(path)
         if op == "edit":
             return self.edit_GET(name)
 
@@ -65,7 +66,7 @@ class handler:
             name = "/"
         else:
             name = "/" + name
-
+        path = xutils.get_real_path(path)
         has_readme = False
         if os.path.isdir(path):
             return "Directory Not Readable"
@@ -104,7 +105,7 @@ class handler:
         if parentname=="":
             parentname="/"
             
-        return render("fs/wiki.html", 
+        return render("code/preview.html", 
             os = os,
             path = path,
             parent = parent,
@@ -174,7 +175,7 @@ class handler:
         if parentname=="":
             parentname="/"
             
-        return render("fs/wiki_edit.html", 
+        return render("code/wiki_edit.html", 
             os = os,
             parent = parent,
             parentname = parentname,
@@ -188,11 +189,14 @@ class handler:
 # Deprecated
 class ReadOnlyHandler:
 
-    def GET(self, path):
+    def GET(self, path=None):
         realpath = os.path.join(config.TMP_DIR, path)
         content  = xutils.readfile(realpath)
-        return xtemplate.render("fs/wiki.html", 
+        return xtemplate.render("code/preview.html", 
             os = os, content = content, type="file")
 
-xurls = (r"/wiki/?(.*)", handler)
+xurls = (
+    r"/wiki/?(.*)", handler,
+    r"/code/preview", handler
+)
 

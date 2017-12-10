@@ -18,18 +18,24 @@ from util import textutil
 
 config = xconfig
 
-_mappings = []
+_rules = []
+
+class BaseRule:
+
+    def __init__(self, pattern, func):
+        self.pattern = pattern
+        self.func = func
 
 def add_rule(pattern, func_str):
-    global _mappings
+    global _rules
     try:
         mod, func_name = func_str.rsplit('.', 1)
         # mod = __import__(mod, None, None, [''])
         mod = six._import_module("handlers.search." + mod)
         func = getattr(mod, func_name)
         func.modfunc = func_str
-        _mappings.append(r"^%s\Z" % pattern)
-        _mappings.append(func)
+        rule = BaseRule(r"^%s\Z" % pattern, func)
+        _rules.append(rule)
     except Exception as e:
         xutils.print_stacktrace()
 
@@ -117,33 +123,21 @@ class MemStore(web.session.DiskStore):
 class handler:
 
     store = MemStore()
-
-    def _match(self, key):
-        global _mappings
-        mappings = _mappings
-        for i in range(0, len(mappings), 2):
-            pattern = mappings[i]
-            func = mappings[i+1]
-            m = re.match(pattern, key)
-            if m:
-                return func, m.groups()
-        return None, None
-
-
     def full_search(self, key, offset, limit):
-        global _mappings
-        mappings = _mappings
+        global _rules
         words = textutil.split_words(key)
         files = []
-        for i in range(0, len(mappings), 2):
-            pattern = mappings[i]
-            func = mappings[i+1]
+        for rule in _rules:
+            pattern = rule.pattern
+            func = rule.func
             # re.match内部已经实现了缓存
             m = re.match(pattern, key)
             if m:
                 try:
-                    print("  >>> ", func.modfunc)
+                    start_time = time.time()
                     results = func(*m.groups())
+                    cost_time = time.time() - start_time
+                    print("  >>> %s - %d ms" % (func.modfunc, cost_time*1000))
                     if results is not None:
                         files += results
                 except Exception as e:

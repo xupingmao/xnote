@@ -257,7 +257,11 @@ def get_file_size(path, format=True):
     if format:
         return get_pretty_file_size(size = st.st_size)
     return st.st_size
-    
+
+def get_real_path(path):
+    if not os.path.exists(path):
+        return quote_unicode(path)
+    return path
     
 def makedirs(dirname):
     if not os.path.exists(dirname):

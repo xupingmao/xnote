@@ -64,54 +64,10 @@
 <div style="float:left;width:100%;">
 
 <script>
-    function switchRename() {
-        if ($("#renameDiv").css("display") == "none") {
-            $("#oldName").hide();
-            $("#renameDiv").css("display", "block");
-            $("#newName").val($("#oldName").html());
-        } else {
-            $("#oldName").show();
-            $("#renameDiv").css("display", "none");
-        }
-    }
-
-        
-    // autosize textarea rows
-    
-
-    function edit() {
-        $("#markdown-input-div").removeClass("hide");
-        $("#markdown-output-div").removeClass("col-md-12").addClass("col-md-6");
-        var height = Math.max(500, $("#markdown-output-div").height());
-        $("#markdown-input").css({height:height+"px"});
-    }
-    
     function preview() {
         if (!$("#markdown-input-div").hasClass("hide")) {
             $("#markdown-input-div").addClass("hide");
             $("#markdown-output-div").removeClass("col-md-6").addClass("col-md-12");
-        }
-    }
-    
-    function renameFile() {
-        var fileId = $("#fileId").text();
-        var oldName = $("#oldName").html();
-        var newName = $("#newName").val();
-        if (newName) {
-            $.post("/file/update", {
-                option: "rename",
-                fileId: fileId,
-                newName: newName
-            }, function (msg) {
-                var result = msg;
-                if (result.success)
-                {
-                    switchRename();
-                    window.location.reload();
-                } else {
-                    alert("修改失败, " + result.msg);
-                }
-            })
         }
     }
 

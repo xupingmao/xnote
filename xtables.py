@@ -171,6 +171,7 @@ def init_table_file():
         manager.add_index("mtime")
 
 def init_table_tag():
+    # 标签表，可以用于一些特征的标记
     # 2017/04/18
     with TableManager(config.DB_PATH, "file_tag", no_pk=True) as manager:
         # 标签名
@@ -212,6 +213,7 @@ def init_table_log():
 
 def init_table_user():
     # 2017/05/21
+    # 简单的用户表
     with TableManager(config.DB_PATH, "user") as manager:
         manager.add_column("name",       "text", "")
         manager.add_column("password",   "text", "")
@@ -239,6 +241,7 @@ def init_table_message():
 
 def init_table_bookmark():
     # 2017/12/09
+    # 通用的收藏数据结构
     with TableManager(xconfig.DB_PATH, "bookmark") as manager:
         manager.add_column("user", "text", "")
         manager.add_column("name", "text", "")
@@ -354,7 +357,6 @@ def init():
     if sqlite3 is None:
         # Jython
         return
-    # init_table_test()
     init_table_user()
     init_table_file()
     init_table_tag()
