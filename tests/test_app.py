@@ -92,7 +92,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual(status, response.status)
 
     def test_static_files(self):
-        self.check_200("/static/lib/jquery.js")
+        self.check_200("/static/lib/jquery/jquery-1.12.4.min.js")
         # 禁止直接访问目录
         self.check_404("/static/")
 
@@ -207,6 +207,7 @@ class TestMain(unittest.TestCase):
 
     def test_message_list(self):
         json_request("/file/message/list")
+        json_request("/file/message/list?status=created")
 
     def test_tag(self):
         json_request("/file/tag/update", method="POST", data=dict(file_id=0, tags="ABC DEF"))
