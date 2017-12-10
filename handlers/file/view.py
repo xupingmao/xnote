@@ -146,9 +146,8 @@ class UpdateHandler(BaseHandler):
         # 不再处理文件，由JS提交
         rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
-            # raise web.seeother("/file/markdown/edit?id=" + str(id))
             if upload_file != None and upload_file.filename != "":
-                raise web.seeother("/file/markdown/edit?id=" + str(id))
+                raise web.seeother("/file/view?id=" + str(id))
             else:
                 raise web.seeother("/file/view?id=" + str(id))
         else:
@@ -269,87 +268,6 @@ class UnmarkHandler:
         db = xtables.get_file_table()
         db.update(is_marked=0, where=dict(id=id))
         raise web.seeother("/file/view?id=%s"%id)
-
-def get_cron_links():
-    SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
-    dirname = xconfig.SCRIPTS_DIR
-    links = []
-    API_PATH = os.path.join(xconfig.HANDLERS_DIR, "api")
-    TOOLS_DIR = xconfig.TOOLS_DIR
-    for fname in os.listdir(API_PATH):
-        fpath = os.path.join(API_PATH, fname)
-        name, ext = os.path.splitext(fname)
-        if name != "__init__" and os.path.isfile(fpath) and ext == ".py":
-            links.append("/api/" + name)
-
-    for fname in os.listdir(TOOLS_DIR):
-        fpath = os.path.join(TOOLS_DIR, fname)
-        name, ext = os.path.splitext(fname)
-        if name != "__init__" and os.path.isfile(fpath) and ext == ".py":
-            links.append("/tools/" + name)
-
-    if os.path.exists(dirname):
-        for fname in os.listdir(dirname):
-            fpath = os.path.join(dirname, fname)
-            if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_TUPLE):
-                links.append("script://" + fname)
-    return links
-
-class MemoEditHandler:
-
-    def GET(self):
-        id = xutils.get_argument("id", type=int)
-        sched = xtables.get_schedule_table().select_one(where=dict(id=id))
-        return xtemplate.render("file/memo_edit.html", item = sched, links = get_cron_links())
-        
-class MemoSaveHandler:
-    
-    @xauth.login_required("admin")
-    def POST(self):
-        id = xutils.get_argument("id")
-        name = xutils.get_argument("name")
-        url  = xutils.get_argument("url")
-        tm_wday = xutils.get_argument("tm_wday")
-        tm_hour = xutils.get_argument("tm_hour")
-        tm_min  = xutils.get_argument("tm_min")
-        message = xutils.get_argument("message")
-        sound_value = xutils.get_argument("sound")
-        webpage_value = xutils.get_argument("webpage")
-        sound = 1 if sound_value == "on" else 0
-        webpage = 1 if webpage_value == "on" else 0
-
-        db = xtables.get_schedule_table()
-        if id == "" or id is None:
-            db.insert(name=name, url=url, mtime=xutils.format_datetime(), 
-                ctime=xutils.format_datetime(),
-                tm_wday = tm_wday,
-                tm_hour = tm_hour,
-                tm_min = tm_min,
-                message = message,
-                sound = sound,
-                webpage = webpage)
-        else:
-            id = int(id)
-            db.update(where=dict(id=id), name=name, url=url, 
-                mtime=xutils.format_datetime(),
-                tm_wday = tm_wday,
-                tm_hour = tm_hour,
-                tm_min = tm_min,
-                message = message,
-                sound = sound,
-                webpage = webpage)
-        xmanager.load_tasks()
-        raise web.seeother("/system/crontab")
-
-class MemoRemoveHandler:
-
-    @xauth.login_required("admin")
-    def GET(self):
-        id = xutils.get_argument("id", type=int)
-        db = xtables.get_schedule_table()
-        db.delete(where=dict(id=id))
-        xmanager.load_tasks()
-        raise web.seeother("/file/group/memo")
         
 class LibraryHandler:
 
@@ -368,9 +286,6 @@ xurls = (
     r"/file/unmark", UnmarkHandler,
     
     r"/file/markdown", ViewHandler,
-    r"/file/memo/edit", MemoEditHandler,
-    r"/file/memo/save", MemoSaveHandler,
-    r"/file/memo/remove", MemoRemoveHandler,
     r"/file/library", LibraryHandler
 )
 

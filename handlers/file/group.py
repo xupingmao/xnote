@@ -143,23 +143,6 @@ class MarkedHandler:
             page_max = math.ceil(count/PAGE_SIZE), 
             page_url="/file/group/marked?page=")
 
-
-class MemoHandler:
-
-    @xauth.login_required("admin")
-    def GET(self):
-        db = xtables.get_schedule_table()
-        # files = db.select()
-        files = xmanager.get_task_list()
-        def set_display_name(file):
-            file.display_name = file.name if file.name != "" else file.url
-            return file
-        files = list(map(set_display_name, files))
-        return xtemplate.render("file/view.html", 
-            pathlist = [PathNode("备忘录", "/file/group/memo")],
-            file_type = "memo",
-            files = files)
-
 xurls = (
     r"/file/group", GroupListHandler,
     r"/file/group/ungrouped", Ungrouped,
@@ -168,7 +151,6 @@ xurls = (
     r"/file/group/move", MoveHandler,
     r"/file/group/bookmark", MarkedHandler,
     r"/file/group/marked", MarkedHandler,
-    r"/file/group/recent_created", RecentCreatedHandler,
-    r"/file/group/memo", MemoHandler,
+    r"/file/group/recent_created", RecentCreatedHandler
 )
 

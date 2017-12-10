@@ -1,6 +1,5 @@
 {% extends base.html %}
 {% block body %}
-
 <div class="col-md-12">
     <a href="/system/script_admin" class="tab-link">脚本</a>
     <a href="/system/crontab" class="tab-link">定时任务</a>
@@ -31,8 +30,8 @@
         <td>
             {% if task.id %}
             <input class="dialog-btn" type="button" value="编辑" 
-                dialog-url="/file/memo/edit?id={{task.id}}" 
-                href="/file/memo/edit?id={{task.id}}" />
+                dialog-url="/system/crontab/edit?id={{task.id}}" 
+                href="/system/crontab/edit?id={{task.id}}" />
             <input type="button" class="link-btn btn-danger" value="删除" href="/system/crontab/remove?id={{task.id}}" confirm-message="确认删除 {{task.display_name}} ?">
             {% end %}
         </td>
@@ -41,7 +40,7 @@
 </table>
 
 <div class="col-md-12 top-offset-1">
-    <input class="dialog-btn" type="button" value="添加" dialog-url="/file/memo/edit" />
+    <input class="dialog-btn" type="button" value="添加" dialog-url="/system/crontab/edit" />
 </div>
 
 <form method="POST" action="/system/crontab/add">
@@ -101,5 +100,4 @@
         }
     })
 </script>
-
 {% end %}
