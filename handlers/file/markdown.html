@@ -1,35 +1,7 @@
 {% init can_edit = False %}
+{% include "file/view_header.html" %}
 
-<div style="">    
-    <span id="fileId" style="display:none;">{{file.id}}</span>
-    <h2>{{file.name}} </h2>
-    
-    <div class="col-md-12">
-        {% if _has_login %}
-            <a href="/file/edit?id={{file.id}}">编辑</a>
-            {% if file.is_public %}
-                <a href="/file/share/cancel?id={{file.id}}">取消分享</a>
-            {% else %}
-                <a href="/file/share?id={{file.id}}">分享</a>
-            {% end %}
-
-            {% if file.is_marked > 0 %}
-                <a href="/file/unmark?id={{file.id}}">取消收藏</a>
-            {% else %}
-                <a href="/file/mark?id={{file.id}}">收藏</a>
-            {% end %}
-
-            <a class="dialog-btn" dialog-url="/file/group?id={{item.id}}&filetype=xml" href="javascript:void({{item.id}})">移动到</a>
-
-        {% end %}
-    </div>
-
-    {% include file/tags.html %}
-    <span id="result" style="color:green"></span>
-</div>
-    
     <hr/>
-
     <form action="/file/update" method="POST">
         <div class="">
             {% if can_edit %}

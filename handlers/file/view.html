@@ -177,13 +177,14 @@ function rename(id, oldName) {
             if (code != "success") {
                 alert(resp.message);
             } else {
-                $("#file-"+id).text(newName);
+                // $("#file-"+id).text(newName);
+                window.location.reload();
             }
         })
     }
 }
 
-function remove(id, name) {
+function remove(id, name, parentId) {
     var confirmed = confirm("确定删除'" + name + "'?");
     if (confirmed) {
         $.post("/file/remove", {id:id}, function (resp) {
@@ -191,7 +192,11 @@ function remove(id, name) {
             if (code != "success") {
                 alert(resp.message);
             } else {
-                window.location.reload();
+                if (parentId) {
+                    window.location.href="/file/view?id="+parentId;
+                } else {
+                    window.location.reload();
+                }
             }
         })
     }

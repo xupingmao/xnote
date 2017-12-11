@@ -3,9 +3,8 @@
 
 <script type="text/javascript" src="/static/lib/wangEditor/wangEditor-3.0.10.min.js"></script>
 {% if op == "view" %}
-    <h2 id="name">{{file["name"]}} <a href="/file/edit?id={{file.id}}">[编辑]</a></h2>
+    {% include "file/view_header.html" %}
 
-    {% include "file/tags.html" %}
     <hr/>
     <div id="editor">
         {% raw file.data %}
@@ -31,14 +30,6 @@
 
 
     <script type="text/javascript">
-    function deleteConfirm () {
-        var name = $("#name").text();
-        var conf = confirm("确认删除 " + name + " 吗?");
-        if (conf) {
-            window.location.href = "/file/remove?id={{file.id}}";
-        }
-    }
-
     var editor = new wangEditor('#toolbar', "#editor");
     editor.customConfig.uploadImgShowBase64 = true   // 使用 base64 保存图片
     editor.create();

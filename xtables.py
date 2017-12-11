@@ -241,7 +241,7 @@ def init_table_message():
 
 def init_table_bookmark():
     # 2017/12/09
-    # 通用的收藏数据结构
+    # 通用的收藏数据结构，基于file的收藏只能收藏file而且不能支持多用户
     with TableManager(xconfig.DB_PATH, "bookmark") as manager:
         manager.add_column("user", "text", "")
         manager.add_column("name", "text", "")

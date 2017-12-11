@@ -27,7 +27,10 @@ var XUI = function (window) {
 
   // 点击跳转链接的按钮
   $(".link-btn").click(function () {
-      var link = $(this).attr("href");
+      var link = $(this).attr("x-href");
+      if (!link) {
+        link = $(this).attr("href");
+      }
       var confirmMessage = $(this).attr("confirm-message");
       if (confirmMessage) {
         var check = confirm(confirmMessage);
