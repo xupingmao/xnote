@@ -127,6 +127,7 @@ class handler:
         global _rules
         words = textutil.split_words(key)
         files = []
+        start_time = time.time()
         for rule in _rules:
             pattern = rule.pattern
             func = rule.func
@@ -134,14 +135,16 @@ class handler:
             m = re.match(pattern, key)
             if m:
                 try:
-                    start_time = time.time()
+                    start_time0 = time.time()
                     results = func(*m.groups())
-                    cost_time = time.time() - start_time
-                    print("  >>> %s - %d ms" % (func.modfunc, cost_time*1000))
+                    cost_time0 = time.time() - start_time0
+                    print("  >>> %s - %d ms" % (func.modfunc, cost_time0*1000))
                     if results is not None:
                         files += results
                 except Exception as e:
                     xutils.print_stacktrace()
+        cost_time = (time.time() - start_time) * 1000
+        print("  === total - %d ms ===" % cost_time)
         return files
 
     def json_request(self):
