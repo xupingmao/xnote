@@ -259,12 +259,23 @@ def init_table_record():
         manager.add_column("key",  "text", "")
         manager.add_column("value", "text", "")
 
+def init_table_calendar():
+    dbpath = os.path.join(xconfig.DATA_DIR, "data.db")
+    with TableManager(dbpath, "calendar") as manager:
+        manager.add_column("ctime", "text", "")
+        manager.add_column("mtime", "text", "")
+        manager.add_column("user",  "text", "")
+        manager.add_column("date",  "text", "")
+        manager.add_column("content", "text", "")
+
 def init_table_storage():
+    # 通用的存储对象
     dbpath = os.path.join(xconfig.DATA_DIR, "data.db")
     with TableManager(dbpath, "storage") as manager:
         manager.add_column("ctime", "text", "")
         manager.add_column("mtime", "text", "")
         manager.add_column("user",  "text", "")
+        manager.add_column("type",  "text", "")
         manager.add_column("key",   "text", "")
         manager.add_column("value", "text", "")
 
@@ -352,6 +363,11 @@ def get_record_table():
     dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
     return DBWrapper(dbpath, "record")
 
+def get_storage_table():
+    return DBWrapper(xconfig.DB_PATH, "storage")
+
+def get_calendar_table():
+    return DBWrapper(xconfig.DB_PATH, "calendar")
 
 def init():
     if sqlite3 is None:
@@ -362,6 +378,7 @@ def init():
     init_table_tag()
     init_table_schedule()
     init_table_message()
+    # init_table_calendar()
     # 非核心结构记录各种日志数据
     init_table_record()
 

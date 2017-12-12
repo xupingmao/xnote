@@ -119,6 +119,11 @@
   /*color: #999;*/
 }
 
+.selected {
+  background-color: green;
+  color: #fff;
+}
+
 td.currentMonth:hover {
   /*border: 3px solid #6C9;*/
   cursor: pointer;
@@ -141,12 +146,24 @@ td.currentMonth:hover {
   padding-right: 5px;
 }
 
+.calendarMessage {
+  width: 100%;
+  max-width: 600px;
+}
+
 </style>
 {% end %}
 
 {% block body %}
 
 <div id="calendar" class="calendar">
+</div>
+<div class="calendarMessage hide">
+  <form action="/system/calendar/save">
+    <input type="text" name="date" class="calendarDate hide">
+    <textarea name="content" class="col-md-12"></textarea>
+    <input type="submit" value="添加">
+  </form>
 </div>
 <div id="notes">
   <div id="file-history"></div>
@@ -306,6 +323,7 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
 
       //_tds[i].data = _thisDayStr;
       _tds[i].setAttribute('data', _thisDayStr);
+      _tds[i].setAttribute("date", getDateStr(_thisDay, '-'));
       if(_thisDayStr == getDateStr(new Date())) {    // 当前天
         _tds[i].className = 'currentMonth currentDay';
       }else if(_thisDayStr.substr(0, 6) == getDateStr(_firstDay).substr(0, 6)) {
@@ -382,14 +400,18 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
   /**
    * 日期转化为字符串， 4位年+2位月+2位日
    */
-  function getDateStr(date) {
+  function getDateStr(date, seperator) {
     var _year = date.getFullYear();
     var _month = date.getMonth() + 1;    // 月从0开始计数
     var _d = date.getDate();
      
     _month = (_month > 9) ? ("" + _month) : ("0" + _month);
     _d = (_d > 9) ? ("" + _d) : ("0" + _d);
-    return _year + _month + _d;
+    if (seperator) {
+      return _year + seperator + _month + seperator + _d;
+    } else {
+      return _year + _month + _d;
+    }
   }
 
   /**
@@ -403,6 +425,14 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     _d = (_d > 9) ? ("" + _d) : ("0" + _d);
     return _month + '-' + _d;
   }
+
+  $(".currentMonth").click(function () {
+    $(".currentMonth").removeClass("selected");
+    $(".calendarMessage").removeClass("hide");
+    $(this).addClass("selected");
+    var selectedDate = $(this).attr("date");
+    $(".calendarDate").val(selectedDate);
+  })
 })();
 
 </script>
