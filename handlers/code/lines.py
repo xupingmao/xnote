@@ -141,16 +141,16 @@ class handler:
             
     def POST(self):
         args = web.input(_method="POST")
-
         path = args.path
         recursive = args.recursive
         type = args.type
+        recursive = recursive == "on"
 
         if path is None:
             line_infos = []
         else:
             line_infos = get_line_infos(path, 
-                recursive = recursive=="on", type = type)
+                recursive = recursive, type = type)
         
         typedict = CODE_EXT_DICT
         # return xtemplate.render("code/lines.html", **locals())

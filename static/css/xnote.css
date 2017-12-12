@@ -579,3 +579,11 @@ li.menu-item:hover {
     background: none;
     text-decoration: underline;
 }
+
+.fs-path {
+    padding: 5px;
+    box-sizing: border-box;
+    background-color: #eee;
+}
+
+    

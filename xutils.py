@@ -533,7 +533,10 @@ def is_editable(filename):
         ".hpp",
         ".py",
         ".lua",
-        ".gradle"
+        ".gradle",
+        ".js",
+        ".json",
+        ".command"
     )
 
 def http_get(url):

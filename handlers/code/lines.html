@@ -36,9 +36,14 @@
         </tr>
     </table>
     <button>统计</button>
-    <a href="/code/analyze?path={{path}}">分析</a>
 </form>
 </div>
+
+{% if len(line_infos) > 0 %}
+<p>总行数 {{line_infos[0].lines}}</p>
+<p>有效行数 {{line_infos[0].validlines}}</p>
+<p>空白行数 {{line_infos[0].blanklines}}</p>
+{% end %}
 
 <table class="table">
 <tr>
