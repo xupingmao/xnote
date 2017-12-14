@@ -35,6 +35,7 @@ class ViewHandler:
         page = xutils.get_argument("page", 1, type=int)
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         db   = xtables.get_file_table()
+        user_name = xauth.get_current_name()
 
         if id == "" and name == "":
             raise HTTPError(504)
@@ -46,16 +47,12 @@ class ViewHandler:
         if file is None:
             raise web.notfound()
         
-        if not file.is_public and xauth.get_current_user() is None:
-            return xauth.redirect_to_login()
+        if not file.is_public and user_name != "admin" and user_name != file.creator:
+            raise web.seeother("/unauthorized")
         show_search_div = False
         pathlist = dao.get_pathlist(db, file)
-        user_name = xauth.get_current_name()
         can_edit = (file.creator == user_name) or (user_name == "admin")
-
         role = xauth.get_current_role()
-        if role != "admin" and file.groups != '*' and file.groups != role:
-            raise web.seeother("/unauthorized")
 
         # 定义一些变量
         files = []

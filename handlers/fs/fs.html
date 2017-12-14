@@ -158,7 +158,7 @@
                 <a class="item-option" href="/tools/sql?path={{item.path}}&from=/fs/{{path}}">查看</a>
             {% end %}
 
-            {% if xutils.is_editable(item.path) or item.ext in (".js", ".command", ".xml") %}
+            {% if xutils.is_editable(item.path) or item.ext in (".js", ".command", ".xml", ".html") %}
                 <a class="item-option" href="/code/view_source?path={{url_escape(item.path)}}">编辑</a>
             {% end %}
 
