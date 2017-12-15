@@ -61,7 +61,7 @@
 <script type="text/javascript">
     $(function () {
 
-        var mode = "text/x-sh";
+        var mode = "text/x-c";
         var name = getUrlParams().path;
         if (name.endsWith(".py")) {
             mode = "text/x-python";
@@ -73,6 +73,8 @@
             mode = "text/x-java";
         } else if (name.endsWith(".md")) {
             mode = "text/x-markdown";
+        } else if (name.endsWith(".sh")) {
+            mode = "text/x-sh";
         }
         var editor = CodeMirror.fromTextArea($("#editor")[0], {
             lineNumbers: true,

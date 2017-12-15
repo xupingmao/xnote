@@ -59,7 +59,12 @@ def worker(addr, q, total):
     global _lock 
     global _handled
     while not q.empty(): 
-        port = q.get() 
+        try:
+            port = q.get(block=False)
+            if port is None:
+                return
+        except:
+            return
         try: 
             console.update("progress: %d/%d" % (_handled, total))
             scan(addr, port) 

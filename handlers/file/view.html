@@ -118,7 +118,8 @@ img {
     {% init file_type = "md" %}
     {% init pathlist = [] %}
     {% init file = None %}
-    {% init show_search_div = False %}
+    {% init show_search_div = True %}
+    {% init show_add_btns = False %}
     {% init show_path_list = True %}
 
     {% if file != None %}
@@ -130,7 +131,7 @@ img {
         {% include "search.html" %}
     {% end %}
 
-    {% if show_search_div %}
+    {% if show_add_btns %}
     <div class="col-md-12" style="padding-bottom: 5px;">
         {% if _has_login %}
         <div class="left" style="float: left;">

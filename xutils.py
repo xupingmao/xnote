@@ -42,6 +42,7 @@ if PY2:
     from urllib import quote, unquote, urlopen
     from ConfigParser import ConfigParser
     from StringIO import StringIO
+    from Queue import Queue
     # from commands import getstatusoutput
 
     def u(s, encoding="utf-8"):
@@ -61,6 +62,7 @@ else:
     from subprocess import getstatusoutput
     from configparser import ConfigParser
     from io import StringIO
+    from queue import Queue
 
     u = str
     listdir = os.listdir
@@ -536,7 +538,8 @@ def is_editable(filename):
         ".gradle",
         ".js",
         ".json",
-        ".command"
+        ".command",
+        ".scala"
     )
 
 def http_get(url):

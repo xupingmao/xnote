@@ -40,6 +40,7 @@
 </div>
 
 {% if len(line_infos) > 0 %}
+<p>文件数 {{len(line_infos)-1}}</p>
 <p>总行数 {{line_infos[0].lines}}</p>
 <p>有效行数 {{line_infos[0].validlines}}</p>
 <p>空白行数 {{line_infos[0].blanklines}}</p>

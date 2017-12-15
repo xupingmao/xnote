@@ -88,6 +88,7 @@ class GroupListHandler:
                 file_type="group",
                 pseudo_groups=True,
                 show_search_div = True,
+                show_add_btns = True,
                 files=data)
 
 class RemovedHandler:

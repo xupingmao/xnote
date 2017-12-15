@@ -90,7 +90,6 @@ class ViewHandler:
             can_edit = can_edit,
             pathlist = pathlist,
             page_max = math.ceil(amount/pagesize),
-            show_search_div = show_search_div,
             page = page,
             page_url = "/file/view?id=%s&page=" % id,
             files = files)

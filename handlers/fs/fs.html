@@ -84,7 +84,14 @@
 
 {% set search_category = "fs" %}
 
-<div class="col-md-12" style="padding-bottom: 5px;">
+<div class="fs-path">
+<a href="/fs//">Home</a> /
+{% for item in fspathlist %}
+    <a href="/fs/{{ item.path }}">{{ item.name }}</a> / 
+{% end %}
+</div>
+
+<div class="col-md-12 top-offset-1" style="padding-bottom: 5px;">
     <form action="/fs/find">
         <div class="right">
             <input class="hide" name="path" value="{{path}}">
@@ -118,19 +125,7 @@
         <div id="dropArea">点击或拖拽上传文件</div>
     </div>
 </div>
-
-
 <hr/>
-
-<div>
-
-<div class="fs-path">
-<a href="/fs//">Home</a> /
-{% for item in fspathlist %}
-    <a href="/fs/{{ item.path }}">{{ item.name }}</a> / 
-{% end %}
-</div>
-
 <div class="col-md-12">
 
 <!-- <li style="padding-top:6px;"><a href="{{path}}/..">上一级目录</a></li> -->

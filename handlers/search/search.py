@@ -15,10 +15,22 @@ import xauth
 import xmanager
 import xtemplate
 from util import textutil
+from xutils import Queue
 
 config = xconfig
 
 _rules = []
+
+class History:
+
+    def __init__(self, size):
+        self.q = Queue()
+        self.size = size
+
+    def put(self, item):
+        self.q.put(item)
+        if self.q.qsize() > self.size:
+            self.q.get()
 
 class BaseRule:
 
