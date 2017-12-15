@@ -1,6 +1,7 @@
 # Xnote
 
 [![Build Status](https://travis-ci.org/xupingmao/xnote.svg?branch=master)](https://travis-ci.org/xupingmao/xnote)
+[![Coverage Status](https://coveralls.io/repos/github/xupingmao/xnote/badge.svg?branch=master)](https://coveralls.io/github/xupingmao/xnote?branch=master)
 
 xnote是一个基于Python的PIM(Personal Information Management)系统，提供内容管理系统以及常用的工具集成环境
 

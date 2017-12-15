@@ -539,7 +539,8 @@ def is_editable(filename):
         ".js",
         ".json",
         ".command",
-        ".scala"
+        ".scala",
+        ".yml"
     )
 
 def http_get(url):
