@@ -170,7 +170,7 @@ xnote
 
 ### 层次架构
 
-![架构图](https://gitee.com/xupingmao/xnote/raw/master/static/image/architecture.svg)
+![架构图](https://gitee.com/xupingmao/xnote/raw/master/screenshots/architecture.svg)
 
 ### 扩展
 

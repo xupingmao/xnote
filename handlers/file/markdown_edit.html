@@ -88,10 +88,10 @@
             <div class="col-md-12" style="border:1px solid #ccc; border-bottom: none;box-sizing: border-box;">
                 <input type="submit" class="btn btn-primary" value="更新"/>
                 <input type="button" id="insertCode" class="btn" value="代码"/> 
+                <input type="button" id="insertBold" class="btn" value="加粗"/>
                 <input type="file" id="file" name="file" class="hide" />
                 <input type="button" id="uploadBtn" class="btn" value="文件" />
                 <input type="button" class="btn btn-primary" onclick="togglePreview(this)" value="关闭预览"/>
-                <input type="button" class="btn btn-danger" onclick="delLink()" value="删除" />
                 <span class="upload-progress"></span>
                 <span id="autosaveResult" class="hide">自动保存成功</span>
             </div>
@@ -143,12 +143,13 @@
     }
 
     function codeInsert(code) {
-        var cur = codeMirror.getCursor();
-        if (cur == null || cur == undefined) {
-            var index = codeMirror.doc.getValue().length;
-            cur = codeMirror.posFromIndex(index);
-        }
-        codeMirror.replaceRange(code, cur, cur, "");
+        // var cur = codeMirror.getCursor();
+        // if (cur == null || cur == undefined) {
+        //     var index = codeMirror.doc.getValue().length;
+        //     cur = codeMirror.posFromIndex(index);
+        // }
+        // codeMirror.replaceRange(code, cur, cur, "");
+        codeMirror.replaceSelection(code, 'around');
     }
 
     $("#file").on("change", function () {
@@ -348,11 +349,17 @@
             
             var selection = codeMirror.getSelection();
             if (selection != "" && selection != null) {
-                codeMirror.replaceSelection("```\n" + selection + "\n```");
+                codeMirror.replaceSelection("```\n" + selection + "\n```", "around");
             } else {
                 codeInsert("```\n[代码]\n```");
             }
-        })
+        });
+
+        $("#insertBold").on("click", function () {
+            var selection = codeMirror.getSelection();
+            codeMirror.replaceSelection("**" + selection + "**", "around");
+        });
+
     })
 </script>
 
