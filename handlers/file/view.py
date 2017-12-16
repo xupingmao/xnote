@@ -36,6 +36,7 @@ class ViewHandler:
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         db   = xtables.get_file_table()
         user_name = xauth.get_current_name()
+        show_add_btns = False
 
         if id == "" and name == "":
             raise HTTPError(504)
@@ -68,6 +69,7 @@ class ViewHandler:
                 offset=(page-1)*pagesize)
             content = file.get_content()
             show_search_div = True
+            show_add_btns = True
         elif file.type == "md" or file.type == "text":
             dao.visit_by_id(id, db)
             content = file.get_content()
@@ -86,6 +88,7 @@ class ViewHandler:
         return xtemplate.render(template_name,
             file=file, 
             op=op,
+            show_add_btns = show_add_btns,
             date2str=date2str,
             can_edit = can_edit,
             pathlist = pathlist,

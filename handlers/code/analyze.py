@@ -27,6 +27,9 @@ CODE_EXT_LIST = (".java",  # Java
                  ".rb",    # Ruby
                  ".go",    # Go
                  ".m",     # Objective-C, Matlab
+                 ".conf",  # configuration
+                 ".ini",
+                 ".rc",
                  )
 
 # TODO 对于小文件可以尝试当成文本文件来处理
