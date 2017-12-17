@@ -96,3 +96,7 @@ def by_time(period, time_str, message):
         xutils.say(out)
         return [SearchResult("提醒", "/system/crontab", out)]
 
+def by_date(date_str, message):
+    if not xauth.is_admin():
+        return None
+    print(date_str, message)

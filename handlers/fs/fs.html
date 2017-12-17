@@ -74,6 +74,18 @@
         background-color: #eee;
     }
 
+    .cmd-input {
+        width: 100%;
+        max-width: 700px;
+        background-color: rgb(230, 230, 255);
+        border-width: 1px;
+        border-style: solid;
+        border-color: black;
+        font-family: monospace;
+        font-size: 16px;
+        display: none;
+    }
+
 </style>
 
 {% end %}
@@ -170,7 +182,7 @@
 {% end %}
 </table>
 <hr/>
-
+<input type="text" class="cmd-input" placeholder="请输入指令">
 </div>
 
 <script type="text/javascript">

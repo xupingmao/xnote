@@ -188,11 +188,8 @@ def init_table_schedule():
     with TableManager(config.DB_PATH, "schedule") as manager:
         manager.add_column("name", "text", "")
         manager.add_column("url",         "text", "")
-        # manager.add_column("interval",    "integer", 60)
         manager.add_column("ctime",       "text", "")
         manager.add_column("mtime",       "text", "")
-        # manager.add_column("repeat_type", "text", "interval")
-        # manager.add_column("pattern",     "text", "00:00:00")
         manager.add_column("tm_wday", "text", "")  # Week Day no-repeat 一次性任务
         manager.add_column("tm_hour", "text", "")
         manager.add_column("tm_min",  "text", "")
@@ -265,7 +262,9 @@ def init_table_calendar():
         manager.add_column("ctime", "text", "")
         manager.add_column("mtime", "text", "")
         manager.add_column("user",  "text", "")
-        manager.add_column("date",  "text", "")
+        # 开始提醒的时间
+        manager.add_column("active_time",  "text", "")
+        manager.add_column("is_read", "int", 0)
         manager.add_column("content", "text", "")
 
 def init_table_storage():

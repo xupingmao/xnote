@@ -34,9 +34,10 @@ class History:
 
 class BaseRule:
 
-    def __init__(self, pattern, func):
+    def __init__(self, pattern, func, scope="home"):
         self.pattern = pattern
         self.func = func
+        self.scope = scope
 
 def add_rule(pattern, func_str):
     global _rules
@@ -214,6 +215,7 @@ def load_rules():
     add_rule(r"([^ ]*)",                "api.search")
     add_rule(r"(\d+)分钟后提醒我?(.*)", "reminder.search")
     add_rule(r"(上午|下午)(.*)提醒我?(.*)", "reminder.by_time")
+    add_rule(r"(.*)日提醒我?(.*)","reminder.by_date")
     add_rule(r"静音(.*)",               "mute.search")
     add_rule(r"mute(.*)",               "mute.search")
     add_rule(r"取消静音",               "mute.cancel")
