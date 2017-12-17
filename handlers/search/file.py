@@ -189,14 +189,15 @@ def search_name(words, groups=None):
     if not isinstance(words, list):
         words = [words]
     like_list = []
+    vars = dict()
     for word in words:
         like_list.append('name LIKE %s ' % to_sqlite_obj('%' + word.upper() + '%'))
-    sql = "SELECT name, id, ctime, mtime, type, creator from file WHERE %s AND is_deleted != 1" % (" AND ".join(like_list))
+    sql = "SELECT name, id, ctime, mtime, type, creator FROM file WHERE %s AND is_deleted == 0" % (" AND ".join(like_list))
     if groups and groups != "admin":
-        sql += " AND (groups = '*' OR groups = '%s')" % groups
-    sql += " ORDER BY atime DESC LIMIT 1000";
-    # print("search name:", sql)
-    all = xtables.get_file_table().query(sql)
+        sql += " AND (is_public = 1 OR creator = $creator)"
+    sql += " ORDER BY mtime DESC LIMIT 1000";
+    vars["creator"] = groups
+    all = xtables.get_file_table().query(sql, vars=vars)
     return [FileDO.fromDict(item) for item in all]
 
 def full_search(words, groups=None):
@@ -204,6 +205,7 @@ def full_search(words, groups=None):
     if not isinstance(words, list):
         words = [words]
     content_like_list = []
+    vars = dict()
     # name_like_list = []
     for word in words:
         content_like_list.append('content like %s ' % to_sqlite_obj('%' + word.upper() + '%'))
@@ -213,10 +215,11 @@ def full_search(words, groups=None):
         % " AND ".join(content_like_list)
 
     if groups and groups != "admin":
-        sql += " AND (groups = '*' OR groups = '%s')" % groups
-    sql += " order by atime desc limit 1000";
-    # print("full search:", sql)
-    all = xtables.get_file_table().query(sql)
+        sql += " AND (is_public = 1 OR creator = $creator)"
+    sql += " order by mtime desc limit 1000";
+
+    vars["creator"] = groups
+    all = xtables.get_file_table().query(sql, vars=vars)
     return [FileDO.fromDict(item) for item in all]
 
 def search(expression):
