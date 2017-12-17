@@ -529,6 +529,9 @@ def is_windows():
 def is_mac():
     return platform.system() == "Darwin"
 
+def is_linux():
+    return os.name == "linux"
+
 def get_text_ext():
     return (
         ".md", 

@@ -10,7 +10,7 @@ __pycache__
 .DS_Store
 /static/exe
 /static/logs
-/bs4/
+/lib/bs4/
 /web/bs4/
 /static/upload/
 /static/lib/jsoneditor/

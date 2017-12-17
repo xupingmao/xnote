@@ -47,7 +47,6 @@ from util import fsutil
 from util import dateutil
 from util import textutil
 from util import htmlutil
-from util import osutil
 from util import dbutil
 from util import netutil
 
