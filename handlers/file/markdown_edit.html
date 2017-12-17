@@ -55,6 +55,30 @@
     box-sizing: border-box;
 }
 
+.toolbox {
+    background-color: #eee;
+    border:1px solid #ccc; 
+    border-bottom: none;
+    box-sizing: border-box;
+}
+
+.toolbox-btn {
+    display: block;
+    float: left;
+    background-color: #eee;
+    color: #000;
+    border-right: 1px solid #ccc;
+    outline: none;
+}
+
+.toolbox-btn:hover {
+    display: block;
+    float: left;
+    color: #fff;
+    background-color: #aaa;
+    border: 1px solid #ccc;
+}
+
 </style>
 {% end %}
 
@@ -85,13 +109,13 @@
         </div>
         <div class="col-md-12">
             <span id="result" style="color:green"></span>
-            <div class="col-md-12" style="border:1px solid #ccc; border-bottom: none;box-sizing: border-box;">
-                <input type="submit" class="btn btn-primary" value="更新"/>
-                <input type="button" id="insertCode" class="btn" value="代码"/> 
-                <input type="button" id="insertStrong" class="btn" value="强调"/>
+            <div class="col-md-12 toolbox">
+                <input type="submit" class="toolbox-btn btn-primary" value="更新"/>
+                <input type="button" id="insertCode" class="toolbox-btn" value="代码"/> 
+                <input type="button" id="insertStrong" class="toolbox-btn" value="强调"/>
                 <input type="file" id="file" name="file" class="hide" />
-                <input type="button" id="uploadBtn" class="btn" value="文件" />
-                <input type="button" class="btn btn-primary" onclick="togglePreview(this)" value="关闭预览"/>
+                <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" />
+                <input type="button" class="toolbox-btn btn-primary" onclick="togglePreview(this)" value="关闭预览"/>
                 <span class="upload-progress"></span>
                 <span id="autosaveResult" class="hide">自动保存成功</span>
             </div>
@@ -357,7 +381,11 @@
 
         $("#insertStrong").on("click", function () {
             var selection = codeMirror.getSelection();
-            codeMirror.replaceSelection("**" + selection + "**", "around");
+            if (selection.startsWith("**") && selection.endsWith("**")) {
+                codeMirror.replaceSelection(selection.substring(2, selection.length-2), "around");
+            } else {
+                codeMirror.replaceSelection("**" + selection + "**", "around");
+            }
         });
 
     })
