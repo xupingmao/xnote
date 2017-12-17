@@ -283,7 +283,6 @@ xurls = (
     r"/file/(\d+)/downvote", Downvote,
     r"/file/mark", MarkHandler,
     r"/file/unmark", UnmarkHandler,
-    
     r"/file/markdown", ViewHandler,
     r"/file/library", LibraryHandler
 )

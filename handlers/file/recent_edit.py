@@ -25,11 +25,10 @@ def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
     # else:
     #     sql = "select * from file where is_deleted != 1 AND groups = '%s'" % user_name
 
-    sql = "select * from file where is_deleted = 0 AND creator = '%s'" % user_name
+    sql = "SELECT * FROM file WHERE is_deleted = 0 AND (creator = $creator OR is_public = 1)"
     sql += " ORDER BY mtime DESC"
     sql += " LIMIT %s, %s" % ((page-1) * pagesize, pagesize)
-    list = execute(sql)
-        
+    list = xtables.get_file_table().query(sql, vars=dict(creator=user_name))
     return [FileDO.fromDict(item) for item in list]
 
 def count_files():
