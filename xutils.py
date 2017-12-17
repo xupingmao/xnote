@@ -529,9 +529,8 @@ def is_windows():
 def is_mac():
     return platform.system() == "Darwin"
 
-def is_editable(filename):
-    name, ext = os.path.splitext(filename)
-    return ext in (
+def get_text_ext():
+    return (
         ".md", 
         ".csv", 
         ".properties", 
@@ -547,8 +546,13 @@ def is_editable(filename):
         ".json",
         ".command",
         ".scala",
-        ".yml"
+        ".yml",
+        ".php"
     )
+
+def is_editable(filename):
+    name, ext = os.path.splitext(filename)
+    return ext in get_text_ext()
 
 def http_get(url):
     stream = urlopen(url)

@@ -72,37 +72,36 @@ class AddHandler:
         return self.POST()
 
 class RemoveHandler:
-    def remove_by_id(self, id):
+
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id", "")
+        name = xutils.get_argument("name", "")
+        file = None
+
+        if id == "" and name == "":
+            return dict(code="fail", message="id,name至少一个不为空")
+
         db = xtables.get_file_table()
-        file = db.select_one(where=dict(id=int(id)))
+        if id != "":
+            file = db.select_one(where=dict(id=int(id)))
+        else:
+            file = db.select_one(where=dict(name=name))
         if file is None:
             return dict(code="fail", message="文件不存在")
+        id = file.id
+
+        if not xauth.is_admin() and file.creator != xauth.get_current_name():
+            return dict(code="fail", message="没有删除权限")
+
         if file.type == "group":
             children_count = db.count(where="parent_id=%s AND is_deleted=0"%id)
             if children_count > 0:
                 return dict(code="fail", message="分组不为空")
+
         db.update(is_deleted=1, mtime=dateutil.format_time(), where=dict(id=int(id)))
         db.delete(where="is_deleted=1 AND mtime < $date", vars=dict(date=dateutil.before(days=30,format=True)))
         return dict(code="success")
-
-    def remove_by_name(self, name):
-        db = xtables.get_file_table()
-        file = db.select_one(where=dict(name=name))
-        if file is None:
-            return dict(code="success")
-        db.update(is_deleted=1, where=dict(id=file.id))
-        return dict(code="success")
-
-    # 物理删除
-    @xauth.login_required("admin")
-    def GET(self):
-        id = xutils.get_argument("id", "")
-        name = xutils.get_argument("name", "")
-        if id == "" and name == "":
-            return dict(code="fail", message="id,name至少一个不为空")
-        if id != "":
-            return self.remove_by_id(int(id))
-        return self.remove_by_name(name)
         
     def POST(self):
         return self.GET()

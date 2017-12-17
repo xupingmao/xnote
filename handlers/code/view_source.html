@@ -13,6 +13,10 @@
 <script type="text/javascript" src="/static/lib/codemirror/mode/javascript.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
 
+{% if path.endswith(".php") %}
+<script type="text/javascript" src="/static/lib/codemirror/mode/php.js"></script>
+{% end %}
+
 <style type="text/css">
 
 .search-key {
@@ -75,6 +79,8 @@
             mode = "text/x-markdown";
         } else if (name.endsWith(".sh")) {
             mode = "text/x-sh";
+        } else if (name.endsWith(".php")) {
+            mode = "text/x-php";
         }
         var editor = CodeMirror.fromTextArea($("#editor")[0], {
             lineNumbers: true,
