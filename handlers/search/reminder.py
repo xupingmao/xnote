@@ -70,7 +70,7 @@ def search(delay_mins_str, message):
 
     result = SearchResult()
     result.name = "提醒"
-    result.raw = "提醒创建成功，将于%s提醒 %s" % (xutils.format_time(millis), message)
+    result.raw = "提醒创建成功，将于%s点%s分提醒 %s" % (tm_hour, tm_min, message)
     result.url = "/system/crontab"
     xutils.say(result.raw)
     return [result]

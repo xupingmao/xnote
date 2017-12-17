@@ -391,6 +391,13 @@ def format_time(seconds=None):
         st = time.localtime(seconds)
         return time.strftime('%Y-%m-%d %H:%M:%S', st)
 
+def format_time_only(seconds=None):
+    if seconds == None:
+        return time.strftime('%H:%M:%S')
+    else:
+        st = time.localtime(seconds)
+        return time.strftime('%H:%M:%S', st)
+
 def format_date(seconds=None):
     if seconds is None:
         return time.strftime('%Y-%m-%d')

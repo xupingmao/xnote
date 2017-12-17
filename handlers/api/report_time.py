@@ -21,9 +21,9 @@ class handler:
             if tm.tm_hour == 7 and tm.tm_min < 30:
                 return False
             if tm.tm_min == 0:
-                msg = "现在是%s点整" % tm.tm_hour
+                msg = "现在时间是%s点整" % tm.tm_hour
             else:
-                msg = "现在是%s点%s分" % (tm.tm_hour, tm.tm_min)
+                msg = "现在时间是%s点%s分" % (tm.tm_hour, tm.tm_min)
             if tm.tm_hour >= 23:
                 return False
                 msg += "，夜深了，请注意休息"

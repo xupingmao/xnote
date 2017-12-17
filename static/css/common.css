@@ -1,6 +1,10 @@
 body {
     /*background-color: #f0f0f0;*/
-    font-family: "Open Sans Light",Helvetica,arial,sans-serif;
+    /*font-family: "Open Sans Light",Helvetica,arial,sans-serif;*/
+    font: 14px "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
+    -webkit-text-size-adjust: 100%; 
+    margin: 0; 
+    padding: 0;
 }
 
 .marked-pre {
@@ -14,6 +18,7 @@ body {
 a {
     font-size: 15px;
     font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
+    text-decoration: none;
 }
 
 .x-center {
