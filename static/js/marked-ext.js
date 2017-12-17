@@ -99,6 +99,7 @@
             + '>\n';
 
     }
+
     // 重写img
     myRenderer.image = function(href, title, text) {
       var out = '<img src="' + href + '" alt="' + text + '" style="max-width:100%;"';
@@ -108,6 +109,7 @@
       out += this.options.xhtml ? '/>' : '>';
       return out;
     };
+
     // 重写code
     myRenderer.code = function(code, lang, escaped) {
       if (this.options.highlight) {
@@ -131,6 +133,12 @@
         + (escaped ? code : escape(code, true))
         + '\n</code></pre>\n';
     };
+
+    // 重写strong
+    myRenderer.strong = function (text) {
+        return '<strong class="marked-strong">' + text + '</strong>';
+    }
+
     marked.setOptions({
         renderer: myRenderer,
         highlight: highlight
