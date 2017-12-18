@@ -169,6 +169,8 @@ def init_table_file():
         manager.add_index("parent_id")
         manager.add_index("type")
         manager.add_index("mtime")
+        # 虽然不能加速匹配过程，但是可以加速全表扫描
+        manager.add_index("name")
 
 def init_table_tag():
     # 标签表，可以用于一些特征的标记
