@@ -55,7 +55,7 @@ def handle_args():
     args = parser.parse_args(sys.argv[1:])
 
     # 处理Data目录
-    xconfig.set_data_path(args.data)
+    xconfig.init(args.data)
     # 端口号
     xconfig.PORT = args.port
 

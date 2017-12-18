@@ -206,5 +206,5 @@ xurls = ("/test", handler)
 
 ## 协议
 
-- MIT
+- GPL
 

@@ -58,10 +58,7 @@ PARTNER_HOST_LIST = [
 # max file size to sync or backup
 MAX_FILE_SIZE = 10 * 1024 ** 2
 
-
-
 ## 变量
-
 # 导航栏位置
 nav_position = "top"
 
@@ -72,7 +69,7 @@ def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-def set_data_path(path):
+def init(path):
     """初始化默认的Data目录,启动时必须调用"""
     global DATA_PATH
     global DATA_DIR
@@ -104,7 +101,7 @@ def set_data_path(path):
     makedirs(SCRIPTS_DIR)
     makedirs(TRASH_DIR)
 
-set_data_path(DATA_DIR)
+init(DATA_DIR)
 """
 - host ip:port
 - 
