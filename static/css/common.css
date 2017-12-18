@@ -323,6 +323,24 @@ li.menu-item:hover {
     padding-right: 2px;
 }
 
+.orange-tag {
+    font-size: small;
+    background-color: orange;
+    color: white;
+    border-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.gray-tag {
+    font-size: small;
+    background-color: #eee;
+    border-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+
 .tag-span {
     font-size: small;
     background-color: green;
@@ -582,6 +600,7 @@ li.menu-item:hover {
 .item-option {
     color: #aaa;
     cursor: pointer;
+    font-size: small;
 }
 .item-option:hover {
     color: #000;
@@ -595,4 +614,6 @@ li.menu-item:hover {
     background-color: #eee;
 }
 
-    
+.group-link {
+    color: blue;
+}

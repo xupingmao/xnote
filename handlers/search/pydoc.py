@@ -7,11 +7,14 @@
 import sys
 import xmanager
 import xutils
+import xauth
 
 SearchResult = xutils.SearchResult
 
 def search(name):
     """搜索Python文档"""
+    if not xauth.is_admin():
+        return
     if name in sys.modules:
         item = SearchResult()
         item.name = "Python Document - %s" % name

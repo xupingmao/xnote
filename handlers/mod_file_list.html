@@ -5,7 +5,7 @@
         <div class="note-body">
             <div class="note-visited-cnt">
                 {% if file.id != None %}
-                <a class="item-option dialog-btn" dialog-url="/file/group/list?id={{file.id}}&filetype=xml">移动到</a>
+                <a class="item-option dialog-btn" dialog-url="/file/group/list?id={{file.id}}&filetype=xml">移动</a>
                 {% end %}
             </div>
             <div class="note-name">
@@ -37,7 +37,7 @@
                 {% end %}
 
                 {% if file.mtime != None %}
-                    <span class="note-last-visit-time">最近编辑:{{file.mtime}}</span>
+                    <span class="note-last-visit-time">最近更新:{{file.mtime}}</span>
                 {% end %}
             </div>
             <div class="note-related">

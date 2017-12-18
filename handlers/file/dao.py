@@ -246,8 +246,8 @@ def search_name(words, limit=None, file_type=None):
     return [FileDO.fromDict(item) for item in all]
 
 def visit_by_id(id, db = None):
-    sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime='%s' where id = %s and visited_cnt < %s" % \
-        (dateutil.format_time(), id, MAX_VISITED_CNT)
+    sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime='%s' where id = %s " % \
+        (dateutil.format_time(), id)
     return db.query(sql)
 
 def get_recent_visit(count):

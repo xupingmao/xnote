@@ -16,14 +16,16 @@
     {% for i, item in enumerate(files) %}
         <tr>
             <td class="note-td">
-                <div class="children-count">
+<!--                 <div class="children-count">
                     {{item.size}}
-                </div>
+                </div> -->
                 {% if item.type == "group" %}
                     <img src="/static/image/folder.gif"/>
+                    <a class="group-link" href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
                 {% else %}
+                    <a href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
                 {% end %}
-                <a href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
+
                 <a class="item-option" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
                 {% if _is_admin %}
                     <a class="item-option" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>
@@ -32,7 +34,8 @@
                 <a class="item-option dialog-btn" dialog-url="/file/group?id={{item.id}}&filetype=xml" href="javascript:void({{item.id}})">移动到</a>
                 {% end %}
                 <div style="font-size: 12px;">
-                    <span class="tag">{{item.creator}}</span>
+                    <span class="gray-tag">{{item.creator}}</span>
+                    <span class="gray-tag">大小: {{item.size}}</span>
                     {{item.mtime}}
                 </div>
             </td>

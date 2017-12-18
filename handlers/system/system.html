@@ -59,6 +59,7 @@
     ("重新加载模块", "/system/reload"),
     ("静音",         "/search/search?key=mute"),
     ("Python Shell", "/system/script/edit?name=test.py"),
+    ("Python文档", "/system/modules_info"),
 ] %}
 
 <div class="col-md-12 top-offset-1">
@@ -73,14 +74,14 @@
 </div>
 {% end %}
 
-{% set database_tools = [
+{% set lib_tools = [
     ("标签云", "/file/taglist"),
     ("时光轴", "/tools/timeline"),
     ("记事", "/tools/message"),
+    ("最近更新", "/file/recent_edit"),
 ] %}
 
 {% set dev_tools = [
-    ("Python文档", "/system/modules_info"),
     ("代码模板", "/tools/code_template"),
     ("浏览器信息", "/tools/browser_info"),
     ("文本对比", "/tools/js_diff"),
@@ -101,7 +102,7 @@
 ] %}
 
 {% set tools_list = [
-    ("知识库", database_tools),
+    ("知识库", lib_tools),
     ("开发工具", dev_tools),
     ("图片处理工具", img_tools),
     ("编解码工具", code_tools),
