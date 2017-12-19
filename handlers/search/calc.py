@@ -17,7 +17,7 @@ def safe_check(expression):
         return m.group()
     return None
 
-def do_calc(expression):
+def do_calc(ctx, expression):
     if expression.startswith("calc"):
         expression = expression[4:]
     expression = expression.strip()

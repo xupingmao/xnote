@@ -220,6 +220,7 @@ def init_table_user():
         manager.add_column("privileges", "text", "")
         manager.add_column("ctime",      "text", "")
         manager.add_column("mtime",      "text", "")
+        manager.add_column("token",      "text", "")
 
 def init_table_message():
     # 用来存储比较短的消息,消息和资料库的主要区别是消息存储较短的单一信息

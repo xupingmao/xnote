@@ -8,7 +8,7 @@ import xauth
 
 from xutils import SearchResult
 
-def search(name):
+def search(ctx, name):
     if not xauth.is_admin():
         return None
     results = []

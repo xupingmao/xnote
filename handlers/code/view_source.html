@@ -1,11 +1,10 @@
 {% extends base.html %}
 
-
 {% block head %}
-
 
 <link rel="stylesheet" href="/static/lib/codemirror/codemirror.min.css">
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/xq-light.css">
 <script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
@@ -86,6 +85,7 @@
             lineNumbers: true,
             mode: mode,
             theme:"monokai",
+            // theme:'xq-light',
             indentUnit:4,
         });
         editor.on("update", function (codeMirror, changeObj) {
@@ -93,6 +93,7 @@
             $("#editor").val(codeMirror.doc.getValue());
         })
         editor.setSize("auto", "auto");
+        window.codeMirror = editor;
     });
 </script>
 {% end %}

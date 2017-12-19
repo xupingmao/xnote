@@ -78,6 +78,9 @@ class handler:
             content = SCRIPT
         else:
             content = "/* empty */"
+
+        if not xauth.is_admin():
+            content = "/* empty */"
         web.header("Etag", time.time())
         return content
 

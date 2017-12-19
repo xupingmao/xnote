@@ -15,7 +15,7 @@ import xutils
 SearchResult = xutils.SearchResult
 url_pattern = re.compile(r"(http|https)://[^ ]+")
 
-def search(name):
+def search(ctx, name):
     # six.print_(xconfig)
     # 查找`handlers/tools/`目录下的工具
     tools_path = xconfig.TOOLS_DIR

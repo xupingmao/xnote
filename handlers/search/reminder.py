@@ -57,7 +57,7 @@ def parse_int(value):
     # value = ''.join(vlist)
     return int(value)
 
-def search(delay_mins_str, message):
+def search(ctx, delay_mins_str, message):
     if not xauth.is_admin():
         return []
 
@@ -77,7 +77,7 @@ def search(delay_mins_str, message):
 
 time_pattern = re.compile(r"([0-9])点(半?)")
 
-def by_time(period, time_str, message):
+def by_time(ctx, period, time_str, message):
     if not xauth.is_admin():
         return None
     print(period, time_str, message)
@@ -96,7 +96,7 @@ def by_time(period, time_str, message):
         xutils.say(out)
         return [SearchResult("提醒", "/system/crontab", out)]
 
-def by_date(date_str, message):
+def by_date(ctx, date_str, message):
     if not xauth.is_admin():
         return None
     print(date_str, message)

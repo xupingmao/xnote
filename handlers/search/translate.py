@@ -32,7 +32,7 @@ def wrap_results(dicts, origin_key):
         files.append(f)
     return files
 
-def search(word):
+def search(ctx, word):
     """英汉翻译"""
     word = word.lower()
     path = os.path.join(xconfig.DATA_PATH, "dictionary.db")
@@ -42,7 +42,7 @@ def search(word):
     dicts = xutils.db_execute(path, sql, (word,))
     return wrap_results(dicts, "en")
 
-def zh2en(word):
+def zh2en(ctx, word):
     word = word.lower()
     path = os.path.join(xconfig.DATA_PATH, "dictionary.db")
     if not os.path.exists(path):

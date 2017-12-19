@@ -125,6 +125,7 @@
 <div id="moreOpts" class="hide">
     <div>
         <input type="button" class="btn" value="打开文件管理器" id="openDirectory"/>
+        <!-- <input type="button" class="btn" value="打开终端" id="openTerminal">-->        
         <input type="button" class="link-btn" href="/code/analyze?path={{path}}&recursive=on" value="高级搜索"/>
         <input type="button" class="link-btn" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
         <input type="button" class="link-btn" href="/tools/zip?dirname={{path}}" value="压缩"/>
@@ -224,6 +225,9 @@
     $("#openDirectory").on("click", function () {
         $.post("/tools/open", {path: "{{path}}"});
     });
+    $("#openTerminal").on("click", function () {
+        $.post("/system/command", {path: "{{path}}"});
+    })
     $("#deleteFile").on("click", function () {
         var checked = $(".checkboxTd :checked");
         if (checked.length == 0) {

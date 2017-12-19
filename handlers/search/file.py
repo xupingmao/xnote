@@ -11,10 +11,8 @@ import xauth
 import xmanager
 import xconfig
 import xtables
-
 from util import textutil
-
-SearchResult = xutils.SearchResult
+from xutils import SearchResult
 config = xconfig
 
 def to_sqlite_obj(text):
@@ -27,90 +25,12 @@ def to_sqlite_obj(text):
     return "'" + text + "'"
     
 class FileDO(dict):
-    """This class behaves like both object and dict"""
-    def __init__(self, name):
-        self.id = None
-        self.related = ''
-        if isinstance(name, list) or isinstance(name, tuple):
-            self.name = name[0]
-            self.addRelatedNames(name)
-        else:
-            self.name = name
-            self.addRelatedName(name)
-        # self.path = getRandomPath()
-        self.size = 0
-        t = xutils.format_datetime()
-        self.mtime = t
-        self.atime = t
-        self.ctime = t
-        # self.status = 0
-        self.visited_cnt = 0
-
-    def __getattr__(self, key): 
-        try:
-            return self[key]
-        except KeyError as k:
-            # raise AttributeError(k)
-            return None
     
-    def __setattr__(self, key, value): 
-        self[key] = value
-
-    def __delattr__(self, key):
-        try:
-            del self[key]
-        except KeyError as k:
-            raise AttributeError(k)
-    
-    def addRelatedName(self, name):
-        name = name.upper()
-        if self.related == '':
-            self.related = ',%s,' % name
-            return
-        if name == '':
-            return
-        tag = ',%s,' % name
-        if tag in self.related:
-            return
-        self.related += name + ','
-        
-    def delRelatedName(self, name):
-        name = name.upper()
-        if name == self.name.upper():
-            raise FileRelationOptionError("can not remove itself from related!!!")
-        names = self.related.split(',')
-        names.remove(name)
-        self.related = ','.join(names)
-        
-    def addRelatedNames(self, names):
-        for name in names:
-            self.addRelatedName(name)
-        
-    def save(self):
-        if self.id is None:
-            FileService.getService().insert(self)
-        else:
-            FileService.getService().update(self)
-            
-    def fixRelated(self):
-        ''' this is a deprecated function '''
-        related = self.related
-        self.related = related.upper()
-        name = self.name.upper()
-        if name not in self.related:
-            self.addRelatedName(name)
-        if self.related[0] != ',':
-            self.related = ',' + self.related
-        if self.related[-1] != ',':
-            self.related += ','
-        if related != self.related:
-            self.save()
-            
     @staticmethod
     def fromDict(dict, option=None):
         """build fileDO from dict"""
         name = dict['name']
-        file = FileDO(name)
+        file = SearchResult()
         for key in dict:
             file[key] = dict[key]
             # setattr(file, key, dict[key])
@@ -119,23 +39,8 @@ class FileDO(dict):
         if option:
             file.option = option
         file.url = "/file/view?id={}".format(dict["id"])
+        file.result_type = "file"
         return file
-        
-    def setBase(self, base):
-        self.base = base
-        
-    def get_content(self):
-        if self.content is None:
-            self.content = ""
-        if "CODE-" in self.related and not self.content.startswith("```"):
-            m = re.match(r".*CODE-([A-Z]*)", self.related)
-            codename = ""
-            if m:
-                codename = m.groups()[0]
-            return "```%s\n%s\n```" % (codename, self.content)
-        return self.content
-
-
 
 def file_dict(id, name, related):
     return dict(id = id, name = name, related = related)
@@ -196,6 +101,7 @@ def search_name(words, groups=None):
     if groups and groups != "admin":
         sql += " AND (is_public = 1 OR creator = $creator)"
     sql += " ORDER BY mtime DESC LIMIT 1000";
+    print(sql)
     vars["creator"] = groups
     all = xtables.get_file_table().query(sql, vars=vars)
     return [FileDO.fromDict(item) for item in all]
@@ -211,7 +117,7 @@ def full_search(words, groups=None):
         content_like_list.append('content like %s ' % to_sqlite_obj('%' + word.upper() + '%'))
     # for word in words:
     #     name_like_list.append("related like %s " % repr("%" + word.upper() + '%'))
-    sql = "SELECT id, name, ctime, mtime, type, creator FROM file WHERE (%s) AND is_deleted != 1" \
+    sql = "SELECT id, name, ctime, mtime, type, creator FROM file WHERE (%s) AND is_deleted == 0" \
         % " AND ".join(content_like_list)
 
     if groups and groups != "admin":
@@ -222,11 +128,12 @@ def full_search(words, groups=None):
     all = xtables.get_file_table().query(sql, vars=vars)
     return [FileDO.fromDict(item) for item in all]
 
-def search(expression):
+def search(ctx, expression):
+    if ctx.search_message and not ctx.search_file_full:
+        return
     words = textutil.split_words(expression)
     files = []
-    search_content = xutils.get_argument("content")
-    if search_content == "on":
+    if ctx.search_file_full:
         content_results = full_search(words, xauth.get_current_name())
     else:
         content_results = []

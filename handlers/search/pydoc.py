@@ -11,7 +11,7 @@ import xauth
 
 SearchResult = xutils.SearchResult
 
-def search(name):
+def search(ctx, name):
     """搜索Python文档"""
     if not xauth.is_admin():
         return

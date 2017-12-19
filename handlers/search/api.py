@@ -26,7 +26,7 @@ def init_name_dict():
 
 init_name_dict()
 
-def search(name):
+def search(ctx, name):
     global _api_name_dict
     results = []
     for task_name in _api_name_dict:

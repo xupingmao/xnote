@@ -133,14 +133,30 @@ class MemStore(web.session.DiskStore):
         values = list(map(map_func , files))
         self[store_key] = values 
 
+class SearchContext:
+
+    def __init__(self):
+        self.search_message = False
+        self.search_file = True
+        self.search_file_full = False
+        self.user_name = ''
+
 class handler:
 
     store = MemStore()
     def full_search(self, key, offset, limit):
         global _rules
-        words = textutil.split_words(key)
-        files = []
+        content = xutils.get_argument("content")
+        message = xutils.get_argument("message")
+        words   = textutil.split_words(key)
+        files   = []
+
         start_time = time.time()
+        ctx = SearchContext()
+        ctx.search_message = (message == "on")
+        ctx.search_file_full = (content == "on")
+        ctx.user_name = xauth.get_current_name()
+
         for rule in _rules:
             pattern = rule.pattern
             func = rule.func
@@ -149,7 +165,7 @@ class handler:
             if m:
                 try:
                     start_time0 = time.time()
-                    results = func(*m.groups())
+                    results = func(ctx, *m.groups())
                     cost_time0 = time.time() - start_time0
                     print("  >>> %s - %d ms" % (func.modfunc, cost_time0*1000))
                     if results is not None:
@@ -172,15 +188,18 @@ class handler:
         """search files by name and content"""
         if not rules_loaded:
             load_rules()
-        key  = xutils.get_argument("key", "")
-        title = xutils.get_argument("title", "")
-        content = xutils.get_argument("content", "")
-        page = xutils.get_argument("page", 1, type = int)
+        key       = xutils.get_argument("key", "")
+        title     = xutils.get_argument("title", "")
+        content   = xutils.get_argument("content", "")
+        message   = xutils.get_argument("message", "")
+        page      = xutils.get_argument("page", 1, type = int)
         user_name = xauth.get_current_role()
-        xutils.get_argument("page_url", "/search/search?key=%s&content=%s&page=" % (key, content))
+
+        xutils.get_argument("page_url", "/search/search?key=%s&content=%s&message=%s&page="\
+            % (key, content, message))
         pagesize = config.PAGE_SIZE
-        offset = (page-1) * pagesize
-        limit  = pagesize
+        offset   = (page-1) * pagesize
+        limit    = pagesize
 
         if key == "" or key == None:
             return xtemplate.render("search_result.html", files=[], count=0)
@@ -219,7 +238,8 @@ def load_rules():
     add_rule(r"静音(.*)",               "mute.search")
     add_rule(r"mute(.*)",               "mute.search")
     add_rule(r"取消静音",               "mute.cancel")
-    add_rule(r"(.*)",                   "file.search")
+    add_rule(r"(.*)", "message.search")
+    add_rule(r"(.*)", "file.search")
     rules_loaded = True
 
 xurls = (

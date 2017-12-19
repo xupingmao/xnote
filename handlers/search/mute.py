@@ -9,7 +9,7 @@ import time
 import xconfig
 import xutils
 
-def search(mute_last):
+def search(ctx, mute_last):
     if mute_last == "":
         last = 3 * 60
     elif mute_last.endswith("小时"):
@@ -23,7 +23,7 @@ def search(mute_last):
     result.raw  = "静音到 %s" % xutils.format_time(xconfig.MUTE_END_TIME)
     return [result]
 
-def cancel():
+def cancel(ctx, *args):
     xconfig.MUTE_END_TIME = None
     result = xutils.SearchResult()
     result.name = "命令 - 取消静音"
