@@ -128,7 +128,6 @@ class UpdateHandler(BaseHandler):
         version   = xutils.get_argument("version", type=int)
         file_type = xutils.get_argument("type")
         name      = xutils.get_argument("name", "")
-        upload_file  = xutils.get_argument("file", {})
 
         file = dao.get_by_id(id)
         assert file is not None
@@ -145,10 +144,7 @@ class UpdateHandler(BaseHandler):
         # 不再处理文件，由JS提交
         rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
-            if upload_file != None and upload_file.filename != "":
-                raise web.seeother("/file/view?id=" + str(id))
-            else:
-                raise web.seeother("/file/view?id=" + str(id))
+            raise web.seeother("/file/view?id=" + str(id))
         else:
             # 传递旧的content
             cur_version = file.version

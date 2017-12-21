@@ -58,11 +58,13 @@ def do_class(functions, name, clz):
 class handler(object):
 
     def GET(self):
-        args = web.input()
-        name = args.name
+        name = xutils.get_argument("name")
+        force = xutils.get_argument("force")
+
+        if force == "true":
+            __import__(name)
 
         doc_info = None
         if name is not None:
             doc_info = DocInfo(name)
-
         return xtemplate.render("system/document.html", doc_info = doc_info)

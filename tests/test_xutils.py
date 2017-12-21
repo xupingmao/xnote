@@ -1,6 +1,6 @@
 # encoding=utf-8
-
 import sys
+import os
 sys.path.insert(1, "lib")
 
 import unittest
@@ -86,6 +86,12 @@ class TestMain(unittest.TestCase):
             soup = xutils.bs4.BeautifulSoup(html, "html.parser")
             text = soup.get_text(separator=" ")
             self.assertEqual("hello world", text)
+
+
+    def test_search_path(self):
+        print(os.getcwd())
+        result = xutils.search_path("./", "*test*")
+        self.assertTrue(len(result) > 0)
 
 
         

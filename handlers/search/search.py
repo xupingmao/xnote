@@ -186,8 +186,7 @@ class handler:
     @xauth.login_required()
     def GET(self):
         """search files by name and content"""
-        if not rules_loaded:
-            load_rules()
+        load_rules()
         key       = xutils.get_argument("key", "")
         title     = xutils.get_argument("title", "")
         content   = xutils.get_argument("content", "")
@@ -203,16 +202,7 @@ class handler:
 
         if key == "" or key == None:
             return xtemplate.render("search_result.html", files=[], count=0)
-        # app 为None，不用全局使用session
-        store = self.store
-        store_key = "s_" + user_name + "-" + key
-        # print("STORE KEY: ", store_key)
-        if store.has_key(store_key):
-            # print("HIT %s" % store_key)
-            files = store[store_key]
-        else:
-            files = self.full_search(key, offset, pagesize)
-            # store[store_key] = files
+        files = self.full_search(key, offset, pagesize)
         # TODO 待优化
         count = len(files)
         files = files[offset:offset+limit]
@@ -225,6 +215,8 @@ class handler:
 rules_loaded = False
 def load_rules():
     global rules_loaded
+    if rules_loaded:
+        return
     add_rule(r"(.*[0-9]+.*)",           "calc.do_calc")
     add_rule(r"([a-zA-Z0-9\.]*)",       "pydoc.search")
     add_rule(r"([a-zA-Z\-]*)",          "translate.search")

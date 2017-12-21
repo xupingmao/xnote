@@ -295,7 +295,7 @@ def touch(path):
         with open(path, "wb") as fp:
             pass
 
-def search_path0(path, key, limit=200):
+def _search_path0(path, key, limit=200):
     result_dirs = []
     result_files = []
     key = key.lower()
@@ -323,8 +323,8 @@ def search_path(path, key):
     result = []
     quoted_key = quote_unicode(key)
     if key != quoted_key:
-        result = search_path0(path, quoted_key)
-    return result + search_path0(path, key)
+        result = _search_path0(path, quoted_key)
+    return result + _search_path0(path, key)
 
 def get_upload_file_path(filename, data_dir="/files", replace_exists = False, prefix=""):
     """生成上传文件名"""

@@ -214,4 +214,12 @@ class TestMain(unittest.TestCase):
         json_request("/file/tag/0")
         json_request("/file/tag/update", method="POST", data=dict(file_id=0, tags=""))
 
+    def test_document(self):
+        self.check_200("/system/document?name=os")
+        self.check_200("/system/document?name=xutils")
 
+    def test_view_source(self):
+        self.check_200("/code/view_source?path=./README.md")
+        
+    def test_markdown_preview(self):
+        self.check_200("/code/preview?path=./README.md")

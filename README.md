@@ -3,13 +3,13 @@
 [![Build Status](https://travis-ci.org/xupingmao/xnote.svg?branch=master)](https://travis-ci.org/xupingmao/xnote)
 [![Coverage Status](https://coveralls.io/repos/github/xupingmao/xnote/badge.svg?branch=master)](https://coveralls.io/github/xupingmao/xnote?branch=master)
 
-xnote是一个基于Python的PIM(Personal Information Management)系统，提供内容管理系统以及常用的工具集成环境
+xnote是一个基于Python的个人信息管理系统(Personal Information Management)，提供知识库管理以及自动化工具。
 
 作为一名程序猿，对我来说，有两件事情让我觉得非常重要，一是知识经验的积累，二是集成的工具，前者帮我出谋划策，而后者则能为我攻城略地。现在前者已经得到了很好的改善，有很多好用的工具可以用来记笔记，管理文档。对于后者，我们确实有很多很好的工具，但是也往往不能很好的满足一些特殊的开发需求，所以很多程序员都是使用脚本语言自己临时写小工具。除此之外，管理大量的软件也是个麻烦事，软件之间互不联通，执行一些批量操作人工成本不小。所以我准备做一款工具来满足自己的需求，它应该有如下特征
 
-- 知识库管理，记录工作和生活中的点滴
-- 集成开发工具，并且很容易扩展和查找，支持动态加载卸载(开发工具集成或者说插件)
-- 智能搜索，部分功能直接可以通过搜索框使用(优化输入输出)
+- 知识库管理，维护文章、日志、个人词库以及文件数据
+- 集成开发工具，并且很容易扩展和查找，支持动态加载卸载(插件)
+- 智能搜索，所有数据都可以快速检索，支持简单的语义指令
 - BS架构、跨平台，既可以在云端使用(使用webapp的模式)，也能运行在本地作为系统增强软件
  
 笔记的目的是管理知识，Xnote最终目标也是管理个人生活工作中的数据和知识.
