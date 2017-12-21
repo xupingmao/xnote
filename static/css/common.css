@@ -7,6 +7,11 @@ body {
     padding: 0;
 }
 
+pre {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
 .marked-pre {
     background: #eee;
     padding: 0.5em;

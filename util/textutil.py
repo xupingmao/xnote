@@ -3,8 +3,11 @@
 __doc__ = """Methods for text operation"""
 
 import re
+import random
 
 """Methods to check the text"""
+
+ALPHA_NUM = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 def contains(self, words):
     """
@@ -232,5 +235,14 @@ def edit_distance(a,b,replace_step=1):
     cache = [[-1 for i in range(len(b)+1)] for i in range(len(a)+1)]
     return edit_distance0(a,b,len(a),len(b),cache,replace_step)
 
+
+def random_string(length, chars=ALPHA_NUM):
+    """生成随机字符串，默认是字母表+数字"""
+    randint = random.randint
+    max_int = len(chars)-1
+    value = ''
+    for i in range(length):
+        value += chars[randint(0, max_int)]
+    return value
 
 

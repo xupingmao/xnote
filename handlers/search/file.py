@@ -101,7 +101,6 @@ def search_name(words, groups=None):
     if groups and groups != "admin":
         sql += " AND (is_public = 1 OR creator = $creator)"
     sql += " ORDER BY mtime DESC LIMIT 1000";
-    print(sql)
     vars["creator"] = groups
     all = xtables.get_file_table().query(sql, vars=vars)
     return [FileDO.fromDict(item) for item in all]

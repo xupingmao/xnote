@@ -310,6 +310,7 @@ class DBWrapper:
         if _db is None:
             if sqlite3 is not None:
                 _db = db.SqliteDB(db=dbpath)
+                _db.query("PRAGMA mmap_size = %s" % xconfig.SQLITE_MMAP_SIZE)
             else:
                 _db = FakeDB()
             DBWrapper._pool[dbpath] = _db
