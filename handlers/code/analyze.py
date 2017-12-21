@@ -77,8 +77,9 @@ def to_list(key):
 
 def get_pretty_around_text(lines, current, limit):
     around_lines = []
-    # start = max(current - limit, 0)
-    start = max(current, 0)
+    limit = int(limit/2)
+    start = max(current - limit, 0)
+    # start = max(current, 0)
     stop  = min(current + limit, len(lines))
     for i in range(start, stop):
         if i == current:

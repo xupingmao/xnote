@@ -46,8 +46,6 @@ OPEN_IN_BROWSER = False
 # 资料相关
 # 分页数量
 PAGE_SIZE = 20
-SQLITE_MMAP_SIZE = 20 * 1024 ** 2
-
 IP_BLACK_LIST = ["192.168.56.1"] # this is vbox ip
 
 PARTNER_HOST_LIST = [
