@@ -47,7 +47,7 @@ def get_file_db():
 
 @xutils.cache(key='file_name.cache', expire=600)
 def get_cached_files():
-    return list(xtables.get_file_table().query('SELECT name, id, ctime, mtime, type, creator FROM file WHERE is_deleted == 0'))
+    return list(xtables.get_file_table().query('SELECT name, id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted == 0'))
 
 def search_in_cache(words, user):
     hits = []
@@ -59,7 +59,7 @@ def search_in_cache(words, user):
         if text_contains(item.name, words):
             item = file_wrapper(item)
             hits.append(item)
-    return hits
+    return sorted(hits, key=lambda x: x.mtime, reverse=True)
 
 def search_name(words, groups=None):
     if not isinstance(words, list):
