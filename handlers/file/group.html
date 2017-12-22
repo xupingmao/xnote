@@ -23,7 +23,7 @@
                     <img src="/static/image/folder.gif"/>
                     <a class="group-link" href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
                 {% else %}
-                    <a href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
+                    <a class="note-link" href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
                 {% end %}
 
                 <a class="item-option" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>

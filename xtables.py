@@ -305,7 +305,7 @@ class DBWrapper:
     def __init__(self, dbpath, tablename):
         self.tablename = tablename
         self.dbpath = dbpath
-        # SqliteDB 使用了threadlocal来实现，是线程安全的，使用全局单实例即可
+        # SqliteDB 内部使用了threadlocal来实现，是线程安全的，使用全局单实例即可
         _db = DBWrapper._pool.get(dbpath)
         if _db is None:
             if sqlite3 is not None:

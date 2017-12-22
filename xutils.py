@@ -670,13 +670,16 @@ def get_argument(key, default_value=None, type = None, strip=False):
 ##   Cache
 #################################################################
 
-def timeit(func):
-    def deco(*args):
-        t1 = time.time()
-        ret = func(*args)
-        t2 = time.time()
-        print("cost time", t2-t1)
-        return ret
+def timeit(repeat=1):
+    def deco(func):
+        def handle(*args):
+            t1 = time.time()
+            for i in range(repeat):
+                ret = func(*args)
+            t2 = time.time()
+            print("cost time", t2-t1)
+            return ret
+        return handle
     return deco
 
 class CacheObj:

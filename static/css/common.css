@@ -622,3 +622,13 @@ li.menu-item:hover {
 .group-link {
     color: blue;
 }
+
+.note-link {
+    color: blue;
+}
+
+.notice {
+    background-color: #cf9;
+    padding: 5px;
+    box-sizing: border-box;
+}
