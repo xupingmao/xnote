@@ -12,7 +12,7 @@ import xmanager
 import xconfig
 import xtables
 from util import textutil
-from xutils import SearchResult
+from xutils import SearchResult, text_contains
 config = xconfig
 
 def to_sqlite_obj(text):
@@ -24,23 +24,20 @@ def to_sqlite_obj(text):
     text = text.replace("'", "''")
     return "'" + text + "'"
     
-class FileDO(dict):
-    
-    @staticmethod
-    def fromDict(dict, option=None):
-        """build fileDO from dict"""
-        name = dict['name']
-        file = SearchResult()
-        for key in dict:
-            file[key] = dict[key]
-            # setattr(file, key, dict[key])
-        if hasattr(file, "content") and file.content is None:
-            file.content = ""
-        if option:
-            file.option = option
-        file.url = "/file/view?id={}".format(dict["id"])
-        file.result_type = "file"
-        return file
+def file_wrapper(dict, option=None):
+    """build fileDO from dict"""
+    name = dict['name']
+    file = SearchResult()
+    for key in dict:
+        file[key] = dict[key]
+        # setattr(file, key, dict[key])
+    if hasattr(file, "content") and file.content is None:
+        file.content = ""
+    if option:
+        file.option = option
+    file.url = "/file/view?id={}".format(dict["id"])
+    file.result_type = "file"
+    return file
 
 def file_dict(id, name, related):
     return dict(id = id, name = name, related = related)
@@ -48,51 +45,27 @@ def file_dict(id, name, related):
 def get_file_db():
     return db.SqliteDB(db=config.DB_PATH)
 
-class FileFilter:
+@xutils.cache(key='file_name.cache', expire=600)
+def get_cached_files():
+    return list(xtables.get_file_table().query('SELECT name, id, ctime, mtime, type, creator FROM file WHERE is_deleted == 0'))
 
-    def __init__(self, file_list = None):
-        # self.name_list = name_list
-        # self.related_list = related_list
-        self._files = {}
-        if file_list:
-            self._sync_list(file_list)
-
-    def init(self, file_list):
-        self._sync_list(file_list)
-
-    def _sync_list(self, file_list):
-        for file in file_list:
-            self._files[file["id"]] = file
-
-    def _sync(self, id, name, related):
-        self._files[id] = [name, related]
-
-    def sync(self, id, file):
-        self._files[id] = file
-
-    def search(self, words, hide=True):
-        """search file with words"""
-        result = []
-        for id in self._files:
-            file = self._files[id]
-            related = file.get("related")
-            if hide and textutil.contains(related, "HIDE"):
-                continue
-            if textutil.contains(related, words):
-                result.append(copy.copy(file))
-        return result
-
-    def filter(self, fnc):
-        result = []
-        for id in self._files:
-            file = self._files[id]
-            if fnc(file):
-                result.append(copy.copy(file))
-        return result
+def search_in_cache(words, user):
+    hits = []
+    for item in get_cached_files():
+        if item.name is None:
+            continue
+        if user != item.creator and user != 'admin' and item.is_public == 0:
+            continue
+        if text_contains(item.name, words):
+            item = file_wrapper(item)
+            hits.append(item)
+    return hits
 
 def search_name(words, groups=None):
     if not isinstance(words, list):
         words = [words]
+    if xconfig.USE_CACHE_SEARCH:
+        return search_in_cache(words, groups)
     like_list = []
     vars = dict()
     for word in words:
@@ -103,7 +76,7 @@ def search_name(words, groups=None):
     sql += " ORDER BY mtime DESC LIMIT 1000";
     vars["creator"] = groups
     all = xtables.get_file_table().query(sql, vars=vars)
-    return [FileDO.fromDict(item) for item in all]
+    return [file_wrapper(item) for item in all]
 
 def full_search(words, groups=None):
     """ full search the files """
@@ -125,7 +98,7 @@ def full_search(words, groups=None):
 
     vars["creator"] = groups
     all = xtables.get_file_table().query(sql, vars=vars)
-    return [FileDO.fromDict(item) for item in all]
+    return [file_wrapper(item) for item in all]
 
 def search(ctx, expression):
     if ctx.search_message and not ctx.search_file_full:

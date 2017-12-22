@@ -9,24 +9,24 @@ import random
 
 ALPHA_NUM = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-def contains(self, words):
+def text_contains(text, words):
     """
-    >>> contains("abc is good", "abc")
+    >>> text_contains("abc is good", "abc")
     True
-    >>> contains("you are right", "rig")
+    >>> text_contains("you are right", "rig")
     True
-    >>> contains("hello,world,yep", ["hello", "yep"])
+    >>> text_contains("hello,world,yep", ["hello", "yep"])
     True
     """
     if isinstance(words, str):
-        return words in self
+        return words in text
     elif isinstance(words, list):
         for word in words:
-            if word not in self:
+            if word not in text:
                 return False
         return True
     else:
-        raise Exception("not matched type")
+        raise Exception("unsupported type")
 
 def count_alpha(text):
     count = 0

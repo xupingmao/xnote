@@ -42,6 +42,8 @@ PROFILE_PATH_SET = set(["/file/view"])
 MUTE_END_TIME = None
 # 打开浏览器
 OPEN_IN_BROWSER = False
+# 启用数据库的缓存搜索
+USE_CACHE_SEARCH = False
 
 # 资料相关
 # 分页数量

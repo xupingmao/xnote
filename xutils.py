@@ -6,6 +6,7 @@ xutils是暴露出去的统一接口
 如果是一个人开发，可以直接写在这个文件中,
 如果是团队开发，依然建议通过xutils暴露统一接口，其他的utils由xutils导入
 """
+from __future__ import print_function
 import sys
 import os
 import traceback
@@ -74,6 +75,7 @@ else:
 from util.dateutil import *
 from util.netutil  import *
 from util.fsutil   import *
+from util.textutil import text_contains
 
 if PY2:
     def getstatusoutput(cmd):
@@ -511,8 +513,9 @@ def log(fmt, *argv):
     f_modname = f_back.f_globals.get("__name__")
     f_name = f_code.co_name
     f_lineno = f_back.f_lineno
+    message = "%s %s.%s:%s %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), f_modname, f_name, f_lineno, message)
     with open(xconfig.LOG_PATH, "a") as fp:
-        print("%s %s.%s:%s %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), f_modname, f_name, f_lineno, message), file=fp)
+        print(message, file=fp)
 
 def trace(fmt, *argv):
     print("   ", fmt.format(*argv))

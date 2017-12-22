@@ -51,6 +51,7 @@ def handle_args():
     parser.add_argument("--webbrowser", default="no")
     parser.add_argument("--debug", default="yes")
     parser.add_argument("--minthreads", default="10")
+    parser.add_argument("--useCacheSearch", default="no")
 
     args = parser.parse_args(sys.argv[1:])
 
@@ -72,6 +73,8 @@ def handle_args():
         xconfig.DEBUG = True
     else:
         web.config.debug = False
+    if args.useCacheSearch == "yes":
+        xconfig.USE_CACHE_SEARCH = True
 
     xconfig.minthreads = int(args.minthreads)
     web.config.minthreads = xconfig.minthreads
