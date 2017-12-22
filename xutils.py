@@ -511,7 +511,8 @@ def log(fmt, *argv):
     f_modname = f_back.f_globals.get("__name__")
     f_name = f_code.co_name
     f_lineno = f_back.f_lineno
-    print("%s %s.%s:%s %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), f_modname, f_name, f_lineno, message))
+    with open(xconfig.LOG_PATH, "a") as fp:
+        print("%s %s.%s:%s %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), f_modname, f_name, f_lineno, message), file=fp)
 
 def trace(fmt, *argv):
     print("   ", fmt.format(*argv))
@@ -667,10 +668,11 @@ def get_argument(key, default_value=None, type = None, strip=False):
 
 
 #################################################################
-##   Cache
+##   各种装饰器
 #################################################################
 
 def timeit(repeat=1):
+    """简单的计时装饰器，可以指定执行次数"""
     def deco(func):
         def handle(*args):
             t1 = time.time()
@@ -682,30 +684,62 @@ def timeit(repeat=1):
         return handle
     return deco
 
+
+_cache_dict = dict()
+
 class CacheObj:
-    def __init__(self, value, expire):
+    _queue = Queue()
+
+    def __init__(self, key, value, expire):
+        global _cache_head
+        global _cache_tail
+        global _cache_dict
+        self.key = key
         self.value = value
         self.expire = expire
         self.expire_time = time.time() + expire
+        if expire < 0:
+            self.expire_time = -1
+
+        _cache_dict[key] = self
+        self._queue.put(self)
+        one = self._queue.get(block=False)
+        if one is not None:
+            if one.is_alive():
+                self._queue.put(one)
+            else:
+                one.clear()
 
     def is_alive(self):
+        if self.expire_time < 0:
+            return True
         return time.time() < self.expire_time
 
-_cache = dict()
-def cache(prefix, expire=600):
-    """缓存的装饰器，尚未完成"""
+    def clear(self):
+        # print("cache %s expired" % self.key)
+        _cache_dict.pop(self.key, None)
+
+def cache(key=None, prefix=None, expire=600):
+    """缓存的装饰器，会自动清理失效的缓存"""
     def deco(func):
-        def inner_deco(*args):
-            key = "%s-%s" % (prefix, args)
-            obj = _cache.get(key)
+        def handle(*args):
+            if key is not None:
+                cache_key = key
+            elif prefix is None:
+                mod = inspect.getmodule(func)
+                funcname = func.__name__
+                cache_key = "%s.%s-%s" % (mod.__name__, funcname, args)
+            else:
+                cache_key = "%s-%s" % (prefix, args)
+            obj = _cache_dict.get(cache_key)
             if obj != None and obj.is_alive():
+                # print("hit cache %s" % cache_key)
                 return obj.value
             if obj != None and not obj.is_alive():
-                del _cache[key]
-            # TODO 处理一次缓存后没被访问的对象，使用一个队列
+                obj.clear()
             value = func(*args)
-            _cache[key] = CacheObj(value, expire)
+            CacheObj(cache_key, value, expire)
             return value
-        return inner_deco
+        return handle
     return deco
 

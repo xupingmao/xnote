@@ -78,6 +78,13 @@ class TagNameHandler:
         return xtemplate.render("file/tagname.html", tagname=tagname, files=files, count=count, page=page)
         # return dict(code="", message="", data=list(tag_list))
 
+@xutils.cache(key="tag.get_taglist", expire=60)
+def get_taglist(db, user_name):
+    groups = ["*", user_name]
+    sql = "SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag GROUP BY LOWER(name) ORDER BY amount DESC, name ASC";
+    tag_list = db.query(sql, vars = dict(groups = groups))
+    return list(tag_list)
+
 class TagListHandler:
 
     @xauth.login_required()
@@ -88,11 +95,8 @@ class TagListHandler:
         #     sql = "SELECT name, COUNT(*) AS amount FROM file_tag GROUP BY name ORDER BY amount DESC, name ASC";
         # else:
         #     sql = "SELECT name, COUNT(*) AS amount FROM file_tag WHERE groups in $groups GROUP BY name ORDER BY amount DESC, name ASC";
-        groups = ["*", user_name]
-        sql = "SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag GROUP BY LOWER(name) ORDER BY amount DESC, name ASC";
-
-        tag_list = db.query(sql, vars = dict(groups = groups))
-        return xtemplate.render("file/taglist.html", tag_list = list(tag_list))
+        tag_list = get_taglist(db, user_name)
+        return xtemplate.render("file/taglist.html", tag_list = tag_list)
         # return dict(code="", message="", data=tag_list)
 
 xurls = (r"/file/tag/(\d+)", TagHandler,

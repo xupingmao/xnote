@@ -158,7 +158,7 @@
                 <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>
             {% end %}
 
-            {% if item.ext == ".txt" %}
+            {% if item.ext in (".txt", ".log") %}
                 <a class="item-option" href="/tools/bookreader?path={{item.path}}&from=/fs/{{path}}">阅读</a>
             {% end %}
 

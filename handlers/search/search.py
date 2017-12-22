@@ -167,13 +167,13 @@ class handler:
                     start_time0 = time.time()
                     results = func(ctx, *m.groups())
                     cost_time0 = time.time() - start_time0
-                    print("  >>> %s - %d ms" % (func.modfunc, cost_time0*1000))
+                    xutils.log("  >>> %s - %d ms" % (func.modfunc, cost_time0*1000))
                     if results is not None:
                         files += results
                 except Exception as e:
                     xutils.print_stacktrace()
         cost_time = (time.time() - start_time) * 1000
-        print("  === total - %d ms ===" % cost_time)
+        xutils.log("  === total - %d ms ===" % cost_time)
         return files
 
     def json_request(self):

@@ -80,6 +80,7 @@ def init(path):
     global CODE_ZIP
     global DATA_ZIP
     global TRASH_DIR
+    global LOG_PATH
 
     makedirs(path)
     DATA_PATH = path
@@ -95,6 +96,7 @@ def init(path):
     CODE_ZIP     = os.path.join(DATA_DIR, "code.zip")
     DATA_ZIP     = os.path.join(DATA_DIR, "data.zip")
     TRASH_DIR  = os.path.join(DATA_DIR, "trash")
+    LOG_PATH   = os.path.join(DATA_DIR, "xnote.log")
 
     makedirs(TMP_DIR)
     makedirs(SCRIPTS_DIR)

@@ -6,6 +6,12 @@ sys.path.insert(1, "lib")
 import unittest
 import xutils
 
+@xutils.cache(prefix='fib')
+def fib(n):
+    if n == 1 or n == 2:
+        return 1
+    return fib(n-1) + fib(n-2)
+
 class TestMain(unittest.TestCase):
     def test_quote_unicode(self):
         result = xutils.quote_unicode("http://测试")
@@ -92,6 +98,9 @@ class TestMain(unittest.TestCase):
         print(os.getcwd())
         result = xutils.search_path("./", "*test*")
         self.assertTrue(len(result) > 0)
+
+    def test_cache(self):
+        fib(35)
 
 
         
