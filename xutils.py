@@ -514,8 +514,9 @@ def log(fmt, *argv):
     f_name = f_code.co_name
     f_lineno = f_back.f_lineno
     message = "%s %s.%s:%s %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), f_modname, f_name, f_lineno, message)
-    with open(xconfig.LOG_PATH, "a", encoding="utf-8") as fp:
+    with open(xconfig.LOG_PATH, "a") as fp:
         print(message, file=fp)
+
 
 def trace(fmt, *argv):
     print("   ", fmt.format(*argv))
