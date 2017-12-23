@@ -45,18 +45,21 @@ def file_dict(id, name, related):
 def get_file_db():
     return db.SqliteDB(db=config.DB_PATH)
 
-@xutils.cache(key='file_name.cache', expire=600)
+@xutils.cache(key='file_name.cache', expire=3600)
 def get_cached_files():
-    return list(xtables.get_file_table().query('SELECT name, id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted == 0'))
+    return list(xtables.get_file_table().query('SELECT name, UPPER(name) as name_upper, id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted == 0'))
 
 def search_in_cache(words, user):
+    def fmap(word):
+        return word.upper()
+    words = list(map(fmap, words))
     hits = []
     for item in get_cached_files():
         if item.name is None:
             continue
         if user != item.creator and user != 'admin' and item.is_public == 0:
             continue
-        if text_contains(item.name, words):
+        if text_contains(item.name_upper, words):
             item = file_wrapper(item)
             hits.append(item)
     return sorted(hits, key=lambda x: x.mtime, reverse=True)

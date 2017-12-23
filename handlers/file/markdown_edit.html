@@ -112,7 +112,7 @@
             <div class="col-md-12 toolbox">
                 <input type="submit" class="toolbox-btn btn-primary" value="更新"/>
                 <input type="button" id="insertCode" class="toolbox-btn" value="代码"/> 
-                <input type="button" id="insertStrong" class="toolbox-btn" value="强调"/>
+                <input type="button" id="insertStrong" class="toolbox-btn" value="加粗"/>
                 <input type="file" id="file" name="file" class="hide" />
                 <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" />
                 <input type="button" class="toolbox-btn btn-primary" onclick="togglePreview(this)" value="关闭预览"/>
@@ -373,7 +373,7 @@
             
             var selection = codeMirror.getSelection();
             if (selection != "" && selection != null) {
-                codeMirror.replaceSelection("```\n" + selection + "\n```", "around");
+                codeMirror.replaceSelection("```" + selection + "```", "around");
             } else {
                 codeInsert("```\n[代码]\n```");
             }
