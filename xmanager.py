@@ -1,6 +1,7 @@
 # encoding:utf-8
 """Xnote 模块管理器
  - 加载并注册模块
+ - 执行cron定时任务
 """
 from __future__ import print_function
 import os
@@ -13,24 +14,14 @@ import json
 import profile
 import inspect
 import six
-
-from threading import Thread, Timer, current_thread
-
-try:
-    from queue import Queue
-except ImportError:
-    from Queue import Queue
-
-
 import web
 import xconfig
 import xtemplate
 import xtables
 import xutils
 import xauth
-
-from util import textutil
-from xutils import Storage
+from threading import Thread, Timer, current_thread
+from xutils import Storage, Queue
 
 config = xconfig
 
@@ -72,8 +63,6 @@ class MyStdout:
 
 def wrapped_handler(handler_clz):
     # Py2 自定义类不是type类型
-    # if not isinstance(handler_clz, type):
-    #     return handler_clz
     if not inspect.isclass(handler_clz):
         return handler_clz
 
@@ -125,6 +114,7 @@ def wrapped_handler(handler_clz):
     return WrappedHandler
 
 def notfound():
+    """404请求处理器"""
     import xtemplate
     raise web.notfound(xtemplate.render("notfound.html"))
 
@@ -150,7 +140,7 @@ def log(msg):
 class ModelManager:
     """模块管理器
     
-    启动时自动加载`handlers`目录下的处理器和定时任务
+    启动时自动加载`handlers`目录下的处理器以及定时任务
     """
 
     def __init__(self, app, vars, mapping = None, last_mapping=None):
@@ -177,8 +167,6 @@ class ModelManager:
         self.report_loading = False
         self.report_unload = True
         self.task_manager = TaskManager(app)
-        self.blacklist = ("handlers.experiment")
-
         # stdout装饰器，方便读取print内容
         if not isinstance(sys.stdout, MyStdout):
             sys.stdout = MyStdout(sys.stdout)
@@ -243,8 +231,6 @@ class ModelManager:
                         if self.report_unload:
                             log("del %s" % modname)
                         del sys.modules[modname] # reload module
-                    if modname.startswith(self.blacklist):
-                        continue
                     # Py3: __import__(name, globals=None, locals=None, fromlist=(), level=0)
                     # Py2: __import__(name, globals={}, locals={}, fromlist=[], level=-1)
                     # fromlist不为空(任意真值*-*)可以得到子模块,比如__import__("os.path", fromlist=1)返回<module "ntpath" ...>
@@ -254,16 +240,12 @@ class ModelManager:
                     # mod = __import__(modname, fromlist=1, level=0)
                     # six的这种方式也不错
                     mod = six._import_module(modname)
-                    # mod = self.get_mod(rootmod, modname)
                     self.load_model(mod, modname)
-                    # self.load_task(mod, modname)
             except Exception as e:
                 self.failed_mods.append([filepath, e])
-                ex_type, ex, tb = sys.exc_info()
                 log("Fail to load module '%s'" % filepath)
                 log("Model traceback (most recent call last):")
-                traceback.print_tb(tb)
-                log(ex)
+                xutils.print_exc()
 
         self.report_failed()
 
@@ -383,7 +365,7 @@ class TaskManager:
 
         def run():
             while True:
-                # 获取分
+                # 获取时间信息
                 tm = time.localtime()
                 for task in self.task_list:
                     if self.match(task, tm):
@@ -461,7 +443,7 @@ class WorkerThread(Thread):
 
     def run(self):
         while True:
-            # queue是block模式
+            # queue默认是block模式
             func, args = self._task_queue.get()
             try:
                 func(*args)

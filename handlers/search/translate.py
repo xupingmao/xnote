@@ -38,7 +38,9 @@ def search(ctx, word):
     path = os.path.join(xconfig.DATA_PATH, "dictionary.db")
     if not os.path.exists(path):
         return []
-    sql = "SELECT * FROM dictTB WHERE LOWER(en)=?"
+    # COLLATE NOCASE是sqlite的方言
+    # 比较通用的做法是冗余字段
+    sql = "SELECT * FROM dictTB WHERE en=? COLLATE NOCASE"
     dicts = xutils.db_execute(path, sql, (word,))
     return wrap_results(dicts, "en")
 

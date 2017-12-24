@@ -23,22 +23,6 @@ from autoreload import AutoReloadThread
 
 config = xconfig
 
-def get_ip_list(blacklist = []):
-    localIp = socket.gethostbyname(socket.gethostname())
-    print("localIP:%s" % localIp)
-    name, aliaslist, ipList = socket.gethostbyname_ex(socket.gethostname())
-    ip_list = []
-
-    for ip in ipList:
-        if ip in blacklist:
-            continue
-        if ip != localIp:
-           print("external IP:%s"%ip)
-        ip_list.append(ip)
-
-    return ip_list  
-    
-
 def check_db():
     xtables.init()
         
@@ -94,14 +78,13 @@ def main():
     config.set("host", "localhost")
     config.set("port", port)
     config.set("start_time", xutils.format_datetime())
-    # I can reload the system by myself
+    # I can reload the handlers by myself
     app = web.application(list(), var_env, autoreload=False)
     
     check_db()
 
     # 最后的mapping，用于匹配优先级较低的处理器
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
-
     mgr = xmanager.init(app, var_env, last_mapping = last_mapping)
     mgr.reload()
 
@@ -116,6 +99,7 @@ def main():
     autoreload_thread = AutoReloadThread(stop_callback)
     autoreload_thread.watch_dir(config.HANDLERS_DIR, recursive=True)
     autoreload_thread.start()
+    # 启动定时任务检查
     mgr.run_task()
 
     if xconfig.OPEN_IN_BROWSER:

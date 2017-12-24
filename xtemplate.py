@@ -1,8 +1,7 @@
 #coding=utf-8
-
-'''
-Tornado template wrapper
+'''Tornado template wrapper
 Created by xupingmao on 2016/12/05
+Modified by xupingmao on 2017/12/24
 '''
 import os
 import json
@@ -119,20 +118,15 @@ def get_user_agent():
     return web.ctx.env.get("HTTP_USER_AGENT")
 
 def pre_render(kw):
-    """ Main hook for template engine """
+    """模板引擎预处理过程"""
     kw["math"] = math
     kw["_is_admin"]  = xauth.is_admin()
     kw["_has_login"] = xauth.has_login()
-    user_name = xauth.get_current_name()
-    if user_name is None:
-        user_name = ""
+    user_name = xauth.get_current_name() or ""
     kw["_user_name"] = user_name
     kw["_user_agent"] = get_user_agent()
     # 处理首页公告
     kw["_top_notice"] = None
-    # print(web.ctx.env)
-    # kw["_nav_position"] = web.cookies(nav_position="top").nav_position
-    kw["_nav_position"] = "top"
     # 用于渲染其他组件
     kw["_render"] = render
     kw["xutils"]  = xutils
@@ -163,12 +157,12 @@ def render(template_name, **kw):
         return json.dumps(nkw, default=encode_json)
     return _loader.load(template_name).generate(**nkw)
 
-def render_text(text, **kw):
+def render_text(text, template_name = "<string>", **kw):
+    """使用模板引擎渲染文本信息"""
     nkw = {}
     pre_render(nkw)
     nkw.update(kw)
-    # TODO 需要优化
-    template = Template(text, name="<string>", loader=_loader)
+    template = Template(text, name=template_name, loader=_loader)
     return template.generate(**nkw)
 
     
@@ -182,6 +176,5 @@ def get_templates():
 def reload():
     global _loader
     _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
-    # load_menu_properties()
     
 reload()
