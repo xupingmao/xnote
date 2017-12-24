@@ -729,19 +729,22 @@ class CacheObj:
     def clear(self):
         # print("cache %s expired" % self.key)
         _cache_dict.pop(self.key, None)
+        # 保证主动生效后能从队列中出列
+        self.expire_time = time.time()
 
 def cache(key=None, prefix=None, expire=600):
     """缓存的装饰器，会自动清理失效的缓存"""
     def deco(func):
+        # 先不支持keywords参数
         def handle(*args):
             if key is not None:
                 cache_key = key
             elif prefix is None:
                 mod = inspect.getmodule(func)
                 funcname = func.__name__
-                cache_key = "%s.%s-%s" % (mod.__name__, funcname, args)
+                cache_key = "%s.%s%s" % (mod.__name__, funcname, args)
             else:
-                cache_key = "%s-%s" % (prefix, args)
+                cache_key = "%s%s" % (prefix, args)
             obj = _cache_dict.get(cache_key)
             if obj != None and obj.is_alive():
                 # print("hit cache %s" % cache_key)
@@ -753,4 +756,13 @@ def cache(key=None, prefix=None, expire=600):
             return value
         return handle
     return deco
+
+
+def cache_expire(key):
+    """使key对应的缓存失效，成功返回True"""
+    obj = _cache_dict.get(key)
+    if obj != None:
+        obj.clear()
+        return True
+    return False
 
