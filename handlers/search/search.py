@@ -157,6 +157,10 @@ class handler:
         ctx.search_file_full = (content == "on")
         ctx.user_name = xauth.get_current_name()
 
+        if ctx.search_message:
+            ctx.search_file = False
+            ctx.search_file_full = False
+
         xutils.log("  key=%s" % key)
         for rule in _rules:
             pattern = rule.pattern

@@ -87,7 +87,6 @@ def full_search(words, groups=None):
         words = [words]
     content_like_list = []
     vars = dict()
-    # name_like_list = []
     for word in words:
         content_like_list.append('content like %s ' % to_sqlite_obj('%' + word.upper() + '%'))
     # for word in words:
@@ -104,24 +103,15 @@ def full_search(words, groups=None):
     return [file_wrapper(item) for item in all]
 
 def search(ctx, expression):
-    if ctx.search_message and not ctx.search_file_full:
-        return
     words = textutil.split_words(expression)
     files = []
+
     if ctx.search_file_full:
-        content_results = full_search(words, xauth.get_current_name())
-    else:
-        content_results = []
-    name_results = search_name(words, xauth.get_current_name())
-    nameset = set()
-    for item in name_results:
-        nameset.add(item.name)
+        files = full_search(words, xauth.get_current_name())
+    
+    if ctx.search_file:
+        files = search_name(words, xauth.get_current_name())
 
-    files += name_results
-
-    for item in content_results:
-        if item.name not in nameset:
-            files.append(item)
     return files
 
 # xmanager.register_search_func(r"(.*)", do_search)
