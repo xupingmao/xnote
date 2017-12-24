@@ -758,7 +758,7 @@ def cache(key=None, prefix=None, expire=600):
     return deco
 
 
-def cache_expire(key):
+def expire_cache(key):
     """使key对应的缓存失效，成功返回True"""
     obj = _cache_dict.get(key)
     if obj != None:
