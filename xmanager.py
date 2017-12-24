@@ -354,7 +354,7 @@ class TaskManager:
             if quoted_url.startswith(("http://", "https://")):
                 # 处理外部HTTP请求
                 response = xutils.urlopen(quoted_url).read()
-                log("Request %r success" % quoted_url)
+                xutils.log("Request %r success" % quoted_url)
                 return response
             elif url.startswith("script://"):
                 name = url[len("script://"):]
@@ -371,14 +371,14 @@ class TaskManager:
                     if self.match(task, tm):
                         worker_thread.put_task(request_url, args=(task,))
                         try:
-                            log("run task [%s]" % task.url)
+                            xutils.log("run task [%s]" % task.url)
                             if task.tm_wday == "no-repeat":
                                 # 一次性任务直接删除
                                 # xtables.get_schedule_table().update(active=0, where=dict(id=task.id))
                                 xtables.get_schedule_table().delete(where=dict(id=task.id))
                                 self.load_tasks()
                         except Exception as e:
-                            log("run task [%s] failed, %s" % (task.url, e))
+                            xutils.log("run task [%s] failed, %s" % (task.url, e))
                         finally:
                             pass
                 tm = time.localtime()

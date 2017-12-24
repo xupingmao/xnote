@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# 
+# Last modified on 2017/12/24
 
-"""Description here"""
+"""xnote定时任务配置"""
 import os
 import web
 import xauth
@@ -11,8 +11,6 @@ import xmanager
 import xtables
 import xutils
 import xconfig
-
-from handlers.base import BaseHandler
 
 SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
 
@@ -23,6 +21,12 @@ def get_cron_links():
     links = []
     API_PATH = os.path.join(xconfig.HANDLERS_DIR, "api")
     TOOLS_DIR = xconfig.TOOLS_DIR
+    if os.path.exists(dirname):
+        for fname in os.listdir(dirname):
+            fpath = os.path.join(dirname, fname)
+            if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_TUPLE):
+                links.append("script://" + fname)
+
     for fname in os.listdir(API_PATH):
         fpath = os.path.join(API_PATH, fname)
         name, ext = os.path.splitext(fname)
@@ -35,14 +39,9 @@ def get_cron_links():
         if name != "__init__" and os.path.isfile(fpath) and ext == ".py":
             links.append("/tools/" + name)
 
-    if os.path.exists(dirname):
-        for fname in os.listdir(dirname):
-            fpath = os.path.join(dirname, fname)
-            if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_TUPLE):
-                links.append("script://" + fname)
     return links
 
-class MemoEditHandler:
+class CronEditHandler:
 
     def GET(self):
         id = xutils.get_argument("id", type=int)
@@ -51,7 +50,7 @@ class MemoEditHandler:
             item = sched, 
             links = get_cron_links())
         
-class MemoSaveHandler:
+class CronSaveHandler:
     
     @xauth.login_required("admin")
     def POST(self):
@@ -90,7 +89,7 @@ class MemoSaveHandler:
         xmanager.load_tasks()
         raise web.seeother("/system/crontab")
 
-class handler:
+class ListHandler:
 
     @xauth.login_required("admin")
     def GET(self):
@@ -99,25 +98,19 @@ class handler:
             if task.url is None: task.url = ""
             task.url = xutils.unquote(task.url)
             parts = task.url.split("://")
+            task.protocol = "unknown"
             if len(parts) == 2:
-                protol = parts[0]
+                protocol = parts[0]
                 name   = parts[1]
-                if protol == "script":
+                task.protocol = protocol
+                if protocol == "script":
                     task.script_name = name
-        scripts = []
-        dirname = xconfig.SCRIPTS_DIR
-        if os.path.exists(dirname):
-            for fname in os.listdir(dirname):
-                fpath = os.path.join(dirname, fname)
-                if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_TUPLE):
-                    scripts.append(fname)
-        scripts.sort()
 
         def set_display_name(file):
             file.display_name = file.name if file.name != "" else file.url
             return file
         task_list = list(map(set_display_name, task_list))
-        return xtemplate.render("system/crontab.html", task_list = task_list, scripts=scripts)
+        return xtemplate.render("system/crontab.html", task_list = task_list)
 
 
     @xauth.login_required("admin")
@@ -194,10 +187,10 @@ class RemoveHandler:
         return self.POST()
 
 xurls=(
-    r"/system/crontab",     handler, 
+    r"/system/crontab",     ListHandler, 
     r"/system/crontab/add", AddHandler,
     r"/system/crontab/remove", RemoveHandler,
-    r"/system/crontab/edit", MemoEditHandler,
-    r"/system/crontab/save", MemoSaveHandler
+    r"/system/crontab/edit", CronEditHandler,
+    r"/system/crontab/save", CronSaveHandler
 )
 

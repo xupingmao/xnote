@@ -223,3 +223,6 @@ class TestMain(unittest.TestCase):
         
     def test_markdown_preview(self):
         self.check_200("/code/preview?path=./README.md")
+
+    def test_cron_list(self):
+        self.check_200("/system/crontab")

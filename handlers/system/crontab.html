@@ -9,50 +9,6 @@
     <input class="dialog-btn" type="button" value="添加" dialog-url="/system/crontab/edit" />
 </div>
 
-<div class="col-md-12">
-<form method="POST" action="/system/crontab/add">
-<table class="hide">
-    <tr>
-        <td></td>
-        <td>
-            <select id="url_type">
-                <option value="script">脚本</option>
-                <option value="url">URL</option>
-            </select>
-            <select name="script_url">
-                {% for script_name in scripts %}
-                    <option value="script://{{script_name}}">{{script_name}}</option>
-                {% end %}
-            </select>
-            <input type="text" name="url" class="hide">
-        </td>
-        <td><select name="tm_wday">
-            {% for wday in sorted(xutils.wday_map) %}
-            <option value="{{wday}}">{{xutils.wday_map[wday]}}</option>
-            {% end %}
-        </select></td>
-        <td>
-            <select name="tm_hour">
-                <option value="*">每小时</option>
-                {% for hour in range(24) %}
-                <option value="{{hour}}">{{hour}}</option>
-                {% end %}
-            </select>
-        </td>
-        <td>
-            <select name="tm_min">
-                <option value="*">每分钟</option>
-                {% for tm_min in range(60) %}
-                <option value="{{tm_min}}">{{tm_min}}</option>
-                {% end %}
-            </select>
-        </td>
-        <td><input type="submit" value="添加"></td>
-    </tr>
-</table>
-</form>
-</div>
-
 <div class="col-md-12 top-offset-1">
 <table class="table col-md-12">
     <tr>
@@ -68,7 +24,11 @@
         <td>{{index+1}}</td>
         <td>
             <div style="word-wrap: break-word; width: 300px;">
-                {{task.display_name}}
+                {% if task.protocol == "script" %}
+                    <a href="/system/script_admin/edit?name={{task.script_name}}">{{task.script_name}}</a>
+                {% else %}
+                    {{task.display_name}}
+                {% end %}
             </div>
         </td>
         <td>{{xutils.wday_map[task.tm_wday]}} 
