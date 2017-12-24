@@ -5,18 +5,10 @@ import time
 import xutils
 from handlers.base import *
 
-def is_img(filename):
-    name, ext = os.path.splitext(filename)
-    return ext.lower() in (".gif", ".png", ".jpg", ".jpeg", ".bmp")
-
 def get_link(filename, webpath):
-    if is_img(filename):
+    if xutils.is_img_file(filename):
         return "![%s](%s)" % (filename, webpath)
     return "[%s](%s)" % (filename, webpath)
-
-def print_env():
-    for key in web.ctx.env:
-        print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
 
 class handler:
 
@@ -26,7 +18,6 @@ class handler:
         prefix = xutils.get_argument("prefix", "")
         filepath = ""
         filename = ""
-        # print_env()
         if not hasattr(file, "filename") or file.filename == "":
             return xtemplate.render("file/upload_file.html", filepath = filepath, filename = filename)
         filename = file.filename

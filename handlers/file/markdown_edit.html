@@ -196,11 +196,6 @@
         
     // autosize textarea rows
     var textContainer = document.getElementById("fileContent");
-    function adjustRows(ele) {
-        var text = ele.innerHTML;
-        var rows = text.count('\n');
-        ele.rows = rows + 10;
-    }
 
     function initCodeMirror() {
         if (window.codeMirror) {
@@ -294,27 +289,6 @@
         }
     }
     
-    function renameFile() {
-        var fileId = $("#fileId").text();
-        var oldName = $("#oldName").html();
-        var newName = $("#newName").val();
-        if (newName) {
-            $.post("/file/update", {
-                option: "rename",
-                fileId: fileId,
-                newName: newName
-            }, function (msg) {
-                console.log(msg);
-                var result = msg;
-                if (result.success) {
-                    switchRename();
-                    window.location.reload();
-                } else {
-                    alert("修改失败, " + result.msg);
-                }
-            })
-        }
-    }
     // set marked code highlight function
     // marked.defaults.highlight = highlight;
 

@@ -330,7 +330,8 @@ def search_path(path, key):
 
 def get_upload_file_path(filename, data_dir="/files", replace_exists = False, prefix=""):
     """生成上传文件名"""
-    filename = get_safe_file_name(filename)
+    if xconfig.USE_URLENCODE:
+        filename = get_safe_file_name(filename)
     basename, ext = os.path.splitext(filename)
     date = time.strftime("%Y/%m")
     dirname = xconfig.DATA_PATH + data_dir + "/" + date + "/"
@@ -354,6 +355,11 @@ def get_upload_file_path(filename, data_dir="/files", replace_exists = False, pr
         webpath = "/data{}/{}/{}".format(data_dir, date, temp_filename)
         fileindex+=1
     return newfilepath, webpath
+
+def is_img_file(filename):
+    """根据文件后缀判断是否是图片"""
+    name, ext = os.path.splitext(filename)
+    return ext.lower() in (".gif", ".png", ".jpg", ".jpeg", ".bmp")
 
 ### DB Utilities
 
@@ -514,8 +520,9 @@ def log(fmt, *argv):
     f_name = f_code.co_name
     f_lineno = f_back.f_lineno
     message = "%s %s.%s:%s %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), f_modname, f_name, f_lineno, message)
-    with open(xconfig.LOG_PATH, "a") as fp:
-        print(message, file=fp)
+    print(message)
+    with open(xconfig.LOG_PATH, "ab") as fp:
+        fp.write((message+"\n").encode("utf-8"))
 
 
 def trace(fmt, *argv):

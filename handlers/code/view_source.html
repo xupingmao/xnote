@@ -48,10 +48,6 @@
             <input type="button" class="link-btn" href="/code/preview?path={{path}}" value="预览">
         {% end %}
     </div>
-    <!--
-    <pre class="col-md-1 marked-pre hide">{% for l in range(1, lines+1) %}{{"%04d\n" % l}}{% end %}</pre>
-    <pre class="col-md-10 marked-pre hide">{{ content }}&nbsp;</pre>
-    -->
     <input name="path" class="hide" value="{{path}}"/>
     <div class="col-md-12">
         <textarea name="content" id="editor">{{content}}</textarea>
@@ -87,6 +83,7 @@
             theme:"monokai",
             // theme:'xq-light',
             indentUnit:4,
+            lineWrapping: true
         });
         editor.on("update", function (codeMirror, changeObj) {
             console.log("update");

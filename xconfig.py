@@ -1,6 +1,5 @@
 # encoding=utf-8
-'''
-system configuration
+'''system configuration
 约定目录叫 XXX_DIR
 文件叫 XXX_PATH
 '''
@@ -8,10 +7,19 @@ import os
 import time
 from collections import OrderedDict
 
+##################################
+# 系统配置项
+##################################
 DEBUG = False
 PORT = "1234"
 minthreads = 10
-# PORT = "8787"
+# 打开浏览器
+OPEN_IN_BROWSER = False
+# 启用数据库的缓存搜索
+USE_CACHE_SEARCH = False
+# 文件系统使用urlencode方式
+USE_URLENCODE = False
+
 
 # 处理器目录
 HANDLERS_DIR = "handlers"
@@ -40,11 +48,6 @@ OPEN_PROFILE = False
 PROFILE_PATH_SET = set(["/file/view"])
 # 静音停止时间
 MUTE_END_TIME = None
-# 打开浏览器
-OPEN_IN_BROWSER = False
-# 启用数据库的缓存搜索
-USE_CACHE_SEARCH = False
-
 # 资料相关
 # 分页数量
 PAGE_SIZE = 20
