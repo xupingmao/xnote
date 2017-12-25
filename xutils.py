@@ -705,13 +705,13 @@ class CacheObj:
     _queue = Queue()
 
     def __init__(self, key, value, expire):
-        global _cache_head
-        global _cache_tail
         global _cache_dict
         self.key = key
         self.value = value
         self.expire = expire
         self.expire_time = time.time() + expire
+        self.is_force_expired = False
+
         if expire < 0:
             self.expire_time = -1
 
@@ -719,6 +719,8 @@ class CacheObj:
         self._queue.put(self)
         one = self._queue.get(block=False)
         if one is not None:
+            if one.is_force_expired == True:
+                return
             if one.is_alive():
                 self._queue.put(one)
             else:
@@ -732,8 +734,6 @@ class CacheObj:
     def clear(self):
         # print("cache %s expired" % self.key)
         _cache_dict.pop(self.key, None)
-        # 保证主动生效后能从队列中出列
-        self.expire_time = time.time()
 
 def cache(key=None, prefix=None, expire=600):
     """缓存的装饰器，会自动清理失效的缓存"""
@@ -765,7 +765,9 @@ def expire_cache(key):
     """使key对应的缓存失效，成功返回True"""
     obj = _cache_dict.get(key)
     if obj != None:
+        # 防止删除了新的cache
         obj.clear()
+        obj.is_force_expired = True
         return True
     return False
 

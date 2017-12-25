@@ -28,7 +28,7 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 
 - Python 3.x
 - Python 2.7
-- Jython（缺乏sqlite支持）
+- Jython (无sqlite)
 
 ## 配置运行
 - 安装依赖的软件包```python -m pip install -r requirements.txt```
