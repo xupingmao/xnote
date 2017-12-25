@@ -151,9 +151,6 @@ def get_relative_path(path, parent):
 class FileItem(Storage):
 
     def __init__(self, path, parent=None):
-        # Fix ending
-        # if os.path.isdir(path) and not path.endswith("/"):
-        #     path = path + "/"
         self.path = path
         self.name = os.path.basename(path)
         self.size = get_file_size(path)

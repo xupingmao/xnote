@@ -148,6 +148,9 @@ class TestMain(unittest.TestCase):
         self.assertEqual("bytes", response.headers["Accept-Ranges"])
         self.assertEqual(True, "Content-Range" in response.headers)
 
+    def test_fs_find(self):
+        json_request("/fs_find", method="POST", data=dict(path="./data", find_key="java"))
+
     def test_sys(self):
         self.check_200("/system/sys")
         self.check_200("/system/user_admin")

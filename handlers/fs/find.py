@@ -46,9 +46,6 @@ class handler:
             plist = limited_glob(path_name)
         else:
             plist = xutils.search_path(path, find_key)
-        # plist = glob.glob(path_name)
-        # plist += glob.glob(os.path.join(path, quoted_key))
-        # print(path, find_key)
         return xtemplate.render("fs/fs.html", 
             fspathlist = xutils.splitpath(path),
             filelist = [xutils.FileItem(p, path) for p in plist])
