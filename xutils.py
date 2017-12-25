@@ -650,9 +650,12 @@ def exec_script(name):
             cmd = cmd.encode(encoding)
         os.system(cmd)
     elif path.endswith(".sh"):
-        os.system("chmod +x " + path)
-        os.system(path)
-        # TODO linux怎么处理?
+        # os.system("chmod +x " + path)
+        # os.system(path)
+        code = readfile(path)
+        # TODO 防止进程阻塞
+        ret, out = getstatusoutput(code)
+        return out
     return ret
 
 
