@@ -1,8 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# 
-
-"""Xnote的数据库配置"""
+"""Xnote的数据库配置，考虑到持续运行的维护，增加表结构需要非常慎重"""
 import os
 import xutils
 import xconfig
@@ -71,7 +69,7 @@ class SqliteTableManager:
         for column in columns:
             name = column["name"]
             type = column["type"]
-            if name == colname and type == coltype:
+            if name == colname:
                 # 已经存在
                 return
         if default_value != None:
@@ -374,7 +372,6 @@ def get_calendar_table():
 
 def init():
     if sqlite3 is None:
-        # Jython
         return
     init_table_user()
     init_table_file()
