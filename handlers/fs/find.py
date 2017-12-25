@@ -52,3 +52,7 @@ class handler:
         return xtemplate.render("fs/fs.html", 
             fspathlist = xutils.splitpath(path),
             filelist = [xutils.FileItem(p, path) for p in plist])
+
+xurls = (
+    r"/fs_find", handler
+)
