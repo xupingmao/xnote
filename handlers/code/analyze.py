@@ -1,10 +1,10 @@
 # encoding=utf-8
 
 import re
-
+import os
+import xtemplate
 import xutils
-from handlers.base import *
-from xutils import xhtml_escape
+from xutils import xhtml_escape, Storage
 
 CODE_EXT_LIST = (".java",  # Java
                  ".c",     # C语言
@@ -184,10 +184,11 @@ class FileSearch:
 
     def search_files(self, path, key, blacklist_str, filename, **kw):
         ignore_case = self.ignore_case
-        recursive = self.recursive
+        recursive   = self.recursive
+        total_lines = 0
 
         if key is None or key == "":
-            return []
+            return [], total_lines
         if not os.path.isdir(path):
             raise Exception("%s is not a directory" % path)
         result_list = []
@@ -211,23 +212,25 @@ class FileSearch:
                 if key != "" and len(result) == 0:
                     # key do not match
                     continue
+                total_lines += len(result)
                 result_list.append(Storage(name=fpath, result = result))
 
             if not recursive:
                 break
-        return result_list
+        return result_list, total_lines
 
 
-class handler(BaseHandler):
+class handler:
     """analyze code"""
-    def default_request(self):
-        ignore_case = self.get_argument("ignore_case", "off")
-        recursive   = self.get_argument("recursive", "off")
-        path        = self.get_argument("path", "", strip=True)
-        key         = self.get_argument("key", "", strip=True)
-        blacklist   = self.get_argument("blacklist", "", strip=True)
-        filename    = self.get_argument("filename", "", strip=True)
-        blacklist_dir = self.get_argument("blacklist_dir", "")
+    def GET(self):
+        ignore_case = xutils.get_argument("ignore_case", "off")
+        recursive   = xutils.get_argument("recursive", "off")
+        path        = xutils.get_argument("path", "", strip=True)
+        key         = xutils.get_argument("key", "", strip=True)
+        blacklist   = xutils.get_argument("blacklist", "", strip=True)
+        filename    = xutils.get_argument("filename", "", strip=True)
+        blacklist_dir = xutils.get_argument("blacklist_dir", "")
+        total_lines = 0
 
         # print(path, blacklist, blacklist_dir, filename)
         file_search = FileSearch(path)
@@ -241,11 +244,13 @@ class handler(BaseHandler):
         files = []
         try:
             if path != "":
-                files = file_search.search_files(path, key, blacklist, filename);
+                files, total_lines = file_search.search_files(path, key, blacklist, filename);
         except Exception as e:
             error = e
         finally:
-            self.render(files = files,
+            return xtemplate.render("code/analyze.html", 
+                files = files,
+                total_lines = total_lines,
                 path = path,
                 ignore_case = ignore_case,
                 error = error)
