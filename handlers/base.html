@@ -226,7 +226,7 @@
   <ul>
     <li><a href="/file/group">知识库</a></li>
     {% if _has_login %}
-    <li><a href="/tools/message?status=created">记事</a></li>
+    <li><a href="/tools/message?status=created">记事({{_notice_count}})</a></li>
     {% end %}
     <li><a href="/system/index">系统</a></li>
     <li><a href="/wiki?path=./README.md">关于</a></li>
@@ -241,7 +241,7 @@
       <li><a href="/file/group">资料分组</a></li>
       <li><a href="/file/group/marked">我的收藏</a></li>
       <li><a href="/file/recent_edit">最近更新</a></li>
-      <li><a href="/tools/message?status=created">快速记事</a></li>
+      <li><a href="/tools/message?status=created">记事({{_notice_count}})</a></li>
       {% end %}
 
       {% if _is_admin %}

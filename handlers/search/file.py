@@ -45,7 +45,7 @@ def file_dict(id, name, related):
 def get_file_db():
     return db.SqliteDB(db=config.DB_PATH)
 
-@xutils.cache(key='file_name.cache', expire=3600)
+@xutils.cache(key='file_name.list', expire=3600)
 def get_cached_files():
     return list(xtables.get_file_table().query('SELECT name, UPPER(name) as name_upper, id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted == 0'))
 

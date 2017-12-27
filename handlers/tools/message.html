@@ -117,7 +117,8 @@
                 </div>
             </div>            
             <div class="col-md-12">
-                <p class="chat-msg-time">{{! message.user }} 
+                <p class="chat-msg-time">
+                    <!-- {{! message.user }} -->
                     <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
                     <a class="smallText" v-if="message.status==100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">重做</a>
                     <a class="smallText" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
@@ -130,7 +131,7 @@
 
     <div class="col-md-12">
         <p>
-            <a class="x-page-link" href="#">共{{!page_max}}页</a> 
+            <a class="x-page-link" href="#">共{{!page_max}}页/{{!amount}}条</a> 
             <a v-if="page > 1" class="x-page-link" v-bind:href="page_prev_url">上一页</a>
             <a class="x-page-link x-page-active" href="#">{{!page}}</a>
             <a v-if="page < page_max" class="x-page-link" v-bind:href="page_next_url">下一页</a>
@@ -186,6 +187,7 @@
             page_prev_url:"#",
             current_user:"",
             status: "",
+            amount: 0
         },
         methods: {
 
@@ -212,6 +214,7 @@
                         })
                         messageList.reverse();
                         self.messageList = messageList;
+                        self.amount = data.amount;
                     }
                 })
             },

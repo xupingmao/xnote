@@ -234,6 +234,8 @@ def init_table_message():
         # 消息的状态 0初始状态（紧急） 50（非紧急minor，慎重考虑） 100已完成
         manager.add_column("status", "int", 0)
         manager.add_column("content", "text", "")
+        # 索引
+        manager.add_index("ctime")
         manager.add_index("type")
         manager.add_index("status")
 

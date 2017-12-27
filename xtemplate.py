@@ -16,7 +16,7 @@ from util import dateutil
 import xconfig
 import xauth
 import xutils
-
+import xtables
 from xutils import ConfigParser
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
@@ -117,6 +117,13 @@ def get_user_agent():
         return ""
     return web.ctx.env.get("HTTP_USER_AGENT")
 
+
+@xutils.cache(prefix="message.count", expire=360)
+def get_message_count(user):
+    if user is None:
+        return 0
+    return xtables.get_message_table().count(where="status=0 AND user=$user", vars=dict(user=user))
+
 def pre_render(kw):
     """模板引擎预处理过程"""
     kw["math"] = math
@@ -130,6 +137,7 @@ def pre_render(kw):
     # 用于渲染其他组件
     kw["_render"] = render
     kw["xutils"]  = xutils
+    kw["_notice_count"] = get_message_count(user_name)
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
 

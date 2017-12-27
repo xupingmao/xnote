@@ -24,6 +24,6 @@ def search(ctx, name):
     bookspath = os.path.join(xconfig.DATA_DIR, "books")
     pathlist = xutils.search_path(bookspath, "*" + name + "*")
     if len(pathlist) > 0:
-        url = "/fs/find?path=%s&find_key=%s"%(bookspath,name)
+        url = "/fs_find?path=%s&find_key=%s"%(bookspath,name)
         results.append(SearchResult("文件搜索结果 - %s"%name, url))
     return results
