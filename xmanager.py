@@ -25,6 +25,11 @@ from xutils import Storage, Queue
 
 config = xconfig
 
+__version__ = "1.0"
+__author__ = "xupingmao (578749341@qq.com)"
+__copyright__ = "(C) 2016-2017 xupingmao. GNU GPL 3."
+__contributors__ = []
+
 class MyStdout:
 
     def __init__(self, stdout):

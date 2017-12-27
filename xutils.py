@@ -736,7 +736,9 @@ class CacheObj:
         _cache_dict.pop(self.key, None)
 
 def cache(key=None, prefix=None, expire=600):
-    """缓存的装饰器，会自动清理失效的缓存"""
+    """缓存的装饰器，会自动清理失效的缓存
+    TODO 可以考虑缓存持久化的问题
+    """
     def deco(func):
         # 先不支持keywords参数
         def handle(*args):
@@ -770,4 +772,31 @@ def expire_cache(key):
         obj.is_force_expired = True
         return True
     return False
+
+
+#################################################################
+##   规则引擎组件
+#################################################################
+
+class BaseRule:
+    """规则引擎基类"""
+
+    def __init__(self, pattern):
+        self.pattern = pattern
+
+    def match(self, ctx, input_str = None):
+        if input_str is not None:
+            return re.match(self.pattern, input_str)
+        return None
+
+    def match_execute(self, ctx, input_str = None):
+        try:
+            matched = self.match(ctx, input_str)
+            if matched:
+                self.execute(ctx, *matched.groups())
+        except Exception as e:
+            print_exc()
+
+    def execute(self, ctx):
+        raise NotImplementedError()
 

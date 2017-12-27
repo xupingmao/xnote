@@ -8,19 +8,7 @@ import xutils
 import xtables
 import xauth
 import xconfig
-
-class AddHandler:
-
-    def POST(self):
-        content = xutils.get_argument("content")
-        user    = xauth.get_current_user()
-        # chatlist.append(content)
-        db = xtables.get_message_table()
-        ctime = xutils.format_time()
-        inserted_id = db.insert(user=user.get("name"), 
-            ctime=ctime, 
-            content=content)
-        return dict(code="success", data=dict(id=inserted_id, content=content, ctime=ctime))
+from xutils import BaseRule, Storage
 
 class ListHandler:
 
@@ -89,21 +77,48 @@ class RemoveHandler:
         db.delete(where=dict(id=id))
         return dict(code="success")
 
-class UpdateHandler:
+
+class CalendarRule(BaseRule):
+
+    def execute(self, ctx, date, month, day):
+        print(date, month, day)
+        ctx.type = "calendar"
+
+
+rules = [
+    CalendarRule(r"(\d+)年(\d+)月(\d+)日")
+]
+
+class SaveHandler:
 
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument("id")
-        content = xutils.get_argument("content")
+        id        = xutils.get_argument("id")
+        content   = xutils.get_argument("content")
         user_name = xauth.get_current_name()
         db = xtables.get_message_table()
-        db.update(content = content, mtime = xutils.format_datetime(), where=dict(id=id, user=user_name))
+        # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
+        ctx = Storage(content = content, user = user_name, type = "")
+        for rule in rules:
+            rule.match_execute(ctx, content)
+
+        if id == "" or id is None:
+            ctime = xutils.format_datetime()
+            inserted_id = db.insert(content = content, 
+                user = user_name, 
+                ctime = ctime, 
+                type = ctx.get("type", ""))
+            return dict(code="success", data=dict(id=inserted_id, content=content, ctime=ctime))
+        db.update(content = content,
+            mtime = xutils.format_datetime(), 
+            type=ctx.get("type", ""), 
+            where=dict(id=id, user=user_name))
         return dict(code="success")
 
 xurls=(
-    "/file/message/add", AddHandler,
+    "/file/message/add", SaveHandler,
     "/file/message/remove", RemoveHandler,
-    "/file/message/update", UpdateHandler,
+    "/file/message/update", SaveHandler,
     "/file/message/finish", FinishMessage,
     "/file/message/open", OpenMessage,
     "/file/message/list", ListHandler
