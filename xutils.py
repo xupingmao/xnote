@@ -110,20 +110,6 @@ wday_map = {
     "7": "周日"
 }
 
-def profile():
-    def run(func):
-        def run2(*args, **kw):
-            if xconfig.OPEN_PROFILE:
-                vars = dict()
-                vars["_f"] = func
-                vars["_args"] = args
-                vars["_kw"] = kw
-                pf.runctx("r=_f(*_args, **_kw)", globals(), vars, sort="time")
-                return vars["r"]
-            return func(*args, **kw)
-        return run2
-    return run
-
 def print_exc():
     """打印系统异常堆栈"""
     ex_type, ex, tb = sys.exc_info()
@@ -696,6 +682,20 @@ def timeit(repeat=1):
         return handle
     return deco
 
+def profile():
+    """Profile装饰器,打印信息到标准输出,不支持递归函数"""
+    def deco(func):
+        def handle(*args, **kw):
+            if xconfig.OPEN_PROFILE:
+                vars = dict()
+                vars["_f"] = func
+                vars["_args"] = args
+                vars["_kw"] = kw
+                pf.runctx("r=_f(*_args, **_kw)", globals(), vars, sort="time")
+                return vars["r"]
+            return func(*args, **kw)
+        return handle
+    return deco
 
 _cache_dict = dict()
 

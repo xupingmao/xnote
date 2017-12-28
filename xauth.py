@@ -152,11 +152,11 @@ def redirect_to_login():
 
 def login_required(user_name=None):
     """管理员验证装饰器"""
-    def _login_required(func):
-        def new_func(*args, **kw):
+    def deco(func):
+        def handle(*args, **kw):
             check_login(user_name)
             ret = func(*args, **kw)
             return ret
-        return new_func
-    return _login_required
+        return handle
+    return deco
 
