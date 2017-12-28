@@ -38,6 +38,7 @@ def handle_args():
     parser.add_argument("--useCacheSearch", default="no")
     parser.add_argument("--useUrlencode", default="no")
 
+    web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
 
     # 处理Data目录
@@ -56,6 +57,7 @@ def handle_args():
         xconfig.OPEN_IN_BROWSER = True
     if args.debug == "yes":
         xconfig.DEBUG = True
+        web.config.debug = True
     if args.useCacheSearch == "yes":
         xconfig.USE_CACHE_SEARCH = True
     if args.useUrlencode == "yes":

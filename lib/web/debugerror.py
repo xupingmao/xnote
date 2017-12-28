@@ -241,7 +241,7 @@ def readlines_safe(filename):
     Add by xupingmao
     try more encoding to readlines
     """
-    for encoding in ["utf-8", "gbk", "mbcs", "latin_1"]:
+    for encoding in ("utf-8", "gbk", "mbcs", "latin_1"):
         try:
             with open(filename, encoding=encoding) as fp:
                 return fp.readlines()
