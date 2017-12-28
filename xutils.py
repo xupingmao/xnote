@@ -93,7 +93,6 @@ if PY2:
 
 
 from tornado.escape import xhtml_escape        
-from web.utils import Storage
 from web.utils import safestr, safeunicode
 
 #################################################################
@@ -139,9 +138,8 @@ def print_web_ctx_env():
         print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
 
 
-class KindObject(dict):
+class Storage(dict):
     """
-    A 'Kind' Object that do not raise AttributeError
     A Storage object is like a dictionary except `obj.foo` can be used
     in addition to `obj['foo']`.
     
@@ -156,9 +154,9 @@ class KindObject(dict):
     """
     def __init__(self, default_value=None, **kw):
         self.default_value = default_value
-        super(KindObject, self).__init__(**kw)
+        super(Storage, self).__init__(**kw)
 
-    def __getattr__(self, key): 
+    def __getattr__(self, key):
         try:
             return self[key]
         except KeyError as k:
@@ -174,7 +172,7 @@ class KindObject(dict):
             raise AttributeError(k)
     
     def __repr__(self):     
-        return '<KindObject ' + dict.__repr__(self) + '>'
+        return '<MyStorage ' + dict.__repr__(self) + '>'
 
 
 class SearchResult(dict):

@@ -103,5 +103,14 @@ class TestMain(unittest.TestCase):
         fib(35)
         self.assertTrue(xutils.expire_cache("fib(1,)"))
 
+    def test_storage(self):
+        obj = xutils.Storage(name="name")
+        self.assertEqual(obj.name, "name")
+        self.assertEqual(obj.value, None)
+
+    def test_storage_default(self):
+        obj = xutils.Storage(1, name="name")
+        self.assertEqual(obj.value, 1)
+
 
         
