@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     /*background-color: #f0f0f0;*/
     /*font-family: "Open Sans Light",Helvetica,arial,sans-serif;*/

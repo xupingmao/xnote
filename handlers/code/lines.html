@@ -38,6 +38,11 @@
             <td>包含子目录</td>
             <td><input type="checkbox" name="recursive" {% if recursive == "on" %} checked {% end %}/></td>
         </tr>
+        <tr>
+            <td>行数排序</td>
+            <td><input type="checkbox" name="lines_sort" default-value="{{lines_sort}}"/></td>
+
+        </tr>
     </table>
     <button>统计</button>
 </form>
@@ -58,18 +63,16 @@
 <th>行数</th>
 <th>有效行数</th>
 <th>空白行数</th>
-<th>查看</th>
 </tr>
 
 {% for index, info in enumerate(line_infos) %}
 
     <tr>
         <td>{{index+1}}</td>
-        <td>{{info.display_name}}</td>
+        <td><a target="_blank" href="/code/view_source?path={{info.fname}}">{{info.display_name}}</a></td>
         <td>{{info.lines}}</td>
         <td>{{info.validlines}}</td>
         <td>{{info.blanklines}}</td>
-        <td>{% if info.fname %}<a target="_blank" href="/code/view_source?path={{info.fname}}">查看</a>{%end%}</td>
     </tr>
 
 {% end %}

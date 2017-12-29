@@ -44,6 +44,7 @@ class LineCounter:
 
     def __init__(self):
         self.filter_text = ""
+        self.lines_sort = False
 
     def count(self):
         pass
@@ -101,7 +102,10 @@ class LineCounter:
         total.fname = None
 
         line_infos.insert(0, total)
-        line_infos.sort(key = lambda info: -info.lines)
+        if self.lines_sort:
+            line_infos.sort(key = lambda info: -info.lines)
+        else:
+            line_infos.sort(key = lambda info: info.display_name)
         return line_infos
 
 
@@ -123,6 +127,7 @@ class handler:
         blackliststr = args.blacklist
         filter_text  = xutils.get_argument("filter_text", "")
         blacklist    = blackliststr.split(",")
+        lines_sort   = xutils.get_argument("lines_sort", "")
         # blacklist = tuple(map(lambda value: os.path.join(path, value.strip(' ')), blacklist))
         # print(blacklist)
 
@@ -140,6 +145,7 @@ class handler:
         
         if count=="on":
             counter = LineCounter()
+            counter.lines_sort = (lines_sort == "on")
             counter.filter_text = filter_text
             line_infos = counter.get_line_infos(path, 
                 recursive = recursive=="on", type = type, skip_func = skip_func)
