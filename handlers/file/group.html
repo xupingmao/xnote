@@ -21,22 +21,20 @@
                 </div> -->
                 {% if item.type == "group" %}
                     <img src="/static/image/folder.gif"/>
-                    <a class="group-link" href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
+                    <a class="group-link" href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>({{item.size}})
                 {% else %}
                     <a class="note-link" href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
+                    ({{item.creator}})
                 {% end %}
 
-                <a class="item-option" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
-                {% if _is_admin %}
-                    <a class="item-option" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>
-                {% end %}
-                {% if item.type != "group" %}
-                <a class="item-option dialog-btn" dialog-url="/file/group?id={{item.id}}&filetype=xml" href="javascript:void({{item.id}})">移动</a>
-                {% end %}
-                <div style="font-size: 12px;">
-                    <span class="gray-tag">{{item.creator}}</span>
-                    <span class="gray-tag">大小: {{item.size}}</span>
-                    {{item.mtime}}
+                <div style="float: right;">
+                    <a class="item-option" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
+                    {% if _is_admin %}
+                        <a class="item-option" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>
+                    {% end %}
+                    {% if item.type != "group" %}
+                    <a class="item-option dialog-btn" dialog-url="/file/group?id={{item.id}}&filetype=xml" href="javascript:void({{item.id}})">移动</a>
+                    {% end %}
                 </div>
             </td>
         </tr>
