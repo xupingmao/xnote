@@ -1,7 +1,7 @@
 # encoding=utf-8
 '''system configuration
 约定目录叫 XXX_DIR
-文件叫 XXX_PATH
+文件叫 XXX_FILE
 '''
 import os
 import time
@@ -10,6 +10,10 @@ from collections import OrderedDict
 ##################################
 # 系统配置项
 ##################################
+
+# 开发者模式,会展示更多的选项和信息
+DEV_MODE = False
+# 开启调试
 DEBUG = False
 PORT = "1234"
 minthreads = 10

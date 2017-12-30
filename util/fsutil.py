@@ -210,8 +210,11 @@ def decode_name(name):
     basename = os.path.basename(name)
     namepart, ext = os.path.splitext(basename)
     if ext in (".xenc", ".x0"):
-        basename = base64.urlsafe_b64decode(namepart.encode("utf-8")).decode("utf-8")
-        return os.path.join(dirname, basename)
+        try:
+            basename = base64.urlsafe_b64decode(namepart.encode("utf-8")).decode("utf-8")
+            return os.path.join(dirname, basename)
+        except:
+            return name
     return name
 
 def encode_name(name):
@@ -219,3 +222,5 @@ def encode_name(name):
     if ext in (".xenc", ".x0"):
         return name
     return base64.urlsafe_b64encode(name.encode("utf-8")).decode("utf-8") + ".x0"
+
+

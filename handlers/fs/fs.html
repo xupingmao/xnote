@@ -111,6 +111,8 @@
             <input type="submit" value="Find"/>
         </div>
     </form>
+</div>
+<div class="col-md-12">
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
         <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
@@ -158,12 +160,16 @@
                 <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>
             {% end %}
 
-            {% if item.ext in (".txt", ".log") %}
+            {% if item.ext in (".txt") %}
                 <a class="item-option" href="/tools/bookreader?path={{item.path}}&from=/fs/{{path}}">阅读</a>
             {% end %}
 
             {% if item.ext == ".db" %}
                 <a class="item-option" href="/tools/sql?path={{item.path}}&from=/fs/{{path}}">查看</a>
+            {% end %}
+
+            {% if item.ext == ".log" %}
+                <a class="item-option" href="/fs/{{item.path}}?type=text">查看</a>
             {% end %}
 
             {% if xutils.is_editable(item.path) or item.ext in (".js", ".command", ".xml", ".html") %}

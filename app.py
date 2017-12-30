@@ -37,6 +37,7 @@ def handle_args():
     parser.add_argument("--minthreads", default="10")
     parser.add_argument("--useCacheSearch", default="no")
     parser.add_argument("--useUrlencode", default="no")
+    parser.add_argument("--devMode", default="no")
 
     web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
@@ -62,6 +63,8 @@ def handle_args():
         xconfig.USE_CACHE_SEARCH = True
     if args.useUrlencode == "yes":
         xconfig.USE_URLENCODE = True
+    if args.devMode == "yes":
+        xconfig.DEV_MODE = True
 
     xconfig.minthreads = int(args.minthreads)
     web.config.minthreads = xconfig.minthreads

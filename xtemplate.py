@@ -9,10 +9,8 @@ import web
 import math
 import inspect
 import six
-
 from tornado.template import Template, Loader
 from util import dateutil
-
 import xconfig
 import xauth
 import xutils
@@ -137,6 +135,7 @@ def pre_render(kw):
     # 用于渲染其他组件
     kw["_render"] = render
     kw["xutils"]  = xutils
+    kw["xconfig"] = xconfig
     kw["_notice_count"] = get_message_count(user_name)
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
