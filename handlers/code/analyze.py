@@ -30,6 +30,7 @@ CODE_EXT_LIST = (".java",  # Java
                  ".conf",  # configuration
                  ".ini",
                  ".rc",
+                 ".md"
                  )
 
 # TODO 对于小文件可以尝试当成文本文件来处理

@@ -15,9 +15,6 @@
 .code-analyze-line:hover {
     background-color: #ccf;
 }
-table td {
-    border:none;
-}
 </style>
 {% end %}
 
@@ -25,7 +22,7 @@ table td {
 <h3>返回 [<a href="/fs/{{?path}}">{{?path}}</a>]</h3>
 <div>
     <form action="">
-        <table>
+        <table class="no-border-table">
         <tr>
             <td>路径</td>
             <td><textarea name="path" cols=100>{{?path}}</textarea></td>

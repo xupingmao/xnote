@@ -15,15 +15,11 @@
     }
     .fs-image {
         width: 180px;
-        /*height: 90px;*/
     }
     .fs-path {
         padding: 5px;
         box-sizing: border-box;
         background-color: #eee;
-    }
-    table td {
-        border: none;
     }
     .left {
         float: left;
@@ -125,16 +121,18 @@
 <div class="col-md-12">
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
+        <input type="button" class="btn" value="新建文件" id="addFile"/>
         <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
         <input type="button" class="btn" value="重命名" id="renameBtn" 
             message="重命名为">
         <input type="button" class="btn-danger" value="删除" id="deleteFile"/>
 
-        <input type="button" class="btn advanced-opt" value="打开文件管理器" id="openDirectory"/>
+        <input type="button" class="btn advanced-opt" value="文件浏览器" id="openDirectory"/>
         <input type="button" class="link-btn advanced-opt" href="/code/analyze?path={{path}}&recursive=on" value="高级搜索"/>
         <input type="button" class="link-btn advanced-opt" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
         <input type="button" class="link-btn advanced-opt" href="/tools/zip?dirname={{path}}" value="压缩"/>
         <input id="uploadFileBtn" type="button" class="btn advanced-opt" value="上传">
+        <!-- <input type="button" class="btn advanced-opt command-btn" data-command="openTerminal" value="终端"> -->
 
         <input id="showMoreOptsBtn" type="button" class="btn" value="更多"/>
     </div>
@@ -152,7 +150,7 @@
 </div>
 <hr/>
 <div class="col-md-12">
-<table class="col-md-12">
+<table class="col-md-12 no-border-table">
 {% for item in filelist %}
     {% if not item.name.startswith("._") %}
     <tr>
@@ -201,6 +199,7 @@
 </div>
 
 <script type="text/javascript">
+    var globalPath = "{{path}}";
     $("#previewImg").on("click", function (target) {
         var self = this;
         var value = $(self).val();
@@ -219,10 +218,18 @@
             $(self).val("预览图片");
         }  
     })
-    $("#addDirectory").on("click", function (target) {
-        var dirname = prompt("新建文件夹");
-        if (dirname && dirname != "") {
-            $.post("/fs_api/add_dir", {path: "{{path}}", dirname: dirname}, function (respText) {
+
+    function createFile(type) {
+        var promptMessage = "新建文件";
+        var url = "/fs_api/add_file";
+
+        if (type == "directory") {
+            promptMessage = "新建文件夹";
+            url = "/fs_api/add_dir";
+        }
+        var fileName = prompt(promptMessage);
+        if (fileName && fileName != "") {
+            $.post(url, {path: globalPath, filename: fileName}, function (respText) {
                 console.log(respText);
                 var data = respText;
                 if (data.code == "success") {
@@ -235,12 +242,21 @@
                 alert(data);
             })
         }
-    })
+    }
+
+    $("#addDirectory").on("click", function (target) {
+        createFile("directory");
+    });
+    $("#addFile").click(function () {
+        createFile("file");
+    });
+
     $("#openDirectory").on("click", function () {
         $.post("/tools/open", {path: "{{path}}"});
     });
-    $("#openTerminal").on("click", function () {
-        $.post("/system/command", {path: "{{path}}"});
+    $(".command-btn").on("click", function () {
+        var command = $(this).attr("data-command");
+        $.get("/system/command", {command: command, path: globalPath});
     })
     $("#deleteFile").on("click", function () {
         var checked = $(".checkboxTd :checked");

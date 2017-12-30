@@ -321,15 +321,31 @@ class AddDirHandler:
     @xauth.login_required("admin")
     def POST(self):
         path = xutils.get_argument("path", "")
-        dirname = xutils.get_argument("dirname", "")
+        filename = xutils.get_argument("filename", "")
         if path == "":
             return dict(code="fail", message="path is empty")
-        newpath = os.path.join(path, dirname)
+        newpath = os.path.join(path, filename)
         try:
             os.makedirs(newpath)
             return dict(code="success")
         except Exception as e:
-            xutils.print_stacktrace()
+            xutils.print_exc()
+            return dict(code="fail", message=str(e))
+
+class AddFileHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        path = xutils.get_argument("path", "")
+        filename = xutils.get_argument("filename", "")
+        if path == "":
+            return dict(code="fail", message="path is empty")
+        newpath = os.path.join(path, filename)
+        try:
+            xutils.touch(newpath)
+            return dict(code="success")
+        except Exception as e:
+            xutils.print_exc()
             return dict(code="fail", message=str(e))
 
 class RemoveHandler:
@@ -370,6 +386,7 @@ xurls = (
     r"/fs-", handler, 
     r"/fs_data", DataDirHandler,
     r"/fs_api/add_dir", AddDirHandler,
+    r"/fs_api/add_file", AddFileHandler,
     r"/fs_api/remove", RemoveHandler,
     r"/fs_api/rename", RenameHandler,
     r"/fs/(.*)", FileSystemHandler,

@@ -109,6 +109,9 @@ table td {
     background-color: #ffffff;
 }
 
+.no-border-table td {
+    border: none;
+}
 /** 标签样式结束 **/
 
 .menu-selected {

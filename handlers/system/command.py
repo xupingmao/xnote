@@ -27,6 +27,9 @@ class handler:
             if xutils.is_mac():
                 # TODO
                 pass
+            if xutils.is_windows():
+                os.popen("start; cd \"%s\"" % path)
+            return "success"
         if path.endswith(".bat"):
             os.popen("start %s" % path)
         else:

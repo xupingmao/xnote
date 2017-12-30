@@ -277,9 +277,14 @@ def remove(path, hard = False):
         os.removedirs(path)
 
 def touch(path):
+    """类似于Linux的touch命令"""
     if not os.path.exists(path):
         with open(path, "wb") as fp:
             pass
+    else:
+        current = time.mktime(time.gmtime())
+        times = (current, current)
+        os.utime(path, times)
 
 def _search_path0(path, key, limit=200):
     result_dirs = []
