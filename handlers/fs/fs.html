@@ -86,6 +86,16 @@
         display: none;
     }
 
+    #uploadFileArea {
+        display: none;
+    }
+
+    {% if not xconfig.DEV_MODE %}
+        .advanced-opt {
+            display: none;
+        }
+    {% end %}
+
 </style>
 
 {% end %}
@@ -119,19 +129,19 @@
         <input type="button" class="btn" value="重命名" id="renameBtn" 
             message="重命名为">
         <input type="button" class="btn-danger" value="删除" id="deleteFile"/>
+
+        <input type="button" class="btn advanced-opt" value="打开文件管理器" id="openDirectory"/>
+        <input type="button" class="link-btn advanced-opt" href="/code/analyze?path={{path}}&recursive=on" value="高级搜索"/>
+        <input type="button" class="link-btn advanced-opt" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
+        <input type="button" class="link-btn advanced-opt" href="/tools/zip?dirname={{path}}" value="压缩"/>
+        <input id="uploadFileBtn" type="button" class="btn advanced-opt" value="上传">
+
         <input id="showMoreOptsBtn" type="button" class="btn" value="更多"/>
     </div>
 </div>
 
 
-<div id="moreOpts" class="hide">
-    <div>
-        <input type="button" class="btn" value="打开文件管理器" id="openDirectory"/>
-        <!-- <input type="button" class="btn" value="打开终端" id="openTerminal">-->        
-        <input type="button" class="link-btn" href="/code/analyze?path={{path}}&recursive=on" value="高级搜索"/>
-        <input type="button" class="link-btn" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
-        <input type="button" class="link-btn" href="/tools/zip?dirname={{path}}" value="压缩"/>
-    </div>
+<div id="uploadFileArea">
     <!-- 文件上传区域 -->
     <div id="uploader-demo">
         <!--用来存放item-->
@@ -142,9 +152,6 @@
 </div>
 <hr/>
 <div class="col-md-12">
-
-<!-- <li style="padding-top:6px;"><a href="{{path}}/..">上一级目录</a></li> -->
-
 <table class="col-md-12">
 {% for item in filelist %}
     {% if not item.name.startswith("._") %}
@@ -168,10 +175,9 @@
                 <a class="item-option" href="/tools/sql?path={{item.path}}&from=/fs/{{path}}">查看</a>
             {% end %}
 
-            {% if item.ext == ".log" %}
+            {% if item.ext in (".log", ".sql") %}
                 {% comment 以文本形式查看 %}
                 <a class="item-option" href="/fs/{{item.path}}?type=text">查看</a>
-            }
             {% end %}
 
             {% if xutils.is_editable(item.path) or item.ext in (".js", ".command", ".xml", ".html") %}
@@ -288,7 +294,10 @@
         }
     });
     $("#showMoreOptsBtn").click(function (event) {
-        $("#moreOpts").toggle(200);
+        $(".advanced-opt").toggle(200);
+    });
+    $("#uploadFileBtn").click(function () {
+        $("#uploadFileArea").toggle(200);
     })
 </script>
 

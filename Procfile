@@ -1,1 +1,1 @@
-web: python app.py --data /data --debug no --useCacheSearch yes --useUrlencode yes
+web: python app.py --data /data --debug no --useCacheSearch yes --useUrlencode yes --devMode yes
