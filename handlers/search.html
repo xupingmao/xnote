@@ -1,7 +1,7 @@
 {% init file_id = "" %}
 
-<div class="col-md-12">
-  <form id="search_form" method="GET" action="{{?action,'/search/search'}}">
+<div class="col-md-12" id="searchBox">
+  <form id="searchForm" method="GET" action="{{?action,'/search/search'}}">
     <input name="category" class="hide" value="{{?search_category}}">
       <div class="input-group">
           <input type="text" id="key" name="key" class="searchInput" value="{{?key}}" placeholder="输入指令或搜索关键字" />
@@ -34,7 +34,7 @@ $(function () {
         }
         // 没有再编辑
         if (keyValue == oldKey) {
-          $("#search_form").submit();
+          $("#searchForm").submit();
         }
       }, 1000);
     }) (newKey);

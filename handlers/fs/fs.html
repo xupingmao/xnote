@@ -169,7 +169,9 @@
             {% end %}
 
             {% if item.ext == ".log" %}
+                {% comment 以文本形式查看 %}
                 <a class="item-option" href="/fs/{{item.path}}?type=text">查看</a>
+            }
             {% end %}
 
             {% if xutils.is_editable(item.path) or item.ext in (".js", ".command", ".xml", ".html") %}
