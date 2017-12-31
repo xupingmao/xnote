@@ -13,10 +13,8 @@
 </div>
 
 <div class="col-md-12">
-    <button onclick="hexToAscii()">Hex->Ascii</button>
     <button onclick="hexToUtf8()">Hex->UTF8</button>
     <button onclick="utf8ToHex()">UTF8->Hex</button>
-    <button onclick="strToHex()">Str->Hex</button>
     <button onclick="numToHex()">Number->Hex</button>
     <button onclick="hexToNum()">Hex->Number</button>
 </div>
@@ -181,11 +179,11 @@ function utf8ToHex() {
         for (var i = 0; i < text.length; i++) {
             var charCode = text.charCodeAt(i);
             if (charCode < 0xff) {
-                byteArray.push(byteToHex2(charCode));
+                byteArray.push(byteToHex(charCode));
             } else {
                 // Unicode is build with a short value
-                byteArray.push(byteToHex2(charCode>>8));
-                byteArray.push(byteToHex2(charCode&0xff));
+                byteArray.push(byteToHex(charCode>>8));
+                byteArray.push(byteToHex(charCode&0xff));
             }
         }
         // TODO check utf-8

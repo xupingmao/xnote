@@ -64,23 +64,29 @@
         var name = getUrlParams().path;
         if (name.endsWith(".py")) {
             mode = "text/x-python";
-        } else if (name.endsWith(".js")) {
+        }
+        if (name.endsWith(".js")) {
             mode = "text/javascript";
-        } else if (name.endsWith(".c")) {
+        } 
+        if (name.endsWith(".c")) {
             mode = "text/x-c";
-        } else if (name.endsWith(".java")) {
+        } 
+        if (name.endsWith(".java")) {
             mode = "text/x-java";
-        } else if (name.endsWith(".md")) {
+        } 
+        if (name.endsWith(".md")) {
             mode = "text/x-markdown";
-        } else if (name.endsWith(".sh") || name.endsWith(".command")) {
+        } 
+        if (name.endsWith(".sh") || name.endsWith(".command")) {
             mode = "text/x-sh";
-        } else if (name.endsWith(".php")) {
+        } 
+        if (name.endsWith(".php")) {
             mode = "text/x-php";
         }
         var editor = CodeMirror.fromTextArea($("#editor")[0], {
             lineNumbers: true,
             mode: mode,
-            theme:"monokai",
+            // theme:"monokai",
             // theme:'xq-light',
             indentUnit:4,
             lineWrapping: true
