@@ -29,6 +29,7 @@ def wrap_results(dicts, origin_key):
         # f.content = f0["cn"]
         f.raw = f0["en"] + "\n"
         f.raw += f0["cn"].replace("\\n", "\n")
+        f.url = "#"
         files.append(f)
     return files
 

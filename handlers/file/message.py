@@ -19,12 +19,11 @@ class ListHandler:
         offset = (page-1) * pagesize
         db = xtables.get_message_table()
         user_name = xauth.get_current_name()
+        kw = "1=1"
         if status == "created":
             kw = "status = 0"
-        elif status == "done":
+        if status == "done":
             kw = "status = 100"
-        else:
-            kw = "1=1"
         kw += " AND user = $user"
         vars = dict(user=xauth.get_current_name())
         chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))

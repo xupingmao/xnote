@@ -259,17 +259,6 @@ def init_table_record():
         manager.add_column("key",  "text", "")
         manager.add_column("value", "text", "")
 
-def init_table_calendar():
-    dbpath = os.path.join(xconfig.DATA_DIR, "data.db")
-    with TableManager(dbpath, "calendar") as manager:
-        manager.add_column("ctime", "text", "")
-        manager.add_column("mtime", "text", "")
-        manager.add_column("user",  "text", "")
-        # 开始提醒的时间
-        manager.add_column("active_time",  "text", "")
-        manager.add_column("is_read", "int", 0)
-        manager.add_column("content", "text", "")
-
 def init_table_storage():
     # 通用的存储对象
     dbpath = os.path.join(xconfig.DATA_DIR, "data.db")
@@ -368,9 +357,6 @@ def get_record_table():
 
 def get_storage_table():
     return DBWrapper(xconfig.DB_PATH, "storage")
-
-def get_calendar_table():
-    return DBWrapper(xconfig.DB_PATH, "calendar")
 
 def init():
     if sqlite3 is None:

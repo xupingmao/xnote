@@ -36,7 +36,7 @@ class handler:
 
     def POST(self):
         path = xutils.get_argument("path")
-        find_key = xutils.get_argument("find_key")
+        find_key = xutils.get_argument("find_key", "")
         find_type = xutils.get_argument("type")
         find_key = "*" + find_key + "*"
         path_name = os.path.join(path, find_key)
