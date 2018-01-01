@@ -11,7 +11,7 @@
         <input type="button" id="tagEditBtn" class="btn" value="确认"/>
     </span>
 
-    {% if _has_login %}
+    {% if _user_name == file.creator  %}
         <a id="toggleFileTagsEditor" href="javascript:toggleFileTagsEditor()">编辑</a>
     {% end %}
 </div>
