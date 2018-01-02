@@ -33,15 +33,28 @@
         
     /* 上传文件样式 */
     .progress {
-        background-color: #ffcccc;
+        background-color: #f90;
+        color: #fff;
         height: 20px;
+        display: none;
+        margin-left: 5px;
+        border-width: 3px;
     }
     .progress span {
         display: block;
-        background-color: green;
+        background-color: #f90;
         color: #fff;
         height: 100%;
     }
+    
+    .finished-tag {
+        color: #fff;
+        background-color: green;
+        border-width: 3px;
+        border-radius: 3px;
+        margin-left: 5px;
+    }
+
     #dropArea {
         float: left;
         width: 100%;
@@ -53,13 +66,6 @@
         color: #d3d3d3;
         cursor: pointer;
         box-sizing: border-box;
-    }
-    .finished-tag {
-        color: #fff;
-        background-color: green;
-        border-width: 3px;
-        border-radius: 3px;
-        margin-left: 5px;
     }
 
     tr:hover td {
@@ -366,6 +372,7 @@ uploader.on( 'fileQueued', function( file ) {
             '<div id="' + file.id + '" class="file-item thumbnail">' +
                 '<img>' +
                 '<div class="info">' + file.name +
+                '<span class="progress"></span>' +
                 '<span class="finished-tag" id="' + file.id + '-result"></span>' + 
                  '</div>' +
             '</div>'
@@ -394,17 +401,9 @@ uploader.on( 'fileQueued', function( file ) {
 // 文件上传过程中创建进度条实时显示。
 uploader.on( 'uploadProgress', function( file, percentage ) {
     var $li = $( '#'+file.id ),
-        $percent = $li.find('.progress span');
-
-    // 避免重复创建
-    if ( !$percent.length ) {
-        $percent = $('<p class="progress"><span></span></p>')
-                .appendTo( $li )
-                .find('span');
-    }
-
-    $percent.css( 'width', percentage * 100 + '%' );
-    $percent.text( (percentage * 100).toFixed(2) + '%');
+        $percent = $li.find('.progress');
+    // $percent.css( 'width', percentage * 100 + '%' );
+    $percent.show().text( (percentage * 100).toFixed(2) + '%');
 });
 
 uploader.on( 'uploadBeforeSend', function (object, data, headers) {

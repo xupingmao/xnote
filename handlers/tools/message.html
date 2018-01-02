@@ -29,6 +29,9 @@
         color: #fff;
         background-color: green;
     }
+    .in-progress {
+        background-color: #f90;
+    }
 
     .chat-msg {
         /*background-color: #99CCFF;*/
@@ -97,7 +100,7 @@
             <div class="chat-avatar col-md-12">
                 {{! message.ctime }}
                 <span class="tag-span" v-if="message.status==100">已完成</span>
-                <span class="tag-span" style="background-color: #f90" v-if="message.status==0">进行中</span>
+                <span class="tag-span in-progress" v-if="message.status==0">进行中</span>
             </div>
             <div class="chat-msg col-md-12">
                 <template v-if="message.editable">
