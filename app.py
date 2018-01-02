@@ -38,6 +38,7 @@ def handle_args():
     parser.add_argument("--useCacheSearch", default="no")
     parser.add_argument("--useUrlencode", default="no")
     parser.add_argument("--devMode", default="no")
+    parser.add_argument("--initScript", default=None)
 
     web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
@@ -67,6 +68,7 @@ def handle_args():
         xconfig.DEV_MODE = True
 
     xconfig.minthreads = int(args.minthreads)
+    xconfig.INIT_SCRIPT = args.initScript
     web.config.minthreads = xconfig.minthreads
 
 
@@ -106,6 +108,9 @@ def main():
     autoreload_thread.start()
     # 启动定时任务检查
     mgr.run_task()
+
+    if xconfig.INIT_SCRIPT is not None:
+        xutils.exec_script(xconfig.INIT_SCRIPT)
 
     if xconfig.OPEN_IN_BROWSER:
         webbrowser.open("http://localhost:1234/")

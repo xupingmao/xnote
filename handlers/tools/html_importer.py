@@ -152,8 +152,9 @@ class handler:
                 download_res_list(images, filename)
 
             if name != "" and name != None:
-                name = "%s_%s.md" % (name, time.strftime("%Y%m%d_%H%M%S"))
-                path = os.path.join(xconfig.TMP_DIR, name)
+                dirname = os.path.join(xconfig.DATA_DIR, time.strftime("archive/%Y/%m/%d"))
+                xutils.makedirs(dirname)
+                path = os.path.join(dirname, "%s_%s.md" % (name, time.strftime("%H%M%S")))
                 xutils.savetofile(path, text)
                 print("save file %s" % path)
 

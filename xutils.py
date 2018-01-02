@@ -623,7 +623,7 @@ def exec_script(name):
             gc.collect()
             after_count = len(gc.get_objects())
             ret = sys.stdout.pop_record()
-            print("gc.objects_count %s -> %s" % (before_count, after_count))
+            log("gc.objects_count %s -> %s" % (before_count, after_count))
         except:
             print_stacktrace()
             ret = sys.stdout.pop_record()

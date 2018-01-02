@@ -23,6 +23,8 @@ OPEN_IN_BROWSER = False
 USE_CACHE_SEARCH = False
 # 文件系统使用urlencode方式
 USE_URLENCODE = False
+# 初始化脚本
+INIT_SCRIPT = None
 
 
 # 处理器目录
