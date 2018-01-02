@@ -15,7 +15,17 @@
         padding: 4px;
         background-color: #9cc;
         box-sizing: border-box;
+        display: none;
     }
+
+    tr:hover td {
+        background: none;
+    }
+
+    tr:hover {
+        background-color: #eee;
+    }
+
 </style>
 
 {% end %}
@@ -28,13 +38,20 @@
 {% init op = "list" %}
 
 <div class="col-md-12">
-    <a href="/system/script_admin" class="tab-link">脚本</a>
+    <a href="/system/script" class="tab-link">脚本</a>
     <a href="/system/crontab" class="tab-link">定时任务</a>
 </div>
 
 {% if op != "edit" %}
-<button class="prompt-btn" action="/system/script_admin?op=add&name=" message="添加新脚本">添加</button>
+<div>
+<form action="/system/script/search" method="GET">
+    <input type="text" id="scriptName" name="name" value="{{?name}}">
+    <button>搜索</button>
+    <input type="button" value="添加" id="addBtn"/>
+</form>
+</div>
 {% end %}
+
 {% if op == "edit" %}
     <h3>{{name}}</h3>
     {# 编辑 #}
@@ -64,7 +81,7 @@
             var editor = CodeMirror.fromTextArea($("#editor")[0], {
                 lineNumbers: true,
                 mode: mode,
-                theme:"monokai",
+                // theme:"monokai",
                 indentUnit:4,
             });
             editor.setSize("auto", "auto");
@@ -86,10 +103,6 @@
     {% comment 列表 %}
     <div class="error">{{error}}</div>
     <table class="table col-md-12 top-offset-1">
-        <tr>
-            <th>文件名</th>
-        </tr>
-
         {% for script in shell_list %}
             <tr>
                 <td>
@@ -110,7 +123,7 @@
         // console.log($(event.target).attr("scriptName"))
         $.post("/system/script_admin/execute?name=" + scriptName, function (responseText) {
             var data = responseText;
-            $("#result").text(data.data);
+            $("#result").show().text(data.data);
         });
     })
 
@@ -122,6 +135,13 @@
                 location.reload();
             });
         }
+    });
+
+    $("#addBtn").click(function () {
+        var name = $("#scriptName").val();
+        $.get("/system/script_admin?op=add&name=" + name, function () {
+            location.reload();
+        });
     })
 </script>
 

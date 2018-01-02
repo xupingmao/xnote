@@ -31,6 +31,17 @@ def get_default_shell_ext():
         return ".bat"
     return ".sh"
 
+def get_script_list():
+    """获取脚本列表"""
+    dirname = xconfig.SCRIPTS_DIR
+    shell_list = []
+    if os.path.exists(dirname):
+        for fname in os.listdir(dirname):
+            fpath = os.path.join(dirname, fname)
+            if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_LIST):
+                shell_list.append(fname)
+    return shell_list
+
 class SaveHandler:
 
     @xauth.login_required("admin")
@@ -71,6 +82,13 @@ class ExecuteHandler:
         ret = xutils.exec_script(name)
         return dict(code="success", message="", data=ret)
 
+class SearchHandler:
+
+    def GET(self):
+        name = xutils.get_argument("name", "")
+        list = [x for x in get_script_list() if x.find(name) >= 0]
+        return xtemplate.render(template_file, shell_list = list, name=name)
+
 class handler:
 
     @xauth.login_required("admin")
@@ -94,13 +112,7 @@ class handler:
             with open(path, "wb") as fp:
                 pass
 
-        shell_list = []
-        
-        if os.path.exists(dirname):
-            for fname in os.listdir(dirname):
-                fpath = os.path.join(dirname, fname)
-                if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_LIST):
-                    shell_list.append(fname)
+        shell_list = get_script_list()
         shell_list.sort()
         return xtemplate.render(template_file, 
             op = op,
@@ -155,12 +167,13 @@ class EditHandler:
 
 xurls = (
     r"/system/script", handler,
+    r"/system/script/search", SearchHandler,
     r"/system/script_admin", handler,
     r"/system/script_admin/edit", EditHandler,
     r"/system/script/edit", EditHandler,
     r"/system/script_admin/save", SaveHandler,
     r"/system/script_admin/execute", ExecuteHandler,
-    r"/system/script_admin/delete", DeleteHandler
+    r"/system/script_admin/delete", DeleteHandler,
 )
 
 
