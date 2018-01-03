@@ -432,7 +432,7 @@ class TaskManager:
 class TaskThread(Thread):
     """docstring for TaskThread"""
     def __init__(self, func, *args):
-        super(TaskThread, self).__init__(name="Xnote Task Thread")
+        super(TaskThread, self).__init__(name="TaskDispatcher")
         # 守护线程，防止卡死
         self.setDaemon(True)
         self.func = func
@@ -442,11 +442,13 @@ class TaskThread(Thread):
         self.func(*self.args)
 
 class WorkerThread(Thread):
+    _task_queue = Queue()
+
     """执行任务队列的线程"""
     def __init__(self):
         super(WorkerThread, self).__init__()
         self.setDaemon(True)
-        self._task_queue = Queue()
+        self.setName("WorkerThread")
 
     def run(self):
         while True:
