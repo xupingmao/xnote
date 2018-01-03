@@ -97,8 +97,6 @@
                 <span id="fileId" class="hide">{{file.id}}</span>
             </div>
             <div class="col-md-12">
-                <!-- <a id="oldName" href="javascript:switchRename()" style="color:blue">{{file.name}}</a> -->
-                
                 <div class="col-md-12 pathlist">
                     <a href="/file/group">Home</a> /
                     {% for item in pathlist %}
@@ -113,6 +111,7 @@
                 <input type="submit" class="toolbox-btn btn-primary" value="更新"/>
                 <input type="button" id="insertCode" class="toolbox-btn" value="代码"/> 
                 <input type="button" id="insertStrong" class="toolbox-btn" value="加粗"/>
+                <input type="button" id="insertDel" class="toolbox-btn" value="删除线"/>
                 <input type="file" id="file" name="file" class="hide" />
                 <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" />
                 <input type="button" class="toolbox-btn btn-primary" onclick="togglePreview(this)" value="关闭预览"/>
@@ -344,7 +343,6 @@
         // setInterval(autoSave, 1000*30);
 
         $("#insertCode").on("click", function () {
-            
             var selection = codeMirror.getSelection();
             if (selection != "" && selection != null) {
                 codeMirror.replaceSelection("```" + selection + "```", "around");
@@ -361,6 +359,11 @@
                 codeMirror.replaceSelection("**" + selection + "**", "around");
             }
         });
+
+        $("#insertDel").click(function () {
+            var selection = codeMirror.getSelection();
+            codeMirror.replaceSelection("~~" + selection + "~~", "around");
+        })
 
     })
 </script>

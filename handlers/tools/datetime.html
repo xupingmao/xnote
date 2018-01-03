@@ -1,24 +1,56 @@
 {% extends base.html %}
 
+{% block head %}
+<style type="text/css">
+    .time-text {
+        width: 300px;
+    }
+</style>
+{% end %}
+
 {% block body %}
 
-<div>
-    <div>
-        <p>Unix时间戳<textarea></textarea></p>
-    </div>
+<h3>时间转换器</h3>
+<div class="col-md-12">
     <table>
         <tr>
             <td>Unix时间戳</td>
-            <td>GMT时间</td>
-            <td>UTC时间</td>
+            <td><input id="unixTime" class="time-text" type="text" name=""></td>
         </tr>
         <tr>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td>GMT时间</td>
+            <td><input id="gmtTime" class="time-text" type="text" name=""></td>
         </tr>
+        <tr>
+            <td>UTC时间</td>
+            <td><input id="utcTime" class="time-text" type="text" name=""></td>
+        </tr>
+        <tr>
+            <td>ISO时间</td>
+            <td><input id="isoTime" class="time-text" type="text" name=""></td>
+        </tr>
+        <tr>
+            <td>ctime</td>
+            <td><input id="ctime" class="time-text" type="text" name=""></td>
     </table>
-    <p><button>转换</button></p>
+    <p><button id="convertBtn">转换</button></p>
 </div>
+
+<script type="text/javascript">
+    $("#convertBtn").click(function () {
+        var unixTime = parseInt($("#unixTime").val());
+        console.log(unixTime);
+
+        if (unixTime) {
+            var date = new Date(unixTime* 1000);
+            $("#gmtTime").val(date.toGMTString());
+            $("#utcTime").val(date.toUTCString());
+            $("#isoTime").val(date.toISOString());
+            $("#ctime").val(date.toString());
+        }
+    });
+
+    $("#unixTime").val(parseInt((new Date().getTime())/1000));
+</script>
 
 {% end %}
