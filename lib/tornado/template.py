@@ -635,9 +635,8 @@ class _Expression(_Node):
         self.raw = raw
 
     def generate(self, writer):
-        if self.expression[0] == '?': # markdone
+        if self.expression[0] == '?': # support default value, modified by xupingmao
             name = self.expression[1:]
-            # namelist = name.split(".")
             values = name.split(",")
             if len(values) == 2:
                 name = values[0]
@@ -646,10 +645,6 @@ class _Expression(_Node):
                 default_value = "''"
             writer.write_line("try:_tt_tmp=%s" % name, self.line)
             writer.write_line("except:_tt_tmp=%s" % default_value, self.line)
-            # writer.write_line("_tt_tmp = get_value(globals(), %r)" % namelist, self.line)
-            # writer.write_line("if %r in globals():" % name, self.line)
-            # writer.write_line(" _tt_tmp = %s" % name, self.line)
-            # writer.write_line("else: _tt_tmp = ''", self.line)
         else:
             writer.write_line("_tt_tmp = %s" % self.expression, self.line)
         writer.write_line("if isinstance(_tt_tmp, _tt_string_types):"

@@ -127,8 +127,8 @@
     <form action="/fs_find">
         <div class="right">
             <input class="hide" name="path" value="{{path}}">
-            <input name = "find_key" type="text" value="{{find_key}}">
-            <input type="submit" value="查找"/>
+            <input name = "find_key" type="text" value="{{find_key}}" style="width: 200px;">
+            <input type="submit" value="搜索"/>
         </div>
     </form>
 </div>
@@ -167,6 +167,11 @@
 <div class="col-md-12">
 <table class="col-md-12 no-border-table">
 {% for item in filelist %}
+    {# 隐藏文件 #}
+    {% if xconfig.HIDE_FILES and item.name[0] == "." %}
+        {% continue %}
+    {% end %}
+
     {% if not item.name.startswith("._") %}
     <tr>
         <td class="checkboxTd"><input type="checkbox" data-path="{{item.path}}" data-name="{{item.name}}"></td>
@@ -176,6 +181,7 @@
             <a href="/fs/{{item.path}}" class="fs-dir">{{item.name}}</a>
         {% else %}
             <a href="/fs/{{item.path}}" class="fs-file">{{item.name}}</a>
+
             {% if item.ext in (".jpg", ".png", ".gif", ".jpeg", ".bmp", ".ico") %}
                 <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>
             {% end %}

@@ -126,7 +126,7 @@ class handler:
         typedict  = CODE_EXT_DICT
         blackliststr = args.blacklist
         filter_text  = xutils.get_argument("filter_text", "")
-        blacklist    = blackliststr.split(",")
+        blacklist    = re.split(r"[,\n]", blackliststr)
         lines_sort   = xutils.get_argument("lines_sort", "")
         # blacklist = tuple(map(lambda value: os.path.join(path, value.strip(' ')), blacklist))
         # print(blacklist)
