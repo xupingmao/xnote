@@ -7,26 +7,11 @@ import socket, ssl
 import re
 import io
 import gzip
-
-# from urllib.request import Request, build_opener, HTTPSHandler, UnknownHandler
-# from urllib.request import HTTPHandler, HTTPDefaultErrorHandler, HTTPRedirectHandler
-# from urllib.request import FTPHandler, FileHandler, HTTPErrorProcessor
-# from urllib.request import DataHandler, OpenerDirector, install_opener
-# import http.client
-# from http.client import HTTPConnection
-
 import xutils
 import xtemplate
+from xutils import splithost
 
 _opener = None
-
-def splithost(url):
-    """splithost('//host[:port]/path') --> 'host[:port]', '/path'."""
-    pattern = re.compile('^(http:|https:)?//([^/?]*)(.*)$')
-    match = pattern.match(url)
-    if match: return match.group(2, 3)
-    return None, url
-
 
 def build_opener(*handlers):
     """Create an opener object from a list of handlers.

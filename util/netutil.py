@@ -7,6 +7,13 @@ try:
 except ImportError as e:
     pass
 
+def splithost(url):
+    """splithost('//host[:port]/path') --> 'host[:port]', '/path'."""
+    pattern = re.compile('^(http:|https:)?//([^/?]*)(.*)$')
+    match = pattern.match(url)
+    if match: return match.group(2, 3)
+    return None, url
+
 def get_path(web_root, web_path):
     if web_path[0] == "/":
         web_path = web_path[1:]

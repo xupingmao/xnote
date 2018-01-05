@@ -823,8 +823,36 @@ li.menu-item:hover {
     background-color: #eee;
 }
 
+/** 知识库列表样式 **/
+#fileTable td {
+    border-left: none;
+    border-right: none;
+}
+
 .group-link {
     color: blue;
+}
+
+.group-div {
+    width: 200px;
+    background-color: #fff;
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    float: left;
+}
+
+.group-div:hover {
+    background-color: #ccc;
+}
+
+.group-div a {
+    color: #000;
+}
+
+.children-count {
+    float: right;
 }
 
 .note-link {

@@ -146,6 +146,10 @@ class TestMain(unittest.TestCase):
     def test_fs_find(self):
         json_request("/fs_find", method="POST", data=dict(path="./data", find_key="java"))
 
+    def test_code_analyze(self):
+        # TODO 解决JSON的循环问题
+        self.check_200("/code/analyze?path=./handlers/&key=test")
+
     def test_sys(self):
         self.check_200("/system/sys")
         self.check_200("/system/user_admin")

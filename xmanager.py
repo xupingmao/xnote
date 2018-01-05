@@ -368,24 +368,25 @@ class TaskManager:
             url = url + "?content=" + xutils.quote_unicode(str(task.message))
             return self.app.request(url, headers=dict(COOKIE=cookie))
 
+        def check_and_run(task, tm):
+            if self.match(task, tm):
+                put_task(request_url, task)
+                try:
+                    xutils.log("run task [%s]" % task.url)
+                    if task.tm_wday == "no-repeat":
+                        # 一次性任务直接删除
+                        # xtables.get_schedule_table().update(active=0, where=dict(id=task.id))
+                        xtables.get_schedule_table().delete(where=dict(id=task.id))
+                        self.load_tasks()
+                except Exception as e:
+                    xutils.log("run task [%s] failed, %s" % (task.url, e))
+
         def run():
             while True:
                 # 获取时间信息
                 tm = time.localtime()
                 for task in self.task_list:
-                    if self.match(task, tm):
-                        worker_thread.put_task(request_url, args=(task,))
-                        try:
-                            xutils.log("run task [%s]" % task.url)
-                            if task.tm_wday == "no-repeat":
-                                # 一次性任务直接删除
-                                # xtables.get_schedule_table().update(active=0, where=dict(id=task.id))
-                                xtables.get_schedule_table().delete(where=dict(id=task.id))
-                                self.load_tasks()
-                        except Exception as e:
-                            xutils.log("run task [%s] failed, %s" % (task.url, e))
-                        finally:
-                            pass
+                    check_and_run(task, tm)
                 tm = time.localtime()
                 # 等待下一个分钟
                 sleep_sec = 60 - tm.tm_sec % 60
@@ -459,8 +460,9 @@ class WorkerThread(Thread):
             except Exception as e:
                 xutils.print_exc()
 
-    def put_task(self, task, args):
-        self._task_queue.put([task, args])
+def put_task(func, *args):
+    """添加异步任务到队列"""
+    WorkerThread._task_queue.put([func, args])
         
 _manager = None        
 def init(app, vars, last_mapping=None):

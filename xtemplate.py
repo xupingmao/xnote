@@ -51,16 +51,6 @@ def load_menu_properties():
         path = "config/menu.default.ini"
 
     menu_list = [];
-    # menu_config = config.Properties(path)
-    # for title in menu_config.get_properties():
-    #     group = dict(title=title)
-    #     group["children"] = []
-    #     children = menu_config.get_properties()[title]
-    #     for item in children:
-    #         url = children[item]
-    #         group["children"].append(dict(name=item, url=url))
-    #     menu_list.append(group)
-
     cf = ConfigParser()
     cf.read(path, encoding="utf-8")
     names = cf.sections()

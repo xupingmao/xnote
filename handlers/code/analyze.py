@@ -1,10 +1,11 @@
 # encoding=utf-8
-
 import re
 import os
 import xtemplate
 import xutils
 from xutils import xhtml_escape, Storage
+
+"""代码分析工具，对文本文件进行全文搜索"""
 
 CODE_EXT_LIST = (".java",  # Java
                  ".c",     # C语言
@@ -203,7 +204,7 @@ class FileSearch:
                     fpath = os.path.join(root, fname)
                     content = xutils.readfile(fpath)
                 except Exception as e:
-                    print("exception")
+                    xutils.print_exc()
                     result_list.append(Storage(name=fpath, 
                         result=[LineInfo(-1, "read file fail, e=%s" % e, None)]))
                     continue
@@ -232,6 +233,8 @@ class handler:
         filename    = xutils.get_argument("filename", "", strip=True)
         blacklist_dir = xutils.get_argument("blacklist_dir", "")
         total_lines = 0
+        error       = ""
+        files       = []
 
         # print(path, blacklist, blacklist_dir, filename)
         file_search = FileSearch(path)
@@ -241,22 +244,15 @@ class handler:
         if recursive == "on":
             file_search.recursive = True
 
-        error = ""
-        files = []
         try:
             if path != "":
                 files, total_lines = file_search.search_files(path, key, blacklist, filename);
         except Exception as e:
             error = e
-        finally:
-            return xtemplate.render("code/analyze.html", 
-                files = files,
-                total_lines = total_lines,
-                path = path,
-                ignore_case = ignore_case,
-                error = error)
+        return xtemplate.render("code/analyze.html", 
+            files = files,
+            total_lines = total_lines,
+            path = path,
+            ignore_case = ignore_case,
+            error = error)
 
-searchkey = "code,代码分析工具"
-
-name = "代码分析工具"
-description = "对代码进行全文检索"
