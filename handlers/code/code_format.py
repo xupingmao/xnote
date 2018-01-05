@@ -1,8 +1,8 @@
+# encoding=utf-8
+from __future__ import print_function
 import sys, os
 
-
 _name_list = ["_", "$"]
-
 _blacklist = [
     "FindNextFile",
     "dwFileAttributes",
@@ -66,7 +66,7 @@ def do_skip_str(line, i, end):
             i += 1
     return str, i
 
-def convert (content):
+def convert(content):
     buf = []
     i = 0
     while i < len(content):

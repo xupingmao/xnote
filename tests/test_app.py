@@ -1,20 +1,16 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-
 import sys
 sys.path.insert(1, "lib")
-
 import unittest
 import json
 import web
 import six
-
 import xmanager
 import xutils
 import xtemplate
 import xconfig
 import xtables
-
 from xutils import u
 
 def init():
@@ -130,12 +126,11 @@ class TestMain(unittest.TestCase):
         self.check_200("/file/edit?id=%s"%id)
         json_request("/file/remove?id=%s" % id)
 
-    def test_group(self):
+    def test_file_group(self):
         self.check_200("/file/group")
         self.check_200("/file/group/ungrouped")
         self.check_200("/file/group/bookmark")
         self.check_200("/file/recent_edit")
-
 
     def test_fs(self):
         self.check_200("/fs//")
@@ -181,16 +176,6 @@ class TestMain(unittest.TestCase):
     def test_alarm(self):
         self.check_200("/api/alarm/test?repeat=1")
 
-    def test_task(self):
-        self.check_200("/system/crontab")
-        self.check_OK("/system/crontab/add", method="POST", data=dict(url="test", tm_wday="*", tm_hour="*", tm_min="*"))
-        sched = xtables.get_schedule_table().select_one(where=dict(url="test"))
-        self.check_OK("/system/crontab/remove?id={}".format(sched.id))
-
-        self.check_OK("/system/crontab/add", method="POST", data=dict(script_url="script://test.py", tm_wday="1", tm_hour="*", tm_min="*"))
-        sched2 = xtables.get_schedule_table().select_one(where=dict(url="script://test.py"))
-        self.check_OK("/system/crontab/remove?id={}".format(sched2.id))
-
     def test_search(self):
         self.check_200("/search?key=测试")
         self.check_200("/search/search?key=测试")
@@ -229,3 +214,14 @@ class TestMain(unittest.TestCase):
 
     def test_cron_list(self):
         self.check_200("/system/crontab")
+
+    def test_cron_task(self):
+        self.check_OK("/system/crontab/add", method="POST", data=dict(url="test", tm_wday="*", tm_hour="*", tm_min="*"))
+        sched = xtables.get_schedule_table().select_one(where=dict(url="test"))
+        self.check_OK("/system/crontab/remove?id={}".format(sched.id))
+
+        self.check_OK("/system/crontab/add", method="POST", data=dict(script_url="script://test.py", tm_wday="1", tm_hour="*", tm_min="*"))
+        sched2 = xtables.get_schedule_table().select_one(where=dict(url="script://test.py"))
+        self.check_OK("/system/crontab/remove?id={}".format(sched2.id))
+
+

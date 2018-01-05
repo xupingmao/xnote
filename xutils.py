@@ -502,6 +502,7 @@ def get_safe_file_name(filename):
 #################################################################
 
 def log(fmt, *argv):
+    fmt = str(fmt)
     message = fmt.format(*argv)
     f_back = inspect.currentframe().f_back
     f_code = f_back.f_code

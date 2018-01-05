@@ -1,9 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# 
-
-"""Description here"""
-
+"""搜索知识库文件"""
 import sys
 import six
 import xutils
@@ -20,7 +17,6 @@ def to_sqlite_obj(text):
         return "NULL"
     if not isinstance(text, six.string_types):
         return repr(text)
-    # text = text.replace('\\', '\\')
     text = text.replace("'", "''")
     return "'" + text + "'"
     
@@ -88,7 +84,7 @@ def full_search(words, groups=None):
     content_like_list = []
     vars = dict()
     for word in words:
-        content_like_list.append('content like %s ' % to_sqlite_obj('%' + word.upper() + '%'))
+        content_like_list.append('content like %s' % to_sqlite_obj('%' + word.upper() + '%'))
     # for word in words:
     #     name_like_list.append("related like %s " % repr("%" + word.upper() + '%'))
     sql = "SELECT id, name, ctime, mtime, type, creator FROM file WHERE (%s) AND is_deleted == 0" \
@@ -107,10 +103,10 @@ def search(ctx, expression):
     files = []
 
     if ctx.search_file_full:
-        files = full_search(words, xauth.get_current_name())
+        files += full_search(words, xauth.get_current_name())
     
     if ctx.search_file:
-        files = search_name(words, xauth.get_current_name())
+        files += search_name(words, xauth.get_current_name())
 
     return files
 

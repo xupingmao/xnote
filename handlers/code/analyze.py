@@ -92,7 +92,7 @@ def get_pretty_around_text(lines, current, limit):
         
 class LineInfo:
     """匹配行的信息"""
-    around_lines_num = 100
+    around_lines_num = 20
     def __init__(self, lineno, text, lines=None):
         self.lineno = lineno
         self.text = text
