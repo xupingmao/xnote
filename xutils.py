@@ -605,7 +605,7 @@ def say(msg):
         time.sleep(1)
 
 
-def exec_script(name):
+def exec_script(name, new_window=True):
     """执行script目录下的脚本"""
     dirname = xconfig.SCRIPTS_DIR
     path = os.path.join(dirname, name)
@@ -632,14 +632,25 @@ def exec_script(name):
     elif name.endswith(".command"):
         # Mac os Script
         xutils.system("chmod +x " + path)
-        ret = xutils.system("open " + path)
+        if new_window:
+            ret = xutils.system("open " + path)
+        else:
+            code = readfile(path)
+            ret, out = getstatusoutput(code)
     elif path.endswith((".bat", ".vbs")):
-        cmd = u("start %s") % path
+        if new_window:
+            cmd = u("start %s") % path
+        else:
+            cmd = readfile(path)
         if six.PY2:
             # Python2 import当前目录优先
             encoding = sys.getfilesystemencoding()
             cmd = cmd.encode(encoding)
-        os.system(cmd)
+        if new_window:
+            os.system(cmd)
+        else:
+            ret, out = getstatusoutput(cmd)
+            print(out)
     elif path.endswith(".sh"):
         # os.system("chmod +x " + path)
         # os.system(path)
@@ -786,7 +797,7 @@ def expire_cache(key):
 class BaseRule:
     """规则引擎基类"""
 
-    def __init__(self, pattern):
+    def __init__(self, pattern=None):
         self.pattern = pattern
 
     def match(self, ctx, input_str = None):
@@ -802,6 +813,6 @@ class BaseRule:
         except Exception as e:
             print_exc()
 
-    def execute(self, ctx):
+    def execute(self, ctx, *argv):
         raise NotImplementedError()
 

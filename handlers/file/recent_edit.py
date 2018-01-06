@@ -1,30 +1,19 @@
 #coding:utf-8
 import math
-
-from handlers.base import *
-from .dao import *
-
 import xconfig
 import xauth
 import xutils
 import xtables
+import xtemplate
+from .dao import *
+from xutils import Storage
 
 # 兼容旧代码
 config = xconfig
 
-def execute(sql):
-    return xtables.get_file_table().query(sql)
-
 # 待优化
 def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
     user_name = xauth.get_current_name()
-    # if user_name == "admin":
-    #     # sql = "select * from file where mtime > '%s' AND is_deleted != 1 order by mtime desc"\
-    #     # % dateutil.before(days=int(days), format=True)
-    #     sql = "select * from file where is_deleted != 1"
-    # else:
-    #     sql = "select * from file where is_deleted != 1 AND groups = '%s'" % user_name
-
     sql = "SELECT * FROM file WHERE is_deleted = 0 AND (creator = $creator OR is_public = 1)"
     sql += " ORDER BY mtime DESC"
     sql += " LIMIT %s, %s" % ((page-1) * pagesize, pagesize)
@@ -34,29 +23,22 @@ def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
 def count_files():
     if xauth.get_current_user() == None:
         return 0
-    user_name = xauth.get_current_user().get("name")
-    # if user_name == "admin":
-    #     count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 ")[0].get("count")
-    # else:
-    #     count = execute("SELECT COUNT(*) as count FROM file WHERE is_deleted = 0 AND groups='%s'" % user_name)[0].get("count")
+    user_name = xauth.get_current_name()
     db = xtables.get_file_table()
-    count = db.count("is_deleted = 0 AND groups='%s'" % user_name)
-    if count == 0:
-        return 1
+    count = db.count("is_deleted = 0 AND (creator = $creator OR is_public = 1)", vars = dict(creator=user_name))
     return count
 
-class handler(BaseHandler):
+class handler:
     """show recent modified files"""
 
     @xauth.login_required()
-    def execute(self):
-        s_days = self.get_argument("days", 30)
-        page = int(self.get_argument("page", 1))
+    def GET(self):
+        days = xutils.get_argument("days", 30, type=int)
+        page = xutils.get_argument("page", 1, type=int)
         page = max(1, page)
-        days = int(s_days)
         files = get_recent_modified(days, page)
         count = count_files()
-        self.render("file/view.html", 
+        return xtemplate.render("file/view.html", 
             pathlist = [Storage(name="最近编辑", url="/file/recent_edit")],
             file_type = "group",
             files = files[:20], 
@@ -64,9 +46,4 @@ class handler(BaseHandler):
             page_max = math.ceil(count/config.PAGE_SIZE), 
             page_url="/file/recent_edit?page=")
 
-    def json_request(self):
-        s_days = self.get_argument("days", 7)
-        days = int(s_days)
-        files = get_recent_modified(days)
-        return files
 

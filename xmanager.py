@@ -36,15 +36,12 @@ class MyStdout:
         self.stdout = stdout
         self.result_dict = dict()
         self.outfile = web.debug
-        # self.logfile = open("./stdout.log", "w")
 
     def write(self, value):
         result = self.result_dict.get(current_thread())
         if result != None:
             result.append(value)
-        # return self.stdout.write(value)
         print(value, file=self.outfile, end="")
-        # print(value, file=self.logfile, end="")
 
     def writelines(self, lines):
         return self.stdout.writelines(lines)
@@ -72,10 +69,7 @@ def wrapped_handler(handler_clz):
         return handler_clz
 
     def wrap(result):
-        if isinstance(result, list):
-            web.header("Content-Type", "application/json")
-            return json.dumps(result)
-        elif isinstance(result, dict):
+        if isinstance(result, (list, dict)):
             web.header("Content-Type", "application/json")
             return json.dumps(result)
         return result
@@ -91,14 +85,8 @@ def wrapped_handler(handler_clz):
             self.target = handler_clz()
 
         def GET(self, *args):
-            # path_info = web.ctx.path
-            # if path_info in xconfig.PROFILE_PATH_SET:
-            #     vars = dict(f = self.target.GET, args=args)
-            #     profile.runctx("r=f(*args)", globals(), vars, sort="time")
-            #     return vars["r"]
             return wrap(self.target.GET(*args))
             
-
         def POST(self, *args):
             return wrap(self.target.POST(*args))
 
@@ -271,7 +259,7 @@ class ModelManager:
                 if not url.startswith(modpath):
                     log("WARN: pattern %r is invalid, should starts with %r" % (url, modpath))
                 self.add_mapping(url, handler)
-        # xurls拥有最高优先级
+        # xurls拥有最高优先级，下面代码兼容旧逻辑
         elif hasattr(module, "handler"):
             handler = module.handler
             clz = name.replace(".", "_")
@@ -327,7 +315,7 @@ class ModelManager:
 
 
 class TaskManager:
-    """定时任务管理器，仿照crontab"""
+    """定时任务管理器，模拟crontab"""
     def __init__(self, app):
         self.task_list = []
         self.app = app
@@ -348,10 +336,6 @@ class TaskManager:
 
     def run_task(self):
         """执行定时任务"""
-        worker_thread = WorkerThread()
-        worker_thread.start()
-        self.load_tasks()
-
         def request_url(task):
             url = task.url
             if url is None: url = ""
@@ -363,7 +347,7 @@ class TaskManager:
                 return response
             elif url.startswith("script://"):
                 name = url[len("script://"):]
-                return xutils.exec_script(name)
+                return xutils.exec_script(name, False)
             cookie = xauth.get_user_cookie("admin")
             url = url + "?content=" + xutils.quote_unicode(str(task.message))
             return self.app.request(url, headers=dict(COOKIE=cookie))
@@ -375,7 +359,6 @@ class TaskManager:
                     xutils.log("run task [%s]" % task.url)
                     if task.tm_wday == "no-repeat":
                         # 一次性任务直接删除
-                        # xtables.get_schedule_table().update(active=0, where=dict(id=task.id))
                         xtables.get_schedule_table().delete(where=dict(id=task.id))
                         self.load_tasks()
                 except Exception as e:
@@ -392,6 +375,12 @@ class TaskManager:
                 sleep_sec = 60 - tm.tm_sec % 60
                 if sleep_sec > 0:
                     time.sleep(sleep_sec)
+        
+        self.load_tasks()
+        # 任务队列处理线程
+        worker_thread = WorkerThread()
+        worker_thread.start()
+
         chk_thread = TaskThread(run)
         chk_thread.start()
         
@@ -425,8 +414,7 @@ class TaskManager:
         self.load_tasks()
         
     def get_task_list(self):
-        # return copy.deepcopy(self.task_list)
-        # TODO 解决深拷贝问题
+        # TODO 解决深拷贝问题 deepcopy会报错
         return copy.copy(self.task_list)
 
 
@@ -464,7 +452,7 @@ def put_task(func, *args):
     """添加异步任务到队列"""
     WorkerThread._task_queue.put([func, args])
         
-_manager = None        
+_manager = None
 def init(app, vars, last_mapping=None):
     global _manager
     _manager = ModelManager(app, vars, last_mapping = last_mapping)

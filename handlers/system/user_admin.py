@@ -1,9 +1,9 @@
 # encoding=utf-8
-
 import web
 import xauth
 import xtemplate
 import xmanager
+import xutils
 
 class handler:
     """用户管理"""
@@ -15,12 +15,11 @@ class handler:
 
     @xauth.login_required("admin")
     def POST(self):
-        args = web.input()
-        name = args.name
-        password = args.password
+        name     = xutils.get_argument("name")
+        password = xutils.get_argument("password")
         xauth.add_user(name, password)
         added = xauth.get_user(name)
-        print(" -- User -- ", added)
+        xutils.log("Add user {}", added)
         # 先暴力解决
         xmanager.reload()
         return self.GET()

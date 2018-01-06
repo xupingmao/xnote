@@ -5,9 +5,7 @@ import os
 import xutils
 import xconfig
 import web.db as db
-
-sqlite3 = xutils.sqlite3
-
+from xutils import sqlite3
 config = xconfig
 
 class SqliteTableManager:
@@ -65,7 +63,6 @@ class SqliteTableManager:
         columns = self.execute("pragma table_info('%s')" % self.tablename, silent=True)
         # print(columns.description)
         # description结构
-        # ()
         for column in columns:
             name = column["name"]
             type = column["type"]

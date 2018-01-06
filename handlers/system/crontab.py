@@ -108,6 +108,8 @@ class ListHandler:
 
         def set_display_name(file):
             file.display_name = file.name if file.name != "" else file.url
+            if file.protocol == "script":
+                file.display_name = file.url
             return file
         task_list = list(map(set_display_name, task_list))
         return xtemplate.render("system/crontab.html", task_list = task_list)

@@ -62,19 +62,8 @@ MUTE_END_TIME = None
 PAGE_SIZE = 20
 IP_BLACK_LIST = ["192.168.56.1"] # this is vbox ip
 
-PARTNER_HOST_LIST = [
-    "192.168.0.9:8080",
-    "192.168.0.21:8080",
-    "192.168.0.10:8080"
-]
-
 # max file size to sync or backup
 MAX_FILE_SIZE = 10 * 1024 ** 2
-
-## 变量
-# 导航栏位置
-nav_position = "top"
-
 
 _config = {}
 
@@ -116,18 +105,13 @@ def init(path):
     makedirs(SCRIPTS_DIR)
     makedirs(TRASH_DIR)
 
-init(DATA_DIR)
-"""
-- host ip:port
-- 
-"""
 
 def get(name, default=None):
+    """获取配置，如果不存在返回default值"""
     if name in globals():
         return globals()[name]
     if name in _config:
         return _config[name]
-        
     if default:
         return default
     return None
@@ -221,9 +205,8 @@ class Properties(object):
     def reload(self):
         self.load_properties()
 
-# navigation = Properties("config/navigation.default.properties")
-# print(navigation.get_properties())
-
-
 def is_mute():
     return MUTE_END_TIME is not None and time.time() < MUTE_END_TIME
+
+
+init(DATA_DIR)
