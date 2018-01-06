@@ -42,6 +42,7 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 - `--ringtone yes`开启启动语音提醒
 - `--delay 60` 延迟启动，单位是秒，这个主要是为了避免重启的定时任务重复执行
 - `--useUrlencode yes`针对只支持ASCII编码的文件系统开启urlencode转换非ASCII码字符
+- `--initScript {script_name}` 启动时运行指定脚本完成自定义初始化操作
 
 ### 数据库升级
 
@@ -71,10 +72,10 @@ creator, modifier, groups, priority from file_20171124;
 ## 功能结构
 
 ### 知识库
-- Markdown编辑器，可视化编辑器
+- Markdown编辑器、可视化编辑器
 - 文档分组、标签
+- 文档分享
 - 搜索
-- 分享，可以把资料生成一个临时链接分享给朋友
 
 
 ### 日程管理

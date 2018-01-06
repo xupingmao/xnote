@@ -11,21 +11,16 @@ import argparse
 
 # insert after working dir
 sys.path.insert(1, "lib")
-
 import web
 import xutils
 import xconfig
 import xtables
 import xmanager
-
 from xutils import *
 from autoreload import AutoReloadThread
 
 config = xconfig
 
-def check_db():
-    xtables.init()
-        
 def handle_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="./data")
@@ -74,40 +69,36 @@ def handle_args():
 
 def main():
     global app
-
     handle_args()
     port = config.PORT
     if not os.environ.get("PORT"):
         os.environ["PORT"] = port
 
     var_env = dict()
-    
-    config.set("host", "localhost")
     config.set("port", port)
     config.set("start_time", xutils.format_datetime())
-    # I can reload the handlers by myself
+    # 关闭autoreload使用自己实现的版本
     app = web.application(list(), var_env, autoreload=False)
-    
-    check_db()
+    # 初始化数据库
+    xtables.init()
 
     # 最后的mapping，用于匹配优先级较低的处理器
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
-    mgr = xmanager.init(app, var_env, last_mapping = last_mapping)
-    mgr.reload()
+    manager = xmanager.init(app, var_env, last_mapping = last_mapping)
+    manager.reload()
 
-    def stop_callback():
-        # app.stop()
-        mgr.reload()
+    def reload_callback():
+        # 重新加载handlers目录下的所有模块
+        manager.reload()
         autoreload_thread.clear_watched_files()
-        # autoreload_thread.watch_dir("template")
-        autoreload_thread.watch_dir(config.HANDLERS_DIR, recursive=True)
+        autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
 
     # autoreload just reload models
-    autoreload_thread = AutoReloadThread(stop_callback)
-    autoreload_thread.watch_dir(config.HANDLERS_DIR, recursive=True)
+    autoreload_thread = AutoReloadThread(reload_callback)
+    autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
     autoreload_thread.start()
     # 启动定时任务检查
-    mgr.run_task()
+    manager.run_task()
 
     if xconfig.INIT_SCRIPT is not None:
         xutils.exec_script(xconfig.INIT_SCRIPT)

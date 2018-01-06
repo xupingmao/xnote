@@ -1,11 +1,9 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/??/??
-# 
 
 """显示代码原文"""
 from handlers.base import *
 from tornado.escape import xhtml_escape
-
 import xauth
 import xutils
 import xtemplate

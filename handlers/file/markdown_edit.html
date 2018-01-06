@@ -4,8 +4,6 @@
 <script src="/static/lib/codemirror/codemirror.min.js"></script>
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/codemirror.min.css">
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
-<!-- <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/xq-light.css">
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/eclipse.css"> -->
 <script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
 <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
 <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
@@ -144,20 +142,7 @@
     </form>
     </div>
 
-<div style="float:left;width:100%;">
-
 <script>
-    function switchRename() {
-        if ($("#renameDiv").css("display") == "none") {
-            $("#oldName").hide();
-            $("#renameDiv").css("display", "block");
-            $("#newName").val($("#oldName").html());
-        } else {
-            $("#oldName").show();
-            $("#renameDiv").css("display", "none");
-        }
-    }
-    
     function delLink() {
         var r = confirm("确认删除 {{file.name}}?");
         if (r) {
@@ -166,12 +151,6 @@
     }
 
     function codeInsert(code) {
-        // var cur = codeMirror.getCursor();
-        // if (cur == null || cur == undefined) {
-        //     var index = codeMirror.doc.getValue().length;
-        //     cur = codeMirror.posFromIndex(index);
-        // }
-        // codeMirror.replaceRange(code, cur, cur, "");
         codeMirror.replaceSelection(code, 'around');
     }
 
@@ -192,10 +171,6 @@
         $("#file").click();
     })
 
-        
-    // autosize textarea rows
-    var textContainer = document.getElementById("fileContent");
-
     function initCodeMirror() {
         if (window.codeMirror) {
             return;
@@ -210,8 +185,6 @@
         var codeMirror = CodeMirror.fromTextArea(editor, {
             lineNumbers:true,
             mode: { name: "text/x-markdown", fencedCodeBlocks: true},
-            // theme:"xq-light",
-            // theme: "monokai",
             lineWrapping: true,
             fixedGutter: true,
         });
@@ -220,7 +193,6 @@
             $("#markdown-input").val(codeMirror.doc.getValue());
         })
         window.codeMirror = codeMirror;
-        // setSize(width, height);
         codeMirror.setSize("auto", "auto");
     }
 
@@ -228,7 +200,9 @@
         var clientWidth = document.body.clientWidth;
         if (clientWidth < 500) {
             // 移动端CodeMirror支持不佳，经常无法触发光标
-            simpleEdit();
+            // simpleEdit();
+            // 部分功能必须依赖CodeMirror
+            mobileEdit();
             return;
         } else if (clientWidth < 1000) {
             // 至少需要500px方便编写
@@ -245,6 +219,9 @@
         initCodeMirror();
     }
 
+    /**
+     * 使用textarea编辑，对于CodeMirror支持不好的场景下使用
+     */
     function simpleEdit() {
         $("#markdown-input-div").removeClass("hide").addClass("col-md-12");
         $("#markdown-output-div").removeClass("col-md-12").addClass("hide");
@@ -261,7 +238,6 @@
         $("#markdown-input").css({height:height+"px"});
         $("#edit-div").show();
         $("#edit-btns").hide();
-
         initCodeMirror();
     }
     
@@ -288,9 +264,6 @@
         }
     }
     
-    // set marked code highlight function
-    // marked.defaults.highlight = highlight;
-
     function escape(html, encode) {
       return html
         .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
@@ -369,5 +342,4 @@
 </script>
 
 <!-- GROUPS: {{file.groups}} -->
-<!-- MD5: {{file.md5}} -->
 {% end %}

@@ -86,6 +86,8 @@ blockquote {
     font-style: italic;
 }
 
+/** 表格相关 **/
+
 table {
     font-family: verdana,arial,sans-serif;
     font-size:14px;
@@ -112,7 +114,18 @@ table td {
 .no-border-table td {
     border: none;
 }
-/** 标签样式结束 **/
+
+.table th{
+    border-color: #ccc;
+}
+
+.table td {
+    border-color: #ccc;
+}
+
+.row-no {
+    width: 50px;
+}
 
 .menu-selected {
     background: #0088cc;
@@ -128,12 +141,6 @@ table td {
 .nav-sidebar > .active > a:focus {
   color: #fff;
   background-color: #428bca;
-}
-
-.xnote-main {
-    /*padding-left: 10%;*/
-    /*padding-right: 10%;*/
-    width: 80%;
 }
 
 .hide {
@@ -479,8 +486,11 @@ li.menu-item:hover {
   margin: 8px 0px 0px 10px; 
   padding-bottom: 5px; 
 }
-.navMenu>li.active > ul.sub-menu, .navMenu>li>ul.sub-menu>li.active >ul.sub-menu { }
-.navMenu>li>ul.sub-menu li { background: none; margin: 0px; padding: 0px; }
+.navMenu>li>ul.sub-menu li { 
+    background: none; 
+    margin: 0px; 
+    padding: 0px; 
+}
 
 .navMenu>li>ul.sub-menu li>a { 
     display: block; 
@@ -491,7 +501,10 @@ li.menu-item:hover {
     clear: both; 
 }
 
-.navMenu>li>ul.sub-menu li>a.active, .navMenu>li>ul.sub-menu li>a:hover, .navMenu>li>ul.sub-menu>li.active >a { color: #FFF; background: #12181b; }
+.navMenu>li>ul.sub-menu li>a.active, .navMenu>li>ul.sub-menu li>a:hover, .navMenu>li>ul.sub-menu>li.active >a { 
+    color: #FFF; 
+    background: #12181b; 
+}
 
 #toggleMenuBtn {
     padding: 3px;
@@ -503,14 +516,6 @@ li.menu-item:hover {
 
 .form-control {
     width: 100%;
-}
-
-.table th{
-    border-color: #ccc;
-}
-
-.table td {
-    border-color: #ccc;
 }
 
 /** color **/

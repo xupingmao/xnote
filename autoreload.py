@@ -16,13 +16,9 @@ import traceback
 
 
 _has_execv = sys.platform != 'win32'
-
 _watched_files = []
-
 _reload_trys = []
-
 _callbacks = []
-
 _reload_attempt = False
 
 def print_exception(e):
@@ -75,11 +71,12 @@ class AutoReloadThread(Thread):
             try:
                 _reload_on_update(modify_times)
             except ReloadError as e:
+                # 通过抛出一个ReloadError来通知重新加载
                 modify_times = {}
-                for fn in _callbacks:
-                    fn()
+                for callback in _callbacks:
+                    callback()
             time.sleep(self.interval)
-            # this is not stable
+
 
 def _check_watch_dirs(watch_dirs):
     for dir in watch_dirs:

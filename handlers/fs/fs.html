@@ -113,7 +113,6 @@
 {% block body %}
 
 {% init find_key = "" %}
-
 {% set search_category = "fs" %}
 
 <div class="fs-path">
@@ -186,7 +185,7 @@
                 <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>
             {% end %}
 
-            {% if item.ext in (".txt") %}
+            {% if item.ext == ".txt" %}
                 <a class="item-option" href="/tools/bookreader?path={{item.path}}&from=/fs/{{path}}">阅读</a>
             {% end %}
 

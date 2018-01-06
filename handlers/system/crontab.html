@@ -1,4 +1,5 @@
 {% extends base.html %}
+
 {% block body %}
 <div class="col-md-12">
     <a href="/system/script" class="tab-link">脚本</a>
@@ -21,7 +22,7 @@
     {% for index, task in enumerate(task_list) %}
     {% set name = task.url %}
     <tr>
-        <td>{{index+1}}</td>
+        <td class="row-no">{{index+1}}</td>
         <td>
             <div style="word-wrap: break-word; width: 300px;">
                 {% if task.protocol == "script" %}

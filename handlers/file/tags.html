@@ -7,7 +7,6 @@
 
     <span id="edit-tags-span" style="display: none;">
         <input id="tagEditText" type="text" value="" />
-        <!-- <a href="/help?name=tag">帮助</a> -->
         <input type="button" id="tagEditBtn" class="btn" value="确认"/>
     </span>
 
@@ -61,7 +60,7 @@ function postTagUpdate() {
             // alert(data);
             toggleFileTagsEditor();
             initTags();
-    })
+    });
 }
 
 $("#tagEditBtn").on("click", function() {
