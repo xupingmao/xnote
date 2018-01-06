@@ -15,6 +15,8 @@ from collections import OrderedDict
 DEV_MODE = False
 # 开启调试
 DEBUG = False
+# 调试盒子模型，针对某些不方便调试的浏览器
+DEBUG_HTML_BOX = False
 PORT = "1234"
 minthreads = 10
 # 打开浏览器

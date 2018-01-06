@@ -12,15 +12,11 @@ import web.db as db
 import xconfig
 import xtables
 import xutils
-
-from xutils import readfile, savetofile
+from xutils import readfile, savetofile, sqlite3
 from util import dateutil
 
-sqlite3 = xutils.sqlite3
 MAX_VISITED_CNT = 200
-
 readFile = readfile
-
 config  = xconfig
 DB_PATH = config.DB_PATH
 
@@ -146,7 +142,6 @@ def to_sqlite_obj(text):
         return "NULL"
     if not isinstance(text, six.string_types):
         return repr(text)
-    # text = text.replace('\\', '\\')
     text = text.replace("'", "''")
     return "'" + text + "'"
     
@@ -186,12 +181,13 @@ class RowDesc:
 def get_file_db():
     return xtables.get_file_table()
 
-def get_pathlist(db, file):
+def get_pathlist(db, file, limit = 2):
     pathlist = []
-    # TODO LIMIT
     while file is not None:
         file.url = "/file/view?id=%s" % file.id
         pathlist.insert(0, file)
+        if len(pathlist) >= limit:
+            break
         if file.parent_id == 0:
             break
         else:
@@ -360,27 +356,7 @@ def printFile(file):
             printFile(single)
         return
     print('name=%s, related=%s, visited_cnt=%s' % (file.name, file.related, file.visited_cnt))
-    
 
-def static_search(context, words):
-    """search file, sqlite do not support call between different threads"""
-    return FileService().smart_search(context, words)
-
-def full_search(words):
-    """ full search the files """
-    if not isinstance(words, list):
-        words = [words]
-    content_like_list = []
-    # name_like_list = []
-    for word in words:
-        content_like_list.append('content like %s ' % repr('%' + word.upper() + '%'))
-    # for word in words:
-    #     name_like_list.append("related like %s " % repr("%" + word.upper() + '%'))
-    sql = "select * from file where (%s) and is_deleted != 1 limit 1000" \
-        % " AND ".join(content_like_list)
-    all = FileDB().execute(sql)
-    return [FileDO.fromDict(item) for item in all]
-    # context["files"] = [FileDO.fromDict(item) for item in all]
 
 def build_sql_row(obj, k):
     v = getattr(obj, k)

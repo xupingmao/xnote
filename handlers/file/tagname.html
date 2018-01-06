@@ -2,5 +2,6 @@
 
 {% block body %}
     <h2>标签: {{tagname}}</h2>
+    {% set page_url="/file/tagname/"+tagname+"?page=" %}
     {% include "file/group.html" %}
 {% end %}

@@ -91,7 +91,8 @@ img {
     {% init pathlist = [] %}
     {% init file = None %}
     {% init show_search_div = True %}
-    {% init show_add_btns = False %}
+    {% init show_add_file = False %}
+    {% init show_add_group = False %}
     {% init show_path_list = True %}
 
     {% if file != None %}
@@ -103,13 +104,17 @@ img {
         {% include "search.html" %}
     {% end %}
 
-    {% if show_add_btns %}
+    {% if show_add_file or show_add_group %}
     <div class="col-md-12" style="padding-bottom: 5px;">
         {% if _has_login %}
         <div class="left" style="float: left;">
+            {% if show_add_file %}
             <input type="button" class="link-btn" value="新建" message="资料名" action="" href="/file/add?parent_id={{file_id}}"/>
+            {% end %}
+            {% if show_add_group %}
             <input type="button" class="prompt-btn" value="新建组" message="分组名" 
             action="/file/add?type=group&parent_id={{file_id}}&name="/>
+            {% end %}
         </div>
         {% end %}
     </div>

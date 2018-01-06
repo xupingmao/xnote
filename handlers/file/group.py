@@ -7,7 +7,6 @@ import xtables
 import xauth
 import xconfig
 import xmanager
-
 from . import dao
 from xutils import Storage
 
@@ -88,7 +87,7 @@ class GroupListHandler:
                 file_type="group",
                 pseudo_groups=True,
                 show_search_div = True,
-                show_add_btns = True,
+                show_add_group = True,
                 files=data)
 
 class RemovedHandler:

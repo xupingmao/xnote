@@ -3,7 +3,6 @@
 import profile
 import math
 import re
-
 from handlers.base import *
 import xauth
 import xutils
@@ -13,13 +12,7 @@ import xtemplate
 import xmanager
 from web import HTTPError
 from . import dao
-
 config = xconfig
-
-def date2str(d):
-    ct = time.gmtime(d / 1000)
-    return time.strftime('%Y-%m-%d %H:%M:%S', ct)
-
 
 def try_decode(bytes):
     try:
@@ -36,7 +29,7 @@ class ViewHandler:
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         db   = xtables.get_file_table()
         user_name = xauth.get_current_name()
-        show_add_btns = False
+        show_add_file = False
 
         if id == "" and name == "":
             raise HTTPError(504)
@@ -69,7 +62,7 @@ class ViewHandler:
                 offset=(page-1)*pagesize)
             content = file.get_content()
             show_search_div = True
-            show_add_btns = True
+            show_add_file = True
         elif file.type == "md" or file.type == "text":
             dao.visit_by_id(id, db)
             content = file.get_content()
@@ -88,8 +81,7 @@ class ViewHandler:
         return xtemplate.render(template_name,
             file=file, 
             op=op,
-            show_add_btns = show_add_btns,
-            date2str=date2str,
+            show_add_file = show_add_file,
             can_edit = can_edit,
             pathlist = pathlist,
             page_max = math.ceil(amount/pagesize),
@@ -102,7 +94,6 @@ def sqlite_escape(text):
         return "NULL"
     if not (isinstance(text, str)):
         return repr(text)
-    # text = text.replace('\\', '\\')
     text = text.replace("'", "''")
     return "'" + text + "'"
 
@@ -152,7 +143,6 @@ class UpdateHandler(BaseHandler):
             file.version = version
             return self.render("file/view.html", file=file, 
                 content = content, 
-                date2str=date2str,
                 children = [],
                 error = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
 

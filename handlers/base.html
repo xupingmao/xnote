@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html><head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0,user-scalable=0"/>
 
@@ -16,14 +15,21 @@
 <script type="text/javascript" src="/system/stats"></script>
 <script type="text/javascript" src="/static/js/xnote-ui.js"></script>
 
-  {% block head %} {% end %}
+{% block head %} {% end %}
+
+{% if xconfig.DEBUG_HTML_BOX %}
+<style>
+  * {
+    box-sizing: border-box;
+    border: solid 1px red;
+  }
+</style>
+{% end %}
 
 </head>
 <body>
 <div class="header">
-  <div class="toggleMenu" style="margin-left: 15px; cursor: pointer;">
-  <!-- <i class="fa fa-bars fa-2x"></i> -->
-  </div>
+  <div class="toggleMenu" style="margin-left: 15px; cursor: pointer;"></div>
 </div>
 
 <div class="navMenuTop">
@@ -164,10 +170,6 @@ $(function() {
       || /\/tools\/.*/.test(pathname))) {
     expandMenu($("#navSystem"));
   }
-
-  // $(window).resize(function () {
-  //   checkResize();
-  // });
 });
 </script>
 </body>
