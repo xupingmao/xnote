@@ -536,25 +536,7 @@ def is_linux():
     return os.name == "linux"
 
 def get_text_ext():
-    return (
-        ".md", 
-        ".csv", 
-        ".properties", 
-        ".java", 
-        ".c",
-        ".cpp",
-        ".h",
-        ".hpp",
-        ".py",
-        ".lua",
-        ".gradle",
-        ".js",
-        ".json",
-        ".command",
-        ".scala",
-        ".yml",
-        ".php"
-    )
+    return xconfig.FS_TEXT_EXT_LIST
 
 def is_editable(filename):
     name, ext = os.path.splitext(filename)

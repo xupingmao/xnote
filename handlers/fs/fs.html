@@ -139,13 +139,15 @@
         <input type="button" class="btn" value="重命名" id="renameBtn" 
             message="重命名为">
         <input type="button" class="btn-danger" value="删除" id="deleteFile"/>
-
         <input type="button" class="btn advanced-opt" value="文件浏览器" id="openDirectory"/>
         <input type="button" class="link-btn advanced-opt" href="/code/analyze?path={{path}}&recursive=on" value="高级搜索"/>
         <input type="button" class="link-btn advanced-opt" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
         <input type="button" class="link-btn advanced-opt" href="/tools/zip?dirname={{path}}" value="压缩"/>
         <input id="uploadFileBtn" type="button" class="btn advanced-opt" value="上传">
-        <!-- <input type="button" class="btn advanced-opt command-btn" data-command="openTerminal" value="终端"> -->
+
+        {% for item in xconfig.FS_OPT_BTNS %}
+            <input type="button" class="link-btn advanced-opt" x-href="{{item.url}}?path={{path}}" value="{{item.name}}"/>
+        {% end %}
 
         <input id="showMoreOptsBtn" type="button" class="btn" value="切换"/>
     </div>
@@ -167,7 +169,7 @@
 <table class="col-md-12 no-border-table">
 {% for item in filelist %}
     {# 隐藏文件 #}
-    {% if xconfig.HIDE_FILES and item.name[0] == "." %}
+    {% if xconfig.FS_HIDE_FILES and item.name[0] == "." %}
         {% continue %}
     {% end %}
 
@@ -198,7 +200,7 @@
                 <a class="item-option" href="/fs/{{item.path}}?type=text">查看</a>
             {% end %}
 
-            {% if xutils.is_editable(item.path) or item.ext in (".js", ".command", ".xml", ".html") %}
+            {% if item.ext in xconfig.FS_TEXT_EXT_LIST %}
                 <a class="item-option" href="/code/view_source?path={{url_escape(item.path)}}">编辑</a>
             {% end %}
 

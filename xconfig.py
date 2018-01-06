@@ -25,7 +25,6 @@ OPEN_IN_BROWSER = False
 USE_CACHE_SEARCH = False
 # 文件系统使用urlencode方式
 USE_URLENCODE = False
-HIDE_FILES = True
 # 初始化脚本
 INIT_SCRIPT = None
 
@@ -64,6 +63,46 @@ IP_BLACK_LIST = ["192.168.56.1"] # this is vbox ip
 
 # max file size to sync or backup
 MAX_FILE_SIZE = 10 * 1024 ** 2
+
+
+FS_HIDE_FILES = True
+# 文件管理扩展的选项 Storage(name=, url=)
+FS_OPT_BTNS = []
+# 文本文件后缀
+FS_TEXT_EXT_LIST = [
+    ".java",  # Java
+    ".scala",
+    ".c",     # C语言
+    ".h",
+    ".cpp",   # C++
+    ".hpp",
+    ".vm",    # velocity
+    ".html",  # HTML
+    ".htm",
+    ".js",    # JavaScript
+    ".json",  
+    ".css", 
+    ".xml",   # XML
+    ".xsd",   # XML schema
+    ".csv",   # csv table
+    ".proto", # proto buf
+    ".py",    # Python
+    ".txt",   # Text
+    ".lua",   # Lua
+    ".rb",    # Ruby
+    ".go",    # Go
+    ".m",     # Objective-C, Matlab
+    ".conf",  # configuration
+    ".sh",     # Linux shell
+    ".bat",    # Windows shell
+    ".cmd",    # Windows shell
+    ".command" # Mac shell
+    ".ini",
+    ".rc",
+    ".properties",
+    ".gradle",
+    ".md"
+]
 
 _config = {}
 

@@ -3,36 +3,12 @@ import re
 import os
 import xtemplate
 import xutils
+import xconfig
 from xutils import xhtml_escape, Storage
 
 """代码分析工具，对文本文件进行全文搜索"""
 
-CODE_EXT_LIST = (".java",  # Java
-                 ".c",     # C语言
-                 ".h",
-                 ".cpp",   # C++
-                 ".hpp",
-                 ".vm",    # velocity
-                 ".html",  # HTML
-                 ".htm",
-                 ".js",    
-                 ".json", 
-                 ".css", 
-                 ".xml",   # XML
-                 ".xsd",
-                 ".csv",   # csv table
-                 ".proto", # proto buf
-                 ".py",    # Python
-                 ".txt",   # Text
-                 ".lua",   # Lua
-                 ".rb",    # Ruby
-                 ".go",    # Go
-                 ".m",     # Objective-C, Matlab
-                 ".conf",  # configuration
-                 ".ini",
-                 ".rc",
-                 ".md"
-                 )
+CODE_EXT_LIST = xconfig.FS_TEXT_EXT_LIST
 
 # TODO 对于小文件可以尝试当成文本文件来处理
 

@@ -3,20 +3,16 @@
 import os
 import web
 import re
+import xconfig
 import xauth
 import xtemplate
 import xutils
 
 from collections import OrderedDict
 
-CODE_EXT_LIST = [
-    ".c",    ".cpp", ".h",       # C 
-    ".java", 
-    ".js",   ".py",  ".lua", ".rb", ".php", # Scripts
-    ".html", ".css", ".xml",         # xml/css
-]
-
+CODE_EXT_LIST = xconfig.FS_TEXT_EXT_LIST
 CODE_EXT_DICT = OrderedDict()
+CODE_EXT_DICT["ALL"]        = CODE_EXT_LIST
 CODE_EXT_DICT["Python"]      = [".py"]
 CODE_EXT_DICT["Python(web)"] = [".py", ".html"]
 CODE_EXT_DICT["Java"]        = [".java"]
@@ -101,11 +97,12 @@ class LineCounter:
             blanklines = total_blanks)
         total.fname = None
 
-        line_infos.insert(0, total)
         if self.lines_sort:
             line_infos.sort(key = lambda info: -info.lines)
         else:
             line_infos.sort(key = lambda info: info.display_name)
+        
+        line_infos.insert(0, total)
         return line_infos
 
 
