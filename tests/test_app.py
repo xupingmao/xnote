@@ -229,16 +229,16 @@ class TestMain(unittest.TestCase):
         self.check_OK("/system/crontab/remove?id={}".format(sched2.id))
 
     
-    def test_todo_list(self):
-        xconfig.clear_todo_list()
-        xconfig.add_todo(message="Everyone can see it")
-        todo_list = xconfig.get_todo_list(user='admin')
-        self.assertEqual(1, len(todo_list))
+    def test_notice_list(self):
+        xconfig.clear_notice_list()
+        xconfig.add_notice(message="Everyone can see it")
+        notice_list = xconfig.get_notice_list(user='admin')
+        self.assertEqual(1, len(notice_list))
     
-    def test_todo_list_user(self):
-        xconfig.clear_todo_list()
-        xconfig.add_todo(user="nobody", message="Nobody can see it")
-        todo_list = xconfig.get_todo_list(user='admin')
-        self.assertEqual(0, len(todo_list))
+    def test_notice_list_user(self):
+        xconfig.clear_notice_list()
+        xconfig.add_notice(user="nobody", message="Nobody can see it")
+        notice_list = xconfig.get_notice_list(user='admin')
+        self.assertEqual(0, len(notice_list))
 
 

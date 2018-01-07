@@ -111,8 +111,8 @@ FS_TEXT_EXT_LIST = [
     ".md"
 ]
 
-# 代办事项
-_todo_list = []
+# 通知公告
+_notice_list = []
 # 配置项
 _config = {}
 
@@ -283,19 +283,24 @@ class Properties(object):
         self.load_properties()
 
 def is_mute():
+    """是否静音"""
     return MUTE_END_TIME is not None and time.time() < MUTE_END_TIME
 
-def add_todo(user=None, message=None, year=None, month=None, day=None):
+def add_notice(user=None,
+        message=None, 
+        year=None, 
+        month=None, 
+        day=None):
     """
-    添加todo事件, 条件为None默认永真，比如user为None，向所有用户推送
+    添加通知事件, 条件为None默认永真，比如user为None，向所有用户推送
     """
-    _todo_list.append(Storage(user=user, year=year, month=month, day=day, message=message))
+    _notice_list.append(Storage(user=user, year=year, month=month, day=day, message=message))
 
-def get_todo_list(type='today', user=None):
+def get_notice_list(type='today', user=None):
     """
-    获取todo列表,user不为空时通过它过滤
-    - today 今天的todo列表
-    - all 所有的todo列表
+    获取通知列表,user不为空时通过它过滤
+    - today 今天的通知
+    - all 所有的通知
     """
     tm = time.localtime()
     def today_filter(todo):
@@ -312,12 +317,12 @@ def get_todo_list(type='today', user=None):
             return False
         return True
     if type == 'today':
-        return list(filter(today_filter, _todo_list))
+        return list(filter(today_filter, _notice_list))
     if type == "all":
-        return _todo_list
+        return _notice_list
 
-def clear_todo_list():
-    global _todo_list
-    _todo_list = [] # Py2 do not have clear method
+def clear_notice_list():
+    global _notice_list
+    _notice_list = [] # Py2 do not have clear method
 
 init(DATA_DIR)

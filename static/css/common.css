@@ -505,7 +505,7 @@ li.menu-item:hover {
     background: lightblue;
 }
 
-.todo {
+.notice {
     border: 1px solid #ccc;
     background-color: #cef2e0;
     margin-bottom: 3px;
@@ -864,8 +864,3 @@ li.menu-item:hover {
     color: blue;
 }
 
-.notice {
-    background-color: #cf9;
-    padding: 5px;
-    box-sizing: border-box;
-}

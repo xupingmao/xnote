@@ -87,8 +87,8 @@
 
 <div class="main">
   
-  {% for item in xconfig.get_todo_list('today', _user_name) %}
-    <div class="todo">{{item.message}}</div>
+  {% for item in xconfig.get_notice_list('today', _user_name) %}
+    <div class="notice">{{item.message}}</div>
   {% end %}
 
   {% block body %} {% end %}
