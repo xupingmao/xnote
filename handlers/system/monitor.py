@@ -1,34 +1,22 @@
 # -*- coding: utf-8 -*-
-
 import web
 import time
 import os
+import sys
 import platform
 import xutils
 import logging
-from logging.handlers import TimedRotatingFileHandler
 import json
 import threading
 import re
 import xtemplate
 import xconfig
+from logging.handlers import TimedRotatingFileHandler
 
 try:
     import psutil
 except ImportError as e:
     psutil = None
-
-sys = xutils.sys
-
-def format_size(size):
-    if size < 1024:
-        return '%s B' % size
-    elif size < 1024 **2:
-        return '%.2f K' % (float(size) / 1024)
-    elif size < 1024 ** 3:
-        return '%.2f M' % (float(size) / 1024 ** 2)
-    else:
-        return '%.2f G' % (float(size) / 1024 ** 3)
 
 def get_mem_info():
     mem_used = 0
@@ -40,14 +28,12 @@ def get_mem_info():
         sys_mem = psutil.virtual_memory()
         sys_mem_used = sys_mem.used
         sys_mem_total = sys_mem.total
-        formated_mem_size = format_size(mem_used)
+        formated_mem_size = xutils.format_size(mem_used)
     elif xutils.is_windows():
         mem_usage = os.popen("tasklist /FI \"PID eq %s\" /FO csv" % os.getpid()).read()
         str_list = mem_usage.split(",")
         pattern = re.compile(r"[0-9,]+ [kK]")
         mem_list = pattern.findall(mem_usage)
-        # print(mem_list)
-        # mem_used = int(str_list[1])
         formated_mem_size = mem_list[-1]
     else:
         # ps -C -p 10538
@@ -69,21 +55,19 @@ class handler:
             sys_mem = psutil.virtual_memory()
             sys_mem_used = sys_mem.used
             sys_mem_total = sys_mem.total
-            formated_mem_size = format_size(mem_used)
+            formated_mem_size = xutils.format_size(mem_used)
         elif xutils.is_windows():
             mem_usage = os.popen("tasklist /FI \"PID eq %s\" /FO csv" % os.getpid()).read()
             str_list = mem_usage.split(",")
             pattern = re.compile(r"[0-9,]+ [kK]")
             mem_list = pattern.findall(mem_usage)
-            # print(mem_list)
-            # mem_used = int(str_list[1])
             formated_mem_size = mem_list[-1]
         else:
             formated_mem_size = ""
         thread_cnt = len(threading.enumerate())
         return xtemplate.render("system/monitor.html", 
             sys_mem_used = formated_mem_size,
-            sys_mem_total = format_size(sys_mem_total),
+            sys_mem_total = xutils.format_size(sys_mem_total),
             python_version = sys.version,
             sys_version = platform.version(),
             processor = platform.processor(),
@@ -91,5 +75,3 @@ class handler:
             start_time = xconfig.get("start_time"))
 
 
-    def POST(self):
-        pass

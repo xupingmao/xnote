@@ -1,11 +1,17 @@
 # encoding=utf-8
-'''system configuration
-约定目录叫 XXX_DIR
-文件叫 XXX_FILE
+'''
+xnote系统配置
+- 约定目录叫 XXX_DIR
+- 文件叫 XXX_FILE
 '''
 import os
 import time
 from collections import OrderedDict
+
+__version__ = "1.0"
+__author__ = "xupingmao (578749341@qq.com)"
+__copyright__ = "(C) 2016-2017 xupingmao. GNU GPL 3."
+__contributors__ = []
 
 ##################################
 # 系统配置项
@@ -77,6 +83,7 @@ FS_TEXT_EXT_LIST = [
     ".cpp",   # C++
     ".hpp",
     ".vm",    # velocity
+    ".vim",   # VIM文件
     ".html",  # HTML
     ".htm",
     ".js",    # JavaScript
@@ -104,17 +111,63 @@ FS_TEXT_EXT_LIST = [
     ".md"
 ]
 
+# 代办事项
+_todo_list = []
+# 配置项
 _config = {}
 
 def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
+
+class Storage(dict):
+    """
+    A Storage object is like a dictionary except `obj.foo` can be used
+    in addition to `obj['foo']`.
+    
+        >>> o = storage(a=1)
+        >>> o.a
+        1
+        >>> o['a']
+        1
+        >>> o.a = 2
+        >>> o['a']
+        2
+        >>> o.errKey
+        None
+    """
+    def __init__(self, default_value=None, **kw):
+        self.default_value = default_value
+        super(Storage, self).__init__(**kw)
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError as k:
+            return self.default_value
+    
+    def __setattr__(self, key, value): 
+        self[key] = value
+    
+    def __delattr__(self, key):
+        try:
+            del self[key]
+        except KeyError as k:
+            raise AttributeError(k)
+    
+    def __repr__(self):     
+        return '<MyStorage ' + dict.__repr__(self) + '>'
+
+
 def init(path):
-    """初始化默认的Data目录,启动时必须调用"""
+    """
+    初始化系统配置项,启动时必须调用
+    """
     global DATA_PATH
     global DATA_DIR
     global DB_PATH
+    global DB_FILE
     global BACKUP_DIR
     global APP_DIR
     global TMP_DIR
@@ -123,23 +176,26 @@ def init(path):
     global DATA_ZIP
     global TRASH_DIR
     global LOG_PATH
+    global LOG_FILE
 
-    makedirs(path)
     DATA_PATH = path
     DATA_DIR  = path
     # 数据库地址
-    DB_PATH    = os.path.join(DATA_PATH, "data.db")
+    DB_PATH      = os.path.join(DATA_PATH, "data.db")
     # 备份数据地址
-    BACKUP_DIR = os.path.join(DATA_PATH, "backup")
+    BACKUP_DIR   = os.path.join(DATA_PATH, "backup")
     # APP地址
     APP_DIR      = os.path.join(DATA_PATH, "app")
     TMP_DIR      = os.path.join(DATA_PATH, "tmp")
     SCRIPTS_DIR  = os.path.join(DATA_DIR, "scripts")
     CODE_ZIP     = os.path.join(DATA_DIR, "code.zip")
     DATA_ZIP     = os.path.join(DATA_DIR, "data.zip")
-    TRASH_DIR  = os.path.join(DATA_DIR, "trash")
-    LOG_PATH   = os.path.join(DATA_DIR, "xnote.log")
+    TRASH_DIR    = os.path.join(DATA_DIR, "trash")
+    LOG_PATH     = os.path.join(DATA_DIR, "xnote.log")
+    DB_FILE      = DB_PATH
+    LOG_FILE     = LOG_PATH
 
+    makedirs(DATA_DIR)
     makedirs(TMP_DIR)
     makedirs(SCRIPTS_DIR)
     makedirs(TRASH_DIR)
@@ -171,24 +227,6 @@ def has_config(key, subkey = None):
     
 def has(key):
     return has_config(key)
-
-class XConfig:
-    """配置管理器"""
-
-    def __init__(self, fname):
-        self.fname = fname
-
-    def load(self):
-        pass
-
-    def getvalue(self, section, key, type=None):
-        pass
-
-    def setvalue(self, section, key, value):
-        pass
-
-    def save(self):
-        pass
         
 class Properties(object): 
     """Properties 文件处理器"""
@@ -247,5 +285,38 @@ class Properties(object):
 def is_mute():
     return MUTE_END_TIME is not None and time.time() < MUTE_END_TIME
 
+def add_todo(user=None, message=None, year=None, month=None, day=None):
+    """
+    添加todo事件, 条件为None默认永真，比如user为None，向所有用户推送
+    """
+    _todo_list.append(Storage(user=user, year=year, month=month, day=day, message=message))
+
+def get_todo_list(type='today', user=None):
+    """
+    获取todo列表,user不为空时通过它过滤
+    - today 今天的todo列表
+    - all 所有的todo列表
+    """
+    tm = time.localtime()
+    def today_filter(todo):
+        year  = tm.tm_year
+        month = tm.tm_mon
+        day  = tm.tm_mday
+        if todo.user != None and user != todo.user:
+            return False
+        if todo.year != None and todo.year != year:
+            return False
+        if todo.month != None and todo.month != month:
+            return False
+        if todo.day != None and todo.day != day:
+            return False
+        return True
+    if type == 'today':
+        return list(filter(today_filter, _todo_list))
+    if type == "all":
+        return _todo_list
+
+def clear_todo_list():
+    _todo_list.clear()
 
 init(DATA_DIR)

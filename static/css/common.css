@@ -132,10 +132,6 @@ table td {
     color: #fff;
 }
 
-.nav-sidebar {
-    /*position: fixed;*/
-}
-
 .nav-sidebar > .active > a,
 .nav-sidebar > .active > a:hover,
 .nav-sidebar > .active > a:focus {
@@ -161,12 +157,9 @@ table td {
     padding-top: 3px;
 }
 
+/** 笔记列表样式 **/
 .note-head {
     font-size: 20px;
-}
-
-.note-name {
-    /*font-size: 20px;*/
 }
 
 .note-name a {
@@ -510,6 +503,13 @@ li.menu-item:hover {
     padding: 3px;
     border-style: solid;
     background: lightblue;
+}
+
+.todo {
+    border: 1px solid #ccc;
+    background-color: #cef2e0;
+    margin-bottom: 3px;
+    padding-left: 3px;
 }
 
 /** base END **/

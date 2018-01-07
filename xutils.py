@@ -2,7 +2,7 @@
 
 """
 utilities for xnote
-xutils是暴露出去的统一接口
+xutils是暴露出去的统一接口，类似于windows.h一样
 如果是一个人开发，可以直接写在这个文件中,
 如果是团队开发，依然建议通过xutils暴露统一接口，其他的utils由xutils导入
 """
@@ -24,9 +24,16 @@ import web
 import xconfig
 
 from fnmatch import fnmatch
+from xconfig import Storage
 from util.ziputil import *
 from util.netutil import splithost
 from util.textutil import edit_distance
+from tornado.escape import xhtml_escape        
+from web.utils import safestr, safeunicode
+from util.dateutil import *
+from util.netutil  import *
+from util.fsutil   import *
+from util.textutil import text_contains
 
 try:
     import sqlite3
@@ -73,14 +80,9 @@ else:
 # 而Py3中的getstatusoutput则是对subprocess.Popen的封装
 # Py2的getstatusoutput, 注意原来的windows下不能正确运行，但是下面改进版的可以运行
 
-from util.dateutil import *
-from util.netutil  import *
-from util.fsutil   import *
-from util.textutil import text_contains
-
 if PY2:
     def getstatusoutput(cmd):
-        ## Return (status, output) of executing cmd in a shell.
+        """Return (status, output) of executing cmd in a shell."""
         import os
         # old
         # pipe = os.popen('{ ' + cmd + '; } 2>&1', 'r')
@@ -92,9 +94,6 @@ if PY2:
         if text[-1:] == '\n': text = text[:-1]
         return sts, text
 
-
-from tornado.escape import xhtml_escape        
-from web.utils import safestr, safeunicode
 
 #################################################################
 
@@ -114,8 +113,6 @@ wday_map = {
 def print_exc():
     """打印系统异常堆栈"""
     ex_type, ex, tb = sys.exc_info()
-    # print(ex)
-    # traceback.print_tb(tb)
     print(traceback.format_exc())
 
 print_stacktrace = print_exc
@@ -123,44 +120,6 @@ print_stacktrace = print_exc
 def print_web_ctx_env():
     for key in web.ctx.env:
         print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
-
-
-class Storage(dict):
-    """
-    A Storage object is like a dictionary except `obj.foo` can be used
-    in addition to `obj['foo']`.
-    
-        >>> o = storage(a=1)
-        >>> o.a
-        1
-        >>> o['a']
-        1
-        >>> o.a = 2
-        >>> o['a']
-        2
-    """
-    def __init__(self, default_value=None, **kw):
-        self.default_value = default_value
-        super(Storage, self).__init__(**kw)
-
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError as k:
-            return self.default_value
-    
-    def __setattr__(self, key, value): 
-        self[key] = value
-    
-    def __delattr__(self, key):
-        try:
-            del self[key]
-        except KeyError as k:
-            raise AttributeError(k)
-    
-    def __repr__(self):     
-        return '<MyStorage ' + dict.__repr__(self) + '>'
-
 
 class SearchResult(dict):
 
@@ -474,7 +433,7 @@ def quote_unicode(url):
     # JavaScript的encodeURIComponent会编码+,&,=等字符
     def quote_char(c):
         # ASCII 范围 [0-127]
-        # 处理空格 ' '
+        # 32=空格
         if c == 32: 
             return '%20'
         if c <= 127:
@@ -584,7 +543,7 @@ def say(msg):
         mac_say(msg)
     else:
         # 防止调用语音API的程序没有正确处理循环
-        time.sleep(1)
+        time.sleep(0.5)
 
 
 def exec_script(name, new_window=True):
@@ -647,12 +606,13 @@ def exec_script(name, new_window=True):
 ##   Web.py Utilities web.py工具类的封装
 #################################################################
 def get_argument(key, default_value=None, type = None, strip=False):
+    ctx_key = "_xnote.input"
     if isinstance(default_value, dict):
         return web.input(**{key: default_value}).get(key)
-    _input = web.ctx.get("_xnote.input")
+    _input = web.ctx.get(ctx_key)
     if _input == None:
         _input = web.input()
-        web.ctx["_xnote.input"] = _input
+        web.ctx[ctx_key] = _input
     value = _input.get(key)
     if value is None or value == "":
         _input[key] = default_value
@@ -700,6 +660,10 @@ def profile():
 _cache_dict = dict()
 
 class CacheObj:
+    """
+    缓存对象，包含缓存的key和value，有一个公共的缓存队列
+    每次生成一个会从缓存队列中取出一个检查是否失效，同时把自己放入队列
+    """
     _queue = Queue()
 
     def __init__(self, key, value, expire):
@@ -734,7 +698,8 @@ class CacheObj:
         _cache_dict.pop(self.key, None)
 
 def cache(key=None, prefix=None, expire=600):
-    """缓存的装饰器，会自动清理失效的缓存
+    """
+    缓存的装饰器，会自动清理失效的缓存
     TODO 可以考虑缓存持久化的问题
     """
     def deco(func):

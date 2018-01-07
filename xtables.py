@@ -1,6 +1,10 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-"""Xnote的数据库配置，考虑到持续运行的维护，增加表结构需要非常慎重"""
+"""
+Xnote的数据库配置
+    考虑到持续运行的维护，增加表结构需要非常慎重
+    考虑清楚你需要的是数据还是配置，如果是配置可以通过扩展脚本配置xconfig
+"""
 import os
 import xutils
 import xconfig
@@ -16,7 +20,7 @@ class SqliteTableManager:
         self.db = sqlite3.connect(filename)
         if no_pk:
             # 没有主键，创建一个占位符
-            sql = "CREATE TABLE IF NOT EXISTS `%s` (dummy int);" % tablename
+            sql = "CREATE TABLE IF NOT EXISTS `%s` (_id int);" % tablename
         elif pkName is None:
             # 只有integer允许AUTOINCREMENT
             sql = "CREATE TABLE IF NOT EXISTS `%s` (id integer primary key autoincrement);" % tablename
@@ -105,6 +109,7 @@ class SqliteTableManager:
 TableManager = SqliteTableManager
 
 def init_table_test():
+    """测试数据库"""
     path = os.path.join(xconfig.DATA_DIR, "test.db")
     with TableManager(path, "test") as manager:
         manager.add_column("id1", "integer", 0)
@@ -218,9 +223,11 @@ def init_table_user():
         manager.add_column("token",      "text", "")
 
 def init_table_message():
-    # 用来存储比较短的消息,消息和资料库的主要区别是消息存储较短的单一信息
-    # 消息支持状态
-    # 2017/05/29
+    """
+    用来存储比较短的消息,消息和资料库的主要区别是消息存储较短的单一信息
+    - 消息支持状态
+    - 2017/05/29
+    """
     with TableManager(config.DB_PATH, "message") as manager:
         manager.add_column("ctime", "text", "")
         manager.add_column("mtime", "text", "")
@@ -284,7 +291,10 @@ class FakeDB():
         return IterBetter(iter([]))
 
 class DBWrapper:
-    """ 基于web.db的装饰器 """
+    """
+    基于web.db的装饰器
+    SqliteDB是全局唯一的，它的底层使用了连接池技术，每个线程都有独立的sqlite连接
+    """
 
     _pool = dict()
 

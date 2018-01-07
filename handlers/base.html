@@ -86,6 +86,11 @@
 </div>
 
 <div class="main">
+  
+  {% for item in xconfig.get_todo_list('today', _user_name) %}
+    <div class="todo">{{item.message}}</div>
+  {% end %}
+
   {% block body %} {% end %}
   <div class="footer"></div>
 </div>

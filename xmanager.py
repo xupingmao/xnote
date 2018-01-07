@@ -1,5 +1,6 @@
 # encoding:utf-8
-"""Xnote 模块管理器
+"""
+Xnote 模块管理器
  - 加载并注册模块
  - 执行cron定时任务
 """
@@ -131,8 +132,8 @@ def log(msg):
     six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
 
 class ModelManager:
-    """模块管理器
-    
+    """
+    模块管理器
     启动时自动加载`handlers`目录下的处理器以及定时任务
     """
 
@@ -178,7 +179,7 @@ class ModelManager:
             pass
 
     def reload(self):
-        """重启所有的模块, 不包括核心模块"""
+        """重启handlers目录下的所有的模块"""
         self.mapping     = []
         self.model_list  = []
         self.failed_mods = []
@@ -431,9 +432,12 @@ class TaskThread(Thread):
         self.func(*self.args)
 
 class WorkerThread(Thread):
+    """
+    执行任务队列的线程，内部有一个队列，所有线程共享
+    """
+    
     _task_queue = Queue()
-
-    """执行任务队列的线程"""
+    
     def __init__(self):
         super(WorkerThread, self).__init__()
         self.setDaemon(True)
