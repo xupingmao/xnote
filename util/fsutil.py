@@ -8,8 +8,8 @@ import base64
 from . import logutil
 from web.utils import Storage
 
-''' read file '''
 def readFile(path):
+    """读取文件, 看xutils.readfile"""
     try:
         fp = open(path, encoding="utf-8")
         content = fp.read()

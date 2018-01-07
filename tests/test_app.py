@@ -228,4 +228,17 @@ class TestMain(unittest.TestCase):
         sched2 = xtables.get_schedule_table().select_one(where=dict(url="script://test.py"))
         self.check_OK("/system/crontab/remove?id={}".format(sched2.id))
 
+    
+    def test_todo_list(self):
+        xconfig.clear_todo_list()
+        xconfig.add_todo(message="Everyone can see it")
+        todo_list = xconfig.get_todo_list(user='admin')
+        self.assertEqual(1, len(todo_list))
+    
+    def test_todo_list_user(self):
+        xconfig.clear_todo_list()
+        xconfig.add_todo(user="nobody", message="Nobody can see it")
+        todo_list = xconfig.get_todo_list(user='admin')
+        self.assertEqual(0, len(todo_list))
+
 

@@ -317,6 +317,7 @@ def get_todo_list(type='today', user=None):
         return _todo_list
 
 def clear_todo_list():
-    _todo_list.clear()
+    global _todo_list
+    _todo_list = [] # Py2 do not have clear method
 
 init(DATA_DIR)

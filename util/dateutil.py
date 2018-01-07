@@ -1,7 +1,6 @@
+# encoding=utf-8
 import time
 import os
-
-
 """ 
         Commonly used format codes:
         

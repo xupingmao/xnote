@@ -24,7 +24,6 @@ import web
 import xconfig
 
 from fnmatch import fnmatch
-from xconfig import Storage
 from util.ziputil import *
 from util.netutil import splithost
 from util.textutil import edit_distance
@@ -34,6 +33,7 @@ from util.dateutil import *
 from util.netutil  import *
 from util.fsutil   import *
 from util.textutil import text_contains
+from xconfig import Storage
 
 try:
     import sqlite3
