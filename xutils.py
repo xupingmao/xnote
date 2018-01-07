@@ -554,11 +554,10 @@ def exec_script(name, new_window=True):
     ret  = 0
     if name.endswith(".py"):
         try:
-            # 方便获取xnote内部信息，同时防止开启过多Python进程
+            # 方便获取xnote内部信息用于扩展，同时防止开启过多Python进程
             code = xutils.readfile(path)
-            globals_copy = {"__name__": "__main__"}
+            globals_copy = {"__name__": "xscript.%s" % name}
             before_count = len(gc.get_objects())
-            # exec(code, globals, locals) locals的作用是为了把修改传递回来
             sys.stdout.record()
             ret = six.exec_(code, globals_copy)
             del globals_copy

@@ -6,13 +6,6 @@
 <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 
 <style type="text/css">
-    .fs-dir {
-        
-    }
-
-    .fs-file {
-
-    }
     .fs-image {
         width: 180px;
     }
@@ -370,7 +363,9 @@ var uploader = WebUploader.create({
     // 文件上传域的name
     fileVal: "file",
     // 不开启并发
-    threads: 1
+    threads: 1,
+    // 关闭压缩选项
+    compress: false
 });
 
 // 当有文件添加进来的时候
