@@ -1,29 +1,23 @@
 # encoding=utf-8
-"""备份相关，需要添加到定时任务中，参考system/crontab
-
+"""
+备份相关，需要添加到定时任务中，参考system/crontab
 """
 import zipfile
 import os
+import re
+import time
+import xutils
+import xconfig
+from xutils import Storage
 from util import dateutil
 from util import fsutil
 from util import logutil
-import xconfig
-import re
-import time
-
-import xutils
 
 config = xconfig
 
-class T:
-    pass
-
 _black_list = [".zip", ".pyc", ".pdf", "__pycache__", ".git"]
-
 _dirname = "./"
-
 _zipname = "xnote.zip"
-
 _dest_path = os.path.join(_dirname, "static", _zipname)
 
 # 是否移除旧备份
@@ -59,7 +53,7 @@ def zip_new_xnote():
     zip_xnote([_zipname, ".db", ".log", ".exe"])
 
 def get_info():
-    info = T()
+    info = Storage()
     info.path = _dest_path
 
     if os.path.exists(_dest_path):

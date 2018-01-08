@@ -46,14 +46,14 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $("#console").terminal(function(command, term) {
-            $.post("/system/command", command, function (data, status) {
+            $.post("/system/command", {command: command}, function (data, status) {
                 term.echo(data);
-            })
-        }).fail(function (data) {
-            console.log(data);
-            term.exception("failed"+data, "error");
-        })
-    })
+            }).fail(function (data) {
+                console.log(data);
+                term.exception("failed"+data, "error");
+            });
+        });
+    });
 </script>
 
 {% end %}

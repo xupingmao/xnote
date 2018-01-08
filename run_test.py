@@ -1,9 +1,7 @@
 # encoding=utf-8
-
 import os
 import sys
 sys.path.insert(1, "lib")
-
 import unittest
 
 # class test_1(unittest.TestCase):

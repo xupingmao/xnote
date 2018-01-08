@@ -35,12 +35,12 @@ History.prototype.after = function () {
     }
     return this.data[this.cur];
 }
-/** webos console class
+/** web console class
  *  
  *   callback (inputStr, response);
  *     response is a function, response(result)
  */
-function WebOSConsole(id, opt, callback) {
+function WebConsole(id, opt, callback) {
     var rows = 20;
     var cols = 40;
     var debug = false;
@@ -320,7 +320,7 @@ function WebOSConsole(id, opt, callback) {
      * 显示字符
      * @param {string} message
      */
-    WebOSConsole.prototype.echo = function(message) {
+    WebConsole.prototype.echo = function(message) {
         this.writeline(message);
     }
 }

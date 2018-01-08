@@ -1,12 +1,9 @@
 # encoding=utf-8
-
+import sys
 import inspect
-
 import web
 import xutils
 import xtemplate
-
-sys = xutils.sys
 
 class DocInfo:
 

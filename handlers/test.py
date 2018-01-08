@@ -3,4 +3,4 @@ class handler:
     def GET(self):
         return "success"
 
-xurls = ("/test", handler)
+xurls = (r"/test", handler)

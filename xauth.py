@@ -2,12 +2,10 @@
 import os
 import hashlib
 import copy
-
 import web
 import xconfig
 import xtables
 import xutils
-
 from xutils import ConfigParser
 from web.utils import Storage
 
@@ -109,9 +107,8 @@ def add_user(name, password):
     refresh_users()
 
 def has_login(name=None):
-    # import threading
-    """验证是否登陆
-
+    """
+    验证是否登陆
     如果``name``指定,则只能该用户名通过验证
     """
     if config.IS_TEST:

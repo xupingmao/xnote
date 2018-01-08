@@ -3,6 +3,7 @@
 # 系统脚本管理
 from __future__ import print_function
 import os
+import sys
 import gc
 import web
 import six
@@ -10,9 +11,7 @@ import xauth
 import xutils
 import xconfig
 import xtemplate
-
 from xutils import u
-sys = xutils.sys
 
 SCRIPT_EXT_LIST = (
     ".bat", 
@@ -93,8 +92,8 @@ class handler:
 
     @xauth.login_required("admin")
     def GET(self):
-        op = xutils.get_argument("op")
-        name = xutils.get_argument("name", "")
+        op    = xutils.get_argument("op")
+        name  = xutils.get_argument("name", "")
         error = xutils.get_argument("error", "")
         dirname = xconfig.SCRIPTS_DIR
 
@@ -109,8 +108,7 @@ class handler:
                 path = os.path.join(dirname, name)
             if os.path.exists(path):
                 raise web.seeother(xutils.quote_unicode("/system/script_admin?error=%r已存在" % name))
-            with open(path, "wb") as fp:
-                pass
+            xutils.touch(path)
 
         shell_list = get_script_list()
         shell_list.sort()

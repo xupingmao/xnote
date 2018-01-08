@@ -8,7 +8,7 @@ Xnote的数据库配置
 import os
 import xutils
 import xconfig
-import web.db as db
+import web.db
 from xutils import sqlite3
 config = xconfig
 
@@ -305,7 +305,7 @@ class DBWrapper:
         _db = DBWrapper._pool.get(dbpath)
         if _db is None:
             if sqlite3 is not None:
-                _db = db.SqliteDB(db=dbpath)
+                _db = web.db.SqliteDB(db=dbpath)
                 _db.query("PRAGMA temp_store = MEMORY")
             else:
                 _db = FakeDB()
@@ -373,7 +373,6 @@ def init():
     init_table_tag()
     init_table_schedule()
     init_table_message()
-    # init_table_calendar()
     # 非核心结构记录各种日志数据
     init_table_record()
 

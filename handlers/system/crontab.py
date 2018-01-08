@@ -54,7 +54,7 @@ class CronSaveHandler:
     
     @xauth.login_required("admin")
     def POST(self):
-        id = xutils.get_argument("id")
+        id   = xutils.get_argument("id")
         name = xutils.get_argument("name")
         url  = xutils.get_argument("url")
         tm_wday = xutils.get_argument("tm_wday")

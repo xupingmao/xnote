@@ -1,5 +1,6 @@
 #coding=utf-8
-'''Tornado template wrapper
+'''
+Tornado template wrapper
 Created by xupingmao on 2016/12/05
 Modified by xupingmao on 2017/12/24
 '''
@@ -50,7 +51,7 @@ def load_menu_properties():
     else:
         path = "config/menu.default.ini"
 
-    menu_list = [];
+    menu_list = []
     cf = ConfigParser()
     cf.read(path, encoding="utf-8")
     names = cf.sections()
@@ -83,7 +84,8 @@ class XnoteLoader(Loader):
         return name
 
     def resolve_path(self, name, parent_path=None):
-        """tornado中的Template._get_ancestors方法会把template的路径作为parent_path参数,
+        """
+        tornado中的Template._get_ancestors方法会把template的路径作为parent_path参数,
         但是Loader默认的方法处理绝对路径时，不处理相对路径,参考resolve_path_old
         由于判断绝对路径是通过`/`开头，这样造成windows系统和posix系统的处理结果不一致
 

@@ -21,6 +21,12 @@ class handler:
         users = xauth.get_users()
         error = ""
 
+        db = xtables.get_record_table()
+        value = "%s-%s" % (get_real_ip(), pswd)
+        db.insert(type="login", key=name, value=value, 
+            ctime = xutils.format_datetime(), 
+            cdate = xutils.format_date())
+
         if name in users:
             user = users[name]
             if pswd == user["password"]:
@@ -33,13 +39,7 @@ class handler:
             else:
                 error = "user or password error"
         else:
-            error = "user or password error"
-        if error != "":
-            db = xtables.get_record_table()
-            value = "%s-%s" % (get_real_ip(), pswd)
-            db.insert(type="login", key=name, value=value, 
-                ctime = xutils.format_datetime(), 
-                cdate = xutils.format_date())
+            error = "user or password error"  
         return xtemplate.render("login.html", 
             username=name, 
             password=pswd,
