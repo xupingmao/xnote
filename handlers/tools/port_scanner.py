@@ -17,11 +17,13 @@ if not PY2:
 
 class Console:
 
+    _lock = threading.RLock()
+
     def __init__(self):
         self.last = ''
 
     def update(self, msg, reset=False):
-        with _lock:
+        with self._lock:
             self.clear_message(len(self.last))
             self.print_message(msg)
             self.last = msg
@@ -29,7 +31,7 @@ class Console:
                 self.last = ''
 
     def print_message(self, msg):
-        with _lock:
+        with self._lock:
             # 使用print没有效果
             sys.stdout.write(msg)
             sys.stdout.flush()
@@ -42,7 +44,6 @@ class Console:
         sys.stdout.write(back)
         sys.stdout.write(whitespace)
         sys.stdout.write(back)
-        sys.stdout.flush()
 
 def scan(addr, port): 
     s = socket.socket() 

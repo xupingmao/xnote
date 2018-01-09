@@ -556,11 +556,11 @@ def exec_script(name, new_window=True):
         try:
             # 方便获取xnote内部信息用于扩展，同时防止开启过多Python进程
             code = xutils.readfile(path)
-            globals_copy = {"__name__": "xscript.%s" % name}
+            mod_globals = {"__name__": "xscript.%s" % name}
             before_count = len(gc.get_objects())
             sys.stdout.record()
-            ret = six.exec_(code, globals_copy)
-            del globals_copy
+            ret = six.exec_(code, mod_globals)
+            del mod_globals
             # 执行一次GC防止内存膨胀
             gc.collect()
             after_count = len(gc.get_objects())
@@ -581,16 +581,12 @@ def exec_script(name, new_window=True):
         if new_window:
             cmd = u("start %s") % path
         else:
-            cmd = readfile(path)
+            cmd = u("start /b %s") % path
         if six.PY2:
             # Python2 import当前目录优先
             encoding = sys.getfilesystemencoding()
             cmd = cmd.encode(encoding)
-        if new_window:
-            os.system(cmd)
-        else:
-            ret, out = getstatusoutput(cmd)
-            print(out)
+        os.system(cmd)
     elif path.endswith(".sh"):
         # os.system("chmod +x " + path)
         # os.system(path)
