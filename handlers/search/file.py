@@ -32,7 +32,8 @@ def file_wrapper(dict, option=None):
     if option:
         file.option = option
     file.url = "/file/view?id={}".format(dict["id"])
-    file.result_type = "file"
+    # 文档类型，和文件系统file区分
+    file.category = "doc_file"
     return file
 
 def file_dict(id, name, related):
@@ -85,14 +86,12 @@ def full_search(words, groups=None):
     vars = dict()
     for word in words:
         content_like_list.append('content like %s' % to_sqlite_obj('%' + word.upper() + '%'))
-    # for word in words:
-    #     name_like_list.append("related like %s " % repr("%" + word.upper() + '%'))
     sql = "SELECT id, name, ctime, mtime, type, creator FROM file WHERE (%s) AND is_deleted == 0" \
         % " AND ".join(content_like_list)
 
     if groups and groups != "admin":
         sql += " AND (is_public = 1 OR creator = $creator)"
-    sql += " order by mtime desc limit 1000";
+    sql += " order by mtime desc limit 1000"
 
     vars["creator"] = groups
     all = xtables.get_file_table().query(sql, vars=vars)
@@ -108,10 +107,10 @@ def search(ctx, expression):
     if ctx.search_file:
         files += search_name(words, xauth.get_current_name())
 
-    # folder 放前面
-    folders = list(filter(lambda x: x.type == "group", files))
+    # group 放前面
+    groups = list(filter(lambda x: x.type == "group", files))
     files1  = list(filter(lambda x: x.type != "group", files))
-    files = folders + files1
+    files = groups + files1
 
     return files
 

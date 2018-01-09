@@ -112,10 +112,17 @@ def chk_backup():
             fsutil.remove(lastfile_path)
             logutil.warn("not valid db backup file, remove {}", lastfile_path)
 
+
+def chk_scripts_backup():
+    dirname = xconfig.SCRIPTS_DIR
+    destfile = os.path.join(xconfig.BACKUP_DIR, time.strftime("scripts.%Y-%m.zip"))
+    xutils.zip_dir(dirname, destfile)
+
 class handler:
     """触发备份事件"""
     def GET(self):
         chk_backup()
+        chk_scripts_backup()
         return "OK"
     
 # chk_backup()

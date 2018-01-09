@@ -5,7 +5,6 @@ import six
 import xconfig
 import xutils
 import xauth
-
 from xutils import SearchResult
 
 def search(ctx, name):
@@ -25,5 +24,5 @@ def search(ctx, name):
     pathlist = xutils.search_path(bookspath, "*" + name + "*")
     if len(pathlist) > 0:
         url = "/fs_find?path=%s&find_key=%s"%(bookspath,name)
-        results.append(SearchResult("文件搜索结果 - %s"%name, url))
+        results.append(SearchResult("图书搜索结果(%s) - %s" % (len(pathlist), name), url))
     return results

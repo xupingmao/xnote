@@ -1,3 +1,4 @@
+<div id="executeResult"></div>
 
 <div class="col-md-12">
     {% for i, file in enumerate(files) %}
@@ -24,7 +25,8 @@
                 <input type="button" class="btn execute-btn" value="执行" href="{{file.command}}"/>
             {% end %}
 
-            {% if file.result_type == "file" %}
+            {# 知识库 #}
+            {% if file.category == "doc_file" %}
             <div>
                 {% if hasattr(file, "priority") and file.priority is not None and file.priority > 0 %}
                     <span class="tag red-bg">置顶</span>
@@ -43,9 +45,6 @@
                 <input type="text" data-role="tagsinput" value="{{file.related}}"/>
             </div>
             {% end %}
-            
-            <div class="note-option">
-            </div> 
         </div>
     </div>
     {% end %}
@@ -80,8 +79,10 @@
         var href = $(e.target).attr("href");
         $.get(href, function (responseText) {
             var obj = responseText;
-            console.log(obj)
-            $("#execute-result").text(JSON.stringify(obj));
+            console.log(obj);
+            if (obj.data) {
+                $("#executeResult").text(JSON.stringify(obj.data));
+            }
         });
     })
 </script>

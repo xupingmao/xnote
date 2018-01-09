@@ -5,9 +5,11 @@
 import zipfile
 import os
 import sys
-
+import xconfig
 
 def quote_unicode(url):
+    if not xconfig.USE_URLENCODE:
+        return url
     def quote_char(c):
         # ASCII 范围 [0-127]
         if c <= 127:
