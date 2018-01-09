@@ -108,6 +108,11 @@ def search(ctx, expression):
     if ctx.search_file:
         files += search_name(words, xauth.get_current_name())
 
+    # folder 放前面
+    folders = list(filter(lambda x: x.type == "group", files))
+    files1  = list(filter(lambda x: x.type != "group", files))
+    files = folders + files1
+
     return files
 
 # xmanager.register_search_func(r"(.*)", do_search)
