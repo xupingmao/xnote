@@ -50,7 +50,7 @@ def add_rule(pattern, func_str):
         rule = BaseRule(r"^%s\Z" % pattern, func)
         _rules.append(rule)
     except Exception as e:
-        xutils.print_stacktrace()
+        xutils.print_exc()
 
 class SearchContext:
 

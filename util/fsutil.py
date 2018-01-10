@@ -189,6 +189,7 @@ class FileItem(Storage):
         return 1
 
 def splitpath(path):
+    path   = os.path.abspath(path)
     path   = path.replace("\\", "/")
     pathes = path.split("/")
     if path[0] == "/":

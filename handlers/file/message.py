@@ -83,9 +83,16 @@ class CalendarRule(BaseRule):
         print(date, month, day)
         ctx.type = "calendar"
 
+class ExpireCacheRule(BaseRule):
+    
+    def execute(self, ctx):
+        user = ctx.user
+        xutils.expire_cache(prefix="message.count", args = (user,))
+
 
 rules = [
-    CalendarRule(r"(\d+)年(\d+)月(\d+)日")
+    CalendarRule(r"(\d+)年(\d+)月(\d+)日"),
+    ExpireCacheRule(r".*")
 ]
 
 class SaveHandler:

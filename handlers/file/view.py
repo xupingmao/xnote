@@ -199,7 +199,7 @@ class RenameHandler:
         file = db.select_one(where=dict(name=name))
         if file is not None:
             return dict(code="fail", message="%r已存在" % name)
-        db.update(where=dict(id=id), name=name)
+        db.update(where=dict(id=id), name=name, mtime=xutils.format_datetime())
         return dict(code="success")
 
     def GET(self):

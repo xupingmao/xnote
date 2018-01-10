@@ -420,7 +420,7 @@ class TaskManager:
 
 
 class TaskThread(Thread):
-    """docstring for TaskThread"""
+    """检查定时任务触发条件线程"""
     def __init__(self, func, *args):
         super(TaskThread, self).__init__(name="TaskDispatcher")
         # 守护线程，防止卡死
@@ -455,9 +455,41 @@ class WorkerThread(Thread):
 def put_task(func, *args):
     """添加异步任务到队列"""
     WorkerThread._task_queue.put([func, args])
-        
+
+class EventManager:
+    """
+    事件管理器
+    @since 2018/01/10
+    """
+    _handlers = dict()
+
+    def register(self, event_type, handler, is_sync = True):
+        """
+        注册事件处理器
+        TODO 事件处理器的去重,使用handler的名称?
+        """
+        handler.is_sync = is_sync
+        handlers = self._handlers.get(event_type, [])
+        handlers.append(handler)
+        self._handlers[event_type] = handlers
+
+    def fire(self, event_type, ctx=None):
+        handlers = self._handlers.get(event_type, [])
+        for handler in handlers:
+            try:
+                handler(ctx)
+            except:
+                xutils.print_exc()
+
+    def reset(self, event_type = None):
+        """重置事件处理器"""
+        if event_type is None:
+            self._handlers = dict()
+        else:
+            self._handlers[event_type] = []
+
 _manager = None
-def init(app, vars, last_mapping=None):
+def init(app, vars, last_mapping = None):
     global _manager
     _manager = ModelManager(app, vars, last_mapping = last_mapping)
     return _manager

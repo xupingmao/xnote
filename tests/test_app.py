@@ -57,14 +57,16 @@ class TestMain(unittest.TestCase):
         print("files=%s" % len(files))
 
     def test_fs_func(self):
-        item0, item1 = xutils.splitpath("/fs/test/")
-        self.assertEqual("/fs/", item0.path)
-        self.assertEqual("/fs/test/", item1.path)
+        if not xutils.is_windows():
+            item0, item1 = xutils.splitpath("/fs/test/")
+            self.assertEqual("/fs/", item0.path)
+            self.assertEqual("/fs/test/", item1.path)
 
-        item0, item1, item2 = xutils.splitpath("C:/data/name/")
-        self.assertEqual("C:/", item0.path)
-        self.assertEqual("C:/data/", item1.path)
-        self.assertEqual("C:/data/name/", item2.path)
+        if xutils.is_windows():
+            item0, item1, item2 = xutils.splitpath("C:/data/name/")
+            self.assertEqual("C:/", item0.path)
+            self.assertEqual("C:/data/", item1.path)
+            self.assertEqual("C:/data/name/", item2.path)
 
     def check_OK(self, *args, **kw):
         response = app.request(*args, **kw)
@@ -149,6 +151,7 @@ class TestMain(unittest.TestCase):
     def test_code_analyze(self):
         # TODO 解决JSON的循环问题
         self.check_200("/code/analyze?path=./handlers/&key=test")
+        self.check_200("/code/analyze?path=./handlers/&key=test&filename=test")
 
     def test_sys(self):
         self.check_200("/system/sys")
