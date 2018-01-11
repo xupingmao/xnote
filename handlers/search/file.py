@@ -97,8 +97,8 @@ def full_search(words, groups=None):
     all = xtables.get_file_table().query(sql, vars=vars)
     return [file_wrapper(item) for item in all]
 
-def search(ctx, expression):
-    words = textutil.split_words(expression)
+def search(ctx, expression=None):
+    words = ctx.words
     files = []
 
     if ctx.search_file_full:
@@ -109,9 +109,7 @@ def search(ctx, expression):
 
     # group 放前面
     groups = list(filter(lambda x: x.type == "group", files))
-    files1  = list(filter(lambda x: x.type != "group", files))
-    files = groups + files1
-
+    text_files  = list(filter(lambda x: x.type != "group", files))
+    files = groups + text_files
     return files
 
-# xmanager.register_search_func(r"(.*)", do_search)

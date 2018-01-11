@@ -67,9 +67,10 @@ class TestMain(unittest.TestCase):
         self.assertEqual("test.html", relative_path)
 
     def test_splitpath(self):
-        path = "/root/test"
-        pathlist = xutils.splitpath(path)
-        self.assertEqual(2, len(pathlist))
+        if not xutils.is_windows():
+            path = "/root/test"
+            pathlist = xutils.splitpath(path)
+            self.assertEqual(2, len(pathlist))
 
     def test_decode_name(self):
         self.assertEqual("a.txt", xutils.decode_name("a.txt"))

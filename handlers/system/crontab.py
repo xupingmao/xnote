@@ -16,7 +16,6 @@ SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
 
 
 def get_cron_links():
-    SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
     dirname = xconfig.SCRIPTS_DIR
     links = []
     API_PATH = os.path.join(xconfig.HANDLERS_DIR, "api")

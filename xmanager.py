@@ -514,6 +514,9 @@ def instance():
     
 def reload():
     _manager.reload()
+    _event_manager.remove_handlers()
+    if xconfig.INIT_SCRIPT is not None:
+        xutils.exec_script(xconfig.INIT_SCRIPT)
 
 def put_task(func, *args):
     """添加异步任务到队列"""

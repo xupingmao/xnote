@@ -55,10 +55,13 @@ def add_rule(pattern, func_str):
 class SearchContext:
 
     def __init__(self):
+        # 输入的文本
+        self.input_text = ''
         self.search_message = False
         self.search_file = True
         self.search_file_full = False
         self.user_name = ''
+        self.doc_files = []
 
 class handler:
 
@@ -71,6 +74,8 @@ class handler:
 
         start_time = time.time()
         ctx = SearchContext()
+        ctx.input_text = key
+        ctx.words = words
         ctx.search_message = (message == "on")
         ctx.search_file_full = (content == "on")
         ctx.user_name = xauth.get_current_name()
@@ -100,13 +105,6 @@ class handler:
         xutils.log("  === total - %d ms ===" % cost_time)
         return files
 
-    def json_request(self):
-        key = xutils.get_argument("key", "").strip()
-        if key == "":
-            raise web.seeother("/")
-        return self.full_search(key, offset, limit)
-
-
     @xauth.login_required()
     def GET(self):
         """search files by name and content"""
@@ -120,14 +118,13 @@ class handler:
 
         xutils.get_argument("page_url", "/search/search?key=%s&content=%s&message=%s&page="\
             % (key, content, message))
-        pagesize = config.PAGE_SIZE
+        pagesize = xconfig.PAGE_SIZE
         offset   = (page-1) * pagesize
         limit    = pagesize
 
         if key == "" or key == None:
             return xtemplate.render("search_result.html", files=[], count=0)
         files = self.full_search(key, offset, pagesize)
-        # TODO 待优化
         count = len(files)
         files = files[offset:offset+limit]
         return xtemplate.render("search_result.html", 

@@ -23,4 +23,3 @@ def search(ctx, name):
         return [item]
     return []
 
-# xmanager.register_search_func(r"(.*)", find_py_docs)

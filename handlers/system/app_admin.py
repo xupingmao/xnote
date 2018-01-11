@@ -6,12 +6,10 @@
 
 import os
 import zipfile
-
 import web
 import xutils
 import xconfig
 import xtemplate
-
 config = xconfig
 
 class FileInfo:

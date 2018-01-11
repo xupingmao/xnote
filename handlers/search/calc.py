@@ -34,7 +34,7 @@ def do_calc(ctx, expression):
         f.raw = str(value)
         return [f]
     except Exception as e:
-        print(e)
+        xutils.print_exc()
         return []
 
 # xmanager.register_search_func(r"calc(.*)", do_calc)

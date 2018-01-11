@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-  
-# Created by xupingmao on 2017/06/11
-# 
+# Created by xupingmao on 2017/06/11 
 
-"""英汉、汉英词典
+"""
+英汉、汉英词典
 
 dictDTB结构
 _id integer primary key autoincrement,en text,cn text,symbol text
@@ -16,7 +16,6 @@ import os
 import xutils
 import xmanager
 import xconfig
-
 from xutils import u
 
 SearchResult = xutils.SearchResult
@@ -26,7 +25,6 @@ def wrap_results(dicts, origin_key):
     for f0 in dicts:
         f = SearchResult()
         f.name = u("翻译 - ") + u(f0[origin_key])
-        # f.content = f0["cn"]
         f.raw = f0["en"] + "\n"
         f.raw += f0["cn"].replace("\\n", "\n")
         f.url = "#"
