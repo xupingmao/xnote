@@ -8,6 +8,7 @@ import xutils
 import xtables
 import xauth
 import xconfig
+import xmanager
 from xutils import BaseRule, Storage
 
 class ListHandler:
@@ -107,6 +108,7 @@ class SaveHandler:
         ctx = Storage(content = content, user = user_name, type = "")
         for rule in rules:
             rule.match_execute(ctx, content)
+        xmanager.fire('message.update', ctx)
 
         if id == "" or id is None:
             ctime = xutils.format_datetime()

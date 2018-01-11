@@ -94,7 +94,7 @@ class TestMain(unittest.TestCase):
         # 禁止直接访问目录
         self.check_404("/static/")
 
-    def test_file(self):
+    def test_file_add_remove(self):
         self.check_200("/file/recent_edit")
         json_request("/file/remove?name=xnote-unit-test")
         file = json_request("/file/add", method="POST", 
@@ -133,6 +133,21 @@ class TestMain(unittest.TestCase):
         self.check_200("/file/group/ungrouped")
         self.check_200("/file/group/bookmark")
         self.check_200("/file/recent_edit")
+
+    def test_file_share(self):
+        json_request("/file/remove?name=xnote-share-test")
+        file = json_request("/file/add", method="POST", 
+            data=dict(name="xnote-share-test", content="hello"))
+        id = file["id"]
+        self.check_OK("/file/share?id=" + str(id))
+        file = json_request("/file/view?id=%s&_type=json" % id).get("file")
+        self.assertEqual(1, file["is_public"])
+        
+        self.check_OK("/file/share/cancel?id=" + str(id))
+        file = json_request("/file/view?id=%s&_type=json" % id).get("file")
+        self.assertEqual(0, file["is_public"])
+
+        json_request("/file/remove?id=" + str(id))
 
     def test_fs(self):
         self.check_200("/fs//")

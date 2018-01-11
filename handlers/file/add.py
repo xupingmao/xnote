@@ -84,9 +84,9 @@ class RemoveHandler:
 
         db = xtables.get_file_table()
         if id != "":
-            file = db.select_one(where=dict(id=int(id)))
+            file = db.select_one(where=dict(id=int(id), is_deleted=0))
         else:
-            file = db.select_one(where=dict(name=name))
+            file = db.select_one(where=dict(name=name, is_deleted=0))
         if file is None:
             return dict(code="fail", message="文件不存在")
         id = file.id
