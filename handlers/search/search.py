@@ -95,6 +95,7 @@ class handler:
                         files += results
                 except Exception as e:
                     xutils.print_stacktrace()
+        xmanager.fire("search", ctx)
         cost_time = (time.time() - start_time) * 1000
         xutils.log("  === total - %d ms ===" % cost_time)
         return files

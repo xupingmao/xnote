@@ -3,7 +3,7 @@ import sys
 import time
 import unittest
 sys.path.insert(1, "lib")
-
+import xmanager
 from xutils   import Storage
 from xmanager import TaskManager
 
@@ -31,3 +31,15 @@ class TestMain(unittest.TestCase):
         task.tm_min  = "*"
         r = task_manager.match(task, tm)
         self.assertEqual(False, r)
+
+    def test_event_handler(self):
+        ctx = Storage()
+
+        def my_handler(ctx):
+            ctx.test = True
+
+        xmanager.remove_handlers('test')
+        xmanager.add_handler('test', my_handler)
+
+        xmanager.fire('test', ctx)
+        self.assertEqual(True, ctx.test)

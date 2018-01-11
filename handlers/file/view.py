@@ -135,6 +135,7 @@ class UpdateHandler(BaseHandler):
         # 不再处理文件，由JS提交
         rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
+            xmanager.fire('file.updated', update_kw)
             raise web.seeother("/file/view?id=" + str(id))
         else:
             # 传递旧的content

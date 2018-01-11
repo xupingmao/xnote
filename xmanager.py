@@ -452,23 +452,34 @@ class WorkerThread(Thread):
             except Exception as e:
                 xutils.print_exc()
 
-def put_task(func, *args):
-    """添加异步任务到队列"""
-    WorkerThread._task_queue.put([func, args])
+class EventHandler:
+
+    def __init__(self, func, is_async = False):
+        self.func = func
+        self.is_async = is_async
+
+    def execute(self, ctx=None):
+        if self.is_async:
+            put_task(func, ctx)
+        else:
+            try:
+                self.func(ctx)
+            except:
+                xutils.print_exc()
 
 class EventManager:
     """
-    事件管理器
+    事件管理器，每个事件由一个执行器链组成，执行器之间有一定的依赖性
     @since 2018/01/10
     """
     _handlers = dict()
 
-    def register(self, event_type, handler, is_sync = True):
+    def add_handler(self, event_type, func, is_async = False):
         """
         注册事件处理器
         TODO 事件处理器的去重,使用handler的名称?
         """
-        handler.is_sync = is_sync
+        handler = EventHandler(func, is_async)
         handlers = self._handlers.get(event_type, [])
         handlers.append(handler)
         self._handlers[event_type] = handlers
@@ -476,30 +487,37 @@ class EventManager:
     def fire(self, event_type, ctx=None):
         handlers = self._handlers.get(event_type, [])
         for handler in handlers:
-            try:
-                handler(ctx)
-            except:
-                xutils.print_exc()
+            handler.execute(ctx)
 
-    def reset(self, event_type = None):
-        """重置事件处理器"""
+    def remove_handlers(self, event_type = None):
+        """移除事件处理器"""
         if event_type is None:
             self._handlers = dict()
         else:
             self._handlers[event_type] = []
 
+
+# 对外接口
 _manager = None
+_event_manager = None
 def init(app, vars, last_mapping = None):
     global _manager
+    global _event_manager
+
     _manager = ModelManager(app, vars, last_mapping = last_mapping)
+    _event_manager = EventManager()
     return _manager
-    
+
 def instance():
     global _manager
     return _manager
     
 def reload():
     _manager.reload()
+
+def put_task(func, *args):
+    """添加异步任务到队列"""
+    WorkerThread._task_queue.put([func, args])
 
 def load_tasks():
     _manager.load_tasks()
@@ -512,3 +530,13 @@ def request(*args, **kw):
     # request参数如下
     # localpart='/', method='GET', data=None, host="0.0.0.0:8080", headers=None, https=False, **kw
     return _manager.app.request(*args, **kw)
+
+def add_handler(event_type, func, is_async=False):
+    _event_manager.add_handler(event_type, func, is_async)
+
+def remove_handlers(event_type=None):
+    _event_manager.remove_handlers(event_type)
+
+def fire(event_type, ctx=None):
+    _event_manager.fire(event_type, ctx)
+
