@@ -32,6 +32,8 @@ def json_request(*args, **kw):
         kw["data"]["_type"] = "json"
     kw["_type"] = "json"
     ret = app.request(*args, **kw)
+    if ret.status == "303 See Other":
+        return
     data = ret.data
     if six.PY2:
         return json.loads(data)
@@ -101,6 +103,8 @@ class TestMain(unittest.TestCase):
             data=dict(name="xnote-unit-test", content="hello"))
         id = file["id"]
         self.check_OK("/file/view?id=" + str(id))
+        json_request("/file/save", method="POST",
+            data=dict(id=id, content="new-content"))
         json_request("/file/remove?id=" + str(id))
 
     def test_file_editor_md(self):

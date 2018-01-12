@@ -3,6 +3,7 @@
 import profile
 import math
 import re
+import web
 import xauth
 import xutils
 import xconfig
@@ -141,7 +142,7 @@ class UpdateHandler:
             cur_version = file.version
             file.content = content
             file.version = version
-            return self.render("file/view.html", file=file, 
+            return xtemplate.render("file/view.html", file=file, 
                 content = content, 
                 children = [],
                 error = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
