@@ -575,8 +575,7 @@ def exec_script(name, new_window=True):
         if new_window:
             ret = xutils.system("open " + path)
         else:
-            code = readfile(path)
-            ret, out = getstatusoutput(code)
+            ret = xutils.system("source " + path)
     elif path.endswith((".bat", ".vbs")):
         if new_window:
             cmd = u("start %s") % path

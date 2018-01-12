@@ -3,7 +3,6 @@
 import profile
 import math
 import re
-from handlers.base import *
 import xauth
 import xutils
 import xconfig
@@ -109,10 +108,10 @@ def get_link(filename, webpath):
         return "![%s](%s)" % (filename, webpath)
     return "[%s](%s)" % (filename, webpath)
 
-class UpdateHandler(BaseHandler):
+class UpdateHandler:
 
     @xauth.login_required()
-    def default_request(self):
+    def POST(self):
         is_public = xutils.get_argument("public", "")
         id        = xutils.get_argument("id", type=int)
         content   = xutils.get_argument("content")

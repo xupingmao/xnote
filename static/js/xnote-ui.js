@@ -25,6 +25,16 @@ var XUI = function (window) {
     })
   }
 
+  function initRadio() {
+    $("input[type=radio]").each(function (index, ele) {
+      var self = $(ele);
+      var value = self.attr("default-value");
+      if (value == self.val()) {
+        self.attr("checked", "checked");
+      }
+    });
+  }
+
   // 点击跳转链接的按钮
   $(".link-btn").click(function () {
       var link = $(this).attr("x-href");
@@ -129,6 +139,7 @@ var XUI = function (window) {
   function initElementProcessors() {
     initSelect();
     initCheckbox();
+    initRadio();
     initTabLink();
   }
 
