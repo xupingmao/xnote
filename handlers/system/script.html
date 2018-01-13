@@ -30,11 +30,6 @@
     tr:hover {
         background-color: #eee;
     }
-
-    #editorArea {
-        height: 400px;
-    }
-
 </style>
 
 {% end %}
@@ -68,6 +63,8 @@
         <div id="editorArea" class="col-md-12">
             <input type="text" name="name" value="{{name}}" class="hide">
             <textarea id="editor" class="col-md-12" name="content" rows=10>{{content}}</textarea>
+        </div>
+        <div class="col-md-12">
             <button id="save" class="btn">保存</button>
             <input type="button" scriptName="{{name}}" class="executeScript btn" value="执行"/>
         </div>
@@ -92,19 +89,18 @@
                 mode: mode,
                 // theme:"monokai",
                 indentUnit:4,
+                lineWrapping: true
             });
-            editor.setSize("auto", "auto");
+            editor.setSize("auto", "450px");
             editor.on("update", function (codeMirror, changeObj) {
-            // console.log("update");
-            $("#editor").val(codeMirror.doc.getValue());
-
+                $("#editor").val(codeMirror.doc.getValue());
+            });
             editor.setOption("extraKeys", {
                 Tab: function(cm) {
                     var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
                     cm.replaceSelection(spaces);
                 }
             });
-        })
         });
     </script>
 

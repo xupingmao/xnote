@@ -189,7 +189,6 @@
             fixedGutter: true,
         });
         codeMirror.on("update", function (codeMirror, changeObj) {
-            // console.log("update");
             $("#markdown-input").val(codeMirror.doc.getValue());
         })
         window.codeMirror = codeMirror;
