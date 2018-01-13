@@ -51,7 +51,7 @@ class SaveHandler:
         path = os.path.join(dirname, name)
         content = content.replace("\r", "")
         xutils.savetofile(path, content)
-        raise web.seeother("/system/script_admin/edit?name="+xutils.quote(name))
+        raise web.seeother("/system/script/edit?name="+xutils.quote(name))
 
 class DeleteHandler:
 
@@ -61,7 +61,7 @@ class DeleteHandler:
         dirname = xconfig.SCRIPTS_DIR
         path = os.path.join(dirname, name)
         os.remove(path)
-        raise web.seeother("/system/script_admin")
+        raise web.seeother("/system/script")
 
 class ExecuteHandler:
 
@@ -165,13 +165,21 @@ class EditHandler:
 
 xurls = (
     r"/system/script", handler,
-    r"/system/script/search", SearchHandler,
     r"/system/script_admin", handler,
+
+    r"/system/script/search", SearchHandler,
+
     r"/system/script_admin/edit", EditHandler,
     r"/system/script/edit", EditHandler,
+    
     r"/system/script_admin/save", SaveHandler,
+    r"/system/script/save", SaveHandler,
+
     r"/system/script_admin/execute", ExecuteHandler,
+    r"/system/script/execute", ExecuteHandler,
+
     r"/system/script_admin/delete", DeleteHandler,
+    r"/system/script/delete", DeleteHandler
 )
 
 

@@ -5,6 +5,7 @@ sys.path.insert(1, "lib")
 
 import unittest
 import xutils
+import xconfig
 
 @xutils.cache(prefix='fib')
 def fib(n):
@@ -112,6 +113,13 @@ class TestMain(unittest.TestCase):
     def test_storage_default(self):
         obj = xutils.Storage(1, name="name")
         self.assertEqual(obj.value, 1)
+
+    def test_save_file(self):
+        tmpfile = os.path.join(xconfig.DATA_DIR, "tmp.txt")
+        xutils.savetofile(tmpfile, "test")
+        content = xutils.readfile(tmpfile)
+        self.assertEqual("test", content)
+        xutils.remove(tmpfile, True)
 
 
         

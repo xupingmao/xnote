@@ -1,5 +1,6 @@
 # encoding=utf-8
-from handlers.base import *
+import web
+import xtemplate
 from handlers.file import dao
 
 index_html = """{% extends base.html %}
@@ -14,8 +15,6 @@ class Home:
 
     def GET(self):
         return xtemplate.render("search_result.html", files = [])
-        # raise web.seeother("/file/recent_edit")
-        # return xtemplate.render_text(index_html)
 
 class Unauthorized():
     html = """
@@ -28,9 +27,15 @@ class Unauthorized():
         web.ctx.status = "401 Unauthorized"
         return xtemplate.render_text(self.html)
 
+class FaviconHandler:
+
+    def GET(self):
+        raise web.seeother("/static/favicon.ico")
+
 xurls = (
     r"/", Home, 
     r"/index", Home,
-    r"/unauthorized", Unauthorized
+    r"/unauthorized", Unauthorized,
+    r"/favicon.ico", FaviconHandler
 )
 

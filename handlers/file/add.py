@@ -61,7 +61,7 @@ class AddHandler:
         except web.HTTPError as e1:
             raise e1
         except Exception as e:
-            xutils.print_stacktrace()
+            xutils.print_exc()
             error = str(e)
         return xtemplate.render("file/add.html", key = "", 
             name = key, tags = tags, error=error,

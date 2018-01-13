@@ -32,7 +32,9 @@ __copyright__ = "(C) 2016-2017 xupingmao. GNU GPL 3."
 __contributors__ = []
 
 class MyStdout:
-
+    """
+    标准输出的装饰器，用来拦截标准输出内容
+    """
     def __init__(self, stdout):
         self.stdout = stdout
         self.result_dict = dict()

@@ -190,8 +190,13 @@ class TestMain(unittest.TestCase):
     def test_notfound(self):
         self.check_404("/nosuchfile")
 
-    def test_script_admin(self):
+    def test_script_list(self):
         self.check_200("/system/script_admin")
+
+    def test_script_add_remove(self):
+        json_request("/system/script/save", method="POST", data=dict(name="xnote-unit-test.py", content="print(123)"))
+        out = xutils.exec_script("xnote-unit-test.py", False, False)
+        json_request("/system/script/delete?name=xnote-unit-test.py", method="POST")
 
     def test_report_time(self):
         self.check_200("/api/report_time")

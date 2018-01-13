@@ -216,6 +216,9 @@ def makedirs(dirname):
         os.makedirs(dirname)
 
 def remove(path, hard = False):
+    """
+    删除文件，默认软删除，也就是移动到trash目录中
+    """
     if not os.path.exists(path):
         return
     if os.path.isfile(path):
@@ -546,7 +549,7 @@ def say(msg):
         time.sleep(0.5)
 
 
-def exec_script(name, new_window=True):
+def exec_script(name, new_window=True, record_stdout = True):
     """执行script目录下的脚本"""
     dirname = xconfig.SCRIPTS_DIR
     path = os.path.join(dirname, name)
@@ -558,17 +561,20 @@ def exec_script(name, new_window=True):
             code = xutils.readfile(path)
             mod_globals = {"__name__": "xscript.%s" % name}
             before_count = len(gc.get_objects())
-            sys.stdout.record()
+            if record_stdout:
+                sys.stdout.record()
             ret = six.exec_(code, mod_globals)
             del mod_globals
             # 执行一次GC防止内存膨胀
             gc.collect()
             after_count = len(gc.get_objects())
-            ret = sys.stdout.pop_record()
+            if record_stdout:
+                ret = sys.stdout.pop_record()
             log("gc.objects_count %s -> %s" % (before_count, after_count))
         except:
-            print_stacktrace()
-            ret = sys.stdout.pop_record()
+            print_exc()
+            if record_stdout:
+                ret = sys.stdout.pop_record()
     elif name.endswith(".command"):
         # Mac os Script
         xutils.system("chmod +x " + path)

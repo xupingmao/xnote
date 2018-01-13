@@ -314,7 +314,7 @@ class StaticFileHandler(FileSystemHandler):
             return "Not Readable %s" % path
         return self.handle_get(path)
 
-class AddDirHandler:
+class BaseAddFileHandler:
 
     @xauth.login_required("admin")
     def POST(self):
@@ -322,29 +322,28 @@ class AddDirHandler:
         filename = xutils.get_argument("filename", "")
         if path == "":
             return dict(code="fail", message="path is empty")
+        if xconfig.USE_URLENCODE:
+            filename = xutils.quote_unicode(filename)
         newpath = os.path.join(path, filename)
         try:
-            os.makedirs(newpath)
+            self.create_file(newpath)
             return dict(code="success")
         except Exception as e:
             xutils.print_exc()
             return dict(code="fail", message=str(e))
 
-class AddFileHandler:
+    def create_file(self, path):
+        raise NotImplementedError()
 
-    @xauth.login_required("admin")
-    def POST(self):
-        path = xutils.get_argument("path", "")
-        filename = xutils.get_argument("filename", "")
-        if path == "":
-            return dict(code="fail", message="path is empty")
-        newpath = os.path.join(path, filename)
-        try:
-            xutils.touch(newpath)
-            return dict(code="success")
-        except Exception as e:
-            xutils.print_exc()
-            return dict(code="fail", message=str(e))
+class AddDirHandler(BaseAddFileHandler):
+
+    def create_file(self, path):
+        os.makedirs(path)
+
+class AddFileHandler(BaseAddFileHandler):
+
+    def create_file(self, path):
+        xutils.touch(path)
 
 class RemoveHandler:
 
