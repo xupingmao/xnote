@@ -31,6 +31,10 @@
         background-color: #eee;
     }
 
+    #editorArea {
+        height: 400px;
+    }
+
 </style>
 
 {% end %}
@@ -61,7 +65,7 @@
     <h3>{{name}}</h3>
     {# 编辑 #}
     <form method="POST" action="/system/script_admin/save">
-        <div class="col-md-12">
+        <div id="editorArea" class="col-md-12">
             <input type="text" name="name" value="{{name}}" class="hide">
             <textarea id="editor" class="col-md-12" name="content" rows=10>{{content}}</textarea>
             <button id="save" class="btn">保存</button>

@@ -4,7 +4,6 @@
 
 """Description here"""
 from io import StringIO
-from handlers.base import *
 from xconfig import *
 import xconfig
 import codecs

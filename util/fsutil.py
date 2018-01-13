@@ -4,7 +4,6 @@ import os
 import platform
 import xutils
 import base64
-
 from . import logutil
 from web.utils import Storage
 

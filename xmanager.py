@@ -540,6 +540,11 @@ def add_handler(event_type, func, is_async=False):
 def remove_handlers(event_type=None):
     _event_manager.remove_handlers(event_type)
 
+def set_handlers(event_type, handlers, is_async=False):
+    _event_manager.remove_handlers(event_type)
+    for handler in handlers:
+        _event_manager.add_handler(event_type, handler, is_async)
+
 def fire(event_type, ctx=None):
     _event_manager.fire(event_type, ctx)
 

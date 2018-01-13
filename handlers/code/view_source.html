@@ -23,6 +23,13 @@
     color: #000;
 }
 
+/**
+#editorArea {
+    height: 400px;
+    overflow: auto;
+}
+*/
+
 </style>
 {% end %}
 
@@ -30,10 +37,10 @@
 {% init pathlist = [] %}
 
 <div class="fs-path">
-<a href="/fs//">Home</a> /
-{% for item in pathlist %}
-    <a href="/fs/{{ item.path }}">{{ item.name }}</a> / 
-{% end %}
+    <a href="/fs//">Home</a> /
+    {% for item in pathlist %}
+        <a href="/fs/{{ item.path }}">{{ item.name }}</a> / 
+    {% end %}
 </div>
 
 <div class="col-md-12">
@@ -49,7 +56,7 @@
         {% end %}
     </div>
     <input name="path" class="hide" value="{{path}}"/>
-    <div class="col-md-12">
+    <div id="editorArea" class="col-md-12">
         <textarea name="content" id="editor">{{content}}</textarea>
     </div>
 </div>

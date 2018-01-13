@@ -13,15 +13,13 @@ import web
 import xutils
 import xauth
 import xconfig
-from handlers.base import *
+import xtemplate
 from xutils import FileItem
+config = xconfig
 
-
-class handler(BaseHandler):
-
+class handler:
     __url__ = r"/fs-"
-
-    def execute(self):
+    def GET(self):
         if xutils.is_windows():
             raise web.seeother("/fs-D:/")
         else:

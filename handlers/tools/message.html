@@ -108,15 +108,17 @@
                     <input type="button" value="更新" v-on:click="updateMessage(message)">
                     <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel">
                 </template>
-                <div v-else-if="message.link">
-                    <a v-bind:href="message.link">{{! message.link }}</a>
-                </div>
-                <div v-else-if="message.imgSrc">
-                    <a v-bind:href="message.imgSrc">
-                        <img v-bind:src="message.imgSrc" class="chat-msg-img"/>
-                    </a>
-                </div>
-                <div v-else class="chat-msg-content" v-html="message.html">
+                <div v-else>
+                    <div v-if="message.link">
+                        <a v-bind:href="message.link">{{! message.link }}</a>
+                    </div>
+                    <div v-if="message.imgSrc">
+                        <a v-bind:href="message.imgSrc">
+                            <img v-bind:src="message.imgSrc" class="chat-msg-img"/>
+                        </a>
+                    </div>
+                    <div v-if="message.html" class="chat-msg-content" v-html="message.html">
+                    </div>
                 </div>
             </div>            
             <div class="col-md-12">
@@ -150,9 +152,11 @@
     function wrapMessage(message) {
         message.editable = false;
         var content = message.content;
-        if (content.startsWith("file://")) {
-            var length = "file://".length;
-            var path = content.substr(length);
+        var reg = /file:\/\/([\S]+)\n*(.*)/gi;
+        var parts = reg.exec(content);
+        if (parts) {
+            var path = parts[1];
+            var text = parts[2];
             var lowerPath = path.toLowerCase();
             if (lowerPath.endsWith(".jpg") || lowerPath.endsWith(".jpeg") || 
                     lowerPath.endsWith(".png") || lowerPath.endsWith(".gif")) {
@@ -160,6 +164,7 @@
             } else {
                 message.link = path;
             }
+            message.html = text;
         } else {
             var html = content.replace(/(https*:\/\/[^ \t\r\n]+)/gi, '<a href="$1">$1</a>');
             html = html.replace(/\n/gi, "<br>");

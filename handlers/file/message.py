@@ -40,6 +40,7 @@ def update_message(id, status):
         return dict(code="fail", message="data not exists")
     if msg.user != xauth.get_current_name():
         return dict(code="fail", message="no permission")
+    xmanager.fire("message.update", Storage(id=id, status=status, user = msg.user, content=msg.content))
     db.update(status=status, mtime=xutils.format_datetime(), where=dict(id=id))
     return dict(code="success")
 
@@ -84,16 +85,14 @@ class CalendarRule(BaseRule):
         print(date, month, day)
         ctx.type = "calendar"
 
-class ExpireCacheRule(BaseRule):
-    
-    def execute(self, ctx):
-        user = ctx.user
-        xutils.expire_cache(prefix="message.count", args = (user,))
+def expire_message_cache(ctx):
+    user = ctx.user
+    xutils.expire_cache(prefix="message.count", args=(user,))
 
+xmanager.set_handlers('message.update', [expire_message_cache])
 
 rules = [
     CalendarRule(r"(\d+)年(\d+)月(\d+)日"),
-    ExpireCacheRule(r".*")
 ]
 
 class SaveHandler:

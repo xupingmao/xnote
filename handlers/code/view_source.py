@@ -2,11 +2,11 @@
 # Created by xupingmao on 2016/??/??
 
 """显示代码原文"""
-from handlers.base import *
-from tornado.escape import xhtml_escape
+import os
 import xauth
 import xutils
 import xtemplate
+from tornado.escape import xhtml_escape
 
 class ViewSourceHandler:
 

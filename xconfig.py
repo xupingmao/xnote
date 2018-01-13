@@ -103,7 +103,8 @@ FS_TEXT_EXT_LIST = [
     ".sh",     # Linux shell
     ".bat",    # Windows shell
     ".cmd",    # Windows shell
-    ".command" # Mac shell
+    ".command", # Mac shell
+    ".sql",     # sql
     ".ini",
     ".rc",
     ".properties",
