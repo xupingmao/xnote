@@ -1,7 +1,6 @@
 # encoding=utf-8
-
-from handlers.base import *
 from collections import OrderedDict
+import os
 import six
 import socket, ssl
 import re

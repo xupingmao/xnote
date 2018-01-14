@@ -223,7 +223,10 @@ class ModelManager:
                 name, ext = os.path.splitext(filename)
                 if os.path.isfile(filepath) and ext == ".py":
                     modname = parent + "." + name
-                    if modname in sys.modules:
+                    old_mod = sys.modules.get(modname)
+                    if old_mod is not None:
+                        if hasattr(old_mod, "unload"):
+                            old_mod.unload()
                         if self.report_unload:
                             log("del %s" % modname)
                         del sys.modules[modname] # reload module

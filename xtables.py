@@ -264,7 +264,9 @@ def init_table_record():
         manager.add_column("value", "text", "")
 
 def init_table_storage():
-    # 通用的存储对象
+    """
+    通用的存储对象, 比词典多一个type
+    """
     dbpath = os.path.join(xconfig.DATA_DIR, "data.db")
     with TableManager(dbpath, "storage") as manager:
         manager.add_column("ctime", "text", "")
@@ -274,8 +276,25 @@ def init_table_storage():
         manager.add_column("key",   "text", "")
         manager.add_column("value", "text", "")
 
-class FakeDB():
+def init_table_dictionary():
+    """
+    词典 2018/01/14
+    """
+    if not xconfig.DEV_MODE:
+        return
+    dbpath = xconfig.DB_FILE
+    with TableManager(dbpath, "dictionary") as manager:
+        manager.add_column("ctime", "text", "")
+        manager.add_column("mtime", "text", "")
+        manager.add_column("user",  "text", "")
+        manager.add_column("key", "text", "")
+        manager.add_column("value", "text", "")
+        manager.add_index("key")
 
+class MockedDB():
+    """
+    模拟的空数据库接口
+    """
     def select(self, *args, **kw):
         from web.utils import IterBetter
         return IterBetter(iter([]))
@@ -308,7 +327,7 @@ class DBWrapper:
                 _db = web.db.SqliteDB(db=dbpath)
                 _db.query("PRAGMA temp_store = MEMORY")
             else:
-                _db = FakeDB()
+                _db = MockedDB()
             DBWrapper._pool[dbpath] = _db
         self.db = _db
 
@@ -365,6 +384,11 @@ def get_record_table():
 def get_storage_table():
     return DBWrapper(xconfig.DB_PATH, "storage")
 
+def get_dictionary_table():
+    if xconfig.DEV_MODE:
+        return DBWrapper(xconfig.DB_PATH, "dictionary")
+    return MockedDB()
+
 def init():
     if sqlite3 is None:
         return
@@ -373,6 +397,7 @@ def init():
     init_table_tag()
     init_table_schedule()
     init_table_message()
+    init_table_dictionary()
     # 非核心结构记录各种日志数据
     init_table_record()
 

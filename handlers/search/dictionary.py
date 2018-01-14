@@ -5,20 +5,18 @@
 英汉、汉英词典
 
 dictDTB结构
-_id integer primary key autoincrement,en text,cn text,symbol text
-
-symbol指音标
+    _id integer primary key autoincrement,
+    en text,cn text,
+    symbol text 指音标
 
 """
-
 import re
 import os
 import xutils
 import xmanager
 import xconfig
-from xutils import u
-
-SearchResult = xutils.SearchResult
+import xtables
+from xutils import u, Storage, SearchResult
 
 def wrap_results(dicts, origin_key):
     files = []
@@ -56,4 +54,17 @@ def zh2en(ctx, word):
     dicts = xutils.db_execute(path, sql, ('%' + word + '%',))
     return wrap_results(dicts, "cn")
 
-# xmanager.register_search_func(r"(.*)", find_translate)
+def find(ctx, *args):
+    """使用词库进行部分模糊匹配"""
+    if not ctx.search_dict:
+        return
+    if not xconfig.DEV_MODE:
+        return
+    user_name = ctx.user_name
+    db = xtables.get_dictionary_table()
+    results = db.select(where="key like $key AND (user=$user OR user='')", vars=dict(key=ctx.input_text + "%", user=user_name))
+    files = []
+    for item in results:
+        value = item.value.replace("\\n", "\n")
+        files.append(Storage(name="翻译 - %s" % item.key, raw=value, url="#"))
+    return files
