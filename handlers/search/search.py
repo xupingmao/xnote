@@ -57,11 +57,19 @@ class SearchContext:
     def __init__(self):
         # 输入的文本
         self.input_text = ''
+        self.user_name = ''
+
         self.search_message = False
         self.search_file = True
         self.search_file_full = False
-        self.user_name = ''
+        self.search_dict = False
+        self.search_tool = True
+        
+        # 处理的结果集
+        self.tools = []
         self.doc_files = []
+        self.dict_files = []
+        self.message_files = []
 
 class handler:
 
@@ -69,6 +77,7 @@ class handler:
         global _rules
         content = xutils.get_argument("content")
         message = xutils.get_argument("message")
+        search_dict = xutils.get_argument("search_dict")
         words   = textutil.split_words(key)
         files   = []
 
@@ -78,11 +87,17 @@ class handler:
         ctx.words = words
         ctx.search_message = (message == "on")
         ctx.search_file_full = (content == "on")
+        ctx.search_dict = (search_dict == "on")
         ctx.user_name = xauth.get_current_name()
 
         if ctx.search_message:
             ctx.search_file = False
             ctx.search_file_full = False
+            ctx.search_tool = False
+        if ctx.search_dict:
+            ctx.search_file = False
+        if ctx.search_file_full:
+            ctx.search_tool = False
 
         xutils.log("  key=%s" % key)
         for rule in _rules:
@@ -99,7 +114,7 @@ class handler:
                     if results is not None:
                         files += results
                 except Exception as e:
-                    xutils.print_stacktrace()
+                    xutils.print_exc()
         xmanager.fire("search", ctx)
         cost_time = (time.time() - start_time) * 1000
         xutils.log("  === total - %d ms ===" % cost_time)
@@ -113,11 +128,11 @@ class handler:
         title     = xutils.get_argument("title", "")
         content   = xutils.get_argument("content", "")
         message   = xutils.get_argument("message", "")
+        search_dict = xutils.get_argument("search_dict", "")
         page      = xutils.get_argument("page", 1, type = int)
         user_name = xauth.get_current_role()
-
-        xutils.get_argument("page_url", "/search/search?key=%s&content=%s&message=%s&page="\
-            % (key, content, message))
+        page_url  =  "/search/search?key=%s&content=%s&message=%s&search_dict=%s&page="\
+            % (key, content, message, search_dict)
         pagesize = xconfig.PAGE_SIZE
         offset   = (page-1) * pagesize
         limit    = pagesize
@@ -131,6 +146,7 @@ class handler:
             files = files, 
             title = title,
             page_max = math.ceil(count/pagesize),
+            page_url = page_url,
             content = content)
 
 rules_loaded = False
@@ -139,9 +155,9 @@ def load_rules():
     if rules_loaded:
         return
     add_rule(r"(.*[0-9]+.*)",           "calc.do_calc")
-    add_rule(r"([a-zA-Z0-9\.]*)",       "pydoc.search")
-    add_rule(r"([a-zA-Z\-]*)",          "translate.search")
-    add_rule(r"翻译\s+([^ ]+)",         "translate.zh2en")
+    add_rule(r"([a-zA-Z0-9\.]+)",       "pydoc.search")
+    add_rule(r"翻译\s+([^ ]+)",         "dictionary.zh2en")
+    add_rule(r"[a-zA-Z\-]+", "dictionary.find")
     add_rule(r"([^ ]*)",                "tools.search")
     add_rule(r"([^ ]*)",                "scripts.search")
     add_rule(r"([^ ]*)",                "api.search")

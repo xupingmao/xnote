@@ -10,6 +10,8 @@ from xutils import SearchResult
 def search(ctx, name):
     if not xauth.is_admin():
         return None
+    if not ctx.search_tool:
+        return
     results = []
     for fname in xutils.listdir(xconfig.SCRIPTS_DIR):
         if name in fname:

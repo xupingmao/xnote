@@ -17,7 +17,7 @@ __contributors__ = []
 # 系统配置项
 ##################################
 
-# 开发者模式,会展示更多的选项和信息
+# 开发者模式,会展示更多的选项和信息,会开启实验性功能
 DEV_MODE = False
 # 开启调试
 DEBUG = False
@@ -33,7 +33,6 @@ USE_CACHE_SEARCH = False
 USE_URLENCODE = False
 # 初始化脚本
 INIT_SCRIPT = None
-
 
 # 处理器目录
 HANDLERS_DIR = "handlers"

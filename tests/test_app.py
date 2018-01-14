@@ -17,6 +17,7 @@ def init():
     xtables.init()
     xconfig.IS_TEST = True
     xconfig.port = "1234"
+    xconfig.DEV_MODE = True
     var_env = dict()
     app = web.application(list(), var_env, autoreload=False)
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")

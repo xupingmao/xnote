@@ -1,10 +1,10 @@
 # encoding=utf-8
-from handlers.base import *
 import sqlite3
 import os
 import xutils
 import xauth
 import xconfig
+import xtemplate
 from collections import OrderedDict
 
 config = xconfig
@@ -35,12 +35,12 @@ def db_execute(path, sql, args = None):
         db.close()
     return kv_result
 
-class handler(BaseHandler):
+class handler:
 
     @xauth.login_required("admin")
-    def execute(self):
-        sql = self.get_argument("sql", "")
-        path = self.get_argument("path", "")
+    def POST(self):
+        sql = xutils.get_argument("sql", "")
+        path = xutils.get_argument("path", "")
         result_list = []
         error = ""
         if sql != "" and path != "":
@@ -51,7 +51,7 @@ class handler(BaseHandler):
             except Exception as e:
                 error = e
         path_list = []
-        for p in os.listdir(config.DATA_PATH):
+        for p in os.listdir(xconfig.DATA_DIR):
             if p.endswith(".db"):
                 p = os.path.join(xconfig.DATA_DIR, p)
                 path_list.append(p)
@@ -59,9 +59,12 @@ class handler(BaseHandler):
             keys = result_list[0].keys()
         else:
             keys = []
-        self.render("tools/sql.html", 
+        return xtemplate.render("tools/sql.html", 
             keys = keys, result_list = result_list, 
             sql = sql, error = error,
             path_list = path_list,
             path = path)
+
+    def GET(self):
+        return self.POST()
 

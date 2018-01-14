@@ -18,6 +18,8 @@ url_pattern = re.compile(r"(http|https)://[^ ]+")
 def search(ctx, name):
     # six.print_(xconfig)
     # 查找`handlers/tools/`目录下的工具
+    if not ctx.search_tool:
+        return
     tools_path = xconfig.TOOLS_DIR
     files = []
     basename_set = set()
@@ -33,6 +35,7 @@ def search(ctx, name):
             f.url = "/tools/" + filename
             f.content = filename
             files.append(f)
+
     if url_pattern.match(name):
         f = SearchResult()
         f.name = "分析网页资源 - " + name

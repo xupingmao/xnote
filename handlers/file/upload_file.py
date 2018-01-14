@@ -1,9 +1,8 @@
 # encoding=utf-8
 import os
 import time
-
 import xutils
-from handlers.base import *
+import xtemplate
 
 def get_link(filename, webpath):
     if xutils.is_img_file(filename):
@@ -23,7 +22,7 @@ class handler:
         filename = file.filename
         # Fix IE HMTL5 API拿到了全路径
         filename = os.path.basename(filename)
-        filepath, webpath = get_upload_file_path(filename, prefix=prefix)
+        filepath, webpath = xutils.get_upload_file_path(filename, prefix=prefix)
         with open(filepath, "wb") as fout:
             # fout.write(x.file.file.read())
             for chunk in file.file:
