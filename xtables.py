@@ -280,7 +280,11 @@ def init_table_dictionary():
     """
     词典 2018/01/14
     """
+<<<<<<< HEAD
     if not xconfig.DEV_MODE:
+=======
+    if xconfig.DEV_MODE:
+>>>>>>> 9804e0874004a44b7bc995e3beacffb5e1cdea65
         return
     dbpath = xconfig.DB_FILE
     with TableManager(dbpath, "dictionary") as manager:
