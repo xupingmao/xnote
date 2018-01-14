@@ -282,7 +282,7 @@ def init_table_dictionary():
     """
     if not xconfig.DEV_MODE:
         return
-    dbpath = xconfig.DB_FILE
+    dbpath = xconfig.DICT_FILE
     with TableManager(dbpath, "dictionary") as manager:
         manager.add_column("ctime", "text", "")
         manager.add_column("mtime", "text", "")
@@ -386,7 +386,7 @@ def get_storage_table():
 
 def get_dictionary_table():
     if xconfig.DEV_MODE:
-        return DBWrapper(xconfig.DB_PATH, "dictionary")
+        return DBWrapper(xconfig.DICT_FILE, "dictionary")
     return MockedDB()
 
 def init():

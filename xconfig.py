@@ -168,6 +168,7 @@ def init(path):
     global DATA_DIR
     global DB_PATH
     global DB_FILE
+    global DICT_FILE
     global BACKUP_DIR
     global APP_DIR
     global TMP_DIR
@@ -182,6 +183,7 @@ def init(path):
     DATA_DIR  = path
     # 数据库地址
     DB_PATH      = os.path.join(DATA_PATH, "data.db")
+    DICT_FILE    = os.path.join(DATA_DIR, "dictionary.db")
     # 备份数据地址
     BACKUP_DIR   = os.path.join(DATA_PATH, "backup")
     # APP地址

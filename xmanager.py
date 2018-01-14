@@ -66,7 +66,7 @@ class MyStdout:
         return "".join(result)
 
 
-def wrapped_handler(handler_clz):
+def wrapped_handler(pattern, handler_clz):
     # Py2 自定义类不是type类型
     if not inspect.isclass(handler_clz):
         return handler_clz
@@ -84,13 +84,20 @@ def wrapped_handler(handler_clz):
            1. 作为一个通用的封装，所有子类必须通过这层安全过滤
            2. 子类不用引入额外的模块
         """
+        # 防止自动转大数
+        visited_count = 0.0
+
         def __init__(self):
+            self.target_class = handler_clz
             self.target = handler_clz()
+            self.pattern = pattern
 
         def GET(self, *args):
+            WrappedHandler.visited_count += 1.0
             return wrap(self.target.GET(*args))
             
         def POST(self, *args):
+            WrappedHandler.visited_count += 1.0
             return wrap(self.target.POST(*args))
 
         def search_priority(self):
@@ -306,7 +313,7 @@ class ModelManager:
 
     def add_mapping(self, url, handler):
         self.mapping.append(url)
-        self.mapping.append(wrapped_handler(handler))
+        self.mapping.append(wrapped_handler(url, handler))
         if self.report_loading:
             log("Load mapping (%s, %s)" % (url, handler))
 
