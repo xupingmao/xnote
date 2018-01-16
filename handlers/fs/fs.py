@@ -365,6 +365,7 @@ class RenameHandler:
         old_name = xutils.get_argument("old_name")
         new_name = xutils.get_argument("new_name")
         if xconfig.USE_URLENCODE:
+            old_name = xutils.quote_unicode(old_name)
             new_name = xutils.quote_unicode(new_name)
         old_path = os.path.join(dirname, old_name)
         new_path = os.path.join(dirname, new_name)
