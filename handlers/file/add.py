@@ -12,6 +12,7 @@ import xauth
 import xutils
 import xtemplate
 import xtables
+from xutils import Storage
 
 class AddHandler:
 

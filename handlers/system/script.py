@@ -39,7 +39,7 @@ def get_script_list():
             fpath = os.path.join(dirname, fname)
             if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_LIST):
                 shell_list.append(fname)
-    return shell_list
+    return sorted(shell_list)
 
 class SaveHandler:
 
@@ -111,7 +111,6 @@ class handler:
             xutils.touch(path)
 
         shell_list = get_script_list()
-        shell_list.sort()
         return xtemplate.render(template_file, 
             op = op,
             name = name,

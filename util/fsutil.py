@@ -87,16 +87,6 @@ def getFileExt(fname):
     if '.' not in fname:return ''
     return fname.split('.')[-1]
 
-def getReadableSize(size):
-    if size < 1024:
-        return '%s B' % size
-    elif size < 1024 **2:
-        return '%.2f K' % (float(size) / 1024)
-    elif size < 1024 ** 3:
-        return '%.2f M' % (float(size) / 1024 ** 2)
-    else:
-        return '%.2f G' % (float(size) / 1024 ** 3)
-
 def format_size(size):
     if size < 1024:
         return '%s B' % size
@@ -152,7 +142,8 @@ class FileItem(Storage):
     def __init__(self, path, parent=None):
         self.path = path
         self.name = os.path.basename(path)
-        self.size = get_file_size(path)
+        self.size = '-'
+        self.cdate = '-'
         _, self.ext = os.path.splitext(path)
         self.ext = self.ext.lower()
 
@@ -170,6 +161,13 @@ class FileItem(Storage):
         else:
             self.type = "dir"
             self.path += "/"
+
+        try:
+            st = os.stat(path)
+            self.size = format_size(st.st_size)
+            self.cdate = xutils.format_date(st.st_ctime)
+        except:
+            pass
 
     # sort方法重写__lt__即可
     def __lt__(self, other):

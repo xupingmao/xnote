@@ -88,6 +88,9 @@
     .size-td {
         width: 100px;
     }
+    .date-td {
+        width: 100px;
+    }
 
     {% if not xconfig.DEV_MODE %}
         .advanced-opt {
@@ -201,6 +204,9 @@
                 <a class="item-option" href="/wiki?path={{item.path}}">预览</a>
             {% end %}
         {% end %}
+        </td>
+        <td class="date-td">
+            {{item.cdate}}
         </td>
         <td class="size-td">
             {{item.size}}

@@ -25,19 +25,25 @@ def get_cron_links():
             fpath = os.path.join(dirname, fname)
             if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_TUPLE):
                 links.append("script://" + fname)
+    links.sort()
 
+    api_links = []
     for fname in os.listdir(API_PATH):
         fpath = os.path.join(API_PATH, fname)
         name, ext = os.path.splitext(fname)
         if name != "__init__" and os.path.isfile(fpath) and ext == ".py":
-            links.append("/api/" + name)
+            api_links.append("/api/" + name)
+    api_links.sort()
+    links += api_links
 
+    tool_links = []
     for fname in os.listdir(TOOLS_DIR):
         fpath = os.path.join(TOOLS_DIR, fname)
         name, ext = os.path.splitext(fname)
         if name != "__init__" and os.path.isfile(fpath) and ext == ".py":
-            links.append("/tools/" + name)
-
+            tool_links.append("/tools/" + name)
+    tool_links.sort()
+    links += tool_links
     return links
 
 class CronEditHandler:

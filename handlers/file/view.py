@@ -60,12 +60,12 @@ class ViewHandler:
                 order="priority DESC, mtime DESC", 
                 limit=pagesize, 
                 offset=(page-1)*pagesize)
-            content = file.get_content()
+            content = file.content
             show_search_div = True
             show_add_file = True
         elif file.type == "md" or file.type == "text":
             dao.visit_by_id(id, db)
-            content = file.get_content()
+            content = file.content
             if op == "edit":
                 template_name = "file/markdown_edit.html"
         else:

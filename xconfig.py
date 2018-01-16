@@ -29,7 +29,7 @@ minthreads = 10
 OPEN_IN_BROWSER = False
 # 启用数据库的缓存搜索
 USE_CACHE_SEARCH = False
-# 文件系统使用urlencode方式
+# 文件系统使用urlencode方式,适用于只支持ASCII字符的系统
 USE_URLENCODE = False
 # 初始化脚本
 INIT_SCRIPT = None

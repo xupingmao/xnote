@@ -2,21 +2,26 @@
 <div>更新于 {{file.mtime}} </div>
 <div>
     标签: 
-    <span id="tags-span">
+    <span id="tags-span" class="tag-toggle">
     </span>
 
-    <span id="edit-tags-span" style="display: none;">
+    <span id="edit-tags-span" class="tag-toggle hide">
         <input id="tagEditText" type="text" value="" />
         <input type="button" id="tagEditBtn" class="btn" value="确认"/>
+        <input type="button" class="tag-toggle-btn" value="取消"/>
     </span>
 
     {% if _user_name == file.creator  %}
-        <a id="toggleFileTagsEditor" href="javascript:toggleFileTagsEditor()">编辑</a>
+        <a class="tag-toggle-btn tag-toggle" style="color: blue; cursor: pointer;">编辑</a>
     {% end %}
 </div>
 
 <script type="text/javascript">
+var gFileId = {{file.id}};
 
+/**
+ * 初始化标签列表
+ */
 function initTags() {
     $.get("/file/tag/{{file.id}}", function(data, status) {
         var tagsList = [];
@@ -55,12 +60,12 @@ function toggleFileTagsEditor() {
 }
 
 function postTagUpdate() {
-    $.post("/file/tag/update", {file_id: {{file.id}}, tags: $("#tagEditText").val()}, 
+    $.post("/file/tag/update", {file_id: gFileId, tags: $("#tagEditText").val()}, 
         function(data, status) {
-            // alert(data);
-            toggleFileTagsEditor();
             initTags();
-    });
+            $(".tag-toggle").toggle();
+        }
+    );
 }
 
 $("#tagEditBtn").on("click", function() {
@@ -74,84 +79,11 @@ $("#tagEditText").on("keyup", function (e) {
     }
 });
 
-$(function () {
-    initTags();
-    return;
-
-    function editRelated () {
-        if ($("#newTagsDiv").css("display") == "none") {
-            $("#newTags").val($("#oldTags").html());
-            $("#newTagsDiv").show();
-        } else {
-            $("#newTagsDiv").hide();
-        }
-    }
-  
-    var chineseComma = String.fromCharCode(65292);
-        
-    function updateRelated() {
-        var text = $("#newTags").val();
-        tags = text.toUpperCase();
-        var result = ajaxGet("/file/update?option=updateRelated&id={{file.id}}&value="+tags, function (result) {
-            // alert(result);
-            var resultObj = result;
-            if (resultObj.success) {
-                var resultSpan = document.getElementById("result");
-                resultSpan.innerHTML = "success!";
-                setTimeout(function () {
-                    resultSpan.innerHTML = "";
-                    $("#oldTags").html(tags);
-                    editRelated();
-                }, 1000);
-            } else {
-                alert("update fail, e = " + result.msg);
-            }
-        }, function (e) { alert ("send message failed!!!"); })
-    }
-
-    $("#menu-file").addClass("active");
-    $("#tagsInput").tagsinput({
-        confirmKeys: [13, 44, 65292, 124], // 65292 is chinese comma
-        itemText: function (item) {
-            // console.log(item);
-            return item.toUpperCase();
-        }
-    });
-
-    var oldTags = $("#oldTags").val() || "";
-
-    var tagList = oldTags.split("|");
-    for (var i = 0; i < tagList.length; i++) {
-        $("#tagsInput").tagsinput("add", tagList[i]);
-    }
-
-    function updateTags(tags, callback) {
-        $.get("/file/update?option=updateRelated&id={{file.id}}&value="+tags, function (data) {
-            var result = data;
-            console.log(data);
-            if (result.success) {
-                if (callback) {
-                    callback();
-                }
-                $("#tagsUpdateDiv").fadeIn(200).fadeOut(500);
-            }
-        });
-    }
-
-    window.updateTags = updateTags;
-
-    $("#tagsInput").on("itemAdded", function (event) {
-        var items = $("#tagsInput").tagsinput("items");
-        var tags = items.join(",");
-        updateTags(tags);
-    })
-
-    $("#tagsInput").on("itemRemoved", function (event) {
-        // alert("removed");
-        var items = $("#tagsInput").tagsinput("items");
-        var tags = items.join(",");
-        updateTags(tags);
-    })
+$(".tag-toggle-btn").click(function () {
+    $(".tag-toggle").toggle();
 })
 
-    </script>
+$(function () {
+    initTags();
+})
+</script>
