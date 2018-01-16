@@ -81,6 +81,11 @@ def backup_db():
     fsutil.copy(dbpath, newdbpath)
 
 def chk_backup():
+    tm = time.localtime()
+    if tm.tm_wday != 5:
+        print("not the day, quit")
+        # 一周备份一次
+        return
     backup_dir = config.get("BACKUP_DIR")
     xutils.makedirs(backup_dir)
     files = os.listdir(backup_dir)
