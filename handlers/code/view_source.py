@@ -3,6 +3,7 @@
 
 """显示代码原文"""
 import os
+import web
 import xauth
 import xutils
 import xtemplate

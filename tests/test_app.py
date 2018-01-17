@@ -240,6 +240,12 @@ class TestMain(unittest.TestCase):
 
     def test_view_source(self):
         self.check_200("/code/view_source?path=./README.md")
+
+    def test_view_source_update(self):
+        json_request("/code/view_source/update", method="POST", data=dict(path="./test.md", content="hello"))
+        content = xutils.readfile("./test.md")
+        self.assertEqual("hello", content)
+        xutils.remove("./test.md")
         
     def test_markdown_preview(self):
         self.check_200("/code/preview?path=./README.md")
