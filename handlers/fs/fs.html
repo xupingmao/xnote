@@ -88,7 +88,7 @@
     .size-td {
         width: 100px;
     }
-    .date-td {
+    .options-td {
         width: 100px;
     }
 
@@ -205,8 +205,9 @@
             {% end %}
         {% end %}
         </td>
-        <td class="date-td">
-            {{item.cdate}}
+        <td class="options-td">
+            <!-- {{item.cdate}} -->
+            <a href="javascript:removeFile('{{item.path}}')" class="item-option">删除</a>
         </td>
         <td class="size-td">
             {{item.size}}
@@ -279,6 +280,23 @@
         var command = $(this).attr("data-command");
         $.get("/system/command", {command: command, path: globalPath});
     })
+
+    function removeFile(path) {
+        var conf = confirm("确认删除 '%s' ?".format(path));
+        if (!conf) {
+            return;
+        }
+        $.post("/fs_api/remove", {path: path}, function (resp) {
+            if (resp.code == "success") {
+                location.reload();
+            } else {
+                alert("删除失败, %s".format(resp.message));
+            }
+        }).fail(function (resp) {
+            console.log(resp);
+            alert("删除失败");
+        })
+    }
     $("#deleteFile").on("click", function () {
         var checked = $(".checkboxTd :checked");
         if (checked.length == 0) {
@@ -288,19 +306,7 @@
         } else {
             var name = checked.attr("data-name");
             var path = checked.attr("data-path");
-            var conf = confirm("确认删除 '%s' ?".format(name));
-            if (conf) {
-                $.post("/fs_api/remove", {path: path}, function (resp) {
-                    if (resp.code == "success") {
-                        location.reload();
-                    } else {
-                        alert("删除失败, %s".format(resp.message));
-                    }
-                }).fail(function (resp) {
-                    console.log(resp);
-                    alert("删除失败");
-                })
-            }
+            removeFile(path);
         }
     });
 

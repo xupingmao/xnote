@@ -356,6 +356,9 @@ class RemoveHandler:
         except Exception as e:
             xutils.print_exc()
             return dict(code="fail", message=str(e))
+    
+    def GET(self):
+        return self.POST()
 
 class RenameHandler:
 

@@ -47,25 +47,21 @@
 </div>
 
 <script type="text/javascript">
-
-$(function () {
-    var editor = $("#input")[0];
-    var codeMirror = CodeMirror.fromTextArea(editor, {
-        lineNumbers:true,
-        mode: { name: "text/javascript", fencedCodeBlocks: true},
-        // theme:"xq-light",
-        theme: "monokai",
-        lineWrapping: true,
-        fixedGutter: true,
-    });
-    codeMirror.on("update", function (codeMirror, changeObj) {
-        console.log("update");
-        $("#input").val(codeMirror.doc.getValue());
+    $(function () {
+        var editor = $("#input")[0];
+        var codeMirror = CodeMirror.fromTextArea(editor, {
+            lineNumbers:true,
+            mode: { name: "text/javascript", fencedCodeBlocks: true},
+            lineWrapping: true,
+            fixedGutter: true
+        });
+        codeMirror.on("update", function (codeMirror, changeObj) {
+            console.log("update");
+            $("#input").val(codeMirror.doc.getValue());
+        })
+        window.codeMirror = codeMirror;
+        codeMirror.setSize("auto", 20 * 20);
     })
-    window.codeMirror = codeMirror;
-    // setSize(width, height);
-    codeMirror.setSize("auto", 20 * 20);
-})
 
     function isBasicType(obj) {
         var typeName = typeof(obj);

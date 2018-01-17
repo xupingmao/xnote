@@ -155,6 +155,9 @@ class Storage(dict):
             del self[key]
         except KeyError as k:
             raise AttributeError(k)
+
+    def __deepcopy__(self, memo):
+        return Storage(**self)
     
     def __repr__(self):     
         return '<MyStorage ' + dict.__repr__(self) + '>'

@@ -427,8 +427,7 @@ class TaskManager:
         self.load_tasks()
         
     def get_task_list(self):
-        # TODO 解决深拷贝问题 deepcopy会报错
-        return copy.copy(self.task_list)
+        return copy.deepcopy(self.task_list)
 
 
 class TaskThread(Thread):
