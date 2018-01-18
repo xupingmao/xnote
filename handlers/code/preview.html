@@ -19,33 +19,21 @@
 {% end %}
 
 {% block body %}
-    <div style="">
+    {% init path = "" %}
+
+    <div>
         <span id="result" style="color:green"></span>
     </div>
-        <div>
-            <div style="float:left;margin-top: 1em;" class="col-md-12">
-            {% if _is_admin and type == "file" %}
-                <a href="/code/view_source?path={{path}}">[编辑]</a>
-            {% elif _is_admin and type == "dir" %}
-                <a href="/wiki/add?type=file&target={{name}}">[添加文件]</a>
-                <a href="/wiki/add?type=dir&target={{name}}">[添加目录]</a>
-            {% end %}
-            </div>
+    <div>
+        <div style="float:left;margin-top: 1em;" class="col-md-12">
+        {% if _is_admin and type == "file" and path != "" %}
+            <a href="/code/view_source?path={{path}}">[编辑]</a>
+        {% elif _is_admin and type == "dir" %}
+            <a href="/wiki/add?type=file&target={{name}}">[添加文件]</a>
+            <a href="/wiki/add?type=dir&target={{name}}">[添加目录]</a>
+        {% end %}
         </div>
-        
-    {% if type == "dir" %}
-        <div>
-            {% for child in children %}
-                <li style="padding-top:6px;">
-                    {% if child.type == "dir" %}
-                        <img src="/static/image/folder.gif"/>
-                    {% end %}
-                    <a href="/wiki{{child.path}}">{{ child.name }}</a>
-                </li>
-            {% end %}
-        </div>
-    {% end %}
-    
+    </div>
     {% if type == "file" or has_readme %}
         <div style="padding-top:20px;">
             <div id="epiceditor" class="row">

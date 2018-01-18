@@ -1,11 +1,12 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/23
-# Last Modified on 2017/11/12
+# Last Modified on 2018/01/18
 import time
 import web
 import xauth
 import xtables
 import xutils
+import xconfig
 
 def save_ip(real_ip):
     if real_ip is not None:
@@ -62,6 +63,7 @@ class handler:
         
         # web.header("Cache-Control", "max-age=600")
         environ = web.ctx.environ
+        content = "/* empty */"
 
         web.header("Content-Type", "application/javascript")
         client_etag = environ.get('HTTP_IF_NONE_MATCH')
@@ -75,9 +77,8 @@ class handler:
             # 采集数据时间区间
             save_ip(web.ctx.env.get("HTTP_X_FORWARDED_FOR"))
             save_ip(web.ctx.env.get("REMOTE_ADDR"))
-            content = SCRIPT
-        else:
-            content = "/* empty */"
+            if xconfig.RECORD_LOCATION:
+                content = SCRIPT
 
         if not xauth.is_admin():
             content = "/* empty */"

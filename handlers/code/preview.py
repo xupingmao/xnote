@@ -3,6 +3,7 @@ import os
 import web
 import xutils
 import xauth
+import xconfig
 from xtemplate import render
 
 WIKI_PATH = "./"
@@ -57,10 +58,6 @@ class handler:
         name = xutils.unquote(name)
         op   = xutils.get_argument("op")
         path = xutils.get_argument("path")
-        print(path)
-        if op == "edit":
-            return self.edit_GET(name)
-
         origin_name = name
         if name == "":
             name = "/"
@@ -68,25 +65,7 @@ class handler:
             name = "/" + name
         path = xutils.get_real_path(path)
         has_readme = False
-        if os.path.isdir(path):
-            return "Directory Not Readable"
-            type = "dir"
-            content = None
-            children = []
-            parent = name
-            for child in os.listdir(path):
-                _, ext = os.path.splitext(child)
-                if child.startswith("_"):
-                    continue
-                if ext in HIDE_EXT_LIST:
-                    continue
-                # if child.lower() in ["index.md", "readme.md"]:
-                #     has_readme = True
-                #     content = xutils.readfile(os.path.join(path, child))
-                #     continue
-                children.append(FileItem(parent, child, path))
-            children.sort(key = lambda item: item.key)
-        elif os.path.isfile(path):
+        if os.path.isfile(path):
             check_resource(path)
             type = "file"
             content = xutils.readfile(path)
@@ -161,7 +140,7 @@ class handler:
                     continue
                 children.append(FileItem(parent, child, path))
             children.sort(key = lambda item: item.key)
-        elif not os.path.exists(path):
+        if not os.path.exists(path):
             type = "file"
             content = ""
             children = None
@@ -195,8 +174,20 @@ class ReadOnlyHandler:
         return xtemplate.render("code/preview.html", 
             os = os, content = content, type="file")
 
+class WikiPathHandler:
+
+    def GET(self, path=""):
+        template_name = "code/preview.html"
+        if not os.path.exists(path):
+            return render(template_name, error="file not exists")
+        if not path.endswith(".md"):
+            return render(template_name, error="file extension error")
+        content = xutils.readfile(path)
+        return render(template_name, content = content, os = os, type = "file", path = path)
+
 xurls = (
-    r"/wiki/?(.*)", handler,
+    r"/wiki/(.*)", WikiPathHandler,
+    r"/wiki", handler,
     r"/code/preview", handler
 )
 

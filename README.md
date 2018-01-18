@@ -18,12 +18,6 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 - [github](https://github.com/xupingmao/xnote)
 - [码云](https://gitee.com/xupingmao/xnote)
 
-### 关于版本
-
-- master版本是开发版本，可以体验最新功能特性，考虑稳定性可以下载tag版本。
-- 目前的大版本是1.0版本，小版本暂时3个月左右迭代一次，质量主要通过自动化测试保证，小版本开发完之后，如果运行一段时间没有明显BUG我会创建一个新的Tag分支。
-- 升级过程中尽量向前兼容，大部分的数据库结构变更可以自动执行，不兼容的地方将会在Release Log中加以说明。
-
 ## Python版本
 
 - Python 3.x
@@ -35,6 +29,7 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 - 无需额外配置，初始化的管理员账号是admin/123456
 - 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 即可
 - 本项目可以直接运行在新浪云应用SAE上面
+- 如果失败参考 [数据库迁移](./docs/db_migrate.md)
 
 ### 启动参数
 - `--data {data_path}` 指定数据存储的data目录，比如`python app.py --data D:/data`
@@ -44,30 +39,6 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 - `--useUrlencode yes`针对只支持ASCII编码的文件系统开启urlencode转换非ASCII码字符
 - `--initScript {script_name}` 启动时运行指定脚本完成自定义初始化操作
 
-### 数据库升级
-
-如果启动失败，报数据库字段错误、或者是启动成功但是丢失了资料的日期信息，那么可能是安装了早期版本导致的，需要对数据库进行一次手动升级，由于sqlite不支持字段重命名，所以会略微麻烦一些。
-
-升级工作主要是三步，如下所示，需要说明的是备份可以登陆到服务器使用sqlite安装程序，也可以通过关键字`sql`搜索出xnote自带的工具操作
-
-- 备份`file`表,
-
-```
-alter table file rename to file_20171124;
-```
-
-- 创建新的`file`表，这一步可以通过重新启动xnote来自动创建
-- 把备份数据迁移到新的`file`表中
-
-```
-insert into file ( id, name, content, data, size, version, type, 
-parent_id, related, ctime, mtime, atime, visited_cnt, is_deleted, is_public, is_marked,
-creator, modifier, groups, priority) 
-select id, name, content, data, size, version, type, 
-parent_id, related, sctime, smtime, satime, visited_cnt, is_deleted, is_public, is_marked,
-creator, modifier, groups, priority from file_20171124;
-
-```
 
 ## 功能结构
 

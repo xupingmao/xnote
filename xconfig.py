@@ -33,6 +33,8 @@ USE_CACHE_SEARCH = False
 USE_URLENCODE = False
 # 初始化脚本
 INIT_SCRIPT = None
+# 记录位置信息，可通过脚本配置打开
+RECORD_LOCATION = False
 
 # 处理器目录
 HANDLERS_DIR = "handlers"

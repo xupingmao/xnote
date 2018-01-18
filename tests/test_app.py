@@ -176,7 +176,6 @@ class TestMain(unittest.TestCase):
     def test_sys(self):
         self.check_200("/system/sys")
         self.check_200("/system/user_admin")
-        self.check_200("/system/sys_var_admin")
         self.check_200("/system/crontab")
         self.check_200("/system/stats")
         self.check_200("/system/stats/location", method="POST")
