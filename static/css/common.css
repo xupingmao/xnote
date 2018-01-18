@@ -341,13 +341,14 @@ li.menu-item:hover {
 
 .navMenuTop {
   background-color: #9cc;
+  width: 100%;
+  float: left;
 }
 
 .navMenuTop * {
   margin: 0px;
   padding: 0px;
   color: black;
-  text-align: center;
 }
 
 .navMenuTop h1 {
@@ -355,13 +356,14 @@ li.menu-item:hover {
 }
 
 .navMenuTop ul {
-  text-align: center;
-  line-height: 30px;
+  height: 30px;
   width: 100%;
+  padding-left: 10px;
 }
 
 .navMenuTop li {
-  display: inline;
+  display: block;
+  float: left;
   padding: 5px;
 }
 
