@@ -119,7 +119,7 @@ def main():
         xutils.exec_script(xconfig.INIT_SCRIPT)
 
     if xconfig.OPEN_IN_BROWSER:
-        webbrowser.open("http://localhost:1234/")
+        webbrowser.open("http://localhost:%s/" % xconfig.PORT)
     app.run()
 
 if __name__ == '__main__':
