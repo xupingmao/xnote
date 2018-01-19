@@ -50,6 +50,9 @@ class handler:
 
 
     def GET(self):
-        return self.POST()
+        return xtemplate.render("login.html",
+            username="",
+            password="",
+            error="")
 
 

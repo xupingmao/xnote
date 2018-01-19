@@ -1,6 +1,4 @@
-{% extends base.html %}
-
-{% block head %}
+{% extends base.html %} {% block head %}
 <script src="/static/lib/codemirror/codemirror.min.js"></script>
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/codemirror.min.css">
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
@@ -9,86 +7,84 @@
 <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
 <script type="text/javascript" src="/static/js/upload.js"></script>
 <script type="text/javascript" src="/static/js/marked-ext.js"></script>
+<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 <style>
-.CodeMirror {
-    width: 100%;
-    font-size:16px;
-    height: auto;
-}
+    .CodeMirror {
+        width: 100%;
+        font-size: 16px;
+        height: auto;
+    }
 
-#markdown-input {
-    position: relative;
-    font-family: monospace;
-}
+    #markdown-input {
+        position: relative;
+        font-family: monospace;
+    }
 
-.alert {
-    color: red;
-    background-color: #FFCCCC;
-    width: initial;
-}
+    .alert {
+        color: red;
+        background-color: #FFCCCC;
+        width: initial;
+    }
 
-.small {
-    font-size: small;
-}
+    .small {
+        font-size: small;
+    }
 
-#submit-div {
-    background-color: white; 
-    top: 0px; 
-    z-index: 100
-}
-#editor-area {
-    border: 1px solid #ccc;
-    height: 400px;
-    overflow-y: scroll;
-    box-sizing: border-box;
-}
-#autosaveResult {
-    color: green;
-    font-size: small;
-}
+    #submit-div {
+        background-color: white;
+        top: 0px;
+        z-index: 100
+    }
 
-.pathlist {
-    background-color: #eee;
-    padding:3px;
-    box-sizing: border-box;
-}
+    #editor-area {
+        border: 1px solid #ccc;
+        height: 400px;
+        overflow-y: scroll;
+        box-sizing: border-box;
+    }
 
-.toolbox {
-    background-color: #eee;
-    border:1px solid #ccc; 
-    border-bottom: none;
-    box-sizing: border-box;
-}
+    #autosaveResult {
+        color: green;
+        font-size: small;
+    }
 
-.toolbox-btn {
-    display: block;
-    float: left;
-    background-color: #eee;
-    color: #000;
-    border-right: 1px solid #ccc;
-    outline: none;
-}
+    .pathlist {
+        background-color: #eee;
+        padding: 3px;
+        box-sizing: border-box;
+    }
 
-.toolbox-btn:hover {
-    display: block;
-    float: left;
-    color: #fff;
-    background-color: #aaa;
-    border: 1px solid #ccc;
-}
+    .toolbox {
+        background-color: #eee;
+        border: 1px solid #ccc;
+        border-bottom: none;
+        box-sizing: border-box;
+    }
 
+    .toolbox-btn {
+        display: block;
+        float: left;
+        background-color: #eee;
+        color: #000;
+        border-right: 1px solid #ccc;
+        outline: none;
+    }
+
+    .toolbox-btn:hover {
+        display: block;
+        float: left;
+        color: #fff;
+        background-color: #aaa;
+        border: 1px solid #ccc;
+    }
 </style>
-{% end %}
+{% end %} {% block body %} {% init error = "" %} {% init download_csv = False %}
 
-{% block body %}
-    {% init error = "" %}
-    {% init download_csv = False %}
-
-    <div class="alert">
+<div class="alert">
     {{error}}
-    </div>
+</div>
 
-    <div class="col-md-12">
+<div class="col-md-12">
     <form id="mainFrame" action="/file/update" enctype="multipart/form-data" method="POST" class="col-md-12">
         <div class="col-md-12" id="submit-div">
             <div>
@@ -96,33 +92,31 @@
             </div>
             <div class="col-md-12">
                 <div class="col-md-12 pathlist">
-                    <a href="/file/group">Home</a> /
-                    {% for item in pathlist %}
-                        <a href="{{item.url}}">{{ item.name }}</a> /
-                    {% end %}
+                    <a href="/file/group">Home</a> / {% for item in pathlist %}
+                    <a href="{{item.url}}">{{ item.name }}</a> / {% end %}
                 </div>
             </div>
         </div>
         <div class="col-md-12">
             <span id="result" style="color:green"></span>
             <div class="col-md-12 toolbox">
-                <input type="submit" class="toolbox-btn btn-primary" value="更新"/>
-                <input type="button" id="insertCode" class="toolbox-btn" value="代码"/> 
-                <input type="button" id="insertStrong" class="toolbox-btn" value="加粗"/>
-                <input type="button" id="insertDel" class="toolbox-btn" value="删除线"/>
+                <input type="submit" class="toolbox-btn btn-primary" value="更新" />
+                <input type="button" id="insertCode" class="toolbox-btn" value="代码" />
+                <input type="button" id="insertStrong" class="toolbox-btn" value="加粗" />
+                <input type="button" id="insertDel" class="toolbox-btn" value="删除线" />
                 <input type="file" id="file" name="file" class="hide" />
                 <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" />
-                <input type="button" class="toolbox-btn btn-primary" onclick="togglePreview(this)" value="关闭预览"/>
-                <span class="upload-progress"></span>
+                <input type="button" class="toolbox-btn btn-primary" onclick="togglePreview(this)" value="关闭预览" />
+                <span id="uploadProgress" class="upload-progress"></span>
                 <span id="autosaveResult" class="hide">自动保存成功</span>
             </div>
-        
+
             <div class="col-md-12" id="editor-area">
                 <div class="col-md-12">
                     <div id="edit-div">
-                        <input style="display:none" name="id" value="{{file.id}}"/>
-                        <input type="text" name="version" value="{{file.version}}" class="hide"/>
-                        <input type="text" name="type" value="md" class="hide"/>
+                        <input style="display:none" name="id" value="{{file.id}}" />
+                        <input type="text" name="version" value="{{file.version}}" class="hide" />
+                        <input type="text" name="type" value="md" class="hide" />
                     </div>
                 </div>
 
@@ -140,13 +134,13 @@
             </div>
         </div>
     </form>
-    </div>
+</div>
 
 <script>
     function delLink() {
         var r = confirm("确认删除 {{file.name}}?");
         if (r) {
-            location.href="/file/update?option=del&id={{file.id}}";
+            location.href = "/file/update?option=del&id={{file.id}}";
         }
     }
 
@@ -154,18 +148,17 @@
         codeMirror.replaceSelection(code, 'around');
     }
 
-    $("#file").on("change", function () {
-        // $("#mainFrame").submit();
-        uploadFile("file", "/file/upload_file?prefix={{file.id}}", function (evt) {
-            // 处理上传成功
-            var responseText = evt.target.responseText;
-            var result = JSON.parse(responseText);
-            console.log(result);
-            var link = result.link;
-            // alert(result);   
-            codeInsert(link);
-        })
-    })
+    // $("#file").on("change", function () {
+    //     uploadFile("file", "/file/upload_file?prefix={{file.id}}", function (evt) {
+    //         // 处理上传成功
+    //         var responseText = evt.target.responseText;
+    //         var result = JSON.parse(responseText);
+    //         console.log(result);
+    //         var link = result.link;
+    //         // alert(result);   
+    //         codeInsert(link);
+    //     })
+    // })
 
     $("#uploadBtn").on("click", function () {
         $("#file").click();
@@ -183,8 +176,8 @@
         }
 
         var codeMirror = CodeMirror.fromTextArea(editor, {
-            lineNumbers:true,
-            mode: { name: "text/x-markdown", fencedCodeBlocks: true},
+            lineNumbers: true,
+            mode: { name: "text/x-markdown", fencedCodeBlocks: true },
             lineWrapping: true,
             fixedGutter: true,
         });
@@ -211,7 +204,7 @@
         $("#markdown-input-div").removeClass("hide");
         $("#markdown-output-div").removeClass("col-md-12").addClass("col-md-6");
         var height = Math.max(500, $("#markdown-output-div").height());
-        $("#markdown-input").css({height:height+"px"});
+        $("#markdown-input").css({ height: height + "px" });
         $("#edit-div").show();
         $("#edit-btns").hide();
 
@@ -225,7 +218,7 @@
         $("#markdown-input-div").removeClass("hide").addClass("col-md-12");
         $("#markdown-output-div").removeClass("col-md-12").addClass("hide");
         var height = Math.max(500, $("#markdown-output-div").height());
-        $("#markdown-input").css({height:height+"px"});
+        $("#markdown-input").css({ height: height + "px" });
         $("#edit-div").show();
         $("#edit-btns").hide();
     }
@@ -234,12 +227,12 @@
         $("#markdown-input-div").removeClass("hide").addClass("col-md-12");
         $("#markdown-output-div").removeClass("col-md-12").addClass("hide");
         var height = Math.max(500, $("#markdown-output-div").height());
-        $("#markdown-input").css({height:height+"px"});
+        $("#markdown-input").css({ height: height + "px" });
         $("#edit-div").show();
         $("#edit-btns").hide();
         initCodeMirror();
     }
-    
+
     function togglePreview(target) {
         if ($("#markdown-input-div").hasClass("col-md-6")) {
             $("#markdown-input-div").removeClass("col-md-6").addClass("col-md-12");
@@ -262,16 +255,16 @@
             $(target).val("预览");
         }
     }
-    
+
     function escape(html, encode) {
-      return html
-        .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/\n/g, '<br/>')
-        .replace(/ /g, '&nbsp;');
+        return html
+            .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/\n/g, '<br/>')
+            .replace(/ /g, '&nbsp;');
     }
 
     $(document).ready(function () {
@@ -290,7 +283,7 @@
             }
             oldContent = input;
             var outtext = marked.parse(input);
-            $("#markdown-output-div").html(outtext); 
+            $("#markdown-output-div").html(outtext);
         }
 
         function autoSave() {
@@ -300,7 +293,7 @@
                 return;
             }
             lastSaved = input;
-            $.post("/file/autosave", {id:fileId, content:input}, function (resp) {
+            $.post("/file/autosave", { id: fileId, content: input }, function (resp) {
                 console.log(resp);
                 if (resp.code == "success") {
                     $("#autosaveResult").show().fadeOut(1000);
@@ -310,7 +303,7 @@
 
         repaint();
         edit();
-        
+
         setInterval(repaint, 200);
         // setInterval(autoSave, 1000*30);
 
@@ -326,7 +319,7 @@
         $("#insertStrong").on("click", function () {
             var selection = codeMirror.getSelection();
             if (selection.startsWith("**") && selection.endsWith("**")) {
-                codeMirror.replaceSelection(selection.substring(2, selection.length-2), "around");
+                codeMirror.replaceSelection(selection.substring(2, selection.length - 2), "around");
             } else {
                 codeMirror.replaceSelection("**" + selection + "**", "around");
             }
@@ -337,7 +330,87 @@
             codeMirror.replaceSelection("~~" + selection + "~~", "around");
         })
 
-    })
+        // 文件上传
+        var BASE_URL = "/static/lib/webuploader"
+        // 初始化Web Uploader
+        var uploader = WebUploader.create({
+            // 选完文件后，是否自动上传。
+            auto: true,
+            // swf文件路径
+            swf: BASE_URL + '/Uploader.swf',
+            // 文件接收服务端。
+            server: '/fs_upload/range',
+            // 选择文件的按钮。可选。
+            // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+            pick: '#filePicker',
+            // 需要分片
+            chunked: true,
+            // 默认5M
+            // chunkSize: 1024 * 1024 * 5,
+            chunkSize: 1024 * 1024 * 5,
+            // 重试次数
+            chunkRetry: 10,
+            // 文件上传域的name
+            fileVal: "file",
+            // 不开启并发
+            threads: 1,
+        });
+
+        // 文件上传过程中创建进度条实时显示。
+        uploader.on('uploadProgress', function (file, percentage) {
+            var $li = $('#uploadProgress'),
+                $percent = $li.find('.progress span');
+
+            // 避免重复创建
+            if (!$percent.length) {
+                $percent = $('<div class="progress"><span></span></div>')
+                    .appendTo($li)
+                    .find('span');
+            }
+
+            $percent.css('width', percentage * 100 + '%');
+            $percent.text((percentage * 100).toFixed(2) + '%');
+        });
+
+        uploader.on('uploadBeforeSend', function (object, data, headers) {
+            $('#uploadProgress').find('.progress').remove();
+            data.dirname = "auto";
+            data.prefix = "{{file.id}}";
+            data.type = "html5";
+        })
+
+        // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+        uploader.on('uploadSuccess', function (file, resp) {
+            $('#uploadProgress').find('.progress').remove();
+            var $li = $('#uploadProgress');
+            $('<div class="progress"><span>上传完成</span></div>')
+                .appendTo($li)
+                .find('span');
+            console.log(resp);
+            codeInsert(resp.link);
+        });
+
+        // 文件上传失败，显示上传出错。
+        uploader.on('uploadError', function (file) {
+            var $li = $('#' + file.id),
+                $error = $li.find('div.error');
+            // 避免重复创建
+            if (!$error.length) {
+                $error = $('<div class="error"></div>').appendTo($li);
+            }
+            $error.text('上传失败');
+        });
+
+        $("#file").on("change", function (event) {
+            console.log(event);
+            var fileList = event.target.files; //获取文件对象 
+            console.log(fileList);
+            if (fileList && fileList.length > 0) {
+                uploader.addFile(fileList);
+            }
+        });
+    });
+
 </script>
 
 <!-- GROUPS: {{file.groups}} -->

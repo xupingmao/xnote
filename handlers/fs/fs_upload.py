@@ -8,6 +8,11 @@ import xutils
 from xutils import quote
 
 
+def get_link(filename, webpath):
+    if xutils.is_img_file(filename):
+        return "![%s](%s)" % (filename, webpath)
+    return "[%s](%s)" % (filename, webpath)
+
 class UploadHandler:
 
     def POST(self):
@@ -50,11 +55,12 @@ class RangeUploadHandler:
         prefix = xutils.get_argument("prefix", "")
         dirname = xutils.get_argument("dirname", xconfig.DATA_DIR)
         dirname = dirname.replace("$DATA", xconfig.DATA_DIR)
-        # print(file.__dict__)
-        # print("%d/%d" % (chunk, chunks))
         filename = None
         webpath  = ""
+        origin_name = ""
+
         if hasattr(file, "filename"):
+            origin_name = file.filename
             # print(" - - %-20s = %s" % ("filename", file.filename))
             xutils.log("recv {}", file.filename)
             filename = os.path.basename(file.filename)
@@ -74,7 +80,7 @@ class RangeUploadHandler:
             return dict(code="fail", message="require file")
         if chunk+1==chunks:
             self.merge_files(dirname, filename, chunks)
-        return dict(code="success", webpath=webpath)
+        return dict(code="success", webpath=webpath, link=get_link(origin_name, webpath))
 
 xurls = (
     # 和文件系统的/fs/冲突了
