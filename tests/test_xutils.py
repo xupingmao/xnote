@@ -1,8 +1,8 @@
 # encoding=utf-8
 import sys
 import os
+import time
 sys.path.insert(1, "lib")
-
 import unittest
 import xutils
 import xconfig
@@ -120,6 +120,11 @@ class TestMain(unittest.TestCase):
         content = xutils.readfile(tmpfile)
         self.assertEqual("test", content)
         xutils.remove(tmpfile, True)
+
+    def test_match_time(self):
+        tm = time.strptime("2015-01-01", "%Y-%m-%d")
+        self.assertFalse(xutils.match_time(year = 2016, tm = tm))
+        self.assertTrue(xutils.match_time(month = 1, tm = tm))
 
 
         

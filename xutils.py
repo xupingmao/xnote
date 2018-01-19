@@ -379,6 +379,19 @@ def days_before(days, format=False):
         return format_time(seconds)
     return time.localtime(seconds)
 
+def match_time(year = None, month = None, day = None, wday = None, tm = None):
+    if tm is None:
+        tm = time.localtime()
+    if year is not None and year != tm.tm_year:
+        return False
+    if month is not None and month != tm.tm_mon:
+        return False
+    if day is not None and day != tm.tm_day:
+        return False
+    if wday is not None and wday != tm.tm_wday:
+        return False
+    return True
+
 #################################################################
 ##   Str Utilities
 #################################################################
