@@ -221,6 +221,7 @@ def init_table_user():
         manager.add_column("ctime",      "text", "")
         manager.add_column("mtime",      "text", "")
         manager.add_column("token",      "text", "")
+        manager.add_column("login_time", "text", "")
 
 def init_table_message():
     """

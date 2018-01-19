@@ -210,6 +210,11 @@ class TestMain(unittest.TestCase):
     def test_search(self):
         self.check_200("/search?key=测试")
         self.check_200("/search/search?key=测试")
+    
+    def test_search_calc(self):
+        result = json_request("/search?key=1%2B2&_type=json")
+        value = result['files'][0]['raw']
+        self.assertEqual("3", value)
 
     def test_http_headers(self):
         data = app.request("/api/http_headers", headers=dict(X_TEST=True)).data
@@ -244,7 +249,7 @@ class TestMain(unittest.TestCase):
         json_request("/code/view_source/update", method="POST", data=dict(path="./test.md", content="hello"))
         content = xutils.readfile("./test.md")
         self.assertEqual("hello", content)
-        xutils.remove("./test.md")
+        xutils.remove("./test.md", hard = True)
         
     def test_markdown_preview(self):
         self.check_200("/code/preview?path=./README.md")

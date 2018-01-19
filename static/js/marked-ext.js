@@ -87,10 +87,7 @@
             + level
             + ' id="'
             + this.options.headerPrefix
-            // 对中文无效
-            // + raw.toLowerCase().replace(/[^\w]+/g, '-')
             + id
-            // + '">'
             + '" class="marked-heading">'
             + checkboxResult.checkbox
             + checkboxResult.text
@@ -102,11 +99,12 @@
 
     // 重写img
     myRenderer.image = function(href, title, text) {
-      var out = '<img src="' + href + '" alt="' + text + '" style="max-width:100%;"';
+      var out = '<a href="' + href + '"><img src="' + href + '" alt="' + text + '" style="max-width:100%;"';
       if (title) {
         out += ' title="' + title + '"';
       }
       out += this.options.xhtml ? '/>' : '>';
+      out += '</a>'
       return out;
     };
 

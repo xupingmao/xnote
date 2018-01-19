@@ -34,6 +34,8 @@ class handler:
                 web.setcookie("xuser", name, expires= 24*3600*30)
                 pswd_md5 = xauth.get_password_md5(pswd)
                 web.setcookie("xpass", pswd_md5, expires=24*3600*30)
+                db = xtables.get_user_table()
+                db.update(login_time=xutils.format_datetime(), where=dict(name=name))
                 if target is None:
                     raise web.seeother("/")
                 raise web.seeother(target)

@@ -385,7 +385,7 @@ li.menu-item:hover {
   height: 100px;
 }
 
-@media screen and (min-width: 700px) {
+@media screen and (min-width: 1000px) {
   /** Desktop **/
   .navMenubox {
     display: block;

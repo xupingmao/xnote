@@ -17,6 +17,10 @@
             text-decoration: none;
             color: #08c;
         }
+        .item {
+            width: 150px;
+            float: left;
+        }
     </style>
 {% end %}
 
@@ -56,7 +60,7 @@
     <h3>系统管理工具</h3>
     <div class="col-md-12">
         {% for name, link in debug_tools %}
-        <div class="col-md-4">
+        <div class="item">
             <a href="{{link}}">{{name}}</a>
         </div>
         {% end %}
@@ -69,6 +73,7 @@
     ("时光轴", "/tools/timeline"),
     ("记事", "/tools/message?status=created"),
     ("最近更新", "/file/recent_edit"),
+    ("我的收藏", "/file/group/marked")
 ] %}
 
 {% set dev_tools = [
@@ -103,7 +108,7 @@
     <h3>{{category}}</h3>
     <div class="col-md-12">
         {% for name, link in tools %}
-        <div class="col-md-4">
+        <div class="item">
             <a href="{{link}}">{{name}}</a>
         </div>
         {% end %}
