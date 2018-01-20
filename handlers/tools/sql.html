@@ -7,7 +7,7 @@
 <script type="text/javascript" src="/static/lib/codemirror/mode/sql.min.js"></script>
 <style>
 .CodeMirror {
-    width: 60rem;
+    width: 100%;
     font-size:16px;
     height: 300px;
 }
@@ -66,8 +66,7 @@ $(function () {
     var editor = $("#editor")[0];
     var codeMirror = CodeMirror.fromTextArea(editor, {
         lineNumbers:true,
-        mode: "text/x-sql",
-        theme:"monokai"
+        mode: "text/x-sql"
     });
 })
 </script>

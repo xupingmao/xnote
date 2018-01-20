@@ -61,7 +61,7 @@
 ] %}
 
 <div class="col-md-12 top-offset-1">
-    <h3>系统管理工具</h3>
+    <h3>系统管理</h3>
     <div class="col-md-12">
         {% for name, link in debug_tools %}
         <div class="item">
@@ -77,7 +77,8 @@
     ("时光轴", "/tools/timeline"),
     ("记事", "/tools/message?status=created"),
     ("最近更新", "/file/recent_edit"),
-    ("我的收藏", "/file/group/marked")
+    ("我的收藏", "/file/group/marked"),
+    ("日历", "/tools/date")
 ] %}
 
 {% set dev_tools = [
@@ -103,7 +104,7 @@
 {% set tools_list = [
     ("知识库", lib_tools, True),
     ("开发工具", dev_tools, False),
-    ("图片处理工具", img_tools, False),
+    ("图片工具", img_tools, False),
     ("编解码工具", code_tools, False),
 ] %}
 
