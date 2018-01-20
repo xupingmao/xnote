@@ -92,7 +92,6 @@ def get_server_ip():
                 
 class SysHandler:
 
-    @xauth.login_required()
     def GET(self):
         shell_list = []
         dirname = "scripts"
