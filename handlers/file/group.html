@@ -11,14 +11,17 @@
                 <a href="/file/group/ungrouped">未分类</a> /
             </td>
         </tr>
+        <tr>
+            <td class="note-td">
+                <img src="/static/image/folder.gif">
+                <a href="/file/group/public">公开</a> /
+            </td>
+        </tr>
     {% end %}
 
     {% for i, item in enumerate(files) %}
         <tr>
             <td class="note-td">
-<!--                 <div class="children-count">
-                    {{item.size}}
-                </div> -->
                 {% if item.type == "group" %}
                     <img src="/static/image/folder.gif"/>
                     <a class="group-link" href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>({{item.size}})

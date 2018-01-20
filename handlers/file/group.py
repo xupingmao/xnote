@@ -75,6 +75,8 @@ class MoveHandler:
 class GroupListHandler:
 
     def GET(self):
+        if not xauth.has_login():
+            raise web.seeother("/file/group/public")
         id = xutils.get_argument("id", "", type=int)
         filetype = xutils.get_argument("filetype", "")
         sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
@@ -144,6 +146,23 @@ class MarkedHandler:
             page_max = math.ceil(count/PAGE_SIZE), 
             page_url="/file/group/marked?page=")
 
+class PublicGroupHandler:
+
+    def GET(self):
+        page = xutils.get_argument("page", 1, type=int)
+        page = max(1, page)
+        db = xtables.get_file_table()
+        where = "is_deleted=0 AND is_public=1"
+        files = db.select(where=where, offset=(page-1)*PAGE_SIZE, limit=PAGE_SIZE)
+        count = db.count(where=where)
+        return xtemplate.render("file/view.html", 
+            pathlist = [Storage(name="公开", url="/file/group/public")],
+            file_type = "group",
+            files = files,
+            page = page, 
+            page_max = math.ceil(count/PAGE_SIZE), 
+            page_url="/file/group/public?page=")
+
 xurls = (
     r"/file/group", GroupListHandler,
     r"/file/group/ungrouped", Ungrouped,
@@ -152,6 +171,7 @@ xurls = (
     r"/file/group/move", MoveHandler,
     r"/file/group/bookmark", MarkedHandler,
     r"/file/group/marked", MarkedHandler,
-    r"/file/group/recent_created", RecentCreatedHandler
+    r"/file/group/recent_created", RecentCreatedHandler,
+    r"/file/group/public", PublicGroupHandler
 )
 
