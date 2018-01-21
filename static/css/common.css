@@ -34,12 +34,6 @@ a {
     text-decoration: none;
 }
 
-.x-center {
-    width: 90%;
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
 a:hover {
     text-decoration: underline;
 }
@@ -385,8 +379,15 @@ li.menu-item:hover {
   height: 100px;
 }
 
+.x-center {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/** Desktop **/
+/*
 @media screen and (min-width: 1000px) {
-  /** Desktop **/
   .navMenubox {
     display: block;
   }
@@ -399,6 +400,7 @@ li.menu-item:hover {
     margin-left: 200px;
   }
 }
+*/
 
 .navMenu-top { 
   padding: 10px; 

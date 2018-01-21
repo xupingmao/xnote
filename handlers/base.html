@@ -33,7 +33,7 @@
 </div>
 
 <div class="navMenuTop">
-  <ul>
+  <ul class="x-center">
     <li><a href="/file/group">知识库</a></li>
     {% if _has_login %}
     <li><a href="/tools/message?status=created">记事({{_notice_count}})</a></li>
@@ -82,7 +82,7 @@
   </div>
 </div>
 
-<div class="main">
+<div class="main x-center">
   
   {% for item in xconfig.get_notice_list('today', _user_name) %}
     <div class="notice">{{item.message}}</div>

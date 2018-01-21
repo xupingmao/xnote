@@ -173,6 +173,9 @@ class TestMain(unittest.TestCase):
         self.check_200("/code/analyze?path=./handlers/&key=test")
         self.check_200("/code/analyze?path=./handlers/&key=test&filename=test")
 
+    def test_code_lines(self):
+        self.check_OK("/code/lines?count=on&path=./handlers")
+
     def test_sys(self):
         self.check_200("/system/sys")
         self.check_200("/system/user_admin")
