@@ -147,28 +147,6 @@ class UpdateHandler:
                 children = [],
                 error = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
 
-    def rename_request(self):
-        fileId = self.get_argument("fileId")
-        newName = self.get_argument("newName")
-        record = dao.get_by_name(newName)
-
-        fileId = int(fileId)
-        old_record = dao.get_by_id(fileId)
-
-        if old_record is None:
-            return result(False, "file with ID %s do not exists" % fileId)
-        elif record is not None:
-            return result(False, "file %s already exists!" % repr(newName))
-        else:
-            # 修改名称不用乐观锁
-            rowcount = dao.update(where= dict(id = fileId), name = newName)
-            return result(rowcount > 0)
-
-    def del_request(self):
-        id = int(self.get_argument("id"))
-        dao.update(where=dict(id=id), is_deleted=1)
-        raise web.seeother("/file/recent_edit")
-
 class Upvote:
 
     @xauth.login_required()
@@ -197,6 +175,10 @@ class RenameHandler:
         if name == "" or name is None:
             return dict(code="fail", message="名称为空")
         db = xtables.get_file_table()
+        old  = db.select_one(where=dict(id=id))
+        if old.creator != xauth.get_current_name():
+            return dict(code="fail", message="没有权限")
+
         file = db.select_one(where=dict(name=name))
         if file is not None:
             return dict(code="fail", message="%r已存在" % name)

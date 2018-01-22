@@ -153,8 +153,6 @@ def readfile(path, mode = "r"):
         gbk 是一种双字节编码，全称《汉字内码扩展规范》，兼容GB2312
         latin_1 是iso-8859-1的别名，单字节编码，兼容ASCII
     '''
-    if xconfig.USE_URLENCODE:
-        path = quote_unicode(path)
     last_err = None
     for encoding in ["utf-8", "gbk", "mbcs", "latin_1"]:
         try:
@@ -209,7 +207,7 @@ def get_file_size(path, format=True):
     return st.st_size
 
 def get_real_path(path):
-    if not os.path.exists(path):
+    if xconfig.USE_URLENCODE:
         return quote_unicode(path)
     return path
     
