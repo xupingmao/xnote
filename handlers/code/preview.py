@@ -177,9 +177,8 @@ class ReadOnlyHandler:
 class WikiPathHandler:
 
     def GET(self, path=""):
+        path = xutils.unquote(path)
         template_name = "code/preview.html"
-        if not os.path.exists(path):
-            return render(template_name, error="file not exists")
         if not path.endswith(".md"):
             return render(template_name, error="file extension error")
         content = xutils.readfile(path)
