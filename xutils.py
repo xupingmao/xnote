@@ -153,6 +153,8 @@ def readfile(path, mode = "r"):
         gbk 是一种双字节编码，全称《汉字内码扩展规范》，兼容GB2312
         latin_1 是iso-8859-1的别名，单字节编码，兼容ASCII
     '''
+    if xconfig.USE_URLENCODE:
+        path = quote_unicode(path)
     last_err = None
     for encoding in ["utf-8", "gbk", "mbcs", "latin_1"]:
         try:
@@ -219,6 +221,8 @@ def remove(path, hard = False):
     """
     删除文件，默认软删除，也就是移动到trash目录中
     """
+    if xconfig.USE_URLENCODE:
+        path = quote_unicode(path)
     if not os.path.exists(path):
         return
     if os.path.isfile(path):

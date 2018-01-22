@@ -19,6 +19,9 @@ class TestMain(unittest.TestCase):
         self.assertEqual("http://%E6%B5%8B%E8%AF%95", result)
         result = xutils.quote_unicode("http://test/测试")
         self.assertEqual("http://test/%E6%B5%8B%E8%AF%95", result)
+        r1 = xutils.quote_unicode("测试")
+        r2 = xutils.quote_unicode(r1)
+        self.assertEqual(r1, r2) # 重复encode是安全的
 
     def test_quote_unicode_2(self):
         result = xutils.quote_unicode("http://test?name=测试")
