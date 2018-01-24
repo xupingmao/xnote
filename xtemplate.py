@@ -16,7 +16,7 @@ import xconfig
 import xauth
 import xutils
 import xtables
-from xutils import ConfigParser
+from xutils import ConfigParser, Storage
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE    = dict(
@@ -28,27 +28,21 @@ _hooks = []
 
 # 系统菜单
 MENU_LIST = [
-    dict(title = "系统管理", children = [
-        dict(name="最近编辑", url="/file/recent_edit"),
-        dict(name="周报", url="/search/search?key=周报"),
-    ]),
+    # 系统管理
+    Storage(category="SYS_TOOLS", admin=True, name="文件管理", url="/fs_data"),
+    Storage(category="SYS_TOOLS", admin=True, name="脚本管理", url="/system/script_admin"),
 
-    dict(title = "知识库", children = [
-        dict(name="系统", url="/system/sys")
-    ]),
+    # 知识库
+    Storage(category="DOC_TOOLS", login=True, name="标签云", url="/file/taglist"),
 
-    dict(title = "开发工具", children = [
-        dict(name="Index", url="/wiki/tools.md"),
-        dict(name="日历", url="/tools/date.html"),
-    ]),
+    # 开发工具
+    Storage(category="DEV_TOOLS", url="/tools/date.html"),
 
-    dict(title = "图片工具", children = [
+    # 图片处理工具
+    Storage(category="IMG_TOOLS", name="图片合并", url="/tools/img_merge"),
 
-    ]),
-
-    dict(title = "编解码工具", children = [
-
-    ])
+    # 编解码工具
+    Storage(category="CODE_TOOLS", url="")
 ]
 
 def load_menu_properties():
