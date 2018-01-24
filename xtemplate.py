@@ -26,22 +26,29 @@ NAMESPACE    = dict(
 
 _hooks = []
 
+# 系统菜单
 MENU_LIST = [
-    
-    dict(title = "资料", children = [
+    dict(title = "系统管理", children = [
         dict(name="最近编辑", url="/file/recent_edit"),
         dict(name="周报", url="/search/search?key=周报"),
     ]),
 
-    dict(title = "系统", children = [
+    dict(title = "知识库", children = [
         dict(name="系统", url="/system/sys")
     ]),
 
-    dict(title = "功能", children = [
+    dict(title = "开发工具", children = [
         dict(name="Index", url="/wiki/tools.md"),
         dict(name="日历", url="/tools/date.html"),
-    ])
+    ]),
 
+    dict(title = "图片工具", children = [
+
+    ]),
+
+    dict(title = "编解码工具", children = [
+
+    ])
 ]
 
 def load_menu_properties():
