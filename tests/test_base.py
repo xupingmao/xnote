@@ -1,14 +1,14 @@
 # encoding=utf-8
 import sys
 sys.path.insert(1, "lib")
-
 import os
 import time
 import unittest
 import xconfig
 import xutils
-from handlers.base import *
+from xutils import get_upload_file_path
 
+config = xconfig
 date = time.strftime("%Y/%m")
 
 def create_tmp_file(name):

@@ -349,7 +349,6 @@ class LogMiddleware:
              
     def log(self, status, environ, cost_time):
         outfile = environ.get('wsgi.errors', web.debug)
-        # req = environ.get('PATH_INFO', '_')
         req = environ.get('PATH_INFO', '_') 
         query_string = environ.get("QUERY_STRING", '')
         if query_string != '':
