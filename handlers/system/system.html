@@ -36,7 +36,8 @@
     {% else %}
     <p>Hello, 游客! <a href="/login">登陆</a></p>
     {% end %}
-    <p>地址 <a href="http://{{?addr}}">http://{{?addr}}</a>
+    {% set site_home = 'http://' + xconfig.get("SITE_HOME", addr) %}
+    <p>地址 <a href="{{site_home}}">{{site_home}}</a>
         <input type="button" id="toggleBarCode" class="btn" value="二维码">
     </p>
     <div id="qrcode" class="hide"></div>

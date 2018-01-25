@@ -24,6 +24,7 @@ DEBUG = False
 # 调试盒子模型，针对某些不方便调试的浏览器
 DEBUG_HTML_BOX = False
 PORT = "1234"
+SITE_HOME = None
 minthreads = 10
 # 打开浏览器
 OPEN_IN_BROWSER = False
@@ -208,15 +209,18 @@ def init(path):
     makedirs(TRASH_DIR)
 
 
-def get(name, default=None):
+def get(name, default_value=None):
     """获取配置，如果不存在返回default值"""
-    if name in globals():
-        return globals()[name]
-    if name in _config:
-        return _config[name]
-    if default:
-        return default
-    return None
+    value = globals().get(name)
+    if value is not None:
+        return value
+    value = _config.get(name)
+    if value is not None:
+        return value
+
+    if value is None:
+        return default_value
+    return value
 
 def set(name, value):
     _config[name] = value
