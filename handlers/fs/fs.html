@@ -203,6 +203,12 @@
             {% if item.ext in (".md", ".csv") %}
                 <a class="item-option" href="/wiki?path={{item.path}}">预览</a>
             {% end %}
+
+            <!--
+            {% if item.ext.endswith(".zip") %}
+                <a class="item-option" href="">解压</a>
+            {% end %}
+            -->
         {% end %}
         </td>
         <td class="options-td">
