@@ -18,13 +18,9 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 - [github](https://github.com/xupingmao/xnote)
 - [码云](https://gitee.com/xupingmao/xnote)
 
-## Python版本
 
-- Python 3.x
-- Python 2.7
-- Jython (无sqlite)
-
-## 配置运行
+## 安装
+- 安装python（支持Python2、3，建议Python3）
 - 安装依赖的软件包```python -m pip install -r requirements.txt```
 - 无需额外配置，初始化的管理员账号是admin/123456
 - 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 即可
