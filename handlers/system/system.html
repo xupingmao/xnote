@@ -43,82 +43,19 @@
     <div id="qrcode" class="hide"></div>
 </div>
 
-{% if _is_admin %}
-
-{% set debug_tools = [
-    ("文件管理",   "/fs_data"),
-    ("脚本管理",   "/system/script_admin"),
-    ("定时任务",   "/system/crontab"),
-
-    ("用户管理", "/system/user_admin"),
-    ("App管理", "/system/app_admin"),
-
-    ("系统信息","/system/monitor"),
-    ("template缓存", "/system/template_cache"),
-    ("重新加载模块", "/system/reload"),
-    ("静音",         "/search/search?key=mute"),
-    ("Python Shell", "/system/script/edit?name=test.py"),
-    ("Python文档", "/system/modules_info"),
-] %}
-
-<div class="col-md-12 top-offset-1">
-    <h3>系统管理</h3>
-    <div class="col-md-12">
-        {% for name, link in debug_tools %}
-        <div class="item">
-            <a href="{{link}}">{{name}}</a>
-        </div>
-        {% end %}
-    </div>
-</div>
-{% end %}
-
-{% set doc_tools = [
-    ("标签云", "/file/taglist"),
-    ("时光轴", "/tools/timeline"),
-    ("记事", "/tools/message?status=created"),
-    ("最近更新", "/file/recent_edit"),
-    ("我的收藏", "/file/group/marked"),
-    ("日历", "/tools/date")
-] %}
-
-{% set dev_tools = [
-    ("代码模板", "/tools/code_template"),
-    ("浏览器信息", "/tools/browser_info"),
-    ("文本对比", "/tools/js_diff"),
-    ("字符串转换", "/tools/string"),
-] %}
-
-{% set img_tools = [
-    ("图片合并", "/tools/img_merge"),
-    ("图片拆分", "/tools/img_split"),
-    ("图像灰度化", "/tools/img2gray"),
-] %}
-
-{% set code_tools = [
-    ("base64", "/tools/base64"),
-    ("二维码", "/tools/barcode"),
-    ("16进制转换", "/tools/hex"),
-    ("md5", "/tools/md5"),
-] %}
-
-{% set tools_list = [
-    ("知识库", doc_tools, True),
-    ("开发工具", dev_tools, False),
-    ("图片工具", img_tools, False),
-    ("编解码工具", code_tools, False),
-] %}
-
-{% for category, tools, need_login in tools_list %}
-    {% if need_login and not _has_login %}
+{% for category in xconfig.MENU_LIST %}
+    {% if category.need_login and not _has_login %}
+        {% continue %}
+    {% end %}
+    {% if category.need_admin and not _is_admin %}
         {% continue %}
     {% end %}
     <div class="col-md-12 top-offset-1">
-        <h3>{{category}}</h3>
+        <h3>{{category.name}}</h3>
         <div class="col-md-12">
-            {% for name, link in tools %}
+            {% for link in category.children %}
             <div class="item">
-                <a href="{{link}}">{{name}}</a>
+                <a href="{{link.url}}">{{link.name}}</a>
             </div>
             {% end %}
         </div>

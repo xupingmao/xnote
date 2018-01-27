@@ -22,28 +22,7 @@ TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE    = dict(
     format_date = dateutil.format_date,
     format_time = dateutil.format_time
-)    
-
-_hooks = []
-
-# 系统菜单
-MENU_LIST = [
-    # 系统管理
-    Storage(category="SYS_TOOLS", admin=True, name="文件管理", url="/fs_data"),
-    Storage(category="SYS_TOOLS", admin=True, name="脚本管理", url="/system/script_admin"),
-
-    # 知识库
-    Storage(category="DOC_TOOLS", login=True, name="标签云", url="/file/taglist"),
-
-    # 开发工具
-    Storage(category="DEV_TOOLS", url="/tools/date.html"),
-
-    # 图片处理工具
-    Storage(category="IMG_TOOLS", name="图片合并", url="/tools/img_merge"),
-
-    # 编解码工具
-    Storage(category="CODE_TOOLS", url="")
-]
+) 
 
 def load_menu_properties():
     """加载导航栏配置"""
@@ -99,9 +78,6 @@ class XnoteLoader(Loader):
 def set_loader_namespace(namespace):
     """ set basic namespace """
     _loader.namespace = namespace
-
-def add_render_hook(hook):
-    _hooks.append(hook)
 
 def get_user_agent():
     if xconfig.IS_TEST:
