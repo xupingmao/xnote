@@ -81,43 +81,6 @@ def get_local_ip(iplist):
             return ip
     return None
 
-def _get_code_lines(dirname):
-    if os.path.isfile(dirname):
-        text = fsutil.read(dirname)
-        return text.count("\n")
-    total_lines = 0
-    for fname in os.listdir(dirname):
-        name, ext = os.path.splitext(fname)
-        path = os.path.join(dirname, fname)
-        if os.path.isdir(path):
-            total_lines += _get_code_lines(path)
-            continue
-        if ext != ".py":
-            continue
-        if not os.path.isfile(path):
-            continue
-        text = fsutil.read(path)
-        lines = 0
-        for line in text.split("\n"):
-            line = line.strip()
-            if line != "":
-                lines += 1
-        total_lines += lines
-    return total_lines
-
-def get_code_lines():
-    dirname = config.WORKING_DIR
-    total_lines = 0
-    # total_lines = _get_code_lines(dirname)
-    total_lines += _get_code_lines("app.py")
-    total_lines += _get_code_lines("autoreload.py")
-    total_lines += _get_code_lines("backup.py")
-    total_lines += _get_code_lines("ModelManager.py")
-    total_lines += _get_code_lines("MyStaticMiddleware.py")
-    total_lines += _get_code_lines(os.path.join(dirname, "util"))
-    total_lines += _get_code_lines(os.path.join(dirname, "model"))
-    return total_lines
-
 def get_ip_list(blacklist = []):
     try:
         # if xutils.is_mac():
@@ -162,40 +125,6 @@ class SysHandler:
             os = os,
             user = xauth.get_current_user()
         )
-
-    def opendirRequest(self):
-        name = self.get_argument("name")
-        if os.path.isdir(name):
-            fsutil.openDirectory(name)
-            ret = { "success": True}
-        else:
-            ret = {"success": False, "errorMsg": "%s is not a dirname" % name}
-
-        self.write(json.dumps(ret))
-
-    def backup_request(self):
-        try:
-            backup.zip_xnote()
-            return {"success": True}
-        except Exception as e:
-            print_exception(e)
-            return {"success": False, "message": str(e)}
-
-    def export_request(self):
-        try:
-            backup.zip_new_xnote()
-            return  {"success": True}
-        except Exception as e:
-            return {"success": False}
-
-    def reload_plugins_request(self):
-        event.fire("load-plugins")
-        event.fire("load-model")
-        raise web.seeother("/system/sys")
-
-    def reload_request(self):
-        autoreload.force_reload()
-        raise web.seeother("/system/sys")
 
 
 handler = SysHandler
