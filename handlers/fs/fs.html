@@ -228,24 +228,37 @@
 
 <script type="text/javascript">
     var globalPath = "{{path}}";
-    $("#previewImg").on("click", function (target) {
+
+    function previewImages() {
+        $(".fs-image-div").each(function (index, target) {
+            var img = $("<img>").attr("src", $(target).attr("img-src")).addClass("fs-image");
+            $(target).append(img);
+            img.on("load", function (event) {
+                $(target).append($("<span class='fs-image-size'>").text(img[0].naturalWidth + "*" + img[0].naturalHeight));
+            });
+        })
+        $("#previewImg").val("取消预览");
+    }
+
+    function togglePreview() {
         var self = this;
         var value = $(self).val();
-        if (value == "预览图片") {
-            $(".fs-image-div").each(function (index, target) {
-                var img = $("<img>").attr("src", $(target).attr("img-src")).addClass("fs-image");
-                $(target).append(img);
-                img.on("load", function (event) {
-                    $(target).append($("<span class='fs-image-size'>").text(img[0].naturalWidth + "*" + img[0].naturalHeight));
-                });
-            })
-            $(self).val("取消预览");
+        if (window.location.hash != '#preview') {
+            previewImages();
+            window.location.hash = '#preview';
         } else {
             $(".fs-image").remove();
             $(".fs-image-size").remove();
             $(self).val("预览图片");
+            window.location.hash = '';
         }  
-    })
+    }
+
+    $("#previewImg").on("click", togglePreview);
+
+    if (window.location.hash == '#preview') {
+        previewImages();
+    }
 
     function createFile(type) {
         var promptMessage = "新建文件";
@@ -348,11 +361,8 @@
     $("#uploadFileBtn").click(function () {
         $("#uploadFileArea").toggle(200);
     })
-</script>
 
-
-<!-- 文件上传逻辑 -->
-<script type="text/javascript">
+// 文件上传逻辑
 var BASE_URL = "/static/lib/webuploader"
 $("#target-path").text(location.hash.substr(1)).attr("href", "/fs/" + location.hash.substr(1));
 // 初始化Web Uploader

@@ -98,7 +98,7 @@ def get_ip_list(blacklist = []):
                print("external IP:%s"%ip)
             ip_list.append(ip)
     except Exception as e:
-        print_exception()
+        xutils.print_exc()
         ip_list = ["localhost"]
 
     return ip_list
