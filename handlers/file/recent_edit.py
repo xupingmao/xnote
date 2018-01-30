@@ -10,23 +10,23 @@ from xutils import Storage
 
 # 兼容旧代码
 config = xconfig
+PAGE_SIZE = xconfig.PAGE_SIZE
 
-# 待优化
-def get_recent_modified(days, page=1, pagesize=config.PAGE_SIZE):
-    user_name = xauth.get_current_name()
-    sql = "SELECT * FROM file WHERE is_deleted = 0 AND (creator = $creator OR is_public = 1)"
-    sql += " ORDER BY mtime DESC"
-    sql += " LIMIT %s, %s" % ((page-1) * pagesize, pagesize)
-    list = xtables.get_file_table().query(sql, vars=dict(creator=user_name))
-    return [FileDO.fromDict(item) for item in list]
+class RecentCreatedHandler:
 
-def count_files():
-    if xauth.get_current_user() == None:
-        return 0
-    user_name = xauth.get_current_name()
-    db = xtables.get_file_table()
-    count = db.count("is_deleted = 0 AND (creator = $creator OR is_public = 1)", vars = dict(creator=user_name))
-    return count
+    def GET(self):
+        offset = 0
+        db = xtables.get_file_table()
+        files = db.select(where="is_deleted=0 AND creator=$name", 
+            vars=dict(name=xauth.get_current_name()),
+            order="ctime DESC",
+            offset=offset,
+            limit=PAGE_SIZE)
+        return xtemplate.render("file/view.html",
+            file_type = "group", 
+            files = files, 
+            show_date = True,
+            show_opts = False)
 
 class handler:
     """show recent modified files"""
@@ -36,14 +36,23 @@ class handler:
         days = xutils.get_argument("days", 30, type=int)
         page = xutils.get_argument("page", 1, type=int)
         page = max(1, page)
-        files = get_recent_modified(days, page)
-        count = count_files()
+
+        db = xtables.get_file_table()
+        where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"
+        files = db.select(where = where, 
+            vars = dict(creator = xauth.get_current_name()),
+            order = "mtime DESC",
+            offset = (page-1) * PAGE_SIZE,
+            limit = PAGE_SIZE)
+        count = db.count(where, vars = dict(creator = xauth.get_current_name()))
+
         return xtemplate.render("file/view.html", 
-            pathlist = [Storage(name="最近编辑", url="/file/recent_edit")],
+            pathlist = [Storage(name="最近更新", url="/file/recent_edit")],
             file_type = "group",
-            files = files[:20], 
+            files = files, 
             page = page, 
-            page_max = math.ceil(count/config.PAGE_SIZE), 
+            page_max = math.ceil(count/PAGE_SIZE), 
+            show_mdate = True,
             page_url="/file/recent_edit?page=")
 
 

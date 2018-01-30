@@ -362,10 +362,13 @@ def format_time_only(seconds=None):
 
 def format_date(seconds=None):
     if seconds is None:
-        return time.strftime('%Y-%m-%d')
+        return time.strftime('%Y/%m/%d')
+    elif isinstance(seconds, str):
+        date_str = seconds.split(" ")[0]
+        return date_str.replace("-", "/")
     else:
         st = time.localtime(seconds)
-        return time.strftime('%Y-%m-%d', st)
+        return time.strftime('%Y/%m/%d', st)
 
 def format_datetime(seconds=None):
     if seconds == None:

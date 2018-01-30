@@ -14,6 +14,8 @@ from web import HTTPError
 from . import dao
 config = xconfig
 
+PAGE_SIZE = xconfig.PAGE_SIZE
+
 def try_decode(bytes):
     try:
         return bytes.decode("utf-8")

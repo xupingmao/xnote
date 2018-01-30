@@ -1,5 +1,8 @@
 {% init files = [] %}
 {% init pseudo_groups = False %}
+{% init show_opts = True %}
+{% init show_cdate = False %}
+{% init show_mdate = False %}
 
 <div class="col-md-12">
     <table id="fileTable" class="col-md-12 table">
@@ -22,6 +25,14 @@
     {% for i, item in enumerate(files) %}
         <tr>
             <td class="note-td">
+                {% if show_cdate %}
+                    <span>{{xutils.format_date(item.ctime)}} - </span>
+                {% end %}
+
+                {% if show_mdate %}
+                    <span>{{xutils.format_date(item.mtime)}} - </span>
+                {% end %}
+
                 {% if item.type == "group" %}
                     <img src="/static/image/folder.gif"/>
                     <a class="group-link" href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>({{item.size}})
@@ -30,7 +41,7 @@
                     ({{item.creator}})
                 {% end %}
 
-                {% if _has_login %}
+                {% if show_opts and _has_login %}
                 <div style="float: right;">
                     <a class="item-option" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
                     {% if _is_admin %}
