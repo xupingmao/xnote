@@ -49,7 +49,7 @@ class handler:
         return xtemplate.render("file/view.html", 
             pathlist = [Storage(name="最近更新", url="/file/recent_edit")],
             file_type = "group",
-            files = files, 
+            files = list(files), 
             page = page, 
             page_max = math.ceil(count/PAGE_SIZE), 
             show_mdate = True,
