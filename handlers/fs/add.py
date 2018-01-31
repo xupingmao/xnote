@@ -1,7 +1,6 @@
 #encoding=utf-8
 import web
 import os
-
 import xtemplate
 from xutils import *
 

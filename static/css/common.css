@@ -791,10 +791,10 @@ li.menu-item:hover {
     margin-bottom: 5px;
 }
 
-.searchInput {
+.search-input {
     float: left;
     height:40px;
-    padding-left: 20px;
+    padding-left: 10px;
     padding-right: 40px;
     width: 100%;
     max-width: 700px;
@@ -802,7 +802,7 @@ li.menu-item:hover {
     box-sizing: border-box;
 }
 
-.searchBtn {
+.search-btn {
     float: left;
     right: 10px;
     background: #355380; 

@@ -1,7 +1,7 @@
 # encoding=utf-8
 
 """
-utilities for xnote
+xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
 如果是一个人开发，可以直接写在这个文件中,
 如果是团队开发，依然建议通过xutils暴露统一接口，其他的utils由xutils导入
@@ -276,6 +276,9 @@ def _search_path0(path, key, limit=200):
     return result_dirs + result_files
 
 def search_path(path, key):
+    """
+    搜索文件系统，key支持通配符表示，具体见fnmatch模块
+    """
     result = []
     quoted_key = quote_unicode(key)
     if key != quoted_key:
