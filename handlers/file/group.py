@@ -153,13 +153,14 @@ class PublicGroupHandler:
         page = max(1, page)
         db = xtables.get_file_table()
         where = "is_deleted=0 AND is_public=1"
-        files = db.select(where=where, offset=(page-1)*PAGE_SIZE, limit=PAGE_SIZE)
+        files = db.select(where=where, offset=(page-1)*PAGE_SIZE, limit=PAGE_SIZE, order="ctime DESC")
         count = db.count(where=where)
         return xtemplate.render("file/view.html", 
             pathlist = [Storage(name="公开", url="/file/group/public")],
             file_type = "group",
             files = files,
             page = page, 
+            show_cdate = True,
             page_max = math.ceil(count/PAGE_SIZE), 
             page_url="/file/group/public?page=")
 
