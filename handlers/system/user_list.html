@@ -1,5 +1,15 @@
 {% extends base.html %}
 
+{% block head %}
+
+<style>
+    .td-no {
+        width: 50px;
+    }
+</style>
+
+{% end %}
+
 {% block body %}
 
 <h2>用户管理</h2>
@@ -10,7 +20,7 @@
 <table class="table col-md-12">
 
     <tr>
-        <th>编号</th>
+        <th class="td-no">编号</th>
         <th>用户名</th>
         <th>密码</th>
         <th>上次更新</th>
@@ -21,7 +31,7 @@
     {% for index, name in enumerate(sorted(user_dict)) %}
     {% set user = user_dict[name] %}
     <tr>
-        <td>{{index+1}}</td>
+        <td class="td-no">{{index+1}}</td>
         <td>{{user.name}}</td>
         <td>{% if "admin" == user.name %} ****** {% else %} {{user.password}} {% end %}</td>
         <td>{{ user.get("mtime") }}</td>

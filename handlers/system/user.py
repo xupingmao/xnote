@@ -5,12 +5,13 @@ import xtemplate
 import xmanager
 import xutils
 
-class handler:
+class ListHandler:
     """用户管理"""
+
     @xauth.login_required("admin")
     def GET(self):
         user_dict = xauth.get_users()
-        return xtemplate.render("system/user_admin.html", 
+        return xtemplate.render("system/user_list.html", 
             user_dict=user_dict)
 
     @xauth.login_required("admin")
@@ -23,3 +24,7 @@ class handler:
         # 先暴力解决
         xmanager.reload()
         return self.GET()
+
+xurls = (
+    r"/system/user/list", ListHandler,
+)
