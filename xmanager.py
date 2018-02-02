@@ -478,6 +478,10 @@ class EventHandler:
             except:
                 xutils.print_exc()
 
+def get_func_abs_name(func):
+    modulename = inspect.getmodulename(func)
+    return modulename + func.__name__
+
 class EventManager:
     """
     事件管理器，每个事件由一个执行器链组成，执行器之间有一定的依赖性

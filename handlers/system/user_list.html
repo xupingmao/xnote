@@ -24,6 +24,7 @@
         <th>用户名</th>
         <th>密码</th>
         <th>上次更新</th>
+        <th>token</th>
         <th>操作</th>
     </tr>
     
@@ -35,6 +36,7 @@
         <td>{{user.name}}</td>
         <td>{% if "admin" == user.name %} ****** {% else %} {{user.password}} {% end %}</td>
         <td>{{ user.get("mtime") }}</td>
+        <td>{{ user.get("token") }}</td>
         <td></td>
     </tr>
     {% end %}
@@ -43,6 +45,7 @@
         <td>{{index+2}}</td>
         <td><input type="text" name="name"></td>
         <td><input type="text" name="password"></td>
+        <td></td>
         <td></td>
         <td><input type="submit" value="添加/更新"></td>
     </tr>

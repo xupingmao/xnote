@@ -52,6 +52,17 @@ def get_user(name):
         return users.get("admin")
     return users.get(name)
 
+def select_first(filter_func):
+    users = _get_users()
+    for item in users.values():
+        if filter_func(item):
+            return item
+
+def get_user_from_token():
+    token = xutils.get_argument("token")
+    if token != None and token != "":
+        return select_first(lambda x: x.token == token)
+
 def get_user_password(name):
     users = _get_users()
     return users[name]["password"]
@@ -59,9 +70,10 @@ def get_user_password(name):
 def get_current_user():
     if xconfig.IS_TEST:
         return get_user("admin")
+    user = get_user_from_token()
+    if user != None:
+        return user
     xuser = web.cookies().get("xuser")
-    if xuser is None:
-        return None
     if has_login(xuser):
         return get_user(xuser)
     return None
@@ -97,13 +109,23 @@ def get_user_cookie(name):
     password = get_user_password(name)
     return "xuser=%s; xpass=%s;" % (name, get_password_md5(password))
 
+def gen_new_token():
+    import uuid
+    return uuid.uuid4().hex
+
 def add_user(name, password):
     db = xtables.get_user_table()
     exist = db.select_one(where=dict(name=name))
     if exist is None:
-        db.insert(name=name,password=password,ctime=xutils.format_time(),mtime=xutils.format_time())
+        db.insert(name=name,password=password,
+            token=gen_new_token(),
+            ctime=xutils.format_time(),
+            mtime=xutils.format_time())
     else:
-        db.update(where=dict(name=name), password=password,mtime=xutils.format_time())
+        db.update(where=dict(name=name), 
+            password=password, 
+            token=gen_new_token(), 
+            mtime=xutils.format_time())
     refresh_users()
 
 def has_login(name=None):
@@ -113,6 +135,12 @@ def has_login(name=None):
     """
     if config.IS_TEST:
         return True
+    
+    # 优先使用token
+    user = get_user_from_token()
+    if user != None:
+        return True
+
     cookies = web.cookies()
     name_in_cookie = cookies.get("xuser")
     pswd_in_cookie = cookies.get("xpass")

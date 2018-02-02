@@ -43,45 +43,6 @@
   </ul>
 </div>
 
-<div class="navMenubox">
-  <div style="overflow: hidden; width: 100%; height: 100%;">
-    <ul class="navMenu">
-      <li><a href="/search/search">搜索</a> </li>
-      {% if _has_login %}
-      <li><a href="/file/group">资料分组</a></li>
-      <li><a href="/file/group/marked">我的收藏</a></li>
-      <li><a href="/file/recent_edit">最近更新</a></li>
-      <li><a href="/tools/message?status=created">记事({{_notice_count}})</a></li>
-      {% end %}
-
-      {% if _is_admin %}
-      <li><a href="/fs_data" class="afinve">文件管理</a> </li>
-      {% end %}
-
-      <li><a href="/system/system">系统功能</a></li>
-      {%if _is_admin %}
-      <li><a href="/system/script_admin">脚本管理</a></li>
-      <li><a href="/system/crontab">定时任务</a></li>
-      {% end %}
-      <li><a href="/tools/date"><span>日历</span></a></li>
-      <li>
-        {% if not _has_login %}
-          <a href="/login" class="afinve">
-            <span>登陆</span>
-          </a> 
-        {% else %}
-          <a href="/logout" class="afinve">
-            <span style="color: red;">登出</span>
-          </a> 
-        {% end %}
-      </li>
-    </ul>
-    <div id="poweredBy" style="position: absolute; bottom: 50px; left: 10px; color: #fff;">
-      Powered by <a style="color: #fff; text-decoration: underline;" href="https://gitee.com/xupingmao/xnote">Xnote</a>
-    </div>
-  </div>
-</div>
-
 <div class="main x-center">
   
   {% for item in xconfig.get_notice_list('today', _user_name) %}

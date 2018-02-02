@@ -177,7 +177,7 @@
             <img src="/static/image/folder.gif"/>
             <a href="/fs/{{item.path}}" class="fs-dir">{{item.name}}</a>
         {% else %}
-            <a href="/fs/{{item.path}}" class="fs-file">{{item.name}}</a>
+            <a href="/fs/{{item.path}}?token={{token}}" class="fs-file">{{item.name}}</a>
 
             {% if item.ext in (".jpg", ".png", ".gif", ".jpeg", ".bmp", ".ico") %}
                 <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>

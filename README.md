@@ -25,7 +25,7 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 - 无需额外配置，初始化的管理员账号是admin/123456
 - 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 即可
 - 本项目可以直接运行在新浪云应用SAE上面
-- 如果失败参考 [数据库迁移](./docs/db_migrate.md)
+- 如果启动失败参考 [数据库迁移](./docs/db_migrate.md)
 
 ### 启动参数
 - `--data {data_path}` 指定数据存储的data目录，比如`python app.py --data D:/data`

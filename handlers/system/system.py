@@ -22,7 +22,7 @@ config = xconfig
 def link(name, url):
     return Storage(name = name, url = url)
 
-debug_tools = [
+sys_tools = [
     link("文件管理",   "/fs_data"),
     link("脚本管理",   "/system/script_admin"),
     link("定时任务",   "/system/crontab"),
@@ -68,7 +68,7 @@ code_tools = [
 ]
 
 xconfig.MENU_LIST = [
-    Storage(name = "系统管理", children = debug_tools, need_login = True, need_admin = True),
+    Storage(name = "系统管理", children = sys_tools, need_login = True, need_admin = True),
     Storage(name = "知识库", children = doc_tools, need_login = True),
     Storage(name = "开发工具", children = dev_tools),
     Storage(name = "图片工具", children = img_tools),

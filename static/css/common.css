@@ -590,6 +590,13 @@ li.menu-item:hover {
     text-decoration: underline;
 }
 
+.button-link {
+    text-decoration: none;
+    cursor: pointer;
+}
+.button-link:hover {
+    background: #ccc;
+}
 
 /** file-list样式 **/
 .tool-div {
