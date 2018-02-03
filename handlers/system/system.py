@@ -75,22 +75,17 @@ xconfig.MENU_LIST = [
     Storage(name = "编解码工具", children = code_tools),
 ]
 
-def get_local_ip(iplist):
-    for ip in iplist:
-        if ip != "localhost":
-            return ip
-    return None
-
+@xutils.cache(key="ip_list", expire=3600)
 def get_ip_list(blacklist = []):
+    """
+    获取本地IP，加上缓存是因为失败的情况下调用非常缓慢
+    """
     try:
-        # if xutils.is_mac():
-            # Mac获取不到
-            # return ["127.0.0.1"]
-        localIp = socket.gethostbyname(socket.gethostname())
+        hostname = socket.gethostname()
+        localIp = socket.gethostbyname(hostname)
         print("localIP:%s" % localIp)
-        name, aliaslist, ipList = socket.gethostbyname_ex(socket.gethostname())
+        name, aliaslist, ipList = socket.gethostbyname_ex(hostname)
         ip_list = []
-
         for ip in ipList:
             if ip in blacklist:
                 continue

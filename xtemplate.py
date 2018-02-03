@@ -128,7 +128,7 @@ def render(template_name, **kw):
     nkw.update(kw)
     _input = web.input()
 
-    if _input.get("_type") == "json":
+    if _input.get("_format") == "json":
         web.header("Content-Type", "application/json")
         return json.dumps(nkw, default=encode_json)
     return _loader.load(template_name).generate(**nkw)

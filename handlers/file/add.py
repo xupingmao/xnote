@@ -23,7 +23,7 @@ class AddHandler:
         key  = xutils.get_argument("key", "")
         content = xutils.get_argument("content", "")
         type    = xutils.get_argument("type", "post")
-        _type   = xutils.get_argument("_type", "")
+        format   = xutils.get_argument("_format", "")
         parent_id = xutils.get_argument("parent_id", 0, type=int)
 
         if key == "":
@@ -56,7 +56,7 @@ class AddHandler:
                 inserted_id = db.insert(**file)                
                 # 更新分组下面页面的数量
                 dao.update_children_count(parent_id, db = db)
-                if _type == "json":
+                if format == "json":
                     return dict(code="success", id=inserted_id)
                 raise web.seeother("/file/view?id={}".format(inserted_id))
         except web.HTTPError as e1:

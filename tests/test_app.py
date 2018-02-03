@@ -30,8 +30,10 @@ app = init()
 def json_request(*args, **kw):
     global app
     if "data" in kw:
-        kw["data"]["_type"] = "json"
-    kw["_type"] = "json"
+        kw["data"]["_format"] = "json"
+    else:
+        kw["data"] = dict(_format="json")
+    kw["_format"] = "json"
     ret = app.request(*args, **kw)
     if ret.status == "303 See Other":
         return
@@ -54,7 +56,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual(b"success", value)
 
     def test_recent_files(self):
-        value = app.request("/file/recent_edit?_type=json").data
+        value = app.request("/file/recent_edit?_format=json").data
         json_value = value.decode("utf-8")
         files = json.loads(json_value)["files"]
         print("files=%s" % len(files))
@@ -113,7 +115,7 @@ class TestMain(unittest.TestCase):
         file = json_request("/file/add", method="POST",
             data=dict(name="xnote-md-test", type="md", content="hello markdown"))
         id = file["id"]
-        file = json_request("/file/view?id=%s&_type=json" % id).get("file")
+        file = json_request("/file/view?id=%s&_format=json" % id).get("file")
         self.assertEqual("md", file["type"])
         self.assertEqual("hello markdown", file["content"])
         self.check_200("/file/edit?id=%s"%id)
@@ -124,8 +126,10 @@ class TestMain(unittest.TestCase):
         file = json_request("/file/add", method="POST",
             data=dict(name="xnote-html-test", type="html"))
         id = file["id"]
+        self.assertTrue(id != "")
+        print("id=%s" % id)
         json_request("/file/save", method="POST", data=dict(id=id, type="html", data="<p>hello</p>"))
-        file = json_request("/file/view?id=%s&_type=json" % id).get("file")
+        file = json_request("/file/view?id=%s&_format=json" % id).get("file")
         self.assertEqual("html", file["type"])
         self.assertEqual("<p>hello</p>", file["data"])
         if xutils.bs4 != None:
@@ -145,18 +149,18 @@ class TestMain(unittest.TestCase):
             data=dict(name="xnote-share-test", content="hello"))
         id = file["id"]
         self.check_OK("/file/share?id=" + str(id))
-        file = json_request("/file/view?id=%s&_type=json" % id).get("file")
+        file = json_request("/file/view?id=%s&_format=json" % id).get("file")
         self.assertEqual(1, file["is_public"])
         
         self.check_OK("/file/share/cancel?id=" + str(id))
-        file = json_request("/file/view?id=%s&_type=json" % id).get("file")
+        file = json_request("/file/view?id=%s&_format=json" % id).get("file")
         self.assertEqual(0, file["is_public"])
 
         json_request("/file/remove?id=" + str(id))
 
     def test_fs(self):
         self.check_200("/fs//")
-        self.check_200("/fs//?_type=json")
+        self.check_200("/fs//?_format=json")
         self.check_200("/data/data.db")
 
     def test_fs_partial_content(self):
@@ -215,7 +219,7 @@ class TestMain(unittest.TestCase):
         self.check_200("/search/search?key=测试")
     
     def test_search_calc(self):
-        result = json_request("/search?key=1%2B2&_type=json")
+        result = json_request("/search?key=1%2B2&_format=json")
         value = result['files'][0]['raw']
         self.assertEqual("3", value)
 

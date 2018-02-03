@@ -333,29 +333,29 @@ li.menu-item:hover {
   display: none;
 }
 
-.navMenuTop {
+.nav-top {
   background-color: #9cc;
   width: 100%;
   float: left;
 }
 
-.navMenuTop * {
+.nav-top * {
   margin: 0px;
   padding: 0px;
   color: black;
 }
 
-.navMenuTop h1 {
+.nav-top h1 {
   font-family: "monospace Consolas";
 }
 
-.navMenuTop ul {
+.nav-top ul {
   height: 30px;
   width: 100%;
   padding-left: 10px;
 }
 
-.navMenuTop li {
+.nav-top li {
   display: block;
   float: left;
   padding: 5px;
