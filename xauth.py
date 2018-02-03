@@ -7,7 +7,7 @@ import xconfig
 import xtables
 import xutils
 from xutils import ConfigParser
-from web.utils import Storage
+from xconfig import Storage
 
 config = xconfig
 # 用户配置
@@ -28,7 +28,10 @@ def _get_users():
     db_users = db.select()
     _users = {}
     # 默认的账号
-    _users["admin"] = Storage(name="admin", password="123456", mtime="")
+    _users["admin"] = Storage(name = "admin", 
+        password = "123456", 
+        mtime = "",
+        token = gen_new_token())
 
     for user in db_users:
         _users[user.name] = user
