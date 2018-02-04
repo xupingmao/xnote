@@ -13,6 +13,8 @@ xnote是一款致力于提升生活和工作的幸福感的工具，通过将知
 
 PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 
+![知识库](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.3_desktop01.png)
+
 -----
 ## 项目地址
 - [github](https://github.com/xupingmao/xnote)
@@ -153,25 +155,6 @@ class handler:
 xurls = ("/test", handler)
 # 启动xnote，访问浏览器localhost:1234/test就会看到success
 ```
-
-## 运行截图
-
-知识库
-
-![知识库](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_editor.PNG)
-
-任务清单
-
-![清单](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_list.PNG)
-
-搜索
-
-![截图03](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v1.2_search.png)
-
-定时任务
-
-![定时任务配置](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/task_web.PNG)
-
 
 ## 协议
 
