@@ -68,6 +68,10 @@ a:hover {
     background-color: red;
 }
 
+.prompt-btn:hover {
+    cursor: pointer;
+}
+
 p,li,a {
     font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
 }
@@ -468,6 +472,11 @@ li.menu-item:hover {
     background: #ccc;
 }
 
+.link {
+    /* color: #37a; */
+    color: #08c;
+}
+
 /** file-list样式 **/
 .tool-div {
     font-size: medium;
@@ -674,7 +683,7 @@ li.menu-item:hover {
     padding-left: 10px;
     padding-right: 40px;
     width: 100%;
-    max-width: 700px;
+    max-width: 500px;
     outline: none;
     box-sizing: border-box;
 }

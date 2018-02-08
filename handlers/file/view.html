@@ -108,6 +108,10 @@ img {
     <div class="col-md-12" style="padding-bottom: 5px;">
         {% if _has_login %}
         <div class="left" style="float: left;">
+            <a class="link" href="/file/add">写文档</a>
+            <a class="link prompt-btn" message="分组名" 
+                    action="/file/add?type=group&parent_id={{file_id}}&name=">加分组</a>
+            <!--
             {% if show_add_file %}
             <input type="button" class="link-btn" value="新建" message="资料名" action="" href="/file/add?parent_id={{file_id}}"/>
             {% end %}
@@ -115,6 +119,7 @@ img {
             <input type="button" class="prompt-btn" value="新建组" message="分组名" 
             action="/file/add?type=group&parent_id={{file_id}}&name="/>
             {% end %}
+            -->
         </div>
         {% end %}
     </div>
