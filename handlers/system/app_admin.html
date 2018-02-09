@@ -34,14 +34,14 @@
 <div class="top-offset-1">
 <table class="table col-md-12 top-offset-1">
     <tr>
-        <th>编号</th>
+        <th class="index-td">编号</th>
         <th>包名</th>
         <th>大小</th>
         <th>操作</th>
     </tr>
     {% for index, app in enumerate(app_list) %}
         <tr>
-            <td>{{index+1}}</td>
+            <td class="index-td">{{index+1}}</td>
             <td><a href="/app/{{app.app_name}}/index.html">{{app.app_name}}</a></td>
             <td>{{app.size}}</td>
             <td><a href="/system/app_admin/unzip?name={{app.app_name}}.zip">解压</a></td>

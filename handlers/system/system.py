@@ -40,7 +40,6 @@ sys_tools = [
 
 doc_tools = [
     link("标签云", "/file/taglist"),
-    link("时光轴", "/tools/timeline"),
     link("记事", "/tools/message?status=created"),
     link("最近更新", "/file/recent_edit"),
     link("我的收藏", "/file/group/marked"),

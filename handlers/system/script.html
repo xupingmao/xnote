@@ -30,6 +30,10 @@
     tr:hover {
         background-color: #eee;
     }
+
+    .option-td {
+        width: 200px;
+    }
 </style>
 
 {% end %}
@@ -110,11 +114,13 @@
     <table class="table col-md-12 top-offset-1">
         {% for index, script in enumerate(shell_list) %}
             <tr>
-                <td class="row-no">{{index+1}}</td>
+                <td class="index-td">{{index+1}}</td>
                 <td>
+                    <a href="/system/script_admin/edit?name={{script}}">{{script}}</a>
+                </td>
+                <td class="option-td">
                     <input type="button" value="执行" class="executeScript btn" scriptName="{{script}}"/> 
                     <input type="button" value="删除" class="deleteScript btn btn-danger" scriptName="{{script}}"/>
-                    <a href="/system/script_admin/edit?name={{script}}">{{script}}</a>
                 </td>
             </tr>
         {% end %}

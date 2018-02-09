@@ -84,8 +84,8 @@ function _strfill(len, c) {
     return s;
 }
 
-function _fmtnum(numval, limit) {
-    var max = Math.pow(10, limit);
+function _fmtnum(numval, length) {
+    var max = Math.pow(10, length);
     if (numval > max) {
         return "" + numval;
     } else {
@@ -97,7 +97,7 @@ function _fmtnum(numval, limit) {
             num /= 10;
         }
         // what if the num is negative?
-        var zeros = limit - cnt;
+        var zeros = length - cnt;
         return _strfill(zeros, '0') + numval;
     }
 }
@@ -122,6 +122,7 @@ function sFormat(fmt) {
         if (c == '%') {
             switch (fmt[i+1]) {
                 case 's':
+                case 'd':
                     i+=1;
                     dest += arguments[idx];
                     idx+=1;
@@ -136,10 +137,10 @@ function sFormat(fmt) {
                 case '3': case '4': case '5':
                 case '6': case '7': case '8':
                 case '8': case '9': {
-                    var num = 0;
+                    var length = 0;
                     i += 1;
                     while (hexmap[fmt[i]] != undefined) {
-                        num = num * 10 + hexmap[fmt[i]];
+                        length = length * 10 + hexmap[fmt[i]];
                         i+=1;
                     }
                     if (fmt[i] == 'd') {
@@ -153,12 +154,11 @@ function sFormat(fmt) {
                             break;
                         }
                         idx+=1;
-                        dest += _fmtnum(val, num);
+                        dest += _fmtnum(val, length);
                     } else if (fmt[i] == 's') {
                         dest += _fmtstr(arguments[idx], num);
                         idx+=1;
                     }
-                    i+=1;
                 }
                 break;
                 default:
@@ -336,4 +336,14 @@ Array.prototype.forEach = Array.prototype.forEach || function (callback) {
         var item = self[i];
         callback(item, i, self);
     }
+}
+
+Date.prototype.format = Date.prototype.format || function (format) {
+    var year = this.getFullYear();
+    var month = this.getMonth() + 1;
+    var day = this.getDate();
+    var hour = this.getHours();
+    var minute = this.getMinutes();
+    var second = this.getSeconds();
+    return sFormat("%d-%2d-%2d %2d:%2d:%2d", year, month, day, hour, minute, second);
 }

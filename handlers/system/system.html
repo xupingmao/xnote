@@ -9,7 +9,7 @@
         .sys-cmd {
             width: 70%;
         }
-        h3 {
+        .category {
             background: #ccf;
             padding: 5px;
         }
@@ -51,7 +51,7 @@
         {% continue %}
     {% end %}
     <div class="col-md-12 top-offset-1">
-        <h3>{{category.name}}</h3>
+        <h3 class="category">{{category.name}}</h3>
         <div class="col-md-12">
             {% for link in category.children %}
             <div class="item">
@@ -62,22 +62,21 @@
     </div>
 {% end %}
 
+<div class="row top-offset-1">
+    <hr/>
+    当前时间: <span id="currentTime"></span>
+</div>
+
 <script type="text/javascript">
-$("#menu-sys").addClass("active");
-
 $(function () {
-
-    // $("#qrcode").hide();
-
     var addr = $("#addr").val();
     // var url = format("http://{}:{}", ip, port);
     var url = "http://" + addr;
     $("#qrcode").qrcode(url);
     function updateTime () {
-        $("#currentDate").html(new Date().toString("yyyy-MM-dd HH:mm:ss"));
+        $("#currentTime").html(new Date().format("yyyy-MM-dd HH:mm:ss"));
         setTimeout(updateTime, 1000);
     }
-
     updateTime();
 })
 

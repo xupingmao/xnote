@@ -121,7 +121,7 @@ table td {
     border-color: #ccc;
 }
 
-.row-no {
+.row-no, .index-td {
     width: 50px;
 }
 
@@ -282,7 +282,7 @@ li.menu-item:hover {
     width: 91.7%;
 }
 
-.col-md-12 {
+.col-md-12, .row {
     float: left;
     width: 100%;
 }
