@@ -106,7 +106,7 @@
                 <input type="button" id="insertDel" class="toolbox-btn" value="删除线" />
                 <input type="file" id="file" name="file" class="hide" />
                 <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" />
-                <input type="button" class="toolbox-btn btn-primary" onclick="togglePreview(this)" value="关闭预览" />
+                <input type="button" class="toolbox-btn btn-primary" onclick="togglePreview(this)" value="预览" />
                 <span id="uploadProgress" class="upload-progress"></span>
                 <span id="autosaveResult" class="hide">自动保存成功</span>
             </div>
@@ -122,13 +122,11 @@
 
                 <div class="col-md-12">
                     <div id="editor" class="col-md-12" style="height: auto; ">
-                        <div id="markdown-input-div" class="col-md-6">
+                        <div id="markdown-input-div" class="col-md-12">
                             <textarea id="markdown-input" class="form-control" name="content" rows=50>{{file.content}}</textarea>
                         </div>
 
-                        <div id="markdown-output-div" class="col-md-12">
-
-                        </div>
+                        <div id="markdown-output-div" class="col-md-6 hide"></div>
                     </div>
                 </div>
             </div>
@@ -201,13 +199,6 @@
             mobileEdit();
             return;
         }
-        $("#markdown-input-div").removeClass("hide");
-        $("#markdown-output-div").removeClass("col-md-12").addClass("col-md-6");
-        var height = Math.max(500, $("#markdown-output-div").height());
-        $("#markdown-input").css({ height: height + "px" });
-        $("#edit-div").show();
-        $("#edit-btns").hide();
-
         initCodeMirror();
     }
 
@@ -234,26 +225,19 @@
     }
 
     function togglePreview(target) {
-        if ($("#markdown-input-div").hasClass("col-md-6")) {
-            $("#markdown-input-div").removeClass("col-md-6").addClass("col-md-12");
-            $("#markdown-output-div").addClass("hide");
-            $(target).val("预览");
-        } else {
+        if ($("#markdown-input-div").hasClass("col-md-12")) {
+            // 全屏模式
             $("#markdown-input-div").addClass("col-md-6").removeClass("col-md-12");
             $("#markdown-output-div").removeClass("hide");
             $(target).val("关闭预览");
-        }
-        return;
-        if (!$("#markdown-input-div").hasClass("hide")) {
-            $("#markdown-input-div").addClass("hide");
-            $("#markdown-output-div").removeClass("hide").removeClass("col-md-6").addClass("col-md-12");
-            $("#edit-div").hide();
-            $("#edit-btns").show();
-            $(target).val("编辑");
         } else {
-            edit();
+            // 半屏模式
+            $("#markdown-input-div").removeClass("col-md-6").addClass("col-md-12");
+            $("#markdown-output-div").addClass("hide");
             $(target).val("预览");
         }
+        // 重新初始化codeMirror
+        codeMirror.setSize("auto", "auto");
     }
 
     function escape(html, encode) {
@@ -271,8 +255,9 @@
         var oldContent = "";
         var lastSaved = $("#markdown-input").val();
         var fileId = $("#fileId").text();
+        var updatePreviewIntervalId = null;
 
-        function repaint() {
+        function updatePreview() {
             var input = $("#markdown-input").val();
             // not modified
             if (input == oldContent) {
@@ -301,10 +286,10 @@
             })
         }
 
-        repaint();
+        updatePreview();
         edit();
 
-        setInterval(repaint, 200);
+        updatePreviewIntervalId = setInterval(updatePreview, 200);
         // setInterval(autoSave, 1000*30);
 
         $("#insertCode").on("click", function () {

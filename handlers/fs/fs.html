@@ -211,12 +211,10 @@
             -->
         {% end %}
         </td>
+        <td class="size-td">{{item.size}}</td>
         <td class="options-td">
             <!-- {{item.cdate}} -->
             <a href="javascript:removeFile('{{item.path}}')" class="item-option">删除</a>
-        </td>
-        <td class="size-td">
-            {{item.size}}
         </td>
     </tr>
     {% end %}
