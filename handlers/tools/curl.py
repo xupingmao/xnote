@@ -8,6 +8,7 @@ import io
 import gzip
 import xutils
 import xtemplate
+import web
 from xutils import splithost
 
 _opener = None
@@ -112,6 +113,7 @@ class handler:
     # 使用低级API访问HTTP，可以任意设置header，data等
     # 但是返回结果也需要自己处理
     def do_http(self, method, addr, url, headers, data):
+        self.status = ""
         cl = six.moves.http_client.HTTPConnection(addr)
         cl.request(method, url, data, headers = headers)
         head = None
@@ -125,6 +127,7 @@ class handler:
         else:
             with cl.getresponse() as resp:
                 self.response_headers = resp.getheaders()
+                self.status = resp.getcode()
                 content_type = resp.getheader("Content-Type")
                 content_encoding = resp.getheader("Content-Encoding")
                 buf = resp.read()
@@ -180,9 +183,11 @@ class handler:
                 response = buf
             # byte 0x8b in position 1 usually signals that the data stream is gzipped
         except Exception as e:
+            xutils.print_exc()
             response = str(e)
 
         return xtemplate.render("tools/curl.html", url=url, 
+            status = self.status,
             method=method, body=body, 
             response=response, cookie=cookie,
             response_headers = self.response_headers)

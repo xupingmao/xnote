@@ -8,22 +8,25 @@
 {% init cookie = "" %}
 {% init response = "" %}
 {% init response_headers = [] %}
+{% init status = "" %}
 
 <h2>cURL模拟器</h2>
 
 <form method="GET">
 
 <div class="col-md-12">
-<h3>URL</h3>
-<textarea name="url" rows=1 class="col-md-10" >{{url}}</textarea>
-<select name="method">
-    <option vlaue="POST" {% if method == "POST" %} selected="true" {% end %} >POST</option>
-    <option value="GET" {% if method == "GET" %} selected="true" {% end %}>GET</option>
-</select>
-<select name="content_type">
-    <option value="application/json">JSON</option>
-    <option value="application/x-www-form-urlencoded">urlencoded</option>
-</select>
+    <h3>cURL</h3>
+    <textarea name="url" rows=3 class="col-md-12" >{{url}}</textarea>
+</div>
+<div class="col-md-12">
+    <select name="method">
+        <option vlaue="POST" {% if method == "POST" %} selected="true" {% end %} >POST</option>
+        <option value="GET" {% if method == "GET" %} selected="true" {% end %}>GET</option>
+    </select>
+    <select name="content_type">
+        <option value="application/json">JSON</option>
+        <option value="application/x-www-form-urlencoded">urlencoded</option>
+    </select>
 </div>
 
 <div class="col-md-12">
@@ -40,6 +43,9 @@
 
 <h3>Response</h3>
 <textarea class="col-md-12" rows=10>{{response}}</textarea>
+
+<h3>status</h3>
+<pre>{{status}}</pre>
 
 <h3>Response Headers</h3>
 <pre>{% for header in response_headers %}{{":".join(header)}}
