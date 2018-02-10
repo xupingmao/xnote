@@ -1,5 +1,7 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
+# @modified 2018/02/10 13:46:42
+
 import sys
 sys.path.insert(1, "lib")
 import unittest
@@ -157,6 +159,10 @@ class TestMain(unittest.TestCase):
         self.assertEqual(0, file["is_public"])
 
         json_request("/file/remove?id=" + str(id))
+
+    def test_file_timeline(self):
+        json_request("/file/timeline")
+        json_request("/file/timeline/month?year=2018&month=1")
 
     def test_fs(self):
         self.check_200("/fs//")

@@ -1,13 +1,12 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# 
+# @modified 2018/02/10 13:45:14
 
 """Description here"""
 import re
-
 import xauth
 import xutils
-from . import dao
+import xtables
 
 class handler:
 
@@ -16,7 +15,7 @@ class handler:
         # days = xutils.get_argument("days", 30, type=int)
         offset = xutils.get_argument("offset", 0, type=int)
         limit  = xutils.get_argument("limit", 20, type=int)
-        db = dao.get_file_db()
+        db = xtables.get_file_table()
         # last_month = xutils.days_before(days, format=True)
         user_name  = xauth.get_current_user()["name"]
         rows = db.query("SELECT id, type, name, creator, ctime, mtime, size FROM file WHERE creator = $creator AND is_deleted=0"
@@ -40,7 +39,7 @@ class DateTimeline:
         month = xutils.get_argument("month")
         if len(month) == 1:
             month = "0" + month
-        db = dao.get_file_db()
+        db = xtables.get_file_table()
         user_name  = xauth.get_current_user()["name"]
         rows = db.query("SELECT id, type, name, creator, ctime, mtime, size FROM file WHERE creator = $creator AND ctime LIKE $ctime AND is_deleted=0"
             + " ORDER BY ctime DESC", 
