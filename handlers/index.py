@@ -1,9 +1,9 @@
 # encoding=utf-8
 import web
 import xtemplate
-from handlers.file import dao
 
-index_html = """{% extends base.html %}
+index_html = """
+{% extends base.html %}
 {% block body %}
 <h1 style="text-align:center;">Welcome to Xnote!</h1>
 {% end %}

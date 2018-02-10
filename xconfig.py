@@ -1,4 +1,6 @@
 # encoding=utf-8
+# @modified 2018/02/10 13:16:19
+
 '''
 xnote系统配置
 - 约定目录叫 XXX_DIR

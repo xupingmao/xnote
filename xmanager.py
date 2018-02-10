@@ -1,4 +1,8 @@
-# encoding:utf-8
+# encoding=utf-8
+# @author xupingmao
+# @since
+# @modified 2018/02/10 13:15:52
+
 """
 Xnote 模块管理器
  - 加载并注册模块

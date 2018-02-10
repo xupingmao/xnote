@@ -110,6 +110,7 @@ class FileSystemHandler:
         '.webp': 'image/webp',
         '.mp4' : 'video/mp4',
         '.avi' : 'video/avi',
+        '.rmvb': 'video/rmvb',
         '.html': 'text/html; charset=utf-8',
         '.py'  : 'text/plain; charset=utf-8',
         '.sh'  : 'text/plain; charset=utf-8',

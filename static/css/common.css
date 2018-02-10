@@ -754,3 +754,7 @@ li.menu-item:hover {
     color: blue;
 }
 
+.scroll-y {
+    overflow-y: auto;
+}
+

@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
+# @modified 2018/02/10 13:16:32
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重

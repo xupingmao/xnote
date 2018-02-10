@@ -1,10 +1,12 @@
 # encoding=utf-8
+# @modified 2018/02/10 13:18:01
 
 """
 xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
 如果是一个人开发，可以直接写在这个文件中,
 如果是团队开发，依然建议通过xutils暴露统一接口，其他的utils由xutils导入
+
 """
 from __future__ import print_function
 import sys
@@ -22,7 +24,6 @@ import profile as pf
 import six
 import web
 import xconfig
-
 from fnmatch import fnmatch
 from util.ziputil import *
 from util.netutil import splithost
