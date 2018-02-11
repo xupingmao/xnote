@@ -196,6 +196,8 @@ class ModelManager:
         self.mapping     = []
         self.model_list  = []
         self.failed_mods = []
+        # remove all event handlers
+        remove_handlers()
         self.load_model_dir(config.HANDLERS_DIR)
         
         self.mapping += self.basic_mapping
@@ -522,9 +524,8 @@ _event_manager = None
 def init(app, vars, last_mapping = None):
     global _manager
     global _event_manager
-
-    _manager = ModelManager(app, vars, last_mapping = last_mapping)
     _event_manager = EventManager()
+    _manager = ModelManager(app, vars, last_mapping = last_mapping)
     return _manager
 
 def instance():

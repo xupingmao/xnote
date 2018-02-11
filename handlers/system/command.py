@@ -1,11 +1,35 @@
 # encoding=utf-8
+# @author xupingmao
+# @modified 2018/02/11 23:49:23
+
 import web
 import os
 import xutils
 import subprocess
 import xauth
 
-class handler:
+
+class OpenDirHandler:
+    @xauth.login_required("admin")
+    def GET(self):
+        path = xutils.get_argument("path")
+        if os.path.isdir(path):
+            path = '"%s"' % path
+            if xutils.is_windows():
+                path = path.replace("/", "\\")
+                cmd = "explorer %s" % path
+            elif xutils.is_mac():
+                cmd = "open %s" % path
+        else:
+            cmd = path
+        print(cmd)
+        os.popen(cmd)
+        return "<html><script>window.close()</script></html>"
+
+    def POST(self):
+        return self.GET()
+
+class CommandHandler:
 
     command_list = {
         "open_xnote_dir": "explorer .",
@@ -49,3 +73,8 @@ class handler:
                 buf = fp.read(bufsize)
         finally:
             fp.close()
+
+xurls = (
+    r"/system/command", CommandHandler,
+    r"/system/command/open", OpenDirHandler,
+)

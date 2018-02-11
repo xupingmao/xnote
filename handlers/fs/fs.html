@@ -291,7 +291,7 @@
     });
 
     $("#openDirectory").on("click", function () {
-        $.post("/tools/open", {path: "{{path}}"});
+        $.post("/system/command/open", {path: "{{path}}"});
     });
     $(".command-btn").on("click", function () {
         var command = $(this).attr("data-command");
