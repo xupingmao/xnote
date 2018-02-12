@@ -20,6 +20,10 @@
                 <pre>{{ file.raw }}</pre>
             {% end %}
 
+            {% if "html" in file and file.html != None %}
+                {% raw file.html %}
+            {% end %}
+
             {# 快捷命令 #}
             {% if file.command != None %}
                 <input type="button" class="btn execute-btn" value="执行" href="{{file.command}}"/>

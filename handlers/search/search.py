@@ -1,4 +1,7 @@
 # encoding=utf-8
+# @author xupingmao
+# @modified 2018/02/12 14:09:51
+
 import re
 import os
 import sys
@@ -100,6 +103,10 @@ class handler:
             ctx.search_tool = False
 
         xutils.log("  key=%s" % key)
+
+        xmanager.fire("search.before", ctx)
+        xmanager.fire("search", ctx)
+
         for rule in _rules:
             pattern = rule.pattern
             func = rule.func
@@ -115,10 +122,10 @@ class handler:
                         files += results
                 except Exception as e:
                     xutils.print_exc()
-        xmanager.fire("search", ctx)
         cost_time = (time.time() - start_time) * 1000
         xutils.log("  === total - %d ms ===" % cost_time)
-        return files
+        xmanager.fire("search.after", ctx)
+        return ctx.tools + files
 
     @xauth.login_required()
     def GET(self):

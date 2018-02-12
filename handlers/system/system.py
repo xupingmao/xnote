@@ -73,34 +73,6 @@ xconfig.MENU_LIST = [
     Storage(name = "图片工具", children = img_tools),
     Storage(name = "编解码工具", children = code_tools),
 ]
-
-@xutils.cache(key="ip_list", expire=3600)
-def get_ip_list(blacklist = []):
-    """
-    获取本地IP，加上缓存是因为失败的情况下调用非常缓慢
-    """
-    try:
-        hostname = socket.gethostname()
-        localIp = socket.gethostbyname(hostname)
-        print("localIP:%s" % localIp)
-        name, aliaslist, ipList = socket.gethostbyname_ex(hostname)
-        ip_list = []
-        for ip in ipList:
-            if ip in blacklist:
-                continue
-            if ip != localIp:
-               print("external IP:%s"%ip)
-            ip_list.append(ip)
-    except Exception as e:
-        xutils.print_exc()
-        ip_list = ["localhost"]
-
-    return ip_list
-
-def get_server_ip():
-    blacklist = config.get("IP_BLACK_LIST")
-    ip_list = get_ip_list(blacklist)
-    return ip_list[0]
                 
 class SysHandler:
 
@@ -112,10 +84,8 @@ class SysHandler:
                 fpath = os.path.join(dirname, fname)
                 if os.path.isfile(fpath) and fpath.endswith(".bat"):
                     shell_list.append(fpath)
-        addr = get_server_ip() + ":" + config.get("PORT")
         return xtemplate.render("system/system.html", 
             Storage = Storage,
-            addr = addr,
             os = os,
             user = xauth.get_current_user()
         )

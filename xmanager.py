@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/02/10 13:15:52
+# @modified 2018/02/12 13:58:17
 
 """
 Xnote 模块管理器
@@ -567,4 +567,14 @@ def set_handlers(event_type, handlers, is_async=False):
 
 def fire(event_type, ctx=None):
     _event_manager.fire(event_type, ctx)
+
+def listen(event_type, is_async = False):
+    """
+    事件监听器注解
+    """
+    def deco(func):
+        _event_manager.add_handler(event_type, func, is_async)
+        return func
+    return deco
+
 
