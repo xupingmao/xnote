@@ -570,6 +570,28 @@ def say(msg):
         # 防止调用语音API的程序没有正确处理循环
         time.sleep(0.5)
 
+def exec_python_code(name, code, record_stdout = True, do_gc = True):
+    try:
+        mod_globals = {"__name__": "xscript.%s" % name}
+        before_count = len(gc.get_objects())
+        if record_stdout:
+            sys.stdout.record()
+        ret = six.exec_(code, mod_globals)
+        del mod_globals
+        # 执行一次GC防止内存膨胀
+        if do_gc:
+            gc.collect()
+        after_count = len(gc.get_objects())
+        if record_stdout:
+            ret = sys.stdout.pop_record()
+        if do_gc:
+            log("gc.objects_count %s -> %s" % (before_count, after_count))
+        return ret
+    except:
+        print_exc()
+        if record_stdout:
+            ret = sys.stdout.pop_record()
+
 
 def exec_script(name, new_window=True, record_stdout = True):
     """执行script目录下的脚本"""
@@ -578,25 +600,9 @@ def exec_script(name, new_window=True, record_stdout = True):
     path = os.path.abspath(path)
     ret  = 0
     if name.endswith(".py"):
-        try:
-            # 方便获取xnote内部信息用于扩展，同时防止开启过多Python进程
-            code = xutils.readfile(path)
-            mod_globals = {"__name__": "xscript.%s" % name}
-            before_count = len(gc.get_objects())
-            if record_stdout:
-                sys.stdout.record()
-            ret = six.exec_(code, mod_globals)
-            del mod_globals
-            # 执行一次GC防止内存膨胀
-            gc.collect()
-            after_count = len(gc.get_objects())
-            if record_stdout:
-                ret = sys.stdout.pop_record()
-            log("gc.objects_count %s -> %s" % (before_count, after_count))
-        except:
-            print_exc()
-            if record_stdout:
-                ret = sys.stdout.pop_record()
+        # 方便获取xnote内部信息用于扩展，同时防止开启过多Python进程
+        code = xutils.readfile(path)
+        ret = exec_python_code(name, code, record_stdout)  
     elif name.endswith(".command"):
         # Mac os Script
         xutils.system("chmod +x " + path)

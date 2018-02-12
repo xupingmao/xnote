@@ -133,11 +133,13 @@
         var content = $("[name=content]").val();
         // console.log(event);
         // console.log($(event.target).attr("scriptName"))
-        $.post("/system/script_admin/execute?name=" + scriptName, function (responseText) {
-            var data = responseText;
-            $("#resultDiv").show();
-            $("#result").show().text(data.data);
-        });
+        $.post("/system/script_admin/execute?name=" + scriptName, 
+            {content: content} ,
+            function (responseText) {
+                var data = responseText;
+                $("#resultDiv").show();
+                $("#result").show().text(data.data);
+            });
     })
 
     $(".deleteScript").on("click", function(event) {
