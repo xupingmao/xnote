@@ -6,6 +6,7 @@
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/xq-light.css">
 <script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
+<script type="text/javascript" src="/static/js/editor.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/python.js"></script>
@@ -51,6 +52,7 @@
 <div class="col-md-12">
     <div class="col-md-12 bottom-offset-1">
         <input type="submit" value="保存">
+        <button id="execute" class="btn hide">执行</button>
         {% if path.endswith(".md") %}
             <input type="button" class="link-btn" href="/code/preview?path={{path}}" value="预览">
         {% end %}
@@ -59,6 +61,12 @@
     <div id="editorArea" class="col-md-12">
         <textarea name="content" id="editor">{{content}}</textarea>
     </div>
+
+    <div id="resultDiv" class="col-md-12 hide">
+        结果
+        <pre id="result" class="col-md-12">
+        </pre>
+    </div>
 </div>
 </form>
 
@@ -66,49 +74,10 @@
 
 <script type="text/javascript">
     $(function () {
-
-        var mode = "text/x-c";
-        var name = getUrlParams().path;
-        if (name.endsWith(".py")) {
-            mode = "text/x-python";
-        }
-        if (name.endsWith(".js")) {
-            mode = "text/javascript";
-        } 
-        if (name.endsWith(".c")) {
-            mode = "text/x-c";
-        } 
-        if (name.endsWith(".java")) {
-            mode = "text/x-java";
-        } 
-        if (name.endsWith(".md")) {
-            mode = "text/x-markdown";
-        } 
-        if (name.endsWith(".sh") || name.endsWith(".command")) {
-            mode = "text/x-sh";
-        } 
-        if (name.endsWith(".php")) {
-            mode = "text/x-php";
-        }
-        var editor = CodeMirror.fromTextArea($("#editor")[0], {
-            lineNumbers: true,
-            mode: mode,
-            // theme:"monokai",
-            // theme:'xq-light',
-            indentUnit:4,
-            lineWrapping: true
-        });
-        editor.on("update", function (codeMirror, changeObj) {
-            console.log("update");
-            $("#editor").val(codeMirror.doc.getValue());
+        var editor = initCodeMirror("#editor", {
+            filename: getUrlParams().path,
+            height: "auto"
         })
-        editor.setSize("auto", "auto");
-        editor.setOption("extraKeys", {
-            Tab: function(cm) {
-                var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-                cm.replaceSelection(spaces);
-            }
-        });
         window.codeMirror = editor;
     });
 </script>

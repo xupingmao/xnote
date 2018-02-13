@@ -8,6 +8,7 @@
 <script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/python.js"></script>
+<script type="text/javascript" src="/static/js/editor.js"></script>
 
 <style type="text/css">
     #result {
@@ -82,29 +83,9 @@
 
     <script>
         $(function () {
-
-            var mode = "text/x-sh";
-            var name = $("input[name=name]").val();
-            if (name.endsWith(".py")) {
-                mode = "text/x-python";
-            }
-            var editor = CodeMirror.fromTextArea($("#editor")[0], {
-                lineNumbers: true,
-                mode: mode,
-                // theme:"monokai",
-                indentUnit:4,
-                lineWrapping: true
-            });
-            editor.setSize("auto", "450px");
-            editor.on("update", function (codeMirror, changeObj) {
-                $("#editor").val(codeMirror.doc.getValue());
-            });
-            editor.setOption("extraKeys", {
-                Tab: function(cm) {
-                    var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-                    cm.replaceSelection(spaces);
-                }
-            });
+            initCodeMirror("#editor", {
+                filename: $("input[name=name]").val()
+            })
         });
     </script>
 

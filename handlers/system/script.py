@@ -78,6 +78,7 @@ class ExecuteHandler:
             path = os.path.join(dirname, name)
             content = content.replace("\r", "")
             xutils.savetofile(path, content)
+        # 必须调用exec_script因为可能没有保存过程
         ret = xutils.exec_script(name)
         return dict(code="success", message="", data=ret)
 

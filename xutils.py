@@ -1,5 +1,7 @@
 # encoding=utf-8
-# @modified 2018/02/10 13:18:01
+# @author xupingmao
+# @since 2016/12/09
+# @modified 2018/02/13 11:22:21
 
 """
 xnote工具类总入口
@@ -591,6 +593,7 @@ def exec_python_code(name, code, record_stdout = True, do_gc = True):
         print_exc()
         if record_stdout:
             ret = sys.stdout.pop_record()
+        return ret
 
 
 def exec_script(name, new_window=True, record_stdout = True):

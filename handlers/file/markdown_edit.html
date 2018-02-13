@@ -8,6 +8,8 @@
 <script type="text/javascript" src="/static/js/upload.js"></script>
 <script type="text/javascript" src="/static/js/marked-ext.js"></script>
 <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+
 <style>
     .CodeMirror {
         width: 100%;
@@ -167,7 +169,7 @@
         $("#file").click();
     })
 
-    function initCodeMirror() {
+    function initMdCodeMirror() {
         if (window.codeMirror) {
             return;
         }
@@ -178,17 +180,10 @@
             $("#markdown-input").text("\n\n\n\n\n");
         }
 
-        var codeMirror = CodeMirror.fromTextArea(editor, {
-            lineNumbers: true,
-            mode: { name: "text/x-markdown", fencedCodeBlocks: true },
-            lineWrapping: true,
-            fixedGutter: true,
+        window.codeMirror = initCodeMirror("#markdown-input", {
+            mode: "text/x-markdown",
+            height: "auto"
         });
-        codeMirror.on("update", function (codeMirror, changeObj) {
-            $("#markdown-input").val(codeMirror.doc.getValue());
-        })
-        window.codeMirror = codeMirror;
-        codeMirror.setSize("auto", "auto");
     }
 
     function edit() {
@@ -204,7 +199,7 @@
             mobileEdit();
             return;
         }
-        initCodeMirror();
+        initMdCodeMirror();
     }
 
     /**
@@ -226,7 +221,7 @@
         $("#markdown-input").css({ height: height + "px" });
         $("#edit-div").show();
         $("#edit-btns").hide();
-        initCodeMirror();
+        initMdCodeMirror();
     }
 
     function togglePreview(target) {
