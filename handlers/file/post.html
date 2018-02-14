@@ -25,7 +25,6 @@
 
     <div style="margin-top: 5px;">
         <input id="saveBtn" type="button" value="保存">
-        <input type="button" class="link-btn" href="/file/view?id={{file.id}}" value="预览">
     </div>
 
 
@@ -40,7 +39,8 @@
         $.post("/file/autosave?type=html", {id:{{file.id}}, data:data}, function (resp) {
             console.log(resp);
             if (resp.code == "success") {
-                window.location.reload();
+                // window.location.reload();
+                window.location.href = "/file/view?id={{file.id}}";
             } else {
                 alert(resp.message);
             }
