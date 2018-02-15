@@ -48,12 +48,14 @@ class RangeUploadHandler:
 
     @xauth.login_required()
     def POST(self):
-        # xutils.print_web_ctx_env()
+        part_file = True
+        chunksize = 5 * 1024 * 1024
         chunk = xutils.get_argument("chunk", 0, type=int)
         chunks = xutils.get_argument("chunks", 1, type=int)
         file = xutils.get_argument("file", {})
         prefix = xutils.get_argument("prefix", "")
         dirname = xutils.get_argument("dirname", xconfig.DATA_DIR)
+        # Fix 安全问题
         dirname = dirname.replace("$DATA", xconfig.DATA_DIR)
         filename = None
         webpath  = ""
@@ -61,7 +63,6 @@ class RangeUploadHandler:
 
         if hasattr(file, "filename"):
             origin_name = file.filename
-            # print(" - - %-20s = %s" % ("filename", file.filename))
             xutils.log("recv {}", file.filename)
             filename = os.path.basename(file.filename)
             filename = xutils.quote_unicode(filename)
@@ -70,15 +71,24 @@ class RangeUploadHandler:
                 dirname  = os.path.dirname(filepath)
                 filename = os.path.basename(filepath)
 
-            # filename = xauth.get_current_name() + '_' + filename
-            tmp_name = "%s_%d.part" % (filename, chunk)
+            filename = xauth.get_current_name() + '_' + filename
+            if part_file:
+                tmp_name = "%s_%d.part" % (filename, chunk)
+                seek = 0
+            else:
+                tmp_name = filename
+                seek = chunk * chunksize
             tmp_path = os.path.join(dirname, tmp_name)
+
             with open(tmp_path, "wb") as fp:
+                fp.seek(seek)
+                if seek != 0:
+                    xutils.log("seek to {}", seek)
                 for file_chunk in file.file:
                     fp.write(file_chunk)
         else:
             return dict(code="fail", message="require file")
-        if chunk+1==chunks:
+        if part_file and chunk+1==chunks:
             self.merge_files(dirname, filename, chunks)
         return dict(code="success", webpath=webpath, link=get_link(origin_name, webpath))
 

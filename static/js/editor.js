@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2018/02/13
-// @modified 2018/02/13 17:12:14
+// @modified 2018/02/15 11:05:27
 
 
 // var codeMirror = CodeMirror.fromTextArea(editor, {
@@ -74,11 +74,11 @@ function initCodeMirror(selector, options) {
     });
 
 
-    if (executable) {
+    if (mode == "text/x-python") {
         $("#execute").show();
         $("#execute").click(function (event) {
-            var content =editor.doc.getValue();
-            $.post("/system/script_admin/execute", 
+            var content = editor.doc.getValue();
+            $.post("/system/command/python", 
                 {content: content} ,
                 function (responseText) {
                     var data = responseText;

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/02/11 23:49:23
+# @modified 2018/02/15 10:46:19
 
 import web
 import os
@@ -74,7 +74,16 @@ class CommandHandler:
         finally:
             fp.close()
 
+class PythonCommandHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        content = xutils.get_argument("content")
+        result = xutils.exec_python_code("<shell>", content)
+        return dict(code="success", message="", data=result)
+
 xurls = (
     r"/system/command", CommandHandler,
     r"/system/command/open", OpenDirHandler,
+    r"/system/command/python", PythonCommandHandler,
 )

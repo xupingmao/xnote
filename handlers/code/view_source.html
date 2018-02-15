@@ -18,19 +18,17 @@
 {% end %}
 
 <style type="text/css">
+    .search-key {
+        background-color: #FF8000;
+        color: #000;
+    }
 
-.search-key {
-    background-color: #FF8000;
-    color: #000;
-}
-
-/**
-#editorArea {
-    height: 400px;
-    overflow: auto;
-}
-*/
-
+    #result {
+        border: 1px solid #ccc;
+        padding: 4px;
+        background-color: #9cc;
+        box-sizing: border-box;
+    }
 </style>
 {% end %}
 
@@ -50,16 +48,17 @@
 <textarea id="content" class="hide">{{content}}</textarea>
 <form method="POST" action="/code/view_source/update">
 <div class="col-md-12">
-    <div class="col-md-12 bottom-offset-1">
-        <input type="submit" value="保存">
-        <button id="execute" class="btn hide">执行</button>
-        {% if path.endswith(".md") %}
-            <input type="button" class="link-btn" href="/code/preview?path={{path}}" value="预览">
-        {% end %}
-    </div>
     <input name="path" class="hide" value="{{path}}"/>
     <div id="editorArea" class="col-md-12">
         <textarea name="content" id="editor">{{content}}</textarea>
+    </div>
+
+    <div class="col-md-12 bottom-offset-1">
+        <input type="submit" value="保存">
+        <input id="execute" type="button" class="btn hide" value="执行"/>
+        {% if path.endswith(".md") %}
+            <input type="button" class="link-btn" href="/code/preview?path={{path}}" value="预览">
+        {% end %}
     </div>
 
     <div id="resultDiv" class="col-md-12 hide">
@@ -76,7 +75,8 @@
     $(function () {
         var editor = initCodeMirror("#editor", {
             filename: getUrlParams().path,
-            height: "auto"
+            height: "auto",
+            mode: "text/x-python"
         })
         window.codeMirror = editor;
     });
