@@ -40,10 +40,11 @@ sys_tools = [
 
 doc_tools = [
     link("标签云", "/file/taglist"),
+    link("词典", "/file/dict"),
     link("记事", "/tools/message?status=created"),
     link("最近更新", "/file/recent_edit"),
     link("我的收藏", "/file/group/marked"),
-    link("日历", "/tools/date")
+    link("日历", "/tools/date"),
 ] 
 
 dev_tools = [

@@ -1,5 +1,8 @@
-# encoding=utf-8
-# Created by xupingmao on 2016/12
+# -*- coding:utf-8 -*-
+# @author xupingmao
+# @since 2016/12
+# @modified 2018/02/18 10:30:49
+
 import profile
 import math
 import re
@@ -12,6 +15,7 @@ import xtemplate
 import xmanager
 from web import HTTPError
 from . import dao
+from xconfig import Storage
 config = xconfig
 
 PAGE_SIZE = xconfig.PAGE_SIZE
@@ -244,6 +248,32 @@ class LibraryHandler:
     def GET(self):
         return xtemplate.render("file/library.html")
 
+class DictHandler:
+
+    def GET(self):
+        page = xutils.get_argument("page", 1, type=int)
+        db = xtables.get_dict_table()
+        items = db.select(order="id", limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
+        def convert(item):
+            v = Storage()
+            v.name = item.key
+            v.summary = item.value
+            v.mtime = item.mtime
+            v.ctime = item.ctime
+            v.url = "#"
+            return v
+        items = map(convert, items)
+        count = db.count()
+        page_max = math.ceil(count / PAGE_SIZE)
+
+        return xtemplate.render("file/view.html", 
+            files = list(items), 
+            file_type = "group",
+            show_opts = False,
+            page = page,
+            page_max = page_max,
+            page_url = "/file/dict?page=")
+
 xurls = (
     r"/file/(edit|view)", ViewHandler, 
     r"/file/rename", RenameHandler,
@@ -255,6 +285,7 @@ xurls = (
     r"/file/mark", MarkHandler,
     r"/file/unmark", UnmarkHandler,
     r"/file/markdown", ViewHandler,
-    r"/file/library", LibraryHandler
+    r"/file/library", LibraryHandler,
+    r"/file/dict", DictHandler
 )
 

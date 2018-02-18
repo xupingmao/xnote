@@ -1,6 +1,7 @@
-# -*- coding:utf-8 -*-  
-# Created by xupingmao on 2017
-# 
+# -*- coding:utf-8 -*-
+# @author xupingmao
+# @since 2017
+# @modified 2018/02/18 10:14:53
 
 """Description here"""
 import web
@@ -107,9 +108,30 @@ class RemoveHandler:
     def POST(self):
         return self.GET()
 
+class DictPutHandler:
+
+    def GET(self):
+        return self.POST()
+
+    @xauth.login_required()
+    def POST(self):
+        key = xutils.get_argument("key")
+        value = xutils.get_argument("value")
+        db = xtables.get_dict_table()
+        item = db.select_one(where=dict(key=key))
+        current = xutils.format_datetime()
+        if key == "" or key is None:
+            return dict(code="fail", message="key is empty")
+        if item is None:
+            db.insert(key=key, value=value, ctime = current, mtime = current)
+        else:
+            db.update(value = value, mtime = current, where = dict(key=key))
+        return db.select_one(where=dict(key=key))
+
 xurls = (
     r"/file/add", AddHandler,
-    r"/file/remove", RemoveHandler
+    r"/file/remove", RemoveHandler,
+    r"/file/dict/put", DictPutHandler
 )
 
 

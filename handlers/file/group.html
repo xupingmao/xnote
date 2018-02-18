@@ -42,9 +42,15 @@
                 {% if item.type == "group" %}
                     <img src="/static/image/folder.gif"/>
                     <a class="group-link" href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>({{item.size}})
+                {% elif hasattr(item, "url") and item.url != None %}
+                    <a class="note-link" href="{{item.url}}">{{item.name}}</a>
                 {% else %}
                     <a class="note-link" href="/file/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
-                    ({{item.creator}})
+                    {% if item.creator != None %} ({{item.creator}}) {% end %}
+                {% end %}
+
+                {% if hasattr(item, "summary") and item.summary is not None %}
+                    <span>{{item.summary}}</span>
                 {% end %}
 
                 {% if show_opts and _has_login %}
