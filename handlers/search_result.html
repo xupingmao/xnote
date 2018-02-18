@@ -8,9 +8,10 @@
           <button class="search-btn">搜&nbsp;索</button>
       </div>
       <div class="col-md-12">
-        <input type="checkbox" name="search_dict" default-value="{{?search_dict}}">词典
-        <input type="checkbox" name="content" default-value="{{?content}}">全文搜索
-        <input type="checkbox" name="message" default-value="{{?message}}">记事
+        <input type="radio" name="category" value="default" default-value="{{?category}}">默认
+        <input type="radio" name="category" value="dict" default-value="{{?category}}">词典
+        <input type="radio" name="category" value="content" default-value="{{?category}}">全文搜索
+        <input type="radio" name="category" value="message" default-value="{{?category}}">记事
       </div>
   </form>
 </div>
@@ -19,7 +20,7 @@
 $(function () {
   $("#key").focus();
 
-  $("#searchForm [type=checkbox]").change(function () {
+  $("#searchForm [type=radio]").change(function () {
     $("#searchForm").submit();
   })
 });

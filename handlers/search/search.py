@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/02/12 14:09:51
+# @modified 2018/02/18 10:52:38
 
 import re
 import os
@@ -78,9 +78,7 @@ class handler:
 
     def full_search(self, key, offset, limit):
         global _rules
-        content = xutils.get_argument("content")
-        message = xutils.get_argument("message")
-        search_dict = xutils.get_argument("search_dict")
+        category = xutils.get_argument("category", "")
         words   = textutil.split_words(key)
         files   = []
 
@@ -88,9 +86,10 @@ class handler:
         ctx = SearchContext()
         ctx.input_text = key
         ctx.words = words
-        ctx.search_message = (message == "on")
-        ctx.search_file_full = (content == "on")
-        ctx.search_dict = (search_dict == "on")
+        ctx.category = category
+        ctx.search_message = (category == "message")
+        ctx.search_file_full = (category == "content")
+        ctx.search_dict = (category == "dict")
         ctx.user_name = xauth.get_current_name()
 
         if ctx.search_message:
@@ -133,28 +132,26 @@ class handler:
         load_rules()
         key       = xutils.get_argument("key", "")
         title     = xutils.get_argument("title", "")
-        content   = xutils.get_argument("content", "")
-        message   = xutils.get_argument("message", "")
-        search_dict = xutils.get_argument("search_dict", "")
+        category  = xutils.get_argument("category", "")
         page      = xutils.get_argument("page", 1, type = int)
         user_name = xauth.get_current_role()
-        page_url  =  "/search/search?key=%s&content=%s&message=%s&search_dict=%s&page="\
-            % (key, content, message, search_dict)
+        page_url  =  "/search/search?key=%s&category=%s&page="\
+            % (key, category)
         pagesize = xconfig.PAGE_SIZE
         offset   = (page-1) * pagesize
         limit    = pagesize
 
         if key == "" or key == None:
-            return xtemplate.render("search_result.html", files=[], count=0)
+            return xtemplate.render("search_result.html", category=category, files=[], count=0)
         files = self.full_search(key, offset, pagesize)
         count = len(files)
         files = files[offset:offset+limit]
         return xtemplate.render("search_result.html", 
+            category = category,
             files = files, 
             title = title,
             page_max = math.ceil(count/pagesize),
-            page_url = page_url,
-            content = content)
+            page_url = page_url)
 
 rules_loaded = False
 def load_rules():
