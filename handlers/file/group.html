@@ -50,7 +50,7 @@
                 {% end %}
 
                 {% if hasattr(item, "summary") and item.summary is not None %}
-                    <span>{{item.summary}}</span>
+                    <pre>{{item.summary}}</pre>
                 {% end %}
 
                 {% if show_opts and _has_login %}

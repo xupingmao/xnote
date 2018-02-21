@@ -1,5 +1,7 @@
-# encoding=utf-8
-
+# -*- coding:utf-8 -*-
+# @author xupingmao <578749341@qq.com>
+# @since 2017
+# @modified 2018/02/21 21:24:06
 import os
 import web
 import xauth
@@ -55,7 +57,7 @@ class RangeUploadHandler:
         file = xutils.get_argument("file", {})
         prefix = xutils.get_argument("prefix", "")
         dirname = xutils.get_argument("dirname", xconfig.DATA_DIR)
-        # Fix 安全问题
+        # Fix 安全问题，不能访问上级目录
         dirname = dirname.replace("$DATA", xconfig.DATA_DIR)
         filename = None
         webpath  = ""
@@ -71,7 +73,6 @@ class RangeUploadHandler:
                 dirname  = os.path.dirname(filepath)
                 filename = os.path.basename(filepath)
 
-            filename = xauth.get_current_name() + '_' + filename
             if part_file:
                 tmp_name = "%s_%d.part" % (filename, chunk)
                 seek = 0

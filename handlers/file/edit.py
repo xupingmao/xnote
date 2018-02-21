@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/02/18 10:14:53
+# @modified 2018/02/21 10:24:17
 
 """Description here"""
 import web
@@ -14,6 +14,9 @@ import xutils
 import xtemplate
 import xtables
 from xutils import Storage
+
+def get_by_name(db, name):
+    return db.select_one(where=dict(name = name, is_deleted = 0, creator = xauth.get_current_name()))
 
 class AddHandler:
 
@@ -47,7 +50,7 @@ class AddHandler:
         try:
             db = xtables.get_file_table()
             if name != '':
-                f = db.select_one(where=dict(name=name,is_deleted=0))
+                f = get_by_name(db, name)
                 if f != None:
                     key = name
                     raise Exception(u"%s 已存在" % name)
@@ -87,8 +90,8 @@ class RemoveHandler:
         db = xtables.get_file_table()
         if id != "":
             file = db.select_one(where=dict(id=int(id), is_deleted=0))
-        else:
-            file = db.select_one(where=dict(name=name, is_deleted=0))
+        elif name != "":
+            file = get_by_name(db, name)
         if file is None:
             return dict(code="fail", message="文件不存在")
         id = file.id
