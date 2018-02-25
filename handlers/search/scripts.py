@@ -5,6 +5,7 @@ import six
 import xconfig
 import xutils
 import xauth
+import xmanager
 from xutils import SearchResult
 
 def search(ctx, name):
@@ -21,10 +22,18 @@ def search(ctx, name):
             result.url  = xutils.u("/system/script_admin?op=edit&name=%s") % fname
             result.command = xutils.u("/system/script_admin/execute?name=%s") % fname
             results.append(result)
+    return results
+
+
+@xmanager.listen("search")
+@xutils.timeit(logfile=True, name="search books")
+def search_books(ctx):
+    if not xauth.is_admin():
+        return
+    name = ctx.input_text
     # 图书搜索结果
     bookspath = os.path.join(xconfig.DATA_DIR, "books")
     pathlist = xutils.search_path(bookspath, "*" + name + "*")
     if len(pathlist) > 0:
         url = "/fs_find?path=%s&find_key=%s"%(bookspath,name)
-        results.append(SearchResult("图书搜索结果(%s) - %s" % (len(pathlist), name), url))
-    return results
+        ctx.tools.append(SearchResult("图书搜索结果(%s) - %s" % (len(pathlist), name), url))
