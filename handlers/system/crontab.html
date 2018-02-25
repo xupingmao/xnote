@@ -24,7 +24,7 @@
     <tr>
         <td class="row-no">{{index+1}}</td>
         <td>
-            <div style="word-wrap: break-word; width: 300px;">
+            <div style="word-wrap: break-word;">
                 {% if task.protocol == "script" %}
                     <a href="/system/script_admin/edit?name={{task.script_name}}">{{task.script_name}}</a>
                 {% else %}
