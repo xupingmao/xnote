@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/02/25 01:23:21
+# @modified 2018/02/25 14:25:10
 
 """
 xnote工具类总入口
@@ -669,9 +669,9 @@ def timeit(repeat=1, logfile=False, name=""):
                 ret = func(*args)
             t2 = time.time()
             if logfile:
-                log("{} cost time: {}", name, t2-t1)
+                log("{} cost time: {} ms", name, int((t2-t1)*1000))
             else:
-                print(name, "cost time: ", t2-t1)
+                print(name, "cost time: ", int((t2-t1)*1000), "ms")
             return ret
         return handle
     return deco
