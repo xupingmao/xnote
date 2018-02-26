@@ -9,5 +9,9 @@
     {% if page < page_max %}
     <a class="x-page-link" href="{{page_url}}{{page+1}}">下一页</a>
     {% end %}
+
+    {% if page_max > 2 %}
+    <a class="x-page-link" href="{{page_url}}{{page_max}}">尾页</a>
+    {% end %}
 </p>
 {% end %}
