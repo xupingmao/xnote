@@ -350,6 +350,7 @@ li.menu-item:hover {
 
 .nav-search-box {
     position: fixed;
+    z-index: 10000;
     width: 100%;
     background-color: #9cc;
 }
