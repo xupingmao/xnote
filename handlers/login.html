@@ -8,20 +8,25 @@
     	tr td {
     		border: none;
     	}
-    	input, button {
+      .login-box {
+        width:30%; 
+        min-width:200px; 
+        padding-top:15%; 
+        margin:0 auto;
+      }
+    	.login-input {
   		  width: 100%;
   		  min-width: 200px;
         padding-top: 12px;
         padding-bottom: 12px;
         border-radius: 0px;
-        box-sizing: border-box;
      	}
-     	input[type=submit], button {
+     	.login-submit {
         padding: 12px 24px;
      		border-radius: 0px;
      		background-color: lightblue;
      	}
-    	input[type=submit]:hover, button:hover {
+    	.login-submit:hover {
     		background-color: #27A9E3;
         border-radius: 0px;
     	}
@@ -33,12 +38,12 @@
 {% end %}
 
 {% block body %}
-  <div style="width:30%; min-width:200px; padding-top:15%; margin:0 auto;">
+  <div class="login-box">
 		<form id="loginForm" name="loginForm" method="POST">
-			<input type="text" name="username" value="{{username}}" placeholder="Account"/>
-			<input type="password" name="password" value="{{password}}" placeholder="Password"/>
+			<input class="login-input" type="text" name="username" value="{{username}}" placeholder="Account"/>
+			<input class="login-input" type="password" name="password" value="{{password}}" placeholder="Password"/>
       <input type="text" name="test" value="Test" class="hide">
-			<button type="submit" value="Login" id="loginBtn" style="margin-top:20px;">Login</button>
+			<button class="login-submit login-input" type="submit" value="Login" id="loginBtn" style="margin-top:20px;">Login</button>
       <label style="width:100%; color:red">{{error}}</label>
 		</form>
 	</div>

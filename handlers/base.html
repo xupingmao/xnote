@@ -32,6 +32,15 @@
   <div class="toggleMenu" style="margin-left: 15px; cursor: pointer;"></div>
 </div>
 
+<div class="nav-search-box">
+  <form id="searchForm" method="GET" action="{{?action,'/search/search'}}">
+    <div class="x-center">
+      <input id="key" name="key" class="nav-search-input" placeholder="搜索或指令" value="{{?key}}"/>
+      <button class="nav-search-btn">搜</button>
+    </div>
+  </form>
+</div>
+
 <div class="nav-top">
   <ul class="x-center">
     <li><a href="/file/group">知识库</a></li>

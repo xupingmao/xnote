@@ -1,8 +1,8 @@
 {% extends base.html %}
 {% block body %}
 
-<div class="col-md-12">
-  <form id="searchForm" method="GET" action="{{?action,'/search/search'}}">
+<div class="col-md-12 hide">
+  <form id="searchForm1" method="GET" action="{{?action,'/search/search'}}">
       <div class="input-group">
           <input type="text" id="key" name="key" class="search-input" value="{{?key}}" placeholder="输入指令或搜索关键字" />
           <button class="search-btn">搜&nbsp;索</button>
@@ -16,13 +16,20 @@
   </form>
 </div>
 
+<div class="col-md-12">
+  <a class="link" href="/search?key={{?key}}&category=default">默认</a>
+  <a class="link" href="/search?key={{?key}}&category=dict">词典</a>
+  <a class="link" href="/search?key={{?key}}&category=content">全文索引</a>
+  <a class="link" href="/search?key={{?key}}&category=message">记事</a>
+</div>
+
 <script type="text/javascript">
 $(function () {
   $("#key").focus();
 
-  $("#searchForm [type=radio]").change(function () {
-    $("#searchForm").submit();
-  })
+  // $("#searchForm [type=radio]").change(function () {
+  //   $("#searchForm").submit();
+  // })
 });
 </script>
 
