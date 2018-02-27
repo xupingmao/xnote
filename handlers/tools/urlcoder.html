@@ -1,0 +1,42 @@
+{% extends base.html %}
+
+{% block head %}
+<script type="text/javascript" src="/static/lib/utf.js"></script>
+{% end %}
+{% block body %}
+
+<h3>URL编解码</h3>
+<div class="col-md-12">
+<label>输入</label>
+<textarea id="input" class="col-md-12" rows=10></textarea>
+</div>
+
+<div class="col-md-12">
+<label>encodeURI</label>
+<textarea id="encodeURIText" class="col-md-12" rows=10></textarea>
+</div>
+
+<div class="col-md-12">
+<label>encodeURIComponent</label>
+<textarea id="encodeURIComponentText" class="col-md-12" rows=10></textarea>
+</div>
+
+<div class="col-md-12">
+    <button onclick="doEncode()">Encode</button>
+    <button onclick="doDecode()">Decode</button>
+</div>
+
+<script>
+function doEncode() {
+    var text = $("#input").val();
+    $("#encodeURIText").val(encodeURI(text));
+    $("#encodeURIComponentText").val(encodeURIComponent(text))
+}
+
+function doDecode() {
+    var chars = decodeURI($("#input").val());
+    $("#encodeURIText").val(chars);
+    $("#encodeURIComponentText").val("");
+}
+</script>
+{% end %}

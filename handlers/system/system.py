@@ -65,6 +65,7 @@ code_tools = [
     link("二维码", "/tools/barcode"),
     link("16进制转换", "/tools/hex"),
     link("md5", "/tools/md5"),
+    link("URL编解码", "/tools/urlcoder"),
 ]
 
 xconfig.MENU_LIST = [
