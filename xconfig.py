@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/02/10 13:16:19
+# @modified 2018/02/28 22:45:27
 
 '''
 xnote系统配置
@@ -305,11 +305,12 @@ def add_notice(user=None,
         message=None, 
         year=None, 
         month=None, 
-        day=None):
+        day=None,
+        wday=None):
     """
     添加通知事件, 条件为None默认永真，比如user为None，向所有用户推送
     """
-    _notice_list.append(Storage(user=user, year=year, month=month, day=day, message=message))
+    _notice_list.append(Storage(user=user, year=year, month=month, day=day, wday=wday, message=message))
 
 def get_notice_list(type='today', user=None):
     """
@@ -322,6 +323,7 @@ def get_notice_list(type='today', user=None):
         year  = tm.tm_year
         month = tm.tm_mon
         day  = tm.tm_mday
+        wday = tm.tm_wday + 1
         if todo.user != None and user != todo.user:
             return False
         if todo.year != None and todo.year != year:
@@ -329,6 +331,8 @@ def get_notice_list(type='today', user=None):
         if todo.month != None and todo.month != month:
             return False
         if todo.day != None and todo.day != day:
+            return False
+        if todo.wday != None and todo.wday != wday:
             return False
         return True
     if type == 'today':
