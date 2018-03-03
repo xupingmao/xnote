@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/03/03 15:23:58
+# @modified 2018/03/03 18:35:13
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -316,6 +316,9 @@ class MockedDB():
     def query(self, *args, **kw):
         from web.utils import IterBetter
         return IterBetter(iter([]))
+
+    def count(self, *args, **kw):
+        return 0
 
 class DBWrapper:
     """

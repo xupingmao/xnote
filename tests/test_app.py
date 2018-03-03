@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/02/10 13:46:42
+# @modified 2018/03/03 18:45:16
 
 import sys
 sys.path.insert(1, "lib")
@@ -32,6 +32,7 @@ app = init()
 def json_request(*args, **kw):
     global app
     if "data" in kw:
+        # 对于POST请求设置无效
         kw["data"]["_format"] = "json"
     else:
         kw["data"] = dict(_format="json")
@@ -163,6 +164,9 @@ class TestMain(unittest.TestCase):
     def test_file_timeline(self):
         json_request("/file/timeline")
         json_request("/file/timeline/month?year=2018&month=1")
+
+    def test_file_dict(self):
+        json_request("/file/dict?_format=json")
 
     def test_fs(self):
         self.check_200("/fs//")
