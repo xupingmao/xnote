@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/03/03 15:26:31
+# @modified 2018/03/03 15:43:11
 
 """
 xnote工具类总入口
@@ -838,6 +838,9 @@ class History:
 
     def get(self):
         return self.q.pop()
+
+    def __len__(self):
+        return len(self.q)
 
     def __iter__(self):
         return iter(self.q)

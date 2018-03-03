@@ -130,4 +130,12 @@ class TestMain(unittest.TestCase):
         self.assertTrue(xutils.match_time(month = 1, tm = tm))
 
 
+    def test_history(self):
+        h = xutils.History("test", 3)
+        h.put(1)
+        h.put(2)
+        h.put(3)
+        h.put(4)
+        self.assertEqual(len(h), 3)
+
         
