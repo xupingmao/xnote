@@ -26,6 +26,7 @@ sys_tools = [
     link("文件管理",   "/fs_data"),
     link("脚本管理",   "/system/script_admin"),
     link("定时任务",   "/system/crontab"),
+    link("历史记录",   "/system/history"),
 
     link("用户管理", "/system/user/list"),
     link("App管理", "/system/app_admin"),

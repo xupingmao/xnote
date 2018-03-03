@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/02/18 10:30:49
+# @modified 2018/03/03 15:37:19
 
 import profile
 import math
@@ -16,6 +16,7 @@ import xmanager
 from web import HTTPError
 from . import dao
 from xconfig import Storage
+from xutils import History
 config = xconfig
 
 PAGE_SIZE = xconfig.PAGE_SIZE
@@ -27,6 +28,8 @@ def try_decode(bytes):
         return bytes.decode("gbk")
 
 class ViewHandler:
+
+    xconfig.file_history = History("文件浏览记录", 200)
 
     def GET(self, op):
         id   = xutils.get_argument("id", "")
@@ -58,6 +61,7 @@ class ViewHandler:
         files = []
         amount = 0
         template_name = "file/view.html"
+        xconfig.file_history.put(dict(user=user_name, file_id = id, name = file.name))
 
         if file.type == "group":
             amount = db.count(where="parent_id=$id AND is_deleted=0 AND creator=$creator", 

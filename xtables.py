@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/02/18 10:11:18
+# @modified 2018/03/03 15:23:58
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -141,7 +141,6 @@ def init_table_file():
         manager.add_column("parent_id", "int", 0)
         # 使用file_tag表,兼容老代码,这里作为一个关键词存储，支持搜索
         manager.add_column("related", "text", "")
-
         # 统计相关
         # 访问次数
         # 创建时间ctime
@@ -157,7 +156,6 @@ def init_table_file():
         manager.add_column("is_public", "int", 0)
         # 是否标记
         manager.add_column("is_marked", "int", 0)
-
         # 权限相关
         # 创建者
         manager.add_column("creator", "text", "")
@@ -172,6 +170,14 @@ def init_table_file():
         manager.add_index("mtime")
         # 虽然不能加速匹配过程，但是可以加速全表扫描
         manager.add_index("name")
+
+def init_table_marked_file():
+    # @since 2018/03/02
+    with TableManager(config.DB_PATH, "marked_file") as manager:
+        manager.add_column("user", "text", "")
+        manager.add_column("file_id", "int", 0)
+        manager.add_column("name",  "text", "")
+        manager.add_column("ctime", "text", "")
 
 def init_table_tag():
     # 标签表，可以用于一些特征的标记
@@ -398,6 +404,7 @@ def init():
         return
     init_table_user()
     init_table_file()
+    # init_table_marked_file()
     init_table_tag()
     init_table_schedule()
     init_table_message()

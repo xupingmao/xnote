@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/02/25 14:25:10
+# @modified 2018/03/03 15:26:31
 
 """
 xnote工具类总入口
@@ -26,6 +26,7 @@ import profile as pf
 import six
 import web
 import xconfig
+from collections import deque
 from fnmatch import fnmatch
 from util.ziputil import *
 from util.netutil import splithost
@@ -418,6 +419,26 @@ def decode_bytes(bytes):
             pass
     return None
 
+
+def obj2dict(obj):
+    v = {}
+    for k in dir(obj):
+        if k[0] != '_':
+            v[k] = getattr(obj, k)
+    return v
+
+def _encode_json(obj):
+    """基本类型不会拦截"""
+    if hasattr(obj, "__call__"):
+        return "<function>"
+    elif inspect.ismodule(obj):
+        return "<module>"
+    return str(obj)
+
+
+def tojson(obj):
+    return json.dumps(obj, default=_encode_json)
+
 #################################################################
 ##   Html Utilities, Python 2 do not have this file
 #################################################################
@@ -798,4 +819,31 @@ class BaseRule:
 
     def execute(self, ctx, *argv):
         raise NotImplementedError()
+
+
+class History:
+    """历史记录, Queue无法遍历, deque是基于数组的，线程安全的"""
+
+    items = dict()
+
+    def __init__(self, name, size):
+        self.q = deque()
+        self.size = size
+        History.items[name] = self
+
+    def put(self, item):
+        self.q.append(item)
+        if len(self.q) > self.size:
+            self.q.popleft()
+
+    def get(self):
+        return self.q.pop()
+
+    def __iter__(self):
+        return iter(self.q)
+
+    def __str__(self):
+        return str(self.q)
+
+
 

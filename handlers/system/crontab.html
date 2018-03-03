@@ -21,7 +21,7 @@
     {% set index = -1 %}
     {% for index, task in enumerate(task_list) %}
     {% set name = task.url %}
-    <tr>
+    <tr class="hover-tr">
         <td class="row-no">{{index+1}}</td>
         <td>
             <div style="word-wrap: break-word;">

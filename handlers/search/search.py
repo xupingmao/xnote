@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/02/18 10:52:38
+# @modified 2018/03/03 15:37:27
 
 import re
 import os
@@ -18,22 +18,11 @@ import xauth
 import xmanager
 import xtemplate
 from util import textutil
-from xutils import Queue
+from xutils import Queue, History
 
 config = xconfig
 
 _rules = []
-
-class History:
-
-    def __init__(self, size):
-        self.q = Queue()
-        self.size = size
-
-    def put(self, item):
-        self.q.put(item)
-        if self.q.qsize() > self.size:
-            self.q.get()
 
 class BaseRule:
 
@@ -75,12 +64,15 @@ class SearchContext:
         self.message_files = []
 
 class handler:
+    xconfig.search_history = History("搜索记录", 200)
 
-    def full_search(self, key, offset, limit):
+    def do_search(self, key, offset, limit):
         global _rules
+
         category = xutils.get_argument("category", "")
         words   = textutil.split_words(key)
         files   = []
+        xconfig.search_history.put(dict(key=key, category=category, user=xauth.get_current_name()))
 
         start_time = time.time()
         ctx = SearchContext()
@@ -143,7 +135,7 @@ class handler:
 
         if key == "" or key == None:
             return xtemplate.render("search_result.html", category=category, files=[], count=0)
-        files = self.full_search(key, offset, pagesize)
+        files = self.do_search(key, offset, pagesize)
         count = len(files)
         files = files[offset:offset+limit]
         return xtemplate.render("search_result.html", 

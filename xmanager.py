@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/02/12 13:58:17
+# @modified 2018/03/03 13:04:54
 
 """
 Xnote 模块管理器
@@ -26,7 +26,7 @@ import xtables
 import xutils
 import xauth
 from threading import Thread, Timer, current_thread
-from xutils import Storage, Queue
+from xutils import Storage, Queue, tojson
 
 config = xconfig
 
@@ -78,7 +78,7 @@ def wrapped_handler(pattern, handler_clz):
     def wrap(result):
         if isinstance(result, (list, dict)):
             web.header("Content-Type", "application/json")
-            return json.dumps(result)
+            return tojson(result)
         return result
 
     class WrappedHandler:

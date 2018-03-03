@@ -16,7 +16,7 @@ import xconfig
 import xauth
 import xutils
 import xtables
-from xutils import ConfigParser, Storage
+from xutils import ConfigParser, Storage, tojson
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE    = dict(
@@ -114,14 +114,6 @@ def pre_render(kw):
     if _input is not None:
         kw.update(_input)
 
-
-def encode_json(obj):
-    if hasattr(obj, "__call__"):
-        return "<function>"
-    elif inspect.ismodule(obj):
-        return "<module>"
-    return obj
-
 def render(template_name, **kw):
     nkw = {}
     pre_render(nkw)
@@ -130,7 +122,7 @@ def render(template_name, **kw):
 
     if _input.get("_format") == "json":
         web.header("Content-Type", "application/json")
-        return json.dumps(nkw, default=encode_json)
+        return tojson(nkw)
     return _loader.load(template_name).generate(**nkw)
 
 def render_text(text, template_name = "<string>", **kw):

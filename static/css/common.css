@@ -125,6 +125,14 @@ table td {
     width: 50px;
 }
 
+.hover-tr:hover td {
+    background: none;
+}
+
+.hover-tr:hover {
+    background-color: #eee;
+}
+
 .menu-selected {
     background: #0088cc;
     color: #fff;
@@ -371,7 +379,7 @@ li.menu-item:hover {
 
 
 .main {
-  padding-top: 10px;
+  /*padding-top: 10px;*/
   padding-left: 10px;
   padding-right: 10px;
   width: auto;

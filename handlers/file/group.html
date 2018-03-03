@@ -8,19 +8,19 @@
     <table id="fileTable" class="col-md-12 table">
 
     {% if pseudo_groups %}
-        <tr>
+        <tr class="hover-tr">
             <td class="note-td">
                 <img src="/static/image/folder.gif">
                 <a href="/file/group/ungrouped">未分类</a>
             </td>
         </tr>
-        <tr>
+        <tr class="hover-tr">
             <td class="note-td">
                 <img src="/static/image/folder.gif">
                 <a href="/file/group/public">公开</a>
             </td>
         </tr>
-        <tr>
+        <tr class="hover-tr">
             <td class="note-td">
                 <img src="/static/image/folder.gif">
                 <a href="/file/recent_edit">最近更新</a>
@@ -29,7 +29,7 @@
     {% end %}
 
     {% for i, item in enumerate(files) %}
-        <tr>
+        <tr class="hover-tr">
             <td class="note-td">
                 {% if show_cdate %}
                     <span>{{xutils.format_date(item.ctime)}} - </span>
