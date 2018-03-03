@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/03/03 18:45:16
+# @modified 2018/03/03 22:53:57
 
 import sys
 sys.path.insert(1, "lib")
@@ -16,11 +16,11 @@ import xtables
 from xutils import u
 
 def init():
-    xtables.init()
     xconfig.IS_TEST = True
     xconfig.port = "1234"
     xconfig.DEV_MODE = True
     var_env = dict()
+    xtables.init()
     app = web.application(list(), var_env, autoreload=False)
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
     mgr = xmanager.init(app, var_env, last_mapping=last_mapping)
