@@ -76,6 +76,7 @@ class RemoveHandler:
         if msg.user != xauth.get_current_name():
             return dict(code="fail", message="no permission")
         db.delete(where=dict(id=id))
+        xmanager.fire("message.update", Storage())
         return dict(code="success")
 
 
