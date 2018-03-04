@@ -111,7 +111,7 @@ class SaveHandler:
         xmanager.fire('message.update', ctx)
 
         if id == "" or id is None:
-            ctime = xutils.format_datetime()
+            ctime = xutils.get_argument("date", xutils.format_datetime())
             inserted_id = db.insert(content = content, 
                 user = user_name, 
                 ctime = ctime, 
@@ -123,12 +123,24 @@ class SaveHandler:
             where=dict(id=id, user=user_name))
         return dict(code="success")
 
+class DateHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        date = xutils.get_argument("date")
+        db = xtables.get_message_table()
+        data = db.select(where="ctime LIKE $date AND user=$user", 
+            vars = dict(date = date + '%', user=xauth.get_current_name()))
+        return dict(code="success", data = list(data))
+
+
 xurls=(
     "/file/message/add", SaveHandler,
     "/file/message/remove", RemoveHandler,
     "/file/message/update", SaveHandler,
     "/file/message/finish", FinishMessage,
     "/file/message/open", OpenMessage,
-    "/file/message/list", ListHandler
+    "/file/message/list", ListHandler,
+    "/file/message/date", DateHandler
 )
 

@@ -1,17 +1,11 @@
 {% extends base.html %}
-
-
 {% block head %}
 <style>
-/* 整体设置 */
-/*{margin:0px;padding:0px;}*/
- 
 /**
  * 设置日历的大小
  */
 .calendar{
   width: 100%;
-  height: 400px;
   display: block;
   margin-top: 20px;
 }
@@ -68,8 +62,6 @@
     cursor: pointer;
     font-weight: lighter;
 }
-
-
  
 /**
  * 设置下个月的按钮图标
@@ -145,9 +137,13 @@ td.currentMonth:hover {
   padding-right: 5px;
 }
 
-.calendarMessage {
-  width: 100%;
-  max-width: 600px;
+.event-feed {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.new-event {
+  margin-top: 10px;
 }
 
 </style>
@@ -157,12 +153,19 @@ td.currentMonth:hover {
 
 <div id="calendar" class="calendar">
 </div>
-<div class="calendarMessage hide">
-  <form action="/system/calendar/save">
-    <input type="text" name="date" class="calendarDate hide">
-    <textarea name="content" class="col-md-12"></textarea>
-    <input type="submit" value="添加">
-  </form>
+
+<div class="new-event col-md-12">
+    <textarea name="content" class="col-md-12 input-box" rows=4></textarea>
+    <input id="newFeedDate" type="input" name="date" />
+    <input id="newFeedSaveBtn" type="button" class="send-button btn" value="添加">
+    <input type="file" id="filePicker" class="hide" />
+    <input type="button" id="filePickerBtn" class="send-button btn hide" value="上传文件"/>
+    <div id="uploadProgress" style="float: right;" ></div>
+</div>
+
+<div class="col-md-12">
+  <h3>事件</h3>
+  <div id="events" class="col-md-12"></div>
 </div>
 <div id="notes">
   <div id="file-history"></div>
@@ -280,7 +283,7 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
   }
 
   /**
-   * 获取日期信息
+   * 获取日期信息，显示在日期的单元格里
    */
   function getDateInfoHTML(date) {
     var html = '<div class="date-info">' + date.getDate() + '</div>';
@@ -325,28 +328,41 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
       _tds[i].setAttribute("date", getDateStr(_thisDay, '-'));
       if(_thisDayStr == getDateStr(new Date())) {    // 当前天
         _tds[i].className = 'currentMonth currentDay';
-      }else if(_thisDayStr.substr(0, 6) == getDateStr(_firstDay).substr(0, 6)) {
+      }else if(_thisDay.getMonth() == _firstDay.getMonth()) {
         _tds[i].className = 'currentMonth';  // 当前月
       }else {    // 其他月
         _tds[i].className = 'otherMonth';
       }
     }
     // 显示当月添加的资料
-    // $.get("/file/timeline/month", {year: _year, month: _month}, function (responseText) {
-    //   var data = responseText;
-    //   $("#file-history").html("");
-    //   for (var key in data) {
-    //     var files = data[key];
-    //     for (var i = 0; i < files.length; i ++) {
-    //       var file = files[i];
-    //       console.log(file);
-    //       var p = $("<p>");
-    //       p.append($("<span>").text(file.ctime).addClass("date-prefix"));
-    //       p.append($("<a>").attr("href", file.url).text(file.name));
-    //       $("#file-history").append(p);
-    //     }
-    //   }
-    // })
+    fetchEvents(_year, _month);
+  }
+
+  /**
+   * 获取当月事件
+   */
+  function fetchEvents(year, month) {
+    var root = $("#events");
+    root.html("查询中...")
+    $.get("/file/message/date", 
+        {date: year + "-" + formatNum(month)},
+        function (data) {
+          console.log(data);
+          root.html("");
+          var list = data.data;
+          for (var i = 0; i < list.length; i++) {
+            var item = list[i];
+            var element = $("<p>").addClass("event-feed").html(item.ctime + " - " + item.content);
+            root.append(element);
+          }
+          if (list.length == 0) {
+            root.html("无事件");
+          }
+        }
+    ).fail(function (data) {
+        console.log(data);
+        root.html("查询失败");
+    })
   }
 
 
@@ -401,16 +417,25 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
    * 日期转化为字符串， 4位年+2位月+2位日
    */
   function getDateStr(date, seperator) {
+    seperator = seperator || "-";
     var _year = date.getFullYear();
     var _month = date.getMonth() + 1;    // 月从0开始计数
     var _d = date.getDate();
      
-    _month = (_month > 9) ? ("" + _month) : ("0" + _month);
-    _d = (_d > 9) ? ("" + _d) : ("0" + _d);
+    _month = formatNum(_month);
+    _d = formatNum(_d);
     if (seperator) {
       return _year + seperator + _month + seperator + _d;
     } else {
       return _year + _month + _d;
+    }
+  }
+
+  function formatNum(month) {
+    if (month > 9) {
+      return "" + month;
+    } else {
+      return "0" + month;
     }
   }
 
@@ -421,8 +446,8 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     var _month = date.getMonth() + 1;    // 月从0开始计数
     var _d = date.getDate();
      
-    _month = (_month > 9) ? ("" + _month) : ("0" + _month);
-    _d = (_d > 9) ? ("" + _d) : ("0" + _d);
+    _month = formatNum(_month);
+    _d = formatNum(_d);
     return _month + '-' + _d;
   }
 
@@ -432,6 +457,21 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     $(this).addClass("selected");
     var selectedDate = $(this).attr("date");
     $(".calendarDate").val(selectedDate);
+    $("#newFeedDate").val(selectedDate);
+  });
+
+  $("#newFeedDate").val(getDateStr(new Date()));
+
+  $("#newFeedSaveBtn").click(function () {
+    $.post("/file/message/add", 
+      {
+        date: $("[name=date]").val(),
+        content: $("[name=content]").val()
+      },
+      function (data) {
+        showCalendarData();
+        $("[name=content]").val("");
+      });
   })
 })();
 
