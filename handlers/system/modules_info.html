@@ -5,24 +5,24 @@
     <div class="col-md-12">
         <h2>模块信息</h2>
         <h3>sys.path</h3>
-        <ul>
+        <table class="table">
             {% for p in sys.path %}
-                <li>{{p}}</li>
+                <tr><td>{{p}}</td></tr>
             {% end %}
-        </ul>
+        </table>
         <p>模块数 {{len(modules)}} </p>
     </div>
 
     <div class="col-md-12">
     <table class="table col-md-12">
         <tr>
-            <th>编号</th>
+            <th class="index-td">编号</th>
             <th>模块名</th>
             <!-- <th>描述</th> -->
         </tr>
     {% for index, mod in enumerate(modules) %}
         <tr>
-            <td>{{index}}</td>
+            <td class="index-td">{{index}}</td>
             <td><a href="/system/document?name={{mod.name}}">{{mod.sysname}}</a></td>
             <!-- <td>{{mod.info}}</td> -->
         </tr>

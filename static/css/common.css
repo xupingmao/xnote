@@ -113,12 +113,24 @@ table td {
     border: none;
 }
 
+.table {
+    width: 100%;
+}
+
 .table th{
     border-color: #ccc;
 }
 
 .table td {
     border-color: #ccc;
+}
+
+.table tr:hover td {
+    background: none;
+}
+
+.table tr:hover {
+    background: #eee;
 }
 
 .row-no, .index-td {
