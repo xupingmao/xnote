@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/03/03 13:04:54
+# @modified 2018/03/05 23:23:47
 
 """
 Xnote 模块管理器
@@ -477,7 +477,7 @@ class EventHandler:
 
     def execute(self, ctx=None):
         if self.is_async:
-            put_task(func, ctx)
+            put_task(self.func, ctx)
         else:
             try:
                 self.func(ctx)

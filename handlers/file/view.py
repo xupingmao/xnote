@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/03/03 15:37:19
+# @modified 2018/03/05 23:25:54
 
 import profile
 import math
@@ -26,6 +26,13 @@ def try_decode(bytes):
         return bytes.decode("utf-8")
     except:
         return bytes.decode("gbk")
+
+@xmanager.listen("file.view", is_async=True)
+def visit_by_id(ctx):
+    id = ctx.id
+    db = xtables.get_file_table()
+    sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime=$atime where id = $id"
+    db.query(sql, vars = dict(atime = xutils.format_datetime(), id=id))
 
 class ViewHandler:
 
@@ -74,7 +81,6 @@ class ViewHandler:
             show_search_div = True
             show_add_file = True
         elif file.type == "md" or file.type == "text":
-            dao.visit_by_id(id, db)
             content = file.content
             if op == "edit":
                 template_name = "file/markdown_edit.html"
@@ -86,8 +92,8 @@ class ViewHandler:
             file.data = file.data.replace(u'\n', '<br/>')
             if file.data == None or file.data == "":
                 file.data = content
-            dao.visit_by_id(id, db)
         
+        xmanager.fire("file.view", file)
         return xtemplate.render(template_name,
             file=file, 
             op=op,
