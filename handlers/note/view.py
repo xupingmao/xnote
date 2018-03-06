@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/03/06 23:21:51
+# @modified 2018/03/06 23:32:42
 
 import profile
 import math
@@ -30,7 +30,7 @@ def visit_by_id(ctx):
 
 class ViewHandler:
 
-    xconfig.note_history = History("文件浏览记录", 200)
+    xconfig.note_history = History("笔记浏览记录", 200)
 
     def GET(self, op):
         id   = xutils.get_argument("id", "")

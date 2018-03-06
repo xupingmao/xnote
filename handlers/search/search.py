@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/03/06 22:58:29
+# @modified 2018/03/06 23:30:05
 
 import re
 import os
@@ -164,7 +164,7 @@ def load_rules():
     add_rule(r"mute(.*)",               "mute.search")
     add_rule(r"取消静音",               "mute.cancel")
     add_rule(r"(.*)", "message.search")
-    add_rule(r"(.*)", "file.search")
+    add_rule(r"(.*)", "note.search")
     rules_loaded = True
 
 xurls = (

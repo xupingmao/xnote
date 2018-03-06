@@ -30,7 +30,7 @@
             {% end %}
 
             {# 知识库 #}
-            {% if file.category == "doc_file" %}
+            {% if file.category == "note" %}
             <div>
                 {% if hasattr(file, "priority") and file.priority is not None and file.priority > 0 %}
                     <span class="tag red-bg">置顶</span>

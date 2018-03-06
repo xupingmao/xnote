@@ -31,9 +31,9 @@ def file_wrapper(dict, option=None):
         file.content = ""
     if option:
         file.option = option
-    file.url = "/file/view?id={}".format(dict["id"])
+    file.url = "/note/view?id={}".format(dict["id"])
     # 文档类型，和文件系统file区分
-    file.category = "doc_file"
+    file.category = "note"
     return file
 
 def file_dict(id, name, related):
