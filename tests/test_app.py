@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/03/03 22:53:57
+# @modified 2018/03/06 23:14:18
 
 import sys
 sys.path.insert(1, "lib")
@@ -254,6 +254,9 @@ class TestMain(unittest.TestCase):
         json_request("/file/tag/update", method="POST", data=dict(file_id=0, tags="ABC DEF"))
         json_request("/file/tag/0")
         json_request("/file/tag/update", method="POST", data=dict(file_id=0, tags=""))
+
+    def test_tagname(self):
+        self.check_OK("/file/tagname/test")
 
     def test_document(self):
         self.check_200("/system/document?name=os")

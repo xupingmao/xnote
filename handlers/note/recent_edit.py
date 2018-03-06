@@ -22,7 +22,7 @@ class RecentCreatedHandler:
             order="ctime DESC",
             offset=offset,
             limit=PAGE_SIZE)
-        return xtemplate.render("file/view.html",
+        return xtemplate.render("note/view.html",
             file_type = "group", 
             files = files, 
             show_date = True,
@@ -46,7 +46,7 @@ class handler:
             limit = PAGE_SIZE)
         count = db.count(where, vars = dict(creator = xauth.get_current_name()))
 
-        return xtemplate.render("file/view.html", 
+        return xtemplate.render("note/view.html", 
             pathlist = [Storage(name="最近更新", url="/file/recent_edit")],
             file_type = "group",
             files = list(files), 
@@ -55,4 +55,7 @@ class handler:
             show_mdate = True,
             page_url="/file/recent_edit?page=")
 
+xurls = (
+    r"/file/recent_edit", handler
+)
 

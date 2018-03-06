@@ -12,6 +12,8 @@ from xutils import Storage
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 
+VIEW_TPL = "note/view.html"
+
 class PathNode:
 
     def __init__(self, name, url):
@@ -46,7 +48,7 @@ class Ungrouped:
                 AND (b.id is null OR b.type != 'group')"""
         amount = db.count(sql = count_sql, vars = vars)
 
-        return xtemplate.render("file/view.html",
+        return xtemplate.render(VIEW_TPL,
             pathlist=[PathNode("未分类", "/file/group/ungrouped")],
             file_type="group",
             files = files,
@@ -83,9 +85,9 @@ class GroupListHandler:
         data = xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name()))
         if filetype == "xml":
             web.header("Content-Type", "text/html; charset=utf-8")
-            return xtemplate.render("file/group_list.html", id=id, filelist=data, file_type="group")
+            return xtemplate.render("note/group_list.html", id=id, filelist=data, file_type="group")
         else:
-            return xtemplate.render("file/view.html",
+            return xtemplate.render(VIEW_TPL,
                 file_type="group",
                 pseudo_groups=True,
                 show_search_div = True,
@@ -101,7 +103,7 @@ class RemovedHandler:
         files = db.select(where="is_deleted=1", order="ctime DESC", offset=(page-1)*10, limit=10)
         amount = db.count(where="is_deleted=1")
 
-        return xtemplate.render("file/view.html",
+        return xtemplate.render(VIEW_TPL,
             pathlist=[PathNode("回收站", "/file/group/removed")],
             file_type="group",
             files = files,
@@ -119,7 +121,7 @@ class RecentCreatedHandler:
         where = "is_deleted=0 AND creator=%r" % xauth.get_current_name()
         files = db.select(where=where, order="ctime DESC", offset=page*PAGE_SIZE,limit=PAGE_SIZE)
         count = db.count(where=where)
-        return xtemplate.render("file/view.html", 
+        return xtemplate.render(VIEW_TPL, 
             pathlist = [Storage(name="最近创建", url="/file/group/recent_created")],
             file_type = "group",
             files = files,
@@ -138,7 +140,7 @@ class MarkedHandler:
         where = "is_deleted=0 AND is_marked=1 AND creator=$creator"
         files = db.select(where=where, order="mtime DESC", vars=vars, offset=(page-1)*PAGE_SIZE,limit=PAGE_SIZE)
         count = db.count(where=where, vars=vars)
-        return xtemplate.render("file/view.html", 
+        return xtemplate.render(VIEW_TPL, 
             pathlist = [Storage(name="收藏", url="/file/group/marked")],
             file_type = "group",
             files = files,
@@ -155,7 +157,7 @@ class PublicGroupHandler:
         where = "is_deleted=0 AND is_public=1"
         files = db.select(where=where, offset=(page-1)*PAGE_SIZE, limit=PAGE_SIZE, order="ctime DESC")
         count = db.count(where=where)
-        return xtemplate.render("file/view.html", 
+        return xtemplate.render(VIEW_TPL, 
             pathlist = [Storage(name="公开", url="/file/group/public")],
             file_type = "group",
             files = files,
@@ -166,6 +168,7 @@ class PublicGroupHandler:
 
 xurls = (
     r"/file/group", GroupListHandler,
+    r"/note/group", GroupListHandler,
     r"/file/group/ungrouped", Ungrouped,
     r"/file/group/removed", RemovedHandler,
     r"/file/group/list", GroupListHandler,

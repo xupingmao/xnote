@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/02/21 10:24:17
+# @modified 2018/03/06 23:03:59
 
 """Description here"""
 import web
@@ -68,7 +68,7 @@ class AddHandler:
         except Exception as e:
             xutils.print_exc()
             error = str(e)
-        return xtemplate.render("file/add.html", key = "", 
+        return xtemplate.render("note/add.html", key = "", 
             name = key, tags = tags, error=error,
             message = error,
             code = code)

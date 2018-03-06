@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/03/03 15:37:27
+# @modified 2018/03/06 22:58:29
 
 import re
 import os
@@ -59,7 +59,7 @@ class SearchContext:
         
         # 处理的结果集
         self.tools = []
-        self.doc_files = []
+        self.notes = []
         self.dict_files = []
         self.message_files = []
 

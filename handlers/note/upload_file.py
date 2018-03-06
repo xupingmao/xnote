@@ -18,7 +18,7 @@ class handler:
         filepath = ""
         filename = ""
         if not hasattr(file, "filename") or file.filename == "":
-            return xtemplate.render("file/upload_file.html", filepath = filepath, filename = filename)
+            return xtemplate.render("note/upload_file.html", filepath = filepath, filename = filename)
         filename = file.filename
         # Fix IE HMTL5 API拿到了全路径
         filename = os.path.basename(filename)
@@ -30,7 +30,7 @@ class handler:
 
         if type == "html5":
             return dict(success=True, message="上传成功", link=get_link(filename, webpath))
-        return xtemplate.render("file/upload_file.html", 
+        return xtemplate.render("note/upload_file.html", 
             filepath = webpath, 
             filename = filename, 
             is_img=is_img(filename))

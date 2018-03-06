@@ -77,7 +77,7 @@ class TagNameHandler:
         files = db.query(sql,
             vars=dict(name=tagname.lower(), offset=offset, limit=limit, groups=groups))
         files = [dao.FileDO.fromDict(f) for f in files]
-        return xtemplate.render("file/tagname.html", 
+        return xtemplate.render("note/tagname.html", 
             tagname=tagname, 
             files=files, 
             page_max = math.ceil(count / pagesize), 
@@ -101,7 +101,7 @@ class TagListHandler:
         # else:
         #     sql = "SELECT name, COUNT(*) AS amount FROM file_tag WHERE groups in $groups GROUP BY name ORDER BY amount DESC, name ASC";
         tag_list = get_taglist(db, user_name)
-        return xtemplate.render("file/taglist.html", tag_list = tag_list)
+        return xtemplate.render("note/taglist.html", tag_list = tag_list)
 
 xurls = (r"/file/tag/(\d+)", TagHandler,
          r"/file/tag/update", UpdateTagHandler,

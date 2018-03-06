@@ -128,15 +128,15 @@ img {
     {% comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 %}
 
     {% if file_type == "md" or file_type == "text" %}
-        {% include "file/markdown.html" %}
+        {% include "note/markdown.html" %}
     {% elif file_type == "table" %}
-        {% include "file/table.html" %}
+        {% include "note/table.html" %}
     {% elif file_type == "group" %}
-        {% include "file/group.html" %}
+        {% include "note/group.html" %}
     {% elif file_type == "group_list" %}
-        {% include "file/group_list.html" %}
+        {% include "note/group_list.html" %}
     {% else %}
-        {% include "file/post.html" %}
+        {% include "note/post.html" %}
     {% end %}
 
 <script type="text/javascript">

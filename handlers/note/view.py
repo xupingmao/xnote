@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/03/05 23:25:54
+# @modified 2018/03/06 23:17:51
 
 import profile
 import math
@@ -67,7 +67,7 @@ class ViewHandler:
         # 定义一些变量
         files = []
         amount = 0
-        template_name = "file/view.html"
+        template_name = "note/view.html"
         xconfig.file_history.put(dict(user=user_name, file_id = id, name = file.name))
 
         if file.type == "group":
@@ -83,7 +83,7 @@ class ViewHandler:
         elif file.type == "md" or file.type == "text":
             content = file.content
             if op == "edit":
-                template_name = "file/markdown_edit.html"
+                template_name = "note/markdown_edit.html"
         else:
             content = file.content
             content = content.replace(u'\xad', '\n')
@@ -158,7 +158,7 @@ class UpdateHandler:
             cur_version = file.version
             file.content = content
             file.version = version
-            return xtemplate.render("file/view.html", file=file, 
+            return xtemplate.render("note/view.html", file=file, 
                 content = content, 
                 children = [],
                 error = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
@@ -256,7 +256,7 @@ class UnmarkHandler:
 class LibraryHandler:
 
     def GET(self):
-        return xtemplate.render("file/library.html")
+        return xtemplate.render("note/library.html")
 
 class DictHandler:
 
@@ -276,7 +276,7 @@ class DictHandler:
         count = db.count()
         page_max = math.ceil(count / PAGE_SIZE)
 
-        return xtemplate.render("file/view.html", 
+        return xtemplate.render("note/view.html", 
             files = list(items), 
             file_type = "group",
             show_opts = False,
@@ -286,6 +286,7 @@ class DictHandler:
 
 xurls = (
     r"/file/(edit|view)", ViewHandler, 
+    r"/note/(edit|view)", ViewHandler,
     r"/file/rename", RenameHandler,
     r"/file/update", UpdateHandler,
     r"/file/save", FileSaveHandler,
