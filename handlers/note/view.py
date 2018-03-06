@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/03/06 23:17:51
+# @modified 2018/03/06 23:21:51
 
 import profile
 import math
@@ -21,13 +21,7 @@ config = xconfig
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 
-def try_decode(bytes):
-    try:
-        return bytes.decode("utf-8")
-    except:
-        return bytes.decode("gbk")
-
-@xmanager.listen("file.view", is_async=True)
+@xmanager.listen("note.view", is_async=True)
 def visit_by_id(ctx):
     id = ctx.id
     db = xtables.get_file_table()
@@ -36,7 +30,7 @@ def visit_by_id(ctx):
 
 class ViewHandler:
 
-    xconfig.file_history = History("文件浏览记录", 200)
+    xconfig.note_history = History("文件浏览记录", 200)
 
     def GET(self, op):
         id   = xutils.get_argument("id", "")
@@ -68,7 +62,7 @@ class ViewHandler:
         files = []
         amount = 0
         template_name = "note/view.html"
-        xconfig.file_history.put(dict(user=user_name, file_id = id, name = file.name))
+        xconfig.note_history.put(dict(user=user_name, file_id = id, name = file.name))
 
         if file.type == "group":
             amount = db.count(where="parent_id=$id AND is_deleted=0 AND creator=$creator", 
@@ -93,7 +87,7 @@ class ViewHandler:
             if file.data == None or file.data == "":
                 file.data = content
         
-        xmanager.fire("file.view", file)
+        xmanager.fire("note.view", file)
         return xtemplate.render(template_name,
             file=file, 
             op=op,
@@ -151,7 +145,7 @@ class UpdateHandler:
         # 不再处理文件，由JS提交
         rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
-            xmanager.fire('file.updated', update_kw)
+            xmanager.fire('note.updated', update_kw)
             raise web.seeother("/file/view?id=" + str(id))
         else:
             # 传递旧的content
