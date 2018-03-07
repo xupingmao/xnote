@@ -1,4 +1,6 @@
 # encoding=utf-8
+# @author xupingmao
+# @modified 2018/03/07 23:50:04
 import os
 import re
 import xauth
@@ -54,8 +56,10 @@ class handler:
         encoding = "utf-8"
         page     = 0
 
-        if not os.path.exists(path):
-            path = xutils.quote_unicode(path)
+        print("path:", path)
+        path = xutils.get_real_path(path)
+        print("real path:", path)
+
         basename, ext = os.path.splitext(path)
         bookmarkpath = basename + ".bookmark"
         bookmark = dict()

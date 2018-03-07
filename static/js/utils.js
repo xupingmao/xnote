@@ -12,7 +12,15 @@ var getUrlParams = function()
         for(var i = 0, a, nv; a = args[i]; i++)
         {
             nv = args[i] = a.split("=");
-            params[nv[0]] = nv.length > 1 ? nv[1] : true;
+            if (nv.length > 1) {
+                var value = nv[1];
+                try {
+                    params[nv[0]] = decodeURIComponent(value);
+                } catch (e) {
+                    params[nv[0]] = value;
+                    console.warn('decode error', e)
+                }
+            }
         }
     }
     return params;
