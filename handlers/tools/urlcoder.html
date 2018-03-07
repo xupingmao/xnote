@@ -34,9 +34,10 @@ function doEncode() {
 }
 
 function doDecode() {
-    var chars = decodeURI($("#input").val());
+    var text = $("#input").val();
+    var chars = decodeURI(text);
     $("#encodeURIText").val(chars);
-    $("#encodeURIComponentText").val("");
+    $("#encodeURIComponentText").val(decodeURIComponent(text));
 }
 </script>
 {% end %}

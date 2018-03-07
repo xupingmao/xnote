@@ -108,9 +108,9 @@ img {
     <div class="col-md-12" style="padding-bottom: 5px;">
         {% if _has_login %}
         <div class="left" style="float: left;">
-            <a class="link" href="/file/add?parent_id={{file_id}}">写文档</a>
+            <a class="link" href="/note/add?parent_id={{file_id}}">记笔记</a>
             <a class="link prompt-btn" message="分组名" 
-                    action="/file/add?type=group&parent_id={{file_id}}&name=">加分组</a>
+                    action="/note/add?type=group&parent_id={{file_id}}&name=">加分组</a>
         </div>
         {% end %}
     </div>

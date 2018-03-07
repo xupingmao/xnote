@@ -30,6 +30,8 @@ def search(ctx, name):
 def search_books(ctx):
     if not xauth.is_admin():
         return
+    if not ctx.category == "book":
+        return
     name = ctx.input_text
     # 图书搜索结果
     bookspath = os.path.join(xconfig.DATA_DIR, "books")

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/03/06 23:03:59
+# @modified 2018/03/07 22:43:34
 
 """Description here"""
 import web
@@ -133,6 +133,7 @@ class DictPutHandler:
 
 xurls = (
     r"/file/add", AddHandler,
+    r"/note/add", AddHandler,
     r"/file/remove", RemoveHandler,
     r"/file/dict/put", DictPutHandler
 )

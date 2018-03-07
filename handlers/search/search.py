@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/03/06 23:30:05
+# @modified 2018/03/07 22:49:08
 
 import re
 import os
@@ -91,6 +91,9 @@ class handler:
         if ctx.search_dict:
             ctx.search_file = False
         if ctx.search_file_full:
+            ctx.search_tool = False
+        if ctx.category == "book":
+            ctx.search_file = False
             ctx.search_tool = False
 
         xutils.log("  key=%s" % key)
