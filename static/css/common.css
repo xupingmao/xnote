@@ -649,6 +649,7 @@ li.menu-item:hover {
     top: 80px;
     background-color: #fff;
     z-index: 100;
+    overflow-y: auto;
 }
 
 .x-dialog-title {
