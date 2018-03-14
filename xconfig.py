@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/03/06 23:22:06
+# @modified 2018/03/15 01:21:41
 
 '''
 xnote系统配置
@@ -71,7 +71,7 @@ PROFILE_PATH_SET = set(["/file/view"])
 MUTE_END_TIME = None
 # 资料相关
 # 分页数量
-PAGE_SIZE = 20
+PAGE_SIZE = 30
 IP_BLACK_LIST = ["192.168.56.1"] # this is vbox ip
 
 # max file size to sync or backup
