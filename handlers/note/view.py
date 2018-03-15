@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/03/06 23:32:42
+# @modified 2018/03/16 01:01:56
 
 import profile
 import math
@@ -146,7 +146,7 @@ class UpdateHandler:
         rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
             xmanager.fire('note.updated', update_kw)
-            raise web.seeother("/file/view?id=" + str(id))
+            raise web.seeother("/note/view?id=" + str(id))
         else:
             # 传递旧的content
             cur_version = file.version

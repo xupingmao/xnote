@@ -1,4 +1,7 @@
 # encoding=utf-8
+# @author xupingmao
+# @modified 2018/03/16 00:43:04
+
 """
 备份相关，需要添加到定时任务中，参考system/crontab
 """
@@ -76,7 +79,7 @@ def backup_db():
     dbpath = config.get("DB_PATH")
     if not os.path.exists(dbpath):
         return
-    backup_dir = config.get("BACKUP_DIR")
+    backup_dir = xconfig.BACKUP_DIR
     newdbpath = os.path.join(backup_dir, dbname)
     fsutil.copy(dbpath, newdbpath)
 
@@ -86,7 +89,7 @@ def chk_backup():
         print("not the day, quit")
         # 一周备份一次
         return
-    backup_dir = config.get("BACKUP_DIR")
+    backup_dir = xconfig.BACKUP_DIR
     xutils.makedirs(backup_dir)
     files = os.listdir(backup_dir)
     sorted_files = sorted(files)

@@ -134,10 +134,13 @@
     });
 
     $("#addBtn").click(function () {
-        var name = $("#scriptName").val();
-        $.get("/system/script_admin?op=add&name=" + name, function () {
-            location.reload();
-        });
+        // var name = $("#scriptName").val();
+        var name = prompt("脚本名称");
+        if (name) {        
+            $.get("/system/script_admin?op=add&name=" + name, function () {
+                location.reload();
+            });
+        }
     })
 </script>
 
