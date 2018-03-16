@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/03/16 01:01:56
+# @modified 2018/03/16 23:21:21
 
 import profile
 import math
@@ -283,7 +283,9 @@ xurls = (
     r"/note/(edit|view)", ViewHandler,
     r"/file/rename", RenameHandler,
     r"/file/update", UpdateHandler,
+    r"/note/update", UpdateHandler,
     r"/file/save", FileSaveHandler,
+    r"/note/save", FileSaveHandler,
     r"/file/autosave", FileSaveHandler,
     r"/file/(\d+)/upvote", Upvote,
     r"/file/(\d+)/downvote", Downvote,

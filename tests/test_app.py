@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/03/06 23:14:18
+# @modified 2018/03/16 22:20:19
 
 import sys
 sys.path.insert(1, "lib")
@@ -102,16 +102,16 @@ class TestMain(unittest.TestCase):
         # 禁止直接访问目录
         self.check_404("/static/")
 
-    def test_file_add_remove(self):
+    def test_note_add_remove(self):
         self.check_200("/file/recent_edit")
-        json_request("/file/remove?name=xnote-unit-test")
-        file = json_request("/file/add", method="POST", 
+        json_request("/note/remove?name=xnote-unit-test")
+        file = json_request("/note/add", method="POST", 
             data=dict(name="xnote-unit-test", content="hello"))
         id = file["id"]
-        self.check_OK("/file/view?id=" + str(id))
-        json_request("/file/save", method="POST",
+        self.check_OK("/note/view?id=" + str(id))
+        json_request("/note/save", method="POST",
             data=dict(id=id, content="new-content"))
-        json_request("/file/remove?id=" + str(id))
+        json_request("/note/remove?id=" + str(id))
 
     def test_file_editor_md(self):
         json_request("/file/remove?name=xnote-md-test")

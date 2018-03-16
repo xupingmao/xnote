@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/03/05 23:23:47
+# @modified 2018/03/16 22:24:39
 
 """
 Xnote 模块管理器
@@ -85,10 +85,10 @@ def wrapped_handler(pattern, handler_clz):
         """ 默认的handler装饰器
         1. 装饰器相对于继承来说，性能略差一些，但是更加安全，父类的方法不会被子类所覆盖
         2. 为什么不用Python的装饰器语法
-           1. 作为一个通用的封装，所有子类必须通过这层安全过滤
+           1. 作为一个通用的封装，所有子类必须通过这层安全过滤，而不是声明才过滤
            2. 子类不用引入额外的模块
         """
-        # 防止自动转大数
+        # 防止自动转大数，浮点数不会转
         visited_count = 0.0
 
         def __init__(self):
@@ -187,7 +187,7 @@ class ModelManager:
             if self.report_loading:
                 log("reimport " + name)
         except Exception as e:
-            pass
+            xutils.print_exc()
         finally:
             pass
 
@@ -396,9 +396,9 @@ class TaskManager:
                     time.sleep(sleep_sec)
         
         self.load_tasks()
-        # 任务队列处理线程
-        worker_thread = WorkerThread()
-        worker_thread.start()
+        # 任务队列处理线程，开启两个线程
+        WorkerThread("WorkerThread-1").start()
+        WorkerThread("WorkerThread-2").start()
 
         chk_thread = TaskThread(run)
         chk_thread.start()
@@ -455,10 +455,10 @@ class WorkerThread(Thread):
     
     _task_queue = Queue()
     
-    def __init__(self):
+    def __init__(self, name="WorkerThread"):
         super(WorkerThread, self).__init__()
         self.setDaemon(True)
-        self.setName("WorkerThread")
+        self.setName(name)
 
     def run(self):
         while True:
