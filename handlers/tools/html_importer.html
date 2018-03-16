@@ -65,12 +65,12 @@ $("#saveToDbBtn").on("click", function () {
     var name = $("#savedName").val();
     var content = $("#content").val();
     $.post("/file/add", 
-        {"_type": "json", "name": name, "content": content, "type": "md"}, 
+        {"_format": "json", "name": name, "content": content, "type": "md"}, 
         function (responseText) {
             console.log(responseText);
             var data = responseText;
             if (data.code == "success") {
-                location.href = "/file/view?id=" + data.id;
+                location.href = "/note/view?id=" + data.id;
             } else {
                 alert(data.message);
             }

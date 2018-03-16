@@ -11,10 +11,14 @@
 <script type="text/javascript" src="/static/js/editor.js"></script>
 
 <style type="text/css">
+    .CodeMirror {
+        border: 1px solid #ccc;
+    }
+
     #result {
         border: 1px solid #ccc;
         padding: 4px;
-        background-color: #9cc;
+        background-color: #eee;
         box-sizing: border-box;
     }
     #scriptName {
@@ -54,8 +58,10 @@
 {% if op != "edit" %}
 <div>
 <form action="/system/script/search" method="GET">
+    <!--
     <input type="text" id="scriptName" name="name" value="{{?name}}">
     <button>搜索</button>
+    -->
     <input type="button" value="添加" id="addBtn"/>
 </form>
 </div>
