@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2018/02/13
-// @modified 2018/02/15 11:05:27
+// @modified 2018/03/17 22:10:01
 
 
 // var codeMirror = CodeMirror.fromTextArea(editor, {
@@ -89,3 +89,96 @@ function initCodeMirror(selector, options) {
     }
     return editor;
 }
+
+
+(function () {
+    // TODO 处理CJK的宽度, CJK认为是2个字符宽度
+    var _padding = '';
+    for (var i = 0; i < 1000; i++) {
+        _padding += ' ';
+    }
+
+    var _isMacOS = navigator.userAgent.indexOf("Mac OS") >= 0;
+    function isMacOS() {
+        return _isMacOS;
+    }
+    if (isMacOS()) {
+        console.log("Mac OS");
+    }
+
+    String.prototype.padLeft = function (size, value) {
+        // return _padding.substring(0, size-this.length) + this;
+        var text = this;
+        while (getStringWidth(text) < size) {
+            text += value;
+        }
+        return text;
+    }
+
+    function getCharWidth(c) {
+        if (!c) {
+            return 0;
+        }
+        var code = c.charCodeAt(0);
+        if (code > 127) {
+            if (isMacOS()) {
+                // Mac是个奇葩, 3个汉字5个宽度
+                return 1.66;
+            }
+            return 2;
+        }
+        return 1;
+    }
+
+    function getStringWidth(str) {
+        if (!str) {
+            return 0;
+        }
+        var width = 0;
+        for (var i = 0; i < str.length; i++) {
+            width += getCharWidth(str[i]);
+        }
+        return Math.round(width);
+    }
+
+    function formatTable(text) {
+        // var text = "name|age|comment\n---|----|--\nCheck No|001|Nothing\nHello中文02|002|中文";
+        var lines = text.split('\n');
+        var table = [];
+        var colWidth = [];
+
+        for (var i = 0; i < lines.length; i++) {
+            var row = lines[i];
+            var cols = row.split('|');
+            table[i] = cols;
+            for (var j = 0; j < cols.length; j++) {
+                var cell = cols[j].trim();
+                cols[j] = cell;
+                var width = colWidth[j] || 0;
+                colWidth[j] = Math.max(getStringWidth(cell), width);
+            }
+        }
+        console.log(colWidth);
+
+        var newText = "";
+        var newLines = [];
+
+        for (var i = 0; i < table.length; i++) {
+            var row = table[i];
+            for (var j = 0; j < row.length; j++) {
+                var cell = row[j].trim();
+                if (cell.indexOf('---') >= 0) {
+                    row[j] = cell.padLeft(colWidth[j], '-');
+                } else {
+                    row[j] = cell.padLeft(colWidth[j], ' ');
+                }
+                
+            }
+            newLines.push(row.join('|'));
+        }
+        return newLines.join("\n");
+    }
+
+    window.formatMarkdownTable = formatTable;
+    
+})();
