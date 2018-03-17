@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/03/03 15:43:11
+# @modified 2018/03/18 01:19:21
 
 """
 xnote工具类总入口
@@ -369,13 +369,13 @@ def format_time_only(seconds=None):
 
 def format_date(seconds=None):
     if seconds is None:
-        return time.strftime('%Y/%m/%d')
+        return time.strftime('%Y-%m-%d')
     elif isinstance(seconds, str):
         date_str = seconds.split(" ")[0]
-        return date_str.replace("-", "/")
+        return date_str
     else:
         st = time.localtime(seconds)
-        return time.strftime('%Y/%m/%d', st)
+        return time.strftime('%Y-%m-%d', st)
 
 def format_datetime(seconds=None):
     if seconds == None:
