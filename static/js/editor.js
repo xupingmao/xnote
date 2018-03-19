@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2018/02/13
-// @modified 2018/03/17 22:10:01
+// @modified 2018/03/19 23:54:59
 
 
 // var codeMirror = CodeMirror.fromTextArea(editor, {
@@ -152,10 +152,12 @@ function initCodeMirror(selector, options) {
             var cols = row.split('|');
             table[i] = cols;
             for (var j = 0; j < cols.length; j++) {
-                var cell = cols[j].trim();
-                cols[j] = cell;
-                var width = colWidth[j] || 0;
-                colWidth[j] = Math.max(getStringWidth(cell), width);
+                if (cols.length > 1) {                
+                    var cell = cols[j].trim();
+                    cols[j] = cell;
+                    var width = colWidth[j] || 0;
+                    colWidth[j] = Math.max(getStringWidth(cell), width);
+                }
             }
         }
         console.log(colWidth);
@@ -165,14 +167,16 @@ function initCodeMirror(selector, options) {
 
         for (var i = 0; i < table.length; i++) {
             var row = table[i];
-            for (var j = 0; j < row.length; j++) {
-                var cell = row[j].trim();
-                if (cell.indexOf('---') >= 0) {
-                    row[j] = cell.padLeft(colWidth[j], '-');
-                } else {
-                    row[j] = cell.padLeft(colWidth[j], ' ');
+            if (row.length > 1) {            
+                for (var j = 0; j < row.length; j++) {
+                    var cell = row[j].trim();
+                    if (cell.indexOf('---') >= 0) {
+                        row[j] = cell.padLeft(colWidth[j], '-');
+                    } else {
+                        row[j] = cell.padLeft(colWidth[j], ' ');
+                    }
+                    
                 }
-                
             }
             newLines.push(row.join('|'));
         }

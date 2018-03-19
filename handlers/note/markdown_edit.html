@@ -317,10 +317,12 @@
         })
 
         $("#formatTable").click(function () {
-            var selection = codeMirror.getSelection();
+            // var selection = codeMirror.getSelection();
+            var selection = codeMirror.doc.getValue();
             var formatedText = formatMarkdownTable(selection);
             console.log(formatedText);
-            codeMirror.replaceSelection(formatedText, "around");
+            // codeMirror.replaceSelection(formatedText, "around");
+            codeMirror.doc.setValue(formatedText);
         })
 
         // 文件上传
