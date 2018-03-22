@@ -138,4 +138,9 @@ class TestMain(unittest.TestCase):
         h.put(4)
         self.assertEqual(len(h), 3)
 
+    def test_exec_code(self):
+        code = "print(123)"
+        xutils.exec_python_code(name='test', code = code, record_stdout = False, raise_err = True)
+
+
         

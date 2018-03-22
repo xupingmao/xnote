@@ -118,10 +118,14 @@
     $(".executeScript").on("click", function(event) {
         var scriptName = $(event.target).attr("scriptName")
         var content = $("[name=content]").val();
+        var path = getUrlParams().path;
         // console.log(event);
         // console.log($(event.target).attr("scriptName"))
         $.post("/system/script_admin/execute?name=" + scriptName, 
-            {content: content} ,
+            {   
+                content: content, 
+                path: path
+            } ,
             function (responseText) {
                 var data = responseText;
                 $("#resultDiv").show();

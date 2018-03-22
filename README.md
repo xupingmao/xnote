@@ -32,7 +32,6 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 ### 启动参数
 - `--data {data_path}` 指定数据存储的data目录，比如`python app.py --data D:/data`
 - `--port 1234`启动端口号，注意优先使用环境变量{PORT}设置的端口号，这是为了自适应云服务容器的端口
-- `--ringtone yes`开启启动语音提醒
 - `--delay 60` 延迟启动，单位是秒，这个主要是为了避免重启的定时任务重复执行
 - `--useUrlencode yes`针对只支持ASCII编码的文件系统开启urlencode转换非ASCII码字符
 - `--initScript {script_name}` 启动时运行指定脚本完成自定义初始化操作

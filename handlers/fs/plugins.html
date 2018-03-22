@@ -1,0 +1,24 @@
+{% extends base.html %}
+
+{% block body %}
+	
+<h3>Path: {{path}}</h3>
+
+<div class="col-md-12">
+	<table class="table">
+		<tr>
+			<th class="index-td">编号</th>
+			<th>脚本</th>
+		</tr>
+
+		{% for index, item in enumerate(scripts) %}
+		<tr>
+			<td class="index-td">{{index+1}}</td>
+			<td><a href="/system/script/edit?name={{item}}&path={{path}}">{{item}}</a></td>
+		</tr>
+		{% end %}
+
+	</table>
+</div>
+
+{% end %}

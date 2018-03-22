@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/03/18 01:19:21
+# @modified 2018/03/22 23:11:12
 
 """
 xnote工具类总入口
@@ -124,6 +124,23 @@ print_stacktrace = print_exc
 def print_web_ctx_env():
     for key in web.ctx.env:
         print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
+
+def print_table_row(row, max_length):
+    for item in row:
+        print(str(item)[:max_length].ljust(max_length), end='')
+    print('')
+
+def print_table(data, max_length=20, ignore_list = None):
+    if len(data) == 0:
+        return
+    headings = list(data[0].keys())
+    if ignore_list:
+        for key in ignore_list:
+            headings.remove(key)
+    print_table_row(headings, max_length)
+    for item in data:
+        row = map(lambda key:item.get(key), headings)
+        print_table_row(row, max_length)
 
 class SearchResult(dict):
 
@@ -593,9 +610,11 @@ def say(msg):
         # 防止调用语音API的程序没有正确处理循环
         time.sleep(0.5)
 
-def exec_python_code(name, code, record_stdout = True, do_gc = True):
+def exec_python_code(name, code, record_stdout = True, raise_err = False, do_gc = True, vars = None):
     try:
         mod_globals = {"__name__": "xscript.%s" % name}
+        if vars is not None:
+            mod_globals.update(vars)
         before_count = len(gc.get_objects())
         if record_stdout:
             sys.stdout.record()
@@ -610,14 +629,16 @@ def exec_python_code(name, code, record_stdout = True, do_gc = True):
         if do_gc:
             log("gc.objects_count %s -> %s" % (before_count, after_count))
         return ret
-    except:
+    except Exception as e:
         print_exc()
+        if raise_err:
+            raise e
         if record_stdout:
             ret = sys.stdout.pop_record()
         return ret
 
 
-def exec_script(name, new_window=True, record_stdout = True):
+def exec_script(name, new_window=True, record_stdout = True, vars = None):
     """执行script目录下的脚本"""
     dirname = xconfig.SCRIPTS_DIR
     path = os.path.join(dirname, name)
@@ -626,7 +647,7 @@ def exec_script(name, new_window=True, record_stdout = True):
     if name.endswith(".py"):
         # 方便获取xnote内部信息用于扩展，同时防止开启过多Python进程
         code = xutils.readfile(path)
-        ret = exec_python_code(name, code, record_stdout)  
+        ret = exec_python_code(name, code, record_stdout, vars = vars)  
     elif name.endswith(".command"):
         # Mac os Script
         xutils.system("chmod +x " + path)

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/03/03 18:35:13
+# @modified 2018/03/20 23:16:39
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -375,6 +375,9 @@ class DBWrapper:
 
 def get_file_table():
     return DBWrapper(config.DB_PATH, "file")
+
+def get_note_table():
+    return get_file_table()
 
 def get_file_tag_table():
     return DBWrapper(config.DB_PATH, "file_tag")

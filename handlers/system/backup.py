@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/03/16 00:43:04
+# @modified 2018/03/21 00:21:34
 
 """
 备份相关，需要添加到定时任务中，参考system/crontab
@@ -84,16 +84,23 @@ def backup_db():
     fsutil.copy(dbpath, newdbpath)
 
 def chk_backup():
-    tm = time.localtime()
-    if tm.tm_wday != 5:
-        print("not the day, quit")
-        # 一周备份一次
-        return
     backup_dir = xconfig.BACKUP_DIR
     xutils.makedirs(backup_dir)
     files = os.listdir(backup_dir)
     sorted_files = sorted(files)
     logutil.info("sorted backup files: {}", sorted_files)
+
+    for fname in sorted_files:
+        path = os.path.join(backup_dir, fname)
+        ctime = os.stat(path).st_ctime
+        print("%s - %s" % (path, xutils.format_time(ctime)))
+
+    tm = time.localtime()
+    if tm.tm_wday != 5:
+        print("not the day, quit")
+        # 一周备份一次
+        return
+
     if _remove_old and len(sorted_files) > _MAX_BACKUP_COUNT:
         target = sorted_files[0]
         target_path = os.path.join(backup_dir, target)

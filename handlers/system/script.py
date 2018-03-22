@@ -73,6 +73,7 @@ class ExecuteHandler:
     def POST(self):
         name = xutils.get_argument("name")
         content = xutils.get_argument("content")
+        path = xutils.get_argument("path")
         if content != "" and content != None:
             dirname = xconfig.SCRIPTS_DIR
             path = os.path.join(dirname, name)
@@ -81,7 +82,7 @@ class ExecuteHandler:
             if old_content != content:
                 xutils.savetofile(path, content)
         # 必须调用exec_script因为可能没有保存过程
-        ret = xutils.exec_script(name)
+        ret = xutils.exec_script(name, vars = dict(path=path))
         return dict(code="success", message="", data=ret)
 
 class SearchHandler:
