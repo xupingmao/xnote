@@ -336,6 +336,7 @@
             alert("不支持批量重命名");
         } else {
             var name = checked.attr("data-name");
+            var path = checked.attr("data-path");
             var dirname = "{{path}}";
             var new_name = prompt("重命名为", name);
             if (new_name) {

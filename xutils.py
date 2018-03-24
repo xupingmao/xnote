@@ -131,17 +131,20 @@ def print_web_ctx_env():
     for key in web.ctx.env:
         print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
 
+
 def print_table_row(row, max_length):
     for item in row:
         print(str(item)[:max_length].ljust(max_length), end='')
     print('')
 
-def print_table(data, max_length=20, ignore_list = None):
+def print_table(data, max_length=20, headings = None, ignore_attrs = None):
+    '''打印表格数据'''
     if len(data) == 0:
         return
-    headings = list(data[0].keys())
-    if ignore_list:
-        for key in ignore_list:
+    if headings is None:
+        headings = list(data[0].keys())
+    if ignore_attrs:
+        for key in ignore_attrs:
             headings.remove(key)
     print_table_row(headings, max_length)
     for item in data:
