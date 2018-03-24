@@ -3,9 +3,11 @@ import os
 import re
 
 try:
+    # try py3 first
     from http.client import HTTPConnection
+    from urllib.request import urlopen
 except ImportError as e:
-    pass
+    from urllib2 import urlopen
 
 def splithost(url):
     """splithost('//host[:port]/path') --> 'host[:port]', '/path'."""
@@ -60,3 +62,20 @@ def do_http(method, url, headers, data=None):
         elif content_encoding != None:
             raise Exception("暂不支持%s编码" % content_encoding)
         return resp.getcode(), response_headers, buf
+
+
+def download_http(address, destpath):
+    bufsize = 1024 * 50
+    stream = urlopen(address)
+    chunk = stream.read(bufsize)
+    dest = open(destpath, "wb")
+    try:
+        readsize = 0
+        while chunk:
+            readsize += len(chunk)
+            print("download %s bytes" % readsize)
+            dest.write(chunk)
+            chunk = stream.read(bufsize)
+        print("download %s bytes, saved to %s" % (readsize, destpath))
+    finally:
+        dest.close()

@@ -49,6 +49,7 @@ def handle_args():
     parser.add_argument("--useUrlencode", default="no")
     parser.add_argument("--devMode", default="no")
     parser.add_argument("--initScript", default=None)
+    parser.add_argument("--master", default="no")
 
     web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
