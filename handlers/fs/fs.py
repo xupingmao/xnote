@@ -389,7 +389,7 @@ description = "下载和上传文件"
 
 xurls = (
     r"/fs-", handler, 
-    r"/fs_data", DataDirHandler,
+    r"/fs_data/?", DataDirHandler,
     r"/fs_api/add_dir", AddDirHandler,
     r"/fs_api/add_file", AddFileHandler,
     r"/fs_api/remove", RemoveHandler,
