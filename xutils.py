@@ -69,6 +69,9 @@ if PY2:
         names = list(os.listdir(dirname))
         encoding = sys.getfilesystemencoding()
         return [newname.decode(encoding) for newname in names]
+
+    def is_str(s):
+        return isinstance(s, (str, unicode))
 else:
     from urllib.parse import quote, unquote
     from urllib.request import urlopen
@@ -79,6 +82,9 @@ else:
 
     u = str
     listdir = os.listdir
+
+    def is_str(s):
+        return isinstance(s, str)
 
 # 关于Py2的getstatusoutput，实际上是对os.popen的封装
 # 而Py3中的getstatusoutput则是对subprocess.Popen的封装
@@ -370,13 +376,6 @@ def db_execute(path, sql, args = None):
 ##   DateTime Utilities
 #################################################################
 
-def format_time(seconds=None):
-    if seconds == None:
-        return time.strftime('%Y-%m-%d %H:%M:%S')
-    else:
-        st = time.localtime(seconds)
-        return time.strftime('%Y-%m-%d %H:%M:%S', st)
-
 def format_time_only(seconds=None):
     if seconds == None:
         return time.strftime('%H:%M:%S')
@@ -387,7 +386,7 @@ def format_time_only(seconds=None):
 def format_date(seconds=None):
     if seconds is None:
         return time.strftime('%Y-%m-%d')
-    elif isinstance(seconds, str):
+    elif is_str(seconds):
         date_str = seconds.split(" ")[0]
         return date_str
     else:
@@ -400,6 +399,8 @@ def format_datetime(seconds=None):
     else:
         st = time.localtime(seconds)
         return time.strftime('%Y-%m-%d %H:%M:%S', st)
+
+format_time = format_datetime
 
 def days_before(days, format=False):
     seconds = time.time()

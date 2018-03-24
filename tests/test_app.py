@@ -233,6 +233,9 @@ class TestMain(unittest.TestCase):
         value = result['files'][0]['raw']
         self.assertEqual("3", value)
 
+    def test_search_message(self):
+        self.check_200("/search?key=test&category=message")
+
     def test_http_headers(self):
         data = app.request("/api/http_headers", headers=dict(X_TEST=True)).data
         self.assertEqual(True, b"HTTP_X_TEST" in data)
