@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/03/07 22:49:08
+# @modified 2018/03/25 11:41:41
 
 import re
 import os
@@ -17,6 +17,7 @@ import xconfig
 import xauth
 import xmanager
 import xtemplate
+import xtables
 from util import textutil
 from xutils import Queue, History
 
@@ -62,6 +63,14 @@ class SearchContext:
         self.notes = []
         self.dict_files = []
         self.message_files = []
+
+def fill_note_info(files):
+    db = xtables.get_note_table()
+    for file in files:
+        if file.category == "note":
+            parent = db.select_one(where=dict(id=file.parent_id))
+            if parent is not None:
+                file.parent_name = parent.name
 
 class handler:
     xconfig.search_history = History("搜索记录", 200)
@@ -141,6 +150,7 @@ class handler:
         files = self.do_search(key, offset, pagesize)
         count = len(files)
         files = files[offset:offset+limit]
+        fill_note_info(files)
         return xtemplate.render("search_result.html", 
             category = category,
             files = files, 

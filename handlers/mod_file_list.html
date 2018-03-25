@@ -35,6 +35,10 @@
                 {% if hasattr(file, "priority") and file.priority is not None and file.priority > 0 %}
                     <span class="tag red-bg">置顶</span>
                 {% end %}
+                {% if file.parent_name != None %}
+                    <span class="tag">{{file.parent_name}}</span>
+                {% end %}
+
                 {% if file.is_public %}
                     <span class="tag">公开</span>
                 {% elif file.creator != None %}

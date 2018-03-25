@@ -44,7 +44,7 @@ def get_file_db():
 
 @xutils.cache(key='file_name.list', expire=3600)
 def get_cached_files():
-    return list(xtables.get_file_table().query('SELECT name, UPPER(name) as name_upper, id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted == 0'))
+    return list(xtables.get_file_table().query('SELECT name, UPPER(name) as name_upper, id, parent_id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted == 0'))
 
 def search_in_cache(words, user):
     def fmap(word):
@@ -70,7 +70,7 @@ def search_name(words, groups=None):
     vars = dict()
     for word in words:
         like_list.append('name LIKE %s ' % to_sqlite_obj('%' + word.upper() + '%'))
-    sql = "SELECT name, id, ctime, mtime, type, creator FROM file WHERE %s AND is_deleted == 0" % (" AND ".join(like_list))
+    sql = "SELECT name, id, parent_id, ctime, mtime, type, creator FROM file WHERE %s AND is_deleted == 0" % (" AND ".join(like_list))
     if groups and groups != "admin":
         sql += " AND (is_public = 1 OR creator = $creator)"
     sql += " ORDER BY mtime DESC LIMIT 1000";
@@ -86,7 +86,7 @@ def full_search(words, groups=None):
     vars = dict()
     for word in words:
         content_like_list.append('content like %s' % to_sqlite_obj('%' + word.upper() + '%'))
-    sql = "SELECT id, name, ctime, mtime, type, creator FROM file WHERE (%s) AND is_deleted == 0" \
+    sql = "SELECT id, parent_id, name, ctime, mtime, type, creator FROM file WHERE (%s) AND is_deleted == 0" \
         % " AND ".join(content_like_list)
 
     if groups and groups != "admin":
