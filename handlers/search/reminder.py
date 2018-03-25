@@ -75,7 +75,7 @@ def search(ctx, delay_mins_str, message):
     xutils.say(result.raw)
     return [result]
 
-time_pattern = re.compile(r"([0-9])点(半?)")
+time_pattern = re.compile(r"([0-9])点(半?)([0-9]*)")
 
 def by_time(ctx, period, time_str, message):
     if not xauth.is_admin():
@@ -83,12 +83,14 @@ def by_time(ctx, period, time_str, message):
     print(period, time_str, message)
     v = time_pattern.findall(time_str)
     if len(v) > 0:
-        tm_hour, tm_min = v[0]
+        tm_hour, tm_min, tm_min2 = v[0]
         tm_hour = int(tm_hour)
         if period == "下午":
             tm_hour += 12
         if tm_min == "半":
             tm_min = 30
+        if tm_min2 != None and tm_min2.isdigit():
+            tm_min = int(tm_min2)
         if tm_min == "":
             tm_min = 0
         add_alarm(tm_hour, tm_min, message)

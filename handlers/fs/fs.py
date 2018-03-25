@@ -1,10 +1,10 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# 
+# @modified 2018/03/25 13:24:45
 
 """文件服务
-- 目录
-- 大文件下载
+    - 文件目录
+    - 大文件下载
 """
 import os
 import mimetypes
@@ -111,10 +111,11 @@ class FileSystemHandler:
         '.mp4' : 'video/mp4',
         '.avi' : 'video/avi',
         '.rmvb': 'video/rmvb',
+        '.mkv' : 'video/x-matroska',
         '.html': 'text/html; charset=utf-8',
         '.py'  : 'text/plain; charset=utf-8',
         '.sh'  : 'text/plain; charset=utf-8',
-        '.txt' : 'text/plain; charset=utf-8',
+        '.txt' : 'application/octet-stream',  # 便于文件下载
         '.md'  : 'text/plain; charset=utf-8',
         '.ini' : 'text/plain; charset=utf-8',
     }
