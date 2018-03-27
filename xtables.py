@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/03/20 23:16:39
+# @modified 2018/03/27 22:28:51
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -240,15 +240,12 @@ def init_table_message():
         manager.add_column("ctime", "text", "")
         manager.add_column("mtime", "text", "")
         manager.add_column("user",  "text", "")
-        # 当前的类型包括 留言 日程提醒
-        manager.add_column("type",  "text", "")
         # 用一个状态可以拍成一排
         # 消息的状态 0初始状态（紧急） 50（非紧急minor，慎重考虑） 100已完成
         manager.add_column("status", "int", 0)
         manager.add_column("content", "text", "")
         # 索引
         manager.add_index("ctime")
-        manager.add_index("type")
         manager.add_index("status")
 
 def init_table_bookmark():

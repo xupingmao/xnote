@@ -3,6 +3,7 @@
 # 
 
 """短消息"""
+import re
 import math
 import xutils
 import xtables
@@ -10,6 +11,29 @@ import xauth
 import xconfig
 import xmanager
 from xutils import BaseRule, Storage
+
+def process_html(message):
+    """简单的处理HTML"""
+    content = message.content
+    # \xad (Soft hyphen), 用来处理断句的
+    content = content.replace('\xad', '\n')
+
+    lines = []
+    for line in content.split("\n"):
+        if line.startswith("file://"):
+            href = line[7:]
+            if line.endswith((".jpg", ".jpeg", ".png", ".gif")):
+                line = '<a href="%s"><img class="chat-msg-img" src="%s"></a>' % (href, href)
+            else:
+                line = '<a href="%s">%s</a>' % (href, href)
+        else:
+            line = line.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
+            line = line.replace(" ", "&nbsp;")
+            line = re.sub(r"https?://[^\s]+", '<a href="\\g<0>">\\g<0></a>', line)
+        lines.append(line)
+    message.html = "<br/>".join(lines)
+    return message
+
 
 class ListHandler:
 
@@ -31,6 +55,7 @@ class ListHandler:
         chatlist.reverse()
         amount = db.count(where=kw, vars=vars)
         page_max = math.ceil(amount / pagesize)
+        chatlist = list(map(process_html, chatlist))
         return dict(code="success", message="", data=chatlist, amount=amount, page_max=page_max, current_user=xauth.get_current_name())
 
 def update_message(id, status):
@@ -114,12 +139,10 @@ class SaveHandler:
             ctime = xutils.get_argument("date", xutils.format_datetime())
             inserted_id = db.insert(content = content, 
                 user = user_name, 
-                ctime = ctime, 
-                type = ctx.get("type", ""))
+                ctime = ctime)
             return dict(code="success", data=dict(id=inserted_id, content=content, ctime=ctime))
         db.update(content = content,
             mtime = xutils.format_datetime(), 
-            type=ctx.get("type", ""), 
             where=dict(id=id, user=user_name))
         return dict(code="success")
 

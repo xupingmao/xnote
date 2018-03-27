@@ -63,7 +63,7 @@
         /*right: 0;*/
         /*width: calc(100% - 5rem);*/
         width: 100%;
-        box-sizing: border-box;
+        outline: none;
     }
 
     .send-button {
@@ -104,7 +104,7 @@
             </div>
             <div class="chat-msg col-md-12">
                 <template v-if="message.editable">
-                    <textarea class="input-box col-md-12" v-bind:rows="message.content.count('\n')+2" v-model="message.content"></textarea>
+                    <textarea class="input-box col-md-12" v-bind:rows="message.content.count('\n')+3" v-model="message.content"></textarea>
                     <input type="button" value="更新" v-on:click="updateMessage(message)">
                     <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel">
                 </template>
@@ -151,6 +151,7 @@
 
     function wrapMessage(message) {
         message.editable = false;
+        return message;
         var content = message.content;
         var reg = /file:\/\/([\S]+)\n*(.*)/gi;
         var parts = reg.exec(content);
@@ -413,16 +414,17 @@ uploader.on( 'uploadError', function( file ) {
 uploader.on( 'uploadComplete', function( file ) {
     var webpath = file.webpath;
     var content = 'file://$name'.replace(/\$name/g, file.webpath);
-    $.post("/file/message/add", {content:content}, function (respText) {
-        var data = respText;
-        if (data.code == "success") {
-            app.refreshMessage();
-        } else {
-            alert(data.message);
-        }
-    }).fail(function (data) {
+    app.input += content + "\n";
+    // $.post("/file/message/add", {content:content}, function (respText) {
+    //     var data = respText;
+    //     if (data.code == "success") {
+    //         app.refreshMessage();
+    //     } else {
+    //         alert(data.message);
+    //     }
+    // }).fail(function (data) {
 
-    })
+    // })
 });
 
 $("#filePickerBtn").on("click", function (event) {
