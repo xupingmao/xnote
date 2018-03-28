@@ -27,9 +27,10 @@ def process_html(message):
             else:
                 line = '<a href="%s">%s</a>' % (href, href)
         else:
-            line = line.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
-            line = line.replace(" ", "&nbsp;")
             line = re.sub(r"https?://[^\s]+", '<a href="\\g<0>">\\g<0></a>', line)
+            line = line.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
+            # TODO 处理空格的问题
+            # line = line.replace(" ", "&nbsp;")
         lines.append(line)
     message.html = "<br/>".join(lines)
     return message
@@ -139,6 +140,8 @@ class SaveHandler:
             ctime = xutils.get_argument("date", xutils.format_datetime())
             inserted_id = db.insert(content = content, 
                 user = user_name, 
+                status = 100,
+                mtime = ctime,
                 ctime = ctime)
             return dict(code="success", data=dict(id=inserted_id, content=content, ctime=ctime))
         db.update(content = content,
