@@ -77,12 +77,13 @@
 {% end %}
 
 {% block body %}
+{% init key = "" %}
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
 <div id="app" class="col-md-12">
     <div class="col-md-12">
-        <a class="tab tab-link" href="/tools/message?status=all">全部</a>
-        <a class="tab tab-link" href="/tools/message?status=created">关注</a>
+        <a class="tab tab-link" href="/message?status=all">全部</a>
+        <a class="tab tab-link" href="/message?status=created">关注</a>
         <!-- <a class="tab tab-link" href="/tools/message?status=minor">不紧急</a> -->
         <!-- <a class="tab tab-link" href="/tools/message?status=done">已完成</a> -->
     </div>
@@ -90,7 +91,7 @@
     <div class="input-div col-md-12">
         <textarea class="col-md-12 input-box" v-model="input" rows=4></textarea>
         <input type="button" name="" class="send-button btn" value="添加" @click="sendMessage()">
-        <input type="file" id="filePicker" class="hide" />
+        <input type="file" id="filePicker" class="hide" multiple/>
         <input type="button" id="filePickerBtn" class="send-button btn" value="上传文件"/>
         <div id="uploadProgress" style="float: right;" ></div>
     </div>
@@ -211,7 +212,7 @@
                 app.page = page;
                 app.page_next_url = app.page_url + (parseInt(page)+1);
                 app.page_prev_url = app.page_url + (page-1);
-                $.get("/file/message/list", {pagesize:20,page:page,status:self.status}, function (respText) {
+                $.get("/file/message/list", {pagesize:20,page:page,status:self.status,key:"{{key}}"}, function (respText) {
                     var data = respText;
                     app.page_max = data.page_max;
                     app.current_user = data.current_user;

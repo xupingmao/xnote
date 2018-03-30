@@ -33,9 +33,9 @@
 </div>
 
 <div class="nav-search-box">
-  <form id="searchForm" method="GET" action="{{?action,'/search/search'}}">
+  <form id="searchForm" method="GET" action="{{?search_action,'/search/search'}}">
     <div class="x-center">
-      <input id="key" name="key" class="nav-search-input" placeholder="搜索或指令" value="{{?key}}"/>
+      <input id="key" name="key" class="nav-search-input" placeholder="{{?search_placeholder, '搜索或指令'}}" value="{{?key}}"/>
       <input class="hide" name="category" value="{{?category}}" />
       <button class="nav-search-btn">搜</button>
     </div>
@@ -46,7 +46,7 @@
   <ul class="x-center">
     <li><a href="/note/group">知识库</a></li>
     {% if _has_login %}
-    <li><a href="/tools/message?status=all">记事({{_notice_count}})</a></li>
+    <li><a href="/message?status=all">记事({{_notice_count}})</a></li>
     {% end %}
     {% if _is_admin %}
     <li><a href="/fs_data/">文件</a></li>

@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
-# 
+# @since 2017/08/04
+# @modified 2018/03/30 21:29:46
 
 """短消息"""
 import re
@@ -10,6 +11,7 @@ import xtables
 import xauth
 import xconfig
 import xmanager
+import xtemplate
 from xutils import BaseRule, Storage
 
 def process_html(message):
@@ -40,8 +42,9 @@ class ListHandler:
 
     def GET(self):
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
-        page = xutils.get_argument("page", 1, type=int)
+        page   = xutils.get_argument("page", 1, type=int)
         status = xutils.get_argument("status")
+        key    = xutils.get_argument("key")
         offset = (page-1) * pagesize
         db = xtables.get_message_table()
         user_name = xauth.get_current_name()
@@ -52,7 +55,12 @@ class ListHandler:
             kw = "status = 100"
         kw += " AND user = $user"
         vars = dict(user=xauth.get_current_name())
-        chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))
+        if key != "" and key != None:
+            kw += " AND content LIKE $content"
+            vars["content"] = '%' + key + '%'
+            chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))
+        else:
+            chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))
         chatlist.reverse()
         amount = db.count(where=kw, vars=vars)
         page_max = math.ceil(amount / pagesize)
@@ -159,6 +167,15 @@ class DateHandler:
             vars = dict(date = date + '%', user=xauth.get_current_name()))
         return dict(code="success", data = list(data))
 
+class MessageHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        return xtemplate.render("message/message.html", 
+            search_action="/message", 
+            search_placeholder="搜索短消息",
+            key = xutils.get_argument("key", ""))
+
 
 xurls=(
     "/file/message/add", SaveHandler,
@@ -167,6 +184,7 @@ xurls=(
     "/file/message/finish", FinishMessage,
     "/file/message/open", OpenMessage,
     "/file/message/list", ListHandler,
-    "/file/message/date", DateHandler
+    "/file/message/date", DateHandler,
+    "/message", MessageHandler,
 )
 
