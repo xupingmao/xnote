@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/03/30 21:29:46
+# @modified 2018/03/31 01:14:55
 
 """短消息"""
 import re
@@ -18,7 +18,7 @@ def process_html(message):
     """简单的处理HTML"""
     content = message.content
     # \xad (Soft hyphen), 用来处理断句的
-    content = content.replace('\xad', '\n')
+    content = content.replace(u'\xad', '\n')
 
     lines = []
     for line in content.split("\n"):
@@ -178,13 +178,13 @@ class MessageHandler:
 
 
 xurls=(
-    "/file/message/add", SaveHandler,
-    "/file/message/remove", RemoveHandler,
-    "/file/message/update", SaveHandler,
-    "/file/message/finish", FinishMessage,
-    "/file/message/open", OpenMessage,
-    "/file/message/list", ListHandler,
-    "/file/message/date", DateHandler,
-    "/message", MessageHandler,
+    r"/file/message/add", SaveHandler,
+    r"/file/message/remove", RemoveHandler,
+    r"/file/message/update", SaveHandler,
+    r"/file/message/finish", FinishMessage,
+    r"/file/message/open", OpenMessage,
+    r"/file/message/list", ListHandler,
+    r"/file/message/date", DateHandler,
+    r"/message", MessageHandler,
 )
 
