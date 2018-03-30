@@ -192,7 +192,7 @@
             input: "",
             page_max: 2,
             page: 1,
-            page_url: "/tools/message?pagesize=20&page=",
+            page_url: "/message?pagesize=20&page=",
             page_next_url:"#",
             page_prev_url:"#",
             current_user:"",
@@ -203,7 +203,7 @@
 
             init: function () {
                 this.status = getUrlParams().status;
-                this.page_url = "/tools/message?status=%s&pagesize=20&page=".format(this.status);
+                this.page_url = "/message?status=%s&pagesize=20&key={{key}}&page=".format(this.status);
             },
 
             refreshMessage: function () {
