@@ -73,6 +73,10 @@
         margin-right: 0.5rem;
     }
 
+    .right {
+        float: right;
+    }
+
 </style>
 {% end %}
 
@@ -99,9 +103,8 @@
     <div class="chat-box col-md-12">
         <div class="chat-msg-div" v-for="message in messageList">
             <div class="chat-avatar col-md-12">
-                {{! message.ctime }}
+                <!-- {{! message.ctime }} -->
                 <!-- <span class="tag-span" v-if="message.status==100">已完成</span> -->
-                <span class="tag-span in-progress" v-if="message.status==0">关注</span>
             </div>
             <div class="chat-msg col-md-12">
                 <template v-if="message.editable">
@@ -121,11 +124,12 @@
                     <div v-if="message.html" class="chat-msg-content" v-html="message.html">
                     </div>
                 </div>
-            </div>            
+            </div>
             <div class="col-md-12">
                 <p class="chat-msg-time">
-                    <!-- {{! message.user }} -->
-                    <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">取消关注</a>
+                    {{! message.ctime }}
+                    <span class="tag-span in-progress" v-if="message.status==0">关注</span>
+                    <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
                     <a class="smallText" v-if="message.status==100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">关注</a>
                     <a class="smallText" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
                     <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" style="color: red;" @click="deleteMessage($event)">删除</a> 
