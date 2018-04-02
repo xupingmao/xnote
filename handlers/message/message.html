@@ -101,6 +101,9 @@
     </div>
 
     <div class="chat-box col-md-12">
+        <div class="chat-msg-div" v-if="messageList.length == 0">
+            空空如也~
+        </div>
         <div class="chat-msg-div" v-for="message in messageList">
             <div class="chat-avatar col-md-12">
                 <!-- {{! message.ctime }} -->

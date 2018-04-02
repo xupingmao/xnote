@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/03/31 01:14:55
+# @modified 2018/04/03 00:21:51
 
 """短消息"""
 import re
@@ -173,7 +173,7 @@ class MessageHandler:
     def GET(self):
         return xtemplate.render("message/message.html", 
             search_action="/message", 
-            search_placeholder="搜索短消息",
+            search_placeholder="搜索备忘信息",
             key = xutils.get_argument("key", ""))
 
 
