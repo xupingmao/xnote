@@ -1,5 +1,8 @@
 # encoding=utf-8
+# @author xupingmao
+# @modified 2018/04/05 23:29:50
 import xtables
+import xutils
 from xutils import SearchResult
 
 def search(ctx, text):
@@ -14,7 +17,7 @@ def search(ctx, text):
         r.name = x.ctime
         r.url = '#'
         r.command = None
-        r.raw = x.content
+        r.html = xutils.mark_text(x.content)
         return r
     return map(convert, msg_list)
 
