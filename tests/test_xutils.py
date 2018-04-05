@@ -142,5 +142,14 @@ class TestMain(unittest.TestCase):
         code = "print(123)"
         xutils.exec_python_code(name='test', code = code, record_stdout = False, raise_err = True)
 
+    def test_mark_text(self):
+        text = "hello world"
+        html = xutils.mark_text(text)
+        self.assertEqual("hello&nbsp;world", html)
+
+        text = "a link https://link"
+        html = xutils.mark_text(text)
+        self.assertEqual('a&nbsp;link&nbsp;<a href="https://link">https://link</a>', html)
+
 
         

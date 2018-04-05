@@ -14,29 +14,13 @@ import xmanager
 import xtemplate
 from xutils import BaseRule, Storage
 
-def process_html(message):
-    """简单的处理HTML"""
-    content = message.content
-    # \xad (Soft hyphen), 用来处理断句的
-    content = content.replace(u'\xad', '\n')
-
-    lines = []
-    for line in content.split("\n"):
-        if line.startswith("file://"):
-            href = line[7:]
-            if line.endswith((".jpg", ".jpeg", ".png", ".gif")):
-                line = '<a href="%s"><img class="chat-msg-img" src="%s"></a>' % (href, href)
-            else:
-                line = '<a href="%s">%s</a>' % (href, href)
-        else:
-            line = re.sub(r"https?://[^\s]+", '<a href="\\g<0>">\\g<0></a>', line)
-            line = line.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
-            # TODO 处理空格的问题
-            # line = line.replace(" ", "&nbsp;")
-        lines.append(line)
-    message.html = "<br/>".join(lines)
+def process_message(message):
+    message.html = xutils.mark_text(message.content)
     return message
 
+def fuzzy_item(item):
+    item = item.replace("'", "''")
+    return "'%%%s%%'" % item
 
 class ListHandler:
 
@@ -56,15 +40,20 @@ class ListHandler:
         kw += " AND user = $user"
         vars = dict(user=xauth.get_current_name())
         if key != "" and key != None:
-            kw += " AND content LIKE $content"
-            vars["content"] = '%' + key + '%'
+            for item in key.split(" "):
+                if item == "":
+                    continue
+                kw += " AND content LIKE " + fuzzy_item(item)
+            # when find numbers, the sql printed is not correct
+            # eg. LIKE '%1%' will be LIKE '%'
+            # print(kw)
             chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))
         else:
             chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))
         chatlist.reverse()
         amount = db.count(where=kw, vars=vars)
         page_max = math.ceil(amount / pagesize)
-        chatlist = list(map(process_html, chatlist))
+        chatlist = list(map(process_message, chatlist))
         return dict(code="success", message="", data=chatlist, amount=amount, page_max=page_max, current_user=xauth.get_current_name())
 
 def update_message(id, status):

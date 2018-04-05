@@ -463,6 +463,30 @@ def tojson(obj):
 #################################################################
 ##   Html Utilities, Python 2 do not have this file
 #################################################################
+
+def mark_text(content):
+    """简单的处理HTML"""
+    # \xad (Soft hyphen), 用来处理断句的
+    content = content.replace(u'\xad', '\n')
+
+    lines = []
+    for line in content.split("\n"):
+        tokens = line.split(" ")
+        for index, item in enumerate(tokens):
+            if item.startswith(("https://", "http://")):
+                tokens[index] = '<a href="%s">%s</a>' % (item, item)
+            elif item.startswith("file://"):
+                href = item[7:]
+                if item.endswith((".jpg", ".jpeg", ".png", ".gif", ".bpm")):
+                    tokens[index] = '<a href="%s"><img class="chat-msg-img" src="%s"></a>' % (href, href)
+                else:
+                    tokens[index] = '<a href="%s">%s</a>' % (href, href)
+        
+        line = '&nbsp;'.join(tokens)
+        line = line.replace("\t", '&nbsp;&nbsp;&nbsp;&nbsp;')
+        lines.append(line)
+    return "<br/>".join(lines)
+
 def html_escape(s, quote=True):
     """
     Replace special characters "&", "<" and ">" to HTML-safe sequences.

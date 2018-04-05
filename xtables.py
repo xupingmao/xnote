@@ -109,7 +109,7 @@ class SqliteTableManager:
 
 TableManager = SqliteTableManager
 
-def init_table_test():
+def init_test_table():
     """测试数据库"""
     path = os.path.join(xconfig.DATA_DIR, "test.db")
     with TableManager(path, "test") as manager:
@@ -121,7 +121,7 @@ def init_table_test():
         manager.add_column("check", "text", "aaa'bbb")
         manager.add_index("check")
 
-def init_table_file():
+def init_file_table():
     with TableManager(config.DB_PATH, "file") as manager:
         manager.add_column("name",    "text", "")
         # 纯文本，用于搜索
@@ -171,7 +171,7 @@ def init_table_file():
         # 虽然不能加速匹配过程，但是可以加速全表扫描
         manager.add_index("name")
 
-def init_table_marked_file():
+def init_marked_file_table():
     # @since 2018/03/02
     with TableManager(config.DB_PATH, "marked_file") as manager:
         manager.add_column("user", "text", "")
@@ -179,7 +179,7 @@ def init_table_marked_file():
         manager.add_column("name",  "text", "")
         manager.add_column("ctime", "text", "")
 
-def init_table_tag():
+def init_tag_table():
     # 标签表，可以用于一些特征的标记
     # 2017/04/18
     with TableManager(config.DB_PATH, "file_tag", no_pk=True) as manager:
@@ -190,7 +190,7 @@ def init_table_tag():
         # 权限控制，标签不做用户区分, groups字段暂时废弃
         # manager.add_column("groups",  "text", "")
 
-def init_table_schedule():
+def init_schedule_table():
     # 2017/05/24
     # task是计划任务
     # Job是已经触发的任务,倾向于一次性的
@@ -211,13 +211,13 @@ def init_table_schedule():
         manager.add_column("webpage", "int", 0) # 是否网页提醒
 
 
-def init_table_log():
+def init_log_table():
     # 2017/05/21
     with TableManager(config.LOG_PATH, "xnote_log") as manager:
         manager.add_column("tag",      "text", "")
         manager.add_column("operator", "text", "")
 
-def init_table_user():
+def init_user_table():
     # 2017/05/21
     # 简单的用户表
     with TableManager(config.DB_PATH, "user") as manager:
@@ -230,7 +230,7 @@ def init_table_user():
         manager.add_column("token",      "text", "")
         manager.add_column("login_time", "text", "")
 
-def init_table_message():
+def init_message_table():
     """
     用来存储比较短的消息,消息和资料库的主要区别是消息存储较短的单一信息
     - 消息支持状态
@@ -248,7 +248,7 @@ def init_table_message():
         manager.add_index("ctime")
         manager.add_index("status")
 
-def init_table_bookmark():
+def init_bookmark_table():
     # 2017/12/09
     # 通用的收藏数据结构，基于file的收藏只能收藏file而且不能支持多用户
     with TableManager(xconfig.DB_PATH, "bookmark") as manager:
@@ -256,7 +256,7 @@ def init_table_bookmark():
         manager.add_column("name", "text", "")
         manager.add_column("link", "text", "")
 
-def init_table_record():
+def init_record_table():
     # 日志库和主库隔离开
     dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
     with TableManager(dbpath, "record") as manager:
@@ -268,7 +268,7 @@ def init_table_record():
         manager.add_column("key",  "text", "")
         manager.add_column("value", "text", "")
 
-def init_table_storage():
+def init_storage_table():
     """
     通用的存储对象, 比词典多一个type
     """
@@ -281,7 +281,7 @@ def init_table_storage():
         manager.add_column("key",   "text", "")
         manager.add_column("value", "text", "")
 
-def init_table_dict():
+def init_dict_table():
     """
     词典 2018/01/14
     """
@@ -405,13 +405,13 @@ get_dictionary_table = get_dict_table
 def init():
     if sqlite3 is None:
         return
-    init_table_user()
-    init_table_file()
-    # init_table_marked_file()
-    init_table_tag()
-    init_table_schedule()
-    init_table_message()
-    init_table_dict()
+    init_user_table()
+    init_file_table()
+    # init_marked_file_table()
+    init_tag_table()
+    init_schedule_table()
+    init_message_table()
+    init_dict_table()
     # 非核心结构记录各种日志数据
-    init_table_record()
+    init_record_table()
 
