@@ -36,6 +36,8 @@
     </div>
 </div>
 
+<a id="downloadLink" class="hide">image.png</a>
+
 <script type="text/javascript">
 
 var globals = {};
@@ -199,17 +201,22 @@ function base64Img2Blob(code){
 
     return new Blob([uInt8Array], {type: contentType}); 
 }
-function downloadFile(fileName, content){
-   
-    var aLink = document.createElement('a');
-    var blob = base64Img2Blob(content); //new Blob([content]);
-  
-    var evt = document.createEvent("HTMLEvents");
-    evt.initEvent("click", false, false);//initEvent 不加后两个参数在FF下会报错
-    aLink.download = fileName;
-    aLink.href = URL.createObjectURL(blob);
-
-    aLink.dispatchEvent(evt);
+function downloadFile(fileName, url){
+    try {
+        // url = url.replace("image/png", "application/octet-stream");
+        window.location.href = url;
+        // window.open(url, "image.png");
+        // var aLink = document.createElement('a');
+        // var aLink = $("#downloadLink")[0];
+        // var evt = document.createEvent("HTMLEvents");
+        // evt.initEvent("click", false, false);//initEvent 不加后两个参数在FF下会报错
+        // aLink.download = fileName;
+        // aLink.href = url;
+        // aLink.dispatchEvent(evt);
+        // $("#downloadLink").click();
+    } catch (e) {
+        alert(e);
+    }
 }           
 </script>
 
