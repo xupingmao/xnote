@@ -23,6 +23,7 @@
         <p>
             <button id="createCanvasBtn">创建画布</button>
             <button id="toggleResult">预览</button>
+            <button id="downloadFile">下载</button>
         </p>
     </div>
 
@@ -174,10 +175,42 @@ $("#toggleResult").on("click", function (event) {
     }
 });
 
+$("#downloadFile").click(function (event) {
+    var canvas = $('#canvas')[0];
+    downloadFile("image.png", canvas.toDataURL("image/png"));
+})
+
 $(function() {
     window.canvasClickEvents = [];
     $("#createCanvasBtn").click();
-})
+});
+
+function base64Img2Blob(code){
+    var parts = code.split(';base64,');
+    var contentType = parts[0].split(':')[1];
+    var raw = window.atob(parts[1]);
+    var rawLength = raw.length;
+
+    var uInt8Array = new Uint8Array(rawLength);
+
+    for (var i = 0; i < rawLength; ++i) {
+      uInt8Array[i] = raw.charCodeAt(i);
+    }
+
+    return new Blob([uInt8Array], {type: contentType}); 
+}
+function downloadFile(fileName, content){
+   
+    var aLink = document.createElement('a');
+    var blob = base64Img2Blob(content); //new Blob([content]);
+  
+    var evt = document.createEvent("HTMLEvents");
+    evt.initEvent("click", false, false);//initEvent 不加后两个参数在FF下会报错
+    aLink.download = fileName;
+    aLink.href = URL.createObjectURL(blob);
+
+    aLink.dispatchEvent(evt);
+}           
 </script>
 
 {% end %}
