@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/03/16 23:21:21
+# @modified 2018/04/08 23:34:34
 
 import profile
 import math
@@ -137,7 +137,8 @@ class UpdateHandler:
         # 所以权限只能是创建者而不是修改者
         update_kw = dict(content=content, 
                 type=file_type, 
-                size=len(content));
+                size=len(content),
+                version=version+1);
 
         if name != "" and name != None:
             update_kw["name"] = name
@@ -152,9 +153,10 @@ class UpdateHandler:
             cur_version = file.version
             file.content = content
             file.version = version
-            return xtemplate.render("note/view.html", file=file, 
+            return xtemplate.render("note/view.html", 
+                pathlist = [],
+                file=file, 
                 content = content, 
-                children = [],
                 error = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
 
 class Upvote:

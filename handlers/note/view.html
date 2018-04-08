@@ -96,6 +96,20 @@ img {
     max-height: 600px;
 }
 
+.red-border {
+    border-color: red;
+}
+
+.error {
+    font-style: italic;
+    border-left: 8px solid red;
+    padding: 5px 10px;
+    margin: 10px 0;
+    line-height: 1.4;
+    font-size: 100%;
+    background-color: #f1f1f1;
+}
+
 </style>
 {% end %}
 
@@ -108,6 +122,7 @@ img {
     {% init show_add_file = False %}
     {% init show_add_group = False %}
     {% init show_path_list = True %}
+    {% init error = "" %}
 
     {% if file != None %}
         {% set globals()['file_type'] = file.type %}
@@ -136,6 +151,12 @@ img {
         {% for item in pathlist %}
             <a href="{{item.url}}">{{ item.name }}</a> /
         {% end %}
+    </div>
+    {% end %}
+
+    {% if error != "" and error != None%}
+    <div class="col-md-12 error">
+        {{error}}
     </div>
     {% end %}
 
