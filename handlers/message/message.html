@@ -219,7 +219,7 @@
                 app.page = page;
                 app.page_next_url = app.page_url + (parseInt(page)+1);
                 app.page_prev_url = app.page_url + (page-1);
-                $.get("/file/message/list", {pagesize:20,page:page,status:self.status,key:"{{key}}"}, function (respText) {
+                $.get("/message/list", {pagesize:20,page:page,status:self.status,key:"{{key}}"}, function (respText) {
                     var data = respText;
                     app.page_max = data.page_max;
                     app.current_user = data.current_user;

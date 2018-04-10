@@ -804,3 +804,11 @@ li.menu-item:hover {
     overflow-y: auto;
 }
 
+.float-right {
+    float: right;
+}
+
+.small-font {
+    font-size: small;
+}
+

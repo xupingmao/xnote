@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/04/03 00:21:51
+# @modified 2018/04/10 00:23:00
 
 """短消息"""
 import re
@@ -172,7 +172,7 @@ xurls=(
     r"/file/message/update", SaveHandler,
     r"/file/message/finish", FinishMessage,
     r"/file/message/open", OpenMessage,
-    r"/file/message/list", ListHandler,
+    r"/message/list", ListHandler,
     r"/file/message/date", DateHandler,
     r"/message", MessageHandler,
 )

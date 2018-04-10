@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/03/15 01:21:41
+# @modified 2018/04/10 00:12:21
 
 '''
 xnote系统配置
@@ -309,6 +309,7 @@ def is_mute():
 
 def add_notice(user=None,
         message=None, 
+        link=None,
         year=None, 
         month=None, 
         day=None,
@@ -316,7 +317,7 @@ def add_notice(user=None,
     """
     添加通知事件, 条件为None默认永真，比如user为None，向所有用户推送
     """
-    _notice_list.append(Storage(user=user, year=year, month=month, day=day, wday=wday, message=message))
+    _notice_list.append(Storage(user=user, year=year, month=month, day=day, wday=wday, message=message, link=link))
 
 def get_notice_list(type='today', user=None):
     """

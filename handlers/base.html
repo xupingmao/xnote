@@ -59,7 +59,12 @@
 <div class="main x-center">
   
   {% for item in xconfig.get_notice_list('today', _user_name) %}
-    <div class="notice">{{item.message}}</div>
+    <div class="notice">
+      {{item.message}}
+      {% if item.link != None %}
+      <div class="float-right"><a class="small-font" href="{{item.link}}">查看</a></div>
+      {% end %}
+    </div>
   {% end %}
 
   {% block body %} {% end %}

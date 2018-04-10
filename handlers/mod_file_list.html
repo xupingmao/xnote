@@ -36,7 +36,7 @@
                     <span class="tag red-bg">置顶</span>
                 {% end %}
                 {% if file.parent_name != None %}
-                    <span class="tag">{{file.parent_name}}</span>
+                    <span class="tag"><a class="tag-link" href="/note/view?id={{file.parent_id}}">{{file.parent_name}}</a></span>
                 {% end %}
 
                 {% if file.is_public %}

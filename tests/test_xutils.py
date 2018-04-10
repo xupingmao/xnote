@@ -151,5 +151,8 @@ class TestMain(unittest.TestCase):
         html = xutils.mark_text(text)
         self.assertEqual('a&nbsp;link&nbsp;<a href="https://link">https://link</a>', html)
 
+    def test_print_table(self):
+        xutils.print_table([dict(name="a", age=10), dict(name="b", age=12)])
+
 
         

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/03/16 22:20:19
+# @modified 2018/04/10 00:24:25
 
 import sys
 sys.path.insert(1, "lib")
@@ -250,8 +250,9 @@ class TestMain(unittest.TestCase):
         json_request("/file/message/remove", method="POST", data=dict(id=data.get("id")))
 
     def test_message_list(self):
-        json_request("/file/message/list")
-        json_request("/file/message/list?status=created")
+        json_request("/message/list")
+        json_request("/message/list?status=created")
+        json_request("/message/list?key=1")
 
     def test_tag(self):
         json_request("/file/tag/update", method="POST", data=dict(file_id=0, tags="ABC DEF"))
