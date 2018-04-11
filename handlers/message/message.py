@@ -1,9 +1,10 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/04/10 00:23:00
+# @modified 2018/04/11 23:51:58
 
 """短消息"""
+import time
 import re
 import math
 import xutils
@@ -40,6 +41,7 @@ class ListHandler:
         kw += " AND user = $user"
         vars = dict(user=xauth.get_current_name())
         if key != "" and key != None:
+            start_time = time.time()
             for item in key.split(" "):
                 if item == "":
                     continue
@@ -48,6 +50,8 @@ class ListHandler:
             # eg. LIKE '%1%' will be LIKE '%'
             # print(kw)
             chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))
+            end_time = time.time()
+            xutils.log("message search time %d ms" % int((end_time-start_time)*1000))
         else:
             chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))
         chatlist.reverse()
