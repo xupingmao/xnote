@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/04/10 00:24:25
+# @modified 2018/04/11 23:05:32
 
 import sys
 sys.path.insert(1, "lib")
@@ -200,9 +200,6 @@ class TestMain(unittest.TestCase):
     def test_tools(self):
         self.check_200("/tools/sql")
         self.check_200("/tools/color")
-
-    def test_backup_info(self):
-        self.check_200("/system/backup_info")
 
     def test_notfound(self):
         self.check_404("/nosuchfile")
