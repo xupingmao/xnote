@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/03/22 23:11:12
+# @modified 2018/04/11 22:45:18
 
 """
 xnote工具类总入口
@@ -480,8 +480,14 @@ def mark_text(content):
                 if item.endswith((".jpg", ".jpeg", ".png", ".gif", ".bpm")):
                     tokens[index] = '<a href="%s"><img class="chat-msg-img" src="%s"></a>' % (href, href)
                 else:
-                    tokens[index] = '<a href="%s">%s</a>' % (href, href)
-        
+                    name = href[href.rfind("/")+1:]
+                    tokens[index] = '<a href="%s">%s</a>' % (href, name)
+            else:
+                token = tokens[index]
+                token = token.replace("<", "&lt;")
+                token = token.replace(">", "&gt;")
+                tokens[index] = token
+
         line = '&nbsp;'.join(tokens)
         line = line.replace("\t", '&nbsp;&nbsp;&nbsp;&nbsp;')
         lines.append(line)

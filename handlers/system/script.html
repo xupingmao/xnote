@@ -143,6 +143,16 @@
         }
     });
 
+    $(".renameScript").click(function (event) {
+        var scriptName = $(event.target).attr("scriptName");
+        var newName = prompt("重命名为", scriptName);
+        if (newName != scriptName) {
+            $.post("/system/script/rename?oldName="+scriptName+"&newName="+newName, function (data) {
+                location.reload();
+            })
+        }
+    })
+
     $("#addBtn").click(function () {
         // var name = $("#scriptName").val();
         var name = prompt("脚本名称");
