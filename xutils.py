@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/04/11 22:45:18
+# @modified 2018/04/12 00:07:17
 
 """
 xnote工具类总入口
@@ -346,7 +346,7 @@ def get_upload_file_path(filename, data_dir="/files", replace_exists = False, pr
 def is_img_file(filename):
     """根据文件后缀判断是否是图片"""
     name, ext = os.path.splitext(filename)
-    return ext.lower() in (".gif", ".png", ".jpg", ".jpeg", ".bmp")
+    return ext.lower() in (".gif", ".png", ".jpg", ".jpeg", ".bmp", ".webp")
 
 ### DB Utilities
 
@@ -477,7 +477,7 @@ def mark_text(content):
                 tokens[index] = '<a href="%s">%s</a>' % (item, item)
             elif item.startswith("file://"):
                 href = item[7:]
-                if item.endswith((".jpg", ".jpeg", ".png", ".gif", ".bpm")):
+                if item.endswith((".jpg", ".jpeg", ".png", ".gif", ".bpm", ".webp")):
                     tokens[index] = '<a href="%s"><img class="chat-msg-img" src="%s"></a>' % (href, href)
                 else:
                     name = href[href.rfind("/")+1:]
