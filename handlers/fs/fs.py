@@ -177,6 +177,7 @@ class FileSystemHandler:
         kw["path"]         = path
         kw["fspathlist"]   = xutils.splitpath(path)
         kw["token"]        = xauth.get_current_user().token
+        kw["search_action"] = "/fs_find"
         return xtemplate.render("fs/fs.html", **kw)
 
     def list_root(self):

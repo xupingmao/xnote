@@ -15,9 +15,11 @@ class handler:
         path = xutils.get_argument("path")
         find_key = xutils.get_argument("find_key", "")
         find_type = xutils.get_argument("type")
+        if find_key == "" or find_key is None:
+            find_key = xutils.get_argument("key", "")
         find_key = "*" + find_key + "*"
         path_name = os.path.join(path, find_key)
-        if find_key == "":
+        if find_key == "**":
             plist = []
         else:
             plist = xutils.search_path(path, find_key)

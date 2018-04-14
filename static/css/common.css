@@ -376,6 +376,7 @@ li.menu-item:hover {
     float: left;
     width: 100%;
     background-color: #9cc;
+    margin-bottom: 10px;
 }
 
 .nav-search-input {

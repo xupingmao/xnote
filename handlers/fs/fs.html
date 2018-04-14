@@ -104,6 +104,12 @@
 
 </style>
 
+    {% set search_action = '/fs_find' %}
+    {% set search_placeholder = '搜索文件' %}
+{% end %}
+
+{% block search_form %}
+<input type="text" name="path" class="hide" value="{{?path}}"/>
 {% end %}
 
 {% block body %}
@@ -118,16 +124,7 @@
 {% end %}
 </div>
 
-<div class="col-md-12 top-offset-1" style="padding-bottom: 5px;">
-    <form action="/fs_find">
-        <div class="right">
-            <input class="hide" name="path" value="{{path}}">
-            <input name = "find_key" type="text" value="{{find_key}}" style="width: 200px;">
-            <input type="submit" value="搜索"/>
-        </div>
-    </form>
-</div>
-<div id="controlArea" class="col-md-12">
+<div id="controlArea" class="col-md-12 top-offset-1">
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
         <input type="button" class="btn" value="新建文件" id="addFile"/>
