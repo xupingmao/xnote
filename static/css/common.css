@@ -371,8 +371,9 @@ li.menu-item:hover {
 }
 
 .nav-search-box {
-    position: fixed;
-    z-index: 10000;
+    /*position: fixed;*/
+    /*z-index: 10000;*/
+    float: left;
     width: 100%;
     background-color: #9cc;
 }
@@ -430,6 +431,7 @@ li.menu-item:hover {
 .notice {
     border: 1px solid #ccc;
     background-color: #cef2e0;
+    margin-top: 3px;
     margin-bottom: 3px;
     padding-left: 3px;
 }
@@ -804,6 +806,10 @@ li.menu-item:hover {
     overflow-y: auto;
 }
 
+.float-left {
+    float: left;
+}
+
 .float-right {
     float: right;
 }
@@ -812,3 +818,18 @@ li.menu-item:hover {
     font-size: small;
 }
 
+.nav-ul {
+    display: block;
+    list-style: none;
+    padding-left: 0px;
+}
+
+.nav-ul li {
+    padding-right: 10px;
+    display: block;
+    float: left;
+}
+
+.nav-ul a {
+    color: black;
+}

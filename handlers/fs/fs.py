@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/03/25 13:24:45
+# @modified 2018/04/13 00:37:33
 
 """文件服务
     - 文件目录
@@ -170,7 +170,6 @@ class FileSystemHandler:
         # SAE上遇到中文出错
         # Fix bad filenames，修改不生效
         # filelist = list(map(lambda x: xutils.decode_bytes(x.encode("utf-8", errors='surrogateescape')), filelist))
-
         # Fix, some `file` in *nix is not file either directory. os.stat方法报错
         path = path.replace("\\", "/")
         kw   = get_filesystem_kw()
@@ -178,7 +177,6 @@ class FileSystemHandler:
         kw["path"]         = path
         kw["fspathlist"]   = xutils.splitpath(path)
         kw["token"]        = xauth.get_current_user().token
-
         return xtemplate.render("fs/fs.html", **kw)
 
     def list_root(self):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/04/11 23:51:58
+# @modified 2018/04/12 00:53:42
 
 """短消息"""
 import time
@@ -51,7 +51,7 @@ class ListHandler:
             # print(kw)
             chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))
             end_time = time.time()
-            xutils.log("message search time %d ms" % int((end_time-start_time)*1000))
+            xutils.log("message search [%s] time %d ms" % (key, int((end_time-start_time)*1000)))
         else:
             chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))
         chatlist.reverse()
