@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/04/13 00:37:33
+# @modified 2018/04/15 00:20:48
 
 """文件服务
     - 文件目录
@@ -128,7 +128,7 @@ class FileSystemHandler:
         """Content-Type设置, 优先级从高到低依次是：自定义配置、系统配置、默认配置"""
         type = xutils.get_argument("type")
         if type == "text":
-            web.header("Content-Type", self.mime_types[".txt"])
+            web.header("Content-Type", 'text/plain; charset=utf-8')
             return
         if type == "blob":
             web.header("Content-Type", self.mime_types[""])

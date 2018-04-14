@@ -30,6 +30,9 @@ def get_default_shell_ext():
         return ".bat"
     return ".sh"
 
+def get_script_path(name):
+    return os.path.join(xconfig.SCRIPTS_DIR, name)
+
 def get_script_list():
     """获取脚本列表"""
     dirname = xconfig.SCRIPTS_DIR
@@ -166,6 +169,24 @@ class EditHandler:
             shell_list = [],
             error = error)
 
+class RenameHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        oldname = xutils.get_argument("oldname")
+        newname = xutils.get_argument("newname")
+        oldpath = get_script_path(oldname)
+        newpath = get_script_path(newname)
+        if not os.path.exists(oldpath):
+            return dict(code="fail", message="源文件不存在")
+        if os.path.exists(newpath):
+            return dict(code="fail", message="目标文件已存在")
+        try:
+            os.rename(oldpath, newpath)
+            return dict(code="success")
+        except Exception as e:
+            return dict(code="fail", message=str(e))
+
 xurls = (
     r"/system/script", handler,
     r"/system/script_admin", handler,
@@ -182,7 +203,8 @@ xurls = (
     r"/system/script/execute", ExecuteHandler,
 
     r"/system/script_admin/delete", DeleteHandler,
-    r"/system/script/delete", DeleteHandler
+    r"/system/script/delete", DeleteHandler,
+    r"/system/script/rename", RenameHandler,
 )
 
 

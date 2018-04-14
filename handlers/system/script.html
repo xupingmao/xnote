@@ -58,10 +58,6 @@
 {% if op != "edit" %}
 <div>
 <form action="/system/script/search" method="GET">
-    <!--
-    <input type="text" id="scriptName" name="name" value="{{?name}}">
-    <button>搜索</button>
-    -->
     <input type="button" value="添加" id="addBtn"/>
 </form>
 </div>
@@ -76,7 +72,8 @@
             <textarea id="editor" class="col-md-12" name="content" rows=10>{{content}}</textarea>
         </div>
         <div class="col-md-12">
-            <button id="save" class="btn">保存</button>
+            <input type="submit" id="save" class="btn" value="保存"/>
+            <input type="button" id="rename" class="btn renameScript" value="重命名"/>
             <input type="button" scriptName="{{name}}" class="executeScript btn" value="执行"/>
         </div>
     </form>
@@ -144,11 +141,16 @@
     });
 
     $(".renameScript").click(function (event) {
-        var scriptName = $(event.target).attr("scriptName");
+        var scriptName = $("input[name=name]").val();
         var newName = prompt("重命名为", scriptName);
         if (newName != scriptName) {
-            $.post("/system/script/rename?oldName="+scriptName+"&newName="+newName, function (data) {
-                location.reload();
+            $.post("/system/script/rename?oldname="+scriptName+"&newname="+newName, function (data) {
+                var code = data.code;
+                if (code != "success") {
+                    alert(data.message);
+                } else {
+                    window.location.href = "/system/script/edit?name=" + newName;
+                }
             })
         }
     })

@@ -1,8 +1,9 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/04/11 23:05:32
+# @modified 2018/04/15 00:28:14
 
 import sys
+import os
 sys.path.insert(1, "lib")
 import unittest
 import json
@@ -28,6 +29,9 @@ def init():
     return app
 
 app = init()
+
+def get_script_path(name):
+    return os.path.join(xconfig.SCRIPTS_DIR, name)
 
 def json_request(*args, **kw):
     global app
@@ -211,6 +215,19 @@ class TestMain(unittest.TestCase):
         json_request("/system/script/save", method="POST", data=dict(name="xnote-unit-test.py", content="print(123)"))
         out = xutils.exec_script("xnote-unit-test.py", False, False)
         json_request("/system/script/delete?name=xnote-unit-test.py", method="POST")
+
+    def test_script_rename(self):
+        path1 = get_script_path("unit-test-1.py")
+        path2 = get_script_path("unit-test-2.py")
+        xutils.remove(path1, hard = True)
+        xutils.remove(path2, hard = True)
+
+        ret = json_request("/system/script/rename?oldname=unit-test-1.py&newname=unit-test-2.py", method="POST")
+        self.assertEqual("fail", ret["code"])
+
+        xutils.touch(path1)
+        ret = json_request("/system/script/rename?oldname=unit-test-1.py&newname=unit-test-2.py", method="POST")
+        self.assertEqual("success", ret["code"])
 
     def test_report_time(self):
         self.check_200("/api/report_time")
