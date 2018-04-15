@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/04/15 00:28:14
+# @modified 2018/04/15 20:40:14
 
 import sys
 import os
@@ -185,6 +185,9 @@ class TestMain(unittest.TestCase):
 
     def test_fs_find(self):
         json_request("/fs_find", method="POST", data=dict(path="./data", find_key="java"))
+
+    def test_fs_plugins(self):
+        self.check_OK("/fs_api/plugins")
 
     def test_code_analyze(self):
         # TODO 解决JSON的循环问题
