@@ -63,10 +63,10 @@ img_tools = [
 
 code_tools = [
     link("base64", "/tools/base64"),
-    link("二维码", "/tools/barcode"),
     link("16进制转换", "/tools/hex"),
     link("md5", "/tools/md5"),
     link("URL编解码", "/tools/urlcoder"),
+    link("二维码", "/tools/barcode"),
 ]
 
 xconfig.MENU_LIST = [

@@ -49,6 +49,7 @@ a:hover {
     color: #fff;
     border-radius: 1px;
     text-decoration: none;
+    margin-top: 5px;
 }
 
 .btn:hover, button:hover, [type=submit]:hover, [type=button]:hover {

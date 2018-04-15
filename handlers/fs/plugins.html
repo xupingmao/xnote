@@ -1,24 +1,76 @@
 {% extends base.html %}
 
+{% block head %}
+<style type="text/css">
+    #result {
+        border: 1px solid #ccc;
+        padding: 4px;
+        background-color: #eee;
+        box-sizing: border-box;
+        margin: 0px;
+    	border-top: none;
+    }
+
+    .panel-title {
+    	width: 100%;
+    	border: 1px solid #ccc;
+    	padding-left: 5px;
+    	margin-top: 5px;
+    }
+
+    .plugin {
+    	margin-top: 5px;
+    }
+
+    .nav-path {
+        padding: 5px;
+        box-sizing: border-box;
+        background-color: #eee;
+    }
+
+</style>
+{% end %}
+
 {% block body %}
-	
-<h3>Path: {{path}}</h3>
+
+<input class="hide" id="path" value="{{path}}">
+<div class="col-md-12 nav-path">
+    <a href="javascript:window.history.back();">返回</a> 
+    文件路径: {{path}}
+</div>
 
 <div class="col-md-12">
-	<table class="table">
-		<tr>
-			<th class="index-td">编号</th>
-			<th>脚本</th>
-		</tr>
-
-		{% for index, item in enumerate(scripts) %}
-		<tr>
-			<td class="index-td">{{index+1}}</td>
-			<td><a href="/system/script/edit?name={{item}}&path={{path}}">{{item}}</a></td>
-		</tr>
-		{% end %}
-
-	</table>
+	{% for index, item in enumerate(scripts) %}
+      	<button class="plugin btn">{{item}}</button>
+	{% end %}
 </div>
+
+<div id="resultDiv" class="col-md-12">
+    <div class="panel-title">结果</div>
+    <pre id="result" class="col-md-12">
+    </pre>
+</div>
+
+<script type="text/javascript">
+
+	function showResult(text) {
+		$("#resultDiv").show();
+		$("#result").text(text);
+	}
+
+	$(".plugin").click(function (event) {
+		var name = $(event.target).text();
+		var path = $("#path").val();
+		// showResult(name);
+		$.post("/fs_api/run_plugin", 
+			{
+				name: name,
+				path: path,
+			},
+			function (result) {
+				showResult(result.data);
+			});
+	})
+</script>
 
 {% end %}
