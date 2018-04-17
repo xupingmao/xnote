@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/04/12 00:07:17
+# @modified 2018/04/15 21:13:27
 
 """
 xnote工具类总入口
@@ -649,7 +649,7 @@ def exec_python_code(name, code, record_stdout = True, raise_err = False, do_gc 
         mod_globals = {"__name__": "xscript.%s" % name}
         if vars is not None:
             mod_globals.update(vars)
-        before_count = len(gc.get_objects())
+        # before_count = len(gc.get_objects())
         if record_stdout:
             sys.stdout.record()
         ret = six.exec_(code, mod_globals)
@@ -657,11 +657,11 @@ def exec_python_code(name, code, record_stdout = True, raise_err = False, do_gc 
         # 执行一次GC防止内存膨胀
         if do_gc:
             gc.collect()
-        after_count = len(gc.get_objects())
+        # after_count = len(gc.get_objects())
         if record_stdout:
             ret = sys.stdout.pop_record()
-        if do_gc:
-            log("gc.objects_count %s -> %s" % (before_count, after_count))
+        # if do_gc:
+        #     log("gc.objects_count %s -> %s" % (before_count, after_count))
         return ret
     except Exception as e:
         print_exc()
