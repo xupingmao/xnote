@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/04/15 20:40:14
+# @modified 2018/04/18 00:56:41
 
 import sys
 import os
@@ -203,6 +203,7 @@ class TestMain(unittest.TestCase):
         self.check_200("/system/crontab")
         self.check_200("/system/stats")
         self.check_200("/system/stats/location", method="POST")
+        self.check_200("/system/monitor")
 
     def test_tools(self):
         self.check_200("/tools/sql")

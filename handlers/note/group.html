@@ -11,19 +11,19 @@
         <tr class="hover-tr">
             <td class="note-td">
                 <img src="/static/image/folder.gif">
-                <a href="/file/group/ungrouped">未分类</a>
+                <a class="group-link" href="/file/group/ungrouped">未分类</a>
             </td>
         </tr>
         <tr class="hover-tr">
             <td class="note-td">
                 <img src="/static/image/folder.gif">
-                <a href="/file/group/public">公开</a>
+                <a class="group-link" href="/file/group/public">公开</a>
             </td>
         </tr>
         <tr class="hover-tr">
             <td class="note-td">
                 <img src="/static/image/folder.gif">
-                <a href="/file/recent_edit">最近更新</a>
+                <a class="group-link" href="/file/recent_edit">最近更新</a>
             </td>
         </tr>
     {% end %}
@@ -54,7 +54,7 @@
                 {% end %}
 
                 {% if show_opts and _has_login %}
-                <div style="float: right;">
+                <div class="float-right">
                     <a class="item-option" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
                     {% if _is_admin %}
                         <a class="item-option" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>

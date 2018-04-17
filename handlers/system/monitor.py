@@ -18,6 +18,12 @@ try:
 except ImportError as e:
     psutil = None
 
+def get_xnote_version():
+    try:
+        return xutils.readfile("version.txt")
+    except:
+        return ""
+
 def get_mem_info():
     mem_used = 0
     mem_total = 0
@@ -72,6 +78,7 @@ class handler:
             sys_version = platform.version(),
             processor = platform.processor(),
             thread_cnt = thread_cnt,
+            xnote_version = get_xnote_version(),
             start_time = xconfig.get("start_time"))
 
 
