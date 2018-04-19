@@ -131,18 +131,19 @@
         <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
         <input type="button" class="btn" value="重命名" id="renameBtn" 
             message="重命名为">
+        <input id="uploadFileBtn" type="button" class="btn" value="上传">
         <!-- <input type="button" class="btn-danger" value="删除" id="deleteFile"/> -->
         <input type="button" class="btn advanced-opt" value="文件浏览器" id="openDirectory"/>
         <input type="button" class="link-btn advanced-opt" href="/code/analyze?path={{path}}&recursive=on" value="高级搜索"/>
         <input type="button" class="link-btn advanced-opt" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
         <input type="button" class="link-btn advanced-opt" href="/tools/zip?dirname={{path}}" value="压缩"/>
-        <input id="uploadFileBtn" type="button" class="btn advanced-opt" value="上传">
 
         {% for item in xconfig.FS_OPT_BTNS %}
             <input type="button" class="link-btn advanced-opt" x-href="{{item.url}}?path={{path}}" value="{{item.name}}"/>
         {% end %}
 
         <input id="showMoreOptsBtn" type="button" class="btn" value="切换"/>
+        <input type="button" class="link-btn" x-href="/fs_api/plugins?path={{path}}" value="更多"/>
     </div>
 </div>
 
