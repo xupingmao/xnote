@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/04/15 21:13:27
+# @modified 2018/04/20 21:37:43
 
 """
 xnote工具类总入口
@@ -645,15 +645,15 @@ def say(msg):
         time.sleep(0.5)
 
 def exec_python_code(name, code, record_stdout = True, raise_err = False, do_gc = True, vars = None):
+    ret = None
     try:
-        mod_globals = {"__name__": "xscript.%s" % name}
-        if vars is not None:
-            mod_globals.update(vars)
+        if vars is None:
+            vars = {}
+        vars["__name__"] = "xscript.%s" % name
         # before_count = len(gc.get_objects())
         if record_stdout:
             sys.stdout.record()
-        ret = six.exec_(code, mod_globals)
-        del mod_globals
+        ret = six.exec_(code, vars)
         # 执行一次GC防止内存膨胀
         if do_gc:
             gc.collect()
@@ -708,6 +708,11 @@ def exec_script(name, new_window=True, record_stdout = True, vars = None):
         return out
     return ret
 
+def load_script(name, vars = None):
+    dirname = xconfig.SCRIPTS_DIR
+    path = os.path.join(dirname, name)
+    path = os.path.abspath(path)
+    return exec_python_code(name, xutils.readfile(path), False, vars = vars)
 
 #################################################################
 ##   Web.py Utilities web.py工具类的封装

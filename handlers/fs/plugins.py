@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/04/19 23:20:48
+# @modified 2018/04/20 22:52:27
 import web
 import os
 import xconfig
 import xutils
 import xtemplate
+import sys
 import xauth
 from util import ziputil
 
@@ -19,12 +20,23 @@ class ListHandler:
 
 class RunPluginHandler:
 
-	@xauth.login_required("admin")
-	def POST(self):
-		name = xutils.get_argument("name")
-		path = xutils.get_argument("path")
-		result = xutils.exec_script(name, vars = dict(path = path))
-		return dict(code="success", data = result)
+    @xauth.login_required("admin")
+    def POST(self):
+        sys.stdout.record()
+        try:
+            name = xutils.get_argument("name")
+            path = xutils.get_argument("path")
+            vars = dict()
+            xutils.load_script(name, vars = vars)
+            main_func = vars.get("main", None)
+            if main_func is not None:
+                main_func(path = path)
+            else:
+                print("main(**kw)方法未定义")
+        except Exception as e:
+            xutils.print_exc()
+        result = sys.stdout.pop_record() + "\n执行完毕"
+        return dict(code="success", data = result)
 
 
 class DownloadPluginsHandler:

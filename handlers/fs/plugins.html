@@ -61,7 +61,7 @@
 	$(".plugin").click(function (event) {
 		var name = $(event.target).text();
 		var path = $("#path").val();
-		// showResult(name);
+		showResult("开始执行 " + name);
 		$.post("/fs_api/run_plugin", 
 			{
 				name: name,

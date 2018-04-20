@@ -65,7 +65,7 @@ def do_http(method, url, headers, data=None):
 
 
 def download_http(address, destpath):
-    bufsize = 1024 * 50
+    bufsize = 1024 * 512
     stream = urlopen(address)
     chunk = stream.read(bufsize)
     dest = open(destpath, "wb")
