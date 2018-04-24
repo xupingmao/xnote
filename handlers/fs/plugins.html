@@ -9,6 +9,7 @@
         box-sizing: border-box;
         margin: 0px;
     	border-top: none;
+        font-family: monospace;
     }
 
     .panel-title {
@@ -47,15 +48,15 @@
 
 <div id="resultDiv" class="col-md-12">
     <div class="panel-title">结果</div>
-    <pre id="result" class="col-md-12">
-    </pre>
+    <div id="result" class="col-md-12">
+    </div>
 </div>
 
 <script type="text/javascript">
 
 	function showResult(text) {
 		$("#resultDiv").show();
-		$("#result").text(text);
+		$("#result").html(text);
 	}
 
 	$(".plugin").click(function (event) {

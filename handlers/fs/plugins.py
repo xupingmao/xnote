@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/04/20 22:52:27
+# @modified 2018/04/24 01:14:41
 import web
 import os
 import xconfig
@@ -36,7 +36,7 @@ class RunPluginHandler:
         except Exception as e:
             xutils.print_exc()
         result = sys.stdout.pop_record() + "\n执行完毕"
-        return dict(code="success", data = result)
+        return dict(code="success", data = xutils.mark_text(result))
 
 
 class DownloadPluginsHandler:

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/04/20 21:37:43
+# @modified 2018/04/21 01:32:54
 
 """
 xnote工具类总入口
@@ -222,13 +222,13 @@ def get_pretty_file_size(path = None, size = 0):
     if size == 0:
         size = os.stat(path).st_size
     if size < 1024:
-        return '%s B' % size
+        return '%sB' % size
     elif size < 1024 **2:
-        return '%.2f K' % (float(size) / 1024)
+        return '%.2fK' % (float(size) / 1024)
     elif size < 1024 ** 3:
-        return '%.2f M' % (float(size) / 1024 ** 2)
+        return '%.2fM' % (float(size) / 1024 ** 2)
     else:
-        return '%.2f G' % (float(size) / 1024 ** 3)
+        return '%.2fG' % (float(size) / 1024 ** 3)
     
 def get_file_size(path, format=True):
     st = os.stat(path)

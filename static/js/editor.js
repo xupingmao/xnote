@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2018/02/13
-// @modified 2018/03/19 23:54:59
+// @modified 2018/04/24 23:23:20
 
 
 // var codeMirror = CodeMirror.fromTextArea(editor, {
@@ -51,11 +51,18 @@ function initCodeMirror(selector, options) {
         mode = options.mode;
     }
 
+    var keyMap = "default";
+
+    if (CodeMirror.keyMap.sublime) {
+        keyMap = "sublime";
+    }
+
     var editor = CodeMirror.fromTextArea($(selector)[0], {
         lineNumbers: true,
         mode: mode,
         indentUnit:4,
-        lineWrapping: true
+        lineWrapping: true,
+        keyMap: keyMap
     });
     editor.setSize("auto", height);
     editor.on("update", function (codeMirror, changeObj) {

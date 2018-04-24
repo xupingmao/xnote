@@ -95,7 +95,7 @@ class SearchHandler:
         list = [x for x in get_script_list() if x.find(name) >= 0]
         return xtemplate.render(template_file, shell_list = list, name=name)
 
-class handler:
+class ListHandler:
 
     @xauth.login_required("admin")
     def GET(self):
@@ -188,8 +188,8 @@ class RenameHandler:
             return dict(code="fail", message=str(e))
 
 xurls = (
-    r"/system/script", handler,
-    r"/system/script_admin", handler,
+    r"/system/script", ListHandler,
+    r"/system/script_admin", ListHandler,
 
     r"/system/script/search", SearchHandler,
 
