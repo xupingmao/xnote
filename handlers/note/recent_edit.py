@@ -47,9 +47,10 @@ class handler:
         count = db.count(where, vars = dict(creator = xauth.get_current_name()))
 
         return xtemplate.render("note/view.html", 
-            pathlist = [Storage(name="最近更新", url="/file/recent_edit")],
+            pathlist = [],
             file_type = "group",
             files = list(files), 
+            file = Storage(name="最近更新", type="group"),
             page = page, 
             page_max = math.ceil(count/PAGE_SIZE), 
             show_mdate = True,

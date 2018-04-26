@@ -1,11 +1,15 @@
 {% if file_type == "group_list" %}
-    <div class="col-md-12">
+    <hr>
+    <div class="">
         <div class="group-div">
-            <a class="tag-link" href="/file/group/ungrouped">未分类</a>
+            <a class="link" href="/file/recent_edit">最近更新</a>
+        </div>
+        <div class="group-div">
+            <a class="link" href="/file/group/ungrouped">未分类</a> {{ ungrouped_count }}
         </div>
         {% for item in files %}
             <div class="group-div">
-                <a class="tag-link" href="/file/view?id={{item.id}}">{{item.name}}</a>
+                <a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a>
                 {{item.size}}
             </div>
         {% end %}

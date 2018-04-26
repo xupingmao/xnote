@@ -102,6 +102,7 @@
                 <div class="col-md-12 pathlist">
                     <a href="/file/group">Home</a> / {% for item in pathlist %}
                     <a href="{{item.url}}">{{ item.name }}</a> / {% end %}
+                    <a href="{{file.url}}">{{ file.name }}</a>
                 </div>
             </div>
         </div>

@@ -524,6 +524,7 @@ li.menu-item:hover {
     /* color: #37a; */
     color: #08c;
     margin-left: 5px;
+    cursor: pointer;
 }
 
 /** file-list样式 **/
@@ -685,6 +686,7 @@ li.menu-item:hover {
     background-color: red;
     float: right;
     border: none;
+    margin-top: 0px;
 }
 
 .x-dialog-title {
@@ -779,21 +781,18 @@ li.menu-item:hover {
 }
 
 .group-div {
-    width: 200px;
+    width: 220px;
     background-color: #fff;
     padding: 5px;
     margin: 5px;
     border: 1px solid #ccc;
     box-sizing: border-box;
     float: left;
+    line-height: 25px;
 }
 
 .group-div:hover {
-    background-color: #ccc;
-}
-
-.group-div a {
-    color: #000;
+    background-color: #eee;
 }
 
 .children-count {

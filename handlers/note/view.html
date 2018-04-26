@@ -110,6 +110,18 @@ img {
     background-color: #f1f1f1;
 }
 
+/** 分组的标签 **/
+.group-tag {
+    border: 1px solid #ccc;
+    background-color: #69c;
+    padding: 5px;
+    margin: 5px;
+    display: block;
+    float: left;
+    line-height: 20px;
+    color: #fff;
+}
+
 </style>
 {% end %}
 
@@ -133,10 +145,11 @@ img {
         <!-- {% include "search.html" %} -->
     {% end %}
 
+    <!--
     {% if show_add_file or show_add_group %}
     <div class="col-md-12" style="padding-bottom: 5px;">
         {% if _has_login %}
-        <div class="left" style="float: left;">
+        <div class="float-left">
             <a class="link" href="/note/add?parent_id={{file_id}}">记笔记</a>
             <a class="link prompt-btn" message="分组名" 
                     action="/note/add?type=group&parent_id={{file_id}}&name=">加分组</a>
@@ -144,14 +157,26 @@ img {
         {% end %}
     </div>
     {% end %}
-    
+-->
+
     {% if show_path_list %}
-    <div class="col-md-12 pathlist">
-        <a href="/note/group">Home</a> /
+    <h3>
+        <a href="/note/group">Home</a> ›
         {% for item in pathlist %}
-            <a href="{{item.url}}">{{ item.name }}</a> /
+            <a href="{{item.url}}">{{ item.name }}</a> ›
         {% end %}
-    </div>
+
+        {% if file is not None %}
+            {{ file.name }}
+            {% if file.type == "group" %}
+            <a class="float-right link" href="/note/add?parent_id={{file.id}}">新增</a>
+            <a class="float-right link" href="javascript:rename({{file.id}}, '{{file.name}}')">重命名</a>
+            {% end %}
+        {% else %}
+            <a class="float-right link prompt-btn" message="分类名" 
+                    action="/note/add?type=group&parent_id={{file_id}}&name=">新增</a>
+        {% end %}
+    </h3>
     {% end %}
 
     {% if error != "" and error != None%}

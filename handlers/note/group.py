@@ -49,9 +49,9 @@ class Ungrouped:
         amount = db.count(sql = count_sql, vars = vars)
 
         return xtemplate.render(VIEW_TPL,
-            pathlist=[PathNode("未分类", "/file/group/ungrouped")],
             file_type="group",
             files = files,
+            file = Storage(name="未分类", type="group"),
             page = page,
             page_max = math.ceil(amount / pagesize),
             page_url="/file/group/ungrouped?page=")
@@ -82,13 +82,16 @@ class GroupListHandler:
         id = xutils.get_argument("id", "", type=int)
         filetype = xutils.get_argument("filetype", "")
         sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
-        data = xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name()))
+        data = list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
         if filetype == "xml":
             web.header("Content-Type", "text/html; charset=utf-8")
             return xtemplate.render("note/group_list.html", id=id, filelist=data, file_type="group")
         else:
+            ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0", 
+                vars=dict(creator=xauth.get_current_name()))
             return xtemplate.render(VIEW_TPL,
-                file_type="group",
+                ungrouped_count = ungrouped_count,
+                file_type="group_list",
                 pseudo_groups=True,
                 show_search_div = True,
                 show_add_group = True,
