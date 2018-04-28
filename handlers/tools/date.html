@@ -154,7 +154,7 @@ td.currentMonth:hover {
 <div id="calendar" class="calendar">
 </div>
 
-<div class="new-event col-md-12">
+<div class="hide new-event col-md-12">
     <textarea name="content" class="col-md-12 input-box" rows=4></textarea>
     <input id="newFeedDate" type="input" name="date" />
     <input id="newFeedSaveBtn" type="button" class="send-button btn" value="添加">
@@ -163,7 +163,7 @@ td.currentMonth:hover {
     <div id="uploadProgress" style="float: right;" ></div>
 </div>
 
-<div class="col-md-12">
+<div class="col-md-12 hide">
   <h3>事件</h3>
   <div id="events" class="col-md-12"></div>
 </div>
@@ -335,7 +335,7 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
       }
     }
     // 显示当月添加的资料
-    fetchEvents(_year, _month);
+    // fetchEvents(_year, _month);
   }
 
   /**

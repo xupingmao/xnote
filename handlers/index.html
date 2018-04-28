@@ -2,46 +2,50 @@
 
 {% block head %}
 <style type="text/css">
-    .panel {
-        width: 100%;
+    .notice-link {
+        color: orange;
     }
 </style>
 {% end %}
 
 {% block body %}
+{% set notice_list = xconfig.get_notice_list('today', _user_name) %}
 
-{% set filelist = category %}
+{% if len(notice_list) > 0 %}
+<div class="col-md-12">
+    <div class="grid-title">提醒</div>
+    <div class="grid-row">
+    {% for item in notice_list %}
+        <div class="grid-item">
+          <a class="notice-link" href="{{item.link}}">{{item.message}}</a>
+        </div>
+    {% end %}
+    </div>
+</div>
+{% end %}
 
-<div class="panel">
-    <div class="">
-       <a href="/file/add?key={{?key}}">增加资料</a>
-       <a href="/file/recent_edit">最近编辑</a>
-   </div>
+<div class="col-md-12">
+    <div class="grid-title">
+        工具库
+        <a class="link float-right" href="/more?type=tool">更多</a>
+    </div>
+    <div class="grid-row">
+        {% for item in tools %}
+            <div class="grid-item">
+                <a class="link" href="{{item.url}}">{{item.name}}</a>
+            </div>
+        {% end %}
+    </div>
 </div>
 
-<div class="panel">
-    <h2>分类资料</h2>
-    <hr/>
-    {% include note/filelist.html %}
+<div class="col-md-12">
+    <div class="grid-title">文档库
+        {% if _has_login %}
+        <a class="float-right link prompt-btn" message="新增分类" 
+                    action="/note/add?type=group&name=">新增</a>
+        {% end %}
+    </div>
+    {% include "note/group_list.html" %}
 </div>
-
-{% set filelist = recentlist %}
-<div class="panel">
-    <h2>最近访问</h2>
-    <hr/>
-
-    {% include note/filelist.html %}
-
-</div>
-
-<!-- <div class="panel">
-    <h2>实用工具</h2>
-    <hr/>
-    <a href="/system/sys">系统信息</a>
-</div> -->
-<!-- <ul>
-    <li><a href="/fs/C:/">文件系统C盘</a></li>
-    <li><a href="/fs/D:/">文件系统D盘</a></li>
-</ul> -->
 
 {% end %}

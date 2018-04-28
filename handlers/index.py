@@ -1,6 +1,10 @@
 # encoding=utf-8
 import web
+import xtables
 import xtemplate
+import xauth
+import xutils
+from xutils import Storage
 
 index_html = """
 {% extends base.html %}
@@ -9,12 +13,69 @@ index_html = """
 {% end %}
 """
 
-searchable = False
+def link(name, url, role = None):
+    return Storage(name = name, url = url, role = role)
+
+_tools = [
+    link("系统状态", "/system/monitor", "admin"),
+    link("脚本管理", "/system/script", "admin"),
+    link("定时任务",   "/system/crontab", "admin"),
+    link("用户管理", "/system/user/list", "admin"),
+
+    link("文件管理",   "/fs_data", "admin"),
+    link("历史记录",   "/system/history", "admin"),
+    link("App管理", "/system/app_admin", "admin"),
+    link("后台模板缓存", "/system/template_cache", "admin"),
+    link("重新加载模块", "/system/reload",         "admin"),
+    link("Python文档", "/system/modules_info",    "admin"),
+
+    link("标签云", "/file/taglist", "user"),
+    link("词典", "/file/dict", "user"),
+    link("备忘", "/message?status=created", "user"),
+    link("最近更新", "/file/recent_edit", "user"),
+    link("我的收藏", "/file/group/marked", "user"),
+
+    # 无权限限制
+    link("日历", "/tools/date"),
+    link("代码模板", "/tools/code_template"),
+    link("浏览器信息", "/tools/browser_info"),
+    link("文本对比", "/tools/js_diff"),
+    link("字符串转换", "/tools/string"),
+    link("图片合并", "/tools/img_merge"),
+    link("图片拆分", "/tools/img_split"),
+    link("图像灰度化", "/tools/img2gray"),
+    link("base64", "/tools/base64"),
+    link("16进制转换", "/tools/hex"),
+    link("md5", "/tools/md5"),
+    link("sha1", "/tools/sha1"),
+    link("URL编解码", "/tools/urlcoder"),
+    link("二维码", "/tools/barcode"),
+]
 
 class Home:
 
     def GET(self):
-        return xtemplate.render("search_result.html", files = [])
+        sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
+        data = list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
+        ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
+            vars=dict(creator=xauth.get_current_name()))
+
+        tools = list(filter(lambda x: x.role is None or x.role == xauth.get_current_role(), _tools))[:4]
+        return xtemplate.render("index.html", 
+            ungrouped_count = ungrouped_count,
+            file_type="group_list",
+            files = data,
+            tools = tools)
+
+class GridHandler:
+
+    def GET(self):
+        type = xutils.get_argument("type", "tool")
+        items = []
+        name = "工具库"
+        if type == "tool":
+            items = list(filter(lambda x: x.role is None or x.role == xauth.get_current_role(), _tools))
+        return xtemplate.render("grid.html", items=items, name = name)
 
 class Unauthorized():
     html = """
@@ -35,6 +96,7 @@ class FaviconHandler:
 xurls = (
     r"/", Home, 
     r"/index", Home,
+    r"/more", GridHandler,
     r"/unauthorized", Unauthorized,
     r"/favicon.ico", FaviconHandler
 )

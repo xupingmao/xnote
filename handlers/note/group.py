@@ -77,8 +77,6 @@ class MoveHandler:
 class GroupListHandler:
 
     def GET(self):
-        if not xauth.has_login():
-            raise web.seeother("/file/group/public")
         id = xutils.get_argument("id", "", type=int)
         filetype = xutils.get_argument("filetype", "")
         sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
@@ -87,7 +85,7 @@ class GroupListHandler:
             web.header("Content-Type", "text/html; charset=utf-8")
             return xtemplate.render("note/group_list.html", id=id, filelist=data, file_type="group")
         else:
-            ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0", 
+            ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
                 vars=dict(creator=xauth.get_current_name()))
             return xtemplate.render(VIEW_TPL,
                 ungrouped_count = ungrouped_count,

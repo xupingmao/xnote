@@ -37,7 +37,7 @@
     <!-- 保持对称 -->
     <div class="float-left">
       <ul class="nav-ul">
-        <li><a href="/note/group">知识库</a></li>
+        <li><a href="/">知识库</a></li>
         {% if _has_login %}
         <li><a href="/message?status=all">备忘({{_notice_count}})</a></li>
         {% end %}
@@ -62,7 +62,7 @@
 </div>
 
 <div class="main x-center">
-  
+<!--
   {% for item in xconfig.get_notice_list('today', _user_name) %}
     <div class="notice">
       {{item.message}}
@@ -71,7 +71,7 @@
       {% end %}
     </div>
   {% end %}
-
+-->
   {% block body %} {% end %}
   <div class="footer"></div>
 </div>

@@ -103,6 +103,7 @@ def pre_render(kw):
     kw["_top_notice"] = None
     # 用于渲染其他组件
     kw["_render"] = render
+    kw["Storage"] = Storage
     kw["xutils"]  = xutils
     kw["xconfig"] = xconfig
     kw["_notice_count"] = get_message_count(user_name)

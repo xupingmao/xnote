@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/04/10 00:12:21
+# @modified 2018/04/27 22:46:10
 
 '''
 xnote系统配置
@@ -317,6 +317,8 @@ def add_notice(user=None,
     """
     添加通知事件, 条件为None默认永真，比如user为None，向所有用户推送
     """
+    if link is None:
+        link = '#'
     _notice_list.append(Storage(user=user, year=year, month=month, day=day, wday=wday, message=message, link=link))
 
 def get_notice_list(type='today', user=None):

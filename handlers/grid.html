@@ -1,0 +1,15 @@
+{% extends base.html %}
+
+{% block body %}
+
+<div class="grid-title">
+    <a href="/" class="link">Home</a> › {{name}}
+</div>
+<div class="grid-row">
+    {% for item in items %}
+        <div class="grid-item">
+            <a class="link" href="{{item.url}}">{{item.name}}</a>
+        </div>
+    {% end %}
+</div>
+{% end %}
