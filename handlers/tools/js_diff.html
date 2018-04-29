@@ -63,8 +63,10 @@
 
 {% block body %}
 
+{% set title = "文本对比" %}
+{% include "tools/base_title.html" %}
+
 <div id="settings">
-    <h2>Diff</h2>
     <label><input type="radio" name="diff_type" value="diffChars"> Chars</label>
     <label><input type="radio" name="diff_type" value="diffWords"> Words</label>
     <label><input type="radio" name="diff_type" value="diffLines" checked> Lines</label>

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/04/29 20:20:06
+# @modified 2018/04/30 00:38:46
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -268,7 +268,7 @@ def init_record_table():
         manager.add_column("key",  "text", "")
         manager.add_column("value", "text", "")
 
-def init_config_table():
+def init_storage_table():
     """
     通用的配置对象, 比词典多一个type，用来存储个人的一些设置之类的
     """
@@ -280,6 +280,7 @@ def init_config_table():
         manager.add_column("type",  "text", "")
         manager.add_column("key",   "text", "")
         manager.add_column("value", "text", "")
+        manager.add_index("key")
 
 def init_dict_table():
     """
@@ -392,7 +393,7 @@ def get_record_table():
     dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
     return DBWrapper(dbpath, "record")
 
-def get_config_table():
+def get_storage_table():
     return DBWrapper(xconfig.DB_PATH, "storage")
 
 def get_dict_table():
@@ -418,7 +419,7 @@ def init():
     init_schedule_table()
     init_message_table()
     init_dict_table()
-    init_config_table()
+    init_storage_table()
     # init_collection_table()
     # 非核心结构记录各种日志数据
     init_record_table()

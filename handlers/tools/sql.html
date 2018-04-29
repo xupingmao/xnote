@@ -9,7 +9,7 @@
 .CodeMirror {
     width: 100%;
     font-size:16px;
-    height: 300px;
+    height: 80px;
     border: 1px solid #ccc;
 }
 </style>
@@ -28,7 +28,7 @@
     </select>
     </p>
 
-<textarea id="editor" name="sql" style="width:100%;" rows = 6>{{sql}}</textarea>
+<textarea id="editor" name="sql" style="width:100%;">{{sql}}</textarea>
 <button>Run</button>
 </form>
 </div>
@@ -36,7 +36,7 @@
 <div class="col-md-12">
 {% if len(keys) > 0 %}
 
-<table>
+<table class="table">
 <tr>
     {% for key in keys %}
     <th>{{key}}</th>

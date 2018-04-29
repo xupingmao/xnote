@@ -86,7 +86,7 @@ class GridHandler:
         name = "工具库"
         if type == "tool":
             items = list(filter(tool_filter, _tools))
-            db = xtables.get_config_table()
+            db = xtables.get_storage_table()
             config = db.select_one(where=dict(key="tools", user=xauth.get_current_name()))
             if config is not None:
                 config_list = xutils.parse_config_text(config.value)
