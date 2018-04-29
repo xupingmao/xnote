@@ -61,8 +61,6 @@ class TagNameHandler:
         limit  = xutils.get_argument("limit", 10, type=int)
         offset = (page-1) * limit
         pagesize = xconfig.PAGE_SIZE
-
-        # role = xauth.get_current_role()
         role = "admin"
 
         if role == "admin":
@@ -95,7 +93,7 @@ class TagListHandler:
     @xauth.login_required()
     def GET(self):
         db = dao.get_file_db()
-        user_name = xauth.get_current_role()
+        user_name = xauth.get_current_name()
         # if user_name == "admin":
         #     sql = "SELECT name, COUNT(*) AS amount FROM file_tag GROUP BY name ORDER BY amount DESC, name ASC";
         # else:

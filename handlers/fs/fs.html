@@ -163,7 +163,7 @@
 <table class="col-md-12 no-border-table">
 {% for item in filelist %}
     {# 隐藏文件 #}
-    {% if xconfig.FS_HIDE_FILES and item.name[0] == "." %}
+    {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." or item.name.endswith((".pyc", ".class"))) %}
         {% continue %}
     {% end %}
 

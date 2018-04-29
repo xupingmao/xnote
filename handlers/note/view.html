@@ -160,8 +160,8 @@ img {
 -->
 
     {% if show_path_list %}
-    <h3>
-        <a href="/note/group">Home</a> ›
+    <div class="grid-title">
+        <a href="/">Home</a> ›
         {% for item in pathlist %}
             <a href="{{item.url}}">{{ item.name }}</a> ›
         {% end %}
@@ -176,7 +176,7 @@ img {
             <a class="float-right link prompt-btn" message="分类名" 
                     action="/note/add?type=group&parent_id={{file_id}}&name=">新增</a>
         {% end %}
-    </h3>
+    </div>
     {% end %}
 
     {% if error != "" and error != None%}

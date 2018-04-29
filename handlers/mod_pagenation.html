@@ -1,5 +1,5 @@
 {% if page_max > 0 %}
-<p>
+<div class="pagenation">
     <a class="x-page-link" href="#">共{{page_max}}页</a> 
     {% if page > 1 %}
     <a class="x-page-link" href="{{page_url}}{{page-1}}">上一页</a>
@@ -13,5 +13,5 @@
     {% if page_max > 2 %}
     <a class="x-page-link" href="{{page_url}}{{page_max}}">尾页</a>
     {% end %}
-</p>
+</div>
 {% end %}

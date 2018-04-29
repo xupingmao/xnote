@@ -138,7 +138,7 @@ class handler:
         title     = xutils.get_argument("title", "")
         category  = xutils.get_argument("category", "")
         page      = xutils.get_argument("page", 1, type = int)
-        user_name = xauth.get_current_role()
+        user_name = xauth.get_current_name()
         page_url  =  "/search/search?key=%s&category=%s&page="\
             % (key, category)
         pagesize = xconfig.PAGE_SIZE

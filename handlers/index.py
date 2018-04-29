@@ -52,6 +52,16 @@ _tools = [
     link("二维码", "/tools/barcode"),
 ]
 
+
+def tool_filter(item):
+    if item.role is None:
+        return True
+    if xauth.get_current_role() == "admin":
+        return True
+    if xauth.get_current_role() == item.role:
+        return True
+    return False
+
 class Home:
 
     def GET(self):
@@ -60,7 +70,7 @@ class Home:
         ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
             vars=dict(creator=xauth.get_current_name()))
 
-        tools = list(filter(lambda x: x.role is None or x.role == xauth.get_current_role(), _tools))[:4]
+        tools = list(filter(tool_filter, _tools))[:4]
         return xtemplate.render("index.html", 
             ungrouped_count = ungrouped_count,
             file_type="group_list",
@@ -74,7 +84,7 @@ class GridHandler:
         items = []
         name = "工具库"
         if type == "tool":
-            items = list(filter(lambda x: x.role is None or x.role == xauth.get_current_role(), _tools))
+            items = list(filter(tool_filter, _tools))
         return xtemplate.render("grid.html", items=items, name = name)
 
 class Unauthorized():

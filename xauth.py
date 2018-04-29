@@ -93,7 +93,11 @@ def get_current_role():
     user = get_current_user()
     if user is None:
         return None
-    return user.get("name")
+    name = user.get("name")
+    if name == "admin":
+        return "admin"
+    else:
+        return "user"
 
 def get_md5_hex(pswd):
     pswd_md5 = hashlib.md5()

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/04/18 00:56:41
+# @modified 2018/04/29 13:02:20
 
 import sys
 import os
@@ -67,6 +67,10 @@ class TestMain(unittest.TestCase):
         json_value = value.decode("utf-8")
         files = json.loads(json_value)["files"]
         print("files=%s" % len(files))
+
+    def test_index(self):
+        self.check_OK("/")
+        self.check_OK("/index")
 
     def test_fs_func(self):
         if not xutils.is_windows():
