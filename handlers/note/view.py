@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/04/08 23:34:34
+# @modified 2018/04/29 15:51:08
 
 import profile
 import math
@@ -65,9 +65,13 @@ class ViewHandler:
         xconfig.note_history.put(dict(user=user_name, file_id = id, name = file.name))
 
         if file.type == "group":
-            amount = db.count(where="parent_id=$id AND is_deleted=0 AND creator=$creator", 
-                vars=dict(id=file.id, creator=user_name))
-            files = db.select(where=dict(parent_id=file.id, is_deleted=0, creator=user_name), 
+            where_sql = "parent_id=$parent_id AND is_deleted=0 AND creator=$creator"
+            if xauth.is_admin():
+                where_sql = "parent_id=$parent_id AND is_deleted=0"
+            amount = db.count(where = where_sql,
+                vars=dict(parent_id=file.id, creator=user_name))
+            files = db.select(where = where_sql, 
+                vars=dict(parent_id=file.id, is_deleted=0, creator=user_name), 
                 order="priority DESC, name", 
                 limit=pagesize, 
                 offset=(page-1)*pagesize)
