@@ -797,7 +797,6 @@ li.menu-item:hover {
 
 .grid-item {
     width: 220px;
-    background-color: #fff;
     padding: 5px;
     margin: 5px;
     margin-top: 0px;
@@ -812,7 +811,6 @@ li.menu-item:hover {
 
 .group-div {
     width: 220px;
-    background-color: #fff;
     padding: 5px;
     margin: 5px;
     margin-top: 0px;

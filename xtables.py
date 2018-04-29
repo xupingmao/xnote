@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/04/11 23:00:30
+# @modified 2018/04/29 15:41:04
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -248,10 +248,10 @@ def init_message_table():
         manager.add_index("ctime")
         manager.add_index("status")
 
-def init_bookmark_table():
+def init_collection_table():
     # 2017/12/09
     # 通用的收藏数据结构，基于file的收藏只能收藏file而且不能支持多用户
-    with TableManager(xconfig.DB_PATH, "bookmark") as manager:
+    with TableManager(xconfig.DB_PATH, "collection") as manager:
         manager.add_column("user", "text", "")
         manager.add_column("name", "text", "")
         manager.add_column("link", "text", "")
@@ -414,11 +414,11 @@ def init():
         return
     init_user_table()
     init_file_table()
-    # init_marked_file_table()
     init_tag_table()
     init_schedule_table()
     init_message_table()
     init_dict_table()
+    # init_collection_table()
     # 非核心结构记录各种日志数据
     init_record_table()
 

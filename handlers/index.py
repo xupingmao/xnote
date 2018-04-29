@@ -13,8 +13,8 @@ index_html = """
 {% end %}
 """
 
-def link(name, url, role = None):
-    return Storage(name = name, url = url, role = role)
+def link(name, link, role = None):
+    return Storage(name = name, link = link, role = role)
 
 _tools = [
     link("系统状态", "/system/monitor", "admin"),
