@@ -1,0 +1,64 @@
+{% extends base.html %}
+
+{% block head %}
+
+<link rel="stylesheet" href="/static/lib/codemirror/codemirror.min.css">
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/xq-light.css">
+<script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
+<script type="text/javascript" src="/static/js/editor.js"></script>
+<script type="text/javascript" src="/static/lib/codemirror/mode/properties.js"></script>
+
+<style type="text/css">
+    .search-key {
+        background-color: #FF8000;
+        color: #000;
+    }
+
+    #result {
+        border: 1px solid #ccc;
+        padding: 4px;
+        background-color: #eee;
+    }
+    #editorArea {
+        border: 1px solid #ccc;
+    }
+</style>
+{% end %}
+
+{% block body %}
+
+<div class="grid-title">
+    <a href="/more?type=tool" class="link">工具库</a>
+    › 系统配置
+</div>
+
+<div class="col-md-12">
+    <p style="color:red">{{?error}}</p>
+</div>
+<form method="POST" action="/system/user/config">
+<div class="col-md-12">
+    <input name="key" class="hide" value="{{config.key}}"/>
+    <div id="editorArea" class="col-md-12">
+        <textarea name="value" id="editor">{{config.value}}</textarea>
+    </div>
+
+    <div class="col-md-12 bottom-offset-1">
+        <input type="submit" value="保存">
+    </div>
+</div>
+</form>
+
+{# TODO 需要处理下搜索的高亮 #}
+
+<script type="text/javascript">
+    $(function () {
+        var editor = initCodeMirror("#editor", {
+            filename: getUrlParams().path,
+            height: "500px",
+            mode: "properties"
+        })
+        window.codeMirror = editor;
+    });
+</script>
+{% end %}

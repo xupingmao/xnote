@@ -246,3 +246,17 @@ def random_string(length, chars=ALPHA_NUM):
     return value
 
 
+def parse_config_text(text):
+    """解析key/value格式的配置文本"""
+    config = []
+    for line in text.split("\n"): 
+        line = line.strip().replace('\n', '') 
+        if line.find("#")!=-1: 
+            line=line[0:line.find('#')] 
+        if line.find('=') > 0: 
+            strs = line.split('=') 
+            strs[1]= line[len(strs[0])+1:]
+            config.append(dict(key=strs[0], value=strs[1]))
+    return config
+            
+

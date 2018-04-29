@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/04/21 01:32:54
+# @modified 2018/04/29 20:42:35
 
 """
 xnote工具类总入口
@@ -36,7 +36,7 @@ from web.utils import safestr, safeunicode
 from util.dateutil import *
 from util.netutil  import *
 from util.fsutil   import *
-from util.textutil import text_contains
+from util.textutil import text_contains, parse_config_text
 from xconfig import Storage
 
 try:

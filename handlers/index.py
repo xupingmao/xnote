@@ -82,10 +82,16 @@ class GridHandler:
     def GET(self):
         type = xutils.get_argument("type", "tool")
         items = []
+        customized_items = []
         name = "工具库"
         if type == "tool":
             items = list(filter(tool_filter, _tools))
-        return xtemplate.render("grid.html", items=items, name = name)
+            db = xtables.get_config_table()
+            config = db.select_one(where=dict(key="tools", user=xauth.get_current_name()))
+            if config is not None:
+                config_list = xutils.parse_config_text(config.value)
+                customized_items = map(lambda x: Storage(name=x.get("key"), link=x.get("value")), config_list)
+        return xtemplate.render("grid.html", items=items, name = name, customized_items = customized_items)
 
 class Unauthorized():
     html = """

@@ -2,6 +2,9 @@
 
 {% block body %}
 
+{% init items = [] %}
+{% init customized_items = [] %}
+
 <div class="grid-title">
     <a href="/" class="link">Home</a> › {{name}}
 </div>
@@ -12,4 +15,17 @@
         </div>
     {% end %}
 </div>
+
+<div class="grid-title">
+    自定义
+    <a href="/system/user/config?key=tools" class="float-right link">编辑</a>
+</div>
+<div class="grid-row">
+    {% for item in customized_items %}
+        <div class="grid-item">
+            <a class="link" href="{{item.link}}">{{item.name}}</a>
+        </div>
+    {% end %}
+</div>
+
 {% end %}

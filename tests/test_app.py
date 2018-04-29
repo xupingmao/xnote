@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/04/29 13:02:20
+# @modified 2018/04/29 20:58:39
 
 import sys
 import os
@@ -208,6 +208,15 @@ class TestMain(unittest.TestCase):
         self.check_200("/system/stats")
         self.check_200("/system/stats/location", method="POST")
         self.check_200("/system/monitor")
+
+    def test_sys_config(self):
+        data = json_request("/system/user/config?key=unit-test&_format=json", method="POST", data=dict(key="unit-test", value="hello"))
+        value = data.get("config").get("value")
+        self.assertEqual("hello", value)
+
+        data = json_request("/system/user/config?key=unit-test&_format=json")
+        value = data.get("config").get("value")
+        self.assertEqual("hello", value)
 
     def test_tools(self):
         self.check_200("/tools/sql")

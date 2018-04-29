@@ -795,6 +795,21 @@ li.menu-item:hover {
     float: left;
 }
 
+.grid-link {
+    display: block;
+    float: left;
+    width: 220px;
+    padding: 5px;
+    margin: 5px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    line-height: 25px;
+}
+
+.grid-link:hover {
+    background: #eee;
+}
+
 .grid-item {
     width: 220px;
     padding: 5px;
