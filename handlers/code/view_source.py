@@ -47,6 +47,7 @@ class UpdateHandler(object):
         if content == "" or path == "":
             raise web.seeother("/fs/")
         else:
+            content = content.replace("\r\n", "\n")
             xutils.savetofile(path, content)
             raise web.seeother("/code/view_source?path=" + xutils.quote_unicode(path))
         

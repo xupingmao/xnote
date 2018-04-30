@@ -1,0 +1,14 @@
+{% extends base.html %}
+
+{% block body %}
+
+{% for name in items %}
+    <div class="grid-title">{{name}}</div>
+    <div class="grid-row">
+        {% for link in items[name] %}
+            <a class="grid-link" href="{{link.link}}">{{link.name}}</a>
+        {% end %}
+    </div>
+{% end %}
+
+{% end %}

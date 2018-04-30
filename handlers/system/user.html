@@ -1,0 +1,35 @@
+{% extends base.html %}
+
+{% block body %}
+
+<div class="grid-title">
+    <a href="/more?type=tool" class="link">工具库</a> › {{_user_name}}
+    
+    <a class="float-right link" href="/logout">登出</a>
+</div>
+
+<div class="row top-offset-1">
+    <hr/>
+    当前时间: <span id="currentTime"></span>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    function updateTime () {
+        $("#currentTime").html(new Date().format("yyyy-MM-dd HH:mm:ss"));
+        setTimeout(updateTime, 1000);
+    }
+    updateTime();
+})
+
+
+function runCommand(path) {
+    // alert("runCommand "+ path);
+    $.get("/system/command", {path: path}, function(data, status) {
+        alert(data);
+    })
+}
+
+
+</script>
+{% end %}

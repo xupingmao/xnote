@@ -17,6 +17,7 @@ def link(name, link, role = None):
     return Storage(name = name, link = link, role = role)
 
 _tools = [
+    link("我的账号", "/system/user"),
     link("系统状态", "/system/monitor", "admin"),
     link("脚本管理", "/system/script", "admin"),
     link("定时任务",   "/system/crontab", "admin"),
@@ -26,7 +27,7 @@ _tools = [
     link("历史记录",   "/system/history", "admin"),
     link("App管理", "/system/app_admin", "admin"),
     link("后台模板缓存", "/system/template_cache", "admin"),
-    link("重新加载模块", "/system/reload",         "admin"),
+    link("系统模块刷新", "/system/reload",         "admin"),
     link("Python文档", "/system/modules_info",    "admin"),
 
     link("标签云", "/file/taglist", "user"),
@@ -54,7 +55,7 @@ _tools = [
     link("base64", "/tools/base64"),
     link("16进制转换", "/tools/hex"),
     link("md5", "/tools/md5"),
-    link("sha1", "/tools/sha1"),
+    link("sha1签名", "/tools/sha1"),
     link("URL编解码", "/tools/urlcoder"),
     link("二维码", "/tools/barcode"),
 ]

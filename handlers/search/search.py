@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/03/25 11:41:41
+# @modified 2018/04/30 18:02:51
 
 import re
 import os
@@ -19,7 +19,7 @@ import xmanager
 import xtemplate
 import xtables
 from xutils import textutil
-from xutils import Queue, History
+from xutils import Queue, History, Storage
 
 config = xconfig
 
@@ -81,7 +81,10 @@ class handler:
         category = xutils.get_argument("category", "")
         words   = textutil.split_words(key)
         files   = []
-        xconfig.search_history.put(dict(key=key, category=category, user=xauth.get_current_name()))
+        xconfig.search_history.put(Storage(name=key, 
+            category=category, 
+            user=xauth.get_current_name(), 
+            link=web.ctx.fullpath))
 
         start_time = time.time()
         ctx = SearchContext()

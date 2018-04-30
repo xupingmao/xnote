@@ -25,6 +25,13 @@ class ListHandler:
         xmanager.reload()
         return self.GET()
 
+class UserHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        return xtemplate.render("system/user.html")
+
 xurls = (
+    r"/system/user", UserHandler,
     r"/system/user/list", ListHandler,
 )

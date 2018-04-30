@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/04/30 00:52:49
+# @modified 2018/04/30 18:31:56
 
 import sys
 import os
@@ -217,6 +217,10 @@ class TestMain(unittest.TestCase):
         data = json_request("/system/storage?key=unit-test&_format=json")
         value = data.get("config").get("value")
         self.assertEqual("hello", value)
+
+    def test_user(self):
+        self.check_OK("/system/user")
+        self.check_OK("/system/user/list")
 
     def test_tools(self):
         self.check_200("/tools/sql")
