@@ -13,7 +13,7 @@ import xconfig
 import xtables
 import xutils
 from xutils import readfile, savetofile, sqlite3
-from util import dateutil
+from xutils import dateutil
 
 MAX_VISITED_CNT = 200
 readFile = readfile

@@ -18,7 +18,7 @@ import xauth
 import xmanager
 import xtemplate
 import xtables
-from util import textutil
+from xutils import textutil
 from xutils import Queue, History
 
 config = xconfig

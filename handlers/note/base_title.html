@@ -1,0 +1,8 @@
+{% init pathlist = [] %}
+<div class="grid-title">
+    <a href="/">Home</a> ›
+    {% for item in pathlist %}
+        <a href="{{item.url}}">{{ item.name }}</a> ›
+    {% end %}
+</div>
+

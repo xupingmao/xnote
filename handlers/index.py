@@ -39,11 +39,18 @@ _tools = [
     link("日历", "/tools/date"),
     link("代码模板", "/tools/code_template"),
     link("浏览器信息", "/tools/browser_info"),
+    link("我的IP", "/api/getip"),
+
+    # 字符串工具
     link("文本对比", "/tools/js_diff"),
     link("字符串转换", "/tools/string"),
+
+    # 图片处理工具
     link("图片合并", "/tools/img_merge"),
     link("图片拆分", "/tools/img_split"),
     link("图像灰度化", "/tools/img2gray"),
+
+    # 编解码工具
     link("base64", "/tools/base64"),
     link("16进制转换", "/tools/hex"),
     link("md5", "/tools/md5"),

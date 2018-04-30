@@ -56,7 +56,7 @@ class TagNameHandler:
     @xauth.login_required()
     def GET(self, tagname):
         tagname = xutils.unquote(tagname)
-        db = dao.get_file_db()
+        db = xtables.get_file_table()
         page   = xutils.get_argument("page", 1, type=int)
         limit  = xutils.get_argument("limit", 10, type=int)
         offset = (page-1) * limit
@@ -92,7 +92,7 @@ class TagListHandler:
 
     @xauth.login_required()
     def GET(self):
-        db = dao.get_file_db()
+        db = xtables.get_file_table()
         user_name = xauth.get_current_name()
         # if user_name == "admin":
         #     sql = "SELECT name, COUNT(*) AS amount FROM file_tag GROUP BY name ORDER BY amount DESC, name ASC";

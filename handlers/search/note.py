@@ -8,7 +8,7 @@ import xauth
 import xmanager
 import xconfig
 import xtables
-from util import textutil
+from xutils import textutil
 from xutils import SearchResult, text_contains
 config = xconfig
 

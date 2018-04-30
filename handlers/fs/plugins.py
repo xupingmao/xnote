@@ -9,7 +9,7 @@ import xutils
 import xtemplate
 import sys
 import xauth
-from util import ziputil
+from xutils import ziputil
 
 class ListHandler:
     @xauth.login_required("admin")

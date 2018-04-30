@@ -12,6 +12,14 @@ def get_real_ip():
         return x_forwarded_for.split(",")[0]
     return web.ctx.env.get("REMOTE_ADDR")
 
+def save_login_info(name, value):
+    db = xtables.get_record_table()
+    message = "%s-%s" % (get_real_ip(), value)
+    if name != "":
+        db.insert(type="login", key=name, value=message, 
+            ctime = xutils.format_datetime(), 
+            cdate = xutils.format_date())
+
 class handler:
 
     def POST(self):
@@ -21,16 +29,10 @@ class handler:
         users = xauth.get_users()
         error = ""
 
-        db = xtables.get_record_table()
-        value = "%s-%s" % (get_real_ip(), pswd)
-        if name != "":
-            db.insert(type="login", key=name, value=value, 
-                ctime = xutils.format_datetime(), 
-                cdate = xutils.format_date())
-
         if name in users:
             user = users[name]
             if pswd == user["password"]:
+                save_login_info(name, "success")
                 web.setcookie("xuser", name, expires= 24*3600*30)
                 pswd_md5 = xauth.get_password_md5(pswd)
                 web.setcookie("xpass", pswd_md5, expires=24*3600*30)
@@ -41,8 +43,11 @@ class handler:
                 raise web.seeother(target)
             else:
                 error = "user or password error"
+                save_login_info(name, pswd)
         else:
-            error = "user or password error"  
+            error = "user or password error"
+            save_login_info(name, pswd)
+
         return xtemplate.render("login.html", 
             username=name, 
             password=pswd,

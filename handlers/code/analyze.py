@@ -4,7 +4,7 @@ import os
 import xtemplate
 import xutils
 import xconfig
-from util import textutil
+from xutils import textutil
 from xutils import xhtml_escape, Storage
 
 """代码分析工具，对文本文件进行全文搜索"""

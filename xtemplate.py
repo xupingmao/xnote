@@ -11,11 +11,11 @@ import math
 import inspect
 import six
 from tornado.template import Template, Loader
-from util import dateutil
 import xconfig
 import xauth
 import xutils
 import xtables
+from xutils import dateutil
 from xutils import ConfigParser, Storage, tojson
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR

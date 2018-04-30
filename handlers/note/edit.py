@@ -1,22 +1,43 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/03/16 22:20:54
+# @modified 2018/04/30 13:11:23
 
 """Description here"""
 import web
 import time
-from .dao import FileDO
-from . import dao
-from util import dateutil
 import xauth
 import xutils
 import xtemplate
 import xtables
 from xutils import Storage
+from xutils import dateutil
 
 def get_by_name(db, name):
     return db.select_one(where=dict(name = name, is_deleted = 0, creator = xauth.get_current_name()))
+
+
+def get_pathlist(db, parent_id, limit = 2):
+    file = db.select_one(where=dict(id = parent_id))
+    pathlist = []
+    while file is not None:
+        file.url = "/note/view?id=%s" % file.id
+        pathlist.insert(0, file)
+        if len(pathlist) >= limit:
+            break
+        if file.parent_id == 0:
+            break
+        else:
+            file = db.select_one(where=dict(id=file.parent_id))
+    return pathlist
+
+def update_children_count(parent_id, db=None):
+    if parent_id is None or parent_id == "":
+        return
+    if db is None:
+        db = get_file_db()
+    group_count = db.count(where="parent_id=$parent_id AND is_deleted=0", vars=dict(parent_id=parent_id))
+    db.update(size=group_count, where=dict(id=parent_id))
 
 class AddHandler:
 
@@ -33,7 +54,7 @@ class AddHandler:
         if key == "":
             key = time.strftime("%Y.%m.%d")
 
-        file = FileDO(name)
+        file = Storage(name = name)
         file.atime   = xutils.format_datetime()
         file.mtime   = xutils.format_datetime()
         file.ctime   = xutils.format_datetime()
@@ -57,9 +78,11 @@ class AddHandler:
                 # 分组提前
                 if file.type == "group":
                     file.priority = 1
-                inserted_id = db.insert(**file)                
+                file_dict = dict(**file)
+                del file_dict["default_value"]
+                inserted_id = db.insert(**file_dict)                
                 # 更新分组下面页面的数量
-                dao.update_children_count(parent_id, db = db)
+                update_children_count(parent_id, db = db)
                 if format == "json":
                     return dict(code="success", id=inserted_id)
                 raise web.seeother("/file/view?id={}".format(inserted_id))
@@ -70,6 +93,7 @@ class AddHandler:
             error = str(e)
         return xtemplate.render("note/add.html", key = "", 
             name = key, tags = tags, error=error,
+            pathlist = get_pathlist(db, parent_id),
             message = error,
             code = code)
 

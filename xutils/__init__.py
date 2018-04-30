@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/04/29 20:42:35
+# @modified 2018/04/30 13:39:08
 
 """
 xnote工具类总入口
@@ -28,15 +28,18 @@ import web
 import xconfig
 from collections import deque
 from fnmatch import fnmatch
-from util.ziputil import *
-from util.netutil import splithost
-from util.textutil import edit_distance
 from tornado.escape import xhtml_escape        
 from web.utils import safestr, safeunicode
-from util.dateutil import *
-from util.netutil  import *
-from util.fsutil   import *
-from util.textutil import text_contains, parse_config_text
+
+# xnote工具
+from . import textutil, ziputil, fsutil, logutil, dateutil
+from .ziputil import *
+from .netutil import splithost
+from .textutil import edit_distance
+from .dateutil import *
+from .netutil  import *
+from .fsutil   import *
+from .textutil import text_contains, parse_config_text
 from xconfig import Storage
 
 try:

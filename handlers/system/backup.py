@@ -12,9 +12,7 @@ import time
 import xutils
 import xconfig
 from xutils import Storage
-from util import dateutil
-from util import fsutil
-from util import logutil
+from xutils import dateutil, fsutil, logutil
 
 config = xconfig
 
