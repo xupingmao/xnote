@@ -6,7 +6,7 @@
     <div class="grid-title">{{name}}</div>
     <div class="grid-row">
         {% for link in items[name] %}
-            <a class="grid-link" href="{{link.link}}">{{link.name}}</a>
+            <a class="grid-link" href="{{link.get('link')}}">{{link.name}}</a>
         {% end %}
     </div>
 {% end %}

@@ -113,3 +113,7 @@ def search(ctx, expression=None):
     files = groups + text_files
     return files
 
+# 初始化缓存
+if xconfig.USE_CACHE_SEARCH:
+    get_cached_files()
+

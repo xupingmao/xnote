@@ -65,7 +65,9 @@
 {% end %}
 
 {% if op == "edit" %}
-    <h3>{{name}}</h3>
+    <!-- <h3>{{name}}</h3> -->
+    {% set title = name %}
+    {% include "tools/base_title.html" %}
     {# 编辑 #}
     <form method="POST" action="/system/script_admin/save">
         <div id="editorArea" class="col-md-12">
@@ -101,7 +103,7 @@
             <tr>
                 <td class="index-td">{{index+1}}</td>
                 <td>
-                    <a href="/system/script_admin/edit?name={{script}}">{{script}}</a>
+                    <a href="/system/script/edit?name={{script}}">{{script}}</a>
                 </td>
                 <td class="option-td">
                     <input type="button" value="执行" class="executeScript btn" scriptName="{{script}}"/> 

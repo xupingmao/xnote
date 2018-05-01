@@ -1,3 +1,7 @@
+{% init right_link = None %}
 <div class="grid-title">
     <a href="/more?type=tool" class="link">工具库</a> › {{title}}
+    {% if right_link is not None %}
+        <a class="float-right link" href="{{right_link.get('link')}}">{{right_link.get('name')}}</a>
+    {% end %}
 </div>
