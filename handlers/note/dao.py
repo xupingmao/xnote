@@ -184,6 +184,7 @@ def get_file_db():
 def get_pathlist(db, file, limit = 2):
     pathlist = []
     while file is not None:
+        pathlist.insert(0, file)
         file.url = "/note/view?id=%s" % file.id
         if len(pathlist) >= limit:
             break
@@ -191,8 +192,6 @@ def get_pathlist(db, file, limit = 2):
             break
         else:
             file = db.select_one(where=dict(id=file.parent_id))
-        if file is not None:
-            pathlist.insert(0, file)
     return pathlist
 
 def get_by_id(id, db=None):

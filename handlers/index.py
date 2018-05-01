@@ -57,7 +57,8 @@ _tools = [
     link("md5", "/tools/md5"),
     link("sha1签名", "/tools/sha1"),
     link("URL编解码", "/tools/urlcoder"),
-    link("二维码", "/tools/barcode"),
+    link("条形码", "/tools/barcode"),
+    link("二维码", "/tools/qrcode"),
 ]
 
 

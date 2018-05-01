@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/04/30 13:10:40
+# @modified 2018/04/30 21:46:23
 
 '''
 xnote系统配置
@@ -41,6 +41,7 @@ INIT_SCRIPT = None
 RECORD_LOCATION = False
 # 菜单配置
 MENU_LIST = []
+TOOL_LIST = []
 
 # 处理器目录
 HANDLERS_DIR = "handlers"

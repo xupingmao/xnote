@@ -149,7 +149,7 @@ class RecentEditHandler:
             limit = PAGE_SIZE)
         count = db.count(where, vars = dict(creator = xauth.get_current_name()))
         return xtemplate.render("note/view.html", 
-            pathlist = [],
+            pathlist = [Storage(name="最近更新", type="group", url="/file/recent_edit")],
             file_type = "group",
             files = list(files), 
             file = Storage(name="最近更新", type="group"),

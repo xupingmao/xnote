@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
 # Copyright (c) 2017
-# @modified 2018/02/12 14:09:24
+# @modified 2018/04/30 21:46:46
 """Description here"""
 
 import os
@@ -57,7 +57,7 @@ def search(ctx, name):
 
         f = SearchResult()
         f.name = "二维码"
-        f.url = "/tools/barcode?content=" + name
+        f.url = "/tools/qrcode?content=" + name
         files.append(f)
     search_menu(files, name)
     return files

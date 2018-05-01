@@ -98,12 +98,11 @@
             <div>
                 <span id="fileId" class="hide">{{file.id}}</span>
             </div>
-            <div class="col-md-12">
-                <div class="col-md-12 pathlist">
-                    <a href="/file/group">Home</a> / {% for item in pathlist %}
-                    <a href="{{item.url}}">{{ item.name }}</a> / {% end %}
-                    <a href="{{file.url}}">{{ file.name }}</a>
-                </div>
+            <div class="grid-title">
+                <a href="/">Home</a>
+                {% for item in pathlist %}
+                    › <a href="{{item.url}}">{{ item.name }}</a>
+                {% end %}
             </div>
         </div>
         <div class="col-md-12">

@@ -1,0 +1,39 @@
+{% extends base.html %}
+
+{% block head %}
+    <script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
+    <script type="text/javascript" src="/static/lib/utf.js"></script>
+{% end %}
+
+{% block body %}
+
+    <div>
+        <h3>生成二维码</h3>
+        <textarea id="qrcode_input" class="col-md-12" rows=5></textarea>
+        <button id="generate">生成</button>
+    </div>
+   
+    <div id="qrcode" class="top-offset-1"></div>
+
+    <script>
+    $(function () {
+        function showBarCode() {
+            var key = $("#qrcode_input").val();
+            key = utf16to8(key);
+            if (key) {
+                $("#qrcode").html("");
+                $("#qrcode").qrcode(key);
+            }    
+        }
+
+        $("#generate").click(function () {
+            showBarCode();
+        });
+
+        var content = getUrlParam("content");
+        $("#qrcode_input").text(content);
+        showBarCode();
+    });
+    </script>
+
+{% end %}

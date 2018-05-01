@@ -1,28 +1,46 @@
 {% extends base.html %}
 
 {% block head %}
-    <script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
+    <script type="text/javascript" src="/static/lib/JsBarcode/JsBarcode.all.min.js"></script>
     <script type="text/javascript" src="/static/lib/utf.js"></script>
 {% end %}
 
 {% block body %}
 
+    {% set title = "条形码" %}
+    {% include "tools/base_title.html" %}
+
     <div>
-        <h3>生成二维码</h3>
-        <textarea id="qrcode_input" class="col-md-12" rows=5></textarea>
+        <textarea id="input" class="col-md-12" rows=5></textarea>
         <button id="generate">生成</button>
     </div>
    
-    <div id="qrcode"></div>
+    <div id="barcode" class="top-offset-1">
+        <img id="imgcode" /> 
+    </div>
 
     <script>
     $(function () {
         function showBarCode() {
-            var key = $("#qrcode_input").val();
+            var key = $("#input").val();
             key = utf16to8(key);
             if (key) {
-                $("#qrcode").html("");
-                $("#qrcode").qrcode(key);
+                JsBarcode("#imgcode", "123", {
+                  format: "CODE39",//选择要使用的条形码类型
+                  width:3,//设置条之间的宽度
+                  height:100,//高度
+                  displayValue:true,//是否在条形码下方显示文字
+                  text: key,//覆盖显示的文本
+                  fontOptions:"bold",//使文字加粗体或变斜体
+                  font:"Consolas",//设置文本的字体
+                  textAlign:"center",//设置文本的水平对齐方式
+                  textPosition:"bottom",//设置文本的垂直位置
+                  textMargin:5,//设置条形码和文本之间的间距
+                  fontSize:15,//设置文本的大小
+                  background:"#eee",//设置条形码的背景
+                  lineColor:"#000",//设置条和文本的颜色。
+                  margin:15//设置条形码周围的空白边距
+                });
             }    
         }
 
@@ -31,7 +49,7 @@
         });
 
         var content = getUrlParam("content");
-        $("#qrcode_input").text(content);
+        $("#input").text(content);
         showBarCode();
     });
     </script>

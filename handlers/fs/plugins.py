@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/04/24 01:14:41
+# @modified 2018/05/01 12:13:12
 import web
 import os
 import xconfig
@@ -35,7 +35,10 @@ class RunPluginHandler:
                 print("main(**kw)方法未定义")
         except Exception as e:
             xutils.print_exc()
-        result = sys.stdout.pop_record() + "\n执行完毕"
+        line = '-' * 30
+        header = "执行 %s\n%s\n" % (name, line)
+        footer = "\n%s\n执行完毕" % line
+        result = header + sys.stdout.pop_record() + footer
         return dict(code="success", data = xutils.mark_text(result))
 
 
