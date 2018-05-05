@@ -1,4 +1,7 @@
 # encoding=utf-8
+# @author xupingmao
+# @since 2017
+# @modified 2018/05/05 11:36:16
 
 __doc__ = """Methods for text operation"""
 

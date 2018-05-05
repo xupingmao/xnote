@@ -1,4 +1,7 @@
 # encoding=utf-8
+# @author xupingmao
+# @since 2017
+# @modified 2018/05/05 11:35:58
 """
 压缩文件，对非ASCII码进行urlencode处理
 """

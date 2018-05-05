@@ -7,7 +7,7 @@ import base64
 from . import logutil
 from web.utils import Storage
 
-def readFile(path):
+def readfile(path):
     """读取文件, 看xutils.readfile"""
     try:
         fp = open(path, encoding="utf-8")
@@ -20,17 +20,10 @@ def readFile(path):
         fp.close()
         return content
 
-def read_utf8(path):
-    fp = open(path, encoding="utf-8")
-    content = fp.read()
-    fp.close()
-    return content
-
-def read(path):
-    return readFile(path)
-
-def readfile(path):
-    return readFile(path)
+# readfile别名
+readFile = readfile
+read = readfile
+read_utf8 = readfile
 
 def readRawFile(path):
     fp = open(path, "rb")

@@ -1,6 +1,7 @@
 # encoding=utf-8
 import os
 import re
+import codecs
 
 try:
     # try py3 first
@@ -8,6 +9,8 @@ try:
     from urllib.request import urlopen
 except ImportError as e:
     from urllib2 import urlopen
+
+BUFSIZE = 1024 * 512
 
 def splithost(url):
     """splithost('//host[:port]/path') --> 'host[:port]', '/path'."""
@@ -63,9 +66,23 @@ def do_http(method, url, headers, data=None):
             raise Exception("暂不支持%s编码" % content_encoding)
         return resp.getcode(), response_headers, buf
 
+def http_get(url, charset='utf-8'):
+    out = []
+    bufsize = BUFSIZE
+    readsize = 0
+
+    stream = urlopen(url)
+    chunk = stream.read(bufsize)
+    while chunk:
+        out.append(chunk)
+        readsize += len(chunk)
+        chunk = stream.read(bufsize)
+    print("get %s bytes" % readsize)
+    bytes = b''.join(out)
+    return codecs.encode(bytes, charset)
 
 def download_http(address, destpath):
-    bufsize = 1024 * 512
+    bufsize = BUFSIZE
     stream = urlopen(address)
     chunk = stream.read(bufsize)
     dest = open(destpath, "wb")

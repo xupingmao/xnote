@@ -1,8 +1,12 @@
+# -*- coding:utf-8 -*-
+# @author xupingmao <578749341@qq.com>
+# @since 2017
+# @modified 2018/05/05 11:21:24
 
 def element(tag, text, clazz):
     """
-    >>> element('span', '123', 'test')
-    "<span class='test'>123</span>"
+        >>> element('span', '123', 'test')
+        "<span class='test'>123</span>"
     """
     return "<%s class='%s'>%s</%s>" % (tag, clazz, text, tag)
 
@@ -20,3 +24,4 @@ def link(link, name = None, clazz = "xnote-link"):
     if name is None:
         name = link
     return "<a class='%s' href='%s'>%s</a>" % (clazz, link, name)
+
