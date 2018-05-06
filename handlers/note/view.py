@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/04/29 15:51:08
+# @modified 2018/05/06 01:08:28
 
 import profile
 import math
@@ -62,7 +62,9 @@ class ViewHandler:
         files = []
         amount = 0
         template_name = "note/view.html"
-        xconfig.note_history.put(dict(user=user_name, file_id = id, name = file.name))
+        xconfig.note_history.put(dict(user=user_name, 
+            link = "/note/view?id=%s" % id, 
+            name = file.name))
 
         if file.type == "group":
             where_sql = "parent_id=$parent_id AND is_deleted=0 AND creator=$creator"

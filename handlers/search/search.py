@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/04/30 18:02:51
+# @modified 2018/05/05 11:43:39
 
 import re
 import os
@@ -81,10 +81,6 @@ class handler:
         category = xutils.get_argument("category", "")
         words   = textutil.split_words(key)
         files   = []
-        xconfig.search_history.put(Storage(name=key, 
-            category=category, 
-            user=xauth.get_current_name(), 
-            link=web.ctx.fullpath))
 
         start_time = time.time()
         ctx = SearchContext()
@@ -130,6 +126,11 @@ class handler:
                     xutils.print_exc()
         cost_time = (time.time() - start_time) * 1000
         xutils.log("  === total - %d ms ===" % cost_time)
+        xconfig.search_history.put(Storage(name="#search# %s - %d ms" % (key, cost_time), 
+            category=category, 
+            user=xauth.get_current_name(), 
+            link=web.ctx.fullpath))
+
         xmanager.fire("search.after", ctx)
         return ctx.tools + files
 
