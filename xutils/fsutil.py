@@ -80,19 +80,24 @@ def getFileExt(fname):
     if '.' not in fname:return ''
     return fname.split('.')[-1]
 
-def format_size(size):
+def format_file_size(size):
+    """
+        >>> format_file_size(10240)
+        '10.00K'
+    """
     if size < 1024:
-        return '%s B' % size
+        return '%sB' % size
     elif size < 1024 **2:
-        return '%.2f K' % (float(size) / 1024)
+        return '%.2fK' % (float(size) / 1024)
     elif size < 1024 ** 3:
-        return '%.2f M' % (float(size) / 1024 ** 2)
+        return '%.2fM' % (float(size) / 1024 ** 2)
     else:
-        return '%.2f G' % (float(size) / 1024 ** 3)
+        return '%.2fG' % (float(size) / 1024 ** 3)
 
-formatSize = format_size
+format_size = format_file_size
+formatSize  = format_size
         
-def renameFile(srcname, dstname):
+def rename_file(srcname, dstname):
     destDirName = os.path.dirname(dstname)
     if not os.path.exists(destDirName):
         os.makedirs(destDirName)

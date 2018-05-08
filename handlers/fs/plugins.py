@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/05/08 23:01:25
+# @modified 2018/05/08 23:20:42
 import web
 import os
 import xconfig
@@ -38,10 +38,10 @@ class RunPluginHandler:
             xutils.print_exc()
         line = '-' * 30
         header = "执行 %s\n%s\n" % (name, line)
-        footer = "\n%s\n执行完毕" % line
+        footer = "\n%s\n执行完毕，请确认下一步操作" % line
         result = header + sys.stdout.pop_record() + footer
         html = xutils.mark_text(result)
-        html += '''<div><button onclick="runPlugin('%s', true)">确认执行</button></div>''' % name
+        html += '''<div><button class="btn-danger" onclick="runPlugin('%s', true)">确认执行</button></div>''' % name
         return dict(code="success", data = html)
 
 

@@ -158,7 +158,9 @@ class TestMain(unittest.TestCase):
         out = xutils.http_get("http://baidu.com")
 
     def test_http_download(self):
-        xutils.http_download("http://baidu.com", "tmp.html")
+        fname = "baidu_tmp.html"
+        xutils.http_download("http://baidu.com", fname)
+        os.remove(fname)
 
     def test_splithost(self):
         host, path = xutils.splithost("http://example.com/hello")
