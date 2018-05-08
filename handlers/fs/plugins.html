@@ -66,12 +66,26 @@
 		$.post("/fs_api/run_plugin", 
 			{
 				name: name,
-				path: path,
+				path: path
 			},
 			function (result) {
 				showResult(result.data);
 			});
-	})
+	});
+
+    function runPlugin(name, confirmed) {
+        var path = $("#path").val();
+        showResult("开始执行 " + name);
+        $.post("/fs_api/run_plugin", 
+            {
+                name: name,
+                path: path,
+                confirmed: confirmed
+            },
+            function (result) {
+                showResult(result.data);
+            });
+    }
 </script>
 
 {% end %}

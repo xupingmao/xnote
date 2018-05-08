@@ -454,6 +454,19 @@ li.menu-item:hover {
     font-size: small;
     background-color: green;
     color: white;
+    border-radius: 0px;
+    padding: 3px;
+    margin-right: 2px;
+}
+
+.pink-tag {
+    background-color: pink;
+}
+
+.red-tag {
+    font-size: small;
+    background-color: red;
+    color: white;
     border-radius: 2px;
     padding-left: 2px;
     padding-right: 2px;
@@ -469,11 +482,8 @@ li.menu-item:hover {
 }
 
 .gray-tag {
-    font-size: small;
+    color: #000;
     background-color: #eee;
-    border-radius: 2px;
-    padding-left: 2px;
-    padding-right: 2px;
 }
 
 
@@ -507,6 +517,7 @@ li.menu-item:hover {
     text-decoration: none;
     color: white;
 }
+
 .tag-link:hover {
     background-color: initial;
     text-decoration: underline;
@@ -589,25 +600,6 @@ li.menu-item:hover {
 .note-visited-cnt {
     float: right;
     font-size: small;
-}
-
-.tag {
-    font-size: small;
-    background-color: green;
-    color: white;
-    border-radius: 2px;
-    padding-left: 2px;
-    padding-right: 2px;
-    margin-right: 2px;
-}
-
-.red-tag {
-    font-size: small;
-    background-color: red;
-    color: white;
-    border-radius: 2px;
-    padding-left: 2px;
-    padding-right: 2px;
 }
 
 .x-page-link {

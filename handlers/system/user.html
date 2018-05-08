@@ -3,12 +3,13 @@
 {% block body %}
 
 <div class="grid-title">
-    <a href="/more?type=tool" class="link">工具库</a> › {{_user_name}}
+    <a href="/more?type=tool" class="link">工具库</a> › 账号 › {{_user_name}}
     
     <a class="float-right link" href="/logout">登出</a>
 </div>
 
 <div class="row top-offset-1">
+    <a href="/system/storage?key=settings" class="link">个人设置</a>
     <hr/>
     当前时间: <span id="currentTime"></span>
 </div>

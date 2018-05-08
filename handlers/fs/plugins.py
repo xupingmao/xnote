@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/05/01 12:13:12
+# @modified 2018/05/08 23:01:25
 import web
 import os
 import xconfig
@@ -26,11 +26,12 @@ class RunPluginHandler:
         try:
             name = xutils.get_argument("name")
             path = xutils.get_argument("path")
+            confirmed = xutils.get_argument("confirmed") == "true"
             vars = dict()
             xutils.load_script(name, vars = vars)
             main_func = vars.get("main", None)
             if main_func is not None:
-                main_func(path = path)
+                main_func(path = path, confirmed = confirmed)
             else:
                 print("main(**kw)方法未定义")
         except Exception as e:
@@ -39,7 +40,9 @@ class RunPluginHandler:
         header = "执行 %s\n%s\n" % (name, line)
         footer = "\n%s\n执行完毕" % line
         result = header + sys.stdout.pop_record() + footer
-        return dict(code="success", data = xutils.mark_text(result))
+        html = xutils.mark_text(result)
+        html += '''<div><button onclick="runPlugin('%s', true)">确认执行</button></div>''' % name
+        return dict(code="success", data = html)
 
 
 class DownloadPluginsHandler:

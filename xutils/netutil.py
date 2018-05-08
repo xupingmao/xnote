@@ -13,7 +13,10 @@ except ImportError as e:
 BUFSIZE = 1024 * 512
 
 def splithost(url):
-    """splithost('//host[:port]/path') --> 'host[:port]', '/path'."""
+    """
+        >>> splithost('//host[:port]/path')
+        ('host[:port]', '/path')
+    """
     pattern = re.compile('^(http:|https:)?//([^/?]*)(.*)$')
     match = pattern.match(url)
     if match: return match.group(2, 3)
@@ -81,7 +84,7 @@ def http_get(url, charset='utf-8'):
     bytes = b''.join(out)
     return codecs.encode(bytes, charset)
 
-def download_http(address, destpath):
+def http_download(address, destpath):
     bufsize = BUFSIZE
     stream = urlopen(address)
     chunk = stream.read(bufsize)

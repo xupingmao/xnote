@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/04/30 13:39:08
+# @modified 2018/05/07 00:38:59
 
 """
 xnote工具类总入口
@@ -252,8 +252,7 @@ def remove(path, hard = False):
     """
     删除文件，默认软删除，也就是移动到trash目录中
     """
-    if xconfig.USE_URLENCODE:
-        path = quote_unicode(path)
+    path = get_real_path(path)
     if not os.path.exists(path):
         return
     if os.path.isfile(path):
