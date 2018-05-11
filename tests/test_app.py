@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/04/30 18:31:56
+# @modified 2018/05/11 23:02:22
 
 import sys
 import os
@@ -21,6 +21,7 @@ def init():
     xconfig.port = "1234"
     xconfig.DEV_MODE = True
     var_env = dict()
+    xconfig.init()
     xtables.init()
     app = web.application(list(), var_env, autoreload=False)
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")

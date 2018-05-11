@@ -201,6 +201,10 @@
             {% if item.ext in (".md", ".csv") %}
                 <a class="item-option" href="/wiki?path={{item.path}}">预览</a>
             {% end %}
+
+            {% if item.ext in (".pdf", ".mp4") %}
+                <a class="item-option" href="/tools/iframe_viewer?path={{item.path}}">预览</a>
+            {% end %}
         {% end %}
         </td>
         <td class="size-td">{{item.size}}</td>

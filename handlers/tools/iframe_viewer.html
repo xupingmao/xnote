@@ -1,0 +1,17 @@
+{% extends base.html %}
+
+{% block body %}
+<script type="text/javascript">
+    $(function () {    
+        var path = getUrlParam("path");
+        var iframe = $("<iframe>").css({
+            "width": "100%",
+            "height": $(window).height() - 50,
+            "border": "none"
+        });
+        iframe.attr("src", "/fs/" + path);
+        $('.main').append(iframe);
+        $(".footer").remove();
+    })
+</script>
+{% end %}

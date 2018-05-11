@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/04/30 21:46:23
+# @modified 2018/05/11 23:01:37
 
 '''
 xnote系统配置
@@ -177,7 +177,7 @@ class Storage(dict):
         return '<MyStorage ' + dict.__repr__(self) + '>'
 
 
-def init(path):
+def init(path = DATA_DIR):
     """
     初始化系统配置项,启动时必须调用
     """
@@ -328,30 +328,38 @@ def get_notice_list(type='today', user=None):
     - today 今天的通知
     - all 所有的通知
     """
-    tm = time.localtime()
-    def today_filter(todo):
-        year  = tm.tm_year
-        month = tm.tm_mon
-        day  = tm.tm_mday
-        wday = tm.tm_wday + 1
-        if todo.user != None and user != todo.user:
-            return False
-        if todo.year != None and todo.year != year:
-            return False
-        if todo.month != None and todo.month != month:
-            return False
-        if todo.day != None and todo.day != day:
-            return False
-        if todo.wday != None and todo.wday != wday:
-            return False
-        return True
-    if type == 'today':
-        return list(filter(today_filter, _notice_list))
+    def create_filter(tm):
+        def filter_handler(todo):
+            year  = tm.tm_year
+            month = tm.tm_mon
+            day  = tm.tm_mday
+            wday = tm.tm_wday + 1
+            if todo.user != None and user != todo.user:
+                return False
+            if todo.year != None and todo.year != year:
+                return False
+            if todo.month != None and todo.month != month:
+                return False
+            if todo.day != None and todo.day != day:
+                return False
+            if todo.wday != None and todo.wday != wday:
+                return False
+            return True
+        return filter_handler
+
     if type == "all":
         return _notice_list
+
+    day = 24 * 3600
+    today_filter = create_filter(time.localtime())
+    
+    if type == 'today':
+        return list(filter(today_filter, _notice_list))
+    if type == "tomorrow":
+        tomorrow_filter = create_filter(time.localtime(time.time() + day))
+        return list(filter(tomorrow_filter, _notice_list))
 
 def clear_notice_list():
     global _notice_list
     _notice_list = [] # Py2 do not have clear method
 
-init(DATA_DIR)
