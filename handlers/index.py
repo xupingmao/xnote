@@ -18,6 +18,7 @@ def link(name, link, role = None):
 
 _tools = [
     link("我的账号", "/system/user"),
+    link("登出", "/logout", "user"),
     link("系统状态", "/system/monitor", "admin"),
     link("脚本管理", "/system/script", "admin"),
     link("定时任务",   "/system/crontab", "admin"),
@@ -122,6 +123,7 @@ xurls = (
     r"/", Home, 
     r"/index", Home,
     r"/more", GridHandler,
+    r"/system/index", GridHandler,
     r"/unauthorized", Unauthorized,
     r"/favicon.ico", FaviconHandler
 )

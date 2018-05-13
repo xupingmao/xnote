@@ -13,7 +13,8 @@
     if (btnRight < 0) {
         btnRight = 20;
     }
-    var botHeight = maxHeight - 100;
+    var botHeight = "100%";
+    var botWidth = maxWidth / 2;
 
     var bots = {};
 
@@ -51,14 +52,14 @@
         }
         var rightBot = $("<div>").css({
             "position": "fixed",
-            "width": "360px",
+            "width": botWidth,
             "right": "0px",
             "bottom": "0px",
             "height": botHeight,
             "background-color": "#fff",
             "border": "solid 1px #ccc",
             "z-index": 50
-        }).append(createIframe("/message?status=all"));
+        }).append(createIframe("/system/index"));
         rightBot.hide();
         $(document.body).append(rightBot);
         bots.right = rightBot;

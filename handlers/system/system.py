@@ -27,10 +27,8 @@ sys_tools = [
     link("脚本管理",   "/system/script_admin"),
     link("定时任务",   "/system/crontab"),
     link("历史记录",   "/system/history"),
-
     link("用户管理", "/system/user/list"),
     link("App管理", "/system/app_admin"),
-
     link("系统信息","/system/monitor"),
     link("后台模板缓存", "/system/template_cache"),
     link("重新加载模块", "/system/reload"),

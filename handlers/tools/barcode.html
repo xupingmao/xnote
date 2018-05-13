@@ -25,7 +25,7 @@
             var key = $("#input").val();
             key = utf16to8(key);
             if (key) {
-                JsBarcode("#imgcode", "123", {
+                JsBarcode("#imgcode", key, {
                   format: "CODE39",//选择要使用的条形码类型
                   width:3,//设置条之间的宽度
                   height:100,//高度
