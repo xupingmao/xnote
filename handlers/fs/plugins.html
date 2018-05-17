@@ -47,7 +47,10 @@
 </div>
 
 <div id="resultDiv" class="col-md-12">
-    <div class="panel-title">结果</div>
+    <div class="panel-title">
+        结果
+        <a id="pluginEditLink" class="hide link float-right" href="#">编辑脚本</a>
+    </div>
     <div id="result" class="col-md-12">
     </div>
 </div>
@@ -71,6 +74,8 @@
 			function (result) {
 				showResult(result.data);
 			});
+        $("#pluginEditLink").removeClass("hide")
+            .attr("href", "/system/script/edit?name=" + name);
 	});
 
     function runPlugin(name, confirmed) {

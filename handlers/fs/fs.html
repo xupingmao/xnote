@@ -203,7 +203,7 @@
             {% end %}
 
             {% if item.ext in (".pdf", ".mp4") %}
-                <a class="item-option" href="/tools/iframe_viewer?path={{item.path}}">预览</a>
+                <a class="item-option" href="/tools/iframe_viewer?path={{quote(item.path)}}">预览</a>
             {% end %}
         {% end %}
         </td>

@@ -15,13 +15,14 @@ import xconfig
 import xauth
 import xutils
 import xtables
-from xutils import dateutil
+from xutils import dateutil, quote
 from xutils import ConfigParser, Storage, tojson
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE    = dict(
     format_date = dateutil.format_date,
-    format_time = dateutil.format_time
+    format_time = dateutil.format_time,
+    quote = quote
 ) 
 
 def load_menu_properties():

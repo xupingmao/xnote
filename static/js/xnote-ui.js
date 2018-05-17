@@ -143,6 +143,41 @@ var XUI = function (window) {
     initTabLink();
   }
 
+  var showToast = function (message, time) {
+    if (!time) {
+      time = 1000;
+    }
+    var maxWidth = $(document.body).width();
+    var fontSize = 14;
+    var toast = $("<div>").css({
+      "margin": "0 auto",
+      "position": "fixed",
+      "left": 0,
+      "top": "24px",
+      "font-size": fontSize,
+      "padding": "14px 18px",
+      "border-radius": "4px",
+      "background": "#000",
+      "opacity": 0.7,
+      "color": "#fff",
+      "line-height": "22px",
+      "z-index": 1000
+    });
+    toast.text(message);
+
+    $(document.body).append(toast);
+    var width = toast.width();
+    var left = (maxWidth - width) / 2;
+    if (left < 0) {
+      left = 0;
+    }
+    toast.css("left", left);
+    setTimeout(function () {
+      toast.remove();
+    }, time);
+  }
+
+  window.showToast = showToast;
   initElementProcessors();
 };
 

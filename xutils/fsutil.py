@@ -156,6 +156,7 @@ class FileItem(Storage):
         if os.path.isfile(path):
             self.type = "file"
             self.name = decode_name(self.name)
+            _, self.ext = os.path.splitext(self.name)
         else:
             self.type = "dir"
             self.path += "/"

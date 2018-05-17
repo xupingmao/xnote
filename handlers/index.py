@@ -60,6 +60,9 @@ _tools = [
     link("URL编解码", "/tools/urlcoder"),
     link("条形码", "/tools/barcode"),
     link("二维码", "/tools/qrcode"),
+
+    # 其他工具
+    link("分屏", "/tools/command_center"),
 ]
 
 

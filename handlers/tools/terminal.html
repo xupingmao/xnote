@@ -46,12 +46,16 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $("#console").terminal(function(command, term) {
-            $.post("/system/command", {command: command}, function (data, status) {
-                term.echo(data);
-            }).fail(function (data) {
-                console.log(data);
-                term.exception("failed"+data, "error");
-            });
+            if (command.indexOf("calc ")>=0) {
+                term.echo(eval(command.substring(4)));
+            } else {            
+                $.post("/system/command", {command: command}, function (data, status) {
+                    term.echo(data);
+                }).fail(function (data) {
+                    console.log(data);
+                    term.exception("failed"+data, "error");
+                });
+            }
         });
     });
 </script>

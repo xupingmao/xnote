@@ -1,0 +1,94 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0,user-scalable=0"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>控制中心</title>
+    <style type="text/css">
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin:0px;
+            padding:0px;
+        }
+        #url {
+            width: 527px;
+        }
+        table {
+            width: 100%;
+        }
+        
+        iframe {
+            float:left;
+            margin:0px;
+            padding:0px;
+            width: 50%;
+            height: 100%;
+            border: none;
+        }
+        .float-left {
+            float:left;
+        }
+        #ctrlArea {
+            width: 200px;
+        }
+        .col-md-12 {
+            float: left;
+            width: 100%;
+        }
+        .col-md-6 {
+            float: left;
+            width: 50%;
+        }
+        .main {
+            width: 50%;
+        }
+        .control {
+            width: 50%;
+            border-left: 1px solid #ccc;
+        }
+        .hide {
+            display: none;
+        }
+        .footer {
+            float: left;
+            height: 20px;
+            width: 100%;
+        }
+        .iframe-state {
+            float: left;
+            width: 50%;
+            font-size: 14px;
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+<div class='col-md-12 hide'>
+    <input placeholder='搜索'>
+    <button>搜索</button>
+</div>
+<div class="float-left col-md-12">
+    <iframe class='main'    id="f1" data-label-id="iframeLabel1" src="/"></iframe>
+    <iframe class='control' id='f2' data-label-id="iframeLabel2" src='/message?status=created'></iframe>
+</div>
+<div class="footer">
+    <div class="iframe-state" id="iframeLabel1"></div>
+    <div class="iframe-state" id="iframeLabel2"></div>
+</div>
+<script src="/static/lib/jquery/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="/static/js/utils.js"></script>
+<script type="text/javascript" src="/static/js/app.js"></script>
+<script>
+$(document.body).ready(function () {
+    var maxHeight = window.innerHeight;
+    var height = maxHeight - 20;
+    $("iframe").css("height", height);
+    $("iframe").on("load", function (e) {
+        var id = $(this).attr("data-label-id");
+        var src = $(this)[0].contentWindow.location.href;
+        $("#" + id).text(src);
+    })
+})
+</script>
+</body>
+
