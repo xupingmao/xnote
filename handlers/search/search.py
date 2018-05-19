@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/05/05 11:43:39
+# @modified 2018/05/19 14:31:22
 
 import re
 import os
@@ -140,7 +140,7 @@ class handler:
         load_rules()
         key       = xutils.get_argument("key", "")
         title     = xutils.get_argument("title", "")
-        category  = xutils.get_argument("category", "")
+        category  = xutils.get_argument("category", "default")
         page      = xutils.get_argument("page", 1, type = int)
         user_name = xauth.get_current_name()
         page_url  =  "/search/search?key=%s&category=%s&page="\

@@ -137,6 +137,17 @@
         return '<strong class="marked-strong">' + text + '</strong>';
     }
 
+    myRenderer.table = function(header, body) {
+      return '<table class="table">\n'
+        + '<thead>\n'
+        + header
+        + '</thead>\n'
+        + '<tbody>\n'
+        + body
+        + '</tbody>\n'
+        + '</table>\n';
+    };
+
     marked.setOptions({
         renderer: myRenderer,
         highlight: highlight

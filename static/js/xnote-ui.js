@@ -35,6 +35,17 @@ var XUI = function (window) {
     });
   }
 
+  function initXRadio() {
+    $(".x-radio").each(function (index, element) {
+      var self = $(element);
+      var option = self.attr("data-option");
+      var value  = self.attr("data-value");
+      if (value == option) {
+        self.addClass("selected-link");
+      }
+    });
+  }
+
   // 点击跳转链接的按钮
   $(".link-btn").click(function () {
       var link = $(this).attr("x-href");
@@ -140,6 +151,7 @@ var XUI = function (window) {
     initSelect();
     initCheckbox();
     initRadio();
+    initXRadio();
     initTabLink();
   }
 

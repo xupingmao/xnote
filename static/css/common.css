@@ -538,6 +538,10 @@ li.menu-item:hover {
     cursor: pointer;
 }
 
+.selected-link {
+    border-bottom: 2px solid red;
+}
+
 /** file-list样式 **/
 .tool-div {
     font-size: medium;
