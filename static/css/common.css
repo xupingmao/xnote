@@ -534,7 +534,7 @@ li.menu-item:hover {
 .link {
     /* color: #37a; */
     color: #08c;
-    margin-left: 5px;
+    margin-right: 5px;
     cursor: pointer;
 }
 
@@ -880,4 +880,8 @@ li.menu-item:hover {
     width: 100%;
     float: left;
     margin-top: 10px;
+}
+
+.keyword {
+    color: blue;
 }

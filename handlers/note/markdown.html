@@ -2,32 +2,17 @@
 {% include "note/view_header.html" %}
 
     <hr/>
-    <form action="/file/update" method="POST">
-        <div class="">
-            {% if can_edit %}
-            <div class="">
-                <div id="update-div" class="hide">
-                    <input name="id" value="{{file.id}}" class="hide"/>
-                    <input name="version" value="{{file.version}}" class="hide"/>
-                    <input type="submit" value="保存"/>
-                    <input onclick="preview()" type="button" value="预览"/>
-                </div>
-            </div>
-            {% end %}
-
-            <div style="padding-top:20px;">
-                <div id="epiceditor" class="row">
-                    <div id="markdown-input-div" class="col-md-6">
-                        <textarea id="markdown-input" class="form-control" name="content" rows=50>{{file.content}}</textarea>
-                    </div>
-
-                    <div id="markdown-output-div" class="col-md-12">
-
-                    </div>
-                </div>
-            </div>
+<div class="col-md-12" style="padding-top:20px;">
+    <div id="epiceditor" class="row">
+        <div id="markdown-input-div" class="col-md-6">
+            <textarea id="markdown-input" class="form-control" name="content" rows=50>{{file.content}}</textarea>
         </div>
-    </form>
+
+        <div id="markdown-output-div" class="col-md-12">
+
+        </div>
+    </div>
+</div>
 
 <div style="float:left;width:100%;">
 {% if 'children' in globals() %}
