@@ -47,14 +47,14 @@ def readbytes(path):
     fp.close()
     return bytes
 
-def removeFile(fullpath, raiseIfNotExists = False):
+def remove_file(fullpath, raiseIfNotExists = False):
     if os.path.exists(fullpath):
         os.remove(fullpath)
     elif raiseIfNotExists:
         raise Error("file not exits!")
 
 def remove(path):
-    removeFile(path)
+    remove_file(path)
 
 def copy(src, dest):
     bufsize = 64 * 1024 # 64k
@@ -76,7 +76,7 @@ def check_create_dirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-def getFileExt(fname):
+def get_file_ext(fname):
     if '.' not in fname:return ''
     return fname.split('.')[-1]
 
@@ -104,7 +104,7 @@ def rename_file(srcname, dstname):
     os.rename(srcname, dstname)
 
 
-def openDirectory(dirname):
+def open_directory(dirname):
     if os.name == "nt":
         os.popen("explorer %s" % dirname)
     elif platform.system() == "Darwin":
@@ -124,6 +124,10 @@ def get_file_size(filepath, format=True):
 
 
 def get_relative_path(path, parent):
+    """
+        >>> get_relative_path('/users/xxx/test/hello.html', '/users/xxx')
+        'test/hello.html'
+    """
     path1 = os.path.abspath(path)
     parent1 = os.path.abspath(parent)
     # abpath之后最后没有/

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/05/20 12:16:31
+# @modified 2018/05/20 22:44:49
 
 __doc__ = """Methods for text operation"""
 
@@ -234,7 +234,13 @@ def edit_distance0(a, b, la, lb, cache=None, replace_step=1):
     return ret
 
 def edit_distance(a,b,replace_step=1):
-    """最小编辑距离算法"""
+    """最小编辑距离算法
+
+        >>> edit_distance('ab', 'a')
+        1
+        >>> edit_distance('abc', 'ac')
+        1
+    """
     cache = [[-1 for i in range(len(b)+1)] for i in range(len(a)+1)]
     return edit_distance0(a,b,len(a),len(b),cache,replace_step)
 

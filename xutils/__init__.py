@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/05/19 16:31:42
+# @modified 2018/05/20 22:33:07
 
 """
 xnote工具类总入口
@@ -222,7 +222,7 @@ def backupfile(path, backup_dir = None, rename=False):
         shutil.copyfile(path, newpath)
         
 def get_pretty_file_size(path = None, size = 0):
-    if size == 0:
+    if size is None:
         size = os.stat(path).st_size
     if size < 1024:
         return '%sB' % size
