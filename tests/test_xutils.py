@@ -6,6 +6,7 @@ sys.path.insert(1, "lib")
 import unittest
 import xutils
 import xconfig
+from xutils import textutil
 
 @xutils.cache(prefix='fib')
 def fib(n):
@@ -150,6 +151,26 @@ class TestMain(unittest.TestCase):
         text = "a link https://link"
         html = xutils.mark_text(text)
         self.assertEqual('a&nbsp;link&nbsp;<a href="https://link">https://link</a>', html)
+
+    def test_count_alpha(self):
+        text = "abc def 123"
+        self.assertEqual(6, textutil.count_alpha(text))
+
+    def test_count_digit(self):
+        text = "abc def 123"
+        self.assertEqual(3, textutil.count_digit(text))
+
+    def test_textutil(self):
+        import doctest
+        doctest.testmod(m=textutil, verbose=True)
+
+    def test_netutil(self):
+        import doctest
+        doctest.testmod(m=xutils.netutil, verbose=True)
+
+    def test_dateutil(self):
+        import doctest
+        doctest.testmod(m=xutils.dateutil, verbose=True)
 
     def test_print_table(self):
         xutils.print_table([dict(name="a", age=10), dict(name="b", age=12)])

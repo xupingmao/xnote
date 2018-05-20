@@ -66,26 +66,24 @@
 		var name = $(event.target).text();
 		var path = $("#path").val();
 		showResult("开始执行 " + name);
-		$.post("/fs_api/run_plugin", 
-			{
-				name: name,
-				path: path
-			},
-			function (result) {
-				showResult(result.data);
-			});
+		runPlugin(name, false);
         $("#pluginEditLink").removeClass("hide")
             .attr("href", "/system/script/edit?name=" + name);
 	});
 
     function runPlugin(name, confirmed) {
+        if (name == "") {
+            return;
+        }
         var path = $("#path").val();
-        showResult("开始执行 " + name);
+        var inputText = $("#inputText").val();
+        showResult("开始执行 " + name + " ...");
         $.post("/fs_api/run_plugin", 
             {
                 name: name,
                 path: path,
-                confirmed: confirmed
+                confirmed: confirmed,
+                input: inputText
             },
             function (result) {
                 showResult(result.data);

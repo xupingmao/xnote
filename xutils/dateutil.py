@@ -1,4 +1,8 @@
 # encoding=utf-8
+# @author xupingmao
+# @since 2016/12/09
+# @modified 2018/05/20 12:19:25
+
 import time
 import os
 """ 
@@ -88,13 +92,13 @@ def getYear():
     return time.strftime("%Y")
 
 def get_days_of_month(y, month):
-    """ get days of a month
-    >>> get_days_of_month(2000, 2)
-    29
-    >>> get_days_of_month(2001, 2)
-    28
-    >>> get_days_of_month(2002, 1)
-    31
+    """get days of a month
+        >>> get_days_of_month(2000, 2)
+        29
+        >>> get_days_of_month(2001, 2)
+        28
+        >>> get_days_of_month(2002, 1)
+        31
     """
     days = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ]
     if 2 == month:

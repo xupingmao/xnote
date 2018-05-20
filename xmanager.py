@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/03/16 22:24:39
+# @modified 2018/05/20 12:05:47
 
 """
 Xnote 模块管理器
@@ -43,6 +43,7 @@ class MyStdout:
         self.stdout = stdout
         self.result_dict = dict()
         self.outfile = web.debug
+        self.encoding = stdout.encoding
 
     def write(self, value):
         result = self.result_dict.get(current_thread())

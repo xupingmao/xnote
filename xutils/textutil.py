@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/05/05 11:36:16
+# @modified 2018/05/20 12:16:31
 
 __doc__ = """Methods for text operation"""
 
@@ -14,12 +14,12 @@ ALPHA_NUM = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 def text_contains(text, words):
     """
-    >>> text_contains("abc is good", "abc")
-    True
-    >>> text_contains("you are right", "rig")
-    True
-    >>> text_contains("hello,world,yep", ["hello", "yep"])
-    True
+        >>> text_contains("abc is good", "abc")
+        True
+        >>> text_contains("you are right", "rig")
+        True
+        >>> text_contains("hello,world,yep", ["hello", "yep"])
+        True
     """
     if isinstance(words, str):
         return words in text
@@ -83,8 +83,8 @@ def issubsetof(text, collection):
 
 def remove(self, target):
     """
-    >>> remove("this is a bat", "bat")
-    'this is a '
+        >>> remove("this is a bat", "bat")
+        'this is a '
     """
     return self.replace(target, "")
 
@@ -103,8 +103,8 @@ def between(self, start, end):
 
 def after(self, start):
     """
-    >>> after("this is good", "this")
-    ' is good'
+        >>> after("this is good", "this")
+        ' is good'
     """
     p1 = self.find(start)
     if p1 >= 0:
@@ -120,14 +120,14 @@ def split_words(text):
 def find(text, key, show_line=False, ignore_case=True):
     """ find key in text, return a list
 
-    >>> find('hello,world', 'hello')
-    ['hello,world']
+        >>> find('hello,world', 'hello')
+        ['hello,world']
 
-    >>> find('hell1,world\\nhello,kid', 'hello', True)
-    ['0002:hello,kid']
-    
-    >>> find("yes", "")
-    []
+        >>> find('hell1,world\\nhello,kid', 'hello', True)
+        ['0002:hello,kid']
+        
+        >>> find("yes", "")
+        []
     """
     result = []
     lineno = 1
@@ -145,7 +145,7 @@ def find(text, key, show_line=False, ignore_case=True):
             target = line.lower()
         else:
             target = line
-        if contains(target, keys):
+        if text_contains(target, keys):
             if show_line:
                 result.append("%04d:%s" % (lineno, line))
             else:
@@ -156,12 +156,12 @@ def find(text, key, show_line=False, ignore_case=True):
 
 def replace(text, origin, dest, ignore_case = False, use_template = False):
     """
-    >>> replace('abc is good', 'iS', 'is not', True)
-    'abc is not good'
-    >>> replace("this is a long story", "loNg", "-long-", True)
-    'this is a -long- story'
-    >>> replace("use Template", "template", '<k>?</k>', True, True)
-    'use <k>Template</k>'
+        >>> replace('abc is good', 'iS', 'is not', True)
+        'abc is not good'
+        >>> replace("this is a long story", "loNg", "-long-", True)
+        'this is a -long- story'
+        >>> replace("use Template", "template", '<k>?</k>', True, True)
+        'use <k>Template</k>'
     """
     if not ignore_case:
         if use_template:
@@ -187,12 +187,12 @@ def replace(text, origin, dest, ignore_case = False, use_template = False):
 
 def like(text, pattern):
     """
-    >>> like("hello,world", "hello*")
-    True
-    >>> like ("yes", "y?s")
-    True
-    >>> like("what", "n*")
-    False
+        >>> like("hello,world", "hello*")
+        True
+        >>> like ("yes", "y?s")
+        True
+        >>> like("what", "n*")
+        False
     """
 
     # TODO 处理`,`
@@ -261,5 +261,5 @@ def parse_config_text(text):
             strs[1]= line[len(strs[0])+1:]
             config.append(dict(key=strs[0], value=strs[1]))
     return config
-            
+
 
