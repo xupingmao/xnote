@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/05/20 22:33:07
+# @modified 2018/05/22 00:20:43
 
 """
 xnote工具类总入口
@@ -794,6 +794,10 @@ class CacheObj:
         if expire < 0:
             self.expire_time = -1
 
+        obj = _cache_dict.get(key, None)
+        if obj is not None:
+            obj.is_force_expired = True
+
         _cache_dict[key] = self
         self._queue.put(self)
         one = self._queue.get(block=False)
@@ -855,6 +859,12 @@ def expire_cache(key = None, prefix = None, args = None):
         return True
     return False
 
+def update_cache(key = None, value = None, prefix = None, args = None):
+    """更新缓存的值
+    """
+    if key is None:
+        key = '%s%s' % (prefix, args)
+    _cache_dict[key] = CacheObj(key, value, -1)
 
 #################################################################
 ##   规则引擎组件

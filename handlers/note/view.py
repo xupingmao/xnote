@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/05/06 01:08:28
+# @modified 2018/05/22 00:26:18
 
 import profile
 import math
@@ -184,28 +184,6 @@ class Downvote:
         db.update(priority=0, where=dict(id=id))
         raise web.seeother("/file/view?id=%s" % id)
 
-class RenameHandler:
-
-    @xauth.login_required()
-    def POST(self):
-        id = xutils.get_argument("id")
-        name = xutils.get_argument("name")
-        if name == "" or name is None:
-            return dict(code="fail", message="名称为空")
-        db = xtables.get_file_table()
-        old  = db.select_one(where=dict(id=id))
-        if old.creator != xauth.get_current_name():
-            return dict(code="fail", message="没有权限")
-
-        file = db.select_one(where=dict(name=name))
-        if file is not None:
-            return dict(code="fail", message="%r已存在" % name)
-        db.update(where=dict(id=id), name=name, mtime=xutils.format_datetime())
-        return dict(code="success")
-
-    def GET(self):
-        return self.POST()
-
 class FileSaveHandler:
 
     @xauth.login_required()
@@ -289,7 +267,6 @@ class DictHandler:
 xurls = (
     r"/file/(edit|view)", ViewHandler, 
     r"/note/(edit|view)", ViewHandler,
-    r"/file/rename", RenameHandler,
     r"/file/update", UpdateHandler,
     r"/note/update", UpdateHandler,
     r"/file/save", FileSaveHandler,

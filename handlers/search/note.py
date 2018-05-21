@@ -42,9 +42,13 @@ def file_dict(id, name, related):
 def get_file_db():
     return db.SqliteDB(db=config.DB_PATH)
 
+def get_cached_files0():
+    return list(xtables.get_file_table().query('SELECT name, UPPER(name) as name_upper, id, parent_id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted == 0'))
+
+
 @xutils.cache(key='file_name.list', expire=3600)
 def get_cached_files():
-    return list(xtables.get_file_table().query('SELECT name, UPPER(name) as name_upper, id, parent_id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted == 0'))
+    return get_cached_files0()
 
 def search_in_cache(words, user):
     def fmap(word):
@@ -112,6 +116,10 @@ def search(ctx, expression=None):
     text_files  = list(filter(lambda x: x.type != "group", files))
     files = groups + text_files
     return files
+
+@xmanager.listen("note.rename", is_async=True)
+def update_cached_files(file):
+    xutils.update_cache("file_name.list", get_cached_files0())
 
 # 初始化缓存
 if xconfig.USE_CACHE_SEARCH:

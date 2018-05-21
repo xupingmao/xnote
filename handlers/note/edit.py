@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/04/30 13:11:23
+# @modified 2018/05/22 00:27:03
 
 """Description here"""
 import web
@@ -10,6 +10,7 @@ import xauth
 import xutils
 import xtemplate
 import xtables
+import xmanager
 from xutils import Storage
 from xutils import dateutil
 
@@ -155,12 +156,38 @@ class DictPutHandler:
             db.update(value = value, mtime = current, where = dict(key=key))
         return db.select_one(where=dict(key=key))
 
+class RenameHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        id = xutils.get_argument("id")
+        name = xutils.get_argument("name")
+        if name == "" or name is None:
+            return dict(code="fail", message="名称为空")
+        db = xtables.get_file_table()
+        old  = db.select_one(where=dict(id=id))
+        if old.creator != xauth.get_current_name():
+            return dict(code="fail", message="没有权限")
+
+        file = db.select_one(where=dict(name=name))
+        if file is not None:
+            return dict(code="fail", message="%r已存在" % name)
+        db.update(where=dict(id=id), name=name, mtime=xutils.format_datetime())
+        event_body = dict(action="rename", id=id, name=name)
+        xmanager.fire("note.updated", event_body)
+        xmanager.fire("note.rename", event_body)
+        return dict(code="success")
+
+    def GET(self):
+        return self.POST()
+
 xurls = (
     r"/file/add", AddHandler,
     r"/note/add", AddHandler,
     r"/file/remove", RemoveHandler,
     r"/note/remove", RemoveHandler,
-    r"/file/dict/put", DictPutHandler
+    r"/file/dict/put", DictPutHandler,
+    r"/file/rename", RenameHandler,
 )
 
 
