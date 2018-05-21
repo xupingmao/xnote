@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/05/05 11:47:46
+# @modified 2018/05/21 21:50:17
 
 """短消息"""
 import time
@@ -145,7 +145,7 @@ class SaveHandler:
             ctime = xutils.get_argument("date", xutils.format_datetime())
             inserted_id = db.insert(content = content, 
                 user = user_name, 
-                status = 100,
+                status = 0,
                 mtime = ctime,
                 ctime = ctime)
             return dict(code="success", data=dict(id=inserted_id, content=content, ctime=ctime))

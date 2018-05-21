@@ -41,11 +41,13 @@
     function highlight_keywords(code) {
         // 先简单处理一下
         var html = escape(code);
+        /*
         var keywords = ["import ", "from ", "def ", "if ", "for ", "try:", "except:", "except ", 
             " in ", "not ", "return "];
         for (var i = 0; i < keywords.length; i++) {
             html = replace_keyword(html, keywords[i]);
         }
+        */
         return html;
     }
 
