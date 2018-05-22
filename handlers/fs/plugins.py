@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/05/20 11:51:02
+# @modified 2018/05/22 23:07:42
 import web
 import os
 import xconfig
@@ -16,7 +16,7 @@ class ListHandler:
     def GET(self):
         path = xutils.get_argument("path")
         scripts = sorted(filter(lambda x: x.endswith(".py") and x.startswith("fs"), os.listdir(xconfig.SCRIPTS_DIR)))
-        return xtemplate.render("fs/plugins.html", path = path, scripts = scripts)
+        return xtemplate.render("fs/plugins.html", path = path, scripts = scripts, show_menu = False)
 
 class RunPluginHandler:
 

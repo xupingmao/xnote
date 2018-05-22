@@ -24,7 +24,7 @@
             "width": "100%",
             "height": "100%",
             "border": "none"
-        }).attr("src", src);
+        }).attr("src", src).attr("id", "botIframe");
     }
 
     function getBottomBot() {
@@ -33,7 +33,7 @@
         }
         var bot = $("<div>").css({"position": "fixed", 
                 "width": "100%", 
-                "height": "200px",
+                "height": "80%",
                 "background-color": "#ccc",
                 "bottom": "0px",
                 "right": "0px",
@@ -60,6 +60,9 @@
             "border-left": "solid 2px #ccc",
             "z-index": 50
         }).append(createIframe("/system/index"));
+        if (maxWidth < 960) {
+          rightBot.css("width", "100%");
+        }
         rightBot.hide();
         $(document.body).append(rightBot);
         bots.right = rightBot;
@@ -90,7 +93,8 @@
             // getBottomBot().slideToggle(200);
             // getRightBot().slideToggle(200);
             // $("#mainContent").toggleClass("col-md-6");
-            getRightBot().animate({"width": "toggle"}, 200);
+            // getRightBot().animate({"width": "toggle"}, 200);
+            getRightBot().fadeToggle(200);
             
             /**
             var oldLocation = window.location.href;
@@ -106,6 +110,18 @@
             showToast(message);
         })
     }
+
+    function showIframeDialog(src) {
+      getRightBot().fadeToggle(200);
+      $("#botIframe").attr("src", src);
+    }
+
+    function hideIframeDialog() {
+      getRightBot().fadeToggle(200);
+    }
+
+    window.showIframeDialog = showIframeDialog;
+    window.hideIframeDialog = hideIframeDialog;
 
     $(function () {
         init();

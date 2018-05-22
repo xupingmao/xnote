@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/05/20 12:05:47
+# @modified 2018/05/22 22:22:00
 
 """
 Xnote 模块管理器
@@ -569,12 +569,17 @@ def set_handlers(event_type, handlers, is_async=False):
 def fire(event_type, ctx=None):
     _event_manager.fire(event_type, ctx)
 
-def listen(event_type, is_async = False):
+def listen(event_type_list, is_async = False):
     """
     事件监听器注解
     """
     def deco(func):
-        _event_manager.add_handler(event_type, func, is_async)
+        if isinstance(event_type_list, list):
+            for event_type in event_type_list:
+                _event_manager.add_handler(event_type, func, is_async)
+        else:
+            event_type = event_type_list
+            _event_manager.add_handler(event_type, func, is_async)
         return func
     return deco
 

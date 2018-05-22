@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/05/22 00:27:03
+# @modified 2018/05/22 22:20:20
 
 """Description here"""
 import web
@@ -84,6 +84,7 @@ class AddHandler:
                 inserted_id = db.insert(**file_dict)                
                 # 更新分组下面页面的数量
                 update_children_count(parent_id, db = db)
+                xmanager.fire("note.add", dict(name=name))
                 if format == "json":
                     return dict(code="success", id=inserted_id)
                 raise web.seeother("/file/view?id={}".format(inserted_id))
@@ -131,6 +132,7 @@ class RemoveHandler:
 
         db.update(is_deleted=1, mtime=dateutil.format_time(), where=dict(id=int(id)))
         db.delete(where="is_deleted=1 AND mtime < $date", vars=dict(date=dateutil.before(days=30,format=True)))
+        xmanager.fire("note.remove", dict(id=id))
         return dict(code="success")
         
     def POST(self):

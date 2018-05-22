@@ -117,8 +117,10 @@ def search(ctx, expression=None):
     files = groups + text_files
     return files
 
-@xmanager.listen("note.rename", is_async=True)
+@xmanager.listen(["note.rename", "note.add", "note.remove"], is_async=True)
 def update_cached_files(file):
+    if not xconfig.USE_CACHE_SEARCH:
+        return
     xutils.update_cache("file_name.list", get_cached_files0())
 
 # 初始化缓存

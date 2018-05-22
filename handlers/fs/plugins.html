@@ -8,19 +8,19 @@
         background-color: #eee;
         box-sizing: border-box;
         margin: 0px;
-    	border-top: none;
+        border-top: none;
         font-family: consolas, monospace;
     }
 
     .panel-title {
-    	width: 100%;
-    	border: 1px solid #ccc;
-    	padding-left: 5px;
-    	margin-top: 5px;
+        width: 100%;
+        border: 1px solid #ccc;
+        padding-left: 5px;
+        margin-top: 5px;
     }
 
     .plugin {
-    	margin-top: 5px;
+        margin-top: 5px;
     }
 
     .nav-path {
@@ -29,21 +29,27 @@
         background-color: #eee;
     }
 
+    .main {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
 </style>
 {% end %}
 
 {% block body %}
-
+{% import os %}
 <input class="hide" id="path" value="{{path}}">
 <div class="col-md-12 nav-path">
-    <a href="javascript:window.history.back();">返回</a> 
+    <!-- <a href="/fs/{{os.path.dirname(path)}}">返回</a>  -->
+    <a href="javascript:window.parent.hideIframeDialog()">关闭</a>
     文件路径: {{path}}
 </div>
 
 <div class="col-md-12">
-	{% for index, item in enumerate(scripts) %}
-      	<button class="plugin btn">{{item}}</button>
-	{% end %}
+    {% for index, item in enumerate(scripts) %}
+        <button class="plugin btn">{{item}}</button>
+    {% end %}
 </div>
 
 <div id="resultDiv" class="col-md-12">
@@ -57,19 +63,19 @@
 
 <script type="text/javascript">
 
-	function showResult(text) {
-		$("#resultDiv").show();
-		$("#result").html(text);
-	}
+    function showResult(text) {
+        $("#resultDiv").show();
+        $("#result").html(text);
+    }
 
-	$(".plugin").click(function (event) {
-		var name = $(event.target).text();
-		var path = $("#path").val();
-		showResult("开始执行 " + name);
-		runPlugin(name, false);
+    $(".plugin").click(function (event) {
+        var name = $(event.target).text();
+        var path = $("#path").val();
+        showResult("开始执行 " + name);
+        runPlugin(name, false);
         $("#pluginEditLink").removeClass("hide")
             .attr("href", "/system/script/edit?name=" + name);
-	});
+    });
 
     function runPlugin(name, confirmed) {
         if (name == "") {

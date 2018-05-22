@@ -102,6 +102,33 @@
         margin-bottom: 5px;
     }
 
+    #result {
+        border: 1px solid #ccc;
+        padding: 4px;
+        background-color: #eee;
+        box-sizing: border-box;
+        margin: 0px;
+        border-top: none;
+        font-family: consolas, monospace;
+    }
+
+    .panel-title {
+        width: 100%;
+        border: 1px solid #ccc;
+        padding-left: 5px;
+        margin-top: 5px;
+    }
+
+    .plugin {
+        margin-top: 5px;
+    }
+
+    .nav-path {
+        padding: 5px;
+        box-sizing: border-box;
+        background-color: #eee;
+    }
+
 </style>
 
     {% set search_action = '/fs_find' %}
@@ -141,7 +168,9 @@
         {% for item in xconfig.FS_OPT_BTNS %}
             <input type="button" class="link-btn advanced-opt" x-href="{{item.url}}?path={{path}}" value="{{item.name}}"/>
         {% end %}
-        <input type="button" class="link-btn" x-href="/fs_api/plugins?path={{path}}" value="更多"/>
+        <input type="button" x-href="/fs_api/plugins?path={{path}}" 
+            onclick="javascript:showIframeDialog('/fs_api/plugins?path={{path}}')"
+            value="更多"/>
     </div>
 </div>
 
@@ -209,7 +238,8 @@
         <td class="options-td">
             <!-- {{item.cdate}} -->
             <a href="javascript:removeFile('{{item.path}}')" class="item-option">删除</a>
-            <a href="/fs_api/plugins?path={{item.path}}" class="item-option">更多</a>
+            <a class="item-option" 
+                href="javascript:showIframeDialog('/fs_api/plugins?path={{item.path}}')">更多</a>
         </td>
     </tr>
     {% end %}
@@ -309,6 +339,11 @@
             alert("删除失败");
         })
     }
+
+    function showPlugins(path) {
+
+    }
+
     $("#deleteFile").on("click", function () {
         var checked = $(".checkboxTd :checked");
         if (checked.length == 0) {

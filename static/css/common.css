@@ -649,10 +649,10 @@ li.menu-item:hover {
     display: none;
     position: fixed;
     margin: 0 auto;
-    top: 80px;
+    top: 50px;
     background-color: #fff;
     z-index: 100;
-    overflow-y: auto;
+    overflow-y: hidden;
 }
 
 .x-dialog-title {
@@ -661,6 +661,12 @@ li.menu-item:hover {
     background-color: #337ab7;
     color: #fff;
     text-align: center;
+}
+
+.x-dialog-body {
+    float: left;
+    width: 100%;
+    overflow-y: auto;
 }
 
 .x-dialog-background {
@@ -683,14 +689,6 @@ li.menu-item:hover {
     float: right;
     border: none;
     margin-top: 0px;
-}
-
-.x-dialog-title {
-    margin: 0 auto;
-    width: 100%;
-    background-color: #337ab7;
-    color: #fff;
-    text-align: center;
 }
 
 .no-border tr td {
