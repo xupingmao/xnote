@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/05/22 23:07:42
+# @modified 2018/05/23 23:30:57
 import web
 import os
 import xconfig
@@ -11,12 +11,23 @@ import sys
 import xauth
 from xutils import ziputil
 
+
+def get_display_name(name):
+    return name[3:]
+
 class ListHandler:
     @xauth.login_required("admin")
     def GET(self):
+        show_menu = (xutils.get_argument("show_menu") == "true")
         path = xutils.get_argument("path")
-        scripts = sorted(filter(lambda x: x.endswith(".py") and x.startswith("fs"), os.listdir(xconfig.SCRIPTS_DIR)))
-        return xtemplate.render("fs/plugins.html", path = path, scripts = scripts, show_menu = False)
+        if path == "" or path == None:
+            path = xconfig.DATA_DIR
+        scripts = sorted(filter(lambda x: x.endswith(".py") and x.startswith("fs-"), os.listdir(xconfig.SCRIPTS_DIR)))
+        return xtemplate.render("fs/plugins.html", 
+            path = path, 
+            scripts = scripts, 
+            get_display_name = get_display_name,
+            show_menu = show_menu)
 
 class RunPluginHandler:
 
@@ -54,7 +65,7 @@ class DownloadPluginsHandler:
         bufsize = 1024 * 100
         dirname = xconfig.SCRIPTS_DIR
         outpath = os.path.join(dirname, "fs-plugins.zip")
-        ziputil.zip_dir(dirname, outpath = outpath, filter = lambda x: os.path.basename(x).startswith("fs") and x.endswith(".py"))
+        ziputil.zip_dir(dirname, outpath = outpath, filter = lambda x: os.path.basename(x).startswith("fs-") and x.endswith(".py"))
         web.header("Content-Disposition", "attachment; filename=fs-plugins.zip")
         with open(outpath, "rb") as fp:
             buf = fp.read(bufsize)

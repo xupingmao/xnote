@@ -5,6 +5,11 @@
     <div class="note"> 
         <div class="note-body">
             <div class="note-visited-cnt">
+                {# 快捷命令 #}
+                {% if file.command != None %}
+                    <input type="button" class="btn execute-btn float-right" value="执行" href="{{file.command}}"/>
+                {% end %}
+
                 {% if file.id != None %}
                 <a class="item-option dialog-btn" dialog-url="/file/group/list?id={{file.id}}&filetype=xml">移动</a>
                 {% end %}
@@ -22,11 +27,6 @@
 
             {% if "html" in file and file.html != None %}
                 {% raw file.html %}
-            {% end %}
-
-            {# 快捷命令 #}
-            {% if file.command != None %}
-                <input type="button" class="btn execute-btn" value="执行" href="{{file.command}}"/>
             {% end %}
 
             {# 知识库 #}

@@ -38,7 +38,7 @@
     }
 
     .option-td {
-        width: 200px;
+        width: 120px;
     }
 </style>
 
@@ -106,8 +106,8 @@
                     <a href="/system/script/edit?name={{script}}">{{script}}</a>
                 </td>
                 <td class="option-td">
-                    <input type="button" value="执行" class="executeScript btn" scriptName="{{script}}"/> 
                     <input type="button" value="删除" class="deleteScript btn btn-danger" scriptName="{{script}}"/>
+                    <input type="button" value="执行" class="executeScript btn" scriptName="{{script}}"/> 
                 </td>
             </tr>
         {% end %}

@@ -48,7 +48,7 @@
 
 <div class="col-md-12">
     {% for index, item in enumerate(scripts) %}
-        <button class="plugin btn">{{item}}</button>
+        <button class="plugin btn" data-name="{{item}}">{{get_display_name(item)}}</button>
     {% end %}
 </div>
 
@@ -69,7 +69,7 @@
     }
 
     $(".plugin").click(function (event) {
-        var name = $(event.target).text();
+        var name = $(event.target).attr("data-name");
         var path = $("#path").val();
         showResult("开始执行 " + name);
         runPlugin(name, false);

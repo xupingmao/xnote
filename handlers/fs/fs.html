@@ -163,8 +163,7 @@
         <input type="button" class="btn advanced-opt" value="本地浏览" id="openDirectory"/>
         <input type="button" class="link-btn advanced-opt" href="/code/analyze?path={{path}}&recursive=on" value="高级搜索"/>
         <input type="button" class="link-btn advanced-opt" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
-        <input type="button" class="link-btn advanced-opt" href="/tools/zip?dirname={{path}}" value="压缩"/>
-
+        
         {% for item in xconfig.FS_OPT_BTNS %}
             <input type="button" class="link-btn advanced-opt" x-href="{{item.url}}?path={{path}}" value="{{item.name}}"/>
         {% end %}

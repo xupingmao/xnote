@@ -34,7 +34,8 @@
         var bot = $("<div>").css({"position": "fixed", 
                 "width": "100%", 
                 "height": "80%",
-                "background-color": "#ccc",
+                "background-color": "#fff",
+                "border": "1px solid #ccc",
                 "bottom": "0px",
                 "right": "0px",
                 "z-index": 50
@@ -43,6 +44,26 @@
         bot.attr("id", "x-bot");
         $(document.body).append(bot);
         bots.bottom = bot;
+        return bot;
+    }
+
+    function getIframeDialog() {
+      if (bots.dialog) {
+        return bots.dialog;
+      }
+      var mainWidth = $(".main").width();
+      var bot = $("<div>").css({"position": "fixed", 
+                "width": mainWidth, 
+                "height": "80%",
+                "background-color": "#fff",
+                "border": "1px solid #ccc",
+                "bottom": "0px",
+                "right": "0px",
+                "z-index": 50
+            }).append(createIframe("/"));
+        bot.hide();
+        $(document.body).append(bot);
+        bots.dialog = bot;
         return bot;
     }
 
