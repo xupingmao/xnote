@@ -19,8 +19,10 @@
 {% end %}
 
 {% block body %}
-<h3>返回 [<a href="/fs/{{?path}}">{{?path}}</a>]</h3>
-<div>
+
+{% include mod_fs_path.html %}
+
+<div class="col-md-12">
     <form action="">
         <table class="no-border-table">
         <tr>

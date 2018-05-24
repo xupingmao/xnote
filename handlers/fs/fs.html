@@ -186,7 +186,7 @@
 
 <hr/>
 <div class="col-md-12">
-<table class="col-md-12 no-border-table">
+<table class="col-md-12 no-border-table fs-table">
 {% for item in filelist %}
     {# 隐藏文件 #}
     {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." or item.name.endswith((".pyc", ".class"))) %}
@@ -199,7 +199,7 @@
         <td>
         {% if item.type == "dir" %}
             <img src="/static/image/folder.gif"/>
-            <a href="/fs/{{item.path}}" class="fs-dir">{{item.name}}</a>
+            <a href="/fs/{{item.path}}" class="fs-folder">{{item.name}}</a>
         {% else %}
             <a href="/fs/{{item.path}}?token={{token}}" class="fs-file">{{item.name}}</a>
 

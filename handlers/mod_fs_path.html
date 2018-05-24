@@ -1,0 +1,6 @@
+<div class="fs-path">
+    <a href="/fs//">Home</a> /
+    {% for item in xutils.splitpath(path) %}
+        <a href="/fs/{{ item.path }}">{{ item.name }}</a> / 
+    {% end %}
+</div>

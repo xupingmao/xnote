@@ -19,12 +19,18 @@
     var bots = {};
 
     function createIframe(src) {
-        return $("<iframe>").css({
-            "float": "left",
-            "width": "100%",
-            "height": "100%",
-            "border": "none"
-        }).attr("src", src).attr("id", "botIframe");
+        return $("<iframe>")
+          .addClass("dialog-iframe")
+          .attr("src", src)
+          .attr("id", "botIframe");
+    }
+
+    function createCloseBtn() {
+      return $("<span>").text("Close").addClass("dialog-close-btn");
+    }
+
+    function createTitle() {
+      return $("<div>").addClass("dialog-title").append(createCloseBtn());
     }
 
     function getBottomBot() {
@@ -67,23 +73,31 @@
         return bot;
     }
 
+    function initEventHandlers() {
+      // close button event
+      $("body").on("click", ".dialog-close-btn", function () {
+        getRightBot().fadeOut(200);
+      });
+    }
+
     function getRightBot() {
         if (bots.right) {
             return bots.right;
         }
+        var width = "50%";
+        if (maxWidth < 600) {
+          width = "100%";
+        }
         var rightBot = $("<div>").css({
             "position": "fixed",
-            "width": botWidth,
+            "width": width,
             "right": "0px",
             "bottom": "0px",
-            "height": botHeight,
+            "top": "0px",
             "background-color": "#fff",
-            "border-left": "solid 2px #ccc",
-            "z-index": 50
-        }).append(createIframe("/system/index"));
-        if (maxWidth < 960) {
-          rightBot.css("width", "100%");
-        }
+            "border": "solid 1px #ccc",
+            "z-index": 50,
+        }).append(createTitle()).append(createIframe("/system/index"));
         rightBot.hide();
         $(document.body).append(rightBot);
         bots.right = rightBot;
@@ -91,54 +105,26 @@
     }
 
     function init() {
-        var botBtn = $("<div>").css({
-            "position": "fixed",
-            "bottom": "50px",
-            "right": btnRight,
-            "width": "50px",
-            "height": "40px",
-            "font-size": "14px",
-            "background-color": "#00c1de",
-            "cursor": "pointer",
-            "border-radius": "5px",
-            "color": "#fff",
-            "padding": "10px",
-            "z-index": 100,
-            "opacity": 0.8
-        })
-        .text("工具")
-        .addClass("bot-btn");
-
+        var botBtn = $("<div>").text("工具").css("right", btnRight).addClass("bot-btn");
         $(document.body).append(botBtn);
         $(".bot-btn").click(function () {
-            // getBottomBot().slideToggle(200);
-            // getRightBot().slideToggle(200);
-            // $("#mainContent").toggleClass("col-md-6");
-            // getRightBot().animate({"width": "toggle"}, 200);
             getRightBot().fadeToggle(200);
-            
-            /**
-            var oldLocation = window.location.href;
-            if (oldLocation.indexOf("command_center") >= 0) {
-                window.location.href = "/";
-            } else {
-                window.location.href = "/tools/command_center";
-            }
-            */
         });
 
         $(window).on("error", function (message, source, lineno, colno, error) {
             showToast(message);
         })
+
+        initEventHandlers();
     }
 
     function showIframeDialog(src) {
-      getRightBot().fadeToggle(200);
+      getRightBot().fadeIn(200);
       $("#botIframe").attr("src", src);
     }
 
     function hideIframeDialog() {
-      getRightBot().fadeToggle(200);
+      getRightBot().fadeOut(200);
     }
 
     window.showIframeDialog = showIframeDialog;

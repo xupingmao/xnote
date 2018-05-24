@@ -2,7 +2,7 @@
 
 {% block body %}
 
-<h3>返回 [<a href="/fs/{{?path}}">{{?path}}</a>]</h3>
+{% include "mod_fs_path.html" %}
 
 <div class="col-md-12">
 <!-- POST会被GET参数覆盖 -->
