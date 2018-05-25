@@ -37,13 +37,7 @@
 
 {% block body %}
 {% init pathlist = [] %}
-
-<div class="fs-path">
-    <a href="/fs//">Home</a> /
-    {% for item in pathlist %}
-        <a href="/fs/{{ item.path }}">{{ item.name }}</a> / 
-    {% end %}
-</div>
+{% include "mod_fs_path.html" %}
 
 <div class="col-md-12">
     <p style="color:red">{{?error}}</p>

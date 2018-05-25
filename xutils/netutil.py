@@ -16,6 +16,8 @@ def splithost(url):
     """
         >>> splithost('//host[:port]/path')
         ('host[:port]', '/path')
+        >>> splithost('http://www.baidu.com/index.html')
+        ('www.baidu.com', '/index.html')
     """
     pattern = re.compile('^(http:|https:)?//([^/?]*)(.*)$')
     match = pattern.match(url)
@@ -37,8 +39,8 @@ def get_http_home(host):
 
 def get_http_url(url):
     if not url.startswith(("http://", "https://")):
-        return "http://" + url
-    return url
+        url = "http://" + url
+    return url.split("#")[0]
 
 def get_host(url):
     p = r"https?://([^\/]+)"
@@ -46,6 +48,38 @@ def get_host(url):
     if m and m.groups():
         return m.groups()[0]
     return None
+
+class HttpRequest:
+
+    def __init__(self, url):
+        self.url = get_http_url(url)
+        self.protocol = url.split("://")[0]
+        self.domain, _ = splithost(url)
+
+    def get_res_url(self, url):
+        """
+            >>> HttpRequest("http://www.a.com").get_res_url("https://b.com/b.png")
+            'https://b.com/b.png'
+            >>> HttpRequest("http://www.a.com").get_res_url("//b.com/b.png")
+            'http://b.com/b.png'
+            >>> HttpRequest("http://www.a.com").get_res_url("/b.png")
+            'http://www.a.com/b.png'
+            >>> HttpRequest("http://www.a.com/a").get_res_url("b.png")
+            'http://www.a.com/a/b.png'
+        """
+        if url.startswith(("http://", "https://")):
+            return url
+        if url.startswith("//"):
+            return "http:" + url
+        if url[0] == '/':
+            # 绝对路径
+            return self.protocol + "://" + self.domain + url
+        # 相对路径
+        return self.url.rstrip("/") + "/" + url
+
+    def get(self, charset = 'utf-8'):
+        return http_get(self.url, charset)
+
 
 # 使用低级API访问HTTP，可以任意设置header，data等
 def do_http(method, url, headers, data=None):
@@ -84,10 +118,14 @@ def http_get(url, charset='utf-8'):
     bytes = b''.join(out)
     return codecs.encode(bytes, charset)
 
-def http_download(address, destpath):
+def http_download(address, destpath = None, dirname = None):
     bufsize = BUFSIZE
+    address = get_http_url(address)
     stream = urlopen(address)
     chunk = stream.read(bufsize)
+    if dirname is not None:
+        basename = os.path.basename(address)
+        destpath = os.path.join(dirname, basename)
     dest = open(destpath, "wb")
     try:
         readsize = 0

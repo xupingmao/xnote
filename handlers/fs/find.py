@@ -25,7 +25,6 @@ class handler:
             plist = xutils.search_path(path, find_key)
         return xtemplate.render("fs/fs.html", 
             token = xauth.get_current_user().token,
-            fspathlist = xutils.splitpath(path),
             filelist = [xutils.FileItem(p, path) for p in plist])
 
 xurls = (

@@ -143,13 +143,7 @@
 
 {% init find_key = "" %}
 {% set search_category = "fs" %}
-
-<div class="fs-path">
-<a href="/fs//">Home</a> /
-{% for item in fspathlist %}
-    <a href="/fs/{{ item.path }}">{{ item.name }}</a> / 
-{% end %}
-</div>
+{% include "mod_fs_path.html" %}
 
 <div id="controlArea" class="col-md-12">
     <div class="left">
@@ -221,7 +215,7 @@
             {% end %}
 
             {% if item.ext in xconfig.FS_TEXT_EXT_LIST %}
-                <a class="item-option" href="/code/view_source?path={{url_escape(item.path)}}">编辑</a>
+                <a class="item-option" href="javascript:showIframeDialog('/code/view_source?path={{url_escape(item.path)}}')">编辑</a>
             {% end %}
 
             {% if item.ext in (".md", ".csv") %}

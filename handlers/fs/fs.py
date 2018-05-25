@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/04/15 00:20:48
+# @modified 2018/05/25 22:57:54
 
 """文件服务
     - 文件目录
@@ -175,7 +175,6 @@ class FileSystemHandler:
         kw   = get_filesystem_kw()
         kw["filelist"]     = filelist
         kw["path"]         = path
-        kw["fspathlist"]   = xutils.splitpath(path)
         kw["token"]        = xauth.get_current_user().token
         kw["search_action"] = "/fs_find"
         return xtemplate.render("fs/fs.html", **kw)

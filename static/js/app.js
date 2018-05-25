@@ -30,7 +30,12 @@
     }
 
     function createTitle() {
-      return $("<div>").addClass("dialog-title").append(createCloseBtn());
+      var btn1 = $("<span>").text("Home").addClass("dialog-title-btn dialog-home-btn");
+      var btn2 = $("<span>").text("Tools").addClass("dialog-title-btn dialog-tools-btn");
+
+      return $("<div>").addClass("dialog-title")
+        .append(createCloseBtn())
+        .append(btn1).append(btn2);
     }
 
     function getBottomBot() {
@@ -78,6 +83,12 @@
       $("body").on("click", ".dialog-close-btn", function () {
         getRightBot().fadeOut(200);
       });
+      $("body").on("click", ".dialog-home-btn", function () {
+        $(".right-bot iframe").attr("src", "/");
+      });
+      $("body").on("click", ".dialog-tools-btn", function () {
+        $(".right-bot iframe").attr("src", "/fs_api/plugins");
+      })
     }
 
     function getRightBot() {
@@ -97,7 +108,9 @@
             "background-color": "#fff",
             "border": "solid 1px #ccc",
             "z-index": 50,
-        }).append(createTitle()).append(createIframe("/system/index"));
+        }).append(createTitle())
+          .append(createIframe("/fs_api/plugins"))
+          .addClass("right-bot");
         rightBot.hide();
         $(document.body).append(rightBot);
         bots.right = rightBot;

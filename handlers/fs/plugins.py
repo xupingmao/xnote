@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/05/23 23:30:57
+# @modified 2018/05/25 20:16:42
 import web
 import os
 import xconfig
@@ -48,11 +48,12 @@ class RunPluginHandler:
                 print("main(**kw)方法未定义")
         except Exception as e:
             xutils.print_exc()
-        line = '-' * 30
-        header = "执行 %s\n%s\n" % (name, line)
-        footer = "\n%s\n执行完毕，请确认下一步操作" % line
-        result = header + sys.stdout.pop_record() + footer
-        html = xutils.mark_text(result)
+        
+        header = "执行 %s<hr>" % name
+        # footer = "\n%s\n执行完毕，请确认下一步操作" % line
+        footer = ''
+        result = sys.stdout.pop_record()
+        html = header + xutils.mark_text(result)
         html += '''<input id="inputText" class="col-md-12" placeholder="请输入参数" value="%s">''' % input
         html += '''<div><button class="btn-danger" onclick="runPlugin('%s', true)">确认执行</button></div>''' % name
         return dict(code="success", data = html)

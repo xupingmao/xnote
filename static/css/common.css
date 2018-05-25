@@ -377,7 +377,6 @@ li.menu-item:hover {
     float: left;
     width: 100%;
     background-color: #9cc;
-    margin-bottom: 10px;
 }
 
 .nav-search-input {
@@ -396,7 +395,7 @@ li.menu-item:hover {
 
 
 .main {
-  /*padding-top: 10px;*/
+  padding-top: 10px;
   padding-left: 10px;
   padding-right: 10px;
   width: auto;
@@ -404,6 +403,7 @@ li.menu-item:hover {
   overflow: auto;
   box-sizing: border-box;
   margin-left: 0px;
+  /*border: 1px solid #ccc;*/
 }
 
 .footer {
@@ -703,6 +703,20 @@ li.menu-item:hover {
 .dialog-close-btn:hover {
     background-color: red;
 }
+
+.dialog-title-btn {
+    float: left;
+    padding-left: 5px;
+    padding-right: 5px;
+    color: #fff;
+    cursor: pointer;
+    line-height: 30px;
+}
+
+.dialog-title-btn:hover {
+    background-color: gray;
+}
+
 
 .dialog-title {
     float: left;
