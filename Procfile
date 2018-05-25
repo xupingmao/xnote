@@ -1,1 +1,1 @@
-web: python app.py --data /data --debug no --useCacheSearch yes --useUrlencode yes --initScript init.py
+web: python app.py --data /data --debug no --useUrlencode yes --initScript init.py
