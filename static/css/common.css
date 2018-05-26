@@ -642,7 +642,10 @@ li.menu-item:hover {
 }
 
 .error {
-    color: red;
+    margin-top: 5px;
+    padding: 5px;
+    background-color: #f2dede;
+    display: none;
 }
 
 .x-dialog {

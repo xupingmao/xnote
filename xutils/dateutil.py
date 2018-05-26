@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/05/20 12:19:25
+# @modified 2018/05/26 22:44:24
 
 import time
 import os
@@ -80,13 +80,6 @@ def parse_time(time_str):
 
 def format_millis(mills):
     return format_time(mills / 1000)
-
-def formatTime(fmt, seconds=None):
-    if seconds is None:
-        return time.strftime(fmt)
-    else:
-        st = time.localtime(seconds)
-        return time.strftime(fmt, st)
 
 def getYear():
     return time.strftime("%Y")

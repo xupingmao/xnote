@@ -25,8 +25,8 @@ _tools = [
     link("用户管理", "/system/user/list", "admin"),
 
     link("文件管理",   "/fs_data", "admin"),
+    link("App管理",   "/fs_api/app", "admin"),
     link("历史记录",   "/system/history", "admin"),
-    link("App管理", "/system/app_admin", "admin"),
     link("后台模板缓存", "/system/template_cache", "admin"),
     link("系统模块刷新", "/system/reload",         "admin"),
     link("Python文档", "/system/modules_info",    "admin"),

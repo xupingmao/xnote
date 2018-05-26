@@ -144,6 +144,7 @@
 {% init find_key = "" %}
 {% set search_category = "fs" %}
 {% include "mod_fs_path.html" %}
+<div class="error col-md-12"></div>
 
 <div id="controlArea" class="col-md-12">
     <div class="left">
@@ -276,6 +277,10 @@
         previewImages();
     }
 
+    function showErrorMessage(message) {
+        $(".error").text(message).fadeIn(200).delay(3000).fadeOut(300);
+    }
+
     function createFile(type) {
         var promptMessage = "新建文件";
         var url = "/fs_api/add_file";
@@ -292,7 +297,7 @@
                 if (data.code == "success") {
                     window.location.reload();
                 } else {
-                    alert(data.message);
+                    showErrorMessage(data.message);
                 }
             }).fail(function (data) {
                 console.log(data);
@@ -325,16 +330,12 @@
             if (resp.code == "success") {
                 location.reload();
             } else {
-                alert("删除失败, %s".format(resp.message));
+                showErrorMessage("删除失败, %s".format(resp.message));
             }
         }).fail(function (resp) {
             console.log(resp);
-            alert("删除失败");
+            showErrorMessage("删除失败");
         })
-    }
-
-    function showPlugins(path) {
-
     }
 
     $("#deleteFile").on("click", function () {
@@ -368,7 +369,7 @@
                         if (resp.code == "success") {
                             location.reload();
                         } else {
-                            alert("重命名失败, %s".format(resp.message));
+                            showErrorMessage("重命名失败, %s".format(resp.message));
                         }
                 }).fail(function (resp) {
                     console.log(resp);

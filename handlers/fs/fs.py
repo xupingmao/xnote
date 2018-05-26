@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/05/25 22:57:54
+# @modified 2018/05/26 22:36:38
 
 """文件服务
     - 文件目录
@@ -16,14 +16,6 @@ import xconfig
 import xtemplate
 from xutils import FileItem
 config = xconfig
-
-class handler:
-    __url__ = r"/fs-"
-    def GET(self):
-        if xutils.is_windows():
-            raise web.seeother("/fs-D:/")
-        else:
-            raise web.seeother("/fs-/")
 
 def is_stared(path):
     return config.has_config("STARED_DIRS", path)
@@ -344,6 +336,8 @@ class AddDirHandler(BaseAddFileHandler):
 class AddFileHandler(BaseAddFileHandler):
 
     def create_file(self, path):
+        if os.path.exists(path):
+            raise Exception("file exists")
         xutils.touch(path)
 
 class RemoveHandler:
@@ -373,6 +367,8 @@ class RenameHandler:
             new_name = xutils.quote_unicode(new_name)
         old_path = os.path.join(dirname, old_name)
         new_path = os.path.join(dirname, new_name)
+        if os.path.exists(new_path):
+            return dict(code="fail", message="%s 已存在" % new_path)
         os.rename(old_path, new_path)
         return dict(code="success")
 
@@ -383,16 +379,20 @@ class DataDirHandler:
         datapath = os.path.abspath(xconfig.DATA_DIR)
         raise web.seeother("/fs/%s" % datapath)
 
-name = "文件系统"
-description = "下载和上传文件"
+class AppHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        app_path = xconfig.APP_DIR
+        raise web.seeother("/fs/%s" % app_path)
 
 xurls = (
-    r"/fs-", handler, 
     r"/fs_data/?", DataDirHandler,
     r"/fs_api/add_dir", AddDirHandler,
     r"/fs_api/add_file", AddFileHandler,
     r"/fs_api/remove", RemoveHandler,
     r"/fs_api/rename", RenameHandler,
+    r"/fs_api/app", AppHandler,
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,

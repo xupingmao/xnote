@@ -43,13 +43,17 @@ def get_http_url(url):
     return url.split("#")[0]
 
 def get_host(url):
+    """
+        >>> get_host("http://www.baidu.com/index.html")
+        'www.baidu.com'
+    """
     p = r"https?://([^\/]+)"
     m = re.match(p, url)
     if m and m.groups():
         return m.groups()[0]
     return None
 
-class HttpRequest:
+class HttpResource:
 
     def __init__(self, url):
         self.url = get_http_url(url)
@@ -58,13 +62,13 @@ class HttpRequest:
 
     def get_res_url(self, url):
         """
-            >>> HttpRequest("http://www.a.com").get_res_url("https://b.com/b.png")
+            >>> HttpResource("http://www.a.com").get_res_url("https://b.com/b.png")
             'https://b.com/b.png'
-            >>> HttpRequest("http://www.a.com").get_res_url("//b.com/b.png")
+            >>> HttpResource("http://www.a.com").get_res_url("//b.com/b.png")
             'http://b.com/b.png'
-            >>> HttpRequest("http://www.a.com").get_res_url("/b.png")
+            >>> HttpResource("http://www.a.com").get_res_url("/b.png")
             'http://www.a.com/b.png'
-            >>> HttpRequest("http://www.a.com/a").get_res_url("b.png")
+            >>> HttpResource("http://www.a.com/a").get_res_url("b.png")
             'http://www.a.com/a/b.png'
         """
         if url.startswith(("http://", "https://")):
@@ -77,12 +81,16 @@ class HttpRequest:
         # 相对路径
         return self.url.rstrip("/") + "/" + url
 
+    def get_res(self, url):
+        return HttpResource(self.get_res_url(url))
+
     def get(self, charset = 'utf-8'):
         return http_get(self.url, charset)
 
 
-# 使用低级API访问HTTP，可以任意设置header，data等
 def do_http(method, url, headers, data=None):
+    """使用低级API访问HTTP，可以任意设置header，data等
+    """
     addr = get_host(url)
     cl = HTTPConnection(addr)
     cl.request(method, url, data, headers = headers)
@@ -98,7 +106,7 @@ def do_http(method, url, headers, data=None):
             fileobj = io.BytesIO(buf)
             gzip_f = gzip.GzipFile(fileobj=fileobj, mode="rb")
             content = gzip_f.read()
-            return content
+            return resp.getcode(), response_headers, content
         elif content_encoding != None:
             raise Exception("暂不支持%s编码" % content_encoding)
         return resp.getcode(), response_headers, buf

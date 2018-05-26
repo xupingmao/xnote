@@ -109,7 +109,7 @@
             "border": "solid 1px #ccc",
             "z-index": 50,
         }).append(createTitle())
-          .append(createIframe("/fs_api/plugins"))
+          .append(createIframe("/"))
           .addClass("right-bot");
         rightBot.hide();
         $(document.body).append(rightBot);
