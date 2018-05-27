@@ -1,40 +1,107 @@
 {% extends base.html %}
 {% block body %}
 
-<div class="col-md-12 hide">
-  <form id="searchForm1" method="GET" action="{{?action,'/search/search'}}">
-      <div class="input-group">
-          <input type="text" id="key" name="key" class="search-input" value="{{?key}}" placeholder="输入指令或搜索关键字" />
-          <button class="search-btn">搜&nbsp;索</button>
-      </div>
-      <div class="col-md-12">
-        <input type="radio" name="category" value="default" default-value="{{?category}}">默认
-        <input type="radio" name="category" value="dict" default-value="{{?category}}">词典
-        <input type="radio" name="category" value="content" default-value="{{?category}}">全文搜索
-        <input type="radio" name="category" value="message" default-value="{{?category}}">备忘
-      </div>
-  </form>
+{% include mod_search.html %}
+
+<div id="executeResult"></div>
+
+<div class="col-md-12">
+    {% for i, file in enumerate(files) %}
+    <div class="note"> 
+        <div class="note-body">
+            <div class="note-visited-cnt">
+                {# 快捷命令 #}
+                {% if file.command != None %}
+                    <input type="button" class="btn execute-btn float-right" value="执行" href="{{file.command}}"/>
+                {% end %}
+
+                {% if file.id != None %}
+                <a class="item-option dialog-btn" dialog-url="/file/group/list?id={{file.id}}&filetype=xml">移动</a>
+                {% end %}
+            </div>
+            <div class="note-name">
+                {% if file.type == "group" %}
+                    <img src="/static/image/folder.gif"/>
+                {% end %}
+                <a href="{{file.url}}">{{file.name}}</a>
+            </div>
+            
+            {% if "raw" in file and file.raw != None %}
+                <pre>{{ file.raw }}</pre>
+            {% end %}
+
+            {% if "html" in file and file.html != None %}
+                {% raw file.html %}
+            {% end %}
+
+            {# 知识库 #}
+            {% if file.category == "note" %}
+            <div>
+                {% if hasattr(file, "priority") and file.priority is not None and file.priority > 0 %}
+                    <span class="tag red-bg">置顶</span>
+                {% end %}
+
+                {% if file.is_public %}
+                    <span class="tag">公开</span>
+                {% elif file.creator != None %}
+                    <span class="tag gray-tag">{{file.creator}}</span>
+                {% end %}
+
+                {% if file.parent_name != None %}
+                    <span class="tag gray-tag">
+                        <a class="link" href="/note/view?id={{file.parent_id}}">{{file.parent_name}}</a>
+                    </span>
+                {% end %}
+
+                {% if file.mtime != None %}
+                    <span class="note-last-visit-time">最近更新:{{file.mtime}}</span>
+                {% end %}
+            </div>
+            <div class="note-related">
+                <input type="text" data-role="tagsinput" value="{{file.related}}"/>
+            </div>
+            {% end %}
+        </div>
+    </div>
+    {% end %}
 </div>
 
-<div class="col-md-12 bottom-offset-1" style="background-color:#eee; padding-left:5px;">
-  <span>搜索条件:</span> 
-  <a class="link x-radio" href="/search?key={{?key}}&category=default" data-option="default" data-value="{{?category}}">默认</a>
-  <a class="link x-radio" href="/search?key={{?key}}&category=content" data-option="content" data-value="{{?category}}">内容</a>
-  <a class="link x-radio" href="/search?key={{?key}}&category=dict" data-option="dict" data-value="{{?category}}">词典</a>
-  <a class="link x-radio" href="/search?key={{?key}}&category=message" data-option="message" data-value="{{?category}}">备忘</a>
-  <a class="link x-radio" href="/search?key={{?key}}&category=book" data-option="book" data-value="{{?category}}">图书</a>
-</div>
-
-<script type="text/javascript">
-$(function () {
-  $("#key").focus();
-
-  // $("#searchForm [type=radio]").change(function () {
-  //   $("#searchForm").submit();
-  // })
-});
+{% if "page" in globals() %}
+    {% init key = "" %}
+    {% if key != "" %}
+        {# TODO 移动端优化 #}
+        <div class="note">
+            <div class="note-body">
+                <div class="note-name">
+                    没找到结果?试试这些吧~
+                </div>
+                <div class="note-content-short">
+                    <br/>
+                    <a href="https://www.baidu.com/s?wd={{key}}" target="_blank">百度</a>
+                    <a href="https://www.google.com/search?q={{key}}" target="_blank">谷歌</a>
+                    <a href="https://www.bing.com/search?q={{key}}" target="_blank">必应</a>
+                    {% if _has_login %}
+                    <a href="/file/add?key={{key}}">创建"{{key}}"</a>
+                    {% end %}
+                </div>
+            </div>
+        </div>
+    {% end %}
+{% init page_max = 0 %}
+{% include mod_pagenation.html %}
+<script>
+    $(".execute-btn").on("click", function (e) {
+        console.log(e);
+        var href = $(e.target).attr("href");
+        $.get(href, function (responseText) {
+            var obj = responseText;
+            console.log(obj);
+            if (obj.data) {
+                $("#executeResult").text(JSON.stringify(obj.data));
+            }
+        });
+    })
 </script>
 
-{% include "mod_file_list.html" %}
-
-{% end %}
+{% end %} {# end page #}
+{% end %} {# block body #}

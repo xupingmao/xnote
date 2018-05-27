@@ -4,6 +4,7 @@
 # @modified 2018/05/22 22:20:20
 
 """Description here"""
+import os
 import web
 import time
 import xauth
@@ -11,6 +12,7 @@ import xutils
 import xtemplate
 import xtables
 import xmanager
+import xconfig
 from xutils import Storage
 from xutils import dateutil
 
@@ -182,6 +184,26 @@ class RenameHandler:
 
     def GET(self):
         return self.POST()
+    
+class ShareHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id", type=int)
+        db = xtables.get_file_table()
+        db.update(is_public=1, where=dict(id=id, creator=xauth.get_current_name()))
+        raise web.seeother("/file/view?id=%s"%id)
+
+
+class UnshareHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id", type=int)
+        db = xtables.get_file_table()
+        db.update(is_public=0, 
+            where=dict(id=id, creator=xauth.get_current_name()))
+        raise web.seeother("/file/view?id=%s"%id)
 
 xurls = (
     r"/file/add", AddHandler,
@@ -190,6 +212,8 @@ xurls = (
     r"/note/remove", RemoveHandler,
     r"/file/dict/put", DictPutHandler,
     r"/file/rename", RenameHandler,
+    r"/file/share", ShareHandler,
+    r"/file/share/cancel", UnshareHandler
 )
 
 

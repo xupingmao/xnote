@@ -1,4 +1,7 @@
-(function () {
+/**
+ * marked.js 插件扩展
+ */
+(function (window) {
 
     function escape(html, encode) {
       return html
@@ -82,7 +85,6 @@
             result.text = text.substring(3);
         } else if (/^\[[Xx]\]/.test(text)) {
             result.checkbox = '<input type="checkbox" checked disabled="true"/>';
-            // result.checkbox = '<img src="/static/image/checked.png" style="height:1.5rem;">';
             result.text = text.substring(3);
         } else {
             result.checkbox = '';
@@ -206,4 +208,4 @@
         return outtext;
     }
 
-})();
+})(window);

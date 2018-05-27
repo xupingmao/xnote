@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/05/22 23:42:40
+# @modified 2018/05/27 11:14:52
 
 import sys
 import os
@@ -270,7 +270,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual("3", value)
 
     def test_search_message(self):
-        self.check_200("/search?key=test&category=message")
+        self.check_200("/message?key=test&category=message")
 
     def test_http_headers(self):
         data = app.request("/api/http_headers", headers=dict(X_TEST=True)).data
