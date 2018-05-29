@@ -5,7 +5,9 @@
 <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
 <div class="col-md-12">
-    <h3>图片合并</h3>
+    {% set title = "图片合并" %}
+    {% include "tools/base_title.html" %}
+
     <p>点击画布上的方块可以选择图片填充，选择多个图片依次水平往后填充, 编辑完成之后点击预览按钮可以获取去除背景和方格的图片</p>
     <p>设置列数和行数都为1可以用来调整图片大小</p>
 </div>

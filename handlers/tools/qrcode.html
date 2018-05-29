@@ -8,7 +8,9 @@
 {% block body %}
 
     <div>
-        <h3>生成二维码</h3>
+    {% set title = "生成二维码" %}
+    {% include "tools/base_title.html" %}
+
         <textarea id="qrcode_input" class="col-md-12" rows=5></textarea>
         <button id="generate">生成</button>
     </div>

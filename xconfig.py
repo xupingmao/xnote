@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/05/11 23:01:37
+# @modified 2018/05/29 22:35:24
 
 '''
 xnote系统配置
@@ -322,42 +322,64 @@ def add_notice(user=None,
         link = '#'
     _notice_list.append(Storage(user=user, year=year, month=month, day=day, wday=wday, message=message, link=link))
 
+
+def create_tomorrow_filter(user):
+    tm = time.localtime(time.time() + 24 * 3600)
+    def tomorrow_filter(todo):
+        year  = tm.tm_year
+        month = tm.tm_mon
+        day  = tm.tm_mday
+        wday = tm.tm_wday + 1
+        if todo.day == None:
+            # 每天都提醒的不重复
+            return False
+        if todo.user != None and user != todo.user:
+            return False
+        if todo.year != None and todo.year != year:
+            return False
+        if todo.month != None and todo.month != month:
+            return False
+        if todo.day != None and todo.day != day:
+            return False
+        if todo.wday != None and todo.wday != wday:
+            return False
+        return True
+    return tomorrow_filter
+
+def create_filter(user):
+    tm = time.localtime()
+    def filter_handler(todo):
+        year  = tm.tm_year
+        month = tm.tm_mon
+        day  = tm.tm_mday
+        wday = tm.tm_wday + 1
+        if todo.user != None and user != todo.user:
+            return False
+        if todo.year != None and todo.year != year:
+            return False
+        if todo.month != None and todo.month != month:
+            return False
+        if todo.day != None and todo.day != day:
+            return False
+        if todo.wday != None and todo.wday != wday:
+            return False
+        return True
+    return filter_handler
+
 def get_notice_list(type='today', user=None):
     """
     获取通知列表,user不为空时通过它过滤
     - today 今天的通知
     - all 所有的通知
     """
-    def create_filter(tm):
-        def filter_handler(todo):
-            year  = tm.tm_year
-            month = tm.tm_mon
-            day  = tm.tm_mday
-            wday = tm.tm_wday + 1
-            if todo.user != None and user != todo.user:
-                return False
-            if todo.year != None and todo.year != year:
-                return False
-            if todo.month != None and todo.month != month:
-                return False
-            if todo.day != None and todo.day != day:
-                return False
-            if todo.wday != None and todo.wday != wday:
-                return False
-            return True
-        return filter_handler
 
     if type == "all":
         return _notice_list
 
-    day = 24 * 3600
-    today_filter = create_filter(time.localtime())
-    
     if type == 'today':
-        return list(filter(today_filter, _notice_list))
+        return list(filter(create_filter(user), _notice_list))
     if type == "tomorrow":
-        tomorrow_filter = create_filter(time.localtime(time.time() + day))
-        return list(filter(tomorrow_filter, _notice_list))
+        return list(filter(create_tomorrow_filter(user), _notice_list))
 
 def clear_notice_list():
     global _notice_list

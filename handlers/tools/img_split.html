@@ -4,7 +4,9 @@
 
 <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
-<h3>图片拆分</h3>
+    {% set title = "图片拆分" %}
+    {% include "tools/base_title.html" %}
+
 <div id="app">
     <input type="file" name="file" id="file" value="选择图片" onchange="handleFiles(this.files)" class="hide" multiple="multiple">
     <div class="col-md-12">

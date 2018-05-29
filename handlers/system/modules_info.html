@@ -2,8 +2,10 @@
 
 {% block body %}
 
+    {% set title = "模块信息" %}
+    {% include "tools/base_title.html" %}
+
     <div class="col-md-12">
-        <h2>模块信息</h2>
         <h3>sys.path</h3>
         <table class="table">
             {% for p in sys.path %}
