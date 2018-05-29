@@ -27,6 +27,7 @@
     <!-- <a href="/fs/{{os.path.dirname(path)}}">返回</a>  -->
     文件路径: {{path}}
 </div>
+<input class="col-md-12" id="searchName" placeholder="搜索插件">
 
 <div class="col-md-12">
     {% for index, item in enumerate(scripts) %}
@@ -76,7 +77,23 @@
             function (result) {
                 showResult(result.data);
             });
-    }
+    };
+
+    $("#searchName").keyup(function (event) {
+        var name = $(this).val();
+        if (name == "") {
+            $(".plugin").show();
+            return;
+        }
+        $(".plugin").each(function (index, element) {
+            var $e = $(element);
+            if ($e.text().indexOf(name) >= 0) {
+                $e.show();
+            } else {
+                $e.hide();
+            }
+        })
+    })
 </script>
 
 {% end %}
