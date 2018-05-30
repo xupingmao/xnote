@@ -11,19 +11,13 @@
         box-sizing: border-box;
         background-color: #eee;
     }
-
-    .main {
-        padding-left: 0px;
-        padding-right: 0px;
-    }
-
 </style>
 {% end %}
 
 {% block body %}
 {% import os %}
 <input class="hide" id="path" value="{{path}}">
-<div class="col-md-12 nav-path">
+<div class="col-md-12">
     <!-- <a href="/fs/{{os.path.dirname(path)}}">返回</a>  -->
     文件路径: {{path}}
 </div>

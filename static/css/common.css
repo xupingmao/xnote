@@ -970,3 +970,7 @@ li.menu-item:hover {
     z-index: 100;
     opacity: 0.8
 }
+
+.border {
+    border: solid 1px #ccc;
+}

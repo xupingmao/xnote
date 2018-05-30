@@ -63,6 +63,7 @@ _tools = [
 
     # 其他工具
     link("分屏", "/tools/command_center"),
+    link("命令模式", "/fs_api/plugins?show_menu=true"),
 ]
 
 
