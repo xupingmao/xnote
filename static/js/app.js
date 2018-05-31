@@ -144,6 +144,19 @@
       getRightBot().fadeOut(200);
     }
 
+    function openDialog(url) {
+      var width = $(".main").width();
+      layer.open({
+        type: 2,
+        title: '子页面',
+        maxmin: true,
+        area: [width + "px", '500px'],
+        content: url,
+        scrollbar: false
+      });
+    }
+
+    window.openDialog = openDialog;
     window.showIframeDialog = showIframeDialog;
     window.hideIframeDialog = hideIframeDialog;
 

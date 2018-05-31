@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/05/29 22:35:24
+# @modified 2018/05/31 00:20:53
 
 '''
 xnote系统配置
@@ -190,6 +190,7 @@ def init(path = DATA_DIR):
     global APP_DIR
     global TMP_DIR
     global SCRIPTS_DIR
+    global COMMANDS_DIR
     global CODE_ZIP
     global DATA_ZIP
     global TRASH_DIR
@@ -199,14 +200,15 @@ def init(path = DATA_DIR):
     DATA_PATH = path
     DATA_DIR  = path
     # 数据库地址
-    DB_PATH      = os.path.join(DATA_PATH, "data.db")
+    DB_PATH      = os.path.join(DATA_DIR, "data.db")
     DICT_FILE    = os.path.join(DATA_DIR, "dictionary.db")
     # 备份数据地址
-    BACKUP_DIR   = os.path.join(DATA_PATH, "backup")
+    BACKUP_DIR   = os.path.join(DATA_DIR, "backup")
     # APP地址
-    APP_DIR      = os.path.join(DATA_PATH, "app")
-    TMP_DIR      = os.path.join(DATA_PATH, "tmp")
+    APP_DIR      = os.path.join(DATA_DIR, "app")
+    TMP_DIR      = os.path.join(DATA_DIR, "tmp")
     SCRIPTS_DIR  = os.path.join(DATA_DIR, "scripts")
+    COMMANDS_DIR = os.path.join(DATA_DIR, "commands")
     CODE_ZIP     = os.path.join(DATA_DIR, "code.zip")
     DATA_ZIP     = os.path.join(DATA_DIR, "data.zip")
     TRASH_DIR    = os.path.join(DATA_DIR, "trash")
@@ -217,6 +219,7 @@ def init(path = DATA_DIR):
     makedirs(DATA_DIR)
     makedirs(TMP_DIR)
     makedirs(SCRIPTS_DIR)
+    makedirs(COMMANDS_DIR)
     makedirs(TRASH_DIR)
 
 

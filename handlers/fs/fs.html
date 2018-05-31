@@ -4,6 +4,7 @@
 
 <link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
 <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
+<script type="text/javascript" src="/static/lib/layer/layer.js"></script>
 
 <style type="text/css">
     .fs-image {
@@ -163,7 +164,7 @@
             <input type="button" class="link-btn advanced-opt" x-href="{{item.url}}?path={{path}}" value="{{item.name}}"/>
         {% end %}
         <input type="button" x-href="/fs_api/plugins?path={{path}}" 
-            onclick="javascript:showIframeDialog('/fs_api/plugins?path={{path}}')"
+            onclick="javascript:openDialog('/fs_api/plugins?path={{path}}')"
             value="更多"/>
     </div>
 </div>
@@ -216,7 +217,7 @@
             {% end %}
 
             {% if item.ext in xconfig.FS_TEXT_EXT_LIST %}
-                <a class="item-option" href="javascript:showIframeDialog('/code/view_source?path={{url_escape(item.path)}}')">编辑</a>
+                <a class="item-option" href="javascript:openDialog('/code/view_source?path={{url_escape(item.path)}}')">编辑</a>
             {% end %}
 
             {% if item.ext in (".md", ".csv") %}
@@ -233,7 +234,7 @@
             <!-- {{item.cdate}} -->
             <a href="javascript:removeFile('{{item.path}}')" class="item-option">删除</a>
             <a class="item-option" 
-                href="javascript:showIframeDialog('/fs_api/plugins?path={{item.path}}')">更多</a>
+                href="javascript:openDialog('/fs_api/plugins?path={{item.path}}')">更多</a>
         </td>
     </tr>
     {% end %}
