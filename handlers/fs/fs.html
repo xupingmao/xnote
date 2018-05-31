@@ -163,9 +163,7 @@
         {% for item in xconfig.FS_OPT_BTNS %}
             <input type="button" class="link-btn advanced-opt" x-href="{{item.url}}?path={{path}}" value="{{item.name}}"/>
         {% end %}
-        <input type="button" x-href="/fs_api/plugins?path={{path}}" 
-            onclick="javascript:openDialog('/fs_api/plugins?path={{path}}')"
-            value="更多"/>
+        <input type="button" class="layer-btn" data-url="/fs_api/plugins?path={{path}}" value="更多"/>
     </div>
 </div>
 
@@ -213,11 +211,11 @@
 
             {% if item.ext in (".log", ".sql") %}
                 {% comment 以文本形式查看 %}
-                <a class="item-option" href="/fs/{{item.path}}?type=text">查看</a>
+                <a class="item-option layer-btn" data-url="/fs/{{item.path}}?type=text">查看</a>
             {% end %}
 
             {% if item.ext in xconfig.FS_TEXT_EXT_LIST %}
-                <a class="item-option" href="javascript:openDialog('/code/view_source?path={{url_escape(item.path)}}')">编辑</a>
+                <a class="item-option" href="/code/view_source?path={{url_escape(item.path)}}">编辑</a>
             {% end %}
 
             {% if item.ext in (".md", ".csv") %}

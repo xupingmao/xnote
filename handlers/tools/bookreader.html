@@ -1,8 +1,8 @@
 {% extends base.html %}
 
 {% block body %}
-
-<a id="backLink">返回目录</a>
+{% set path = xutils.get_argument("path") %}
+{% include mod_fs_path.html %}
 <div class="col-md-12" style="text-align: center;">
     <button class="backward" style="float: left;">上一页</button>
     <span style="text-align: center;"><button class="read">阅读</button></span>

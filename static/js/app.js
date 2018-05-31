@@ -89,9 +89,15 @@
       });
       $("body").on("click", ".dialog-tools-btn", function () {
         $(".right-bot iframe").attr("src", "/fs_api/plugins");
-      })
+      });
       $("body").on("click", ".dialog-refresh-btn", function () {
         $(".right-bot iframe")[0].contentWindow.location.reload();
+      });
+
+      $(".layer-btn").click(function (event) {
+        var target = event.target;
+        var url = $(target).attr("data-url");
+        openDialog(url);
       })
     }
 
@@ -162,53 +168,11 @@
 
     $(function () {
         init();
-
-        // window.onbeforeunload = function(e) {
-        //   var dialogText = 'Dialog text here';
-        //   e.returnValue = dialogText;
-        //   return dialogText;
-        // };
-        // function onunloadHandler(){
-        //     var warning="谢谢光临";
-        //     alert(warning);
-        // }
-        // window.onbeforeunload = onbeforeunloadHandler;
-        // window.onunload = onunloadHandler;
     });
 })(window);
 
 
 $(function() {
-  function expandMenu(ele, delay) {
-    // 禁用
-    return;
-    if (delay == undefined) {
-      delay = 0;
-    }
-    var parent = ele.parent().parent(); //获取当前页签的父级的父级
-    var labeul = ele.parent("li").find(">ul");
-    if (ele.parent().hasClass('open') == false) {
-      //展开未展开
-      parent.find('ul').slideUp(delay);
-      parent.find("li").removeClass("open");
-      parent.find('li a').removeClass("active").find(".arrow").removeClass("open");
-      ele.parent("li").addClass("open").find(labeul).slideDown(delay);
-      ele.addClass("active").find(".arrow").addClass("open")
-    } else {
-      ele.parent("li").removeClass("open").find(labeul).slideUp(delay);
-      if (ele.parent().find("ul").length > 0) {
-        ele.removeClass("active").find(".arrow").removeClass("open");
-      } else {
-        ele.addClass("active");
-      }
-    }
-  }
-  // nav收缩展开
-  $('.navMenu li a').on('click',
-    function() {
-      expandMenu($(this), 300);
-  });
-
 
   function showSideBar() {
     $(".navMenubox").animate({"margin-left": "0px"});
@@ -245,13 +209,4 @@ $(function() {
     toggleMenu();
   });
 
-  var pathname = location.pathname;
-  if (/\/file\/.*/.test(pathname)) {
-    expandMenu($("#navFile"));
-  }
-  if (pathname != "/tools/message"
-      && (/\/system\/.*/.test(pathname) 
-      || /\/tools\/.*/.test(pathname))) {
-    expandMenu($("#navSystem"));
-  }
 });
