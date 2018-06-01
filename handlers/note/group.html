@@ -63,7 +63,7 @@
                         <a class="item-option" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>
                     {% end %}
                     {% if item.type != "group" %}
-                    <a class="item-option dialog-btn" dialog-url="/file/group?id={{item.id}}&filetype=xml" href="javascript:void({{item.id}})">移动</a>
+                    <a class="item-option move-btn" data-url="/file/group?id={{item.id}}&filetype=xml">移动</a>
                     {% end %}
                 </div>
                 {% end %}
@@ -72,6 +72,25 @@
     {% end %}
     </table>
 </div>
+
+<script type="text/javascript">
+$(function () {
+    $(".move-btn").click(function (event) {
+        var url = $(event.target).attr("data-url");
+        $.get(url, function (respHtml) {
+            var width = $(".main").width();
+            layer.open({
+              type: 1,
+              title: "移动分组",
+              shadeClose: true,
+              area: [width + "px", '80%'],
+              content: respHtml,
+              scrollbar: false
+            });
+        });
+    })
+})
+</script>
 
 {% if "page" in globals() %}
     {% include mod_pagenation.html %}

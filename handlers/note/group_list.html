@@ -24,15 +24,12 @@
         {% end %}
     </div>
 {% else %}
-    <div class="x-dialog x-dialog-remote" style="height: 400px;">
-        <div class="x-dialog-title">移动分组 <input type="button" class="x-dialog-close" value="关闭"/></div>
-        <div class="col-md-12 scroll-y">
-        {% for item in filelist %}
-        <span class="tag-span-light">
-            <a href="javascript:moveTo({{id}}, {{item.id}})"><span>{{item.name}}</span></a>
-        </span>
-        {% end %}
-        </div>
+    <div class="col-md-12 scroll-y">
+    {% for item in filelist %}
+    <span class="tag-span-light">
+        <a href="javascript:moveTo({{id}}, {{item.id}})"><span>{{item.name}}</span></a>
+    </span>
+    {% end %}
     </div>
 
     <script type="text/javascript">
