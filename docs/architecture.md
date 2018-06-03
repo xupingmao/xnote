@@ -48,7 +48,7 @@ xnote
 - jsdiff
 - codemirror
 
-### 扩展
+### 开发新模块
 
 在handlers目录下添加python程序，比如test.py
 
@@ -57,6 +57,8 @@ class handler:
     def GET(self):
         return "success"
 # 如果配置了xurls全局变量，xnote会注册指定的url pattern否则按照相对handlers的路径注册
-xurls = ("/test", handler)
+xurls = (
+    r"/test", handler
+)
 # 启动xnote，访问浏览器localhost:1234/test就会看到success
 ```

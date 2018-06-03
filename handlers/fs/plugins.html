@@ -51,7 +51,7 @@
         showResult("开始执行 " + name);
         runPlugin(name, false);
         $("#pluginEditLink").removeClass("hide")
-            .attr("href", "/system/script/edit?name=" + name);
+            .attr("href", "/system/script/edit?name=commands/" + name);
     });
 
     function runPlugin(name, confirmed) {

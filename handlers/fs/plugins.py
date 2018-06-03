@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/05/25 20:16:42
+# @modified 2018/06/04 00:19:37
 import web
 import os
 import xconfig
@@ -13,7 +13,18 @@ from xutils import ziputil
 
 
 def get_display_name(name):
-    return name[3:]
+    if name.startswith("fs-"):
+        # 兼容历史数据
+        return name[3:]
+    else:
+        return name
+
+def filter_plugin(x):
+    return x.endswith(".py")
+
+def list_plugins():
+    scripts = sorted(filter(filter_plugin, os.listdir(xconfig.COMMANDS_DIR)))
+    return scripts
 
 class ListHandler:
     @xauth.login_required("admin")
@@ -22,7 +33,7 @@ class ListHandler:
         path = xutils.get_argument("path")
         if path == "" or path == None:
             path = xconfig.DATA_DIR
-        scripts = sorted(filter(lambda x: x.endswith(".py") and x.startswith("fs-"), os.listdir(xconfig.SCRIPTS_DIR)))
+        scripts = list_plugins()
         return xtemplate.render("fs/plugins.html", 
             path = path, 
             scripts = scripts, 
@@ -40,6 +51,7 @@ class RunPluginHandler:
             confirmed = xutils.get_argument("confirmed") == "true"
             input = xutils.get_argument("input", "")
             vars = dict()
+            name = os.path.join("commands", name)
             xutils.load_script(name, vars = vars)
             main_func = vars.get("main", None)
             if main_func is not None:
@@ -64,9 +76,9 @@ class DownloadPluginsHandler:
     @xauth.login_required("admin")
     def GET(self):
         bufsize = 1024 * 100
-        dirname = xconfig.SCRIPTS_DIR
+        dirname = xconfig.COMMANDS_DIR
         outpath = os.path.join(dirname, "fs-plugins.zip")
-        ziputil.zip_dir(dirname, outpath = outpath, filter = lambda x: os.path.basename(x).startswith("fs-") and x.endswith(".py"))
+        ziputil.zip_dir(dirname, outpath = outpath)
         web.header("Content-Disposition", "attachment; filename=fs-plugins.zip")
         with open(outpath, "rb") as fp:
             buf = fp.read(bufsize)
