@@ -21,7 +21,7 @@
                 <a class="link" href="/file/mark?id={{file.id}}">收藏</a>
             {% end %}
 
-            <a class="dialog-btn link" dialog-url="/file/group?id={{item.id}}&filetype=xml" href="javascript:void({{item.id}})">移动</a>
+            <a class="move-btn link" data-url="/file/group?id={{item.id}}&filetype=xml">移动</a>
             <a class="red" href="javascript:remove({{item.id}}, '{{item.name}}', {{item.parent_id}})">删除</a>
 
         {% end %}
