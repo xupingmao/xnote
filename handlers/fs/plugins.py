@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/06/04 00:19:37
+# @modified 2018/06/04 00:56:38
 import web
 import os
 import xconfig
@@ -51,8 +51,8 @@ class RunPluginHandler:
             confirmed = xutils.get_argument("confirmed") == "true"
             input = xutils.get_argument("input", "")
             vars = dict()
-            name = os.path.join("commands", name)
-            xutils.load_script(name, vars = vars)
+            script_name = os.path.join("commands", name)
+            xutils.load_script(script_name, vars = vars)
             main_func = vars.get("main", None)
             if main_func is not None:
                 main_func(path = path, confirmed = confirmed, input = input)
