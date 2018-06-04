@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/06/04 23:38:44
+# @modified 2018/06/05 00:32:19
 
 """
 xnote工具类总入口
@@ -710,7 +710,10 @@ def exec_script(name, new_window=True, record_stdout = True, vars = None):
         return out
     return ret
 
-def load_script(name, vars = None, dirname = xconfig.SCRIPTS_DIR):
+def load_script(name, vars = None, dirname = None):
+    if dirname is None:
+        # 必须实时获取dirname
+        dirname = xconfig.SCRIPTS_DIR
     path = os.path.join(dirname, name)
     path = os.path.abspath(path)
     return exec_python_code(name, xutils.readfile(path), False, vars = vars)
