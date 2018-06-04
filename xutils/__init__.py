@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/06/04 22:36:59
+# @modified 2018/06/04 23:38:44
 
 """
 xnote工具类总入口
@@ -35,7 +35,7 @@ from web.utils import safestr, safeunicode
 from . import textutil, ziputil, fsutil, logutil, dateutil, htmlutil
 from .ziputil import *
 from .netutil import splithost
-from .textutil import edit_distance
+from .textutil import edit_distance, cut_text
 from .dateutil import *
 from .netutil  import *
 from .fsutil   import *

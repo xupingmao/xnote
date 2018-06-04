@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/06/04 22:25:37
+# @modified 2018/06/04 23:36:45
 
 __doc__ = """Methods for text operation"""
 
@@ -288,4 +288,15 @@ def parse_config_text(text):
             config.append(dict(key=strs[0], value=strs[1]))
     return config
 
-
+def cut_text(text, length):
+    """
+        >>> cut_text('abc', 5)
+        'abc'
+        >>> cut_text('abcdefg', 5)
+        'abc..'
+        >>> cut_text('abcd', 5)
+        'abc..'
+    """
+    if len(text) <= length:
+        return text
+    return text[:length-2] + ".."

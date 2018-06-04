@@ -1,7 +1,9 @@
 # encoding=utf-8
+# @modified 2018/06/04 23:31:57
 import os
 import re
 import codecs
+import six
 
 try:
     # try py3 first
@@ -11,6 +13,8 @@ except ImportError as e:
     from urllib2 import urlopen
 
 BUFSIZE = 1024 * 512
+
+USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36"
 
 def splithost(url):
     """
@@ -87,12 +91,21 @@ class HttpResource:
     def get(self, charset = 'utf-8'):
         return http_get(self.url, charset)
 
+class HttpResponse:
+
+    def __init__(self, status, headers, content):
+        self.status = status
+        self.headers = headers
+        self.content = content
 
 def do_http(method, url, headers, data=None):
     """使用低级API访问HTTP，可以任意设置header，data等
     """
     addr = get_host(url)
-    cl = HTTPConnection(addr)
+    cl = six.moves.http_client.HTTPConnection(addr)
+    headers = headers or dict()
+    if "User-Agent" not in headers:
+        headers["User-Agent"] = USER_AGENT
     cl.request(method, url, data, headers = headers)
     head = None
     buf = None
