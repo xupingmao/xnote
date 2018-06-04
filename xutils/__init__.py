@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/05/22 00:20:43
+# @modified 2018/06/04 22:36:59
 
 """
 xnote工具类总入口
@@ -32,7 +32,7 @@ from tornado.escape import xhtml_escape
 from web.utils import safestr, safeunicode
 
 # xnote工具
-from . import textutil, ziputil, fsutil, logutil, dateutil
+from . import textutil, ziputil, fsutil, logutil, dateutil, htmlutil
 from .ziputil import *
 from .netutil import splithost
 from .textutil import edit_distance
@@ -710,8 +710,7 @@ def exec_script(name, new_window=True, record_stdout = True, vars = None):
         return out
     return ret
 
-def load_script(name, vars = None):
-    dirname = xconfig.SCRIPTS_DIR
+def load_script(name, vars = None, dirname = xconfig.SCRIPTS_DIR):
     path = os.path.join(dirname, name)
     path = os.path.abspath(path)
     return exec_python_code(name, xutils.readfile(path), False, vars = vars)
@@ -780,6 +779,7 @@ class CacheObj:
     """
     缓存对象，包含缓存的key和value，有一个公共的缓存队列
     每次生成一个会从缓存队列中取出一个检查是否失效，同时把自己放入队列
+    TODO 提供按照大小过滤的规则
     """
     _queue = Queue()
 

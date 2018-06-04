@@ -176,6 +176,10 @@ class TestMain(unittest.TestCase):
         import doctest
         doctest.testmod(m=xutils.fsutil, verbose=True)
 
+    def test_htmlutil(self):
+        import doctest
+        doctest.testmod(m=xutils.htmlutil, verbose=True)
+
     def test_print_table(self):
         xutils.print_table([dict(name="a", age=10), dict(name="b", age=12)])
 

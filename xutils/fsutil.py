@@ -25,26 +25,16 @@ readFile = readfile
 read = readfile
 read_utf8 = readfile
 
-def readRawFile(path):
-    fp = open(path, "rb")
-    buf = fp.read(1024)
-    while buf:
-        yield buf
-        buf = fp.read(1024)
-    fp.close()
-
 def writebytes(path, bytes):
     dirname = os.path.dirname(path)
     check_create_dirs(dirname)
-    fp = open(path, "wb")
-    fp.write(bytes)
-    fp.close()
+    with open(path, "wb") as fp:
+        fp.write(bytes)
     return bytes
 
 def readbytes(path):
-    fp = open(path, "rb")
-    bytes = fp.read()
-    fp.close()
+    with open(path, "rb") as fp:
+        bytes = fp.read()
     return bytes
 
 def remove_file(fullpath, raiseIfNotExists = False):
@@ -53,8 +43,7 @@ def remove_file(fullpath, raiseIfNotExists = False):
     elif raiseIfNotExists:
         raise Error("file not exits!")
 
-def remove(path):
-    remove_file(path)
+remove = remove_file
 
 def copy(src, dest):
     bufsize = 64 * 1024 # 64k

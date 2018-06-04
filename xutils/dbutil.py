@@ -1,5 +1,4 @@
 # encoding=utf-8
-
 import os
 try:
     import sqlite3
@@ -11,6 +10,7 @@ except ImportError:
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
+# @modified 2018/06/04 23:07:18
 ###########################################################
 
 def search_escape(text):

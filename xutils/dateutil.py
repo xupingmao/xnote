@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/05/26 22:44:24
+# @modified 2018/06/04 23:22:26
 
 import time
 import os
@@ -27,13 +27,6 @@ import os
 
 _DAY = 3600 * 24
 FORMAT = '%Y-%m-%d %H:%M:%S'
-
-def getTime(seconds=None):
-    if seconds == None:
-        return time.strftime('%Y-%m-%d %H:%M:%S')
-    else:
-        st = time.localtime(seconds)
-        return time.strftime('%Y-%m-%d %H:%M:%S', st)
 
 def get_seconds(date = None):
     if date is None:
@@ -81,7 +74,7 @@ def parse_time(time_str):
 def format_millis(mills):
     return format_time(mills / 1000)
 
-def getYear():
+def get_current_year():
     return time.strftime("%Y")
 
 def get_days_of_month(y, month):

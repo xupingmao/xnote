@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2018/05/05 11:21:24
+# @modified 2018/06/04 22:35:03
 
 def element(tag, text, clazz):
     """
@@ -15,6 +15,10 @@ def span(text, clazz = 'xnote-span'):
 
 
 def pre(text, clazz = 'xnote-pre'):
+    """
+        >>> pre('hello')
+        "<pre class='xnote-pre'>hello</pre>"
+    """
     return element("pre", text, clazz)
 
 def div(text, clazz = 'xnote-div'):

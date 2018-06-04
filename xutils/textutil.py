@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/05/20 22:44:49
+# @modified 2018/06/04 22:25:37
 
 __doc__ = """Methods for text operation"""
 
@@ -61,12 +61,32 @@ def _chk_list(text, func):
     return True
 
 def isalpha(text):
+    """
+        >>> isalpha('a')
+        True
+        >>> isalpha('abc')
+        True
+        >>> isalpha('12abc')
+        False
+    """
     return _chk_list(text, _isalpha)
 
 def isalnum(text):
+    """
+        >>> isalnum('123abc')
+        True
+        >>> isalnum('-abc-')
+        False
+    """
     return _chk_list(text, _isalnum)
 
 def isdigit(text):
+    """
+        >>> isdigit('123')
+        True
+        >>> isdigit('abc111')
+        False
+    """
     return _chk_list(text, _isdigit)
 
 def issubsetof(text, collection):
@@ -90,8 +110,8 @@ def remove(self, target):
 
 def between(self, start, end):
     """Get the text between start end end
-    >>> between("start words end", "start", "end")
-    ' words '
+        >>> between("start words end", "start", "end")
+        ' words '
     """
     p1 = self.find(start)
     if p1 < 0:
