@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/04/30 00:38:46
+# @modified 2018/06/05 22:42:49
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -154,8 +154,8 @@ def init_file_table():
         manager.add_column("is_deleted", "int", 0)
         # 是否公开
         manager.add_column("is_public", "int", 0)
-        # 是否标记
-        manager.add_column("is_marked", "int", 0)
+        # 是否标记，不应该是文档的属性，使用collection表记录
+        # manager.add_column("is_marked", "int", 0)
         # 权限相关
         # 创建者
         manager.add_column("creator", "text", "")

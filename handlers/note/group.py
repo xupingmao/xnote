@@ -52,6 +52,7 @@ class Ungrouped:
 
         return xtemplate.render(VIEW_TPL,
             file_type="group",
+            pathlist = [Storage(name="未分类", type="group", url="/file/group/ungrouped")],
             files = files,
             file = Storage(name="未分类", type="group"),
             page = page,
@@ -128,7 +129,8 @@ class RecentCreatedHandler:
         return xtemplate.render("note/view.html",
             file_type = "group", 
             files = files, 
-            show_date = True,
+            pathlist = [Storage(name="最近创建", type="group", url="/note/recent_created")],
+            show_cdate = True,
             show_opts = False)
 
 class RecentEditHandler:
@@ -187,7 +189,7 @@ class PublicGroupHandler:
         files = db.select(where=where, offset=(page-1)*PAGE_SIZE, limit=PAGE_SIZE, order="ctime DESC")
         count = db.count(where=where)
         return xtemplate.render(VIEW_TPL, 
-            pathlist = [Storage(name="公开", url="/file/group/public")],
+            pathlist = [Storage(name="分享文章", url="/file/group/public")],
             file_type = "group",
             files = files,
             page = page, 
@@ -204,7 +206,7 @@ xurls = (
     r"/file/group/move", MoveHandler,
     r"/file/group/bookmark", MarkedHandler,
     r"/file/group/marked", MarkedHandler,
-    r"/file/group/recent_created", RecentCreatedHandler,
+    r"/note/recent_created", RecentCreatedHandler,
     r"/file/recent_edit", RecentEditHandler,
     r"/file/group/public", PublicGroupHandler
 )
