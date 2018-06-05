@@ -12,8 +12,8 @@ import xconfig
 class TagHandler:
     
     def GET(self, id):
-        id   = int(id)
-        db   = xtables.get_file_tag_table()
+        id        = int(id)
+        db        = xtables.get_file_tag_table()
         file_tags = db.select(where=dict(file_id=id))
         return dict(code="", message="", data=list(file_tags))
 
@@ -21,23 +21,23 @@ class UpdateTagHandler:
 
     @xauth.login_required()
     def POST(self):
-        id   = xutils.get_argument("file_id", type=int)
+        id       = xutils.get_argument("file_id", type=int)
         tags_str = xutils.get_argument("tags")
-
-        tag_db = xtables.get_file_tag_table()
+        tag_db   = xtables.get_file_tag_table()
+        
         if tags_str is None or tags_str == "":
             tag_db.delete(where=dict(file_id=id))
             return dict(code="success")
         new_tags = set(tags_str.split(" "))
-        file = dao.get_by_id(id)
-        db   = dao.get_file_db()
-        file_db = xtables.get_file_table()
+        file     = dao.get_by_id(id)
+        db       = dao.get_file_db()
+        file_db  = xtables.get_file_table()
         # 求出两个差集进行运算
         old_tags = tag_db.select(where=dict(file_id=id))
         old_tags = set([v.name for v in old_tags])
 
         to_delete = old_tags - new_tags
-        to_add = new_tags - old_tags
+        to_add    = new_tags - old_tags
 
         for item in to_delete:
             tag_db.delete(where=dict(name=item, file_id=id))
@@ -55,11 +55,11 @@ class TagNameHandler:
 
     @xauth.login_required()
     def GET(self, tagname):
-        tagname = xutils.unquote(tagname)
-        db = xtables.get_file_table()
-        page   = xutils.get_argument("page", 1, type=int)
-        limit  = xutils.get_argument("limit", 10, type=int)
-        offset = (page-1) * limit
+        tagname  = xutils.unquote(tagname)
+        db       = xtables.get_file_table()
+        page     = xutils.get_argument("page", 1, type=int)
+        limit    = xutils.get_argument("limit", 10, type=int)
+        offset   = (page-1) * limit
         pagesize = xconfig.PAGE_SIZE
         role = "admin"
 
@@ -76,10 +76,10 @@ class TagNameHandler:
             vars=dict(name=tagname.lower(), offset=offset, limit=limit, groups=groups))
         files = [dao.FileDO.fromDict(f) for f in files]
         return xtemplate.render("note/tagname.html", 
-            tagname=tagname, 
-            files=files, 
-            page_max = math.ceil(count / pagesize), 
-            page=page)
+            tagname  =tagname, 
+            files    =files, 
+            page_max =math.ceil(count / pagesize), 
+            page     =page)
 
 @xutils.cache(key="tag.get_taglist", expire=60)
 def get_taglist(db, user_name):
@@ -92,17 +92,15 @@ class TagListHandler:
 
     @xauth.login_required()
     def GET(self):
-        db = xtables.get_file_table()
+        db        = xtables.get_file_table()
         user_name = xauth.get_current_name()
-        # if user_name == "admin":
-        #     sql = "SELECT name, COUNT(*) AS amount FROM file_tag GROUP BY name ORDER BY amount DESC, name ASC";
-        # else:
-        #     sql = "SELECT name, COUNT(*) AS amount FROM file_tag WHERE groups in $groups GROUP BY name ORDER BY amount DESC, name ASC";
-        tag_list = get_taglist(db, user_name)
+        tag_list  = get_taglist(db, user_name)
         return xtemplate.render("note/taglist.html", tag_list = tag_list)
 
-xurls = (r"/file/tag/(\d+)", TagHandler,
-         r"/file/tag/update", UpdateTagHandler,
-         r"/file/tagname/(.*)", TagNameHandler,
-         r"/file/taglist", TagListHandler)
+xurls = (
+    r"/file/tag/(\d+)"   , TagHandler,
+    r"/file/tag/update"  , UpdateTagHandler,
+    r"/file/tagname/(.*)", TagNameHandler,
+    r"/file/taglist"     , TagListHandler
+)
 

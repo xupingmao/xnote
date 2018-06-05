@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/05/22 00:26:18
+# @modified 2018/06/05 23:17:23
 
 import profile
 import math
@@ -33,12 +33,12 @@ class ViewHandler:
     xconfig.note_history = History("笔记浏览记录", 200)
 
     def GET(self, op):
-        id   = xutils.get_argument("id", "")
-        name = xutils.get_argument("name", "")
-        page = xutils.get_argument("page", 1, type=int)
-        pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
-        db   = xtables.get_file_table()
-        user_name = xauth.get_current_name()
+        id            = xutils.get_argument("id", "")
+        name          = xutils.get_argument("name", "")
+        page          = xutils.get_argument("page", 1, type=int)
+        pagesize      = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
+        db            = xtables.get_file_table()
+        user_name     = xauth.get_current_name()
         show_add_file = False
 
         if id == "" and name == "":
@@ -54,9 +54,9 @@ class ViewHandler:
         if not file.is_public and user_name != "admin" and user_name != file.creator:
             raise web.seeother("/unauthorized")
         show_search_div = False
-        pathlist = dao.get_pathlist(db, file)
-        can_edit = (file.creator == user_name) or (user_name == "admin")
-        role = xauth.get_current_role()
+        pathlist        = dao.get_pathlist(db, file)
+        can_edit        = (file.creator == user_name) or (user_name == "admin")
+        role            = xauth.get_current_role()
 
         # 定义一些变量
         files = []
@@ -77,9 +77,9 @@ class ViewHandler:
                 order="priority DESC, name", 
                 limit=pagesize, 
                 offset=(page-1)*pagesize)
-            content = file.content
+            content         = file.content
             show_search_div = True
-            show_add_file = True
+            show_add_file   = True
         elif file.type == "md" or file.type == "text":
             content = file.content
             if op == "edit":
@@ -125,45 +125,6 @@ def get_link(filename, webpath):
         return "![%s](%s)" % (filename, webpath)
     return "[%s](%s)" % (filename, webpath)
 
-class UpdateHandler:
-
-    @xauth.login_required()
-    def POST(self):
-        is_public = xutils.get_argument("public", "")
-        id        = xutils.get_argument("id", type=int)
-        content   = xutils.get_argument("content")
-        version   = xutils.get_argument("version", type=int)
-        file_type = xutils.get_argument("type")
-        name      = xutils.get_argument("name", "")
-
-        file = dao.get_by_id(id)
-        assert file is not None
-
-        # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
-        # 所以权限只能是创建者而不是修改者
-        update_kw = dict(content=content, 
-                type=file_type, 
-                size=len(content),
-                version=version+1);
-
-        if name != "" and name != None:
-            update_kw["name"] = name
-
-        # 不再处理文件，由JS提交
-        rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
-        if rowcount > 0:
-            xmanager.fire('note.updated', update_kw)
-            raise web.seeother("/note/view?id=" + str(id))
-        else:
-            # 传递旧的content
-            cur_version = file.version
-            file.content = content
-            file.version = version
-            return xtemplate.render("note/view.html", 
-                pathlist = [],
-                file=file, 
-                content = content, 
-                error = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
 
 class Upvote:
 
@@ -183,40 +144,6 @@ class Downvote:
         file = db.select_one(where=dict(id=int(id)))
         db.update(priority=0, where=dict(id=id))
         raise web.seeother("/file/view?id=%s" % id)
-
-class FileSaveHandler:
-
-    @xauth.login_required()
-    def POST(self):
-        content = xutils.get_argument("content", "")
-        data    = xutils.get_argument("data", "")
-        id = xutils.get_argument("id", "0", type=int)
-        type = xutils.get_argument("type")
-        name = xauth.get_current_name()
-        db = xtables.get_file_table()
-        where = None
-        if xauth.is_admin():
-            where=dict(id=id)
-        else:
-            where=dict(id=id, creator=name)
-        kw = dict(size=len(content), mtime=xutils.format_datetime(), 
-            where=where)
-        if type == "html":
-            kw["data"] = data
-            kw["content"] = data
-            if xutils.bs4 is not None:
-                soup = xutils.bs4.BeautifulSoup(data, "html.parser")
-                content = soup.get_text(separator=" ")
-                kw["content"] = content
-            kw["size"] = len(content)
-        else:
-            kw["content"] = content
-            kw["size"] = len(content)
-        rowcount = db.update(**kw)
-        if rowcount > 0:
-            return dict(code="success")
-        else:
-            return dict(code="fail")
 
 class MarkHandler:
 
@@ -265,19 +192,14 @@ class DictHandler:
             page_url = "/file/dict?page=")
 
 xurls = (
-    r"/file/(edit|view)", ViewHandler, 
-    r"/note/(edit|view)", ViewHandler,
-    r"/file/update", UpdateHandler,
-    r"/note/update", UpdateHandler,
-    r"/file/save", FileSaveHandler,
-    r"/note/save", FileSaveHandler,
-    r"/file/autosave", FileSaveHandler,
-    r"/file/(\d+)/upvote", Upvote,
+    r"/file/(edit|view)"   , ViewHandler, 
+    r"/note/(edit|view)"   , ViewHandler,
+    r"/file/(\d+)/upvote"  , Upvote,
     r"/file/(\d+)/downvote", Downvote,
-    r"/file/mark", MarkHandler,
-    r"/file/unmark", UnmarkHandler,
-    r"/file/markdown", ViewHandler,
-    r"/file/library", LibraryHandler,
-    r"/file/dict", DictHandler
+    r"/file/mark"          , MarkHandler,
+    r"/file/unmark"        , UnmarkHandler,
+    r"/file/markdown"      , ViewHandler,
+    r"/file/library"       , LibraryHandler,
+    r"/file/dict"          , DictHandler
 )
 

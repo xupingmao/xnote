@@ -79,7 +79,7 @@ def tool_filter(item):
 class Home:
 
     def GET(self):
-        sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
+        sql  = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
         data = list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
         ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
             vars=dict(creator=xauth.get_current_name()))
@@ -94,13 +94,13 @@ class Home:
 class GridHandler:
 
     def GET(self):
-        type = xutils.get_argument("type", "tool")
-        items = []
+        type             = xutils.get_argument("type", "tool")
+        items            = []
         customized_items = []
-        name = "工具库"
+        name             = "工具库"
         if type == "tool":
-            items = list(filter(tool_filter, _tools))
-            db = xtables.get_storage_table()
+            items  = list(filter(tool_filter, _tools))
+            db     = xtables.get_storage_table()
             config = db.select_one(where=dict(key="tools", user=xauth.get_current_name()))
             if config is not None:
                 config_list = xutils.parse_config_text(config.value)

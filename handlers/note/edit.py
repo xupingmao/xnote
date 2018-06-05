@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/05/22 22:20:20
+# @modified 2018/06/05 23:21:46
 
 """Description here"""
 import os
@@ -46,22 +46,22 @@ class AddHandler:
 
     @xauth.login_required()
     def POST(self):
-        name = xutils.get_argument("name", "")
-        tags = xutils.get_argument("tags", "")
-        key  = xutils.get_argument("key", "")
-        content = xutils.get_argument("content", "")
-        type    = xutils.get_argument("type", "post")
-        format   = xutils.get_argument("_format", "")
+        name      = xutils.get_argument("name", "")
+        tags      = xutils.get_argument("tags", "")
+        key       = xutils.get_argument("key", "")
+        content   = xutils.get_argument("content", "")
+        type      = xutils.get_argument("type", "post")
+        format    = xutils.get_argument("_format", "")
         parent_id = xutils.get_argument("parent_id", 0, type=int)
 
         if key == "":
             key = time.strftime("%Y.%m.%d")
 
-        file = Storage(name = name)
-        file.atime   = xutils.format_datetime()
-        file.mtime   = xutils.format_datetime()
-        file.ctime   = xutils.format_datetime()
-        file.creator = xauth.get_current_name()
+        file           = Storage(name = name)
+        file.atime     = xutils.format_datetime()
+        file.mtime     = xutils.format_datetime()
+        file.ctime     = xutils.format_datetime()
+        file.creator   = xauth.get_current_name()
         # 默认私有
         file.groups    = file.creator
         file.parent_id = parent_id
@@ -147,10 +147,10 @@ class DictPutHandler:
 
     @xauth.login_required()
     def POST(self):
-        key = xutils.get_argument("key")
-        value = xutils.get_argument("value")
-        db = xtables.get_dict_table()
-        item = db.select_one(where=dict(key=key))
+        key     = xutils.get_argument("key")
+        value   = xutils.get_argument("value")
+        db      = xtables.get_dict_table()
+        item    = db.select_one(where=dict(key=key))
         current = xutils.format_datetime()
         if key == "" or key is None:
             return dict(code="fail", message="key is empty")
@@ -205,15 +205,94 @@ class UnshareHandler:
             where=dict(id=id, creator=xauth.get_current_name()))
         raise web.seeother("/file/view?id=%s"%id)
 
+class FileSaveHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        content = xutils.get_argument("content", "")
+        data    = xutils.get_argument("data", "")
+        id      = xutils.get_argument("id", "0", type=int)
+        type    = xutils.get_argument("type")
+        name    = xauth.get_current_name()
+        db      = xtables.get_file_table()
+        where   = None
+        if xauth.is_admin():
+            where=dict(id=id)
+        else:
+            where=dict(id=id, creator=name)
+        kw = dict(size=len(content), mtime=xutils.format_datetime(), 
+            where=where)
+        if type == "html":
+            kw["data"] = data
+            kw["content"] = data
+            if xutils.bs4 is not None:
+                soup = xutils.bs4.BeautifulSoup(data, "html.parser")
+                content = soup.get_text(separator=" ")
+                kw["content"] = content
+            kw["size"] = len(content)
+        else:
+            kw["content"] = content
+            kw["size"] = len(content)
+        rowcount = db.update(**kw)
+        if rowcount > 0:
+            return dict(code="success")
+        else:
+            return dict(code="fail")
+
+class UpdateHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        is_public = xutils.get_argument("public", "")
+        id        = xutils.get_argument("id", type=int)
+        content   = xutils.get_argument("content")
+        version   = xutils.get_argument("version", type=int)
+        file_type = xutils.get_argument("type")
+        name      = xutils.get_argument("name", "")
+
+        file = dao.get_by_id(id)
+        assert file is not None
+
+        # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
+        # 所以权限只能是创建者而不是修改者
+        update_kw = dict(content=content, 
+                type=file_type, 
+                size=len(content),
+                version=version+1);
+
+        if name != "" and name != None:
+            update_kw["name"] = name
+
+        # 不再处理文件，由JS提交
+        rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
+        if rowcount > 0:
+            xmanager.fire('note.updated', update_kw)
+            raise web.seeother("/note/view?id=" + str(id))
+        else:
+            # 传递旧的content
+            cur_version = file.version
+            file.content = content
+            file.version = version
+            return xtemplate.render("note/view.html", 
+                pathlist = [],
+                file     = file, 
+                content  = content, 
+                error    = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
+
 xurls = (
-    r"/file/add", AddHandler,
-    r"/note/add", AddHandler,
-    r"/file/remove", RemoveHandler,
-    r"/note/remove", RemoveHandler,
-    r"/file/dict/put", DictPutHandler,
-    r"/file/rename", RenameHandler,
-    r"/file/share", ShareHandler,
-    r"/file/share/cancel", UnshareHandler
+    r"/file/add"         , AddHandler,
+    r"/note/add"         , AddHandler,
+    r"/file/remove"      , RemoveHandler,
+    r"/note/remove"      , RemoveHandler,
+    r"/file/dict/put"    , DictPutHandler,
+    r"/file/rename"      , RenameHandler,
+    r"/file/share"       , ShareHandler,
+    r"/file/share/cancel", UnshareHandler,
+    r"/file/update"      , UpdateHandler,
+    r"/note/update"      , UpdateHandler,
+    r"/file/save"        , FileSaveHandler,
+    r"/note/save"        , FileSaveHandler,
+    r"/file/autosave"    , FileSaveHandler
 )
 
 
