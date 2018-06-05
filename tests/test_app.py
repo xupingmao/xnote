@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/06/05 23:51:44
+# @modified 2018/06/06 00:08:40
 
 import sys
 import os
@@ -160,8 +160,8 @@ class TestMain(unittest.TestCase):
     def test_file_group(self):
         self.check_200("/file/group")
         self.check_200("/file/group/ungrouped")
-        self.check_200("/file/group/bookmark")
         self.check_200("/file/recent_edit")
+        self.check_200("/note/recent_created")
 
     def test_file_share(self):
         json_request("/file/remove?name=xnote-share-test")
