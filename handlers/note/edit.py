@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/06/05 23:21:46
+# @modified 2018/06/05 23:55:45
 
 """Description here"""
 import os
@@ -18,7 +18,6 @@ from xutils import dateutil
 
 def get_by_name(db, name):
     return db.select_one(where=dict(name = name, is_deleted = 0, creator = xauth.get_current_name()))
-
 
 def get_pathlist(db, parent_id, limit = 2):
     file = db.select_one(where=dict(id = parent_id))
@@ -41,6 +40,14 @@ def update_children_count(parent_id, db=None):
         db = get_file_db()
     group_count = db.count(where="parent_id=$parent_id AND is_deleted=0", vars=dict(parent_id=parent_id))
     db.update(size=group_count, where=dict(id=parent_id))
+
+def update_note(db, where, **kw):
+    kw["mtime"] = dateutil.format_time()
+    # 处理乐观锁
+    version = where.get("version")
+    if version:
+        kw["version"] = version + 1
+    return db.update(where = where, vars=None, **kw)
 
 class AddHandler:
 
@@ -249,8 +256,9 @@ class UpdateHandler:
         version   = xutils.get_argument("version", type=int)
         file_type = xutils.get_argument("type")
         name      = xutils.get_argument("name", "")
+        db        = xtables.get_file_table()
+        file      = db.select_one(where=dict(id=id))
 
-        file = dao.get_by_id(id)
         assert file is not None
 
         # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
@@ -264,7 +272,7 @@ class UpdateHandler:
             update_kw["name"] = name
 
         # 不再处理文件，由JS提交
-        rowcount = dao.update(where = dict(id=id, version=version), **update_kw)
+        rowcount = update_note(db, where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
             xmanager.fire('note.updated', update_kw)
             raise web.seeother("/note/view?id=" + str(id))

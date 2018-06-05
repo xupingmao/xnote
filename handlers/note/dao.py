@@ -224,23 +224,6 @@ def get_vpath(record):
     pathlist.reverse()
     return pathlist
 
-def search_name(words, limit=None, file_type=None):
-    if not isinstance(words, list):
-        words = [words]
-    like_list = []
-    for word in words:
-        like_list.append('name like %s ' % repr('%' + word.upper() + '%'))
-    sql = "SELECT * from file WHERE %s and is_deleted != 1 " % (" AND ".join(like_list))
-    if file_type != None:
-        sql += " AND type = %r" % file_type
-    sql += " ORDER BY atime DESC"
-    if not limit:
-        limit = 200
-    sql += " LIMIT {}".format(limit)
-    db = FileDB()
-    all = db.execute(sql)
-    return [FileDO.fromDict(item) for item in all]
-
 def visit_by_id(id, db = None):
     sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime='%s' where id = %s " % \
         (dateutil.format_time(), id)
@@ -348,15 +331,6 @@ def getWords(line):
     for word in words:
         if word != '' : new_words.append(word)
     return new_words
-
-    
-def printFile(file):
-    if isinstance(file, list):
-        for single in file:
-            printFile(single)
-        return
-    print('name=%s, related=%s, visited_cnt=%s' % (file.name, file.related, file.visited_cnt))
-
 
 def build_sql_row(obj, k):
     v = getattr(obj, k)
