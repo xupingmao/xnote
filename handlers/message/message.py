@@ -39,6 +39,8 @@ class ListHandler:
             kw = "status = 0"
         if status == "done":
             kw = "status = 100"
+        if status == "suspended":
+            kw = "status = 50"
         kw += " AND user = $user"
         vars = dict(user=xauth.get_current_name())
         if key != "" and key != None:
@@ -91,6 +93,12 @@ class OpenMessage:
             return
         return update_message(id, 0)
         
+class UpdateStatusHandler:
+
+    def POST(self):
+        id     = xutils.get_argument("id")
+        status = xutils.get_argument("status", type=int)
+        return update_message(id, status)
 
 class RemoveHandler:
 
@@ -180,6 +188,7 @@ xurls=(
     r"/file/message/update", SaveHandler,
     r"/file/message/finish", FinishMessage,
     r"/file/message/open", OpenMessage,
+    r"/message/status", UpdateStatusHandler,
     r"/message/list", ListHandler,
     r"/file/message/date", DateHandler,
     r"/message", MessageHandler,

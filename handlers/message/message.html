@@ -86,6 +86,7 @@
 <div id="app" class="col-md-12">
     <div class="col-md-12">
         <a class="tab tab-link" href="/message?status=created">关注</a>
+        <a class="tab tab-link" href="/message?status=suspended">挂起</a>
         <a class="tab tab-link" href="/message?status=all">全部</a>
         <!-- <a class="tab tab-link" href="/tools/message?status=minor">不紧急</a> -->
         <!-- <a class="tab tab-link" href="/tools/message?status=done">已完成</a> -->
@@ -131,8 +132,14 @@
                 <p class="chat-msg-time">
                     {{! message.ctime }}
                     <span class="tag-span in-progress" v-if="message.status==0">关注</span>
+                    <a class="smallText" v-if="message.status!=0" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">关注</a>
+
+                    <span class="tag-span suspended" v-if="message.status==50">挂起</span>
+                    <a class="smallText" v-if="message.status!=50" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateStatus($event, 50)">挂起</a>
+                    
+                    <span class="tag-span suspended" v-if="message.status==100">完成</span>
                     <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
-                    <a class="smallText" v-if="message.status==100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">关注</a>
+                    
                     <a class="smallText" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
                     <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" style="color: red;" @click="deleteMessage($event)">删除</a> 
                 </p>
@@ -303,6 +310,15 @@
                     console.log(resp);
                     app.refreshMessage();
                 })
+            },
+
+            updateStatus: function (event, status) {
+                var id = $(event.currentTarget).attr("msg-id");
+                var message = {id: id, status: status};
+                $.post("/message/status", message, function (resp) {
+                    console.log(resp);
+                    app.refreshMessage();
+                });
             }
         }
     });
