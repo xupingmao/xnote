@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/06/07 21:47:20
+# @modified 2018/06/07 22:20:51
 
 """短消息"""
 import time
@@ -134,6 +134,8 @@ class CalendarRule(BaseRule):
 def expire_message_cache(ctx):
     user = ctx.user
     xutils.expire_cache(prefix="message.count", args=(user,))
+    xutils.expire_cache(prefix="message.count.status", args=(user,50))
+    xutils.expire_cache(prefix="message.count.status", args=(user,0))
 
 xmanager.set_handlers('message.update', [expire_message_cache])
 

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/05/19 14:31:22
+# @modified 2018/06/07 22:21:35
 
 import re
 import os
@@ -180,7 +180,6 @@ def load_rules():
     add_rule(r"静音(.*)",               "mute.search")
     add_rule(r"mute(.*)",               "mute.search")
     add_rule(r"取消静音",               "mute.cancel")
-    add_rule(r"(.*)", "message.search")
     add_rule(r"(.*)", "note.search")
     rules_loaded = True
 

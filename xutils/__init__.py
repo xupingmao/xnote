@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/06/05 00:32:19
+# @modified 2018/06/07 22:18:56
 
 """
 xnote工具类总入口
@@ -11,26 +11,7 @@ xutils是暴露出去的统一接口，类似于windows.h一样
 
 """
 from __future__ import print_function
-import sys
-import os
-import traceback
-import inspect
-import json
-import base64
-import time
-import platform
-import re
-import gc
-import shutil
-import profile as pf
-import six
-import web
-import xconfig
-from collections import deque
-from fnmatch import fnmatch
-from tornado.escape import xhtml_escape        
-from web.utils import safestr, safeunicode
-
+from .imports import *
 # xnote工具
 from . import textutil, ziputil, fsutil, logutil, dateutil, htmlutil
 from .ziputil import *
@@ -40,73 +21,8 @@ from .dateutil import *
 from .netutil  import *
 from .fsutil   import *
 from .textutil import text_contains, parse_config_text
+from .cacheutil import cache, expire_cache, update_cache
 from xconfig import Storage
-
-try:
-    import sqlite3
-except ImportError:
-    sqlite3 = None # jython
-
-try:
-    import bs4
-except ImportError:
-    bs4 = None
-
-PY2 = sys.version_info[0] == 2
-
-if PY2:
-    from urllib import quote, unquote, urlopen
-    from ConfigParser import ConfigParser
-    from StringIO import StringIO
-    from Queue import Queue
-    # from commands import getstatusoutput
-
-    def u(s, encoding="utf-8"):
-        if isinstance(s, str):
-            return s.decode(encoding)
-        elif isinstance(s, unicode):
-            return s
-        return str(s)
-
-    def listdir(dirname):
-        names = list(os.listdir(dirname))
-        encoding = sys.getfilesystemencoding()
-        return [newname.decode(encoding) for newname in names]
-
-    def is_str(s):
-        return isinstance(s, (str, unicode))
-else:
-    from urllib.parse import quote, unquote
-    from urllib.request import urlopen
-    from subprocess import getstatusoutput
-    from configparser import ConfigParser
-    from io import StringIO
-    from queue import Queue
-
-    u = str
-    listdir = os.listdir
-
-    def is_str(s):
-        return isinstance(s, str)
-
-# 关于Py2的getstatusoutput，实际上是对os.popen的封装
-# 而Py3中的getstatusoutput则是对subprocess.Popen的封装
-# Py2的getstatusoutput, 注意原来的windows下不能正确运行，但是下面改进版的可以运行
-
-if PY2:
-    def getstatusoutput(cmd):
-        """Return (status, output) of executing cmd in a shell."""
-        import os
-        # old
-        # pipe = os.popen('{ ' + cmd + '; } 2>&1', 'r')
-        # 这样修改有一个缺点就是执行多个命令的时候只能获取最后一个命令的输出
-        pipe = os.popen(cmd + ' 2>&1', 'r')
-        text = pipe.read()
-        sts = pipe.close()
-        if sts is None: sts = 0
-        if text[-1:] == '\n': text = text[:-1]
-        return sts, text
-
 
 #################################################################
 
@@ -775,99 +691,6 @@ def profile():
             return func(*args, **kw)
         return handle
     return deco
-
-_cache_dict = dict()
-
-class CacheObj:
-    """
-    缓存对象，包含缓存的key和value，有一个公共的缓存队列
-    每次生成一个会从缓存队列中取出一个检查是否失效，同时把自己放入队列
-    TODO 提供按照大小过滤的规则
-    """
-    _queue = Queue()
-
-    def __init__(self, key, value, expire):
-        global _cache_dict
-        self.key = key
-        self.value = value
-        self.expire = expire
-        self.expire_time = time.time() + expire
-        self.is_force_expired = False
-
-        if expire < 0:
-            self.expire_time = -1
-
-        obj = _cache_dict.get(key, None)
-        if obj is not None:
-            obj.is_force_expired = True
-
-        _cache_dict[key] = self
-        self._queue.put(self)
-        one = self._queue.get(block=False)
-        if one is not None:
-            if one.is_force_expired == True:
-                return
-            if one.is_alive():
-                self._queue.put(one)
-            else:
-                one.clear()
-
-    def is_alive(self):
-        if self.expire_time < 0:
-            return True
-        return time.time() < self.expire_time
-
-    def clear(self):
-        # print("cache %s expired" % self.key)
-        _cache_dict.pop(self.key, None)
-
-def cache(key=None, prefix=None, expire=600):
-    """
-    缓存的装饰器，会自动清理失效的缓存
-    TODO 可以考虑缓存持久化的问题
-    """
-    def deco(func):
-        # 先不支持keywords参数
-        def handle(*args):
-            if key is not None:
-                cache_key = key
-            elif prefix is None:
-                mod = inspect.getmodule(func)
-                funcname = func.__name__
-                cache_key = "%s.%s%s" % (mod.__name__, funcname, args)
-            else:
-                cache_key = "%s%s" % (prefix, args)
-            obj = _cache_dict.get(cache_key)
-            if obj != None and obj.is_alive():
-                # print("hit cache %s" % cache_key)
-                return obj.value
-            if obj != None and not obj.is_alive():
-                obj.clear()
-            value = func(*args)
-            CacheObj(cache_key, value, expire)
-            return value
-        return handle
-    return deco
-
-
-def expire_cache(key = None, prefix = None, args = None):
-    """使key对应的缓存失效，成功返回True"""
-    if key == None:
-        key = "%s%s" % (prefix, args)
-    obj = _cache_dict.get(key)
-    if obj != None:
-        # 防止删除了新的cache
-        obj.clear()
-        obj.is_force_expired = True
-        return True
-    return False
-
-def update_cache(key = None, value = None, prefix = None, args = None):
-    """更新缓存的值
-    """
-    if key is None:
-        key = '%s%s' % (prefix, args)
-    _cache_dict[key] = CacheObj(key, value, -1)
 
 #################################################################
 ##   规则引擎组件
