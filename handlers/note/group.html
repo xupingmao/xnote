@@ -56,7 +56,7 @@
                     <pre>{{item.summary}}</pre>
                 {% end %}
 
-                {% if show_opts and _has_login %}
+                {% if show_opts and _user_name == item.creator %}
                 <div class="float-right">
                     <a class="item-option" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
                     {% if _is_admin %}

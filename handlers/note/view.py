@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/06/05 23:17:23
+# @modified 2018/06/07 21:52:33
 
 import profile
 import math
@@ -51,7 +51,7 @@ class ViewHandler:
         if file is None:
             raise web.notfound()
         
-        if not file.is_public and user_name != "admin" and user_name != file.creator:
+        if file.type != "group" and not file.is_public and user_name != "admin" and user_name != file.creator:
             raise web.seeother("/unauthorized")
         show_search_div = False
         pathlist        = dao.get_pathlist(db, file)
@@ -67,7 +67,7 @@ class ViewHandler:
             name = file.name))
 
         if file.type == "group":
-            where_sql = "parent_id=$parent_id AND is_deleted=0 AND creator=$creator"
+            where_sql = "parent_id=$parent_id AND is_deleted=0 AND (creator=$creator OR is_public=1)"
             if xauth.is_admin():
                 where_sql = "parent_id=$parent_id AND is_deleted=0"
             amount = db.count(where = where_sql,

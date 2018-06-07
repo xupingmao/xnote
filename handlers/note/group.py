@@ -130,7 +130,7 @@ class RecentCreatedHandler:
             files      = files, 
             pathlist   = [Storage(name="最近创建", type="group", url="/note/recent_created")],
             show_cdate = True,
-            show_opts  = False)
+            show_opts  = True)
 
 class RecentEditHandler:
     """show recent modified files"""

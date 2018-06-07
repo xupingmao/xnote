@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/06/06 00:08:40
+# @modified 2018/06/07 21:49:23
 
 import sys
 import os
@@ -296,6 +296,8 @@ class TestMain(unittest.TestCase):
     def test_message_list(self):
         json_request("/message/list")
         json_request("/message/list?status=created")
+        json_request("/message/list?status=suspended")
+        # search
         json_request("/message/list?key=1")
 
     def test_tag(self):

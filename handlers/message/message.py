@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/05/21 21:50:17
+# @modified 2018/06/07 21:47:20
 
 """短消息"""
 import time
@@ -23,6 +23,12 @@ def process_message(message):
 def fuzzy_item(item):
     item = item.replace("'", "''")
     return "'%%%s%%'" % item
+
+@xutils.cache(prefix="message.count.status", expire=60)
+def count_message(user, status):
+    count = xtables.get_message_table().count(where="user=$user AND status=$status",
+        vars = dict(user = user, status = status))
+    return count
 
 class ListHandler:
 
@@ -179,6 +185,7 @@ class MessageHandler:
         return xtemplate.render("message/message.html", 
             search_action="/message", 
             search_placeholder="搜索备忘信息",
+            count_message = count_message,
             key = xutils.get_argument("key", ""))
 
 

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/06/05 22:42:49
+# @modified 2018/06/07 00:33:45
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -223,6 +223,7 @@ def init_user_table():
     with TableManager(config.DB_PATH, "user") as manager:
         manager.add_column("name",       "text", "")
         manager.add_column("password",   "text", "")
+        manager.add_column("salt",       "text", "")
         # 额外的访问权限
         manager.add_column("privileges", "text", "")
         manager.add_column("ctime",      "text", "")
@@ -241,7 +242,7 @@ def init_message_table():
         manager.add_column("mtime", "text", "")
         manager.add_column("user",  "text", "")
         # 用一个状态可以拍成一排
-        # 消息的状态 0初始状态（紧急） 50（非紧急minor，慎重考虑） 100已完成
+        # 消息的状态 0关注 50挂起 100已完成
         manager.add_column("status", "int", 0)
         manager.add_column("content", "text", "")
         # 索引
@@ -285,6 +286,7 @@ def init_storage_table():
 def init_dict_table():
     """
     词典 2018/01/14
+    和主库隔离
     """
     if not xconfig.DEV_MODE:
         return
