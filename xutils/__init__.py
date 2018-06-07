@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/06/07 22:18:56
+# @modified 2018/06/08 01:15:01
 
 """
 xnote工具类总入口
@@ -187,7 +187,7 @@ def remove(path, hard = False):
         # os.remove(path)
     elif os.path.isdir(path):
         # shutil.rmtree(path)
-        os.removedirs(path)
+        os.rmdir(path)
 
 def touch(path):
     """类似于Linux的touch命令"""

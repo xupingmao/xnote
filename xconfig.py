@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/06/03 23:30:33
+# @modified 2018/06/08 00:58:45
 
 '''
 xnote系统配置
@@ -49,7 +49,6 @@ HANDLERS_DIR = "handlers"
 TOOLS_DIR   = "handlers/tools"
 WORKING_DIR = os.path.dirname(__file__)
 WEBDIR      = os.path.join(WORKING_DIR, "static")
-UPLOAD_DIR  = os.path.join(WORKING_DIR, "static", "upload")
 PLUGINS_DIR = os.path.join(WORKING_DIR, "plugins")
 LOG_DIR     = os.path.join(WORKING_DIR, "log")
 
@@ -62,7 +61,6 @@ DB_DIR      = os.path.join(WORKING_DIR, "db")
 CONFIG_DIR  = os.path.join(DATA_DIR, "config")
 
 # 其他标记
-
 # 测试用的flag,开启会拥有admin权限
 IS_TEST  = False
 # 开启性能分析
