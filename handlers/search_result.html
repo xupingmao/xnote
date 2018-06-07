@@ -2,6 +2,7 @@
 {% block body %}
 
 {% include mod_search.html %}
+<script type="text/javascript" src="/static/lib/layer/layer.js"></script>
 
 <div id="executeResult"></div>
 
@@ -16,7 +17,7 @@
                 {% end %}
 
                 {% if file.id != None %}
-                <a class="item-option dialog-btn" dialog-url="/file/group/list?id={{file.id}}&filetype=xml">移动</a>
+                <a class="item-option move-btn" data-url="/file/group/list?id={{file.id}}&filetype=xml">移动</a>
                 {% end %}
             </div>
             <div class="note-name">

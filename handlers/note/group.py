@@ -7,7 +7,6 @@ import xtables
 import xauth
 import xconfig
 import xmanager
-from . import dao
 from xutils import Storage
 
 # 兼容旧代码
@@ -15,6 +14,12 @@ config = xconfig
 PAGE_SIZE = xconfig.PAGE_SIZE
 
 VIEW_TPL = "note/view.html"
+
+def update_children_count(parent_id, db=None):
+    if parent_id is None or parent_id == "":
+        return
+    group_count = db.count(where="parent_id=$parent_id AND is_deleted=0", vars=dict(parent_id=parent_id))
+    db.update(size=group_count, where=dict(id=parent_id))
 
 class PathNode:
 
@@ -69,8 +74,8 @@ class MoveHandler:
         if file is None:
             return dict(code="fail", message="file not exists")
         db.update(parent_id=parent_id, where=dict(id=id))
-        dao.update_children_count(file.parent_id, db=db)
-        dao.update_children_count(parent_id, db=db)
+        update_children_count(file.parent_id, db=db)
+        update_children_count(parent_id, db=db)
         return dict(code="success")
 
     def POST(self):

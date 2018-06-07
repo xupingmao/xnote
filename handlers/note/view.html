@@ -222,32 +222,6 @@ function remove(id, name, parentId) {
     }
 }
 
-function moveTo(selfId, parentId) {
-    $.post("/file/group/move", 
-        {id:selfId, parent_id: parentId}, 
-        function (resp){
-            console.log(resp);
-            window.location.reload();
-    });
-}
-
-$(function () {
-    $(".move-btn").click(function (event) {
-        var url = $(event.target).attr("data-url");
-        $.get(url, function (respHtml) {
-            var width = $(".main").width();
-            layer.open({
-              type: 1,
-              title: "移动分组",
-              shadeClose: true,
-              area: [width + "px", '80%'],
-              content: respHtml,
-              scrollbar: false
-            });
-        });
-    })
-})
-
 </script>
 
 {% end %}

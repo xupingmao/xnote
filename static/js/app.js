@@ -174,6 +174,18 @@
 
 $(function() {
 
+  function moveTo(selfId, parentId) {
+      $.post("/file/group/move", 
+          {id:selfId, parent_id: parentId}, 
+          function (resp){
+              console.log(resp);
+              window.location.reload();
+      });
+  }
+
+  window.moveTo = moveTo;
+
+
   function showSideBar() {
     $(".navMenubox").animate({"margin-left": "0px"});
     $("#poweredBy").show();
@@ -208,5 +220,20 @@ $(function() {
   $(".toggleMenu").on("click", function () {
     toggleMenu();
   });
+
+  $(".move-btn").click(function (event) {
+      var url = $(event.target).attr("data-url");
+      $.get(url, function (respHtml) {
+          var width = $(".main").width();
+          layer.open({
+            type: 1,
+            title: "移动分组",
+            shadeClose: true,
+            area: [width + "px", '80%'],
+            content: respHtml,
+            scrollbar: false
+          });
+      });
+  })
 
 });
