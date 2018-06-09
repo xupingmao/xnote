@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2018/06/09 23:52:54
+# @modified 2018/06/10 00:49:03
 import os
 import glob
 import xutils
@@ -26,12 +26,19 @@ def get_file_cache():
     xutils.log("files count =", count)
     return file_cache
 
-def find_in_cache(key):
+def find_in_cache0(key):
     plist = []
     files = get_file_cache()
     for item in files:
         if fnmatch(item, key):
             plist.append(item)
+    return plist
+
+def find_in_cache(key):
+    quoted_key = xutils.quote_unicode(key)
+    plist = find_in_cache0(key)
+    if quoted_key != key:
+        plist += find_in_cache0(quoted_key)
     return plist
 
 class handler:
