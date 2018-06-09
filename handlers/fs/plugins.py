@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/06/04 00:56:38
+# @modified 2018/06/09 22:21:11
 import web
 import os
 import xconfig
@@ -55,7 +55,8 @@ class RunPluginHandler:
             xutils.load_script(script_name, vars = vars)
             main_func = vars.get("main", None)
             if main_func is not None:
-                main_func(path = path, confirmed = confirmed, input = input)
+                real_path = xutils.get_real_path(path)
+                main_func(path = real_path, confirmed = confirmed, input = input)
             else:
                 print("main(**kw)方法未定义")
         except Exception as e:

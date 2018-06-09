@@ -1,11 +1,13 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/06/07 22:19:05
+# @modified 2018/06/10 00:00:14
 """
 缓存的实现，考虑失效的规则如下
 1. 按时间失效
-2. LRU
+2. FIFO, First In First Out
+3. LRU, Least Recently Used
+4. LFU, Least Frequently Used
 """
 from .imports import *
 _cache_dict = dict()

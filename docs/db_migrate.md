@@ -22,3 +22,16 @@ parent_id, related, sctime, smtime, satime, visited_cnt, is_deleted, is_public, 
 creator, modifier, groups, priority from file_20171124;
 
 ```
+
+# message表删除字段
+
+```
+-- 重命名表名
+ALTER TABLE message rename TO message_old;
+
+-- 移动部分字段到新表
+INSERT INTO message (id, ctime, mtime, user, status, content)
+SELECT id, ctime, mtime, user, status, content FROM message_old;
+
+-- 如果OK，删除旧表
+```

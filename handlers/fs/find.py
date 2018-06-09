@@ -1,9 +1,38 @@
-# encoding=utf-8
+# -*- coding:utf-8 -*-
+# @author xupingmao <578749341@qq.com>
+# @since 2017/??/??
+# @modified 2018/06/09 23:52:54
 import os
 import glob
 import xutils
 import xauth
 import xtemplate
+import xconfig
+from fnmatch import fnmatch
+
+@xutils.cache(prefix="fs.find", expire=3600)
+def get_file_cache():
+    count = 0
+    file_cache = []
+    for root, dirs, files in os.walk(xconfig.DATA_DIR):
+        for item in dirs:
+            path = os.path.join(root, item)
+            file_cache.append(path)
+            count += 1
+        for item in files:
+            path = os.path.join(root, item)
+            file_cache.append(path)
+            count += 1
+    xutils.log("files count =", count)
+    return file_cache
+
+def find_in_cache(key):
+    plist = []
+    files = get_file_cache()
+    for item in files:
+        if fnmatch(item, key):
+            plist.append(item)
+    return plist
 
 class handler:
 
@@ -21,8 +50,12 @@ class handler:
         path_name = os.path.join(path, find_key)
         if find_key == "**":
             plist = []
+        elif os.path.abspath(path) == os.path.abspath(xconfig.DATA_DIR) and xconfig.USE_CACHE_SEARCH:
+            # search in cache
+            plist = find_in_cache(find_key)
         else:
             plist = xutils.search_path(path, find_key)
+        # TODO max result size
         return xtemplate.render("fs/fs.html", 
             token = xauth.get_current_user().token,
             filelist = [xutils.FileItem(p, path) for p in plist])
