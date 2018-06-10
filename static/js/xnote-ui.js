@@ -178,7 +178,7 @@ var XUI = function (window) {
     toast.text(message);
 
     $(document.body).append(toast);
-    var width = toast.width();
+    var width = toast.outerWidth();
     var left = (maxWidth - width) / 2;
     if (left < 0) {
       left = 0;

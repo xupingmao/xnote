@@ -133,11 +133,6 @@
         $(".bot-btn").click(function () {
             getRightBot().fadeToggle(200);
         });
-
-        $(window).on("error", function (message, source, lineno, colno, error) {
-            showToast(message);
-        })
-
         initEventHandlers();
     }
 

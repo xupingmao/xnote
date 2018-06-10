@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/06/07 21:52:33
+# @modified 2018/06/10 12:00:46
 
 import profile
 import math
@@ -50,6 +50,8 @@ class ViewHandler:
             file = dao.get_by_name(name, db=db)
         if file is None:
             raise web.notfound()
+        if file.is_deleted == 1:
+            raise web.seeother("/")
         
         if file.type != "group" and not file.is_public and user_name != "admin" and user_name != file.creator:
             raise web.seeother("/unauthorized")
