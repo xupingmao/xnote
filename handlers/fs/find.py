@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2018/06/12 23:23:39
+# @modified 2018/06/12 23:33:42
 import os
 import glob
 import xutils
@@ -10,7 +10,7 @@ import xtemplate
 import xconfig
 from fnmatch import fnmatch
 
-@xutils.cache(prefix="fs.find", expire=3600)
+@xutils.cache(prefix="fs.find", expire=-1)
 def get_cached_files():
     count = 0
     file_cache = []
@@ -23,7 +23,7 @@ def get_cached_files():
             path = os.path.join(root, item)
             file_cache.append(path)
             count += 1
-    xutils.log("files count =", count)
+    xutils.log("files count = {}", count)
     return file_cache
 
 def find_in_cache0(key):
