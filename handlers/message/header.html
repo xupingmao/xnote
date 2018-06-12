@@ -1,0 +1,9 @@
+<!-- header.html -->
+<div class="col-md-12">
+    <a class="tab tab-link" href="/message?status=created">关注({{count_message(_user_name, 0)}})</a>
+    <a class="tab tab-link" href="/message?status=suspended">挂起({{count_message(_user_name, 50)}})</a>
+    <a class="tab tab-link" href="/message?status=all">全部</a>
+    <a class="tab tab-link" href="/message/calendar">日历</a>
+    <!-- <a class="tab tab-link" href="/tools/message?status=minor">不紧急</a> -->
+    <!-- <a class="tab tab-link" href="/tools/message?status=done">已完成</a> -->
+</div>

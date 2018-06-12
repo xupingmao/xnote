@@ -84,14 +84,7 @@
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 {% include mod_search.html %}
 <div id="app" class="col-md-12">
-    <div class="col-md-12">
-        <a class="tab tab-link" href="/message?status=created">关注({{count_message(_user_name, 0)}})</a>
-        <a class="tab tab-link" href="/message?status=suspended">挂起({{count_message(_user_name, 50)}})</a>
-        <a class="tab tab-link" href="/message?status=all">全部</a>
-        <!-- <a class="tab tab-link" href="/tools/message?status=minor">不紧急</a> -->
-        <!-- <a class="tab tab-link" href="/tools/message?status=done">已完成</a> -->
-    </div>
-
+    {% include "message/header.html" %}
     <div class="input-div col-md-12">
         <textarea class="col-md-12 input-box" v-model="input" rows=4></textarea>
         <input type="button" name="" class="send-button btn" value="添加" @click="sendMessage()">

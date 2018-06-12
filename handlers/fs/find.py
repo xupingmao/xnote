@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2018/06/10 00:49:03
+# @modified 2018/06/12 23:23:39
 import os
 import glob
 import xutils
@@ -11,7 +11,7 @@ import xconfig
 from fnmatch import fnmatch
 
 @xutils.cache(prefix="fs.find", expire=3600)
-def get_file_cache():
+def get_cached_files():
     count = 0
     file_cache = []
     for root, dirs, files in os.walk(xconfig.DATA_DIR):
@@ -28,7 +28,7 @@ def get_file_cache():
 
 def find_in_cache0(key):
     plist = []
-    files = get_file_cache()
+    files = get_cached_files()
     for item in files:
         if fnmatch(item, key):
             plist.append(item)

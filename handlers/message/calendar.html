@@ -1,0 +1,481 @@
+{% extends base.html %}
+{% block head %}
+<style>
+/**
+ * 设置日历的大小
+ */
+.calendar{
+  width: 100%;
+  display: block;
+  margin-top: 20px;
+}
+ 
+/**
+ * 设置日历顶部盒子
+ */
+.calendar .calendar-title-box{
+  position: relative;
+  width: 100%;
+  height: 36px;
+  line-height: 36px;
+  text-align:center;
+  /*border-bottom: 1px solid #ddd;*/
+  font-weight: bold;
+}
+ 
+/**
+ * 设置上个月的按钮图标
+ */
+.calendar .prev-month {
+  position: absolute;
+  top: 12px;
+  left: 0px;
+  display: inline-block;
+  width: 0px;
+  height: 0px;
+  border-left: 0px;
+  border-top: 6px solid transparent;
+  border-right: 8px solid #999;
+  border-bottom: 6px solid transparent;
+  cursor: pointer;
+}
+
+.span-btn {
+  background: #9cf;
+  border-radius: 3px;
+  color: white;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.span-btn:hover {
+  background-color: #69f;
+}
+
+.calendar .prev-month2 {
+  float: left;
+  cursor: pointer;
+  font-weight: lighter;
+}
+
+.calendar .next-month2 {
+    float: right;
+    cursor: pointer;
+    font-weight: lighter;
+}
+ 
+/**
+ * 设置下个月的按钮图标
+ */
+.calendar .next-month {
+  position: absolute;
+  top: 12px;
+  right: 0px;
+  display: inline-block;
+  width: 0px;
+  height: 0px;
+  border-right: 0px;
+  border-top: 6px solid transparent;
+  border-left: 8px solid #999;
+  border-bottom: 6px solid transparent;
+  cursor: pointer;
+}
+ 
+ 
+/* 设置日历表格样式 */
+.calendar-table{
+  width: 100%;
+  border-collapse: collapse;
+  text-align:center;
+}
+ 
+/* 表格行高 */
+.calendar-table tr{
+  height: 30px;
+  line-height: 30px;
+}
+ 
+.calendar-table tr td {
+  width: 14.2%;
+  padding: 0px;
+}
+
+/* 当前天 颜色特殊显示 */
+.currentDay {
+  color: #fff;
+  background-color: #00C1DE
+}
+ 
+/* 本月 文字颜色 */
+.currentMonth {
+  /*color: #999;*/
+}
+
+.selected {
+  background-color: green;
+  color: #fff;
+}
+
+td.currentMonth:hover {
+  /*border: 3px solid #6C9;*/
+  cursor: pointer;
+  background-color: #9c9;
+  color: #fff;
+}
+ 
+/* 其他月颜色 */
+.otherMonth{
+  color: #ede;
+}
+
+.date-info {
+  padding: 0px;
+  font-size: 12px;
+  height: 1.4rem;
+}
+
+.date-prefix {
+  padding-right: 5px;
+}
+
+.event-feed {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.new-event {
+  margin-top: 10px;
+}
+
+</style>
+{% end %}
+
+{% block body %}
+
+{% include "message/header.html" %}
+<div id="calendar" class="calendar">
+</div>
+
+<div class="hide new-event col-md-12">
+    <textarea name="content" class="col-md-12 input-box" rows=4></textarea>
+    <input id="newFeedDate" type="input" name="date" />
+    <input id="newFeedSaveBtn" type="button" class="send-button btn" value="添加">
+    <input type="file" id="filePicker" class="hide" />
+    <input type="button" id="filePickerBtn" class="send-button btn hide" value="上传文件"/>
+    <div id="uploadProgress" style="float: right;" ></div>
+</div>
+
+<div class="col-md-12 hide">
+  <h3>事件</h3>
+  <div id="events" class="col-md-12"></div>
+</div>
+<div id="notes">
+  <div id="file-history"></div>
+</div>
+
+<script type="text/javascript">
+/**
+var d1 = new Date();  // 获取当前系统时间 我现在的时间是 2016年4月25日 星期一
+d1.getFullYear();    // 获取年信息， 2016
+d1.getMonth();      // 获取月信息（从0开始 范围：0-11） 3
+d1.getDate();      // 获取天信息 此处结果：25
+d1.getDay();      // 获取星期信息 （0-6） 此处结果： 1 
+
+var d2 = new Date(2016, 2, 15);    // 月是从0开始计数， 需要减一
+d2.getFullYear();          // 2016
+d2.getMonth();            // 2
+d2.getDate();            // 15
+d2.toLocaleDateString();      // "2016/3/15" 证明设置正确 
+*/
+
+(function(){
+
+  /**
+   * 常量, 节日列表
+   */
+  HOLIDAY_MAP = {
+    "01-01": "元旦",
+    "02-14": "情人节",
+    "03-05": "惊蛰",
+    "03-08": "妇女节",
+    "03-20": "春分",
+    "04-01": "愚人节",
+    "05-01": "劳动节",
+    "05-04": "青年节",
+    "06-01": "儿童节",
+    "09-03": "抗战胜利日",
+    "09-10": "教师节",
+    "10-01": "国庆节"
+  }
+
+  var getHolidayInfo = function (date) {
+    var monthDay = getMonthDayStr(date);
+    return HOLIDAY_MAP[monthDay];
+  }
+
+  /*
+   * 用于记录日期，显示的时候，根据dateObj中的日期的年月显示
+   */
+  var dateObj = (function(){
+    var _date = new Date();    // 默认为当前系统时间
+    return {
+      getDate : function(){
+        return _date;
+      },
+      setDate : function(date) {
+        _date = date;
+      }
+    };
+  })();
+ 
+  // 设置calendar div中的html部分
+  renderHtml();
+  // 表格中显示日期
+  showCalendarData();
+  // 绑定事件
+  bindEvent();
+ 
+  /**
+   * 渲染html结构
+   */
+  function renderHtml() {
+    var calendar = document.getElementById("calendar");
+    var titleBox = document.createElement("div");  // 标题盒子 设置上一月 下一月 标题
+    var bodyBox = document.createElement("div");  // 表格区 显示数据
+ 
+    // 设置标题盒子中的html
+    titleBox.className = 'calendar-title-box';
+    titleBox.innerHTML = '<a id="prevMonth" class="prev-month2" href="#">上个月</a>' +
+    // "<span class='prev-month2 span-btn' id='prevMonth'>上个月</span>" +
+      "<span class='calendar-title' id='calendarTitle'></span>" +
+      // "<span id='nextMonth' class='next-month2 span-btn'>下个月</span>";
+      '<a id="nextMonth" class="next-month2" href="#">下个月</a>';
+    calendar.appendChild(titleBox);    // 添加到calendar div中
+ 
+    // 设置表格区的html结构
+    bodyBox.className = 'calendar-body-box';
+    var _headHtml = "<tr>" + 
+              "<th>日</th>" +
+              "<th>一</th>" +
+              "<th>二</th>" +
+              "<th>三</th>" +
+              "<th>四</th>" +
+              "<th>五</th>" +
+              "<th>六</th>" +
+            "</tr>";
+    var _bodyHtml = "";
+ 
+    // 一个月最多31天，所以一个月最多占6行表格
+    for(var i = 0; i < 6; i++) {  
+      _bodyHtml += "<tr>" +
+              "<td></td>" +
+              "<td></td>" +
+              "<td></td>" +
+              "<td></td>" +
+              "<td></td>" +
+              "<td></td>" +
+              "<td></td>" +
+            "</tr>";
+    }
+    bodyBox.innerHTML = "<table id='calendarTable' class='calendar-table'>" +
+              _headHtml + _bodyHtml +
+              "</table>";
+    // 添加到calendar div中
+    calendar.appendChild(bodyBox);
+  }
+
+  /**
+   * 获取日期信息，显示在日期的单元格里
+   */
+  function getDateInfoHTML(date) {
+    var html = '<div class="date-info">' + date.getDate() + '</div>';
+    // console.log(monthDay);
+    // return html;
+    var holiday = getHolidayInfo(date);
+    if (holiday) {
+      if (holiday.length > 3) {
+        holiday = holiday.substr(0,2) + "..";
+      }
+      return html + '<div class="date-info">' + holiday + "</div>"
+    } else {
+      // 保持对齐
+      return html + '<div class="date-info">&nbsp;</div>'
+    }
+  }
+ 
+  /**
+   * 表格中显示数据，并设置类名
+   */
+  function showCalendarData() {
+    var _year = dateObj.getDate().getFullYear();
+    var _month = dateObj.getDate().getMonth() + 1;
+    // var _dateStr = getDateStr(dateObj.getDate());
+ 
+    // 设置顶部标题栏中的 年、月信息
+    var calendarTitle = document.getElementById("calendarTitle");
+    var titleStr = _year + "年" + _month + "月";
+    calendarTitle.innerText = titleStr;
+ 
+    // 设置表格中的日期数据
+    var _table = document.getElementById("calendarTable");
+    var _tds = _table.getElementsByTagName("td");
+    var _firstDay = new Date(_year, _month - 1, 1);  // 当前月第一天
+    for(var i = 0; i < _tds.length; i++) {
+      var _thisDay = new Date(_year, _month - 1, i + 1 - _firstDay.getDay());
+      var _thisDayStr = getDateStr(_thisDay);
+      _tds[i].innerHTML = getDateInfoHTML(_thisDay);
+
+      //_tds[i].data = _thisDayStr;
+      _tds[i].setAttribute('data', _thisDayStr);
+      _tds[i].setAttribute("date", getDateStr(_thisDay, '-'));
+      if(_thisDayStr == getDateStr(new Date())) {    // 当前天
+        _tds[i].className = 'currentMonth currentDay';
+      }else if(_thisDay.getMonth() == _firstDay.getMonth()) {
+        _tds[i].className = 'currentMonth';  // 当前月
+      }else {    // 其他月
+        _tds[i].className = 'otherMonth';
+      }
+    }
+    // 显示当月添加的资料
+    // fetchEvents(_year, _month);
+  }
+
+  /**
+   * 获取当月事件
+   */
+  function fetchEvents(year, month) {
+    var root = $("#events");
+    root.html("查询中...")
+    $.get("/file/message/date", 
+        {date: year + "-" + formatNum(month)},
+        function (data) {
+          console.log(data);
+          root.html("");
+          var list = data.data;
+          for (var i = 0; i < list.length; i++) {
+            var item = list[i];
+            var element = $("<p>").addClass("event-feed").html(item.ctime + " - " + item.content);
+            root.append(element);
+          }
+          if (list.length == 0) {
+            root.html("无事件");
+          }
+        }
+    ).fail(function (data) {
+        console.log(data);
+        root.html("查询失败");
+    })
+  }
+
+
+  /**
+   * 绑定上个月下个月事件
+   */
+  function bindEvent() {
+    var prevMonth = document.getElementById("prevMonth");
+    var nextMonth = document.getElementById("nextMonth");
+    addEvent(prevMonth, 'click', toPrevMonth);
+    addEvent(nextMonth, 'click', toNextMonth);
+  }
+ 
+  /**
+   * 绑定事件
+   */
+  function addEvent(dom, eType, func) {
+    if(dom.addEventListener) {  // DOM 2.0
+      dom.addEventListener(eType, function(e){
+        func(e);
+      });
+    } else if(dom.attachEvent){  // IE5+
+      dom.attachEvent('on' + eType, function(e){
+        func(e);
+      });
+    } else {  // DOM 0
+      dom['on' + eType] = function(e) {
+        func(e);
+      }
+    }
+  }
+ 
+  /**
+   * 点击上个月图标触发
+   */
+  function toPrevMonth() {
+    var date = dateObj.getDate();
+    dateObj.setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1));
+    showCalendarData();
+  }
+ 
+  /**
+   * 点击下个月图标触发
+   */
+  function toNextMonth() {
+    var date = dateObj.getDate();
+    dateObj.setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1));
+    showCalendarData();
+  }
+ 
+  /**
+   * 日期转化为字符串， 4位年+2位月+2位日
+   */
+  function getDateStr(date, seperator) {
+    seperator = seperator || "-";
+    var _year = date.getFullYear();
+    var _month = date.getMonth() + 1;    // 月从0开始计数
+    var _d = date.getDate();
+     
+    _month = formatNum(_month);
+    _d = formatNum(_d);
+    if (seperator) {
+      return _year + seperator + _month + seperator + _d;
+    } else {
+      return _year + _month + _d;
+    }
+  }
+
+  function formatNum(month) {
+    if (month > 9) {
+      return "" + month;
+    } else {
+      return "0" + month;
+    }
+  }
+
+  /**
+   * 获取月日, 格式如03-02
+   */
+  function getMonthDayStr(date) {
+    var _month = date.getMonth() + 1;    // 月从0开始计数
+    var _d = date.getDate();
+     
+    _month = formatNum(_month);
+    _d = formatNum(_d);
+    return _month + '-' + _d;
+  }
+
+  $(".currentMonth").click(function () {
+    $(".currentMonth").removeClass("selected");
+    // $(".calendarMessage").removeClass("hide");
+    $(this).addClass("selected");
+    var selectedDate = $(this).attr("date");
+    $(".calendarDate").val(selectedDate);
+    $("#newFeedDate").val(selectedDate);
+  });
+
+  $("#newFeedDate").val(getDateStr(new Date()));
+
+  $("#newFeedSaveBtn").click(function () {
+    $.post("/file/message/add", 
+      {
+        date: $("[name=date]").val(),
+        content: $("[name=content]").val()
+      },
+      function (data) {
+        showCalendarData();
+        $("[name=content]").val("");
+      });
+  })
+})();
+
+</script>
+
+{% end %}

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/06/07 22:20:51
+# @modified 2018/06/12 01:23:04
 
 """短消息"""
 import time
@@ -191,6 +191,11 @@ class MessageHandler:
             key = xutils.get_argument("key", ""))
 
 
+class CalendarHandler:
+
+    def GET(self):
+        return xtemplate.render("message/calendar.html", count_message = count_message)
+
 xurls=(
     r"/file/message/add", SaveHandler,
     r"/file/message/remove", RemoveHandler,
@@ -201,5 +206,6 @@ xurls=(
     r"/message/list", ListHandler,
     r"/file/message/date", DateHandler,
     r"/message", MessageHandler,
+    r"/message/calendar", CalendarHandler
 )
 

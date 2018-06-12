@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/06/07 21:49:23
+# @modified 2018/06/12 23:25:11
 
 import sys
 import os
@@ -271,6 +271,12 @@ class TestMain(unittest.TestCase):
     def test_search(self):
         self.check_200("/search?key=测试")
         self.check_200("/search/search?key=测试")
+
+    def test_search_in_cache(self):
+        xconfig.USE_CACHE_SEARCH = True
+        self.check_200("/search?key=测试")
+        self.check_200("/fs_find?find_key=xnote&path=" + xconfig.DATA_DIR)
+        xconfig.USE_CACHE_SEARCH = False
     
     def test_search_calc(self):
         result = json_request("/search?key=1%2B2&_format=json")
