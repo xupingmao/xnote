@@ -74,6 +74,12 @@
     };
 
     $("#searchName").keyup(function (event) {
+        var keyCode = event.keyCode || event.which;
+        if (keyCode == 13) {
+            // 回车
+            runPlugin($(this).val() + ".py", false);
+            return;
+        }
         var name = $(this).val();
         if (name == "") {
             $(".plugin").show();

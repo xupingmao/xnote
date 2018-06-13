@@ -32,7 +32,7 @@
 </div>
 {% end %}
 
-<script>
+<script type="text/javascript">
     function switchRename() {
         if ($("#renameDiv").css("display") == "none") {
             $("#oldName").hide();
@@ -43,7 +43,6 @@
             $("#renameDiv").css("display", "none");
         }
     }
-
     
     function delLink() {
         var r = confirm("确认删除 {{file.name}}?");
@@ -52,16 +51,8 @@
         }
     }
 
-        
     // autosize textarea rows
-    
-    var related = "{{file.related}}";
     var textContainer = document.getElementById("fileContent");
-    function adjustRows(ele) {
-        var text = ele.innerHTML;
-        var rows = text.count('\n');
-        ele.rows = rows + 10;
-    }
 
     function edit() {
         location.href = "/file/view?id={{file.id}}";
@@ -109,7 +100,6 @@
     }
     // set marked code highlight function
     // marked.defaults.highlight = highlight;
-
     function escape(html, encode) {
       return html
         .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
@@ -163,8 +153,6 @@
             }
         })
     }
-
-
 </script>
 
 <!-- GROUPS: {{file.groups}} -->

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/06/04 23:36:45
+# @modified 2018/06/13 22:50:34
 
 __doc__ = """Methods for text operation"""
 
@@ -295,8 +295,12 @@ def cut_text(text, length):
         >>> cut_text('abcdefg', 5)
         'abc..'
         >>> cut_text('abcd', 5)
-        'abc..'
+        'abcd'
     """
     if len(text) <= length:
         return text
     return text[:length-2] + ".."
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

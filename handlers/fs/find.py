@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2018/06/12 23:33:42
+# @modified 2018/06/14 00:04:34
 import os
 import glob
 import xutils
@@ -27,10 +27,11 @@ def get_cached_files():
     return file_cache
 
 def find_in_cache0(key):
+    key = key.upper()
     plist = []
     files = get_cached_files()
     for item in files:
-        if fnmatch(item, key):
+        if fnmatch(item.upper(), key):
             plist.append(item)
     return plist
 

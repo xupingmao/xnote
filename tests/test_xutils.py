@@ -162,7 +162,7 @@ class TestMain(unittest.TestCase):
 
     def test_textutil(self):
         import doctest
-        doctest.testmod(m=textutil, verbose=True)
+        doctest.testmod(m=xutils.textutil, verbose=True)
 
     def test_netutil(self):
         import doctest

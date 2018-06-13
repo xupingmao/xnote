@@ -12,13 +12,13 @@ xnote
 |   |-- api/        # 系统接口，返回JSON格式，供页面、定时任务、搜索调用
 |   |-- ...         # 其他目录
 |-- tests/          # 测试用例
+|-- xutils/         # 工具类集合
 |-- app.py          # 程序入口
 |-- xconfig.py      # 程序配置
 |-- xmanager.py     # handlers管理器，负责模块加载，注册URL，以及定时任务触发
 |-- xauth.py        # 权限控制
 |-- xtables.py      # 数据库表结构，自动建表
-|-- xtemplate.py    # view渲染接口
-|-- xutils.py       # 工具类统一入口
+|-- xtemplate.py    # view渲染接口   
 |-- autoreload.py   # 监控文件变更自动reload，主要用于调试，生产环境可以关闭
 
 ```
