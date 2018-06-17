@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/06/08 00:58:45
+# @modified 2018/06/17 10:04:06
 
 '''
 xnote系统配置
@@ -20,25 +20,26 @@ __contributors__ = []
 # 系统配置项
 ##################################
 
-# 开发者模式,会展示更多的选项和信息,会开启实验性功能
-DEV_MODE = False
+# 开发者模式            ,会展示更多的选项和信息,会开启实验性功能
+DEV_MODE           = False
 # 开启调试
-DEBUG = False
+DEBUG              = False
 # 调试盒子模型，针对某些不方便调试的浏览器
-DEBUG_HTML_BOX = False
-PORT = "1234"
-SITE_HOME = None
-minthreads = 10
+DEBUG_HTML_BOX     = False
+PORT               = "1234"
+SITE_HOME          = None
+minthreads         = 10
 # 打开浏览器
-OPEN_IN_BROWSER = False
+OPEN_IN_BROWSER    = False
 # 启用数据库的缓存搜索
-USE_CACHE_SEARCH = False
+USE_CACHE_SEARCH   = False
 # 文件系统使用urlencode方式,适用于只支持ASCII字符的系统
-USE_URLENCODE = False
+USE_URLENCODE      = False
 # 初始化脚本
-INIT_SCRIPT = None
+INIT_SCRIPT        = None
 # 记录位置信息，可通过脚本配置打开
-RECORD_LOCATION = False
+RECORD_LOCATION    = False
+BASE_TEMPLATE      = "base.html"
 # 菜单配置
 MENU_LIST = []
 TOOL_LIST = []
@@ -46,11 +47,11 @@ TOOL_LIST = []
 # 处理器目录
 HANDLERS_DIR = "handlers"
 # 工具目录
-TOOLS_DIR   = "handlers/tools"
-WORKING_DIR = os.path.dirname(__file__)
-WEBDIR      = os.path.join(WORKING_DIR, "static")
-PLUGINS_DIR = os.path.join(WORKING_DIR, "plugins")
-LOG_DIR     = os.path.join(WORKING_DIR, "log")
+TOOLS_DIR    = "handlers/tools"
+WORKING_DIR  = os.path.dirname(__file__)
+WEBDIR       = os.path.join(WORKING_DIR, "static")
+PLUGINS_DIR  = os.path.join(WORKING_DIR, "plugins")
+LOG_DIR      = os.path.join(WORKING_DIR, "log")
 
 
 # 用户数据的地址
@@ -61,25 +62,23 @@ DB_DIR      = os.path.join(WORKING_DIR, "db")
 CONFIG_DIR  = os.path.join(DATA_DIR, "config")
 
 # 其他标记
-# 测试用的flag,开启会拥有admin权限
-IS_TEST  = False
+# 测试用的flag       ,开启会拥有admin权限
+IS_TEST          = False
 # 开启性能分析
-OPEN_PROFILE = False
+OPEN_PROFILE     = False
 PROFILE_PATH_SET = set(["/file/view"])
 # 静音停止时间
-MUTE_END_TIME = None
+MUTE_END_TIME    = None
 # 资料相关
 # 分页数量
-PAGE_SIZE = 30
-IP_BLACK_LIST = ["192.168.56.1"] # this is vbox ip
-
+PAGE_SIZE        = 30
+IP_BLACK_LIST    = ["192.168.56.1"] # this is vbox ip
 # max file size to sync or backup
-MAX_FILE_SIZE = 10 * 1024 ** 2
-
-
-FS_HIDE_FILES = True
-# 文件管理扩展的选项 Storage(name=, url=)
-FS_OPT_BTNS = []
+MAX_FILE_SIZE    = 10 * 1024 ** 2
+# 是否隐藏系统文件
+FS_HIDE_FILES    = True
+# 文件管理扩展的选项      ,类型Storage
+FS_OPT_BTNS      = []
 # 文本文件后缀
 FS_TEXT_EXT_LIST = [
     ".java",  # Java

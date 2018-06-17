@@ -1,7 +1,7 @@
 {% init can_edit = False %}
 {% include "note/view_header.html" %}
 
-    <hr/>
+<hr/>
 <div class="col-md-12" style="padding-top:20px;">
     <div id="epiceditor" class="row">
         <div id="markdown-input-div" class="col-md-6">
@@ -13,24 +13,6 @@
         </div>
     </div>
 </div>
-
-<div style="float:left;width:100%;">
-{% if 'children' in globals() %}
-
-{% if len(children) > 0 %}
-    <h1>子页面</h1>
-    <hr/>
-{% end %}
-
-<ul>
-{% for child in children %}
-    <li>
-    [{{child.ctime}}] <a href="/file/edit?id={{child.id}}">{{child.name}}</a>
-    </li>
-{% end %}
-</ul>
-</div>
-{% end %}
 
 <script type="text/javascript">
     function switchRename() {

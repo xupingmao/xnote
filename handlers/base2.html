@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0,user-scalable=0"/>
+
+<title>Xnote</title>
+<link rel="shortcut icon" href="/static/favicon.ico"/>
+<link rel="bookmark" href="/static/favicon.ico"/>
+<link rel="stylesheet" href="/static/css/common.css"/>
+<script src="/static/lib/jquery/jquery-1.12.4.min.js"></script>
+<script type="text/javascript">
+  window.xuser = "{{_user_name}}";
+</script>
+<script type="text/javascript" src="/static/js/utils.js"></script>
+<script type="text/javascript" src="/system/stats"></script>
+<script type="text/javascript" src="/static/js/xnote-ui.js"></script>
+<script type="text/javascript" src="/static/lib/layer/layer.js"></script>
+{% if _has_login %}
+<script type="text/javascript" src="/static/js/app.js"></script>
+{% end %}
+
+{% block head %} {% end %}
+
+{% if xconfig.DEBUG_HTML_BOX %}
+<style>
+  * {
+    box-sizing: border-box;
+    border: solid 1px red;
+  }
+</style>
+{% end %}
+
+</head>
+<body>
+<div class="header">
+    <div class="toggleMenu" style="margin-left: 15px; cursor: pointer;"></div>
+</div>
+
+<div class="main x-center">
+    <div class="main-content">
+        <div class="col-md-12">
+            {% block body %} {% end %}
+            <div class="footer"></div>
+        </div>
+    </div>
+    <div class="aside">
+        <div class="aside-item">
+            <div class="aside-title">
+                常用
+            </div>
+            <div class="aside-content">
+                <li><a class="link" href="/">首页</a></li>
+                <li><a class="link" href="/message?status=created">备忘录</a></li>
+                <li><a class="link" href="/fs_data/">文件</a></li>
+                <li><a class="link" href="/system/index">系统</a></li>
+                <li><a class="link" href="/wiki/README.md">关于</a></li>
+            </div>
+        </div>
+
+        <div class="aside-item">
+            <div class="aside-title">搜索</div>
+            <div class="aside-content">
+                <form id="searchForm" method="GET" action="{{?search_action,'/search/search'}}">
+                {% block search_form %} {% end %}
+                <input id="key" name="key"
+                    placeholder="{{?search_placeholder, '搜索或指令'}}" 
+                    value="{{?key}}"/>
+                <input class="hide" 
+                    name="category" 
+                    value="{{?category}}" />
+                <button>搜索</button>
+              </form>
+            </div>
+        </div>
+        {% block aside %} {% end %}
+    </div>
+</div>
+<!-- Main Part End -->
+<div class="x-dialog-background"></div>
+</body>
+</html>

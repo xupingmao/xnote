@@ -1,9 +1,7 @@
-#coding=utf-8
-'''
-Tornado template wrapper
-Created by xupingmao on 2016/12/05
-Modified by xupingmao on 2017/12/24
-'''
+# -*- coding:utf-8 -*-
+# @author xupingmao <578749341@qq.com>
+# @since 2016/12/05
+# @modified 2018/06/17 22:47:10
 import os
 import json
 import web
@@ -22,7 +20,7 @@ TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE    = dict(
     format_date = dateutil.format_date,
     format_time = dateutil.format_time,
-    quote = quote
+    quote       = quote
 ) 
 
 def load_menu_properties():
@@ -48,8 +46,6 @@ def load_menu_properties():
     global MENU_LIST
     MENU_LIST = menu_list
 
-
-
 class XnoteLoader(Loader):
     """定制Template Loader"""
     
@@ -74,7 +70,10 @@ class XnoteLoader(Loader):
         这样做的好处是一般全局母版的位置是不变的，移动模块不需要修改母版位置，这里的`全局`也并不是真的全局，
         而是寻找母版或者include模板时不进行路径转换
         """
-        return name 
+        # 处理默认的模板，这里hack掉
+        if name == "base.html":
+            return xconfig.BASE_TEMPLATE
+        return name
 
 def set_loader_namespace(namespace):
     """ set basic namespace """

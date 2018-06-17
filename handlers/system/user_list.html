@@ -17,9 +17,8 @@
 
 <div class="col-md-12">&nbsp;</div>
 
-<form method="POST">
+<form method="POST" class="col-md-12">
 <table class="table col-md-12">
-
     <tr>
         <th class="td-no">编号</th>
         <th>用户名</th>
@@ -28,7 +27,6 @@
         <th>token</th>
         <th>操作</th>
     </tr>
-    
     {% set index = -1 %}
     {% for index, name in enumerate(sorted(user_dict)) %}
     {% set user = user_dict[name] %}

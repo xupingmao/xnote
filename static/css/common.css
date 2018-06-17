@@ -976,3 +976,41 @@ li.menu-item:hover {
 .border {
     border: solid 1px #ccc;
 }
+
+.main-content {
+    width: 100%;
+    float: left;
+    padding-right: 235px;
+}
+
+.aside {
+    float: left;
+    width: 225px;
+    margin-left: -225px;
+}
+
+.aside-item {
+    background-color: white;
+    padding: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+}
+
+.aside-title {
+    border-bottom: 1px solid #ccc;
+}
+
+@media screen and (max-width: 600px) {
+    /** mobile **/
+    .main-content {
+        width: 100%;
+        padding-right: 0px;
+    }
+
+    .aside {
+        width: 100%;
+        padding: 0px;
+        padding-top: 10px;
+        margin-left: 0px;
+    }
+}

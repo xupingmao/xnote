@@ -78,6 +78,7 @@ class handler:
             sys_version = platform.version(),
             processor = platform.processor(),
             thread_cnt = thread_cnt,
+            xconfig = xconfig,
             xnote_version = get_xnote_version(),
             start_time = xconfig.get("start_time"))
 

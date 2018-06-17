@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/06/12 23:25:11
+# @modified 2018/06/17 22:50:09
 
 import sys
 import os
@@ -72,6 +72,9 @@ class TestMain(unittest.TestCase):
     def test_index(self):
         self.check_OK("/")
         self.check_OK("/index")
+
+    def test_home(self):
+        self.check_OK("/home")
 
     def test_fs_func(self):
         if not xutils.is_windows():

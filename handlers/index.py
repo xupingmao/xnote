@@ -35,7 +35,6 @@ _tools = [
     link("词典", "/file/dict", "user"),
     link("备忘", "/message?status=created", "user"),
     link("最近更新", "/file/recent_edit", "user"),
-    link("我的收藏", "/file/group/marked", "user"),
 
     # 无权限限制
     link("日历", "/tools/date"),
@@ -76,9 +75,28 @@ def tool_filter(item):
         return True
     return False
 
-class Home:
+def list_recent_created():
+    where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"
+    db = xtables.get_file_table()
+    return db.select(where = where, 
+            vars   = dict(creator = xauth.get_current_name()),
+            order  = "ctime DESC",
+            limit  = 5)
+
+
+def list_most_visited():
+    where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"
+    db = xtables.get_file_table()
+    return db.select(where = where, 
+            vars   = dict(creator = xauth.get_current_name()),
+            order  = "visited_cnt DESC",
+            limit  = 5)
+
+class IndexHandler:
 
     def GET(self):
+        recent_created = list_recent_created()
+        most_visited   = list_most_visited()
         sql  = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
         data = list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
         ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
@@ -86,6 +104,8 @@ class Home:
 
         tools = list(filter(tool_filter, _tools))[:4]
         return xtemplate.render("index.html", 
+            recent_created = recent_created, 
+            most_visited = most_visited,
             ungrouped_count = ungrouped_count,
             file_type="group_list",
             files = data,
@@ -124,8 +144,9 @@ class FaviconHandler:
         raise web.seeother("/static/favicon.ico")
 
 xurls = (
-    r"/", Home, 
-    r"/index", Home,
+    r"/", IndexHandler, 
+    r"/index", IndexHandler,
+    r"/home", IndexHandler,
     r"/more", GridHandler,
     r"/system/index", GridHandler,
     r"/unauthorized", Unauthorized,
