@@ -1,4 +1,5 @@
 # encoding=utf-8
+# @modified 2018/06/19 23:05:32
 import codecs
 import os
 import platform
@@ -21,8 +22,8 @@ def readfile(path):
         return content
 
 # readfile别名
-readFile = readfile
-read = readfile
+readFile  = readfile
+read      = readfile
 read_utf8 = readfile
 
 def writebytes(path, bytes):
