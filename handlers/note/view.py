@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/06/10 12:00:46
+# @modified 2018/06/19 22:00:45
 
 import profile
 import math
@@ -27,6 +27,15 @@ def visit_by_id(ctx):
     db = xtables.get_file_table()
     sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime=$atime where id = $id"
     db.query(sql, vars = dict(atime = xutils.format_datetime(), id=id))
+
+def list_group():
+    sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
+    return list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
+
+def list_recent(parent_id):
+    sql = "SELECT * FROM file WHERE is_deleted = 0 AND creator = $creator AND parent_id = $parent_id ORDER BY ctime DESC LIMIT 5"
+    return list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name(), 
+        parent_id = parent_id)))
 
 class ViewHandler:
 
@@ -61,9 +70,11 @@ class ViewHandler:
         role            = xauth.get_current_role()
 
         # 定义一些变量
-        files = []
-        amount = 0
-        template_name = "note/view.html"
+        files          = []
+        groups         = []
+        recent_created = []
+        amount         = 0
+        template_name  = "note/view.html"
         xconfig.note_history.put(dict(user=user_name, 
             link = "/note/view?id=%s" % id, 
             name = file.name))
@@ -82,6 +93,8 @@ class ViewHandler:
             content         = file.content
             show_search_div = True
             show_add_file   = True
+            groups          = list_group()
+            recent_created  = list_recent(file.id)
         elif file.type == "md" or file.type == "text":
             content = file.content
             if op == "edit":
@@ -103,9 +116,11 @@ class ViewHandler:
             can_edit = can_edit,
             pathlist = pathlist,
             page_max = math.ceil(amount/pagesize),
-            page = page,
+            page     = page,
             page_url = "/file/view?id=%s&page=" % id,
-            files = files)
+            files    = files, 
+            recent_created = recent_created,
+            groups   = groups)
 
 def sqlite_escape(text):
     if text is None:

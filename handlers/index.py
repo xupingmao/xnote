@@ -78,19 +78,19 @@ def tool_filter(item):
 def list_recent_created():
     where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"
     db = xtables.get_file_table()
-    return db.select(where = where, 
+    return list(db.select(where = where, 
             vars   = dict(creator = xauth.get_current_name()),
             order  = "ctime DESC",
-            limit  = 5)
+            limit  = 5))
 
 
 def list_most_visited():
     where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"
     db = xtables.get_file_table()
-    return db.select(where = where, 
+    return list(db.select(where = where, 
             vars   = dict(creator = xauth.get_current_name()),
             order  = "visited_cnt DESC",
-            limit  = 5)
+            limit  = 5))
 
 class IndexHandler:
 

@@ -1,0 +1,44 @@
+
+{% init recent_created = [] %}
+{% if len(recent_created) > 0 %}
+<div class="aside-item">
+    <div class="aside-title">
+        最新文章
+    </div>
+    <div class="aside-content">
+        {% for item in recent_created %}
+            <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a></li>
+        {% end %}
+    </div>
+</div>
+{% end %}
+
+
+{% init most_visited = [] %}
+{% if len(most_visited) > 0 %}
+<div class="aside-item">
+    <div class="aside-title">
+        最常访问
+    </div>
+    <div class="aside-content">
+        {% for item in most_visited %}
+            <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a></li>
+        {% end %}
+    </div>
+</div>
+{% end %}
+
+<!-- Groups -->
+{% init groups = [] %}
+{% if len(groups) > 0 %}
+<div class="aside-item">
+    <div class="aside-title">
+        分组
+    </div>
+    <div class="aside-content">
+        {% for item in groups %}
+            <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}({{item.size}})</a></li>
+        {% end %}
+    </div>
+</div>
+{% end %}

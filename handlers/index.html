@@ -59,27 +59,5 @@
 {% end %}
 
 {% block aside %}
-{% init recent_created = [] %}
-{% init most_visited = [] %}
-<div class="aside-item">
-    <div class="aside-title">
-        最新文章
-    </div>
-    <div class="aside-content">
-        {% for item in recent_created %}
-            <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a></li>
-        {% end %}
-    </div>
-</div>
-
-<div class="aside-item">
-    <div class="aside-title">
-        最常访问
-    </div>
-    <div class="aside-content">
-        {% for item in most_visited %}
-            <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a></li>
-        {% end %}
-    </div>
-</div>
+    {% include note/mod_aside.html %}
 {% end %}
