@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/06/17 22:50:09
+# @modified 2018/06/19 18:09:40
 
 import sys
 import os
@@ -21,7 +21,7 @@ def init():
     xconfig.port = "1234"
     xconfig.DEV_MODE = True
     var_env = dict()
-    xconfig.init()
+    xconfig.init("./testdata")
     xtables.init()
     app = web.application(list(), var_env, autoreload=False)
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
@@ -295,11 +295,11 @@ class TestMain(unittest.TestCase):
 
     def test_message_add(self):
         # Py2: webpy会自动把str对象转成unicode对象，data参数传unicode反而会有问题
-        response = json_request("/file/message/add", method="POST", data=dict(content="Xnote测试"))
+        response = json_request("/file/message/add", method="POST", data=dict(content="Xnote-Unit-Test"))
         self.assertEqual("success", response.get("code"))
         data = response.get("data")
         # Py2: 判断的时候必须使用unicode
-        self.assertEqual(u"Xnote测试", data.get("content"))
+        self.assertEqual(u"Xnote-Unit-Test", data.get("content"))
         json_request("/file/message/remove", method="POST", data=dict(id=data.get("id")))
 
     def test_message_list(self):

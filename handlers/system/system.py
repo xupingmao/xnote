@@ -17,6 +17,7 @@ import autoreload
 import xtemplate
 import xutils
 import xauth
+import xmanager
 config = xconfig
 
 def link(name, url):
@@ -92,6 +93,17 @@ class SysHandler:
             user = xauth.get_current_user()
         )
 
+class ConfigHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        key = xutils.get_argument("key")
+        value = xutils.get_argument("value")
+        setattr(xconfig, key, value)
+        if key == "BASE_TEMPLATE":
+            xmanager.reload()
+        return dict(code="success")
+
 
 handler = SysHandler
 searchkey = "sys|系统信息"
@@ -102,4 +114,5 @@ xurls = (
     r"/system/sys",   SysHandler,
     r"/system/index", SysHandler,
     r"/system/system", SysHandler,
+    r"/system/xconfig", ConfigHandler
 )

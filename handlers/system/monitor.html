@@ -41,9 +41,24 @@
         </tr>
         <tr>
             <td>母板类型</td>
-            <td>{{xconfig.BASE_TEMPLATE}}</td>
+            <td>
+                <input type="radio" name="base_template" default-value="{{xconfig.BASE_TEMPLATE}}" value="base.html">base.html
+                <input type="radio" name="base_template" default-value="{{xconfig.BASE_TEMPLATE}}" value="base2.html">base2.html
+            </td>
         </tr>
     </table>
 </div>
+
+<script type="text/javascript">
+    $("[name=base_template]").on("change", function (e) {
+        var val = $(e.target).val();
+        // alert(val);
+        $.post("/system/xconfig", 
+            {key: "BASE_TEMPLATE", value: val}, 
+            function (data) {
+                window.location.reload();
+        })
+    })
+</script>
 
 {% end %}

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/06/12 01:23:04
+# @modified 2018/06/19 18:04:39
 
 """短消息"""
 import time
@@ -164,11 +164,13 @@ class SaveHandler:
                 status = 0,
                 mtime = ctime,
                 ctime = ctime)
+            id = inserted_id
             return dict(code="success", data=dict(id=inserted_id, content=content, ctime=ctime))
-        db.update(content = content,
-            mtime = xutils.format_datetime(), 
-            where=dict(id=id, user=user_name))
-        return dict(code="success")
+        else:
+            db.update(content = content,
+                mtime = xutils.format_datetime(), 
+                where=dict(id=id, user=user_name))
+        return dict(code="success", data=dict(id=id))
 
 class DateHandler:
 

@@ -36,6 +36,8 @@
     <div class="toggleMenu" style="margin-left: 15px; cursor: pointer;"></div>
 </div>
 
+{% include base_menu.html %}
+
 <div class="main x-center">
     <div class="main-content">
         <div class="col-md-12">
@@ -44,14 +46,17 @@
         </div>
     </div>
     <div class="aside">
+        <!--
         <div class="aside-item">
             <div class="aside-title">
                 常用
             </div>
             <div class="aside-content">
                 <li><a class="link" href="/">首页</a></li>
-                <li><a class="link" href="/message?status=created">备忘录</a></li>
+                <li><a class="link" href="/message?status=created">备忘</a></li>
+                {% if _is_admin %}
                 <li><a class="link" href="/fs_data/">文件</a></li>
+                {% end %}
                 <li><a class="link" href="/system/index">系统</a></li>
                 <li><a class="link" href="/wiki/README.md">关于</a></li>
             </div>
@@ -72,6 +77,7 @@
               </form>
             </div>
         </div>
+        -->
         {% block aside %} {% end %}
     </div>
 </div>
