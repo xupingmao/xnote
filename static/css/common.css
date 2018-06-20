@@ -1004,7 +1004,7 @@ li.menu-item:hover {
     border-bottom: 1px solid #ccc;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 550px) {
     /** mobile **/
     .main-content {
         width: 100%;
