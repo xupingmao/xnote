@@ -44,7 +44,7 @@
         {% continue %}
     {% end %}
     <div class="col-md-12 top-offset-1">
-        <h3 class="category">{{category.name}}</h3>
+        <div class="grid-title">{{category.name}}</div>
         <div class="col-md-12">
             {% for link in category.children %}
             <div class="item">
@@ -56,10 +56,10 @@
 {% end %}
 
 <div class="col-md-12 top-offset-1">
-    <h3 class="category">
+    <div class="grid-title">
         自定义
         <a href="/system/storage?key=tools" class="float-right link">编辑</a>
-    </h3>
+    </div>
     <div class="col-md-12">
         {% for link in customized_items %}
         <div class="item">
