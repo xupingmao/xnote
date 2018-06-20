@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/06/19 22:00:45
+# @modified 2018/06/20 22:08:12
 
 import profile
 import math
@@ -27,10 +27,6 @@ def visit_by_id(ctx):
     db = xtables.get_file_table()
     sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime=$atime where id = $id"
     db.query(sql, vars = dict(atime = xutils.format_datetime(), id=id))
-
-def list_group():
-    sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
-    return list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
 
 def list_recent(parent_id):
     sql = "SELECT * FROM file WHERE is_deleted = 0 AND creator = $creator AND parent_id = $parent_id ORDER BY ctime DESC LIMIT 5"
@@ -93,7 +89,7 @@ class ViewHandler:
             content         = file.content
             show_search_div = True
             show_add_file   = True
-            groups          = list_group()
+            groups          = xtables.call("note.list_group")
             recent_created  = list_recent(file.id)
         elif file.type == "md" or file.type == "text":
             content = file.content

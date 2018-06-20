@@ -1,5 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
+# @modified 2018/06/20 22:07:40
 
 """资料的DAO操作集合
 
@@ -12,34 +13,28 @@ import web.db as db
 import xconfig
 import xtables
 import xutils
+import xauth
 from xutils import readfile, savetofile, sqlite3
 from xutils import dateutil
 
 MAX_VISITED_CNT = 200
-readFile = readfile
-config  = xconfig
-DB_PATH = config.DB_PATH
+readFile        = readfile
+config          = xconfig
+DB_PATH         = config.DB_PATH
 
 
 class FileDO(dict):
     """This class behaves like both object and dict"""
     def __init__(self, name):
-        self.id = None
-        self.related = ''
-        if isinstance(name, list) or isinstance(name, tuple):
-            self.name = name[0]
-            self.addRelatedNames(name)
-        else:
-            self.name = name
-            self.addRelatedName(name)
-        # self.path = getRandomPath()
-        self.size = 0
-        t = dateutil.get_seconds()
-        self.mtime = t
-        self.atime = t
-        self.ctime = t
-        # self.status = 0
+        self.id          = None
+        self.related     = ''
+        self.size        = 0
+        t                = dateutil.get_seconds()
+        self.mtime       = t
+        self.atime       = t
+        self.ctime       = t
         self.visited_cnt = 0
+        self.name        = name
 
     def __getattr__(self, key): 
         try:
@@ -57,46 +52,6 @@ class FileDO(dict):
         except KeyError as k:
             raise AttributeError(k)
     
-    def addRelatedName(self, name):
-        if name is None:
-            return
-        name = name.upper()
-        if self.related == '':
-            self.related = ',%s,' % name
-            return
-        if name == '':
-            return
-        tag = ',%s,' % name
-        if tag in self.related:
-            return
-        self.related += name + ','
-        
-    def delRelatedName(self, name):
-        name = name.upper()
-        if name == self.name.upper():
-            raise FileRelationOptionError("can not remove itself from related!!!")
-        names = self.related.split(',')
-        names.remove(name)
-        self.related = ','.join(names)
-        
-    def addRelatedNames(self, names):
-        for name in names:
-            self.addRelatedName(name)
-            
-    def fixRelated(self):
-        ''' this is a deprecated function '''
-        related = self.related
-        self.related = related.upper()
-        name = self.name.upper()
-        if name not in self.related:
-            self.addRelatedName(name)
-        if self.related[0] != ',':
-            self.related = ',' + self.related
-        if self.related[-1] != ',':
-            self.related += ','
-        if related != self.related:
-            self.save()
-            
     @staticmethod
     def fromDict(dict, option=None):
         """build fileDO from dict"""
@@ -111,31 +66,6 @@ class FileDO(dict):
             file.option = option
         file.url = "/file/view?id={}".format(dict["id"])
         return file
-        
-    def setBase(self, base):
-        self.base = base
-        
-    def get_content(self):
-        if self.content is None:
-            self.content = ""
-        if "CODE-" in self.related and not self.content.startswith("```"):
-            m = re.match(r".*CODE-([A-Z]*)", self.related)
-            codename = ""
-            if m:
-                codename = m.groups()[0]
-            return "```%s\n%s\n```" % (codename, self.content)
-        return self.content
-        
-    def writeContent(self, content):
-        raise Exception("not implemented")
-
-def getMilliSecond():
-    t = time.time()
-    ms = t - int(t)
-    return '%03d' % int(ms*1000)
-    
-def getRandomPath():
-    return time.strftime("%Y/%m/%d-%H%M%S")+"-"+getMilliSecond()
 
 def to_sqlite_obj(text):
     if text is None:
@@ -144,15 +74,7 @@ def to_sqlite_obj(text):
         return repr(text)
     text = text.replace("'", "''")
     return "'" + text + "'"
-    
 
-
-class FileRelationOptionError(Exception):
-    def __init__(self, msg):
-        self.error = msg
-        
-    def __str__(self):
-        return str(self.error)
 
 class TableDesc:
     def __init__(self, row = None):
@@ -273,64 +195,9 @@ def insert(file):
         file.is_deleted = 0
     return get_db().insert(**file)
         
-
 def get_db():
     return get_file_db()
 
-class FileDB:
-
-    def __init__(self, dbpath = None):
-        if dbpath is None:
-            dbpath = config.DB_PATH
-        self.path = dbpath
-        self.conn = sqlite3.connect(dbpath)
-        self.cursor = self.conn.cursor()
-
-    def setup():
-        ''' setup database file '''
-        filedb = FileDB()
-            
-    def __del__(self):
-        self.conn.close()
-        
-    def execute0(self, sql):
-        cursorobj = self.cursor
-        try:
-            cursorobj.execute(sql)
-            result = cursorobj.fetchall()
-            self.conn.commit()
-            return result
-        except Exception:
-            raise
-        return result
-        
-    def execute(self, sql):
-        cursorobj = self.cursor
-        try:
-            if sql.startswith("update") and "where" not in sql:
-                raise Exception("update without where!!!")
-            cursorobj.execute(sql)
-            result = cursorobj.fetchall()
-            result1 = []
-            for single in result:
-                resultMap = {}
-                for i, desc in enumerate(cursorobj.description):
-                    name = desc[0]
-                    resultMap[name] = single[i]
-                result1.append(resultMap)
-            self.conn.commit()
-            return result1
-        except Exception as e:
-            raise e
-        return result
-
-def getWords(line):
-    line = line.strip()
-    words = line.split(' ')
-    new_words = []
-    for word in words:
-        if word != '' : new_words.append(word)
-    return new_words
 
 def build_sql_row(obj, k):
     v = getattr(obj, k)
@@ -344,3 +211,8 @@ def get_table_struct(table_name):
         result.append(item)
     return result
 
+def list_group():
+    sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
+    return list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
+
+xtables.register("note.list_group", list_group)

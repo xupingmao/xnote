@@ -148,6 +148,11 @@ table td {
     background-color: #eee;
 }
 
+.line-td {
+    border-left: none;
+    border-right: none;
+}
+
 .menu-selected {
     background: #0088cc;
     color: #fff;

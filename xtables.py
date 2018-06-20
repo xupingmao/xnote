@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/06/19 22:16:27
+# @modified 2018/06/20 22:09:37
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -405,6 +405,8 @@ def get_dict_table():
         return DBWrapper(xconfig.DICT_FILE, "dictionary")
     return MockedDB()
 
+get_dictionary_table = get_dict_table
+
 def get_table(name):
     """
     获取数据库表，表的创建和访问不必在xtables中定义
@@ -412,7 +414,12 @@ def get_table(name):
     """
     return DBWrapper(xconfig.DB_FILE, name)
 
-get_dictionary_table = get_dict_table
+_funcs = dict()
+def register(name, func):
+    _funcs[name] = func
+
+def call(name, *args, **kw):
+    return _funcs[name](*args, **kw)
 
 def init():
     if sqlite3 is None:

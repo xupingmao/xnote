@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/06/17 22:47:10
+# @modified 2018/06/20 23:03:34
 import os
 import json
 import web
@@ -71,7 +71,7 @@ class XnoteLoader(Loader):
         而是寻找母版或者include模板时不进行路径转换
         """
         # 处理默认的模板，这里hack掉
-        if name == "base.html":
+        if name == "base":
             return xconfig.BASE_TEMPLATE
         return name
 

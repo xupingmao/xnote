@@ -34,8 +34,15 @@
 <div class="aside-item">
     <div class="aside-title">
         分组
+        {% if _has_login %}
+        <a class="float-right link prompt-btn" message="新增分类" 
+                    action="/note/add?type=group&name=">新增</a>
+        {% end %}
     </div>
     <div class="aside-content">
+        <li><a class="link" href="/file/group/ungrouped">未分类</a></li>
+        <li><a class="link" href="/file/group/public">分享笔记</a></li>
+        <li><a class="link" href="/note/recent_created">最新笔记</a></li>
         {% for item in groups %}
             <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}({{item.size}})</a></li>
         {% end %}

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/06/17 10:04:06
+# @modified 2018/06/20 23:11:23
 
 '''
 xnote系统配置
@@ -39,7 +39,7 @@ USE_URLENCODE      = False
 INIT_SCRIPT        = None
 # 记录位置信息，可通过脚本配置打开
 RECORD_LOCATION    = False
-BASE_TEMPLATE      = "base.html"
+BASE_TEMPLATE      = "base2.html"
 # 菜单配置
 MENU_LIST = []
 TOOL_LIST = []

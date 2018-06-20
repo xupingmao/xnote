@@ -55,6 +55,20 @@
     </div>
 {% end %}
 
+<div class="col-md-12 top-offset-1">
+    <h3 class="category">
+        自定义
+        <a href="/system/storage?key=tools" class="float-right link">编辑</a>
+    </h3>
+    <div class="col-md-12">
+        {% for link in customized_items %}
+        <div class="item">
+            <a href="{{link.url}}">{{link.name}}</a>
+        </div>
+        {% end %}
+    </div>
+</div>
+
 <div class="row top-offset-1">
     <hr/>
     当前时间: <span id="currentTime"></span>

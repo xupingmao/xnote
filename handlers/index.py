@@ -31,6 +31,7 @@ _tools = [
     link("系统模块刷新", "/system/reload",         "admin"),
     link("Python文档", "/system/modules_info",    "admin"),
 
+    link("旧版首页", "/index", "user"),
     link("标签云", "/file/taglist", "user"),
     link("词典", "/file/dict", "user"),
     link("备忘", "/message?status=created", "user"),
@@ -104,12 +105,10 @@ class IndexHandler:
 
         tools = list(filter(tool_filter, _tools))[:4]
         return xtemplate.render("index.html", 
-            recent_created = recent_created, 
-            most_visited = most_visited,
             ungrouped_count = ungrouped_count,
-            file_type="group_list",
-            files = data,
-            tools = tools)
+            file_type       = "group_list",
+            files           = data,
+            tools           = tools)
 
 class GridHandler:
 
@@ -129,10 +128,10 @@ class GridHandler:
 
 class Unauthorized():
     html = """
-{% extends base.html %}
-{% block body %}
-    <h3>抱歉,您没有访问的权限</h3>
-{% end %}
+        {% extends base.html %}
+        {% block body %}
+            <h3>抱歉,您没有访问的权限</h3>
+        {% end %}
     """
     def GET(self):
         web.ctx.status = "401 Unauthorized"
@@ -144,11 +143,11 @@ class FaviconHandler:
         raise web.seeother("/static/favicon.ico")
 
 xurls = (
-    r"/", IndexHandler, 
+    r"/", "handlers.note.group.RecentEditHandler", 
     r"/index", IndexHandler,
     r"/home", IndexHandler,
     r"/more", GridHandler,
-    r"/system/index", GridHandler,
+    # r"/system/index", GridHandler,
     r"/unauthorized", Unauthorized,
     r"/favicon.ico", FaviconHandler
 )

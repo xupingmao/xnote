@@ -18,6 +18,7 @@ import xtemplate
 import xutils
 import xauth
 import xmanager
+import xtables
 config = xconfig
 
 def link(name, url):
@@ -39,42 +40,38 @@ sys_tools = [
 ] 
 
 doc_tools = [
+    link("笔记分组", "/index"),
     link("标签云", "/file/taglist"),
     link("词典", "/file/dict"),
     link("备忘", "/message?status=created"),
     link("最近更新", "/file/recent_edit"),
-    link("我的收藏", "/file/group/marked"),
     link("日历", "/tools/date"),
 ] 
 
-dev_tools = [
+other_tools = [
     link("代码模板", "/tools/code_template"),
     link("浏览器信息", "/tools/browser_info"),
     link("文本对比", "/tools/js_diff"),
     link("字符串转换", "/tools/string"),
-]
-
-img_tools = [
     link("图片合并", "/tools/img_merge"),
     link("图片拆分", "/tools/img_split"),
     link("图像灰度化", "/tools/img2gray"),
-]
-
-code_tools = [
     link("base64", "/tools/base64"),
     link("16进制转换", "/tools/hex"),
     link("md5", "/tools/md5"),
-    link("sha1", "/tools/sha1"),
+    link("sha1签名", "/tools/sha1"),
     link("URL编解码", "/tools/urlcoder"),
-    link("二维码", "/tools/barcode"),
+    link("条形码", "/tools/barcode"),
+    link("二维码", "/tools/qrcode"),
+    # 其他工具
+    link("分屏", "/tools/command_center"),
+    link("命令模式", "/fs_api/plugins?show_menu=true"),
 ]
 
 xconfig.MENU_LIST = [
     Storage(name = "系统管理", children = sys_tools, need_login = True, need_admin = True),
     Storage(name = "知识库", children = doc_tools, need_login = True),
-    Storage(name = "开发工具", children = dev_tools),
-    Storage(name = "图片工具", children = img_tools),
-    Storage(name = "编解码工具", children = code_tools),
+    Storage(name = "常用工具", children = other_tools),
 ]
                 
 class SysHandler:
@@ -87,10 +84,20 @@ class SysHandler:
                 fpath = os.path.join(dirname, fname)
                 if os.path.isfile(fpath) and fpath.endswith(".bat"):
                     shell_list.append(fpath)
+
+        # 自定义链接
+        customized_items = []
+        db  = xtables.get_storage_table()
+        config = db.select_one(where=dict(key="tools", user=xauth.get_current_name()))
+        if config is not None:
+            config_list = xutils.parse_config_text(config.value)
+            customized_items = map(lambda x: Storage(name=x.get("key"), link=x.get("value")), config_list)
+
         return xtemplate.render("system/system.html", 
-            Storage = Storage,
-            os = os,
-            user = xauth.get_current_user()
+            Storage          = Storage,
+            os               = os,
+            user             = xauth.get_current_user(),
+            customized_items = customized_items
         )
 
 class ConfigHandler:
@@ -103,12 +110,6 @@ class ConfigHandler:
         if key == "BASE_TEMPLATE":
             xmanager.reload()
         return dict(code="success")
-
-
-handler = SysHandler
-searchkey = "sys|系统信息"
-name = "系统信息"
-description = "展示系统的内存使用、监听地址、数据库大小等内容"
 
 xurls = (
     r"/system/sys",   SysHandler,

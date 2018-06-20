@@ -140,14 +140,13 @@ class RecentCreatedHandler:
 class RecentEditHandler:
     """show recent modified files"""
 
-    @xauth.login_required()
     def GET(self):
         days = xutils.get_argument("days", 30, type=int)
         page = xutils.get_argument("page", 1, type=int)
         page = max(1, page)
 
         db = xtables.get_file_table()
-        where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"
+        where = "is_deleted = 0 AND (creator = $creator OR is_public = 1) AND type != 'group'"
         files = db.select(where = where, 
             vars   = dict(creator = xauth.get_current_name()),
             order  = "mtime DESC",
@@ -155,14 +154,16 @@ class RecentEditHandler:
             limit  = PAGE_SIZE)
         count = db.count(where, vars = dict(creator = xauth.get_current_name()))
         return xtemplate.render("note/view.html", 
-            pathlist   = [Storage(name="最近更新", type="group", url="/file/recent_edit")],
-            file_type  = "group",
-            files      = list(files), 
-            file       = Storage(name="最近更新", type="group"),
-            page       = page, 
-            page_max   = math.ceil(count/PAGE_SIZE), 
-            show_mdate = True,
-            page_url   ="/file/recent_edit?page=")
+            pathlist    = [Storage(name="最近更新", type="group", url="/file/recent_edit")],
+            file_type   = "group",
+            files       = list(files), 
+            file        = Storage(name="最近更新", type="group"),
+            page        = page, 
+            show_notice = True,
+            page_max    = math.ceil(count/PAGE_SIZE), 
+            groups      = xtables.call("note.list_group"),
+            show_mdate  = True,
+            page_url    ="/file/recent_edit?page=")
 
 class MarkedHandler:
     
@@ -193,7 +194,7 @@ class PublicGroupHandler:
         files = db.select(where=where, offset=(page-1)*PAGE_SIZE, limit=PAGE_SIZE, order="ctime DESC")
         count = db.count(where=where)
         return xtemplate.render(VIEW_TPL, 
-            pathlist   = [Storage(name="分享文章", url="/file/group/public")],
+            pathlist   = [Storage(name="分享笔记", url="/file/group/public")],
             file_type  = "group",
             files      = files,
             page       = page, 

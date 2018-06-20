@@ -1,7 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-
-from . import dao
+# @modified 2018/06/20 21:58:09
 import math
 import xutils
 import xtemplate
@@ -21,6 +20,7 @@ class UpdateTagHandler:
 
     @xauth.login_required()
     def POST(self):
+        from . import dao
         id       = xutils.get_argument("file_id", type=int)
         tags_str = xutils.get_argument("tags")
         tag_db   = xtables.get_file_tag_table()
@@ -55,6 +55,7 @@ class TagNameHandler:
 
     @xauth.login_required()
     def GET(self, tagname):
+        from . import dao
         tagname  = xutils.unquote(tagname)
         db       = xtables.get_file_table()
         page     = xutils.get_argument("page", 1, type=int)

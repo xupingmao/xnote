@@ -1,4 +1,4 @@
-{% extends base.html %}
+{% extends base %}
 
 {% block head %}
 <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
@@ -133,18 +133,23 @@ img {
 
 
 {% block body %}
-    {% init file_type = "md" %}
-    {% init pathlist = [] %}
-    {% init file = None %}
+    {% init file_type       = "md" %}
+    {% init pathlist        = [] %}
+    {% init file            = None %}
+    {% init show_notice     = False %}
     {% init show_search_div = True %}
-    {% init show_add_file = False %}
-    {% init show_add_group = False %}
-    {% init show_path_list = True %}
-    {% init error = "" %}
+    {% init show_add_file   = False %}
+    {% init show_add_group  = False %}
+    {% init show_path_list  = True %}
+    {% init error           = "" %}
 
     {% if file != None %}
         {% set globals()['file_type'] = file.type %}
         {% set globals()['file_id'] = file.id %}
+    {% end %}
+
+    {% if show_notice %}
+        {% include mod_notice.html %}
     {% end %}
 
     {% if show_path_list %}
