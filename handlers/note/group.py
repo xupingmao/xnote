@@ -61,6 +61,7 @@ class Ungrouped:
             file      = Storage(name="未分类", type="group"),
             page      = page,
             page_max  = math.ceil(amount / pagesize),
+            groups    = xtables.call("note.list_group"),
             page_url  ="/file/group/ungrouped?page=")
 
 class MoveHandler:
@@ -125,7 +126,7 @@ class RecentCreatedHandler:
     def GET(self):
         offset = 0
         db = xtables.get_file_table()
-        files = db.select(where="is_deleted=0 AND creator=$name", 
+        files = db.select(where="is_deleted=0 AND creator=$name AND type != 'group'", 
             vars=dict(name=xauth.get_current_name()),
             order="ctime DESC",
             offset=offset,
@@ -134,6 +135,7 @@ class RecentCreatedHandler:
             file_type  = "group", 
             files      = files, 
             pathlist   = [Storage(name="最近创建", type="group", url="/note/recent_created")],
+            groups     = xtables.call("note.list_group"),
             show_cdate = True,
             show_opts  = True)
 
@@ -199,6 +201,7 @@ class PublicGroupHandler:
             files      = files,
             page       = page, 
             show_cdate = True,
+            groups     = xtables.call("note.list_group"),
             page_max   = math.ceil(count/PAGE_SIZE), 
             page_url   ="/file/group/public?page=")
 

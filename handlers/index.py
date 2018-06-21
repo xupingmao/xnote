@@ -76,15 +76,6 @@ def tool_filter(item):
         return True
     return False
 
-def list_recent_created():
-    where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"
-    db = xtables.get_file_table()
-    return list(db.select(where = where, 
-            vars   = dict(creator = xauth.get_current_name()),
-            order  = "ctime DESC",
-            limit  = 5))
-
-
 def list_most_visited():
     where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"
     db = xtables.get_file_table()
@@ -96,8 +87,6 @@ def list_most_visited():
 class IndexHandler:
 
     def GET(self):
-        recent_created = list_recent_created()
-        most_visited   = list_most_visited()
         sql  = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
         data = list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
         ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 

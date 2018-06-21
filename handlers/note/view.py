@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/06/20 22:08:12
+# @modified 2018/06/21 22:25:00
 
 import profile
 import math
@@ -27,11 +27,6 @@ def visit_by_id(ctx):
     db = xtables.get_file_table()
     sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime=$atime where id = $id"
     db.query(sql, vars = dict(atime = xutils.format_datetime(), id=id))
-
-def list_recent(parent_id):
-    sql = "SELECT * FROM file WHERE is_deleted = 0 AND creator = $creator AND parent_id = $parent_id ORDER BY ctime DESC LIMIT 5"
-    return list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name(), 
-        parent_id = parent_id)))
 
 class ViewHandler:
 
@@ -90,11 +85,13 @@ class ViewHandler:
             show_search_div = True
             show_add_file   = True
             groups          = xtables.call("note.list_group")
-            recent_created  = list_recent(file.id)
+            recent_created  = xtables.call("note.list_recent_created", file.id)
         elif file.type == "md" or file.type == "text":
             content = file.content
             if op == "edit":
                 template_name = "note/markdown_edit.html"
+            else:
+                recent_created = xtables.call("note.list_recent_created", file.parent_id, 20)
         else:
             content = file.content
             content = content.replace(u'\xad', '\n')

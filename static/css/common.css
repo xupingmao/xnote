@@ -450,12 +450,6 @@ li.menu-item:hover {
     width: 100%;
 }
 
-/** color **/
-
-.red {
-    color:red;
-}
-
 .tag {
     font-size: small;
     background-color: green;
@@ -1018,3 +1012,12 @@ li.menu-item:hover {
         margin-left: 0px;
     }
 }
+
+
+
+/** color **/
+
+.red {
+    color:red;
+}
+
