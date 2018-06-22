@@ -6,7 +6,7 @@ import web
 import xconfig
 import xtables
 import xutils
-from xutils import ConfigParser
+from xutils import ConfigParser, textutil
 from xconfig import Storage
 
 config = xconfig
@@ -104,13 +104,24 @@ def get_md5_hex(pswd):
     pswd_md5.update(pswd.encode("utf-8"))
     return pswd_md5.hexdigest()
 
-def get_password_md5(passwd):
+def get_password_md5(password, salt):
     # 加上日期防止cookie泄露意义不大
     # 考虑使用session失效检测或者定时提醒更新密码
-    # passwd = passwd + xutils.format_date()
+    # password = password + xutils.format_date()
+    if password is None:
+        password = ""
     pswd_md5 = hashlib.md5()
-    pswd_md5.update(passwd.encode("utf-8"))
+    pswd_md5.update(password.encode("utf-8"))
+    pswd_md5.update(salt.encode("utf-8"))
     return pswd_md5.hexdigest()
+
+def write_cookie(name):
+    web.setcookie("xuser", name, expires= 24*3600*30)
+    user     = get_user(name)
+    password = user.password
+    salt     = user.salt
+    pswd_md5 = get_password_md5(password, salt)
+    web.setcookie("xpass", pswd_md5, expires=24*3600*30)
 
 def get_user_cookie(name):
     password = get_user_password(name)
@@ -121,18 +132,31 @@ def gen_new_token():
     return uuid.uuid4().hex
 
 def add_user(name, password):
+    if name == "" or name == None:
+        return
+    if password == "" or password == None:
+        return
     db = xtables.get_user_table()
     exist = db.select_one(where=dict(name=name))
     if exist is None:
         db.insert(name=name,password=password,
             token=gen_new_token(),
             ctime=xutils.format_time(),
+            salt=textutil.random_string(6),
             mtime=xutils.format_time())
     else:
         db.update(where=dict(name=name), 
             password=password, 
             token=gen_new_token(), 
+            salt=textutil.random_string(6),
             mtime=xutils.format_time())
+    refresh_users()
+
+def remove_user(name):
+    if name == "admin":
+        return
+    db = xtables.get_user_table()
+    db.delete(where=dict(name=name))
     refresh_users()
 
 def has_login(name=None):
@@ -164,7 +188,7 @@ def has_login(name=None):
     if user is None:
         return False
 
-    password_md5 = get_password_md5(user["password"])
+    password_md5 = get_password_md5(user["password"], user["salt"])
     return password_md5 == pswd_in_cookie
 
 def is_admin():

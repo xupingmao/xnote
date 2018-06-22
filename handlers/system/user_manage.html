@@ -1,0 +1,109 @@
+{% extends base %}
+
+{% block head %}
+
+<style>
+    .td-no {
+        width: 50px;
+    }
+
+    .label {
+        width: 150px;
+        text-align: right;
+    }
+</style>
+
+{% end %}
+
+{% block body %}
+
+{% set title = "用户管理" %}
+{% include "tools/base_title.html" %}
+
+<form method="POST" class="col-md-12" action="/system/user/list">
+
+{% if user_info != None %}
+<input type="hidden" name="name" value="{{user_info.name}}">
+<table class="table col-md-12">
+    <tr>
+        <td class="label">用户名</td>
+        <td>{{user_info.name}}</td>
+    </tr>
+    <tr>
+        <td class="label">密码</td>
+        <td><input name="password" value="{{user_info.password}}"></td>
+    </tr>
+    <tr>
+        <td class="label">salt</td>
+        <td>{{user_info.salt}}</td>
+    </tr>
+    <tr>
+        <td class="label">token</td>
+        <td>{{user_info.token}}</td>
+    </tr>
+    <tr>
+        <td class="label">上次更新</td>
+        <td>{{user_info.mtime}}</td>
+    </tr>
+    <tr>
+        <td class="label">上次登录</td>
+        <td>{{user_info.login_time}}</td>
+    </tr>
+</table>
+<input type="submit" value="更新密码">
+{% if user_info.name != "admin" %}
+    <input class="btn-danger" type="button" value="删除用户">
+{% end %}
+{% else %}
+<table class="table col-md-12">
+    <tr>
+        <td class="label">用户名</td>
+        <td><input name="name"></td>
+    </tr>
+    <tr>
+        <td class="label">密码</td>
+        <td><input name="password" value=""></td>
+    </tr>
+</table>
+<input type="submit" value="新增用户">
+{% end %}
+
+<script type="text/javascript">
+$(function () {
+    $(".btn-danger").click(function () {
+        var name = $("input[name=name]").val()
+        var ret = confirm("确定删除[" + name + "]?")
+        if (ret) {
+            $.post("/system/user/remove", 
+                {name: name},
+                function (result) {
+                    window.location.reload();
+                });
+        }
+    })    
+})
+</script>
+
+{% end %}
+
+{% block aside %}
+<div class="aside-item">
+    <div class="aside-title">
+        操作
+    </div>
+    <div class="aside-content">
+        <li><a class="link" href="/system/user/list">添加用户</a></li>
+    </div>
+</div>
+
+<div class="aside-item">
+    <div class="aside-title">
+        用户列表
+    </div>
+    <div class="aside-content">
+        {% for name in sorted(user_dict) %}
+            <li><a class="link" href="/system/user?name={{name}}">{{name}}</a></li>
+        {% end %}
+    </div>
+</div>
+{% end %}

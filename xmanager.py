@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/05/22 22:22:00
+# @modified 2018/06/23 00:46:07
 
 """
 Xnote 模块管理器
@@ -534,6 +534,7 @@ def instance():
     return _manager
     
 def reload():
+    xauth.refresh_users()
     _manager.reload()
     _event_manager.remove_handlers()
     if xconfig.INIT_SCRIPT is not None:

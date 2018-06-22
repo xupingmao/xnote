@@ -50,6 +50,7 @@ def handle_args():
     parser.add_argument("--devMode", default="no")
     parser.add_argument("--initScript", default=None)
     parser.add_argument("--master", default="no")
+    parser.add_argument("--test", default="no")
 
     web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
@@ -77,6 +78,8 @@ def handle_args():
         xconfig.USE_URLENCODE = True
     if args.devMode == "yes":
         xconfig.DEV_MODE = True
+    if args.test == "yes":
+        xconfig.IS_TEST = True
 
     xconfig.minthreads = int(args.minthreads)
     xconfig.INIT_SCRIPT = args.initScript
