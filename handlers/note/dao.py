@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/06/21 22:23:35
+# @modified 2018/06/22 22:48:43
 
 """资料的DAO操作集合
 
@@ -215,7 +215,7 @@ def list_group():
     sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
     return list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
 
-def list_recent_created(parent_id = None, limit = 5):
+def list_recent_created(parent_id = None, limit = 10):
     where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"
     if parent_id != None:
         where += " AND parent_id = %s" % parent_id

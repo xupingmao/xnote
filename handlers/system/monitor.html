@@ -42,19 +42,27 @@
         <tr>
             <td>母板类型</td>
             <td>
-                <input type="radio" name="base_template" default-value="{{xconfig.BASE_TEMPLATE}}" value="base.html">base.html
-                <input type="radio" name="base_template" default-value="{{xconfig.BASE_TEMPLATE}}" value="base2.html">base2.html
+                <input type="radio" name="BASE_TEMPLATE" default-value="{{xconfig.BASE_TEMPLATE}}" value="base.html">base.html
+                <input type="radio" name="BASE_TEMPLATE" default-value="{{xconfig.BASE_TEMPLATE}}" value="base2.html">base2.html
+            </td>
+        </tr>
+        <tr>
+            <td>是否隐藏文件</td>
+            <td>
+                <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="True">True
+                <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="False">False
             </td>
         </tr>
     </table>
 </div>
 
 <script type="text/javascript">
-    $("[name=base_template]").on("change", function (e) {
+    $("[type=radio]").on("change", function (e) {
         var val = $(e.target).val();
+        var key = $(e.target).attr("name");
         // alert(val);
         $.post("/system/xconfig", 
-            {key: "BASE_TEMPLATE", value: val}, 
+            {key: key, value: val}, 
             function (data) {
                 window.location.reload();
         })

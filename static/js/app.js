@@ -128,8 +128,8 @@
     }
 
     function init() {
-        var botBtn = $("<div>").text("工具").css("right", btnRight).addClass("bot-btn");
-        $(document.body).append(botBtn);
+        // var botBtn = $("<div>").text("工具").css("right", btnRight).addClass("bot-btn");
+        // $(document.body).append(botBtn);
         $(".bot-btn").click(function () {
             getRightBot().fadeToggle(200);
         });

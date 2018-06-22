@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/06/19 18:09:40
+# @modified 2018/06/22 22:56:03
 
 import sys
 import os
@@ -21,6 +21,7 @@ def init():
     xconfig.port = "1234"
     xconfig.DEV_MODE = True
     var_env = dict()
+    xutils.remove_file("./testdata/data.db", hard = True)
     xconfig.init("./testdata")
     xtables.init()
     app = web.application(list(), var_env, autoreload=False)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/06/05 23:55:45
+# @modified 2018/06/22 22:58:05
 
 """Description here"""
 import os
@@ -69,8 +69,6 @@ class AddHandler:
         file.mtime     = xutils.format_datetime()
         file.ctime     = xutils.format_datetime()
         file.creator   = xauth.get_current_name()
-        # 默认私有
-        file.groups    = file.creator
         file.parent_id = parent_id
         file.type      = type
         file.content   = content

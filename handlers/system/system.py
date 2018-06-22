@@ -25,13 +25,13 @@ def link(name, url):
     return Storage(name = name, url = url)
 
 sys_tools = [
+    link("系统状态",   "/system/monitor"),
     link("文件管理",   "/fs_data"),
     link("脚本管理",   "/system/script_admin"),
     link("定时任务",   "/system/crontab"),
     link("历史记录",   "/system/history"),
-    link("用户管理", "/system/user/list"),
-    link("App管理", "/system/app_admin"),
-    link("系统信息","/system/monitor"),
+    link("用户管理",   "/system/user/list"),
+    link("App管理",   "/fs_api/app"),
     link("后台模板缓存", "/system/template_cache"),
     link("重新加载模块", "/system/reload"),
     link("静音",         "/search/search?key=mute"),
@@ -109,6 +109,8 @@ class ConfigHandler:
         setattr(xconfig, key, value)
         if key == "BASE_TEMPLATE":
             xmanager.reload()
+        if key == "FS_HIDE_FILES":
+            setattr(xconfig, key, value == "True")
         return dict(code="success")
 
 xurls = (

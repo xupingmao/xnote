@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/06/13 23:33:59
+# @modified 2018/06/22 22:56:21
 
 """
 xnote工具类总入口
@@ -164,7 +164,7 @@ def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-def remove(path, hard = False):
+def remove_file(path, hard = False):
     """
     删除文件，默认软删除，也就是移动到trash目录中
     """
@@ -188,6 +188,8 @@ def remove(path, hard = False):
     elif os.path.isdir(path):
         # shutil.rmtree(path)
         os.rmdir(path)
+
+remove = remove_file
 
 def touch(path):
     """类似于Linux的touch命令"""

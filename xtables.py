@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/06/20 23:41:47
+# @modified 2018/06/22 00:26:36
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -161,10 +161,6 @@ def init_file_table():
         manager.add_column("creator", "text", "")
         # 修改者
         manager.add_column("modifier", "text", "")
-        # 权限组
-        manager.add_column("groups", "text", "")
-        # 展示优先级，用于收藏等标记
-        manager.add_column("priority", "int", 0)
 
         # 各种索引
         manager.add_index("parent_id")

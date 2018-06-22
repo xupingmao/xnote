@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/06/21 22:25:00
+# @modified 2018/06/22 22:48:31
 
 import profile
 import math
@@ -62,7 +62,6 @@ class ViewHandler:
 
         # 定义一些变量
         files          = []
-        groups         = []
         recent_created = []
         amount         = 0
         template_name  = "note/view.html"
@@ -70,6 +69,7 @@ class ViewHandler:
             link = "/note/view?id=%s" % id, 
             name = file.name))
 
+        groups = xtables.call("note.list_group")
         if file.type == "group":
             where_sql = "parent_id=$parent_id AND is_deleted=0 AND (creator=$creator OR is_public=1)"
             if xauth.is_admin():
@@ -78,20 +78,19 @@ class ViewHandler:
                 vars=dict(parent_id=file.id, creator=user_name))
             files = db.select(where = where_sql, 
                 vars=dict(parent_id=file.id, is_deleted=0, creator=user_name), 
-                order="priority DESC, name", 
+                order="name", 
                 limit=pagesize, 
                 offset=(page-1)*pagesize)
             content         = file.content
             show_search_div = True
             show_add_file   = True
-            groups          = xtables.call("note.list_group")
-            recent_created  = xtables.call("note.list_recent_created", file.id)
+            recent_created  = xtables.call("note.list_recent_created", file.id, 10)
         elif file.type == "md" or file.type == "text":
             content = file.content
             if op == "edit":
                 template_name = "note/markdown_edit.html"
             else:
-                recent_created = xtables.call("note.list_recent_created", file.parent_id, 20)
+                recent_created = xtables.call("note.list_recent_created", file.parent_id, 10)
         else:
             content = file.content
             content = content.replace(u'\xad', '\n')

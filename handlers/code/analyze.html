@@ -93,11 +93,7 @@
 
 <script type="text/javascript">
     function toggle(id) {
-        if ($(id).hasClass("hide")) {
-            $(id).removeClass("hide");
-        } else {
-            $(id).addClass("hide");
-        }
+        $(id).toggle();
     }
 
     function toggle1(id) {
