@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/06/23 00:55:58
+# @modified 2018/06/23 13:45:51
 
 '''
 xnote系统配置
@@ -78,7 +78,7 @@ MAX_FILE_SIZE    = 10 * 1024 ** 2
 # 是否隐藏系统文件
 FS_HIDE_FILES    = True
 # 文件管理扩展的选项      ,类型Storage
-FS_OPT_BTNS      = []
+FS_LINK          = "/fs_list"
 # 文本文件后缀
 FS_TEXT_EXT_LIST = [
     ".java",  # Java
@@ -114,7 +114,8 @@ FS_TEXT_EXT_LIST = [
     ".rc",
     ".properties",
     ".gradle",
-    ".md"
+    ".md",
+    ".yml"
 ]
 
 # 通知公告

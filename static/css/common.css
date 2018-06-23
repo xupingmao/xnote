@@ -814,6 +814,7 @@ li.menu-item:hover {
 
 .fs-file {
     color: black;
+    cursor: pointer;
 }
 
 .fs-folder {

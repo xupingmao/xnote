@@ -2,6 +2,9 @@
 
 {% block head %}
 <style type="text/css">
+    body {
+        background-color: white;
+    }
     .plugin {
         margin-top: 5px;
     }
@@ -17,10 +20,6 @@
 {% block body %}
 {% import os %}
 <input class="hide" id="path" value="{{path}}">
-<div class="col-md-12">
-    <!-- <a href="/fs/{{os.path.dirname(path)}}">返回</a>  -->
-    文件路径: {{path}}
-</div>
 <input class="col-md-12" id="searchName" placeholder="搜索插件">
 
 <div class="col-md-12">

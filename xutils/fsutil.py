@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/06/19 23:05:32
+# @modified 2018/06/23 10:48:45
 import codecs
 import os
 import platform
@@ -177,6 +177,11 @@ class FileItem(Storage):
         if self.type == "dir":
             return -1
         return 1
+
+def list_files(dirname):
+    filelist = [FileItem(os.path.join(dirname, child)) for child in os.listdir(dirname)]
+    filelist.sort()
+    return filelist
 
 def splitpath(path):
     path   = os.path.abspath(path)

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/05/26 22:36:38
+# @modified 2018/06/23 13:36:50
 
 """文件服务
     - 文件目录
@@ -33,7 +33,6 @@ def get_filesystem_kw():
     """return filesystem utils"""
     kw = {}
     kw["os"]            = os
-    kw["is_stared"]     = is_stared
     kw["search_type"]   = "fs"
     kw["get_file_size"] = get_file_size
     return kw
@@ -107,7 +106,7 @@ class FileSystemHandler:
         '.html': 'text/html; charset=utf-8',
         '.py'  : 'text/plain; charset=utf-8',
         '.sh'  : 'text/plain; charset=utf-8',
-        '.txt' : 'application/octet-stream',  # 便于文件下载
+        '.txt' : 'text/plain; charset=utf-8',  # 便于文件下载
         '.md'  : 'text/plain; charset=utf-8',
         '.ini' : 'text/plain; charset=utf-8',
     }
@@ -372,7 +371,7 @@ class RenameHandler:
         os.rename(old_path, new_path)
         return dict(code="success")
 
-class DataDirHandler:
+class ListDirHandler:
 
     @xauth.login_required("admin")
     def GET(self):
@@ -387,7 +386,7 @@ class AppHandler:
         raise web.seeother("/fs/%s" % app_path)
 
 xurls = (
-    r"/fs_data/?", DataDirHandler,
+    r"/fs_list/?", ListDirHandler,
     r"/fs_api/add_dir", AddDirHandler,
     r"/fs_api/add_file", AddFileHandler,
     r"/fs_api/remove", RemoveHandler,

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/06/09 22:21:11
+# @modified 2018/06/23 13:34:41
 import web
 import os
 import xconfig
@@ -89,6 +89,7 @@ class DownloadPluginsHandler:
 
 xurls = (
     r"/fs_api/plugins", ListHandler,
+    r"/fs_plugins", ListHandler,
     r"/fs_api/run_plugin", RunPluginHandler,
     r"/fs_api/plugins/download", DownloadPluginsHandler
 )

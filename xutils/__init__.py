@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/06/22 22:56:21
+# @modified 2018/06/23 13:33:27
 
 """
 xnote工具类总入口
@@ -266,7 +266,11 @@ def get_upload_file_path(filename, data_dir="/files", replace_exists = False, pr
 def is_img_file(filename):
     """根据文件后缀判断是否是图片"""
     name, ext = os.path.splitext(filename)
-    return ext.lower() in (".gif", ".png", ".jpg", ".jpeg", ".bmp", ".webp", ".ico")
+    return ext.lower() in (".gif", ".png", ".jpg", ".jpeg", ".bmp", ".webp", ".ico", ".jfif")
+
+def is_text_file(filename):
+    name, ext = os.path.splitext(filename)
+    return ext.lower() in xconfig.FS_TEXT_EXT_LIST
 
 ### DB Utilities
 
