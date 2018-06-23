@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/06/22 00:26:36
+# @modified 2018/06/23 19:47:16
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -410,13 +410,6 @@ def get_table(name):
     @since 2019/04/11
     """
     return DBWrapper(xconfig.DB_FILE, name)
-
-_funcs = dict()
-def register(name, func):
-    _funcs[name] = func
-
-def call(name, *args, **kw):
-    return _funcs[name](*args, **kw)
 
 def init():
     if sqlite3 is None:

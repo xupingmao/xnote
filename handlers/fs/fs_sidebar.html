@@ -118,10 +118,11 @@
 {% end %}
 
 <div class="fs-path">
-    <a href="/fs//">Home</a> /
+    <a href="/fs_sidebar?path=/">Home</a> /
     {% for item in xutils.splitpath(xutils.get_real_path(path)) %}
         <a href="/fs_sidebar?path={{ item.path }}">{{ item.name }}</a> / 
     {% end %}
+    <a class="right" href="/fs/{{path}}">列表</a>
 </div>
 
 <hr/>

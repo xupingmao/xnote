@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/06/22 22:48:31
+# @modified 2018/06/23 19:49:36
 
 import profile
 import math
@@ -69,7 +69,7 @@ class ViewHandler:
             link = "/note/view?id=%s" % id, 
             name = file.name))
 
-        groups = xtables.call("note.list_group")
+        groups = xutils.call("note.list_group")
         if file.type == "group":
             where_sql = "parent_id=$parent_id AND is_deleted=0 AND (creator=$creator OR is_public=1)"
             if xauth.is_admin():
@@ -84,13 +84,13 @@ class ViewHandler:
             content         = file.content
             show_search_div = True
             show_add_file   = True
-            recent_created  = xtables.call("note.list_recent_created", file.id, 10)
+            recent_created  = xutils.call("note.list_recent_created", file.id, 10)
         elif file.type == "md" or file.type == "text":
             content = file.content
             if op == "edit":
                 template_name = "note/markdown_edit.html"
             else:
-                recent_created = xtables.call("note.list_recent_created", file.parent_id, 10)
+                recent_created = xutils.call("note.list_recent_created", file.parent_id, 10)
         else:
             content = file.content
             content = content.replace(u'\xad', '\n')

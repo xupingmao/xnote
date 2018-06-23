@@ -61,7 +61,7 @@ class Ungrouped:
             file      = Storage(name="未分类", type="group"),
             page      = page,
             page_max  = math.ceil(amount / pagesize),
-            groups    = xtables.call("note.list_group"),
+            groups    = xutils.call("note.list_group"),
             page_url  ="/file/group/ungrouped?page=")
 
 class MoveHandler:
@@ -135,7 +135,7 @@ class RecentCreatedHandler:
             file_type  = "group", 
             files      = files, 
             pathlist   = [Storage(name="最近创建", type="group", url="/note/recent_created")],
-            groups     = xtables.call("note.list_group"),
+            groups     = xutils.call("note.list_group"),
             show_cdate = True,
             show_opts  = True)
 
@@ -163,7 +163,7 @@ class RecentEditHandler:
             page        = page, 
             show_notice = True,
             page_max    = math.ceil(count/PAGE_SIZE), 
-            groups      = xtables.call("note.list_group"),
+            groups      = xutils.call("note.list_group"),
             show_mdate  = True,
             page_url    ="/file/recent_edit?page=")
 
@@ -201,7 +201,7 @@ class PublicGroupHandler:
             files      = files,
             page       = page, 
             show_cdate = True,
-            groups     = xtables.call("note.list_group"),
+            groups     = xutils.call("note.list_group"),
             page_max   = math.ceil(count/PAGE_SIZE), 
             page_url   ="/file/group/public?page=")
 

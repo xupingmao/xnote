@@ -333,7 +333,7 @@ li.menu-item:hover {
 .top-offset-1 { margin-top: 1em; }
 .top-offset-2 { margin-top: 2em; }
 
-.bottom-offset-1 { margin-bottom: 1em; }
+.bottom-offset-1 { margin-bottom: 5px; }
 
 
 /** base START **/
@@ -796,7 +796,7 @@ li.menu-item:hover {
 .item-option {
     color: #aaa;
     cursor: pointer;
-    font-size: small;
+    font-size: 12px;
 }
 .item-option:hover {
     color: #000;

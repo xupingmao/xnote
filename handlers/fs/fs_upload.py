@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2018/02/21 21:24:06
+# @modified 2018/06/23 14:09:09
 import os
 import web
 import xauth
@@ -67,7 +67,7 @@ class RangeUploadHandler:
             origin_name = file.filename
             xutils.log("recv {}", file.filename)
             filename = os.path.basename(file.filename)
-            filename = xutils.quote_unicode(filename)
+            filename = xutils.get_real_path(filename)
             if dirname == "auto":
                 filepath, webpath = xutils.get_upload_file_path(filename, replace_exists=True, prefix=prefix)
                 dirname  = os.path.dirname(filepath)

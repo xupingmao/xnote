@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/06/22 22:48:43
+# @modified 2018/06/23 19:47:49
 
 """资料的DAO操作集合
 
@@ -225,6 +225,6 @@ def list_recent_created(parent_id = None, limit = 10):
             order  = "ctime DESC",
             limit  = limit))
 
-xtables.register("note.list_group", list_group)
-xtables.register("note.list_recent_created", list_recent_created)
+xutils.register_func("note.list_group", list_group)
+xutils.register_func("note.list_recent_created", list_recent_created)
 

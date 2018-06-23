@@ -147,6 +147,7 @@
 
 <div id="controlArea" class="col-md-12">
     <div class="left">
+        <input type="button" class="link-btn" href="/fs_sidebar?path={{path}}" value="分栏模式"/>
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
         <input type="button" class="btn" value="新建文件" id="addFile"/>
         <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
@@ -377,145 +378,8 @@
     $("#uploadFileBtn").click(function () {
         $("#uploadFileArea").toggle(200);
     })
-
-// 文件上传逻辑
-var BASE_URL = "/static/lib/webuploader"
-$("#target-path").text(location.hash.substr(1)).attr("href", "/fs/" + location.hash.substr(1));
-// 初始化Web Uploader
-var uploader = WebUploader.create({
-
-    // 选完文件后，是否自动上传。
-    auto: true,
-
-    // swf文件路径
-    swf: BASE_URL + '/Uploader.swf',
-
-    // 文件接收服务端。
-    server: '/fs_upload/range',
-
-    // 选择文件的按钮。可选。
-    // 内部根据当前运行是创建，可能是input元素，也可能是flash.
-    pick: '#filePicker',
-
-    // 需要分片
-    chunked: true,
-    // 默认5M
-    // chunkSize: 1024 * 1024 * 5,
-    chunkSize: 1024 * 1024 * 5,
-    // 重试次数
-    chunkRetry: 10,
-    // 文件上传域的name
-    fileVal: "file",
-    // 不开启并发
-    threads: 1,
-    // 关闭压缩选项
-    compress: false
-});
-
-// 当有文件添加进来的时候
-uploader.on( 'fileQueued', function( file ) {
-    var $li = $(
-            '<div id="' + file.id + '" class="file-item thumbnail">' +
-                '<img>' +
-                '<div class="info">' + file.name +
-                '<span class="progress"></span>' +
-                '<span class="finished-tag" id="' + file.id + '-result"></span>' + 
-                 '</div>' +
-            '</div>'
-            ),
-        $img = $li.find('img');
-
-    $list = $("#fileList");
-    // $list为容器jQuery实例
-    $list.append( $li );
-
-    // 创建缩略图
-    // 如果为非图片文件，可以不用调用此方法。
-    // thumbnailWidth x thumbnailHeight 为 100 x 100
-    var thumbnailWidth = 100;
-    var thumbnailHeight = 100;
-    uploader.makeThumb( file, function( error, src ) {
-        if ( error ) {
-            $img.replaceWith('<span>不能预览</span>');
-            return;
-        }
-
-        $img.attr( 'src', src );
-    }, thumbnailWidth, thumbnailHeight );
-});
-
-// 文件上传过程中创建进度条实时显示。
-uploader.on( 'uploadProgress', function( file, percentage ) {
-    var $li = $( '#'+file.id ),
-        $percent = $li.find('.progress');
-    // $percent.css( 'width', percentage * 100 + '%' );
-    $percent.show().text( (percentage * 100).toFixed(2) + '%');
-});
-
-uploader.on( 'uploadBeforeSend', function (object, data, headers) {
-    data.dirname = "{{path}}"
-})
-
-// 文件上传成功，给item添加成功class, 用样式标记上传成功。
-uploader.on( 'uploadSuccess', function( file ) {
-    $( '#'+file.id ).addClass('upload-state-done');
-    $( '#'+file.id + "-result" ).text("上传完成");
-});
-
-// 文件上传失败，显示上传出错。
-uploader.on( 'uploadError', function( file ) {
-    var $li = $( '#'+file.id ),
-        $error = $li.find('div.error');
-
-    // 避免重复创建
-    if ( !$error.length ) {
-        $error = $('<div class="error"></div>').appendTo( $li );
-    }
-
-    $error.text('上传失败');
-});
-
-// 完成上传完了，成功或者失败，先删除进度条。
-uploader.on( 'uploadComplete', function( file ) {
-    $( '#'+file.id ).find('.progress').remove();
-});
-
-uploader.on( 'error', function (file) {
-    alert("未知错误" + file);
-})
-
-// 必须先禁用所有的拖拽默认行为
-$(document).on("dragenter", function (event) {
-    event.preventDefault();
-})
-$(document).on("dragleave", function (event) {
-    event.preventDefault();
-})
-$(document).on("drop", function (event) {
-    event.preventDefault();
-})
-$(document).on("dragover", function (event) {
-    event.preventDefault();
-})
-
-$("#dropArea").on("drop", function (event) {
-    console.log(event);
-    event.preventDefault(); //取消默认浏览器拖拽效果 
-    var originalEvent = event.originalEvent;
-    var fileList = originalEvent.dataTransfer.files; //获取文件对象 
-    console.log(fileList);
-    if (fileList && fileList.length > 0) {
-        uploader.addFile(fileList);
-    }
-});
-
-$("#dropArea").on("click", function (event) {
-    console.log(event);
-    event.preventDefault(); //取消默认浏览器拖拽效果 
-    $("[name=file]").click();
-})
-
-
 </script>
+
+{% include fs/fs_upload.html %}
 
 {% end %}
