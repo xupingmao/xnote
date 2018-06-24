@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/06/13 22:50:34
+# @modified 2018/06/24 19:12:17
 
 __doc__ = """Methods for text operation"""
 
@@ -136,6 +136,20 @@ def split_words(text):
     while words.count('') > 0:
         words.remove('')
     return words
+
+def split_first(text, sep = ' '):
+    """
+        >>> split_first("find a.name b.name")
+        ('find', 'a.name b.name')
+        >>> split_first("find")
+        ('find', '')
+        >>> split_first('find-a.name b.name', '-')
+        ('find', 'a.name b.name')
+    """
+    index = text.find(sep)
+    if index >= 0:
+        return text[:index], text[index+1:]
+    return text, ""
 
 def find(text, key, show_line=False, ignore_case=True):
     """ find key in text, return a list
@@ -287,6 +301,22 @@ def parse_config_text(text):
             strs[1]= line[len(strs[0])+1:]
             config.append(dict(key=strs[0], value=strs[1]))
     return config
+
+def parse_simple_command(text):
+    """
+        >>> parse_simple_command("find a.name b.name")
+        ('find', 'a.name b.name')
+        >>> parse_simple_command("find")
+        ('find', '')
+        >>> parse_simple_command('find    a.name b.name')
+        ('find', 'a.name b.name')
+        >>> parse_simple_command('find-name \t lalala')
+        ('find-name', 'lalala')
+    """
+    pattern = re.compile(r"^([^\s]+)\s+(.*)$")
+    match = pattern.match(text)
+    if match: return match.group(1, 2)
+    return text, ""
 
 def cut_text(text, length):
     """

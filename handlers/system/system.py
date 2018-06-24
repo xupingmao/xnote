@@ -65,7 +65,7 @@ other_tools = [
     link("二维码", "/tools/qrcode"),
     # 其他工具
     link("分屏", "/tools/command_center"),
-    link("命令模式", "/fs_api/plugins?show_menu=true"),
+    link("命令模式", "/fs_shell"),
 ]
 
 xconfig.MENU_LIST = [

@@ -1,4 +1,4 @@
-{% extends base.html %}
+{% extends base %}
 
 {% block head %}
 
@@ -147,7 +147,6 @@
 
 <div id="controlArea" class="col-md-12">
     <div class="left">
-        <input type="button" class="link-btn" href="/fs_sidebar?path={{path}}" value="分栏模式"/>
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
         <input type="button" class="btn" value="新建文件" id="addFile"/>
         <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
@@ -382,4 +381,8 @@
 
 {% include fs/fs_upload.html %}
 
+{% end %}
+
+{% block aside %}
+    {% include fs/mod_aside.html %}
 {% end %}

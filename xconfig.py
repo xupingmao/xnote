@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/06/23 13:45:51
+# @modified 2018/06/24 00:55:36
 
 '''
 xnote系统配置
@@ -189,6 +189,7 @@ def init(path = DATA_DIR):
     global TMP_DIR
     global SCRIPTS_DIR
     global COMMANDS_DIR
+    global PAGES_DIR
     global CODE_ZIP
     global DATA_ZIP
     global TRASH_DIR
@@ -208,6 +209,7 @@ def init(path = DATA_DIR):
     # 脚本的地址
     SCRIPTS_DIR  = os.path.join(DATA_DIR,    "scripts")
     COMMANDS_DIR = os.path.join(SCRIPTS_DIR, "commands")
+    PAGES_DIR    = os.path.join(SCRIPTS_DIR, "pages")
     CODE_ZIP     = os.path.join(DATA_DIR, "code.zip")
     DATA_ZIP     = os.path.join(DATA_DIR, "data.zip")
     TRASH_DIR    = os.path.join(DATA_DIR, "trash")
@@ -219,6 +221,7 @@ def init(path = DATA_DIR):
     makedirs(TMP_DIR)
     makedirs(SCRIPTS_DIR)
     makedirs(COMMANDS_DIR)
+    makedirs(PAGES_DIR)
     makedirs(TRASH_DIR)
 
 

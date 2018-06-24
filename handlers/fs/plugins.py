@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/06/23 13:34:41
+# @modified 2018/06/24 19:51:13
 import web
 import os
 import xconfig
@@ -9,8 +9,7 @@ import xutils
 import xtemplate
 import sys
 import xauth
-from xutils import ziputil
-
+from xutils import ziputil, textutil
 
 def get_display_name(name):
     if name.startswith("fs-"):
@@ -22,18 +21,37 @@ def get_display_name(name):
 def filter_plugin(x):
     return x.endswith(".py")
 
-def list_plugins():
+def list_commands():
     scripts = sorted(filter(filter_plugin, os.listdir(xconfig.COMMANDS_DIR)))
     return scripts
 
+def suggest_commands(name):
+    name, ext = os.path.splitext(name)
+    commands = list_commands()
+    if name == "" or name == ".py":
+        print("所有命令如下")
+    else:
+        print("命令`%s`无效，你可以尝试" % name)
+    suggested_list = []
+    for command in commands:
+        if command.find(name) >= 0:
+            suggested_list.append(command)
+    if len(suggested_list) > 0:
+        for command in suggested_list:
+            print(command)
+    else:
+        for command in commands:
+            print(command)
+
 class ListHandler:
+
     @xauth.login_required("admin")
     def GET(self):
         show_menu = (xutils.get_argument("show_menu") == "true")
         path = xutils.get_argument("path")
         if path == "" or path == None:
             path = xconfig.DATA_DIR
-        scripts = list_plugins()
+        scripts = list_commands()
         return xtemplate.render("fs/plugins.html", 
             path = path, 
             scripts = scripts, 
@@ -44,21 +62,30 @@ class RunPluginHandler:
 
     @xauth.login_required("admin")
     def POST(self):
+        func_ret = None
         sys.stdout.record()
         try:
             name = xutils.get_argument("name")
             path = xutils.get_argument("path")
             confirmed = xutils.get_argument("confirmed") == "true"
-            input = xutils.get_argument("input", "")
+            name, input = textutil.parse_simple_command(name)
+            if not name.endswith(".py"):
+                name += ".py"
+            if input == "":
+                input = xutils.get_argument("input", "")
             vars = dict()
             script_name = os.path.join("commands", name)
-            xutils.load_script(script_name, vars = vars)
-            main_func = vars.get("main", None)
-            if main_func is not None:
-                real_path = xutils.get_real_path(path)
-                main_func(path = real_path, confirmed = confirmed, input = input)
+            script_path = os.path.join(xconfig.COMMANDS_DIR, name)
+            if not os.path.exists(script_path):
+                suggest_commands(name)
             else:
-                print("main(**kw)方法未定义")
+                xutils.load_script(script_name, vars = vars)
+                main_func = vars.get("main", None)
+                if main_func is not None:
+                    real_path = xutils.get_real_path(path)
+                    func_ret = main_func(path = real_path, confirmed = confirmed, input = input)
+                else:
+                    print("main(**kw)方法未定义")
         except Exception as e:
             xutils.print_exc()
         
@@ -66,7 +93,10 @@ class RunPluginHandler:
         # footer = "\n%s\n执行完毕，请确认下一步操作" % line
         footer = ''
         result = sys.stdout.pop_record()
-        html = header + xutils.mark_text(result)
+        if xutils.get_doctype(result) == "html":
+            html = header + result[6:]
+        else:
+            html = header + xutils.mark_text(result)
         html += '''<input id="inputText" class="col-md-12" placeholder="请输入参数" value="%s">''' % input
         html += '''<div><button class="btn-danger" onclick="runPlugin('%s', true)">确认执行</button></div>''' % name
         return dict(code="success", data = html)

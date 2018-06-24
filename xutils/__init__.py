@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/06/23 19:47:24
+# @modified 2018/06/24 19:17:20
 
 """
 xnote工具类总入口
@@ -387,6 +387,14 @@ def tojson(obj):
 #################################################################
 ##   Html Utilities, Python 2 do not have this file
 #################################################################
+
+def set_doctype(type):
+    print("#!%s\n" % type)
+
+def get_doctype(text):
+    if text.startswith("#!html"):
+        return "html"
+    return "text"
 
 def mark_text(content):
     """简单的处理HTML"""

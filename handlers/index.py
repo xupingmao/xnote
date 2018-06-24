@@ -4,6 +4,8 @@ import xtables
 import xtemplate
 import xauth
 import xutils
+import os
+import xconfig
 from xutils import Storage
 
 index_html = """
@@ -131,6 +133,25 @@ class FaviconHandler:
     def GET(self):
         raise web.seeother("/static/favicon.ico")
 
+class PageHandler:
+
+    def GET(self, name = ""):
+        if not name.endswith(".py"):
+            name += ".py"
+        script_name = "pages/" + name
+        if not os.path.exists(os.path.join(xconfig.PAGES_DIR, name)):
+            return "file `%s` not found" % script_name
+        vars = dict()
+        xutils.load_script(script_name, vars)
+        main_func = vars.get("main")
+        if main_func != None:
+            return main_func()
+        else:
+            return "function `main` not found!"
+
+    def POST(self, name = ""):
+        return self.GET(name)
+
 xurls = (
     r"/", "handlers.note.group.RecentEditHandler", 
     r"/index", IndexHandler,
@@ -138,6 +159,7 @@ xurls = (
     r"/more", GridHandler,
     # r"/system/index", GridHandler,
     r"/unauthorized", Unauthorized,
-    r"/favicon.ico", FaviconHandler
+    r"/favicon.ico", FaviconHandler,
+    r"/pages/(.+)", PageHandler
 )
 

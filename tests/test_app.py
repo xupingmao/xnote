@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/06/23 13:29:38
+# @modified 2018/06/24 19:57:50
 
 import sys
 import os
@@ -92,6 +92,7 @@ class TestMain(unittest.TestCase):
     def check_OK(self, *args, **kw):
         response = app.request(*args, **kw)
         status = response.status
+        print(status)
         self.assertEqual(True, status == "200 OK" or status == "303 See Other")
 
     def check_200(self, *args, **kw):
@@ -209,6 +210,9 @@ class TestMain(unittest.TestCase):
     def test_fs_sidebar(self):
         self.check_OK("/fs_sidebar")
 
+    def test_fs_shell(self):
+        self.check_OK("/fs_shell")
+
     def test_code_analyze(self):
         # TODO 解决JSON的循环问题
         self.check_200("/code/analyze?path=./handlers/&key=test")
@@ -224,6 +228,10 @@ class TestMain(unittest.TestCase):
         self.check_200("/system/stats")
         self.check_200("/system/stats/location", method="POST")
         self.check_200("/system/monitor")
+
+    def test_api(self):
+        self.check_200("/api/check_network")
+        self.check_200("/api/getip")
 
     def test_sys_storage(self):
         data = json_request("/system/storage?key=unit-test&_format=json", method="POST", data=dict(key="unit-test", value="hello"))

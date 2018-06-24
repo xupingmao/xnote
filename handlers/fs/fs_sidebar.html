@@ -1,4 +1,4 @@
-{% extends base.html %}
+{% extends base %}
 
 {% block head %}
 
@@ -117,13 +117,8 @@
 <div class="error col-md-12">{{error}}</div>
 {% end %}
 
-<div class="fs-path">
-    <a href="/fs_sidebar?path=/">Home</a> /
-    {% for item in xutils.splitpath(xutils.get_real_path(path)) %}
-        <a href="/fs_sidebar?path={{ item.path }}">{{ item.name }}</a> / 
-    {% end %}
-    <a class="right" href="/fs/{{path}}">列表</a>
-</div>
+{% set fs_path_url = "/fs_sidebar?path=" %}
+{% include mod_fs_path.html %}
 
 <hr/>
 <div class="col-md-12 fs-main">
@@ -176,4 +171,8 @@
     })
 </script>
 
+{% end %}
+
+{% block aside %}
+    {% include fs/mod_aside.html %}
 {% end %}

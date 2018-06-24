@@ -1,4 +1,4 @@
-{% extends base.html %}
+{% extends base %}
 
 {% block head %}
 <style type="text/css">
@@ -18,6 +18,9 @@
 
 {% block body %}
 {% import os %}
+
+{% set fs_path_url = "/fs_shell?path=" %}
+{% include mod_fs_path.html %}
 <input class="hide" id="path" value="{{path}}">
 <input class="col-md-12" id="searchName" placeholder="执行命令">
 <div id="resultDiv" class="col-md-12">
@@ -87,3 +90,8 @@
     })
 </script>
 {% end %}
+
+{% block aside %}
+    {% include fs/mod_aside.html %}
+{% end %}
+

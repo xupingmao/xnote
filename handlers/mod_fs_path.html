@@ -1,8 +1,9 @@
+{% init fs_path_url  = "/fs/" %}
 {% init fs_path_option = None %}
 <div class="fs-path">
-    <a href="/fs//">Home</a> /
+    <a href="{{fs_path_url}}/">Home</a> /
     {% for item in xutils.splitpath(xutils.get_real_path(path)) %}
-        <a href="/fs/{{ item.path }}">{{ item.name }}</a> / 
+        <a href="{{fs_path_url}}{{ item.path }}">{{ item.name }}</a> / 
     {% end %}
     {% if fs_path_option %}
         {% raw fs_path_option %}
