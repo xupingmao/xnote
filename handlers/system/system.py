@@ -26,7 +26,7 @@ def link(name, url):
 
 sys_tools = [
     link("系统状态",   "/system/monitor"),
-    link("文件管理",   "/fs_data"),
+    link("文件管理",   "/fs_list"),
     link("脚本管理",   "/system/script_admin"),
     link("定时任务",   "/system/crontab"),
     link("历史记录",   "/system/history"),
@@ -40,6 +40,8 @@ sys_tools = [
 ] 
 
 doc_tools = [
+    link("我的账号",   "/system/user"),
+    link("登出",    "/logout"),
     link("笔记分组", "/index"),
     link("标签云", "/file/taglist"),
     link("词典", "/file/dict"),

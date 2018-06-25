@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/06/24 19:57:50
+# @modified 2018/06/26 01:02:00
 
 import sys
 import os
@@ -232,6 +232,7 @@ class TestMain(unittest.TestCase):
     def test_api(self):
         self.check_200("/api/check_network")
         self.check_200("/api/getip")
+        self.check_200("/api/ipv6")
 
     def test_sys_storage(self):
         data = json_request("/system/storage?key=unit-test&_format=json", method="POST", data=dict(key="unit-test", value="hello"))

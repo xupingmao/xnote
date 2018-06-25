@@ -331,6 +331,42 @@ def cut_text(text, length):
         return text
     return text[:length-2] + ".."
 
+def to_camel_case(name, upper = False):
+    """
+        >>> to_camel_case('name')
+        'name'
+        >>> to_camel_case('get_name')
+        'getName'
+        >>> to_camel_case('get_my_name', True)
+        'GetMyName'
+    """
+    target = ''
+    for c in name:
+        if upper:
+            target += c.upper()
+            upper = False
+        elif c == '_':
+            upper = True
+        else:
+            target += c
+    return target
+
+def to_underscore(name):
+    """
+        >>> to_underscore('getName')
+        'get_name'
+        >>> to_underscore('GetName')
+        'get_name'
+    """
+    target = ''
+    for index, c in enumerate(name):
+        if c.isupper() and index != 0:
+            target += '_' + c.lower()
+        else:
+            target += c.lower()
+    return target
+
+
 if __name__ == '__main__':
     import doctest
-    doctest.testmod()
+    doctest.testmod(verbose=True)

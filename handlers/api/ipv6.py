@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2016/03/24
-
+# @modified 2018/06/26 01:04:13
 import re
 import subprocess
 import xutils
@@ -39,6 +39,7 @@ def get_local_ipv6_address():
         return None
 
     output = (getIPV6_process.stdout.read())
+    getIPV6_process.stdout.close()
 
     ipv6_pattern='(([a-f0-9]{1,4}:){7}[a-f0-9]{1,4})'
     m = re.search(ipv6_pattern, str(output))

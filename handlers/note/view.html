@@ -184,8 +184,6 @@ img {
 
     {% if file_type == "md" or file_type == "text" %}
         {% include "note/markdown.html" %}
-    {% elif file_type == "table" %}
-        {% include "note/table.html" %}
     {% elif file_type == "group" %}
         {% include "note/group.html" %}
     {% elif file_type == "group_list" %}
