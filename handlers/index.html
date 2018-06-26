@@ -9,7 +9,7 @@
 {% end %}
 
 {% block body %}
-{% set cut_text = xutils.cut_text %}
+{% set get_short_text = xutils.get_short_text %}
 {% set msg_len = 15 %}
 {% set notice_list1 = xconfig.get_notice_list('today', _user_name) %}
 {% set notice_list2 = xconfig.get_notice_list('tomorrow', _user_name) %}
@@ -20,12 +20,12 @@
     <div class="grid-row">
     {% for item in notice_list1 %}
         <div class="grid-item">
-          <a class="notice-link" href="{{item.link}}">{{cut_text(item.message, msg_len)}}</a>
+          <a class="notice-link" href="{{item.link}}">{{get_short_text(item.message, msg_len)}}</a>
         </div>
     {% end %}
     {% for item in notice_list2 %}
         <div class="grid-item">
-          <a class="notice-link" href="{{item.link}}">明天 - {{cut_text(item.message, msg_len)}}</a>
+          <a class="notice-link" href="{{item.link}}">明天 - {{get_short_text(item.message, msg_len)}}</a>
         </div>
     {% end %}
     </div>

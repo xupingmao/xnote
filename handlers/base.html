@@ -1,41 +1,4 @@
-<!DOCTYPE html>
-<html><head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0,user-scalable=0"/>
-
-<title>Xnote</title>
-<link rel="shortcut icon" href="/static/favicon.ico"/>
-<link rel="bookmark" href="/static/favicon.ico"/>
-<link rel="stylesheet" href="/static/css/common.css"/>
-<script src="/static/lib/jquery/jquery-1.12.4.min.js"></script>
-<script type="text/javascript">
-  window.xuser = "{{_user_name}}";
-</script>
-<script type="text/javascript" src="/static/js/utils.js"></script>
-<script type="text/javascript" src="/system/stats"></script>
-<script type="text/javascript" src="/static/js/xnote-ui.js"></script>
-<script type="text/javascript" src="/static/lib/layer/layer.js"></script>
-{% if _has_login %}
-<script type="text/javascript" src="/static/js/app.js"></script>
-{% end %}
-
-{% block head %} {% end %}
-
-{% if xconfig.DEBUG_HTML_BOX %}
-<style>
-  * {
-    box-sizing: border-box;
-    border: solid 1px red;
-  }
-</style>
-{% end %}
-
-</head>
-<body>
-<div class="header">
-  <div class="toggleMenu" style="margin-left: 15px; cursor: pointer;"></div>
-</div>
-{% include base_menu.html %}
+{% include base_top.html %}
 
 <div class="main x-center">
   {% block body %} {% end %}

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/06/24 19:12:17
+# @modified 2018/06/26 23:03:11
 
 __doc__ = """Methods for text operation"""
 
@@ -318,26 +318,26 @@ def parse_simple_command(text):
     if match: return match.group(1, 2)
     return text, ""
 
-def cut_text(text, length):
+def get_short_text(text, length):
     """
-        >>> cut_text('abc', 5)
+        >>> get_short_text('abc', 5)
         'abc'
-        >>> cut_text('abcdefg', 5)
+        >>> get_short_text('abcdefg', 5)
         'abc..'
-        >>> cut_text('abcd', 5)
+        >>> get_short_text('abcd', 5)
         'abcd'
     """
     if len(text) <= length:
         return text
     return text[:length-2] + ".."
 
-def to_camel_case(name, upper = False):
+def get_camel_case(name, upper = False):
     """
-        >>> to_camel_case('name')
+        >>> get_camel_case('name')
         'name'
-        >>> to_camel_case('get_name')
+        >>> get_camel_case('get_name')
         'getName'
-        >>> to_camel_case('get_my_name', True)
+        >>> get_camel_case('get_my_name', True)
         'GetMyName'
     """
     target = ''
@@ -350,12 +350,13 @@ def to_camel_case(name, upper = False):
         else:
             target += c
     return target
+to_camel_case = get_camel_case
 
-def to_underscore(name):
+def get_underscore(name):
     """
-        >>> to_underscore('getName')
+        >>> get_underscore('getName')
         'get_name'
-        >>> to_underscore('GetName')
+        >>> get_underscore('GetName')
         'get_name'
     """
     target = ''
@@ -365,6 +366,7 @@ def to_underscore(name):
         else:
             target += c.lower()
     return target
+to_underscore = get_underscore
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/06/24 19:17:20
+# @modified 2018/06/26 23:01:49
 
 """
 xnote工具类总入口
@@ -16,7 +16,7 @@ from .imports import *
 from . import textutil, ziputil, fsutil, logutil, dateutil, htmlutil
 from .ziputil import *
 from .netutil import splithost
-from .textutil import edit_distance, cut_text
+from .textutil import edit_distance, get_short_text
 from .dateutil import *
 from .netutil  import *
 from .fsutil   import *
@@ -156,6 +156,8 @@ def get_file_size(path, format=True):
     return st.st_size
 
 def get_real_path(path):
+    if path == None:
+        return None
     if xconfig.USE_URLENCODE:
         return quote_unicode(path)
     return path

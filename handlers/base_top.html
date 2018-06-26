@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0,user-scalable=0"/>
+{% init html_title = None %}
+<title>Xnote{%if html_title%} - {{html_title}}{%end%}</title>
+<link rel="shortcut icon" href="/static/favicon.ico"/>
+<link rel="bookmark" href="/static/favicon.ico"/>
+<link rel="stylesheet" href="/static/css/common.css"/>
+<script src="/static/lib/jquery/jquery-1.12.4.min.js"></script>
+<script type="text/javascript">
+  window.xuser = "{{_user_name}}";
+</script>
+<script type="text/javascript" src="/static/js/utils.js"></script>
+<script type="text/javascript" src="/system/stats"></script>
+<script type="text/javascript" src="/static/js/xnote-ui.js"></script>
+<script type="text/javascript" src="/static/lib/layer/layer.js"></script>
+{% if _has_login %}
+<script type="text/javascript" src="/static/js/app.js"></script>
+{% end %}
+
+{% block head %} {% end %}
+
+{% if xconfig.DEBUG_HTML_BOX %}
+<style>
+  * {
+    box-sizing: border-box;
+    border: solid 1px red;
+  }
+</style>
+{% end %}
+
+</head>
+<body>
+<div class="header">
+    <div class="toggleMenu" style="margin-left: 15px; cursor: pointer;"></div>
+</div>
+
+{% init show_menu = True %}
+{% if show_menu %}
+<div class="nav-search-box">
+  <div class="x-center" style="padding-left:10px; padding-right:10px;">
+    <!-- 保持对称 -->
+    <div class="float-left">
+      <ul class="nav-ul">
+        <li><a href="/">知识库</a></li>
+        {% if _has_login %}
+        <li><a href="/message?status=created">备忘({{_notice_count}})</a></li>
+        {% end %}
+        {% if _is_admin %}
+        <li><a href="{{xconfig.FS_LINK}}">文件</a></li>
+        {% end %}
+        <li><a href="/system/index">系统</a></li>
+        <li><a href="/wiki/README.md">关于</a></li>
+      </ul>
+    </div>
+
+    <div class="float-right" style="width:345px;">
+      <form id="searchForm" method="GET" action="{{?search_action,'/search/search'}}">
+        {% block search_form %} {% end %}
+        <input id="key" name="key" class="nav-search-input" placeholder="{{?search_placeholder, '搜索或指令'}}" value="{{?key}}"/>
+        <input class="hide" name="category" value="{{?category}}" />
+        <button class="nav-search-btn">搜</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% end %}

@@ -63,7 +63,7 @@
             function (result) {
                 showResult(result.data);
                 $("#pluginEditLink").removeClass("hide")
-                    .attr("href", "/system/script/edit?name=commands/" + name);
+                    .attr("href", "/system/script/edit?name=commands/" + result.name);
             });
     };
 

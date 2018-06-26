@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/06/23 19:49:36
+# @modified 2018/06/26 22:54:19
 
 import profile
 import math
@@ -40,6 +40,7 @@ class ViewHandler:
         db            = xtables.get_file_table()
         user_name     = xauth.get_current_name()
         show_add_file = False
+        title         = None
 
         if id == "" and name == "":
             raise HTTPError(504)
@@ -69,6 +70,7 @@ class ViewHandler:
             link = "/note/view?id=%s" % id, 
             name = file.name))
 
+        title  = file.name
         groups = xutils.call("note.list_group")
         if file.type == "group":
             where_sql = "parent_id=$parent_id AND is_deleted=0 AND (creator=$creator OR is_public=1)"
@@ -102,7 +104,8 @@ class ViewHandler:
         
         xmanager.fire("note.view", file)
         return xtemplate.render(template_name,
-            file=file, 
+            html_title = title,
+            file = file, 
             op=op,
             show_add_file = show_add_file,
             can_edit = can_edit,
@@ -168,11 +171,6 @@ class UnmarkHandler:
         db = xtables.get_file_table()
         db.update(is_marked=0, where=dict(id=id))
         raise web.seeother("/file/view?id=%s"%id)
-        
-class LibraryHandler:
-
-    def GET(self):
-        return xtemplate.render("note/library.html")
 
 class DictHandler:
 
@@ -208,7 +206,6 @@ xurls = (
     r"/file/mark"          , MarkHandler,
     r"/file/unmark"        , UnmarkHandler,
     r"/file/markdown"      , ViewHandler,
-    r"/file/library"       , LibraryHandler,
     r"/file/dict"          , DictHandler
 )
 

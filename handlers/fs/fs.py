@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/06/23 13:36:50
+# @modified 2018/06/26 22:45:49
 
 """文件服务
     - 文件目录
@@ -336,7 +336,8 @@ class AddFileHandler(BaseAddFileHandler):
 
     def create_file(self, path):
         if os.path.exists(path):
-            raise Exception("file exists")
+            name = os.path.basename(path)
+            raise Exception("file [%s] exists" % name)
         xutils.touch(path)
 
 class RemoveHandler:
