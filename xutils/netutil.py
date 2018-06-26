@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/06/04 23:31:57
+# @modified 2018/06/26 23:57:23
 import os
 import re
 import codecs
@@ -137,7 +137,7 @@ def http_get(url, charset='utf-8'):
         chunk = stream.read(bufsize)
     print("get %s bytes" % readsize)
     bytes = b''.join(out)
-    return codecs.encode(bytes, charset)
+    return codecs.decode(bytes, charset)
 
 def http_download(address, destpath = None, dirname = None):
     bufsize = BUFSIZE
