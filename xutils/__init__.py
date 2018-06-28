@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/06/26 23:01:49
+# @modified 2018/06/28 23:55:28
 
 """
 xnote工具类总入口
@@ -419,7 +419,8 @@ def mark_text(content):
                     tokens[index] = '<a href="%s">%s</a>' % (href, name)
             elif pat.match(item):
                 ret = pat.match(item)
-                tokens[index] = '<a href="%s">%s</a>' % ret.groups()
+                name, link = ret.groups()
+                tokens[index] = '<a href="%s">%s</a>' % (link, name)
             else:
                 token = tokens[index]
                 token = token.replace("<", "&lt;")

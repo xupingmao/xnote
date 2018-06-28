@@ -152,6 +152,10 @@ class TestMain(unittest.TestCase):
         html = xutils.mark_text(text)
         self.assertEqual('a&nbsp;link&nbsp;<a href="https://link">https://link</a>', html)
 
+        text = 'Link [name](/http)'
+        html = xutils.mark_text(text)
+        self.assertEqual('Link&nbsp;<a href="/http">name</a>', html)
+
     def test_count_alpha(self):
         text = "abc def 123"
         self.assertEqual(6, textutil.count_alpha(text))

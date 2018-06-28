@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/06/28 23:03:09
+# @modified 2018/06/28 23:22:35
 import web
 import os
 import xconfig
@@ -101,7 +101,7 @@ class RunPluginHandler:
             html = header + result[6:]
         else:
             html = header + xutils.mark_text(result)
-        html += '''<input id="inputText" class="col-md-12" placeholder="请输入参数" value="%s">''' % input
+        html += '''<input id="inputText" class="col-md-12 hide" placeholder="请输入参数" value="">'''
         html += '''<div><button class="btn-danger" onclick="runPlugin('%s', true)">确认执行</button></div>''' % name
         return dict(code="success", data = html, name = name)
 
