@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/06/26 22:55:52
+# @modified 2018/06/28 23:03:09
 import web
 import os
 import xconfig
@@ -69,6 +69,10 @@ class RunPluginHandler:
             path = xutils.get_argument("path")
             confirmed = xutils.get_argument("confirmed") == "true"
             name, input = textutil.parse_simple_command(name)
+            name = xconfig.get_alias(name, name)
+            new_command = "%s %s" % (name, input)
+            name, input = textutil.parse_simple_command(new_command)
+            
             if not name.endswith(".py"):
                 name += ".py"
             if input == "":

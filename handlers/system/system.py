@@ -27,11 +27,11 @@ def link(name, url):
 sys_tools = [
     link("系统状态",   "/system/monitor"),
     link("文件管理",   "/fs_list"),
-    link("脚本管理",   "/system/script_admin"),
+    link("脚本管理",   "/fs_link/scripts"),
     link("定时任务",   "/system/crontab"),
     link("历史记录",   "/system/history"),
     link("用户管理",   "/system/user/list"),
-    link("App管理",   "/fs_api/app"),
+    link("App管理",   "/fs_link/app"),
     link("后台模板缓存", "/system/template_cache"),
     link("重新加载模块", "/system/reload"),
     link("静音",         "/search/search?key=mute"),

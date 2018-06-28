@@ -166,7 +166,7 @@
 
             refreshMessage: function () {
                 var self = this;
-                $.get("/file/message/list", function (respText) {
+                $.get("/message/list", function (respText) {
                     var data = respText;
                     if (data.code == "success") {
                         var messageList = [];

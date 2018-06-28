@@ -1,11 +1,22 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/06/24 00:55:36
+# @modified 2018/06/28 23:11:37
 
 '''
 xnote系统配置
+
+# 文件配置
 - 约定目录叫 XXX_DIR
 - 文件叫 XXX_FILE
+
+# 通知的配置
+- add_notice
+- get_notice_list
+
+# 别名配置
+- set_alias
+- get_alias
+
 '''
 import os
 import time
@@ -389,4 +400,14 @@ def get_notice_list(type='today', user=None):
 def clear_notice_list():
     global _notice_list
     _notice_list = [] # Py2 do not have clear method
+
+# 设置别名
+_alias_dict = {}
+def set_alias(name, value):
+    """设置别名，用于扩展命令"""
+    _alias_dict[name] = value
+
+def get_alias(name, default_value):
+    """获取别名，用于扩展命令"""
+    return _alias_dict.get(name, default_value)
 

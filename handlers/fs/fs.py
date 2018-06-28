@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/06/26 22:45:49
+# @modified 2018/06/28 23:00:43
 
 """文件服务
     - 文件目录
@@ -379,12 +379,12 @@ class ListDirHandler:
         datapath = os.path.abspath(xconfig.DATA_DIR)
         raise web.seeother("/fs/%s" % datapath)
 
-class AppHandler:
+class LinkHandler:
 
     @xauth.login_required("admin")
-    def GET(self):
-        app_path = xconfig.APP_DIR
-        raise web.seeother("/fs/%s" % app_path)
+    def GET(self, name):
+        link_path = os.path.join(xconfig.DATA_DIR, name)
+        raise web.seeother("/fs/%s" % link_path)
 
 xurls = (
     r"/fs_list/?", ListDirHandler,
@@ -392,7 +392,7 @@ xurls = (
     r"/fs_api/add_file", AddFileHandler,
     r"/fs_api/remove", RemoveHandler,
     r"/fs_api/rename", RenameHandler,
-    r"/fs_api/app", AppHandler,
+    r"/fs_link/(.*)", LinkHandler,
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,

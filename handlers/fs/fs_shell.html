@@ -39,13 +39,6 @@
         $("#result").html(text);
     }
 
-    $(".plugin").click(function (event) {
-        var name = $(event.target).attr("data-name");
-        var path = $("#path").val();
-        showResult("开始执行 " + name);
-        runPlugin(name, false);
-    });
-
     function runPlugin(name, confirmed) {
         if (name == "") {
             return;
@@ -74,19 +67,6 @@
             runPlugin($(this).val(), false);
             return;
         }
-        var name = $(this).val();
-        if (name == "") {
-            $(".plugin").show();
-            return;
-        }
-        $(".plugin").each(function (index, element) {
-            var $e = $(element);
-            if ($e.text().indexOf(name) >= 0) {
-                $e.show();
-            } else {
-                $e.hide();
-            }
-        })
     })
 </script>
 {% end %}
