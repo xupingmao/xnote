@@ -155,18 +155,6 @@
         codeMirror.replaceSelection(code, 'around');
     }
 
-    // $("#file").on("change", function () {
-    //     uploadFile("file", "/file/upload_file?prefix={{file.id}}", function (evt) {
-    //         // 处理上传成功
-    //         var responseText = evt.target.responseText;
-    //         var result = JSON.parse(responseText);
-    //         console.log(result);
-    //         var link = result.link;
-    //         // alert(result);   
-    //         codeInsert(link);
-    //     })
-    // })
-
     $("#uploadBtn").on("click", function () {
         $("#file").click();
     })
@@ -303,18 +291,21 @@
             }
         });
 
-        $("#insertStrong").on("click", function () {
+        function toggleSurround(chars) {
             var selection = codeMirror.getSelection();
-            if (selection.startsWith("**") && selection.endsWith("**")) {
-                codeMirror.replaceSelection(selection.substring(2, selection.length - 2), "around");
+            if (selection.startsWith(chars) && selection.endsWith(chars)) {
+                codeMirror.replaceSelection(selection.substring(chars.length, selection.length - chars.length), "around");
             } else {
-                codeMirror.replaceSelection("**" + selection + "**", "around");
+                codeMirror.replaceSelection(chars + selection + chars, "around");
             }
+        }
+
+        $("#insertStrong").on("click", function () {
+            toggleSurround("**");
         });
 
         $("#insertDel").click(function () {
-            var selection = codeMirror.getSelection();
-            codeMirror.replaceSelection("~~" + selection + "~~", "around");
+            toggleSurround("~~");
         })
 
         $("#formatTable").click(function () {

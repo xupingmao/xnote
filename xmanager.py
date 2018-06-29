@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/06/23 00:46:07
+# @modified 2018/06/29 22:08:19
 
 """
 Xnote 模块管理器
@@ -484,6 +484,9 @@ class EventHandler:
                 self.func(ctx)
             except:
                 xutils.print_exc()
+
+    def __str__(self):
+        return "<EventHandler %s object at %s>" % (self.func.__name__, id(self))
 
 def get_func_abs_name(func):
     modulename = inspect.getmodulename(func)

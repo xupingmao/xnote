@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/06/28 23:22:35
+# @modified 2018/06/29 21:56:45
 import web
 import os
 import xconfig
@@ -112,9 +112,9 @@ class DownloadPluginsHandler:
     def GET(self):
         bufsize = 1024 * 100
         dirname = xconfig.COMMANDS_DIR
-        outpath = os.path.join(dirname, "fs-plugins.zip")
+        outpath = os.path.join(dirname, "commands.zip")
         ziputil.zip_dir(dirname, outpath = outpath)
-        web.header("Content-Disposition", "attachment; filename=fs-plugins.zip")
+        web.header("Content-Disposition", "attachment; filename=commands.zip")
         with open(outpath, "rb") as fp:
             buf = fp.read(bufsize)
             while buf:
