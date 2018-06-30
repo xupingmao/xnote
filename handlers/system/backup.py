@@ -1,9 +1,9 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/03/21 00:21:34
+# @modified 2018/06/30 01:44:38
 
 """
-备份相关，需要添加到定时任务中，参考system/crontab
+备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
 import os

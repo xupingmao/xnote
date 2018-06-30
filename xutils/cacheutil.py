@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/06/12 23:43:33
+# @modified 2018/06/30 15:39:15
 """
 缓存的实现，考虑失效的规则如下
 1. 按时间失效
@@ -98,12 +98,20 @@ def expire_cache(key = None, prefix = None, args = None):
         return True
     return False
 
-def update_cache(key = None, value = None, prefix = None, args = None):
-    """更新缓存的值
-    """
+def put_cache(key = None, value = None, prefix = None, args = None, expire = -1):
+    """设置缓存的值"""
     if key is None:
         key = '%s%s' % (prefix, args)
-    _cache_dict[key] = CacheObj(key, value, -1)
+    _cache_dict[key] = CacheObj(key, value, expire)
+
+def get_cache(key):
+    """获取缓存的值"""
+    obj = _cache_dict.get(key)
+    if obj is None:
+        return None
+    return obj.value
+
+update_cache = put_cache
 
 def update_cache_by_key(key):
     """

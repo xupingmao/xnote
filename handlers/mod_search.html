@@ -6,6 +6,8 @@
   <a class="link x-radio" href="/search?key={{?key}}&category=content" data-option="content" data-value="{{?category}}">内容</a>
   <a class="link x-radio" href="/search?key={{?key}}&category=dict" data-option="dict" data-value="{{?category}}">词典</a>
   <a class="link x-radio" href="/message?key={{?key}}&category=message" data-option="message" data-value="{{?category}}">备忘</a>
+  {%if _is_admin%}
   <a class="link x-radio" href="/search?key={{?key}}&category=book" data-option="book" data-value="{{?category}}">图书</a>
+  {%end%}
 </div>
 {% end %}

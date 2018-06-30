@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/06/29 22:08:19
+# @modified 2018/07/01 01:11:55
 
 """
 Xnote 模块管理器
@@ -26,7 +26,7 @@ import xtables
 import xutils
 import xauth
 from threading import Thread, Timer, current_thread
-from xutils import Storage, Queue, tojson
+from xutils import Storage, Queue, tojson, MyStdout
 
 config = xconfig
 
@@ -34,42 +34,6 @@ __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
 __copyright__ = "(C) 2016-2017 xupingmao. GNU GPL 3."
 __contributors__ = []
-
-class MyStdout:
-    """
-    标准输出的装饰器，用来拦截标准输出内容
-    """
-    def __init__(self, stdout):
-        self.stdout = stdout
-        self.result_dict = dict()
-        self.outfile = web.debug
-        self.encoding = stdout.encoding
-
-    def write(self, value):
-        result = self.result_dict.get(current_thread())
-        if result != None:
-            result.append(value)
-        print(value, file=self.outfile, end="")
-
-    def writelines(self, lines):
-        return self.stdout.writelines(lines)
-
-    def flush(self):
-        return self.stdout.flush()
-
-    def close(self):
-        return self.stdout.close()
-
-    def record(self):
-        # 这里检测TTL
-        self.result_dict[current_thread()] = []
-
-    def pop_record(self):
-        # 非线程池模式下必须pop_record，不然会有内存泄漏的危险
-        # 考虑引入TTL检测机制
-        result = self.result_dict.pop(current_thread(), [])
-        return "".join(result)
-
 
 def wrapped_handler(pattern, handler_clz):
     # Py2 自定义类不是type类型

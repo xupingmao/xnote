@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/06/29 21:56:45
+# @modified 2018/07/01 01:06:52
 import web
 import os
 import xconfig
@@ -18,11 +18,11 @@ def get_display_name(name):
     else:
         return name
 
-def filter_plugin(x):
+def filter_command(x):
     return x.endswith(".py")
 
 def list_commands():
-    scripts = sorted(filter(filter_plugin, os.listdir(xconfig.COMMANDS_DIR)))
+    scripts = sorted(filter(filter_command, os.listdir(xconfig.COMMANDS_DIR)))
     return scripts
 
 def suggest_commands(name):

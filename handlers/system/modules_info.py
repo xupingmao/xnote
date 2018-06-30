@@ -40,4 +40,9 @@ class handler(object):
         return xtemplate.render("system/modules_info.html", 
             modules = query_modules(),
             sys = sys)
+
+xurls = (
+    r"/system/pydoc", handler,
+    r"/system/modules_info", handler
+)
         

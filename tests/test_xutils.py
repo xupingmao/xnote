@@ -6,7 +6,7 @@ sys.path.insert(1, "lib")
 import unittest
 import xutils
 import xconfig
-from xutils import textutil
+from xutils import textutil, cacheutil
 
 @xutils.cache(prefix='fib')
 def fib(n):
@@ -108,6 +108,10 @@ class TestMain(unittest.TestCase):
     def test_cache(self):
         fib(35)
         self.assertTrue(xutils.expire_cache("fib(1,)"))
+
+    def test_cache2(self):
+        cacheutil.put_cache("name", 123)
+        self.assertEqual(123, cacheutil.get_cache("name"))
 
     def test_storage(self):
         obj = xutils.Storage(name="name")

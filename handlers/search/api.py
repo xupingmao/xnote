@@ -1,10 +1,12 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/18
+# @modified 2018/07/01 01:01:59
 from __future__ import print_function
 import os
 import six
 import xutils
 import xconfig
+import xauth
 
 SearchResult = xutils.SearchResult
 ROOT_PATH = os.path.join(xconfig.HANDLERS_DIR, "api")
@@ -28,6 +30,8 @@ init_name_dict()
 
 def search(ctx, name):
     global _api_name_dict
+    if not xauth.is_admin():
+        return
     results = []
     for task_name in _api_name_dict:
         task_command = _api_name_dict[task_name]

@@ -75,7 +75,7 @@ def search_name(words, groups=None):
     for word in words:
         like_list.append('name LIKE %s ' % to_sqlite_obj('%' + word.upper() + '%'))
     sql = "SELECT name, id, parent_id, ctime, mtime, type, creator FROM file WHERE %s AND is_deleted == 0" % (" AND ".join(like_list))
-    if groups and groups != "admin":
+    if groups != "admin":
         sql += " AND (is_public = 1 OR creator = $creator)"
     sql += " ORDER BY mtime DESC LIMIT 1000";
     vars["creator"] = groups
@@ -93,7 +93,7 @@ def full_search(words, groups=None):
     sql = "SELECT id, parent_id, name, ctime, mtime, type, creator FROM file WHERE (%s) AND is_deleted == 0" \
         % " AND ".join(content_like_list)
 
-    if groups and groups != "admin":
+    if groups != "admin":
         sql += " AND (is_public = 1 OR creator = $creator)"
     sql += " order by mtime desc limit 1000"
 

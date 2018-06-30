@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/06/28 23:55:28
+# @modified 2018/07/01 01:14:25
 
 """
 xnote工具类总入口
@@ -11,6 +11,7 @@ xutils是暴露出去的统一接口，类似于windows.h一样
 
 """
 from __future__ import print_function
+from threading import current_thread
 from .imports import *
 # xnote工具
 from . import textutil, ziputil, fsutil, logutil, dateutil, htmlutil
@@ -91,7 +92,42 @@ class SearchResult(dict):
             del self[key]
         except KeyError as k:
             raise AttributeError(k)
-    
+
+class MyStdout:
+    """
+    标准输出的装饰器，用来拦截标准输出内容
+    """
+    def __init__(self, stdout):
+        self.stdout = stdout
+        self.result_dict = dict()
+        self.outfile = web.debug
+        self.encoding = stdout.encoding
+
+    def write(self, value):
+        result = self.result_dict.get(current_thread())
+        if result != None:
+            result.append(value)
+        print(value, file=self.outfile, end="")
+
+    def writelines(self, lines):
+        return self.stdout.writelines(lines)
+
+    def flush(self):
+        return self.stdout.flush()
+
+    def close(self):
+        return self.stdout.close()
+
+    def record(self):
+        # 这里检测TTL
+        self.result_dict[current_thread()] = []
+
+    def pop_record(self):
+        # 非线程池模式下必须pop_record，不然会有内存泄漏的危险
+        # 考虑引入TTL检测机制
+        result = self.result_dict.pop(current_thread(), [])
+        return "".join(result)
+
 #################################################################
 ##   File System Utilities
 #################################################################
@@ -501,7 +537,10 @@ def get_safe_file_name(filename):
 
 def log(fmt, *argv):
     fmt = u(fmt)
-    message = fmt.format(*argv)
+    if len(argv) > 0:
+        message = fmt.format(*argv)
+    else:
+        message = fmt
     f_back = inspect.currentframe().f_back
     f_code = f_back.f_code
     f_modname = f_back.f_globals.get("__name__")
@@ -591,6 +630,8 @@ def exec_python_code(name, code, record_stdout = True, raise_err = False, do_gc 
         vars["__name__"] = "xscript.%s" % name
         # before_count = len(gc.get_objects())
         if record_stdout:
+            if not isinstance(sys.stdout, MyStdout):
+                sys.stdout = MyStdout(sys.stdout)
             sys.stdout.record()
         ret = six.exec_(code, vars)
         # 执行一次GC防止内存膨胀
@@ -654,6 +695,9 @@ def load_script(name, vars = None, dirname = None):
     path = os.path.join(dirname, name)
     path = os.path.abspath(path)
     return exec_python_code(name, xutils.readfile(path), False, vars = vars)
+
+def exec_command(command, confirmed = False):
+    pass
 
 #################################################################
 ##   Web.py Utilities web.py工具类的封装

@@ -1,4 +1,5 @@
 # encoding=utf-8
+# @modified 2018/07/01 01:16:16
 """
     Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -15,6 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+from __future__ import print_function
 import os, socket, sys
 import json
 import time

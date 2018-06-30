@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/06/07 22:21:35
+# @modified 2018/07/01 00:46:41
 
 import re
 import os
@@ -134,7 +134,6 @@ class handler:
         xmanager.fire("search.after", ctx)
         return ctx.tools + files
 
-    @xauth.login_required()
     def GET(self):
         """search files by name and content"""
         load_rules()

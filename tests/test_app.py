@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/06/26 01:02:00
+# @modified 2018/07/01 01:15:01
 
 import sys
 import os
@@ -228,6 +228,8 @@ class TestMain(unittest.TestCase):
         self.check_200("/system/stats")
         self.check_200("/system/stats/location", method="POST")
         self.check_200("/system/monitor")
+        self.check_200("/system/network_profile?total_size=1024")
+        # self.check_200("/system/pydoc")
 
     def test_api(self):
         self.check_200("/api/check_network")
@@ -246,6 +248,7 @@ class TestMain(unittest.TestCase):
     def test_user(self):
         self.check_OK("/system/user")
         self.check_OK("/system/user/list")
+        self.check_OK("/system/user?name=admin")
 
     def test_tools(self):
         self.check_200("/tools/sql")
@@ -253,6 +256,14 @@ class TestMain(unittest.TestCase):
 
     def test_notfound(self):
         self.check_404("/nosuchfile")
+
+    def test_exec_script(self):
+        name = "xnote-unit-test.py"
+        content = """print('hello')"""
+        test_path = os.path.join(xconfig.SCRIPTS_DIR, name)
+        xutils.savetofile(test_path, content)
+        result = xutils.exec_script(name)
+        self.assertEqual("hello\n", result)
 
     def test_script_list(self):
         self.check_200("/system/script_admin")
@@ -370,5 +381,6 @@ class TestMain(unittest.TestCase):
         xconfig.add_notice(user="nobody", message="Nobody can see it")
         notice_list = xconfig.get_notice_list(user='admin')
         self.assertEqual(0, len(notice_list))
+
 
 
