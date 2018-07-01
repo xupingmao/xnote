@@ -1,0 +1,75 @@
+{% extends base.html %}
+
+{% block head %}
+<script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
+<script type="text/javascript" src="/static/lib/marked/marked.js"></script>
+<script type="text/javascript" src="/static/js/marked-ext.js"></script>
+{% end %}
+
+{% block body %}
+
+<h3 style="text-align:center;">{{note.name}}</h3>
+<hr/>
+
+{% if note.type == "md" %}
+<div class="col-md-12" style="padding-top:20px;">
+    <div id="epiceditor" class="row">
+        <div id="markdown-input-div" class="col-md-6">
+            <textarea id="markdown-input" class="form-control" name="content" rows=50>{{note.content}}</textarea>
+        </div>
+
+        <div id="markdown-output-div" class="col-md-12">
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    // set marked code highlight function
+    // marked.defaults.highlight = highlight;
+    function escape(html, encode) {
+      return html
+        .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\n/g, '<br/>')
+        .replace(/ /g, '&nbsp;');
+    }
+    
+    function preview() {
+        if (!$("#markdown-input-div").hasClass("hide")) {
+            $("#markdown-input-div").addClass("hide");
+            $("#markdown-output-div").removeClass("hide").removeClass("col-md-6").addClass("col-md-12");
+
+            $("#update-div").addClass("hide");
+            $("#edit-div").removeClass("hide");
+        }
+    }
+
+    $(function () {
+        var old_content = $("#markdown-input-div").val();
+        setInterval(function () {
+            var input = $("#markdown-input").val();
+            // not modified
+            if (input == old_content) {
+                return;
+            }
+            if ($("#markdown-output-div").hasClass("hide")) {
+                return;
+            }
+            old_content = input;
+            var outtext = marked.parse(input);
+            $("#markdown-output-div").html(outtext); 
+            // 尽量多用原生CSS实现布局和交互
+            // registerScrollEvent();
+        }, 200);
+        preview();
+    })
+</script>
+{% else %}
+    {% raw note.data %}
+{% end %}
+
+{% end %}

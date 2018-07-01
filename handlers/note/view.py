@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/06/26 22:54:19
+# @modified 2018/07/01 16:27:56
 
 import profile
 import math
@@ -117,6 +117,17 @@ class ViewHandler:
             recent_created = recent_created,
             groups   = groups)
 
+class PrintHandler:
+
+    def GET(self):
+        id = xutils.get_argument("id")
+        db = xtables.get_file_table()
+        file = dao.get_by_id(id, db=db)
+        user_name = xauth.get_current_name()
+        if file.is_public != 1 and user_name != "admin" and user_name != file.creator:
+            raise web.seeother("/unauthorized")
+        return xtemplate.render("note/print.html", show_menu = False, note = file)
+
 def sqlite_escape(text):
     if text is None:
         return "NULL"
@@ -201,6 +212,7 @@ class DictHandler:
 xurls = (
     r"/file/(edit|view)"   , ViewHandler, 
     r"/note/(edit|view)"   , ViewHandler,
+    r"/note/print"         , PrintHandler,
     r"/file/(\d+)/upvote"  , Upvote,
     r"/file/(\d+)/downvote", Downvote,
     r"/file/mark"          , MarkHandler,

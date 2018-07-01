@@ -13,6 +13,7 @@
                 <a class="link" href="/file/share?id={{file.id}}">分享</a>
             {% end %}
             <a class="move-btn link" data-url="/file/group?id={{item.id}}&filetype=xml">移动</a>
+            <a class="link" href="/note/print?id={{file.id}}" target="_blank">打印</a>
             <a class="red" href="javascript:remove({{item.id}}, '{{item.name}}', {{item.parent_id}})">删除</a>
         {% end %}
     </div>

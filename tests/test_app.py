@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/07/01 01:15:01
+# @modified 2018/07/01 16:35:55
 
 import sys
 import os
@@ -123,6 +123,7 @@ class TestMain(unittest.TestCase):
             data=dict(name="xnote-unit-test", content="hello"))
         id = file["id"]
         self.check_OK("/note/view?id=" + str(id))
+        self.check_OK("/note/print?id=" + str(id))
 
         # 乐观锁更新
         json_request("/note/update", method="POST", 
