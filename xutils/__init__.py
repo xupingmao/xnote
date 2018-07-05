@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/07/01 01:14:25
+# @modified 2018/07/05 01:06:19
 
 """
 xnote工具类总入口
@@ -440,7 +440,7 @@ def mark_text(content):
     content = content.replace(u'\xad', '\n')
     lines = []
     # markdown的LINK样式
-    pat = re.compile(r"\[(.*)\]\((.+)\)")
+    # pat = re.compile(r"\[(.*)\]\((.+)\)")
     for line in content.split("\n"):
         tokens = line.split(" ")
         for index, item in enumerate(tokens):
@@ -453,10 +453,10 @@ def mark_text(content):
                 else:
                     name = href[href.rfind("/")+1:]
                     tokens[index] = '<a href="%s">%s</a>' % (href, name)
-            elif pat.match(item):
-                ret = pat.match(item)
-                name, link = ret.groups()
-                tokens[index] = '<a href="%s">%s</a>' % (link, name)
+            # elif pat.match(item):
+            #     ret = pat.match(item)
+            #     name, link = ret.groups()
+            #     tokens[index] = '<a href="%s">%s</a>' % (link, name)
             else:
                 token = tokens[index]
                 token = token.replace("<", "&lt;")
