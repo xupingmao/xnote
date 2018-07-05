@@ -4,9 +4,8 @@
 
 body {
     background-color: #f0f0f0;
-    /*background-color: rgb(82, 86, 89);*/
-    /*font-family: "Open Sans Light",Helvetica,arial,sans-serif;*/
-    font: 14px "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
+    font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
+    font-size: 14px;
     -webkit-text-size-adjust: 100%; 
     margin: 0; 
     padding: 0;
@@ -396,7 +395,7 @@ li.menu-item:hover {
     /*z-index: 10000;*/
     float: left;
     width: 100%;
-    background-color: #9cc;
+    /*background-color: #9cc;*/
 }
 
 .nav-search-input {
