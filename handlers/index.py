@@ -7,6 +7,7 @@ import xutils
 import os
 import xconfig
 from xutils import Storage
+from xutils.dateutil import Timer
 
 index_html = """
 {% extends base.html %}
@@ -45,10 +46,18 @@ def list_most_visited():
 class IndexHandler:
 
     def GET(self):
+        t = Timer()
+        t.start()
         sql  = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
         data = list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
+        t.stop()
+        xutils.log("group time: %s" % t.cost())
+
+        t.start()
         ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
             vars=dict(creator=xauth.get_current_name()))
+        t.stop()
+        xutils.log("recent time: %s" % t.cost())
 
         tools = list(filter(tool_filter, list_tools()))[:4]
         return xtemplate.render("index.html", 

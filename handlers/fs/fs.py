@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/06/28 23:00:43
+# @modified 2018/07/10 23:46:46
 
 """文件服务
     - 文件目录
@@ -287,7 +287,8 @@ class StaticFileHandler(FileSystemHandler):
 
     """外置数据的静态文件支持"""
     def GET(self, path):
-        # path = xutils.unquote(path)
+        path = xutils.unquote(path)
+        path = xutils.get_real_path(path)
         if not self.is_path_allowed(path):
             xauth.check_login("admin")
         data_prefix = config.DATA_DIR

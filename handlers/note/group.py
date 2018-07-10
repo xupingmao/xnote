@@ -8,6 +8,7 @@ import xauth
 import xconfig
 import xmanager
 from xutils import Storage
+from xutils.dateutil import Timer
 
 # 兼容旧代码
 config = xconfig
@@ -147,24 +148,34 @@ class RecentEditHandler:
         page = xutils.get_argument("page", 1, type=int)
         page = max(1, page)
 
+        t = Timer()
+        t.start()
         db = xtables.get_file_table()
         where = "is_deleted = 0 AND (creator = $creator OR is_public = 1) AND type != 'group'"
-        files = db.select(where = where, 
+        files = list(db.select(where = where, 
             vars   = dict(creator = xauth.get_current_name()),
             order  = "mtime DESC",
             offset = (page-1) * PAGE_SIZE,
-            limit  = PAGE_SIZE)
+            limit  = PAGE_SIZE))
+        t.stop()
+        xutils.log("list recent edit %s" % t.cost())
+
+        t.start()
+        groups = xutils.call("note.list_group")
+        t.stop()
+        xutils.log("list group %s" % t.cost())
+        
         count = db.count(where, vars = dict(creator = xauth.get_current_name()))
         return xtemplate.render("note/view.html", 
             html_title  = "最近更新",
             pathlist    = [Storage(name="最近更新", type="group", url="/file/recent_edit")],
             file_type   = "group",
-            files       = list(files), 
+            files       = files, 
             file        = Storage(name="最近更新", type="group"),
             page        = page, 
             show_notice = True,
             page_max    = math.ceil(count/PAGE_SIZE), 
-            groups      = xutils.call("note.list_group"),
+            groups      = groups,
             show_mdate  = True,
             page_url    ="/file/recent_edit?page=")
 
