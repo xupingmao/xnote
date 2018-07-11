@@ -22,7 +22,7 @@ import xtables
 config = xconfig
 
 def link(name, url):
-    return Storage(name = name, url = url)
+    return Storage(name = name, url = url, link = url)
 
 sys_tools = [
     link("系统状态",   "/system/monitor"),
@@ -75,6 +75,13 @@ xconfig.MENU_LIST = [
     Storage(name = "知识库", children = doc_tools, need_login = True),
     Storage(name = "常用工具", children = other_tools),
 ]
+
+def list_pages():
+    links = []
+    for name in sorted(os.listdir(xconfig.PAGES_DIR)):
+        name, ext = os.path.splitext(name)
+        links.append(link(name, "/pages/" + name))
+    return links
                 
 class SysHandler:
 
@@ -99,7 +106,8 @@ class SysHandler:
             Storage          = Storage,
             os               = os,
             user             = xauth.get_current_user(),
-            customized_items = customized_items
+            customized_items = customized_items,
+            pages            = list_pages()
         )
 
 class ConfigHandler:

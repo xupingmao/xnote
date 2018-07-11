@@ -1,8 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/07/10 23:58:15
-
+# @modified 2018/07/11 00:18:42
 import time
 import os
 """ 
@@ -98,11 +97,24 @@ def get_days_of_month(y, month):
 
 class Timer:
 
+    def __init__(self, name = "[unknown]"):
+        self.name = name
+
     def start(self):
         self.start_time = time.time()
 
     def stop(self):
         self.stop_time = time.time()
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        import xutils
+        self.stop()
+        xutils.log("%s cost time: %s" % (self.name, self.cost()))
+
 
     def cost(self):
         return "%s ms" % int((self.stop_time - self.start_time) * 1000)
