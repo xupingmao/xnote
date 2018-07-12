@@ -55,9 +55,11 @@
     </div>
 {% end %}
 
+{% if _is_admin %}
 <div class="col-md-12 top-offset-1">
     <div class="grid-title">
         Pages
+        <a href="/fs_link/scripts/pages" class="float-right link">管理</a>
     </div>
     <div class="col-md-12">
         {% for link in pages %}
@@ -67,6 +69,7 @@
         {% end %}
     </div>
 </div>
+{% end %}
 
 <div class="col-md-12 top-offset-1">
     <div class="grid-title">
