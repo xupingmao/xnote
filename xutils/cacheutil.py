@@ -1,13 +1,15 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/06/30 15:39:15
+# @modified 2018/07/13 01:56:08
 """
 缓存的实现，考虑失效的规则如下
 1. 按时间失效
 2. FIFO, First In First Out
 3. LRU, Least Recently Used
 4. LFU, Least Frequently Used
+
+参考redis的API
 """
 from .imports import *
 _cache_dict = dict()
@@ -122,3 +124,7 @@ def update_cache_by_key(key):
         func = obj.func
         args = obj.args
         obj.value = func(*args)
+
+def keys(pattern=None):
+    return _cache_dict.keys()
+

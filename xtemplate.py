@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/06/20 23:03:34
+# @modified 2018/07/14 01:25:27
 import os
 import json
 import web
@@ -127,7 +127,9 @@ def render(template_name, **kw):
     return _loader.load(template_name).generate(**nkw)
 
 def render_text(text, template_name = "<string>", **kw):
-    """使用模板引擎渲染文本信息"""
+    """使用模板引擎渲染文本信息
+    TODO 缓存
+    """
     nkw = {}
     pre_render(nkw)
     nkw.update(kw)
@@ -145,5 +147,45 @@ def get_templates():
 def reload():
     global _loader
     _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
+
+class BaseTextPage:
+    """纯文本页面的基类"""
+
+    template = """
+{% extends base.html %}
+{% block body %}
+
+{% init input = "" %}
+{% init output = "" %}
+
+{% include "tools/base_title.html" %}
+<form method="{{method}}">
+    <textarea class="col-md-12 code" name="input" rows={{rows}}>{{input}}</textarea>
+    <button>处理</button>
+</form>
+<pre class="col-md-12">{{output}}</pre>
+{% end %}
+"""
+
+    def __init__(self):
+        self.rows = 20
+        self.title = "BaseTextPage"
+        self.method = "POST"
+
+    def handle(self, input):
+        raise NotImplementedError()
+
+    def get_input(self):
+        return xutils.get_argument("input", "")
+
+    def render(self):
+        input  = self.get_input()
+        output = self.handle(input)
+        return render_text(self.template, 
+            title = self.title,
+            method = self.method,
+            rows = self.rows,
+            input = input, 
+            output = output)
     
 reload()

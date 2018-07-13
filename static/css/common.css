@@ -927,6 +927,10 @@ li.menu-item:hover {
     font-size: small;
 }
 
+.code {
+    font-family: Consolas, monospace;
+}
+
 .nav-ul {
     display: block;
     list-style: none;
@@ -1031,7 +1035,6 @@ li.menu-item:hover {
 
 
 /** color **/
-
 .red {
     color:red;
 }

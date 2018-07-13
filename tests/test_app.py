@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/07/01 16:35:55
+# @modified 2018/07/14 01:26:28
 
 import sys
 import os
@@ -50,6 +50,14 @@ def json_request(*args, **kw):
     if six.PY2:
         return json.loads(data)
     return json.loads(data.decode("utf-8"))
+
+
+class TextPage(xtemplate.BaseTextPage):
+    def get_input(self):
+        return ""
+
+    def handle(self, input):
+        return "test"
 
 class TestMain(unittest.TestCase):
 
@@ -382,6 +390,9 @@ class TestMain(unittest.TestCase):
         xconfig.add_notice(user="nobody", message="Nobody can see it")
         notice_list = xconfig.get_notice_list(user='admin')
         self.assertEqual(0, len(notice_list))
+
+    def test_BaseTextPage(self):
+        TextPage().render()
 
 
 
