@@ -7,6 +7,7 @@ import web
 import xauth
 import xutils
 import xtemplate
+import xconfig
 from tornado.escape import xhtml_escape
 
 class ViewSourceHandler:
@@ -20,15 +21,21 @@ class ViewSourceHandler:
             return xtemplate.render(template_name, error = "path is empty")
         else:
             error = ""
+            warn  = ""
             try:
                 path = xutils.get_real_path(path)
-                content = xutils.readfile(path)
+                max_file_size = xconfig.MAX_TEXT_SIZE
+                if xutils.get_file_size(path, format=False) >= max_file_size:
+                    warn = "文件过大，只显示部分内容"
+                content = xutils.readfile(path, limit = max_file_size)
                 # 使用JavaScript来处理搜索关键字高亮问题
                 # if key != "":
                 #     content = xutils.html_escape(content)
                 #     key     = xhtml_escape(key)
                 #     content = textutil.replace(content, key, htmlutil.span("?", "search-key"), ignore_case=True, use_template=True)
                 return xtemplate.render(template_name, 
+                    error = error,
+                    warn = warn,
                     pathlist = xutils.splitpath(path),
                     name = os.path.basename(path), 
                     path = path,
@@ -40,6 +47,7 @@ class ViewSourceHandler:
 
 
 class UpdateHandler(object):
+    
     @xauth.login_required("admin")
     def POST(self):
         path = xutils.get_argument("path", "")

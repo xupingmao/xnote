@@ -29,6 +29,7 @@
         padding: 4px;
         background-color: #eee;
     }
+
     #editorArea {
         border: 1px solid #ccc;
     }
@@ -36,12 +37,23 @@
 {% end %}
 
 {% block body %}
+{% init warn = "" %}
+{% init error = "" %}
 {% init pathlist = [] %}
 {% include "mod_fs_path.html" %}
 
-<div class="col-md-12">
-    <p style="color:red">{{?error}}</p>
+{% if warn != "" %}
+<div class="col-md-12 warn">
+    {{warn}}
 </div>
+{% end %}
+
+{% if error != "" %}
+<div class="col-md-12 error">
+    {{?error}}
+</div>
+{% end %}
+
 <form method="POST" action="/code/view_source/update">
 <div class="col-md-12">
     <input name="path" class="hide" value="{{path}}"/>

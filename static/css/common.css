@@ -414,7 +414,7 @@ li.menu-item:hover {
 
 
 .main {
-  padding-top: 10px;
+  /*padding-top: 10px;*/
   padding-left: 10px;
   padding-right: 10px;
   width: auto;
@@ -656,10 +656,13 @@ li.menu-item:hover {
 }
 
 .error {
-    margin-top: 5px;
     padding: 5px;
     background-color: #f2dede;
-    display: none;
+}
+
+.warn {
+    padding: 5px;
+    background-color: #ffc;
 }
 
 .x-dialog {

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/07/05 01:06:19
+# @modified 2018/07/14 11:56:53
 
 """
 xnote工具类总入口
@@ -131,7 +131,7 @@ class MyStdout:
 #################################################################
 ##   File System Utilities
 #################################################################
-def readfile(path, mode = "r"):
+def readfile(path, mode = "r", limit = -1):
     '''
     读取文件，尝试多种编码，编码别名参考标准库Lib/encodings/aliases.py
         utf-8 是一种边长编码，兼容ASCII
@@ -143,11 +143,17 @@ def readfile(path, mode = "r"):
         try:
             if PY2:
                 with open(path) as fp:
-                    content = fp.read()
+                    if limit > 0:
+                        content = fp.read(limit)
+                    else:
+                        content = fp.read()
                     return content.decode(encoding)
             else:
                 with open(path, encoding=encoding) as fp:
-                    content = fp.read()
+                    if limit > 0:
+                        content = fp.read(limit)
+                    else:
+                        content = fp.read()
                     return content
         except Exception as e:
             last_err = e

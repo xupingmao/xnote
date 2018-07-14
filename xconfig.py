@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/06/28 23:11:37
+# @modified 2018/07/14 12:19:31
 
 '''
 xnote系统配置
@@ -86,6 +86,8 @@ PAGE_SIZE        = 30
 IP_BLACK_LIST    = ["192.168.56.1"] # this is vbox ip
 # max file size to sync or backup
 MAX_FILE_SIZE    = 10 * 1024 ** 2
+# 文本编辑器的最大文件限制
+MAX_TEXT_SIZE    = 100 * 1024
 # 是否隐藏系统文件
 FS_HIDE_FILES    = True
 # 文件管理扩展的选项      ,类型Storage

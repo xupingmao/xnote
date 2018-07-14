@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/07/10 23:46:46
+# @modified 2018/07/14 12:29:25
 
 """文件服务
     - 文件目录
@@ -46,9 +46,6 @@ def get_parent_path(path):
     return os.path.dirname(path2).replace("\\", "/") # fix windows file sep
 
 def list_abs_dir(path):
-    # pathlist = []
-    # for item in os.listdir(path):
-    #     pathlist.append(os.path.join(path, item))
     return [os.path.join(path, item) for item in os.listdir(path)]
 
 def getpathlist2(path):

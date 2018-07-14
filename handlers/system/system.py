@@ -73,7 +73,7 @@ other_tools = [
 xconfig.MENU_LIST = [
     Storage(name = "系统管理", children = sys_tools, need_login = True, need_admin = True),
     Storage(name = "知识库", children = doc_tools, need_login = True),
-    Storage(name = "常用工具", children = other_tools),
+    Storage(name = "工具箱", children = other_tools),
 ]
 
 def list_pages():
