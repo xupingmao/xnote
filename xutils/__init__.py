@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/07/14 11:56:53
+# @modified 2018/07/14 12:58:34
 
 """
 xnote工具类总入口
@@ -43,7 +43,9 @@ wday_map = {
 def print_exc():
     """打印系统异常堆栈"""
     ex_type, ex, tb = sys.exc_info()
-    print(traceback.format_exc())
+    exc_info = traceback.format_exc()
+    print(exc_info)
+    return exc_info
 
 print_stacktrace = print_exc
 

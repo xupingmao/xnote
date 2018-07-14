@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/07/14 01:25:27
+# @modified 2018/07/14 12:59:46
 import os
 import json
 import web
@@ -155,10 +155,16 @@ class BaseTextPage:
 {% extends base.html %}
 {% block body %}
 
+{% init error = "" %}
 {% init input = "" %}
 {% init output = "" %}
 
 {% include "tools/base_title.html" %}
+{% if error != "" %}
+<div class="col-md-12 error">
+{{error}}
+</div>
+{% end %}
 <form method="{{method}}">
     <textarea class="col-md-12 code" name="input" rows={{rows}}>{{input}}</textarea>
     <button>处理</button>
@@ -180,8 +186,14 @@ class BaseTextPage:
 
     def render(self):
         input  = self.get_input()
-        output = self.handle(input)
+        error  = ""
+        output = ""
+        try:
+            output = self.handle(input)
+        except:
+            error = xutils.print_exc()
         return render_text(self.template, 
+            error = error,
             title = self.title,
             method = self.method,
             rows = self.rows,
