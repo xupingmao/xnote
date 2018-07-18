@@ -1,7 +1,8 @@
 
 <!-- Groups -->
+{% init show_groups = False %}
 {% init groups = [] %}
-{% if len(groups) > 0 %}
+{% if len(groups) > 0 or show_groups %}
 <div class="aside-item">
     <div class="aside-title">
         分组

@@ -177,6 +177,7 @@ class RecentEditHandler:
             page_max    = math.ceil(count/PAGE_SIZE), 
             groups      = groups,
             show_mdate  = True,
+            show_groups = True,
             page_url    ="/file/recent_edit?page=")
 
 class MarkedHandler:

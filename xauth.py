@@ -30,6 +30,7 @@ def _get_users():
     # 默认的账号
     _users["admin"] = Storage(name = "admin", 
         password = "123456", 
+        salt = "",
         mtime = "",
         token = gen_new_token())
 

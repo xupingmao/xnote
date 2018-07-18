@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/07/14 12:58:34
+# @modified 2018/07/16 00:33:54
 
 """
 xnote工具类总入口
@@ -563,12 +563,18 @@ def log(fmt, *argv):
 def trace(fmt, *argv):
     print("   ", fmt.format(*argv))
 
-def system(cmd):
-    if PY2:
-        encoding = sys.getfilesystemencoding()
-        os.system(cmd.encode(encoding))
-    else:
-        os.system(cmd)
+def system(cmd, cwd = None):
+    p = subprocess.Popen(cmd, cwd=cwd, 
+                                 shell=True, 
+                                 stdout=subprocess.PIPE, 
+                                 stderr=subprocess.PIPE)
+    # out = p.stdout.read()
+    # err = p.stderr.read()
+    # if PY2:
+    #     encoding = sys.getfilesystemencoding()
+    #     os.system(cmd.encode(encoding))
+    # else:
+    #     os.system(cmd)
 
 def is_windows():
     return os.name == "nt"

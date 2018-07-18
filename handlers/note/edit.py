@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/06/22 22:58:05
+# @modified 2018/07/19 00:15:51
 
 """Description here"""
 import os
@@ -83,9 +83,6 @@ class AddHandler:
                 if f != None:
                     key = name
                     raise Exception(u"%s 已存在" % name)
-                # 分组提前
-                if file.type == "group":
-                    file.priority = 1
                 file_dict = dict(**file)
                 del file_dict["default_value"]
                 inserted_id = db.insert(**file_dict)                
@@ -178,7 +175,7 @@ class RenameHandler:
         if old.creator != xauth.get_current_name():
             return dict(code="fail", message="没有权限")
 
-        file = db.select_one(where=dict(name=name))
+        file = db.select_one(where=dict(name=name, is_deleted=0))
         if file is not None:
             return dict(code="fail", message="%r已存在" % name)
         db.update(where=dict(id=id), name=name, mtime=xutils.format_datetime())
