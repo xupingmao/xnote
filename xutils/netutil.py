@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/07/19 23:58:28
+# @modified 2018/07/20 01:00:18
 import os
 import re
 import codecs
@@ -102,15 +102,18 @@ def do_http(method, url, headers, data=None, charset='utf-8'):
     """使用低级API访问HTTP，可以任意设置header，data等
     """
     addr = get_host(url)
-    cl = six.moves.http_client.HTTPConnection(addr)
+    if url.startswith("https://"):
+        conn = six.moves.http_client.HTTPSConnection(addr)
+    else:
+        conn = six.moves.http_client.HTTPConnection(addr)
     headers = headers or dict()
     if "User-Agent" not in headers:
         headers["User-Agent"] = USER_AGENT
-    cl.request(method, url, data, headers = headers)
+    conn.request(method, url, data, headers = headers)
     head = None
     buf = None
     response_headers = None
-    with cl.getresponse() as resp:
+    with conn.getresponse() as resp:
         response_headers = resp.getheaders()
         content_type = resp.getheader("Content-Type")
         content_encoding = resp.getheader("Content-Encoding")
