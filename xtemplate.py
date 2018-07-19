@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/07/14 12:59:46
+# @modified 2018/07/20 00:40:18
 import os
 import json
 import web
@@ -161,9 +161,9 @@ class BaseTextPage:
 
 {% include "tools/base_title.html" %}
 {% if error != "" %}
-<div class="col-md-12 error">
+<pre class="col-md-12 error">
 {{error}}
-</div>
+</pre>
 {% end %}
 <form method="{{method}}">
     <textarea class="col-md-12 code" name="input" rows={{rows}}>{{input}}</textarea>
@@ -177,6 +177,13 @@ class BaseTextPage:
         self.rows = 20
         self.title = "BaseTextPage"
         self.method = "POST"
+        self.output = ""
+
+    def write(self, text):
+        self.output += text
+
+    def writeline(self, line):
+        self.output += line + "\n"
 
     def handle(self, input):
         raise NotImplementedError()
@@ -198,6 +205,6 @@ class BaseTextPage:
             method = self.method,
             rows = self.rows,
             input = input, 
-            output = output)
+            output = self.output + output)
     
 reload()
