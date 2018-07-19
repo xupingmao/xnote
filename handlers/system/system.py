@@ -37,6 +37,7 @@ sys_tools = [
     link("静音",         "/search/search?key=mute"),
     link("Python解释器", "/system/script/edit?name=test.py"),
     link("Python文档", "/system/modules_info"),
+    link("SQL控制台", "/tools/sql"),
 ] 
 
 doc_tools = [

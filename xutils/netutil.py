@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/06/26 23:57:23
+# @modified 2018/07/19 23:58:28
 import os
 import re
 import codecs
@@ -98,7 +98,7 @@ class HttpResponse:
         self.headers = headers
         self.content = content
 
-def do_http(method, url, headers, data=None):
+def do_http(method, url, headers, data=None, charset='utf-8'):
     """使用低级API访问HTTP，可以任意设置header，data等
     """
     addr = get_host(url)
@@ -122,7 +122,7 @@ def do_http(method, url, headers, data=None):
             return resp.getcode(), response_headers, content
         elif content_encoding != None:
             raise Exception("暂不支持%s编码" % content_encoding)
-        return resp.getcode(), response_headers, buf
+        return resp.getcode(), response_headers, codecs.decode(buf, charset)
 
 def http_get(url, charset='utf-8'):
     out = []
@@ -138,6 +138,10 @@ def http_get(url, charset='utf-8'):
     print("get %s bytes" % readsize)
     bytes = b''.join(out)
     return codecs.decode(bytes, charset)
+
+def http_post(url, body='', charset='utf-8'):
+    status, headers, body = do_http("POST", url, None, body)
+    return body
 
 def http_download(address, destpath = None, dirname = None):
     bufsize = BUFSIZE

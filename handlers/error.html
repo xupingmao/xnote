@@ -1,0 +1,12 @@
+{% extends base.html %}
+{% block body %}
+
+{% init error = "" %}
+
+{% if error != "" %}
+<div class="col-md-12 error">
+{{error}}
+</div>
+{% end %}
+
+{% end %}

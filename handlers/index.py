@@ -105,14 +105,20 @@ class PageHandler:
             name += ".py"
         script_name = "pages/" + name
         if not os.path.exists(os.path.join(xconfig.PAGES_DIR, name)):
-            return "file `%s` not found" % script_name
-        vars = dict()
-        xutils.load_script(script_name, vars)
-        main_func = vars.get("main")
-        if main_func != None:
-            return main_func()
-        else:
-            return "function `main` not found!"
+            error = "file `%s` not found" % script_name
+            return xtemplate.render("error.html", error=error)
+        try:
+            vars = dict()
+            vars["script_name"] = script_name
+            xutils.load_script(script_name, vars)
+            main_func = vars.get("main")
+            if main_func != None:
+                return main_func()
+            else:
+                return xtemplate.render("error.html", error="function `main` not found!")
+        except:
+            xutils.print_exc()
+            return xtemplate.render("error.html", error="未知异常")
 
     def POST(self, name = ""):
         return self.GET(name)
