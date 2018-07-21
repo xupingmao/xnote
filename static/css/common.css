@@ -665,6 +665,12 @@ li.menu-item:hover {
     background-color: #ffc;
 }
 
+.info {
+    padding: 5px;
+    background-color: #C1FFC1;
+    margin: 0px;
+}
+
 .x-dialog {
     display: none;
     position: fixed;
