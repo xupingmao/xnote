@@ -98,24 +98,24 @@ class FaviconHandler:
     def GET(self):
         raise web.seeother("/static/favicon.ico")
 
-class PageHandler:
+class PluginsHandler:
 
     def GET(self, name = ""):
         if not name.endswith(".py"):
             name += ".py"
-        script_name = "pages/" + name
-        if not os.path.exists(os.path.join(xconfig.PAGES_DIR, name)):
+        script_name = "plugins/" + name
+        if not os.path.exists(os.path.join(xconfig.PLUGINS_DIR, name)):
             error = "file `%s` not found" % script_name
             return xtemplate.render("error.html", error=error)
         try:
             vars = dict()
             vars["script_name"] = script_name
             xutils.load_script(script_name, vars)
-            main_func = vars.get("main")
-            if main_func != None:
-                return main_func()
+            main_class = vars.get("Main")
+            if main_class != None:
+                return main_class().render()
             else:
-                return xtemplate.render("error.html", error="function `main` not found!")
+                return xtemplate.render("error.html", error="class `Main` not found!")
         except:
             error = xutils.print_exc()
             return xtemplate.render("error.html", error=error)
@@ -131,6 +131,6 @@ xurls = (
     # r"/system/index", GridHandler,
     r"/unauthorized", Unauthorized,
     r"/favicon.ico", FaviconHandler,
-    r"/pages/(.+)", PageHandler
+    r"/plugins/(.+)", PluginsHandler
 )
 

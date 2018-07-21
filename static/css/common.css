@@ -658,6 +658,7 @@ li.menu-item:hover {
 .error {
     padding: 5px;
     background-color: #f2dede;
+    margin: 0px;
 }
 
 .warn {

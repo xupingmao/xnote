@@ -76,11 +76,14 @@ xconfig.MENU_LIST = [
     Storage(name = "工具箱", children = other_tools),
 ]
 
-def list_pages():
+def list_plugins():
+    dirname = xconfig.PLUGINS_DIR
+    if not os.path.isdir(dirname):
+        return []
     links = []
-    for name in sorted(os.listdir(xconfig.PAGES_DIR)):
+    for name in sorted(os.listdir(dirname)):
         name, ext = os.path.splitext(name)
-        links.append(link(name, "/pages/" + name))
+        links.append(link(name, "/plugins/" + name))
     return links
                 
 class SysHandler:
@@ -107,7 +110,7 @@ class SysHandler:
             os               = os,
             user             = xauth.get_current_user(),
             customized_items = customized_items,
-            pages            = list_pages()
+            plugins          = list_plugins()
         )
 
 class ConfigHandler:

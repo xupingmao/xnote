@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/07/14 01:26:28
+# @modified 2018/07/21 22:50:53
 
 import sys
 import os
@@ -50,6 +50,10 @@ def json_request(*args, **kw):
     if six.PY2:
         return json.loads(data)
     return json.loads(data.decode("utf-8"))
+
+def request_html(*args, **kw):
+    ret = app.request(*args, **kw)
+    return ret.data
 
 
 class TextPage(xtemplate.BaseTextPage):
@@ -393,6 +397,18 @@ class TestMain(unittest.TestCase):
 
     def test_BaseTextPage(self):
         TextPage().render()
+
+    def test_plugin(self):
+        code  = '''
+class Main:
+    def render(self):
+        return "hello,world"
+        '''
+        fpath = os.path.join(xconfig.PLUGINS_DIR, "test.py")
+        xutils.savetofile(fpath, code)
+        html = request_html("/plugins/test")
+        self.assertEqual(b"hello,world", html)
+
 
 
 

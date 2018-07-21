@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/07/21 12:30:36
+# @modified 2018/07/21 19:27:25
 import web
 import os
 import xconfig
@@ -64,9 +64,11 @@ class RunPluginHandler:
     def POST(self):
         func_ret = None
         sys.stdout.record()
+        original_name = ""
         try:
             name = xutils.get_argument("name")
             path = xutils.get_argument("path")
+            original_name = name
             confirmed = xutils.get_argument("confirmed") == "true"
             name, input = textutil.parse_simple_command(name)
             name = xconfig.get_alias(name, name)
@@ -102,7 +104,7 @@ class RunPluginHandler:
         else:
             html = header + xutils.mark_text(result)
         html += '''<input id="inputText" class="col-md-12 hide" placeholder="请输入参数" value="">'''
-        html += '''<div><button class="btn-danger" onclick="runPlugin('%s', true)">确认执行</button></div>''' % name
+        html += '''<div><button class="btn-danger" onclick="runPlugin('%s', true)">确认执行</button></div>''' % original_name
         return dict(code="success", data = html, name = name)
 
 

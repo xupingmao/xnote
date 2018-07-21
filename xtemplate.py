@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/07/21 12:03:28
+# @modified 2018/07/21 22:45:52
 import os
 import json
 import web
@@ -148,8 +148,8 @@ def reload():
     global _loader
     _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
 
-class BaseTextPage:
-    """纯文本页面的基类"""
+class BaseTextPlugin:
+    """纯文本插件的基类"""
 
     template = """
 {% extends base.html %}
@@ -184,7 +184,7 @@ class BaseTextPage:
 
     def __init__(self):
         self.rows = 20
-        self.title = "BaseTextPage"
+        self.title = "BaseTextPlugin"
         self.method = "POST"
         self.output = ""
         self.description = ""
@@ -206,7 +206,7 @@ class BaseTextPage:
         error  = ""
         output = ""
         try:
-            output = self.handle(input) or ""
+            output = str(self.handle(input))
         except:
             error = xutils.print_exc()
         return render_text(self.template, 
@@ -218,5 +218,7 @@ class BaseTextPage:
             rows = self.rows,
             input = input, 
             output = self.output + output)
-    
+
+BaseTextPage = BaseTextPlugin
+
 reload()

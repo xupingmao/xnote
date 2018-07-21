@@ -38,6 +38,11 @@
 {% end %}
 
 {% block body %}
+  
+  {% if error != "" and error != None %}
+    <div class="col-md-12 error">{{error}}</div>
+  {% end %}
+
   <div class="login-box">
 		<form id="loginForm" name="loginForm" method="POST">
       登录名
@@ -46,7 +51,6 @@
 			<input class="login-input" type="password" name="password" value="{{password}}" placeholder="Password"/>
       <input type="text" name="test" value="Test" class="hide">
 			<button class="login-submit login-input" type="submit" value="Login" id="loginBtn" style="margin-top:20px;">Login</button>
-      <label style="width:100%; color:red">{{error}}</label>
 		</form>
 	</div>
 {% end %}

@@ -9,13 +9,13 @@ import xmanager
 from xutils import SearchResult
 from xutils import u
 
-def search_pages(name):
+def search_plugins(name):
     results = []
-    for fname in xutils.listdir(xconfig.PAGES_DIR):
+    for fname in xutils.listdir(xconfig.PLUGINS_DIR):
         if name in fname:
             result = SearchResult()
-            result.name = u("Pages - " + fname)
-            result.url  = u("/pages/" + fname)
+            result.name = u("Plugins - " + fname)
+            result.url  = u("/plugins/" + fname)
             results.append(result)
     return results
 
@@ -24,8 +24,11 @@ def search(ctx, name):
         return None
     if not ctx.search_tool:
         return
-    results = search_pages(name)
+    results = search_plugins(name)
     for fname in xutils.listdir(xconfig.SCRIPTS_DIR):
+        fpath = os.path.join(xconfig.SCRIPTS_DIR, fname)
+        if not os.path.isfile(fpath):
+            continue
         if name in fname:
             result = xutils.SearchResult()
             result.name = xutils.u("脚本 - ") + fname
