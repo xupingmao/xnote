@@ -1,3 +1,72 @@
+/**
+ * 通用的操作函数
+ */
+$(function() {
+
+  function moveTo(selfId, parentId) {
+      $.post("/file/group/move", 
+          {id:selfId, parent_id: parentId}, 
+          function (resp){
+              console.log(resp);
+              window.location.reload();
+      });
+  }
+  window.moveTo = moveTo;
+
+  function showSideBar() {
+    $(".navMenubox").animate({"margin-left": "0px"});
+    $("#poweredBy").show();
+  }
+
+  function hideSideBar() {
+    $(".navMenubox").animate({"margin-left": "-200px"});
+    $("#poweredBy").hide();
+  }
+
+  function checkResize() {
+    if ($(".navMenubox").is(":animated")) {
+      return;
+    }
+    if (window.innerWidth < 600) {
+      // 移动端，兼容下不支持@media的浏览器 
+      hideSideBar();
+    } else {
+      showSideBar();
+    }
+  }
+
+  function toggleMenu() {
+    var marginLeft = $(".navMenubox").css("margin-left");
+    if (marginLeft == "0px") {
+      hideSideBar();
+    } else {
+      showSideBar();
+    }
+  }
+
+  $(".toggleMenu").on("click", function () {
+    toggleMenu();
+  });
+
+  $(".move-btn").click(function (event) {
+      var url = $(event.target).attr("data-url");
+      $.get(url, function (respHtml) {
+          var width = $(".main").width();
+          layer.open({
+            type: 1,
+            title: "移动分组",
+            shadeClose: true,
+            area: [width + "px", '80%'],
+            content: respHtml,
+            scrollbar: false
+          });
+      });
+  });
+});
+
+/**
+ * 处理悬浮控件
+ */
 (function (window) {
 
     if (self != top) {
@@ -165,70 +234,3 @@
         init();
     });
 })(window);
-
-
-$(function() {
-
-  function moveTo(selfId, parentId) {
-      $.post("/file/group/move", 
-          {id:selfId, parent_id: parentId}, 
-          function (resp){
-              console.log(resp);
-              window.location.reload();
-      });
-  }
-
-  window.moveTo = moveTo;
-
-
-  function showSideBar() {
-    $(".navMenubox").animate({"margin-left": "0px"});
-    $("#poweredBy").show();
-  }
-
-  function hideSideBar() {
-    $(".navMenubox").animate({"margin-left": "-200px"});
-    $("#poweredBy").hide();
-  }
-
-  function checkResize() {
-    if ($(".navMenubox").is(":animated")) {
-      return;
-    }
-    if (window.innerWidth < 600) {
-      // 移动端，兼容下不支持@media的浏览器 
-      hideSideBar();
-    } else {
-      showSideBar();
-    }
-  }
-
-  function toggleMenu() {
-    var marginLeft = $(".navMenubox").css("margin-left");
-    if (marginLeft == "0px") {
-      hideSideBar();
-    } else {
-      showSideBar();
-    }
-  }
-
-  $(".toggleMenu").on("click", function () {
-    toggleMenu();
-  });
-
-  $(".move-btn").click(function (event) {
-      var url = $(event.target).attr("data-url");
-      $.get(url, function (respHtml) {
-          var width = $(".main").width();
-          layer.open({
-            type: 1,
-            title: "移动分组",
-            shadeClose: true,
-            area: [width + "px", '80%'],
-            content: respHtml,
-            scrollbar: false
-          });
-      });
-  })
-
-});

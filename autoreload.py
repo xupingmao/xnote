@@ -14,6 +14,7 @@ import os
 import sys
 import traceback
 
+BLOCKED_EXT_LIST = [".pyc", ".class"]
 
 _has_execv = sys.platform != 'win32'
 _watched_files = []
@@ -40,7 +41,7 @@ class AutoReloadThread(Thread):
         super(AutoReloadThread, self).__init__(name="AutoReloadThread")
         self.setDaemon(True)
         self.interval = 0.5
-        self.watch_dirs = []
+        self.watched_dirs = []
 
         for callback in callbacks:
             _callbacks.append(callback)
@@ -49,13 +50,22 @@ class AutoReloadThread(Thread):
         if recursive:
             self.watch_recursive_dir(dir)
             return
-        self.watch_dirs.append(dir)
-        _check_watch_dirs(self.watch_dirs)
+        self.watched_dirs.append(dir)
+        _check_watch_dirs(self.watched_dirs)
+
+    def watch_file(self, filepath):
+        global _watched_files
+        path = os.path.abspath(filepath)
+        _watched_files.append(path)
+
 
     def watch_recursive_dir(self, dir):
         for root, dirs, files in os.walk(dir):
             for filename in files:
                 abspath = os.path.join(root, filename)
+                name, ext = os.path.splitext(filename)
+                if ext in BLOCKED_EXT_LIST:
+                    continue
                 if abspath not in _watched_files:
                     _watched_files.append(abspath)
 
@@ -78,8 +88,8 @@ class AutoReloadThread(Thread):
             time.sleep(self.interval)
 
 
-def _check_watch_dirs(watch_dirs):
-    for dir in watch_dirs:
+def _check_watch_dirs(watched_dirs):
+    for dir in watched_dirs:
         _check_watch_dir(dir)
 
 def _check_watch_dir(dir):

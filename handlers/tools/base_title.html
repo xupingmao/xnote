@@ -1,6 +1,6 @@
 {% init right_link = None %}
 <div class="grid-title">
-    <a href="javascript:history.back();" class="link">返回</a> › {{title}}
+    <a href="/system/index" class="link">系统</a> › {{title}}
     {% if right_link is not None %}
         <a class="float-right link" href="{{right_link.get('link')}}">{{right_link.get('name')}}</a>
     {% end %}

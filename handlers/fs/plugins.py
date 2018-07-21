@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/07/01 01:06:52
+# @modified 2018/07/21 12:30:36
 import web
 import os
 import xconfig
@@ -106,15 +106,15 @@ class RunPluginHandler:
         return dict(code="success", data = html, name = name)
 
 
-class DownloadPluginsHandler:
+class DownloadHandler:
 
     @xauth.login_required("admin")
-    def GET(self):
+    def GET(self, name=""):
         bufsize = 1024 * 100
-        dirname = xconfig.COMMANDS_DIR
-        outpath = os.path.join(dirname, "commands.zip")
+        dirname = os.path.join(xconfig.SCRIPTS_DIR, name)
+        outpath = os.path.join(xconfig.SCRIPTS_DIR, name + ".zip")
         ziputil.zip_dir(dirname, outpath = outpath)
-        web.header("Content-Disposition", "attachment; filename=commands.zip")
+        web.header("Content-Disposition", "attachment; filename=%s.zip" % name)
         with open(outpath, "rb") as fp:
             buf = fp.read(bufsize)
             while buf:
@@ -125,5 +125,5 @@ xurls = (
     r"/fs_api/plugins", ListHandler,
     r"/fs_plugins", ListHandler,
     r"/fs_api/run_plugin", RunPluginHandler,
-    r"/fs_api/plugins/download", DownloadPluginsHandler
+    r"/fs_api/download/(commands|pages)", DownloadHandler
 )

@@ -117,8 +117,8 @@ class PageHandler:
             else:
                 return xtemplate.render("error.html", error="function `main` not found!")
         except:
-            xutils.print_exc()
-            return xtemplate.render("error.html", error="未知异常")
+            error = xutils.print_exc()
+            return xtemplate.render("error.html", error=error)
 
     def POST(self, name = ""):
         return self.GET(name)

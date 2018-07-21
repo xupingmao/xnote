@@ -209,7 +209,7 @@
             {% end %}
 
             {% if item.ext in xconfig.FS_TEXT_EXT_LIST %}
-                <a class="item-option" href="/code/view_source?path={{url_escape(item.path)}}">编辑</a>
+                <a class="item-option" href="/code/edit?path={{url_escape(item.path)}}">编辑</a>
             {% end %}
 
             {% if item.ext in (".md", ".csv") %}

@@ -26,7 +26,7 @@
     </div>
 
     {% if _is_admin and path != "" %}
-        {% set fs_path_option = '<a class="float-right" href="/code/view_source?path={}">[编辑]</a>'.format(path) %}
+        {% set fs_path_option = '<a class="float-right" href="/code/edit?path={}">[编辑]</a>'.format(path) %}
         {% include "mod_fs_path.html" %}
     {% end %}
     

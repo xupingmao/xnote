@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/07/01 01:16:16
+# @modified 2018/07/21 11:35:55
 """
     Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -117,6 +117,7 @@ def main():
     # autoreload just reload models
     autoreload_thread = AutoReloadThread(reload_callback)
     autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
+    autoreload_thread.watch_file("xtemplate.py")
     autoreload_thread.start()
     # 启动定时任务检查
     manager.run_task()

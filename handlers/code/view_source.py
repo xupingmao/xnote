@@ -17,6 +17,7 @@ class ViewSourceHandler:
         template_name = "code/view_source.html"
         path = xutils.get_argument("path", "")
         key  = xutils.get_argument("key", "")
+        readonly = False
         if path == "":
             return xtemplate.render(template_name, error = "path is empty")
         else:
@@ -27,6 +28,7 @@ class ViewSourceHandler:
                 max_file_size = xconfig.MAX_TEXT_SIZE
                 if xutils.get_file_size(path, format=False) >= max_file_size:
                     warn = "文件过大，只显示部分内容"
+                    readonly = True
                 content = xutils.readfile(path, limit = max_file_size)
                 # 使用JavaScript来处理搜索关键字高亮问题
                 # if key != "":
@@ -43,7 +45,9 @@ class ViewSourceHandler:
             except Exception as e:
                 xutils.print_stacktrace()
                 error = e
-            return xtemplate.render(template_name, error = error, lines = 0, content="")
+            return xtemplate.render(template_name, 
+                readonly = readonly,
+                error = error, lines = 0, content="")
 
 
 class UpdateHandler(object):

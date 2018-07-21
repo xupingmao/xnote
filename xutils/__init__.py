@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/07/16 00:33:54
+# @modified 2018/07/21 12:02:05
 
 """
 xnote工具类总入口
@@ -636,7 +636,11 @@ def say(msg):
         # 防止调用语音API的程序没有正确处理循环
         time.sleep(0.5)
 
-def exec_python_code(name, code, record_stdout = True, raise_err = False, do_gc = True, vars = None):
+def exec_python_code(name, code, 
+        record_stdout = True, 
+        raise_err = False, 
+        do_gc = True, 
+        vars = None):
     ret = None
     try:
         if vars is None:
@@ -708,7 +712,8 @@ def load_script(name, vars = None, dirname = None):
         dirname = xconfig.SCRIPTS_DIR
     path = os.path.join(dirname, name)
     path = os.path.abspath(path)
-    return exec_python_code(name, xutils.readfile(path), False, vars = vars)
+    return exec_python_code(name, xutils.readfile(path), 
+        record_stdout = False, raise_err = True, vars = vars)
 
 def exec_command(command, confirmed = False):
     pass

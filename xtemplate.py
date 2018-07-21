@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/07/20 00:40:18
+# @modified 2018/07/21 12:03:28
 import os
 import json
 import web
@@ -156,15 +156,24 @@ class BaseTextPage:
 {% block body %}
 
 {% init error = "" %}
+{% init description = "" %}
 {% init input = "" %}
 {% init output = "" %}
 
 {% include "tools/base_title.html" %}
+
+{% if description != "" %}
+<pre class="col-md-12 info">
+{{description}}
+</pre>
+{% end %}
+
 {% if error != "" %}
 <pre class="col-md-12 error">
 {{error}}
 </pre>
 {% end %}
+
 <form method="{{method}}">
     <textarea class="col-md-12 code" name="input" rows={{rows}}>{{input}}</textarea>
     <button>处理</button>
@@ -178,6 +187,7 @@ class BaseTextPage:
         self.title = "BaseTextPage"
         self.method = "POST"
         self.output = ""
+        self.description = ""
 
     def write(self, text):
         self.output += text
@@ -196,10 +206,12 @@ class BaseTextPage:
         error  = ""
         output = ""
         try:
-            output = self.handle(input)
+            output = self.handle(input) or ""
         except:
             error = xutils.print_exc()
         return render_text(self.template, 
+            script_name = globals().get("script_name"),
+            description = self.description,
             error = error,
             title = self.title,
             method = self.method,

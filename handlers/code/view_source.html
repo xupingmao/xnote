@@ -37,6 +37,7 @@
 {% end %}
 
 {% block body %}
+{% init readonly = False %}
 {% init warn = "" %}
 {% init error = "" %}
 {% init pathlist = [] %}
@@ -62,10 +63,15 @@
     </div>
 
     <div class="col-md-12 bottom-offset-1">
-        <input type="submit" value="保存">
+        {% if readonly %}
+            <input type="submit" value="保存">
+        {% end %}
         <input id="execute" type="button" class="btn hide" value="执行"/>
         {% if path.endswith(".md") %}
             <input type="button" class="link-btn" href="/code/preview?path={{path}}" value="预览">
+        {% end %}
+        {% if path.find("/pages/") >= 0 %}
+            <input type="button" class="link-btn" href="/pages/{{name}}" value="预览"/>
         {% end %}
         <span>注意不会自动保存</span>
     </div>

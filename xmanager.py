@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/07/01 01:11:55
+# @modified 2018/07/21 11:20:49
 
 """
 Xnote 模块管理器
@@ -169,6 +169,7 @@ class ModelManager:
         self.mapping += self.last_mapping
         self.app.init_mapping(self.mapping)
         
+        del sys.modules['xtemplate']
         import xtemplate
         xtemplate.reload()
 
