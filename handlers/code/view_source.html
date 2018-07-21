@@ -63,7 +63,7 @@
     </div>
 
     <div class="col-md-12 bottom-offset-1">
-        {% if readonly %}
+        {% if not readonly %}
             <input type="submit" value="保存">
         {% end %}
         <input id="execute" type="button" class="btn hide" value="执行"/>
