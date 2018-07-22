@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/07/21 22:45:52
+# @modified 2018/07/21 23:27:56
 import os
 import json
 import web
@@ -206,7 +206,7 @@ class BaseTextPlugin:
         error  = ""
         output = ""
         try:
-            output = str(self.handle(input))
+            output = self.handle(input) or ""
         except:
             error = xutils.print_exc()
         return render_text(self.template, 
