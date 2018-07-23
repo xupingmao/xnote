@@ -11,11 +11,14 @@ from xutils import u
 
 def search_plugins(name):
     results = []
-    for fname in xutils.listdir(xconfig.PLUGINS_DIR):
+    dirname = xconfig.PLUGINS_DIR
+    for fname in xutils.listdir(dirname):
         if name in fname:
             result = SearchResult()
+            result.category = "plugin"
             result.name = u("Plugins - " + fname)
             result.url  = u("/plugins/" + fname)
+            result.edit_link = u("/code/edit?path=" + os.path.join(dirname, fname))
             results.append(result)
     return results
 

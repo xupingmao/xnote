@@ -19,6 +19,11 @@
                 {% if file.id != None %}
                 <a class="item-option move-btn" data-url="/file/group/list?id={{file.id}}&filetype=xml">移动</a>
                 {% end %}
+
+                {# 插件 #}
+                {% if file.category == "plugin" %}
+                    <a class="item-option" href="{{file.edit_link}}">编辑</a>
+                {% end %}
             </div>
             <div class="note-name">
                 {% if file.type == "group" %}
