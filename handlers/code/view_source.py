@@ -44,9 +44,10 @@ class ViewSourceHandler:
                     path = path,
                     content = content, lines = content.count("\n")+1)
             except Exception as e:
-                xutils.print_stacktrace()
+                xutils.print_exc()
                 error = e
             return xtemplate.render(template_name, 
+                name = "",
                 readonly = readonly,
                 error = error, lines = 0, content="")
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/07/21 23:27:56
+# @modified 2018/07/25 00:03:19
 import os
 import json
 import web
@@ -175,10 +175,15 @@ class BaseTextPlugin:
 {% end %}
 
 <form method="{{method}}">
+    {% if rows == 1 %}
+    <input class="col-md-12" name="input"/>
+    {% else %}
     <textarea class="col-md-12 code" name="input" rows={{rows}}>{{input}}</textarea>
+    {% end %}
     <button>处理</button>
 </form>
-<pre class="col-md-12">{{output}}</pre>
+<pre class="col-md-12">{{ output }}</pre>
+<div class="col-md-12">{% raw html %}</div>
 {% end %}
 """
 
@@ -188,12 +193,16 @@ class BaseTextPlugin:
         self.method = "POST"
         self.output = ""
         self.description = ""
+        self.html = ""
 
     def write(self, text):
         self.output += text
 
     def writeline(self, line):
         self.output += line + "\n"
+
+    def writehtml(self, html):
+        self.html += html
 
     def handle(self, input):
         raise NotImplementedError()
@@ -217,7 +226,8 @@ class BaseTextPlugin:
             method = self.method,
             rows = self.rows,
             input = input, 
-            output = self.output + output)
+            output = self.output + output,
+            html = self.html)
 
 BaseTextPage = BaseTextPlugin
 

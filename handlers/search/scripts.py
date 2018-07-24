@@ -16,9 +16,26 @@ def search_plugins(name):
         if name in fname:
             result = SearchResult()
             result.category = "plugin"
-            result.name = u("Plugins - " + fname)
+            result.name = u("插件 - " + fname)
             result.url  = u("/plugins/" + fname)
             result.edit_link = u("/code/edit?path=" + os.path.join(dirname, fname))
+            results.append(result)
+    return results
+
+def search_scripts(name):
+    results = []
+    for fname in xutils.listdir(xconfig.SCRIPTS_DIR):
+        fpath = os.path.join(xconfig.SCRIPTS_DIR, fname)
+        if not os.path.isfile(fpath):
+            continue
+        if fname.endswith(".zip"):
+            continue
+        if name in fname:
+            result = xutils.SearchResult()
+            result.name = xutils.u("脚本 - ") + fname
+            result.raw  = xutils.u("搜索到可执行脚本 - ") + fname
+            result.url  = xutils.u("/system/script_admin?op=edit&name=%s") % fname
+            result.command = xutils.u("/system/script_admin/execute?name=%s") % fname
             results.append(result)
     return results
 
@@ -28,17 +45,7 @@ def search(ctx, name):
     if not ctx.search_tool:
         return
     results = search_plugins(name)
-    for fname in xutils.listdir(xconfig.SCRIPTS_DIR):
-        fpath = os.path.join(xconfig.SCRIPTS_DIR, fname)
-        if not os.path.isfile(fpath):
-            continue
-        if name in fname:
-            result = xutils.SearchResult()
-            result.name = xutils.u("脚本 - ") + fname
-            result.raw  = xutils.u("搜索到可执行脚本 - ") + fname
-            result.url  = xutils.u("/system/script_admin?op=edit&name=%s") % fname
-            result.command = xutils.u("/system/script_admin/execute?name=%s") % fname
-            results.append(result)
+    results += search_scripts(name)
     return results
 
 

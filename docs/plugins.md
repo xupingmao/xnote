@@ -1,5 +1,9 @@
 # xnote插件
 
+## 新增插件
+
+在```$DATA/scripts/plugins```目录下创建一个Python文件。
+
 ## 插件示例
 
 ```python
@@ -18,3 +22,7 @@ class Main(BaseTextPlugin):
         # 处理命令请求
         pass
 ```
+
+## 插件卸载
+
+直接删除对应的Python文件即可
