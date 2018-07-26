@@ -6,6 +6,7 @@ body {
     background-color: #f0f0f0;
     font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
     font-size: 14px;
+    letter-spacing: 1px;
     -webkit-text-size-adjust: 100%; 
     margin: 0; 
     padding: 0;
@@ -163,6 +164,7 @@ table td {
 }
 
 .line-td {
+    border-top: none;
     border-left: none;
     border-right: none;
 }
@@ -846,6 +848,7 @@ li.menu-item:hover {
 
 /** 知识库列表样式 **/
 #fileTable td {
+    border-top: none;
     border-left: none;
     border-right: none;
 }

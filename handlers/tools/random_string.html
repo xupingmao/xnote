@@ -4,22 +4,27 @@
 
 {% block body %}
 
-<h2>随机字符串生成器</h2>
+{% set title = "随机字符串生成器" %}
+{% include "tools/base_title.html" %}
 
-长度<input id="length" value="100"/>
-<ul>
-<li><input id="digit" type="checkbox" checked="true" value="1234567890">1234567890</li>
-<li><input id="lowerAlphabet" type="checkbox" checked="true" value="abcdefghijklmnopqrstuvwxyz">a-z</li>
-<li><input id="upperAlphabet" type="checkbox" checked="true" value="ABCDEFGHIJKLMNOPQRSTUVWXYZ">A-Z</li>
-<li><input id="symbol" type="checkbox" value="~!@#$%^&*">~!@#$%^&*</li>
-<li>其他<br/><textarea id="others" style="width:50%;"></textarea></li>
-</ul>
+<div class="col-md-12">字符长度<input id="length" value="100"/></div>
+<div class="col-md-12">生成的数量<input id="count" value="1"/></div>
+<div>字符内容</div>
+<div>
+    <ul>
+        <li><input id="digit" type="checkbox" checked="true" value="1234567890">1234567890</li>
+        <li><input id="lowerAlphabet" type="checkbox" checked="true" value="abcdefghijklmnopqrstuvwxyz">a-z</li>
+        <li><input id="upperAlphabet" type="checkbox" checked="true" value="ABCDEFGHIJKLMNOPQRSTUVWXYZ">A-Z</li>
+        <li><input id="symbol" type="checkbox" value="~!@#$%^&*">~!@#$%^&*</li>
+        <li>其他<br/><textarea id="others" style="width:50%;"></textarea></li>
+    </ul>
+</div>
 
 <div>
     <input type="button" onclick="generate()" value="生成"/>
 </div>
 
-<textarea id="out" style="width: 100%;" rows=20></textarea>
+<textarea id="out" style="width: 100%; font-family: monospace; " rows=20></textarea>
 
 
 <script type="text/javascript">
@@ -46,14 +51,18 @@
 
 
         var length = parseInt($("#length").val());
+        var count = parseInt($("#count").val());
         var out = "";
-        for (var i = 0; i < length; i++) {
-            var randomIndex = parseInt(Math.random() * dictLength -1);
-            if (randomIndex < 0) {
-                randomIndex = 0;
+        for (var c = 0; c < count; c++) {        
+            for (var i = 0; i < length; i++) {
+                var randomIndex = parseInt(Math.random() * dictLength -1);
+                if (randomIndex < 0) {
+                    randomIndex = 0;
+                }
+                console.log(dict, randomIndex);
+                out += dict[randomIndex];
             }
-            console.log(dict, randomIndex);
-            out += dict[randomIndex];
+            out += "\n";
         }
         $("#out").val(out);
     }

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/07/25 00:03:19
+# @modified 2018/07/26 00:49:44
 import os
 import json
 import web
@@ -210,12 +210,18 @@ class BaseTextPlugin:
     def get_input(self):
         return xutils.get_argument("input", "")
 
+    def get_format(self):
+        return xutils.get_argument("_format", "")
+
     def render(self):
         input  = self.get_input()
         error  = ""
         output = ""
         try:
             output = self.handle(input) or ""
+            if self.get_format() == "text":
+                web.header("Content-Type", "text/plain; charset:utf-8")
+                return self.output + output
         except:
             error = xutils.print_exc()
         return render_text(self.template, 
