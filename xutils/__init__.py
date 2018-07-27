@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/07/21 12:02:05
+# @modified 2018/07/28 00:26:59
 
 """
 xnote工具类总入口
@@ -829,6 +829,10 @@ class History:
 
     def __str__(self):
         return str(self.q)
+
+    @staticmethod
+    def get_items(name):
+        return History.items.get(name, [])
 
 _funcs = dict()
 def register_func(name, func):

@@ -55,22 +55,6 @@
     </div>
 {% end %}
 
-{% if _is_admin %}
-<div class="col-md-12 top-offset-1">
-    <div class="grid-title">
-        插件
-        <a href="/fs_link/scripts/plugins" class="float-right link">管理</a>
-    </div>
-    <div class="col-md-12">
-        {% for link in plugins %}
-        <div class="item">
-            <a href="{{link.link}}">{{link.name}}</a>
-        </div>
-        {% end %}
-    </div>
-</div>
-{% end %}
-
 <div class="col-md-12 top-offset-1">
     <div class="grid-title">
         常用链接

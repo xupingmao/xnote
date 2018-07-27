@@ -1,0 +1,55 @@
+{% extends base.html %}
+
+{% block head %}
+    <style type="text/css">
+        a {
+            text-decoration: none;
+            color: #08c;
+        }
+
+        .item {
+            width: 150px;
+            height: 25px;
+            float: left;
+        }
+
+        .logo {
+            width: 45px;
+            height: 45px;
+        }
+    </style>
+{% end %}
+
+
+{% block body %}
+
+    {% init recent = [] %}
+
+    <div class="col-md-12">
+        <div class="grid-title">
+            最近使用
+        </div>
+        <div class="col-md-12">
+            {% for link in recent %}
+            <div class="item">
+                <a href="{{link.link}}">{{link.name}}</a>
+            </div>
+            {% end %}
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="grid-title">
+            所有
+            <a href="/fs_link/scripts/plugins" class="float-right link">管理</a>
+        </div>
+        <div class="col-md-12">
+            {% for link in plugins %}
+            <div class="item">
+                <a href="{{link.link}}">{{link.name}}</a>
+            </div>
+            {% end %}
+        </div>
+    </div>
+
+{% end %}

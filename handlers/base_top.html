@@ -44,12 +44,12 @@
       <!-- 保持对称 -->
       <div class="float-left">
         <ul class="nav-ul">
-          <li><a href="/">知识库</a></li>
+          <li><a href="/">笔记</a></li>
           {% if _has_login %}
           <li><a href="/message?status=created">备忘({{_notice_count}})</a></li>
           {% end %}
           {% if _is_admin %}
-          <li><a href="{{xconfig.FS_LINK}}">文件</a></li>
+          <li><a href="/system/plugins">插件</a></li>
           {% end %}
           <li><a href="/system/index">系统</a></li>
           <li><a href="/wiki/README.md">关于</a></li>

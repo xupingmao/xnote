@@ -19,6 +19,7 @@ import xutils
 import xauth
 import xmanager
 import xtables
+from xutils import History
 config = xconfig
 
 def link(name, url):
@@ -54,7 +55,7 @@ other_tools = [
     link("代码模板", "/tools/code_template"),
     link("浏览器信息", "/tools/browser_info"),
     link("文本对比", "/tools/js_diff"),
-    link("字符串转换", "/tools/string"),
+    link("字符转换", "/tools/string"),
     link("图片合并", "/tools/img_merge"),
     link("图片拆分", "/tools/img_split"),
     link("图像灰度化", "/tools/img2gray"),
@@ -86,6 +87,12 @@ def list_plugins():
         name, ext = os.path.splitext(name)
         links.append(link(name, "/plugins/" + name))
     return links
+
+def list_recent_plugins():
+    items = History.get_items("plugins")
+    links = list(items)
+    links.reverse()
+    return links;
                 
 class SysHandler:
 
@@ -110,9 +117,17 @@ class SysHandler:
             Storage          = Storage,
             os               = os,
             user             = xauth.get_current_user(),
-            customized_items = customized_items,
-            plugins          = list_plugins()
+            customized_items = customized_items
         )
+
+class PluginsHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        return xtemplate.render("system/plugins.html", 
+            html_title = "插件",
+            recent = list_recent_plugins(),
+            plugins = list_plugins())
 
 class ConfigHandler:
 
@@ -131,5 +146,6 @@ xurls = (
     r"/system/sys",   SysHandler,
     r"/system/index", SysHandler,
     r"/system/system", SysHandler,
-    r"/system/xconfig", ConfigHandler
+    r"/system/xconfig", ConfigHandler,
+    r"/system/plugins", PluginsHandler,
 )
