@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2018/06/04 22:35:03
+# @modified 2018/07/28 12:16:59
 
 def element(tag, text, clazz):
     """
@@ -24,8 +24,8 @@ def pre(text, clazz = 'xnote-pre'):
 def div(text, clazz = 'xnote-div'):
     return element("div", text, clazz)
 
-def link(link, name = None, clazz = "xnote-link"):
-    if name is None:
-        name = link
+def link(name, link = None, clazz = "xnote-link"):
+    if link is None:
+        link = name
     return "<a class='%s' href='%s'>%s</a>" % (clazz, link, name)
 

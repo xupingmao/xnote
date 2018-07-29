@@ -1,12 +1,16 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/06/26 23:03:11
-
+# @modified 2018/07/28 11:47:51
 __doc__ = """Methods for text operation"""
 
 import re
 import random
+try:
+    # Py3
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
 
 """Methods to check the text"""
 
@@ -301,6 +305,21 @@ def parse_config_text(text):
             strs[1]= line[len(strs[0])+1:]
             config.append(dict(key=strs[0], value=strs[1]))
     return config
+
+def parse_ini_text(text):
+    """解析INI文件内容"""
+    data = dict()
+    cf = ConfigParser()
+    cf.read_string(text)
+    names = cf.sections()
+    for name in names:
+        item = dict()
+        options = cf.options(name)
+        for option in options:
+            value = cf.get(name, option)
+            item[option] = value
+        data[name] = item
+    return data
 
 def parse_simple_command(text):
     """

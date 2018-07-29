@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/07/26 00:49:44
+# @modified 2018/07/29 19:20:18
 import os
 import json
 import web
@@ -21,30 +21,7 @@ NAMESPACE    = dict(
     format_date = dateutil.format_date,
     format_time = dateutil.format_time,
     quote       = quote
-) 
-
-def load_menu_properties():
-    """加载导航栏配置"""
-    if os.path.exists("config/menu.ini"):
-        path = "config/menu.ini"
-    else:
-        path = "config/menu.default.ini"
-
-    menu_list = []
-    cf = ConfigParser()
-    cf.read(path, encoding="utf-8")
-    names = cf.sections()
-    for name in names:
-        group = dict(title = name)
-        options = cf.options(name)
-        group["children"] = []
-        for option in options:
-            url = cf.get(name, option)
-            group["children"].append(dict(name=option, url=url))
-        menu_list.append(group)
-
-    global MENU_LIST
-    MENU_LIST = menu_list
+)
 
 class XnoteLoader(Loader):
     """定制Template Loader"""
@@ -119,11 +96,13 @@ def render(template_name, **kw):
     nkw = {}
     pre_render(nkw)
     nkw.update(kw)
-    _input = web.input()
 
-    if _input.get("_format") == "json":
-        web.header("Content-Type", "application/json")
-        return tojson(nkw)
+    if hasattr(web.ctx, "env"):
+        # 不一定是WEB过来的请求
+        _input = web.input()
+        if _input.get("_format") == "json":
+            web.header("Content-Type", "application/json")
+            return tojson(nkw)
     return _loader.load(template_name).generate(**nkw)
 
 def render_text(text, template_name = "<string>", **kw):
@@ -151,42 +130,6 @@ def reload():
 class BaseTextPlugin:
     """纯文本插件的基类"""
 
-    template = """
-{% extends base.html %}
-{% block body %}
-
-{% init error = "" %}
-{% init description = "" %}
-{% init input = "" %}
-{% init output = "" %}
-
-{% include "tools/base_title.html" %}
-
-{% if description != "" %}
-<pre class="col-md-12 info">
-{{description}}
-</pre>
-{% end %}
-
-{% if error != "" %}
-<pre class="col-md-12 error">
-{{error}}
-</pre>
-{% end %}
-
-<form method="{{method}}">
-    {% if rows == 1 %}
-    <input class="col-md-12" name="input"/>
-    {% else %}
-    <textarea class="col-md-12 code" name="input" rows={{rows}}>{{input}}</textarea>
-    {% end %}
-    <button>处理</button>
-</form>
-<pre class="col-md-12">{{ output }}</pre>
-<div class="col-md-12">{% raw html %}</div>
-{% end %}
-"""
-
     def __init__(self):
         self.rows = 20
         self.title = "BaseTextPlugin"
@@ -194,6 +137,7 @@ class BaseTextPlugin:
         self.output = ""
         self.description = ""
         self.html = ""
+        self.css_style = ""
 
     def write(self, text):
         self.output += text
@@ -224,7 +168,7 @@ class BaseTextPlugin:
                 return self.output + output
         except:
             error = xutils.print_exc()
-        return render_text(self.template, 
+        return render("plugins/text.html",
             script_name = globals().get("script_name"),
             description = self.description,
             error = error,
@@ -233,6 +177,7 @@ class BaseTextPlugin:
             rows = self.rows,
             input = input, 
             output = self.output + output,
+            css_style = self.css_style,
             html = self.html)
 
 BaseTextPage = BaseTextPlugin

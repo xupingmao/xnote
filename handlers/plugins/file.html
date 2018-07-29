@@ -1,0 +1,30 @@
+{% extends base.html %}
+
+{% block head %}
+
+{% end %}
+
+{% block body %}
+
+{% init error = "" %}
+{% init description = "" %}
+{% init input = "" %}
+{% init output = "" %}
+
+{% include "tools/base_title.html" %}
+
+{% if description != "" %}
+<pre class="col-md-12 info">
+{{description}}
+</pre>
+{% end %}
+
+{% if error != "" %}
+<pre class="col-md-12 error">
+{{error}}
+</pre>
+{% end %}
+
+<pre class="col-md-12">{{ output }}</pre>
+<div class="col-md-12">{% raw html %}</div>
+{% end %}

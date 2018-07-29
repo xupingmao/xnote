@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/07/21 22:50:53
+# @modified 2018/07/29 19:11:40
 
 import sys
 import os
@@ -56,8 +56,12 @@ def request_html(*args, **kw):
     return ret.data
 
 
-class TextPage(xtemplate.BaseTextPage):
+class TextPage(xtemplate.BaseTextPlugin):
+
     def get_input(self):
+        return ""
+
+    def get_format(self):
         return ""
 
     def handle(self, input):
@@ -395,7 +399,7 @@ class TestMain(unittest.TestCase):
         notice_list = xconfig.get_notice_list(user='admin')
         self.assertEqual(0, len(notice_list))
 
-    def test_BaseTextPage(self):
+    def test_BaseTextPlugin(self):
         TextPage().render()
 
     def test_plugin(self):
