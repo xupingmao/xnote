@@ -79,13 +79,13 @@
         var result = {};
         if (/^\[\]/.test(text)) {
             result.checkbox = '<input type="checkbox" disabled="true"/>';
-            result.text = text.substring(2);
+            result.text = '<span class="xnote-todo">' + text.substring(2) + '</span>';
         } else if (/^\[ \]/.test(text)) {
             result.checkbox = '<input type="checkbox" disabled="true"/>';
             result.text = text.substring(3);
         } else if (/^\[[Xx]\]/.test(text)) {
             result.checkbox = '<input type="checkbox" checked disabled="true"/>';
-            result.text = text.substring(3);
+            result.text = '<span class="xnote-done">' + text.substring(3) + '</span>';
         } else {
             result.checkbox = '';
             result.text = text;
