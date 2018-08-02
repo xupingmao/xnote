@@ -20,6 +20,7 @@ import xauth
 import xmanager
 import xtables
 from xutils import History
+from xutils import cacheutil
 config = xconfig
 
 def link(name, url):
@@ -89,8 +90,8 @@ def list_plugins():
     return links
 
 def list_recent_plugins():
-    items = History.get_items("plugins")
-    links = list(items)
+    items = cacheutil.zrange("plugins.history", -5, -1)
+    links = [dict(name=name, link="/plugins/" + name) for name in items]
     links.reverse()
     return links;
                 

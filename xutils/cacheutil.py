@@ -1,18 +1,38 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/07/13 01:56:08
+# @modified 2018/08/02 23:49:23
 """
 缓存的实现，考虑失效的规则如下
-1. 按时间失效
-2. FIFO, First In First Out
-3. LRU, Least Recently Used
-4. LFU, Least Frequently Used
+
+失效的检查策略
+1. 读取时检查失效
+2. 生成新的缓存时从队列中取出多个缓存进行检查
+
+持久化策略
+1. 初始化的时候从文件中读取，运行过程中直接从内存读取
+2. 创建或者更新的时候持久化到文件
+3. TODO 考虑持久化时的并发控制
+
+
+淘汰置换规则（仅用于会失效的缓存）
+1. FIFO, First In First Out
+2. LRU, Least Recently Used
+3. LFU, Least Frequently Used
 
 参考redis的API
 """
 from .imports import *
 _cache_dict = dict()
+
+def encode_key(text):
+    """编码key为文件名"""
+    return base64.urlsafe_b64encode(text.encode("utf-8")).decode("utf-8") + ".pk"
+
+def decode_key(text):
+    """解码文件名称为key值，暂时没有使用"""
+    return base64.urlsafe_b64decode(text[:-3].encode("utf-8")).decode("utf-8")
+
 
 class CacheObj:
     """
@@ -22,12 +42,18 @@ class CacheObj:
     """
     _queue = Queue()
 
-    def __init__(self, key, value, expire):
+    def __init__(self, key, value, expire=-1):
         global _cache_dict
-        self.key = key
-        self.value = value
-        self.expire = expire
-        self.expire_time = time.time() + expire
+        
+        if value is None:
+            print("invalid key [%s], value is None" % key)
+            return
+
+        self.key              = key
+        self.value            = value
+        self.expire           = expire
+        self.expire_time      = time.time() + expire
+        self.type             = "string"
         self.is_force_expired = False
 
         if expire < 0:
@@ -37,8 +63,9 @@ class CacheObj:
         if obj is not None:
             obj.is_force_expired = True
 
-        _cache_dict[key] = self
+        self.save()
         self._queue.put(self)
+
         one = self._queue.get(block=False)
         if one is not None:
             if one.is_force_expired == True:
@@ -48,14 +75,41 @@ class CacheObj:
             else:
                 one.clear()
 
+    def _get_path(self, key):
+        return os.path.join(xconfig.STORAGE_DIR, encode_key(key))
+
+    def save(self):
+        _cache_dict[self.key] = self
+        # save to disk
+        path = self._get_path(self.key)
+        obj = dict(key = self.key, 
+                type = self.type,
+                value = self.value, 
+                expire_time = self.expire_time)
+        pickled = pickle.dumps(obj)
+        with open(path, "wb") as fp:
+            fp.write(pickled)
+
     def is_alive(self):
+        if self.is_force_expired:
+            return False
         if self.expire_time < 0:
             return True
         return time.time() < self.expire_time
 
+    def get_value(self):
+        if self.is_alive():
+            return self.value
+        self.clear()
+        return None
+
     def clear(self):
         # print("cache %s expired" % self.key)
         _cache_dict.pop(self.key, None)
+        # remove from disk
+        path = self._get_path(self.key)
+        if os.path.exists(path):
+            os.remove(path)
 
 def cache(key=None, prefix=None, expire=600):
     """
@@ -106,12 +160,22 @@ def put_cache(key = None, value = None, prefix = None, args = None, expire = -1)
         key = '%s%s' % (prefix, args)
     _cache_dict[key] = CacheObj(key, value, expire)
 
-def get_cache(key):
+def get_cache(key, default_value=None):
     """获取缓存的值"""
     obj = _cache_dict.get(key)
     if obj is None:
-        return None
-    return obj.value
+        return default_value
+    return obj.get_value()
+
+def get_cache_obj(key, default_value=None):
+    obj = _cache_dict.get(key)
+    obj = _cache_dict.get(key)
+    if obj is None:
+        return default_value
+    if obj.is_alive():
+        return obj
+    obj.clear()
+    return None
 
 update_cache = put_cache
 
@@ -125,6 +189,84 @@ def update_cache_by_key(key):
         args = obj.args
         obj.value = func(*args)
 
+class SortedObject:
+
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+
+    def __lt__(self, obj):
+        return self.value < obj.value
+
+    def __cmp__(self, obj):
+        return cmp(self.value, obj.value)
+
+def zadd(key, score, member):
+    obj = get_cache_obj(key)
+    if obj != None and obj.value != None:
+        if obj.type != "zset":
+            raise TypeError("require zset but found %s" % obj.type)
+        obj.value[member] = score
+        obj.type = "zset"
+        obj.save()
+    else:
+        obj = CacheObj(key, dict())
+        obj.value[member] = score
+        obj.type = "zset"
+        obj.save()
+
+def zrange(key, start, stop):
+    """zset分片，包含start、stop"""
+    obj = get_cache_obj(key)
+    if obj != None:
+        items = obj.value.items()
+        if stop == -1:
+            stop = len(items)
+        else:
+            stop += 1
+        sorted_items = sorted(items, key = lambda x: x[1])
+        sorted_keys = [k[0] for k in sorted_items]
+        return sorted_keys[start: stop]
+    return []
+
+def zcount(key):
+    obj = get_cache_obj(key)
+    if obj != None:
+        return len(obj.value)
+    return 0
+
 def keys(pattern=None):
     return _cache_dict.keys()
+
+def set(key, value, expire=-1):
+    CacheObj(key, value, expire)
+
+def delete(key):
+    """del与python关键字冲突"""
+    obj = get_cache_obj(key)
+    if obj != None:
+        obj.clear()
+
+def print_exc():
+    """打印系统异常堆栈"""
+    ex_type, ex, tb = sys.exc_info()
+    exc_info = traceback.format_exc()
+    print(exc_info)
+
+def load_dump():
+    dirname = xconfig.STORAGE_DIR
+    for fname in os.listdir(dirname):
+        if not fname.endswith(".pk"):
+            continue
+        try:
+            fpath = os.path.join(dirname, fname)
+            with open(fpath, "rb") as fp:
+                pickled = fp.read()
+                dict_obj = pickle.loads(pickled)
+                obj = CacheObj(dict_obj["key"], 
+                    dict_obj["value"], 
+                    dict_obj["expire_time"] - time.time())
+                obj.type = dict_obj.get("type", "string")
+        except:
+            print_exc()
 

@@ -2,7 +2,7 @@
 # 专门用来import各种依赖
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
-# @modified 2018/07/16 00:30:10
+# @modified 2018/08/02 22:33:13
 from __future__ import print_function
 import sys
 import os
@@ -20,6 +20,7 @@ import six
 import web
 import xconfig
 import subprocess
+import pickle
 from collections import deque
 from fnmatch import fnmatch
 from tornado.escape import xhtml_escape        
@@ -41,7 +42,7 @@ if PY2:
     from urllib import quote, unquote, urlopen
     from ConfigParser import ConfigParser
     from StringIO import StringIO
-    from Queue import Queue
+    from Queue import Queue, PriorityQueue
     # from commands import getstatusoutput
 
     def u(s, encoding="utf-8"):
@@ -64,7 +65,7 @@ else:
     from subprocess import getstatusoutput
     from configparser import ConfigParser
     from io import StringIO
-    from queue import Queue
+    from queue import Queue, PriorityQueue
 
     u = str
     listdir = os.listdir

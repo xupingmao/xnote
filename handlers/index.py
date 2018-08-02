@@ -6,7 +6,8 @@ import xauth
 import xutils
 import os
 import xconfig
-from xutils import Storage
+import time
+from xutils import Storage, cacheutil
 from xutils.dateutil import Timer
 from xutils import History
 
@@ -101,8 +102,6 @@ class FaviconHandler:
 
 class PluginsHandler:
 
-    history = History("plugins", 5)
-
     def GET(self, name = ""):
         if not name.endswith(".py"):
             name += ".py"
@@ -111,7 +110,7 @@ class PluginsHandler:
             error = "file `%s` not found" % script_name
             return xtemplate.render("error.html", error=error)
         try:
-            self.history.put(Storage(name=os.path.splitext(name)[0], link=web.ctx.path))
+            cacheutil.zadd("plugins.history", time.time(), os.path.splitext(name)[0])
             vars = dict()
             vars["script_name"] = script_name
             xutils.load_script(script_name, vars)

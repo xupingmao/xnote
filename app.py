@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/07/21 11:35:55
+# @modified 2018/08/03 00:04:17
 """
     Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -38,12 +38,14 @@ from autoreload import AutoReloadThread
 
 config = xconfig
 
+DEFAULT_PORT = "1234"
+
 def handle_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="./data")
     parser.add_argument("--delay", default="0")
     parser.add_argument("--ringtone", default="no")
-    parser.add_argument("--port", default="1234")
+    parser.add_argument("--port", default=DEFAULT_PORT)
     parser.add_argument("--webbrowser", default="no")
     parser.add_argument("--debug", default="yes")
     parser.add_argument("--minthreads", default="10")
@@ -92,6 +94,10 @@ def main():
     global app
     handle_args()
     port = config.PORT
+    if port != DEFAULT_PORT:
+        # 指定端口优先级最高
+        os.environ["PORT"] = port
+
     if not os.environ.get("PORT"):
         os.environ["PORT"] = port
 
@@ -127,6 +133,9 @@ def main():
 
     if xconfig.OPEN_IN_BROWSER:
         webbrowser.open("http://localhost:%s/" % xconfig.PORT)
+
+    # 加载持久化的缓存
+    xutils.cacheutil.load_dump()
     app.run()
 
 if __name__ == '__main__':

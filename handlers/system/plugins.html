@@ -32,7 +32,7 @@
         <div class="col-md-12">
             {% for link in recent %}
             <div class="item">
-                <a href="{{link.link}}">{{link.name}}</a>
+                <a href="{{link.get('link')}}">{{link.get('name')}}</a>
             </div>
             {% end %}
         </div>
