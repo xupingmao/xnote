@@ -51,6 +51,10 @@
 {% set  index = 1 %}
 {% init op = "list" %}
 
+{% if error != "" and error != None %}
+<div class="col-md-12 error">{{error}}</div>
+{% end %}
+
 <div class="col-md-12">
     <a href="/system/script" class="tab-link">脚本</a>
     <a href="/system/crontab" class="tab-link">定时任务</a>
@@ -97,7 +101,6 @@
 
 {% else %}
     {% comment 列表 %}
-    <div class="error">{{error}}</div>
     <table class="table col-md-12 top-offset-1">
         {% for index, script in enumerate(shell_list) %}
             <tr>

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/07/19 00:15:51
+# @modified 2018/08/03 02:17:43
 
 """Description here"""
 import os
@@ -15,6 +15,7 @@ import xmanager
 import xconfig
 from xutils import Storage
 from xutils import dateutil
+from xutils import cacheutil
 
 def get_by_name(db, name):
     return db.select_one(where=dict(name = name, is_deleted = 0, creator = xauth.get_current_name()))
@@ -88,6 +89,7 @@ class AddHandler:
                 inserted_id = db.insert(**file_dict)                
                 # 更新分组下面页面的数量
                 update_children_count(parent_id, db = db)
+                cacheutil.delete("recent_files#"+file.creator)
                 xmanager.fire("note.add", dict(name=name))
                 if format == "json":
                     return dict(code="success", id=inserted_id)

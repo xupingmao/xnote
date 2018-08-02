@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/06/23 19:47:49
+# @modified 2018/08/03 02:06:38
 
 """资料的DAO操作集合
 
@@ -211,6 +211,7 @@ def get_table_struct(table_name):
         result.append(item)
     return result
 
+@xutils.cache(key="group.list")
 def list_group():
     sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
     return list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))

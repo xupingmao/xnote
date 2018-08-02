@@ -18,14 +18,16 @@
 
 {% block body %}
 {% import os %}
-<input class="hide" id="path" value="{{path}}">
-<input class="col-md-12" id="searchName" placeholder="执行命令">
-<div id="resultDiv" class="col-md-12">
-    <div class="output-title">
-        结果
-        <a id="pluginEditLink" class="hide link float-right" href="#">编辑脚本</a>
-    </div>
-    <div id="result" class="col-md-12 output-body">
+<div class="col-md-12 top-offset-1">
+    <input class="hide" id="path" value="{{path}}">
+    <input class="col-md-12" id="searchName" placeholder="执行命令">
+    <div id="resultDiv" class="col-md-12">
+        <div class="output-title">
+            结果
+            <a id="pluginEditLink" class="hide link float-right" href="#">编辑脚本</a>
+        </div>
+        <div id="result" class="col-md-12 output-body">
+        </div>
     </div>
 </div>
 

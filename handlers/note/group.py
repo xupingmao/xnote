@@ -8,6 +8,7 @@ import xauth
 import xconfig
 import xmanager
 from xutils import Storage
+from xutils import cacheutil
 from xutils.dateutil import Timer
 
 # 兼容旧代码
@@ -148,15 +149,21 @@ class RecentEditHandler:
         page = xutils.get_argument("page", 1, type=int)
         page = max(1, page)
 
+        db = xtables.get_file_table()
         t = Timer()
         t.start()
-        db = xtables.get_file_table()
+        creator = xauth.get_current_name()
         where = "is_deleted = 0 AND (creator = $creator OR is_public = 1) AND type != 'group'"
-        files = list(db.select(where = where, 
-            vars   = dict(creator = xauth.get_current_name()),
-            order  = "mtime DESC",
-            offset = (page-1) * PAGE_SIZE,
-            limit  = PAGE_SIZE))
+        
+        files = cacheutil.get("recent_files#" + creator)
+        if files is None:
+            files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator", 
+                where = where, 
+                vars   = dict(creator = creator),
+                order  = "mtime DESC",
+                offset = (page-1) * PAGE_SIZE,
+                limit  = PAGE_SIZE))
+            cacheutil.set("recent_files#" + creator, files, expire=600)
         t.stop()
         xutils.log("list recent edit %s" % t.cost())
 

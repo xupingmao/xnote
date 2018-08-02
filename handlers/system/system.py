@@ -90,7 +90,7 @@ def list_plugins():
     return links
 
 def list_recent_plugins():
-    items = cacheutil.zrange("plugins.history", -5, -1)
+    items = cacheutil.zrange("plugins.history", -6, -1)
     links = [dict(name=name, link="/plugins/" + name) for name in items]
     links.reverse()
     return links;

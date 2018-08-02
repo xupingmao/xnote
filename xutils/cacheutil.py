@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/08/02 23:49:23
+# @modified 2018/08/03 02:12:15
 """
 缓存的实现，考虑失效的规则如下
 
@@ -53,7 +53,7 @@ class CacheObj:
         self.value            = value
         self.expire           = expire
         self.expire_time      = time.time() + expire
-        self.type             = "string"
+        self.type             = "object"
         self.is_force_expired = False
 
         if expire < 0:
@@ -113,7 +113,7 @@ class CacheObj:
 
 def cache(key=None, prefix=None, expire=600):
     """
-    缓存的装饰器，会自动清理失效的缓存
+    缓存的装饰器，会自动清理失效的缓存ge
     TODO 可以考虑缓存持久化的问题
     """
     def deco(func):
@@ -160,12 +160,14 @@ def put_cache(key = None, value = None, prefix = None, args = None, expire = -1)
         key = '%s%s' % (prefix, args)
     _cache_dict[key] = CacheObj(key, value, expire)
 
-def get_cache(key, default_value=None):
+def get(key, default_value=None):
     """获取缓存的值"""
     obj = _cache_dict.get(key)
     if obj is None:
         return default_value
     return obj.get_value()
+
+get_cache = get
 
 def get_cache_obj(key, default_value=None):
     obj = _cache_dict.get(key)
@@ -266,7 +268,7 @@ def load_dump():
                 obj = CacheObj(dict_obj["key"], 
                     dict_obj["value"], 
                     dict_obj["expire_time"] - time.time())
-                obj.type = dict_obj.get("type", "string")
+                obj.type = dict_obj.get("type", "object")
         except:
             print_exc()
 
