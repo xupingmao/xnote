@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/07/14 12:29:25
+# @modified 2018/08/05 01:14:29
 
 """文件服务
     - 文件目录
@@ -14,6 +14,7 @@ import xutils
 import xauth
 import xconfig
 import xtemplate
+import shutil
 from xutils import FileItem
 config = xconfig
 

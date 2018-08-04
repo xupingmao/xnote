@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/08/03 02:06:38
+# @modified 2018/08/05 00:55:02
 
 """资料的DAO操作集合
 
@@ -15,7 +15,7 @@ import xtables
 import xutils
 import xauth
 from xutils import readfile, savetofile, sqlite3
-from xutils import dateutil
+from xutils import dateutil, cacheutil
 
 MAX_VISITED_CNT = 200
 readFile        = readfile
@@ -211,10 +211,15 @@ def get_table_struct(table_name):
         result.append(item)
     return result
 
-@xutils.cache(key="group.list")
 def list_group():
-    sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
-    return list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
+    current_name = xauth.get_current_name()
+    cache_key = "group.list#" + current_name
+    value = cacheutil.get(cache_key)
+    if value is None:
+        sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
+        value = list(xtables.get_file_table().query(sql, vars = dict(creator=current_name)))
+        cacheutil.set(cache_key, value, expire=-1)
+    return value
 
 def list_recent_created(parent_id = None, limit = 10):
     where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"

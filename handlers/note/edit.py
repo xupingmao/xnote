@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/08/04 14:50:35
+# @modified 2018/08/05 01:06:26
 
 """Description here"""
 import os
@@ -89,7 +89,7 @@ class AddHandler:
                 inserted_id = db.insert(**file_dict)                
                 # 更新分组下面页面的数量
                 update_children_count(parent_id, db = db)
-                cacheutil.prefix_del("recent_files")
+                cacheutil.prefix_del("recent_notes")
                 xmanager.fire("note.add", dict(name=name))
                 if format == "json":
                     return dict(code="success", id=inserted_id)
@@ -181,9 +181,11 @@ class RenameHandler:
         if file is not None:
             return dict(code="fail", message="%r已存在" % name)
         db.update(where=dict(id=id), name=name, mtime=xutils.format_datetime())
-        event_body = dict(action="rename", id=id, name=name)
+        event_body = dict(action="rename", id=id, name=name, type=old.type)
         xmanager.fire("note.updated", event_body)
         xmanager.fire("note.rename", event_body)
+        if old.type == "group":
+            cacheutil.prefix_del("group.list")
         return dict(code="success")
 
     def GET(self):

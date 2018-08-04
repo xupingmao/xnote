@@ -46,7 +46,7 @@ def get_cached_notes0():
     return list(xtables.get_file_table().query('SELECT name, UPPER(name) as name_upper, id, parent_id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted == 0'))
 
 
-@xutils.cache(key='file_name.list', expire=3600)
+@xutils.cache(key='note_name.list', expire=3600)
 def get_cached_notes():
     return get_cached_notes0()
 
@@ -121,7 +121,7 @@ def search(ctx, expression=None):
 def update_cached_notes(file):
     if not xconfig.USE_CACHE_SEARCH:
         return
-    xutils.update_cache("file_name.list", get_cached_notes0())
+    xutils.update_cache("note_name.list", get_cached_notes0())
 
 # 初始化缓存
 if xconfig.USE_CACHE_SEARCH:

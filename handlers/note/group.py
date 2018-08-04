@@ -155,7 +155,7 @@ class RecentEditHandler:
         creator = xauth.get_current_name()
         where = "is_deleted = 0 AND (creator = $creator OR is_public = 1) AND type != 'group'"
         
-        cache_key = "recent_files#%s#%s" % (creator, page)
+        cache_key = "recent_notes#%s#%s" % (creator, page)
         files = cacheutil.get(cache_key)
         if files is None:
             files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator", 

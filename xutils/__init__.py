@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/07/28 11:59:13
+# @modified 2018/08/05 01:17:22
 
 """
 xnote工具类总入口
@@ -24,6 +24,7 @@ from .fsutil   import *
 from .textutil import text_contains, parse_config_text
 from .cacheutil import cache, expire_cache, update_cache
 from xconfig import Storage
+import shutil
 
 #################################################################
 
@@ -232,8 +233,19 @@ def remove_file(path, hard = False):
             os.rename(path, destpath)
         # os.remove(path)
     elif os.path.isdir(path):
-        # shutil.rmtree(path)
-        os.rmdir(path)
+        if hard:
+            shutil.rmtree(path)
+            return
+        path = path.rstrip("/")
+        basename = os.path.basename(path)
+        target = os.path.join(xconfig.TRASH_DIR, basename)
+        target = os.path.abspath(target)
+        path   = os.path.abspath(path)
+        if target == path:
+            # 直接删除文件夹
+            shutil.rmtree(path)
+        else:
+            shutil.move(path, target)
 
 remove = remove_file
 
