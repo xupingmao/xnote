@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/08/03 02:17:43
+# @modified 2018/08/04 14:50:35
 
 """Description here"""
 import os
@@ -89,7 +89,7 @@ class AddHandler:
                 inserted_id = db.insert(**file_dict)                
                 # 更新分组下面页面的数量
                 update_children_count(parent_id, db = db)
-                cacheutil.delete("recent_files#"+file.creator)
+                cacheutil.prefix_del("recent_files")
                 xmanager.fire("note.add", dict(name=name))
                 if format == "json":
                     return dict(code="success", id=inserted_id)

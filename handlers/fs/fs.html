@@ -226,7 +226,8 @@
             <!-- {{item.cdate}} -->
             <a href="javascript:removeFile('{{item.path}}')" class="item-option">删除</a>
             <a class="item-option" 
-                href="javascript:openDialog('/fs_api/plugins?path={{item.path}}')">更多</a>
+                data-path="{{item.path}}"
+                onclick="openFileOption(this)">更多</a>
         </td>
     </tr>
     {% end %}

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/08/03 02:12:15
+# @modified 2018/08/04 15:12:59
 """
 缓存的实现，考虑失效的规则如下
 
@@ -27,7 +27,8 @@ _cache_dict = dict()
 
 def encode_key(text):
     """编码key为文件名"""
-    return base64.urlsafe_b64encode(text.encode("utf-8")).decode("utf-8") + ".pk"
+    return text + ".pk"
+    # return base64.urlsafe_b64encode(text.encode("utf-8")).decode("utf-8") + ".pk"
 
 def decode_key(text):
     """解码文件名称为key值，暂时没有使用"""
@@ -45,9 +46,12 @@ class CacheObj:
     def __init__(self, key, value, expire=-1):
         global _cache_dict
         
+        if key is None:
+            raise ValueError("key cannot be None")
         if value is None:
-            print("invalid key [%s], value is None" % key)
-            return
+            raise ValueError("value cannot be None")
+        if key.find("/") >= 0:
+            raise ValueError("cannot contains / in key")
 
         self.key              = key
         self.value            = value
@@ -248,6 +252,17 @@ def delete(key):
     obj = get_cache_obj(key)
     if obj != None:
         obj.clear()
+
+def prefix_del(prefix):
+    """使用前缀删除"""
+    keys = []
+    for key in _cache_dict:
+        if key.startswith(prefix):
+            keys.append(key)
+    for key in keys:
+        obj = get_cache_obj(key)
+        if obj != None:
+            obj.clear()
 
 def print_exc():
     """打印系统异常堆栈"""

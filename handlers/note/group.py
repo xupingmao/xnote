@@ -155,7 +155,8 @@ class RecentEditHandler:
         creator = xauth.get_current_name()
         where = "is_deleted = 0 AND (creator = $creator OR is_public = 1) AND type != 'group'"
         
-        files = cacheutil.get("recent_files#" + creator)
+        cache_key = "recent_files#%s#%s" % (creator, page)
+        files = cacheutil.get(cache_key)
         if files is None:
             files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator", 
                 where = where, 
@@ -163,7 +164,7 @@ class RecentEditHandler:
                 order  = "mtime DESC",
                 offset = (page-1) * PAGE_SIZE,
                 limit  = PAGE_SIZE))
-            cacheutil.set("recent_files#" + creator, files, expire=600)
+            cacheutil.set(cache_key, files, expire=600)
         t.stop()
         xutils.log("list recent edit %s" % t.cost())
 

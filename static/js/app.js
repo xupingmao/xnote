@@ -226,7 +226,14 @@ $(function() {
       });
     }
 
+    function openFileOption(e) {
+      console.log(e);
+      var path = $(e).attr("data-path");
+      openDialog("/fs_api/plugins?path=" + path);
+    }
+
     window.openDialog = openDialog;
+    window.openFileOption = openFileOption;
     window.showIframeDialog = showIframeDialog;
     window.hideIframeDialog = hideIframeDialog;
 
