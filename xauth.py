@@ -125,8 +125,10 @@ def write_cookie(name):
     web.setcookie("xpass", pswd_md5, expires=24*3600*30)
 
 def get_user_cookie(name):
-    password = get_user_password(name)
-    return "xuser=%s; xpass=%s;" % (name, get_password_md5(password))
+    user = get_user(name)
+    password = user.get("password")
+    salt = user.get("salt")
+    return "xuser=%s; xpass=%s;" % (name, get_password_md5(password, salt))
 
 def gen_new_token():
     import uuid

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/08/05 00:55:02
+# @modified 2018/08/06 00:28:12
 
 """资料的DAO操作集合
 
@@ -212,7 +212,7 @@ def get_table_struct(table_name):
     return result
 
 def list_group():
-    current_name = xauth.get_current_name()
+    current_name = str(xauth.get_current_name())
     cache_key = "group.list#" + current_name
     value = cacheutil.get(cache_key)
     if value is None:

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/08/04 15:12:59
+# @modified 2018/08/05 01:34:04
 """
 缓存的实现，考虑失效的规则如下
 
@@ -173,12 +173,14 @@ def get(key, default_value=None):
 
 get_cache = get
 
-def get_cache_obj(key, default_value=None):
+def get_cache_obj(key, default_value=None, type=None):
     obj = _cache_dict.get(key)
     obj = _cache_dict.get(key)
     if obj is None:
         return default_value
     if obj.is_alive():
+        if type != None and type != obj.type:
+            raise TypeError("require %s but found %s" % (type, obj.type))
         return obj
     obj.clear()
     return None
@@ -240,6 +242,34 @@ def zcount(key):
     if obj != None:
         return len(obj.value)
     return 0
+
+def hset(key, field, value, expire=-1):
+    obj = get_cache_obj(key, type="hash")
+    if obj != None and obj.value != None:
+        obj.value[field] = value
+        obj.type = "hash"
+        obj.save()
+    else:
+        obj = CacheObj(key, dict())
+        obj.value[field] = value
+        obj.type = "hash"
+        obj.save()
+
+def hget(key, field):
+    obj = get_cache_obj(key, type="hash")
+    if obj != None and obj.value != None:
+        return obj.value.get(field)
+    else:
+        return None
+
+def hdel(key, field):
+    obj = get_cache_obj(key, type="hash")
+    if obj != None and obj.value != None:
+        del obj.value[field]
+        # TODO 还需要判断是否真的存在
+        return 1
+    else:
+        return 0
 
 def keys(pattern=None):
     return _cache_dict.keys()
