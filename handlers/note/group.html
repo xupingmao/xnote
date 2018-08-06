@@ -35,11 +35,11 @@
         <tr class="hover-tr">
             <td class="note-td">
                 {% if show_cdate %}
-                    <span>{{xutils.format_date(item.ctime)}} - </span>
+                    <span>{{xutils.format_date(item.ctime).replace('-', '/')}} - </span>
                 {% end %}
 
                 {% if show_mdate %}
-                    <span>{{xutils.format_date(item.mtime)}} - </span>
+                    <span>{{xutils.format_date(item.mtime).replace('-', '/')}} - </span>
                 {% end %}
 
                 {% if item.type == "group" %}

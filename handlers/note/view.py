@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/07/01 16:27:56
+# @modified 2018/08/06 22:52:08
 
 import profile
 import math
@@ -80,19 +80,17 @@ class ViewHandler:
                 vars=dict(parent_id=file.id, creator=user_name))
             files = db.select(where = where_sql, 
                 vars=dict(parent_id=file.id, is_deleted=0, creator=user_name), 
-                order="name", 
+                order="mtime DESC", 
                 limit=pagesize, 
                 offset=(page-1)*pagesize)
             content         = file.content
             show_search_div = True
             show_add_file   = True
-            recent_created  = xutils.call("note.list_recent_created", file.id, 10)
+            # recent_created  = xutils.call("note.list_recent_created", file.id, 10)
         elif file.type == "md" or file.type == "text":
             content = file.content
             if op == "edit":
                 template_name = "note/markdown_edit.html"
-            else:
-                recent_created = xutils.call("note.list_recent_created", file.parent_id, 10)
         else:
             content = file.content
             content = content.replace(u'\xad', '\n')
