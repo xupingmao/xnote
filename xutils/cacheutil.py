@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/08/05 01:34:04
+# @modified 2018/08/07 23:41:19
 """
 缓存的实现，考虑失效的规则如下
 
@@ -108,7 +108,7 @@ class CacheObj:
         return None
 
     def clear(self):
-        # print("cache %s expired" % self.key)
+        print("clear cache %s" % self.key)
         _cache_dict.pop(self.key, None)
         # remove from disk
         path = self._get_path(self.key)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/08/07 23:31:27
+# @modified 2018/08/07 23:37:46
 
 """Description here"""
 import os
@@ -50,6 +50,12 @@ def update_note(db, where, **kw):
         kw["version"] = version + 1
     return db.update(where = where, vars=None, **kw)
 
+@xmanager.listen(["note.add", "note.updated", "note.rename"])
+def update_cache(ctx):
+    type = ctx.get("type", "")
+    cacheutil.prefix_del("recent_notes")
+    cacheutil.prefix_del("group.list")
+
 class AddHandler:
 
     @xauth.login_required()
@@ -89,9 +95,7 @@ class AddHandler:
                 inserted_id = db.insert(**file_dict)                
                 # 更新分组下面页面的数量
                 update_children_count(parent_id, db = db)
-                cacheutil.prefix_del("recent_notes")
-                cacheutil.prefix_del("group.list")
-                xmanager.fire("note.add", dict(name=name))
+                xmanager.fire("note.add", dict(name=name, type=type))
                 if format == "json":
                     return dict(code="success", id=inserted_id)
                 raise web.seeother("/file/view?id={}".format(inserted_id))
