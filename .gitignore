@@ -37,3 +37,5 @@ tools.md
 /handlers/experiment/
 **/.cache/
 .vscode/
+/testdir/
+/中文/

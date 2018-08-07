@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/07/01 00:46:41
+# @modified 2018/08/07 23:20:02
 
 import re
 import os
@@ -158,7 +158,7 @@ class handler:
             category = category,
             files = files, 
             title = title,
-            page_max = math.ceil(count/pagesize),
+            page_max = int(math.ceil(count/pagesize)),
             page_url = page_url)
 
 rules_loaded = False

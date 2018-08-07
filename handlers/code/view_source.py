@@ -9,6 +9,7 @@ import xutils
 import xtemplate
 import xconfig
 from tornado.escape import xhtml_escape
+from xutils import u
 
 class ViewSourceHandler:
 

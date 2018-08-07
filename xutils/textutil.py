@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/07/28 11:47:51
+# @modified 2018/08/07 23:17:57
 __doc__ = """Methods for text operation"""
 
 import re
@@ -11,6 +11,7 @@ try:
     from configparser import ConfigParser
 except ImportError:
     from ConfigParser import ConfigParser
+from .imports import is_str
 
 """Methods to check the text"""
 
@@ -25,7 +26,7 @@ def text_contains(text, words):
         >>> text_contains("hello,world,yep", ["hello", "yep"])
         True
     """
-    if isinstance(words, str):
+    if is_str(words):
         return words in text
     elif isinstance(words, list):
         for word in words:

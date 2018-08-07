@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/08/05 01:14:29
+# @modified 2018/08/07 23:29:33
 
 """文件服务
     - 文件目录
@@ -15,7 +15,7 @@ import xauth
 import xconfig
 import xtemplate
 import shutil
-from xutils import FileItem
+from xutils import FileItem, u
 config = xconfig
 
 def is_stared(path):
@@ -287,9 +287,10 @@ class StaticFileHandler(FileSystemHandler):
     def GET(self, path):
         path = xutils.unquote(path)
         path = xutils.get_real_path(path)
+        path = u(path)
         if not self.is_path_allowed(path):
             xauth.check_login("admin")
-        data_prefix = config.DATA_DIR
+        data_prefix = u(config.DATA_DIR)
         if not path.startswith("static"):
             newpath = os.path.join(data_prefix, path)
         else:
@@ -375,7 +376,7 @@ class ListDirHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        datapath = os.path.abspath(xconfig.DATA_DIR)
+        datapath = u(os.path.abspath(xconfig.DATA_DIR))
         raise web.seeother("/fs/%s" % datapath)
 
 class LinkHandler:

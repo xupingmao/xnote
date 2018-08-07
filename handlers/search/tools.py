@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
 # Copyright (c) 2017
-# @modified 2018/04/30 21:46:46
+# @modified 2018/08/07 23:16:03
 """Description here"""
 
 import os
@@ -13,7 +13,7 @@ import xmanager
 import xconfig
 import xutils
 import xauth
-from xutils import text_contains, Storage
+from xutils import text_contains, Storage, u
 
 SearchResult = xutils.SearchResult
 url_pattern = re.compile(r"(http|https)://[^ ]+")
@@ -25,7 +25,7 @@ def search_menu(files, name):
         if category.need_admin and not xauth.is_admin():
             continue
         for child in category.children:
-            if text_contains(child.name, name):
+            if text_contains(u(child.name), u(name)):
                 files.append(Storage(name = '菜单 - ' + child.name, url = child.url))
 
 def search(ctx, name):
