@@ -110,7 +110,11 @@ class PluginsHandler:
             error = "file `%s` not found" % script_name
             return xtemplate.render("error.html", error=error)
         try:
-            cacheutil.zadd("plugins.history", time.time(), os.path.splitext(name)[0])
+            try:
+                cacheutil.zadd("plugins.history", time.time(), os.path.splitext(name)[0])
+            except TypeError:
+                cacheutil.delete("plugins.history")
+                cacheutil.zadd("plugins.history", time.time(), os.path.splitext(name)[0])
             vars = dict()
             vars["script_name"] = script_name
             xutils.load_script(script_name, vars)
