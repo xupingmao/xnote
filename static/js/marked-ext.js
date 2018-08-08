@@ -97,6 +97,12 @@
         var result = processCheckbox(text);
         return '<li>' + result.checkbox + result.text + '</li>\n';
     }
+
+    myRenderer.paragraph = function (text) {
+        var result = processCheckbox(text);
+        return '<p>' + result.checkbox + result.text + '</p>\n';
+    }
+
     myRenderer.heading = function (text, level, raw) {
         var id = raw.replace(/ /g, '-');
         this.headings.push({text:raw, link:id, level:level});
@@ -113,7 +119,6 @@
             + '</h'
             + level
             + '>\n';
-
     }
 
     // 重写img
