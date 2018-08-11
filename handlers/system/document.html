@@ -7,6 +7,10 @@
         border: solid 1px;
         padding: 2px;
     }
+    .doc-type {
+        color: red;
+        background-color: #eee;
+    }
 </style>
 {% end %}
 
@@ -16,7 +20,7 @@
 {% if doc_info is not None %}
     <h2>模块: {{doc_info.name}}</h2>
 
-    <p>位于 <a href="/code/view_source?path={{doc_info.file}}">{{doc_info.file}}</a></p>
+    <p>位于 <a href="/code/edit?path={{doc_info.file}}">{{doc_info.file}}</a></p>
     <pre class="doc-detail">{{doc_info.doc}}</pre>
 
     <h2>方法</h2>
@@ -24,8 +28,9 @@
     {% for func in doc_info.functions %}
 
     <div>
-        <span>{{func[0]}}</span>
-        <pre class="doc-detail">{{func[1]}}</pre>
+        <span>{{func.name}}</span>
+        <span class="doc-type">{{func.type}}</span>
+        <pre class="doc-detail">{{func.doc}}</pre>
     </div>
 
     {% end %}

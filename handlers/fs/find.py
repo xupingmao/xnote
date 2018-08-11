@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2018/08/05 01:05:00
+# @modified 2018/08/11 01:40:30
 import os
 import glob
 import xutils
@@ -10,7 +10,7 @@ import xtemplate
 import xconfig
 from fnmatch import fnmatch
 
-@xutils.cache(prefix="fs.list", expire=-1)
+@xutils.cache(key="fs.list", expire=-1)
 def get_cached_files():
     count = 0
     file_cache = []

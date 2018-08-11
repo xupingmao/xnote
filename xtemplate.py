@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/07/29 19:20:18
+# @modified 2018/08/11 11:31:21
 import os
 import json
 import web
@@ -138,6 +138,8 @@ class BaseTextPlugin:
         self.description = ""
         self.html = ""
         self.css_style = ""
+        self.show_pagenation = False
+        self.page_url = "?page="
 
     def write(self, text):
         self.output += text
@@ -157,11 +159,15 @@ class BaseTextPlugin:
     def get_format(self):
         return xutils.get_argument("_format", "")
 
+    def get_page(self):
+        return xutils.get_argument("page", 1, type=int)
+
     def render(self):
         input  = self.get_input()
         error  = ""
         output = ""
         try:
+            self.page = self.get_page()
             output = self.handle(input) or ""
             if self.get_format() == "text":
                 web.header("Content-Type", "text/plain; charset:utf-8")
@@ -169,6 +175,7 @@ class BaseTextPlugin:
         except:
             error = xutils.print_exc()
         return render("plugins/text.html",
+            model = self,
             script_name = globals().get("script_name"),
             description = self.description,
             error = error,

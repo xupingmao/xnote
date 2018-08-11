@@ -7,6 +7,13 @@ import xtemplate
 
 class DocInfo:
 
+    def __init__(self, name, doc, type="func"):
+        self.name = name
+        self.doc = doc
+        self.type = type
+
+class ModInfo:
+
     def __init__(self, name):
         self.name = name
         mod = sys.modules[name]
@@ -23,6 +30,9 @@ class DocInfo:
 
         attr_dict = mod.__dict__
         for attr in sorted(attr_dict):
+            if attr[0] == '_':
+                # 跳过private方法
+                continue
             value = attr_dict[attr]
             # 通过__module__判断是否时本模块的函数
             # isroutine判断是否是函数或者方法
@@ -31,9 +41,9 @@ class DocInfo:
                 # 跳过非本模块的方法
                 continue
             if inspect.isroutine(value):
-                functions.append([attr + getargspec(value), value.__doc__])
+                functions.append(DocInfo(attr + getargspec(value), value.__doc__))
             elif inspect.isclass(value):
-                do_class(functions, name + '.' + attr, value)
+                do_class(functions, attr, value)
             # TODO 处理类的文档，参考pydoc
 
 def getargspec(value):
@@ -47,10 +57,15 @@ def getargspec(value):
     return argspec
 
 def do_class(functions, name, clz):
+    doc = getattr(clz, "__doc__")
+    if doc:
+        functions.append(DocInfo(name, doc, "class"))
     for attr in clz.__dict__:
         value = clz.__dict__[attr]
         if inspect.isroutine(value):
-            functions.append([name+"."+attr+getargspec(value), value.__doc__])
+            if attr[0] == "_" and value.__doc__ is None:
+                continue
+            functions.append(DocInfo(name+"."+attr+getargspec(value), value.__doc__))
 
 class handler(object):
 
@@ -63,5 +78,5 @@ class handler(object):
 
         doc_info = None
         if name is not None:
-            doc_info = DocInfo(name)
+            doc_info = ModInfo(name)
         return xtemplate.render("system/document.html", doc_info = doc_info)

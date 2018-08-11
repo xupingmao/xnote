@@ -6,6 +6,7 @@ sys.path.insert(1, "lib")
 import unittest
 import xutils
 import xconfig
+import doctest
 from xutils import textutil, cacheutil
 
 @xutils.cache(prefix='fib')
@@ -187,6 +188,15 @@ class TestMain(unittest.TestCase):
     def test_htmlutil(self):
         import doctest
         doctest.testmod(m=xutils.htmlutil, verbose=True)
+
+    def test_functions(self):
+        from xutils import functions
+        import doctest
+        doctest.testmod(m=functions, verbose=True)
+
+    def test_dbutil(self):
+        from xutils import dbutil
+        doctest.testmod(m=dbutil, verbose=True)
 
     def test_print_table(self):
         xutils.print_table([dict(name="a", age=10), dict(name="b", age=12)])

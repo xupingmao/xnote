@@ -1,9 +1,37 @@
 {% extends base.html %}
 
 {% block head %}
+
+<style type="text/css">
+.gallery-item {
+    float: left;
+    width: 150px;
+    height: 180px;
+    text-align: center;
+    overflow: hidden;
+    border:1px solid #ccc;
+    margin: 5px;
+}
+
+.gallery-item>div {
+    width:150px;
+    height:150px;
+}
+
+.gallery-item img {
+    max-width:150px;
+    max-height:150px;
+}
+
+.gallery-item a {
+    display: block;
+}
+</style>
+
 <style type="text/css">
     {% raw css_style %}
 </style>
+
 {% end %}
 
 {% block body %}
@@ -25,24 +53,11 @@
     {{error}}
     </pre>
     {% end %}
-    {% if rows > 0 %}
-    <form method="{{method}}">
-        {% if rows == 1 %}
-        <input class="col-md-12" name="input" value="{{input}}"/>
-        {% else %}
-        <textarea class="col-md-12 code" name="input" rows={{rows}}>{{input}}</textarea>
-        {% end %}
-        <button>处理</button>
-    </form>
-    {% end %}
+
+    {% include mod_pagenation.html %}
+
+
     <pre class="col-md-12">{{ output }}</pre>
     <div class="col-md-12">{% raw html %}</div>
-
-    {% if model.show_pagenation %}
-        {# 分页 #}
-        {% set page = model.page %}
-        {% set page_max = model.page_max %}
-        {% set page_url = model.page_url %}
-        {% include mod_pagenation.html %}
-    {% end %}
 {% end %}
+
