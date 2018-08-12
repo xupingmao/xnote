@@ -241,3 +241,34 @@ $(function() {
         init();
     });
 })(window);
+
+/**
+ * xnote的公有方法
+ */
+var xnote = {
+
+  createUploader: function () {
+    return WebUploader.create({
+            // 选完文件后，是否自动上传。
+            auto: true,
+            // swf文件路径
+            swf: BASE_URL + '/Uploader.swf',
+            // 文件接收服务端。
+            server: '/fs_upload/range',
+            // 选择文件的按钮。可选。
+            // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+            pick: '#filePicker',
+            // 需要分片
+            chunked: true,
+            // 默认5M
+            // chunkSize: 1024 * 1024 * 5,
+            chunkSize: 1024 * 1024 * 5,
+            // 重试次数
+            chunkRetry: 10,
+            // 文件上传域的name
+            fileVal: "file",
+            // 不开启并发
+            threads: 1,
+        });
+  }
+}

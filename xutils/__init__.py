@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/08/05 01:17:22
+# @modified 2018/08/11 13:25:46
 
 """
 xnote工具类总入口
@@ -468,7 +468,7 @@ def mark_text(content):
                 tokens[index] = '<a href="%s">%s</a>' % (item, item)
             elif item.startswith("file://"):
                 href = item[7:]
-                if item.endswith((".jpg", ".jpeg", ".png", ".gif", ".bpm", ".webp")):
+                if is_img_file(href):
                     tokens[index] = '<a href="%s"><img class="chat-msg-img" src="%s"></a>' % (href, href)
                 else:
                     name = href[href.rfind("/")+1:]

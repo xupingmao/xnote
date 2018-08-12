@@ -7,7 +7,7 @@ import xtemplate
 
 class DocInfo:
 
-    def __init__(self, name, doc, type="func"):
+    def __init__(self, name, doc, type="function"):
         self.name = name
         self.doc = doc
         self.type = type
@@ -65,7 +65,7 @@ def do_class(functions, name, clz):
         if inspect.isroutine(value):
             if attr[0] == "_" and value.__doc__ is None:
                 continue
-            functions.append(DocInfo(name+"."+attr+getargspec(value), value.__doc__))
+            functions.append(DocInfo(name+"."+attr+getargspec(value), value.__doc__, "method"))
 
 class handler(object):
 
