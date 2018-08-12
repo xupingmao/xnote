@@ -35,7 +35,9 @@
         <button>处理</button>
     </form>
     {% end %}
+    {% if output != None and output != "" %}
     <pre class="col-md-12">{{ output }}</pre>
+    {% end %}
     <div class="col-md-12">{% raw html %}</div>
 
     {% if model.show_pagenation %}
