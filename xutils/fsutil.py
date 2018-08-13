@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/06/23 10:48:45
+# @modified 2018/08/12 21:50:46
 import codecs
 import os
 import platform
@@ -219,4 +219,11 @@ def encode_name(name):
         return name
     return base64.urlsafe_b64encode(name.encode("utf-8")).decode("utf-8") + ".x0"
 
+
+def path_equals(source, target):
+    """
+        >>> path_equals('/home/a.txt', '/home/ccc/../a.txt')
+        True
+    """
+    return os.path.abspath(source) == os.path.abspath(target)
 

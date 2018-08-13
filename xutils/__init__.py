@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/08/11 13:25:46
+# @modified 2018/08/13 09:28:14
 
 """
 xnote工具类总入口
@@ -311,6 +311,9 @@ def get_upload_file_path(filename, data_dir="/files", replace_exists = False, pr
         return dirname + filename, webpath
     newfilepath = origin_filename
     webpath = "/data{}/{}/{}".format(data_dir, date, filename)
+    if filename == "":
+        # get upload directory
+        return dirname, webpath
 
     while not replace_exists and os.path.exists(newfilepath):
         name, ext = os.path.splitext(filename)

@@ -1,12 +1,14 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2018/06/23 14:09:09
+# @modified 2018/08/13 22:25:44
 import os
 import web
 import xauth
 import xconfig
 import xutils
+import xtemplate
+import xmanager
 from xutils import quote
 
 
@@ -31,7 +33,12 @@ class UploadHandler:
                 # fout.write(x.file.file.read())
                 for chunk in x.file.file:
                     fout.write(chunk)
+            xmanager.fire("fs.upload", filepath)
         raise web.seeother("/fs/%s" % quote(dirname))
+
+    def GET(self):
+        path, webpath = xutils.get_upload_file_path("")
+        return xtemplate.render("fs/fs_upload.html", path = path)
 
 class RangeUploadHandler:
 
@@ -46,6 +53,7 @@ class RangeUploadHandler:
                 with open(tmp_path, "rb") as tmp_fp:
                     fp.write(tmp_fp.read())
                 xutils.remove(tmp_path, True)
+            xmanager.fire("fs.upload", dict(path=dest_path))
 
 
     @xauth.login_required()
