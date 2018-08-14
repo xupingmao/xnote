@@ -3,6 +3,11 @@
 <div class="main x-center">
     <div class="main-content">
         <div class="col-md-12">
+            {% if warn != "" and warn != None %}
+            <pre class="col-md-12 warn">
+                {{warn}}
+            </pre>
+            {% end %}
             {% block body %} {% end %}
             <div class="footer"></div>
         </div>

@@ -1,8 +1,13 @@
 {% include base_top.html %}
 
 <div class="main x-center">
-  {% block body %} {% end %}
-  <div class="footer"></div>
+    {% if warn != "" and warn != None %}
+    <pre class="col-md-12 warn">
+        {{warn}}
+    </pre>
+    {% end %}
+    {% block body %} {% end %}
+    <div class="footer"></div>
 </div>
 <!-- Main Part End -->
 <div class="x-dialog-background"></div>

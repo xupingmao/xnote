@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/08/11 11:31:21
+# @modified 2018/08/15 00:07:03
 import os
 import json
 import web
@@ -86,6 +86,8 @@ def pre_render(kw):
     kw["_notice_count"] = get_message_count(user_name)
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
+    if xutils.sqlite3 is None:
+        kw["warn"] = "WARN: sqlite3不可用"
 
     # render input
     _input = web.ctx.get("_xnote.input")
@@ -124,8 +126,10 @@ def get_templates():
     
     
 def reload():
+    """reload template manager"""
     global _loader
     _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
+    _loader.reset()
 
 class BaseTextPlugin:
     """纯文本插件的基类"""
