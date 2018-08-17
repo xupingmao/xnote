@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/06/23 19:47:16
+# @modified 2018/08/17 22:33:34
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -124,9 +124,9 @@ def init_test_table():
 def init_file_table():
     with TableManager(config.DB_PATH, "file") as manager:
         manager.add_column("name",    "text", "")
-        # 纯文本，用于搜索
+        # 纯文本，用于搜索, 已废弃，移动到note_content
         manager.add_column("content", "text", "")
-        # 原始的数据，比如带标签的HTML，还有图片等的base64数据
+        # 原始的数据，比如带标签的HTML，还有图片等的base64数据，已废弃，移动到note_content
         manager.add_column("data", "text", "")
         # 文本内容长度或者子页面数量
         manager.add_column("size",    "long", 0)
@@ -169,6 +169,13 @@ def init_file_table():
         manager.add_index("mtime")
         # 虽然不能加速匹配过程，但是可以加速全表扫描
         manager.add_index("name")
+
+def init_note_content_table():
+    with TableManager(config.DB_PATH, "note_content") as manager:
+        # 纯文本，用于搜索
+        manager.add_column("content", "text", "")
+        # 原始的数据，比如带标签的HTML，还有图片等的base64数据
+        manager.add_column("data", "text", "")
 
 def init_marked_file_table():
     # @since 2018/03/02
@@ -378,8 +385,11 @@ def get_file_table():
 def get_note_table():
     return get_file_table()
 
+def get_note_content_table():
+    return DBWrapper(xconfig.DB_PATH, "note_content")
+
 def get_file_tag_table():
-    return DBWrapper(config.DB_PATH, "file_tag")
+    return DBWrapper(xconfig.DB_PATH, "file_tag")
 
 def get_schedule_table():
     return DBWrapper(config.DB_PATH, "schedule")
@@ -417,6 +427,8 @@ def init():
     init_user_table()
     init_file_table()
     init_tag_table()
+    init_note_content_table()
+
     init_schedule_table()
     init_message_table()
     init_dict_table()

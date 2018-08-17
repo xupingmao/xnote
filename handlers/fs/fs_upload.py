@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2018/08/13 22:25:44
+# @modified 2018/08/16 00:43:08
 import os
 import web
 import xauth
@@ -33,7 +33,7 @@ class UploadHandler:
                 # fout.write(x.file.file.read())
                 for chunk in x.file.file:
                     fout.write(chunk)
-            xmanager.fire("fs.upload", filepath)
+            xmanager.fire("fs.upload", dict(path=filepath))
         raise web.seeother("/fs/%s" % quote(dirname))
 
     def GET(self):

@@ -90,7 +90,7 @@ def full_search(words, groups=None):
     vars = dict()
     for word in words:
         content_like_list.append('content like %s' % to_sqlite_obj('%' + word.upper() + '%'))
-    sql = "SELECT id, parent_id, name, ctime, mtime, type, creator FROM file WHERE (%s) AND is_deleted == 0" \
+    sql = "SELECT id FROM note_content WHERE (%s) AND is_deleted == 0" \
         % " AND ".join(content_like_list)
 
     if groups != "admin":

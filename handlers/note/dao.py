@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/08/06 00:28:12
+# @modified 2018/08/17 23:12:56
 
 """资料的DAO操作集合
 
@@ -67,6 +67,31 @@ class FileDO(dict):
         file.url = "/file/view?id={}".format(dict["id"])
         return file
 
+def query_note_conent(id):
+    db = xtables.get_note_content_table()
+    result = db.select_one(where=dict(id=id))
+    if result is None:
+        return None, None
+    return result.get("content", ""), result.get("data", "")
+
+def build_note(dict):
+    id   = dict['id']
+    name = dict['name']
+    note = FileDO(name)
+    for key in dict:
+        note[key] = dict[key]
+        # setattr(file, key, dict[key])
+    if note.get("content", None) is None:
+        note.content = ""
+    content, data = query_note_conent(id)
+    if content is not None:
+        note.content = content
+    if data is not None:
+        note.data = data
+    note.url = "/file/view?id={}".format(dict["id"])
+    return note
+
+
 def to_sqlite_obj(text):
     if text is None:
         return "NULL"
@@ -121,7 +146,7 @@ def get_by_id(id, db=None):
         db = get_file_db()
     first = db.select_one(where=dict(id=id))
     if first is not None:
-        return FileDO.fromDict(first)
+        return build_note(first)
     return None
 
 def get_by_name(name, db=None):
@@ -130,7 +155,7 @@ def get_by_name(name, db=None):
     result = get_db().select_one(where=dict(name=name, is_deleted=0))
     if result is None:
         return None
-    return FileDO.fromDict(result)
+    return build_note(result)
 
 def get_vpath(record):
     pathlist = []

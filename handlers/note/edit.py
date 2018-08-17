@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/08/07 23:37:46
+# @modified 2018/08/17 23:10:44
 
 """Description here"""
 import os
@@ -42,13 +42,44 @@ def update_children_count(parent_id, db=None):
     group_count = db.count(where="parent_id=$parent_id AND is_deleted=0", vars=dict(parent_id=parent_id))
     db.update(size=group_count, where=dict(id=parent_id))
 
+def update_note_content(id, content, data=''):
+    if id is None:
+        return
+    if content is None:
+        content = ''
+    if data is None:
+        data = ''
+    db = xtables.get_note_content_table()
+    result = db.select_one(where=dict(id=id))
+    if result is None:
+        db.insert(id=id, content=content, data=data)
+    else:
+        db.update(where=dict(id=id), 
+            content=content,
+            data = data)
+
 def update_note(db, where, **kw):
+    note_id = where.get('id')
+    content = kw.get('content')
+    data = kw.get('data')
+
     kw["mtime"] = dateutil.format_time()
     # 处理乐观锁
     version = where.get("version")
     if version:
         kw["version"] = version + 1
-    return db.update(where = where, vars=None, **kw)
+    # 这两个字段废弃，移动到单独的表中
+    if 'content' in kw:
+        del kw['content']
+        kw['content'] = ''
+    if 'data' in kw:
+        del kw['data']
+        kw['data'] = ''
+    rows = db.update(where = where, vars=None, **kw)
+    if rows > 0:
+        # 更新成功后再更新内容，不考虑极端的冲突情况
+        update_note_content(note_id, content, data)
+    return rows
 
 @xmanager.listen(["note.add", "note.updated", "note.rename"])
 def update_cache(ctx):
@@ -224,6 +255,7 @@ class FileSaveHandler:
         data    = xutils.get_argument("data", "")
         id      = xutils.get_argument("id", "0", type=int)
         type    = xutils.get_argument("type")
+        version = xutils.get_argument("version", 0, type=int)
         name    = xauth.get_current_name()
         db      = xtables.get_file_table()
         where   = None
@@ -231,8 +263,9 @@ class FileSaveHandler:
             where=dict(id=id)
         else:
             where=dict(id=id, creator=name)
-        kw = dict(size=len(content), mtime=xutils.format_datetime(), 
-            where=where)
+        kw = dict(size=len(content), 
+            mtime=xutils.format_datetime(), 
+            version = version)
         if type == "html":
             kw["data"] = data
             kw["content"] = data
@@ -243,8 +276,9 @@ class FileSaveHandler:
             kw["size"] = len(content)
         else:
             kw["content"] = content
+            kw['data'] = ''
             kw["size"] = len(content)
-        rowcount = db.update(**kw)
+        rowcount = update_note(db, where, **kw)
         if rowcount > 0:
             return dict(code="success")
         else:
@@ -278,7 +312,7 @@ class UpdateHandler:
         # 不再处理文件，由JS提交
         rowcount = update_note(db, where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
-            xmanager.fire('note.updated', update_kw)
+            xmanager.fire('note.updated', dict(id=id, name=name, content=content))
             raise web.seeother("/note/view?id=" + str(id))
         else:
             # 传递旧的content
