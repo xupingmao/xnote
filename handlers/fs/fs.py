@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/08/07 23:29:33
+# @modified 2018/08/17 23:26:21
 
 """文件服务
     - 文件目录
@@ -384,6 +384,7 @@ class LinkHandler:
     @xauth.login_required("admin")
     def GET(self, name):
         link_path = os.path.join(xconfig.DATA_DIR, name)
+        link_path = os.path.abspath(link_path)
         raise web.seeother("/fs/%s" % link_path)
 
 xurls = (
