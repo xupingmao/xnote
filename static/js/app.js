@@ -245,6 +245,7 @@ $(function() {
 /**
  * xnote的公有方法
  */
+var BASE_URL = "/static/lib/webuploader";
 var xnote = {
 
   createUploader: function () {
