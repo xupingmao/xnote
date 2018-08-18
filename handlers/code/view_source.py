@@ -13,19 +13,28 @@ from xutils import u
 
 class ViewSourceHandler:
 
+    def resolve_path(self, path, type=''):
+        if type == "script":
+            path = os.path.join(xconfig.SCRIPTS_DIR, path)
+        path = os.path.abspath(path)
+        return xutils.get_real_path(path)
+
     @xauth.login_required("admin")
     def GET(self):
         template_name = "code/view_source.html"
         path = xutils.get_argument("path", "")
         key  = xutils.get_argument("key", "")
+        type = xutils.get_argument("type", "")
         readonly = False
         if path == "":
-            return xtemplate.render(template_name, error = "path is empty")
+            return xtemplate.render(template_name, 
+                content = "",
+                error = "path is empty")
         else:
             error = ""
             warn  = ""
             try:
-                path = xutils.get_real_path(path)
+                path = self.resolve_path(path, type)
                 max_file_size = xconfig.MAX_TEXT_SIZE
                 if xutils.get_file_size(path, format=False) >= max_file_size:
                     warn = "文件过大，只显示部分内容"

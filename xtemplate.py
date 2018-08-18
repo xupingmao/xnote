@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/08/15 00:07:03
+# @modified 2018/08/18 19:48:48
 import os
 import json
 import web
@@ -121,9 +121,10 @@ def render_text(text, template_name = "<string>", **kw):
 def get_code(name):
     return _loader.load(name).code
 
+
 def get_templates():
     return _loader.templates.copy()
-    
+
     
 def reload():
     """reload template manager"""
@@ -161,9 +162,11 @@ class BaseTextPlugin:
         return xutils.get_argument("input", "")
 
     def get_format(self):
+        """返回当前请求的数据格式"""
         return xutils.get_argument("_format", "")
 
     def get_page(self):
+        """返回当前页码"""
         return xutils.get_argument("page", 1, type=int)
 
     def render(self):
