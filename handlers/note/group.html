@@ -49,7 +49,9 @@
                     <a class="note-link" href="{{item.url}}">{{item.name}}</a>
                 {% else %}
                     <a class="note-link" href="/note/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
-                    {% if item.creator != None %} ({{item.creator}}) {% end %}
+                    {% if item.creator != None %} 
+                    <!-- ({{item.creator}}) -->
+                    {% end %}
                 {% end %}
 
                 {% if hasattr(item, "summary") and item.summary is not None %}

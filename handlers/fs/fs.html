@@ -1,4 +1,4 @@
-{% extends base.html %}
+{% extends base %}
 
 {% block head %}
 
@@ -145,6 +145,8 @@
 {% set search_category = "fs" %}
 <div class="hide error col-md-12"></div>
 
+{% include "mod_fs_path.html" %}
+
 <div id="controlArea" class="col-md-12">
     <div class="left">
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
@@ -171,7 +173,6 @@
     </div>
 </div>
 
-{% include "mod_fs_path.html" %}
 <hr/>
 <div class="col-md-12">
 <table class="col-md-12 no-border-table fs-table">

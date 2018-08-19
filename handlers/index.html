@@ -15,7 +15,7 @@
 {% set notice_list2 = xconfig.get_notice_list('tomorrow', _user_name) %}
 
 {% if len(notice_list1+notice_list2) > 0 %}
-<div class="col-md-12">
+<div class="col-md-12 bottom-offset-1">
     <div class="grid-title">提醒</div>
     <div class="grid-row">
     {% for item in notice_list1 %}
@@ -32,7 +32,7 @@
 </div>
 {% end %}
 
-<div class="col-md-12">
+<div class="col-md-12 bottom-offset-1">
     <div class="grid-title">
         工具库
         <a class="link float-right" href="/more?type=tool">更多</a>
@@ -46,7 +46,7 @@
     </div>
 </div>
 
-<div class="col-md-12">
+<div class="col-md-12 bottom-offset-1">
     <div class="grid-title">文档库
         {% if _has_login %}
         <a class="float-right link prompt-btn" message="新增分类" 

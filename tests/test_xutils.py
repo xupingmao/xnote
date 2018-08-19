@@ -214,5 +214,19 @@ class TestMain(unittest.TestCase):
         self.assertEqual("example.com", host)
         self.assertEqual("/hello", path)
 
+    def test_get_short_text(self):
+        v = textutil.get_short_text('abcd', 10)
+        self.assertEqual('abcd', v)
+        v = textutil.get_short_text('012345', 3)
+        self.assertEqual('012345', v)
+        v = textutil.get_short_text(u'中文123', 4)
+        self.assertEqual(u'中文123', v)
+        v = textutil.get_short_text(u'中文12345678', 4)
+        self.assertEqual(u'中文12..', v)
+        # 奇数个半角
+        v = textutil.get_short_text(u'中文1中文中文', 4)
+        self.assertEqual(u'中文1..', v)
+
+
 
         

@@ -861,10 +861,10 @@ li.menu-item:hover {
 .grid-title {
     width: 100%;
     float: left;
-    margin-bottom: 10px;
     padding-left: 5px;
     border-left: 5px solid #039BE5;
     background: #efefef;
+    margin-bottom: 5px;
 }
 
 .grid-row {
@@ -1040,7 +1040,7 @@ li.menu-item:hover {
     margin: 5px;
 }
 
-@media screen and (max-width: 550px) {
+@media screen and (max-width: 800px) {
     /** mobile **/
     .main-content {
         width: 100%;

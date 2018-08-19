@@ -20,6 +20,7 @@
 {% end %}
 
 {% block head %} {% end %}
+{% init hide_aside = False %}
 
 {% if xconfig.DEBUG_HTML_BOX %}
 <style>
@@ -27,6 +28,18 @@
     box-sizing: border-box;
     border: solid 1px red;
   }
+</style>
+{% end %}
+
+{# 侧边栏是否显示 #}
+{% if hide_aside %}
+<style type="text/css">
+.main-content {
+  padding-right: 0px;
+}
+.aside {
+  display: none;
+}
 </style>
 {% end %}
 

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/08/07 23:17:57
+# @modified 2018/08/19 14:36:44
 __doc__ = """Methods for text operation"""
 
 import re
@@ -343,13 +343,27 @@ def get_short_text(text, length):
         >>> get_short_text('abc', 5)
         'abc'
         >>> get_short_text('abcdefg', 5)
-        'abc..'
+        'abcdefg'
         >>> get_short_text('abcd', 5)
         'abcd'
+        >>> get_short_text('中文12345678', 5)
+        '中文1234..'
     """
     if len(text) <= length:
         return text
-    return text[:length-2] + ".."
+    end_pos = 0
+    count = 0
+    for c in text:
+        count += 1
+        if count > length:
+            break
+        if ord(c) <= 127:
+            end_pos += 2
+        else:
+            end_pos += 1
+    if end_pos >= len(text):
+        return text
+    return text[:end_pos-2] + ".."
 
 def get_camel_case(name, upper = False):
     """

@@ -5,15 +5,12 @@
 <div class="col-md-12 bottom-offset-1">
     <div class="grid-title">提醒</div>
     <div class="grid-row">
-        <table class="table">
-            {% for item in notice_list1 %}
-                <tr><td class="line-td"><a class="link" href="{{item.link}}">{{item.message}}</a></td></tr>
-            {% end %}
-
-            {% for item in notice_list2 %}
-                <tr><td class="line-td"><a class="link" href="{{item.link}}">明天 - {{item.message}}</a></td></tr>
-            {% end %}
-        </table>
+        {% for item in notice_list1 %}
+        <div class="info"><a class="link" href="{{item.link}}">{{item.message}}</a></div>
+        {% end %}
+        {% for item in notice_list2 %}
+        <div class="info"><a class="link" href="{{item.link}}">明天 - {{item.message}}</a></div>
+        {% end %}
     </div>
 </div>
 {% end %}
