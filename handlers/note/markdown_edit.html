@@ -358,6 +358,7 @@
 
         // 文件上传失败，显示上传出错。
         uploader.on('uploadError', function (file) {
+            console.error("上传失败", file)
             var $li = $('#' + file.id),
                 $error = $li.find('div.error');
             // 避免重复创建
