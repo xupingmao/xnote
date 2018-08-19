@@ -1011,13 +1011,13 @@ li.menu-item:hover {
 .main-content {
     width: 100%;
     float: left;
-    padding-right: 235px;
+    padding-right: 230px;
 }
 
 .aside {
     float: left;
-    width: 225px;
-    margin-left: -225px;
+    width: 220px;
+    margin-left: -220px;
 }
 
 .aside-item {
@@ -1040,7 +1040,7 @@ li.menu-item:hover {
     margin: 5px;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 700px) {
     /** mobile **/
     .main-content {
         width: 100%;

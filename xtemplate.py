@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/08/18 19:48:48
+# @modified 2018/08/19 19:10:32
 import os
 import json
 import web
@@ -145,6 +145,7 @@ class BaseTextPlugin:
         self.css_style = ""
         self.show_pagenation = False
         self.page_url = "?page="
+        self.aside_html = ""
 
     def write(self, text):
         self.output += text
