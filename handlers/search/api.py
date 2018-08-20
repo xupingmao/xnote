@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/18
-# @modified 2018/07/01 01:01:59
+# @modified 2018/08/20 23:06:05
 from __future__ import print_function
 import os
 import six
@@ -21,6 +21,8 @@ _api_name_dict = {
 def init_name_dict():
     global _api_name_dict
     for fname in os.listdir(ROOT_PATH):
+        if fpath[0] == '_':
+            continue
         fpath = os.path.join(ROOT_PATH, fname)
         name, ext = os.path.splitext(fname)
         if os.path.isfile(fpath) and ext == ".py":

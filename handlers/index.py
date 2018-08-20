@@ -103,6 +103,8 @@ class FaviconHandler:
 class PluginsHandler:
 
     def GET(self, name = ""):
+        display_name = xutils.unquote(name)
+        name = xutils.get_real_path(display_name)
         if not name.endswith(".py"):
             name += ".py"
         script_name = "plugins/" + name
@@ -111,10 +113,10 @@ class PluginsHandler:
             return xtemplate.render("error.html", error=error)
         try:
             try:
-                cacheutil.zadd("plugins.history", time.time(), os.path.splitext(name)[0])
+                cacheutil.zadd("plugins.history", time.time(), os.path.splitext(display_name)[0])
             except TypeError:
                 cacheutil.delete("plugins.history")
-                cacheutil.zadd("plugins.history", time.time(), os.path.splitext(name)[0])
+                cacheutil.zadd("plugins.history", time.time(), os.path.splitext(display_name)[0])
             vars = dict()
             vars["script_name"] = script_name
             xutils.load_script(script_name, vars)

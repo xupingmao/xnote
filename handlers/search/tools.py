@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
 # Copyright (c) 2017
-# @modified 2018/08/07 23:16:03
+# @modified 2018/08/20 23:05:30
 """Description here"""
 
 import os
@@ -37,6 +37,8 @@ def search(ctx, name):
     files = []
     basename_set = set()
     for filename in os.listdir(tools_path):
+        if filename[0] == '_':
+            continue
         _filename, ext = os.path.splitext(filename)
         if ext in (".html", ".py"):
             basename_set.add(_filename)

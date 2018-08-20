@@ -13,7 +13,7 @@ xnote是一款致力于提升生活和工作的幸福感的工具，通过将知
 
 PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 
-![知识库](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_home.png)
+![主页](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v2.0.png)
 
 -----
 ## 项目地址

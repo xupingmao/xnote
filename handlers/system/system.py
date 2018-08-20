@@ -86,6 +86,7 @@ def list_plugins():
     links = []
     for name in sorted(os.listdir(dirname)):
         name, ext = os.path.splitext(name)
+        name = xutils.unquote(name)
         links.append(link(name, "/plugins/" + name))
     return links
 

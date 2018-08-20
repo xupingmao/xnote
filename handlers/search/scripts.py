@@ -13,10 +13,11 @@ def search_plugins(name):
     results = []
     dirname = xconfig.PLUGINS_DIR
     for fname in xutils.listdir(dirname):
-        if name in fname:
+        unquote_name = xutils.unquote(fname)
+        if name in unquote_name:
             result = SearchResult()
             result.category = "plugin"
-            result.name = u("插件 - " + fname)
+            result.name = u("插件 - " + unquote_name)
             result.url  = u("/plugins/" + fname)
             result.edit_link = u("/code/edit?path=" + os.path.join(dirname, fname))
             results.append(result)
