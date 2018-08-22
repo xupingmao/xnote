@@ -1,10 +1,12 @@
 # encoding=utf-8
+# @modified 2018/08/22 23:54:40
 import sqlite3
 import os
 import xutils
 import xauth
 import xconfig
 import xtemplate
+import time
 from collections import OrderedDict
 
 config = xconfig
@@ -42,6 +44,7 @@ class handler:
         sql = xutils.get_argument("sql", "")
         path = xutils.get_argument("path", "")
         result_list = []
+        t_start = time.time()
         error = ""
         if sql != "" and path != "":
             # TODO execute sql
@@ -50,6 +53,7 @@ class handler:
                 result_list = db_execute(realpath, sql)
             except Exception as e:
                 error = e
+        t_stop = time.time()
         path_list = []
         for p in os.listdir(xconfig.DATA_DIR):
             if p.endswith(".db"):
@@ -62,6 +66,7 @@ class handler:
         return xtemplate.render("tools/sql.html", 
             keys = keys, result_list = result_list, 
             sql = sql, error = error,
+            cost_time = int((t_stop - t_start) * 1000),
             path_list = path_list,
             path = path)
 

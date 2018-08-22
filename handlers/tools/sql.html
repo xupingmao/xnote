@@ -16,7 +16,7 @@
 {% end %}
 
 {% block body %}
-
+{% init cost_time = None %}
 {% set title = "sql" %}
 {% include "tools/base_title.html" %}
 
@@ -30,11 +30,16 @@
         {% end %}
     </select>
     </p>
-
-<textarea id="editor" name="sql" style="width:100%;">{{sql}}</textarea>
-<button>Run</button>
+    <textarea id="editor" name="sql" style="width:100%;">{{sql}}</textarea>
+    <button>Run</button>
 </form>
 </div>
+
+{% if cost_time is not None %}
+<div class="col-md-12">
+耗时: {{cost_time}} ms
+</div>
+{% end %}
 
 <div class="col-md-12">
 {% if len(keys) > 0 %}
