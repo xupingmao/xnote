@@ -21,6 +21,18 @@
 
 {% block head %} {% end %}
 {% init hide_aside = False %}
+{% init show_menu = True %}
+
+{% if not show_menu %}
+<style type="text/css">
+  body {
+    background: transparent;
+  }
+  .main {
+    padding: 0px;
+  }
+</style>
+{% end %}
 
 {% if xconfig.DEBUG_HTML_BOX %}
 <style>
@@ -49,7 +61,6 @@
     <div class="toggleMenu" style="margin-left: 15px; cursor: pointer;"></div>
 </div>
 
-{% init show_menu = True %}
 {% init warn = "" %}
 
 {% if show_menu %}
