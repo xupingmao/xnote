@@ -1,7 +1,14 @@
-{% extends base.html %}
+{% extends base %}
 
 {% block body %}
-    <h2>标签: {{tagname}}</h2>
+
+<div class="grid-title">
+    标签: {{tagname}}
+</div>
     {% set page_url="/file/tagname/"+tagname+"?page=" %}
     {% include "note/group.html" %}
+{% end %}
+
+{% block aside %}
+    {% include note/mod_aside.html %}
 {% end %}
