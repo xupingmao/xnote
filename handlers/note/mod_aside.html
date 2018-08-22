@@ -2,7 +2,7 @@
 <!-- Groups -->
 {% init show_groups = False %}
 {% init groups = [] %}
-{% if len(groups) > 0 or show_groups %}
+
 <div class="aside-item">
     <div class="aside-title">
         常用
@@ -11,10 +11,11 @@
         <li><a class="link" href="/file/group/ungrouped">未分类</a></li>
         <li><a class="link" href="/file/group/public">分享笔记</a></li>
         <li><a class="link" href="/note/recent_created">最新笔记</a></li>
+        <li><a class="link" href="/file/taglist">标签云</a></li>
     </div>
-    
 </div>
 
+{% if len(groups) > 0 or show_groups %}
 <div class="aside-item">
     <div class="aside-title">
         分组

@@ -19,13 +19,13 @@
     <div class="grid-title">提醒</div>
     <div class="grid-row">
     {% for item in notice_list1 %}
-        <div class="grid-item">
-          <a class="notice-link" href="{{item.link}}">{{get_short_text(item.message, msg_len)}}</a>
+        <div class="grid-item info">
+          <a class="link" href="{{item.link}}">{{get_short_text(item.message, msg_len)}}</a>
         </div>
     {% end %}
     {% for item in notice_list2 %}
         <div class="grid-item">
-          <a class="notice-link" href="{{item.link}}">明天 - {{get_short_text(item.message, msg_len)}}</a>
+          <a class="link" href="{{item.link}}">明天 - {{get_short_text(item.message, msg_len)}}</a>
         </div>
     {% end %}
     </div>

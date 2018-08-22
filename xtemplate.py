@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/08/19 19:10:32
+# @modified 2018/08/21 01:40:50
 import os
 import json
 import web
@@ -132,12 +132,15 @@ def reload():
     _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
     _loader.reset()
 
-class BaseTextPlugin:
-    """纯文本插件的基类"""
+class BasePlugin:
+    """插件的基类"""
 
     def __init__(self):
+        # 输入框的行数
         self.rows = 20
-        self.title = "BaseTextPlugin"
+        # 插件的标题
+        self.title = "BasePlugin"
+        # 提交请求的方法
         self.method = "POST"
         self.output = ""
         self.description = ""
@@ -195,6 +198,7 @@ class BaseTextPlugin:
             css_style = self.css_style,
             html = self.html)
 
-BaseTextPage = BaseTextPlugin
+BaseTextPage = BasePlugin
+BaseTextPlugin = BasePlugin
 
 reload()

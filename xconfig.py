@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/07/31 23:42:25
+# @modified 2018/08/22 01:34:17
 
 '''
 xnote系统配置
@@ -47,7 +47,7 @@ USE_CACHE_SEARCH   = False
 # 文件系统使用urlencode方式,适用于只支持ASCII字符的系统
 USE_URLENCODE      = False
 # 初始化脚本
-INIT_SCRIPT        = None
+INIT_SCRIPT        = "init.py"
 # 记录位置信息，可通过脚本配置打开
 RECORD_LOCATION    = False
 BASE_TEMPLATE      = "base2.html"

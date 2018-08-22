@@ -3,7 +3,8 @@
 }
 
 body {
-    background-color: #f0f0f0;
+    /*background-color: #f0f0f0;*/
+    background-color: #777;
     font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
     font-size: 14px;
     letter-spacing: 1px;
@@ -395,7 +396,6 @@ li.menu-item:hover {
 .nav-search-box {
     /*position: fixed;*/
     /*z-index: 10000;*/
-    float: left;
     width: 100%;
     /*background-color: #9cc;*/
 }
@@ -1038,6 +1038,15 @@ li.menu-item:hover {
 
 .aside-content {
     margin: 5px;
+}
+
+.aside-content li {
+    display: block;
+    width: 100%;
+}
+
+.aside-content li:hover {
+    background-color: #eee;
 }
 
 @media screen and (max-width: 700px) {

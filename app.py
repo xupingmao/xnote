@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/08/03 00:04:17
+# @modified 2018/08/22 01:38:02
 """
     Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -52,7 +52,7 @@ def handle_args():
     parser.add_argument("--useCacheSearch", default="no")
     parser.add_argument("--useUrlencode", default="no")
     parser.add_argument("--devMode", default="no")
-    parser.add_argument("--initScript", default=None)
+    parser.add_argument("--initScript", default="init.py")
     parser.add_argument("--master", default="no")
     parser.add_argument("--test", default="no")
 
