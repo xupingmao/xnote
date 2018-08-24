@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/08/17 22:33:34
+# @modified 2018/08/23 01:09:58
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -193,6 +193,7 @@ def init_tag_table():
         manager.add_column("name",    "text", "")
         # 标签ID
         manager.add_column("file_id", "int", 0)
+        manager.add_column("user",    "text", "")
         # 权限控制，标签不做用户区分, groups字段暂时废弃
         # manager.add_column("groups",  "text", "")
 

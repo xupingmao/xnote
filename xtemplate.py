@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/08/21 01:40:50
+# @modified 2018/08/25 00:25:56
 import os
 import json
 import web
@@ -197,6 +197,12 @@ class BasePlugin:
             output = self.output + output,
             css_style = self.css_style,
             html = self.html)
+
+    def GET(self):
+        return self.render()
+
+    def POST(self):
+        return self.render()
 
 BaseTextPage = BasePlugin
 BaseTextPlugin = BasePlugin

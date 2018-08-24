@@ -19,6 +19,8 @@ import xutils
 import xauth
 import xmanager
 import xtables
+import web
+from xtemplate import BasePlugin
 from xutils import History
 from xutils import cacheutil
 config = xconfig
@@ -132,6 +134,46 @@ class PluginsHandler:
             recent = list_recent_plugins(),
             plugins = list_plugins())
 
+TEMPLATE = '''# -*- coding:utf-8 -*-
+import os
+import re
+import math
+import time
+import xconfig
+import xutils
+import xauth
+from xtemplate import BasePlugin
+
+class Main(BaseTextPlugin):
+    
+    def handle(self, input):
+        self.description = """提示内容"""
+        # 输入框的行数
+        self.rows = 20
+        self.title = '插件标题'
+    
+    def command(self):
+        pass
+'''
+
+class NewPluginHandler(BasePlugin):
+    """默认的插件声明入口，定义一个叫做Main的类"""
+
+    def handle(self, input):
+        self.description = '''请输入插件名称'''
+        self.title = '通过模板创建插件'
+        self.rows = 1
+        if input != '':
+            name = os.path.join(xconfig.PLUGINS_DIR, input)
+            if not name.endswith(".py"):
+                name += ".py"
+            if os.path.exists(name):
+                return "文件[%s]已经存在!" % name
+            code = xconfig.get("NEW_PLUGIN_TEMPLATE", TEMPLATE)
+            xutils.savetofile(name, code)
+            raise web.seeother('/code/edit?path=%s' % name)
+
+
 class ConfigHandler:
 
     @xauth.login_required("admin")
@@ -151,4 +193,5 @@ xurls = (
     r"/system/system", SysHandler,
     r"/system/xconfig", ConfigHandler,
     r"/system/plugins", PluginsHandler,
+    r"/system/new-plugin", NewPluginHandler
 )

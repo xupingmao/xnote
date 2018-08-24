@@ -42,7 +42,7 @@
     <div class="col-md-12">
         <div class="grid-title">
             所有插件
-            <a href="/fs_link/scripts/plugins" class="float-right link">管理</a>
+            <!-- <a href="/fs_link/scripts/plugins" class="float-right link">管理</a> -->
         </div>
         <div class="col-md-12">
             {% for link in plugins %}
@@ -53,4 +53,17 @@
         </div>
     </div>
 
+{% end %}
+
+
+{% block aside %}
+<div class="aside-item">
+    <div class="aside-title">
+        操作
+    </div>
+    <div class="aside-content">
+        <li><a class="link" href="/system/new-plugin">新增插件</a></li>
+        <li><a href="/fs_link/scripts/plugins" class="link">插件管理</a></li>
+    </div>
+</div>
 {% end %}
