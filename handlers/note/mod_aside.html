@@ -15,7 +15,7 @@
     </div>
 </div>
 
-{% if len(groups) > 0 or show_groups %}
+{% if _has_login and (len(groups) > 0 or show_groups) %}
 <div class="aside-item">
     <div class="aside-title">
         分组

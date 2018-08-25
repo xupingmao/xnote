@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2018/08/23 00:03:36
+# @modified 2018/08/25 20:20:29
 import os
 import web
 import xauth
@@ -39,6 +39,7 @@ class UploadHandler:
     def GET(self):
         path, webpath = xutils.get_upload_file_path("")
         show_menu = (xutils.get_argument("show_menu") != "false")
+        path = os.path.abspath(path)
         return xtemplate.render("fs/fs_upload.html", 
             show_menu = show_menu, 
             path = path)

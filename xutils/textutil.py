@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/08/19 14:36:44
+# @modified 2018/08/25 20:11:49
 __doc__ = """Methods for text operation"""
 
 import re
@@ -34,7 +34,18 @@ def text_contains(text, words):
                 return False
         return True
     else:
-        raise Exception("unsupported type")
+        raise TypeError("unsupported type")
+
+def contains_any(text, words):
+    if is_str(words):
+        return words in text
+    elif isinstance(words, (list, tuple)):
+        for word in words:
+            if word in text:
+                return True
+        return False
+    else:
+        raise TypeError("unsupported type, words require str, list, tuple")
 
 def count_alpha(text):
     count = 0

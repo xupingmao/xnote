@@ -240,6 +240,18 @@ $(function() {
     $(function () {
         init();
     });
+
+    function toggleMenu() {
+      $(".aside-background").toggle();
+      $(".aside").toggle(500);
+    }
+
+    $(".aside-background").on('click', function () {
+      toggleMenu();
+    });
+
+    window.toggleMenu = toggleMenu;
+
 })(window);
 
 /**
@@ -275,3 +287,4 @@ var xnote = {
         });
   }
 }
+

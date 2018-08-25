@@ -129,10 +129,10 @@ class RecentCreatedHandler:
         offset = 0
         db = xtables.get_file_table()
         files = db.select(where="is_deleted=0 AND creator=$name AND type != 'group'", 
-            vars=dict(name=xauth.get_current_name()),
-            order="ctime DESC",
-            offset=offset,
-            limit=PAGE_SIZE)
+            vars   = dict(name=xauth.get_current_name()),
+            order  = "ctime DESC",
+            offset = offset,
+            limit  = PAGE_SIZE)
         return xtemplate.render("note/view.html",
             file_type  = "group", 
             files      = files, 

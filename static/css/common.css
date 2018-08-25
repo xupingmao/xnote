@@ -713,6 +713,17 @@ li.menu-item:hover {
     opacity: 0.5;
 }
 
+.background {
+    display: none;
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    opacity: 0.5;
+}
+
 .x-dialog-ajax {
     display: block;
 }
@@ -1023,6 +1034,33 @@ li.menu-item:hover {
     margin-left: -220px;
 }
 
+@media screen and (max-width: 700px) {
+    /** mobile **/
+    .main-content {
+        width: 100%;
+        padding-right: 0px;
+    }
+
+    .aside {
+        width: 100%;
+        padding: 0px;
+        padding-top: 10px;
+        margin-left: 0px;
+    }
+
+/*    .aside {
+        background-color: #fff;
+        display: none;
+        position: fixed;
+        height: 100%;
+        overflow: auto;
+        right: 0px;
+        top: 0px;
+        width: 200px;
+        z-index: 100;
+    }*/
+}
+
 .aside-item {
     background-color: white;
     /*border: 1px solid #ccc;*/
@@ -1051,23 +1089,6 @@ li.menu-item:hover {
 .aside-content li:hover {
     background-color: #eee;
 }
-
-@media screen and (max-width: 700px) {
-    /** mobile **/
-    .main-content {
-        width: 100%;
-        padding-right: 0px;
-    }
-
-    .aside {
-        width: 100%;
-        padding: 0px;
-        padding-top: 10px;
-        margin-left: 0px;
-    }
-}
-
-
 
 /** color **/
 .red {

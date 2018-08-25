@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/08/17 23:10:44
+# @modified 2018/08/25 23:03:56
 
 """Description here"""
 import os
@@ -109,7 +109,7 @@ class AddHandler:
         file.creator   = xauth.get_current_name()
         file.parent_id = parent_id
         file.type      = type
-        file.content   = content
+        file.content   = ""
         file.size      = len(content)
 
         code = "fail"
@@ -123,7 +123,8 @@ class AddHandler:
                     raise Exception(u"%s 已存在" % name)
                 file_dict = dict(**file)
                 del file_dict["default_value"]
-                inserted_id = db.insert(**file_dict)                
+                inserted_id = db.insert(**file_dict)
+                update_note_content(inserted_id, content)             
                 # 更新分组下面页面的数量
                 update_children_count(parent_id, db = db)
                 xmanager.fire("note.add", dict(name=name, type=type))

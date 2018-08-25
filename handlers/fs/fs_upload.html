@@ -1,4 +1,4 @@
-{% extends base.html %}
+{% extends base %}
 
 {% block head %}
 <style type="text/css">
@@ -62,4 +62,8 @@
     </div>
 
     {% include "fs/mod_fs_upload.html" %}
+{% end %}
+
+{% block aside %}
+    {% include fs/mod_aside.html %}
 {% end %}
