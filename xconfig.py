@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/08/22 01:34:17
+# @modified 2018/08/25 12:30:48
 
 '''
 xnote系统配置
@@ -130,6 +130,8 @@ FS_TEXT_EXT_LIST = [
     ".md",
     ".yml"
 ]
+
+FS_IMG_EXT_LIST = [".gif", ".png", ".jpg", ".jpeg", ".bmp", ".webp", ".ico", ".jfif", ".cur"]
 
 # 通知公告
 _notice_list = []

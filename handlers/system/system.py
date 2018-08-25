@@ -46,7 +46,6 @@ sys_tools = [
 
 doc_tools = [
     link("我的账号",   "/system/user"),
-    link("登出",    "/logout"),
     link("笔记分组", "/index"),
     link("标签云", "/file/taglist"),
     link("词典", "/file/dict"),
