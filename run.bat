@@ -36,4 +36,5 @@
 @echo Use Python Location: %PY_EXE%
 call %PY_EXE% app.py --webbrowser yes %*
 
-exit
+@rem wait to report errors
+pause

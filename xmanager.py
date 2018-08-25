@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/07/21 11:20:49
+# @modified 2018/08/25 19:38:23
 
 """
 Xnote 模块管理器
@@ -506,7 +506,11 @@ def reload():
     _manager.reload()
     _event_manager.remove_handlers()
     if xconfig.INIT_SCRIPT is not None:
-        xutils.exec_script(xconfig.INIT_SCRIPT)
+        try:
+            xutils.exec_script(xconfig.INIT_SCRIPT)
+        except:
+            xutils.print_exc()
+            print("Failed to execute script %s" % xconfig.INIT_SCRIPT)
 
 def put_task(func, *args):
     """添加异步任务到队列"""

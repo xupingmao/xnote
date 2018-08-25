@@ -45,7 +45,6 @@ sys_tools = [
 ] 
 
 doc_tools = [
-    link("我的账号",   "/system/user"),
     link("笔记分组", "/index"),
     link("标签云", "/file/taglist"),
     link("词典", "/file/dict"),
@@ -186,11 +185,26 @@ class ConfigHandler:
             setattr(xconfig, key, value == "True")
         return dict(code="success")
 
+class UserCssHandler:
+
+    def GET(self):
+        web.header("Content-Type", "text/css")
+        return xconfig.get("USER_CSS", "")
+
+class UserJsHandler:
+
+    def GET(self):
+        web.header("Content-Type", "application/javascript")
+        return xconfig.get("USRE_JS", "")
+        
+
 xurls = (
     r"/system/sys",   SysHandler,
     r"/system/index", SysHandler,
     r"/system/system", SysHandler,
     r"/system/xconfig", ConfigHandler,
     r"/system/plugins", PluginsHandler,
-    r"/system/new-plugin", NewPluginHandler
+    r"/system/new-plugin", NewPluginHandler,
+    r"/system/user.css", UserCssHandler,
+    r"/system/user.js", UserJsHandler
 )

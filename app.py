@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/08/22 01:38:02
+# @modified 2018/08/25 19:37:50
 """
     Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -112,7 +112,7 @@ def main():
     # 最后的mapping，用于匹配优先级较低的处理器
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
     manager = xmanager.init(app, var_env, last_mapping = last_mapping)
-    manager.reload()
+    xmanager.reload()
 
     def reload_callback():
         # 重新加载handlers目录下的所有模块
@@ -127,10 +127,6 @@ def main():
     autoreload_thread.start()
     # 启动定时任务检查
     manager.run_task()
-
-    if xconfig.INIT_SCRIPT is not None:
-        xutils.exec_script(xconfig.INIT_SCRIPT)
-
     if xconfig.OPEN_IN_BROWSER:
         webbrowser.open("http://localhost:%s/" % xconfig.PORT)
 
