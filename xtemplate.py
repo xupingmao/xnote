@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/08/25 00:25:56
+# @modified 2018/08/26 23:46:06
 import os
 import json
 import web
@@ -140,6 +140,7 @@ class BasePlugin:
         self.rows = 20
         # 插件的标题
         self.title = "BasePlugin"
+        self.btn_text = "处理"
         # 提交请求的方法
         self.method = "POST"
         self.output = ""

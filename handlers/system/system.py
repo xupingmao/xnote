@@ -137,12 +137,13 @@ import os
 import re
 import math
 import time
+import web
 import xconfig
 import xutils
 import xauth
 from xtemplate import BasePlugin
 
-class Main(BaseTextPlugin):
+class Main(BasePlugin):
     
     def handle(self, input):
         self.description = """提示内容"""

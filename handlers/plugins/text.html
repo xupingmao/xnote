@@ -32,7 +32,7 @@
         {% else %}
         <textarea class="col-md-12 code" name="input" rows={{rows}}>{{input}}</textarea>
         {% end %}
-        <button>处理</button>
+        <button>{{model.btn_text}}</button>
     </form>
     {% end %}
     {% if output != None and output != "" %}
