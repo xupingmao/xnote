@@ -198,6 +198,19 @@ class UserJsHandler:
         web.header("Content-Type", "application/javascript")
         return xconfig.get("USRE_JS", "")
         
+class CacheHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        key = xutils.get_argument("key", "")
+        value = xutils.get_argument("value", "")
+        cacheutil.set(key, value)
+        return dict(code = "success")
+
+    @xauth.login_required("admin")
+    def GET(self):
+        key = xutils.get_argument("key", "")
+        return dict(code = "success", data = cacheutil.get(key))
 
 xurls = (
     r"/system/sys",   SysHandler,
@@ -207,5 +220,6 @@ xurls = (
     r"/system/plugins", PluginsHandler,
     r"/system/new-plugin", NewPluginHandler,
     r"/system/user.css", UserCssHandler,
-    r"/system/user.js", UserJsHandler
+    r"/system/user.js", UserJsHandler,
+    r"/system/cache", CacheHandler
 )

@@ -127,9 +127,9 @@ img {
 
     {% if show_path_list %}
     <div class="grid-title">
-        <a href="/">Home</a>
+        <a href="/" class="link2">Home</a>
         {% for item in pathlist %}
-            › <a href="{{item.url}}">{{ item.name }}</a> 
+            › <a href="{{item.url}}" class="link2">{{ item.name }}</a> 
         {% end %}
 
         {% if file is not None %}

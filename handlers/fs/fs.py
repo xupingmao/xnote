@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/08/17 23:26:21
+# @modified 2018/09/01 01:11:32
 
 """文件服务
     - 文件目录
@@ -360,8 +360,12 @@ class RenameHandler:
     @xauth.login_required("admin")
     def POST(self):
         dirname  = xutils.get_argument("dirname")
-        old_name = xutils.get_argument("old_name")
-        new_name = xutils.get_argument("new_name")
+        old_name = xutils.get_argument("old_name", "")
+        new_name = xutils.get_argument("new_name", "")
+        if old_name == "":
+            return dict(code="fail", message="old_name is blank")
+        if new_name == "":
+            new_name = os.path.basename(old_name)
         if xconfig.USE_URLENCODE:
             old_name = xutils.quote_unicode(old_name)
             new_name = xutils.quote_unicode(new_name)
@@ -370,6 +374,33 @@ class RenameHandler:
         if os.path.exists(new_path):
             return dict(code="fail", message="%s 已存在" % new_path)
         os.rename(old_path, new_path)
+        return dict(code="success")
+
+class CutHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        files = xutils.get_argument("files[]", list())
+        xconfig.FS_CLIP = files
+        return dict(code="success")
+
+
+class PasteHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        dirname = xutils.get_argument("dirname", "")
+        old_path = xutils.get_argument("old_path", "")
+        old_path = xutils.get_real_path(old_path).rstrip("/")
+        dirname  = xutils.get_real_path(dirname)
+        basename = os.path.basename(old_path)
+        print(old_path, dirname, basename)
+        new_path = os.path.join(dirname, basename)
+        if os.path.exists(new_path):
+            return dict(code="fail", message="%s 已存在" % new_path)
+        os.rename(old_path, new_path)
+        if xconfig.FS_CLIP != None:
+            xconfig.FS_CLIP.remove(old_path)
         return dict(code="success")
 
 class ListDirHandler:
@@ -393,6 +424,8 @@ xurls = (
     r"/fs_api/add_file", AddFileHandler,
     r"/fs_api/remove", RemoveHandler,
     r"/fs_api/rename", RenameHandler,
+    r"/fs_api/cut", CutHandler,
+    r"/fs_api/paste", PasteHandler,
     r"/fs_link/(.*)", LinkHandler,
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/02/15 10:46:19
+# @modified 2018/08/29 00:09:30
 
 import web
 import os
@@ -9,19 +9,16 @@ import subprocess
 import xauth
 
 
-class OpenDirHandler:
+class OpenHandler:
     @xauth.login_required("admin")
     def GET(self):
         path = xutils.get_argument("path")
-        if os.path.isdir(path):
-            path = '"%s"' % path
-            if xutils.is_windows():
-                path = path.replace("/", "\\")
-                cmd = "explorer %s" % path
-            elif xutils.is_mac():
-                cmd = "open %s" % path
-        else:
-            cmd = path
+        path = '"%s"' % path
+        if xutils.is_windows():
+            path = path.replace("/", "\\")
+            cmd = "explorer %s" % path
+        elif xutils.is_mac():
+            cmd = "open %s" % path
         print(cmd)
         os.popen(cmd)
         return "<html><script>window.close()</script></html>"
@@ -84,6 +81,6 @@ class PythonCommandHandler:
 
 xurls = (
     r"/system/command", CommandHandler,
-    r"/system/command/open", OpenDirHandler,
+    r"/system/command/open", OpenHandler,
     r"/system/command/python", PythonCommandHandler,
 )

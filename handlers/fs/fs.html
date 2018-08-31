@@ -154,6 +154,7 @@
         <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
         <input type="button" class="btn" value="重命名" id="renameBtn" 
             message="重命名为">
+        <input type="button" class="btn" value="剪切" id="cutBtn" message="剪切"/>
         <input id="uploadFileBtn" type="button" class="btn" value="上传">
         <input type="button" class="btn advanced-opt" value="本地浏览" id="openDirectory"/>
         <input type="button" class="link-btn advanced-opt" href="/code/analyze?path={{path}}&recursive=on" value="高级搜索"/>
@@ -239,6 +240,7 @@
 </div>
 
 <script type="text/javascript">
+$(function () {
     var globalPath = "{{path}}";
 
     function previewImages() {
@@ -311,6 +313,7 @@
     $("#openDirectory").on("click", function () {
         $.post("/system/command/open", {path: "{{path}}"});
     });
+
     $(".command-btn").on("click", function () {
         var command = $(this).attr("data-command");
         $.get("/system/command", {command: command, path: globalPath});
@@ -373,12 +376,54 @@
             }
         }
     });
+
+
+    $("#cutBtn").on("click", function () {
+        var checked = $(".checkboxTd :checked");
+        if (checked.length == 0) {
+            alert("请选择文件");
+        } else {
+            var cutPathList = [];
+            checked.each(function (index, element) {
+                // console.log(element);
+                var path = $(element).attr("data-path");
+                console.log(path);
+                cutPathList.push(path);
+            });
+            var data = {"files": cutPathList};
+            $.post("/fs_api/cut", data, function (resp) {
+                console.log(resp);
+                window.location.reload();
+            }).fail(function (errorMessage) {
+                alert("update clipboard failed!" + errorMessage);
+            })
+        }
+    });
+
+    $(".paste-link").on("click", function (e) {
+        var target = e.target;
+        var dataPath = $(target).attr("data-path");
+        // alert("move from " + dataPath + " to " + globalPath);
+        var data = {dirname: globalPath, old_path: dataPath};
+        $.post("/fs_api/paste", data, function (resp) {
+            if (resp.code != "success") {
+                alert(resp.message);
+            } else {
+                window.location.reload();
+            }
+        }).fail(function () {
+            // 
+        });
+    });
+
     $("#showMoreOptsBtn").click(function (event) {
         $(".advanced-opt").toggle(200);
     });
+
     $("#uploadFileBtn").click(function () {
         $("#uploadFileArea").toggle(200);
-    })
+    });
+});
 </script>
 
 {% include fs/mod_fs_upload.html %}

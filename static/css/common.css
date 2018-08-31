@@ -557,6 +557,16 @@ li.menu-item:hover {
     cursor: pointer;
 }
 
+.link2 {
+    color: black;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.link2:hover {
+    color: gray;
+}
+
 .selected-link {
     border-bottom: 2px solid red;
 }
@@ -658,6 +668,10 @@ li.menu-item:hover {
 
 .blue-text {
     color: #00f;
+}
+
+.center-text {
+    text-align: center;
 }
 
 .error {
@@ -1069,6 +1083,7 @@ li.menu-item:hover {
 .aside-item li {
     list-style: none;
     padding-left: 5px;
+    line-height: 20px;
 }
 
 .aside-title {

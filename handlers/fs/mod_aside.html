@@ -10,3 +10,22 @@
         <!-- <li><a class="link" href="/fs_upload">上传文件</a></li> -->
     </div>
 </div>
+
+{% set clipboard_data = xconfig.get("FS_CLIP") %}
+{% if clipboard_data != None and len(clipboard_data) > 0 %}
+{% set get_short_text = xutils.textutil.get_short_text %}
+<div class="aside-item">
+    <div class="aside-title">
+        剪切板
+    </div>
+    <div class="aside-content">
+        {% for clip_path in clipboard_data %}
+            {% set clip_base_name = os.path.basename(clip_path.rstrip("/")) %}
+            <li>
+                <a class="link float-right paste-link" data-path="{{clip_path}}">粘贴</a>
+                <span>{{get_short_text(clip_base_name, 8)}}</span>
+            </li>
+        {% end %}
+    </div>
+</div>
+{% end %}

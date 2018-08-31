@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/08/07 23:41:19
+# @modified 2018/08/31 01:51:19
 """
 缓存的实现，考虑失效的规则如下
 
@@ -43,7 +43,7 @@ class CacheObj:
     """
     _queue = Queue()
 
-    def __init__(self, key, value, expire=-1):
+    def __init__(self, key, value, expire = -1, type = "object"):
         global _cache_dict
         
         if key is None:
@@ -57,7 +57,7 @@ class CacheObj:
         self.value            = value
         self.expire           = expire
         self.expire_time      = time.time() + expire
-        self.type             = "object"
+        self.type             = type
         self.is_force_expired = False
 
         if expire < 0:
@@ -197,6 +197,27 @@ def update_cache_by_key(key):
         args = obj.args
         obj.value = func(*args)
 
+def lpush(key, value):
+    obj = get_cache_obj(key, type="list")
+    if obj != None and obj.value != None:
+        obj.value.insert(0, value)
+        obj.save()
+    else:
+        obj = CacheObj(key, [value], type = "list")
+        obj.save()
+
+def lrange(key, start = 0, stop = -1):
+    obj = get_cache_obj(key, type = "list")
+    if obj != None and obj.value != None:
+        length = len(obj.value)
+        if start < 0:
+            start += length
+        if stop < 0:
+            stop += length
+        return obj.value[start: stop+1]
+    else:
+        return []
+
 class SortedObject:
 
     def __init__(self, key, value):
@@ -250,9 +271,8 @@ def hset(key, field, value, expire=-1):
         obj.type = "hash"
         obj.save()
     else:
-        obj = CacheObj(key, dict())
+        obj = CacheObj(key, dict(), type = "hash")
         obj.value[field] = value
-        obj.type = "hash"
         obj.save()
 
 def hget(key, field):

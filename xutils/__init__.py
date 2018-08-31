@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/08/25 12:30:37
+# @modified 2018/08/31 01:42:47
 
 """
 xnote工具类总入口
@@ -740,7 +740,7 @@ def exec_command(command, confirmed = False):
 #################################################################
 def get_argument(key, default_value=None, type = None, strip=False):
     ctx_key = "_xnote.input"
-    if isinstance(default_value, dict):
+    if isinstance(default_value, (dict, list)):
         return web.input(**{key: default_value}).get(key)
     _input = web.ctx.get(ctx_key)
     if _input == None:
