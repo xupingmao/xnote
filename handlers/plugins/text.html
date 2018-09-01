@@ -35,10 +35,13 @@
         <button>{{model.btn_text}}</button>
     </form>
     {% end %}
+
+    <div class="col-md-12">{% raw html %}</div>
+
+    {# 文本输出放到后面 #}
     {% if output != None and output != "" %}
     <pre class="col-md-12">{{ output }}</pre>
     {% end %}
-    <div class="col-md-12">{% raw html %}</div>
 
     {% if model.show_pagenation %}
         {# 分页 #}

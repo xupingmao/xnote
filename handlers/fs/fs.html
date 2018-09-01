@@ -335,6 +335,7 @@ $(function () {
             showErrorMessage("删除失败");
         })
     }
+    window.removeFile = removeFile;
 
     $("#deleteFile").on("click", function () {
         var checked = $(".checkboxTd :checked");

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/08/25 19:38:23
+# @modified 2018/09/01 21:29:52
 
 """
 Xnote 模块管理器
@@ -129,16 +129,16 @@ class ModelManager:
         else:
             self.last_mapping = last_mapping
 
-        self.vars = vars
-        self.search_dict = {}
-        self.task_dict = {}
-        self.model_list = []
-        self.black_list = ["__pycache__"]
-        self.failed_mods = []
-        self.debug = True
+        self.vars           = vars
+        self.search_dict    = {}
+        self.task_dict      = {}
+        self.model_list     = []
+        self.black_list     = ["__pycache__"]
+        self.failed_mods    = []
+        self.debug          = True
         self.report_loading = False
-        self.report_unload = True
-        self.task_manager = TaskManager(app)
+        self.report_unload  = True
+        self.task_manager   = TaskManager(app)
         # stdout装饰器，方便读取print内容
         if not isinstance(sys.stdout, MyStdout):
             sys.stdout = MyStdout(sys.stdout)
@@ -450,6 +450,11 @@ class EventHandler:
             except:
                 xutils.print_exc()
 
+    def __eq__(self, other):
+        if not type(self) != type(other):
+            return False
+        return self.func == other.func
+
     def __str__(self):
         return "<EventHandler %s object at %s>" % (self.func.__name__, id(self))
 
@@ -467,10 +472,13 @@ class EventManager:
     def add_handler(self, event_type, func, is_async = False):
         """
         注册事件处理器
-        TODO 事件处理器的去重,使用handler的名称?
+        事件处理器的去重,通过判断是不是同一个函数，不通过函数名，如果修改初始化脚本需要执行【重新加载模块】功能
         """
         handler = EventHandler(func, is_async)
         handlers = self._handlers.get(event_type, [])
+        if handler in handlers:
+            warn("handler %s is already registered" % handler)
+            return
         handlers.append(handler)
         self._handlers[event_type] = handlers
 
@@ -494,7 +502,7 @@ def init(app, vars, last_mapping = None):
     global _manager
     global _event_manager
     _event_manager = EventManager()
-    _manager = ModelManager(app, vars, last_mapping = last_mapping)
+    _manager       = ModelManager(app, vars, last_mapping = last_mapping)
     return _manager
 
 def instance():

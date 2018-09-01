@@ -421,7 +421,7 @@ li.menu-item:hover {
   padding-right: 10px;
   width: auto;
   height: 100%;
-  overflow: auto;
+  overflow: hidden;
   box-sizing: border-box;
   margin-left: 0px;
   background-color: #fff;

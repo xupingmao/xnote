@@ -1,18 +1,18 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/08/26 23:46:06
+# @modified 2018/09/01 21:08:41
 import os
 import json
 import web
 import math
 import inspect
 import six
-from tornado.template import Template, Loader
 import xconfig
 import xauth
 import xutils
 import xtables
+from tornado.template import Template, Loader
 from xutils import dateutil, quote
 from xutils import ConfigParser, Storage, tojson
 
@@ -70,19 +70,19 @@ def get_message_count(user):
 
 def pre_render(kw):
     """模板引擎预处理过程"""
-    kw["math"] = math
-    kw["_is_admin"]  = xauth.is_admin()
-    kw["_has_login"] = xauth.has_login()
-    user_name = xauth.get_current_name() or ""
-    kw["_user_name"] = user_name
-    kw["_user_agent"] = get_user_agent()
+    kw["math"]          = math
+    kw["_is_admin"]     = xauth.is_admin()
+    kw["_has_login"]    = xauth.has_login()
+    user_name           = xauth.get_current_name() or ""
+    kw["_user_name"]    = user_name
+    kw["_user_agent"]   = get_user_agent()
     # 处理首页公告
-    kw["_top_notice"] = None
+    kw["_top_notice"]   = None
     # 用于渲染其他组件
-    kw["_render"] = render
-    kw["Storage"] = Storage
-    kw["xutils"]  = xutils
-    kw["xconfig"] = xconfig
+    kw["_render"]       = render
+    kw["Storage"]       = Storage
+    kw["xutils"]        = xutils
+    kw["xconfig"]       = xconfig
     kw["_notice_count"] = get_message_count(user_name)
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
@@ -137,19 +137,19 @@ class BasePlugin:
 
     def __init__(self):
         # 输入框的行数
-        self.rows = 20
+        self.rows            = 20
         # 插件的标题
-        self.title = "BasePlugin"
-        self.btn_text = "处理"
+        self.title           = "BasePlugin"
+        self.btn_text        = "处理"
         # 提交请求的方法
-        self.method = "POST"
-        self.output = ""
-        self.description = ""
-        self.html = ""
-        self.css_style = ""
+        self.method          = "POST"
+        self.output          = ""
+        self.description     = ""
+        self.html            = ""
+        self.css_style       = ""
         self.show_pagenation = False
-        self.page_url = "?page="
-        self.aside_html = ""
+        self.page_url        = "?page="
+        self.aside_html      = ""
 
     def write(self, text):
         self.output += text
@@ -187,17 +187,33 @@ class BasePlugin:
         except:
             error = xutils.print_exc()
         return render("plugins/text.html",
-            model = self,
+            model       = self,
             script_name = globals().get("script_name"),
             description = self.description,
-            error = error,
-            title = self.title,
-            method = self.method,
-            rows = self.rows,
-            input = input, 
-            output = self.output + output,
-            css_style = self.css_style,
-            html = self.html)
+            error       = error,
+            title       = self.title,
+            method      = self.method,
+            rows        = self.rows,
+            input       = input, 
+            output      = self.output + output,
+            css_style   = self.css_style,
+            html        = self.html)
+
+    def on_install(self):
+        """安装插件事件, TODO"""
+        pass
+
+    def on_uninstall(self):
+        """卸载插件事件, TODO"""
+        pass
+
+    def on_boot(self):
+        """系统启动事件"""
+        pass
+
+    def on_event(self, event):
+        """其他事件"""
+        pass
 
     def GET(self):
         return self.render()
@@ -205,7 +221,7 @@ class BasePlugin:
     def POST(self):
         return self.render()
 
-BaseTextPage = BasePlugin
+BaseTextPage   = BasePlugin
 BaseTextPlugin = BasePlugin
 
 reload()
