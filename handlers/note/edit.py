@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/08/25 23:03:56
+# @modified 2018/09/01 16:09:28
 
 """Description here"""
 import os
@@ -111,6 +111,7 @@ class AddHandler:
         file.type      = type
         file.content   = ""
         file.size      = len(content)
+        file.is_public = 0
 
         code = "fail"
         error = ""
@@ -235,6 +236,8 @@ class ShareHandler:
         id = xutils.get_argument("id", type=int)
         db = xtables.get_file_table()
         db.update(is_public=1, where=dict(id=id, creator=xauth.get_current_name()))
+        tag = xtables.get_file_tag_table()
+        tag.update(is_public=1, where=dict(file_id=id, user=xauth.get_current_name()))
         raise web.seeother("/file/view?id=%s"%id)
 
 
@@ -246,6 +249,8 @@ class UnshareHandler:
         db = xtables.get_file_table()
         db.update(is_public=0, 
             where=dict(id=id, creator=xauth.get_current_name()))
+        tag = xtables.get_file_tag_table()
+        tag.update(is_public=0, where=dict(file_id=id, user=xauth.get_current_name()))
         raise web.seeother("/file/view?id=%s"%id)
 
 class FileSaveHandler:
@@ -324,7 +329,7 @@ class UpdateHandler:
                 pathlist = [],
                 file     = file, 
                 content  = content, 
-                error    = "更新失败, version冲突,当前version={},最新version={}".format(version, cur_version))
+                error    = "更新失败, 版本冲突,当前version={},最新version={}".format(version, cur_version))
 
 xurls = (
     r"/file/add"         , AddHandler,

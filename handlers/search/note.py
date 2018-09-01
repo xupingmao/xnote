@@ -89,13 +89,13 @@ def full_search(words, groups=None):
     content_like_list = []
     vars = dict()
     for word in words:
-        content_like_list.append('content like %s' % to_sqlite_obj('%' + word.upper() + '%'))
-    sql = "SELECT id, parent_id, name, ctime, mtime, type, creator FROM file WHERE (%s) AND is_deleted == 0" \
-        % " AND ".join(content_like_list)
-
+        content_like_list.append('note_content.content like %s' % to_sqlite_obj('%' + word.upper() + '%'))
+    sql = "SELECT file.id AS id, file.parent_id AS parent_id, file.name AS name, file.ctime AS ctime, file.mtime AS mtime, file.type AS type, file.creator AS creator FROM file JOIN note_content ON file.id = note_content.id WHERE file.is_deleted == 0 AND "
+    sql += " AND ".join(content_like_list)
     if groups != "admin":
-        sql += " AND (is_public = 1 OR creator = $creator)"
+        sql += " AND (file.is_public = 1 OR file.creator = $creator)"
     sql += " order by mtime desc limit 1000"
+    print(sql)
 
     vars["creator"] = groups
     all = xtables.get_file_table().query(sql, vars=vars)

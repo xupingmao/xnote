@@ -8,9 +8,11 @@
         常用
     </div>
     <div class="aside-content">
-        <li><a class="link" href="/file/group/ungrouped">未分类</a></li>
+        {% if _has_login %}
+            <li><a class="link" href="/file/group/ungrouped">未分类</a></li>
+            <li><a class="link" href="/note/recent_created">最新笔记</a></li>
+        {% end %}
         <li><a class="link" href="/file/group/public">分享笔记</a></li>
-        <li><a class="link" href="/note/recent_created">最新笔记</a></li>
         <li><a class="link" href="/file/taglist">标签云</a></li>
     </div>
 </div>

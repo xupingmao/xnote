@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/08/23 01:51:40
+# @modified 2018/09/01 16:05:52
 import math
 import xutils
 import xtemplate
@@ -14,7 +14,8 @@ class TagHandler:
         id        = int(id)
         db        = xtables.get_file_tag_table()
         user_name = xauth.get_current_name()
-        file_tags = db.select(where=dict(file_id=id, user=user_name))
+        sql = "SELECT * FROM file_tag WHERE file_id=$file_id AND (user=$user OR is_public=1)"
+        file_tags = db.query(sql, vars=dict(file_id=id, user=user_name))
         return dict(code="", message="", data=list(file_tags))
 
 class UpdateTagHandler:
@@ -45,7 +46,7 @@ class UpdateTagHandler:
             tag_db.delete(where=dict(name=item, file_id=id, user=user_name))
         for item in to_add:
             if item == "": continue
-            tag_db.insert(name=item, file_id=id, user=user_name)
+            tag_db.insert(name=item, file_id=id, user=user_name, is_public=file.is_public)
 
         file_db.update(related=tags_str, where=dict(id=id))
         return dict(code="", message="", data="OK")
@@ -55,7 +56,6 @@ class UpdateTagHandler:
 
 class TagNameHandler:
 
-    @xauth.login_required()
     def GET(self, tagname):
         from . import dao
         tagname  = xutils.unquote(tagname)
@@ -65,9 +65,12 @@ class TagNameHandler:
         offset   = (page-1) * limit
         pagesize = xconfig.PAGE_SIZE
 
-        user_name = xauth.get_current_name()
-        count_sql = "SELECT COUNT(1) AS amount FROM file_tag WHERE LOWER(name) = $name AND user=$user"
-        sql = "SELECT f.* FROM file f, file_tag ft ON ft.file_id = f.id WHERE LOWER(ft.name) = $name AND ft.user=$user ORDER BY f.ctime DESC LIMIT $offset, $limit"
+        if xauth.has_login():
+            user_name = xauth.get_current_name()
+        else:
+            user_name = ""
+        count_sql = "SELECT COUNT(1) AS amount FROM file_tag WHERE LOWER(name) = $name AND (user=$user OR is_public=1)"
+        sql = "SELECT f.* FROM file f, file_tag ft ON ft.file_id = f.id WHERE LOWER(ft.name) = $name AND (ft.user=$user OR ft.is_public=1) ORDER BY f.ctime DESC LIMIT $offset, $limit"
         count = db.query(count_sql, vars=dict(name=tagname.lower(), user=user_name))[0].amount
 
         files = db.query(sql,
@@ -80,18 +83,23 @@ class TagNameHandler:
             page     =page)
 
 # @xutils.cache(key="tag.get_taglist", expire=60)
-def get_taglist(db, user_name):
-    sql = "SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag WHERE user=$user GROUP BY LOWER(name) ORDER BY amount DESC, name ASC";
+def get_taglist(db, user_name=None):
+    if user_name is None:
+        sql = "SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag WHERE is_public=1 GROUP BY LOWER(name) ORDER BY amount DESC, name ASC";
+    else:
+        sql = "SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag WHERE user=$user GROUP BY LOWER(name) ORDER BY amount DESC, name ASC";
     tag_list = db.query(sql, vars = dict(user = user_name))
     return list(tag_list)
 
 class TagListHandler:
 
-    @xauth.login_required()
     def GET(self):
-        db        = xtables.get_file_table()
-        user_name = xauth.get_current_name()
-        tag_list  = get_taglist(db, user_name)
+        db = xtables.get_file_table()
+        if xauth.has_login():
+            user_name = xauth.get_current_name()
+            tag_list  = get_taglist(db, user_name)
+        else:
+            tag_list  = get_taglist(db)
         return xtemplate.render("note/taglist.html", 
             tag_list = tag_list)
 

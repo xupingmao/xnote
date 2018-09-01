@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/07/29 19:11:40
+# @modified 2018/09/01 16:12:55
 
 import sys
 import os
@@ -204,6 +204,16 @@ class TestMain(unittest.TestCase):
         json_request("/file/timeline")
         json_request("/file/timeline/month?year=2018&month=1")
 
+    def test_note_tag(self):
+        json_request("/note/remove?name=xnote-tag-test")
+        file = json_request("/note/add", method="POST", 
+            data=dict(name="xnote-tag-test", content="hello"))
+        id = file["id"]
+        json_request("/file/tag/update", method="POST", data=dict(file_id=id, tags="ABC DEF"))
+        json_request("/file/tag/%s" % id)
+        json_request("/file/tag/update", method="POST", data=dict(file_id=id, tags=""))
+
+
     def test_file_dict(self):
         json_request("/file/dict?_format=json")
 
@@ -349,11 +359,6 @@ class TestMain(unittest.TestCase):
         json_request("/message/list?status=suspended")
         # search
         json_request("/message/list?key=1")
-
-    def test_tag(self):
-        json_request("/file/tag/update", method="POST", data=dict(file_id=0, tags="ABC DEF"))
-        json_request("/file/tag/0")
-        json_request("/file/tag/update", method="POST", data=dict(file_id=0, tags=""))
 
     def test_tagname(self):
         self.check_OK("/file/tagname/test")
