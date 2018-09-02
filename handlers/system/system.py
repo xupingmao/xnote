@@ -37,7 +37,7 @@ sys_tools = [
     link("用户管理",   "/system/user/list"),
     link("App管理",   "/fs_link/app"),
     # link("后台模板缓存", "/system/template_cache"),
-    link("重新加载模块", "/system/reload"),
+    link("系统刷新",  "/system/reload"),
     link("Python解释器", "/system/script/edit?name=test.py"),
     link("Python文档", "/system/modules_info"),
     link("SQL控制台", "/tools/sql"),
@@ -122,6 +122,13 @@ class SysHandler:
             user             = xauth.get_current_user(),
             customized_items = customized_items
         )
+
+
+class ReloadHandler:
+    @xauth.login_required("admin")
+    def GET(self):
+        xmanager.reload()
+        raise web.seeother("/")
 
 class PluginsHandler:
 
@@ -216,6 +223,7 @@ xurls = (
     r"/system/sys",   SysHandler,
     r"/system/index", SysHandler,
     r"/system/system", SysHandler,
+    r"/system/reload", ReloadHandler,
     r"/system/xconfig", ConfigHandler,
     r"/system/plugins", PluginsHandler,
     r"/system/new-plugin", NewPluginHandler,

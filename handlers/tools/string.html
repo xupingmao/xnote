@@ -27,7 +27,7 @@ function getRadioValue(name) {
 }
 
 function to_array(inputStr, option) {
-    var seperator = option.getSeperator()
+    var seperator = option.getSeperator();
     var lines = inputStr.split(seperator);
     var lineStr = "";
 
@@ -72,8 +72,9 @@ function bashformat(fmt, data) {
 }
 
 
-function to_multiline(inputStr, option) {
-    var list = inputStr.split('\n');
+function to_str_def(inputStr, option) {
+    var seperator = option.getSeperator();
+    var list = inputStr.split(seperator);
     var quote = option.getQuote();
     var str = '';
     for (var i = 0; i < list.length; i++) {
@@ -82,6 +83,21 @@ function to_multiline(inputStr, option) {
         if (i < list.length-1) {
             str += '+\n';
         }
+    }
+    return str;
+}
+
+function to_lines(inputStr, option) {
+    var seperator = option.getSeperator();
+    var list = inputStr.split(seperator);
+    var quote = option.getQuote();
+    var str = '';
+    for (var i = 0; i < list.length; i++) {
+        var item = list[i].trim();
+        if (item == "") {
+            continue;
+        }
+        str += quote + item + '\n' + quote;
     }
     return str;
 }
@@ -436,6 +452,8 @@ function parse_java_func(inputStr, option) {
 
 </script>
 
+<div class="col-md-12 error hide" id="error"></div>
+
 <div class="container col-md-6">
     <textarea id="input" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
 </div>
@@ -444,20 +462,21 @@ function parse_java_func(inputStr, option) {
 </div>
 
 <div class="container">
-    <p>分割符<select id="seperator">
-        <option value="\n">换行</option>
-        <option value=",">逗号</option>
-        <option value=";">分号</option>
-        <option value=" ">空格</option>
-    </select></p>
-    <p>引号
-        <input type="radio" name="quote" value="0" checked />双引号
-        <input type="radio" name="quote" value="1"/>单引号
-        <input type="radio" name="quote" value="2"/>无
+    <p>分割符
+        <input type="radio" name="seperator" value="\n" checked/>换行
+        <input type="radio" name="seperator" value=","/>逗号
+        <input type="radio" name="seperator" value=";"/>分号
+        <input type="radio" name="seperator" value=" "/>空格
     </p>
     <p>过滤重复<input type="checkbox" id="unique"/></p>
+
+    <p>引号
+        <input type="radio" name="quote" value="0" checked/>无
+        <input type="radio" name="quote" value="1"/>单引号
+        <input type="radio" name="quote" value="2"/>双引号
+    </p>
     <p>
-        转换成大写
+        大小写转换
         <input type="radio" name="case" value="0" checked />普通
         <input type="radio" name="case" value="upper"/>大写
         <input type="radio" name="case" value="lower"/>小写
@@ -466,7 +485,8 @@ function parse_java_func(inputStr, option) {
         转换方式
         <select id="option">
             <option value="to_array">转成数组</option>
-            <option value="to_multiline">转成多行字符串</option>
+            <option value="to_lines">转成多行</option>
+            <option value="to_str_def">字符串定义</option>
             <option value="str_info">字符串信息</option>
             <option value="to_enum">转换成枚举</option>
             <option value="get_first_word">获取第一个单词</option>
@@ -482,9 +502,6 @@ function parse_java_func(inputStr, option) {
     <p><button onclick="execute()">转换</button></p>
 </div>
 
-<div class="col-md-12" id="error" style="color:red">
-</div>
-        
 <script>
 
     function select(ident) {
@@ -511,13 +528,13 @@ function parse_java_func(inputStr, option) {
         
         this.getQuote = function () {
             var value = getRadioValue("quote");
-            if (value == "0") return '"';
+            if (value == "2") return '"';
             else if (value == "1") return "'";
             return "";
         }
 
         this.getSeperator = function () {
-            var value = select("#seperator").value;
+            var value = getRadioValue("seperator");
             if (value == "\\n") return "\n";
             return value;
         }
@@ -533,7 +550,10 @@ function parse_java_func(inputStr, option) {
         this.isLowerCase = function () {
             return getCase() == "lower";
         }
+    }
 
+    function showError(message) {
+        $("#error").show().text(message);
     }
 
     function execute() {
@@ -541,11 +561,11 @@ function parse_java_func(inputStr, option) {
         console.log(option);
         var input = getInput();
         try {
-            $("#error").html("");
+            $("#error").hide();
             var str = window[option](input, new Option());
             output(str);
         } catch (e) {
-            $("#error").html(e);
+            showError("");
         }
         
     }

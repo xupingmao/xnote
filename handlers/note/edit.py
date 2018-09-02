@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/09/01 16:09:28
+# @modified 2018/09/02 21:13:37
 
 """Description here"""
 import os
@@ -176,6 +176,9 @@ class RemoveHandler:
 
         db.update(is_deleted=1, mtime=dateutil.format_time(), where=dict(id=int(id)))
         db.delete(where="is_deleted=1 AND mtime < $date", vars=dict(date=dateutil.before(days=30,format=True)))
+        # 删除标签
+        tag_db = xtables.get_file_tag_table()
+        tag_db.delete(where=dict(file_id=id));
         xmanager.fire("note.remove", dict(id=id))
         return dict(code="success")
         
