@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/08/31 01:51:19
+# @modified 2018/09/03 23:49:42
 """
 缓存的实现，考虑失效的规则如下
 
@@ -166,7 +166,7 @@ def put_cache(key = None, value = None, prefix = None, args = None, expire = -1)
 
 def get(key, default_value=None):
     """获取缓存的值"""
-    obj = _cache_dict.get(key)
+    obj = get_cache_obj(key)
     if obj is None:
         return default_value
     return obj.get_value()

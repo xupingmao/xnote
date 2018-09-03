@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/09/01 16:05:52
+# @modified 2018/09/03 23:55:47
 import math
 import xutils
 import xtemplate
@@ -84,10 +84,7 @@ class TagNameHandler:
 
 # @xutils.cache(key="tag.get_taglist", expire=60)
 def get_taglist(db, user_name=None):
-    if user_name is None:
-        sql = "SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag WHERE is_public=1 GROUP BY LOWER(name) ORDER BY amount DESC, name ASC";
-    else:
-        sql = "SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag WHERE user=$user GROUP BY LOWER(name) ORDER BY amount DESC, name ASC";
+    sql = "SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag WHERE (user=$user OR is_public=1) GROUP BY LOWER(name) ORDER BY amount DESC, name ASC";
     tag_list = db.query(sql, vars = dict(user = user_name))
     return list(tag_list)
 
@@ -99,7 +96,7 @@ class TagListHandler:
             user_name = xauth.get_current_name()
             tag_list  = get_taglist(db, user_name)
         else:
-            tag_list  = get_taglist(db)
+            tag_list  = get_taglist(db, "")
         return xtemplate.render("note/taglist.html", 
             tag_list = tag_list)
 

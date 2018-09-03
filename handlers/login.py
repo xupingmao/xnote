@@ -1,10 +1,15 @@
 # encoding=utf-8
+# @modified 2018/09/03 23:57:46
 import web
+import time
 import hashlib
 import xutils
 import xauth
 import xtemplate
 import xtables
+from xutils import dateutil, cacheutil
+
+RETRY_LIMIT = 3
 
 def get_real_ip():
     x_forwarded_for = web.ctx.env.get("HTTP_X_FORWARDED_FOR")
@@ -28,23 +33,27 @@ class handler:
         target = xutils.get_argument("target")
         users = xauth.get_users()
         error = ""
-
-        if name in users:
+        count = cacheutil.get("login.fail.count#%s" % name, 0)
+        if count >= RETRY_LIMIT:
+            error = "重试次数过多"
+        elif name in users:
             user = users[name]
             if pswd == user["password"]:
                 save_login_info(name, "success")
                 xauth.write_cookie(name)
-                db = xtables.get_user_table()
-                db.update(login_time=xutils.format_datetime(), where=dict(name=name))
+                xauth.update_user(name, dict(login_time=xutils.format_datetime(), retry_times = 0))                
                 if target is None:
                     raise web.seeother("/")
                 raise web.seeother(target)
             else:
-                error = "user or password error"
+                error = "用户名或密码错误"
                 save_login_info(name, pswd)
+                cacheutil.set("login.fail.count#%s" % name, count + 1, 60)
         else:
-            error = "user or password error"
+            error = "用户名或密码错误"
             save_login_info(name, pswd)
+            # 用户名异常的不做限制，防止缓存被刷爆
+            # cacheutil.set("login.fail.count#%s" % name, count+1, 60)
 
         return xtemplate.render("login.html", 
             username=name, 

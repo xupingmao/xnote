@@ -155,6 +155,14 @@ def add_user(name, password):
             mtime=xutils.format_time())
     refresh_users()
 
+def update_user(name, user):
+    if name == "" or name == None:
+        return
+    mem_user = _users[name]
+    mem_user.update(user)
+    db = xtables.get_user_table()
+    db.update(where = dict(name=name), **user)
+
 def remove_user(name):
     if name == "admin":
         return
