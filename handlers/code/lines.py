@@ -12,28 +12,29 @@ from collections import OrderedDict
 
 CODE_EXT_LIST = xconfig.FS_TEXT_EXT_LIST
 CODE_EXT_DICT = OrderedDict()
-CODE_EXT_DICT["ALL"]        = CODE_EXT_LIST
-CODE_EXT_DICT["Python"]      = [".py"]
-CODE_EXT_DICT["Python(web)"] = [".py", ".html"]
-CODE_EXT_DICT["Java"]        = [".java"]
-CODE_EXT_DICT["Web前端"]     = [".html", ".htm", ".js", ".css"]
-CODE_EXT_DICT["C/C++"]       = [".c", ".h", ".cpp", ".hpp"]
-CODE_EXT_DICT["Lua"]         = [".lua"]
-CODE_EXT_DICT["Ruby"]        = [".rb"],
-CODE_EXT_DICT["Php"]         = [".php"]
+CODE_EXT_DICT["ALL"]           = CODE_EXT_LIST
+CODE_EXT_DICT["Python"]        = [".py"]
+CODE_EXT_DICT["Python(web)"]   = [".py", ".html"]
+CODE_EXT_DICT["Java"]          = [".java"]
+CODE_EXT_DICT["Html/JS/CSS"]   = [".html", ".htm", ".js", ".css"]
+CODE_EXT_DICT["C/C++"]         = [".c", ".h", ".cpp", ".hpp"]
+CODE_EXT_DICT["Lua"]           = [".lua"]
+CODE_EXT_DICT["Ruby"]          = [".rb"],
+CODE_EXT_DICT["Php"]           = [".php"]
+CODE_EXT_DICT["Pascal/Delphi"] = [".pas"]
 
 class LinesInfo(object):
     """docstring for LinesInfo"""
     def __init__(self, fname, lines = 0, comments = 0, blanklines = 0, root = None):
         super(LinesInfo, self).__init__()
-        self.fname = fname
-        self.lines = lines
-        self.comments = comments
-        self.blanklines = blanklines
-        self.validlines = lines - blanklines
+        self.fname        = fname
+        self.lines        = lines
+        self.comments     = comments
+        self.blanklines   = blanklines
+        self.validlines   = lines - blanklines
         self.display_name = fname
         if root:
-            self.root = root
+            self.root         = root
             self.display_name = xutils.get_relative_path(fname, root)
 
 class LineCounter:

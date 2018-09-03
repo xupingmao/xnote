@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/09/01 21:29:52
+# @modified 2018/09/03 01:38:13
 
 """
 Xnote 模块管理器
@@ -107,6 +107,9 @@ class WebModel:
         
 
 def log(msg):
+    six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
+
+def warn(msg):
     six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
 
 class ModelManager:
@@ -479,6 +482,7 @@ class EventManager:
         if handler in handlers:
             warn("handler %s is already registered" % handler)
             return
+        log("register handler %s" % handler)
         handlers.append(handler)
         self._handlers[event_type] = handlers
 
@@ -510,9 +514,9 @@ def instance():
     return _manager
     
 def reload():
+    _event_manager.remove_handlers()
     xauth.refresh_users()
     _manager.reload()
-    _event_manager.remove_handlers()
     if xconfig.INIT_SCRIPT is not None:
         try:
             xutils.exec_script(xconfig.INIT_SCRIPT)
@@ -542,7 +546,7 @@ def add_handler(event_type, func, is_async=False):
 def remove_handlers(event_type=None):
     _event_manager.remove_handlers(event_type)
 
-def set_handlers(event_type, handlers, is_async=False):
+def set_handlers0(event_type, handlers, is_async=False):
     _event_manager.remove_handlers(event_type)
     for handler in handlers:
         _event_manager.add_handler(event_type, handler, is_async)

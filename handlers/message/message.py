@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/06/19 18:04:39
+# @modified 2018/09/03 01:49:09
 
 """短消息"""
 import time
@@ -14,7 +14,7 @@ import xauth
 import xconfig
 import xmanager
 import xtemplate
-from xutils import BaseRule, Storage
+from xutils import BaseRule, Storage, cacheutil
 
 def process_message(message):
     message.html = xutils.mark_text(message.content)
@@ -79,8 +79,8 @@ def update_message(id, status):
         return dict(code="fail", message="data not exists")
     if msg.user != xauth.get_current_name():
         return dict(code="fail", message="no permission")
-    xmanager.fire("message.update", Storage(id=id, status=status, user = msg.user, content=msg.content))
     db.update(status=status, mtime=xutils.format_datetime(), where=dict(id=id))
+    xmanager.fire("message.update", Storage(id=id, status=status, user = msg.user, content=msg.content))
     return dict(code="success")
 
 class FinishMessage:
@@ -121,7 +121,7 @@ class RemoveHandler:
         if msg.user != xauth.get_current_name():
             return dict(code="fail", message="no permission")
         db.delete(where=dict(id=id))
-        xmanager.fire("message.update", Storage())
+        xmanager.fire("message.update", Storage(id=id))
         return dict(code="success")
 
 
@@ -131,13 +131,9 @@ class CalendarRule(BaseRule):
         print(date, month, day)
         ctx.type = "calendar"
 
+@xmanager.listen(["message.update", "message.add"])
 def expire_message_cache(ctx):
-    user = ctx.user
-    xutils.expire_cache(prefix="message.count", args=(user,))
-    xutils.expire_cache(prefix="message.count.status", args=(user,50))
-    xutils.expire_cache(prefix="message.count.status", args=(user,0))
-
-xmanager.set_handlers('message.update', [expire_message_cache])
+    cacheutil.prefix_del("message.count")
 
 rules = [
     CalendarRule(r"(\d+)年(\d+)月(\d+)日"),
@@ -152,10 +148,9 @@ class SaveHandler:
         user_name = xauth.get_current_name()
         db = xtables.get_message_table()
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
-        ctx = Storage(content = content, user = user_name, type = "")
+        ctx = Storage(id = id, content = content, user = user_name, type = "")
         for rule in rules:
             rule.match_execute(ctx, content)
-        xmanager.fire('message.update', ctx)
 
         if id == "" or id is None:
             ctime = xutils.get_argument("date", xutils.format_datetime())
@@ -165,11 +160,13 @@ class SaveHandler:
                 mtime = ctime,
                 ctime = ctime)
             id = inserted_id
+            xmanager.fire('message.add', dict(id=id, user=user_name, content=content, ctime=ctime))
             return dict(code="success", data=dict(id=inserted_id, content=content, ctime=ctime))
         else:
             db.update(content = content,
                 mtime = xutils.format_datetime(), 
                 where=dict(id=id, user=user_name))
+            xmanager.fire("message.update", dict(id=id, user=user_name, content=content))
         return dict(code="success", data=dict(id=id))
 
 class DateHandler:

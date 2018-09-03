@@ -1,16 +1,15 @@
 {% extends base.html %}
 
 {% block body %}
-<div class="col-md-12">
+<!-- <div class="col-md-12">
     <a href="/system/script" class="tab-link">脚本</a>
     <a href="/system/crontab" class="tab-link">定时任务</a>
-</div>
+</div> -->
+
+{% set title = "定时任务" %}
+{% include "tools/base_title.html" %}
 
 <div class="col-md-12">
-    <input class="dialog-btn" type="button" value="添加" dialog-url="/system/crontab/edit" />
-</div>
-
-<div class="col-md-12 top-offset-1">
 <table class="table col-md-12">
     <tr>
         <th>编号</th>
@@ -48,6 +47,11 @@
     {% end %}
 </table>
 </div>
+
+<div class="col-md-12">
+    <input class="dialog-btn" type="button" value="新增任务" dialog-url="/system/crontab/edit" />
+</div>
+
 
 <script type="text/javascript">
     $("#url_type").on("change", function (event) {

@@ -85,9 +85,10 @@
 {% include mod_search.html %}
 <div id="app" class="col-md-12">
     {% include "message/header.html" %}
+
     <div class="input-div col-md-12">
         <textarea class="col-md-12 input-box" v-model="input" rows=4></textarea>
-        <input type="button" name="" class="send-button btn" value="添加" @click="sendMessage()">
+        <input type="button" name="" class="send-button btn" value="新增提醒" @click="sendMessage()">
         <input type="file" id="filePicker" class="hide" multiple/>
         <input type="button" id="filePickerBtn" class="send-button btn" value="上传文件"/>
         <div id="uploadProgress" style="float: right;" ></div>

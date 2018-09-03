@@ -57,6 +57,7 @@ class ViewSourceHandler:
                 xutils.print_exc()
                 error = e
             return xtemplate.render(template_name, 
+                path = path,
                 name = "",
                 readonly = readonly,
                 error = error, lines = 0, content="")

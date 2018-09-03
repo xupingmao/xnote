@@ -41,7 +41,7 @@ sys_tools = [
     link("Python解释器", "/system/script/edit?name=test.py"),
     link("Python文档", "/system/modules_info"),
     link("SQL控制台", "/tools/sql"),
-    link("初始化脚本", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT))
+    link("启动规则", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT))
 ] 
 
 doc_tools = [

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/08/25 19:37:50
+# @modified 2018/09/03 01:29:35
 """
     Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -116,7 +116,7 @@ def main():
 
     def reload_callback():
         # 重新加载handlers目录下的所有模块
-        manager.reload()
+        xmanager.reload()
         autoreload_thread.clear_watched_files()
         autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
 
