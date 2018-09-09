@@ -1048,36 +1048,11 @@ li.menu-item:hover {
     margin-left: -220px;
 }
 
-@media screen and (max-width: 700px) {
-    /** mobile **/
-    .main-content {
-        width: 100%;
-        padding-right: 0px;
-    }
-
-    .aside {
-        width: 100%;
-        padding: 0px;
-        padding-top: 10px;
-        margin-left: 0px;
-    }
-
-/*    .aside {
-        background-color: #fff;
-        display: none;
-        position: fixed;
-        height: 100%;
-        overflow: auto;
-        right: 0px;
-        top: 0px;
-        width: 200px;
-        z-index: 100;
-    }*/
-}
-
 .aside-item {
     background-color: white;
     /*border: 1px solid #ccc;*/
+    width: 100%;
+    float: left;
 }
 
 .aside-item li {
@@ -1113,4 +1088,39 @@ li.menu-item:hover {
 .xnote-done {
     color: #aaa;
 }
+
+
+/** 移动端样式放在最后 **/
+@media screen and (max-width: 700px) {
+    /** mobile **/
+    .main-content {
+        width: 100%;
+        padding-right: 0px;
+    }
+
+    .aside {
+        width: 100%;
+        padding: 0px;
+        padding-top: 10px;
+        margin-left: 0px;
+    }
+
+    .aside-content li {
+        float: left;
+        width: auto;
+    }
+
+/*    .aside {
+        background-color: #fff;
+        display: none;
+        position: fixed;
+        height: 100%;
+        overflow: auto;
+        right: 0px;
+        top: 0px;
+        width: 200px;
+        z-index: 100;
+    }*/
+}
+
 
