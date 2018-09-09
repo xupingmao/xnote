@@ -414,6 +414,11 @@ li.menu-item:hover {
     height: 30px;
 }
 
+.search-box {
+    width: 345px;
+    float: right;
+}
+
 
 .main {
   /*padding-top: 10px;*/
@@ -1093,6 +1098,11 @@ li.menu-item:hover {
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 700px) {
     /** mobile **/
+
+    .menu-box {
+        width: 100%;
+    }
+    
     .main-content {
         width: 100%;
         padding-right: 0px;
