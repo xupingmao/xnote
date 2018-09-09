@@ -1,0 +1,27 @@
+{% if show_menu %}
+    <div class="col-md-12">
+      <!-- 保持对称 -->
+      <div class="float-left">
+        <ul class="nav-ul">
+          <li><a href="/">笔记</a></li>
+          {% if _has_login %}
+          <li><a href="/message?status=created">提醒({{_notice_count}})</a></li>
+          {% end %}
+          {% if _is_admin %}
+          <li><a href="/system/plugins">插件</a></li>
+          {% end %}
+          <li><a href="/system/index">系统</a></li>
+          <li><a href="/wiki/README.md">关于</a></li>
+        </ul>
+      </div>
+
+      <div class="float-right" style="width:345px;">
+        <form id="searchForm" method="GET" action="{{?search_action,'/search/search'}}">
+          {% block search_form %} {% end %}
+          <input id="key" name="key" class="nav-search-input" placeholder="{{?search_placeholder, '搜索或指令'}}" value="{{?key}}"/>
+          <input class="hide" name="category" value="{{?category}}" />
+          <button class="nav-search-btn">搜</button>
+        </form>
+      </div>
+    </div>
+{% end %}

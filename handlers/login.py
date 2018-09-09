@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/09/03 23:57:46
+# @modified 2018/09/09 21:11:35
 import web
 import time
 import hashlib
@@ -41,7 +41,7 @@ class handler:
             if pswd == user["password"]:
                 save_login_info(name, "success")
                 xauth.write_cookie(name)
-                xauth.update_user(name, dict(login_time=xutils.format_datetime(), retry_times = 0))                
+                xauth.update_user(name, dict(login_time=xutils.format_datetime()))                
                 if target is None:
                     raise web.seeother("/")
                 raise web.seeother(target)
