@@ -17,7 +17,7 @@
                 {% end %}
 
                 {% if file.id != None %}
-                <a class="item-option move-btn" data-url="/file/group/list?id={{file.id}}&filetype=xml">移动</a>
+                <a class="item-option move-btn" data-url="/note/group/list?id={{file.id}}&filetype=xml">移动</a>
                 {% end %}
 
                 {# 插件 #}
@@ -87,7 +87,7 @@
                     <a href="https://www.google.com/search?q={{key}}" target="_blank">谷歌</a>
                     <a href="https://www.bing.com/search?q={{key}}" target="_blank">必应</a>
                     {% if _has_login %}
-                    <a href="/file/add?key={{key}}">创建"{{key}}"</a>
+                    <a href="/note/add?key={{key}}">创建"{{key}}"</a>
                     {% end %}
                 </div>
             </div>

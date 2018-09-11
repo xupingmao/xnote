@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2018/02/10 13:45:14
+# @modified 2018/09/11 01:07:53
 
 """Description here"""
 import re
@@ -24,7 +24,7 @@ class handler:
         result = dict()
         for row in rows:
             date = re.match(r"\d+\-\d+", row.ctime).group(0)
-            row.url = "/file/view?id={}".format(row.id);
+            row.url = "/note/view?id={}".format(row.id);
             # 优化数据大小
             row.content = ""
             if date not in result:
@@ -47,7 +47,7 @@ class DateTimeline:
         result = dict()
         for row in rows:
             date = re.match(r"\d+\-\d+", row.ctime).group(0)
-            row.url = "/file/view?id={}".format(row.id);
+            row.url = "/note/view?id={}".format(row.id);
             # 优化数据大小
             row.content = ""
             if date not in result:
@@ -57,6 +57,8 @@ class DateTimeline:
 
 xurls = (
     r"/file/timeline", handler,
-    r"/file/timeline/month", DateTimeline
+    r"/note/timeline", handler,
+    r"/file/timeline/month", DateTimeline,
+    r"/note/timeline/month", DateTimeline
 )
 

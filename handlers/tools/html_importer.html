@@ -64,7 +64,7 @@
 $("#saveToDbBtn").on("click", function () {
     var name = $("#savedName").val();
     var content = $("#content").val();
-    $.post("/file/add", 
+    $.post("/note/add", 
         {"_format": "json", "name": name, "content": content, "type": "md"}, 
         function (responseText) {
             console.log(responseText);

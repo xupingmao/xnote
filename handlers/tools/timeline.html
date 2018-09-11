@@ -266,7 +266,7 @@ img {
     }
 
     function loadMore() {
-      $.get("/file/timeline?_type=json", 
+      $.get("/note/timeline?_type=json", 
         { 
           offset: window.offset,
           limit : QUERY_LIMIT

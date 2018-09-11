@@ -48,7 +48,7 @@ doc_tools = [
     link("笔记分组", "/index"),
     link("标签云", "/file/taglist"),
     link("词典", "/file/dict"),
-    link("备忘", "/message?status=created"),
+    link("提醒", "/message?status=created"),
     link("最近更新", "/file/recent_edit"),
     link("日历", "/tools/date"),
 ] 

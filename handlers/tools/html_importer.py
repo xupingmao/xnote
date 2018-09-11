@@ -161,7 +161,7 @@ class handler:
             if False:
                 user_name = xauth.get_current_name()
                 def save():
-                    xmanager.request("/file/add", method="POST", 
+                    xmanager.request("/note/add", method="POST", 
                         data=dict(name=name, content=text, type="md"),
                         headers=dict(COOKIE=xauth.get_user_cookie(user_name)))
                 Timer(1, save).start()
