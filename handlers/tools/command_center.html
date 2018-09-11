@@ -59,7 +59,7 @@
 
         .frame {
             float: left;
-            width: 50%;
+            /*width: 50%;*/
             height: 100%;
             border-right: 1px solid #ccc;
         }
@@ -77,9 +77,6 @@
         .float-left {
             float:left;
         }
-        #ctrlArea {
-            width: 200px;
-        }
         .col-md-12 {
             float: left;
             width: 100%;
@@ -95,9 +92,8 @@
         .hide {
             display: none;
         }
-        .iframe-state {
+        .frame-state {
             float: left;
-            width: 50%;
             overflow: auto;
             font-size: 14px;
             background-color: #eee;
@@ -109,6 +105,9 @@
 <div class='header'>
     <div class="header-link-box">
         <a href="/system/index" class="header-link">返回系统</a>
+        <a href="?cols=1" class="header-link">单列</a>
+        <a href="?cols=2" class="header-link">两列</a>
+        <a href="?cols=3" class="header-link">三列</a>
     </div>
     <div class="search-box hide">
         <input placeholder='搜索'>
@@ -116,24 +115,64 @@
     </div>
 </div>
 <div class="main col-md-12">
-    <div class="frame">
-        <iframe class='left-iframe'  id="f1" data-label-id="iframeLabel1" src="/"></iframe>
-    </div>
-    <div class="frame">
-        <iframe class='right-iframe' id='f2' data-label-id="iframeLabel2" src='/message?status=created'></iframe>
-    </div>
+<!--     <div class="frame">
+        <iframe id="f1" data-label-id="state-1" src="/"></iframe>
+    </div> -->
 </div>
 <div class="footer">
-    <div class="iframe-state" id="iframeLabel1"></div>
-    <div class="iframe-state" id="iframeLabel2"></div>
+    <!-- <div class="iframe-state" id="state-1"></div> -->
 </div>
 <script src="/static/lib/jquery/jquery-1.12.4.min.js"></script>
 <script type="text/javascript" src="/static/js/utils.js"></script>
 <script>
+var getUrlParams = function()
+{
+    var params = {};
+    var url = window.location.href;
+    url = url.split("#")[0];
+    var idx = url.indexOf("?");
+    if(idx > 0)
+    {
+        var queryStr = url.substring(idx + 1);
+        var args = queryStr.split("&");
+        for(var i = 0, a, nv; a = args[i]; i++)
+        {
+            nv = args[i] = a.split("=");
+            if (nv.length > 1) {
+                var value = nv[1];
+                try {
+                    params[nv[0]] = decodeURIComponent(value);
+                } catch (e) {
+                    params[nv[0]] = value;
+                    console.warn('decode error', e)
+                }
+            }
+        }
+    }
+    return params;
+};
+
+function GridView(url, id) {
+    var iframe = $("<iframe>").attr("src", url)
+        .attr("id", "f-" + id)
+        .attr("data-label-id", "state-" + id);
+    this.view = $("<div>").addClass("frame").append(iframe);
+    this.state = $("<div>").addClass("frame-state").attr("id", "state-" + id);
+}
+
+GridView.prototype.render = function () {
+    $(".main").append(this.view);
+    $(".footer").append(this.state);
+}
 $(document.body).ready(function () {
-    var maxHeight = window.innerHeight;
-    // var height = maxHeight - 20;
-    // $("iframe").css("height", height);
+    var params = getUrlParams();
+    var cols = params["cols"] || 2;
+    for (var i = 0; i < cols; i++) {
+        new GridView("/", i).render();
+    }
+    $(".frame").css("width", 100/cols+"%");
+    $(".frame-state").css("width", 100/cols+"%");
+
     $("iframe").on("load", function (e) {
         var id = $(this).attr("data-label-id");
         var src = $(this)[0].contentWindow.location.href;

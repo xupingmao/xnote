@@ -70,7 +70,7 @@ other_tools = [
     link("二维码", "/tools/qrcode"),
     link("随机生成器", "/tools/random_string"),
     # 其他工具
-    link("分屏", "/tools/command_center"),
+    link("分屏模式", "/tools/command_center"),
     link("命令模式", "/fs_shell"),
 ]
 
