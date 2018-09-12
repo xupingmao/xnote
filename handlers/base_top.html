@@ -30,7 +30,7 @@
 {% end %}
 
 {% block head %} {% end %}
-{% init hide_aside = False %}
+{% init show_aside = True %}
 {% init show_menu = True %}
 
 {% if not show_menu %}
@@ -54,7 +54,7 @@
 {% end %}
 
 {# 侧边栏是否显示 #}
-{% if hide_aside %}
+{% if not show_aside %}
 <style type="text/css">
 .main-content {
   padding-right: 0px;

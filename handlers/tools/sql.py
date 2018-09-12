@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/08/22 23:54:40
+# @modified 2018/09/13 00:49:55
 import sqlite3
 import os
 import xutils
@@ -59,13 +59,17 @@ class handler:
             if p.endswith(".db"):
                 p = os.path.join(xconfig.DATA_DIR, p)
                 path_list.append(p)
+        if path == "" and len(path_list) > 0:
+            path = path_list[0]
         if len(result_list) > 0:
             keys = result_list[0].keys()
         else:
             keys = []
         return xtemplate.render("tools/sql.html", 
-            keys = keys, result_list = result_list, 
-            sql = sql, error = error,
+            keys = keys, 
+            result_list = result_list, 
+            sql = sql, 
+            error = error,
             cost_time = int((t_stop - t_start) * 1000),
             path_list = path_list,
             path = path)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/08/19 14:13:11
+# @modified 2018/09/13 00:40:46
 
 import profile
 import math
@@ -101,10 +101,14 @@ class ViewHandler:
                 file.data = content
         
         xmanager.fire("note.view", file)
+        show_aside = True
+        if op == "edit":
+            show_aside = False
         return xtemplate.render(template_name,
-            html_title = title,
-            file = file, 
-            op=op,
+            show_aside    = show_aside,
+            html_title    = title,
+            file          = file, 
+            op            = op,
             show_add_file = show_add_file,
             can_edit = can_edit,
             pathlist = pathlist,

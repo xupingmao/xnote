@@ -16,9 +16,16 @@
 {% end %}
 
 {% block body %}
+{% init error     = "" %}
 {% init cost_time = None %}
-{% set title = "sql" %}
+{% set title      = "SQL控制台" %}
 {% include "tools/base_title.html" %}
+
+{% if error != "" %}
+<pre class="col-md-12 error">
+{{error}}
+</pre>
+{% end %}
 
 <div class="col-md-12">
 <form>
@@ -44,30 +51,24 @@
 <div class="col-md-12">
 {% if len(keys) > 0 %}
 
-<table class="table">
-<tr>
-    {% for key in keys %}
-    <th>{{key}}</th>
-    {% end %} <!-- for end -->
-</tr>
+    <table class="table">
+        <tr>
+            {% for key in keys %}
+            <th>{{key}}</th>
+            {% end %} <!-- for end -->
+        </tr>
 
-    {% for record in result_list %}
-    <tr>
-    {% for val in record.values() %}
-        <td>{{val}}</td>
-    {% end %}
-    </tr>
-
-    {% end %}
-
-</table>
+        {% for record in result_list %}
+            <tr>
+            {% for val in record.values() %}
+                <td>{{val}}</td>
+            {% end %}
+            </tr>
+        {% end %}
+    </table>
 
 {% end %} <!-- if end -->
 
-</div>
-
-<div style="color:red;">
-{{error}}
 </div>
 
 <script type="text/javascript">
