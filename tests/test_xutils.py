@@ -227,6 +227,14 @@ class TestMain(unittest.TestCase):
         v = textutil.get_short_text(u'中文1中文中文', 4)
         self.assertEqual(u'中文1..', v)
 
+    def test_RecordList(self):
+        rl = xutils.RecordList()
+        rl.visit('test')
+        rl.visit('name')
+        records = rl.recent()
+        self.assertEqual(2, len(records))
+        self.assertEqual('name', records[0].name)
+
 
 
         

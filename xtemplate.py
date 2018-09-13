@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/09/01 21:08:41
+# @modified 2018/09/13 23:53:48
 import os
 import json
 import web
@@ -150,6 +150,7 @@ class BasePlugin:
         self.show_pagenation = False
         self.page_url        = "?page="
         self.aside_html      = ""
+        self.option_links    = []
 
     def write(self, text):
         self.output += text

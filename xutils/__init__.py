@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/08/31 01:42:47
+# @modified 2018/09/14 00:05:52
 
 """
 xnote工具类总入口
@@ -850,6 +850,31 @@ class History:
     @staticmethod
     def get_items(name):
         return History.items.get(name, [])
+
+class RecordInfo:
+
+    def __init__(self, name, url):
+        self.name = name
+        self.url  = url
+
+class RecordList:
+    """访问记录，可以统计最近访问的，最多访问的记录"""
+    def __init__(self, max_size = 1000):
+        self.max_size   = max_size
+        self.records    = []
+
+    def visit(self, name, url=None):
+        self.records.append(RecordInfo(name, url))
+        if len(self.records) > self.max_size:
+            del self.records[0]
+
+    def recent(self, count=5):
+        records = self.records[-count:]
+        records.reverse()
+        return records
+
+    def most(self, count):
+        return []
 
 _funcs = dict()
 def register_func(name, func):

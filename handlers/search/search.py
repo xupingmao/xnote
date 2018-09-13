@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/08/07 23:20:02
+# @modified 2018/09/14 00:22:00
 
 import re
 import os
@@ -18,7 +18,7 @@ import xauth
 import xmanager
 import xtemplate
 import xtables
-from xutils import textutil
+from xutils import textutil, u
 from xutils import Queue, History, Storage
 
 config = xconfig
@@ -40,7 +40,7 @@ def add_rule(pattern, func_str):
         mod = six._import_module("handlers.search." + mod)
         func = getattr(mod, func_name)
         func.modfunc = func_str
-        rule = BaseRule(r"^%s\Z" % pattern, func)
+        rule = BaseRule(r"^%s\Z" % u(pattern), func)
         _rules.append(rule)
     except Exception as e:
         xutils.print_exc()
