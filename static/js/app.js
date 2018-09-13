@@ -3,6 +3,8 @@
  */
 $(function() {
 
+  $(".main").css("min-height", window.innerHeight);
+
   function moveTo(selfId, parentId) {
       $.post("/file/group/move", 
           {id:selfId, parent_id: parentId}, 
