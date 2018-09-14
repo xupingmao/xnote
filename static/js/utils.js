@@ -1,4 +1,6 @@
-
+/**
+ * 获取请求参数
+ */
 var getUrlParams = function()
 {
     var params = {};
@@ -28,6 +30,27 @@ var getUrlParams = function()
 
 var getUrlParam = function (key) {
     return getUrlParams()[key];
+}
+
+/** 
+* 获取窗口的宽度
+*/
+function getWindowWidth() {
+    if (window.innerWidth) {
+        return window.innerWidth;
+    } else {
+        // For IE
+        return Math.min(document.body.clientHeight, document.documentElement.clientHeight);
+    }
+}
+
+function getWindowHeight() {
+    if (window.innerHeight) {
+        return window.innerHeight;
+    } else {
+        // For IE
+        return Math.min(document.body.clientWidth, document.documentElement.clientWidth);
+    }
 }
 
 

@@ -16,6 +16,8 @@ __pycache__
 /static/lib/jsoneditor/
 /static/lib/My97DatePicker/
 /static/lib/highlight.js/
+/static/lib/wangEditor/wangEditor-10.0.13.js
+/static/lib/wangEditor/wangEditor-3.0.10.js
 /static/img/
 /static/deprecated/
 /static/wiki/

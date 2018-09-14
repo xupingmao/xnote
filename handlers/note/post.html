@@ -1,7 +1,7 @@
 {% init op = "view" %}
 {% init error = "" %}
 
-<script type="text/javascript" src="/static/lib/wangEditor/wangEditor-3.0.10.min.js"></script>
+<script type="text/javascript" src="/static/lib/wangEditor/wangEditor-3.1.1.min.js"></script>
 {% if op == "view" %}
     {% include "note/view_header.html" %}
 
@@ -30,9 +30,14 @@
 
     <script type="text/javascript">
     var editor = new wangEditor('#toolbar', "#editor");
-    editor.customConfig.uploadImgShowBase64 = true   // 使用 base64 保存图片
+    editor.customConfig.uploadImgServer = false;
+    editor.customConfig.uploadImgShowBase64 = true;   // 使用 base64 保存图片
+    editor.customConfig.linkImgCallback = function (link) {
+        // 处理图片粘贴的回调
+        // console.log(link);
+    }
     editor.create();
-    editor.txt.html($("#data").text())
+    editor.txt.html($("#data").text());
 
     $("#saveBtn").click(function () {
         var data = editor.txt.html();

@@ -3,17 +3,17 @@
  */
 $(function() {
 
-  $(".main").css("min-height", window.innerHeight);
+  // 设置最小的高度
+  $(".main").css("min-height", getWindowHeight());
 
-  function moveTo(selfId, parentId) {
-      $.post("/file/group/move", 
+  window.moveTo = function (selfId, parentId) {
+      $.post("/note/group/move", 
           {id:selfId, parent_id: parentId}, 
           function (resp){
               console.log(resp);
               window.location.reload();
       });
   }
-  window.moveTo = moveTo;
 
   function showSideBar() {
     $(".navMenubox").animate({"margin-left": "0px"});
@@ -70,11 +70,6 @@ $(function() {
  * 处理悬浮控件
  */
 (function (window) {
-
-    if (self != top) {
-        // in iframe
-        return;
-    }
 
     var width = 960;
     var maxWidth = $(window).width();
@@ -216,7 +211,7 @@ $(function() {
       getRightBot().fadeOut(200);
     }
 
-    function openDialog(url) {
+    window.openDialog = function (url) {
       var width = $(".main").width();
       layer.open({
         type: 2,
@@ -228,22 +223,16 @@ $(function() {
       });
     }
 
-    function openFileOption(e) {
+    window.openFileOption = function (e) {
       console.log(e);
       var path = $(e).attr("data-path");
       openDialog("/fs_api/plugins?path=" + path);
     }
 
-    window.openDialog = openDialog;
-    window.openFileOption = openFileOption;
     window.showIframeDialog = showIframeDialog;
     window.hideIframeDialog = hideIframeDialog;
 
-    $(function () {
-        init();
-    });
-
-    function toggleMenu() {
+    window.toggleMenu = function () {
       $(".aside-background").toggle();
       $(".aside").toggle(500);
     }
@@ -252,7 +241,10 @@ $(function() {
       toggleMenu();
     });
 
-    window.toggleMenu = toggleMenu;
+    if (self == top) {
+      // 不是处于iframe环境
+      init();
+    }
 
 })(window);
 
