@@ -22,12 +22,18 @@
         color: #2092d9;
     }
 
-    .finished-tag {
+    .finished {
         color: #fff;
         background-color: green;
     }
     .in-progress {
         background-color: #f90;
+        color: white;
+    }
+
+    .suspended {
+        background-color: #aaa;
+        color: white;
     }
 
     .chat-msg {
@@ -125,13 +131,13 @@
             <div class="col-md-12">
                 <p class="chat-msg-time">
                     {{! message.ctime }}
-                    <span class="tag-span in-progress" v-if="message.status==0">关注</span>
+                    <span class="inline-tag in-progress" v-if="message.status==0">关注</span>
                     <a class="smallText" v-if="message.status!=0" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">关注</a>
 
-                    <span class="tag-span suspended" v-if="message.status==50">挂起</span>
+                    <span class="inline-tag suspended" v-if="message.status==50">挂起</span>
                     <a class="smallText" v-if="message.status!=50" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateStatus($event, 50)">挂起</a>
                     
-                    <span class="tag-span suspended" v-if="message.status==100">完成</span>
+                    <span class="inline-tag finished" v-if="message.status==100">完成</span>
                     <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
                     
                     <a class="smallText" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>

@@ -30,6 +30,96 @@ pre {
     color: red;
 }
 
+/**
+ * 全局通用的设置
+ */
+
+p,li,a {
+    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
+}
+
+h1,h2,h3 {
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Helvetica, STKaiti, SimSun, serif
+}
+
+.col-md-1 {
+    float: left;
+    width: 8.3%;
+}
+
+.col-md-2 {
+    float: left;
+    width: 16.7%;
+}
+
+.col-md-3 {
+    float: left;
+    width: 25%;
+}
+
+.col-md-4 {
+    float:left;
+    width: 33.3%;
+}
+
+.col-md-5 {
+    float: left;
+    width: 41.7%;
+}
+
+.col-md-6 {
+    float: left;
+    width: 50%;
+}
+
+.col-md-7 {
+    float: left;
+    width: 58.3%;
+}
+
+.col-md-8 {
+    float: left;
+    width: 66.7%;
+}
+
+.col-md-9 {
+    float: left;
+    width: 75%;
+}
+
+.col-md-10 {
+    float: left;
+    width: 83.3%;
+}
+
+.col-md-11 {
+    float: left;
+    width: 91.7%;
+}
+.col-md-12, .row {  float: left; width: 100%;}
+.col-md-offset-12 {  margin-left: 100%;}
+.col-md-offset-11 {  margin-left: 91.66666666666666%;}
+.col-md-offset-10 {  margin-left: 83.33333333333334%;}
+.col-md-offset-9 {  margin-left: 75%;}
+.col-md-offset-8 {  margin-left: 66.66666666666666%;}
+.col-md-offset-7 {  margin-left: 58.333333333333336%;}
+.col-md-offset-6 {  margin-left: 50%;}
+.col-md-offset-5 {  margin-left: 41.66666666666667%;}
+.col-md-offset-4 {  margin-left: 33.33333333333333%;}
+.col-md-offset-3 {  margin-left: 25%;}
+.col-md-offset-2 {  margin-left: 16.666666666666664%;}
+.col-md-offset-1 {  margin-left: 8.333333333333332%;}
+.col-md-offset-0 {  margin-left: 0;}
+.top-offset-1 { margin-top: 1em; }
+.top-offset-2 { margin-top: 2em; }
+.bottom-offset-1 { margin-bottom: 5px; }
+
+
+
+/**
+ * 链接样式
+ */
+
 a {
     font-size: 14px;
     font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
@@ -42,6 +132,48 @@ a:hover {
     text-decoration: underline;
 }
 
+.tag-link {
+    text-decoration: none;
+    color: white;
+}
+
+.tag-link:hover {
+    background-color: initial;
+    text-decoration: underline;
+}
+
+.button-link {
+    text-decoration: none;
+    cursor: pointer;
+}
+.button-link:hover {
+    background: #ccc;
+}
+
+.link {
+    /*color: #37a; */
+    color: #08c;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.link2 {
+    color: black;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.link2:hover {
+    color: gray;
+}
+
+.selected-link {
+    border-bottom: 2px solid red;
+}
+
+/**
+ * 按钮样式
+ */
 /** 不能指定input[type=button]不然会覆盖其他class样式 **/
 .btn, [type=submit], [type=button], button {
     -webkit-appearance: none; /* 消除IOS默认的按钮样式 */
@@ -77,14 +209,6 @@ a:hover {
     cursor: pointer;
 }
 
-p,li,a {
-    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
-}
-
-h1,h2,h3 {
-    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Helvetica, STKaiti, SimSun, serif
-}
-
 blockquote {
     font-style: italic;
     display: block;
@@ -103,8 +227,7 @@ blockquote p {
 }
 
 
-/** 表格相关 **/
-
+/** 表格样式 **/
 table {
     font-family: verdana,arial,sans-serif;
     font-size:14px;
@@ -170,11 +293,13 @@ table td {
     border-right: none;
 }
 
+/** 以下为具体场景下的样式 **/
 .menu-selected {
     background: #0088cc;
     color: #fff;
 }
 
+/** 侧边栏样式 **/
 .nav-sidebar > .active > a,
 .nav-sidebar > .active > a:hover,
 .nav-sidebar > .active > a:focus {
@@ -268,89 +393,6 @@ li.menu-item a:hover {
 li.menu-item:hover {
     background-color: #777;
 }
-
-/** 宽度样式 **/
-
-.col-md-1 {
-    float: left;
-    width: 8.3%;
-    /*min-width: 200px;*/
-}
-
-.col-md-2 {
-    float: left;
-    width: 16.7%;
-}
-
-.col-md-3 {
-    float: left;
-    width: 25%;
-}
-
-.col-md-4 {
-    float:left;
-    width: 33.3%;
-}
-
-.col-md-5 {
-    float: left;
-    width: 41.7%;
-}
-
-.col-md-6 {
-    float: left;
-    width: 50%;
-}
-
-.col-md-7 {
-    float: left;
-    width: 58.3%;
-}
-
-.col-md-8 {
-    float: left;
-    width: 66.7%;
-}
-
-.col-md-9 {
-    float: left;
-    width: 75%;
-}
-
-.col-md-10 {
-    float: left;
-    width: 83.3%;
-}
-
-.col-md-11 {
-    float: left;
-    width: 91.7%;
-}
-
-.col-md-12, .row {
-    float: left;
-    width: 100%;
-}
-
-.col-md-offset-12 {  margin-left: 100%;}
-.col-md-offset-11 {  margin-left: 91.66666666666666%;}
-.col-md-offset-10 {  margin-left: 83.33333333333334%;}
-.col-md-offset-9 {  margin-left: 75%;}
-.col-md-offset-8 {  margin-left: 66.66666666666666%;}
-.col-md-offset-7 {  margin-left: 58.333333333333336%;}
-.col-md-offset-6 {  margin-left: 50%;}
-.col-md-offset-5 {  margin-left: 41.66666666666667%;}
-.col-md-offset-4 {  margin-left: 33.33333333333333%;}
-.col-md-offset-3 {  margin-left: 25%;}
-.col-md-offset-2 {  margin-left: 16.666666666666664%;}
-.col-md-offset-1 {  margin-left: 8.333333333333332%;}
-.col-md-offset-0 {  margin-left: 0;}
-
-.top-offset-1 { margin-top: 1em; }
-.top-offset-2 { margin-top: 2em; }
-
-.bottom-offset-1 { margin-bottom: 5px; }
-
 
 /** base START **/
 
@@ -486,6 +528,11 @@ li.menu-item:hover {
     margin-right: 2px;
 }
 
+.inline-tag {
+    display: inline-block;
+    padding: 2px;
+}
+
 .pink-tag {
     background-color: pink;
 }
@@ -513,15 +560,24 @@ li.menu-item:hover {
     background-color: #eee;
 }
 
-
 .tag-span {
+    display: block;
+    float: left;
     font-size: small;
-    background-color: green;
-    color: white;
+    color: blue;
+    line-height: 20px;
     border-radius: 2px;
-    padding-left: 2px;
-    padding-right: 2px;
-    margin-left: 3px;
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid #ccc;
+}
+
+.tag-span a {
+    color: blue;
+}
+
+.tag-span:hover {
+    background-color: #eee;
 }
 
 .tag-span-light {
@@ -537,46 +593,6 @@ li.menu-item:hover {
 
 .tag-span-light a {
     color: #000;
-}
-
-
-.tag-link {
-    text-decoration: none;
-    color: white;
-}
-
-.tag-link:hover {
-    background-color: initial;
-    text-decoration: underline;
-}
-
-.button-link {
-    text-decoration: none;
-    cursor: pointer;
-}
-.button-link:hover {
-    background: #ccc;
-}
-
-.link {
-    /*color: #37a; */
-    color: #08c;
-    margin-right: 5px;
-    cursor: pointer;
-}
-
-.link2 {
-    color: black;
-    margin-right: 5px;
-    cursor: pointer;
-}
-
-.link2:hover {
-    color: gray;
-}
-
-.selected-link {
-    border-bottom: 2px solid red;
 }
 
 /** file-list样式 **/
