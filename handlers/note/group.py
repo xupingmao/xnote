@@ -232,6 +232,7 @@ xurls = (
     r"/file/group/ungrouped", Ungrouped,
     r"/file/group/removed"  , RemovedHandler,
     r"/file/group/list"     , GroupListHandler,
+    r"/note/group/move"     , MoveHandler,
     r"/file/group/move"     , MoveHandler,
     r"/file/group/bookmark" , MarkedHandler,
     r"/file/group/marked"   , MarkedHandler,
