@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/09/03 23:49:42
+# @modified 2018/09/15 19:08:09
 """
 缓存的实现，考虑失效的规则如下
 
@@ -84,6 +84,8 @@ class CacheObj:
 
     def save(self):
         _cache_dict[self.key] = self
+        if self.is_temp():
+            return
         # save to disk
         path = self._get_path(self.key)
         obj = dict(key = self.key, 
@@ -101,6 +103,9 @@ class CacheObj:
             return True
         return time.time() < self.expire_time
 
+    def is_temp(self):
+        return self.expire_time > 0
+
     def get_value(self):
         if self.is_alive():
             return self.value
@@ -110,6 +115,8 @@ class CacheObj:
     def clear(self):
         print("clear cache %s" % self.key)
         _cache_dict.pop(self.key, None)
+        if self.is_temp():
+            return
         # remove from disk
         path = self._get_path(self.key)
         if os.path.exists(path):
@@ -334,6 +341,8 @@ def load_dump():
                     dict_obj["value"], 
                     dict_obj["expire_time"] - time.time())
                 obj.type = dict_obj.get("type", "object")
+                if obj.is_temp():
+                    os.remove(fpath)
         except:
             print_exc()
 

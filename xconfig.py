@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/09/01 01:15:54
+# @modified 2018/09/15 19:01:31
 
 '''
 xnote系统配置
@@ -16,6 +16,8 @@ xnote系统配置
 # 别名配置
 - set_alias
 - get_alias
+
+# 菜单配置
 
 '''
 import os
@@ -82,7 +84,7 @@ PROFILE_PATH_SET = set(["/file/view"])
 MUTE_END_TIME    = None
 # 资料相关
 # 分页数量
-PAGE_SIZE        = 30
+PAGE_SIZE        = 20
 IP_BLACK_LIST    = ["192.168.56.1"] # this is vbox ip
 # max file size to sync or backup
 MAX_FILE_SIZE    = 10 * 1024 ** 2
@@ -419,4 +421,19 @@ def set_alias(name, value):
 def get_alias(name, default_value):
     """获取别名，用于扩展命令"""
     return _alias_dict.get(name, default_value)
+
+class MenuItem:
+
+    def __init__(self, name, link=None, role=None):
+        self.name = name
+        self.link = link
+        self.role = role
+        self.children = []
+
+    def is_visible(self):
+        import xauth
+        if self.role != None:
+            user_role = xauth.get_current_role()
+            return user_role == self.role
+        return True
 
