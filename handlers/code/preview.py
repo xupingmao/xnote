@@ -181,6 +181,8 @@ class WikiPathHandler:
         template_name = "code/preview.html"
         if not path.endswith(".md"):
             return render(template_name, error="file extension error")
+        if not os.path.exists(path):
+            return render(template_name, error="文件不存在")
         content = xutils.readfile(path)
         return render(template_name, content = content, os = os, type = "file", path = path)
 

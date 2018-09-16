@@ -8,9 +8,9 @@
 
 ```python
 import xutils
-from xtemplate import BaseTextPlugin
+from xtemplate import BasePlugin
 
-class Main(BaseTextPlugin):
+class Main(BasePlugin):
     """默认的插件声明入口，定义一个叫做Main的类"""
 
     def render(self):
@@ -26,3 +26,9 @@ class Main(BaseTextPlugin):
 ## 插件卸载
 
 直接删除对应的Python文件即可
+
+## 插件的生命周期
+
+- 初始化：系统启动或者刷新的时候触发
+- 响应客户请求：执行render方法
+- 系统关闭：暂时无

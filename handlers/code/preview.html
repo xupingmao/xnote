@@ -24,6 +24,13 @@
 
 {% block body %}
     {% init path = "" %}
+    {% init error = "" %}
+
+    {% if error != "" %}
+    <div class="col-md-12 error">
+        {{?error}}
+    </div>
+    {% end %}
 
     <div class="col-md-12">
         <span id="result" style="color:green"></span>
