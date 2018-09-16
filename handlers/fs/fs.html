@@ -12,7 +12,6 @@
     }
     .fs-path {
         padding: 5px;
-        box-sizing: border-box;
         background-color: #eee;
     }
     .left {
@@ -125,7 +124,6 @@
 
     .nav-path {
         padding: 5px;
-        box-sizing: border-box;
         background-color: #eee;
     }
 
@@ -159,7 +157,7 @@
         <input type="button" class="btn advanced-opt" value="本地浏览" id="openDirectory"/>
         <input type="button" class="link-btn advanced-opt" href="/code/analyze?path={{path}}&recursive=on" value="高级搜索"/>
         <input type="button" class="link-btn advanced-opt" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
-        <input type="button" class="layer-btn" data-url="/fs_api/plugins?path={{path}}" value="更多"/>
+        <input type="button" data-path="{{path}}" onclick="openFileOption(this)" value="更多"/>
     </div>
 </div>
 
