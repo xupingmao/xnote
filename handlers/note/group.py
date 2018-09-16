@@ -182,7 +182,7 @@ class RecentEditHandler:
             files       = files, 
             file        = Storage(name="最近更新", type="group"),
             page        = page, 
-            show_notice = False,
+            show_notice = True,
             page_max    = math.ceil(count/PAGE_SIZE), 
             groups      = groups,
             show_mdate  = True,
