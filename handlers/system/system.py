@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# 
+# @modified 2018/09/15 22:21:47
 
 """Description here"""
 from io import StringIO
@@ -116,6 +116,7 @@ class SysHandler:
             customized_items = map(lambda x: Storage(name=x.get("key"), link=x.get("value")), config_list)
 
         return xtemplate.render("system/system.html", 
+            html_title       = "系统",
             Storage          = Storage,
             os               = os,
             user             = xauth.get_current_user(),
@@ -230,3 +231,4 @@ xurls = (
     r"/system/user.js", UserJsHandler,
     r"/system/cache", CacheHandler
 )
+

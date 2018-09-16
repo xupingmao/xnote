@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2018/08/25 20:20:29
+# @modified 2018/09/16 10:38:58
 import os
 import web
 import xauth
@@ -20,21 +20,22 @@ def get_link(filename, webpath):
 class UploadHandler:
 
     def POST(self):
-        args = web.input(file = {}, dirname = None)
-        x = args
-        dirname = args.dirname
-        if 'file' in x:
-            if x.file.filename == "":
-                raise web.seeother("//fs/%s" % quote(dirname))
-            xutils.makedirs(dirname)
-            filename = xutils.quote(os.path.basename(x.file.filename))
-            filepath = os.path.join(dirname, filename)
+        file    = xutils.get_argument("file", {})
+        dirname = xutils.get_argument("dirname")
+        prefix  = xutils.get_argument("prefix")
+        if file.filename != None:
+            filename = file.filename
+            if file.filename == "":
+                return dict(code="fail", message="filename is empty")
+            # xutils.makedirs(dirname)
+            filepath, webpath = xutils.get_upload_file_path(file.filename, prefix = prefix)
+            # filename = xutils.quote(os.path.basename(x.file.filename))
             with open(filepath, "wb") as fout:
                 # fout.write(x.file.file.read())
-                for chunk in x.file.file:
+                for chunk in file.file:
                     fout.write(chunk)
             xmanager.fire("fs.upload", dict(path=filepath))
-        raise web.seeother("/fs/%s" % quote(dirname))
+        return dict(code="success", webpath = webpath, link = get_link(filename, webpath))
 
     def GET(self):
         path, webpath = xutils.get_upload_file_path("")

@@ -11,6 +11,9 @@
           <li><a href="/system/plugins">插件</a></li>
           {% end %}
           <li><a href="/system/index">系统</a></li>
+          {% if not _has_login %}
+          <li><a class="link" href="/login">登录</a></li>
+          {% end %}
           <li><a href="/wiki/README.md">关于</a></li>
         </ul>
       </div>

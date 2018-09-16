@@ -8,17 +8,15 @@
         选项
     </div>
     <div class="aside-content">
-        {% if not _has_login %}
-            <li><a class="link" href="/login">登录</a></li>
-        {% else %}
-            <li><a class="link" href="/logout">登出</a></li>
-        {% end %}
         {% if _has_login %}
             <li><a class="link" href="/file/group/ungrouped">未分类</a></li>
             <li><a class="link" href="/note/recent_created">最新笔记</a></li>
         {% end %}
         <li><a class="link" href="/file/group/public">分享笔记</a></li>
         <li><a class="link" href="/file/taglist">标签云</a></li>
+        {% if _has_login %}
+            <li><a class="link" href="/logout">退出</a></li>
+        {% end %}
     </div>
 </div>
 

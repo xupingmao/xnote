@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/09/14 00:05:52
+# @modified 2018/09/16 10:39:14
 
 """
 xnote工具类总入口
@@ -293,7 +293,10 @@ def search_path(path, key):
         result = _search_path0(path, quoted_key)
     return result + _search_path0(path, key)
 
-def get_upload_file_path(filename, data_dir="/files", replace_exists = False, prefix=""):
+def get_upload_file_path(filename, 
+        data_dir="/files", 
+        replace_exists = False, 
+        prefix=""):
     """生成上传文件名"""
     if xconfig.USE_URLENCODE:
         filename = get_safe_file_name(filename)

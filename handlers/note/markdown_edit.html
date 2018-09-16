@@ -376,6 +376,33 @@
                 uploader.addFile(fileList);
             }
         });
+
+        $(document).on("paste", function (e) {
+            console.log(e);
+
+            window.e = e;
+
+            var clipboardData = e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {};
+
+            // console.log(clipboardData);
+
+            if (clipboardData.items) {
+                arrForEach(clipboardData.items, function (item, index) {
+                    var value = item.value;
+                    // console.log(item, value);
+                    if (/image/i.test(item.type)) {
+                        console.log(item);
+                        var blob = item.getAsFile();
+                        // console.log(blob);
+                        xnote.uploadBlob(blob, fileId, function (respJson) {
+                            console.log(respJson);
+                            var link = respJson.link;
+                            codeInsert(link);
+                        });
+                    }
+                })
+            }
+        })
     });
 
 </script>

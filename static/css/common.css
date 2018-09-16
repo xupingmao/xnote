@@ -42,60 +42,17 @@ h1,h2,h3 {
     font-family: "Palatino Linotype", "Book Antiqua", Palatino, Helvetica, STKaiti, SimSun, serif
 }
 
-.col-md-1 {
-    float: left;
-    width: 8.3%;
-}
-
-.col-md-2 {
-    float: left;
-    width: 16.7%;
-}
-
-.col-md-3 {
-    float: left;
-    width: 25%;
-}
-
-.col-md-4 {
-    float:left;
-    width: 33.3%;
-}
-
-.col-md-5 {
-    float: left;
-    width: 41.7%;
-}
-
-.col-md-6 {
-    float: left;
-    width: 50%;
-}
-
-.col-md-7 {
-    float: left;
-    width: 58.3%;
-}
-
-.col-md-8 {
-    float: left;
-    width: 66.7%;
-}
-
-.col-md-9 {
-    float: left;
-    width: 75%;
-}
-
-.col-md-10 {
-    float: left;
-    width: 83.3%;
-}
-
-.col-md-11 {
-    float: left;
-    width: 91.7%;
-}
+.col-md-1{float:left;width:8.3%;}
+.col-md-2{float:left;width:16.7%;}
+.col-md-3{float:left;width:25%;}
+.col-md-4{float:left;width:33.3%;}
+.col-md-5{float:left;width:41.7%;}
+.col-md-6{float:left;width:50%;}
+.col-md-7{float:left;width:58.3%;}
+.col-md-8{float:left;width:66.7%;}
+.col-md-9{float:left;width:75%;}
+.col-md-10{float:left;width:83.3%;}
+.col-md-11 { float: left; width: 91.7%; }
 .col-md-12, .row {  float: left; width: 100%;}
 .col-md-offset-12 {  margin-left: 100%;}
 .col-md-offset-11 {  margin-left: 91.66666666666666%;}

@@ -252,8 +252,9 @@ $(function() {
  * xnote的公有方法
  */
 var BASE_URL = "/static/lib/webuploader";
-var xnote = {
 
+// xnote全局对象
+var xnote = {
   createUploader: function () {
     return WebUploader.create({
             // 选完文件后，是否自动上传。
@@ -279,6 +280,34 @@ var xnote = {
             // 默认压缩是开启的
             // compress: {}
         });
+  },
+
+  // 把blob对象转换成文件上传到服务器
+  uploadBlob: function (blob, prefix, successFn, errorFn) {
+    var fd = new FormData();
+    fd.append("file", blob);
+    fd.append("prefix", prefix);
+    //创建XMLHttpRequest对象
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST','/fs_upload');
+    xhr.onload = function () {
+        if ( xhr.readyState === 4 ) {
+            if ( xhr.status === 200 ) {
+                var data = JSON.parse( xhr.responseText );
+                if (successFn) {
+                  successFn(data);
+                } else {
+                  console.log(data);
+                }
+            } else {
+                console.error( xhr.statusText );
+            }
+        };
+    };
+    xhr.onerror = function (e) {
+        console.log( xhr.statusText );
+    }
+    xhr.send(fd);
   }
 }
 

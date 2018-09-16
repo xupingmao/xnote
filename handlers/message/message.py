@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/09/03 01:49:09
+# @modified 2018/09/15 22:21:09
 
 """短消息"""
 import time
@@ -155,17 +155,17 @@ class SaveHandler:
         if id == "" or id is None:
             ctime = xutils.get_argument("date", xutils.format_datetime())
             inserted_id = db.insert(content = content, 
-                user = user_name, 
+                user   = user_name, 
                 status = 0,
-                mtime = ctime,
-                ctime = ctime)
+                mtime  = ctime,
+                ctime  = ctime)
             id = inserted_id
             xmanager.fire('message.add', dict(id=id, user=user_name, content=content, ctime=ctime))
             return dict(code="success", data=dict(id=inserted_id, content=content, ctime=ctime))
         else:
             db.update(content = content,
                 mtime = xutils.format_datetime(), 
-                where=dict(id=id, user=user_name))
+                where = dict(id=id, user=user_name))
             xmanager.fire("message.update", dict(id=id, user=user_name, content=content))
         return dict(code="success", data=dict(id=id))
 
@@ -184,10 +184,11 @@ class MessageHandler:
     @xauth.login_required()
     def GET(self):
         return xtemplate.render("message/message.html", 
-            search_action="/message", 
-            search_placeholder="搜索备忘信息",
-            count_message = count_message,
-            key = xutils.get_argument("key", ""))
+            search_action      = "/message", 
+            html_title         = "提醒",
+            search_placeholder = "搜索提醒信息",
+            count_message      = count_message,
+            key                = xutils.get_argument("key", ""))
 
 
 class CalendarHandler:

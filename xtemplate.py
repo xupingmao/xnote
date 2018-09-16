@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/09/13 23:53:48
+# @modified 2018/09/16 09:08:13
 import os
 import json
 import web
@@ -152,6 +152,9 @@ class BasePlugin:
         self.aside_html      = ""
         self.option_links    = []
 
+    def add_option_link(name, url):
+        self.option_links.append(dict(name=name, url = url))
+
     def write(self, text):
         self.output += text
 
@@ -208,8 +211,8 @@ class BasePlugin:
         """卸载插件事件, TODO"""
         pass
 
-    def on_boot(self):
-        """系统启动事件"""
+    def on_init(self):
+        """系统初始化事件"""
         pass
 
     def on_event(self, event):
