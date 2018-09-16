@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/09/15 19:01:31
+# @modified 2018/09/16 23:57:56
 
 '''
 xnote系统配置
@@ -53,6 +53,8 @@ INIT_SCRIPT        = "init.py"
 # 记录位置信息，可通过脚本配置打开
 RECORD_LOCATION    = False
 BASE_TEMPLATE      = "base2.html"
+LOAD_PLUGINS_ON_INIT = True
+
 # 菜单配置
 MENU_LIST = []
 TOOL_LIST = []

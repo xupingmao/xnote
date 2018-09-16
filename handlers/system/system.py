@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/09/16 11:22:02
+# @modified 2018/09/17 00:11:02
 
 """Description here"""
 from io import StringIO
@@ -149,6 +149,7 @@ import web
 import xconfig
 import xutils
 import xauth
+import xmanager
 from xtemplate import BasePlugin
 
 class Main(BasePlugin):

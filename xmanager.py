@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/09/16 11:14:27
+# @modified 2018/09/17 00:01:14
 
 """
 Xnote 模块管理器
@@ -389,13 +389,13 @@ class TaskManager:
             return False
         
     def load_tasks(self):
-        schedule = xtables.get_schedule_table()
-        tasks = schedule.select(order="url")
+        schedule       = xtables.get_schedule_table()
+        tasks          = schedule.select(order="url")
         self.task_list = list(tasks)
         # 系统默认的任务
         backup_task = xutils.Storage(name="[系统]备份", url="/system/backup", 
-            tm_wday="*", tm_hour="11", tm_min="0", 
-            message="", sound=0, webpage=0, id=None)
+            tm_wday = "*", tm_hour="11", tm_min="0", 
+            message = "", sound=0, webpage=0, id=None)
         self.task_list.append(backup_task)
             
     def save_tasks(self):
@@ -500,7 +500,7 @@ class EventManager:
 
 
 # 对外接口
-_manager = None
+_manager       = None
 _event_manager = None
 def init(app, vars, last_mapping = None):
     global _manager
@@ -517,13 +517,38 @@ def reload():
     _event_manager.remove_handlers()
     xauth.refresh_users()
     _manager.reload()
+    # 重新加载定时任务
+    _manager.load_tasks()
+
     cacheutil.clear_temp()
+    load_init_script()
+    load_plugins(xconfig.PLUGINS_DIR)
+
+def load_init_script():
     if xconfig.INIT_SCRIPT is not None:
         try:
             xutils.exec_script(xconfig.INIT_SCRIPT)
         except:
             xutils.print_exc()
             print("Failed to execute script %s" % xconfig.INIT_SCRIPT)
+
+def load_plugins(dirname):
+    if not xconfig.LOAD_PLUGINS_ON_INIT:
+        return
+    for fname in os.listdir(dirname):
+        fpath = os.path.join(dirname, fname)
+        if os.path.isfile(fpath) and fname.endswith(".py"):
+            script_name = "plugins/" + fname
+            vars = dict()
+            vars["script_name"] = script_name
+            try:
+                xutils.load_script(script_name, vars)
+                main_class = vars.get("Main")
+                if main_class != None:
+                    if hasattr(main_class, 'on_init'):
+                        main_class().on_init()
+            except:
+                xutils.print_exc()
 
 def put_task(func, *args):
     """添加异步任务到队列"""

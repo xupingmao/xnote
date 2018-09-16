@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/09/14 00:22:00
+# @modified 2018/09/17 00:03:57
 
 import re
 import os
@@ -29,8 +29,8 @@ class BaseRule:
 
     def __init__(self, pattern, func, scope="home"):
         self.pattern = pattern
-        self.func = func
-        self.scope = scope
+        self.func    = func
+        self.scope   = scope
 
 def add_rule(pattern, func_str):
     global _rules
@@ -49,19 +49,18 @@ class SearchContext:
 
     def __init__(self):
         # 输入的文本
-        self.input_text = ''
-        self.user_name = ''
-
-        self.search_message = False
-        self.search_file = True
+        self.input_text       = ''
+        self.user_name        = ''
+        self.search_message   = False
+        self.search_file      = True
         self.search_file_full = False
-        self.search_dict = False
-        self.search_tool = True
+        self.search_dict      = False
+        self.search_tool      = True
         
         # 处理的结果集
-        self.tools = []
-        self.notes = []
-        self.dict_files = []
+        self.tools         = []
+        self.notes         = []
+        self.dict_files    = []
         self.message_files = []
 
 def fill_note_info(files):
@@ -79,18 +78,19 @@ class handler:
         global _rules
 
         category = xutils.get_argument("category", "")
-        words   = textutil.split_words(key)
-        files   = []
+        words    = textutil.split_words(key)
+        files    = []
 
-        start_time = time.time()
-        ctx = SearchContext()
-        ctx.input_text = key
-        ctx.words = words
-        ctx.category = category
-        ctx.search_message = (category == "message")
+        start_time           = time.time()
+        ctx                  = SearchContext()
+        ctx.key              = key
+        ctx.input_text       = key
+        ctx.words            = words
+        ctx.category         = category
+        ctx.search_message   = (category == "message")
         ctx.search_file_full = (category == "content")
-        ctx.search_dict = (category == "dict")
-        ctx.user_name = xauth.get_current_name()
+        ctx.search_dict      = (category == "dict")
+        ctx.user_name        = xauth.get_current_name()
 
         if ctx.search_message:
             ctx.search_file = False
@@ -117,8 +117,8 @@ class handler:
             if m:
                 try:
                     start_time0 = time.time()
-                    results = func(ctx, *m.groups())
-                    cost_time0 = time.time() - start_time0
+                    results     = func(ctx, *m.groups())
+                    cost_time0  = time.time() - start_time0
                     xutils.log("  >>> %s - %d ms" % (func.modfunc, cost_time0*1000))
                     if results is not None:
                         files += results
@@ -127,9 +127,9 @@ class handler:
         cost_time = (time.time() - start_time) * 1000
         xutils.log("  === total - %d ms ===" % cost_time)
         xconfig.search_history.put(Storage(name="#search# %s - %d ms" % (key, cost_time), 
-            category=category, 
-            user=xauth.get_current_name(), 
-            link=web.ctx.fullpath))
+            category = category, 
+            user     = xauth.get_current_name(), 
+            link     = web.ctx.fullpath))
 
         xmanager.fire("search.after", ctx)
         return ctx.tools + files
@@ -149,15 +149,18 @@ class handler:
         limit    = pagesize
 
         if key == "" or key == None:
-            return xtemplate.render("search_result.html", category=category, files=[], count=0)
+            return xtemplate.render("search_result.html", 
+                category = category, 
+                files    = [], 
+                count    = 0)
         files = self.do_search(key, offset, pagesize)
         count = len(files)
         files = files[offset:offset+limit]
         fill_note_info(files)
         return xtemplate.render("search_result.html", 
             category = category,
-            files = files, 
-            title = title,
+            files    = files, 
+            title    = title,
             page_max = int(math.ceil(count/pagesize)),
             page_url = page_url)
 
