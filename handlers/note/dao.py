@@ -1,12 +1,13 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/08/17 23:12:56
+# @modified 2018/09/16 11:48:00
 
 """资料的DAO操作集合
 
 由于sqlite是单线程，所以直接使用方法操作
 如果是MySQL等数据库，使用 threadeddict 来操作，直接用webpy的ctx
 """
+import math
 import re
 import six
 import web.db as db
@@ -15,7 +16,7 @@ import xtables
 import xutils
 import xauth
 from xutils import readfile, savetofile, sqlite3
-from xutils import dateutil, cacheutil
+from xutils import dateutil, cacheutil, Timer
 
 MAX_VISITED_CNT = 200
 readFile        = readfile
@@ -256,6 +257,30 @@ def list_recent_created(parent_id = None, limit = 10):
             order  = "ctime DESC",
             limit  = limit))
 
+def list_recent_edit(parent_id=None, offset=0, limit=None):
+    if limit is None:
+        limit = xconfig.PAGE_SIZE
+    db = xtables.get_file_table()
+    t = Timer()
+    t.start()
+    creator = xauth.get_current_name()
+    where = "is_deleted = 0 AND (creator = $creator OR is_public = 1) AND type != 'group'"
+    
+    cache_key = "recent_notes#%s#%s" % (creator, math.ceil(offset/limit))
+    files = cacheutil.get(cache_key)
+    if files is None:
+        files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator", 
+            where = where, 
+            vars   = dict(creator = creator),
+            order  = "mtime DESC",
+            offset = offset,
+            limit  = limit))
+        cacheutil.set(cache_key, files, expire=600)
+    t.stop()
+    xutils.log("list recent edit %s" % t.cost())
+    return files
+
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_recent_created", list_recent_created)
+xutils.register_func("note.list_recent_edit", list_recent_edit)
 

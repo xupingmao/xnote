@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/09/03 01:38:13
+# @modified 2018/09/16 11:14:27
 
 """
 Xnote 模块管理器
@@ -26,7 +26,7 @@ import xtables
 import xutils
 import xauth
 from threading import Thread, Timer, current_thread
-from xutils import Storage, Queue, tojson, MyStdout
+from xutils import Storage, Queue, tojson, MyStdout, cacheutil
 
 config = xconfig
 
@@ -517,6 +517,7 @@ def reload():
     _event_manager.remove_handlers()
     xauth.refresh_users()
     _manager.reload()
+    cacheutil.clear_temp()
     if xconfig.INIT_SCRIPT is not None:
         try:
             xutils.exec_script(xconfig.INIT_SCRIPT)

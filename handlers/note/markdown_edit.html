@@ -393,7 +393,6 @@
                     if (/image/i.test(item.type)) {
                         console.log(item);
                         var blob = item.getAsFile();
-                        // console.log(blob);
                         xnote.uploadBlob(blob, fileId, function (respJson) {
                             console.log(respJson);
                             var link = respJson.link;

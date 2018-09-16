@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/09/15 22:21:47
+# @modified 2018/09/16 11:22:02
 
 """Description here"""
 from io import StringIO
@@ -128,6 +128,7 @@ class ReloadHandler:
     @xauth.login_required("admin")
     def GET(self):
         xmanager.reload()
+        import web
         raise web.seeother("/")
 
 class PluginsHandler:

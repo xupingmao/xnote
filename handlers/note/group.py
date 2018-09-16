@@ -145,9 +145,10 @@ class RecentEditHandler:
     """show recent modified files"""
 
     def GET(self):
-        days = xutils.get_argument("days", 30, type=int)
-        page = xutils.get_argument("page", 1, type=int)
-        page = max(1, page)
+        days     = xutils.get_argument("days", 30, type=int)
+        page     = xutils.get_argument("page", 1, type=int)
+        pagesize = xutils.get_argument("pagesize", PAGE_SIZE, type=int)
+        page     = max(1, page)
 
         db = xtables.get_file_table()
         t = Timer()
@@ -162,8 +163,8 @@ class RecentEditHandler:
                 where = where, 
                 vars   = dict(creator = creator),
                 order  = "mtime DESC",
-                offset = (page-1) * PAGE_SIZE,
-                limit  = PAGE_SIZE))
+                offset = (page-1) * pagesize,
+                limit  = pagesize))
             cacheutil.set(cache_key, files, expire=600)
         t.stop()
         xutils.log("list recent edit %s" % t.cost())
@@ -181,7 +182,7 @@ class RecentEditHandler:
             files       = files, 
             file        = Storage(name="最近更新", type="group"),
             page        = page, 
-            show_notice = True,
+            show_notice = False,
             page_max    = math.ceil(count/PAGE_SIZE), 
             groups      = groups,
             show_mdate  = True,
@@ -237,6 +238,7 @@ xurls = (
     r"/file/group/bookmark" , MarkedHandler,
     r"/file/group/marked"   , MarkedHandler,
     r"/note/recent_created" , RecentCreatedHandler,
+    r"/note/recent_edit"    , RecentEditHandler,
     r"/file/recent_edit"    , RecentEditHandler,
     r"/file/group/public"   , PublicGroupHandler
 )

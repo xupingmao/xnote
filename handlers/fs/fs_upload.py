@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2018/09/16 10:38:58
+# @modified 2018/09/16 12:34:20
 import os
+import uuid
 import web
 import xauth
 import xconfig
@@ -20,15 +21,19 @@ def get_link(filename, webpath):
 class UploadHandler:
 
     def POST(self):
-        file    = xutils.get_argument("file", {})
-        dirname = xutils.get_argument("dirname")
-        prefix  = xutils.get_argument("prefix")
+        file     = xutils.get_argument("file", {})
+        dirname  = xutils.get_argument("dirname")
+        prefix   = xutils.get_argument("prefix")
+        uuidname = xutils.get_argument("uuidname")
         if file.filename != None:
             filename = file.filename
             if file.filename == "":
                 return dict(code="fail", message="filename is empty")
+            basename, ext = os.path.splitext(filename)
+            if uuidname == "true":
+                filename = str(uuid.uuid1()) + ext
             # xutils.makedirs(dirname)
-            filepath, webpath = xutils.get_upload_file_path(file.filename, prefix = prefix)
+            filepath, webpath = xutils.get_upload_file_path(filename, prefix = prefix)
             # filename = xutils.quote(os.path.basename(x.file.filename))
             with open(filepath, "wb") as fout:
                 # fout.write(x.file.file.read())

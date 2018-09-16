@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/09/15 19:08:09
+# @modified 2018/09/16 11:19:09
 """
 缓存的实现，考虑失效的规则如下
 
@@ -345,4 +345,10 @@ def load_dump():
                     os.remove(fpath)
         except:
             print_exc()
+
+def clear_temp():
+    for key in _cache_dict.copy():
+        value = _cache_dict.get(key)
+        if value != None and value.is_temp():
+            value.clear()
 

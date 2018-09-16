@@ -287,6 +287,7 @@ var xnote = {
     var fd = new FormData();
     fd.append("file", blob);
     fd.append("prefix", prefix);
+    fd.append("uuidname", "true");
     //创建XMLHttpRequest对象
     var xhr = new XMLHttpRequest();
     xhr.open('POST','/fs_upload');

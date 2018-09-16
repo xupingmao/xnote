@@ -50,11 +50,11 @@ class IndexHandler:
     def GET(self):
         t = Timer()
         t.start()
-        sql  = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
-        data = list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
+        groups = xutils.call("note.list_group")
         t.stop()
         xutils.log("group time: %s" % t.cost())
 
+        notes  = xutils.call("note.list_recent_edit", limit = 10)
         t.start()
         ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
             vars=dict(creator=xauth.get_current_name()))
@@ -64,8 +64,9 @@ class IndexHandler:
         tools = list(filter(tool_filter, list_tools()))[:4]
         return xtemplate.render("index.html", 
             ungrouped_count = ungrouped_count,
-            file_type       = "group_list",
-            files           = data,
+            groups          = groups,
+            notes           = notes,
+            files           = groups,
             tools           = tools)
 
 class GridHandler:

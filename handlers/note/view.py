@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/09/13 00:40:46
+# @modified 2018/09/16 11:09:40
 
 import profile
 import math
@@ -117,6 +117,7 @@ class ViewHandler:
             page_url = "/file/view?id=%s&page=" % id,
             files    = files, 
             recent_created = recent_created,
+            show_groups = True,
             groups   = groups)
 
 class PrintHandler:
