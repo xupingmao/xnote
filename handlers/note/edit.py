@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/09/02 21:13:37
+# @modified 2018/09/16 22:12:42
 
 """Description here"""
 import os
@@ -18,7 +18,9 @@ from xutils import dateutil
 from xutils import cacheutil
 
 def get_by_name(db, name):
-    return db.select_one(where=dict(name = name, is_deleted = 0, creator = xauth.get_current_name()))
+    return db.select_one(where=dict(name = name, 
+        is_deleted = 0, 
+        creator = xauth.get_current_name()))
 
 def get_pathlist(db, parent_id, limit = 2):
     file = db.select_one(where=dict(id = parent_id))
@@ -39,7 +41,8 @@ def update_children_count(parent_id, db=None):
         return
     if db is None:
         db = get_file_db()
-    group_count = db.count(where="parent_id=$parent_id AND is_deleted=0", vars=dict(parent_id=parent_id))
+    group_count = db.count(where="parent_id=$parent_id AND is_deleted=0", 
+        vars=dict(parent_id=parent_id))
     db.update(size=group_count, where=dict(id=parent_id))
 
 def update_note_content(id, content, data=''):
@@ -131,17 +134,20 @@ class AddHandler:
                 xmanager.fire("note.add", dict(name=name, type=type))
                 if format == "json":
                     return dict(code="success", id=inserted_id)
-                raise web.seeother("/file/view?id={}".format(inserted_id))
+                raise web.seeother("/note/view?id={}".format(inserted_id))
         except web.HTTPError as e1:
             raise e1
         except Exception as e:
             xutils.print_exc()
             error = str(e)
-        return xtemplate.render("note/add.html", key = "", 
-            name = key, tags = tags, error=error,
+        return xtemplate.render("note/add.html", 
+            key      = "", 
+            name     = key, 
+            tags     = tags, 
+            error    = error,
             pathlist = get_pathlist(db, parent_id),
-            message = error,
-            code = code)
+            message  = error,
+            code     = code)
 
     def GET(self):
         return self.POST()
@@ -157,11 +163,12 @@ class RemoveHandler:
         if id == "" and name == "":
             return dict(code="fail", message="id,name至少一个不为空")
 
-        db = xtables.get_file_table()
+        t_file    = xtables.get_file_table()
+        t_content = xtables.get_note_content_table()
         if id != "":
-            file = db.select_one(where=dict(id=int(id), is_deleted=0))
+            file = t_file.select_one(where=dict(id=int(id), is_deleted=0))
         elif name != "":
-            file = get_by_name(db, name)
+            file = get_by_name(t_file, name)
         if file is None:
             return dict(code="fail", message="文件不存在")
         id = file.id
@@ -170,15 +177,20 @@ class RemoveHandler:
             return dict(code="fail", message="没有删除权限")
 
         if file.type == "group":
-            children_count = db.count(where="parent_id=%s AND is_deleted=0"%id)
+            children_count = t_file.count(where="parent_id=%s AND is_deleted=0"%id)
             if children_count > 0:
                 return dict(code="fail", message="分组不为空")
 
-        db.update(is_deleted=1, mtime=dateutil.format_time(), where=dict(id=int(id)))
-        db.delete(where="is_deleted=1 AND mtime < $date", vars=dict(date=dateutil.before(days=30,format=True)))
+        t_file.update(is_deleted=1, mtime=dateutil.format_time(), where=dict(id=int(id)))
+        outdated = t_file.select(where="is_deleted=1 AND mtime < $date", 
+            vars=dict(date=dateutil.before(days=30,format=True)))
+        for item in outdated:
+            t_file.delete(where=dict(id=item['id']))
+            t_content.delete(where=dict(id=item['id']))
+
         # 删除标签
-        tag_db = xtables.get_file_tag_table()
-        tag_db.delete(where=dict(file_id=id));
+        t_tag = xtables.get_file_tag_table()
+        t_tag.delete(where=dict(file_id=id));
         xmanager.fire("note.remove", dict(id=id))
         return dict(code="success")
         
@@ -241,7 +253,7 @@ class ShareHandler:
         db.update(is_public=1, where=dict(id=id, creator=xauth.get_current_name()))
         tag = xtables.get_file_tag_table()
         tag.update(is_public=1, where=dict(file_id=id, user=xauth.get_current_name()))
-        raise web.seeother("/file/view?id=%s"%id)
+        raise web.seeother("/note/view?id=%s"%id)
 
 
 class UnshareHandler:
@@ -254,7 +266,7 @@ class UnshareHandler:
             where=dict(id=id, creator=xauth.get_current_name()))
         tag = xtables.get_file_tag_table()
         tag.update(is_public=0, where=dict(file_id=id, user=xauth.get_current_name()))
-        raise web.seeother("/file/view?id=%s"%id)
+        raise web.seeother("/note/view?id=%s"%id)
 
 class FileSaveHandler:
 
@@ -269,24 +281,24 @@ class FileSaveHandler:
         db      = xtables.get_file_table()
         where   = None
         if xauth.is_admin():
-            where=dict(id=id)
+            where = dict(id=id)
         else:
-            where=dict(id=id, creator=name)
+            where = dict(id=id, creator=name)
         kw = dict(size=len(content), 
             mtime=xutils.format_datetime(), 
             version = version)
         if type == "html":
-            kw["data"] = data
+            kw["data"]    = data
             kw["content"] = data
             if xutils.bs4 is not None:
-                soup = xutils.bs4.BeautifulSoup(data, "html.parser")
-                content = soup.get_text(separator=" ")
+                soup          = xutils.bs4.BeautifulSoup(data, "html.parser")
+                content       = soup.get_text(separator=" ")
                 kw["content"] = content
             kw["size"] = len(content)
         else:
             kw["content"] = content
-            kw['data'] = ''
-            kw["size"] = len(content)
+            kw['data']    = ''
+            kw["size"]    = len(content)
         rowcount = update_note(db, where, **kw)
         if rowcount > 0:
             return dict(code="success")
