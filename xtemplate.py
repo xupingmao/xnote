@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/09/16 09:08:13
+# @modified 2018/09/17 23:51:03
 import os
 import json
 import web
@@ -195,6 +195,7 @@ class BasePlugin:
             script_name = globals().get("script_name"),
             description = self.description,
             error       = error,
+            html_title  = self.title,
             title       = self.title,
             method      = self.method,
             rows        = self.rows,

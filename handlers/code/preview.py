@@ -183,8 +183,14 @@ class WikiPathHandler:
             return render(template_name, error="file extension error")
         if not os.path.exists(path):
             return render(template_name, error="文件不存在")
+        basename = os.path.basename(path)
         content = xutils.readfile(path)
-        return render(template_name, content = content, os = os, type = "file", path = path)
+        return render(template_name, 
+            html_title = basename,
+            content    = content, 
+            os         = os, 
+            type       = "file",
+            path       = path)
 
 xurls = (
     r"/wiki/(.*)", WikiPathHandler,

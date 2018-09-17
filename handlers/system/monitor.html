@@ -8,10 +8,12 @@
 
 <div class="col-md-12">
     <table class="table">
-        <tr>
-            <td>软件版本</td>
-            <td>{{xnote_version}}</td>
-        </tr>
+        {% for item in item_list %}
+            <tr>
+                <td>{{item.key}}</td>
+                <td>{{item.value}}</td>
+            </tr>
+        {% end %}
         <tr>
             <td>系统启动时间</td>
             <td>{{start_time}}</td>
