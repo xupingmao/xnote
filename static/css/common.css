@@ -83,10 +83,13 @@ a {
     text-decoration: none;
     word-wrap: break-word;
     word-break: break-all;
+    color: #08c;
 }
 
 a:hover {
     text-decoration: underline;
+    /*color: white;*/
+    /*background-color: #08c;*/
 }
 
 .tag-link {
@@ -128,25 +131,41 @@ a:hover {
     border-bottom: 2px solid red;
 }
 
-.classic-link {
+/** 高对比度link **/
+.contract-link {
     display: inline-block;
     color: #08c;
     line-height: 20px;
     float: left;
     margin: 3px;
     padding: 3px;
-    text-decoration: underline;
+    text-decoration: none;
 }
 
-.classic-link:hover {
-    background-color: #eee;
+.contract-link:hover {
+    color: white;
+    background-color: #08c;
+    text-decoration: none;
+}
+
+
+.menu-link {
+    color: black;
+    padding: 3px;
+}
+
+.menu-link:hover {
+    color: white;
+    background-color: #08c;
+    text-decoration: none;
 }
 
 /**
  * 按钮样式
  */
-/** 不能指定input[type=button]不然会覆盖其他class样式 **/
+/** 不能指定input[type=button]不然会覆盖其他class样式(选择器优先级过高) **/
 .btn, [type=submit], [type=button], button {
+    display: inline-block;
     -webkit-appearance: none; /* 消除IOS默认的按钮样式 */
     background-color: #337ab7;
     border-color: #2e6da4;
@@ -162,6 +181,7 @@ a:hover {
     background-color: #286090;
     border-color: #204d74;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .btn-danger {
@@ -991,10 +1011,6 @@ li.menu-item:hover {
     padding-right: 10px;
     display: block;
     float: left;
-}
-
-.nav-ul a {
-    color: black;
 }
 
 .pagenation {

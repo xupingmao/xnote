@@ -3,18 +3,18 @@
       <!-- 保持对称 -->
       <div class="menu-box float-left">
         <ul class="nav-ul">
-          <li><a href="/">笔记</a></li>
+          <li><a class="menu-link" href="/">笔记</a></li>
           {% if _has_login %}
-          <li><a href="/message?status=created">提醒({{_notice_count}})</a></li>
+          <li><a class="menu-link" href="/message?status=created">提醒({{_notice_count}})</a></li>
           {% end %}
           {% if _is_admin %}
-          <li><a href="/system/plugins">插件</a></li>
+          <li><a class="menu-link" href="/system/plugins">插件</a></li>
           {% end %}
-          <li><a href="/system/index">系统</a></li>
+          <li><a class="menu-link" href="/system/index">系统</a></li>
           {% if not _has_login %}
-          <li><a class="link" href="/login">登录</a></li>
+          <li><a class="menu-link" class="link" href="/login">登录</a></li>
           {% end %}
-          <li><a href="/wiki/README.md">关于</a></li>
+          <li><a class="menu-link" href="/wiki/README.md">关于</a></li>
         </ul>
       </div>
 
