@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/09/17 00:03:57
+# @modified 2018/09/18 23:26:37
 
 import re
 import os
@@ -49,6 +49,7 @@ class SearchContext:
 
     def __init__(self):
         # 输入的文本
+        self.key              = ''
         self.input_text       = ''
         self.user_name        = ''
         self.search_message   = False
@@ -174,7 +175,6 @@ def load_rules():
     add_rule(r"翻译\s+([^ ]+)",         "dictionary.zh2en")
     add_rule(r"[a-zA-Z\-]+", "dictionary.find")
     add_rule(r"([^ ]*)",                "tools.search")
-    add_rule(r"([^ ]*)",                "scripts.search")
     add_rule(r"([^ ]*)",                "api.search")
     add_rule(r"(\d+)分钟后提醒我?(.*)", "reminder.search")
     add_rule(r"(上午|下午)(.*)提醒我?(.*)", "reminder.by_time")

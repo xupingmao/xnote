@@ -1,9 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/08/25 20:11:49
-__doc__ = """Methods for text operation"""
-
+# @modified 2018/09/18 23:35:37
 import re
 import random
 try:
@@ -13,17 +11,21 @@ except ImportError:
     from ConfigParser import ConfigParser
 from .imports import is_str
 
-"""Methods to check the text"""
+__doc__ = """文本处理函数库
+
+Text Process Library
+"""
+
 
 ALPHA_NUM = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-def text_contains(text, words):
+def contains_all(text, words):
     """
-        >>> text_contains("abc is good", "abc")
+        >>> contains_all("abc is good", "abc")
         True
-        >>> text_contains("you are right", "rig")
+        >>> contains_all("you are right", "rig")
         True
-        >>> text_contains("hello,world,yep", ["hello", "yep"])
+        >>> contains_all("hello,world,yep", ["hello", "yep"])
         True
     """
     if is_str(words):
@@ -35,6 +37,8 @@ def text_contains(text, words):
         return True
     else:
         raise TypeError("unsupported type")
+
+text_contains = contains_all
 
 def contains_any(text, words):
     if is_str(words):
@@ -147,7 +151,7 @@ def after(self, start):
         return self[p1+len(start):]
 
 def split_words(text):
-    text = text.replace("\t", ' ')
+    text  = text.replace("\t", ' ')
     words = text.split(' ')
     while words.count('') > 0:
         words.remove('')
@@ -195,7 +199,7 @@ def find(text, key, show_line=False, ignore_case=True):
             target = line.lower()
         else:
             target = line
-        if text_contains(target, keys):
+        if contains_all(target, keys):
             if show_line:
                 result.append("%04d:%s" % (lineno, line))
             else:
@@ -218,11 +222,11 @@ def replace(text, origin, dest, ignore_case = False, use_template = False):
             dest = dest.replace("?", origin)
         return text.replace(origin, dest)
     else:
-        start = 0
-        origin = origin.lower()
+        start      = 0
+        origin     = origin.lower()
         text_lower = text.lower()
-        new_text = ""
-        pos = 0
+        new_text   = ""
+        pos        = 0
         while pos >= 0:
             pos = text_lower.find(origin, start)
             if pos >= 0:
@@ -375,6 +379,8 @@ def get_short_text(text, length):
     if end_pos >= len(text):
         return text
     return text[:end_pos-2] + ".."
+
+shortfor = get_short_text
 
 def get_camel_case(name, upper = False):
     """

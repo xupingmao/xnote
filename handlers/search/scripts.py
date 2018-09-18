@@ -6,19 +6,19 @@ import xconfig
 import xutils
 import xauth
 import xmanager
-from xutils import SearchResult
-from xutils import u
+from xutils import SearchResult, u, textutil
 
 def search_plugins(name):
     results = []
     dirname = xconfig.PLUGINS_DIR
+    words   = textutil.split_words(name)
     for fname in xutils.listdir(dirname):
         unquote_name = xutils.unquote(fname)
-        if name in unquote_name:
-            result = SearchResult()
-            result.category = "plugin"
-            result.name = u("插件 - " + unquote_name)
-            result.url  = u("/plugins/" + fname)
+        if textutil.contains_all(unquote_name, words):
+            result           = SearchResult()
+            result.category  = "plugin"
+            result.name      = u("插件 - " + unquote_name)
+            result.url       = u("/plugins/" + fname)
             result.edit_link = u("/code/edit?path=" + os.path.join(dirname, fname))
             results.append(result)
     return results
@@ -32,22 +32,25 @@ def search_scripts(name):
         if fname.endswith(".zip"):
             continue
         if name in fname:
-            result = xutils.SearchResult()
-            result.name = xutils.u("脚本 - ") + fname
-            result.raw  = xutils.u("搜索到可执行脚本 - ") + fname
-            result.url  = xutils.u("/system/script_admin?op=edit&name=%s") % fname
+            result         = xutils.SearchResult()
+            result.name    = xutils.u("脚本 - ") + fname
+            result.raw     = xutils.u("搜索到可执行脚本 - ") + fname
+            result.url     = xutils.u("/system/script_admin?op=edit&name=%s") % fname
             result.command = xutils.u("/system/script_admin/execute?name=%s") % fname
             results.append(result)
     return results
 
-def search(ctx, name):
+@xmanager.listen("search")
+@xutils.timeit(logfile=True, name="search scripts")
+def search(ctx):
     if not xauth.is_admin():
         return None
     if not ctx.search_tool:
         return
+    name    = ctx.key
     results = search_plugins(name)
     results += search_scripts(name)
-    return results
+    ctx.tools += results
 
 
 @xmanager.listen("search")

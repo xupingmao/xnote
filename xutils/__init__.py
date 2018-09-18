@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/09/16 10:39:14
+# @modified 2018/09/18 23:30:42
 
 """
 xnote工具类总入口
@@ -567,11 +567,11 @@ def log(fmt, *argv):
         message = fmt.format(*argv)
     else:
         message = fmt
-    f_back = inspect.currentframe().f_back
-    f_code = f_back.f_code
+    f_back    = inspect.currentframe().f_back
+    f_code    = f_back.f_code
     f_modname = f_back.f_globals.get("__name__")
-    f_name = f_code.co_name
-    f_lineno = f_back.f_lineno
+    f_name    = f_code.co_name
+    f_lineno  = f_back.f_lineno
     message = "%s %s.%s:%s %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), f_modname, f_name, f_lineno, message)
     print(message)
     with open(xconfig.LOG_PATH, "ab") as fp:
@@ -656,9 +656,9 @@ def say(msg):
 
 def exec_python_code(name, code, 
         record_stdout = True, 
-        raise_err = False, 
-        do_gc = True, 
-        vars = None):
+        raise_err     = False, 
+        do_gc         = True, 
+        vars          = None):
     ret = None
     try:
         if vars is None:
@@ -691,9 +691,9 @@ def exec_python_code(name, code,
 def exec_script(name, new_window=True, record_stdout = True, vars = None):
     """执行script目录下的脚本"""
     dirname = xconfig.SCRIPTS_DIR
-    path = os.path.join(dirname, name)
-    path = os.path.abspath(path)
-    ret  = 0
+    path    = os.path.join(dirname, name)
+    path    = os.path.abspath(path)
+    ret     = 0
     if name.endswith(".py"):
         # 方便获取xnote内部信息用于扩展，同时防止开启过多Python进程
         code = xutils.readfile(path)
