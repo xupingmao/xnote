@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/09/17 00:01:14
+# @modified 2018/09/19 23:50:55
 
 """
 Xnote 模块管理器
@@ -352,12 +352,19 @@ class TaskManager:
                 except Exception as e:
                     xutils.log("run task [%s] failed, %s" % (task.url, e))
 
+        def fire_cron_events(tm):
+            fire("cron.minute", tm)
+            if tm.tm_min == 0:
+                fire("cron.hour", tm)
+
         def run():
             while True:
                 # 获取时间信息
                 tm = time.localtime()
                 for task in self.task_list:
                     check_and_run(task, tm)
+                # cron.* 事件
+                put_task(fire_cron_events, tm)
                 tm = time.localtime()
                 # 等待下一个分钟
                 sleep_sec = 60 - tm.tm_sec % 60
