@@ -72,11 +72,20 @@ h1,h2,h3 {
 .bottom-offset-1 { margin-bottom: 5px; }
 
 
+/** 标题样式 **/
+.heading {
+    margin: 5px 0px;
+    padding: 5px;
+    display: block;
+    float: left;
+    width: 100%;
+    font-size: 16px;
+    background: #eee;
+    border-left: 5px solid #039BE5;
+}
 
-/**
- * 链接样式
- */
 
+/** 链接样式 **/
 a {
     font-size: 14px;
     font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
@@ -106,6 +115,7 @@ a:hover {
     text-decoration: none;
     cursor: pointer;
 }
+
 .button-link:hover {
     background: #ccc;
 }

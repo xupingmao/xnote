@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/09/19 23:50:55
+# @modified 2018/09/20 00:16:29
 
 """
 Xnote 模块管理器
@@ -30,9 +30,9 @@ from xutils import Storage, Queue, tojson, MyStdout, cacheutil
 
 config = xconfig
 
-__version__ = "1.0"
-__author__ = "xupingmao (578749341@qq.com)"
-__copyright__ = "(C) 2016-2017 xupingmao. GNU GPL 3."
+__version__      = "1.0"
+__author__       = "xupingmao (578749341@qq.com)"
+__copyright__    = "(C) 2016-2017 xupingmao. GNU GPL 3."
 __contributors__ = []
 
 def wrapped_handler(pattern, handler_clz):
@@ -447,9 +447,10 @@ class WorkerThread(Thread):
 
 class EventHandler:
 
-    def __init__(self, func, is_async = False):
-        self.func = func
-        self.is_async = is_async
+    def __init__(self, func, is_async = False, description = ''):
+        self.func        = func
+        self.is_async    = is_async
+        self.description = description
 
     def execute(self, ctx=None):
         if self.is_async:
@@ -461,9 +462,7 @@ class EventHandler:
                 xutils.print_exc()
 
     def __eq__(self, other):
-        if not type(self) != type(other):
-            return False
-        return self.func == other.func
+        return type(self) == type(other) and self.func == other.func
 
     def __str__(self):
         return "<EventHandler %s object at %s>" % (self.func.__name__, id(self))
@@ -484,7 +483,7 @@ class EventManager:
         注册事件处理器
         事件处理器的去重,通过判断是不是同一个函数，不通过函数名，如果修改初始化脚本需要执行【重新加载模块】功能
         """
-        handler = EventHandler(func, is_async)
+        handler  = EventHandler(func, is_async)
         handlers = self._handlers.get(event_type, [])
         if handler in handlers:
             warn("handler %s is already registered" % handler)
@@ -587,7 +586,7 @@ def set_handlers0(event_type, handlers, is_async=False):
 def fire(event_type, ctx=None):
     _event_manager.fire(event_type, ctx)
 
-def listen(event_type_list, is_async = False):
+def listen(event_type_list, is_async = False, description = None):
     """
     事件监听器注解
     """

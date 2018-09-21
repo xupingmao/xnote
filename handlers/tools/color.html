@@ -11,6 +11,17 @@
             float: left;
             width: 25%;
         }
+
+        h1, h2, h3 {
+            margin: 5px 0px;
+            padding: 5px;
+            display: block;
+            float: left;
+            width: 100%;
+            font-size: 16px;
+            background: #eee;
+            border-left: 5px solid #039BE5;
+        }
     </style>
 {% end %}
 
@@ -63,7 +74,7 @@
         #BBBBBB;
         #AAAAAA;
         #FF8040;
-        #FF8000</textarea>
+        #FF8000;</textarea>
     </div>
 <script>
 
@@ -109,8 +120,8 @@ function process() {
         div.innerHTML += item;
         parent.appendChild(div);
         if ((count+1) % 4 == 0) {
-            var br = document.createElement('br');
-            parent.appendChild(br);
+            // var br = document.createElement('br');
+            // parent.appendChild(br);
         }
         count++;
     }
@@ -120,15 +131,16 @@ document.onreadystatechange = function () {
     // console.log(document.readyState);
     if (document.readyState == "complete") {
         var other = document.getElementById('other');
-        var colors = ["00", "50", "80", "CC", "FF"];
+        var colors = ["00", "55", "88", "CC", "FF"];
         var text = "";
-        for (var i in colors) {
-            for (var j in colors) {
-                for (var k in colors) {
-                    text += "#" + colors[i] + colors[j] + colors[k] + ";";
-                }
-            }
-        }
+
+        arrForEach(colors, function (i) {
+            arrForEach(colors, function (j) {
+                arrForEach(colors, function (k) {
+                    text += "#" + i + j + k + ";";
+                })
+            })
+        })
         other.innerHTML=text;
         process();
     }
