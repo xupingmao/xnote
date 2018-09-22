@@ -1,4 +1,5 @@
 {% init pathlist = [] %}
+{% init error = "" %}
 <div class="grid-title">
     <a href="/" class="link2">Home</a> ›
     {% for item in pathlist %}
@@ -6,3 +7,9 @@
     {% end %}
 </div>
 
+
+{% if error != "" %}
+<pre class="col-md-12 error">
+{{error}}
+</pre>
+{% end %}
