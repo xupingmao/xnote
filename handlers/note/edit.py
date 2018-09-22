@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/09/16 22:12:42
+# @modified 2018/09/22 10:59:34
 
 """Description here"""
 import os
@@ -147,6 +147,7 @@ class AddHandler:
             error    = error,
             pathlist = get_pathlist(db, parent_id),
             message  = error,
+            groups   = xutils.call("note.list_group"),
             code     = code)
 
     def GET(self):
