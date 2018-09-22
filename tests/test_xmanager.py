@@ -34,12 +34,11 @@ class TestMain(unittest.TestCase):
 
     def test_event_handler(self):
         ctx = Storage()
-
+        xmanager.remove_handlers('test')
+        
+        @xmanager.listen("test")
         def my_handler(ctx):
             ctx.test = True
-
-        xmanager.remove_handlers('test')
-        xmanager.add_handler('test', my_handler)
-
+        
         xmanager.fire('test', ctx)
         self.assertEqual(True, ctx.test)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
 # Copyright (c) 2017
-# @modified 2018/08/20 23:05:30
+# @modified 2018/09/22 23:38:03
 """Description here"""
 
 import os
@@ -93,7 +93,7 @@ def get_server_ip():
     return ip_list[0]
 
 @xmanager.listen('search')
-def show_qrcode(ctx):
+def show_addr_qrcode(ctx):
     if ctx.input_text == "addr":
         r = SearchResult()
         addr = "http://" + get_server_ip() + ":" + str(xconfig.PORT)

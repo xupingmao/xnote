@@ -52,24 +52,24 @@ h1,h2,h3 {
 .col-md-8{float:left;width:66.7%;}
 .col-md-9{float:left;width:75%;}
 .col-md-10{float:left;width:83.3%;}
-.col-md-11 { float: left; width: 91.7%; }
-.col-md-12, .row {  float: left; width: 100%;}
-.col-md-offset-12 {  margin-left: 100%;}
-.col-md-offset-11 {  margin-left: 91.66666666666666%;}
-.col-md-offset-10 {  margin-left: 83.33333333333334%;}
-.col-md-offset-9 {  margin-left: 75%;}
-.col-md-offset-8 {  margin-left: 66.66666666666666%;}
-.col-md-offset-7 {  margin-left: 58.333333333333336%;}
-.col-md-offset-6 {  margin-left: 50%;}
-.col-md-offset-5 {  margin-left: 41.66666666666667%;}
-.col-md-offset-4 {  margin-left: 33.33333333333333%;}
-.col-md-offset-3 {  margin-left: 25%;}
-.col-md-offset-2 {  margin-left: 16.666666666666664%;}
-.col-md-offset-1 {  margin-left: 8.333333333333332%;}
-.col-md-offset-0 {  margin-left: 0;}
-.top-offset-1 { margin-top: 1em; }
-.top-offset-2 { margin-top: 2em; }
-.bottom-offset-1 { margin-bottom: 5px; }
+.col-md-11{float:left;width:91.7%;}
+.col-md-12,.row{float:left;width:100%;}
+.col-md-offset-12{margin-left:100%;}
+.col-md-offset-11{margin-left:91.66666666666666%;}
+.col-md-offset-10{margin-left:83.33333333333334%;}
+.col-md-offset-9{margin-left:75%;}
+.col-md-offset-8{margin-left:66.66666666666666%;}
+.col-md-offset-7{margin-left:58.333333333333336%;}
+.col-md-offset-6{margin-left:50%;}
+.col-md-offset-5{margin-left:41.66666666666667%;}
+.col-md-offset-4{margin-left:33.33333333333333%;}
+.col-md-offset-3{margin-left:25%;}
+.col-md-offset-2{margin-left:16.666666666666664%;}
+.col-md-offset-1{margin-left:8.333333333333332%;}
+.col-md-offset-0{margin-left:0;}
+.top-offset-1{margin-top:1em;}
+.top-offset-2{margin-top:2em;}
+.bottom-offset-1{margin-bottom:5px;}
 
 
 /** 标题样式 **/
@@ -141,7 +141,7 @@ a:hover {
     border-bottom: 2px solid red;
 }
 
-/** 高对比度link **/
+/* 高对比度link */
 .contract-link {
     display: inline-block;
     color: #08c;
@@ -158,7 +158,7 @@ a:hover {
     text-decoration: none;
 }
 
-
+/* 菜单的链接样式 */
 .menu-link {
     color: black;
     padding: 3px;
@@ -170,10 +170,28 @@ a:hover {
     text-decoration: none;
 }
 
-/**
- * 按钮样式
- */
-/** 不能指定input[type=button]不然会覆盖其他class样式(选择器优先级过高) **/
+/* TAB页的链接样式 */
+.tab-link {
+    float: left;
+    padding: 2px;
+    cursor: pointer;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    color: #ccc;
+}
+
+.tab-link:hover {
+    color: #000;
+}
+
+.tab-link-active {
+    color: #000;
+}
+
+
+/** 按钮样式 **/
+
+/* 不能指定input[type=button]不然会覆盖其他class样式(选择器优先级过高) */
 .btn, [type=submit], [type=button], button {
     display: inline-block;
     -webkit-appearance: none; /* 消除IOS默认的按钮样式 */
@@ -830,22 +848,6 @@ li.menu-item:hover {
     border: none;
 }
 
-
-.tab-link {
-    float: left;
-    padding: 2px;
-    cursor: pointer;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    color: #ccc;
-}
-.tab-link:hover {
-    color: #000;
-}
-.tab-link-active {
-    color: #000;
-}
-
 .input-group {
     float:left;
     width:100%;
@@ -1114,7 +1116,7 @@ li.menu-item:hover {
     background-color: #eee;
 }
 
-/** color **/
+/** 颜色属性 **/
 .red {
     color:red;
 }
@@ -1148,18 +1150,6 @@ li.menu-item:hover {
         float: left;
         width: auto;
     }
-
-/*    .aside {
-        background-color: #fff;
-        display: none;
-        position: fixed;
-        height: 100%;
-        overflow: auto;
-        right: 0px;
-        top: 0px;
-        width: 200px;
-        z-index: 100;
-    }*/
 }
 
 

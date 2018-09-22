@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/09/22 10:59:34
+# @modified 2018/09/22 23:19:02
 
 """Description here"""
 import os
@@ -84,8 +84,8 @@ def update_note(db, where, **kw):
         update_note_content(note_id, content, data)
     return rows
 
-@xmanager.listen(["note.add", "note.updated", "note.rename"])
-def update_cache(ctx):
+@xmanager.listen(["note.add", "note.updated", "note.rename", "note.remove"])
+def update_note_cache(ctx):
     type = ctx.get("type", "")
     cacheutil.prefix_del("recent_notes")
     cacheutil.prefix_del("group.list")

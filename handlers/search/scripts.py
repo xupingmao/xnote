@@ -41,8 +41,7 @@ def search_scripts(name):
     return results
 
 @xmanager.listen("search")
-@xutils.timeit(logfile=True, name="search scripts")
-def search(ctx):
+def on_search_scripts(ctx):
     if not xauth.is_admin():
         return None
     if not ctx.search_tool:
@@ -54,8 +53,7 @@ def search(ctx):
 
 
 @xmanager.listen("search")
-@xutils.timeit(logfile=True, name="search books")
-def search_books(ctx):
+def on_search_books(ctx):
     if not xauth.is_admin():
         return
     if not ctx.category == "book":
@@ -67,3 +65,4 @@ def search_books(ctx):
     if len(pathlist) > 0:
         url = "/fs_find?path=%s&find_key=%s"%(bookspath,name)
         ctx.tools.append(SearchResult("图书搜索结果(%s) - %s" % (len(pathlist), name), url))
+

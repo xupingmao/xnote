@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/09/18 23:30:42
+# @modified 2018/09/22 23:43:28
 
 """
 xnote工具类总入口
@@ -561,18 +561,21 @@ def get_safe_file_name(filename):
 ##   Platform/OS Utilities, Python 2 do not have this file
 #################################################################
 
-def log(fmt, *argv):
+def log(fmt, show_logger = False, *argv):
     fmt = u(fmt)
     if len(argv) > 0:
         message = fmt.format(*argv)
     else:
         message = fmt
-    f_back    = inspect.currentframe().f_back
-    f_code    = f_back.f_code
-    f_modname = f_back.f_globals.get("__name__")
-    f_name    = f_code.co_name
-    f_lineno  = f_back.f_lineno
-    message = "%s %s.%s:%s %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), f_modname, f_name, f_lineno, message)
+    if show_logger:
+        f_back    = inspect.currentframe().f_back
+        f_code    = f_back.f_code
+        f_modname = f_back.f_globals.get("__name__")
+        f_name    = f_code.co_name
+        f_lineno  = f_back.f_lineno
+        message = "%s %s.%s:%s %s" % (format_time(), f_modname, f_name, f_lineno, message)
+    else:
+        message = "%s %s" % (format_time(), message)
     print(message)
     with open(xconfig.LOG_PATH, "ab") as fp:
         fp.write((message+"\n").encode("utf-8"))

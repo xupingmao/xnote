@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/09/20 00:16:29
+# @modified 2018/09/22 23:44:24
 
 """
 Xnote 模块管理器
@@ -447,29 +447,56 @@ class WorkerThread(Thread):
 
 class EventHandler:
 
-    def __init__(self, func, is_async = False, description = ''):
+    def __init__(self, event_type, func, is_async = False, description = ''):
+        self.event_type  = event_type
+        self.key         = None
         self.func        = func
         self.is_async    = is_async
         self.description = description
+        self.profile     = True
+
+        func_name = get_func_abs_name(func)
+
+        if self.description != "" and self.description is not None:
+            self.key = "%s:%s" % (func_name, self.description)
+        else:
+            self.key = func_name
 
     def execute(self, ctx=None):
         if self.is_async:
             put_task(self.func, ctx)
         else:
             try:
+                if self.profile:
+                    start = time.time()
                 self.func(ctx)
+                if self.profile:
+                    stop  = time.time()
+                    xutils.log("EventHandler %s cost %sms" % (self.key, int((stop-start)*1000)))
             except:
                 xutils.print_exc()
 
     def __eq__(self, other):
+        if self.key is not None:
+            return self.key == other.key
         return type(self) == type(other) and self.func == other.func
 
     def __str__(self):
-        return "<EventHandler %s object at %s>" % (self.func.__name__, id(self))
+        if self.is_async:
+            return "<EventHandler %s async>" % self.key
+        return "<EventHandler %s>" % self.key
 
 def get_func_abs_name(func):
-    modulename = inspect.getmodulename(func)
-    return modulename + func.__name__
+    module = inspect.getmodule(func)
+    if module is not None:
+        return module.__name__ + "." + func.__name__
+    else:
+        return "<string>." + func.__name__
+
+    # filepath = inspect.getfile(func)
+    # filename = os.path.basename(filepath)
+    # basename, ext = os.path.splitext(filename)
+    # return basename + "." + func.__name__
 
 class EventManager:
     """
@@ -478,12 +505,12 @@ class EventManager:
     """
     _handlers = dict()
 
-    def add_handler(self, event_type, func, is_async = False):
+    def add_handler(self, handler):
         """
         注册事件处理器
         事件处理器的去重,通过判断是不是同一个函数，不通过函数名，如果修改初始化脚本需要执行【重新加载模块】功能
         """
-        handler  = EventHandler(func, is_async)
+        event_type = handler.event_type
         handlers = self._handlers.get(event_type, [])
         if handler in handlers:
             warn("handler %s is already registered" % handler)
@@ -572,8 +599,8 @@ def request(*args, **kw):
     # localpart='/', method='GET', data=None, host="0.0.0.0:8080", headers=None, https=False, **kw
     return _manager.app.request(*args, **kw)
 
-def add_handler(event_type, func, is_async=False):
-    _event_manager.add_handler(event_type, func, is_async)
+def add_handler(handler):
+    _event_manager.add_handler(handler)
 
 def remove_handlers(event_type=None):
     _event_manager.remove_handlers(event_type)
@@ -584,6 +611,7 @@ def set_handlers0(event_type, handlers, is_async=False):
         _event_manager.add_handler(event_type, handler, is_async)
 
 def fire(event_type, ctx=None):
+    '''发布一个事件'''
     _event_manager.fire(event_type, ctx)
 
 def listen(event_type_list, is_async = False, description = None):
@@ -593,10 +621,16 @@ def listen(event_type_list, is_async = False, description = None):
     def deco(func):
         if isinstance(event_type_list, list):
             for event_type in event_type_list:
-                _event_manager.add_handler(event_type, func, is_async)
+                handler = EventHandler(event_type, func, 
+                    is_async = is_async, 
+                    description = description)
+                _event_manager.add_handler(handler)
         else:
             event_type = event_type_list
-            _event_manager.add_handler(event_type, func, is_async)
+            handler = EventHandler(event_type, func, 
+                is_async = is_async, 
+                description = description)
+            _event_manager.add_handler(handler)
         return func
     return deco
 
