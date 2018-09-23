@@ -1,4 +1,14 @@
 # encoding=utf-8
+# @author xupingmao
+# @since 2017/02/19
+# @modified 2018/09/24 00:07:36
+
+"""代码分析工具，对文本文件进行全文搜索
+
+    2018/09/23 - 支持正则表达式
+    2017/03/26 - 支持查看命中行的上下文
+    2017/02/19 - 第一版简单的搜索
+"""
 import re
 import os
 import xtemplate
@@ -7,7 +17,6 @@ import xconfig
 from xutils import textutil
 from xutils import xhtml_escape, Storage
 
-"""代码分析工具，对文本文件进行全文搜索"""
 
 CODE_EXT_LIST = xconfig.FS_TEXT_EXT_LIST
 
@@ -129,6 +138,7 @@ class FileSearch:
         self.path = path
         self.ignore_case = False
         self.recursive = False
+        self.use_regexp = False
 
     def set_exclude_dirs(self, blacklist_dir):
         path = self.path
@@ -161,15 +171,35 @@ class FileSearch:
             return True
         return False
 
+    def search_by_regexp(self, content, pattern, blacklist, ignore_case):
+        result = []
+        lineno = 1
+        if pattern == "":
+            return result
+
+        lines = content.split("\n")
+        for line in lines:
+            m = pattern.match(line)
+            if m:
+                # line = str(m.groups())
+                result.append(LineInfo(lineno, line, lines))
+            lineno += 1
+        return result
+
     def search_files(self, path, key, blacklist_str, filename, **kw):
         ignore_case = self.ignore_case
         recursive   = self.recursive
         total_lines = 0
+        blacklist   = to_list(blacklist_str)
 
         if key is None or key == "":
             return [], total_lines
         if not os.path.isdir(path):
             raise Exception("%s is not a directory" % path)
+
+        if self.use_regexp:
+            pattern = re.compile(key)
+
         result_list = []
         for root, dirs, files in os.walk(path):
             for fname in files:
@@ -186,7 +216,10 @@ class FileSearch:
                         result=[LineInfo(-1, "read file fail, e=%s" % e, None)]))
                     continue
                 # 查找结果
-                result = code_find(content, key, blacklist_str, 
+                if self.use_regexp:
+                    result = self.search_by_regexp(content, pattern, blacklist, ignore_case)
+                else:
+                    result = code_find(content, key, blacklist_str, 
                     ignore_case=ignore_case)
                 if key != "" and len(result) == 0:
                     # key do not match
@@ -209,27 +242,36 @@ class handler:
         blacklist   = xutils.get_argument("blacklist", "", strip=True)
         filename    = xutils.get_argument("filename", "", strip=True)
         blacklist_dir = xutils.get_argument("blacklist_dir", "")
+        regexp      = xutils.get_argument("regexp", "", strip=True)
         total_lines = 0
         error       = ""
         files       = []
 
         # print(path, blacklist, blacklist_dir, filename)
-        file_search = FileSearch(path)
-        file_search.set_exclude_dirs(blacklist_dir)
+        searcher = FileSearch(path)
+        searcher.set_exclude_dirs(blacklist_dir)
+        if regexp == "on":
+            searcher.use_regexp = True
         if ignore_case == "on":
-            file_search.ignore_case = True
+            searcher.ignore_case = True
         if recursive == "on":
-            file_search.recursive = True
+            searcher.recursive = True
 
         try:
             if path != "":
-                files, total_lines = file_search.search_files(path, key, blacklist, filename);
+                files, total_lines = searcher.search_files(path, key, blacklist, filename);
         except Exception as e:
             error = e
-        return xtemplate.render("code/analyze.html", 
+        return xtemplate.render("code/code_search.html", 
             files = files,
             total_lines = total_lines,
             path = path,
             ignore_case = ignore_case,
             error = error)
+
+xurls = (
+    r"/code/search", handler,
+    r"/code/analyze", handler
+)
+
 

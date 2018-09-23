@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/09/14 00:16:22
+# @modified 2018/09/24 00:11:31
 
 import sys
 import os
@@ -368,6 +368,7 @@ class TestMain(unittest.TestCase):
         self.check_OK("/file/tagname/test")
 
     def test_document(self):
+        self.check_200("/system/modules_info")
         self.check_200("/system/document?name=os")
         self.check_200("/system/document?name=xutils")
 

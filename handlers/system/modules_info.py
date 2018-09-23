@@ -1,13 +1,20 @@
 # encoding=utf-8
+# @author xupingmao
+# @since
+# @modified 2018/09/24 00:18:16
 import six
 import xutils
 import xtemplate
+import sys
 
-sys = xutils.sys
 class ModuleInfo:
-
     def __init__(self, mod, sysname):
-        self.name = mod.__name__
+        try:
+            self.name = mod.__name__
+        except:
+            # getattr判断无效
+            xutils.print_exc()
+            self.name = "Unknown"
         self.sysname = sysname
         self.is_builtin = False
         if hasattr(mod, "__file__"):
