@@ -1,10 +1,9 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/09/17 00:11:02
+# @modified 2018/09/26 00:15:22
 
 """Description here"""
 from io import StringIO
-from xconfig import *
 import xconfig
 import codecs
 import time
@@ -23,6 +22,7 @@ import web
 from xtemplate import BasePlugin
 from xutils import History
 from xutils import cacheutil
+from xutils import Storage
 config = xconfig
 
 def link(name, url):
@@ -84,10 +84,23 @@ def list_plugins():
     if not os.path.isdir(dirname):
         return []
     links = []
-    for name in sorted(os.listdir(dirname)):
+    recent_names = cacheutil.zrange("plugins.history", -50, -1)
+    recent_names.reverse()
+    recent_names = [x + ".py" for x in recent_names]
+    plugins_list = os.listdir(dirname)
+    plugins_list = set(plugins_list) - set(recent_names)
+
+    for name in recent_names + sorted(plugins_list):
+        fpath = os.path.join(dirname, name)
+        if not os.path.exists(fpath):
+            continue
         name, ext = os.path.splitext(name)
         name = xutils.unquote(name)
-        links.append(link(name, "/plugins/" + name))
+        st = os.stat(fpath)
+        item = link(name, "/plugins/" + name)
+        item.atime = xutils.format_date(st.st_atime)
+        item.edit_link = "/code/edit?path=" + fpath
+        links.append(item)
     return links
 
 def list_recent_plugins():

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/09/17 00:30:54
+# @modified 2018/09/24 00:40:37
 
 """短消息"""
 import time
@@ -175,7 +175,7 @@ class DateHandler:
     def GET(self):
         date = xutils.get_argument("date")
         db = xtables.get_message_table()
-        data = db.select(where="ctime LIKE $date AND user=$user", 
+        data = db.select(where="ctime LIKE $date AND user=$user LIMIT 200", 
             vars = dict(date = date + '%', user=xauth.get_current_name()))
         return dict(code="success", data = list(data))
 

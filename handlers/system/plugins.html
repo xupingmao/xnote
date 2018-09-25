@@ -3,8 +3,8 @@
 {% block head %}
     <style type="text/css">
         .item {
-            line-height: 25px;
             float: left;
+            line-height: 25px;
             margin: 3px;
             padding: 3px;
         }
@@ -17,6 +17,23 @@
             width: 45px;
             height: 45px;
         }
+
+        .plugin-name {
+
+        }
+
+        .plugin-time {
+            float: right;
+        }
+
+        .plugin-item {
+            float: left;
+            width: 100%;
+            padding: 5px;
+            margin-top: 0px;
+            margin-bottom: 5px;
+            border: 1px solid #ccc;
+        }
     </style>
 {% end %}
 
@@ -25,6 +42,7 @@
 
     {% init recent = [] %}
 
+<!--
     <div class="col-md-12">
         <div class="grid-title">
             最近使用
@@ -37,11 +55,13 @@
             {% end %}
         </div>
     </div>
+-->
+
+<!--
 
     <div class="col-md-12">
         <div class="grid-title">
             所有插件
-            <!-- <a href="/fs_link/scripts/plugins" class="float-right link">管理</a> -->
         </div>
         <div class="col-md-12">
             {% for link in plugins %}
@@ -51,6 +71,28 @@
             {% end %}
         </div>
     </div>
+-->
+
+<div class="small-device col-md-12">
+    <a class="link" href="/system/new-plugin">新增插件</a>
+    <a class="link" href="/fs_link/scripts/plugins">插件管理</a>
+</div>
+
+<div class="plugin-list">
+    {% for link in plugins %}
+    <div class="plugin-item">
+        <div class="col-md-12">
+            <a href="{{link.link}}">{{link.name}}</a>
+            {% if _is_admin %}
+            <a class="float-right item-option" href="{{link.edit_link}}">编辑</a>
+            {% end %}
+        </div>
+        <div>
+            <span class="plugin-time">{{link.atime}}</span>
+        </div>
+    </div>
+    {% end %}
+</div>
 
 {% end %}
 

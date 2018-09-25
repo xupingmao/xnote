@@ -1125,6 +1125,9 @@ li.menu-item:hover {
     color: #aaa;
 }
 
+.small-device {
+    display: none;
+}
 
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 700px) {
@@ -1149,6 +1152,10 @@ li.menu-item:hover {
     .aside-content li {
         float: left;
         width: auto;
+    }
+
+    .small-device {
+        display: inherit;
     }
 }
 
