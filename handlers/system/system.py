@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/09/26 00:15:22
+# @modified 2018/09/29 23:59:50
 
 """Description here"""
 from io import StringIO
@@ -57,7 +57,7 @@ other_tools = [
     link("代码模板", "/tools/code_template"),
     link("浏览器信息", "/tools/browser_info"),
     link("文本对比", "/tools/js_diff"),
-    link("字符转换", "/tools/string"),
+    link("文本转换", "/tools/text_processor"),
     link("图片合并", "/tools/img_merge"),
     link("图片拆分", "/tools/img_split"),
     link("图像灰度化", "/tools/img2gray"),

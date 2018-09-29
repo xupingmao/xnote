@@ -37,6 +37,7 @@
 {% end %}
 
 {% block body %}
+{% import os %}
 {% init readonly = False %}
 {% init warn = "" %}
 {% init error = "" %}
@@ -52,6 +53,8 @@
 <form method="POST" action="/code/view_source/update">
 <div class="col-md-12">
     <input name="path" class="hide" value="{{path}}"/>
+    <input name="basename" class="hide" value="{{os.path.basename(path)}}"/>
+    <input name="dirname" class="hide" value="{{os.path.dirname(path)}}"/>
     <div id="editorArea" class="col-md-12">
         <textarea name="content" id="editor">{{content}}</textarea>
     </div>
@@ -59,6 +62,7 @@
     <div class="col-md-12 bottom-offset-1">
         {% if not readonly %}
             <input type="submit" value="保存">
+            <input type="button" id="rename" class="btn rename-btn" value="重命名"/>
         {% end %}
         <input id="execute" type="button" class="btn hide" value="执行"/>
         {% if path.endswith(".md") %}
@@ -87,6 +91,28 @@
             height: "500px"
         })
         window.codeMirror = editor;
+
+        // 重命名
+        $(".rename-btn").click(function (event) {
+            var name     = $("[name=basename]").val();
+            var dirname  = $("[name=dirname]").val();
+            var new_name = prompt("重命名为", name);
+            if (new_name) {
+                $.post("/fs_api/rename", 
+                    {dirname: dirname, old_name: name, new_name: new_name}, 
+                    function (resp) {
+                        if (resp.code == "success") {
+                            var location = resp.location;
+                            window.location.href = "/code/edit?path=" + dirname + "/" + new_name;
+                        } else {
+                            showErrorMessage("重命名失败, %s".format(resp.message));
+                        }
+                }).fail(function (resp) {
+                    console.log(resp);
+                    alert("重命名失败");
+                });
+            }
+        })
     });
 </script>
 {% end %}

@@ -36,6 +36,10 @@
         <td id="innerSize"></td>
     </tr>
     <tr>
+        <td>ClientSize</td>
+        <td id="clientSize"></td>
+    </tr>
+    <tr>
         <td>getUserMedia</td>
         <td id="checkGetUserMedia"></td>
     </tr>
@@ -59,6 +63,10 @@
         <td>FormData</td>
         <td type-name="FormData" class="check-support"></td>
     </tr>
+    <tr>
+        <td>Audio</td>
+        <td type-name="Audio" class="check-support"></td>
+    </tr>
 </table>
 </div>
 
@@ -68,6 +76,8 @@ $("#appName").html(navigator.appName);
 $("#appVersion").html(navigator.appVersion);
 $("#vendor").html(navigator.vendor);
 $("#screen").html(screen.width+"x"+screen.height);
+$("#innerSize").text(window.innerWidth + "x" + window.innerHeight);
+$("#clientSize").text(document.body.clientWidth + "x" + document.body.clientHeight);
 $("#checkGetUserMedia").html(navigator.getUserMedia ? navigator.getUserMedia.toString() : undefined);
 $("#checkRTCPeerConnection").html(window.RTCPeerConnection ? window.RTCPeerConnection.toString() : undefined);
 $(document).ready(function () {
@@ -88,6 +98,5 @@ $(document).ready(function () {
         }
     })
 })
-$("#innerSize").text(window.innerWidth + "x" + window.innerHeight);
 </script>
 {% end %}

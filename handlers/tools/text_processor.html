@@ -2,10 +2,20 @@
 {% block head %}
     <script src="/static/js/array.js"></script>
     <script type="text/javascript" src="/static/js/Lexer.js"></script>
+    <style type="text/css">
+        p {
+            float: left;
+            width: 100%;
+            margin: 0px;
+        }
+    </style>
 {% end %}
 
 {% block body %}
-
+<!-- 
+@since 2016/12/18
+@modified 2018/09/30 00:23:21
+-->
 {% set title = "字符串转换" %}
 {% include "tools/base_title.html" %}
 
@@ -482,6 +492,10 @@ function parse_java_func(inputStr, option) {
         <input type="radio" name="case" value="lower"/>小写
     </p>
     <p>
+        <span>正则表达式</span>
+        <textarea id="regexp" class="col-md-12"></textarea>
+    </p>
+    <p>
         转换方式
         <select id="option">
             <option value="to_array">转成数组</option>
@@ -560,9 +574,20 @@ function parse_java_func(inputStr, option) {
         var option = select('#option').value;
         console.log(option);
         var input = getInput();
+        var regexpText = $("#regexp").val();
         try {
             $("#error").hide();
-            var str = window[option](input, new Option());
+            if (regexpText) {
+                var reg = new RegExp(regexpText, "g");
+                var result = reg.exec(input);
+                var str = "";
+                while (result) {
+                    str += "\n" + result[0];
+                    result = reg.exec(input); 
+                }
+            } else {
+                var str = window[option](input, new Option());
+            }
             output(str);
         } catch (e) {
             showError("");
