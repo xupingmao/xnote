@@ -1076,6 +1076,7 @@ li.menu-item:hover {
     width: 100%;
     float: left;
     padding-right: 230px;
+    min-height: 20px;
 }
 
 .aside {

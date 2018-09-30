@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/09/29 23:59:50
+# @modified 2018/09/30 20:54:48
 
 """Description here"""
 from io import StringIO
@@ -38,7 +38,6 @@ sys_tools = [
     link("App管理",   "/fs_link/app"),
     # link("后台模板缓存", "/system/template_cache"),
     link("系统刷新",  "/system/reload"),
-    link("Python解释器", "/system/script/edit?name=test.py"),
     link("Python文档", "/system/modules_info"),
     link("SQL控制台", "/tools/sql"),
     link("启动规则", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT))
@@ -79,35 +78,6 @@ xconfig.MENU_LIST = [
     Storage(name = "工具箱", children = other_tools),
 ]
 
-def list_plugins():
-    dirname = xconfig.PLUGINS_DIR
-    if not os.path.isdir(dirname):
-        return []
-    links = []
-    recent_names = cacheutil.zrange("plugins.history", -50, -1)
-    recent_names.reverse()
-    recent_names = [x + ".py" for x in recent_names]
-    plugins_list = os.listdir(dirname)
-    plugins_list = set(plugins_list) - set(recent_names)
-
-    for name in recent_names + sorted(plugins_list):
-        fpath = os.path.join(dirname, name)
-        if not os.path.exists(fpath):
-            continue
-        name, ext = os.path.splitext(name)
-        name = xutils.unquote(name)
-        st = os.stat(fpath)
-        item = link(name, "/plugins/" + name)
-        item.atime = xutils.format_date(st.st_atime)
-        item.edit_link = "/code/edit?path=" + fpath
-        links.append(item)
-    return links
-
-def list_recent_plugins():
-    items = cacheutil.zrange("plugins.history", -6, -1)
-    links = [dict(name=name, link="/plugins/" + name) for name in items]
-    links.reverse()
-    return links;
                 
 class SysHandler:
 
@@ -143,56 +113,6 @@ class ReloadHandler:
         xmanager.reload()
         import web
         raise web.seeother("/")
-
-class PluginsHandler:
-
-    @xauth.login_required("admin")
-    def GET(self):
-        return xtemplate.render("system/plugins.html", 
-            html_title = "插件",
-            recent = list_recent_plugins(),
-            plugins = list_plugins())
-
-TEMPLATE = '''# -*- coding:utf-8 -*-
-import os
-import re
-import math
-import time
-import web
-import xconfig
-import xutils
-import xauth
-import xmanager
-from xtemplate import BasePlugin
-
-class Main(BasePlugin):
-    
-    def handle(self, input):
-        self.description = """提示内容"""
-        # 输入框的行数
-        self.rows = 20
-        self.title = '插件标题'
-    
-    def command(self):
-        pass
-'''
-
-class NewPluginHandler(BasePlugin):
-    """默认的插件声明入口，定义一个叫做Main的类"""
-
-    def handle(self, input):
-        self.description = '''请输入插件名称'''
-        self.title = '通过模板创建插件'
-        self.rows = 1
-        if input != '':
-            name = os.path.join(xconfig.PLUGINS_DIR, input)
-            if not name.endswith(".py"):
-                name += ".py"
-            if os.path.exists(name):
-                return "文件[%s]已经存在!" % name
-            code = xconfig.get("NEW_PLUGIN_TEMPLATE", TEMPLATE)
-            xutils.savetofile(name, code)
-            raise web.seeother('/code/edit?path=%s' % name)
 
 
 class ConfigHandler:
@@ -240,8 +160,6 @@ xurls = (
     r"/system/system", SysHandler,
     r"/system/reload", ReloadHandler,
     r"/system/xconfig", ConfigHandler,
-    r"/system/plugins", PluginsHandler,
-    r"/system/new-plugin", NewPluginHandler,
     r"/system/user.css", UserCssHandler,
     r"/system/user.js", UserJsHandler,
     r"/system/cache", CacheHandler

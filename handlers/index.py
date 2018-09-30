@@ -1,4 +1,7 @@
 # encoding=utf-8
+# @author xupingmao
+# @since 2017/02/19
+# @modified 2018/09/30 21:00:29
 import web
 import xtables
 import xtemplate
@@ -101,38 +104,6 @@ class FaviconHandler:
     def GET(self):
         raise web.seeother("/static/favicon.ico")
 
-class PluginsHandler:
-
-    def GET(self, name = ""):
-        display_name = xutils.unquote(name)
-        name = xutils.get_real_path(display_name)
-        if not name.endswith(".py"):
-            name += ".py"
-        script_name = "plugins/" + name
-        if not os.path.exists(os.path.join(xconfig.PLUGINS_DIR, name)):
-            error = "file `%s` not found" % script_name
-            return xtemplate.render("error.html", error=error)
-        try:
-            try:
-                cacheutil.zadd("plugins.history", time.time(), os.path.splitext(display_name)[0])
-            except TypeError:
-                cacheutil.delete("plugins.history")
-                cacheutil.zadd("plugins.history", time.time(), os.path.splitext(display_name)[0])
-            vars = dict()
-            vars["script_name"] = script_name
-            xutils.load_script(script_name, vars)
-            main_class = vars.get("Main")
-            if main_class != None:
-                return main_class().render()
-            else:
-                return xtemplate.render("error.html", error="class `Main` not found!")
-        except:
-            error = xutils.print_exc()
-            return xtemplate.render("error.html", error=error)
-
-    def POST(self, name = ""):
-        return self.GET(name)
-
 xurls = (
     r"/", "handlers.note.group.RecentEditHandler", 
     r"/index", IndexHandler,
@@ -140,7 +111,6 @@ xurls = (
     r"/more", GridHandler,
     # r"/system/index", GridHandler,
     r"/unauthorized", Unauthorized,
-    r"/favicon.ico", FaviconHandler,
-    r"/plugins/(.+)", PluginsHandler
+    r"/favicon.ico", FaviconHandler
 )
 
