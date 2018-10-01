@@ -53,7 +53,7 @@ h1,h2,h3 {
 .col-md-9{float:left;width:75%;}
 .col-md-10{float:left;width:83.3%;}
 .col-md-11{float:left;width:91.7%;}
-.col-md-12,.row{float:left;width:100%;overflow:auto;}
+.col-md-12{float:left;width:100%;}
 .col-md-offset-12{margin-left:100%;}
 .col-md-offset-11{margin-left:91.66666666666666%;}
 .col-md-offset-10{margin-left:83.33333333333334%;}
@@ -70,6 +70,7 @@ h1,h2,h3 {
 .top-offset-1{margin-top:1em;}
 .top-offset-2{margin-top:2em;}
 .bottom-offset-1{margin-bottom:5px;}
+.row{float: left;width: 100%;overflow: auto;}
 
 
 /** 标题样式 **/
