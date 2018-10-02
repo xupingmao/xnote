@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/09/24 00:40:37
+# @modified 2018/10/02 16:09:01
 
 """短消息"""
 import time
@@ -29,6 +29,15 @@ def count_message(user, status):
     count = xtables.get_message_table().count(where="user=$user AND status=$status",
         vars = dict(user = user, status = status))
     return count
+
+def get_status_by_code(code):
+    if code == "created":
+        return 0
+    if code == "suspended":
+        return 50
+    if code == "done":
+        return 100
+    return 0
 
 class ListHandler:
 
@@ -145,6 +154,7 @@ class SaveHandler:
     def POST(self):
         id        = xutils.get_argument("id")
         content   = xutils.get_argument("content")
+        status    = xutils.get_argument("status")
         user_name = xauth.get_current_name()
         db = xtables.get_message_table()
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
@@ -156,7 +166,7 @@ class SaveHandler:
             ctime = xutils.get_argument("date", xutils.format_datetime())
             inserted_id = db.insert(content = content, 
                 user   = user_name, 
-                status = 0,
+                status = get_status_by_code(status),
                 mtime  = ctime,
                 ctime  = ctime)
             id = inserted_id
@@ -202,6 +212,7 @@ xurls=(
     r"/file/message/update", SaveHandler,
     r"/file/message/finish", FinishMessage,
     r"/file/message/open", OpenMessage,
+    r"/message/add", SaveHandler,
     r"/message/status", UpdateStatusHandler,
     r"/message/list", ListHandler,
     r"/file/message/date", DateHandler,

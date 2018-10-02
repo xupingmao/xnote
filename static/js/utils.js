@@ -1,18 +1,19 @@
+// @author xupingmao
+// @since 2017/08/16
+// @modified 2018/10/02 16:06:53
+
 /**
  * 获取请求参数
  */
-var getUrlParams = function()
-{
+var getUrlParams = function() {
     var params = {};
     var url = window.location.href;
     url = url.split("#")[0];
     var idx = url.indexOf("?");
-    if(idx > 0)
-    {
+    if(idx > 0) {
         var queryStr = url.substring(idx + 1);
         var args = queryStr.split("&");
-        for(var i = 0, a, nv; a = args[i]; i++)
-        {
+        for(var i = 0, a, nv; a = args[i]; i++) {
             nv = args[i] = a.split("=");
             if (nv.length > 1) {
                 var value = nv[1];
@@ -28,6 +29,7 @@ var getUrlParams = function()
     return params;
 };
 
+/** 根据key获取url参数值 **/
 var getUrlParam = function (key) {
     return getUrlParams()[key];
 }

@@ -251,16 +251,21 @@
                     return;
                 }
                 var self = this;
-                $.post("/file/message/add", {content:self.input}, function (respText) {
-                    var data = respText;
-                    if (data.code == "success") {
-                        var msg = wrapMessage(data.data);
-                        self.messageList.push(msg);
-                        self.input = "";
-                    } else {
-                        alert(data.message);
-                    }
-                    app.refreshMessage();
+                $.post("/message/add", 
+                    {
+                        content:self.input, 
+                        status: getUrlParam("status")
+                    },
+                    function (respText) {
+                        var data = respText;
+                        if (data.code == "success") {
+                            var msg = wrapMessage(data.data);
+                            self.messageList.push(msg);
+                            self.input = "";
+                        } else {
+                            alert(data.message);
+                        }
+                        app.refreshMessage();
                 }).fail(function (data) {
 
                 })

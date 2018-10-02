@@ -1,8 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# 
-
-"""Description here"""
+# @modified 2018/10/02 17:39:03
 import re
 import xmanager
 import xutils

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/10/01 12:36:15
+# @modified 2018/10/02 20:07:43
 import os
 import json
 import web
@@ -151,6 +151,7 @@ class BasePlugin:
         self.page_url        = "?page="
         self.aside_html      = ""
         self.option_links    = []
+        self.show_aside      = True
 
     def add_option_link(name, url):
         self.option_links.append(dict(name=name, url = url))
@@ -202,6 +203,7 @@ class BasePlugin:
             input       = input, 
             output      = self.output + output,
             css_style   = self.css_style,
+            show_aside  = self.show_aside,
             html        = self.html)
 
     def on_install(self, context=None):

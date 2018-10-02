@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-  
-# Created by xupingmao on 2017/06/11 
+# Created by xupingmao on 2017/06/11
+# @modified 2018/10/02 17:40:02
 
 """
 英汉、汉英词典

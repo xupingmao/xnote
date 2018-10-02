@@ -9,10 +9,6 @@
             padding: 3px;
         }
 
-        /*.item:hover {
-            background-color: #eee;
-        }*/
-
         .logo {
             width: 45px;
             height: 45px;
@@ -103,8 +99,11 @@
         选项
     </div>
     <div class="aside-content">
-        <li><a class="link" href="/plugins_new">新增插件</a></li>
-        <li><a href="/fs_link/scripts/plugins" class="link">插件管理</a></li>
+        <ul>
+            <li>插件数: {{len(plugins)}}</li>
+            <li><a class="link" href="/plugins_new">新增插件</a></li>
+            <li><a href="/fs_link/scripts/plugins" class="link">插件管理</a></li>
+        </ul>
     </div>
 </div>
 {% end %}

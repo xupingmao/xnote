@@ -357,7 +357,19 @@ table td {
     padding-top: 3px;
 }
 
-/** 笔记列表样式 **/
+/** 笔记样式 **/
+.note-menu {
+    width: 100%;
+    float: left;
+    border: 1px solid #ccc;
+}
+
+.note-menu h1 {
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+}
+
 .note-head {
     font-size: 20px;
 }
@@ -626,7 +638,7 @@ li.menu-item:hover {
     color: #000;
 }
 
-/** file-list样式 **/
+/** note-list样式 **/
 .tool-div {
     font-size: medium;
 }
@@ -664,6 +676,26 @@ li.menu-item:hover {
 .note-name a {
     font-size: medium;
     color: blue;
+}
+
+.note-title {
+    width: 100%;
+    float: left;
+}
+
+.note-info {
+    width: 100%;
+    float: left;
+}
+
+.note-info span {
+    display: inline-block;
+    padding-top: 2px;
+}
+
+.note-time {
+    font-size: 12px;
+    color: #aaa;
 }
 
 .note-content-short {
@@ -1108,6 +1140,11 @@ li.menu-item:hover {
 
 .aside-content {
     margin: 5px;
+}
+
+.aside-content ul {
+    margin: 0px;
+    padding: 0px;
 }
 
 .aside-content li {

@@ -189,7 +189,9 @@
         if (myRenderer.headings.length==0) {
             return outtext;
         }
-        var menuText = "<h1>目录</h1>";
+
+        // 处理目录
+        var menuText = '<div class="note-menu"><h1>目录</h1>';
         menuText+="<ul>";
         for (var i = 0; i < myRenderer.headings.length; i++) {
             var heading = myRenderer.headings[i];
@@ -208,7 +210,7 @@
                 }
             });
         }
-        menuText+="</ul>";
+        menuText+="</ul></div>";
         outtext = menuText + outtext;
         return outtext;
     }
