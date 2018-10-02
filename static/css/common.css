@@ -139,7 +139,8 @@ a:hover {
 }
 
 .selected-link {
-    border-bottom: 2px solid red;
+    /*border-bottom: 2px solid red;*/
+    color: red;
 }
 
 /* 高对比度link */

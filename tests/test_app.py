@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/09/24 00:11:31
+# @modified 2018/10/02 13:42:27
 
 import sys
 import os
@@ -152,6 +152,9 @@ class TestMain(unittest.TestCase):
             data=dict(id=id, content="new-content"))
         json_request("/note/remove?id=" + str(id))
 
+    def test_note_timeline(self):
+        self.check_200("/note/timeline")
+
     def test_file_editor_md(self):
         json_request("/file/remove?name=xnote-md-test")
         file = json_request("/file/add", method="POST",
@@ -216,6 +219,9 @@ class TestMain(unittest.TestCase):
 
     def test_file_dict(self):
         json_request("/file/dict?_format=json")
+
+    def test_dict(self):
+        self.check_200("/file/dict")
 
     def test_fs(self):
         self.check_200("/fs//")
@@ -366,6 +372,9 @@ class TestMain(unittest.TestCase):
 
     def test_tagname(self):
         self.check_OK("/file/tagname/test")
+
+    def test_taglist(self):
+        self.check_OK("/file/taglist")
 
     def test_document(self):
         self.check_200("/system/modules_info")

@@ -46,6 +46,8 @@ def on_search_scripts(ctx):
         return None
     if not ctx.search_tool:
         return
+    if ctx.search_dict:
+        return
     name    = ctx.key
     results = search_plugins(name)
     results += search_scripts(name)

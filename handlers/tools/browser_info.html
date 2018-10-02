@@ -44,8 +44,12 @@
         <td id="checkGetUserMedia"></td>
     </tr>
     <tr>
+        <td>geolocation</td>
+        <td id="checkGeolocation"></td>
+    </tr>
+    <tr>
         <td>RTCPeerConnection</td>
-        <td id="checkRTCPeerConnection"></td>
+        <td type-name="RTCPeerConnection" class="check-support"></td>
     </tr>
     <tr>
         <td>Worker</td>
@@ -67,6 +71,15 @@
         <td>Audio</td>
         <td type-name="Audio" class="check-support"></td>
     </tr>
+    <tr>
+        <td>Notification</td>
+        <td type-name="Notification" class="check-support"></td>
+    </tr>
+    <tr>
+        <td>DeviceOrientationEvent</td>
+        <td type-name="DeviceOrientationEvent" class="check-support"></td>
+    </tr>
+
 </table>
 </div>
 
@@ -78,8 +91,8 @@ $("#vendor").html(navigator.vendor);
 $("#screen").html(screen.width+"x"+screen.height);
 $("#innerSize").text(window.innerWidth + "x" + window.innerHeight);
 $("#clientSize").text(document.body.clientWidth + "x" + document.body.clientHeight);
-$("#checkGetUserMedia").html(navigator.getUserMedia ? navigator.getUserMedia.toString() : undefined);
-$("#checkRTCPeerConnection").html(window.RTCPeerConnection ? window.RTCPeerConnection.toString() : undefined);
+$("#checkGetUserMedia").html(navigator.getUserMedia ? "Support" : "Unsupport");
+$("#checkGeolocation").html(navigator.geolocation ? "Support" : "Unsupport");
 $(document).ready(function () {
     $(".check-item").each(function (index) {
         var typeName = $(this).attr("type-name");
@@ -93,8 +106,10 @@ $(document).ready(function () {
         var typeName = $(this).attr("type-name");
         console.log(index + ":" + typeName);
         console.log(window[typeName]);
-        if (typeof window[typeName]) {
+        if (typeof window[typeName] != "undefined") {
             $(this).html("Support");
+        } else {
+            $(this).html("Unsupport");
         }
     })
 })

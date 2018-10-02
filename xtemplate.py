@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/09/17 23:51:03
+# @modified 2018/10/01 12:36:15
 import os
 import json
 import web
@@ -204,15 +204,15 @@ class BasePlugin:
             css_style   = self.css_style,
             html        = self.html)
 
-    def on_install(self):
+    def on_install(self, context=None):
         """安装插件事件, TODO"""
         pass
 
-    def on_uninstall(self):
+    def on_uninstall(self, context=None):
         """卸载插件事件, TODO"""
         pass
 
-    def on_init(self):
+    def on_init(self, context=None):
         """系统初始化事件"""
         pass
 

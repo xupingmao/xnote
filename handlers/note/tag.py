@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/09/03 23:55:47
+# @modified 2018/10/02 12:09:58
 import math
 import xutils
 import xtemplate
@@ -77,10 +77,10 @@ class TagNameHandler:
             vars=dict(name=tagname.lower(), offset=offset, limit=limit, user=user_name))
         files = [dao.FileDO.fromDict(f) for f in files]
         return xtemplate.render("note/tagname.html", 
-            tagname  =tagname, 
-            files    =files, 
-            page_max =math.ceil(count / pagesize), 
-            page     =page)
+            tagname  = tagname, 
+            files    = files, 
+            page_max = math.ceil(count / pagesize), 
+            page     = page)
 
 # @xutils.cache(key="tag.get_taglist", expire=60)
 def get_taglist(db, user_name=None):

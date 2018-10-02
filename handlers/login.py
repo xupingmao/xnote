@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/09/09 21:11:35
+# @modified 2018/10/02 12:03:02
 import web
 import time
 import hashlib
@@ -34,6 +34,8 @@ class handler:
         users = xauth.get_users()
         error = ""
         count = cacheutil.get("login.fail.count#%s" % name, 0)
+        name  = name.strip()
+        pswd  = pswd.strip()
         if count >= RETRY_LIMIT:
             error = "重试次数过多"
         elif name in users:

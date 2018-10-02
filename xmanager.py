@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/09/22 23:44:24
+# @modified 2018/10/01 12:35:08
 
 """
 Xnote 模块管理器
@@ -565,6 +565,14 @@ def load_init_script():
             xutils.print_exc()
             print("Failed to execute script %s" % xconfig.INIT_SCRIPT)
 
+class PluginInitContext:
+
+    def __init__(self):
+        self.name = None
+
+    def set_name(self, name):
+        self.name = name
+
 def load_plugins(dirname):
     if not xconfig.LOAD_PLUGINS_ON_INIT:
         return
@@ -575,11 +583,12 @@ def load_plugins(dirname):
             vars = dict()
             vars["script_name"] = script_name
             try:
-                xutils.load_script(script_name, vars)
+                module = xutils.load_script(script_name, vars)
                 main_class = vars.get("Main")
                 if main_class != None:
                     if hasattr(main_class, 'on_init'):
-                        main_class().on_init()
+                        context = PluginInitContext()
+                        main_class().on_init(context)
             except:
                 xutils.print_exc()
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/09/16 11:09:40
+# @modified 2018/10/02 11:27:58
 
 import profile
 import math
@@ -62,6 +62,7 @@ class ViewHandler:
         role            = xauth.get_current_role()
 
         # 定义一些变量
+        show_mdate     = False
         files          = []
         recent_created = []
         amount         = 0
@@ -86,6 +87,7 @@ class ViewHandler:
             content         = file.content
             show_search_div = True
             show_add_file   = True
+            show_mdate      = True
             # recent_created  = xutils.call("note.list_recent_created", file.id, 10)
         elif file.type == "md" or file.type == "text":
             content = file.content
@@ -109,6 +111,7 @@ class ViewHandler:
             html_title    = title,
             file          = file, 
             op            = op,
+            show_mdate    = show_mdate,
             show_add_file = show_add_file,
             can_edit = can_edit,
             pathlist = pathlist,

@@ -1,5 +1,7 @@
 # encoding=utf-8
-
+# @author xupingmao
+# @since 2017/02/19
+# @modified 2018/10/02 12:08:38
 import os
 import web
 import re
@@ -7,7 +9,6 @@ import xconfig
 import xauth
 import xtemplate
 import xutils
-
 from collections import OrderedDict
 
 CODE_EXT_LIST = xconfig.FS_TEXT_EXT_LIST
