@@ -1,5 +1,13 @@
 {% extends base.html %}
 
+{% block head %}
+<style type="text/css">
+#canvas {
+    max-width: 100%;
+}
+</style>
+{% end %}
+
 {% block body %}
 
 <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
@@ -10,13 +18,23 @@
 <div id="app">
     <input type="file" name="file" id="file" value="选择图片" onchange="handleFiles(this.files)" class="hide" multiple="multiple">
     <div class="col-md-12">
-        列数<input type="text" id="cols" value="4"><br/>
-        行数<input type="text" id="rows" value="4">
-        <p>选择第<input type="text" id="selectedPart" value="1">张</p>
-        <p>
+        <div>
+            <label class="label">列数</label>
+            <input type="text" id="cols" value="4">
+        </div>
+        <div>
+            <label class="label">行数</label>
+            <input type="text" id="rows" value="4">
+        </div>
+        <div>
+            <label class="label">选择第</label>
+            <input type="text" id="selectedPart" value="1">张
+        </div>
+        <div>
+            <button id="selectFile">选择文件</button>
             <button id="splitBtn">分割</button>
             <button id="extractBtn">提取</button>
-        </p>
+        </div>
     </div>
 
     <div id="inputImageDiv" class="col-md-12">
@@ -28,9 +46,8 @@
     </div>
 </div>
 <div class="col-md-12">
-<h4>说明</h4>
-<p>点击画布可以选择图片进行分割</p>
-<p>设置列数和行数都为1可以用来调整图片大小</p>
+    <h4>说明</h4>
+    <p>点击画布可以选择图片进行分割,设置列数和行数都为1可以用来调整图片大小</p>
 </div>
 
 <script type="text/javascript">
@@ -132,10 +149,38 @@ $("#splitBtn").on("click", function (event) {
     splitImage(window.selectedImg);
 });
 
-$("#canvas").on("click", function (event) {
+$("#selectFile").on("click", function (event) {
     console.log(event);
     $("#file").click();
-})
+});
+
+$("#canvas").on("click", function (event) {
+    if (!window.selectedImg) {
+        return;
+    }
+    var cols = getCols();
+    var rows = getRows();
+
+    var x = event.offsetX;
+    var y = event.offsetY;
+
+    console.log(x, y);
+    var cssWidth = $("#canvas").width() / cols;
+    var cssHeight = $("#canvas").height() / rows;
+
+    var realWidth = $("#canvas")[0].width / cols;
+    var realHeight = $("#canvas")[0].height / rows;
+
+    x = parseInt(x / cssWidth) * realWidth;
+    y = parseInt(y / cssHeight) * realHeight;
+
+    $("#extractCanvas").removeClass('hide');
+    var canvas = $("#extractCanvas")[0];
+    var ctx = $("#extractCanvas")[0].getContext('2d');
+    canvas.width = realWidth;
+    canvas.height = realHeight;
+    ctx.drawImage(window.selectedImg, x, y, realWidth, realHeight, 0, 0, realWidth, realHeight);
+});
 
 $("#extractBtn").on("click", function (event) {
     $("#extractCanvas").removeClass("hide");

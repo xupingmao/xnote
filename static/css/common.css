@@ -1,3 +1,10 @@
+/*
+统一的样式库
+@author xupingmao
+@since 2017/12/16
+@modified 2018/10/03 17:10:00
+*/
+
 * {
     box-sizing: border-box;
 }
@@ -85,6 +92,12 @@ h1,h2,h3 {
     border-left: 5px solid #039BE5;
 }
 
+
+/** label **/
+.label {
+    display: inline-block;
+    width: 100px;
+}
 
 /** 链接样式 **/
 a {

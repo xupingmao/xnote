@@ -1,5 +1,18 @@
 {% extends base.html %}
 
+{% block head %}
+
+<style type="text/css">
+
+label {
+    display: inline-block;
+    width: 100px;
+}
+
+</style>
+
+{% end %}
+
 {% block body %}
 
 <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
@@ -8,24 +21,30 @@
     {% set title = "图片合并" %}
     {% include "tools/base_title.html" %}
 
-    <p>点击画布上的方块可以选择图片填充，选择多个图片依次水平往后填充, 编辑完成之后点击预览按钮可以获取去除背景和方格的图片</p>
-    <p>设置列数和行数都为1可以用来调整图片大小</p>
+    <p>
+        点击画布上的方块可以选择图片填充，选择多个图片依次水平往后填充,
+        编辑完成之后点击预览按钮可以获取去除背景和方格的图片，设置列数和行数都为1可以用来调整图片大小,
+        右键图片进行保存
+    </p>
 </div>
 
 <div id="app">
     <input type="file" name="file" id="file" value="选择图片" onchange="handleFiles(this.files)" class="hide" multiple="multiple">
     <div class="col-md-12">
-        列数<input type="text" id="cols" value="4">
+            <label>列数</label>
+            <input type="text" id="cols" value="4">
         <br/>
-        行数<input type="text" id="rows" value="4">
+            <label>行数</label>
+            <input type="text" id="rows" value="4">
         <br/>
-        每帧宽度<input type="text" id="width" value="64">
+            <label>每帧宽度</label>
+            <input type="text" id="width" value="64">
         <br/>
-        每帧高度<input type="text" id="height" value="64">
+            <label>每帧高度</label>
+            <input type="text" id="height" value="64">
         <p>
             <button id="createCanvasBtn">创建画布</button>
             <button id="toggleResult">预览</button>
-            <button id="downloadFile">下载</button>
         </p>
     </div>
 
@@ -36,14 +55,15 @@
         <canvas id="canvas"></canvas>
         <canvas id="realCanvas" class="hide"></canvas>
     </div>
-</div>
 
-<a id="downloadLink" class="hide">image.png</a>
+    <img id="targetImage" class="hide">
+</div>
 
 <script type="text/javascript">
 
 var globals = {};
 
+// @deprecated 此方法已废弃
 function repaint(images) {
     if (images.length == 0) {
         return;
@@ -81,6 +101,8 @@ function handleFiles(files) {
             var file = files[i];  
             var reader = new FileReader();  
             var img = $("<img>");
+
+            // 创建URL对象
             var url = window.URL.createObjectURL(file)
             console.log(url);
             (function (url, index) {            
@@ -90,8 +112,7 @@ function handleFiles(files) {
                 img.onload = function(event)  {  
                     // document.getElementById("filecontent").innerHTML = this.result;  
                     var img = event.target;
-                    console.log(event);
-                    console.log(img);
+                    // console.log(event);
                     ctx.drawImage(img, 0, 0, img.width, img.height, 
                         startX + index * getFrameWidth(), startY, getFrameWidth(), getFrameHeight());
                     realCtx.drawImage(img, 0, 0, img.width, img.height, 
@@ -100,6 +121,12 @@ function handleFiles(files) {
             })(url, i);
             // reader.readAsDataURL();
         }
+
+        // 生成下载链接
+        // Chrome报错 Not allowed to navigate top frame to data URL
+        // var canvas = $("#canvas")[0];
+        // console.log(canvas.toDataURL("image/png"));
+        // $("#downloadLink").attr("href", canvas.toDataURL("image/png"));
     }
   }  
 
@@ -168,14 +195,18 @@ $("#canvas").on("click", function (event) {
 })
 
 $("#toggleResult").on("click", function (event) {
-    if ($("#realCanvas").hasClass("hide")) {
-        $("#realCanvas").removeClass("hide");
-        $("#canvas").addClass("hide");
+    var canvas = $("#realCanvas")[0];
+    if ($("#canvas").hasClass('hide')) {
+        // 预览 -> 编辑
+        $("#canvas").removeClass("hide");
         $("#toggleResult").text("编辑");
     } else {
-        $("#canvas").removeClass("hide");
-        $("#realCanvas").addClass("hide");
+        // 编辑 -> 预览
+        $("#targetImage").addClass('hide');
+        $("#canvas").addClass("hide");
         $("#toggleResult").text("预览");
+        // 生成图片
+        $("#targetImage").attr("src", canvas.toDataURL()).removeClass('hide');
     }
 });
 
@@ -205,9 +236,10 @@ function base64Img2Blob(code){
 }
 function downloadFile(fileName, url){
     try {
+        console.log(fileName, url)
         // url = url.replace("image/png", "application/octet-stream");
-        window.location.href = url;
-        // window.open(url, "image.png");
+        // window.location.href = url;
+        window.open(url, fileName);
         // var aLink = document.createElement('a');
         // var aLink = $("#downloadLink")[0];
         // var evt = document.createEvent("HTMLEvents");
