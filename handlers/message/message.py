@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/10/02 16:09:01
+# @modified 2018/10/03 10:47:27
 
 """短消息"""
 import time
@@ -194,6 +194,7 @@ class MessageHandler:
     @xauth.login_required()
     def GET(self):
         return xtemplate.render("message/message.html", 
+            category           = "message",
             search_action      = "/message", 
             html_title         = "提醒",
             search_placeholder = "搜索提醒信息",

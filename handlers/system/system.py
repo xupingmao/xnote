@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/09/30 20:54:48
+# @modified 2018/10/03 10:49:08
 
 """Description here"""
 from io import StringIO
@@ -49,7 +49,7 @@ doc_tools = [
     link("词典", "/file/dict"),
     link("提醒", "/message?status=created"),
     link("最近更新", "/file/recent_edit"),
-    link("日历", "/tools/date"),
+    link("日历", "/message/calendar"),
 ] 
 
 other_tools = [

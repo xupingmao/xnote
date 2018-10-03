@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/10/02 20:07:43
+# @modified 2018/10/03 09:50:54
 import os
 import json
 import web
@@ -151,7 +151,7 @@ class BasePlugin:
         self.page_url        = "?page="
         self.aside_html      = ""
         self.option_links    = []
-        self.show_aside      = True
+        self.show_aside      = False
 
     def add_option_link(name, url):
         self.option_links.append(dict(name=name, url = url))
@@ -189,6 +189,9 @@ class BasePlugin:
             if self.get_format() == "text":
                 web.header("Content-Type", "text/plain; charset:utf-8")
                 return self.output + output
+            # 处理侧边栏显示
+            if self.aside_html != None or len(self.option_links) > 0:
+                self.show_aside = True
         except:
             error = xutils.print_exc()
         return render("plugins/text.html",

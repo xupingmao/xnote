@@ -36,6 +36,7 @@
             text = text.replace(/\n/gi, "<br>");
             $("#content").html(text);
             $("#progress").text((resp.current/resp.size*100).toFixed(2) + "%");
+            $("#content").scrollTop(0);
             // 先前进，再读这一章节
             if (read == "true") {
                 // read 永远是当前章节
