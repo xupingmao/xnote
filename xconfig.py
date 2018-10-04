@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/09/16 23:57:56
+# @modified 2018/10/04 20:05:29
 
 '''
 xnote系统配置
@@ -41,7 +41,7 @@ DEBUG              = False
 DEBUG_HTML_BOX     = False
 PORT               = "1234"
 SITE_HOME          = None
-minthreads         = 10
+MIN_THREADS        = 10
 # 打开浏览器
 OPEN_IN_BROWSER    = False
 # 启用数据库的缓存搜索
@@ -53,7 +53,10 @@ INIT_SCRIPT        = "init.py"
 # 记录位置信息，可通过脚本配置打开
 RECORD_LOCATION    = False
 BASE_TEMPLATE      = "base2.html"
+
+# 插件相关
 LOAD_PLUGINS_ON_INIT = True
+PLUGINS = {}
 
 # 菜单配置
 MENU_LIST = []

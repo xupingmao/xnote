@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/09/30 21:04:38
+# @modified 2018/10/04 21:12:30
 from io import StringIO
 import xconfig
 import codecs
@@ -37,16 +37,20 @@ def list_plugins():
     plugins_list = os.listdir(dirname)
     plugins_list = set(plugins_list) - set(recent_names)
 
-    for name in recent_names + sorted(plugins_list):
-        fpath = os.path.join(dirname, name)
+    for fname in recent_names + sorted(plugins_list):
+        fpath = os.path.join(dirname, fname)
         if not os.path.exists(fpath):
             continue
-        name, ext = os.path.splitext(name)
+        name, ext = os.path.splitext(fname)
         name = xutils.unquote(name)
         st = os.stat(fpath)
         item = link(name, "/plugins/" + name)
         item.atime = xutils.format_date(st.st_atime)
         item.edit_link = "/code/edit?path=" + fpath
+        plugin_context = xconfig.PLUGINS.get(fname)
+        item.title = ''
+        if plugin_context is not None:
+            item.title = plugin_context.title
         links.append(item)
     return links
 
@@ -55,6 +59,28 @@ def list_recent_plugins():
     links = [dict(name=name, link="/plugins/" + name) for name in items]
     links.reverse()
     return links;
+
+def load_plugin(name):
+    try:
+        display_name = xutils.unquote(name)
+        cacheutil.zadd("plugins.history", time.time(), os.path.splitext(display_name)[0])
+    except TypeError:
+        cacheutil.delete("plugins.history")
+        cacheutil.zadd("plugins.history", time.time(), os.path.splitext(display_name)[0])
+ 
+    context = xconfig.PLUGINS.get(name)
+    if context is None:
+        script_name = "plugins/" + name
+        if not os.path.exists(os.path.join(xconfig.PLUGINS_DIR, name)):
+            error = "file `%s` not found" % script_name
+            return xtemplate.render("error.html", error=error)
+        vars = dict()
+        vars["script_name"] = script_name
+        xutils.load_script(script_name, vars)
+        main_class = vars.get("Main")
+        return main_class
+    else:
+        return context.clazz
 
 class PluginsListHandler:
 
@@ -113,20 +139,8 @@ class PluginsHandler:
         name = xutils.get_real_path(display_name)
         if not name.endswith(".py"):
             name += ".py"
-        script_name = "plugins/" + name
-        if not os.path.exists(os.path.join(xconfig.PLUGINS_DIR, name)):
-            error = "file `%s` not found" % script_name
-            return xtemplate.render("error.html", error=error)
         try:
-            try:
-                cacheutil.zadd("plugins.history", time.time(), os.path.splitext(display_name)[0])
-            except TypeError:
-                cacheutil.delete("plugins.history")
-                cacheutil.zadd("plugins.history", time.time(), os.path.splitext(display_name)[0])
-            vars = dict()
-            vars["script_name"] = script_name
-            xutils.load_script(script_name, vars)
-            main_class = vars.get("Main")
+            main_class = load_plugin(name)
             if main_class != None:
                 return main_class().render()
             else:

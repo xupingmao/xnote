@@ -1,5 +1,6 @@
 # encoding=utf-8
-# @modified 2018/09/03 01:29:35
+# @since 2016/12/04
+# @modified 2018/10/04 19:15:01
 """
     Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -37,7 +38,6 @@ from xutils import *
 from autoreload import AutoReloadThread
 
 config = xconfig
-
 DEFAULT_PORT = "1234"
 
 def handle_args():
@@ -85,9 +85,9 @@ def handle_args():
     if args.test == "yes":
         xconfig.IS_TEST = True
 
-    xconfig.minthreads = int(args.minthreads)
+    xconfig.MIN_THREADS = int(args.minthreads)
     xconfig.INIT_SCRIPT = args.initScript
-    web.config.minthreads = xconfig.minthreads
+    web.config.minthreads = xconfig.MIN_THREADS
 
 
 def main():

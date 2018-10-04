@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/10/01 12:35:08
+# @modified 2018/10/04 20:57:48
 
 """
 Xnote 模块管理器
@@ -565,17 +565,17 @@ def load_init_script():
             xutils.print_exc()
             print("Failed to execute script %s" % xconfig.INIT_SCRIPT)
 
-class PluginInitContext:
+class PluginContext:
 
     def __init__(self):
-        self.name = None
+        self.title = ""
+        self.description = ""
 
-    def set_name(self, name):
-        self.name = name
 
 def load_plugins(dirname):
     if not xconfig.LOAD_PLUGINS_ON_INIT:
         return
+    xconfig.PLUGINS = {}
     for fname in os.listdir(dirname):
         fpath = os.path.join(dirname, fname)
         if os.path.isfile(fpath) and fname.endswith(".py"):
@@ -586,9 +586,13 @@ def load_plugins(dirname):
                 module = xutils.load_script(script_name, vars)
                 main_class = vars.get("Main")
                 if main_class != None:
+                    instance = main_class()
+                    context = PluginContext()
                     if hasattr(main_class, 'on_init'):
-                        context = PluginInitContext()
-                        main_class().on_init(context)
+                        instance.on_init(context)
+                        context.title = getattr(instance, "title", "")
+                    context.clazz = main_class
+                    xconfig.PLUGINS[fname] = context
             except:
                 xutils.print_exc()
 

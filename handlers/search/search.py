@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/09/18 23:26:37
+# @modified 2018/10/03 19:01:11
 
 import re
 import os
@@ -150,7 +150,7 @@ class handler:
         limit    = pagesize
 
         if key == "" or key == None:
-            return xtemplate.render("search_result.html", 
+            return xtemplate.render("search/search_result.html", 
                 category = category, 
                 files    = [], 
                 count    = 0)
@@ -158,7 +158,7 @@ class handler:
         count = len(files)
         files = files[offset:offset+limit]
         fill_note_info(files)
-        return xtemplate.render("search_result.html", 
+        return xtemplate.render("search/search_result.html", 
             category = category,
             files    = files, 
             title    = title,
