@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/10/04 21:12:30
+# @modified 2018/10/04 21:30:41
 from io import StringIO
 import xconfig
 import codecs
@@ -110,6 +110,10 @@ class Main(BasePlugin):
         # 输入框的行数
         self.rows = 20
         self.title = '插件标题'
+
+    def on_init(self, context=None):
+        # 插件初始化操作
+        self.title = 'PluginName'
     
     def command(self):
         pass
@@ -121,6 +125,7 @@ class NewPluginHandler(BasePlugin):
     def handle(self, input):
         self.description = '''请输入插件名称'''
         self.title = '通过模板创建插件'
+        self.btn_text = '创建'
         self.rows = 1
         if input != '':
             name = os.path.join(xconfig.PLUGINS_DIR, input)
