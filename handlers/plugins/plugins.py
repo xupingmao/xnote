@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/10/04 21:30:41
+# @modified 2018/10/04 22:03:33
 from io import StringIO
 import xconfig
 import codecs
@@ -104,16 +104,17 @@ import xmanager
 from xtemplate import BasePlugin
 
 class Main(BasePlugin):
+
+    title = "PluginName"
+    description = """提示内容"""
     
     def handle(self, input):
-        self.description = """提示内容"""
         # 输入框的行数
         self.rows = 20
-        self.title = '插件标题'
 
     def on_init(self, context=None):
         # 插件初始化操作
-        self.title = 'PluginName'
+        pass
     
     def command(self):
         pass

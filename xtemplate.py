@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/10/04 18:27:17
+# @modified 2018/10/04 22:03:46
 import os
 import json
 import web
@@ -135,16 +135,17 @@ def reload():
 class BasePlugin:
     """插件的基类"""
 
+    # 插件的标题
+    title = "PluginName"
+    description = ""
+
     def __init__(self):
         # 输入框的行数
-        self.rows            = 20
-        # 插件的标题
-        self.title           = "BasePlugin"
+        self.rows            = 20    
         self.btn_text        = "处理"
         # 提交请求的方法
         self.method          = "POST"
         self.output          = ""
-        self.description     = ""
         self.html            = ""
         self.css_style       = ""
         self.show_pagenation = False
