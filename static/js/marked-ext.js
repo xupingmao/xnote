@@ -191,7 +191,7 @@
         }
 
         // 处理目录
-        var menuText = '<div class="note-menu"><h1>目录</h1>';
+        var menuText = '<div class="marked-menu"><h1>目录</h1>';
         menuText+="<ul>";
         for (var i = 0; i < myRenderer.headings.length; i++) {
             var heading = myRenderer.headings[i];

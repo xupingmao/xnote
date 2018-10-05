@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/03 17:10:00
+@modified 2018/10/05 17:35:39
 */
 
 * {
@@ -23,6 +23,20 @@ body {
 pre {
     word-wrap: break-word;
     white-space: pre-wrap;
+}
+
+/** marked 样式 **/
+.marked-menu {
+    width: 100%;
+    float: left;
+    /*border: 1px solid #ccc;*/
+}
+
+.marked-menu h1 {
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+    font-size: 20px;
 }
 
 .marked-pre {
@@ -371,18 +385,6 @@ table td {
 }
 
 /** 笔记样式 **/
-.note-menu {
-    width: 100%;
-    float: left;
-    border: 1px solid #ccc;
-}
-
-.note-menu h1 {
-    text-align: center;
-    margin: 0px;
-    padding: 0px;
-}
-
 .note-head {
     font-size: 20px;
 }

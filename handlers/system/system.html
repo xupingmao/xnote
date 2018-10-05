@@ -14,11 +14,19 @@
             padding: 5px;
         }
         .item {
-            width: 140px;
+            width: 20%;
             height: 25px;
             line-height: 25px;
             float: left;
         }
+
+        @media screen and (max-width: 700px) {
+            /** mobile **/
+            .item {
+                width: 50%;
+            }
+        }
+
         /**
         .item a {
             text-decoration: none;
