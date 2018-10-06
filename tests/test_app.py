@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/10/02 13:42:27
+# @modified 2018/10/06 12:10:47
 
 import sys
 import os
@@ -184,7 +184,7 @@ class TestMain(unittest.TestCase):
 
     def test_file_group(self):
         self.check_200("/file/group")
-        self.check_200("/file/group/ungrouped")
+        self.check_200("/note/ungrouped")
         self.check_200("/file/recent_edit")
         self.check_200("/note/recent_created")
 

@@ -57,14 +57,15 @@ class Ungrouped:
         amount = db.count(sql = count_sql, vars = vars)
 
         return xtemplate.render(VIEW_TPL,
-            file_type ="group",
-            pathlist  = [Storage(name="未分类", type="group", url="/file/group/ungrouped")],
-            files     = files,
-            file      = Storage(name="未分类", type="group"),
-            page      = page,
-            page_max  = math.ceil(amount / pagesize),
-            groups    = xutils.call("note.list_group"),
-            page_url  ="/file/group/ungrouped?page=")
+            file_type  = "group",
+            pathlist   = [Storage(name="未分类", type="group", url="/file/group/ungrouped")],
+            files      = files,
+            file       = Storage(name="未分类", type="group"),
+            page       = page,
+            page_max   = math.ceil(amount / pagesize),
+            groups     = xutils.call("note.list_group"),
+            show_mdate = True,
+            page_url   = "/file/group/ungrouped?page=")
 
 class MoveHandler:
     
@@ -225,12 +226,12 @@ class PublicGroupHandler:
             show_cdate = True,
             groups     = xutils.call("note.list_group"),
             page_max   = math.ceil(count/PAGE_SIZE), 
-            page_url   ="/file/group/public?page=")
+            page_url   = "/file/group/public?page=")
 
 xurls = (
     r"/file/group"          , GroupListHandler,
     r"/note/group"          , GroupListHandler,
-    r"/file/group/ungrouped", Ungrouped,
+    r"/note/ungrouped"      , Ungrouped,
     r"/file/group/removed"  , RemovedHandler,
     r"/file/group/list"     , GroupListHandler,
     r"/note/group/move"     , MoveHandler,

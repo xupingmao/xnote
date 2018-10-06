@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/10/03 10:49:08
+# @modified 2018/10/06 11:51:58
 
 """Description here"""
 from io import StringIO
@@ -44,11 +44,12 @@ sys_tools = [
 ] 
 
 doc_tools = [
-    link("笔记分组", "/index"),
-    link("标签云", "/file/taglist"),
+    link("分类", "/note/group"),
+    link("未分类", "/note/ungrouped"),
+    link("标签", "/note/taglist"),
     link("词典", "/file/dict"),
     link("提醒", "/message?status=created"),
-    link("最近更新", "/file/recent_edit"),
+    link("最近", "/file/recent_edit"),
     link("日历", "/message/calendar"),
 ] 
 
