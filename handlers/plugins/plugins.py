@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/10/04 22:03:33
+# @modified 2018/10/06 12:27:34
 from io import StringIO
 import xconfig
 import codecs
@@ -69,7 +69,7 @@ def load_plugin(name):
         cacheutil.zadd("plugins.history", time.time(), os.path.splitext(display_name)[0])
  
     context = xconfig.PLUGINS.get(name)
-    if context is None:
+    if xconfig.DEBUG or context is None:
         script_name = "plugins/" + name
         if not os.path.exists(os.path.join(xconfig.PLUGINS_DIR, name)):
             error = "file `%s` not found" % script_name

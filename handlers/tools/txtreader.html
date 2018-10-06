@@ -1,9 +1,63 @@
-{% extends base.html %}
+{% extends common/base_simple.html %}
+
+<!-- 
+@since 2017/12/02
+@modified 2018/10/06 13:05:51
+-->
+
+{% block head %}
+<style type="text/css">
+
+.char {
+    font-size: 12px;
+    width: 14px;
+    height: 14px;
+    float: left;
+    display: block;
+}
+
+.reader-header {
+    position: fixed;
+    top: 0px;
+    height: 30px;
+    width: 100%;
+    background-color: #ccc;
+}
+
+.reader-footer {
+    position: fixed;
+    bottom: 0px;
+    height: 30px;
+    width: 100%;
+    background-color: #ccc;
+}
+
+#content {
+    padding-bottom: 30px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#progress {
+    position: absolute;
+    left: 50%;
+    margin-left: -30px;
+    width: 60px;
+    text-align: center;
+}
+
+.forward {
+    position: absolute;
+    right: 0px;
+}
+
+</style>
+{% end %}
 
 {% block body %}
 {% set path = xutils.get_argument("path") %}
 {% include mod_fs_path.html %}
-<div class="col-md-12" style="text-align: center;">
+<div class="col-md-12 hide" style="text-align: center;">
     <button class="backward" style="float: left;">上一页</button>
     <span style="text-align: center;"><button class="read">阅读</button></span>
     <button class="forward" style="float: right;">下一页</button>
@@ -11,12 +65,11 @@
 
 <div class="col-md-12" id="content"></div>
 
-<div class="col-md-12" style="text-align: center;">
-    <button class="backward" style="float: left;">上一页</button>
-    <span id="progress" class="center-align"></span>
-    <button class="forward" style="float: right;">下一页</button>
+<div class="col-md-12 reader-footer" style="text-align: center;">
+    <button class="backward float-left">上一页</button>
+    <div id="progress"></div>
+    <button class="forward">下一页</button>
 </div>
-
 
 <script type="text/javascript">
     var path = getUrlParams().path;
@@ -36,7 +89,7 @@
             text = text.replace(/\n/gi, "<br>");
             $("#content").html(text);
             $("#progress").text((resp.current/resp.size*100).toFixed(2) + "%");
-            $("#content").scrollTop(0);
+            $(window).scrollTop(0);
             // 先前进，再读这一章节
             if (read == "true") {
                 // read 永远是当前章节
@@ -55,17 +108,31 @@
         readbook("current", "true");
     });
 
-    $(".forward").click(function () {
+    function readForward() {
         autoForward = false;
         readbook("forward", "false");
-    });
+    }
 
-    $(".backward").click(function () {
+    function readBackward() {
         autoForward = false;
-        readbook("backward", "false")
-    });
+        readbook("backward", "false");
+    }
+
+    $(".forward").click(readForward);
+    $(".backward").click(readBackward);
 
     readbook("current", "false");
+
+    $(window).on("keyup", function (event) {
+        var keyCode = event.keyCode;
+        console.log(keyCode);
+        switch (keyCode) {
+          // shift
+          case 16: return;
+          case 39: readForward(); break;
+          case 37: readBackward(); break;
+        }
+    })
 </script>
 
 {% end %}
