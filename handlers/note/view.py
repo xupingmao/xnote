@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/10/02 11:27:58
+# @modified 2018/10/08 00:44:04
 
 import profile
 import math
@@ -80,10 +80,10 @@ class ViewHandler:
             amount = db.count(where = where_sql,
                 vars=dict(parent_id=file.id, creator=user_name))
             files = db.select(where = where_sql, 
-                vars=dict(parent_id=file.id, is_deleted=0, creator=user_name), 
-                order="mtime DESC", 
-                limit=pagesize, 
-                offset=(page-1)*pagesize)
+                vars = dict(parent_id=file.id, is_deleted=0, creator=user_name), 
+                order = "name", 
+                limit = pagesize, 
+                offset = (page-1)*pagesize)
             content         = file.content
             show_search_div = True
             show_add_file   = True

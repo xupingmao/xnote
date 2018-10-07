@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/10/06 12:10:47
+# @modified 2018/10/08 00:49:04
 
 import sys
 import os
@@ -151,6 +151,13 @@ class TestMain(unittest.TestCase):
         json_request("/note/save", method="POST",
             data=dict(id=id, content="new-content"))
         json_request("/note/remove?id=" + str(id))
+
+    def test_note_group_add_view(self):
+        group = json_request("/note/add", method="POST",
+            data = dict(name="xnote-unit-group", type="group"))
+        id = group['id']
+        self.check_OK('/note/view?id=%s' % id)
+        json_request('/note/remove?id=%s' % id)
 
     def test_note_timeline(self):
         self.check_200("/note/timeline")

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/10/04 20:57:48
+# @modified 2018/10/08 00:50:54
 
 """
 Xnote 模块管理器
@@ -472,7 +472,7 @@ class EventHandler:
                 self.func(ctx)
                 if self.profile:
                     stop  = time.time()
-                    xutils.log("EventHandler %s cost %sms" % (self.key, int((stop-start)*1000)))
+                    xutils.log("EventHandler [%sms] %s" % (int((stop-start)*1000), self.key))
             except:
                 xutils.print_exc()
 
