@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/10/03 17:04:58
+# @modified 2018/10/10 01:06:59
 
 """文件服务
     - 文件目录
@@ -107,6 +107,8 @@ class FileSystemHandler:
         '.txt' : 'text/plain; charset=utf-8',  # 便于文件下载
         '.md'  : 'text/plain; charset=utf-8',
         '.ini' : 'text/plain; charset=utf-8',
+        '.js'  : 'application/x-javascript; charset=utf-8',
+        '.css' : 'text/css; charset=utf-8'
     }
 
     encodings = {

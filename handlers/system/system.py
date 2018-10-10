@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/10/06 11:51:58
+# @modified 2018/10/10 00:29:51
 
 """Description here"""
 from io import StringIO
@@ -40,10 +40,12 @@ sys_tools = [
     link("系统刷新",  "/system/reload"),
     link("Python文档", "/system/modules_info"),
     link("SQL控制台", "/tools/sql"),
-    link("启动规则", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT))
+    link("启动规则", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
+    link("定制CSS", "/code/edit?type=script&path=user.css")
 ] 
 
 doc_tools = [
+    link("搜索", "/search"),
     link("分类", "/note/group"),
     link("未分类", "/note/ungrouped"),
     link("标签", "/note/taglist"),
@@ -133,7 +135,23 @@ class UserCssHandler:
 
     def GET(self):
         web.header("Content-Type", "text/css")
-        return xconfig.get("USER_CSS", "")
+        environ = web.ctx.environ
+        path = os.path.join(xconfig.SCRIPTS_DIR, "user.css")
+
+        if not xconfig.DEBUG:
+            web.header("Cache-Control", "max-age=3600")
+
+        if not os.path.exists(path):
+            return b''
+        
+        etag = '"%s"' % os.path.getmtime(path)
+        client_etag = environ.get('HTTP_IF_NONE_MATCH')
+        web.header("Etag", etag)
+        if etag == client_etag:
+            web.ctx.status = "304 Not Modified"
+            return b'' # 其实webpy已经通过yield空bytes来避免None
+        return xutils.readfile(path)
+        # return xconfig.get("USER_CSS", "")
 
 class UserJsHandler:
 
