@@ -2,7 +2,7 @@
 
 <!--
     @since 2017/09/14
-    @modified 2018/10/10 01:09:18
+    @modified 2018/10/12 09:42:13
 -->
 
 {% block head %}
@@ -32,16 +32,6 @@
             }
         }
 
-        /**
-        .item a {
-            text-decoration: none;
-            color: #08c;
-            padding: 3px;
-        }
-        .item a:hover {
-            color: white;
-            background-color: #08c;
-        }*/
     </style>
 {% end %}
 
@@ -55,7 +45,7 @@
     {% if category.need_admin and not _is_admin %}
         {% continue %}
     {% end %}
-    <div class="col-md-12 bottom-offset-1">
+    <div class="col-md-12 bottom-offset-1 grid-card">
         <div class="grid-title">{{category.name}}</div>
         <div class="col-md-12">
             {% for link in category.children %}
@@ -67,7 +57,7 @@
     </div>
 {% end %}
 
-<div class="col-md-12 top-offset-1">
+<div class="col-md-12 grid-card">
     <div class="grid-title">
         常用链接
         <a href="/system/storage?key=tools" class="float-right link">编辑</a>
@@ -79,11 +69,6 @@
         </div>
         {% end %}
     </div>
-</div>
-
-<div class="row top-offset-1">
-    <hr/>
-    当前时间: <span id="currentTime"></span>
 </div>
 
 <script type="text/javascript">
@@ -113,12 +98,15 @@ function runCommand(path) {
         用户信息
     </div>
     <div class="aside-content">
+        <ul>
         {% if _has_login %}
-            <li>用户名: {{_user_name}}</li>
+            <li>时间: <span id="currentTime"></span></li>
+            <li>用户: {{_user_name}}</li>
             <li><a href="/logout">登出</a></li>
         {% else %}
             <li><a href="/login">登陆</a></li>
         {% end %}
+        </ul>
     </div>
 </div>
 {% end %}

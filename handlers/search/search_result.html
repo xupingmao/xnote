@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2018/10/03 19:00:44
+@modified 2018/10/12 02:27:41
 -->
 
 {% block body %}
@@ -100,7 +100,11 @@
         </div>
     {% end %}
 {% init page_max = 0 %}
-{% include mod_pagenation.html %}
+
+<div class="grid-card">
+    {% include mod_pagenation.html %}
+</div>
+
 <script>
     $(".execute-btn").on("click", function (e) {
         console.log(e);

@@ -143,6 +143,7 @@
 {% set search_category = "fs" %}
 <div class="hide error col-md-12"></div>
 
+<div class="grid-card">
 {% include "mod_fs_path.html" %}
 
 <div id="controlArea" class="col-md-12">
@@ -172,7 +173,6 @@
     </div>
 </div>
 
-<hr/>
 <div class="col-md-12">
 <table class="col-md-12 no-border-table fs-table">
 {% for item in filelist %}
@@ -235,6 +235,7 @@
 </table>
 
 <input type="text" class="cmd-input" placeholder="请输入指令">
+</div>
 </div>
 
 <script type="text/javascript">

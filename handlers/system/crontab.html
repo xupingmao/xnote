@@ -6,10 +6,11 @@
     <a href="/system/crontab" class="tab-link">定时任务</a>
 </div> -->
 
+<div class="col-md-12 grid-card">
+
 {% set title = "定时任务" %}
 {% include "tools/base_title.html" %}
 
-<div class="col-md-12">
 <table class="table col-md-12">
     <tr>
         <th>编号</th>
@@ -46,10 +47,11 @@
     </tr>
     {% end %}
 </table>
-</div>
 
 <div class="col-md-12">
     <input class="dialog-btn" type="button" value="新增任务" dialog-url="/system/crontab/edit" />
+</div>
+
 </div>
 
 

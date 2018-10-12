@@ -126,45 +126,47 @@ img {
         {% include mod_notice.html %}
     {% end %}
 
-    {% if show_path_list %}
-    <div class="grid-title">
-        <a href="/" class="link2">Home</a>
-        {% for item in pathlist %}
-            › <a href="{{item.url}}" class="link2">{{ item.name }}</a> 
+    <div class="col-md-12 grid-card">
+        {% if show_path_list %}
+        <div class="grid-title">
+            <a href="/" class="link2">Home</a>
+            {% for item in pathlist %}
+                › <a href="{{item.url}}" class="link2">{{ item.name }}</a> 
+            {% end %}
+
+            {% if file is not None %}
+                {% if file.type == "group" and _user_name == file.creator %}
+                {% if file.size == 0 %}
+                    <a class="float-right red" href="javascript:remove({{file.id}}, '{{file.name}}')">删除</a>
+                {% end %}
+                <a class="float-right link" href="/note/add?parent_id={{file.id}}">新增</a>
+                <a class="float-right link" href="javascript:rename({{file.id}}, '{{file.name}}')">重命名</a>
+                {% end %}
+            {% elif _has_login %}
+                <a class="float-right link prompt-btn" message="分类名" 
+                        action="/note/add?type=group&name=">新增</a>
+            {% end %}
+        </div>
         {% end %}
 
-        {% if file is not None %}
-            {% if file.type == "group" and _user_name == file.creator %}
-            {% if file.size == 0 %}
-                <a class="float-right red" href="javascript:remove({{file.id}}, '{{file.name}}')">删除</a>
-            {% end %}
-            <a class="float-right link" href="/note/add?parent_id={{file.id}}">新增</a>
-            <a class="float-right link" href="javascript:rename({{file.id}}, '{{file.name}}')">重命名</a>
-            {% end %}
-        {% elif _has_login %}
-            <a class="float-right link prompt-btn" message="分类名" 
-                    action="/note/add?type=group&name=">新增</a>
+        {% if error != "" and error != None%}
+        <div class="col-md-12 error">
+            {{error}}
+        </div>
+        {% end %}
+
+        {% comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 %}
+
+        {% if file_type == "md" or file_type == "text" %}
+            {% include "note/markdown.html" %}
+        {% elif file_type == "group" %}
+            {% include "note/note_list.html" %}
+        {% elif file_type == "group_list" %}
+            {% include "note/group_list.html" %}
+        {% else %}
+            {% include "note/post.html" %}
         {% end %}
     </div>
-    {% end %}
-
-    {% if error != "" and error != None%}
-    <div class="col-md-12 error">
-        {{error}}
-    </div>
-    {% end %}
-
-    {% comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 %}
-
-    {% if file_type == "md" or file_type == "text" %}
-        {% include "note/markdown.html" %}
-    {% elif file_type == "group" %}
-        {% include "note/note_list.html" %}
-    {% elif file_type == "group_list" %}
-        {% include "note/group_list.html" %}
-    {% else %}
-        {% include "note/post.html" %}
-    {% end %}
 
 <script type="text/javascript">
 function rename(id, oldName) {

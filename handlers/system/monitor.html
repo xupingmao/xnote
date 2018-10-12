@@ -1,12 +1,14 @@
 {% extends base.html %}
 
 {% block body %}
-{% set title = "系统状态" %}
-{% include "tools/base_title.html" %}
 
 <!-- TODO d3.js 展示内存和CPU日志 -->
 
-<div class="col-md-12">
+<div class="col-md-12 grid-card">
+
+    {% set title = "系统状态" %}
+    {% include "tools/base_title.html" %}
+
     <table class="table">
         {% for item in item_list %}
             <tr>
