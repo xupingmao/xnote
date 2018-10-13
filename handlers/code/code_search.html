@@ -20,9 +20,9 @@
 
 {% block body %}
 
-{% include mod_fs_path.html %}
-
-<div class="col-md-12">
+<div class="col-md-12 card">
+    {% include mod_fs_path.html %}
+    
     <form action="">
         <table class="no-border-table">
         <tr>
@@ -68,7 +68,7 @@
 {{?error}}
 
 {% if len(files) > 0 %}
-<div class="col-md-12">
+<div class="col-md-12 card">
     匹配文件数: {{len(files)}}<br/>
     匹配行数: {{total_lines}}
 </div>
@@ -76,7 +76,7 @@
 
 {% for index1, file in enumerate(files) %}
 
-<div class="row">
+<div class="row card">
     <div style="float:right;">匹配数: {{len(file.result)}}</div>
     <div class="code-analyze-name">
         <a href="/code/view_source?path={{file.name}}&key={{key}}" target="_blank">{{file.name}}</a>

@@ -2,9 +2,8 @@
 
 {% block body %}
 
+<div class="col-md-12 card">
 {% include "mod_fs_path.html" %}
-
-<div class="col-md-12">
 <!-- POST会被GET参数覆盖 -->
 <form method="GET">
     <input type="text" name="count" class="hide" value="on">
@@ -47,34 +46,36 @@
 </form>
 </div>
 
-{% if len(line_infos) > 0 %}
-<div>文件数 {{len(line_infos)-1}}</br>
-总行数 {{line_infos[0].lines}}</br>
-有效行数 {{line_infos[0].validlines}}</br>
-空白行数 {{line_infos[0].blanklines}}</br>
-</div>
-{% end %}
+<div class="card">
+    {% if len(line_infos) > 0 %}
+    <div>文件数 {{len(line_infos)-1}}</br>
+    总行数 {{line_infos[0].lines}}</br>
+    有效行数 {{line_infos[0].validlines}}</br>
+    空白行数 {{line_infos[0].blanklines}}</br>
+    </div>
+    {% end %}
 
-<table class="table">
-<tr>
-<th>编号</th>
-<th>文件名</th>
-<th>行数</th>
-<th>有效行数</th>
-<th>空白行数</th>
-</tr>
-
-{% for index, info in enumerate(line_infos) %}
-
+    <table class="table">
     <tr>
-        <td>{{index+1}}</td>
-        <td><a target="_blank" href="/code/view_source?path={{info.fname}}">{{info.display_name}}</a></td>
-        <td>{{info.lines}}</td>
-        <td>{{info.validlines}}</td>
-        <td>{{info.blanklines}}</td>
+    <th>编号</th>
+    <th>文件名</th>
+    <th>行数</th>
+    <th>有效行数</th>
+    <th>空白行数</th>
     </tr>
 
-{% end %}
-</table>
+    {% for index, info in enumerate(line_infos) %}
+
+        <tr>
+            <td>{{index+1}}</td>
+            <td><a target="_blank" href="/code/view_source?path={{info.fname}}">{{info.display_name}}</a></td>
+            <td>{{info.lines}}</td>
+            <td>{{info.validlines}}</td>
+            <td>{{info.blanklines}}</td>
+        </tr>
+
+    {% end %}
+    </table>
+</div>
 
 {% end %}

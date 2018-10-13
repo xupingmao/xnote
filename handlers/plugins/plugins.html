@@ -28,44 +28,7 @@
 
 {% block body %}
 
-    {% init recent = [] %}
-
-<!--
-    <div class="col-md-12">
-        <div class="grid-title">
-            最近使用
-        </div>
-        <div class="col-md-12">
-            {% for link in recent %}
-            <div class="item">
-                <a href="{{link.get('link')}}">{{link.get('name')}}</a>
-            </div>
-            {% end %}
-        </div>
-    </div>
--->
-
-<!--
-
-    <div class="col-md-12">
-        <div class="grid-title">
-            所有插件
-        </div>
-        <div class="col-md-12">
-            {% for link in plugins %}
-            <div class="item">
-                <a href="{{link.link}}">{{link.name}}</a>
-            </div>
-            {% end %}
-        </div>
-    </div>
--->
-
-<div class="small-device col-md-12">
-    <a class="link" href="/plugins_new">新增插件</a>
-    <a class="link" href="/fs_link/scripts/plugins">插件管理</a>
-</div>
-
+{% init recent = [] %}
 <div class="plugin-list">
     {% for link in plugins %}
     <div class="plugin-item">

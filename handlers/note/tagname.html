@@ -2,11 +2,13 @@
 
 {% block body %}
 
-<div class="grid-title">
-    标签: {{tagname}}
-</div>
+<div class="card">
+    <div class="grid-title">
+        标签: {{tagname}}
+    </div>
     {% set page_url="/file/tagname/"+tagname+"?page=" %}
     {% include "note/note_list.html" %}
+</div>
 {% end %}
 
 {% block aside %}

@@ -1,4 +1,4 @@
-{% if page_max > 0 %}
+{% if page_max >= 0 %}
 <div class="pagenation">
     <a class="x-page-link" href="#">共{{page_max}}页</a> 
     {% if page > 1 and page_max > 2 %}
@@ -11,7 +11,7 @@
 
     <a class="x-page-link x-page-active" href="#">{{page}}</a>
     
-    {% for j in range(page+1, min(page+4, page_max+1)) %}
+    {% for j in range(page+1, int(min(page+4, page_max+1))) %}
         <a class="x-page-link" href="{{page_url}}{{j}}">{{j}}</a>
     {% end %}
 

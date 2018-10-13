@@ -4,8 +4,6 @@
 <script type="text/javascript" src="/static/lib/wangEditor/wangEditor-3.1.1.min.js"></script>
 {% if op == "view" %}
     {% include "note/view_header.html" %}
-
-    <hr/>
     <div id="editor" class="row">
         {% raw file.data %}
     </div>
