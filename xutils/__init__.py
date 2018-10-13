@@ -1,13 +1,12 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/09/22 23:43:28
+# @modified 2018/10/14 01:02:54
 
 """
 xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
-如果是一个人开发，可以直接写在这个文件中,
-如果是合作开发，依然建议通过xutils暴露统一接口，其他的utils由xutils导入
+建议通过xutils暴露统一接口，其他的utils由xutils导入
 
 """
 from __future__ import print_function

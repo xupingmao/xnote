@@ -1,15 +1,10 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/09/18 23:35:37
+# @modified 2018/10/14 01:04:47
 import re
 import random
-try:
-    # Py3
-    from configparser import ConfigParser
-except ImportError:
-    from ConfigParser import ConfigParser
-from .imports import is_str
+from .imports import is_str, ConfigParser
 
 __doc__ = """文本处理函数库
 

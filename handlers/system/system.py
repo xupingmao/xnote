@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/10/13 13:38:20
+# @modified 2018/10/14 01:09:13
 
 """Description here"""
 from io import StringIO
@@ -41,7 +41,7 @@ sys_tools = [
     link("Python文档", "/system/modules_info"),
     link("SQL控制台", "/tools/sql"),
     link("启动规则", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
-    link("定制CSS", "/code/edit?type=script&path=user.css")
+    link("定制CSS", "/code/edit?type=script&path=user.css"),
 ] 
 
 doc_tools = [
@@ -72,7 +72,7 @@ other_tools = [
     link("二维码", "/tools/qrcode"),
     link("随机生成器", "/tools/random_string"),
     # 其他工具
-    link("分屏模式", "/tools/command_center")
+    link("分屏模式", "/tools/command_center"),
 ]
 
 xconfig.MENU_LIST = [
