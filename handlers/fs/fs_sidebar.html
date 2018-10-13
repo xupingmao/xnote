@@ -117,10 +117,10 @@
 <div class="error col-md-12">{{error}}</div>
 {% end %}
 
+<div class="card">
 {% set fs_path_url = "/fs_sidebar?path=" %}
 {% include mod_fs_path.html %}
 
-<hr/>
 <div class="col-md-12 fs-main">
 <div class="fs-left">
 <table class="col-md-12 no-border-table fs-table">
@@ -144,6 +144,7 @@
 </div>
 <div class="fs-preview">
     <iframe id="previewIframe" src="/fs_api/plugins?path={{path}}"></iframe>
+</div>
 </div>
 </div>
 

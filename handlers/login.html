@@ -11,7 +11,8 @@
       .login-box {
         width:30%; 
         min-width:200px; 
-        padding-top:10%; 
+        background-color: #fff;
+        padding: 10px;
         margin:0 auto;
       }
     	.login-input {
@@ -33,17 +34,17 @@
         padding-top: 3px;
         size: 14px;
       }
+      
     </style>
 {% end %}
 
 {% block body %}
-  
-  {% if error != "" and error != None %}
-    <div class="col-md-12 error">{{error}}</div>
-  {% end %}
-
+<div class="card">
   <div class="login-box">
-		<form id="loginForm" name="loginForm" method="POST">
+    {% if error != "" and error != None %}
+      <div class="col-md-12 error">{{error}}</div>
+    {% end %}
+    <form id="loginForm" name="loginForm" method="POST">
       登录名
 			<input class="login-input" type="text" name="username" value="{{username}}" placeholder="Account"/>
       密码
@@ -52,4 +53,6 @@
 			<button class="login-submit login-input" type="submit" value="Login" id="loginBtn" style="margin-top:20px;">Login</button>
 		</form>
 	</div>
+</div>
+
 {% end %}

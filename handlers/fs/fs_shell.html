@@ -15,7 +15,7 @@
 
 {% block body %}
 {% import os %}
-
+<div class="card">
 {% set fs_path_url = "/fs_shell?path=" %}
 {% include mod_fs_path.html %}
 <input class="hide" id="path" value="{{path}}">
@@ -27,6 +27,7 @@
     </div>
     <div id="result" class="col-md-12 output-body">
     </div>
+</div>
 </div>
 
 <script type="text/javascript">

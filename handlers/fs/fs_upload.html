@@ -48,8 +48,8 @@
 {% end %}
 
 {% block body %}
+<div class="card">
     {% include "mod_fs_path.html" %}
-
 
     <div id="uploadFileArea">
         <!-- 文件上传区域 -->
@@ -62,6 +62,7 @@
     </div>
 
     {% include "fs/mod_fs_upload.html" %}
+</div>
 {% end %}
 
 {% block aside %}

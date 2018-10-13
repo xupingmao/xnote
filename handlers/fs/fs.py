@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/10/10 01:06:59
+# @modified 2018/10/13 15:00:17
 
 """文件服务
     - 文件目录
@@ -167,8 +167,14 @@ class FileSystemHandler:
         kw["filelist"]     = filelist
         kw["path"]         = path
         kw["token"]        = xauth.get_current_user().token
+        kw["parent_path"]  = get_parent_path(path)
         kw["search_action"] = "/fs_find"
-        return xtemplate.render("fs/fs.html", **kw)
+
+        mode = xutils.get_argument("mode")
+        if mode == "grid":
+            return xtemplate.render("fs/fs_grid.html", **kw)
+        else:
+            return xtemplate.render("fs/fs.html", **kw)
 
     def list_root(self):
         raise web.seeother("/fs//")

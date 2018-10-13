@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/13 13:20:56
+@modified 2018/10/13 15:24:59
 */
 
 * {
@@ -1263,7 +1263,6 @@ li.menu-item:hover {
     .aside {
         width: 100%;
         padding: 0px;
-        padding-top: 10px;
         margin-left: 0px;
     }
 
