@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/10/08 00:50:54
+# @modified 2018/10/13 13:26:50
 
 """
 Xnote 模块管理器
@@ -556,6 +556,7 @@ def reload():
     cacheutil.clear_temp()
     load_init_script()
     load_plugins(xconfig.PLUGINS_DIR)
+    fire("sys.reload")
 
 def load_init_script():
     if xconfig.INIT_SCRIPT is not None:

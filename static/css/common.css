@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/13 13:16:18
+@modified 2018/10/13 13:20:56
 */
 
 * {
@@ -1142,7 +1142,7 @@ li.menu-item:hover {
     margin-bottom: 10px;
     /*box-shadow: 1px 1px 1px #888;*/
     border-bottom: 1px solid #ccc;
-    border-right: 1px solid #ccc;
+    /*border-right: 1px solid #ccc;*/
 }
 
 .aside-item li {
@@ -1238,7 +1238,7 @@ li.menu-item:hover {
     /*border-radius: 5px;*/
     /*box-shadow: 1px 1px 1px #888;*/
     border-bottom: 1px solid #ccc;
-    border-right: 1px solid #ccc;
+    /*border-right: 1px solid #ccc;*/
 }
 
 .nav {

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/10/10 00:29:51
+# @modified 2018/10/13 13:38:20
 
 """Description here"""
 from io import StringIO
@@ -184,3 +184,9 @@ xurls = (
     r"/system/cache", CacheHandler
 )
 
+@xmanager.listen("sys.reload")
+def on_init(ctx = None):
+    path = os.path.join(xconfig.SCRIPTS_DIR, "user.css")
+    if not os.path.exists(path):
+        return 
+    xconfig.set("USER_CSS", xutils.readfile(path))
