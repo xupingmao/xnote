@@ -20,37 +20,42 @@
     {% init input = "" %}
     {% init output = "" %}
 
-    {% include "tools/base_title.html" %}
+    <div class="grid-card">
+        {% include "tools/base_title.html" %}
 
-    {% if description != "" %}
-    <pre class="col-md-12 info">
-    {{description}}
-    </pre>
-    {% end %}
-
-    {% if error != "" %}
-    <pre class="col-md-12 error">
-    {{error}}
-    </pre>
-    {% end %}
-    {% if rows > 0 %}
-    <form method="{{method}}">
-        {% if rows == 1 %}
-        <input class="col-md-12" name="input" value="{{input}}"/>
-        {% else %}
-        <textarea class="col-md-12 code" name="input" rows={{rows}}>{{input}}</textarea>
+        {% if description != "" %}
+        <pre class="col-md-12 info">
+        {{description}}
+        </pre>
         {% end %}
-        <button>{{model.btn_text}}</button>
-    </form>
-    {% end %}
 
-    <div class="col-md-12">{% raw html %}</div>
+        {% if error != "" %}
+        <pre class="col-md-12 error">
+        {{error}}
+        </pre>
+        {% end %}
+        {% if rows > 0 %}
+        <form method="{{method}}">
+            {% if rows == 1 %}
+            <input class="col-md-12" name="input" value="{{input}}"/>
+            {% else %}
+            <textarea class="col-md-12 code" name="input" rows={{rows}}>{{input}}</textarea>
+            {% end %}
+            <button>{{model.btn_text}}</button>
+        </form>
+        {% end %}
+    </div>
+
+    {% if html %}
+    <div class="col-md-12 grid-card">{% raw html %}</div>
+    {% end %}
 
     {# 文本输出放到后面 #}
     {% if output != None and output != "" %}
     <pre class="col-md-12 plugin-output">{{ output }}</pre>
     {% end %}
 
+    <div class="grid-card">
     {% if model.show_pagenation %}
         {# 分页 #}
         {% set page = model.page %}
@@ -58,6 +63,7 @@
         {% set page_url = model.page_url %}
         {% include mod_pagenation.html %}
     {% end %}
+    </div>
 {% end %}
 
 {% block aside %}

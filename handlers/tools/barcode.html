@@ -6,7 +6,7 @@
 {% end %}
 
 {% block body %}
-
+<div class="card">
     {% set title = "条形码" %}
     {% include "tools/base_title.html" %}
 
@@ -18,8 +18,9 @@
     <div id="barcode" class="top-offset-1">
         <img id="imgcode" /> 
     </div>
+</div>
 
-    <script>
+<script>
     $(function () {
         function showBarCode() {
             var key = $("#input").val();
@@ -52,6 +53,6 @@
         $("#input").text(content);
         showBarCode();
     });
-    </script>
+</script>
 
 {% end %}

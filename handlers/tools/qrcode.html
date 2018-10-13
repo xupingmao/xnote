@@ -7,15 +7,17 @@
 
 {% block body %}
 
-    <div>
+<div class="card">
     {% set title = "生成二维码" %}
     {% include "tools/base_title.html" %}
 
-        <textarea id="qrcode_input" class="col-md-12" rows=5></textarea>
-        <button id="generate">生成</button>
-    </div>
+    <textarea id="qrcode_input" class="col-md-12" rows=5></textarea>
+    <button id="generate">生成</button>
+
+    
+</div>
    
-    <div id="qrcode" class="top-offset-1"></div>
+<div id="qrcode" class="card hide"></div>
 
     <script>
     $(function () {
@@ -23,7 +25,7 @@
             var key = $("#qrcode_input").val();
             key = utf16to8(key);
             if (key) {
-                $("#qrcode").html("");
+                $("#qrcode").html("").show();
                 $("#qrcode").qrcode(key);
             }    
         }

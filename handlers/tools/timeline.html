@@ -186,13 +186,13 @@ img {
 {% block body %}
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
-<header class="site-header">
+<header class="site-header card">
   <div class="wrapper">
     <h1 class="site-header__title">知识库时光轴</h1>
   </div>
 </header>
 
-<section class="timeline">
+<section class="timeline card">
   <div id="app" class="wrapper">
     <div class="timeline__item" v-for="item in itemList">
       <div class="timeline__item__station"></div>
@@ -206,7 +206,7 @@ img {
   </div>
 </section>
 
-<header class="site-footer">
+<header class="site-footer card">
   <div class="wrapper">
     <a id="loadMore" href="javascript:void(0)">加载更多</a>
   </div>

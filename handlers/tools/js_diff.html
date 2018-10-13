@@ -63,29 +63,34 @@
 
 {% block body %}
 
-{% set title = "文本对比" %}
-{% include "tools/base_title.html" %}
+<div class="grid-card">
+    {% set title = "文本对比" %}
+    {% include "tools/base_title.html" %}
 
-<div id="settings">
-    <label><input type="radio" name="diff_type" value="diffChars"> Chars</label>
-    <label><input type="radio" name="diff_type" value="diffWords"> Words</label>
-    <label><input type="radio" name="diff_type" value="diffLines" checked> Lines</label>
+    <div id="settings">
+        <label><input type="radio" name="diff_type" value="diffChars"> Chars</label>
+        <label><input type="radio" name="diff_type" value="diffWords"> Words</label>
+        <label><input type="radio" name="diff_type" value="diffLines" checked> Lines</label>
+    </div>
+
+    <div>
+        <div class="left">
+        <textarea rows=15 id="left_text"></textarea>
+        </div>
+
+        <div class="right">
+        <textarea rows=15 id="right_text"></textarea>
+        </div>
+    </div>
 </div>
 
-<div>
-<div class="left">
-<textarea rows=15 id="left_text"></textarea>
+<div class="card">
+    <h2>比较结果</h2>
+    <pre class="result" id="cmp_result">
+
+    </pre>
 </div>
 
-<div class="right">
-<textarea rows=15 id="right_text"></textarea>
-</div>
-</div>
-
-<h2>比较结果</h2>
-<pre class="result" id="cmp_result">
-
-</pre>
 
 <script type="text/javascript">
 var a = document.getElementById('left_text');

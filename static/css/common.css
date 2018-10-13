@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/12 09:52:09
+@modified 2018/10/13 13:16:18
 */
 
 * {
@@ -1139,8 +1139,10 @@ li.menu-item:hover {
     /*border: 1px solid #ccc;*/
     width: 100%;
     float: left;
-    border-radius: 5px;
     margin-bottom: 10px;
+    /*box-shadow: 1px 1px 1px #888;*/
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ccc;
 }
 
 .aside-item li {
@@ -1227,12 +1229,16 @@ li.menu-item:hover {
     padding: 5px;
 }
 
-.grid-card {
+.grid-card,.card {
     float: left;
     width: 100%;
     background-color: #fff;
     margin-bottom: 10px;
     padding: 5px;
+    /*border-radius: 5px;*/
+    /*box-shadow: 1px 1px 1px #888;*/
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ccc;
 }
 
 .nav {

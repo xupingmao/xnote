@@ -14,10 +14,68 @@
 {% block body %}
 <!-- 
 @since 2016/12/18
-@modified 2018/09/30 00:23:21
+@modified 2018/10/13 12:27:48
 -->
-{% set title = "字符串转换" %}
-{% include "tools/base_title.html" %}
+
+<div class="card">
+    {% set title = "文本转换" %}
+    {% include "tools/base_title.html" %}
+
+    <div class="col-md-12 error hide" id="error"></div>
+
+    <div class="container col-md-6">
+        <textarea id="input" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
+    </div>
+    <div class="container col-md-6">
+        <textarea id="output" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
+    </div>
+
+    <div class="container">
+        <p>分割符
+            <input type="radio" name="seperator" value="\n" checked/>换行
+            <input type="radio" name="seperator" value=","/>逗号
+            <input type="radio" name="seperator" value=";"/>分号
+            <input type="radio" name="seperator" value=" "/>空格
+        </p>
+        <p>过滤重复<input type="checkbox" id="unique"/></p>
+
+        <p>引号
+            <input type="radio" name="quote" value="0" checked/>无
+            <input type="radio" name="quote" value="1"/>单引号
+            <input type="radio" name="quote" value="2"/>双引号
+        </p>
+        <p>
+            大小写转换
+            <input type="radio" name="case" value="0" checked />普通
+            <input type="radio" name="case" value="upper"/>大写
+            <input type="radio" name="case" value="lower"/>小写
+        </p>
+        <p>
+            <span>正则表达式</span>
+            <textarea id="regexp" class="col-md-12"></textarea>
+        </p>
+        <p>
+            转换方式
+            <select id="option">
+                <option value="to_array">转成数组</option>
+                <option value="to_lines">转成多行</option>
+                <option value="to_str_def">字符串定义</option>
+                <option value="str_info">字符串信息</option>
+                <option value="to_enum">转换成枚举</option>
+                <option value="get_first_word">获取第一个单词</option>
+                <option value="to_uniq">去重</option>
+                <option value="get_ip">提取IP</option>
+                <option value="listToMultiLine">去引号</option>
+                <option value="parse_func">解析C语言函数定义</option>
+                <option value="parse_java_func">提取Java方法声明</option>
+                <option value="gen_markdown_table">转为markdown表格</option>
+                <option value="remove_quote">去引号</option>
+            </select>
+        </p>
+        <p><button onclick="execute()">转换</button></p>
+    </div>
+</div>
+
 
 <script>
 
@@ -461,61 +519,6 @@ function parse_java_func(inputStr, option) {
 }
 
 </script>
-
-<div class="col-md-12 error hide" id="error"></div>
-
-<div class="container col-md-6">
-    <textarea id="input" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
-</div>
-<div class="container col-md-6">
-    <textarea id="output" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
-</div>
-
-<div class="container">
-    <p>分割符
-        <input type="radio" name="seperator" value="\n" checked/>换行
-        <input type="radio" name="seperator" value=","/>逗号
-        <input type="radio" name="seperator" value=";"/>分号
-        <input type="radio" name="seperator" value=" "/>空格
-    </p>
-    <p>过滤重复<input type="checkbox" id="unique"/></p>
-
-    <p>引号
-        <input type="radio" name="quote" value="0" checked/>无
-        <input type="radio" name="quote" value="1"/>单引号
-        <input type="radio" name="quote" value="2"/>双引号
-    </p>
-    <p>
-        大小写转换
-        <input type="radio" name="case" value="0" checked />普通
-        <input type="radio" name="case" value="upper"/>大写
-        <input type="radio" name="case" value="lower"/>小写
-    </p>
-    <p>
-        <span>正则表达式</span>
-        <textarea id="regexp" class="col-md-12"></textarea>
-    </p>
-    <p>
-        转换方式
-        <select id="option">
-            <option value="to_array">转成数组</option>
-            <option value="to_lines">转成多行</option>
-            <option value="to_str_def">字符串定义</option>
-            <option value="str_info">字符串信息</option>
-            <option value="to_enum">转换成枚举</option>
-            <option value="get_first_word">获取第一个单词</option>
-            <option value="to_uniq">去重</option>
-            <option value="get_ip">提取IP</option>
-            <option value="listToMultiLine">去引号</option>
-            <option value="parse_func">解析C语言函数定义</option>
-            <option value="parse_java_func">提取Java方法声明</option>
-            <option value="gen_markdown_table">转为markdown表格</option>
-            <option value="remove_quote">去引号</option>
-        </select>
-    </p>
-    <p><button onclick="execute()">转换</button></p>
-</div>
-
 <script>
 
     function select(ident) {

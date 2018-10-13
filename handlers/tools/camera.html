@@ -1,16 +1,21 @@
 {% extends base.html %}
 
 {% block body %}
+<div class="card">
+    {% set title = "摄像头" %}
+    {% include "common/base_title.html" %}
+    
+    <video id="video" width="640" height="480" autoplay class="hide"></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
 
-<video id="video" width="640" height="480" autoplay class="hide"></video>
-<canvas id="canvas" width="640" height="480"></canvas>
-<br/>
-<button id="snap">截图</button>
-<br/>
-<canvas id="canvas_static_pic" width="640" height="480" class="hide"></canvas>
-<img id="canvas2img" class="hide" width="640" height="480"/>
-<br/>
-<button id="close">关闭</button>
+    <div>
+        <button id="snap">截图</button>
+        <button id="close">关闭截图</button>
+    </div>
+
+    <canvas id="canvas_static_pic" width="640" height="480" class="hide"></canvas>
+    <img id="canvas2img" class="hide" width="640" height="480"/>
+</div>
 <script type="text/javascript">
     window.addEventListener("DOMContentLoaded", function() {
     // Grab elements, create settings, etc.

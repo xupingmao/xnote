@@ -2,6 +2,7 @@
 
 {% block body %}
 
+<div class="grid-card">
 {% for name in items %}
     <div class="grid-title">{{name}}</div>
     <div class="grid-row">
@@ -10,5 +11,6 @@
         {% end %}
     </div>
 {% end %}
+</div>
 
 {% end %}

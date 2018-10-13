@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/09/01 15:54:31
+# @modified 2018/10/13 13:17:24
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -84,7 +84,13 @@ class SqliteTableManager:
 
     def add_index(self, colname, is_unique = False):
         # sqlite的索引和table是一个级别的schema
-        sql = "CREATE INDEX IF NOT EXISTS idx_%s_%s ON `%s` (`%s`)" % (self.tablename, colname, self.tablename, colname)
+        if isinstance(colname, list):
+            idx_name = "idx_" + self.tablename
+            idx_name += "_".join(colname)
+            colname_str = ",".join(colname)
+            sql = "CREATE INDEX IF NOT EXISTS %s ON `%s` (%s)" % (idx_name, self.tablename, colname_str)
+        else:
+            sql = "CREATE INDEX IF NOT EXISTS idx_%s_%s ON `%s` (`%s`)" % (self.tablename, colname, self.tablename, colname)
         try:
             self.execute(sql)
         except Exception:
@@ -163,7 +169,7 @@ def init_file_table():
         manager.add_column("modifier", "text", "")
 
         # 各种索引
-        manager.add_index("parent_id")
+        manager.add_index(["parent_id", "name"])
         manager.add_index("type")
         manager.add_index("ctime")
         manager.add_index("mtime")

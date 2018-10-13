@@ -18,56 +18,61 @@
 {% block body %}
 {% init error     = "" %}
 {% init cost_time = None %}
-{% set title      = "SQL控制台" %}
-{% include "tools/base_title.html" %}
+<div class="col-md-12 grid-card">
+    {% set title      = "SQL控制台" %}
+    {% include "tools/base_title.html" %}
 
-{% if error != "" %}
-<pre class="col-md-12 error">
-{{error}}
-</pre>
-{% end %}
+    {% if error != "" %}
+    <pre class="col-md-12 error">
+    {{error}}
+    </pre>
+    {% end %}
 
-<div class="col-md-12">
-<form>
-    <p>Path
-    <select name="path" value="{{path}}">
-        <option value="{{path}}">{{path}}</option>
-        {% for p in path_list %}
-            <option value="{{p}}">{{p}}</option>
-        {% end %}
-    </select>
-    </p>
-    <textarea id="editor" name="sql" style="width:100%;">{{sql}}</textarea>
-    <button>Run</button>
-</form>
-</div>
 
-{% if cost_time is not None %}
-<div class="col-md-12">
-耗时: {{cost_time}} ms
-</div>
-{% end %}
-
-<div class="row">
-{% if len(keys) > 0 %}
-
-    <table class="table">
-        <tr>
-            {% for key in keys %}
-            <th>{{key}}</th>
-            {% end %} <!-- for end -->
-        </tr>
-
-        {% for record in result_list %}
-            <tr>
-            {% for val in record.values() %}
-                <td>{{val}}</td>
+    <form>
+        <p>Path
+        <select name="path" value="{{path}}">
+            <option value="{{path}}">{{path}}</option>
+            {% for p in path_list %}
+                <option value="{{p}}">{{p}}</option>
             {% end %}
-            </tr>
-        {% end %}
-    </table>
+        </select>
+        </p>
+        <textarea id="editor" name="sql" style="width:100%;">{{sql}}</textarea>
+        <button>Run</button>
+    </form>
+</div>
 
-{% end %} <!-- if end -->
+<div class="grid-card">
+
+    {% if cost_time is not None %}
+    <div class="col-md-12">
+    耗时: {{cost_time}} ms
+    </div>
+    {% end %}
+
+    <div class="row">
+    {% if len(keys) > 0 %}
+
+        <table class="table">
+            <tr>
+                {% for key in keys %}
+                <th>{{key}}</th>
+                {% end %} <!-- for end -->
+            </tr>
+
+            {% for record in result_list %}
+                <tr>
+                {% for val in record.values() %}
+                    <td>{{val}}</td>
+                {% end %}
+                </tr>
+            {% end %}
+        </table>
+
+    {% end %} <!-- if end -->
+
+    </div>
 
 </div>
 

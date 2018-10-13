@@ -4,29 +4,31 @@
 {% end %}
 {% block body %}
 
-{% set title = "16进制转换器" %}
-{% include "tools/base_title.html" %}
+<div class="card">
+    {% set title = "16进制转换器" %}
+    {% include "tools/base_title.html" %}
 
-<div class="col-md-6">
-    <textarea id="input" class="col-md-12" rows=10></textarea>
-</div>
+    <div class="col-md-6">
+        <textarea id="input" class="col-md-12" rows=10 placeholder="输入"></textarea>
+    </div>
 
-<div class="col-md-6">
-    <textarea id="output" class="col-md-12" rows=10></textarea>
-</div>
+    <div class="col-md-6">
+        <textarea id="output" class="col-md-12" rows=10 placeholder="输出"></textarea>
+    </div>
 
-<div class="col-md-12">
-    <button onclick="hexToUtf8()">Hex->UTF8</button>
-    <button onclick="utf8ToHex()">UTF8->Hex</button>
-    <button onclick="numToHex()">Number->Hex</button>
-    <button onclick="hexToNum()">Hex->Number</button>
-</div>
+    <div class="col-md-12">
+        <button onclick="hexToUtf8()">Hex->UTF8</button>
+        <button onclick="utf8ToHex()">UTF8->Hex</button>
+        <button onclick="numToHex()">Number->Hex</button>
+        <button onclick="hexToNum()">Hex->Number</button>
+    </div>
 
-<div id="error" class="col-md-12" style="color:red;">
-</div>
+    <div id="error" class="col-md-12" style="color:red;">
+    </div>
 
-<div class="col-md-12">
-    <p>hex格式省略0x, 比如'hello'写成16进制为<code>68656c6c6f</code></p>
+    <div class="col-md-12">
+        <p>hex格式省略0x, 比如'hello'写成16进制为<code>68656c6c6f</code></p>
+    </div>
 </div>
 
 <script>

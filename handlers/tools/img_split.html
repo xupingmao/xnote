@@ -12,10 +12,14 @@
 
 <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
+<div class="card">
     {% set title = "图片拆分" %}
     {% include "tools/base_title.html" %}
+    <p>点击画布可以选择图片进行分割,设置列数和行数都为1可以用来调整图片大小</p>
+</div>
 
-<div id="app">
+
+<div id="app" class="card">
     <input type="file" name="file" id="file" value="选择图片" onchange="handleFiles(this.files)" class="hide" multiple="multiple">
     <div class="col-md-12">
         <div>
@@ -44,10 +48,6 @@
         <canvas id="canvas"></canvas>
         <canvas id="extractCanvas" class="hide"></canvas>
     </div>
-</div>
-<div class="col-md-12">
-    <h4>说明</h4>
-    <p>点击画布可以选择图片进行分割,设置列数和行数都为1可以用来调整图片大小</p>
 </div>
 
 <script type="text/javascript">

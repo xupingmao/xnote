@@ -5,23 +5,24 @@
 {% end %}
 {% block body %}
 
+<div class="card">
     {% set title = "Base64编解码" %}
     {% include "tools/base_title.html" %}
 
+    <div class="col-md-6">
+        <label>Input</label>
+        <textarea id="input" class="col-md-12" rows=10></textarea>
+    </div>
 
-<div class="col-md-6">
-<label>Input</label>
-<textarea id="input" class="col-md-12" rows=10></textarea>
-</div>
+    <div class="col-md-6">
+        <label>Output</label>
+        <textarea id="output" class="col-md-12" rows=10></textarea>
+    </div>
 
-<div class="col-md-6">
-<label>Output</label>
-<textarea id="output" class="col-md-12" rows=10></textarea>
-</div>
-
-<div class="col-md-12">
-    <button onclick="base64Encode()">Encode</button>
-    <button onclick="base64Decode()">Decode</button>
+    <div class="col-md-12">
+        <button onclick="base64Encode()">Encode</button>
+        <button onclick="base64Decode()">Decode</button>
+    </div>
 </div>
 
 <script>

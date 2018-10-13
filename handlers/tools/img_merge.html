@@ -17,7 +17,7 @@ label {
 
 <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
-<div class="col-md-12">
+<div class="col-md-12 card">
     {% set title = "图片合并" %}
     {% include "tools/base_title.html" %}
 
@@ -28,7 +28,7 @@ label {
     </p>
 </div>
 
-<div id="app">
+<div id="app" class="card">
     <input type="file" name="file" id="file" value="选择图片" onchange="handleFiles(this.files)" class="hide" multiple="multiple">
     <div class="col-md-12">
             <label>列数</label>
@@ -196,17 +196,20 @@ $("#canvas").on("click", function (event) {
 
 $("#toggleResult").on("click", function (event) {
     var canvas = $("#realCanvas")[0];
-    if ($("#canvas").hasClass('hide')) {
-        // 预览 -> 编辑
-        $("#canvas").removeClass("hide");
-        $("#toggleResult").text("编辑");
-    } else {
+    if ($("#targetImage").hasClass('hide')) {
         // 编辑 -> 预览
-        $("#targetImage").addClass('hide');
-        $("#canvas").addClass("hide");
-        $("#toggleResult").text("预览");
+        // $("#realCanvas").removeClass("hide");
+        $("#targetImage").removeClass('hide');
+        $("#canvas").addClass('hide');
+        $("#toggleResult").text("编辑");
         // 生成图片
-        $("#targetImage").attr("src", canvas.toDataURL()).removeClass('hide');
+        $("#targetImage").attr("src", canvas.toDataURL());
+    } else {
+        // 预览 -> 编辑
+        // $("#realCanvas").addClass('hide');
+        $("#targetImage").addClass('hide');
+        $("#canvas").removeClass("hide");
+        $("#toggleResult").text("预览");
     }
 });
 

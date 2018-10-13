@@ -5,21 +5,23 @@
 {% end %}
 {% block body %}
 
+<div class="card">
 {% set title = "MD5" %}
 {% include "tools/base_title.html" %}
 
 <div class="col-md-6">
-<label>Input</label>
-<textarea id="input" class="col-md-12" rows=10></textarea>
+    <label>Input</label>
+    <textarea id="input" class="col-md-12" rows=10></textarea>
 </div>
 
 <div class="col-md-6">
-<label>Output</label>
-<textarea id="output" class="col-md-12" rows=10></textarea>
+    <label>Output</label>
+    <textarea id="output" class="col-md-12" rows=10></textarea>
 </div>
 
 <div class="col-md-12">
     <button onclick="md5Encode()">Encode</button>
+</div>
 </div>
 
 <script>

@@ -5,229 +5,11 @@
 {% end %}
 
 {% block body %}
+
+<div class="card">
     {% set title = "代码模板" %}
     {% include "tools/base_title.html" %}
-    
-<script>
 
-function toCamel(name) {
-	return name.replace(/_\w/g, function(m) {
-		return m[1].toUpperCase();
-	})
-}
-
-function toUnderscore(name) {
-    return name.replace(/[a-z][A-Z]/g, function(m) {
-        return m[0]+"_"+m[1].toLowerCase();
-    });
-}
-
-function bashformat(fmt, data) {
-	var reg = /\$(\w+)/gi;
-	return fmt.replace(reg, function (part) {
-		var key = part.substring(1);
-		if (key in data) {
-			return data[key];
-		}
-		return part;
-	});
-}
-
-
-function splitWords (string) {
-    var rawWords = string.split(/[ \t\r\n]/);
-    var words = [];
-    for (var i = 0; i < rawWords.length; i++) {
-        var item = rawWords[i];
-        item = item.trim();
-        if (item != "") {
-            words.push(item);
-        }
-    };
-    return words;
-}
-
-
-function gen_markdown_table (inputStr, opt) {
-    
-    inputStr = inputStr.replace("\r", "");
-    var lines = inputStr.split("\n");
-
-    var isFirstLine = true;
-    var result = "";
-
-    for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
-        var words = splitWords(line);
-        if (words.length == 0) {
-            continue;
-        }
-        if (isFirstLine) {
-            result += "|" + words.join("|") + "|";
-            result += "\n";
-            var cols = [];
-            for (var i = 0; i < words.length; i++) {
-                cols.push("--")
-            };
-            result += "|" + cols.join("|") + "|\n";
-            isFirstLine = false;
-        } else {
-            result += "|" + words.join("|") + "|\n";
-        }
-    };
-    return result;
-}
-
-
-function gen_protobuf_dao(inputStr, option) {
-	var lexer = new Lexer();
-	var tokens = lexer.parse(inputStr);
-	var out = "";
-	for (var i = 0; i < tokens.length; i+=2) {
-		var name = tokens[i].value;
-		var type = tokens[i+1].value;
-		var vars = {
-		type: type,
-		origin_name: name,
-		name: toCamel(name),
-		get: toCamel("get_" + name),
-		set: toCamel("set_" + name)
-		};
-		var defines1 = bashformat("@Column(name = \"$origin_name\")\npublic $type $get() {\n return data.$get();\n}\n",
-		vars);
-		var defines2 = bashformat("public void $set($type $name){\n data.$set($name);\n}\n", vars);
-		out += defines1 + defines2;
-	}
-	return out;
-}
-
-/**
- * 生成JPA的实体
- * @param {string} inputStr
- * @param {object} option
- */
-function gen_jpa_entity(inputStr, option) {
-    var lexer = new Lexer();
-    var tokens = lexer.parse(inputStr);
-    var out = "";
-    var inputStrComment = "";
-    inputStrComment += "/** \n";
-    inputStrComment += inputStr;
-    inputStrComment += "\n**/\n\n";
-
-    var declare_list = ["@Id"];
-    for (var i = 0; i < tokens.length; i+=2) {
-        var name = tokens[i].value;
-        var type = tokens[i+1].value;
-        var vars = {
-        type: type,
-        origin_name: name,
-        name: toCamel(name),
-        get: toCamel("get_" + name),
-        set: toCamel("set_" + name)
-        };
-        var decl = bashformat("@Column(name = \"$origin_name\")\nprivate $type $name;\n", vars);
-        var defines1 = bashformat("\npublic $type $get() {\n return this.$name;\n}\n",
-        vars);
-        var defines2 = bashformat("public void $set($type $name){\n this.$name = $name;\n}\n", vars);
-
-        declare_list.push(decl);
-        out += defines1 + defines2;
-    }
-    return inputStrComment + declare_list.join("\n") + "\n" + out;
-}
-/**
- * @param {string} inputStr
- * @param {object} option
- * @param {function} callback
- */
-function handle_pairs(inputStr, option, callback) {
-    var lexer = new Lexer();
-    var tokens = lexer.parse(inputStr);
-    var declare_list = [];
-
-    for (var i = 0; i < tokens.length; i+=2) {
-        var name = tokens[i].value;
-        var type = tokens[i+1].value;
-        declare_list.push(callback(i, name, type));
-    }
-    return declare_list.join("\n") + "\n";
-}
-
-function gen_pojo(inputStr, option) {
-	var lexer = new Lexer();
-	var tokens = lexer.parse(inputStr);
-	var out = "";
-    var declare_list = [];
-
-	for (var i = 0; i < tokens.length; i+=2) {
-		var name = tokens[i].value;
-		var type = tokens[i+1].value;
-		var vars = {
-		type: type,
-		origin_name: name,
-		name: toCamel(name),
-		get: toCamel("get_" + name),
-		set: toCamel("set_" + name)
-		};
-        var decl = bashformat("private $type $name;", vars);
-		var defines1 = bashformat("public $type $get() {\n return this.$name;\n}\n",
-		vars);
-		var defines2 = bashformat("public void $set($type $name){\n this.$name = $name;\n}\n", vars);
-        
-        declare_list.push(decl);
-		out += defines1 + defines2;
-	}
-	return declare_list.join("\n") + "\n" + out;
-}
-
-function gen_java_to_string(inputStr, option) {
-    var callback = function (i, name) {
-        var text = '';
-        if (i != 0) {
-            text += bashformat('sb.append(",$name=");\n', {name: name});
-        } else {
-            text += bashformat('sb.append("$name=");\n', {name: name});
-        }
-        text += bashformat('sb.append($func());', {func: toCamel("get_" + name)});
-        return text;
-    }
-
-    var lexer = new Lexer();
-    var tokens = lexer.parse(inputStr);
-    var declare_list = [];
-
-    for (var i = 0; i < tokens.length; i+=1) {
-        var name = tokens[i].value;
-        declare_list.push(callback(i, name));
-    }
-    var doc = "/* Generated by code_template\n"
-    doc += inputStr;
-    doc += "\n*/\n";
-    return doc + "StringBuilder sb = new StringBuilder();\n"
-        + "sb.append('{');\n"
-        + declare_list.join("\n") + "\n"
-        + "sb.append('}');\n"
-        + "return sb.toString();";
-}
-
-function gen_java_converter(inputStr, option) {
-    var lexer = new Lexer();
-    var tokens = lexer.parse(inputStr);
-    var source = tokens[0].value;
-    var target = tokens[1].value;
-    var code = "";
-    for (var i = 2; i < tokens.length; i++) {
-        var name = tokens[i].value;
-        var getName = toCamel("get_" + name);
-        var setName = toCamel("set_" + name);
-        code += bashformat("$target.$setName($source.$getName());\n", 
-            {source:source, target:target, getName:getName, setName:setName});
-    }
-    return code;
-}
-
-</script>
 <div class="container col-md-6">
     <textarea id="input" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
 </div>
@@ -290,6 +72,228 @@ public void setUserName(String userName) {
 
 <div class="col-md-12" id="error" style="color:red">
 </div>
+</div>
+    
+<script>
+
+function toCamel(name) {
+    return name.replace(/_\w/g, function(m) {
+        return m[1].toUpperCase();
+    })
+}
+
+function toUnderscore(name) {
+    return name.replace(/[a-z][A-Z]/g, function(m) {
+        return m[0]+"_"+m[1].toLowerCase();
+    });
+}
+
+function bashformat(fmt, data) {
+    var reg = /\$(\w+)/gi;
+    return fmt.replace(reg, function (part) {
+        var key = part.substring(1);
+        if (key in data) {
+            return data[key];
+        }
+        return part;
+    });
+}
+
+
+function splitWords (string) {
+    var rawWords = string.split(/[ \t\r\n]/);
+    var words = [];
+    for (var i = 0; i < rawWords.length; i++) {
+        var item = rawWords[i];
+        item = item.trim();
+        if (item != "") {
+            words.push(item);
+        }
+    };
+    return words;
+}
+
+
+function gen_markdown_table (inputStr, opt) {
+    
+    inputStr = inputStr.replace("\r", "");
+    var lines = inputStr.split("\n");
+
+    var isFirstLine = true;
+    var result = "";
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var words = splitWords(line);
+        if (words.length == 0) {
+            continue;
+        }
+        if (isFirstLine) {
+            result += "|" + words.join("|") + "|";
+            result += "\n";
+            var cols = [];
+            for (var i = 0; i < words.length; i++) {
+                cols.push("--")
+            };
+            result += "|" + cols.join("|") + "|\n";
+            isFirstLine = false;
+        } else {
+            result += "|" + words.join("|") + "|\n";
+        }
+    };
+    return result;
+}
+
+
+function gen_protobuf_dao(inputStr, option) {
+    var lexer = new Lexer();
+    var tokens = lexer.parse(inputStr);
+    var out = "";
+    for (var i = 0; i < tokens.length; i+=2) {
+        var name = tokens[i].value;
+        var type = tokens[i+1].value;
+        var vars = {
+        type: type,
+        origin_name: name,
+        name: toCamel(name),
+        get: toCamel("get_" + name),
+        set: toCamel("set_" + name)
+        };
+        var defines1 = bashformat("@Column(name = \"$origin_name\")\npublic $type $get() {\n return data.$get();\n}\n",
+        vars);
+        var defines2 = bashformat("public void $set($type $name){\n data.$set($name);\n}\n", vars);
+        out += defines1 + defines2;
+    }
+    return out;
+}
+
+/**
+ * 生成JPA的实体
+ * @param {string} inputStr
+ * @param {object} option
+ */
+function gen_jpa_entity(inputStr, option) {
+    var lexer = new Lexer();
+    var tokens = lexer.parse(inputStr);
+    var out = "";
+    var inputStrComment = "";
+    inputStrComment += "/** \n";
+    inputStrComment += inputStr;
+    inputStrComment += "\n**/\n\n";
+
+    var declare_list = ["@Id"];
+    for (var i = 0; i < tokens.length; i+=2) {
+        var name = tokens[i].value;
+        var type = tokens[i+1].value;
+        var vars = {
+        type: type,
+        origin_name: name,
+        name: toCamel(name),
+        get: toCamel("get_" + name),
+        set: toCamel("set_" + name)
+        };
+        var decl = bashformat("@Column(name = \"$origin_name\")\nprivate $type $name;\n", vars);
+        var defines1 = bashformat("\npublic $type $get() {\n return this.$name;\n}\n",
+        vars);
+        var defines2 = bashformat("public void $set($type $name){\n this.$name = $name;\n}\n", vars);
+
+        declare_list.push(decl);
+        out += defines1 + defines2;
+    }
+    return inputStrComment + declare_list.join("\n") + "\n" + out;
+}
+/**
+ * @param {string} inputStr
+ * @param {object} option
+ * @param {function} callback
+ */
+function handle_pairs(inputStr, option, callback) {
+    var lexer = new Lexer();
+    var tokens = lexer.parse(inputStr);
+    var declare_list = [];
+
+    for (var i = 0; i < tokens.length; i+=2) {
+        var name = tokens[i].value;
+        var type = tokens[i+1].value;
+        declare_list.push(callback(i, name, type));
+    }
+    return declare_list.join("\n") + "\n";
+}
+
+function gen_pojo(inputStr, option) {
+    var lexer = new Lexer();
+    var tokens = lexer.parse(inputStr);
+    var out = "";
+    var declare_list = [];
+
+    for (var i = 0; i < tokens.length; i+=2) {
+        var name = tokens[i].value;
+        var type = tokens[i+1].value;
+        var vars = {
+        type: type,
+        origin_name: name,
+        name: toCamel(name),
+        get: toCamel("get_" + name),
+        set: toCamel("set_" + name)
+        };
+        var decl = bashformat("private $type $name;", vars);
+        var defines1 = bashformat("public $type $get() {\n return this.$name;\n}\n",
+        vars);
+        var defines2 = bashformat("public void $set($type $name){\n this.$name = $name;\n}\n", vars);
+        
+        declare_list.push(decl);
+        out += defines1 + defines2;
+    }
+    return declare_list.join("\n") + "\n" + out;
+}
+
+function gen_java_to_string(inputStr, option) {
+    var callback = function (i, name) {
+        var text = '';
+        if (i != 0) {
+            text += bashformat('sb.append(",$name=");\n', {name: name});
+        } else {
+            text += bashformat('sb.append("$name=");\n', {name: name});
+        }
+        text += bashformat('sb.append($func());', {func: toCamel("get_" + name)});
+        return text;
+    }
+
+    var lexer = new Lexer();
+    var tokens = lexer.parse(inputStr);
+    var declare_list = [];
+
+    for (var i = 0; i < tokens.length; i+=1) {
+        var name = tokens[i].value;
+        declare_list.push(callback(i, name));
+    }
+    var doc = "/* Generated by code_template\n"
+    doc += inputStr;
+    doc += "\n*/\n";
+    return doc + "StringBuilder sb = new StringBuilder();\n"
+        + "sb.append('{');\n"
+        + declare_list.join("\n") + "\n"
+        + "sb.append('}');\n"
+        + "return sb.toString();";
+}
+
+function gen_java_converter(inputStr, option) {
+    var lexer = new Lexer();
+    var tokens = lexer.parse(inputStr);
+    var source = tokens[0].value;
+    var target = tokens[1].value;
+    var code = "";
+    for (var i = 2; i < tokens.length; i++) {
+        var name = tokens[i].value;
+        var getName = toCamel("get_" + name);
+        var setName = toCamel("set_" + name);
+        code += bashformat("$target.$setName($source.$getName());\n", 
+            {source:source, target:target, getName:getName, setName:setName});
+    }
+    return code;
+}
+
+</script>
         
 <script>
 

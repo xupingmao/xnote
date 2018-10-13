@@ -2,10 +2,11 @@
 
 {% block body %}
 
+
+<div class="col-md-12 card">
     {% set title = "图片灰度化" %}
     {% include "tools/base_title.html" %}
 
-<div class="col-md-12">
     <input id="file" type="file" onchange="handleFiles(this.files)" class="hide" />
     <input type="button" id="selectBtn" class="btn" value="选择图片"/>
     <input class="btn" id="rotateClockwise" type="button" value="顺时针旋转"/>
@@ -30,7 +31,7 @@
     </div>
 </div>
 
-<div class="row top-offset-1">
+<div class="card row">
     <canvas id="myCanvas"></canvas>
 </div>
 <script type="text/javascript">
