@@ -173,7 +173,7 @@ function rename(id, oldName) {
     var newName = prompt("新名称", oldName);
     console.log(newName);
     if (newName != "" && newName != null) {
-        $.post("/file/rename", {id:id, name:newName}, function (resp) {
+        $.post("/note/rename", {id:id, name:newName}, function (resp) {
             var code = resp.code;
             if (code != "success") {
                 alert(resp.message);
@@ -188,7 +188,7 @@ function rename(id, oldName) {
 function remove(id, name, parentId) {
     var confirmed = confirm("确定删除'" + name + "'?");
     if (confirmed) {
-        $.post("/file/remove", {id:id}, function (resp) {
+        $.post("/note/remove", {id:id}, function (resp) {
             var code = resp.code;
             if (code != "success") {
                 alert(resp.message);

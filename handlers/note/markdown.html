@@ -28,7 +28,7 @@
     function delLink() {
         var r = confirm("确认删除 {{file.name}}?");
         if (r) {
-            location.href="/file/update?option=del&id={{file.id}}";
+            location.href="/note/update?option=del&id={{file.id}}";
         }
     }
 
@@ -63,7 +63,7 @@
         var oldName = $("#oldName").html();
         var newName = $("#newName").val();
         if (newName) {
-            $.post("/file/update", {
+            $.post("/note/update", {
                 option: "rename",
                 fileId: fileId,
                 newName: newName

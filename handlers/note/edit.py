@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/09/22 23:19:02
+# @modified 2018/10/14 18:32:55
 
 """Description here"""
 import os
@@ -269,7 +269,7 @@ class UnshareHandler:
         tag.update(is_public=0, where=dict(file_id=id, user=xauth.get_current_name()))
         raise web.seeother("/note/view?id=%s"%id)
 
-class FileSaveHandler:
+class AjaxSaveHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -302,6 +302,7 @@ class FileSaveHandler:
             kw["size"]    = len(content)
         rowcount = update_note(db, where, **kw)
         if rowcount > 0:
+            xmanager.fire('note.updated', dict(id=id, name=name, content=content))
             return dict(code="success")
         else:
             return dict(code="fail")
@@ -348,19 +349,16 @@ class UpdateHandler:
                 error    = "更新失败, 版本冲突,当前version={},最新version={}".format(version, cur_version))
 
 xurls = (
-    r"/file/add"         , AddHandler,
     r"/note/add"         , AddHandler,
-    r"/file/remove"      , RemoveHandler,
     r"/note/remove"      , RemoveHandler,
+    r"/note/rename"      , RenameHandler,
+    r"/note/update"      , UpdateHandler,
     r"/file/dict/put"    , DictPutHandler,
-    r"/file/rename"      , RenameHandler,
     r"/file/share"       , ShareHandler,
     r"/file/share/cancel", UnshareHandler,
-    r"/file/update"      , UpdateHandler,
-    r"/note/update"      , UpdateHandler,
-    r"/file/save"        , FileSaveHandler,
-    r"/note/save"        , FileSaveHandler,
-    r"/file/autosave"    , FileSaveHandler
+    r"/file/save"        , AjaxSaveHandler,
+    r"/note/save"        , AjaxSaveHandler,
+    r"/file/autosave"    , AjaxSaveHandler
 )
 
 

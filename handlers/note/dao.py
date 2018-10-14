@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/09/16 11:48:00
+# @modified 2018/10/14 18:22:14
 
 """资料的DAO操作集合
 
@@ -65,7 +65,7 @@ class FileDO(dict):
             file.content = ""
         if option:
             file.option = option
-        file.url = "/file/view?id={}".format(dict["id"])
+        file.url = "/note/view?id={}".format(dict["id"])
         return file
 
 def query_note_conent(id):
@@ -89,7 +89,7 @@ def build_note(dict):
         note.content = content
     if data is not None:
         note.data = data
-    note.url = "/file/view?id={}".format(dict["id"])
+    note.url = "/note/view?id={}".format(dict["id"])
     return note
 
 

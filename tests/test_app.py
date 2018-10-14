@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/10/14 11:43:22
+# @modified 2018/10/14 18:30:15
 
 import sys
 import os
@@ -163,19 +163,19 @@ class TestMain(unittest.TestCase):
         self.check_200("/note/timeline")
 
     def test_file_editor_md(self):
-        json_request("/file/remove?name=xnote-md-test")
-        file = json_request("/file/add", method="POST",
+        json_request("/note/remove?name=xnote-md-test")
+        file = json_request("/note/add", method="POST",
             data=dict(name="xnote-md-test", type="md", content="hello markdown"))
         id = file["id"]
         file = json_request("/file/view?id=%s&_format=json" % id).get("file")
         self.assertEqual("md", file["type"])
         self.assertEqual("hello markdown", file["content"])
         self.check_200("/file/edit?id=%s"%id)
-        json_request("/file/remove?id=%s" % id)
+        json_request("/note/remove?id=%s" % id)
 
     def test_file_editor_html(self):
-        json_request("/file/remove?name=xnote-html-test")
-        file = json_request("/file/add", method="POST",
+        json_request("/note/remove?name=xnote-html-test")
+        file = json_request("/note/add", method="POST",
             data=dict(name="xnote-html-test", type="html"))
         id = file["id"]
         self.assertTrue(id != "")
@@ -187,7 +187,7 @@ class TestMain(unittest.TestCase):
         if xutils.bs4 != None:
             self.assertEqual("hello", file["content"])
         self.check_200("/file/edit?id=%s"%id)
-        json_request("/file/remove?id=%s" % id)
+        json_request("/note/remove?id=%s" % id)
 
     def test_file_group(self):
         self.check_200("/file/group")
@@ -196,8 +196,8 @@ class TestMain(unittest.TestCase):
         self.check_200("/note/recent_created")
 
     def test_file_share(self):
-        json_request("/file/remove?name=xnote-share-test")
-        file = json_request("/file/add", method="POST", 
+        json_request("/note/remove?name=xnote-share-test")
+        file = json_request("/note/add", method="POST", 
             data=dict(name="xnote-share-test", content="hello"))
         id = file["id"]
         self.check_OK("/file/share?id=" + str(id))
@@ -208,7 +208,7 @@ class TestMain(unittest.TestCase):
         file = json_request("/file/view?id=%s&_format=json" % id).get("file")
         self.assertEqual(0, file["is_public"])
 
-        json_request("/file/remove?id=" + str(id))
+        json_request("/note/remove?id=" + str(id))
 
     def test_file_timeline(self):
         json_request("/file/timeline")

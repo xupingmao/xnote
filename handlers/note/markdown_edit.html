@@ -93,7 +93,7 @@
 </div>
 
 <div class="grid-card">
-    <form id="mainFrame" action="/file/update" enctype="multipart/form-data" method="POST" class="col-md-12">
+    <form id="mainFrame" action="/note/update" enctype="multipart/form-data" method="POST" class="col-md-12">
         <div class="col-md-12" id="submit-div">
             <div>
                 <span id="fileId" class="hide">{{file.id}}</span>
@@ -147,7 +147,7 @@
     function delLink() {
         var r = confirm("确认删除 {{file.name}}?");
         if (r) {
-            location.href = "/file/update?option=del&id={{file.id}}";
+            location.href = "/note/update?option=del&id={{file.id}}";
         }
     }
 
