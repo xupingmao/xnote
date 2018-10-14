@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/10/13 13:26:50
+# @modified 2018/10/14 13:02:39
 
 """
 Xnote 模块管理器
@@ -55,6 +55,7 @@ def wrapped_handler(pattern, handler_clz):
         """
         # 防止自动转大数，浮点数不会转
         visited_count = 0.0
+        handler_class = handler_clz
 
         def __init__(self):
             self.target_class = handler_clz

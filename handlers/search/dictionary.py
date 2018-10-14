@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2018/10/02 17:40:02
+# @modified 2018/10/14 11:36:02
 
 """
 英汉、汉英词典
@@ -17,15 +17,15 @@ import xutils
 import xmanager
 import xconfig
 import xtables
-from xutils import u, Storage, SearchResult
+from xutils import u, Storage, SearchResult, textutil
 
 def wrap_results(dicts, origin_key):
     files = []
     for f0 in dicts:
         f = SearchResult()
         f.name = u("翻译 - ") + u(f0[origin_key])
-        f.raw = f0["en"] + "\n"
-        f.raw += f0["cn"].replace("\\n", "\n")
+        f.raw = f0["key"] + "\n"
+        f.raw += f0["value"].replace("\\n", "\n")
         f.url = "#"
         files.append(f)
     return files
@@ -42,18 +42,27 @@ def search(ctx, word):
     dicts = xutils.db_execute(path, sql, (word,))
     return wrap_results(dicts, "en")
 
-def zh2en(ctx, word):
-    word = word.lower()
+@xmanager.listen("search")
+def do_translate(ctx):
+    key    = ctx.key
+    result = re.match(r"翻译\s*([^\s]+)", key)
+    if result:
+        word = result.groups()[0]
+    else:
+        return
+    word = word.strip().lower()
     path = os.path.join(xconfig.DATA_PATH, "dictionary.db")
     if not os.path.exists(path):
-        return []
-    sql = "SELECT * FROM dictTB WHERE cn LIKE ?"
-    dicts = xutils.db_execute(path, sql, ('%' + word,))
-    if len(dicts) > 0:
-        return wrap_results(dicts, "cn")
-    sql = "SELECT * FROM dictTB WHERE cn LIKE ?"
-    dicts = xutils.db_execute(path, sql, ('%' + word + '%',))
-    return wrap_results(dicts, "cn")
+        return
+    user_name = ctx.user_name
+    table     = xtables.get_dict_table()
+    if textutil.isalpha(word):
+        dicts = table.select(where="key LIKE $key",
+            vars = dict(key = word + '%'))
+    else:
+        dicts = table.select(where="value LIKE $value", 
+            vars = dict(value = '%' + word + '%', user = user_name))
+    ctx.tools += wrap_results(dicts, "key")
 
 def find(ctx, *args):
     """使用词库进行部分模糊匹配"""

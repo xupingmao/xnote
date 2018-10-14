@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/10/08 00:49:04
+# @modified 2018/10/14 11:43:22
 
 import sys
 import os
@@ -356,6 +356,9 @@ class TestMain(unittest.TestCase):
     def test_search_mute(self):
         self.check_200(xutils.quote_unicode("/search?key=静音"))
         self.assertTrue(xconfig.MUTE_END_TIME != None)
+
+    def test_search_translate(self):
+        self.check_200(xutils.quote_unicode("/search?key=翻译test"))
 
     def test_http_headers(self):
         data = app.request("/api/http_headers", headers=dict(X_TEST=True)).data

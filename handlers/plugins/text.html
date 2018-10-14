@@ -46,24 +46,24 @@
         {% end %}
     </div>
 
-    {% if html %}
-    <div class="col-md-12 grid-card">{% raw html %}</div>
+    {% if html != None and html != "" %}
+    <div class="col-md-12 card">{% raw html %}</div>
     {% end %}
 
     {# 文本输出放到后面 #}
     {% if output != None and output != "" %}
-    <pre class="col-md-12 plugin-output">{{ output }}</pre>
+    <pre class="col-md-12 card">{{ output }}</pre>
     {% end %}
 
-    <div class="grid-card">
     {% if model.show_pagenation %}
+    <div class="card">
         {# 分页 #}
         {% set page = model.page %}
         {% set page_max = model.page_max %}
         {% set page_url = model.page_url %}
         {% include mod_pagenation.html %}
-    {% end %}
     </div>
+    {% end %}
 {% end %}
 
 {% block aside %}

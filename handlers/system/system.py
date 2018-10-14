@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/10/14 01:09:13
+# @modified 2018/10/14 01:43:58
 
 """Description here"""
 from io import StringIO
@@ -185,7 +185,7 @@ xurls = (
 )
 
 @xmanager.listen("sys.reload")
-def on_init(ctx = None):
+def on_reload(ctx = None):
     path = os.path.join(xconfig.SCRIPTS_DIR, "user.css")
     if not os.path.exists(path):
         return 

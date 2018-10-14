@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/10/03 19:01:11
+# @modified 2018/10/14 11:37:40
 
 import re
 import os
@@ -59,10 +59,10 @@ class SearchContext:
         self.search_tool      = True
         
         # 处理的结果集
-        self.tools         = []
-        self.notes         = []
-        self.dict_files    = []
-        self.message_files = []
+        self.tools    = []
+        self.notes    = []
+        self.dicts    = []
+        self.messages = []
 
 def fill_note_info(files):
     db = xtables.get_note_table()
@@ -172,7 +172,6 @@ def load_rules():
         return
     add_rule(r"(.*[0-9]+.*)",           "calc.do_calc")
     add_rule(r"([a-zA-Z0-9\.]+)",       "pydoc.search")
-    add_rule(r"翻译\s+([^ ]+)",         "dictionary.zh2en")
     add_rule(r"[a-zA-Z\-]+", "dictionary.find")
     add_rule(r"([^ ]*)",                "tools.search")
     add_rule(r"([^ ]*)",                "api.search")
