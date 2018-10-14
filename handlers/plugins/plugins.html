@@ -31,7 +31,7 @@
 {% init recent = [] %}
 <div class="plugin-list">
     {% for link in plugins %}
-    <div class="plugin-item">
+    <div class="plugin-item card">
         <div class="col-md-12">
             <a href="{{link.link}}">{{link.name}}</a>
             {% if _is_admin %}
@@ -56,9 +56,19 @@
     </div>
     <div class="aside-content">
         <ul>
-            <li>插件数: {{len(plugins)}}</li>
             <li><a class="link" href="/plugins_new">新增插件</a></li>
             <li><a href="/fs_link/scripts/plugins" class="link">插件管理</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="aside-item">
+    <div class="aside-title">
+        统计
+    </div>
+    <div class="aside-content">
+        <ul>
+            <li>插件数: {{len(plugins)}}</li>
         </ul>
     </div>
 </div>

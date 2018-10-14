@@ -1,5 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/14
+# @modified 2018/10/15 01:42:26
 import os
 import six
 import xconfig
@@ -7,21 +8,6 @@ import xutils
 import xauth
 import xmanager
 from xutils import SearchResult, u, textutil
-
-def search_plugins(name):
-    results = []
-    dirname = xconfig.PLUGINS_DIR
-    words   = textutil.split_words(name)
-    for fname in xutils.listdir(dirname):
-        unquote_name = xutils.unquote(fname)
-        if textutil.contains_all(unquote_name, words):
-            result           = SearchResult()
-            result.category  = "plugin"
-            result.name      = u("插件 - " + unquote_name)
-            result.url       = u("/plugins/" + fname)
-            result.edit_link = u("/code/edit?path=" + os.path.join(dirname, fname))
-            results.append(result)
-    return results
 
 def search_scripts(name):
     results = []
@@ -49,9 +35,7 @@ def on_search_scripts(ctx):
     if ctx.search_dict:
         return
     name    = ctx.key
-    results = search_plugins(name)
-    results += search_scripts(name)
-    ctx.tools += results
+    ctx.tools += search_scripts(name)
 
 
 @xmanager.listen("search")

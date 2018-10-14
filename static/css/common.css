@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/14 11:39:44
+@modified 2018/10/15 02:02:24
 */
 
 * {
@@ -350,6 +350,12 @@ table td {
 
 .list-item:hover {
     background-color: #eee;
+}
+
+/** 列表图标 **/
+.list-icon {
+    float: left;
+    padding-right: 5px;
 }
 
 /** 以下为具体场景下的样式 **/
@@ -1195,7 +1201,6 @@ li.menu-item:hover {
 
 /** 消息 **/
 .chat-msg-div {
-    margin-top: 10px;
     float: left;
     width: 100%;
     background-color: #fff;

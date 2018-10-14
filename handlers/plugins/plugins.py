@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/10/06 12:27:34
+# @modified 2018/10/15 01:51:30
 from io import StringIO
 import xconfig
 import codecs
@@ -22,6 +22,7 @@ from xtemplate import BasePlugin
 from xutils import History
 from xutils import cacheutil
 from xutils import Storage
+from xutils import textutil, SearchResult, u
 
 def link(name, url):
     return Storage(name = name, url = url, link = url)
@@ -81,6 +82,33 @@ def load_plugin(name):
         return main_class
     else:
         return context.clazz
+
+@xmanager.listen("search")
+def on_search_plugins(ctx):
+    if not xauth.is_admin():
+        return
+    if not ctx.search_tool:
+        return
+    if ctx.search_dict:
+        return
+    name    = ctx.key
+    results = []
+    dirname = xconfig.PLUGINS_DIR
+    words   = textutil.split_words(name)
+    for fname in xutils.listdir(dirname):
+        unquote_name = xutils.unquote(fname)
+        plugin_context = xconfig.PLUGINS.get(fname)
+        if textutil.contains_all(unquote_name, words) \
+                or (plugin_context != None and textutil.contains_all(plugin_context.title, words)):
+            result           = SearchResult()
+            result.category  = "plugin"
+            result.name      = u("插件 - " + unquote_name)
+            if plugin_context != None:
+                result.raw = u(plugin_context.title)
+            result.url       = u("/plugins/" + fname)
+            result.edit_link = u("/code/edit?path=" + os.path.join(dirname, fname))
+            results.append(result)
+    ctx.tools += results
 
 class PluginsListHandler:
 

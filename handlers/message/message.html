@@ -90,7 +90,7 @@
 <div id="app" class="col-md-12">
     {% include "message/header.html" %}
 
-    <div class="message-input col-md-12">
+    <div class="message-input col-md-12 card">
         <textarea class="col-md-12 input-box" v-model="input" rows=4></textarea>
         <input type="button" name="" class="send-button btn" value="创建提醒" @click="sendMessage()">
         <input type="file" id="filePicker" class="hide" multiple/>
