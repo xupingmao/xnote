@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/10/13 13:17:24
+# @modified 2018/10/16 00:29:27
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -86,7 +86,8 @@ class SqliteTableManager:
         # sqlite的索引和table是一个级别的schema
         if isinstance(colname, list):
             idx_name = "idx_" + self.tablename
-            idx_name += "_".join(colname)
+            for name in colname:
+                idx_name += "_" + name
             colname_str = ",".join(colname)
             sql = "CREATE INDEX IF NOT EXISTS %s ON `%s` (%s)" % (idx_name, self.tablename, colname_str)
         else:
@@ -260,8 +261,8 @@ def init_message_table():
         manager.add_column("status", "int", 0)
         manager.add_column("content", "text", "")
         # 索引
-        manager.add_index("ctime")
-        manager.add_index("status")
+        manager.add_index(["user", "ctime", "status"])
+        manager.add_index(["user", "status"])
 
 def init_collection_table():
     # 2017/12/09

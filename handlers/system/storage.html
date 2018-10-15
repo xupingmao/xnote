@@ -28,26 +28,28 @@
 
 {% block body %}
 
-<div class="grid-title">
-    <a href="javascript:history.back();" class="link">返回</a>
-    › 系统配置
-</div>
-
-<div class="col-md-12">
-    <p style="color:red">{{?error}}</p>
-</div>
-<form method="POST" action="/system/storage">
-<div class="col-md-12">
-    <input name="key" class="hide" value="{{config.key}}"/>
-    <div id="editorArea" class="col-md-12">
-        <textarea name="value" id="editor">{{config.value}}</textarea>
+<div class="card">
+    <div class="grid-title">
+        <a href="javascript:history.back();" class="link">返回</a>
+        › 系统配置
     </div>
 
-    <div class="col-md-12 bottom-offset-1">
-        <input type="submit" value="保存">
+    <div class="col-md-12">
+        <p style="color:red">{{?error}}</p>
     </div>
+    <form method="POST" action="/system/storage">
+    <div class="col-md-12">
+        <input name="key" class="hide" value="{{config.key}}"/>
+        <div id="editorArea" class="col-md-12">
+            <textarea name="value" id="editor">{{config.value}}</textarea>
+        </div>
+
+        <div class="col-md-12 bottom-offset-1">
+            <input type="submit" value="保存">
+        </div>
+    </div>
+    </form>
 </div>
-</form>
 
 {# TODO 需要处理下搜索的高亮 #}
 
