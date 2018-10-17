@@ -1,8 +1,13 @@
 {% init right_link = None %}
+{% init back_link = None %}
 <div class="grid-title">
     <!-- <a href="/system/index" class="link">系统</a> › -->
     {{title}}
     {% if right_link is not None %}
         <a class="float-right link" href="{{right_link.get('link')}}">{{right_link.get('name')}}</a>
+    {% end %}
+
+    {% if back_link != None %}
+        <a class="float-right link" href="{{back_link}}">返回</a>
     {% end %}
 </div>

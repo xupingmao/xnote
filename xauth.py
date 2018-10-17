@@ -12,6 +12,7 @@ from xconfig import Storage
 config = xconfig
 # 用户配置
 _users = None
+INVALID_NAMES = ["public", "deleted"]
 
 
 def _get_users():
@@ -139,6 +140,8 @@ def add_user(name, password):
         return
     if password == "" or password == None:
         return
+    if name in INVALID_NAMES:
+        return dict(code="INVALID_NAME", message="非法的用户名")
     db = xtables.get_user_table()
     exist = db.select_one(where=dict(name=name))
     if exist is None:

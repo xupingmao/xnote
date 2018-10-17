@@ -21,7 +21,8 @@
     {% init output = "" %}
 
     <div class="grid-card">
-        {% include "tools/base_title.html" %}
+        {% set back_link = "javascript:history.back();" %}
+        {% include common/base_title.html %}
 
         {% if description != "" %}
         <pre class="col-md-12 info">

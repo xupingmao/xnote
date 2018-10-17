@@ -146,6 +146,8 @@ class RecentEditHandler:
     """show recent modified files"""
 
     def GET(self):
+        if not xauth.has_login():
+            raise web.seeother("/note/public")
         days     = xutils.get_argument("days", 30, type=int)
         page     = xutils.get_argument("page", 1, type=int)
         pagesize = xutils.get_argument("pagesize", PAGE_SIZE, type=int)
@@ -155,9 +157,9 @@ class RecentEditHandler:
         t = Timer()
         t.start()
         creator = xauth.get_current_name()
-        where = "is_deleted = 0 AND (creator = $creator OR is_public = 1) AND type != 'group'"
+        where = "is_deleted = 0 AND creator = $creator AND type != 'group'"
         
-        cache_key = "recent_notes#%s#%s" % (creator, page)
+        cache_key = "note[%s].recent#%s" % (creator, page)
         files = cacheutil.get(cache_key)
         if files is None:
             files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator", 
@@ -168,14 +170,22 @@ class RecentEditHandler:
                 limit  = pagesize))
             cacheutil.set(cache_key, files, expire=600)
         t.stop()
-        xutils.log("list recent edit %s" % t.cost())
+        xutils.log("list recent edit [%s]" % t.cost())
 
         t.start()
         groups = xutils.call("note.list_group")
         t.stop()
-        xutils.log("list group %s" % t.cost())
+        xutils.log("list group [%s]" % t.cost())
         
-        count = db.count(where, vars = dict(creator = xauth.get_current_name()))
+        t.start()
+        count_key = "note[%s].count" % creator
+        count = cacheutil.get(count_key)
+        if count is None:
+            count = db.count(where, vars = dict(creator = xauth.get_current_name()))
+            cacheutil.set(count_key, count, expire=600)
+        t.stop()
+        xutils.log("count [%s]" % t.cost())
+
         return xtemplate.render("note/view.html", 
             html_title  = "最近更新",
             pathlist    = [Storage(name="最近更新", type="group", url="/file/recent_edit")],
@@ -190,24 +200,6 @@ class RecentEditHandler:
             show_groups = True,
             page_url    ="/file/recent_edit?page=")
 
-class MarkedHandler:
-    
-    @xauth.login_required()
-    def GET(self):
-        page  = xutils.get_argument("page", 1, type=int)
-        page  = max(1, page)
-        db    = xtables.get_file_table()
-        vars  = dict(creator=xauth.get_current_name())
-        where = "is_deleted=0 AND is_marked=1 AND creator=$creator"
-        files = db.select(where=where, order="mtime DESC", vars=vars, offset=(page-1)*PAGE_SIZE,limit=PAGE_SIZE)
-        count = db.count(where=where, vars=vars)
-        return xtemplate.render(VIEW_TPL, 
-            pathlist  = [Storage(name="收藏", url="/file/group/marked")],
-            file_type = "group",
-            files     = files,
-            page      = page, 
-            page_max  = math.ceil(count/PAGE_SIZE), 
-            page_url  ="/file/group/marked?page=")
 
 class PublicGroupHandler:
 
@@ -236,11 +228,10 @@ xurls = (
     r"/file/group/list"     , GroupListHandler,
     r"/note/group/move"     , MoveHandler,
     r"/file/group/move"     , MoveHandler,
-    r"/file/group/bookmark" , MarkedHandler,
-    r"/file/group/marked"   , MarkedHandler,
     r"/note/recent_created" , RecentCreatedHandler,
     r"/note/recent_edit"    , RecentEditHandler,
     r"/file/recent_edit"    , RecentEditHandler,
-    r"/file/group/public"   , PublicGroupHandler
+    r"/file/group/public"   , PublicGroupHandler,
+    r"/note/public"         , PublicGroupHandler
 )
 

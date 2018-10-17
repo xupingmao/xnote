@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/10/16 00:29:27
+# @modified 2018/10/17 01:57:54
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -111,6 +111,25 @@ class SqliteTableManager:
         # TODO
         pass
 
+    def generate_migrate_sql(self, droped_names):
+        """生成迁移字段的SQL（本质上是迁移）"""
+        columns = self.execute("pragma table_info('%s')" % self.tablename, silent=True)
+        new_names = []
+        old_names = []
+        for column in columns:
+            name = column["name"]
+            type = column["type"]
+            old_names.append(name)
+            if name not in droped_names:
+                new_names.append(name)
+        # step1 = "ALTER TABLE %s RENAME TO backup_table;" % (self.tablename)
+        step2 = "INSERT INTO %s (%s) \nSELECT %s FROM backup_table;" % (
+                self.tablename,
+                ",".join(new_names),
+                ",".join(old_names)
+            )
+        return step2
+
     def close(self):
         self.db.close()
 
@@ -148,32 +167,32 @@ def init_file_table():
         manager.add_column("parent_id", "int", 0)
         # 使用file_tag表,兼容老代码,这里作为一个关键词存储，支持搜索
         manager.add_column("related", "text", "")
-        # 统计相关
-        # 访问次数
         # 创建时间ctime
         manager.add_column("ctime", "text", "")
         # 修改时间mtime
         manager.add_column("mtime", "text", "")
         # 访问时间atime
         manager.add_column("atime", "text", "")
+        # 访问次数
         manager.add_column("visited_cnt", "int", 0)
         # 逻辑删除标记
         manager.add_column("is_deleted", "int", 0)
         # 是否公开
         manager.add_column("is_public", "int", 0)
-        # 是否标记，不应该是文档的属性，使用collection表记录
-        # manager.add_column("is_marked", "int", 0)
         # 权限相关
         # 创建者
         manager.add_column("creator", "text", "")
         # 修改者
-        manager.add_column("modifier", "text", "")
+        # manager.add_column("modifier", "text", "")
+        # 可以访问的角色, 如果是公开的则为public, 删除的为deleted
+        manager.add_column("role", "text", "")
 
         # 各种索引
         manager.add_index(["parent_id", "name"])
+        manager.add_index(["creator", "mtime", "type", "is_deleted"])
+        manager.add_index(["role", "mtime"])
         manager.add_index("type")
         manager.add_index("ctime")
-        manager.add_index("mtime")
         # 虽然不能加速匹配过程，但是可以加速全表扫描
         manager.add_index("name")
 

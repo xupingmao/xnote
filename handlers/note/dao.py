@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/10/14 18:22:14
+# @modified 2018/10/16 01:29:46
 
 """资料的DAO操作集合
 
@@ -239,7 +239,7 @@ def get_table_struct(table_name):
 
 def list_group():
     current_name = str(xauth.get_current_name())
-    cache_key = "group.list#" + current_name
+    cache_key = "note[%s].group.list" % current_name
     value = cacheutil.get(cache_key)
     if value is None:
         sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
@@ -266,7 +266,7 @@ def list_recent_edit(parent_id=None, offset=0, limit=None):
     creator = xauth.get_current_name()
     where = "is_deleted = 0 AND (creator = $creator OR is_public = 1) AND type != 'group'"
     
-    cache_key = "recent_notes#%s#%s" % (creator, math.ceil(offset/limit))
+    cache_key = "note[%s].recent#%s" % (creator, math.ceil(offset/limit))
     files = cacheutil.get(cache_key)
     if files is None:
         files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator", 

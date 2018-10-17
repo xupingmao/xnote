@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/10/15 01:51:30
+# @modified 2018/10/17 00:20:00
 from io import StringIO
 import xconfig
 import codecs
@@ -129,6 +129,7 @@ import xconfig
 import xutils
 import xauth
 import xmanager
+import xtables
 from xtemplate import BasePlugin
 
 class Main(BasePlugin):
