@@ -159,7 +159,7 @@ class RecentEditHandler:
         creator = xauth.get_current_name()
         where = "is_deleted = 0 AND creator = $creator AND type != 'group'"
         
-        cache_key = "note[%s].recent#%s" % (creator, page)
+        cache_key = "[%s]note.recent#%s" % (creator, page)
         files = cacheutil.get(cache_key)
         if files is None:
             files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator", 
@@ -178,7 +178,7 @@ class RecentEditHandler:
         xutils.log("list group [%s]" % t.cost())
         
         t.start()
-        count_key = "note[%s].count" % creator
+        count_key = "[%s]note.count" % creator
         count = cacheutil.get(count_key)
         if count is None:
             count = db.count(where, vars = dict(creator = xauth.get_current_name()))

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/10/14 18:32:55
+# @modified 2018/10/18 01:25:25
 
 """Description here"""
 import os
@@ -87,8 +87,7 @@ def update_note(db, where, **kw):
 @xmanager.listen(["note.add", "note.updated", "note.rename", "note.remove"])
 def update_note_cache(ctx):
     type = ctx.get("type", "")
-    cacheutil.prefix_del("recent_notes")
-    cacheutil.prefix_del("group.list")
+    cacheutil.prefix_del("[%s]note" % xauth.get_current_name())
 
 class AddHandler:
 
