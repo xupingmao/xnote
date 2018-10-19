@@ -140,7 +140,9 @@
 {% block body %}
 
 {% init find_key = "" %}
+{% init error = "" %}
 {% set search_category = "fs" %}
+
 <div class="hide error col-md-12"></div>
 
 <div class="grid-card">
@@ -237,9 +239,16 @@
 </div>
 </div>
 
+{% if error != "" %}
+<div class="card">
+    <pre class="error col-md-12">{{error}}</pre>
+</div>
+{% end %}
+
 <script type="text/javascript">
 $(function () {
     var globalPath = "{{path}}";
+    var globalError  = "{{error}}";
 
     function previewImages() {
         $(".fs-image-div").each(function (index, target) {
@@ -317,7 +326,7 @@ $(function () {
         $.get("/system/command", {command: command, path: globalPath});
     })
 
-    function removeFile(path) {
+    window.removeFile = function(path) {
         var conf = confirm("确认删除 '%s' ?".format(path));
         if (!conf) {
             return;
@@ -333,7 +342,6 @@ $(function () {
             showErrorMessage("删除失败");
         })
     }
-    window.removeFile = removeFile;
 
     $("#deleteFile").on("click", function () {
         var checked = $(".checkboxTd :checked");

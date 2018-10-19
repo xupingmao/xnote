@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/15 02:08:00
+@modified 2018/10/19 01:40:53
 */
 
 * {
@@ -1224,11 +1224,10 @@ li.menu-item:hover {
 .plugin-item {
     float: left;
     width: 100%;
-    padding: 5px;
-    margin-top: 0px;
-    margin-bottom: 5px;
     background-color: #fff;
-    /*border: 1px solid #ccc;*/
+    padding: 5px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
 }
 
 .plugin-output {

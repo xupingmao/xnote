@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/10/13 15:00:17
+# @modified 2018/10/19 23:38:42
 
 """文件服务
     - 文件目录
@@ -149,7 +149,10 @@ class FileSystemHandler:
             else:
                 filelist = list_abs_dir(path)
         except OSError:
-            return "No permission to list directory"
+            return xtemplate.render("fs/fs.html", 
+                path = path,
+                filelist = [],
+                error="No permission to list directory")
 
         # filelist中路径均不带/
         # 排序：文件夹优先，按字母顺序排列
@@ -171,8 +174,11 @@ class FileSystemHandler:
         kw["search_action"] = "/fs_find"
 
         mode = xutils.get_argument("mode")
+        kw["fs_mode"] = mode
         if mode == "grid":
             return xtemplate.render("fs/fs_grid.html", **kw)
+        elif mode == "shell":
+            return xtemplate.render("fs/fs_shell.html", **kw)
         else:
             return xtemplate.render("fs/fs.html", **kw)
 

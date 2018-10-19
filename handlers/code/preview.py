@@ -193,8 +193,8 @@ class WikiPathHandler:
             path       = path)
 
 xurls = (
-    r"/wiki/(.*)", WikiPathHandler,
-    r"/wiki", handler,
+    r"/code/wiki/(.*)", WikiPathHandler,
+    r"/code/wiki", handler,
     r"/code/preview", handler
 )
 

@@ -31,7 +31,7 @@
 {% init recent = [] %}
 <div class="plugin-list">
     {% for link in plugins %}
-    <div class="plugin-item card">
+    <div class="plugin-item">
         <div class="col-md-12">
             <a href="{{link.link}}">{{link.name}}</a>
             {% if _is_admin %}

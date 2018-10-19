@@ -118,7 +118,7 @@
 {% end %}
 
 <div class="card">
-{% set fs_path_url = "/fs_sidebar?path=" %}
+{% set fs_path_url = "/fs_sidebar?path=$path" %}
 {% include mod_fs_path.html %}
 
 <div class="col-md-12 fs-main">
