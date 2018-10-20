@@ -14,7 +14,7 @@
 {% block body %}
 <!-- 
 @since 2016/12/18
-@modified 2018/10/13 12:27:48
+@modified 2018/10/20 13:48:15
 -->
 
 <div class="card">
@@ -37,7 +37,10 @@
             <input type="radio" name="seperator" value=";"/>分号
             <input type="radio" name="seperator" value=" "/>空格
         </p>
-        <p>过滤重复<input type="checkbox" id="unique"/></p>
+        <p>
+            过滤重复<input type="checkbox" id="unique"/>
+            排序<input type="checkbox" id="enableSort"/>
+        </p>
 
         <p>引号
             <input type="radio" name="quote" value="0" checked/>无
@@ -567,10 +570,43 @@ function parse_java_func(inputStr, option) {
         this.isLowerCase = function () {
             return getCase() == "lower";
         }
+
+        this.isUnique = function () {
+            return select("#unique").checked;
+        }
+
+        this.isSorted = function() {
+            return select("#enableSort").checked;
+        }
     }
 
     function showError(message) {
         $("#error").show().text(message);
+    }
+
+    function handleRegexp(regexpText, input) {
+        var option = new Option();
+        var reg = new RegExp(regexpText, "g");
+        var result = reg.exec(input);
+        var str = "";
+        var strArray = [];
+        while (result) {
+            var match = result[0];
+            if (match) {
+                match = match.trim();
+            }
+            // str += "\n" + result[0];
+            if (option.isUnique() && strArray.indexOf(match) >= 0) {
+                // skip
+            } else {
+                strArray.push(match);
+            }
+            result = reg.exec(input); 
+        }
+        if (option.isSorted()) {
+            strArray.sort();
+        }
+        return strArray.join("\n");
     }
 
     function execute() {
@@ -581,13 +617,7 @@ function parse_java_func(inputStr, option) {
         try {
             $("#error").hide();
             if (regexpText) {
-                var reg = new RegExp(regexpText, "g");
-                var result = reg.exec(input);
-                var str = "";
-                while (result) {
-                    str += "\n" + result[0];
-                    result = reg.exec(input); 
-                }
+                var str = handleRegexp(regexpText, input);
             } else {
                 var str = window[option](input, new Option());
             }
