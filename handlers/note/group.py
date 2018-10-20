@@ -1,4 +1,6 @@
 # encoding=utf-8
+# @since 2016/12
+# @modified 2018/10/20 19:35:29
 import math
 import web
 import xutils
@@ -116,12 +118,12 @@ class RemovedHandler:
         amount = db.count(where="is_deleted=1")
 
         return xtemplate.render(VIEW_TPL,
-            pathlist  =[PathNode("回收站", "/file/group/removed")],
-            file_type ="group",
+            pathlist  = [PathNode("回收站", "/file/group/removed")],
+            file_type = "group",
             files     = files,
             page      = page,
             page_max  = math.ceil(amount / 10),
-            page_url  ="/file/group/removed?page=")
+            page_url  = "/file/group/removed?page=")
 
 class RecentCreatedHandler:
 
@@ -184,7 +186,7 @@ class RecentEditHandler:
             count = db.count(where, vars = dict(creator = xauth.get_current_name()))
             cacheutil.set(count_key, count, expire=600)
         t.stop()
-        xutils.log("count [%s]" % t.cost())
+        xutils.log("recent count [%s]" % t.cost())
 
         return xtemplate.render("note/view.html", 
             html_title  = "最近更新",

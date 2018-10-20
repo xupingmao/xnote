@@ -1,6 +1,6 @@
 {% extends base.html %}
 {% block head %}
-    <script src="/static/js/array.js"></script>
+    <script type="text/javascript" src="/static/js/array.js"></script>
     <script type="text/javascript" src="/static/js/Lexer.js"></script>
     <style type="text/css">
         p {
@@ -14,12 +14,12 @@
 {% block body %}
 <!-- 
 @since 2016/12/18
-@modified 2018/10/20 13:48:15
+@modified 2018/10/20 19:38:22
 -->
 
 <div class="card">
     {% set title = "文本转换" %}
-    {% include "tools/base_title.html" %}
+    {% include common/base_title.html %}
 
     <div class="col-md-12 error hide" id="error"></div>
 
@@ -80,7 +80,7 @@
 </div>
 
 
-<script>
+<script type="text/javascript">
 
 function toCamel(name) {
     return name.replace(/_\w/g, function(m) {
@@ -521,112 +521,109 @@ function parse_java_func(inputStr, option) {
     return str;
 }
 
-</script>
-<script>
-
-    function select(ident) {
-        if (ident[0]=='#') {
-            return document.getElementById(ident.substring(1));
-        }
-        if (ident[0]=='.') {
-            return document.getElementsByClassName(ident.substring(1));
-        }
+function select(ident) {
+    if (ident[0]=='#') {
+        return document.getElementById(ident.substring(1));
     }
+    if (ident[0]=='.') {
+        return document.getElementsByClassName(ident.substring(1));
+    }
+}
 
-    function output(str) {
-        document.getElementById("output").innerHTML = str;
+function output(str) {
+    document.getElementById("output").innerHTML = str;
+}
+
+function getInput() {
+    return document.getElementById("input").value;
+}
+
+function Option () {
+    this.getInstance = function () {
+        return new Option();
     }
     
-    function getInput() {
-        return document.getElementById("input").value;
+    this.getQuote = function () {
+        var value = getRadioValue("quote");
+        if (value == "2") return '"';
+        else if (value == "1") return "'";
+        return "";
+    }
+
+    this.getSeperator = function () {
+        var value = getRadioValue("seperator");
+        if (value == "\\n") return "\n";
+        return value;
     }
     
-    function Option () {
-        this.getInstance = function () {
-            return new Option();
-        }
-        
-        this.getQuote = function () {
-            var value = getRadioValue("quote");
-            if (value == "2") return '"';
-            else if (value == "1") return "'";
-            return "";
-        }
-
-        this.getSeperator = function () {
-            var value = getRadioValue("seperator");
-            if (value == "\\n") return "\n";
-            return value;
-        }
-        
-        function getCase() {
-            return getRadioValue("case");
-        }
-        
-        this.isUpperCase = function () {
-            return getCase() == "upper";
-        }
-
-        this.isLowerCase = function () {
-            return getCase() == "lower";
-        }
-
-        this.isUnique = function () {
-            return select("#unique").checked;
-        }
-
-        this.isSorted = function() {
-            return select("#enableSort").checked;
-        }
+    function getCase() {
+        return getRadioValue("case");
+    }
+    
+    this.isUpperCase = function () {
+        return getCase() == "upper";
     }
 
-    function showError(message) {
-        $("#error").show().text(message);
+    this.isLowerCase = function () {
+        return getCase() == "lower";
     }
 
-    function handleRegexp(regexpText, input) {
-        var option = new Option();
-        var reg = new RegExp(regexpText, "g");
-        var result = reg.exec(input);
-        var str = "";
-        var strArray = [];
-        while (result) {
-            var match = result[0];
-            if (match) {
-                match = match.trim();
-            }
-            // str += "\n" + result[0];
-            if (option.isUnique() && strArray.indexOf(match) >= 0) {
-                // skip
-            } else {
-                strArray.push(match);
-            }
-            result = reg.exec(input); 
-        }
-        if (option.isSorted()) {
-            strArray.sort();
-        }
-        return strArray.join("\n");
+    this.isUnique = function () {
+        return select("#unique").checked;
     }
 
-    function execute() {
-        var option = select('#option').value;
-        console.log(option);
-        var input = getInput();
-        var regexpText = $("#regexp").val();
-        try {
-            $("#error").hide();
-            if (regexpText) {
-                var str = handleRegexp(regexpText, input);
-            } else {
-                var str = window[option](input, new Option());
-            }
-            output(str);
-        } catch (e) {
-            showError("");
-        }
-        
+    this.isSorted = function() {
+        return select("#enableSort").checked;
     }
+}
+
+function showError(message) {
+    $("#error").show().text(message);
+}
+
+function handleRegexp(regexpText, input) {
+    var option = new Option();
+    var reg = new RegExp(regexpText, "g");
+    var result = reg.exec(input);
+    var str = "";
+    var strArray = [];
+    while (result) {
+        var match = result[0];
+        if (match) {
+            match = match.trim();
+        }
+        // str += "\n" + result[0];
+        if (option.isUnique() && strArray.indexOf(match) >= 0) {
+            // skip
+        } else {
+            strArray.push(match);
+        }
+        result = reg.exec(input); 
+    }
+    if (option.isSorted()) {
+        strArray.sort();
+    }
+    return strArray.join("\n");
+}
+
+function execute() {
+    var option = select('#option').value;
+    console.log(option);
+    var input = getInput();
+    var regexpText = $("#regexp").val();
+    try {
+        $("#error").hide();
+        if (regexpText) {
+            var str = handleRegexp(regexpText, input);
+        } else {
+            var str = window[option](input, new Option());
+        }
+        output(str);
+    } catch (e) {
+        showError("");
+    }
+    
+}
 </script>
 
 {% end %}

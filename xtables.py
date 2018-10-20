@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/10/17 01:57:54
+# @modified 2018/10/20 19:19:02
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -302,6 +302,8 @@ def init_record_table():
         # 自己把所有条件都组装到key里
         manager.add_column("key",  "text", "")
         manager.add_column("value", "text", "")
+        # 索引
+        manager.add_index(["type", "ctime"])
 
 def init_storage_table():
     """

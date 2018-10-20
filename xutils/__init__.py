@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/10/14 01:02:54
+# @modified 2018/10/20 20:01:49
 
 """
 xnote工具类总入口
@@ -264,16 +264,17 @@ def _search_path0(path, key, limit=200):
     key = key.lower()
     count = 0
     for root, dirs, files in os.walk(path):
+        root_len = len(root)
         for f in dirs:
             abspath = os.path.join(root, f)
-            if fnmatch(abspath.lower(), key):
+            if fnmatch(f.lower(), key):
                 result_dirs.append(abspath)
                 count+=1
                 if count >= limit:
                     break
         for f in files:
             abspath = os.path.join(root, f)
-            if fnmatch(abspath.lower(), key):
+            if fnmatch(f.lower(), key):
                 result_files.append(abspath)
                 count+=1
                 if count >= limit:

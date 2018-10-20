@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/10/17 00:20:00
+# @modified 2018/10/20 19:58:43
 from io import StringIO
 import xconfig
 import codecs
@@ -120,6 +120,7 @@ class PluginsListHandler:
             plugins    = list_plugins())
 
 TEMPLATE = '''# -*- coding:utf-8 -*-
+# @since $since
 import os
 import re
 import math
@@ -164,6 +165,7 @@ class NewPluginHandler(BasePlugin):
             if os.path.exists(name):
                 return "文件[%s]已经存在!" % name
             code = xconfig.get("NEW_PLUGIN_TEMPLATE", TEMPLATE)
+            code = code.replace("$since", xutils.format_datetime())
             xutils.savetofile(name, code)
             raise web.seeother('/code/edit?path=%s' % name)
 

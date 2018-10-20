@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/10/18 01:25:25
+# @modified 2018/10/20 20:14:06
 
 """Description here"""
 import os
@@ -284,8 +284,8 @@ class AjaxSaveHandler:
             where = dict(id=id)
         else:
             where = dict(id=id, creator=name)
-        kw = dict(size=len(content), 
-            mtime=xutils.format_datetime(), 
+        kw = dict(size = len(content), 
+            mtime = xutils.format_datetime(), 
             version = version)
         if type == "html":
             kw["data"]    = data
@@ -301,7 +301,8 @@ class AjaxSaveHandler:
             kw["size"]    = len(content)
         rowcount = update_note(db, where, **kw)
         if rowcount > 0:
-            xmanager.fire('note.updated', dict(id=id, name=name, content=content))
+            xmanager.fire('note.updated', dict(id=id, name=name, 
+                content=content, version=version+1))
             return dict(code="success")
         else:
             return dict(code="fail")
@@ -324,9 +325,9 @@ class UpdateHandler:
         # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
         # 所以权限只能是创建者而不是修改者
         update_kw = dict(content=content, 
-                type=file_type, 
-                size=len(content),
-                version=version+1);
+                type = file_type, 
+                size = len(content),
+                version = version);
 
         if name != "" and name != None:
             update_kw["name"] = name
@@ -334,7 +335,8 @@ class UpdateHandler:
         # 不再处理文件，由JS提交
         rowcount = update_note(db, where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
-            xmanager.fire('note.updated', dict(id=id, name=name, content=content))
+            xmanager.fire('note.updated', dict(id=id, name=file.name, 
+                content=content, version=version+1))
             raise web.seeother("/note/view?id=" + str(id))
         else:
             # 传递旧的content
