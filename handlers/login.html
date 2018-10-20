@@ -39,11 +39,12 @@
 {% end %}
 
 {% block body %}
+{% if error != "" and error != None %}
+  <div class="col-md-12 error">{{error}}</div>
+{% end %}
+    
 <div class="card">
   <div class="login-box">
-    {% if error != "" and error != None %}
-      <div class="col-md-12 error">{{error}}</div>
-    {% end %}
     <form id="loginForm" name="loginForm" method="POST">
       登录名
 			<input class="login-input" type="text" name="username" value="{{username}}" placeholder="Account"/>

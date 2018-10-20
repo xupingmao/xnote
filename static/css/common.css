@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/20 13:25:46
+@modified 2018/10/20 13:32:22
 */
 
 * {
@@ -524,7 +524,7 @@ li.menu-item:hover {
 .search-box {
     width: 345px;
     float: right;
-    padding: 5px;
+    padding: 5px 0px;
 }
 
 .mobile-search-input {
