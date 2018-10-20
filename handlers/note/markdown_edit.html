@@ -1,14 +1,14 @@
 {% extends base.html %} {% block head %}
-<script src="/static/lib/codemirror/codemirror.min.js"></script>
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/codemirror.min.css">
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/keymap/sublime.js"></script>
 <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
 <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
+<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 <script type="text/javascript" src="/static/js/upload.js"></script>
 <script type="text/javascript" src="/static/js/marked-ext.js"></script>
-<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 <script type="text/javascript" src="/static/js/editor.js"></script>
 
 <style>
@@ -53,14 +53,12 @@
     .pathlist {
         background-color: #eee;
         padding: 3px;
-        box-sizing: border-box;
     }
 
     .toolbox {
         background-color: #eee;
         border: 1px solid #ccc;
         border-bottom: none;
-        box-sizing: border-box;
     }
 
     .toolbox-btn {

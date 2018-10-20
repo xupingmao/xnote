@@ -43,11 +43,15 @@
 
     <div id="inputImageDiv" class="col-md-12">
     </div>
-
     <div id="canvasContainer" class="col-md-12 top-offset-1">
         <canvas id="canvas"></canvas>
-        <canvas id="extractCanvas" class="hide"></canvas>
     </div>
+</div>
+
+<div class="card">
+    {% set title = "输出图片" %}
+    {% include common/base_title.html %}
+    <canvas id="extractCanvas" class="hide"></canvas>
 </div>
 
 <script type="text/javascript">

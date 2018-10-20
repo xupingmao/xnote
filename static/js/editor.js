@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2018/02/13
-// @modified 2018/04/24 23:23:20
+// @modified 2018/10/20 16:14:41
 
 
 // var codeMirror = CodeMirror.fromTextArea(editor, {
@@ -45,6 +45,9 @@ function initCodeMirror(selector, options) {
     } 
     if (name.endsWith(".php")) {
         mode = "text/x-php";
+    }
+    if (name.endsWith(".css")) {
+        mode = "text/css";
     }
 
     if (options.mode) {

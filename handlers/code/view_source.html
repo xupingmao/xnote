@@ -6,16 +6,19 @@
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
 <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/xq-light.css">
 <script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
-<script type="text/javascript" src="/static/js/editor.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/python.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/javascript.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/keymap/sublime.js"></script>
+<script type="text/javascript" src="/static/js/editor.js"></script>
 
 {% if path.endswith(".php") %}
 <script type="text/javascript" src="/static/lib/codemirror/mode/php.js"></script>
+{% end %}
+{% if path.endswith(".css") %}
+<script type="text/javascript" src="/static/lib/codemirror/mode/css.min.js"></script>
 {% end %}
 
 <style type="text/css">

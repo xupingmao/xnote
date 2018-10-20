@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/10/14 01:43:58
+# @modified 2018/10/20 16:30:10
 
 """Description here"""
 from io import StringIO
@@ -129,6 +129,9 @@ class ConfigHandler:
             xmanager.reload()
         if key == "FS_HIDE_FILES":
             setattr(xconfig, key, value == "True")
+        if key == "DEBUG":
+            setattr(xconfig, key, value == "True")
+            web.config.debug = xconfig.DEBUG
         return dict(code="success")
 
 class UserCssHandler:
