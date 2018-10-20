@@ -20,13 +20,14 @@
 
       <div class="search-box">
         <form id="searchForm" method="GET" action="{{?search_action,'/search/search'}}">
-          <button class="nav-search-btn">搜</button>
           <input id="key" name="key" class="nav-search-input" 
             placeholder="{{?search_placeholder, '搜索或指令'}}" 
             value="{{?key}}"/>
+          <button class="nav-search-btn">搜</button>
           <input class="hide" name="category" value="{{?category}}" />
           {% block search_form %} {% end %}
         </form>
       </div>
+
     </div>
 {% end %}

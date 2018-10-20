@@ -1,11 +1,12 @@
 {% extends base.html %}
 {% block body %}
 
-{% set title = "线程详情" %}
-{% set right_link = dict(link="javascript:history.back()", name="返回") %}
-{% include "tools/base_title.html" %}
+<div class="col-md-12 card">
 
-<div class="col-md-12">
+    {% set title = "线程详情" %}
+    {% set right_link = dict(link="javascript:history.back()", name="返回") %}
+    {% include "common/base_title.html" %}
+
     <table class="table" border="border:#ff6600 1px solid">
         <tr>
             <th>编号</th>
