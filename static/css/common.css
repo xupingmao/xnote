@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/20 13:43:52
+@modified 2018/10/20 20:43:14
 */
 
 * {
@@ -489,15 +489,15 @@ li.menu-item:hover {
 }
 
 .nav-top ul {
-  height: 30px;
-  width: 100%;
-  padding-left: 10px;
+    height: 30px;
+    width: 100%;
+    padding-left: 10px;
 }
 
 .nav-top li {
-  display: block;
-  float: left;
-  padding: 5px;
+    display: block;
+    float: left;
+    padding: 5px;
 }
 
 .nav-search-box {
@@ -552,31 +552,25 @@ li.menu-item:hover {
 }
 
 .main {
-  width: auto;
-  height: 100%;
-  overflow: hidden;
+    width: auto;
+    height: 100%;
+    overflow: hidden;
 }
 
 .footer {
-  display: none;
-  width: 100%;
-  height: 20px;
-  text-align: center;
-  font-size: 16px;
-  color: blue;
-  background-color: #fff;
+    display: none;
+    width: 100%;
+    height: 20px;
+    text-align: center;
+    font-size: 16px;
+    color: blue;
+    background-color: #fff;
 }
 
 .navMenu-top { 
-  padding: 10px; 
-  color: #fff; 
-  border-bottom: 1px solid rgba(255,255,255,.1) 
-}
-
-#toggleMenuBtn {
-    padding: 3px;
-    border-style: solid;
-    background: lightblue;
+    padding: 10px; 
+    color: #fff; 
+    border-bottom: 1px solid rgba(255,255,255,.1);
 }
 
 .notice {

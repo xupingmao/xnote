@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/10/04 22:03:46
+# @modified 2018/10/20 21:17:42
 import os
 import json
 import web
@@ -138,6 +138,8 @@ class BasePlugin:
     # 插件的标题
     title = "PluginName"
     description = ""
+    # 默认需要管理员权限访问
+    require_admin = True
 
     def __init__(self):
         # 输入框的行数
@@ -153,7 +155,7 @@ class BasePlugin:
         self.aside_html      = ""
         self.option_links    = []
         self.show_aside      = False
-
+        
     def add_option_link(name, url):
         self.option_links.append(dict(name=name, url = url))
 
@@ -181,6 +183,8 @@ class BasePlugin:
         return xutils.get_argument("page", 1, type=int)
 
     def render(self):
+        if self.require_admin:
+            xauth.check_login("admin")
         input  = self.get_input()
         error  = ""
         output = ""
