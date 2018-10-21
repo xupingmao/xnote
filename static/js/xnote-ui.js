@@ -111,7 +111,7 @@ var XUI = function (window) {
     // 初始化样式
     $(".x-dialog-background").css({"display":"none", "position":"fixed", "left": "0px", "top": "0px", 
         "width": "100%", "height":"100%", "background-color": "#000", "opacity": 0.5});
-    $(".x-dialog-close").css({"background-color":"red", "float":"right", "border":"none"});
+    $(".x-dialog-close").css({"background-color":"red", "float":"right"});
 
     $(".x-dialog").each(function (index, ele) {
         var self = $(ele);
@@ -155,7 +155,7 @@ var XUI = function (window) {
     initTabLink();
   }
 
-  var showToast = function (message, time) {
+  window.showToast = function (message, time) {
     if (!time) {
       time = 1000;
     }
@@ -189,7 +189,6 @@ var XUI = function (window) {
     }, time);
   }
 
-  window.showToast = showToast;
   initElementProcessors();
 };
 

@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/20 20:43:14
+@modified 2018/10/21 13:19:59
 */
 
 * {
@@ -818,7 +818,7 @@ li.menu-item:hover {
     width: 100%;
     background-color: #337ab7;
     color: #fff;
-    text-align: center;
+    padding: 5px;
 }
 
 .x-dialog-body {
@@ -858,6 +858,11 @@ li.menu-item:hover {
     float: right;
     border: none;
     margin-top: 0px;
+    border: 1px solid transparent;
+}
+
+.x-dialog-close:hover {
+    border: 1px solid black;
 }
 
 .dialog-close-btn {

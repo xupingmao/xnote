@@ -423,6 +423,14 @@ $(function () {
         });
     });
 
+    $(".clear-clip-link").click(function(event) {
+        /* 清空剪切板 */
+        $.post("/fs_api/clear_clip", function (resp) {
+            console.log(resp);
+            window.location.reload();
+        });
+    });
+
     $("#showMoreOptsBtn").click(function (event) {
         $(".advanced-opt").toggle(200);
     });

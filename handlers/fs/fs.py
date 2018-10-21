@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/10/19 23:38:42
+# @modified 2018/10/21 20:10:04
 
 """文件服务
     - 文件目录
@@ -398,6 +398,9 @@ class CutHandler:
         xconfig.FS_CLIP = files
         return dict(code="success")
 
+    def GET(self):
+        return self.POST()
+
 
 class PasteHandler:
 
@@ -416,6 +419,16 @@ class PasteHandler:
         if xconfig.FS_CLIP != None:
             xconfig.FS_CLIP.remove(old_path)
         return dict(code="success")
+
+class ClearClipHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        xconfig.FS_CLIP = None
+        return dict(code="success")
+
+    def GET(self):
+        return self.POST()
 
 class ListDirHandler:
 
@@ -440,6 +453,7 @@ xurls = (
     r"/fs_api/rename", RenameHandler,
     r"/fs_api/cut", CutHandler,
     r"/fs_api/paste", PasteHandler,
+    r"/fs_api/clear_clip", ClearClipHandler,
     r"/fs_link/(.*)", LinkHandler,
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,

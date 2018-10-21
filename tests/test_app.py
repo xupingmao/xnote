@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/10/19 23:42:37
+# @modified 2018/10/21 20:09:25
 
 import sys
 import os
@@ -249,6 +249,10 @@ class TestMain(unittest.TestCase):
 
     def test_fs_sidebar(self):
         self.check_OK("/fs_sidebar")
+
+    def test_fs_cut(self):
+        self.check_OK("/fs_api/cut?files=001.txt&files=002.txt")
+        self.check_OK("/fs_api/clear_clip")
 
     def test_fs_shell(self):
         self.check_OK("/fs//?mode=shell")
