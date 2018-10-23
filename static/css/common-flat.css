@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/21 13:20:27
+@modified 2018/10/24 00:45:37
 */
 
 * {
@@ -1127,20 +1127,20 @@ li.menu-item:hover {
 
 .aside-item {
     background-color: white;
-    /*border: 1px solid #ccc;*/
+    border: 1px solid #ccc;
     width: 100%;
     float: left;
+    margin-bottom: 10px;
 }
 
 .aside-item li {
     list-style: none;
-    padding-left: 5px;
     line-height: 20px;
 }
 
 .aside-title {
-    border: 1px solid #ccc;
-    background-color: #efefef;
+    border-bottom: 1px solid #ccc;
+    /*background-color: #efefef;*/
     padding: 5px;
 }
 
@@ -1190,9 +1190,17 @@ li.menu-item:hover {
     width: 100%;
     padding: 5px;
     margin-top: 0px;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     border: 1px solid #ccc;
 }
+
+.grid-card, .card {
+    float: left;
+    width: 100%;
+    background-color: #fff;
+    margin-bottom: 10px;
+}
+
 
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 700px) {
