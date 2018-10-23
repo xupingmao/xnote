@@ -29,10 +29,9 @@
 {% block body %}
 
 <div class="card">
-    <div class="grid-title">
-        <a href="javascript:history.back();" class="link">返回</a>
-        › 系统配置
-    </div>
+    {% set title = "系统配置" %}
+    {% set back_link = "javascript:history.back();" %}
+    {% include common/base_title.html %}
 
     <div class="col-md-12">
         <p style="color:red">{{?error}}</p>

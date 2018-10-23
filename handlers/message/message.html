@@ -90,6 +90,8 @@
 <div id="app" class="col-md-12">
     {% include "message/header.html" %}
 
+    {# include common/mod_notice.html #}
+
     <div class="message-input col-md-12 card">
         <textarea class="col-md-12 input-box" v-model="input" rows=4></textarea>
         <input type="button" name="" class="send-button btn" value="创建提醒" @click="sendMessage()">
@@ -122,25 +124,27 @@
                             <img v-bind:src="message.imgSrc" class="chat-msg-img"/>
                         </a>
                     </div>
+                    <!-- 解析出的html -->
                     <div v-if="message.html" class="chat-msg-content" v-html="message.html">
                     </div>
-                </div>
-            </div>
-            <div class="col-md-12">
-                <p class="chat-msg-option">
-                    <span class="chat-msg-time">{{! message.ctime }}</span>
-                    <span class="inline-tag in-progress" v-if="message.status==0">关注</span>
-                    <a class="smallText" v-if="message.status!=0" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">关注</a>
+                    <!-- 操作 -->
+                    <div class="col-md-12">
+                        <p class="chat-msg-option">
+                            <span class="chat-msg-time">{{! message.ctime }}</span>
+                            <span class="inline-tag in-progress" v-if="message.status==0">关注</span>
+                            <a class="smallText" v-if="message.status!=0" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">关注</a>
 
-                    <span class="inline-tag suspended" v-if="message.status==50">挂起</span>
-                    <a class="smallText" v-if="message.status!=50" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateStatus($event, 50)">挂起</a>
-                    
-                    <span class="inline-tag finished" v-if="message.status==100">完成</span>
-                    <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
-                    
-                    <a class="smallText" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
-                    <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" style="color: red;" @click="deleteMessage($event)">删除</a> 
-                </p>
+                            <span class="inline-tag suspended" v-if="message.status==50">挂起</span>
+                            <a class="smallText" v-if="message.status!=50" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateStatus($event, 50)">挂起</a>
+                            
+                            <span class="inline-tag finished" v-if="message.status==100">完成</span>
+                            <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
+                            
+                            <a class="smallText" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
+                            <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" style="color: red;" @click="deleteMessage($event)">删除</a> 
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

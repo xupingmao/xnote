@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/09/16 11:19:09
+# @modified 2018/10/23 00:57:29
 """
 缓存的实现，考虑失效的规则如下
 
@@ -34,6 +34,12 @@ def decode_key(text):
     """解码文件名称为key值，暂时没有使用"""
     return base64.urlsafe_b64decode(text[:-3].encode("utf-8")).decode("utf-8")
 
+
+def log_debug(msg):
+    pass
+
+def log_error(msg):
+    print(msg)
 
 class CacheObj:
     """
@@ -113,7 +119,7 @@ class CacheObj:
         return None
 
     def clear(self):
-        print("clear cache %s" % self.key)
+        log_debug("clear cache %s" % self.key)
         _cache_dict.pop(self.key, None)
         if self.is_temp():
             return
@@ -325,7 +331,7 @@ def print_exc():
     """打印系统异常堆栈"""
     ex_type, ex, tb = sys.exc_info()
     exc_info = traceback.format_exc()
-    print(exc_info)
+    log_error(exc_info)
 
 def load_dump():
     dirname = xconfig.STORAGE_DIR

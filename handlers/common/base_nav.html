@@ -1,33 +1,34 @@
 {% if show_menu %}
-    <div class="col-md-12 nav">
-      <!-- 保持对称 -->
-      <div class="menu-box float-left">
-        <ul class="nav-ul">
-          <li><a class="menu-link" href="/">笔记</a></li>
-          {% if _has_login %}
-          <li><a class="menu-link" href="/message?status=created">提醒({{_notice_count}})</a></li>
-          {% end %}
-          {% if _is_admin %}
-          <li><a class="menu-link" href="/plugins_list">插件</a></li>
-          {% end %}
-          <li><a class="menu-link" href="/system/index">系统</a></li>
-          {% if not _has_login %}
-          <li><a class="menu-link" class="link" href="/login">登录</a></li>
-          {% end %}
-          <li><a class="menu-link" href="/code/wiki/README.md">关于</a></li>
-        </ul>
-      </div>
-
-      <div class="search-box">
-        <form id="searchForm" method="GET" action="{{?search_action,'/search/search'}}">
-          <input id="key" name="key" class="nav-search-input" 
-            placeholder="{{?search_placeholder, '搜索或指令'}}" 
-            value="{{?key}}"/>
-          <button class="nav-search-btn">搜</button>
-          <input class="hide" name="category" value="{{?category}}" />
-          {% block search_form %} {% end %}
-        </form>
-      </div>
-
+<div class="col-md-12 nav">
+  <div class="x-center">
+    <!-- 保持对称 -->
+    <div class="menu-box float-left">
+      <ul class="nav-ul">
+        <li><a class="menu-link" href="/">笔记</a></li>
+        {% if _has_login %}
+        <li><a class="menu-link" href="/message?status=created">提醒({{_notice_count}})</a></li>
+        {% end %}
+        {% if _is_admin %}
+        <li><a class="menu-link" href="/plugins_list">插件</a></li>
+        {% end %}
+        <li><a class="menu-link" href="/system/index">系统</a></li>
+        {% if not _has_login %}
+        <li><a class="menu-link" class="link" href="/login">登录</a></li>
+        {% end %}
+        <li><a class="menu-link" href="/code/wiki/README.md">关于</a></li>
+      </ul>
     </div>
+
+    <div class="search-box">
+      <form id="searchForm" method="GET" action="{{?search_action,'/search/search'}}">
+        <input id="key" name="key" class="nav-search-input" 
+          placeholder="{{?search_placeholder, '搜索或指令'}}" 
+          value="{{?key}}"/>
+        <button class="nav-search-btn">搜</button>
+        <input class="hide" name="category" value="{{?category}}" />
+        {% block search_form %} {% end %}
+      </form>
+    </div>
+  </div>
+</div>
 {% end %}

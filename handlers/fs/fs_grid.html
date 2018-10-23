@@ -74,6 +74,13 @@
 }
 </style>
 
+    {% set search_action = '/fs_find' %}
+    {% set search_placeholder = '搜索文件' %}
+    
+{% end %}
+
+{% block search_form %}
+    <input type="text" name="path" class="hide" value="{{?path}}"/>
 {% end %}
 
 {% block body %}
