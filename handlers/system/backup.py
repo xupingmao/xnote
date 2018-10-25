@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/06/30 01:44:38
-
+# @since 2017/07/29
+# @modified 2018/10/25 01:28:57
 """
 备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
@@ -11,6 +11,7 @@ import re
 import time
 import xutils
 import xconfig
+import xauth
 from xutils import Storage
 from xutils import dateutil, fsutil, logutil
 
@@ -132,8 +133,10 @@ def chk_scripts_backup():
     xutils.zip_dir(dirname, destfile)
 
 class handler:
-    """触发备份事件"""
+
+    @xauth.login_required("admin")
     def GET(self):
+        """触发备份事件"""
         chk_backup()
         chk_scripts_backup()
         return "OK"

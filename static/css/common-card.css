@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/24 00:45:37
+@modified 2018/10/25 01:39:12
 */
 
 * {
@@ -11,7 +11,7 @@
 
 body {
     /*background-color: #f0f0f0;*/
-    background-color: #777;
+    background-color: #eee;
     font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
     font-size: 14px;
     letter-spacing: 1px;
@@ -352,6 +352,12 @@ table td {
     background-color: #eee;
 }
 
+/** 列表图标 **/
+.list-icon {
+    float: left;
+    padding-right: 5px;
+}
+
 /** 以下为具体场景下的样式 **/
 .menu-selected {
     background: #0088cc;
@@ -483,15 +489,19 @@ li.menu-item:hover {
 }
 
 .nav-top ul {
-  height: 30px;
-  width: 100%;
-  padding-left: 10px;
+    height: 30px;
+    width: 100%;
+    padding-left: 10px;
 }
 
 .nav-top li {
-  display: block;
-  float: left;
-  padding: 5px;
+    display: block;
+    float: left;
+    padding: 5px;
+}
+
+.nav-search-box {
+    width: 100%;
 }
 
 .nav-search-input {
@@ -517,15 +527,34 @@ li.menu-item:hover {
     padding: 5px 0px;
 }
 
+.mobile-search-input {
+    width: 100%;
+    height: 30px;
+    outline: none;
+    padding-left: 5px;
+    padding-right: 40px;
+    display: inline-block;
+    float: left;
+}
+
+.mobile-search-btn {
+    float: left;
+    height: 30px;
+    width: 40px;
+    margin-left: -40px;
+    margin-top: 0px;
+}
+
+.x-center {
+    width: 100%;
+    max-width: 950px;
+    margin: 0 auto;
+}
+
 .main {
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 10px;
     width: auto;
     height: 100%;
     overflow: hidden;
-    margin-left: 0px;
-    background-color: #fff;
 }
 
 .footer {
@@ -538,16 +567,10 @@ li.menu-item:hover {
     background-color: #fff;
 }
 
-.x-center {
-    width: 100%;
-    max-width: 950px;
-    margin: 0 auto;
-}
-
 .navMenu-top { 
-  padding: 10px; 
-  color: #fff; 
-  border-bottom: 1px solid rgba(255,255,255,.1) 
+    padding: 10px; 
+    color: #fff; 
+    border-bottom: 1px solid rgba(255,255,255,.1);
 }
 
 .notice {
@@ -968,8 +991,8 @@ li.menu-item:hover {
     float: left;
     padding-left: 5px;
     border-left: 5px solid #039BE5;
-    background: #efefef;
-    margin-bottom: 5px;
+    background: #fff;
+    margin-bottom: 10px;
 }
 
 .grid-row {
@@ -1127,20 +1150,24 @@ li.menu-item:hover {
 
 .aside-item {
     background-color: white;
-    border: 1px solid #ccc;
+    /*border: 1px solid #ccc;*/
     width: 100%;
     float: left;
     margin-bottom: 10px;
+    /*box-shadow: 1px 1px 1px #888;*/
+    border-bottom: 1px solid #ccc;
+    /*border-right: 1px solid #ccc;*/
 }
 
 .aside-item li {
     list-style: none;
+    /*padding-left: 5px;*/
     line-height: 20px;
 }
 
 .aside-title {
     border-bottom: 1px solid #ccc;
-    /*background-color: #efefef;*/
+    background-color: #fff;
     padding: 5px;
 }
 
@@ -1175,32 +1202,69 @@ li.menu-item:hover {
     display: none;
 }
 
+.markdown-output-div {
+    background-color: #fff;
+    padding: 5px;
+}
+
 /** 消息 **/
 .chat-msg-div {
-    margin-top: 1rem;
     float: left;
     width: 100%;
+    background-color: #fff;
     padding: 5px;
+    margin-bottom: 10px;
     border-bottom: 1px solid #ccc;
+}
+
+.message-status {
+    padding: 5px;
+    background-color: #fff;
+    margin-bottom: 10px;
+}
+
+.message-input {
+    background-color: #fff;
+    padding: 5px;
 }
 
 /** 插件 **/
 .plugin-item {
     float: left;
     width: 100%;
+    background-color: #fff;
     padding: 5px;
-    margin-top: 0px;
     margin-bottom: 10px;
-    border: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
 }
 
-.grid-card, .card {
+.plugin-output {
+    background-color: #fff;
+    padding: 5px;
+}
+
+.grid-card,.card {
     float: left;
     width: 100%;
     background-color: #fff;
     margin-bottom: 10px;
+    padding: 5px;
+    /*border-radius: 5px;*/
+    /*box-shadow: 1px 1px 1px #888;*/
+    border-bottom: 1px solid #ccc;
+    /*border-right: 1px solid #ccc;*/
 }
 
+.nav {
+    background-color: #fff;
+    margin-bottom: 10px;
+    padding: 0px 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+.x-photo {
+    cursor: pointer;
+}
 
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 700px) {
@@ -1217,7 +1281,6 @@ li.menu-item:hover {
     .aside {
         width: 100%;
         padding: 0px;
-        padding-top: 10px;
         margin-left: 0px;
     }
 

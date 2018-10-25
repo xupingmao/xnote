@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/09/22 23:52:30
+# @modified 2018/10/25 01:24:18
 import web
 import os
 import xconfig
@@ -114,7 +114,7 @@ class DownloadHandler:
     def GET(self, name=""):
         bufsize = 1024 * 100
         dirname = os.path.join(xconfig.SCRIPTS_DIR, name)
-        outpath = os.path.join(xconfig.SCRIPTS_DIR, name + ".zip")
+        outpath = os.path.join(xconfig.TMP_DIR, name + ".zip")
         ziputil.zip_dir(dirname, outpath = outpath)
         web.header("Content-Disposition", "attachment; filename=%s.zip" % name)
         with open(outpath, "rb") as fp:

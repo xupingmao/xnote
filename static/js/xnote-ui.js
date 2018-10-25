@@ -1,3 +1,9 @@
+/**
+ * xnote专用ui
+ * 依赖库
+ *   jquery
+ *   layer.js
+ */
 var XUI = function (window) {
   // 处理select标签选中情况
   function initSelect() {  
@@ -93,6 +99,29 @@ var XUI = function (window) {
       })
     }
   });
+
+  $(".x-photo").unbind('click').on('click', function (e) {
+        // console.log(e);
+        var src = $(this).attr("src");
+        var alt = $(this).attr("alt");
+        console.log(src);
+        layer.photos({
+            "photos": {
+                  "title": "", //相册标题
+                  "id": 123, //相册id
+                  "start": 0, //初始显示的图片序号，默认0
+                  "data": [   //相册包含的图片，数组格式
+                    {
+                      "alt": alt,
+                      "pid": 666, //图片id
+                      "src": src, //原图地址
+                      "thumb": "" //缩略图地址
+                    }
+                  ]
+                },
+            "anim":5
+        });
+  })
 
   // 类似tab的超链接
   function initTabLink() {

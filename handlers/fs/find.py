@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2018/08/11 01:40:30
+# @modified 2018/10/25 02:26:51
 import os
 import glob
 import xutils
@@ -52,6 +52,7 @@ class handler:
         path = xutils.get_argument("path")
         find_key = xutils.get_argument("find_key", "")
         find_type = xutils.get_argument("type")
+        mode = xutils.get_argument("mode")
         if find_key == "" or find_key is None:
             find_key = xutils.get_argument("key", "")
         find_key = "*" + find_key + "*"
@@ -64,7 +65,10 @@ class handler:
         else:
             plist = xutils.search_path(path, find_key)
         # TODO max result size
-        return xtemplate.render("fs/fs.html", 
+        tpl = "fs/fs.html"
+        if mode == "grid":
+            tpl = "fs/fs_grid.html"
+        return xtemplate.render(tpl, 
             token = xauth.get_current_user().token,
             filelist = [xutils.FileItem(p, path) for p in plist])
 
