@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/10/20 19:58:43
+# @modified 2018/10/27 15:57:29
 from io import StringIO
 import xconfig
 import codecs
@@ -44,9 +44,15 @@ def list_plugins():
             continue
         name, ext = os.path.splitext(fname)
         name = xutils.unquote(name)
-        st = os.stat(fpath)
         item = link(name, "/plugins/" + name)
-        item.atime = xutils.format_date(st.st_atime)
+        # st = os.stat(fpath)
+        # item.atime = xutils.format_date(st.st_atime)
+        atime = cacheutil.zscore("plugins.history", name)
+        if atime:
+            item.atime = xutils.format_date(atime)
+        else:
+            item.atime = ""
+
         item.edit_link = "/code/edit?path=" + fpath
         plugin_context = xconfig.PLUGINS.get(fname)
         item.title = ''
@@ -64,10 +70,11 @@ def list_recent_plugins():
 def load_plugin(name):
     try:
         display_name = xutils.unquote(name)
-        cacheutil.zadd("plugins.history", time.time(), os.path.splitext(display_name)[0])
+        base_name = os.path.splitext(display_name)[0]
+        cacheutil.zadd("plugins.history", time.time(), base_name)
     except TypeError:
         cacheutil.delete("plugins.history")
-        cacheutil.zadd("plugins.history", time.time(), os.path.splitext(display_name)[0])
+        cacheutil.zadd("plugins.history", time.time(), base_name)
  
     context = xconfig.PLUGINS.get(name)
     if xconfig.DEBUG or context is None:

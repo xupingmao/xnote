@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/10/20 20:01:49
+# @modified 2018/10/27 13:48:08
 
 """
 xnote工具类总入口
@@ -22,6 +22,7 @@ from .netutil  import *
 from .fsutil   import *
 from .textutil import text_contains, parse_config_text
 from .cacheutil import cache, expire_cache, update_cache
+from .functions import History
 from xconfig import Storage
 import shutil
 
@@ -824,38 +825,6 @@ class BaseRule:
 
     def execute(self, ctx, *argv):
         raise NotImplementedError()
-
-
-class History:
-    """历史记录, Queue无法遍历, deque是基于数组的，线程安全的"""
-
-    items = dict()
-
-    def __init__(self, name, size):
-        self.q = deque()
-        self.size = size
-        History.items[name] = self
-
-    def put(self, item):
-        self.q.append(item)
-        if len(self.q) > self.size:
-            self.q.popleft()
-
-    def get(self):
-        return self.q.pop()
-
-    def __len__(self):
-        return len(self.q)
-
-    def __iter__(self):
-        return iter(self.q)
-
-    def __str__(self):
-        return str(self.q)
-
-    @staticmethod
-    def get_items(name):
-        return History.items.get(name, [])
 
 class RecordInfo:
 

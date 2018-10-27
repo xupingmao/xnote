@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2018/10/20 11:59:19
+@modified 2018/10/27 16:55:10
 -->
 
 {% block body %}
@@ -10,7 +10,20 @@
 {% include common/mod_search.html %}
 <script type="text/javascript" src="/static/lib/layer/layer.js"></script>
 
-<div id="executeResult"></div>
+<div id="executeResult">
+</div>
+{% init recent = [] %}
+
+{% if len(recent) > 0 %}
+<div class="col-md-12">
+    <div class="grid-title">搜索历史</div>
+    {% for value in recent %}
+    <span class="tag-span">
+        <a class="link" href="/search?key={{value.get('key')}}">{{value.get('key')}}</a>
+    </span>
+    {% end %}
+</div>
+{% end %}
 
 <div class="col-md-12">
     {% for i, file in enumerate(files) %}

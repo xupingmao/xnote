@@ -138,10 +138,10 @@ class TestMain(unittest.TestCase):
 
     def test_history(self):
         h = xutils.History("test", 3)
-        h.put(1)
-        h.put(2)
-        h.put(3)
-        h.put(4)
+        h.add(1)
+        h.add(2)
+        h.add(3)
+        h.add(4)
         self.assertEqual(len(h), 3)
 
     def test_exec_code(self):

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/10/20 19:19:02
+# @modified 2018/10/27 16:32:31
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -245,11 +245,17 @@ def init_schedule_table():
         manager.add_column("webpage", "int", 0) # 是否网页提醒
 
 
-def init_log_table():
+def init_history_table():
     # 2017/05/21
-    with TableManager(config.LOG_PATH, "xnote_log") as manager:
-        manager.add_column("tag",      "text", "")
-        manager.add_column("operator", "text", "")
+    dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
+    with TableManager(dbpath, "history") as manager:
+        manager.add_column("type", "text", "")
+        manager.add_column("key",  "text", "")
+        manager.add_column("user", "text", "")
+        manager.add_column("ctime", "text", "")
+        # 耗时
+        manager.add_column("rt", "int", 0)
+
 
 def init_user_table():
     # 2017/05/21

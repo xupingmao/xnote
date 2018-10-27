@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/10/23 00:57:29
+# @modified 2018/10/27 16:03:51
 """
 缓存的实现，考虑失效的规则如下
 
@@ -244,6 +244,7 @@ class SortedObject:
         return cmp(self.value, obj.value)
 
 def zadd(key, score, member):
+    ## TODO 双写两个列表
     obj = get_cache_obj(key)
     if obj != None and obj.value != None:
         if obj.type != "zset":
@@ -276,6 +277,12 @@ def zcount(key):
     if obj != None:
         return len(obj.value)
     return 0
+
+def zscore(key, member):
+    obj = get_cache_obj(key)
+    if obj != None:
+        return obj.value.get(member, None)
+    return None
 
 def hset(key, field, value, expire=-1):
     obj = get_cache_obj(key, type="hash")

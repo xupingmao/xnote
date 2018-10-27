@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/10/20 16:30:10
+# @modified 2018/10/27 13:28:25
 
 """Description here"""
 from io import StringIO
@@ -33,7 +33,7 @@ sys_tools = [
     link("文件管理",   "/fs_list"),
     link("脚本管理",   "/fs_link/scripts"),
     link("定时任务",   "/system/crontab"),
-    link("访问记录",   "/system/history"),
+    link("系统日志",   "/system/history"),
     link("用户管理",   "/system/user/list"),
     link("App管理",   "/fs_link/app"),
     # link("后台模板缓存", "/system/template_cache"),

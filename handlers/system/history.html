@@ -2,15 +2,39 @@
 
 {% block body %}
 
-<div class="grid-card">
-{% for name in items %}
-    <div class="grid-title">{{name}}</div>
-    <div class="grid-row">
-        {% for link in items[name] %}
-            <a class="grid-link" href="{{link.get('link')}}">{{link.get('name')}}</a>
-        {% end %}
+<div class="card">
+    {% set title = "系统日志" %}
+    {% include "tools/base_title.html" %}
+
+    <div class="col-md-12">
+        <form>
+            <label>类型</label>
+            <input name="type" value="{{?type}}">
+
+            <button>检索</button>
+        </form>
     </div>
-{% end %}
+</div>
+
+<div class="grid-card">
+    <table class="table">
+        <tr>
+            <td width="20%">时间</td>
+            <td width="20%">类型</td>
+            <td width="20%">用户</td>
+            <td width="20%">耗时</td>
+            <td width="20%">信息</td>
+        </tr>
+    {% for value in items %}
+        <tr>
+            <td>{{value.get('ctime')}}</td>
+            <td>{{value.get('type')}}</td>
+            <td>{{value.get('user')}}</td>
+            <td>{{value.get('rt')}}</td>
+            <td>{{value.get('key')}}</td>
+        </tr>
+    {% end %}
+    </table>
 </div>
 
 {% end %}

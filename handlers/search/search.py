@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/10/14 11:37:40
+# @modified 2018/10/27 16:56:36
 
 import re
 import os
@@ -22,8 +22,10 @@ from xutils import textutil, u
 from xutils import Queue, History, Storage
 
 config = xconfig
-
 _rules = []
+# 初始化搜索记录
+if xconfig.search_history is None:
+    xconfig.search_history = History('search', 1000)
 
 class BaseRule:
 
@@ -73,7 +75,6 @@ def fill_note_info(files):
                 file.parent_name = parent.name
 
 class handler:
-    xconfig.search_history = History("搜索记录", 200)
 
     def do_search(self, key, offset, limit):
         global _rules
@@ -125,12 +126,9 @@ class handler:
                         files += results
                 except Exception as e:
                     xutils.print_exc()
-        cost_time = (time.time() - start_time) * 1000
+        cost_time = int((time.time() - start_time) * 1000)
         xutils.log("  === total - %d ms ===" % cost_time)
-        xconfig.search_history.put(Storage(name="#search# %s - %d ms" % (key, cost_time), 
-            category = category, 
-            user     = xauth.get_current_name(), 
-            link     = web.ctx.fullpath))
+        xconfig.search_history.add(key, cost_time)
 
         xmanager.fire("search.after", ctx)
         return ctx.tools + files
@@ -151,6 +149,9 @@ class handler:
 
         if key == "" or key == None:
             return xtemplate.render("search/search_result.html", 
+                recent = xconfig.search_history.recent(10, 
+                    lambda x:x.get('user')==user_name),
+                html_title = "搜索",
                 category = category, 
                 files    = [], 
                 count    = 0)
@@ -159,6 +160,7 @@ class handler:
         files = files[offset:offset+limit]
         fill_note_info(files)
         return xtemplate.render("search/search_result.html", 
+            html_title = "搜索",
             category = category,
             files    = files, 
             title    = title,

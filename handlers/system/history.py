@@ -1,9 +1,11 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2018/05/02 01:15:21
+# @modified 2018/10/27 16:15:05
 import xtemplate
 import xauth
+import xutils
+import xconfig
 from xutils import History
 
 class HistoryHandler(object):
@@ -11,11 +13,11 @@ class HistoryHandler(object):
 
     @xauth.login_required("admin")
     def GET(self):
-        items = dict()
-        for k in History.items:
-            v = History.items[k]
-            items[k] = list(v)
-            items[k].reverse()
+        xutils.get_argument("type", "")
+        items = []
+        if xconfig.search_history:
+            items = xconfig.search_history.list(0, 50);
+        print(items)
         return xtemplate.render("system/history.html", items = items)
         
 

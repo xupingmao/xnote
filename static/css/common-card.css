@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/25 01:39:12
+@modified 2018/10/27 13:25:26
 */
 
 * {
@@ -1243,7 +1243,7 @@ li.menu-item:hover {
     padding: 5px;
 }
 
-.grid-card,.card {
+.plugin-head,.grid-card,.card {
     float: left;
     width: 100%;
     background-color: #fff;
