@@ -1,7 +1,8 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2018/10/27 17:11:28
+# @modified 2018/10/27 18:25:00
+import xconfig
 from xconfig import Storage
 from collections import deque
 from .dateutil import format_time
@@ -133,7 +134,7 @@ class MemTable:
         if items is None:
             return result
         for index, value in enumerate(items):
-            if len(result) >= limit:
+            if limit >= 0 and len(result) >= limit:
                 break
             if index >= offset:
                 result.append(value)

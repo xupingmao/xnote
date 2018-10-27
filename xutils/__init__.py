@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/10/27 13:48:08
+# @modified 2018/10/27 18:21:21
 
 """
 xnote工具类总入口
@@ -100,17 +100,19 @@ class MyStdout:
     """
     标准输出的装饰器，用来拦截标准输出内容
     """
-    def __init__(self, stdout):
+    def __init__(self, stdout, do_print = True):
         self.stdout = stdout
         self.result_dict = dict()
         self.outfile = web.debug
         self.encoding = stdout.encoding
+        self.do_print = do_print
 
     def write(self, value):
         result = self.result_dict.get(current_thread())
         if result != None:
             result.append(value)
-        print(value, file=self.outfile, end="")
+        if self.do_print:
+            print(value, file=self.outfile, end="")
 
     def writelines(self, lines):
         return self.stdout.writelines(lines)

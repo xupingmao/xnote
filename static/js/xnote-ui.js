@@ -3,6 +3,9 @@
  * 依赖库
  *   jquery
  *   layer.js
+ * @author xupingmao
+ * @since 2017/10/21
+ * @modified 2018/10/27 19:04:40
  */
 var XUI = function (window) {
   // 处理select标签选中情况

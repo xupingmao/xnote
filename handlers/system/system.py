@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/10/27 13:28:25
+# @modified 2018/10/27 17:57:12
 
 """Description here"""
 from io import StringIO
@@ -115,7 +115,7 @@ class ReloadHandler:
     def GET(self):
         xmanager.reload()
         import web
-        raise web.seeother("/")
+        raise web.seeother("/system/index")
 
 
 class ConfigHandler:

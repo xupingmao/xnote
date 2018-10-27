@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/10/21 20:09:25
+# @modified 2018/10/27 18:47:58
 
 import sys
 import os
@@ -46,6 +46,7 @@ def json_request(*args, **kw):
     ret = app.request(*args, **kw)
     if ret.status == "303 See Other":
         return
+    assert ret.status == "200 OK"
     data = ret.data
     if six.PY2:
         return json.loads(data)
