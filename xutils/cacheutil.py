@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/10/27 16:03:51
+# @modified 2018/10/28 14:13:36
 """
 缓存的实现，考虑失效的规则如下
 
@@ -259,7 +259,10 @@ def zadd(key, score, member):
         obj.save()
 
 def zrange(key, start, stop):
-    """zset分片，包含start、stop"""
+    """zset分片，包含start，包含stop
+    :arg int start: 从0开始，负数表示倒数
+    :arg int stop: 从0开始，负数表示倒数
+    """
     obj = get_cache_obj(key)
     if obj != None:
         items = obj.value.items()
@@ -283,6 +286,17 @@ def zscore(key, member):
     if obj != None:
         return obj.value.get(member, None)
     return None
+
+def zincrby(key, increment, member):
+    obj = get_cache_obj(key)
+    if obj != None:
+        score = obj.value.get(member)
+        if score is None:
+            obj.value[member] = increment
+        else:
+            obj.value[member] += increment
+    else:
+        zadd(key, increment, member)
 
 def hset(key, field, value, expire=-1):
     obj = get_cache_obj(key, type="hash")

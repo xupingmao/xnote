@@ -235,6 +235,24 @@ class TestMain(unittest.TestCase):
         self.assertEqual(2, len(records))
         self.assertEqual('name', records[0].name)
 
+    def test_MemTable_list(self):
+        table = xutils.MemTable(100)
+        table.insert(name='t1', age=8)
+        table.insert(name='t2', age=9)
+        table.insert(name='t3', age=10)
+        table.insert(name='t4', age=12)
+        result = table.list(0, 1, lambda x:x.get('age')>=10)
+        self.assertEqual(1, len(result))
+        self.assertEqual('t3', result[0]['name'])
+
+    def test_MemTable_first(self):
+        table = xutils.MemTable(100)
+        table.insert(name='t1', age=8)
+        table.insert(name='t2', age=9)
+        table.insert(name='t3', age=10)
+        table.insert(name='t4', age=12)
+        result = table.first(lambda x:x.get('age')>=10)
+        self.assertEqual('t3', result['name'])
 
 
         
