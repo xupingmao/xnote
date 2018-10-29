@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/10/28 13:35:23
+# @modified 2018/10/29 23:04:05
 
 """
 xnote工具类总入口
@@ -370,13 +370,6 @@ def db_execute(path, sql, args = None):
 ##   DateTime Utilities
 #################################################################
 
-def format_time_only(seconds=None):
-    if seconds == None:
-        return time.strftime('%H:%M:%S')
-    else:
-        st = time.localtime(seconds)
-        return time.strftime('%H:%M:%S', st)
-
 def format_date(seconds=None):
     if seconds is None:
         return time.strftime('%Y-%m-%d')
@@ -386,15 +379,6 @@ def format_date(seconds=None):
     else:
         st = time.localtime(seconds)
         return time.strftime('%Y-%m-%d', st)
-
-def format_datetime(seconds=None):
-    if seconds == None:
-        return time.strftime('%Y-%m-%d %H:%M:%S')
-    else:
-        st = time.localtime(seconds)
-        return time.strftime('%Y-%m-%d %H:%M:%S', st)
-
-format_time = format_datetime
 
 def days_before(days, format=False):
     seconds = time.time()

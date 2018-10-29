@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/10/28 14:13:36
+# @modified 2018/10/29 02:23:57
 """
 缓存的实现，考虑失效的规则如下
 
@@ -245,10 +245,8 @@ class SortedObject:
 
 def zadd(key, score, member):
     ## TODO 双写两个列表
-    obj = get_cache_obj(key)
+    obj = get_cache_obj(key, type="zset")
     if obj != None and obj.value != None:
-        if obj.type != "zset":
-            raise TypeError("require zset but found %s" % obj.type)
         obj.value[member] = score
         obj.type = "zset"
         obj.save()
@@ -259,7 +257,7 @@ def zadd(key, score, member):
         obj.save()
 
 def zrange(key, start, stop):
-    """zset分片，包含start，包含stop
+    """zset分片，不同于Python，这里是左右包含，包含start，包含stop
     :arg int start: 从0开始，负数表示倒数
     :arg int stop: 从0开始，负数表示倒数
     """
@@ -319,9 +317,10 @@ def hget(key, field):
 def hdel(key, field):
     obj = get_cache_obj(key, type="hash")
     if obj != None and obj.value != None:
-        del obj.value[field]
-        # TODO 还需要判断是否真的存在
-        return 1
+        if field in obj.value:
+            del obj.value[field]
+            return 1
+        return 0
     else:
         return 0
 

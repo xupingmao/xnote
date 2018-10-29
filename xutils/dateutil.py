@@ -1,26 +1,26 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/07/11 00:18:42
+# @modified 2018/10/29 23:04:15
 import time
 import os
 """ 
-        Commonly used format codes:
-        
-        %Y  Year with century as a decimal number.
-        %m  Month as a decimal number [01,12].
-        %d  Day of the month as a decimal number [01,31].
-        %H  Hour (24-hour clock) as a decimal number [00,23].
-        %M  Minute as a decimal number [00,59].
-        %S  Second as a decimal number [00,61].
-        %z  Time zone offset from UTC.
-        %a  Locale's abbreviated weekday name.
-        %A  Locale's full weekday name.
-        %b  Locale's abbreviated month name.
-        %B  Locale's full month name.
-        %c  Locale's appropriate date and time representation.
-        %I  Hour (12-hour clock) as a decimal number [01,12].
-        %p  Locale's equivalent of either AM or PM.
+Commonly used format codes:
+
+%Y  Year with century as a decimal number.
+%m  Month as a decimal number [01,12].
+%d  Day of the month as a decimal number [01,31].
+%H  Hour (24-hour clock) as a decimal number [00,23].
+%M  Minute as a decimal number [00,59].
+%S  Second as a decimal number [00,61].
+%z  Time zone offset from UTC.
+%a  Locale's abbreviated weekday name.
+%A  Locale's full weekday name.
+%b  Locale's abbreviated month name.
+%B  Locale's full month name.
+%c  Locale's appropriate date and time representation.
+%I  Hour (12-hour clock) as a decimal number [01,12].
+%p  Locale's equivalent of either AM or PM.
 """
 
 
@@ -51,12 +51,23 @@ def getyyyyMMdd(seconds=None):
 def get_date(seconds=None):
     return getyyyyMMdd(seconds)
 
-def format_time(seconds=None):
+def format_datetime(seconds=None):
     if seconds == None:
         return time.strftime('%Y-%m-%d %H:%M:%S')
     else:
         st = time.localtime(seconds)
         return time.strftime('%Y-%m-%d %H:%M:%S', st)
+
+format_time = format_datetime
+
+
+def format_time_only(seconds=None):
+    if seconds == None:
+        return time.strftime('%H:%M:%S')
+    else:
+        st = time.localtime(seconds)
+        return time.strftime('%H:%M:%S', st)
+
 
 def format_date(seconds=None, fmt = None):
     if fmt is None:

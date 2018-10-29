@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/25 01:39:56
+@modified 2018/10/29 02:09:55
 */
 
 * {
@@ -121,6 +121,7 @@ a {
     word-wrap: break-word;
     word-break: break-all;
     color: #08c;
+    cursor: pointer;
 }
 
 a:hover {
@@ -231,6 +232,8 @@ a:hover {
     border-radius: 1px;
     text-decoration: none;
     margin-top: 5px;
+    padding: 1px 7px 2px;
+    font-size: 11px;
 }
 
 .btn:hover, button:hover, [type=submit]:hover, [type=button]:hover {
