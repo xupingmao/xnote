@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/10/27 15:57:29
+# @modified 2018/11/01 23:15:55
 from io import StringIO
 import xconfig
 import codecs
@@ -67,7 +67,7 @@ def list_recent_plugins():
     links.reverse()
     return links;
 
-def load_plugin(name):
+def log_plugin_visit(name):
     try:
         display_name = xutils.unquote(name)
         base_name = os.path.splitext(display_name)[0]
@@ -75,7 +75,9 @@ def load_plugin(name):
     except TypeError:
         cacheutil.delete("plugins.history")
         cacheutil.zadd("plugins.history", time.time(), base_name)
- 
+
+def load_plugin(name):
+    log_plugin_visit(name)
     context = xconfig.PLUGINS.get(name)
     if xconfig.DEBUG or context is None:
         script_name = "plugins/" + name
@@ -174,6 +176,7 @@ class NewPluginHandler(BasePlugin):
             code = xconfig.get("NEW_PLUGIN_TEMPLATE", TEMPLATE)
             code = code.replace("$since", xutils.format_datetime())
             xutils.savetofile(name, code)
+            log_plugin_visit(os.path.basename(name))
             raise web.seeother('/code/edit?path=%s' % name)
 
 class PluginsHandler:

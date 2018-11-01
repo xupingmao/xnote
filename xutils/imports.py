@@ -2,7 +2,7 @@
 # 专门用来import各种依赖
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
-# @modified 2018/08/02 22:33:13
+# @modified 2018/10/31 01:10:34
 from __future__ import print_function
 import sys
 import os
@@ -21,6 +21,7 @@ import web
 import xconfig
 import subprocess
 import pickle
+from xconfig import Storage
 from collections import deque
 from fnmatch import fnmatch
 from tornado.escape import xhtml_escape        

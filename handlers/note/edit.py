@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/10/20 20:14:06
+# @modified 2018/10/31 01:34:35
 
 """Description here"""
 import os
@@ -125,7 +125,6 @@ class AddHandler:
                     key = name
                     raise Exception(u"%s 已存在" % name)
                 file_dict = dict(**file)
-                del file_dict["default_value"]
                 inserted_id = db.insert(**file_dict)
                 update_note_content(inserted_id, content)             
                 # 更新分组下面页面的数量

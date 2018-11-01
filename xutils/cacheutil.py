@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/10/29 02:23:57
+# @modified 2018/10/31 01:33:10
 """
 缓存的实现，考虑失效的规则如下
 
@@ -88,6 +88,9 @@ class CacheObj:
     def _get_path(self, key):
         return os.path.join(xconfig.STORAGE_DIR, encode_key(key))
 
+    def _get_json_path(self, key):
+        return os.path.join(xconfig.STORAGE_DIR, key + ".json")
+
     def save(self):
         _cache_dict[self.key] = self
         if self.is_temp():
@@ -98,9 +101,16 @@ class CacheObj:
                 type = self.type,
                 value = self.value, 
                 expire_time = self.expire_time)
-        pickled = pickle.dumps(obj)
-        with open(path, "wb") as fp:
-            fp.write(pickled)
+
+        self._save_as_json(obj)
+        # pickled = pickle.dumps(obj)
+        # with open(path, "wb") as fp:
+        #     fp.write(pickled)
+
+    def _save_as_json(self, obj):
+        path = self._get_json_path(self.key)
+        with open(path, "w") as fp:
+            fp.write(json.dumps(obj))
 
     def is_alive(self):
         if self.is_force_expired:
@@ -187,7 +197,8 @@ def get(key, default_value=None):
 get_cache = get
 
 def get_cache_obj(key, default_value=None, type=None):
-    obj = _cache_dict.get(key)
+    if not is_str(key):
+        raise TypeError("cache key must be string")
     obj = _cache_dict.get(key)
     if obj is None:
         return default_value
@@ -296,6 +307,14 @@ def zincrby(key, increment, member):
     else:
         zadd(key, increment, member)
 
+def zrem(key, member):
+    obj = get_cache_obj(key)
+    if obj != None:
+        value = obj.value.pop(member)
+        return 1 if value != None else 0
+    else:
+        return 0
+
 def hset(key, field, value, expire=-1):
     obj = get_cache_obj(key, type="hash")
     if obj != None and obj.value != None:
@@ -353,19 +372,26 @@ def print_exc():
     exc_info = traceback.format_exc()
     log_error(exc_info)
 
+def json_object_hook(dict_obj):
+    return Storage(**dict_obj)
+
 def load_dump():
     dirname = xconfig.STORAGE_DIR
+    valid_ext_tuple = (".json")
     for fname in os.listdir(dirname):
-        if not fname.endswith(".pk"):
+        if not fname.endswith(valid_ext_tuple):
             continue
         try:
             fpath = os.path.join(dirname, fname)
             with open(fpath, "rb") as fp:
                 pickled = fp.read()
-                dict_obj = pickle.loads(pickled)
+                if fname.endswith(".json"):
+                    dict_obj = json.loads(pickled.decode("utf-8"), object_hook = json_object_hook)
+                else:
+                    dict_obj = pickle.loads(pickled)
+                # 持久化的都是不失效的数据
                 obj = CacheObj(dict_obj["key"], 
-                    dict_obj["value"], 
-                    dict_obj["expire_time"] - time.time())
+                    dict_obj["value"], -1)
                 obj.type = dict_obj.get("type", "object")
                 if obj.is_temp():
                     os.remove(fpath)

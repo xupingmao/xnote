@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/10/23 23:59:38
+# @modified 2018/10/31 01:29:32
 
 '''
 xnote系统配置
@@ -176,15 +176,16 @@ class Storage(dict):
         >>> o.errKey
         None
     """
-    def __init__(self, default_value=None, **kw):
-        self.default_value = default_value
+    def __init__(self, **kw):
+        # default_value会导致items等函数出问题
+        # self.default_value = default_value
         super(Storage, self).__init__(**kw)
 
     def __getattr__(self, key):
         try:
             return self[key]
         except KeyError as k:
-            return self.default_value
+            return None
     
     def __setattr__(self, key, value): 
         self[key] = value

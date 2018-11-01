@@ -120,8 +120,9 @@ class TestMain(unittest.TestCase):
         self.assertEqual(obj.value, None)
 
     def test_storage_default(self):
-        obj = xutils.Storage(1, name="name")
-        self.assertEqual(obj.value, 1)
+        # 删除了默认值的特性，会影响遍历功能，如果需要自行继承实现一套
+        obj = xutils.Storage(name="name")
+        self.assertEqual(obj.value, None)
 
     def test_save_file(self):
         tmpfile = os.path.join(xconfig.DATA_DIR, "tmp.txt")
