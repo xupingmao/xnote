@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2018/09/16 12:34:20
+# @modified 2018/11/02 00:00:04
 import os
 import uuid
 import web
@@ -10,6 +10,7 @@ import xconfig
 import xutils
 import xtemplate
 import xmanager
+import time
 from xutils import quote
 
 
@@ -18,20 +19,24 @@ def get_link(filename, webpath):
         return "![%s](%s)" % (filename, webpath)
     return "[%s](%s)" % (filename, webpath)
 
+def generate_filename(ext):
+    return time.strftime("%Y%m%d_%H%M%S") + "_" + xauth.get_current_name() + ext
+
 class UploadHandler:
 
     def POST(self):
         file     = xutils.get_argument("file", {})
         dirname  = xutils.get_argument("dirname")
         prefix   = xutils.get_argument("prefix")
-        uuidname = xutils.get_argument("uuidname")
+        name     = xutils.get_argument("name")
         if file.filename != None:
             filename = file.filename
             if file.filename == "":
                 return dict(code="fail", message="filename is empty")
             basename, ext = os.path.splitext(filename)
-            if uuidname == "true":
-                filename = str(uuid.uuid1()) + ext
+            if name == "auto":
+                # filename = str(uuid.uuid1()) + ext
+                filename = generate_filename(ext)
             # xutils.makedirs(dirname)
             filepath, webpath = xutils.get_upload_file_path(filename, prefix = prefix)
             # filename = xutils.quote(os.path.basename(x.file.filename))

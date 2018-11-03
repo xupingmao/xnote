@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/10/29 23:04:05
+# @modified 2018/11/03 15:28:11
 
 """
 xnote工具类总入口
@@ -68,7 +68,8 @@ def print_table(data, max_length=20, headings = None, ignore_attrs = None):
         headings = list(data[0].keys())
     if ignore_attrs:
         for key in ignore_attrs:
-            headings.remove(key)
+            if key in headings:
+                headings.remove(key)
     print_table_row(headings, max_length)
     for item in data:
         row = map(lambda key:item.get(key), headings)

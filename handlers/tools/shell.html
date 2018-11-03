@@ -15,14 +15,21 @@
 {% init code = "" %}
 {% init output = "" %}
 
-<h2>Shell控制台</h2>
-<div class="col-md-11 top-offset-1">
-    <textarea id="editor" class="col-md-12" rows="20" id="code">{{code}}</textarea>
-    <input type="button" value="Run" id="run"/>
+<div class="card">
+    {% set title = "Shell控制台" %}
+    {% include common/base_title.html %}
+    <div class="col-md-12">
+        <textarea id="editor" class="col-md-12" rows="20" id="code">{{code}}</textarea>
+        <input type="button" value="Run" id="run"/>
+    </div>
+
+</div>
+
+<div class="col-md-12 card">
     <textarea id="output" class="col-md-12" rows="5">{{output}}</textarea>
 </div>
 
-<script>
+<script type="text/javascript">
 $(function () {
   var editor = CodeMirror.fromTextArea($("#editor")[0], {
     lineNumbers: true,
@@ -37,7 +44,7 @@ $(function () {
     $("#run").click(function() {
         $("#output").val("");
         var code = $("#editor").val();
-        $.post("/system/run_cmd", {type:"shell", code:code}, 
+        $.post("/system/command", {type:"shell", command:code}, 
             function (data, status) {
                 // alert(status);
                 $("#output").val(data);

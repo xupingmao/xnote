@@ -3,7 +3,7 @@
 {% block head %}
 <style>
     #console {
-        width:60em;
+        width:100%;
         height:30em;
         background: black;
     }
@@ -25,39 +25,31 @@
 
 {% block body %}
 
-<h2 class="top-offset-1">在线终端</h2>
-<div id="console" class="top-offset-1"></div>
-<!-- <script src="/static/js/webos/console.js"></script> -->
+<div class="card">
+    {% set title = "在线终端" %}
+    {% include common/base_title.html %}
+</div>
+
+<div class="card">
+    <div id="console"></div>
+</div>
 
 <script type="text/javascript" src="/static/lib/jquery.terminal/jquery.terminal-1.3.1.min.js"></script>
-
-<!-- <script type="text/javascript">
-    new WebOSConsole("console", {cols:100, rows:40}, function (inputStr, term) {
-        // 使用
-        $.post("/system/command", inputStr, function (data, status) {
-            response(data);
-        }).fail(function (data) {
-            console.log(data)
-            response("Fail to read response from server");
-        });
-    }).start();
-</script> -->
-
 <script type="text/javascript">
-    $(document).ready(function() {
-        $("#console").terminal(function(command, term) {
-            if (command.indexOf("calc ")>=0) {
-                term.echo(eval(command.substring(4)));
-            } else {            
-                $.post("/system/command", {command: command}, function (data, status) {
-                    term.echo(data);
-                }).fail(function (data) {
-                    console.log(data);
-                    term.exception("failed"+data, "error");
-                });
-            }
-        });
+$(document).ready(function() {
+    $("#console").terminal(function(command, term) {
+        if (command.indexOf("calc ")>=0) {
+            term.echo(eval(command.substring(4)));
+        } else {            
+            $.post("/system/command", {command: command}, function (data, status) {
+                term.echo(data);
+            }).fail(function (data) {
+                console.log(data);
+                term.exception("failed"+data, "error");
+            });
+        }
     });
+});
 </script>
 
 {% end %}

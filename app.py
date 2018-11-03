@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2018/10/04 19:15:01
+# @modified 2018/11/03 16:37:17
 """
     Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -34,6 +34,7 @@ import xutils
 import xconfig
 import xtables
 import xmanager
+import signal
 from xutils import *
 from autoreload import AutoReloadThread
 
@@ -89,6 +90,18 @@ def handle_args():
     xconfig.INIT_SCRIPT = args.initScript
     web.config.minthreads = xconfig.MIN_THREADS
 
+def handle_signal(signum, frame):
+    """处理系统消息
+    :arg int signum:
+    :arg object frame, current stack frame:
+    """
+    xutils.log("Signal received: %s" % signum)
+    if signum == signal.SIGALRM:
+        # 时钟信号
+        return
+    # 优雅下线
+    xmanager.fire("sys.exit")
+    exit(0)
 
 def main():
     global app
@@ -127,6 +140,17 @@ def main():
     autoreload_thread.start()
     # 启动定时任务检查
     manager.run_task()
+
+    # 注册信号响应
+    # 键盘终止信号
+    signal.signal(signal.SIGINT, handle_signal)
+    # kill终止信号
+    signal.signal(signal.SIGTERM, handle_signal)
+    # 时钟信号
+    # signal.signal(signal.SIGALRM, handle_signal)
+    # signal.alarm(5)
+
+    # 启动打开浏览器选项
     if xconfig.OPEN_IN_BROWSER:
         webbrowser.open("http://localhost:%s/" % xconfig.PORT)
 

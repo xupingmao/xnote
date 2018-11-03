@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/10/29 02:09:55
+@modified 2018/11/03 20:44:48
 */
 
 * {
@@ -660,7 +660,6 @@ li.menu-item:hover {
     float: left;
     border: solid 1px;
     border-color: #ccc;
-    box-sizing: border-box; 
     background-color: #fff;
     margin-bottom: 10px;
     width: 100%;
@@ -1179,11 +1178,11 @@ li.menu-item:hover {
 }
 
 /** 消息 **/
-.chat-msg-div {
-    margin-top: 1rem;
+.message-row {
     float: left;
     width: 100%;
     padding: 5px;
+    margin-bottom: 10px;
     border-bottom: 1px solid #ccc;
 }
 

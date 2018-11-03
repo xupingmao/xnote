@@ -18,29 +18,43 @@
     font-family: monospace;
 }
 
+#input {
+    height: 400px;
+}
+
+#output {
+    margin: 0px;
+    padding: 5px;
+    background-color: #eee;
+    height: 400px;
+    overflow-y: auto;
+}
+
 </style>
 {% end %}
 
 
 {% block body %}
 
-<div class="col-md-12">
-    <h3>说明</h3>
-    <p>本工具完全基于浏览器</p>
+<div class="card">
+    {% set title = "JS控制台" %}
+    {% include common/base_title.html %}
 </div>
 
-<div class="col-md-6">
-    <h3>Input</h3>
-    <textarea id="input" class="col-md-12" rows="20"></textarea>
-    <button onclick="run()">Run</button>
-</div>
-<div class="col-md-6">
-    <h3>Output</h3>
-    <pre id="output" class="col-md-12"></pre>
-    <div id="error" class="col-md-12" style="color: red;"></div>
+<div class="card">
+    <div class="col-md-6">
+        <h3>Input</h3>
+        <textarea id="input" class="col-md-12" rows="20"></textarea>
+        <button onclick="run()">Run</button>
+    </div>
+    <div class="col-md-6">
+        <h3>Output</h3>
+        <pre id="output" class="col-md-12"></pre>
+        <div id="error" class="col-md-12" style="color: red;"></div>
+    </div>
 </div>
 
-<div class="col-md-12">
+<div class="card">
     <h3>函数说明</h3>
     <p><code>print(msg)</code>输出结果</p>
     <p><code>println(msg)</code>输出换行结果</p>
@@ -88,8 +102,7 @@
             return;
         }
 
-        println("=================================================");
-
+        println("--------------------");
         println("[");
         for (var key in obj) {
             var value = obj[key];

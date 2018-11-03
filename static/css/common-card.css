@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/11/01 23:29:52
+@modified 2018/11/03 20:45:43
 */
 
 * {
@@ -679,15 +679,17 @@ li.menu-item:hover {
     font-size: small;
     padding-top: 3px;
 }
+
 .note {
     float: left;
     border: solid 1px;
     border-color: #ccc;
-    box-sizing: border-box; 
     background-color: #fff;
     margin-bottom: 10px;
     width: 100%;
+    border-radius: 3px;
 }
+
 .note-body {
     padding: 10px;
 }
@@ -1208,13 +1210,14 @@ li.menu-item:hover {
 }
 
 /** 消息 **/
-.chat-msg-div {
+.message-row {
     float: left;
     width: 100%;
     background-color: #fff;
     padding: 5px;
     margin-bottom: 10px;
     border-bottom: 1px solid #ccc;
+    border-radius: 3px;
 }
 
 .message-status {
@@ -1237,6 +1240,7 @@ li.menu-item:hover {
     margin-bottom: 10px;
     border-bottom: 1px solid #ccc;
     border-radius: 3px;
+    min-height: 48px;
 }
 
 .plugin-output {
