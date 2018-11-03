@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2018/10/20 19:35:29
+# @modified 2018/11/03 23:51:17
 import math
 import web
 import xutils
@@ -129,18 +129,27 @@ class RecentCreatedHandler:
 
     @xauth.login_required()
     def GET(self):
-        offset = 0
-        db = xtables.get_file_table()
-        files = db.select(where="is_deleted=0 AND creator=$name AND type != 'group'", 
-            vars   = dict(name=xauth.get_current_name()),
+        page   = xutils.get_argument("page", 1, type=int)
+        offset = min(0, (page-1)*PAGE_SIZE)
+        db     = xtables.get_file_table()
+        where  = "is_deleted=0 AND creator=$creator AND type != 'group'"
+        files = db.select(where = where, 
+            vars   = dict(creator = xauth.get_current_name()),
             order  = "ctime DESC",
             offset = offset,
             limit  = PAGE_SIZE)
+        count = db.count(where = where, 
+            vars = dict(creator = xauth.get_current_name()))
+
         return xtemplate.render("note/view.html",
+            html_title = "最近创建",
             file_type  = "group", 
             files      = files, 
             pathlist   = [Storage(name="最近创建", type="group", url="/note/recent_created")],
             groups     = xutils.call("note.list_group"),
+            page       = page,
+            page_max   = int(math.ceil(count/PAGE_SIZE)),
+            page_url   = "/note/recent_created?page=",
             show_cdate = True,
             show_opts  = True)
 
@@ -194,12 +203,12 @@ class RecentEditHandler:
             file_type   = "group",
             files       = files, 
             file        = Storage(name="最近更新", type="group"),
-            page        = page, 
-            show_notice = True,
-            page_max    = math.ceil(count/PAGE_SIZE), 
             groups      = groups,
+            show_notice = True,
             show_mdate  = True,
             show_groups = True,
+            page        = page, 
+            page_max    = math.ceil(count/PAGE_SIZE), 
             page_url    ="/file/recent_edit?page=")
 
 

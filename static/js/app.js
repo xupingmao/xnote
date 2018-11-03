@@ -69,8 +69,7 @@ $(function() {
 /**
  * 处理悬浮控件
  */
-(function (window) {
-
+$(function () {
     var width = 960;
     var maxWidth = $(window).width();
     var maxHeight = $(window).height();
@@ -147,6 +146,7 @@ $(function() {
 
     function initEventHandlers() {
       // close button event
+      console.log("init");
       $("body").on("click", ".dialog-close-btn", function () {
         getRightBot().fadeOut(200);
       });
@@ -159,12 +159,13 @@ $(function() {
       $("body").on("click", ".dialog-refresh-btn", function () {
         $(".right-bot iframe")[0].contentWindow.location.reload();
       });
-
-      $(".layer-btn").click(function (event) {
+      $("body").on("click", ".layer-btn", function (event) {
+        console.log("click");
         var target = event.target;
         var url = $(target).attr("data-url");
         openDialog(url);
-      })
+      });
+      console.log("init done");
     }
 
     function getRightBot() {
@@ -241,12 +242,11 @@ $(function() {
       toggleMenu();
     });
 
-    if (self == top) {
+    // if (self == top) {
       // 不是处于iframe环境
-      init();
-    }
-
-})(window);
+    // }
+    init();
+});
 
 /**
  * xnote的公有方法
