@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/10/27 18:47:58
+# @modified 2018/11/04 00:10:28
 
 import sys
 import os
@@ -407,6 +407,9 @@ class TestMain(unittest.TestCase):
         
     def test_markdown_preview(self):
         self.check_200("/code/preview?path=./README.md")
+
+    def test_code_wiki(self):
+        self.check_200("/code/wiki/README.md")
 
     def test_cron_list(self):
         self.check_200("/system/crontab")
