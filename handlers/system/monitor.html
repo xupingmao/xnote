@@ -5,7 +5,7 @@
 <!-- TODO d3.js 展示内存和CPU日志 -->
 
 <div class="col-md-12 grid-card">
-
+    {% import web %}
     {% set title = "系统状态" %}
     {% include "tools/base_title.html" %}
 
@@ -55,6 +55,13 @@
             <td>
                 <input type="radio" name="THEME" default-value="{{xconfig.THEME}}" value="common.css">经典
                 <input type="radio" name="THEME" default-value="{{xconfig.THEME}}" value="common-card.css">卡片
+            </td>
+        </tr>
+        <tr>
+            <td>语言</td>
+            <td>
+                <input type="radio" name="LANG" default-value="{{web.cookies().get('lang', 'zh')}}" value="zh">中文
+                <input type="radio" name="LANG" default-value="{{web.cookies().get('lang', 'zh')}}" value="en">English
             </td>
         </tr>
         <tr>

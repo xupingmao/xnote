@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/10/27 17:57:12
+# @modified 2018/11/04 21:33:33
 
 """Description here"""
 from io import StringIO
@@ -132,6 +132,8 @@ class ConfigHandler:
         if key == "DEBUG":
             setattr(xconfig, key, value == "True")
             web.config.debug = xconfig.DEBUG
+        if key == "LANG":
+            web.setcookie("lang", value)
         return dict(code="success")
 
 class UserCssHandler:

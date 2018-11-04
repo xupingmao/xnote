@@ -1,7 +1,7 @@
-# encoding=utf-8
+# -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/03 15:28:11
+# @modified 2018/11/04 19:22:04
 
 """
 xnote工具类总入口

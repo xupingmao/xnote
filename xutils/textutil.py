@@ -1,7 +1,7 @@
-# encoding=utf-8
+# -*- coding:utf-8 -*-
 # @author xupingmao
-# @since 2017
-# @modified 2018/10/14 01:04:47
+# @since 2017/?/?
+# @modified 2018/11/04 20:58:37
 import re
 import random
 from .imports import is_str, ConfigParser
@@ -310,11 +310,13 @@ def parse_config_text(text):
     for line in text.split("\n"): 
         line = line.strip().replace('\n', '') 
         if line.find("#")!=-1: 
+            # 删除注释部分
             line=line[0:line.find('#')] 
-        if line.find('=') > 0: 
-            strs = line.split('=') 
-            strs[1]= line[len(strs[0])+1:]
-            config.append(dict(key=strs[0], value=strs[1]))
+        eq_pos = line.find('=')
+        if eq_pos > 0: 
+            key   = line[:eq_pos].strip()
+            value = line[eq_pos+1:].strip()
+            config.append(dict(key=key, value=value))
     return config
 
 def parse_ini_text(text):

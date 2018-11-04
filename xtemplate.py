@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/10/20 21:17:42
+# @modified 2018/11/04 21:38:53
 import os
 import json
 import web
@@ -22,6 +22,35 @@ NAMESPACE    = dict(
     format_time = dateutil.format_time,
     quote       = quote
 )
+
+_lang_dict = dict()
+
+def load_languages():
+    global _lang_dict
+
+    _lang_dict.clear()
+    dirname = xconfig.LANG_DIR
+    for fname in os.listdir(dirname):
+        name, ext = os.path.splitext(fname)
+        if ext != ".properties":
+            continue
+        fpath   = os.path.join(dirname, fname)
+        content = xutils.readfile(fpath)
+        config  = xutils.parse_config_text(content)
+        mapping = dict()
+        for item in config:
+            mapping[item['key']] = item['value']
+        _lang_dict[name] = mapping
+
+
+def T(text, lang = None):
+    if lang is None:
+        lang = web.ctx.get('_lang', 'zh')
+    mapping = _lang_dict.get(lang)
+    if mapping is None:
+        return text
+    else:
+        return mapping.get(text, text)
 
 class XnoteLoader(Loader):
     """定制Template Loader"""
@@ -84,8 +113,12 @@ def pre_render(kw):
     kw["xutils"]        = xutils
     kw["xconfig"]       = xconfig
     kw["_notice_count"] = get_message_count(user_name)
+    kw["T"]             = T
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
+        # 语言环境
+        web.ctx._lang = web.cookies().get("lang", "zh")
+
     if xutils.sqlite3 is None:
         kw["warn"] = "WARN: sqlite3不可用"
 
@@ -131,6 +164,7 @@ def reload():
     global _loader
     _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
     _loader.reset()
+    load_languages()
 
 class BasePlugin:
     """插件的基类"""
