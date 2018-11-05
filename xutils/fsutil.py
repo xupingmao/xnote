@@ -1,10 +1,11 @@
 # encoding=utf-8
-# @modified 2018/08/12 21:50:46
+# @modified 2018/11/05 00:38:26
 import codecs
 import os
 import platform
 import xutils
 import base64
+import time
 from . import logutil
 from web.utils import Storage
 
@@ -32,6 +33,15 @@ def writebytes(path, bytes):
     with open(path, "wb") as fp:
         fp.write(bytes)
     return bytes
+
+def savetofile(path, content):
+    import codecs
+    with open(path, mode="wb") as fp:
+        buf = codecs.encode(content, "utf-8")
+        fp.write(buf)
+    return content
+    
+savefile = savetofile
 
 def readbytes(path):
     with open(path, "rb") as fp:
@@ -184,6 +194,9 @@ def list_files(dirname):
     return filelist
 
 def splitpath(path):
+    """拆分文件路径
+    :arg str path:
+    """
     path   = os.path.abspath(path)
     path   = path.replace("\\", "/")
     pathes = path.split("/")
@@ -226,4 +239,29 @@ def path_equals(source, target):
         True
     """
     return os.path.abspath(source) == os.path.abspath(target)
+
+def tmp_path(prefix = "", ext = ""):
+    """生成临时文件路径
+    TODO 多线程情况下加锁
+    """
+    import xconfig
+    retry_times = 10
+    name = prefix + time.strftime("%Y_%m_%d_%H%M%S")
+    base_path = os.path.join(xconfig.TMP_DIR, name)
+    path = base_path + ext
+    for i in range(1, retry_times+1):
+        if not os.path.exists(path):
+            return path
+        path = "%s_%s" % (base_path, i) + ext
+    return None
+
+def touch(path):
+    """类似于Linux的touch命令"""
+    if not os.path.exists(path):
+        with open(path, "wb") as fp:
+            pass
+    else:
+        current = time.mktime(time.gmtime())
+        times = (current, current)
+        os.utime(path, times)
 

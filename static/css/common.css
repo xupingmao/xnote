@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/11/04 19:13:01
+@modified 2018/11/05 01:44:15
 */
 
 * {
@@ -1070,7 +1070,6 @@ li.menu-item:hover {
 .pagenation {
     width: 100%;
     float: left;
-    margin-top: 10px;
 }
 
 .keyword {

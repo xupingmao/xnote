@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/04 19:22:04
+# @modified 2018/11/05 00:38:16
 
 """
 xnote工具类总入口
@@ -164,15 +164,7 @@ def readfile(path, mode = "r", limit = -1):
         except Exception as e:
             last_err = e
     raise Exception("can not read file %s" % path, last_err)
-        
-def savetofile(path, content):
-    import codecs
-    with open(path, mode="wb") as fp:
-        buf = codecs.encode(content, "utf-8")
-        fp.write(buf)
-    return content
-    
-savefile = savetofile
+
 
 def backupfile(path, backup_dir = None, rename=False):
     if os.path.exists(path):
@@ -251,16 +243,6 @@ def remove_file(path, hard = False):
             shutil.move(path, target)
 
 remove = remove_file
-
-def touch(path):
-    """类似于Linux的touch命令"""
-    if not os.path.exists(path):
-        with open(path, "wb") as fp:
-            pass
-    else:
-        current = time.mktime(time.gmtime())
-        times = (current, current)
-        os.utime(path, times)
 
 def _search_path0(path, key, limit=200):
     result_dirs = []
@@ -549,7 +531,7 @@ def get_safe_file_name(filename):
 ##   Platform/OS Utilities, Python 2 do not have this file
 #################################################################
 
-def log(fmt, show_logger = False, *argv):
+def log(fmt, show_logger = False, fpath = None, *argv):
     fmt = u(fmt)
     if len(argv) > 0:
         message = fmt.format(*argv)
@@ -565,7 +547,9 @@ def log(fmt, show_logger = False, *argv):
     else:
         message = "%s %s" % (format_time(), message)
     print(message)
-    with open(xconfig.LOG_PATH, "ab") as fp:
+    if fpath is None:
+        fpath = xconfig.LOG_PATH
+    with open(fpath, "ab") as fp:
         fp.write((message+"\n").encode("utf-8"))
 
 

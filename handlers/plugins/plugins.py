@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/11/01 23:15:55
+# @modified 2018/11/05 00:19:32
 from io import StringIO
 import xconfig
 import codecs
@@ -106,6 +106,7 @@ def on_search_plugins(ctx):
     words   = textutil.split_words(name)
     for fname in xutils.listdir(dirname):
         unquote_name = xutils.unquote(fname)
+        unquote_name, ext = os.path.splitext(unquote_name)
         plugin_context = xconfig.PLUGINS.get(fname)
         if textutil.contains_all(unquote_name, words) \
                 or (plugin_context != None and textutil.contains_all(plugin_context.title, words)):

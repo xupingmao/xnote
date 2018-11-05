@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2018/11/03 23:51:17
+# @modified 2018/11/05 01:17:33
 import math
 import web
 import xutils
@@ -130,7 +130,7 @@ class RecentCreatedHandler:
     @xauth.login_required()
     def GET(self):
         page   = xutils.get_argument("page", 1, type=int)
-        offset = min(0, (page-1)*PAGE_SIZE)
+        offset = max(0, (page-1)*PAGE_SIZE)
         db     = xtables.get_file_table()
         where  = "is_deleted=0 AND creator=$creator AND type != 'group'"
         files = db.select(where = where, 

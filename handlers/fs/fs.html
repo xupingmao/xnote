@@ -196,7 +196,7 @@
             <img src="/static/image/folder.gif"/>
             <a href="/fs/{{item.path}}" class="fs-folder">{{item.name}}</a>
         {% else %}
-            <a href="/fs/{{item.path}}?token={{token}}" class="fs-file">{{item.name}}</a>
+            <a href="/fs/{{item.path}}" class="fs-file">{{item.name}}</a>
 
             {% if xutils.is_img_file(item.path) %}
                 <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>

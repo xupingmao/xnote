@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/10/27 16:56:36
+# @modified 2018/11/05 23:47:52
 
 import re
 import os
@@ -155,11 +155,13 @@ class handler:
                 category = category, 
                 files    = [], 
                 count    = 0)
+        key   = key.strip()
         files = self.do_search(key, offset, pagesize)
         count = len(files)
         files = files[offset:offset+limit]
         fill_note_info(files)
         return xtemplate.render("search/search_result.html", 
+            key = key,
             html_title = "搜索",
             category = category,
             files    = files, 
