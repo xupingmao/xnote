@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/05 00:38:16
+# @modified 2018/11/07 22:40:19
 
 """
 xnote工具类总入口
@@ -302,7 +302,7 @@ def get_upload_file_path(filename,
     webpath = "/data{}/{}/{}".format(data_dir, date, filename)
     if filename == "":
         # get upload directory
-        return dirname, webpath
+        return os.path.abspath(dirname), webpath
 
     while not replace_exists and os.path.exists(newfilepath):
         name, ext = os.path.splitext(filename)
@@ -311,7 +311,7 @@ def get_upload_file_path(filename,
         newfilepath = dirname + temp_filename
         webpath = "/data{}/{}/{}".format(data_dir, date, temp_filename)
         fileindex+=1
-    return newfilepath, webpath
+    return os.path.abspath(newfilepath), webpath
 
 def is_img_file(filename):
     """根据文件后缀判断是否是图片"""

@@ -90,7 +90,7 @@ class TestMain(unittest.TestCase):
     def test_edit_distance(self):
         self.assertEqual(1, xutils.edit_distance("abcd","abc"))
         self.assertEqual(2, xutils.edit_distance("abcd", "ab"))
-        self.assertEqual(3, xutils.edit_distance("abc", "def"))
+        self.assertEqual(6, xutils.edit_distance("abc", "def"))
         self.assertEqual(3, xutils.edit_distance("kkabcd", "abc"))
 
     def test_bs4(self):

@@ -28,7 +28,7 @@ class TestMain(unittest.TestCase):
         print()
         print(path)
         print(webpath)
-        self.assertEqual(config.DATA_PATH + "/files/%s/test.txt" % date, path)
+        self.assertEqual(os.path.abspath(config.DATA_PATH + "/files/%s/test.txt" % date), path)
         self.assertEqual("/data/files/%s/test.txt" % date, webpath)
 
     def test_get_upload_file_path_1(self):
@@ -38,7 +38,7 @@ class TestMain(unittest.TestCase):
         print()
         print(path)
         print(webpath)
-        self.assertEqual(config.DATA_PATH + "/files/%s/test_1.txt" % date, path)
+        self.assertEqual(os.path.abspath(config.DATA_PATH + "/files/%s/test_1.txt" % date), path)
         self.assertEqual("/data/files/%s/test_1.txt" % date, webpath)
         remove_tmp_file("test.txt")
 
@@ -50,7 +50,7 @@ class TestMain(unittest.TestCase):
         print()
         print(path)
         print(webpath)
-        self.assertEqual(config.DATA_PATH + "/files/%s/test_2.txt" % date, path)
+        self.assertEqual(os.path.abspath(config.DATA_PATH + "/files/%s/test_2.txt" % date), path)
         self.assertEqual("/data/files/%s/test_2.txt" % date, webpath)
         remove_tmp_file("test.txt")
         remove_tmp_file("test_1.txt")

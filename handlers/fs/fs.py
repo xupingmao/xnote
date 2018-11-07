@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/10/21 20:10:04
+# @modified 2018/11/08 01:24:51
 
 """文件服务
     - 文件目录
@@ -36,6 +36,7 @@ def get_filesystem_kw():
     kw["os"]            = os
     kw["search_type"]   = "fs"
     kw["get_file_size"] = get_file_size
+    kw["html_title"]    = "文件"
     return kw
 
 def get_parent_path(path):
@@ -152,7 +153,7 @@ class FileSystemHandler:
             return xtemplate.render("fs/fs.html", 
                 path = path,
                 filelist = [],
-                error="No permission to list directory")
+                error = "No permission to list directory")
 
         # filelist中路径均不带/
         # 排序：文件夹优先，按字母顺序排列
@@ -445,6 +446,13 @@ class LinkHandler:
         link_path = os.path.abspath(link_path)
         raise web.seeother("/fs/%s" % link_path)
 
+class RecentHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        datapath, webpath = xutils.get_upload_file_path("")
+        raise web.seeother("/fs/%s" % datapath)
+
 xurls = (
     r"/fs_list/?", ListDirHandler,
     r"/fs_api/add_dir", AddDirHandler,
@@ -455,6 +463,7 @@ xurls = (
     r"/fs_api/paste", PasteHandler,
     r"/fs_api/clear_clip", ClearClipHandler,
     r"/fs_link/(.*)", LinkHandler,
+    r"/fs_recent", RecentHandler,
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,

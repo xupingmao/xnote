@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2018/09/18 00:13:22
+# @modified 2018/11/08 01:34:07
 import web
 import time
 import os
@@ -14,6 +14,7 @@ import threading
 import re
 import xtemplate
 import xconfig
+import xauth
 from logging.handlers import TimedRotatingFileHandler
 from xutils import sqlite3
 
@@ -57,6 +58,7 @@ class Item:
 
 class handler:
 
+    @xauth.login_required("admin")
     def GET(self):
         mem_used          = 0
         sys_mem_used      = 0

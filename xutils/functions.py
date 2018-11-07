@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2018/10/28 13:57:39
+# @modified 2018/11/07 22:26:01
 import xconfig
 from xconfig import Storage
 from collections import deque
@@ -216,6 +216,12 @@ class History(MemTable):
         found.count += 1
         found.time = format_time()
         self.data.append(found)
+
+
+def dictsort(dictionary, key='value'):
+    if key == 'value':
+        return sorted(dictionary.items(), key = lambda item: item[1])
+    return sorted(dictionary.items(), key = lambda item: item[0])
 
 if __name__ == '__main__':
     import doctest

@@ -48,6 +48,7 @@ def get_cron_links():
 
 class CronEditHandler:
 
+    @xauth.login_required("admin")
     def GET(self):
         id = xutils.get_argument("id", type=int)
         sched = xtables.get_schedule_table().select_one(where=dict(id=id))

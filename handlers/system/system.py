@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/11/04 21:33:33
+# @modified 2018/11/08 01:33:10
 
 """Description here"""
 from io import StringIO
@@ -184,8 +184,8 @@ xurls = (
     r"/system/system", SysHandler,
     r"/system/reload", ReloadHandler,
     r"/system/xconfig", ConfigHandler,
-    r"/system/user.css", UserCssHandler,
-    r"/system/user.js", UserJsHandler,
+    r"/system/user\.css", UserCssHandler,
+    r"/system/user\.js", UserJsHandler,
     r"/system/cache", CacheHandler
 )
 

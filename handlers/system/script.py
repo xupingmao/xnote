@@ -90,6 +90,7 @@ class ExecuteHandler:
 
 class SearchHandler:
 
+    @xauth.login_required("admin")
     def GET(self):
         name = xutils.get_argument("name", "")
         list = [x for x in get_script_list() if x.find(name) >= 0]

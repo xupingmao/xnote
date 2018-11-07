@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/11/05 00:38:26
+# @modified 2018/11/07 02:08:03
 import codecs
 import os
 import platform
@@ -240,11 +240,13 @@ def path_equals(source, target):
     """
     return os.path.abspath(source) == os.path.abspath(target)
 
-def tmp_path(prefix = "", ext = ""):
+def tmp_path(fname = "", prefix = "", ext = ""):
     """生成临时文件路径
     TODO 多线程情况下加锁
     """
     import xconfig
+    if fname != None:
+        return os.path.join(xconfig.TMP_DIR, fname)
     retry_times = 10
     name = prefix + time.strftime("%Y_%m_%d_%H%M%S")
     base_path = os.path.join(xconfig.TMP_DIR, name)
@@ -254,6 +256,12 @@ def tmp_path(prefix = "", ext = ""):
             return path
         path = "%s_%s" % (base_path, i) + ext
     return None
+
+def data_path(fname):
+    """获取data目录文件路径
+    """
+    import xconfig
+    return os.path.join(xconfig.DATA_DIR, fname)
 
 def touch(path):
     """类似于Linux的touch命令"""

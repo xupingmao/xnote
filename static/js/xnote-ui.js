@@ -5,7 +5,7 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2018/10/27 19:04:40
+ * @modified 2018/11/08 01:21:57
  */
 var XUI = function (window) {
   // 处理select标签选中情况
@@ -103,7 +103,7 @@ var XUI = function (window) {
     }
   });
 
-  $(".x-photo").unbind('click').on('click', function (e) {
+  $("body").on('click', ".x-photo", function (e) {
         // console.log(e);
         var src = $(this).attr("src");
         var alt = $(this).attr("alt");

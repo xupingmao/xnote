@@ -258,7 +258,9 @@ $(function () {
 
     function previewImages() {
         $(".fs-image-div").each(function (index, target) {
-            var img = $("<img>").attr("src", $(target).attr("img-src")).addClass("fs-image");
+            var img = $("<img>").attr("src", $(target).attr("img-src"))
+                .addClass("fs-image")
+                .addClass("x-photo");
             $(target).append(img);
             img.on("load", function (event) {
                 $(target).append($("<span class='fs-image-size'>").text(img[0].naturalWidth + "*" + img[0].naturalHeight));

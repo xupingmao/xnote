@@ -1,12 +1,14 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/21
-# @modified 2018/06/30 01:46:36
+# @modified 2018/11/08 01:33:45
 # 性能测试使用
 import xutils
 import random
+import xauth
 
 class handler:
 
+    @xauth.login_required("admin")
     def GET(self):
         # 100M
         total_size = xutils.get_argument("total_size", 100 * 1024 ** 2, type = int)

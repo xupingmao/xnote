@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2018/11/04 20:58:37
+# @modified 2018/11/07 22:25:26
 import re
 import random
 from .imports import is_str, ConfigParser
@@ -260,7 +260,7 @@ def byte2str(buf):
         except:
             pass
 
-def edit_distance0(a, b, la, lb, cache=None, replace_step=1):
+def edit_distance0(a, b, la, lb, cache=None, replace_step=2):
     # 典型的可以使用动态规划，为了可读性，依旧保持原来的递归求解结构
     # 对于这种纯粹的函数，提供装饰器或者在虚拟机进行优化更方便理解
     if cache[la][lb] >= 0:
@@ -282,7 +282,7 @@ def edit_distance0(a, b, la, lb, cache=None, replace_step=1):
     cache[la][lb]=ret
     return ret
 
-def edit_distance(a,b,replace_step=1):
+def edit_distance(a,b,replace_step=2):
     """最小编辑距离算法
 
         >>> edit_distance('ab', 'a')
