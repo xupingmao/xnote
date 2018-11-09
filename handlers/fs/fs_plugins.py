@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/10/25 01:24:18
+# @modified 2018/11/08 23:26:36
 import web
 import os
 import xconfig
@@ -12,6 +12,7 @@ import xauth
 from xutils import ziputil, textutil
 
 def get_display_name(name):
+    name, ext = os.path.splitext(name)
     if name.startswith("fs-"):
         # 兼容历史数据
         return name[3:]

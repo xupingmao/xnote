@@ -22,7 +22,7 @@
     <input class="col-md-12" id="searchName" placeholder="执行命令">
     
     {% for name in scripts %}
-        <button class="plugin" data-name="{{name}}">{{name}}</button>
+        <button class="plugin" data-name="{{name}}">{{get_display_name(name)}}</button>
     {% end %}
 </div>
 

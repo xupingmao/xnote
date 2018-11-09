@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/11/04 20:58:15
+# @modified 2018/11/09 19:55:30
 
 '''
 xnote系统配置
@@ -152,7 +152,7 @@ _notice_list = []
 # 搜索历史
 search_history = None
 # 笔记访问历史
-note_hisotry = None
+note_history = None
 
 # 配置项
 _config = {}

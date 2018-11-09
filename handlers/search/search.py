@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/11/05 23:47:52
+# @modified 2018/11/09 21:55:39
 
 import re
 import os
@@ -59,6 +59,8 @@ class SearchContext:
         self.search_file_full = False
         self.search_dict      = False
         self.search_tool      = True
+        # 是否继续执行，用于最后兜底的搜索，一般是性能消耗比较大的
+        self.stop             = False
         
         # 处理的结果集
         self.tools    = []
@@ -106,7 +108,7 @@ class handler:
             ctx.search_file = False
             ctx.search_tool = False
 
-        xutils.log("  key=%s" % key)
+        xutils.trace("SearchKey", key)
 
         xmanager.fire("search.before", ctx)
         xmanager.fire("search", ctx)
@@ -121,16 +123,21 @@ class handler:
                     start_time0 = time.time()
                     results     = func(ctx, *m.groups())
                     cost_time0  = time.time() - start_time0
-                    xutils.log("  >>> %s - %d ms" % (func.modfunc, cost_time0*1000))
+                    xutils.trace("SearchHandler", func.modfunc, int(cost_time0*1000))
                     if results is not None:
                         files += results
                 except Exception as e:
                     xutils.print_exc()
         cost_time = int((time.time() - start_time) * 1000)
-        xutils.log("  === total - %d ms ===" % cost_time)
+        xutils.trace("SearchTime",  key, cost_time)
         xconfig.search_history.add(key, cost_time)
-
         xmanager.fire("search.after", ctx)
+
+        if ctx.stop:
+            return ctx.tools + files
+
+        # 慢搜索
+        xmanager.fire("search.slow", ctx)
         return ctx.tools + files
 
     def GET(self):

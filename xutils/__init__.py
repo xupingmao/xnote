@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/07 22:40:19
+# @modified 2018/11/09 22:05:03
 
 """
 xnote工具类总入口
@@ -553,8 +553,15 @@ def log(fmt, show_logger = False, fpath = None, *argv):
         fp.write((message+"\n").encode("utf-8"))
 
 
-def trace(fmt, *argv):
-    print("   ", fmt.format(*argv))
+def trace(scene, message, cost=0):
+    import xauth
+    # print("   ", fmt.format(*argv))
+    fpath = xconfig.LOG_PATH
+    full_message = "%s [%s] [%s] [%sms] %s" % (format_time(), 
+        xauth.get_current_name(), scene, cost, message)
+    print(full_message)
+    with open(fpath, "ab") as fp:
+        fp.write((full_message+"\n").encode("utf-8"))
 
 def system(cmd, cwd = None):
     p = subprocess.Popen(cmd, cwd=cwd, 
@@ -606,7 +613,7 @@ def mac_say(msg):
         if m == "":
             continue
         cmd = u("say %s") % escape(m)
-        trace(cmd)
+        trace("MacSay", cmd)
         os.system(cmd.encode("utf-8"))
 
 def windows_say(msg):
@@ -717,6 +724,8 @@ def exec_command(command, confirmed = False):
 ##   Web.py Utilities web.py工具类的封装
 #################################################################
 def get_argument(key, default_value=None, type = None, strip=False):
+    if not hasattr(web.ctx, "env"):
+        return default_value or None
     ctx_key = "_xnote.input"
     if isinstance(default_value, (dict, list)):
         return web.input(**{key: default_value}).get(key)

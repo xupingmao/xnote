@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/11/05 01:44:15
+@modified 2018/11/09 22:06:57
 */
 
 * {
@@ -236,6 +236,11 @@ a:hover {
     font-size: 11px;
 }
 
+/* 单选 */
+input[type=radio] {
+    cursor: pointer;
+}
+
 .btn:hover, button:hover, [type=submit]:hover, [type=button]:hover {
     color: #fff;
     background-color: #286090;
@@ -253,6 +258,10 @@ a:hover {
 }
 
 .btn-cancel {
+    background-color: red;
+}
+
+.btn-cancel:hover {
     background-color: red;
 }
 

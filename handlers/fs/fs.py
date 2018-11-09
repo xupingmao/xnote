@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/11/08 01:24:51
+# @modified 2018/11/09 21:48:07
 
 """文件服务
     - 文件目录
@@ -37,6 +37,7 @@ def get_filesystem_kw():
     kw["search_type"]   = "fs"
     kw["get_file_size"] = get_file_size
     kw["html_title"]    = "文件"
+    # kw["show_aside"]    = False
     return kw
 
 def get_parent_path(path):
@@ -207,7 +208,7 @@ class FileSystemHandler:
                 web.header("Accept-Ranges", "bytes")
                 web.header("Content-Range", content_range)
 
-                xutils.trace("<== Content-Range:%s" % content_range)
+                xutils.trace("Download", "<== Content-Range:%s" % content_range)
                 # 发送数据
                 fp = open(path, "rb")
                 try:
@@ -221,7 +222,7 @@ class FileSystemHandler:
                         readsize = min(rest, blocksize)
                 finally:
                     # 基本上和with等价，这里打印出来
-                    xutils.trace("close %s" % path)
+                    xutils.trace("Download", "close %s" % path)
                     fp.close()
             except Exception as e:
                 # 其他未知异常
@@ -264,7 +265,7 @@ class FileSystemHandler:
             # print_env()
 
             if http_range is not None:
-                xutils.trace("==> HTTP_RANGE {}", http_range)
+                xutils.trace("Download", "==> HTTP_RANGE %s" % http_range)
                 return self.read_range(path, http_range, blocksize)
             else:
                 return self.read_all(path, blocksize)            

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2018/11/05 01:17:33
+# @modified 2018/11/09 22:28:17
 import math
 import web
 import xutils
@@ -92,8 +92,7 @@ class GroupListHandler:
     def GET(self):
         id = xutils.get_argument("id", "", type=int)
         filetype = xutils.get_argument("filetype", "")
-        sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
-        data = list(xtables.get_file_table().query(sql, vars = dict(creator=xauth.get_current_name())))
+        data = xutils.call("note.list_group", xauth.get_current_name())
         if filetype == "xml":
             web.header("Content-Type", "text/html; charset=utf-8")
             return xtemplate.render("note/group_list.html", id=id, filelist=data, file_type="group")
@@ -163,39 +162,13 @@ class RecentEditHandler:
         page     = xutils.get_argument("page", 1, type=int)
         pagesize = xutils.get_argument("pagesize", PAGE_SIZE, type=int)
         page     = max(1, page)
+        offset   = max(0, (page-1) * pagesize)
+        limit    = pagesize
 
-        db = xtables.get_file_table()
-        t = Timer()
-        t.start()
         creator = xauth.get_current_name()
-        where = "is_deleted = 0 AND creator = $creator AND type != 'group'"
-        
-        cache_key = "[%s]note.recent#%s" % (creator, page)
-        files = cacheutil.get(cache_key)
-        if files is None:
-            files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator", 
-                where = where, 
-                vars   = dict(creator = creator),
-                order  = "mtime DESC",
-                offset = (page-1) * pagesize,
-                limit  = pagesize))
-            cacheutil.set(cache_key, files, expire=600)
-        t.stop()
-        xutils.log("list recent edit [%s]" % t.cost())
-
-        t.start()
-        groups = xutils.call("note.list_group")
-        t.stop()
-        xutils.log("list group [%s]" % t.cost())
-        
-        t.start()
-        count_key = "[%s]note.count" % creator
-        count = cacheutil.get(count_key)
-        if count is None:
-            count = db.count(where, vars = dict(creator = xauth.get_current_name()))
-            cacheutil.set(count_key, count, expire=600)
-        t.stop()
-        xutils.log("recent count [%s]" % t.cost())
+        files   = xutils.call("note.list_recent_edit", None, offset, limit)
+        groups  = xutils.call("note.list_group", creator)
+        count   = xutils.call("note.count_recent_edit", creator)
 
         return xtemplate.render("note/view.html", 
             html_title  = "最近更新",

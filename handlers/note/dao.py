@@ -1,12 +1,13 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/10/18 01:24:42
+# @modified 2018/11/09 22:37:54
 
 """资料的DAO操作集合
 
 由于sqlite是单线程，所以直接使用方法操作
 如果是MySQL等数据库，使用 threadeddict 来操作，直接用webpy的ctx
 """
+import time
 import math
 import re
 import six
@@ -179,7 +180,7 @@ def visit_by_id(id, db = None):
 
 def get_recent_visit(count):
     db = FileDB()
-    all = db.execute("select * from file where is_deleted != 1 and not (related like '%%HIDE%%') order by atime desc limit %s" % count)
+    all = db.execute("SELECT * from file where is_deleted != 1 and not (related like '%%HIDE%%') order by atime desc limit %s" % count)
     return [FileDO.fromDict(item) for item in all]
 
 def get_recent_created(count):
@@ -237,25 +238,34 @@ def get_table_struct(table_name):
         result.append(item)
     return result
 
-def list_group():
-    current_name = str(xauth.get_current_name())
-    cache_key = "note[%s].group.list" % current_name
+def list_group(current_name = None):
+    if current_name is None:
+        current_name = str(xauth.get_current_name())
+    t1 = time.time()
+    cache_key = "[%s]note.group.list" % current_name
     value = cacheutil.get(cache_key)
     if value is None:
         sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
         value = list(xtables.get_file_table().query(sql, vars = dict(creator=current_name)))
-        cacheutil.set(cache_key, value, expire=-1)
+        cacheutil.set(cache_key, value, expire=600)
+    t2 = time.time()
+    xutils.trace("NoteDao.ListGroup", "", int((t2-t1)*1000))
     return value
 
 def list_recent_created(parent_id = None, limit = 10):
-    where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"
+    t = Timer()
+    t.start()
+    where = "is_deleted = 0 AND (creator = $creator)"
     if parent_id != None:
         where += " AND parent_id = %s" % parent_id
     db = xtables.get_file_table()
-    return list(db.select(where = where, 
+    result = list(db.select(where = where, 
             vars   = dict(creator = xauth.get_current_name()),
             order  = "ctime DESC",
             limit  = limit))
+    t.stop()
+    xutils.trace("NoteDao.ListRecentCreated", "", t.cost_millis())
+    return result
 
 def list_recent_edit(parent_id=None, offset=0, limit=None):
     if limit is None:
@@ -264,7 +274,7 @@ def list_recent_edit(parent_id=None, offset=0, limit=None):
     t = Timer()
     t.start()
     creator = xauth.get_current_name()
-    where = "is_deleted = 0 AND (creator = $creator OR is_public = 1) AND type != 'group'"
+    where = "is_deleted = 0 AND (creator = $creator) AND type != 'group'"
     
     cache_key = "[%s]note.recent#%s" % (creator, math.ceil(offset/limit))
     files = cacheutil.get(cache_key)
@@ -277,10 +287,25 @@ def list_recent_edit(parent_id=None, offset=0, limit=None):
             limit  = limit))
         cacheutil.set(cache_key, files, expire=600)
     t.stop()
-    xutils.log("list recent edit %s" % t.cost())
+    xutils.trace("NoteDao.ListRecentEdit", "", t.cost_millis())
     return files
+
+def count_recent_edit(creator):
+    t = Timer()
+    t.start()
+    count_key = "[%s]note.count" % creator
+    count = cacheutil.get(count_key)
+    if count is None:
+        db    = xtables.get_file_table()
+        where = "is_deleted = 0 AND creator = $creator AND type != 'group'"
+        count = db.count(where, vars = dict(creator = xauth.get_current_name()))
+        cacheutil.set(count_key, count, expire=600)
+    t.stop()
+    xutils.trace("NoteDao.CountRecentEdit", "", t.cost_millis())
+    return count
 
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
+xutils.register_func("note.count_recent_edit", count_recent_edit)
 

@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
+# @modified 2018/11/09 21:24:35
 """搜索知识库文件"""
+import re
 import sys
 import six
 import xutils
@@ -83,7 +85,8 @@ def search_name(words, groups=None):
     return [file_wrapper(item) for item in all]
 
 def full_search(words, groups=None):
-    """ full search the files """
+    """full search the files
+    """
     if not isinstance(words, list):
         words = [words]
     content_like_list = []
@@ -101,9 +104,23 @@ def full_search(words, groups=None):
     all = xtables.get_file_table().query(sql, vars=vars)
     return [file_wrapper(item) for item in all]
 
+def filter_symbols(words):
+    new_words = []
+    for word in words:
+        word = re.sub("。", "", word)
+        if word == "":
+            continue
+        new_words.append(word)
+    return new_words
+
 def search(ctx, expression=None):
     words = ctx.words
     files = []
+
+    words = filter_symbols(words)
+
+    if len(words) == 0:
+        return files
 
     if ctx.search_file_full:
         files += full_search(words, xauth.get_current_name())

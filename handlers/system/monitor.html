@@ -6,7 +6,7 @@
 
 <div class="col-md-12 grid-card">
     {% import web %}
-    {% set title = "系统状态" %}
+    {% set title = "系统设置" %}
     {% include "tools/base_title.html" %}
 
     <table class="table">
@@ -65,10 +65,10 @@
             </td>
         </tr>
         <tr>
-            <td>隐藏系统文件</td>
+            <td>系统文件</td>
             <td>
-                <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="True">True
-                <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="False">False
+                <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="True">隐藏
+                <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="False">显示
             </td>
         </tr>
         <tr>

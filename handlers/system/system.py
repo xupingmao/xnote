@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/11/08 01:33:10
+# @modified 2018/11/09 19:52:48
 
 """Description here"""
 from io import StringIO
@@ -29,7 +29,7 @@ def link(name, url):
     return Storage(name = name, url = url, link = url)
 
 sys_tools = [
-    link("系统状态",   "/system/monitor"),
+    link("系统设置",   "/system/monitor"),
     link("文件管理",   "/fs_list"),
     link("脚本管理",   "/fs_link/scripts"),
     link("定时任务",   "/system/crontab"),

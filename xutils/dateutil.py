@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/10/29 23:04:15
+# @modified 2018/11/09 22:20:42
 import time
 import os
 """ 
@@ -129,4 +129,7 @@ class Timer:
 
     def cost(self):
         return "%s ms" % int((self.stop_time - self.start_time) * 1000)
+
+    def cost_millis(self):
+        return int((self.stop_time - self.start_time) * 1000)
 

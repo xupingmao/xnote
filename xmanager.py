@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/10/14 13:02:39
+# @modified 2018/11/09 22:03:34
 
 """
 Xnote 模块管理器
@@ -345,7 +345,7 @@ class TaskManager:
             if self.match(task, tm):
                 put_task(request_url, task)
                 try:
-                    xutils.log("run task [%s]" % task.url)
+                    xutils.trace("RunTask",  task.url)
                     if task.tm_wday == "no-repeat":
                         # 一次性任务直接删除
                         xtables.get_schedule_table().delete(where=dict(id=task.id))
@@ -473,7 +473,7 @@ class EventHandler:
                 self.func(ctx)
                 if self.profile:
                     stop  = time.time()
-                    xutils.log("EventHandler [%sms] %s" % (int((stop-start)*1000), self.key))
+                    xutils.trace("EventHandler",  self.key, int((stop-start)*1000))
             except:
                 xutils.print_exc()
 
@@ -516,7 +516,7 @@ class EventManager:
         if handler in handlers:
             warn("handler %s is already registered" % handler)
             return
-        log("register handler %s" % handler)
+        xutils.trace("EventRegister", str(handler))
         handlers.append(handler)
         self._handlers[event_type] = handlers
 

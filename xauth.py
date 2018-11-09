@@ -78,6 +78,9 @@ def get_current_user():
     user = get_user_from_token()
     if user != None:
         return user
+    if not hasattr(web.ctx, "env"):
+        # 尚未完成初始化
+        return None
     xuser = web.cookies().get("xuser")
     if has_login(xuser):
         return get_user(xuser)
