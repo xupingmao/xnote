@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/11/04 00:10:28
+# @modified 2018/11/11 20:03:33
 
 import sys
 import os
@@ -225,11 +225,11 @@ class TestMain(unittest.TestCase):
         json_request("/file/tag/update", method="POST", data=dict(file_id=id, tags=""))
 
 
-    def test_file_dict(self):
-        json_request("/file/dict?_format=json")
+    def test_dict_json(self):
+        json_request("/note/dict?_format=json")
 
     def test_dict(self):
-        self.check_200("/file/dict")
+        self.check_200("/note/dict")
 
     def test_fs(self):
         self.check_200("/fs//")

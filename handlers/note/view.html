@@ -126,25 +126,28 @@ img {
         {% include common/mod_notice.html %}
     {% end %}
 
+    {# 收藏一下这个符号 › #}
     <div class="col-md-12 grid-card">
         {% if show_path_list %}
         <div class="grid-title">
             <a href="/" class="link2">{{T("Home")}}</a>
             {% for item in pathlist %}
-                › <a href="{{item.url}}" class="link2">{{ item.name }}</a> 
+                / <a href="{{item.url}}" class="link2">{{ item.name }}</a> 
             {% end %}
 
             {% if file is not None %}
                 {% if file.type == "group" and _user_name == file.creator %}
-                {% if file.size == 0 %}
-                    <a class="float-right red" href="javascript:remove({{file.id}}, '{{file.name}}')">删除</a>
-                {% end %}
-                <a class="float-right link" href="/note/add?parent_id={{file.id}}">新增</a>
-                <a class="float-right link" href="javascript:rename({{file.id}}, '{{file.name}}')">重命名</a>
+                    {% if file.size == 0 %}
+                        <a class="float-right red" href="javascript:remove({{file.id}}, '{{file.name}}')">删除</a>
+                    {% end %}
+                    <a class="float-right link" href="/note/add?parent_id={{file.id}}">新增</a>
+                    <a class="float-right link" href="javascript:rename({{file.id}}, '{{file.name}}')">重命名</a>
                 {% end %}
             {% elif _has_login %}
+                <!--
                 <a class="float-right link prompt-btn" message="分类名" 
                         action="/note/add?type=group&name=">新增</a>
+                -->
             {% end %}
         </div>
         {% end %}

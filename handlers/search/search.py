@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/11/09 21:55:39
+# @modified 2018/11/11 17:59:40
 
 import re
 import os
@@ -102,6 +102,7 @@ class handler:
             ctx.search_tool = False
         if ctx.search_dict:
             ctx.search_file = False
+            ctx.search_tool = False
         if ctx.search_file_full:
             ctx.search_tool = False
         if ctx.category == "book":

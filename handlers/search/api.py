@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/18
-# @modified 2018/08/21 23:38:41
+# @modified 2018/11/11 17:59:26
 from __future__ import print_function
 import os
 import six
@@ -33,6 +33,8 @@ init_name_dict()
 def search(ctx, name):
     global _api_name_dict
     if not xauth.is_admin():
+        return
+    if not ctx.search_tool:
         return
     results = []
     for task_name in _api_name_dict:

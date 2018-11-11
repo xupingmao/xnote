@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/10/31 01:34:35
+# @modified 2018/11/11 18:26:44
 
 """Description here"""
 import os
@@ -143,7 +143,8 @@ class AddHandler:
             name     = key, 
             tags     = tags, 
             error    = error,
-            pathlist = get_pathlist(db, parent_id),
+            pathlist = [Storage(name="创建笔记", url="/note/add")],
+            # pathlist = get_pathlist(db, parent_id),
             message  = error,
             groups   = xutils.call("note.list_group"),
             code     = code)

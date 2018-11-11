@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/09 22:05:03
+# @modified 2018/11/11 18:04:03
 
 """
 xnote工具类总入口
@@ -137,34 +137,6 @@ class MyStdout:
 #################################################################
 ##   File System Utilities
 #################################################################
-def readfile(path, mode = "r", limit = -1):
-    '''
-    读取文件，尝试多种编码，编码别名参考标准库Lib/encodings/aliases.py
-        utf-8 是一种边长编码，兼容ASCII
-        gbk 是一种双字节编码，全称《汉字内码扩展规范》，兼容GB2312
-        latin_1 是iso-8859-1的别名，单字节编码，兼容ASCII
-    '''
-    last_err = None
-    for encoding in ["utf-8", "gbk", "mbcs", "latin_1"]:
-        try:
-            if PY2:
-                with open(path) as fp:
-                    if limit > 0:
-                        content = fp.read(limit)
-                    else:
-                        content = fp.read()
-                    return content.decode(encoding)
-            else:
-                with open(path, encoding=encoding) as fp:
-                    if limit > 0:
-                        content = fp.read(limit)
-                    else:
-                        content = fp.read()
-                    return content
-        except Exception as e:
-            last_err = e
-    raise Exception("can not read file %s" % path, last_err)
-
 
 def backupfile(path, backup_dir = None, rename=False):
     if os.path.exists(path):

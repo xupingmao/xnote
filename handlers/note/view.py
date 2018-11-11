@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/10/20 19:35:34
+# @modified 2018/11/11 20:01:17
 import profile
 import math
 import re
@@ -212,7 +212,7 @@ class DictHandler:
             show_opts = False,
             page = page,
             page_max = page_max,
-            page_url = "/file/dict?page=")
+            page_url = "/note/dict?page=")
 
 xurls = (
     r"/file/(edit|view)"   , ViewHandler, 
@@ -223,6 +223,6 @@ xurls = (
     r"/file/mark"          , MarkHandler,
     r"/file/unmark"        , UnmarkHandler,
     r"/file/markdown"      , ViewHandler,
-    r"/file/dict"          , DictHandler
+    r"/note/dict"          , DictHandler
 )
 

@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/11/09 19:51:02
+@modified 2018/11/10 00:35:07
 */
 
 * {
@@ -198,6 +198,7 @@ a:hover {
     color: white;
     background-color: #08c;
     text-decoration: none;
+    border-radius: 3px;
 }
 
 /* TAB页的链接样式 */
@@ -764,8 +765,8 @@ li.menu-item:hover {
 
 .x-page-link {
     border: 1px solid #ccc;
+    border-radius: 3px;
     text-decoration: none;
-    /*padding:2px;*/
     padding-left: 5px;
     padding-right: 5px;
     color: #000;

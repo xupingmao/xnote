@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/11/04 21:38:53
+# @modified 2018/11/11 16:28:13
 import os
 import json
 import web
@@ -228,6 +228,11 @@ class BasePlugin:
             if self.get_format() == "text":
                 web.header("Content-Type", "text/plain; charset:utf-8")
                 return self.output + output
+
+            # 复杂对象交给框架处理
+            if isinstance(output, (dict, list)):
+                return output
+
             # 处理侧边栏显示
             if self.aside_html != "" or len(self.option_links) > 0:
                 self.show_aside = True

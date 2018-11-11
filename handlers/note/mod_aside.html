@@ -2,6 +2,7 @@
 <!-- Groups -->
 {% init show_groups = False %}
 {% init groups = [] %}
+{% init parent_id = "" %}
 
 <div class="aside-item">
     <div class="aside-title">
@@ -10,13 +11,13 @@
     <div class="aside-content">
         <ul>
         {% if _has_login %}
-            <li><a class="link" href="/note/add">新建笔记</a></li>
+            <li><a class="link" href="/note/add">{{T('New_Note')}}</a></li>
             <li><a class="link" href="/note/recent_created">最新创建</a></li>
             <li><a class="link" href="/note/recent_edit">最近更新</a></li>
         {% end %}
             <li><a class="link" href="/file/group/public">分享笔记</a></li>
             <li><a class="link" href="/file/taglist">标签云</a></li>
-            <li><a class="link" href="javascript:history.back()">返回</a></li>
+            <!-- <li><a class="link" href="javascript:history.back()">返回</a></li> -->
         </ul>
     </div>
 </div>

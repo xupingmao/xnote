@@ -1,9 +1,9 @@
 {% init pathlist = [] %}
 {% init error = "" %}
 <div class="grid-title">
-    <a href="/" class="link2">Home</a> ›
+    <a href="/" class="link2">{{T("Home")}}</a>
     {% for item in pathlist %}
-        <a href="{{item.url}}" class="link2">{{ item.name }}</a> ›
+         / <a href="{{item.url}}" class="link2">{{ item.name }}</a>
     {% end %}
 </div>
 
