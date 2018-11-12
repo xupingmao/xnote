@@ -1,6 +1,6 @@
 ﻿# -*- coding:utf-8 -*-
 # @author sunjoy <ccnusjy@gmail.com>
-# @modified 2018/11/07 02:13:07
+# @modified 2018/11/12 23:13:19
 # source https://github.com/iurisilvio
 # 基于最大匹配算法
 from __future__ import print_function
@@ -24,6 +24,8 @@ class SEG(object):
         curpath   = _curpath
         self.d    = {}
         self.debug("loading dict...")
+        # 分词符号，可以自定义修改
+        self.split_pattern = u"。|，|,|！|…|!|《|》|<|>|\"|'|:|：|？|\?|、|\||“|”|‘|’|；|—|（|）|·|\(|\)|　| "
         if dictpath is not None:
             self.load_words([x.rstrip() for x in open(dictpath).readlines()])
         self.specialwords= set([x for x in specialwords])
@@ -76,7 +78,8 @@ class SEG(object):
         :rtype list:
         """
         R = []
-        tmp = re.sub(u"。|，|,|！|…|!|《|》|<|>|\"|'|:|：|？|\?|、|\||“|”|‘|’|；|—|（|）|·|\(|\)|　"," ",piece).split()
+        # tmp = re.sub(u"。|，|,|！|…|!|《|》|<|>|\"|'|:|：|？|\?|、|\||“|”|‘|’|；|—|（|）|·|\(|\)|　"," ",piece).split()
+        tmp = re.split(self.split_pattern, piece)
         ln1 = len(tmp)
         for i in range(len(tmp)-1,-1,-1):
             mc = re.split(r"([0-9A-Za-z\-\+#@_\.]+)",tmp[i])

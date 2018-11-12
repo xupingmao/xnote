@@ -67,3 +67,17 @@
     </div>
 </div>
 {% end %}
+
+{% init recommended_notes = [] %}
+{% if len(recommended_notes) > 0 %}
+<div class="aside-item">
+    <div class="aside-title">
+        推荐
+    </div>
+    <div class="aside-content">
+        {% for item in recommended_notes %}
+            <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a></li>
+        {% end %}
+    </div>
+</div>
+{% end %}

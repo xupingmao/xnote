@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/11/10 00:35:07
+@modified 2018/11/12 20:53:46
 */
 
 * {
@@ -1283,7 +1283,7 @@ li.menu-item:hover {
 }
 
 /** 移动端样式放在最后 **/
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 950px) {
     /** mobile **/
     .search-box {
         width: 100%;

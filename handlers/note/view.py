@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/11/11 20:01:17
+# @modified 2018/11/12 23:05:55
 import profile
 import math
 import re
@@ -61,14 +61,17 @@ class ViewHandler:
         role            = xauth.get_current_role()
 
         # 定义一些变量
+        show_groups    = True
         show_mdate     = False
         files          = []
         recent_created = []
         amount         = 0
+        show_recommend = False
         template_name  = "note/view.html"
         xconfig.note_history.put(dict(user=user_name, 
             link = "/note/view?id=%s" % id, 
             name = file.name))
+        recommended_notes = []
 
         title  = file.name
         groups = xutils.call("note.list_group")
@@ -92,6 +95,7 @@ class ViewHandler:
             content = file.content
             if op == "edit":
                 template_name = "note/markdown_edit.html"
+            show_recommend = True
         else:
             content = file.content
             content = content.replace(u'\xad', '\n')
@@ -100,6 +104,17 @@ class ViewHandler:
             file.data = file.data.replace(u'\n', '<br/>')
             if file.data == None or file.data == "":
                 file.data = content
+            show_recommend = True
+
+        if show_recommend:
+            show_groups = False
+            # 推荐系统
+            ctx = Storage(id=file.id, name = file.name, creator = file.creator, 
+                content = file.content,
+                parent_id = file.parent_id,
+                recommended_notes = [])
+            xmanager.fire("note.recommend", ctx)
+            recommended_notes = ctx.recommended_notes
         
         xmanager.fire("note.view", file)
         show_aside = True
@@ -119,8 +134,9 @@ class ViewHandler:
             page_url = "/file/view?id=%s&page=" % id,
             files    = files, 
             recent_created = recent_created,
-            show_groups = True,
-            groups   = groups)
+            show_groups = show_groups,
+            groups   = groups,
+            recommended_notes = recommended_notes)
 
 class PrintHandler:
 
