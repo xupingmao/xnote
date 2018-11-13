@@ -76,7 +76,7 @@
     </div>
     <div class="aside-content">
         {% for item in recommended_notes %}
-            <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a></li>
+            <li><a class="link" href="{{item.url}}">{{item.name}}</a></li>
         {% end %}
     </div>
 </div>

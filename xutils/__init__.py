@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/11 18:04:03
+# @modified 2018/11/13 23:05:09
 
 """
 xnote工具类总入口
@@ -421,6 +421,9 @@ def mark_text(content):
                 else:
                     name = href[href.rfind("/")+1:]
                     tokens[index] = '<a href="%s">%s</a>' % (href, name)
+            elif item.count("#") >=2:
+                tokens[index] = re.sub(r"#([^#]+)#", 
+                    "<a class=\"link\" href=\"/message?category=message&key=\\g<1>\">#\\g<1>#</a>", item)
             # elif pat.match(item):
             #     ret = pat.match(item)
             #     name, link = ret.groups()

@@ -32,6 +32,7 @@ class TccHandler:
             if json == "true":
                 return xutils.json_str(status=status, output=output)
         return xtemplate.render("tools/tcc.html", 
+            show_aside = False,
             code = code,
             output = output)
             
@@ -49,7 +50,7 @@ class handler:
         web.header("Content-Type", "text/html")
         fpath = os.path.join(xconfig.HANDLERS_DIR, "tools", name)
         if os.path.exists(fpath):
-            return xtemplate.render("tools/" + name)
+            return xtemplate.render("tools/" + name, show_aside = False)
         else:
             raise web.notfound()
 
