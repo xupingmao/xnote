@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/11/09 19:55:30
+# @modified 2018/11/16 00:10:50
 
 '''
 xnote系统配置
@@ -33,7 +33,7 @@ __contributors__ = []
 # 系统配置项
 ##################################
 
-# 开发者模式            ,会展示更多的选项和信息,会开启实验性功能
+# 开发者模式,会展示更多的选项和信息,会开启实验性功能
 DEV_MODE           = False
 # 开启调试
 DEBUG              = False
@@ -85,7 +85,7 @@ DB_DIR      = os.path.join(WORKING_DIR, "db")
 CONFIG_DIR  = os.path.join(DATA_DIR, "config")
 
 # 其他标记
-# 测试用的flag       ,开启会拥有admin权限
+# 测试用的flag,开启会拥有admin权限
 IS_TEST          = False
 # 开启性能分析
 OPEN_PROFILE     = False
@@ -102,7 +102,7 @@ MAX_FILE_SIZE    = 10 * 1024 ** 2
 MAX_TEXT_SIZE    = 100 * 1024
 # 是否隐藏系统文件
 FS_HIDE_FILES    = True
-# 文件管理扩展的选项      ,类型Storage
+# 文件管理扩展的选项,类型Storage
 FS_LINK          = "/fs_list"
 # 文本文件后缀
 FS_TEXT_EXT_LIST = [
@@ -130,17 +130,18 @@ FS_TEXT_EXT_LIST = [
     ".go",    # Go
     ".m",     # Objective-C, Matlab
     ".conf",  # configuration
-    ".sh",     # Linux shell
-    ".bat",    # Windows shell
-    ".cmd",    # Windows shell
+    ".sh",      # Linux shell
+    ".bat",     # Windows shell
+    ".cmd",     # Windows shell
     ".command", # Mac shell
     ".sql",     # sql
+    ".php",
     ".ini",
     ".rc",
     ".properties",
     ".gradle",
     ".md",
-    ".yml"
+    ".yml",
 ]
 
 FS_IMG_EXT_LIST = [".gif", ".png", ".jpg", ".jpeg", ".bmp", ".webp", ".ico", ".jfif", ".cur"]

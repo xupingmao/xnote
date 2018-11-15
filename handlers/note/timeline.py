@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2018/09/11 01:07:53
+# @modified 2018/11/14 03:23:31
 
 """Description here"""
 import re
@@ -56,9 +56,7 @@ class DateTimeline:
         return result
 
 xurls = (
-    r"/file/timeline", handler,
     r"/note/timeline", handler,
-    r"/file/timeline/month", DateTimeline,
     r"/note/timeline/month", DateTimeline
 )
 

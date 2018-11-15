@@ -10,7 +10,7 @@ except ImportError:
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2018/06/04 23:07:18
+# @modified 2018/11/16 00:31:57
 ###########################################################
 
 def search_escape(text):
@@ -62,6 +62,26 @@ def execute(path, sql):
         raise
     db.close()
     return result
+
+def execute(path, sql):
+    db = sqlite3.connect(path)
+    cursorobj = db.cursor()
+    try:
+        cursorobj.execute(sql)
+        kv_result = []
+        result = cursorobj.fetchall()
+        for single in result:
+            resultMap = {}
+            for i, desc in enumerate(cursorobj.description):
+                name = desc[0]
+                resultMap[name] = single[i]
+            kv_result.append(resultMap)
+        db.commit()
+        return kv_result
+    except Exception:
+        raise
+    finally:
+        db.close()
     
 def get_update_sql(table, update_dict, condition_dict):
     """

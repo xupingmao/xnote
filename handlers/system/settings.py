@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2018/11/08 01:34:07
+# @modified 2018/11/14 02:00:04
 import web
 import time
 import os
@@ -86,7 +86,7 @@ class handler:
             Item('软件版本',    get_xnote_version()),
             Item('sqlite版本', sqlite3.sqlite_version if sqlite3 != None else '')
         ]
-        return xtemplate.render("system/monitor.html", 
+        return xtemplate.render("system/settings.html", 
             item_list      = item_list,
             sys_mem_used   = formated_mem_size,
             sys_mem_total  = xutils.format_size(sys_mem_total),

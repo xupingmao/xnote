@@ -1,0 +1,310 @@
+﻿{% extends base %}
+{% block head %}
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: -webkit-linear-gradient(right, #BE93C5 , #7BC6CC);
+  background: linear-gradient(to left, #BE93C5 , #7BC6CC);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* _site-header.css */
+.site-header {
+  text-align: center;
+}
+
+.site-header__title {
+  font-size: 36px;
+}
+
+.site-footer {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.site-footer__title, .site-footer__title a {
+  font-size: 36px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.wrapper {
+  padding-left: 18px;
+  padding-right: 18px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.timeline {
+  position: relative;
+  margin: 30px auto;
+  padding: 60px 0;
+
+}
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  width: 4px;
+  height: 100%;
+  background-color: #8d94b1;
+}
+.timeline__item {
+  position: relative;
+}
+.timeline__item::after{
+  content: "";
+  clear: both;
+  display: table;
+}
+.timeline__item:nth-child(2n) .timeline__item__content {
+  float: right;
+}
+.timeline__item:nth-child(2n) .timeline__item__content::before {
+  content: '';
+  right: 40%;
+}
+.timeline__item:nth-child(2n) .timeline__item__content__date {
+  background-color: #b292c5;
+}
+.timeline__item:nth-child(2n) .timeline__item__content__description {
+  color: #b292c5;
+}
+.timeline__item:last-child {
+  margin-bottom: 0;
+}
+.timeline__item-bg {
+  -webkit-transition: all 1s ease-out;
+  transition: all 1s ease-out;
+  color: #fff;
+}
+.timeline__item-bg:nth-child(2n) .timeline__item__station {
+  background-color: #b292c5;
+}
+.timeline__item-bg:nth-child(2n) .timeline__item__content {
+  background-color: #b292c5;
+}
+.timeline__item-bg:nth-child(2n) .timeline__item__content::before {
+  background-color: #b292c5;
+}
+.timeline__item-bg:nth-child(2n) .timeline__item__content__description {
+  color: #fff;
+}
+.timeline__item-bg .timeline__item__station {
+  background-color: #65adb7;
+}
+.timeline__item-bg .timeline__item__content {
+  background-color: #65adb7;
+}
+.timeline__item-bg .timeline__item__content::before {
+  background-color: #65adb7;
+}
+.timeline__item-bg .timeline__item__content__description {
+  color: #fff;
+}
+.timeline__item__station {
+  background-color: #9aa0b9;
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  border-radius: 50%;
+  padding: 10px;
+  top: 0;
+  left: 10%;
+  margin-left: -33px;
+  border: 4px solid #8d94b1;
+  -webkit-transition: all .3s ease-out;
+  transition: all .3s ease-out;
+}
+
+.timeline__item__content {
+  width: 80%;
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 6px;
+  float: right;
+  -webkit-transition: all .3s ease-out;
+  transition: all .3s ease-out;
+}
+.timeline__item__content::before {
+  content: '';
+  position: absolute;
+  left: 10%;
+  background: #8d94b1;
+  top: 20px;
+  width: 10%;
+  height: 4px;
+  z-index: -1;
+  -webkit-transition: all .3s ease-out;
+  transition: all .3s ease-out;
+}
+.timeline__item__content__date {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 15px;
+  margin-bottom: 10px;
+  background-color: #65adb7;
+  color: #fff;
+  display: inline-block;
+  border-radius: 4px;
+  border: 2px solid #fff;
+}
+.timeline__item__content__description {
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 300;
+  color: #65adb7;
+}
+
+/* _site-footer.css */
+.site-footer {
+  padding: 50px 0 200px 0;
+
+}
+.site-footer__text {
+  color: #e6e6e6;
+  font-size: 14px;
+  text-align: center;
+}
+.site-footer__text__link {
+  color: #8287a9;
+}
+</style>
+{% end %}
+
+{% block body %}
+<script src="/static/lib/vue/vue-2.2.6.min.js"></script>
+
+<header class="site-header card">
+  <div class="wrapper">
+    <h1 class="site-header__title">知识库时光轴</h1>
+  </div>
+</header>
+
+<section class="timeline card">
+  <div id="app" class="wrapper">
+    <div class="timeline__item" v-for="item in itemList">
+      <div class="timeline__item__station"></div>
+      <div class="timeline__item__content">
+        <h2>{{!item.title}}</h2>
+        <p v-for="file in item.files">
+          <a v-bind:href="file.url">{{!file.name}}</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<header class="site-footer card">
+  <div class="wrapper">
+    <a id="loadMore" href="javascript:void(0)">加载更多</a>
+  </div>
+</header>
+
+<script>
+  // 全局变量
+  var QUERY_LIMIT = 100;
+
+    var itemList = {
+        "2016": []
+    }
+
+    var list = [
+        {"title": "1977 Aug. 20", "description": "Voyager 2 launched from Kennedy Space Flight Center"},
+        {"title": "2017 Mar. 17", "description": "This is a test"}
+    ]
+
+    function customWayPoint(className, addClassName, customOffset) {
+        var waypoints = $(className).waypoint({
+            handler: function (direction) {
+                if (direction == "down") {
+                    $(className).addClass(addClassName);
+                } else {
+                    $(className).removeClass(addClassName);
+                }
+            },
+            offset: customOffset
+        });
+    }
+
+    var defaultOffset = '50%';
+
+    for (i = 0; i < itemList.length; i++) {
+        customWayPoint('.timeline__item--' + i, 'timeline__item-bg', defaultOffset);
+    }
+
+    var app = new Vue({
+        el: "#app",
+        data: {
+            itemList: itemList
+        }
+    });
+
+    app.itemList = [];
+    window.offset = 0;
+
+    function mergeFiles(list, key, files) {
+      for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        if (item.title == key) {
+          item.files = item.files.concat(files);
+          return;
+        }
+      }
+      list.push({title: key, files: files});
+    }
+
+    function loadMore() {
+      $.get("/note/timeline?_type=json", 
+        { 
+          offset: window.offset,
+          limit : QUERY_LIMIT
+        }, 
+        function (data, status) {
+          if (data == "{}") {
+            alert("没有更多了");
+            return;
+          }
+          var resp = data;
+          // app.itemList = [];
+          var count = 0;
+          for (var key in resp) {
+            console.log(key, resp);
+            var files = resp[key];
+            window.offset += files.length;
+            mergeFiles(app.itemList, key, files);
+            count++;
+            // app.itemList.push({title: key, files: files});
+          }
+          if (count == 0) {
+            alert("没有更多了");
+            return;
+          }
+          app.itemList.sort(function (a, b) {
+            return a.title < b.title;
+          })
+  //        app.itemList = resp;
+          // window.offset = app.itemList.length;
+      });
+    }
+
+
+    $("#loadMore").on("click", function() {
+      loadMore();
+    })
+
+    loadMore();
+
+</script>
+{% end %}

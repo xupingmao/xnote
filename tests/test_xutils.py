@@ -110,7 +110,7 @@ class TestMain(unittest.TestCase):
         fib(35)
         self.assertTrue(xutils.expire_cache("fib(1,)"))
 
-    def test_cache2(self):
+    def test_cache_put(self):
         cacheutil.put_cache("name", 123)
         self.assertEqual(123, cacheutil.get_cache("name"))
 

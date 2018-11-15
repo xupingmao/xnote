@@ -1,10 +1,11 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/11/09 21:48:07
+# @modified 2018/11/16 00:16:10
 
-"""文件服务
-    - 文件目录
-    - 大文件下载
+"""xnote文件服务，主要功能:
+    1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
+    2. 文件浏览器
+    3. 大文件下载、断点续传
 """
 import os
 import mimetypes

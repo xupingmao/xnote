@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/10/27 16:32:31
+# @modified 2018/11/16 00:24:23
 """
 Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
@@ -190,8 +190,8 @@ def init_file_table():
         # 各种索引
         manager.add_index(["parent_id", "name"])
         manager.add_index(["creator", "mtime", "type", "is_deleted"])
+        manager.add_index(["creator", "type"])
         manager.add_index(["role", "mtime"])
-        manager.add_index("type")
         manager.add_index("ctime")
         # 虽然不能加速匹配过程，但是可以加速全表扫描
         manager.add_index("name")

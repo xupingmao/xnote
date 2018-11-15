@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/09/13 00:49:55
+# @modified 2018/11/14 00:15:54
 import sqlite3
 import os
 import xutils
@@ -66,6 +66,7 @@ class handler:
         else:
             keys = []
         return xtemplate.render("tools/sql.html", 
+            show_aside = False,
             keys = keys, 
             result_list = result_list, 
             sql = sql, 

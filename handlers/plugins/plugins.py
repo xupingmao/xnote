@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/11/05 00:19:32
+# @modified 2018/11/14 00:31:42
 from io import StringIO
 import xconfig
 import codecs
@@ -82,8 +82,7 @@ def load_plugin(name):
     if xconfig.DEBUG or context is None:
         script_name = "plugins/" + name
         if not os.path.exists(os.path.join(xconfig.PLUGINS_DIR, name)):
-            error = "file `%s` not found" % script_name
-            return xtemplate.render("error.html", error=error)
+            return None
         vars = dict()
         vars["script_name"] = script_name
         xutils.load_script(script_name, vars)
@@ -192,7 +191,8 @@ class PluginsHandler:
             if main_class != None:
                 return main_class().render()
             else:
-                return xtemplate.render("error.html", error="class `Main` not found!")
+                return xtemplate.render("error.html", 
+                    error = "plugin `%s` not found!" % name)
         except:
             error = xutils.print_exc()
             return xtemplate.render("error.html", error=error)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/10/31 01:33:10
+# @modified 2018/11/15 01:32:28
 """
 缓存的实现，考虑失效的规则如下
 
@@ -27,7 +27,7 @@ _cache_dict = dict()
 
 def encode_key(text):
     """编码key为文件名"""
-    return text + ".pk"
+    return text + ".json"
     # return base64.urlsafe_b64encode(text.encode("utf-8")).decode("utf-8") + ".pk"
 
 def decode_key(text):
@@ -58,6 +58,8 @@ class CacheObj:
             raise ValueError("value cannot be None")
         if key.find("/") >= 0:
             raise ValueError("cannot contains / in key")
+        if not self.is_valid_key(key):
+            raise ValueError("invalid key `%s`" % key)
 
         self.key              = key
         self.value            = value
@@ -85,10 +87,10 @@ class CacheObj:
             else:
                 one.clear()
 
-    def _get_path(self, key):
-        return os.path.join(xconfig.STORAGE_DIR, encode_key(key))
+    def is_valid_key(self, key):
+        return re.match(r"^[0-9a-zA-Z\[\]_\-\.\(\)\@\#,'\"\$ ]+$", key) != None
 
-    def _get_json_path(self, key):
+    def _get_path(self, key):
         return os.path.join(xconfig.STORAGE_DIR, key + ".json")
 
     def save(self):
@@ -102,15 +104,9 @@ class CacheObj:
                 value = self.value, 
                 expire_time = self.expire_time)
 
-        self._save_as_json(obj)
-        # pickled = pickle.dumps(obj)
-        # with open(path, "wb") as fp:
-        #     fp.write(pickled)
-
-    def _save_as_json(self, obj):
-        path = self._get_json_path(self.key)
+        encoded = json.dumps(obj)
         with open(path, "w") as fp:
-            fp.write(json.dumps(obj))
+            fp.write(encoded)
 
     def is_alive(self):
         if self.is_force_expired:
@@ -385,6 +381,8 @@ def load_dump():
             fpath = os.path.join(dirname, fname)
             with open(fpath, "rb") as fp:
                 pickled = fp.read()
+                if pickled == b'':
+                    continue
                 if fname.endswith(".json"):
                     dict_obj = json.loads(pickled.decode("utf-8"), object_hook = json_object_hook)
                 else:
@@ -396,6 +394,7 @@ def load_dump():
                 if obj.is_temp():
                     os.remove(fpath)
         except:
+            log_error("failed to load cache %s" % fname)
             print_exc()
 
 def clear_temp():

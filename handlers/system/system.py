@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/11/11 18:12:32
+# @modified 2018/11/15 01:11:58
 
 """Description here"""
 from io import StringIO
@@ -29,7 +29,7 @@ def link(name, url):
     return Storage(name = name, url = url, link = url)
 
 sys_tools = [
-    link("系统设置",   "/system/monitor"),
+    link("系统设置",   "/system/settings"),
     link("文件管理",   "/fs_list"),
     link("脚本管理",   "/fs_link/scripts"),
     link("定时任务",   "/system/crontab"),
@@ -38,7 +38,7 @@ sys_tools = [
     link("App管理",   "/fs_link/app"),
     # link("后台模板缓存", "/system/template_cache"),
     link("系统刷新",  "/system/reload"),
-    link("Python文档", "/system/modules_info"),
+    link("模块说明", "/system/modules_info"),
     link("SQL控制台", "/tools/sql"),
     link("启动规则", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
     link("定制CSS", "/code/edit?type=script&path=user.css"),
@@ -53,6 +53,7 @@ doc_tools = [
     link("提醒", "/message?status=created"),
     link("最近", "/note/recent_edit"),
     link("日历", "/message/calendar"),
+    link("时光轴", "/tools/timeline")
 ] 
 
 other_tools = [
@@ -72,7 +73,7 @@ other_tools = [
     link("二维码", "/tools/qrcode"),
     link("随机生成器", "/tools/random_string"),
     # 其他工具
-    link("分屏模式", "/tools/command_center"),
+    link("分屏模式", "/tools/multi_win"),
 ]
 
 xconfig.MENU_LIST = [

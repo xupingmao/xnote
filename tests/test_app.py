@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/11/11 20:03:33
+# @modified 2018/11/14 03:25:00
 
 import sys
 import os
@@ -212,8 +212,8 @@ class TestMain(unittest.TestCase):
         json_request("/note/remove?id=" + str(id))
 
     def test_file_timeline(self):
-        json_request("/file/timeline")
-        json_request("/file/timeline/month?year=2018&month=1")
+        json_request("/note/timeline")
+        json_request("/note/timeline/month?year=2018&month=1")
 
     def test_note_tag(self):
         json_request("/note/remove?name=xnote-tag-test")
@@ -272,7 +272,7 @@ class TestMain(unittest.TestCase):
         self.check_200("/system/crontab")
         self.check_200("/system/stats")
         self.check_200("/system/stats/location", method="POST")
-        self.check_200("/system/monitor")
+        self.check_200("/system/settings")
         self.check_200("/system/network_profile?total_size=1024")
         # self.check_200("/system/pydoc")
 

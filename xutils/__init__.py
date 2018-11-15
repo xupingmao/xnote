@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/13 23:05:09
+# @modified 2018/11/16 00:17:21
 
 """
 xnote工具类总入口
@@ -532,7 +532,7 @@ def trace(scene, message, cost=0):
     import xauth
     # print("   ", fmt.format(*argv))
     fpath = xconfig.LOG_PATH
-    full_message = "%s [%s] [%s] [%sms] %s" % (format_time(), 
+    full_message = "%s|%s|%s|%sms|%s" % (format_time(), 
         xauth.get_current_name(), scene, cost, message)
     print(full_message)
     with open(fpath, "ab") as fp:
