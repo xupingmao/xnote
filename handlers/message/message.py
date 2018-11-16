@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/11/07 23:23:05
+# @modified 2018/11/16 01:25:23
 
 """短消息"""
 import time
@@ -70,7 +70,7 @@ class ListHandler:
             chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=pagesize, offset=offset))
             end_time = time.time()
             cost_time = int((end_time-start_time)*1000)
-            xutils.log("message search [%s] time %d ms" % (key, cost_time))
+            xutils.trace("MessageSearch", key, cost_time)
             if xconfig.search_history is not None:
                 xconfig.search_history.add(key, cost_time)
         else:

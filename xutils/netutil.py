@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/07/20 01:00:18
+# @modified 2018/11/16 02:29:08
 import os
 import re
 import codecs
@@ -128,6 +128,7 @@ def do_http(method, url, headers, data=None, charset='utf-8'):
         return resp.getcode(), response_headers, codecs.decode(buf, charset)
 
 def http_get(url, charset='utf-8'):
+    """Http的GET请求"""
     out = []
     bufsize = BUFSIZE
     readsize = 0
@@ -143,6 +144,11 @@ def http_get(url, charset='utf-8'):
     return codecs.decode(bytes, charset)
 
 def http_post(url, body='', charset='utf-8'):
+    """HTTP的POST请求
+    :arg str url: 请求的地址
+    :arg str body: POST请求体
+    :arg str charset: 字符集，默认utf-8
+    """
     status, headers, body = do_http("POST", url, None, body)
     return body
 

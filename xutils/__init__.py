@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/16 00:17:21
+# @modified 2018/11/16 02:31:31
 
 """
 xnote工具类总入口
@@ -15,7 +15,7 @@ from .imports import *
 # xnote工具
 from . import textutil, ziputil, fsutil, logutil, dateutil, htmlutil
 from .ziputil import *
-from .netutil import splithost
+from .netutil import splithost, http_get, http_post
 from .textutil import edit_distance, get_short_text
 from .dateutil import *
 from .netutil  import *
@@ -566,10 +566,6 @@ def get_text_ext():
 def is_editable(filename):
     name, ext = os.path.splitext(filename)
     return ext in get_text_ext()
-
-def http_get(url):
-    stream = urlopen(url)
-    return decode_bytes(stream.read())
 
 def mac_say(msg):
     def escape(str):

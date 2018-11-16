@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/11/12 20:53:36
+@modified 2018/11/16 21:34:55
 */
 
 * {
@@ -327,6 +327,7 @@ table td {
     border-color: #ccc;
 }
 
+/*
 .table tr:hover td {
     background: none;
 }
@@ -334,6 +335,7 @@ table td {
 .table tr:hover {
     background: #eee;
 }
+*/
 
 .row-no, .index-td {
     width: 50px;

@@ -6,11 +6,11 @@
     <span id="edit-tags-span" class="tag-toggle hide">
         <input id="tagEditText" type="text" value="" />
         <input type="button" id="tagEditBtn" class="btn" value="确认"/>
-        <input type="button" class="tag-toggle-btn" value="取消"/>
+        <input type="button" class="tag-toggle-btn btn-danger" value="取消"/>
     </span>
 
     {% if _user_name == file.creator  %}
-        <a class="tag-toggle-btn tag-toggle" style="color: blue; cursor: pointer;">编辑</a>
+        <a class="tag-toggle-btn tag-toggle">编辑</a>
     {% end %}
 </div>
 

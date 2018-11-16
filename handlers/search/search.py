@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/11/11 17:59:40
+# @modified 2018/11/16 23:44:16
 
 import re
 import os
@@ -18,7 +18,7 @@ import xauth
 import xmanager
 import xtemplate
 import xtables
-from xutils import textutil, u
+from xutils import textutil, u, cacheutil
 from xutils import Queue, History, Storage
 
 config = xconfig
@@ -84,6 +84,7 @@ class handler:
         category = xutils.get_argument("category", "")
         words    = textutil.split_words(key)
         files    = []
+        user_name = xauth.get_current_name()
 
         start_time           = time.time()
         ctx                  = SearchContext()
@@ -94,7 +95,7 @@ class handler:
         ctx.search_message   = (category == "message")
         ctx.search_file_full = (category == "content")
         ctx.search_dict      = (category == "dict")
-        ctx.user_name        = xauth.get_current_name()
+        ctx.user_name        = user_name
 
         if ctx.search_message:
             ctx.search_file = False
@@ -132,13 +133,17 @@ class handler:
         cost_time = int((time.time() - start_time) * 1000)
         xutils.trace("SearchTime",  key, cost_time)
         xconfig.search_history.add(key, cost_time)
-        xmanager.fire("search.after", ctx)
+
+        cacheutil.zincrby("search_history.%s" % user_name, 1, key)
+        cacheutil.zmaxsize("search_history.%s" % user_name, xconfig.SEARCH_HISTORY_MAX_SIZE)
 
         if ctx.stop:
             return ctx.tools + files
 
         # 慢搜索
         xmanager.fire("search.slow", ctx)
+        xmanager.fire("search.after", ctx)
+
         return ctx.tools + files
 
     def GET(self):
@@ -157,8 +162,7 @@ class handler:
 
         if key == "" or key == None:
             return xtemplate.render("search/search_result.html", 
-                recent = xconfig.search_history.recent(10, 
-                    lambda x:x.get('user')==user_name),
+                recent = list(reversed(cacheutil.zrange("search_history.%s" % user_name, 0, -1))),
                 html_title = "搜索",
                 category = category, 
                 files    = [], 

@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2018/10/02 11:26:03
+@modified 2018/11/16 21:36:46
 -->
 
 {% init files = [] %}
@@ -16,19 +16,19 @@
     <table id="fileTable" class="col-md-12 table">
 
     {% if pseudo_groups %}
-        <tr class="hover-tr">
+        <tr class="">
             <td class="note-td">
                 <img src="/static/image/folder.gif">
                 <a class="group-link" href="/file/group/ungrouped">未分类</a>
             </td>
         </tr>
-        <tr class="hover-tr">
+        <tr class="">
             <td class="note-td">
                 <img src="/static/image/folder.gif">
                 <a class="group-link" href="/file/group/public">公开</a>
             </td>
         </tr>
-        <tr class="hover-tr">
+        <tr class="">
             <td class="note-td">
                 <img src="/static/image/folder.gif">
                 <a class="group-link" href="/file/recent_edit">最近更新</a>
@@ -37,7 +37,7 @@
     {% end %}
 
     {% for i, item in enumerate(files) %}
-        <tr class="hover-tr">
+        <tr class="">
             <td class="note-td">
                 <div class="note-title">
                     {% if item.type == "group" %}

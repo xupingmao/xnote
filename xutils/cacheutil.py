@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/11/15 01:32:28
+# @modified 2018/11/16 23:46:47
 """
 缓存的实现，考虑失效的规则如下
 
@@ -22,6 +22,7 @@
 
 参考redis的API
 """
+from collections import OrderedDict
 from .imports import *
 _cache_dict = dict()
 
@@ -36,6 +37,7 @@ def decode_key(text):
 
 
 def log_debug(msg):
+    # print(msg)
     pass
 
 def log_error(msg):
@@ -48,6 +50,8 @@ class CacheObj:
     TODO 提供按照大小过滤的规则
     """
     _queue = Queue()
+    # 缓存的最大容量，用于集合类型
+    max_size = -1
 
     def __init__(self, key, value, expire = -1, type = "object"):
         global _cache_dict
@@ -67,6 +71,10 @@ class CacheObj:
         self.expire_time      = time.time() + expire
         self.type             = type
         self.is_force_expired = False
+
+        if type == "zset" and not isinstance(value, OrderedDict):
+            value = OrderedDict(**value)
+            self.value = value
 
         if expire < 0:
             self.expire_time = -1
@@ -93,6 +101,12 @@ class CacheObj:
     def _get_path(self, key):
         return os.path.join(xconfig.STORAGE_DIR, key + ".json")
 
+    def get_dump_value(self):
+        if self.type == "zset":
+            return dict(**self.value)
+        else:
+            return self.value
+
     def save(self):
         _cache_dict[self.key] = self
         if self.is_temp():
@@ -101,7 +115,7 @@ class CacheObj:
         path = self._get_path(self.key)
         obj = dict(key = self.key, 
                 type = self.type,
-                value = self.value, 
+                value = self.get_dump_value(), 
                 expire_time = self.expire_time)
 
         encoded = json.dumps(obj)
@@ -254,19 +268,20 @@ def zadd(key, score, member):
     ## TODO 双写两个列表
     obj = get_cache_obj(key, type="zset")
     if obj != None and obj.value != None:
+        obj.value.pop(member)
         obj.value[member] = score
         obj.type = "zset"
         obj.save()
     else:
-        obj = CacheObj(key, dict())
+        obj = CacheObj(key, OrderedDict(), type="zset")
         obj.value[member] = score
-        obj.type = "zset"
         obj.save()
 
 def zrange(key, start, stop):
     """zset分片，不同于Python，这里是左右包含，包含start，包含stop
     :arg int start: 从0开始，负数表示倒数
     :arg int stop: 从0开始，负数表示倒数
+    TODO 优化排序算法，使用有序列表+哈希表
     """
     obj = get_cache_obj(key)
     if obj != None:
@@ -293,13 +308,18 @@ def zscore(key, member):
     return None
 
 def zincrby(key, increment, member):
+    """通过setdefault处理并发问题"""
     obj = get_cache_obj(key)
     if obj != None:
-        score = obj.value.get(member)
-        if score is None:
-            obj.value[member] = increment
-        else:
-            obj.value[member] += increment
+        obj.value.setdefault(member, 0)
+        obj.value[member] += increment
+        # obj.value.move_to_end(member, last=True)
+        obj.value[member] = obj.value.pop(member)
+        if obj.max_size > 0:
+            # LRU置换
+            while len(obj.value) > obj.max_size:
+                obj.value.popitem(last = False)
+        obj.save()
     else:
         zadd(key, increment, member)
 
@@ -307,9 +327,32 @@ def zrem(key, member):
     obj = get_cache_obj(key)
     if obj != None:
         value = obj.value.pop(member)
-        return 1 if value != None else 0
+        if value != None:
+            obj.save()
+            return 1
+        return 0
     else:
         return 0
+
+def zremrangebyrank(key, start, stop):
+    '''删除zset区间'''
+    obj = get_cache_obj(key)
+    if obj is None:
+        return 0
+    members = zrange(key, start, stop)
+    if len(members) == 0:
+        return 0
+    for member in members:
+        log_debug("del %s" % member)
+        obj.value.pop(member)
+    obj.save()
+    return len(members)
+
+def zmaxsize(key, max_size):
+    obj = get_cache_obj(key)
+    if obj is None:
+        return
+    obj.max_size = max_size
 
 def hset(key, field, value, expire=-1):
     obj = get_cache_obj(key, type="hash")
@@ -389,8 +432,7 @@ def load_dump():
                     dict_obj = pickle.loads(pickled)
                 # 持久化的都是不失效的数据
                 obj = CacheObj(dict_obj["key"], 
-                    dict_obj["value"], -1)
-                obj.type = dict_obj.get("type", "object")
+                    dict_obj["value"], -1, dict_obj.get("type", "object"))
                 if obj.is_temp():
                     os.remove(fpath)
         except:
