@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/11/16 23:46:47
+# @modified 2018/11/17 02:04:36
 """
 缓存的实现，考虑失效的规则如下
 
@@ -268,7 +268,7 @@ def zadd(key, score, member):
     ## TODO 双写两个列表
     obj = get_cache_obj(key, type="zset")
     if obj != None and obj.value != None:
-        obj.value.pop(member)
+        obj.value.pop(member, None)
         obj.value[member] = score
         obj.type = "zset"
         obj.save()
