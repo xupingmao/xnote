@@ -9,7 +9,7 @@
 <div class="col-md-12 grid-card">
 
 {% set title = "定时任务" %}
-{% include "tools/base_title.html" %}
+{% include common/base_title.html %}
 
 <table class="table col-md-12">
     <tr>
@@ -21,7 +21,7 @@
     {% set index = -1 %}
     {% for index, task in enumerate(task_list) %}
     {% set name = task.url %}
-    <tr class="hover-tr">
+    <tr class="">
         <td class="row-no">{{index+1}}</td>
         <td>
             <div style="word-wrap: break-word;">
@@ -36,7 +36,7 @@
             {% if task.tm_hour == "*" %} 每小时 {% else %} {{task.tm_hour}}时 {% end %}
             {% if task.tm_min == "*" %} 每分钟 {% else %} {{task.tm_min}}分 {% end %} 
         </td>
-        <td>
+        <td style="width:110px;">
             {% if task.id %}
             <input class="dialog-btn" type="button" value="编辑" 
                 dialog-url="/system/crontab/edit?id={{task.id}}" 

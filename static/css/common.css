@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/11/16 21:34:55
+@modified 2018/11/17 14:24:54
 */
 
 * {
@@ -301,7 +301,7 @@ table th {
     padding: 8px;
     border-style: solid;
     border-color: #ccc;
-    background-color: #dedede;
+    background-color: #eee;
 }
 table td {
     border-width: 1px;

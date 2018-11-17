@@ -97,9 +97,9 @@
                 <span id="fileId" class="hide">{{file.id}}</span>
             </div>
             <div class="grid-title">
-                <a class="link2" href="/">Home</a>
+                <a class="link2" href="/">{{ T('Home') }}</a>
                 {% for item in pathlist %}
-                    › <a class="link2" href="{{item.url}}">{{ item.name }}</a>
+                    / <a class="link2" href="{{item.url}}">{{ item.name }}</a>
                 {% end %}
             </div>
         </div>
@@ -141,7 +141,7 @@
     </form>
 </div>
 
-<script>
+<script type="text/javascript">
     function delLink() {
         var r = confirm("确认删除 {{file.name}}?");
         if (r) {

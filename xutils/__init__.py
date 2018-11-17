@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/16 02:31:31
+# @modified 2018/11/17 15:06:44
 
 """
 xnote工具类总入口
@@ -173,10 +173,6 @@ def get_real_path(path):
     if xconfig.USE_URLENCODE:
         return quote_unicode(path)
     return path
-    
-def makedirs(dirname):
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
 
 def remove_file(path, hard = False):
     """

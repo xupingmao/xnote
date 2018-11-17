@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/11/16 23:44:16
+# @modified 2018/11/17 14:51:54
 
 import re
 import os
@@ -134,8 +134,8 @@ class handler:
         xutils.trace("SearchTime",  key, cost_time)
         xconfig.search_history.add(key, cost_time)
 
-        cacheutil.zincrby("search_history.%s" % user_name, 1, key)
-        cacheutil.zmaxsize("search_history.%s" % user_name, xconfig.SEARCH_HISTORY_MAX_SIZE)
+        cacheutil.zincrby("[%s]search_history" % user_name, 1, key)
+        cacheutil.zmaxsize("[%s]search_history" % user_name, xconfig.SEARCH_HISTORY_MAX_SIZE)
 
         if ctx.stop:
             return ctx.tools + files
@@ -162,7 +162,7 @@ class handler:
 
         if key == "" or key == None:
             return xtemplate.render("search/search_result.html", 
-                recent = list(reversed(cacheutil.zrange("search_history.%s" % user_name, 0, -1))),
+                recent = list(reversed(cacheutil.zrange("[%s]search_history" % user_name, 0, -1))),
                 html_title = "搜索",
                 category = category, 
                 files    = [], 

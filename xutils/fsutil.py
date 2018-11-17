@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/11/11 18:05:40
+# @modified 2018/11/17 15:08:52
 import codecs
 import os
 import platform
@@ -9,6 +9,12 @@ import time
 from .imports import *
 from . import logutil
 from web.utils import Storage
+
+def makedirs(dirname):
+    '''检查并创建目录(如果不存在不报错)'''
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
 
 def readfile(path, mode = "r", limit = -1):
     '''读取文件，尝试多种编码，编码别名参考标准库Lib/encodings/aliases.py
@@ -48,7 +54,7 @@ read_utf8 = readfile
 
 def writebytes(path, bytes):
     dirname = os.path.dirname(path)
-    check_create_dirs(dirname)
+    makedirs(dirname)
     with open(path, "wb") as fp:
         fp.write(bytes)
     return bytes
@@ -90,10 +96,6 @@ def copy(src, dest):
 
     srcfp.close()
     destfp.close()
-
-def check_create_dirs(dirname):
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
 
 def get_file_ext(fname):
     if '.' not in fname:return ''

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/11/11 18:26:44
+# @modified 2018/11/17 15:28:09
 
 """Description here"""
 import os
@@ -16,6 +16,7 @@ import xconfig
 from xutils import Storage
 from xutils import dateutil
 from xutils import cacheutil
+from xtemplate import T
 
 def get_by_name(db, name):
     return db.select_one(where=dict(name = name, 
@@ -92,7 +93,7 @@ def update_note_cache(ctx):
 class AddHandler:
 
     @xauth.login_required()
-    def POST(self):
+    def POST(self, method='POST'):
         name      = xutils.get_argument("name", "")
         tags      = xutils.get_argument("tags", "")
         key       = xutils.get_argument("key", "")
@@ -119,11 +120,16 @@ class AddHandler:
         error = ""
         try:
             db = xtables.get_file_table()
-            if name != '':
+            if name == '':
+                if method == 'POST':
+                    message = 'name is empty'
+                    raise Exception(message)
+            else:
                 f = get_by_name(db, name)
                 if f != None:
                     key = name
-                    raise Exception(u"%s 已存在" % name)
+                    message = u"%s 已存在" % name
+                    raise Exception(message)
                 file_dict = dict(**file)
                 inserted_id = db.insert(**file_dict)
                 update_note_content(inserted_id, content)             
@@ -134,23 +140,26 @@ class AddHandler:
                     return dict(code="success", id=inserted_id)
                 raise web.seeother("/note/view?id={}".format(inserted_id))
         except web.HTTPError as e1:
+            xutils.print_exc()
             raise e1
         except Exception as e:
             xutils.print_exc()
             error = str(e)
+            if format == 'json':
+                return dict(code = 'fail', message = error)
         return xtemplate.render("note/add.html", 
             key      = "", 
             name     = key, 
             tags     = tags, 
             error    = error,
-            pathlist = [Storage(name="创建笔记", url="/note/add")],
+            pathlist = [Storage(name=T("New_Note"), url="/note/add")],
             # pathlist = get_pathlist(db, parent_id),
             message  = error,
             groups   = xutils.call("note.list_group"),
             code     = code)
 
     def GET(self):
-        return self.POST()
+        return self.POST('GET')
 
 class RemoveHandler:
 

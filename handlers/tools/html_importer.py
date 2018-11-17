@@ -103,7 +103,9 @@ class handler:
         save  = xutils.get_argument("save")
         if save != "" and save != None:
             return self.POST()
-        return xtemplate.render(self.template_path, address=address, url=address)
+        return xtemplate.render(self.template_path, 
+            show_aside = False,
+            address=address, url=address)
 
     @xauth.login_required()
     def POST(self):
@@ -167,6 +169,7 @@ class handler:
                 Timer(1, save).start()
 
             return xtemplate.render(self.template_path,
+                show_aside = False,
                 images = images,
                 links = links,
                 csses = csses,
@@ -178,6 +181,7 @@ class handler:
         except Exception as e:
             xutils.print_stacktrace()
             return xtemplate.render(self.template_path,
+                show_aside = False,
                 error = str(e))
 
 

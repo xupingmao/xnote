@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/11/11 16:28:13
+# @modified 2018/11/17 14:13:18
 import os
 import json
 import web
@@ -198,6 +198,9 @@ class BasePlugin:
 
     def writeline(self, line):
         self.output += line + "\n"
+
+    def writetext(self, text):
+        self.output += text
 
     def writehtml(self, html):
         self.html += html

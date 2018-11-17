@@ -7,38 +7,57 @@
         width: 90%;
         float: none;
     }
+
+    label {
+        float: left;
+        width: 100px;
+    }
+
+    h1, h2, h3 {
+        margin: 5px 0px;
+        padding: 5px;
+        display: block;
+        float: left;
+        width: 100%;
+        font-size: 14px;
+        background: #eee;
+        border-left: 5px solid #039BE5;
+    }
+
 </style>
 {% end %}
 
 {% block body %}
 
+{% init url = "" %}
 {% init error = "" %}
 {% init address = "" %}
 {% init images = [] %}
 {% init scripts = [] %}
 {% init texts = [] %}
 
-<div class="rol-md-12 top-offset-1">
+<div class="col-md-12 card">
+    {% set title = "网页资源采集器" %}
+    {% include common/base_title.html %}
     <form method="POST" enctype="multipart/form-data">
-        <h2>上传文件或者填写网址</h2>
-        <p><input type="file" name="file" /></p>
-        <p>网址<input type="text" name="url" style="width: 50em;" value="{{url}}" /></p>
-        <!-- <p>下载资源<input type="checkbox" name="download_res"/></p> -->
-        <input type="submit" value="Submit"/>
+        <p><label>上传文件</label><input type="file" name="file" /></p>
+        <p><label>网址</label><input type="text" name="url" style="width: 50em;" value="{{url}}" /></p>
+        <div>
+            <input type="submit" value="抓取网页"/>
+            <input type="button" id="saveToDbBtn" class="btn" value="保存到资料库">
+        </div>
     </form>
 </div>
 
 <div style="color:red;">{{error}}</div>
 
-<h2>Markdown 文本</h2>
-<div>
-    资料名:<input id="savedName">
-    <input type="button" id="saveToDbBtn" class="btn" value="保存到资料库">
+<div class="card">
+    <h2>Markdown 文本</h2>
+    <textarea rows="30" class="content" id="content">
+    {% for text in texts%}{{text}}
+    {% end %}
+    </textarea>
 </div>
-<textarea rows="30" class="content" id="content">
-{% for text in texts%}{{text}}
-{% end %}
-</textarea>
 
 <h2>纯文本</h2>
 <div><button id="readText">阅读</button></div>
@@ -62,19 +81,24 @@
 
 <script type="text/javascript">
 $("#saveToDbBtn").on("click", function () {
-    var name = $("#savedName").val();
-    var content = $("#content").val();
-    $.post("/note/add", 
-        {"_format": "json", "name": name, "content": content, "type": "md"}, 
-        function (responseText) {
-            console.log(responseText);
-            var data = responseText;
-            if (data.code == "success") {
-                location.href = "/note/view?id=" + data.id;
-            } else {
-                alert(data.message);
-            }
-    })
+    layer.prompt({title: '输入资料名称'}, function(pass, index){
+        layer.close(index);
+        // 保存文档
+        // var name = $("#savedName").val();
+        var name = pass;
+        var content = $("#content").val();
+        $.post("/note/add", 
+            {"_format": "json", "name": name, "content": content, "type": "md"}, 
+            function (responseText) {
+                console.log(responseText);
+                var data = responseText;
+                if (data.code == "success") {
+                    location.href = "/note/view?id=" + data.id;
+                } else {
+                    layer.alert(data.message);
+                }
+        })
+    });
 });
 
 $("#readText").click(function () {

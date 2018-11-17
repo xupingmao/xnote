@@ -18,7 +18,7 @@ xnote
 |-- xmanager.py     # handlers管理器，负责模块加载，注册URL，以及定时任务触发
 |-- xauth.py        # 权限控制
 |-- xtables.py      # 数据库表结构，自动建表
-|-- xtemplate.py    # view渲染接口   
+|-- xtemplate.py    # view层的渲染接口   
 |-- autoreload.py   # 监控文件变更自动reload，主要用于调试，生产环境可以关闭
 
 ```
@@ -41,12 +41,13 @@ xnote
 
 ## 前端
 
-- jquery
+- jquery 无须解释
+- layer web弹层组件
 - marked(markdown解析器)
 - qrcode 二维码生成器
-- csv.js
-- jsdiff
-- codemirror
+- csv.js 解析csv文件
+- jsdiff 文本对比
+- codemirror 代码编辑器
 
 ### 开发新模块
 
