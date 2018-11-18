@@ -1,59 +1,95 @@
 {% extends base.html %}
 
 {% block head %}
-    <style>
-    	table {
-    		width: 100%;
-    	}
-    	tr td {
-    		border: none;
-    	}
-      .login-box {
-        width:30%; 
-        min-width:200px; 
-        background-color: #fff;
-        padding: 10px;
-        margin:0 auto;
-      }
-    	.login-input {
-  		  width: 100%;
-  		  min-width: 200px;
-        padding: 12px;
-        border-radius: 0px;
-     	}
-     	.login-submit {
-        padding: 12px 24px;
-     		border-radius: 0px;
-     		background-color: lightblue;
-     	}
-    	.login-submit:hover {
-    		background-color: #27A9E3;
-        border-radius: 0px;
-    	}
-      .input-header {
-        padding-top: 3px;
-        size: 14px;
-      }
-      
-    </style>
+<style type="text/css">
+	.login-input {
+	  width: 100%;
+	  min-width: 200px;
+    padding: 12px;
+    border-radius: 0px;
+    outline: none;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+ 	}
+
+ 	.login-submit {
+    padding: 12px 24px;
+ 		border-radius: 0px;
+ 		background-color: lightblue;
+ 	}
+	
+  .login-submit:hover {
+		background-color: #27A9E3;
+    border-radius: 0px;
+	}
+  
+  .input-header {
+    padding-top: 3px;
+    size: 14px;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .main {
+    background-color: transparent;
+  }
+
+  .login-box {
+    width: 300px;
+    background-color: #fff;
+    margin: 0 auto;
+    margin-top: 20%;
+    border-radius: 5px;
+  }
+  
+  .login-header {
+    float: left;
+    width: 100%;
+    padding: 10px;
+    background-color: #337ab7;
+    color: white;
+    border-radius: 5px 5px 0px 0px;
+  }
+
+  .login-body {
+    float: left;
+    width: 100%;
+    padding: 10px;
+    background-color: #fff;
+  }
+
+  .login-footer {
+    float: left;
+    width: 100%;
+    background-color: #fff;
+    padding: 0px 10px 10px 10px;
+  }
+</style>
 {% end %}
 
 {% block body %}
-{% if error != "" and error != None %}
-  <div class="col-md-12 error">{{error}}</div>
-{% end %}
     
-<div class="card">
-  <div class="login-box">
+<div class="login-box">
+  <div class="login-header">登录</div>
+  
+  {% if error != "" and error != None %}
+    <div class="col-md-12 error">{{error}}</div>
+  {% end %}
+
+  <div class="login-body">
     <form id="loginForm" name="loginForm" method="POST">
-      登录名
-			<input class="login-input" type="text" name="username" value="{{username}}" placeholder="Account"/>
-      密码
-			<input class="login-input" type="password" name="password" value="{{password}}" placeholder="Password"/>
+  		<input class="login-input" type="text" name="username" value="{{username}}" placeholder="账户名"/>
+  		<input class="login-input" type="password" name="password" value="{{password}}" placeholder="密码"/>
       <input type="text" name="test" value="Test" class="hide">
-			<button class="login-submit login-input" type="submit" value="Login" id="loginBtn" style="margin-top:20px;">Login</button>
-		</form>
-	</div>
+  		<button class="login-submit login-input" type="submit" value="Login" id="loginBtn">登录</button>
+  	</form>
+  </div>
+
+  <div class="login-footer">
+    <a href="/" class="link">返回首页</a>
+  </div>
 </div>
 
 {% end %}

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/11/15 01:11:58
+# @modified 2018/11/18 15:10:27
 
 """Description here"""
 from io import StringIO
@@ -23,7 +23,6 @@ from xtemplate import BasePlugin
 from xutils import History
 from xutils import cacheutil
 from xutils import Storage
-config = xconfig
 
 def link(name, url):
     return Storage(name = name, url = url, link = url)
@@ -97,9 +96,9 @@ class SysHandler:
         # 自定义链接
         customized_items = []
         db  = xtables.get_storage_table()
-        config = db.select_one(where=dict(key="tools", user=xauth.get_current_name()))
-        if config is not None:
-            config_list = xutils.parse_config_text(config.value)
+        user_config = db.select_one(where=dict(key="tools", user=xauth.get_current_name()))
+        if user_config is not None:
+            config_list = xutils.parse_config_text(user_config.value)
             customized_items = map(lambda x: Storage(name=x.get("key"), link=x.get("value")), config_list)
 
         return xtemplate.render("system/system.html", 
@@ -126,6 +125,8 @@ class ConfigHandler:
         key = xutils.get_argument("key")
         value = xutils.get_argument("value")
         setattr(xconfig, key, value)
+        cacheutil.hset('sys.config', key, value)
+
         if key == "BASE_TEMPLATE":
             xmanager.reload()
         if key == "FS_HIDE_FILES":
@@ -192,6 +193,12 @@ xurls = (
 
 @xmanager.listen("sys.reload")
 def on_reload(ctx = None):
+    for key in ('THEME', 'FS_HIDE_FILES'):
+        value = cacheutil.hget('sys.config', key)
+        print("hget key=%s, value=%s" % (key, value))
+        if value is not None:
+            setattr(xconfig, key, value)
+
     path = os.path.join(xconfig.SCRIPTS_DIR, "user.css")
     if not os.path.exists(path):
         return 

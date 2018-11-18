@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/11/17 02:04:36
+# @modified 2018/11/18 15:03:16
 """
 缓存的实现，考虑失效的规则如下
 
@@ -355,21 +355,29 @@ def zmaxsize(key, max_size):
     obj.max_size = max_size
 
 def hset(key, field, value, expire=-1):
-    obj = get_cache_obj(key, type="hash")
-    if obj != None and obj.value != None:
-        obj.value[field] = value
-        obj.type = "hash"
-        obj.save()
-    else:
-        obj = CacheObj(key, dict(), type = "hash")
-        obj.value[field] = value
-        obj.save()
+    try:
+        obj = get_cache_obj(key, type="hash")
+        if obj != None and obj.value != None:
+            obj.value[field] = value
+            obj.type = "hash"
+            obj.save()
+        else:
+            obj = CacheObj(key, dict(), type = "hash")
+            obj.value[field] = value
+            obj.save()
+    except:
+        print_exc()
+        return None
 
 def hget(key, field):
-    obj = get_cache_obj(key, type="hash")
-    if obj != None and obj.value != None:
-        return obj.value.get(field)
-    else:
+    try:
+        obj = get_cache_obj(key, type="hash")
+        if obj != None and obj.value != None:
+            return obj.value.get(field)
+        else:
+            return None
+    except:
+        print_exc()
         return None
 
 def hdel(key, field):

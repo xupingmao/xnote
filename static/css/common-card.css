@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/11/17 14:47:59
+@modified 2018/11/18 14:43:43
 */
 
 * {
@@ -96,7 +96,7 @@ h1,h2,h3 {
 
 /** 标题样式 **/
 .heading {
-    margin: 5px 0px;
+    margin: 0px 0px 10px 0px;
     padding: 5px;
     display: block;
     float: left;
@@ -701,7 +701,7 @@ li.menu-item:hover {
     background-color: #fff;
     margin-bottom: 10px;
     width: 100%;
-    border-radius: 3px;
+    border-radius: 5px;
 }
 
 .note-body {
@@ -1172,7 +1172,7 @@ li.menu-item:hover {
     float: left;
     margin-bottom: 10px;
     border-bottom: 1px solid #ccc;
-    border-radius: 3px;
+    border-radius: 5px;
 }
 
 .aside-item li {
@@ -1230,7 +1230,7 @@ li.menu-item:hover {
     padding: 5px;
     margin-bottom: 10px;
     border-bottom: 1px solid #ccc;
-    border-radius: 3px;
+    border-radius: 5px;
 }
 
 .message-status {
@@ -1252,7 +1252,7 @@ li.menu-item:hover {
     padding: 5px;
     margin-bottom: 10px;
     border-bottom: 1px solid #ccc;
-    border-radius: 3px;
+    border-radius: 5px;
     min-height: 48px;
 }
 
@@ -1267,7 +1267,7 @@ li.menu-item:hover {
     background-color: #fff;
     margin-bottom: 10px;
     padding: 5px;
-    border-radius: 3px;
+    border-radius: 5px;
     /*box-shadow: 1px 1px 1px #888;*/
     border-bottom: 1px solid #ccc;
     /*border-right: 1px solid #ccc;*/

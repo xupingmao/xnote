@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2018/11/03 16:37:17
+# @modified 2018/11/18 15:15:19
 """
     Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -121,6 +121,8 @@ def main():
     app = web.application(list(), var_env, autoreload=False)
     # 初始化数据库
     xtables.init()
+    # 加载持久化的缓存
+    xutils.cacheutil.load_dump()
 
     # 最后的mapping，用于匹配优先级较低的处理器
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
@@ -154,8 +156,6 @@ def main():
     if xconfig.OPEN_IN_BROWSER:
         webbrowser.open("http://localhost:%s/" % xconfig.PORT)
 
-    # 加载持久化的缓存
-    xutils.cacheutil.load_dump()
     app.run()
 
 if __name__ == '__main__':

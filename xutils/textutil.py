@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2018/11/07 22:25:26
+# @modified 2018/11/18 14:51:10
 import re
 import random
 from .imports import is_str, ConfigParser
@@ -304,9 +304,14 @@ def random_string(length, chars=ALPHA_NUM):
     return value
 
 
-def parse_config_text(text):
-    """解析key/value格式的配置文本"""
-    config = []
+def parse_config_text(text, ret_type = 'list'):
+    """解析key/value格式的配置文本
+    :arg str ret_type: 返回的格式，包含list, dict
+    """
+    if ret_type == 'dict':
+        config = dict()
+    else:
+        config = []
     for line in text.split("\n"): 
         line = line.strip().replace('\n', '') 
         if line.find("#")!=-1: 
@@ -316,7 +321,10 @@ def parse_config_text(text):
         if eq_pos > 0: 
             key   = line[:eq_pos].strip()
             value = line[eq_pos+1:].strip()
-            config.append(dict(key=key, value=value))
+            if ret_type == 'dict':
+                config[key] = value
+            else:
+                config.append(dict(key=key, value=value))
     return config
 
 def parse_ini_text(text):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/11/17 14:13:18
+# @modified 2018/11/18 14:54:08
 import os
 import json
 import web
@@ -36,11 +36,8 @@ def load_languages():
             continue
         fpath   = os.path.join(dirname, fname)
         content = xutils.readfile(fpath)
-        config  = xutils.parse_config_text(content)
-        mapping = dict()
-        for item in config:
-            mapping[item['key']] = item['value']
-        _lang_dict[name] = mapping
+        config  = xutils.parse_config_text(content, ret_type = 'dict')
+        _lang_dict[name] = config
 
 
 def T(text, lang = None):

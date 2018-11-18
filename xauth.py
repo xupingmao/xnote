@@ -48,7 +48,7 @@ def get_users():
 def refresh_users():
     global _users
     _users = None
-    print("refresh users")
+    xutils.trace("ReLoadUsers", "reload users")
     return _get_users()
 
 def get_user(name):

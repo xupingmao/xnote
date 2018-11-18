@@ -18,7 +18,7 @@
 
 <div class="col-md-12 card">
 {% if doc_info is not None %}
-    <h2>模块: {{doc_info.name}}</h2>
+    <h2 class="heading">模块: {{doc_info.name}}</h2>
 
     <p>位于 <a href="/code/edit?path={{doc_info.file}}">{{doc_info.file}}</a></p>
     <pre class="doc-detail">{{doc_info.doc}}</pre>

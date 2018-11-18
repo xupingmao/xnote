@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/17 15:06:44
+# @modified 2018/11/17 18:41:04
 
 """
 xnote工具类总入口
@@ -193,7 +193,9 @@ def remove_file(path, hard = False):
         else:
             name = os.path.basename(path)
             destpath = os.path.join(dustbin, "%s_%s" % (time.strftime("%Y%m%d"), name))
-            os.rename(path, destpath)
+            # os.rename(path, destpath)
+            # shutil.move 可以跨磁盘分区移动文件
+            shutil.move(path, destpath)
         # os.remove(path)
     elif os.path.isdir(path):
         if hard:
@@ -205,7 +207,7 @@ def remove_file(path, hard = False):
         target = os.path.abspath(target)
         path   = os.path.abspath(path)
         if target == path:
-            # 直接删除文件夹
+            # 已经在回收站，直接删除文件夹
             shutil.rmtree(path)
         else:
             shutil.move(path, target)
