@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/11/16 23:38:49
+# @modified 2018/11/18 23:54:15
 
 '''
 xnote系统配置
@@ -114,6 +114,7 @@ FS_TEXT_EXT_LIST = [
     ".h",
     ".cpp",   # C++
     ".hpp",
+    ".cs",    # C#
     ".vm",    # velocity
     ".vim",   # VIM文件
     ".html",  # HTML

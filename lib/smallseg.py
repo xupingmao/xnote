@@ -1,6 +1,6 @@
 ﻿# -*- coding:utf-8 -*-
 # @author sunjoy <ccnusjy@gmail.com>
-# @modified 2018/11/15 00:20:39
+# @modified 2018/11/19 01:19:38
 # source https://github.com/iurisilvio
 # 基于最大匹配算法
 from __future__ import print_function
@@ -25,7 +25,7 @@ class SEG(object):
         self.d    = {}
         self.debug("loading dict...")
         # 分词符号，可以自定义修改
-        self.split_pattern = u"。|，|,|！|…|!|《|》|<|>|\"|'|:|：|？|\?|、|\||“|”|‘|’|；|—|（|）|·|\(|\)|　|\s"
+        self.split_pattern = u"。|，|,|！|…|!|《|》|<|>|\"|'|:|：|？|\?|、|\||“|”|‘|’|；|—|（|）|·|\(|\)|　|\s|\[|\]"
         if dictpath is not None:
             self.load_words([x.rstrip() for x in open(dictpath).readlines()])
         self.specialwords= set([x for x in specialwords])

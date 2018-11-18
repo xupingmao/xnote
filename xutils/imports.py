@@ -2,7 +2,7 @@
 # 专门用来import各种依赖
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
-# @modified 2018/11/16 23:09:38
+# @modified 2018/11/19 01:27:51
 from __future__ import print_function
 import sys
 import os
@@ -61,6 +61,7 @@ if PY2:
     def is_str(s):
         return isinstance(s, (str, unicode))
 else:
+    # Py3 and later
     from urllib.parse import quote, unquote
     from urllib.request import urlopen
     from subprocess import getstatusoutput

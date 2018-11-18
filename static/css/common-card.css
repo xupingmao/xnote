@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/11/18 14:43:43
+@modified 2018/11/18 23:49:18
 */
 
 * {
@@ -230,7 +230,6 @@ a:hover {
     border-color: #2e6da4;
     border: 1px solid transparent;
     color: #fff;
-    border-radius: 1px;
     text-decoration: none;
     margin-top: 5px;
     padding: 1px 7px 2px;
@@ -1177,8 +1176,8 @@ li.menu-item:hover {
 
 .aside-item li {
     list-style: none;
-    /*padding-left: 5px;*/
     line-height: 20px;
+    cursor: pointer;
 }
 
 .aside-title {

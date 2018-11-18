@@ -179,11 +179,11 @@
         {% continue %}
     {% end %}
 
-    {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." or item.name.endswith((".pyc", ".class"))) %}
+    {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." 
+            or item.name.endswith((".pyc", ".class"))) %}
         {% continue %}
     {% end %}
 
-    {% if not item.name.startswith("._") %}
     <tr>
         <td class="checkboxTd"><input type="checkbox" data-path="{{item.path}}" data-name="{{item.name}}"></td>
         <td>
@@ -193,8 +193,14 @@
         {% else %}
             <a href="/fs/{{item.path}}" class="fs-file">{{item.name}}</a>
 
+            {# 图片浏览器 #}
             {% if xutils.is_img_file(item.path) %}
                 <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>
+            {% end %}
+
+            {# 文本编辑器 #}
+            {% if xutils.is_text_file(item.path) %}
+                <a class="item-option" href="/code/edit?path={{url_escape(item.path)}}">编辑</a>
             {% end %}
 
             {% if item.ext == ".txt" %}
@@ -208,10 +214,6 @@
             {% if item.ext in (".log", ".sql") %}
                 {% comment 以文本形式查看 %}
                 <a class="item-option layer-btn" data-url="/fs/{{item.path}}?type=text">查看</a>
-            {% end %}
-
-            {% if item.ext in xconfig.FS_TEXT_EXT_LIST %}
-                <a class="item-option" href="/code/edit?path={{url_escape(item.path)}}">编辑</a>
             {% end %}
 
             {% if item.ext in (".md", ".csv") %}
@@ -234,7 +236,6 @@
             </div>
         </td>
     </tr>
-    {% end %}
 {% end %}
 </table>
 
