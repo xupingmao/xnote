@@ -2,7 +2,7 @@
 
 ## 新增插件
 
-在```$DATA/scripts/plugins```目录下创建一个Python文件。
+点击【插件】-> 【新增插件】，然后在新增插件页面输入插件名称。（新增插件功能本身就是用插件机制实现的）
 
 ## 插件示例
 
@@ -12,6 +12,8 @@ from xtemplate import BasePlugin
 
 class Main(BasePlugin):
     """默认的插件声明入口，定义一个叫做Main的类"""
+    
+    title = '测试插件'
 
     def render(self):
         # 处理页面渲染

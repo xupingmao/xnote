@@ -58,6 +58,13 @@
             </td>
         </tr>
         <tr>
+            <td>选项风格</td>
+            <td>
+                <input type="radio" name="OPTION_STYLE" default-value="{{xconfig.OPTION_STYLE}}" value="aside">侧边栏
+                <input type="radio" name="OPTION_STYLE" default-value="{{xconfig.OPTION_STYLE}}" value="tab">标签页
+            </td>
+        </tr>
+        <tr>
             <td>语言</td>
             <td>
                 <input type="radio" name="LANG" default-value="{{web.cookies().get('lang', 'zh')}}" value="zh">中文

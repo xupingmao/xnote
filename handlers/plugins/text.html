@@ -38,9 +38,9 @@
         {% if rows > 0 %}
         <form method="{{method}}">
             {% if rows == 1 %}
-            <input class="col-md-12" name="input" value="{{input}}"/>
+            <input class="col-md-12" name="input" value="{{input}}" placeholder="{{model.placeholder}}"/>
             {% else %}
-            <textarea class="col-md-12 code" name="input" rows={{rows}}>{{input}}</textarea>
+            <textarea class="col-md-12 code" name="input" rows={{rows}} placeholder="{{model.placeholder}}">{{input}}</textarea>
             {% end %}
             <button>{{model.btn_text}}</button>
         </form>

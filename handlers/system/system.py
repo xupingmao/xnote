@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/11/18 15:10:27
+# @modified 2018/11/20 23:08:02
 
 """Description here"""
 from io import StringIO
@@ -39,8 +39,8 @@ sys_tools = [
     link("系统刷新",  "/system/reload"),
     link("模块说明", "/system/modules_info"),
     link("SQL控制台", "/tools/sql"),
-    link("启动规则", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
-    link("定制CSS", "/code/edit?type=script&path=user.css"),
+    link("启动脚本", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
+    link("自定义CSS", "/code/edit?type=script&path=user.css"),
 ] 
 
 doc_tools = [
@@ -193,7 +193,7 @@ xurls = (
 
 @xmanager.listen("sys.reload")
 def on_reload(ctx = None):
-    for key in ('THEME', 'FS_HIDE_FILES'):
+    for key in ('THEME', 'FS_HIDE_FILES', 'OPTION_STYLE'):
         value = cacheutil.hget('sys.config', key)
         print("hget key=%s, value=%s" % (key, value))
         if value is not None:

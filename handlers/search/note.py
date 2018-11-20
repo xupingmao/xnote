@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2018/11/09 21:24:35
+# @modified 2018/11/19 01:46:19
 """搜索知识库文件"""
 import re
 import sys
@@ -41,11 +41,8 @@ def file_wrapper(dict, option=None):
 def file_dict(id, name, related):
     return dict(id = id, name = name, related = related)
 
-def get_file_db():
-    return db.SqliteDB(db=config.DB_PATH)
-
 def get_cached_notes0():
-    return list(xtables.get_file_table().query('SELECT name, UPPER(name) as name_upper, id, parent_id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted == 0'))
+    return list(xtables.get_file_table().query('SELECT name, UPPER(name) as name_upper, id, parent_id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted = 0'))
 
 
 @xutils.cache(key='note_name.list', expire=3600)

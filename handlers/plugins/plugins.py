@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/11/14 00:31:42
+# @modified 2018/11/20 23:06:14
 from io import StringIO
 import xconfig
 import codecs
@@ -125,6 +125,7 @@ class PluginsListHandler:
     def GET(self):
         return xtemplate.render("plugins/plugins.html", 
             html_title = "插件",
+            show_aside = xconfig.OPTION_STYLE == "aside",
             recent     = list_recent_plugins(),
             plugins    = list_plugins())
 
@@ -140,6 +141,7 @@ import xutils
 import xauth
 import xmanager
 import xtables
+from xutils import cacheutil
 from xtemplate import BasePlugin
 
 class Main(BasePlugin):

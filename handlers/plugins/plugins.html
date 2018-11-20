@@ -21,12 +21,21 @@
         .plugin-time {
             float: right;
         }
-
     </style>
 {% end %}
 
 
 {% block body %}
+
+{% if not show_aside %}
+<div class="card">
+    <a class="link" href="/plugins_new">新增插件</a>|
+    <a class="link" href="/fs_link/scripts/plugins">插件管理</a>|
+    <a class="link" href="/fs_api/download/plugins">打包下载</a>
+
+    <div class="float-right">插件数: {{len(plugins)}}</div>
+</div>
+{% end %}
 
 {% init recent = [] %}
 <div class="plugin-list">

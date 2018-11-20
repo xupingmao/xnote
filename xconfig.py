@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/11/18 23:54:15
+# @modified 2018/11/20 23:00:29
 
 '''
 xnote系统配置
@@ -56,6 +56,8 @@ RECORD_LOCATION    = False
 BASE_TEMPLATE      = "base2.html"
 # 主题样式
 THEME              = "common.css"
+# 选项风格
+OPTION_STYLE       = "aside"
 
 # 插件相关
 LOAD_PLUGINS_ON_INIT = True
