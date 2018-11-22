@@ -80,5 +80,6 @@ class UpdateHandler(object):
 xurls = (
     r"/code/view_source", ViewSourceHandler,
     r"/code/view_source/update", UpdateHandler,
+    r"/code/update", UpdateHandler,
     r"/code/edit", ViewSourceHandler
 )

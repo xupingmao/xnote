@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/11/18 23:28:21
+@modified 2018/11/23 01:21:36
 */
 
 * {
@@ -231,7 +231,8 @@ a:hover {
     text-decoration: none;
     margin-top: 5px;
     padding: 1px 7px 2px;
-    font-size: 11px;
+    font-size: 12px;
+    line-height: 18px;
 }
 
 /* 单选 */

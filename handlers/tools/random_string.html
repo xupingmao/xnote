@@ -8,18 +8,24 @@
 {% set title = "随机字符串生成器" %}
 {% include "tools/base_title.html" %}
 
-<div class="col-md-12">字符长度<input id="length" value="10"/></div>
-<div class="col-md-12">生成的数量<input id="count" value="1"/></div>
-<div>字符内容</div>
-<div>
-    <ul>
-        <li><input id="digit" type="checkbox" checked="true" value="1234567890">1234567890</li>
-        <li><input id="lowerAlphabet" type="checkbox" checked="true" value="abcdefghijklmnopqrstuvwxyz">a-z</li>
-        <li><input id="upperAlphabet" type="checkbox" checked="true" value="ABCDEFGHIJKLMNOPQRSTUVWXYZ">A-Z</li>
-        <li><input id="symbol" type="checkbox" value="~!@#$%^&*">~!@#$%^&*</li>
-        <li>其他<br/><textarea id="others" style="width:50%;"></textarea></li>
-    </ul>
-</div>
+    <div class="col-md-12">
+        <label class="label">字符长度</label>
+        <input id="length" value="10"/>
+    </div>
+    <div class="col-md-12">
+        <label class="label">生成的数量</label>
+        <input id="count" value="1"/>
+    </div>
+    <div>字符内容</div>
+    <div>
+        <ul>
+            <li><input id="digit" type="checkbox" checked="true" value="1234567890">1234567890</li>
+            <li><input id="lowerAlphabet" type="checkbox" checked="true" value="abcdefghijklmnopqrstuvwxyz">a-z</li>
+            <li><input id="upperAlphabet" type="checkbox" checked="true" value="ABCDEFGHIJKLMNOPQRSTUVWXYZ">A-Z</li>
+            <li><input id="symbol" type="checkbox" value="~!@#$%^&*">~!@#$%^&*</li>
+            <li>其他<br/><textarea id="others" style="width:50%;"></textarea></li>
+        </ul>
+    </div>
 
 <div>
     <input type="button" onclick="generate()" value="生成"/>

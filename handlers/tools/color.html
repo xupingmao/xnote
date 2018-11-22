@@ -1,17 +1,13 @@
 {% extends base %}
 
 {% block head %}
-    <style>
-        .common-color-div div {
+    <style type="text/css">
+        .common-color-div div, #other-color-div div {
             float: left;
             width: 25%;
+            padding: 5px;
+            min-width: 150px;
         }
-
-        #other-color-div div {
-            float: left;
-            width: 25%;
-        }
-
     </style>
 {% end %}
 

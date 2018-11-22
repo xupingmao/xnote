@@ -55,7 +55,7 @@
     </div>
     {% end %}
 
-    <form method="POST" action="/code/view_source/update">
+    <form method="POST" action="/code/update">
         <input name="path" class="hide" value="{{path}}"/>
         <input name="basename" class="hide" value="{{os.path.basename(path)}}"/>
         <input name="dirname" class="hide" value="{{os.path.dirname(path)}}"/>

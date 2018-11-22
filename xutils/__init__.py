@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/17 18:41:04
+# @modified 2018/11/22 01:07:19
 
 """
 xnote工具类总入口
@@ -428,6 +428,7 @@ def mark_text(content):
             #     tokens[index] = '<a href="%s">%s</a>' % (link, name)
             else:
                 token = tokens[index]
+                token = token.replace("&", "&amp;")
                 token = token.replace("<", "&lt;")
                 token = token.replace(">", "&gt;")
                 tokens[index] = token
@@ -576,7 +577,7 @@ def mac_say(msg):
         new_str_list.append('"')
         return ''.join(new_str_list)
 
-    msglist = re.split(r"[,.;?!():，。？！；：\n]", msg)
+    msglist = re.split(r"[,.;?!():，。？！；：\n\"'<>《》\[\]]", msg)
     for m in msglist:
         m = m.strip()
         if m == "":
@@ -591,8 +592,10 @@ def windows_say(msg):
         # dynamic=True不生成静态的Python代码
         voice = cc.CreateObject("SAPI.SpVoice", dynamic=True)
         voice.Speak(msg)
-    except:
+    except ImportError:
         pass
+    except:
+        print_exc()
 
 def say(msg):
     if xconfig.IS_TEST:
