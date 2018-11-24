@@ -5,7 +5,7 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2018/11/08 01:21:57
+ * @modified 2018/11/24 02:40:10
  */
 var XUI = function (window) {
   // 处理select标签选中情况
@@ -108,19 +108,29 @@ var XUI = function (window) {
         var src = $(this).attr("src");
         var alt = $(this).attr("alt");
         console.log(src);
+
+        var data = [];
+        var imageIndex = 0;
+        var target = e.target;
+
+        $(".x-photo").each(function(index, el) {
+          if (el == target) {
+            imageIndex = index;
+          }
+          data.push({
+            "alt": $(el).attr("alt"),
+            "pid": 0,
+            "src": $(el).attr("src"),
+            "thumb": ""
+          });
+        });
+
         layer.photos({
             "photos": {
                   "title": "", //相册标题
                   "id": 123, //相册id
-                  "start": 0, //初始显示的图片序号，默认0
-                  "data": [   //相册包含的图片，数组格式
-                    {
-                      "alt": alt,
-                      "pid": 666, //图片id
-                      "src": src, //原图地址
-                      "thumb": "" //缩略图地址
-                    }
-                  ]
+                  "start": imageIndex, //初始显示的图片序号，默认0
+                  "data": data
                 },
             "anim":5
         });

@@ -1,6 +1,6 @@
 {% extends base %}
 {% block head %}
-    <script src="/static/js/array.js"></script>
+    <script src="/static/js/utils.js"></script>
     <script type="text/javascript" src="/static/js/Lexer.js"></script>
 {% end %}
 
@@ -29,12 +29,11 @@
             <!-- <option value="to_underscore">转为下划线风格</option> -->
         </select>
     </p>
-
     <p><button onclick="execute()">转换</button></p>
 </div>
 
 <div class="col-md-12">
-    <h2>使用说明</h2>
+    <h2 class="heading">使用说明</h2>
     <table> 
         <tr>
             <th>类型</th>

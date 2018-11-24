@@ -72,7 +72,7 @@
             {% if path.endswith(".md") %}
                 <input type="button" class="link-btn" href="/code/preview?path={{path}}" value="预览">
             {% end %}
-            {% if path.find("/plugins/") >= 0 %}
+            {% if path.find("/plugins/") >= 0 or path.find("\\plugins\\") >= 0 %}
                 <input type="button" class="link-btn" href="/plugins/{{name}}" value="预览"/>
             {% end %}
             <span>注意不会自动保存</span>

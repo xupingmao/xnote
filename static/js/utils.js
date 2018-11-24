@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2017/08/16
-// @modified 2018/10/02 16:06:53
+// @modified 2018/11/24 12:42:01
 
 /**
  * 获取请求参数
@@ -29,7 +29,10 @@ var getUrlParams = function() {
     return params;
 };
 
-/** 根据key获取url参数值 **/
+/**
+ * 根据key获取url参数值 
+ * @param {string} key
+ */
 var getUrlParam = function (key) {
     return getUrlParams()[key];
 }
@@ -54,8 +57,6 @@ function getWindowHeight() {
         return Math.min(document.body.clientWidth, document.documentElement.clientWidth);
     }
 }
-
-
 
 // 遍历对象
 function objForEach(obj, fn) {
@@ -320,7 +321,8 @@ String.prototype.format = String.prototype.format || function () {
     return dest;
 }
 /**
- * @param count int
+ * 生成重复的字符串
+ * @param {number} count
  * @return string
  */
 String.prototype.repeat = function (count) {
@@ -373,11 +375,15 @@ String.prototype.repeat = function (count) {
 // 4.5.1 [[DefineOwnProperty]] ( P, Desc, Throw )
 // 4.5.2 length
 
-Array.prototype.startsWith = Array.prototype.startsWith || function (dst) {
+/**
+ * 判断数组中是否存在以start开头的字符串
+ * @param {string} start
+ */
+Array.prototype.startsWith = Array.prototype.startsWith || function (start) {
     var array = this;
     for (var key in array) {
         var item = array[key];
-        if (item.startsWith(dst)) return true;
+        if (item.startsWith(start)) return true;
     }
     return false;
 }
@@ -392,7 +398,7 @@ Array.prototype.each = Array.prototype.each || function (callback) {
 
 /**
  * forEach遍历
- * @param callback
+ * @param {function} callback
  */
 Array.prototype.forEach = Array.prototype.forEach || function (callback) {
     var self = this;
