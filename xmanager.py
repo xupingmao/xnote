@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/11/25 20:03:16
+# @modified 2018/11/25 20:43:42
 
 """
 Xnote 模块管理器
@@ -590,9 +590,9 @@ def load_plugins(dirname):
                 if main_class != None:
                     instance = main_class()
                     context = PluginContext()
+                    context.title = getattr(instance, "title", "")
                     if hasattr(main_class, 'on_init'):
                         instance.on_init(context)
-                        context.title = getattr(instance, "title", "")
                     context.clazz = main_class
                     xconfig.PLUGINS[fname] = context
             except:
