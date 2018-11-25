@@ -9,7 +9,9 @@ import xutils
 class handler:
 
     def GET(self):
-        return xtemplate.render("system/thread_info.html", thread_list = threading.enumerate())
+        return xtemplate.render("system/thread_info.html", 
+            show_aside = False,
+            thread_list = threading.enumerate())
 
 name = "线程信息"
 description = "线程信息"

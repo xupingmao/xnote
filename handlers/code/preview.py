@@ -85,6 +85,7 @@ class handler:
             parentname="/"
             
         return render("code/preview.html", 
+            show_aside = False,
             os = os,
             path = path,
             parent = parent,
@@ -155,6 +156,7 @@ class handler:
             parentname="/"
             
         return render("code/wiki_edit.html", 
+            show_aside = False,
             os = os,
             parent = parent,
             parentname = parentname,
@@ -186,6 +188,7 @@ class WikiPathHandler:
         basename = os.path.basename(path)
         content = xutils.readfile(path)
         return render(template_name, 
+            show_aside = False,
             html_title = basename,
             content    = content, 
             os         = os, 

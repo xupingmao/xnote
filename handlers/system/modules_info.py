@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/09/24 00:18:16
+# @modified 2018/11/25 20:22:07
 import six
 import xutils
 import xtemplate
@@ -45,6 +45,7 @@ class handler(object):
     
     def GET(self):
         return xtemplate.render("system/modules_info.html", 
+            show_aside = False,
             modules = query_modules(),
             sys = sys)
 

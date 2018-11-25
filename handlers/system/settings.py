@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2018/11/18 23:52:40
+# @modified 2018/11/25 20:22:50
 import web
 import time
 import os
@@ -87,6 +87,7 @@ class handler:
             Item('sqlite版本', sqlite3.sqlite_version if sqlite3 != None else '')
         ]
         return xtemplate.render("system/settings.html", 
+            show_aside     = False,
             html_title     = "系统设置",
             item_list      = item_list,
             sys_mem_used   = formated_mem_size,
