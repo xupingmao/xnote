@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/10/02 12:03:02
+# @modified 2018/11/25 22:37:07
 import web
 import time
 import hashlib
@@ -58,6 +58,7 @@ class handler:
             # cacheutil.set("login.fail.count#%s" % name, count+1, 60)
 
         return xtemplate.render("login.html", 
+            show_aside = False,
             username=name, 
             password=pswd,
             error = error)
@@ -65,6 +66,7 @@ class handler:
 
     def GET(self):
         return xtemplate.render("login.html",
+            show_aside=False,
             username="",
             password="",
             error="")
