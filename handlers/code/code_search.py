@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2018/09/24 00:07:36
+# @modified 2018/11/25 19:58:24
 
 """代码分析工具，对文本文件进行全文搜索
 
@@ -263,6 +263,7 @@ class handler:
         except Exception as e:
             error = e
         return xtemplate.render("code/code_search.html", 
+            show_aside = False,
             files = files,
             total_lines = total_lines,
             path = path,

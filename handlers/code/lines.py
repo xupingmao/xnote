@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2018/10/02 12:08:38
+# @modified 2018/11/25 19:58:54
 import os
 import web
 import re
@@ -154,6 +154,7 @@ class handler:
 
         # return xtemplate.render("code/lines.html", **locals())
         return xtemplate.render("code/lines.html", 
+            show_aside = False,
             typedict = typedict,
             line_infos = line_infos,
             **args)
@@ -176,6 +177,7 @@ class handler:
         typedict = CODE_EXT_DICT
         # return xtemplate.render("code/lines.html", **locals())
         return xtemplate.render("code/lines.html", 
+            show_aside = False,
             typedict = typedict,
             line_infos = line_infos,
             **args)

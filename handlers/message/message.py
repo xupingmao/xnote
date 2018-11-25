@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/11/16 01:25:23
+# @modified 2018/11/25 19:57:15
 
 """短消息"""
 import time
@@ -206,7 +206,9 @@ class MessageHandler:
 class CalendarHandler:
 
     def GET(self):
-        return xtemplate.render("message/calendar.html", count_message = count_message)
+        return xtemplate.render("message/calendar.html", 
+            show_aside = False,
+            count_message = count_message)
 
 xurls=(
     r"/file/message/add", SaveHandler,

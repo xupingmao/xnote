@@ -118,7 +118,9 @@ class ListHandler:
                 file.display_name = file.url
             return file
         task_list = list(map(set_display_name, task_list))
-        return xtemplate.render("system/crontab.html", task_list = task_list)
+        return xtemplate.render("system/crontab.html", 
+            show_aside = False,
+            task_list = task_list)
 
 
     @xauth.login_required("admin")

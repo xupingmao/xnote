@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/04/29 20:09:51
-# @modified 2018/04/30 00:38:14
+# @modified 2018/11/25 20:05:40
 import xutils
 import xtemplate
 import xtables
@@ -17,7 +17,9 @@ class StorageHandler:
         config = db.select_one(where=dict(key=key, user=xauth.get_current_name()))
         if config is None:
             config = Storage(key=key, value="")
-        return xtemplate.render("system/storage.html", config = config)
+        return xtemplate.render("system/storage.html", 
+            show_aside = False,
+            config = config)
     
     @xauth.login_required()
     def POST(self):
@@ -34,7 +36,9 @@ class StorageHandler:
             db.update(value=value, mtime = xutils.format_datetime(), where=dict(key=key, user=user))
 
         config = Storage(key = key, value = value)
-        return xtemplate.render("system/storage.html", config = config)
+        return xtemplate.render("system/storage.html", 
+            show_aside = False,
+            config = config)
 
 xurls = (
     r"/system/storage", StorageHandler

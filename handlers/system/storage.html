@@ -27,15 +27,19 @@
 {% end %}
 
 {% block body %}
+{% init error = "" %}
 
 <div class="card">
     {% set title = "系统配置" %}
     {% set back_link = "javascript:history.back();" %}
     {% include common/base_title.html %}
 
-    <div class="col-md-12">
-        <p style="color:red">{{?error}}</p>
-    </div>
+    {% if error != "" %}
+    <pre class="col-md-12 error">
+    {{error}}
+    </pre>
+    {% end %}
+
     <form method="POST" action="/system/storage">
     <div class="col-md-12">
         <input name="key" class="hide" value="{{config.key}}"/>

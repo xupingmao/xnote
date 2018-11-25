@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2018/10/28 13:24:14
+# @modified 2018/11/25 20:04:54
 import xtemplate
 import xauth
 import xutils
@@ -18,7 +18,9 @@ class HistoryHandler(object):
         if xconfig.search_history:
             items = xconfig.search_history.recent(50);
         print(items)
-        return xtemplate.render("system/history.html", items = items)
+        return xtemplate.render("system/history.html", 
+            show_aside = False,
+            items = items)
         
 
 xurls = (

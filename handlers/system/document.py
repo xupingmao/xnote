@@ -79,4 +79,7 @@ class handler(object):
         doc_info = None
         if name is not None:
             doc_info = ModInfo(name)
-        return xtemplate.render("system/document.html", doc_info = doc_info)
+        return xtemplate.render("system/document.html", 
+            show_aside = False,
+            doc_info = doc_info)
+

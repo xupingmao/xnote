@@ -46,6 +46,7 @@ class ViewSourceHandler:
                 #     key     = xhtml_escape(key)
                 #     content = textutil.replace(content, key, htmlutil.span("?", "search-key"), ignore_case=True, use_template=True)
                 return xtemplate.render(template_name, 
+                    show_aside = False,
                     readonly = readonly,
                     error = error,
                     warn = warn,
@@ -57,6 +58,7 @@ class ViewSourceHandler:
                 xutils.print_exc()
                 error = e
             return xtemplate.render(template_name, 
+                show_aside = False,
                 path = path,
                 name = "",
                 readonly = readonly,

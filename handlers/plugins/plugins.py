@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/11/20 23:06:14
+# @modified 2018/11/25 19:45:49
 from io import StringIO
 import xconfig
 import codecs
@@ -34,7 +34,6 @@ def list_plugins():
     links = []
     recent_names = cacheutil.zrange("plugins.history", -50, -1)
     recent_names.reverse()
-    recent_names = [x + ".py" for x in recent_names]
     plugins_list = os.listdir(dirname)
     plugins_list = set(plugins_list) - set(recent_names)
 
@@ -47,7 +46,7 @@ def list_plugins():
         item = link(name, "/plugins/" + name)
         # st = os.stat(fpath)
         # item.atime = xutils.format_date(st.st_atime)
-        atime = cacheutil.zscore("plugins.history", name)
+        atime = cacheutil.zscore("plugins.history", fname)
         if atime:
             item.atime = xutils.format_date(atime)
         else:
@@ -69,12 +68,11 @@ def list_recent_plugins():
 
 def log_plugin_visit(name):
     try:
-        display_name = xutils.unquote(name)
-        base_name = os.path.splitext(display_name)[0]
-        cacheutil.zadd("plugins.history", time.time(), base_name)
+        fname = xutils.unquote(name)
+        cacheutil.zadd("plugins.history", time.time(), fname)
     except TypeError:
         cacheutil.delete("plugins.history")
-        cacheutil.zadd("plugins.history", time.time(), base_name)
+        cacheutil.zadd("plugins.history", time.time(), fname)
 
 def load_plugin(name):
     log_plugin_visit(name)
@@ -144,6 +142,10 @@ import xtables
 from xutils import cacheutil
 from xtemplate import BasePlugin
 
+HTML = """
+<!-- Html -->
+"""
+
 class Main(BasePlugin):
 
     title = "PluginName"
@@ -152,6 +154,7 @@ class Main(BasePlugin):
     def handle(self, input):
         # 输入框的行数
         self.rows = 20
+        self.writehtml(HTML)
 
     def on_init(self, context=None):
         # 插件初始化操作
@@ -201,6 +204,7 @@ class PluginsHandler:
 
     def POST(self, name = ""):
         return self.GET(name)
+
 
 xurls = (
     r"/plugins_list", PluginsListHandler,

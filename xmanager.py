@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/11/09 22:03:34
+# @modified 2018/11/25 20:03:16
 
 """
 Xnote 模块管理器
@@ -89,7 +89,7 @@ def wrapped_handler(pattern, handler_clz):
 def notfound():
     """404请求处理器"""
     import xtemplate
-    raise web.notfound(xtemplate.render("notfound.html"))
+    raise web.notfound(xtemplate.render("notfound.html", show_aside = False))
 
 class WebModel:
     def __init__(self):

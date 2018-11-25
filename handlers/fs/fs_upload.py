@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2018/11/02 00:00:04
+# @modified 2018/11/25 01:39:49
 import os
 import uuid
 import web
@@ -88,7 +88,7 @@ class RangeUploadHandler:
 
         if hasattr(file, "filename"):
             origin_name = file.filename
-            xutils.log("recv {}", file.filename)
+            xutils.trace("UploadFile", file.filename)
             filename = os.path.basename(file.filename)
             filename = xutils.get_real_path(filename)
             if dirname == "auto":

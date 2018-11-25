@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/11/16 00:16:10
+# @modified 2018/11/25 01:42:44
 
 """xnote文件服务，主要功能:
     1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -16,11 +16,11 @@ import xauth
 import xconfig
 import xtemplate
 import shutil
-from xutils import FileItem, u
-config = xconfig
+import xmanager
+from xutils import FileItem, u, Storage
 
 def is_stared(path):
-    return config.has_config("STARED_DIRS", path)
+    return xconfig.has_config("STARED_DIRS", path)
 
 def get_file_size(filepath):
     try:
@@ -307,7 +307,7 @@ class StaticFileHandler(FileSystemHandler):
         path = u(path)
         if not self.is_path_allowed(path):
             xauth.check_login("admin")
-        data_prefix = u(config.DATA_DIR)
+        data_prefix = u(xconfig.DATA_DIR)
         if not path.startswith("static"):
             newpath = os.path.join(data_prefix, path)
         else:
@@ -390,6 +390,7 @@ class RenameHandler:
         new_path = os.path.join(dirname, new_name)
         if os.path.exists(new_path):
             return dict(code="fail", message="%s 已存在" % new_path)
+        xmanager.fire("fs.rename", Storage(path = new_path, new_path = new_path, old_path = old_path))
         os.rename(old_path, new_path)
         return dict(code="success")
 
