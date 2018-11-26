@@ -1,0 +1,358 @@
+{% init error = "" %}
+
+<link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
+<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
+
+<style type="text/css">
+    .fs-image {
+        width: 180px;
+    }
+    .fs-path {
+        padding: 5px;
+        background-color: #eee;
+    }
+
+    .file-list {
+        display: block;
+        float: left;
+        width: 100%;
+        overflow: auto;
+    }
+
+    .checkboxTd {
+        width: 20px;
+    }
+        
+    /* 上传文件样式 */
+    .progress {
+        background-color: #f90;
+        color: #fff;
+        height: 20px;
+        display: none;
+        margin-left: 5px;
+        border-width: 3px;
+    }
+    .progress span {
+        display: block;
+        background-color: #f90;
+        color: #fff;
+        height: 100%;
+    }
+    
+    .finished-tag {
+        color: #fff;
+        background-color: green;
+        border-width: 3px;
+        border-radius: 3px;
+        margin-left: 5px;
+    }
+
+    #dropArea {
+        float: left;
+        width: 100%;
+        height: 80px;
+        line-height: 80px;
+        border: 3px dashed silver;
+        text-align: center;
+        font-size: 36px;
+        color: #d3d3d3;
+        cursor: pointer;
+        box-sizing: border-box;
+    }
+
+    tr:hover td {
+        background: none;
+    }
+
+    tr:hover {
+        background-color: #eee;
+    }
+
+    .cmd-input {
+        width: 100%;
+        max-width: 700px;
+        background-color: rgb(230, 230, 255);
+        border-width: 1px;
+        border-style: solid;
+        border-color: black;
+        font-family: monospace;
+        font-size: 16px;
+        display: none;
+    }
+
+    #uploadFileArea {
+        display: none;
+    }
+
+    .size-td {
+        width: 100px;
+    }
+    .options-td {
+        width: 25%;
+    }
+
+    {% if not xconfig.DEV_MODE %}
+        .advanced-opt {
+            display: none;
+        }
+    {% end %}
+
+    #controlArea {
+        margin-bottom: 5px;
+    }
+
+    #result {
+        border: 1px solid #ccc;
+        padding: 4px;
+        background-color: #eee;
+        margin: 0px;
+        border-top: none;
+        font-family: consolas, monospace;
+    }
+
+    .panel-title {
+        width: 100%;
+        border: 1px solid #ccc;
+        padding-left: 5px;
+        margin-top: 5px;
+    }
+
+    .plugin {
+        margin-top: 5px;
+    }
+
+    .nav-path {
+        padding: 5px;
+        background-color: #eee;
+    }
+</style>
+
+<div id="controlArea" class="col-md-12">
+    <div class="float-left">
+        <input type="button" class="btn" value="预览图片" id="previewImg"/>
+        <input type="button" class="btn" value="新建文件" id="addFile"/>
+        <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
+        <input type="button" class="btn" value="重命名" id="renameBtn" 
+            message="重命名为">
+        <input type="button" class="btn" value="剪切" id="cutBtn" message="剪切"/>
+        <input id="uploadFileBtn" type="button" class="btn" value="上传">
+        <input type="button" class="btn advanced-opt" value="本地浏览" id="openDirectory"/>
+        <input type="button" class="link-btn advanced-opt" href="/code/search?path={{path}}&recursive=on" value="搜索内容"/>
+        <input type="button" class="link-btn advanced-opt" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
+        <input type="button" data-path="{{path}}" onclick="openFileOption(this)" value="更多"/>
+    </div>
+</div>
+
+<div id="uploadFileArea">
+    <!-- 文件上传区域 -->
+    <div id="uploader-demo">
+        <!--用来存放item-->
+        <div id="fileList" class="uploader-list"></div>
+        <div id="filePicker" class="hide">选择文件</div>
+        <div id="dropArea">点击或拖拽上传文件</div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+$(function () {
+    var globalPath = "{{path}}";
+    var globalError  = "{{error}}";
+
+    function previewImages() {
+        $(".fs-image-div").each(function (index, target) {
+            var img = $("<img>").attr("src", $(target).attr("img-src"))
+                .addClass("fs-image")
+                .addClass("x-photo");
+            $(target).append(img);
+            img.on("load", function (event) {
+                $(target).append($("<span class='fs-image-size'>").text(img[0].naturalWidth + "*" + img[0].naturalHeight));
+            });
+        })
+        $("#previewImg").val("取消预览");
+    }
+
+    function togglePreview() {
+        var self = this;
+        var value = $(self).val();
+        if (window.location.hash != '#preview') {
+            previewImages();
+            window.location.hash = '#preview';
+        } else {
+            $(".fs-image").remove();
+            $(".fs-image-size").remove();
+            $(self).val("预览图片");
+            window.location.hash = '';
+        }  
+    }
+
+    $("#previewImg").on("click", togglePreview);
+
+    if (window.location.hash == '#preview') {
+        previewImages();
+    }
+
+    function showErrorMessage(message) {
+        $(".error").text(message).fadeIn(200).delay(3000).fadeOut(300);
+    }
+
+    function createFile(type) {
+        var promptMessage = "新建文件";
+        var url = "/fs_api/add_file";
+
+        if (type == "directory") {
+            promptMessage = "新建文件夹";
+            url = "/fs_api/add_dir";
+        }
+        var fileName = prompt(promptMessage);
+        if (fileName && fileName != "") {
+            $.post(url, {path: globalPath, filename: fileName}, function (respText) {
+                console.log(respText);
+                var data = respText;
+                if (data.code == "success") {
+                    window.location.reload();
+                } else {
+                    showErrorMessage(data.message);
+                }
+            }).fail(function (data) {
+                console.log(data);
+                alert(data);
+            })
+        }
+    }
+
+    $("#addDirectory").on("click", function (target) {
+        createFile("directory");
+    });
+    $("#addFile").click(function () {
+        createFile("file");
+    });
+
+    $("#openDirectory").on("click", function () {
+        $.post("/system/command/open", {path: "{{path}}"});
+    });
+
+    $(".command-btn").on("click", function () {
+        var command = $(this).attr("data-command");
+        $.get("/system/command", {command: command, path: globalPath});
+    })
+
+    window.removeFile = function(path) {
+        var conf = confirm("确认删除 '%s' ?".format(path));
+        if (!conf) {
+            return;
+        }
+        $.post("/fs_api/remove", {path: path}, function (resp) {
+            if (resp.code == "success") {
+                location.reload();
+            } else {
+                showErrorMessage("删除失败, %s".format(resp.message));
+            }
+        }).fail(function (resp) {
+            console.log(resp);
+            showErrorMessage("删除失败");
+        })
+    }
+
+    $("#deleteFile").on("click", function () {
+        var checked = $(".checkboxTd :checked");
+        if (checked.length == 0) {
+            alert("请选择文件");
+        } else if (checked.length > 1) {
+            alert("不支持批量删除");
+        } else {
+            var name = checked.attr("data-name");
+            var path = checked.attr("data-path");
+            removeFile(path);
+        }
+    });
+
+    $("#renameBtn").on("click", function () {
+        var checked = $(".checkboxTd :checked");
+        if (checked.length == 0) {
+            alert("请选择文件");
+        } else if (checked.length > 1) {
+            alert("不支持批量重命名");
+        } else {
+            var name = checked.attr("data-name");
+            var path = checked.attr("data-path");
+            var dirname = "{{path}}";
+            var new_name = prompt("重命名为", name);
+            if (new_name) {
+                $.post("/fs_api/rename", 
+                    {dirname: dirname, old_name: name, new_name: new_name}, 
+                    function (resp) {
+                        if (resp.code == "success") {
+                            location.reload();
+                        } else {
+                            showErrorMessage("重命名失败, %s".format(resp.message));
+                        }
+                }).fail(function (resp) {
+                    console.log(resp);
+                    alert("重命名失败");
+                })
+            }
+        }
+    });
+
+
+    $("#cutBtn").on("click", function () {
+        var checked = $(".checkboxTd :checked");
+        if (checked.length == 0) {
+            alert("请选择文件");
+        } else {
+            var cutPathList = [];
+            checked.each(function (index, element) {
+                // console.log(element);
+                var path = $(element).attr("data-path");
+                console.log(path);
+                cutPathList.push(path);
+            });
+            var data = {"files": cutPathList};
+            $.post("/fs_api/cut", data, function (resp) {
+                console.log(resp);
+                window.location.reload();
+            }).fail(function (errorMessage) {
+                alert("update clipboard failed!" + errorMessage);
+            })
+        }
+    });
+
+    $(".paste-link").on("click", function (e) {
+        var target = e.target;
+        var dataPath = $(target).attr("data-path");
+        // alert("move from " + dataPath + " to " + globalPath);
+        var data = {dirname: globalPath, old_path: dataPath};
+        $.post("/fs_api/paste", data, function (resp) {
+            if (resp.code != "success") {
+                alert(resp.message);
+            } else {
+                window.location.reload();
+            }
+        }).fail(function () {
+            // 
+        });
+    });
+
+    $(".clear-clip-link").click(function(event) {
+        /* 清空剪切板 */
+        $.post("/fs_api/clear_clip", function (resp) {
+            console.log(resp);
+            window.location.reload();
+        });
+    });
+
+    $("#showMoreOptsBtn").click(function (event) {
+        $(".advanced-opt").toggle(200);
+    });
+
+    $("#uploadFileBtn").click(function () {
+        $("#uploadFileArea").toggle(200);
+    });
+
+    adjustHeight(".file-list", 30);
+});
+</script>
+
+{% include fs/mod_fs_upload.html %}
+

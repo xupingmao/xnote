@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/11/25 20:02:33
+# @modified 2018/11/26 19:18:38
 
 '''
 xnote系统配置
@@ -147,6 +147,7 @@ FS_TEXT_EXT_LIST = [
     ".gradle",
     ".md",
     ".yml",
+    ".log"
 ]
 
 FS_IMG_EXT_LIST = [".gif", ".png", ".jpg", ".jpeg", ".bmp", ".webp", ".ico", ".jfif", ".cur"]

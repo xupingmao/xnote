@@ -90,10 +90,12 @@
 
 <script type="text/javascript">
     $(function () {
+        var editorHeight = adjustHeight("#editorArea", 50);
+
         var editor = initCodeMirror("#editor", {
             filename: getUrlParams().path,
-            height: "500px"
-        })
+            height: editorHeight
+        });
         window.codeMirror = editor;
 
         // 重命名
@@ -116,7 +118,7 @@
                     alert("重命名失败");
                 });
             }
-        })
+        });
     });
 </script>
 {% end %}

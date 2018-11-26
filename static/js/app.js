@@ -238,6 +238,18 @@ $(function () {
       $(".aside").toggle(500);
     }
 
+    /**
+     * 调整高度，通过
+     * @param {string} selector 选择器
+     * @param {number} bottom 距离窗口底部的距离
+     */
+    window.adjustHeight = function (selector, bottom) {
+      bottom = bottom || 0;
+      var height = getWindowHeight() - $(selector).offset().top - bottom;
+      $(selector).css("height", height);
+      return height;
+    }
+
     $(".aside-background").on('click', function () {
       toggleMenu();
     });

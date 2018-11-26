@@ -5,7 +5,7 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2018/11/24 02:40:10
+ * @modified 2018/11/26 12:33:32
  */
 var XUI = function (window) {
   // 处理select标签选中情况
@@ -230,7 +230,6 @@ var XUI = function (window) {
       toast.remove();
     }, time);
   }
-
   initElementProcessors();
 };
 
