@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2018/11/07 22:26:01
+# @modified 2018/11/29 23:24:24
 import xconfig
 from xconfig import Storage
 from collections import deque
@@ -217,6 +217,11 @@ class History(MemTable):
         found.time = format_time()
         self.data.append(found)
 
+def listremove(list, obj):
+    if list is None:
+        return
+    while obj in list:
+        list.remove(obj)
 
 def dictsort(dictionary, key='value'):
     if key == 'value':

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/11/20 22:45:36
+# @modified 2018/11/26 22:49:40
 import os
 import json
 import web
@@ -13,7 +13,7 @@ import xauth
 import xutils
 import xtables
 from tornado.template import Template, Loader
-from xutils import dateutil, quote
+from xutils import dateutil, quote, u
 from xutils import ConfigParser, Storage, tojson
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
@@ -176,15 +176,15 @@ class BasePlugin:
         # 输入框的行数
         self.rows            = 20    
         self.btn_text        = "处理"
-        self.placeholder     = ""
+        self.placeholder     = u("")
         # 提交请求的方法
         self.method          = "POST"
-        self.output          = ""
-        self.html            = ""
-        self.css_style       = ""
+        self.output          = u("")
+        self.html            = u("")
+        self.css_style       = u("")
         self.show_pagenation = False
         self.page_url        = "?page="
-        self.aside_html      = ""
+        self.aside_html      = u("")
         self.option_links    = []
         self.show_aside      = False
         
@@ -192,16 +192,16 @@ class BasePlugin:
         self.option_links.append(dict(name=name, url = url))
 
     def write(self, text):
-        self.output += text
+        self.output += u(text)
 
     def writeline(self, line):
-        self.output += line + "\n"
+        self.output += u(line + "\n")
 
     def writetext(self, text):
-        self.output += text
+        self.output += u(text)
 
     def writehtml(self, html):
-        self.html += html
+        self.html += u(html)
 
     def handle(self, input):
         raise NotImplementedError()
@@ -222,7 +222,7 @@ class BasePlugin:
             xauth.check_login("admin")
         input  = self.get_input()
         error  = ""
-        output = ""
+        output = u("")
         try:
             self.page = self.get_page()
             output = self.handle(input) or ""

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/22 01:07:19
+# @modified 2018/11/29 23:23:27
 
 """
 xnote工具类总入口
@@ -22,7 +22,7 @@ from .netutil  import *
 from .fsutil   import *
 from .textutil import text_contains, parse_config_text
 from .cacheutil import cache, expire_cache, update_cache
-from .functions import History, MemTable
+from .functions import History, MemTable, listremove
 from xconfig import Storage
 import shutil
 
@@ -641,6 +641,12 @@ def exec_python_code(name, code,
             ret = sys.stdout.pop_record()
         return ret
 
+def fix_py2_code(code):
+    if not PY2:
+        return code
+    # remove encoding declaration, otherwise will cause
+    # SyntaxError: encoding declaration in Unicode string
+    return re.sub(r'^#[^\r\n]+', '', code)
 
 def exec_script(name, new_window=True, record_stdout = True, vars = None):
     """执行script目录下的脚本"""
@@ -651,6 +657,7 @@ def exec_script(name, new_window=True, record_stdout = True, vars = None):
     if name.endswith(".py"):
         # 方便获取xnote内部信息用于扩展，同时防止开启过多Python进程
         code = xutils.readfile(path)
+        code = fix_py2_code(code)
         ret = exec_python_code(name, code, record_stdout, vars = vars)  
     elif name.endswith(".command"):
         # Mac os Script
@@ -686,6 +693,7 @@ def load_script(name, vars = None, dirname = None, code = None):
         path = os.path.join(dirname, name)
         path = os.path.abspath(path)
         code = readfile(path)
+        code = fix_py2_code(code)
     return exec_python_code(name, code, 
         record_stdout = False, raise_err = True, vars = vars)
 

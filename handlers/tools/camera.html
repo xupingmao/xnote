@@ -27,6 +27,7 @@
         videoObj = { "video": true },
         errBack = function(error) {
             console.log("Video capture error: ", error.code); 
+            layer.alert(error);
         };
 
     function updateVideo() {
@@ -50,7 +51,9 @@
         .then(function (stream) {
             video.src = window.URL.createObjectURL(stream);
             video.play();
-        }).catch(function(error) {});
+        }).catch(function(error) {
+            layer.alert(error);
+        });
     } else if(navigator.getUserMedia) { // Standard
         navigator.getUserMedia(videoObj, function(stream) {
             video.src = stream;

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/11/08 23:26:36
+# @modified 2018/11/26 23:30:58
 import web
 import os
 import xconfig
@@ -54,6 +54,7 @@ class ListHandler:
             path = xconfig.DATA_DIR
         scripts = list_commands()
         return xtemplate.render("fs/fs_plugins.html", 
+            show_aside = False,
             path = path, 
             scripts = scripts, 
             get_display_name = get_display_name,

@@ -49,7 +49,7 @@ xnote
 - jsdiff 文本对比
 - codemirror 代码编辑器
 
-### 开发新模块
+## 新模块开发
 
 在handlers目录下添加python程序，比如test.py
 

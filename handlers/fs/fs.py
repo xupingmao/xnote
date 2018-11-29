@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/11/25 01:42:44
+# @modified 2018/11/29 23:23:56
 
 """xnote文件服务，主要功能:
     1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -421,7 +421,7 @@ class PasteHandler:
             return dict(code="fail", message="%s 已存在" % new_path)
         os.rename(old_path, new_path)
         if xconfig.FS_CLIP != None:
-            xconfig.FS_CLIP.remove(old_path)
+            xutils.listremove(xconfig.FS_CLIP, old_path)
         return dict(code="success")
 
 class ClearClipHandler:

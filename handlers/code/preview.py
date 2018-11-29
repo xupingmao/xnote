@@ -1,4 +1,5 @@
 # encoding=utf-8
+# @modified 2018/11/29 23:42:17
 import os
 import web
 import xutils
@@ -76,13 +77,13 @@ class handler:
         else:
             # file not exists or not readable
             children = None
-            content = "File \"%s\" does not exists" % origin_name
+            content = "File \"%s\" does not exists" % path
             type = "file"
         
         parent = os.path.dirname(name)
         parentname = os.path.basename(parent)
-        if parentname=="":
-            parentname="/"
+        if parentname == "":
+            parentname = "/"
             
         return render("code/preview.html", 
             show_aside = False,
@@ -182,9 +183,15 @@ class WikiPathHandler:
         path = xutils.unquote(path)
         template_name = "code/preview.html"
         if not path.endswith(".md"):
-            return render(template_name, error="file extension error")
+            return render(template_name, 
+                path = path,
+                show_aside = False,
+                error = "file extension error")
         if not os.path.exists(path):
-            return render(template_name, error="文件不存在")
+            return render(template_name, 
+                path = path,
+                show_aside = False,
+                error = "文件不存在")
         basename = os.path.basename(path)
         content = xutils.readfile(path)
         return render(template_name, 

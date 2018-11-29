@@ -79,7 +79,7 @@
                     {% end %}
 
                     {% if item.ext.lower() in (".md", ".csv") %}
-                        <a class="item-option" href="/code/wiki?path={{item.path}}">预览</a>
+                        <a class="item-option" href="/code/wiki/{{item.path}}">预览</a>
                     {% end %}
 
                     {% if item.ext.lower() in (".pdf", ".mp4") %}
