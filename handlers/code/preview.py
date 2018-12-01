@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/11/29 23:42:17
+# @modified 2018/12/01 11:59:42
 import os
 import web
 import xutils
@@ -53,19 +53,18 @@ def get_path_list(path):
         last = vpath
     return pathlist
 
-class handler:
+class PreviewHandler:
     
-    def GET(self, name=""):
-        name = xutils.unquote(name)
-        op   = xutils.get_argument("op")
-        path = xutils.get_argument("path")
-        origin_name = name
-        if name == "":
-            name = "/"
+    def GET(self, path=""):
+        if path == "":
+            path = xutils.get_argument("path")
         else:
-            name = "/" + name
-        path = xutils.get_real_path(path)
-        has_readme = False
+            path = xutils.unquote(path)
+        
+        basename = os.path.basename(path)
+        op       = xutils.get_argument("op")
+        path     = xutils.get_real_path(path)
+
         if os.path.isfile(path):
             check_resource(path)
             type = "file"
@@ -77,26 +76,17 @@ class handler:
         else:
             # file not exists or not readable
             children = None
-            content = "File \"%s\" does not exists" % path
-            type = "file"
-        
-        parent = os.path.dirname(name)
-        parentname = os.path.basename(parent)
-        if parentname == "":
-            parentname = "/"
-            
+            content  = "File \"%s\" does not exists" % path
+            type     = "file"
+                    
         return render("code/preview.html", 
             show_aside = False,
+            html_title = basename,
             os = os,
             path = path,
-            parent = parent,
-            parentname = parentname,
-            wikilist = get_path_list(name),
-            name = origin_name,
-            children = children,
             content = content,
             type = type,
-            has_readme = has_readme)
+            has_readme = False)
 
     def POST(self, name):
         return self.edit_POST(name)
@@ -177,34 +167,9 @@ class ReadOnlyHandler:
         return xtemplate.render("code/preview.html", 
             os = os, content = content, type="file")
 
-class WikiPathHandler:
-
-    def GET(self, path=""):
-        path = xutils.unquote(path)
-        template_name = "code/preview.html"
-        if not path.endswith(".md"):
-            return render(template_name, 
-                path = path,
-                show_aside = False,
-                error = "file extension error")
-        if not os.path.exists(path):
-            return render(template_name, 
-                path = path,
-                show_aside = False,
-                error = "文件不存在")
-        basename = os.path.basename(path)
-        content = xutils.readfile(path)
-        return render(template_name, 
-            show_aside = False,
-            html_title = basename,
-            content    = content, 
-            os         = os, 
-            type       = "file",
-            path       = path)
-
 xurls = (
-    r"/code/wiki/(.*)", WikiPathHandler,
-    r"/code/wiki", handler,
-    r"/code/preview", handler
+    r"/code/wiki/(.*)", PreviewHandler,
+    r"/code/wiki", PreviewHandler,
+    r"/code/preview", PreviewHandler
 )
 
