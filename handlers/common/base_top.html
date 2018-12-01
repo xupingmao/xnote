@@ -6,7 +6,10 @@
 <title>Xnote{%if html_title%} | {{html_title}}{%end%}</title>
 <link rel="shortcut icon" href="/static/favicon.ico"/>
 <link rel="bookmark" href="/static/favicon.ico"/>
-<link rel="stylesheet" href="/static/css/{{xconfig.THEME}}"/>
+<link rel="stylesheet" href="/static/css/common.css"/>
+{% if xconfig.THEME == "card" %}
+<link rel="stylesheet" href="/static/css/common-card.css"/>
+{% end %}
 <script type="text/javascript" src="/static/lib/jquery/jquery-1.12.4.min.js"></script>
 <script type="text/javascript" src="/static/lib/layer/layer.js"></script>
 <script type="text/javascript">

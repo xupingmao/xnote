@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2018/11/09 22:28:17
+# @modified 2018/12/01 00:47:17
 import math
 import web
 import xutils
@@ -158,6 +158,8 @@ class RecentEditHandler:
     def GET(self):
         if not xauth.has_login():
             raise web.seeother("/note/public")
+        if xutils.sqlite3 is None:
+            raise web.seeother("/fs_list")
         days     = xutils.get_argument("days", 30, type=int)
         page     = xutils.get_argument("page", 1, type=int)
         pagesize = xutils.get_argument("pagesize", PAGE_SIZE, type=int)
