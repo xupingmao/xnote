@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2018/11/16 21:36:46
+@modified 2018/12/04 22:58:31
 -->
 
 {% init files = [] %}
@@ -44,9 +44,9 @@
                         <img src="/static/image/folder.gif"/>
                         <a class="group-link" href="/note/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>({{item.size}})
                     {% elif hasattr(item, "url") and item.url != None %}
-                        <a class="note-link" href="{{item.url}}">{{item.name}}</a>
+                        <a class="note-link dialog-link" href="{{item.url}}">{{item.name}}</a>
                     {% else %}
-                        <a class="note-link" href="/note/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
+                        <a class="note-link dialog-link" href="/note/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
                         {% if item.creator != None %} 
                         <!-- ({{item.creator}}) -->
                         {% end %}
@@ -88,3 +88,4 @@
 {% if "page" in globals() %}
     {% include mod_pagenation.html %}
 {% end %}
+

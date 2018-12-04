@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2018/11/18 14:43:30
+@modified 2018/12/04 23:07:16
 -->
 
 {% block body %}
@@ -46,7 +46,11 @@
                 {% if file.type == "group" %}
                     <img src="/static/image/folder.gif"/>
                 {% end %}
-                <a href="{{file.url}}">{{file.name}}</a>
+                {% if file.category == "note" %}
+                    <a class="dialog-link" href="{{file.url}}">{{file.name}}</a>
+                {% else %}
+                    <a href="{{file.url}}">{{file.name}}</a>
+                {% end %}
             </div>
             
             {% if "raw" in file and file.raw != None %}

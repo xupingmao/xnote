@@ -43,6 +43,8 @@
                 <a href="/system/thread_info">详情</a>
             </td>
         </tr>
+
+        <!-- 主题设置 -->
         <tr class="hide">
             <td>母板类型</td>
             <td>
@@ -65,7 +67,15 @@
             </td>
         </tr>
         <tr>
-            <td>语言</td>
+            <td>页面打开</td>
+            <td>
+                <input type="radio" name="PAGE_OPEN" default-value="{{xconfig.PAGE_OPEN}}" value="self">当前页面
+                <input type="radio" name="PAGE_OPEN" default-value="{{xconfig.PAGE_OPEN}}" value="dialog">对话框
+            </td>
+        </tr>
+
+        <tr>
+            <td>{{T('Language')}}</td>
             <td>
                 <input type="radio" name="LANG" default-value="{{web.cookies().get('lang', 'zh')}}" value="zh">中文
                 <input type="radio" name="LANG" default-value="{{web.cookies().get('lang', 'zh')}}" value="en">English
@@ -79,7 +89,7 @@
             </td>
         </tr>
         <tr>
-            <td>调试</td>
+            <td>调试模式</td>
             <td>
                 <input type="radio" name="DEBUG" default-value="{{xconfig.DEBUG}}" value="True">开启
                 <input type="radio" name="DEBUG" default-value="{{xconfig.DEBUG}}" value="False">关闭

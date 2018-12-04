@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/12/01 00:59:21
+@modified 2018/12/04 00:24:45
 */
 
 * {
@@ -807,6 +807,7 @@ li.menu-item:hover {
     background-color: #337ab7;
     color: #fff;
     padding: 5px;
+    cursor: move;
 }
 
 .x-dialog-body {

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/11/30 23:53:30
+# @modified 2018/12/04 22:53:45
 
 '''
 xnote系统配置
@@ -58,6 +58,8 @@ BASE_TEMPLATE      = "base.html"
 THEME              = "normal"
 # 选项风格
 OPTION_STYLE       = "aside"
+# 页面打开方式
+PAGE_OPEN          = "self"
 
 # 插件相关
 LOAD_PLUGINS_ON_INIT = True

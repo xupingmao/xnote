@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/11/12 23:05:55
+# @modified 2018/12/04 00:58:25
 import profile
 import math
 import re
@@ -36,6 +36,7 @@ class ViewHandler:
         name          = xutils.get_argument("name", "")
         page          = xutils.get_argument("page", 1, type=int)
         pagesize      = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
+        show_menu     = xutils.get_argument("show_menu", "true") != "false"
         db            = xtables.get_file_table()
         user_name     = xauth.get_current_name()
         show_add_file = False
@@ -127,6 +128,7 @@ class ViewHandler:
             op            = op,
             show_mdate    = show_mdate,
             show_add_file = show_add_file,
+            show_menu     = show_menu,
             can_edit = can_edit,
             pathlist = pathlist,
             page_max = math.ceil(amount/pagesize),

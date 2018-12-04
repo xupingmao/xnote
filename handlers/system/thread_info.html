@@ -12,17 +12,30 @@
             <th>编号</th>
             <th>Name</th>
             <th>is_alive</th>
-            <th>属性</th>
+            <th>处理器</th>
+            <th>操作</th>
         </tr>
     {% for idx,thread in enumerate(thread_list) %}
         <tr>       
             <td>{{idx+1}}</td>
             <td>{{thread.getName()}}</td> 
             <td>{{thread.is_alive()}}</td>
-            <td>{{thread.__dict__}}</td>
+            <td>{{thread.__dict__.get("handler_class")}}</td>
+            <td><a class="view-detail" data-value="{{thread.__dict__}}">详情</a></td>
         </tr>
     {% end %}
     </table>
 </div>
+
+<script type="text/javascript">
+$(function () {
+    $(".view-detail").click(function (e) {
+        var value = $(this).attr("data-value");
+        layer.open({
+            content: value
+        });
+    });
+})
+</script>
 
 {% end %}

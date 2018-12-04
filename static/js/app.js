@@ -250,9 +250,38 @@ $(function () {
       return height;
     }
 
+    /**
+     * 调整导航栏，如果在iframe中，则不显示菜单
+     */
+    window.adjustNav = function () {
+      if (self != top) {
+        $(".nav").hide();
+        $(".main").css("padding", "10px");
+      }
+    }
+
     $(".aside-background").on('click', function () {
       toggleMenu();
     });
+
+
+    if (window.PAGE_OPEN == "dialog") {    
+      // 使用对话框浏览笔记
+      $(".dialog-link").click(function (e) {
+          e.preventDefault();
+          var url = $(this).attr("href");
+          var width = $(".main").width();
+          layer.open({
+              type: 2,
+              title: "查看",
+              shadeClose: true,
+              shade: 0.8,
+              area: [width + "px", "90%"],
+              scrollbar: false,
+              content: url
+          });
+      });
+    }
 
     // if (self == top) {
       // 不是处于iframe环境

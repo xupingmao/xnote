@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/11/25 20:43:42
+# @modified 2018/12/02 01:54:42
 
 """
 Xnote 模块管理器
@@ -25,6 +25,7 @@ import xtemplate
 import xtables
 import xutils
 import xauth
+import threading
 from threading import Thread, Timer, current_thread
 from xutils import Storage, Queue, tojson, MyStdout, cacheutil
 
@@ -64,11 +65,17 @@ def wrapped_handler(pattern, handler_clz):
 
         def GET(self, *args):
             WrappedHandler.visited_count += 1.0
-            return wrap(self.target.GET(*args))
+            threading.current_thread().handler_class = self.target
+            result = wrap(self.target.GET(*args))
+            threading.current_thread().handler_class = None
+            return result
             
         def POST(self, *args):
             WrappedHandler.visited_count += 1.0
-            return wrap(self.target.POST(*args))
+            threading.current_thread().handler_class = self.target
+            result = wrap(self.target.POST(*args))
+            threading.current_thread().handler_class = None
+            return result
 
         def search_priority(self):
             return 0

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/11/26 13:43:22
+# @modified 2018/12/04 23:08:21
 
 """Description here"""
 from io import StringIO
@@ -192,7 +192,7 @@ xurls = (
 
 @xmanager.listen("sys.reload")
 def on_reload(ctx = None):
-    for key in ('THEME', 'FS_HIDE_FILES', 'OPTION_STYLE'):
+    for key in ('THEME', 'FS_HIDE_FILES', 'OPTION_STYLE', 'PAGE_OPEN'):
         value = cacheutil.hget('sys.config', key)
         print("hget key=%s, value=%s" % (key, value))
         if value is not None:
