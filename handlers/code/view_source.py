@@ -11,6 +11,10 @@ import xconfig
 from tornado.escape import xhtml_escape
 from xutils import u
 
+def can_preview(path):
+    name, ext = os.path.splitext(path)
+    return ext.lower() in (".md", ".csv")
+
 class ViewSourceHandler:
 
     def resolve_path(self, path, type=''):
@@ -20,7 +24,7 @@ class ViewSourceHandler:
         return xutils.get_real_path(path)
 
     @xauth.login_required("admin")
-    def GET(self):
+    def GET(self, path=""):
         template_name = "code/view_source.html"
         path = xutils.get_argument("path", "")
         key  = xutils.get_argument("key", "")
@@ -46,6 +50,7 @@ class ViewSourceHandler:
                 #     key     = xhtml_escape(key)
                 #     content = textutil.replace(content, key, htmlutil.span("?", "search-key"), ignore_case=True, use_template=True)
                 return xtemplate.render(template_name, 
+                    show_preview = can_preview(path),
                     show_aside = False,
                     readonly = readonly,
                     error = error,

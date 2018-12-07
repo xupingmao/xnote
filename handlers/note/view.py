@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/12/04 00:58:25
+# @modified 2018/12/08 02:22:08
 import profile
 import math
 import re
@@ -225,6 +225,7 @@ class DictHandler:
         page_max = math.ceil(count / PAGE_SIZE)
 
         return xtemplate.render("note/view.html", 
+            show_aside = True,
             files = list(items), 
             file_type = "group",
             show_opts = False,

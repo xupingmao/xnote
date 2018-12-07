@@ -1,0 +1,9 @@
+<div class="col-md-12 scroll-y">
+    {% for item in filelist %}
+    <span class="tag-span">
+        <a class="link" href="javascript:moveTo({{id}}, {{item.id}})">
+            {{item.name}}
+        </a>
+    </span>
+    {% end %}
+</div>

@@ -5,7 +5,7 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2018/12/04 00:31:38
+ * @modified 2018/12/06 23:55:10
  */
 var XUI = function (window) {
   // 处理select标签选中情况
@@ -175,12 +175,15 @@ var XUI = function (window) {
         var left = (width - dialogWidth) / 2;
         self.css({"width":dialogWidth, "left": left});
     });
+
+    $("body").css("overflow", "hidden");
   }
   
   function hideDialog() {
       $(".x-dialog").hide();
       $(".x-dialog-background").hide();
       $(".x-dialog-remote").remove();// 清空远程的dialog
+      $("body").css("overflow", "auto");
   }
   
   $(".x-dialog-background").click(function () {

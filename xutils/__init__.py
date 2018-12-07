@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/29 23:23:27
+# @modified 2018/12/08 01:52:42
 
 """
 xnote工具类总入口
@@ -292,6 +292,13 @@ def is_text_file(filename):
     name, ext = os.path.splitext(filename)
     return ext.lower() in xconfig.FS_TEXT_EXT_LIST
 
+def get_text_ext():
+    return xconfig.FS_TEXT_EXT_LIST
+
+def is_editable(filename):
+    name, ext = os.path.splitext(filename)
+    return ext in get_text_ext()
+
 ### DB Utilities
 
 def db_execute(path, sql, args = None):
@@ -558,13 +565,6 @@ def is_mac():
 
 def is_linux():
     return os.name == "linux"
-
-def get_text_ext():
-    return xconfig.FS_TEXT_EXT_LIST
-
-def is_editable(filename):
-    name, ext = os.path.splitext(filename)
-    return ext in get_text_ext()
 
 def mac_say(msg):
     def escape(str):

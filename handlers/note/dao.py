@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/11/09 22:37:54
+# @modified 2018/12/08 00:12:11
 
 """资料的DAO操作集合
 
@@ -140,7 +140,7 @@ def get_pathlist(db, file, limit = 2):
         if file.parent_id == 0:
             break
         else:
-            file = db.select_one(where=dict(id=file.parent_id))
+            file = db.select_one(what="id,name,type,creator", where=dict(id=file.parent_id))
     return pathlist
 
 def get_by_id(id, db=None):

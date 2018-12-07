@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2018/12/01 00:47:17
+# @modified 2018/12/08 02:22:32
 import math
 import web
 import xutils
@@ -89,23 +89,31 @@ class MoveHandler:
         
 class GroupListHandler:
 
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id", "", type=int)
+        data = xutils.call("note.list_group", xauth.get_current_name())
+        ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
+            vars=dict(creator=xauth.get_current_name()))
+        return xtemplate.render(VIEW_TPL,
+            ungrouped_count = ungrouped_count,
+            file_type       = "group_list",
+            pseudo_groups   = True,
+            show_search_div = True,
+            show_add_group  = True,
+            files           = data)
+
+class GroupSelectHandler:
+    @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id", "", type=int)
         filetype = xutils.get_argument("filetype", "")
         data = xutils.call("note.list_group", xauth.get_current_name())
-        if filetype == "xml":
-            web.header("Content-Type", "text/html; charset=utf-8")
-            return xtemplate.render("note/group_list.html", id=id, filelist=data, file_type="group")
-        else:
-            ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
-                vars=dict(creator=xauth.get_current_name()))
-            return xtemplate.render(VIEW_TPL,
-                ungrouped_count = ungrouped_count,
-                file_type       = "group_list",
-                pseudo_groups   = True,
-                show_search_div = True,
-                show_add_group  = True,
-                files           = data)
+        web.header("Content-Type", "text/html; charset=utf-8")
+        return xtemplate.render("note/group_select.html", 
+            id=id, filelist=data, file_type="group")
+
+
 
 class RemovedHandler:
 
@@ -149,6 +157,7 @@ class RecentCreatedHandler:
             page       = page,
             page_max   = int(math.ceil(count/PAGE_SIZE)),
             page_url   = "/note/recent_created?page=",
+            show_aside = True,
             show_cdate = True,
             show_opts  = True)
 
@@ -182,6 +191,7 @@ class RecentEditHandler:
             show_notice = True,
             show_mdate  = True,
             show_groups = True,
+            show_aside  = True,
             page        = page, 
             page_max    = math.ceil(count/PAGE_SIZE), 
             page_url    ="/file/recent_edit?page=")
@@ -197,6 +207,7 @@ class PublicGroupHandler:
         files = db.select(where=where, offset=(page-1)*PAGE_SIZE, limit=PAGE_SIZE, order="ctime DESC")
         count = db.count(where=where)
         return xtemplate.render(VIEW_TPL, 
+            show_aside = True,
             pathlist   = [Storage(name="分享笔记", url="/file/group/public")],
             file_type  = "group",
             files      = files,
@@ -218,6 +229,7 @@ xurls = (
     r"/note/recent_edit"    , RecentEditHandler,
     r"/file/recent_edit"    , RecentEditHandler,
     r"/file/group/public"   , PublicGroupHandler,
-    r"/note/public"         , PublicGroupHandler
+    r"/note/public"         , PublicGroupHandler,
+    r"/note/group/select"   , GroupSelectHandler
 )
 

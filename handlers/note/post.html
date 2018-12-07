@@ -7,7 +7,6 @@
     <div id="editor" class="row">
         {% raw file.data %}
     </div>
-    <br/>
 {% else %}
     {% set rows = file.data.count('\n') %}
     <div class="alert">{{error}}</div>
@@ -50,6 +49,5 @@
         })
     })
     </script>
-
 
 {% end %}

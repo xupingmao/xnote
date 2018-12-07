@@ -137,17 +137,16 @@ img {
 
             {% if file is not None %}
                 {% if file.type == "group" and _user_name == file.creator %}
+                    {# 笔记列表 #}
                     {% if file.size == 0 %}
                         <a class="float-right red" href="javascript:remove({{file.id}}, '{{file.name}}')">删除</a>
                     {% end %}
                     <a class="float-right link" href="/note/add?parent_id={{file.id}}">新增</a>
                     <a class="float-right link" href="javascript:rename({{file.id}}, '{{file.name}}')">重命名</a>
+                {% else %}
+                    {# 其他普通笔记 #}
+                    <a class="float-right link" href="javascript:history.back()">返回</a>
                 {% end %}
-            {% elif _has_login %}
-                <!--
-                <a class="float-right link prompt-btn" message="分类名" 
-                        action="/note/add?type=group&name=">新增</a>
-                -->
             {% end %}
         </div>
         {% end %}

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/11/17 15:28:09
+# @modified 2018/12/08 02:23:47
 
 """Description here"""
 import os
@@ -148,6 +148,7 @@ class AddHandler:
             if format == 'json':
                 return dict(code = 'fail', message = error)
         return xtemplate.render("note/add.html", 
+            show_aside = True,
             key      = "", 
             name     = key, 
             tags     = tags, 

@@ -12,6 +12,7 @@ class ListHandler:
     def GET(self):
         user_dict = xauth.get_users()
         return xtemplate.render("system/user_manage.html", 
+            show_aside = True,
             user_info = None,
             user_dict=user_dict)
 
@@ -35,6 +36,7 @@ class UserHandler:
         if name != "":
             user_info = xauth.get_user(name)
         return xtemplate.render("system/user_manage.html", 
+            show_aside = True,
             name = name,
             user_info = user_info, 
             user_dict = xauth.get_users())

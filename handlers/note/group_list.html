@@ -1,40 +1,28 @@
 {% init file_type = "group_list" %}
 {% init ungrouped_count = 0 %}
 
-{% if file_type == "group_list" %}
-    <div class="grid-row">
-        <div class="grid-item">
-            <img src="/static/image/folder.gif"/>
-            <a class="link" href="/file/recent_edit">最近更新</a>
-        </div>
-        <div class="grid-item">
-            <img src="/static/image/folder.gif"/>
-            <a class="link" href="/note/recent_created">最近创建</a>
-        </div>
-        <div class="grid-item">
-            <img src="/static/image/folder.gif"/>
-            <a class="link" href="/file/group/public">分享文章</a>
-        </div>
-        <div class="grid-item">
-            <img src="/static/image/folder.gif"/>
-            <a class="link" href="/file/group/ungrouped">未分类</a> {{ ungrouped_count }}
-        </div>
-        {% for item in files %}
-            <div class="grid-item">
-                <img src="/static/image/folder.gif"/>
-                <a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a>
-                {{item.size}}
-            </div>
-        {% end %}
+<div class="grid-row">
+    <div class="grid-item">
+        <img src="/static/image/folder.gif"/>
+        <a class="link" href="/file/recent_edit">最近更新</a>
     </div>
-{% else %}
-    <div class="col-md-12 scroll-y">
-    {% for item in filelist %}
-    <span class="tag-span">
-        <a class="link" href="javascript:moveTo({{id}}, {{item.id}})">
-            {{item.name}}
-        </a>
-    </span>
+    <div class="grid-item">
+        <img src="/static/image/folder.gif"/>
+        <a class="link" href="/note/recent_created">最近创建</a>
+    </div>
+    <div class="grid-item">
+        <img src="/static/image/folder.gif"/>
+        <a class="link" href="/file/group/public">分享文章</a>
+    </div>
+    <div class="grid-item">
+        <img src="/static/image/folder.gif"/>
+        <a class="link" href="/file/group/ungrouped">未分类</a> {{ ungrouped_count }}
+    </div>
+    {% for item in files %}
+        <div class="grid-item">
+            <img src="/static/image/folder.gif"/>
+            <a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a>
+            {{item.size}}
+        </div>
     {% end %}
-    </div>
-{% end %}
+</div>

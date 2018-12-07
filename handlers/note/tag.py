@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/10/06 11:35:37
+# @modified 2018/12/08 02:23:19
 import math
 import xutils
 import xtemplate
@@ -77,6 +77,7 @@ class TagNameHandler:
             vars=dict(name=tagname.lower(), offset=offset, limit=limit, user=user_name))
         files = [dao.FileDO.fromDict(f) for f in files]
         return xtemplate.render("note/tagname.html", 
+            show_aside = True,
             tagname    = tagname, 
             files      = files, 
             show_mdate = True,
@@ -99,6 +100,7 @@ class TagListHandler:
         else:
             tag_list  = get_taglist(db, "")
         return xtemplate.render("note/taglist.html", 
+            show_aside = True,
             tag_list = tag_list)
 
 xurls = (

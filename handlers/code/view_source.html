@@ -63,6 +63,7 @@
 {% init warn = "" %}
 {% init error = "" %}
 {% init pathlist = [] %}
+{% init show_preview = False %}
 
 <div class="col-md-12 grid-card">
     {% include "mod_fs_path.html" %}
@@ -87,8 +88,8 @@
                 <input type="button" id="rename" class="btn rename-btn" value="重命名"/>
             {% end %}
             <input id="execute" type="button" class="btn hide" value="执行"/>
-            {% if path.endswith(".md") %}
-                <input type="button" class="link-btn" href="/code/wiki/{{path}}" value="预览">
+            {% if show_preview %}
+                <a class="btn" href="/code/wiki/{{path}}">{{T("Preview")}}</a>
             {% end %}
             {% if path.find("/plugins/") >= 0 or path.find("\\plugins\\") >= 0 %}
                 <input type="button" class="link-btn" href="/plugins/{{name}}" value="预览"/>

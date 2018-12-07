@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/12/04 22:53:45
+# @modified 2018/12/08 02:27:25
 
 '''
 xnote系统配置
@@ -55,7 +55,7 @@ INIT_SCRIPT        = "init.py"
 RECORD_LOCATION    = False
 BASE_TEMPLATE      = "base.html"
 # 主题样式
-THEME              = "normal"
+THEME              = "standard"
 # 选项风格
 OPTION_STYLE       = "aside"
 # 页面打开方式
