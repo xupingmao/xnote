@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/11/25 20:09:48
+# @modified 2018/12/08 23:40:24
 
 import re
 import os
@@ -76,6 +76,19 @@ def fill_note_info(files):
             if parent is not None:
                 file.parent_name = parent.name
 
+def log_search_history(user, key):
+    cache_key = "[%s]search_history" % user
+    history = cacheutil.get(cache_key)
+    if isinstance(history, list):
+        if key in history:
+            history.remove(key)
+        history.append(key)
+    else:
+        history = [key]
+    if len(history) > xconfig.SEARCH_HISTORY_MAX_SIZE:
+        history = history[-xconfig.SEARCH_HISTORY_MAX_SIZE:]
+    cacheutil.set(cache_key, history)
+
 class handler:
 
     def do_search(self, key, offset, limit):
@@ -132,10 +145,9 @@ class handler:
                     xutils.print_exc()
         cost_time = int((time.time() - start_time) * 1000)
         xutils.trace("SearchTime",  key, cost_time)
-        xconfig.search_history.add(key, cost_time)
 
-        cacheutil.zincrby("[%s]search_history" % user_name, 1, key)
-        cacheutil.zmaxsize("[%s]search_history" % user_name, xconfig.SEARCH_HISTORY_MAX_SIZE)
+        xconfig.search_history.add(key, cost_time)
+        log_search_history(user_name, key)
 
         if ctx.stop:
             return ctx.tools + files
@@ -163,7 +175,7 @@ class handler:
         if key == "" or key == None:
             return xtemplate.render("search/search_result.html", 
                 show_aside = False,
-                recent = list(reversed(cacheutil.zrange("[%s]search_history" % user_name, 0, -1))),
+                recent = list(reversed(cacheutil.get("[%s]search_history" % user_name))),
                 html_title = "搜索",
                 category = category, 
                 files    = [], 

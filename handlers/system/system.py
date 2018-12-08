@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/12/04 23:08:21
+# @modified 2018/12/09 01:00:58
 
 """Description here"""
 from io import StringIO
@@ -23,6 +23,7 @@ from xtemplate import BasePlugin
 from xutils import History
 from xutils import cacheutil
 from xutils import Storage
+from xtemplate import T
 
 def link(name, url):
     return Storage(name = name, url = url, link = url)
@@ -43,13 +44,13 @@ sys_tools = [
 ] 
 
 doc_tools = [
-    link("搜索", "/search"),
-    link("分类", "/note/group"),
-    link("未分类", "/note/ungrouped"),
-    link("标签", "/note/taglist"),
+    link(T("Search History"), "/search"),
+    link(T("Note Categories"), "/note/group"),
+    link(T("Note Tags"), "/note/taglist"),
+    link(T("Recent Updated"), "/note/recent_edit"),
+    link(T("Uncategorized Notes"), "/note/ungrouped"),
     link("词典", "/note/dict"),
     link("提醒", "/message?status=created"),
-    link("最近", "/note/recent_edit"),
     link("日历", "/message/calendar"),
     link("时光轴", "/tools/timeline")
 ] 
@@ -64,11 +65,11 @@ other_tools = [
     link("图像灰度化", "/tools/img2gray"),
     link("base64", "/tools/base64"),
     link("16进制转换", "/tools/hex"),
-    link("md5", "/tools/md5"),
+    link("md5签名", "/tools/md5"),
     link("sha1签名", "/tools/sha1"),
     link("URL编解码", "/tools/urlcoder"),
-    link("条形码", "/tools/barcode"),
-    link("二维码", "/tools/qrcode"),
+    link("条形码生成", "/tools/barcode"),
+    link("二维码生成", "/tools/qrcode"),
     link("随机生成器", "/tools/random_string"),
     # 其他工具
     link("分屏模式", "/tools/multi_win"),
@@ -79,6 +80,13 @@ xconfig.MENU_LIST = [
     Storage(name = "知识库", children = doc_tools, need_login = True),
     Storage(name = "工具箱", children = other_tools),
 ]
+
+
+@xutils.cache(expire=60)
+def get_tools_config(user):
+    db  = xtables.get_storage_table()
+    user_config = db.select_one(where=dict(key="tools", user=user))
+    return user_config
 
                 
 class SysHandler:
@@ -94,13 +102,13 @@ class SysHandler:
 
         # 自定义链接
         customized_items = []
-        db  = xtables.get_storage_table()
-        user_config = db.select_one(where=dict(key="tools", user=xauth.get_current_name()))
+        user_config = get_tools_config(xauth.get_current_name())
         if user_config is not None:
             config_list = xutils.parse_config_text(user_config.value)
             customized_items = map(lambda x: Storage(name=x.get("key"), link=x.get("value")), config_list)
 
         return xtemplate.render("system/system.html", 
+            show_aside       = False,
             html_title       = "系统",
             Storage          = Storage,
             os               = os,

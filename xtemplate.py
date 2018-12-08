@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/11/26 22:49:40
+# @modified 2018/12/09 00:49:20
 import os
 import json
 import web
@@ -42,7 +42,14 @@ def load_languages():
 
 def T(text, lang = None):
     if lang is None:
-        lang = web.ctx.get('_lang', 'zh')
+        lang = web.ctx.get('_lang')
+        if lang is None and hasattr(web.ctx, "env"):
+            # 语言环境
+            lang = web.cookies().get("lang", "zh")
+            web.ctx._lang = lang
+        if lang is None:
+            lang = 'zh'
+
     mapping = _lang_dict.get(lang)
     if mapping is None:
         return text
@@ -113,8 +120,6 @@ def pre_render(kw):
     kw["T"]             = T
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
-        # 语言环境
-        web.ctx._lang = web.cookies().get("lang", "zh")
 
     if xutils.sqlite3 is None:
         kw["warn"] = "WARN: sqlite3不可用"

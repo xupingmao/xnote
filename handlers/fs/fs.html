@@ -86,7 +86,7 @@
                         <a class="item-option" href="/tools/iframe_viewer?path={{quote(item.path)}}">预览</a>
                     {% end %}
 
-                    <a class="item-option" href="/fs/{{item.path}}?type=blob">下载</a>
+                    <a class="item-option" href="/fs/{{item.path}}?type=blob&token={{token}}">下载</a>
                 {% end %}
                 <a class="item-option"
                     href="javascript:removeFile('{{item.path}}')">删除</a>

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/12/08 02:27:25
+# @modified 2018/12/08 23:41:41
 
 '''
 xnote系统配置
@@ -100,7 +100,7 @@ MUTE_END_TIME    = None
 # 分页数量
 PAGE_SIZE        = 20
 # 搜索历史的最大记录数
-SEARCH_HISTORY_MAX_SIZE  = 20
+SEARCH_HISTORY_MAX_SIZE  = 100
 IP_BLACK_LIST    = ["192.168.56.1"] # this is vbox ip
 # max file size to sync or backup
 MAX_FILE_SIZE    = 10 * 1024 ** 2

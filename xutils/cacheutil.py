@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/11/18 15:03:16
+# @modified 2018/12/08 23:54:37
 """
 缓存的实现，考虑失效的规则如下
 
@@ -171,13 +171,15 @@ def cache(key=None, prefix=None, expire=600):
             if obj != None and not obj.is_alive():
                 obj.clear()
             value = func(*args)
+            if value is None:
+                delete(cache_key)
+                return None
             cache_obj = CacheObj(cache_key, value, expire)
             cache_obj.func = func
             cache_obj.args = args
             return value
         return handle
     return deco
-
 
 def expire_cache(key = None, prefix = None, args = None):
     """使key对应的缓存失效，成功返回True"""
@@ -195,7 +197,16 @@ def put_cache(key = None, value = None, prefix = None, args = None, expire = -1)
     """设置缓存的值"""
     if key is None:
         key = '%s%s' % (prefix, args)
-    _cache_dict[key] = CacheObj(key, value, expire)
+    if value is None:
+        delete(key)
+        return
+    CacheObj(key, value, expire)
+
+def set(key, value, expire=-1):
+    if value is None:
+        delete(key)
+        return
+    CacheObj(key, value, expire)
 
 def get(key, default_value=None):
     """获取缓存的值"""
@@ -203,8 +214,25 @@ def get(key, default_value=None):
     if obj is None:
         return default_value
     return obj.get_value()
-
+# 方法别名
 get_cache = get
+
+def delete(key):
+    """del与python关键字冲突"""
+    obj = get_cache_obj(key)
+    if obj != None:
+        obj.clear()
+
+def prefix_del(prefix):
+    """使用前缀删除"""
+    keys = []
+    for key in _cache_dict:
+        if key.startswith(prefix):
+            keys.append(key)
+    for key in keys:
+        obj = get_cache_obj(key)
+        if obj != None:
+            obj.clear()
 
 def get_cache_obj(key, default_value=None, type=None):
     if not is_str(key):
@@ -392,26 +420,6 @@ def hdel(key, field):
 
 def keys(pattern=None):
     return _cache_dict.keys()
-
-def set(key, value, expire=-1):
-    CacheObj(key, value, expire)
-
-def delete(key):
-    """del与python关键字冲突"""
-    obj = get_cache_obj(key)
-    if obj != None:
-        obj.clear()
-
-def prefix_del(prefix):
-    """使用前缀删除"""
-    keys = []
-    for key in _cache_dict:
-        if key.startswith(prefix):
-            keys.append(key)
-    for key in keys:
-        obj = get_cache_obj(key)
-        if obj != None:
-            obj.clear()
 
 def print_exc():
     """打印系统异常堆栈"""

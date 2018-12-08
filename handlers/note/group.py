@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2018/12/08 02:22:32
+# @modified 2018/12/08 02:40:47
 import math
 import web
 import xutils
@@ -59,6 +59,7 @@ class Ungrouped:
         amount = db.count(sql = count_sql, vars = vars)
 
         return xtemplate.render(VIEW_TPL,
+            show_aside = True,
             file_type  = "group",
             pathlist   = [Storage(name="未分类", type="group", url="/file/group/ungrouped")],
             files      = files,
