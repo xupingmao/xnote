@@ -10,9 +10,12 @@
     {% set title = "条形码" %}
     {% include "tools/base_title.html" %}
 
-    <div>
+    <div class="col-md-12">
         <textarea id="input" class="col-md-12" rows=5></textarea>
         <button id="generate">生成</button>
+    </div>
+
+    <div id="errorMsg" class="col-md-12 error hide">
     </div>
    
     <div id="barcode" class="top-offset-1">
@@ -25,7 +28,9 @@
         function showBarCode() {
             var key = $("#input").val();
             key = utf16to8(key);
+            $("#errorMsg").hide();
             if (key) {
+              try {
                 JsBarcode("#imgcode", key, {
                   format: "CODE39",//选择要使用的条形码类型
                   width:3,//设置条之间的宽度
@@ -42,6 +47,9 @@
                   lineColor:"#000",//设置条和文本的颜色。
                   margin:15//设置条形码周围的空白边距
                 });
+              } catch (e) {
+                $("#errorMsg").text(e).show();
+              }
             }    
         }
 

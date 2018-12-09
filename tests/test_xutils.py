@@ -257,5 +257,9 @@ class TestMain(unittest.TestCase):
         result = table.first(lambda x:x.get('age')>=10)
         self.assertEqual('t3', result['name'])
 
+    def test_tokenizer(self):
+        from xutils import tokenizer
+        tokenizer.main_test()
+
 
         

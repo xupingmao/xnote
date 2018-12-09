@@ -2,7 +2,7 @@
 
 <!--
     @since 2017/09/14
-    @modified 2018/12/08 13:42:46
+    @modified 2018/12/09 14:22:26
 -->
 
 {% block head %}
@@ -69,17 +69,20 @@
         </div>
         {% end %}
     </div>
+    
+</div>
+
+<div class="grid-card">
+    <div class="col-md-12">
+        <span class="currentTime"></span>
+        <span class="float-right">
+            用户: {{_user_name}}
+            <a href="/logout">登出</a>
+        </span>
+    </div>
 </div>
 {% end %}
 
-<hr/>
-<div class="col-md-12">
-    <span class="currentTime"></span>
-    <span class="float-right">
-        用户: {{_user_name}}
-        <a href="/logout">登出</a>
-    </span>
-</div>
 
 <script type="text/javascript">
 $(function () {

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/11/19 00:05:56
-# @modified 2018/12/07 01:20:43
+# @modified 2018/12/09 15:40:36
 
 class Token:
 
@@ -275,7 +275,7 @@ def loadfile(fname):
     with open(fname) as fp:
         return fp.read()
 
-def main():
+def main_test():
     import sys
     ARGV = sys.argv
     if len(ARGV) == 1:
@@ -301,6 +301,6 @@ def main():
         print(fmt % (index+1, token.type, token.pos, token.val))
 
 if __name__ == "__main__":
-    main()
+    main_test()
 
 

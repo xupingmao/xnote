@@ -42,3 +42,4 @@ tools.md
 .vscode/
 /testdir/
 /中文/
+.coverage

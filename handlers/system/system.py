@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/12/09 01:00:58
+# @modified 2018/12/09 02:53:02
 
 """Description here"""
 from io import StringIO
@@ -38,7 +38,7 @@ sys_tools = [
     # link("后台模板缓存", "/system/template_cache"),
     link("系统刷新",  "/system/reload"),
     link("模块说明", "/system/modules_info"),
-    link("SQL执行器", "/tools/sql"),
+    link(T("SQL"), "/tools/sql"),
     link("启动脚本", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
     link("自定义CSS", "/code/edit?type=script&path=user.css"),
 ] 
