@@ -1,4 +1,4 @@
-{% init item = xutils.Storage(name="", url="", message="") %}
+{% init item = xutils.Storage(name="", url="", message="", id="") %}
 <div class="x-dialog x-dialog-remote" style="height: 400px;" id="memoEditBox">
     <form action="/system/crontab/save" method="POST">
     <input class="hide" name="id" value="{{item.id}}">

@@ -259,7 +259,14 @@ class TestMain(unittest.TestCase):
 
     def test_tokenizer(self):
         from xutils import tokenizer
-        tokenizer.main_test()
+        content = '''
+            this is a example
+            a = 10
+            c = 'a string'
+            float = 1.2
+            '''
+        tokens = tokenizer.tokenize(content)
+
 
 
         

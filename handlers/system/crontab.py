@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# Last modified on 2017/12/24
+# @modified 2018/12/09 23:40:44
 
 """xnote定时任务配置"""
 import os

@@ -1,9 +1,8 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/12/08 23:54:37
-"""
-缓存的实现，考虑失效的规则如下
+# @modified 2018/12/12 22:01:39
+"""缓存的实现，考虑失效的规则如下
 
 失效的检查策略
 1. 读取时检查失效
@@ -44,8 +43,7 @@ def log_error(msg):
     print(msg)
 
 class CacheObj:
-    """
-    缓存对象，包含缓存的key和value，有一个公共的缓存队列
+    """缓存对象，包含缓存的key和value，有一个公共的缓存队列
     每次生成一个会从缓存队列中取出一个检查是否失效，同时把自己放入队列
     TODO 提供按照大小过滤的规则
     """
@@ -149,8 +147,7 @@ class CacheObj:
             os.remove(path)
 
 def cache(key=None, prefix=None, expire=600):
-    """
-    缓存的装饰器，会自动清理失效的缓存ge
+    """缓存的装饰器，会自动清理失效的缓存
     TODO 可以考虑缓存持久化的问题
     """
     def deco(func):
@@ -193,29 +190,30 @@ def expire_cache(key = None, prefix = None, args = None):
         return True
     return False
 
-def put_cache(key = None, value = None, prefix = None, args = None, expire = -1):
-    """设置缓存的值"""
+def put(key, value = None, expire = -1):
+    """设置缓存的值
+    @param {object} value value对象必须可以json序列化，如果value为None，会删除key对应的对象
+    @param {integer} expire 失效时间，单位秒，如果小于等于0认为不失效，会持久化到文件
+    """
     if key is None:
-        key = '%s%s' % (prefix, args)
-    if value is None:
-        delete(key)
-        return
-    CacheObj(key, value, expire)
-
-def set(key, value, expire=-1):
+        raise ValueError("key can not be None")
     if value is None:
         delete(key)
         return
     CacheObj(key, value, expire)
 
 def get(key, default_value=None):
-    """获取缓存的值"""
+    """读取缓存对象
+    @param {object} default_value 如果缓存对象不存在，返回default_value
+    """
     obj = get_cache_obj(key)
     if obj is None:
         return default_value
     return obj.get_value()
 # 方法别名
 get_cache = get
+put_cache = put
+set = put
 
 def delete(key):
     """del与python关键字冲突"""
@@ -250,9 +248,7 @@ def get_cache_obj(key, default_value=None, type=None):
 update_cache = put_cache
 
 def update_cache_by_key(key):
-    """
-    直接通过key来更新缓存，前提是缓存已经存在
-    """
+    """直接通过key来更新缓存，前提是缓存已经存在"""
     obj = _cache_dict.get(key)
     if obj != None:
         func = obj.func

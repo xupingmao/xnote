@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/12/09 15:15:07
+@modified 2018/12/11 22:10:47
 */
 
 * {
@@ -475,6 +475,13 @@ li.menu-item:hover {
   position: fixed;
   left: 0px;
   top: 0px;
+}
+
+.nav {
+    width: 100%;
+    float: left;
+    background-color: #fff;
+    padding: 0px 10px;
 }
 
 .nav-top {
@@ -1125,8 +1132,8 @@ li.menu-item:hover {
 }
 
 .main-content {
-    width: 100%;
     float: left;
+    width: 100%;
     padding-right: 230px;
     min-height: 20px;
 }
