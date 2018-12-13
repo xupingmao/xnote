@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2018/11/19 01:46:19
+# @modified 2018/12/13 22:45:38
 """搜索知识库文件"""
 import re
 import sys
@@ -135,7 +135,7 @@ def search(ctx, expression=None):
 def update_cached_notes(file):
     if not xconfig.USE_CACHE_SEARCH:
         return
-    xutils.update_cache("note_name.list", get_cached_notes0())
+    xutils.cache_put("note_name.list", get_cached_notes0())
 
 # 初始化缓存
 if xconfig.USE_CACHE_SEARCH:

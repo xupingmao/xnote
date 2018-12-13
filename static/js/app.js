@@ -4,7 +4,8 @@
 $(function() {
 
   // 设置最小的高度
-  $(".main").css("min-height", getWindowHeight());
+  $(".main").css("min-height", getWindowHeight() - $(".main").offset().top);
+  // $(".main").css("min-height", getWindowHeight());
 
   window.moveTo = function (selfId, parentId) {
       $.post("/note/group/move", 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/12/12 22:01:39
+# @modified 2018/12/14 00:34:50
 """缓存的实现，考虑失效的规则如下
 
 失效的检查策略
@@ -161,12 +161,9 @@ def cache(key=None, prefix=None, expire=600):
                 cache_key = "%s.%s%s" % (mod.__name__, funcname, args)
             else:
                 cache_key = "%s%s" % (prefix, args)
-            obj = _cache_dict.get(cache_key)
-            if obj != None and obj.is_alive():
-                # print("hit cache %s" % cache_key)
+            obj = get_cache_obj(cache_key)
+            if obj is not None:
                 return obj.value
-            if obj != None and not obj.is_alive():
-                obj.clear()
             value = func(*args)
             if value is None:
                 delete(cache_key)
@@ -178,18 +175,6 @@ def cache(key=None, prefix=None, expire=600):
         return handle
     return deco
 
-def expire_cache(key = None, prefix = None, args = None):
-    """使key对应的缓存失效，成功返回True"""
-    if key == None:
-        key = "%s%s" % (prefix, args)
-    obj = _cache_dict.get(key)
-    if obj != None:
-        # 防止删除了新的cache
-        obj.clear()
-        obj.is_force_expired = True
-        return True
-    return False
-
 def put(key, value = None, expire = -1):
     """设置缓存的值
     @param {object} value value对象必须可以json序列化，如果value为None，会删除key对应的对象
@@ -199,8 +184,9 @@ def put(key, value = None, expire = -1):
         raise ValueError("key can not be None")
     if value is None:
         delete(key)
-        return
+        return True
     CacheObj(key, value, expire)
+    return True
 
 def get(key, default_value=None):
     """读取缓存对象
@@ -210,16 +196,20 @@ def get(key, default_value=None):
     if obj is None:
         return default_value
     return obj.get_value()
-# 方法别名
-get_cache = get
-put_cache = put
-set = put
 
-def delete(key):
-    """del与python关键字冲突"""
+
+def delete(key = None, prefix = None, args = None):
+    """使key对应的缓存失效，成功返回True
+    del与python关键字冲突
+    @param {string} key 缓存的key
+    """
+    if key == None:
+        key = "%s%s" % (prefix, args)
     obj = get_cache_obj(key)
     if obj != None:
         obj.clear()
+        return True
+    return False
 
 def prefix_del(prefix):
     """使用前缀删除"""
@@ -231,6 +221,12 @@ def prefix_del(prefix):
         obj = get_cache_obj(key)
         if obj != None:
             obj.clear()
+
+# 方法别名
+cache_get = get
+cache_put = put
+cache_expire = delete
+set = put
 
 def get_cache_obj(key, default_value=None, type=None):
     if not is_str(key):
@@ -244,8 +240,6 @@ def get_cache_obj(key, default_value=None, type=None):
         return obj
     obj.clear()
     return None
-
-update_cache = put_cache
 
 def update_cache_by_key(key):
     """直接通过key来更新缓存，前提是缓存已经存在"""
