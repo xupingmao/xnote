@@ -283,7 +283,11 @@
         $("#insertCode").on("click", function () {
             var selection = codeMirror.getSelection();
             if (selection != "" && selection != null) {
-                codeMirror.replaceSelection("```" + selection + "```", "around");
+                if (selection.indexOf('\n') >= 0) {
+                    codeMirror.replaceSelection("```" + selection + "```", "around");
+                } else {
+                    codeMirror.replaceSelection("`" + selection + "`", "around");
+                }
             } else {
                 codeInsert("```\n[代码]\n```");
             }

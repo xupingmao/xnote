@@ -1,10 +1,9 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/12/02 01:54:42
+# @modified 2018/12/15 17:14:08
 
-"""
-Xnote 模块管理器
+"""Xnote 模块管理器
  - 加载并注册模块
  - 执行cron定时任务
 """

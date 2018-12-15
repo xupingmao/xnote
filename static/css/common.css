@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/12/11 22:10:47
+@modified 2018/12/15 17:20:53
 */
 
 * {
@@ -812,7 +812,7 @@ li.menu-item:hover {
 .x-dialog-title {
     margin: 0 auto;
     width: 100%;
-    background-color: #337ab7;
+    background-color: #214FA3;
     color: #fff;
     padding: 5px;
     cursor: move;
@@ -1013,9 +1013,9 @@ li.menu-item:hover {
 }
 
 .grid-item {
-    width: 220px;
+    width: 20%;
     padding: 5px;
-    margin: 5px;
+    /*margin: 5px;*/
     margin-top: 0px;
     margin-bottom: 0px;
     float: left;
@@ -1250,6 +1250,10 @@ li.menu-item:hover {
 
     .small-device {
         display: inherit;
+    }
+
+    .grid-item {
+        width: 50%;
     }
 }
 

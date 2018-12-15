@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/12/09 02:53:02
+# @modified 2018/12/15 15:26:00
 
 """Description here"""
 from io import StringIO
@@ -41,13 +41,14 @@ sys_tools = [
     link(T("SQL"), "/tools/sql"),
     link("启动脚本", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
     link("自定义CSS", "/code/edit?type=script&path=user.css"),
+    link("Shell", "/tools/shell")
 ] 
 
 doc_tools = [
     link(T("Search History"), "/search"),
+    link(T("Recent Updated"), "/note/recent_edit"),
     link(T("Note Categories"), "/note/group"),
     link(T("Note Tags"), "/note/taglist"),
-    link(T("Recent Updated"), "/note/recent_edit"),
     link(T("Uncategorized Notes"), "/note/ungrouped"),
     link("词典", "/note/dict"),
     link("提醒", "/message?status=created"),

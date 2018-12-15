@@ -1,9 +1,8 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/12/09 15:28:16
+# @modified 2018/12/15 17:14:23
 
-'''
-xnote系统配置
+'''xnote系统配置
 
 # 文件配置
 - 约定目录叫 XXX_DIR

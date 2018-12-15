@@ -1,9 +1,12 @@
 # encoding=utf-8
-# @modified 2018/11/16 02:29:08
+# @modified 2018/12/15 14:25:52
+# decode: bytes -> str
+# encode: str -> bytes
 import os
 import re
 import codecs
 import six
+import socket
 
 try:
     # try py3 first
@@ -171,3 +174,41 @@ def http_download(address, destpath = None, dirname = None):
         print("download %s bytes, saved to %s" % (readsize, destpath))
     finally:
         dest.close()
+
+def tcp_send(domain, port, content, timeout=1):
+    """发送TCP请求, 由于TCP协议没有终止标识，超时就返回所有结果
+    @param {string} domain 域名
+    @param {integer} port 端口号
+    @param {bytes|str} content 发送内容
+    @return {bytes} 返回结果
+    """
+    TIMEOUT = timeout
+    BUFSIZE = 1024
+
+    data = content
+    if isinstance(content, str):
+        data = content.encode("utf-8")
+    ip = socket.gethostbyname(domain)
+
+    conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if hasattr(conn, "settimeout"):
+        # timeout单位是秒
+        conn.settimeout(TIMEOUT)
+    conn.connect((ip, port))
+    conn.sendall(data)
+    result = []
+    try:
+        # 使用文件同样会抛出socket.timeout异常，无法判断文件EOF
+        # fp = conn.makefile()
+        while True:
+            buf = conn.recv(BUFSIZE)
+            if not buf:break
+            result.append(buf)
+    except socket.timeout:
+        # FIXME 如果真的是超时怎么办
+        return b''.join(result)
+    finally:
+        conn.close()
+    return b''.join(result)
+
+

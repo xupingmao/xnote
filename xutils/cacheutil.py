@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/12/14 00:34:50
+# @modified 2018/12/14 00:58:10
 """缓存的实现，考虑失效的规则如下
 
 失效的检查策略
@@ -409,7 +409,8 @@ def hdel(key, field):
         return 0
 
 def keys(pattern=None):
-    return _cache_dict.keys()
+    """返回所有缓存的key列表"""
+    return list(_cache_dict.keys())
 
 def print_exc():
     """打印系统异常堆栈"""
