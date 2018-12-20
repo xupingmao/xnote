@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/12/15 17:20:53
+@modified 2018/12/21 00:39:30
 */
 
 * {
@@ -477,12 +477,51 @@ li.menu-item:hover {
   top: 0px;
 }
 
+
+.root {
+    padding-bottom: 10px;
+    width: auto;
+    height: 100%;
+    overflow: hidden;
+    margin-left: 0px;
+    background-color:#fff; 
+    margin: 0 auto;
+    max-width: 950px;
+}
+
 .nav {
-    width: 100%;
+    /*position: fixed;*/
+    /*width: 930px;*/
     float: left;
+    width: 100%;
+    padding: 0px 10px;
     background-color: #fff;
+}
+
+.footer {
+    display: none;
+    width: 100%;
+    height: 20px;
+    text-align: center;
+    font-size: 16px;
+    color: blue;
+    background-color: #fff;
+}
+
+.x-center {
+    width: 100%;
+    max-width: 950px;
+    margin: 0 auto;
+}
+
+.x-body {
+    /*position: absolute;*/
+    float: left;
+    width: 100%;
+
     padding: 0px 10px;
 }
+
 
 .nav-top {
   /*background-color: #9cc;*/
@@ -536,33 +575,6 @@ li.menu-item:hover {
     width: 345px;
     float: right;
     padding: 5px 0px;
-}
-
-.main {
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 10px;
-    width: auto;
-    height: 100%;
-    overflow: hidden;
-    margin-left: 0px;
-    background-color: #fff;
-}
-
-.footer {
-    display: none;
-    width: 100%;
-    height: 20px;
-    text-align: center;
-    font-size: 16px;
-    color: blue;
-    background-color: #fff;
-}
-
-.x-center {
-    width: 100%;
-    max-width: 950px;
-    margin: 0 auto;
 }
 
 .navMenu-top { 
@@ -803,7 +815,6 @@ li.menu-item:hover {
     display: none;
     position: fixed;
     margin: 0 auto;
-    top: 50px;
     background-color: #fff;
     z-index: 100;
     overflow-y: hidden;
@@ -1228,6 +1239,16 @@ li.menu-item:hover {
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 950px) {
     /** mobile **/
+
+    .root {
+        left: 0px;
+        right: 0px;
+    }
+
+    .x-body {
+        /*top: 80px;*/
+    }
+
     .search-box {
         width: 100%;
     }

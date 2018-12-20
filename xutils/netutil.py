@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/12/15 14:25:52
+# @modified 2018/12/16 21:48:42
 # decode: bytes -> str
 # encode: str -> bytes
 import os
@@ -175,11 +175,12 @@ def http_download(address, destpath = None, dirname = None):
     finally:
         dest.close()
 
-def tcp_send(domain, port, content, timeout=1):
+def tcp_send(domain, port, content, timeout=1, on_recv_func=None):
     """发送TCP请求, 由于TCP协议没有终止标识，超时就返回所有结果
     @param {string} domain 域名
     @param {integer} port 端口号
     @param {bytes|str} content 发送内容
+    @param {function} on_recv_func 自定义处理tcp包的函数，返回True继续，返回False中断
     @return {bytes} 返回结果
     """
     TIMEOUT = timeout
@@ -204,6 +205,9 @@ def tcp_send(domain, port, content, timeout=1):
             buf = conn.recv(BUFSIZE)
             if not buf:break
             result.append(buf)
+            if on_recv_func:
+                if not on_recv_func(buf):
+                    break
     except socket.timeout:
         # FIXME 如果真的是超时怎么办
         return b''.join(result)

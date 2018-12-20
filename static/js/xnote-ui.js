@@ -5,7 +5,7 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2018/12/06 23:55:10
+ * @modified 2018/12/17 00:47:18
  */
 var XUI = function (window) {
   // 处理select标签选中情况
@@ -55,6 +55,19 @@ var XUI = function (window) {
     });
   }
 
+  // 类似tab的超链接
+  function initTabLink() {
+    $(".tab-link").each(function (index, ele) {
+      var link = $(ele).attr("href");
+      var fullpath = location.href;
+      console.log(link, fullpath);
+      if (fullpath.indexOf(link) >= 0) {
+        $(ele).addClass("tab-link-active");
+      }
+    });
+  }
+  
+
   // 点击跳转链接的按钮
   $(".link-btn").click(function () {
       var link = $(this).attr("x-href");
@@ -95,10 +108,10 @@ var XUI = function (window) {
       $.get(dialogUrl, function (respHtml) {
         $(document.body).append(respHtml);
         doModal(dialogId);
-        initElementProcessors();
+        initDefaultValue();
         // 重新绑定事件
         $(".x-dialog-close, .x-dialog-cancel").unbind("click");
-        $(".x-dialog-close, .x-dialog-cancel").on("click", function () { hideDialog(); });
+        $(".x-dialog-close, .x-dialog-cancel").on("click", function () { onDialogHide(); });
       })
     }
   });
@@ -145,23 +158,11 @@ var XUI = function (window) {
     });
   });
 
-  // 类似tab的超链接
-  function initTabLink() {
-    $(".tab-link").each(function (index, ele) {
-      var link = $(ele).attr("href");
-      var fullpath = location.href;
-      console.log(link, fullpath);
-      if (fullpath.indexOf(link) >= 0) {
-        $(ele).addClass("tab-link-active");
-      }
-    });
-  }
-  
-  // 对话框相关
+  /**
+   * 初始化弹层
+   */
   function initDialog() {
     // 初始化样式
-    $(".x-dialog-background").css({"display":"none", "position":"fixed", "left": "0px", "top": "0px", 
-        "width": "100%", "height":"100%", "background-color": "#000", "opacity": 0.5});
     $(".x-dialog-close").css({"background-color":"red", "float":"right"});
 
     $(".x-dialog").each(function (index, ele) {
@@ -172,14 +173,18 @@ var XUI = function (window) {
         } else {
           dialogWidth = 600;
         }
+        var top = Math.max((getWindowHeight() - self.height()) / 2, 0);
         var left = (width - dialogWidth) / 2;
-        self.css({"width":dialogWidth, "left": left});
+        self.css({"width":dialogWidth, "left": left}).css("top", top);
     });
 
     $("body").css("overflow", "hidden");
   }
   
-  function hideDialog() {
+  /**
+   * 隐藏弹层
+   */
+  function onDialogHide() {
       $(".x-dialog").hide();
       $(".x-dialog-background").hide();
       $(".x-dialog-remote").remove();// 清空远程的dialog
@@ -187,12 +192,12 @@ var XUI = function (window) {
   }
   
   $(".x-dialog-background").click(function () {
-      hideDialog();
-  })
+      onDialogHide();
+  });
   
   $(".x-dialog-close, .x-dialog-cancel").click(function () {
-      hideDialog();
-  })
+      onDialogHide();
+  });
   
   function doModal(id) {
     initDialog();
@@ -201,7 +206,8 @@ var XUI = function (window) {
     $("#"+id).show();
   }
 
-  function initElementProcessors() {
+  // 初始化表单控件的默认值
+  function initDefaultValue() {
     initSelect();
     initCheckbox();
     initRadio();
@@ -242,7 +248,9 @@ var XUI = function (window) {
       toast.remove();
     }, time);
   }
-  initElementProcessors();
+
+  // 初始化
+  initDefaultValue();
 };
 
 $(document).ready(function () {

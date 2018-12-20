@@ -38,7 +38,7 @@
 {% end %}
 
 {% init recent = [] %}
-<div class="plugin-list">
+<div class="plugin-list col-md-12">
     {% for link in plugins %}
     <div class="plugin-item">
         <div class="col-md-12">
@@ -54,6 +54,12 @@
     </div>
     {% end %}
 </div>
+
+<script type="text/javascript">
+$(function () {
+    adjustHeight(".plugin-list", 20);
+})
+</script>
 
 {% end %}
 

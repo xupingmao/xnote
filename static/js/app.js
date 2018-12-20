@@ -4,8 +4,7 @@
 $(function() {
 
   // 设置最小的高度
-  $(".main").css("min-height", getWindowHeight() - $(".main").offset().top);
-  // $(".main").css("min-height", getWindowHeight());
+  $(".root").css("min-height", getWindowHeight());
 
   window.moveTo = function (selfId, parentId) {
       $.post("/note/group/move", 
@@ -247,7 +246,7 @@ $(function () {
     window.adjustHeight = function (selector, bottom) {
       bottom = bottom || 0;
       var height = getWindowHeight() - $(selector).offset().top - bottom;
-      $(selector).css("height", height);
+      $(selector).css("height", height).css("overflow", "auto");
       return height;
     }
 

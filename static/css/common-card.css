@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/12/01 01:05:12
+@modified 2018/12/20 00:23:44
 */
 
 .menu-link:hover {
@@ -23,6 +23,10 @@
     margin-bottom: 10px;
     padding: 0px 5px;
     border-bottom: 1px solid #ccc;
+}
+
+.x-body {
+    padding: 0px;
 }
 
 /* 不能指定input[type=button]不然会覆盖其他class样式(选择器优先级过高) */
