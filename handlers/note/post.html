@@ -38,11 +38,11 @@
 
     $("#saveBtn").click(function () {
         var data = editor.txt.html();
-        $.post("/file/autosave?type=html", {id:{{file.id}}, version:{{file.version}}, data:data}, function (resp) {
+        $.post("/note/save?type=html", {id:{{file.id}}, version:{{file.version}}, data:data}, function (resp) {
             console.log(resp);
             if (resp.code == "success") {
                 // window.location.reload();
-                window.location.href = "/file/view?id={{file.id}}";
+                window.location.href = "/note/view?id={{file.id}}";
             } else {
                 alert(resp.message);
             }

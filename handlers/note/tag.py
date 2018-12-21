@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/12/08 02:23:19
+# @modified 2018/12/21 21:46:52
 import math
 import xutils
 import xtemplate
@@ -104,10 +104,9 @@ class TagListHandler:
             tag_list = tag_list)
 
 xurls = (
-    r"/file/tag/(\d+)"   , TagHandler,
-    r"/file/tag/update"  , UpdateTagHandler,
-    r"/file/tagname/(.*)", TagNameHandler,
-    r"/file/taglist"     , TagListHandler,
+    r"/note/tag/(\d+)"   , TagHandler,
+    r"/note/tag/update"  , UpdateTagHandler,
+    r"/note/tagname/(.*)", TagNameHandler,
     r"/note/taglist"     , TagListHandler
 )
 

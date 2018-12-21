@@ -2,17 +2,19 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2018/12/04 23:07:16
+@modified 2018/12/21 21:14:55
 -->
 
 {% block body %}
+
+{% init page_max = 0 %}
+{% init recent = [] %}
 
 {% include common/mod_search.html %}
 <script type="text/javascript" src="/static/lib/layer/layer.js"></script>
 
 <div id="executeResult">
 </div>
-{% init recent = [] %}
 
 {% if len(recent) > 0 %}
 <div class="col-md-12 card">
@@ -23,7 +25,7 @@
 </div>
 {% end %}
 
-<div class="col-md-12">
+<div class="col-md-12 result-list">
     {% for i, file in enumerate(files) %}
     <div class="note"> 
         <div class="note-body">
@@ -114,8 +116,6 @@
             </div>
         </div>
     {% end %}
-{% init page_max = 0 %}
-
 <div class="grid-card">
     {% include mod_pagenation.html %}
 </div>
@@ -134,5 +134,6 @@
     })
 </script>
 
-{% end %} {# end page #}
-{% end %} {# block body #}
+{% end %} 
+
+{% end %}

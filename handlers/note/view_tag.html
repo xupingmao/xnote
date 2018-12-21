@@ -21,7 +21,7 @@ var gFileId = {{file.id}};
  * 初始化标签列表
  */
 function initTags() {
-    $.get("/file/tag/{{file.id}}", function(data, status) {
+    $.get("/note/tag/{{file.id}}", function(data, status) {
         var tagsList = [];
         var response = data;
         var tags = response.data;
@@ -31,7 +31,7 @@ function initTags() {
             var link = $("<a>");
             link.addClass("link");
             link.text(element.name);
-            link.attr("href", "/file/tagname/"+element.name);
+            link.attr("href", "/note/tagname/"+element.name);
             span.addClass("tag gray-tag");
             span.append(link);
             $("#tags-span").append(span);
@@ -58,7 +58,7 @@ function toggleFileTagsEditor() {
 }
 
 function postTagUpdate() {
-    $.post("/file/tag/update", {file_id: gFileId, tags: $("#tagEditText").val()}, 
+    $.post("/note/tag/update", {file_id: gFileId, tags: $("#tagEditText").val()}, 
         function(data, status) {
             initTags();
             $(".tag-toggle").toggle();

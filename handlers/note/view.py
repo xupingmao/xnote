@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/12/08 02:22:08
+# @modified 2018/12/21 22:16:41
 import profile
 import math
 import re
@@ -133,7 +133,7 @@ class ViewHandler:
             pathlist = pathlist,
             page_max = math.ceil(amount/pagesize),
             page     = page,
-            page_url = "/file/view?id=%s&page=" % id,
+            page_url = "/note/view?id=%s&page=" % id,
             files    = files, 
             recent_created = recent_created,
             show_groups = show_groups,
@@ -162,12 +162,8 @@ def sqlite_escape(text):
 def result(success = True, msg=None):
     return {"success": success, "result": None, "msg": msg}
 
-def is_img(filename):
-    name, ext = os.path.splitext(filename)
-    return ext.lower() in (".gif", ".png", ".jpg", ".jpeg", ".bmp")
-
 def get_link(filename, webpath):
-    if is_img(filename):
+    if xutils.is_img_file(filename):
         return "![%s](%s)" % (filename, webpath)
     return "[%s](%s)" % (filename, webpath)
 
@@ -180,7 +176,7 @@ class Upvote:
         db = xtables.get_file_table()
         file = db.select_one(where=dict(id=int(id)))
         db.update(priority=1, where=dict(id=id))
-        raise web.seeother("/file/view?id=%s" % id)
+        raise web.seeother("/note/view?id=%s" % id)
 
 class Downvote:
     @xauth.login_required()
@@ -189,7 +185,7 @@ class Downvote:
         db = xtables.get_file_table()
         file = db.select_one(where=dict(id=int(id)))
         db.update(priority=0, where=dict(id=id))
-        raise web.seeother("/file/view?id=%s" % id)
+        raise web.seeother("/note/view?id=%s" % id)
 
 class MarkHandler:
 
@@ -197,14 +193,14 @@ class MarkHandler:
         id = xutils.get_argument("id")
         db = xtables.get_file_table()
         db.update(is_marked=1, where=dict(id=id))
-        raise web.seeother("/file/view?id=%s"%id)
+        raise web.seeother("/note/view?id=%s"%id)
 
 class UnmarkHandler:
     def GET(self):
         id = xutils.get_argument("id")
         db = xtables.get_file_table()
         db.update(is_marked=0, where=dict(id=id))
-        raise web.seeother("/file/view?id=%s"%id)
+        raise web.seeother("/note/view?id=%s"%id)
 
 class DictHandler:
 

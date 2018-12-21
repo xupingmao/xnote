@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/11/25 19:57:15
+# @modified 2018/12/21 22:19:19
 
 """短消息"""
 import time
@@ -211,16 +211,15 @@ class CalendarHandler:
             count_message = count_message)
 
 xurls=(
-    r"/file/message/add", SaveHandler,
-    r"/file/message/remove", RemoveHandler,
-    r"/file/message/update", SaveHandler,
-    r"/file/message/finish", FinishMessage,
-    r"/file/message/open", OpenMessage,
+    r"/message", MessageHandler,
     r"/message/add", SaveHandler,
     r"/message/status", UpdateStatusHandler,
     r"/message/list", ListHandler,
-    r"/file/message/date", DateHandler,
-    r"/message", MessageHandler,
+    r"/message/remove", RemoveHandler,
+    r"/message/update", SaveHandler,
+    r"/message/open", OpenMessage,
+    r"/message/finish", FinishMessage,
+    r"/message/date", DateHandler,
     r"/message/calendar", CalendarHandler
 )
 

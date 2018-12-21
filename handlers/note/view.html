@@ -196,7 +196,7 @@ function remove(id, name, parentId) {
                 alert(resp.message);
             } else {
                 if (parentId) {
-                    window.location.href="/file/view?id="+parentId;
+                    window.location.href="/note/view?id="+parentId;
                 } else {
                     window.location.reload();
                 }

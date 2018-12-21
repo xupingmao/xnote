@@ -7,6 +7,14 @@
 <script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
 <script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
 
+<style>
+.CodeMirror {
+    width: 100%;
+    font-size:16px;
+    border: 1px solid #ccc;
+}
+</style>
+
 {% end %}
 
 {% block body %}
@@ -26,15 +34,14 @@
 </div>
 
 <div class="col-md-12 card">
-    <textarea id="output" class="col-md-12" rows="5">{{output}}</textarea>
+    <textarea id="output" class="col-md-12" rows="5" placeholder="标准输出">{{output}}</textarea>
 </div>
 
 <script type="text/javascript">
 $(function () {
   var editor = CodeMirror.fromTextArea($("#editor")[0], {
     lineNumbers: true,
-    mode: "text/x-sh",
-    theme:"monokai"
+    mode: "text/x-sh"
   });
   editor.on("update", function (codeMirror, changeObj) {
     console.log("update");

@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/12/21 00:39:30
+@modified 2018/12/21 21:41:32
 */
 
 * {
@@ -1000,7 +1000,7 @@ li.menu-item:hover {
     padding-left: 5px;
     border-left: 5px solid #039BE5;
     background: #efefef;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .grid-row {

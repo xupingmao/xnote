@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/12/15 15:26:00
+# @modified 2018/12/21 21:16:00
 
 """Description here"""
 from io import StringIO
@@ -47,6 +47,7 @@ sys_tools = [
 doc_tools = [
     link(T("Search History"), "/search"),
     link(T("Recent Updated"), "/note/recent_edit"),
+    link(T("Recent Created"), "/note/recent_created"),
     link(T("Note Categories"), "/note/group"),
     link(T("Note Tags"), "/note/taglist"),
     link(T("Uncategorized Notes"), "/note/ungrouped"),

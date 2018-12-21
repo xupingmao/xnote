@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2018/11/14 03:25:00
+# @modified 2018/12/21 22:13:26
 
 import sys
 import os
@@ -82,7 +82,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual(b"success", value)
 
     def test_recent_files(self):
-        value = app.request("/file/recent_edit?_format=json").data
+        value = app.request("/note/recent_edit?_format=json").data
         json_value = value.decode("utf-8")
         files = json.loads(json_value)["files"]
         print("files=%s" % len(files))
@@ -134,7 +134,7 @@ class TestMain(unittest.TestCase):
         self.check_404("/static/")
 
     def test_note_add_remove(self):
-        self.check_200("/file/recent_edit")
+        self.check_200("/note/recent_edit")
         json_request("/note/remove?name=xnote-unit-test")
         file = json_request("/note/add", method="POST", 
             data=dict(name="xnote-unit-test", content="hello"))
@@ -168,10 +168,10 @@ class TestMain(unittest.TestCase):
         file = json_request("/note/add", method="POST",
             data=dict(name="xnote-md-test", type="md", content="hello markdown"))
         id = file["id"]
-        file = json_request("/file/view?id=%s&_format=json" % id).get("file")
+        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
         self.assertEqual("md", file["type"])
         self.assertEqual("hello markdown", file["content"])
-        self.check_200("/file/edit?id=%s"%id)
+        self.check_200("/note/edit?id=%s"%id)
         json_request("/note/remove?id=%s" % id)
 
     def test_file_editor_html(self):
@@ -181,32 +181,32 @@ class TestMain(unittest.TestCase):
         id = file["id"]
         self.assertTrue(id != "")
         print("id=%s" % id)
-        json_request("/file/save", method="POST", data=dict(id=id, type="html", data="<p>hello</p>"))
-        file = json_request("/file/view?id=%s&_format=json" % id).get("file")
+        json_request("/note/save", method="POST", data=dict(id=id, type="html", data="<p>hello</p>"))
+        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
         self.assertEqual("html", file["type"])
         self.assertEqual("<p>hello</p>", file["data"])
         if xutils.bs4 != None:
             self.assertEqual("hello", file["content"])
-        self.check_200("/file/edit?id=%s"%id)
+        self.check_200("/note/edit?id=%s"%id)
         json_request("/note/remove?id=%s" % id)
 
     def test_file_group(self):
-        self.check_200("/file/group")
+        self.check_200("/note/group")
         self.check_200("/note/ungrouped")
-        self.check_200("/file/recent_edit")
+        self.check_200("/note/recent_edit")
         self.check_200("/note/recent_created")
 
-    def test_file_share(self):
+    def test_note_share(self):
         json_request("/note/remove?name=xnote-share-test")
         file = json_request("/note/add", method="POST", 
             data=dict(name="xnote-share-test", content="hello"))
         id = file["id"]
-        self.check_OK("/file/share?id=" + str(id))
-        file = json_request("/file/view?id=%s&_format=json" % id).get("file")
+        self.check_OK("/note/share?id=" + str(id))
+        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
         self.assertEqual(1, file["is_public"])
         
-        self.check_OK("/file/share/cancel?id=" + str(id))
-        file = json_request("/file/view?id=%s&_format=json" % id).get("file")
+        self.check_OK("/note/share/cancel?id=" + str(id))
+        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
         self.assertEqual(0, file["is_public"])
 
         json_request("/note/remove?id=" + str(id))
@@ -220,9 +220,9 @@ class TestMain(unittest.TestCase):
         file = json_request("/note/add", method="POST", 
             data=dict(name="xnote-tag-test", content="hello"))
         id = file["id"]
-        json_request("/file/tag/update", method="POST", data=dict(file_id=id, tags="ABC DEF"))
-        json_request("/file/tag/%s" % id)
-        json_request("/file/tag/update", method="POST", data=dict(file_id=id, tags=""))
+        json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags="ABC DEF"))
+        json_request("/note/tag/%s" % id)
+        json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags=""))
 
 
     def test_dict_json(self):
@@ -371,12 +371,12 @@ class TestMain(unittest.TestCase):
 
     def test_message_add(self):
         # Py2: webpy会自动把str对象转成unicode对象，data参数传unicode反而会有问题
-        response = json_request("/file/message/add", method="POST", data=dict(content="Xnote-Unit-Test"))
+        response = json_request("/message/add", method="POST", data=dict(content="Xnote-Unit-Test"))
         self.assertEqual("success", response.get("code"))
         data = response.get("data")
         # Py2: 判断的时候必须使用unicode
         self.assertEqual(u"Xnote-Unit-Test", data.get("content"))
-        json_request("/file/message/remove", method="POST", data=dict(id=data.get("id")))
+        json_request("/message/remove", method="POST", data=dict(id=data.get("id")))
 
     def test_message_list(self):
         json_request("/message/list")
@@ -386,10 +386,10 @@ class TestMain(unittest.TestCase):
         json_request("/message/list?key=1")
 
     def test_tagname(self):
-        self.check_OK("/file/tagname/test")
+        self.check_OK("/note/tagname/test")
 
     def test_taglist(self):
-        self.check_OK("/file/taglist")
+        self.check_OK("/note/taglist")
 
     def test_document(self):
         self.check_200("/system/modules_info")

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2018/12/08 02:40:47
+# @modified 2018/12/21 22:06:12
 import math
 import web
 import xutils
@@ -61,14 +61,14 @@ class Ungrouped:
         return xtemplate.render(VIEW_TPL,
             show_aside = True,
             file_type  = "group",
-            pathlist   = [Storage(name="未分类", type="group", url="/file/group/ungrouped")],
+            pathlist   = [Storage(name="未分类", type="group", url="/note/ungrouped")],
             files      = files,
             file       = Storage(name="未分类", type="group"),
             page       = page,
             page_max   = math.ceil(amount / pagesize),
             groups     = xutils.call("note.list_group"),
             show_mdate = True,
-            page_url   = "/file/group/ungrouped?page=")
+            page_url   = "/note/ungrouped?page=")
 
 class MoveHandler:
     
@@ -126,12 +126,12 @@ class RemovedHandler:
         amount = db.count(where="is_deleted=1")
 
         return xtemplate.render(VIEW_TPL,
-            pathlist  = [PathNode("回收站", "/file/group/removed")],
+            pathlist  = [PathNode("回收站", "/note/removed")],
             file_type = "group",
             files     = files,
             page      = page,
             page_max  = math.ceil(amount / 10),
-            page_url  = "/file/group/removed?page=")
+            page_url  = "/note/removed?page=")
 
 class RecentCreatedHandler:
 
@@ -184,7 +184,7 @@ class RecentEditHandler:
 
         return xtemplate.render("note/view.html", 
             html_title  = "最近更新",
-            pathlist    = [Storage(name="最近更新", type="group", url="/file/recent_edit")],
+            pathlist    = [Storage(name="最近更新", type="group", url="/note/recent_edit")],
             file_type   = "group",
             files       = files, 
             file        = Storage(name="最近更新", type="group"),
@@ -195,7 +195,7 @@ class RecentEditHandler:
             show_aside  = True,
             page        = page, 
             page_max    = math.ceil(count/PAGE_SIZE), 
-            page_url    ="/file/recent_edit?page=")
+            page_url    ="/note/recent_edit?page=")
 
 
 class PublicGroupHandler:
@@ -209,19 +209,20 @@ class PublicGroupHandler:
         count = db.count(where=where)
         return xtemplate.render(VIEW_TPL, 
             show_aside = True,
-            pathlist   = [Storage(name="分享笔记", url="/file/group/public")],
+            pathlist   = [Storage(name="分享笔记", url="/note/public")],
             file_type  = "group",
             files      = files,
             page       = page, 
             show_cdate = True,
             groups     = xutils.call("note.list_group"),
             page_max   = math.ceil(count/PAGE_SIZE), 
-            page_url   = "/file/group/public?page=")
+            page_url   = "/note/public?page=")
 
 xurls = (
-    r"/file/group"          , GroupListHandler,
     r"/note/group"          , GroupListHandler,
     r"/note/ungrouped"      , Ungrouped,
+    r"/note/public"         , PublicGroupHandler,
+    r"/note/removed"        , RemovedHandler,
     r"/file/group/removed"  , RemovedHandler,
     r"/file/group/list"     , GroupListHandler,
     r"/note/group/move"     , MoveHandler,
@@ -229,8 +230,6 @@ xurls = (
     r"/note/recent_created" , RecentCreatedHandler,
     r"/note/recent_edit"    , RecentEditHandler,
     r"/file/recent_edit"    , RecentEditHandler,
-    r"/file/group/public"   , PublicGroupHandler,
-    r"/note/public"         , PublicGroupHandler,
     r"/note/group/select"   , GroupSelectHandler
 )
 

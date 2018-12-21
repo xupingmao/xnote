@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/12/08 02:23:47
+# @modified 2018/12/21 22:14:13
 
 """Description here"""
 import os
@@ -364,11 +364,14 @@ xurls = (
     r"/note/remove"      , RemoveHandler,
     r"/note/rename"      , RenameHandler,
     r"/note/update"      , UpdateHandler,
+    r"/note/share"       , ShareHandler,
+    r"/note/save"        , AjaxSaveHandler,
+    r"/note/share/cancel", UnshareHandler,
+
     r"/file/dict/put"    , DictPutHandler,
     r"/file/share"       , ShareHandler,
     r"/file/share/cancel", UnshareHandler,
     r"/file/save"        , AjaxSaveHandler,
-    r"/note/save"        , AjaxSaveHandler,
     r"/file/autosave"    , AjaxSaveHandler
 )
 

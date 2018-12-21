@@ -269,7 +269,7 @@
                 var content = $(el).attr("msg-content");
                 var check = confirm("确认删除 '%s' ?".format(content));
                 if (check) {                
-                    $.post("/file/message/remove", {id: id}, function (resp) {
+                    $.post("/message/remove", {id: id}, function (resp) {
                         if (resp.code == "success") {
                             app.refreshMessage();
                         } else {
@@ -283,7 +283,7 @@
                 var el = event.currentTarget;
                 var self = this;
                 var id = $(el).attr("msg-id");
-                $.post("/file/message/finish", {id: id}, function (resp) {
+                $.post("/message/finish", {id: id}, function (resp) {
                     if (resp.code == "success") {
                         app.refreshMessage();
                     } else {
@@ -296,7 +296,7 @@
                 var el = event.currentTarget;
                 var self = this;
                 var id = $(el).attr("msg-id");
-                $.post("/file/message/open", {id: id}, function (resp) {
+                $.post("/message/open", {id: id}, function (resp) {
                     if (resp.code == "success") {
                         app.refreshMessage();
                     } else {
@@ -306,7 +306,7 @@
             },
 
             updateMessage: function (message) {
-                $.post("/file/message/update", message, function (resp) {
+                $.post("/message/update", message, function (resp) {
                     console.log(resp);
                     app.refreshMessage();
                 })

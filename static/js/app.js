@@ -213,7 +213,7 @@ $(function () {
     }
 
     window.openDialog = function (url) {
-      var width = $(".main").width();
+      var width = $(".root").width();
       layer.open({
         type: 2,
         title: '子页面',

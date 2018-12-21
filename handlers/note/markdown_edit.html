@@ -266,7 +266,7 @@
                 return;
             }
             lastSaved = input;
-            $.post("/file/autosave", { id: fileId, content: input }, function (resp) {
+            $.post("/note/save", { id: fileId, content: input }, function (resp) {
                 console.log(resp);
                 if (resp.code == "success") {
                     $("#autosaveResult").show().fadeOut(1000);

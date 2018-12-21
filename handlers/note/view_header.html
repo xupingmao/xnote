@@ -8,9 +8,9 @@
             <a class="link" href="/note/edit?id={{file.id}}">编辑</a>
             <a class="link" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
             {% if file.is_public %}
-                <a class="link" href="/file/share/cancel?id={{file.id}}">取消分享</a>
+                <a class="link" href="/note/share/cancel?id={{file.id}}">取消分享</a>
             {% else %}
-                <a class="link" href="/file/share?id={{file.id}}">分享</a>
+                <a class="link" href="/note/share?id={{file.id}}">分享</a>
             {% end %}
             <a class="move-btn link" data-url="/note/group/select?id={{item.id}}">移动</a>
             <a class="link" href="/note/print?id={{file.id}}" target="_blank">打印</a>

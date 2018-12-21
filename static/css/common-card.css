@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/12/20 00:23:44
+@modified 2018/12/21 21:40:33
 */
 
 .menu-link:hover {
@@ -13,7 +13,7 @@
 }
 
 
-.main {
+.root {
     background-color: transparent;
     padding: 0px;
 }
