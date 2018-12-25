@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2018/12/25 22:15:32
+# @modified 2018/12/25 23:00:28
 import web
 import time
 import os
@@ -188,16 +188,21 @@ class PropertiesHandler:
             show_aside = False,
             config = config)
 
-    def update_settings(self, value):
-        from xutils.textutil import parse_ini_text
-        config = parse_ini_text(value)
+    def update_settings(self, config_text):
+        from xutils import ConfigParser
 
-        # 处理导航
-        nav_dict = config.get("NAV_LIST", dict())
         nav_list = []
-        for key in nav_dict:
-            value = nav_dict[key]
-            nav_list.append(Storage(name = key, url = value))
+
+        cf = ConfigParser()
+        cf.read_string(config_text)
+        names = cf.sections()
+
+        options = cf.options('NAV_LIST')
+        for option in options:
+            value = cf.get('NAV_LIST', option)
+            nav_list.append(Storage(name = option, url = value))
+
+        # 处理导航        
         xconfig.NAV_LIST = nav_list
 
 

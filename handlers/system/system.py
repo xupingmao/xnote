@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/12/25 22:32:15
+# @modified 2018/12/25 23:40:46
 
 """Description here"""
 from io import StringIO
@@ -85,7 +85,8 @@ xconfig.MENU_LIST = [
 ]
 
 xconfig.NAV_LIST = [
-    Storage(name = "About", url = "/code/wiki/README.md")
+    Storage(name = "Plugins", url = "/plugins_list", user = "admin"),
+    Storage(name = "About",   url = "/code/wiki/README.md"),
 ]
 
 @xutils.cache(expire=60)
