@@ -7,9 +7,6 @@
       {% if _has_login %}
       <li><a class="menu-link" href="/message?status=created">{{T("Message")}}({{_notice_count}})</a></li>
       {% end %}
-      {% if _is_admin %}
-      <li><a class="menu-link" href="/plugins_list">{{T("Plugin")}}</a></li>
-      {% end %}
 
       {# 自定义配置的导航 #}
       {% for link in xconfig.NAV_LIST %}

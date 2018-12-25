@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/12/25 23:40:46
+# @modified 2018/12/26 00:16:37
 
 """Description here"""
 from io import StringIO
@@ -33,15 +33,15 @@ sys_tools = [
     link("文件管理",   "/fs_list"),
     link("脚本管理",   "/fs_link/scripts"),
     link("定时任务",   "/system/crontab"),
-    link("系统日志",   "/system/history"),
     link("用户管理",   "/system/user/list"),
-    # link("后台模板缓存", "/system/template_cache"),
+    link("系统日志",   "/system/history"),
     link("系统刷新",  "/system/reload"),
     link("模块说明", "/system/modules_info"),
     link(T("SQL"), "/tools/sql"),
-    link("启动脚本", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
+    link("启动脚本",  "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
     link("自定义CSS", "/code/edit?type=script&path=user.css"),
-    link("Shell", "/tools/shell")
+    link(T("Plugin"), "/plugins_list"),
+    link("Shell",    "/tools/shell"),
 ] 
 
 doc_tools = [
@@ -85,7 +85,7 @@ xconfig.MENU_LIST = [
 ]
 
 xconfig.NAV_LIST = [
-    Storage(name = "Plugins", url = "/plugins_list", user = "admin"),
+    Storage(name = "Plugin", url = "/plugins_list", user = "admin"),
     Storage(name = "About",   url = "/code/wiki/README.md"),
 ]
 
