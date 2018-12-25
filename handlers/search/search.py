@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/12/08 23:40:24
+# @modified 2018/12/22 01:16:29
 
 import re
 import os
@@ -175,7 +175,7 @@ class handler:
         if key == "" or key == None:
             return xtemplate.render("search/search_result.html", 
                 show_aside = False,
-                recent = list(reversed(cacheutil.get("[%s]search_history" % user_name))),
+                recent = list(reversed(xutils.cache_get("[%s]search_history" % user_name, []))),
                 html_title = "搜索",
                 category = category, 
                 files    = [], 

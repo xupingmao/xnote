@@ -53,7 +53,7 @@ $(function() {
   $(".move-btn").click(function (event) {
       var url = $(event.target).attr("data-url");
       $.get(url, function (respHtml) {
-          var width = $(".main").width();
+          var width = $(".root").width();
           layer.open({
             type: 1,
             title: "移动分组",
@@ -128,7 +128,7 @@ $(function () {
       if (bots.dialog) {
         return bots.dialog;
       }
-      var mainWidth = $(".main").width();
+      var mainWidth = $(".root").width();
       var bot = $("<div>").css({"position": "fixed", 
                 "width": mainWidth, 
                 "height": "80%",
@@ -256,7 +256,7 @@ $(function () {
     window.adjustNav = function () {
       if (self != top) {
         $(".nav").hide();
-        $(".main").css("padding", "10px");
+        $(".root").css("padding", "10px");
       }
     }
 
@@ -270,7 +270,7 @@ $(function () {
       $(".dialog-link").click(function (e) {
           e.preventDefault();
           var url = $(this).attr("href");
-          var width = $(".main").width();
+          var width = $(".root").width();
           layer.open({
               type: 2,
               title: "查看",

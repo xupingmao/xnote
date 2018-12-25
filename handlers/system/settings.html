@@ -119,7 +119,7 @@
         var val = $(e.target).val();
         var key = $(e.target).attr("name");
         // alert(val);
-        $.post("/system/xconfig", 
+        $.post("/system/config", 
             {key: key, value: val}, 
             function (data) {
                 window.location.reload();

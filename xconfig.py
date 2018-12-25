@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/12/15 17:14:23
+# @modified 2018/12/25 01:43:20
 
 '''xnote系统配置
 
@@ -66,7 +66,8 @@ PLUGINS = {}
 
 # 菜单配置
 MENU_LIST = []
-TOOL_LIST = []
+# 导航配置
+NAV_LIST  = []
 
 # 处理器目录
 HANDLERS_DIR = "handlers"

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/12/21 21:16:00
+# @modified 2018/12/25 22:32:15
 
 """Description here"""
 from io import StringIO
@@ -75,6 +75,7 @@ other_tools = [
     link("随机生成器", "/tools/random_string"),
     # 其他工具
     link("分屏模式", "/tools/multi_win"),
+    link("JS Console", "/tools/jsconsole"),
 ]
 
 xconfig.MENU_LIST = [
@@ -83,6 +84,9 @@ xconfig.MENU_LIST = [
     Storage(name = "工具箱", children = other_tools),
 ]
 
+xconfig.NAV_LIST = [
+    Storage(name = "About", url = "/code/wiki/README.md")
+]
 
 @xutils.cache(expire=60)
 def get_tools_config(user):
@@ -107,7 +111,7 @@ class SysHandler:
         user_config = get_tools_config(xauth.get_current_name())
         if user_config is not None:
             config_list = xutils.parse_config_text(user_config.value)
-            customized_items = map(lambda x: Storage(name=x.get("key"), link=x.get("value")), config_list)
+            customized_items = map(lambda x: Storage(name=x.get("key"), url=x.get("value")), config_list)
 
         return xtemplate.render("system/system.html", 
             show_aside       = False,
@@ -194,7 +198,7 @@ xurls = (
     r"/system/index", SysHandler,
     r"/system/system", SysHandler,
     r"/system/reload", ReloadHandler,
-    r"/system/xconfig", ConfigHandler,
+    r"/system/config", ConfigHandler,
     r"/system/user\.css", UserCssHandler,
     r"/system/user\.js", UserJsHandler,
     r"/system/cache", CacheHandler

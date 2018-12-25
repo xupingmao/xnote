@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2018/11/25 20:22:50
+# @modified 2018/12/25 22:15:32
 import web
 import time
 import os
@@ -15,8 +15,9 @@ import re
 import xtemplate
 import xconfig
 import xauth
+import xtables
 from logging.handlers import TimedRotatingFileHandler
-from xutils import sqlite3
+from xutils import sqlite3, Storage
 
 try:
     import psutil
@@ -56,7 +57,7 @@ class Item:
         self.key   = key
         self.value = value
 
-class handler:
+class SettingsHandler:
 
     @xauth.login_required("admin")
     def GET(self):
@@ -101,3 +102,107 @@ class handler:
             start_time     = xconfig.get("start_time"))
 
 
+
+class StorageHandler:
+    """基于数据库的配置"""
+
+    @xauth.login_required()
+    def GET(self):
+        key  = xutils.get_argument("key")
+        db = xtables.get_storage_table()
+        config = db.select_one(where=dict(key=key, user=xauth.get_current_name()))
+        if config is None:
+            config = Storage(key=key, value="")
+        return xtemplate.render("system/properties.html", 
+            action = "/system/storage",
+            show_aside = False,
+            config = config)
+    
+    @xauth.login_required()
+    def POST(self):
+        key = xutils.get_argument("key")
+        value = xutils.get_argument("value")
+        user = xauth.get_current_name()
+        db = xtables.get_storage_table()
+        config = db.select_one(where=dict(key=key, user=user))
+        if config is None:
+            db.insert(user = user, key = key, value = value, 
+                ctime = xutils.format_datetime(), 
+                mtime = xutils.format_datetime())
+        else:
+            db.update(value=value, mtime = xutils.format_datetime(), where=dict(key=key, user=user))
+
+        config = Storage(key = key, value = value)
+        return xtemplate.render("system/properties.html", 
+            action = "/system/storage",
+            show_aside = False,
+            config = config)
+
+DEFAULT_SETTINGS = '''
+
+# 导航配置
+[NAV_LIST]
+About = /code/wiki/README.md
+
+
+# 索引目录
+[INDEX_DIRS]
+
+
+'''
+
+class PropertiesHandler:
+    """基于缓存的配置"""
+
+    @xauth.login_required()
+    def GET(self):
+        key  = xutils.get_argument("key")
+        user = xauth.get_current_name()
+        default_value = ""
+
+        if key == "settings":
+            default_value = DEFAULT_SETTINGS
+
+        config = Storage(key = key, value = xutils.cache_get("[%s]_prop_%s" % (user, key), 
+            default_value))
+
+        if config is None:
+            config = Storage(key=key, value="")
+        return xtemplate.render("system/properties.html", 
+            show_aside = False,
+            config = config)
+    
+    @xauth.login_required()
+    def POST(self):
+        key = xutils.get_argument("key")
+        value = xutils.get_argument("value")
+        user = xauth.get_current_name()
+        
+        xutils.cache_put("[%s]_prop_%s" % (user, key), value)
+
+        if key == "settings":
+            self.update_settings(value)
+        
+        config = Storage(key = key, value = value)
+        return xtemplate.render("system/properties.html", 
+            show_aside = False,
+            config = config)
+
+    def update_settings(self, value):
+        from xutils.textutil import parse_ini_text
+        config = parse_ini_text(value)
+
+        # 处理导航
+        nav_dict = config.get("NAV_LIST", dict())
+        nav_list = []
+        for key in nav_dict:
+            value = nav_dict[key]
+            nav_list.append(Storage(name = key, url = value))
+        xconfig.NAV_LIST = nav_list
+
+
+xurls = (
+    r"/system/settings", SettingsHandler,
+    r"/system/properties", PropertiesHandler,
+    r"/system/storage", StorageHandler
+)
