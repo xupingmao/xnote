@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/11/03 21:34:20
+# @modified 2018/12/30 10:00:21
 
 import web
 import os
@@ -62,14 +62,23 @@ class CommandHandler:
     def POST(self):
         bufsize = 1024
         input_str = xutils.get_argument("command")
+        p = None
         try:
-            fp = os.popen(input_str)
-            buf = fp.read(bufsize)
-            while buf:
-                yield buf
-                buf = fp.read(bufsize)
+            p = subprocess.Popen(input_str, 
+                                 shell=True, 
+                                 stdout=subprocess.PIPE, 
+                                 stderr=subprocess.PIPE)
+            out = p.stdout.read()
+            err = p.stderr.read()
+            yield out or b''
+            yield err or b''
+        except:
+            xutils.print_exc()
         finally:
-            fp.close()
+            if p:
+                p.stdout.close()
+                p.stderr.close()
+            yield b''
 
 class PythonCommandHandler:
 

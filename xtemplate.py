@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/12/09 00:49:20
+# @modified 2018/12/28 01:16:42
 import os
 import json
 import web
@@ -85,6 +85,17 @@ class XnoteLoader(Loader):
             return xconfig.BASE_TEMPLATE
         return name
 
+    def _create_template(self, name):
+        if name.endswith(".str"):
+            return Template(name, name = name, loader = self)
+        path = os.path.join(self.root, name)
+        with open(path, "rb") as f:
+            template = Template(f.read(), name=name, loader=self)
+            return template
+
+    def init_template(self, name, text):
+        self.templates[name] = Template(text, name=name, loader=self)
+
 def set_loader_namespace(namespace):
     """ set basic namespace """
     _loader.namespace = namespace
@@ -143,14 +154,16 @@ def render(template_name, **kw):
     return _loader.load(template_name).generate(**nkw)
 
 def render_text(text, template_name = "<string>", **kw):
-    """使用模板引擎渲染文本信息
-    TODO 缓存
+    """使用模板引擎渲染文本信息,使用缓存
     """
     nkw = {}
     pre_render(nkw)
     nkw.update(kw)
-    template = Template(text, name=template_name, loader=_loader)
-    return template.generate(**nkw)
+
+    # 热加载模式下str的id会变化
+    name = "template_%s.str" % hash(text)
+    _loader.init_template(name, text)
+    return _loader.load(name).generate(**kw)
 
     
 def get_code(name):
@@ -207,6 +220,10 @@ class BasePlugin:
 
     def writehtml(self, html):
         self.html += u(html)
+
+    def writetemplate(self, template, **kw):
+        html = render_text(template, **kw)
+        self.html += u(html.decode("utf-8"))
 
     def handle(self, input):
         raise NotImplementedError()

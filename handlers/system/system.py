@@ -1,8 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/12/26 00:16:37
-
-"""Description here"""
+# @modified 2018/12/30 11:37:17
+"""System functions"""
 from io import StringIO
 import xconfig
 import codecs
@@ -29,32 +28,33 @@ def link(name, url):
     return Storage(name = name, url = url, link = url)
 
 sys_tools = [
-    link("系统设置",   "/system/settings"),
-    link("文件管理",   "/fs_list"),
-    link("脚本管理",   "/fs_link/scripts"),
-    link("定时任务",   "/system/crontab"),
-    link("用户管理",   "/system/user/list"),
-    link("系统日志",   "/system/history"),
-    link("系统刷新",  "/system/reload"),
-    link("模块说明", "/system/modules_info"),
-    link(T("SQL"), "/tools/sql"),
-    link("启动脚本",  "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
-    link("自定义CSS", "/code/edit?type=script&path=user.css"),
-    link(T("Plugin"), "/plugins_list"),
+    link("Menu_Settings",   "/system/settings"),
+    link("Menu_Configure",  "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
+    link("Menu_File",       "/fs_list"),
+    link("Menu_Scripts",    "/fs_link/scripts"),
+    link("Menu_Cron",   "/system/crontab"),
+    link("Menu_User",   "/system/user/list"),
+    link("Menu_Log",    "/system/history"),
+    link("Menu_Refresh",  "/system/reload"),
+    link("Menu_Modules",  "/system/modules_info"),
+    link("SQL",      "/tools/sql"),
+    link("Menu_CSS", "/code/edit?type=script&path=user.css"),
+    link("Plugin",   "/plugins_list"),
     link("Shell",    "/tools/shell"),
 ] 
 
 doc_tools = [
-    link(T("Search History"), "/search"),
-    link(T("Recent Updated"), "/note/recent_edit"),
-    link(T("Recent Created"), "/note/recent_created"),
-    link(T("Note Categories"), "/note/group"),
-    link(T("Note Tags"), "/note/taglist"),
-    link(T("Uncategorized Notes"), "/note/ungrouped"),
-    link("词典", "/note/dict"),
-    link("提醒", "/message?status=created"),
-    link("日历", "/message/calendar"),
-    link("时光轴", "/tools/timeline")
+    link("Search History",      "/search"),
+    link("Recent Updated",      "/note/recent_edit"),
+    link("Recent Created",      "/note/recent_created"),
+    link("Note Categories",     "/note/group"),
+    link("Note Tags",           "/note/taglist"),
+    link("Uncategorized Notes", "/note/ungrouped"),
+    link("Dictionary",          "/note/dict"),
+    link("Message",  "/message?status=created"),
+    link("Calendar", "/message/calendar"),
+    link("Timeline", "/tools/timeline"),
+    link("About System",    "/code/wiki/README.md"),
 ] 
 
 other_tools = [
@@ -75,15 +75,17 @@ other_tools = [
     link("随机生成器", "/tools/random_string"),
     # 其他工具
     link("分屏模式", "/tools/multi_win"),
-    link("JS Console", "/tools/jsconsole"),
+    link("RunJS", "/tools/runjs"),
 ]
 
+# 所有功能配置
 xconfig.MENU_LIST = [
-    Storage(name = "系统管理", children = sys_tools, need_login = True, need_admin = True),
-    Storage(name = "知识库", children = doc_tools, need_login = True),
-    Storage(name = "工具箱", children = other_tools),
+    Storage(name = "System", children = sys_tools, need_login = True, need_admin = True),
+    Storage(name = "Data", children = doc_tools, need_login = True),
+    Storage(name = "Tools", children = other_tools),
 ]
 
+# 导航配置
 xconfig.NAV_LIST = [
     Storage(name = "Plugin", url = "/plugins_list", user = "admin"),
     Storage(name = "About",   url = "/code/wiki/README.md"),
@@ -96,7 +98,7 @@ def get_tools_config(user):
     return user_config
 
                 
-class SysHandler:
+class IndexHandler:
 
     def GET(self):
         shell_list = []
@@ -115,7 +117,7 @@ class SysHandler:
             customized_items = map(lambda x: Storage(name=x.get("key"), url=x.get("value")), config_list)
 
         return xtemplate.render("system/system.html", 
-            show_aside       = False,
+            show_aside       = (xconfig.OPTION_STYLE == "aside"),
             html_title       = "系统",
             Storage          = Storage,
             os               = os,
@@ -195,9 +197,9 @@ class CacheHandler:
         return dict(code = "success", data = cacheutil.get(key))
 
 xurls = (
-    r"/system/sys",   SysHandler,
-    r"/system/index", SysHandler,
-    r"/system/system", SysHandler,
+    r"/system/sys",   IndexHandler,
+    r"/system/index", IndexHandler,
+    r"/system/system", IndexHandler,
     r"/system/reload", ReloadHandler,
     r"/system/config", ConfigHandler,
     r"/system/user\.css", UserCssHandler,
@@ -209,7 +211,7 @@ xurls = (
 def on_reload(ctx = None):
     for key in ('THEME', 'FS_HIDE_FILES', 'OPTION_STYLE', 'PAGE_OPEN'):
         value = cacheutil.hget('sys.config', key)
-        print("hget key=%s, value=%s" % (key, value))
+        xutils.log("hget key=%s, value=%s" % (key, value))
         if value is not None:
             setattr(xconfig, key, value)
 

@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/12/21 21:41:32
+@modified 2018/12/30 02:14:26
 */
 
 * {
@@ -27,13 +27,14 @@ pre {
 }
 
 /** marked 样式 **/
-.marked-menu {
+.marked-contents {
     width: 100%;
     float: left;
-    /*border: 1px solid #ccc;*/
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
 }
 
-.marked-menu h1 {
+.marked-contents h1 {
     text-align: center;
     margin: 0px;
     padding: 0px;
@@ -1190,6 +1191,7 @@ li.menu-item:hover {
 
 .aside-content li:hover {
     background-color: #eee;
+    cursor: pointer;
 }
 
 /** 颜色属性 **/
@@ -1264,17 +1266,16 @@ li.menu-item:hover {
         margin-left: 0px;
     }
 
-    .aside-content li {
-        float: left;
-        width: auto;
-    }
-
     .small-device {
         display: inherit;
     }
 
     .grid-item {
         width: 50%;
+    }
+
+    .mobile-hidden {
+        display: none;
     }
 }
 

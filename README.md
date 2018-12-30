@@ -73,14 +73,6 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 - 条形码、二维码生成器(barcode)
 - 图像处理（合并、拆分、灰度化）
 
-### 系统扩展
-
-- 自定义启动脚本
-- [插件扩展](./docs/plugins.md)
-- [搜索扩展](./docs/search_extension.md)
-- [文件命令扩展](./docs/commands.md)
-
-
 ### 其他特性
 - debug模式下自动侦测模块修改并重新加载
 - 支持文件下载断点续传,发生网络故障后不用重新下载
@@ -93,6 +85,10 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 - 自定义CSS
 
 ## 相关文档
+- [更新日志](./docs/changelog.md)
+- [插件扩展](./docs/plugins.md)
+- [搜索扩展](./docs/search_extension.md)
+- [文件命令扩展](./docs/commands.md)
 - [系统架构](./docs/architecture.md)
 
 ## 协议

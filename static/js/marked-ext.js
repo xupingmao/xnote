@@ -121,14 +121,25 @@
             + '>\n';
     }
 
+    /// 重写img, 不依赖JS版本
+    // myRenderer.image = function(href, title, text) {
+    //   var out = '<p class="marked-img"><a href="' + href + '"><img src="' + href + '" alt="' + text + '" style="max-width:100%;"';
+    //   if (title) {
+    //     out += ' title="' + title + '"';
+    //   }
+    //   out += this.options.xhtml ? '/>' : '>';
+    //   out += '</a></p>'
+    //   return out;
+    // };
+
     // 重写img
     myRenderer.image = function(href, title, text) {
-      var out = '<p class="marked-img"><a href="' + href + '"><img src="' + href + '" alt="' + text + '" style="max-width:100%;"';
+      var out = '<p class="marked-img"><img class="x-photo" src="' + href + '" alt="' + text + '" style="max-width:100%;"';
       if (title) {
         out += ' title="' + title + '"';
       }
       out += this.options.xhtml ? '/>' : '>';
-      out += '</a></p>'
+      out += '</p>'
       return out;
     };
 
@@ -191,7 +202,7 @@
         }
 
         // 处理目录
-        var menuText = '<div class="marked-menu"><h1>目录</h1>';
+        var menuText = '<div class="marked-contents"><h1>目录</h1>';
         menuText+="<ul>";
         for (var i = 0; i < myRenderer.headings.length; i++) {
             var heading = myRenderer.headings[i];

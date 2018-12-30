@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/12/25 01:43:20
+# @modified 2018/12/30 10:30:43
 
 '''xnote系统配置
 
@@ -50,7 +50,7 @@ USE_CACHE_SEARCH   = False
 USE_URLENCODE      = False
 # 初始化脚本
 INIT_SCRIPT        = "init.py"
-# 记录位置信息，可通过脚本配置打开
+# 是否记录位置信息，可通过脚本配置打开
 RECORD_LOCATION    = False
 BASE_TEMPLATE      = "base.html"
 # 主题样式
@@ -69,6 +69,10 @@ MENU_LIST = []
 # 导航配置
 NAV_LIST  = []
 
+
+##################################
+# 存储目录配置项
+##################################
 # 处理器目录
 HANDLERS_DIR = "handlers"
 # 工具目录
@@ -79,8 +83,6 @@ WORKING_DIR  = os.path.dirname(__file__)
 WEBDIR       = os.path.join(WORKING_DIR, "static")
 PLUGINS_DIR  = os.path.join(WORKING_DIR, "plugins")
 LOG_DIR      = os.path.join(WORKING_DIR, "log")
-
-
 # 用户数据的地址
 DATA_PATH   = os.path.join(WORKING_DIR, "data")
 DATA_DIR    = DATA_PATH

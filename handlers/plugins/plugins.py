@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/11/28 00:50:04
+# @modified 2018/12/28 01:19:00
 from io import StringIO
 import xconfig
 import codecs
@@ -140,7 +140,6 @@ import xauth
 import xmanager
 import xtables
 import xtemplate
-from xutils import cacheutil
 from xtemplate import BasePlugin
 
 HTML = """
@@ -154,7 +153,7 @@ class Main(BasePlugin):
     
     def handle(self, input):
         # 输入框的行数
-        self.rows = 20
+        self.rows = 5
         self.writehtml(HTML)
 
     def on_init(self, context=None):
