@@ -267,6 +267,11 @@ class TestMain(unittest.TestCase):
             '''
         tokens = tokenizer.tokenize(content)
 
+    def test_listmerge(self):
+        l1 = [1,2,3]
+        l2 = [3,4,5]
+        self.assertEqual([1,2,3,4,5], xutils.functions.listmerge(l1, l2))
+
 
 
         

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/12/30 11:37:17
+# @modified 2018/12/30 22:59:28
 """System functions"""
 from io import StringIO
 import xconfig
@@ -24,8 +24,8 @@ from xutils import cacheutil
 from xutils import Storage
 from xtemplate import T
 
-def link(name, url):
-    return Storage(name = name, url = url, link = url)
+def link(name, url, user = None):
+    return Storage(name = name, url = url, link = url, user = user)
 
 sys_tools = [
     link("Menu_Settings",   "/system/settings"),
@@ -89,6 +89,14 @@ xconfig.MENU_LIST = [
 xconfig.NAV_LIST = [
     Storage(name = "Plugin", url = "/plugins_list", user = "admin"),
     Storage(name = "About",   url = "/code/wiki/README.md"),
+]
+
+xconfig.NOTE_OPTIONS = [
+    link("New_Note", "/note/add"),
+    link("Recent Updated", "/note/recent_created"),
+    link("Recent Created", "/note/recent_created"),
+    link("Public",   "/note/public"),
+    link("Tag List", "/note/taglist"),
 ]
 
 @xutils.cache(expire=60)

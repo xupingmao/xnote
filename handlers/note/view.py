@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2018/12/21 22:16:41
+# @modified 2019/01/02 22:26:54
 import profile
 import math
 import re
@@ -113,9 +113,9 @@ class ViewHandler:
             ctx = Storage(id=file.id, name = file.name, creator = file.creator, 
                 content = file.content,
                 parent_id = file.parent_id,
-                recommended_notes = [])
+                result = [])
             xmanager.fire("note.recommend", ctx)
-            recommended_notes = ctx.recommended_notes
+            recommended_notes = ctx.result
         
         xmanager.fire("note.view", file)
         show_aside = True

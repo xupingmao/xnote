@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2018/12/30 10:30:43
+# @modified 2019/01/02 22:32:47
 
 '''xnote系统配置
 
@@ -68,6 +68,10 @@ PLUGINS = {}
 MENU_LIST = []
 # 导航配置
 NAV_LIST  = []
+# 笔记的扩展配置
+NOTE_OPTIONS = []
+# 文件管理器的扩展配置
+FS_OPTIONS = []
 
 
 ##################################
@@ -113,7 +117,7 @@ FS_HIDE_FILES    = True
 # 文件管理扩展的选项,类型Storage
 FS_LINK          = "/fs_list"
 # 文本文件后缀
-FS_TEXT_EXT_LIST = [
+FS_TEXT_EXT_LIST = set([
     ".java",  # Java
     ".scala",
     ".c",     # C语言
@@ -152,9 +156,9 @@ FS_TEXT_EXT_LIST = [
     ".md",
     ".yml",
     ".log"
-]
+])
 
-FS_IMG_EXT_LIST = [".gif", ".png", ".jpg", ".jpeg", ".bmp", ".webp", ".ico", ".jfif", ".cur"]
+FS_IMG_EXT_LIST = set([".gif", ".png", ".jpg", ".jpeg", ".bmp", ".webp", ".ico", ".jfif", ".cur"])
 # 剪切板
 FS_CLIP = []
 
@@ -186,7 +190,7 @@ class Storage(dict):
         >>> o.a = 2
         >>> o['a']
         2
-        >>> o.errKey
+        >>> o.noSuchKey
         None
     """
     def __init__(self, **kw):
@@ -286,6 +290,10 @@ def get(name, default_value=None):
     return value
 
 def set(name, value):
+    """和set函数冲突了，建议使用put"""
+    _config[name] = value
+
+def put(name, value):
     _config[name] = value
 
 def get_config():
@@ -332,6 +340,7 @@ class Properties(object):
         else: 
             dict[strName] = value 
             return 
+
     def load_properties(self): 
         self.properties = self.new_dict()
         self.properties_list = self.new_dict()

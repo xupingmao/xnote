@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/12/22 01:16:29
+# @modified 2018/12/31 23:08:49
 
 import re
 import os
@@ -158,7 +158,7 @@ class handler:
 
         return ctx.tools + files
 
-    def GET(self):
+    def GET(self, path_key = None):
         """search files by name and content"""
         load_rules()
         key       = xutils.get_argument("key", "")
@@ -171,6 +171,9 @@ class handler:
         pagesize = xconfig.PAGE_SIZE
         offset   = (page-1) * pagesize
         limit    = pagesize
+
+        if path_key:
+            key = xutils.unquote(path_key)
 
         if key == "" or key == None:
             return xtemplate.render("search/search_result.html", 
@@ -216,6 +219,7 @@ def load_rules():
 
 xurls = (
     r"/search/search", handler, 
-    r"/search", handler
+    r"/search", handler,
+    r"/s/(.+)", handler
 )
 

@@ -2,7 +2,7 @@
 # 专门用来import各种依赖
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
-# @modified 2018/11/19 01:27:51
+# @modified 2018/12/30 12:53:08
 from __future__ import print_function
 import sys
 import os
@@ -92,3 +92,35 @@ if PY2:
         if sts is None: sts = 0
         if text[-1:] == '\n': text = text[:-1]
         return sts, text
+
+
+def quote_unicode(url):
+    # python的quote会quote大部分字符，包括ASCII符号
+    # JavaScript的encodeURI
+    # encodeURI 会替换所有的字符，但不包括以下字符，即使它们具有适当的UTF-8转义序列：
+    #    类型  包含
+    #    保留字符    ; , / ? : @ & = + $
+    #    非转义的字符  字母 数字 - _ . ! ~ * ' ( )
+    #    数字符号    #
+    # 根据最新的RFC3986，方括号[]也是非转义字符
+    # JavaScript的encodeURIComponent会编码+,&,=等字符
+    def quote_char(c):
+        # ASCII 范围 [0-127]
+        # 32=空格
+        if c == 32: 
+            return '%20'
+        if c <= 127:
+            return chr(c)
+        return '%%%02X' % c
+
+    if six.PY2:
+        bytes = url
+        return ''.join([quote_char(ord(c)) for c in bytes])
+    else:
+        bytes = url.encode("utf-8")
+        return ''.join([quote_char(c) for c in bytes])
+
+    # def urlencode(matched):
+    #     text = matched.group()
+    #     return quote(text)
+    # return re.sub(r"[\u4e00-\u9fa5]+", urlencode, url)

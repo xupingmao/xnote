@@ -10,7 +10,8 @@
             <li><a class="link" href="/fs/{{path}}?mode=grid">{{ T('Grid Mode') }}</a></li>
             <li><a class="link" href="/fs/{{path}}?mode=shell">{{ T('Cmd Mode') }}</a></li>
             <li><a class="link" href="/fs_sidebar?path={{path}}">{{ T('Sidebar Mode') }}</a></li>
-            <li><a class="link" href="/fs_recent">{{ T('Recent Files') }}</a></li>
+            <li><a class="link" href="/code/search?path={{path}}&recursive=on">内容搜索</a></li>
+            <li><a class="link" href="/code/lines?path={{path}}&recursive=on">代码统计</a></li>
         </ul>
     </div>
 </div>

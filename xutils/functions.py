@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2018/11/29 23:24:24
+# @modified 2018/12/30 23:08:19
 import xconfig
 from xconfig import Storage
 from collections import deque
@@ -223,7 +223,27 @@ def listremove(list, obj):
     while obj in list:
         list.remove(obj)
 
+def listmerge(list1, list2):
+    """合并两个列表，过滤重复的值
+    @param {list} list1
+    @param {list} list2
+    @return {list}
+    """
+    target = []
+    for c in list1:
+        if c not in target:
+            target.append(c)
+    for c in list2:
+        if c not in target:
+            target.append(c)
+    return target
+
 def dictsort(dictionary, key='value'):
+    """返回排序之后的字典key列表/value列表
+    @param {dict} dictionary
+    @param {str} key 默认返回value，如果传值返回key
+    @return {list}
+    """
     if key == 'value':
         return sorted(dictionary.items(), key = lambda item: item[1])
     return sorted(dictionary.items(), key = lambda item: item[0])

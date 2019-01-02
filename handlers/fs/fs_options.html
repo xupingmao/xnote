@@ -136,8 +136,7 @@
         <input type="button" class="btn" value="剪切" id="cutBtn" message="剪切"/>
         <input type="button" class="btn" value="上传" id="uploadFileBtn" >
         <input type="button" class="btn advanced-opt mobile-hidden" value="本地浏览" id="openDirectory"/>
-        <input type="button" class="link-btn advanced-opt" href="/code/search?path={{path}}&recursive=on" value="搜索内容"/>
-        <input type="button" class="link-btn advanced-opt" href="/code/lines?path={{path}}&recursive=on" value="统计"/>
+        <input type="button" class="link-btn" href="/fs_recent" value="{{ T('Recent Files') }}"/>
         <input type="button" data-path="{{path}}" onclick="openFileOption(this)" value="更多"/>
     </div>
 </div>
@@ -158,7 +157,9 @@ $(function () {
 
     function previewImages() {
         $(".fs-image-div").each(function (index, target) {
-            var img = $("<img>").attr("src", $(target).attr("img-src"))
+            var src = $(target).attr("img-src");
+            var img = $("<img>").attr("src", src)
+                .attr("alt", src)
                 .addClass("fs-image")
                 .addClass("x-photo");
             $(target).append(img);

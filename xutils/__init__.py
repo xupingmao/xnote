@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/12/13 22:44:20
+# @modified 2018/12/30 23:45:16
 
 """
 xnote工具类总入口
@@ -214,41 +214,6 @@ def remove_file(path, hard = False):
 
 remove = remove_file
 
-def _search_path0(path, key, limit=200):
-    result_dirs = []
-    result_files = []
-    key = key.lower()
-    count = 0
-    for root, dirs, files in os.walk(path):
-        root_len = len(root)
-        for f in dirs:
-            abspath = os.path.join(root, f)
-            if fnmatch(f.lower(), key):
-                result_dirs.append(abspath)
-                count+=1
-                if count >= limit:
-                    break
-        for f in files:
-            abspath = os.path.join(root, f)
-            if fnmatch(f.lower(), key):
-                result_files.append(abspath)
-                count+=1
-                if count >= limit:
-                    break
-        if count >= limit:
-            break
-    return result_dirs + result_files
-
-def search_path(path, key):
-    """
-    搜索文件系统，key支持通配符表示，具体见fnmatch模块
-    """
-    result = []
-    quoted_key = quote_unicode(key)
-    if key != quoted_key:
-        result = _search_path0(path, quoted_key)
-    return result + _search_path0(path, key)
-
 def get_upload_file_path(filename, 
         data_dir="/files", 
         replace_exists = False, 
@@ -422,7 +387,7 @@ def mark_text(content):
             elif item.startswith("file://"):
                 href = item[7:]
                 if is_img_file(href):
-                    tokens[index] = '<a href="%s"><img class="chat-msg-img" src="%s"></a>' % (href, href)
+                    tokens[index] = '<img class="chat-msg-img x-photo" alt="%s" src="%s">' % (href, href)
                 else:
                     name = href[href.rfind("/")+1:]
                     tokens[index] = '<a href="%s">%s</a>' % (href, name)
@@ -471,38 +436,6 @@ def encode_uri_component(url):
     quoted = quoted.replace("?", "%3F")
     quoted = quoted.replace("&", "%26")
     return quoted
-
-def quote_unicode(url):
-    # python的quote会quote大部分字符，包括ASCII符号
-    # JavaScript的encodeURI
-    # encodeURI 会替换所有的字符，但不包括以下字符，即使它们具有适当的UTF-8转义序列：
-    #    类型  包含
-    #    保留字符    ; , / ? : @ & = + $
-    #    非转义的字符  字母 数字 - _ . ! ~ * ' ( )
-    #    数字符号    #
-    # 根据最新的RFC3986，方括号[]也是非转义字符
-    # JavaScript的encodeURIComponent会编码+,&,=等字符
-    def quote_char(c):
-        # ASCII 范围 [0-127]
-        # 32=空格
-        if c == 32: 
-            return '%20'
-        if c <= 127:
-            return chr(c)
-        return '%%%02X' % c
-
-    if six.PY2:
-        bytes = url
-        return ''.join([quote_char(ord(c)) for c in bytes])
-    else:
-        bytes = url.encode("utf-8")
-        return ''.join([quote_char(c) for c in bytes])
-
-    # def urlencode(matched):
-    #     text = matched.group()
-    #     return quote(text)
-    # return re.sub(r"[\u4e00-\u9fa5]+", urlencode, url)
-    
 
 def get_safe_file_name(filename):
     filename = filename.replace(" ", "_")

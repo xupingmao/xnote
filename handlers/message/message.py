@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2018/12/21 22:19:19
+# @modified 2019/01/02 00:28:45
 
 """短消息"""
 import time
@@ -49,13 +49,18 @@ class ListHandler:
         offset = (page-1) * pagesize
         db = xtables.get_message_table()
         user_name = xauth.get_current_name()
+        # 未完成任务的分页
+        undone_pagesize = 1000
+
         kw = "1=1"
         if status == "created":
             kw = "status = 0"
+            pagesize = undone_pagesize
         if status == "done":
             kw = "status = 100"
         if status == "suspended":
             kw = "status = 50"
+            pagesize = undone_pagesize
         kw += " AND user = $user"
         vars = dict(user=xauth.get_current_name())
         if key != "" and key != None:
@@ -79,7 +84,10 @@ class ListHandler:
         amount = db.count(where=kw, vars=vars)
         page_max = math.ceil(amount / pagesize)
         chatlist = list(map(process_message, chatlist))
-        return dict(code="success", message="", data=chatlist, amount=amount, page_max=page_max, current_user=xauth.get_current_name())
+        return dict(code="success", message="", 
+            pagesize = pagesize,
+            data=chatlist, amount=amount, 
+            page_max=page_max, current_user=xauth.get_current_name())
 
 def update_message(id, status):
     db = xtables.get_message_table()

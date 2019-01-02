@@ -5,7 +5,7 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2018/12/17 00:47:18
+ * @modified 2018/12/30 23:58:20
  */
 var XUI = function (window) {
   // 处理select标签选中情况
@@ -57,7 +57,7 @@ var XUI = function (window) {
 
   // 类似tab的超链接
   function initTabLink() {
-    $(".tab-link").each(function (index, ele) {
+    $(".x-tab").each(function (index, ele) {
       var link = $(ele).attr("href");
       var fullpath = location.href;
       console.log(link, fullpath);
