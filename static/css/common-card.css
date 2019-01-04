@@ -2,8 +2,12 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2018/12/21 21:40:33
+@modified 2019/01/04 21:19:17
 */
+
+body {
+    background-color: #eee;
+}
 
 .menu-link:hover {
     color: white;
@@ -19,10 +23,10 @@
 }
 
 .nav {
-    background-color: #fff;
     margin-bottom: 10px;
     padding: 0px 5px;
-    border-bottom: 1px solid #ccc;
+    background-color: transparent;
+    /*border-bottom: 1px solid #ccc;*/
 }
 
 .x-body {

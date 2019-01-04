@@ -1,4 +1,5 @@
 {% init path = xconfig.DATA_DIR %}
+{% init file_plugins = [] %}
 {% import os %}
 <div class="aside-item">
     <div class="aside-title">
@@ -9,9 +10,11 @@
             <li><a class="link" href="/fs/{{path}}">{{ T('List Mode') }}</a></li>
             <li><a class="link" href="/fs/{{path}}?mode=grid">{{ T('Grid Mode') }}</a></li>
             <li><a class="link" href="/fs/{{path}}?mode=shell">{{ T('Cmd Mode') }}</a></li>
-            <li><a class="link" href="/fs_sidebar?path={{path}}">{{ T('Sidebar Mode') }}</a></li>
             <li><a class="link" href="/code/search?path={{path}}&recursive=on">内容搜索</a></li>
             <li><a class="link" href="/code/lines?path={{path}}&recursive=on">代码统计</a></li>
+            {% for p in file_plugins %}
+                <li><a class="link" href="/plugins/{{p.fname}}?path={{path}}">{{p.title}}</a></li>
+            {% end %}
         </ul>
     </div>
 </div>

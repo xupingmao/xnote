@@ -14,7 +14,7 @@
 {% block body %}
 <!-- 
 @since 2016/12/18
-@modified 2018/11/24 12:44:35
+@modified 2019/01/04 21:32:27
 -->
 
 <div class="card">
@@ -97,14 +97,15 @@ function getRadioValue(name) {
     return undefined;
 }
 
-function to_array(inputStr, option) {
+function to_array(inputStr, option, targetSep) {
     var seperator = option.getSeperator();
     var lines = inputStr.split(seperator);
     var lineStr = "";
+    var targetArray = [];
+    targetSep = targetSep || ",";
 
     var quote = option.getQuote();
     var unique = select('#unique').checked;
-    items = [];
 
     lines.each(function (index, item) {
         if (item.trim) {
@@ -117,18 +118,22 @@ function to_array(inputStr, option) {
             if (option.isLowerCase()) {
                 item = item.toLowerCase();
             }
-            if (unique && items.indexOf(item) != -1) {
+            if (unique && targetArray.indexOf(item) != -1) {
                 return null;
             } else {
-                items.push(item);
-                lineStr += quote + item + quote + ",";
+                item = quote + item + quote;
+                lineStr += item + targetSep;
             }
+            targetArray.push(item);
         }
     });
     if (lineStr[lineStr.length-1]==',') {
         lineStr = lineStr.substring(0, lineStr.length-1);
     }
-    return lineStr;
+    if (option.isSorted()) {
+        targetArray.sort();
+    }
+    return targetArray.join(targetSep);
 }
 
 function bashformat(fmt, data) {
@@ -159,18 +164,7 @@ function to_str_def(inputStr, option) {
 }
 
 function to_lines(inputStr, option) {
-    var seperator = option.getSeperator();
-    var list = inputStr.split(seperator);
-    var quote = option.getQuote();
-    var str = '';
-    for (var i = 0; i < list.length; i++) {
-        var item = list[i].trim();
-        if (item == "") {
-            continue;
-        }
-        str += quote + item + '\n' + quote;
-    }
-    return str;
+    return to_array(inputStr, option, "\n");
 }
 
 String.prototype.count = function (dst) {

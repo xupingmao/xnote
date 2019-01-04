@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/12/15 17:14:08
+# @modified 2019/01/04 22:13:59
 
 """Xnote 模块管理器
  - 加载并注册模块
@@ -594,8 +594,10 @@ def load_plugins(dirname):
                 module = xutils.load_script(script_name, vars)
                 main_class = vars.get("Main")
                 if main_class != None:
+                    main_class.fname = fname
                     instance = main_class()
                     context = PluginContext()
+                    context.fname = fname
                     context.title = getattr(instance, "title", "")
                     if hasattr(main_class, 'on_init'):
                         instance.on_init(context)
@@ -603,6 +605,15 @@ def load_plugins(dirname):
                     xconfig.PLUGINS[fname] = context
             except:
                 xutils.print_exc()
+
+@xutils.timeit(logfile=True, logargs=True, name="FindPlugins")
+def find_plugins(target):
+    plugins = []
+    for fname in xconfig.PLUGINS:
+        p = xconfig.PLUGINS.get(fname)
+        if p and hasattr(p.clazz, "is_visible") and p.clazz.is_visible(target):
+            plugins.append(p)
+    return plugins
 
 def put_task(func, *args):
     """添加异步任务到队列"""

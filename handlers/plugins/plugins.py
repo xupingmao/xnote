@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2018/12/28 01:19:00
+# @modified 2019/01/04 00:24:50
 from io import StringIO
 import xconfig
 import codecs
@@ -149,7 +149,10 @@ HTML = """
 class Main(BasePlugin):
 
     title = "PluginName"
-    description = """提示内容"""
+    # 提示内容
+    description = ""
+    # 是否需要管理员权限
+    require_admin = True
     
     def handle(self, input):
         # 输入框的行数
@@ -162,6 +165,14 @@ class Main(BasePlugin):
     
     def command(self):
         pass
+
+    @staticmethod
+    def is_visible(target):
+        """插件是否可见
+        @param {object} target 目标对象
+            {str} target.type 文件类型 {dir, file, note}
+            {str} target.path 文件路径"""
+        return False
 '''
 
 class NewPluginHandler(BasePlugin):

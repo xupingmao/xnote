@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/12/30 23:45:16
+# @modified 2019/01/04 22:13:50
 
 """
 xnote工具类总入口
@@ -350,8 +350,10 @@ def obj2dict(obj):
 
 def _encode_json(obj):
     """基本类型不会拦截"""
-    if hasattr(obj, "__call__"):
+    if inspect.isfunction(obj):
         return "<function>"
+    elif inspect.isclass(obj):
+        return "<class>"
     elif inspect.ismodule(obj):
         return "<module>"
     return str(obj)
@@ -662,7 +664,7 @@ def get_argument(key, default_value=None, type = None, strip=False):
 ##   各种装饰器
 #################################################################
 
-def timeit(repeat=1, logfile=False, name=""):
+def timeit(repeat=1, logfile=False, logargs=False, name=""):
     """简单的计时装饰器，可以指定执行次数"""
     def deco(func):
         def handle(*args):
@@ -671,7 +673,11 @@ def timeit(repeat=1, logfile=False, name=""):
                 ret = func(*args)
             t2 = time.time()
             if logfile:
-                log("{} cost time: {} ms", name, int((t2-t1)*1000))
+                if logargs:
+                    message = str(args)
+                else:
+                    message = ""
+                trace(name, message, int((t2-t1)*1000))
             else:
                 print(name, "cost time: ", int((t2-t1)*1000), "ms")
             return ret

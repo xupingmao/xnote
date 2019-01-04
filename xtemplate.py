@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2018/12/28 01:16:42
+# @modified 2019/01/04 00:22:17
 import os
 import json
 import web
@@ -297,6 +297,16 @@ class BasePlugin:
 
     def POST(self):
         return self.render()
+
+    @staticmethod
+    def is_visible(target):
+        """插件是否可见
+        @param {object} target 目标对象
+        对于文件插件
+            - {str} type 文件类型 {dir, file, note}
+            - {str} path 文件路径
+        """
+        return False
 
 BaseTextPage   = BasePlugin
 BaseTextPlugin = BasePlugin
