@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2019/01/05 20:20:00
+# @modified 2019/01/05 20:36:54
 """缓存的实现，考虑失效的规则如下
 
 失效的检查策略
@@ -84,14 +84,20 @@ class CacheObj:
         self.save()
         self._queue.put(self)
 
-        one = self._queue.get(block=False)
-        if one is not None:
-            if one.is_force_expired == True:
-                return
-            if one.is_alive():
-                self._queue.put(one)
-            else:
-                one.clear()
+        # find and clear expired cache objects
+        try:
+            for i in range(2):
+                one = self._queue.get(block=False)
+                if one is not None:
+                    if one.is_force_expired == True:
+                        return
+                    if one.is_alive():
+                        self._queue.put(one)
+                    else:
+                        one.clear()
+        except:
+            # queue.Empty异常
+            print_exc()
 
     def is_valid_key(self, key):
         return re.match(r"^[0-9a-zA-Z\[\]_\-\.\(\)\@\#,'\"\$ ]+$", key) != None
