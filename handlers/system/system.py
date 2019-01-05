@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2018/12/30 22:59:28
+# @modified 2019/01/05 13:15:50
 """System functions"""
 from io import StringIO
 import xconfig
@@ -27,20 +27,24 @@ from xtemplate import T
 def link(name, url, user = None):
     return Storage(name = name, url = url, link = url, user = user)
 
+def admin_link(name, url):
+    return link(name, url, "admin")
+
 sys_tools = [
-    link("Menu_Settings",   "/system/settings"),
-    link("Menu_Configure",  "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
-    link("Menu_File",       "/fs_list"),
-    link("Menu_Scripts",    "/fs_link/scripts"),
-    link("Menu_Cron",   "/system/crontab"),
-    link("Menu_User",   "/system/user/list"),
-    link("Menu_Log",    "/system/history"),
-    link("Menu_Refresh",  "/system/reload"),
-    link("Menu_Modules",  "/system/modules_info"),
-    link("SQL",      "/tools/sql"),
-    link("Menu_CSS", "/code/edit?type=script&path=user.css"),
-    link("Plugin",   "/plugins_list"),
-    link("Shell",    "/tools/shell"),
+    admin_link("Menu_Settings",   "/system/settings"),
+    admin_link("Menu_Configure",  "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
+    admin_link("Menu_File",       "/fs_list"),
+    admin_link("Menu_Scripts",    "/fs_link/scripts"),
+    admin_link("Menu_Cron",   "/system/crontab"),
+    admin_link("Menu_User",   "/system/user/list"),
+    admin_link("Menu_Log",    "/system/history"),
+    admin_link("Menu_Refresh",  "/system/reload"),
+    admin_link("Menu_Modules",  "/system/modules_info"),
+    admin_link("SQL",      "/tools/sql"),
+    admin_link("Menu_CSS", "/code/edit?type=script&path=user.css"),
+    admin_link("Plugin",   "/plugins_list"),
+    admin_link("Shell",    "/tools/shell"),
+    link("About System",    "/code/wiki/README.md"),
 ] 
 
 doc_tools = [
@@ -54,7 +58,6 @@ doc_tools = [
     link("Message",  "/message?status=created"),
     link("Calendar", "/message/calendar"),
     link("Timeline", "/tools/timeline"),
-    link("About System",    "/code/wiki/README.md"),
 ] 
 
 other_tools = [
@@ -80,7 +83,7 @@ other_tools = [
 
 # 所有功能配置
 xconfig.MENU_LIST = [
-    Storage(name = "System", children = sys_tools, need_login = True, need_admin = True),
+    Storage(name = "System", children = sys_tools, need_login = True),
     Storage(name = "Data", children = doc_tools, need_login = True),
     Storage(name = "Tools", children = other_tools),
 ]

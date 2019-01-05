@@ -2,7 +2,7 @@
 
 <!--
     @since 2017/09/14
-    @modified 2018/12/30 10:32:29
+    @modified 2019/01/05 13:23:17
 -->
 
 {% block head %}
@@ -54,19 +54,28 @@
 {% block body %}
 
 {% for category in xconfig.MENU_LIST %}
+
     {% if category.need_login and not _has_login %}
+        <div class="col-md-12 bottom-offset-1 grid-card">
+            <div class="grid-title">{{T(category.name)}}</div>
+            <div class="col-md-12">
+                <div class="item">
+                    <a href="/login">{{T("Login")}}</a>
+                </div>
+            </div>
+        </div>
         {% continue %}
     {% end %}
-    {% if category.need_admin and not _is_admin %}
-        {% continue %}
-    {% end %}
+
     <div class="col-md-12 bottom-offset-1 grid-card">
         <div class="grid-title">{{T(category.name)}}</div>
         <div class="col-md-12">
             {% for link in category.children %}
-            <div class="item">
-                <a href="{{link.url}}">{{T(link.name)}}</a>
-            </div>
+                {% if link.user is None or link.user == _user_name %}
+                <div class="item">
+                    <a href="{{link.url}}">{{T(link.name)}}</a>
+                </div>
+                {% end %}
             {% end %}
         </div>
     </div>
@@ -118,9 +127,8 @@ function runCommand(path) {
         alert(data);
     })
 }
-
-
 </script>
+
 {% end %}
 
 {% block aside %}

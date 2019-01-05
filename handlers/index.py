@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2018/09/30 21:00:29
+# @modified 2019/01/05 13:01:06
 import web
 import xtables
 import xtemplate
@@ -92,7 +92,9 @@ class Unauthorized():
     html = """
         {% extends base.html %}
         {% block body %}
-            <h3>抱歉,您没有访问的权限</h3>
+            <div class="box">
+                <h3>抱歉,您没有访问的权限</h3>
+            </div>
         {% end %}
     """
     def GET(self):

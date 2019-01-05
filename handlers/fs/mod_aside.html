@@ -1,6 +1,8 @@
 {% init path = xconfig.DATA_DIR %}
-{% init file_plugins = [] %}
+{% import xmanager %}
 {% import os %}
+{% init file_plugins = xmanager.find_plugins(Storage(type="dir", path=path)) %}
+
 <div class="aside-item">
     <div class="aside-title">
         选项
@@ -10,7 +12,7 @@
             <li><a class="link" href="/fs/{{path}}">{{ T('List Mode') }}</a></li>
             <li><a class="link" href="/fs/{{path}}?mode=grid">{{ T('Grid Mode') }}</a></li>
             <li><a class="link" href="/fs/{{path}}?mode=shell">{{ T('Cmd Mode') }}</a></li>
-            <li><a class="link" href="/code/search?path={{path}}&recursive=on">内容搜索</a></li>
+            <li><a class="link" href="/code/search?path={{path}}&recursive=on">文本搜索</a></li>
             <li><a class="link" href="/code/lines?path={{path}}&recursive=on">代码统计</a></li>
             {% for p in file_plugins %}
                 <li><a class="link" href="/plugins/{{p.fname}}?path={{path}}">{{p.title}}</a></li>

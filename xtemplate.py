@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/01/04 00:22:17
+# @modified 2019/01/05 14:57:48
 import os
 import json
 import web
@@ -163,7 +163,7 @@ def render_text(text, template_name = "<string>", **kw):
     # 热加载模式下str的id会变化
     name = "template_%s.str" % hash(text)
     _loader.init_template(name, text)
-    return _loader.load(name).generate(**kw)
+    return _loader.load(name).generate(**nkw)
 
     
 def get_code(name):
@@ -202,6 +202,9 @@ class BasePlugin:
         self.css_style       = u("")
         self.show_pagenation = False
         self.page_url        = "?page="
+        # 侧边栏类型 {note, file}
+        self.aside_type      = None
+        # 侧边栏自定义HTML
         self.aside_html      = u("")
         self.option_links    = []
         self.show_aside      = False

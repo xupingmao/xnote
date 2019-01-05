@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/01/02 22:26:54
+# @modified 2019/01/05 13:25:10
 import profile
 import math
 import re
@@ -142,6 +142,7 @@ class ViewHandler:
 
 class PrintHandler:
 
+    @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
         db = xtables.get_file_table()
@@ -179,6 +180,7 @@ class Upvote:
         raise web.seeother("/note/view?id=%s" % id)
 
 class Downvote:
+
     @xauth.login_required()
     def GET(self, id):
         id = int(id)
@@ -189,6 +191,7 @@ class Downvote:
 
 class MarkHandler:
 
+    @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
         db = xtables.get_file_table()
@@ -196,6 +199,8 @@ class MarkHandler:
         raise web.seeother("/note/view?id=%s"%id)
 
 class UnmarkHandler:
+
+    @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
         db = xtables.get_file_table()

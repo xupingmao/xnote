@@ -69,17 +69,21 @@
 
 {% block aside %}
     {# 选项 #}
-    {% if len(model.option_links) > 0 %}
-        <div class="aside-item">
-            <div class="aside-title">
-                选项
+    {% if model.aside_type == "file" %}
+        {% include fs/mod_aside.html %}
+    {% else %}
+        {% if len(model.option_links) > 0 %}
+            <div class="aside-item">
+                <div class="aside-title">
+                    选项
+                </div>
+                <div class="aside-content">
+                    {% for link in model.option_links %}
+                        <li><a class="link" href="{{link.get('url')}}">{{link.get('name')}}</a></li>
+                    {% end %}
+                </div>
             </div>
-            <div class="aside-content">
-                {% for link in model.option_links %}
-                    <li><a class="link" href="{{link.get('url')}}">{{link.get('name')}}</a></li>
-                {% end %}
-            </div>
-        </div>
+        {% end %}
     {% end %}
 
     {% raw model.aside_html %}

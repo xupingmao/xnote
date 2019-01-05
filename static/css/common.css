@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/01/04 21:17:29
+@modified 2019/01/05 13:00:41
 */
 
 * {
@@ -1224,7 +1224,7 @@ li.menu-item:hover {
     min-height: 48px;
 }
 
-.grid-card, .card {
+.grid-card, .card, .box {
     float: left;
     width: 100%;
     background-color: #fff;

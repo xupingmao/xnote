@@ -116,6 +116,15 @@ class TestMain(unittest.TestCase):
         cacheutil.delete("name")
         self.assertEqual(None, cacheutil.get("name"))
 
+    def test_cache_load_dump(self):
+        xutils.cacheutil.load_dump()
+
+    def test_cache_hash(self):
+        xutils.cacheutil.hset("h01", "key", "value")
+        value = xutils.cacheutil.hget("h01", "key")
+        self.assertEqual("value", value)
+        self.assertEqual(None, xutils.cacheutil.hget("h01", "key02"))
+
     def test_storage(self):
         obj = xutils.Storage(name="name")
         self.assertEqual(obj.name, "name")

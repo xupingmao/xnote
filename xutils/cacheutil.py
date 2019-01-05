@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2018/12/14 00:58:10
+# @modified 2019/01/05 20:20:00
 """缓存的实现，考虑失效的规则如下
 
 失效的检查策略
@@ -138,6 +138,8 @@ class CacheObj:
 
     def clear(self):
         log_debug("clear cache %s" % self.key)
+        # 标记为删除，用于清除queue中的引用
+        self.is_force_expired = True
         _cache_dict.pop(self.key, None)
         if self.is_temp():
             return

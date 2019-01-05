@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/01/04 21:19:17
+@modified 2019/01/05 13:00:50
 */
 
 body {
@@ -92,7 +92,7 @@ body {
     background-color: #fff;
 }
 
-.plugin-head,.grid-card,.card {
+.plugin-head,.grid-card,.card, .box {
     float: left;
     width: 100%;
     background-color: #fff;

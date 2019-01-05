@@ -43,5 +43,4 @@ def main(path=None, confirmed = False, **kw):
             print('回收站清空完毕')
 ```
 
-好了，终于写完了，请随便折腾，出了问题锅就自己背了吧。
 

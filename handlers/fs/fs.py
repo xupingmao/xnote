@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/01/04 22:09:00
+# @modified 2019/01/05 14:54:00
 
 """xnote文件服务，主要功能:
     1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -165,10 +165,6 @@ class FileSystemHandler:
         filelist = [FileItem(item) for item in filelist]
         filelist.sort()
 
-        # 处理文件插件
-        target = Storage(type = "dir", path = path)
-        plugins = xmanager.find_plugins(target)
-
         # SAE上遇到中文出错
         # Fix bad filenames，修改不生效
         # filelist = list(map(lambda x: xutils.decode_bytes(x.encode("utf-8", errors='surrogateescape')), filelist))
@@ -181,7 +177,6 @@ class FileSystemHandler:
         kw["parent_path"]  = get_parent_path(path)
         kw["search_action"] = "/fs_find"
         kw["show_aside"]   = True
-        kw["file_plugins"] = plugins
 
         mode = xutils.get_argument("mode")
         kw["fs_mode"] = mode
