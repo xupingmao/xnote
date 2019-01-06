@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/03/07 23:50:04
+# @modified 2019/01/06 20:05:41
 import os
 import re
 import xauth
@@ -56,9 +56,15 @@ class handler:
         encoding = "utf-8"
         page     = 0
 
+        if not path:
+            return dict(code = "fail", message = "parameter path is empty")
+
         print("path:", path)
         path = xutils.get_real_path(path)
         print("real path:", path)
+
+        if not os.path.exists(path):
+            return dict(code = "fail", message = "file `%s` not exists" % path)
 
         basename, ext = os.path.splitext(path)
         bookmarkpath = basename + ".bookmark"

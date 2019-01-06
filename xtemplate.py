@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/01/05 14:57:48
+# @modified 2019/01/06 18:37:36
 import os
 import json
 import web
@@ -155,6 +155,7 @@ def render(template_name, **kw):
 
 def render_text(text, template_name = "<string>", **kw):
     """使用模板引擎渲染文本信息,使用缓存
+    TODO 控制缓存大小
     """
     nkw = {}
     pre_render(nkw)

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/12/30 12:51:38
+# @modified 2019/01/06 17:56:52
 import codecs
 import os
 import platform
@@ -118,6 +118,7 @@ def format_file_size(size):
 format_size = format_file_size
 formatSize  = format_size
         
+
 def rename_file(srcname, dstname):
     destDirName = os.path.dirname(dstname)
     if not os.path.exists(destDirName):
@@ -130,6 +131,7 @@ def open_directory(dirname):
         os.popen("explorer %s" % dirname)
     elif platform.system() == "Darwin":
         os.popen("open %s" % dirname)
+
 
 def get_file_size(filepath, format=True):
     try:
@@ -327,3 +329,16 @@ def search_path(path, key):
     if key != quoted_key:
         result = _search_path0(path, quoted_key)
     return result + _search_path0(path, key)
+
+def get_pretty_file_size(path = None, size = 0):
+    if size is None:
+        size = os.stat(path).st_size
+    if size < 1024:
+        return '%sB' % size
+    elif size < 1024 **2:
+        return '%.2fK' % (float(size) / 1024)
+    elif size < 1024 ** 3:
+        return '%.2fM' % (float(size) / 1024 ** 2)
+    else:
+        return '%.2fG' % (float(size) / 1024 ** 3)
+    

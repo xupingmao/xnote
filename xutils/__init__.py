@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/01/04 22:13:50
+# @modified 2019/01/06 18:01:28
 
 """
 xnote工具类总入口
@@ -136,6 +136,7 @@ class MyStdout:
 
 #################################################################
 ##   File System Utilities
+##   @see fsutil
 #################################################################
 
 def backupfile(path, backup_dir = None, rename=False):
@@ -149,24 +150,6 @@ def backupfile(path, backup_dir = None, rename=False):
         import shutil
         shutil.copyfile(path, newpath)
         
-def get_pretty_file_size(path = None, size = 0):
-    if size is None:
-        size = os.stat(path).st_size
-    if size < 1024:
-        return '%sB' % size
-    elif size < 1024 **2:
-        return '%.2fK' % (float(size) / 1024)
-    elif size < 1024 ** 3:
-        return '%.2fM' % (float(size) / 1024 ** 2)
-    else:
-        return '%.2fG' % (float(size) / 1024 ** 3)
-    
-def get_file_size(path, format=True):
-    st = os.stat(path)
-    if format:
-        return get_pretty_file_size(size = st.st_size)
-    return st.st_size
-
 def get_real_path(path):
     if path == None:
         return None
@@ -291,39 +274,6 @@ def db_execute(path, sql, args = None):
     finally:
         db.close()
     return kv_result
-#################################################################
-##   DateTime Utilities
-#################################################################
-
-def format_date(seconds=None):
-    if seconds is None:
-        return time.strftime('%Y-%m-%d')
-    elif is_str(seconds):
-        date_str = seconds.split(" ")[0]
-        return date_str
-    else:
-        st = time.localtime(seconds)
-        return time.strftime('%Y-%m-%d', st)
-
-def days_before(days, format=False):
-    seconds = time.time()
-    seconds -= days * 3600 * 24
-    if format:
-        return format_time(seconds)
-    return time.localtime(seconds)
-
-def match_time(year = None, month = None, day = None, wday = None, tm = None):
-    if tm is None:
-        tm = time.localtime()
-    if year is not None and year != tm.tm_year:
-        return False
-    if month is not None and month != tm.tm_mon:
-        return False
-    if day is not None and day != tm.tm_day:
-        return False
-    if wday is not None and wday != tm.tm_wday:
-        return False
-    return True
 
 #################################################################
 ##   Str Utilities

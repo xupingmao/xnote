@@ -1,10 +1,11 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2018/11/09 22:20:42
+# @modified 2019/01/06 19:55:59
 import time
 import os
-""" 
+from .imports import is_str
+"""处理时间的工具类
 Commonly used format codes:
 
 %Y  Year with century as a decimal number.
@@ -27,12 +28,6 @@ Commonly used format codes:
 _DAY = 3600 * 24
 FORMAT = '%Y-%m-%d %H:%M:%S'
 
-def get_seconds(date = None):
-    if date is None:
-        return int(time.time())
-    st = time.strptime(date, '%Y-%m-%d %H:%M:%S')
-    return time.mktime(st)
-
 def before(days=None, month=None, format=False):
     if days is not None:
         fasttime = time.time() - days * _DAY
@@ -41,15 +36,13 @@ def before(days=None, month=None, format=False):
         return fasttime
     return None
 
-def getyyyyMMdd(seconds=None):
-    if seconds is None:
-        return time.strftime("%Y%m%d")
-    else:
-        st = time.localtime(seconds)
-        return time.strftime("%Y%m%d", st)
+def days_before(days, format=False):
+    seconds = time.time()
+    seconds -= days * 3600 * 24
+    if format:
+        return format_time(seconds)
+    return time.localtime(seconds)
 
-def get_date(seconds=None):
-    return getyyyyMMdd(seconds)
 
 def format_datetime(seconds=None):
     if seconds == None:
@@ -72,17 +65,29 @@ def format_time_only(seconds=None):
 def format_date(seconds=None, fmt = None):
     if fmt is None:
         fmt = "%Y-%m-%d"
-    if seconds == None:
+    if seconds is None:
         return time.strftime(fmt)
+    elif is_str(seconds):
+        date_str = seconds.split(" ")[0]
+        return date_str
     else:
         st = time.localtime(seconds)
         return time.strftime(fmt, st)
 
-def parse_time(time_str):
-    return get_seconds(time_str)
 
 def format_millis(mills):
     return format_time(mills / 1000)
+
+
+def parse_time(date = None, fmt = None):
+    if date is None:
+        return int(time.time())
+    if fmt is None:
+        fmt = '%Y-%m-%d %H:%M:%S'
+    st = time.strptime(date, fmt)
+    return time.mktime(st)
+
+get_seconds = parse_time
 
 def get_current_year():
     return time.strftime("%Y")
@@ -133,3 +138,16 @@ class Timer:
     def cost_millis(self):
         return int((self.stop_time - self.start_time) * 1000)
 
+
+def match_time(year = None, month = None, day = None, wday = None, tm = None):
+    if tm is None:
+        tm = time.localtime()
+    if year is not None and year != tm.tm_year:
+        return False
+    if month is not None and month != tm.tm_mon:
+        return False
+    if day is not None and day != tm.tm_day:
+        return False
+    if wday is not None and wday != tm.tm_wday:
+        return False
+    return True

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2019/01/05 20:36:54
+# @modified 2019/01/06 15:58:50
 """缓存的实现，考虑失效的规则如下
 
 失效的检查策略
@@ -86,11 +86,11 @@ class CacheObj:
 
         # find and clear expired cache objects
         try:
-            for i in range(2):
+            for i in range(3):
                 one = self._queue.get(block=False)
                 if one is not None:
                     if one.is_force_expired == True:
-                        return
+                        continue
                     if one.is_alive():
                         self._queue.put(one)
                     else:
