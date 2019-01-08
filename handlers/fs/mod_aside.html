@@ -1,6 +1,6 @@
-{% init path = xconfig.DATA_DIR %}
 {% import xmanager %}
 {% import os %}
+{% init path = os.path.abspath(xconfig.DATA_DIR) %}
 {% init file_plugins = xmanager.find_plugins(Storage(type="dir", path=path)) %}
 
 <div class="aside-item">
@@ -15,7 +15,7 @@
             <li><a class="link" href="/code/search?path={{path}}&recursive=on">文本搜索</a></li>
             <li><a class="link" href="/code/lines?path={{path}}&recursive=on">代码统计</a></li>
             {% for p in file_plugins %}
-                <li><a class="link" href="/plugins/{{p.fname}}?path={{path}}">{{p.title}}</a></li>
+                <li><a class="link" href="/plugins/{{p.name}}?path={{path}}">{{p.title}}</a></li>
             {% end %}
         </ul>
     </div>

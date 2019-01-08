@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/01/04 22:13:59
+# @modified 2019/01/08 23:14:22
 
 """Xnote 模块管理器
  - 加载并注册模块
@@ -578,6 +578,15 @@ class PluginContext:
     def __init__(self):
         self.title = ""
         self.description = ""
+        self.fname = ""
+
+    # sort方法重写__lt__即可
+    def __lt__(self, other):
+        return self.title < other.title
+
+    # 兼容Python2
+    def __cmp__(self, other):
+        return cmp(self.title, other.title)
 
 
 def load_plugins(dirname):
@@ -598,6 +607,7 @@ def load_plugins(dirname):
                     instance = main_class()
                     context = PluginContext()
                     context.fname = fname
+                    context.name = os.path.splitext(fname)[0]
                     context.title = getattr(instance, "title", "")
                     if hasattr(main_class, 'on_init'):
                         instance.on_init(context)
@@ -613,6 +623,7 @@ def find_plugins(target):
         p = xconfig.PLUGINS.get(fname)
         if p and hasattr(p.clazz, "is_visible") and p.clazz.is_visible(target):
             plugins.append(p)
+    plugins.sort()
     return plugins
 
 def put_task(func, *args):

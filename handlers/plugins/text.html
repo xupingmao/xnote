@@ -71,6 +71,8 @@
     {# 选项 #}
     {% if model.aside_type == "file" %}
         {% include fs/mod_aside.html %}
+    {% elif model.aside_type == "note" %}
+        {% include note/mod_aside.html %}
     {% else %}
         {% if len(model.option_links) > 0 %}
             <div class="aside-item">

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2018/12/15 17:13:44
-"""
+# @modified 2019/01/06 22:54:33
+"""xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
 This program is free software: you can redistribute it and/or modify

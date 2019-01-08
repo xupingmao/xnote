@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/01/06 18:37:36
+# @modified 2019/01/08 23:25:53
 import os
 import json
 import web
@@ -261,7 +261,7 @@ class BasePlugin:
                 return output
 
             # 处理侧边栏显示
-            if self.aside_html != "" or len(self.option_links) > 0:
+            if self.aside_html != "" or len(self.option_links) > 0 or self.aside_type:
                 self.show_aside = True
         except:
             error = xutils.print_exc()

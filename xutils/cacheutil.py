@@ -1,8 +1,13 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2019/01/06 15:58:50
-"""缓存的实现，考虑失效的规则如下
+# @modified 2019/01/08 23:17:27
+"""缓存的实现，API列表如下
+
+* cache(key = None, prefix = None, expire = 600) 缓存装饰器，用于加速函数调用
+* cache_put(key, value, expire = -1) 写入缓存
+* cache_get(key, default_value = None) 读取缓存
+* cache_del(key)  删除缓存
 
 失效的检查策略
 1. 读取时检查失效
@@ -233,7 +238,7 @@ def prefix_del(prefix):
 # 方法别名
 cache_get = get
 cache_put = put
-cache_expire = delete
+cache_del = delete
 set = put
 
 def get_cache_obj(key, default_value=None, type=None):

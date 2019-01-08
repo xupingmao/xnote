@@ -15,7 +15,7 @@
 <div class="card">
     {% set title = "图片拆分" %}
     {% include "tools/base_title.html" %}
-    <p>点击画布可以选择图片进行分割,设置列数和行数都为1可以用来调整图片大小</p>
+    <p>点击画布可以选择图片进行分割,设置列数和行数都为1可以用来调整图片大小,点击图片区域选取</p>
 </div>
 
 
@@ -30,10 +30,12 @@
             <label class="label">行数</label>
             <input type="text" id="rows" value="4">
         </div>
+        <!--
         <div>
             <label class="label">选择第</label>
             <input type="text" id="selectedPart" value="1">张
         </div>
+        -->
         <div>
             <button id="selectFile">选择文件</button>
             <button id="splitBtn">分割</button>

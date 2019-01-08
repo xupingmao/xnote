@@ -108,7 +108,7 @@ class TestMain(unittest.TestCase):
 
     def test_cache(self):
         self.assertEqual(9227465, fib(35))
-        self.assertTrue(xutils.cache_expire("fib(1,)"))
+        self.assertTrue(xutils.cache_del("fib(1,)"))
 
     def test_cache_set_delete(self):
         cacheutil.set("name", 123)

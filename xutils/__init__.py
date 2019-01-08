@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/01/06 18:01:28
+# @modified 2019/01/08 23:05:51
 
 """
 xnote工具类总入口
@@ -21,7 +21,7 @@ from .dateutil import *
 from .netutil  import *
 from .fsutil   import *
 from .textutil import text_contains, parse_config_text
-from .cacheutil import cache, cache_get, cache_put, cache_expire
+from .cacheutil import cache, cache_get, cache_put, cache_del
 from .functions import History, MemTable, listremove
 from xconfig import Storage
 import shutil

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/01/06 20:04:20
+# @modified 2019/01/08 23:18:48
 
 import sys
 import os
@@ -244,6 +244,8 @@ class TestMain(unittest.TestCase):
 
     def test_fs_find(self):
         json_request("/fs_find", method="POST", data=dict(path="./data", find_key="java"))
+        self.check_OK("/fs_index")
+        self.check_OK("/fs_index", method="POST", action="reindex")
 
     def test_fs_plugins(self):
         self.check_OK("/fs_api/plugins?path=/")

@@ -1,14 +1,22 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2018/10/25 02:26:51
+# @modified 2019/01/08 23:04:13
 import os
+import sys
 import glob
 import xutils
 import xauth
 import xtemplate
 import xconfig
+import time
 from fnmatch import fnmatch
+
+
+def update_file_index():
+    xutils.cache_del("fs.list")
+    return get_cached_files()
+
 
 @xutils.cache(key="fs.list", expire=-1)
 def get_cached_files():
@@ -35,14 +43,14 @@ def find_in_cache0(key):
             plist.append(item)
     return plist
 
-def find_in_cache(key):
+def find_in_cache(key, maxsize=sys.maxsize):
     quoted_key = xutils.quote_unicode(key)
     plist = find_in_cache0(key)
     if quoted_key != key:
         plist += find_in_cache0(quoted_key)
     return plist
 
-class handler:
+class SearchHandler:
 
     def GET(self):
         return self.POST()
@@ -72,6 +80,38 @@ class handler:
             token = xauth.get_current_user().token,
             filelist = [xutils.FileItem(p, path) for p in plist])
 
+class IndexHandler:
+    """文件索引管理"""
+
+    @xauth.login_required("admin")
+    def GET(self):
+        tpl = "fs/fs_index.html"
+        fslist = xutils.cache_get("fs.list")
+        if fslist:
+            index_size = len(fslist)
+        else:
+            index_size = 0
+
+        return xtemplate.render(tpl, 
+            index_size = index_size,
+            show_aside = (xconfig.OPTION_STYLE == "aside"))
+
+    @xauth.login_required("admin")
+    def POST(self):
+        tpl = "fs/fs_index.html"
+        action = xutils.get_argument("action")
+        if action == "reindex":
+            t1 = time.time()
+            fslist = update_file_index()
+            t2 = time.time()
+            return xtemplate.render(tpl, 
+                index_size = len(fslist),
+                action = action, 
+                cost = (t2-t1)*1000,
+                show_aside = (xconfig.OPTION_STYLE == "aside"))
+        return self.GET()
+
 xurls = (
-    r"/fs_find", handler
+    r"/fs_find", SearchHandler,
+    r"/fs_index", IndexHandler,
 )
