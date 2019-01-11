@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2018/12/25 23:00:28
+# @modified 2019/01/11 01:04:03
 import web
 import time
 import os
@@ -163,7 +163,7 @@ class PropertiesHandler:
         if key == "settings":
             default_value = DEFAULT_SETTINGS
 
-        config = Storage(key = key, value = xutils.cache_get("[%s]_prop_%s" % (user, key), 
+        config = Storage(key = key, value = xutils.cache_get("%s@prop_%s" % (user, key), 
             default_value))
 
         if config is None:
@@ -178,7 +178,7 @@ class PropertiesHandler:
         value = xutils.get_argument("value")
         user = xauth.get_current_name()
         
-        xutils.cache_put("[%s]_prop_%s" % (user, key), value)
+        xutils.cache_put("%s@prop_%s" % (user, key), value)
 
         if key == "settings":
             self.update_settings(value)

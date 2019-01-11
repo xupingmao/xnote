@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2018/11/25 01:39:49
+# @modified 2019/01/10 22:42:45
 import os
 import uuid
 import web
@@ -20,7 +20,7 @@ def get_link(filename, webpath):
     return "[%s](%s)" % (filename, webpath)
 
 def generate_filename(ext):
-    return time.strftime("%Y%m%d_%H%M%S") + "_" + xauth.get_current_name() + ext
+    return xauth.get_current_name() + '@' + time.strftime("%Y%m%d_%H%M%S") + ext
 
 class UploadHandler:
 
@@ -80,8 +80,11 @@ class RangeUploadHandler:
         file = xutils.get_argument("file", {})
         prefix = xutils.get_argument("prefix", "")
         dirname = xutils.get_argument("dirname", xconfig.DATA_DIR)
-        # Fix 安全问题，不能访问上级目录
         dirname = dirname.replace("$DATA", xconfig.DATA_DIR)
+        # 不能访问上级目录
+        if ".." in dirname:
+            return dict(code="fail", message="can not access parent directory")
+
         filename = None
         webpath  = ""
         origin_name = ""
@@ -92,6 +95,10 @@ class RangeUploadHandler:
             filename = os.path.basename(file.filename)
             filename = xutils.get_real_path(filename)
             if dirname == "auto":
+                if prefix:
+                    prefix = xauth.get_current_name() + '@' + prefix + '_'
+                else:
+                    prefix = xauth.get_current_name() + '@'
                 filepath, webpath = xutils.get_upload_file_path(filename, replace_exists=True, prefix=prefix)
                 dirname  = os.path.dirname(filepath)
                 filename = os.path.basename(filepath)

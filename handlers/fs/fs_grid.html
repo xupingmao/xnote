@@ -51,6 +51,11 @@
 .menu {
     display: block;
 }
+
+.fs-icon {
+    width: 80px;
+    height: 80px;
+}
 </style>
 
     {% set search_action = '/fs_find' %}
@@ -77,7 +82,7 @@
     {% if parent_path %}
     <div class="gallery-item">
         <div>
-            <img src="/static/image/folder2.png">
+            <img class="fs-icon" src="/static/image/folder2.png">
         </div>
         <a href="/fs/{{parent_path}}?mode=grid">上级目录</a>
     </div>
@@ -97,11 +102,13 @@
         <div class="gallery-item">
             <div>
                 {% if item.type == "dir" %}
-                    <img src="/static/image/folder2.png">
+                    <img class="fs-icon" src="/static/image/folder2.png">
                 {% elif xutils.is_img_file(item.path) %}
                     <img class="x-photo" src="/fs/{{item.path}}">
+                {% elif xutils.is_text_file(item.path) %}
+                    <img class="fs-icon" src="/static/image/icon_txt.png">
                 {% else %}
-                    <img src="/static/image/file.png">
+                    <img class="fs-icon" src="/static/image/file2.png">
                 {% end %}
             </div>
             <a href="/fs/{{item.path}}?mode=grid">{{item.name}}</a>

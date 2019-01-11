@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/01/08 23:25:53
+# @modified 2019/01/11 23:10:47
 import os
 import json
 import web
@@ -191,6 +191,12 @@ class BasePlugin:
     # 默认需要管理员权限访问
     require_admin = True
 
+    # 侧边栏类型 {note, dir, file, system}
+    aside_type = None
+    # 侧边栏自定义HTML
+    aside_html = u("")
+    show_aside = False
+
     def __init__(self):
         # 输入框的行数
         self.rows            = 20    
@@ -203,12 +209,7 @@ class BasePlugin:
         self.css_style       = u("")
         self.show_pagenation = False
         self.page_url        = "?page="
-        # 侧边栏类型 {note, file}
-        self.aside_type      = None
-        # 侧边栏自定义HTML
-        self.aside_html      = u("")
         self.option_links    = []
-        self.show_aside      = False
         
     def add_option_link(name, url):
         self.option_links.append(dict(name=name, url = url))

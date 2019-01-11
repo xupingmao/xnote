@@ -2,7 +2,7 @@
 
 <!--
     @since 2017/09/14
-    @modified 2019/01/05 13:23:17
+    @modified 2019/01/10 00:13:37
 -->
 
 {% block head %}
@@ -132,6 +132,8 @@ function runCommand(path) {
 {% end %}
 
 {% block aside %}
+{% import xmanager %}
+{% init sys_plugins = xmanager.find_plugins(Storage(type="system")) %}
 <div class="aside-item">
     <div class="aside-title">
         用户信息
@@ -148,4 +150,20 @@ function runCommand(path) {
         </ul>
     </div>
 </div>
+
+{% if len(sys_plugins) > 0 %}
+    <div class="aside-item">
+        <div class="aside-title">
+            {{T("Options")}}
+        </div>
+        <div class="aside-content">
+            <ul>
+            {% for p in sys_plugins %}
+                <li><a href="/plugins/{{p.name}}">{{p.title}}</a></li>
+            {% end %}
+            </ul>
+        </div>
+    </div>
+{% end %}
+
 {% end %}

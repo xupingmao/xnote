@@ -14,6 +14,12 @@ config = xconfig
 _users = None
 INVALID_NAMES = ["public", "deleted"]
 
+def is_valid_username(name):
+    """有效的用户名为字母+数字"""
+    if name in INVALID_NAMES:
+        return False
+    return name.isalnum()
+
 
 def _get_users():
     """获取用户，内部接口"""
@@ -143,7 +149,7 @@ def add_user(name, password):
         return
     if password == "" or password == None:
         return
-    if name in INVALID_NAMES:
+    if not is_valid_username(name):
         return dict(code="INVALID_NAME", message="非法的用户名")
     db = xtables.get_user_table()
     exist = db.select_one(where=dict(name=name))

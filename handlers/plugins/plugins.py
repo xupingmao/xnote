@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/01/04 00:24:50
+# @modified 2019/01/10 00:23:46
 from io import StringIO
 import xconfig
 import codecs
@@ -169,9 +169,8 @@ class Main(BasePlugin):
     @staticmethod
     def is_visible(target):
         """插件是否可见
-        @param {object} target 目标对象
-            {str} target.type 文件类型 {dir, file, note}
-            {str} target.path 文件路径"""
+        @param {object} target 场景对象
+        """
         return False
 '''
 

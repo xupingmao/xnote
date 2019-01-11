@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/01/06 22:51:25
+# @modified 2019/01/10 01:35:05
 """System functions"""
 from io import StringIO
 import xconfig
@@ -144,7 +144,9 @@ class IndexHandler:
 class ReloadHandler:
     @xauth.login_required("admin")
     def GET(self):
-        xmanager.reload()
+        # autoreload will load new handlers
+        import autoreload
+        autoreload.reload()
         import web
         raise web.seeother("/system/index")
 

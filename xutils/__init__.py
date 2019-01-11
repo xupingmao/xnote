@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/01/08 23:05:51
+# @modified 2019/01/10 22:40:44
 
 """
 xnote工具类总入口
@@ -213,7 +213,7 @@ def get_upload_file_path(filename,
     fileindex = 1
 
     if prefix != "" and prefix != None:
-        filename = prefix + "_" + filename
+        filename = prefix + filename
         webpath = "/data{}/{}/{}".format(data_dir, date, filename)
         return dirname + filename, webpath
     newfilepath = origin_filename

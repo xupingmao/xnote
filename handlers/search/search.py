@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2018/12/31 23:08:49
+# @modified 2019/01/10 22:45:17
 
 import re
 import os
@@ -77,7 +77,7 @@ def fill_note_info(files):
                 file.parent_name = parent.name
 
 def log_search_history(user, key):
-    cache_key = "[%s]search_history" % user
+    cache_key = "%s@search_history" % user
     history = cacheutil.get(cache_key)
     if isinstance(history, list):
         if key in history:
@@ -178,7 +178,7 @@ class handler:
         if key == "" or key == None:
             return xtemplate.render("search/search_result.html", 
                 show_aside = False,
-                recent = list(reversed(xutils.cache_get("[%s]search_history" % user_name, []))),
+                recent = list(reversed(xutils.cache_get("%s@search_history" % user_name, []))),
                 html_title = "搜索",
                 category = category, 
                 files    = [], 

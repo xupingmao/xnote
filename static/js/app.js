@@ -522,6 +522,14 @@ layer.photos = function(options, loop, key){
             imgarea[1] = imgarea[1]/wh[1];
           }
         }
+
+        // 图片太小了，进行放大
+        var minsize = 150;
+        if (imgarea[0] < minsize && imgarea[1] < minsize) {
+          var ratio = Math.min(minsize/imgarea[0], minsize/imgarea[1]);
+          imgarea[0] = imgarea[0]*ratio;
+          imgarea[1] = imgarea[1]*ratio;
+        }
         
         return [imgarea[0]+'px', imgarea[1]+'px']; 
       }(),

@@ -1,8 +1,10 @@
 
 <!-- Groups -->
+{% import xmanager %}
 {% init show_groups = False %}
 {% init groups = [] %}
 {% init parent_id = "" %}
+{% init note_plugins = xmanager.find_plugins(Storage(type="note")) %}
 
 <div class="aside-item">
     <div class="aside-title">
@@ -17,6 +19,10 @@
         {% end %}
             <li><a class="link" href="/note/public">分享笔记</a></li>
             <li><a class="link" href="/note/taglist">{{T("Tag List")}}</a></li>
+
+            {% for p in note_plugins %}
+                <li><a class="link" href="/plugins/{{p.name}}">{{p.title}}</a></li>
+            {% end %}
         </ul>
     </div>
 </div>
