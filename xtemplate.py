@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/01/11 23:10:47
+# @modified 2019/01/13 13:35:39
 import os
 import json
 import web
@@ -26,6 +26,7 @@ NAMESPACE    = dict(
 _lang_dict = dict()
 
 def load_languages():
+    """加载系统语言配置"""
     global _lang_dict
 
     _lang_dict.clear()
@@ -71,8 +72,7 @@ class XnoteLoader(Loader):
         return name
 
     def resolve_path(self, name, parent_path=None):
-        """
-        tornado中的Template._get_ancestors方法会把template的路径作为parent_path参数,
+        """tornado中的Template._get_ancestors方法会把template的路径作为parent_path参数,
         但是Loader默认的方法处理绝对路径时，不处理相对路径,参考resolve_path_old
         由于判断绝对路径是通过`/`开头，这样造成windows系统和posix系统的处理结果不一致
 
@@ -155,7 +155,7 @@ def render(template_name, **kw):
 
 def render_text(text, template_name = "<string>", **kw):
     """使用模板引擎渲染文本信息,使用缓存
-    TODO 控制缓存大小
+    TODO 控制缓存大小，使用FIFO或者LRU淘汰
     """
     nkw = {}
     pre_render(nkw)
@@ -172,6 +172,7 @@ def get_code(name):
 
 
 def get_templates():
+    """获取所有模板的浅拷贝"""
     return _loader.templates.copy()
 
     

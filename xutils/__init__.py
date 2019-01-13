@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/01/10 22:40:44
+# @modified 2019/01/13 16:05:14
 
 """
 xnote工具类总入口
@@ -237,15 +237,15 @@ def is_img_file(filename):
     return ext.lower() in xconfig.FS_IMG_EXT_LIST
 
 def is_text_file(filename):
+    """判断是否是文本文件"""
     name, ext = os.path.splitext(filename)
     return ext.lower() in xconfig.FS_TEXT_EXT_LIST
 
 def get_text_ext():
     return xconfig.FS_TEXT_EXT_LIST
 
-def is_editable(filename):
-    name, ext = os.path.splitext(filename)
-    return ext in get_text_ext()
+def is_editable(fpath):
+    return is_text_file(fpath)
 
 ### DB Utilities
 

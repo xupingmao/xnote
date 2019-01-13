@@ -193,7 +193,9 @@ def has_login(name=None):
     # 优先使用token
     user = get_user_from_token()
     if user != None:
-        return True
+        if name is None:
+            return True
+        return user.get("name") == name
 
     cookies = web.cookies()
     name_in_cookie = cookies.get("xuser")

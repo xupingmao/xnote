@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/01/06 17:56:52
+# @modified 2019/01/13 16:11:04
 import codecs
 import os
 import platform
@@ -17,13 +17,13 @@ def makedirs(dirname):
 
 
 def readfile(path, mode = "r", limit = -1):
-    '''读取文件，尝试多种编码，编码别名参考标准库Lib/encodings/aliases.py
-    utf-8 是一种边长编码，兼容ASCII
-    gbk 是一种双字节编码，全称《汉字内码扩展规范》，兼容GB2312
-    latin_1 是iso-8859-1的别名，单字节编码，兼容ASCII
+    '''读取文件，尝试多种编码，编码别名参考标准库`Lib/encodings/aliases.py`
+    * utf-8 是一种边长编码，兼容ASCII
+    * gbk 是一种双字节编码，全称《汉字内码扩展规范》，兼容GB2312
+    * latin_1 是iso-8859-1的别名，单字节编码，兼容ASCII
     '''
     last_err = None
-    for encoding in ["utf-8", "gbk", "mbcs", "latin_1"]:
+    for encoding in ("utf-8", "gbk", "mbcs", "latin_1"):
         try:
             if PY2:
                 with open(path) as fp:
@@ -52,21 +52,22 @@ readFile  = readfile
 read      = readfile
 read_utf8 = readfile
 
-def writebytes(path, bytes):
+def writefile(path, content):
+    import codecs
     dirname = os.path.dirname(path)
     makedirs(dirname)
-    with open(path, "wb") as fp:
-        fp.write(bytes)
-    return bytes
 
-def savetofile(path, content):
-    import codecs
     with open(path, mode="wb") as fp:
-        buf = codecs.encode(content, "utf-8")
+        if is_str(content):
+            buf = codecs.encode(content, "utf-8")
+        else:
+            buf = content
         fp.write(buf)
     return content
-    
-savefile = savetofile
+
+savetofile = writefile
+savefile   = writefile
+writebytes = writefile
 
 def readbytes(path):
     with open(path, "rb") as fp:
@@ -87,10 +88,11 @@ def copy(src, dest):
     destfp = open(dest, "wb")
 
     try:
-        buf = srcfp.read(bufsize)
-        while buf:
-            destfp.write(buf)
+        while True:
             buf = srcfp.read(bufsize)
+            if not buf:
+                break
+            destfp.write(buf)
     except Exception as e:
         logutil.error("copy file from {} to {} failed", src, dest, e)
 

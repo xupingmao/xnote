@@ -1,9 +1,9 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2018/12/21 22:14:13
+# @modified 2019/01/13 00:43:34
 
-"""Description here"""
+"""笔记编辑相关处理"""
 import os
 import web
 import time
@@ -68,6 +68,7 @@ def update_note(db, where, **kw):
     data = kw.get('data')
 
     kw["mtime"] = dateutil.format_time()
+    kw["atime"] = dateutil.format_time()
     # 处理乐观锁
     version = where.get("version")
     if version:

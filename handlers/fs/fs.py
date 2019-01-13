@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/01/05 14:54:00
+# @modified 2019/01/13 14:29:51
 
 """xnote文件服务，主要功能:
     1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -366,6 +366,7 @@ class RemoveHandler:
         path = xutils.get_argument("path")
         try:
             xutils.remove(path)
+            xmanager.fire("fs.remove", Storage(path = path))
             return dict(code="success")
         except Exception as e:
             xutils.print_exc()

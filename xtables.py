@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2018/12/15 17:14:13
+# @modified 2019/01/13 16:02:47
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -389,8 +389,11 @@ class DBWrapper:
     def select(self, *args, **kw):
         return self.db.select(self.tablename, *args, **kw)
 
-    def select_one(self, *args, **kw):
+    def select_first(self, *args, **kw):
         return self.db.select(self.tablename, *args, **kw).first()
+
+    def select_one(self, *args, **kw):
+        return self.select_first(*args, **kw)
 
     def query(self, *args, **kw):
         return self.db.query(*args, **kw)
@@ -449,12 +452,14 @@ def get_dict_table():
 
 get_dictionary_table = get_dict_table
 
-def get_table(name):
+def get_table(name, dbpath = None):
     """
     获取数据库表，表的创建和访问不必在xtables中定义
     @since 2019/04/11
     """
-    return DBWrapper(xconfig.DB_FILE, name)
+    if dbpath is None:
+        dbpath = xconfig.DB_FILE
+    return DBWrapper(dbpath, name)
 
 def init():
     if sqlite3 is None:
