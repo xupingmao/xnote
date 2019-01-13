@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/01/11 01:04:03
+# @modified 2019/01/13 16:16:02
 import web
 import time
 import os
@@ -110,7 +110,7 @@ class StorageHandler:
     def GET(self):
         key  = xutils.get_argument("key")
         db = xtables.get_storage_table()
-        config = db.select_one(where=dict(key=key, user=xauth.get_current_name()))
+        config = db.select_first(where=dict(key=key, user=xauth.get_current_name()))
         if config is None:
             config = Storage(key=key, value="")
         return xtemplate.render("system/properties.html", 
@@ -124,7 +124,7 @@ class StorageHandler:
         value = xutils.get_argument("value")
         user = xauth.get_current_name()
         db = xtables.get_storage_table()
-        config = db.select_one(where=dict(key=key, user=user))
+        config = db.select_first(where=dict(key=key, user=user))
         if config is None:
             db.insert(user = user, key = key, value = value, 
                 ctime = xutils.format_datetime(), 

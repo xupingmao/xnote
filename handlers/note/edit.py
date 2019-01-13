@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/01/13 00:43:34
+# @modified 2019/01/13 16:16:07
 
 """笔记编辑相关处理"""
 import os
@@ -19,12 +19,12 @@ from xutils import cacheutil
 from xtemplate import T
 
 def get_by_name(db, name):
-    return db.select_one(where=dict(name = name, 
+    return db.select_first(where=dict(name = name, 
         is_deleted = 0, 
         creator = xauth.get_current_name()))
 
 def get_pathlist(db, parent_id, limit = 2):
-    file = db.select_one(where=dict(id = parent_id))
+    file = db.select_first(where=dict(id = parent_id))
     pathlist = []
     while file is not None:
         file.url = "/note/view?id=%s" % file.id
@@ -34,7 +34,7 @@ def get_pathlist(db, parent_id, limit = 2):
         if file.parent_id == 0:
             break
         else:
-            file = db.select_one(where=dict(id=file.parent_id))
+            file = db.select_first(where=dict(id=file.parent_id))
     return pathlist
 
 def update_children_count(parent_id, db=None):
@@ -54,7 +54,7 @@ def update_note_content(id, content, data=''):
     if data is None:
         data = ''
     db = xtables.get_note_content_table()
-    result = db.select_one(where=dict(id=id))
+    result = db.select_first(where=dict(id=id))
     if result is None:
         db.insert(id=id, content=content, data=data)
     else:
@@ -177,7 +177,7 @@ class RemoveHandler:
         t_file    = xtables.get_file_table()
         t_content = xtables.get_note_content_table()
         if id != "":
-            file = t_file.select_one(where=dict(id=int(id), is_deleted=0))
+            file = t_file.select_first(where=dict(id=int(id), is_deleted=0))
         elif name != "":
             file = get_by_name(t_file, name)
         if file is None:
@@ -218,7 +218,7 @@ class DictPutHandler:
         key     = xutils.get_argument("key")
         value   = xutils.get_argument("value")
         db      = xtables.get_dict_table()
-        item    = db.select_one(where=dict(key=key))
+        item    = db.select_first(where=dict(key=key))
         current = xutils.format_datetime()
         if key == "" or key is None:
             return dict(code="fail", message="key is empty")
@@ -226,7 +226,7 @@ class DictPutHandler:
             db.insert(key=key, value=value, ctime = current, mtime = current)
         else:
             db.update(value = value, mtime = current, where = dict(key=key))
-        return db.select_one(where=dict(key=key))
+        return db.select_first(where=dict(key=key))
 
 class RenameHandler:
 
@@ -237,11 +237,11 @@ class RenameHandler:
         if name == "" or name is None:
             return dict(code="fail", message="名称为空")
         db = xtables.get_file_table()
-        old  = db.select_one(where=dict(id=id))
+        old  = db.select_first(where=dict(id=id))
         if old.creator != xauth.get_current_name():
             return dict(code="fail", message="没有权限")
 
-        file = db.select_one(where=dict(name=name, is_deleted=0))
+        file = db.select_first(where=dict(name=name, is_deleted=0))
         if file is not None:
             return dict(code="fail", message="%r已存在" % name)
         db.update(where=dict(id=id), name=name, mtime=xutils.format_datetime())
@@ -329,7 +329,7 @@ class UpdateHandler:
         file_type = xutils.get_argument("type")
         name      = xutils.get_argument("name", "")
         db        = xtables.get_file_table()
-        file      = db.select_one(where=dict(id=id))
+        file      = db.select_first(where=dict(id=id))
 
         assert file is not None
 

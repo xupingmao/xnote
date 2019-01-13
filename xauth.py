@@ -152,7 +152,7 @@ def add_user(name, password):
     if not is_valid_username(name):
         return dict(code="INVALID_NAME", message="非法的用户名")
     db = xtables.get_user_table()
-    exist = db.select_one(where=dict(name=name))
+    exist = db.select_first(where=dict(name=name))
     if exist is None:
         db.insert(name=name,password=password,
             token=gen_new_token(),

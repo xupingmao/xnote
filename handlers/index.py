@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/01/05 13:01:06
+# @modified 2019/01/13 16:16:08
 import web
 import xtables
 import xtemplate
@@ -82,7 +82,7 @@ class GridHandler:
         if type == "tool":
             items  = list(filter(tool_filter, list_tools()))
             db     = xtables.get_storage_table()
-            config = db.select_one(where=dict(key="tools", user=xauth.get_current_name()))
+            config = db.select_first(where=dict(key="tools", user=xauth.get_current_name()))
             if config is not None:
                 config_list = xutils.parse_config_text(config.value)
                 customized_items = map(lambda x: Storage(name=x.get("key"), link=x.get("value")), config_list)

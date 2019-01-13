@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/01/10 01:35:05
+# @modified 2019/01/13 16:15:59
 """System functions"""
 from io import StringIO
 import xconfig
@@ -109,7 +109,7 @@ xconfig.NOTE_OPTIONS = [
 @xutils.cache(expire=60)
 def get_tools_config(user):
     db  = xtables.get_storage_table()
-    user_config = db.select_one(where=dict(key="tools", user=user))
+    user_config = db.select_first(where=dict(key="tools", user=user))
     return user_config
 
                 

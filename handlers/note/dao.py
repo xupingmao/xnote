@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2018/12/08 00:12:11
+# @modified 2019/01/13 16:16:07
 
 """资料的DAO操作集合
 
@@ -71,7 +71,7 @@ class FileDO(dict):
 
 def query_note_conent(id):
     db = xtables.get_note_content_table()
-    result = db.select_one(where=dict(id=id))
+    result = db.select_first(where=dict(id=id))
     if result is None:
         return None, None
     return result.get("content", ""), result.get("data", "")
@@ -140,13 +140,13 @@ def get_pathlist(db, file, limit = 2):
         if file.parent_id == 0:
             break
         else:
-            file = db.select_one(what="id,name,type,creator", where=dict(id=file.parent_id))
+            file = db.select_first(what="id,name,type,creator", where=dict(id=file.parent_id))
     return pathlist
 
 def get_by_id(id, db=None):
     if db is None:
         db = get_file_db()
-    first = db.select_one(where=dict(id=id))
+    first = db.select_first(where=dict(id=id))
     if first is not None:
         return build_note(first)
     return None
@@ -154,7 +154,7 @@ def get_by_id(id, db=None):
 def get_by_name(name, db=None):
     if db is None:
         db = get_file_db()
-    result = get_db().select_one(where=dict(name=name, is_deleted=0))
+    result = get_db().select_first(where=dict(name=name, is_deleted=0))
     if result is None:
         return None
     return build_note(result)

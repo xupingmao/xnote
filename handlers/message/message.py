@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/01/02 00:28:45
+# @modified 2019/01/13 16:16:09
 
 """短消息"""
 import time
@@ -91,7 +91,7 @@ class ListHandler:
 
 def update_message(id, status):
     db = xtables.get_message_table()
-    msg = db.select_one(where=dict(id=id))
+    msg = db.select_first(where=dict(id=id))
     if msg is None:
         return dict(code="fail", message="data not exists")
     if msg.user != xauth.get_current_name():
@@ -131,7 +131,7 @@ class RemoveHandler:
         if id == "":
             return
         db = xtables.get_message_table()
-        msg = db.select_one(where=dict(id=id))
+        msg = db.select_first(where=dict(id=id))
         if msg is None:
             return dict(code="fail", message="data not exists")
         

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2018/12/30 23:08:19
+# @modified 2019/01/13 16:21:23
 import xconfig
 from xconfig import Storage
 from collections import deque
@@ -145,8 +145,8 @@ class MemTable:
                 break
         return result
 
-    def first(self, func=None):
-        result = self.list(0,1,func)
+    def first(self, func=None, limit=1):
+        result = self.list(0,limit,func)
         if len(result) == 0:
             return None
         return result[0]

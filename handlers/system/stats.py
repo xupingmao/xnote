@@ -17,7 +17,7 @@ def save_ip(real_ip):
         if real_ip.startswith("10.") or real_ip.startswith("192.168") or real_ip == "127.0.0.1":
             return
         db = xtables.get_record_table()
-        record = db.select_one(where=dict(type="ip", key=real_ip, cdate=xutils.format_date()))
+        record = db.select_first(where=dict(type="ip", key=real_ip, cdate=xutils.format_date()))
         if record is None:
             db.insert(type="ip", key=real_ip, cdate=xutils.format_date(), 
                 ctime=xutils.format_datetime(), value="1")

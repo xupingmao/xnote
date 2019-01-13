@@ -26,7 +26,7 @@ class handler:
         message = None
 
         db = xtables.get_record_table()
-        record = db.select_one(where="type='weather' AND DATE(ctime)=$date_str AND key=$key", 
+        record = db.select_first(where="type='weather' AND DATE(ctime)=$date_str AND key=$key", 
             vars=dict(date_str=xutils.format_date(), key=city_name))
         if record is not None:
             message = record.value

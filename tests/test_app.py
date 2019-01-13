@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/01/08 23:18:48
+# @modified 2019/01/13 16:17:50
 
 import sys
 import os
@@ -418,11 +418,11 @@ class TestMain(unittest.TestCase):
 
     def test_cron_task(self):
         self.check_OK("/system/crontab/add", method="POST", data=dict(url="test", tm_wday="*", tm_hour="*", tm_min="*"))
-        sched = xtables.get_schedule_table().select_one(where=dict(url="test"))
+        sched = xtables.get_schedule_table().select_first(where=dict(url="test"))
         self.check_OK("/system/crontab/remove?id={}".format(sched.id))
 
         self.check_OK("/system/crontab/add", method="POST", data=dict(script_url="script://test.py", tm_wday="1", tm_hour="*", tm_min="*"))
-        sched2 = xtables.get_schedule_table().select_one(where=dict(url="script://test.py"))
+        sched2 = xtables.get_schedule_table().select_first(where=dict(url="script://test.py"))
         self.check_OK("/system/crontab/remove?id={}".format(sched2.id))
 
     

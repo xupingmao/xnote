@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/01/05 13:25:10
+# @modified 2019/01/13 16:16:05
 import profile
 import math
 import re
@@ -175,7 +175,7 @@ class Upvote:
     def GET(self, id):
         id = int(id)
         db = xtables.get_file_table()
-        file = db.select_one(where=dict(id=int(id)))
+        file = db.select_first(where=dict(id=int(id)))
         db.update(priority=1, where=dict(id=id))
         raise web.seeother("/note/view?id=%s" % id)
 
@@ -185,7 +185,7 @@ class Downvote:
     def GET(self, id):
         id = int(id)
         db = xtables.get_file_table()
-        file = db.select_one(where=dict(id=int(id)))
+        file = db.select_first(where=dict(id=int(id)))
         db.update(priority=0, where=dict(id=id))
         raise web.seeother("/note/view?id=%s" % id)
 

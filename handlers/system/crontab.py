@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2018/12/09 23:40:44
+# @modified 2019/01/13 16:16:03
 
 """xnote定时任务配置"""
 import os
@@ -51,7 +51,7 @@ class CronEditHandler:
     @xauth.login_required("admin")
     def GET(self):
         id = xutils.get_argument("id", type=int)
-        sched = xtables.get_schedule_table().select_one(where=dict(id=id))
+        sched = xtables.get_schedule_table().select_first(where=dict(id=id))
         return xtemplate.render("system/crontab_edit.html", 
             item = sched, 
             links = get_cron_links())

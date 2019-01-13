@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2018/12/21 22:06:12
+# @modified 2019/01/13 16:16:06
 import math
 import web
 import xutils
@@ -77,7 +77,7 @@ class MoveHandler:
         id = xutils.get_argument("id", "", type=int)
         parent_id = xutils.get_argument("parent_id", "", type=int)
         db = xtables.get_file_table()
-        file = db.select_one(where=dict(id=id))
+        file = db.select_first(where=dict(id=id))
         if file is None:
             return dict(code="fail", message="file not exists")
         db.update(parent_id=parent_id, where=dict(id=id))

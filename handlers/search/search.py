@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2019/01/10 22:45:17
+# @modified 2019/01/13 16:16:05
 
 import re
 import os
@@ -72,7 +72,7 @@ def fill_note_info(files):
     db = xtables.get_note_table()
     for file in files:
         if file.category == "note":
-            parent = db.select_one(where=dict(id=file.parent_id))
+            parent = db.select_first(where=dict(id=file.parent_id))
             if parent is not None:
                 file.parent_name = parent.name
 
