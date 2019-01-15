@@ -20,10 +20,6 @@ class Main(BasePlugin):
         # 处理页面渲染
         name = xutils.get_argument("name", "defaultName")
         return "Hello, %s" % name
-        
-    def command(self, input):
-        # 处理命令请求
-        pass
     
     @staticmethod
     def is_visible(target):

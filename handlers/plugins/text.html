@@ -47,13 +47,14 @@
         {% end %}
     </div>
 
+    {# HTML输出 #}
     {% if html != None and html != "" %}
-    <div class="col-md-12 card">{% raw html %}</div>
+        {% raw html %}
     {% end %}
 
     {# 文本输出放到后面 #}
     {% if output != None and output != "" %}
-    <pre class="col-md-12 card">{{ output }}</pre>
+    <pre class="row card">{{ output }}</pre>
     {% end %}
 
     {% if model.show_pagenation %}

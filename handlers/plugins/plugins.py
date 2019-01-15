@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/01/10 00:23:46
+# @modified 2019/01/15 00:21:32
 from io import StringIO
 import xconfig
 import codecs
@@ -161,9 +161,6 @@ class Main(BasePlugin):
 
     def on_init(self, context=None):
         # 插件初始化操作
-        pass
-    
-    def command(self):
         pass
 
     @staticmethod

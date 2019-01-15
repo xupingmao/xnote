@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/01/13 13:35:39
+# @modified 2019/01/15 00:30:09
 import os
 import json
 import web
@@ -246,6 +246,7 @@ class BasePlugin:
         return xutils.get_argument("page", 1, type=int)
 
     def render(self):
+        """图形界面入口"""
         if self.require_admin:
             xauth.check_login("admin")
         input  = self.get_input()
@@ -282,6 +283,10 @@ class BasePlugin:
             show_aside  = self.show_aside,
             html        = self.html)
 
+    def on_command(self, command):
+        """命令行入口"""
+        pass
+
     def on_install(self, context=None):
         """安装插件事件, TODO"""
         pass
@@ -308,8 +313,7 @@ class BasePlugin:
     def is_visible(target):
         """插件是否可见
         @param {object} target 目标对象
-        对于文件插件
-            - {str} type 文件类型 {dir, file, note}
+            - {str} type 文件类型 {dir, file, note, system}
             - {str} path 文件路径
         """
         return False
