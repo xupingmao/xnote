@@ -70,9 +70,9 @@
 
 {% block aside %}
     {# 选项 #}
-    {% if model.aside_type == "file" %}
+    {% if model.category == "dir" %}
         {% include fs/mod_aside.html %}
-    {% elif model.aside_type == "note" %}
+    {% elif model.category == "note" %}
         {% include note/mod_aside.html %}
     {% else %}
         {% if len(model.option_links) > 0 %}

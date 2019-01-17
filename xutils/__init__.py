@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/01/13 16:05:14
+# @modified 2019/01/17 01:22:16
 
 """
 xnote工具类总入口
@@ -246,6 +246,12 @@ def get_text_ext():
 
 def is_editable(fpath):
     return is_text_file(fpath)
+
+def attrget(obj, attr, default_value = None):
+    if hasattr(obj, attr):
+        return getattr(obj, attr, default_value)
+    else:
+        return default_value
 
 ### DB Utilities
 

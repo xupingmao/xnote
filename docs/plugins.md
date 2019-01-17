@@ -15,16 +15,16 @@ class Main(BasePlugin):
     """默认的插件声明入口，定义一个叫做Main的类"""
     
     title = '测试插件'
+    # 插件类别
+    category = "system"
+    # 查看权限
+    required_role = "admin"
 
     def render(self):
         # 处理页面渲染
         name = xutils.get_argument("name", "defaultName")
         return "Hello, %s" % name
     
-    @staticmethod
-    def is_visible(target):
-        # 显示在文件管理的选项栏中并且只有管理员能看到
-        return target.type == "dir" and xauth.is_admin()
 ```
 
 ## 插件卸载

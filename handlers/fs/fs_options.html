@@ -348,7 +348,10 @@ $(function () {
         $("#uploadFileArea").toggle(200);
     });
 
-    adjustHeight(".file-list", 30);
+    // do not adjust height in mobile
+    if (isPc()) {
+        adjustHeight(".file-list", 30);
+    }
 });
 </script>
 

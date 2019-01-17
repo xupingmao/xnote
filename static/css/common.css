@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/01/05 13:00:41
+@modified 2019/01/18 00:52:48
 */
 
 * {
@@ -41,7 +41,7 @@ pre {
 }
 
 .marked-pre {
-    background: #eee;
+    background: #FFFFE0;
     padding: 0.5em;
     border: 1px solid #ddd;
     word-wrap: break-word;

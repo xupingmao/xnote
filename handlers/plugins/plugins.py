@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/01/15 00:21:32
+# @modified 2019/01/17 00:45:53
 from io import StringIO
 import xconfig
 import codecs
@@ -151,8 +151,10 @@ class Main(BasePlugin):
     title = "PluginName"
     # 提示内容
     description = ""
-    # 是否需要管理员权限
-    require_admin = True
+    # 访问权限
+    required_role = None
+    # 插件分类 {note, dir, system}
+    category    = None
     
     def handle(self, input):
         # 输入框的行数
@@ -162,13 +164,6 @@ class Main(BasePlugin):
     def on_init(self, context=None):
         # 插件初始化操作
         pass
-
-    @staticmethod
-    def is_visible(target):
-        """插件是否可见
-        @param {object} target 场景对象
-        """
-        return False
 '''
 
 class NewPluginHandler(BasePlugin):

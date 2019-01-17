@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/01/15 00:30:09
+# @modified 2019/01/17 00:46:33
 import os
 import json
 import web
@@ -162,7 +162,7 @@ def render_text(text, template_name = "<string>", **kw):
     nkw.update(kw)
 
     # 热加载模式下str的id会变化
-    name = "template_%s.str" % hash(text)
+    name = "template@%s.str" % hash(text)
     _loader.init_template(name, text)
     return _loader.load(name).generate(**nkw)
 
@@ -191,9 +191,12 @@ class BasePlugin:
     description = ""
     # 默认需要管理员权限访问
     require_admin = True
+    # 要求的访问权限
+    required_role = "admin"
 
-    # 侧边栏类型 {note, dir, file, system}
-    aside_type = None
+    # 插件分类 {note, dir, system}
+    category = None
+
     # 侧边栏自定义HTML
     aside_html = u("")
     show_aside = False
@@ -264,7 +267,7 @@ class BasePlugin:
                 return output
 
             # 处理侧边栏显示
-            if self.aside_html != "" or len(self.option_links) > 0 or self.aside_type:
+            if self.aside_html != "" or len(self.option_links) > 0 or self.category:
                 self.show_aside = True
         except:
             error = xutils.print_exc()

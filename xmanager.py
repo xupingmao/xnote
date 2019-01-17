@@ -1,11 +1,12 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/01/08 23:14:22
+# @modified 2019/01/17 01:34:15
 
 """Xnote 模块管理器
- - 加载并注册模块
- - 执行cron定时任务
+ * 请求处理器加载和注册
+ * 定时任务注册和执行
+ * 插件注册和查找
 """
 from __future__ import print_function
 import os
@@ -617,12 +618,20 @@ def load_plugins(dirname):
                 xutils.print_exc()
 
 @xutils.timeit(logfile=True, logargs=True, name="FindPlugins")
-def find_plugins(target):
+def find_plugins(category):
+    role = xauth.get_current_role()
     plugins = []
+
+    if role is None:
+        # not logged in
+        return plugins
+
     for fname in xconfig.PLUGINS:
         p = xconfig.PLUGINS.get(fname)
-        if p and hasattr(p.clazz, "is_visible") and p.clazz.is_visible(target):
-            plugins.append(p)
+        if p and xutils.attrget(p.clazz, "category") == category:
+            required_role = xutils.attrget(p.clazz, "required_role")
+            if role == "admin" or required_role is None or required_role == role:
+                plugins.append(p)
     plugins.sort()
     return plugins
 

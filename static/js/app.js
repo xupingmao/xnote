@@ -239,6 +239,13 @@ $(function () {
     }
 
     /**
+     * 判断是否是PC设备，要求width>=800 && height>=600
+     */
+    window.isPc = function () {
+      return getWindowWidth() >= 800 && getWindowHeight() >= 600;
+    }
+
+    /**
      * 调整高度，通过
      * @param {string} selector 选择器
      * @param {number} bottom 距离窗口底部的距离

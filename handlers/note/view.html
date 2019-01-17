@@ -170,6 +170,12 @@ img {
         {% end %}
     </div>
 
+    <div class="card">
+    {% if "page" in globals() %}
+        {% include mod_pagenation.html %}
+    {% end %}
+    </div>
+
 <script type="text/javascript">
 function rename(id, oldName) {
     var newName = prompt("新名称", oldName);

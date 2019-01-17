@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/01/13 16:15:59
+# @modified 2019/01/17 01:48:22
 """System functions"""
 from io import StringIO
 import xconfig
@@ -53,7 +53,7 @@ doc_tools = [
     # 笔记
     link("Recent Updated",      "/note/recent_edit"),
     link("Recent Created",      "/note/recent_created"),
-    link("Note Categories",     "/note/group"),
+    link("Note Groups",         "/note/group"),
     link("Note Tags",           "/note/taglist"),
     link("Uncategorized Notes", "/note/ungrouped"),
     link("Timeline", "/tools/timeline"),

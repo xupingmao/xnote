@@ -1,7 +1,7 @@
 {% import xmanager %}
 {% import os %}
 {% init path = os.path.abspath(xconfig.DATA_DIR) %}
-{% init file_plugins = xmanager.find_plugins(Storage(type="dir", path=path)) %}
+{% init file_plugins = xmanager.find_plugins("dir") %}
 
 <div class="aside-item">
     <div class="aside-title">
