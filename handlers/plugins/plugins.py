@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/01/17 00:45:53
+# @modified 2019/01/18 01:14:05
 from io import StringIO
 import xconfig
 import codecs
@@ -152,9 +152,9 @@ class Main(BasePlugin):
     # 提示内容
     description = ""
     # 访问权限
-    required_role = None
+    required_role = "admin"
     # 插件分类 {note, dir, system}
-    category    = None
+    category = None
     
     def handle(self, input):
         # 输入框的行数

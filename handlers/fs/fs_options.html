@@ -129,6 +129,7 @@
 
 <div id="controlArea" class="col-md-12">
     <div class="float-left">
+        <input type="button" class="btn" value="{{T('Select All')}}" id="selectAllBtn"/>
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
         <input type="button" class="btn" value="新建文件" id="addFile"/>
         <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
@@ -191,7 +192,18 @@ $(function () {
     }
 
     function showErrorMessage(message) {
-        $(".error").text(message).fadeIn(200).delay(3000).fadeOut(300);
+        showMessage("error", message);
+    }
+
+    function showMessage(level, message) {
+        var ele = ".error";
+        if (level == "error") {
+            ele = ".error";
+        }
+        if (level == "success") {
+            ele = ".success";
+        }
+        $(ele).text(message).fadeIn(200).delay(3000).fadeOut(300);
     }
 
     function createFile(type) {
@@ -332,6 +344,32 @@ $(function () {
         });
     });
 
+    $(".paste-all-link").click(function () {
+        var failed = 0;
+        var rest = $(".paste-link").length;
+        $(".paste-link").each(function (index, target) {
+            var dataPath = $(target).attr("data-path");
+            // alert("move from " + dataPath + " to " + globalPath);
+            var data = {dirname: globalPath, old_path: dataPath};
+            $.post("/fs_api/paste", data, function (resp) {
+                if (resp.code != "success") {
+                    // alert(resp.message);
+                    // failed += 1
+                    showErrorMessage("failed to paste " + dataPath);
+                } 
+                rest -= 1;
+                if (rest === 0) {
+                    showMessage("success", "paste done!");
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 500);
+                }
+            }).fail(function () {
+                // 
+            });
+        });
+    })
+
     $(".clear-clip-link").click(function(event) {
         /* 清空剪切板 */
         $.post("/fs_api/clear_clip", function (resp) {
@@ -346,6 +384,21 @@ $(function () {
 
     $("#uploadFileBtn").click(function () {
         $("#uploadFileArea").toggle(200);
+    });
+
+    $("#selectAllBtn").click(function () {
+        var toggle = parseInt($(this).attr("toggle") || 0);
+        if (toggle % 2 === 0) {        
+            $("input[type=checkbox]").prop("checked", true);
+            $(this).val("全不选");
+        } 
+
+        if (toggle % 2 === 1) {        
+            $("input[type=checkbox]").prop("checked", false);
+            $(this).val("全选");
+        }
+        toggle += 1;
+        $(this).attr("toggle", toggle);
     });
 
     // do not adjust height in mobile

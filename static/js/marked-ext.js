@@ -154,12 +154,12 @@
       }
 
       if (!lang) {
-        return '<pre class="marked-pre"><code>'
+        return '<pre class="marked-code"><code>'
           + (escaped ? code : escape(code, true))
           + '\n</code></pre>';
       }
 
-      return '<pre class="marked-pre"><code class="'
+      return '<pre class="marked-code"><code class="'
         + this.options.langPrefix
         + escape(lang, true)
         + '">'

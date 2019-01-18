@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/01/18 00:52:48
+@modified 2019/01/18 23:22:01
 */
 
 * {
@@ -40,9 +40,9 @@ pre {
     font-size: 20px;
 }
 
-.marked-pre {
-    background: #FFFFE0;
-    padding: 0.5em;
+.marked-code {
+    background: #ffd;
+    padding: 0.5rem;
     border: 1px solid #ddd;
     word-wrap: break-word;
     white-space: pre-wrap;
@@ -807,6 +807,12 @@ li.menu-item:hover {
     padding: 5px;
     background-color: #C1FFC1;
     margin: 0px;
+}
+
+.success {
+    padding: 5px;
+    margin: 0px;
+    background-color: #cf9;
 }
 
 .x-dialog {
