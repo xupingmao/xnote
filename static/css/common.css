@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/01/18 23:22:01
+@modified 2019/01/19 19:35:01
 */
 
 * {
@@ -128,16 +128,6 @@ a:hover {
     text-decoration: underline;
     /*color: white;*/
     /*background-color: #08c;*/
-}
-
-.tag-link {
-    text-decoration: none;
-    color: white;
-}
-
-.tag-link:hover {
-    background-color: initial;
-    text-decoration: underline;
 }
 
 .button-link {
@@ -522,8 +512,6 @@ li.menu-item:hover {
 
 
 .nav-top {
-  /*background-color: #9cc;*/
-  /* background-color: black; */
   width: 100%;
   float: left;
   margin-top: 40px;
@@ -589,12 +577,11 @@ li.menu-item:hover {
     padding-left: 3px;
 }
 
-/** base END **/
-
 .form-control {
     width: 100%;
 }
 
+/** Tags **/
 .tag {
     font-size: small;
     background-color: green;
@@ -602,6 +589,16 @@ li.menu-item:hover {
     border-radius: 0px;
     padding: 3px;
     margin-right: 2px;
+}
+
+.tag-link {
+    text-decoration: none;
+    color: white;
+}
+
+.tag-link:hover {
+    background-color: initial;
+    text-decoration: underline;
 }
 
 .inline-tag {
@@ -998,7 +995,7 @@ li.menu-item:hover {
     color: #08c;
 }
 
-.grid-title {
+.grid-title, .card-title {
     width: 100%;
     float: left;
     padding-left: 5px;

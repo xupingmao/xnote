@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/01/18 01:14:05
+# @modified 2019/01/19 19:20:57
 from io import StringIO
 import xconfig
 import codecs
@@ -24,6 +24,8 @@ from xutils import cacheutil
 from xutils import Storage
 from xutils import textutil, SearchResult, u
 
+MAX_HISTORY = 200
+
 def link(name, url):
     return Storage(name = name, url = url, link = url)
 
@@ -32,7 +34,7 @@ def list_plugins():
     if not os.path.isdir(dirname):
         return []
     links = []
-    recent_names = cacheutil.zrange("plugins.history", -50, -1)
+    recent_names = cacheutil.zrange("plugins.history", -MAX_HISTORY, -1)
     recent_names.reverse()
     plugins_list = os.listdir(dirname)
     plugins_list = set(plugins_list) - set(recent_names)
@@ -129,6 +131,7 @@ class PluginsListHandler:
 
 TEMPLATE = '''# -*- coding:utf-8 -*-
 # @since $since
+# @author $author
 import os
 import re
 import math
@@ -180,9 +183,11 @@ class NewPluginHandler(BasePlugin):
                 name += ".py"
             if os.path.exists(name):
                 return "文件[%s]已经存在!" % name
+            user_name = xauth.get_current_name()
             code = xconfig.get("NEW_PLUGIN_TEMPLATE", TEMPLATE)
             code = code.replace("$since", xutils.format_datetime())
-            xutils.savetofile(name, code)
+            code = code.replace("$author", user_name)
+            xutils.writefile(name, code)
             log_plugin_visit(os.path.basename(name))
             raise web.seeother('/code/edit?path=%s' % name)
 

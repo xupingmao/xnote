@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/01/15 02:30:12
+@modified 2019/01/19 19:17:35
 */
 
 body {
@@ -89,7 +89,7 @@ body {
     border-radius: 5px;
 }
 
-.grid-title {
+.grid-title, .card-title {
     background-color: #fff;
 }
 

@@ -33,3 +33,20 @@
     </div>
 {% end %}
 
+<script type="text/javascript">
+$(function () {
+    function updateTime () {
+        $(".currentTime").html(new Date().format("yyyy-MM-dd HH:mm:ss"));
+        setTimeout(updateTime, 1000);
+    }
+    updateTime();
+})
+
+
+function runCommand(path) {
+    // alert("runCommand "+ path);
+    $.get("/system/command", {path: path}, function(data, status) {
+        alert(data);
+    })
+}
+</script>

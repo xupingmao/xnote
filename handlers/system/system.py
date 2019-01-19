@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/01/17 01:48:22
+# @modified 2019/01/19 19:18:31
 """System functions"""
 from io import StringIO
 import xconfig
@@ -79,7 +79,7 @@ other_tools = [
     link("URL编解码", "/tools/urlcoder"),
     link("条形码生成", "/tools/barcode"),
     link("二维码生成", "/tools/qrcode"),
-    link("随机生成器", "/tools/random_string"),
+    link("随机字符串", "/tools/random_string"),
     # 其他工具
     link("分屏模式", "/tools/multi_win"),
     link("RunJS", "/tools/runjs"),
