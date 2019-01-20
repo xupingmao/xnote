@@ -129,13 +129,21 @@
 
 <div id="controlArea" class="col-md-12">
     <div class="float-left">
+        <!-- 查看文件 -->
         <input type="button" class="btn" value="{{T('Select All')}}" id="selectAllBtn"/>
         <input type="button" class="btn" value="预览图片" id="previewImg"/>
+        
+        <!-- 导入文件 -->
+        <input type="button" class="btn" value="上传" id="uploadFileBtn" >
         <input type="button" class="btn" value="新建文件" id="addFile"/>
         <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
+
+        <!-- 管理文件 -->
+        <input type="button" class="btn" value="删除" id="deleteBtn"/>
         <input type="button" class="btn" value="重命名" id="renameBtn" message="重命名为">
         <input type="button" class="btn" value="剪切" id="cutBtn" message="剪切"/>
-        <input type="button" class="btn" value="上传" id="uploadFileBtn" >
+
+        <!-- 其他选项 -->
         <input type="button" class="btn advanced-opt mobile-hidden" value="本地浏览" id="openDirectory"/>
         <input type="button" class="link-btn" href="/fs_recent" value="{{ T('Recent Files') }}"/>
         <input type="button" data-path="{{path}}" onclick="openFileOption(this)" value="更多"/>
@@ -234,6 +242,7 @@ $(function () {
     $("#addDirectory").on("click", function (target) {
         createFile("directory");
     });
+
     $("#addFile").click(function () {
         createFile("file");
     });
@@ -248,28 +257,48 @@ $(function () {
     })
 
     window.removeFile = function(path) {
-        var conf = confirm("确认删除 '%s' ?".format(path));
-        if (!conf) {
-            return;
-        }
-        $.post("/fs_api/remove", {path: path}, function (resp) {
-            if (resp.code == "success") {
-                location.reload();
-            } else {
-                showErrorMessage("删除失败, %s".format(resp.message));
+        var pathlist = path;
+        if (path instanceof Array) {
+            if (!confirm("确认删除%s个文件?".format(path.length))) {
+                return;
             }
-        }).fail(function (resp) {
-            console.log(resp);
-            showErrorMessage("删除失败");
-        })
+        } else {
+            var name = /([^\/\\]+)[\\\/]?$/.exec(path)[1]
+            if (!confirm("确认删除 '%s' ?".format(name))) {
+                return;
+            }
+            pathlist = [path];
+        }
+        var rest = pathlist.length;
+        for (var i = 0; i < pathlist.length; i++) {
+            rest--;
+            var path = pathlist[i];        
+            $.post("/fs_api/remove", {path: path}, function (resp) {
+                if (resp.code == "success" && rest <= 0) {
+                    location.reload();
+                } else {
+                    showErrorMessage("删除失败, %s".format(resp.message));
+                }
+            }).fail(function (resp) {
+                console.log(resp);
+                showErrorMessage("删除失败");
+            })
+        }
     }
 
-    $("#deleteFile").on("click", function () {
-        var checked = $(".checkboxTd :checked");
+    $("#deleteBtn").on("click", function () {
+        var checked = $(":checked");
         if (checked.length == 0) {
             alert("请选择文件");
         } else if (checked.length > 1) {
-            alert("不支持批量删除");
+            var pathlist = []
+            $(":checked").each(function (index, element) {
+                var name = $(element).attr("data-name");
+                var path = $(element).attr("data-path");
+                pathlist.push(path);
+            });
+
+            removeFile(pathlist);
         } else {
             var name = checked.attr("data-name");
             var path = checked.attr("data-path");
@@ -278,7 +307,7 @@ $(function () {
     });
 
     $("#renameBtn").on("click", function () {
-        var checked = $(".checkboxTd :checked");
+        var checked = $(":checked");
         if (checked.length == 0) {
             alert("请选择文件");
         } else if (checked.length > 1) {
@@ -364,8 +393,8 @@ $(function () {
                         window.location.reload();
                     }, 500);
                 }
-            }).fail(function () {
-                // 
+            }).fail(function (err) {
+                console.error(err);
             });
         });
     })

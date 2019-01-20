@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/01/13 16:16:05
+# @modified 2019/01/20 16:52:38
 import profile
 import math
 import re
@@ -125,6 +125,7 @@ class ViewHandler:
             show_aside    = show_aside,
             html_title    = title,
             file          = file, 
+            note_id       = id,
             op            = op,
             show_mdate    = show_mdate,
             show_add_file = show_add_file,

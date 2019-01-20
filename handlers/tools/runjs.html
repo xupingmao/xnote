@@ -53,13 +53,17 @@
 </div>
 
 <div class="card">
-    <h3>函数说明</h3>
-    <p><code>print(msg)</code>输出结果</p>
-    <p><code>println(msg)</code>输出换行结果</p>
-    <p><code>dir(obj)</code>查看对象属性</p>
+    <h1 class="card-title">函数说明</h1>
+    <pre>
+print(msg)   输出结果
+println(msg) 输出换行结果,也可以使用console.log
+dir(obj)     查看对象属性
+    </pre>
 </div>
 
 <script type="text/javascript">
+    var _console = console;
+
     $(function () {
         var editor = $("#input")[0];
         var codeMirror = CodeMirror.fromTextArea(editor, {
@@ -81,14 +85,23 @@
         // 不能随便换行
         return typeName == "string" || typeName == "number" || typeName == "boolean"
     }
-    function print(msg) {
+
+    function print(msg, color) {
+        color = color || "black";
         $("#output").text($("#output").text() + msg);
     }
-    function println(msg) {
-        if (msg==undefined) {
-            msg="";
+
+    function println() {
+        for (var i = 0; i < arguments.length; i++) {
+            var arg = arguments[i];
+            print(arg);
         }
-        print(msg+"\n")
+        print("\n");
+    }
+
+    function console_clear() {
+        $("#error").text("");
+        $("#output").text("");
     }
 
     function dir(obj) {
@@ -115,12 +128,31 @@
         // eval接受一个参数string,eval会改变window对象
         // eval(string)
         try {
-            $("#error").text("");
-            $("#output").text("");
+            console_clear();
+
+            window.console = {
+                "log": println,
+                "info": println,
+                "warn": println,
+                "error": println,
+                "clear": console_clear,
+                "assert": _console.assert,
+                "count": _console.count,
+                "group": _console.group,
+                "groupCollapsed": _console.groupCollapsed,
+                "groupEnd": _console.groupEnd,
+                "table": _console.table,
+                "time": _console.time,
+                "timeEnd": _console.timeEnd,
+                "trace": _console.trace
+            };
+
             var output = eval(input);
             // $("#output").text(output);
         } catch (e) {
             $("#error").text(e);
+        } finally {
+            window.console = _console;
         }
     }
 </script>

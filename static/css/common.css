@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/01/19 19:35:01
+@modified 2019/01/19 20:08:04
 */
 
 * {
@@ -1001,7 +1001,11 @@ li.menu-item:hover {
     padding-left: 5px;
     border-left: 5px solid #039BE5;
     background: #efefef;
+    margin-top: 0px;
     margin-bottom: 5px;
+    font-family: arial,"Sim Sun";
+    font-weight: bold;
+    font-size: 14px;
 }
 
 .grid-row {

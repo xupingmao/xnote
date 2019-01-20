@@ -4,6 +4,7 @@
 {% init show_groups = False %}
 {% init groups = [] %}
 {% init parent_id = "" %}
+{% init note_id = "" %}
 {% init note_plugins = xmanager.find_plugins("note") %}
 
 <div class="aside-item">
@@ -21,7 +22,7 @@
             <li><a class="link" href="/note/taglist">{{T("Tag List")}}</a></li>
 
             {% for p in note_plugins %}
-                <li><a class="link" href="/plugins/{{p.name}}">{{p.title}}</a></li>
+                <li><a class="link" href="/plugins/{{p.name}}?note_id={{note_id}}">{{p.title}}</a></li>
             {% end %}
         </ul>
     </div>

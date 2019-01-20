@@ -7,7 +7,7 @@
 .gallery-item {
     float: left;
     width: 120px;
-    height: 150px;
+    height: 160px;
     text-align: center;
     overflow: hidden;
     border:1px solid #ccc;
@@ -21,7 +21,7 @@
 }
 
 
-.gallery-item>div {
+.icon-box {
     width:100%;
     height:120px;
     line-height:120px;
@@ -81,7 +81,7 @@
     
     {% if parent_path %}
     <div class="gallery-item">
-        <div>
+        <div class="icon-box">
             <img class="fs-icon" src="/static/image/folder2.png">
         </div>
         <a href="/fs/{{parent_path}}?mode=grid">上级目录</a>
@@ -100,7 +100,7 @@
 
     {% if not item.name.startswith("._") %}
         <div class="gallery-item">
-            <div>
+            <div class="icon-box">
                 {% if item.type == "dir" %}
                     <img class="fs-icon" src="/static/image/folder2.png">
                 {% elif xutils.is_img_file(item.path) %}
@@ -111,6 +111,7 @@
                     <img class="fs-icon" src="/static/image/file2.png">
                 {% end %}
             </div>
+            <input type="checkbox" class="float-left" data-path="{{item.path}}" data-name="{{item.name}}">
             <a href="/fs/{{item.path}}?mode=grid">{{item.name}}</a>
         </div>
     {% end %}
