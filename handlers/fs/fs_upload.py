@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/01/10 22:42:45
+# @modified 2019/01/21 23:10:17
 import os
 import uuid
 import web
@@ -96,7 +96,7 @@ class RangeUploadHandler:
             filename = xutils.get_real_path(filename)
             if dirname == "auto":
                 if prefix:
-                    prefix = xauth.get_current_name() + '@' + prefix + '_'
+                    prefix = xauth.get_current_name() + '@' + prefix + '$'
                 else:
                     prefix = xauth.get_current_name() + '@'
                 filepath, webpath = xutils.get_upload_file_path(filename, replace_exists=True, prefix=prefix)

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/01/13 16:11:04
+# @modified 2019/01/21 01:01:07
 import codecs
 import os
 import platform
@@ -43,9 +43,15 @@ def readfile(path, mode = "r", limit = -1):
             last_err = e
     raise Exception("can not read file %s" % path, last_err)
 
-def readlines(fpath):
+def readlines(fpath, limit = -1):
     with open(fpath, encoding="utf-8") as fp:
-        return fp.readlines()
+        if limit <= 0:
+            return fp.readlines()
+        else:
+            lines = []
+            for n in range(limit):
+                lines.append(fp.readline())
+            return lines
 
 # readfile别名
 readFile  = readfile

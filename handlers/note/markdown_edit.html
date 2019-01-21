@@ -343,7 +343,7 @@
         uploader.on('uploadBeforeSend', function (object, data, headers) {
             $('#uploadProgress').find('.progress').remove();
             data.dirname = "auto";
-            data.prefix = "{{file.id}}";
+            data.prefix = "N{{file.id}}";
             data.type = "html5";
         })
 

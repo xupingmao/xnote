@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/01/02 22:32:47
+# @modified 2019/01/21 23:34:24
 
 '''xnote系统配置
 
@@ -112,6 +112,8 @@ IP_BLACK_LIST    = ["192.168.56.1"] # this is vbox ip
 MAX_FILE_SIZE    = 10 * 1024 ** 2
 # 文本编辑器的最大文件限制
 MAX_TEXT_SIZE    = 100 * 1024
+# 文件系统列分隔符，文件名保留符号参考函数 xutils.get_safe_file_name(filename)
+FS_COL_SEP       = "$"
 # 是否隐藏系统文件
 FS_HIDE_FILES    = True
 # 文件管理扩展的选项,类型Storage

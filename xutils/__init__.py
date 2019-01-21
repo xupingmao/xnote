@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/01/17 01:22:16
+# @modified 2019/01/21 23:31:08
 
 """
 xnote工具类总入口
@@ -202,8 +202,9 @@ def get_upload_file_path(filename,
         replace_exists = False, 
         prefix=""):
     """生成上传文件名"""
+    filename = get_safe_file_name(filename)
     if xconfig.USE_URLENCODE:
-        filename = get_safe_file_name(filename)
+        filename = quote_unicode(filename)
     basename, ext = os.path.splitext(filename)
     date = time.strftime("%Y/%m")
     dirname = xconfig.DATA_PATH + data_dir + "/" + date + "/"
@@ -396,8 +397,10 @@ def encode_uri_component(url):
     return quoted
 
 def get_safe_file_name(filename):
-    filename = filename.replace(" ", "_")
-    return quote_unicode(filename)
+    """处理文件名中的特殊符号"""
+    for c in " @$:#\\|":
+        filename = filename.replace(c, "_")
+    return filename
 
 #################################################################
 ##   Platform/OS Utilities, Python 2 do not have this file
