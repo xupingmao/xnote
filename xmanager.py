@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/01/17 01:34:15
+# @modified 2019/01/26 16:36:27
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -12,6 +12,7 @@ from __future__ import print_function
 import os
 import sys
 import gc
+import re
 import traceback
 import time
 import copy
@@ -28,8 +29,6 @@ import xauth
 import threading
 from threading import Thread, Timer, current_thread
 from xutils import Storage, Queue, tojson, MyStdout, cacheutil
-
-config = xconfig
 
 __version__      = "1.0"
 __author__       = "xupingmao (578749341@qq.com)"
@@ -121,8 +120,7 @@ def warn(msg):
     six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
 
 class ModelManager:
-    """
-    模块管理器
+    """模块管理器
     启动时自动加载`handlers`目录下的处理器以及定时任务
     """
 
@@ -174,7 +172,7 @@ class ModelManager:
         self.failed_mods = []
         # remove all event handlers
         remove_handlers()
-        self.load_model_dir(config.HANDLERS_DIR)
+        self.load_model_dir(xconfig.HANDLERS_DIR)
         
         self.mapping += self.basic_mapping
         self.mapping += self.last_mapping
@@ -200,7 +198,7 @@ class ModelManager:
         del namelist[0]
         return "/" + "/".join(namelist)
         
-    def load_model_dir(self, parent = config.HANDLERS_DIR):
+    def load_model_dir(self, parent = xconfig.HANDLERS_DIR):
         dirname = parent.replace(".", "/")
         if not os.path.exists(dirname):
             return
@@ -465,7 +463,7 @@ class EventHandler:
 
         func_name = get_func_abs_name(func)
 
-        if self.description != "" and self.description is not None:
+        if self.description:
             self.key = "%s:%s" % (func_name, self.description)
         else:
             self.key = func_name
@@ -480,7 +478,7 @@ class EventHandler:
                 self.func(ctx)
                 if self.profile:
                     stop  = time.time()
-                    xutils.trace("EventHandler",  self.key, int((stop-start)*1000))
+                    xutils.trace("EventHandler", self.key, int((stop-start)*1000))
             except:
                 xutils.print_exc()
 
@@ -493,6 +491,25 @@ class EventHandler:
         if self.is_async:
             return "<EventHandler %s async>" % self.key
         return "<EventHandler %s>" % self.key
+
+class SearchHandler(EventHandler):
+
+    def execute(self, ctx=None):
+        try:
+            matched = self.pattern.match(ctx.key)
+            if not matched:
+                return
+            start = time.time()
+            ctx.groups = matched.groups()
+            self.func(ctx)
+            stop = time.time()
+            xutils.trace("SearchHandler", self.key, int((stop-start))*1000)
+        except:
+            xutils.print_exc()
+
+    def __str__(self):
+        return "<SearchHandler /%s/ %s>" % (self.pattern.pattern, self.key)
+
 
 def get_func_abs_name(func):
     module = inspect.getmodule(func)
@@ -507,8 +524,7 @@ def get_func_abs_name(func):
     # return basename + "." + func.__name__
 
 class EventManager:
-    """
-    事件管理器，每个事件由一个执行器链组成，执行器之间有一定的依赖性
+    """事件管理器，每个事件由一个执行器链组成，执行器之间有一定的依赖性
     @since 2018/01/10
     """
     _handlers = dict()
@@ -538,7 +554,6 @@ class EventManager:
             self._handlers = dict()
         else:
             self._handlers[event_type] = []
-
 
 # 对外接口
 _manager       = None
@@ -639,11 +654,14 @@ def put_task(func, *args):
     """添加异步任务到队列"""
     WorkerThread._task_queue.put([func, args])
 
+
 def load_tasks():
     _manager.load_tasks()
 
+
 def get_task_list():
     return _manager.get_task_list()
+
 
 def request(*args, **kw):
     global _manager
@@ -651,25 +669,28 @@ def request(*args, **kw):
     # localpart='/', method='GET', data=None, host="0.0.0.0:8080", headers=None, https=False, **kw
     return _manager.app.request(*args, **kw)
 
+
 def add_handler(handler):
     _event_manager.add_handler(handler)
 
+
 def remove_handlers(event_type=None):
     _event_manager.remove_handlers(event_type)
+
 
 def set_handlers0(event_type, handlers, is_async=False):
     _event_manager.remove_handlers(event_type)
     for handler in handlers:
         _event_manager.add_handler(event_type, handler, is_async)
 
+
 def fire(event_type, ctx=None):
-    '''发布一个事件'''
+    """发布一个事件"""
     _event_manager.fire(event_type, ctx)
 
+
 def listen(event_type_list, is_async = False, description = None):
-    """
-    事件监听器注解
-    """
+    """事件监听器注解"""
     def deco(func):
         if isinstance(event_type_list, list):
             for event_type in event_type_list:
@@ -683,6 +704,16 @@ def listen(event_type_list, is_async = False, description = None):
                 is_async = is_async, 
                 description = description)
             _event_manager.add_handler(handler)
+        return func
+    return deco
+
+
+def searchable(pattern = r".*", description = None):
+    """搜索装饰器"""
+    def deco(func):
+        handler = SearchHandler("search", func, description = description)
+        handler.pattern = re.compile(pattern)
+        _event_manager.add_handler(handler)
         return func
     return deco
 

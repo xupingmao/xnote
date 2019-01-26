@@ -57,10 +57,12 @@ def parse_int(value):
     # value = ''.join(vlist)
     return int(value)
 
-def search(ctx, delay_mins_str, message):
+@xmanager.searchable(r"(\d+)分钟后提醒我?(.*)")
+def search(ctx):
     if not xauth.is_admin():
-        return []
-
+        return
+    delay_mins_str = ctx.groups[0]
+    message = ctx.groups[1]
     delay_mins = parse_int(delay_mins_str)
     millis = time.time() + int(delay_mins) * 60
     tm = time.localtime(millis)
@@ -73,13 +75,17 @@ def search(ctx, delay_mins_str, message):
     result.raw = "提醒创建成功，将于%s点%s分提醒 %s" % (tm_hour, tm_min, message)
     result.url = "/system/crontab"
     xutils.say(result.raw)
-    return [result]
+    ctx.tools.append(result)
 
 time_pattern = re.compile(r"([0-9])点(半?)([0-9]*)")
 
-def by_time(ctx, period, time_str, message):
+@xmanager.searchable(r"(上午|下午)(.*)提醒我?(.*)")
+def by_time(ctx):
     if not xauth.is_admin():
         return None
+    period = ctx.groups[0]
+    time_str = ctx.groups[1]
+    message = ctx.groups[2]
     print(period, time_str, message)
     v = time_pattern.findall(time_str)
     if len(v) > 0:
@@ -96,9 +102,13 @@ def by_time(ctx, period, time_str, message):
         add_alarm(tm_hour, tm_min, message)
         out = "提醒创建成功，将于%s点%s分提醒%s" % (tm_hour, tm_min, message)
         xutils.say(out)
-        return [SearchResult("提醒", "/system/crontab", out)]
+        ctx.tools.append(SearchResult("提醒", "/system/crontab", out))
 
+@xmanager.searchable(r"(.*)日提醒我?(.*)")
 def by_date(ctx, date_str, message):
     if not xauth.is_admin():
         return None
     print(date_str, message)
+    date_str = ctx.groups[0]
+    message = ctx.groups[1]
+

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/01/19 19:20:57
+# @modified 2019/01/26 16:17:23
 from io import StringIO
 import xconfig
 import codecs
@@ -91,7 +91,7 @@ def load_plugin(name):
     else:
         return context.clazz
 
-@xmanager.listen("search")
+@xmanager.searchable()
 def on_search_plugins(ctx):
     if not xauth.is_admin():
         return

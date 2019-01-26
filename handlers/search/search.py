@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2019/01/13 16:16:05
+# @modified 2019/01/26 16:45:40
 
 import re
 import os
@@ -53,6 +53,8 @@ class SearchContext:
         # 输入的文本
         self.key              = ''
         self.input_text       = ''
+        # 正则匹配的分组
+        self.groups           = []
         self.user_name        = ''
         self.search_message   = False
         self.search_file      = True
@@ -203,19 +205,13 @@ def load_rules():
     global rules_loaded
     if rules_loaded:
         return
-    add_rule(r"(.*[0-9]+.*)",           "calc.do_calc")
-    add_rule(r"([a-zA-Z0-9\.]+)",       "pydoc.search")
-    add_rule(r"[a-zA-Z\-]+", "dictionary.find")
-    add_rule(r"([^ ]*)",                "tools.search")
     add_rule(r"([^ ]*)",                "api.search")
-    add_rule(r"(\d+)分钟后提醒我?(.*)", "reminder.search")
-    add_rule(r"(上午|下午)(.*)提醒我?(.*)", "reminder.by_time")
-    add_rule(r"(.*)日提醒我?(.*)","reminder.by_date")
     add_rule(r"静音(.*)",               "mute.search")
     add_rule(r"mute(.*)",               "mute.search")
     add_rule(r"取消静音",               "mute.cancel")
     add_rule(r"(.*)", "note.search")
     rules_loaded = True
+
 
 xurls = (
     r"/search/search", handler, 

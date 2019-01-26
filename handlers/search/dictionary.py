@@ -1,9 +1,8 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2018/10/14 11:36:02
+# @modified 2019/01/26 16:39:24
 
-"""
-英汉、汉英词典
+"""英汉、汉英词典
 
 dictDTB结构
     _id integer primary key autoincrement,
@@ -42,14 +41,10 @@ def search(ctx, word):
     dicts = xutils.db_execute(path, sql, (word,))
     return wrap_results(dicts, "en")
 
-@xmanager.listen("search")
+@xmanager.searchable(r"翻译|定义|define|translate\s*([^\s]+)")
 def do_translate(ctx):
-    key    = ctx.key
-    result = re.match(r"翻译\s*([^\s]+)", key)
-    if result:
-        word = result.groups()[0]
-    else:
-        return
+    key  = ctx.key
+    word = ctx.groups[0]
     word = word.strip().lower()
     path = os.path.join(xconfig.DATA_PATH, "dictionary.db")
     if not os.path.exists(path):
@@ -64,7 +59,8 @@ def do_translate(ctx):
             vars = dict(value = '%' + word + '%', user = user_name))
     ctx.tools += wrap_results(dicts, "key")
 
-def find(ctx, *args):
+@xmanager.searchable(r"[a-zA-Z\-]+")
+def translate_english(ctx):
     """使用词库进行部分模糊匹配"""
     if not ctx.search_dict:
         return
@@ -73,8 +69,9 @@ def find(ctx, *args):
     user_name = ctx.user_name
     db = xtables.get_dictionary_table()
     results = db.select(where="key like $key AND (user=$user OR user='')", vars=dict(key=ctx.input_text + "%", user=user_name))
-    files = []
     for item in results:
         value = item.value.replace("\\n", "\n")
-        files.append(Storage(name="翻译 - %s" % item.key, raw=value, url="#"))
-    return files
+        ctx.tools.append(Storage(name="翻译 - %s" % item.key, raw=value, url="#"))
+
+
+

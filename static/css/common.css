@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/01/19 20:08:04
+@modified 2019/01/23 01:01:25
 */
 
 * {
@@ -49,6 +49,10 @@ pre {
 }
 
 .marked-strong {
+    color: red;
+}
+
+.marked-strong>a {
     color: red;
 }
 

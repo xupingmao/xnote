@@ -169,7 +169,7 @@
 
     // 重写strong
     myRenderer.strong = function (text) {
-        return '<strong class="marked-strong">' + text + '</strong>';
+        return '<strong class="marked-strong"><a href="/s/' + text + '">' + text + '</a></strong>';
     }
 
     myRenderer.table = function(header, body) {

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
 # Copyright (c) 2017
-# @modified 2018/09/22 23:38:03
+# @modified 2019/01/26 16:41:07
 """Description here"""
 
 import os
@@ -28,11 +28,13 @@ def search_menu(files, name):
             if text_contains(u(child.name), u(name)):
                 files.append(Storage(name = '菜单 - ' + child.name, url = child.url))
 
-def search(ctx, name):
+@xmanager.searchable(r"([^ ]+)")
+def search(ctx):
     # six.print_(xconfig)
     # 查找`handlers/tools/`目录下的工具
     if not ctx.search_tool:
         return
+    name = ctx.key
     tools_path = xconfig.TOOLS_DIR
     files = []
     basename_set = set()
@@ -62,7 +64,8 @@ def search(ctx, name):
         f.url = "/tools/qrcode?content=" + name
         files.append(f)
     search_menu(files, name)
-    return files
+    
+    ctx.tools += files
 
 @xutils.cache(key="ip_list", expire=3600)
 def get_ip_list(blacklist = []):
@@ -92,16 +95,15 @@ def get_server_ip():
     ip_list = get_ip_list(blacklist)
     return ip_list[0]
 
-@xmanager.listen('search')
+@xmanager.searchable('addr')
 def show_addr_qrcode(ctx):
-    if ctx.input_text == "addr":
-        r = SearchResult()
-        addr = "http://" + get_server_ip() + ":" + str(xconfig.PORT)
-        r.url = addr
-        r.name = '地址 - %s' % addr
-        r.html = '''<script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
-        <div id='qrcode'></div>
-        <script>$("#qrcode").qrcode('%s');</script>
-        ''' % addr
-        ctx.tools.append(r)
+    r = SearchResult()
+    addr = "http://" + get_server_ip() + ":" + str(xconfig.PORT)
+    r.url = addr
+    r.name = '地址 - %s' % addr
+    r.html = '''<script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
+    <div id='qrcode'></div>
+    <script>$("#qrcode").qrcode('%s');</script>
+    ''' % addr
+    ctx.tools.append(r)
 

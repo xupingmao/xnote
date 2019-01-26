@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2018/10/02 17:39:03
+# @modified 2019/01/26 16:22:43
 import re
 import xmanager
 import xutils
@@ -15,7 +15,9 @@ def safe_check(expression):
         return m.group()
     return None
 
-def do_calc(ctx, expression):
+@xmanager.searchable(r"(.*[0-9]+.*)")
+def do_calc(ctx):
+    expression = ctx.key
     if expression.startswith("calc"):
         expression = expression[4:]
     expression = expression.strip()
@@ -25,15 +27,12 @@ def do_calc(ctx, expression):
     try:
         value = eval(exp)
         if str(value) == exp:
-            return None
+            return
         f = SearchResult()
         f.url = "#"
         f.name = "计算结果"
         f.raw = str(value)
-        return [f]
+        ctx.tools.append(f)
     except Exception as e:
         xutils.print_exc()
-        return []
 
-# xmanager.register_search_func(r"calc(.*)", do_calc)
-# xmanager.register_search_func(r"(.*[0-9]+.*)", try_calc)

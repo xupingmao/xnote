@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/14
-# @modified 2018/11/19 01:16:02
+# @modified 2019/01/26 16:18:29
 import os
 import six
 import xconfig
@@ -26,7 +26,7 @@ def search_scripts(name):
             results.append(result)
     return results
 
-@xmanager.listen("search")
+@xmanager.searchable()
 def on_search_scripts(ctx):
     if not xauth.is_admin():
         return None
@@ -38,7 +38,7 @@ def on_search_scripts(ctx):
     ctx.tools += search_scripts(name)
 
 
-@xmanager.listen("search")
+@xmanager.searchable()
 def on_search_books(ctx):
     if not xauth.is_admin():
         return
