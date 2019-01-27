@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2019/01/26 16:39:24
+# @modified 2019/01/27 00:56:00
 
 """英汉、汉英词典
 
@@ -41,10 +41,10 @@ def search(ctx, word):
     dicts = xutils.db_execute(path, sql, (word,))
     return wrap_results(dicts, "en")
 
-@xmanager.searchable(r"翻译|定义|define|translate\s*([^\s]+)")
+@xmanager.searchable(r"(翻译|定义|define|def|translate)\s+([^\s]+)")
 def do_translate(ctx):
     key  = ctx.key
-    word = ctx.groups[0]
+    word = ctx.groups[1]
     word = word.strip().lower()
     path = os.path.join(xconfig.DATA_PATH, "dictionary.db")
     if not os.path.exists(path):

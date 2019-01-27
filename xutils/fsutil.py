@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/01/21 01:01:07
+# @modified 2019/01/27 01:16:23
 import codecs
 import os
 import platform
@@ -144,14 +144,17 @@ def open_directory(dirname):
 def get_file_size(filepath, format=True):
     try:
         st = os.stat(filepath)
-        if st and st.st_size > 0:
+        if st and st.st_size >= 0:
             if format:
                 return format_size(st.st_size)
             else:
                 return st.st_size
-        return "-"
     except OSError as e:
+        pass
+    if format:
         return "-"
+    else:
+        return -1
 
 
 def get_relative_path(path, parent):

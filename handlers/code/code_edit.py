@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/??/??
+# @modified 2019/01/27 01:09:38
 
 """显示代码原文"""
 import os
@@ -25,7 +26,7 @@ class ViewSourceHandler:
 
     @xauth.login_required("admin")
     def GET(self, path=""):
-        template_name = "code/view_source.html"
+        template_name = "code/code_edit.html"
         path = xutils.get_argument("path", "")
         key  = xutils.get_argument("key", "")
         type = xutils.get_argument("type", "")
@@ -81,7 +82,7 @@ class UpdateHandler(object):
         else:
             content = content.replace("\r\n", "\n")
             xutils.savetofile(path, content)
-            raise web.seeother("/code/view_source?path=" + xutils.quote_unicode(path))
+            raise web.seeother("/code/edit?path=" + xutils.quote_unicode(path))
         
 
 xurls = (

@@ -1,6 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2019/01/26 16:45:40
+# @since 2017/02/19
+# @modified 2019/01/26 16:55:58
 
 import re
 import os
@@ -91,6 +92,9 @@ def log_search_history(user, key):
         history = history[-xconfig.SEARCH_HISTORY_MAX_SIZE:]
     cacheutil.set(cache_key, history)
 
+def list_search_history(user_name):
+    return list(reversed(xutils.cache_get("%s@search_history" % user_name, [])))
+
 class handler:
 
     def do_search(self, key, offset, limit):
@@ -180,8 +184,8 @@ class handler:
         if key == "" or key == None:
             return xtemplate.render("search/search_result.html", 
                 show_aside = False,
-                recent = list(reversed(xutils.cache_get("%s@search_history" % user_name, []))),
-                html_title = "搜索",
+                recent = list_search_history(user_name),
+                html_title = "Search",
                 category = category, 
                 files    = [], 
                 count    = 0)
@@ -193,7 +197,7 @@ class handler:
         return xtemplate.render("search/search_result.html", 
             show_aside = False,
             key = key,
-            html_title = "搜索",
+            html_title = "Search",
             category = category,
             files    = files, 
             title    = title,
