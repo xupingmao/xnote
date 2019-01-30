@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/01/26 16:55:58
+# @modified 2019/01/29 01:39:39
 
 import re
 import os
@@ -83,7 +83,7 @@ def log_search_history(user, key):
     cache_key = "%s@search_history" % user
     history = cacheutil.get(cache_key)
     if isinstance(history, list):
-        if key in history:
+        while key in history:
             history.remove(key)
         history.append(key)
     else:

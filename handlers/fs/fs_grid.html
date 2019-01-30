@@ -10,7 +10,7 @@
     height: 160px;
     text-align: center;
     overflow: hidden;
-    border:1px solid #ccc;
+    border:1px solid #eee;
 }
 
 @media screen and (max-width: 400px) {
@@ -70,6 +70,7 @@
 
 {% block body %}
 
+{% import xutils.textutil as textutil %}
 {% init parent_path = None %}
 
 <div class="card">
@@ -77,46 +78,46 @@
     {% include mod_fs_path.html %}
     {% include fs/fs_options.html %}
 
-<div class="file-list">
-    
-    {% if parent_path %}
-    <div class="gallery-item">
-        <div class="icon-box">
-            <img class="fs-icon" src="/static/image/folder2.png">
-        </div>
-        <a href="/fs/{{parent_path}}?mode=grid">上级目录</a>
-    </div>
-    {% end %}
-
-{% for item in filelist %}
-    {# 隐藏文件 #}
-    {% if item.name == "" %}
-        {% continue %}
-    {% end %}
-    
-    {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." or item.name.endswith((".pyc", ".class"))) %}
-        {% continue %}
-    {% end %}
-
-    {% if not item.name.startswith("._") %}
+    <div class="file-list">
+        
+        {% if parent_path %}
         <div class="gallery-item">
             <div class="icon-box">
-                {% if item.type == "dir" %}
-                    <img class="fs-icon" src="/static/image/folder2.png">
-                {% elif xutils.is_img_file(item.path) %}
-                    <img class="x-photo" src="/fs/{{item.path}}">
-                {% elif xutils.is_text_file(item.path) %}
-                    <img class="fs-icon" src="/static/image/icon_txt.png">
-                {% else %}
-                    <img class="fs-icon" src="/static/image/file2.png">
-                {% end %}
+                <img class="fs-icon" src="/static/image/folder2.png">
             </div>
-            <input type="checkbox" class="float-left" data-path="{{item.path}}" data-name="{{item.name}}">
-            <a href="/fs/{{item.path}}?mode=grid">{{item.name}}</a>
+            <a href="/fs/{{parent_path}}?mode=grid">上级目录</a>
         </div>
-    {% end %}
-{% end %}
-</div>
+        {% end %}
+
+        {% for item in filelist %}
+            {# 隐藏文件 #}
+            {% if item.name == "" %}
+                {% continue %}
+            {% end %}
+            
+            {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." or item.name.endswith((".pyc", ".class"))) %}
+                {% continue %}
+            {% end %}
+
+            {% if not item.name.startswith("._") %}
+                <div class="gallery-item">
+                    <div class="icon-box">
+                        {% if item.type == "dir" %}
+                            <img class="fs-icon" src="/static/image/folder2.png">
+                        {% elif xutils.is_img_file(item.path) %}
+                            <img class="x-photo" src="/fs/{{item.path}}">
+                        {% elif xutils.is_text_file(item.path) %}
+                            <img class="fs-icon" src="/static/image/icon_txt.png">
+                        {% else %}
+                            <img class="fs-icon" src="/static/image/file2.png">
+                        {% end %}
+                    </div>
+                    <input type="checkbox" class="float-left" data-path="{{item.path}}" data-name="{{item.name}}">
+                    <a href="/fs/{{item.path}}?mode=grid">{{textutil.get_short_text(item.name, 10)}}</a>
+                </div>
+            {% end %}
+        {% end %}
+    </div>
 
 </div>
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/01/21 23:10:17
+# @modified 2019/01/30 00:16:31
 import os
 import uuid
 import web
@@ -19,8 +19,23 @@ def get_link(filename, webpath):
         return "![%s](%s)" % (filename, webpath)
     return "[%s](%s)" % (filename, webpath)
 
-def generate_filename(ext):
-    return xauth.get_current_name() + '@' + time.strftime("%Y%m%d_%H%M%S") + ext
+def get_safe_file_name(filename):
+    """处理文件名中的特殊符号"""
+    for c in " @$:#\\|":
+        filename = filename.replace(c, "_")
+    return filename
+
+def generate_filename(filename, prefix, ext = None):
+    if prefix:
+        prefix = xauth.get_current_name() + '@' + prefix + '@'
+    else:
+        prefix = xauth.get_current_name() + '@'
+    if filename is None:
+        filename = time.strftime("%Y%m%d_%H%M%S")
+    filename = get_safe_file_name(filename)
+    if ext:
+        filename += ext
+    return prefix + filename
 
 class UploadHandler:
 
@@ -36,9 +51,9 @@ class UploadHandler:
             basename, ext = os.path.splitext(filename)
             if name == "auto":
                 # filename = str(uuid.uuid1()) + ext
-                filename = generate_filename(ext)
+                filename = generate_filename(None, prefix, ext)
             # xutils.makedirs(dirname)
-            filepath, webpath = xutils.get_upload_file_path(filename, prefix = prefix)
+            filepath, webpath = xutils.get_upload_file_path(filename)
             # filename = xutils.quote(os.path.basename(x.file.filename))
             with open(filepath, "wb") as fout:
                 # fout.write(x.file.file.read())
@@ -95,11 +110,8 @@ class RangeUploadHandler:
             filename = os.path.basename(file.filename)
             filename = xutils.get_real_path(filename)
             if dirname == "auto":
-                if prefix:
-                    prefix = xauth.get_current_name() + '@' + prefix + '$'
-                else:
-                    prefix = xauth.get_current_name() + '@'
-                filepath, webpath = xutils.get_upload_file_path(filename, replace_exists=True, prefix=prefix)
+                filename = generate_filename(filename, prefix)
+                filepath, webpath = xutils.get_upload_file_path(filename, replace_exists=True)
                 dirname  = os.path.dirname(filepath)
                 filename = os.path.basename(filepath)
 

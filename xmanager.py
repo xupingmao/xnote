@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/01/26 16:36:27
+# @modified 2019/01/31 00:35:13
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -27,6 +27,7 @@ import xtables
 import xutils
 import xauth
 import threading
+from collections import deque
 from threading import Thread, Timer, current_thread
 from xutils import Storage, Queue, tojson, MyStdout, cacheutil
 
@@ -431,11 +432,10 @@ class TaskThread(Thread):
         self.func(*self.args)
 
 class WorkerThread(Thread):
-    """
-    执行任务队列的线程，内部有一个队列，所有线程共享
+    """执行任务队列的线程，内部有一个队列，所有线程共享
     """
     
-    _task_queue = Queue()
+    _task_queue = deque()
     
     def __init__(self, name="WorkerThread"):
         super(WorkerThread, self).__init__()
@@ -444,10 +444,14 @@ class WorkerThread(Thread):
 
     def run(self):
         while True:
-            # queue默认是block模式
-            func, args = self._task_queue.get()
+            # queue.Queue默认是block模式
+            # 但是deque没有block模式，popleft可能抛出IndexError异常
             try:
-                func(*args)
+                if self._task_queue:
+                    func, args = self._task_queue.popleft()
+                    func(*args)
+                else:
+                    time.sleep(0.01)
             except Exception as e:
                 xutils.print_exc()
 
@@ -652,7 +656,7 @@ def find_plugins(category):
 
 def put_task(func, *args):
     """添加异步任务到队列"""
-    WorkerThread._task_queue.put([func, args])
+    WorkerThread._task_queue.append([func, args])
 
 
 def load_tasks():

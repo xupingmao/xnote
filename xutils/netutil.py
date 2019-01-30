@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/12/16 21:48:42
+# @modified 2019/01/29 01:40:19
 # decode: bytes -> str
 # encode: str -> bytes
 import os
@@ -8,12 +8,14 @@ import codecs
 import six
 import socket
 
+# TODO fix SSLV3_ALERT_HANDSHAKE_FAILURE on MacOS
 try:
     # try py3 first
     from http.client import HTTPConnection
-    from urllib.request import urlopen
+    from urllib.request import urlopen, Request
+
 except ImportError as e:
-    from urllib2 import urlopen
+    from urllib2 import urlopen, Request
 
 BUFSIZE = 1024 * 512
 
@@ -158,7 +160,11 @@ def http_post(url, body='', charset='utf-8'):
 def http_download(address, destpath = None, dirname = None):
     bufsize = BUFSIZE
     address = get_http_url(address)
-    stream = urlopen(address)
+    headers = {
+        "User-Agent": USER_AGENT
+    }
+    request = Request(address, headers = headers)
+    stream = urlopen(request)
     chunk = stream.read(bufsize)
     if dirname is not None:
         basename = os.path.basename(address)
