@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/01/21 23:34:24
+# @modified 2019/01/31 00:52:38
 
 '''xnote系统配置
 
@@ -241,6 +241,7 @@ def init(path = DATA_DIR):
     global DATA_ZIP
     global TRASH_DIR
     global LOG_PATH
+    global LOG_DIR
     global LOG_FILE
     global STORAGE_DIR
     global ETC_DIR
@@ -265,6 +266,7 @@ def init(path = DATA_DIR):
     LOG_PATH     = os.path.join(DATA_DIR, "xnote.log")
     STORAGE_DIR  = os.path.join(DATA_DIR, "etc")
     ETC_DIR      = os.path.join(DATA_DIR, "etc")
+    LOG_DIR      = os.path.join(DATA_DIR, "log")
     DB_FILE      = DB_PATH
     LOG_FILE     = LOG_PATH
 
@@ -276,6 +278,7 @@ def init(path = DATA_DIR):
     makedirs(TRASH_DIR)
     makedirs(STORAGE_DIR)
     makedirs(ETC_DIR)
+    makedirs(LOG_DIR)
 
 
 def get(name, default_value=None):

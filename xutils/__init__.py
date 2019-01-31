@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/01/30 00:10:44
+# @modified 2019/01/31 00:51:35
 
 """
 xnote工具类总入口
@@ -405,6 +405,10 @@ def get_safe_file_name(filename):
 ##   Platform/OS Utilities, Python 2 do not have this file
 #################################################################
 
+def get_log_path():
+    fname = time.strftime("xnote.%Y-%m-%d.log")
+    return os.path.join(xconfig.LOG_DIR, fname)
+
 def log(fmt, show_logger = False, fpath = None, *argv):
     fmt = u(fmt)
     if len(argv) > 0:
@@ -422,7 +426,7 @@ def log(fmt, show_logger = False, fpath = None, *argv):
         message = "%s %s" % (format_time(), message)
     print(message)
     if fpath is None:
-        fpath = xconfig.LOG_PATH
+        fpath = get_log_path()
     with open(fpath, "ab") as fp:
         fp.write((message+"\n").encode("utf-8"))
 
@@ -430,7 +434,7 @@ def log(fmt, show_logger = False, fpath = None, *argv):
 def trace(scene, message, cost=0):
     import xauth
     # print("   ", fmt.format(*argv))
-    fpath = xconfig.LOG_PATH
+    fpath = get_log_path()
     full_message = "%s|%s|%s|%sms|%s" % (format_time(), 
         xauth.get_current_name(), scene, cost, message)
     print(full_message)

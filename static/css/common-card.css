@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/01/19 19:17:35
+@modified 2019/01/31 01:02:12
 */
 
 body {
@@ -10,10 +10,10 @@ body {
 }
 
 .menu-link:hover {
-    color: white;
-    background-color: #08c;
-    text-decoration: none;
-    border-radius: 3px;
+    /*color: white;*/
+    /*background-color: #08c;*/
+    /*text-decoration: none;*/
+    /*border-radius: 3px;*/
 }
 
 

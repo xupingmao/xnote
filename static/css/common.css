@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/01/23 01:01:25
+@modified 2019/01/31 01:05:56
 */
 
 * {
@@ -189,9 +189,10 @@ a:hover {
 }
 
 .menu-link:hover {
-    color: white;
-    background-color: #08c;
-    text-decoration: none;
+    /*color: white;*/
+    /*background-color: #08c;*/
+    /*text-decoration: none;*/
+    text-decoration: underline;
 }
 
 /* TAB页的链接样式 */
