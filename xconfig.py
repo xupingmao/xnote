@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/01/31 00:52:38
+# @modified 2019/02/02 19:01:19
 
 '''xnote系统配置
 
@@ -264,8 +264,8 @@ def init(path = DATA_DIR):
     DATA_ZIP     = os.path.join(DATA_DIR, "data.zip")
     TRASH_DIR    = os.path.join(DATA_DIR, "trash")
     LOG_PATH     = os.path.join(DATA_DIR, "xnote.log")
-    STORAGE_DIR  = os.path.join(DATA_DIR, "etc")
-    ETC_DIR      = os.path.join(DATA_DIR, "etc")
+    STORAGE_DIR  = os.path.join(DATA_DIR, "storage")
+    ETC_DIR      = os.path.join(DATA_DIR, "storage")
     LOG_DIR      = os.path.join(DATA_DIR, "log")
     DB_FILE      = DB_PATH
     LOG_FILE     = LOG_PATH

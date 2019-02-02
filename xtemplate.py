@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/01/17 00:46:33
+# @modified 2019/02/02 13:09:44
 import os
 import json
 import web
@@ -271,7 +271,7 @@ class BasePlugin:
                 self.show_aside = True
         except:
             error = xutils.print_exc()
-        return render("plugins/text.html",
+        return render("plugins/base_plugin.html",
             model       = self,
             script_name = globals().get("script_name"),
             description = self.description,
@@ -311,15 +311,6 @@ class BasePlugin:
 
     def POST(self):
         return self.render()
-
-    @staticmethod
-    def is_visible(target):
-        """插件是否可见
-        @param {object} target 目标对象
-            - {str} type 文件类型 {dir, file, note, system}
-            - {str} path 文件路径
-        """
-        return False
 
 BaseTextPage   = BasePlugin
 BaseTextPlugin = BasePlugin

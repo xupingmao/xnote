@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/01/31 00:35:13
+# @modified 2019/02/02 13:10:40
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -507,7 +507,7 @@ class SearchHandler(EventHandler):
             ctx.groups = matched.groups()
             self.func(ctx)
             stop = time.time()
-            xutils.trace("SearchHandler", self.key, int((stop-start))*1000)
+            xutils.trace("SearchHandler", self.key, int((stop-start)*1000))
         except:
             xutils.print_exc()
 
