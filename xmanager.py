@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/02/02 13:10:40
+# @modified 2019/02/06 13:51:05
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -411,7 +411,7 @@ class TaskManager:
             tm_wday = "*", tm_hour="11", tm_min="0", 
             message = "", sound=0, webpage=0, id=None)
         self.task_list.append(backup_task)
-            
+
     def save_tasks(self):
         self.load_tasks()
         

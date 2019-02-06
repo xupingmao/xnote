@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/01/29 01:40:19
+# @modified 2019/02/03 00:05:04
 # decode: bytes -> str
 # encode: str -> bytes
 import os
@@ -80,6 +80,8 @@ class HttpResource:
             >>> HttpResource("http://www.a.com/a").get_res_url("b.png")
             'http://www.a.com/a/b.png'
         """
+        if not url:
+            return None
         if url.startswith(("http://", "https://")):
             return url
         if url.startswith("//"):

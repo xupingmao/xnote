@@ -1,14 +1,22 @@
 # encoding=utf-8
-# @modified 2019/01/27 01:16:23
+# @modified 2019/02/06 14:22:04
 import codecs
 import os
 import platform
 import xutils
 import base64
 import time
+import xconfig
 from .imports import *
 from . import logutil
 from web.utils import Storage
+
+def get_real_path(path):
+    if path == None:
+        return None
+    if xconfig.USE_URLENCODE:
+        return quote_unicode(path)
+    return path
 
 def makedirs(dirname):
     '''检查并创建目录(如果不存在不报错)'''
@@ -54,7 +62,6 @@ def readlines(fpath, limit = -1):
             return lines
 
 # readfile别名
-readFile  = readfile
 read      = readfile
 read_utf8 = readfile
 
@@ -80,13 +87,51 @@ def readbytes(path):
         bytes = fp.read()
     return bytes
 
-def remove_file(fullpath, raiseIfNotExists = False):
-    if os.path.exists(fullpath):
-        os.remove(fullpath)
-    elif raiseIfNotExists:
-        raise Error("file not exits!")
+def rmfile(path, hard = False):
+    """删除文件，默认软删除，移动到trash目录中，如果已经在trash目录或者硬删除，从磁盘中抹除
+    """
+    path = get_real_path(path)
+    if not os.path.exists(path):
+        return
+    if os.path.isfile(path):
+        if hard:
+            os.remove(path)
+            return
+        dirname = os.path.dirname(path)
+        dirname = os.path.abspath(dirname)
+        dustbin = os.path.abspath(xconfig.TRASH_DIR)
+        if dirname == dustbin:
+            os.remove(path)
+        else:
+            fname = os.path.basename(path)
+            name, ext = os.path.splitext(fname)
+            suffix = 0
+            while True:
+                suffix += 1
+                destpath = os.path.join(dustbin, "%s@%s@%s%s" % (name, time.strftime("%Y%m%d"), suffix, ext))
+                if not os.path.exists(destpath):
+                    break
+            # os.rename(path, destpath)
+            # shutil.move 可以跨磁盘分区移动文件
+            shutil.move(path, destpath)
+        # os.remove(path)
+    elif os.path.isdir(path):
+        if hard:
+            shutil.rmtree(path)
+            return
+        path = path.rstrip("/")
+        basename = os.path.basename(path)
+        target = os.path.join(xconfig.TRASH_DIR, basename)
+        target = os.path.abspath(target)
+        path   = os.path.abspath(path)
+        if target == path:
+            # 已经在回收站，直接删除文件夹
+            shutil.rmtree(path)
+        else:
+            shutil.move(path, target)
 
-remove = remove_file
+remove = rmfile
+remove_file = rmfile
 
 def copy(src, dest):
     bufsize = 64 * 1024 # 64k
@@ -109,9 +154,9 @@ def get_file_ext(fname):
     if '.' not in fname:return ''
     return fname.split('.')[-1]
 
-def format_file_size(size):
+def format_size(size):
     """
-        >>> format_file_size(10240)
+        >>> format_size(10240)
         '10.00K'
     """
     if size < 1024:
@@ -123,9 +168,10 @@ def format_file_size(size):
     else:
         return '%.2fG' % (float(size) / 1024 ** 3)
 
-format_size = format_file_size
-formatSize  = format_size
-        
+
+def format_file_size(fpath):
+    """获取文件大小"""
+    return get_file_size(fpath, format=True)
 
 def rename_file(srcname, dstname):
     destDirName = os.path.dirname(dstname)
@@ -140,8 +186,7 @@ def open_directory(dirname):
     elif platform.system() == "Darwin":
         os.popen("open %s" % dirname)
 
-
-def get_file_size(filepath, format=True):
+def get_file_size(filepath, format=False):
     try:
         st = os.stat(filepath)
         if st and st.st_size >= 0:
@@ -341,15 +386,48 @@ def search_path(path, key):
         result = _search_path0(path, quoted_key)
     return result + _search_path0(path, key)
 
-def get_pretty_file_size(path = None, size = 0):
-    if size is None:
-        size = os.stat(path).st_size
-    if size < 1024:
-        return '%sB' % size
-    elif size < 1024 **2:
-        return '%.2fK' % (float(size) / 1024)
-    elif size < 1024 ** 3:
-        return '%.2fM' % (float(size) / 1024 ** 2)
-    else:
-        return '%.2fG' % (float(size) / 1024 ** 3)
-    
+
+def backupfile(path, backup_dir = None, rename=False):
+    if os.path.exists(path):
+        if backup_dir is None:
+            backup_dir = os.path.dirname(path)
+        name   = os.path.basename(path)
+        newname = name + ".bak"
+        newpath = os.path.join(backup_dir, newname)
+        # need to handle case that bakup file exists
+        import shutil
+        shutil.copyfile(path, newpath)
+
+
+def get_upload_file_path(filename, data_dir = "/files", 
+        replace_exists = False, prefix = ""):
+    """生成上传文件名"""
+    if xconfig.USE_URLENCODE:
+        filename = quote_unicode(filename)
+    basename, ext = os.path.splitext(filename)
+    date = time.strftime("%Y/%m")
+    dirname = xconfig.DATA_PATH + data_dir + "/" + date + "/"
+
+    origin_filename = dirname + filename
+    makedirs(dirname)
+    fileindex = 1
+
+    if prefix != "" and prefix != None:
+        filename = prefix + filename
+        webpath = "/data{}/{}/{}".format(data_dir, date, filename)
+        return dirname + filename, webpath
+    newfilepath = origin_filename
+    webpath = "/data{}/{}/{}".format(data_dir, date, filename)
+    if filename == "":
+        # get upload directory
+        return os.path.abspath(dirname), webpath
+
+    while not replace_exists and os.path.exists(newfilepath):
+        name, ext = os.path.splitext(filename)
+        # 使用下划线，括号会使marked.js解析图片url失败
+        temp_filename = "{}_{}{}".format(name, fileindex, ext)
+        newfilepath = dirname + temp_filename
+        webpath = "/data{}/{}/{}".format(data_dir, date, temp_filename)
+        fileindex+=1
+    return os.path.abspath(newfilepath), webpath
+

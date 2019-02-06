@@ -78,7 +78,7 @@ def get_user_password(name):
     users = _get_users()
     return users[name]["password"]
 
-def get_current_user():
+def current_user():
     if xconfig.IS_TEST:
         return get_user("admin")
     user = get_user_from_token()
@@ -91,15 +91,17 @@ def get_current_user():
     if has_login(xuser):
         return get_user(xuser)
     return None
+get_current_user = current_user
 
-def get_current_name():
+def current_name():
     """获取当前用户名"""
     user = get_current_user()
     if user is None:
         return None
     return user.get("name")
+get_current_name = current_name
 
-def get_current_role():
+def current_role():
     """获取当前用户的角色"""
     user = get_current_user()
     if user is None:
@@ -109,6 +111,7 @@ def get_current_role():
         return "admin"
     else:
         return "user"
+get_current_role = current_role
 
 def get_md5_hex(pswd):
     pswd_md5 = hashlib.md5()

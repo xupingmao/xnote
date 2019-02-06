@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/01/31 00:51:35
+# @modified 2019/02/06 14:10:19
 
 """
 xnote工具类总入口
@@ -138,98 +138,6 @@ class MyStdout:
 ##   File System Utilities
 ##   @see fsutil
 #################################################################
-
-def backupfile(path, backup_dir = None, rename=False):
-    if os.path.exists(path):
-        if backup_dir is None:
-            backup_dir = os.path.dirname(path)
-        name   = os.path.basename(path)
-        newname = name + ".bak"
-        newpath = os.path.join(backup_dir, newname)
-        # need to handle case that bakup file exists
-        import shutil
-        shutil.copyfile(path, newpath)
-        
-def get_real_path(path):
-    if path == None:
-        return None
-    if xconfig.USE_URLENCODE:
-        return quote_unicode(path)
-    return path
-
-def remove_file(path, hard = False):
-    """
-    删除文件，默认软删除，也就是移动到trash目录中
-    """
-    path = get_real_path(path)
-    if not os.path.exists(path):
-        return
-    if os.path.isfile(path):
-        if hard:
-            os.remove(path)
-            return
-        dirname = os.path.dirname(path)
-        dirname = os.path.abspath(dirname)
-        dustbin = os.path.abspath(xconfig.TRASH_DIR)
-        if dirname == dustbin:
-            os.remove(path)
-        else:
-            name = os.path.basename(path)
-            destpath = os.path.join(dustbin, "%s_%s" % (time.strftime("%Y%m%d"), name))
-            # os.rename(path, destpath)
-            # shutil.move 可以跨磁盘分区移动文件
-            shutil.move(path, destpath)
-        # os.remove(path)
-    elif os.path.isdir(path):
-        if hard:
-            shutil.rmtree(path)
-            return
-        path = path.rstrip("/")
-        basename = os.path.basename(path)
-        target = os.path.join(xconfig.TRASH_DIR, basename)
-        target = os.path.abspath(target)
-        path   = os.path.abspath(path)
-        if target == path:
-            # 已经在回收站，直接删除文件夹
-            shutil.rmtree(path)
-        else:
-            shutil.move(path, target)
-
-remove = remove_file
-
-def get_upload_file_path(filename, 
-        data_dir="/files", 
-        replace_exists = False, 
-        prefix=""):
-    """生成上传文件名"""
-    if xconfig.USE_URLENCODE:
-        filename = quote_unicode(filename)
-    basename, ext = os.path.splitext(filename)
-    date = time.strftime("%Y/%m")
-    dirname = xconfig.DATA_PATH + data_dir + "/" + date + "/"
-
-    origin_filename = dirname + filename
-    makedirs(dirname)
-    fileindex = 1
-
-    if prefix != "" and prefix != None:
-        filename = prefix + filename
-        webpath = "/data{}/{}/{}".format(data_dir, date, filename)
-        return dirname + filename, webpath
-    newfilepath = origin_filename
-    webpath = "/data{}/{}/{}".format(data_dir, date, filename)
-    if filename == "":
-        # get upload directory
-        return os.path.abspath(dirname), webpath
-
-    while not replace_exists and os.path.exists(newfilepath):
-        name, ext = os.path.splitext(filename)
-        # 使用下划线，括号会使marked.js解析图片url失败
-        temp_filename = "{}_{}{}".format(name, fileindex, ext)
-        newfilepath = dirname + temp_filename
-        webpath = "/data{}/{}/{}".format(data_dir, date, temp_filename)
-        fileindex+=1
-    return os.path.abspath(newfilepath), webpath
 
 def is_img_file(filename):
     """根据文件后缀判断是否是图片"""
@@ -400,6 +308,9 @@ def get_safe_file_name(filename):
     for c in " @$:#\\|":
         filename = filename.replace(c, "_")
     return filename
+
+def md5_hex(string):
+    return hashlib.md5(string.encode("utf-8")).hexdigest()
 
 #################################################################
 ##   Platform/OS Utilities, Python 2 do not have this file

@@ -2,7 +2,7 @@
 # 专门用来import各种依赖
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
-# @modified 2018/12/30 12:53:08
+# @modified 2019/02/06 14:14:44
 from __future__ import print_function
 import sys
 import os
@@ -21,6 +21,7 @@ import web
 import xconfig
 import subprocess
 import pickle
+import hashlib
 from xconfig import Storage
 from collections import deque
 from fnmatch import fnmatch
@@ -30,7 +31,7 @@ from web.utils import safestr, safeunicode
 try:
     import sqlite3
 except ImportError:
-    sqlite3 = None # jython
+    sqlite3 = None # sqlite3 is not available, may be jython
 
 try:
     import bs4

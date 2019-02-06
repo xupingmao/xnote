@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2019/01/06 20:05:41
+# @modified 2019/02/06 10:16:08
 import os
 import re
 import xauth
@@ -67,15 +67,18 @@ class handler:
             return dict(code = "fail", message = "file `%s` not exists" % path)
 
         basename, ext = os.path.splitext(path)
-        bookmarkpath = basename + ".bookmark"
-        bookmark = dict()
-        if os.path.exists(bookmarkpath):
-            try:
-                bookmark = json.loads(xutils.readfile(bookmarkpath))
-                if not isinstance(bookmark, dict):
-                    bookmark = dict()
-            except:
-                pass
+        key = "bookmark@%s@%s" % (xauth.current_name(), xutils.md5_hex(path))
+        bookmark = xutils.cache_get(key, {})
+        # bookmarkpath = '%s@%s.bookmark' % (xauth.get_current_name(), basename)
+        # bookmark = dict()
+        # if os.path.exists(bookmarkpath):
+        #     try:
+        #         bookmark = json.loads(xutils.readfile(bookmarkpath))
+        #         if not isinstance(bookmark, dict):
+        #             bookmark = dict()
+        #     except:
+        #         pass
+
         page = bookmark.get("page", 0)
         size = xutils.get_file_size(path, format=False)
 
@@ -94,6 +97,7 @@ class handler:
             if read == "true":
                 xutils.say(text)
             if direction in ("forward", "backward"):
-                xutils.savetofile(bookmarkpath, json.dumps(bookmark))
+                # xutils.writefile(bookmarkpath, json.dumps(bookmark))
+                xutils.cache_put(key, bookmark)
         return dict(code="success", data=text, page=page, current=current, size=size)
 
