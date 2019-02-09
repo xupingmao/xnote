@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/02/06 22:55:45
+# @modified 2019/02/09 18:35:23
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -311,9 +311,7 @@ def init_record_table():
         manager.add_index(["type", "ctime"])
 
 def init_storage_table():
-    """
-    通用的配置对象, 比词典多一个type，用来存储个人的一些设置之类的
-    """
+    """通用的配置对象, 比词典多一个type，用来存储个人的一些设置之类的"""
     dbpath = os.path.join(xconfig.DATA_DIR, "data.db")
     with TableManager(dbpath, "storage") as manager:
         manager.add_column("ctime", "text", "")
@@ -325,12 +323,9 @@ def init_storage_table():
         manager.add_index("key")
 
 def init_dict_table():
+    """词典，和主库隔离
+    @since 2018/01/14
     """
-    词典 2018/01/14
-    和主库隔离
-    """
-    if not xconfig.DEV_MODE:
-        return
     dbpath = xconfig.DICT_FILE
     with TableManager(dbpath, "dictionary") as manager:
         manager.add_column("ctime", "text", "")
@@ -348,6 +343,9 @@ class MockedDB():
         from web.utils import IterBetter
         return IterBetter(iter([]))
 
+    def select_first(self, *args, **kw):
+        return None
+
     def update(self, *args, **kw):
         return 0
 
@@ -362,8 +360,7 @@ class MockedDB():
         return 0
 
 class DBWrapper:
-    """
-    基于web.db的装饰器
+    """基于web.db的装饰器
     SqliteDB是全局唯一的，它的底层使用了连接池技术，每个线程都有独立的sqlite连接
     """
 
@@ -450,8 +447,7 @@ def get_dict_table():
 get_dictionary_table = get_dict_table
 
 def get_table(name, dbpath = None):
-    """
-    获取数据库表，表的创建和访问不必在xtables中定义
+    """获取数据库表，表的创建和访问不必在xtables中定义
     @since 2019/04/11
     """
     if dbpath is None:

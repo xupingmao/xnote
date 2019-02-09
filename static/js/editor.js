@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2018/02/13
-// @modified 2019/02/08 22:43:52
+// @modified 2019/02/09 18:30:34
 
 
 // var codeMirror = CodeMirror.fromTextArea(editor, {
@@ -61,9 +61,11 @@ function initCodeMirror(selector, options) {
     }
 
     // 补全配置, TODO补上hintWords
-    CodeMirror.defineOption("hintOptions", {
-        "hint": CodeMirror.hint.anyword
-    });
+    if (CodeMirror.hint) {    
+        CodeMirror.defineOption("hintOptions", {
+            "hint": CodeMirror.hint.anyword
+        });
+    }
 
 
     var editor = CodeMirror.fromTextArea($(selector)[0], {
