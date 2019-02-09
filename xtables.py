@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/01/13 16:16:50
+# @modified 2019/02/06 22:55:45
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -110,7 +110,7 @@ class SqliteTableManager:
         # TODO
         pass
 
-    def generate_migrate_sql(self, droped_names):
+    def generate_migrate_sql(self, dropped_names):
         """生成迁移字段的SQL（本质上是迁移）"""
         columns = self.execute("pragma table_info('%s')" % self.tablename, silent=True)
         new_names = []
@@ -119,7 +119,7 @@ class SqliteTableManager:
             name = column["name"]
             type = column["type"]
             old_names.append(name)
-            if name not in droped_names:
+            if name not in dropped_names:
                 new_names.append(name)
         # step1 = "ALTER TABLE %s RENAME TO backup_table;" % (self.tablename)
         step2 = "INSERT INTO %s (%s) \nSELECT %s FROM backup_table;" % (

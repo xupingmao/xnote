@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2018/02/13
-// @modified 2018/10/20 16:14:41
+// @modified 2019/02/08 22:43:52
 
 
 // var codeMirror = CodeMirror.fromTextArea(editor, {
@@ -60,12 +60,19 @@ function initCodeMirror(selector, options) {
         keyMap = "sublime";
     }
 
+    // 补全配置, TODO补上hintWords
+    CodeMirror.defineOption("hintOptions", {
+        "hint": CodeMirror.hint.anyword
+    });
+
+
     var editor = CodeMirror.fromTextArea($(selector)[0], {
         lineNumbers: true,
         mode: mode,
         indentUnit:4,
         lineWrapping: true,
         keyMap: keyMap
+        // extraKeys is defined below.
     });
     editor.setSize("auto", height);
     editor.on("update", function (codeMirror, changeObj) {
@@ -80,9 +87,22 @@ function initCodeMirror(selector, options) {
                 var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
                 cm.replaceSelection(spaces);
             }
-        }
+        },
+        Ctrl: "autocomplete"
     });
 
+    editor.on("keyup", function (cm, e) {
+        // console.log(e);
+        var keyCode = e.keyCode;
+        
+        if ((keyCode >= 97 && keyCode <= 122) 
+            || (keyCode >= 65 && keyCode <= 90)
+            || keyCode == 95
+            || keyCode == 36) {
+            // 字母及其他合法变量字符_$
+            editor.showHint();
+        }
+    });
 
     if (mode == "text/x-python") {
         $("#execute").show();

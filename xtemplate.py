@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/02/02 13:09:44
+# @modified 2019/02/08 23:28:37
 import os
 import json
 import web
@@ -189,6 +189,7 @@ class BasePlugin:
     # 插件的标题
     title = "PluginName"
     description = ""
+    
     # 默认需要管理员权限访问
     require_admin = True
     # 要求的访问权限
@@ -200,6 +201,10 @@ class BasePlugin:
     # 侧边栏自定义HTML
     aside_html = u("")
     show_aside = False
+
+    # 搜索配置
+    search_action = "/search"
+    search_placeholder = None
 
     def __init__(self):
         # 输入框的行数
@@ -284,7 +289,9 @@ class BasePlugin:
             output      = self.output + output,
             css_style   = self.css_style,
             show_aside  = self.show_aside,
-            html        = self.html)
+            html        = self.html,
+            search_action = self.search_action,
+            search_placeholder = self.search_placeholder)
 
     def on_command(self, command):
         """命令行入口"""
