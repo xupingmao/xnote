@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2018/11/18 14:51:10
+# @modified 2019/02/13 21:57:06
 import re
 import random
 from .imports import is_str, ConfigParser
@@ -283,7 +283,7 @@ def edit_distance0(a, b, la, lb, cache=None, replace_step=2):
     return ret
 
 def edit_distance(a,b,replace_step=2):
-    """最小编辑距离算法
+    """最小编辑距离算法(Leven-shtein Distance)
 
         >>> edit_distance('ab', 'a')
         1
@@ -293,6 +293,14 @@ def edit_distance(a,b,replace_step=2):
     cache = [[-1 for i in range(len(b)+1)] for i in range(len(a)+1)]
     return edit_distance0(a,b,len(a),len(b),cache,replace_step)
 
+def jaccard_similarity(str1, str2):
+    """Jaccard/Tanimoto系数"""
+    set1 = set(str1)
+    set2 = set(str2)
+    return float(len(set1.intersection(set2))) / len(set1.union(set2))
+
+def jaccard_distance(str1, str2):
+    return 1.0 - jaccard_similarity(str1, str2)
 
 def random_string(length, chars=ALPHA_NUM):
     """生成随机字符串，默认是字母表+数字"""

@@ -1,4 +1,5 @@
 {% if show_menu %}
+{% init search_placeholder = "搜索或指令" %}
 <div class="nav">
   <!-- 保持对称 -->
   <div class="menu-box float-left">
@@ -29,7 +30,7 @@
   <div class="search-box">
     <form id="searchForm" method="GET" action="{{?search_action,'/search/search'}}">
       <input id="key" name="key" class="nav-search-input" 
-        placeholder="{{?search_placeholder, '搜索或指令'}}" 
+        placeholder="{{search_placeholder}}" 
         value="{{?key}}"/>
       <button class="nav-search-btn">搜</button>
       <input class="hide" name="category" value="{{?category}}" />

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/01/19 19:18:31
+# @modified 2019/02/12 23:48:36
 """System functions"""
 from io import StringIO
 import xconfig
@@ -42,7 +42,7 @@ sys_tools = [
     admin_link("Menu_Modules",  "/system/modules_info"),
     admin_link("SQL",      "/tools/sql"),
     admin_link("Menu_CSS", "/code/edit?type=script&path=user.css"),
-    admin_link("Plugin",   "/plugins_list"),
+    admin_link("Menu_Plugin",   "/plugins_list"),
     admin_link("Shell",    "/tools/shell"),
     link("About System",    "/code/wiki/README.md"),
 ] 

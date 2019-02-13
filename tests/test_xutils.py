@@ -93,6 +93,13 @@ class TestMain(unittest.TestCase):
         self.assertEqual(6, xutils.edit_distance("abc", "def"))
         self.assertEqual(3, xutils.edit_distance("kkabcd", "abc"))
 
+    def test_jaccard_similarity(self):
+        from xutils.textutil import jaccard_similarity, jaccard_distance
+        str1 = 'hello'
+        str2 = 'hell0'
+        self.assertEqual(3.0/5, jaccard_similarity(str1, str2))
+        self.assertEqual(1-3.0/5, jaccard_distance(str1, str2))
+
     def test_bs4(self):
         html = "<p>hello<p><p>world</p>"
         if xutils.bs4 is not None:

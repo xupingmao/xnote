@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/01/26 16:17:23
+# @modified 2019/02/09 22:31:59
 from io import StringIO
 import xconfig
 import codecs
@@ -29,17 +29,9 @@ MAX_HISTORY = 200
 def link(name, url):
     return Storage(name = name, url = url, link = url)
 
-def list_plugins():
-    dirname = xconfig.PLUGINS_DIR
-    if not os.path.isdir(dirname):
-        return []
+def build_plugin_links(dirname, fnames):
     links = []
-    recent_names = cacheutil.zrange("plugins.history", -MAX_HISTORY, -1)
-    recent_names.reverse()
-    plugins_list = os.listdir(dirname)
-    plugins_list = set(plugins_list) - set(recent_names)
-
-    for fname in recent_names + sorted(plugins_list):
+    for fname in fnames:
         fpath = os.path.join(dirname, fname)
         if not os.path.exists(fpath):
             continue
@@ -60,6 +52,23 @@ def list_plugins():
         if plugin_context is not None:
             item.title = plugin_context.title
         links.append(item)
+    return links
+
+def list_plugins(category):
+    dirname = xconfig.PLUGINS_DIR
+    if not os.path.isdir(dirname):
+        return []
+
+    if category:
+        plugins = xmanager.find_plugins(category)
+        print(category, plugins)
+        links = build_plugin_links(dirname, [p.fname for p in plugins])
+    else:
+        recent_names = cacheutil.zrange("plugins.history", -MAX_HISTORY, -1)
+        recent_names.reverse()
+        plugins_list = os.listdir(dirname)
+        plugins_list = set(plugins_list) - set(recent_names)
+        links = build_plugin_links(dirname, recent_names + sorted(plugins_list))    
     return links
 
 def list_recent_plugins():
@@ -123,11 +132,12 @@ class PluginsListHandler:
 
     @xauth.login_required("admin")
     def GET(self):
+        category = xutils.get_argument("category", "")
         return xtemplate.render("plugins/plugins.html", 
             html_title = "插件",
             show_aside = xconfig.OPTION_STYLE == "aside",
             recent     = list_recent_plugins(),
-            plugins    = list_plugins())
+            plugins    = list_plugins(category))
 
 TEMPLATE = '''# -*- coding:utf-8 -*-
 # @since $since
