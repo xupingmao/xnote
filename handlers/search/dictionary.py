@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2019/01/27 00:56:00
+# @modified 2019/02/15 22:16:55
 
 """英汉、汉英词典
 
@@ -22,9 +22,10 @@ def wrap_results(dicts, origin_key):
     files = []
     for f0 in dicts:
         f = SearchResult()
+        f.key = u(f0["key"])
+        f.category = "dict"
         f.name = u("翻译 - ") + u(f0[origin_key])
-        f.raw = f0["key"] + "\n"
-        f.raw += f0["value"].replace("\\n", "\n")
+        f.raw = f0["value"].replace("\\n", "\n")
         f.url = "#"
         files.append(f)
     return files
@@ -41,7 +42,9 @@ def search(ctx, word):
     dicts = xutils.db_execute(path, sql, (word,))
     return wrap_results(dicts, "en")
 
-@xmanager.searchable(r"(翻译|定义|define|def|translate)\s+([^\s]+)")
+# \u7ffb\u8bd1 翻译
+# \u5b9a\u4e49 定义
+@xmanager.searchable(r"(\u7ffb\u8bd1|\u5b9a\u4e49|define|def|translate)\s+([^\s]+)")
 def do_translate(ctx):
     key  = ctx.key
     word = ctx.groups[1]
@@ -57,7 +60,7 @@ def do_translate(ctx):
     else:
         dicts = table.select(where="value LIKE $value", 
             vars = dict(value = '%' + word + '%', user = user_name))
-    ctx.tools += wrap_results(dicts, "key")
+    ctx.dicts += wrap_results(dicts, "key")
 
 @xmanager.searchable(r"[a-zA-Z\-]+")
 def translate_english(ctx):
@@ -71,7 +74,8 @@ def translate_english(ctx):
     results = db.select(where="key like $key AND (user=$user OR user='')", vars=dict(key=ctx.input_text + "%", user=user_name))
     for item in results:
         value = item.value.replace("\\n", "\n")
-        ctx.tools.append(Storage(name="翻译 - %s" % item.key, raw=value, url="#"))
+        ctx.dicts.append(Storage(name=u("翻译 - %s") % item.key, key = item.key,
+            raw = value, url = "#", category = "dict"))
 
 
 

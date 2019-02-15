@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/01/29 01:39:39
+# @modified 2019/02/14 00:59:41
 
 import re
 import os
@@ -58,17 +58,17 @@ class SearchContext:
         self.groups           = []
         self.user_name        = ''
         self.search_message   = False
-        self.search_file      = True
-        self.search_file_full = False
+        self.search_note      = True
+        self.search_note_content = False
         self.search_dict      = False
         self.search_tool      = True
         # 是否继续执行，用于最后兜底的搜索，一般是性能消耗比较大的
         self.stop             = False
         
         # 处理的结果集
+        self.dicts    = []
         self.tools    = []
         self.notes    = []
-        self.dicts    = []
         self.messages = []
 
 def fill_note_info(files):
@@ -112,21 +112,21 @@ class handler:
         ctx.words            = words
         ctx.category         = category
         ctx.search_message   = (category == "message")
-        ctx.search_file_full = (category == "content")
+        ctx.search_note_content = (category == "content")
         ctx.search_dict      = (category == "dict")
         ctx.user_name        = user_name
 
         if ctx.search_message:
-            ctx.search_file = False
-            ctx.search_file_full = False
+            ctx.search_note = False
+            ctx.search_note_content = False
             ctx.search_tool = False
         if ctx.search_dict:
-            ctx.search_file = False
+            ctx.search_note = False
             ctx.search_tool = False
-        if ctx.search_file_full:
+        if ctx.search_note_content:
             ctx.search_tool = False
         if ctx.category == "book":
-            ctx.search_file = False
+            ctx.search_note = False
             ctx.search_tool = False
 
         xutils.trace("SearchKey", key)
@@ -156,13 +156,13 @@ class handler:
         log_search_history(user_name, key)
 
         if ctx.stop:
-            return ctx.tools + files
+            return ctx.dicts + ctx.tools + files
 
         # 慢搜索
         xmanager.fire("search.slow", ctx)
         xmanager.fire("search.after", ctx)
 
-        return ctx.tools + files
+        return ctx.dicts + ctx.tools + files
 
     def GET(self, path_key = None):
         """search files by name and content"""

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/01/13 16:16:07
+# @modified 2019/02/15 21:38:45
 
 """资料的DAO操作集合
 
@@ -304,8 +304,21 @@ def count_recent_edit(creator):
     xutils.trace("NoteDao.CountRecentEdit", "", t.cost_millis())
     return count
 
+def count_ungrouped(creator):
+    t = Timer()
+    t.start()
+    count_key = "%s@note.ungrouped.count" % creator
+    count = cacheutil.get(count_key)
+    if count is None:
+        count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
+            vars=dict(creator=creator))
+    t.stop()
+    xutils.trace("NoteDao.CountUngrouped", "", t.cost_millis())
+    return count
+
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.count_recent_edit", count_recent_edit)
+xutils.register_func("note.count_ungrouped", count_ungrouped)
 

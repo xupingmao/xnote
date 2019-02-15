@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2019/02/13 00:34:26
+@modified 2019/02/15 22:19:45
 -->
 
 {% block body %}
@@ -42,6 +42,11 @@
                 {# 插件 #}
                 {% if file.category == "plugin" %}
                     <a class="item-option" href="{{file.edit_link}}">编辑</a>
+                {% end %}
+
+                {# 词典 #}
+                {% if _is_admin and file.category == "dict" %}
+                    <a class="item-option" href="/dict/edit/{{file.key}}">编辑</a>
                 {% end %}
             </div>
             <div class="note-name">

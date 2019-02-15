@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/01/13 16:16:08
+# @modified 2019/02/15 21:42:06
 import web
 import xtables
 import xtemplate
@@ -51,21 +51,12 @@ def list_most_visited():
 class IndexHandler:
 
     def GET(self):
-        t = Timer()
-        t.start()
         groups = xutils.call("note.list_group")
-        t.stop()
-        xutils.log("group time: %s" % t.cost())
-
         notes  = xutils.call("note.list_recent_edit", limit = 10)
-        t.start()
-        ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
-            vars=dict(creator=xauth.get_current_name()))
-        t.stop()
-        xutils.log("recent time: %s" % t.cost())
-
+        ungrouped_count = xutils.call("note.count_ungrouped", xauth.current_name())
         tools = list(filter(tool_filter, list_tools()))[:4]
         return xtemplate.render("index.html", 
+            show_aside      = True,
             ungrouped_count = ungrouped_count,
             groups          = groups,
             notes           = notes,

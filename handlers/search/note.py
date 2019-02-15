@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2019/01/26 16:45:59
+# @modified 2019/02/14 00:59:05
 """搜索知识库文件"""
 import re
 import sys
@@ -119,10 +119,10 @@ def search(ctx, expression=None):
     if len(words) == 0:
         return files
 
-    if ctx.search_file_full:
+    if ctx.search_note_content:
         files += full_search(words, xauth.get_current_name())
     
-    if ctx.search_file:
+    if ctx.search_note:
         files += search_name(words, xauth.get_current_name())
 
     # group 放前面

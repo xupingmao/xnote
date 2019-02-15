@@ -1,0 +1,36 @@
+{% extends base %}
+
+{% block head %}
+<style type="text/css">
+</style>
+{% end %}
+
+{% block body %}
+{% init name = "" %}
+{% init value = "" %}
+
+<div class="card">
+    <h3 class="card-title">词典录入</h3>
+
+    <form method="POST" action="">
+        <table class="table no-border-table">
+            <tr>
+                <td>名称</td>
+                <td><input type="text" class="mid-text" name="name" value="{{name}}" style="width:200px;"/></td>
+            </tr>
+            <tr>
+                <td>解释</td>
+                <td><textarea name="value" rows=5 class="row">{{value}}</textarea></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><button>保存</button></td>
+            </tr>
+        </table>
+    </form>
+</div>
+{% end %}
+
+{% block aside %}
+    {% include note/mod_aside.html %}
+{% end %}
