@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2019/01/08 23:17:27
+# @modified 2019/02/16 01:18:16
 """缓存的实现，API列表如下
 
 * cache(key = None, prefix = None, expire = 600) 缓存装饰器，用于加速函数调用
@@ -26,9 +26,11 @@
 
 参考redis的API
 """
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from .imports import *
+
 _cache_dict = dict()
+_cache_queue = deque()
 
 def encode_key(text):
     """编码key为文件名"""
@@ -52,12 +54,12 @@ class CacheObj:
     每次生成一个会从缓存队列中取出一个检查是否失效，同时把自己放入队列
     TODO 提供按照大小过滤的规则
     """
-    _queue = Queue()
     # 缓存的最大容量，用于集合类型
     max_size = -1
 
     def __init__(self, key, value, expire = -1, type = "object"):
         global _cache_dict
+        global _cache_queue
         
         if key is None:
             raise ValueError("key cannot be None")
@@ -87,17 +89,19 @@ class CacheObj:
             obj.is_force_expired = True
 
         self.save()
-        self._queue.put(self)
+        _cache_queue.append(self)
 
         # find and clear expired cache objects
         try:
             for i in range(3):
-                one = self._queue.get(block=False)
+                if len(_cache_queue) == 0:
+                    break
+                one = _cache_queue.popleft()
                 if one is not None:
                     if one.is_force_expired == True:
                         continue
                     if one.is_alive():
-                        self._queue.put(one)
+                        _cache_queue.append(one)
                     else:
                         one.clear()
         except:

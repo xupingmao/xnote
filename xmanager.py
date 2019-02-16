@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/02/06 13:51:05
+# @modified 2019/02/16 10:56:51
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -644,6 +644,9 @@ def find_plugins(category):
     if role is None:
         # not logged in
         return plugins
+
+    if category == "None":
+        category = None
 
     for fname in xconfig.PLUGINS:
         p = xconfig.PLUGINS.get(fname)

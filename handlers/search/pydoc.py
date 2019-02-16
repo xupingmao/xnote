@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2019/01/26 16:27:58
+# @modified 2019/02/16 01:29:52
 
 """Description here"""
 import sys
 import xmanager
 import xutils
 import xauth
+from xtemplate import T
 
 SearchResult = xutils.SearchResult
 
@@ -18,7 +19,7 @@ def search(ctx):
     name = ctx.groups[0]
     if name in sys.modules:
         item = SearchResult()
-        item.name = "Python Document - %s" % name
+        item.name = T("Python Document") + " - %s" % name
         item.url = "/system/document?name=%s" % name
         item.content = ""
         ctx.tools.append(item)

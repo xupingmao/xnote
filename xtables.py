@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/02/09 18:35:23
+# @modified 2019/02/15 23:17:46
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -295,6 +295,7 @@ def init_collection_table():
         manager.add_column("user", "text", "")
         manager.add_column("name", "text", "")
         manager.add_column("link", "text", "")
+        manager.add_column("type", "text", "")
 
 def init_record_table():
     # 日志库和主库隔离开
@@ -466,7 +467,7 @@ def init():
     init_message_table()
     init_dict_table()
     init_storage_table()
-    # init_collection_table()
+    init_collection_table()
     # 非核心结构记录各种日志数据
     init_record_table()
 

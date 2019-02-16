@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/01/31 01:05:56
+@modified 2019/02/16 01:10:59
 */
 
 * {
@@ -300,7 +300,7 @@ table th {
 }
 table td {
     border-width: 1px;
-    padding: 8px;
+    padding: 5px;
     border-style: solid;
     border-color: #ccc;
     background-color: #ffffff;
@@ -1000,7 +1000,7 @@ li.menu-item:hover {
     color: #08c;
 }
 
-.grid-title, .card-title {
+.grid-title, .card-title, .card>h1,.card>h2,.card>h3,.card>h4 {
     width: 100%;
     float: left;
     padding-left: 5px;

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/02/08 23:28:37
+# @modified 2019/02/16 11:03:18
 import os
 import json
 import web
@@ -195,7 +195,7 @@ class BasePlugin:
     # 要求的访问权限
     required_role = "admin"
 
-    # 插件分类 {note, dir, system}
+    # 插件分类 {note, dir, system, network}
     category = None
 
     # 侧边栏自定义HTML

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/01/13 16:16:09
+# @modified 2019/02/16 01:35:31
 
 """短消息"""
 import time
@@ -97,7 +97,7 @@ def update_message(id, status):
     if msg.user != xauth.get_current_name():
         return dict(code="fail", message="no permission")
     db.update(status=status, mtime=xutils.format_datetime(), where=dict(id=id))
-    xmanager.fire("message.update", Storage(id=id, status=status, user = msg.user, content=msg.content))
+    xmanager.fire("message.updated", Storage(id=id, status=status, user = msg.user, content=msg.content))
     return dict(code="success")
 
 class FinishMessage:
@@ -148,7 +148,7 @@ class CalendarRule(BaseRule):
         print(date, month, day)
         ctx.type = "calendar"
 
-@xmanager.listen(["message.update", "message.add", "message.remove"])
+@xmanager.listen(["message.updated", "message.add", "message.remove"])
 def expire_message_cache(ctx):
     cacheutil.prefix_del("message.count")
 

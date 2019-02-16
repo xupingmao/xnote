@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/01/13 16:17:50
+# @modified 2019/02/16 11:07:40
 
 import sys
 import os
@@ -230,6 +230,9 @@ class TestMain(unittest.TestCase):
 
     def test_dict(self):
         self.check_200("/note/dict")
+
+    def test_dict_edit(self):
+        self.check_200("/dict/edit/test")
 
     def test_fs(self):
         self.check_200("/fs//")
