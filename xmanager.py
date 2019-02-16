@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/02/16 10:56:51
+# @modified 2019/02/16 13:04:24
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -29,7 +29,7 @@ import xauth
 import threading
 from collections import deque
 from threading import Thread, Timer, current_thread
-from xutils import Storage, Queue, tojson, MyStdout, cacheutil
+from xutils import Storage, Queue, tojson, MyStdout, cacheutil, u
 
 __version__      = "1.0"
 __author__       = "xupingmao (578749341@qq.com)"
@@ -512,7 +512,8 @@ class SearchHandler(EventHandler):
             xutils.print_exc()
 
     def __str__(self):
-        return "<SearchHandler /%s/ %s>" % (self.pattern.pattern, self.key)
+        pattern = u(self.pattern.pattern)
+        return "<SearchHandler /%s/ %s>" % (pattern, self.key)
 
 
 def get_func_abs_name(func):
@@ -543,7 +544,8 @@ class EventManager:
         if handler in handlers:
             warn("handler %s is already registered" % handler)
             return
-        xutils.trace("EventRegister", str(handler))
+        # XXX 使用str(handler)在Python2.7环境下报错
+        xutils.trace("EventRegister", "%s" % handler)
         handlers.append(handler)
         self._handlers[event_type] = handlers
 
@@ -719,7 +721,9 @@ def searchable(pattern = r".*", description = None):
     """搜索装饰器"""
     def deco(func):
         handler = SearchHandler("search", func, description = description)
-        handler.pattern = re.compile(pattern)
+        # unicode_pat = r"^%s\Z" % u(pattern)
+        unicode_pat = u(pattern)
+        handler.pattern = re.compile(unicode_pat)
         _event_manager.add_handler(handler)
         return func
     return deco

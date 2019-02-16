@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2019/02/06 10:16:08
+# @modified 2019/02/16 11:45:46
 import os
 import re
 import xauth
@@ -69,6 +69,7 @@ class handler:
         basename, ext = os.path.splitext(path)
         key = "bookmark@%s@%s" % (xauth.current_name(), xutils.md5_hex(path))
         bookmark = xutils.cache_get(key, {})
+        bookmark['path'] = path
         # bookmarkpath = '%s@%s.bookmark' % (xauth.get_current_name(), basename)
         # bookmark = dict()
         # if os.path.exists(bookmarkpath):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/02/06 14:10:19
+# @modified 2019/02/16 13:06:21
 
 """
 xnote工具类总入口
@@ -347,7 +347,7 @@ def trace(scene, message, cost=0):
     # print("   ", fmt.format(*argv))
     fpath = get_log_path()
     full_message = "%s|%s|%s|%sms|%s" % (format_time(), 
-        xauth.get_current_name(), scene, cost, message)
+        xauth.current_name(), scene, cost, message)
     print(full_message)
     with open(fpath, "ab") as fp:
         fp.write((full_message+"\n").encode("utf-8"))

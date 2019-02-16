@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/02/12 23:48:36
+# @modified 2019/02/16 13:05:23
 """System functions"""
 from io import StringIO
 import xconfig
@@ -228,7 +228,7 @@ xurls = (
 def on_reload(ctx = None):
     for key in ('THEME', 'FS_HIDE_FILES', 'OPTION_STYLE', 'PAGE_OPEN'):
         value = cacheutil.hget('sys.config', key)
-        xutils.log("hget key=%s, value=%s" % (key, value))
+        xutils.trace("HGET", "key=%s, value=%s" % (key, value))
         if value is not None:
             setattr(xconfig, key, value)
 

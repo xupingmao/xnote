@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2019/02/15 22:16:55
+# @modified 2019/02/16 12:49:38
 
 """英汉、汉英词典
 
@@ -44,7 +44,7 @@ def search(ctx, word):
 
 # \u7ffb\u8bd1 翻译
 # \u5b9a\u4e49 定义
-@xmanager.searchable(r"(\u7ffb\u8bd1|\u5b9a\u4e49|define|def|translate)\s+([^\s]+)")
+@xmanager.searchable(r"(翻译|定义|define|def|translate)\s+([^\s]+)")
 def do_translate(ctx):
     key  = ctx.key
     word = ctx.groups[1]
