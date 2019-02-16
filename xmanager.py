@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/02/16 13:04:24
+# @modified 2019/02/16 19:51:42
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -717,10 +717,10 @@ def listen(event_type_list, is_async = False, description = None):
     return deco
 
 
-def searchable(pattern = r".*", description = None):
+def searchable(pattern = r".*", description = None, event_type = "search"):
     """搜索装饰器"""
     def deco(func):
-        handler = SearchHandler("search", func, description = description)
+        handler = SearchHandler(event_type, func, description = description)
         # unicode_pat = r"^%s\Z" % u(pattern)
         unicode_pat = u(pattern)
         handler.pattern = re.compile(unicode_pat)

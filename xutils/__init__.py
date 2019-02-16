@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/02/16 13:06:21
+# @modified 2019/02/16 19:50:12
 
 """
 xnote工具类总入口
@@ -77,7 +77,7 @@ def print_table(data, max_length=20, headings = None, ignore_attrs = None):
 
 class SearchResult(dict):
 
-    def __init__(self, name=None, url=None, raw=None):
+    def __init__(self, name=None, url='#', raw=None):
         self.name = name
         self.url = url
         self.raw = raw

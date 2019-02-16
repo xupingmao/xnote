@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/02/16 11:02:51
+# @modified 2019/02/16 22:45:43
 from io import StringIO
 import xconfig
 import codecs
@@ -139,7 +139,7 @@ class PluginsListHandler:
             recent     = list_recent_plugins(),
             plugins    = list_plugins(category))
 
-TEMPLATE = '''# -*- coding:utf-8 -*-
+DEFAULT_PLUGIN_TEMPLATE = '''# -*- coding:utf-8 -*-
 # @since $since
 # @author $author
 import os
@@ -194,12 +194,45 @@ class NewPluginHandler(BasePlugin):
             if os.path.exists(name):
                 return "文件[%s]已经存在!" % name
             user_name = xauth.get_current_name()
-            code = xconfig.get("NEW_PLUGIN_TEMPLATE", TEMPLATE)
+            code = xconfig.get("NEW_PLUGIN_TEMPLATE", DEFAULT_PLUGIN_TEMPLATE)
             code = code.replace("$since", xutils.format_datetime())
             code = code.replace("$author", user_name)
             xutils.writefile(name, code)
             log_plugin_visit(os.path.basename(name))
             raise web.seeother('/code/edit?path=%s' % name)
+
+DEFAULT_COMMAND_TEMPLATE = '''# -*- coding:utf-8 -*-
+# @since $since
+# @author $author
+import os
+import xutils
+
+def main(path = "", confirmed = False, **kw):
+    # your code here
+    pass
+'''
+
+class NewCommandPlugin(BasePlugin):
+    """默认的插件声明入口，定义一个叫做Main的类"""
+
+    def handle(self, input):
+        self.title = '通过模板创建命令扩展'
+        self.description = '''请输入命令扩展名称'''
+        self.btn_text = '创建'
+        self.rows = 1
+        if input != '':
+            name = os.path.join(xconfig.COMMANDS_DIR, input)
+            if not name.endswith(".py"):
+                name += ".py"
+            if os.path.exists(name):
+                return "文件[%s]已经存在!" % name
+            user_name = xauth.get_current_name()
+            code = xconfig.get("NEW_COMMAND_TEMPLATE", DEFAULT_COMMAND_TEMPLATE)
+            code = code.replace("$since", xutils.format_datetime())
+            code = code.replace("$author", user_name)
+            xutils.writefile(name, code)
+            raise web.seeother('/code/edit?path=%s' % name)
+
 
 class PluginsHandler:
 
@@ -226,5 +259,6 @@ class PluginsHandler:
 xurls = (
     r"/plugins_list", PluginsListHandler,
     r"/plugins_new", NewPluginHandler,
+    r"/plugins_new/command", NewCommandPlugin,
     r"/plugins/(.+)", PluginsHandler
 )

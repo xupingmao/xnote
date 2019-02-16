@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/02/06 14:22:04
+# @modified 2019/02/16 19:26:24
 import codecs
 import os
 import platform
@@ -89,6 +89,9 @@ def readbytes(path):
 
 def rmfile(path, hard = False):
     """删除文件，默认软删除，移动到trash目录中，如果已经在trash目录或者硬删除，从磁盘中抹除
+    @param {str} path
+    @param {bool} hard=False 是否硬删除
+    @return {str} path in trash.
     """
     path = get_real_path(path)
     if not os.path.exists(path):
@@ -127,8 +130,10 @@ def rmfile(path, hard = False):
         if target == path:
             # 已经在回收站，直接删除文件夹
             shutil.rmtree(path)
+            return
         else:
             shutil.move(path, target)
+            return target
 
 remove = rmfile
 remove_file = rmfile
@@ -155,7 +160,7 @@ def get_file_ext(fname):
     return fname.split('.')[-1]
 
 def format_size(size):
-    """
+    """格式化大小
         >>> format_size(10240)
         '10.00K'
     """
@@ -165,8 +170,10 @@ def format_size(size):
         return '%.2fK' % (float(size) / 1024)
     elif size < 1024 ** 3:
         return '%.2fM' % (float(size) / 1024 ** 2)
-    else:
+    elif size < 1024 ** 4:
         return '%.2fG' % (float(size) / 1024 ** 3)
+    else:
+        return '%.2fT' % (float(size) / 1024 ** 4)
 
 
 def format_file_size(fpath):
@@ -174,9 +181,9 @@ def format_file_size(fpath):
     return get_file_size(fpath, format=True)
 
 def rename_file(srcname, dstname):
-    destDirName = os.path.dirname(dstname)
-    if not os.path.exists(destDirName):
-        os.makedirs(destDirName)
+    dest_dirname = os.path.dirname(dstname)
+    if not os.path.exists(dest_dirname):
+        os.makedirs(dest_dirname)
     os.rename(srcname, dstname)
 
 

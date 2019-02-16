@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/02/03 00:05:04
+# @modified 2019/02/16 23:03:27
 # decode: bytes -> str
 # encode: str -> bytes
 import os
@@ -7,6 +7,7 @@ import re
 import codecs
 import six
 import socket
+from .imports import try_decode
 
 # TODO fix SSLV3_ALERT_HANDSHAKE_FAILURE on MacOS
 try:
@@ -134,7 +135,7 @@ def do_http(method, url, headers, data=None, charset='utf-8'):
             raise Exception("暂不支持%s编码" % content_encoding)
         return resp.getcode(), response_headers, codecs.decode(buf, charset)
 
-def http_get(url, charset='utf-8'):
+def http_get(url, charset=None):
     """Http的GET请求"""
     out = []
     bufsize = BUFSIZE
@@ -148,7 +149,10 @@ def http_get(url, charset='utf-8'):
         chunk = stream.read(bufsize)
     print("get %s bytes" % readsize)
     bytes = b''.join(out)
-    return codecs.decode(bytes, charset)
+    if charset:
+        return codecs.decode(bytes, charset)
+    else:
+        return try_decode(bytes)
 
 def http_post(url, body='', charset='utf-8'):
     """HTTP的POST请求

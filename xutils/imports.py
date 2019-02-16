@@ -2,7 +2,7 @@
 # 专门用来import各种依赖
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
-# @modified 2019/02/06 14:14:44
+# @modified 2019/02/16 23:05:31
 from __future__ import print_function
 import sys
 import os
@@ -22,6 +22,7 @@ import xconfig
 import subprocess
 import pickle
 import hashlib
+import codecs
 from xconfig import Storage
 from collections import deque
 from fnmatch import fnmatch
@@ -125,3 +126,13 @@ def quote_unicode(url):
     #     text = matched.group()
     #     return quote(text)
     # return re.sub(r"[\u4e00-\u9fa5]+", urlencode, url)
+
+def try_decode(bytes):
+    exc = None
+    for charset in ("utf-8", "gbk", "mbcs", "latin_1"):
+        try:
+            return codecs.decode(bytes, charset)
+        except Exception as e:
+            exc = e
+    raise exc
+

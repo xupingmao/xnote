@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/02/14 00:59:41
+# @modified 2019/02/16 19:47:10
 
 import re
 import os
@@ -131,7 +131,12 @@ class handler:
 
         xutils.trace("SearchKey", key)
 
+        # 阻断性的搜索，比如特定语法的
         xmanager.fire("search.before", ctx)
+        if ctx.stop:
+            return ctx.dicts + ctx.tools + ctx.notes
+
+        # 普通的搜索行为
         xmanager.fire("search", ctx)
 
         for rule in _rules:
