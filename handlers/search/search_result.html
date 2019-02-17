@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2019/02/15 22:19:45
+@modified 2019/02/17 21:00:21
 -->
 
 {% block body %}
@@ -49,9 +49,13 @@
                     <a class="item-option" href="/dict/edit/{{file.key}}">编辑</a>
                 {% end %}
             </div>
+
             <div class="note-name">
                 {% if file.type == "group" %}
                     <img src="/static/image/folder.gif"/>
+                {% end %}
+                {% if file.type == "csv" %}
+                    <img src="/static/image/icon_csv.png"/>
                 {% end %}
                 {% if file.category == "note" %}
                     <a class="dialog-link" href="{{file.url}}">{{file.name}}</a>
@@ -71,14 +75,16 @@
             {# 知识库 #}
             {% if file.category == "note" %}
             <div>
+                {% if file.creator != None %}
+                    <span class="tag gray-tag">{{file.creator}}</span>
+                {% end %}
+
                 {% if hasattr(file, "priority") and file.priority is not None and file.priority > 0 %}
                     <span class="tag red-bg">置顶</span>
                 {% end %}
 
                 {% if file.is_public %}
                     <span class="tag">公开</span>
-                {% elif file.creator != None %}
-                    <span class="tag gray-tag">{{file.creator}}</span>
                 {% end %}
 
                 {% if file.parent_name != None %}
