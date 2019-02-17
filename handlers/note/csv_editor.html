@@ -16,6 +16,8 @@
 }
 </style>
 
+{% include "note/view_header.html" %}
+
 <textarea id="content" class="hide">{{file.content}}</textarea>
 <div id="myParent" class="row">
     <div id="my"></div>
@@ -60,7 +62,8 @@ $(function () {
         colHeaders: head,
         colWidths: colWidths,
         columns: columns,
-        wordWrap: true
+        wordWrap: true,
+        columnSorting: false
     });
 
     $("#saveBtn").click(function () {
