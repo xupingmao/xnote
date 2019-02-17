@@ -115,6 +115,7 @@ img {
     {% init show_add_file   = False %}
     {% init show_add_group  = False %}
     {% init show_path_list  = True %}
+    {% init show_pagination = True %}
     {% init error           = "" %}
 
     {% if file != None %}
@@ -165,12 +166,14 @@ img {
             {% include "note/note_list.html" %}
         {% elif file_type == "group_list" %}
             {% include "note/group_list.html" %}
+        {% elif file_type == "csv" %}
+            {% include note/csv_editor.html %}
         {% else %}
             {% include "note/post.html" %}
         {% end %}
     </div>
 
-    {% if "page" in globals() %}
+    {% if show_pagination and "page" in globals() %}
     <div class="card">
         {% include mod_pagenation.html %}
     </div>

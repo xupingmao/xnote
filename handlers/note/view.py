@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/02/15 00:29:57
+# @modified 2019/02/17 18:17:23
 import profile
 import math
 import re
@@ -41,6 +41,8 @@ class ViewHandler:
         user_name     = xauth.get_current_name()
         show_add_file = False
         title         = None
+        show_pagination = True
+        show_search_div = False
 
         if id == "" and name == "":
             raise HTTPError(504)
@@ -56,7 +58,6 @@ class ViewHandler:
         
         if file.type != "group" and not file.is_public and user_name != "admin" and user_name != file.creator:
             raise web.seeother("/unauthorized")
-        show_search_div = False
         pathlist        = dao.get_pathlist(db, file)
         can_edit        = (file.creator == user_name) or (user_name == "admin")
         role            = xauth.get_current_role()
@@ -97,6 +98,7 @@ class ViewHandler:
             if op == "edit":
                 template_name = "note/markdown_edit.html"
             show_recommend = True
+            show_pagination = False
         else:
             content = file.content
             content = content.replace(u'\xad', '\n')
@@ -106,6 +108,7 @@ class ViewHandler:
             if file.data == None or file.data == "":
                 file.data = content
             show_recommend = True
+            show_pagination = False
 
         if show_recommend:
             show_groups = False
@@ -130,6 +133,7 @@ class ViewHandler:
             show_mdate    = show_mdate,
             show_add_file = show_add_file,
             show_menu     = show_menu,
+            show_pagination = show_pagination,
             can_edit = can_edit,
             pathlist = pathlist,
             page_max = math.ceil(amount/pagesize),

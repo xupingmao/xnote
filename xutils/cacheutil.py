@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2019/02/16 01:18:16
+# @modified 2019/02/16 23:48:54
 """缓存的实现，API列表如下
 
 * cache(key = None, prefix = None, expire = 600) 缓存装饰器，用于加速函数调用
@@ -56,6 +56,7 @@ class CacheObj:
     """
     # 缓存的最大容量，用于集合类型
     max_size = -1
+    valid_key_pattern = re.compile(r"^[0-9a-zA-Z\[\]_\-\.\(\)\@\#,'\"\$ ]+$")
 
     def __init__(self, key, value, expire = -1, type = "object"):
         global _cache_dict
@@ -109,7 +110,7 @@ class CacheObj:
             print_exc()
 
     def is_valid_key(self, key):
-        return re.match(r"^[0-9a-zA-Z\[\]_\-\.\(\)\@\#,'\"\$ ]+$", key) != None
+        return self.valid_key_pattern.match(key) != None
 
     def _get_path(self, key):
         return os.path.join(xconfig.STORAGE_DIR, key + ".json")
@@ -253,7 +254,7 @@ def get_cache_obj(key, default_value=None, type=None):
         return default_value
     if obj.is_alive():
         if type != None and type != obj.type:
-            raise TypeError("require %s but found %s" % (type, obj.type))
+            raise TypeError("expect %s but found %s" % (type, obj.type))
         return obj
     obj.clear()
     return None
@@ -424,6 +425,13 @@ def hdel(key, field):
         return 0
     else:
         return 0
+
+def hkeys(key, field):
+    obj = get_cache_obj(key, type="hash")
+    if obj != None and obj.value != None:
+        return list(obj.value.keys())
+    else:
+        return list()
 
 def keys(pattern=None):
     """返回所有缓存的key列表"""
