@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/01/13 16:16:07
+# @modified 2019/02/23 14:07:49
 
 """笔记编辑相关处理"""
 import os
@@ -151,6 +151,7 @@ class AddHandler:
         return xtemplate.render("note/add.html", 
             show_aside = True,
             key      = "", 
+            type     = type,
             name     = key, 
             tags     = tags, 
             error    = error,

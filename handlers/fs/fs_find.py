@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2019/01/08 23:04:13
+# @modified 2019/02/23 13:48:43
 import os
 import sys
 import glob
@@ -58,6 +58,8 @@ class SearchHandler:
     @xauth.login_required("admin")
     def POST(self):
         path = xutils.get_argument("path")
+        if not path:
+            path = xconfig.DATA_DIR
         find_key = xutils.get_argument("find_key", "")
         find_type = xutils.get_argument("type")
         mode = xutils.get_argument("mode")
@@ -77,6 +79,7 @@ class SearchHandler:
         if mode == "grid":
             tpl = "fs/fs_grid.html"
         return xtemplate.render(tpl, 
+            path  = path,
             token = xauth.get_current_user().token,
             filelist = [xutils.FileItem(p, path) for p in plist])
 

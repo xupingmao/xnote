@@ -1,0 +1,27 @@
+{% extends base.html %}
+
+{% block body %}
+
+<div class="card">
+    <h3>
+        {{T("Smart Folder")}}
+        <a class="float-right">{{T("Add")}}</a>
+    </h3>
+
+    <table class="table">
+        <tr>
+            <th>名称</th>
+            <th>规则</th>
+            <th>操作</th>
+        </tr>
+        {% for rule in rules %}
+            <tr>
+                <td>{{rule.name}}</td>
+                <td>{{rule.get('expression')}}</td>
+                <td></td>
+            </tr>
+        {% end %}
+    </table>
+</div>
+
+{% end %}

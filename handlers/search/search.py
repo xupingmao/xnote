@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/02/16 19:47:10
+# @modified 2019/02/18 22:52:21
 
 import re
 import os
@@ -188,7 +188,7 @@ class handler:
 
         if key == "" or key == None:
             return xtemplate.render("search/search_result.html", 
-                show_aside = False,
+                show_aside = True,
                 recent = list_search_history(user_name),
                 html_title = "Search",
                 category = category, 
@@ -200,7 +200,7 @@ class handler:
         files = files[offset:offset+limit]
         fill_note_info(files)
         return xtemplate.render("search/search_result.html", 
-            show_aside = False,
+            show_aside = True,
             key = key,
             html_title = "Search",
             category = category,
@@ -221,10 +221,24 @@ def load_rules():
     add_rule(r"(.*)", "note.search")
     rules_loaded = True
 
+class RulesHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        rules = list_search_rules()
+        return xtemplate.render("search/search_rules.html", rules = rules)
+
+def list_search_rules():
+    # TODO cache
+    table = xtables.get_search_rule_table()
+    return table.select(where=dict(user=xauth.current_name()))
+
+xutils.register_func("search.list_rules", list_search_rules)
 
 xurls = (
     r"/search/search", handler, 
     r"/search", handler,
+    r"/search/rules", RulesHandler,
     r"/s/(.+)", handler
 )
 

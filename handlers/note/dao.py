@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/02/15 21:38:45
+# @modified 2019/02/23 14:21:59
 
 """资料的DAO操作集合
 
@@ -274,9 +274,13 @@ def list_recent_edit(parent_id=None, offset=0, limit=None):
     t = Timer()
     t.start()
     creator = xauth.get_current_name()
-    where = "is_deleted = 0 AND (creator = $creator) AND type != 'group'"
+    if creator:
+        where = "is_deleted = 0 AND (creator = $creator) AND type != 'group'"
+    else:
+        # 未登录
+        where = "is_deleted = 0 AND is_public = 1 AND type != 'group'"
     
-    cache_key = "[%s]note.recent#%s" % (creator, math.ceil(offset/limit))
+    cache_key = "[%s]note.recent$%s$%s" % (creator, offset, limit)
     files = cacheutil.get(cache_key)
     if files is None:
         files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator", 

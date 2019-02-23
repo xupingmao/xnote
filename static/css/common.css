@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/02/16 01:10:59
+@modified 2019/02/23 14:01:04
 */
 
 * {
@@ -550,6 +550,7 @@ li.menu-item:hover {
     height: 30px;
     outline: none;
     padding-left: 5px;
+    padding-right: 30px;
     float: left;
     display: block;
 }
@@ -966,6 +967,7 @@ li.menu-item:hover {
     cursor: pointer;
     font-size: 12px;
 }
+
 .item-option:hover {
     color: #000;
     background: none;
@@ -1043,9 +1045,9 @@ li.menu-item:hover {
     line-height: 25px;
 }
 
-.grid-item:hover {
+/*.grid-item:hover {
     background-color: #eee;
-}
+}*/
 
 .group-div {
     width: 220px;
@@ -1198,10 +1200,10 @@ li.menu-item:hover {
     width: 100%;
 }
 
-.aside-content li:hover {
+/*.aside-content li:hover {
     background-color: #eee;
     cursor: pointer;
-}
+}*/
 
 /** 颜色属性 **/
 .red {

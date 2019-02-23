@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/02/15 21:42:06
+# @modified 2019/02/23 13:37:13
 import web
 import xtables
 import xtemplate
@@ -52,7 +52,7 @@ class IndexHandler:
 
     def GET(self):
         groups = xutils.call("note.list_group")
-        notes  = xutils.call("note.list_recent_edit", limit = 10)
+        notes  = xutils.call("note.list_recent_edit", limit = 6)
         ungrouped_count = xutils.call("note.count_ungrouped", xauth.current_name())
         tools = list(filter(tool_filter, list_tools()))[:4]
         return xtemplate.render("index.html", 
@@ -98,7 +98,8 @@ class FaviconHandler:
         raise web.seeother("/static/favicon.ico")
 
 xurls = (
-    r"/", "handlers.note.group.RecentEditHandler", 
+    # r"/", "handlers.note.group.RecentEditHandler", 
+    r"/", IndexHandler,
     r"/index", IndexHandler,
     r"/home", IndexHandler,
     r"/more", GridHandler,

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/02/02 19:01:19
+# @modified 2019/02/23 13:48:08
 
 '''xnote系统配置
 
@@ -246,8 +246,8 @@ def init(path = DATA_DIR):
     global STORAGE_DIR
     global ETC_DIR
 
-    DATA_PATH = path
-    DATA_DIR  = path
+    DATA_PATH = os.path.abspath(path)
+    DATA_DIR  = os.path.abspath(path)
     # 数据库地址
     DB_PATH      = os.path.join(DATA_DIR, "data.db")
     DICT_FILE    = os.path.join(DATA_DIR, "dictionary.db")

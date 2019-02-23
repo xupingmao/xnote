@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/02/15 23:17:46
+# @modified 2019/02/18 22:25:50
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -336,6 +336,18 @@ def init_dict_table():
         manager.add_column("value", "text", "")
         manager.add_index("key")
 
+def init_search_rule_table():
+    """搜索规则（智能文件夹）
+    @since 2019/02/18
+    """
+    with TableManager(xconfig.DB_PATH, "search_rule") as manager:
+        manager.add_column("ctime", "text", "")
+        manager.add_column("mtime", "text", "")
+        manager.add_column("user",  "text", "")
+        manager.add_column("name", "text", "")
+        manager.add_column("expression", "text", "")
+        manager.add_index("user")
+
 class MockedDB():
     """
     模拟的空数据库接口
@@ -441,9 +453,10 @@ def get_storage_table():
     return DBWrapper(xconfig.DB_PATH, "storage")
 
 def get_dict_table():
-    if xconfig.DEV_MODE:
-        return DBWrapper(xconfig.DICT_FILE, "dictionary")
-    return MockedDB()
+    return DBWrapper(xconfig.DICT_FILE, "dictionary")
+
+def get_search_rule_table():
+    return DBWrapper(xconfig.DB_PATH, "search_rule")
 
 get_dictionary_table = get_dict_table
 
@@ -467,7 +480,8 @@ def init():
     init_message_table()
     init_dict_table()
     init_storage_table()
-    init_collection_table()
+    # init_collection_table()
+    init_search_rule_table()
     # 非核心结构记录各种日志数据
     init_record_table()
 

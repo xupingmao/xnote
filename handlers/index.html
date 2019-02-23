@@ -5,37 +5,61 @@
     .notice-link {
         color: orange;
     }
+
+    .recent {
+        float: left;
+        width: 50%;
+    }
+
+    @media screen and (max-width: 950px) {
+        .recent {
+            width: 100%;
+        }
+    }
 </style>
 {% end %}
 
 {% block body %}
 
-{# 今日提醒 #}
-{% include common/mod_notice.html %}
+    {# 今日提醒 #}
+    {% include common/mod_notice.html %}
 
-<div class="col-md-12 bottom-offset-1 box">
-    <div class="grid-title">
-        工具库
-        <a class="link float-right" href="/more?type=tool">更多</a>
+    <div class="col-md-12 card">
+        <h3>最近更新</h3>
+        <div class="row" style="padding:5px;">
+            {% for item in notes %}
+                <div class="recent"><a href="/note/view?id={{item.id}}">{{item.name}}</a></div>
+            {% end %}
+        </div>
     </div>
-    <div class="grid-row">
-        {% for item in tools %}
-            <div class="grid-item">
-                <a class="link" href="{{item.link}}">{{T(item.name)}}</a>
-            </div>
-        {% end %}
-    </div>
-</div>
 
-<div class="col-md-12 bottom-offset-1 box">
-    <div class="grid-title">文档库
-        {% if _has_login %}
-        <a class="float-right link prompt-btn" message="新增分类" 
-                    action="/note/add?type=group&name=">新增</a>
-        {% end %}
+    <!-- 
+    <div class="col-md-12 bottom-offset-1 box">
+        <div class="grid-title">
+            工具库
+            <a class="link float-right" href="/more?type=tool">更多</a>
+        </div>
+        <div class="grid-row">
+            {% for item in tools %}
+                <div class="grid-item">
+                    <a class="link" href="{{item.link}}">{{T(item.name)}}</a>
+                </div>
+            {% end %}
+        </div>
     </div>
-    {% include "note/group_list.html" %}
-</div>
+     -->
+
+    {% if _has_login %}
+    <div class="col-md-12 bottom-offset-1 box">
+        <div class="grid-title">笔记本
+            {% if _has_login %}
+            <a class="float-right link prompt-btn" message="新增分类" 
+                        action="/note/add?type=group&name=">新增</a>
+            {% end %}
+        </div>
+        {% include "note/group_list.html" %}
+    </div>
+    {% end %}
 
 {% end %}
 

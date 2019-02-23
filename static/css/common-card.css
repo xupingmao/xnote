@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/02/16 01:11:23
+@modified 2019/02/23 11:27:24
 */
 
 body {
@@ -108,3 +108,8 @@ body {
     box-shadow: 0 0 5px #ccc;
 }
 
+.aside-item {
+    background-color: inherit;
+    border: none;
+    box-shadow: none;
+}

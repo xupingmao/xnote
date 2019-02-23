@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/01/13 16:16:06
+# @modified 2019/02/23 11:59:45
 import math
 import web
 import xutils
@@ -189,7 +189,7 @@ class RecentEditHandler:
             files       = files, 
             file        = Storage(name="最近更新", type="group"),
             groups      = groups,
-            show_notice = True,
+            show_notice = False,
             show_mdate  = True,
             show_groups = True,
             show_aside  = True,
@@ -223,13 +223,14 @@ xurls = (
     r"/note/ungrouped"      , Ungrouped,
     r"/note/public"         , PublicGroupHandler,
     r"/note/removed"        , RemovedHandler,
-    r"/file/group/removed"  , RemovedHandler,
-    r"/file/group/list"     , GroupListHandler,
-    r"/note/group/move"     , MoveHandler,
-    r"/file/group/move"     , MoveHandler,
     r"/note/recent_created" , RecentCreatedHandler,
     r"/note/recent_edit"    , RecentEditHandler,
+    r"/note/group/move"     , MoveHandler,
+    r"/note/group/select"   , GroupSelectHandler,
+    
+    r"/file/group/removed"  , RemovedHandler,
+    r"/file/group/list"     , GroupListHandler,
+    r"/file/group/move"     , MoveHandler,
     r"/file/recent_edit"    , RecentEditHandler,
-    r"/note/group/select"   , GroupSelectHandler
 )
 

@@ -1,6 +1,6 @@
 <!--
 @since 2018/05/27
-@modified 2018/10/20 11:58:42
+@modified 2019/02/23 13:43:44
 -->
 
 {% init key = "" %}
@@ -11,7 +11,7 @@
   <a class="link x-radio" href="/search?key={{?key}}&category=dict" data-option="dict" data-value="{{?category}}">词典</a>
   <a class="link x-radio" href="/message?key={{?key}}&category=message" data-option="message" data-value="{{?category}}">提醒</a>
   {%if _is_admin%}
-  <a class="link x-radio" href="/search?key={{?key}}&category=book" data-option="book" data-value="{{?category}}">图书</a>
+  <a class="link x-radio" href="/fs_find?key={{?key}}" data-option="book" data-value="{{?category}}">文件</a>
   {%end%}
 </div>
 {% end %}

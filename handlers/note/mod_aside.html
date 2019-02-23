@@ -28,13 +28,15 @@
     </div>
 </div>
 
+{% include search/mod_search_rules.html %}
+
 {% if _has_login and show_groups %}
 <div class="aside-item">
     <div class="aside-title">
         分组
         {% if _has_login %}
-        <a class="float-right link prompt-btn" message="新增分类" 
-                    action="/note/add?type=group&name=">新增</a>
+        <a class="float-right prompt-btn" message="新增分类" 
+                    action="/note/add?type=group&name=">{{T("New")}}</a>
         {% end %}
     </div>
     <div class="aside-content">

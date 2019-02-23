@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/02/16 13:05:23
+# @modified 2019/02/23 14:05:03
 """System functions"""
 from io import StringIO
 import xconfig
@@ -73,12 +73,12 @@ other_tools = [
     link("图片拆分", "/tools/img_split"),
     link("图像灰度化", "/tools/img2gray"),
     link("base64", "/tools/base64"),
-    link("16进制转换", "/tools/hex"),
+    link("HEX转换", "/tools/hex"),
     link("md5签名", "/tools/md5"),
     link("sha1签名", "/tools/sha1"),
     link("URL编解码", "/tools/urlcoder"),
-    link("条形码生成", "/tools/barcode"),
-    link("二维码生成", "/tools/qrcode"),
+    link("条形码", "/tools/barcode"),
+    link("二维码", "/tools/qrcode"),
     link("随机字符串", "/tools/random_string"),
     # 其他工具
     link("分屏模式", "/tools/multi_win"),
@@ -94,6 +94,7 @@ xconfig.MENU_LIST = [
 
 # 导航配置
 xconfig.NAV_LIST = [
+    Storage(name = "File", url = "/fs_list", user = "admin"),
     Storage(name = "Plugin", url = "/plugins_list", user = "admin"),
     Storage(name = "About",   url = "/code/wiki/README.md"),
 ]

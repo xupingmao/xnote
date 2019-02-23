@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2019/02/13 21:57:06
+# @modified 2019/02/23 12:23:10
 import re
 import random
 from .imports import is_str, ConfigParser
@@ -366,15 +366,15 @@ def parse_simple_command(text):
     if match: return match.group(1, 2)
     return text, ""
 
-def get_short_text(text, length):
+def short_text(text, length):
     """
-        >>> get_short_text('abc', 5)
+        >>> short_text('abc', 5)
         'abc'
-        >>> get_short_text('abcdefg', 5)
+        >>> short_text('abcdefg', 5)
         'abcdefg'
-        >>> get_short_text('abcd', 5)
+        >>> short_text('abcd', 5)
         'abcd'
-        >>> get_short_text('中文12345678', 5)
+        >>> short_text('中文12345678', 5)
         '中文1234..'
     """
     if len(text) <= length:
@@ -393,7 +393,8 @@ def get_short_text(text, length):
         return text
     return text[:end_pos-2] + ".."
 
-shortfor = get_short_text
+shortfor       = short_text
+get_short_text = short_text
 
 def get_camel_case(name, upper = False):
     """

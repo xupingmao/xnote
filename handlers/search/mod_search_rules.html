@@ -1,0 +1,15 @@
+{% if _has_login %}
+
+{% set search_rules = xutils.call("search.list_rules") %}
+<div class="aside-item">
+    <div class="aside-title">
+        {{T("Smart Folder")}}
+        <a class="float-right" href="/search/rules">{{T("Edit")}}</a>
+    </div>
+    <div class="aside-content">
+        {% for rule in search_rules %}
+        <a href="{{rule.get('expression')}}">{{rule.name}}</a>
+        {% end %}
+    </div>
+</div>
+{% end %}
