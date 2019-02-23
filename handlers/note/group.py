@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/02/23 11:59:45
+# @modified 2019/02/23 15:08:09
 import math
 import web
 import xutils
@@ -150,17 +150,18 @@ class RecentCreatedHandler:
             vars = dict(creator = xauth.get_current_name()))
 
         return xtemplate.render("note/view.html",
-            html_title = "最近创建",
-            file_type  = "group", 
-            files      = files, 
-            pathlist   = [Storage(name="最近创建", type="group", url="/note/recent_created")],
-            groups     = xutils.call("note.list_group"),
-            page       = page,
-            page_max   = int(math.ceil(count/PAGE_SIZE)),
-            page_url   = "/note/recent_created?page=",
-            show_aside = True,
-            show_cdate = True,
-            show_opts  = True)
+            html_title  = "最近创建",
+            file_type   = "group", 
+            files       = files, 
+            pathlist    = [Storage(name="最近创建", type="group", url="/note/recent_created")],
+            groups      = xutils.call("note.list_group"),
+            page        = page,
+            page_max    = int(math.ceil(count/PAGE_SIZE)),
+            page_url    = "/note/recent_created?page=",
+            show_groups = True,
+            show_aside  = True,
+            show_cdate  = True,
+            show_opts   = True)
 
 class RecentEditHandler:
     """show recent modified files"""

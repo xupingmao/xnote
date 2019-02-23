@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/02/23 14:07:49
+# @modified 2019/02/23 15:02:38
 
 """笔记编辑相关处理"""
 import os
@@ -99,7 +99,7 @@ class AddHandler:
         tags      = xutils.get_argument("tags", "")
         key       = xutils.get_argument("key", "")
         content   = xutils.get_argument("content", "")
-        type      = xutils.get_argument("type", "post")
+        type      = xutils.get_argument("type", "md")
         format    = xutils.get_argument("_format", "")
         parent_id = xutils.get_argument("parent_id", 0, type=int)
 
