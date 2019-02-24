@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/02/24 12:35:31
+# @modified 2019/02/24 14:13:31
 
 """资料的DAO操作集合
 
@@ -333,7 +333,7 @@ def list_tag(user_name):
         tag_list = list(db.query(sql, vars = dict(user = user_name)))
         xutils.cache_put(cache_key, tag_list, 60 * 10)
     t.stop()
-    xutils.trace("NoteDao.ListTag", user_name, t.cost_millis())
+    xutils.trace("NoteDao.ListTag", "", t.cost_millis())
     return tag_list
 
 xutils.register_func("note.list_group", list_group)

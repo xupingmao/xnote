@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2019/02/23 12:23:10
+# @modified 2019/02/24 15:53:54
 import re
 import random
 from .imports import is_str, ConfigParser
@@ -379,19 +379,40 @@ def short_text(text, length):
     """
     if len(text) <= length:
         return text
-    end_pos = 0
-    count = 0
+    pos = 0
+    size = 0
+    need_cut = False
+    last_size = 1
     for c in text:
-        count += 1
-        if count > length:
-            break
+        pos += 1
         if ord(c) <= 127:
-            end_pos += 2
+            # 半角
+            size += 0.5
+            last_size = 1
         else:
-            end_pos += 1
-    if end_pos >= len(text):
+            size += 1
+            last_size = 2
+        if size == length:
+            # 刚好
+            if pos == len(text):
+                # 最后一个字符
+                return text
+            if last_size == 2:
+                # 上一个全角
+                pos -= 1
+            if last_size == 1:
+                # 上一个半角
+                pos -= 2
+            need_cut = True
+            break
+        if size - length == 0.5:
+            # 多一个半角，上一个字符一定是全角
+            pos -= 2
+            need_cut = True
+            break
+    if not need_cut:
         return text
-    return text[:end_pos-2] + ".."
+    return text[:pos] + ".."
 
 shortfor       = short_text
 get_short_text = short_text

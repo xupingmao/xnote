@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/01/13 14:29:51
+# @modified 2019/02/25 00:26:15
 
 """xnote文件服务，主要功能:
     1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -402,6 +402,8 @@ class CutHandler:
     @xauth.login_required("admin")
     def POST(self):
         files = xutils.get_argument("files[]", list())
+        for i, fpath in enumerate(files):
+            files[i] = os.path.abspath(fpath)
         xconfig.FS_CLIP = files
         return dict(code="success")
 
@@ -416,6 +418,7 @@ class PasteHandler:
         dirname = xutils.get_argument("dirname", "")
         old_path = xutils.get_argument("old_path", "")
         old_path = xutils.get_real_path(old_path).rstrip("/")
+        old_path = os.path.abspath(old_path)
         dirname  = xutils.get_real_path(dirname)
         basename = os.path.basename(old_path)
         print(old_path, dirname, basename)

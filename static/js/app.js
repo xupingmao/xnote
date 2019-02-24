@@ -357,6 +357,46 @@ var xnote = {
         console.log( xhr.statusText );
     }
     xhr.send(fd);
+  },
+
+  // 询问函数，原生prompt的替代方案
+  prompt: function (title, defaultValue, callback) {
+    if (layer && layer.prompt) {
+      // 使用layer弹层
+      layer.prompt({
+        title: title,
+        value: defaultValue,
+        area: ['400px', '300px']
+      }, function (value, index, element) {
+        callback(value);
+        layer.close(index);
+      })
+    } else {
+      var result = prompt(title, defaultValue);
+      callback(result);
+    }
+  },
+
+  // 确认函数
+  confirm: function (message, callback) {
+    if (layer && layer.confirm) {
+      layer.confirm(message, function (index) {
+        callback(true);
+        layer.close(index);
+      })
+    } else {
+      var result = confirm(message);
+      callback(result);
+    }
+  },
+
+  // 警告函数
+  alert: function (message) {
+    if (layer && layer.alert) {
+      layer.alert(message);
+    } else {
+      alert(message);
+    }
   }
 }
 

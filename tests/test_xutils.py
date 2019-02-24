@@ -9,6 +9,8 @@ import xconfig
 import doctest
 from xutils import textutil, cacheutil
 
+xconfig.init("./testdata")
+
 @xutils.cache(prefix='fib')
 def fib(n):
     if n == 1 or n == 2:
@@ -233,18 +235,30 @@ class TestMain(unittest.TestCase):
         self.assertEqual("example.com", host)
         self.assertEqual("/hello", path)
 
-    def test_get_short_text(self):
-        v = textutil.get_short_text('abcd', 10)
+    def test_short_text(self):
+        # 足够
+        v = textutil.short_text('abcd', 10)
         self.assertEqual('abcd', v)
-        v = textutil.get_short_text('012345', 3)
-        self.assertEqual('012345', v)
-        v = textutil.get_short_text(u'中文123', 4)
+        v = textutil.short_text(u'中文123', 4)
         self.assertEqual(u'中文123', v)
-        v = textutil.get_short_text(u'中文12345678', 4)
+
+        # 刚好
+        v = textutil.short_text('012345', 3)
+        self.assertEqual('012345', v)
+        v = textutil.short_text(u'中文1234', 4)
+        self.assertEqual(u'中文1234', v)
+
+        # 不够
+        v = textutil.short_text(u'中文12345678', 4)
         self.assertEqual(u'中文12..', v)
         # 奇数个半角
-        v = textutil.get_short_text(u'中文1中文中文', 4)
+        v = textutil.short_text(u'中文1中文中文', 4)
         self.assertEqual(u'中文1..', v)
+        v = textutil.short_text(u'BUG及问题记录', 5)
+        self.assertEqual(u'BUG及问..', v)
+
+        v = textutil.short_text(u'1234中国人', 4)
+        self.assertEqual(u'1234中..', v)
 
     def test_RecordList(self):
         rl = xutils.RecordList()

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2018/12/01 11:59:42
+# @modified 2019/02/25 00:12:38
 import os
 import web
 import xutils
@@ -14,11 +14,10 @@ HIDE_EXT_LIST = [
 ]
 
 def check_resource(path):
-    _,ext = os.path.splitext(path)
-    if ext in (".png", ".jpg"):
+    if xutils.is_img_file(path):
         pathlist = path.split("/")
         pathlist = map(lambda name: xutils.quote(name), pathlist)
-        uri = "/" + "/".join(pathlist)
+        uri = "/fs//" + "/".join(pathlist)
         # print(uri)
         raise web.seeother(uri)
     return False

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/02/16 19:26:24
+# @modified 2019/02/25 00:00:19
 import codecs
 import os
 import platform
@@ -132,7 +132,15 @@ def rmfile(path, hard = False):
             shutil.rmtree(path)
             return
         else:
-            shutil.move(path, target)
+            suffix = 0
+            while True:
+                suffix += 1
+                if os.path.exists(target):
+                    tmp_name = "%s@%s" % (basename, suffix)
+                    target = os.path.join(xconfig.TRASH_DIR, tmp_name)
+                else:
+                    shutil.move(path, target)
+                    break
             return target
 
 remove = rmfile

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/02/16 23:03:27
+# @modified 2019/02/24 23:34:35
 # decode: bytes -> str
 # encode: str -> bytes
 import os
@@ -29,9 +29,9 @@ def splithost(url):
         >>> splithost('http://www.baidu.com/index.html')
         ('www.baidu.com', '/index.html')
     """
-    pattern = re.compile('^(http:|https:)?//([^/?]*)(.*)$')
+    pattern = re.compile('^(http:|https:)?(//)?([^/?]*)(.*)$')
     match = pattern.match(url)
-    if match: return match.group(2, 3)
+    if match: return match.group(3, 4)
     return None, url
 
 def get_path(web_root, web_path):
