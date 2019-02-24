@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/02/23 13:37:13
+# @modified 2019/02/24 13:53:13
 import web
 import xtables
 import xtemplate
@@ -51,16 +51,21 @@ def list_most_visited():
 class IndexHandler:
 
     def GET(self):
-        groups = xutils.call("note.list_group")
-        notes  = xutils.call("note.list_recent_edit", limit = 6)
-        ungrouped_count = xutils.call("note.count_ungrouped", xauth.current_name())
-        tools = list(filter(tool_filter, list_tools()))[:4]
+        current_name    = xauth.current_name()
+        groups          = xutils.call("note.list_group")
+        notes           = xutils.call("note.list_recent_edit", limit = 6)
+        ungrouped_count = xutils.call("note.count_ungrouped", current_name)
+        tools           = list(filter(tool_filter, list_tools()))[:4]
+        tags            = xutils.call("note.list_tag", current_name)
+        recent_search   = xutils.call("search.list_recent", current_name, 10)
         return xtemplate.render("index.html", 
             show_aside      = True,
             ungrouped_count = ungrouped_count,
+            recent_search   = recent_search,
             groups          = groups,
             notes           = notes,
             files           = groups,
+            tags            = tags,
             tools           = tools)
 
 class GridHandler:

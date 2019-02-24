@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/01/05 13:05:43
+# @modified 2019/02/24 12:15:01
 import math
 import xutils
 import xtemplate
@@ -95,12 +95,11 @@ def get_taglist(db, user_name=None):
 class TagListHandler:
 
     def GET(self):
-        db = xtables.get_file_table()
         if xauth.has_login():
             user_name = xauth.get_current_name()
-            tag_list  = get_taglist(db, user_name)
+            tag_list  = xutils.call("note.list_tag", user_name)
         else:
-            tag_list  = get_taglist(db, "")
+            tag_list  = xutils.call("note.list_tag", "")
         return xtemplate.render("note/taglist.html", 
             show_aside = True,
             tag_list = tag_list)

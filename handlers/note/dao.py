@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/02/23 14:21:59
+# @modified 2019/02/24 12:35:31
 
 """资料的DAO操作集合
 
@@ -320,7 +320,24 @@ def count_ungrouped(creator):
     xutils.trace("NoteDao.CountUngrouped", "", t.cost_millis())
     return count
 
+def list_tag(user_name):
+    t = Timer()
+    t.start()
+    cache_key = "%s@tag_list" % user_name
+    tag_list = xutils.cache_get(cache_key)
+    if tag_list is None:
+        db = xtables.get_file_tag_table()
+        sql = """SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag 
+            WHERE (user=$user OR is_public=1) 
+            GROUP BY LOWER(name) ORDER BY amount DESC, name ASC""";
+        tag_list = list(db.query(sql, vars = dict(user = user_name)))
+        xutils.cache_put(cache_key, tag_list, 60 * 10)
+    t.stop()
+    xutils.trace("NoteDao.ListTag", user_name, t.cost_millis())
+    return tag_list
+
 xutils.register_func("note.list_group", list_group)
+xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.count_recent_edit", count_recent_edit)

@@ -50,6 +50,14 @@
      -->
 
     {% if _has_login %}
+
+    <div class="card row">
+        <h3>最近搜索</h3>
+        {% for value in recent_search %}
+            <a class="tag-span" href="/search?key={{value}}">{{value}}</a>
+        {% end %}
+    </div>
+
     <div class="col-md-12 bottom-offset-1 box">
         <div class="grid-title">笔记本
             {% if _has_login %}
@@ -58,6 +66,16 @@
             {% end %}
         </div>
         {% include "note/group_list.html" %}
+    </div>
+
+    <div class="col-md-12 bottom-offset-1 card">
+        <h3>标签列表</h3>
+        {% for tag_info in tags %}
+        <span class="tag-span">
+            <a class="tag-link" href="/note/tagname/{{tag_info.name}}">{{tag_info.name}}</a>
+            {{tag_info.amount}}
+        </span>
+        {% end %}
     </div>
     {% end %}
 

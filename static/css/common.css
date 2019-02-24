@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/02/23 14:01:04
+@modified 2019/02/24 14:06:22
 */
 
 * {
@@ -481,7 +481,7 @@ li.menu-item:hover {
     margin-left: 0px;
     background-color:#fff; 
     margin: 0 auto;
-    max-width: 950px;
+    max-width: 1150px;
 }
 
 .nav {

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/02/18 22:52:21
+# @modified 2019/02/24 13:02:07
 
 import re
 import os
@@ -92,8 +92,11 @@ def log_search_history(user, key):
         history = history[-xconfig.SEARCH_HISTORY_MAX_SIZE:]
     cacheutil.set(cache_key, history)
 
-def list_search_history(user_name):
-    return list(reversed(xutils.cache_get("%s@search_history" % user_name, [])))
+def list_search_history(user_name, limit = -1):
+    history = list(reversed(xutils.cache_get("%s@search_history" % user_name, [])))
+    if limit > 0:
+        return history[:limit]
+    return history
 
 class handler:
 
@@ -234,6 +237,7 @@ def list_search_rules():
     return table.select(where=dict(user=xauth.current_name()))
 
 xutils.register_func("search.list_rules", list_search_rules)
+xutils.register_func("search.list_recent", list_search_history)
 
 xurls = (
     r"/search/search", handler, 
