@@ -26,7 +26,10 @@
     {% include common/mod_notice.html %}
 
     <div class="col-md-12 card">
-        <h3>最近更新</h3>
+        <div class="grid-title">
+            最近更新
+            <a class="link float-right" href="/note/recent_edit">{{T("More")}}</a>
+        </div>
         <div class="row" style="padding:5px;">
             {% for item in notes %}
                 <div class="recent"><a href="/note/view?id={{item.id}}">{{item.name}}</a></div>
@@ -53,7 +56,10 @@
     {% if _has_login %}
 
     <div class="card row">
-        <h3>最近搜索</h3>
+        <div class="grid-title">
+            最近搜索
+            <a class="link float-right" href="/search">{{T("More")}}</a>
+        </div>
         {% for value in recent_search %}
             <a class="tag-span" href="/search?key={{value}}">{{value}}</a>
         {% end %}
