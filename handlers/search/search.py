@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/02/24 13:02:07
+# @modified 2019/03/02 13:45:11
 
 import re
 import os
@@ -191,7 +191,7 @@ class handler:
 
         if key == "" or key == None:
             return xtemplate.render("search/search_result.html", 
-                show_aside = True,
+                show_aside = False,
                 recent = list_search_history(user_name),
                 html_title = "Search",
                 category = category, 
@@ -203,7 +203,7 @@ class handler:
         files = files[offset:offset+limit]
         fill_note_info(files)
         return xtemplate.render("search/search_result.html", 
-            show_aside = True,
+            show_aside = False,
             key = key,
             html_title = "Search",
             category = category,

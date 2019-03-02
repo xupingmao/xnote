@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/02/23 14:05:03
+# @modified 2019/02/26 01:07:30
 """System functions"""
 from io import StringIO
 import xconfig
@@ -53,6 +53,7 @@ doc_tools = [
     # 笔记
     link("Recent Updated",      "/note/recent_edit"),
     link("Recent Created",      "/note/recent_created"),
+    link("Recent Viewed",       "/note/recent_viewed"),
     link("Note Groups",         "/note/group"),
     link("Note Tags",           "/note/taglist"),
     link("Uncategorized Notes", "/note/ungrouped"),
@@ -101,8 +102,9 @@ xconfig.NAV_LIST = [
 
 xconfig.NOTE_OPTIONS = [
     link("New_Note", "/note/add"),
-    link("Recent Updated", "/note/recent_created"),
+    link("Recent Updated", "/note/recent_edit"),
     link("Recent Created", "/note/recent_created"),
+    link("Recent View",  "/note/recent_viewed"),
     link("Public",   "/note/public"),
     link("Tag List", "/note/taglist"),
 ]
@@ -158,8 +160,6 @@ class ConfigHandler:
     def POST(self):
         key = xutils.get_argument("key")
         value = xutils.get_argument("value")
-        setattr(xconfig, key, value)
-        cacheutil.hset('sys.config', key, value)
 
         if key == "BASE_TEMPLATE":
             xmanager.reload()
@@ -168,8 +168,13 @@ class ConfigHandler:
         if key == "DEBUG":
             setattr(xconfig, key, value == "True")
             web.config.debug = xconfig.DEBUG
+        if key == "RECENT_SEARCH_LIMIT":
+            value = int(value)
         if key == "LANG":
             web.setcookie("lang", value)
+
+        setattr(xconfig, key, value)
+        cacheutil.hset('sys.config', key, value)
         return dict(code="success")
 
 class UserCssHandler:
@@ -227,7 +232,7 @@ xurls = (
 
 @xmanager.listen("sys.reload")
 def on_reload(ctx = None):
-    for key in ('THEME', 'FS_HIDE_FILES', 'OPTION_STYLE', 'PAGE_OPEN'):
+    for key in ('THEME', 'FS_HIDE_FILES', 'OPTION_STYLE', 'PAGE_OPEN', 'RECENT_SEARCH_LIMIT'):
         value = cacheutil.hget('sys.config', key)
         xutils.trace("HGET", "key=%s, value=%s" % (key, value))
         if value is not None:

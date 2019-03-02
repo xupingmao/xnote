@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/02/16 22:45:43
+# @modified 2019/02/26 01:44:11
 from io import StringIO
 import xconfig
 import codecs
@@ -123,6 +123,7 @@ def on_search_plugins(ctx):
             result.name      = u("插件 - " + unquote_name)
             if plugin_context != None:
                 result.raw = u(plugin_context.title)
+                # result.name = u("插件 %s (%s)") % (u(plugin_context.title), unquote_name)
             result.url       = u("/plugins/" + unquote_name)
             result.edit_link = u("/code/edit?path=" + os.path.join(dirname, fname))
             results.append(result)

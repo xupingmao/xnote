@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/02/24 14:13:31
+# @modified 2019/02/26 01:19:29
 
 """资料的DAO操作集合
 
@@ -267,6 +267,20 @@ def list_recent_created(parent_id = None, limit = 10):
     xutils.trace("NoteDao.ListRecentCreated", "", t.cost_millis())
     return result
 
+def list_recent_viewed(creator = None, offset = 0, limit = 10):
+    t = Timer()
+    t.start()
+    where = "is_deleted = 0 AND (creator = $creator)"
+    db = xtables.get_file_table()
+    result = list(db.select(where = where, 
+            vars   = dict(creator = creator),
+            order  = "atime DESC",
+            offset = offset,
+            limit  = limit))
+    t.stop()
+    xutils.trace("NoteDao.ListRecentViewed", "", t.cost_millis())
+    return result
+
 def list_recent_edit(parent_id=None, offset=0, limit=None):
     if limit is None:
         limit = xconfig.PAGE_SIZE
@@ -294,7 +308,7 @@ def list_recent_edit(parent_id=None, offset=0, limit=None):
     xutils.trace("NoteDao.ListRecentEdit", "", t.cost_millis())
     return files
 
-def count_recent_edit(creator):
+def count_user_note(creator):
     t = Timer()
     t.start()
     count_key = "[%s]note.count" % creator
@@ -325,6 +339,7 @@ def list_tag(user_name):
     t.start()
     cache_key = "%s@tag_list" % user_name
     tag_list = xutils.cache_get(cache_key)
+    tag_list = None
     if tag_list is None:
         db = xtables.get_file_tag_table()
         sql = """SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag 
@@ -340,6 +355,8 @@ xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
-xutils.register_func("note.count_recent_edit", count_recent_edit)
+xutils.register_func("note.list_recent_viewed", list_recent_viewed)
+xutils.register_func("note.count_recent_edit", count_user_note)
+xutils.register_func("note.count_user_note", count_user_note)
 xutils.register_func("note.count_ungrouped", count_ungrouped)
 

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/02/23 15:08:09
+# @modified 2019/02/26 01:24:18
 import math
 import web
 import xutils
@@ -12,6 +12,7 @@ import xmanager
 from xutils import Storage
 from xutils import cacheutil
 from xutils.dateutil import Timer
+from xtemplate import T
 
 # 兼容旧代码
 config = xconfig
@@ -163,10 +164,11 @@ class RecentCreatedHandler:
             show_cdate  = True,
             show_opts   = True)
 
-class RecentEditHandler:
-    """show recent modified files"""
 
-    def GET(self):
+class RecentHandler:
+    """show recent notes"""
+
+    def GET(self, orderby = "edit"):
         if not xauth.has_login():
             raise web.seeother("/note/public")
         if xutils.sqlite3 is None:
@@ -179,16 +181,22 @@ class RecentEditHandler:
         limit    = pagesize
 
         creator = xauth.get_current_name()
-        files   = xutils.call("note.list_recent_edit", None, offset, limit)
+        if orderby == "viewed":
+            html_title = "Recent Viewed"
+            files = xutils.call("note.list_recent_viewed", creator, offset, limit)
+        else:
+            html_title = "Recent Updated"
+            files = xutils.call("note.list_recent_edit", None, offset, limit)
+        
         groups  = xutils.call("note.list_group", creator)
-        count   = xutils.call("note.count_recent_edit", creator)
+        count   = xutils.call("note.count_user_note", creator)
 
         return xtemplate.render("note/view.html", 
-            html_title  = "最近更新",
-            pathlist    = [Storage(name="最近更新", type="group", url="/note/recent_edit")],
+            html_title  = html_title,
+            pathlist    = [Storage(name=T(html_title), type="group", url="/note/recent_" + orderby)],
             file_type   = "group",
             files       = files, 
-            file        = Storage(name="最近更新", type="group"),
+            file        = Storage(name=T(html_title), type="group"),
             groups      = groups,
             show_notice = False,
             show_mdate  = True,
@@ -196,7 +204,7 @@ class RecentEditHandler:
             show_aside  = True,
             page        = page, 
             page_max    = math.ceil(count/PAGE_SIZE), 
-            page_url    ="/note/recent_edit?page=")
+            page_url    ="/note/recent_%s?page=" % orderby)
 
 
 class PublicGroupHandler:
@@ -225,13 +233,14 @@ xurls = (
     r"/note/public"         , PublicGroupHandler,
     r"/note/removed"        , RemovedHandler,
     r"/note/recent_created" , RecentCreatedHandler,
-    r"/note/recent_edit"    , RecentEditHandler,
+    r"/note/recent_edit"    , RecentHandler,
+    r"/note/recent_(viewed)", RecentHandler,
     r"/note/group/move"     , MoveHandler,
     r"/note/group/select"   , GroupSelectHandler,
     
     r"/file/group/removed"  , RemovedHandler,
     r"/file/group/list"     , GroupListHandler,
     r"/file/group/move"     , MoveHandler,
-    r"/file/recent_edit"    , RecentEditHandler,
+    r"/file/recent_edit"    , RecentHandler,
 )
 

@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/xupingmao/xnote.svg?branch=master)](https://travis-ci.org/xupingmao/xnote)
 [![Coverage Status](https://coveralls.io/repos/github/xupingmao/xnote/badge.svg?branch=master)](https://coveralls.io/github/xupingmao/xnote?branch=master)
 
-xnote是一款功能丰富的个人信息管理系统，提供多种维度的数据管理功能。它有如下特点
+xnote是一款功能丰富的个人信息管理系统，提供多种维度的数据管理功能。它主要有如下特性
 
 - 拥有丰富的数据管理能力，支持笔记、提醒、文件管理
 - 自带工具箱，默认提供了大量常用的工具
@@ -14,6 +14,8 @@ xnote是一款功能丰富的个人信息管理系统，提供多种维度的数
 PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 
 ![主页](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v2.1_home.png)
+
+![home](screenshots/xnote_v2.2.4_home.png)
 
 -----
 ## 项目地址
@@ -45,7 +47,7 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 - 基于用户维度进行数据权限隔离
 
 ### 任务管理
-- 可以快速写文字或者上传图片、文件等
+- 可以快速写文字提醒或者上传图片、文件等
 - 提醒有关注、挂起、完成三个状态，基本满足日常工作需求
 - 基于用户维度进行数据权限隔离
 - 日历功能，暂时比较简单
@@ -53,11 +55,12 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 ### 文件管理
 - 访问需要管理员权限
 - 列表、网格等多种视图模式
-- 文件上传下载、创建、删除、重命名、剪切等操作
+- 文件上传、下载、创建、删除、重命名、剪切、粘贴等操作
 - 文本编辑器
 - 文本内容搜索
 - 代码行统计
 - WebShell
+- 支持命令扩展
 
 ### 工具箱
 - Python文档(pydoc)
@@ -73,9 +76,8 @@ PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 具体特性如下
 
 - 插件中可以监听系统消息，包括笔记、提醒、文件、时间、系统五种类型的消息
-- 插件可以通过实现`is_visible`接口显示在笔记、文件、系统等功能的选项入口中
-- 插件模板
-- 插件访问日志
+- 插件可以通过`category`属性设置分类，显示在笔记、文件、系统等功能的选项入口中
+- 可以通过模板创建插件
 
 ### 其他特性
 - debug模式下自动侦测模块修改并重新加载

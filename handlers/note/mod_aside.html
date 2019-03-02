@@ -13,14 +13,14 @@
     </div>
     <div class="aside-content">
         <ul>
-        {% if _has_login %}
-            <li><a class="link" href="/note/add">{{T('New_Note')}}</a></li>
-            <li><a class="link" href="/note/recent_created">最近创建</a></li>
-            <li><a class="link" href="/note/recent_edit">最近更新</a></li>
-        {% end %}
+            {% if _has_login %}
+                <li><a class="link" href="/note/add">{{T('New_Note')}}</a></li>
+                <li><a class="link" href="/note/recent_created">{{T("Recent Created")}}</a></li>
+                <li><a class="link" href="/note/recent_edit">{{T("Recent Updated")}}</a></li>
+                <li><a class="link" href="/note/recent_viewed">{{T("Recent Viewed")}}</a></li>
+            {% end %}
+            
             <li><a class="link" href="/note/public">分享笔记</a></li>
-            <li><a class="link" href="/note/taglist">{{T("Tag List")}}</a></li>
-
             {% for p in note_plugins %}
                 <li><a class="link" href="/plugins/{{p.name}}?note_id={{note_id}}">{{p.title}}</a></li>
             {% end %}
@@ -28,7 +28,7 @@
     </div>
 </div>
 
-{% include search/mod_search_rules.html %}
+{# include search/mod_search_rules.html #}
 
 {% if _has_login and show_groups %}
 <div class="aside-item">
