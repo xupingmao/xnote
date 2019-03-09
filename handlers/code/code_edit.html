@@ -120,11 +120,12 @@
 <script type="text/javascript">
     $(function () {
         var editorHeight = adjustHeight("#editorArea", 50);
+        $("#editorArea").css("overflow-y", "hidden");
         var editor = initCodeMirror("#editor", {
             filename: getUrlParams().path,
             height: editorHeight
         });
-        window.codeMirror = editor;
+        window.codeEditor = editor;
 
         // 重命名
         $(".rename-btn").click(function (event) {

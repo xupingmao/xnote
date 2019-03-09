@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/02/25 22:29:39
+# @modified 2019/03/06 01:01:49
 
 '''xnote系统配置
 
@@ -162,6 +162,7 @@ FS_TEXT_EXT_LIST = set([
     ".log"
 ])
 
+hashset = set
 FS_IMG_EXT_LIST = set([".gif", ".png", ".jpg", ".jpeg", ".bmp", ".webp", ".ico", ".jfif", ".cur"])
 # 剪切板
 FS_CLIP = []
@@ -393,7 +394,11 @@ def add_notice(user=None,
 
 def create_tomorrow_filter(user):
     tm = time.localtime(time.time() + 24 * 3600)
+    message_set = hashset()
     def tomorrow_filter(todo):
+        if todo.message in message_set:
+            return False
+        message_set.add(todo.message)
         year  = tm.tm_year
         month = tm.tm_mon
         day  = tm.tm_mday
@@ -416,7 +421,11 @@ def create_tomorrow_filter(user):
 
 def create_filter(user):
     tm = time.localtime()
+    message_set = hashset()
     def filter_handler(todo):
+        if todo.message in message_set:
+            return False
+        message_set.add(todo.message)
         year  = tm.tm_year
         month = tm.tm_mon
         day  = tm.tm_mday

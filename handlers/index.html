@@ -61,7 +61,7 @@
             <a class="link float-right" href="/search">{{T("More")}}</a>
         </div>
         {% for value in recent_search %}
-            <a class="tag-span" href="/search?key={{value}}">{{value}}</a>
+            <a class="tag-span" href="/search?key={{value}}">{{xutils.short_text(value,10)}}</a>
         {% end %}
     </div>
 
