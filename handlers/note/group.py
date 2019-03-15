@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/02/26 01:24:18
+# @modified 2019/03/10 18:12:22
 import math
 import web
 import xutils
@@ -13,10 +13,6 @@ from xutils import Storage
 from xutils import cacheutil
 from xutils.dateutil import Timer
 from xtemplate import T
-
-# 兼容旧代码
-config = xconfig
-PAGE_SIZE = xconfig.PAGE_SIZE
 
 VIEW_TPL = "note/view.html"
 
@@ -139,14 +135,14 @@ class RecentCreatedHandler:
     @xauth.login_required()
     def GET(self):
         page   = xutils.get_argument("page", 1, type=int)
-        offset = max(0, (page-1)*PAGE_SIZE)
+        offset = max(0, (page-1)*xconfig.PAGE_SIZE)
         db     = xtables.get_file_table()
         where  = "is_deleted=0 AND creator=$creator AND type != 'group'"
         files = db.select(where = where, 
             vars   = dict(creator = xauth.get_current_name()),
             order  = "ctime DESC",
             offset = offset,
-            limit  = PAGE_SIZE)
+            limit  = xconfig.PAGE_SIZE)
         count = db.count(where = where, 
             vars = dict(creator = xauth.get_current_name()))
 
@@ -157,7 +153,7 @@ class RecentCreatedHandler:
             pathlist    = [Storage(name="最近创建", type="group", url="/note/recent_created")],
             groups      = xutils.call("note.list_group"),
             page        = page,
-            page_max    = int(math.ceil(count/PAGE_SIZE)),
+            page_max    = int(math.ceil(count/xconfig.PAGE_SIZE)),
             page_url    = "/note/recent_created?page=",
             show_groups = True,
             show_aside  = True,
@@ -175,7 +171,7 @@ class RecentHandler:
             raise web.seeother("/fs_list")
         days     = xutils.get_argument("days", 30, type=int)
         page     = xutils.get_argument("page", 1, type=int)
-        pagesize = xutils.get_argument("pagesize", PAGE_SIZE, type=int)
+        pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         page     = max(1, page)
         offset   = max(0, (page-1) * pagesize)
         limit    = pagesize
@@ -203,7 +199,7 @@ class RecentHandler:
             show_groups = True,
             show_aside  = True,
             page        = page, 
-            page_max    = math.ceil(count/PAGE_SIZE), 
+            page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    ="/note/recent_%s?page=" % orderby)
 
 
@@ -214,7 +210,7 @@ class PublicGroupHandler:
         page = max(1, page)
         db = xtables.get_file_table()
         where = "is_deleted=0 AND is_public=1"
-        files = db.select(where=where, offset=(page-1)*PAGE_SIZE, limit=PAGE_SIZE, order="ctime DESC")
+        files = db.select(where=where, offset=(page-1)*xconfig.PAGE_SIZE, limit=xconfig.PAGE_SIZE, order="ctime DESC")
         count = db.count(where=where)
         return xtemplate.render(VIEW_TPL, 
             show_aside = True,
@@ -224,7 +220,7 @@ class PublicGroupHandler:
             page       = page, 
             show_cdate = True,
             groups     = xutils.call("note.list_group"),
-            page_max   = math.ceil(count/PAGE_SIZE), 
+            page_max   = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url   = "/note/public?page=")
 
 xurls = (

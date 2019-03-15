@@ -302,6 +302,32 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
   }
  
   /**
+   * 创建日历的标题
+   */
+  function createCalendarTitle(year, month) {
+    var diff = 10;
+    var html = '<select id="yearSelect" name="year">';
+    for (var i = year - diff; i <= year + diff; i++) {
+      if (i == year) {
+        html += '<option selected value=' + i + '>' + i + '年</option>';
+      } else {
+        html += '<option value=' + i + '>' + i + '年</option>';
+      }
+    }
+    html += '</select>';
+    html += '<select id="monthSelect" name="month">'
+    for (var j = 1; j <= 12; j++) {
+      if (j == month) {
+        html += '<option selected value=' + j + '>' + j + '月</option>';
+      } else {
+        html += '<option value=' + j + '>' + j + '月</option>';
+      }
+    }
+    html += '</select>';
+    return html;
+  }
+
+  /**
    * 表格中显示数据，并设置类名
    */
   function showCalendarData() {
@@ -312,7 +338,7 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     // 设置顶部标题栏中的 年、月信息
     var calendarTitle = document.getElementById("calendarTitle");
     var titleStr = _year + "年" + _month + "月";
-    calendarTitle.innerText = titleStr;
+    calendarTitle.innerHTML = createCalendarTitle(_year, _month);
  
     // 设置表格中的日期数据
     var _table = document.getElementById("calendarTable");
@@ -472,6 +498,15 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
         showCalendarData();
         $("[name=content]").val("");
       });
+  });
+
+  // 修改日历
+  $("body").on("change", "select", function (e) {
+    var year = $("#yearSelect").val();
+    var month = $("#monthSelect").val();
+    var date = dateObj.getDate();
+    dateObj.setDate(new Date(parseInt(year), parseInt(month) - 1, 1));
+    showCalendarData();
   })
 })();
 

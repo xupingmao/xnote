@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2019/02/16 23:48:54
+# @modified 2019/03/15 00:45:27
 """缓存的实现，API列表如下
 
 * cache(key = None, prefix = None, expire = 600) 缓存装饰器，用于加速函数调用
@@ -276,6 +276,15 @@ def lpush(key, value):
         obj = CacheObj(key, [value], type = "list")
         obj.save()
 
+def rpush(key, value):
+    obj = get_cache_obj(key, type="list")
+    if obj != None and obj.value != None:
+        obj.value.append(value)
+        obj.save()
+    else:
+        obj = CacheObj(key, [value], type = "list")
+        obj.save()
+
 def lrange(key, start = 0, stop = -1):
     obj = get_cache_obj(key, type = "list")
     if obj != None and obj.value != None:
@@ -287,6 +296,31 @@ def lrange(key, start = 0, stop = -1):
         return obj.value[start: stop+1]
     else:
         return []
+
+def ltrim(key, start = 0, stop = -1):
+    obj = get_cache_obj(key, type = "list")
+    if obj != None and obj.value != None:
+        length = len(obj.value)
+        if start < 0:
+            start += length
+        if stop < 0:
+            stop += length
+        obj.value = obj.value[start: stop+1]
+        obj.save()
+    else:
+        pass
+
+def lindex(key, index):
+    obj = get_cache_obj(key, type = "list")
+    if obj != None and obj.value != None:
+        length = len(obj.value)
+        if index < 0:
+            index += length
+        if index >= length or index < 0:
+            return None
+        return obj.value[index]
+    else:
+        return None
 
 class SortedObject:
 

@@ -32,7 +32,7 @@
         </div>
         <div class="row" style="padding:5px;">
             {% for item in notes %}
-                <div class="recent"><a href="/note/view?id={{item.id}}">{{item.name}}</a></div>
+                <div class="recent"><a href="/note/view?id={{item.id}}">{{xutils.short_text(item.name, 18)}}</a></div>
             {% end %}
         </div>
     </div>
@@ -80,7 +80,7 @@
         <h3>标签列表</h3>
         {% for tag_info in tags %}
         <span class="tag-span">
-            <a class="tag-link" href="/note/tagname/{{tag_info.name}}">{{tag_info.name}}</a>
+            <a href="/note/tagname/{{tag_info.name}}">{{tag_info.name}}</a>
             {{tag_info.amount}}
         </span>
         {% end %}

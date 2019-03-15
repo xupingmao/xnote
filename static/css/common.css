@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/02/24 14:06:22
+@modified 2019/03/14 00:30:37
 */
 
 * {
@@ -650,10 +650,6 @@ li.menu-item:hover {
     border: 1px solid #ccc;
 }
 
-.tag-span a {
-    color: blue;
-}
-
 .tag-span:hover {
     background-color: #eee;
 }
@@ -1275,6 +1271,12 @@ li.menu-item:hover {
         width: 100%;
         padding: 0px;
         margin-left: 0px;
+    }
+
+    .aside li {
+        float: left;
+        width: auto;
+        padding-right: 5px;
     }
 
     .small-device {
