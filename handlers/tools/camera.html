@@ -9,6 +9,7 @@
     <canvas id="canvas" width="640" height="480"></canvas>
 
     <div>
+        <button id="reverseBtn">翻转</button>
         <button id="snap">截图</button>
         <button id="close">关闭截图</button>
     </div>
@@ -17,6 +18,8 @@
     <img id="canvas2img" class="hide" width="640" height="480"/>
 </div>
 <script type="text/javascript">
+    var videoDirection = "mirror";
+
     window.addEventListener("DOMContentLoaded", function() {
     // Grab elements, create settings, etc.
     var canvas = document.getElementById("canvas"),
@@ -92,14 +95,27 @@
     //     image.src = canvas_static_pic.toDataURL("image/png");
     //     window.location.href = "image/octet-stream" + image.src;
     // });
+    
+    $("#reverseBtn").click(function () {
+        if (videoDirection == "mirror") {
+            videoDirection = "camera";
+        } else {
+            videoDirection = "mirror";
+        }
+    })
+
 }, false);
 
 function updateImage(ctx, video, width, height) {
-    ctx.translate(width, 0);
-    ctx.scale(-1,1); 
-    ctx.drawImage(video, 0, 0, width, height); 
-    ctx.scale(-1,1); 
-    ctx.translate(-width, 0);
+    if (videoDirection == "mirror") {    
+        ctx.translate(width, 0);
+        ctx.scale(-1,1); 
+        ctx.drawImage(video, 0, 0, width, height); 
+        ctx.scale(-1,1); 
+        ctx.translate(-width, 0);
+    } else {
+        ctx.drawImage(video, 0, 0, width, height);
+    }
 }
 
 </script>

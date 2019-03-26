@@ -6,6 +6,7 @@
 {% init parent_id = "" %}
 {% init note_id = "" %}
 {% init note_plugins = xmanager.find_plugins("note") %}
+{% init file_type = None %}
 
 <div class="aside-item">
     <div class="aside-title">
@@ -18,6 +19,9 @@
                 <li><a class="link" href="/note/recent_created">{{T("Recent Created")}}</a></li>
                 <li><a class="link" href="/note/recent_edit">{{T("Recent Updated")}}</a></li>
                 <li><a class="link" href="/note/recent_viewed">{{T("Recent Viewed")}}</a></li>
+                {% if False and file_type == "md" %}
+                <li><a class="link" href="/note/history?id={{file_id}}">{{T("History")}}</a></li>
+                {% end %}
             {% end %}
             
             <li><a class="link" href="/note/public">分享笔记</a></li>

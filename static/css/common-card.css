@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/02/23 11:27:24
+@modified 2019/03/27 00:27:35
 */
 
 body {
@@ -77,9 +77,8 @@ body {
     background-color: #fff;
     padding: 5px;
     margin-bottom: 10px;
-    border-bottom: 1px solid #ccc;
     border-radius: 5px;
-    box-shadow: 0 0 5px #ccc;
+    /*box-shadow: 0 0 5px #ccc;*/
 }
 
 /** 插件 **/
@@ -101,7 +100,8 @@ body {
     padding: 5px;
     border-radius: 5px;
     border: 1px solid #ccc;
-    box-shadow: 0 0 5px #ccc;
+    /*阴影不是很好看*/
+    /*box-shadow: 0 0 5px #ccc;*/
 }
 
 .aside-item {

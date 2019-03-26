@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2017/08/16
-// @modified 2018/12/02 23:19:44
+// @modified 2019/03/27 00:36:12
 
 /**
  * 获取请求参数
@@ -455,5 +455,11 @@ Date.prototype.format = Date.prototype.format || function (format) {
     var hour = this.getHours();
     var minute = this.getMinutes();
     var second = this.getSeconds();
+    if (format == "yyyy-MM-dd") {
+        return sFormat("%d-%2d-%2d", year, month, day);
+    }
+    if (format == "HH:mm:ss") {
+        return sFormat("%2d:%2d:%2d", hour, minute, second);
+    }
     return sFormat("%d-%2d-%2d %2d:%2d:%2d", year, month, day, hour, minute, second);
 }

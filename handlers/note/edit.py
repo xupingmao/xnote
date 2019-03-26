@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/02/23 15:02:38
+# @modified 2019/03/25 00:47:08
 
 """笔记编辑相关处理"""
 import os
@@ -90,6 +90,15 @@ def update_note(db, where, **kw):
 def update_note_cache(ctx):
     type = ctx.get("type", "")
     cacheutil.prefix_del("[%s]note" % xauth.get_current_name())
+
+@xmanager.listen("note.updated")
+def record_history(ctx):
+    id = ctx.get("id")
+    content = ctx.get("content")
+    version = ctx.get("version")
+    mtime   = ctx.get("mtime")
+    table   = xtables.get_note_history_table()
+    table.insert(note_id = id, content = content, version = version, mtime = mtime)
 
 class AddHandler:
 
@@ -314,7 +323,8 @@ class AjaxSaveHandler:
         rowcount = update_note(db, where, **kw)
         if rowcount > 0:
             xmanager.fire('note.updated', dict(id=id, name=name, 
-                content=content, version=version+1))
+                mtime = dateutil.format_datetime(),
+                content = content, version=version+1))
             return dict(code="success")
         else:
             return dict(code="fail")
@@ -348,7 +358,8 @@ class UpdateHandler:
         rowcount = update_note(db, where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
             xmanager.fire('note.updated', dict(id=id, name=file.name, 
-                content=content, version=version+1))
+                mtime = dateutil.format_datetime(),
+                content = content, version=version+1))
             raise web.seeother("/note/view?id=" + str(id))
         else:
             # 传递旧的content

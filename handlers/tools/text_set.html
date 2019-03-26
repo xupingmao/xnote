@@ -1,0 +1,125 @@
+{% extends base %}
+{% block head %}
+    <script type="text/javascript" src="/static/js/utils.js"></script>
+    <script type="text/javascript" src="/static/js/Lexer.js"></script>
+    <style type="text/css">
+        p {
+            float: left;
+            width: 100%;
+            margin: 0px;
+        }
+    </style>
+{% end %}
+
+{% block body %}
+<!-- 
+@since 2016/12/18
+@modified 2019/01/04 21:32:27
+-->
+
+<div class="card">
+    {% set title = "文本集合运算" %}
+    {% include common/base_title.html %}
+
+    <div class="col-md-12 error hide" id="error"></div>
+
+    <div class="container col-md-6">
+        <textarea id="leftText" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
+    </div>
+    <div class="container col-md-6">
+        <textarea id="rightText" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
+    </div>
+
+    <div class="row">
+        <button id="setUnionBtn">并集运算</button>
+        <button id="setIntersectionBtn">交集运算</button>
+        <button id="setSubstractionBtn">差集运算</button>
+    </div>
+
+    <div class="row top-offset-1">
+        <textarea id="outputText" rows=20 class="form-control"></textarea>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+$(function () {
+    if (!window.Set) {
+        alert("JavaScript版本过低");
+        return;
+    }
+    function getArray(selector) {
+        var text = $(selector).val();
+        var array = text.split("\n");
+        var newArray = [];
+        array.forEach(function (item, index) {
+            var newItem = item.trim();
+            if (newItem && newItem != "") {
+                newArray.push(newItem);
+            }
+        });
+        return new Set(newArray);
+    }
+
+    function getLeftArray() {
+        return getArray("#leftText");
+    }
+
+    function getRightArray() {
+        return getArray("#rightText");
+    }
+
+    function setOutputArray(array) {
+        var result = array.join("\n");
+        $("#outputText").val(result);
+    }
+    $("#setUnionBtn").click(function (e) {
+        setOutputArray([]);
+
+        var left = getLeftArray();
+        var right = getRightArray();
+        
+        right.forEach(function (item, index) {
+            if (!left.has(item)) {
+                // left不包含
+                left.add(item);
+            }
+        });
+        setOutputArray(Array.from(left));
+    });
+
+    $("#setIntersectionBtn").click(function (e) {
+        setOutputArray([]);
+        
+        var left = getLeftArray();
+        var right = getRightArray();
+        var result = new Set();
+        
+        left.forEach(function (item, index) {
+            if (right.has(item)) {
+                // 同时在right
+                result.add(item);
+            }
+        });
+        setOutputArray(Array.from(result));
+    });
+
+    $("#setSubstractionBtn").click(function (e) {
+        setOutputArray([]);
+        
+        var left = getLeftArray();
+        var right = getRightArray();
+        var result = new Set();
+        
+        left.forEach(function (item, index) {
+            if (!right.has(item)) {
+                // 不在right
+                result.add(item);
+            }
+        });
+        setOutputArray(Array.from(result));
+    });
+})
+</script>
+
+{% end %}

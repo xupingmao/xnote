@@ -3,12 +3,15 @@
 {% init sys_plugins = xmanager.find_plugins("system") %}
 <div class="aside-item">
     <div class="aside-title">
-        用户信息
+        用户
     </div>
     <div class="aside-content">
         <ul>
-            <li>用户: {{_user_name}}</li>
+            <li>{{_user_name}}</li>
+            <!--
+            <li>日期: <span class="currentDate"></span></li>
             <li>时间: <span class="currentTime"></span></li>
+            -->
             {% if _has_login %}
                 <li><a href="/logout">登出</a></li>
             {% else %}
@@ -33,10 +36,19 @@
     </div>
 {% end %}
 
+<div class="aside-item">
+    <div class="aside-title">{{T("Time")}}</div>
+    <div class="aside-content">
+        <span class="currentDateTime"></span>
+    </div>
+</div>
+
 <script type="text/javascript">
 $(function () {
     function updateTime () {
-        $(".currentTime").html(new Date().format("yyyy-MM-dd HH:mm:ss"));
+        $(".currentTime").html(new Date().format("HH:mm:ss"));
+        $(".currentDate").html(new Date().format("yyyy-MM-dd"));
+        $(".currentDateTime").html(new Date().format("yyyy-MM-dd HH:mm:ss"));
         setTimeout(updateTime, 1000);
     }
     updateTime();

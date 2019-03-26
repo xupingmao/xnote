@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/02/18 22:25:50
+# @modified 2019/03/25 00:45:51
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -201,6 +201,15 @@ def init_note_content_table():
         manager.add_column("content", "text", "")
         # 原始的数据，比如带标签的HTML，还有图片等的base64数据
         manager.add_column("data", "text", "")
+
+def init_note_history_table():
+    dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
+    with TableManager(dbpath, "note_history") as manager:
+        manager.add_column("note_id", "int", 0)
+        manager.add_column("content", "text", "")
+        manager.add_column("mtime",   "text", "")
+        manager.add_column("version", "int", 0)
+        manager.add_index(["note_id", "version"])
 
 def init_marked_file_table():
     # @since 2018/03/02
@@ -430,6 +439,10 @@ def get_file_table():
 def get_note_table():
     return get_file_table()
 
+def get_note_history_table():
+    dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
+    return DBWrapper(dbpath, "note_history")
+
 def get_note_content_table():
     return DBWrapper(xconfig.DB_PATH, "note_content")
 
@@ -458,6 +471,7 @@ def get_dict_table():
 def get_search_rule_table():
     return DBWrapper(xconfig.DB_PATH, "search_rule")
 
+
 get_dictionary_table = get_dict_table
 
 def get_table(name, dbpath = None):
@@ -475,6 +489,7 @@ def init():
     init_file_table()
     init_tag_table()
     init_note_content_table()
+    init_note_history_table()
 
     init_schedule_table()
     init_message_table()

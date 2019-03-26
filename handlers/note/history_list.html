@@ -1,0 +1,21 @@
+{% extends base %}
+
+{% block body %}
+{% init file_type = "history" %}
+
+<div class="card">
+    <h3>{{T("History")}}</h3>
+    <table class="table">
+        <tr>
+            <th>文件名</th>
+            <th>时间</th>
+            <th>版本</th>
+        </tr>
+    </table>
+</div>
+
+{% end %}
+
+{% block aside %}
+    {% include note/mod_aside.html %}
+{% end %}

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/02/17 18:17:23
+# @modified 2019/03/27 00:12:24
 import profile
 import math
 import re
@@ -239,10 +239,20 @@ class DictHandler:
             page_max = page_max,
             page_url = "/note/dict?page=")
 
+class NoteHistoryHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        table = xtables.get_note_history_table()
+        return xtemplate.render("note/history_list.html", 
+            show_aside = True)
+
+
 xurls = (
     r"/note/(edit|view)"   , ViewHandler,
     r"/note/print"         , PrintHandler,
     r"/note/dict"          , DictHandler,
+    r"/note/history"       , NoteHistoryHandler,
     
     r"/file/(edit|view)"   , ViewHandler, 
     r"/file/(\d+)/upvote"  , Upvote,

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/02/25 22:30:18
+# @modified 2019/03/27 00:06:47
 import web
 import xtables
 import xtemplate
@@ -59,6 +59,7 @@ class IndexHandler:
         tags            = xutils.call("note.list_tag", current_name)
         recent_search   = xutils.call("search.list_recent", current_name, xconfig.RECENT_SEARCH_LIMIT)
         return xtemplate.render("index.html", 
+            file_type       = "home",
             show_aside      = True,
             ungrouped_count = ungrouped_count,
             recent_search   = recent_search,
