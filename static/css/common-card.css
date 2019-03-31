@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/03/27 00:27:35
+@modified 2019/03/31 17:04:14
 */
 
 body {
@@ -109,7 +109,6 @@ body {
 }
 
 .aside-item {
-    background-color: inherit;
-    border: none;
+    border: 1px solid #ccc;
     box-shadow: none;
 }

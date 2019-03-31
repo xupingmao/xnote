@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/03/25 00:47:08
+# @modified 2019/03/30 01:20:55
 
 """笔记编辑相关处理"""
 import os
@@ -307,7 +307,7 @@ class AjaxSaveHandler:
             where = dict(id=id, creator=name)
         kw = dict(size = len(content), 
             mtime = xutils.format_datetime(), 
-            version = version)
+            version = version + 1)
         if type == "html":
             kw["data"]    = data
             kw["content"] = data
