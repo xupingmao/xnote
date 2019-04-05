@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/03/30 01:20:55
+# @modified 2019/04/05 17:49:50
 
 """笔记编辑相关处理"""
 import os
@@ -71,7 +71,7 @@ def update_note(db, where, **kw):
     kw["atime"] = dateutil.format_time()
     # 处理乐观锁
     version = where.get("version")
-    if version:
+    if version != None:
         kw["version"] = version + 1
     # 这两个字段废弃，移动到单独的表中
     if 'content' in kw:
@@ -97,8 +97,9 @@ def record_history(ctx):
     content = ctx.get("content")
     version = ctx.get("version")
     mtime   = ctx.get("mtime")
+    name    = ctx.get("name")
     table   = xtables.get_note_history_table()
-    table.insert(note_id = id, content = content, version = version, mtime = mtime)
+    table.insert(name = name, note_id = id, content = content, version = version, mtime = mtime)
 
 class AddHandler:
 

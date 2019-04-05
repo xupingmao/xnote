@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/02/26 01:19:29
+# @modified 2019/04/05 18:29:19
 
 """资料的DAO操作集合
 
@@ -147,6 +147,14 @@ def get_by_id(id, db=None):
     if db is None:
         db = get_file_db()
     first = db.select_first(where=dict(id=id))
+    if first is not None:
+        return build_note(first)
+    return None
+
+def get_by_id_creator(id, creator, db=None):
+    if db is None:
+        db = get_file_db()
+    first = db.select_first(where=dict(id=id, creator = creator))
     if first is not None:
         return build_note(first)
     return None
@@ -359,4 +367,5 @@ xutils.register_func("note.list_recent_viewed", list_recent_viewed)
 xutils.register_func("note.count_recent_edit", count_user_note)
 xutils.register_func("note.count_user_note", count_user_note)
 xutils.register_func("note.count_ungrouped", count_ungrouped)
+xutils.register_func("note.get_by_id_creator", get_by_id_creator)
 

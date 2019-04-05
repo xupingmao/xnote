@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/03/06 00:50:13
+# @modified 2019/04/05 13:02:40
 """System functions"""
 from io import StringIO
 import xconfig
@@ -97,7 +97,6 @@ xconfig.MENU_LIST = [
 xconfig.NAV_LIST = [
     Storage(name = "File", url = "/fs_list", user = "admin"),
     Storage(name = "Plugin", url = "/plugins_list", user = "admin"),
-    Storage(name = "About",   url = "/code/wiki/README.md"),
 ]
 
 xconfig.NOTE_OPTIONS = [

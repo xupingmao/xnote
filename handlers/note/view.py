@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/03/27 00:12:24
+# @modified 2019/04/05 18:31:10
 import profile
 import math
 import re
@@ -244,8 +244,34 @@ class NoteHistoryHandler:
     @xauth.login_required()
     def GET(self):
         table = xtables.get_note_history_table()
+        note_id = xutils.get_argument("id")
+        creator = xauth.current_name()
+        note = xutils.call("note.get_by_id_creator", note_id, creator)
+        if note is None:
+            history_list = []
+        else:
+            history_list = table.select(where=dict(note_id=note_id), order="mtime DESC")
         return xtemplate.render("note/history_list.html", 
+            history_list = history_list,
             show_aside = True)
+
+class HistoryViewHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        note_id = xutils.get_argument("id")
+        version = xutils.get_argument("version")
+        
+        table = xtables.get_note_history_table()
+        creator = xauth.current_name()
+        note = xutils.call("note.get_by_id_creator", note_id, creator)
+        content = ""
+        if note != None:
+            note = table.select_first(where = dict(note_id = note_id, version = version))
+            if note != None:
+                content = note.content
+        return dict(code = "success", data = content)
+
 
 
 xurls = (
@@ -253,6 +279,7 @@ xurls = (
     r"/note/print"         , PrintHandler,
     r"/note/dict"          , DictHandler,
     r"/note/history"       , NoteHistoryHandler,
+    r"/note/history_view"  , HistoryViewHandler,
     
     r"/file/(edit|view)"   , ViewHandler, 
     r"/file/(\d+)/upvote"  , Upvote,

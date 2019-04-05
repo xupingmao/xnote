@@ -19,8 +19,8 @@
                 <li><a class="link" href="/note/recent_created">{{T("Recent Created")}}</a></li>
                 <li><a class="link" href="/note/recent_edit">{{T("Recent Updated")}}</a></li>
                 <li><a class="link" href="/note/recent_viewed">{{T("Recent Viewed")}}</a></li>
-                {% if False and file_type == "md" %}
-                <li><a class="link" href="/note/history?id={{file_id}}">{{T("History")}}</a></li>
+                {% if file_type == "md" %}
+                <li><a class="link" href="/note/history?id={{file_id}}">{{T("Note_History")}}</a></li>
                 {% end %}
             {% end %}
             
@@ -84,7 +84,7 @@
 {% if len(recommended_notes) > 0 %}
 <div class="aside-item">
     <div class="aside-title">
-        推荐
+        相关文章
     </div>
     <div class="aside-content">
         {% for item in recommended_notes %}
