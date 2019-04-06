@@ -1,10 +1,9 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/02/23 12:22:40
+# @modified 2019/04/06 16:48:41
 
-"""
-xnote工具类总入口
+"""xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
 建议通过xutils暴露统一接口，其他的utils由xutils导入
 
@@ -141,11 +140,15 @@ class MyStdout:
 
 def is_img_file(filename):
     """根据文件后缀判断是否是图片"""
+    if filename.endswith(".x0"):
+        filename = fsutil.decode_name(filename)
     name, ext = os.path.splitext(filename)
     return ext.lower() in xconfig.FS_IMG_EXT_LIST
 
 def is_text_file(filename):
-    """判断是否是文本文件"""
+    """根据文件后缀判断是否是文本文件"""
+    if filename.endswith(".x0"):
+        filename = fsutil.decode_name(filename)
     name, ext = os.path.splitext(filename)
     return ext.lower() in xconfig.FS_TEXT_EXT_LIST
 

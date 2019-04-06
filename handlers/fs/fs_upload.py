@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/01/30 00:16:31
+# @modified 2019/04/07 01:27:37
 import os
 import uuid
 import web
@@ -27,9 +27,7 @@ def get_safe_file_name(filename):
 
 def generate_filename(filename, prefix, ext = None):
     if prefix:
-        prefix = xauth.get_current_name() + '@' + prefix + '@'
-    else:
-        prefix = xauth.get_current_name() + '@'
+        prefix = prefix + '@'
     if filename is None:
         filename = time.strftime("%Y%m%d_%H%M%S")
     filename = get_safe_file_name(filename)
@@ -44,6 +42,7 @@ class UploadHandler:
         dirname  = xutils.get_argument("dirname")
         prefix   = xutils.get_argument("prefix")
         name     = xutils.get_argument("name")
+        user_name = xauth.current_name()
         if file.filename != None:
             filename = file.filename
             if file.filename == "":
@@ -53,7 +52,7 @@ class UploadHandler:
                 # filename = str(uuid.uuid1()) + ext
                 filename = generate_filename(None, prefix, ext)
             # xutils.makedirs(dirname)
-            filepath, webpath = xutils.get_upload_file_path(filename)
+            filepath, webpath = xutils.get_upload_file_path(user_name, filename)
             # filename = xutils.quote(os.path.basename(x.file.filename))
             with open(filepath, "wb") as fout:
                 # fout.write(x.file.file.read())
@@ -63,7 +62,8 @@ class UploadHandler:
         return dict(code="success", webpath = webpath, link = get_link(filename, webpath))
 
     def GET(self):
-        path, webpath = xutils.get_upload_file_path("")
+        user_name = xauth.current_name()
+        path, webpath = xutils.get_upload_file_path(user_name, "")
         show_menu = (xutils.get_argument("show_menu") != "false")
         path = os.path.abspath(path)
         return xtemplate.render("fs/fs_upload.html", 
@@ -88,6 +88,7 @@ class RangeUploadHandler:
 
     @xauth.login_required()
     def POST(self):
+        user_name = xauth.current_name()
         part_file = True
         chunksize = 5 * 1024 * 1024
         chunk = xutils.get_argument("chunk", 0, type=int)
@@ -111,7 +112,7 @@ class RangeUploadHandler:
             filename = xutils.get_real_path(filename)
             if dirname == "auto":
                 filename = generate_filename(filename, prefix)
-                filepath, webpath = xutils.get_upload_file_path(filename, replace_exists=True)
+                filepath, webpath = xutils.get_upload_file_path(user_name, filename, replace_exists=True)
                 dirname  = os.path.dirname(filepath)
                 filename = os.path.basename(filepath)
 

@@ -25,7 +25,7 @@
     {% for item in files %}
         <div class="grid-item">
             <img src="/static/image/folder.gif"/>
-            <a class="link" href="/note/view?id={{item.id}}" title="{{item.name}}">{{xutils.short_text(item.name, 5)}}</a>
+            <a class="link" href="/note/view?id={{item.id}}" title="{{item.name}}">{{xutils.short_text(item.name, 6)}}</a>
             {{item.size}}
         </div>
     {% end %}

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/02/25 00:00:19
+# @modified 2019/04/07 01:48:36
 import codecs
 import os
 import platform
@@ -414,25 +414,20 @@ def backupfile(path, backup_dir = None, rename=False):
         shutil.copyfile(path, newpath)
 
 
-def get_upload_file_path(filename, data_dir = "/files", 
-        replace_exists = False, prefix = ""):
+def get_upload_file_path(user, filename, upload_dir = "files", replace_exists = False):
     """生成上传文件名"""
     if xconfig.USE_URLENCODE:
         filename = quote_unicode(filename)
     basename, ext = os.path.splitext(filename)
     date = time.strftime("%Y/%m")
-    dirname = xconfig.DATA_PATH + data_dir + "/" + date + "/"
-
-    origin_filename = dirname + filename
+    dirname = os.path.join(xconfig.DATA_PATH, upload_dir, user, date)
     makedirs(dirname)
+
+    origin_filename = os.path.join(dirname, filename)
     fileindex = 1
 
-    if prefix != "" and prefix != None:
-        filename = prefix + filename
-        webpath = "/data{}/{}/{}".format(data_dir, date, filename)
-        return dirname + filename, webpath
     newfilepath = origin_filename
-    webpath = "/data{}/{}/{}".format(data_dir, date, filename)
+    webpath = "/data/{}/{}/{}/{}".format(upload_dir, user, date, filename)
     if filename == "":
         # get upload directory
         return os.path.abspath(dirname), webpath
@@ -441,8 +436,8 @@ def get_upload_file_path(filename, data_dir = "/files",
         name, ext = os.path.splitext(filename)
         # 使用下划线，括号会使marked.js解析图片url失败
         temp_filename = "{}_{}{}".format(name, fileindex, ext)
-        newfilepath = dirname + temp_filename
-        webpath = "/data{}/{}/{}".format(data_dir, date, temp_filename)
-        fileindex+=1
+        newfilepath = os.path.join(dirname, temp_filename)
+        webpath = "/data/{}/{}/{}/{}".format(upload_dir, user, date, temp_filename)
+        fileindex += 1
     return os.path.abspath(newfilepath), webpath
 

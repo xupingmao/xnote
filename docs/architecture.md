@@ -3,25 +3,26 @@
 ### 目录结构
 ```
 代码结构
-|-- lib/            # 第三方类库，程序启动时添加到sys.path中
 |-- static/         # 静态文件
 |-- handlers/       # http请求处理器目录，功能实现大部分在这里
+|   |-- api/        # 系统接口，返回JSON格式，供页面、定时任务、搜索调用
 |   |-- system/     # 系统功能目录
-|   |-- note/       # 资料功能目录
+|   |-- note/       # 笔记功能目录
 |   |-- fs/         # 文件功能目录
 |   |-- tools/      # 工具目录
-|   |-- api/        # 系统接口，返回JSON格式，供页面、定时任务、搜索调用
 |   |-- plugins/    # 插件目录
 |   |-- ...         # 其他目录
 |-- tests/          # 测试用例
 |-- xutils/         # 工具类集合
+|-- lib/            # 第三方类库，程序启动时添加到sys.path中
+|-- lang/           # 多语言配置
 |-- app.py          # 程序入口
 |-- xconfig.py      # 程序配置
 |-- xmanager.py     # handlers管理器，负责模块加载，注册URL，以及定时任务触发
 |-- xauth.py        # 权限控制
-|-- xtables.py      # 数据库表结构，自动建表
+|-- xtables.py      # 数据库表结构
 |-- xtemplate.py    # view层的渲染接口   
-|-- autoreload.py   # 监控文件变更自动reload，主要用于调试，生产环境可以关闭
+|-- autoreload.py   # 脚本变更热加载，主要用于调试，生产环境可以关闭
 
 
 数据区结构
@@ -60,6 +61,7 @@
 - csv.js 解析csv文件
 - jsdiff 文本对比
 - codemirror 代码编辑器
+- jexcel web表格
 
 ## 新模块开发
 

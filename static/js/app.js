@@ -53,7 +53,7 @@ $(function() {
   $(".move-btn").click(function (event) {
       var url = $(event.target).attr("data-url");
       $.get(url, function (respHtml) {
-          var width = $(".root").width();
+          var width = $(".root").width() - 40;
           layer.open({
             type: 1,
             title: "移动分组",
@@ -213,9 +213,10 @@ $(function () {
     }
 
     window.openDialog = function (url) {
-      var width = $(".root").width();
+      var width = $(".root").width() - 40;
       layer.open({
         type: 2,
+        shadeClose: true,
         title: '子页面',
         maxmin: true,
         area: [width + "px", '80%'],

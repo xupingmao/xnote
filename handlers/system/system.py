@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/04/05 13:02:40
+# @modified 2019/04/06 17:10:33
 """System functions"""
 from io import StringIO
 import xconfig
@@ -66,13 +66,17 @@ doc_tools = [
 ] 
 
 other_tools = [
-    link("代码模板", "/tools/code_template"),
     link("浏览器信息", "/tools/browser_info"),
+    # 文本
+    link("代码模板", "/tools/code_template"),
     link("文本对比", "/tools/js_diff"),
     link("文本转换", "/tools/text_processor"),
+    link("随机字符串", "/tools/random_string"),
+    # 图片
     link("图片合并", "/tools/img_merge"),
     link("图片拆分", "/tools/img_split"),
     link("图像灰度化", "/tools/img2gray"),
+    # 编解码
     link("base64", "/tools/base64"),
     link("HEX转换", "/tools/hex"),
     link("md5签名", "/tools/md5"),
@@ -80,7 +84,6 @@ other_tools = [
     link("URL编解码", "/tools/urlcoder"),
     link("条形码", "/tools/barcode"),
     link("二维码", "/tools/qrcode"),
-    link("随机字符串", "/tools/random_string"),
     # 其他工具
     link("分屏模式", "/tools/multi_win"),
     link("RunJS", "/tools/runjs"),
@@ -162,8 +165,8 @@ class ConfigHandler:
 
         if key == "BASE_TEMPLATE":
             xmanager.reload()
-        if key == "FS_HIDE_FILES":
-            setattr(xconfig, key, value == "True")
+        if key in ("FS_HIDE_FILES", "DEBUG_HTML_BOX"):
+            value = value.lower() in ("true", "yes", "on")
         if key == "DEBUG":
             setattr(xconfig, key, value == "True")
             web.config.debug = xconfig.DEBUG
