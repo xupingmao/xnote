@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/04/07 01:27:37
+# @modified 2019/04/07 01:56:21
 import os
 import uuid
 import web
@@ -58,7 +58,7 @@ class UploadHandler:
                 # fout.write(x.file.file.read())
                 for chunk in file.file:
                     fout.write(chunk)
-            xmanager.fire("fs.upload", dict(path=filepath))
+            xmanager.fire("fs.upload", dict(user=user_name, path=filepath))
         return dict(code="success", webpath = webpath, link = get_link(filename, webpath))
 
     def GET(self):
@@ -83,7 +83,7 @@ class RangeUploadHandler:
                 with open(tmp_path, "rb") as tmp_fp:
                     fp.write(tmp_fp.read())
                 xutils.remove(tmp_path, True)
-            xmanager.fire("fs.upload", dict(path=dest_path))
+            xmanager.fire("fs.upload", dict(user=user_name, path=dest_path))
 
 
     @xauth.login_required()
