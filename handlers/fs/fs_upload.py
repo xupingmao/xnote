@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/04/07 01:56:21
+# @modified 2019/04/07 16:09:59
 import os
 import uuid
 import web
@@ -74,6 +74,7 @@ class RangeUploadHandler:
 
     def merge_files(self, dirname, filename, chunks):
         dest_path = os.path.join(dirname, filename)
+        user_name = xauth.current_name()
         with open(dest_path, "wb") as fp:
             for chunk in range(chunks):
                 tmp_path = os.path.join(dirname, filename)

@@ -1,8 +1,5 @@
 {% init error = "" %}
 
-<link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
-<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
-
 <style type="text/css">
     .fs-image {
         width: 180px;
@@ -149,15 +146,6 @@
         <input type="button" data-path="{{path}}" onclick="openFileOption(this)" value="更多"/>
     </div>
 </div>
-
-<div id="uploadFileArea">
-    <!-- 文件上传区域 -->
-    <!--用来存放item-->
-    <div id="fileList" class="uploader-list"></div>
-    <div id="filePicker" class="hide">选择文件</div>
-    <div id="dropArea">点击或拖拽上传文件</div>
-</div>
-
 
 <script type="text/javascript">
 $(function () {

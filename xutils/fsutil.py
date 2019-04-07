@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/04/07 01:48:36
+# @modified 2019/04/07 14:08:04
 import codecs
 import os
 import platform
@@ -218,7 +218,7 @@ def get_file_size(filepath, format=False):
 
 
 def get_relative_path(path, parent):
-    """
+    """获取文件相对parent的路径
         >>> get_relative_path('/users/xxx/test/hello.html', '/users/xxx')
         'test/hello.html'
     """

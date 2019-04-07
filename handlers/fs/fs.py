@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/02/25 00:26:15
+# @modified 2019/04/07 15:44:53
 
 """xnote文件服务，主要功能:
     1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -364,9 +364,10 @@ class RemoveHandler:
     @xauth.login_required("admin")
     def POST(self):
         path = xutils.get_argument("path")
+        user_name = xauth.current_name()
         try:
             xutils.remove(path)
-            xmanager.fire("fs.remove", Storage(path = path))
+            xmanager.fire("fs.remove", Storage(user = user_name, path = path))
             return dict(code="success")
         except Exception as e:
             xutils.print_exc()
@@ -382,6 +383,7 @@ class RenameHandler:
         dirname  = xutils.get_argument("dirname")
         old_name = xutils.get_argument("old_name", "")
         new_name = xutils.get_argument("new_name", "")
+        user_name = xauth.current_name()
         if old_name == "":
             return dict(code="fail", message="old_name is blank")
         if new_name == "":
@@ -393,7 +395,7 @@ class RenameHandler:
         new_path = os.path.join(dirname, new_name)
         if os.path.exists(new_path):
             return dict(code="fail", message="%s 已存在" % new_path)
-        xmanager.fire("fs.rename", Storage(path = new_path, new_path = new_path, old_path = old_path))
+        xmanager.fire("fs.rename", Storage(user = user_name, path = new_path, new_path = new_path, old_path = old_path))
         os.rename(old_path, new_path)
         return dict(code="success")
 
@@ -459,7 +461,7 @@ class RecentHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        datapath, webpath = xutils.get_upload_file_path("")
+        datapath, webpath = xutils.get_upload_file_path(xauth.current_name(), "")
         raise web.seeother("/fs/%s" % datapath)
 
 xurls = (
