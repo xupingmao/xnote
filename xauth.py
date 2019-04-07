@@ -223,8 +223,6 @@ def is_admin():
     return config.IS_TEST or has_login("admin")
 
 def check_login(user_name=None):
-    if user_name is None:
-        return
     if has_login(user_name):
         return
     elif has_login():

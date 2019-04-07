@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/02/16 22:54:39
+# @modified 2019/04/07 19:22:22
 
 import sys
 import os
@@ -262,6 +262,9 @@ class TestMain(unittest.TestCase):
 
     def test_fs_shell(self):
         self.check_OK("/fs//?mode=shell")
+
+    def test_fs_upload(self):
+        self.check_OK("/fs_upload")
 
     def test_code_analyze(self):
         # TODO 解决JSON的循环问题

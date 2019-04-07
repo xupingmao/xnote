@@ -11,7 +11,7 @@
 
       {# 自定义配置的导航 #}
       {% for link in xconfig.NAV_LIST %}
-        {% if link.user == None or link.user == _user_name %}
+        {% if link.user == None or (_has_login and link.user in (_user_name, "*")) %}
             <li><a class="menu-link" href="{{link.url}}">{{T(link.name)}}</a></li>
         {% end %}
       {% end %}

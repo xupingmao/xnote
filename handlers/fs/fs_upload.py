@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/04/07 16:09:59
+# @modified 2019/04/07 19:19:51
 import os
 import uuid
 import web
@@ -11,6 +11,7 @@ import xutils
 import xtemplate
 import xmanager
 import time
+import math
 from xutils import quote
 
 
@@ -35,8 +36,22 @@ def generate_filename(filename, prefix, ext = None):
         filename += ext
     return prefix + filename
 
+def get_display_name(fpath, parent):
+    path = xutils.get_relative_path(fpath, parent)
+    return xutils.unquote(path)
+
+def get_webpath(fpath):
+    rpath = xutils.get_relative_path(fpath, xconfig.DATA_DIR)
+    return "/data/" + rpath
+
+def upload_link_by_month(year, month, delta = 0):
+    t_mon  = (month - 1 + delta) % 12 + 1
+    t_year = year + math.floor((month-1+delta)/12)
+    return "/fs_upload?year=%s&month=%02d" % (t_year, t_mon)
+
 class UploadHandler:
 
+    @xauth.login_required()
     def POST(self):
         file     = xutils.get_argument("file", {})
         dirname  = xutils.get_argument("dirname")
@@ -61,14 +76,34 @@ class UploadHandler:
             xmanager.fire("fs.upload", dict(user=user_name, path=filepath))
         return dict(code="success", webpath = webpath, link = get_link(filename, webpath))
 
+    @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
-        path, webpath = xutils.get_upload_file_path(user_name, "")
-        show_menu = (xutils.get_argument("show_menu") != "false")
-        path = os.path.abspath(path)
+        print(user_name)
+        
+        year  = xutils.get_argument("year", time.strftime("%Y"))
+        month = xutils.get_argument("month", time.strftime("%m"))
+        if len(month) == 1:
+            month = '0' + month
+        
+        dirname = os.path.join(xconfig.DATA_DIR, "files", user_name, year, month)
+        
+        pathlist = []
+        for root, dirs, files in os.walk(dirname):
+            for fname in files:
+                fpath = os.path.join(root, fname)
+                pathlist.append(fpath)
+        
         return xtemplate.render("fs/fs_upload.html", 
-            show_menu = show_menu, 
-            path = path)
+            show_aside = False,
+            pathlist = pathlist, 
+            year = int(year),
+            month = int(month),
+            path = dirname, 
+            user_dir = dirname,
+            get_webpath = get_webpath,
+            upload_link_by_month = upload_link_by_month,
+            get_display_name = get_display_name)
 
 class RangeUploadHandler:
 
@@ -116,6 +151,9 @@ class RangeUploadHandler:
                 filepath, webpath = xutils.get_upload_file_path(user_name, filename, replace_exists=True)
                 dirname  = os.path.dirname(filepath)
                 filename = os.path.basename(filepath)
+            else:
+                # TODO check permission.
+                pass
 
             if part_file:
                 tmp_name = "%s_%d.part" % (filename, chunk)
@@ -123,6 +161,8 @@ class RangeUploadHandler:
             else:
                 tmp_name = filename
                 seek = chunk * chunksize
+
+            xutils.makedirs(dirname)
             tmp_path = os.path.join(dirname, tmp_name)
 
             with open(tmp_path, "wb") as fp:

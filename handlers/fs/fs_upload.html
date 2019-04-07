@@ -39,32 +39,87 @@
         box-sizing: border-box;
     }
 
+    .option-td {
+        width: 25%;
+    }
 </style>
-
-
-<link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
-<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 
 {% end %}
 
 {% block body %}
-<div class="card">
-    {% include "mod_fs_path.html" %}
+    
+    <div class="card">
+        日期
+        <select name="year" value="{{year}}">
+            {% for j in range(year-5,year+6) %}
+                <option value="{{j}}">{{j}}</option>
+            {% end %}
+        </select>
+        <select name="month" value="{{month}}">
+            {% for i in range(1,13) %}
+                <option value="{{i}}">{{i}}</option>
+            {% end %}
+        </select>
 
-    <div id="uploadFileArea">
-        <!-- 文件上传区域 -->
-        <div id="uploader-demo">
-            <!--用来存放item-->
-            <div id="fileList" class="uploader-list"></div>
-            <div id="filePicker" class="hide">选择文件</div>
-            <div id="dropArea">点击或拖拽上传文件</div>
+        <div class="float-right">
+            <a href="{{upload_link_by_month(year, month, -1)}}">上个月</a>
+            <a href="{{upload_link_by_month(year, month, 1)}}">下个月</a>
+            {% if _is_admin %}
+                <a href="/fs_list">管理</a>
+            {% end %}
         </div>
     </div>
 
-    {% include "fs/mod_fs_upload.html" %}
-</div>
+    {% import os %}
+    <div class="card row">
+        {% include fs/mod_fs_upload.html %}
+
+        <table class="table row">
+        {% for fpath in pathlist %}
+            {% set fname = os.path.basename(fpath) %}
+            {% set display_name = get_display_name(fpath, user_dir) %}
+            <tr>
+                <td><a href="{{get_webpath(fpath)}}">{{display_name}}</a></td>
+                <td class="option-td">
+                    {{xutils.format_file_size(fpath)}}
+                </td>
+                <td class="option-td">
+                    <!--
+                    <button class="btn">下载</button>
+                    <button class="btn rename-btn" data-path="{{fpath}}" data-name="{{fname}}">重命名</button>
+                    <button class="btn-danger">删除</button>
+                    -->
+                </td>
+            </tr>
+        {% end %}
+        </table>
+    </div>
+
+    <script>
+    $(function () {
+        $(".rename-btn").click(function (e) {
+            var oldName = $(this).attr("data-name");
+            xnote.prompt("输入新的文件名", oldName, function (value) {
+                
+            });
+        });
+        
+        $("select").change(function (e) {
+            var year = $("[name=year]").val();
+            var month = $("[name=month]").val();
+            location.href = "?year=" + year + "&month=" + month;
+        });
+    })
+    </script>
+
 {% end %}
 
 {% block aside %}
-    {% include fs/mod_aside.html %}
+    <div class="aside-item">
+        <div class="aside-title">
+            日期
+        </div>
+        <div class="aside-content">
+        </div>
+    </div>
 {% end %}

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/04/06 17:10:33
+# @modified 2019/04/07 19:05:41
 """System functions"""
 from io import StringIO
 import xconfig
@@ -98,7 +98,7 @@ xconfig.MENU_LIST = [
 
 # 导航配置
 xconfig.NAV_LIST = [
-    Storage(name = "File", url = "/fs_list", user = "admin"),
+    Storage(name = "File", url = "/fs_upload", user = "*"),
     Storage(name = "Plugin", url = "/plugins_list", user = "admin"),
 ]
 
