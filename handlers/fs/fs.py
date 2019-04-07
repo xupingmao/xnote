@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/04/07 15:44:53
+# @modified 2019/04/07 23:11:49
 
 """xnote文件服务，主要功能:
     1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -366,6 +366,9 @@ class RemoveHandler:
         path = xutils.get_argument("path")
         user_name = xauth.current_name()
         try:
+            if not os.path.exists(path):
+                basename = os.path.basename(path)
+                return dict(code="fail", message="源文件`%s`不存在" % basename)
             xutils.remove(path)
             xmanager.fire("fs.remove", Storage(user = user_name, path = path))
             return dict(code="success")
@@ -393,10 +396,12 @@ class RenameHandler:
             new_name = xutils.quote_unicode(new_name)
         old_path = os.path.join(dirname, old_name)
         new_path = os.path.join(dirname, new_name)
+        if not os.path.exists(old_path):
+            return dict(code="fail", message="源文件 `%s` 不存在" % old_name)
         if os.path.exists(new_path):
-            return dict(code="fail", message="%s 已存在" % new_path)
-        xmanager.fire("fs.rename", Storage(user = user_name, path = new_path, new_path = new_path, old_path = old_path))
+            return dict(code="fail", message="目标文件 `%s` 已存在" % new_name)
         os.rename(old_path, new_path)
+        xmanager.fire("fs.rename", Storage(user = user_name, path = new_path, new_path = new_path, old_path = old_path))
         return dict(code="success")
 
 class CutHandler:

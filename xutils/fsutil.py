@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/04/07 14:08:04
+# @modified 2019/04/07 23:15:03
 import codecs
 import os
 import platform
@@ -93,9 +93,11 @@ def rmfile(path, hard = False):
     @param {bool} hard=False 是否硬删除
     @return {str} path in trash.
     """
-    path = get_real_path(path)
     if not os.path.exists(path):
-        return
+        # 尝试转换一下path
+        path = get_real_path(path)
+        if not os.path.exists(path):
+            return
     if os.path.isfile(path):
         if hard:
             os.remove(path)

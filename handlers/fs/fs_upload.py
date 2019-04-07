@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/04/07 19:19:51
+# @modified 2019/04/07 22:56:04
 import os
 import uuid
 import web
@@ -100,7 +100,7 @@ class UploadHandler:
             year = int(year),
             month = int(month),
             path = dirname, 
-            user_dir = dirname,
+            dirname = dirname,
             get_webpath = get_webpath,
             upload_link_by_month = upload_link_by_month,
             get_display_name = get_display_name)
