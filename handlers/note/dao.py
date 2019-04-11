@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/05 18:29:19
+# @modified 2019/04/10 23:46:55
 
 """资料的DAO操作集合
 
@@ -316,6 +316,23 @@ def list_recent_edit(parent_id=None, offset=0, limit=None):
     xutils.trace("NoteDao.ListRecentEdit", "", t.cost_millis())
     return files
 
+def list_by_date(field, creator, date):
+    db = xtables.get_file_table()
+    date_pattern = date + "%"
+
+    if field == "name":
+        where = "creator = $creator AND is_deleted = 0 AND name LIKE $date"
+        date_pattern = "%" + date + "%"
+    elif field == "mtime":
+        where = "creator = $creator AND is_deleted = 0 AND mtime LIKE $date"
+    else:
+        where = "creator = $creator AND is_deleted = 0 AND ctime LIKE $date"
+    files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator", 
+            where = where, 
+            vars   = dict(creator = creator, date = date_pattern),
+            order  = "name DESC"))
+    return files
+
 def count_user_note(creator):
     t = Timer()
     t.start()
@@ -359,13 +376,26 @@ def list_tag(user_name):
     xutils.trace("NoteDao.ListTag", "", t.cost_millis())
     return tag_list
 
+def find_prev_note(note):
+    where = "parent_id = $parent_id AND name < $name ORDER BY name DESC LIMIT 1"
+    table = xtables.get_file_table()
+    return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
+
+def find_next_note(note):
+    where = "parent_id = $parent_id AND name > $name ORDER BY name ASC LIMIT 1"
+    table = xtables.get_file_table()
+    return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
+
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.list_recent_viewed", list_recent_viewed)
+xutils.register_func("note.list_by_date", list_by_date)
 xutils.register_func("note.count_recent_edit", count_user_note)
 xutils.register_func("note.count_user_note", count_user_note)
 xutils.register_func("note.count_ungrouped", count_ungrouped)
 xutils.register_func("note.get_by_id_creator", get_by_id_creator)
+xutils.register_func("note.find_prev_note", find_prev_note)
+xutils.register_func("note.find_next_note", find_next_note)
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/04/05 18:31:10
+# @modified 2019/04/10 23:47:23
 import profile
 import math
 import re
@@ -70,6 +70,8 @@ class ViewHandler:
         amount         = 0
         show_recommend = False
         template_name  = "note/view.html"
+        next_note      = None
+        prev_note      = None
         xconfig.note_history.put(dict(user=user_name, 
             link = "/note/view?id=%s" % id, 
             name = file.name))
@@ -119,6 +121,9 @@ class ViewHandler:
                 result = [])
             xmanager.fire("note.recommend", ctx)
             recommended_notes = ctx.result
+
+            next_note = xutils.call("note.find_next_note", file)
+            prev_note = xutils.call("note.find_prev_note", file)
         
         xmanager.fire("note.view", file)
         show_aside = True
@@ -143,6 +148,8 @@ class ViewHandler:
             recent_created = recent_created,
             show_groups = show_groups,
             groups   = groups,
+            prev_note = prev_note,
+            next_note = next_note,
             recommended_notes = recommended_notes)
 
 class PrintHandler:

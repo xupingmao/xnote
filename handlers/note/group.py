@@ -1,7 +1,8 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/03/10 18:12:22
+# @modified 2019/04/10 00:55:12
 import math
+import time
 import web
 import xutils
 import xtemplate
@@ -223,6 +224,41 @@ class PublicGroupHandler:
             page_max   = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url   = "/note/public?page=")
 
+def link_by_month(year, month, delta = 0):
+    t_mon  = (month - 1 + delta) % 12 + 1
+    t_year = year + math.floor((month-1+delta)/12)
+    return "/note/date?year=%s&month=%02d" % (t_year, t_mon)
+
+class DateHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        user_name = xauth.current_name()
+        
+        year  = xutils.get_argument("year", time.strftime("%Y"))
+        month = xutils.get_argument("month", time.strftime("%m"))
+        if len(month) == 1:
+            month = '0' + month
+
+        date = year + "-" + month
+        created = xutils.call("note.list_by_date", "ctime", user_name, date)
+        by_name = xutils.call("note.list_by_date", "name", user_name, year + "_" + month)
+
+        notes = []
+        dup = set()
+        for v in created + by_name:
+            if v.id in dup:
+                continue
+            dup.add(v.id)
+            notes.append(v)
+
+        return xtemplate.render("note/list_by_date.html", 
+            show_aside = True,
+            link_by_month = link_by_month,
+            year = int(year),
+            month = int(month),
+            notes = notes)
+
 xurls = (
     r"/note/group"          , GroupListHandler,
     r"/note/ungrouped"      , Ungrouped,
@@ -233,6 +269,8 @@ xurls = (
     r"/note/recent_(viewed)", RecentHandler,
     r"/note/group/move"     , MoveHandler,
     r"/note/group/select"   , GroupSelectHandler,
+    r"/note/date"           , DateHandler,
+    r"/note/monthly"        , DateHandler,
     
     r"/file/group/removed"  , RemovedHandler,
     r"/file/group/list"     , GroupListHandler,

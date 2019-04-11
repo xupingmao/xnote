@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/04/07 22:56:04
+# @modified 2019/04/09 00:23:26
 import os
 import uuid
 import web
@@ -79,7 +79,6 @@ class UploadHandler:
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
-        print(user_name)
         
         year  = xutils.get_argument("year", time.strftime("%Y"))
         month = xutils.get_argument("month", time.strftime("%m"))
@@ -93,6 +92,7 @@ class UploadHandler:
             for fname in files:
                 fpath = os.path.join(root, fname)
                 pathlist.append(fpath)
+        pathlist = sorted(pathlist)
         
         return xtemplate.render("fs/fs_upload.html", 
             show_aside = False,

@@ -1,5 +1,6 @@
 
 <!-- Groups -->
+{% import time %}
 {% import xmanager %}
 {% init show_groups = False %}
 {% init groups = [] %}
@@ -24,7 +25,8 @@
                 {% end %}
             {% end %}
             
-            <li><a class="link" href="/note/public">分享笔记</a></li>
+            <li><a class="link" href="/note/public">分享文章</a></li>
+
             {% for p in note_plugins %}
                 <li><a class="link" href="/plugins/{{p.name}}?note_id={{note_id}}">{{p.title}}</a></li>
             {% end %}
@@ -46,6 +48,23 @@
     <div class="aside-content">
         {% for item in groups %}
             <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}({{item.size}})</a></li>
+        {% end %}
+    </div>
+</div>
+{% end %}
+
+{% import xutils.dateutil as dateutil %}
+{% init show_archived = True %}
+{% if show_archived %}
+<div class="aside-item">
+    <div class="aside-title">
+        归档
+    </div>
+    <div class="aside-content">
+        {% set tm = time.localtime() %}
+        {% for delta in range(12) %}
+            {% set y, m, d = dateutil.date_add(tm, months = -delta) %}
+            <li><a href="/note/date?year={{y}}&month={{m}}">{{"%s-%02d" % (y, m)}}</a></li>
         {% end %}
     </div>
 </div>
@@ -79,6 +98,7 @@
     </div>
 </div>
 {% end %}
+
 
 {% init recommended_notes = [] %}
 {% if len(recommended_notes) > 0 %}

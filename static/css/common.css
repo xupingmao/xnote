@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/04/06 13:51:05
+@modified 2019/04/09 23:22:31
 */
 
 * {
@@ -10,7 +10,7 @@
 }
 
 body {
-    background-color: #fff;
+    background-color: #ccc;
     font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
     font-size: 14px;
     letter-spacing: 1px;

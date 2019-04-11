@@ -1,0 +1,68 @@
+{% extends base %}
+
+{% block head %}
+<style type="text/css">
+    .option-td {
+        width: 25%;
+    }
+</style>
+
+{% end %}
+
+{% block body %}
+    <div class="card">
+        日期
+        <select name="year" value="{{year}}">
+            {% for j in range(year-5,year+6) %}
+                <option value="{{j}}">{{j}}</option>
+            {% end %}
+        </select>
+        <select name="month" value="{{month}}">
+            {% for i in range(1,13) %}
+                <option value="{{i}}">{{i}}</option>
+            {% end %}
+        </select>
+
+        <div class="float-right">
+            <a href="{{link_by_month(year, month, -1)}}">上个月</a>
+            <a href="{{link_by_month(year, month, 1)}}">下个月</a>
+        </div>
+    </div>
+
+    {% if len(notes) > 0 %}
+    <div class="card row">
+        <table class="table row">
+        {% for note in notes %}
+            <tr>
+                <td><a href="/note/view?id={{note.id}}">{{note.name}}</a></td>
+                <td class="option-td">
+                    {{note.ctime}}
+                </td>
+                <td class="option-td">
+                    <!--
+                    <button class="btn rename-btn">重命名</button>
+                    <button class="btn-danger delete-btn">删除</button>
+                    -->
+                </td>
+            </tr>
+        {% end %}
+        </table>
+    </div>
+    {% end %}
+
+    <script>
+    $(function () {
+        $("select").change(function (e) {
+            var year = $("[name=year]").val();
+            var month = $("[name=month]").val();
+            location.href = "?year=" + year + "&month=" + month;
+        });
+
+    })
+    </script>
+
+{% end %}
+
+{% block aside %}
+    {% include note/mod_aside.html %}
+{% end %}

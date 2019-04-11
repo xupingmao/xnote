@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/01/06 19:55:59
+# @modified 2019/04/11 02:44:46
 import time
 import os
 from .imports import is_str
@@ -91,6 +91,21 @@ get_seconds = parse_time
 
 def get_current_year():
     return time.strftime("%Y")
+
+def date_add(tm, years = 0, months = 0, days = 0):
+    if tm is None:
+        tm = time.localtime()
+    year  = tm.tm_year
+    month = tm.tm_mon
+    day   = tm.tm_mday
+    if years != 0:
+        year += years
+    if months != 0:
+        month += months
+        year += int((month - 1) / 12)
+        month = (month - 1) % 12 + 1
+    # TODO days
+    return year, month, day
 
 def get_days_of_month(y, month):
     """get days of a month
