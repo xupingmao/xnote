@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/10 23:46:55
+# @modified 2019/04/13 12:16:17
 
 """资料的DAO操作集合
 
@@ -75,6 +75,13 @@ def query_note_conent(id):
     if result is None:
         return None, None
     return result.get("content", ""), result.get("data", "")
+
+def query_note_name(id):
+    db = xtables.get_note_table()
+    result = db.select_first(what = "name", where = dict(id = id))
+    if result:
+        return result.name
+    return None
 
 def build_note(dict):
     id   = dict['id']
@@ -331,6 +338,9 @@ def list_by_date(field, creator, date):
             where = where, 
             vars   = dict(creator = creator, date = date_pattern),
             order  = "name DESC"))
+    for item in files:
+        item.parent_name = query_note_name(item.parent_id)
+
     return files
 
 def count_user_note(creator):

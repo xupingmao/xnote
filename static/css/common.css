@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/04/09 23:22:31
+@modified 2019/04/13 14:08:36
 */
 
 * {
@@ -316,6 +316,7 @@ table td {
 
 .table th{
     border-color: #ccc;
+    text-align: left;
 }
 
 .table td {

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/04/10 00:55:12
+# @modified 2019/04/13 14:07:07
 import math
 import time
 import web
@@ -11,7 +11,7 @@ import xauth
 import xconfig
 import xmanager
 from xutils import Storage
-from xutils import cacheutil
+from xutils import cacheutil, dateutil
 from xutils.dateutil import Timer
 from xtemplate import T
 
@@ -156,7 +156,7 @@ class RecentCreatedHandler:
             page        = page,
             page_max    = int(math.ceil(count/xconfig.PAGE_SIZE)),
             page_url    = "/note/recent_created?page=",
-            show_groups = True,
+            show_groups = False,
             show_aside  = True,
             show_cdate  = True,
             show_opts   = True)
@@ -197,7 +197,7 @@ class RecentHandler:
             groups      = groups,
             show_notice = False,
             show_mdate  = True,
-            show_groups = True,
+            show_groups = False,
             show_aside  = True,
             page        = page, 
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
@@ -225,9 +225,9 @@ class PublicGroupHandler:
             page_url   = "/note/public?page=")
 
 def link_by_month(year, month, delta = 0):
-    t_mon  = (month - 1 + delta) % 12 + 1
-    t_year = year + math.floor((month-1+delta)/12)
-    return "/note/date?year=%s&month=%02d" % (t_year, t_mon)
+    tm = Storage(tm_year = year, tm_mon = month, tm_mday = 0)
+    t_year, t_mon, t_day = dateutil.date_add(tm, months = delta)
+    return "/note/date?year=%d&month=%02d" % (t_year, t_mon)
 
 class DateHandler:
 

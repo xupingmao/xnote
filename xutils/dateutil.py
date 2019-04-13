@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/04/12 01:01:34
+# @modified 2019/04/13 12:59:08
 import time
 import os
 import math
@@ -106,7 +106,7 @@ def date_add(tm, years = 0, months = 0, days = 0):
         year += math.floor((month - 1.0) / 12)
         month = (month - 1) % 12 + 1
     # TODO days
-    return year, month, day
+    return int(year), month, day
 
 def get_days_of_month(y, month):
     """get days of a month

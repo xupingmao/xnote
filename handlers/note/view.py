@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/04/10 23:47:23
+# @modified 2019/04/13 12:19:03
 import profile
 import math
 import re
@@ -63,10 +63,11 @@ class ViewHandler:
         role            = xauth.get_current_role()
 
         # 定义一些变量
-        show_groups    = True
+        show_groups    = False
         show_mdate     = False
         files          = []
         recent_created = []
+        groups         = []
         amount         = 0
         show_recommend = False
         template_name  = "note/view.html"
@@ -78,7 +79,6 @@ class ViewHandler:
         recommended_notes = []
 
         title  = file.name
-        groups = xutils.call("note.list_group")
         if file.type == "group":
             where_sql = "parent_id=$parent_id AND is_deleted=0 AND (creator=$creator OR is_public=1)"
             if xauth.is_admin():

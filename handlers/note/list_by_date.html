@@ -32,17 +32,23 @@
     {% if len(notes) > 0 %}
     <div class="card row">
         <table class="table row">
+            <tr>
+                <th>标题</th>
+                <th>主题</th>
+                <th>创建时间</th>
+            </tr>
         {% for note in notes %}
             <tr>
                 <td><a href="/note/view?id={{note.id}}">{{note.name}}</a></td>
-                <td class="option-td">
-                    {{note.ctime}}
-                </td>
                 <td class="option-td">
                     <!--
                     <button class="btn rename-btn">重命名</button>
                     <button class="btn-danger delete-btn">删除</button>
                     -->
+                    <a href="/note/view?id={{note.parent_id}}">{{note.parent_name}}</a>
+                </td>
+                <td class="option-td">
+                    {{note.ctime}}
                 </td>
             </tr>
         {% end %}

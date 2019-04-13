@@ -53,23 +53,6 @@
 </div>
 {% end %}
 
-{% import xutils.dateutil as dateutil %}
-{% init show_archived = True %}
-{% if show_archived %}
-<div class="aside-item">
-    <div class="aside-title">
-        归档
-    </div>
-    <div class="aside-content">
-        {% set tm = time.localtime() %}
-        {% for delta in range(12) %}
-            {% set y, m, d = dateutil.date_add(tm, months = -delta) %}
-            <li><a href="/note/date?year={{y}}&month={{m}}">{{"%s-%02d" % (y, m)}}</a></li>
-        {% end %}
-    </div>
-</div>
-{% end %}
-
 {% init recent_created = [] %}
 {% if len(recent_created) > 0 %}
 <div class="aside-item">
@@ -113,6 +96,24 @@
             {% else %}
                 <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a></li>
             {% end %}
+        {% end %}
+    </div>
+</div>
+{% end %}
+
+
+{% import xutils.dateutil as dateutil %}
+{% init show_archived = True %}
+{% if show_archived %}
+<div class="aside-item">
+    <div class="aside-title">
+        归档
+    </div>
+    <div class="aside-content">
+        {% set tm = time.localtime() %}
+        {% for delta in range(12) %}
+            {% set y, m, d = dateutil.date_add(tm, months = -delta) %}
+            <li><a href="/note/date?year={{y}}&month={{m}}">{{"%s-%02d" % (y, m)}}</a></li>
         {% end %}
     </div>
 </div>
