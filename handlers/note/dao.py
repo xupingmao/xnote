@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/13 12:16:17
+# @modified 2019/04/13 23:38:28
 
 """资料的DAO操作集合
 
@@ -267,7 +267,7 @@ def list_group(current_name = None):
     xutils.trace("NoteDao.ListGroup", "", int((t2-t1)*1000))
     return value
 
-def list_recent_created(parent_id = None, limit = 10):
+def list_recent_created(parent_id = None, offset = 0, limit = 10):
     t = Timer()
     t.start()
     where = "is_deleted = 0 AND (creator = $creator)"
@@ -277,7 +277,10 @@ def list_recent_created(parent_id = None, limit = 10):
     result = list(db.select(where = where, 
             vars   = dict(creator = xauth.get_current_name()),
             order  = "ctime DESC",
+            offset = offset,
             limit  = limit))
+    for item in result:
+        item.parent_name = query_note_name(item.parent_id)
     t.stop()
     xutils.trace("NoteDao.ListRecentCreated", "", t.cost_millis())
     return result
@@ -292,6 +295,8 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
             order  = "atime DESC",
             offset = offset,
             limit  = limit))
+    for item in result:
+        item.parent_name = query_note_name(item.parent_id)
     t.stop()
     xutils.trace("NoteDao.ListRecentViewed", "", t.cost_millis())
     return result
@@ -318,6 +323,8 @@ def list_recent_edit(parent_id=None, offset=0, limit=None):
             order  = "mtime DESC",
             offset = offset,
             limit  = limit))
+        for item in files:
+            item.parent_name = query_note_name(item.parent_id)
         cacheutil.set(cache_key, files, expire=600)
     t.stop()
     xutils.trace("NoteDao.ListRecentEdit", "", t.cost_millis())

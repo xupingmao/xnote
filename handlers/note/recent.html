@@ -10,34 +10,18 @@
 {% end %}
 
 {% block body %}
-    <div class="card">
-        日期
-        <select name="year" value="{{year}}">
-            {% for j in range(year-5,year+6) %}
-                <option value="{{j}}">{{j}}</option>
-            {% end %}
-        </select>
-        <select name="month" value="{{month}}">
-            {% for i in range(1,13) %}
-                <option value="{{i}}">{{i}}</option>
-            {% end %}
-        </select>
 
-        <div class="float-right">
-            <a href="{{link_by_month(year, month, -1)}}">上个月</a>
-            <a href="{{link_by_month(year, month, 1)}}">下个月</a>
-        </div>
-    </div>
-
-    {% if len(notes) > 0 %}
+    {% if len(files) > 0 %}
     <div class="card row">
+        <h3>{{T(html_title)}}</h3>
+
         <table class="table row">
             <tr>
                 <th>标题</th>
                 <th>主题</th>
-                <th>创建时间</th>
+                <th>{{T(time_attr)}}</th>
             </tr>
-        {% for note in notes %}
+        {% for note in files %}
             <tr>
                 <td><a href="/note/view?id={{note.id}}">{{note.name}}</a></td>
                 <td class="option-td">
@@ -50,11 +34,18 @@
                     {% end %}
                 </td>
                 <td class="option-td">
-                    {{note.ctime}}
+                    {{getattr(note, time_attr)}}
                 </td>
             </tr>
         {% end %}
         </table>
+    </div>
+    {% end %}
+
+    {% init show_pagination = True %}
+    {% if show_pagination and "page" in globals() %}
+    <div class="card">
+        {% include mod_pagenation.html %}
     </div>
     {% end %}
 

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/04/13 14:07:07
+# @modified 2019/04/13 23:40:59
 import math
 import time
 import web
@@ -131,40 +131,10 @@ class RemovedHandler:
             page_max  = math.ceil(amount / 10),
             page_url  = "/note/removed?page=")
 
-class RecentCreatedHandler:
-
-    @xauth.login_required()
-    def GET(self):
-        page   = xutils.get_argument("page", 1, type=int)
-        offset = max(0, (page-1)*xconfig.PAGE_SIZE)
-        db     = xtables.get_file_table()
-        where  = "is_deleted=0 AND creator=$creator AND type != 'group'"
-        files = db.select(where = where, 
-            vars   = dict(creator = xauth.get_current_name()),
-            order  = "ctime DESC",
-            offset = offset,
-            limit  = xconfig.PAGE_SIZE)
-        count = db.count(where = where, 
-            vars = dict(creator = xauth.get_current_name()))
-
-        return xtemplate.render("note/view.html",
-            html_title  = "最近创建",
-            file_type   = "group", 
-            files       = files, 
-            pathlist    = [Storage(name="最近创建", type="group", url="/note/recent_created")],
-            groups      = xutils.call("note.list_group"),
-            page        = page,
-            page_max    = int(math.ceil(count/xconfig.PAGE_SIZE)),
-            page_url    = "/note/recent_created?page=",
-            show_groups = False,
-            show_aside  = True,
-            show_cdate  = True,
-            show_opts   = True)
-
-
 class RecentHandler:
     """show recent notes"""
 
+    @xauth.login_required()
     def GET(self, orderby = "edit"):
         if not xauth.has_login():
             raise web.seeother("/note/public")
@@ -176,19 +146,26 @@ class RecentHandler:
         page     = max(1, page)
         offset   = max(0, (page-1) * pagesize)
         limit    = pagesize
+        time_attr = "ctime"
 
         creator = xauth.get_current_name()
         if orderby == "viewed":
             html_title = "Recent Viewed"
             files = xutils.call("note.list_recent_viewed", creator, offset, limit)
+            time_attr = "atime"
+        elif orderby == "created":
+            html_title = "Recent Created"
+            files = xutils.call("note.list_recent_created", None, offset, limit)
+            time_attr = "ctime"
         else:
             html_title = "Recent Updated"
             files = xutils.call("note.list_recent_edit", None, offset, limit)
+            time_attr = "mtime"
         
         groups  = xutils.call("note.list_group", creator)
         count   = xutils.call("note.count_user_note", creator)
 
-        return xtemplate.render("note/view.html", 
+        return xtemplate.render("note/recent.html", 
             html_title  = html_title,
             pathlist    = [Storage(name=T(html_title), type="group", url="/note/recent_" + orderby)],
             file_type   = "group",
@@ -200,6 +177,7 @@ class RecentHandler:
             show_groups = False,
             show_aside  = True,
             page        = page, 
+            time_attr   = time_attr,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    ="/note/recent_%s?page=" % orderby)
 
@@ -264,7 +242,7 @@ xurls = (
     r"/note/ungrouped"      , Ungrouped,
     r"/note/public"         , PublicGroupHandler,
     r"/note/removed"        , RemovedHandler,
-    r"/note/recent_created" , RecentCreatedHandler,
+    r"/note/recent_(created)" , RecentHandler,
     r"/note/recent_edit"    , RecentHandler,
     r"/note/recent_(viewed)", RecentHandler,
     r"/note/group/move"     , MoveHandler,

@@ -4,6 +4,7 @@
 <div id="uploadFileArea">
     <!-- 文件上传区域 -->
     <!--用来存放item-->
+    <input type="hidden" id="dirnameInput" value="{{path}}"/>
     <div id="fileList" class="uploader-list"></div>
     <div id="filePicker" class="hide">选择文件</div>
     <div id="dropArea">点击或拖拽上传文件</div>
@@ -86,7 +87,7 @@
     });
 
     uploader.on( 'uploadBeforeSend', function (object, data, headers) {
-        data.dirname = "{{path}}"
+        data.dirname = $("#dirnameInput").val();
     })
 
     // 文件上传成功，给item添加成功class, 用样式标记上传成功。
