@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/04/05 13:31:43
+# @modified 2019/04/14 14:47:07
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -185,6 +185,8 @@ def init_file_table():
         # manager.add_column("modifier", "text", "")
         # 可以访问的角色, 如果是公开的则为public, 删除的为deleted
         manager.add_column("role", "text", "")
+        # 置顶顺序
+        manager.add_column("priority", "int", 0)
 
         # 各种索引
         manager.add_index(["parent_id", "name"])

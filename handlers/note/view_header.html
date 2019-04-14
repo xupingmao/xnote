@@ -13,7 +13,12 @@
                 <a class="link" href="/note/share?id={{file.id}}">分享</a>
             {% end %}
             <a class="move-btn link" data-url="/note/group/select?id={{item.id}}">移动</a>
-            <a class="link" href="/note/print?id={{file.id}}" target="_blank">打印</a>
+            {% if file.priority > 0 %}
+                <a class="link" href="/note/unstick?id={{file.id}}">取消置顶</a>
+            {% else %}
+                <a class="link" href="/note/stick?id={{file.id}}">置顶</a>
+            {% end %}
+            <!-- <a class="link" href="/note/print?id={{file.id}}" target="_blank">打印</a> -->
             <a class="red" href="javascript:remove({{item.id}}, '{{item.name}}', {{item.parent_id}})">删除</a>
         {% end %}
     </div>

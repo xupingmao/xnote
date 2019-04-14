@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/04/05 17:49:50
+# @modified 2019/04/14 15:17:11
 
 """笔记编辑相关处理"""
 import os
@@ -174,7 +174,7 @@ class AddHandler:
     def GET(self):
         return self.POST('GET')
 
-class RemoveHandler:
+class RemoveAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -239,7 +239,7 @@ class DictPutHandler:
             db.update(value = value, mtime = current, where = dict(key=key))
         return db.select_first(where=dict(key=key))
 
-class RenameHandler:
+class RenameAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -290,7 +290,7 @@ class UnshareHandler:
         tag.update(is_public=0, where=dict(file_id=id, user=xauth.get_current_name()))
         raise web.seeother("/note/view?id=%s"%id)
 
-class AjaxSaveHandler:
+class SaveAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -373,20 +373,40 @@ class UpdateHandler:
                 content  = content, 
                 error    = "更新失败, 版本冲突,当前version={},最新version={}".format(version, cur_version))
 
+class StickHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id", type = int)
+        user = xauth.current_name()
+        xutils.call("note.update_priority", user, id, 1)
+        raise web.found("/note/view?id=" + str(id))
+
+class UnstickHandler:
+    
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id", type = int)
+        user = xauth.current_name()
+        xutils.call("note.update_priority", user, id, 0)
+        raise web.found("/note/view?id=" + str(id))
+
 xurls = (
     r"/note/add"         , AddHandler,
-    r"/note/remove"      , RemoveHandler,
-    r"/note/rename"      , RenameHandler,
+    r"/note/remove"      , RemoveAjaxHandler,
+    r"/note/rename"      , RenameAjaxHandler,
     r"/note/update"      , UpdateHandler,
     r"/note/share"       , ShareHandler,
-    r"/note/save"        , AjaxSaveHandler,
+    r"/note/save"        , SaveAjaxHandler,
     r"/note/share/cancel", UnshareHandler,
+    r"/note/stick"       , StickHandler,
+    r"/note/unstick"     , UnstickHandler,
 
     r"/file/dict/put"    , DictPutHandler,
     r"/file/share"       , ShareHandler,
     r"/file/share/cancel", UnshareHandler,
-    r"/file/save"        , AjaxSaveHandler,
-    r"/file/autosave"    , AjaxSaveHandler
+    r"/file/save"        , SaveAjaxHandler,
+    r"/file/autosave"    , SaveAjaxHandler
 )
 
 

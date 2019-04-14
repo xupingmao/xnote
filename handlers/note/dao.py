@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/13 23:38:28
+# @modified 2019/04/14 15:14:20
 
 """资料的DAO操作集合
 
@@ -317,10 +317,10 @@ def list_recent_edit(parent_id=None, offset=0, limit=None):
     cache_key = "[%s]note.recent$%s$%s" % (creator, offset, limit)
     files = cacheutil.get(cache_key)
     if files is None:
-        files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator", 
+        files = list(db.select(what="name, id, parent_id, ctime, mtime, type, creator, priority", 
             where = where, 
             vars   = dict(creator = creator),
-            order  = "mtime DESC",
+            order  = "priority DESC, mtime DESC",
             offset = offset,
             limit  = limit))
         for item in files:
@@ -403,6 +403,14 @@ def find_next_note(note):
     table = xtables.get_file_table()
     return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
 
+def update_priority(creator, id, value):
+    table = xtables.get_file_table()
+    rows = table.update(priority = value, where = dict(creator = creator, id = id))
+    cache_key = "[%s]note.recent" % creator
+    cacheutil.prefix_del(cache_key)
+    return rows > 0
+
+
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_recent_created", list_recent_created)
@@ -415,4 +423,5 @@ xutils.register_func("note.count_ungrouped", count_ungrouped)
 xutils.register_func("note.get_by_id_creator", get_by_id_creator)
 xutils.register_func("note.find_prev_note", find_prev_note)
 xutils.register_func("note.find_next_note", find_next_note)
+xutils.register_func("note.update_priority", update_priority)
 

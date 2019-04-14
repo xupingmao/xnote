@@ -32,7 +32,12 @@
         </div>
         <div class="row" style="padding:5px;">
             {% for item in notes %}
-                <div class="recent"><a href="/note/view?id={{item.id}}">{{xutils.short_text(item.name, 18)}}</a></div>
+                <div class="recent">
+                    <a href="/note/view?id={{item.id}}">
+                        {% if item.priority > 0 %}[{{T("Sticky")}}]{% end %}
+                        {{xutils.short_text(item.name, 18)}}
+                    </a>
+                </div>
             {% end %}
         </div>
     </div>
