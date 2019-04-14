@@ -1,0 +1,37 @@
+{% init file_type = "group_list" %}
+{% init ungrouped_count = 0 %}
+
+<div class="grid-row card">
+    <h3>{{T("NoteBook")}}
+        <a class="float-right link prompt-btn" message="新建笔记本" 
+                        action="/note/add?type=group&name=">新增</a>
+    </h3>
+    
+<!--     <div class="grid-item">
+        <img src="/static/image/folder.gif"/>
+        <a class="link" href="/note/recent_edit">最近更新</a>
+    </div>
+    <div class="grid-item">
+        <img src="/static/image/folder.gif"/>
+        <a class="link" href="/note/recent_created">最近创建</a>
+    </div>
+    <div class="grid-item">
+        <img src="/static/image/folder.gif"/>
+        <a class="link" href="/note/public">分享文章</a>
+    </div> -->
+    <div class="grid-item">
+        <img src="/static/image/folder.gif"/>
+        <a class="link" href="/note/ungrouped">未分类</a> {{ ungrouped_count }}
+    </div>
+    <div class="grid-item">
+        <img src="/static/image/folder.gif"/>
+        <a class="link" href="/note/removed">回收站</a>
+    </div>
+    {% for item in files %}
+        <div class="grid-item">
+            <img src="/static/image/folder.gif"/>
+            <a class="link" href="/note/view?id={{item.id}}" title="{{item.name}}">{{xutils.short_text(item.name, 6)}}</a>
+            {{item.size}}
+        </div>
+    {% end %}
+</div>

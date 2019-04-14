@@ -1,32 +1,5 @@
-{% init file_type = "group_list" %}
-{% init ungrouped_count = 0 %}
+{% extends base %}
 
-<div class="grid-row">
-<!--     <div class="grid-item">
-        <img src="/static/image/folder.gif"/>
-        <a class="link" href="/note/recent_edit">最近更新</a>
-    </div>
-    <div class="grid-item">
-        <img src="/static/image/folder.gif"/>
-        <a class="link" href="/note/recent_created">最近创建</a>
-    </div>
-    <div class="grid-item">
-        <img src="/static/image/folder.gif"/>
-        <a class="link" href="/note/public">分享文章</a>
-    </div> -->
-    <div class="grid-item">
-        <img src="/static/image/folder.gif"/>
-        <a class="link" href="/note/ungrouped">未分类</a> {{ ungrouped_count }}
-    </div>
-    <div class="grid-item">
-        <img src="/static/image/folder.gif"/>
-        <a class="link" href="/note/removed">回收站</a>
-    </div>
-    {% for item in files %}
-        <div class="grid-item">
-            <img src="/static/image/folder.gif"/>
-            <a class="link" href="/note/view?id={{item.id}}" title="{{item.name}}">{{xutils.short_text(item.name, 6)}}</a>
-            {{item.size}}
-        </div>
-    {% end %}
-</div>
+{% block body %}
+    {% include note/mod_group_list.html %}
+{% end %}

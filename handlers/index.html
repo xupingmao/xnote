@@ -54,31 +54,24 @@
      -->
 
     {% if _has_login %}
-
-    <!--
-    <div class="card row">
-        <div class="grid-title">
-            最近搜索
-            <a class="link float-right" href="/search">{{T("More")}}</a>
-        </div>
-        {% for value in recent_search %}
-            <a class="tag-span" href="/search?key={{value}}">{{xutils.short_text(value,10)}}</a>
-        {% end %}
-    </div>
-    -->
-
-    <div class="col-md-12 bottom-offset-1 box">
-        <div class="grid-title">笔记本
-            {% if _has_login %}
-            <a class="float-right link prompt-btn" message="新增分类" 
-                        action="/note/add?type=group&name=">新增</a>
+        <!--
+        <div class="card row">
+            <div class="grid-title">
+                最近搜索
+                <a class="link float-right" href="/search">{{T("More")}}</a>
+            </div>
+            {% for value in recent_search %}
+                <a class="tag-span" href="/search?key={{value}}">{{xutils.short_text(value,10)}}</a>
             {% end %}
         </div>
-        {% include "note/group_list.html" %}
-    </div>
+        -->
+        
+        <div class="col-md-12">
+            {% include "note/mod_group_list.html" %}
+        </div>
     {% end %}
 
-    <div class="col-md-12 bottom-offset-1 card">
+    <div class="col-md-12 card">
         <h3>标签列表</h3>
         {% for tag_info in tags %}
         <span class="tag-span">

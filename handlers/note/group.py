@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/04/13 23:40:59
+# @modified 2019/04/14 11:43:30
 import math
 import time
 import web
@@ -94,7 +94,7 @@ class GroupListHandler:
         data = xutils.call("note.list_group", xauth.get_current_name())
         ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
             vars=dict(creator=xauth.get_current_name()))
-        return xtemplate.render(VIEW_TPL,
+        return xtemplate.render("note/group_list.html",
             ungrouped_count = ungrouped_count,
             file_type       = "group_list",
             pseudo_groups   = True,
@@ -119,8 +119,12 @@ class RemovedHandler:
     @xauth.login_required()
     def GET(self):
         page = xutils.get_argument("page", 1, type=int)
+        user_name = xauth.current_name()
+
         db = xtables.get_file_table()
-        files = db.select(where="is_deleted=1", order="ctime DESC", offset=(page-1)*10, limit=10)
+        files = db.select(where="is_deleted=1 AND creator=$creator", 
+            vars = dict(creator = user_name),
+            order="ctime DESC", offset=(page-1)*10, limit=10)
         amount = db.count(where="is_deleted=1")
 
         return xtemplate.render(VIEW_TPL,
@@ -135,7 +139,7 @@ class RecentHandler:
     """show recent notes"""
 
     @xauth.login_required()
-    def GET(self, orderby = "edit"):
+    def GET(self, orderby = "edit", show_notice = False):
         if not xauth.has_login():
             raise web.seeother("/note/public")
         if xutils.sqlite3 is None:
@@ -172,7 +176,7 @@ class RecentHandler:
             files       = files, 
             file        = Storage(name=T(html_title), type="group"),
             groups      = groups,
-            show_notice = False,
+            show_notice = show_notice,
             show_mdate  = True,
             show_groups = False,
             show_aside  = True,
@@ -239,6 +243,7 @@ class DateHandler:
 
 xurls = (
     r"/note/group"          , GroupListHandler,
+    r"/note/group_list"     , GroupListHandler,
     r"/note/ungrouped"      , Ungrouped,
     r"/note/public"         , PublicGroupHandler,
     r"/note/removed"        , RemovedHandler,

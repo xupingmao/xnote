@@ -10,25 +10,30 @@
 {% end %}
 
 {% block body %}
+    
+    {% if show_notice %}
+        {% include common/mod_notice.html %}
+    {% end %}
 
     {% if len(files) > 0 %}
     <div class="card row">
-        <h3>{{T(html_title)}}</h3>
+        <h3>
+            {{T(html_title)}}
+            <div class="float-right">
+                <a href="/note/group_list">{{T("Group")}}</a>
+            </div>
+        </h3>
 
         <table class="table row">
             <tr>
-                <th>标题</th>
-                <th>主题</th>
+                <th>{{T("Title")}}</th>
+                <th>{{T("Group")}}</th>
                 <th>{{T(time_attr)}}</th>
             </tr>
         {% for note in files %}
             <tr>
                 <td><a href="/note/view?id={{note.id}}">{{note.name}}</a></td>
                 <td class="option-td">
-                    <!--
-                    <button class="btn rename-btn">重命名</button>
-                    <button class="btn-danger delete-btn">删除</button>
-                    -->
                     {% if note.parent_id != 0 %}
                     <a href="/note/view?id={{note.parent_id}}">{{note.parent_name}}</a>
                     {% end %}
