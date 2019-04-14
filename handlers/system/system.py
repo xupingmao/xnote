@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/04/07 19:05:41
+# @modified 2019/04/14 15:53:43
 """System functions"""
 from io import StringIO
 import xconfig
@@ -170,9 +170,7 @@ class ConfigHandler:
         if key == "DEBUG":
             setattr(xconfig, key, value == "True")
             web.config.debug = xconfig.DEBUG
-        if key == "RECENT_SEARCH_LIMIT":
-            value = int(value)
-        if key == "PAGE_SIZE":
+        if key in ("RECENT_SEARCH_LIMIT", "RECENT_SIZE", "PAGE_SIZE"):
             value = int(value)
         if key == "LANG":
             web.setcookie("lang", value)
@@ -236,7 +234,7 @@ xurls = (
 
 @xmanager.listen("sys.reload")
 def on_reload(ctx = None):
-    for key in ('THEME', 'FS_HIDE_FILES', 'OPTION_STYLE', 'PAGE_OPEN', 'RECENT_SEARCH_LIMIT', "PAGE_SIZE"):
+    for key in ('THEME', 'FS_HIDE_FILES', 'OPTION_STYLE', 'PAGE_OPEN', 'RECENT_SEARCH_LIMIT', "PAGE_SIZE", "RECENT_SIZE"):
         value = cacheutil.hget('sys.config', key)
         xutils.trace("HGET", "key=%s, value=%s" % (key, value))
         if value is not None:

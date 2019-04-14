@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/03/27 00:06:47
+# @modified 2019/04/14 15:54:15
 import web
 import xtables
 import xtemplate
@@ -53,7 +53,7 @@ class IndexHandler:
     def GET(self):
         current_name    = xauth.current_name()
         groups          = xutils.call("note.list_group")
-        notes           = xutils.call("note.list_recent_edit", limit = 6)
+        notes           = xutils.call("note.list_recent_edit", limit = xconfig.RECENT_SIZE)
         ungrouped_count = xutils.call("note.count_ungrouped", current_name)
         tools           = list(filter(tool_filter, list_tools()))[:4]
         tags            = xutils.call("note.list_tag", current_name)

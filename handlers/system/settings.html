@@ -82,12 +82,20 @@
             </td>
         </tr>
         <tr>
-            <td>最近搜索</td>
+            <td>{{T("Recent Search")}}</td>
             <td>
                 <input type="radio" name="RECENT_SEARCH_LIMIT" default-value="{{xconfig.RECENT_SEARCH_LIMIT}}" value="10">10
                 <input type="radio" name="RECENT_SEARCH_LIMIT" default-value="{{xconfig.RECENT_SEARCH_LIMIT}}" value="15">15
                 <input type="radio" name="RECENT_SEARCH_LIMIT" default-value="{{xconfig.RECENT_SEARCH_LIMIT}}" value="20">20
                 <input type="radio" name="RECENT_SEARCH_LIMIT" default-value="{{xconfig.RECENT_SEARCH_LIMIT}}" value="30">30
+            </td>
+        </tr>
+        <tr>
+            <td>{{T("Recent Modified")}}</td>
+            <td>
+                <input type="radio" name="RECENT_SIZE" default-value="{{xconfig.RECENT_SIZE}}" value="6">6
+                <input type="radio" name="RECENT_SIZE" default-value="{{xconfig.RECENT_SIZE}}" value="9">9
+                <input type="radio" name="RECENT_SIZE" default-value="{{xconfig.RECENT_SIZE}}" value="12">12
             </td>
         </tr>
         <tr>

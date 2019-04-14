@@ -20,8 +20,14 @@
                 <li><a class="link" href="/note/recent_created">{{T("Recent Created")}}</a></li>
                 <li><a class="link" href="/note/recent_edit">{{T("Recent Updated")}}</a></li>
                 <li><a class="link" href="/note/recent_viewed">{{T("Recent Viewed")}}</a></li>
+                {% if _is_admin %}
+                    <li><a href="/system/settings">{{T("Menu_Settings")}}</a>
+                {% end %}
                 {% if file_type == "md" %}
-                <li><a class="link" href="/note/history?id={{file_id}}">{{T("Note_History")}}</a></li>
+                    <!-- 笔记选项 -->
+                    <li><a class="link" href="/note/history?id={{file_id}}">{{T("Note_History")}}</a></li>
+                {% else %}
+                    <!-- 目录选项 -->
                 {% end %}
             {% end %}
             

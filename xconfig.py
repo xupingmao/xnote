@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/04/07 16:36:39
+# @modified 2019/04/14 15:53:32
 
 '''xnote系统配置
 
@@ -108,6 +108,7 @@ PAGE_SIZE        = 20
 # 搜索历史的最大记录数
 SEARCH_HISTORY_MAX_SIZE  = 100
 RECENT_SEARCH_LIMIT = 10
+RECENT_SIZE = 6
 
 IP_BLACK_LIST    = ["192.168.56.1"] # this is vbox ip
 # max file size to sync or backup
