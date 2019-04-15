@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/04/14 15:53:43
+# @modified 2019/04/16 00:39:29
 """System functions"""
 from io import StringIO
 import xconfig
@@ -43,8 +43,7 @@ sys_tools = [
     admin_link("SQL",      "/tools/sql"),
     admin_link("Menu_CSS", "/code/edit?type=script&path=user.css"),
     admin_link("Menu_Plugin",   "/plugins_list"),
-    admin_link("Shell",    "/tools/shell"),
-    link("About System",    "/code/wiki/README.md"),
+    admin_link("Shell",    "/tools/shell")
 ] 
 
 doc_tools = [
@@ -121,20 +120,12 @@ def get_tools_config(user):
 class IndexHandler:
 
     def GET(self):
-        shell_list = []
-        dirname = "scripts"
-        if os.path.exists(dirname):
-            for fname in os.listdir(dirname):
-                fpath = os.path.join(dirname, fname)
-                if os.path.isfile(fpath) and fpath.endswith(".bat"):
-                    shell_list.append(fpath)
-
         # 自定义链接
-        customized_items = []
-        user_config = get_tools_config(xauth.get_current_name())
-        if user_config is not None:
-            config_list = xutils.parse_config_text(user_config.value)
-            customized_items = map(lambda x: Storage(name=x.get("key"), url=x.get("value")), config_list)
+        # customized_items = []
+        # user_config = get_tools_config(xauth.get_current_name())
+        # if user_config is not None:
+        #     config_list = xutils.parse_config_text(user_config.value)
+        #     customized_items = map(lambda x: Storage(name=x.get("key"), url=x.get("value")), config_list)
 
         return xtemplate.render("system/system.html", 
             show_aside       = (xconfig.OPTION_STYLE == "aside"),
@@ -142,7 +133,7 @@ class IndexHandler:
             Storage          = Storage,
             os               = os,
             user             = xauth.get_current_user(),
-            customized_items = customized_items
+            customized_items = []
         )
 
 
@@ -153,7 +144,7 @@ class ReloadHandler:
         import autoreload
         autoreload.reload()
         import web
-        raise web.seeother("/system/index")
+        raise web.seeother("/system/settings")
 
 
 class ConfigHandler:

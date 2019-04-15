@@ -17,8 +17,10 @@
       {% end %}
 
       
-      {# 全部功能导航 #}
-      <li><a class="menu-link" href="/system/index">{{T("More")}}</a></li>
+      {# 系统功能 #}
+      {% if _has_login %}
+      <li><a class="menu-link" href="/system/settings">{{T("System")}}</a></li>
+      {% end %}
       
       {% if not _has_login %}
       <li><a class="menu-link" class="link" href="/login">{{T("Login")}}</a></li>

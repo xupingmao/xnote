@@ -1,163 +1,221 @@
 {% extends base.html %}
 
+{% block head %}
+<style type="text/css">
+.key {
+    width: 25%;
+}
+
+.table td {
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+{% if not _is_admin %}
+    .admin-visible {
+        display: none;
+    }
+{% end %}
+
+</style>
+{% end %}
+
 {% block body %}
 
 <!-- TODO d3.js 展示内存和CPU日志 -->
+{% import web %}
 
-<div class="col-md-12 grid-card">
-    {% import web %}
-    {% set title = "系统设置" %}
-    {% include "tools/base_title.html" %}
+<div class="col-md-12 card">
+    <h3>{{T("Menu_Settings")}}</h3>
 
     <table class="table">
-        {% for item in item_list %}
-            <tr>
-                <td>{{item.key}}</td>
-                <td>{{item.value}}</td>
-            </tr>
-        {% end %}
-        <tr>
-            <td>系统启动时间</td>
+        <tr class="">
+            <td class="key">{{T("当前用户")}}</td>
+            <td>
+                {{_user_name}} <a href="/logout">退出登录</a>
+            </td>
+        </tr>
+
+        <tr class="admin-visible">
+            <td class="key">系统启动时间</td>
             <td>{{start_time}}</td>
         </tr>
-        <tr>
-            <td>系统内存占用</td>
+        <tr class="admin-visible">
+            <td class="key">系统内存占用</td>
             <td>{{sys_mem_used}} / {{sys_mem_total}}</td>
         </tr>
-        <tr>
-            <td>OS版本</td>
-            <td>{{sys_version}}</td>
-        </tr>
-        <tr>
-            <td>处理器</td>
-            <td>{{processor}}</td>
-        </tr>
-        <tr>
-            <td>Python版本</td>
-            <td>{{python_version}}</td>
-        </tr>
-        <tr>
-            <td>线程总数</td>
+
+        <tr class="admin-visible">
+            <td class="key">线程总数</td>
             <td>
                 <span>{{thread_cnt}}</span>
                 <a href="/system/thread_info">详情</a>
             </td>
         </tr>
 
-        <!-- 主题设置 -->
-        <tr class="hide">
-            <td>母板类型</td>
+        <tr class="user-visible">
+            <td class="key">更多功能</td>
             <td>
-                <input type="radio" name="BASE_TEMPLATE" default-value="{{xconfig.BASE_TEMPLATE}}" value="base.html">base.html
-                <input type="radio" name="BASE_TEMPLATE" default-value="{{xconfig.BASE_TEMPLATE}}" value="base2.html">base2.html
+                <a href="/system/index">功能列表</a>
             </td>
         </tr>
-        <tr>
-            <td>主题</td>
+
+        <tr class="admin-visible">
+            <td class="key">管理功能</td>
+            <td>
+                <a href="/system/reload">系统刷新</a>
+                <a href="/system/user/list">用户管理</a>
+                <a href="/system/crontab">定时任务</a>
+                <a href="/tools/sql">SQL</a>
+                <a href="/tools/shell">Shell</a>
+            </td>
+        </tr>
+
+        <!-- UI设置 -->
+        <tr class="admin-visible">
+            <td class="key">主题</td>
             <td>
                 <input type="radio" name="THEME" default-value="{{xconfig.THEME}}" value="standard">默认
                 <input type="radio" name="THEME" default-value="{{xconfig.THEME}}" value="card">卡片
             </td>
         </tr>
-        <tr>
-            <td>选项风格</td>
+        <tr class="admin-visible">
+            <td class="key">选项风格</td>
             <td>
                 <input type="radio" name="OPTION_STYLE" default-value="{{xconfig.OPTION_STYLE}}" value="aside">侧边
                 <input type="radio" name="OPTION_STYLE" default-value="{{xconfig.OPTION_STYLE}}" value="top">顶部
             </td>
         </tr>
-        <tr>
-            <td>页面打开</td>
+        <tr class="admin-visible">
+            <td class="key">页面打开</td>
             <td>
                 <input type="radio" name="PAGE_OPEN" default-value="{{xconfig.PAGE_OPEN}}" value="self">当前页面
                 <input type="radio" name="PAGE_OPEN" default-value="{{xconfig.PAGE_OPEN}}" value="dialog">弹层
             </td>
         </tr>
 
-        <tr>
-            <td>{{T('Language')}}</td>
+        <tr class="admin-visible">
+            <td class="key">{{T('Language')}}</td>
             <td>
                 <input type="radio" name="LANG" default-value="{{web.cookies().get('lang', 'zh')}}" value="zh">中文
                 <input type="radio" name="LANG" default-value="{{web.cookies().get('lang', 'zh')}}" value="en">English
             </td>
         </tr>
-        <tr>
-            <td>{{T("Recent Search")}}</td>
+        <tr class="admin-visible">
+            <td class="key">{{T("Recent Search")}}</td>
             <td>
-                <input type="radio" name="RECENT_SEARCH_LIMIT" default-value="{{xconfig.RECENT_SEARCH_LIMIT}}" value="10">10
-                <input type="radio" name="RECENT_SEARCH_LIMIT" default-value="{{xconfig.RECENT_SEARCH_LIMIT}}" value="15">15
-                <input type="radio" name="RECENT_SEARCH_LIMIT" default-value="{{xconfig.RECENT_SEARCH_LIMIT}}" value="20">20
-                <input type="radio" name="RECENT_SEARCH_LIMIT" default-value="{{xconfig.RECENT_SEARCH_LIMIT}}" value="30">30
+                <select name="RECENT_SEARCH_LIMIT" value="{{xconfig.RECENT_SEARCH_LIMIT}}">
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                </select>
             </td>
         </tr>
-        <tr>
-            <td>{{T("Recent Modified")}}</td>
+        <tr class="admin-visible">
+            <td class="key">{{T("Recent Modified")}}</td>
             <td>
                 <input type="radio" name="RECENT_SIZE" default-value="{{xconfig.RECENT_SIZE}}" value="6">6
                 <input type="radio" name="RECENT_SIZE" default-value="{{xconfig.RECENT_SIZE}}" value="9">9
                 <input type="radio" name="RECENT_SIZE" default-value="{{xconfig.RECENT_SIZE}}" value="12">12
             </td>
         </tr>
-        <tr>
-            <td>{{T("Page Size")}}</td>
+        <tr class="admin-visible">
+            <td class="key">{{T("Page Size")}}</td>
             <td>
-                <input type="radio" name="PAGE_SIZE" default-value="{{xconfig.PAGE_SIZE}}" value="20">20
-                <input type="radio" name="PAGE_SIZE" default-value="{{xconfig.PAGE_SIZE}}" value="30">30
-                <input type="radio" name="PAGE_SIZE" default-value="{{xconfig.PAGE_SIZE}}" value="50">50
-                <input type="radio" name="PAGE_SIZE" default-value="{{xconfig.PAGE_SIZE}}" value="100">100
+                <select name="PAGE_SIZE" value="{{xconfig.PAGE_SIZE}}">
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
             </td>
         </tr>
-        <tr>
-            <td>系统文件</td>
+        <tr class="admin-visible">
+            <td class="key">系统文件</td>
             <td>
                 <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="True">隐藏
                 <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="False">显示
             </td>
         </tr>
-        <tr>
-            <td>调试模式</td>
+        <tr class="admin-visible">
+            <td class="key">调试模式</td>
             <td>
                 <input type="radio" name="DEBUG" default-value="{{xconfig.DEBUG}}" value="True">开启
                 <input type="radio" name="DEBUG" default-value="{{xconfig.DEBUG}}" value="False">关闭
             </td>
         </tr>
-        <tr>
-            <td>页面调试</td>
+        <tr class="admin-visible">
+            <td class="key">页面调试</td>
             <td>
                 <input type="radio" name="DEBUG_HTML_BOX" default-value="{{xconfig.DEBUG_HTML_BOX}}" value="True">开启
                 <input type="radio" name="DEBUG_HTML_BOX" default-value="{{xconfig.DEBUG_HTML_BOX}}" value="False">关闭
             </td>
         </tr>
-        <tr>
-            <td>实验室功能</td>
+        <tr class="admin-visible">
+            <td class="key">实验室功能</td>
             <td>
                 <input type="radio" name="DEV_MODE" default-value="{{xconfig.DEV_MODE}}" value="True">开启
                 <input type="radio" name="DEV_MODE" default-value="{{xconfig.DEV_MODE}}" value="False">关闭
             </td>
         </tr>
-        <!--
-        <tr>
-            <td>文件浏览器</td>
+        <tr class="admin-visible">
+            <td class="key">高级配置</td>
             <td>
-                <input type="radio" name="FS_LINK" default-value="{{xconfig.FS_LINK}}" value="/fs_list">列表模式
-                <input type="radio" name="FS_LINK" default-value="{{xconfig.FS_LINK}}" value="/fs_sidebar">侧边栏
+                <a href="{{init_script_url}}">配置脚本</a>
+                <a href="/code/edit?type=script&path=user.css">CSS配置</a>
             </td>
         </tr>
-        -->
+        
+        <!-- 系统信息，有敏感信息 -->
+        {% if _is_admin %}
+            <tr class="admin-visible">
+                <td class="key">处理器</td>
+                <td>{{processor}}</td>
+            </tr>
+            <tr class="admin-visible">
+                <td class="key">OS版本</td>
+                <td>{{sys_version}}</td>
+            </tr>
+            <tr class="admin-visible">
+                <td class="key">Python版本</td>
+                <td>{{python_version}}</td>
+            </tr>
+            {% for item in item_list %}
+                <tr>
+                    <td class="key">{{item.key}}</td>
+                    <td>{{item.value}}</td>
+                </tr>
+            {% end %}
+        {% end %}
+
     </table>
 </div>
 
 <script type="text/javascript">
+    function updateSetting(key, value) {
+        $.post("/system/config", 
+            {key: key, value: value}, 
+            function (data) {
+                window.location.reload();
+        }).fail(function (resp) {
+            console.log(resp);
+            alert("设置失败");
+        });
+    }
+
     $("[type=radio]").on("change", function (e) {
         var val = $(e.target).val();
         var key = $(e.target).attr("name");
         // alert(val);
-        $.post("/system/config", 
-            {key: key, value: val}, 
-            function (data) {
-                window.location.reload();
-        })
-    })
+        updateSetting(key, val);
+    });
+
+    $("select").change(function (e) {
+        var key = $(this).attr("name");
+        var val = $(this).val();
+        updateSetting(key, val);
+    });
 </script>
 
 {% end %}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/01/13 16:16:02
+# @modified 2019/04/16 00:15:46
 import web
 import time
 import os
@@ -23,6 +23,8 @@ try:
     import psutil
 except ImportError as e:
     psutil = None
+
+INIT_SCRIPT_URL = "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)
 
 def get_xnote_version():
     try:
@@ -59,7 +61,7 @@ class Item:
 
 class SettingsHandler:
 
-    @xauth.login_required("admin")
+    @xauth.login_required()
     def GET(self):
         mem_used          = 0
         sys_mem_used      = 0
@@ -99,7 +101,8 @@ class SettingsHandler:
             thread_cnt     = thread_cnt,
             xconfig        = xconfig,
             xnote_version  = get_xnote_version(),
-            start_time     = xconfig.get("start_time"))
+            start_time     = xconfig.get("start_time"),
+            init_script_url = INIT_SCRIPT_URL)
 
 
 

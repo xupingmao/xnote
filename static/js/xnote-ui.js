@@ -5,7 +5,7 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2018/12/30 23:58:20
+ * @modified 2019/04/15 23:15:44
  */
 var XUI = function (window) {
   // 处理select标签选中情况
@@ -57,14 +57,19 @@ var XUI = function (window) {
 
   // 类似tab的超链接
   function initTabLink() {
+    var hasActive = false;
     $(".x-tab").each(function (index, ele) {
       var link = $(ele).attr("href");
       var fullpath = location.href;
       console.log(link, fullpath);
       if (fullpath.indexOf(link) >= 0) {
         $(ele).addClass("tab-link-active");
+        hasActive = true;
       }
     });
+    if (!hasActive) {
+      $(".x-tab-default").addClass("tab-link-active");
+    }
   }
   
 
