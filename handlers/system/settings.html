@@ -6,11 +6,6 @@
     width: 25%;
 }
 
-.table td {
-    word-wrap: break-word;
-    word-break: break-all;
-}
-
 {% if not _is_admin %}
     .admin-visible {
         display: none;
@@ -54,7 +49,7 @@
         </tr>
 
         <tr class="user-visible">
-            <td class="key">更多功能</td>
+            <td class="key">扩展功能</td>
             <td>
                 <a href="/system/index">功能列表</a>
             </td>
@@ -167,8 +162,8 @@
             </td>
         </tr>
         
-        <!-- 系统信息，有敏感信息 -->
         {% if _is_admin %}
+            <!-- 系统信息，有敏感信息 -->
             <tr class="admin-visible">
                 <td class="key">处理器</td>
                 <td>{{processor}}</td>
@@ -188,6 +183,13 @@
                 </tr>
             {% end %}
         {% end %}
+
+        <tr>
+            <td class="key">关于系统</td>
+            <td>
+                <a href="/code/wiki/README.md">查看</a>
+            </td>
+        </tr>
 
     </table>
 </div>

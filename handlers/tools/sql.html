@@ -31,12 +31,11 @@
 
     <form>
         <p>Path
-        <select name="path" value="{{path}}">
-            <option value="{{path}}">{{path}}</option>
-            {% for p in path_list %}
-                <option value="{{p}}">{{p}}</option>
-            {% end %}
-        </select>
+            <select name="path" value="{{path}}">
+                {% for p in path_list %}
+                    <option value="{{p}}">{{p}}</option>
+                {% end %}
+            </select>
         </p>
         <textarea id="editor" name="sql" style="width:100%;">{{sql}}</textarea>
         <button>Run</button>

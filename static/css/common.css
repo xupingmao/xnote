@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/04/13 14:08:36
+@modified 2019/04/18 02:42:08
 */
 
 * {
@@ -321,6 +321,8 @@ table td {
 
 .table td {
     border-color: #ccc;
+    word-wrap: break-word;
+    word-break: break-all;
 }
 
 /*
@@ -1232,7 +1234,7 @@ li.menu-item:hover {
     margin-top: 0px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
-    min-height: 48px;
+    height: 48px;
 }
 
 .grid-card, .card, .box {
@@ -1291,6 +1293,11 @@ li.menu-item:hover {
 
     .mobile-hidden {
         display: none;
+    }
+
+    .plugin-item {
+        width: 100%;
+        margin-left: 0px;
     }
 }
 

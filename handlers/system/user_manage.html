@@ -19,8 +19,12 @@
 {% block body %}
 
 <div class="card">
-{% set title = "用户管理" %}
-{% include "tools/base_title.html" %}
+
+    <h3>
+        用户管理
+        <a class="float-right" href="/system/user/list">返回</a>
+    </h3>
+
 
 <form method="POST" class="col-md-12" action="/system/user/list">
 

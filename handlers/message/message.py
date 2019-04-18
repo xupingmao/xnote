@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/03/16 00:18:25
+# @modified 2019/04/16 23:03:09
 
 """短消息"""
 import time
@@ -156,6 +156,12 @@ rules = [
     CalendarRule(r"(\d+)年(\d+)月(\d+)日"),
 ]
 
+def get_remote_ip():
+    x_forwarded_for = web.ctx.env.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for != None:
+        return x_forwarded_for.split(",")[0]
+    return web.ctx.env.get("REMOTE_ADDR")
+
 class SaveHandler:
 
     @xauth.login_required()
@@ -163,6 +169,7 @@ class SaveHandler:
         id        = xutils.get_argument("id")
         content   = xutils.get_argument("content")
         status    = xutils.get_argument("status")
+        location  = xutils.get_argument("location", "")
         user_name = xauth.get_current_name()
         db = xtables.get_message_table()
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
@@ -170,11 +177,15 @@ class SaveHandler:
         for rule in rules:
             rule.match_execute(ctx, content)
 
+        if location == "":
+            location = get_remote_ip()
+
         if id == "" or id is None:
             ctime = xutils.get_argument("date", xutils.format_datetime())
             inserted_id = db.insert(content = content, 
                 user   = user_name, 
                 status = get_status_by_code(status),
+                location = location,
                 mtime  = ctime,
                 ctime  = ctime)
             id = inserted_id

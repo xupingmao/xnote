@@ -28,7 +28,9 @@
     <div class="col-md-12 card">
         <div class="grid-title">
             最近更新
-            <a class="link float-right" href="/note/recent_edit">{{T("More")}}</a>
+            <div class="float-right">
+                <a href="/note/recent_edit">{{T("More")}}</a>
+            </div>
         </div>
         <div class="row" style="padding:5px;">
             {% for item in notes %}

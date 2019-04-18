@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/02/26 01:44:11
+# @modified 2019/04/18 22:51:04
 from io import StringIO
 import xconfig
 import codecs
@@ -59,7 +59,7 @@ def list_plugins(category):
     if not os.path.isdir(dirname):
         return []
 
-    if category:
+    if category and category != "all":
         plugins = xmanager.find_plugins(category)
         print(category, plugins)
         links = build_plugin_links(dirname, [p.fname for p in plugins])
@@ -135,6 +135,7 @@ class PluginsListHandler:
     def GET(self):
         category = xutils.get_argument("category", "")
         return xtemplate.render("plugins/plugins.html", 
+            category = category,
             html_title = "插件",
             show_aside = xconfig.OPTION_STYLE == "aside",
             recent     = list_recent_plugins(),

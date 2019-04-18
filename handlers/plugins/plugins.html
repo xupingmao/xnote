@@ -21,20 +21,36 @@
         .plugin-time {
             float: right;
         }
+
     </style>
 {% end %}
 
 
 {% block body %}
 
-<!-- 
+ 
 <div class="card">
-    <a class="tab tab-link x-tab x-tab-default" href="/plugins_list?tab=default">默认</a>
+    <a class="tab tab-link x-tab x-tab-default" href="/plugins_list?category=all">全部</a>
+    <a class="tab tab-link x-tab" href="/plugins_list?category=note">笔记</a>
+    <a class="tab tab-link x-tab" href="/plugins_list?category=dir">文件</a>
+    <a class="tab tab-link x-tab" href="/plugins_list?category=network">网络</a>
+    <a class="tab tab-link x-tab" href="/plugins_list?category=system">系统</a>
+
+    <a class="btn float-right" href="/plugins_new">新增</a>
+
+<!--     类型
+    <select value="{{category}}">
+        <option value="all">全部</option>
+        <option value="note">笔记</option>
+        <option value="dir">文件</option>
+        <option value="network">网络</option>
+        <option value="system">系统</option>
+    </select> -->
 </div> 
--->
+
 
 {% if not show_aside %}
-<div class="card">
+<div class="card hide">
     <a class="link" href="/plugins_new">新增插件</a>|
     <a class="link" href="/fs_link/scripts/plugins">插件管理</a>|
     <a class="link" href="/fs_api/download/plugins">打包下载</a>
@@ -45,19 +61,19 @@
 
 {% init recent = [] %}
 <div class="plugin-list col-md-12">
-    {% for link in plugins %}
-    <div class="plugin-item">
-        <div class="col-md-12">
-            <a href="{{link.link}}">{{link.name}}</a>
-            {% if _is_admin %}
-            <a class="float-right item-option" href="{{link.edit_link}}">编辑</a>
-            {% end %}
+    {% for index, link in enumerate(plugins) %}
+        <div class="plugin-item hide">
+            <div class="col-md-12">
+                <a href="{{link.link}}">{{link.name}}</a>
+                {% if _is_admin %}
+                <a class="float-right item-option" href="{{link.edit_link}}">编辑</a>
+                {% end %}
+            </div>
+            <div>
+                <span>{{link.title}}</span>
+                <span class="plugin-time">{{link.atime}}</span>
+            </div>
         </div>
-        <div>
-            <span>{{link.title}}</span>
-            <span class="plugin-time">{{link.atime}}</span>
-        </div>
-    </div>
     {% end %}
 </div>
 {% end %}
@@ -104,5 +120,31 @@
         </ul>
     </div>
 </div>
+
+<script type="text/javascript">
+$(function () {
+    var listWidth = $(".plugin-list").width();
+    // 一行的卡片数量
+    var itemCols = 3;
+    var itemWidth = (listWidth - (itemCols-1) * 10) / itemCols;
+
+    $(".plugin-item").each(function (index, element) {
+        if (listWidth >= 600) {        
+            $(element).css("width", itemWidth);
+            if (index % itemCols == 0) {
+                $(element).css("margin-left", "0px");
+            } else {
+                $(element).css("margin-left", "10px");
+            }
+        }
+        $(element).show();
+    });
+
+    $("select").change(function (e) {
+        var category = $(this).val();
+        window.location.href = "/plugins_list?category=" + category;
+    })
+})
+</script>
 
 {% end %}
