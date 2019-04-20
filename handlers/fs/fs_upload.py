@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/04/09 00:23:26
+# @modified 2019/04/20 02:45:49
 import os
 import uuid
 import web
@@ -13,7 +13,7 @@ import xmanager
 import time
 import math
 from xutils import quote
-
+from xtemplate import T
 
 def get_link(filename, webpath):
     if xutils.is_img_file(filename):
@@ -96,6 +96,7 @@ class UploadHandler:
         
         return xtemplate.render("fs/fs_upload.html", 
             show_aside = False,
+            html_title = T("文件"),
             pathlist = pathlist, 
             year = int(year),
             month = int(month),
@@ -177,8 +178,34 @@ class RangeUploadHandler:
             self.merge_files(dirname, filename, chunks)
         return dict(code="success", webpath=webpath, link=get_link(origin_name, webpath))
 
+class UploadSearchHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        key = xutils.get_argument("key")
+        user_name = xauth.current_name()
+        user_dir  = os.path.join(xconfig.UPLOAD_DIR, user_name)
+
+        find_key = "*" + key + "*"
+        if find_key == "**":
+            plist = []
+        else:
+            plist = xutils.search_path(user_dir, find_key, "file")
+
+        return xtemplate.render("fs/fs_upload.html", 
+            show_aside = False,
+            html_title = T("文件"),
+            page = "search",
+            pathlist = plist, 
+            path = user_dir, 
+            dirname = user_dir,
+            get_webpath = get_webpath,
+            upload_link_by_month = upload_link_by_month,
+            get_display_name = get_display_name)
+
 xurls = (
     # 和文件系统的/fs/冲突了
     r"/fs_upload", UploadHandler, 
+    r"/fs_upload/search", UploadSearchHandler,
     r"/fs_upload/range", RangeUploadHandler
 )

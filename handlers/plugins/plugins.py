@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/04/18 22:51:04
+# @modified 2019/04/19 00:39:43
 from io import StringIO
 import xconfig
 import codecs
@@ -90,12 +90,15 @@ def load_plugin(name):
     context = xconfig.PLUGINS.get(name)
     if xconfig.DEBUG or context is None:
         script_name = "plugins/" + name
-        if not os.path.exists(os.path.join(xconfig.PLUGINS_DIR, name)):
+        fpath = os.path.join(xconfig.PLUGINS_DIR, name)
+        if not os.path.exists(fpath):
             return None
         vars = dict()
         vars["script_name"] = script_name
+        vars["fpath"] = fpath
         xutils.load_script(script_name, vars)
         main_class = vars.get("Main")
+        main_class.fpath = fpath
         return main_class
     else:
         return context.clazz

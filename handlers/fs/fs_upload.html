@@ -44,11 +44,18 @@
     }
 </style>
 
+{% set search_action = '/fs_upload/search' %}
+{% set search_placeholder = '搜索文件' %}
+
 {% end %}
 
 {% block body %}
+    
+    {% init page = "upload" %}
+
     <input type="hidden" id="dirname" value="{{dirname}}"/>
 
+    {% if page == "upload" %}
     <div class="card">
         日期
         <select name="year" value="{{year}}">
@@ -70,10 +77,23 @@
             {% end %}
         </div>
     </div>
+    {% end %}
+
+    {% if page == "search" %}
+    <div class="card">
+        <h3>搜索结果</h3>
+    </div>
+    {% end %}
 
     {% import os %}
     <div class="card row">
-        {% include fs/mod_fs_upload.html %}
+        {% if page == "upload" %}
+            {% include fs/mod_fs_upload.html %}
+        {% end %}
+
+        {% if len(pathlist) == 0 %}
+            空空如也~
+        {% end %}
 
         <table class="table row">
         {% for fpath in pathlist %}

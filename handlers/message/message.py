@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/04/16 23:03:09
+# @modified 2019/04/20 02:35:10
 
 """短消息"""
 import time
@@ -15,6 +15,7 @@ import xconfig
 import xmanager
 import xtemplate
 from xutils import BaseRule, Storage, cacheutil
+from xtemplate import T
 
 def process_message(message):
     message.html = xutils.mark_text(message.content)
@@ -86,8 +87,10 @@ class ListHandler:
         chatlist = list(map(process_message, chatlist))
         return dict(code="success", message="", 
             pagesize = pagesize,
-            data=chatlist, amount=amount, 
-            page_max=page_max, current_user=xauth.get_current_name())
+            data=chatlist, 
+            amount=amount, 
+            page_max=page_max, 
+            current_user=xauth.get_current_name())
 
 def update_message(id, status):
     db = xtables.get_message_table()
@@ -216,8 +219,8 @@ class MessageHandler:
             show_aside         = False,
             category           = "message",
             search_action      = "/message", 
-            html_title         = "提醒",
-            search_placeholder = "搜索提醒信息",
+            html_title         = T("提醒"),
+            search_placeholder = T("搜索提醒"),
             count_message      = count_message,
             key                = xutils.get_argument("key", ""))
 

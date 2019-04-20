@@ -21,8 +21,16 @@
     {% init output = "" %}
 
     <div class="plugin-head">
-        {% set back_link = "javascript:history.back();" %}
-        {% include common/base_title.html %}
+
+        <div class="grid-title">
+            {{title}}
+            <span class="float-right">
+                {% if _is_admin %}
+                    <a href="/code/edit?path={{fpath}}">编辑</a>
+                {% end %}
+                <a href="javascript:history.back();">返回</a>
+            </span>
+        </div>
 
         {% if description != "" %}
         <pre class="col-md-12 info">

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/02/16 11:03:18
+# @modified 2019/04/19 00:39:58
 import os
 import json
 import web
@@ -205,6 +205,8 @@ class BasePlugin:
     # 搜索配置
     search_action = "/search"
     search_placeholder = None
+    # 插件路径
+    fpath = None
 
     def __init__(self):
         # 输入框的行数
@@ -279,6 +281,7 @@ class BasePlugin:
         return render("plugins/base_plugin.html",
             model       = self,
             script_name = globals().get("script_name"),
+            fpath       = self.fpath,
             description = self.description,
             error       = error,
             html_title  = self.title,

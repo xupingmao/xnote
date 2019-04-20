@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/04/07 23:15:03
+# @modified 2019/04/20 02:48:09
 import codecs
 import os
 import platform
@@ -369,20 +369,21 @@ def touch(path):
         times = (current, current)
         os.utime(path, times)
 
-def _search_path0(path, key, limit=200):
+def _search_path0(path, key, limit=200, option=""):
     result_dirs = []
     result_files = []
     key = key.lower()
     count = 0
     for root, dirs, files in os.walk(path):
         root_len = len(root)
-        for f in dirs:
-            abspath = os.path.join(root, f)
-            if fnmatch(f.lower(), key):
-                result_dirs.append(abspath)
-                count+=1
-                if count >= limit:
-                    break
+        if option!="file":
+            for f in dirs:
+                abspath = os.path.join(root, f)
+                if fnmatch(f.lower(), key):
+                    result_dirs.append(abspath)
+                    count+=1
+                    if count >= limit:
+                        break
         for f in files:
             abspath = os.path.join(root, f)
             if fnmatch(f.lower(), key):
@@ -394,14 +395,19 @@ def _search_path0(path, key, limit=200):
             break
     return result_dirs + result_files
 
-def search_path(path, key):
+def search_path(path, key, option = ""):
     """搜索文件系统，key支持通配符表示，具体见fnmatch模块
+    @param {string} path 
+    @param {string} key
+    @param {string} option 附加选项
+        - file 仅搜索文件
+        - dir 仅搜索目录
     """
     result = []
     quoted_key = quote_unicode(key)
     if key != quoted_key:
-        result = _search_path0(path, quoted_key)
-    return result + _search_path0(path, key)
+        result = _search_path0(path, quoted_key, 200, option)
+    return result + _search_path0(path, key, 200, option)
 
 
 def backupfile(path, backup_dir = None, rename=False):

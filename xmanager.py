@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/02/16 19:51:42
+# @modified 2019/04/19 00:37:58
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -621,6 +621,7 @@ def load_plugins(dirname):
             script_name = "plugins/" + fname
             vars = dict()
             vars["script_name"] = script_name
+            vars["fpath"] = fpath
             try:
                 module = xutils.load_script(script_name, vars)
                 main_class = vars.get("Main")
