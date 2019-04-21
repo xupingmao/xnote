@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/04/20 02:45:49
+# @modified 2019/04/20 16:49:02
 import os
 import uuid
 import web
@@ -190,7 +190,7 @@ class UploadSearchHandler:
         if find_key == "**":
             plist = []
         else:
-            plist = xutils.search_path(user_dir, find_key, "file")
+            plist = sorted(xutils.search_path(user_dir, find_key, "file"))
 
         return xtemplate.render("fs/fs_upload.html", 
             show_aside = False,

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/04/13 12:19:03
+# @modified 2019/04/20 17:18:06
 import profile
 import math
 import re
@@ -44,6 +44,7 @@ class ViewHandler:
         show_pagination = True
         show_search_div = False
 
+        # 回收站的笔记也能看到
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
@@ -53,8 +54,6 @@ class ViewHandler:
             file = dao.get_by_name(name, db=db)
         if file is None:
             raise web.notfound()
-        if file.is_deleted == 1:
-            raise web.seeother("/")
         
         if file.type != "group" and not file.is_public and user_name != "admin" and user_name != file.creator:
             raise web.seeother("/unauthorized")

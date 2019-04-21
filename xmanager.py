@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/04/19 00:37:58
+# @modified 2019/04/20 17:45:07
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -627,6 +627,7 @@ def load_plugins(dirname):
                 main_class = vars.get("Main")
                 if main_class != None:
                     main_class.fname = fname
+                    main_class.fpath = fpath
                     instance = main_class()
                     context = PluginContext()
                     context.fname = fname
