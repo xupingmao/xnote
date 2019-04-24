@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/04/20 02:35:10
+# @modified 2019/04/24 00:23:14
 
 """短消息"""
 import time
@@ -180,15 +180,14 @@ class SaveHandler:
         for rule in rules:
             rule.match_execute(ctx, content)
 
-        if location == "":
-            location = get_remote_ip()
+        ip = get_remote_ip()
 
         if id == "" or id is None:
             ctime = xutils.get_argument("date", xutils.format_datetime())
             inserted_id = db.insert(content = content, 
                 user   = user_name, 
                 status = get_status_by_code(status),
-                location = location,
+                ip     = ip,
                 mtime  = ctime,
                 ctime  = ctime)
             id = inserted_id

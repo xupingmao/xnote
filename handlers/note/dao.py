@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/14 15:14:20
+# @modified 2019/04/24 01:47:48
 
 """资料的DAO操作集合
 
@@ -372,6 +372,7 @@ def count_ungrouped(creator):
     if count is None:
         count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
             vars=dict(creator=creator))
+        xutils.cache_put(count_key, count, expire=600)
     t.stop()
     xutils.trace("NoteDao.CountUngrouped", "", t.cost_millis())
     return count

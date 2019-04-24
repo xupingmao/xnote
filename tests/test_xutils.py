@@ -176,7 +176,7 @@ class TestMain(unittest.TestCase):
 
         text = "a link https://link"
         html = xutils.mark_text(text)
-        self.assertEqual('a&nbsp;link&nbsp;<a href="https://link">https://link</a>', html)
+        self.assertEqual('a&nbsp;link&nbsp;<a target="_blank" href="https://link">https://link</a>', html)
 
         # text = 'Link [name](/http)'
         # html = xutils.mark_text(text)

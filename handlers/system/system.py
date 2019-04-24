@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/04/17 01:00:55
+# @modified 2019/04/24 22:33:36
 """System functions"""
 from io import StringIO
 import xconfig
@@ -156,7 +156,7 @@ class ConfigHandler:
 
         if key == "BASE_TEMPLATE":
             xmanager.reload()
-        if key in ("FS_HIDE_FILES", "DEBUG_HTML_BOX"):
+        if key in ("FS_HIDE_FILES", "DEBUG_HTML_BOX", "RECORD_LOCATION"):
             value = value.lower() in ("true", "yes", "on")
         if key == "DEBUG":
             setattr(xconfig, key, value == "True")
@@ -225,7 +225,13 @@ xurls = (
 
 @xmanager.listen("sys.reload")
 def on_reload(ctx = None):
-    for key in ('THEME', 'FS_HIDE_FILES', 'OPTION_STYLE', 'PAGE_OPEN', 'RECENT_SEARCH_LIMIT', "PAGE_SIZE", "RECENT_SIZE"):
+    keys = (
+        "THEME", 'FS_HIDE_FILES', 'OPTION_STYLE', 
+        'PAGE_OPEN', 'RECENT_SEARCH_LIMIT', 
+        "PAGE_SIZE", "RECENT_SIZE",
+        "RECORD_LOCATION",
+    )
+    for key in keys:
         value = cacheutil.hget('sys.config', key)
         xutils.trace("HGET", "key=%s, value=%s" % (key, value))
         if value is not None:

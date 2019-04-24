@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/04/06 16:48:41
+# @modified 2019/04/23 00:36:50
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -252,7 +252,7 @@ def mark_text(content):
         tokens = line.split(" ")
         for index, item in enumerate(tokens):
             if item.startswith(("https://", "http://")):
-                tokens[index] = '<a href="%s">%s</a>' % (item, item)
+                tokens[index] = '<a target="_blank" href="%s">%s</a>' % (item, item)
             elif item.startswith("file://"):
                 href = item[7:]
                 if is_img_file(href):

@@ -21,7 +21,9 @@
 <script type="text/javascript" src="/static/js/utils.js"></script>
 <script type="text/javascript" src="/static/js/xnote-ui.js"></script>
 <script type="text/javascript" src="/static/js/app.js"></script>
+{% if xconfig.RECORD_LOCATION %}
 <script type="text/javascript" src="/system/stats"></script>
+{% end %}
 
 {# 自定义的样式 #}
 {% if xconfig.get("USER_CSS") %}

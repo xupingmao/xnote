@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/04/16 22:58:22
+# @modified 2019/04/24 00:22:33
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -296,6 +296,8 @@ def init_message_table():
         # 消息的状态 0关注 50挂起 100已完成
         manager.add_column("status", "int", 0)
         manager.add_column("content", "text", "")
+        # IP地址
+        manager.add_column("ip", "text", "")
         # 地址信息
         manager.add_column("location", "text", "")
         # 索引
