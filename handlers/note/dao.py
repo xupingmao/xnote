@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/24 23:00:40
+# @modified 2019/04/25 02:09:31
 
 """资料的DAO操作集合
 
@@ -82,6 +82,14 @@ def query_note_name(id):
     if result:
         return result.name
     return None
+
+def batch_query(id_list):
+    db = xtables.get_note_table()
+    result = db.select(where = "id IN $id_list", vars = dict(id_list = id_list))
+    dict_result = dict()
+    for item in result:
+        dict_result[item.id] = item
+    return dict_result
 
 def build_note(dict):
     id   = dict['id']
@@ -253,6 +261,15 @@ def get_table_struct(table_name):
         result.append(item)
     return result
 
+def fill_parent_name(files):
+    id_list = []
+    for item in files:
+        id_list.append(item.id)
+
+    name_dict = batch_query(id_list)
+    for item in files:
+        item.parent_name = name_dict.get(item.parent_id)
+
 def list_group(current_name = None):
     if current_name is None:
         current_name = str(xauth.get_current_name())
@@ -279,8 +296,7 @@ def list_recent_created(parent_id = None, offset = 0, limit = 10):
             order  = "ctime DESC",
             offset = offset,
             limit  = limit))
-    for item in result:
-        item.parent_name = query_note_name(item.parent_id)
+    fill_parent_name(result)
     t.stop()
     xutils.trace("NoteDao.ListRecentCreated", "", t.cost_millis())
     return result
@@ -295,8 +311,7 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
             order  = "atime DESC",
             offset = offset,
             limit  = limit))
-    for item in result:
-        item.parent_name = query_note_name(item.parent_id)
+    fill_parent_name(result)
     t.stop()
     xutils.trace("NoteDao.ListRecentViewed", "", t.cost_millis())
     return result
@@ -323,8 +338,7 @@ def list_recent_edit(parent_id=None, offset=0, limit=None):
             order  = "priority DESC, mtime DESC",
             offset = offset,
             limit  = limit))
-        for item in files:
-            item.parent_name = query_note_name(item.parent_id)
+        fill_parent_name(files)
         cacheutil.set(cache_key, files, expire=600)
     t.stop()
     xutils.trace("NoteDao.ListRecentEdit", "", t.cost_millis())
@@ -345,8 +359,7 @@ def list_by_date(field, creator, date):
             where = where, 
             vars   = dict(creator = creator, date = date_pattern),
             order  = "name DESC"))
-    for item in files:
-        item.parent_name = query_note_name(item.parent_id)
+    fill_parent_name(files)
 
     return files
 
