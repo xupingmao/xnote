@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/25 02:09:31
+# @modified 2019/04/25 02:20:24
 
 """资料的DAO操作集合
 
@@ -264,11 +264,15 @@ def get_table_struct(table_name):
 def fill_parent_name(files):
     id_list = []
     for item in files:
-        id_list.append(item.id)
+        id_list.append(item.parent_id)
 
-    name_dict = batch_query(id_list)
+    note_dict = batch_query(id_list)
     for item in files:
-        item.parent_name = name_dict.get(item.parent_id)
+        parent = note_dict.get(item.parent_id)
+        if parent != None:
+            item.parent_name = parent.name
+        else:
+            item.parent_name = None
 
 def list_group(current_name = None):
     if current_name is None:
