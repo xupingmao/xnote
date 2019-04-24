@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/24 01:47:48
+# @modified 2019/04/24 23:00:40
 
 """资料的DAO操作集合
 
@@ -260,7 +260,7 @@ def list_group(current_name = None):
     cache_key = "[%s]note.group.list" % current_name
     value = cacheutil.get(cache_key)
     if value is None:
-        sql = "SELECT * FROM file WHERE type = 'group' AND is_deleted = 0 AND creator = $creator ORDER BY name LIMIT 1000"
+        sql = "SELECT * FROM file WHERE creator = $creator AND type = 'group' AND is_deleted = 0 ORDER BY name LIMIT 1000"
         value = list(xtables.get_file_table().query(sql, vars = dict(creator=current_name)))
         cacheutil.set(cache_key, value, expire=600)
     t2 = time.time()

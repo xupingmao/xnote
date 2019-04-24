@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/04/14 15:54:15
+# @modified 2019/04/24 22:58:40
 import web
 import xtables
 import xtemplate
@@ -54,14 +54,12 @@ class IndexHandler:
         current_name    = xauth.current_name()
         groups          = xutils.call("note.list_group")
         notes           = xutils.call("note.list_recent_edit", limit = xconfig.RECENT_SIZE)
-        ungrouped_count = xutils.call("note.count_ungrouped", current_name)
         tools           = list(filter(tool_filter, list_tools()))[:4]
         tags            = xutils.call("note.list_tag", current_name)
         recent_search   = xutils.call("search.list_recent", current_name, xconfig.RECENT_SEARCH_LIMIT)
         return xtemplate.render("index.html", 
             file_type       = "home",
             show_aside      = True,
-            ungrouped_count = ungrouped_count,
             recent_search   = recent_search,
             groups          = groups,
             notes           = notes,
