@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/02/24 12:15:01
+# @modified 2019/04/25 22:12:02
 import math
 import xutils
 import xtemplate
@@ -84,13 +84,6 @@ class TagNameHandler:
             page_max   = math.ceil(count / pagesize), 
             page       = page)
 
-# @xutils.cache(key="tag.get_taglist", expire=60)
-def get_taglist(db, user_name=None):
-    sql = """SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag 
-        WHERE (user=$user OR is_public=1) 
-        GROUP BY LOWER(name) ORDER BY amount DESC, name ASC""";
-    tag_list = db.query(sql, vars = dict(user = user_name))
-    return list(tag_list)
 
 class TagListHandler:
 

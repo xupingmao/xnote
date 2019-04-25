@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/25 02:20:24
+# @modified 2019/04/25 22:09:42
 
 """资料的DAO操作集合
 
@@ -399,7 +399,6 @@ def list_tag(user_name):
     t.start()
     cache_key = "%s@tag_list" % user_name
     tag_list = xutils.cache_get(cache_key)
-    tag_list = None
     if tag_list is None:
         db = xtables.get_file_tag_table()
         sql = """SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag 

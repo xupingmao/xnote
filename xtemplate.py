@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/04/19 00:39:58
+# @modified 2019/04/26 00:27:12
 import os
 import json
 import web
@@ -110,7 +110,12 @@ def get_user_agent():
 def get_message_count(user):
     if user is None:
         return 0
-    return xtables.get_message_table().count(where="status=0 AND user=$user", vars=dict(user=user))
+    try:
+        return xtables.get_message_table().count(where="status=0 AND user=$user", vars=dict(user=user))
+    except:
+        # 数据库被锁
+        xutils.print_exc()
+        return 0
 
 def pre_render(kw):
     """模板引擎预处理过程"""
