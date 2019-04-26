@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/04/26 01:36:40
+# @modified 2019/04/27 00:15:46
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -400,12 +400,7 @@ class DBWrapper:
         # SqliteDB 内部使用了threadlocal来实现，是线程安全的，使用全局单实例即可
         _db = DBWrapper._pool.get(dbpath)
         if _db is None:
-            if sqlite3 is not None:
-                _db = web.db.SqliteDB(db=dbpath)
-                _db.query("PRAGMA temp_store = MEMORY")
-            else:
-                _db = MockedDB()
-            DBWrapper._pool[dbpath] = _db
+            raise Exception("db wrapper %s is not inited!" % dbpath)
         self.db = _db
 
     def insert(self, *args, **kw):
@@ -434,10 +429,6 @@ class DBWrapper:
 
     def delete(self, *args, **kw):
         return self.db.delete(self.tablename, *args, **kw)
-
-    def execute(self, sql, args=None):
-        # 不建议使用，尽量使用query
-        return xutils.db_execute(self.dbpath, sql, args)
 
 def get_file_table():
     return DBWrapper(xconfig.DB_PATH, "file")
@@ -488,9 +479,17 @@ def get_table(name, dbpath = None):
         dbpath = xconfig.DB_FILE
     return DBWrapper(dbpath, name)
 
+def init_db_wrapper(dbpath):
+    DBWrapper._pool[dbpath] = web.db.SqliteDB(db = dbpath)
+
 def init():
     if sqlite3 is None:
         return
+
+    init_db_wrapper(xconfig.DB_FILE)
+    init_db_wrapper(xconfig.DICT_FILE)
+    init_db_wrapper(xconfig.RECORD_FILE)
+
     init_user_table()
     init_file_table()
     init_tag_table()

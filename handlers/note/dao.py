@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/25 22:09:42
+# @modified 2019/04/27 00:19:43
 
 """资料的DAO操作集合
 
@@ -195,26 +195,6 @@ def get_vpath(record):
 
     pathlist.reverse()
     return pathlist
-
-def visit_by_id(id, db = None):
-    sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime='%s' where id = %s " % \
-        (dateutil.format_time(), id)
-    return db.query(sql)
-
-def get_recent_visit(count):
-    db = FileDB()
-    all = db.execute("SELECT * from file where is_deleted != 1 and not (related like '%%HIDE%%') order by atime desc limit %s" % count)
-    return [FileDO.fromDict(item) for item in all]
-
-def get_recent_created(count):
-    db = FileDB()
-    all = db.execute("SELECT * FROM file WHERE is_deleted != 1 ORDER BY ctime DESC LIMIT %s" % count)
-    return [FileDO.fromDict(item) for item in all]
-
-def get_recent_modified(count):
-    db = FileDB()
-    all = db.execute("SELECT * FROM file WHERE is_deleted != 1 ORDER BY mtime DESC LIMIT %s" % count)
-    return [FileDO.fromDict(item) for item in all]
 
 def update(where, **kw):
     db = get_file_db()

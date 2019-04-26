@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/04/26 21:50:10
+# @modified 2019/04/27 00:14:33
 
 '''xnote系统配置
 
@@ -235,10 +235,12 @@ def init(path = DATA_DIR):
     global DB_PATH
     global DB_FILE
     global DICT_FILE
+    global RECORD_FILE
     global BACKUP_DIR
     global UPLOAD_DIR
     global APP_DIR
     global TMP_DIR
+    global DB_DIR
     global SCRIPTS_DIR
     global COMMANDS_DIR
     global PLUGINS_DIR
@@ -257,6 +259,8 @@ def init(path = DATA_DIR):
     DB_DIR       = os.path.join(DATA_DIR, "db")
     DB_PATH      = os.path.join(DATA_DIR, "data.db")
     DICT_FILE    = os.path.join(DATA_DIR, "dictionary.db")
+    RECORD_FILE  = os.path.join(DATA_DIR, "record.db")
+    
     # 备份数据地址
     BACKUP_DIR   = os.path.join(DATA_DIR, "backup")
     # APP地址

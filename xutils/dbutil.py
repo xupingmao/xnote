@@ -1,16 +1,22 @@
 # encoding=utf-8
 import os
+import json
 try:
     import sqlite3
 except ImportError:
     sqlite3 = None
+
+try:
+    import leveldb
+except ImportError:
+    leveldb = None
     
 ###########################################################
 # @desc db utilties
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2018/11/16 00:31:57
+# @modified 2019/04/26 23:45:11
 ###########################################################
 
 def search_escape(text):
@@ -236,7 +242,88 @@ class ObjDB:
         # use select * from table where key1 like d[key1] and key2 like d[key2]
         
 
-        
+# 初始化KV存储
+_leveldb = None
+if leveldb:
+    import xconfig
+    _leveldb = leveldb.LevelDB(xconfig.DB_DIR)
+
+def check_leveldb():
+    if leveldb is None:
+        raise Exception("leveldb not found!")
+
+def get(key):
+    check_leveldb()
+    try:
+        key = key.encode("utf-8")
+        value = _leveldb.Get(key)
+        return json.loads(value.decode("utf-8"))
+    except KeyError:
+        return None
+
+def put(key, obj_value, sync = False):
+    check_leveldb()
+    
+    key = key.encode("utf-8")
+    value = json.dumps(obj_value)
+    _leveldb.Put(key, value.encode("utf-8"), sync = sync)
+
+def delete(key, sync = False):
+    check_leveldb()
+
+    key = key.encode("utf-8")
+    _leveldb.Delete(key, sync = sync)
+
+def scan(key_from = None, key_to = None, func = None):
+    check_leveldb()
+
+    if key_from:
+        key_from = key_from.encode("utf-8")
+    if key_to:
+        key_to = key_to.encode("utf-8")
+    iterator = _leveldb.RangeIter(key_from, key_to, include_value = True)
+    for key, value in iterator:
+        key = key.decode("utf-8")
+        value = json.loads(value.decode("utf-8"))
+        func(key, value)
+
+def prefix_scan(prefix, func, reverse = False):
+    check_leveldb()
+
+    key_from = None
+    key_to = None
+
+    origin_prefix = prefix
+    prefix = prefix.encode("utf-8")
+
+    if reverse:
+        key_to = prefix
+    else:
+        key_from = prefix
+
+    iterator = _leveldb.RangeIter(key_from, key_to, include_value = True, reverse = reverse)
+    for key, value in iterator:
+        key = key.decode("utf-8")
+        value = json.loads(value.decode("utf-8"))
+        if not func(key, value):
+            break
+
+def count(key_from = None, key_to = None, filter_func = None):
+    check_leveldb()
+
+    if key_from:
+        key_from = key_from.encode("utf-8")
+    if key_to:
+        key_to = key_to.encode("utf-8")
+    iterator = _leveldb.RangeIter(key_from, key_to, include_value = True)
+    count = 0
+    for key, value in iterator:
+        key = key.decode("utf-8")
+        value = json.dumps(value.decode("utf-8"))
+        if filter_func(key, value):
+            count += 1
+    return count
+
 if __name__ == "__main__":
     db = ObjDB('pkm.db')
     d = {"id":7}
