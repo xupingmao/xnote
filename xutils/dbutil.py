@@ -10,13 +10,15 @@ try:
     import leveldb
 except ImportError:
     leveldb = None
-    
+
+from xconfig import Storage
+
 ###########################################################
 # @desc db utilties
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/04/26 23:45:11
+# @modified 2019/04/27 01:48:41
 ###########################################################
 
 def search_escape(text):
@@ -257,7 +259,10 @@ def get(key):
     try:
         key = key.encode("utf-8")
         value = _leveldb.Get(key)
-        return json.loads(value.decode("utf-8"))
+        obj = json.loads(value.decode("utf-8"))
+        if isinstance(obj, dict):
+            obj = Storage(**obj)
+        return obj
     except KeyError:
         return None
 
@@ -305,8 +310,20 @@ def prefix_scan(prefix, func, reverse = False):
     for key, value in iterator:
         key = key.decode("utf-8")
         value = json.loads(value.decode("utf-8"))
+        if isinstance(value, dict):
+            value = Storage(**value)
         if not func(key, value):
             break
+
+def prefix_list(prefix):
+    result = []
+    def func(key, value):
+        if not key.startswith(prefix):
+            return False
+        result.append(value)
+        return True
+    prefix_scan(prefix, func)
+    return result
 
 def count(key_from = None, key_to = None, filter_func = None):
     check_leveldb()
@@ -323,6 +340,57 @@ def count(key_from = None, key_to = None, filter_func = None):
         if filter_func(key, value):
             count += 1
     return count
+
+def zadd(key, score, member):
+    obj = get(key)
+    if obj != None:
+        obj.pop(member, None)
+        obj[member] = score
+        put(key, obj)
+    else:
+        obj = dict()
+        obj[member] = score
+        put(key, obj)
+
+def zrange(key, start, stop):
+    """zset分片，不同于Python，这里是左右包含，包含start，包含stop，默认从小到大排序
+    :arg int start: 从0开始，负数表示倒数
+    :arg int stop: 从0开始，负数表示倒数
+    TODO 优化排序算法，使用有序列表+哈希表
+    """
+    obj = get(key)
+    if obj != None:
+        items = obj.items()
+        length = len(items)
+
+        if stop < 0:
+            stop += length + 1
+        if start < 0:
+            start += length + 1
+
+        sorted_items = sorted(items, key = lambda x: x[1])
+        sorted_keys = [k[0] for k in sorted_items]
+        if stop < start:
+            # 需要逆序
+            stop -= 1
+            start += 1
+            found = sorted_keys[stop: start]
+            found.reverse()
+            return found
+        return sorted_keys[start: stop]
+    return []
+
+def zcount(key):
+    obj = get(key)
+    if obj != None:
+        return len(obj)
+    return 0
+
+def zscore(key, member):
+    obj = get(key)
+    if obj != None:
+        return obj.get(member)
+    return None
 
 if __name__ == "__main__":
     db = ObjDB('pkm.db')

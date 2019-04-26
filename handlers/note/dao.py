@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/27 00:19:43
+# @modified 2019/04/27 01:51:05
 
 """资料的DAO操作集合
 
@@ -17,7 +17,7 @@ import xtables
 import xutils
 import xauth
 from xutils import readfile, savetofile, sqlite3
-from xutils import dateutil, cacheutil, Timer
+from xutils import dateutil, cacheutil, Timer, dbutil
 
 MAX_VISITED_CNT = 200
 readFile        = readfile
@@ -407,6 +407,20 @@ def update_priority(creator, id, value):
     cacheutil.prefix_del(cache_key)
     return rows > 0
 
+def add_history(id, version, note):
+    # table   = xtables.get_note_history_table()
+    # table.insert(name = name, note_id = id, content = content, version = version, mtime = mtime)
+    dbutil.put("note.history:%s:%s" % (id, version), note)
+
+def list_history(note_id):
+    history_list = dbutil.prefix_list("note.history:%s:" % note_id)
+    history_list = sorted(history_list, key = lambda x: x.mtime or "", reverse = True)
+    # history_list = table.select(where=dict(note_id=note_id), order="mtime DESC")
+    return history_list
+
+def get_history(note_id, version):
+    # note = table.select_first(where = dict(note_id = note_id, version = version))
+    return dbutil.get("note.history:%s:%s" % (note_id, version))
 
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_tag", list_tag)
@@ -421,4 +435,7 @@ xutils.register_func("note.get_by_id_creator", get_by_id_creator)
 xutils.register_func("note.find_prev_note", find_prev_note)
 xutils.register_func("note.find_next_note", find_next_note)
 xutils.register_func("note.update_priority", update_priority)
+xutils.register_func("note.add_history", add_history)
+xutils.register_func("note.list_history", list_history)
+xutils.register_func("note.get_history", get_history)
 

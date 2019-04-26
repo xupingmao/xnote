@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/04/20 17:18:06
+# @modified 2019/04/27 01:44:19
 import profile
 import math
 import re
@@ -16,6 +16,7 @@ from web import HTTPError
 from . import dao
 from xconfig import Storage
 from xutils import History
+from xutils import dbutil
 config = xconfig
 
 PAGE_SIZE = xconfig.PAGE_SIZE
@@ -256,7 +257,7 @@ class NoteHistoryHandler:
         if note is None:
             history_list = []
         else:
-            history_list = table.select(where=dict(note_id=note_id), order="mtime DESC")
+            history_list = xutils.call("note.list_history", note_id)
         return xtemplate.render("note/history_list.html", 
             history_list = history_list,
             show_aside = True)
@@ -273,7 +274,7 @@ class HistoryViewHandler:
         note = xutils.call("note.get_by_id_creator", note_id, creator)
         content = ""
         if note != None:
-            note = table.select_first(where = dict(note_id = note_id, version = version))
+            note = xutils.call("note.get_history", note_id, version)
             if note != None:
                 content = note.content
         return dict(code = "success", data = content)

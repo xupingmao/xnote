@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/04/14 15:17:11
+# @modified 2019/04/27 01:50:22
 
 """笔记编辑相关处理"""
 import os
@@ -16,6 +16,7 @@ import xconfig
 from xutils import Storage
 from xutils import dateutil
 from xutils import cacheutil
+from xutils import dbutil
 from xtemplate import T
 
 def get_by_name(db, name):
@@ -98,8 +99,7 @@ def record_history(ctx):
     version = ctx.get("version")
     mtime   = ctx.get("mtime")
     name    = ctx.get("name")
-    table   = xtables.get_note_history_table()
-    table.insert(name = name, note_id = id, content = content, version = version, mtime = mtime)
+    xutils.call("note.add_history", id, version, ctx)
 
 class AddHandler:
 
