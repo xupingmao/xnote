@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2019/01/06 22:54:33
+# @modified 2019/04/26 01:33:57
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -115,12 +115,14 @@ def main():
         os.environ["PORT"] = port
 
     var_env = dict()
-    config.set("port", port)
-    config.set("start_time", xutils.format_datetime())
-    # 关闭autoreload使用自己实现的版本
-    app = web.application(list(), var_env, autoreload=False)
+    xconfig.set("port", port)
+    xconfig.set("start_time", xutils.format_datetime())
+    
     # 初始化数据库
     xtables.init()
+
+    # 关闭autoreload使用自己实现的版本
+    app = web.application(list(), var_env, autoreload=False)
     # 加载持久化的缓存
     xutils.cacheutil.load_dump()
 

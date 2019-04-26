@@ -1,9 +1,8 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2018/10/25 01:28:57
-"""
-备份相关，系统默认会添加到定时任务中，参考system/crontab
+# @modified 2019/04/26 01:47:04
+"""备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
 import os
@@ -75,7 +74,7 @@ def get_info():
 def backup_db():
     now = time.strftime("%Y%m%d")
     dbname = "data.{}.db".format(now)
-    dbpath = config.get("DB_PATH")
+    dbpath = xconfig.DB_FILE
     if not os.path.exists(dbpath):
         return
     backup_dir = xconfig.BACKUP_DIR

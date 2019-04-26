@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/04/14 15:53:32
+# @modified 2019/04/26 21:50:10
 
 '''xnote系统配置
 
@@ -91,7 +91,7 @@ LOG_DIR      = os.path.join(WORKING_DIR, "log")
 DATA_PATH   = os.path.join(WORKING_DIR, "data")
 DATA_DIR    = DATA_PATH
 SCRIPTS_DIR = os.path.join(DATA_DIR, "scripts")
-DB_DIR      = os.path.join(WORKING_DIR, "db")
+DB_DIR      = os.path.join(DATA_DIR, "db")
 CONFIG_DIR  = os.path.join(DATA_DIR, "config")
 
 # 其他标记
@@ -254,6 +254,7 @@ def init(path = DATA_DIR):
     DATA_PATH = os.path.abspath(path)
     DATA_DIR  = os.path.abspath(path)
     # 数据库地址
+    DB_DIR       = os.path.join(DATA_DIR, "db")
     DB_PATH      = os.path.join(DATA_DIR, "data.db")
     DICT_FILE    = os.path.join(DATA_DIR, "dictionary.db")
     # 备份数据地址
@@ -276,16 +277,20 @@ def init(path = DATA_DIR):
     DB_FILE      = DB_PATH
     LOG_FILE     = LOG_PATH
 
+    # 一级目录
     makedirs(DATA_DIR)
     makedirs(UPLOAD_DIR)
     makedirs(TMP_DIR)
     makedirs(SCRIPTS_DIR)
-    makedirs(COMMANDS_DIR)
-    makedirs(PLUGINS_DIR)
     makedirs(TRASH_DIR)
     makedirs(STORAGE_DIR)
     makedirs(ETC_DIR)
     makedirs(LOG_DIR)
+    makedirs(DB_DIR)
+
+    # 二级目录
+    makedirs(COMMANDS_DIR)
+    makedirs(PLUGINS_DIR)
 
 
 def get(name, default_value=None):

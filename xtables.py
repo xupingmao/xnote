@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/04/24 00:22:33
+# @modified 2019/04/26 01:36:40
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -10,7 +10,6 @@ import xutils
 import xconfig
 import web.db
 from xutils import sqlite3
-config = xconfig
 
 class SqliteTableManager:
     """检查数据库字段，如果不存在就自动创建"""
@@ -147,7 +146,7 @@ def init_test_table():
         manager.add_index("check")
 
 def init_file_table():
-    with TableManager(config.DB_PATH, "file") as manager:
+    with TableManager(xconfig.DB_PATH, "file") as manager:
         manager.add_column("name",    "text", "")
         # 纯文本，用于搜索, 已废弃，移动到note_content
         manager.add_column("content", "text", "")
@@ -198,7 +197,7 @@ def init_file_table():
         manager.add_index("name")
 
 def init_note_content_table():
-    with TableManager(config.DB_PATH, "note_content") as manager:
+    with TableManager(xconfig.DB_PATH, "note_content") as manager:
         # 纯文本，用于搜索
         manager.add_column("content", "text", "")
         # 原始的数据，比如带标签的HTML，还有图片等的base64数据
@@ -216,7 +215,7 @@ def init_note_history_table():
 
 def init_marked_file_table():
     # @since 2018/03/02
-    with TableManager(config.DB_PATH, "marked_file") as manager:
+    with TableManager(xconfig.DB_PATH, "marked_file") as manager:
         manager.add_column("user", "text", "")
         manager.add_column("file_id", "int", 0)
         manager.add_column("name",  "text", "")
@@ -225,7 +224,7 @@ def init_marked_file_table():
 def init_tag_table():
     # 标签表，可以用于一些特征的标记
     # 2017/04/18
-    with TableManager(config.DB_PATH, "file_tag", no_pk=True) as manager:
+    with TableManager(xconfig.DB_PATH, "file_tag", no_pk=True) as manager:
         # 标签名
         manager.add_column("name",      "text", "")
         # 标签ID
@@ -239,7 +238,7 @@ def init_schedule_table():
     # 2017/05/24
     # task是计划任务
     # Job是已经触发的任务,倾向于一次性的
-    with TableManager(config.DB_PATH, "schedule") as manager:
+    with TableManager(xconfig.DB_PATH, "schedule") as manager:
         manager.add_column("name", "text", "")
         manager.add_column("url",         "text", "")
         manager.add_column("ctime",       "text", "")
@@ -271,7 +270,7 @@ def init_history_table():
 def init_user_table():
     # 2017/05/21
     # 简单的用户表
-    with TableManager(config.DB_PATH, "user") as manager:
+    with TableManager(xconfig.DB_PATH, "user") as manager:
         manager.add_column("name",       "text", "")
         manager.add_column("password",   "text", "")
         manager.add_column("salt",       "text", "")
@@ -288,7 +287,7 @@ def init_message_table():
     - 消息支持状态
     - 2017/05/29
     """
-    with TableManager(config.DB_PATH, "message") as manager:
+    with TableManager(xconfig.DB_PATH, "message") as manager:
         manager.add_column("ctime", "text", "")
         manager.add_column("mtime", "text", "")
         manager.add_column("user",  "text", "")
@@ -329,7 +328,7 @@ def init_record_table():
 
 def init_storage_table():
     """通用的配置对象, 比词典多一个type，用来存储个人的一些设置之类的"""
-    dbpath = os.path.join(xconfig.DATA_DIR, "data.db")
+    dbpath = xconfig.DB_PATH
     with TableManager(dbpath, "storage") as manager:
         manager.add_column("ctime", "text", "")
         manager.add_column("mtime", "text", "")
@@ -441,7 +440,7 @@ class DBWrapper:
         return xutils.db_execute(self.dbpath, sql, args)
 
 def get_file_table():
-    return DBWrapper(config.DB_PATH, "file")
+    return DBWrapper(xconfig.DB_PATH, "file")
 
 def get_note_table():
     return get_file_table()
@@ -457,13 +456,13 @@ def get_file_tag_table():
     return DBWrapper(xconfig.DB_PATH, "file_tag")
 
 def get_schedule_table():
-    return DBWrapper(config.DB_PATH, "schedule")
+    return DBWrapper(xconfig.DB_PATH, "schedule")
 
 def get_user_table():
-    return DBWrapper(config.DB_PATH, "user")
+    return DBWrapper(xconfig.DB_PATH, "user")
 
 def get_message_table():
-    return DBWrapper(config.DB_PATH, "message")
+    return DBWrapper(xconfig.DB_PATH, "message")
 
 def get_record_table():
     dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
