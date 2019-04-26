@@ -136,6 +136,13 @@
             </td>
         </tr>
         <tr class="admin-visible">
+            <td class="key">数据库引擎</td>
+            <td>
+                <input type="radio" name="DB_ENGINE" default-value="{{xconfig.DB_ENGINE}}" value="leveldb">leveldb
+                <input type="radio" name="DB_ENGINE" default-value="{{xconfig.DB_ENGINE}}" value="sqlite">sqlite
+            </td>
+        </tr>
+        <tr class="admin-visible">
             <td class="key">调试模式</td>
             <td>
                 <input type="radio" name="DEBUG" default-value="{{xconfig.DEBUG}}" value="True">开启

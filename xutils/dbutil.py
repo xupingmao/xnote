@@ -18,7 +18,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/04/27 01:48:41
+# @modified 2019/04/27 03:32:37
 ###########################################################
 
 def search_escape(text):
@@ -270,6 +270,7 @@ def put(key, obj_value, sync = False):
     check_leveldb()
     
     key = key.encode("utf-8")
+    # 注意json序列化有个问题，会把数字开头的key转成字符串
     value = json.dumps(obj_value)
     _leveldb.Put(key, value.encode("utf-8"), sync = sync)
 
@@ -315,12 +316,15 @@ def prefix_scan(prefix, func, reverse = False):
         if not func(key, value):
             break
 
-def prefix_list(prefix):
+def prefix_list(prefix, include_key = False):
     result = []
     def func(key, value):
         if not key.startswith(prefix):
             return False
-        result.append(value)
+        if include_key:
+            result.append((key, value))
+        else:
+            result.append(value)
         return True
     prefix_scan(prefix, func)
     return result
@@ -343,8 +347,8 @@ def count(key_from = None, key_to = None, filter_func = None):
 
 def zadd(key, score, member):
     obj = get(key)
+    print("zadd %r %r" % (member, score))
     if obj != None:
-        obj.pop(member, None)
         obj[member] = score
         put(key, obj)
     else:

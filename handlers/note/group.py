@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/04/14 11:43:30
+# @modified 2019/04/27 03:07:21
 import math
 import time
 import web
@@ -138,7 +138,6 @@ class RemovedHandler:
 class RecentHandler:
     """show recent notes"""
 
-    @xauth.login_required()
     def GET(self, orderby = "edit", show_notice = False):
         if not xauth.has_login():
             raise web.seeother("/note/public")

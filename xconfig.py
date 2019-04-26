@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/04/27 00:14:33
+# @modified 2019/04/27 03:01:09
 
 '''xnote系统配置
 
@@ -83,6 +83,8 @@ HANDLERS_DIR = "handlers"
 TOOLS_DIR    = "handlers/tools"
 # 语言配置目录
 LANG_DIR     = "lang"
+DB_ENGINE    = "leveldb"
+
 WORKING_DIR  = os.path.dirname(__file__)
 WEBDIR       = os.path.join(WORKING_DIR, "static")
 PLUGINS_DIR  = os.path.join(WORKING_DIR, "plugins")

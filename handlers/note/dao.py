@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/27 01:51:05
+# @modified 2019/04/27 03:33:07
 
 """资料的DAO操作集合
 
@@ -83,13 +83,23 @@ def query_note_name(id):
         return result.name
     return None
 
-def batch_query(id_list):
+def batch_query_sqlite(id_list):
     db = xtables.get_note_table()
     result = db.select(where = "id IN $id_list", vars = dict(id_list = id_list))
     dict_result = dict()
     for item in result:
         dict_result[item.id] = item
     return dict_result
+
+def batch_query(id_list):
+    if xconfig.DB_ENGINE == "sqlite":
+        return batch_query_sqlite(id_list)
+    result = dict()
+    for id in id_list:
+        note = dbutil.get("note.full:%s" % id)
+        if note:
+            result[id] = note
+    return result
 
 def build_note(dict):
     id   = dict['id']
@@ -300,7 +310,7 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
     xutils.trace("NoteDao.ListRecentViewed", "", t.cost_millis())
     return result
 
-def list_recent_edit(parent_id=None, offset=0, limit=None):
+def list_recent_edit_old(parent_id=None, offset=0, limit=None):
     if limit is None:
         limit = xconfig.PAGE_SIZE
     db = xtables.get_file_table()
@@ -325,7 +335,32 @@ def list_recent_edit(parent_id=None, offset=0, limit=None):
         fill_parent_name(files)
         cacheutil.set(cache_key, files, expire=600)
     t.stop()
-    xutils.trace("NoteDao.ListRecentEdit", "", t.cost_millis())
+    xutils.trace("NoteDao.ListRecentEdit", "sqlite", t.cost_millis())
+    return files
+
+def list_recent_edit(parent_id = None, offset=0, limit=None):
+    """通过KV存储实现"""
+
+    if xconfig.DB_ENGINE == "sqlite":
+        return list_recent_edit_old(parent_id, offset, limit)
+
+    if limit is None:
+        limit = xconfig.PAGE_SIZE
+    t = Timer()
+    t.start()
+
+    user = xauth.get_current_name()
+    if user is None:
+        user = "public"
+    
+    id_list = dbutil.zrange("z:note.recent:%s" % user, -offset-1, -offset-limit)
+
+    note_dict = batch_query(id_list)
+    files = [note_dict[id] for id in id_list]
+    fill_parent_name(files)
+
+    t.stop()
+    xutils.trace("NoteDao.ListRecentEdit", "leveldb", t.cost_millis())
     return files
 
 def list_by_date(field, creator, date):
