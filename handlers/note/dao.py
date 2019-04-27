@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/27 11:00:49
+# @modified 2019/04/27 12:21:48
 
 """资料的DAO操作集合
 
@@ -440,11 +440,13 @@ def list_tag(user_name):
     xutils.trace("NoteDao.ListTag", "", t.cost_millis())
     return tag_list
 
+@xutils.timeit(name = "NoteDao.FindPrev", logfile = True)
 def find_prev_note(note):
     where = "parent_id = $parent_id AND name < $name ORDER BY name DESC LIMIT 1"
     table = xtables.get_file_table()
     return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
 
+@xutils.timeit(name = "NoteDao.FindNext", logfile = True)
 def find_next_note(note):
     where = "parent_id = $parent_id AND name > $name ORDER BY name ASC LIMIT 1"
     table = xtables.get_file_table()
