@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/04/27 01:50:22
+# @modified 2019/04/28 00:30:35
 
 """笔记编辑相关处理"""
 import os
@@ -23,20 +23,6 @@ def get_by_name(db, name):
     return db.select_first(where=dict(name = name, 
         is_deleted = 0, 
         creator = xauth.get_current_name()))
-
-def get_pathlist(db, parent_id, limit = 2):
-    file = db.select_first(where=dict(id = parent_id))
-    pathlist = []
-    while file is not None:
-        file.url = "/note/view?id=%s" % file.id
-        pathlist.insert(0, file)
-        if len(pathlist) >= limit:
-            break
-        if file.parent_id == 0:
-            break
-        else:
-            file = db.select_first(where=dict(id=file.parent_id))
-    return pathlist
 
 def update_children_count(parent_id, db=None):
     if parent_id is None or parent_id == "":
@@ -116,36 +102,37 @@ class AddHandler:
         if key == "":
             key = time.strftime("%Y.%m.%d")
 
-        file           = Storage(name = name)
-        file.atime     = xutils.format_datetime()
-        file.mtime     = xutils.format_datetime()
-        file.ctime     = xutils.format_datetime()
-        file.creator   = xauth.get_current_name()
-        file.parent_id = parent_id
-        file.type      = type
-        file.content   = ""
-        file.size      = len(content)
-        file.is_public = 0
+        note           = Storage(name = name)
+        note.atime     = xutils.format_datetime()
+        note.mtime     = xutils.format_datetime()
+        note.ctime     = xutils.format_datetime()
+        note.creator   = xauth.get_current_name()
+        note.parent_id = parent_id
+        note.type      = type
+        note.content   = ""
+        note.data      = ""
+        note.size      = len(content)
+        note.is_public = 0
+        note.priority  = 0
+        note.version   = 0
 
         code = "fail"
         error = ""
         try:
-            db = xtables.get_file_table()
             if name == '':
                 if method == 'POST':
                     message = 'name is empty'
                     raise Exception(message)
             else:
-                f = get_by_name(db, name)
+                f = xutils.call("note.get_by_name", name)
                 if f != None:
                     key = name
                     message = u"%s 已存在" % name
                     raise Exception(message)
-                file_dict = dict(**file)
-                inserted_id = db.insert(**file_dict)
-                update_note_content(inserted_id, content)             
-                # 更新分组下面页面的数量
-                update_children_count(parent_id, db = db)
+                inserted_id = xutils.call("note.create", note)
+
+                # 更新分组下面页面的数量 TODO
+                # update_children_count(parent_id, db = db)
                 xmanager.fire("note.add", dict(name=name, type=type))
                 if format == "json":
                     return dict(code="success", id=inserted_id)
@@ -166,7 +153,6 @@ class AddHandler:
             tags     = tags, 
             error    = error,
             pathlist = [Storage(name=T("New_Note"), url="/note/add")],
-            # pathlist = get_pathlist(db, parent_id),
             message  = error,
             groups   = xutils.call("note.list_group"),
             code     = code)
@@ -243,19 +229,24 @@ class RenameAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument("id")
+        id   = xutils.get_argument("id")
         name = xutils.get_argument("name")
         if name == "" or name is None:
             return dict(code="fail", message="名称为空")
-        db = xtables.get_file_table()
-        old  = db.select_first(where=dict(id=id))
+
+        old = xutils.call("note.get_by_id", id)
+        if old is None:
+            return dict(code="fail", message="笔记不存在")
+
         if old.creator != xauth.get_current_name():
             return dict(code="fail", message="没有权限")
 
-        file = db.select_first(where=dict(name=name, is_deleted=0))
-        if file is not None:
+        file = xutils.call("note.get_by_name", name)
+        if file is not None and file.is_deleted == 0:
             return dict(code="fail", message="%r已存在" % name)
-        db.update(where=dict(id=id), name=name, mtime=xutils.format_datetime())
+
+        xutils.call("note.update", dict(id=id), name=name)
+
         event_body = dict(action="rename", id=id, name=name, type=old.type)
         xmanager.fire("note.updated", event_body)
         xmanager.fire("note.rename", event_body)
@@ -321,7 +312,7 @@ class SaveAjaxHandler:
             kw["content"] = content
             kw['data']    = ''
             kw["size"]    = len(content)
-        rowcount = update_note(db, where, **kw)
+        rowcount = xutils.call("note.update", where, **kw)
         if rowcount > 0:
             xmanager.fire('note.updated', dict(id=id, name=name, 
                 mtime = dateutil.format_datetime(),
@@ -335,15 +326,20 @@ class UpdateHandler:
     @xauth.login_required()
     def POST(self):
         is_public = xutils.get_argument("public", "")
-        id        = xutils.get_argument("id", type=int)
+        id        = xutils.get_argument("id")
         content   = xutils.get_argument("content")
-        version   = xutils.get_argument("version", type=int)
+        version   = xutils.get_argument("version", 0, type=int)
         file_type = xutils.get_argument("type")
         name      = xutils.get_argument("name", "")
         db        = xtables.get_file_table()
-        file      = db.select_first(where=dict(id=id))
+        file      = xutils.call("note.get_by_id", id)
 
-        assert file is not None
+        if file is None:
+            return xtemplate.render("note/view.html", 
+                pathlist = [],
+                file     = file, 
+                content  = content, 
+                error    = "笔记不存在")
 
         # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
         # 所以权限只能是创建者而不是修改者
@@ -356,7 +352,7 @@ class UpdateHandler:
             update_kw["name"] = name
 
         # 不再处理文件，由JS提交
-        rowcount = update_note(db, where = dict(id=id, version=version), **update_kw)
+        rowcount = xutils.call("note.update", where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
             xmanager.fire('note.updated', dict(id=id, name=file.name, 
                 mtime = dateutil.format_datetime(),
@@ -377,18 +373,18 @@ class StickHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id", type = int)
+        id = xutils.get_argument("id")
         user = xauth.current_name()
-        xutils.call("note.update_priority", user, id, 1)
+        xutils.call("note.update", dict(id = id, creator = user), priority = 1)
         raise web.found("/note/view?id=" + str(id))
 
 class UnstickHandler:
     
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id", type = int)
+        id = xutils.get_argument("id")
         user = xauth.current_name()
-        xutils.call("note.update_priority", user, id, 0)
+        xutils.call("note.update", dict(id = id, creator = user), priority = 0)
         raise web.found("/note/view?id=" + str(id))
 
 xurls = (

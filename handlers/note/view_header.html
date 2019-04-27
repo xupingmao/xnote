@@ -6,7 +6,7 @@
     <div class="col-md-12">
         {% if _has_login and  (_is_admin or _user_name == item.creator) %}
             <a class="link" href="/note/edit?id={{file.id}}">编辑</a>
-            <a class="link" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
+            <a class="link" href="javascript:rename('{{item.id}}', '{{item.name}}')">重命名</a>
             {% if file.is_public %}
                 <a class="link" href="/note/share/cancel?id={{file.id}}">取消分享</a>
             {% else %}

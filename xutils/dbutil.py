@@ -20,7 +20,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/04/27 20:33:26
+# @modified 2019/04/28 00:09:17
 ###########################################################
 
 def search_escape(text):
@@ -304,11 +304,13 @@ def put(key, obj_value, sync = False):
     key = key.encode("utf-8")
     # 注意json序列化有个问题，会把数字开头的key转成字符串
     value = json.dumps(obj_value)
+    # print("Put %s = %s" % (key, value))
     _leveldb.Put(key, value.encode("utf-8"), sync = sync)
 
 def delete(key, sync = False):
     check_leveldb()
 
+    print("Delete %s" % key)
     key = key.encode("utf-8")
     _leveldb.Delete(key, sync = sync)
 

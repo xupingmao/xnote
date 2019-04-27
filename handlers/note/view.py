@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/04/27 11:02:58
+# @modified 2019/04/28 00:35:40
 import profile
 import math
 import re
@@ -24,9 +24,7 @@ PAGE_SIZE = xconfig.PAGE_SIZE
 @xmanager.listen("note.view", is_async=True)
 def visit_by_id(ctx):
     id = ctx.id
-    db = xtables.get_file_table()
-    sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime=$atime where id = $id"
-    db.query(sql, vars = dict(atime = xutils.format_datetime(), id=id))
+    xutils.call("note.visit", id)
 
 class ViewHandler:
 
@@ -50,7 +48,6 @@ class ViewHandler:
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
-            id = int(id)
             file = xutils.call("note.get_by_id", id)
         elif name is not None:
             file = dao.get_by_name(name, db=db)

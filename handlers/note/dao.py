@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/27 12:21:48
+# @modified 2019/04/28 00:35:29
 
 """资料的DAO操作集合
 
@@ -207,20 +207,144 @@ def get_by_id(id, db=None, include_full = True):
     return note
 
 def get_by_id_creator(id, creator, db=None):
-    if db is None:
-        db = get_file_db()
-    first = db.select_first(where=dict(id=id, creator = creator))
-    if first is not None:
-        return build_note(first)
+    note = get_by_id(id)
+    if note and note.creator == creator:
+        return note
     return None
 
-def get_by_name(name, db=None):
-    if db is None:
-        db = get_file_db()
+def update_note_content(id, content, data=''):
+    if id is None:
+        return
+    if content is None:
+        content = ''
+    if data is None:
+        data = ''
+    db = xtables.get_note_content_table()
+    result = db.select_first(where=dict(id=id))
+    if result is None:
+        db.insert(id=id, content=content, data=data)
+    else:
+        db.update(where=dict(id=id), 
+            content=content,
+            data = data)
+
+def create_note(note_dict):
+    content  = note_dict["content"]
+    data     = note_dict["data"]
+    creator  = note_dict["creator"]
+    priority = note_dict["priority"]
+    mtime    = note_dict["mtime"]
+
+    if xconfig.DB_ENGINE == "sqlite":
+        db         = xtables.get_file_table()
+        id         = db.insert(**note_dict)
+        update_note_content(id, content, data)
+        return id
+    else:
+        id = dbutil.timeseq()
+        key = "note.full:%s" % id
+        note_dict["id"] = id
+        dbutil.put(key, note_dict)
+        score = "%02d:%s" % (priority, mtime)
+        dbutil.zadd("z:note.recent:%s" % creator, score, id)
+        return id
+
+def rdb_update_note(where, **kw):
+    db      = xtables.get_file_table()
+    note_id = where.get('id')
+    content = kw.get('content')
+    data    = kw.get('data')
+
+    kw["mtime"] = dateutil.format_time()
+    kw["atime"] = dateutil.format_time()
+    # 处理乐观锁
+    version = where.get("version")
+    if version != None:
+        kw["version"] = version + 1
+    # 这两个字段废弃，移动到单独的表中
+    if 'content' in kw:
+        del kw['content']
+        kw['content'] = ''
+    if 'data' in kw:
+        del kw['data']
+        kw['data'] = ''
+    rows = db.update(where = where, vars=None, **kw)
+    if rows > 0:
+        # 更新成功后再更新内容，不考虑极端的冲突情况
+        update_note_content(note_id, content, data)
+    return rows
+
+def kv_update_note(where, **kw):
+    note_id  = where['id']
+    creator  = where.get('creator')
+    content  = kw.get('content')
+    data     = kw.get('data')
+    priority = kw.get('priority')
+    name     = kw.get("name")
+    atime    = kw.get("atime")
+
+    note = get_by_id(note_id)
+    if note:
+        if creator and note.creator != creator:
+            return 0
+        if content:
+            note.content = content
+        if data:
+            note.data = data
+        if priority != None:
+            note.priority = priority
+        if name:
+            note.name = name
+        if atime:
+            note.atime = atime
+
+        creator      = note.creator
+        mtime        = xutils.format_time()
+        note.mtime   = mtime
+        priority     = note.priority
+        note.version += 1
+
+        dbutil.put("note.full:%s" % note_id, note)
+        score = "%02d:%s" % (priority, mtime)
+        dbutil.zadd("z:note.recent:%s" % creator, score, note_id)
+        return 1
+    return 0
+
+
+def update_note(where, **kw):
+    if xconfig.DB_ENGINE == "sqlite":
+        return rdb_update_note(where, **kw)
+    else:
+        return kv_update_note(where, **kw)
+
+def rdb_get_by_name(name):
+    db = get_file_db()
     result = get_db().select_first(where=dict(name=name, is_deleted=0))
     if result is None:
         return None
     return build_note(result)
+
+def kv_get_by_name(name):
+    def find_func(key, value):
+        return value.name == name
+    result = dbutil.prefix_list("note:", find_func, 0, 1)
+    if len(result) > 0:
+        return result[0]
+    return None
+
+def get_by_name(name):
+    if xconfig.DB_ENGINE == "sqlite":
+        return rdb_get_by_name(name)
+    else:
+        return kv_get_by_name(name)
+
+def visit_note(id):
+    if xconfig.DB_ENGINE == "sqlite":
+        db = xtables.get_file_table()
+        sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime=$atime where id = $id"
+        db.query(sql, vars = dict(atime = xutils.format_datetime(), id=id))
+    else:
+        update_note(dict(id=id), atime = xutils.format_datetime())
 
 def get_vpath(record):
     pathlist = []
@@ -371,10 +495,14 @@ def list_recent_edit(parent_id = None, offset=0, limit=None):
     if user is None:
         user = "public"
     
-    id_list = dbutil.zrange("z:note.recent:%s" % user, -offset-1, -offset-limit)
-
+    id_list   = dbutil.zrange("z:note.recent:%s" % user, -offset-1, -offset-limit)
     note_dict = batch_query(id_list)
-    files = [note_dict[id] for id in id_list]
+    files     = []
+
+    for id in id_list:
+        note = note_dict.get(id)
+        if note:
+            files.append(note)
     fill_parent_name(files)
     return files
 
@@ -474,7 +602,11 @@ def get_history(note_id, version):
     # note = table.select_first(where = dict(note_id = note_id, version = version))
     return dbutil.get("note.history:%s:%s" % (note_id, version))
 
+xutils.register_func("note.create", create_note)
+xutils.register_func("note.update", update_note)
+xutils.register_func("note.visit",  visit_note)
 xutils.register_func("note.get_by_id", get_by_id)
+xutils.register_func("note.get_by_name", get_by_name)
 xutils.register_func("note.list_path", list_path)
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_tag", list_tag)
