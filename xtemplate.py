@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/04/26 00:27:12
+# @modified 2019/04/27 11:21:30
 import os
 import json
 import web
@@ -145,6 +145,7 @@ def pre_render(kw):
     if _input is not None:
         kw.update(_input)
 
+@xutils.timeit(name = "Template.Render", logfile = True)
 def render(template_name, **kw):
     nkw = {}
     pre_render(nkw)

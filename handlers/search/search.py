@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/03/02 13:45:11
+# @modified 2019/04/27 11:18:59
 
 import re
 import os
@@ -92,6 +92,7 @@ def log_search_history(user, key):
         history = history[-xconfig.SEARCH_HISTORY_MAX_SIZE:]
     cacheutil.set(cache_key, history)
 
+@xutils.timeit(name = "Search.ListRecent", logargs = True, logfile = True)
 def list_search_history(user_name, limit = -1):
     history = list(reversed(xutils.cache_get("%s@search_history" % user_name, [])))
     if limit > 0:
