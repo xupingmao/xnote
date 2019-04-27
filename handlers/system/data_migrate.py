@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/04/27 03:24:48
+# @modified 2019/04/27 10:27:25
 
 import os
 import re
@@ -84,10 +84,32 @@ def migrate_note_history():
         dbutil.put("note.history:%s:%s" % (item.note_id, item.version), item)
     return "迁移完成!"
 
+def build_full_note(note, db):
+    id = note.id
+    result = db.select_first(where=dict(id=id))
+    if result is None:
+        return
+
+    content = result.get("content", "")
+    data = result.get("data", "")
+    if content != "":
+        note.content = content
+    if data != "":
+        note.data = data
+
 def migrate_note_full():
     db = xtables.get_note_table()
+    content_db = xtables.get_note_content_table()
     for item in db.select():
-        dbutil.put("note.full:%s" % item.id, item)
+        ldb_value = dbutil.get("note.full:%s" % item.id)
+        # 如果存在需要比较修改时间
+        if ldb_value and item.mtime >= ldb_value.mtime:
+            build_full_note(item, content_db)
+            dbutil.put("note.full:%s" % item.id, item)
+        
+        if ldb_value is None:
+            build_full_note(item, content_db)
+            dbutil.put("note.full:%s" % item.id, item)
     return "迁移完成!"
 
 xurls = (

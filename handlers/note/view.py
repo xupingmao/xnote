@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/04/27 01:44:19
+# @modified 2019/04/27 10:25:20
 import profile
 import math
 import re
@@ -50,7 +50,7 @@ class ViewHandler:
             raise HTTPError(504)
         if id != "":
             id = int(id)
-            file = dao.get_by_id(id, db=db)
+            file = xutils.call("note.get_by_id", id)
         elif name is not None:
             file = dao.get_by_name(name, db=db)
         if file is None:

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/27 03:33:07
+# @modified 2019/04/27 10:42:24
 
 """资料的DAO操作集合
 
@@ -168,13 +168,20 @@ def get_pathlist(db, file, limit = 2):
             file = db.select_first(what="id,name,type,creator", where=dict(id=file.parent_id))
     return pathlist
 
-def get_by_id(id, db=None):
+@xutils.timeit(name = "NoteDao.GetById:sqlite", logfile = True)
+def get_by_id_old(id, db=None):
     if db is None:
         db = get_file_db()
     first = db.select_first(where=dict(id=id))
     if first is not None:
         return build_note(first)
     return None
+
+@xutils.timeit(name = "NoteDao.GetById:leveldb", logfile = True)
+def get_by_id(id, db=None):
+    if xconfig.DB_ENGINE == "sqlite":
+        return get_by_id_old(id, db)
+    return dbutil.get("note.full:%s" % id)
 
 def get_by_id_creator(id, creator, db=None):
     if db is None:
@@ -264,23 +271,20 @@ def fill_parent_name(files):
         else:
             item.parent_name = None
 
+@xutils.timeit(name = "NoteDao.ListGroup", logfile = True)
 def list_group(current_name = None):
     if current_name is None:
         current_name = str(xauth.get_current_name())
-    t1 = time.time()
     cache_key = "[%s]note.group.list" % current_name
     value = cacheutil.get(cache_key)
     if value is None:
         sql = "SELECT * FROM file WHERE creator = $creator AND type = 'group' AND is_deleted = 0 ORDER BY name LIMIT 1000"
         value = list(xtables.get_file_table().query(sql, vars = dict(creator=current_name)))
         cacheutil.set(cache_key, value, expire=600)
-    t2 = time.time()
-    xutils.trace("NoteDao.ListGroup", "", int((t2-t1)*1000))
     return value
 
+@xutils.timeit(name = "NoteDao.ListRecentCreated", logfile = True)
 def list_recent_created(parent_id = None, offset = 0, limit = 10):
-    t = Timer()
-    t.start()
     where = "is_deleted = 0 AND (creator = $creator)"
     if parent_id != None:
         where += " AND parent_id = %s" % parent_id
@@ -291,13 +295,10 @@ def list_recent_created(parent_id = None, offset = 0, limit = 10):
             offset = offset,
             limit  = limit))
     fill_parent_name(result)
-    t.stop()
-    xutils.trace("NoteDao.ListRecentCreated", "", t.cost_millis())
     return result
 
+@xutils.timeit(name = "NoteDao.ListRecentViewed", logfile = True, logargs = True)
 def list_recent_viewed(creator = None, offset = 0, limit = 10):
-    t = Timer()
-    t.start()
     where = "is_deleted = 0 AND (creator = $creator)"
     db = xtables.get_file_table()
     result = list(db.select(where = where, 
@@ -306,16 +307,13 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
             offset = offset,
             limit  = limit))
     fill_parent_name(result)
-    t.stop()
-    xutils.trace("NoteDao.ListRecentViewed", "", t.cost_millis())
     return result
 
+@xutils.timeit(name = "NoteDao.ListRecentEdit:sqlite", logfile = True, logargs = True)
 def list_recent_edit_old(parent_id=None, offset=0, limit=None):
     if limit is None:
         limit = xconfig.PAGE_SIZE
     db = xtables.get_file_table()
-    t = Timer()
-    t.start()
     creator = xauth.get_current_name()
     if creator:
         where = "is_deleted = 0 AND (creator = $creator) AND type != 'group'"
@@ -334,10 +332,9 @@ def list_recent_edit_old(parent_id=None, offset=0, limit=None):
             limit  = limit))
         fill_parent_name(files)
         cacheutil.set(cache_key, files, expire=600)
-    t.stop()
-    xutils.trace("NoteDao.ListRecentEdit", "sqlite", t.cost_millis())
     return files
 
+@xutils.timeit(name = "NoteDao.ListRecentEdit:leveldb", logfile = True, logargs = True)
 def list_recent_edit(parent_id = None, offset=0, limit=None):
     """通过KV存储实现"""
 
@@ -346,8 +343,6 @@ def list_recent_edit(parent_id = None, offset=0, limit=None):
 
     if limit is None:
         limit = xconfig.PAGE_SIZE
-    t = Timer()
-    t.start()
 
     user = xauth.get_current_name()
     if user is None:
@@ -358,9 +353,6 @@ def list_recent_edit(parent_id = None, offset=0, limit=None):
     note_dict = batch_query(id_list)
     files = [note_dict[id] for id in id_list]
     fill_parent_name(files)
-
-    t.stop()
-    xutils.trace("NoteDao.ListRecentEdit", "leveldb", t.cost_millis())
     return files
 
 def list_by_date(field, creator, date):
@@ -457,6 +449,7 @@ def get_history(note_id, version):
     # note = table.select_first(where = dict(note_id = note_id, version = version))
     return dbutil.get("note.history:%s:%s" % (note_id, version))
 
+xutils.register_func("note.get_by_id", get_by_id)
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_recent_created", list_recent_created)
