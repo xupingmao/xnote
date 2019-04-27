@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/28 00:35:29
+# @modified 2019/04/28 01:23:25
 
 """资料的DAO操作集合
 
@@ -274,6 +274,14 @@ def rdb_update_note(where, **kw):
         update_note_content(note_id, content, data)
     return rows
 
+def kv_put_note(note_id, note):
+    priority = note.priority
+    mtime    = note.mtime
+    creator  = note.creator
+    dbutil.put("note.full:%s" % note_id, note)
+    score = "%02d:%s" % (priority, mtime)
+    dbutil.zadd("z:note.recent:%s" % creator, score, note_id)
+
 def kv_update_note(where, **kw):
     note_id  = where['id']
     creator  = where.get('creator')
@@ -297,16 +305,17 @@ def kv_update_note(where, **kw):
             note.name = name
         if atime:
             note.atime = atime
-
-        creator      = note.creator
-        mtime        = xutils.format_time()
-        note.mtime   = mtime
-        priority     = note.priority
+        note.mtime   = xutils.format_time()
         note.version += 1
+        
+        # 只修改优先级
+        if len(kw) == 1 and kw.get('priority') != None:
+            note.version -= 1
+        # 只修改名称
+        if len(kw) == 1 and kw.get('name') != None:
+            note.version -= 1
 
-        dbutil.put("note.full:%s" % note_id, note)
-        score = "%02d:%s" % (priority, mtime)
-        dbutil.zadd("z:note.recent:%s" % creator, score, note_id)
+        kv_put_note(note_id, note)
         return 1
     return 0
 
@@ -344,7 +353,11 @@ def visit_note(id):
         sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime=$atime where id = $id"
         db.query(sql, vars = dict(atime = xutils.format_datetime(), id=id))
     else:
-        update_note(dict(id=id), atime = xutils.format_datetime())
+        note = get_by_id(id)
+        if note:
+            note.atime = xutils.format_datetime()
+            note.visited_cnt += 1
+            kv_put_note(id, note)
 
 def get_vpath(record):
     pathlist = []
