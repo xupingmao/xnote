@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/04/27 10:25:20
+# @modified 2019/04/27 11:02:58
 import profile
 import math
 import re
@@ -32,6 +32,7 @@ class ViewHandler:
 
     xconfig.note_history = History("笔记浏览记录", 200)
 
+    @xutils.timeit(name = "Note.View", logfile = True)
     def GET(self, op):
         id            = xutils.get_argument("id", "")
         name          = xutils.get_argument("name", "")
@@ -58,7 +59,7 @@ class ViewHandler:
         
         if file.type != "group" and not file.is_public and user_name != "admin" and user_name != file.creator:
             raise web.seeother("/unauthorized")
-        pathlist        = dao.get_pathlist(db, file)
+        pathlist        = xutils.call("note.list_path", file)
         can_edit        = (file.creator == user_name) or (user_name == "admin")
         role            = xauth.get_current_role()
 

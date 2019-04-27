@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/04/24 22:58:40
+# @modified 2019/04/27 11:06:42
 import web
 import xtables
 import xtemplate
@@ -50,6 +50,7 @@ def list_most_visited():
 
 class IndexHandler:
 
+    @xutils.timeit(name = "Home", logfile = True)
     def GET(self):
         current_name    = xauth.current_name()
         groups          = xutils.call("note.list_group")

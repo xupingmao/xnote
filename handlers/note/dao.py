@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/27 10:42:24
+# @modified 2019/04/27 11:00:49
 
 """资料的DAO操作集合
 
@@ -155,7 +155,10 @@ class RowDesc:
 def get_file_db():
     return xtables.get_file_table()
 
-def get_pathlist(db, file, limit = 2):
+@xutils.timeit(name = "NoteDao.ListPath:sqlite", logfile = True)
+def list_path_old(file, limit = 2, db = None):
+    if db is None:
+        db = xtables.get_file_table()
     pathlist = []
     while file is not None:
         pathlist.insert(0, file)
@@ -168,6 +171,22 @@ def get_pathlist(db, file, limit = 2):
             file = db.select_first(what="id,name,type,creator", where=dict(id=file.parent_id))
     return pathlist
 
+@xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
+def list_path(file, limit = 2):
+    if xconfig.DB_ENGINE == "sqlite":
+        return list_path_old(file, limit)
+    pathlist = []
+    while file is not None:
+        pathlist.insert(0, file)
+        file.url = "/note/view?id=%s" % file.id
+        if len(pathlist) >= limit:
+            break
+        if file.parent_id == 0:
+            break
+        else:
+            file = get_by_id(file.parent_id, include_full = False)
+    return pathlist
+
 @xutils.timeit(name = "NoteDao.GetById:sqlite", logfile = True)
 def get_by_id_old(id, db=None):
     if db is None:
@@ -178,10 +197,14 @@ def get_by_id_old(id, db=None):
     return None
 
 @xutils.timeit(name = "NoteDao.GetById:leveldb", logfile = True)
-def get_by_id(id, db=None):
+def get_by_id(id, db=None, include_full = True):
     if xconfig.DB_ENGINE == "sqlite":
         return get_by_id_old(id, db)
-    return dbutil.get("note.full:%s" % id)
+    note = dbutil.get("note.full:%s" % id)
+    if note and not include_full:
+        del note.content
+        del note.data
+    return note
 
 def get_by_id_creator(id, creator, db=None):
     if db is None:
@@ -450,6 +473,7 @@ def get_history(note_id, version):
     return dbutil.get("note.history:%s:%s" % (note_id, version))
 
 xutils.register_func("note.get_by_id", get_by_id)
+xutils.register_func("note.list_path", list_path)
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_recent_created", list_recent_created)
