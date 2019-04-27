@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/04/27 00:15:46
+# @modified 2019/04/27 22:58:49
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -419,9 +419,12 @@ class DBWrapper:
         if sqlite3 is None:
             return 0
         if sql is None:
-            sql = "SELECT COUNT(1) AS amount FROM %s" % self.tablename
-            if where:
-                sql += " WHERE %s" % where
+            if isinstance(where, dict):
+                return self.select_first(what = "COUNT(1) AS amount", where = where).amount
+            else:
+                sql = "SELECT COUNT(1) AS amount FROM %s" % self.tablename
+                if where:
+                    sql += " WHERE %s" % where
         return self.db.query(sql, vars = vars).first().amount
 
     def update(self, *args, **kw):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/04/27 11:21:30
+# @modified 2019/04/27 23:03:40
 import os
 import json
 import web
@@ -11,7 +11,6 @@ import six
 import xconfig
 import xauth
 import xutils
-import xtables
 from tornado.template import Template, Loader
 from xutils import dateutil, quote, u
 from xutils import ConfigParser, Storage, tojson
@@ -111,7 +110,7 @@ def get_message_count(user):
     if user is None:
         return 0
     try:
-        return xtables.get_message_table().count(where="status=0 AND user=$user", vars=dict(user=user))
+        return xutils.call("message.count", user, 0)
     except:
         # 数据库被锁
         xutils.print_exc()

@@ -1,6 +1,8 @@
 # encoding=utf-8
 import os
+import time
 import json
+
 try:
     import sqlite3
 except ImportError:
@@ -18,7 +20,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/04/27 03:32:37
+# @modified 2019/04/27 20:33:26
 ###########################################################
 
 def search_escape(text):
@@ -250,6 +252,39 @@ if leveldb:
     import xconfig
     _leveldb = leveldb.LevelDB(xconfig.DB_DIR)
 
+
+class Table:
+
+    def __init__(self, name):
+        self.table_name = table_name
+
+    def get_key(self, id):
+        return self.table_name + ":" + id
+
+    def get_by_id(self, id):
+        key = self.get_key(id)
+        return get(key)
+
+    def update(self, id, obj):
+        key = self.get_key(id)
+        put(key, obj)
+
+    def delete(self, id):
+        key = self.get_key(id)
+        delete(key)
+
+    def count(self, func):
+        pass
+
+def timeseq():
+    return "%020d" % int(time.time()*1000)
+
+def get_object_from_bytes(bytes):
+    obj = json.loads(bytes.decode("utf-8"))
+    if isinstance(obj, dict):
+        obj = Storage(**obj)
+    return obj
+
 def check_leveldb():
     if leveldb is None:
         raise Exception("leveldb not found!")
@@ -259,10 +294,7 @@ def get(key):
     try:
         key = key.encode("utf-8")
         value = _leveldb.Get(key)
-        obj = json.loads(value.decode("utf-8"))
-        if isinstance(obj, dict):
-            obj = Storage(**obj)
-        return obj
+        return get_object_from_bytes(value)
     except KeyError:
         return None
 
@@ -280,18 +312,19 @@ def delete(key, sync = False):
     key = key.encode("utf-8")
     _leveldb.Delete(key, sync = sync)
 
-def scan(key_from = None, key_to = None, func = None):
+def scan(key_from = None, key_to = None, func = None, reverse = False):
     check_leveldb()
 
     if key_from:
         key_from = key_from.encode("utf-8")
     if key_to:
         key_to = key_to.encode("utf-8")
-    iterator = _leveldb.RangeIter(key_from, key_to, include_value = True)
+    iterator = _leveldb.RangeIter(key_from, key_to, include_value = True, reverse = reverse)
     for key, value in iterator:
         key = key.decode("utf-8")
-        value = json.loads(value.decode("utf-8"))
-        func(key, value)
+        value = get_object_from_bytes(value)
+        if not func(key, value):
+            break
 
 def prefix_scan(prefix, func, reverse = False):
     check_leveldb()
@@ -308,25 +341,54 @@ def prefix_scan(prefix, func, reverse = False):
         key_from = prefix
 
     iterator = _leveldb.RangeIter(key_from, key_to, include_value = True, reverse = reverse)
+
+    offset = 0
     for key, value in iterator:
         key = key.decode("utf-8")
-        value = json.loads(value.decode("utf-8"))
-        if isinstance(value, dict):
-            value = Storage(**value)
+        if not key.startswith(origin_prefix):
+            break
+        value = get_object_from_bytes(value)
         if not func(key, value):
             break
+        offset += 1
 
-def prefix_list(prefix, include_key = False):
-    result = []
-    def func(key, value):
-        if not key.startswith(prefix):
-            return False
-        if include_key:
-            result.append((key, value))
-        else:
-            result.append(value)
-        return True
-    prefix_scan(prefix, func)
+def prefix_list(prefix, filter_func = None, offset = 0, limit = -1, reverse = False):
+    """通过前缀查询
+    @param {int} offset 包含
+    """
+    check_leveldb()
+
+    origin_prefix = prefix
+
+    if reverse:
+        # 时序表的主键为 表名:用户名:时间序列 时间序列长度为20
+        prefix += ":9"
+
+    prefix   = prefix.encode("utf-8")
+    # print("prefix: %s, origin_prefix: %s, reverse: %s" % (prefix, origin_prefix, reverse))
+    if reverse:
+        iterator = _leveldb.RangeIter(None, prefix, include_value = True, reverse = reverse)
+    else:
+        iterator = _leveldb.RangeIter(prefix, None, include_value = True, reverse = reverse)
+
+    position = 0
+    matched_offset  = 0
+    result   = []
+
+    for key, value in iterator:
+        key = key.decode("utf-8")
+        if not key.startswith(origin_prefix):
+            break
+        value = get_object_from_bytes(value)
+        if filter_func is None or filter_func(key, value):
+            if matched_offset >= offset:
+                result.append(value)
+            matched_offset += 1
+
+        if limit > 0 and len(result) >= limit:
+            break
+        position += 1
+
     return result
 
 def count(key_from = None, key_to = None, filter_func = None):
@@ -340,10 +402,21 @@ def count(key_from = None, key_to = None, filter_func = None):
     count = 0
     for key, value in iterator:
         key = key.decode("utf-8")
-        value = json.dumps(value.decode("utf-8"))
+        value = get_object_from_bytes(value)
         if filter_func(key, value):
             count += 1
     return count
+
+def prefix_count(prefix, filter_func):
+    count = [0]
+    def func(key, value):
+        if not key.startswith(prefix):
+            return False
+        if filter_func(key, value):
+            count[0] += 1
+        return True
+    prefix_scan(prefix, func)
+    return count[0]
 
 def zadd(key, score, member):
     obj = get(key)

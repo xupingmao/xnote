@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/04/27 10:27:25
+# @modified 2019/04/27 22:28:46
 
 import os
 import re
@@ -27,6 +27,7 @@ HTML = """
         <a class="btn" href="?action=note.full">迁移笔记主表</a>
         <a class="btn" href="?action=note.history">迁移笔记历史</a>
         <a class="btn" href="?action=note.recent">迁移最近更新</a>
+        <a class="btn" href="?action=message">迁移提醒</a>
     </div>
 
     <div class="top-offset-1">
@@ -62,6 +63,8 @@ class MigrateHandler(BasePlugin):
             result = migrate_note_history()
         if action == "note.recent":
             result = migrate_note_recent()
+        if action == "message":
+            result = migrate_message()
 
         cost = int((time.time() - t1) * 1000)
         self.writetemplate(HTML, result = result, cost = cost)
@@ -112,6 +115,71 @@ def migrate_note_full():
             dbutil.put("note.full:%s" % item.id, item)
     return "迁移完成!"
 
+def migrate_message():
+    db = xtables.get_message_table()
+    for item in db.select():
+        try:
+            unix_timestamp = xutils.parse_time(item.ctime)
+        except:
+            unix_timestamp = xutils.parse_time(item.ctime, "%Y-%m-%d")
+        timestamp = "%020d" % (unix_timestamp * 1000)
+        key = "message:%s:%s" % (item.user, timestamp)
+
+        item["old_id"] = item.id
+        item["id"] = key
+        
+        ldb_value = dbutil.get(key)
+        put_to_db = False
+        if ldb_value and item.mtime >= ldb_value.mtime:
+            put_to_db = True
+        if ldb_value is None:
+            put_to_db = True
+
+        if put_to_db:
+            dbutil.put(key, item)
+    return "迁移完成!"
+
+SCAN_HTML = """
+<div class="card">
+    <table class="table">
+        {% for key, value in result %}
+            <tr>
+                <td style="width:20%">{{key}}</td>
+                <td style="width:80%">{{value}}</td>
+            </tr>
+        {% end %}
+    </table>
+</div>
+"""
+
+class DbScanHandler(BasePlugin):
+
+    title = "数据库扫描"
+    # 提示内容
+    description = ""
+    # 访问权限
+    required_role = "admin"
+    # 插件分类 {note, dir, system, network}
+    category = None
+    
+    def handle(self, input):
+        # 输入框的行数
+        self.rows = 1
+        result = []
+        reverse = xutils.get_argument("reverse") == "true"
+
+        def func(key, value):
+            if input in key:
+                result.append((key, value))
+                if len(result) > 30:
+                    return False
+            return True
+
+        dbutil.scan(func = func, reverse = reverse)
+        self.writetemplate(SCAN_HTML, result = result)
+
+
 xurls = (
-    "/system/data_migrate", MigrateHandler
+    "/system/data_migrate", MigrateHandler,
+    "/system/db_scan", DbScanHandler,
 )
