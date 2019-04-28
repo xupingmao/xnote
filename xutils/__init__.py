@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/04/29 00:54:54
+# @modified 2019/04/29 01:23:06
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -540,7 +540,7 @@ def get_argument(key, default_value=None, type = None, strip=False):
 ##   各种装饰器
 #################################################################
 
-def timeit(repeat=1, logfile=False, logargs=False, name=""):
+def timeit(repeat=1, logfile=False, logargs=False, name="", logret=False):
     """简单的计时装饰器，可以指定执行次数"""
     def deco(func):
         def handle(*args, **kw):
@@ -549,10 +549,12 @@ def timeit(repeat=1, logfile=False, logargs=False, name=""):
                 ret = func(*args, **kw)
             t2 = time.time()
             if logfile:
+                message = ""
+
                 if logargs:
                     message = str(args)
-                else:
-                    message = ""
+                if logret:
+                    message = message + "|" + str(ret)
                 trace(name, message, int((t2-t1)*1000))
             else:
                 print(name, "cost time: ", int((t2-t1)*1000), "ms")

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/29 00:44:43
+# @modified 2019/04/29 01:22:01
 
 """资料的DAO操作集合
 
@@ -593,18 +593,18 @@ def list_by_date(field, creator, date):
 
     return files
 
+@xutils.timeit(name = "NoteDao.CountNote", logfile=True, logargs=True, logret=True)
 def count_user_note(creator):
-    t = Timer()
-    t.start()
-    count_key = "[%s]note.count" % creator
-    count = cacheutil.get(count_key)
-    if count is None:
+    if xconfig.DB_ENGINE == "sqlite":
         db    = xtables.get_file_table()
         where = "is_deleted = 0 AND creator = $creator AND type != 'group'"
         count = db.count(where, vars = dict(creator = xauth.get_current_name()))
-        cacheutil.set(count_key, count, expire=600)
-    t.stop()
-    xutils.trace("NoteDao.CountRecentEdit", "", t.cost_millis())
+    else:
+        def count_func(key, value):
+            if value.is_deleted:
+                return False
+            return value.creator == creator and type != 'group'
+        count = dbutil.prefix_count("note.full", count_func)
     return count
 
 def count_ungrouped(creator):
