@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/04/28 00:31:16
+# @modified 2019/04/29 00:54:54
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -346,13 +346,14 @@ def log(fmt, show_logger = False, fpath = None, *argv):
 
 
 def trace(scene, message, cost=0):
+    # 这里在SAE上面有巨大的性能损耗
     import xauth
     fpath = get_log_path()
     full_message = "%s|%s|%s|%sms|%s" % (format_time(), 
         xauth.current_name(), scene, cost, message)
     print(full_message)
-    with open(fpath, "ab") as fp:
-        fp.write((full_message+"\n").encode("utf-8"))
+    # with open(fpath, "ab") as fp:
+    #     fp.write((full_message+"\n").encode("utf-8"))
 
 def system(cmd, cwd = None):
     p = subprocess.Popen(cmd, cwd=cwd, 
