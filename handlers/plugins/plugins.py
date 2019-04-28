@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/04/19 00:39:43
+# @modified 2019/04/28 09:51:41
 from io import StringIO
 import xconfig
 import codecs
@@ -61,7 +61,6 @@ def list_plugins(category):
 
     if category and category != "all":
         plugins = xmanager.find_plugins(category)
-        print(category, plugins)
         links = build_plugin_links(dirname, [p.fname for p in plugins])
     else:
         recent_names = cacheutil.zrange("plugins.history", -MAX_HISTORY, -1)

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/04/27 03:07:21
+# @modified 2019/04/29 00:18:53
 import math
 import time
 import web
@@ -72,15 +72,18 @@ class MoveHandler:
     
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id", "", type=int)
-        parent_id = xutils.get_argument("parent_id", "", type=int)
-        db = xtables.get_file_table()
-        file = db.select_first(where=dict(id=id))
+        id        = xutils.get_argument("id", "")
+        parent_id = xutils.get_argument("parent_id", "")
+
+        print("Move", id, parent_id)
+
+        file = xutils.call("note.get_by_id", id)
         if file is None:
             return dict(code="fail", message="file not exists")
-        db.update(parent_id=parent_id, where=dict(id=id))
-        update_children_count(file.parent_id, db=db)
-        update_children_count(parent_id, db=db)
+
+        xutils.call("note.update", dict(id=id), parent_id = parent_id)
+        # update_children_count(file.parent_id, db=db)
+        # update_children_count(parent_id, db=db)
         return dict(code="success")
 
     def POST(self):
@@ -105,7 +108,7 @@ class GroupListHandler:
 class GroupSelectHandler:
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id", "", type=int)
+        id = xutils.get_argument("id", "")
         filetype = xutils.get_argument("filetype", "")
         data = xutils.call("note.list_group", xauth.get_current_name())
         web.header("Content-Type", "text/html; charset=utf-8")

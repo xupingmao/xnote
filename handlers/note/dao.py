@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/28 01:23:25
+# @modified 2019/04/29 00:44:43
 
 """资料的DAO操作集合
 
@@ -283,13 +283,14 @@ def kv_put_note(note_id, note):
     dbutil.zadd("z:note.recent:%s" % creator, score, note_id)
 
 def kv_update_note(where, **kw):
-    note_id  = where['id']
-    creator  = where.get('creator')
-    content  = kw.get('content')
-    data     = kw.get('data')
-    priority = kw.get('priority')
-    name     = kw.get("name")
-    atime    = kw.get("atime")
+    note_id   = where['id']
+    creator   = where.get('creator')
+    content   = kw.get('content')
+    data      = kw.get('data')
+    priority  = kw.get('priority')
+    name      = kw.get("name")
+    atime     = kw.get("atime")
+    parent_id = kw.get("parent_id")
 
     note = get_by_id(note_id)
     if note:
@@ -305,6 +306,8 @@ def kv_update_note(where, **kw):
             note.name = name
         if atime:
             note.atime = atime
+        if parent_id:
+            note.parent_id = parent_id
         note.mtime   = xutils.format_time()
         note.version += 1
         
@@ -315,6 +318,7 @@ def kv_update_note(where, **kw):
         if len(kw) == 1 and kw.get('name') != None:
             note.version -= 1
 
+        # TODO 处理移动分类的情况
         kv_put_note(note_id, note)
         return 1
     return 0
@@ -356,6 +360,8 @@ def visit_note(id):
         note = get_by_id(id)
         if note:
             note.atime = xutils.format_datetime()
+            if note.visited_cnt is None:
+                note.visited_cnt = 0
             note.visited_cnt += 1
             kv_put_note(id, note)
 
@@ -431,8 +437,8 @@ def fill_parent_name(files):
         else:
             item.parent_name = None
 
-@xutils.timeit(name = "NoteDao.ListGroup", logfile = True)
-def list_group(current_name = None):
+@xutils.timeit(name = "NoteDao.ListGroup:sqlite", logfile = True)
+def rdb_list_group(current_name = None):
     if current_name is None:
         current_name = str(xauth.get_current_name())
     cache_key = "[%s]note.group.list" % current_name
@@ -442,6 +448,55 @@ def list_group(current_name = None):
         value = list(xtables.get_file_table().query(sql, vars = dict(creator=current_name)))
         cacheutil.set(cache_key, value, expire=600)
     return value
+
+@xutils.timeit(name = "NoteDao.ListGroup:leveldb", logfile = True)
+def kv_list_group(current_name = None):
+    # TODO 添加索引优化
+    def list_group_func(key, value):
+        return value.type == "group" and value.creator == current_name and value.is_deleted == 0
+
+    notes = dbutil.prefix_list("note.full:", list_group_func)
+    return notes
+
+def list_group(current_name = None):
+    if current_name is None:
+        current_name = str(xauth.get_current_name())
+
+    if xconfig.DB_ENGINE == "sqlite":
+        return rdb_list_group(current_name)
+    else:
+        return kv_list_group(current_name)
+
+def rdb_list_note(creator, parent_id, offset, limit):
+    db = xtables.get_note_table()
+    where_sql = "parent_id=$parent_id AND is_deleted=0 AND (creator=$creator OR is_public=1)"
+    if xauth.is_admin():
+        where_sql = "parent_id=$parent_id AND is_deleted=0"
+    files = db.select(where = where_sql, 
+        vars = dict(parent_id=file.id, is_deleted=0, creator=user_name), 
+        order = "name", 
+        limit = pagesize, 
+        offset = (page-1)*pagesize)
+    return files
+
+@xutils.timeit(name = "NoteDao.ListNote:leveldb", logfile = True, logargs=True)
+def kv_list_note(creator, parent_id, offset, limit):
+    # TODO 添加索引优化
+    def list_note_func(key, value):
+        if value.is_deleted:
+            return False
+        if value.is_public:
+            return True
+        return value.creator == creator and value.parent_id == parent_id
+
+    notes = dbutil.prefix_list("note.full:", list_note_func, offset, limit)
+    return notes
+
+def list_note(*args):
+    if xconfig.DB_ENGINE == "sqlite":
+        return rdb_list_note(*args)
+    else:
+        return kv_list_note(*args)
 
 @xutils.timeit(name = "NoteDao.ListRecentCreated", logfile = True)
 def list_recent_created(parent_id = None, offset = 0, limit = 10):
@@ -470,7 +525,7 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
     return result
 
 @xutils.timeit(name = "NoteDao.ListRecentEdit:sqlite", logfile = True, logargs = True)
-def list_recent_edit_old(parent_id=None, offset=0, limit=None):
+def rdb_list_recent_edit(parent_id=None, offset=0, limit=None):
     if limit is None:
         limit = xconfig.PAGE_SIZE
     db = xtables.get_file_table()
@@ -499,7 +554,7 @@ def list_recent_edit(parent_id = None, offset=0, limit=None):
     """通过KV存储实现"""
 
     if xconfig.DB_ENGINE == "sqlite":
-        return list_recent_edit_old(parent_id, offset, limit)
+        return rdb_list_recent_edit(parent_id, offset, limit)
 
     if limit is None:
         limit = xconfig.PAGE_SIZE
@@ -565,6 +620,25 @@ def count_ungrouped(creator):
     xutils.trace("NoteDao.CountUngrouped", "", t.cost_millis())
     return count
 
+@xutils.timeit(name = "NoteDao.CountNote", logfile = True, logargs = True)
+def count_note(creator, parent_id):
+    if xconfig.DB_ENGINE == "sqlite":
+        db = xtables.get_note_table()
+        where_sql = "parent_id=$parent_id AND is_deleted=0 AND (creator=$creator OR is_public=1)"
+        amount    = db.count(where = where_sql,
+                    vars=dict(parent_id=parent_id, creator=creator))
+        return amount
+    else:
+        # TODO 添加索引优化
+        def list_note_func(key, value):
+            if value.is_deleted:
+                return False
+            if value.is_public:
+                return True
+            return value.creator == creator and value.parent_id == parent_id
+
+        return dbutil.prefix_count("note.full", list_note_func)
+
 def list_tag(user_name):
     t = Timer()
     t.start()
@@ -618,10 +692,12 @@ def get_history(note_id, version):
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
 xutils.register_func("note.visit",  visit_note)
+xutils.register_func("note.count",  count_note)
 xutils.register_func("note.get_by_id", get_by_id)
 xutils.register_func("note.get_by_name", get_by_name)
 xutils.register_func("note.list_path", list_path)
 xutils.register_func("note.list_group", list_group)
+xutils.register_func("note.list_note", list_note)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)

@@ -20,7 +20,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/04/28 00:09:17
+# @modified 2019/04/28 23:53:27
 ###########################################################
 
 def search_escape(text):
@@ -409,12 +409,14 @@ def count(key_from = None, key_to = None, filter_func = None):
             count += 1
     return count
 
-def prefix_count(prefix, filter_func):
+def prefix_count(prefix, filter_func = None):
     count = [0]
     def func(key, value):
         if not key.startswith(prefix):
             return False
-        if filter_func(key, value):
+        if filter_func is None:
+            count[0] += 1
+        elif filter_func(key, value):
             count[0] += 1
         return True
     prefix_scan(prefix, func)

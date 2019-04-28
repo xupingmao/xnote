@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/04/28 00:35:40
+# @modified 2019/04/29 00:33:05
 import profile
 import math
 import re
@@ -78,16 +78,8 @@ class ViewHandler:
 
         title  = file.name
         if file.type == "group":
-            where_sql = "parent_id=$parent_id AND is_deleted=0 AND (creator=$creator OR is_public=1)"
-            if xauth.is_admin():
-                where_sql = "parent_id=$parent_id AND is_deleted=0"
-            amount = db.count(where = where_sql,
-                vars=dict(parent_id=file.id, creator=user_name))
-            files = db.select(where = where_sql, 
-                vars = dict(parent_id=file.id, is_deleted=0, creator=user_name), 
-                order = "name", 
-                limit = pagesize, 
-                offset = (page-1)*pagesize)
+            files  = xutils.call("note.list_note", user_name, file.id, (page-1)*pagesize, pagesize)
+            amount = xutils.call("note.count", user_name, file.id)
             content         = file.content
             show_search_div = True
             show_add_file   = True
