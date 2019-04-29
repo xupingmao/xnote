@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/29 21:49:44
+# @modified 2019/04/29 23:46:51
 
 """资料的DAO操作集合
 
@@ -96,7 +96,7 @@ def batch_query(id_list):
         return batch_query_sqlite(id_list)
     result = dict()
     for id in id_list:
-        note = dbutil.get("note.full:%s" % id)
+        note = dbutil.get("note_full:%s" % id)
         if note:
             result[id] = note
     return result
@@ -200,7 +200,7 @@ def get_by_id_old(id, db=None):
 def get_by_id(id, db=None, include_full = True):
     if xconfig.DB_ENGINE == "sqlite":
         return get_by_id_old(id, db)
-    note = dbutil.get("note.full:%s" % id)
+    note = dbutil.get("note_full:%s" % id)
     if note and not include_full:
         del note.content
         del note.data
@@ -242,7 +242,7 @@ def create_note(note_dict):
         return id
     else:
         id = dbutil.timeseq()
-        key = "note.full:%s" % id
+        key = "note_full:%s" % id
         note_dict["id"] = id
         dbutil.put(key, note_dict)
         score = "%02d:%s" % (priority, mtime)
@@ -278,12 +278,17 @@ def kv_put_note(note_id, note):
     priority = note.priority
     mtime    = note.mtime
     creator  = note.creator
-    dbutil.put("note.full:%s" % note_id, note)
+    dbutil.put("note_full:%s" % note_id, note)
+
     score = "%02d:%s" % (priority, mtime)
     if note.is_deleted:
         dbutil.zrem("z:note.recent:%s" % creator, note_id)
     else:
         dbutil.zadd("z:note.recent:%s" % creator, score, note_id)
+
+    del note['content']
+    del note['data']
+    dbutil.put("note_tiny:%s" % note_id, note)
 
 def kv_update_note(where, **kw):
     note_id   = where['id']
@@ -470,7 +475,7 @@ def kv_list_group(creator = None):
     def list_group_func(key, value):
         return value.type == "group" and value.creator == creator and value.is_deleted == 0
 
-    notes = dbutil.prefix_list("note.full:", list_group_func)
+    notes = dbutil.prefix_list("note_full:", list_group_func)
     notes.sort(key = lambda x: x.name)
     return notes
 
@@ -501,7 +506,7 @@ def kv_list_note(creator, parent_id, offset, limit):
             return False
         return (value.is_public or value.creator == creator) and value.parent_id == parent_id
 
-    notes = dbutil.prefix_list("note.full:", list_note_func, offset, limit)
+    notes = dbutil.prefix_list("note_full:", list_note_func, offset, limit)
     return notes
 
 def list_note(*args):
@@ -616,7 +621,7 @@ def count_user_note(creator):
             if value.is_deleted:
                 return False
             return value.creator == creator and type != 'group'
-        count = dbutil.prefix_count("note.full", count_func)
+        count = dbutil.prefix_count("note_full", count_func)
     return count
 
 def count_ungrouped(creator):
@@ -647,7 +652,7 @@ def count_note(creator, parent_id):
                 return False
             return (value.is_public or value.creator == creator) and value.parent_id == parent_id
 
-        return dbutil.prefix_count("note.full", list_note_func)
+        return dbutil.prefix_count("note_full", list_note_func)
 
 def list_tag(user_name):
     t = Timer()
@@ -687,17 +692,18 @@ def update_priority(creator, id, value):
 def add_history(id, version, note):
     # table   = xtables.get_note_history_table()
     # table.insert(name = name, note_id = id, content = content, version = version, mtime = mtime)
+    note.note_id = id
     dbutil.put("note.history:%s:%s" % (id, version), note)
 
 def list_history(note_id):
-    history_list = dbutil.prefix_list("note.history:%s:" % note_id)
+    history_list = dbutil.prefix_list("note_history:%s:" % note_id)
     history_list = sorted(history_list, key = lambda x: x.mtime or "", reverse = True)
     # history_list = table.select(where=dict(note_id=note_id), order="mtime DESC")
     return history_list
 
 def get_history(note_id, version):
     # note = table.select_first(where = dict(note_id = note_id, version = version))
-    return dbutil.get("note.history:%s:%s" % (note_id, version))
+    return dbutil.get("note_history:%s:%s" % (note_id, version))
 
 def file_wrapper(dict, option=None):
     """build fileDO from dict"""
@@ -730,9 +736,10 @@ def rdb_search_name(words, groups=None):
     return [file_wrapper(item) for item in all]
 
 def kv_search_name(words, creator=None):
+    words = [word.lower() for word in words]
     def search_func(key, value):
-        return (value.creator == creator or value.is_public) and textutil.contains_any(value.name, words)
-    result = dbutil.prefix_list("note.full", search_func, 0, -1)
+        return (value.creator == creator or value.is_public) and textutil.contains_any(value.name.lower(), words)
+    result = dbutil.prefix_list("note_full", search_func, 0, -1)
     return [file_wrapper(item) for item in result]
 
 def search_name(words, creator=None):
@@ -761,11 +768,12 @@ def rdb_search_content(words, groups=None):
     return [file_wrapper(item) for item in all]
 
 def kv_search_content(words, creator=None):
+    words = [word.lower() for word in words]
     def search_func(key, value):
         if value.content is None:
             return False
-        return (value.creator == creator or value.is_public) and textutil.contains_any(value.content, words)
-    result = dbutil.prefix_list("note.full", search_func, 0, -1)
+        return (value.creator == creator or value.is_public) and textutil.contains_any(value.content.lower(), words)
+    result = dbutil.prefix_list("note_full", search_func, 0, -1)
     return [file_wrapper(item) for item in result]
 
 def search_content(words, creator=None):

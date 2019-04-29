@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/04/29 00:33:05
+# @modified 2019/04/29 23:43:08
 import profile
 import math
 import re
@@ -240,7 +240,6 @@ class NoteHistoryHandler:
 
     @xauth.login_required()
     def GET(self):
-        table = xtables.get_note_history_table()
         note_id = xutils.get_argument("id")
         creator = xauth.current_name()
         note = xutils.call("note.get_by_id_creator", note_id, creator)
@@ -259,7 +258,6 @@ class HistoryViewHandler:
         note_id = xutils.get_argument("id")
         version = xutils.get_argument("version")
         
-        table = xtables.get_note_history_table()
         creator = xauth.current_name()
         note = xutils.call("note.get_by_id_creator", note_id, creator)
         content = ""

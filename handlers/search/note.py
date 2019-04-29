@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2019/04/29 21:49:05
+# @modified 2019/04/29 21:54:40
 """搜索知识库文件"""
 import re
 import sys
@@ -41,46 +41,6 @@ def file_wrapper(dict, option=None):
 def file_dict(id, name, related):
     return dict(id = id, name = name, related = related)
 
-def get_cached_notes0():
-    return list(xtables.get_file_table().query('SELECT name, UPPER(name) as name_upper, id, parent_id, ctime, mtime, type, creator, is_public FROM file WHERE is_deleted = 0'))
-
-
-@xutils.cache(key='note_name.list', expire=3600)
-def get_cached_notes():
-    return get_cached_notes0()
-
-def search_in_cache(words, user):
-    def fmap(word):
-        return word.upper()
-    words = list(map(fmap, words))
-    hits = []
-    for item in get_cached_notes():
-        if item.name is None:
-            continue
-        if user != item.creator and user != 'admin' and item.is_public == 0:
-            continue
-        if text_contains(item.name_upper, words):
-            item = file_wrapper(item)
-            hits.append(item)
-    return sorted(hits, key=lambda x: x.mtime, reverse=True)
-
-def search_name(words, groups=None):
-    if not isinstance(words, list):
-        words = [words]
-    if xconfig.USE_CACHE_SEARCH:
-        return search_in_cache(words, groups)
-    like_list = []
-    vars = dict()
-    for word in words:
-        like_list.append('name LIKE %s ' % to_sqlite_obj('%' + word.upper() + '%'))
-    sql = "SELECT name, id, parent_id, ctime, mtime, type, creator FROM file WHERE %s AND is_deleted == 0" % (" AND ".join(like_list))
-    if groups != "admin":
-        sql += " AND (is_public = 1 OR creator = $creator)"
-    sql += " ORDER BY mtime DESC LIMIT 1000";
-    vars["creator"] = groups
-    all = xtables.get_file_table().query(sql, vars=vars)
-    return [file_wrapper(item) for item in all]
-
 def filter_symbols(words):
     new_words = []
     for word in words:
@@ -110,14 +70,4 @@ def search(ctx, expression=None):
     text_files  = list(filter(lambda x: x.type != "group", files))
     files = groups + text_files
     return files
-
-@xmanager.listen(["note.rename", "note.add", "note.remove"], is_async=True)
-def update_cached_notes(file):
-    if not xconfig.USE_CACHE_SEARCH:
-        return
-    xutils.cache_put("note_name.list", get_cached_notes0())
-
-# 初始化缓存
-if xconfig.USE_CACHE_SEARCH:
-    get_cached_notes()
 

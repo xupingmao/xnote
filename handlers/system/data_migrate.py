@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/04/27 22:28:46
+# @modified 2019/04/29 23:49:02
 
 import os
 import re
@@ -24,8 +24,8 @@ HTML = """
     xnote从2.3版本开始，数据库采用leveldb，不再使用sqlite，此工具用于把sqlite数据库数据迁移到leveldb
 
     <div>
-        <a class="btn" href="?action=note.full">迁移笔记主表</a>
-        <a class="btn" href="?action=note.history">迁移笔记历史</a>
+        <a class="btn" href="?action=note_full">迁移笔记主表</a>
+        <a class="btn" href="?action=note_history">迁移笔记历史</a>
         <a class="btn" href="?action=note.recent">迁移最近更新</a>
         <a class="btn" href="?action=message">迁移提醒</a>
     </div>
@@ -57,9 +57,9 @@ class MigrateHandler(BasePlugin):
         action = xutils.get_argument("action")
         t1 = time.time()
 
-        if action == "note.full":
+        if action == "note_full":
             result = migrate_note_full()
-        if action == "note.history":
+        if action == "note_history":
             result = migrate_note_history()
         if action == "note.recent":
             result = migrate_note_recent()
@@ -82,9 +82,24 @@ def migrate_note_recent():
     return "迁移完成!"
 
 def migrate_note_history():
+    # sqlite to kv
     db = xtables.get_note_history_table()
     for item in db.select():
-        dbutil.put("note.history:%s:%s" % (item.note_id, item.version), item)
+        dbutil.put("note_history:%s:%s" % (item.note_id, item.version), item)
+
+    # old_key to new_key
+    for item in dbutil.prefix_list("note.history"):
+        # 这里leveldb第一版没有note_id，而是id字段
+        old_key   = "note.history:%s:%s" % (item.id, item.version)
+        new_key   = "note_history:%s:%s" % (item.id, item.version)
+        new_value = dbutil.get(new_key)
+        if new_value and (new_value.mtime is None or item.mtime > new_value.mtime):
+            dbutil.put(new_key, item)
+            dbutil.delete(old_key)
+
+        if new_value is None:
+            dbutil.put(new_key, item)
+            dbutil.delete(old_key)
     return "迁移完成!"
 
 def build_full_note(note, db):
@@ -101,18 +116,29 @@ def build_full_note(note, db):
         note.data = data
 
 def migrate_note_full():
+    # sqlite to leveldb
     db = xtables.get_note_table()
     content_db = xtables.get_note_content_table()
     for item in db.select():
-        ldb_value = dbutil.get("note.full:%s" % item.id)
+        ldb_value = dbutil.get("note_full:%s" % item.id)
         # 如果存在需要比较修改时间
         if ldb_value and item.mtime >= ldb_value.mtime:
             build_full_note(item, content_db)
-            dbutil.put("note.full:%s" % item.id, item)
+            dbutil.put("note_full:%s" % item.id, item)
         
         if ldb_value is None:
             build_full_note(item, content_db)
-            dbutil.put("note.full:%s" % item.id, item)
+            dbutil.put("note_full:%s" % item.id, item)
+    # old key to new key
+    for item in dbutil.prefix_list("note.full:"):
+        new_key   = "note_full:%s" % item.id
+        new_value = dbutil.get(new_key)
+        if new_value and item.mtime >= new_value.mtime:
+            dbutil.put(new_key, item)
+        
+        if new_value is None:
+            dbutil.put(new_key, item)
+
     return "迁移完成!"
 
 def migrate_message():
