@@ -20,7 +20,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/04/29 02:00:10
+# @modified 2019/04/30 00:09:13
 ###########################################################
 
 def search_escape(text):
@@ -355,6 +355,9 @@ def prefix_scan(prefix, func, reverse = False):
         offset += 1
 
 def prefix_list(prefix, filter_func = None, offset = 0, limit = -1, reverse = False):
+    return list(prefix_iter(prefix, filter_func, offset, limit, reverse))
+
+def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = False):
     """通过前缀查询
     @param {int} offset 包含
     """
@@ -373,9 +376,9 @@ def prefix_list(prefix, filter_func = None, offset = 0, limit = -1, reverse = Fa
     else:
         iterator = _leveldb.RangeIter(prefix, None, include_value = True, reverse = reverse)
 
-    position = 0
-    matched_offset  = 0
-    result   = []
+    position       = 0
+    matched_offset = 0
+    result_size    = 0
 
     for key, value in iterator:
         key = key.decode("utf-8")
@@ -384,14 +387,14 @@ def prefix_list(prefix, filter_func = None, offset = 0, limit = -1, reverse = Fa
         value = get_object_from_bytes(value)
         if filter_func is None or filter_func(key, value):
             if matched_offset >= offset:
-                result.append(value)
+                result_size += 1
+                yield value
             matched_offset += 1
 
-        if limit > 0 and len(result) >= limit:
+        if limit > 0 and result_size >= limit:
             break
         position += 1
 
-    return result
 
 def count(key_from = None, key_to = None, filter_func = None):
     check_leveldb()

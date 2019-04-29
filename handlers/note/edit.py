@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/04/29 01:55:35
+# @modified 2019/04/30 00:22:57
 
 """笔记编辑相关处理"""
 import os
@@ -80,7 +80,7 @@ def update_note_cache(ctx):
 
 @xmanager.listen("note.updated")
 def record_history(ctx):
-    id = ctx.get("id")
+    id      = ctx.get("id")
     content = ctx.get("content")
     version = ctx.get("version")
     mtime   = ctx.get("mtime")

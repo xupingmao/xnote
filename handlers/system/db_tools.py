@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/04/29 23:49:02
+# @modified 2019/04/30 00:19:02
 
 import os
 import re
@@ -70,7 +70,7 @@ class MigrateHandler(BasePlugin):
         self.writetemplate(HTML, result = result, cost = cost)
 
 def migrate_note_recent():
-    recent_list = dbutil.prefix_list("z:note.recent", include_key = True)
+    recent_list = dbutil.prefix_iter("z:note.recent", include_key = True)
     for key, item in recent_list:
         dbutil.delete(key)
     db = xtables.get_note_table()
@@ -88,7 +88,7 @@ def migrate_note_history():
         dbutil.put("note_history:%s:%s" % (item.note_id, item.version), item)
 
     # old_key to new_key
-    for item in dbutil.prefix_list("note.history"):
+    for item in dbutil.prefix_iter("note.history"):
         # 这里leveldb第一版没有note_id，而是id字段
         old_key   = "note.history:%s:%s" % (item.id, item.version)
         new_key   = "note_history:%s:%s" % (item.id, item.version)
@@ -130,7 +130,7 @@ def migrate_note_full():
             build_full_note(item, content_db)
             dbutil.put("note_full:%s" % item.id, item)
     # old key to new key
-    for item in dbutil.prefix_list("note.full:"):
+    for item in dbutil.prefix_iter("note.full:"):
         new_key   = "note_full:%s" % item.id
         new_value = dbutil.get(new_key)
         if new_value and item.mtime >= new_value.mtime:
@@ -175,6 +175,7 @@ SCAN_HTML = """
             </tr>
         {% end %}
     </table>
+    <a href="?key_from={{key}}">下一页</a>
 </div>
 """
 
@@ -193,6 +194,7 @@ class DbScanHandler(BasePlugin):
         self.rows = 1
         result = []
         reverse = xutils.get_argument("reverse") == "true"
+        key_from = xutils.get_argument("key_from", None)
 
         def func(key, value):
             if input in key:
@@ -201,11 +203,11 @@ class DbScanHandler(BasePlugin):
                     return False
             return True
 
-        dbutil.scan(func = func, reverse = reverse)
+        dbutil.scan(key_from = key_from, func = func, reverse = reverse)
         self.writetemplate(SCAN_HTML, result = result)
 
 
 xurls = (
-    "/system/data_migrate", MigrateHandler,
+    "/system/db_migrate", MigrateHandler,
     "/system/db_scan", DbScanHandler,
 )

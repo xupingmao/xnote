@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/29 23:46:51
+# @modified 2019/04/30 00:26:31
 
 """资料的DAO操作集合
 
@@ -690,10 +690,11 @@ def update_priority(creator, id, value):
     return rows > 0
 
 def add_history(id, version, note):
+    # print("add_history", id, version, note)
     # table   = xtables.get_note_history_table()
     # table.insert(name = name, note_id = id, content = content, version = version, mtime = mtime)
-    note.note_id = id
-    dbutil.put("note.history:%s:%s" % (id, version), note)
+    note['note_id'] = id
+    dbutil.put("note_history:%s:%s" % (id, version), note)
 
 def list_history(note_id):
     history_list = dbutil.prefix_list("note_history:%s:" % note_id)
