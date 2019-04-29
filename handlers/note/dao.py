@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/30 00:26:31
+# @modified 2019/04/30 00:52:37
 
 """资料的DAO操作集合
 
@@ -475,7 +475,7 @@ def kv_list_group(creator = None):
     def list_group_func(key, value):
         return value.type == "group" and value.creator == creator and value.is_deleted == 0
 
-    notes = dbutil.prefix_list("note_full:", list_group_func)
+    notes = dbutil.prefix_list("note_tiny:", list_group_func)
     notes.sort(key = lambda x: x.name)
     return notes
 
@@ -506,7 +506,7 @@ def kv_list_note(creator, parent_id, offset, limit):
             return False
         return (value.is_public or value.creator == creator) and value.parent_id == parent_id
 
-    notes = dbutil.prefix_list("note_full:", list_note_func, offset, limit)
+    notes = dbutil.prefix_list("note_tiny:", list_note_func, offset, limit)
     return notes
 
 def list_note(*args):
@@ -652,7 +652,7 @@ def count_note(creator, parent_id):
                 return False
             return (value.is_public or value.creator == creator) and value.parent_id == parent_id
 
-        return dbutil.prefix_count("note_full", list_note_func)
+        return dbutil.prefix_count("note_tiny", list_note_func)
 
 def list_tag(user_name):
     t = Timer()

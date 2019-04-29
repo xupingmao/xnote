@@ -20,7 +20,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/04/30 00:09:13
+# @modified 2019/04/30 00:50:55
 ###########################################################
 
 def search_escape(text):
@@ -354,10 +354,10 @@ def prefix_scan(prefix, func, reverse = False):
             break
         offset += 1
 
-def prefix_list(prefix, filter_func = None, offset = 0, limit = -1, reverse = False):
-    return list(prefix_iter(prefix, filter_func, offset, limit, reverse))
+def prefix_list(prefix, filter_func = None, offset = 0, limit = -1, reverse = False, include_key = False):
+    return list(prefix_iter(prefix, filter_func, offset, limit, reverse, include_key))
 
-def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = False):
+def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = False, include_key = False):
     """通过前缀查询
     @param {int} offset 包含
     """
@@ -388,7 +388,10 @@ def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = Fa
         if filter_func is None or filter_func(key, value):
             if matched_offset >= offset:
                 result_size += 1
-                yield value
+                if include_key:
+                    yield key, value
+                else:
+                    yield value
             matched_offset += 1
 
         if limit > 0 and result_size >= limit:
