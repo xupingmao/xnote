@@ -20,7 +20,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/04/28 23:53:27
+# @modified 2019/04/29 02:00:10
 ###########################################################
 
 def search_escape(text):
@@ -471,6 +471,13 @@ def zscore(key, member):
     obj = get(key)
     if obj != None:
         return obj.get(member)
+    return None
+
+def zrem(key, member):
+    obj = get(key)
+    if obj != None:
+        del obj[member]
+        put(key, obj)
     return None
 
 if __name__ == "__main__":

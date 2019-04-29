@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/04/28 00:30:35
+# @modified 2019/04/29 01:55:35
 
 """笔记编辑相关处理"""
 import os
@@ -115,6 +115,7 @@ class AddHandler:
         note.is_public = 0
         note.priority  = 0
         note.version   = 0
+        note.is_deleted = 0
 
         code = "fail"
         error = ""
@@ -168,33 +169,38 @@ class RemoveAjaxHandler:
         name = xutils.get_argument("name", "")
         file = None
 
+        print("remove", id, name)
+
         if id == "" and name == "":
             return dict(code="fail", message="id,name至少一个不为空")
 
-        t_file    = xtables.get_file_table()
-        t_content = xtables.get_note_content_table()
         if id != "":
-            file = t_file.select_first(where=dict(id=int(id), is_deleted=0))
+            file = xutils.call("note.get_by_id", id)
         elif name != "":
-            file = get_by_name(t_file, name)
+            file = xutils.call("note.get_by_name", name)
         if file is None:
             return dict(code="fail", message="文件不存在")
+
+        t_file    = xtables.get_file_table()
+        t_content = xtables.get_note_content_table()
         id = file.id
 
-        if not xauth.is_admin() and file.creator != xauth.get_current_name():
+        creator = xauth.current_name()
+        if not xauth.is_admin() and file.creator != creator:
             return dict(code="fail", message="没有删除权限")
 
         if file.type == "group":
-            children_count = t_file.count(where="parent_id=%s AND is_deleted=0"%id)
+            children_count = xutils.call("note.count", creator, file.id)
             if children_count > 0:
                 return dict(code="fail", message="分组不为空")
 
-        t_file.update(is_deleted=1, mtime=dateutil.format_time(), where=dict(id=int(id)))
-        outdated = t_file.select(where="is_deleted=1 AND mtime < $date", 
-            vars=dict(date=dateutil.before(days=30,format=True)))
-        for item in outdated:
-            t_file.delete(where=dict(id=item['id']))
-            t_content.delete(where=dict(id=item['id']))
+        xutils.call("note.delete", id)
+        # t_file.update(is_deleted=1, mtime=dateutil.format_time(), where=dict(id=int(id)))
+        # outdated = t_file.select(where="is_deleted=1 AND mtime < $date", 
+        #     vars=dict(date=dateutil.before(days=30,format=True)))
+        # for item in outdated:
+        #     t_file.delete(where=dict(id=item['id']))
+        #     t_content.delete(where=dict(id=item['id']))
 
         # 删除标签
         t_tag = xtables.get_file_tag_table()

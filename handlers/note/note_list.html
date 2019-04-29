@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/02/17 21:01:37
+@modified 2019/04/29 01:52:07
 -->
 
 {% init files = [] %}
@@ -73,9 +73,9 @@
 
                     {% if show_opts and _user_name == item.creator %}
                     <div class="float-right">
-                        <a class="item-option" href="javascript:rename({{item.id}}, '{{item.name}}')">重命名</a>
+                        <a class="item-option" href="javascript:rename('{{item.id}}', '{{item.name}}')">重命名</a>
                         {% if _is_admin %}
-                            <a class="item-option" href="javascript:remove({{item.id}}, '{{item.name}}')">删除</a>
+                            <a class="item-option" href="javascript:remove('{{item.id}}', '{{item.name}}')">删除</a>
                         {% end %}
                         {% if item.type != "group" %}
                         <a class="item-option move-btn" data-url="/note/group/select?id={{item.id}}">移动</a>

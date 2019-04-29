@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/29 01:22:01
+# @modified 2019/04/29 21:49:44
 
 """资料的DAO操作集合
 
@@ -16,8 +16,8 @@ import xconfig
 import xtables
 import xutils
 import xauth
-from xutils import readfile, savetofile, sqlite3
-from xutils import dateutil, cacheutil, Timer, dbutil
+from xutils import readfile, savetofile, sqlite3, Storage
+from xutils import dateutil, cacheutil, Timer, dbutil, textutil
 
 MAX_VISITED_CNT = 200
 readFile        = readfile
@@ -280,7 +280,10 @@ def kv_put_note(note_id, note):
     creator  = note.creator
     dbutil.put("note.full:%s" % note_id, note)
     score = "%02d:%s" % (priority, mtime)
-    dbutil.zadd("z:note.recent:%s" % creator, score, note_id)
+    if note.is_deleted:
+        dbutil.zrem("z:note.recent:%s" % creator, note_id)
+    else:
+        dbutil.zadd("z:note.recent:%s" % creator, score, note_id)
 
 def kv_update_note(where, **kw):
     note_id   = where['id']
@@ -363,6 +366,18 @@ def visit_note(id):
             if note.visited_cnt is None:
                 note.visited_cnt = 0
             note.visited_cnt += 1
+            kv_put_note(id, note)
+
+def delete_note(id):
+    if xconfig.DB_ENGINE == "sqlite":
+        db = xtables.get_file_table()
+        sql = "UPDATE file SET is_deleted = 1, mtime=$mtime where id = $id"
+        db.query(sql, vars = dict(mtime = xutils.format_datetime(), id=id))
+    else:
+        note = get_by_id(id)
+        if note:
+            note.mtime = xutils.format_datetime()
+            note.is_deleted = 1
             kv_put_note(id, note)
 
 def get_vpath(record):
@@ -450,12 +465,13 @@ def rdb_list_group(current_name = None):
     return value
 
 @xutils.timeit(name = "NoteDao.ListGroup:leveldb", logfile = True)
-def kv_list_group(current_name = None):
+def kv_list_group(creator = None):
     # TODO 添加索引优化
     def list_group_func(key, value):
-        return value.type == "group" and value.creator == current_name and value.is_deleted == 0
+        return value.type == "group" and value.creator == creator and value.is_deleted == 0
 
     notes = dbutil.prefix_list("note.full:", list_group_func)
+    notes.sort(key = lambda x: x.name)
     return notes
 
 def list_group(current_name = None):
@@ -470,13 +486,11 @@ def list_group(current_name = None):
 def rdb_list_note(creator, parent_id, offset, limit):
     db = xtables.get_note_table()
     where_sql = "parent_id=$parent_id AND is_deleted=0 AND (creator=$creator OR is_public=1)"
-    if xauth.is_admin():
-        where_sql = "parent_id=$parent_id AND is_deleted=0"
     files = db.select(where = where_sql, 
-        vars = dict(parent_id=file.id, is_deleted=0, creator=user_name), 
+        vars = dict(parent_id=parent_id, is_deleted=0, creator=creator), 
         order = "name", 
-        limit = pagesize, 
-        offset = (page-1)*pagesize)
+        limit = limit, 
+        offset = offset)
     return files
 
 @xutils.timeit(name = "NoteDao.ListNote:leveldb", logfile = True, logargs=True)
@@ -485,9 +499,7 @@ def kv_list_note(creator, parent_id, offset, limit):
     def list_note_func(key, value):
         if value.is_deleted:
             return False
-        if value.is_public:
-            return True
-        return value.creator == creator and value.parent_id == parent_id
+        return (value.is_public or value.creator == creator) and value.parent_id == parent_id
 
     notes = dbutil.prefix_list("note.full:", list_note_func, offset, limit)
     return notes
@@ -620,7 +632,7 @@ def count_ungrouped(creator):
     xutils.trace("NoteDao.CountUngrouped", "", t.cost_millis())
     return count
 
-@xutils.timeit(name = "NoteDao.CountNote", logfile = True, logargs = True)
+@xutils.timeit(name = "NoteDao.CountNote", logfile = True, logargs = True, logret = True)
 def count_note(creator, parent_id):
     if xconfig.DB_ENGINE == "sqlite":
         db = xtables.get_note_table()
@@ -633,9 +645,7 @@ def count_note(creator, parent_id):
         def list_note_func(key, value):
             if value.is_deleted:
                 return False
-            if value.is_public:
-                return True
-            return value.creator == creator and value.parent_id == parent_id
+            return (value.is_public or value.creator == creator) and value.parent_id == parent_id
 
         return dbutil.prefix_count("note.full", list_note_func)
 
@@ -689,12 +699,90 @@ def get_history(note_id, version):
     # note = table.select_first(where = dict(note_id = note_id, version = version))
     return dbutil.get("note.history:%s:%s" % (note_id, version))
 
+def file_wrapper(dict, option=None):
+    """build fileDO from dict"""
+    name = dict['name']
+    file = Storage()
+    for key in dict:
+        file[key] = dict[key]
+        # setattr(file, key, dict[key])
+    if hasattr(file, "content") and file.content is None:
+        file.content = ""
+    if option:
+        file.option = option
+    file.url = "/note/view?id={}".format(dict["id"])
+    # 文档类型，和文件系统file区分
+    file.category = "note"
+    return file
+
+def rdb_search_name(words, groups=None):
+    if not isinstance(words, list):
+        words = [words]
+    like_list = []
+    vars = dict()
+    for word in words:
+        like_list.append('name LIKE %s ' % to_sqlite_obj('%' + word.upper() + '%'))
+    sql = "SELECT name, id, parent_id, ctime, mtime, type, creator FROM file WHERE %s AND is_deleted == 0" % (" AND ".join(like_list))
+    sql += " AND (is_public = 1 OR creator = $creator)"
+    sql += " ORDER BY mtime DESC LIMIT 1000";
+    vars["creator"] = groups
+    all = xtables.get_file_table().query(sql, vars=vars)
+    return [file_wrapper(item) for item in all]
+
+def kv_search_name(words, creator=None):
+    def search_func(key, value):
+        return (value.creator == creator or value.is_public) and textutil.contains_any(value.name, words)
+    result = dbutil.prefix_list("note.full", search_func, 0, -1)
+    return [file_wrapper(item) for item in result]
+
+def search_name(words, creator=None):
+    if xconfig.DB_ENGINE == "sqlite":
+        return rdb_search_name(words, creator)
+    else:
+        return kv_search_name(words, creator)
+
+def rdb_search_content(words, groups=None):
+    """full search the files
+    """
+    if not isinstance(words, list):
+        words = [words]
+    content_like_list = []
+    vars = dict()
+    for word in words:
+        content_like_list.append('note_content.content like %s' % to_sqlite_obj('%' + word.upper() + '%'))
+    sql = "SELECT file.id AS id, file.parent_id AS parent_id, file.name AS name, file.ctime AS ctime, file.mtime AS mtime, file.type AS type, file.creator AS creator FROM file JOIN note_content ON file.id = note_content.id WHERE file.is_deleted == 0 AND "
+    sql += " AND ".join(content_like_list)
+    if groups != "admin":
+        sql += " AND (file.is_public = 1 OR file.creator = $creator)"
+    sql += " order by mtime desc limit 1000"
+
+    vars["creator"] = groups
+    all = xtables.get_file_table().query(sql, vars=vars)
+    return [file_wrapper(item) for item in all]
+
+def kv_search_content(words, creator=None):
+    def search_func(key, value):
+        if value.content is None:
+            return False
+        return (value.creator == creator or value.is_public) and textutil.contains_any(value.content, words)
+    result = dbutil.prefix_list("note.full", search_func, 0, -1)
+    return [file_wrapper(item) for item in result]
+
+def search_content(words, creator=None):
+    if xconfig.DB_ENGINE == "sqlite":
+        return rdb_search_content(words, creator)
+    else:
+        return kv_search_content(words, creator)
+
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
 xutils.register_func("note.visit",  visit_note)
 xutils.register_func("note.count",  count_note)
+xutils.register_func("note.delete", delete_note)
 xutils.register_func("note.get_by_id", get_by_id)
 xutils.register_func("note.get_by_name", get_by_name)
+xutils.register_func("note.search_name", search_name)
+xutils.register_func("note.search_content", search_content)
 xutils.register_func("note.list_path", list_path)
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_note", list_note)

@@ -19,7 +19,7 @@
                 <a class="link" href="/note/stick?id={{file.id}}">置顶</a>
             {% end %}
             <!-- <a class="link" href="/note/print?id={{file.id}}" target="_blank">打印</a> -->
-            <a class="red" href="javascript:remove({{item.id}}, '{{item.name}}', '{{item.parent_id}}')">删除</a>
+            <a class="red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>
         {% end %}
     </div>
 

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2019/02/14 00:59:05
+# @modified 2019/04/29 21:49:05
 """搜索知识库文件"""
 import re
 import sys
@@ -81,26 +81,6 @@ def search_name(words, groups=None):
     all = xtables.get_file_table().query(sql, vars=vars)
     return [file_wrapper(item) for item in all]
 
-def full_search(words, groups=None):
-    """full search the files
-    """
-    if not isinstance(words, list):
-        words = [words]
-    content_like_list = []
-    vars = dict()
-    for word in words:
-        content_like_list.append('note_content.content like %s' % to_sqlite_obj('%' + word.upper() + '%'))
-    sql = "SELECT file.id AS id, file.parent_id AS parent_id, file.name AS name, file.ctime AS ctime, file.mtime AS mtime, file.type AS type, file.creator AS creator FROM file JOIN note_content ON file.id = note_content.id WHERE file.is_deleted == 0 AND "
-    sql += " AND ".join(content_like_list)
-    if groups != "admin":
-        sql += " AND (file.is_public = 1 OR file.creator = $creator)"
-    sql += " order by mtime desc limit 1000"
-    print(sql)
-
-    vars["creator"] = groups
-    all = xtables.get_file_table().query(sql, vars=vars)
-    return [file_wrapper(item) for item in all]
-
 def filter_symbols(words):
     new_words = []
     for word in words:
@@ -120,10 +100,10 @@ def search(ctx, expression=None):
         return files
 
     if ctx.search_note_content:
-        files += full_search(words, xauth.get_current_name())
+        files += xutils.call("note.search_content", words, xauth.current_name())
     
     if ctx.search_note:
-        files += search_name(words, xauth.get_current_name())
+        files += xutils.call("note.search_name", words, xauth.current_name())
 
     # group 放前面
     groups = list(filter(lambda x: x.type == "group", files))
