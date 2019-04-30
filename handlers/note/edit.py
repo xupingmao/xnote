@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/04/30 00:22:57
+# @modified 2019/05/01 02:00:00
 
 """笔记编辑相关处理"""
 import os
@@ -109,7 +109,7 @@ class AddHandler:
         note.creator   = xauth.get_current_name()
         note.parent_id = parent_id
         note.type      = type
-        note.content   = ""
+        note.content   = content
         note.data      = ""
         note.size      = len(content)
         note.is_public = 0
@@ -267,11 +267,9 @@ class ShareHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id", type=int)
-        db = xtables.get_file_table()
-        db.update(is_public=1, where=dict(id=id, creator=xauth.get_current_name()))
-        tag = xtables.get_file_tag_table()
-        tag.update(is_public=1, where=dict(file_id=id, user=xauth.get_current_name()))
+        id      = xutils.get_argument("id")
+        creator = xauth.current_name()
+        xutils.call("note.update", dict(id = id, creator = creator), is_public = 1)
         raise web.seeother("/note/view?id=%s"%id)
 
 
@@ -279,12 +277,9 @@ class UnshareHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id", type=int)
-        db = xtables.get_file_table()
-        db.update(is_public=0, 
-            where=dict(id=id, creator=xauth.get_current_name()))
-        tag = xtables.get_file_tag_table()
-        tag.update(is_public=0, where=dict(file_id=id, user=xauth.get_current_name()))
+        id = xutils.get_argument("id")
+        creator = xauth.current_name()
+        xutils.call("note.update", dict(id = id, creator = creator), is_public = 0)
         raise web.seeother("/note/view?id=%s"%id)
 
 class SaveAjaxHandler:
@@ -293,12 +288,12 @@ class SaveAjaxHandler:
     def POST(self):
         content = xutils.get_argument("content", "")
         data    = xutils.get_argument("data", "")
-        id      = xutils.get_argument("id", "0", type=int)
+        id      = xutils.get_argument("id")
         type    = xutils.get_argument("type")
         version = xutils.get_argument("version", 0, type=int)
         name    = xauth.get_current_name()
-        db      = xtables.get_file_table()
         where   = None
+
         if xauth.is_admin():
             where = dict(id=id)
         else:
@@ -325,7 +320,7 @@ class SaveAjaxHandler:
                 content = content, version=version+1))
             return dict(code="success")
         else:
-            return dict(code="fail")
+            return dict(code="fail", message="更新失败")
 
 class UpdateHandler:
 

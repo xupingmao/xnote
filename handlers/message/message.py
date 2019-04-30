@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/04/27 23:04:12
+# @modified 2019/05/01 01:35:29
 
 """短消息"""
 import time
@@ -57,6 +57,12 @@ def create_message(**kw):
         kw['id'] = key
         dbutil.put(key, kw)
         return key
+
+def get_message_by_id(id):
+    return dbutil.get(id)
+
+def delete_message_by_id(id):
+    dbutil.delete(id)
 
 def get_status_by_code(code):
     if code == "created":
@@ -233,14 +239,14 @@ class RemoveHandler:
         id = xutils.get_argument("id")
         if id == "":
             return
-        db = xtables.get_message_table()
-        msg = db.select_first(where=dict(id=id))
+        msg = get_message_by_id(id)
         if msg is None:
             return dict(code="fail", message="data not exists")
         
-        if msg.user != xauth.get_current_name():
+        if msg.user != xauth.current_name():
             return dict(code="fail", message="no permission")
-        db.delete(where=dict(id=id))
+
+        delete_message_by_id(id)
         xmanager.fire("message.remove", Storage(id=id))
         return dict(code="success")
 

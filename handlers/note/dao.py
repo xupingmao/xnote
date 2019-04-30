@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/30 23:30:40
+# @modified 2019/05/01 02:07:47
 
 """资料的DAO操作集合
 
@@ -300,6 +300,8 @@ def kv_update_note(where, **kw):
     name      = kw.get("name")
     atime     = kw.get("atime")
     parent_id = kw.get("parent_id")
+    is_public = kw.get("is_public")
+    tags      = kw.get("tags")
 
     note = get_by_id(note_id)
     if note:
@@ -317,6 +319,11 @@ def kv_update_note(where, **kw):
             note.atime = atime
         if parent_id != None:
             note.parent_id = parent_id
+        if is_public != None:
+            note.is_public = is_public
+        if tags != None:
+            note.tags = tags
+
         note.mtime   = xutils.format_time()
         note.version += 1
         
@@ -678,20 +685,14 @@ def count_note(creator, parent_id):
 
         return dbutil.prefix_count("note_tiny", list_note_func)
 
+@xutils.timeit(name = "NoteDao.ListTag", logfile = True, logargs = True)
 def list_tag(user_name):
-    t = Timer()
-    t.start()
-    cache_key = "%s@tag_list" % user_name
-    tag_list = xutils.cache_get(cache_key)
-    if tag_list is None:
-        db = xtables.get_file_tag_table()
-        sql = """SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag 
-            WHERE (user=$user OR is_public=1) 
-            GROUP BY LOWER(name) ORDER BY amount DESC, name ASC""";
-        tag_list = list(db.query(sql, vars = dict(user = user_name)))
-        xutils.cache_put(cache_key, tag_list, 60 * 10)
-    t.stop()
-    xutils.trace("NoteDao.ListTag", "", t.cost_millis())
+    db = xtables.get_file_tag_table()
+    sql = """SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag 
+        WHERE (user=$user OR is_public=1) 
+        GROUP BY LOWER(name) ORDER BY amount DESC, name ASC""";
+    tag_list = list(db.query(sql, vars = dict(user = user_name)))
+    xutils.cache_put(cache_key, tag_list, 60 * 10)
     return tag_list
 
 @xutils.timeit(name = "NoteDao.FindPrev", logfile = True)

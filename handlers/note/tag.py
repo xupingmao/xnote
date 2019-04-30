@@ -1,55 +1,42 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/25 22:12:02
+# @modified 2019/05/01 02:13:09
 import math
 import xutils
 import xtemplate
 import xauth
 import xtables
 import xconfig
+from xutils import Storage
 
 class TagHandler:
     
     def GET(self, id):
-        id        = int(id)
-        db        = xtables.get_file_tag_table()
-        user_name = xauth.get_current_name()
-        sql = "SELECT * FROM file_tag WHERE file_id=$file_id AND (user=$user OR is_public=1)"
-        file_tags = db.query(sql, vars=dict(file_id=id, user=user_name))
-        return dict(code="", message="", data=list(file_tags))
+        note = xutils.call("note.get_by_id", id)
+        tags = None
+        if note:
+            tags = [Storage(name=name) for name in note.tags]
+        if not isinstance(tags, list):
+            tags = []
+        return dict(code="", message="", data=tags)
 
 class UpdateTagHandler:
 
     @xauth.login_required()
     def POST(self):
-        from . import dao
-        id       = xutils.get_argument("file_id", type=int)
-        tags_str = xutils.get_argument("tags")
-        tag_db   = xtables.get_file_tag_table()
+        id        = xutils.get_argument("file_id")
+        tags_str  = xutils.get_argument("tags")
+        tag_db    = xtables.get_file_tag_table()
         user_name = xauth.get_current_name()
-        
+        note      = xutils.call("note.get_by_id", id)
+
         if tags_str is None or tags_str == "":
-            tag_db.delete(where=dict(file_id=id, user=user_name))
+            # tag_db.delete(where=dict(file_id=id, user=user_name))
+            xutils.call("note.update", dict(id = id, creator = user_name), tags = [])
             return dict(code="success")
-        new_tags = set(tags_str.split(" "))
-        file     = dao.get_by_id(id)
-        db       = dao.get_file_db()
-        file_db  = xtables.get_file_table()
-        # 求出两个差集进行运算
-        old_tags = tag_db.select(where=dict(file_id=id, user=user_name))
-        old_tags = set([v.name for v in old_tags])
-
-        to_delete = old_tags - new_tags
-        to_add    = new_tags - old_tags
-
-        for item in to_delete:
-            tag_db.delete(where=dict(name=item, file_id=id, user=user_name))
-        for item in to_add:
-            if item == "": continue
-            tag_db.insert(name=item, file_id=id, user=user_name, is_public=file.is_public)
-
-        file_db.update(related=tags_str, where=dict(id=id))
-        return dict(code="", message="", data="OK")
+        new_tags = tags_str.split(" ")
+        xutils.call("note.update", dict(id = id, creator = user_name), tags = new_tags)
+        return dict(code="success", message="", data="OK")
 
     def GET(self):
         return self.POST()
