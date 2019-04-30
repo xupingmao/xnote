@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/04/27 11:06:42
+# @modified 2019/04/30 23:21:46
 import web
 import xtables
 import xtemplate
@@ -52,12 +52,13 @@ class IndexHandler:
 
     @xutils.timeit(name = "Home", logfile = True)
     def GET(self):
-        current_name    = xauth.current_name()
-        groups          = xutils.call("note.list_group")
-        notes           = xutils.call("note.list_recent_edit", limit = xconfig.RECENT_SIZE)
-        tools           = list(filter(tool_filter, list_tools()))[:4]
-        tags            = xutils.call("note.list_tag", current_name)
-        recent_search   = xutils.call("search.list_recent", current_name, xconfig.RECENT_SEARCH_LIMIT)
+        current_name  = xauth.current_name()
+        groups        = xutils.call("note.list_group")
+        notes         = xutils.call("note.list_recent_edit", limit = xconfig.RECENT_SIZE)
+        tools         = list(filter(tool_filter, list_tools()))[:4]
+        # tags        = xutils.call("note.list_tag", current_name)
+        tags          = []
+        recent_search = xutils.call("search.list_recent", current_name, xconfig.RECENT_SEARCH_LIMIT)
         return xtemplate.render("index.html", 
             file_type       = "home",
             show_aside      = True,

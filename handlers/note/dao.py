@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/30 22:42:02
+# @modified 2019/04/30 23:30:40
 
 """资料的DAO操作集合
 
@@ -283,12 +283,13 @@ def kv_put_note(note_id, note):
     score = "%02d:%s" % (priority, mtime)
     if note.is_deleted:
         dbutil.zrem("z:note.recent:%s" % creator, note_id)
+        dbutil.delete("note_tiny:%s:%s" % (note.creator, note_id))
     else:
         dbutil.zadd("z:note.recent:%s" % creator, score, note_id)
 
     del note['content']
     del note['data']
-    dbutil.put("note_tiny:%s" % note_id, note)
+    dbutil.put("note_tiny:%s:%s" % (note.creator, note_id), note)
 
 def kv_update_note(where, **kw):
     note_id   = where['id']
@@ -314,7 +315,7 @@ def kv_update_note(where, **kw):
             note.name = name
         if atime:
             note.atime = atime
-        if parent_id:
+        if parent_id != None:
             note.parent_id = parent_id
         note.mtime   = xutils.format_time()
         note.version += 1
@@ -326,7 +327,7 @@ def kv_update_note(where, **kw):
         if len(kw) == 1 and kw.get('name') != None:
             note.version -= 1
 
-        # TODO 处理移动分类的情况
+        # TODO 处理移动分类时的统计
         kv_put_note(note_id, note)
         return 1
     return 0
@@ -488,6 +489,24 @@ def list_group(current_name = None):
     else:
         return kv_list_group(current_name)
 
+def list_public(offset, limit):
+    def list_func(key, value):
+        if value.is_deleted:
+            return False
+        return value.is_public
+
+    notes = dbutil.prefix_list("note_tiny:", list_func, offset, limit)
+    notes.sort(key = lambda x: x.mtime, reverse = True)
+    return notes
+
+def count_public():
+    def list_func(key, value):
+        if value.is_deleted:
+            return False
+        return value.is_public
+
+    return dbutil.prefix_count("note_tiny:", list_func)
+
 def rdb_list_note(creator, parent_id, offset, limit):
     db = xtables.get_note_table()
     where_sql = "parent_id=$parent_id AND is_deleted=0 AND (creator=$creator OR is_public=1)"
@@ -506,7 +525,7 @@ def kv_list_note(creator, parent_id, offset, limit):
             return False
         if value.type == "group":
             return False
-        return (value.is_public or value.creator == creator) and value.parent_id == parent_id
+        return (value.is_public or value.creator == creator) and str(value.parent_id) == str(parent_id)
 
     notes = dbutil.prefix_list("note_tiny:", list_note_func, offset, limit)
     notes.sort(key = lambda x: x.name)
@@ -655,7 +674,7 @@ def count_note(creator, parent_id):
                 return False
             if value.type == "group":
                 return False
-            return (value.is_public or value.creator == creator) and value.parent_id == parent_id
+            return (value.is_public or value.creator == creator) and str(value.parent_id) == str(parent_id)
 
         return dbutil.prefix_count("note_tiny", list_note_func)
 
@@ -677,15 +696,38 @@ def list_tag(user_name):
 
 @xutils.timeit(name = "NoteDao.FindPrev", logfile = True)
 def find_prev_note(note):
-    where = "parent_id = $parent_id AND name < $name ORDER BY name DESC LIMIT 1"
-    table = xtables.get_file_table()
-    return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
+    # where = "parent_id = $parent_id AND name < $name ORDER BY name DESC LIMIT 1"
+    # table = xtables.get_file_table()
+    # return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
+    parent_id = note.parent_id
+    note_name = note.name
+    def find_next_func(key, value):
+        if value.is_deleted:
+            return False
+        return value.parent_id == parent_id and value.name < note_name
+    result = dbutil.prefix_list("note_tiny:%s" % note.creator, find_next_func, 0, 1)
+    if len(result) > 0:
+        return result[0]
+    else:
+        return None
+
 
 @xutils.timeit(name = "NoteDao.FindNext", logfile = True)
 def find_next_note(note):
-    where = "parent_id = $parent_id AND name > $name ORDER BY name ASC LIMIT 1"
-    table = xtables.get_file_table()
-    return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
+    # where = "parent_id = $parent_id AND name > $name ORDER BY name ASC LIMIT 1"
+    # table = xtables.get_file_table()
+    # return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
+    parent_id = note.parent_id
+    note_name = note.name
+    def find_next_func(key, value):
+        if value.is_deleted:
+            return False
+        return value.parent_id == parent_id and value.name > note_name
+    result = dbutil.prefix_list("note_tiny:%s" % note.creator, find_next_func, 0, 1)
+    if len(result) > 0:
+        return result[0]
+    else:
+        return None
 
 def update_priority(creator, id, value):
     table = xtables.get_file_table()
@@ -803,6 +845,8 @@ xutils.register_func("note.list_path", list_path)
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_note", list_note)
 xutils.register_func("note.list_tag", list_tag)
+xutils.register_func("note.list_public", list_public)
+xutils.register_func("note.count_public", count_public)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.list_recent_viewed", list_recent_viewed)

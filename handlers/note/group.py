@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/04/30 22:45:02
+# @modified 2019/04/30 23:19:04
 import math
 import time
 import web
@@ -172,10 +172,9 @@ class PublicGroupHandler:
     def GET(self):
         page = xutils.get_argument("page", 1, type=int)
         page = max(1, page)
-        db = xtables.get_file_table()
-        where = "is_deleted=0 AND is_public=1"
-        files = db.select(where=where, offset=(page-1)*xconfig.PAGE_SIZE, limit=xconfig.PAGE_SIZE, order="ctime DESC")
-        count = db.count(where=where)
+        offset = (page - 1) * xconfig.PAGE_SIZE
+        files = xutils.call("note.list_public", offset, xconfig.PAGE_SIZE)
+        count = xutils.call("note.count_public")
         return xtemplate.render(VIEW_TPL, 
             show_aside = True,
             pathlist   = [Storage(name="分享笔记", url="/note/public")],

@@ -20,7 +20,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/04/30 00:50:55
+# @modified 2019/04/30 23:29:00
 ###########################################################
 
 def search_escape(text):
@@ -430,7 +430,7 @@ def prefix_count(prefix, filter_func = None):
 
 def zadd(key, score, member):
     obj = get(key)
-    print("zadd %r %r" % (member, score))
+    # print("zadd %r %r" % (member, score))
     if obj != None:
         obj[member] = score
         put(key, obj)
