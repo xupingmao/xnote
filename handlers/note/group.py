@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/04/29 00:18:53
+# @modified 2019/04/30 22:45:02
 import math
 import time
 import web
@@ -33,28 +33,12 @@ class Ungrouped:
 
     @xauth.login_required()
     def GET(self):
-        page           = xutils.get_argument("page", 1, type=int)
-        db             = xtables.get_file_table()
-        user_name      = xauth.get_current_name()
-        pagesize       = xconfig.PAGE_SIZE
-        vars           = dict()
-        vars["name"]   = user_name
-        vars["offset"] = (page-1) * pagesize
-        vars["limit"]  = pagesize
-
-        sql = """SELECT a.* FROM file a LEFT JOIN file b ON a.parent_id = b.id 
-            WHERE a.is_deleted = 0 
-                AND a.type != 'group' 
-                AND a.creator = $name AND (b.id is null OR b.type != 'group') 
-            ORDER BY mtime DESC LIMIT $offset, $limit"""
-        files = db.query(sql, vars=vars)
-        
-        count_sql = """SELECT COUNT(1) AS amount FROM file a LEFT JOIN file b ON a.parent_id = b.id 
-            WHERE a.is_deleted = 0 
-                AND a.type != 'group' 
-                AND a.creator = $name
-                AND (b.id is null OR b.type != 'group')"""
-        amount = db.count(sql = count_sql, vars = vars)
+        page      = xutils.get_argument("page", 1, type=int)
+        user_name = xauth.get_current_name()
+        pagesize  = xconfig.PAGE_SIZE
+        offset    = (page-1) * pagesize
+        files     = xutils.call("note.list_note", user_name, 0, offset, pagesize)
+        amount    = xutils.call("note.count", user_name, 0);
 
         return xtemplate.render(VIEW_TPL,
             show_aside = True,
@@ -74,9 +58,6 @@ class MoveHandler:
     def GET(self):
         id        = xutils.get_argument("id", "")
         parent_id = xutils.get_argument("parent_id", "")
-
-        print("Move", id, parent_id)
-
         file = xutils.call("note.get_by_id", id)
         if file is None:
             return dict(code="fail", message="file not exists")
@@ -93,12 +74,10 @@ class GroupListHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id", "", type=int)
-        data = xutils.call("note.list_group", xauth.get_current_name())
-        ungrouped_count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
-            vars=dict(creator=xauth.get_current_name()))
+        id   = xutils.get_argument("id", "", type=int)
+        data = xutils.call("note.list_group", xauth.current_name())
         return xtemplate.render("note/group_list.html",
-            ungrouped_count = ungrouped_count,
+            ungrouped_count = 0,
             file_type       = "group_list",
             pseudo_groups   = True,
             show_search_div = True,
@@ -110,7 +89,7 @@ class GroupSelectHandler:
     def GET(self):
         id = xutils.get_argument("id", "")
         filetype = xutils.get_argument("filetype", "")
-        data = xutils.call("note.list_group", xauth.get_current_name())
+        data = xutils.call("note.list_group", xauth.current_name())
         web.header("Content-Type", "text/html; charset=utf-8")
         return xtemplate.render("note/group_select.html", 
             id=id, filelist=data, file_type="group")

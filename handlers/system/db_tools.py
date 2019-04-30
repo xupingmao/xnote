@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/04/30 00:50:12
+# @modified 2019/04/30 22:47:38
 
 import os
 import re
@@ -25,7 +25,6 @@ HTML = """
 
     <div>
         <a class="btn" href="?action=note_full">迁移笔记主表</a>
-        <a class="btn" href="?action=note_history">迁移笔记历史</a>
         <a class="btn" href="?action=message">迁移提醒</a>
         <a class="btn" href="?action=build_index">构建索引</a>
     </div>
@@ -63,8 +62,6 @@ class MigrateHandler(BasePlugin):
             result = migrate_note_history()
         if action == "build_index":
             result = build_index()
-        if action == "note.recent":
-            result = migrate_note_recent()
         if action == "message":
             result = migrate_message()
 
@@ -76,7 +73,7 @@ def migrate_note_recent():
     for key, item in recent_list:
         dbutil.delete(key)
     db = xtables.get_note_table()
-    for item in dbutil.prefix_iter("note_full"):
+    for item in dbutil.prefix_iter("note_tiny"):
         if item.type != "group":
             dbutil.zadd("z:note.recent:%s" % item.creator, "%02d:%s" % (item.priority, item.mtime), item.id)
         if item.is_public:
@@ -145,8 +142,6 @@ def migrate_note_full():
 
 
 def build_index():
-    migrate_note_recent()
-
     # old key to new key
     for item in dbutil.prefix_iter("note_full:"):
         key = "note_tiny:%s:%s" % (item.creator, item.id)
@@ -154,6 +149,7 @@ def build_index():
         del item.data
         dbutil.put(key, item)
 
+    migrate_note_recent()
     return "迁移完成!"
 
 def migrate_message():
@@ -203,6 +199,8 @@ class DbScanHandler(BasePlugin):
     required_role = "admin"
     # 插件分类 {note, dir, system, network}
     category = None
+
+    placeholder = "主键"
     
     def handle(self, input):
         # 输入框的行数

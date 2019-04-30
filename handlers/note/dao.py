@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/04/30 00:52:37
+# @modified 2019/04/30 22:42:02
 
 """资料的DAO操作集合
 
@@ -504,9 +504,12 @@ def kv_list_note(creator, parent_id, offset, limit):
     def list_note_func(key, value):
         if value.is_deleted:
             return False
+        if value.type == "group":
+            return False
         return (value.is_public or value.creator == creator) and value.parent_id == parent_id
 
     notes = dbutil.prefix_list("note_tiny:", list_note_func, offset, limit)
+    notes.sort(key = lambda x: x.name)
     return notes
 
 def list_note(*args):
@@ -650,6 +653,8 @@ def count_note(creator, parent_id):
         def list_note_func(key, value):
             if value.is_deleted:
                 return False
+            if value.type == "group":
+                return False
             return (value.is_public or value.creator == creator) and value.parent_id == parent_id
 
         return dbutil.prefix_count("note_tiny", list_note_func)
@@ -739,8 +744,10 @@ def rdb_search_name(words, groups=None):
 def kv_search_name(words, creator=None):
     words = [word.lower() for word in words]
     def search_func(key, value):
-        return (value.creator == creator or value.is_public) and textutil.contains_any(value.name.lower(), words)
-    result = dbutil.prefix_list("note_full", search_func, 0, -1)
+        if value.is_deleted:
+            return False
+        return (value.creator == creator or value.is_public) and textutil.contains_all(value.name.lower(), words)
+    result = dbutil.prefix_list("note_tiny", search_func, 0, -1)
     return [file_wrapper(item) for item in result]
 
 def search_name(words, creator=None):
@@ -773,7 +780,7 @@ def kv_search_content(words, creator=None):
     def search_func(key, value):
         if value.content is None:
             return False
-        return (value.creator == creator or value.is_public) and textutil.contains_any(value.content.lower(), words)
+        return (value.creator == creator or value.is_public) and textutil.contains_all(value.content.lower(), words)
     result = dbutil.prefix_list("note_full", search_func, 0, -1)
     return [file_wrapper(item) for item in result]
 
