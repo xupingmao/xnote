@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/01 10:02:28
+# @modified 2019/05/01 14:45:38
 
 """资料的DAO操作集合
 
@@ -546,15 +546,20 @@ def list_note(*args):
 
 @xutils.timeit(name = "NoteDao.ListRecentCreated", logfile = True)
 def list_recent_created(parent_id = None, offset = 0, limit = 10):
-    where = "is_deleted = 0 AND (creator = $creator)"
-    if parent_id != None:
-        where += " AND parent_id = %s" % parent_id
-    db = xtables.get_file_table()
-    result = list(db.select(where = where, 
-            vars   = dict(creator = xauth.get_current_name()),
-            order  = "ctime DESC",
-            offset = offset,
-            limit  = limit))
+    # where = "is_deleted = 0 AND (creator = $creator)"
+    # if parent_id != None:
+    #     where += " AND parent_id = %s" % parent_id
+    # db = xtables.get_file_table()
+    # result = list(db.select(where = where, 
+    #         vars   = dict(creator = xauth.get_current_name()),
+    #         order  = "ctime DESC",
+    #         offset = offset,
+    #         limit  = limit))
+    def list_func(key, value):
+        return value.is_deleted != 1
+
+    creator = xauth.current_name()
+    result  = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
     fill_parent_name(result)
     return result
 
@@ -692,7 +697,6 @@ def list_tag(user_name):
         WHERE (user=$user OR is_public=1) 
         GROUP BY LOWER(name) ORDER BY amount DESC, name ASC""";
     tag_list = list(db.query(sql, vars = dict(user = user_name)))
-    xutils.cache_put(cache_key, tag_list, 60 * 10)
     return tag_list
 
 @xutils.timeit(name = "NoteDao.FindPrev", logfile = True)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/05/01 02:56:47
+# @modified 2019/05/01 14:50:25
 
 import os
 import re
@@ -148,7 +148,7 @@ def build_index():
 
     # old key to new key
     for item in dbutil.prefix_iter("note_full:"):
-        key = "note_tiny:%s:%s" % (item.creator, item.id)
+        key = "note_tiny:%s:%020d" % (item.creator, int(item.id))
         del item.content
         del item.data
         dbutil.put(key, item)
