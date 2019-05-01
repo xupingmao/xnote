@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/01 02:13:09
+# @modified 2019/05/01 10:04:30
 import math
 import xutils
 import xtemplate
@@ -14,7 +14,7 @@ class TagHandler:
     def GET(self, id):
         note = xutils.call("note.get_by_id", id)
         tags = None
-        if note:
+        if note and note.tags != None:
             tags = [Storage(name=name) for name in note.tags]
         if not isinstance(tags, list):
             tags = []
@@ -29,6 +29,8 @@ class UpdateTagHandler:
         tag_db    = xtables.get_file_tag_table()
         user_name = xauth.get_current_name()
         note      = xutils.call("note.get_by_id", id)
+
+        print(id, tags_str)
 
         if tags_str is None or tags_str == "":
             # tag_db.delete(where=dict(file_id=id, user=user_name))

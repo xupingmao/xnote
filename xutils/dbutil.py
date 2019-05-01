@@ -20,7 +20,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/04/30 23:29:00
+# @modified 2019/05/01 10:17:05
 ###########################################################
 
 def search_escape(text):
@@ -359,7 +359,12 @@ def prefix_list(prefix, filter_func = None, offset = 0, limit = -1, reverse = Fa
 
 def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = False, include_key = False):
     """通过前缀查询
-    @param {int} offset 包含
+    @param {string} prefix 遍历前缀
+    @param {function} filter_func 过滤函数
+    @param {int} offset 选择的开始下标，包含
+    @param {int} limit  选择的数据行数
+    @param {boolean} reverse 是否反向遍历
+    @param {boolean} include_key 返回的数据是否包含key，默认只有value
     """
     check_leveldb()
 

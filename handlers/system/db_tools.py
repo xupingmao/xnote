@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/04/30 22:47:38
+# @modified 2019/05/01 02:56:47
 
 import os
 import re
@@ -142,6 +142,10 @@ def migrate_note_full():
 
 
 def build_index():
+    # 先删除老的索引
+    for key, value in dbutil.prefix_iter("note_tiny:", include_key = True):
+        dbutil.delete(key)
+
     # old key to new key
     for item in dbutil.prefix_iter("note_full:"):
         key = "note_tiny:%s:%s" % (item.creator, item.id)

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/01 02:07:47
+# @modified 2019/05/01 10:02:28
 
 """资料的DAO操作集合
 
@@ -283,7 +283,6 @@ def kv_put_note(note_id, note):
     score = "%02d:%s" % (priority, mtime)
     if note.is_deleted:
         dbutil.zrem("z:note.recent:%s" % creator, note_id)
-        dbutil.delete("note_tiny:%s:%s" % (note.creator, note_id))
     else:
         dbutil.zadd("z:note.recent:%s" % creator, score, note_id)
 
@@ -526,13 +525,14 @@ def rdb_list_note(creator, parent_id, offset, limit):
 
 @xutils.timeit(name = "NoteDao.ListNote:leveldb", logfile = True, logargs=True)
 def kv_list_note(creator, parent_id, offset, limit):
+    parent_id = str(parent_id)
     # TODO 添加索引优化
     def list_note_func(key, value):
         if value.is_deleted:
             return False
         if value.type == "group":
             return False
-        return (value.is_public or value.creator == creator) and str(value.parent_id) == str(parent_id)
+        return (value.is_public or value.creator == creator) and str(value.parent_id) == parent_id
 
     notes = dbutil.prefix_list("note_tiny:", list_note_func, offset, limit)
     notes.sort(key = lambda x: x.name)
@@ -700,13 +700,14 @@ def find_prev_note(note):
     # where = "parent_id = $parent_id AND name < $name ORDER BY name DESC LIMIT 1"
     # table = xtables.get_file_table()
     # return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
-    parent_id = note.parent_id
+    parent_id = str(note.parent_id)
     note_name = note.name
-    def find_next_func(key, value):
+    def find_prev_func(key, value):
         if value.is_deleted:
             return False
-        return value.parent_id == parent_id and value.name < note_name
-    result = dbutil.prefix_list("note_tiny:%s" % note.creator, find_next_func, 0, 1)
+        return str(value.parent_id) == parent_id and value.name < note_name
+    result = dbutil.prefix_list("note_tiny:%s" % note.creator, find_prev_func)
+    result.sort(key = lambda x:x.name, reverse=False)
     if len(result) > 0:
         return result[0]
     else:
@@ -718,13 +719,15 @@ def find_next_note(note):
     # where = "parent_id = $parent_id AND name > $name ORDER BY name ASC LIMIT 1"
     # table = xtables.get_file_table()
     # return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
-    parent_id = note.parent_id
+    parent_id = str(note.parent_id)
     note_name = note.name
     def find_next_func(key, value):
         if value.is_deleted:
             return False
-        return value.parent_id == parent_id and value.name > note_name
-    result = dbutil.prefix_list("note_tiny:%s" % note.creator, find_next_func, 0, 1)
+        return str(value.parent_id) == parent_id and value.name > note_name
+    result = dbutil.prefix_list("note_tiny:%s" % note.creator, find_next_func)
+    result.sort(key = lambda x:x.name)
+    # print([x.name for x in result])
     if len(result) > 0:
         return result[0]
     else:

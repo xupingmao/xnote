@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/04/30 23:12:53
+# @modified 2019/05/01 09:51:26
 import profile
 import math
 import re
@@ -101,7 +101,7 @@ class ViewHandler:
             show_recommend = True
             show_pagination = False
 
-        if show_recommend:
+        if show_recommend and user_name is not None:
             show_groups = False
             # 推荐系统
             ctx = Storage(id=file.id, name = file.name, creator = file.creator, 
@@ -134,21 +134,20 @@ class ViewHandler:
             page     = page,
             page_url = "/note/view?id=%s&page=" % id,
             files    = files, 
-            recent_created = recent_created,
-            show_groups = show_groups,
-            groups   = groups,
-            prev_note = prev_note,
-            next_note = next_note,
+            recent_created    = recent_created,
+            show_groups       = show_groups,
+            groups            = groups,
+            prev_note         = prev_note,
+            next_note         = next_note,
             recommended_notes = recommended_notes)
 
 class PrintHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id")
-        db = xtables.get_file_table()
-        file = dao.get_by_id(id, db=db)
-        user_name = xauth.get_current_name()
+        id        = xutils.get_argument("id")
+        file      = xutils.call("note.get_by_id", id)
+        user_name = xauth.current_name()
         if file.is_public != 1 and user_name != "admin" and user_name != file.creator:
             raise web.seeother("/unauthorized")
         return xtemplate.render("note/print.html", show_menu = False, note = file)
