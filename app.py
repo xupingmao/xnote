@@ -29,6 +29,7 @@ import traceback
 import argparse
 # insert after working dir
 sys.path.insert(1, "lib")
+os.environ["PATH"] += os.pathsep + "lib"
 import web
 import xutils
 import xconfig

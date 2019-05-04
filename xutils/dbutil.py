@@ -2,6 +2,7 @@
 import os
 import time
 import json
+import xutils
 
 try:
     import sqlite3
@@ -246,12 +247,32 @@ class ObjDB:
         # use select * from table where key1 like d[key1] and key2 like d[key2]
         
 
+class LevelDBPy:
+
+    def __init__(self, path):
+        self._db = leveldbpy.DB(path.encode("utf-8"), create_if_missing=True)
+
+    def Get(self, key):
+        return self._db.get(key)
+
+    def Put(self, key, value, sync = False):
+        return self._db.put(key, value)
+
+    def Delete(self, key, sync = False):
+        return self._db.delete(key)
+
+    def RangeIter(self, *args, **kw):
+        return []
+
 # 初始化KV存储
 _leveldb = None
 if leveldb:
     import xconfig
     _leveldb = leveldb.LevelDB(xconfig.DB_DIR)
 
+if xutils.is_windows():
+    import leveldbpy, xconfig
+    _leveldb = LevelDBPy(xconfig.DB_DIR)
 
 class Table:
 
@@ -280,13 +301,15 @@ def timeseq():
     return "%020d" % int(time.time()*1000)
 
 def get_object_from_bytes(bytes):
+    if bytes is None:
+        return None
     obj = json.loads(bytes.decode("utf-8"))
     if isinstance(obj, dict):
         obj = Storage(**obj)
     return obj
 
 def check_leveldb():
-    if leveldb is None:
+    if _leveldb is None:
         raise Exception("leveldb not found!")
 
 def get(key):
