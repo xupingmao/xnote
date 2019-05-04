@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/01 14:45:38
+# @modified 2019/05/04 18:16:52
 
 """资料的DAO操作集合
 
@@ -711,7 +711,7 @@ def find_prev_note(note):
             return False
         return str(value.parent_id) == parent_id and value.name < note_name
     result = dbutil.prefix_list("note_tiny:%s" % note.creator, find_prev_func)
-    result.sort(key = lambda x:x.name, reverse=False)
+    result.sort(key = lambda x:x.name, reverse=True)
     if len(result) > 0:
         return result[0]
     else:

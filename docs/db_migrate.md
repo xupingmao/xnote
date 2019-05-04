@@ -35,3 +35,7 @@ SELECT id, ctime, mtime, user, status, content FROM message_old;
 
 -- 如果OK，删除旧表
 ```
+
+# sqlite到leveldb迁移
+
+依次找到【系统】、【管理功能】、【数据迁移】。再执行相关的迁移操作即可，注意如果数据量比较大可能迁移时间比较长。

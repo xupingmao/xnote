@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/04/27 22:58:49
+# @modified 2019/05/04 18:38:44
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -483,7 +483,9 @@ def get_table(name, dbpath = None):
     return DBWrapper(dbpath, name)
 
 def init_db_wrapper(dbpath):
-    DBWrapper._pool[dbpath] = web.db.SqliteDB(db = dbpath)
+    db = web.db.SqliteDB(db = dbpath)
+    db.query("PRAGMA temp_store = MEMORY;")
+    DBWrapper._pool[dbpath] = db
 
 def init():
     if sqlite3 is None:
