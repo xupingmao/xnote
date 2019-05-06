@@ -261,8 +261,14 @@ class LevelDBPy:
     def Delete(self, key, sync = False):
         return self._db.delete(key)
 
-    def RangeIter(self, *args, **kw):
-        return []
+    def RangeIter(self, key_from = None, key_to = None, reverse = False, include_value = False):
+        if include_value:
+            keys_only = False
+        else:
+            keys_only = True
+
+        iterator = self._db.iterator(keys_only = keys_only)
+        return iterator.RangeIter(key_from, key_to, include_value = include_value, reverse = reverse)
 
 # 初始化KV存储
 _leveldb = None

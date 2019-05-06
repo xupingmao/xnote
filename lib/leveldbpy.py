@@ -303,6 +303,9 @@ class Iterator(object):
     def __iter__(self):
         return self
 
+    def __next__(self):
+        return self.next()
+
     def next(self):
         """Advances the iterator one step. Also returns the current value prior
         to moving the iterator
@@ -361,6 +364,49 @@ class Iterator(object):
                     not end_inclusive and row.key == end_key)):
                 break
             yield row
+
+    def RangeIter(self, key_from = None, key_to = None, include_value = True, reverse = False, 
+            verify_checksums = False, fill_cache = True):
+        """return RangeIter of py-leveldb style.
+            key_from: (inclusive)
+            key_to:   (inclusive)
+        """
+        # print("locals=", locals())
+        if not include_value:
+            self._keys_only = True
+        else:
+            self._keys_only = False
+
+        if reverse:
+            if key_to:
+                self.seek(key_to)
+                # 如果没命中key必须调用一次才行 TODO 待确认
+                self.prev()
+            else:
+                self.seekLast()
+
+            while True:
+                if not self.valid():
+                    raise StopIteration()
+                key = self.key()
+                # print(key, key_from)
+                if key_from and key < key_from:
+                    raise StopIteration()
+                yield self.prev()
+        else:
+            if key_from:
+                self.seek(key_from)
+            else:
+                self.seekFirst()
+
+            while True:
+                if not self.valid():
+                    raise StopIteration()
+                key = self.key()
+                # print(key, key_to)
+                if key_to and key > key_to:
+                    raise StopIteration()
+                yield self.next()
 
     def keys(self):
         while self.valid():
