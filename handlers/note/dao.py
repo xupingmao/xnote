@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/04 18:16:52
+# @modified 2019/05/07 00:56:32
 
 """资料的DAO操作集合
 
@@ -288,7 +288,7 @@ def kv_put_note(note_id, note):
 
     del note['content']
     del note['data']
-    dbutil.put("note_tiny:%s:%s" % (note.creator, note_id), note)
+    dbutil.put("note_tiny:%s:%020d" % (note.creator, int(note_id)), note)
 
 def kv_update_note(where, **kw):
     note_id   = where['id']
