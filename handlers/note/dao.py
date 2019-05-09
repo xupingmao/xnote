@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/07 00:56:32
+# @modified 2019/05/09 23:36:18
 
 """资料的DAO操作集合
 
@@ -94,9 +94,11 @@ def batch_query_sqlite(id_list):
 def batch_query(id_list):
     if xconfig.DB_ENGINE == "sqlite":
         return batch_query_sqlite(id_list)
+
+    creator = xauth.current_name()
     result = dict()
     for id in id_list:
-        note = dbutil.get("note_full:%s" % id)
+        note = dbutil.get("note_tiny:%s:%020d" % (creator, int(id)))
         if note:
             result[id] = note
     return result
