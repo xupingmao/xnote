@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/09 23:36:18
+# @modified 2019/05/10 00:04:40
 
 """资料的DAO操作集合
 
@@ -657,7 +657,7 @@ def count_user_note(creator):
             if value.is_deleted:
                 return False
             return value.creator == creator and type != 'group'
-        count = dbutil.prefix_count("note_full", count_func)
+        count = dbutil.prefix_count("note_tiny", count_func)
     return count
 
 def count_ungrouped(creator):
