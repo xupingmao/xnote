@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/04/30 23:21:46
+# @modified 2019/05/09 22:59:15
 import web
 import xtables
 import xtemplate
@@ -52,6 +52,10 @@ class IndexHandler:
 
     @xutils.timeit(name = "Home", logfile = True)
     def GET(self):
+        from handlers.note.group import RecentHandler
+        return RecentHandler().GET()
+
+        # 老的逻辑
         current_name  = xauth.current_name()
         groups        = xutils.call("note.list_group")
         notes         = xutils.call("note.list_recent_edit", limit = xconfig.RECENT_SIZE)

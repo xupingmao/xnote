@@ -20,15 +20,15 @@
         <h3>
             {{T(html_title)}}
             <div class="float-right">
-                <a href="/note/group_list">{{T("Group")}}</a>
+                <a href="/note/add" class="btn">{{T("创建")}}</a>
             </div>
         </h3>
 
         <table class="table row">
             <tr>
-                <th>{{T("Title")}}</th>
-                <th>{{T("Group")}}</th>
-                <th>{{T(time_attr)}}</th>
+                <td>{{T("Title")}}</td>
+                <td>{{T("Group")}}</td>
+                <td>{{T(time_attr)}}</td>
             </tr>
         {% for note in files %}
             <tr>

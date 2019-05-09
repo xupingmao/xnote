@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/04/30 23:19:04
+# @modified 2019/05/09 22:56:42
 import math
 import time
 import web
@@ -82,6 +82,7 @@ class GroupListHandler:
             pseudo_groups   = True,
             show_search_div = True,
             show_add_group  = True,
+            show_aside      = True,
             files           = data)
 
 class GroupSelectHandler:
@@ -120,7 +121,7 @@ class RemovedHandler:
 class RecentHandler:
     """show recent notes"""
 
-    def GET(self, orderby = "edit", show_notice = False):
+    def GET(self, orderby = "edit", show_notice = True):
         if not xauth.has_login():
             raise web.seeother("/note/public")
         if xutils.sqlite3 is None:
