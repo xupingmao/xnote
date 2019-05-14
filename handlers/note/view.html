@@ -142,8 +142,15 @@ img {
                     {% if file.size == 0 %}
                         <a class="float-right red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
                     {% end %}
-                    <a class="float-right link" href="/note/add?parent_id={{file.id}}">新增</a>
-                    <a class="float-right link" href="javascript:rename({{file.id}}, '{{file.name}}')">重命名</a>
+                    <div class="float-right">
+                        {% if file.priority > 0 %}
+                            <a class="link" href="/note/unstick?id={{file.id}}">取消置顶</a>
+                        {% else %}
+                            <a class="link" href="/note/stick?id={{file.id}}">置顶</a>
+                        {% end %}
+                        <a class="link" href="javascript:rename({{file.id}}, '{{file.name}}')">重命名</a>
+                        <a class="link" href="/note/add?parent_id={{file.id}}">新增</a>
+                    </div>
                 {% else %}
                     {# 其他普通笔记 #}
                     <a class="float-right link" href="javascript:history.back()">返回</a>

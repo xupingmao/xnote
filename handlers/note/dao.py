@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/14 23:28:56
+# @modified 2019/05/15 01:37:45
 
 """资料的DAO操作集合
 
@@ -646,7 +646,7 @@ def list_recent_edit(parent_id = None, offset=0, limit=None):
     fill_parent_name(files)
     return files
 
-def list_by_date(field, creator, date):
+def rdb_list_by_date(field, creator, date):
     db = xtables.get_file_table()
     date_pattern = date + "%"
 
@@ -662,7 +662,20 @@ def list_by_date(field, creator, date):
             vars   = dict(creator = creator, date = date_pattern),
             order  = "name DESC"))
     fill_parent_name(files)
+    return files
 
+def list_by_date(field, creator, date):
+    user = creator
+    if user is None:
+        user = "public"
+
+    def list_func(key, value):
+        if value.is_deleted:
+            return False
+        return date in getattr(value, field)
+    
+    files = dbutil.prefix_list("note_tiny:%s" % user, list_func)
+    fill_parent_name(files)
     return files
 
 @xutils.timeit(name = "NoteDao.CountNote", logfile=True, logargs=True, logret=True)

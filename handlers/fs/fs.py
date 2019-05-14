@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/04/14 11:41:23
+# @modified 2019/05/15 01:24:23
 
 """xnote文件服务，主要功能:
     1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -469,7 +469,15 @@ class LinkHandler:
 
     @xauth.login_required("admin")
     def GET(self, name):
-        link_path = os.path.join(xconfig.DATA_DIR, name)
+        if name == "home":
+            link_path = "~"
+            if xutils.is_mac():
+                link_path = os.environ['HOME']
+            if xutils.is_windows():
+                link_path = os.path.join(os.environ['HOMEDRIVE'], os.environ['HOMEPATH'])
+        else:
+            link_path = os.path.join(xconfig.DATA_DIR, name)
+        
         link_path = os.path.abspath(link_path)
         raise web.seeother("/fs/%s" % link_path)
 
