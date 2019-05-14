@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/10 00:04:40
+# @modified 2019/05/14 23:28:56
 
 """资料的DAO操作集合
 
@@ -280,13 +280,16 @@ def kv_put_note(note_id, note):
     priority = note.priority
     mtime    = note.mtime
     creator  = note.creator
+    atime    = note.atime
     dbutil.put("note_full:%s" % note_id, note)
 
     score = "%02d:%s" % (priority, mtime)
     if note.is_deleted:
         dbutil.zrem("z:note.recent:%s" % creator, note_id)
+        dbutil.zrem("note_visit:%s" % creator, note_id)
     else:
         dbutil.zadd("z:note.recent:%s" % creator, score, note_id)
+        dbutil.zadd("note_visit:%s" % creator, atime, note_id)
 
     del note['content']
     del note['data']
@@ -567,15 +570,31 @@ def list_recent_created(parent_id = None, offset = 0, limit = 10):
 
 @xutils.timeit(name = "NoteDao.ListRecentViewed", logfile = True, logargs = True)
 def list_recent_viewed(creator = None, offset = 0, limit = 10):
-    where = "is_deleted = 0 AND (creator = $creator)"
-    db = xtables.get_file_table()
-    result = list(db.select(where = where, 
-            vars   = dict(creator = creator),
-            order  = "atime DESC",
-            offset = offset,
-            limit  = limit))
-    fill_parent_name(result)
-    return result
+    # where = "is_deleted = 0 AND (creator = $creator)"
+    # db = xtables.get_file_table()
+    # result = list(db.select(where = where, 
+    #         vars   = dict(creator = creator),
+    #         order  = "atime DESC",
+    #         offset = offset,
+    #         limit  = limit))
+
+    if limit is None:
+        limit = xconfig.PAGE_SIZE
+
+    user = xauth.current_name()
+    if user is None:
+        user = "public"
+    
+    id_list   = dbutil.zrange("note_visit:%s" % user, -offset-1, -offset-limit)
+    note_dict = batch_query(id_list)
+    files     = []
+
+    for id in id_list:
+        note = note_dict.get(id)
+        if note:
+            files.append(note)
+    fill_parent_name(files)
+    return files
 
 @xutils.timeit(name = "NoteDao.ListRecentEdit:sqlite", logfile = True, logargs = True)
 def rdb_list_recent_edit(parent_id=None, offset=0, limit=None):
@@ -612,7 +631,7 @@ def list_recent_edit(parent_id = None, offset=0, limit=None):
     if limit is None:
         limit = xconfig.PAGE_SIZE
 
-    user = xauth.get_current_name()
+    user = xauth.current_name()
     if user is None:
         user = "public"
     
