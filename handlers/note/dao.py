@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/15 01:37:45
+# @modified 2019/05/15 23:17:33
 
 """资料的DAO操作集合
 
@@ -874,6 +874,17 @@ def search_content(words, creator=None):
     else:
         return kv_search_content(words, creator)
 
+
+def count_removed(creator):
+    def count_func(key, value):
+        return value.is_deleted and value.creator == creator
+    return dbutil.prefix_count("note_tiny:%s" % creator, count_func)
+
+def list_removed(creator, offset, limit):
+    def list_func(key, value):
+        return value.is_deleted and value.creator == creator
+    return dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
+
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
 xutils.register_func("note.visit",  visit_note)
@@ -903,4 +914,6 @@ xutils.register_func("note.update_priority", update_priority)
 xutils.register_func("note.add_history", add_history)
 xutils.register_func("note.list_history", list_history)
 xutils.register_func("note.get_history", get_history)
+xutils.register_func("note.count_removed", count_removed)
+xutils.register_func("note.list_removed", list_removed)
 

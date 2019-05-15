@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/05/09 22:56:42
+# @modified 2019/05/16 00:03:10
 import math
 import time
 import web
@@ -104,17 +104,18 @@ class RemovedHandler:
         page = xutils.get_argument("page", 1, type=int)
         user_name = xauth.current_name()
 
-        db = xtables.get_file_table()
-        files = db.select(where="is_deleted=1 AND creator=$creator", 
-            vars = dict(creator = user_name),
-            order="ctime DESC", offset=(page-1)*10, limit=10)
-        amount = db.count(where="is_deleted=1")
+        limit  = xconfig.PAGE_SIZE
+        offset = (page-1)*limit
+
+        amount = xutils.call("note.count_removed", user_name)
+        files  = xutils.call("note.list_removed", user_name, offset, limit)
 
         return xtemplate.render(VIEW_TPL,
-            pathlist  = [PathNode("回收站", "/note/removed")],
+            pathlist  = [PathNode(T("回收站"), "/note/removed")],
             file_type = "group",
             files     = files,
             page      = page,
+            show_aside = True,
             page_max  = math.ceil(amount / 10),
             page_url  = "/note/removed?page=")
 
