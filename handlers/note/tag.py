@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/01 10:04:30
+# @modified 2019/05/16 23:55:01
 import math
 import xutils
 import xtemplate
@@ -30,8 +30,6 @@ class UpdateTagHandler:
         user_name = xauth.get_current_name()
         note      = xutils.call("note.get_by_id", id)
 
-        print(id, tags_str)
-
         if tags_str is None or tags_str == "":
             # tag_db.delete(where=dict(file_id=id, user=user_name))
             xutils.call("note.update", dict(id = id, creator = user_name), tags = [])
@@ -46,31 +44,34 @@ class UpdateTagHandler:
 class TagNameHandler:
 
     def GET(self, tagname):
-        from . import dao
         tagname  = xutils.unquote(tagname)
-        db       = xtables.get_file_table()
         page     = xutils.get_argument("page", 1, type=int)
-        limit    = xutils.get_argument("limit", 10, type=int)
+        limit    = xutils.get_argument("limit", xconfig.PAGE_SIZE, type=int)
         offset   = (page-1) * limit
-        pagesize = xconfig.PAGE_SIZE
 
         if xauth.has_login():
             user_name = xauth.get_current_name()
         else:
             user_name = ""
-        count_sql = "SELECT COUNT(1) AS amount FROM file_tag WHERE LOWER(name) = $name AND (user=$user OR is_public=1)"
-        sql = "SELECT f.* FROM file f, file_tag ft ON ft.file_id = f.id WHERE LOWER(ft.name) = $name AND (ft.user=$user OR ft.is_public=1) ORDER BY f.ctime DESC LIMIT $offset, $limit"
-        count = db.query(count_sql, vars=dict(name=tagname.lower(), user=user_name))[0].amount
 
-        files = db.query(sql,
-            vars=dict(name=tagname.lower(), offset=offset, limit=limit, user=user_name))
-        files = [dao.FileDO.fromDict(f) for f in files]
+        # count_sql = "SELECT COUNT(1) AS amount FROM file_tag WHERE LOWER(name) = $name AND (user=$user OR is_public=1)"
+        # sql = "SELECT f.* FROM file f, file_tag ft ON ft.file_id = f.id WHERE LOWER(ft.name) = $name AND (ft.user=$user OR ft.is_public=1) ORDER BY f.ctime DESC LIMIT $offset, $limit"
+        # count = db.query(count_sql, vars=dict(name=tagname.lower(), user=user_name))[0].amount
+
+        # files = db.query(sql,
+        #     vars=dict(name=tagname.lower(), offset=offset, limit=limit, user=user_name))
+        # files = [dao.FileDO.fromDict(f) for f in files]
+
+        files = xutils.call("note.list_by_tag", user_name, tagname)
+        count = len(files)
+
+        files = files[offset: offset+limit]
         return xtemplate.render("note/tagname.html", 
             show_aside = True,
             tagname    = tagname, 
             files      = files, 
             show_mdate = True,
-            page_max   = math.ceil(count / pagesize), 
+            page_max   = math.ceil(count / limit), 
             page       = page)
 
 

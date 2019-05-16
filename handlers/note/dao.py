@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/15 23:17:33
+# @modified 2019/05/16 23:50:10
 
 """资料的DAO操作集合
 
@@ -678,6 +678,20 @@ def list_by_date(field, creator, date):
     fill_parent_name(files)
     return files
 
+def list_by_tag(user, tagname):
+    if user is None:
+        user = "public"
+
+    def list_func(key, value):
+        if value.is_deleted:
+            return False
+        if value.tags is None:
+            return False
+        return tagname in value.tags
+    
+    files = dbutil.prefix_list("note_tiny:%s" % user, list_func)
+    return files
+
 @xutils.timeit(name = "NoteDao.CountNote", logfile=True, logargs=True, logret=True)
 def count_user_note(creator):
     if xconfig.DB_ENGINE == "sqlite":
@@ -725,12 +739,34 @@ def count_note(creator, parent_id):
         return dbutil.prefix_count("note_tiny", list_note_func)
 
 @xutils.timeit(name = "NoteDao.ListTag", logfile = True, logargs = True)
-def list_tag(user_name):
+def rdb_list_tag(user_name):
     db = xtables.get_file_tag_table()
     sql = """SELECT LOWER(name) AS name, COUNT(*) AS amount FROM file_tag 
         WHERE (user=$user OR is_public=1) 
         GROUP BY LOWER(name) ORDER BY amount DESC, name ASC""";
     tag_list = list(db.query(sql, vars = dict(user = user_name)))
+    return tag_list
+
+
+def list_tag(user):
+    if user is None:
+        user = "public"
+
+    tags = dict()
+    def list_func(key, value):
+        if value.is_deleted:
+            return False
+        if value.tags is None:
+            return False
+        for tag in value.tags:
+            count = tags.get(tag, 0)
+            count += 1
+            tags[tag] = count
+    
+    dbutil.prefix_count("note_tiny:%s" % user, list_func)
+    
+    tag_list = [Storage(name = k, amount = tags[k]) for k in tags]
+    tag_list.sort(key = lambda x: -x.amount)
     return tag_list
 
 @xutils.timeit(name = "NoteDao.FindPrev", logfile = True)
@@ -904,6 +940,7 @@ xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.list_recent_viewed", list_recent_viewed)
 xutils.register_func("note.list_by_date", list_by_date)
+xutils.register_func("note.list_by_tag", list_by_tag)
 xutils.register_func("note.count_recent_edit", count_user_note)
 xutils.register_func("note.count_user_note", count_user_note)
 xutils.register_func("note.count_ungrouped", count_ungrouped)

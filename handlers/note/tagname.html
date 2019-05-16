@@ -9,6 +9,11 @@
     {% set page_url="/note/tagname/"+tagname+"?page=" %}
     {% include "note/note_list.html" %}
 </div>
+
+<div class="card">
+    {% include mod_pagenation.html %}
+</div>
+    
 {% end %}
 
 {% block aside %}

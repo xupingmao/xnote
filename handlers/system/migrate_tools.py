@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/05/01 14:50:25
+# @modified 2019/05/16 23:52:09
 
 import os
 import re
@@ -27,6 +27,7 @@ HTML = """
         <a class="btn" href="?action=note_full">迁移笔记主表</a>
         <a class="btn" href="?action=message">迁移提醒</a>
         <a class="btn" href="?action=build_index">构建索引</a>
+        <a class="btn" href="?action=note_tags">迁移标签</a>
     </div>
 
     <div class="top-offset-1">
@@ -64,6 +65,8 @@ class MigrateHandler(BasePlugin):
             result = build_index()
         if action == "message":
             result = migrate_message()
+        if action == "note_tags":
+            result = migrate_note_tags()
 
         cost = int((time.time() - t1) * 1000)
         self.writetemplate(HTML, result = result, cost = cost)
@@ -114,23 +117,28 @@ def build_full_note(note, db):
     if data != "":
         note.data = data
 
+def build_note_full_key(id):
+    return "note_full:%s" % id
+
 def migrate_note_full():
     # sqlite to leveldb
     db = xtables.get_note_table()
     content_db = xtables.get_note_content_table()
     for item in db.select():
-        ldb_value = dbutil.get("note_full:%s" % item.id)
+        note_key  = build_note_full_key(item.id)
+        ldb_value = dbutil.get(note_key)
         # 如果存在需要比较修改时间
         if ldb_value and item.mtime >= ldb_value.mtime:
             build_full_note(item, content_db)
-            dbutil.put("note_full:%s" % item.id, item)
+            dbutil.put(note_key, item)
         
         if ldb_value is None:
             build_full_note(item, content_db)
-            dbutil.put("note_full:%s" % item.id, item)
+            dbutil.put(note_key, item)
+
     # old key to new key
     for item in dbutil.prefix_iter("note.full:"):
-        new_key   = "note_full:%s" % item.id
+        new_key   = build_note_full_key(item.id)
         new_value = dbutil.get(new_key)
         if new_value and item.mtime >= new_value.mtime:
             dbutil.put(new_key, item)
@@ -140,6 +148,11 @@ def migrate_note_full():
 
     return "迁移完成!"
 
+def put_note_tiny(item):
+    key = "note_tiny:%s:%020d" % (item.creator, int(item.id))
+    del item.content
+    del item.data
+    dbutil.put(key, item)
 
 def build_index():
     # 先删除老的索引
@@ -148,13 +161,32 @@ def build_index():
 
     # old key to new key
     for item in dbutil.prefix_iter("note_full:"):
-        key = "note_tiny:%s:%020d" % (item.creator, int(item.id))
-        del item.content
-        del item.data
-        dbutil.put(key, item)
+        put_note_tiny(item)
 
     migrate_note_recent()
     return "迁移完成!"
+
+def migrate_note_tags():
+    db = xtables.get_file_tag_table()
+    count = 0
+    for item in db.select():
+        note_id = item.file_id
+        creator = item.user
+        note_key = build_note_full_key(note_id)
+        note = dbutil.get(note_key)
+        if note != None:
+            tag_set = set()
+            if note.tags != None:
+                tag_set.update(note.tags)
+            tag_set.add(item.name)
+            note.tags = list(tag_set)
+
+            # 更新入库
+            dbutil.put(note_key, note)
+            put_note_tiny(note)
+            count += 1
+
+    return "迁移完成,标签数量: %s" % count
 
 def migrate_message():
     db = xtables.get_message_table()
