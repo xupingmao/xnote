@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/05/14 23:34:21
+# @modified 2019/05/18 00:50:23
 ###########################################################
 
 def search_escape(text):
@@ -277,6 +277,7 @@ if leveldb:
     _leveldb = leveldb.LevelDB(xconfig.DB_DIR)
 
 if xutils.is_windows():
+    os.environ["PATH"] += os.pathsep + "lib"
     import leveldbpy, xconfig
     _leveldb = LevelDBPy(xconfig.DB_DIR)
 

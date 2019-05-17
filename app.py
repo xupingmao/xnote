@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2019/05/18 00:38:22
+# @modified 2019/05/18 00:49:54
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -29,7 +29,6 @@ import traceback
 import argparse
 # insert after working dir
 sys.path.insert(1, "lib")
-os.environ["PATH"] += os.pathsep + "lib"
 import web
 import xutils
 import xconfig
