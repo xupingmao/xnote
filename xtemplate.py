@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/04/30 22:48:02
+# @modified 2019/05/18 00:41:11
 import os
 import json
 import web
@@ -136,8 +136,8 @@ def pre_render(kw):
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
 
-    if xutils.sqlite3 is None:
-        kw["warn"] = "WARN: sqlite3不可用"
+    if len(xconfig.errors) > 0:
+        kw["warn"] = "; ".join(xconfig.errors)
 
     # render input
     _input = web.ctx.get("_xnote.input")

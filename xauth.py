@@ -29,10 +29,6 @@ def _get_users():
     if _users is not None:
         return _users
 
-    # defaults = read_users_from_ini("config/users.default.ini")
-    # customs  = read_users_from_ini("config/users.ini")
-    db = xtables.get_user_table()
-    db_users = db.select()
     _users = {}
     # 默认的账号
     _users["admin"] = Storage(name = "admin", 
@@ -40,6 +36,14 @@ def _get_users():
         salt = "",
         mtime = "",
         token = gen_new_token())
+
+    if xutils.sqlite3 is None:
+        return _users
+
+    # defaults = read_users_from_ini("config/users.default.ini")
+    # customs  = read_users_from_ini("config/users.ini")
+    db = xtables.get_user_table()
+    db_users = db.select()
 
     for user in db_users:
         _users[user.name] = user

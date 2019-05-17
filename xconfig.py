@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/04/27 03:01:09
+# @modified 2019/05/18 00:42:34
 
 '''xnote系统配置
 
@@ -27,6 +27,9 @@ __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
 __copyright__ = "(C) 2016-2017 xupingmao. GNU GPL 3."
 __contributors__ = []
+
+# 系统错误信息
+errors = []
 
 ##################################
 # 系统配置项

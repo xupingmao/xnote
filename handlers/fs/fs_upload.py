@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/04/20 16:49:02
+# @modified 2019/05/18 00:20:48
 import os
 import uuid
 import web
@@ -47,7 +47,7 @@ def get_webpath(fpath):
 def upload_link_by_month(year, month, delta = 0):
     t_mon  = (month - 1 + delta) % 12 + 1
     t_year = year + math.floor((month-1+delta)/12)
-    return "/fs_upload?year=%s&month=%02d" % (t_year, t_mon)
+    return "/fs_upload?year=%d&month=%02d" % (t_year, t_mon)
 
 class UploadHandler:
 

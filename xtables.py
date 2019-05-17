@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/05/07 01:27:03
+# @modified 2019/05/18 00:40:55
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -399,6 +399,9 @@ class DBWrapper:
         self.dbpath = dbpath
         # SqliteDB 内部使用了threadlocal来实现，是线程安全的，使用全局单实例即可
         _db = DBWrapper._pool.get(dbpath)
+        if xutils.sqlite3 is None:
+            self.db = MockedDB()
+            return
         if _db is None:
             raise Exception("db wrapper %s is not inited!" % dbpath)
         self.db = _db
@@ -492,6 +495,7 @@ def init_db_wrapper(dbpath):
 
 def init():
     if sqlite3 is None:
+        xconfig.errors.append("sqlite3依赖丢失,部分功能不可用")
         return
 
     init_db_wrapper(xconfig.DB_FILE)

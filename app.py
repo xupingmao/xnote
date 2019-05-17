@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2019/04/26 01:33:57
+# @modified 2019/05/18 00:38:22
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -61,8 +61,12 @@ def handle_args():
     web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
 
-    # 处理Data目录
-    xconfig.init(args.data)
+    # 处理Data目录，创建各种目录
+    try:
+        xconfig.init(args.data)
+    except Exception as e:
+        xconfig.errors.append("创建目录失败")
+        xutils.print_exc()
     # 端口号
     xconfig.PORT = args.port
 
