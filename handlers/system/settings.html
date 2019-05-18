@@ -40,18 +40,20 @@
             <td>{{sys_mem_used}} / {{sys_mem_total}}</td>
         </tr>
 
-        <tr class="admin-visible">
-            <td class="key">线程总数</td>
-            <td>
-                <span>{{thread_cnt}}</span>
-                <a href="/system/thread_info">详情</a>
-            </td>
-        </tr>
-
         <tr class="user-visible">
             <td class="key">扩展功能</td>
             <td>
                 <a href="/system/index">功能列表</a>
+            </td>
+        </tr>
+
+
+        <tr class="admin-visible">
+            <td class="key">任务管理</td>
+            <td>
+                <a href="/system/thread_info">系统线程({{thread_cnt}})</a>
+                <a href="/system/crontab">定时任务</a>
+                <a href="/system/event">事件任务</a>
             </td>
         </tr>
 
@@ -60,10 +62,8 @@
             <td>
                 <a href="/system/reload">系统刷新</a>
                 <a href="/system/user/list">用户管理</a>
-                <a href="/system/crontab">定时任务</a>
                 <a href="/tools/sql">{{T("sqlite管理")}}</a>
                 <a href="/system/db_scan">leveldb管理</a>
-                
                 <a href="/system/db_migrate">数据迁移</a>
                 <a href="/tools/shell">Shell</a>
             </td>
@@ -72,9 +72,10 @@
         <tr class="admin-visible">
             <td class="key">目录管理</td>
             <td>
-                <a href="/fs_link/db">{{T("数据库目录")}}</a>
-                <a href="/fs_link/scripts">脚本目录</a>
                 <a href="/fs_link/home">Home</a>
+                <a href="/fs_link/db">{{T("数据库目录")}}</a>
+                <a href="/fs_link/log">{{T("日志目录")}}</a>
+                <a href="/fs_link/scripts">脚本目录</a>
             </td>
         </tr>
 
@@ -108,6 +109,7 @@
                 <input type="radio" name="LANG" default-value="{{web.cookies().get('lang', 'zh')}}" value="en">English
             </td>
         </tr>
+        <!--
         <tr class="admin-visible">
             <td class="key">{{T("Recent Search")}}</td>
             <td>
@@ -127,6 +129,7 @@
                 <input type="radio" name="RECENT_SIZE" default-value="{{xconfig.RECENT_SIZE}}" value="12">12
             </td>
         </tr>
+        -->
         <tr class="admin-visible">
             <td class="key">{{T("Page Size")}}</td>
             <td>

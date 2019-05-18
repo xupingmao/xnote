@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2019/05/18 00:49:54
+# @modified 2019/05/18 10:18:59
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -122,13 +122,19 @@ def main():
     xconfig.set("port", port)
     xconfig.set("start_time", xutils.format_datetime())
     
+    # 初始化日志
+    xutils.init_logger()
     # 初始化数据库
     xtables.init()
 
     # 关闭autoreload使用自己实现的版本
     app = web.application(list(), var_env, autoreload=False)
     # 加载持久化的缓存
-    xutils.cacheutil.load_dump()
+    try:
+        xutils.cacheutil.load_dump()
+    except:
+        xutils.print_exc()
+        xconfig.errors.append("加载缓存失败")
 
     # 最后的mapping，用于匹配优先级较低的处理器
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")

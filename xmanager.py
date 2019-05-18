@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/04/20 17:45:07
+# @modified 2019/05/18 10:27:34
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -448,8 +448,8 @@ class WorkerThread(Thread):
             # 但是deque没有block模式，popleft可能抛出IndexError异常
             try:
                 if self._task_queue:
-                    func, args = self._task_queue.popleft()
-                    func(*args)
+                    func, args, kw = self._task_queue.popleft()
+                    func(*args, **kw)
                 else:
                     time.sleep(0.01)
             except Exception as e:
@@ -661,9 +661,9 @@ def find_plugins(category):
     plugins.sort()
     return plugins
 
-def put_task(func, *args):
+def put_task(func, *args, **kw):
     """添加异步任务到队列"""
-    WorkerThread._task_queue.append([func, args])
+    WorkerThread._task_queue.append([func, args, kw])
 
 
 def load_tasks():

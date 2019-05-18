@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/04/29 01:23:06
+# @modified 2019/05/18 10:38:29
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -24,6 +24,8 @@ from .cacheutil import cache, cache_get, cache_put, cache_del
 from .functions import History, MemTable, listremove
 from xconfig import Storage
 import shutil
+import logging
+import logging.handlers
 
 #################################################################
 
@@ -39,6 +41,31 @@ wday_map = {
     "6": "周六",
     "7": "周日"
 }
+
+logger = None
+def init_logger():
+    global logger
+    # filename = os.path.join(xconfig.LOG_DIR, "xnote.log")
+    # fmt_str  = '%(asctime)s %(levelname)s %(message)s'
+    # fileshandle = logging.handlers.TimedRotatingFileHandler(filename, when='MIDNIGHT', interval=1, backupCount=0)
+    # fileshandle.suffix = "%Y-%m-%d"
+    # fileshandle.setLevel(logging.DEBUG)
+    # formatter = logging.Formatter(fmt_str)
+    # fileshandle.setFormatter(formatter)
+    # logger = logging.getLogger('')
+    # logger.setLevel(logging.INFO)
+    # logger.addHandler(fileshandle)
+
+    # logger.info("logger inited!")
+
+def async_func():
+    """同步调用转化成异步调用的装饰器"""
+    def deco(func):
+        def handle(*args, **kw):
+            import xmanager
+            xmanager.put_task(func, *args, **kw)
+        return handle
+    return deco
 
 def print_exc():
     """打印系统异常堆栈"""
@@ -97,15 +124,17 @@ class SearchResult(dict):
             raise AttributeError(k)
 
 class MyStdout:
-    """
-    标准输出的装饰器，用来拦截标准输出内容
+    """标准输出的装饰器，用来拦截标准输出内容
     """
     def __init__(self, stdout, do_print = True):
         self.stdout = stdout
         self.result_dict = dict()
         self.outfile = web.debug
-        self.encoding = stdout.encoding
         self.do_print = do_print
+        try:
+            self.encoding = stdout.encoding
+        except:
+            print_exc()
 
     def write(self, value):
         result = self.result_dict.get(current_thread())
@@ -352,8 +381,12 @@ def trace(scene, message, cost=0):
     full_message = "%s|%s|%s|%sms|%s" % (format_time(), 
         xauth.current_name(), scene, cost, message)
     print(full_message)
-    # with open(fpath, "ab") as fp:
-    #     fp.write((full_message+"\n").encode("utf-8"))
+    log_async(fpath, full_message)
+
+@async_func()
+def log_async(fpath, full_message):
+    with open(fpath, "ab") as fp:
+        fp.write((full_message+"\n").encode("utf-8"))
 
 def system(cmd, cwd = None):
     p = subprocess.Popen(cmd, cwd=cwd, 
