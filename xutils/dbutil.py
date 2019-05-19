@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/05/18 00:50:23
+# @modified 2019/05/18 15:11:57
 ###########################################################
 
 def search_escape(text):
@@ -310,7 +310,12 @@ def timeseq():
 def get_object_from_bytes(bytes):
     if bytes is None:
         return None
-    obj = json.loads(bytes.decode("utf-8"))
+    str_value = bytes.decode("utf-8")
+    try:
+        obj = json.loads(str_value)
+    except:
+        xutils.print_exc()
+        return str_value
     if isinstance(obj, dict):
         obj = Storage(**obj)
     return obj

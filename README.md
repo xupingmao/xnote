@@ -1,7 +1,5 @@
 # Xnote
 
-**注意：windows版尚不支持leveldb，正在开发中**
-
 [![Build Status](https://travis-ci.org/xupingmao/xnote.svg?branch=master)](https://travis-ci.org/xupingmao/xnote)
 [![Coverage Status](https://coveralls.io/repos/github/xupingmao/xnote/badge.svg?branch=master)](https://coveralls.io/github/xupingmao/xnote?branch=master)
 

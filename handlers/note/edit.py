@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/05/01 02:00:00
+# @modified 2019/05/19 23:39:48
 
 """笔记编辑相关处理"""
 import os
@@ -195,17 +195,6 @@ class RemoveAjaxHandler:
                 return dict(code="fail", message="分组不为空")
 
         xutils.call("note.delete", id)
-        # t_file.update(is_deleted=1, mtime=dateutil.format_time(), where=dict(id=int(id)))
-        # outdated = t_file.select(where="is_deleted=1 AND mtime < $date", 
-        #     vars=dict(date=dateutil.before(days=30,format=True)))
-        # for item in outdated:
-        #     t_file.delete(where=dict(id=item['id']))
-        #     t_content.delete(where=dict(id=item['id']))
-
-        # 删除标签
-        t_tag = xtables.get_file_tag_table()
-        t_tag.delete(where=dict(file_id=id));
-        xmanager.fire("note.remove", dict(id=id))
         return dict(code="success")
         
     def POST(self):

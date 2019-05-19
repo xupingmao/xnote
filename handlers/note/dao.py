@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/16 23:50:10
+# @modified 2019/05/19 23:37:48
 
 """资料的DAO操作集合
 
@@ -249,6 +249,7 @@ def create_note(note_dict):
         dbutil.put(key, note_dict)
         score = "%02d:%s" % (priority, mtime)
         dbutil.zadd("z:note.recent:%s" % creator, score, id)
+        update_children_count(note_dict["parent_id"])
         return id
 
 def rdb_update_note(where, **kw):
@@ -396,6 +397,7 @@ def delete_note(id):
             note.mtime = xutils.format_datetime()
             note.is_deleted = 1
             kv_put_note(id, note)
+            update_children_count(note.parent_id)
 
 def get_vpath(record):
     pathlist = []
@@ -421,15 +423,18 @@ def update(where, **kw):
     return db.update(where = where, vars=None, **kw)
 
 def update_children_count(parent_id, db=None):
-    if parent_id is None or parent_id == "":
+    if parent_id is None or parent_id == "" or parent_id == 0:
         return
-    if db is None:
-        db = get_file_db()
-    group_count = db.count(where="parent_id=$parent_id AND is_deleted=0", vars=dict(parent_id=parent_id))
-    db.update(size=group_count, where=dict(id=parent_id))
 
-def delete_by_id(id):
-    update(where=dict(id=id), is_deleted=1)
+    note = get_by_id(parent_id)
+    if note is None:
+        return
+
+    creator        = note.creator
+    children_count = count_note(creator, parent_id)
+    note.size      = children_count
+
+    kv_put_note(note.id, note)
 
 def insert(file):
     name = file.name
