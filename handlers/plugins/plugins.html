@@ -45,8 +45,9 @@
         <option value="network">网络</option>
         <option value="system">系统</option>
     </select> -->
-    
+    {% if _is_admin %}
     <a class="btn float-right" href="/plugins_new">新增</a>
+    {% end %}
 </div> 
 
 
@@ -66,7 +67,7 @@
         <div class="plugin-item hide">
             <div class="col-md-12">
                 <a href="{{link.link}}">{{link.name}}</a>
-                {% if _is_admin %}
+                {% if _is_admin and link.editable %}
                 <a class="float-right item-option" href="{{link.edit_link}}">编辑</a>
                 {% end %}
             </div>

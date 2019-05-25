@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/05/25 11:59:40
+# @modified 2019/05/25 17:55:53
 ###########################################################
 
 def search_escape(text):
@@ -250,6 +250,7 @@ class ObjDB:
 class LevelDBPy:
 
     def __init__(self, path):
+        import leveldbpy
         self._db = leveldbpy.DB(path.encode("utf-8"), create_if_missing=True)
 
     def Get(self, key):

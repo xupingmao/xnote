@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/25 02:14:51
+# @modified 2019/05/25 17:44:40
 
 """资料的DAO操作集合
 
@@ -360,6 +360,8 @@ def rdb_get_by_name(name):
 
 def kv_get_by_name(name):
     def find_func(key, value):
+        if value.is_deleted:
+            return False
         return value.name == name
     result = dbutil.prefix_list("note:", find_func, 0, 1)
     if len(result) > 0:

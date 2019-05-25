@@ -5,21 +5,12 @@
   <div class="menu-box float-left">
     <ul class="nav-ul">
       <li><a class="menu-link" href="/">{{T("Home")}}</a></li>
-      {% if _has_login %}
-      <li><a class="menu-link" href="/message?status=created">{{T("Message")}}</a></li>
-      {% end %}
 
-      {# 自定义配置的导航 #}
-      {% for link in xconfig.NAV_LIST %}
-        {% if link.user == None or (_has_login and link.user in (_user_name, "*")) %}
-            <li><a class="menu-link" href="{{link.url}}">{{T(link.name)}}</a></li>
-        {% end %}
-      {% end %}
-
-      
-      {# 系统功能 #}
       {% if _has_login %}
-      <li><a class="menu-link" href="/system/settings">{{T("System")}}</a></li>
+        <li><a class="menu-link" href="/message?status=created">{{T("Message")}}</a></li>
+        <li><a class="menu-link" href="/fs_upload">{{T("File")}}</a></li>
+        <li><a class="menu-link" href="/plugins_list">{{T("Tool")}}</a></li>
+        <li><a class="menu-link" href="/system/settings">{{T("System")}}</a></li>
       {% end %}
       
       {% if not _has_login %}

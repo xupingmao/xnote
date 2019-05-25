@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/04/24 22:33:36
+# @modified 2019/05/25 17:43:25
 """System functions"""
 from io import StringIO
 import xconfig
@@ -93,12 +93,6 @@ xconfig.MENU_LIST = [
     Storage(name = "System", children = sys_tools, need_login = True),
     Storage(name = "Data", children = doc_tools, need_login = True),
     Storage(name = "Tools", children = other_tools),
-]
-
-# 导航配置
-xconfig.NAV_LIST = [
-    Storage(name = "File", url = "/fs_upload", user = "*"),
-    Storage(name = "Tool", url = "/plugins_list", user = "admin"),
 ]
 
 xconfig.NOTE_OPTIONS = [

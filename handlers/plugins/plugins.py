@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/04/28 09:51:41
+# @modified 2019/05/25 18:24:56
 from io import StringIO
 import xconfig
 import codecs
@@ -18,6 +18,7 @@ import xauth
 import xmanager
 import xtables
 import web
+import copy
 from xtemplate import BasePlugin
 from xutils import History
 from xutils import cacheutil
@@ -26,8 +27,35 @@ from xutils import textutil, SearchResult, u
 
 MAX_HISTORY = 200
 
-def link(name, url):
-    return Storage(name = name, url = url, link = url)
+def link(name, url, title = ""):
+    return Storage(name = name, url = url, link = url, title = title, editable = False, atime="")
+
+INNER_TOOLS = [
+    link("浏览器信息", "/tools/browser_info"),
+    # 文本
+    link("代码模板", "/tools/code_template"),
+    link("文本对比", "/tools/js_diff"),
+    link("文本转换", "/tools/text_processor"),
+    link("随机字符串", "/tools/random_string"),
+    # 图片
+    link("图片合并", "/tools/img_merge"),
+    link("图片拆分", "/tools/img_split"),
+    link("图像灰度化", "/tools/img2gray"),
+    # 编解码
+    link("base64", "/tools/base64"),
+    link("HEX转换", "/tools/hex"),
+    link("md5签名", "/tools/md5"),
+    link("sha1签名", "/tools/sha1"),
+    link("URL编解码", "/tools/urlcoder"),
+    link("条形码", "/tools/barcode"),
+    link("二维码", "/tools/qrcode"),
+    # 其他工具
+    link("分屏模式", "/tools/multi_win"),
+    link("RunJS", "/tools/runjs"),
+]
+
+def build_inner_tools():
+    return copy.copy(INNER_TOOLS)
 
 def build_plugin_links(dirname, fnames):
     links = []
@@ -38,6 +66,7 @@ def build_plugin_links(dirname, fnames):
         name, ext = os.path.splitext(fname)
         name = xutils.unquote(name)
         item = link(name, "/plugins/" + name)
+        item.editable = True
         # st = os.stat(fpath)
         # item.atime = xutils.format_date(st.st_atime)
         atime = cacheutil.zscore("plugins.history", fname)
@@ -60,14 +89,17 @@ def list_plugins(category):
         return []
 
     if category and category != "all":
+        # 某个分类的插件
         plugins = xmanager.find_plugins(category)
         links = build_plugin_links(dirname, [p.fname for p in plugins])
     else:
+        # 所有插件
         recent_names = cacheutil.zrange("plugins.history", -MAX_HISTORY, -1)
         recent_names.reverse()
         plugins_list = os.listdir(dirname)
         plugins_list = set(plugins_list) - set(recent_names)
-        links = build_plugin_links(dirname, recent_names + sorted(plugins_list))    
+        links = build_inner_tools()
+        links += build_plugin_links(dirname, recent_names + sorted(plugins_list))    
     return links
 
 def list_recent_plugins():
@@ -133,15 +165,26 @@ def on_search_plugins(ctx):
 
 class PluginsListHandler:
 
-    @xauth.login_required("admin")
+    @xauth.login_required()
     def GET(self):
         category = xutils.get_argument("category", "")
+
+        if xauth.is_admin():
+            recent   = list_recent_plugins()
+            plugins  = list_plugins(category)
+        else:
+            recent = []
+            if category == "" or category == "all":
+                plugins = build_inner_tools()
+            else:
+                plugins = []
+
         return xtemplate.render("plugins/plugins.html", 
             category = category,
             html_title = "插件",
             show_aside = xconfig.OPTION_STYLE == "aside",
-            recent     = list_recent_plugins(),
-            plugins    = list_plugins(category))
+            recent     = recent,
+            plugins    = plugins)
 
 DEFAULT_PLUGIN_TEMPLATE = '''# -*- coding:utf-8 -*-
 # @since $since
