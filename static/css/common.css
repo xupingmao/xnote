@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/05/25 02:04:26
+@modified 2019/05/25 12:32:47
 */
 
 * {
@@ -1082,6 +1082,14 @@ li.menu-item:hover {
 
 .float-right {
     float: right;
+}
+
+.align-right {
+    text-align: right;
+}
+
+.align-center {
+    text-align: center;
 }
 
 .small-font {

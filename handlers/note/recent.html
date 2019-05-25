@@ -28,7 +28,7 @@
             <tr>
                 <td>{{T("Title")}}</td>
                 <td>{{T("文集")}}</td>
-                <td>{{T(time_attr)}}</td>
+                <td class="align-right">{{T(time_attr)}}</td>
             </tr>
         {% for note in files %}
             <tr>
@@ -43,7 +43,7 @@
                     <a href="/note/view?id={{note.parent_id}}">{{note.parent_name}}</a>
                     {% end %}
                 </td>
-                <td class="option-td">
+                <td class="option-td align-right">
                     {{getattr(note, time_attr)}}
                 </td>
             </tr>

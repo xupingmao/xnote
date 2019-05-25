@@ -13,7 +13,7 @@ xnote是一款功能丰富的个人信息管理系统，提供多种维度的数
 
 PS：目前本项目主要目标人群是个人，提供有限的多用户支持
 
-![主页](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v2.3_20190411.png)
+![主页](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v2.3_home.png)
 
 -----
 ## 项目地址
