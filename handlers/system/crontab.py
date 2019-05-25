@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/01/13 16:16:03
+# @modified 2019/05/22 01:07:07
 
 """xnote定时任务配置"""
 import os
@@ -11,6 +11,7 @@ import xmanager
 import xtables
 import xutils
 import xconfig
+from xutils import dbutil, Storage
 
 SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
 
@@ -50,8 +51,9 @@ class CronEditHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        id = xutils.get_argument("id", type=int)
-        sched = xtables.get_schedule_table().select_first(where=dict(id=id))
+        id  = xutils.get_argument("id")
+        key = "schedule:%s" % id
+        sched = dbutil.get(key)
         return xtemplate.render("system/crontab_edit.html", 
             item = sched, 
             links = get_cron_links())
@@ -72,26 +74,33 @@ class CronSaveHandler:
         sound = 1 if sound_value == "on" else 0
         webpage = 1 if webpage_value == "on" else 0
 
-        db = xtables.get_schedule_table()
+        # db = xtables.get_schedule_table()
         if id == "" or id is None:
-            db.insert(name=name, url=url, mtime=xutils.format_datetime(), 
-                ctime=xutils.format_datetime(),
+            id  = dbutil.timeseq()
+            key = "schedule:%s" % id
+            data = dict(id = id, name=name, url=url, mtime=xutils.format_datetime(), 
+                ctime   = xutils.format_datetime(),
                 tm_wday = tm_wday,
                 tm_hour = tm_hour,
-                tm_min = tm_min,
+                tm_min  = tm_min,
                 message = message,
-                sound = sound,
+                sound   = sound,
                 webpage = webpage)
+            dbutil.put(key, data)
         else:
-            id = int(id)
-            db.update(where=dict(id=id), name=name, url=url, 
-                mtime=xutils.format_datetime(),
-                tm_wday = tm_wday,
-                tm_hour = tm_hour,
-                tm_min = tm_min,
-                message = message,
-                sound = sound,
-                webpage = webpage)
+            key = "schedule:%s" % id
+            data = dbutil.get(key)
+            if data is not None:
+                data.mtime = xutils.format_datetime()
+                data.name  = name
+                data.url   = url
+                data.tm_wday = tm_wday
+                data.tm_hour = tm_hour
+                data.tm_min  = tm_min
+                data.message = message
+                data.sound   = sound
+                data.webpage = webpage
+                dbutil.put(key, data)
         xmanager.load_tasks()
         raise web.seeother("/system/crontab")
 
@@ -188,8 +197,10 @@ class RemoveHandler:
 
     @xauth.login_required("admin")
     def POST(self):
-        id = xutils.get_argument("id", type=int)
-        xtables.get_schedule_table().delete(where=dict(id=id))
+        id = xutils.get_argument("id")
+        # xtables.get_schedule_table().delete(where=dict(id=id))
+        key = "schedule:%s" % id
+        dbutil.delete(key)
         xmanager.load_tasks()
         raise web.seeother("/system/crontab")
 

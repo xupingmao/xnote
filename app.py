@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2019/05/18 10:18:59
+# @modified 2019/05/25 11:58:19
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -94,6 +94,17 @@ def handle_args():
     xconfig.INIT_SCRIPT = args.initScript
     web.config.minthreads = xconfig.MIN_THREADS
 
+    port = xconfig.PORT
+    if port != DEFAULT_PORT:
+        # 指定端口优先级最高
+        os.environ["PORT"] = port
+
+    if not os.environ.get("PORT"):
+        os.environ["PORT"] = port
+
+    xconfig.set("port", port)
+    xconfig.set("start_time", xutils.format_datetime())
+
 def handle_signal(signum, frame):
     """处理系统消息
     :arg int signum:
@@ -107,34 +118,38 @@ def handle_signal(signum, frame):
     xmanager.fire("sys.exit")
     exit(0)
 
-def main():
-    global app
-    handle_args()
-    port = config.PORT
-    if port != DEFAULT_PORT:
-        # 指定端口优先级最高
-        os.environ["PORT"] = port
+def try_init_db():
+    try:
+        # 初始化数据库
+        xtables.init()
+        # 初始化leveldb数据库
+        dbutil.init()
+    except:
+        xutils.print_exc()
+        xconfig.errors.append("数据库初始化失败")
 
-    if not os.environ.get("PORT"):
-        os.environ["PORT"] = port
-
-    var_env = dict()
-    xconfig.set("port", port)
-    xconfig.set("start_time", xutils.format_datetime())
-    
-    # 初始化日志
-    xutils.init_logger()
-    # 初始化数据库
-    xtables.init()
-
-    # 关闭autoreload使用自己实现的版本
-    app = web.application(list(), var_env, autoreload=False)
-    # 加载持久化的缓存
+def try_load_cache():
     try:
         xutils.cacheutil.load_dump()
     except:
         xutils.print_exc()
         xconfig.errors.append("加载缓存失败")
+
+def main():
+    global app
+
+    # 处理初始化参数
+    handle_args()
+    # 初始化日志
+    xutils.init_logger()
+    # 初始化数据库
+    try_init_db()
+    # 加载缓存
+    try_load_cache()
+
+    # 关闭autoreload使用自己实现的版本
+    var_env = dict()
+    app = web.application(list(), var_env, autoreload=False)
 
     # 最后的mapping，用于匹配优先级较低的处理器
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")

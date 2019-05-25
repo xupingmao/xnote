@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/05/18 15:11:57
+# @modified 2019/05/25 11:59:40
 ###########################################################
 
 def search_escape(text):
@@ -272,14 +272,19 @@ class LevelDBPy:
 
 # 初始化KV存储
 _leveldb = None
-if leveldb:
-    import xconfig
-    _leveldb = leveldb.LevelDB(xconfig.DB_DIR)
 
-if xutils.is_windows():
-    os.environ["PATH"] += os.pathsep + "lib"
-    import leveldbpy, xconfig
-    _leveldb = LevelDBPy(xconfig.DB_DIR)
+def init():
+    global _leveldb
+    print("init leveldb start ...")
+    if leveldb:
+        import xconfig
+        _leveldb = leveldb.LevelDB(xconfig.DB_DIR)
+
+    if xutils.is_windows():
+        os.environ["PATH"] += os.pathsep + "lib"
+        import leveldbpy, xconfig
+        _leveldb = LevelDBPy(xconfig.DB_DIR)
+    print("init leveldb done, leveldb =", _leveldb)
 
 class Table:
 
@@ -306,6 +311,9 @@ class Table:
 
 def timeseq():
     return "%020d" % int(time.time()*1000)
+
+def new_id(prefix):
+    return "%s:%s" % (prefix, timeseq())
 
 def get_object_from_bytes(bytes):
     if bytes is None:

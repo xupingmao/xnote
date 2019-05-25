@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/05/16 23:52:09
+# @modified 2019/05/22 01:21:10
 
 import os
 import re
@@ -28,6 +28,7 @@ HTML = """
         <a class="btn" href="?action=message">迁移提醒</a>
         <a class="btn" href="?action=build_index">构建索引</a>
         <a class="btn" href="?action=note_tags">迁移标签</a>
+        <a class="btn" href="?action=schedule">迁移任务</a>
     </div>
 
     <div class="top-offset-1">
@@ -67,6 +68,8 @@ class MigrateHandler(BasePlugin):
             result = migrate_message()
         if action == "note_tags":
             result = migrate_note_tags()
+        if action == "schedule":
+            result = migrate_schedule()
 
         cost = int((time.time() - t1) * 1000)
         self.writetemplate(HTML, result = result, cost = cost)
@@ -212,6 +215,15 @@ def migrate_message():
             dbutil.put(key, item)
     return "迁移完成!"
 
+def migrate_schedule():
+    db = xtables.get_schedule_table()
+    for item in db.select():
+        key = "schedule:%s" % item.id
+        data = dbutil.get(key)
+        if data is None:
+            dbutil.put(key, item)
+    return "迁移完成!"
+
 SCAN_HTML = """
 <div class="card">
     <table class="table">
@@ -222,7 +234,7 @@ SCAN_HTML = """
             </tr>
         {% end %}
     </table>
-    <a href="?key_from={{key}}">下一页</a>
+    <a href="?key_from={{key_from}}">下一页</a>
 </div>
 """
 
@@ -253,7 +265,7 @@ class DbScanHandler(BasePlugin):
             return True
 
         dbutil.scan(key_from = key_from, func = func, reverse = reverse)
-        self.writetemplate(SCAN_HTML, result = result)
+        self.writetemplate(SCAN_HTML, result = result, key_from = key_from, key = input)
 
 
 xurls = (

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/19 23:37:48
+# @modified 2019/05/25 02:14:51
 
 """资料的DAO操作集合
 
@@ -366,7 +366,7 @@ def kv_get_by_name(name):
         return result[0]
     return None
 
-def get_by_name(name):
+def get_by_name(name, db = None):
     if xconfig.DB_ENGINE == "sqlite":
         return rdb_get_by_name(name)
     else:
@@ -544,9 +544,9 @@ def kv_list_note(creator, parent_id, offset, limit):
             return False
         return (value.is_public or value.creator == creator) and str(value.parent_id) == parent_id
 
-    notes = dbutil.prefix_list("note_tiny:", list_note_func, offset, limit)
+    notes = dbutil.prefix_list("note_tiny:", list_note_func)
     notes.sort(key = lambda x: x.name)
-    return notes
+    return notes[offset:offset+limit]
 
 def list_note(*args):
     if xconfig.DB_ENGINE == "sqlite":
@@ -708,7 +708,7 @@ def count_user_note(creator):
             if value.is_deleted:
                 return False
             return value.creator == creator and type != 'group'
-        count = dbutil.prefix_count("note_tiny", count_func)
+        count = dbutil.prefix_count("note_tiny:%s" % creator, count_func)
     return count
 
 def count_ungrouped(creator):
@@ -933,29 +933,34 @@ xutils.register_func("note.count",  count_note)
 xutils.register_func("note.delete", delete_note)
 xutils.register_func("note.get_by_id", get_by_id)
 xutils.register_func("note.get_by_name", get_by_name)
+xutils.register_func("note.get_by_id_creator", get_by_id_creator)
 xutils.register_func("note.search_name", search_name)
 xutils.register_func("note.search_content", search_content)
+
+# list functions
 xutils.register_func("note.list_path", list_path)
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_note", list_note)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_public", list_public)
-xutils.register_func("note.count_public", count_public)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.list_recent_viewed", list_recent_viewed)
 xutils.register_func("note.list_by_date", list_by_date)
 xutils.register_func("note.list_by_tag", list_by_tag)
+xutils.register_func("note.list_removed", list_removed)
+
+# count functions
+xutils.register_func("note.count_public", count_public)
 xutils.register_func("note.count_recent_edit", count_user_note)
 xutils.register_func("note.count_user_note", count_user_note)
 xutils.register_func("note.count_ungrouped", count_ungrouped)
-xutils.register_func("note.get_by_id_creator", get_by_id_creator)
+xutils.register_func("note.count_removed", count_removed)
+
 xutils.register_func("note.find_prev_note", find_prev_note)
 xutils.register_func("note.find_next_note", find_next_note)
 xutils.register_func("note.update_priority", update_priority)
 xutils.register_func("note.add_history", add_history)
 xutils.register_func("note.list_history", list_history)
 xutils.register_func("note.get_history", get_history)
-xutils.register_func("note.count_removed", count_removed)
-xutils.register_func("note.list_removed", list_removed)
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/05/01 09:51:26
+# @modified 2019/05/22 00:40:14
 import profile
 import math
 import re
@@ -13,7 +13,6 @@ import xtables
 import xtemplate
 import xmanager
 from web import HTTPError
-from . import dao
 from xconfig import Storage
 from xutils import History
 from xutils import dbutil
@@ -49,7 +48,7 @@ class ViewHandler:
         if id != "":
             file = xutils.call("note.get_by_id", id)
         elif name is not None:
-            file = dao.get_by_name(name, db=db)
+            file = xutils.call("note.get_by_name", name, db=db)
         if file is None:
             raise web.notfound()
         
@@ -86,10 +85,11 @@ class ViewHandler:
             # recent_created  = xutils.call("note.list_recent_created", file.id, 10)
         elif file.type == "md" or file.type == "text":
             content = file.content
-            if op == "edit":
-                template_name = "note/markdown_edit.html"
             show_recommend = True
             show_pagination = False
+            if op == "edit":
+                show_recommend = False
+                template_name = "note/markdown_edit.html"
         else:
             content = file.content
             content = content.replace(u'\xad', '\n')

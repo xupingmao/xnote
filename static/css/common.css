@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/04/18 02:42:08
+@modified 2019/05/25 02:04:26
 */
 
 * {
@@ -1259,6 +1259,16 @@ li.menu-item:hover {
 
     .x-body {
         /*top: 80px;*/
+    }
+
+    /* 移动端菜单样式 */
+    .menu-box, .nav-ul {
+        width: 100%;
+    }
+
+    .nav-ul li {
+        width: 20%;
+        text-align: center;
     }
 
     .search-box {

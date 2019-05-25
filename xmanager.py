@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/05/18 10:27:34
+# @modified 2019/05/22 01:01:10
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -29,7 +29,7 @@ import xauth
 import threading
 from collections import deque
 from threading import Thread, Timer, current_thread
-from xutils import Storage, Queue, tojson, MyStdout, cacheutil, u
+from xutils import Storage, Queue, tojson, MyStdout, cacheutil, u, dbutil
 
 __version__      = "1.0"
 __author__       = "xupingmao (578749341@qq.com)"
@@ -403,8 +403,9 @@ class TaskManager:
             return False
         
     def load_tasks(self):
-        schedule       = xtables.get_schedule_table()
-        tasks          = schedule.select(order="url")
+        # schedule       = xtables.get_schedule_table()
+        # tasks          = schedule.select(order="url")
+        tasks = dbutil.prefix_list("schedule")
         self.task_list = list(tasks)
         # 系统默认的任务
         backup_task = xutils.Storage(name="[系统]备份", url="/system/backup", 

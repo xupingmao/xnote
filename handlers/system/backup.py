@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2019/04/26 01:47:04
+# @modified 2019/05/25 12:02:51
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -131,12 +131,18 @@ def chk_scripts_backup():
     destfile = os.path.join(xconfig.BACKUP_DIR, time.strftime("scripts.%Y-%m.zip"))
     xutils.zip_dir(dirname, destfile)
 
+def chk_db_backup():
+    dirname = xconfig.DB_DIR
+    destfile = os.path.join(xconfig.BACKUP_DIR, time.strftime("db.%Y-%m.zip"))
+    xutils.zip_dir(dirname, destfile)
+
 class handler:
 
     @xauth.login_required("admin")
     def GET(self):
         """触发备份事件"""
         chk_backup()
+        chk_db_backup()
         chk_scripts_backup()
         return "OK"
     

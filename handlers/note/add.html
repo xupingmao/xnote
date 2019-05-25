@@ -13,21 +13,20 @@ label {
 
 {% init type = "md" %}
 <div class="card">
-    {% include note/base_title.html %}
-
+    <h3>{{T("创建笔记")}}</h3>
     <form method="POST" action="">
         <div class="row">
-            <label>标题</label> 
+            <label>{{T("标题")}}</label> 
             <input type="text" class="mid-text" name="name" value="{{name}}" style="width:200px;"/>
         </div>
         <div class="row">
-            <label>类型</label>
+            <label>{{T("类型")}}</label>
             <input type="radio" name="type" value="md" {% if type=="md" %} checked {% end %}>Markdown
             <input type="radio" name="type" value="html" {% if type=="html" %} checked {% end %}>富文本
             <input type="radio" name="type" value="csv" {% if type=="csv" %} checked {% end %}>表格
         </div>
         <div class="row">
-            <label>分类</label>
+            <label>{{T("文集")}}</label>
             <select name="parent_id">
                 {%for item in groups %}
                     <option value="{{item.id}}" {%if item.id==parent_id%} selected {%end%}>{{item.name}}</option>
@@ -36,7 +35,7 @@ label {
         </div>
         <div class="row">
             <label>&nbsp;</label>
-            <button class="mid-text">添加</button>
+            <button class="mid-text">{{T("添加")}}</button>
         </div>
     </form>
 </div>

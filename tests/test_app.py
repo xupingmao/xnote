@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/05/01 01:59:28
+# @modified 2019/05/25 11:53:51
 
 import sys
 import os
@@ -14,7 +14,7 @@ import xutils
 import xtemplate
 import xconfig
 import xtables
-from xutils import u
+from xutils import u, dbutil
 
 def init():
     xconfig.IS_TEST = True
@@ -24,6 +24,7 @@ def init():
     xutils.remove_file("./testdata/data.db", hard = True)
     xconfig.init("./testdata")
     xtables.init()
+    dbutil.init()
     app = web.application(list(), var_env, autoreload=False)
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
     mgr = xmanager.init(app, var_env, last_mapping=last_mapping)
