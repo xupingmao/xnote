@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/05/25 17:43:25
+# @modified 2019/05/26 00:32:43
 """System functions"""
 from io import StringIO
 import xconfig
@@ -140,30 +140,6 @@ class ReloadHandler:
         import web
         raise web.seeother("/system/settings")
 
-
-class ConfigHandler:
-
-    @xauth.login_required("admin")
-    def POST(self):
-        key = xutils.get_argument("key")
-        value = xutils.get_argument("value")
-
-        if key == "BASE_TEMPLATE":
-            xmanager.reload()
-        if key in ("FS_HIDE_FILES", "DEBUG_HTML_BOX", "RECORD_LOCATION"):
-            value = value.lower() in ("true", "yes", "on")
-        if key == "DEBUG":
-            setattr(xconfig, key, value == "True")
-            web.config.debug = xconfig.DEBUG
-        if key in ("RECENT_SEARCH_LIMIT", "RECENT_SIZE", "PAGE_SIZE"):
-            value = int(value)
-        if key == "LANG":
-            web.setcookie("lang", value)
-
-        setattr(xconfig, key, value)
-        cacheutil.hset('sys.config', key, value)
-        return dict(code="success")
-
 class UserCssHandler:
 
     def GET(self):
@@ -211,27 +187,7 @@ xurls = (
     r"/system/index", IndexHandler,
     r"/system/system", IndexHandler,
     r"/system/reload", ReloadHandler,
-    r"/system/config", ConfigHandler,
     r"/system/user\.css", UserCssHandler,
     r"/system/user\.js", UserJsHandler,
     r"/system/cache", CacheHandler
 )
-
-@xmanager.listen("sys.reload")
-def on_reload(ctx = None):
-    keys = (
-        "THEME", 'FS_HIDE_FILES', 'OPTION_STYLE', 
-        'PAGE_OPEN', 'RECENT_SEARCH_LIMIT', 
-        "PAGE_SIZE", "RECENT_SIZE",
-        "RECORD_LOCATION",
-    )
-    for key in keys:
-        value = cacheutil.hget('sys.config', key)
-        xutils.trace("HGET", "key=%s, value=%s" % (key, value))
-        if value is not None:
-            setattr(xconfig, key, value)
-
-    path = os.path.join(xconfig.SCRIPTS_DIR, "user.css")
-    if not os.path.exists(path):
-        return 
-    xconfig.set("USER_CSS", xutils.readfile(path))

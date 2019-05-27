@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/05/22 01:21:10
+# @modified 2019/05/25 22:18:08
 
 import os
 import re
@@ -75,15 +75,16 @@ class MigrateHandler(BasePlugin):
         self.writetemplate(HTML, result = result, cost = cost)
 
 def migrate_note_recent():
-    recent_list = dbutil.prefix_iter("z:note.recent", include_key = True)
+    recent_list = dbutil.prefix_iter("note_recent", include_key = True)
     for key, item in recent_list:
         dbutil.delete(key)
+
     db = xtables.get_note_table()
     for item in dbutil.prefix_iter("note_tiny"):
         if item.type != "group":
-            dbutil.zadd("z:note.recent:%s" % item.creator, "%02d:%s" % (item.priority, item.mtime), item.id)
+            dbutil.zadd("note_recent:%s" % item.creator, "%02d:%s" % (item.priority, item.mtime), item.id)
         if item.is_public:
-            dbutil.zadd("z:note.recent:public", "%02d:%s" % (item.priority, item.mtime), item.id)
+            dbutil.zadd("note_recent:public", "%02d:%s" % (item.priority, item.mtime), item.id)
     return "迁移完成!"
 
 def migrate_note_history():

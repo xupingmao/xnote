@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/05/16 00:03:10
+# @modified 2019/05/28 00:50:57
 import math
 import time
 import web
@@ -179,7 +179,7 @@ class PublicGroupHandler:
         count = xutils.call("note.count_public")
         return xtemplate.render(VIEW_TPL, 
             show_aside = True,
-            pathlist   = [Storage(name="分享笔记", url="/note/public")],
+            pathlist   = [Storage(name="公开笔记", url="/note/public")],
             file_type  = "group",
             files      = files,
             page       = page, 

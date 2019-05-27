@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/04/16 00:15:46
+# @modified 2019/05/26 00:32:47
 import web
 import time
 import os
@@ -16,8 +16,9 @@ import xtemplate
 import xconfig
 import xauth
 import xtables
+import xmanager
 from logging.handlers import TimedRotatingFileHandler
-from xutils import sqlite3, Storage
+from xutils import sqlite3, Storage, cacheutil
 
 try:
     import psutil
@@ -209,8 +210,52 @@ class PropertiesHandler:
         xconfig.NAV_LIST = nav_list
 
 
+
+class ConfigHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        key = xutils.get_argument("key")
+        value = xutils.get_argument("value")
+
+        if key == "BASE_TEMPLATE":
+            xmanager.reload()
+        if key in ("FS_HIDE_FILES", "DEBUG_HTML_BOX", "RECORD_LOCATION"):
+            value = value.lower() in ("true", "yes", "on")
+        if key == "DEBUG":
+            setattr(xconfig, key, value == "True")
+            web.config.debug = xconfig.DEBUG
+        if key in ("RECENT_SEARCH_LIMIT", "RECENT_SIZE", "PAGE_SIZE"):
+            value = int(value)
+        if key == "LANG":
+            web.setcookie("lang", value)
+
+        setattr(xconfig, key, value)
+        cacheutil.hset('sys.config', key, value)
+        return dict(code="success")
+
+@xmanager.listen("sys.reload")
+def on_reload(ctx = None):
+    keys = (
+        "THEME", 'FS_HIDE_FILES', 'OPTION_STYLE', 
+        'PAGE_OPEN', 'RECENT_SEARCH_LIMIT', 
+        "PAGE_SIZE", "RECENT_SIZE",
+        "RECORD_LOCATION",
+    )
+    for key in keys:
+        value = cacheutil.hget('sys.config', key)
+        xutils.trace("HGET", "key=%s, value=%s" % (key, value))
+        if value is not None:
+            setattr(xconfig, key, value)
+
+    path = os.path.join(xconfig.SCRIPTS_DIR, "user.css")
+    if not os.path.exists(path):
+        return 
+    xconfig.set("USER_CSS", xutils.readfile(path))
+
 xurls = (
     r"/system/settings", SettingsHandler,
     r"/system/properties", PropertiesHandler,
-    r"/system/storage", StorageHandler
+    r"/system/storage", StorageHandler,
+    r"/system/config", ConfigHandler,
 )

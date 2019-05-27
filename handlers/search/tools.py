@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
 # Copyright (c) 2017
-# @modified 2019/01/26 16:41:07
+# @modified 2019/05/28 01:25:05
 """Description here"""
 
 import os
@@ -55,8 +55,8 @@ def search(ctx):
 
     if url_pattern.match(name):
         f = SearchResult()
-        f.name = "分析网页资源 - " + name
-        f.url = "/tools/html_importer?url=" + name
+        f.name = "导入笔记 - " + name
+        f.url = "/note/html_importer?url=" + name
         files.append(f)
 
         f = SearchResult()

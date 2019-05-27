@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/25 17:44:40
+# @modified 2019/05/25 22:16:32
 
 """资料的DAO操作集合
 
@@ -248,7 +248,7 @@ def create_note(note_dict):
         note_dict["id"] = id
         dbutil.put(key, note_dict)
         score = "%02d:%s" % (priority, mtime)
-        dbutil.zadd("z:note.recent:%s" % creator, score, id)
+        dbutil.zadd("note_recent:%s" % creator, score, id)
         update_children_count(note_dict["parent_id"])
         return id
 
@@ -286,10 +286,10 @@ def kv_put_note(note_id, note):
 
     score = "%02d:%s" % (priority, mtime)
     if note.is_deleted:
-        dbutil.zrem("z:note.recent:%s" % creator, note_id)
+        dbutil.zrem("note_recent:%s" % creator, note_id)
         dbutil.zrem("note_visit:%s" % creator, note_id)
     else:
-        dbutil.zadd("z:note.recent:%s" % creator, score, note_id)
+        dbutil.zadd("note_recent:%s" % creator, score, note_id)
         dbutil.zadd("note_visit:%s" % creator, atime, note_id)
 
     del note['content']
@@ -642,7 +642,7 @@ def list_recent_edit(parent_id = None, offset=0, limit=None):
     if user is None:
         user = "public"
     
-    id_list   = dbutil.zrange("z:note.recent:%s" % user, -offset-1, -offset-limit)
+    id_list   = dbutil.zrange("note_recent:%s" % user, -offset-1, -offset-limit)
     note_dict = batch_query(id_list)
     files     = []
 
