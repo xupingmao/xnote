@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/05/18 00:42:34
+# @modified 2019/06/01 22:38:52
 
 '''xnote系统配置
 
@@ -92,12 +92,17 @@ WORKING_DIR  = os.path.dirname(__file__)
 WEBDIR       = os.path.join(WORKING_DIR, "static")
 PLUGINS_DIR  = os.path.join(WORKING_DIR, "plugins")
 LOG_DIR      = os.path.join(WORKING_DIR, "log")
+# 日志失效时间
+LOG_EXPIRE   = 24 * 3600 * 365
 # 用户数据的地址
 DATA_PATH   = os.path.join(WORKING_DIR, "data")
 DATA_DIR    = DATA_PATH
 SCRIPTS_DIR = os.path.join(DATA_DIR, "scripts")
 DB_DIR      = os.path.join(DATA_DIR, "db")
 CONFIG_DIR  = os.path.join(DATA_DIR, "config")
+BACKUP_DIR  = os.path.join(DATA_DIR, "backup")
+# 备份失效时间
+BACKUP_EXPIRE = 24 * 3600 * 365
 
 # 其他标记
 # 测试用的flag,开启会拥有admin权限

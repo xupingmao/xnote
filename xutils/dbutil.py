@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/05/25 17:55:53
+# @modified 2019/05/29 23:32:01
 ###########################################################
 
 def search_escape(text):
@@ -257,10 +257,10 @@ class LevelDBPy:
         return self._db.get(key)
 
     def Put(self, key, value, sync = False):
-        return self._db.put(key, value)
+        return self._db.put(key, value, sync = sync)
 
     def Delete(self, key, sync = False):
-        return self._db.delete(key)
+        return self._db.delete(key, sync = sync)
 
     def RangeIter(self, key_from = None, key_to = None, reverse = False, include_value = False):
         if include_value:

@@ -1,10 +1,11 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/22
-
 import web
+import xauth
 
 class handler:
 
+    @xauth.login_required("admin")
     def GET(self):
         headers = dict()
         for key in web.ctx.env:

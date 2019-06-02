@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/05/28 00:50:57
+# @modified 2019/06/03 01:48:27
 import math
 import time
 import web
@@ -116,8 +116,49 @@ class RemovedHandler:
             files     = files,
             page      = page,
             show_aside = True,
+            show_mdate = True,
             page_max  = math.ceil(amount / 10),
             page_url  = "/note/removed?page=")
+
+
+class BaseListHandler:
+
+    note_type = "gallery"
+    title     = "相册"
+
+    @xauth.login_required()
+    def GET(self):
+        page = xutils.get_argument("page", 1, type=int)
+        user_name = xauth.current_name()
+
+        limit  = xconfig.PAGE_SIZE
+        offset = (page-1)*limit
+
+        amount = xutils.call("note.count_by_type", user_name, self.note_type)
+        files  = xutils.call("note.list_by_type",  user_name, self.note_type, offset, limit)
+
+        return xtemplate.render(VIEW_TPL,
+            pathlist  = [PathNode(self.title, "/note/" + self.note_type)],
+            file_type = "group",
+            files     = files,
+            page      = page,
+            show_aside = True,
+            show_mdate = True,
+            page_max  = math.ceil(amount / 10),
+            page_url  = "/note/%s?page=" % self.note_type)
+
+class GalleryListHandler(BaseListHandler):
+
+    def __init__(self):
+        self.note_type = "gallery"
+        self.title = "相册"
+
+class TableListHandler(BaseListHandler):
+
+    def __init__(self):
+        self.note_type = "csv"
+        self.title = "表格"
+
 
 class RecentHandler:
     """show recent notes"""
@@ -236,6 +277,8 @@ xurls = (
     r"/note/group/select"   , GroupSelectHandler,
     r"/note/date"           , DateHandler,
     r"/note/monthly"        , DateHandler,
+    r"/note/gallery"        , GalleryListHandler,
+    r"/note/table"          , TableListHandler,
     
     r"/file/group/removed"  , RemovedHandler,
     r"/file/group/list"     , GroupListHandler,

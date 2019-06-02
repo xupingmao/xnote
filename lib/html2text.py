@@ -90,6 +90,10 @@ for k in unifiable.keys():
 
 ### End Entity Nonsense ###
 
+def debug(*args):
+    # print(*args)
+    pass
+
 def onlywhite(line):
     """Return true if the line does only consist of whitespace characters."""
     for c in line:
@@ -251,7 +255,11 @@ class HTML2Text(HTMLParser.HTMLParser):
 
     def handle(self, data):
         self.feed(data)
+        # print("handle:", self.outtextlist)
         self.feed("")
+
+        debug("handle:", self.outtextlist)
+
         return self.optwrap(self.close())
 
     def outtextf(self, s):
@@ -263,6 +271,8 @@ class HTML2Text(HTMLParser.HTMLParser):
 
         self.pbr()
         self.o('', 0, 'end')
+
+        debug("close:", self.outtextlist)
 
         self.outtext = self.outtext.join(self.outtextlist)
         if self.unicode_snob:
@@ -475,13 +485,17 @@ class HTML2Text(HTMLParser.HTMLParser):
                     self.maybe_automatic_link = attrs['href']
                 else:
                     self.astack.append(None)
+                debug("handle_tag:a.1", self.astack)
             else:
                 if self.astack:
+                    self.p_p = 0
+                    debug("handle_tag:a.2", self.astack)
                     a = self.astack.pop()
                     if self.maybe_automatic_link:
                         self.maybe_automatic_link = None
                     elif a:
                         if self.inline_links:
+                            debug("handle_tag:a.3", self.outtextlist)
                             self.o("](" + escape_md(a['href']) + ")")
                         else:
                             i = self.previousIndex(a)
@@ -574,6 +588,8 @@ class HTML2Text(HTMLParser.HTMLParser):
         self.br_toggle = '  '
 
     def o(self, data, puredata=0, force=0):
+        debug("o:", data)
+
         if self.abbr_data is not None:
             self.abbr_data += data
 
@@ -626,6 +642,9 @@ class HTML2Text(HTMLParser.HTMLParser):
                 self.space = 0
 
             if self.p_p:
+                debug("o:p_p", self.p_p)
+                debug("o:p_p", self.astack)
+
                 self.out((self.br_toggle+'\n'+bq)*self.p_p)
                 self.space = 0
                 self.br_toggle = ''
@@ -729,9 +748,11 @@ class HTML2Text(HTMLParser.HTMLParser):
             return text
 
         assert wrap, "Requires Python 2.3."
+        # print("optwrap:```", text, "```")
         result = ''
         newlines = 0
         for para in text.split("\n"):
+            # print("optwrap:", para)
             if len(para) > 0:
                 if not skipwrap(para):
                     result += "\n".join(wrap(para, self.body_width))
@@ -739,6 +760,7 @@ class HTML2Text(HTMLParser.HTMLParser):
                         result += "  \n"
                         newlines = 1
                     else:
+                        # print("optwrap:", "\\n\\n")
                         result += "\n\n"
                         newlines = 2
                 else:
@@ -910,6 +932,16 @@ def main():
 
     wrapwrite(h.handle(data))
 
+def test():
+    address = "http://www.test.com"
+    h = HTML2Text(baseurl = address)
+    html = '<a href="/test"><div>test</div></a>'
+    text = "From %s\n\n" % address + h.handle(html)
+
+    print("-"*60)
+    print(text)
 
 if __name__ == "__main__":
     main()
+    
+

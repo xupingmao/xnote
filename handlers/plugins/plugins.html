@@ -124,8 +124,9 @@
 </div>
 
 <script type="text/javascript">
-$(function () {
+function updateView() {
     var listWidth = $(".plugin-list").width();
+    console.log("listWidth=" + listWidth);
     // 一行的卡片数量
     var itemCols = 3;
     var itemWidth = (listWidth - (itemCols-1) * 10) / itemCols;
@@ -138,15 +139,30 @@ $(function () {
             } else {
                 $(element).css("margin-left", "10px");
             }
+        } else {
+            $(element).css("margin-left", "0px");
+            $(element).css("width", "100%");
         }
         $(element).show();
     });
 
+}
+
+$(function () {
+    updateView();
+
     $("select").change(function (e) {
         var category = $(this).val();
         window.location.href = "/plugins_list?category=" + category;
-    })
-})
+    });
+
+    window.onresize = function (e) {
+        console.log(e);
+        updateView();
+    }
+
+    setTimeout(updateView, 200);
+});
 </script>
 
 {% end %}

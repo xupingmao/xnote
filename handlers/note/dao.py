@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/25 22:16:32
+# @modified 2019/05/29 22:59:06
 
 """资料的DAO操作集合
 
@@ -928,6 +928,16 @@ def list_removed(creator, offset, limit):
         return value.is_deleted and value.creator == creator
     return dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
 
+def list_by_type(creator, type, offset, limit):
+    def list_func(key, value):
+        return value.type == type and value.creator == creator and value.is_deleted == 0
+    return dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
+
+def count_by_type(creator, type):
+    def count_func(key, value):
+        return value.type == type and value.creator == creator and value.is_deleted == 0
+    return dbutil.prefix_count("note_tiny:%s" % creator, count_func)
+
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
 xutils.register_func("note.visit",  visit_note)
@@ -951,6 +961,7 @@ xutils.register_func("note.list_recent_viewed", list_recent_viewed)
 xutils.register_func("note.list_by_date", list_by_date)
 xutils.register_func("note.list_by_tag", list_by_tag)
 xutils.register_func("note.list_removed", list_removed)
+xutils.register_func("note.list_by_type", list_by_type)
 
 # count functions
 xutils.register_func("note.count_public", count_public)
@@ -958,6 +969,7 @@ xutils.register_func("note.count_recent_edit", count_user_note)
 xutils.register_func("note.count_user_note", count_user_note)
 xutils.register_func("note.count_ungrouped", count_ungrouped)
 xutils.register_func("note.count_removed", count_removed)
+xutils.register_func("note.count_by_type", count_by_type)
 
 xutils.register_func("note.find_prev_note", find_prev_note)
 xutils.register_func("note.find_next_note", find_next_note)

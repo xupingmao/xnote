@@ -131,9 +131,9 @@ img {
     <div class="col-md-12 grid-card">
         {% if show_path_list %}
         <div class="grid-title">
-            <a href="/" class="link2">{{T("Home")}}</a>
-            {% for item in pathlist %}
-                / <a href="{{item.url}}" class="link2">{{ item.name }}</a> 
+            <!-- <a href="/" class="link2">{{T("Home")}}</a> -->
+            {% for i, item in enumerate(pathlist) %}
+                {% if i > 0 %} / {% end %}<a href="{{item.url}}" class="link2">{{ item.name }}</a>
             {% end %}
 
             {% if file is not None %}
@@ -174,7 +174,7 @@ img {
         {% elif file_type == "csv" %}
             {% include note/csv_editor.html %}
         {% else %}
-            {% include "note/post.html" %}
+            {% include note/post.html %}
         {% end %}
     </div>
 
@@ -186,7 +186,7 @@ img {
                 <div class="col-md-6"><a href="/note/view?id={{prev_note.id}}">[上一篇]{{prev_note.name}}</a></div>
             {% end %}
             {% if next_note %}
-                <div class="col-md-6"><a href="/note/view?id={{next_note.id}}">[下一篇]{{next_note.name}}</a></div>
+                <div class="col-md-6"><a class="float-right" href="/note/view?id={{next_note.id}}">[下一篇]{{next_note.name}}</a></div>
             {% end %}
         </div>
     {% end %}
