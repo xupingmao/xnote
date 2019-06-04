@@ -3,15 +3,13 @@
 [![Build Status](https://travis-ci.org/xupingmao/xnote.svg?branch=master)](https://travis-ci.org/xupingmao/xnote)
 [![Coverage Status](https://coveralls.io/repos/github/xupingmao/xnote/badge.svg?branch=master)](https://coveralls.io/github/xupingmao/xnote?branch=master)
 
-xnote是一款功能丰富的个人信息管理系统，提供多种维度的数据管理功能。它主要有如下特性
+xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据管理功能。它主要有如下特性
 
-- 拥有丰富的数据管理能力，支持笔记、提醒、文件管理
+- 拥有丰富的数据管理能力，支持多种笔记格式以及文件管理功能
 - 自带工具箱，默认提供了大量常用的工具
 - 提供扩展能力，用户可以编写各种插件满足自己的需求
 - 跨平台，支持Windows、Mac、Linux三大平台，可以在云服务上部署，也可以在本地运行
-
-
-PS：目前本项目主要目标人群是个人，提供有限的多用户支持
+- 提供有限的多用户支持
 
 ![主页](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v2.3_home.png)
 

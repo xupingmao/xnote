@@ -36,19 +36,19 @@
         }
     }
 
-    function replace_keyword(html, regexp, target) {
+    function replaceKeyword(html, regexp, target) {
         target = target || regexp;
         return html.replace(new RegExp(regexp, 'g'), '<code class="keyword">' + target + "</code>");
     }
 
-    function highlight_keywords(code) {
+    function highlightKeywords(code) {
         // 先简单处理一下
         var html = escape(code);
         /*
         var keywords = ["import ", "from ", "def ", "if ", "for ", "try:", "except:", "except ", 
             " in ", "not ", "return "];
         for (var i = 0; i < keywords.length; i++) {
-            html = replace_keyword(html, keywords[i]);
+            html = replaceKeyword(html, keywords[i]);
         }
         */
         return html;
@@ -68,7 +68,7 @@
             console.log(code);
             return highlight_csv(code);
         } else {
-            return highlight_keywords(code);
+            return highlightKeywords(code);
         }
     }
 

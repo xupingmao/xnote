@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/05/28 00:49:26
+@modified 2019/06/04 23:30:57
 -->
 
 {% init files = [] %}
@@ -42,15 +42,22 @@
                 <div class="note-title">
                     {% if item.type == "group" %}
                         <img src="/static/image/folder.gif"/>
-                        <a class="group-link" href="/note/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>({{item.size}})
+                        <a class="group-link" href="/note/view?id={{item.id}}" id="file-{{item.id}}">
+                            {{item.name}}
+                        </a>({{item.size}})
                     {% elif hasattr(item, "url") and item.url != None %}
-                        <a class="note-link dialog-link" href="{{item.url}}">{{item.name}}</a>
+                        <a class="note-link dialog-link" href="{{item.url}}">
+                            {%if item.priority>0%}[置顶]{%end%} {{item.name}}
+                        </a>
                     {% else %}
                         {% if item.type == "csv" %}
                             <img src="/static/image/icon_csv.png"/>
                         {% end %}
                         
-                        <a class="note-link dialog-link" href="/note/view?id={{item.id}}" id="file-{{item.id}}">{{item.name}}</a>
+                        <a class="note-link dialog-link" href="/note/view?id={{item.id}}" id="file-{{item.id}}">
+                            {%if item.priority>0%}[置顶]{%end%} {{item.name}}
+                        </a>
+
                         {% if item.creator != None %} 
                         <!-- ({{item.creator}}) -->
                         {% end %}

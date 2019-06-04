@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/29 22:59:06
+# @modified 2019/06/04 23:53:24
 
 """资料的DAO操作集合
 
@@ -308,6 +308,9 @@ def kv_update_note(where, **kw):
     is_public = kw.get("is_public")
     tags      = kw.get("tags")
 
+    old_parent_id = None
+    new_parent_id = None
+
     note = get_by_id(note_id)
     if note:
         if creator and note.creator != creator:
@@ -323,6 +326,8 @@ def kv_update_note(where, **kw):
         if atime:
             note.atime = atime
         if parent_id != None:
+            old_parent_id  = note.parent_id
+            new_parent_id  = parent_id
             note.parent_id = parent_id
         if is_public != None:
             note.is_public = is_public
@@ -339,8 +344,13 @@ def kv_update_note(where, **kw):
         if len(kw) == 1 and kw.get('name') != None:
             note.version -= 1
 
-        # TODO 处理移动分类时的统计
         kv_put_note(note_id, note)
+
+        # 处理移动分类时的统计
+        if new_parent_id != None and new_parent_id != old_parent_id:
+            update_children_count(old_parent_id)
+            update_children_count(new_parent_id)
+
         return 1
     return 0
 
@@ -548,6 +558,7 @@ def kv_list_note(creator, parent_id, offset, limit):
 
     notes = dbutil.prefix_list("note_tiny:", list_note_func)
     notes.sort(key = lambda x: x.name)
+    notes.sort(key = lambda x: x.priority, reverse = True)
     return notes[offset:offset+limit]
 
 def list_note(*args):
@@ -875,7 +886,9 @@ def kv_search_name(words, creator=None):
             return False
         return (value.creator == creator or value.is_public) and textutil.contains_all(value.name.lower(), words)
     result = dbutil.prefix_list("note_tiny", search_func, 0, -1)
-    return [file_wrapper(item) for item in result]
+    notes  = [file_wrapper(item) for item in result]
+    notes.sort(key = lambda x: x.mtime, reverse = True)
+    return notes
 
 def search_name(words, creator=None):
     if xconfig.DB_ENGINE == "sqlite":

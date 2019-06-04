@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/05/25 12:32:47
+@modified 2019/06/05 00:44:17
 */
 
 * {
@@ -17,6 +17,8 @@ body {
     -webkit-text-size-adjust: 100%; 
     margin: 0; 
     padding: 0;
+    background-repeat:no-repeat ;
+    background-size:100% 100%; 
     background-attachment: fixed;
 }
 
@@ -1215,6 +1217,10 @@ li.menu-item:hover {
 /** 颜色属性 **/
 .red {
     color:red;
+}
+
+.xnote-todo {
+    background-color: orange;
 }
 
 .xnote-done {

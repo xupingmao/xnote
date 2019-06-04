@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/05/25 11:53:51
+# @modified 2019/06/05 00:31:25
 
 import sys
 import os
@@ -164,7 +164,7 @@ class TestMain(unittest.TestCase):
     def test_note_timeline(self):
         self.check_200("/note/timeline")
 
-    def test_file_editor_md(self):
+    def test_note_editor_md(self):
         json_request("/note/remove?name=xnote-md-test")
         file = json_request("/note/add", method="POST",
             data=dict(name="xnote-md-test", type="md", content="hello markdown"))
@@ -175,7 +175,7 @@ class TestMain(unittest.TestCase):
         self.check_200("/note/edit?id=%s" % id)
         json_request("/note/remove?id=%s" % id)
 
-    def test_file_editor_html(self):
+    def test_note_editor_html(self):
         json_request("/note/remove?name=xnote-html-test")
         file = json_request("/note/add", method="POST",
             data=dict(name="xnote-html-test", type="html"))
@@ -191,11 +191,15 @@ class TestMain(unittest.TestCase):
         self.check_200("/note/edit?id=%s"%id)
         json_request("/note/remove?id=%s" % id)
 
-    def test_file_group(self):
+    def test_note_group(self):
         self.check_200("/note/group")
         self.check_200("/note/ungrouped")
+        self.check_200("/note/public")
+        self.check_200("/note/removed")
         self.check_200("/note/recent_edit")
         self.check_200("/note/recent_created")
+        self.check_200("/note/group/select")
+        self.check_200("/note/date?year=2019&month=1")
 
     def test_note_share(self):
         json_request("/note/remove?name=xnote-share-test")

@@ -184,7 +184,10 @@ img {
         <div class="card">
             {% if prev_note %}
                 <div class="col-md-6"><a href="/note/view?id={{prev_note.id}}">[上一篇]{{prev_note.name}}</a></div>
+            {% else %}
+                <div class="col-md-6">&nbsp;</div>
             {% end %}
+
             {% if next_note %}
                 <div class="col-md-6"><a class="float-right" href="/note/view?id={{next_note.id}}">[下一篇]{{next_note.name}}</a></div>
             {% end %}

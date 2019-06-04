@@ -38,4 +38,4 @@ SELECT id, ctime, mtime, user, status, content FROM message_old;
 
 # sqlite到leveldb迁移
 
-依次找到【系统】、【管理功能】、【数据迁移】。再执行相关的迁移操作即可，注意如果数据量比较大可能迁移时间比较长。
+在【系统】页面找到【数据迁移】功能。再执行相关的迁移操作即可，注意如果数据量比较大可能迁移时间比较长。

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/14
-# @modified 2019/01/26 16:18:29
+# @modified 2019/06/04 23:25:03
 import os
 import six
 import xconfig
@@ -19,7 +19,7 @@ def search_scripts(name):
             continue
         if name in fname:
             result         = xutils.SearchResult()
-            result.name    = xutils.u("脚本 - ") + fname
+            result.name    = xutils.u("[脚本] ") + fname
             result.raw     = xutils.u("搜索到可执行脚本 - ") + fname
             result.url     = xutils.u("/code/edit?path=%s") % fpath
             result.command = xutils.u("/system/script_admin/execute?name=%s") % fname

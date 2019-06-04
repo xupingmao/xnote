@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2019/03/02 13:44:45
+@modified 2019/06/04 23:23:27
 -->
 
 {% block body %}
@@ -29,6 +29,7 @@
     {% for i, file in enumerate(files) %}
     <div class="note"> 
         <div class="note-body">
+            {# 右侧操作选项 #}
             <div class="note-visited-cnt">
                 {# 快捷命令 #}
                 {% if file.command != None %}
@@ -74,32 +75,32 @@
 
             {# 知识库 #}
             {% if file.category == "note" %}
-            <div>
-                {% if file.creator != None %}
-                    <span class="tag gray-tag">{{file.creator}}</span>
-                {% end %}
+                <div>
+                    {% if file.creator != None %}
+                        <span class="tag gray-tag">{{file.creator}}</span>
+                    {% end %}
 
-                {% if hasattr(file, "priority") and file.priority is not None and file.priority > 0 %}
-                    <span class="tag red-bg">置顶</span>
-                {% end %}
+                    {% if hasattr(file, "priority") and file.priority is not None and file.priority > 0 %}
+                        <span class="tag red-bg">置顶</span>
+                    {% end %}
 
-                {% if file.is_public %}
-                    <span class="tag">公开</span>
-                {% end %}
+                    {% if file.is_public %}
+                        <span class="tag">公开</span>
+                    {% end %}
 
-                {% if file.parent_name != None %}
-                    <span class="tag gray-tag">
-                        <a class="link" href="/note/view?id={{file.parent_id}}">{{file.parent_name}}</a>
-                    </span>
-                {% end %}
+                    {% if file.parent_name != None %}
+                        <span class="tag gray-tag">
+                            <a class="link" href="/note/view?id={{file.parent_id}}">{{file.parent_name}}</a>
+                        </span>
+                    {% end %}
 
-                {% if file.mtime != None %}
-                    <span class="float-right note-last-visit-time">更新:{{file.mtime}}</span>
-                {% end %}
-            </div>
-            <div class="note-related">
-                <input type="text" data-role="tagsinput" value="{{file.related}}"/>
-            </div>
+                    {% if file.mtime != None %}
+                        <span class="float-right note-last-visit-time">更新:{{file.mtime}}</span>
+                    {% end %}
+                </div>
+                <div class="note-related">
+                    <input type="text" data-role="tagsinput" value="{{file.related}}"/>
+                </div>
             {% end %}
         </div>
     </div>
