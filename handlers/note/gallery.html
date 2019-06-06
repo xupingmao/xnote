@@ -1,0 +1,116 @@
+{% include note/view_header.html %}
+{% include fs/mod_fs_upload.html %}
+{% import xutils.textutil as textutil %}
+{% init parent_path = None %}
+
+
+<style type="text/css">
+    .gallery-item {
+        float: left;
+        width: 150px;
+        height: 150px;
+        text-align: center;
+        overflow: hidden;
+        border:1px solid #eee;
+    }
+
+    @media screen and (max-width: 400px) {
+        /** mobile **/
+        .gallery-item {
+            width: 50%;
+        }
+    }
+    
+    .icon-box {
+        float: left;
+        width:100%;
+        height:120px;
+        line-height:120px;
+    }
+
+    .gallery-item img {
+        max-width:100%;
+        max-height:100%;
+        display:inline-block;
+        vertical-align:middle;
+    }
+
+    .gallery-item a {
+        display: block;
+        float: left;
+        width: 100%;
+    }
+
+    .list-item {
+        float: left;
+        width: 100%;
+        padding: 3px;
+    }
+    .list-item:hover {
+        background-color: #eee;
+        cursor: pointer;
+    }
+
+    .menu {
+        display: block;
+    }
+
+    .fs-icon {
+        width: 80px;
+        height: 80px;
+    }
+</style>
+
+<div class="file-list">
+    {% for item in filelist %}
+        {# 隐藏文件 #}
+        {% if item.name == "" %}
+            {% continue %}
+        {% end %}
+        
+        {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." or item.name.endswith((".pyc", ".class"))) %}
+            {% continue %}
+        {% end %}
+
+        {% if not item.name.startswith("._") %}
+            <div class="gallery-item context-menu-one">
+                <div class="icon-box">
+                    {% if item.type == "dir" %}
+                        <img class="fs-icon" src="/static/image/folder2.png">
+                    {% elif xutils.is_img_file(item.path) %}
+                        <img class="x-photo" src="/fs/{{item.path}}">
+                    {% elif xutils.is_text_file(item.path) %}
+                        <img class="fs-icon" src="/static/image/icon_txt.png">
+                    {% else %}
+                        <img class="fs-icon" src="/static/image/file2.png">
+                    {% end %}
+                </div>
+                {# TODO 要使用web路径 #}
+                <a href="/fs/{{item.path}}?mode=grid">{{textutil.get_short_text(item.name, 10)}}</a>
+            </div>
+        {% end %}
+    {% end %}
+</div>
+
+<script type="text/javascript">
+$(function () {
+    function updateSize() { 
+        console.log("updateSize");
+        var listWidth = $(".file-list").width();
+        var photoWidth = 200;
+
+        if (listWidth <= 400) {
+            photoWidth = 100;
+        }
+
+        var cols = parseInt(listWidth / photoWidth);
+        photoWidth = parseInt(listWidth / cols);
+
+        $(".gallery-item").css("width", photoWidth);
+        // 采用读写分离的方式，阅读和编辑使用两个不同的视图
+    }
+
+    updateSize();
+    $(window).on("resize", updateSize);
+})
+</script>

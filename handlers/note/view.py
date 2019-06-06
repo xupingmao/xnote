@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/05/22 00:40:14
+# @modified 2019/06/06 02:11:07
 import profile
 import math
 import re
@@ -12,10 +12,12 @@ import xconfig
 import xtables
 import xtemplate
 import xmanager
+import os
 from web import HTTPError
 from xconfig import Storage
 from xutils import History
 from xutils import dbutil
+from xutils import fsutil
 config = xconfig
 
 PAGE_SIZE = xconfig.PAGE_SIZE
@@ -69,6 +71,7 @@ class ViewHandler:
         template_name  = "note/view.html"
         next_note      = None
         prev_note      = None
+        filelist       = None
         xconfig.note_history.put(dict(user=user_name, 
             link = "/note/view?id=%s" % id, 
             name = file.name))
@@ -76,13 +79,12 @@ class ViewHandler:
 
         title  = file.name
         if file.type == "group":
-            files  = xutils.call("note.list_note", user_name, file.id, (page-1)*pagesize, pagesize)
+            files  = xutils.call("note.list_by_parent", user_name, file.id, (page-1)*pagesize, pagesize)
             amount = xutils.call("note.count", user_name, file.id)
             content         = file.content
             show_search_div = True
             show_add_file   = True
             show_mdate      = True
-            # recent_created  = xutils.call("note.list_recent_created", file.id, 10)
         elif file.type == "md" or file.type == "text":
             content = file.content
             show_recommend = True
@@ -101,6 +103,15 @@ class ViewHandler:
             show_recommend = True
             show_pagination = False
 
+        fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(id))
+
+        # 处理相册
+        if file.type == "gallery":
+            if os.path.exists(fpath):
+                filelist = fsutil.list_files(fpath)
+            else:
+                filelist = []
+
         if show_recommend and user_name is not None:
             show_groups = False
             # 推荐系统
@@ -118,10 +129,13 @@ class ViewHandler:
         show_aside = True
         if op == "edit":
             show_aside = False
+
         return xtemplate.render(template_name,
             show_aside    = show_aside,
             html_title    = title,
             file          = file, 
+            path          = fpath,
+            filelist      = filelist,
             note_id       = id,
             op            = op,
             show_mdate    = show_mdate,

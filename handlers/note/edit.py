@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/05/19 23:39:48
+# @modified 2019/06/06 22:57:46
 
 """笔记编辑相关处理"""
 import os
@@ -102,11 +102,12 @@ class AddHandler:
         if key == "":
             key = time.strftime("%Y.%m.%d")
 
+        creator        = xauth.current_name()
         note           = Storage(name = name)
         note.atime     = xutils.format_datetime()
         note.mtime     = xutils.format_datetime()
         note.ctime     = xutils.format_datetime()
-        note.creator   = xauth.get_current_name()
+        note.creator   = creator
         note.parent_id = parent_id
         note.type      = type
         note.content   = content
@@ -135,6 +136,14 @@ class AddHandler:
                 # 更新分组下面页面的数量 TODO
                 # update_children_count(parent_id, db = db)
                 xmanager.fire("note.add", dict(name=name, type=type))
+
+                # 创建对应的文件夹
+                if type != "group":
+                    dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(parent_id), str(inserted_id))
+                else:
+                    dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(inserted_id))
+                xutils.makedirs(dirname)
+
                 if format == "json":
                     return dict(code="success", id=inserted_id)
                 raise web.seeother("/note/view?id={}".format(inserted_id))
@@ -180,10 +189,6 @@ class RemoveAjaxHandler:
             file = xutils.call("note.get_by_name", name)
         if file is None:
             return dict(code="fail", message="文件不存在")
-
-        t_file    = xtables.get_file_table()
-        t_content = xtables.get_note_content_table()
-        id = file.id
 
         creator = xauth.current_name()
         if not xauth.is_admin() and file.creator != creator:

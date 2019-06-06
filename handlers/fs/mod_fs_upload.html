@@ -1,6 +1,52 @@
 <link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
 <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 
+<style type="text/css">
+    /* 上传文件样式 */
+    .progress {
+        background-color: #f90;
+        color: #fff;
+        height: 20px;
+        display: none;
+        margin-left: 5px;
+        border-width: 3px;
+    }
+    .progress span {
+        display: block;
+        background-color: #f90;
+        color: #fff;
+        height: 100%;
+    }
+    
+    .finished-tag {
+        color: #fff;
+        background-color: green;
+        border-width: 3px;
+        border-radius: 3px;
+        margin-left: 5px;
+    }
+
+    #dropArea {
+        float: left;
+        width: 100%;
+        height: 80px;
+        line-height: 80px;
+        border: 3px dashed silver;
+        text-align: center;
+        font-size: 36px;
+        color: #d3d3d3;
+        cursor: pointer;
+    }
+
+    @media screen and (max-width: 400px) {
+        /** mobile **/
+        #dropArea {
+            font-size: 24px;
+        }
+    }
+</style>
+
+
 <div id="uploadFileArea">
     <!-- 文件上传区域 -->
     <!--用来存放item-->

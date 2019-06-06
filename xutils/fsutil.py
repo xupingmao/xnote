@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/04/20 02:48:09
+# @modified 2019/06/06 00:56:46
 import codecs
 import os
 import platform
@@ -86,6 +86,13 @@ def readbytes(path):
     with open(path, "rb") as fp:
         bytes = fp.read()
     return bytes
+
+def mvfile(from_path, to_path):
+    if not os.path.exists(from_path):
+        return
+    to_dirname = os.path.dirname(to_path)
+    makedirs(to_dirname)
+    os.rename(from_path, to_path)
 
 def rmfile(path, hard = False):
     """删除文件，默认软删除，移动到trash目录中，如果已经在trash目录或者硬删除，从磁盘中抹除

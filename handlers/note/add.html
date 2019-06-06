@@ -5,6 +5,11 @@
 label {
     float: left;
     width: 80px;
+    display: block;
+}
+.label-rest {
+    float: left;
+    width: calc(100% - 80px);
 }
 </style>
 {% end %}
@@ -21,10 +26,20 @@ label {
         </div>
         <div class="row">
             <label>{{T("类型")}}</label>
-            <input type="radio" name="type" value="md" {% if type=="md" %} checked {% end %}>Markdown
-            <input type="radio" name="type" value="html" {% if type=="html" %} checked {% end %}>富文本
-            <input type="radio" name="type" value="csv" {% if type=="csv" %} checked {% end %}>表格
-            <!-- <input type="radio" name="type" value="gallery" {% if type=="gallery" %} checked {% end %}>相册 -->
+            <div class="label-rest">
+                <div class="float-left">
+                    <input type="radio" name="type" value="md" {% if type=="md" %} checked {% end %}>Markdown
+                </div>
+                <div class="float-left">
+                    <input type="radio" name="type" value="html" {% if type=="html" %} checked {% end %}>富文本
+                </div>
+                <div class="float-left">
+                    <input type="radio" name="type" value="csv" {% if type=="csv" %} checked {% end %}>表格
+                </div>
+                <div class="float-left">
+                    <input type="radio" name="type" value="gallery" {% if type=="gallery" %} checked {% end %}>相册
+                </div>
+            </div>
         </div>
         <div class="row">
             <label>{{T("笔记本")}}</label>

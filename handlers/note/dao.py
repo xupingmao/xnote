@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/06/04 23:53:24
+# @modified 2019/06/06 02:10:54
 
 """资料的DAO操作集合
 
@@ -12,12 +12,13 @@ import math
 import re
 import six
 import web.db as db
+import os
 import xconfig
 import xtables
 import xutils
 import xauth
 from xutils import readfile, savetofile, sqlite3, Storage
-from xutils import dateutil, cacheutil, Timer, dbutil, textutil
+from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
 
 MAX_VISITED_CNT = 200
 readFile        = readfile
@@ -350,6 +351,9 @@ def kv_update_note(where, **kw):
         if new_parent_id != None and new_parent_id != old_parent_id:
             update_children_count(old_parent_id)
             update_children_count(new_parent_id)
+            old_dirname = os.path.join(xconfig.UPLOAD_DIR, note.creator, str(old_parent_id), str(note.id))
+            new_dirname = os.path.join(xconfig.UPLOAD_DIR, note.creator, str(new_parent_id), str(note.id))
+            fsutil.mvfile(old_dirname, new_dirname)
 
         return 1
     return 0
@@ -561,7 +565,7 @@ def kv_list_note(creator, parent_id, offset, limit):
     notes.sort(key = lambda x: x.priority, reverse = True)
     return notes[offset:offset+limit]
 
-def list_note(*args):
+def list_by_parent(*args):
     if xconfig.DB_ENGINE == "sqlite":
         return rdb_list_note(*args)
     else:
@@ -965,7 +969,8 @@ xutils.register_func("note.search_content", search_content)
 # list functions
 xutils.register_func("note.list_path", list_path)
 xutils.register_func("note.list_group", list_group)
-xutils.register_func("note.list_note", list_note)
+xutils.register_func("note.list_note",  list_by_parent)
+xutils.register_func("note.list_by_parent", list_by_parent)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_public", list_public)
 xutils.register_func("note.list_recent_created", list_recent_created)

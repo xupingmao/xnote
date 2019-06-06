@@ -173,6 +173,8 @@ img {
             {% include "note/note_list.html" %}
         {% elif file_type == "csv" %}
             {% include note/csv_editor.html %}
+        {% elif file_type == "gallery" %}
+            {% include note/gallery.html %}
         {% else %}
             {% include note/post.html %}
         {% end %}
