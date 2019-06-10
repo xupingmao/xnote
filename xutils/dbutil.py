@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/05/29 23:32:01
+# @modified 2019/06/06 23:54:04
 ###########################################################
 
 def search_escape(text):
@@ -311,6 +311,7 @@ class Table:
         pass
 
 def timeseq():
+    # TODO 加锁防止并发生成一样的值
     return "%020d" % int(time.time()*1000)
 
 def new_id(prefix):

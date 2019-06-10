@@ -139,17 +139,27 @@ img {
             {% if file is not None %}
                 {% if file.type == "group" and _user_name == file.creator %}
                     {# 笔记列表 #}
-                    {% if file.size == 0 %}
-                        <a class="float-right red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
-                    {% end %}
                     <div class="float-right">
-                        {% if file.priority > 0 %}
-                            <a class="link" href="/note/unstick?id={{file.id}}">取消置顶</a>
-                        {% else %}
-                            <a class="link" href="/note/stick?id={{file.id}}">置顶</a>
-                        {% end %}
-                        <a class="link" href="javascript:rename({{file.id}}, '{{file.name}}')">重命名</a>
                         <a class="link" href="/note/add?parent_id={{file.id}}">新增</a>
+
+                        <div class="dropdown">
+                          <span class="link">更多</span>
+                          <div class="dropdown-content">                            
+                            {% if file.priority > 0 %}
+                                <a class="dropdown-option" href="/note/unstick?id={{file.id}}">取消置顶</a>
+                            {% else %}
+                                <a class="dropdown-option" href="/note/stick?id={{file.id}}">置顶</a>
+                            {% end %}
+
+                            <a class="dropdown-option" href="javascript:rename('{{file.id}}', '{{file.name}}')">重命名</a>
+                            <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=mtime_desc&page={{page}}">按时间排序</a>
+                            <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name&page={{page}}">按名称排序</a>
+                            
+                            {% if file.size == 0 %}
+                                <a class="dropdown-option" style="color:red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
+                            {% end %}
+                          </div>
+                        </div>
                     </div>
                 {% else %}
                     {# 其他普通笔记 #}

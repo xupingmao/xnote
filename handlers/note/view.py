@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/06/06 02:11:07
+# @modified 2019/06/10 19:41:13
 import profile
 import math
 import re
@@ -38,6 +38,7 @@ class ViewHandler:
         page          = xutils.get_argument("page", 1, type=int)
         pagesize      = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         show_menu     = xutils.get_argument("show_menu", "true") != "false"
+        orderby       = xutils.get_argument("orderby", "mtiem_desc")
         user_name     = xauth.get_current_name()
         show_add_file = False
         title         = None
@@ -79,7 +80,7 @@ class ViewHandler:
 
         title  = file.name
         if file.type == "group":
-            files  = xutils.call("note.list_by_parent", user_name, file.id, (page-1)*pagesize, pagesize)
+            files  = xutils.call("note.list_by_parent", user_name, file.id, (page-1)*pagesize, pagesize, orderby)
             amount = xutils.call("note.count", user_name, file.id)
             content         = file.content
             show_search_div = True
@@ -108,7 +109,7 @@ class ViewHandler:
         # 处理相册
         if file.type == "gallery":
             if os.path.exists(fpath):
-                filelist = fsutil.list_files(fpath)
+                filelist = fsutil.list_files(fpath, webpath = True)
             else:
                 filelist = []
 

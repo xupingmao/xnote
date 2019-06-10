@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/06/03 01:48:27
+# @modified 2019/06/07 01:20:30
 import math
 import time
 import web
@@ -16,12 +16,6 @@ from xutils.dateutil import Timer
 from xtemplate import T
 
 VIEW_TPL = "note/view.html"
-
-def update_children_count(parent_id, db=None):
-    if parent_id is None or parent_id == "":
-        return
-    group_count = db.count(where="parent_id=$parent_id AND is_deleted=0", vars=dict(parent_id=parent_id))
-    db.update(size=group_count, where=dict(id=parent_id))
 
 class PathNode:
 
@@ -63,8 +57,6 @@ class MoveHandler:
             return dict(code="fail", message="file not exists")
 
         xutils.call("note.update", dict(id=id), parent_id = parent_id)
-        # update_children_count(file.parent_id, db=db)
-        # update_children_count(parent_id, db=db)
         return dict(code="success")
 
     def POST(self):
@@ -267,6 +259,7 @@ class DateHandler:
 xurls = (
     r"/note/group"          , GroupListHandler,
     r"/note/group_list"     , GroupListHandler,
+    r"/note/books"          , GroupListHandler,
     r"/note/ungrouped"      , Ungrouped,
     r"/note/public"         , PublicGroupHandler,
     r"/note/removed"        , RemovedHandler,

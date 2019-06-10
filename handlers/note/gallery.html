@@ -20,7 +20,7 @@
             width: 50%;
         }
     }
-    
+
     .icon-box {
         float: left;
         width:100%;
@@ -78,7 +78,7 @@
                     {% if item.type == "dir" %}
                         <img class="fs-icon" src="/static/image/folder2.png">
                     {% elif xutils.is_img_file(item.path) %}
-                        <img class="x-photo" src="/fs/{{item.path}}">
+                        <img class="x-photo" src="/data/files/{{item.path}}">
                     {% elif xutils.is_text_file(item.path) %}
                         <img class="fs-icon" src="/static/image/icon_txt.png">
                     {% else %}
@@ -86,7 +86,7 @@
                     {% end %}
                 </div>
                 {# TODO 要使用web路径 #}
-                <a href="/fs/{{item.path}}?mode=grid">{{textutil.get_short_text(item.name, 10)}}</a>
+                <a href="/data/files/{{item.path}}?mode=grid">{{textutil.get_short_text(item.name, 10)}}</a>
             </div>
         {% end %}
     {% end %}

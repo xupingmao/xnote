@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/06/06 00:56:46
+# @modified 2019/06/10 19:29:27
 import codecs
 import os
 import platform
@@ -291,8 +291,11 @@ class FileItem(Storage):
             return -1
         return 1
 
-def list_files(dirname):
+def list_files(dirname, webpath = False):
     filelist = [FileItem(os.path.join(dirname, child)) for child in os.listdir(dirname)]
+    if webpath:
+        for item in filelist:
+            item.path = get_relative_path(item.path, xconfig.UPLOAD_DIR)
     filelist.sort()
     return filelist
 

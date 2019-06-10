@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/06/06 02:10:54
+# @modified 2019/06/10 19:42:16
 
 """资料的DAO操作集合
 
@@ -550,7 +550,7 @@ def rdb_list_note(creator, parent_id, offset, limit):
     return files
 
 @xutils.timeit(name = "NoteDao.ListNote:leveldb", logfile = True, logargs=True)
-def kv_list_note(creator, parent_id, offset, limit):
+def kv_list_by_parent(creator, parent_id, offset, limit, orderby="mtime_desc"):
     parent_id = str(parent_id)
     # TODO 添加索引优化
     def list_note_func(key, value):
@@ -561,7 +561,11 @@ def kv_list_note(creator, parent_id, offset, limit):
         return (value.is_public or value.creator == creator) and str(value.parent_id) == parent_id
 
     notes = dbutil.prefix_list("note_tiny:", list_note_func)
-    notes.sort(key = lambda x: x.name)
+    if orderby == "name":
+        notes.sort(key = lambda x: x.name)
+    else:
+        # mtime_desc
+        notes.sort(key = lambda x: x.mtime, reverse = True)
     notes.sort(key = lambda x: x.priority, reverse = True)
     return notes[offset:offset+limit]
 
@@ -569,7 +573,7 @@ def list_by_parent(*args):
     if xconfig.DB_ENGINE == "sqlite":
         return rdb_list_note(*args)
     else:
-        return kv_list_note(*args)
+        return kv_list_by_parent(*args)
 
 @xutils.timeit(name = "NoteDao.ListRecentCreated", logfile = True)
 def list_recent_created(parent_id = None, offset = 0, limit = 10):

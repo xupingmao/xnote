@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/06/05 00:44:17
+@modified 2019/06/10 20:18:40
 */
 
 * {
@@ -227,7 +227,7 @@ a:hover {
     border: 1px solid transparent;
     color: #fff;
     text-decoration: none;
-    margin-top: 5px;
+    margin-top: 0px;
     padding: 1px 7px 2px;
     font-size: 12px;
     line-height: 18px;
@@ -566,6 +566,7 @@ li.menu-item:hover {
     width: 30px;
     margin-left: -30px;
     margin-top: 0px;
+    border-radius: 0px;
 }
 
 .search-box {
@@ -1050,6 +1051,25 @@ li.menu-item:hover {
     background-color: #eee;
 }*/
 
+.book-item {
+    width: 100%;
+    padding: 5px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    float: left;
+    line-height: 25px;
+    border-bottom: 1px solid #ccc;
+}
+
+.book-item:hover {
+    background-color: #efefef;
+}
+
+.book-size {
+    float: right;
+    color: black;
+}
+
 .group-div {
     width: 220px;
     padding: 5px;
@@ -1260,6 +1280,40 @@ li.menu-item:hover {
 
 .x-photo {
     cursor: pointer;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    left: -80px;
+    background-color: #f9f9f9;
+    min-width: 120px;
+    border: 1px solid #ccc;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    cursor: pointer;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-option {
+    padding: 5px;
+    margin: 0px;
+    color: black;
+    font-weight: bold;
+    display: block;
+}
+
+.dropdown-option:hover {
+    background-color: blue;
+    color: white;
 }
 
 /** 移动端样式放在最后 **/
