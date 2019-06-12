@@ -1,5 +1,11 @@
 {% init file_type = "group_list" %}
 {% init ungrouped_count = 0 %}
+{% set fixed_books = [
+    ("未分类", "/note/ungrouped"),
+    ("回收站", "/note/removed"),
+    ("表格", "/note/table"),
+    ("相册", "/note/gallery"),
+]%}
 
 <div class="grid-row card">
     <h3>{{T("NoteBook")}}
@@ -9,39 +15,21 @@
             <a class="btn" href="/note/add">+笔记</a>
         </div>
     </h3>
-    
-    <a href="/note/ungrouped">
-        <div class="book-item">
-            <img src="/static/image/folder.gif"/>
-            未分类
-        </div>
-    </a>
-    
-    <a href="/note/removed">
-        <div class="book-item">
-            <img src="/static/image/folder.gif"/>
-            回收站
-        </div>
-    </a>
 
-    <a href="/note/table">
-        <div class="book-item">
-            <img src="/static/image/folder.gif"/>
-            表格
-        </div>
-    </a>
-
-    <a href="/note/gallery">
-        <div class="book-item">
-            <img src="/static/image/folder.gif"/>
-            相册
-        </div>
-    </a>
+    {% for name, url in fixed_books %}
+        <a href="{{url}}">
+            <div class="book-item">
+                <img src="/static/image/folder.gif"/>
+                {{name}}
+            </div>
+        </a>
+    {% end %}
 
     {% for item in files %}
         <a href="/note/view?id={{item.id}}">
         <div class="book-item">
             <img src="/static/image/folder.gif"/>
+            {% if item.priority > 0 %}[置顶]{% end %}
             {{item.name}}
             <span class="book-size">[{{item.size}}]</span>
         </div>

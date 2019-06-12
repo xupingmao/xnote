@@ -143,7 +143,7 @@ img {
                         <a class="link" href="/note/add?parent_id={{file.id}}">新增</a>
 
                         <div class="dropdown">
-                          <span class="link">更多</span>
+                          <span class="dropdown-btn link">更多</span>
                           <div class="dropdown-content">                            
                             {% if file.priority > 0 %}
                                 <a class="dropdown-option" href="/note/unstick?id={{file.id}}">取消置顶</a>
@@ -246,6 +246,23 @@ function remove(id, name, parentId) {
         })
     }
 }
+
+$(function () {
+
+    $(".dropdown").click(function (e) {
+        var target = e.target;
+        $(target).next(".dropdown-content").toggle();
+    });
+
+    $("body").on("click", function (e) {
+        var target = e.target;
+        if ($(target).hasClass("dropdown") || $(target).hasClass("dropdown-btn")) {
+            return;
+        }
+        $(".dropdown-content").hide();
+    });
+
+})
 
 </script>
 

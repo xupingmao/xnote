@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/05/18 10:38:29
+# @modified 2019/06/12 23:13:21
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -289,9 +289,9 @@ def mark_text(content):
                 else:
                     name = href[href.rfind("/")+1:]
                     tokens[index] = '<a href="%s">%s</a>' % (href, name)
-            elif item.count("#") >=2:
-                tokens[index] = re.sub(r"#([^#]+)#", 
-                    "<a class=\"link\" href=\"/message?category=message&key=\\g<1>\">#\\g<1>#</a>", item)
+            elif item.count("#") >=1:
+                tokens[index] = re.sub(r"#([^#]+)(#?)", 
+                    "<a class=\"link\" href=\"/message?category=message&key=\\g<1>\">#\\g<1>\\g<2></a>", item)
             # elif pat.match(item):
             #     ret = pat.match(item)
             #     name, link = ret.groups()
@@ -668,4 +668,5 @@ def register_func(name, func):
 def call(_func_name, *args, **kw):
     return _funcs[_func_name](*args, **kw)
 
-
+def lookup_func(name):
+    return _funcs[name]

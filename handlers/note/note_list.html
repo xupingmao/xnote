@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/06/04 23:30:57
+@modified 2019/06/13 01:07:31
 -->
 
 {% init files = [] %}
@@ -12,87 +12,30 @@
 
 {% include "note/view_header.html" %}
 
-<div class="col-md-12">
-    <table id="fileTable" class="col-md-12 table">
+<div class="grid-row">
+    {% for item in files %}
+        <a class="dialog-link" href="/note/view?id={{item.id}}">
+        <div class="book-item">
+            {% if item.type == "group" %}
+                <img src="/static/image/folder.gif"/>
+            {% elif item.type == "csv" %}
+                <img src="/static/image/icon_csv.png"/>
+            {% end %}
 
-    {% if pseudo_groups %}
-        <tr class="">
-            <td class="note-td">
-                <img src="/static/image/folder.gif">
-                <a class="group-link" href="/group/ungrouped">未分类</a>
-            </td>
-        </tr>
-        <tr class="">
-            <td class="note-td">
-                <img src="/static/image/folder.gif">
-                <a class="group-link" href="/group/public">公开</a>
-            </td>
-        </tr>
-        <tr class="">
-            <td class="note-td">
-                <img src="/static/image/folder.gif">
-                <a class="group-link" href="/note/recent_edit">最近更新</a>
-            </td>
-        </tr>
+            {%if item.priority>0%}[置顶]{%end%}
+            {{item.name}}
+            
+            <span class="book-size">
+                {% if show_cdate %}
+                    {{format_date(item.ctime).replace('-', '/')}}
+                {% end %}
+
+                {% if show_mdate %}
+                    {{format_date(item.mtime).replace('-', '/')}}
+                {% end %}
+            </span>
+        </div>
+        </a>
     {% end %}
-
-    {% for i, item in enumerate(files) %}
-        <tr class="">
-            <td class="note-td">
-                <div class="note-title">
-                    {% if item.type == "group" %}
-                        <img src="/static/image/folder.gif"/>
-                        <a class="group-link" href="/note/view?id={{item.id}}" id="file-{{item.id}}">
-                            {{item.name}}
-                        </a>({{item.size}})
-                    {% elif hasattr(item, "url") and item.url != None %}
-                        <a class="note-link dialog-link" href="{{item.url}}">
-                            {%if item.priority>0%}[置顶]{%end%} {{item.name}}
-                        </a>
-                    {% else %}
-                        {% if item.type == "csv" %}
-                            <img src="/static/image/icon_csv.png"/>
-                        {% end %}
-                        
-                        <a class="note-link dialog-link" href="/note/view?id={{item.id}}" id="file-{{item.id}}">
-                            {%if item.priority>0%}[置顶]{%end%} {{item.name}}
-                        </a>
-
-                        {% if item.creator != None %} 
-                        <!-- ({{item.creator}}) -->
-                        {% end %}
-                    {% end %}
-                </div>
-                <div class="note-info">
-                    {% if hasattr(item, "summary") and item.summary is not None %}
-                        <pre>{{item.summary}}</pre>
-                    {% end %}
-
-                    <div class="float-left note-time">
-                        {% if show_cdate %}
-                            <span>{{xutils.format_date(item.ctime).replace('-', '/')}}</span>
-                        {% end %}
-
-                        {% if show_mdate %}
-                            <span>{{xutils.format_date(item.mtime).replace('-', '/')}}</span>
-                        {% end %}
-                    </div>
-
-                    {% if show_opts and _user_name == item.creator %}
-                    <div class="float-right">
-                        <a class="item-option" href="javascript:rename('{{item.id}}', '{{item.name}}')">重命名</a>
-                        {% if _is_admin %}
-                            <a class="item-option" href="javascript:remove('{{item.id}}', '{{item.name}}')">删除</a>
-                        {% end %}
-                        {% if item.type != "group" %}
-                        <a class="item-option move-btn" data-url="/note/group/select?id={{item.id}}">移动</a>
-                        {% end %}
-                    </div>
-                    {% end %}
-                </div>
-            </td>
-        </tr>
-    {% end %}
-    </table>
 </div>
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/06/10 19:41:13
+# @modified 2019/06/12 02:51:34
 import profile
 import math
 import re
@@ -147,7 +147,7 @@ class ViewHandler:
             pathlist = pathlist,
             page_max = math.ceil(amount/pagesize),
             page     = page,
-            page_url = "/note/view?id=%s&page=" % id,
+            page_url = "/note/view?id=%s&orderby=%s&page=" % (id, orderby),
             files    = files, 
             recent_created    = recent_created,
             show_groups       = show_groups,

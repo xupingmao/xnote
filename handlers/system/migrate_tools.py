@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/05/25 22:18:08
+# @modified 2019/06/12 02:00:39
 
 import os
 import re
@@ -235,7 +235,7 @@ SCAN_HTML = """
             </tr>
         {% end %}
     </table>
-    <a href="?key_from={{key_from}}">下一页</a>
+    <a href="?key_from={{last_key}}">下一页</a>
 </div>
 """
 
@@ -256,17 +256,19 @@ class DbScanHandler(BasePlugin):
         self.rows = 1
         result = []
         reverse = xutils.get_argument("reverse") == "true"
-        key_from = xutils.get_argument("key_from", None)
+        key_from = xutils.get_argument("key_from", "")
+        last_key = [None]
 
         def func(key, value):
             if input in key:
                 result.append((key, value))
                 if len(result) > 30:
+                    last_key[0] = key
                     return False
             return True
 
         dbutil.scan(key_from = key_from, func = func, reverse = reverse)
-        self.writetemplate(SCAN_HTML, result = result, key_from = key_from, key = input)
+        self.writetemplate(SCAN_HTML, result = result, last_key = last_key[0], key = input)
 
 
 xurls = (

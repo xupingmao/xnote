@@ -44,7 +44,7 @@
                     {% end %}
                 </td>
                 <td class="option-td align-right">
-                    {{getattr(note, time_attr)}}
+                    {{format_date(getattr(note, time_attr))}}
                 </td>
             </tr>
         {% end %}

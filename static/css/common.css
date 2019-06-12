@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/06/10 20:18:40
+@modified 2019/06/12 02:45:58
 */
 
 * {
@@ -1299,9 +1299,9 @@ li.menu-item:hover {
     cursor: pointer;
 }
 
-.dropdown:hover .dropdown-content {
+/*.dropdown:hover .dropdown-content {
     display: block;
-}
+}*/
 
 .dropdown-option {
     padding: 5px;
