@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/06/06 22:57:46
+# @modified 2019/06/13 01:32:20
 
 """笔记编辑相关处理"""
 import os
@@ -97,7 +97,7 @@ class AddHandler:
         content   = xutils.get_argument("content", "")
         type      = xutils.get_argument("type", "md")
         format    = xutils.get_argument("_format", "")
-        parent_id = xutils.get_argument("parent_id", 0, type=int)
+        parent_id = xutils.get_argument("parent_id", "0")
 
         if key == "":
             key = time.strftime("%Y.%m.%d")

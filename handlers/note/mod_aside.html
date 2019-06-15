@@ -16,17 +16,23 @@
     <div class="aside-content">
         <ul>
             {% if _has_login %}
-                <!-- <li><a class="link" href="/note/group">{{T('所有文集')}}</a></li> -->
+                <!-- 笔记选项 -->
                 <li><a class="link" href="/note/recent_created">{{T("Recent Created")}}</a></li>
                 <li><a class="link" href="/note/recent_edit">{{T("Recent Updated")}}</a></li>
                 <li><a class="link" href="/note/recent_viewed">{{T("Recent Viewed")}}</a></li>
                 <li><a class="link" href="/note/taglist">{{T("标签列表")}}</a></li>
-                {% if file_type == "md" %}
-                    <!-- 笔记选项 -->
+                {% if file_type == "md" or file_type == "html" %}
                     <li><a class="link" href="/note/history?id={{file_id}}">{{T("Note_History")}}</a></li>
-                {% else %}
-                    <!-- 目录选项 -->
                 {% end %}
+                
+                {% if file_type == "gallery" %}
+                    <li><a href="/note/gallery">我的相册</a>
+                {% end %}
+
+                {% if file_type == "csv" %}
+                    <li><a href="/note/table">我的表格</a>
+                {% end %}
+
             {% end %}
             
             <li><a class="link" href="/note/public">公开笔记</a></li>
@@ -34,10 +40,6 @@
             {% if _is_admin %}
                 <li><a href="/plugins_list?category=note">扩展功能</a></li>
             {% end %}
-
-<!--             {% for p in note_plugins %}
-                <li><a class="link" href="/plugins/{{p.name}}?note_id={{note_id}}">{{p.title}}</a></li>
-            {% end %} -->
         </ul>
     </div>
 </div>

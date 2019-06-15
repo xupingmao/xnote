@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/06/12 02:51:34
+# @modified 2019/06/15 01:13:27
 import profile
 import math
 import re
@@ -112,6 +112,7 @@ class ViewHandler:
                 filelist = fsutil.list_files(fpath, webpath = True)
             else:
                 filelist = []
+            file.path = fpath
 
         if show_recommend and user_name is not None:
             show_groups = False
@@ -235,6 +236,7 @@ class DictHandler:
             v.mtime = item.mtime
             v.ctime = item.ctime
             v.url = "#"
+            v.priority = 0
             return v
         items = map(convert, items)
         count = db.count()

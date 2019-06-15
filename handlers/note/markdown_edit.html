@@ -97,9 +97,8 @@
                 <span id="fileId" class="hide">{{file.id}}</span>
             </div>
             <div class="grid-title">
-                <a class="link2" href="/">{{ T('Home') }}</a>
-                {% for item in pathlist %}
-                    / <a class="link2" href="{{item.url}}">{{ item.name }}</a>
+                {% for i, item in enumerate(pathlist) %}
+                    {% if i > 0 %} / {% end %}<a href="{{item.url}}" class="link2">{{ item.name }}</a>
                 {% end %}
             </div>
         </div>

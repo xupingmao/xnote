@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/06/13 01:07:31
+@modified 2019/06/15 11:33:32
 -->
 
 {% init files = [] %}
@@ -14,7 +14,7 @@
 
 <div class="grid-row">
     {% for item in files %}
-        <a class="dialog-link" href="/note/view?id={{item.id}}">
+        <a class="dialog-link" href="{{item.url}}">
         <div class="book-item">
             {% if item.type == "group" %}
                 <img src="/static/image/folder.gif"/>

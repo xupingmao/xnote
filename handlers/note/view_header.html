@@ -18,6 +18,11 @@
             {% else %}
                 <a class="link" href="/note/stick?id={{file.id}}">置顶</a>
             {% end %}
+
+            {% if _is_admin and file.type == "gallery" %}
+                <a class="link" href="/fs/{{file.path}}">管理文件</a>
+            {% end %}
+
             <!-- <a class="link" href="/note/print?id={{file.id}}" target="_blank">打印</a> -->
             <a class="red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>
         {% end %}

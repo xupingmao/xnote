@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/06/13 00:56:32
+# @modified 2019/06/15 12:11:42
 
 """资料的DAO操作集合
 
@@ -111,6 +111,8 @@ def sort_notes(notes, orderby = "mtime_desc"):
         # mtime_desc
         notes.sort(key = lambda x: x.mtime, reverse = True)
     notes.sort(key = lambda x: x.priority, reverse = True)
+    for note in notes:
+        note.url = "/note/view?id=%s" % note.id
 
 def build_note(dict):
     id   = dict['id']
@@ -184,8 +186,6 @@ def list_path_old(file, limit = 2, db = None):
 
 @xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
 def list_path(file, limit = 2):
-    if xconfig.DB_ENGINE == "sqlite":
-        return list_path_old(file, limit)
     pathlist = []
     while file is not None:
         pathlist.insert(0, file)
@@ -200,12 +200,12 @@ def list_path(file, limit = 2):
 
 @xutils.timeit(name = "NoteDao.GetById:leveldb", logfile = True)
 def get_by_id(id, db=None, include_full = True):
-    if xconfig.DB_ENGINE == "sqlite":
-        return get_by_id_old(id, db)
     note = dbutil.get("note_full:%s" % id)
     if note and not include_full:
         del note.content
         del note.data
+    if note:
+        note.url = "/note/view?id=%s" % note.id
     return note
 
 def get_by_id_creator(id, creator, db=None):
@@ -213,22 +213,6 @@ def get_by_id_creator(id, creator, db=None):
     if note and note.creator == creator:
         return note
     return None
-
-def update_note_content(id, content, data=''):
-    if id is None:
-        return
-    if content is None:
-        content = ''
-    if data is None:
-        data = ''
-    db = xtables.get_note_content_table()
-    result = db.select_first(where=dict(id=id))
-    if result is None:
-        db.insert(id=id, content=content, data=data)
-    else:
-        db.update(where=dict(id=id), 
-            content=content,
-            data = data)
 
 def create_note(note_dict):
     content  = note_dict["content"]
@@ -248,6 +232,13 @@ def kv_put_note(note_id, note):
     mtime    = note.mtime
     creator  = note.creator
     atime    = note.atime
+
+    # 删除不需要持久化的数据
+    if "path" in note:
+        del note["path"]
+    if "url" in note:
+        del note["url"]
+
     dbutil.put("note_full:%s" % note_id, note)
 
     score = "%02d:%s" % (priority, mtime)
@@ -334,22 +325,19 @@ def get_by_name(name, db = None):
         return value.name == name
     result = dbutil.prefix_list("note:", find_func, 0, 1)
     if len(result) > 0:
-        return result[0]
+        note = result[0]
+        note.url = "/note/view?id=%s" % note.id
+        return note
     return None
 
 def visit_note(id):
-    if xconfig.DB_ENGINE == "sqlite":
-        db = xtables.get_file_table()
-        sql = "UPDATE file SET visited_cnt = visited_cnt + 1, atime=$atime where id = $id"
-        db.query(sql, vars = dict(atime = xutils.format_datetime(), id=id))
-    else:
-        note = get_by_id(id)
-        if note:
-            note.atime = xutils.format_datetime()
-            if note.visited_cnt is None:
-                note.visited_cnt = 0
-            note.visited_cnt += 1
-            kv_put_note(id, note)
+    note = get_by_id(id)
+    if note:
+        note.atime = xutils.format_datetime()
+        if note.visited_cnt is None:
+            note.visited_cnt = 0
+        note.visited_cnt += 1
+        kv_put_note(id, note)
 
 def delete_note(id):
     note = get_by_id(id)
@@ -389,12 +377,6 @@ def update_children_count(parent_id, db=None):
         
 def get_db():
     return get_file_db()
-
-
-def build_sql_row(obj, k):
-    v = getattr(obj, k)
-    if v is None: return 'NULL'
-    return to_sqlite_obj(v)
 
 def get_table_struct(table_name):
     rs = get_db().execute("pragma table_info('%s')" % table_name)
@@ -709,7 +691,9 @@ def search_content(words, creator=None):
             return False
         return (value.creator == creator or value.is_public) and textutil.contains_all(value.content.lower(), words)
     result = dbutil.prefix_list("note_full", search_func, 0, -1)
-    return [file_wrapper(item) for item in result]
+    notes = [file_wrapper(item) for item in result]
+    sort_notes(notes)
+    return notes
 
 def count_removed(creator):
     def count_func(key, value):
@@ -719,7 +703,9 @@ def count_removed(creator):
 def list_removed(creator, offset, limit):
     def list_func(key, value):
         return value.is_deleted and value.creator == creator
-    return dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
+    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
+    sort_notes(notes)
+    return notes
 
 def list_by_type(creator, type, offset, limit):
     def list_func(key, value):

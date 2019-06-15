@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/06/07 01:20:30
+# @modified 2019/06/15 12:10:21
 import math
 import time
 import web
@@ -21,7 +21,17 @@ class PathNode:
 
     def __init__(self, name, url):
         self.name = name
-        self.url = url
+        self.url  = url
+
+class GroupItem:
+    """笔记本的类型"""
+
+    def __init__(self, name, url):
+        self.type     = "group"
+        self.priority = 0
+        self.name     = name
+        self.url      = url
+        self.mtime    = dateutil.format_time()
 
 class Ungrouped:
 
@@ -136,7 +146,7 @@ class BaseListHandler:
             page      = page,
             show_aside = True,
             show_mdate = True,
-            page_max  = math.ceil(amount / 10),
+            page_max  = math.ceil(amount / xconfig.PAGE_SIZE),
             page_url  = "/note/%s?page=" % self.note_type)
 
 class GalleryListHandler(BaseListHandler):
@@ -151,6 +161,39 @@ class TableListHandler(BaseListHandler):
         self.note_type = "csv"
         self.title = "表格"
 
+class AddressBookHandler(BaseListHandler):
+
+    def __init__(self):
+        self.note_type = "address"
+        self.title = "通讯录"
+
+class HtmlListHandler(BaseListHandler):
+
+    def __init__(self):
+        self.note_type = "html"
+        self.title = "富文本"
+
+class TypeListHandler:
+
+    def GET(self):
+        page = 1
+
+        limit  = xconfig.PAGE_SIZE
+        offset = (page-1)*limit
+
+        files = [
+            GroupItem("未分类", "/note/ungrouped"),
+            GroupItem("回收站", "/note/removed"),
+            GroupItem("富文本", "/note/html"),
+        ]
+        amount = len(files)
+
+        return xtemplate.render(VIEW_TPL,
+            pathlist  = [PathNode("系统分类", "/note/types")],
+            file_type = "group",
+            files     = files,
+            show_aside = True,
+            show_mdate = True)
 
 class RecentHandler:
     """show recent notes"""
@@ -270,8 +313,13 @@ xurls = (
     r"/note/group/select"   , GroupSelectHandler,
     r"/note/date"           , DateHandler,
     r"/note/monthly"        , DateHandler,
+
+    # 笔记分类
     r"/note/gallery"        , GalleryListHandler,
     r"/note/table"          , TableListHandler,
+    r"/note/html"           , HtmlListHandler,
+    r"/note/addressbook"    , AddressBookHandler,
+    r"/note/types"          , TypeListHandler,
     
     r"/file/group/removed"  , RemovedHandler,
     r"/file/group/list"     , GroupListHandler,

@@ -1,32 +1,33 @@
 {% init file_type = "group_list" %}
 {% init ungrouped_count = 0 %}
 {% set fixed_books = [
-    ("未分类", "/note/ungrouped"),
-    ("回收站", "/note/removed"),
-    ("表格", "/note/table"),
     ("相册", "/note/gallery"),
+    ("表格", "/note/table"),
+    ("通讯录", "/note/addressbook"),
+    ("系统分类", "/note/types"),
 ]%}
 
 <div class="grid-row card">
     <h3>{{T("NoteBook")}}
         <div class="float-right">
-            <a class="prompt-btn btn" message="新建笔记本" 
+            <a class="prompt-btn inline-btn" message="新建笔记本" 
                         action="/note/add?type=group&name=">+笔记本</a>
-            <a class="btn" href="/note/add">+笔记</a>
+            <a class="inline-btn" href="/note/add">+笔记</a>
         </div>
     </h3>
 
     {% for name, url in fixed_books %}
-        <a href="{{url}}">
-            <div class="book-item">
+        <a href="{{url}}" class="fixed-book">
+            <div class="book-item fixed-book-item">
                 <img src="/static/image/folder.gif"/>
                 {{name}}
+                <span class="book-size">⇨</span>
             </div>
         </a>
     {% end %}
 
     {% for item in files %}
-        <a href="/note/view?id={{item.id}}">
+        <a href="{{item.url}}">
         <div class="book-item">
             <img src="/static/image/folder.gif"/>
             {% if item.priority > 0 %}[置顶]{% end %}
@@ -36,3 +37,15 @@
         </a>
     {% end %}
 </div>
+
+<script type="text/javascript">
+$(function (e) {
+    // $("#unfoldLink").click(function (e) {
+    //     $(".fixed-book").slideToggle("fast", function (e) {
+    //         if ($(this).is(":visible")) {
+    //             $(this).css("display", "block");
+    //         }
+    //     });
+    // });
+})
+</script>

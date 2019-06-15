@@ -2,7 +2,7 @@
 统一的样式库
 @author xupingmao
 @since 2017/12/16
-@modified 2019/06/12 02:45:58
+@modified 2019/06/15 11:20:10
 */
 
 * {
@@ -219,7 +219,7 @@ a:hover {
 /** 按钮样式 **/
 
 /* 不能指定input[type=button]不然会覆盖其他class样式(选择器优先级过高) */
-.btn, [type=submit], [type=button], button {
+.btn, [type=submit], [type=button], button, .inline-btn {
     display: inline-block;
     -webkit-appearance: none; /* 消除IOS默认的按钮样式 */
     background-color: #337ab7;
@@ -227,7 +227,7 @@ a:hover {
     border: 1px solid transparent;
     color: #fff;
     text-decoration: none;
-    margin-top: 0px;
+    margin-top: 5px;
     padding: 1px 7px 2px;
     font-size: 12px;
     line-height: 18px;
@@ -238,12 +238,16 @@ input[type=radio] {
     cursor: pointer;
 }
 
-.btn:hover, button:hover, [type=submit]:hover, [type=button]:hover {
+.btn:hover, .inline-btn:hover, button:hover, [type=submit]:hover, [type=button]:hover {
     color: #fff;
     background-color: #286090;
     border-color: #204d74;
     cursor: pointer;
     text-decoration: none;
+}
+
+.inline-btn {
+    margin-top: 0px;
 }
 
 .btn-danger {
@@ -1312,7 +1316,7 @@ li.menu-item:hover {
 }
 
 .dropdown-option:hover {
-    background-color: blue;
+    background-color: #09f;
     color: white;
 }
 
