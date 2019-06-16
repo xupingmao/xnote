@@ -43,8 +43,8 @@
                     <a href="/note/view?id={{note.parent_id}}">{{note.parent_name}}</a>
                     {% end %}
                 </td>
-                <td class="option-td align-right">
-                    {{format_date(getattr(note, time_attr))}}
+                <td class="option-td align-right recent-note-date">
+                    {{format_date(getattr(note, time_attr)).replace("-", "/")}}
                 </td>
             </tr>
         {% end %}

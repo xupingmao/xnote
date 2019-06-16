@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/06/15 12:10:21
+# @modified 2019/06/16 21:04:23
 import math
 import time
 import web
@@ -182,6 +182,9 @@ class TypeListHandler:
         offset = (page-1)*limit
 
         files = [
+            # GroupItem("相册", "/note/gallery"),
+            # GroupItem("表格", "/note/table"),
+            # GroupItem("通讯录", "/note/addressbook"),
             GroupItem("未分类", "/note/ungrouped"),
             GroupItem("回收站", "/note/removed"),
             GroupItem("富文本", "/note/html"),
@@ -189,7 +192,7 @@ class TypeListHandler:
         amount = len(files)
 
         return xtemplate.render(VIEW_TPL,
-            pathlist  = [PathNode("系统分类", "/note/types")],
+            pathlist  = [PathNode("更多分类", "/note/types")],
             file_type = "group",
             files     = files,
             show_aside = True,

@@ -9,6 +9,7 @@
 <link rel="shortcut icon" href="/static/favicon.ico"/>
 <link rel="bookmark" href="/static/favicon.ico"/>
 <link rel="stylesheet" href="/static/css/common.css"/>
+<link rel="stylesheet" href="/static/css/app.css"/>
 {% if xconfig.THEME == "card" %}
 <link rel="stylesheet" href="/static/css/common-card.css"/>
 {% end %}
@@ -18,9 +19,12 @@
   window.xuser = "{{_user_name}}";
   window.PAGE_OPEN = "{{xconfig.PAGE_OPEN}}";
 </script>
+
+<!-- 应用JS脚本,优先级更高，所以放在后面 -->
 <script type="text/javascript" src="/static/js/utils.js"></script>
 <script type="text/javascript" src="/static/js/xnote-ui.js"></script>
 <script type="text/javascript" src="/static/js/app.js"></script>
+
 {% if xconfig.RECORD_LOCATION %}
 <script type="text/javascript" src="/system/stats"></script>
 {% end %}

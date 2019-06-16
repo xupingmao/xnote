@@ -4,7 +4,7 @@
     ("相册", "/note/gallery"),
     ("表格", "/note/table"),
     ("通讯录", "/note/addressbook"),
-    ("系统分类", "/note/types"),
+    ("更多分类", "/note/types"),
 ]%}
 
 <div class="grid-row card">
@@ -32,7 +32,8 @@
             <img src="/static/image/folder.gif"/>
             {% if item.priority > 0 %}[置顶]{% end %}
             {{item.name}}
-            <span class="book-size">[{{item.size}}]</span>
+            <span style="color: black;">({{item.size}})</span>
+            <span class="book-size">{{format_date(item.mtime).replace('-', '/')}}</span>
         </div>
         </a>
     {% end %}

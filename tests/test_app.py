@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/06/05 00:31:25
+# @modified 2019/06/16 13:30:02
 
 import sys
 import os
@@ -111,7 +111,7 @@ class TestMain(unittest.TestCase):
         response = app.request(*args, **kw)
         status = response.status
         print(status)
-        self.assertEqual(True, status == "200 OK" or status == "303 See Other")
+        self.assertEqual(True, status == "200 OK" or status == "303 See Other" or status == "302 Found")
 
     def check_200(self, *args, **kw):
         response = app.request(*args, **kw)
@@ -161,6 +161,11 @@ class TestMain(unittest.TestCase):
         self.check_OK('/note/view?id=%s' % id)
         json_request('/note/remove?id=%s' % id)
 
+    def test_note_list_by_type(self):
+        self.check_OK("/note/types")
+        self.check_OK("/note/table")
+        self.check_OK("/note/gallery")
+
     def test_note_timeline(self):
         self.check_200("/note/timeline")
 
@@ -173,6 +178,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual("md", file["type"])
         self.assertEqual("hello markdown", file["content"])
         self.check_200("/note/edit?id=%s" % id)
+        self.check_OK("/note/history?id=%s" % id)
         json_request("/note/remove?id=%s" % id)
 
     def test_note_editor_html(self):
@@ -214,6 +220,7 @@ class TestMain(unittest.TestCase):
         file = json_request("/note/view?id=%s&_format=json" % id).get("file")
         self.assertEqual(0, file["is_public"])
 
+        # clean up
         json_request("/note/remove?id=" + str(id))
 
     def test_file_timeline(self):
@@ -229,6 +236,17 @@ class TestMain(unittest.TestCase):
         json_request("/note/tag/%s" % id)
         json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags=""))
 
+    def test_note_stick(self):
+        json_request("/note/remove?name=xnote-share-test")
+        file = json_request("/note/add", method="POST", 
+            data=dict(name="xnote-share-test", content="hello"))
+        id = file["id"]
+
+        self.check_OK("/note/stick?id=%s" % id)
+        self.check_OK("/note/unstick?id=%s" % id)
+
+        # clean up
+        json_request("/note/remove?id=" + str(id))
 
     def test_dict_json(self):
         json_request("/note/dict?_format=json")
@@ -302,6 +320,9 @@ class TestMain(unittest.TestCase):
         data = json_request("/system/storage?key=unit-test&_format=json")
         value = data.get("config").get("value")
         self.assertEqual("hello", value)
+
+    def test_sys_db_scan(self):
+        self.check_OK("/system/db_scan")
 
     def test_user(self):
         self.check_OK("/system/user")

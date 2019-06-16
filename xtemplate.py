@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/05/18 00:41:11
+# @modified 2019/06/16 13:38:28
 import os
 import json
 import web
@@ -283,8 +283,12 @@ class BasePlugin:
             # 处理侧边栏显示
             if self.aside_html != "" or len(self.option_links) > 0 or self.category:
                 self.show_aside = True
+        except web.webapi.Redirect:
+            # 跳转的异常
+            pass
         except:
             error = xutils.print_exc()
+            web.ctx.status = "500 Internal Server Error"
         return render("plugins/base_plugin.html",
             model       = self,
             script_name = globals().get("script_name"),

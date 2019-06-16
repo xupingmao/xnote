@@ -110,10 +110,9 @@ class handler:
     @xauth.login_required()
     def POST(self):
         try:
-            file = xutils.get_argument("file", {})
-            download_res = False            
-            address = xutils.get_argument("url", "")
-            name    = xutils.get_argument("name", "")
+            file     = xutils.get_argument("file", {})
+            address  = xutils.get_argument("url", "")
+            name     = xutils.get_argument("name", "")
             filename = ""
 
             if hasattr(file, "filename"):
@@ -123,11 +122,14 @@ class handler:
             if not isempty(address):
                 html = readhttp(address)
             else:
+                # 读取文件
                 html = ""
                 for chunk in file.file:
                     html += chunk.decode("utf-8")
 
             print("Read html, filename={}, length={}".format(filename, len(html)))
+
+
             soup = BeautifulSoup(html, "html.parser")
             element_list = soup.find_all(["script", "style"])
             for element in element_list:
@@ -146,12 +148,8 @@ class handler:
 
             texts = [text]
 
-            images = get_addr_list(images)
+            images  = get_addr_list(images)
             scripts = get_addr_list(scripts)
-            # texts = get_text_list(texts)
-
-            if download_res:
-                download_res_list(images, filename)
 
             if name != "" and name != None:
                 dirname = os.path.join(xconfig.DATA_DIR, time.strftime("archive/%Y/%m/%d"))
@@ -162,11 +160,11 @@ class handler:
 
             if False:
                 user_name = xauth.get_current_name()
-                def save():
-                    xmanager.request("/note/add", method="POST", 
-                        data=dict(name=name, content=text, type="md"),
-                        headers=dict(COOKIE=xauth.get_user_cookie(user_name)))
-                Timer(1, save).start()
+                xutils.call("note.create", 
+                    name = name, 
+                    content = content, 
+                    type = "md", 
+                    creator = user_name)
 
             return xtemplate.render(self.template_path,
                 show_aside = False,

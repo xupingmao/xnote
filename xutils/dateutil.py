@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/04/13 12:59:08
+# @modified 2019/06/15 15:18:05
 import time
 import os
 import math
@@ -66,6 +66,8 @@ def format_time_only(seconds=None):
 def format_date(seconds=None, fmt = None):
     if fmt is None:
         fmt = "%Y-%m-%d"
+    if fmt == "/":
+        fmt = "%Y/%m/%d"
     if seconds is None:
         return time.strftime(fmt)
     elif is_str(seconds):

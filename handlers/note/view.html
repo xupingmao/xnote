@@ -180,15 +180,15 @@ img {
         {% comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 %}
 
         {% if file_type == "md" or file_type == "text" %}
-            {% include "note/markdown.html" %}
+            {% include note/editor/markdown.html %}
         {% elif file_type == "group" %}
-            {% include "note/note_list.html" %}
+            {% include note/note_list.html %}
         {% elif file_type == "csv" %}
-            {% include note/csv_editor.html %}
+            {% include note/editor/csv_editor.html %}
         {% elif file_type == "gallery" %}
-            {% include note/gallery.html %}
+            {% include note/editor/gallery.html %}
         {% else %}
-            {% include note/post.html %}
+            {% include note/editor/post.html %}
         {% end %}
     </div>
 

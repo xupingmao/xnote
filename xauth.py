@@ -190,8 +190,7 @@ def remove_user(name):
     refresh_users()
 
 def has_login(name=None):
-    """
-    验证是否登陆
+    """验证是否登陆
     如果``name``指定,则只能该用户名通过验证
     """
     if config.IS_TEST:

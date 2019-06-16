@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/06/15 01:13:27
+# @modified 2019/06/15 19:32:49
 import profile
 import math
 import re
@@ -92,7 +92,7 @@ class ViewHandler:
             show_pagination = False
             if op == "edit":
                 show_recommend = False
-                template_name = "note/markdown_edit.html"
+                template_name = "note/editor/markdown_edit.html"
         else:
             content = file.content
             content = content.replace(u'\xad', '\n')
@@ -291,7 +291,6 @@ xurls = (
     r"/note/history"       , NoteHistoryHandler,
     r"/note/history_view"  , HistoryViewHandler,
     
-    r"/file/(edit|view)"   , ViewHandler, 
     r"/file/(\d+)/upvote"  , Upvote,
     r"/file/(\d+)/downvote", Downvote,
     r"/file/mark"          , MarkHandler,

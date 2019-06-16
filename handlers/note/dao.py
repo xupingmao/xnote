@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/06/15 12:11:42
+# @modified 2019/06/15 19:43:32
 
 """资料的DAO操作集合
 
@@ -17,6 +17,7 @@ import xconfig
 import xtables
 import xutils
 import xauth
+import xmanager
 from xutils import readfile, savetofile, sqlite3, Storage
 from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
 
@@ -168,22 +169,6 @@ class RowDesc:
 def get_file_db():
     return xtables.get_file_table()
 
-@xutils.timeit(name = "NoteDao.ListPath:sqlite", logfile = True)
-def list_path_old(file, limit = 2, db = None):
-    if db is None:
-        db = xtables.get_file_table()
-    pathlist = []
-    while file is not None:
-        pathlist.insert(0, file)
-        file.url = "/note/view?id=%s" % file.id
-        if len(pathlist) >= limit:
-            break
-        if file.parent_id == 0:
-            break
-        else:
-            file = db.select_first(what="id,name,type,creator", where=dict(id=file.parent_id))
-    return pathlist
-
 @xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
 def list_path(file, limit = 2):
     pathlist = []
@@ -215,16 +200,30 @@ def get_by_id_creator(id, creator, db=None):
     return None
 
 def create_note(note_dict):
-    content  = note_dict["content"]
-    data     = note_dict["data"]
-    creator  = note_dict["creator"]
-    priority = note_dict["priority"]
-    mtime    = note_dict["mtime"]
+    content   = note_dict["content"]
+    data      = note_dict["data"]
+    creator   = note_dict["creator"]
+    priority  = note_dict["priority"]
+    mtime     = note_dict["mtime"]
+    parent_id = note_dict.get("parent_id", "0")
+    name      = note_dict.get("name")
 
     note_id = dbutil.timeseq()
     note_dict["id"] = note_id
     kv_put_note(note_id, note_dict)
+    
+    # 更新分组下面页面的数量 TODO
     update_children_count(note_dict["parent_id"])
+
+    xmanager.fire("note.add", dict(name=name, type=type))
+
+    # 创建对应的文件夹
+    if type != "group":
+        dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(parent_id), str(note_id))
+    else:
+        dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(note_id))
+    xutils.makedirs(dirname)
+
     return note_id
 
 def kv_put_note(note_id, note):
@@ -241,6 +240,7 @@ def kv_put_note(note_id, note):
 
     dbutil.put("note_full:%s" % note_id, note)
 
+    # 更新索引字段
     score = "%02d:%s" % (priority, mtime)
     if note.is_deleted:
         dbutil.zrem("note_recent:%s" % creator, note_id)
@@ -255,6 +255,12 @@ def kv_put_note(note_id, note):
 
     if note.type == "group":
         dbutil.put("notebook:%s:%020d" % (note.creator, int(note_id)), note)
+
+def touch_note(note_id):
+    note = get_by_id(note_id)
+    if note != None:
+        note.mtime = dateutil.format_datetime()
+        kv_put_note(note_id, note)
 
 def update_note(where, **kw):
     note_id   = where['id']
@@ -313,7 +319,8 @@ def update_note(where, **kw):
             old_dirname = os.path.join(xconfig.UPLOAD_DIR, note.creator, str(old_parent_id), str(note.id))
             new_dirname = os.path.join(xconfig.UPLOAD_DIR, note.creator, str(new_parent_id), str(note.id))
             fsutil.mvfile(old_dirname, new_dirname)
-
+        # 更新parent更新时间
+        touch_note(note.parent_id)
         return 1
     return 0
 
@@ -405,7 +412,7 @@ def kv_list_group(creator = None):
         return value.type == "group" and value.creator == creator and value.is_deleted == 0
 
     notes = dbutil.prefix_list("note_tiny:", list_group_func)
-    sort_notes(notes, "name")
+    sort_notes(notes, "mtime_desc")
     return notes
 
 def list_group(current_name = None):

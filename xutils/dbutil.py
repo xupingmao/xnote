@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/06/06 23:54:04
+# @modified 2019/06/16 13:33:02
 ###########################################################
 
 def search_escape(text):
@@ -360,11 +360,17 @@ def delete(key, sync = False):
     _leveldb.Delete(key, sync = sync)
 
 def scan(key_from = None, key_to = None, func = None, reverse = False):
+    """扫描数据库
+    @param {string} key_from
+    @param {string} key_to
+    @param {function} func
+    @param {boolean} reverse
+    """
     check_leveldb()
 
-    if key_from:
+    if key_from != None:
         key_from = key_from.encode("utf-8")
-    if key_to:
+    if key_to != None:
         key_to = key_to.encode("utf-8")
     iterator = _leveldb.RangeIter(key_from, key_to, include_value = True, reverse = reverse)
     for key, value in iterator:

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/06/13 01:32:20
+# @modified 2019/06/15 19:39:46
 
 """笔记编辑相关处理"""
 import os
@@ -132,18 +132,6 @@ class AddHandler:
                     message = u"%s 已存在" % name
                     raise Exception(message)
                 inserted_id = xutils.call("note.create", note)
-
-                # 更新分组下面页面的数量 TODO
-                # update_children_count(parent_id, db = db)
-                xmanager.fire("note.add", dict(name=name, type=type))
-
-                # 创建对应的文件夹
-                if type != "group":
-                    dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(parent_id), str(inserted_id))
-                else:
-                    dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(inserted_id))
-                xutils.makedirs(dirname)
-
                 if format == "json":
                     return dict(code="success", id=inserted_id)
                 raise web.seeother("/note/view?id={}".format(inserted_id))
