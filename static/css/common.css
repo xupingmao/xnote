@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/06/16 21:09:19
+ * @modified 2019/06/18 23:36:54
 */
 
 * {
@@ -1017,8 +1017,8 @@ li.menu-item:hover {
     margin-top: 0px;
     margin-bottom: 5px;
     font-family: arial,"Sim Sun";
-    font-weight: bold;
     font-size: 14px;
+    font-weight: normal;
 }
 
 .grid-row {

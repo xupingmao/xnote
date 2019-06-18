@@ -2,11 +2,10 @@
  * 应用相关的CSS样式
  * @author xupingmao
  * @since 2019/06/16
- * @modified 2019/06/16 21:14:44
+ * @modified 2019/06/16 21:24:01
 */
 
 .recent-note-date {
-    font-size: 12px;
 }
 
 /* 上传文件样式 */
@@ -69,5 +68,9 @@
     /** mobile **/
     #dropArea {
         font-size: 24px;
+    }
+
+    .recent-note-date {
+        font-size: 12px;
     }
 }

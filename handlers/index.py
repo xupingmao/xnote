@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/05/09 22:59:15
+# @modified 2019/06/18 23:40:01
 import web
 import xtables
 import xtemplate
@@ -52,8 +52,8 @@ class IndexHandler:
 
     @xutils.timeit(name = "Home", logfile = True)
     def GET(self):
-        from handlers.note.group import RecentHandler
-        return RecentHandler().GET()
+        from handlers.note.group import GroupListHandler
+        return GroupListHandler().GET()
 
         # 老的逻辑
         current_name  = xauth.current_name()
