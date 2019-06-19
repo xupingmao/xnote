@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/06/18 23:36:54
+ * @modified 2019/06/19 23:42:55
 */
 
 * {
@@ -500,6 +500,10 @@ li.menu-item:hover {
     background-color: #fff;
 }
 
+.nav-left {
+    display: none;
+}
+
 .footer {
     display: none;
     width: 100%;
@@ -552,6 +556,11 @@ li.menu-item:hover {
   display: block;
   float: left;
   padding: 5px;
+}
+
+.nav-left-search {
+    padding: 10px;
+    display: none;
 }
 
 .nav-search-input {

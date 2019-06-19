@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/06/15 19:43:32
+# @modified 2019/06/19 00:57:16
 
 """资料的DAO操作集合
 
@@ -535,6 +535,7 @@ def list_by_tag(user, tagname):
         return tagname in value.tags
     
     files = dbutil.prefix_list("note_tiny:%s" % user, list_func)
+    sort_notes(files)
     return files
 
 @xutils.timeit(name = "NoteDao.CountNote", logfile=True, logargs=True, logret=True)
