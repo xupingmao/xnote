@@ -20,28 +20,22 @@ label {
 <div class="card">
     <h3>{{T("创建笔记")}}</h3>
     <form method="POST" action="">
-        <div class="row">
+        <div class="row top-offset-1">
             <label>{{T("标题")}}</label> 
             <input type="text" class="mid-text" name="name" value="{{name}}" style="width:200px;"/>
         </div>
-        <div class="row">
+        
+        <div class="row top-offset-1">
             <label>{{T("类型")}}</label>
-            <div class="label-rest">
-                <div class="float-left">
-                    <input type="radio" name="type" value="md" {% if type=="md" %} checked {% end %}>Markdown
-                </div>
-                <div class="float-left">
-                    <input type="radio" name="type" value="html" {% if type=="html" %} checked {% end %}>富文本
-                </div>
-                <div class="float-left">
-                    <input type="radio" name="type" value="csv" {% if type=="csv" %} checked {% end %}>表格
-                </div>
-                <div class="float-left">
-                    <input type="radio" name="type" value="gallery" {% if type=="gallery" %} checked {% end %}>相册
-                </div>
-            </div>
+            <select name="type" value="{{type}}">
+                <option value="md">Markdown</option>
+                <option value="html">富文本</option>
+                <option value="csv">表格</option>
+                <option value="gallery">相册</option>
+            </select>
         </div>
-        <div class="row">
+
+        <div class="row top-offset-1">
             <label>{{T("笔记本")}}</label>
             <select name="parent_id">
                 {%for item in groups %}
@@ -49,7 +43,7 @@ label {
                 {% end %}
             </select>
         </div>
-        <div class="row">
+        <div class="row top-offset-1">
             <label>&nbsp;</label>
             <button class="mid-text">{{T("添加")}}</button>
         </div>

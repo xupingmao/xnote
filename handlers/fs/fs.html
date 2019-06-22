@@ -89,8 +89,7 @@
 
                     <a class="item-option" href="/fs/{{item.path}}?type=blob&token={{token}}">下载</a>
                 {% end %}
-                <a class="item-option"
-                    href="javascript:removeFile('{{item.path}}')">删除</a>
+                <a class="item-option delete-link" data-path="{{item.path}}" href="#">删除</a>
                 <a class="item-option" 
                     data-path="{{item.path}}"
                     onclick="openFileOption(this)">更多</a>

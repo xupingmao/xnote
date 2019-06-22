@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/06/10 19:29:27
+# @modified 2019/06/20 22:52:16
 import codecs
 import os
 import platform
@@ -22,6 +22,8 @@ def makedirs(dirname):
     '''检查并创建目录(如果不存在不报错)'''
     if not os.path.exists(dirname):
         os.makedirs(dirname)
+        return True
+    return False
 
 
 def readfile(path, mode = "r", limit = -1):

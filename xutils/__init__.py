@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/06/12 23:13:21
+# @modified 2019/06/22 21:34:14
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -288,6 +288,8 @@ def mark_text(content):
                     tokens[index] = '<img class="chat-msg-img x-photo" alt="%s" src="%s">' % (href, href)
                 else:
                     name = href[href.rfind("/")+1:]
+                    # 尝试urldecode名称
+                    name = unquote(name)
                     tokens[index] = '<a href="%s">%s</a>' % (href, name)
             elif item.count("#") >=1:
                 tokens[index] = re.sub(r"#([^#]+)(#?)", 

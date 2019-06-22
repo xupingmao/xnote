@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/06/19 00:57:16
+# @modified 2019/06/20 22:48:43
 
 """资料的DAO操作集合
 
@@ -241,13 +241,14 @@ def kv_put_note(note_id, note):
     dbutil.put("note_full:%s" % note_id, note)
 
     # 更新索引字段
-    score = "%02d:%s" % (priority, mtime)
     if note.is_deleted:
         dbutil.zrem("note_recent:%s" % creator, note_id)
         dbutil.zrem("note_visit:%s" % creator, note_id)
     else:
-        dbutil.zadd("note_recent:%s" % creator, score, note_id)
+        dbutil.zadd("note_recent:%s" % creator, mtime, note_id)
         dbutil.zadd("note_visit:%s" % creator, atime, note_id)
+        if note.is_public:
+            dbutil.zadd("note_recent:public", mtime, note_id)
 
     del note['content']
     del note['data']

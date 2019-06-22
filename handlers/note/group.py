@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/06/16 21:04:23
+# @modified 2019/06/22 21:37:58
 import math
 import time
 import web
@@ -184,9 +184,9 @@ class TypeListHandler:
         files = [
             # GroupItem("相册", "/note/gallery"),
             # GroupItem("表格", "/note/table"),
-            # GroupItem("通讯录", "/note/addressbook"),
             GroupItem("未分类", "/note/ungrouped"),
             GroupItem("回收站", "/note/removed"),
+            GroupItem("通讯录", "/note/addressbook"),
             GroupItem("富文本", "/note/html"),
         ]
         amount = len(files)

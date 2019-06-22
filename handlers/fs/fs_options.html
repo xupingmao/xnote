@@ -251,7 +251,9 @@ $(function () {
                 return;
             }
         } else {
-            var name = /([^\/\\]+)[\\\/]?$/.exec(path)[1]
+            // 从path中获取文件名
+            var name = /([^\/\\]+)[\\\/]?$/.exec(path)[1];
+            name = decodeURI(name);
             if (!confirm("确认删除 '%s' ?".format(name))) {
                 return;
             }
@@ -273,6 +275,11 @@ $(function () {
             })
         }
     }
+
+    $(".delete-link").click(function (e) {
+        var path = $(this).attr("data-path");
+        removeFile(path);
+    })
 
     $("#deleteBtn").on("click", function () {
         var checked = $(":checked");

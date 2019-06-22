@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/06/12 02:00:39
+# @modified 2019/06/20 22:47:53
 
 import os
 import re
@@ -82,9 +82,9 @@ def migrate_note_recent():
     db = xtables.get_note_table()
     for item in dbutil.prefix_iter("note_tiny"):
         if item.type != "group":
-            dbutil.zadd("note_recent:%s" % item.creator, "%02d:%s" % (item.priority, item.mtime), item.id)
+            dbutil.zadd("note_recent:%s" % item.creator, item.mtime, item.id)
         if item.is_public:
-            dbutil.zadd("note_recent:public", "%02d:%s" % (item.priority, item.mtime), item.id)
+            dbutil.zadd("note_recent:public", item.mtime, item.id)
     return "迁移完成!"
 
 def migrate_note_history():
