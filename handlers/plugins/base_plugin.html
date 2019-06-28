@@ -25,7 +25,7 @@
         <div class="grid-title">
             {{title}}
             <span class="float-right">
-                {% if _is_admin %}
+                {% if _is_admin and model.editable %}
                     <a href="/code/edit?path={{fpath}}">编辑</a>
                 {% end %}
                 <a href="javascript:history.back();">返回</a>

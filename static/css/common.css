@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/06/22 22:19:08
+ * @modified 2019/06/26 01:06:34
  */
 
 * {
@@ -1303,10 +1303,14 @@ li.menu-item:hover {
 .dropdown-content {
     display: none;
     position: absolute;
+    top: 30px;
     left: -80px;
     background-color: #f9f9f9;
     min-width: 120px;
     border: 1px solid #ccc;
+    border-radius: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
     cursor: pointer;

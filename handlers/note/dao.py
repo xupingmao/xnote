@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/06/20 22:48:43
+# @modified 2019/06/26 00:52:51
 
 """资料的DAO操作集合
 
@@ -226,6 +226,23 @@ def create_note(note_dict):
 
     return note_id
 
+def update_note_rank(note):
+    mtime = note.mtime
+    atime = note.atime
+    creator = note.creator
+    note_id = note.id
+    
+    if note.is_deleted:
+        dbutil.zrem("note_recent:%s" % creator, note_id)
+        dbutil.zrem("note_visit:%s" % creator, note_id)
+        dbutil.zrem("note_recent:public", note_id)
+    elif note.type != "group":
+        # 分组不需要记录
+        dbutil.zadd("note_recent:%s" % creator, mtime, note_id)
+        dbutil.zadd("note_visit:%s" % creator, atime, note_id)
+        if note.is_public:
+            dbutil.zadd("note_recent:public", mtime, note_id)
+
 def kv_put_note(note_id, note):
     priority = note.priority
     mtime    = note.mtime
@@ -240,21 +257,15 @@ def kv_put_note(note_id, note):
 
     dbutil.put("note_full:%s" % note_id, note)
 
-    # 更新索引字段
-    if note.is_deleted:
-        dbutil.zrem("note_recent:%s" % creator, note_id)
-        dbutil.zrem("note_visit:%s" % creator, note_id)
-    else:
-        dbutil.zadd("note_recent:%s" % creator, mtime, note_id)
-        dbutil.zadd("note_visit:%s" % creator, atime, note_id)
-        if note.is_public:
-            dbutil.zadd("note_recent:public", mtime, note_id)
+    # 更新笔记的排序
+    update_note_rank(note)
 
     del note['content']
     del note['data']
     dbutil.put("note_tiny:%s:%020d" % (note.creator, int(note_id)), note)
 
     if note.type == "group":
+        # 笔记本的索引
         dbutil.put("notebook:%s:%020d" % (note.creator, int(note_id)), note)
 
 def touch_note(note_id):

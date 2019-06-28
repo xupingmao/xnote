@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/06/16 13:38:28
+# @modified 2019/06/28 02:07:22
 import os
 import json
 import web
@@ -215,6 +215,7 @@ class BasePlugin:
 
     # 输入框默认文案
     placeholder     = u("")
+    editable        = True
     
     def __init__(self):
         # 输入框的行数

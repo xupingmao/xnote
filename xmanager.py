@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/05/22 01:01:10
+# @modified 2019/06/28 01:08:14
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -411,7 +411,13 @@ class TaskManager:
         backup_task = xutils.Storage(name="[系统]备份", url="/system/backup", 
             tm_wday = "*", tm_hour="11", tm_min="0", 
             message = "", sound=0, webpage=0, id=None)
+
+        clean_task  = xutils.Storage(name = "[系统]磁盘清理", url="/cron/diskclean",
+            tm_wday = "*", tm_hour="*", tm_min="0",
+            message = "", sound=0, webpage=0, id=None)
+
         self.task_list.append(backup_task)
+        self.task_list.append(clean_task)
 
     def save_tasks(self):
         self.load_tasks()

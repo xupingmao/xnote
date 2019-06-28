@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/06/22 21:34:14
+# @modified 2019/06/28 20:34:04
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -372,8 +372,7 @@ def log(fmt, show_logger = False, fpath = None, *argv):
     print(message)
     if fpath is None:
         fpath = get_log_path()
-    with open(fpath, "ab") as fp:
-        fp.write((message+"\n").encode("utf-8"))
+    log_async(fpath, message)
 
 
 def trace(scene, message, cost=0):

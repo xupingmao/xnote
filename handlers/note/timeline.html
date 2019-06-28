@@ -95,7 +95,7 @@
           // app.itemList = [];
           var count = 0;
           for (var key in resp) {
-            console.log(key, resp);
+            console.log(key, resp[key]);
             var files = resp[key];
             window.offset += files.length;
             mergeFiles(app.itemList, key, files);
@@ -106,11 +106,16 @@
             alert("没有更多了");
             return;
           }
+          
           app.itemList.sort(function (a, b) {
-            return a.title < b.title;
-          })
-  //        app.itemList = resp;
-          // window.offset = app.itemList.length;
+            if (a.title < b.title) {
+              return 1;
+            }
+            if (a.title > b.title) {
+              return -1;
+            }
+            return 0;
+          });
       });
     }
 
@@ -122,4 +127,8 @@
     loadMore();
 
 </script>
+{% end %}
+
+{% block aside %}
+  {% include note/mod_aside.html %}
 {% end %}

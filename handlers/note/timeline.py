@@ -1,26 +1,22 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2018/11/14 03:23:31
+# @modified 2019/06/28 20:26:08
 
 """Description here"""
 import re
 import xauth
 import xutils
 import xtables
+import xtemplate
 
 class handler:
 
     @xauth.login_required()
     def GET(self):
-        # days = xutils.get_argument("days", 30, type=int)
         offset = xutils.get_argument("offset", 0, type=int)
         limit  = xutils.get_argument("limit", 20, type=int)
-        db = xtables.get_file_table()
-        # last_month = xutils.days_before(days, format=True)
-        user_name  = xauth.get_current_user()["name"]
-        rows = db.query("SELECT id, type, name, creator, ctime, mtime, size FROM file WHERE creator = $creator AND is_deleted=0"
-            + " ORDER BY ctime DESC LIMIT $offset, $limit", 
-            dict(creator=user_name, offset=offset, limit=limit))
+        user_name  = xauth.current_name()
+        rows = xutils.call("note.list_recent_created", None, offset, limit)
         result = dict()
         for row in rows:
             date = re.match(r"\d+\-\d+", row.ctime).group(0)
@@ -55,8 +51,15 @@ class DateTimeline:
             result[date].append(row)
         return result
 
+class TimelineHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        return xtemplate.render("note/timeline.html", show_aside = True)
+
 xurls = (
     r"/note/timeline", handler,
-    r"/note/timeline/month", DateTimeline
+    r"/note/timeline/month", DateTimeline,
+    r"/note/tools/timeline", TimelineHandler,
 )
 

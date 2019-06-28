@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/06/01 22:38:52
+# @modified 2019/06/28 01:05:10
 
 '''xnote系统配置
 
@@ -103,6 +103,7 @@ CONFIG_DIR  = os.path.join(DATA_DIR, "config")
 BACKUP_DIR  = os.path.join(DATA_DIR, "backup")
 # 备份失效时间
 BACKUP_EXPIRE = 24 * 3600 * 365
+TRASH_EXPIRE  = 24 * 3600 * 90
 
 # 其他标记
 # 测试用的flag,开启会拥有admin权限

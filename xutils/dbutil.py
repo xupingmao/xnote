@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/06/16 13:33:02
+# @modified 2019/06/26 00:49:34
 ###########################################################
 
 def search_escape(text):
@@ -541,7 +541,8 @@ def zrem(key, member):
         if member in obj:
             del obj[member]
             put(key, obj)
-    return None
+            return 1
+    return 0
 
 if __name__ == "__main__":
     db = ObjDB('pkm.db')

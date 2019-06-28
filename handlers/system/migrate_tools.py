@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/06/20 22:47:53
+# @modified 2019/06/28 02:08:23
 
 import os
 import re
@@ -49,6 +49,7 @@ class MigrateHandler(BasePlugin):
     required_role = "admin"
     # 插件分类 {note, dir, system, network}
     category = None
+    editable = False
     
     def handle(self, input):
         # 输入框的行数
@@ -250,6 +251,7 @@ class DbScanHandler(BasePlugin):
     category = None
 
     placeholder = "主键"
+    editable = False
     
     def handle(self, input):
         # 输入框的行数

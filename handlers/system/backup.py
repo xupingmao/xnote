@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2019/06/01 22:38:19
+# @modified 2019/06/28 01:02:27
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -136,22 +136,12 @@ def chk_db_backup():
     destfile = os.path.join(xconfig.BACKUP_DIR, time.strftime("db.%Y-%m.zip"))
     xutils.zip_dir(dirname, destfile)
 
-def rm_expired_files(dirname, expired_time):
-    now = time.time()
-    for fname in os.listdir(dirname):
-        fpath = os.path.join(dirname, fname)
-        st = os.stat(fpath)
-        if now - st.st_ctime >= expired_time:
-            print("%s is expired" % fname)
-            xutils.rmfile(fpath)
 
 class handler:
 
     @xauth.login_required("admin")
     def GET(self):
         """触发备份事件"""
-        rm_expired_files(xconfig.BACKUP_DIR, xconfig.BACKUP_EXPIRE)
-        rm_expired_files(xconfig.LOG_DIR, xconfig.LOG_EXPIRE)
         chk_backup()
         chk_db_backup()
         chk_scripts_backup()
