@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/06/15 11:33:32
+@modified 2019/06/30 11:27:37
 -->
 
 {% init files = [] %}
@@ -12,29 +12,29 @@
 
 {% include "note/view_header.html" %}
 
-<div class="grid-row">
+<div class="grid-row note-list">
     {% for item in files %}
         <a class="dialog-link" href="{{item.url}}">
-        <div class="book-item">
-            {% if item.type == "group" %}
-                <img src="/static/image/folder.gif"/>
-            {% elif item.type == "csv" %}
-                <img src="/static/image/icon_csv.png"/>
-            {% end %}
-
-            {%if item.priority>0%}[置顶]{%end%}
-            {{item.name}}
-            
-            <span class="book-size">
-                {% if show_cdate %}
-                    {{format_date(item.ctime).replace('-', '/')}}
+            <div class="book-item">
+                {% if item.type == "group" %}
+                    <img src="/static/image/folder.gif"/>
+                {% elif item.type == "csv" %}
+                    <img src="/static/image/icon_csv.png"/>
                 {% end %}
 
-                {% if show_mdate %}
-                    {{format_date(item.mtime).replace('-', '/')}}
-                {% end %}
-            </span>
-        </div>
+                {%if item.priority>0%}[置顶]{%end%}
+                {{item.name}}
+                
+                <span class="book-size">
+                    {% if show_cdate %}
+                        {{format_date(item.ctime).replace('-', '/')}}
+                    {% end %}
+
+                    {% if show_mdate %}
+                        {{format_date(item.mtime).replace('-', '/')}}
+                    {% end %}
+                </span>
+            </div>
         </a>
     {% end %}
 </div>

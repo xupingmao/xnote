@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/06/28 02:08:23
+# @modified 2019/06/29 18:21:05
 
 import os
 import re
@@ -29,6 +29,7 @@ HTML = """
         <a class="btn" href="?action=build_index">构建索引</a>
         <a class="btn" href="?action=note_tags">迁移标签</a>
         <a class="btn" href="?action=schedule">迁移任务</a>
+        <a class="btn" href="?action=user">迁移用户</a>
     </div>
 
     <div class="top-offset-1">
@@ -71,6 +72,8 @@ class MigrateHandler(BasePlugin):
             result = migrate_note_tags()
         if action == "schedule":
             result = migrate_schedule()
+        if action == "user":
+            result = migrate_user()
 
         cost = int((time.time() - t1) * 1000)
         self.writetemplate(HTML, result = result, cost = cost)
@@ -225,6 +228,18 @@ def migrate_schedule():
         if data is None:
             dbutil.put(key, item)
     return "迁移完成!"
+
+def migrate_user():
+    count = 0
+    db = xtables.get_user_table()
+    for item in db.select():
+        name = item.name.lower()
+        key = "user:%s" % name
+        data = dbutil.get(key)
+        if data is None:
+            dbutil.put(key, item)
+            count += 1
+    return "迁移%s条数据" % count
 
 SCAN_HTML = """
 <div class="card">

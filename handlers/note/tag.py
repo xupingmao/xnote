@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/05/16 23:55:01
+# @modified 2019/06/29 01:20:09
 import math
 import xutils
 import xtemplate
@@ -84,6 +84,7 @@ class TagListHandler:
         else:
             tag_list  = xutils.call("note.list_tag", "")
         return xtemplate.render("note/taglist.html", 
+            html_title = "标签列表",
             show_aside = True,
             tag_list = tag_list)
 

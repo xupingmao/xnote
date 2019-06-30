@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/06/26 00:52:51
+# @modified 2019/06/30 10:51:27
 
 """资料的DAO操作集合
 
@@ -33,10 +33,10 @@ class FileDO(dict):
         self.id          = None
         self.related     = ''
         self.size        = 0
-        t                = dateutil.get_seconds()
-        self.mtime       = t
-        self.atime       = t
-        self.ctime       = t
+        now = dateutil.format_time()
+        self.mtime       = now
+        self.atime       = now
+        self.ctime       = now
         self.visited_cnt = 0
         self.name        = name
 

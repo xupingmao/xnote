@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2019/06/28 02:06:13
+# @modified 2019/07/01 00:30:45
 import os
 import time
 import xtemplate
@@ -23,11 +23,13 @@ OPTION_HTML = '''
 '''
 
 def readlines(fpath):
+    if not os.path.exists(fpath):
+        return []
     with open(fpath, encoding="utf-8") as fp:
         return fp.readlines()
 
-def get_log_path():
-    fname = time.strftime("xnote.%Y-%m-%d.log")
+def get_log_path(date):
+    fname = "xnote.%s.log" % date
     return os.path.join(xconfig.LOG_DIR, fname)
     
 class LogHandler(BasePlugin):
@@ -40,8 +42,12 @@ class LogHandler(BasePlugin):
         self.rows = 0
         self.render_options()
         type = xutils.get_argument("type", "tail_rev")
-        
-        fpath = get_log_path()
+        date = xutils.get_argument("date")
+        if not date:
+            date = time.strftime("%Y-%m-%d")
+        self.title = "xnote日志(%s)" % date
+
+        fpath = get_log_path(date)
         if type == "tail":
             return ''.join(readlines(fpath)[-100:])
         if type == "tail_rev":

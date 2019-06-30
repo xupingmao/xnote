@@ -4,15 +4,14 @@ import hashlib
 import copy
 import web
 import xconfig
-import xtables
 import xutils
-from xutils import ConfigParser, textutil
+from xutils import ConfigParser, textutil, dbutil
 from xconfig import Storage
 
 config = xconfig
 # 用户配置
 _users = None
-INVALID_NAMES = ["public", "deleted"]
+INVALID_NAMES = ["public", "deleted", "system"]
 
 def is_valid_username(name):
     """有效的用户名为字母+数字"""
@@ -37,17 +36,13 @@ def _get_users():
         mtime = "",
         token = gen_new_token())
 
-    if xutils.sqlite3 is None:
-        return _users
-
-    # defaults = read_users_from_ini("config/users.default.ini")
-    # customs  = read_users_from_ini("config/users.ini")
-    db = xtables.get_user_table()
-    db_users = db.select()
-
-    for user in db_users:
-        _users[user.name] = user
-    
+    user_list = dbutil.prefix_list("user")
+    for user in user_list:
+        if user.name is None:
+            xutils.trace("UserList", "invalid user %s" % user)
+            continue
+        name = user.name.lower()
+        _users[name] = user
     return _users
 
 def get_users():
@@ -66,6 +61,12 @@ def get_user(name):
     if xconfig.IS_TEST:
         return users.get("admin")
     return users.get(name)
+
+def find_by_name(name):
+    if name is None:
+        return None
+    name = name.lower()
+    return dbutil.get("user:%s" % name)
 
 def select_first(filter_func):
     users = _get_users()
@@ -158,35 +159,41 @@ def add_user(name, password):
         return
     if not is_valid_username(name):
         return dict(code="INVALID_NAME", message="非法的用户名")
-    db = xtables.get_user_table()
-    exist = db.select_first(where=dict(name=name))
-    if exist is None:
-        db.insert(name=name,password=password,
+
+    name  = name.lower()
+    found = find_by_name(name)
+    if found is not None:
+        found.mtime = xutils.format_time()
+        found.salt  = textutil.random_string(6)
+        found.token = gen_new_token()
+        found.password = password
+        update_user(name, found)
+    else:
+        user = Storage(name=name,
+            password=password,
             token=gen_new_token(),
             ctime=xutils.format_time(),
             salt=textutil.random_string(6),
             mtime=xutils.format_time())
-    else:
-        db.update(where=dict(name=name), 
-            password=password, 
-            token=gen_new_token(), 
-            salt=textutil.random_string(6),
-            mtime=xutils.format_time())
+        dbutil.put("user:%s" % name, user)
+        xutils.trace("UserAdd", name)
     refresh_users()
 
 def update_user(name, user):
     if name == "" or name == None:
         return
+    name = name.lower()
     mem_user = _users[name]
     mem_user.update(user)
-    db = xtables.get_user_table()
-    db.update(where = dict(name=name), **user)
+
+    dbutil.put("user:%s" % name, mem_user)
+    xutils.trace("UserUpdate", mem_user)
 
 def remove_user(name):
     if name == "admin":
         return
-    db = xtables.get_user_table()
-    db.delete(where=dict(name=name))
+    name = name.lower()
+    dbutil.delete("user:%s" % name)
     refresh_users()
 
 def has_login(name=None):

@@ -84,9 +84,9 @@
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 {% include common/mod_search.html %}
 <div id="app" class="col-md-12">
-    {% include "message/header.html" %}
-
     {# include common/mod_notice.html #}
+
+    {% include "message/header.html" %}
 
     <div class="message-input col-md-12 card">
         <textarea class="col-md-12 input-box" v-model="input" rows=4></textarea>
