@@ -4,7 +4,7 @@
 
 <div class="card">
     <div class="grid-title">
-        标签: {{tagname}}
+        <a href="/note/taglist">标签列表</a> / {{tagname}}
     </div>
     {% set page_url="/note/tagname/"+tagname+"?page=" %}
     {% include "note/note_list.html" %}

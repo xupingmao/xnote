@@ -73,6 +73,7 @@ $(function () {
     var width = 960;
     var maxWidth = $(window).width();
     var maxHeight = $(window).height();
+    var leftPartWidth = 200;
 
     var btnRight = (maxWidth - width) / 2 + 20;
     if (btnRight < 0) {
@@ -201,6 +202,13 @@ $(function () {
             getRightBot().fadeToggle(200);
         });
         initEventHandlers();
+        initPoweredBy();
+    }
+
+    function initPoweredBy() {
+        var divWidth = $("#poweredBy").width();
+        var left = (leftPartWidth - divWidth) / 2;
+        $("#poweredBy").css("left", left);
     }
 
     function showIframeDialog(src) {

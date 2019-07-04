@@ -4,11 +4,11 @@
   <!-- 保持对称 -->
   <div class="menu-box float-left">
     <ul class="nav-ul">
-      <li><a class="menu-link" href="/">{{T("Home")}}</a></li>
+      <li><a class="menu-link" href="/">{{T("笔记")}}</a></li>
 
       {% if _has_login %}
-        <li><a class="menu-link" href="/message?status=created">{{T("Msg")}}</a></li>
-        <li><a class="menu-link" href="/note/books">{{T("笔记本")}}</a></li>
+        <li><a class="menu-link" href="/message?status=created">{{T("Todo")}}</a></li>
+        <li><a class="menu-link" href="/fs_upload">{{T("文件")}}</a></li>
         <li><a class="menu-link" href="/plugins_list">{{T("Tool")}}</a></li>
         <li><a class="menu-link" href="/system/settings">{{T("Sys")}}</a></li>
       {% end %}
@@ -51,7 +51,7 @@
         <li><a href="/note/public">公开笔记</a></li>
         <li><a href="/note/recent_edit">最近更新</a></li>
         <li><a href="/note/taglist">标签列表</a></li>
-        <li><a href="/message?status=created">消息提醒</a></li> 
+        <li><a href="/message?status=created">待办事项</a></li> 
         <li><a href="/plugins_list">工具插件</a></li>       
         {% if _is_admin %}
           <li><a href="/fs_list">文件管理</a></li> 

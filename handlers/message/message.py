@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/06/12 23:16:15
+# @modified 2019/07/05 00:13:58
 
 """短消息"""
 import time
@@ -218,8 +218,8 @@ class MessageHandler:
             show_aside         = False,
             category           = "message",
             search_action      = "/message", 
-            html_title         = T("提醒"),
-            search_placeholder = T("搜索提醒"),
+            html_title         = T("待办"),
+            search_placeholder = T("搜索目标"),
             count_message      = count_message,
             key                = xutils.get_argument("key", ""))
 

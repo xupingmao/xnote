@@ -167,15 +167,7 @@
                 <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="False">显示
             </td>
         </tr>
-        <!--         
-        <tr class="admin-visible">
-            <td class="key">数据库引擎</td>
-            <td>
-                <input type="radio" name="DB_ENGINE" default-value="{{xconfig.DB_ENGINE}}" value="leveldb">leveldb
-                <input type="radio" name="DB_ENGINE" default-value="{{xconfig.DB_ENGINE}}" value="sqlite">sqlite
-            </td>
-        </tr>
-        -->
+
         <tr class="admin-visible">
             <td class="key">调试模式</td>
             <td>
@@ -204,6 +196,19 @@
                 <input type="radio" name="RECORD_LOCATION" default-value="{{xconfig.RECORD_LOCATION}}" value="False">关闭
             </td>
         </tr>
+
+        <tr class="admin-visible">
+            <td class="key">回收站清理</td>
+            <td>
+                <select name="TRASH_EXPIRE" data-type="int" value="{{xconfig.TRASH_EXPIRE}}">
+                    <option value="2592000">30天</option>
+                    <option value="7776000">90天</option>
+                    <option value="15552000">180天</option>
+                    <option value="31104000">360天</option>
+                </select>
+            </td>
+        </tr>
+
         <tr class="admin-visible">
             <td class="key">高级配置</td>
             <td>
@@ -237,9 +242,9 @@
 </div>
 
 <script type="text/javascript">
-    function updateSetting(key, value) {
+    function updateSetting(key, value, type) {
         $.post("/system/config", 
-            {key: key, value: value}, 
+            {key: key, value: value, type: type}, 
             function (data) {
                 window.location.reload();
         }).fail(function (resp) {
@@ -258,7 +263,8 @@
     $("select").change(function (e) {
         var key = $(this).attr("name");
         var val = $(this).val();
-        updateSetting(key, val);
+        var type = $(this).attr("data-type");
+        updateSetting(key, val, type);
     });
 </script>
 

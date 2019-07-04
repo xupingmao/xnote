@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/05/26 00:32:47
+# @modified 2019/07/04 22:38:02
 import web
 import time
 import os
@@ -215,8 +215,10 @@ class ConfigHandler:
 
     @xauth.login_required("admin")
     def POST(self):
-        key = xutils.get_argument("key")
+        key   = xutils.get_argument("key")
         value = xutils.get_argument("value")
+        type  = xutils.get_argument("type")
+        xutils.info("UpdateConfig", "%s,%s,%s" % (type, key, value))
 
         if key == "BASE_TEMPLATE":
             xmanager.reload()
@@ -225,7 +227,7 @@ class ConfigHandler:
         if key == "DEBUG":
             setattr(xconfig, key, value == "True")
             web.config.debug = xconfig.DEBUG
-        if key in ("RECENT_SEARCH_LIMIT", "RECENT_SIZE", "PAGE_SIZE"):
+        if key in ("RECENT_SEARCH_LIMIT", "RECENT_SIZE", "PAGE_SIZE", "TRASH_EXPIRE"):
             value = int(value)
         if key == "LANG":
             web.setcookie("lang", value)
@@ -240,7 +242,7 @@ def on_reload(ctx = None):
         "THEME", 'FS_HIDE_FILES', 'OPTION_STYLE', 
         'PAGE_OPEN', 'RECENT_SEARCH_LIMIT', 
         "PAGE_SIZE", "RECENT_SIZE",
-        "RECORD_LOCATION",
+        "RECORD_LOCATION", "TRASH_EXPIRE"
     )
     for key in keys:
         value = cacheutil.hget('sys.config', key)

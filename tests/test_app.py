@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/06/28 20:35:48
+# @modified 2019/07/04 23:00:00
 
 import sys
 import os
@@ -206,6 +206,7 @@ class TestMain(unittest.TestCase):
         self.check_200("/note/recent_created")
         self.check_200("/note/group/select")
         self.check_200("/note/date?year=2019&month=1")
+        self.check_200("/note/sticky")
 
     def test_note_share(self):
         json_request("/note/remove?name=xnote-share-test")

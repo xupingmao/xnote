@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/06/30 10:51:27
+# @modified 2019/07/03 23:38:39
 
 """资料的DAO操作集合
 
@@ -739,6 +739,13 @@ def count_by_type(creator, type):
         return value.type == type and value.creator == creator and value.is_deleted == 0
     return dbutil.prefix_count("note_tiny:%s" % creator, count_func)
 
+def list_sticky(creator):
+    def list_func(key, value):
+        return value.priority > 0 and value.creator == creator and value.is_deleted == 0
+    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func)
+    sort_notes(notes)
+    return notes
+
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
 xutils.register_func("note.visit",  visit_note)
@@ -764,6 +771,7 @@ xutils.register_func("note.list_by_date", list_by_date)
 xutils.register_func("note.list_by_tag", list_by_tag)
 xutils.register_func("note.list_removed", list_removed)
 xutils.register_func("note.list_by_type", list_by_type)
+xutils.register_func("note.list_sticky",  list_sticky)
 
 # count functions
 xutils.register_func("note.count_public", count_public)

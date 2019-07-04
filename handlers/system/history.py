@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2019/07/01 00:30:45
+# @modified 2019/07/04 22:41:07
 import os
 import time
 import xtemplate
@@ -14,10 +14,10 @@ from xtemplate import BasePlugin
 
 OPTION_HTML = '''
 <div class="row card">
-    <a class="btn" href="?type=tail_rev">tail(倒序)</a>
-    <a class="btn" href="?type=tail">tail</a>
-    <a class="btn" href="?type=head">head</a>
-    <a class="btn" href="?type=all">all</a>
+    <a class="x-tab" href="?type=tail_rev">tail(倒序)</a>
+    <a class="x-tab" href="?type=tail">tail</a>
+    <a class="x-tab" href="?type=head">head</a>
+    <a class="x-tab" href="?type=all">all</a>
 </div>
 
 '''

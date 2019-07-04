@@ -17,11 +17,12 @@
         <ul>
             {% if _has_login %}
                 <!-- 笔记选项 -->
-                <li><a class="link" href="/note/recent_created">{{T("Recent Created")}}</a></li>
-                <li><a class="link" href="/note/recent_edit">{{T("Recent Updated")}}</a></li>
-                <li><a class="link" href="/note/recent_viewed">{{T("Recent Viewed")}}</a></li>
-                <li><a class="link" href="/note/tools/timeline">{{T("笔记时光")}}</a></li>
-                <li><a class="link" href="/note/taglist">{{T("标签列表")}}</a></li>
+                <li><a href="/note/recent_created">{{T("Recent Created")}}</a></li>
+                <li><a href="/note/recent_edit">{{T("Recent Updated")}}</a></li>
+                <li><a href="/note/recent_viewed">{{T("Recent Viewed")}}</a></li>
+                <li><a href="/note/tools/timeline">{{T("笔记时光")}}</a></li>
+                <li><a href="/note/taglist">{{T("标签列表")}}</a></li>
+
                 {% if file_type == "md" or file_type == "html" %}
                     <li><a class="link" href="/note/history?id={{file_id}}">{{T("Note_History")}}</a></li>
                 {% end %}
@@ -37,10 +38,6 @@
             {% end %}
             
             <li><a class="link" href="/note/public">公开笔记</a></li>
-
-            {% if _is_admin %}
-                <li><a href="/plugins_list?category=note">扩展功能</a></li>
-            {% end %}
         </ul>
     </div>
 </div>

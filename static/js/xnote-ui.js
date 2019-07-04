@@ -5,7 +5,7 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2019/04/15 23:15:44
+ * @modified 2019/07/04 22:43:10
  */
 var XUI = function (window) {
   // 处理select标签选中情况
@@ -61,7 +61,7 @@ var XUI = function (window) {
     $(".x-tab").each(function (index, ele) {
       var link = $(ele).attr("href");
       var fullpath = location.href;
-      console.log(link, fullpath);
+      
       if (fullpath.indexOf(link) >= 0) {
         $(ele).addClass("tab-link-active");
         hasActive = true;

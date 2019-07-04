@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/06/22 21:37:58
+# @modified 2019/07/03 23:37:22
 import math
 import time
 import web
@@ -302,6 +302,20 @@ class DateHandler:
             month = int(month),
             notes = notes)
 
+class StickyHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        user  = xauth.current_name()
+        files = xutils.call("note.list_sticky", user)
+        return xtemplate.render(VIEW_TPL,
+            pathlist  = [PathNode("置顶笔记", "/note/sticky")],
+            file_type = "group",
+            files     = files,
+            show_aside = True,
+            show_mdate = True)
+
+
 xurls = (
     r"/note/group"          , GroupListHandler,
     r"/note/group_list"     , GroupListHandler,
@@ -309,6 +323,7 @@ xurls = (
     r"/note/ungrouped"      , Ungrouped,
     r"/note/public"         , PublicGroupHandler,
     r"/note/removed"        , RemovedHandler,
+    r"/note/sticky"         , StickyHandler,
     r"/note/recent_(created)" , RecentHandler,
     r"/note/recent_edit"    , RecentHandler,
     r"/note/recent_(viewed)", RecentHandler,

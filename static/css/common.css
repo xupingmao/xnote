@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/06/29 22:58:48
+ * @modified 2019/07/05 00:40:03
  */
 
 * {
@@ -198,16 +198,17 @@ a:hover {
 }
 
 /* TAB页的链接样式 */
-.tab-link {
+.tab-link, .x-tab {
     float: left;
     padding: 2px;
     cursor: pointer;
     margin-right: 5px;
     margin-bottom: 5px;
+    line-height: 20px;
     color: #ccc;
 }
 
-.tab-link:hover {
+.tab-link:hover, .x-tab:hover {
     color: #000;
 }
 
@@ -244,6 +245,17 @@ input[type=radio] {
     border-color: #204d74;
     cursor: pointer;
     text-decoration: none;
+}
+
+.btn-default {
+    color: black;
+    background-color: white;
+    border: 1px solid #ccc;
+}
+
+.btn-default:hover {
+    color: black;
+    background-color: #ccc;
 }
 
 .inline-btn {
