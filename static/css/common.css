@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/07/05 00:40:03
+ * @modified 2019/07/06 14:47:36
  */
 
 * {
@@ -701,6 +701,15 @@ li.menu-item:hover {
 }
 
 /** note-list样式 **/
+
+.note-list>a:last-child>.book-item {
+    border-bottom: none;
+}
+
+.book-list>a:last-child>.book-item {
+    border-bottom: none;
+}
+
 .tool-div {
     font-size: medium;
 }

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/07/03 23:37:22
+# @modified 2019/07/07 22:55:07
 import math
 import time
 import web
@@ -33,7 +33,7 @@ class GroupItem:
         self.url      = url
         self.mtime    = dateutil.format_time()
 
-class Ungrouped:
+class DefaultListHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -43,18 +43,19 @@ class Ungrouped:
         offset    = (page-1) * pagesize
         files     = xutils.call("note.list_note", user_name, 0, offset, pagesize)
         amount    = xutils.call("note.count", user_name, 0);
+        parent    = PathNode("智能分类", "/note/types")
 
         return xtemplate.render(VIEW_TPL,
             show_aside = True,
             file_type  = "group",
-            pathlist   = [Storage(name="未分类", type="group", url="/note/ungrouped")],
+            pathlist   = [parent, Storage(name="默认分类", type="group", url="/note/default")],
             files      = files,
-            file       = Storage(name="未分类", type="group"),
+            file       = Storage(name="默认分类", type="group"),
             page       = page,
             page_max   = math.ceil(amount / pagesize),
             groups     = xutils.call("note.list_group"),
             show_mdate = True,
-            page_url   = "/note/ungrouped?page=")
+            page_url   = "/note/default?page=")
 
 class MoveHandler:
     
@@ -111,9 +112,10 @@ class RemovedHandler:
 
         amount = xutils.call("note.count_removed", user_name)
         files  = xutils.call("note.list_removed", user_name, offset, limit)
+        parent = PathNode("智能分类", "/note/types")
 
         return xtemplate.render(VIEW_TPL,
-            pathlist  = [PathNode(T("回收站"), "/note/removed")],
+            pathlist  = [parent, PathNode(T("回收站"), "/note/removed")],
             file_type = "group",
             files     = files,
             page      = page,
@@ -139,8 +141,10 @@ class BaseListHandler:
         amount = xutils.call("note.count_by_type", user_name, self.note_type)
         files  = xutils.call("note.list_by_type",  user_name, self.note_type, offset, limit)
 
+        # 上级菜单
+        parent = PathNode("智能分类", "/note/types")
         return xtemplate.render(VIEW_TPL,
-            pathlist  = [PathNode(self.title, "/note/" + self.note_type)],
+            pathlist  = [parent, PathNode(self.title, "/note/" + self.note_type)],
             file_type = "group",
             files     = files,
             page      = page,
@@ -182,17 +186,20 @@ class TypeListHandler:
         offset = (page-1)*limit
 
         files = [
-            # GroupItem("相册", "/note/gallery"),
-            # GroupItem("表格", "/note/table"),
-            GroupItem("未分类", "/note/ungrouped"),
+            GroupItem("默认分类", "/note/default"),
             GroupItem("回收站", "/note/removed"),
+            GroupItem("最近更新", "/note/recent_edit"),
+            GroupItem("最近创建", "/note/recent_created"),
+            GroupItem("最近浏览", "/note/recent_viewed"),
+            GroupItem("相册", "/note/gallery"),
+            GroupItem("表格", "/note/table"),
             GroupItem("通讯录", "/note/addressbook"),
             GroupItem("富文本", "/note/html"),
         ]
         amount = len(files)
 
         return xtemplate.render(VIEW_TPL,
-            pathlist  = [PathNode("更多分类", "/note/types")],
+            pathlist  = [PathNode("智能分类", "/note/types")],
             file_type = "group",
             files     = files,
             show_aside = True,
@@ -228,16 +235,12 @@ class RecentHandler:
             files = xutils.call("note.list_recent_edit", None, offset, limit)
             time_attr = "mtime"
         
-        groups  = xutils.call("note.list_group", creator)
         count   = xutils.call("note.count_user_note", creator)
 
         return xtemplate.render("note/recent.html", 
             html_title  = html_title,
-            pathlist    = [Storage(name=T(html_title), type="group", url="/note/recent_" + orderby)],
             file_type   = "group",
             files       = files, 
-            file        = Storage(name=T(html_title), type="group"),
-            groups      = groups,
             show_notice = show_notice,
             show_mdate  = True,
             show_groups = False,
@@ -320,7 +323,8 @@ xurls = (
     r"/note/group"          , GroupListHandler,
     r"/note/group_list"     , GroupListHandler,
     r"/note/books"          , GroupListHandler,
-    r"/note/ungrouped"      , Ungrouped,
+    r"/note/default"        , DefaultListHandler,
+    r"/note/ungrouped"      , DefaultListHandler,
     r"/note/public"         , PublicGroupHandler,
     r"/note/removed"        , RemovedHandler,
     r"/note/sticky"         , StickyHandler,

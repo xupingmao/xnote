@@ -40,6 +40,7 @@ tools.md
 /handlers/experiment/
 **/.cache/
 .vscode/
+.pytest_cache/
 /testdir/
 /中文/
 .coverage
