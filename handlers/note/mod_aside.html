@@ -26,14 +26,6 @@
                 {% if file_type == "md" or file_type == "html" %}
                     <li><a class="link" href="/note/history?id={{file_id}}">{{T("Note_History")}}</a></li>
                 {% end %}
-                
-                {% if file_type == "gallery" %}
-                    <li><a href="/note/gallery">我的相册</a>
-                {% end %}
-
-                {% if file_type == "csv" %}
-                    <li><a href="/note/table">我的表格</a>
-                {% end %}
 
             {% end %}
             

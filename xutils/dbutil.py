@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/06/26 00:49:34
+# @modified 2019/07/08 00:04:51
 ###########################################################
 
 def search_escape(text):
@@ -351,6 +351,11 @@ def put(key, obj_value, sync = False):
     value = json.dumps(obj_value)
     # print("Put %s = %s" % (key, value))
     _leveldb.Put(key, value.encode("utf-8"), sync = sync)
+
+def insert(table_name, obj_value, sync = False):
+    key = new_id(table_name)
+    put(key, obj_value, sync)
+    return key
 
 def delete(key, sync = False):
     check_leveldb()

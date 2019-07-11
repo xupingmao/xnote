@@ -75,7 +75,7 @@ $(function () {
         data.splice(0, 0, head);
         var csvData = CSV.encode(data);
         console.log(csvData);
-        $.post("/note/save?type=csv", {id:{{file.id}}, version:{{file.version}}, content:csvData}, function (resp) {
+        $.post("/note/save?type=csv", {id:"{{file.id}}", version:{{file.version}}, content:csvData}, function (resp) {
             console.log(resp);
             if (resp.code == "success") {
                 // window.location.reload();

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/07/03 23:38:39
+# @modified 2019/07/08 23:25:56
 
 """资料的DAO操作集合
 
@@ -519,6 +519,9 @@ def list_recent_edit(parent_id = None, offset=0, limit=None):
             files.append(note)
     fill_parent_name(files)
     return files
+
+def list_most_visited(creator):
+    pass
 
 
 def list_by_date(field, creator, date):

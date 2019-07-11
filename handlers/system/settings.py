@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/07/04 22:38:02
+# @modified 2019/07/11 00:39:35
 import web
 import time
 import os
@@ -242,7 +242,8 @@ def on_reload(ctx = None):
         "THEME", 'FS_HIDE_FILES', 'OPTION_STYLE', 
         'PAGE_OPEN', 'RECENT_SEARCH_LIMIT', 
         "PAGE_SIZE", "RECENT_SIZE",
-        "RECORD_LOCATION", "TRASH_EXPIRE"
+        "RECORD_LOCATION", "TRASH_EXPIRE",
+        "PAGE_WIDTH"
     )
     for key in keys:
         value = cacheutil.hget('sys.config', key)

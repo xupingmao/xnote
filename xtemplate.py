@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/06/28 02:07:22
+# @modified 2019/07/08 01:31:08
 import os
 import json
 import web
@@ -188,6 +188,56 @@ def reload():
     _loader.reset()
     load_languages()
 
+
+class Input:
+    """输入文本框"""
+    def __init__(self, label, name, value):
+        pass
+
+class Textarea:
+
+    def __init__(self, label, name, value):
+        pass
+
+class TabLink:
+    """tab页链接"""
+    def __init__(self):
+        pass
+
+class SubmitButton:
+    """提交按钮"""
+
+    def __init__(self, label):
+        pass
+
+class ActionButton:
+    """查询后的操作行为按钮，比如删除、刷新等"""
+
+    def __init__(self, label, action, data = None):
+        pass
+
+class ConfirmButton:
+    """确认按钮"""
+
+    def __init__(self, label, action, data = None):
+        pass
+
+class PromptButton:
+    """询问输入按钮"""
+
+    def __init__(self, label, action, data = None):
+        pass
+
+class DataTable:
+    """数据表格"""
+
+    def __init__(self, headings, data):
+        """初始化数据表格
+        @param {dict} headings 表头
+        @param {dict} data 数据
+        """
+        pass
+
 class BasePlugin:
     """插件的基类"""
 
@@ -307,6 +357,10 @@ class BasePlugin:
             html        = self.html,
             search_action = self.search_action,
             search_placeholder = self.search_placeholder)
+
+    def on_action(self, action, data):
+        """处理各种按钮行为"""
+        pass
 
     def on_command(self, command):
         """命令行入口"""

@@ -1,8 +1,8 @@
 # encoding=utf-8
 # getip 
 # Created on 2017/09/26
+# @modified 2019/07/12 00:52:34
 import web
-import xtables
 import xutils
 
 class handler:

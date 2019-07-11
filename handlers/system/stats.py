@@ -7,6 +7,7 @@ import xauth
 import xtables
 import xutils
 import xconfig
+from xutils import dbutil
 
 def save_ip(real_ip):
     if real_ip is not None:
@@ -90,9 +91,8 @@ class LocationHandler:
     def POST(self):
         coords = xutils.get_argument("coords")
         if coords != "null":
-            db = xtables.get_record_table()
-            db.insert(type="location", key=xauth.get_current_name(), cdate=xutils.format_date(), 
-                ctime=xutils.format_datetime(), value=coords)
+            dbutil.insert("record:location", dict(type="location", key=xauth.get_current_name(), cdate=xutils.format_date(), 
+                ctime=xutils.format_datetime(), value=coords))
         return "{}"
 
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2019/07/04 22:41:07
+# @modified 2019/07/08 00:17:55
 import os
 import time
 import xtemplate
@@ -14,10 +14,10 @@ from xtemplate import BasePlugin
 
 OPTION_HTML = '''
 <div class="row card">
-    <a class="x-tab" href="?type=tail_rev">tail(倒序)</a>
-    <a class="x-tab" href="?type=tail">tail</a>
-    <a class="x-tab" href="?type=head">head</a>
-    <a class="x-tab" href="?type=all">all</a>
+    <a class="x-tab" href="?type=rev_tail">最近(倒序)</a>
+    <a class="x-tab" href="?type=tail">最近</a>
+    <a class="x-tab" href="?type=head">最早</a>
+    <a class="x-tab" href="?type=all">全部</a>
 </div>
 
 '''
@@ -41,7 +41,7 @@ class LogHandler(BasePlugin):
     def handle(self, content):
         self.rows = 0
         self.render_options()
-        type = xutils.get_argument("type", "tail_rev")
+        type = xutils.get_argument("type", "rev_tail")
         date = xutils.get_argument("date")
         if not date:
             date = time.strftime("%Y-%m-%d")
@@ -50,7 +50,7 @@ class LogHandler(BasePlugin):
         fpath = get_log_path(date)
         if type == "tail":
             return ''.join(readlines(fpath)[-100:])
-        if type == "tail_rev":
+        if type == "rev_tail":
             lines = readlines(fpath)[-100:]
             lines.reverse()
             return "".join(lines)

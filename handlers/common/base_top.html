@@ -6,6 +6,13 @@
 {% import xconfig %}
 {% init _user_name = None %}
 <title>Xnote{%if html_title%} | {{T(html_title)}}{%end%}</title>
+
+<style type="text/css">
+.root {
+  max-width: {{xconfig.PAGE_WIDTH}}px;
+}
+</style>
+
 <link rel="shortcut icon" href="/static/favicon.ico"/>
 <link rel="bookmark" href="/static/favicon.ico"/>
 <link rel="stylesheet" href="/static/css/common.css"/>

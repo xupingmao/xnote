@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/07/06 14:47:36
+ * @modified 2019/07/11 00:38:35
  */
 
 * {
@@ -502,7 +502,6 @@ li.menu-item:hover {
     margin-left: 0px;
     background-color:#fff; 
     margin: 0 auto;
-    max-width: 1150px;
 }
 
 .nav {

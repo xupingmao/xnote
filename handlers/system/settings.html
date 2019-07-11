@@ -48,6 +48,14 @@
         </tr>
 
         <tr class="user-visible">
+            <td class="key">笔记管理</td>
+            <td>
+                <a>数据统计</a> |
+                <a>批量操作</a>
+            </td>
+        </tr>
+
+        <tr class="user-visible">
             <td class="key">扩展功能</td>
             <td>
                 <a href="/fs_upload">上传管理</a> |
@@ -113,6 +121,15 @@
                 <input type="radio" name="OPTION_STYLE" default-value="{{xconfig.OPTION_STYLE}}" value="top">顶部
             </td>
         </tr>
+        
+        <tr class="admin-visible">
+            <td class="key">宽度</td>
+            <td>
+                <input type="radio" name="PAGE_WIDTH" default-value="{{xconfig.PAGE_WIDTH}}" value="1150">1150
+                <input type="radio" name="PAGE_WIDTH" default-value="{{xconfig.PAGE_WIDTH}}" value="900">900
+            </td>
+        </tr>
+
         <tr class="admin-visible">
             <td class="key">页面打开</td>
             <td>
@@ -152,7 +169,7 @@
         <tr class="admin-visible">
             <td class="key">{{T("Page Size")}}</td>
             <td>
-                <select name="PAGE_SIZE" value="{{xconfig.PAGE_SIZE}}">
+                <select name="PAGE_SIZE" data-type="int" value="{{xconfig.PAGE_SIZE}}">
                     <option value="20">20</option>
                     <option value="30">30</option>
                     <option value="50">50</option>
@@ -256,8 +273,9 @@
     $("[type=radio]").on("change", function (e) {
         var val = $(e.target).val();
         var key = $(e.target).attr("name");
+        var type = $(this).attr("data-type");
         // alert(val);
-        updateSetting(key, val);
+        updateSetting(key, val, type);
     });
 
     $("select").change(function (e) {

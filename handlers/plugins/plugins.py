@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/06/16 13:44:56
+# @modified 2019/07/07 23:17:41
 from io import StringIO
 import xconfig
 import codecs
@@ -236,6 +236,7 @@ class NewPluginHandler(BasePlugin):
         self.title = '通过模板创建插件'
         self.btn_text = '创建'
         self.rows = 1
+        self.editable = False
         if input != '':
             name = os.path.join(xconfig.PLUGINS_DIR, input)
             if not name.endswith(".py"):
@@ -269,6 +270,7 @@ class NewCommandPlugin(BasePlugin):
         self.description = '''请输入命令扩展名称'''
         self.btn_text = '创建'
         self.rows = 1
+        self.editable = False
         if input != '':
             name = os.path.join(xconfig.COMMANDS_DIR, input)
             if not name.endswith(".py"):

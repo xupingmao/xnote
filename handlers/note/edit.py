@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/06/15 19:39:46
+# @modified 2019/07/08 23:59:30
 
 """笔记编辑相关处理"""
 import os
@@ -17,6 +17,7 @@ from xutils import Storage
 from xutils import dateutil
 from xutils import cacheutil
 from xutils import dbutil
+from xutils import textutil
 from xtemplate import T
 
 def get_by_name(db, name):
@@ -100,7 +101,7 @@ class AddHandler:
         parent_id = xutils.get_argument("parent_id", "0")
 
         if key == "":
-            key = time.strftime("%Y.%m.%d")
+            key = time.strftime("%Y.%m.%d") + dateutil.current_wday()
 
         creator        = xauth.current_name()
         note           = Storage(name = name)
@@ -117,6 +118,7 @@ class AddHandler:
         note.priority  = 0
         note.version   = 0
         note.is_deleted = 0
+        note.tags       = textutil.split_words(tags)
 
         code = "fail"
         error = ""

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/06/28 01:08:14
+# @modified 2019/07/08 00:12:48
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -115,10 +115,12 @@ class WebModel:
         
 
 def log(msg):
-    six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
+    # six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
+    xutils.info("INIT", msg)
 
 def warn(msg):
-    six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
+    # six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
+    xutils.warn("INIT", msg)
 
 class ModelManager:
     """模块管理器

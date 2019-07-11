@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/04/30 23:12:26
+# @modified 2019/07/07 23:28:25
 
 import re
 import os
@@ -26,7 +26,7 @@ config = xconfig
 _rules = []
 # 初始化搜索记录
 if xconfig.search_history is None:
-    xconfig.search_history = History('search', 1000)
+    xconfig.search_history = History('search', xconfig.SEARCH_HISTORY_MAX_SIZE)
 
 class BaseRule:
 
@@ -72,7 +72,6 @@ class SearchContext:
         self.messages = []
 
 def fill_note_info(files):
-    db = xtables.get_note_table()
     for file in files:
         if file.category == "note":
             parent = xutils.call("note.get_by_id", file.parent_id)

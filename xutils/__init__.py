@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/07/04 22:38:46
+# @modified 2019/07/08 00:14:21
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -374,23 +374,26 @@ def log(fmt, show_logger = False, fpath = None, *argv):
         fpath = get_log_path()
     log_async(fpath, message)
 
-
-def trace(scene, message, cost=0):
-    # 这里在SAE上面有巨大的性能损耗
+def _write_log(level, metric, message, cost):
     import xauth
     fpath = get_log_path()
-    full_message = "%s|TRACE|%s|%s|%sms|%s" % (format_time(), 
-        xauth.current_name(), scene, cost, message)
+    user_name = xauth.current_name()
+    if user_name is None:
+        user_name = "-"
+    full_message = "%s|%s|%s|%s|%sms|%s" % (format_time(), level, user_name, metric, cost, message)
     print(full_message)
+    # 同步写在SAE上面有巨大的性能损耗
     log_async(fpath, full_message)
+
+def trace(metric, message, cost=0):
+    _write_log("TRACE", metric, message, cost)
+    
 
 def info(metric, message, cost=0):
-    import xauth
-    fpath = get_log_path()
-    full_message = "%s|INFO|%s|%s|%sms|%s" % (format_time(), 
-        xauth.current_name(), metric, cost, message)
-    print(full_message)
-    log_async(fpath, full_message)
+    _write_log("INFO", metric, message, cost)
+
+def warn(metric, message, cost=0):
+    _write_log("WARN", metric, message, cost)
 
 @async_func()
 def log_async(fpath, full_message):

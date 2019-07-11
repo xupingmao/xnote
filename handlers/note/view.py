@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/06/15 19:32:49
+# @modified 2019/07/08 23:47:20
 import profile
 import math
 import re
@@ -45,6 +45,8 @@ class ViewHandler:
         show_pagination = True
         show_search_div = False
 
+        if id == "0":
+            raise web.found("/")
         # 回收站的笔记也能看到
         if id == "" and name == "":
             raise HTTPError(504)

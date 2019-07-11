@@ -1,4 +1,10 @@
 {% set item = file %}
+{% set type_dict = dict(
+    md = "Markdown",
+    gallery = "相册",
+    html = "富文本",
+    csv = "表格"
+) %}
 
 {% if item != None and item.type != "group" %}
 <div class="col-md-12" style="border-bottom:1px solid #ccc"> 
@@ -29,8 +35,12 @@
     </div>
 
     <div>{{file.creator}} 创建于 {{file.ctime}} 更新于 {{file.mtime}} </div>
-    <span>字数: {{len(item.content)}}</span>
-    <span>行数: {{item.content.count("\n")}}</span>
+
+    <div class="row">
+        <span>字数: {{len(item.content)}}</span>
+        <span>行数: {{item.content.count("\n")}}</span>
+        <span>类型: <a href="/note/{{item.type}}">{{type_dict.get(item.type, item.type)}}</a></span>
+    </div>
 
     {% include note/view_tag.html %}
     <span id="result" style="color:green"></span>

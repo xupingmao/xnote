@@ -1,13 +1,12 @@
 # encoding=utf-8
-# @modified 2018/11/25 22:37:07
+# @modified 2019/07/12 00:52:07
 import web
 import time
 import hashlib
 import xutils
 import xauth
 import xtemplate
-import xtables
-from xutils import dateutil, cacheutil
+from xutils import dateutil, cacheutil, dbutil
 
 RETRY_LIMIT = 3
 
@@ -18,12 +17,12 @@ def get_real_ip():
     return web.ctx.env.get("REMOTE_ADDR")
 
 def save_login_info(name, value):
-    db = xtables.get_record_table()
     message = "%s-%s" % (get_real_ip(), value)
     if name != "":
-        db.insert(type="login", key=name, value=message, 
+        dbutil.insert("record:login", dict(type="login", 
+            key = name, value = message, 
             ctime = xutils.format_datetime(), 
-            cdate = xutils.format_date())
+            cdate = xutils.format_date()))
 
 class handler:
 

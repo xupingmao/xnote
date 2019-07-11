@@ -89,7 +89,7 @@
     {% include "message/header.html" %}
 
     <div class="message-input col-md-12 card">
-        <textarea class="col-md-12 input-box" v-model="input" rows=4></textarea>
+        <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" placeholder="快速记录灵感、备忘、任务等"></textarea>
         <input type="file" id="filePicker" class="hide" multiple/>
         <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
         <input type="button" name="" class="send-button btn" value="创建" @click="sendMessage()">

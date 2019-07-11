@@ -94,7 +94,7 @@ $("#saveToDbBtn").on("click", function () {
         var name = pass;
         var content = $("#content").val();
         $.post("/note/add", 
-            {"_format": "json", "name": name, "content": content, "type": "md"}, 
+            {"_format": "json", "name": name, "content": content, "type": "md", "tags": "来自网络"}, 
             function (responseText) {
                 console.log(responseText);
                 var data = responseText;

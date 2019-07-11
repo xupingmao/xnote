@@ -164,6 +164,7 @@ class handler:
                     name = name, 
                     content = content, 
                     type = "md", 
+                    tags = ["来自网络"],
                     creator = user_name)
 
             return xtemplate.render(self.template_path,

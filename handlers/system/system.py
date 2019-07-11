@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/05/26 00:32:43
+# @modified 2019/07/09 00:16:04
 """System functions"""
 from io import StringIO
 import xconfig
@@ -37,7 +37,7 @@ sys_tools = [
     admin_link("Menu_Scripts",    "/fs_link/scripts"),
     admin_link("Menu_Cron",   "/system/crontab"),
     admin_link("Menu_User",   "/system/user/list"),
-    admin_link("Menu_Log",    "/system/history"),
+    admin_link("Menu_Log",    "/system/log"),
     admin_link("Menu_Refresh",  "/system/reload"),
     admin_link("Menu_Modules",  "/system/modules_info"),
     admin_link("SQL",      "/tools/sql"),
@@ -55,8 +55,8 @@ doc_tools = [
     link("Recent Viewed",       "/note/recent_viewed"),
     link("Note Groups",         "/note/group"),
     link("Note Tags",           "/note/taglist"),
-    link("Uncategorized Notes", "/note/ungrouped"),
-    link("Timeline", "/tools/timeline"),
+    link("默认分类", "/note/default"),
+    link("笔记时光", "/tools/timeline"),
     link("Dictionary",          "/note/dict"),
 
     # 提醒

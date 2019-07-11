@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/07/07 22:55:07
+# @modified 2019/07/11 00:43:35
 import math
 import time
 import web
@@ -177,6 +177,18 @@ class HtmlListHandler(BaseListHandler):
         self.note_type = "html"
         self.title = "富文本"
 
+class MarkdownListHandler(BaseListHandler):
+
+    def __init__(self):
+        self.note_type = "md"
+        self.title = "Markdown"
+
+class ListHandler(BaseListHandler):
+
+    def __init__(self):
+        self.note_type = "list"
+        self.title = "清单"
+
 class TypeListHandler:
 
     def GET(self):
@@ -339,8 +351,11 @@ xurls = (
     # 笔记分类
     r"/note/gallery"        , GalleryListHandler,
     r"/note/table"          , TableListHandler,
+    r"/note/csv"            , TableListHandler,
     r"/note/html"           , HtmlListHandler,
     r"/note/addressbook"    , AddressBookHandler,
+    r"/note/md"             , MarkdownListHandler,
+    r"/note/list"           , ListHandler,
     r"/note/types"          , TypeListHandler,
     
     r"/file/group/removed"  , RemovedHandler,

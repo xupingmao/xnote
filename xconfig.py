@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/06/28 01:05:10
+# @modified 2019/07/11 00:35:24
 
 '''xnote系统配置
 
@@ -62,6 +62,8 @@ THEME              = "standard"
 OPTION_STYLE       = "aside"
 # 页面打开方式
 PAGE_OPEN          = "self"
+# 页面宽度
+PAGE_WIDTH         = "1150"
 
 # 插件相关
 LOAD_PLUGINS_ON_INIT = True
@@ -117,7 +119,7 @@ MUTE_END_TIME    = None
 # 分页数量
 PAGE_SIZE        = 20
 # 搜索历史的最大记录数
-SEARCH_HISTORY_MAX_SIZE  = 100
+SEARCH_HISTORY_MAX_SIZE  = 1000
 RECENT_SEARCH_LIMIT = 10
 RECENT_SIZE = 6
 
