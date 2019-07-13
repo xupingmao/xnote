@@ -34,7 +34,7 @@
                     </a>
                 </td>
                 <td class="option-td">
-                    {% if note.parent_id != 0 %}
+                    {% if note.parent_id != 0 and note.parent_id != "0" %}
                     <a href="/note/view?id={{note.parent_id}}">{{note.parent_name}}</a>
                     {% end %}
                 </td>

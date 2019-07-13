@@ -222,10 +222,10 @@ class TestMain(unittest.TestCase):
     def test_print_table(self):
         xutils.print_table([dict(name="a", age=10), dict(name="b", age=12)])
 
-    def test_http_get(self):
+    def skip_test_http_get(self):
         out = xutils.http_get("http://baidu.com")
 
-    def test_http_download(self):
+    def skip_test_http_download(self):
         fname = "baidu_tmp.html"
         xutils.http_download("http://baidu.com", fname)
         os.remove(fname)

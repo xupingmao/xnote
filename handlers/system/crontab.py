@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/05/22 01:07:07
+# @modified 2019/07/13 09:58:56
 
 """xnote定时任务配置"""
 import os
@@ -16,18 +16,8 @@ from xutils import dbutil, Storage
 SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
 
 
-def get_cron_links():
-    dirname = xconfig.SCRIPTS_DIR
-    links = []
+def get_api_links():
     API_PATH = os.path.join(xconfig.HANDLERS_DIR, "api")
-    TOOLS_DIR = xconfig.TOOLS_DIR
-    if os.path.exists(dirname):
-        for fname in os.listdir(dirname):
-            fpath = os.path.join(dirname, fname)
-            if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_TUPLE):
-                links.append("script://" + fname)
-    links.sort()
-
     api_links = []
     for fname in os.listdir(API_PATH):
         fpath = os.path.join(API_PATH, fname)
@@ -35,8 +25,10 @@ def get_cron_links():
         if name != "__init__" and os.path.isfile(fpath) and ext == ".py":
             api_links.append("/api/" + name)
     api_links.sort()
-    links += api_links
+    return api_links
 
+def get_tool_links():
+    TOOLS_DIR = xconfig.TOOLS_DIR
     tool_links = []
     for fname in os.listdir(TOOLS_DIR):
         fpath = os.path.join(TOOLS_DIR, fname)
@@ -44,7 +36,24 @@ def get_cron_links():
         if name != "__init__" and os.path.isfile(fpath) and ext == ".py":
             tool_links.append("/tools/" + name)
     tool_links.sort()
-    links += tool_links
+    return tool_links
+
+def get_script_links():
+    dirname = xconfig.SCRIPTS_DIR
+    links = []
+    if os.path.exists(dirname):
+        for fname in os.listdir(dirname):
+            fpath = os.path.join(dirname, fname)
+            if os.path.isfile(fpath) and fpath.endswith(SCRIPT_EXT_TUPLE):
+                links.append("script://" + fname)
+    links.sort()
+    return links
+
+def get_cron_links():
+    links = []
+    links += get_api_links()
+    # links += get_tool_links()
+    links += get_script_links()
     return links
 
 class CronEditHandler:
