@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/06/29 01:20:09
+# @modified 2019/07/14 17:14:27
 import math
 import xutils
 import xtemplate
@@ -12,10 +12,10 @@ from xutils import Storage
 class TagHandler:
     
     def GET(self, id):
-        note = xutils.call("note.get_by_id", id)
-        tags = None
-        if note and note.tags != None:
-            tags = [Storage(name=name) for name in note.tags]
+        creator = xauth.current_name()
+        tags    = xutils.call("note.get_tags", creator, id)
+        if tags != None:
+            tags = [Storage(name=name) for name in tags]
         if not isinstance(tags, list):
             tags = []
         return dict(code="", message="", data=tags)
@@ -26,16 +26,14 @@ class UpdateTagHandler:
     def POST(self):
         id        = xutils.get_argument("file_id")
         tags_str  = xutils.get_argument("tags")
-        tag_db    = xtables.get_file_tag_table()
         user_name = xauth.get_current_name()
         note      = xutils.call("note.get_by_id", id)
 
         if tags_str is None or tags_str == "":
-            # tag_db.delete(where=dict(file_id=id, user=user_name))
-            xutils.call("note.update", dict(id = id, creator = user_name), tags = [])
+            xutils.call("note.update_tags", note_id = id, creator = user_name, tags = [])
             return dict(code="success")
         new_tags = tags_str.split(" ")
-        xutils.call("note.update", dict(id = id, creator = user_name), tags = new_tags)
+        xutils.call("note.update_tags", note_id = id, creator = user_name, tags = new_tags)
         return dict(code="success", message="", data="OK")
 
     def GET(self):
@@ -53,15 +51,6 @@ class TagNameHandler:
             user_name = xauth.get_current_name()
         else:
             user_name = ""
-
-        # count_sql = "SELECT COUNT(1) AS amount FROM file_tag WHERE LOWER(name) = $name AND (user=$user OR is_public=1)"
-        # sql = "SELECT f.* FROM file f, file_tag ft ON ft.file_id = f.id WHERE LOWER(ft.name) = $name AND (ft.user=$user OR ft.is_public=1) ORDER BY f.ctime DESC LIMIT $offset, $limit"
-        # count = db.query(count_sql, vars=dict(name=tagname.lower(), user=user_name))[0].amount
-
-        # files = db.query(sql,
-        #     vars=dict(name=tagname.lower(), offset=offset, limit=limit, user=user_name))
-        # files = [dao.FileDO.fromDict(f) for f in files]
-
         files = xutils.call("note.list_by_tag", user_name, tagname)
         count = len(files)
 

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/06/20 22:52:16
+# @modified 2019/07/14 17:05:31
 import codecs
 import os
 import platform
@@ -73,7 +73,10 @@ def writefile(path, content):
     makedirs(dirname)
 
     with open(path, mode="wb") as fp:
-        if is_str(content):
+        if PY2 and isinstance(content, str):
+            # Python2 环境下, str和byte完全一样，不需要编码成utf8
+            buf = content
+        elif is_str(content):
             buf = codecs.encode(content, "utf-8")
         else:
             buf = content
@@ -106,11 +109,15 @@ def rmfile(path, hard = False):
         # 尝试转换一下path
         path = get_real_path(path)
         if not os.path.exists(path):
-            return
+            return False
     if os.path.isfile(path):
         if hard:
             os.remove(path)
-            return
+            return True
+        if os.path.islink(path):
+            # 软链接直接删除
+            os.remove(path)
+            return True
         dirname = os.path.dirname(path)
         dirname = os.path.abspath(dirname)
         dustbin = os.path.abspath(xconfig.TRASH_DIR)

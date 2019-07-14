@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/07/08 23:25:56
+# @modified 2019/07/14 17:31:59
 
 """资料的DAO操作集合
 
@@ -20,6 +20,7 @@ import xauth
 import xmanager
 from xutils import readfile, savetofile, sqlite3, Storage
 from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
+from xutils import attrget
 
 MAX_VISITED_CNT = 200
 readFile        = readfile
@@ -365,6 +366,7 @@ def delete_note(id):
         note.is_deleted = 1
         kv_put_note(id, note)
         update_children_count(note.parent_id)
+        delete_tags(note.creator, id)
 
 def get_vpath(record):
     pathlist = []
@@ -538,21 +540,6 @@ def list_by_date(field, creator, date):
     fill_parent_name(files)
     return files
 
-def list_by_tag(user, tagname):
-    if user is None:
-        user = "public"
-
-    def list_func(key, value):
-        if value.is_deleted:
-            return False
-        if value.tags is None:
-            return False
-        return tagname in value.tags
-    
-    files = dbutil.prefix_list("note_tiny:%s" % user, list_func)
-    sort_notes(files)
-    return files
-
 @xutils.timeit(name = "NoteDao.CountNote", logfile=True, logargs=True, logret=True)
 def count_user_note(creator):
     if xconfig.DB_ENGINE == "sqlite":
@@ -598,28 +585,6 @@ def count_note(creator, parent_id):
             return (value.is_public or value.creator == creator) and str(value.parent_id) == str(parent_id)
 
         return dbutil.prefix_count("note_tiny", list_note_func)
-
-
-def list_tag(user):
-    if user is None:
-        user = "public"
-
-    tags = dict()
-    def list_func(key, value):
-        if value.is_deleted:
-            return False
-        if value.tags is None:
-            return False
-        for tag in value.tags:
-            count = tags.get(tag, 0)
-            count += 1
-            tags[tag] = count
-    
-    dbutil.prefix_count("note_tiny:%s" % user, list_func)
-    
-    tag_list = [Storage(name = k, amount = tags[k]) for k in tags]
-    tag_list.sort(key = lambda x: -x.amount)
-    return tag_list
 
 @xutils.timeit(name = "NoteDao.FindPrev", logfile = True)
 def find_prev_note(note):
@@ -733,7 +698,7 @@ def list_removed(creator, offset, limit):
 def list_by_type(creator, type, offset, limit):
     def list_func(key, value):
         return value.type == type and value.creator == creator and value.is_deleted == 0
-    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
+    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
     sort_notes(notes)
     return notes
 
@@ -749,14 +714,71 @@ def list_sticky(creator):
     sort_notes(notes)
     return notes
 
+def get_tags(creator, note_id):
+    key = "note_tags:%s:%s" % (creator, note_id)
+    note_tags = dbutil.get(key)
+    if note_tags:
+        return attrget(note_tags, "tags")
+    return None
+
+def update_tags(creator, note_id, tags):
+    key = "note_tags:%s:%s" % (creator, note_id)
+    dbutil.put(key, Storage(note_id = note_id, tags = tags))
+
+def delete_tags(creator, note_id):
+    key = "note_tags:%s:%s" % (creator, note_id)
+    dbutil.delete(key)
+
+def list_by_tag(user, tagname):
+    if user is None:
+        user = "public"
+
+    def list_func(key, value):
+        if value.tags is None:
+            return False
+        return tagname in value.tags
+    
+    tags = dbutil.prefix_list("note_tags:%s" % user, list_func)
+    files = []
+    for tag in tags:
+        note = get_by_id(tag.note_id)
+        if note != None:
+            files.append(note)
+    sort_notes(files)
+    return files
+
+def list_tag(user):
+    if user is None:
+        user = "public"
+
+    tags = dict()
+    def list_func(key, value):
+        if value.tags is None:
+            return False
+        for tag in value.tags:
+            count = tags.get(tag, 0)
+            count += 1
+            tags[tag] = count
+    
+    dbutil.prefix_count("note_tags:%s" % user, list_func)
+    
+    tag_list = [Storage(name = k, amount = tags[k]) for k in tags]
+    tag_list.sort(key = lambda x: -x.amount)
+    return tag_list
+
+# write functions
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
 xutils.register_func("note.visit",  visit_note)
 xutils.register_func("note.count",  count_note)
 xutils.register_func("note.delete", delete_note)
+xutils.register_func("note.update_tags", update_tags)
+
+# query functions
 xutils.register_func("note.get_by_id", get_by_id)
 xutils.register_func("note.get_by_name", get_by_name)
 xutils.register_func("note.get_by_id_creator", get_by_id_creator)
+xutils.register_func("note.get_tags", get_tags)
 xutils.register_func("note.search_name", search_name)
 xutils.register_func("note.search_content", search_content)
 

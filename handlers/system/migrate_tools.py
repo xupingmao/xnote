@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/06/29 18:21:05
+# @modified 2019/07/14 17:27:22
 
 import os
 import re
@@ -15,13 +15,13 @@ import xmanager
 import xtables
 import xtemplate
 from xtemplate import BasePlugin
-from xutils import dbutil
+from xutils import dbutil, Storage
 
 HTML = """
 <!-- Html -->
 
 <div class="card">
-    xnote从2.3版本开始，数据库采用leveldb，不再使用sqlite，此工具用于把sqlite数据库数据迁移到leveldb
+    <p>xnote从2.3版本开始，数据库采用leveldb，不再使用sqlite</p>
 
     <div>
         <a class="btn" href="?action=note_full">迁移笔记主表</a>
@@ -192,6 +192,14 @@ def migrate_note_tags():
             # 更新入库
             dbutil.put(note_key, note)
             put_note_tiny(note)
+            count += 1
+
+    for item in dbutil.prefix_iter("note_tiny"):
+        note_id = str(item.id)
+        note_tag_key = "note_tags:%s:%s" % (item.creator, note_id)
+        note_tag = dbutil.get(note_tag_key)
+        if note_tag is None and item.tags != None:
+            dbutil.put(note_tag_key, Storage(note_id = note_id, tags = item.tags))
             count += 1
 
     return "迁移完成,标签数量: %s" % count

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/07/07 23:17:41
+# @modified 2019/07/14 17:01:17
 from io import StringIO
 import xconfig
 import codecs
@@ -243,7 +243,7 @@ class NewPluginHandler(BasePlugin):
                 name += ".py"
             if os.path.exists(name):
                 return u("文件[%s]已经存在!") % u(name)
-            user_name = xauth.get_current_name()
+            user_name = xauth.current_name()
             code = xconfig.get("NEW_PLUGIN_TEMPLATE", DEFAULT_PLUGIN_TEMPLATE)
             code = code.replace("$since", xutils.format_datetime())
             code = code.replace("$author", user_name)

@@ -43,14 +43,22 @@
         {{error}}
         </pre>
         {% end %}
+
         {% if rows > 0 %}
         <form method="{{method}}">
+            <!-- 输入框区域 BEGIN -->
             {% if rows == 1 %}
-            <input class="col-md-12" name="input" value="{{input}}" placeholder="{{model.placeholder}}"/>
+                <input class="col-md-12" name="input" value="{{input}}" placeholder="{{model.placeholder}}"/>
             {% else %}
-            <textarea class="col-md-12 code" name="input" rows={{rows}} placeholder="{{model.placeholder}}">{{input}}</textarea>
+                <textarea class="col-md-12 code" name="input" rows={{rows}} placeholder="{{model.placeholder}}">{{input}}</textarea>
             {% end %}
-            <button>{{model.btn_text}}</button>
+            <!-- 输入框区域 END -->
+
+            <!-- 按钮区域 BEGIN -->
+            <div class="row">
+                <button>{{model.btn_text}}</button>
+            </div>
+            <!-- 按钮区域 END -->
         </form>
         {% end %}
     </div>

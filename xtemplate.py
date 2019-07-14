@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/07/08 01:31:08
+# @modified 2019/07/14 16:56:08
 import os
 import json
 import web
@@ -188,6 +188,20 @@ def reload():
     _loader.reset()
     load_languages()
 
+class Panel:
+
+    def __init__(self):
+        self.children = []
+
+    def add(self, child):
+        self.children.append(child)
+
+    def render(self):
+        html = '<div class="row">'
+        for child in html:
+            html += child.render()
+        html += '</div>'
+        return html
 
 class Input:
     """输入文本框"""
@@ -213,19 +227,19 @@ class SubmitButton:
 class ActionButton:
     """查询后的操作行为按钮，比如删除、刷新等"""
 
-    def __init__(self, label, action, data = None):
+    def __init__(self, label, action, context = None):
         pass
 
 class ConfirmButton:
     """确认按钮"""
 
-    def __init__(self, label, action, data = None):
+    def __init__(self, label, action, context = None):
         pass
 
 class PromptButton:
     """询问输入按钮"""
 
-    def __init__(self, label, action, data = None):
+    def __init__(self, label, action, context = None):
         pass
 
 class DataTable:
@@ -318,11 +332,11 @@ class BasePlugin:
         if self.require_admin:
             xauth.check_login("admin")
         input  = self.get_input()
-        error  = ""
+        error  = u("")
         output = u("")
         try:
             self.page = self.get_page()
-            output = self.handle(input) or ""
+            output = self.handle(input) or u("")
             if self.get_format() == "text":
                 web.header("Content-Type", "text/plain; charset:utf-8")
                 return self.output + output
@@ -358,8 +372,12 @@ class BasePlugin:
             search_action = self.search_action,
             search_placeholder = self.search_placeholder)
 
-    def on_action(self, action, data):
-        """处理各种按钮行为"""
+    def on_action(self, name, context, input):
+        """处理各种按钮行为，包括 action/confirm/prompt 等按钮
+        @param {string} name 按钮名称
+        @param {object} context 上下文，渲染的时候放入的
+        @param {string/boolean} input 输入信息
+        """
         pass
 
     def on_command(self, command):
