@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/07/08 00:14:21
+# @modified 2019/07/18 23:52:41
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -394,6 +394,9 @@ def info(metric, message, cost=0):
 
 def warn(metric, message, cost=0):
     _write_log("WARN", metric, message, cost)
+
+def error(metric, message, cost=0):
+    _write_log("ERROR", metric, message, cost)
 
 @async_func()
 def log_async(fpath, full_message):

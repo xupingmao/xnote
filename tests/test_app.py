@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/07/04 23:00:00
+# @modified 2019/07/19 00:17:22
 
 import sys
 import os
@@ -307,6 +307,7 @@ class TestMain(unittest.TestCase):
         self.check_200("/system/settings")
         self.check_200("/system/network_profile?total_size=1024")
         self.check_200("/system/log")
+        self.check_200("/system/clipboard-monitor")
         # self.check_200("/system/pydoc")
 
     def test_api(self):

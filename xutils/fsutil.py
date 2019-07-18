@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/07/14 17:05:31
+# @modified 2019/07/19 00:00:53
 import codecs
 import os
 import platform
@@ -26,7 +26,7 @@ def makedirs(dirname):
     return False
 
 
-def readfile(path, mode = "r", limit = -1):
+def readfile(path, mode = "r", limit = -1, raise_error = True):
     '''读取文件，尝试多种编码，编码别名参考标准库`Lib/encodings/aliases.py`
     * utf-8 是一种边长编码，兼容ASCII
     * gbk 是一种双字节编码，全称《汉字内码扩展规范》，兼容GB2312
@@ -51,7 +51,8 @@ def readfile(path, mode = "r", limit = -1):
                     return content
         except Exception as e:
             last_err = e
-    raise Exception("can not read file %s" % path, last_err)
+    if raise_error:
+        raise Exception("can not read file %s" % path, last_err)
 
 def readlines(fpath, limit = -1):
     with open(fpath, encoding="utf-8") as fp:
@@ -67,12 +68,12 @@ def readlines(fpath, limit = -1):
 read      = readfile
 read_utf8 = readfile
 
-def writefile(path, content):
+def writefile(path, content, mode = "wb"):
     import codecs
     dirname = os.path.dirname(path)
     makedirs(dirname)
 
-    with open(path, mode="wb") as fp:
+    with open(path, mode=mode) as fp:
         if PY2 and isinstance(content, str):
             # Python2 环境下, str和byte完全一样，不需要编码成utf8
             buf = content
@@ -86,6 +87,9 @@ def writefile(path, content):
 savetofile = writefile
 savefile   = writefile
 writebytes = writefile
+
+def writeline(path, content, mode = "wb"):
+    writefile(path, content + "\n", mode)
 
 def readbytes(path):
     with open(path, "rb") as fp:
