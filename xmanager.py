@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/07/08 00:12:48
+# @modified 2019/07/22 00:06:24
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -318,6 +318,8 @@ class TaskManager:
         self.app = app
 
     def _match(self, current, pattern):
+        if pattern == "mod5":
+            return current % 5 == 0
         return str(current) == pattern or pattern == "*" or pattern == "no-repeat"
 
     def match(self, task, tm=None):

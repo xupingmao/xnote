@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/07/18 22:55:08
-# @modified 2019/07/19 00:05:38
+# @modified 2019/07/20 22:42:44
 import os
 import re
 import math
@@ -68,8 +68,7 @@ def watch_clipboard(ctx=None):
                 fsutil.makedirs(dirname)
 
                 fpath = get_current_log_path()
-                fsutil.writeline(fpath, "\n-------------------", "ab")
-                fsutil.writeline(fpath, dateutil.format_time(), "ab")
+                fsutil.writeline(fpath, "\n----- %s -----" % dateutil.format_time(), "ab")
                 fsutil.writeline(fpath, info, "ab")
                 last_paste = info
 xurls = (

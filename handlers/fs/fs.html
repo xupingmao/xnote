@@ -15,13 +15,18 @@
 
 {% init find_key = "" %}
 {% init error = "" %}
-{% set search_category = "fs" %}
+{% init show_fs_path = True %}
+{% init search_category = "fs" %}
 
 <div class="hide error row"></div>
 <div class="hide success row"></div>
 
 <div class="grid-card">
-{% include mod_fs_path.html %}
+
+{% if show_fs_path %}
+    {% include mod_fs_path.html %}
+{% end %}
+
 {% include fs/fs_options.html %}
 
 <div class="col-md-12 file-list">

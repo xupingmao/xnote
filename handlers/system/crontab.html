@@ -32,10 +32,7 @@
                 {% end %}
             </div>
         </td>
-        <td>{{xutils.wday_map[task.tm_wday]}} 
-            {% if task.tm_hour == "*" %} 每小时 {% else %} {{task.tm_hour}}时 {% end %}
-            {% if task.tm_min == "*" %} 每分钟 {% else %} {{task.tm_min}}分 {% end %} 
-        </td>
+        <td>{{ display_time_rule(task) }}</td>
         <td style="width:110px;">
             {% if task.id %}
             <input class="dialog-btn" type="button" value="编辑" 

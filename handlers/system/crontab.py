@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/07/13 09:58:56
+# @modified 2019/07/20 22:57:18
 
 """xnote定时任务配置"""
 import os
@@ -55,6 +55,22 @@ def get_cron_links():
     # links += get_tool_links()
     links += get_script_links()
     return links
+
+def display_time_rule(task):
+    week = xutils.wday_map[task.tm_wday]
+    hour = "每小时"
+    if task.tm_hour != "*":
+        hour = "%s时" % task.tm_hour
+
+    if task.tm_min == "*":
+        minute = "每分钟"
+    if task.tm_min == "mod5":
+        minute = "每5分钟"
+    else:
+        minute = "%s分" % task.tm_min
+
+    return "%s %s %s" % (week, hour, minute)
+
 
 class CronEditHandler:
 
@@ -138,7 +154,8 @@ class ListHandler:
         task_list = list(map(set_display_name, task_list))
         return xtemplate.render("system/crontab.html", 
             show_aside = False,
-            task_list = task_list)
+            task_list = task_list,
+            display_time_rule = display_time_rule)
 
 
     @xauth.login_required("admin")

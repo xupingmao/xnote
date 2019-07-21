@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/07/14 16:56:08
+# @modified 2019/07/22 00:09:59
 import os
 import json
 import web
@@ -197,7 +197,7 @@ class Panel:
         self.children.append(child)
 
     def render(self):
-        html = '<div class="row">'
+        html = '<div class="row x-plugin-panel">'
         for child in html:
             html += child.render()
         html += '</div>'
@@ -206,7 +206,16 @@ class Panel:
 class Input:
     """输入文本框"""
     def __init__(self, label, name, value):
-        pass
+        self.label = label
+        self.name = name
+        self.value = value
+
+    def render(self):
+        html  = '<div class="x-plugin-input">'
+        html +=   '<label class="x-plugin-input-label">%s</label>' % self.label
+        html +=   '<input class="x-plugin-input-text" name="%s" value="%s">' % (self.name, self.value)
+        html += '</div>'
+        return html
 
 class Textarea:
 
@@ -280,6 +289,14 @@ class BasePlugin:
     # 输入框默认文案
     placeholder     = u("")
     editable        = True
+
+    # 工具分为header、body、footer几个部分
+    # * header展示输入面板
+    # * body展示主数据（包括分页）
+    # * footer 展示相关操作
+    header = Panel()
+    body   = Panel()
+    footer = Panel()
     
     def __init__(self):
         # 输入框的行数

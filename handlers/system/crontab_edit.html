@@ -39,6 +39,7 @@
                 </select>
                 分钟:<select name="tm_min" value="{{item.tm_min}}">
                     <option value="*">每分钟</option>
+                    <option value="mod5">每5分钟</option>
                     {% for tm_min in range(0, 60, 5) %}
                     <option value="{{tm_min}}">{{tm_min}}</option>
                     {% end %}
