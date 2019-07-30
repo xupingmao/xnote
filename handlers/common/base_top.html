@@ -64,6 +64,12 @@
   .main {
     padding: 0px;
   }
+  .nav {
+    display: none;
+  }
+  .nav-left {
+    display: none;
+  }
 </style>
 {% end %}
 
@@ -76,7 +82,7 @@
 </style>
 {% end %}
 
-{# 侧边栏是否显示 #}
+{# 侧边栏(右侧)是否显示 #}
 {% if not show_aside %}
 <style type="text/css">
 .main-content {

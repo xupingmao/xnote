@@ -23,6 +23,10 @@
     <div class="plugin-head">
 
         <div class="grid-title">
+            {% if model.category %}
+                <a class="link2" href="/plugins_list?category={{model.category}}">上一级</a> /
+            {% end %}
+            
             {{title}}
             <span class="float-right">
                 {% if _is_admin and model.editable %}

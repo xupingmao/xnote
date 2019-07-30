@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/05/25 12:45:52
+# @modified 2019/07/30 00:26:43
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -190,6 +190,9 @@ class FileSystemHandler:
             return xtemplate.render("fs/fs_grid.html", **kw)
         elif mode == "shell":
             return xtemplate.render("fs/fs_shell.html", **kw)
+        elif mode == "sidebar":
+            kw["show_aside"] = False
+            return xtemplate.render("fs/fs_sidebar.html", **kw)
         else:
             return xtemplate.render("fs/fs.html", **kw)
 

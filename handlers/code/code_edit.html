@@ -65,6 +65,20 @@
       opacity: .5;
     }
 </style>
+
+{% if embed == "true" %}
+    <style type="text/css">
+        .nav, .fs-path {
+            display: none;
+        }
+
+        .grid-card {
+            border-radius: 0px;
+            border: none;
+        }
+    </style>
+{% end %}
+
 {% end %}
 
 {% block body %}

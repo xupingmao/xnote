@@ -109,6 +109,7 @@
                 <template v-if="message.editable">
                     <textarea class="input-box col-md-12" v-bind:rows="message.content.count('\n')+3" v-model="message.content"></textarea>
                     <input type="button" value="更新" v-on:click="updateMessage(message)">
+                    <input type="button" value="删除" class="btn-danger" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" @click="deleteMessage($event)">
                     <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel">
                 </template>
                 <div v-else>
@@ -127,8 +128,8 @@
                     <div class="col-md-12">
                         <p class="chat-msg-option">
                             <span class="chat-msg-time">{{! message.ctime }}</span>
-                            <span class="inline-tag in-progress" v-if="message.status==0">关注</span>
-                            <a class="smallText" v-if="message.status!=0" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">关注</a>
+                            <span class="inline-tag in-progress" v-if="message.status==0">待办</span>
+                            <a class="smallText" v-if="message.status!=0" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">待办</a>
 
                             <span class="inline-tag suspended" v-if="message.status==50">挂起</span>
                             <a class="smallText" v-if="message.status!=50" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateStatus($event, 50)">挂起</a>
@@ -137,7 +138,7 @@
                             <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
                             
                             <a class="smallText" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
-                            <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" style="color: red;" @click="deleteMessage($event)">删除</a> 
+                           <!-- <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" style="color: red;" @click="deleteMessage($event)">删除</a>  -->
                         </p>
                     </div>
                 </div>

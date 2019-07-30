@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/??/??
-# @modified 2019/01/27 01:09:38
+# @modified 2019/07/30 00:44:19
 
 """显示代码原文"""
 import os
@@ -31,6 +31,8 @@ class ViewSourceHandler:
         key  = xutils.get_argument("key", "")
         type = xutils.get_argument("type", "")
         readonly = False
+        embed  = xutils.get_argument("embed", "false")
+        
         if path == "":
             return xtemplate.render(template_name, 
                 content = "",
@@ -59,7 +61,9 @@ class ViewSourceHandler:
                     pathlist = xutils.splitpath(path),
                     name = os.path.basename(path), 
                     path = path,
-                    content = content, lines = content.count("\n")+1)
+                    content = content, 
+                    embed = embed,
+                    lines = content.count("\n")+1)
             except Exception as e:
                 xutils.print_exc()
                 error = e
@@ -68,6 +72,7 @@ class ViewSourceHandler:
                 path = path,
                 name = "",
                 readonly = readonly,
+                embed = embed,
                 error = error, lines = 0, content="")
 
 

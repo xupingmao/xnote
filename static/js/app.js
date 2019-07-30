@@ -202,13 +202,6 @@ $(function () {
             getRightBot().fadeToggle(200);
         });
         initEventHandlers();
-        initPoweredBy();
-    }
-
-    function initPoweredBy() {
-        var divWidth = $("#poweredBy").width();
-        var left = (leftPartWidth - divWidth) / 2;
-        $("#poweredBy").css("left", left);
     }
 
     function showIframeDialog(src) {

@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/07/11 00:38:35
+ * @modified 2019/07/24 01:36:02
  */
 
 * {
@@ -247,35 +247,28 @@ input[type=radio] {
     text-decoration: none;
 }
 
-.btn-default {
+.btn-default, .btn-cancel {
     color: black;
-    background-color: white;
+    background-color: #eee;
     border: 1px solid #ccc;
 }
 
-.btn-default:hover {
+.btn-default:hover, .btn-cancel:hover {
     color: black;
     background-color: #ccc;
 }
 
-.inline-btn {
-    margin-top: 0px;
-}
 
 .btn-danger {
-    background-color: red;
+    background-color: #f00;
 }
 
 .btn-danger:hover {
-    background-color: red;
+    background-color: #c00;
 }
 
-.btn-cancel {
-    background-color: red;
-}
-
-.btn-cancel:hover {
-    background-color: red;
+.inline-btn {
+    margin-top: 0px;
 }
 
 .prompt-btn:hover {
@@ -396,7 +389,7 @@ table td {
   background-color: #428bca;
 }
 
-.hide {
+.hide, .hidden {
     display: none;
 }
 
@@ -582,6 +575,7 @@ li.menu-item:hover {
     padding-right: 30px;
     float: left;
     display: block;
+    border: 1px solid #ccc;
 }
 
 .nav-search-btn {
