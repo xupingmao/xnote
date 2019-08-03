@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/07/11 00:39:35
+# @modified 2019/08/03 16:08:23
 import web
 import time
 import os
@@ -232,6 +232,11 @@ class ConfigHandler:
         if key == "LANG":
             web.setcookie("lang", value)
 
+        if type == "int":
+            value = int(value)
+        if type == "bool":
+            value = value.lower() in ("true", "yes", "on")
+
         setattr(xconfig, key, value)
         cacheutil.hset('sys.config', key, value)
         return dict(code="success")
@@ -243,7 +248,7 @@ def on_reload(ctx = None):
         'PAGE_OPEN', 'RECENT_SEARCH_LIMIT', 
         "PAGE_SIZE", "RECENT_SIZE",
         "RECORD_LOCATION", "TRASH_EXPIRE",
-        "PAGE_WIDTH"
+        "PAGE_WIDTH", "FS_VIEW_MODE"
     )
     for key in keys:
         value = cacheutil.hget('sys.config', key)

@@ -122,6 +122,17 @@
                 <input type="radio" name="OPTION_STYLE" default-value="{{xconfig.OPTION_STYLE}}" value="top">顶部
             </td>
         </tr>
+
+        <tr class="admin-visible">
+            <td class="key">文件视图</td>
+            <td>
+                <select name="FS_VIEW_MODE" data-type="str" value="{{xconfig.FS_VIEW_MODE}}">
+                    <option value="list">列表</option>
+                    <option value="grid">网格</option>
+                    <option value="sidebar">侧栏</option>
+                </select>
+            </td>
+        </tr>
         
         <tr class="admin-visible">
             <td class="key">宽度</td>

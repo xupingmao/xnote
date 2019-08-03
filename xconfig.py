@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/07/13 10:31:37
+# @modified 2019/08/03 16:06:11
 
 '''xnote系统配置
 
@@ -137,6 +137,8 @@ FS_COL_SEP       = "$"
 FS_HIDE_FILES    = True
 # 文件管理扩展的选项,类型Storage
 FS_LINK          = "/fs_list"
+# 文件浏览模式 list/grid/sidebar
+FS_VIEW_MODE     = "list"
 # 文本文件后缀
 FS_TEXT_EXT_LIST = set([
     ".java",  # Java

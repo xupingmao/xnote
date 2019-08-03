@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/07/30 00:26:43
+# @modified 2019/08/03 16:09:04
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -184,7 +184,7 @@ class FileSystemHandler:
         kw["search_action"] = "/fs_find"
         kw["show_aside"]   = True
 
-        mode = xutils.get_argument("mode")
+        mode = xutils.get_argument("mode", xconfig.FS_VIEW_MODE)
         kw["fs_mode"] = mode
         if mode == "grid":
             return xtemplate.render("fs/fs_grid.html", **kw)
