@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/07/08 23:47:20
+# @modified 2019/08/03 15:56:09
 import profile
 import math
 import re
@@ -126,8 +126,8 @@ class ViewHandler:
             xmanager.fire("note.recommend", ctx)
             recommended_notes = ctx.result
 
-            next_note = xutils.call("note.find_next_note", file)
-            prev_note = xutils.call("note.find_prev_note", file)
+            next_note = xutils.call("note.find_next_note", file, user_name)
+            prev_note = xutils.call("note.find_prev_note", file, user_name)
         
         xmanager.fire("note.view", file)
         show_aside = True

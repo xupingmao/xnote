@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/14
-# @modified 2019/06/04 23:25:03
+# @modified 2019/08/03 15:51:25
 import os
 import six
 import xconfig
@@ -10,6 +10,7 @@ import xmanager
 from xutils import SearchResult, u, textutil
 
 def search_scripts(name):
+    words   = textutil.split_words(name)
     results = []
     for fname in xutils.listdir(xconfig.SCRIPTS_DIR):
         fpath = os.path.join(xconfig.SCRIPTS_DIR, fname)
@@ -17,7 +18,7 @@ def search_scripts(name):
             continue
         if fname.endswith(".zip"):
             continue
-        if name in fname:
+        if textutil.contains_all(fname, words):
             result         = xutils.SearchResult()
             result.name    = xutils.u("[脚本] ") + fname
             result.raw     = xutils.u("搜索到可执行脚本 - ") + fname

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/07/14 17:31:59
+# @modified 2019/08/03 15:55:26
 
 """资料的DAO操作集合
 
@@ -587,7 +587,7 @@ def count_note(creator, parent_id):
         return dbutil.prefix_count("note_tiny", list_note_func)
 
 @xutils.timeit(name = "NoteDao.FindPrev", logfile = True)
-def find_prev_note(note):
+def find_prev_note(note, user_name):
     # where = "parent_id = $parent_id AND name < $name ORDER BY name DESC LIMIT 1"
     # table = xtables.get_file_table()
     # return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
@@ -597,7 +597,7 @@ def find_prev_note(note):
         if value.is_deleted:
             return False
         return str(value.parent_id) == parent_id and value.name < note_name
-    result = dbutil.prefix_list("note_tiny:%s" % note.creator, find_prev_func)
+    result = dbutil.prefix_list("note_tiny:%s" % user_name, find_prev_func)
     result.sort(key = lambda x:x.name, reverse=True)
     if len(result) > 0:
         return result[0]
@@ -606,7 +606,7 @@ def find_prev_note(note):
 
 
 @xutils.timeit(name = "NoteDao.FindNext", logfile = True)
-def find_next_note(note):
+def find_next_note(note, user_name):
     # where = "parent_id = $parent_id AND name > $name ORDER BY name ASC LIMIT 1"
     # table = xtables.get_file_table()
     # return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
@@ -616,7 +616,7 @@ def find_next_note(note):
         if value.is_deleted:
             return False
         return str(value.parent_id) == parent_id and value.name > note_name
-    result = dbutil.prefix_list("note_tiny:%s" % note.creator, find_next_func)
+    result = dbutil.prefix_list("note_tiny:%s" % user_name, find_next_func)
     result.sort(key = lambda x:x.name)
     # print([x.name for x in result])
     if len(result) > 0:
