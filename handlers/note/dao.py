@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/08/03 15:55:26
+# @modified 2019/08/04 20:15:22
 
 """资料的DAO操作集合
 
@@ -194,6 +194,9 @@ def get_by_id(id, db=None, include_full = True):
         note.url = "/note/view?id=%s" % note.id
     return note
 
+# def get_tiny_by_id(user_name, id):
+#     return dbutil.get("note_tiny:%s:%020d" % (user_name, int(id)))
+
 def get_by_id_creator(id, creator, db=None):
     note = get_by_id(id)
     if note and note.creator == creator:
@@ -243,6 +246,10 @@ def update_note_rank(note):
         dbutil.zadd("note_visit:%s" % creator, atime, note_id)
         if note.is_public:
             dbutil.zadd("note_recent:public", mtime, note_id)
+
+# def put_tiny(note_tiny):
+#     key = "note_tiny:%s:%020d" % (note_tiny.creator, int(note_tiny.id))
+#     dbutil.put(key, note_tiny)
 
 def kv_put_note(note_id, note):
     priority = note.priority
@@ -724,6 +731,11 @@ def get_tags(creator, note_id):
 def update_tags(creator, note_id, tags):
     key = "note_tags:%s:%s" % (creator, note_id)
     dbutil.put(key, Storage(note_id = note_id, tags = tags))
+
+    note = get_by_id(note_id)
+    if note != None:
+        note.tags = tags
+        kv_put_note(note_id, note)
 
 def delete_tags(creator, note_id):
     key = "note_tags:%s:%s" % (creator, note_id)

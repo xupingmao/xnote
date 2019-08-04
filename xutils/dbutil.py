@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/07/08 00:04:51
+# @modified 2019/08/04 20:10:44
 ###########################################################
 
 def search_escape(text):
@@ -488,6 +488,15 @@ def prefix_count(prefix, filter_func = None):
         return True
     prefix_scan(prefix, func)
     return count[0]
+
+def count_table(table_name):
+    key_from = ("%s:" % table_name).encode("utf-8")
+    key_to   = ("%s:f" % table_name).encode("utf-8")
+    iterator = _leveldb.RangeIter(key_from, key_to, include_value = False)
+    count = 0
+    for key in iterator:
+        count += 1
+    return count
 
 def zadd(key, score, member):
     obj = get(key)
