@@ -81,7 +81,8 @@
     }
 
     function loadMore() {
-      $.get("/note/timeline?_type=json", 
+      var type = getUrlParam("type");
+      $.get("/note/timeline?_type=json&type=" + type, 
         { 
           offset: window.offset,
           limit : QUERY_LIMIT

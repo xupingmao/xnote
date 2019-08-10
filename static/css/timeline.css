@@ -5,6 +5,11 @@ p,h3 {
 
 article,section,time,aside{display:block;}
 
+article {
+  float: left;
+  width: 100%;
+}
+
 body {
   /*color: #9f9f9f;*/
   /*background: #fff;*/
@@ -73,13 +78,14 @@ body {
   position: relative;
 }
 .content article > h3 {
-  width: 15%;
+  /*width: 15%;*/
   height: 20px;
   line-height: 20px;
-  text-align: right;
+  /*text-align: right;*/
   font-size: 1.4em;
   color: #1d1d1d;
   padding: 10px 0 20px;
+  padding-left: 10%;
 }
 .content article section {
   /*padding: 0 0 17px;*/

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2019/06/28 20:26:08
+# @modified 2019/08/10 13:41:07
 
 """Description here"""
 import re
@@ -9,17 +9,26 @@ import xutils
 import xtables
 import xtemplate
 
-class handler:
+class TimelineAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
         offset = xutils.get_argument("offset", 0, type=int)
         limit  = xutils.get_argument("limit", 20, type=int)
+        type   = xutils.get_argument("type")
         user_name  = xauth.current_name()
-        rows = xutils.call("note.list_recent_created", None, offset, limit)
+
+        if type == "mtime":
+            rows = xutils.call("note.list_recent_edit", user_name, offset, limit)
+        else:
+            rows = xutils.call("note.list_recent_created", None, offset, limit)
         result = dict()
         for row in rows:
-            date = re.match(r"\d+\-\d+", row.ctime).group(0)
+            if type == "mtime":
+                date_time = row.mtime
+            else:
+                date_time = row.ctime
+            date = re.match(r"\d+\-\d+", date_time).group(0)
             row.url = "/note/view?id={}".format(row.id);
             # 优化数据大小
             row.content = ""
@@ -55,10 +64,10 @@ class TimelineHandler:
 
     @xauth.login_required()
     def GET(self):
-        return xtemplate.render("note/timeline.html", show_aside = True)
+        return xtemplate.render("note/timeline.html", show_aside = False)
 
 xurls = (
-    r"/note/timeline", handler,
+    r"/note/timeline", TimelineAjaxHandler,
     r"/note/timeline/month", DateTimeline,
     r"/note/tools/timeline", TimelineHandler,
 )
