@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/08/04 20:15:22
+# @modified 2019/08/10 23:50:58
 
 """资料的DAO操作集合
 
@@ -778,6 +778,13 @@ def list_tag(user):
     tag_list.sort(key = lambda x: -x.amount)
     return tag_list
 
+def list_comments(note_id):
+    return dbutil.prefix_list("note_comment:%s" % note_id, reverse = True)
+
+def save_comment(comment):
+    key = "note_comment:%s:%s" % (comment["note_id"], dbutil.timeseq())
+    dbutil.put(key, comment)
+
 # write functions
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
@@ -824,4 +831,10 @@ xutils.register_func("note.update_priority", update_priority)
 xutils.register_func("note.add_history", add_history)
 xutils.register_func("note.list_history", list_history)
 xutils.register_func("note.get_history", get_history)
+
+# comments
+xutils.register_func("note.list_comments", list_comments)
+xutils.register_func("note.save_comment", save_comment)
+
+
 

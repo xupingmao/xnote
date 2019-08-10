@@ -210,6 +210,10 @@ img {
         </div>
     {% end %}
 
+    {% if file_type != "group" %}
+        {% include note/comment.html %}
+    {% end %}
+
     {% if show_pagination and "page" in globals() %}
     <div class="card">
         {% include mod_pagenation.html %}
