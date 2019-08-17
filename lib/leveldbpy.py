@@ -54,9 +54,17 @@ import ctypes
 import ctypes.util
 import weakref
 import threading
+import platform
 from collections import namedtuple
 
-_ldb = ctypes.CDLL(ctypes.util.find_library('leveldb'))
+_dll_name = "leveldb"
+
+if platform.architecture()[0] == "64bit":
+    _dll_name = "leveldb-x64"
+else:
+    _dll_name = "leveldb"
+
+_ldb = ctypes.CDLL(ctypes.util.find_library(_dll_name))
 # _ldb = ctypes.CDLL('./lib/leveldb.dll')
 
 _ldb.leveldb_filterpolicy_create_bloom.argtypes = [ctypes.c_int]
