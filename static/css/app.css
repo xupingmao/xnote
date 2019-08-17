@@ -2,7 +2,7 @@
  * 应用相关的CSS样式
  * @author xupingmao
  * @since 2019/06/16
- * @modified 2019/08/11 00:13:20
+ * @modified 2019/08/14 23:42:16
 */
 
 .recent-note-date {
@@ -77,6 +77,14 @@
 
 .comment-content {
     font-style: italic;
+}
+
+.menu-aside {
+    display: none;
+}
+
+.markdown-output-div {
+    margin-top: 10px;
 }
 
 @media screen and (max-width: 400px) {

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/07/11 00:43:35
+# @modified 2019/08/15 00:18:32
 import math
 import time
 import web
@@ -200,6 +200,7 @@ class TypeListHandler:
         files = [
             GroupItem("默认分类", "/note/default"),
             GroupItem("回收站", "/note/removed"),
+            GroupItem("公开笔记", "/note/public"),
             GroupItem("最近更新", "/note/recent_edit"),
             GroupItem("最近创建", "/note/recent_created"),
             GroupItem("最近浏览", "/note/recent_viewed"),

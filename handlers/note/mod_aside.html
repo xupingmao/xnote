@@ -103,7 +103,7 @@
 
 
 {% import xutils.dateutil as dateutil %}
-{% init show_archived = True %}
+{% init show_archived = False %}
 {% if show_archived %}
 <div class="aside-item">
     <div class="aside-title">
@@ -118,3 +118,11 @@
     </div>
 </div>
 {% end %}
+
+<div class="aside-item menu-aside">
+    <div class="aside-title">
+        目录
+    </div>
+    <div class="aside-content" id="menuBox">
+    </div>
+</div>

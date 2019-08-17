@@ -195,12 +195,19 @@ $(function () {
         return rightBot;
     }
 
+    function initSearchBoxWidth() {
+      if (window.SHOW_ASIDE == "False") {
+        $(".nav-left-search").css("width", "100%");
+      }
+    }
+
     function init() {
         // var botBtn = $("<div>").text("工具").css("right", btnRight).addClass("bot-btn");
         // $(document.body).append(botBtn);
         $(".bot-btn").click(function () {
             getRightBot().fadeToggle(200);
         });
+        initSearchBoxWidth();
         initEventHandlers();
     }
 

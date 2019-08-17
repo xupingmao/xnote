@@ -224,7 +224,8 @@
         }
 
         // 处理目录
-        var menuText = '<div class="marked-contents"><h1>目录</h1>';
+        var menuText = '<div class="marked-contents">';
+        
         menuText+="<ul>";
         for (var i = 0; i < myRenderer.headings.length; i++) {
             var heading = myRenderer.headings[i];
@@ -244,7 +245,10 @@
             });
         }
         menuText+="</ul></div>";
-        outtext = menuText + outtext;
+        // outtext = menuText + outtext;
+
+        $(".menu-aside").show();
+        $("#menuBox").html(menuText);
         return outtext;
     }
 

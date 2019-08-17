@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/07/19 00:17:22
+# @modified 2019/08/17 10:06:33
 
 import sys
 import os
@@ -179,6 +179,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual("hello markdown", file["content"])
         self.check_200("/note/edit?id=%s" % id)
         self.check_OK("/note/history?id=%s" % id)
+        json_request("/note/history_view?id=%s&version=%s" % (file["id"], file["version"]))
         json_request("/note/remove?id=%s" % id)
 
     def test_note_editor_html(self):
