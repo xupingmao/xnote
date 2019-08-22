@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2019/06/12 23:18:30
+# @modified 2019/08/20 01:11:10
 import xutils
 import xconfig
 import xmanager
@@ -108,10 +108,20 @@ def kv_list_message_page(user, status, offset, limit):
 def list_message_page(*args):
     return db_call("list_message_page", *args)
 
+def list_file_page(user, offset, limit):
+    def filter_func(key, value):
+        if value.content is None:
+            return False
+        return value.content.find("file://") >= 0
+    chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+    return chatlist, amount
+
 xutils.register_func("message.create", create_message)
 xutils.register_func("message.search", search_message)
 xutils.register_func("message.delete", delete_message_by_id)
 xutils.register_func("message.count", count_message)
 xutils.register_func("message.find_by_id", get_message_by_id)
 xutils.register_func("message.list", list_message_page)
+xutils.register_func("message.list_file", list_file_page)
 

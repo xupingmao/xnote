@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/07/05 00:13:58
+# @modified 2019/08/20 01:05:56
 
 """短消息"""
 import time
@@ -41,6 +41,7 @@ class ListHandler:
         page   = xutils.get_argument("page", 1, type=int)
         status = xutils.get_argument("status")
         key    = xutils.get_argument("key")
+        tag    = xutils.get_argument("tag")
         offset = (page-1) * pagesize
         user_name = xauth.get_current_name()
         # 未完成任务的分页
@@ -59,7 +60,10 @@ class ListHandler:
             status_num = 50
             kw = "status = 50"
             pagesize = undone_pagesize
-        if key != "" and key != None:
+
+        if tag == "file":
+            chatlist, amount = xutils.call("message.list_file", user_name, offset, pagesize)
+        elif key != "" and key != None:
             chatlist, amount = xutils.call("message.search", user_name, key, offset, pagesize)
         else:
             chatlist, amount = xutils.call("message.list", user_name, status_num, offset, pagesize)

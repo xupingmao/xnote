@@ -231,7 +231,7 @@
             var heading = myRenderer.headings[i];
             var text = heading.text;
             var link = heading.link;
-            var level = heading.level;
+            var level = heading.level - 1;
             var margin_left = level * 10 + "px";
             menuText += '<li><a href="#link" style="margin-left:mleft">text</a></li>'.replace(/mleft|link|text/g, function (match, index) {
                 // console.log(match, index);

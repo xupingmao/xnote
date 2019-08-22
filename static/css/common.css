@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/08/17 01:27:57
+ * @modified 2019/08/20 11:26:09
  */
 
 * {
@@ -32,7 +32,7 @@ pre {
     /* 避免顶部fixed菜单遮挡 */
     padding-top: 50px;
     margin-top: -50px;
-    font-family: "黑体";
+    font-family: "Microsoft YaHei", "黑体";
 }
 
 .marked-img {
@@ -171,6 +171,10 @@ a:hover {
 
 .link2:hover {
     color: gray;
+}
+
+.path-link {
+    line-height: 28px;
 }
 
 .selected-link {
@@ -1333,7 +1337,7 @@ li.menu-item:hover {
     display: none;
     position: absolute;
     top: 30px;
-    left: -80px;
+    left: -67px;
     background-color: #f9f9f9;
     min-width: 120px;
     border: 1px solid #ccc;

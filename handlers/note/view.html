@@ -119,60 +119,11 @@ img {
 
     {# 收藏一下这个符号 › #}
     <div class="col-md-12 card">
-        {% if show_path_list %}
-        <div class="grid-title">
-            <!-- <a href="/" class="link2">{{T("Home")}}</a> -->
-            {% for i, item in enumerate(pathlist) %}
-                {% if i > 0 %} / {% end %}<a href="{{item.url}}" class="link2">{{ item.name }}</a>
-            {% end %}
-
-            {% if file is not None %}
-                {% if file.type == "group" and _user_name == file.creator %}
-                    {# 笔记列表 #}
-                    <div class="float-right">
-                        <a class="link" href="/note/add?parent_id={{file.id}}">新增</a>
-
-                        <div class="dropdown">
-                          <span class="dropdown-btn link">更多▾</span>
-                          <div class="dropdown-content">                            
-                            {% if file.priority > 0 %}
-                                <a class="dropdown-option" href="/note/unstick?id={{file.id}}">取消置顶</a>
-                            {% else %}
-                                <a class="dropdown-option" href="/note/stick?id={{file.id}}">置顶</a>
-                            {% end %}
-
-                            <a class="dropdown-option" href="javascript:rename('{{file.id}}', '{{file.name}}')">重命名</a>
-                            <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=mtime_desc&page={{page}}">按时间排序</a>
-                            <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name&page={{page}}">按名称排序</a>
-                            
-                            {% if file.size == 0 %}
-                                <a class="dropdown-option" style="color:red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
-                            {% end %}
-                          </div>
-                        </div>
-                    </div>
-                {% else %}
-                    {# 其他普通笔记 #}
-                    <div class="float-right">
-                        <a href="javascript:history.back()">返回</a>
-                    </div>
-                {% end %}
-            {% end %}
-        </div>
-        {% end %}
-
-        {% if error != "" and error != None%}
-        <div class="col-md-12 error">
-            {{error}}
-        </div>
-        {% end %}
-
         {% comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 %}
-
-        {% if file_type == "md" or file_type == "text" %}
-            {% include note/editor/markdown.html %}
-        {% elif file_type == "group" %}
+        {% if file_type == "group" %}
             {% include note/note_list.html %}
+        {% elif file_type == "md" or file_type == "text" %}
+            {% include note/editor/markdown.html %}
         {% elif file_type == "csv" %}
             {% include note/editor/csv_editor.html %}
         {% elif file_type == "gallery" %}
@@ -200,10 +151,12 @@ img {
         </div>
     {% end %}
 
+    {# 评论功能 #}
     {% if file_type != "group" %}
         {% include note/comment.html %}
     {% end %}
 
+    {# 分页 #}
     {% if show_pagination and "page" in globals() %}
     <div class="card">
         {% include mod_pagenation.html %}

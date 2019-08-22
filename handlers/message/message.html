@@ -241,23 +241,26 @@
             refreshMessage: function () {
                 var self = this;
                 var page = getUrlParams().page || 1;
+                var tag  = getUrlParam("tag");
                 app.page = page;
                 app.page_next_url = app.page_url + (parseInt(page)+1);
                 app.page_prev_url = app.page_url + (page-1);
-                $.get("/message/list", {pagesize:20,page:page,status:self.status,key:"{{key}}"}, function (respText) {
-                    var data = respText;
-                    app.page_max = data.page_max;
-                    app.current_user = data.current_user;
-                    if (data.code == "success") {
-                        var messageList = [];
-                        data.data.forEach(function (item, index) {
-                            // console.log(item, index);
-                            messageList.push(wrapMessage(item));
-                        })
-                        messageList.reverse();
-                        self.messageList = messageList;
-                        self.amount = data.amount;
-                    }
+                $.get("/message/list", 
+                    {pagesize:20,page:page,status:self.status,key:"{{key}}",tag:tag}, 
+                    function (respText) {
+                        var data = respText;
+                        app.page_max = data.page_max;
+                        app.current_user = data.current_user;
+                        if (data.code == "success") {
+                            var messageList = [];
+                            data.data.forEach(function (item, index) {
+                                // console.log(item, index);
+                                messageList.push(wrapMessage(item));
+                            })
+                            messageList.reverse();
+                            self.messageList = messageList;
+                            self.amount = data.amount;
+                        }
                 })
             },
 
