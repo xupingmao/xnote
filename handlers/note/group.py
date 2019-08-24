@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/08/15 00:18:32
+# @modified 2019/08/25 00:17:11
 import math
 import time
 import web
@@ -146,6 +146,7 @@ class BaseListHandler:
         return xtemplate.render(VIEW_TPL,
             pathlist  = [parent, PathNode(self.title, "/note/" + self.note_type)],
             file_type = "group",
+            group_type = self.note_type,
             files     = files,
             page      = page,
             show_aside = True,

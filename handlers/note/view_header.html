@@ -1,5 +1,6 @@
 {% init show_path_list = False %}
 {% init error = None %}
+{% init group_type = None %}
 
 {% set item = file %}
 {% set type_dict = dict(
@@ -38,6 +39,8 @@
                   </div>
                 </div>
             </div>
+        {% elif group_type == "gallery" %}
+            <div class="float-right"><a class="btn" href="/note/add?type=gallery">创建相册</a></div>
         {% else %}
             {# 其他普通笔记 #}
             <div class="float-right">

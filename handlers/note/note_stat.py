@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2019/08/20 11:10:15
+# @modified 2019/08/25 00:22:19
 import xauth
 from xutils import dbutil
 from xtemplate import BasePlugin
@@ -27,6 +27,7 @@ class StatHandler(BasePlugin):
 
     title = "笔记数据统计"
     editable = False
+    require_admin = False
 
     def handle(self, input):
         self.rows = 0

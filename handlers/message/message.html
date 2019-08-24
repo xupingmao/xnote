@@ -235,7 +235,12 @@
 
             init: function () {
                 this.status = getUrlParams().status;
-                this.page_url = "/message?status=%s&pagesize=20&key={{key}}&page=".format(this.status);
+                var tag = getUrlParam("tag");
+                this.page_url = "/message?status=%s&pagesize=20&key={{key}}&tag=%s&page=".format(this.status, tag);
+
+                if (tag == "file") {
+                    $("#tabFile").addClass("tab-link-active");
+                }
             },
 
             refreshMessage: function () {
