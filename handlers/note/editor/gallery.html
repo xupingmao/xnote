@@ -1,5 +1,9 @@
 {% include note/view_header.html %}
-{% include fs/mod_fs_upload.html %}
+
+{% if file.creator == _user_name %} 
+    {% include fs/mod_fs_upload.html %}
+{% end %}
+
 {% import xutils.textutil as textutil %}
 {% init parent_path = None %}
 

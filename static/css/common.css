@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/08/20 11:26:09
+ * @modified 2019/09/07 18:05:20
  */
 
 * {
@@ -1365,6 +1365,20 @@ li.menu-item:hover {
     background-color: #09f;
     color: white;
 }
+
+.dropdown-option-red {
+    padding: 5px;
+    margin: 0px;
+    color: red;
+    font-weight: bold;
+    display: block;
+}
+
+.dropdown-option-red:hover {
+    background-color: #09f;
+    color: red;
+}
+
 
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 950px) {

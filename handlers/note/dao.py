@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/08/19 00:29:10
+# @modified 2019/09/07 18:00:05
 
 """资料的DAO操作集合
 
@@ -109,6 +109,8 @@ def batch_query(id_list):
 def sort_notes(notes, orderby = "mtime_desc"):
     if orderby == "name":
         notes.sort(key = lambda x: x.name)
+    elif orderby == "name_desc":
+        notes.sort(key = lambda x: x.name, reverse = True)
     else:
         # mtime_desc
         notes.sort(key = lambda x: x.mtime, reverse = True)
@@ -293,6 +295,7 @@ def update_note(where, **kw):
     parent_id = kw.get("parent_id")
     is_public = kw.get("is_public")
     tags      = kw.get("tags")
+    orderby   = kw.get("orderby")
 
     old_parent_id = None
     new_parent_id = None
@@ -319,6 +322,8 @@ def update_note(where, **kw):
             note.is_public = is_public
         if tags != None:
             note.tags = tags
+        if orderby != None:
+            note.orderby = orderby
 
         note.mtime   = xutils.format_time()
         note.version += 1
@@ -639,6 +644,8 @@ def update_priority(creator, id, value):
     return rows > 0
 
 def add_history(id, version, note):
+    if version is None:
+        return
     note['note_id'] = id
     dbutil.put("note_history:%s:%s" % (id, version), note)
 

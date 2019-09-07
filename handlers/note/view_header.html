@@ -1,6 +1,7 @@
 {% init show_path_list = False %}
 {% init error = None %}
 {% init group_type = None %}
+{% init op = "view" %}
 
 {% set item = file %}
 {% set type_dict = dict(
@@ -19,7 +20,7 @@
         {% if file != None and file.type == "group" and _user_name == file.creator %}
             {# 下拉选项 #}
             <div class="float-right">
-                <a class="link btn" href="/note/add?parent_id={{file.id}}">新增</a>
+                <a class="btn" href="/note/add?parent_id={{file.id}}">新增</a>
                 <div class="dropdown">
                   <span class="dropdown-btn link btn">更多▾</span>
                   <div class="dropdown-content">                            
@@ -30,11 +31,12 @@
                     {% end %}
 
                     <a class="dropdown-option" href="javascript:rename('{{file.id}}', '{{file.name}}')">重命名</a>
-                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=mtime_desc&page={{page}}">按时间排序</a>
-                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name&page={{page}}">按名称排序</a>
+                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=mtime_desc&page={{page}}">按时间倒序</a>
+                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name&page={{page}}">按名称顺序</a>
+                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name_desc&page={{page}}">按名称倒序</a>
                     
                     {% if file.size == 0 %}
-                        <a class="dropdown-option" style="color:red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
+                        <a class="dropdown-option-red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
                     {% end %}
                   </div>
                 </div>
@@ -44,7 +46,33 @@
         {% else %}
             {# 其他普通笔记 #}
             <div class="float-right">
-                <a href="javascript:history.back()">返回</a>
+                {% if file != None and _user_name == file.creator and op == "view" %}
+                <a class="btn" href="/note/edit?id={{file.id}}">编辑</a>
+                <div class="dropdown">
+                    <span class="dropdown-btn link btn">更多▾</span>
+                    <div class="dropdown-content">
+                        <a class="dropdown-option link" href="javascript:rename('{{item.id}}', '{{item.name}}')">重命名</a>
+                        {% if file.is_public %}
+                            <a class="dropdown-option link" href="/note/share/cancel?id={{file.id}}">取消分享</a>
+                        {% else %}
+                            <a class="dropdown-option link" href="/note/share?id={{file.id}}">分享</a>
+                        {% end %}
+                        <a class="dropdown-option move-btn link" data-url="/note/group/select?id={{item.id}}">移动</a>
+                        {% if file.priority > 0 %}
+                            <a class="dropdown-option link" href="/note/unstick?id={{file.id}}">取消置顶</a>
+                        {% else %}
+                            <a class="dropdown-option link" href="/note/stick?id={{file.id}}">置顶</a>
+                        {% end %}
+
+                        {% if _is_admin and file.type == "gallery" %}
+                            <a class="dropdown-option link" href="/fs/{{file.path}}">管理文件</a>
+                        {% end %}
+
+                        <a class="dropdown-option-red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>
+                    </div>
+                </div>
+                {% end %}
+                <!-- <a href="javascript:history.back()">返回</a> -->
             </div>
         {% end %}
     </div>
@@ -53,7 +81,7 @@
 {% if item != None and item.type != "group" %}
     <div class="col-md-12" style="border-bottom:1px solid #ccc"> 
         <span id="fileId" style="display:none;">{{file.id}}</span>    
-        <div class="col-md-12">
+        <div class="col-md-12 hide">
             {% if _has_login and  (_is_admin or _user_name == item.creator) %}
                 <a class="link" href="/note/edit?id={{file.id}}">编辑</a>
                 <a class="link" href="javascript:rename('{{item.id}}', '{{item.name}}')">重命名</a>

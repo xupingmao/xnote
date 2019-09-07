@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/08/03 15:56:09
+# @modified 2019/09/07 18:01:07
 import profile
 import math
 import re
@@ -38,7 +38,7 @@ class ViewHandler:
         page          = xutils.get_argument("page", 1, type=int)
         pagesize      = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         show_menu     = xutils.get_argument("show_menu", "true") != "false"
-        orderby       = xutils.get_argument("orderby", "mtiem_desc")
+        orderby       = xutils.get_argument("orderby", None)
         user_name     = xauth.get_current_name()
         show_add_file = False
         title         = None
@@ -82,6 +82,11 @@ class ViewHandler:
 
         title  = file.name
         if file.type == "group":
+            if orderby != None and file.orderby != orderby:
+                xutils.call("note.update", where = dict(id = file.id, creator = file.creator), orderby = orderby)
+            else:
+                orderby = file.orderby
+
             files  = xutils.call("note.list_by_parent", user_name, file.id, (page-1)*pagesize, pagesize, orderby)
             amount = xutils.call("note.count", user_name, file.id)
             content         = file.content
