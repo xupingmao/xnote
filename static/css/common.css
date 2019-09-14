@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/09/07 18:05:20
+ * @modified 2019/09/14 13:14:39
  */
 
 * {
@@ -1379,6 +1379,14 @@ li.menu-item:hover {
     color: red;
 }
 
+.icon {
+    width: 16px;
+    height: 16px;
+}
+
+.mobile-only {
+    display: none;
+}
 
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 950px) {
@@ -1440,6 +1448,10 @@ li.menu-item:hover {
     .plugin-item {
         width: 100%;
         margin-left: 0px;
+    }
+
+    .mobile-only {
+        display: block;
     }
 }
 

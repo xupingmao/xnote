@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/09/07 18:00:05
+# @modified 2019/09/14 13:32:55
 
 """资料的DAO操作集合
 
@@ -798,8 +798,8 @@ xutils.register_func("note.update", update_note)
 xutils.register_func("note.visit",  visit_note)
 xutils.register_func("note.count",  count_note)
 xutils.register_func("note.delete", delete_note)
+xutils.register_func("note.touch",  touch_note)
 xutils.register_func("note.update_tags", update_tags)
-
 # query functions
 xutils.register_func("note.get_by_id", get_by_id)
 xutils.register_func("note.get_by_name", get_by_name)

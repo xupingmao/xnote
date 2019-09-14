@@ -49,12 +49,13 @@
       {% if _has_login %}
         <li><a href="/note/books">我的笔记</a></li>
         <li><a href="/note/sticky">我的置顶</a></li>
+        <li><a href="/note/taglist">标签列表</a></li>
       {% end %}
         <li><a href="/note/public">公开笔记</a></li>
       {% if _has_login %}
         <li><a href="/note/tools/timeline?type=mtime">最近更新</a></li>
-        <li><a href="/note/taglist">标签列表</a></li>
         <li><a href="/message?status=created">待办事项</a></li> 
+        <li><a href="/note/gallery">我的相册</a></li>
         <li><a href="/plugins_list">工具插件</a></li>
         {% if _is_admin %}
           <li><a href="/fs_list">文件管理</a></li> 

@@ -6,6 +6,12 @@
     ("智能分类", "/note/types"),
 ]%}
 
+{% set mobile_only_books = [
+    ("标签列表", "/note/taglist"),
+    ("公开笔记", "/note/public"),
+    ("我的相册", "/note/gallery")
+] %}
+
 {% include common/mod_notice.html %}
 
 <div class="grid-row card book-list">
@@ -22,7 +28,17 @@
             <div class="book-item fixed-book-item">
                 <img src="/static/image/folder.gif"/>
                 {{name}}
-                <span class="book-size">⇨</span>
+                <span class="book-size"><img class="icon" src="/static/image/icon_right.png"/></span>
+            </div>
+        </a>
+    {% end %}
+
+    {% for name, url in mobile_only_books %}
+        <a href="{{url}}" class="mobile-only">
+            <div class="book-item fixed-book-item">
+                <img src="/static/image/folder.gif"/>
+                {{name}}
+                <span class="book-size"><img class="icon" src="/static/image/icon_right.png"/></span>
             </div>
         </a>
     {% end %}

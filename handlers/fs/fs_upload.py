@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/05/18 00:20:48
+# @modified 2019/09/14 13:32:01
 import os
 import uuid
 import web
@@ -49,6 +49,10 @@ def upload_link_by_month(year, month, delta = 0):
     t_year = year + math.floor((month-1+delta)/12)
     return "/fs_upload?year=%d&month=%02d" % (t_year, t_mon)
 
+def try_touch_note(note_id):
+    if note_id != None and note_id != "":
+        xutils.call("note.touch", note_id)
+
 class UploadHandler:
 
     @xauth.login_required()
@@ -57,6 +61,7 @@ class UploadHandler:
         dirname  = xutils.get_argument("dirname")
         prefix   = xutils.get_argument("prefix")
         name     = xutils.get_argument("name")
+        note_id  = xutils.get_argument("note_id")
         user_name = xauth.current_name()
         if file.filename != None:
             filename = file.filename
@@ -74,6 +79,8 @@ class UploadHandler:
                 for chunk in file.file:
                     fout.write(chunk)
             xmanager.fire("fs.upload", dict(user=user_name, path=filepath))
+        
+        try_touch_note(note_id)
         return dict(code="success", webpath = webpath, link = get_link(filename, webpath))
 
     @xauth.login_required()
@@ -134,6 +141,8 @@ class RangeUploadHandler:
         prefix = xutils.get_argument("prefix", "")
         dirname = xutils.get_argument("dirname", xconfig.DATA_DIR)
         dirname = dirname.replace("$DATA", xconfig.DATA_DIR)
+        note_id = xutils.get_argument("note_id")
+
         # 不能访问上级目录
         if ".." in dirname:
             return dict(code="fail", message="can not access parent directory")
@@ -176,6 +185,10 @@ class RangeUploadHandler:
             return dict(code="fail", message="require file")
         if part_file and chunk+1==chunks:
             self.merge_files(dirname, filename, chunks)
+
+        try_touch_note(note_id)
+        if note_id != None and note_id != "":
+            xutils.call("note.touch", note_id)
         return dict(code="success", webpath=webpath, link=get_link(origin_name, webpath))
 
 class UploadSearchHandler:
