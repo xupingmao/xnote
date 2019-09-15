@@ -107,7 +107,7 @@
         </tr>
 
         <!-- UI设置 -->
-        <tr class="admin-visible">
+        <tr class="admin-visible hide">
             <td class="key">主题</td>
             <td>
                 <input type="radio" name="THEME" default-value="{{xconfig.THEME}}" value="standard">默认
@@ -115,11 +115,20 @@
                 <input type="radio" name="THEME" default-value="{{xconfig.THEME}}" value="left">侧边栏
             </td>
         </tr>
-        <tr class="admin-visible">
+
+        <tr class="admin-visible hide">
             <td class="key">选项风格</td>
             <td>
                 <input type="radio" name="OPTION_STYLE" default-value="{{xconfig.OPTION_STYLE}}" value="aside">侧边
                 <input type="radio" name="OPTION_STYLE" default-value="{{xconfig.OPTION_STYLE}}" value="top">顶部
+            </td>
+        </tr>
+
+        <tr class="admin-visible hide">
+            <td class="key">宽度</td>
+            <td>
+                <input type="radio" name="PAGE_WIDTH" default-value="{{xconfig.PAGE_WIDTH}}" value="1150">1150
+                <input type="radio" name="PAGE_WIDTH" default-value="{{xconfig.PAGE_WIDTH}}" value="900">900
             </td>
         </tr>
 
@@ -131,14 +140,6 @@
                     <option value="grid">网格</option>
                     <option value="sidebar">侧栏</option>
                 </select>
-            </td>
-        </tr>
-        
-        <tr class="admin-visible">
-            <td class="key">宽度</td>
-            <td>
-                <input type="radio" name="PAGE_WIDTH" default-value="{{xconfig.PAGE_WIDTH}}" value="1150">1150
-                <input type="radio" name="PAGE_WIDTH" default-value="{{xconfig.PAGE_WIDTH}}" value="900">900
             </td>
         </tr>
 

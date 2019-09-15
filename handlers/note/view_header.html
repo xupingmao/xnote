@@ -64,9 +64,13 @@
                             <a class="dropdown-option link" href="/note/stick?id={{file.id}}">置顶</a>
                         {% end %}
 
+                        <a class="dropdown-option link" href="/note/history?id={{file_id}}">{{T("Note_History")}}</a>
+
                         {% if _is_admin and file.type == "gallery" %}
                             <a class="dropdown-option link" href="/fs/{{file.path}}">管理文件</a>
                         {% end %}
+
+                        <a class="dropdown-option link" href="/note/print?id={{file.id}}" target="_blank">打印模式</a>
 
                         <a class="dropdown-option-red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>
                     </div>
@@ -78,6 +82,7 @@
     </div>
 {% end %}
 
+{# 笔记的概要信息 #}
 {% if item != None and item.type != "group" %}
     <div class="col-md-12" style="border-bottom:1px solid #ccc"> 
         <span id="fileId" style="display:none;">{{file.id}}</span>    
@@ -100,7 +105,6 @@
                 {% if _is_admin and file.type == "gallery" %}
                     <a class="link" href="/fs/{{file.path}}">管理文件</a>
                 {% end %}
-
                 <!-- <a class="link" href="/note/print?id={{file.id}}" target="_blank">打印</a> -->
                 <a class="red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>
             {% end %}

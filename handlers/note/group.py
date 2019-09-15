@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/08/25 00:17:11
+# @modified 2019/09/15 11:16:51
 import math
 import time
 import web
@@ -15,7 +15,8 @@ from xutils import cacheutil, dateutil
 from xutils.dateutil import Timer
 from xtemplate import T
 
-VIEW_TPL = "note/view.html"
+VIEW_TPL   = "note/view.html"
+TYPES_NAME = "笔记分类"
 
 class PathNode:
 
@@ -33,6 +34,10 @@ class GroupItem:
         self.url      = url
         self.mtime    = dateutil.format_time()
 
+def type_node_path(name, url):
+    parent = PathNode(TYPES_NAME, "/note/types")
+    return [parent, GroupItem(T(name), url)]
+
 class DefaultListHandler:
 
     @xauth.login_required()
@@ -43,7 +48,7 @@ class DefaultListHandler:
         offset    = (page-1) * pagesize
         files     = xutils.call("note.list_note", user_name, 0, offset, pagesize)
         amount    = xutils.call("note.count", user_name, 0);
-        parent    = PathNode("智能分类", "/note/types")
+        parent    = PathNode(TYPES_NAME, "/note/types")
 
         return xtemplate.render(VIEW_TPL,
             show_aside = True,
@@ -88,6 +93,9 @@ class GroupListHandler:
             show_aside      = True,
             files           = data)
 
+class BookListHandler(GroupListHandler):
+    pass
+
 class GroupSelectHandler:
     @xauth.login_required()
     def GET(self):
@@ -112,7 +120,7 @@ class RemovedHandler:
 
         amount = xutils.call("note.count_removed", user_name)
         files  = xutils.call("note.list_removed", user_name, offset, limit)
-        parent = PathNode("智能分类", "/note/types")
+        parent = PathNode(TYPES_NAME, "/note/types")
 
         return xtemplate.render(VIEW_TPL,
             pathlist  = [parent, PathNode(T("回收站"), "/note/removed")],
@@ -142,7 +150,7 @@ class BaseListHandler:
         files  = xutils.call("note.list_by_type",  user_name, self.note_type, offset, limit)
 
         # 上级菜单
-        parent = PathNode("智能分类", "/note/types")
+        parent = PathNode(TYPES_NAME, "/note/types")
         return xtemplate.render(VIEW_TPL,
             pathlist  = [parent, PathNode(self.title, "/note/" + self.note_type)],
             file_type = "group",
@@ -205,6 +213,7 @@ class TypeListHandler:
             GroupItem("最近更新", "/note/recent_edit"),
             GroupItem("最近创建", "/note/recent_created"),
             GroupItem("最近浏览", "/note/recent_viewed"),
+            GroupItem("Markdown", "/note/md"),
             GroupItem("相册", "/note/gallery"),
             GroupItem("表格", "/note/table"),
             GroupItem("通讯录", "/note/addressbook"),
@@ -213,11 +222,11 @@ class TypeListHandler:
         amount = len(files)
 
         return xtemplate.render(VIEW_TPL,
-            pathlist  = [PathNode("智能分类", "/note/types")],
+            pathlist  = [PathNode(TYPES_NAME, "/note/types")],
             file_type = "group",
             files     = files,
             show_aside = True,
-            show_mdate = True)
+            show_next  = True)
 
 class RecentHandler:
     """show recent notes"""
@@ -235,32 +244,52 @@ class RecentHandler:
         limit    = pagesize
         time_attr = "ctime"
 
+        show_mdate = False
+        show_cdate = False
+        show_adate = False
+
         creator = xauth.get_current_name()
         if orderby == "viewed":
             html_title = "Recent Viewed"
             files = xutils.call("note.list_recent_viewed", creator, offset, limit)
             time_attr = "atime"
+            show_adate = True
         elif orderby == "created":
             html_title = "Recent Created"
             files = xutils.call("note.list_recent_created", None, offset, limit)
             time_attr = "ctime"
+            show_cdate = True
         else:
             html_title = "Recent Updated"
             files = xutils.call("note.list_recent_edit", None, offset, limit)
             time_attr = "mtime"
+            show_mdate = True
         
         count   = xutils.call("note.count_user_note", creator)
 
-        return xtemplate.render("note/recent.html", 
-            html_title  = html_title,
-            file_type   = "group",
-            files       = files, 
-            show_notice = show_notice,
-            show_mdate  = True,
-            show_groups = False,
-            show_aside  = True,
-            page        = page, 
-            time_attr   = time_attr,
+        # return xtemplate.render("note/recent.html", 
+        #     html_title  = html_title,
+        #     file_type   = "group",
+        #     files       = files, 
+        #     show_notice = show_notice,
+        #     show_mdate  = True,
+        #     show_groups = False,
+        #     show_aside  = True,
+        #     page        = page, 
+        #     time_attr   = time_attr,
+        #     page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
+        #     page_url    ="/note/recent_%s?page=" % orderby)
+        
+        return xtemplate.render(VIEW_TPL,
+            pathlist  = type_node_path(html_title, ""),
+            html_title = html_title,
+            file_type  = "group",
+            files = files,
+            show_aside = True,
+            page = page,
+            show_cdate = show_cdate,
+            show_mdate = show_mdate,
+            show_adate = show_adate,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    ="/note/recent_%s?page=" % orderby)
 

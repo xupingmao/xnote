@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/06/30 11:27:37
+@modified 2019/09/15 11:16:09
 -->
 
 {% init files = [] %}
@@ -8,6 +8,8 @@
 {% init show_opts = True %}
 {% init show_cdate = False %}
 {% init show_mdate = False %}
+{% init show_adate = False %}
+{% init show_next  = False %}
 {% init file = None %}
 
 {% include "note/view_header.html" %}
@@ -32,6 +34,14 @@
 
                     {% if show_mdate %}
                         {{format_date(item.mtime).replace('-', '/')}}
+                    {% end %}
+
+                    {% if show_adate %}
+                        {{format_date(item.atime).replace('-', '/')}}
+                    {% end %}
+
+                    {% if show_next %}
+                        <img class="icon" src="/static/image/icon_right.png"/>
                     {% end %}
                 </span>
             </div>

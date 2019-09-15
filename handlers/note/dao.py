@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/09/14 13:32:55
+# @modified 2019/09/15 11:23:50
 
 """资料的DAO操作集合
 
@@ -116,7 +116,7 @@ def sort_notes(notes, orderby = "mtime_desc"):
         notes.sort(key = lambda x: x.mtime, reverse = True)
     notes.sort(key = lambda x: x.priority, reverse = True)
     for note in notes:
-        note.url = "/note/view?id=%s" % note.id
+        fill_note_url(note)
 
 def build_note(dict):
     id   = dict['id']
@@ -132,7 +132,7 @@ def build_note(dict):
         note.content = content
     if data is not None:
         note.data = data
-    note.url = "/note/view?id={}".format(dict["id"])
+    fill_note_url(note)
     return note
 
 
@@ -144,6 +144,9 @@ def to_sqlite_obj(text):
     text = text.replace("'", "''")
     return "'" + text + "'"
 
+def fill_note_url(note):
+    if note:
+        note.url = "/note/view?id={}".format(note["id"])
 
 class TableDesc:
     def __init__(self, row = None):
@@ -193,7 +196,7 @@ def get_by_id(id, db=None, include_full = True):
         del note.content
         del note.data
     if note:
-        note.url = "/note/view?id=%s" % note.id
+        fill_note_url(note)
     return note
 
 # def get_tiny_by_id(user_name, id):
@@ -358,7 +361,7 @@ def get_by_name(name, db = None):
     result = dbutil.prefix_list("note:", find_func, 0, 1)
     if len(result) > 0:
         note = result[0]
-        note.url = "/note/view?id=%s" % note.id
+        fill_note_url(note)
         return note
     return None
 
@@ -421,6 +424,7 @@ def get_table_struct(table_name):
 def fill_parent_name(files):
     id_list = []
     for item in files:
+        fill_note_url(item)
         id_list.append(item.parent_id)
 
     note_dict = batch_query(id_list)
