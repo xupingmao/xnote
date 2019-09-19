@@ -32,30 +32,20 @@
   </div>
 </div>
 
-<div class="nav-left-search">
-  <form id="searchForm2" method="GET" action="{{?search_action,'/search/search'}}">
-    <input id="key" name="key" class="nav-search-input" 
-      placeholder="{{search_placeholder}}" 
-      value="{{?key}}"/>
-    <button class="nav-search-btn btn-default">搜</button>
-    <input class="hide" name="category" value="{{?category}}" />
-    {% block search_form %} {% end %}
-  </form>
-</div>
-
 <div class="nav-left">
   <div class="nav-left-inner-box">
     <ul class="navMenu">
       {% if _has_login %}
         <li><a href="/note/books">我的笔记</a></li>
         <li><a href="/note/sticky">我的置顶</a></li>
+        <li><a href="/note/recent_edit">最近更新</a></li>
         <li><a href="/note/taglist">标签列表</a></li>
       {% end %}
         <li><a href="/note/public">公开笔记</a></li>
       {% if _has_login %}
-        <li><a href="/note/tools/timeline?type=mtime">最近更新</a></li>
         <li><a href="/message?status=created">待办事项</a></li> 
         <li><a href="/note/gallery">我的相册</a></li>
+        <li><a href="/note/types">笔记分类</a></li>
         <li><a href="/plugins_list">工具插件</a></li>
         {% if _is_admin %}
           <li><a href="/fs_list">文件管理</a></li> 
@@ -71,7 +61,7 @@
         </li>
       {% end %}
     </ul>
-    <div id="poweredBy" style="position: absolute; bottom: 30px; left: 15px; color: #fff;">
+    <div id="poweredBy">
       Powered by <a style="color: #fff; text-decoration: underline;" href="/code/wiki/README.md">Xnote</a>
     </div>
   </div>

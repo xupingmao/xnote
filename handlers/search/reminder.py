@@ -13,6 +13,7 @@ import xutils
 import xconfig
 import xtables
 import xmanager
+from xutils import dbutil
 
 SearchResult = xutils.SearchResult
 
@@ -36,19 +37,19 @@ num_dict = {
 
 
 def add_alarm(tm_hour, tm_min, message):
-    db = xtables.get_schedule_table()
     url = "/api/alarm"
     tm_wday = "no-repeat"
     name = "[提醒] %s" % message
 
-    db.insert(name=name,
-            url=url,
-            message=message,
-            ctime=xutils.format_time(),
-            mtime=xutils.format_time(),
-            tm_wday=tm_wday,
-            tm_hour=tm_hour,
-            tm_min=tm_min)
+    id  = dbutil.timeseq()
+    key = "schedule:%s" % id
+    data = dict(id = id, name=name, url=url, mtime=xutils.format_datetime(), 
+        ctime   = xutils.format_datetime(),
+        tm_wday = tm_wday,
+        tm_hour = tm_hour,
+        tm_min  = tm_min,
+        message = message)
+    dbutil.put(key, data)
     xmanager.load_tasks()
 
 def parse_int(value):

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/07/22 00:06:24
+# @modified 2019/09/19 00:15:19
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -358,7 +358,7 @@ class TaskManager:
                     xutils.trace("RunTask",  task.url)
                     if task.tm_wday == "no-repeat":
                         # 一次性任务直接删除
-                        xtables.get_schedule_table().delete(where=dict(id=task.id))
+                        dbutil.delete(task.id)
                         self.load_tasks()
                 except Exception as e:
                     xutils.log("run task [%s] failed, %s" % (task.url, e))

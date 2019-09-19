@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/09/14 13:14:39
+ * @modified 2019/09/20 01:27:40
  */
 
 * {
@@ -10,7 +10,7 @@
 }
 
 body {
-    background-color: #ccc;
+    /*background-color: #ccc;*/
     font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
     font-size: 14px;
     letter-spacing: 1px;
@@ -544,13 +544,15 @@ li.menu-item:hover {
 }
 
 .x-body {
-    /*position: absolute;*/
-    float: left;
-    width: 100%;
-
-    padding: 0px 10px;
+    position: absolute;
+    left: 200px;
+    right: 220px;
+    top: 0px;
+    bottom: 0px;
+    overflow-y: auto;
+    width: auto;
+    padding: 0px;
 }
-
 
 .nav-top {
   width: 100%;
@@ -582,8 +584,10 @@ li.menu-item:hover {
 }
 
 .nav-left-search {
+    float: left;
     padding: 10px;
     display: none;
+    padding-bottom: 0px;
 }
 
 .nav-search-input {
@@ -1232,8 +1236,8 @@ li.menu-item:hover {
 .main-content {
     float: left;
     width: 100%;
-    padding-right: 230px;
     min-height: 20px;
+    padding: 10px;
 }
 
 .aside {
@@ -1384,6 +1388,14 @@ li.menu-item:hover {
     height: 16px;
 }
 
+.icon-next, .icon-right {
+    display: block;
+    background-image: url(/static/image/icon_right.png);
+    background-size: 16px 16px;
+    width: 16px;
+    height: 16px;
+}
+
 .mobile-only {
     display: none;
 }
@@ -1417,7 +1429,6 @@ li.menu-item:hover {
 
     .main-content {
         width: 100%;
-        padding-right: 0px;
     }
 
     .aside {

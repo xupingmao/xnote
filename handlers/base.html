@@ -1,10 +1,22 @@
 {% include common/base_top.html %}
+{% init search_placeholder = "搜索或指令" %}
 
 <div class="root">
 
     {% include common/base_nav.html %}
 
     <div class="x-body">
+        <div class="nav-left-search">
+          <form id="searchForm2" method="GET" action="{{?search_action,'/search/search'}}">
+            <input id="key" name="key" class="nav-search-input" 
+              placeholder="{{search_placeholder}}" 
+              value="{{?key}}"/>
+            <button class="nav-search-btn btn-default">搜</button>
+            <input class="hide" name="category" value="{{?category}}" />
+            {% block search_form %} {% end %}
+          </form>
+        </div>
+
         <div class="main-content">
             <div class="col-md-12">
                 {% if warn != "" and warn != None %}

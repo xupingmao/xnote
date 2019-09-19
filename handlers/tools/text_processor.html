@@ -14,7 +14,7 @@
 {% block body %}
 <!-- 
 @since 2016/12/18
-@modified 2019/01/04 21:32:27
+@modified 2019/09/20 01:21:34
 -->
 
 <div class="card">
@@ -607,6 +607,7 @@ function execute() {
     var regexpText = $("#regexp").val();
     try {
         $("#error").hide();
+        output("");
         if (regexpText) {
             var str = handleRegexp(regexpText, input);
         } else {

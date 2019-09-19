@@ -1,15 +1,15 @@
 {% init file_type = "group_list" %}
 {% init ungrouped_count = 0 %}
 {% set fixed_books = [
-    ("我的置顶", "/note/sticky"),
-    ("最近更新", "/note/recent_edit"),
-    ("笔记分类", "/note/types"),
 ]%}
 
 {% set mobile_only_books = [
+    ("我的置顶", "/note/sticky"),
+    ("最近更新", "/note/recent_edit"),
     ("标签列表", "/note/taglist"),
     ("公开笔记", "/note/public"),
-    ("我的相册", "/note/gallery")
+    ("我的相册", "/note/gallery"),
+    ("笔记分类", "/note/types"),
 ] %}
 
 {% include common/mod_notice.html %}
@@ -28,7 +28,9 @@
             <div class="book-item fixed-book-item">
                 <img src="/static/image/folder.gif"/>
                 {{name}}
-                <span class="book-size"><img class="icon" src="/static/image/icon_right.png"/></span>
+                <span class="book-size">
+                    <span class="icon-next">&nbsp;</span>
+                </span>
             </div>
         </a>
     {% end %}
@@ -38,7 +40,9 @@
             <div class="book-item fixed-book-item">
                 <img src="/static/image/folder.gif"/>
                 {{name}}
-                <span class="book-size"><img class="icon" src="/static/image/icon_right.png"/></span>
+                <span class="book-size">
+                    <span class="icon-next">&nbsp;</span>
+                </span>
             </div>
         </a>
     {% end %}

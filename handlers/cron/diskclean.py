@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/28 01:01:33
-# @modified 2019/07/19 00:14:25
+# @modified 2019/09/18 00:10:27
 import zipfile
 import os
 import re
@@ -11,6 +11,8 @@ import xconfig
 import xauth
 from xutils import Storage
 from xutils import dateutil, fsutil, logutil
+
+MAX_DEPTH = 3
 
 def is_empty_dir(dirname):
     return len(os.listdir(dirname)) == 0
