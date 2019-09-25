@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/09/15 11:23:50
+# @modified 2019/09/22 22:55:27
 
 """资料的DAO操作集合
 
@@ -146,7 +146,8 @@ def to_sqlite_obj(text):
 
 def fill_note_url(note):
     if note:
-        note.url = "/note/view?id={}".format(note["id"])
+        # note.url = "/note/view?id={}".format(note["id"])
+        note.url = "/note/{}".format(note["id"])
 
 class TableDesc:
     def __init__(self, row = None):

@@ -92,9 +92,58 @@ img {
     color: #fff;
 }
 
+{% init show_left = False %}
+{% if show_left %}
+    .x-left {
+        position: absolute;
+        left: 200px;
+        width: 200px;
+        bottom: 0px;
+        top: 0px;
+        overflow-y: auto;
+        border-right: 1px solid #ccc;
+    }
+
+    .x-left-title {
+        border-bottom: 1px solid #ccc;
+        padding: 5px;
+    }
+
+    .x-left-content {
+        padding: 5px;
+    }
+
+    .x-left-content li {
+        list-style: none;
+        line-height: 20px;
+    }
+
+    .x-body {
+        left: 400px;
+    }
+{% end %}
+
 </style>
 {% end %}
 
+{% block left_part %}
+    {% init groups = [] %}
+    {% init show_groups = False %}
+
+    {% if _has_login and show_groups %}
+        <div class="x-left-title">
+            目录
+            {% if _has_login %}
+            <a class="float-right" href="/note/add?parent_id={{file.parent_id}}">{{T("Create")}}</a>
+            {% end %}
+        </div>
+        <div class="x-left-content">
+            {% for item in groups %}
+                <li><a class="link" href="/note/{{item.id}}">{{item.name}}</a></li>
+            {% end %}
+        </div>
+    {% end %}
+{% end %}
 
 {% block body %}
     {% init file_type       = "md" %}
@@ -140,13 +189,13 @@ img {
     {% if prev_note or next_note %}
         <div class="card">
             {% if prev_note %}
-                <div class="col-md-6"><a href="/note/view?id={{prev_note.id}}">[上一篇]{{prev_note.name}}</a></div>
+                <div class="col-md-6"><a href="/note/{{prev_note.id}}?is_iframe={{is_iframe}}">[上一篇]{{prev_note.name}}</a></div>
             {% else %}
                 <div class="col-md-6">[上一篇]无</div>
             {% end %}
 
             {% if next_note %}
-                <div class="col-md-6"><a class="float-right" href="/note/view?id={{next_note.id}}">[下一篇]{{next_note.name}}</a></div>
+                <div class="col-md-6"><a class="float-right" href="/note/{{next_note.id}}?is_iframe={{is_iframe}}">[下一篇]{{next_note.name}}</a></div>
             {% end %}
         </div>
     {% end %}
@@ -197,23 +246,6 @@ function remove(id, name, parentId) {
         })
     }
 }
-
-$(function () {
-
-    $(".dropdown").click(function (e) {
-        var target = e.target;
-        $(target).next(".dropdown-content").slideToggle("fast");
-    });
-
-    $("body").on("click", function (e) {
-        var target = e.target;
-        if ($(target).hasClass("dropdown") || $(target).hasClass("dropdown-btn")) {
-            return;
-        }
-        $(".dropdown-content").hide();
-    });
-
-})
 
 </script>
 

@@ -9,7 +9,7 @@
 {% init note_plugins = xmanager.find_plugins("note") %}
 {% init file_type = None %}
 
-<div class="aside-item">
+<div class="aside-item hide">
     <div class="aside-title">
         选项
     </div>
@@ -28,10 +28,10 @@
 
 {# include search/mod_search_rules.html #}
 
-{% if _has_login and show_groups %}
+{% if False and _has_login and show_groups %}
 <div class="aside-item">
     <div class="aside-title">
-        分组
+        目录
         {% if _has_login %}
         <a class="float-right prompt-btn" message="新增分类" 
                     action="/note/add?type=group&name=">{{T("New")}}</a>
@@ -113,7 +113,7 @@
 
 <div class="aside-item menu-aside">
     <div class="aside-title">
-        目录
+        大纲
     </div>
     <div class="aside-content" id="menuBox">
     </div>

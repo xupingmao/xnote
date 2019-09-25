@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/09/07 18:01:07
+# @modified 2019/09/26 05:39:54
 import profile
 import math
 import re
@@ -27,23 +27,49 @@ def visit_by_id(ctx):
     id = ctx.id
     xutils.call("note.visit", id)
 
+def render_note_list(notes, file):
+    return xtemplate.render("note/note_list_left.html", 
+        notes = notes, 
+        files = notes,
+        file  = file,
+        show_search = False)
+
+def handle_view_groups(kw, user_name, file, op):
+    if file.type != "group" and op != "edit":
+        parent_id = file.parent_id
+        kw.show_left = True
+        kw.show_groups = True
+        # TODO orderby 从 parent上面取
+        parent = xutils.call("note.get_by_id", parent_id)
+        if parent != None:
+            kw.groups = xutils.call("note.list_by_parent", user_name, parent_id, 0, 200, parent.orderby)
+
+
 class ViewHandler:
 
     xconfig.note_history = History("笔记浏览记录", 200)
 
     @xutils.timeit(name = "Note.View", logfile = True)
-    def GET(self, op):
-        id            = xutils.get_argument("id", "")
+    def GET(self, op, id = None):
+        if id is None:
+            id = xutils.get_argument("id", "")
         name          = xutils.get_argument("name", "")
         page          = xutils.get_argument("page", 1, type=int)
         pagesize      = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         show_menu     = xutils.get_argument("show_menu", "true") != "false"
+        show_search   = xutils.get_argument("show_search", "true") != "false"
         orderby       = xutils.get_argument("orderby", None)
-        user_name     = xauth.get_current_name()
+        is_iframe     = xutils.get_argument("is_iframe", "false")
+        user_name     = xauth.current_name()
         show_add_file = False
         title         = None
         show_pagination = True
         show_search_div = False
+
+        kw = Storage()
+        kw.show_left = False
+        kw.show_groups = False
+        kw.groups = []
 
         if id == "0":
             raise web.found("/")
@@ -64,13 +90,12 @@ class ViewHandler:
         role            = xauth.get_current_role()
 
         # 定义一些变量
-        show_groups    = False
         show_mdate     = False
         files          = []
         recent_created = []
-        groups         = []
         amount         = 0
         show_recommend = False
+        
         template_name  = "note/view.html"
         next_note      = None
         prev_note      = None
@@ -93,6 +118,7 @@ class ViewHandler:
             show_search_div = True
             show_add_file   = True
             show_mdate      = True
+            # return render_note_list(files, file)
         elif file.type == "md" or file.type == "text":
             content = file.content
             show_recommend = True
@@ -122,7 +148,6 @@ class ViewHandler:
             file.path = fpath
 
         if show_recommend and user_name is not None:
-            show_groups = False
             # 推荐系统
             ctx = Storage(id=file.id, name = file.name, creator = file.creator, 
                 content = file.content,
@@ -139,6 +164,13 @@ class ViewHandler:
         if op == "edit":
             show_aside = False
 
+        if is_iframe == "true":
+            show_menu = False
+            show_search = False
+
+        # 如果是页面，需要查出上级目录列表
+        handle_view_groups(kw, user_name, file, op)
+        
         return xtemplate.render(template_name,
             show_aside    = show_aside,
             html_title    = title,
@@ -150,6 +182,7 @@ class ViewHandler:
             show_mdate    = show_mdate,
             show_add_file = show_add_file,
             show_menu     = show_menu,
+            show_search   = show_search,
             show_pagination = show_pagination,
             can_edit = can_edit,
             pathlist = pathlist,
@@ -158,11 +191,19 @@ class ViewHandler:
             page_url = "/note/view?id=%s&orderby=%s&page=" % (id, orderby),
             files    = files, 
             recent_created    = recent_created,
-            show_groups       = show_groups,
-            groups            = groups,
             prev_note         = prev_note,
             next_note         = next_note,
-            recommended_notes = recommended_notes)
+            is_iframe         = is_iframe,
+            recommended_notes = recommended_notes,
+            **kw)
+
+class ViewByIdHandler(ViewHandler):
+
+    def GET(self, id):
+        return super(ViewByIdHandler, self).GET("view", id)
+
+    def POST(self, id):
+        return super(ViewByIdHandler, self).POST("view", id)
 
 class PrintHandler:
 
@@ -294,6 +335,7 @@ class HistoryViewHandler:
 xurls = (
     r"/note/(edit|view)"   , ViewHandler,
     r"/note/print"         , PrintHandler,
+    r"/note/(\d+)"         , ViewByIdHandler,
     r"/note/dict"          , DictHandler,
     r"/note/history"       , NoteHistoryHandler,
     r"/note/history_view"  , HistoryViewHandler,

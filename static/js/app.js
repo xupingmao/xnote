@@ -299,9 +299,14 @@ $(function () {
       });
     }
 
-    // if (self == top) {
-      // 不是处于iframe环境
-    // }
+    function processInIframe() {
+      
+    }
+
+    if (self != top) {
+      processInIframe();
+    }
+
     init();
 });
 

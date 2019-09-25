@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/07/22 00:09:59
+# @modified 2019/09/24 11:50:24
 import os
 import json
 import web
@@ -118,10 +118,11 @@ def get_message_count(user):
 
 def pre_render(kw):
     """模板引擎预处理过程"""
+    user_name           = xauth.current_name() or ""
+
     kw["math"]          = math
     kw["_is_admin"]     = xauth.is_admin()
     kw["_has_login"]    = xauth.has_login()
-    user_name           = xauth.get_current_name() or ""
     kw["_user_name"]    = user_name
     kw["_user_agent"]   = get_user_agent()
     # 处理首页公告
@@ -144,11 +145,15 @@ def pre_render(kw):
     if _input is not None:
         kw.update(_input)
 
+def post_render(kw):
+    pass
+
 @xutils.timeit(name = "Template.Render", logfile = True)
 def render(template_name, **kw):
     nkw = {}
     pre_render(nkw)
     nkw.update(kw)
+    post_render(nkw)
 
     if hasattr(web.ctx, "env"):
         # 不一定是WEB过来的请求

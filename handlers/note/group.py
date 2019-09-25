@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/09/15 11:16:51
+# @modified 2019/09/26 01:32:07
 import math
 import time
 import web
@@ -218,6 +218,7 @@ class TypeListHandler:
             GroupItem("表格", "/note/table"),
             GroupItem("通讯录", "/note/addressbook"),
             GroupItem("富文本", "/note/html"),
+            GroupItem("时光轴", "/note/tools/timeline")
         ]
         amount = len(files)
 
@@ -279,6 +280,10 @@ class RecentHandler:
         #     time_attr   = time_attr,
         #     page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
         #     page_url    ="/note/recent_%s?page=" % orderby)
+
+        # return xtemplate.render("note/note_list_left.html", 
+        #     show_search = False,
+        #     notes = files)
         
         return xtemplate.render(VIEW_TPL,
             pathlist  = type_node_path(html_title, ""),

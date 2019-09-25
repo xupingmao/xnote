@@ -5,6 +5,10 @@
 
     {% include common/base_nav.html %}
 
+    <div class="x-left">
+        {% block left_part %} {% end %}
+    </div>
+
     <div class="x-body">
         <div class="nav-left-search">
           <form id="searchForm2" method="GET" action="{{?search_action,'/search/search'}}">

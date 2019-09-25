@@ -2,6 +2,7 @@
 {% init error = None %}
 {% init group_type = None %}
 {% init op = "view" %}
+{% init is_iframe = False %}
 
 {% set item = file %}
 {% set type_dict = dict(
@@ -47,7 +48,7 @@
             {# 其他普通笔记 #}
             <div class="float-right">
                 {% if file != None and _user_name == file.creator and op == "view" %}
-                <a class="btn" href="/note/edit?id={{file.id}}">编辑</a>
+                <a class="btn" href="/note/edit?id={{file.id}}&is_iframe={{is_iframe}}">编辑</a>
                 <div class="dropdown">
                     <span class="dropdown-btn link btn">更多▾</span>
                     <div class="dropdown-content">
