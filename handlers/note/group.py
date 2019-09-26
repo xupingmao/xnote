@@ -248,6 +248,7 @@ class RecentHandler:
         show_mdate = False
         show_cdate = False
         show_adate = False
+        dir_type   = "recent_edit"
 
         creator = xauth.get_current_name()
         if orderby == "viewed":
@@ -255,16 +256,19 @@ class RecentHandler:
             files = xutils.call("note.list_recent_viewed", creator, offset, limit)
             time_attr = "atime"
             show_adate = True
+            dir_type = "recent_viewed"
         elif orderby == "created":
             html_title = "Recent Created"
-            files = xutils.call("note.list_recent_created", None, offset, limit)
+            files = xutils.call("note.list_recent_created", creator, offset, limit)
             time_attr = "ctime"
             show_cdate = True
+            dir_type = "recent_created"
         else:
             html_title = "Recent Updated"
-            files = xutils.call("note.list_recent_edit", None, offset, limit)
+            files = xutils.call("note.list_recent_edit", creator, offset, limit)
             time_attr = "mtime"
             show_mdate = True
+            dir_type = "recent_edit"
         
         count   = xutils.call("note.count_user_note", creator)
 
@@ -289,6 +293,7 @@ class RecentHandler:
             pathlist  = type_node_path(html_title, ""),
             html_title = html_title,
             file_type  = "group",
+            dir_type   = dir_type,
             files = files,
             show_aside = True,
             page = page,
@@ -362,6 +367,7 @@ class StickyHandler:
         return xtemplate.render(VIEW_TPL,
             pathlist  = [PathNode("置顶笔记", "/note/sticky")],
             file_type = "group",
+            dir_type  = "sticky",
             files     = files,
             show_aside = True,
             show_mdate = True)

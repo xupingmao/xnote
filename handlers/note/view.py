@@ -34,15 +34,23 @@ def render_note_list(notes, file):
         file  = file,
         show_search = False)
 
-def handle_view_groups(kw, user_name, file, op):
-    if file.type != "group" and op != "edit":
+def handle_left_dir(kw, user_name, file, op):
+    is_iframe = xutils.get_argument("is_iframe")
+    if file.type != "group" and is_iframe != "true":
         parent_id = file.parent_id
         kw.show_left = True
         kw.show_groups = True
-        # TODO orderby 从 parent上面取
-        parent = xutils.call("note.get_by_id", parent_id)
-        if parent != None:
-            kw.groups = xutils.call("note.list_by_parent", user_name, parent_id, 0, 200, parent.orderby)
+        dir_type = xutils.get_argument("dir_type")
+        kw.dir_type = dir_type
+
+        if dir_type == "sticky":
+            kw.groups = xutils.call("note.list_sticky", user_name)
+        if dir_type == "recent_edit":
+            kw.groups = xutils.call("note.list_recent_created", user_name, 0, 200)
+        else:
+            parent = xutils.call("note.get_by_id", parent_id)
+            if parent != None:
+                kw.groups = xutils.call("note.list_by_parent", user_name, parent_id, 0, 200, parent.orderby)
 
 
 class ViewHandler:
@@ -169,7 +177,7 @@ class ViewHandler:
             show_search = False
 
         # 如果是页面，需要查出上级目录列表
-        handle_view_groups(kw, user_name, file, op)
+        handle_left_dir(kw, user_name, file, op)
         
         return xtemplate.render(template_name,
             show_aside    = show_aside,

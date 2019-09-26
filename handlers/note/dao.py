@@ -489,11 +489,10 @@ def list_by_parent(*args):
     return kv_list_by_parent(*args)
 
 @xutils.timeit(name = "NoteDao.ListRecentCreated", logfile = True)
-def list_recent_created(parent_id = None, offset = 0, limit = 10):
+def list_recent_created(creator = None, offset = 0, limit = 10):
     def list_func(key, value):
         return value.is_deleted != 1
 
-    creator = xauth.current_name()
     result  = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
     fill_parent_name(result)
     return result
@@ -519,16 +518,12 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
     return files
 
 @xutils.timeit(name = "NoteDao.ListRecentEdit:leveldb", logfile = True, logargs = True)
-def list_recent_edit(parent_id = None, offset=0, limit=None):
+def list_recent_edit(creator = None, offset=0, limit=None):
     """通过KV存储实现"""
     if limit is None:
         limit = xconfig.PAGE_SIZE
-
-    user = xauth.current_name()
-    if user is None:
-        user = "public"
     
-    id_list   = dbutil.zrange("note_recent:%s" % user, -offset-1, -offset-limit)
+    id_list   = dbutil.zrange("note_recent:%s" % creator, -offset-1, -offset-limit)
     note_dict = batch_query(id_list)
     files     = []
 

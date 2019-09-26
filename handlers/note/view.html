@@ -19,10 +19,6 @@
     font-size: small;
 }
 
-img {
-    max-width: 100%;
-}
-
 .alert {
     color: red;
     background-color: #FFCCCC;
@@ -116,6 +112,7 @@ img {
     .x-left-content li {
         list-style: none;
         line-height: 20px;
+        padding-bottom: 5px;
     }
 
     .x-body {
@@ -129,6 +126,7 @@ img {
 {% block left_part %}
     {% init groups = [] %}
     {% init show_groups = False %}
+    {% init dir_type = "" %}
 
     {% if _has_login and show_groups %}
         <div class="x-left-title">
@@ -139,7 +137,7 @@ img {
         </div>
         <div class="x-left-content">
             {% for item in groups %}
-                <li><a class="link" href="/note/{{item.id}}">{{item.name}}</a></li>
+                <li><a class="link" href="/note/{{item.id}}?dir_type={{dir_type}}">{{item.name}}</a></li>
             {% end %}
         </div>
     {% end %}

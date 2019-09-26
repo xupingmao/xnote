@@ -65,7 +65,7 @@
                             <a class="dropdown-option link" href="/note/stick?id={{file.id}}">置顶</a>
                         {% end %}
 
-                        <a class="dropdown-option link" href="/note/history?id={{file_id}}">{{T("Note_History")}}</a>
+                        <a class="dropdown-option link" href="/note/history?id={{file_id}}">{{T("History")}}</a>
 
                         {% if _is_admin and file.type == "gallery" %}
                             <a class="dropdown-option link" href="/fs/{{file.path}}">管理文件</a>
