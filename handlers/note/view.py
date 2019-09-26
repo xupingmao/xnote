@@ -46,7 +46,7 @@ def handle_left_dir(kw, user_name, file, op):
         if dir_type == "sticky":
             kw.groups = xutils.call("note.list_sticky", user_name)
         if dir_type == "recent_edit":
-            kw.groups = xutils.call("note.list_recent_created", user_name, 0, 200)
+            kw.groups = xutils.call("note.list_recent_edit", user_name, 0, 200)
         else:
             parent = xutils.call("note.get_by_id", parent_id)
             if parent != None:
