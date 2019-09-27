@@ -127,6 +127,7 @@
     {% init groups = [] %}
     {% init show_groups = False %}
     {% init dir_type = "" %}
+    {% init tags = "" %}
 
     {% if _has_login and show_groups %}
         <div class="x-left-title">
@@ -137,7 +138,7 @@
         </div>
         <div class="x-left-content">
             {% for item in groups %}
-                <li><a class="link" href="/note/{{item.id}}?dir_type={{dir_type}}">{{item.name}}</a></li>
+                <li><a class="link" href="/note/{{item.id}}?dir_type={{dir_type}}&tags={{tags}}">{{item.name}}</a></li>
             {% end %}
         </div>
     {% end %}

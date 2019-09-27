@@ -11,16 +11,17 @@
 {% init show_next  = False %}
 {% init file = None %}
 {% init dir_type = "" %}
+{% init tags = "" %}
 
 {% include "note/view_header.html" %}
 <div class="grid-row note-list">
     {% for item in files %}
-        <a class="dialog-link" href="{{item.url}}?dir_type={{dir_type}}">
+        <a class="dialog-link" href="{{item.url}}?dir_type={{dir_type}}&tags={{tags}}">
             <div class="book-item">
                 {% if item.type == "group" %}
-                    <img src="/static/image/folder.gif"/>
+                    <img class="icon" src="/static/image/folder.gif"/>   
                 {% elif item.type == "csv" %}
-                    <img src="/static/image/icon_csv.png"/>
+                    <img class="icon" src="/static/image/icon_csv.png"/>
                 {% end %}
 
                 {%if item.priority>0%}[置顶]{%end%}

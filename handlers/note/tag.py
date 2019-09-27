@@ -58,6 +58,7 @@ class TagNameHandler:
         return xtemplate.render("note/tagname.html", 
             show_aside = True,
             tagname    = tagname, 
+            tags       = tagname,
             files      = files, 
             show_mdate = True,
             page_max   = math.ceil(count / limit), 

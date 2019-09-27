@@ -685,3 +685,18 @@ def call(_func_name, *args, **kw):
 
 def lookup_func(name):
     return _funcs[name]
+
+class DAO:
+    """DAO封装"""
+    def __init__(self, domain):
+        self.domain = domain
+        self._meth  = dict()
+
+    def __getattr__(self, key):
+        func = self._meth.get(key)
+        if func:
+            return func
+        method = self.domain + "." + key
+        func = _funcs[method]
+        self._meth[method] = func
+        return func

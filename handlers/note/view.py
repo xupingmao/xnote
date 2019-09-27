@@ -18,9 +18,9 @@ from xconfig import Storage
 from xutils import History
 from xutils import dbutil
 from xutils import fsutil
-config = xconfig
 
 PAGE_SIZE = xconfig.PAGE_SIZE
+NOTE_DAO = xutils.DAO("note")
 
 @xmanager.listen("note.view", is_async=True)
 def visit_by_id(ctx):
@@ -36,22 +36,51 @@ def render_note_list(notes, file):
 
 def handle_left_dir(kw, user_name, file, op):
     is_iframe = xutils.get_argument("is_iframe")
-    if file.type != "group" and is_iframe != "true":
-        parent_id = file.parent_id
-        kw.show_left = True
-        kw.show_groups = True
-        dir_type = xutils.get_argument("dir_type")
-        kw.dir_type = dir_type
+    dir_type = xutils.get_argument("dir_type")
+    tags = xutils.get_argument("tags")
 
-        if dir_type == "sticky":
-            kw.groups = xutils.call("note.list_sticky", user_name)
-        if dir_type == "recent_edit":
-            kw.groups = xutils.call("note.list_recent_edit", user_name, 0, 200)
-        else:
-            parent = xutils.call("note.get_by_id", parent_id)
-            if parent != None:
-                kw.groups = xutils.call("note.list_by_parent", user_name, parent_id, 0, 200, parent.orderby)
+    if file.type == "group":
+        return
+    if is_iframe == "true":
+        return
 
+    parent_id = file.parent_id
+    kw.show_left = True
+    kw.show_groups = True
+    kw.dir_type = dir_type
+
+    if tags != "" and tags != None:
+        kw.groups = NOTE_DAO.list_by_tag(user_name, tags)
+    elif dir_type == "sticky":
+        kw.groups = NOTE_DAO.list_sticky(user_name)
+    elif dir_type == "recent_edit":
+        kw.groups = NOTE_DAO.list_recent_edit(user_name, 0, 200)
+    elif dir_type == "recent_created":
+        kw.groups = NOTE_DAO.list_recent_created(user_name, 0, 200)
+    else:
+        parent = NOTE_DAO.get_by_id(parent_id)
+        if parent is None:
+            return
+        kw.groups = NOTE_DAO.list_by_parent(user_name, parent_id, 0, 200, parent.orderby)
+
+def handle_note_recommend(kw, file, user_name):
+    ctx = Storage(id=file.id, name = file.name, creator = file.creator, 
+        content = file.content,
+        parent_id = file.parent_id,
+        result = [])
+    xmanager.fire("note.recommend", ctx)
+    kw.recommended_notes = ctx.result
+    kw.next_note = xutils.call("note.find_next_note", file, user_name)
+    kw.prev_note = xutils.call("note.find_prev_note", file, user_name)
+
+def handle_note_content(file):
+    content = file.content
+    content = content.replace(u'\xad', '\n')
+    content = content.replace(u'\n', '<br/>')
+    file.data = file.data.replace(u"\xad", "\n")
+    file.data = file.data.replace(u'\n', '<br/>')
+    if file.data == None or file.data == "":
+        file.data = content
 
 class ViewHandler:
 
@@ -78,6 +107,7 @@ class ViewHandler:
         kw.show_left = False
         kw.show_groups = False
         kw.groups = []
+        kw.recommended_notes = []
 
         if id == "0":
             raise web.found("/")
@@ -103,11 +133,11 @@ class ViewHandler:
         recent_created = []
         amount         = 0
         show_recommend = False
-        
         template_name  = "note/view.html"
         next_note      = None
         prev_note      = None
         filelist       = None
+
         xconfig.note_history.put(dict(user=user_name, 
             link = "/note/view?id=%s" % id, 
             name = file.name))
@@ -135,13 +165,8 @@ class ViewHandler:
                 show_recommend = False
                 template_name = "note/editor/markdown_edit.html"
         else:
-            content = file.content
-            content = content.replace(u'\xad', '\n')
-            content = content.replace(u'\n', '<br/>')
-            file.data = file.data.replace(u"\xad", "\n")
-            file.data = file.data.replace(u'\n', '<br/>')
-            if file.data == None or file.data == "":
-                file.data = content
+            # post/html 等其他类型
+            handle_note_content(file)
             show_recommend = True
             show_pagination = False
 
@@ -157,15 +182,8 @@ class ViewHandler:
 
         if show_recommend and user_name is not None:
             # 推荐系统
-            ctx = Storage(id=file.id, name = file.name, creator = file.creator, 
-                content = file.content,
-                parent_id = file.parent_id,
-                result = [])
-            xmanager.fire("note.recommend", ctx)
-            recommended_notes = ctx.result
-
-            next_note = xutils.call("note.find_next_note", file, user_name)
-            prev_note = xutils.call("note.find_prev_note", file, user_name)
+            handle_note_recommend(kw, file, user_name)
+            
         
         xmanager.fire("note.view", file)
         show_aside = True
@@ -199,11 +217,7 @@ class ViewHandler:
             page_url = "/note/view?id=%s&orderby=%s&page=" % (id, orderby),
             files    = files, 
             recent_created    = recent_created,
-            prev_note         = prev_note,
-            next_note         = next_note,
-            is_iframe         = is_iframe,
-            recommended_notes = recommended_notes,
-            **kw)
+            is_iframe         = is_iframe, **kw)
 
 class ViewByIdHandler(ViewHandler):
 
