@@ -71,6 +71,20 @@ def display_time_rule(task):
 
     return "%s %s %s" % (week, hour, minute)
 
+def add_cron_task(url, mtime, ctime, tm_wday, tm_hour, tm_min, 
+        name = "", message="", sound=0, webpage=0):
+    id  = dbutil.timeseq()
+    key = "schedule:%s" % id
+    data = dict(id = id, name=name, url=url, mtime=xutils.format_datetime(), 
+        ctime   = xutils.format_datetime(),
+        tm_wday = tm_wday,
+        tm_hour = tm_hour,
+        tm_min  = tm_min,
+        message = message,
+        sound   = sound,
+        webpage = webpage)
+    dbutil.put(key, data)
+    return id
 
 class CronEditHandler:
 
@@ -101,9 +115,7 @@ class CronSaveHandler:
 
         # db = xtables.get_schedule_table()
         if id == "" or id is None:
-            id  = dbutil.timeseq()
-            key = "schedule:%s" % id
-            data = dict(id = id, name=name, url=url, mtime=xutils.format_datetime(), 
+            id = add_cron_task(name=name, url=url, mtime=xutils.format_datetime(), 
                 ctime   = xutils.format_datetime(),
                 tm_wday = tm_wday,
                 tm_hour = tm_hour,
@@ -111,7 +123,6 @@ class CronSaveHandler:
                 message = message,
                 sound   = sound,
                 webpage = webpage)
-            dbutil.put(key, data)
         else:
             key = "schedule:%s" % id
             data = dbutil.get(key)
@@ -202,6 +213,7 @@ class AddHandler:
         tm_wday = xutils.get_argument("tm_wday")
         tm_hour = xutils.get_argument("tm_hour")
         tm_min  = xutils.get_argument("tm_min")
+        format  = xutils.get_argument("_format")
 
         if script_url != "" and script_url != None:
             url = script_url
@@ -209,14 +221,16 @@ class AddHandler:
         if url == "":
             raise web.seeother("/system/crontab")
 
-        db  = xtables.get_schedule_table()
-        db.insert(url=url,
+        sched_id = add_cron_task(url=url,
             ctime=xutils.format_time(),
             mtime=xutils.format_time(),
             tm_wday=tm_wday,
             tm_hour=tm_hour,
             tm_min=tm_min)
         xmanager.instance().load_tasks()
+
+        if format == "json":
+            return dict(code = "success", data = dict(id = sched_id))
         raise web.seeother("/system/crontab")
 
 class RemoveHandler:

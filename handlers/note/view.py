@@ -53,6 +53,8 @@ def handle_left_dir(kw, user_name, file, op):
         kw.groups = NOTE_DAO.list_by_tag(user_name, tags)
     elif dir_type == "sticky":
         kw.groups = NOTE_DAO.list_sticky(user_name)
+    elif dir_type == "public":
+        kw.groups = NOTE_DAO.list_public(0, xconfig.PAGE_SIZE)
     elif dir_type == "recent_edit":
         kw.groups = NOTE_DAO.list_recent_edit(user_name, 0, 200)
     elif dir_type == "recent_created":
@@ -70,8 +72,8 @@ def handle_note_recommend(kw, file, user_name):
         result = [])
     xmanager.fire("note.recommend", ctx)
     kw.recommended_notes = ctx.result
-    kw.next_note = xutils.call("note.find_next_note", file, user_name)
-    kw.prev_note = xutils.call("note.find_prev_note", file, user_name)
+    kw.next_note = NOTE_DAO.find_next_note(file, user_name)
+    kw.prev_note = NOTE_DAO.find_prev_note(file, user_name)
 
 def handle_note_content(file):
     content = file.content
@@ -81,6 +83,18 @@ def handle_note_content(file):
     file.data = file.data.replace(u'\n', '<br/>')
     if file.data == None or file.data == "":
         file.data = content
+
+def handle_note_files(kw, file):
+    fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(file.id))
+    filelist = []
+    # 处理相册
+    if file.type == "gallery":
+        if os.path.exists(fpath):
+            filelist = fsutil.list_files(fpath, webpath = True)
+        file.path = fpath
+
+    kw.path = fpath
+    kw.filelist = filelist
 
 class ViewHandler:
 
@@ -115,9 +129,9 @@ class ViewHandler:
         if id == "" and name == "":
             raise HTTPError(504)
         if id != "":
-            file = xutils.call("note.get_by_id", id)
+            file = NOTE_DAO.get_by_id(id)
         elif name is not None:
-            file = xutils.call("note.get_by_name", name, db=db)
+            file = NOTE_DAO.get_by_name(name)
         if file is None:
             raise web.notfound()
         
@@ -136,17 +150,14 @@ class ViewHandler:
         template_name  = "note/view.html"
         next_note      = None
         prev_note      = None
-        filelist       = None
 
         xconfig.note_history.put(dict(user=user_name, 
-            link = "/note/view?id=%s" % id, 
-            name = file.name))
-        recommended_notes = []
+            link = "/note/%s" % id, name = file.name))
 
         title  = file.name
         if file.type == "group":
             if orderby != None and file.orderby != orderby:
-                xutils.call("note.update", where = dict(id = file.id, creator = file.creator), orderby = orderby)
+                NOTE_DAO.update(where = dict(id = file.id, creator = file.creator), orderby = orderby)
             else:
                 orderby = file.orderby
 
@@ -170,15 +181,8 @@ class ViewHandler:
             show_recommend = True
             show_pagination = False
 
-        fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(id))
-
-        # 处理相册
-        if file.type == "gallery":
-            if os.path.exists(fpath):
-                filelist = fsutil.list_files(fpath, webpath = True)
-            else:
-                filelist = []
-            file.path = fpath
+        # 处理笔记背后的文件系统
+        handle_note_files(kw, file)
 
         if show_recommend and user_name is not None:
             # 推荐系统
@@ -201,8 +205,6 @@ class ViewHandler:
             show_aside    = show_aside,
             html_title    = title,
             file          = file, 
-            path          = fpath,
-            filelist      = filelist,
             note_id       = id,
             op            = op,
             show_mdate    = show_mdate,

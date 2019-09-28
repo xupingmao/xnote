@@ -9,6 +9,8 @@ import xutils
 import xtables
 import xtemplate
 
+NOTE_DAO = xutils.DAO("note")
+
 class TimelineAjaxHandler:
 
     @xauth.login_required()
@@ -19,9 +21,9 @@ class TimelineAjaxHandler:
         user_name  = xauth.current_name()
 
         if type == "mtime":
-            rows = xutils.call("note.list_recent_edit", user_name, offset, limit)
+            rows = NOTE_DAO.list_recent_edit(user_name, offset, limit)
         else:
-            rows = xutils.call("note.list_recent_created", None, offset, limit)
+            rows = NOTE_DAO.list_recent_created(user_name, offset, limit)
         result = dict()
         for row in rows:
             if type == "mtime":
@@ -29,7 +31,6 @@ class TimelineAjaxHandler:
             else:
                 date_time = row.ctime
             date = re.match(r"\d+\-\d+", date_time).group(0)
-            row.url = "/note/view?id={}".format(row.id);
             # 优化数据大小
             row.content = ""
             if date not in result:

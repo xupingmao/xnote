@@ -17,6 +17,7 @@ from xtemplate import T
 
 VIEW_TPL   = "note/view.html"
 TYPES_NAME = "笔记分类"
+NOTE_DAO   = xutils.DAO("note")
 
 class PathNode:
 
@@ -310,12 +311,13 @@ class PublicGroupHandler:
         page = xutils.get_argument("page", 1, type=int)
         page = max(1, page)
         offset = (page - 1) * xconfig.PAGE_SIZE
-        files = xutils.call("note.list_public", offset, xconfig.PAGE_SIZE)
-        count = xutils.call("note.count_public")
+        files = NOTE_DAO.list_public(offset, xconfig.PAGE_SIZE)
+        count = NOTE_DAO.count_public()
         return xtemplate.render(VIEW_TPL, 
             show_aside = True,
             pathlist   = [Storage(name="公开笔记", url="/note/public")],
             file_type  = "group",
+            dir_type   = "public",
             files      = files,
             page       = page, 
             show_cdate = True,

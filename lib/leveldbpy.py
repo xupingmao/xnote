@@ -395,11 +395,13 @@ class Iterator(object):
 
             while True:
                 if not self.valid():
-                    raise StopIteration()
+                    # raise StopIteration()
+                    return
                 key = self.key()
                 # print(key, key_from)
                 if key_from and key < key_from:
-                    raise StopIteration()
+                    # raise StopIteration()
+                    return
                 yield self.prev()
         else:
             if key_from:
@@ -409,11 +411,13 @@ class Iterator(object):
 
             while True:
                 if not self.valid():
-                    raise StopIteration()
+                    # raise StopIteration()
+                    return
                 key = self.key()
                 # print(key, key_to)
                 if key_to and key > key_to:
-                    raise StopIteration()
+                    # raise StopIteration()
+                    return
                 yield self.next()
 
     def keys(self):

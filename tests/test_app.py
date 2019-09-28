@@ -452,14 +452,17 @@ class TestMain(unittest.TestCase):
     def test_cron_list(self):
         self.check_200("/system/crontab")
 
-    def test_cron_task(self):
-        self.check_OK("/system/crontab/add", method="POST", data=dict(url="test", tm_wday="*", tm_hour="*", tm_min="*"))
-        sched = xtables.get_schedule_table().select_first(where=dict(url="test"))
-        self.check_OK("/system/crontab/remove?id={}".format(sched.id))
+    def test_cron_add_url(self):
+        result = json_request("/system/crontab/add", method="POST", 
+            data=dict(url="test", tm_wday="*", tm_hour="*", tm_min="*"))
+        sched_id = result["data"]["id"]
+        self.check_OK("/system/crontab/remove?id={}".format(sched_id))
 
-        self.check_OK("/system/crontab/add", method="POST", data=dict(script_url="script://test.py", tm_wday="1", tm_hour="*", tm_min="*"))
-        sched2 = xtables.get_schedule_table().select_first(where=dict(url="script://test.py"))
-        self.check_OK("/system/crontab/remove?id={}".format(sched2.id))
+    def test_cron_add_script(self):
+        result = json_request("/system/crontab/add", method="POST", 
+            data=dict(script_url="script://test.py", tm_wday="1", tm_hour="*", tm_min="*"))
+        sched_id = result["data"]["id"]
+        self.check_OK("/system/crontab/remove?id={}".format(sched_id))
 
     
     def test_notice_list(self):
