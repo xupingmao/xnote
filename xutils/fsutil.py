@@ -450,7 +450,7 @@ def get_upload_file_path(user, filename, upload_dir = "files", replace_exists = 
     if xconfig.USE_URLENCODE:
         filename = quote_unicode(filename)
     basename, ext = os.path.splitext(filename)
-    date = time.strftime("%Y/%m")
+    date = time.strftime("upload/%Y/%m")
     dirname = os.path.join(xconfig.DATA_PATH, upload_dir, user, date)
     makedirs(dirname)
 

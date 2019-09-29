@@ -10,11 +10,21 @@ import xutils
 import xtemplate
 import xconfig
 from tornado.escape import xhtml_escape
-from xutils import u
+from xutils import u, Storage
 
 def can_preview(path):
     name, ext = os.path.splitext(path)
     return ext.lower() in (".md", ".csv")
+
+def handle_embed(kw):
+    embed  = xutils.get_argument("embed", "false")
+
+    kw.show_aside = False
+    kw.embed = embed
+    if embed == "true":
+        kw.show_aside = False
+        kw.show_left  = False
+        kw.show_menu  = False
 
 class ViewSourceHandler:
 
@@ -31,8 +41,13 @@ class ViewSourceHandler:
         key  = xutils.get_argument("key", "")
         type = xutils.get_argument("type", "")
         readonly = False
-        embed  = xutils.get_argument("embed", "false")
         
+
+        kw = Storage()
+        
+        # 处理嵌入页面
+        handle_embed(kw)
+
         if path == "":
             return xtemplate.render(template_name, 
                 content = "",
@@ -54,7 +69,6 @@ class ViewSourceHandler:
                 #     content = textutil.replace(content, key, htmlutil.span("?", "search-key"), ignore_case=True, use_template=True)
                 return xtemplate.render(template_name, 
                     show_preview = can_preview(path),
-                    show_aside = False,
                     readonly = readonly,
                     error = error,
                     warn = warn,
@@ -62,18 +76,15 @@ class ViewSourceHandler:
                     name = os.path.basename(path), 
                     path = path,
                     content = content, 
-                    embed = embed,
-                    lines = content.count("\n")+1)
+                    lines = content.count("\n")+1, **kw)
             except Exception as e:
                 xutils.print_exc()
                 error = e
             return xtemplate.render(template_name, 
-                show_aside = False,
                 path = path,
                 name = "",
                 readonly = readonly,
-                embed = embed,
-                error = error, lines = 0, content="")
+                error = error, lines = 0, content="", **kw)
 
 
 class UpdateHandler(object):
