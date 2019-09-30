@@ -66,23 +66,6 @@
     }
 </style>
 
-{% if embed == "true" %}
-    <style type="text/css">
-        .nav, .fs-path, .nav-left, .nav-left-search {
-            display: none;
-        }
-
-        .grid-card {
-            border-radius: 0px;
-            border: none;
-        }
-
-        .root {
-            padding-left: 0px;
-        }
-    </style>
-{% end %}
-
 {% end %}
 
 {% block body %}
@@ -92,6 +75,7 @@
 {% init error = "" %}
 {% init pathlist = [] %}
 {% init show_preview = False %}
+{% init embed = False %}
 
 <div class="col-md-12 grid-card">
     {% include "mod_fs_path.html" %}
@@ -117,10 +101,10 @@
             {% end %}
             <input id="execute" type="button" class="btn hide" value="执行"/>
             {% if show_preview %}
-                <a class="btn" href="/code/wiki/{{path}}">{{T("Preview")}}</a>
+                <a class="btn" href="/code/wiki/{{path}}?embed={{embed}}">{{T("Preview")}}</a>
             {% end %}
             {% if path.find("/plugins/") >= 0 or path.find("\\plugins\\") >= 0 %}
-                <input type="button" class="link-btn" href="/plugins/{{name}}" value="预览"/>
+                <input type="button" class="link-btn" href="/plugins/{{name}}?embed={{embed}}" value="预览"/>
             {% end %}
             <span>注意不会自动保存</span>
         </div>

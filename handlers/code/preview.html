@@ -25,6 +25,7 @@
 {% block body %}
     {% init path = "" %}
     {% init error = "" %}
+    {% init embed = False %}
 
     {% if error != "" %}
     <div class="col-md-12 error">
@@ -38,7 +39,7 @@
 
     <div class="grid-card">
         {% if _is_admin and path != "" %}
-            {% set fs_path_option = '<a class="float-right" href="/code/edit?path={}">[编辑]</a>'.format(path) %}
+            {% set fs_path_option = '<a class="float-right" href="/code/edit?path={}&embed={}">[编辑]</a>'.format(path, embed) %}
             {% include "mod_fs_path.html" %}
         {% end %}
         

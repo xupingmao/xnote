@@ -1,11 +1,12 @@
 # encoding=utf-8
-# @modified 2019/02/25 00:12:38
+# @modified 2019/09/30 11:13:34
 import os
 import web
 import xutils
 import xauth
 import xconfig
 from xtemplate import render
+from xutils import Storage
 
 WIKI_PATH = "./"
 
@@ -52,6 +53,15 @@ def get_path_list(path):
         last = vpath
     return pathlist
 
+def handle_layout(kw):
+    kw.show_aside = False
+    embed = xutils.get_argument("embed", type=bool)
+    kw.embed = embed
+    if embed:
+        kw.show_menu = False
+        kw.show_search = False
+        kw.show_path = True
+
 class PreviewHandler:
     
     def GET(self, path=""):
@@ -63,6 +73,7 @@ class PreviewHandler:
         basename = os.path.basename(path)
         op       = xutils.get_argument("op")
         path     = xutils.get_real_path(path)
+        kw = Storage()
 
         if os.path.isfile(path):
             check_resource(path)
@@ -77,15 +88,15 @@ class PreviewHandler:
             children = None
             content  = "File \"%s\" does not exists" % path
             type     = "file"
-                    
+        
+        handle_layout(kw)
         return render("code/preview.html", 
-            show_aside = False,
             html_title = basename,
             os = os,
             path = path,
             content = content,
             type = type,
-            has_readme = False)
+            has_readme = False, **kw)
 
     def POST(self, name):
         return self.edit_POST(name)

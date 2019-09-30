@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/??/??
-# @modified 2019/07/30 00:44:19
+# @modified 2019/09/30 11:15:59
 
 """显示代码原文"""
 import os
@@ -17,14 +17,16 @@ def can_preview(path):
     return ext.lower() in (".md", ".csv")
 
 def handle_embed(kw):
-    embed  = xutils.get_argument("embed", "false")
+    embed  = xutils.get_argument("embed", type=bool)
 
     kw.show_aside = False
     kw.embed = embed
-    if embed == "true":
+    if embed:
         kw.show_aside = False
         kw.show_left  = False
         kw.show_menu  = False
+        kw.show_search = False
+        kw.show_path = False
 
 class ViewSourceHandler:
 

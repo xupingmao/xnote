@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2018/11/26 23:30:58
+# @modified 2019/09/30 13:17:09
 import web
 import os
 import xconfig
@@ -48,17 +48,25 @@ class ListHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        show_menu = (xutils.get_argument("show_menu") == "true")
+        show_menu = xutils.get_argument("show_menu", type=bool)
+        embed = xutils.get_argument("embed", type=bool)
         path = xutils.get_argument("path")
         if path == "" or path == None:
             path = xconfig.DATA_DIR
         scripts = list_commands()
+
+        show_search = True
+        if embed:
+            show_menu = False
+            show_search = False
+
         return xtemplate.render("fs/fs_plugins.html", 
             show_aside = False,
             path = path, 
             scripts = scripts, 
             get_display_name = get_display_name,
-            show_menu = show_menu)
+            show_menu = show_menu,
+            show_search = show_search)
 
 class RunPluginHandler:
 

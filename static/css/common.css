@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/09/20 01:27:40
+ * @modified 2019/09/30 13:11:18
  */
 
 * {
@@ -1287,6 +1287,10 @@ li.menu-item:hover {
 /** 颜色属性 **/
 .red {
     color:red;
+}
+
+.black {
+    color: black;
 }
 
 .xnote-todo {

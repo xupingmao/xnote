@@ -137,8 +137,21 @@
             {% end %}
         </div>
         <div class="x-left-content">
+            <li>
+                <i class="fa fa-chevron-left"></i>
+                <a class="link" href="/note/books">返回上级</a>
+            </li>
             {% for item in groups %}
-                <li><a class="link" href="/note/{{item.id}}?dir_type={{dir_type}}&tags={{tags}}">{{item.name}}</a></li>
+                <li>
+                    {% if item.type == "group" %}
+                        <i class="fa fa-folder"></i>
+                    {% elif item.type == "gallery" %}
+                        <i class="fa fa-photo"></i>
+                    {% else %}
+                        <i class="fa fa-file-text-o"></i>
+                    {% end %}
+                    <a class="link" href="/note/{{item.id}}?dir_type={{dir_type}}&tags={{tags}}">{{item.name}}</a>
+                </li>
             {% end %}
         </div>
     {% end %}

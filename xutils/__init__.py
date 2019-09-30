@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/07/18 23:52:41
+# @modified 2019/09/30 10:56:13
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -576,7 +576,11 @@ def get_argument(key, default_value=None, type = None, strip=False):
     if value is None or value == "":
         _input[key] = default_value
         return default_value
-    if type != None:
+    if type == bool:
+        # bool函数对飞空字符串都默认返回true，需要处理一下
+        value = value in ("true", "True", "yes", "Y", "on")
+        _input[key] = value
+    elif type != None:
         value = type(value)
         _input[key] = value
     if strip and isinstance(value, str):

@@ -1,6 +1,9 @@
 {% init fs_mode = "" %}
 {% init fs_path_url  = "/fs/$path?mode=" + fs_mode %}
 {% init fs_path_option = None %}
+{% init show_path = True %}
+
+{% if show_path %}
 <div class="fs-path">
     <a href="{{fs_path_url.replace('$path', '/')}}">Home</a> /
     {% for item in xutils.splitpath(xutils.get_real_path(path)) %}
@@ -10,3 +13,4 @@
         {% raw fs_path_option %}
     {% end %}
 </div>
+{% end %}

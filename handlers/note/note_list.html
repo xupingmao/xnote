@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/09/24 11:06:45
+@modified 2019/09/30 13:13:30
 -->
 
 {% init files = [] %}
@@ -19,9 +19,13 @@
         <a class="dialog-link" href="{{item.url}}?dir_type={{dir_type}}&tags={{tags}}">
             <div class="book-item">
                 {% if item.type == "group" %}
-                    <img class="icon" src="/static/image/folder.gif"/>   
+                    <i class="fa fa-folder black"></i>
                 {% elif item.type == "csv" %}
-                    <img class="icon" src="/static/image/icon_csv.png"/>
+                    <i class="fa fa-table black"></i>
+                {% elif item.type == "gallery" %}
+                    <i class="fa fa-image black"></i>
+                {% else %}
+                    <i class="fa fa-file-text-o black"></i>
                 {% end %}
 
                 {%if item.priority>0%}[置顶]{%end%}
