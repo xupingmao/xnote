@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2019/06/04 23:23:27
+@modified 2019/10/01 16:54:23
 -->
 
 {% block body %}
@@ -53,11 +53,15 @@
 
             <div class="note-name">
                 {% if file.type == "group" %}
-                    <img src="/static/image/folder.gif"/>
+                    <i class="fa fa-folder orange"></i>
+                {% elif file.type == "csv" %}
+                    <i class="fa fa-table"></i>
+                {% elif file.type == "gallery" %}
+                    <i class="fa fa-image"></i>
+                {% elif file.type != None %}
+                    <i class="fa fa-file-text-o"></i>
                 {% end %}
-                {% if file.type == "csv" %}
-                    <img src="/static/image/icon_csv.png"/>
-                {% end %}
+
                 {% if file.category == "note" %}
                     <a class="dialog-link" href="{{file.url}}">{{file.name}}</a>
                 {% else %}

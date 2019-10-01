@@ -133,24 +133,32 @@
         <div class="x-left-title">
             目录
             {% if _has_login %}
-            <a class="float-right" href="/note/add?parent_id={{file.parent_id}}">{{T("Create")}}</a>
+                <a class="float-right" href="/note/add?parent_id={{file.parent_id}}">{{T("Create")}}</a>
             {% end %}
         </div>
         <div class="x-left-content">
             <li>
                 <i class="fa fa-chevron-left"></i>
-                <a class="link" href="/note/books">返回上级</a>
+                <a class="link" href="/note/books">返回书架</a>
             </li>
             {% for item in groups %}
                 <li>
                     {% if item.type == "group" %}
-                        <i class="fa fa-folder"></i>
+                        <i class="fa fa-folder orange"></i>
                     {% elif item.type == "gallery" %}
                         <i class="fa fa-photo"></i>
+                    {% elif item.type == "csv" %}
+                        <i class="fa fa-table"></i>
                     {% else %}
                         <i class="fa fa-file-text-o"></i>
                     {% end %}
-                    <a class="link" href="/note/{{item.id}}?dir_type={{dir_type}}&tags={{tags}}">{{item.name}}</a>
+
+                    {%if item.priority>0%}
+                        <i class="fa fa-thumb-tack black"></i>
+                    {%end%}
+                    <a class="link" href="/note/{{item.id}}?dir_type={{dir_type}}&tags={{tags}}">
+                        {{item.name}}
+                    </a>
                 </li>
             {% end %}
         </div>
@@ -172,10 +180,6 @@
     {% if file != None %}
         {% set globals()['file_type'] = file.type %}
         {% set globals()['file_id'] = file.id %}
-    {% end %}
-
-    {% if show_notice %}
-        {% include common/mod_notice.html %}
     {% end %}
 
     {# 收藏一下这个符号 › #}

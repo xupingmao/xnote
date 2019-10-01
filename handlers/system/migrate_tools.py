@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/07/14 17:27:22
+# @modified 2019/10/01 15:58:37
 
 import os
 import re
@@ -25,11 +25,11 @@ HTML = """
 
     <div>
         <a class="btn" href="?action=note_full">迁移笔记主表</a>
-        <a class="btn" href="?action=message">迁移提醒</a>
-        <a class="btn" href="?action=build_index">构建索引</a>
-        <a class="btn" href="?action=note_tags">迁移标签</a>
-        <a class="btn" href="?action=schedule">迁移任务</a>
-        <a class="btn" href="?action=user">迁移用户</a>
+        <a class="btn" href="?action=message">迁移待办表</a>
+        <a class="btn" href="?action=build_index">构建索引表</a>
+        <a class="btn" href="?action=note_tags">迁移标签表</a>
+        <a class="btn" href="?action=schedule">迁移任务表</a>
+        <a class="btn" href="?action=user">迁移用户表</a>
     </div>
 
     <div class="top-offset-1">

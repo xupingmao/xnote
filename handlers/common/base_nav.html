@@ -27,7 +27,9 @@
       <input id="key" name="key" class="nav-search-input" 
         placeholder="{{search_placeholder}}" 
         value="{{?key}}"/>
-      <button class="nav-search-btn btn-default">搜</button>
+      <button class="nav-search-btn btn-default">
+        <i class="fa fa-search"></i>
+      </button>
       <input class="hide" name="category" value="{{?category}}" />
       {% block search_form %} {% end %}
     </form>

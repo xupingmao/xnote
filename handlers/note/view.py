@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/09/26 05:39:54
+# @modified 2019/10/01 16:37:05
 import profile
 import math
 import re
@@ -355,6 +355,11 @@ class HistoryViewHandler:
         return dict(code = "success", data = content)
 
 
+class NoticeHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        return xtemplate.render("note/notice.html")
 
 xurls = (
     r"/note/(edit|view)"   , ViewHandler,
@@ -363,6 +368,7 @@ xurls = (
     r"/note/dict"          , DictHandler,
     r"/note/history"       , NoteHistoryHandler,
     r"/note/history_view"  , HistoryViewHandler,
+    r"/note/notice"        , NoticeHandler,
     
     r"/file/(\d+)/upvote"  , Upvote,
     r"/file/(\d+)/downvote", Downvote,

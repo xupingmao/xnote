@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/09/30 13:11:18
+ * @modified 2019/10/01 15:52:40
  */
 
 * {
@@ -1279,11 +1279,6 @@ li.menu-item:hover {
     width: 100%;
 }
 
-/*.aside-content li:hover {
-    background-color: #eee;
-    cursor: pointer;
-}*/
-
 /** 颜色属性 **/
 .red {
     color:red;
@@ -1291,6 +1286,14 @@ li.menu-item:hover {
 
 .black {
     color: black;
+}
+
+.orange {
+    color: orange;
+}
+
+.green {
+    color: green;
 }
 
 .xnote-todo {

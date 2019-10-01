@@ -1,6 +1,7 @@
 {% init file_type = "group_list" %}
 {% init ungrouped_count = 0 %}
 {% set fixed_books = [
+    ("今日提醒", "/note/notice")
 ]%}
 
 {% set mobile_only_books = [
@@ -11,8 +12,6 @@
     ("我的相册", "/note/gallery"),
     ("笔记分类", "/note/types"),
 ] %}
-
-{% include common/mod_notice.html %}
 
 <div class="grid-row card book-list">
     <h3>{{T("NoteBook")}}
@@ -26,10 +25,10 @@
     {% for name, url in fixed_books %}
         <a href="{{url}}" class="fixed-book">
             <div class="book-item fixed-book-item">
-                <img src="/static/image/folder.gif"/>
+                <i class="fa fa-folder orange"></i>
                 {{name}}
                 <span class="book-size">
-                    <span class="icon-next">&nbsp;</span>
+                    <i class="fa fa-chevron-right"></i>
                 </span>
             </div>
         </a>
@@ -38,10 +37,10 @@
     {% for name, url in mobile_only_books %}
         <a href="{{url}}" class="mobile-only">
             <div class="book-item fixed-book-item">
-                <img src="/static/image/folder.gif"/>
+                <i class="fa fa-folder orange"></i>
                 {{name}}
                 <span class="book-size">
-                    <span class="icon-next">&nbsp;</span>
+                    <i class="fa fa-chevron-right"></i>
                 </span>
             </div>
         </a>
@@ -50,10 +49,13 @@
     {% for item in files %}
         <a href="{{item.url}}">
         <div class="book-item">
-            <img src="/static/image/folder.gif"/>
-            {% if item.priority > 0 %}[置顶]{% end %}
-            {{item.name}}
-            <span style="color: black;">({{item.size}})</span>
+            <i class="fa fa-folder orange"></i>
+            {% if item.priority > 0 %}
+                <i class="fa fa-thumb-tack black"></i>
+            {% end %}
+            
+            <span>{{item.name}}</span>
+            <span class="black">({{item.size}})</span>
             <span class="book-size">{{format_date(item.mtime).replace('-', '/')}}</span>
         </div>
         </a>

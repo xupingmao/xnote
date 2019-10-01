@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/09/26 01:32:07
+# @modified 2019/10/01 17:12:19
 import math
 import time
 import web
@@ -93,9 +93,6 @@ class GroupListHandler:
             show_add_group  = True,
             show_aside      = True,
             files           = data)
-
-class BookListHandler(GroupListHandler):
-    pass
 
 class GroupSelectHandler:
     @xauth.login_required()
@@ -198,6 +195,12 @@ class ListHandler(BaseListHandler):
     def __init__(self):
         self.note_type = "list"
         self.title = "清单"
+
+class TextHandler(BaseListHandler):
+
+    def __init__(self):
+        self.note_type = "text"
+        self.title = "文本"
 
 class TypeListHandler:
 
@@ -400,6 +403,7 @@ xurls = (
     r"/note/addressbook"    , AddressBookHandler,
     r"/note/md"             , MarkdownListHandler,
     r"/note/list"           , ListHandler,
+    r"/note/text"           , TextHandler,
     r"/note/types"          , TypeListHandler,
     
     r"/file/group/removed"  , RemovedHandler,

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/08/17 10:06:33
+# @modified 2019/10/01 16:50:22
 
 import sys
 import os
@@ -165,6 +165,9 @@ class TestMain(unittest.TestCase):
         self.check_OK("/note/types")
         self.check_OK("/note/table")
         self.check_OK("/note/gallery")
+
+    def test_note_notice(self):
+        self.check_OK("/note/notice")
 
     def test_note_timeline(self):
         self.check_200("/note/timeline")
