@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/09/15 11:30:32
+# @modified 2019/10/02 16:40:45
 import web
 import time
 import os
@@ -259,7 +259,7 @@ def on_reload(ctx = None):
     path = os.path.join(xconfig.SCRIPTS_DIR, "user.css")
     if not os.path.exists(path):
         return 
-    xconfig.set("USER_CSS", xutils.readfile(path))
+    xconfig.USER_CSS = xutils.readfile(path)
 
     # 暂时取消多主题
     xconfig.THEME = "left"

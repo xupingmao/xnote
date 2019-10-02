@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2019/09/14 18:29:00
+# @modified 2019/10/02 16:38:58
 import xauth
 import xutils
 from xutils import dbutil
@@ -39,6 +39,7 @@ class StatHandler(BasePlugin):
         stat_list.append(["备忘总数", dbutil.count_table("message:%s" % user_name)])
         if xauth.is_admin():
             stat_list.append(["笔记历史数", dbutil.count_table("note_history")])
+            stat_list.append(["评论总数", dbutil.count_table("note_comment")])
 
         self.writetemplate(HTML, stat_list = stat_list)
 

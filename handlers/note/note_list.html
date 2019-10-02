@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/10/02 02:52:11
+@modified 2019/10/02 16:58:28
 -->
 
 {% init files = [] %}
@@ -16,16 +16,19 @@
 
 {% include "note/view_header.html" %}
 <div class="grid-row note-list">
-    <a class="dialog-link" href="{{back_url}}">
-        <div class="book-item">
-            <i class="fa fa-folder orange"></i>
-            
-            <span>返回书架</span>
-            <span class="book-size">
-                <i class="fa fa-chevron-right"></i>
-            </span>
-        </div>
-    </a>
+    {% if _has_login %}
+        <a class="dialog-link" href="{{back_url}}">
+            <div class="book-item">
+                <i class="fa fa-folder orange"></i>
+                
+                <span>返回书架</span>
+                <span class="book-size">
+                    <i class="fa fa-chevron-right"></i>
+                </span>
+            </div>
+        </a>
+    {% end %}
+
     {% for item in files %}
         <a class="dialog-link" href="{{item.url}}?dir_type={{dir_type}}&tags={{tags}}">
             <div class="book-item">
@@ -35,6 +38,12 @@
                     <i class="fa fa-table black"></i>
                 {% elif item.type == "gallery" %}
                     <i class="fa fa-image black"></i>
+                {% elif item.type == "trash" %}
+                    <i class="fa fa-trash black"></i>
+                {% elif item.type == "gear" %}
+                    <i class="fa fa-gear black"></i>
+                {% elif item.type == "cube" %}
+                    <i class="fa fa-cube black"></i>
                 {% else %}
                     <i class="fa fa-file-text-o black"></i>
                 {% end %}

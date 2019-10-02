@@ -129,7 +129,7 @@
     {% init dir_type = "" %}
     {% init tags = "" %}
 
-    {% if _has_login and show_groups %}
+    {% if show_groups %}
         <div class="x-left-title">
             目录
             {% if _has_login %}
@@ -137,10 +137,13 @@
             {% end %}
         </div>
         <div class="x-left-content">
-            <li>
-                <i class="fa fa-chevron-left"></i>
-                <a class="link" href="/note/books">返回书架</a>
-            </li>
+            {% if _has_login %}
+                <li>
+                    <i class="fa fa-chevron-left"></i>
+                    <a class="link" href="/note/books">返回书架</a>
+                </li>
+            {% end %}
+            
             {% for item in groups %}
                 <li>
                     {% if item.type == "group" %}

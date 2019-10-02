@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/08/07 00:18:10
+# @modified 2019/10/02 14:35:53
 import web
 import xtables
 import xtemplate
@@ -14,10 +14,19 @@ from xutils import Storage, cacheutil
 from xutils.dateutil import Timer
 from xutils import History
 
-index_html = """
+INDEX_HTML = """
 {% extends base.html %}
 {% block body %}
-<h1 style="text-align:center;">Welcome to Xnote!</h1>
+    <h1 style="text-align:center;">Welcome to Xnote!</h1>
+{% end %}
+"""
+
+UNAUTHORIZED_HTML = """
+{% extends base.html %}
+{% block body %}
+    <div class="box">
+        <h3>抱歉,您没有访问的权限</h3>
+    </div>
 {% end %}
 """
 
@@ -53,11 +62,9 @@ class IndexHandler:
     @xutils.timeit(name = "Home", logfile = True)
     def GET(self):
         if xauth.has_login():
-            from handlers.note.group import GroupListHandler
-            return GroupListHandler().GET()
+            raise web.found("/note/books")
         else:
-            from handlers.note.group import PublicGroupHandler
-            return PublicGroupHandler().GET()
+            raise web.found("/note/public")
 
         # 老的逻辑
         current_name  = xauth.current_name()
@@ -94,30 +101,20 @@ class GridHandler:
         return xtemplate.render("grid.html", items=items, name = name, customized_items = customized_items)
 
 class Unauthorized():
-    html = """
-        {% extends base.html %}
-        {% block body %}
-            <div class="box">
-                <h3>抱歉,您没有访问的权限</h3>
-            </div>
-        {% end %}
-    """
     def GET(self):
         web.ctx.status = "401 Unauthorized"
-        return xtemplate.render_text(self.html)
+        return xtemplate.render_text(UNAUTHORIZED_HTML)
 
 class FaviconHandler:
 
     def GET(self):
-        raise web.seeother("/static/favicon.ico")
+        raise web.found("/static/favicon.ico")
 
 xurls = (
-    # r"/", "handlers.note.group.RecentEditHandler", 
     r"/", IndexHandler,
     r"/index", IndexHandler,
     r"/home", IndexHandler,
     r"/more", GridHandler,
-    # r"/system/index", GridHandler,
     r"/unauthorized", Unauthorized,
     r"/favicon.ico", FaviconHandler
 )

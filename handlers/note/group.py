@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/02 14:18:49
+# @modified 2019/10/02 17:07:13
 import math
 import time
 import web
@@ -19,11 +19,13 @@ VIEW_TPL   = "note/view.html"
 TYPES_NAME = "笔记工具"
 NOTE_DAO   = xutils.DAO("note")
 
-class PathNode:
+class PathNode(Storage):
 
-    def __init__(self, name, url):
-        self.name = name
-        self.url  = url
+    def __init__(self, name, url, type="note"):
+        self.name     = name
+        self.url      = url
+        self.type     = type
+        self.priority = 0
 
 class GroupItem:
     """笔记本的类型"""
@@ -203,7 +205,7 @@ class TextHandler(BaseListHandler):
         self.note_type = "text"
         self.title = "文本"
 
-class ToolsListHandler:
+class ToolListHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -214,7 +216,7 @@ class ToolsListHandler:
 
         files = [
             GroupItem("默认分类", "/note/default"),
-            GroupItem("回收站", "/note/removed"),
+            PathNode("回收站", "/note/removed", "trash"),
             GroupItem("公开笔记", "/note/public"),
             GroupItem("最近更新", "/note/recent_edit"),
             GroupItem("最近创建", "/note/recent_created"),
@@ -224,8 +226,10 @@ class ToolsListHandler:
             GroupItem("表格", "/note/table"),
             GroupItem("通讯录", "/note/addressbook"),
             GroupItem("富文本", "/note/html"),
-            GroupItem("时光轴", "/note/tools/timeline"),
-            GroupItem("按月查看", "/note/date")
+            PathNode("时光轴", "/note/tools/timeline", "cube"),
+            PathNode("按月查看", "/note/date", "cube"),
+            PathNode("导入笔记", "/note/html_importer", "cube"),
+            PathNode("数据统计", "/note/stat", "cube")
         ]
         amount = len(files)
 
@@ -235,6 +239,10 @@ class ToolsListHandler:
             files     = files,
             show_aside = True,
             show_next  = True)
+
+class TypesHandler(ToolListHandler):
+    """A alias for ToolListHandler"""
+    pass
 
 class RecentHandler:
     """show recent notes"""
@@ -408,8 +416,8 @@ xurls = (
     r"/note/md"             , MarkdownListHandler,
     r"/note/list"           , ListHandler,
     r"/note/text"           , TextHandler,
-    r"/note/tools"          , ToolsListHandler,
-    r"/note/types"          , ToolsListHandler,
+    r"/note/tools"          , ToolListHandler,
+    r"/note/types"          , TypesHandler,
     
     r"/file/group/removed"  , RemovedHandler,
     r"/file/group/list"     , GroupListHandler,

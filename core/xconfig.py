@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/08/03 16:06:11
+# @modified 2019/10/02 14:49:12
 
 '''xnote系统配置
 
@@ -55,28 +55,33 @@ USE_URLENCODE      = False
 INIT_SCRIPT        = "init.py"
 # 是否记录位置信息，可通过脚本配置打开
 RECORD_LOCATION    = False
-BASE_TEMPLATE      = "base.html"
+
+
+# *** 样式设置 ***
+BASE_TEMPLATE = "base.html"
 # 主题样式
-THEME              = "standard"
+THEME         = "standard"
 # 选项风格
-OPTION_STYLE       = "aside"
+OPTION_STYLE  = "aside"
 # 页面打开方式
-PAGE_OPEN          = "self"
+PAGE_OPEN     = "self"
 # 页面宽度
-PAGE_WIDTH         = "1150"
+PAGE_WIDTH    = "1150"
+USER_CSS      = None
+USER_JS       = None
 
 # 插件相关
 LOAD_PLUGINS_ON_INIT = True
-PLUGINS = {}
+PLUGINS              = {}
 
 # 菜单配置
-MENU_LIST = []
+MENU_LIST    = []
 # 导航配置
-NAV_LIST  = []
+NAV_LIST     = []
 # 笔记的扩展配置
 NOTE_OPTIONS = []
 # 文件管理器的扩展配置
-FS_OPTIONS = []
+FS_OPTIONS   = []
 
 
 ##################################
@@ -181,6 +186,7 @@ FS_TEXT_EXT_LIST = set([
     ".log"
 ])
 
+# 后面定义的set函数和系统函数冲突了，所以这里创建一个hashset的别名
 hashset = set
 FS_IMG_EXT_LIST = set([".gif", ".png", ".jpg", ".jpeg", ".bmp", ".webp", ".ico", ".jfif", ".cur"])
 # 剪切板

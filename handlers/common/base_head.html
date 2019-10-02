@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html><head>
+<head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0,user-scalable=0"/>
 {% init html_title = None %}
@@ -10,12 +9,6 @@
 {% import xconfig %}
 
 <title>Xnote{%if html_title%} | {{T(html_title)}}{%end%}</title>
-
-<style type="text/css">
-.root {
-  max-width: {{xconfig.PAGE_WIDTH}}px;
-}
-</style>
 
 <link rel="shortcut icon" href="/static/favicon.ico"/>
 <link rel="bookmark" href="/static/favicon.ico"/>
@@ -33,6 +26,7 @@
 
 <script type="text/javascript" src="/static/lib/jquery/jquery-1.12.4.min.js"></script>
 <script type="text/javascript" src="/static/lib/layer/layer.js"></script>
+
 <script type="text/javascript">
   window.xuser = "{{_user_name}}";
   window.PAGE_OPEN = "{{xconfig.PAGE_OPEN}}";
@@ -49,18 +43,16 @@
 {% end %}
 
 {# 自定义的样式 #}
-{% if xconfig.get("USER_CSS") %}
-<link rel="stylesheet" type="text/css" href="/system/user.css">
+{% if xconfig.USER_CSS != None %}
+  <link rel="stylesheet" type="text/css" href="/system/user.css">
 {% end %}
 
 {# 自定义脚本 #}
-{% if xconfig.get("USER_JS") %}
-<script type="text/javascript" src="/system/user.js"></script>
+{% if xconfig.USER_JS != None %}
+  <script type="text/javascript" src="/system/user.js"></script>
 {% end %}
 
 {% block head %} {% end %}
-{% init show_aside = False %}
-{% init show_menu = True %}
 
 {% if not show_menu %}
 <style type="text/css">
@@ -83,38 +75,33 @@
 {% end %}
 
 {% if not show_search %}
-<style type="text/css">
-  .nav-left-search {
-    display: none;
-  }
-</style>
+  <style type="text/css">
+    .nav-left-search {
+      display: none;
+    }
+  </style>
 {% end %}
 
 {% if xconfig.DEBUG_HTML_BOX %}
-<style type="text/css">
-  * {
-    box-sizing: border-box;
-    border: solid 1px red;
-  }
-</style>
+  <!-- 用于移动端或者其他不方便调试设备的样式调试 -->
+  <style type="text/css">
+    * {
+      box-sizing: border-box;
+      border: solid 1px red;
+    }
+  </style>
 {% end %}
 
 {# 侧边栏(右侧)是否显示 #}
 {% if not show_aside %}
-<style type="text/css">
-.main-content {
-  /*padding-right: 0px;*/
-}
-.x-body {
-  right: 0px;
-}
-.aside {
-  display: none;
-}
-</style>
+  <style type="text/css">
+    .x-body {
+      right: 0px;
+    }
+    .aside {
+      display: none;
+    }
+  </style>
 {% end %}
 
 </head>
-<body>
-{% init warn = "" %}
-

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/10/01 15:56:01
+# @modified 2019/10/02 17:18:49
 
 """资料的DAO操作集合
 
@@ -381,6 +381,13 @@ def visit_note(id):
 
 def delete_note(id):
     note = get_by_id(id)
+    if note and note.is_deleted == 1:
+        # 已经被删除了，执行物理删除
+        tiny_key = "note_tiny:%s:%s" % (note.creator, note.id)
+        full_key = "note_full:%s" % note.id
+        dbutil.delete(tiny_key)
+        dbutil.delete(full_key)
+        return
     if note:
         note.mtime = xutils.format_datetime()
         note.is_deleted = 1

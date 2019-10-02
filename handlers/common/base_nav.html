@@ -1,5 +1,6 @@
 
 {% init search_placeholder = "搜索或指令" %}
+{% init search_action = "/search/search" %}
 
 {% if show_menu %}
 <div class="nav">
@@ -16,14 +17,14 @@
       {% end %}
       
       {% if not _has_login %}
-      <li><a class="menu-link" class="link" href="/login">{{T("Login")}}</a></li>
+        <li><a class="menu-link" class="link" href="/login">{{T("Login")}}</a></li>
       {% end %}
 
     </ul>
   </div>
 
   <div class="search-box">
-    <form id="searchForm" method="GET" action="{{?search_action,'/search/search'}}">
+    <form id="searchForm" method="GET" action="{{search_action}}">
       <input id="key" name="key" class="nav-search-input" 
         placeholder="{{search_placeholder}}" 
         value="{{?key}}"/>

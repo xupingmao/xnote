@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/10/02 14:02:27
+# @modified 2019/10/02 14:54:17
 import profile
 import math
 import re
@@ -44,10 +44,10 @@ def handle_left_dir(kw, user_name, file, op):
     if is_iframe == "true":
         return
 
-    parent_id = file.parent_id
-    kw.show_left = True
+    parent_id      = file.parent_id
+    kw.show_left   = True
     kw.show_groups = True
-    kw.dir_type = dir_type
+    kw.dir_type    = dir_type
 
     if tags != "" and tags != None:
         kw.groups = NOTE_DAO.list_by_tag(user_name, tags)

@@ -1,49 +1,57 @@
-{% include common/base_top.html %}
+<!DOCTYPE html>
+<html>
+{% include common/base_head.html %}
+
 {% init search_placeholder = "搜索或指令" %}
+{% init search_action = "/search/search" %}
+{% init warn = "" %}
 
-<div class="root">
+<body>
+    <div class="root">
+        <!-- 导航/菜单栏 -->
+        {% include common/base_nav.html %}
 
-    {% include common/base_nav.html %}
-
-    <div class="x-left">
-        {% block left_part %} {% end %}
-    </div>
-
-    <div class="x-body">
-        <div class="nav-left-search">
-          <form id="searchForm2" method="GET" action="{{?search_action,'/search/search'}}">
-            <input id="key" name="key" class="nav-search-input" 
-              placeholder="{{search_placeholder}}" 
-              value="{{?key}}"/>
-            <button class="nav-search-btn btn-default">
-                <i class="fa fa-search"></i>
-            </button>
-            <input class="hide" name="category" value="{{?category}}" />
-            {% block search_form %} {% end %}
-          </form>
+        <!-- 左侧侧边栏 -->
+        <div class="x-left">
+            {% block left_part %} {% end %}
         </div>
 
-        <div class="main-content">
-            <div class="col-md-12">
-                {% if warn != "" and warn != None %}
-                <pre class="col-md-12 warn">
-                    {{warn}}
-                </pre>
-                {% end %}
-                {% block body %} {% end %}
+        <div class="x-body">
+            <div class="nav-left-search">
+              <form id="searchForm2" method="GET" action="{{search_action}}">
+                <input id="key" name="key" class="nav-search-input" 
+                  placeholder="{{search_placeholder}}" 
+                  value="{{?key}}"/>
+                <button class="nav-search-btn btn-default">
+                    <i class="fa fa-search"></i>
+                </button>
+                <input class="hide" name="category" value="{{?category}}" />
+                {% block search_form %} {% end %}
+              </form>
+            </div>
+
+            <div class="main-content">
+                <div class="col-md-12">
+                    {% if warn != "" and warn != None %}
+                    <pre class="col-md-12 warn">
+                        {{warn}}
+                    </pre>
+                    {% end %}
+                    {% block body %} {% end %}
+                </div>
             </div>
         </div>
+
+        <!-- 右边的侧边栏 -->    
         <div class="aside">
             {% block aside %} {% end %}
         </div>
+        <!-- Main Part End -->
+        <div class="footer">
+        </div>
     </div>
-    
-    <!-- Main Part End -->
-    <div class="footer">
-    </div>
-</div>
 
-<div class="x-dialog-background"></div>
-<div class="aside-background background"></div>
+    <div class="x-dialog-background"></div>
+    <div class="aside-background background"></div>
 </body>
 </html>

@@ -1,12 +1,11 @@
 {% extends base.html %}
 {% block body %}
+    {% init error = "" %}
 
-{% init error = "" %}
-
-{% if error != "" %}
-<pre class="col-md-12 error">
-{{error}}
-</pre>
-{% end %}
+    {% if error != "" %}
+        <pre class="col-md-12 error">
+            {{error}}
+        </pre>
+    {% end %}
 
 {% end %}
