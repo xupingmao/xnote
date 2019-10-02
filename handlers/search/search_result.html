@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2019/10/01 16:54:23
+@modified 2019/10/02 14:22:32
 -->
 
 {% block body %}
@@ -79,7 +79,7 @@
 
             {# 知识库 #}
             {% if file.category == "note" %}
-                <div>
+                <div class="item-ext-info">
                     {% if file.creator != None %}
                         <span class="tag gray-tag">{{file.creator}}</span>
                     {% end %}
