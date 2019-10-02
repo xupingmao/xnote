@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/01 17:12:19
+# @modified 2019/10/02 14:18:49
 import math
 import time
 import web
@@ -16,7 +16,7 @@ from xutils.dateutil import Timer
 from xtemplate import T
 
 VIEW_TPL   = "note/view.html"
-TYPES_NAME = "笔记分类"
+TYPES_NAME = "笔记工具"
 NOTE_DAO   = xutils.DAO("note")
 
 class PathNode:
@@ -54,6 +54,7 @@ class DefaultListHandler:
         return xtemplate.render(VIEW_TPL,
             show_aside = True,
             file_type  = "group",
+            back_url   = "/note/types",
             pathlist   = [parent, Storage(name="默认分类", type="group", url="/note/default")],
             files      = files,
             file       = Storage(name="默认分类", type="group"),
@@ -202,8 +203,9 @@ class TextHandler(BaseListHandler):
         self.note_type = "text"
         self.title = "文本"
 
-class TypeListHandler:
+class ToolsListHandler:
 
+    @xauth.login_required()
     def GET(self):
         page = 1
 
@@ -222,7 +224,8 @@ class TypeListHandler:
             GroupItem("表格", "/note/table"),
             GroupItem("通讯录", "/note/addressbook"),
             GroupItem("富文本", "/note/html"),
-            GroupItem("时光轴", "/note/tools/timeline")
+            GroupItem("时光轴", "/note/tools/timeline"),
+            GroupItem("按月查看", "/note/date")
         ]
         amount = len(files)
 
@@ -356,7 +359,7 @@ class DateHandler:
             dup.add(v.id)
             notes.append(v)
 
-        return xtemplate.render("note/list_by_date.html", 
+        return xtemplate.render("note/tools/list_by_date.html", 
             show_aside = True,
             link_by_month = link_by_month,
             year = int(year),
@@ -390,6 +393,7 @@ xurls = (
     r"/note/recent_(created)" , RecentHandler,
     r"/note/recent_edit"    , RecentHandler,
     r"/note/recent_(viewed)", RecentHandler,
+    r"/note/move"           , MoveHandler,
     r"/note/group/move"     , MoveHandler,
     r"/note/group/select"   , GroupSelectHandler,
     r"/note/date"           , DateHandler,
@@ -404,7 +408,8 @@ xurls = (
     r"/note/md"             , MarkdownListHandler,
     r"/note/list"           , ListHandler,
     r"/note/text"           , TextHandler,
-    r"/note/types"          , TypeListHandler,
+    r"/note/tools"          , ToolsListHandler,
+    r"/note/types"          , ToolsListHandler,
     
     r"/file/group/removed"  , RemovedHandler,
     r"/file/group/list"     , GroupListHandler,

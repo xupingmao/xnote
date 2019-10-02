@@ -4,8 +4,7 @@
 <link rel="stylesheet" href="/static/css/timeline.css"/>
 
 <div id="app" class="card content">
-  {% set title = "时光轴" %}
-  {% include common/base_title.html %}
+  <h3 class="card-title"><a href="/note/tools" class="link2">返回上级</a>&nbsp;/&nbsp;时光轴</h3>
   <article v-for="item in itemList">
     <h3>{{!item.title}}</h3>
     <section v-for="file in item.files">

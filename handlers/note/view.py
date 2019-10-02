@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/10/01 16:37:05
+# @modified 2019/10/02 14:02:27
 import profile
 import math
 import re
@@ -238,7 +238,7 @@ class PrintHandler:
         user_name = xauth.current_name()
         if file.is_public != 1 and user_name != "admin" and user_name != file.creator:
             raise web.seeother("/unauthorized")
-        return xtemplate.render("note/print.html", show_menu = False, note = file)
+        return xtemplate.render("note/tools/print.html", show_menu = False, note = file)
 
 def sqlite_escape(text):
     if text is None:

@@ -7,7 +7,7 @@ $(function() {
   $(".root").css("min-height", getWindowHeight());
 
   window.moveTo = function (selfId, parentId) {
-      $.post("/note/group/move", 
+      $.post("/note/move", 
           {id:selfId, parent_id: parentId}, 
           function (resp){
               console.log(resp);

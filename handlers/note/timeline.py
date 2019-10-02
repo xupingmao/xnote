@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2019/08/10 13:41:07
+# @modified 2019/10/02 14:00:01
 
 """Description here"""
 import re
@@ -65,7 +65,7 @@ class TimelineHandler:
 
     @xauth.login_required()
     def GET(self):
-        return xtemplate.render("note/timeline.html", show_aside = False)
+        return xtemplate.render("note/tools/timeline.html", show_aside = False)
 
 xurls = (
     r"/note/timeline", TimelineAjaxHandler,

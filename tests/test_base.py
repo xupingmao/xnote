@@ -1,6 +1,7 @@
 # encoding=utf-8
 import sys
 sys.path.insert(1, "lib")
+sys.path.insert(1, "core")
 import os
 import time
 import unittest

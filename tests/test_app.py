@@ -1,10 +1,11 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/10/01 16:50:22
+# @modified 2019/10/02 14:20:52
 
 import sys
 import os
 sys.path.insert(1, "lib")
+sys.path.insert(1, "core")
 import unittest
 import json
 import web

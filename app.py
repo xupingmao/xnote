@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2019/08/17 10:18:21
+# @modified 2019/10/02 10:40:39
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2017  xupingmao 578749341@qq.com
 
@@ -29,6 +29,7 @@ import traceback
 import argparse
 # insert after working dir
 sys.path.insert(1, "lib")
+sys.path.insert(1, "core")
 import web
 import xutils
 import xconfig
@@ -165,7 +166,7 @@ def main():
     # autoreload just reload models
     autoreload_thread = AutoReloadThread(reload_callback)
     autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
-    autoreload_thread.watch_file("xtemplate.py")
+    autoreload_thread.watch_file("core/xtemplate.py")
     autoreload_thread.start()
     # 启动定时任务检查
     manager.run_task()

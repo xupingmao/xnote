@@ -3,6 +3,7 @@ import sys
 import os
 import time
 sys.path.insert(1, "lib")
+sys.path.insert(1, "core")
 import unittest
 import xutils
 import xconfig
