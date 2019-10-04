@@ -19,7 +19,7 @@
         {% end %}
 
         {% if file != None and file.type == "group" and _user_name == file.creator %}
-            {# 下拉选项 #}
+            {# 文件夹下拉选项 #}
             <div class="float-right">
                 <a class="btn" href="/note/add?parent_id={{file.id}}">新增</a>
                 <div class="dropdown">
@@ -29,6 +29,12 @@
                         <a class="dropdown-option" href="/note/unstick?id={{file.id}}">取消置顶</a>
                     {% else %}
                         <a class="dropdown-option" href="/note/stick?id={{file.id}}">置顶</a>
+                    {% end %}
+
+                    {% if file.archived %}
+                        <a class="dropdown-option" href="/note/unarchive?id={{file.id}}">取消归档</a>
+                    {% else %}
+                        <a class="dropdown-option" href="/note/archive?id={{file.id}}">归档</a>
                     {% end %}
 
                     <a class="dropdown-option" href="javascript:rename('{{file.id}}', '{{file.name}}')">重命名</a>

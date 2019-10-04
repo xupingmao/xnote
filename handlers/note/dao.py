@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/10/04 23:22:07
+# @modified 2019/10/05 00:21:51
 
 """资料的DAO操作集合
 
@@ -304,6 +304,7 @@ def update_note(where, **kw):
     is_public = kw.get("is_public")
     tags      = kw.get("tags")
     orderby   = kw.get("orderby")
+    archived  = kw.get("archived")
 
     old_parent_id = None
     new_parent_id = None
@@ -332,6 +333,8 @@ def update_note(where, **kw):
             note.tags = tags
         if orderby != None:
             note.orderby = orderby
+        if archived != None:
+            note.archived = archived
 
         note.mtime   = xutils.format_time()
         note.version += 1
@@ -448,20 +451,16 @@ def fill_parent_name(files):
             item.parent_name = None
 
 @xutils.timeit(name = "NoteDao.ListGroup:leveldb", logfile = True)
-def kv_list_group(creator = None):
+def list_group(creator = None, skip_archived = False):
     # TODO 添加索引优化
     def list_group_func(key, value):
+        if skip_archived and value.archived:
+            return False
         return value.type == "group" and value.creator == creator and value.is_deleted == 0
 
     notes = dbutil.prefix_list("note_tiny:", list_group_func)
     sort_notes(notes, "mtime_desc")
     return notes
-
-def list_group(current_name = None):
-    if current_name is None:
-        current_name = str(xauth.get_current_name())
-
-    return kv_list_group(current_name)
 
 def list_public(offset, limit):
     def list_func(key, value):
@@ -482,7 +481,7 @@ def count_public():
     return dbutil.prefix_count("note_tiny:", list_func)
 
 @xutils.timeit(name = "NoteDao.ListNote:leveldb", logfile = True, logargs=True)
-def kv_list_by_parent(creator, parent_id, offset, limit, orderby="mtime_desc"):
+def list_by_parent(creator, parent_id, offset, limit, orderby="mtime_desc"):
     parent_id = str(parent_id)
     # TODO 添加索引优化
     def list_note_func(key, value):
@@ -495,9 +494,6 @@ def kv_list_by_parent(creator, parent_id, offset, limit, orderby="mtime_desc"):
     notes = dbutil.prefix_list("note_tiny:", list_note_func)
     sort_notes(notes, orderby)
     return notes[offset:offset+limit]
-
-def list_by_parent(*args):
-    return kv_list_by_parent(*args)
 
 @xutils.timeit(name = "NoteDao.ListRecentCreated", logfile = True)
 def list_recent_created(creator = None, offset = 0, limit = 10):
@@ -726,6 +722,13 @@ def list_sticky(creator):
     sort_notes(notes)
     return notes
 
+def list_archived(creator):
+    def list_func(key, value):
+        return value.archived and value.creator == creator and value.is_deleted == 0
+    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func)
+    sort_notes(notes)
+    return notes
+
 def get_tags(creator, note_id):
     key = "note_tags:%s:%s" % (creator, note_id)
     note_tags = dbutil.get(key)
@@ -821,6 +824,7 @@ xutils.register_func("note.list_by_tag", list_by_tag)
 xutils.register_func("note.list_removed", list_removed)
 xutils.register_func("note.list_by_type", list_by_type)
 xutils.register_func("note.list_sticky",  list_sticky)
+xutils.register_func("note.list_archived", list_archived)
 
 # count functions
 xutils.register_func("note.count_public", count_public)

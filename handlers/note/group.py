@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/04 23:37:32
+# @modified 2019/10/05 00:20:42
 import math
 import time
 import web
@@ -89,10 +89,17 @@ class GroupListHandler:
     def GET(self):
         id   = xutils.get_argument("id", "", type=int)
         user_name = xauth.current_name()
-        notes = NOTE_DAO.list_group(user_name)
+        notes = NOTE_DAO.list_group(user_name, skip_archived = True)
+
+        # 默认分组处理
         default_book_count = NOTE_DAO.count(user_name, 0)
         if default_book_count > 0:
             notes.insert(0, GroupItem("默认分组", "/note/default", default_book_count))
+
+        # 归档分组处理
+        archived_books = NOTE_DAO.list_archived(user_name)
+        if len(archived_books) > 0:
+            notes.insert(0, GroupItem("归档分组", "/note/archived", len(archived_books)))
 
         return xtemplate.render("note/group_list.html",
             ungrouped_count = 0,
@@ -376,6 +383,19 @@ class StickyHandler:
             show_aside = True,
             show_mdate = True)
 
+class ArchivedHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        user  = xauth.current_name()
+        files = NOTE_DAO.list_archived(user)
+        return xtemplate.render(VIEW_TPL,
+            pathlist  = [PathNode("归档笔记", "/note/archived")],
+            file_type = "group",
+            dir_type  = "archived",
+            files     = files,
+            show_aside = True,
+            show_mdate = True)
 
 xurls = (
     r"/note/group"          , GroupListHandler,
@@ -385,6 +405,7 @@ xurls = (
     r"/note/ungrouped"      , DefaultListHandler,
     r"/note/public"         , PublicGroupHandler,
     r"/note/removed"        , RemovedHandler,
+    r"/note/archived"       , ArchivedHandler,
     r"/note/sticky"         , StickyHandler,
     r"/note/recent_(created)" , RecentHandler,
     r"/note/recent_edit"    , RecentHandler,

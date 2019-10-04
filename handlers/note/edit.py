@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/07/08 23:59:30
+# @modified 2019/10/05 00:13:41
 
 """笔记编辑相关处理"""
 import os
@@ -19,6 +19,8 @@ from xutils import cacheutil
 from xutils import dbutil
 from xutils import textutil
 from xtemplate import T
+
+NOTE_DAO = xutils.DAO("note")
 
 def get_by_name(db, name):
     return db.select_first(where=dict(name = name, 
@@ -372,6 +374,20 @@ class UnstickHandler:
         xutils.call("note.update", dict(id = id, creator = user), priority = 0)
         raise web.found("/note/view?id=" + str(id))
 
+class ArchiveHandler:
+
+    def GET(self):
+        id = xutils.get_argument("id")
+        NOTE_DAO.update(where=dict(id=id), archived=True)
+        raise web.found("/note/%s" % id)
+
+class UnarchiveHandler:
+
+    def GET(self):
+        id = xutils.get_argument("id")
+        NOTE_DAO.update(where=dict(id=id), archived=False)
+        raise web.found("/note/%s" % id)
+
 xurls = (
     r"/note/add"         , AddHandler,
     r"/note/remove"      , RemoveAjaxHandler,
@@ -382,6 +398,8 @@ xurls = (
     r"/note/share/cancel", UnshareHandler,
     r"/note/stick"       , StickHandler,
     r"/note/unstick"     , UnstickHandler,
+    r"/note/archive"     , ArchiveHandler,
+    r"/note/unarchive"   , UnarchiveHandler,
 
     r"/file/dict/put"    , DictPutHandler,
     r"/file/share"       , ShareHandler,
