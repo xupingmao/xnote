@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/10/02 17:18:49
+# @modified 2019/10/04 23:22:07
 
 """资料的DAO操作集合
 
@@ -25,7 +25,7 @@ from xutils import attrget
 MAX_VISITED_CNT = 200
 readFile        = readfile
 config          = xconfig
-DB_PATH         = config.DB_PATH
+DB_PATH         = xconfig.DB_PATH
 
 
 class FileDO(dict):
@@ -578,36 +578,23 @@ def count_user_note(creator):
     return count
 
 def count_ungrouped(creator):
-    t = Timer()
-    t.start()
-    count_key = "%s@note.ungrouped.count" % creator
-    count = cacheutil.get(count_key)
-    if count is None:
-        count = xtables.get_file_table().count(where="creator=$creator AND parent_id=0 AND is_deleted=0 AND type!='group'", 
-            vars=dict(creator=creator))
-        xutils.cache_put(count_key, count, expire=600)
-    t.stop()
-    xutils.trace("NoteDao.CountUngrouped", "", t.cost_millis())
-    return count
+    return count_ungrouped(creator, 0)
 
 @xutils.timeit(name = "NoteDao.CountNote", logfile = True, logargs = True, logret = True)
 def count_note(creator, parent_id):
-    if xconfig.DB_ENGINE == "sqlite":
-        db = xtables.get_note_table()
-        where_sql = "parent_id=$parent_id AND is_deleted=0 AND (creator=$creator OR is_public=1)"
-        amount    = db.count(where = where_sql,
-                    vars=dict(parent_id=parent_id, creator=creator))
-        return amount
-    else:
-        # TODO 添加索引优化
-        def list_note_func(key, value):
-            if value.is_deleted:
-                return False
-            if value.type == "group":
-                return False
-            return (value.is_public or value.creator == creator) and str(value.parent_id) == str(parent_id)
+    """统计笔记数量
+    @param {string} creator 创建者
+    @param {string/number} parent_id 父级节点ID
+    """
+    # TODO 添加索引优化
+    def list_note_func(key, value):
+        if value.is_deleted:
+            return False
+        if value.type == "group":
+            return False
+        return (value.is_public or value.creator == creator) and str(value.parent_id) == str(parent_id)
 
-        return dbutil.prefix_count("note_tiny", list_note_func)
+    return dbutil.prefix_count("note_tiny", list_note_func)
 
 @xutils.timeit(name = "NoteDao.FindPrev", logfile = True)
 def find_prev_note(note, user_name):

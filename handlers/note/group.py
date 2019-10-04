@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/02 17:07:13
+# @modified 2019/10/04 23:37:32
 import math
 import time
 import web
@@ -30,11 +30,12 @@ class PathNode(Storage):
 class GroupItem:
     """笔记本的类型"""
 
-    def __init__(self, name, url):
+    def __init__(self, name, url, size = 0):
         self.type     = "group"
         self.priority = 0
         self.name     = name
         self.url      = url
+        self.size     = size
         self.mtime    = dateutil.format_time()
 
 def type_node_path(name, url):
@@ -49,20 +50,20 @@ class DefaultListHandler:
         user_name = xauth.get_current_name()
         pagesize  = xconfig.PAGE_SIZE
         offset    = (page-1) * pagesize
-        files     = xutils.call("note.list_note", user_name, 0, offset, pagesize)
-        amount    = xutils.call("note.count", user_name, 0);
+        files     = NOTE_DAO.list_note(user_name, 0, offset, pagesize)
+        amount    = NOTE_DAO.count(user_name, 0);
         parent    = PathNode(TYPES_NAME, "/note/types")
 
         return xtemplate.render(VIEW_TPL,
             show_aside = True,
             file_type  = "group",
-            back_url   = "/note/types",
+            back_url   = "/note/books",
             pathlist   = [parent, Storage(name="默认分类", type="group", url="/note/default")],
             files      = files,
             file       = Storage(name="默认分类", type="group"),
             page       = page,
             page_max   = math.ceil(amount / pagesize),
-            groups     = xutils.call("note.list_group"),
+            groups     = NOTE_DAO.list_group(),
             show_mdate = True,
             page_url   = "/note/default?page=")
 
@@ -72,11 +73,11 @@ class MoveHandler:
     def GET(self):
         id        = xutils.get_argument("id", "")
         parent_id = xutils.get_argument("parent_id", "")
-        file = xutils.call("note.get_by_id", id)
+        file = NOTE_DAO.get_by_id(id)
         if file is None:
             return dict(code="fail", message="file not exists")
 
-        xutils.call("note.update", dict(id=id), parent_id = parent_id)
+        NOTE_DAO.update(dict(id=id), parent_id = parent_id)
         return dict(code="success")
 
     def POST(self):
@@ -87,7 +88,12 @@ class GroupListHandler:
     @xauth.login_required()
     def GET(self):
         id   = xutils.get_argument("id", "", type=int)
-        data = xutils.call("note.list_group", xauth.current_name())
+        user_name = xauth.current_name()
+        notes = NOTE_DAO.list_group(user_name)
+        default_book_count = NOTE_DAO.count(user_name, 0)
+        if default_book_count > 0:
+            notes.insert(0, GroupItem("默认分组", "/note/default", default_book_count))
+
         return xtemplate.render("note/group_list.html",
             ungrouped_count = 0,
             file_type       = "group_list",
@@ -95,14 +101,14 @@ class GroupListHandler:
             show_search_div = True,
             show_add_group  = True,
             show_aside      = True,
-            files           = data)
+            files           = notes)
 
 class GroupSelectHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id", "")
         filetype = xutils.get_argument("filetype", "")
-        data = xutils.call("note.list_group", xauth.current_name())
+        data = NOTE_DAO.list_group(xauth.current_name())
         web.header("Content-Type", "text/html; charset=utf-8")
         return xtemplate.render("note/group_select.html", 
             id=id, filelist=data, file_type="group")
@@ -119,8 +125,8 @@ class RemovedHandler:
         limit  = xconfig.PAGE_SIZE
         offset = (page-1)*limit
 
-        amount = xutils.call("note.count_removed", user_name)
-        files  = xutils.call("note.list_removed", user_name, offset, limit)
+        amount = NOTE_DAO.count_removed(user_name)
+        files  = NOTE_DAO.list_removed(user_name, offset, limit)
         parent = PathNode(TYPES_NAME, "/note/types")
 
         return xtemplate.render(VIEW_TPL,
@@ -147,8 +153,8 @@ class BaseListHandler:
         limit  = xconfig.PAGE_SIZE
         offset = (page-1)*limit
 
-        amount = xutils.call("note.count_by_type", user_name, self.note_type)
-        files  = xutils.call("note.list_by_type",  user_name, self.note_type, offset, limit)
+        amount = NOTE_DAO.count_by_type(user_name, self.note_type)
+        files  = NOTE_DAO.list_by_type(user_name, self.note_type, offset, limit)
 
         # 上级菜单
         parent = PathNode(TYPES_NAME, "/note/types")
@@ -215,7 +221,6 @@ class ToolListHandler:
         offset = (page-1)*limit
 
         files = [
-            GroupItem("默认分类", "/note/default"),
             PathNode("回收站", "/note/removed", "trash"),
             GroupItem("公开笔记", "/note/public"),
             GroupItem("最近更新", "/note/recent_edit"),
@@ -285,24 +290,7 @@ class RecentHandler:
             show_mdate = True
             dir_type = "recent_edit"
         
-        count   = xutils.call("note.count_user_note", creator)
-
-        # return xtemplate.render("note/recent.html", 
-        #     html_title  = html_title,
-        #     file_type   = "group",
-        #     files       = files, 
-        #     show_notice = show_notice,
-        #     show_mdate  = True,
-        #     show_groups = False,
-        #     show_aside  = True,
-        #     page        = page, 
-        #     time_attr   = time_attr,
-        #     page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
-        #     page_url    ="/note/recent_%s?page=" % orderby)
-
-        # return xtemplate.render("note/note_list_left.html", 
-        #     show_search = False,
-        #     notes = files)
+        count   = NOTE_DAO.count_user_note(creator)
         
         return xtemplate.render(VIEW_TPL,
             pathlist  = type_node_path(html_title, ""),
