@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/10/05 09:53:56
+ * @modified 2019/10/05 15:29:56
  */
 
 * {
@@ -31,7 +31,7 @@ pre {
 .marked-heading {
     /* 避免顶部fixed菜单遮挡 */
     padding-top: 50px;
-    margin-top: -50px;
+    margin-top: -40px;
     font-family: "Microsoft YaHei", "黑体";
 }
 

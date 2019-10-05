@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/10/05 10:31:59
+# @modified 2019/10/05 20:36:19
 
 import sys
 import os
@@ -17,47 +17,19 @@ import xconfig
 import xtables
 from xutils import u, dbutil
 
-def init():
-    xconfig.IS_TEST = True
-    xconfig.port = "1234"
-    xconfig.DEV_MODE = True
-    var_env = dict()
-    xutils.remove_file("./testdata/data.db", hard = True)
-    xconfig.init("./testdata")
-    xtables.init()
-    dbutil.init()
-    app = web.application(list(), var_env, autoreload=False)
-    last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
-    mgr = xmanager.init(app, var_env, last_mapping=last_mapping)
-    mgr.reload()
-    return app
+# cannot perform relative import
+try:
+    import test_base
+except ImportError:
+    from tests import test_base
 
-app = init()
+app          = test_base.init()
+json_request = test_base.json_request
+request_html = test_base.request_html
+BaseTestCase = test_base.BaseTestCase
 
 def get_script_path(name):
     return os.path.join(xconfig.SCRIPTS_DIR, name)
-
-def json_request(*args, **kw):
-    global app
-    if "data" in kw:
-        # 对于POST请求设置无效
-        kw["data"]["_format"] = "json"
-    else:
-        kw["data"] = dict(_format="json")
-    kw["_format"] = "json"
-    ret = app.request(*args, **kw)
-    if ret.status == "303 See Other":
-        return
-    assert ret.status == "200 OK"
-    data = ret.data
-    if six.PY2:
-        return json.loads(data)
-    return json.loads(data.decode("utf-8"))
-
-def request_html(*args, **kw):
-    ret = app.request(*args, **kw)
-    return ret.data
-
 
 class TextPage(xtemplate.BaseTextPlugin):
 
@@ -70,7 +42,7 @@ class TextPage(xtemplate.BaseTextPlugin):
     def handle(self, input):
         return "test"
 
-class TestMain(unittest.TestCase):
+class TestMain(BaseTestCase):
 
     def test_xtables(self):
         xtables.init_test_table()
@@ -108,151 +80,10 @@ class TestMain(unittest.TestCase):
             self.assertEqual("C:/data/", item1.path)
             self.assertEqual("C:/data/name/", item2.path)
 
-    def check_OK(self, *args, **kw):
-        response = app.request(*args, **kw)
-        status = response.status
-        print(status)
-        self.assertEqual(True, status == "200 OK" or status == "303 See Other" or status == "302 Found")
-
-    def check_200(self, *args, **kw):
-        response = app.request(*args, **kw)
-        self.assertEqual("200 OK", response.status)
-
-    def check_303(self, *args, **kw):
-        response = app.request(*args, **kw)
-        self.assertEqual("303 See Other", response.status)
-
-    def check_404(self, url):
-        response = app.request(url)
-        self.assertEqual("404 Not Found", response.status)
-
-    def check_status(self, status, *args, **kw):
-        response = app.request(*args, **kw)
-        self.assertEqual(status, response.status)
-
     def test_static_files(self):
         self.check_200("/static/lib/jquery/jquery-1.12.4.min.js")
         # 禁止直接访问目录
         self.check_404("/static/")
-
-    def test_note_add_remove(self):
-        self.check_200("/note/recent_edit")
-        json_request("/note/remove?name=xnote-unit-test")
-        file = json_request("/note/add", method="POST", 
-            data=dict(name="xnote-unit-test", content="hello"))
-        id = file["id"]
-        self.check_OK("/note/view?id=" + str(id))
-        self.check_OK("/note/print?id=" + str(id))
-
-        # 乐观锁更新
-        json_request("/note/update", method="POST", 
-            data=dict(id=id, content="new-content2", type="md", version=0))
-        json_request("/note/update", method="POST", 
-            data=dict(id=id, content="new-content3", type="md", version=1))
-        
-        # 普通更新
-        json_request("/note/save", method="POST",
-            data=dict(id=id, content="new-content"))
-        json_request("/note/remove?id=" + str(id))
-
-    def test_note_group_add_view(self):
-        group = json_request("/note/add", method="POST",
-            data = dict(name="xnote-unit-group", type="group"))
-        id = group['id']
-        self.check_OK('/note/view?id=%s' % id)
-        json_request('/note/remove?id=%s' % id)
-
-    def test_note_list_by_type(self):
-        self.check_OK("/note/types")
-        self.check_OK("/note/table")
-        self.check_OK("/note/gallery")
-
-    def test_note_notice(self):
-        self.check_OK("/note/notice")
-
-    def test_note_timeline(self):
-        self.check_200("/note/timeline")
-
-    def test_note_editor_md(self):
-        json_request("/note/remove?name=xnote-md-test")
-        file = json_request("/note/add", method="POST",
-            data=dict(name="xnote-md-test", type="md", content="hello markdown"))
-        id = file["id"]
-        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
-        self.assertEqual("md", file["type"])
-        self.assertEqual("hello markdown", file["content"])
-        self.check_200("/note/edit?id=%s" % id)
-        self.check_OK("/note/history?id=%s" % id)
-        json_request("/note/history_view?id=%s&version=%s" % (file["id"], file["version"]))
-        json_request("/note/remove?id=%s" % id)
-
-    def test_note_editor_html(self):
-        json_request("/note/remove?name=xnote-html-test")
-        file = json_request("/note/add", method="POST",
-            data=dict(name="xnote-html-test", type="html"))
-        id = file["id"]
-        self.assertTrue(id != "")
-        print("id=%s" % id)
-        json_request("/note/save", method="POST", data=dict(id=id, type="html", data="<p>hello</p>"))
-        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
-        self.assertEqual("html", file["type"])
-        self.assertEqual("<p>hello</p>", file["data"])
-        if xutils.bs4 != None:
-            self.assertEqual("hello", file["content"])
-        self.check_200("/note/edit?id=%s"%id)
-        json_request("/note/remove?id=%s" % id)
-
-    def test_note_group(self):
-        self.check_200("/note/group")
-        self.check_200("/note/ungrouped")
-        self.check_200("/note/public")
-        self.check_200("/note/removed")
-        self.check_200("/note/recent_edit")
-        self.check_200("/note/recent_created")
-        self.check_200("/note/group/select")
-        self.check_200("/note/date?year=2019&month=1")
-        self.check_200("/note/sticky")
-
-    def test_note_share(self):
-        json_request("/note/remove?name=xnote-share-test")
-        file = json_request("/note/add", method="POST", 
-            data=dict(name="xnote-share-test", content="hello"))
-        id = file["id"]
-        self.check_OK("/note/share?id=" + str(id))
-        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
-        self.assertEqual(1, file["is_public"])
-        
-        self.check_OK("/note/share/cancel?id=" + str(id))
-        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
-        self.assertEqual(0, file["is_public"])
-
-        # clean up
-        json_request("/note/remove?id=" + str(id))
-
-    def test_file_timeline(self):
-        json_request("/note/timeline")
-        json_request("/note/timeline/month?year=2018&month=1")
-
-    def test_note_tag(self):
-        json_request("/note/remove?name=xnote-tag-test")
-        file = json_request("/note/add", method="POST", 
-            data=dict(name="xnote-tag-test", content="hello"))
-        id = file["id"]
-        json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags="ABC DEF"))
-        json_request("/note/tag/%s" % id)
-        json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags=""))
-
-    def test_note_stick(self):
-        json_request("/note/remove?name=xnote-share-test")
-        file = json_request("/note/add", method="POST", 
-            data=dict(name="xnote-share-test", content="hello"))
-        id = file["id"]
-
-        self.check_OK("/note/stick?id=%s" % id)
-        self.check_OK("/note/unstick?id=%s" % id)
-
-        # clean up
-        json_request("/note/remove?id=" + str(id))
 
     def test_dict_json(self):
         json_request("/note/dict?_format=json")

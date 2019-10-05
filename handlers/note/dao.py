@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/10/05 00:21:51
+# @modified 2019/10/05 20:52:50
 
 """资料的DAO操作集合
 
@@ -106,7 +106,7 @@ def batch_query(id_list):
             result[id] = note
     return result
 
-def sort_notes(notes, orderby = "mtime_desc"):
+def sort_notes(notes, orderby = "name"):
     if orderby == "name":
         notes.sort(key = lambda x: x.name)
     elif orderby == "name_desc":
@@ -481,7 +481,7 @@ def count_public():
     return dbutil.prefix_count("note_tiny:", list_func)
 
 @xutils.timeit(name = "NoteDao.ListNote:leveldb", logfile = True, logargs=True)
-def list_by_parent(creator, parent_id, offset, limit, orderby="mtime_desc"):
+def list_by_parent(creator, parent_id, offset, limit, orderby="name"):
     parent_id = str(parent_id)
     # TODO 添加索引优化
     def list_note_func(key, value):
@@ -787,11 +787,19 @@ def list_tag(user):
     return tag_list
 
 def list_comments(note_id):
-    return dbutil.prefix_list("note_comment:%s" % note_id, reverse = True)
+    comments = []
+    for key, value in dbutil.prefix_iter("note_comment:%s" % note_id, reverse = True, include_key = True):
+        comment = value
+        comment['id'] = key
+        comments.append(comment)
+    return comments
 
 def save_comment(comment):
     key = "note_comment:%s:%s" % (comment["note_id"], dbutil.timeseq())
     dbutil.put(key, comment)
+
+def delete_comment(comment_id):
+    dbutil.delete(comment_id)
 
 # write functions
 xutils.register_func("note.create", create_note)
@@ -844,6 +852,7 @@ xutils.register_func("note.get_history", get_history)
 # comments
 xutils.register_func("note.list_comments", list_comments)
 xutils.register_func("note.save_comment", save_comment)
+xutils.register_func("note.delete_comment", delete_comment)
 
 
 
