@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/05 00:20:42
+# @modified 2019/10/05 10:05:57
 import math
 import time
 import web
@@ -27,11 +27,11 @@ class PathNode(Storage):
         self.type     = type
         self.priority = 0
 
-class GroupItem:
+class GroupItem(Storage):
     """笔记本的类型"""
 
-    def __init__(self, name, url, size = 0):
-        self.type     = "group"
+    def __init__(self, name, url, size = 0, type="group"):
+        self.type     = type
         self.priority = 0
         self.name     = name
         self.url      = url
@@ -94,12 +94,12 @@ class GroupListHandler:
         # 默认分组处理
         default_book_count = NOTE_DAO.count(user_name, 0)
         if default_book_count > 0:
-            notes.insert(0, GroupItem("默认分组", "/note/default", default_book_count))
+            notes.insert(0, GroupItem("默认分组", "/note/default", default_book_count, "system"))
 
         # 归档分组处理
         archived_books = NOTE_DAO.list_archived(user_name)
         if len(archived_books) > 0:
-            notes.insert(0, GroupItem("归档分组", "/note/archived", len(archived_books)))
+            notes.insert(0, GroupItem("归档分组", "/note/archived", len(archived_books), "system"))
 
         return xtemplate.render("note/group_list.html",
             ungrouped_count = 0,
@@ -228,7 +228,6 @@ class ToolListHandler:
         offset = (page-1)*limit
 
         files = [
-            PathNode("回收站", "/note/removed", "trash"),
             GroupItem("公开笔记", "/note/public"),
             GroupItem("最近更新", "/note/recent_edit"),
             GroupItem("最近创建", "/note/recent_created"),
@@ -238,10 +237,12 @@ class ToolListHandler:
             GroupItem("表格", "/note/table"),
             GroupItem("通讯录", "/note/addressbook"),
             GroupItem("富文本", "/note/html"),
+            PathNode("回收站", "/note/removed", "trash"),
             PathNode("时光轴", "/note/tools/timeline", "cube"),
             PathNode("按月查看", "/note/date", "cube"),
             PathNode("导入笔记", "/note/html_importer", "cube"),
-            PathNode("数据统计", "/note/stat", "cube")
+            PathNode("数据统计", "/note/stat", "cube"),
+            PathNode("上传管理", "/fs_upload", "cube")
         ]
         amount = len(files)
 
@@ -426,11 +427,6 @@ xurls = (
     r"/note/list"           , ListHandler,
     r"/note/text"           , TextHandler,
     r"/note/tools"          , ToolListHandler,
-    r"/note/types"          , TypesHandler,
-    
-    r"/file/group/removed"  , RemovedHandler,
-    r"/file/group/list"     , GroupListHandler,
-    r"/file/group/move"     , MoveHandler,
-    r"/file/recent_edit"    , RecentHandler,
+    r"/note/types"          , TypesHandler
 )
 

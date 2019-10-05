@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/09/14 13:32:01
+# @modified 2019/10/05 00:44:04
 import os
 import uuid
 import web
@@ -92,7 +92,7 @@ class UploadHandler:
         if len(month) == 1:
             month = '0' + month
         
-        dirname = os.path.join(xconfig.DATA_DIR, "files", user_name, year, month)
+        dirname = os.path.join(xconfig.DATA_DIR, "files", user_name, "upload", year, month)
         
         pathlist = []
         for root, dirs, files in os.walk(dirname):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/10/02 14:54:17
+# @modified 2019/10/05 10:19:46
 import profile
 import math
 import re
@@ -329,12 +329,13 @@ class NoteHistoryHandler:
     def GET(self):
         note_id = xutils.get_argument("id")
         creator = xauth.current_name()
-        note = xutils.call("note.get_by_id_creator", note_id, creator)
+        note = NOTE_DAO.get_by_id_creator(note_id, creator)
         if note is None:
             history_list = []
         else:
-            history_list = xutils.call("note.list_history", note_id)
+            history_list = NOTE_DAO.list_history(note_id)
         return xtemplate.render("note/history_list.html", 
+            current_note = note,
             history_list = history_list,
             show_aside = True)
 

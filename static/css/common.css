@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/10/01 15:52:40
+ * @modified 2019/10/05 09:53:56
  */
 
 * {
@@ -1398,9 +1398,18 @@ li.menu-item:hover {
 .icon-next, .icon-right {
     display: block;
     background-image: url(/static/image/icon_right.png);
-    background-size: 16px 16px;
+    background-size: cover;
     width: 16px;
     height: 16px;
+}
+
+.icon-folder-system {
+    display: inline-block;
+    background-image: url(/static/image/icon_folder_settings.png);
+    background-size: cover;
+    width: 16px;
+    height: 16px;
+    margin-left: -1px;
 }
 
 .mobile-only {

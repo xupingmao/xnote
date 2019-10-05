@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2019/10/02 14:00:01
+# @modified 2019/10/05 10:25:53
 
 """Description here"""
 import re
@@ -45,15 +45,11 @@ class DateTimeline:
         month = xutils.get_argument("month")
         if len(month) == 1:
             month = "0" + month
-        db = xtables.get_file_table()
-        user_name  = xauth.get_current_user()["name"]
-        rows = db.query("SELECT id, type, name, creator, ctime, mtime, size FROM file WHERE creator = $creator AND ctime LIKE $ctime AND is_deleted=0"
-            + " ORDER BY ctime DESC", 
-            dict(creator=user_name, ctime="%s-%s%%" % (year, month)))
+        user_name  = xauth.current_name()
+        rows = NOTE_DAO.list_by_date("ctime", user_name, "%s-%s" % (year, month))
         result = dict()
         for row in rows:
             date = re.match(r"\d+\-\d+", row.ctime).group(0)
-            row.url = "/note/view?id={}".format(row.id);
             # 优化数据大小
             row.content = ""
             if date not in result:

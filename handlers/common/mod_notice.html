@@ -1,6 +1,6 @@
 <!--
 @since 2018/06/20
-@modified 2019/10/01 16:41:09
+@modified 2019/10/05 09:55:41
 -->
 
 {% set notice_list1 = xconfig.get_notice_list('today',    _user_name) %}
@@ -8,7 +8,6 @@
 {% set get_short_text = xutils.get_short_text %}
 {% set msg_len = 15 %}
 
-{% if len(notice_list1+notice_list2) > 0 %}
 <div class="col-md-12 card">
     <h3><a href="/" class="link2">{{T("主页")}}</a>&nbsp;/&nbsp;今日提醒</h3>
     <div class="grid-row" style="padding:5px;">
@@ -20,4 +19,3 @@
         {% end %}
     </div>
 </div>
-{% end %}

@@ -236,7 +236,7 @@ $(function () {
     window.openFileOption = function (e) {
       console.log(e);
       var path = $(e).attr("data-path");
-      openDialog("/fs_api/plugins?path=" + path);
+      openDialog("/fs_api/plugins?embed=true&path=" + path);
     }
 
     window.showIframeDialog = showIframeDialog;

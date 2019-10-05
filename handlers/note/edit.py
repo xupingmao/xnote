@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/10/05 00:13:41
+# @modified 2019/10/05 10:03:29
 
 """笔记编辑相关处理"""
 import os
@@ -88,7 +88,7 @@ def record_history(ctx):
     version = ctx.get("version")
     mtime   = ctx.get("mtime")
     name    = ctx.get("name")
-    xutils.call("note.add_history", id, version, ctx)
+    NOTE_DAO.add_history(id, version, ctx)
 
 class AddHandler:
 
@@ -130,12 +130,12 @@ class AddHandler:
                     message = 'name is empty'
                     raise Exception(message)
             else:
-                f = xutils.call("note.get_by_name", name)
+                f = NOTE_DAO.get_by_name(name)
                 if f != None:
                     key = name
                     message = u"%s 已存在" % name
                     raise Exception(message)
-                inserted_id = xutils.call("note.create", note)
+                inserted_id = NOTE_DAO.create(note)
                 if format == "json":
                     return dict(code="success", id=inserted_id)
                 raise web.seeother("/note/view?id={}".format(inserted_id))
@@ -156,7 +156,7 @@ class AddHandler:
             error    = error,
             pathlist = [Storage(name=T("New_Note"), url="/note/add")],
             message  = error,
-            groups   = xutils.call("note.list_group"),
+            groups   = NOTE_DAO.list_group(creator),
             code     = code)
 
     def GET(self):
@@ -176,9 +176,9 @@ class RemoveAjaxHandler:
             return dict(code="fail", message="id,name至少一个不为空")
 
         if id != "":
-            file = xutils.call("note.get_by_id", id)
+            file = NOTE_DAO.get_by_id(id)
         elif name != "":
-            file = xutils.call("note.get_by_name", name)
+            file = NOTE_DAO.get_by_name(name)
         if file is None:
             return dict(code="fail", message="文件不存在")
 
@@ -187,11 +187,11 @@ class RemoveAjaxHandler:
             return dict(code="fail", message="没有删除权限")
 
         if file.type == "group":
-            children_count = xutils.call("note.count", creator, file.id)
+            children_count = NOTE_DAO.count(creator, file.id)
             if children_count > 0:
                 return dict(code="fail", message="分组不为空")
 
-        xutils.call("note.delete", id)
+        NOTE_DAO.delete(id)
         return dict(code="success")
         
     def POST(self):
@@ -226,18 +226,18 @@ class RenameAjaxHandler:
         if name == "" or name is None:
             return dict(code="fail", message="名称为空")
 
-        old = xutils.call("note.get_by_id", id)
+        old = NOTE_DAO.get_by_id(id)
         if old is None:
             return dict(code="fail", message="笔记不存在")
 
         if old.creator != xauth.get_current_name():
             return dict(code="fail", message="没有权限")
 
-        file = xutils.call("note.get_by_name", name)
+        file = NOTE_DAO.get_by_name(name)
         if file is not None and file.is_deleted == 0:
             return dict(code="fail", message="%r已存在" % name)
 
-        xutils.call("note.update", dict(id=id), name=name)
+        NOTE_DAO.update(dict(id=id), name=name)
 
         event_body = dict(action="rename", id=id, name=name, type=old.type)
         xmanager.fire("note.updated", event_body)
@@ -255,7 +255,7 @@ class ShareHandler:
     def GET(self):
         id      = xutils.get_argument("id")
         creator = xauth.current_name()
-        xutils.call("note.update", dict(id = id, creator = creator), is_public = 1)
+        NOTE_DAO.update(dict(id = id, creator = creator), is_public = 1)
         raise web.seeother("/note/view?id=%s"%id)
 
 
@@ -265,7 +265,7 @@ class UnshareHandler:
     def GET(self):
         id = xutils.get_argument("id")
         creator = xauth.current_name()
-        xutils.call("note.update", dict(id = id, creator = creator), is_public = 0)
+        NOTE_DAO.update(dict(id = id, creator = creator), is_public = 0)
         raise web.seeother("/note/view?id=%s"%id)
 
 class SaveAjaxHandler:
@@ -299,7 +299,7 @@ class SaveAjaxHandler:
             kw["content"] = content
             kw['data']    = ''
             kw["size"]    = len(content)
-        rowcount = xutils.call("note.update", where, **kw)
+        rowcount = NOTE_DAO.update(where, **kw)
         if rowcount > 0:
             xmanager.fire('note.updated', dict(id=id, name=name, 
                 mtime = dateutil.format_datetime(),
@@ -318,8 +318,7 @@ class UpdateHandler:
         version   = xutils.get_argument("version", 0, type=int)
         file_type = xutils.get_argument("type")
         name      = xutils.get_argument("name", "")
-        db        = xtables.get_file_table()
-        file      = xutils.call("note.get_by_id", id)
+        file      = NOTE_DAO.get_by_id(id)
 
         if file is None:
             return xtemplate.render("note/view.html", 
@@ -339,7 +338,7 @@ class UpdateHandler:
             update_kw["name"] = name
 
         # 不再处理文件，由JS提交
-        rowcount = xutils.call("note.update", where = dict(id=id, version=version), **update_kw)
+        rowcount = NOTE_DAO.update(where = dict(id=id, version=version), **update_kw)
         if rowcount > 0:
             xmanager.fire('note.updated', dict(id=id, name=file.name, 
                 mtime = dateutil.format_datetime(),
@@ -362,7 +361,7 @@ class StickHandler:
     def GET(self):
         id = xutils.get_argument("id")
         user = xauth.current_name()
-        xutils.call("note.update", dict(id = id, creator = user), priority = 1)
+        NOTE_DAO.update(dict(id = id, creator = user), priority = 1)
         raise web.found("/note/view?id=" + str(id))
 
 class UnstickHandler:
@@ -371,7 +370,7 @@ class UnstickHandler:
     def GET(self):
         id = xutils.get_argument("id")
         user = xauth.current_name()
-        xutils.call("note.update", dict(id = id, creator = user), priority = 0)
+        NOTE_DAO.update(dict(id = id, creator = user), priority = 0)
         raise web.found("/note/view?id=" + str(id))
 
 class ArchiveHandler:
