@@ -2,13 +2,14 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2019/10/02 14:22:32
+@modified 2019/10/07 00:38:24
 -->
 
 {% block body %}
 
 {% init page_max = 0 %}
 {% init recent = [] %}
+{% init show_path = False %}
 
 {% include common/mod_search.html %}
 <script type="text/javascript" src="/static/lib/layer/layer.js"></script>
@@ -17,12 +18,21 @@
 </div>
 
 {% if len(recent) > 0 %}
-<div class="col-md-12 card">
-    <div class="grid-title">搜索历史</div>
-    {% for value in recent %}
-        <a class="tag-span" href="/search?key={{value}}">{{value}}</a>
-    {% end %}
-</div>
+    <div class="col-md-12 card">
+        <h3>搜索历史</h3>
+        {% for value in recent %}
+            <a class="tag-span" href="/search?key={{value}}">{{value}}</a>
+        {% end %}
+    </div>
+{% end %}
+
+{% if show_path %}
+    <div class="card">
+        <h3>
+            <a href="{{parent.url}}" class="link2">{{parent.name}}</a> / 
+            <a href="{{current.url}}" class="link2">{{current.name}}</a>
+        </h3>
+    </div>
 {% end %}
 
 <div class="col-md-12 result-list">
@@ -84,7 +94,7 @@
                         <span class="tag gray-tag">{{file.creator}}</span>
                     {% end %}
 
-                    {% if hasattr(file, "priority") and file.priority is not None and file.priority > 0 %}
+                    {% if file.priority is not None and file.priority > 0 %}
                         <span class="tag red-bg">置顶</span>
                     {% end %}
 

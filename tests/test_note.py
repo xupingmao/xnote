@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2019/10/05 21:05:22
+# @modified 2019/10/07 00:42:20
 import xutils
 
 # cannot perform relative import
@@ -150,4 +150,8 @@ class TestMain(BaseTestCase):
         data = json_request("/note/comments?note_id=123")
         self.assertEqual(1, len(data))
         self.assertEqual("hello", data[0]['content'])
+
+    def test_note_management(self):
+        self.check_OK("/note/management?parent_id=0")
+        self.check_OK("/note/management?parent_id=123")
 

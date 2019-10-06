@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/05 10:05:57
+# @modified 2019/10/07 00:38:45
 import math
 import time
 import web
@@ -398,6 +398,22 @@ class ArchivedHandler:
             show_aside = True,
             show_mdate = True)
 
+class ManagementHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        parent_id = xutils.get_argument("parent_id", 0)
+        user_name = xauth.current_name()
+        
+        notes = NOTE_DAO.list_note(user_name, parent_id, 0, 200)
+        parent = Storage(url = "/note/%s" % parent_id, name = "上级目录")
+        current = Storage(url = "#", name = "整理")
+        return xtemplate.render("search/search_result.html", 
+            files = notes,
+            show_path = True,
+            current = current,
+            parent = parent)
+
 xurls = (
     r"/note/group"          , GroupListHandler,
     r"/note/group_list"     , GroupListHandler,
@@ -416,6 +432,7 @@ xurls = (
     r"/note/group/select"   , GroupSelectHandler,
     r"/note/date"           , DateHandler,
     r"/note/monthly"        , DateHandler,
+    r"/note/management"     , ManagementHandler,
 
     # 笔记分类
     r"/note/gallery"        , GalleryListHandler,
