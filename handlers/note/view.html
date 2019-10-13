@@ -22,7 +22,7 @@
 .alert {
     color: red;
     background-color: #FFCCCC;
-    width: initial;
+    width: auto;
 }
 
 .x-code-block {
@@ -47,7 +47,6 @@
 .pathlist {
     background-color: #eee;
     padding:3px;
-    box-sizing: border-box;
 }
 
 .hover {
@@ -233,19 +232,20 @@
 
 <script type="text/javascript">
 function rename(id, oldName) {
-    var newName = prompt("新名称", oldName);
-    console.log(newName);
-    if (newName != "" && newName != null) {
-        $.post("/note/rename", {id:id, name:newName}, function (resp) {
-            var code = resp.code;
-            if (code != "success") {
-                alert(resp.message);
-            } else {
-                // $("#file-"+id).text(newName);
-                window.location.reload();
-            }
-        })
-    }
+    xnote.prompt("新名称", oldName, function () {
+        console.log(newName);
+        if (newName != "" && newName != null) {
+            $.post("/note/rename", {id:id, name:newName}, function (resp) {
+                var code = resp.code;
+                if (code != "success") {
+                    alert(resp.message);
+                } else {
+                    // $("#file-"+id).text(newName);
+                    window.location.reload();
+                }
+            })
+        }
+    });
 }
 
 function remove(id, name, parentId) {
@@ -266,6 +266,9 @@ function remove(id, name, parentId) {
     }
 }
 
+$(function () {
+    window.adjustTable();
+})
 </script>
 
 {% end %}

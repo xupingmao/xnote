@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/10/05 10:19:46
+# @modified 2019/10/07 21:19:06
 import profile
 import math
 import re
@@ -38,6 +38,9 @@ def handle_left_dir(kw, user_name, file, op):
     is_iframe = xutils.get_argument("is_iframe")
     dir_type = xutils.get_argument("dir_type")
     tags = xutils.get_argument("tags")
+
+    if file.type in ("html", "csv"):
+        kw.show_aside = False
 
     if file.type == "group":
         return
@@ -198,19 +201,20 @@ class ViewHandler:
             show_menu = False
             show_search = False
 
+        kw.show_aside = show_aside
+        kw.show_menu  = show_menu
+        kw.show_search = show_search
+
         # 如果是页面，需要查出上级目录列表
         handle_left_dir(kw, user_name, file, op)
-        
+
         return xtemplate.render(template_name,
-            show_aside    = show_aside,
             html_title    = title,
             file          = file, 
             note_id       = id,
             op            = op,
             show_mdate    = show_mdate,
             show_add_file = show_add_file,
-            show_menu     = show_menu,
-            show_search   = show_search,
             show_pagination = show_pagination,
             can_edit = can_edit,
             pathlist = pathlist,

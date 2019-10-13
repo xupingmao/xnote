@@ -56,7 +56,7 @@ $(function() {
           var width = $(".root").width() - 40;
           layer.open({
             type: 1,
-            title: "移动分组",
+            title: "移动笔记",
             shadeClose: true,
             area: [width + "px", '80%'],
             content: respHtml,
@@ -253,6 +253,8 @@ $(function () {
     window.isPc = function () {
       return getWindowWidth() >= 800 && getWindowHeight() >= 600;
     }
+    // alias
+    window.isDesktop = window.isPc;
 
     /**
      * 调整高度，通过
@@ -274,6 +276,15 @@ $(function () {
         $(".nav").hide();
         $(".root").css("padding", "10px");
       }
+    }
+
+    window.adjustTable = function () {
+      $("table").each(function (index, element) {
+        var count = $(element).find("th").length;
+        if (count > 0) {
+          $(element).find("th").css("width", 100 / count + '%');
+        }
+      });
     }
 
     $(".aside-background").on('click', function () {
@@ -380,6 +391,7 @@ var xnote = {
       layer.prompt({
         title: title,
         value: defaultValue,
+        scrollbar: false,
         area: ['400px', '300px']
       }, function (value, index, element) {
         callback(value);

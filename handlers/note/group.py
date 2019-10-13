@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/07 00:38:45
+# @modified 2019/10/07 01:03:14
 import math
 import time
 import web
@@ -37,6 +37,11 @@ class GroupItem(Storage):
         self.url      = url
         self.size     = size
         self.mtime    = dateutil.format_time()
+
+class SystemFolder(GroupItem):
+
+    def __init__(self, name, url, size=0):
+        GroupItem.__init__(self, name, url, size, "system")
 
 def type_node_path(name, url):
     parent = PathNode(TYPES_NAME, "/note/types")
@@ -228,15 +233,15 @@ class ToolListHandler:
         offset = (page-1)*limit
 
         files = [
-            GroupItem("公开笔记", "/note/public"),
-            GroupItem("最近更新", "/note/recent_edit"),
-            GroupItem("最近创建", "/note/recent_created"),
-            GroupItem("最近浏览", "/note/recent_viewed"),
-            GroupItem("Markdown", "/note/md"),
-            GroupItem("相册", "/note/gallery"),
-            GroupItem("表格", "/note/table"),
-            GroupItem("通讯录", "/note/addressbook"),
-            GroupItem("富文本", "/note/html"),
+            SystemFolder("公开笔记", "/note/public"),
+            SystemFolder("最近更新", "/note/recent_edit"),
+            SystemFolder("最近创建", "/note/recent_created"),
+            SystemFolder("最近浏览", "/note/recent_viewed"),
+            SystemFolder("Markdown", "/note/md"),
+            SystemFolder("相册", "/note/gallery"),
+            SystemFolder("表格", "/note/table"),
+            SystemFolder("通讯录", "/note/addressbook"),
+            SystemFolder("富文本", "/note/html"),
             PathNode("回收站", "/note/removed", "trash"),
             PathNode("时光轴", "/note/tools/timeline", "cube"),
             PathNode("按月查看", "/note/date", "cube"),

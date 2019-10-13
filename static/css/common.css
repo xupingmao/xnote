@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/10/05 15:29:56
+ * @modified 2019/10/07 01:04:07
  */
 
 * {
@@ -1410,6 +1410,9 @@ li.menu-item:hover {
     width: 16px;
     height: 16px;
     margin-left: -1px;
+    float: left;
+    margin-top: 4px;
+    margin-right: 4px;
 }
 
 .mobile-only {
