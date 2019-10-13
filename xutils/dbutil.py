@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/08/04 20:10:44
+# @modified 2019/10/13 21:13:57
 ###########################################################
 
 def search_escape(text):
@@ -428,6 +428,7 @@ def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = Fa
 
     if reverse:
         # 时序表的主键为 表名:用户名:时间序列 时间序列长度为20
+        # TODO 优化逆向查询
         prefix += ":9"
 
     prefix   = prefix.encode("utf-8")

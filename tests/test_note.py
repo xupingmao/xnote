@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2019/10/07 00:42:20
+# @modified 2019/10/14 00:39:30
 import xutils
 
 # cannot perform relative import
@@ -119,12 +119,15 @@ class TestMain(BaseTestCase):
 
     def test_note_tag(self):
         json_request("/note/remove?name=xnote-tag-test")
-        file = json_request("/note/add", method="POST", 
+        note = json_request("/note/add", method="POST", 
             data=dict(name="xnote-tag-test", content="hello"))
-        id = file["id"]
+        id = note["id"]
         json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags="ABC DEF"))
         json_request("/note/tag/%s" % id)
         json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags=""))
+
+        # clean up
+        json_request("/note/remove?id=%s" % id)
 
     def test_note_stick(self):
         json_request("/note/remove?name=xnote-share-test")

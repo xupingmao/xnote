@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/10/07 21:19:06
+# @modified 2019/10/13 21:11:25
 import profile
 import math
 import re
@@ -366,6 +366,18 @@ class NoticeHandler:
     def GET(self):
         return xtemplate.render("note/notice.html")
 
+class QueryHandler:
+
+    @xauth.login_required("admin")
+    def GET(self, action = ""):
+        if action == "get_by_id":
+            id = xutils.get_argument("id")
+            return dict(code = "success", data = NOTE_DAO.get_by_id(id))
+        if action == "get_by_name":
+            name = xutils.get_argument("name")
+            return dict(code = "success", data = NOTE_DAO.get_by_name(name))
+        return dict(code="fail", message = "unknown action")
+
 xurls = (
     r"/note/(edit|view)"   , ViewHandler,
     r"/note/print"         , PrintHandler,
@@ -374,6 +386,7 @@ xurls = (
     r"/note/history"       , NoteHistoryHandler,
     r"/note/history_view"  , HistoryViewHandler,
     r"/note/notice"        , NoticeHandler,
+    r"/note/query/(\w+)"   , QueryHandler,
     
     r"/file/(\d+)/upvote"  , Upvote,
     r"/file/(\d+)/downvote", Downvote,

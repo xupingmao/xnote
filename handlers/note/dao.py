@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/10/05 20:52:50
+# @modified 2019/10/14 00:31:27
 
 """资料的DAO操作集合
 
@@ -366,11 +366,10 @@ def get_by_name(name, db = None):
         if value.is_deleted:
             return False
         return value.name == name
-    result = dbutil.prefix_list("note:", find_func, 0, 1)
+    result = dbutil.prefix_list("note_tiny:", find_func, 0, 1)
     if len(result) > 0:
         note = result[0]
-        build_note_info(note)
-        return note
+        return get_by_id(note.id)
     return None
 
 def visit_note(id):
@@ -822,17 +821,17 @@ xutils.register_func("note.list_path", list_path)
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_note",  list_by_parent)
 xutils.register_func("note.list_by_parent", list_by_parent)
+xutils.register_func("note.list_by_date", list_by_date)
+xutils.register_func("note.list_by_tag", list_by_tag)
+xutils.register_func("note.list_by_type", list_by_type)
+xutils.register_func("note.list_removed", list_removed)
+xutils.register_func("note.list_sticky",  list_sticky)
+xutils.register_func("note.list_archived", list_archived)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_public", list_public)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.list_recent_viewed", list_recent_viewed)
-xutils.register_func("note.list_by_date", list_by_date)
-xutils.register_func("note.list_by_tag", list_by_tag)
-xutils.register_func("note.list_removed", list_removed)
-xutils.register_func("note.list_by_type", list_by_type)
-xutils.register_func("note.list_sticky",  list_sticky)
-xutils.register_func("note.list_archived", list_archived)
 
 # count functions
 xutils.register_func("note.count_public", count_public)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/10/05 10:03:29
+# @modified 2019/10/14 00:33:50
 
 """笔记编辑相关处理"""
 import os
@@ -172,15 +172,15 @@ class RemoveAjaxHandler:
 
         print("remove", id, name)
 
-        if id == "" and name == "":
-            return dict(code="fail", message="id,name至少一个不为空")
-
         if id != "":
             file = NOTE_DAO.get_by_id(id)
         elif name != "":
             file = NOTE_DAO.get_by_name(name)
+        else:
+            return dict(code="fail", message="id,name至少一个不为空")
+
         if file is None:
-            return dict(code="fail", message="文件不存在")
+            return dict(code="fail", message="笔记不存在")
 
         creator = xauth.current_name()
         if not xauth.is_admin() and file.creator != creator:
@@ -242,8 +242,6 @@ class RenameAjaxHandler:
         event_body = dict(action="rename", id=id, name=name, type=old.type)
         xmanager.fire("note.updated", event_body)
         xmanager.fire("note.rename", event_body)
-        if old.type == "group":
-            cacheutil.prefix_del("group.list")
         return dict(code="success")
 
     def GET(self):

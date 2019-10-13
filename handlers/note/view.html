@@ -232,7 +232,7 @@
 
 <script type="text/javascript">
 function rename(id, oldName) {
-    xnote.prompt("新名称", oldName, function () {
+    xnote.prompt("新名称", oldName, function (newName) {
         console.log(newName);
         if (newName != "" && newName != null) {
             $.post("/note/rename", {id:id, name:newName}, function (resp) {
