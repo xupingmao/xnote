@@ -104,7 +104,7 @@ class GroupListHandler:
         # 归档分组处理
         archived_books = NOTE_DAO.list_archived(user_name)
         if len(archived_books) > 0:
-            notes.insert(0, GroupItem("归档分组", "/note/archived", len(archived_books), "system"))
+            notes.insert(0, GroupItem("已归档", "/note/archived", len(archived_books), "system"))
 
         return xtemplate.render("note/group_list.html",
             ungrouped_count = 0,
