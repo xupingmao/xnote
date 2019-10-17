@@ -19,8 +19,7 @@
     <div class="grid-row card book-list">
         <h3>{{T("NoteBook")}}
             <div class="float-right">
-                <a class="prompt-btn inline-btn" message="新建笔记本" 
-                            action="/note/add?type=group&name=">+笔记本</a>
+                <a class="inline-btn" id="addBookBtn">+笔记本</a>
                 <a class="inline-btn" href="/note/add">+笔记</a>
             </div>
         </h3>
@@ -69,6 +68,26 @@
             </a>
         {% end %}
     </div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#addBookBtn").click(function () {
+            xnote.prompt("新建笔记本", "", function (newValue) {
+                $.post("/note/add", {type:"group", name:newValue, _format: "json"}, function (resp) {
+                    var code = resp.code;
+                    if (code != "success") {
+                        alert("创建笔记本失败:" + resp.message);
+                    } else {
+                        window.location.reload();
+                    }
+                }).fail(function (e) {
+                    alert("创建笔记失败:" + e);
+                })
+            })
+        })
+    })
+</script>
+
 {% end %}
 
 {% block aside %}

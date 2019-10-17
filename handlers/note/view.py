@@ -52,6 +52,9 @@ def handle_left_dir(kw, user_name, file, op):
     kw.show_groups = True
     kw.dir_type    = dir_type
 
+    if op == "edit":
+        kw.show_search = False
+
     if tags != "" and tags != None:
         kw.groups = NOTE_DAO.list_by_tag(user_name, tags)
     elif dir_type == "sticky":
