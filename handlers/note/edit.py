@@ -169,10 +169,9 @@ class RemoveAjaxHandler:
         id = xutils.get_argument("id", "")
         name = xutils.get_argument("name", "")
         file = None
+        print("remove, id=%s, name=%s" % (id, name))
 
-        print("remove", id, name)
-
-        if id != "":
+        if id != "" and id != None:
             file = NOTE_DAO.get_by_id(id)
         elif name != "":
             file = NOTE_DAO.get_by_name(name)
@@ -191,7 +190,7 @@ class RemoveAjaxHandler:
             if children_count > 0:
                 return dict(code="fail", message="分组不为空")
 
-        NOTE_DAO.delete(id)
+        NOTE_DAO.delete(file.id)
         return dict(code="success")
         
     def POST(self):

@@ -498,7 +498,7 @@ def init():
         xconfig.errors.append("sqlite3依赖丢失,部分功能不可用")
         return
 
-    init_db_wrapper(xconfig.DB_FILE)
+    # init_db_wrapper(xconfig.DB_FILE)
     init_db_wrapper(xconfig.DICT_FILE)
     init_db_wrapper(xconfig.RECORD_FILE)
 

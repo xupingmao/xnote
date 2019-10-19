@@ -382,20 +382,24 @@ def visit_note(id):
         kv_put_note(id, note)
 
 def delete_note(id):
+    print("try to delete note", id)
     note = get_by_id(id)
-    if note and note.is_deleted == 1:
+    if note is None:
+        return
+
+    if note.is_deleted == 1:
         # 已经被删除了，执行物理删除
         tiny_key = "note_tiny:%s:%s" % (note.creator, note.id)
         full_key = "note_full:%s" % note.id
         dbutil.delete(tiny_key)
         dbutil.delete(full_key)
         return
-    if note:
-        note.mtime = xutils.format_datetime()
-        note.is_deleted = 1
-        kv_put_note(id, note)
-        update_children_count(note.parent_id)
-        delete_tags(note.creator, id)
+
+    note.mtime = xutils.format_datetime()
+    note.is_deleted = 1
+    kv_put_note(id, note)
+    update_children_count(note.parent_id)
+    delete_tags(note.creator, id)
 
 def get_vpath(record):
     pathlist = []

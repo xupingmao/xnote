@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
 # Copyright (C) 2012 Space Monkey, Inc.
+#               2019 xupingmao 578749341@qq.com
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -389,7 +390,10 @@ class Iterator(object):
             if key_to:
                 self.seek(key_to)
                 # 如果没命中key必须调用一次才行 TODO 待确认
-                self.prev()
+                try:
+                    self.prev()
+                except StopIteration:
+                    return
             else:
                 self.seekLast()
 
@@ -402,7 +406,11 @@ class Iterator(object):
                 if key_from and key < key_from:
                     # raise StopIteration()
                     return
-                yield self.prev()
+                try:
+                    prev_value = self.prev()
+                except StopIteration:
+                    return
+                yield prev_value
         else:
             if key_from:
                 self.seek(key_from)
@@ -418,7 +426,11 @@ class Iterator(object):
                 if key_to and key > key_to:
                     # raise StopIteration()
                     return
-                yield self.next()
+                try:
+                    next_value = self.next()
+                except StopIteration:
+                    return
+                yield next_value
 
     def keys(self):
         while self.valid():

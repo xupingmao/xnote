@@ -19,7 +19,7 @@
             padding: 5px;
         }
         .item {
-            width: 20%;
+            width: 160px;
             height: 25px;
             line-height: 25px;
             float: left;
@@ -28,11 +28,7 @@
         @media screen and (max-width: 700px) {
             /** mobile **/
             .item {
-                width: 25%;
-            }
-
-            .item>a {
-                /*font-size: 12px;*/
+                width: 33.33%;
             }
         }
 
@@ -76,6 +72,7 @@
             {% for link in category.children %}
                 {% if link.user is None or link.user == _user_name %}
                 <div class="item">
+                    <i class="fa fa-{{link.icon}}"></i>
                     <a href="{{link.url}}">{{T(link.name)}}</a>
                 </div>
                 {% end %}
@@ -101,18 +98,6 @@
         </div>
     </div>
     #}
-
-    {% if not show_aside %}
-    <div class="grid-card">
-        <div class="col-md-12">
-            <span class="currentTime"></span>
-            <span class="float-right">
-                用户: {{_user_name}}
-                <a href="/logout">登出</a>
-            </span>
-        </div>
-    </div>
-    {% end %}
 
 {% end %}
 

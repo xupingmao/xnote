@@ -53,15 +53,23 @@ $(function() {
   $(".move-btn").click(function (event) {
       var url = $(event.target).attr("data-url");
       $.get(url, function (respHtml) {
-          var width = $(".root").width() - 40;
-          layer.open({
-            type: 1,
-            title: "移动笔记",
-            shadeClose: true,
-            area: [width + "px", '80%'],
-            content: respHtml,
-            scrollbar: false
-          });
+        var width = $(".root").width() - 40;
+        var area;
+
+        if (isMobile()) {
+          area = ['100%', '100%'];
+        } else {
+          area = [width + 'px', '80%'];
+        }
+        
+        layer.open({
+          type: 1,
+          title: "移动笔记",
+          shadeClose: true,
+          area: area,
+          content: respHtml,
+          scrollbar: false
+        });
       });
   });
 });
@@ -255,6 +263,10 @@ $(function () {
     }
     // alias
     window.isDesktop = window.isPc;
+
+    window.isMobile = function() {
+      return !isPc();
+    }
 
     /**
      * 调整高度，通过

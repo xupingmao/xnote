@@ -2,7 +2,7 @@
 # @since 2016/12/04
 # @modified 2019/10/02 10:40:39
 """xnote - Xnote is Not Only Text Editor
-Copyright (C) 2016-2017  xupingmao 578749341@qq.com
+Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

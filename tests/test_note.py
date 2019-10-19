@@ -121,6 +121,7 @@ class TestMain(BaseTestCase):
         json_request("/note/remove?name=xnote-tag-test")
         note = json_request("/note/add", method="POST", 
             data=dict(name="xnote-tag-test", content="hello"))
+        print("created note:", note)
         id = note["id"]
         json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags="ABC DEF"))
         json_request("/note/tag/%s" % id)

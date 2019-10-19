@@ -97,10 +97,12 @@ class TestMain(BaseTestCase):
     def test_fs(self):
         self.check_200("/fs//")
         self.check_200("/fs//?_format=json")
-        self.check_200("/data/data.db")
+        # self.check_200("/data/data.db")
 
     def test_fs_partial_content(self):
-        response = app.request("/data/data.db", headers=dict(RANGE="bytes=1-100"))
+        fpath = os.path.join(xconfig.DATA_DIR, "test.txt")
+        xutils.writefile(fpath, "test")
+        response = app.request("/data/test.txt", headers=dict(RANGE="bytes=1-100"))
         self.assertEqual("206 Partial Content", response.status)
         self.assertEqual("bytes", response.headers["Accept-Ranges"])
         self.assertEqual(True, "Content-Range" in response.headers)

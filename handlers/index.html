@@ -44,7 +44,7 @@
         </div>
     </div>
 
-    <!-- 
+    
     <div class="col-md-12 bottom-offset-1 box">
         <div class="grid-title">
             工具库
@@ -58,23 +58,10 @@
             {% end %}
         </div>
     </div>
-     -->
+    
 
     {% if _has_login %}
-        <!--
-        <div class="card row">
-            <div class="grid-title">
-                最近搜索
-                <a class="link float-right" href="/search">{{T("More")}}</a>
-            </div>
-            {% for value in recent_search %}
-                <a class="tag-span" href="/search?key={{value}}">{{xutils.short_text(value,10)}}</a>
-            {% end %}
-        </div>
-        -->
-        
         <div class="col-md-12">
-            {% include "note/mod_book_list.html" %}
         </div>
     {% end %}
 

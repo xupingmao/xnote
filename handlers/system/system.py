@@ -24,47 +24,56 @@ from xutils import cacheutil
 from xutils import Storage
 from xtemplate import T
 
-def link(name, url, user = None):
-    return Storage(name = name, url = url, link = url, user = user)
+def link(name, url, user = None, icon = "cube"):
+    return Storage(name = name, url = url, link = url, user = user, icon = icon)
 
-def admin_link(name, url):
-    return link(name, url, "admin")
+def admin_link(name, url, icon = "cube"):
+    return link(name, url, "admin", icon)
 
-sys_tools = [
-    admin_link("Menu_Settings",   "/system/settings"),
-    admin_link("Menu_Configure",  "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
-    admin_link("Menu_File",       "/fs_list"),
+def user_link(name, url, icon = "cube"):
+    return link(name, url, None, icon)
+
+SYS_TOOLS = [
+    admin_link("Menu_Settings",   "/system/settings", "cog"),
+    admin_link("Menu_File",       "/fs_list", "file"),
     admin_link("Menu_Scripts",    "/fs_link/scripts"),
     admin_link("Menu_Cron",   "/system/crontab"),
-    admin_link("Menu_User",   "/system/user/list"),
+    admin_link("Menu_User",   "/system/user/list", "user"),
     admin_link("Menu_Log",    "/system/log"),
-    admin_link("Menu_Refresh",  "/system/reload"),
+    admin_link("Menu_Refresh",  "/system/reload", "refresh"),
     admin_link("Menu_Modules",  "/system/modules_info"),
-    admin_link("SQL",      "/tools/sql"),
+    admin_link("Menu_Configure", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
     admin_link("Menu_CSS", "/code/edit?type=script&path=user.css"),
     admin_link("Menu_Plugin",   "/plugins_list"),
     admin_link("Shell",    "/tools/shell")
 ] 
 
-doc_tools = [
-    link("Search History",      "/search"),
+NOTE_TOOLS = [
+    user_link("Search History",      "/search"),
 
     # 笔记
-    link("Recent Updated",      "/note/recent_edit"),
-    link("Recent Created",      "/note/recent_created"),
-    link("Recent Viewed",       "/note/recent_viewed"),
-    link("Note Groups",         "/note/group"),
-    link("Note Tags",           "/note/taglist"),
-    link("默认分类", "/note/default"),
-    link("笔记时光", "/tools/timeline"),
-    link("Dictionary",          "/note/dict"),
+    user_link("Recent Updated",      "/note/recent_edit", "folder"),
+    user_link("Recent Created",      "/note/recent_created", "folder"),
+    user_link("Recent Viewed",       "/note/recent_viewed", "folder"),
+    user_link("Note Groups", "/note/group", "book"),
+    user_link("标签列表", "/note/taglist", "tags"),
+    user_link("默认分类", "/note/default"),
+    user_link("笔记时光", "/note/tools/timeline"),
+    user_link("Dictionary", "/note/dict"),
 
     # 提醒
-    link("Message",  "/message?status=created"),
-    link("Calendar", "/message/calendar"),
+    user_link("待办",  "/message?status=created", "calendar-check-o"),
+    user_link("日历", "/message/calendar", "calendar"),
+    user_link("上传管理", "/fs_upload", "upload")
 ] 
 
-other_tools = [
+DATA_TOOLS = [
+    admin_link("数据迁移",  "/system/db_migrate", "database"),
+    admin_link("SQL", "/tools/sql", "database"),
+    admin_link("leveldb", "/system/db_scan", "database")
+]
+
+OTHER_TOOLS = [
     link("浏览器信息", "/tools/browser_info"),
     # 文本
     link("代码模板", "/tools/code_template"),
@@ -72,9 +81,9 @@ other_tools = [
     link("文本转换", "/tools/text_processor"),
     link("随机字符串", "/tools/random_string"),
     # 图片
-    link("图片合并", "/tools/img_merge"),
-    link("图片拆分", "/tools/img_split"),
-    link("图像灰度化", "/tools/img2gray"),
+    user_link("图片合并", "/tools/img_merge", "image"),
+    user_link("图片拆分", "/tools/img_split", "image"),
+    user_link("图像灰度化", "/tools/img2gray", "image"),
     # 编解码
     link("base64", "/tools/base64"),
     link("HEX转换", "/tools/hex"),
@@ -90,9 +99,10 @@ other_tools = [
 
 # 所有功能配置
 xconfig.MENU_LIST = [
-    Storage(name = "System", children = sys_tools, need_login = True),
-    Storage(name = "Data", children = doc_tools, need_login = True),
-    Storage(name = "Tools", children = other_tools),
+    Storage(name = "System", children = SYS_TOOLS, need_login = True),
+    Storage(name = "Note", children = NOTE_TOOLS, need_login = True),
+    Storage(name = "数据管理", children = DATA_TOOLS, need_login = True),
+    Storage(name = "Tools", children = OTHER_TOOLS),
 ]
 
 xconfig.NOTE_OPTIONS = [
@@ -136,8 +146,8 @@ class ReloadHandler:
     def GET(self):
         # autoreload will load new handlers
         import autoreload
-        autoreload.reload()
         import web
+        autoreload.reload()
         raise web.seeother("/system/settings")
 
 class UserCssHandler:

@@ -180,7 +180,6 @@ class SaveHandler:
         status    = xutils.get_argument("status")
         location  = xutils.get_argument("location", "")
         user_name = xauth.get_current_name()
-        db = xtables.get_message_table()
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
         ctx = Storage(id = id, content = content, user = user_name, type = "")
         for rule in rules:
