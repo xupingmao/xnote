@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/10/07 01:04:07
+ * @modified 2019/10/20 18:11:13
  */
 
 * {
@@ -111,6 +111,9 @@ h1,h2,h3 {
 .bottom-offset-1{margin-bottom:5px;}
 .row{float: left;width: 100%;overflow: auto;}
 
+.pad10 {
+    padding: 10px;
+}
 
 /** 标题样式 **/
 .heading {

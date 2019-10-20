@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/10/13 21:11:25
+# @modified 2019/10/20 18:23:52
 import profile
 import math
 import re
@@ -341,7 +341,7 @@ class NoteHistoryHandler:
             history_list = []
         else:
             history_list = NOTE_DAO.list_history(note_id)
-        return xtemplate.render("note/history_list.html", 
+        return xtemplate.render("note/template/history_list.html", 
             current_note = note,
             history_list = history_list,
             show_aside = True)

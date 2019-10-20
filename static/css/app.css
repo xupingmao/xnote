@@ -2,7 +2,7 @@
  * 应用相关的CSS样式
  * @author xupingmao
  * @since 2019/06/16
- * @modified 2019/10/02 14:22:50
+ * @modified 2019/10/20 18:16:52
 */
 
 .recent-note-date {
@@ -100,6 +100,10 @@
 
 .item-ext-info {
     padding-top: 10px;
+}
+
+.note-group-select {
+    padding: 5px;
 }
 
 @media screen and (max-width: 950px) {

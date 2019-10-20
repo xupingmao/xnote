@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/07 01:03:14
+# @modified 2019/10/20 18:27:11
 import math
 import time
 import web
@@ -106,7 +106,7 @@ class GroupListHandler:
         if len(archived_books) > 0:
             notes.insert(0, GroupItem("已归档", "/note/archived", len(archived_books), "system"))
 
-        return xtemplate.render("note/group_list.html",
+        return xtemplate.render("note/template/group_list.html",
             ungrouped_count = 0,
             file_type       = "group_list",
             pseudo_groups   = True,
@@ -115,16 +115,35 @@ class GroupListHandler:
             show_aside      = True,
             files           = notes)
 
+def load_category(user_name):
+    data = NOTE_DAO.list_group(user_name)
+    sticky_groups = list(filter(lambda x: x.priority != None and x.priority > 0, data))
+    archived_groups = list(filter(lambda x: x.archived == True, data))
+    normal_groups = list(filter(lambda x: x not in sticky_groups and x not in archived_groups, data))
+    groups_tuple = [
+        ("置顶", sticky_groups),
+        ("普通", normal_groups),
+        ("已归档", archived_groups)
+    ]
+    return groups_tuple
+
 class GroupSelectHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id", "")
         filetype = xutils.get_argument("filetype", "")
-        data = NOTE_DAO.list_group(xauth.current_name())
+        groups_tuple = load_category(xauth.current_name())
         web.header("Content-Type", "text/html; charset=utf-8")
-        return xtemplate.render("note/group_select.html", 
-            id=id, filelist=data, file_type="group")
+        return xtemplate.render("note/template/group_select.html", 
+            id=id, groups_tuple = groups_tuple)
 
+class CategoryHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        groups_tuple = load_category(xauth.current_name())
+        return xtemplate.render("note/template/category.html", 
+            id=id, groups_tuple = groups_tuple)
 
 
 class RemovedHandler:
@@ -423,6 +442,7 @@ xurls = (
     r"/note/group"          , GroupListHandler,
     r"/note/group_list"     , GroupListHandler,
     r"/note/books"          , GroupListHandler,
+    r"/note/category"       , CategoryHandler,
     r"/note/default"        , DefaultListHandler,
     r"/note/ungrouped"      , DefaultListHandler,
     r"/note/public"         , PublicGroupHandler,

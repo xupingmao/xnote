@@ -1,0 +1,17 @@
+{% extends base %}
+
+{% block body %}
+    <div class="note-group-select col-md-12 scroll-y">
+        {% for category, groups in groups_tuple %}
+            <h3 class="card-title">{{category}}</h3>
+
+            {% for item in groups %}
+                <span class="tag-span">
+                    <a class="link" href="/note/{{item.id}}">
+                        {{item.name}}
+                    </a>
+                </span>
+            {% end %}
+        {% end %}
+    </div>
+{% end %}

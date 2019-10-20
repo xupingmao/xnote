@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/10/02 16:40:45
+# @modified 2019/10/20 18:00:19
 import web
 import time
 import os
@@ -90,7 +90,7 @@ class SettingsHandler:
             Item('软件版本',    get_xnote_version()),
             Item('sqlite版本', sqlite3.sqlite_version if sqlite3 != None else '')
         ]
-        return xtemplate.render("system/settings.html", 
+        return xtemplate.render("system/template/settings.html", 
             show_aside     = False,
             html_title     = "系统设置",
             item_list      = item_list,

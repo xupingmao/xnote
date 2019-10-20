@@ -78,6 +78,10 @@
         background-color: #aaa;
         border: 1px solid #ccc;
     }
+
+    #markdown-output-div {
+        border-left: 1px solid #ccc;
+    }
 </style>
 {% end %} 
 
@@ -109,7 +113,6 @@
         <div class="col-md-12">
             <span id="result" style="color:green"></span>
             <div class="col-md-12 toolbox">
-                <input type="submit" class="toolbox-btn btn-primary" value="更新" />
                 <input type="button" id="insertCode" class="toolbox-btn" value="代码" />
                 <input type="button" id="insertStrong" class="toolbox-btn" value="加粗" />
                 <input type="button" id="insertDel" class="toolbox-btn" value="删除线" />

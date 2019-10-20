@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/07/09 00:16:04
+# @modified 2019/10/20 18:29:11
 """System functions"""
 from io import StringIO
 import xconfig
@@ -38,7 +38,7 @@ SYS_TOOLS = [
     admin_link("Menu_File",       "/fs_list", "file"),
     admin_link("Menu_Scripts",    "/fs_link/scripts"),
     admin_link("Menu_Cron",   "/system/crontab"),
-    admin_link("Menu_User",   "/system/user/list", "user"),
+    admin_link("Menu_User",   "/system/user/list", "users"),
     admin_link("Menu_Log",    "/system/log"),
     admin_link("Menu_Refresh",  "/system/reload", "refresh"),
     admin_link("Menu_Modules",  "/system/modules_info"),
@@ -55,16 +55,18 @@ NOTE_TOOLS = [
     user_link("Recent Updated",      "/note/recent_edit", "folder"),
     user_link("Recent Created",      "/note/recent_created", "folder"),
     user_link("Recent Viewed",       "/note/recent_viewed", "folder"),
-    user_link("Note Groups", "/note/group", "book"),
+    user_link("默认分类", "/note/default", "folder"),
+    user_link("笔记本", "/note/group", "book"),
+    user_link("书架", "/note/category", "book"),
     user_link("标签列表", "/note/taglist", "tags"),
-    user_link("默认分类", "/note/default"),
-    user_link("笔记时光", "/note/tools/timeline"),
-    user_link("Dictionary", "/note/dict"),
+    user_link("时光轴", "/note/tools/timeline"),
+    user_link("字典", "/note/dict"),
 
     # 提醒
     user_link("待办",  "/message?status=created", "calendar-check-o"),
     user_link("日历", "/message/calendar", "calendar"),
-    user_link("上传管理", "/fs_upload", "upload")
+    user_link("上传管理", "/fs_upload", "upload"),
+    user_link("数据统计", "/note/stat", "bar-chart"),
 ] 
 
 DATA_TOOLS = [
@@ -76,10 +78,10 @@ DATA_TOOLS = [
 OTHER_TOOLS = [
     link("浏览器信息", "/tools/browser_info"),
     # 文本
-    link("代码模板", "/tools/code_template"),
-    link("文本对比", "/tools/js_diff"),
-    link("文本转换", "/tools/text_processor"),
-    link("随机字符串", "/tools/random_string"),
+    user_link("代码模板", "/tools/code_template", "code"),
+    user_link("文本对比", "/tools/js_diff", "code"),
+    user_link("文本转换", "/tools/text_processor", "code"),
+    user_link("随机字符串", "/tools/random_string", "code"),
     # 图片
     user_link("图片合并", "/tools/img_merge", "image"),
     user_link("图片拆分", "/tools/img_split", "image"),
@@ -124,15 +126,7 @@ def get_tools_config(user):
 class IndexHandler:
 
     def GET(self):
-        # 自定义链接
-        # customized_items = []
-        # user_config = get_tools_config(xauth.get_current_name())
-        # if user_config is not None:
-        #     config_list = xutils.parse_config_text(user_config.value)
-        #     customized_items = map(lambda x: Storage(name=x.get("key"), url=x.get("value")), config_list)
-
-        return xtemplate.render("system/system.html", 
-            show_aside       = (xconfig.OPTION_STYLE == "aside"),
+        return xtemplate.render("system/template/system.html", 
             html_title       = "系统",
             Storage          = Storage,
             os               = os,
