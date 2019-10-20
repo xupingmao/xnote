@@ -546,7 +546,7 @@ li.menu-item:hover {
 .x-body {
     position: absolute;
     left: 200px;
-    right: 220px;
+    right: 200px;
     top: 0px;
     bottom: 0px;
     overflow-y: auto;
