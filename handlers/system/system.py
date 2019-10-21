@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/10/20 18:29:11
+# @modified 2019/10/21 23:09:40
 """System functions"""
 from io import StringIO
 import xconfig
@@ -31,10 +31,19 @@ def admin_link(name, url, icon = "cube"):
     return link(name, url, "admin", icon)
 
 def user_link(name, url, icon = "cube"):
-    return link(name, url, None, icon)
+    return Storage(name = name, url = url, link = url, user = None, is_user = True, icon = icon)
+
+def guest_link(name, url, icon = "cube"):
+    return Storage(name = name, url = url, link = url, user = None, is_guest = True, icon = icon)
+
+def public_link(name, url, icon = "cube"):
+    return Storage(name = name, url = url, link = url, user = None, is_public = True, icon = icon)
 
 SYS_TOOLS = [
-    admin_link("Menu_Settings",   "/system/settings", "cog"),
+    user_link("设置",   "/system/settings", "cog"),
+    public_link("关于", "/code/wiki/README.md", "info-circle"),
+    user_link("退出", "/logout", "sign-out"),
+    guest_link("登录", "/login", "sign-in"),
     admin_link("Menu_File",       "/fs_list", "file"),
     admin_link("Menu_Scripts",    "/fs_link/scripts"),
     admin_link("Menu_Cron",   "/system/crontab"),
@@ -49,7 +58,7 @@ SYS_TOOLS = [
 ] 
 
 NOTE_TOOLS = [
-    user_link("Search History",      "/search"),
+    user_link("搜索历史", "/search", "history"),
 
     # 笔记
     user_link("Recent Updated",      "/note/recent_edit", "folder"),
@@ -71,32 +80,32 @@ NOTE_TOOLS = [
 
 DATA_TOOLS = [
     admin_link("数据迁移",  "/system/db_migrate", "database"),
-    admin_link("SQL", "/tools/sql", "database"),
+    admin_link("SQLite", "/tools/sql", "database"),
     admin_link("leveldb", "/system/db_scan", "database")
 ]
 
 OTHER_TOOLS = [
-    link("浏览器信息", "/tools/browser_info"),
+    public_link("浏览器信息", "/tools/browser_info"),
     # 文本
-    user_link("代码模板", "/tools/code_template", "code"),
-    user_link("文本对比", "/tools/js_diff", "code"),
-    user_link("文本转换", "/tools/text_processor", "code"),
-    user_link("随机字符串", "/tools/random_string", "code"),
+    public_link("代码模板", "/tools/code_template", "code"),
+    public_link("文本对比", "/tools/js_diff", "code"),
+    public_link("文本转换", "/tools/text_processor", "code"),
+    public_link("随机字符串", "/tools/random_string", "code"),
     # 图片
-    user_link("图片合并", "/tools/img_merge", "image"),
-    user_link("图片拆分", "/tools/img_split", "image"),
-    user_link("图像灰度化", "/tools/img2gray", "image"),
+    public_link("图片合并", "/tools/img_merge", "image"),
+    public_link("图片拆分", "/tools/img_split", "image"),
+    public_link("图像灰度化", "/tools/img2gray", "image"),
     # 编解码
-    link("base64", "/tools/base64"),
-    link("HEX转换", "/tools/hex"),
-    link("md5签名", "/tools/md5"),
-    link("sha1签名", "/tools/sha1"),
-    link("URL编解码", "/tools/urlcoder"),
-    link("条形码", "/tools/barcode"),
-    link("二维码", "/tools/qrcode"),
+    public_link("base64", "/tools/base64"),
+    public_link("HEX转换", "/tools/hex"),
+    public_link("md5签名", "/tools/md5"),
+    public_link("sha1签名", "/tools/sha1"),
+    public_link("URL编解码", "/tools/urlcoder"),
+    public_link("条形码", "/tools/barcode"),
+    public_link("二维码", "/tools/qrcode"),
     # 其他工具
-    link("分屏模式", "/tools/multi_win"),
-    link("RunJS", "/tools/runjs"),
+    public_link("分屏模式", "/tools/multi_win"),
+    public_link("RunJS", "/tools/runjs"),
 ]
 
 # 所有功能配置
@@ -122,15 +131,36 @@ def get_tools_config(user):
     user_config = db.select_first(where=dict(key="tools", user=user))
     return user_config
 
+
                 
 class IndexHandler:
 
     def GET(self):
-        return xtemplate.render("system/template/system.html", 
+        user_name = xauth.current_name()
+        menu_list = []
+
+        def filter_link_func(link):
+            if link.is_guest:
+                return user_name is None
+            if link.is_user:
+                return user_name != None
+            if link.user is None:
+                return True
+            return link.user == user_name
+
+        for category in xconfig.MENU_LIST:
+            children = category.children
+            if len(children) == 0:
+                continue
+            children = list(filter(filter_link_func, children))
+            menu_list.append(Storage(name = category.name, children = children))
+
+        return xtemplate.render("system/template/system.html",
             html_title       = "系统",
             Storage          = Storage,
             os               = os,
             user             = xauth.get_current_user(),
+            menu_list = menu_list,
             customized_items = []
         )
 
@@ -142,7 +172,7 @@ class ReloadHandler:
         import autoreload
         import web
         autoreload.reload()
-        raise web.seeother("/system/settings")
+        raise web.seeother("/system/index")
 
 class UserCssHandler:
 

@@ -40,13 +40,11 @@
   <div class="nav-left-inner-box">
     <ul class="navMenu">
       {% if _has_login %}
-        <li><a href="/note/books">我的笔记</a></li>
+        <li><a href="/">我的笔记</a></li>
         <li><a href="/note/sticky">我的置顶</a></li>
         <li><a href="/note/recent_edit">最近更新</a></li>
         <li><a href="/note/taglist">标签列表</a></li>
-      {% end %}
         <li><a href="/note/public">公开笔记</a></li>
-      {% if _has_login %}
         <li><a href="/message?status=created">待办事项</a></li> 
         <li><a href="/note/gallery">我的相册</a></li>
         <li><a href="/note/tools">笔记工具</a></li>
@@ -55,15 +53,13 @@
           <li><a href="/fs_list">文件管理</a></li> 
         {% end %}
         <li><a href="/system/index">系统设置</a></li>
+      {% else %}
+        <!-- 未登录状态 -->
+        <li><a href="/note/public">公开笔记</a></li>
+        <li><a href="/login" class="afinve"><span>登陆系统</span></a></li>
+        <li><a href="/system/index">系统设置</a></li>
       {% end %}
 
-      {% if not _has_login %}
-        <li>
-          <a href="/login" class="afinve">
-            <span>登陆系统</span>
-          </a> 
-        </li>
-      {% end %}
     </ul>
     <div id="poweredBy">
       Powered by <a style="color: #fff; text-decoration: underline;" href="/code/wiki/README.md">Xnote</a>

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/10/14 00:31:27
+# @modified 2019/10/22 00:07:52
 
 """资料的DAO操作集合
 
@@ -152,6 +152,8 @@ def build_note_info(note):
             note.content = ''
         if note.data is None:
             note.data = ''
+        if note.type == "group":
+            note.icon = "folder"
 
 class TableDesc:
     def __init__(self, row = None):
@@ -272,6 +274,8 @@ def kv_put_note(note_id, note):
         del note["path"]
     if "url" in note:
         del note["url"]
+    if "icon" in note:
+        del note["icon"]
 
     dbutil.put("note_full:%s" % note_id, note)
 

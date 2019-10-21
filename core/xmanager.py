@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/09/19 00:15:19
+# @modified 2019/10/21 23:59:38
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -644,6 +644,7 @@ def load_plugins(dirname):
                     context.fname = fname
                     context.name = os.path.splitext(fname)[0]
                     context.title = getattr(instance, "title", "")
+                    context.category = xutils.attrget(instance, "category")
                     if hasattr(main_class, 'on_init'):
                         instance.on_init(context)
                     context.clazz = main_class

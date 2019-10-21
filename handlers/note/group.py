@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/20 18:27:11
+# @modified 2019/10/21 23:43:57
 import math
 import time
 import web
@@ -37,11 +37,13 @@ class GroupItem(Storage):
         self.url      = url
         self.size     = size
         self.mtime    = dateutil.format_time()
+        self.icon     = "folder"
 
 class SystemFolder(GroupItem):
 
-    def __init__(self, name, url, size=0):
+    def __init__(self, name, url, size=None):
         GroupItem.__init__(self, name, url, size, "system")
+        self.icon = "system-folder"
 
 def type_node_path(name, url):
     parent = PathNode(TYPES_NAME, "/note/types")
@@ -115,7 +117,7 @@ class GroupListHandler:
             show_aside      = True,
             files           = notes)
 
-def load_category(user_name):
+def load_category(user_name, include_system = False):
     data = NOTE_DAO.list_group(user_name)
     sticky_groups = list(filter(lambda x: x.priority != None and x.priority > 0, data))
     archived_groups = list(filter(lambda x: x.archived == True, data))
@@ -125,6 +127,15 @@ def load_category(user_name):
         ("普通", normal_groups),
         ("已归档", archived_groups)
     ]
+
+    if include_system:
+        system_folders = [
+            SystemFolder("默认分组", "/note/default"),
+            SystemFolder("最近更新", "/note/recent_edit"),
+            SystemFolder("公开笔记", "/note/public")
+        ]
+        groups_tuple.insert(0, ("系统", system_folders))
+
     return groups_tuple
 
 class GroupSelectHandler:
@@ -141,7 +152,7 @@ class CategoryHandler:
 
     @xauth.login_required()
     def GET(self):
-        groups_tuple = load_category(xauth.current_name())
+        groups_tuple = load_category(xauth.current_name(), True)
         return xtemplate.render("note/template/category.html", 
             id=id, groups_tuple = groups_tuple)
 

@@ -2,7 +2,7 @@
 
 <!--
     @since 2017/09/14
-    @modified 2019/04/16 00:13:04
+    @modified 2019/10/21 23:05:42
 -->
 
 {% block head %}
@@ -49,36 +49,22 @@
 
 {% block body %}
 
-{% for category in xconfig.MENU_LIST %}
+{% for category in menu_list %}
 
-    {% if category.need_login and not _has_login %}
+    {% if len(category.children) > 0 %}
         <div class="col-md-12 bottom-offset-1 grid-card">
             <div class="grid-title">{{T(category.name)}}</div>
             <div class="col-md-12">
-                <div class="item">
-                    <a href="/code/wiki/README.md">{{T("About System")}}</a>
-                </div>
-                <div class="item">
-                    <a href="/login">{{T("Login")}}</a>
-                </div>
+                {% for link in category.children %}
+                    <div class="item">
+                        <i class="fa fa-{{link.icon}}"></i>
+                        <a href="{{link.url}}">{{T(link.name)}}</a>
+                    </div>
+                {% end %}
             </div>
         </div>
-        {% continue %}
     {% end %}
 
-    <div class="col-md-12 bottom-offset-1 grid-card">
-        <div class="grid-title">{{T(category.name)}}</div>
-        <div class="col-md-12">
-            {% for link in category.children %}
-                {% if link.user is None or link.user == _user_name %}
-                <div class="item">
-                    <i class="fa fa-{{link.icon}}"></i>
-                    <a href="{{link.url}}">{{T(link.name)}}</a>
-                </div>
-                {% end %}
-            {% end %}
-        </div>
-    </div>
 {% end %}
 
 {% if _has_login %}

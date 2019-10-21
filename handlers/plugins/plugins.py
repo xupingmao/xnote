@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/07/14 17:01:17
+# @modified 2019/10/22 00:06:16
 from io import StringIO
 import xconfig
 import codecs
@@ -28,30 +28,35 @@ from xutils import textutil, SearchResult, u
 MAX_HISTORY = 200
 
 def link(name, url, title = ""):
+    if title == "":
+        title = name
     return Storage(name = name, url = url, link = url, title = title, editable = False, atime="")
 
+def inner_link(name, url):
+    return Storage(name = name, url = url, link = url, title = name, editable = False, category = "inner", atime="")
+
 INNER_TOOLS = [
-    link("浏览器信息", "/tools/browser_info"),
+    inner_link("浏览器信息", "/tools/browser_info"),
     # 文本
-    link("代码模板", "/tools/code_template"),
-    link("文本对比", "/tools/js_diff"),
-    link("文本转换", "/tools/text_processor"),
-    link("随机字符串", "/tools/random_string"),
+    inner_link("代码模板", "/tools/code_template"),
+    inner_link("文本对比", "/tools/js_diff"),
+    inner_link("文本转换", "/tools/text_processor"),
+    inner_link("随机字符串", "/tools/random_string"),
     # 图片
-    link("图片合并", "/tools/img_merge"),
-    link("图片拆分", "/tools/img_split"),
-    link("图像灰度化", "/tools/img2gray"),
+    inner_link("图片合并", "/tools/img_merge"),
+    inner_link("图片拆分", "/tools/img_split"),
+    inner_link("图像灰度化", "/tools/img2gray"),
     # 编解码
-    link("base64", "/tools/base64"),
-    link("HEX转换", "/tools/hex"),
-    link("md5签名", "/tools/md5"),
-    link("sha1签名", "/tools/sha1"),
-    link("URL编解码", "/tools/urlcoder"),
-    link("条形码", "/tools/barcode"),
-    link("二维码", "/tools/qrcode"),
+    inner_link("base64", "/tools/base64"),
+    inner_link("HEX转换", "/tools/hex"),
+    inner_link("md5签名", "/tools/md5"),
+    inner_link("sha1签名", "/tools/sha1"),
+    inner_link("URL编解码", "/tools/urlcoder"),
+    inner_link("条形码", "/tools/barcode"),
+    inner_link("二维码", "/tools/qrcode"),
     # 其他工具
-    link("分屏模式", "/tools/multi_win"),
-    link("RunJS", "/tools/runjs"),
+    inner_link("分屏模式", "/tools/multi_win"),
+    inner_link("RunJS", "/tools/runjs"),
 ]
 
 def build_inner_tools():
@@ -80,6 +85,9 @@ def build_plugin_links(dirname, fnames):
         item.title = ''
         if plugin_context is not None:
             item.title = plugin_context.title
+            item.category = plugin_context.category
+        else:
+            item.title = name
         links.append(item)
     return links
 
@@ -88,7 +96,10 @@ def list_plugins(category):
     if not os.path.isdir(dirname):
         return []
 
-    if category and category != "all":
+    if category == "other":
+        plugins = xmanager.find_plugins(None)
+        links = build_plugin_links(dirname, [p.fname for p in plugins])
+    elif category and category != "all":
         # 某个分类的插件
         plugins = xmanager.find_plugins(category)
         links = build_plugin_links(dirname, [p.fname for p in plugins])
@@ -102,11 +113,20 @@ def list_plugins(category):
         links += build_plugin_links(dirname, recent_names + sorted(plugins_list))    
     return links
 
+def find_plugin_by_name(name):
+    plugins = list_plugins("all")
+    name, ext = os.path.splitext(name)
+    for p in plugins:
+        if u(p.name) == u(name):
+            return p
+    return None
+
 def list_recent_plugins():
     items = cacheutil.zrange("plugins.history", -6, -1)
-    links = [dict(name=name, link="/plugins/" + name) for name in items]
+    print(items)
+    links = [find_plugin_by_name(name) for name in items]
     links.reverse()
-    return links;
+    return list(filter(None, links))
 
 def log_plugin_visit(name):
     try:
@@ -165,7 +185,7 @@ def on_search_plugins(ctx):
             results.append(result)
     ctx.tools += results
 
-class PluginsListHandler:
+class PluginsListOldHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -181,12 +201,48 @@ class PluginsListHandler:
             else:
                 plugins = []
 
-        return xtemplate.render("plugins/plugins.html", 
+        return xtemplate.render("plugins/plugins_old.html", 
             category = category,
             html_title = "插件",
             show_aside = xconfig.OPTION_STYLE == "aside",
             recent     = recent,
             plugins    = plugins)
+
+class PluginsListHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        category = xutils.get_argument("category", "")
+        plugin_categories = []
+
+        if xauth.is_admin():
+            recent   = list_recent_plugins()
+            plugins  = list_plugins(category)
+
+            # note_plugins = list(filter(lambda x: x.category == "note", plugins))
+            note_plugins = list_plugins("note")
+            dev_plugins  = list_plugins("develop")
+            sys_plugins  = list_plugins("system")
+            dir_plugins  = list_plugins("dir")
+            net_plugins  = list_plugins("network")
+            other_plugins = list(filter(lambda x: x.category not in ("inner", "note", "develop", "system", "dir", "network"), plugins))
+
+            plugin_categories.append(["最近", recent])
+            plugin_categories.append(["默认工具", build_inner_tools()])
+            plugin_categories.append(["笔记", note_plugins])
+            plugin_categories.append(["开发工具", dev_plugins])
+            plugin_categories.append(["系统", sys_plugins])
+            plugin_categories.append(["文件", dir_plugins])
+            plugin_categories.append(["网络", net_plugins])
+            plugin_categories.append(["其他", other_plugins])
+        else:
+            plugins = build_inner_tools()
+            plugin_categories.append(["默认工具", plugins])
+
+        return xtemplate.render("plugins/plugins.html", 
+            category = category,
+            html_title = "插件",
+            plugin_categories = plugin_categories)
 
 DEFAULT_PLUGIN_TEMPLATE = '''# -*- coding:utf-8 -*-
 # @since $since
@@ -309,6 +365,7 @@ class PluginsHandler:
 
 xurls = (
     r"/plugins_list", PluginsListHandler,
+    r"/plugins_list_old", PluginsListOldHandler,
     r"/plugins_new", NewPluginHandler,
     r"/plugins_new/command", NewCommandPlugin,
     r"/plugins/(.+)", PluginsHandler

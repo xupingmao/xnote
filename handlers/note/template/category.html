@@ -3,14 +3,15 @@
 {% block body %}
     <div class="note-group-select col-md-12 scroll-y">
         {% for category, groups in groups_tuple %}
-            <h3 class="card-title">{{category}}</h3>
-
-            {% for item in groups %}
-                <span class="tag-span">
-                    <a class="link" href="/note/{{item.id}}">
-                        {{item.name}}
-                    </a>
-                </span>
+            {% if len(groups) > 0 %}
+                <h3 class="card-title">{{category}}</h3>
+                {% for item in groups %}
+                    <span class="tag-span">
+                        <i class="fa fa-{{item.icon}}"></i>
+                        <a href="{{item.url}}">{{item.name}}</a>
+                        {% if item.size != None %}<span>{{item.size}}</span>{% end %}
+                    </span>
+                {% end %}
             {% end %}
         {% end %}
     </div>

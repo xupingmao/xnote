@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2019/10/14 00:39:30
+# @modified 2019/10/20 20:45:10
 import xutils
 
 # cannot perform relative import
@@ -158,4 +158,9 @@ class TestMain(BaseTestCase):
     def test_note_management(self):
         self.check_OK("/note/management?parent_id=0")
         self.check_OK("/note/management?parent_id=123")
+
+    def test_note_category(self):
+        self.check_OK("/note/category")
+
+    
 
