@@ -1,17 +1,19 @@
 {% extends base %}
 
 {% block body %}
-    <div class="note-group-select col-md-12 scroll-y">
+    <div class="col-md-12">
         {% for category, groups in groups_tuple %}
             {% if len(groups) > 0 %}
-                <h3 class="card-title">{{category}}</h3>
-                {% for item in groups %}
-                    <span class="tag-span">
-                        <i class="fa fa-{{item.icon}}"></i>
-                        <a href="{{item.url}}">{{item.name}}</a>
-                        {% if item.size != None %}<span>{{item.size}}</span>{% end %}
-                    </span>
-                {% end %}
+                <div class="card">
+                    <h3 class="card-title">{{category}}</h3>
+                    {% for item in groups %}
+                        <span class="tag-span">
+                            <i class="fa fa-{{item.icon}}"></i>
+                            <a href="{{item.url}}">{{item.name}}</a>
+                            {% if item.size != None %}<span>{{item.size}}</span>{% end %}
+                        </span>
+                    {% end %}
+                </div>
             {% end %}
         {% end %}
     </div>

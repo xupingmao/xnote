@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/10/22 00:06:16
+# @modified 2019/10/23 00:20:07
 from io import StringIO
 import xconfig
 import codecs
@@ -271,7 +271,7 @@ class Main(BasePlugin):
     description = ""
     # 访问权限
     required_role = "admin"
-    # 插件分类 {note, dir, system, network}
+    # 插件分类 {note, dir, system, network, develop}
     category = None
     
     def handle(self, input):

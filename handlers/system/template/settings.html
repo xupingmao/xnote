@@ -65,7 +65,7 @@
             </td>
         </tr>
 
-        <tr class="admin-visible">
+        <tr class="admin-visible hide">
             <td class="key">数据管理</td>
             <td>
                 <a href="/system/user/list">用户管理</a> |
@@ -104,6 +104,14 @@
                 <input type="radio" name="THEME" default-value="{{xconfig.THEME}}" value="standard">默认
                 <input type="radio" name="THEME" default-value="{{xconfig.THEME}}" value="card">卡片
                 <input type="radio" name="THEME" default-value="{{xconfig.THEME}}" value="left">侧边栏
+            </td>
+        </tr>
+
+        <tr class="admin-visible">
+            <td class="key">首页风格</td>
+            <td>
+                <input type="radio" name="HOME_PATH" default-value="{{xconfig.HOME_PATH}}" value="/note/books">列表
+                <input type="radio" name="HOME_PATH" default-value="{{xconfig.HOME_PATH}}" value="/note/category">网格
             </td>
         </tr>
 

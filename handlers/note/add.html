@@ -25,25 +25,28 @@ label {
             <input type="text" class="mid-text" name="name" value="{{name}}" style="width:200px;"/>
         </div>
         
-        <div class="row top-offset-1">
-            <label>{{T("类型")}}</label>
-            <select name="type" value="{{type}}">
-                <option value="md">Markdown</option>
-                <option value="html">富文本</option>
-                <option value="csv">表格</option>
-                <option value="gallery">相册</option>
-                <option value="list">清单</option>
-            </select>
-        </div>
+        {% if type != "group" %}
+            <div class="row top-offset-1">
+                <label>{{T("类型")}}</label>
+                <select name="type" value="{{type}}">
+                    <option value="md">Markdown</option>
+                    <option value="html">富文本</option>
+                    <option value="csv">表格</option>
+                    <option value="gallery">相册</option>
+                    <option value="list">清单</option>
+                </select>
+            </div>
 
-        <div class="row top-offset-1">
-            <label>{{T("笔记本")}}</label>
-            <select name="parent_id">
-                {%for item in groups %}
-                    <option value="{{item.id}}" {%if str(item.id)==str(parent_id)%} selected {%end%}>{{item.name}}</option>
-                {% end %}
-            </select>
-        </div>
+            <div class="row top-offset-1">
+                <label>{{T("笔记本")}}</label>
+                <select name="parent_id">
+                    {%for item in groups %}
+                        <option value="{{item.id}}" {%if str(item.id)==str(parent_id)%} selected {%end%}>{{item.name}}</option>
+                    {% end %}
+                </select>
+            </div>
+        {% end %}
+
         <div class="row top-offset-1">
             <label>&nbsp;</label>
             <button class="mid-text">{{T("添加")}}</button>

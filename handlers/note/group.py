@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/21 23:43:57
+# @modified 2019/10/25 00:28:02
 import math
 import time
 import web
@@ -45,6 +45,14 @@ class SystemFolder(GroupItem):
         GroupItem.__init__(self, name, url, size, "system")
         self.icon = "system-folder"
 
+class NoteLink:
+    def __init__(self, name, url, icon = "cube"):
+        self.type = "action"
+        self.name = name
+        self.url  = url
+        self.icon = icon
+        self.size = None
+
 def type_node_path(name, url):
     parent = PathNode(TYPES_NAME, "/note/types")
     return [parent, GroupItem(T(name), url)]
@@ -64,7 +72,7 @@ class DefaultListHandler:
         return xtemplate.render(VIEW_TPL,
             show_aside = True,
             file_type  = "group",
-            back_url   = "/note/books",
+            back_url   = xconfig.HOME_PATH,
             pathlist   = [parent, Storage(name="默认分类", type="group", url="/note/default")],
             files      = files,
             file       = Storage(name="默认分类", type="group"),
@@ -124,17 +132,23 @@ def load_category(user_name, include_system = False):
     normal_groups = list(filter(lambda x: x not in sticky_groups and x not in archived_groups, data))
     groups_tuple = [
         ("置顶", sticky_groups),
-        ("普通", normal_groups),
+        ("笔记本", normal_groups),
         ("已归档", archived_groups)
     ]
 
     if include_system:
         system_folders = [
-            SystemFolder("默认分组", "/note/default"),
-            SystemFolder("最近更新", "/note/recent_edit"),
-            SystemFolder("公开笔记", "/note/public")
+            NoteLink("笔记", "/note/add", "file-text-o"),
+            NoteLink("相册", "/note/add?type=gallery", "photo"),
+            NoteLink("表格", "/note/add?type=csv", "table"),
+            NoteLink("笔记本", "/note/add?type=group", "folder")
         ]
-        groups_tuple.insert(0, ("系统", system_folders))
+        groups_tuple.insert(0, ("新建", system_folders))
+
+        default_book_count = NOTE_DAO.count(user_name, 0)
+        if default_book_count > 0:
+            sticky_groups.insert(0, GroupItem("默认分组", "/note/default", default_book_count, "system"))
+
 
     return groups_tuple
 
