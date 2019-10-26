@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/10/21 23:09:40
+# @modified 2019/10/27 00:15:33
 """System functions"""
 from io import StringIO
 import xconfig
@@ -76,6 +76,7 @@ NOTE_TOOLS = [
     user_link("日历", "/message/calendar", "calendar"),
     user_link("上传管理", "/fs_upload", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),
+    user_link("笔记工具", "/note/tools", "cubes"),
 ] 
 
 DATA_TOOLS = [

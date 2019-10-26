@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2019/10/23 01:33:08
+# @modified 2019/10/26 22:04:57
 import xauth
 import xutils
 from xutils import dbutil
@@ -11,6 +11,7 @@ from xtemplate import BasePlugin
 HTML = """
 <style>
     .key { width: 75%; }
+    .admin-stat { margin-top: 10px; }
 </style>
 
 <table class="table">
@@ -27,7 +28,7 @@ HTML = """
 </table>
 
 {% if _is_admin %}
-    <h3>全局统计</h3>
+    <h3 class="card-title admin-stat">全局统计</h3>
     <table class="table">
         <tr>
             <th class="key">项目</th>
@@ -59,6 +60,7 @@ class StatHandler(BasePlugin):
         stat_list.append(["备忘总数", dbutil.count_table("message:%s" % user_name)])
         if xauth.is_admin():
             admin_stat_list.append(["笔记总数", dbutil.count_table("note_tiny")])
+            admin_stat_list.append(["索引总数", dbutil.count_table("note_index")])
             admin_stat_list.append(["笔记历史数", dbutil.count_table("note_history")])
             admin_stat_list.append(["评论总数", dbutil.count_table("note_comment")])
             admin_stat_list.append(["notebook", dbutil.count_table("notebook")])

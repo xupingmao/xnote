@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/10/14 00:33:50
+# @modified 2019/10/26 21:51:56
 
 """笔记编辑相关处理"""
 import os
@@ -122,8 +122,10 @@ class AddHandler:
         note.is_deleted = 0
         note.tags       = textutil.split_words(tags)
 
+        heading = T("创建笔记")
         code = "fail"
         error = ""
+        
         try:
             if name == '':
                 if method == 'POST':
@@ -138,7 +140,7 @@ class AddHandler:
                 inserted_id = NOTE_DAO.create(note)
                 if format == "json":
                     return dict(code="success", id=inserted_id)
-                raise web.seeother("/note/view?id={}".format(inserted_id))
+                raise web.seeother("/note/{}".format(inserted_id))
         except web.HTTPError as e1:
             xutils.print_exc()
             raise e1
@@ -147,14 +149,16 @@ class AddHandler:
             error = str(e)
             if format == 'json':
                 return dict(code = 'fail', message = error)
+
+        if type == "group":
+            heading = T("创建笔记本")
         return xtemplate.render("note/add.html", 
-            show_aside = True,
+            heading  = heading,
             key      = "", 
             type     = type,
             name     = key, 
             tags     = tags, 
             error    = error,
-            pathlist = [Storage(name=T("New_Note"), url="/note/add")],
             message  = error,
             groups   = NOTE_DAO.list_group(creator),
             code     = code)

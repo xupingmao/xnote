@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/25 00:28:02
+# @modified 2019/10/27 00:20:15
 import math
 import time
 import web
@@ -26,6 +26,7 @@ class PathNode(Storage):
         self.url      = url
         self.type     = type
         self.priority = 0
+        self.icon     = type
 
 class GroupItem(Storage):
     """笔记本的类型"""
@@ -125,6 +126,25 @@ class GroupListHandler:
             show_aside      = True,
             files           = notes)
 
+def load_note_tools():
+    return [
+        SystemFolder("公开笔记", "/note/public"),
+        SystemFolder("最近更新", "/note/recent_edit"),
+        SystemFolder("最近创建", "/note/recent_created"),
+        SystemFolder("最近浏览", "/note/recent_viewed"),
+        SystemFolder("Markdown", "/note/md"),
+        SystemFolder("相册", "/note/gallery"),
+        SystemFolder("表格", "/note/table"),
+        SystemFolder("通讯录", "/note/addressbook"),
+        SystemFolder("富文本", "/note/html"),
+        PathNode("回收站", "/note/removed", "trash"),
+        PathNode("时光轴", "/note/tools/timeline", "cube"),
+        PathNode("按月查看", "/note/date", "cube"),
+        PathNode("导入笔记", "/note/html_importer", "cube"),
+        PathNode("数据统计", "/note/stat", "cube"),
+        PathNode("上传管理", "/fs_upload", "cube")
+    ]
+
 def load_category(user_name, include_system = False):
     data = NOTE_DAO.list_group(user_name)
     sticky_groups = list(filter(lambda x: x.priority != None and x.priority > 0, data))
@@ -143,11 +163,19 @@ def load_category(user_name, include_system = False):
             NoteLink("表格", "/note/add?type=csv", "table"),
             NoteLink("笔记本", "/note/add?type=group", "folder")
         ]
-        groups_tuple.insert(0, ("新建", system_folders))
 
         default_book_count = NOTE_DAO.count(user_name, 0)
         if default_book_count > 0:
             sticky_groups.insert(0, GroupItem("默认分组", "/note/default", default_book_count, "system"))
+
+        note_tools = load_note_tools()
+        groups_tuple = [
+            ("新建", system_folders),
+            ("置顶", sticky_groups),
+            ("笔记本", normal_groups),
+            ("笔记工具", note_tools),
+            ("已归档", archived_groups),
+        ]
 
 
     return groups_tuple
@@ -276,23 +304,7 @@ class ToolListHandler:
         limit  = xconfig.PAGE_SIZE
         offset = (page-1)*limit
 
-        files = [
-            SystemFolder("公开笔记", "/note/public"),
-            SystemFolder("最近更新", "/note/recent_edit"),
-            SystemFolder("最近创建", "/note/recent_created"),
-            SystemFolder("最近浏览", "/note/recent_viewed"),
-            SystemFolder("Markdown", "/note/md"),
-            SystemFolder("相册", "/note/gallery"),
-            SystemFolder("表格", "/note/table"),
-            SystemFolder("通讯录", "/note/addressbook"),
-            SystemFolder("富文本", "/note/html"),
-            PathNode("回收站", "/note/removed", "trash"),
-            PathNode("时光轴", "/note/tools/timeline", "cube"),
-            PathNode("按月查看", "/note/date", "cube"),
-            PathNode("导入笔记", "/note/html_importer", "cube"),
-            PathNode("数据统计", "/note/stat", "cube"),
-            PathNode("上传管理", "/fs_upload", "cube")
-        ]
+        files = load_note_tools()
         amount = len(files)
 
         return xtemplate.render(VIEW_TPL,

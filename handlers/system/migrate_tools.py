@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/10/01 15:58:37
+# @modified 2019/10/27 00:14:04
 
 import os
 import re
@@ -30,6 +30,7 @@ HTML = """
         <a class="btn" href="?action=note_tags">迁移标签表</a>
         <a class="btn" href="?action=schedule">迁移任务表</a>
         <a class="btn" href="?action=user">迁移用户表</a>
+        <a class="btn" href="?action=search">迁移搜索记录</a>
     </div>
 
     <div class="top-offset-1">
@@ -74,6 +75,8 @@ class MigrateHandler(BasePlugin):
             result = migrate_schedule()
         if action == "user":
             result = migrate_user()
+        if action == "search":
+            result = migrade_search()
 
         cost = int((time.time() - t1) * 1000)
         self.writetemplate(HTML, result = result, cost = cost)
@@ -248,6 +251,10 @@ def migrate_user():
             dbutil.put(key, item)
             count += 1
     return "迁移%s条数据" % count
+
+def migrate_search():
+    count = 0
+    return "Not Implemented Yet"
 
 SCAN_HTML = """
 <div class="card">

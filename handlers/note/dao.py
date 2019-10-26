@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/10/22 00:07:52
+# @modified 2019/10/26 23:56:23
 
 """资料的DAO操作集合
 
@@ -18,13 +18,12 @@ import xtables
 import xutils
 import xauth
 import xmanager
+import copy
 from xutils import readfile, savetofile, sqlite3, Storage
 from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
 from xutils import attrget
 
 MAX_VISITED_CNT = 200
-readFile        = readfile
-config          = xconfig
 DB_PATH         = xconfig.DB_PATH
 
 
@@ -72,32 +71,7 @@ class FileDO(dict):
         file.url = "/note/view?id={}".format(dict["id"])
         return file
 
-def query_note_conent(id):
-    db = xtables.get_note_content_table()
-    result = db.select_first(where=dict(id=id))
-    if result is None:
-        return None, None
-    return result.get("content", ""), result.get("data", "")
-
-def query_note_name(id):
-    db = xtables.get_note_table()
-    result = db.select_first(what = "name", where = dict(id = id))
-    if result:
-        return result.name
-    return None
-
-def batch_query_sqlite(id_list):
-    db = xtables.get_note_table()
-    result = db.select(where = "id IN $id_list", vars = dict(id_list = id_list))
-    dict_result = dict()
-    for item in result:
-        dict_result[item.id] = item
-    return dict_result
-
 def batch_query(id_list):
-    if xconfig.DB_ENGINE == "sqlite":
-        return batch_query_sqlite(id_list)
-
     creator = xauth.current_name()
     result = dict()
     for id in id_list:
@@ -135,15 +109,6 @@ def build_note(dict):
     build_note_info(note)
     return note
 
-
-def to_sqlite_obj(text):
-    if text is None:
-        return "NULL"
-    if not isinstance(text, six.string_types):
-        return repr(text)
-    text = text.replace("'", "''")
-    return "'" + text + "'"
-
 def build_note_info(note):
     if note:
         # note.url = "/note/view?id={}".format(note["id"])
@@ -154,33 +119,6 @@ def build_note_info(note):
             note.data = ''
         if note.type == "group":
             note.icon = "folder"
-
-class TableDesc:
-    def __init__(self, row = None):
-        if row != None:
-            self.name = row[0]
-            self.items = []
-        else:
-            self.name = ""
-            self.items = []
-    
-    def __repr__(self):
-        return "%s :{\n%s\n}" % (self.name, self.items)
-
-class RowDesc:
-    def __init__(self, row):
-        self.name = row['name']
-        self.type = row['type']
-        self.defaultValue = row['dflt_value']
-        self.notNull = row['notnull']
-        self.primaryKey = row['pk']
-
-    def __repr__(self):
-        return "%s : %s\n" % (self.name, self.type)
-
-
-def get_file_db():
-    return xtables.get_file_table()
 
 @xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
 def list_path(file, limit = 2):
@@ -197,17 +135,25 @@ def list_path(file, limit = 2):
     return pathlist
 
 @xutils.timeit(name = "NoteDao.GetById:leveldb", logfile = True)
-def get_by_id(id, db=None, include_full = True):
+def get_by_id(id, include_full = True):
+    note_index = dbutil.get("note_index:%s" % id)
+
+    if not include_full and note_index != None:
+        build_note_info(note_index)
+        return note_index
+
     note = dbutil.get("note_full:%s" % id)
     if note and not include_full:
         del note.content
         del note.data
+    if note_index:
+        note.name = note_index.name
+        note.mtime = note_index.mtime
+        note.atime = note_index.atime
+        note.size  = note_index.size
     if note:
         build_note_info(note)
     return note
-
-# def get_tiny_by_id(user_name, id):
-#     return dbutil.get("note_tiny:%s:%020d" % (user_name, int(id)))
 
 def get_by_id_creator(id, creator, db=None):
     note = get_by_id(id)
@@ -239,7 +185,6 @@ def create_note(note_dict):
     else:
         dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(note_id))
     xutils.makedirs(dirname)
-
     return note_id
 
 def update_note_rank(note):
@@ -259,10 +204,6 @@ def update_note_rank(note):
         if note.is_public:
             dbutil.zadd("note_recent:public", mtime, note_id)
 
-# def put_tiny(note_tiny):
-#     key = "note_tiny:%s:%020d" % (note_tiny.creator, int(note_tiny.id))
-#     dbutil.put(key, note_tiny)
-
 def kv_put_note(note_id, note):
     priority = note.priority
     mtime    = note.mtime
@@ -278,6 +219,7 @@ def kv_put_note(note_id, note):
         del note["icon"]
 
     dbutil.put("note_full:%s" % note_id, note)
+    update_index(note)
 
     # 更新笔记的排序
     update_note_rank(note)
@@ -294,7 +236,24 @@ def touch_note(note_id):
     note = get_by_id(note_id)
     if note != None:
         note.mtime = dateutil.format_datetime()
-        kv_put_note(note_id, note)
+        update_index(note)
+
+def del_dict_key(dict, key):
+    if key in dict:
+        del dict[key]
+
+def update_index(note):
+    id = note['id']
+
+    note_index = Storage(**note)
+
+    del_dict_key(note_index, 'path')
+    del_dict_key(note_index, 'url')
+    del_dict_key(note_index, 'icon')
+    del_dict_key(note_index, 'data')
+    del_dict_key(note_index, 'content')
+
+    dbutil.put('note_index:%s' % id, note_index)
 
 def update_note(where, **kw):
     note_id   = where['id']
@@ -340,15 +299,16 @@ def update_note(where, **kw):
         if archived != None:
             note.archived = archived
 
+        old_version  = note.version
         note.mtime   = xutils.format_time()
         note.version += 1
         
         # 只修改优先级
         if len(kw) == 1 and kw.get('priority') != None:
-            note.version -= 1
+            note.version = old_version
         # 只修改名称
         if len(kw) == 1 and kw.get('name') != None:
-            note.version -= 1
+            note.version = old_version
 
         kv_put_note(note_id, note)
 
@@ -363,7 +323,6 @@ def update_note(where, **kw):
         touch_note(note.parent_id)
         return 1
     return 0
-
 
 def get_by_name(name, db = None):
     def find_func(key, value):
@@ -383,7 +342,7 @@ def visit_note(id):
         if note.visited_cnt is None:
             note.visited_cnt = 0
         note.visited_cnt += 1
-        kv_put_note(id, note)
+        update_index(note)
 
 def delete_note(id):
     print("try to delete note", id)
@@ -395,8 +354,10 @@ def delete_note(id):
         # 已经被删除了，执行物理删除
         tiny_key = "note_tiny:%s:%s" % (note.creator, note.id)
         full_key = "note_full:%s" % note.id
+        index_key = "note_index:%s" % note.id
         dbutil.delete(tiny_key)
         dbutil.delete(full_key)
+        dbutil.delete(index_key)
         return
 
     note.mtime = xutils.format_datetime()
@@ -404,6 +365,9 @@ def delete_note(id):
     kv_put_note(id, note)
     update_children_count(note.parent_id)
     delete_tags(note.creator, id)
+
+    book_key = "notebook:%s:%020d" % (note.creator, int(id))
+    dbutil.delete(book_key)
 
 def get_vpath(record):
     pathlist = []
@@ -431,17 +395,8 @@ def update_children_count(parent_id, db=None):
     children_count = count_note(creator, parent_id)
     note.size      = children_count
 
-    kv_put_note(note.id, note)
-        
-def get_db():
-    return get_file_db()
+    update_index(note)
 
-def get_table_struct(table_name):
-    rs = get_db().execute("pragma table_info('%s')" % table_name)
-    result = []
-    for item in rs:
-        result.append(item)
-    return result
 
 def fill_parent_name(files):
     id_list = []
@@ -550,7 +505,6 @@ def list_recent_edit(creator = None, offset=0, limit=None):
 
 def list_most_visited(creator):
     pass
-
 
 def list_by_date(field, creator, date):
     user = creator
@@ -818,8 +772,8 @@ xutils.register_func("note.touch",  touch_note)
 xutils.register_func("note.update_tags", update_tags)
 # query functions
 xutils.register_func("note.get_by_id", get_by_id)
-xutils.register_func("note.get_by_name", get_by_name)
 xutils.register_func("note.get_by_id_creator", get_by_id_creator)
+xutils.register_func("note.get_by_name", get_by_name)
 xutils.register_func("note.get_tags", get_tags)
 xutils.register_func("note.search_name", search_name)
 xutils.register_func("note.search_content", search_content)
