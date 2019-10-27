@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/27 13:33:10
+# @modified 2019/10/27 17:27:58
 import math
 import time
 import web
@@ -118,18 +118,18 @@ def load_note_tools():
         SystemFolder("最近更新", "/note/recent_edit"),
         SystemFolder("最近创建", "/note/recent_created"),
         SystemFolder("最近浏览", "/note/recent_viewed"),
-        NoteLink("日历", "/message/calender", "calendar"),
+        NoteLink("日历", "/message/calendar", "calendar"),
         NoteLink("Markdown", "/note/md", "file-text"),
         NoteLink("相册", "/note/gallery", "image"),
         NoteLink("表格", "/note/table", "table"),
         NoteLink("通讯录", "/note/addressbook", "address-book"),
         NoteLink("富文本", "/note/html", "file-word-o"),
-        PathNode("回收站", "/note/removed", "trash"),
-        PathNode("时光轴", "/note/tools/timeline", "cube"),
-        PathNode("按月查看", "/note/date", "cube"),
-        PathNode("导入笔记", "/note/html_importer", "cube"),
-        PathNode("数据统计", "/note/stat", "cube"),
-        PathNode("上传管理", "/fs_upload", "cube")
+        NoteLink("回收站", "/note/removed", "trash"),
+        NoteLink("时光轴", "/note/tools/timeline", "cube"),
+        NoteLink("按月查看", "/note/date", "cube"),
+        NoteLink("导入笔记", "/note/html_importer", "cube"),
+        NoteLink("数据统计", "/note/stat", "bar-chart"),
+        PathNode("上传管理", "/fs_upload", "upload")
     ]
 
 def load_category(user_name, include_system = False):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/10/27 12:22:42
+# @modified 2019/10/27 17:06:34
 
 """笔记编辑相关处理"""
 import os
@@ -90,6 +90,15 @@ def record_history(ctx):
     name    = ctx.get("name")
     NOTE_DAO.add_history(id, version, ctx)
 
+def get_heading_by_type(type):
+    if type == "group":
+        return T("创建笔记本")
+    if type == "gallery":
+        return T("创建相册")
+    if type == "csv":
+        return T("创建表格")
+    return T("创建笔记")
+
 class AddHandler:
 
     @xauth.login_required()
@@ -150,8 +159,8 @@ class AddHandler:
             if format == 'json':
                 return dict(code = 'fail', message = error)
 
-        if type == "group":
-            heading = T("创建笔记本")
+        heading = get_heading_by_type(type)
+
         return xtemplate.render("note/add.html", 
             heading  = heading,
             key      = "", 
