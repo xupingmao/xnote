@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/10/26 23:56:23
+# @modified 2019/10/27 15:58:19
 
 """资料的DAO操作集合
 
@@ -211,23 +211,18 @@ def kv_put_note(note_id, note):
     atime    = note.atime
 
     # 删除不需要持久化的数据
-    if "path" in note:
-        del note["path"]
-    if "url" in note:
-        del note["url"]
-    if "icon" in note:
-        del note["icon"]
+    del_dict_key(note, "path")
+    del_dict_key(note, "url")
+    del_dict_key(note, "icon")
 
     dbutil.put("note_full:%s" % note_id, note)
+
+    # 更新索引
     update_index(note)
 
-    # 更新笔记的排序
-    update_note_rank(note)
-
-    del note['content']
-    del note['data']
-    dbutil.put("note_tiny:%s:%020d" % (note.creator, int(note_id)), note)
-
+    del_dict_key(note, "content")
+    del_dict_key(note, "data")
+    
     if note.type == "group":
         # 笔记本的索引
         dbutil.put("notebook:%s:%020d" % (note.creator, int(note_id)), note)
@@ -254,6 +249,11 @@ def update_index(note):
     del_dict_key(note_index, 'content')
 
     dbutil.put('note_index:%s' % id, note_index)
+    
+    # 更新笔记的排序
+    update_note_rank(note)
+    # 更新用户索引
+    dbutil.put("note_tiny:%s:%020d" % (note.creator, int(id)), note)
 
 def update_note(where, **kw):
     note_id   = where['id']

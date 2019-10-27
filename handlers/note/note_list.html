@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/10/23 00:56:55
+@modified 2019/10/27 13:25:41
 -->
 
 {% init files = [] %}
@@ -46,6 +46,8 @@
                     <i class="fa fa-cube black"></i>
                 {% elif item.type == "system" %}
                     <i class="icon-folder-system"></i>
+                {% elif item.type == "link" %}
+                    <i class="fa fa-{{item.icon}} black"></i>
                 {% else %}
                     <i class="fa fa-file-text-o black"></i>
                 {% end %}

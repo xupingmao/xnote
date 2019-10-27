@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/27 00:20:15
+# @modified 2019/10/27 13:33:10
 import math
 import time
 import web
@@ -48,11 +48,12 @@ class SystemFolder(GroupItem):
 
 class NoteLink:
     def __init__(self, name, url, icon = "cube"):
-        self.type = "action"
+        self.type = "link"
         self.name = name
         self.url  = url
         self.icon = icon
         self.size = None
+        self.priority = 0
 
 def type_node_path(name, url):
     parent = PathNode(TYPES_NAME, "/note/types")
@@ -83,22 +84,7 @@ class DefaultListHandler:
             show_mdate = True,
             page_url   = "/note/default?page=")
 
-class MoveHandler:
-    
-    @xauth.login_required()
-    def GET(self):
-        id        = xutils.get_argument("id", "")
-        parent_id = xutils.get_argument("parent_id", "")
-        file = NOTE_DAO.get_by_id(id)
-        if file is None:
-            return dict(code="fail", message="file not exists")
 
-        NOTE_DAO.update(dict(id=id), parent_id = parent_id)
-        return dict(code="success")
-
-    def POST(self):
-        return self.GET()
-        
 class GroupListHandler:
 
     @xauth.login_required()
@@ -132,11 +118,12 @@ def load_note_tools():
         SystemFolder("最近更新", "/note/recent_edit"),
         SystemFolder("最近创建", "/note/recent_created"),
         SystemFolder("最近浏览", "/note/recent_viewed"),
-        SystemFolder("Markdown", "/note/md"),
-        SystemFolder("相册", "/note/gallery"),
-        SystemFolder("表格", "/note/table"),
-        SystemFolder("通讯录", "/note/addressbook"),
-        SystemFolder("富文本", "/note/html"),
+        NoteLink("日历", "/message/calender", "calendar"),
+        NoteLink("Markdown", "/note/md", "file-text"),
+        NoteLink("相册", "/note/gallery", "image"),
+        NoteLink("表格", "/note/table", "table"),
+        NoteLink("通讯录", "/note/addressbook", "address-book"),
+        NoteLink("富文本", "/note/html", "file-word-o"),
         PathNode("回收站", "/note/removed", "trash"),
         PathNode("时光轴", "/note/tools/timeline", "cube"),
         PathNode("按月查看", "/note/date", "cube"),
@@ -489,8 +476,6 @@ xurls = (
     r"/note/recent_(created)" , RecentHandler,
     r"/note/recent_edit"    , RecentHandler,
     r"/note/recent_(viewed)", RecentHandler,
-    r"/note/move"           , MoveHandler,
-    r"/note/group/move"     , MoveHandler,
     r"/note/group/select"   , GroupSelectHandler,
     r"/note/date"           , DateHandler,
     r"/note/monthly"        , DateHandler,
