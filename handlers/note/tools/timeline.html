@@ -1,12 +1,32 @@
 ﻿{% extends base %}
+
+{% block head %}
+<style type="text/css">
+  .time {
+    padding:5px;
+    background-color: #eee;
+  }
+
+  .things {
+    padding-left: 20px;
+  }
+
+  #loadMore {
+    text-align: center;
+    width: 100%;
+    float: left;
+    color: blue;
+  }
+</style>
+{% end %}
+
 {% block body %}
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
-<link rel="stylesheet" href="/static/css/timeline.css"/>
 
 <div id="app" class="card content">
-  <h3 class="card-title"><a href="/note/tools" class="link2">返回上级</a>&nbsp;/&nbsp;时光轴</h3>
-  <article v-for="item in itemList">
-    <h3>{{!item.title}}</h3>
+  <h3 class="card-title">时光轴</h3>
+  <article class="row" v-for="item in itemList">
+    <h3 class="time">{{!item.title}}</h3>
     <section v-for="file in item.files">
       <span class="point-time point-green"></span>
       <time datetime="">

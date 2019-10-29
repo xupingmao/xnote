@@ -2,7 +2,7 @@
  * 应用相关的CSS样式
  * @author xupingmao
  * @since 2019/06/16
- * @modified 2019/10/20 18:16:52
+ * @modified 2019/10/29 00:59:06
 */
 
 .recent-note-date {
@@ -68,15 +68,24 @@
     width: 100%;
     float: left;
     margin-top: 20px;
-    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
 }
 
 .comment-user {
+    float: left;
+    font-weight: bold;
+}
+
+.comment-time {
     float: right;
+    font-size: 12px;
+    color: #555;
 }
 
 .comment-content {
-    font-style: italic;
+    float: left;
+    width: 100%;
+    padding: 10px;
 }
 
 .menu-aside {

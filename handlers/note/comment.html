@@ -19,10 +19,11 @@ $(function () {
             for (var i = 0; i < resp.length; i++) {
                 var item = resp[i];
                 var html = $("<div>").addClass("comment-row");
-                var user = $("<div>").addClass("comment-user").text(item.ctime + ", by " + item.user);
+                var user = $("<div>").addClass("comment-user").text(item.user);
                 var content = $("<div>").addClass("comment-content").text(item.content);
+                var time = $("<div>").addClass("comment-time").text(item.ctime);
 
-                html.append(content).append(user);
+                html.append(user).append(time).append(content);
                 $("#comments").append(html);
             }
         }).fail(function (resp) {

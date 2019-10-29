@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/27 17:27:58
+# @modified 2019/10/30 01:07:39
 import math
 import time
 import web
@@ -154,6 +154,7 @@ def load_category(user_name, include_system = False):
         default_book_count = NOTE_DAO.count(user_name, 0)
         if default_book_count > 0:
             sticky_groups.insert(0, GroupItem("默认分组", "/note/default", default_book_count, "system"))
+        sticky_groups.insert(0, NoteLink("时光轴", "/note/tools/timeline", "cube"))
 
         note_tools = load_note_tools()
         groups_tuple = [
