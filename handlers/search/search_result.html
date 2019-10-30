@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2019/10/07 00:38:24
+@modified 2019/10/31 00:37:13
 -->
 
 {% block body %}
@@ -19,7 +19,7 @@
 
 {% if len(recent) > 0 %}
     <div class="col-md-12 card">
-        <h3>搜索历史</h3>
+        <h3 class="card-title">搜索历史</h3>
         {% for value in recent %}
             <a class="tag-span" href="/search?key={{value}}">{{value}}</a>
         {% end %}
