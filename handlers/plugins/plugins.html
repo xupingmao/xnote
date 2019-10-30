@@ -4,7 +4,7 @@
 
 {% if _is_admin %}
     <div class="card">
-        <h3>操作</h3>
+        <h3 class="card-title">操作</h3>
         <span class="tag-span"><a href="/plugins_new">新增</a></span>
         <span class="tag-span"><a href="/fs_link/scripts/plugins">管理</a></span>
         <span class="tag-span"><a href="/fs_api/download/plugins">下载</a></span>
@@ -18,7 +18,7 @@
             {% continue %}
         {% end %}
         <div class="card">
-            <h3>{{category}}</h3>
+            <h3 class="card-title">{{category}}</h3>
             {% for item in plugins %}
                 <span class="tag-span">
                     <a href="{{item.link}}">{{item.title}}</a>

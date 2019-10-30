@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/30 01:07:39
+# @modified 2019/10/31 00:18:27
 import math
 import time
 import web
@@ -38,7 +38,7 @@ class GroupItem(Storage):
         self.url      = url
         self.size     = size
         self.mtime    = dateutil.format_time()
-        self.icon     = "folder"
+        self.icon     = "fa-folder"
 
 class SystemFolder(GroupItem):
 
@@ -47,7 +47,7 @@ class SystemFolder(GroupItem):
         self.icon = "system-folder"
 
 class NoteLink:
-    def __init__(self, name, url, icon = "cube"):
+    def __init__(self, name, url, icon = "fa-cube"):
         self.type = "link"
         self.name = name
         self.url  = url
@@ -114,22 +114,23 @@ class GroupListHandler:
 
 def load_note_tools():
     return [
-        SystemFolder("公开笔记", "/note/public"),
+        SystemFolder("公共笔记", "/note/timeline?type=public"),
         SystemFolder("最近更新", "/note/recent_edit"),
         SystemFolder("最近创建", "/note/recent_created"),
         SystemFolder("最近浏览", "/note/recent_viewed"),
-        NoteLink("日历", "/message/calendar", "calendar"),
-        NoteLink("Markdown", "/note/md", "file-text"),
-        NoteLink("相册", "/note/gallery", "image"),
-        NoteLink("表格", "/note/table", "table"),
-        NoteLink("通讯录", "/note/addressbook", "address-book"),
-        NoteLink("富文本", "/note/html", "file-word-o"),
-        NoteLink("回收站", "/note/removed", "trash"),
-        NoteLink("时光轴", "/note/tools/timeline", "cube"),
-        NoteLink("按月查看", "/note/date", "cube"),
-        NoteLink("导入笔记", "/note/html_importer", "cube"),
-        NoteLink("数据统计", "/note/stat", "bar-chart"),
-        PathNode("上传管理", "/fs_upload", "upload")
+        NoteLink("标签", "/note/taglist", "fa-tags"),
+        NoteLink("日历", "/message/calendar", "fa-calendar"),
+        NoteLink("Markdown", "/note/md", "fa-file-text"),
+        NoteLink("相册", "/note/gallery", "fa-image"),
+        NoteLink("表格", "/note/table", "fa-table"),
+        NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
+        NoteLink("富文本", "/note/html", "fa-file-word-o"),
+        NoteLink("回收站", "/note/removed", "fa-trash"),
+        NoteLink("时光轴", "/note/tools/timeline", "fa-cube"),
+        NoteLink("按月查看", "/note/date", "fa-cube"),
+        NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
+        NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
+        PathNode("上传管理", "/fs_upload", "fa-upload")
     ]
 
 def load_category(user_name, include_system = False):
@@ -145,10 +146,10 @@ def load_category(user_name, include_system = False):
 
     if include_system:
         system_folders = [
-            NoteLink("笔记", "/note/add", "file-text-o"),
-            NoteLink("相册", "/note/add?type=gallery", "photo"),
-            NoteLink("表格", "/note/add?type=csv", "table"),
-            NoteLink("笔记本", "/note/add?type=group", "folder")
+            NoteLink("笔记", "/note/add", "fa-file-text-o"),
+            NoteLink("相册", "/note/add?type=gallery", "fa-photo"),
+            NoteLink("表格", "/note/add?type=csv", "fa-table"),
+            NoteLink("笔记本", "/note/add?type=group", "fa-folder")
         ]
 
         default_book_count = NOTE_DAO.count(user_name, 0)

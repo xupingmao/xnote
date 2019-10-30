@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/10/27 00:14:04
+# @modified 2019/10/31 00:32:25
 
 import os
 import re
@@ -86,7 +86,6 @@ def migrate_note_recent():
     for key, item in recent_list:
         dbutil.delete(key)
 
-    db = xtables.get_note_table()
     for item in dbutil.prefix_iter("note_tiny"):
         if item.type != "group":
             dbutil.zadd("note_recent:%s" % item.creator, item.mtime, item.id)
@@ -131,9 +130,15 @@ def build_full_note(note, db):
 def build_note_full_key(id):
     return "note_full:%s" % id
 
-def migrate_note_full():
-    # sqlite to leveldb
-    db = xtables.get_note_table()
+def get_note_table():
+    try:
+        return xtables.get_note_table()
+    except:
+        # note table is not inited
+        return None
+
+def migrate_note_from_db():
+    db = get_note_table()
     content_db = xtables.get_note_content_table()
     for item in db.select():
         note_key  = build_note_full_key(item.id)
@@ -147,6 +152,12 @@ def migrate_note_full():
             build_full_note(item, content_db)
             dbutil.put(note_key, item)
 
+def migrate_note_full():
+    # sqlite to leveldb
+    db = get_note_table()
+    if db:
+        migrate_note_from_db()
+    
     # old key to new key
     for item in dbutil.prefix_iter("note.full:"):
         new_key   = build_note_full_key(item.id)

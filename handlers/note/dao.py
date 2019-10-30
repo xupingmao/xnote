@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/10/27 15:58:19
+# @modified 2019/10/30 01:42:17
 
 """资料的DAO操作集合
 
@@ -117,15 +117,22 @@ def build_note_info(note):
             note.content = ''
         if note.data is None:
             note.data = ''
+        # process icon
         if note.type == "group":
-            note.icon = "folder"
+            note.icon = "fa-folder"
+        elif note.type == "csv":
+            note.icon = "fa-table"
+        elif note.type == "html":
+            note.icon = "fa-file-word-o"
+        else:
+            note.icon = "fa-file-text-o"
 
 @xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
 def list_path(file, limit = 2):
     pathlist = []
     while file is not None:
         pathlist.insert(0, file)
-        file.url = "/note/view?id=%s" % file.id
+        file.url = "/note/%s" % file.id
         if len(pathlist) >= limit:
             break
         if file.parent_id == 0:

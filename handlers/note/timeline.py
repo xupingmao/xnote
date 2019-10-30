@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2019/10/05 10:25:53
+# @modified 2019/10/31 00:21:19
 
 """Description here"""
 import re
@@ -8,6 +8,7 @@ import xauth
 import xutils
 import xtables
 import xtemplate
+from xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -22,6 +23,10 @@ class TimelineAjaxHandler:
 
         if type == "mtime":
             rows = NOTE_DAO.list_recent_edit(user_name, offset, limit)
+        elif type == "public":
+            rows = NOTE_DAO.list_public(offset, limit)
+        elif type == "gallery":
+            rows = NOTE_DAO.list_by_type(user_name, "gallery", offset, limit)
         else:
             rows = NOTE_DAO.list_recent_created(user_name, offset, limit)
         result = dict()
@@ -61,11 +66,20 @@ class TimelineHandler:
 
     @xauth.login_required()
     def GET(self):
-        return xtemplate.render("note/tools/timeline.html", show_aside = False)
+        type = xutils.get_argument("type")
+        title = T("时光轴")
+        if type == "public":
+            title = T("公共笔记")
+        if type == "gallery":
+            title = T("相册")
+        return xtemplate.render("note/tools/timeline.html", 
+            title = title,
+            show_aside = False)
 
 xurls = (
-    r"/note/timeline", TimelineAjaxHandler,
-    r"/note/timeline/month", DateTimeline,
+    r"/note/timeline", TimelineHandler,
     r"/note/tools/timeline", TimelineHandler,
+    r"/note/timeline/month", DateTimeline,
+    r"/note/api/timeline", TimelineAjaxHandler,
 )
 

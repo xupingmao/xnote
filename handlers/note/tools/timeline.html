@@ -2,11 +2,6 @@
 
 {% block head %}
 <style type="text/css">
-  .time {
-    padding:5px;
-    background-color: #eee;
-  }
-
   .things {
     padding-left: 20px;
   }
@@ -24,16 +19,19 @@
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
 <div id="app" class="card content">
-  <h3 class="card-title">时光轴</h3>
+  <h3 class="card-title">{{title}}</h3>
   <article class="row" v-for="item in itemList">
-    <h3 class="time">{{!item.title}}</h3>
+    <h3 class="card-title-2">{{!item.title}}</h3>
     <section v-for="file in item.files">
       <span class="point-time point-green"></span>
       <time datetime="">
         <span>{{!item.ctime}}</span>
       </time>
       <aside>
-        <p class="things"><a v-bind:href="file.url">{{!file.name}}</a></p>
+        <p class="things">
+          <i class="fa" v-bind:class="file.icon"></i>
+          <a v-bind:href="file.url">{{!file.name}}</a>
+        </p>
         <p class="brief"><span class="text-green"></span></p>
       </aside>
     </section>
@@ -101,7 +99,7 @@
 
     function loadMore() {
       var type = getUrlParam("type");
-      $.get("/note/timeline?_type=json&type=" + type, 
+      $.get("/note/api/timeline?_type=json&type=" + type, 
         { 
           offset: window.offset,
           limit : QUERY_LIMIT

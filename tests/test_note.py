@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2019/10/20 20:45:10
+# @modified 2019/10/31 00:19:43
 import xutils
 
 # cannot perform relative import
@@ -56,6 +56,9 @@ class TestMain(BaseTestCase):
 
     def test_note_timeline(self):
         self.check_200("/note/timeline")
+        self.check_200("/note/timeline?type=public")
+        json_request("/note/api/timeline")
+        json_request("/note/timeline/month?year=2018&month=1")
 
     def test_note_editor_md(self):
         json_request("/note/remove?name=xnote-md-test")
@@ -112,10 +115,6 @@ class TestMain(BaseTestCase):
 
         # clean up
         json_request("/note/remove?id=" + str(id))
-
-    def test_file_timeline(self):
-        json_request("/note/timeline")
-        json_request("/note/timeline/month?year=2018&month=1")
 
     def test_note_tag(self):
         json_request("/note/remove?name=xnote-tag-test")
