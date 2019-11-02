@@ -136,13 +136,6 @@
             {% end %}
         </div>
         <div class="x-left-content">
-            {% if _has_login %}
-                <li>
-                    <i class="fa fa-chevron-left"></i>
-                    <a class="link" href="/">上级目录</a>
-                </li>
-            {% end %}
-            
             {% for item in groups %}
                 <li>
                     {% if item.type == "group" %}

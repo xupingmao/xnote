@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/11/02 15:06:45
+# @modified 2019/11/02 15:20:45
 import profile
 import math
 import re
@@ -136,8 +136,9 @@ class ViewHandler:
         show_search_div = False
 
         kw = Storage()
-        kw.show_left = False
+        kw.show_left   = False
         kw.show_groups = False
+        kw.show_aside  = True
         kw.groups = []
         kw.recommended_notes = []
 
@@ -185,6 +186,7 @@ class ViewHandler:
             show_search_div = True
             show_add_file   = True
             show_mdate      = True
+            kw.show_aside   = False
         elif file.type == "md" or file.type == "text":
             content = file.content
             show_recommend = True
@@ -207,15 +209,13 @@ class ViewHandler:
             
         
         xmanager.fire("note.view", file)
-        show_aside = True
         if op == "edit":
-            show_aside = False
+            kw.show_aside = False
 
         if is_iframe == "true":
             show_menu = False
             show_search = False
 
-        kw.show_aside = show_aside
         kw.show_menu  = show_menu
         kw.show_search = show_search
 
