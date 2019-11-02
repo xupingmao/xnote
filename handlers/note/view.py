@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/10/26 23:47:01
+# @modified 2019/11/02 15:06:45
 import profile
 import math
 import re
@@ -90,12 +90,24 @@ def handle_note_content(file):
     if file.data == None or file.data == "":
         file.data = content
 
+def find_gallery_path(file):
+    # 新的位置
+    fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.id))
+    if os.path.exists(fpath):
+        return fpath
+    # TODO 归档的位置
+    # 老的位置
+    fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(file.id))
+    if os.path.exists(fpath):
+        return fpath
+
 def handle_note_files(kw, file):
     fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(file.id))
     filelist = []
     # 处理相册
     if file.type == "gallery":
-        if os.path.exists(fpath):
+        fpath = find_gallery_path(file)
+        if fpath != None:
             filelist = fsutil.list_files(fpath, webpath = True)
         file.path = fpath
 
@@ -167,13 +179,12 @@ class ViewHandler:
             else:
                 orderby = file.orderby
 
-            files  = xutils.call("note.list_by_parent", user_name, file.id, (page-1)*pagesize, pagesize, orderby)
-            amount = xutils.call("note.count", user_name, file.id)
+            files  = NOTE_DAO.list_by_parent(user_name, file.id, (page-1)*pagesize, pagesize, orderby)
+            amount = NOTE_DAO.count(user_name, file.id)
             content         = file.content
             show_search_div = True
             show_add_file   = True
             show_mdate      = True
-            # return render_note_list(files, file)
         elif file.type == "md" or file.type == "text":
             content = file.content
             show_recommend = True
@@ -367,6 +378,8 @@ class NoticeHandler:
 
     @xauth.login_required()
     def GET(self):
+        # 刷新提醒,上下文为空
+        xmanager.fire("notice.update")
         return xtemplate.render("note/notice.html")
 
 class QueryHandler:

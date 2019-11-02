@@ -16,6 +16,8 @@
 {% end %}
 
 {% block body %}
+{% init type = "ctime" %}
+
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
 <div id="app" class="card content">
@@ -98,7 +100,7 @@
     }
 
     function loadMore() {
-      var type = getUrlParam("type");
+      var type = "{{type}}" || getUrlParam("type");
       $.get("/note/api/timeline?_type=json&type=" + type, 
         { 
           offset: window.offset,

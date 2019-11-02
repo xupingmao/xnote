@@ -4,7 +4,10 @@
 {% init file_type = "history" %}
 
 <div class="card">
-    <h3><a href="/note/{{current_note.id}}" class="link2">{{current_note.name}}</a> / {{T("History")}}</h3>
+    <h3 class="card-title">
+        <a href="/note/{{current_note.id}}" class="link2">{{current_note.name}}</a> 
+        / {{T("History")}}
+    </h3>
     <table class="table">
         <tr>
             <th>名称</th>

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/10/30 01:42:17
+# @modified 2019/11/02 13:28:01
 
 """资料的DAO操作集合
 
@@ -187,11 +187,9 @@ def create_note(note_dict):
     xmanager.fire("note.add", dict(name=name, type=type))
 
     # 创建对应的文件夹
-    if type != "group":
-        dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(parent_id), str(note_id))
-    else:
+    if type == "gallery":
         dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(note_id))
-    xutils.makedirs(dirname)
+        xutils.makedirs(dirname)
     return note_id
 
 def update_note_rank(note):
@@ -323,9 +321,6 @@ def update_note(where, **kw):
         if new_parent_id != None and new_parent_id != old_parent_id:
             update_children_count(old_parent_id)
             update_children_count(new_parent_id)
-            old_dirname = os.path.join(xconfig.UPLOAD_DIR, note.creator, str(old_parent_id), str(note.id))
-            new_dirname = os.path.join(xconfig.UPLOAD_DIR, note.creator, str(new_parent_id), str(note.id))
-            fsutil.mvfile(old_dirname, new_dirname)
         # 更新parent更新时间
         touch_note(note.parent_id)
         return 1
@@ -420,7 +415,7 @@ def fill_parent_name(files):
             item.parent_name = None
 
 @xutils.timeit(name = "NoteDao.ListGroup:leveldb", logfile = True)
-def list_group(creator = None, skip_archived = False):
+def list_group(creator = None, orderby = "name", skip_archived = False):
     # TODO 添加索引优化
     def list_group_func(key, value):
         if skip_archived and value.archived:
@@ -428,7 +423,7 @@ def list_group(creator = None, skip_archived = False):
         return value.type == "group" and value.creator == creator and value.is_deleted == 0
 
     notes = dbutil.prefix_list("note_tiny:", list_group_func)
-    sort_notes(notes, "mtime_desc")
+    sort_notes(notes, orderby)
     return notes
 
 def list_public(offset, limit):

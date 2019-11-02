@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2019/10/31 00:21:19
+# @modified 2019/10/31 00:44:32
 
 """Description here"""
 import re
@@ -14,7 +14,6 @@ NOTE_DAO = xutils.DAO("note")
 
 class TimelineAjaxHandler:
 
-    @xauth.login_required()
     def GET(self):
         offset = xutils.get_argument("offset", 0, type=int)
         limit  = xutils.get_argument("limit", 20, type=int)
@@ -64,12 +63,14 @@ class DateTimeline:
 
 class TimelineHandler:
 
-    @xauth.login_required()
     def GET(self):
         type = xutils.get_argument("type")
         title = T("时光轴")
         if type == "public":
             title = T("公共笔记")
+        else:
+            xauth.check_login()
+
         if type == "gallery":
             title = T("相册")
         return xtemplate.render("note/tools/timeline.html", 

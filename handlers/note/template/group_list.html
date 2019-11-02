@@ -3,71 +3,58 @@
 {% block body %}
     {% init file_type = "group_list" %}
     {% init ungrouped_count = 0 %}
-    {% set fixed_books = [
-        ("今日提醒", "/note/notice")
-    ]%}
-
-    {% set mobile_only_books = [
-        ("我的置顶", "/note/sticky"),
-        ("最近更新", "/note/recent_edit"),
-        ("标签列表", "/note/taglist"),
-        ("公开笔记", "/note/public"),
-        ("我的相册", "/note/gallery"),
-        ("笔记工具", "/note/tools"),
-    ] %}
+    {% init fixed_books = [] %}
 
     <div class="grid-row card book-list">
-        <h3>{{T("NoteBook")}}
+        <h3 class="card-title">{{T("置顶")}}
             <div class="float-right">
                 <a class="inline-btn" id="addBookBtn">+笔记本</a>
                 <a class="inline-btn" href="/note/add">+笔记</a>
             </div>
         </h3>
 
-        {% for name, url in fixed_books %}
-            <a href="{{url}}" class="fixed-book">
+        {% for item in fixed_books %}
+            <a href="{{item.url}}" class="fixed-book">
                 <div class="book-item fixed-book-item">
-                    <i class="fa fa-folder orange"></i>
-                    {{name}}
+                    <i class="fa {{item.icon}} orange"></i>
+                    {% if item.priority > 0 %}
+                        <i class="fa fa-thumb-tack black"></i>
+                    {% end %}
+
+                    {{item.name}}
+                    {% if item.size != None %}<span class="black">({{item.size}})</span>{% end %}
                     <span class="book-size">
                         <i class="fa fa-chevron-right"></i>
                     </span>
                 </div>
-            </a>
-        {% end %}
-
-        {% for name, url in mobile_only_books %}
-            <a href="{{url}}" class="mobile-only">
-                <div class="book-item fixed-book-item">
-                    <i class="fa fa-folder orange"></i>
-                    {{name}}
-                    <span class="book-size">
-                        <i class="fa fa-chevron-right"></i>
-                    </span>
-                </div>
-            </a>
-        {% end %}
-
-        {% for item in files %}
-            <a href="{{item.url}}">
-            <div class="book-item">
-                {% if item.type == "system" %}
-                    <i class="icon-folder-system"></i>
-                {% else %}
-                    <i class="fa fa-folder orange"></i>
-                {% end %}
-
-                {% if item.priority > 0 %}
-                    <i class="fa fa-thumb-tack black"></i>
-                {% end %}
-                
-                <span>{{item.name}}</span>
-                <span class="black">({{item.size}})</span>
-                <span class="book-size">{{format_date(item.mtime).replace('-', '/')}}</span>
-            </div>
             </a>
         {% end %}
     </div>
+
+    {% if len(files) > 0 %}
+        <div class="grid-row card book-list">
+            <h3 class="card-title">{{T("笔记本")}}</h3>
+            {% for item in files %}
+                <a href="{{item.url}}">
+                <div class="book-item">
+                    {% if item.type == "system" %}
+                        <i class="icon-folder-system"></i>
+                    {% else %}
+                        <i class="fa fa-folder orange"></i>
+                    {% end %}
+
+                    {% if item.priority > 0 %}
+                        <i class="fa fa-thumb-tack black"></i>
+                    {% end %}
+                    
+                    <span>{{item.name}}</span>
+                    <span class="black">({{item.size}})</span>
+                    <span class="book-size">{{format_date(item.mtime).replace('-', '/')}}</span>
+                </div>
+                </a>
+            {% end %}
+        </div>
+    {% end %}
 
 <script type="text/javascript">
     $(function () {

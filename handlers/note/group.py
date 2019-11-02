@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/10/31 00:18:27
+# @modified 2019/11/02 14:53:45
 import math
 import time
 import web
@@ -92,25 +92,31 @@ class GroupListHandler:
         id   = xutils.get_argument("id", "", type=int)
         user_name = xauth.current_name()
         notes = NOTE_DAO.list_group(user_name, skip_archived = True)
+        fixed_books = []
+        normal_books = []
 
+        fixed_books.append(NoteLink("今日提醒", "/note/notice", "fa-bell"))
         # 默认分组处理
         default_book_count = NOTE_DAO.count(user_name, 0)
         if default_book_count > 0:
-            notes.insert(0, GroupItem("默认分组", "/note/default", default_book_count, "system"))
+            fixed_books.append(GroupItem("默认分组", "/note/default", default_book_count, "system"))
 
         # 归档分组处理
         archived_books = NOTE_DAO.list_archived(user_name)
         if len(archived_books) > 0:
-            notes.insert(0, GroupItem("已归档", "/note/archived", len(archived_books), "system"))
+            fixed_books.append(GroupItem("已归档", "/note/archived", len(archived_books), "system"))
+        fixed_books.append(NoteLink("笔记工具", "/note/tools"))
+
+        for note in notes:
+            if note.priority > 0:
+                fixed_books.append(note)
+            else:
+                normal_books.append(note)
 
         return xtemplate.render("note/template/group_list.html",
             ungrouped_count = 0,
-            file_type       = "group_list",
-            pseudo_groups   = True,
-            show_search_div = True,
-            show_add_group  = True,
-            show_aside      = True,
-            files           = notes)
+            fixed_books     = fixed_books,
+            files           = normal_books)
 
 def load_note_tools():
     return [
@@ -134,7 +140,7 @@ def load_note_tools():
     ]
 
 def load_category(user_name, include_system = False):
-    data = NOTE_DAO.list_group(user_name)
+    data = NOTE_DAO.list_group(user_name, orderby = "name")
     sticky_groups = list(filter(lambda x: x.priority != None and x.priority > 0, data))
     archived_groups = list(filter(lambda x: x.archived == True, data))
     normal_groups = list(filter(lambda x: x not in sticky_groups and x not in archived_groups, data))
@@ -157,12 +163,10 @@ def load_category(user_name, include_system = False):
             sticky_groups.insert(0, GroupItem("默认分组", "/note/default", default_book_count, "system"))
         sticky_groups.insert(0, NoteLink("时光轴", "/note/tools/timeline", "cube"))
 
-        note_tools = load_note_tools()
         groups_tuple = [
             ("新建", system_folders),
             ("置顶", sticky_groups),
             ("笔记本", normal_groups),
-            ("笔记工具", note_tools),
             ("已归档", archived_groups),
         ]
 
@@ -237,7 +241,6 @@ class BaseListHandler:
             group_type = self.note_type,
             files     = files,
             page      = page,
-            show_aside = True,
             show_mdate = True,
             page_max  = math.ceil(amount / xconfig.PAGE_SIZE),
             page_url  = "/note/%s?page=" % self.note_type)
@@ -300,7 +303,6 @@ class ToolListHandler:
             pathlist  = [PathNode(TYPES_NAME, "/note/types")],
             file_type = "group",
             files     = files,
-            show_aside = True,
             show_next  = True)
 
 class TypesHandler(ToolListHandler):
@@ -364,10 +366,14 @@ class RecentHandler:
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    ="/note/recent_%s?page=" % orderby)
 
-
 class PublicGroupHandler:
 
     def GET(self):
+        return xtemplate.render("note/tools/timeline.html", 
+            title = T("公开笔记"), 
+            type = "public")
+
+        # 老的分页逻辑
         page = xutils.get_argument("page", 1, type=int)
         page = max(1, page)
         offset = (page - 1) * xconfig.PAGE_SIZE
@@ -381,7 +387,7 @@ class PublicGroupHandler:
             files      = files,
             page       = page, 
             show_cdate = True,
-            groups     = xutils.call("note.list_group"),
+            groups     = NOTE_DAO.list_group(),
             page_max   = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url   = "/note/public?page=")
 
