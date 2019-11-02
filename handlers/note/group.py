@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/11/02 14:53:45
+# @modified 2019/11/02 15:37:06
 import math
 import time
 import web
@@ -72,7 +72,6 @@ class DefaultListHandler:
         parent    = PathNode(TYPES_NAME, "/note/types")
 
         return xtemplate.render(VIEW_TPL,
-            show_aside = True,
             file_type  = "group",
             back_url   = xconfig.HOME_PATH,
             pathlist   = [parent, Storage(name="默认分类", type="group", url="/note/default")],
@@ -451,7 +450,6 @@ class ArchivedHandler:
             file_type = "group",
             dir_type  = "archived",
             files     = files,
-            show_aside = True,
             show_mdate = True)
 
 class ManagementHandler:

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/11/02 15:20:45
+# @modified 2019/11/02 15:36:07
 import profile
 import math
 import re
@@ -110,6 +110,7 @@ def handle_note_files(kw, file):
         if fpath != None:
             filelist = fsutil.list_files(fpath, webpath = True)
         file.path = fpath
+        kw.show_aside = False
 
     kw.path = fpath
     kw.filelist = filelist
