@@ -2,20 +2,12 @@
  * 卡片主题的样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/06/22 22:23:08
+ * @modified 2019/11/11 11:49:59
  */
 
 body {
     background-color: #eee;
 }
-
-.menu-link:hover {
-    /*color: white;*/
-    /*background-color: #08c;*/
-    /*text-decoration: none;*/
-    /*border-radius: 3px;*/
-}
-
 
 .root {
     background-color: transparent;
@@ -30,6 +22,10 @@ body {
 }
 
 .x-body {
+    padding: 0px;
+}
+
+.main-content {
     padding: 0px;
 }
 

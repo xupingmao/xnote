@@ -21,7 +21,7 @@ from xconfig import Storage
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/10/13 21:13:57
+# @modified 2019/11/11 21:08:30
 ###########################################################
 
 def search_escape(text):
@@ -334,6 +334,11 @@ def check_leveldb():
     if _leveldb is None:
         raise Exception("leveldb not found!")
 
+def check_get_leveldb():
+    if _leveldb is None:
+        raise Exception("leveldb not found!")
+    return _leveldb
+
 def get(key):
     check_leveldb()
     try:
@@ -492,8 +497,8 @@ def prefix_count(prefix, filter_func = None):
 
 def count_table(table_name):
     key_from = ("%s:" % table_name).encode("utf-8")
-    key_to   = ("%s:f" % table_name).encode("utf-8")
-    iterator = _leveldb.RangeIter(key_from, key_to, include_value = False)
+    key_to   = ("%s:" % table_name).encode("utf-8") + b'\xff'
+    iterator = check_get_leveldb().RangeIter(key_from, key_to, include_value = False)
     count = 0
     for key in iterator:
         count += 1

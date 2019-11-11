@@ -2,8 +2,13 @@
  * 侧边栏主题样式
  * @author xupingmao
  * @since 2019/06/18
- * @modified 2019/11/02 13:29:50
+ * @modified 2019/11/11 20:43:30
  */
+
+body {
+    background-color: #fff;
+}
+
 .root {
     padding-left: 200px;
     width: 100%;
@@ -13,6 +18,17 @@
 
 .nav {
   display: none;
+}
+
+.x-body {
+    position: absolute;
+    left: 200px;
+    right: 200px;
+    top: 0px;
+    bottom: 0px;
+    overflow-y: auto;
+    width: auto;
+    padding: 0px;
 }
 
 .main-content {
@@ -124,7 +140,7 @@
 
 .navMenu>li>a.active, .navMenu>li>a:hover { 
     color: #FFF; 
-    background: #12181b; 
+    background: #666; 
 }
 
 .navMenu>li>ul.sub-menu, .navMenu>li>ul.sub-menu>li>ul.sub-menu { 
@@ -170,6 +186,12 @@
 
     .nav {
       display: block;
+    }
+
+    .x-body {
+        position: static;
+        width: 100%;
+        float: left;
     }
 
     .main-content {

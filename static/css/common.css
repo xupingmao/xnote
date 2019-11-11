@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/10/31 00:27:08
+ * @modified 2019/11/11 11:46:46
  */
 
 * {
@@ -10,7 +10,7 @@
 }
 
 body {
-    /*background-color: #ccc;*/
+    background-color: #ccc;
     font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
     font-size: 14px;
     letter-spacing: 1px;
@@ -511,7 +511,7 @@ li.menu-item:hover {
 
 .root {
     padding-bottom: 10px;
-    width: auto;
+    width: 960px;
     height: 100%;
     overflow: hidden;
     margin-left: 0px;
@@ -547,14 +547,8 @@ li.menu-item:hover {
 }
 
 .x-body {
-    position: absolute;
-    left: 200px;
-    right: 200px;
-    top: 0px;
-    bottom: 0px;
-    overflow-y: auto;
-    width: auto;
-    padding: 0px;
+    width: 100%;
+    margin: 0 auto;
 }
 
 .nav-top {
@@ -1360,17 +1354,12 @@ li.menu-item:hover {
     background-color: #f9f9f9;
     min-width: 120px;
     border: 1px solid #ccc;
-    border-radius: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
     cursor: pointer;
 }
-
-/*.dropdown:hover .dropdown-content {
-    display: block;
-}*/
 
 .dropdown-option {
     padding: 5px;

@@ -8,8 +8,13 @@
 
 <div class="col-md-12 grid-card">
 
-{% set title = "定时任务" %}
-{% include common/base_title.html %}
+<h3 class="card-title">
+    <span>定时任务</span>
+    <div class="float-right">
+        <input class="dialog-btn" type="button" value="新增任务" dialog-url="/system/crontab/edit" />
+    </div>
+</div>
+</h3>
 
 <table class="table col-md-12">
     <tr>
@@ -44,10 +49,6 @@
     </tr>
     {% end %}
 </table>
-
-<div class="col-md-12">
-    <input class="dialog-btn" type="button" value="新增任务" dialog-url="/system/crontab/edit" />
-</div>
 
 </div>
 

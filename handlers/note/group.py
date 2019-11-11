@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/11/02 15:37:06
+# @modified 2019/11/11 11:52:39
 import math
 import time
 import web
@@ -91,10 +91,12 @@ class GroupListHandler:
         id   = xutils.get_argument("id", "", type=int)
         user_name = xauth.current_name()
         notes = NOTE_DAO.list_group(user_name, skip_archived = True)
+        tools = []
         fixed_books = []
         normal_books = []
 
-        fixed_books.append(NoteLink("今日提醒", "/note/notice", "fa-bell"))
+        tools.append(NoteLink("提醒", "/note/notice", "fa-bell"))
+        tools.append(NoteLink("相册", "/note/gallery", "fa-photo"))
         # 默认分组处理
         default_book_count = NOTE_DAO.count(user_name, 0)
         if default_book_count > 0:
@@ -103,8 +105,8 @@ class GroupListHandler:
         # 归档分组处理
         archived_books = NOTE_DAO.list_archived(user_name)
         if len(archived_books) > 0:
-            fixed_books.append(GroupItem("已归档", "/note/archived", len(archived_books), "system"))
-        fixed_books.append(NoteLink("笔记工具", "/note/tools"))
+            tools.append(GroupItem("已归档", "/note/archived", len(archived_books), "system"))
+        tools.append(NoteLink("工具", "/note/tools"))
 
         for note in notes:
             if note.priority > 0:
@@ -114,6 +116,7 @@ class GroupListHandler:
 
         return xtemplate.render("note/template/group_list.html",
             ungrouped_count = 0,
+            tools = tools,
             fixed_books     = fixed_books,
             files           = normal_books)
 
@@ -135,7 +138,7 @@ def load_note_tools():
         NoteLink("按月查看", "/note/date", "fa-cube"),
         NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
         NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
-        PathNode("上传管理", "/fs_upload", "fa-upload")
+        NoteLink("上传管理", "/fs_upload", "fa-upload")
     ]
 
 def load_category(user_name, include_system = False):

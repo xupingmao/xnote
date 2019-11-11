@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/10/31 23:24:19
+@modified 2019/11/08 01:38:03
 -->
 
 {% init files = [] %}
@@ -52,11 +52,13 @@
                     <i class="fa fa-file-text-o black"></i>
                 {% end %}
 
-                {%if item.priority>0%}
+                {% if item.priority>0 %}
                     <i class="fa fa-thumb-tack black"></i>
-                {%end%}
+                {% end %}
                 
                 <span>{{item.name}}</span>
+                {% if item.type == "group" %}<span class="black">({{item.size}})</span>{% end %}
+
                 <span class="book-size">
                     {% if show_cdate %}
                         {{format_date(item.ctime).replace('-', '/')}}

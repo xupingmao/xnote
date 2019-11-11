@@ -3,17 +3,18 @@
 {% block body %}
     {% init file_type = "group_list" %}
     {% init ungrouped_count = 0 %}
+    {% init tools = [] %}
     {% init fixed_books = [] %}
 
     <div class="grid-row card book-list">
-        <h3 class="card-title">{{T("置顶")}}
+        <h3 class="card-title">{{T("分类")}}
             <div class="float-right">
                 <a class="inline-btn" id="addBookBtn">+笔记本</a>
                 <a class="inline-btn" href="/note/add">+笔记</a>
             </div>
         </h3>
 
-        {% for item in fixed_books %}
+        {% for item in tools %}
             <a href="{{item.url}}" class="fixed-book">
                 <div class="book-item fixed-book-item">
                     <i class="fa {{item.icon}} orange"></i>
@@ -30,6 +31,31 @@
             </a>
         {% end %}
     </div>
+
+    {% if len(fixed_books) > 0 %}
+        <div class="grid-row card book-list">
+            <h3 class="card-title">{{T("置顶")}}</h3>
+            {% for item in fixed_books %}
+                <a href="{{item.url}}">
+                <div class="book-item">
+                    {% if item.type == "system" %}
+                        <i class="icon-folder-system"></i>
+                    {% else %}
+                        <i class="fa fa-folder orange"></i>
+                    {% end %}
+
+                    {% if item.priority > 0 %}
+                        <i class="fa fa-thumb-tack black"></i>
+                    {% end %}
+                    
+                    <span>{{item.name}}</span>
+                    <span class="black">({{item.size}})</span>
+                    <span class="book-size">{{format_date(item.mtime).replace('-', '/')}}</span>
+                </div>
+                </a>
+            {% end %}
+        </div>
+    {% end %}
 
     {% if len(files) > 0 %}
         <div class="grid-row card book-list">

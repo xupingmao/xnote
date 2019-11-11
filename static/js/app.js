@@ -230,12 +230,20 @@ $(function () {
 
     window.openDialog = function (url) {
       var width = $(".root").width() - 40;
+      var area;
+
+      if (isMobile()) {
+        area = ['100%', '100%'];
+      } else {
+        area = [width + 'px', '80%'];
+      }
+
       layer.open({
         type: 2,
         shadeClose: true,
         title: '子页面',
         maxmin: true,
-        area: [width + "px", '80%'],
+        area: area,
         content: url,
         scrollbar: false
       });

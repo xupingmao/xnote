@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/10/29 01:16:33
+# @modified 2019/11/05 00:25:07
 
 """笔记编辑相关处理"""
 import os
@@ -162,6 +162,7 @@ class AddHandler:
         heading = get_heading_by_type(type)
 
         return xtemplate.render("note/add.html", 
+            show_search = False,
             heading  = heading,
             key      = "", 
             type     = type,

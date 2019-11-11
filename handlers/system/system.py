@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/10/27 00:15:33
+# @modified 2019/11/11 20:46:19
 """System functions"""
 from io import StringIO
 import xconfig
@@ -53,7 +53,7 @@ SYS_TOOLS = [
     admin_link("Menu_Modules",  "/system/modules_info"),
     admin_link("Menu_Configure", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
     admin_link("Menu_CSS", "/code/edit?type=script&path=user.css"),
-    admin_link("Menu_Plugin",   "/plugins_list"),
+    admin_link("Menu_Plugin",   "/plugins_list", "cogs"),
     admin_link("Shell",    "/tools/shell")
 ] 
 
