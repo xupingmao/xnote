@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
 # Copyright (c) 2017
-# @modified 2019/05/28 01:25:05
+# @modified 2019/11/12 02:59:45
 """Description here"""
 
 import os
@@ -48,7 +48,8 @@ def search(ctx):
     for filename in basename_set:
         if name in filename:
             f = SearchResult()
-            f.name = "工具 - " + filename
+            f.icon = "fa-cube"
+            f.name = filename
             f.url = "/tools/" + filename
             f.content = filename
             files.append(f)

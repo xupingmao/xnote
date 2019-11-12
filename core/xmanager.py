@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/10/21 23:59:38
+# @modified 2019/11/12 22:54:09
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -621,6 +621,15 @@ class PluginContext:
     def __cmp__(self, other):
         return cmp(self.title, other.title)
 
+def is_plugin_file(fpath):
+    return os.path.isfile(fpath) and fpath.endswith(".py")
+
+def load_sub_plugins(dirname):
+    for fname in os.listdir(dirname):
+        fpath = os.path.join(dirname, fname)
+        if is_plugin_file(fpath):
+            # TODO 支持插件子目录
+            pass
 
 def load_plugins(dirname):
     if not xconfig.LOAD_PLUGINS_ON_INIT:
@@ -628,7 +637,9 @@ def load_plugins(dirname):
     xconfig.PLUGINS = {}
     for fname in os.listdir(dirname):
         fpath = os.path.join(dirname, fname)
-        if os.path.isfile(fpath) and fname.endswith(".py"):
+        if os.path.isdir(fpath):
+            load_sub_plugins(fpath)
+        if is_plugin_file(fpath):
             script_name = "plugins/" + fname
             vars = dict()
             vars["script_name"] = script_name

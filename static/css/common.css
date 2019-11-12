@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/11/11 11:46:46
+ * @modified 2019/11/12 02:45:46
  */
 
 * {
@@ -546,6 +546,10 @@ li.menu-item:hover {
     margin: 0 auto;
 }
 
+.x-left {
+    display: none;
+}
+
 .x-body {
     width: 100%;
     margin: 0 auto;
@@ -561,7 +565,6 @@ li.menu-item:hover {
   margin: 0px;
   padding: 0px;
   color: black;
-  /* color: white; */
 }
 
 .nav-top h1 {
@@ -1246,6 +1249,7 @@ li.menu-item:hover {
     float: left;
     width: 220px;
     margin-left: -220px;
+    display: none;
 }
 
 .aside-item {
@@ -1410,6 +1414,14 @@ li.menu-item:hover {
     float: left;
     margin-top: 4px;
     margin-right: 4px;
+}
+
+.icon-script {
+    display: block;
+    width: 16px;
+    height: 16px;
+    background-size: cover;
+    background-image: url(/static/image/icon_script.svg);
 }
 
 .mobile-only {

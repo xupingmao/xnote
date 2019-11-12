@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/11/11 11:52:39
+# @modified 2019/11/12 23:01:54
 import math
 import time
 import web
@@ -97,6 +97,8 @@ class GroupListHandler:
 
         tools.append(NoteLink("提醒", "/note/notice", "fa-bell"))
         tools.append(NoteLink("相册", "/note/gallery", "fa-photo"))
+        tools.append(NoteLink("更多", "/note/tools"))
+        
         # 默认分组处理
         default_book_count = NOTE_DAO.count(user_name, 0)
         if default_book_count > 0:
@@ -105,8 +107,7 @@ class GroupListHandler:
         # 归档分组处理
         archived_books = NOTE_DAO.list_archived(user_name)
         if len(archived_books) > 0:
-            tools.append(GroupItem("已归档", "/note/archived", len(archived_books), "system"))
-        tools.append(NoteLink("工具", "/note/tools"))
+            fixed_books.append(GroupItem("已归档", "/note/archived", len(archived_books), "system"))
 
         for note in notes:
             if note.priority > 0:

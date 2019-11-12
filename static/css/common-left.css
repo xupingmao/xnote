@@ -2,7 +2,7 @@
  * 侧边栏主题样式
  * @author xupingmao
  * @since 2019/06/18
- * @modified 2019/11/11 20:43:30
+ * @modified 2019/11/11 21:37:28
  */
 
 body {
@@ -18,6 +18,10 @@ body {
 
 .nav {
   display: none;
+}
+
+.x-left {
+    display: block;
 }
 
 .x-body {
@@ -41,15 +45,15 @@ body {
 }
 
 .aside {
-    position: fixed;
+    position: absolute;
     right: 0px;
     top: 0px;
     width: 200px;
     height: 100%;
     margin-left: 0px;
     border-left: 1px solid #ccc;
-    /*padding: 10px;*/
     overflow: auto;
+    display: block;
 }
 
 .aside-item {
@@ -57,12 +61,12 @@ body {
 }
 
 .nav-left { 
+    position: absolute;
     display: block;
     width: 200px;
     background: #1c2229; 
     height:100%; 
     float: left;
-    position: fixed;
     top: 0px;
     left: 0px;
     text-align: left;

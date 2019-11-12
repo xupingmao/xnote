@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/11/02 15:36:07
+# @modified 2019/11/12 22:52:58
 import profile
 import math
 import re
@@ -90,23 +90,15 @@ def handle_note_content(file):
     if file.data == None or file.data == "":
         file.data = content
 
-def find_gallery_path(file):
-    # 新的位置
-    fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.id))
-    if os.path.exists(fpath):
-        return fpath
-    # TODO 归档的位置
-    # 老的位置
-    fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(file.id))
-    if os.path.exists(fpath):
-        return fpath
 
 def handle_note_files(kw, file):
     fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(file.id))
     filelist = []
     # 处理相册
     if file.type == "gallery":
-        fpath = find_gallery_path(file)
+        print(file)
+        fpath = fsutil.get_gallery_path(file)
+        print(fpath)
         if fpath != None:
             filelist = fsutil.list_files(fpath, webpath = True)
         file.path = fpath
@@ -114,6 +106,7 @@ def handle_note_files(kw, file):
 
     kw.path = fpath
     kw.filelist = filelist
+    file.path = fpath
 
 class ViewHandler:
 

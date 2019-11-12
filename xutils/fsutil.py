@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/07/19 00:00:53
+# @modified 2019/11/12 22:52:47
 import codecs
 import os
 import platform
@@ -471,4 +471,22 @@ def get_upload_file_path(user, filename, upload_dir = "files", replace_exists = 
         webpath = "/data/{}/{}/{}/{}".format(upload_dir, user, date, temp_filename)
         fileindex += 1
     return os.path.abspath(newfilepath), webpath
+
+def get_gallery_path(note):
+    # 新的位置, 增加一级子目录（100个），对于一个用户应该够用了
+    second_dir = "%02d" % (int(note.id) % 100)
+    standard_dir = os.path.join(xconfig.UPLOAD_DIR, note.creator, "gallery", second_dir, str(note.id))
+    if os.path.exists(standard_dir):
+        return standard_dir
+    # TODO 归档的位置
+    # 老的位置
+    fpath = os.path.join(xconfig.UPLOAD_DIR, note.creator, str(note.parent_id), str(note.id))
+    if os.path.exists(fpath):
+        # 修复数据另外通过工具实现
+        return fpath
+
+    # 如果依然不存在，创建一个地址
+    makedirs(standard_dir)
+    return standard_dir
+
 

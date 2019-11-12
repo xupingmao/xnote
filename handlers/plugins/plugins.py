@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/10/23 00:20:07
+# @modified 2019/11/12 02:38:56
 from io import StringIO
 import xconfig
 import codecs
@@ -174,12 +174,13 @@ def on_search_plugins(ctx):
                 or (plugin_context != None and textutil.contains_all(plugin_context.title, words)):
             result           = SearchResult()
             result.category  = "plugin"
-            result.name      = u("[插件] " + unquote_name)
+            result.icon      = "fa-cube"
+            result.name      = u(unquote_name)
             if plugin_context != None:
                 # result.raw = u(plugin_context.title)
                 # result.name = u("插件 %s (%s)") % (u(plugin_context.title), unquote_name)
                 if plugin_context.title != None:
-                    result.name = u("[插件] " + plugin_context.title + "(" + unquote_name + ")")
+                    result.name = u(plugin_context.title + "(" + unquote_name + ")")
             result.url       = u("/plugins/" + unquote_name)
             result.edit_link = u("/code/edit?path=" + os.path.join(dirname, fname))
             results.append(result)
