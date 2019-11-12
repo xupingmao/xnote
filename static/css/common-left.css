@@ -2,7 +2,7 @@
  * 侧边栏主题样式
  * @author xupingmao
  * @since 2019/06/18
- * @modified 2019/11/11 21:37:28
+ * @modified 2019/11/13 00:05:19
  */
 
 body {
@@ -190,6 +190,10 @@ body {
 
     .nav {
       display: block;
+    }
+
+    .x-left {
+        display: none;
     }
 
     .x-body {
