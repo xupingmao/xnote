@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/11/02 13:28:01
+# @modified 2019/11/14 01:12:36
 
 """资料的DAO操作集合
 
@@ -158,6 +158,7 @@ def get_by_id(id, include_full = True):
         note.mtime = note_index.mtime
         note.atime = note_index.atime
         note.size  = note_index.size
+        note.tags  = note_index.tags
     if note:
         build_note_info(note)
     return note
@@ -706,7 +707,7 @@ def update_tags(creator, note_id, tags):
     note = get_by_id(note_id)
     if note != None:
         note.tags = tags
-        kv_put_note(note_id, note)
+        update_index(note)
 
 def delete_tags(creator, note_id):
     key = "note_tags:%s:%s" % (creator, note_id)

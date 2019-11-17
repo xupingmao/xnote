@@ -1,8 +1,10 @@
 # encoding=utf-8
+from __future__ import print_function, with_statement
 import os
 import time
 import json
 import xutils
+import threading
 
 try:
     import sqlite3
@@ -16,12 +18,15 @@ except ImportError:
 
 from xconfig import Storage
 
+TIME_SEQ_LOCK = threading.Lock()
+LAST_TIME_SEQ = -1
+
 ###########################################################
 # @desc db utilties
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/11/11 21:08:30
+# @modified 2019/11/14 01:17:00
 ###########################################################
 
 def search_escape(text):
@@ -311,8 +316,19 @@ class Table:
         pass
 
 def timeseq():
-    # TODO 加锁防止并发生成一样的值
-    return "%020d" % int(time.time()*1000)
+    # 加锁防止并发生成一样的值
+    global LAST_TIME_SEQ
+    global TIME_SEQ_LOCK
+
+    with TIME_SEQ_LOCK:
+        t = int(time.time() * 1000)
+        if t == LAST_TIME_SEQ:
+            # 等于上次生成的值，说明太快了，sleep一下进行控速
+            # print("too fast, sleep 0.001")
+            time.sleep(0.001)
+            t = int(time.time() * 1000)
+        LAST_TIME_SEQ = t
+        return "%020d" % t
 
 def new_id(prefix):
     return "%s:%s" % (prefix, timeseq())
