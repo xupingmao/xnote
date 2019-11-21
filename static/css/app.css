@@ -2,7 +2,7 @@
  * 应用相关的CSS样式
  * @author xupingmao
  * @since 2019/06/16
- * @modified 2019/10/29 00:59:06
+ * @modified 2019/11/19 01:05:38
 */
 
 .recent-note-date {
@@ -102,9 +102,15 @@
     left: 0px; 
     right: 0px; 
     padding: 15px; 
-    color: #fff;
-    background-color: #1c2229;
-    border-top: 1px solid #666;
+    /*color: #fff;*/
+    /*background-color: #1c2229;*/
+    /*border-top: 1px solid #666;*/
+    border-top: 1px solid #ccc;
+}
+
+#poweredBy>a {
+    /*color: #fff;*/
+    text-decoration: underline;
 }
 
 .item-ext-info {

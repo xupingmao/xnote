@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/05/18 09:44:13
-# @modified 2019/05/18 09:46:40
+# @modified 2019/11/19 00:50:14
 
 import xutils
 import xmanager
@@ -10,7 +10,8 @@ from xtemplate import BasePlugin
 
 class EventHandler(BasePlugin):
     
-    title = '事件任务'
+    title = '系统事件'
+    editable = False
     
     def handle(self, content):
         self.rows = 0

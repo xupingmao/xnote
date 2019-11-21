@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/07/07 23:28:25
+# @modified 2019/11/21 14:24:09
 
 import re
 import os
@@ -22,11 +22,10 @@ import xtables
 from xutils import textutil, u, cacheutil
 from xutils import Queue, History, Storage
 
+NOTE_DAO = xutils.DAO("note")
+
 config = xconfig
 _rules = []
-# 初始化搜索记录
-if xconfig.search_history is None:
-    xconfig.search_history = History('search', xconfig.SEARCH_HISTORY_MAX_SIZE)
 
 class BaseRule:
 
@@ -78,25 +77,20 @@ def fill_note_info(files):
             if parent is not None:
                 file.parent_name = parent.name
 
-def log_search_history(user, key):
-    cache_key = "%s@search_history" % user
-    history = cacheutil.get(cache_key)
-    if isinstance(history, list):
-        while key in history:
-            history.remove(key)
-        history.append(key)
-    else:
-        history = [key]
-    if len(history) > xconfig.SEARCH_HISTORY_MAX_SIZE:
-        history = history[-xconfig.SEARCH_HISTORY_MAX_SIZE:]
-    cacheutil.set(cache_key, history)
+def log_search_history(user, key, category = "default", cost_time = 0):
+    NOTE_DAO.add_search_history(user, key, category, cost_time)
 
 @xutils.timeit(name = "Search.ListRecent", logargs = True, logfile = True)
 def list_search_history(user_name, limit = -1):
-    history = list(reversed(xutils.cache_get("%s@search_history" % user_name, [])))
-    if limit > 0:
-        return history[:limit]
-    return history
+    raw_history_list = NOTE_DAO.list_search_history(user_name)
+    history_list = []
+
+    for item in raw_history_list:
+        if item.key is None:
+            continue
+        if item.key not in history_list:
+            history_list.append(item.key)
+    return history_list
 
 class handler:
 
@@ -132,8 +126,6 @@ class handler:
             ctx.search_note = False
             ctx.search_tool = False
 
-        xutils.trace("SearchKey", key)
-
         # 阻断性的搜索，比如特定语法的
         xmanager.fire("search.before", ctx)
         if ctx.stop:
@@ -158,10 +150,7 @@ class handler:
                 except Exception as e:
                     xutils.print_exc()
         cost_time = int((time.time() - start_time) * 1000)
-        xutils.trace("SearchTime",  key, cost_time)
-
-        xconfig.search_history.add(key, cost_time)
-        log_search_history(user_name, key)
+        log_search_history(user_name, key, category, cost_time)
 
         if ctx.stop:
             return ctx.dicts + ctx.tools + files

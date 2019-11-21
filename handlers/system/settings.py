@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/10/23 01:03:05
+# @modified 2019/11/21 01:12:52
 import web
 import time
 import os
@@ -263,7 +263,7 @@ def on_reload(ctx = None):
     xconfig.USER_CSS = xutils.readfile(path)
 
     # 暂时取消多主题
-    xconfig.THEME = "left"
+    # xconfig.THEME = "left"
 
 xurls = (
     r"/system/settings", SettingsHandler,

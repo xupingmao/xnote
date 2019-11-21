@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/11/14 01:12:36
+# @modified 2019/11/21 14:13:10
 
 """资料的DAO操作集合
 
@@ -765,6 +765,15 @@ def save_comment(comment):
 def delete_comment(comment_id):
     dbutil.delete(comment_id)
 
+def add_search_history(user, search_key, category = "default", cost_time = 0):
+    key = "search_history:%s:%s" % (user, dbutil.timeseq())
+    dbutil.put(key, Storage(key = search_key, category = category, cost_time = cost_time))
+
+def list_search_history(user, limit = 1000, orderby = "time_desc"):
+    if user is None or user == "":
+        return []
+    return dbutil.prefix_list("search_history:%s" % user, reverse = True, limit = limit)
+
 # write functions
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
@@ -809,9 +818,12 @@ xutils.register_func("note.count_by_type", count_by_type)
 xutils.register_func("note.find_prev_note", find_prev_note)
 xutils.register_func("note.find_next_note", find_next_note)
 xutils.register_func("note.update_priority", update_priority)
+
 xutils.register_func("note.add_history", add_history)
 xutils.register_func("note.list_history", list_history)
 xutils.register_func("note.get_history", get_history)
+xutils.register_func("note.add_search_history", add_search_history)
+xutils.register_func("note.list_search_history", list_search_history)
 
 # comments
 xutils.register_func("note.list_comments", list_comments)

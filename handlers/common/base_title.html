@@ -1,8 +1,8 @@
 {% init right_link = None %}
 {% init back_link = None %}
-<div class="grid-title">
+<div class="card">
     <!-- <a href="/system/index" class="link">系统</a> › -->
-    {{title}}
+    <h3 class="card-title">{{title}}</a>
     {% if right_link is not None %}
         <a class="float-right link" href="{{right_link.get('link')}}">{{right_link.get('name')}}</a>
     {% end %}

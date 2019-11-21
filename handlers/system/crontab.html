@@ -7,49 +7,48 @@
 </div> -->
 
 <div class="col-md-12 grid-card">
-
-<h3 class="card-title">
-    <span>定时任务</span>
-    <div class="float-right">
-        <input class="dialog-btn" type="button" value="新增任务" dialog-url="/system/crontab/edit" />
-    </div>
+    <h3 class="card-title">
+        <span>定时任务</span>
+        <div class="float-right">
+            <input class="dialog-btn" type="button" value="新增任务" dialog-url="/system/crontab/edit" />
+        </div>
+    </h3>
 </div>
-</h3>
 
-<table class="table col-md-12">
-    <tr>
-        <th>编号</th>
-        <th>任务</th>
-        <th>时间</th>
-        <th>操作</th>
-    </tr>
-    {% set index = -1 %}
-    {% for index, task in enumerate(task_list) %}
-    {% set name = task.url %}
-    <tr class="">
-        <td class="row-no">{{index+1}}</td>
-        <td>
-            <div style="word-wrap: break-word;">
-                {% if task.protocol == "script" %}
-                    <a href="/code/edit?path={{task.script_name}}&type=script">{{task.script_name}}</a>
-                {% else %}
-                    {{task.display_name}}
+<div class="card">
+    <table class="table col-md-12">
+        <tr>
+            <th>编号</th>
+            <th>任务</th>
+            <th>时间</th>
+            <th>操作</th>
+        </tr>
+        {% set index = -1 %}
+        {% for index, task in enumerate(task_list) %}
+        {% set name = task.url %}
+        <tr class="">
+            <td class="row-no">{{index+1}}</td>
+            <td>
+                <div style="word-wrap: break-word;">
+                    {% if task.protocol == "script" %}
+                        <a href="/code/edit?path={{task.script_name}}&type=script">{{task.script_name}}</a>
+                    {% else %}
+                        {{task.display_name}}
+                    {% end %}
+                </div>
+            </td>
+            <td>{{ display_time_rule(task) }}</td>
+            <td style="width:110px;">
+                {% if task.id %}
+                <input class="dialog-btn" type="button" value="编辑" 
+                    dialog-url="/system/crontab/edit?id={{task.id}}" 
+                    href="/system/crontab/edit?id={{task.id}}" />
+                <input type="button" class="link-btn btn-danger" value="删除" href="/system/crontab/remove?id={{task.id}}" confirm-message="确认删除 {{task.display_name}} ?">
                 {% end %}
-            </div>
-        </td>
-        <td>{{ display_time_rule(task) }}</td>
-        <td style="width:110px;">
-            {% if task.id %}
-            <input class="dialog-btn" type="button" value="编辑" 
-                dialog-url="/system/crontab/edit?id={{task.id}}" 
-                href="/system/crontab/edit?id={{task.id}}" />
-            <input type="button" class="link-btn btn-danger" value="删除" href="/system/crontab/remove?id={{task.id}}" confirm-message="确认删除 {{task.display_name}} ?">
-            {% end %}
-        </td>
-    </tr>
-    {% end %}
-</table>
-
+            </td>
+        </tr>
+        {% end %}
+    </table>
 </div>
 
 

@@ -26,7 +26,7 @@ LAST_TIME_SEQ = -1
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/11/14 01:17:00
+# @modified 2019/11/21 14:15:17
 ###########################################################
 
 def search_escape(text):
@@ -445,14 +445,15 @@ def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = Fa
     """
     check_leveldb()
 
+    if prefix[-1] != ':':
+        prefix += ':'
     origin_prefix = prefix
+    prefix   = prefix.encode("utf-8")
 
     if reverse:
         # 时序表的主键为 表名:用户名:时间序列 时间序列长度为20
-        # TODO 优化逆向查询
-        prefix += ":9"
-
-    prefix   = prefix.encode("utf-8")
+        prefix += b'\xff'
+    
     # print("prefix: %s, origin_prefix: %s, reverse: %s" % (prefix, origin_prefix, reverse))
     if reverse:
         iterator = _leveldb.RangeIter(None, prefix, include_value = True, reverse = reverse)

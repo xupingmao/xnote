@@ -27,7 +27,7 @@
         <tr class="">
             <td class="key">{{T("当前用户")}}</td>
             <td>
-                {{_user_name}} <a href="/logout">退出登录</a>
+                {{_user_name}} <a href="/logout">退出</a>
             </td>
         </tr>
 
@@ -48,9 +48,16 @@
         </tr>
 
         <tr class="user-visible">
-            <td class="key">扩展功能</td>
+            <td class="key">功能列表</td>
             <td>
-                <a href="/system/index">功能列表</a>
+                <a href="/system/index">查看</a>
+            </td>
+        </tr>
+
+        <tr class="admin-visible">
+            <td class="key">文件管理</td>
+            <td>
+                <a href="/fs_list">进入</a>
             </td>
         </tr>
 
@@ -58,10 +65,8 @@
         <tr class="admin-visible">
             <td class="key">任务管理</td>
             <td>
-                <a href="/system/thread_info">系统线程({{thread_cnt}})</a> |
                 <a href="/system/crontab">定时任务</a> |
-                <a href="/system/event">事件任务</a> |
-                <a href="/system/reload">系统刷新</a>
+                <a href="/system/event">系统事件</a>
             </td>
         </tr>
 

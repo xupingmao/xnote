@@ -2,7 +2,7 @@
  * 侧边栏主题样式
  * @author xupingmao
  * @since 2019/06/18
- * @modified 2019/11/13 00:05:19
+ * @modified 2019/11/21 12:44:13
  */
 
 body {
@@ -36,7 +36,7 @@ body {
 }
 
 .main-content {
-    /*padding-right: 220px;*/
+    padding: 10px;
 }
 
 .nav-left-search {
@@ -64,7 +64,9 @@ body {
     position: absolute;
     display: block;
     width: 200px;
-    background: #1c2229; 
+    /*background: #1c2229; */
+    border-right: 1px solid #ccc;
+    background: #eee;
     height:100%; 
     float: left;
     top: 0px;
@@ -94,11 +96,10 @@ body {
     overflow: hidden; 
     padding-left: 0px; 
     line-height: 30px; 
-    color: #ABB1B7; 
     transition: all .3s; 
     position: relative; 
     text-decoration: none; 
-    font-size: 16px; 
+    /*font-size: 16px; */
     padding-left: 15px;
 }
 
@@ -143,8 +144,10 @@ body {
 }
 
 .navMenu>li>a.active, .navMenu>li>a:hover { 
-    color: #FFF; 
-    background: #666; 
+    /*color: #FFF; */
+    /*background: #666; */
+    text-decoration: underline;
+    background-color: #ddd;
 }
 
 .navMenu>li>ul.sub-menu, .navMenu>li>ul.sub-menu>li>ul.sub-menu { 

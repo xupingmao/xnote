@@ -142,7 +142,7 @@
 
         <!-- 其他选项 -->
         <input type="button" class="btn advanced-opt mobile-hidden" value="本地浏览" id="openDirectory"/>
-        <input type="button" class="link-btn mobile-hidden" href="/fs_recent" value="{{ T('最近文件') }}"/>
+        <input type="button" class="link-btn mobile-hidden" href="/code/search?path={{path}}&recursive=on" value="高级搜索"/>
         <input type="button" data-path="{{path}}" onclick="openFileOption(this)" value="更多"/>
     </div>
 </div>
@@ -414,7 +414,7 @@ $(function () {
         var toggle = parseInt($(this).attr("toggle") || 0);
         if (toggle % 2 === 0) {        
             $("input[type=checkbox]").prop("checked", true);
-            $(this).val("全不选");
+            $(this).val("反选");
         } 
 
         if (toggle % 2 === 1) {        

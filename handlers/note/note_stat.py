@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2019/11/11 21:09:36
+# @modified 2019/11/21 14:34:06
 import xauth
 import xutils
 from xutils import dbutil
@@ -14,20 +14,23 @@ HTML = """
     .admin-stat { margin-top: 10px; }
 </style>
 
-<table class="table">
-    <tr>
-        <th class="key">项目</th>
-        <th>数量</th>
-    </tr>
-    {% for key, value in stat_list %}
+<div class="card">
+    <table class="table">
         <tr>
-            <td>{{key}}</td>
-            <td>{{value}}</td>
+            <th class="key">项目</th>
+            <th>数量</th>
         </tr>
-    {% end %}
-</table>
+        {% for key, value in stat_list %}
+            <tr>
+                <td>{{key}}</td>
+                <td>{{value}}</td>
+            </tr>
+        {% end %}
+    </table>
+</div>
 
 {% if _is_admin %}
+<div class="card">
     <h3 class="card-title admin-stat">全局统计</h3>
     <table class="table">
         <tr>
@@ -41,6 +44,7 @@ HTML = """
             </tr>
         {% end %}
     </table>
+</div>
 {% end %}
 """
 
@@ -58,6 +62,7 @@ class StatHandler(BasePlugin):
         stat_list.append(["我的笔记", dbutil.count_table("note_tiny:%s" % user_name)])
         stat_list.append(["笔记本",   xutils.call("note.count_by_type", user_name, "group")])
         stat_list.append(["备忘总数", dbutil.count_table("message:%s" % user_name)])
+        stat_list.append(["搜索记录", dbutil.count_table("search_history:%s" % user_name)])
         if xauth.is_admin():
             admin_stat_list.append(["note_full", dbutil.count_table("note_full")])
             admin_stat_list.append(["note_tiny", dbutil.count_table("note_tiny")])
@@ -68,6 +73,7 @@ class StatHandler(BasePlugin):
             admin_stat_list.append(["message",  dbutil.count_table("message")])
             admin_stat_list.append(["schedule", dbutil.count_table("schedule")])
             admin_stat_list.append(["user", dbutil.count_table("user")])
+            admin_stat_list.append(["search_history", dbutil.count_table("search_history")])
 
         self.writetemplate(HTML, stat_list = stat_list, admin_stat_list = admin_stat_list)
 
