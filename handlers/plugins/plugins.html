@@ -3,7 +3,24 @@
 {% block body %}
 
 {% if _is_admin %}
-    <div class="card">
+    <div class="transparent-card hide">
+        <a class="btn" href="/plugins_new">新增</a>
+        <a class="btn" href="/fs_link/scripts/plugins">管理</a>
+        <a class="btn" href="/fs_api/download/plugins">下载</a>
+        <a class="btn" href="/plugins_list_old">旧版工具箱</a>
+    </div>
+
+    <div class="transparent-card">
+        <a class="btn" href="/plugins_new">新增</a>
+        <a class="btn" href="/fs_link/scripts/plugins">管理</a>
+        <a class="btn" href="/fs_api/download/plugins">下载</a>
+        
+        <div class="float-right">
+            <a class="btn" href="/plugins_list_old">返回旧版</a>
+        </div>
+    </div>
+
+    <div class="card hide">
         <h3 class="card-title">操作</h3>
         <span class="tag-span"><a href="/plugins_new">新增</a></span>
         <span class="tag-span"><a href="/fs_link/scripts/plugins">管理</a></span>

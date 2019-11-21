@@ -2,7 +2,7 @@
  * 卡片主题的样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/11/21 01:10:59
+ * @modified 2019/11/21 15:24:12
  */
 
 body {
@@ -16,10 +16,9 @@ body {
 }
 
 .nav {
-    margin-bottom: 10px;
-    padding: 0px 5px;
+    padding: 0px;
     background-color: transparent;
-    /*border-bottom: 1px solid #ccc;*/
+    border: none;
 }
 
 .x-body {

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/11/21 14:13:10
+# @modified 2019/11/21 16:04:06
 
 """资料的DAO操作集合
 
@@ -124,6 +124,8 @@ def build_note_info(note):
             note.icon = "fa-table"
         elif note.type == "html":
             note.icon = "fa-file-word-o"
+        elif note.type == "gallery":
+            note.icon = "fa-photo"
         else:
             note.icon = "fa-file-text-o"
 
@@ -667,11 +669,11 @@ def list_removed(creator, offset, limit):
     sort_notes(notes)
     return notes
 
-def list_by_type(creator, type, offset, limit):
+def list_by_type(creator, type, offset, limit, orderby = "name"):
     def list_func(key, value):
         return value.type == type and value.creator == creator and value.is_deleted == 0
     notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
-    sort_notes(notes)
+    sort_notes(notes, orderby)
     return notes
 
 def count_by_type(creator, type):

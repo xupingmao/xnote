@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/11/08 01:38:03
+@modified 2019/11/21 16:07:10
 -->
 
 {% init files = [] %}
@@ -30,7 +30,7 @@
     {% end %}
 
     {% for item in files %}
-        <a class="dialog-link" href="{{item.url}}?dir_type={{dir_type}}&tags={{tags}}">
+        <a class="dialog-link" href="{{item.url}}">
             <div class="book-item">
                 {% if item.type == "group" %}
                     <i class="fa fa-folder orange"></i>

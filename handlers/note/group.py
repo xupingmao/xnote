@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/11/12 23:01:54
+# @modified 2019/11/21 16:12:05
 import math
 import time
 import web
@@ -97,6 +97,7 @@ class GroupListHandler:
 
         tools.append(NoteLink("提醒", "/note/notice", "fa-bell"))
         tools.append(NoteLink("相册", "/note/gallery", "fa-photo"))
+        tools.append(NoteLink("最近", "/note/timeline", "fa-history"))
         tools.append(NoteLink("更多", "/note/tools"))
         
         # 默认分组处理
@@ -123,16 +124,14 @@ class GroupListHandler:
 
 def load_note_tools():
     return [
-        SystemFolder("公共笔记", "/note/timeline?type=public"),
-        SystemFolder("最近更新", "/note/recent_edit"),
-        SystemFolder("最近创建", "/note/recent_created"),
-        SystemFolder("最近浏览", "/note/recent_viewed"),
+        SystemFolder("公共笔记", "/note/public"),
+        NoteLink("最近", "/note/timeline", "history"),
         NoteLink("标签", "/note/taglist", "fa-tags"),
         NoteLink("日历", "/message/calendar", "fa-calendar"),
         NoteLink("Markdown", "/note/md", "fa-file-text"),
         NoteLink("相册", "/note/gallery", "fa-image"),
         NoteLink("表格", "/note/table", "fa-table"),
-        NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
+        # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
         NoteLink("富文本", "/note/html", "fa-file-word-o"),
         NoteLink("回收站", "/note/removed", "fa-trash"),
         NoteLink("时光轴", "/note/tools/timeline", "fa-cube"),
@@ -224,6 +223,7 @@ class BaseListHandler:
 
     note_type = "gallery"
     title     = "相册"
+    orderby   = "ctime_desc"
 
     @xauth.login_required()
     def GET(self):
@@ -234,7 +234,7 @@ class BaseListHandler:
         offset = (page-1)*limit
 
         amount = NOTE_DAO.count_by_type(user_name, self.note_type)
-        files  = NOTE_DAO.list_by_type(user_name, self.note_type, offset, limit)
+        files  = NOTE_DAO.list_by_type(user_name, self.note_type, offset, limit, self.orderby)
 
         # 上级菜单
         parent = PathNode(TYPES_NAME, "/note/types")
@@ -253,6 +253,7 @@ class GalleryListHandler(BaseListHandler):
     def __init__(self):
         self.note_type = "gallery"
         self.title = "相册"
+        self.orderby = "ctime_desc"
 
 class TableListHandler(BaseListHandler):
 

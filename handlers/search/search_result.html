@@ -2,13 +2,14 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2019/11/21 01:12:34
+@modified 2019/11/21 22:51:18
 -->
 
 {% block body %}
 
 {% init page_max = 0 %}
 {% init recent = [] %}
+{% init tools = [] %}
 {% init show_path = False %}
 
 {% include common/mod_search.html %}
@@ -36,6 +37,16 @@
 {% end %}
 
 <div class="col-md-12 result-list">
+    
+    {% if len(tools) > 0 %}
+        <div class="card">
+            <h3 class="card-title">脚本</h3>
+            {% for tool in tools %}
+                <a class="tag-span" href="{{tool.url}}">{{tool.name}}</a>
+            {% end %}
+        </div>
+    {% end %}
+
     {% for i, file in enumerate(files) %}
     <div class="note"> 
         <div class="note-body">

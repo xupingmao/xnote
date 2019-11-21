@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/11/21 14:24:09
+# @modified 2019/11/21 14:52:14
 
 import re
 import os
@@ -94,7 +94,7 @@ def list_search_history(user_name, limit = -1):
 
 class handler:
 
-    def do_search(self, key, offset, limit):
+    def do_search(self, page_ctx, key, offset, limit):
         global _rules
 
         category = xutils.get_argument("category", "")
@@ -159,6 +159,8 @@ class handler:
         xmanager.fire("search.slow", ctx)
         xmanager.fire("search.after", ctx)
 
+        page_ctx.tools = []
+
         return ctx.dicts + ctx.tools + files
 
     def GET(self, path_key = None):
@@ -184,10 +186,12 @@ class handler:
                 recent = list_search_history(user_name),
                 html_title = "Search",
                 category = category, 
+                tools    = [],
                 files    = [], 
                 count    = 0)
         key   = key.strip()
-        files = self.do_search(key, offset, pagesize)
+        ctx   = Storage()
+        files = self.do_search(ctx, key, offset, pagesize)
         count = len(files)
         files = files[offset:offset+limit]
         fill_note_info(files)
@@ -199,7 +203,8 @@ class handler:
             files    = files, 
             title    = title,
             page_max = int(math.ceil(count/pagesize)),
-            page_url = page_url)
+            page_url = page_url,
+            **ctx)
 
 rules_loaded = False
 def load_rules():
