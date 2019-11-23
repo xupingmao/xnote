@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/11/12 22:52:58
+# @modified 2019/11/23 16:11:26
 import profile
 import math
 import re
@@ -188,6 +188,9 @@ class ViewHandler:
             if op == "edit":
                 show_recommend = False
                 template_name = "note/editor/markdown_edit.html"
+        elif file.type == "list":
+            kw.show_aside = False
+            show_pagination = False
         else:
             # post/html 等其他类型
             handle_note_content(file)
@@ -210,7 +213,7 @@ class ViewHandler:
             show_menu = False
             show_search = False
 
-        kw.show_menu  = show_menu
+        kw.show_menu   = show_menu
         kw.show_search = show_search
 
         # 如果是页面，需要查出上级目录列表
@@ -373,7 +376,13 @@ class NoticeHandler:
     @xauth.login_required()
     def GET(self):
         # 刷新提醒,上下文为空
+        user_name = xauth.current_name()
+        offset    = 0
+        limit     = 200
+        orderby   = "ctime_desc"
+
         xmanager.fire("notice.update")
+        # files  = NOTE_DAO.list_by_type(user_name, "list", offset, limit, orderby)
         return xtemplate.render("note/notice.html")
 
 class QueryHandler:

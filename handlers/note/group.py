@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/11/21 16:12:05
+# @modified 2019/11/23 16:35:36
 import math
 import time
 import web
@@ -127,9 +127,9 @@ def load_note_tools():
         SystemFolder("公共笔记", "/note/public"),
         NoteLink("最近", "/note/timeline", "history"),
         NoteLink("标签", "/note/taglist", "fa-tags"),
-        NoteLink("日历", "/message/calendar", "fa-calendar"),
         NoteLink("Markdown", "/note/md", "fa-file-text"),
         NoteLink("相册", "/note/gallery", "fa-image"),
+        NoteLink("清单", "/note/list", "fa-list"),
         NoteLink("表格", "/note/table", "fa-table"),
         # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
         NoteLink("富文本", "/note/html", "fa-file-word-o"),
@@ -374,7 +374,7 @@ class PublicGroupHandler:
 
     def GET(self):
         return xtemplate.render("note/tools/timeline.html", 
-            title = T("公开笔记"), 
+            title = T("公共笔记"), 
             type = "public")
 
         # 老的分页逻辑
@@ -464,8 +464,13 @@ class ManagementHandler:
         parent_id = xutils.get_argument("parent_id", 0)
         user_name = xauth.current_name()
         
+        parent_note = NOTE_DAO.get_by_id(parent_id)
+        if parent_note != None:
+            parent_name = parent_note.name
+        else:
+            parent_name = "上级目录"
         notes = NOTE_DAO.list_note(user_name, parent_id, 0, 200)
-        parent = Storage(url = "/note/%s" % parent_id, name = "上级目录")
+        parent = Storage(url = "/note/%s" % parent_id, name = parent_name)
         current = Storage(url = "#", name = "整理")
         return xtemplate.render("search/search_result.html", 
             files = notes,

@@ -341,6 +341,28 @@ $(function () {
     init();
 });
 
+window.ContentDialog = {
+  open: function (title, content) {
+    var width = $(".root").width() - 40;
+    var area;
+
+    if (isMobile()) {
+      area = ['100%', '100%'];
+    } else {
+      area = [width + 'px', '80%'];
+    }
+
+    layer.open({
+      type: 1,
+      shadeClose: true,
+      title: title,
+      area: area,
+      content: content,
+      scrollbar: false
+    });
+  }
+}
+
 /**
  * xnote的公有方法
  */

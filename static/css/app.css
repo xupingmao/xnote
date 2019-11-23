@@ -2,7 +2,7 @@
  * 应用相关的CSS样式
  * @author xupingmao
  * @since 2019/06/16
- * @modified 2019/11/19 01:05:38
+ * @modified 2019/11/23 15:51:11
 */
 
 .recent-note-date {
@@ -74,6 +74,16 @@
 .comment-user {
     float: left;
     font-weight: bold;
+}
+
+.comment-foot {
+    width: 100%;
+    font-size: 10px;
+}
+
+.comment-foot a {
+    font-size: 10px;
+    color: #666
 }
 
 .comment-time {

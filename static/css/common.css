@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/11/21 15:28:46
+ * @modified 2019/11/23 17:31:07
  */
 
 * {
@@ -59,6 +59,7 @@ pre {
     border: 1px solid #ddd;
     word-wrap: break-word;
     white-space: pre-wrap;
+    margin: 0px;
 }
 
 .marked-strong {
@@ -106,9 +107,11 @@ h1,h2,h3 {
 .col-md-offset-2{margin-left:16.666666666666664%;}
 .col-md-offset-1{margin-left:8.333333333333332%;}
 .col-md-offset-0{margin-left:0;}
-.top-offset-1{margin-top:1em;}
-.top-offset-2{margin-top:2em;}
+
+.top-offset-1{margin-top:5px;}
+.top-offset-2{margin-top:10px;}
 .bottom-offset-1{margin-bottom:5px;}
+
 .row{float: left;width: 100%;overflow: auto;}
 
 .pad10 {
@@ -444,6 +447,21 @@ table td {
     word-break: break-all;
 }
 
+.note-detail-head {
+    float: left;
+    width: 100%;
+    padding: 5px;
+    padding-bottom: 5px;
+    border: 1px solid #ccc;
+}
+
+.note-detail-foot {
+    float: left;
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+
 .note-last-visit-time {
     padding-left: 2px;
     padding-top: 2px;
@@ -544,6 +562,7 @@ li.menu-item:hover {
 .x-body {
     width: 100%;
     margin: 0 auto;
+    min-height: 400px;
     /*padding: 0px 10%;*/
 }
 
@@ -1434,6 +1453,10 @@ li.menu-item:hover {
 
 .mobile-only {
     display: none;
+}
+
+.no-outline {
+    outline: none;
 }
 
 /** 移动端样式放在最后 **/

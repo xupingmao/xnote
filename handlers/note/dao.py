@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/11/21 16:04:06
+# @modified 2019/11/23 17:00:32
 
 """资料的DAO操作集合
 
@@ -126,6 +126,8 @@ def build_note_info(note):
             note.icon = "fa-file-word-o"
         elif note.type == "gallery":
             note.icon = "fa-photo"
+        elif note.type == "list":
+            note.icon = "fa-list"
         else:
             note.icon = "fa-file-text-o"
 
@@ -329,6 +331,18 @@ def update_note(where, **kw):
         return 1
     return 0
 
+def update0(note):
+    """更新基本信息，比如name、mtime、content、items、priority等,不处理parent_id更新"""
+    current = get_by_id(note.id)
+    if current is None:
+        return
+    # 更新各种字段
+    current_time = xutils.format_datetime()
+    note.version = current.version + 1
+    note.mtime   = current_time
+    note.atime   = current_time
+    kv_put_note(note.id, note)
+
 def get_by_name(name, db = None):
     def find_func(key, value):
         if value.is_deleted:
@@ -425,7 +439,7 @@ def list_group(creator = None, orderby = "name", skip_archived = False):
             return False
         return value.type == "group" and value.creator == creator and value.is_deleted == 0
 
-    notes = dbutil.prefix_list("note_tiny:", list_group_func)
+    notes = dbutil.prefix_list("notebook:", list_group_func)
     sort_notes(notes, orderby)
     return notes
 
@@ -761,11 +775,21 @@ def list_comments(note_id):
     return comments
 
 def save_comment(comment):
-    key = "note_comment:%s:%s" % (comment["note_id"], dbutil.timeseq())
+    timeseq = dbutil.timeseq()
+
+    comment["timeseq"] = timeseq
+    key = "note_comment:%s:%s" % (comment["note_id"], timeseq)
     dbutil.put(key, comment)
+
+    key2 = "comment_index:%s:%s" % (comment["user"], timeseq)
+    comment_index = comment.copy()
+    dbutil.put(key2, comment_index)
 
 def delete_comment(comment_id):
     dbutil.delete(comment_id)
+
+def get_comment(comment_id):
+    return dbutil.get(comment_id)
 
 def add_search_history(user, search_key, category = "default", cost_time = 0):
     key = "search_history:%s:%s" % (user, dbutil.timeseq())
@@ -779,6 +803,7 @@ def list_search_history(user, limit = 1000, orderby = "time_desc"):
 # write functions
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
+xutils.register_func("note.update0", update0)
 xutils.register_func("note.visit",  visit_note)
 xutils.register_func("note.count",  count_note)
 xutils.register_func("note.delete", delete_note)
@@ -829,6 +854,7 @@ xutils.register_func("note.list_search_history", list_search_history)
 
 # comments
 xutils.register_func("note.list_comments", list_comments)
+xutils.register_func("note.get_comment",  get_comment)
 xutils.register_func("note.save_comment", save_comment)
 xutils.register_func("note.delete_comment", delete_comment)
 

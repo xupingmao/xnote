@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/11/21 16:07:10
+@modified 2019/11/23 17:44:54
 -->
 
 {% init files = [] %}
@@ -14,7 +14,7 @@
 {% init tags = "" %}
 {% init back_url = "/" %}
 
-{% include "note/view_header.html" %}
+{% include note/template/view_header.html %}
 <div class="grid-row note-list">
     {% if _has_login %}
         <a class="dialog-link" href="{{back_url}}">
@@ -34,22 +34,8 @@
             <div class="book-item">
                 {% if item.type == "group" %}
                     <i class="fa fa-folder orange"></i>
-                {% elif item.type == "csv" %}
-                    <i class="fa fa-table black"></i>
-                {% elif item.type == "gallery" %}
-                    <i class="fa fa-image black"></i>
-                {% elif item.type == "trash" %}
-                    <i class="fa fa-trash black"></i>
-                {% elif item.type == "gear" %}
-                    <i class="fa fa-gear black"></i>
-                {% elif item.type == "cube" %}
-                    <i class="fa fa-cube black"></i>
-                {% elif item.type == "system" %}
-                    <i class="icon-folder-system"></i>
-                {% elif item.type == "link" %}
-                    <i class="fa fa-{{item.icon}} {{item.icon}} black"></i>
                 {% else %}
-                    <i class="fa fa-file-text-o black"></i>
+                    <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
                 {% end %}
 
                 {% if item.priority>0 %}

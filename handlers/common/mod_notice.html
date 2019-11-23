@@ -1,6 +1,6 @@
 <!--
 @since 2018/06/20
-@modified 2019/11/02 13:40:45
+@modified 2019/11/23 13:34:31
 -->
 
 {% set notice_list1 = xconfig.get_notice_list('today',    _user_name) %}
@@ -9,7 +9,7 @@
 {% set msg_len = 15 %}
 
 <div class="col-md-12 card">
-    <h3 class="grid-title"><a href="/" class="link2">{{T("主页")}}</a>&nbsp;/&nbsp;今日提醒</h3>
+    <h3 class="grid-title">今日提醒</h3>
     <div class="grid-row" style="padding:5px;">
         {% for item in notice_list1 %}
             <div><a class="link" href="{{item.link}}">{{item.message}}</a></div>

@@ -17,9 +17,13 @@
 .jexcel td {
     word-break: break-all;
 }
+#myParent {
+    margin-top: 5px;
+    width: 100%;
+}
 </style>
 
-{% include "note/view_header.html" %}
+{% include note/template/view_header.html %}
 
 <textarea id="content" class="hide">{{file.content}}</textarea>
 <div id="myParent" class="row">

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2019/08/20 01:11:10
+# @modified 2019/11/23 16:22:20
 import xutils
 import xconfig
 import xmanager
@@ -100,6 +100,7 @@ def kv_list_message_page(user, status, offset, limit):
     def filter_func(key, value):
         if status is None:
             return value.user == user
+        value.id = key
         return value.user == user and value.status == status
     chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
     amount   = dbutil.prefix_count("message:%s" % user, filter_func)

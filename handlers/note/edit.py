@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/11/05 00:25:07
+# @modified 2019/11/23 17:49:18
 
 """笔记编辑相关处理"""
 import os
@@ -149,7 +149,7 @@ class AddHandler:
                 inserted_id = NOTE_DAO.create(note)
                 if format == "json":
                     return dict(code="success", id=inserted_id)
-                raise web.seeother("/note/{}".format(inserted_id))
+                raise web.seeother("/note/edit?id={}".format(inserted_id))
         except web.HTTPError as e1:
             xutils.print_exc()
             raise e1
@@ -413,6 +413,35 @@ class MoveHandler:
 
     def POST(self):
         return self.GET()
+
+class AppendAjaxHandler:
+
+    def GET(self):
+        return self.POST()
+
+    @xauth.login_required()
+    def POST(self):
+        user    = xauth.current_name()
+        note_id = xutils.get_argument("note_id")
+        content = xutils.get_argument("content")
+        version = xutils.get_argument("version", 1, type = int)
+        note = NOTE_DAO.get_by_id(note_id)
+
+        if note == None:
+            return dict(code = "404", message = "note not found")
+
+        if note.creator != user:
+            return dict(code = "403", message = "unauthorized")
+
+        if note.list_items is None:
+            note.list_items = []
+        note.list_items.append(content)
+        NOTE_DAO.update0(note)
+        xmanager.fire('note.updated', dict(id=note_id, 
+            name = note.name, 
+            mtime = dateutil.format_datetime(), 
+            content = content, version=version+1))
+        return dict(code = "success")
         
 
 xurls = (
@@ -422,6 +451,7 @@ xurls = (
     r"/note/update"      , UpdateHandler,
     r"/note/share"       , ShareHandler,
     r"/note/save"        , SaveAjaxHandler,
+    r"/note/append"      , AppendAjaxHandler,
     r"/note/share/cancel", UnshareHandler,
     r"/note/stick"       , StickHandler,
     r"/note/unstick"     , UnstickHandler,

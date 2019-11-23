@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/08/20 01:05:56
+# @modified 2019/11/23 16:23:00
 
 """短消息"""
 import time
@@ -18,6 +18,9 @@ from xutils import BaseRule, Storage, cacheutil, dbutil, textutil
 from xtemplate import T
 
 def process_message(message):
+    if message.content is None:
+        message.content = ""
+        return message
     message.html = xutils.mark_text(message.content)
     return message
 

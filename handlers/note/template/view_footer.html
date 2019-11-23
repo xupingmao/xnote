@@ -1,0 +1,19 @@
+{% init prev_note = None %}
+{% init next_note = None %}
+
+{% if file != None %}
+    <div class="card note-detail-foot">
+        <div class="row">{{file.creator}} 创建于 {{file.ctime}} 更新于 {{file.mtime}} </div>
+        {% if prev_note or next_note %}
+            {% if prev_note %}
+                <div class="col-md-6"><a href="/note/{{prev_note.id}}?is_iframe={{is_iframe}}">[上一篇]{{prev_note.name}}</a></div>
+            {% else %}
+                <div class="col-md-6">[上一篇]无</div>
+            {% end %}
+
+            {% if next_note %}
+                <div class="col-md-6"><a class="float-right" href="/note/{{next_note.id}}?is_iframe={{is_iframe}}">[下一篇]{{next_note.name}}</a></div>
+            {% end %}
+        {% end %}
+    </div>
+{% end %}

@@ -3,7 +3,7 @@
 
 <script type="text/javascript" src="/static/lib/wangEditor/wangEditor-3.1.1.min.js"></script>
 {% if op == "view" %}
-    {% include "note/view_header.html" %}
+    {% include note/template/view_header.html %}
     <div id="editor" class="row">
         {% raw file.data %}
     </div>

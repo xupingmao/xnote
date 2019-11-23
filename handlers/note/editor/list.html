@@ -1,4 +1,7 @@
-{% include note/view_header.html %}
+{% init show_tags = False %}
+{% set globals()["show_comment"] = False %}
+{% include note/template/view_header.html %}
 
-<textarea class="col-md-12"></textarea>
-<button>添加</button>
+{% set globals()["comment_class"] = "top-offset-1" %}
+{% set globals()["comment_btn_text"] = "提交" %}
+{% include note/template/comment.html %}

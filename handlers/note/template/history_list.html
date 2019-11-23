@@ -35,13 +35,8 @@ $(function () {
         var version = $(this).attr("data-version");
         var width   = $(".root").width() - 40;
         $.get("/note/history_view", {id: note_id, version: version}, function (resp) {
-            layer.open({
-                type:1, 
-                shadeClose: true,
-                title: "版本 - " + version,
-                area: [width + "px", '80%'],
-                content: $("<div>").append($("<textarea>").text(resp.data).width("100%").height("100%")).html()
-            });
+            var content = $("<div>").append($("<textarea>").text(resp.data).width("100%").height("100%")).html();
+            window.ContentDialog.open("版本 - " + version, content);
         }).fail(function (resp) {
             layer.alert("系统繁忙，请重试");
         });

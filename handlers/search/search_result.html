@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2019/11/21 22:51:18
+@modified 2019/11/23 16:27:04
 -->
 
 {% block body %}
@@ -75,12 +75,6 @@
             <div class="note-name">
                 {% if file.type == "group" %}
                     <i class="fa fa-folder orange"></i>
-                {% elif file.type == "csv" %}
-                    <i class="fa fa-table"></i>
-                {% elif file.type == "gallery" %}
-                    <i class="fa fa-image"></i>
-                {% elif file.type != None %}
-                    <i class="fa fa-file-text-o"></i>
                 {% else %}
                     <i class="fa {{file.icon}}"></i>
                 {% end %}

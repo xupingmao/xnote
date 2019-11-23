@@ -9,7 +9,8 @@
     md = "Markdown",
     gallery = "相册",
     html = "富文本",
-    csv = "表格"
+    csv = "表格",
+    list = "清单"
 ) %}
 
 {% if show_path_list %}
@@ -51,6 +52,8 @@
             </div>
         {% elif group_type == "gallery" %}
             <div class="float-right"><a class="btn" href="/note/add?type=gallery">创建相册</a></div>
+        {% elif group_type == "list" %}
+            <div class="float-right"><a class="btn" href="/note/add?type=list">创建清单</a></div>
         {% else %}
             {# 其他普通笔记 #}
             <div class="float-right">
@@ -92,7 +95,7 @@
 
 {# 笔记的概要信息 #}
 {% if item != None and item.type != "group" %}
-    <div class="col-md-12" style="border-bottom:1px solid #ccc"> 
+    <div class="note-detail-head"> 
         <span id="fileId" style="display:none;">{{file.id}}</span>    
         <div class="col-md-12 hide">
             {% if _has_login and  (_is_admin or _user_name == item.creator) %}
@@ -120,12 +123,10 @@
             {% end %}
         </div>
 
-        <div>{{file.creator}} 创建于 {{file.ctime}} 更新于 {{file.mtime}} </div>
-
         <div class="row">
-            <span>字数: {{len(item.content)}}</span>
-            <span>行数: {{item.content.count("\n")}}</span>
             <span>类型: <a href="/note/{{item.type}}">{{type_dict.get(item.type, item.type)}}</a></span>
+            <span>字数: {{len(file.content)}}</span>
+            <span>行数: {{file.content.count("\n")}}</span>
         </div>
 
         {% include note/view_tag.html %}
