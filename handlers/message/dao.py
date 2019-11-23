@@ -1,12 +1,17 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2019/11/23 16:22:20
+# @modified 2019/11/24 00:24:12
 import xutils
 import xconfig
 import xmanager
 import xtables
 from xutils import dbutil, cacheutil, textutil, Storage
+
+class MessageDO(Storage):
+
+    def __init__(self):
+        pass
 
 def create_message(**kw):
     if xconfig.DB_ENGINE == "sqlite":
@@ -21,28 +26,6 @@ def create_message(**kw):
 @xmanager.listen(["message.updated", "message.add", "message.remove"])
 def expire_message_cache(ctx):
     cacheutil.prefix_del("message.count")
-
-
-def rdb_search_message(user_name, key, offset, limit):
-    db   = xtables.get_message_table()
-    vars = dict(user= user_name)
-    kw = "user = $user"
-    start_time = time.time()
-    for item in key.split(" "):
-        if item == "":
-            continue
-        kw += " AND content LIKE " + fuzzy_item(item)
-    # when find numbers, the sql printed is not correct
-    # eg. LIKE '%1%' will be LIKE '%'
-    chatlist = list(db.select(where=kw, vars=vars, order="ctime DESC", limit=limit, offset=offset))
-    end_time = time.time()
-    cost_time = int((end_time-start_time)*1000)
-    xutils.trace("MessageSearch", key, cost_time)
-    if xconfig.search_history is not None:
-        xconfig.search_history.add(key, cost_time)
-
-    amount = db.count(where=kw, vars=vars)
-    return chatlist, amount
 
 def search_message(user_name, key, offset, limit):
     words = []
@@ -96,7 +79,7 @@ def rdb_list_message_page(user, status, offset, limit):
     return chatlist, amount
 
 @xutils.timeit(name = "kv.message.list", logfile = True, logargs = True)
-def kv_list_message_page(user, status, offset, limit):
+def list_message_page(user, status, offset, limit):
     def filter_func(key, value):
         if status is None:
             return value.user == user
@@ -106,17 +89,52 @@ def kv_list_message_page(user, status, offset, limit):
     amount   = dbutil.prefix_count("message:%s" % user, filter_func)
     return chatlist, amount
 
-def list_message_page(*args):
-    return db_call("list_message_page", *args)
-
 def list_file_page(user, offset, limit):
     def filter_func(key, value):
         if value.content is None:
             return False
         return value.content.find("file://") >= 0
     chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    # TODO 后续可以用message_stat加速
     amount   = dbutil.prefix_count("message:%s" % user, filter_func)
     return chatlist, amount
+
+def get_filter_by_tag_func(tag):
+    def filter_func(key, value):
+        if tag is None or tag == "all":
+            return True
+        if tag == "task":
+            return value.tag == "task" or value.status == 0 or value.status == 50
+        if tag == "done":
+            return value.tag == "done" or value.status == 100
+        return value.tag == tag
+    return filter_func
+
+def list_by_tag(user, tag, offset, limit):
+    filter_func = get_filter_by_tag_func(tag)
+    chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+    return chatlist, amount
+
+def count_by_tag(user, tag):
+    return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
+
+def get_message_stat(user):
+    value = dbutil.get("user_stat:%s:message" % user)
+    if value is None:
+        return Storage(task_count = 0, log_count = 0)
+    return value
+
+def refresh_message_stat(user):
+    task_count = count_by_tag(user, "task")
+    log_count  = count_by_tag(user, "log")
+    done_count = count_by_tag(user, "done")
+    stat       = get_message_stat(user)
+
+    stat.task_count = task_count
+    stat.log_count  = log_count
+    stat.done_count = done_count
+    dbutil.put("user_stat:%s:message" % user, stat)
 
 xutils.register_func("message.create", create_message)
 xutils.register_func("message.search", search_message)
@@ -125,4 +143,7 @@ xutils.register_func("message.count", count_message)
 xutils.register_func("message.find_by_id", get_message_by_id)
 xutils.register_func("message.list", list_message_page)
 xutils.register_func("message.list_file", list_file_page)
+xutils.register_func("message.list_by_tag", list_by_tag)
+xutils.register_func("message.get_message_stat", get_message_stat)
+xutils.register_func("message.refresh_message_stat", refresh_message_stat)
 

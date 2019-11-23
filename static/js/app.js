@@ -342,14 +342,18 @@ $(function () {
 });
 
 window.ContentDialog = {
-  open: function (title, content) {
+  open: function (title, content, size) {
     var width = $(".root").width() - 40;
     var area;
 
     if (isMobile()) {
       area = ['100%', '100%'];
     } else {
-      area = [width + 'px', '80%'];
+      if (size == "small") {
+        area = ['400px', '300px'];        
+      } else {
+        area = [width + 'px', '80%'];
+      }
     }
 
     layer.open({

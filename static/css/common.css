@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/11/23 17:31:07
+ * @modified 2019/11/23 18:05:54
  */
 
 * {
@@ -254,6 +254,7 @@ a:hover {
     font-size: 12px;
     line-height: 18px;
     border-radius: 3px;
+    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
 }
 
 /* 单选 */

@@ -5,10 +5,6 @@
 <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 
 <style type="text/css">
-    .chat-box {
-        /*background-color: #CCFF99;*/
-    }
-
     .chat-avatar {
         color: #2092d9;
     }
@@ -37,7 +33,6 @@
         border-radius: 5px;
         word-wrap: break-word;
         word-break: break-all;
-        /*background-color: #99CCFF;*/
         padding: 5px 0px;
     }
 
@@ -57,10 +52,6 @@
     }
 
     .input-box {
-        /*position: relative;*/
-        /*left: 0;*/
-        /*right: 0;*/
-        /*width: calc(100% - 5rem);*/
         width: 100%;
         outline: none;
     }
@@ -89,7 +80,7 @@
     {% include "message/header.html" %}
 
     <div class="message-input col-md-12 card">
-        <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" placeholder="快速记录灵感、备忘、任务等"></textarea>
+        <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" placeholder="快速记录任务、记录、想法等"></textarea>
         <input type="file" id="filePicker" class="hide" multiple/>
         <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
         <input type="button" name="" class="send-button btn" value="创建" @click="sendMessage()">
@@ -128,17 +119,14 @@
                     <div class="col-md-12">
                         <p class="chat-msg-option">
                             <span class="chat-msg-time">{{! message.ctime }}</span>
-                            <span class="inline-tag in-progress" v-if="message.status==0">待办</span>
-                            <a class="smallText" v-if="message.status!=0" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">待办</a>
 
-                            <span class="inline-tag suspended" v-if="message.status==50">挂起</span>
-                            <a class="smallText" v-if="message.status!=50" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateStatus($event, 50)">挂起</a>
-                            
-                            <span class="inline-tag finished" v-if="message.status==100">完成</span>
-                            <a class="smallText" v-if="message.status!=100" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
-                            
-                            <a class="smallText" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
-                           <!-- <a class="smallText" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" style="color: red;" @click="deleteMessage($event)">删除</a>  -->
+                            <a class="smallText" v-if="message.tag == 'task'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
+
+                            <a class="smallText" v-if="message.tag == 'done'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">重做</a>
+
+                            <a class="smallText red" v-bind:msg-id="message.id" href="javascript:void(0)" v-bind:msg-id="message.id" v-bind:msg-content="message.content" @click="deleteMessage($event)">删除</a>
+
+                            <a class="smallText hide" v-on:click="openMarkDialog(message)" href="javascript:void(0)">标记</a>
                         </p>
                     </div>
                 </div>
@@ -151,6 +139,11 @@
         <a v-if="page > 1" class="x-page-link" v-bind:href="page_prev_url">上一页</a>
         <a class="x-page-link x-page-active" href="#">{{!page}}</a>
         <a v-if="page < page_max" class="x-page-link" v-bind:href="page_next_url">下一页</a>
+    </div>
+
+    <div class="mark-dialog-tpl hide">
+        <a class="tag-span" href="javascript:markMessage($id, 'task')">任务</a>
+        <a class="tag-span" href="javascript:markMessage($id, '')">记录</a>
     </div>
 </div>
 
@@ -184,26 +177,6 @@
 
     function wrapMessage(message) {
         message.editable = false;
-        return message;
-        var content = message.content;
-        var reg = /file:\/\/([\S]+)\n*(.*)/gi;
-        var parts = reg.exec(content);
-        if (parts) {
-            var path = parts[1];
-            var text = parts[2];
-            var lowerPath = path.toLowerCase();
-            if (lowerPath.endsWith(".jpg") || lowerPath.endsWith(".jpeg") || 
-                    lowerPath.endsWith(".png") || lowerPath.endsWith(".gif")) {
-                message.imgSrc = path;
-            } else {
-                message.link = path;
-            }
-            message.html = text;
-        } else {
-            var html = content.replace(/(https*:\/\/[^ \t\r\n]+)/gi, '<a href="$1">$1</a>');
-            html = html.replace(/\n/gi, "<br>");
-            message.html = html;
-        }
         return message;
     }
 
@@ -266,6 +239,12 @@
                             self.messageList = messageList;
                             self.amount = data.amount;
                         }
+                });
+
+                $.get("/message/stat", function (resp) {
+                    $(".task-count").text(resp.task_count);
+                    $(".done-count").text(resp.done_count);
+                    $(".log-count").text(resp.log_count);
                 })
             },
 
@@ -274,10 +253,10 @@
                     return;
                 }
                 var self = this;
-                $.post("/message/add", 
+                $.post("/message/save", 
                     {
                         content:self.input, 
-                        status: getUrlParam("status")
+                        tag: getUrlParam("tag")
                     },
                     function (respText) {
                         var data = respText;
@@ -301,7 +280,7 @@
                 var content = $(el).attr("msg-content");
                 var check = confirm("确认删除 '%s' ?".format(content));
                 if (check) {                
-                    $.post("/message/remove", {id: id}, function (resp) {
+                    $.post("/message/delete", {id: id}, function (resp) {
                         if (resp.code == "success") {
                             app.refreshMessage();
                         } else {
@@ -351,6 +330,20 @@
                     console.log(resp);
                     app.refreshMessage();
                 });
+            },
+
+            markMessage: function (id, tag) {
+                $.post("/message/mark", {id: id, tag: tag}, function (resp) {
+                    app.refreshMessage();
+                }).fail(function (err) {
+                    alert("标记失败:" + err);
+                })
+            },
+
+            openMarkDialog: function (message) {
+                var tpl = $(".mark-dialog-tpl").html();
+                var html = tpl.replace("$id", message.id);
+                ContentDialog.open("标记为", html, "small");
             }
         }
     });

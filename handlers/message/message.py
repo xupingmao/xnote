@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/23 16:23:00
+# @modified 2019/11/24 00:28:46
 
 """短消息"""
 import time
@@ -17,7 +17,11 @@ import xtemplate
 from xutils import BaseRule, Storage, cacheutil, dbutil, textutil
 from xtemplate import T
 
+MSG_DAO = xutils.DAO("message")
+
 def process_message(message):
+    if message.status == 0:
+        message.tag = "task"
     if message.content is None:
         message.content = ""
         return message
@@ -42,80 +46,69 @@ class ListHandler:
     def GET(self):
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         page   = xutils.get_argument("page", 1, type=int)
-        status = xutils.get_argument("status")
         key    = xutils.get_argument("key")
-        tag    = xutils.get_argument("tag")
+        tag    = xutils.get_argument("tag", "task")
         offset = (page-1) * pagesize
         user_name = xauth.get_current_name()
-        # 未完成任务的分页
-        undone_pagesize = 1000
-        status_num = None
 
-        kw = "1=1"
-        if status == "created":
-            status_num = 0
-            kw = "status = 0"
-            pagesize = undone_pagesize
-        if status == "done":
-            status_num = 100
-            kw = "status = 100"
-        if status == "suspended":
-            status_num = 50
-            kw = "status = 50"
-            pagesize = undone_pagesize
+        if tag == "task":
+            pagesize = 1000
 
         if tag == "file":
-            chatlist, amount = xutils.call("message.list_file", user_name, offset, pagesize)
+            # 文件
+            chatlist, amount = MSG_DAO.list_file(user_name, offset, pagesize)
         elif key != "" and key != None:
-            chatlist, amount = xutils.call("message.search", user_name, key, offset, pagesize)
+            # 搜索
+            chatlist, amount = MSG_DAO.search(user_name, key, offset, pagesize)
         else:
-            chatlist, amount = xutils.call("message.list", user_name, status_num, offset, pagesize)
+            # 所有的
+            chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
             
         chatlist.reverse()
         page_max = math.ceil(amount / pagesize)
         chatlist = list(map(process_message, chatlist))
+
         return dict(code="success", message="", 
             pagesize = pagesize,
-            data=chatlist, 
-            amount=amount, 
-            page_max=page_max, 
-            current_user=xauth.get_current_name())
+            data = chatlist, 
+            amount = amount, 
+            page_max = page_max, 
+            current_user = xauth.get_current_name())
 
 def update_message_status(id, status):
-    if xconfig.DB_ENGINE == "sqlite":
-        db = xtables.get_message_table()
-        msg = db.select_first(where=dict(id=id))
-        if msg is None:
-            return dict(code="fail", message="data not exists")
-        if msg.user != xauth.get_current_name():
-            return dict(code="fail", message="no permission")
-        db.update(status=status, mtime=xutils.format_datetime(), where=dict(id=id))
-        xmanager.fire("message.updated", Storage(id=id, status=status, user = msg.user, content=msg.content))
-    else:
-        user_name = xauth.current_name()
-        data = dbutil.get(id)
-        if data and data.user == user_name:
-            data.status = status
-            data.mtime = xutils.format_datetime()
-            dbutil.put(id, data)
-            xmanager.fire("message.updated", Storage(id=id, user=user_name, status = status, content = data.content))
+    user_name = xauth.current_name()
+    data = dbutil.get(id)
+    if data and data.user == user_name:
+        data.status = status
+        data.mtime = xutils.format_datetime()
+        dbutil.put(id, data)
+        MSG_DAO.refresh_message_stat(user_name)
+        xmanager.fire("message.updated", Storage(id=id, user=user_name, status = status, content = data.content))
 
     return dict(code="success")
 
 def update_message_content(id, user_name, content):
-    if xconfig.DB_ENGINE == "sqlite":
-        db = xtables.get_message_table()
-        db.update(content = content,
-            mtime = xutils.format_datetime(), 
-            where = dict(id=id, user=user_name))
+    data = dbutil.get(id)
+    if data and data.user == user_name:
+        data.content = content
+        data.mtime = xutils.format_datetime()
+        dbutil.put(id, data)
         xmanager.fire("message.update", dict(id=id, user=user_name, content=content))
-    else:
-        data = dbutil.get(id)
-        if data and data.user == user_name:
-            data.content = content
-            data.mtime = xutils.format_datetime()
-            dbutil.put(id, data)
-            xmanager.fire("message.update", dict(id=id, user=user_name, content=content))
+
+def update_message_tag(id, tag):
+    user_name = xauth.current_name()
+    data = dbutil.get(id)
+    if data and data.user == user_name:
+        # 修复status数据，全部采用tag
+        if 'status' in data:
+            del data['status']
+        data.tag   = tag
+        data.mtime = xutils.format_datetime()
+        dbutil.put(id, data)
+        MSG_DAO.refresh_message_stat(user_name)
+        xmanager.fire("message.updated", Storage(id=id, user=user_name, tag = tag, content = data.content))
+
+    return dict(code="success")
 
 class FinishMessage:
 
@@ -123,7 +116,7 @@ class FinishMessage:
         id = xutils.get_argument("id")
         if id == "":
             return
-        return update_message_status(id, 100)
+        return update_message_tag(id, "done")
 
 class OpenMessage:
 
@@ -131,7 +124,7 @@ class OpenMessage:
         id = xutils.get_argument("id")
         if id == "":
             return
-        return update_message_status(id, 0)
+        return update_message_tag(id, "task")
         
 class UpdateStatusHandler:
 
@@ -140,7 +133,7 @@ class UpdateStatusHandler:
         status = xutils.get_argument("status", type=int)
         return update_message_status(id, status)
 
-class RemoveHandler:
+class DeleteHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -154,7 +147,8 @@ class RemoveHandler:
         if msg.user != xauth.current_name():
             return dict(code="fail", message="no permission")
 
-        xutils.call("message.delete", id)
+        MSG_DAO.delete(id)
+        MSG_DAO.refresh_message_stat(msg.user)
         return dict(code="success")
 
 
@@ -180,9 +174,10 @@ class SaveHandler:
     def POST(self):
         id        = xutils.get_argument("id")
         content   = xutils.get_argument("content")
-        status    = xutils.get_argument("status")
+        tag       = xutils.get_argument("tag")
         location  = xutils.get_argument("location", "")
         user_name = xauth.get_current_name()
+
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
         ctx = Storage(id = id, content = content, user = user_name, type = "")
         for rule in rules:
@@ -192,13 +187,15 @@ class SaveHandler:
 
         if id == "" or id is None:
             ctime = xutils.get_argument("date", xutils.format_datetime())
-            inserted_id = xutils.call("message.create", content = content, 
+            inserted_id = MSG_DAO.create(content = content, 
                 user   = user_name, 
-                status = get_status_by_code(status),
+                tag    = tag,
                 ip     = ip,
                 mtime  = ctime,
                 ctime  = ctime)
             id = inserted_id
+            MSG_DAO.refresh_message_stat(user_name)
+            
             xmanager.fire('message.add', dict(id=id, user=user_name, content=content, ctime=ctime))
             return dict(code="success", data=dict(id=inserted_id, content=content, ctime=ctime))
         else:
@@ -220,13 +217,15 @@ class MessageHandler:
     @xauth.login_required()
     def GET(self):
         from .dao import count_message
+        user = xauth.current_name()
         return xtemplate.render("message/message.html", 
             show_aside         = False,
             category           = "message",
             search_action      = "/message", 
             html_title         = T("待办"),
-            search_placeholder = T("搜索目标"),
+            search_placeholder = T("搜索待办"),
             count_message      = count_message,
+            message_stat       = MSG_DAO.get_message_stat(user),
             key                = xutils.get_argument("key", ""))
 
 
@@ -234,19 +233,28 @@ class CalendarHandler:
 
     def GET(self):
         from .dao import count_message
+        user = xauth.current_name()
         return xtemplate.render("message/calendar.html", 
             show_aside = False,
+            message_stat = MSG_DAO.get_message_stat(user),
             count_message = count_message)
 
+class StatHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        user = xauth.current_name()
+        return MSG_DAO.get_message_stat(user)
 xurls=(
     r"/message", MessageHandler,
-    r"/message/add", SaveHandler,
+    r"/message/save", SaveHandler,
     r"/message/status", UpdateStatusHandler,
     r"/message/list", ListHandler,
-    r"/message/remove", RemoveHandler,
+    r"/message/delete", DeleteHandler,
     r"/message/update", SaveHandler,
     r"/message/open", OpenMessage,
     r"/message/finish", FinishMessage,
     r"/message/date", DateHandler,
-    r"/message/calendar", CalendarHandler
+    r"/message/calendar", CalendarHandler,
+    r"/message/stat", StatHandler
 )

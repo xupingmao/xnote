@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/11/23 16:35:36
+# @modified 2019/11/23 23:29:58
 import math
 import time
 import web
@@ -76,7 +76,7 @@ class DefaultListHandler:
             back_url   = xconfig.HOME_PATH,
             pathlist   = [parent, Storage(name="默认分类", type="group", url="/note/default")],
             files      = files,
-            file       = Storage(name="默认分类", type="group"),
+            file       = Storage(id = 0, name="默认分类", type="group"),
             page       = page,
             page_max   = math.ceil(amount / pagesize),
             groups     = NOTE_DAO.list_group(),

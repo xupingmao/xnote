@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/10/05 20:36:19
+# @modified 2019/11/24 00:27:18
 
 import sys
 import os
@@ -244,14 +244,14 @@ class TestMain(BaseTestCase):
         data = app.request("/api/http_headers", headers=dict(X_TEST=True)).data
         self.assertEqual(True, b"HTTP_X_TEST" in data)
 
-    def test_message_add(self):
+    def test_message_create(self):
         # Py2: webpy会自动把str对象转成unicode对象，data参数传unicode反而会有问题
-        response = json_request("/message/add", method="POST", data=dict(content="Xnote-Unit-Test"))
+        response = json_request("/message/save", method="POST", data=dict(content="Xnote-Unit-Test"))
         self.assertEqual("success", response.get("code"))
         data = response.get("data")
         # Py2: 判断的时候必须使用unicode
         self.assertEqual(u"Xnote-Unit-Test", data.get("content"))
-        json_request("/message/remove", method="POST", data=dict(id=data.get("id")))
+        json_request("/message/delete", method="POST", data=dict(id=data.get("id")))
 
     def test_message_list(self):
         json_request("/message/list")

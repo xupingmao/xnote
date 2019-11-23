@@ -25,6 +25,19 @@
     </div>
 </div>
 
+<div class="comment-item-tpl hide">
+    <div class="comment-row">
+        <div class="comment-user">${user}</div>
+        <div class="comment-time">${time}</div>
+        <div class="comment-content">${content}</div>
+        <div class="comment-foot">
+            <div class="float-right">
+                <a class="delete-comment-btn" data-id="${dataId}" data-content="${dateContent}">删除</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript">
 $(function () {
 
@@ -33,23 +46,16 @@ $(function () {
             $("#comments").empty();
             for (var i = 0; i < resp.length; i++) {
                 var item = resp[i];
-                var html = $("<div>").addClass("comment-row");
-                var user = $("<div>").addClass("comment-user").text(item.user);
-                var content = $("<div>").addClass("comment-content").html(item.html);
-                var time = $("<div>").addClass("comment-time").text(item.ctime);
-                var deleteLink = $("<a>").addClass("delete-comment-btn")
-                    .text("删除")
-                    .attr("data-id", item.id)
-                    .attr("data-content", item.content);
-                if (window.xuser == item.user) {
-                    var operation = $("<div>").addClass('float-right').append(deleteLink);
-                } else {
-                    var operation = $("<div>").addClass('float-right');
-                }
-                var foot = $("<div>").addClass("comment-foot").append(operation);
-                html.append(user).append(time).append(content).append(foot);
-                $("#comments").append(html);
+
+                var tpl = $(".comment-item-tpl").html();
+                var element = $(tpl);
+                element.find(".comment-user").text(item.user);
+                element.find(".comment-time").text(item.ctime);
+                element.find(".comment-content").html(item.html);
+                element.find(".delete-comment-btn").attr("data-id", item.id).attr("data-content", item.content);
+                $("#comments").append(element);
             }
+            
         }).fail(function (resp) {
             console.log("请求失败", resp);
         });

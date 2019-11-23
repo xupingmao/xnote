@@ -1,9 +1,16 @@
 <!-- header.html -->
 <div class="col-md-12 message-status card">
-    <a class="tab tab-link x-tab" href="/message?status=created">待办({{count_message(_user_name, 0)}})</a>
-    <a class="tab tab-link x-tab" href="/message?status=suspended">挂起({{count_message(_user_name, 50)}})</a>
-    <!-- <a class="tab tab-link x-tab" href="/message?status=done">完成</a> -->
-    <a id="tabFile" class="tab tab-link x-tab" href="/message?tag=file">文件</a>
-    <a class="tab tab-link x-tab" href="/message?status=all">全部</a>
+    <a class="tab tab-link x-tab" href="/message?tag=task">
+        任务(<span class="task-count">{{message_stat.task_count}}</span>)
+    </a>
+    <a class="tab tab-link x-tab" href="/message?tag=done">
+        完成(<span class="done-count">{{message_stat.done_count}}</span>)
+    </a>
+    <a class="tab tab-link x-tab" href="/message?tag=log">
+        记录(<span class="log-count">{{message_stat.log_count}}</span>)
+    </a>
+    <a class="tab tab-link x-tab" href="/message?tag=idea">想法</a>
+    <a class="tab tab-link x-tab" href="/message?tag=file">文件</a>
+    <a class="tab tab-link x-tab" href="/message?tag=all">全部</a>
     <a class="tab tab-link x-tab" href="/message/calendar">日历</a>
 </div>
