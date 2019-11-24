@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/24 00:28:46
+# @modified 2019/11/24 15:44:21
 
 """短消息"""
 import time
@@ -20,7 +20,8 @@ from xtemplate import T
 MSG_DAO = xutils.DAO("message")
 
 def process_message(message):
-    if message.status == 0:
+    if message.status == 0 or message.status == 50:
+        # 兼容历史数据
         message.tag = "task"
     if message.content is None:
         message.content = ""
@@ -57,6 +58,9 @@ class ListHandler:
         if tag == "file":
             # 文件
             chatlist, amount = MSG_DAO.list_file(user_name, offset, pagesize)
+        elif tag == "link":
+            # 链接
+            chatlist, amount = MSG_DAO.list_link(user_name, offset, pagesize)
         elif key != "" and key != None:
             # 搜索
             chatlist, amount = MSG_DAO.search(user_name, key, offset, pagesize)

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2019/10/31 00:44:32
+# @modified 2019/11/24 16:23:13
 
 """Description here"""
 import re
@@ -65,7 +65,7 @@ class TimelineHandler:
 
     def GET(self):
         type = xutils.get_argument("type")
-        title = T("时光轴")
+        title = T("最近创建")
         if type == "public":
             title = T("公共笔记")
         else:

@@ -79,8 +79,8 @@
 
     {% include "message/header.html" %}
 
-    <div class="message-input col-md-12 card">
-        <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" placeholder="快速记录任务、记录、想法等"></textarea>
+    <div class="message-input col-md-12 card" v-if="inputBoxVisible">
+        <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" v-bind:placeholder="placeholder"></textarea>
         <input type="file" id="filePicker" class="hide" multiple/>
         <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
         <input type="button" name="" class="send-button btn" value="创建" @click="sendMessage()">
@@ -180,11 +180,27 @@
         return message;
     }
 
+    var currentTag = getUrlParam("tag");
+    var hiddenInputBoxTags = ["file", "link", "done", "notice", "all"];
+    var placeholder = "记录发生的事情、产生的想法";
+
+    if (currentTag == "task") {
+        placeholder = "记录要完成的任务";
+    }
+    if (currentTag == "cron") {
+        placeholder = "记录需要定期回顾的事情、常用的链接";
+    }
+    if (currentTag == "idea") {
+        placeholder = "记录自己的奇思妙想";
+    }
+
     var app = new Vue({
         el: "#app",
         data: {
             title: "消息",
             message: "Hello, Vue!",
+            inputBoxVisible: hiddenInputBoxTags.indexOf(currentTag) < 0,
+            placeholder: placeholder,
             messageList: [newMessage("Welcome to chatroom")],
             person: {
                 name:"Jhon",
@@ -216,6 +232,16 @@
                 }
             },
 
+            refreshCount: function () {
+                $.get("/message/stat", function (resp) {
+                    $(".task-count").text(resp.task_count);
+                    $(".done-count").text(resp.done_count);
+                    $(".log-count").text(resp.log_count);
+                    $(".idea-count").text(resp.idea_count);
+                    $(".cron-count").text(resp.cron_count);
+                })
+            },
+
             refreshMessage: function () {
                 var self = this;
                 var page = getUrlParams().page || 1;
@@ -238,14 +264,10 @@
                             messageList.reverse();
                             self.messageList = messageList;
                             self.amount = data.amount;
+
+                            app.refreshCount();
                         }
                 });
-
-                $.get("/message/stat", function (resp) {
-                    $(".task-count").text(resp.task_count);
-                    $(".done-count").text(resp.done_count);
-                    $(".log-count").text(resp.log_count);
-                })
             },
 
             sendMessage: function () {

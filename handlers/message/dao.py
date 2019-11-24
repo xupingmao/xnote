@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2019/11/24 00:24:12
+# @modified 2019/11/24 16:31:05
 import xutils
 import xconfig
 import xmanager
@@ -99,6 +99,16 @@ def list_file_page(user, offset, limit):
     amount   = dbutil.prefix_count("message:%s" % user, filter_func)
     return chatlist, amount
 
+def list_link_page(user, offset, limit):
+    def filter_func(key, value):
+        if value.content is None:
+            return False
+        return value.content.find("http://") >= 0 or value.content.find("https://") >= 0
+    chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    # TODO 后续可以用message_stat加速
+    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+    return chatlist, amount
+
 def get_filter_by_tag_func(tag):
     def filter_func(key, value):
         if tag is None or tag == "all":
@@ -113,7 +123,18 @@ def get_filter_by_tag_func(tag):
 def list_by_tag(user, tag, offset, limit):
     filter_func = get_filter_by_tag_func(tag)
     chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
-    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+
+    # 利用message_stat优化count查询
+    if tag == "done":
+        amount = get_message_stat(user).done_count
+    elif tag == "task":
+        amount = get_message_stat(user).task_count
+    elif tag == "cron":
+        amount = get_message_stat(user).cron_count
+    elif tag == "log":
+        amount = get_message_stat(user).log_count
+    else:
+        amount = count_by_tag(user, tag)
     return chatlist, amount
 
 def count_by_tag(user, tag):
@@ -122,18 +143,20 @@ def count_by_tag(user, tag):
 def get_message_stat(user):
     value = dbutil.get("user_stat:%s:message" % user)
     if value is None:
-        return Storage(task_count = 0, log_count = 0)
+        return Storage(task_count = 0, cron_count = 0, log_count = 0, done_count = 0)
     return value
 
 def refresh_message_stat(user):
     task_count = count_by_tag(user, "task")
     log_count  = count_by_tag(user, "log")
     done_count = count_by_tag(user, "done")
+    cron_count = count_by_tag(user, "cron")
     stat       = get_message_stat(user)
 
     stat.task_count = task_count
     stat.log_count  = log_count
     stat.done_count = done_count
+    stat.cron_count = cron_count
     dbutil.put("user_stat:%s:message" % user, stat)
 
 xutils.register_func("message.create", create_message)
@@ -143,6 +166,7 @@ xutils.register_func("message.count", count_message)
 xutils.register_func("message.find_by_id", get_message_by_id)
 xutils.register_func("message.list", list_message_page)
 xutils.register_func("message.list_file", list_file_page)
+xutils.register_func("message.list_link", list_link_page)
 xutils.register_func("message.list_by_tag", list_by_tag)
 xutils.register_func("message.get_message_stat", get_message_stat)
 xutils.register_func("message.refresh_message_stat", refresh_message_stat)

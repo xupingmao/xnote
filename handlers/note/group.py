@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/11/23 23:29:58
+# @modified 2019/11/24 16:22:37
 import math
 import time
 import web
@@ -95,8 +95,8 @@ class GroupListHandler:
         fixed_books = []
         normal_books = []
 
-        tools.append(NoteLink("提醒", "/note/notice", "fa-bell"))
         tools.append(NoteLink("相册", "/note/gallery", "fa-photo"))
+        # tools.append(NoteLink("清单", "/note/list", "fa-list"))
         tools.append(NoteLink("最近", "/note/timeline", "fa-history"))
         tools.append(NoteLink("更多", "/note/tools"))
         
