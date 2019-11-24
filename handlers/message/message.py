@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/24 22:31:03
+# @modified 2019/11/25 01:04:14
 
 """短消息"""
 import time
@@ -18,6 +18,7 @@ from xutils import BaseRule, Storage, cacheutil, dbutil, textutil
 from xtemplate import T
 
 MSG_DAO = xutils.DAO("message")
+DEFAULT_TAG = "log"
 
 def build_search_html(content):
     return '搜索 <a href="/message?category=message&key=%s">%s</a>' % (xutils.encode_uri_component(content), xutils.html_escape(content))
@@ -51,6 +52,14 @@ def get_status_by_code(code):
         return 100
     return 0
 
+def format_count(count):
+    if count >= 1000 and count < 1000000:
+        return '%dk' % int(count / 1000)
+    if count > 1000000:
+        return '%dm' % int(count / 1000000)
+    # 保持类型一致
+    return str(count)
+
 class ListHandler:
 
     def GET(self):
@@ -80,7 +89,6 @@ class ListHandler:
             # 所有的
             chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
             
-        chatlist.reverse()
         page_max = math.ceil(amount / pagesize)
         chatlist = list(map(process_message, chatlist))
 
@@ -190,7 +198,7 @@ class SaveHandler:
     def POST(self):
         id        = xutils.get_argument("id")
         content   = xutils.get_argument("content")
-        tag       = xutils.get_argument("tag")
+        tag       = xutils.get_argument("tag", DEFAULT_TAG)
         location  = xutils.get_argument("location", "")
         user_name = xauth.get_current_name()
 
@@ -232,17 +240,22 @@ class MessageHandler:
 
     @xauth.login_required()
     def GET(self):
-        from .dao import count_message
         user = xauth.current_name()
+        key  = xutils.get_argument("key", "")
+        if key != None and key != "":
+            default_content = "#%s# " % key
+        else:
+            default_content = ""
+
         return xtemplate.render("message/message.html", 
             show_aside         = False,
             category           = "message",
             search_action      = "/message", 
             html_title         = T("待办"),
             search_placeholder = T("搜索待办"),
-            count_message      = count_message,
+            default_content    = default_content,
             message_stat       = MSG_DAO.get_message_stat(user),
-            key                = xutils.get_argument("key", ""))
+            key                = key)
 
 
 class CalendarHandler:
@@ -260,7 +273,11 @@ class StatHandler:
     @xauth.login_required()
     def GET(self):
         user = xauth.current_name()
-        return MSG_DAO.get_message_stat(user)
+        stat = MSG_DAO.get_message_stat(user)
+
+        stat.done_count = format_count(stat.done_count)
+
+        return stat
 xurls=(
     r"/message", MessageHandler,
     r"/message/save", SaveHandler,

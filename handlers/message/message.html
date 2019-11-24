@@ -8,6 +8,8 @@
 
 {% block body %}
 {% init key = "" %}
+{% init default_content = "" %}
+
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 {% include common/mod_search.html %}
 <div id="app" class="col-md-12">
@@ -16,7 +18,8 @@
     {% include "message/header.html" %}
 
     <div class="message-input col-md-12 card" v-if="inputBoxVisible">
-        <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" v-bind:placeholder="placeholder"></textarea>
+        <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" v-bind:placeholder="placeholder">{{default_content}}</textarea>
+
         <input type="file" id="filePicker" class="hide" multiple/>
         <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
         <input type="button" name="" class="send-button btn" value="创建" @click="sendMessage()">
@@ -115,7 +118,7 @@
     }
 
     function newMessage(content, user, status) {
-        return {"content": content, html: content, user:user, status:status}
+        return {"content": content, html: content, user:user, status:status, editable: false}
     }
 
     function wrapMessage(message) {
@@ -147,7 +150,7 @@
             message: "Hello, Vue!",
             inputBoxVisible: hiddenInputBoxTags.indexOf(currentTag) < 0,
             placeholder: placeholder,
-            messageList: [newMessage("Welcome to chatroom")],
+            messageList: [newMessage("空空如也~")],
             person: {
                 name:"Jhon",
                 age: 20,
@@ -156,7 +159,7 @@
             seen: false,
             rawHtml: "{{!message}}",
             url: "https://www.baidu.com",
-            input: "",
+            input: "{{default_content}}",
             page_max: 2,
             page: 1,
             page_url: "/message?pagesize=20&page=",
@@ -207,7 +210,6 @@
                                 // console.log(item, index);
                                 messageList.push(wrapMessage(item));
                             })
-                            messageList.reverse();
                             self.messageList = messageList;
                             self.amount = data.amount;
 
