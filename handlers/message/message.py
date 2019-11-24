@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/24 15:44:21
+# @modified 2019/11/24 19:02:07
 
 """短消息"""
 import time
@@ -23,6 +23,9 @@ def process_message(message):
     if message.status == 0 or message.status == 50:
         # 兼容历史数据
         message.tag = "task"
+    if message.status == 100:
+        message.tag = "done"
+
     if message.content is None:
         message.content = ""
         return message

@@ -1,0 +1,87 @@
+/**
+ * 备忘消息的CSS样式
+ * @author xupingmao
+ * @since 2019/11/24
+ * @modified 2019/11/24 19:09:04
+*/
+
+
+/** 消息 **/
+.message-row {
+    float: left;
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+}
+
+.message-item-header {
+    float: left;
+    width: 100%;
+}
+
+.msg-left-op-link {
+    margin-right: 20px;
+}
+
+.chat-avatar {
+    color: #2092d9;
+}
+
+.finished {
+    color: #fff;
+    background-color: green;
+}
+.in-progress {
+    background-color: #f90;
+    color: white;
+}
+
+.suspended {
+    background-color: #aaa;
+    color: white;
+}
+
+.chat-msg {
+    margin-top: 0.1rem;
+    float: left;
+}
+
+.chat-msg-content {
+    border-width: 5px;
+    border-radius: 5px;
+    word-wrap: break-word;
+    word-break: break-all;
+    padding: 5px 0px;
+}
+
+.chat-msg-img {
+    width: 180px;
+}
+.chat-msg-option {
+    color: #888;
+    margin: 0;
+    font-size: 10px;
+}
+
+.chat-msg-time {
+    display: block;
+    padding: 2px;
+    color: #888;
+}
+
+.input-box {
+    width: 100%;
+    outline: none;
+}
+
+.send-button {
+    float: left;
+    width: 4rem;
+    margin-top: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.right {
+    float: right;
+}

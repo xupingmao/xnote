@@ -1,0 +1,184 @@
+/**
+ * 笔记的CSS样式
+ * @author xupingmao
+ * @since 2019/11/24
+ * @modified 2019/11/24 19:14:36
+*/
+
+
+/** note-list样式 **/
+
+.note-list>a:last-child>.book-item {
+    border-bottom: none;
+}
+
+.book-list>a:last-child>.book-item {
+    border-bottom: none;
+}
+
+
+.tool-div {
+    font-size: medium;
+}
+
+.tool-div a {
+    font-size: medium;
+    color: blue;
+}
+
+.tool-description {
+    font-size: small;
+    padding-top: 3px;
+}
+.note {
+    float: left;
+    border: solid 1px;
+    border-color: #ccc;
+    background-color: #fff;
+    margin-bottom: 10px;
+    width: 100%;
+}
+.note-body {
+    padding: 10px;
+}
+
+.note-head {
+    font-size: 20px;
+}
+
+.note-name {
+    /*font-size: 20px;*/
+}
+
+.note-name a {
+    font-size: medium;
+    color: blue;
+}
+
+.note-title {
+    width: 100%;
+    float: left;
+}
+
+.note-info {
+    width: 100%;
+    float: left;
+}
+
+.note-info span {
+    display: inline-block;
+    padding-top: 2px;
+}
+
+.note-time {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.note-content-short {
+    font-size: small;
+    word-break: break-all;
+}
+
+.note-last-modify-time,
+.note-last-visit-time {
+    padding-left: 2px;
+    padding-top: 2px;
+    font-size: small;
+    color: green;
+}
+
+.note-related {
+    font-size: 6px;
+    padding-left: 5px;
+    color: red;
+    display: none;
+}
+.note-visited-cnt {
+    float: right;
+    font-size: small;
+}
+
+
+/** 笔记样式 **/
+.note-head {
+    font-size: 20px;
+}
+
+.note-name a {
+    font-size: medium;
+    color: blue;
+}
+
+.note-content-short {
+    font-size: small;
+    word-break: break-all;
+}
+
+.note-detail-head {
+    float: left;
+    width: 100%;
+    padding: 5px;
+    padding-bottom: 5px;
+    border: 1px solid #ccc;
+}
+
+.note-detail-foot {
+    float: left;
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+
+.note-last-visit-time {
+    padding-left: 2px;
+    padding-top: 2px;
+    font-size: small;
+    color: green;
+}
+
+.note-related {
+    font-size: 6px;
+    padding-left: 5px;
+    color: red;
+    display: none;
+}
+.note-visited-cnt {
+    float: right;
+    font-size: small;
+}
+
+/** 评论 **/
+.comment-row {
+    width: 100%;
+    float: left;
+    margin-top: 20px;
+    border-bottom: 1px solid #ccc;
+}
+
+.comment-user {
+    float: left;
+    font-weight: bold;
+}
+
+.comment-foot {
+    width: 100%;
+    font-size: 10px;
+}
+
+.comment-foot a {
+    font-size: 10px;
+    color: #666
+}
+
+.comment-time {
+    float: right;
+    font-size: 12px;
+    color: #555;
+}
+
+.comment-content {
+    float: left;
+    width: 100%;
+    padding: 10px;
+}
