@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/25 01:04:14
+# @modified 2019/11/25 01:23:31
 
 """短消息"""
 import time
@@ -53,12 +53,22 @@ def get_status_by_code(code):
     return 0
 
 def format_count(count):
+    if count is None:
+        return "0"
     if count >= 1000 and count < 1000000:
         return '%dk' % int(count / 1000)
     if count > 1000000:
         return '%dm' % int(count / 1000000)
     # 保持类型一致
     return str(count)
+
+def format_message_stat(stat):
+    stat.task_count = format_count(stat.task_count)
+    stat.done_count = format_count(stat.done_count)
+    stat.cron_count = format_count(stat.cron_count)
+    stat.log_count  = format_count(stat.log_count)
+    stat.search_count = format_count(stat.search_count)
+    return stat
 
 class ListHandler:
 
@@ -247,6 +257,9 @@ class MessageHandler:
         else:
             default_content = ""
 
+        stat = MSG_DAO.get_message_stat(user)
+        stat = format_message_stat(stat)
+
         return xtemplate.render("message/message.html", 
             show_aside         = False,
             category           = "message",
@@ -254,7 +267,7 @@ class MessageHandler:
             html_title         = T("待办"),
             search_placeholder = T("搜索待办"),
             default_content    = default_content,
-            message_stat       = MSG_DAO.get_message_stat(user),
+            message_stat       = stat,
             key                = key)
 
 
@@ -274,9 +287,7 @@ class StatHandler:
     def GET(self):
         user = xauth.current_name()
         stat = MSG_DAO.get_message_stat(user)
-
-        stat.done_count = format_count(stat.done_count)
-
+        format_message_stat(stat)
         return stat
 xurls=(
     r"/message", MessageHandler,
