@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/24 19:02:07
+# @modified 2019/11/24 22:31:03
 
 """短消息"""
 import time
@@ -19,6 +19,9 @@ from xtemplate import T
 
 MSG_DAO = xutils.DAO("message")
 
+def build_search_html(content):
+    return '搜索 <a href="/message?category=message&key=%s">%s</a>' % (xutils.encode_uri_component(content), xutils.html_escape(content))
+
 def process_message(message):
     if message.status == 0 or message.status == 50:
         # 兼容历史数据
@@ -29,7 +32,10 @@ def process_message(message):
     if message.content is None:
         message.content = ""
         return message
-    message.html = xutils.mark_text(message.content)
+    if message.tag == "search":
+        message.html = build_search_html(message.content)
+    else:
+        message.html = xutils.mark_text(message.content)
     return message
 
 def fuzzy_item(item):
@@ -58,15 +64,18 @@ class ListHandler:
         if tag == "task":
             pagesize = 1000
 
-        if tag == "file":
+        if key != "" and key != None:
+            # 搜索
+            start_time = time.time()
+            chatlist, amount = MSG_DAO.search(user_name, key, offset, pagesize)
+            cost_time  = time.time() - start_time
+            MSG_DAO.add_search_history(user_name, key, cost_time)
+        elif tag == "file":
             # 文件
             chatlist, amount = MSG_DAO.list_file(user_name, offset, pagesize)
         elif tag == "link":
             # 链接
             chatlist, amount = MSG_DAO.list_link(user_name, offset, pagesize)
-        elif key != "" and key != None:
-            # 搜索
-            chatlist, amount = MSG_DAO.search(user_name, key, offset, pagesize)
         else:
             # 所有的
             chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)

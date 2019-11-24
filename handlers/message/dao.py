@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2019/11/24 16:31:05
+# @modified 2019/11/24 22:47:50
 import xutils
 import xconfig
 import xmanager
@@ -32,10 +32,14 @@ def search_message(user_name, key, offset, limit):
     for item in key.split(" "):
         if item == "":
             continue
-        words.append(item)
+        words.append(item.lower())
 
     def search_func(key, value):
-        return value.user == user_name and textutil.contains_all(value.content, words)
+        if value.tag == "search":
+            return False
+        if value.content is None:
+            return False
+        return value.user == user_name and textutil.contains_all(value.content.lower(), words)
 
     chatlist = dbutil.prefix_list("message:%s" % user_name, search_func, offset, limit, reverse = True)
     amount   = dbutil.prefix_count("message:%s" % user_name, search_func)
@@ -133,6 +137,8 @@ def list_by_tag(user, tag, offset, limit):
         amount = get_message_stat(user).cron_count
     elif tag == "log":
         amount = get_message_stat(user).log_count
+    elif tag == "search":
+        amount = get_message_stat(user).search_count
     else:
         amount = count_by_tag(user, tag)
     return chatlist, amount
@@ -151,13 +157,20 @@ def refresh_message_stat(user):
     log_count  = count_by_tag(user, "log")
     done_count = count_by_tag(user, "done")
     cron_count = count_by_tag(user, "cron")
+    search_count = count_by_tag(user, "search")
     stat       = get_message_stat(user)
 
     stat.task_count = task_count
     stat.log_count  = log_count
     stat.done_count = done_count
     stat.cron_count = cron_count
+    stat.search_count = search_count
     dbutil.put("user_stat:%s:message" % user, stat)
+
+def add_search_history(user, search_key, cost_time = 0):
+    key = "msg_search_history:%s:%s" % (user, dbutil.timeseq())
+    dbutil.put(key, Storage(key = search_key, cost_time = cost_time))
+
 
 xutils.register_func("message.create", create_message)
 xutils.register_func("message.search", search_message)
@@ -170,4 +183,5 @@ xutils.register_func("message.list_link", list_link_page)
 xutils.register_func("message.list_by_tag", list_by_tag)
 xutils.register_func("message.get_message_stat", get_message_stat)
 xutils.register_func("message.refresh_message_stat", refresh_message_stat)
+xutils.register_func("message.add_search_history", add_search_history)
 

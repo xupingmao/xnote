@@ -115,7 +115,7 @@
     }
 
     function newMessage(content, user, status) {
-        return {"content": content, user:user, status:status}
+        return {"content": content, html: content, user:user, status:status}
     }
 
     function wrapMessage(message) {
@@ -135,6 +135,9 @@
     }
     if (currentTag == "idea") {
         placeholder = "记录自己的奇思妙想";
+    }
+    if (currentTag == "search") {
+        placeholder = "存储搜索关键字";
     }
 
     var app = new Vue({
