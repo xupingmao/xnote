@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2019/11/24 22:47:50
+# @modified 2019/11/26 00:03:15
 import xutils
 import xconfig
 import xmanager
@@ -14,14 +14,21 @@ class MessageDO(Storage):
         pass
 
 def create_message(**kw):
-    if xconfig.DB_ENGINE == "sqlite":
-        db = xtables.get_message_table()
-        return db.insert(**kw)
-    else:
-        key      = "message:%s:%s" % (kw['user'], dbutil.timeseq())
-        kw['id'] = key
-        dbutil.put(key, kw)
-        return key
+    key = "message:%s:%s" % (kw['user'], dbutil.timeseq())
+    kw['id'] = key
+    dbutil.put(key, kw)
+    return key
+
+def update_message(message):
+    id = message['id']
+    assert id.startswith("message:")
+    dbutil.put(id, message)
+
+def add_message_history(message):
+    id_str = message['id']
+    prefix, user, timeseq = id_str.split(':')
+    new_id = 'msg_history:%s:%s:%s' % (user, timeseq, message.get('version', 0))
+    dbutil.put(new_id, message)
 
 @xmanager.listen(["message.updated", "message.add", "message.remove"])
 def expire_message_cache(ctx):
@@ -35,7 +42,7 @@ def search_message(user_name, key, offset, limit):
         words.append(item.lower())
 
     def search_func(key, value):
-        if value.tag == "search":
+        if value.tag == "key":
             return False
         if value.content is None:
             return False
@@ -137,8 +144,8 @@ def list_by_tag(user, tag, offset, limit):
         amount = get_message_stat(user).cron_count
     elif tag == "log":
         amount = get_message_stat(user).log_count
-    elif tag == "search":
-        amount = get_message_stat(user).search_count
+    elif tag == "key":
+        amount = get_message_stat(user).key_count
     else:
         amount = count_by_tag(user, tag)
     return chatlist, amount
@@ -149,7 +156,7 @@ def count_by_tag(user, tag):
 def get_message_stat(user):
     value = dbutil.get("user_stat:%s:message" % user)
     if value is None:
-        return Storage(task_count = 0, cron_count = 0, log_count = 0, done_count = 0)
+        return Storage(task_count = 0, cron_count = 0, log_count = 0, done_count = 0, key_count = 0)
     return value
 
 def refresh_message_stat(user):
@@ -157,14 +164,14 @@ def refresh_message_stat(user):
     log_count  = count_by_tag(user, "log")
     done_count = count_by_tag(user, "done")
     cron_count = count_by_tag(user, "cron")
-    search_count = count_by_tag(user, "search")
+    key_count  = count_by_tag(user, "key")
     stat       = get_message_stat(user)
 
     stat.task_count = task_count
     stat.log_count  = log_count
     stat.done_count = done_count
     stat.cron_count = cron_count
-    stat.search_count = search_count
+    stat.key_count  = key_count
     dbutil.put("user_stat:%s:message" % user, stat)
 
 def add_search_history(user, search_key, cost_time = 0):
@@ -173,6 +180,7 @@ def add_search_history(user, search_key, cost_time = 0):
 
 
 xutils.register_func("message.create", create_message)
+xutils.register_func("message.update", update_message)
 xutils.register_func("message.search", search_message)
 xutils.register_func("message.delete", delete_message_by_id)
 xutils.register_func("message.count", count_message)
@@ -184,4 +192,5 @@ xutils.register_func("message.list_by_tag", list_by_tag)
 xutils.register_func("message.get_message_stat", get_message_stat)
 xutils.register_func("message.refresh_message_stat", refresh_message_stat)
 xutils.register_func("message.add_search_history", add_search_history)
+xutils.register_func("message.add_history", add_message_history)
 

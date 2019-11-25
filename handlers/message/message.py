@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/25 01:23:31
+# @modified 2019/11/26 00:11:51
 
 """短消息"""
 import time
@@ -21,7 +21,8 @@ MSG_DAO = xutils.DAO("message")
 DEFAULT_TAG = "log"
 
 def build_search_html(content):
-    return '搜索 <a href="/message?category=message&key=%s">%s</a>' % (xutils.encode_uri_component(content), xutils.html_escape(content))
+    fmt = '搜索 <a href="/message?category=message&key=%s">%s</a>'
+    return fmt % (xutils.encode_uri_component(content), xutils.html_escape(content))
 
 def process_message(message):
     if message.status == 0 or message.status == 50:
@@ -33,10 +34,14 @@ def process_message(message):
     if message.content is None:
         message.content = ""
         return message
-    if message.tag == "search":
+
+    if message.tag == "key" or message.tag == "search":
         message.html = build_search_html(message.content)
     else:
         message.html = xutils.mark_text(message.content)
+
+    if message.tag == "done":
+        message.html += "<br>------<br>完成于 %s" % message.mtime
     return message
 
 def fuzzy_item(item):
@@ -115,8 +120,10 @@ def update_message_status(id, status):
     if data and data.user == user_name:
         data.status = status
         data.mtime = xutils.format_datetime()
-        dbutil.put(id, data)
+        
+        MSG_DAO.update(data)
         MSG_DAO.refresh_message_stat(user_name)
+
         xmanager.fire("message.updated", Storage(id=id, user=user_name, status = status, content = data.content))
 
     return dict(code="success")
@@ -124,9 +131,14 @@ def update_message_status(id, status):
 def update_message_content(id, user_name, content):
     data = dbutil.get(id)
     if data and data.user == user_name:
+        # 先保存历史
+        MSG_DAO.add_history(data)
+
         data.content = content
-        data.mtime = xutils.format_datetime()
-        dbutil.put(id, data)
+        data.mtime   = xutils.format_datetime()
+        data.version = data.get('version', 0) + 1
+        MSG_DAO.update(data)
+
         xmanager.fire("message.update", dict(id=id, user=user_name, content=content))
 
 def update_message_tag(id, tag):

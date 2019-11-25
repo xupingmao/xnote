@@ -134,13 +134,13 @@
         placeholder = "记录要完成的任务";
     }
     if (currentTag == "cron") {
-        placeholder = "记录需要定期回顾的事情、常用的链接";
+        placeholder = "记录需要定期回顾的事情、长期规划";
     }
     if (currentTag == "idea") {
         placeholder = "记录自己的奇思妙想";
     }
-    if (currentTag == "search") {
-        placeholder = "存储搜索关键字";
+    if (currentTag == "key") {
+        placeholder = "存储话题（关键字）";
     }
 
     var app = new Vue({
@@ -188,6 +188,7 @@
                     $(".log-count").text(resp.log_count);
                     $(".idea-count").text(resp.idea_count);
                     $(".cron-count").text(resp.cron_count);
+                    $(".key-count").text(resp.key_count);
                 })
             },
 
