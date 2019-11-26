@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/26 00:11:51
+# @modified 2019/11/27 00:26:33
 
 """短消息"""
 import time
@@ -171,7 +171,19 @@ class OpenMessage:
         if id == "":
             return
         return update_message_tag(id, "task")
-        
+
+class UpdateTagHandler:
+
+    def POST(self):
+        id = xutils.get_argument("id")
+        tag = xutils.get_argument("tag")
+        if id == "":
+            return
+        if tag in ("task", "cron", "log", "key"):
+            return update_message_tag(id, tag)
+        else:
+            return dict(success = False, message = "invalid tag")
+
 class UpdateStatusHandler:
 
     def POST(self):
@@ -312,5 +324,6 @@ xurls=(
     r"/message/finish", FinishMessage,
     r"/message/date", DateHandler,
     r"/message/calendar", CalendarHandler,
-    r"/message/stat", StatHandler
+    r"/message/stat", StatHandler,
+    r"/message/tag", UpdateTagHandler
 )

@@ -15,7 +15,7 @@
 <div id="app" class="col-md-12">
     {# include common/mod_notice.html #}
 
-    {% include "message/header.html" %}
+    {% include message/header.html %}
 
     <div class="message-input col-md-12 card" v-if="inputBoxVisible">
         <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" v-bind:placeholder="placeholder">{{default_content}}</textarea>
@@ -64,11 +64,16 @@
                     <div class="col-md-12">
                         <p class="chat-msg-option">
 
+                            <!-- task 专用 -->
                             <a class="smallText msg-left-op-link" v-if="message.tag == 'task'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
 
                             <a class="smallText msg-left-op-link" v-if="message.tag == 'done'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">重做</a>
 
+                            <!-- 通用 -->
                             <a class="smallText msg-left-op-link" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
+                            
+                            <!-- log专用 -->
+                            <a class="smallText msg-left-op-link" v-if="message.tag == 'log'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateTag($event, 'task')">转任务</a>
 
                             <a class="smallText red float-right" v-bind:msg-id="message.id" href="javascript:void(0)" v-bind:msg-id="message.id" v-bind:msg-content="message.content" @click="deleteMessage($event)">删除</a>
 
@@ -234,7 +239,7 @@
                         if (data.code == "success") {
                             var msg = wrapMessage(data.data);
                             self.messageList.push(msg);
-                            self.input = "";
+                            self.input = "{{default_content}}";
                         } else {
                             alert(data.message);
                         }
@@ -266,6 +271,19 @@
                 var self = this;
                 var id = $(el).attr("msg-id");
                 $.post("/message/finish", {id: id}, function (resp) {
+                    if (resp.code == "success") {
+                        app.refreshMessage();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            },
+
+            updateTag: function (event, tag) {
+                var el = event.currentTarget;
+                var self = this;
+                var id = $(el).attr("msg-id");
+                $.post("/message/tag", {id: id, tag: tag}, function (resp) {
                     if (resp.code == "success") {
                         app.refreshMessage();
                     } else {

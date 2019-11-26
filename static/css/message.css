@@ -2,7 +2,7 @@
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2019/11/24 19:09:04
+ * @modified 2019/11/26 00:22:28
 */
 
 
@@ -65,7 +65,7 @@
 }
 
 .chat-msg-time {
-    display: block;
+    display: inline-block;
     padding: 2px;
     color: #888;
 }
