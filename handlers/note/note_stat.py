@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2019/11/25 23:36:41
+# @modified 2019/11/30 17:50:46
 import xauth
 import xutils
 from xutils import dbutil
@@ -39,7 +39,7 @@ HTML = """
         </tr>
         {% for key, value in admin_stat_list %}
             <tr>
-                <td>{{key}}</td>
+                <td><a href="/system/db_scan?key_from={{key}}">{{key}}</a></td>
                 <td>{{value}}</td>
             </tr>
         {% end %}
@@ -70,13 +70,17 @@ class StatHandler(BasePlugin):
             admin_stat_list.append(["note_history", dbutil.count_table("note_history")])
             admin_stat_list.append(["note_comment", dbutil.count_table("note_comment")])
             admin_stat_list.append(["notebook", dbutil.count_table("notebook")])
-            admin_stat_list.append(["message",  dbutil.count_table("message")])
-            admin_stat_list.append(["schedule", dbutil.count_table("schedule")])
-            admin_stat_list.append(["user", dbutil.count_table("user")])
             admin_stat_list.append(["search_history", dbutil.count_table("search_history")])
-            admin_stat_list.append(["user_stat", dbutil.count_table("user_stat")])
+            
+            admin_stat_list.append(["message",  dbutil.count_table("message")])
             admin_stat_list.append(["msg_search_history", dbutil.count_table("msg_search_history")])
             admin_stat_list.append(["msg_history", dbutil.count_table("msg_history")])
+            admin_stat_list.append(["msg_key", dbutil.count_table("msg_key")])
+            admin_stat_list.append(["user_stat", dbutil.count_table("user_stat")])
+
+            admin_stat_list.append(["schedule", dbutil.count_table("schedule")])
+            admin_stat_list.append(["user", dbutil.count_table("user")])
+            admin_stat_list.append(["record", dbutil.count_table("record")])
 
         self.writetemplate(HTML, stat_list = stat_list, admin_stat_list = admin_stat_list)
 

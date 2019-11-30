@@ -11,7 +11,9 @@
 {% init default_content = "" %}
 
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
+
 {% include common/mod_search.html %}
+
 <div id="app" class="col-md-12">
     {# include common/mod_notice.html #}
 
@@ -74,6 +76,10 @@
                             
                             <!-- log专用 -->
                             <a class="smallText msg-left-op-link" v-if="message.tag == 'log'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateTag($event, 'task')">转任务</a>
+                            <!-- log专用END -->
+
+                            <!-- key专用 -->
+                            <a class="smallText msg-left-op-link" v-if="message.tag == 'key'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="touchMessage($event)">置顶</a>
 
                             <a class="smallText red float-right" v-bind:msg-id="message.id" href="javascript:void(0)" v-bind:msg-id="message.id" v-bind:msg-content="message.content" @click="deleteMessage($event)">删除</a>
 
@@ -294,7 +300,6 @@
 
             openMessage: function (event) {
                 var el = event.currentTarget;
-                var self = this;
                 var id = $(el).attr("msg-id");
                 $.post("/message/open", {id: id}, function (resp) {
                     if (resp.code == "success") {
@@ -309,6 +314,19 @@
                 $.post("/message/update", message, function (resp) {
                     console.log(resp);
                     app.refreshMessage();
+                })
+            },
+
+            touchMessage: function (message) {
+                var el = event.currentTarget;
+                var id = $(el).attr("msg-id");
+                $.post("/message/touch", {id: id}, function (resp) {
+                    console.log(resp);
+                    if (resp.code == "success") {
+                        app.refreshMessage();
+                    } else {
+                        alert(resp.message);
+                    }
                 })
             },
 

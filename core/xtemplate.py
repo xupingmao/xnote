@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/09/24 11:50:24
+# @modified 2019/11/30 18:32:12
 import os
 import json
 import web
@@ -104,6 +104,10 @@ def get_user_agent():
         return ""
     return web.ctx.env.get("HTTP_USER_AGENT")
 
+def get_user_config(user):
+    if not xauth.has_login():
+        return Storage()
+    return xauth.get_user_config(user)
 
 @xutils.cache(prefix="message.count", expire=360)
 def get_message_count(user):
@@ -132,6 +136,7 @@ def pre_render(kw):
     kw["Storage"]       = Storage
     kw["xutils"]        = xutils
     kw["xconfig"]       = xconfig
+    kw["_user_config"]   = get_user_config(user_name)
     kw["_notice_count"] = get_message_count(user_name)
     kw["T"]             = T
     if hasattr(web.ctx, "env"):

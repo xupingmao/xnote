@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/11/21 01:12:52
+# @modified 2019/11/30 19:06:03
 import web
 import time
 import os
@@ -26,6 +26,7 @@ except ImportError as e:
     psutil = None
 
 INIT_SCRIPT_URL = "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)
+USER_CONFIG_KEY_SET = set(["TODO_MODE", "SIMPLE_MODE"])
 
 def get_xnote_version():
     try:
@@ -210,10 +211,24 @@ class PropertiesHandler:
         xconfig.NAV_LIST = nav_list
 
 
+@xauth.login_required()
+def set_user_config(key, value):
+    if key not in USER_CONFIG_KEY_SET:
+        return
+    user = xauth.current_user()
+    if user.config is None:
+        user.config = Storage()
+    user.config[key] = value
+    xauth.update_user(user["name"], user)
+
+@xauth.login_required("admin")
+def set_sys_config(key, value):
+    setattr(xconfig, key, value)
+    cacheutil.hset('sys.config', key, value)
 
 class ConfigHandler:
 
-    @xauth.login_required("admin")
+    @xauth.login_required()
     def POST(self):
         key   = xutils.get_argument("key")
         value = xutils.get_argument("value")
@@ -237,8 +252,11 @@ class ConfigHandler:
         if type == "bool":
             value = value.lower() in ("true", "yes", "on")
 
-        setattr(xconfig, key, value)
-        cacheutil.hset('sys.config', key, value)
+        if key in USER_CONFIG_KEY_SET:
+            set_user_config(key, value)
+        else:
+            set_sys_config(key, value)
+            
         return dict(code="success")
 
 @xmanager.listen("sys.reload")

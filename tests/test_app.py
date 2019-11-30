@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/11/24 00:27:18
+# @modified 2019/11/30 19:17:45
 
 import sys
 import os
@@ -251,6 +251,7 @@ class TestMain(BaseTestCase):
         data = response.get("data")
         # Py2: 判断的时候必须使用unicode
         self.assertEqual(u"Xnote-Unit-Test", data.get("content"))
+        json_request("/message/touch", method="POST", data=dict(id=data.get("id")))
         json_request("/message/delete", method="POST", data=dict(id=data.get("id")))
 
     def test_message_list(self):

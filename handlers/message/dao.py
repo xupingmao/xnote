@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2019/11/26 00:03:15
+# @modified 2019/11/30 19:16:18
 import xutils
 import xconfig
 import xmanager
@@ -14,15 +14,21 @@ class MessageDO(Storage):
         pass
 
 def create_message(**kw):
-    key = "message:%s:%s" % (kw['user'], dbutil.timeseq())
+    tag = kw['tag']
+    if tag == 'key':
+        key = "msg_key:%s:%s" % (kw['user'], dbutil.timeseq())
+    else:
+        key = "message:%s:%s" % (kw['user'], dbutil.timeseq())
     kw['id'] = key
     dbutil.put(key, kw)
     return key
 
 def update_message(message):
     id = message['id']
-    assert id.startswith("message:")
-    dbutil.put(id, message)
+    if id.startswith(("msg_key:", "message:")):
+        dbutil.put(id, message)
+    else:
+        raise Exception("invalid message id:%s" % id)
 
 def add_message_history(message):
     id_str = message['id']
@@ -42,8 +48,6 @@ def search_message(user_name, key, offset, limit):
         words.append(item.lower())
 
     def search_func(key, value):
-        if value.tag == "key":
-            return False
         if value.content is None:
             return False
         return value.user == user_name and textutil.contains_all(value.content.lower(), words)
@@ -79,6 +83,8 @@ def count_message(user, status):
     return db_call("count_message", user, status)
 
 def get_message_by_id(id):
+    if id is None:
+        return None
     return dbutil.get(id)
 
 
@@ -131,9 +137,17 @@ def get_filter_by_tag_func(tag):
         return value.tag == tag
     return filter_func
 
+def list_key(user, offset, limit):
+    items = dbutil.prefix_list("msg_key:%s" % user)
+    items.sort(key = lambda x: x.mtime, reverse = True)
+    return items[offset: offset+limit]
+
 def list_by_tag(user, tag, offset, limit):
-    filter_func = get_filter_by_tag_func(tag)
-    chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    if tag == "key":
+        chatlist = list_key(user, offset, limit)
+    else:
+        filter_func = get_filter_by_tag_func(tag)
+        chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
 
     # 利用message_stat优化count查询
     if tag == "done":
@@ -151,21 +165,30 @@ def list_by_tag(user, tag, offset, limit):
     return chatlist, amount
 
 def count_by_tag(user, tag):
+    if tag == "key":
+        return dbutil.count_table("msg_key:%s" % user)
     return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
 
-def get_message_stat(user):
+def get_message_stat0(user):
     value = dbutil.get("user_stat:%s:message" % user)
     if value is None:
-        return Storage(task_count = 0, cron_count = 0, log_count = 0, done_count = 0, key_count = 0)
+        return Storage()
+    return value
+
+def get_message_stat(user):
+    value = get_message_stat0(user)
+    if value is None:
+        return refresh_message_stat(user)
     return value
 
 def refresh_message_stat(user):
+    # TODO 优化，只需要更新原来的tag和新的tag
     task_count = count_by_tag(user, "task")
     log_count  = count_by_tag(user, "log")
     done_count = count_by_tag(user, "done")
     cron_count = count_by_tag(user, "cron")
     key_count  = count_by_tag(user, "key")
-    stat       = get_message_stat(user)
+    stat       = get_message_stat0(user)
 
     stat.task_count = task_count
     stat.log_count  = log_count
@@ -173,6 +196,7 @@ def refresh_message_stat(user):
     stat.cron_count = cron_count
     stat.key_count  = key_count
     dbutil.put("user_stat:%s:message" % user, stat)
+    return stat
 
 def add_search_history(user, search_key, cost_time = 0):
     key = "msg_search_history:%s:%s" % (user, dbutil.timeseq())

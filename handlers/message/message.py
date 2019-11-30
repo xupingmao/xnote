@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/30 11:52:03
+# @modified 2019/11/30 18:59:28
 
 """短消息"""
 import time
@@ -19,6 +19,12 @@ from xtemplate import T
 
 MSG_DAO = xutils.DAO("message")
 DEFAULT_TAG = "log"
+
+def success():
+    return dict(success = True, code = "success")
+
+def failure(message, code = "fail"):
+    return dict(success = False, code = code, message = message)
 
 def build_search_html(content):
     fmt = '搜索 <a href="/message?category=message&key=%s">%s</a>'
@@ -155,21 +161,23 @@ def update_message_tag(id, tag):
         data.mtime = xutils.format_datetime()
         if tag == "done":
             data.done_time = xutils.format_datetime()
-        dbutil.put(id, data)
+
+        MSG_DAO.update(data)
         MSG_DAO.refresh_message_stat(user_name)
         xmanager.fire("message.updated", Storage(id=id, user=user_name, tag = tag, content = data.content))
 
     return dict(code="success")
 
-class FinishMessage:
+class FinishMessageHandler:
 
+    @xauth.login_required()
     def POST(self):
         id = xutils.get_argument("id")
         if id == "":
             return
         return update_message_tag(id, "done")
 
-class OpenMessage:
+class OpenMessageHandler:
 
     def POST(self):
         id = xutils.get_argument("id")
@@ -179,6 +187,7 @@ class OpenMessage:
 
 class UpdateTagHandler:
 
+    @xauth.login_required()
     def POST(self):
         id = xutils.get_argument("id")
         tag = xutils.get_argument("tag")
@@ -187,14 +196,29 @@ class UpdateTagHandler:
         if tag in ("task", "cron", "log", "key"):
             return update_message_tag(id, tag)
         else:
-            return dict(success = False, message = "invalid tag")
+            return failure(message = "invalid tag")
 
 class UpdateStatusHandler:
 
+    @xauth.login_required()
     def POST(self):
         id     = xutils.get_argument("id")
         status = xutils.get_argument("status", type=int)
         return update_message_status(id, status)
+
+class TouchHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        id = xutils.get_argument("id")
+        msg = MSG_DAO.find_by_id(id)
+        if msg is None:
+            return failure(message = "message not found, id:%s" % id)
+        if msg.user != xauth.current_name():
+            return failure(message = "not authorized")
+        msg.mtime = xutils.format_datetime()
+        MSG_DAO.update(msg)
+        return success()
 
 class DeleteHandler:
 
@@ -203,7 +227,7 @@ class DeleteHandler:
         id = xutils.get_argument("id")
         if id == "":
             return
-        msg = xutils.call("message.find_by_id", id)
+        msg = MSG_DAO.find_by_id(id)
         if msg is None:
             return dict(code="fail", message="data not exists")
         
@@ -294,7 +318,7 @@ class MessageHandler:
             category           = "message",
             search_action      = "/message", 
             html_title         = T("待办"),
-            search_placeholder = T("搜索待办"),
+            search_placeholder = T("搜索待办事项"),
             default_content    = default_content,
             message_stat       = stat,
             key                = key)
@@ -328,8 +352,9 @@ xurls=(
     r"/message/list", ListHandler,
     r"/message/delete", DeleteHandler,
     r"/message/update", SaveHandler,
-    r"/message/open", OpenMessage,
-    r"/message/finish", FinishMessage,
+    r"/message/open", OpenMessageHandler,
+    r"/message/finish", FinishMessageHandler,
+    r"/message/touch", TouchHandler,
     r"/message/date", DateHandler,
     r"/message/calendar", CalendarHandler,
     r"/message/stat", StatHandler,

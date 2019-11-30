@@ -41,6 +41,10 @@ def _get_users():
         if user.name is None:
             xutils.trace("UserList", "invalid user %s" % user)
             continue
+        if isinstance(user.config, dict):
+            user.config = Storage(**user.config)
+        else:
+            user.config = Storage()
         name = user.name.lower()
         _users[name] = user
     return _users
@@ -61,6 +65,14 @@ def get_user(name):
     if xconfig.IS_TEST:
         return users.get("admin")
     return users.get(name)
+
+def get_user_config(name):
+    user = get_user(name)
+    if user != None:
+        if user.config is None:
+            user.config = Storage()
+        return user.config
+    return None
 
 def find_by_name(name):
     if name is None:
