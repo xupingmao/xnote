@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/30 18:59:28
+# @modified 2019/11/30 23:36:58
 
 """短消息"""
 import time
@@ -19,6 +19,13 @@ from xtemplate import T
 
 MSG_DAO = xutils.DAO("message")
 DEFAULT_TAG = "log"
+TAG_TEXT_DICT = dict(
+    done = "完成",
+    cron = "定期",
+    task = "任务",
+    log = "记事",
+    key = "话题"
+)
 
 def success():
     return dict(success = True, code = "success")
@@ -36,6 +43,8 @@ def process_message(message):
         message.tag = "task"
     if message.status == 100:
         message.tag = "done"
+
+    message.tag_text = TAG_TEXT_DICT.get(message.tag, message.tag)
 
     if message.content is None:
         message.content = ""
@@ -306,7 +315,11 @@ class MessageHandler:
         user = xauth.current_name()
         key  = xutils.get_argument("key", "")
         if key != None and key != "":
-            default_content = "#%s# " % key
+            if key[0] == '#':
+                # 精确搜索
+                default_content = key
+            else:
+                default_content = "#%s# " % key
         else:
             default_content = ""
 

@@ -19,7 +19,7 @@
 
     {% include message/header.html %}
 
-    <div class="message-input col-md-12 card" v-if="inputBoxVisible">
+    <div class="message-input-box card" v-if="inputBoxVisible">
         <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" v-bind:placeholder="placeholder">{{default_content}}</textarea>
 
         <input type="file" id="filePicker" class="hide" multiple/>
@@ -56,6 +56,7 @@
                     <!-- 时间 -->
                     <div class="message-item-header">
                         <span class="chat-msg-time">{{! message.ctime }}</span>
+                        <span v-bind:class="[message.tag_class]">{{! message.tag_text }}</span>
                     </div>
                     
                     <!-- 解析出的html -->
@@ -128,16 +129,8 @@
         });
     }
 
-    function newMessage(content, user, status) {
-        return {"content": content, html: content, user:user, status:status, editable: false}
-    }
-
-    function wrapMessage(message) {
-        message.editable = false;
-        return message;
-    }
-
     var currentTag = getUrlParam("tag");
+    var searchKey  = getUrlParam("key");
     var hiddenInputBoxTags = ["file", "link", "done", "notice", "all"];
     var placeholder = "记录发生的事情、产生的想法";
 
@@ -152,6 +145,25 @@
     }
     if (currentTag == "key") {
         placeholder = "存储话题（关键字）";
+    }
+
+    function newMessage(content, user, status) {
+        return {"content": content, html: content, user:user, status:status, editable: false}
+    }
+
+    function wrapMessage(message) {
+        message.editable = false;
+        if (currentTag == "file" || currentTag == "all" || currentTag == "link" || searchKey) {
+            // 只有特殊处理的才需要渲染tag
+            if (message.tag == "task") {
+                message.tag_class = "msg-tag-orange";
+            } else {
+                message.tag_class = "msg-tag";
+            }
+        } else {
+            message.tag_class = "hide";
+        }
+        return message;
     }
 
     var app = new Vue({

@@ -1513,7 +1513,7 @@ li.menu-item:hover {
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2019/11/26 00:22:28
+ * @modified 2019/11/30 21:53:55
 */
 
 
@@ -1595,6 +1595,17 @@ li.menu-item:hover {
 
 .right {
     float: right;
+}
+
+.msg-tag,.msg-tag-orange {
+    padding-left: 5px;
+    padding-right: 5px;
+    color: white;
+    background-color: #ccc;
+}
+
+.msg-tag-orange {
+    background-color: orange;
 }/**
  * 笔记的CSS样式
  * @author xupingmao

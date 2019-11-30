@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/11/28 00:42:01
+# @modified 2019/11/30 21:14:21
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -340,6 +340,7 @@ def encode_uri_component(url):
     quoted = quoted.replace(" ", "%20")
     quoted = quoted.replace("=", "%3D")
     quoted = quoted.replace("+", "%2B")
+    quoted = quoted.replace("#", "%23")
     return quoted
 
 def get_safe_file_name(filename):
