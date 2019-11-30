@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/27 00:26:33
+# @modified 2019/11/30 11:52:03
 
 """短消息"""
 import time
@@ -41,7 +41,10 @@ def process_message(message):
         message.html = xutils.mark_text(message.content)
 
     if message.tag == "done":
-        message.html += "<br>------<br>完成于 %s" % message.mtime
+        done_time = message.done_time
+        if done_time is None:
+            done_time = message.mtime
+        message.html += "<br>------<br>完成于 %s" % done_time
     return message
 
 def fuzzy_item(item):
@@ -150,6 +153,8 @@ def update_message_tag(id, tag):
             del data['status']
         data.tag   = tag
         data.mtime = xutils.format_datetime()
+        if tag == "done":
+            data.done_time = xutils.format_datetime()
         dbutil.put(id, data)
         MSG_DAO.refresh_message_stat(user_name)
         xmanager.fire("message.updated", Storage(id=id, user=user_name, tag = tag, content = data.content))
@@ -300,9 +305,12 @@ class CalendarHandler:
     def GET(self):
         from .dao import count_message
         user = xauth.current_name()
+        stat = MSG_DAO.get_message_stat(user)
+        stat = format_message_stat(stat)
+
         return xtemplate.render("message/calendar.html", 
             show_aside = False,
-            message_stat = MSG_DAO.get_message_stat(user),
+            message_stat = stat,
             count_message = count_message)
 
 class StatHandler:
