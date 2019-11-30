@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/11/12 22:54:09
+# @modified 2019/11/30 17:23:52
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -29,7 +29,7 @@ import xauth
 import threading
 from collections import deque
 from threading import Thread, Timer, current_thread
-from xutils import Storage, Queue, tojson, MyStdout, cacheutil, u, dbutil
+from xutils import Storage, Queue, tojson, MyStdout, cacheutil, u, dbutil, fsutil
 
 __version__      = "1.0"
 __author__       = "xupingmao (578749341@qq.com)"
@@ -624,44 +624,55 @@ class PluginContext:
 def is_plugin_file(fpath):
     return os.path.isfile(fpath) and fpath.endswith(".py")
 
+def load_plugin_file(fpath, fname = None):
+    if fname is None:
+        fname = os.path.basename(fpath)
+    dirname = os.path.dirname(fpath)
+
+    # plugin name
+    pname = fsutil.get_relative_path(fpath, xconfig.PLUGINS_DIR)
+
+    vars = dict()
+    vars["script_name"] = pname
+    vars["fpath"] = fpath
+    try:
+        module = xutils.load_script(fname, vars, dirname = dirname)
+        main_class = vars.get("Main")
+        if main_class != None:
+            main_class.fname = fname
+            main_class.fpath = fpath
+            instance = main_class()
+            context = PluginContext()
+            context.fname = fname
+            context.fpath = fpath
+            context.name = os.path.splitext(fname)[0]
+            context.title = getattr(instance, "title", "")
+            context.category = xutils.attrget(instance, "category")
+            context.url = "/plugins/%s" % pname
+            if hasattr(main_class, 'on_init'):
+                instance.on_init(context)
+            context.clazz = main_class
+            xconfig.PLUGINS_DICT[pname] = context
+    except:
+        xutils.print_exc()
+
 def load_sub_plugins(dirname):
     for fname in os.listdir(dirname):
         fpath = os.path.join(dirname, fname)
         if is_plugin_file(fpath):
-            # TODO 支持插件子目录
-            pass
+            # 支持插件子目录
+            load_plugin_file(fpath, fname)
 
 def load_plugins(dirname):
     if not xconfig.LOAD_PLUGINS_ON_INIT:
         return
-    xconfig.PLUGINS = {}
+    xconfig.PLUGINS_DICT = {}
     for fname in os.listdir(dirname):
         fpath = os.path.join(dirname, fname)
         if os.path.isdir(fpath):
             load_sub_plugins(fpath)
         if is_plugin_file(fpath):
-            script_name = "plugins/" + fname
-            vars = dict()
-            vars["script_name"] = script_name
-            vars["fpath"] = fpath
-            try:
-                module = xutils.load_script(script_name, vars)
-                main_class = vars.get("Main")
-                if main_class != None:
-                    main_class.fname = fname
-                    main_class.fpath = fpath
-                    instance = main_class()
-                    context = PluginContext()
-                    context.fname = fname
-                    context.name = os.path.splitext(fname)[0]
-                    context.title = getattr(instance, "title", "")
-                    context.category = xutils.attrget(instance, "category")
-                    if hasattr(main_class, 'on_init'):
-                        instance.on_init(context)
-                    context.clazz = main_class
-                    xconfig.PLUGINS[fname] = context
-            except:
-                xutils.print_exc()
+            load_plugin_file(fpath, fname)
 
 @xutils.timeit(logfile=True, logargs=True, name="FindPlugins")
 def find_plugins(category):
@@ -675,14 +686,17 @@ def find_plugins(category):
     if category == "None":
         category = None
 
-    for fname in xconfig.PLUGINS:
-        p = xconfig.PLUGINS.get(fname)
+    for fname in xconfig.PLUGINS_DICT:
+        p = xconfig.PLUGINS_DICT.get(fname)
         if p and xutils.attrget(p.clazz, "category") == category:
             required_role = xutils.attrget(p.clazz, "required_role")
             if role == "admin" or required_role is None or required_role == role:
                 plugins.append(p)
     plugins.sort()
     return plugins
+
+def list_plugins(category):
+    return 
 
 def put_task(func, *args, **kw):
     """添加异步任务到队列"""

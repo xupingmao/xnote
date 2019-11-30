@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/10/23 01:02:18
+# @modified 2019/11/30 17:11:03
 
 '''xnote系统配置
 
@@ -73,7 +73,7 @@ HOME_PATH     = "/note/books"
 
 # 插件相关
 LOAD_PLUGINS_ON_INIT = True
-PLUGINS              = {}
+PLUGINS_DICT         = {}
 
 # 菜单配置
 MENU_LIST    = []

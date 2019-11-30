@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/11/12 02:38:56
+# @modified 2019/11/30 17:25:22
 from io import StringIO
 import xconfig
 import codecs
@@ -62,55 +62,39 @@ INNER_TOOLS = [
 def build_inner_tools():
     return copy.copy(INNER_TOOLS)
 
-def build_plugin_links(dirname, fnames):
+def build_plugin_links(plugins):
     links = []
-    for fname in fnames:
-        fpath = os.path.join(dirname, fname)
-        if not os.path.exists(fpath):
-            continue
-        name, ext = os.path.splitext(fname)
-        name = xutils.unquote(name)
-        item = link(name, "/plugins/" + name)
+    for plugin in plugins:
+        fname = plugin.fname
+        fpath = plugin.fpath
+
+        item = link(plugin.title, plugin.url)
         item.editable = True
-        # st = os.stat(fpath)
-        # item.atime = xutils.format_date(st.st_atime)
-        atime = cacheutil.zscore("plugins.history", fname)
+        atime = cacheutil.zscore("plugins.history", plugin.name)
         if atime:
             item.atime = xutils.format_date(atime)
         else:
             item.atime = ""
 
         item.edit_link = "/code/edit?path=" + fpath
-        plugin_context = xconfig.PLUGINS.get(fname)
-        item.title = ''
-        if plugin_context is not None:
-            item.title = plugin_context.title
-            item.category = plugin_context.category
-        else:
-            item.title = name
+        item.title = plugin.title
+
         links.append(item)
+
     return links
 
 def list_plugins(category):
-    dirname = xconfig.PLUGINS_DIR
-    if not os.path.isdir(dirname):
-        return []
-
     if category == "other":
         plugins = xmanager.find_plugins(None)
-        links = build_plugin_links(dirname, [p.fname for p in plugins])
+        links = build_plugin_links(plugins)
     elif category and category != "all":
         # 某个分类的插件
         plugins = xmanager.find_plugins(category)
-        links = build_plugin_links(dirname, [p.fname for p in plugins])
+        links = build_plugin_links(plugins)
     else:
         # 所有插件
-        recent_names = cacheutil.zrange("plugins.history", -MAX_HISTORY, -1)
-        recent_names.reverse()
-        plugins_list = os.listdir(dirname)
-        plugins_list = set(plugins_list) - set(recent_names)
         links = build_inner_tools()
-        links += build_plugin_links(dirname, recent_names + sorted(plugins_list))    
+        links += build_plugin_links(xconfig.PLUGINS_DICT.values())    
     return links
 
 def find_plugin_by_name(name):
@@ -138,7 +122,7 @@ def log_plugin_visit(name):
 
 def load_plugin(name):
     log_plugin_visit(name)
-    context = xconfig.PLUGINS.get(name)
+    context = xconfig.PLUGINS_DICT.get(name)
     if xconfig.DEBUG or context is None:
         script_name = "plugins/" + name
         fpath = os.path.join(xconfig.PLUGINS_DIR, name)
@@ -164,14 +148,14 @@ def on_search_plugins(ctx):
         return
     name    = ctx.key
     results = []
-    dirname = xconfig.PLUGINS_DIR
     words   = textutil.split_words(name)
-    for fname in xutils.listdir(dirname):
-        unquote_name = xutils.unquote(fname)
+    for name in xconfig.PLUGINS_DICT:
+        plugin = xconfig.PLUGINS_DICT[name]
+        unquote_name = xutils.unquote(plugin.fname)
         unquote_name, ext = os.path.splitext(unquote_name)
-        plugin_context = xconfig.PLUGINS.get(fname)
+        plugin_context = plugin
         if textutil.contains_all(unquote_name, words) \
-                or (plugin_context != None and textutil.contains_all(plugin_context.title, words)):
+                or (textutil.contains_all(plugin_context.title, words)):
             result           = SearchResult()
             result.category  = "plugin"
             result.icon      = "fa-cube"
@@ -181,8 +165,8 @@ def on_search_plugins(ctx):
                 # result.name = u("插件 %s (%s)") % (u(plugin_context.title), unquote_name)
                 if plugin_context.title != None:
                     result.name = u(plugin_context.title + "(" + unquote_name + ")")
-            result.url       = u("/plugins/" + unquote_name)
-            result.edit_link = u("/code/edit?path=" + os.path.join(dirname, fname))
+            result.url       = u(plugin.url)
+            result.edit_link = u("/code/edit?path=" + plugin.fpath)
             results.append(result)
     ctx.tools += results
 
@@ -219,8 +203,6 @@ class PluginsListHandler:
         if xauth.is_admin():
             recent   = list_recent_plugins()
             plugins  = list_plugins(category)
-
-            # note_plugins = list(filter(lambda x: x.category == "note", plugins))
             note_plugins = list_plugins("note")
             dev_plugins  = list_plugins("develop")
             sys_plugins  = list_plugins("system")
