@@ -472,6 +472,28 @@
         }
     });
 
+    $(document).on("paste", function (e) {
+        console.log(e);
+        var clipboardData = e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {};
+        // console.log(clipboardData);
+
+        if (clipboardData.items) {
+            arrForEach(clipboardData.items, function (item, index) {
+                var value = item.value;
+                // console.log(item, value);
+                if (/image/i.test(item.type)) {
+                    console.log(item);
+                    var blob = item.getAsFile();
+                    xnote.uploadBlob(blob, 'msg', function (respJson) {
+                        console.log(respJson);
+                        var link = "file://" + respJson.webpath;
+                        app.input += link + '\n';
+                    });
+                }
+            })
+        }
+    });
+
 </script>
 
 {% end %}
