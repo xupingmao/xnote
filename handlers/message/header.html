@@ -1,20 +1,28 @@
 <!-- header.html -->
 <div class="col-md-12 message-status card">
-    <a class="tab tab-link x-tab" href="/message?tag=task">
-        任务(<span class="task-count">{{message_stat.task_count}}</span>)
-    </a>
-    <a class="tab tab-link x-tab" href="/message?tag=cron">
-        定期(<span class="cron-count">{{message_stat.cron_count}}</span>)
-    </a>
-    <a class="tab tab-link x-tab" href="/message?tag=log">
-        记事(<span class="log-count">{{message_stat.log_count}}</span>)
-    </a>
-    <a class="tab tab-link x-tab" href="/message?tag=done">
-        完成(<span class="done-count">{{message_stat.done_count}}</span>)
-    </a>
-    <a class="tab tab-link x-tab" href="/message?tag=key">
-        话题(<span class="key-count">{{message_stat.key_count}}</span>)
-    </a>
+    {% if True %}
+        <a class="tab tab-link x-tab" href="/message?tag=task">
+            任务(<span class="task-count">{{message_stat.task_count}}</span>)
+        </a>
+        <a class="tab tab-link x-tab" href="/message?tag=cron">
+            定期(<span class="cron-count">{{message_stat.cron_count}}</span>)
+        </a>
+        <a class="tab tab-link x-tab" href="/message?tag=done">
+            完成(<span class="done-count">{{message_stat.done_count}}</span>)
+        </a>
+        <a class="tab tab-link x-tab" href="/message?tag=log">
+            记事(<span class="log-count">{{message_stat.log_count}}</span>)
+        </a>
+        <a class="tab tab-link x-tab" href="/message?tag=key">
+            话题(<span class="key-count">{{message_stat.key_count}}</span>)
+        </a>
+    {% else %}
+        <a class="tab tab-link x-tab" href="/message?tag=task">任务</a>
+        <a class="tab tab-link x-tab" href="/message?tag=cron">定期</a>
+        <a class="tab tab-link x-tab" href="/message?tag=done">完成</a>
+        <a class="tab tab-link x-tab" href="/message?tag=log">记事</a>
+        <a class="tab tab-link x-tab" href="/message?tag=key">话题</a>
+    {% end %}
     <a class="tab tab-link x-tab" href="/message?tag=file">文件</a>
     <a class="tab tab-link x-tab" href="/message?tag=link">链接</a>
     <a class="tab tab-link x-tab" href="/message?tag=all">全部</a>

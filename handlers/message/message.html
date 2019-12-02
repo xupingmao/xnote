@@ -12,8 +12,11 @@
 
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
-{% include common/mod_search.html %}
+{% if from_ == "note" %}
+    {% include common/mod_search.html %}
+{% end %}
 
+<input class="default-content-input" type="hidden" value="{{default_content}}"/>
 <div id="app" class="col-md-12">
     {# include common/mod_notice.html #}
 
@@ -24,7 +27,7 @@
 
         <input type="file" id="filePicker" class="hide" multiple/>
         <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
-        <input type="button" name="" class="send-button btn" value="创建" @click="sendMessage()">
+        <input type="button" name="" class="send-button btn" value="创建" @click="createMessage()">
         <div id="uploadProgress" style="float: right;" ></div>
     </div>
 
@@ -133,6 +136,7 @@
     var searchKey  = getUrlParam("key");
     var hiddenInputBoxTags = ["file", "link", "done", "notice", "all"];
     var placeholder = "记录发生的事情、产生的想法";
+    var defaultContent = $(".default-content-input").val();
 
     if (currentTag == "task") {
         placeholder = "记录要完成的任务";
@@ -182,7 +186,8 @@
             seen: false,
             rawHtml: "{{!message}}",
             url: "https://www.baidu.com",
-            input: "{{default_content}}",
+            input: defaultContent,
+            attachments: [],
             page_max: 2,
             page: 1,
             page_url: "/message?pagesize=20&page=",
@@ -242,7 +247,7 @@
                 });
             },
 
-            sendMessage: function () {
+            createMessage: function () {
                 if (this.input == "") {
                     return;
                 }
@@ -250,6 +255,7 @@
                 $.post("/message/save", 
                     {
                         content:self.input, 
+                        attachments: self.attachments,
                         tag: getUrlParam("tag")
                     },
                     function (respText) {
@@ -257,7 +263,7 @@
                         if (data.code == "success") {
                             var msg = wrapMessage(data.data);
                             self.messageList.push(msg);
-                            self.input = "{{default_content}}";
+                            self.input = defaultContent;
                         } else {
                             alert(data.message);
                         }
@@ -374,6 +380,7 @@
     var BASE_URL = "/static/lib/webuploader"
     // 初始化Web Uploader
     var uploader = xnote.createUploader();
+    var loadingIndex = 0;
 
     // 当有文件添加进来的时候
     uploader.on( 'fileQueued', function( file ) {
@@ -456,6 +463,8 @@
         var webpath = file.webpath;
         var content = 'file://$name'.replace(/\$name/g, file.webpath);
         app.input += content + "\n";
+
+        layer.close(loadingIndex);
     });
 
     $("#filePickerBtn").on("click", function (event) {
@@ -468,6 +477,7 @@
         var fileList = event.target.files; //获取文件对象 
         console.log(fileList);
         if (fileList && fileList.length > 0) {
+            loadingIndex = layer.load(2);
             uploader.addFile(fileList);
         }
     });
@@ -482,12 +492,15 @@
                 var value = item.value;
                 // console.log(item, value);
                 if (/image/i.test(item.type)) {
+                    // 阻断编辑
+                    var index = layer.load(1);
                     console.log(item);
                     var blob = item.getAsFile();
                     xnote.uploadBlob(blob, 'msg', function (respJson) {
                         console.log(respJson);
                         var link = "file://" + respJson.webpath;
                         app.input += link + '\n';
+                        layer.close(index);
                     });
                 }
             })

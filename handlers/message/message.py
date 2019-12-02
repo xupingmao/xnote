@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/11/30 23:36:58
+# @modified 2019/12/03 00:33:14
 
 """短消息"""
 import time
@@ -125,12 +125,12 @@ class ListHandler:
         page_max = math.ceil(amount / pagesize)
         chatlist = list(map(process_message, chatlist))
 
-        return dict(code="success", message="", 
-            pagesize = pagesize,
-            data = chatlist, 
+        return dict(code="success", message = "", 
+            data   = chatlist, 
             amount = amount, 
             page_max = page_max, 
-            current_user = xauth.get_current_name())
+            pagesize = pagesize,
+            current_user = xauth.current_name())
 
 def update_message_status(id, status):
     user_name = xauth.current_name()
@@ -312,8 +312,10 @@ class MessageHandler:
 
     @xauth.login_required()
     def GET(self):
-        user = xauth.current_name()
-        key  = xutils.get_argument("key", "")
+        user  = xauth.current_name()
+        key   = xutils.get_argument("key", "")
+        from_ = xutils.get_argument("from")
+
         if key != None and key != "":
             if key[0] == '#':
                 # 精确搜索
@@ -334,7 +336,8 @@ class MessageHandler:
             search_placeholder = T("搜索待办事项"),
             default_content    = default_content,
             message_stat       = stat,
-            key                = key)
+            key                = key,
+            from_              = from_)
 
 
 class CalendarHandler:

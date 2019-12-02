@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/11/30 21:14:21
+# @modified 2019/12/02 23:58:50
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -333,15 +333,15 @@ def urlsafe_b64encode(text):
 def urlsafe_b64decode(text):
     return base64.urlsafe_b64decode(text.encode("utf-8")).decode("utf-8")
 
-def encode_uri_component(url):
-    quoted = quote_unicode(url)
-    quoted = quoted.replace("?", "%3F")
-    quoted = quoted.replace("&", "%26")
-    quoted = quoted.replace(" ", "%20")
-    quoted = quoted.replace("=", "%3D")
-    quoted = quoted.replace("+", "%2B")
-    quoted = quoted.replace("#", "%23")
-    return quoted
+def encode_uri_component(text):
+    # quoted = quote_unicode(text)
+    # quoted = quoted.replace("?", "%3F")
+    # quoted = quoted.replace("&", "%26")
+    # quoted = quoted.replace(" ", "%20")
+    # quoted = quoted.replace("=", "%3D")
+    # quoted = quoted.replace("+", "%2B")
+    # quoted = quoted.replace("#", "%23")
+    return quote(text)
 
 def get_safe_file_name(filename):
     """处理文件名中的特殊符号"""
