@@ -60,6 +60,7 @@
     background-color: #337ab7;
     color: white;
     border-radius: 5px 5px 0px 0px;
+    /*border-radius: 0px;*/
     text-align: center;
   }
 
@@ -82,7 +83,7 @@
     display: none;
   }
 
-  @media screen and (max-width: 950px) {
+  @media screen and (max-width: 1000px) {
     .x-body {
       padding: 0px;
       background-color: transparent;
@@ -106,7 +107,7 @@
 
     .login-footer {
       position: absolute;
-      bottom: 50px;
+      bottom: 10px;
       text-align: center;
       background-color: transparent;
     }
@@ -139,11 +140,20 @@
 
 <script type="text/javascript">
 $(function () {
-  var bodyWidth = $(".login-body").width();
-  if (bodyWidth < 400) {
-    var height = $(".login-body").outerHeight();
-    $(".login-body").css("top", (getWindowHeight() - height) / 2);
+  function adjustLoginBody() {  
+    var bodyWidth = $(".login-body").width();
+
+    console.log("bodyWidth=" + bodyWidth);
+    console.log("windowHeight=" + getWindowHeight());
+
+    if (bodyWidth < 1000) {
+      var height = $(".login-body").outerHeight();
+      $(".login-body").css("top", (getWindowHeight() - height) / 2);
+    }
   }
+
+  adjustLoginBody();
+  window.onresize = adjustLoginBody;
 })
 </script>
 

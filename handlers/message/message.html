@@ -384,50 +384,14 @@
 
     // 当有文件添加进来的时候
     uploader.on( 'fileQueued', function( file ) {
-        var $li = $(
-                '<div id="' + file.id + '" class="file-item thumbnail">' +
-                    '<img>' +
-                    '<div class="info">' + file.name +
-                    '<span class="finished-tag" id="' + file.id + '-result"></span>' + 
-                     '</div>' +
-                '</div>'
-                ),
-            $img = $li.find('img');
-
-        $list = $("#fileList");
-        // $list为容器jQuery实例
-        $list.append( $li );
-
-        // 创建缩略图
-        // 如果为非图片文件，可以不用调用此方法。
-        // thumbnailWidth x thumbnailHeight 为 100 x 100
-        var thumbnailWidth = 100;
-        var thumbnailHeight = 100;
-        uploader.makeThumb( file, function( error, src ) {
-            if ( error ) {
-                $img.replaceWith('<span>不能预览</span>');
-                return;
-            }
-
-            $img.attr( 'src', src );
-        }, thumbnailWidth, thumbnailHeight );
+        // 接受文件
     });
 
 
     // 文件上传过程中创建进度条实时显示。
     uploader.on( 'uploadProgress', function( file, percentage ) {
-        var $li = $( '#uploadProgress' ),
-        $percent = $li.find('.progress span');
-
-        // 避免重复创建
-        if ( !$percent.length ) {
-            $percent = $('<div class="progress"><span></span></div>')
-                    .appendTo( $li )
-                    .find('span');
-        }
-
-        $percent.css( 'width', percentage * 100 + '%' );
-        $percent.text( (percentage * 100).toFixed(2) + '%');
+        var percent = (percentage * 100).toFixed(2) + '%';
+        console.log('upload process ' + percent)
     });
 
     uploader.on( 'uploadBeforeSend', function (object, data, headers) {
@@ -437,25 +401,12 @@
 
     // 文件上传成功，给item添加成功class, 用样式标记上传成功。
     uploader.on( 'uploadSuccess', function( file, resp) {
-        $( '#uploadProgress' ).find('.progress').remove();
-        var $li = $( '#uploadProgress' );
-        $('<div class="progress"><span>上传完成</span></div>')
-                    .appendTo( $li )
-                    .find('span');
         file.webpath = resp.webpath;
     });
 
     // 文件上传失败，显示上传出错。
     uploader.on( 'uploadError', function( file ) {
-        var $li = $( '#'+file.id ),
-            $error = $li.find('div.error');
-
-        // 避免重复创建
-        if ( !$error.length ) {
-            $error = $('<div class="error"></div>').appendTo( $li );
-        }
-
-        $error.text('上传失败');
+        layer.alert('上传失败');
     });
 
     // 完成上传完了，成功或者失败，先删除进度条。

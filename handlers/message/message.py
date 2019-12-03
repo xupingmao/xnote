@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/12/03 00:33:14
+# @modified 2019/12/04 00:18:27
 
 """短消息"""
 import time
@@ -93,7 +93,7 @@ def format_message_stat(stat):
     stat.search_count = format_count(stat.search_count)
     return stat
 
-class ListHandler:
+class ListAjaxHandler:
 
     def GET(self):
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
@@ -243,6 +243,10 @@ class DeleteHandler:
         if msg.user != xauth.current_name():
             return dict(code="fail", message="no permission")
 
+        # 先保存历史
+        MSG_DAO.add_history(msg)
+
+        # 删除并刷新统计信息
         MSG_DAO.delete(id)
         MSG_DAO.refresh_message_stat(msg.user)
         return dict(code="success")
@@ -343,7 +347,6 @@ class MessageHandler:
 class CalendarHandler:
 
     def GET(self):
-        from .dao import count_message
         user = xauth.current_name()
         stat = MSG_DAO.get_message_stat(user)
         stat = format_message_stat(stat)
@@ -351,7 +354,8 @@ class CalendarHandler:
         return xtemplate.render("message/calendar.html", 
             show_aside = False,
             message_stat = stat,
-            count_message = count_message)
+            search_action      = "/message", 
+            search_placeholder = T("搜索待办事项"))
 
 class StatHandler:
 
@@ -365,7 +369,7 @@ xurls=(
     r"/message", MessageHandler,
     r"/message/save", SaveHandler,
     r"/message/status", UpdateStatusHandler,
-    r"/message/list", ListHandler,
+    r"/message/list", ListAjaxHandler,
     r"/message/delete", DeleteHandler,
     r"/message/update", SaveHandler,
     r"/message/open", OpenMessageHandler,
