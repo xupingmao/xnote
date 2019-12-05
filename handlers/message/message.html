@@ -47,6 +47,21 @@
                     <input type="button" value="删除" class="btn-danger hide" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" @click="deleteMessage($event)">
                     <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel">
                 </template>
+                <div v-else-if="message.tag == 'key'">
+                    <div v-if="message.html" class="msg-item-content">
+                        <div class="float-left" v-html="message.html"></div>
+                        
+                        <a class="smallText msg-right-op-link red" v-bind:msg-id="message.id" href="javascript:void(0)" 
+                            v-bind:msg-id="message.id" 
+                            v-bind:msg-content="message.content" 
+                            @click="deleteMessage($event)">删除</a>
+
+                        <a class="smallText msg-right-op-link" v-if="message.tag == 'key'" 
+                            v-bind:msg-id="message.id" 
+                            href="javascript:void(0)" 
+                            @click="touchMessage($event)">置顶</a>
+                    </div>
+                </div>
                 <div v-else>
                     <div v-if="message.link">
                         <a v-bind:href="message.link">{{! message.link }}</a>
@@ -57,17 +72,17 @@
                         </a>
                     </div>
                     <!-- 时间 -->
-                    <div class="message-item-header">
+                    <div class="msg-item-header">
                         <span class="chat-msg-time">{{! message.ctime }}</span>
                         <span v-bind:class="[message.tag_class]">{{! message.tag_text }}</span>
                     </div>
                     
                     <!-- 解析出的html -->
-                    <div v-if="message.html" class="chat-msg-content" v-html="message.html">
+                    <div v-if="message.html" class="msg-item-content" v-html="message.html">
                     </div>
 
                     <!-- 操作 -->
-                    <div class="col-md-12">
+                    <div class="msg-item-option">
                         <p class="chat-msg-option">
 
                             <!-- task 专用 -->
@@ -85,7 +100,7 @@
                             <!-- key专用 -->
                             <a class="smallText msg-left-op-link" v-if="message.tag == 'key'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="touchMessage($event)">置顶</a>
 
-                            <a class="smallText red float-right" v-bind:msg-id="message.id" href="javascript:void(0)" v-bind:msg-id="message.id" v-bind:msg-content="message.content" @click="deleteMessage($event)">删除</a>
+                            <a class="smallText msg-right-op-link red" v-bind:msg-id="message.id" href="javascript:void(0)" v-bind:msg-id="message.id" v-bind:msg-content="message.content" @click="deleteMessage($event)">删除</a>
 
                             <a class="smallText hide" v-on:click="openMarkDialog(message)" href="javascript:void(0)">标记</a>
                         </p>
