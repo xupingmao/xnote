@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/12/04 00:18:27
+# @modified 2019/12/07 12:05:08
 
 """短消息"""
 import time
@@ -17,8 +17,8 @@ import xtemplate
 from xutils import BaseRule, Storage, cacheutil, dbutil, textutil
 from xtemplate import T
 
-MSG_DAO = xutils.DAO("message")
-DEFAULT_TAG = "log"
+MSG_DAO       = xutils.DAO("message")
+DEFAULT_TAG   = "log"
 TAG_TEXT_DICT = dict(
     done = "完成",
     cron = "定期",
@@ -103,7 +103,7 @@ class ListAjaxHandler:
         offset = (page-1) * pagesize
         user_name = xauth.get_current_name()
 
-        if tag == "task":
+        if tag == "task" or tag == "key":
             pagesize = 1000
 
         if key != "" and key != None:
@@ -220,7 +220,7 @@ class TouchHandler:
     @xauth.login_required()
     def POST(self):
         id = xutils.get_argument("id")
-        msg = MSG_DAO.find_by_id(id)
+        msg = MSG_DAO.get_by_id(id)
         if msg is None:
             return failure(message = "message not found, id:%s" % id)
         if msg.user != xauth.current_name():
@@ -236,7 +236,7 @@ class DeleteHandler:
         id = xutils.get_argument("id")
         if id == "":
             return
-        msg = MSG_DAO.find_by_id(id)
+        msg = MSG_DAO.get_by_id(id)
         if msg is None:
             return dict(code="fail", message="data not exists")
         
@@ -268,6 +268,31 @@ def get_remote_ip():
         return x_forwarded_for.split(",")[0]
     return web.ctx.env.get("REMOTE_ADDR")
 
+def create_message(user_name, tag, content, ip):
+    ctime = xutils.get_argument("date", xutils.format_datetime())
+    message = dict(content = content, 
+        user   = user_name, 
+        tag    = tag,
+        ip     = ip,
+        mtime  = ctime,
+        ctime  = ctime)
+    id = MSG_DAO.create(**message)
+    message['id'] = id
+    MSG_DAO.refresh_message_stat(user_name)
+    
+    xmanager.fire('message.add', dict(id=id, user=user_name, content=content, ctime=ctime))
+    return message
+
+def check_content_for_update(user_name, tag, content):
+    if tag == 'key':
+        return MSG_DAO.get_by_content(user_name, tag, content)
+    return None
+
+def apply_rules(user_name, id, tag, content):
+    ctx = Storage(id = id, content = content, user = user_name, type = "")
+    for rule in rules:
+        rule.match_execute(ctx, content)
+
 class SaveHandler:
 
     @xauth.login_required()
@@ -277,27 +302,20 @@ class SaveHandler:
         tag       = xutils.get_argument("tag", DEFAULT_TAG)
         location  = xutils.get_argument("location", "")
         user_name = xauth.get_current_name()
+        ip        = get_remote_ip()
 
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
-        ctx = Storage(id = id, content = content, user = user_name, type = "")
-        for rule in rules:
-            rule.match_execute(ctx, content)
-
-        ip = get_remote_ip()
+        apply_rules(user_name, id, tag, content)
 
         if id == "" or id is None:
-            ctime = xutils.get_argument("date", xutils.format_datetime())
-            inserted_id = MSG_DAO.create(content = content, 
-                user   = user_name, 
-                tag    = tag,
-                ip     = ip,
-                mtime  = ctime,
-                ctime  = ctime)
-            id = inserted_id
-            MSG_DAO.refresh_message_stat(user_name)
-            
-            xmanager.fire('message.add', dict(id=id, user=user_name, content=content, ctime=ctime))
-            return dict(code="success", data=dict(id=inserted_id, content=content, ctime=ctime))
+            item = check_content_for_update(user_name, tag, content)
+            if item != None:
+                item.mtime = xutils.format_datetime()
+                MSG_DAO.update(item)
+                message = item
+            else:
+                message = create_message(user_name, tag, content, ip)            
+            return dict(code="success", data=message)
         else:
             update_message_content(id, user_name, content)
         return dict(code="success", data=dict(id=id))

@@ -28,7 +28,6 @@
         <input type="file" id="filePicker" class="hide" multiple/>
         <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
         <input type="button" name="" class="send-button btn" value="创建" @click="createMessage()">
-        <div id="uploadProgress" style="float: right;" ></div>
     </div>
 
     <div class="chat-box col-md-12">
@@ -428,7 +427,7 @@
     uploader.on( 'uploadComplete', function( file ) {
         var webpath = file.webpath;
         var content = 'file://$name'.replace(/\$name/g, file.webpath);
-        app.input += content + "\n";
+        app.input += '\n' + content + "\n";
 
         layer.close(loadingIndex);
     });
@@ -465,7 +464,7 @@
                     xnote.uploadBlob(blob, 'msg', function (respJson) {
                         console.log(respJson);
                         var link = "file://" + respJson.webpath;
-                        app.input += link + '\n';
+                        app.input += '\n' + link + '\n';
                         layer.close(index);
                     });
                 }

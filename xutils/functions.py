@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2019/01/13 16:21:23
+# @modified 2019/12/07 11:46:59
 import xconfig
 from xconfig import Storage
 from collections import deque
@@ -237,6 +237,12 @@ def listmerge(list1, list2):
         if c not in target:
             target.append(c)
     return target
+
+def first_or_none(list):
+    if len(list) > 0:
+        return list[0]
+    else:
+        return None
 
 def dictsort(dictionary, key='value'):
     """返回排序之后的字典key列表/value列表

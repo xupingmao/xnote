@@ -1,12 +1,12 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2019/11/30 19:16:18
+# @modified 2019/12/07 11:47:25
 import xutils
 import xconfig
 import xmanager
 import xtables
-from xutils import dbutil, cacheutil, textutil, Storage
+from xutils import dbutil, cacheutil, textutil, Storage, functions
 
 class MessageDO(Storage):
 
@@ -142,6 +142,22 @@ def list_key(user, offset, limit):
     items.sort(key = lambda x: x.mtime, reverse = True)
     return items[offset: offset+limit]
 
+def get_content_filter_func(tag, content):
+    def filter_func(key, value):
+        if tag is None:
+            return value.content == content
+        return value.tag == tag and value.content == content
+    return filter_func
+
+def get_by_content(user, tag, content):
+    if tag == "key":
+        # tag是独立的表，不需要比较tag
+        filter_func = get_content_filter_func(None, content)
+        msg_list = dbutil.prefix_list("msg_key:%s" % user, filter_func, 0, 1)
+        return functions.first_or_none(msg_list)
+    else:
+        return None
+
 def list_by_tag(user, tag, offset, limit):
     if tag == "key":
         chatlist = list_key(user, offset, limit)
@@ -209,6 +225,8 @@ xutils.register_func("message.search", search_message)
 xutils.register_func("message.delete", delete_message_by_id)
 xutils.register_func("message.count", count_message)
 xutils.register_func("message.find_by_id", get_message_by_id)
+xutils.register_func("message.get_by_id",  get_message_by_id)
+xutils.register_func("message.get_by_content", get_by_content)
 xutils.register_func("message.list", list_message_page)
 xutils.register_func("message.list_file", list_file_page)
 xutils.register_func("message.list_link", list_link_page)

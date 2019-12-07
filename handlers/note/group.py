@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/11/24 16:22:37
+# @modified 2019/12/07 11:25:40
 import math
 import time
 import web
@@ -44,7 +44,7 @@ class SystemFolder(GroupItem):
 
     def __init__(self, name, url, size=None):
         GroupItem.__init__(self, name, url, size, "system")
-        self.icon = "system-folder"
+        self.icon = "icon-folder-system"
 
 class NoteLink:
     def __init__(self, name, url, icon = "fa-cube"):
