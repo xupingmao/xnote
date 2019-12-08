@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/12/08 15:04:31
+# @modified 2019/12/08 15:17:23
 
 """短消息"""
 import time
@@ -34,7 +34,7 @@ def failure(message, code = "fail"):
     return dict(success = False, code = code, message = message)
 
 def build_search_html(content):
-    fmt = '搜索 <a href="/message?category=message&key=%s">%s</a>'
+    fmt = u'搜索 <a href="/message?category=message&key=%s">%s</a>'
     return fmt % (xutils.encode_uri_component(content), xutils.html_escape(content))
 
 def build_done_html(message):
@@ -129,7 +129,6 @@ class ListAjaxHandler:
         else:
             if tag == "task" or tag == "key":
                 pagesize = 1000
-            # 所有的
             chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
             
         page_max = math.ceil(amount / pagesize)

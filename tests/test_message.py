@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/12/08 15:00:26
+# @modified 2019/12/08 15:30:01
 
 import sys
 import os
@@ -30,6 +30,9 @@ BaseTestCase = test_base.BaseTestCase
 
 def get_script_path(name):
     return os.path.join(xconfig.SCRIPTS_DIR, name)
+
+def del_msg_by_id(id):
+    json_request("/message/delete", method="POST", data=dict(id=id))
 
 class TextPage(xtemplate.BaseTextPlugin):
 
@@ -76,7 +79,21 @@ class TestMain(BaseTestCase):
         self.assertEqual(2, len(done_list))
 
         for msg in done_list:
-            json_request("/message/delete", method="POST", data=dict(id = msg['id']))
+            del_msg_by_id(msg['id'])
+
+    def test_message_key(self):
+        response = json_request("/message/save", method="POST", data=dict(content="Xnote-Unit-Test", tag="key"))
+        self.assertEqual("success", response.get("code"))
+        data = response.get("data")
+        msg_id = data['id']
+
+        key_result = json_request("/message/list?tag=key")
+        self.assertEqual("success", key_result['code'])
+
+        key_list = key_result['data']
+        self.assertEqual(1, len(key_list))
+
+        del_msg_by_id(msg_id)
 
 
 
