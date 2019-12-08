@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/11/21 14:52:14
+# @modified 2019/12/08 14:10:10
 
 import re
 import os
@@ -25,7 +25,7 @@ from xutils import Queue, History, Storage
 NOTE_DAO = xutils.DAO("note")
 
 config = xconfig
-_rules = []
+_RULES = []
 
 class BaseRule:
 
@@ -35,7 +35,7 @@ class BaseRule:
         self.scope   = scope
 
 def add_rule(pattern, func_str):
-    global _rules
+    global _RULES
     try:
         mod, func_name = func_str.rsplit('.', 1)
         # mod = __import__(mod, None, None, [''])
@@ -43,7 +43,7 @@ def add_rule(pattern, func_str):
         func = getattr(mod, func_name)
         func.modfunc = func_str
         rule = BaseRule(r"^%s\Z" % u(pattern), func)
-        _rules.append(rule)
+        _RULES.append(rule)
     except Exception as e:
         xutils.print_exc()
 
@@ -92,40 +92,61 @@ def list_search_history(user_name, limit = -1):
             history_list.append(item.key)
     return history_list
 
+def build_search_context(user_name, category, key):
+    words                   = textutil.split_words(key)
+    ctx                     = SearchContext()
+    ctx.key                 = key
+    ctx.input_text          = key
+    ctx.words               = words
+    ctx.category            = category
+    ctx.search_message      = (category == "message")
+    ctx.search_note_content = (category == "content")
+    ctx.search_dict         = (category == "dict")
+    ctx.user_name           = user_name
+
+    if ctx.search_message:
+        ctx.search_note = False
+        ctx.search_note_content = False
+        ctx.search_tool = False
+    if ctx.search_dict:
+        ctx.search_note = False
+        ctx.search_tool = False
+    if ctx.search_note_content:
+        ctx.search_tool = False
+    if ctx.category == "book":
+        ctx.search_note = False
+        ctx.search_tool = False
+
+    return ctx
+
+def apply_search_rules(ctx, key):
+    files = []
+    for rule in _RULES:
+        pattern = rule.pattern
+        func = rule.func
+        # re.match内部已经实现了缓存
+        m = re.match(pattern, key)
+        if m:
+            try:
+                start_time0 = time.time()
+                results     = func(ctx, *m.groups())
+                cost_time0  = time.time() - start_time0
+                xutils.trace("SearchHandler", func.modfunc, int(cost_time0*1000))
+                if results is not None:
+                    files += results
+            except Exception as e:
+                xutils.print_exc()
+    return files
+
 class handler:
 
     def do_search(self, page_ctx, key, offset, limit):
-        global _rules
-
-        category = xutils.get_argument("category", "")
-        words    = textutil.split_words(key)
-        files    = []
-        user_name = xauth.get_current_name()
-
-        start_time           = time.time()
-        ctx                  = SearchContext()
-        ctx.key              = key
-        ctx.input_text       = key
-        ctx.words            = words
-        ctx.category         = category
-        ctx.search_message   = (category == "message")
-        ctx.search_note_content = (category == "content")
-        ctx.search_dict      = (category == "dict")
-        ctx.user_name        = user_name
-
-        if ctx.search_message:
-            ctx.search_note = False
-            ctx.search_note_content = False
-            ctx.search_tool = False
-        if ctx.search_dict:
-            ctx.search_note = False
-            ctx.search_tool = False
-        if ctx.search_note_content:
-            ctx.search_tool = False
-        if ctx.category == "book":
-            ctx.search_note = False
-            ctx.search_tool = False
-
+        category   = xutils.get_argument("category", "")
+        words      = textutil.split_words(key)
+        user_name  = xauth.get_current_name()
+        start_time = time.time()
+        ctx        = build_search_context(user_name, category, key)
+        
         # 阻断性的搜索，比如特定语法的
         xmanager.fire("search.before", ctx)
         if ctx.stop:
@@ -134,28 +155,16 @@ class handler:
         # 普通的搜索行为
         xmanager.fire("search", ctx)
 
-        for rule in _rules:
-            pattern = rule.pattern
-            func = rule.func
-            # re.match内部已经实现了缓存
-            m = re.match(pattern, key)
-            if m:
-                try:
-                    start_time0 = time.time()
-                    results     = func(ctx, *m.groups())
-                    cost_time0  = time.time() - start_time0
-                    xutils.trace("SearchHandler", func.modfunc, int(cost_time0*1000))
-                    if results is not None:
-                        files += results
-                except Exception as e:
-                    xutils.print_exc()
+        files = apply_search_rules(ctx, key)
+
         cost_time = int((time.time() - start_time) * 1000)
+        
         log_search_history(user_name, key, category, cost_time)
 
         if ctx.stop:
             return ctx.dicts + ctx.tools + files
 
-        # 慢搜索
+        # 慢搜索,如果时间过长,这个服务会被降级
         xmanager.fire("search.slow", ctx)
         xmanager.fire("search.after", ctx)
 

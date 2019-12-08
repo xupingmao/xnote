@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/12/07 12:05:08
+# @modified 2019/12/08 15:04:31
 
 """短消息"""
 import time
@@ -14,7 +14,7 @@ import xauth
 import xconfig
 import xmanager
 import xtemplate
-from xutils import BaseRule, Storage, cacheutil, dbutil, textutil
+from xutils import BaseRule, Storage, cacheutil, dbutil, textutil, functions, u
 from xtemplate import T
 
 MSG_DAO       = xutils.DAO("message")
@@ -37,6 +37,19 @@ def build_search_html(content):
     fmt = '搜索 <a href="/message?category=message&key=%s">%s</a>'
     return fmt % (xutils.encode_uri_component(content), xutils.html_escape(content))
 
+def build_done_html(message):
+    task = None
+    done_time = message.done_time
+
+    if message.ref != None:
+        task = MSG_DAO.get_by_id(message.ref)
+
+    if task != None:
+        message.html = u("完成任务:<br>&gt;&nbsp;") + xutils.mark_text(task.content)
+    elif done_time is None:
+        done_time = message.mtime
+        message.html += u("<br>------<br>完成于 %s") % done_time
+
 def process_message(message):
     if message.status == 0 or message.status == 50:
         # 兼容历史数据
@@ -56,10 +69,7 @@ def process_message(message):
         message.html = xutils.mark_text(message.content)
 
     if message.tag == "done":
-        done_time = message.done_time
-        if done_time is None:
-            done_time = message.mtime
-        message.html += "<br>------<br>完成于 %s" % done_time
+        build_done_html(message)
     return message
 
 def fuzzy_item(item):
@@ -103,14 +113,12 @@ class ListAjaxHandler:
         offset = (page-1) * pagesize
         user_name = xauth.get_current_name()
 
-        if tag == "task" or tag == "key":
-            pagesize = 1000
-
         if key != "" and key != None:
             # 搜索
             start_time = time.time()
             chatlist, amount = MSG_DAO.search(user_name, key, offset, pagesize)
-            cost_time  = time.time() - start_time
+
+            cost_time  = functions.second_to_ms(time.time() - start_time)
             MSG_DAO.add_search_history(user_name, key, cost_time)
         elif tag == "file":
             # 文件
@@ -119,6 +127,8 @@ class ListAjaxHandler:
             # 链接
             chatlist, amount = MSG_DAO.list_link(user_name, offset, pagesize)
         else:
+            if tag == "task" or tag == "key":
+                pagesize = 1000
             # 所有的
             chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
             
@@ -159,6 +169,17 @@ def update_message_content(id, user_name, content):
 
         xmanager.fire("message.update", dict(id=id, user=user_name, content=content))
 
+def add_done_message(old_message):
+    old_id = old_message['id']
+
+    new_message = old_message.copy()
+    new_message['id'] = None
+    new_message['content'] = ''
+    new_message['ref']  = old_id
+    new_message['type'] = 'done'
+
+    MSG_DAO.create(**new_message)
+
 def update_message_tag(id, tag):
     user_name = xauth.current_name()
     data = dbutil.get(id)
@@ -170,6 +191,8 @@ def update_message_tag(id, tag):
         data.mtime = xutils.format_datetime()
         if tag == "done":
             data.done_time = xutils.format_datetime()
+            # 任务完成时除了标记原来任务的完成时间，还要新建一条消息
+            add_done_message(data)
 
         MSG_DAO.update(data)
         MSG_DAO.refresh_message_stat(user_name)

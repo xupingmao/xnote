@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2019/12/07 11:46:59
+# @modified 2019/12/08 14:12:22
 import xconfig
 from xconfig import Storage
 from collections import deque
@@ -243,6 +243,9 @@ def first_or_none(list):
         return list[0]
     else:
         return None
+
+def second_to_ms(seconds):
+    return int(seconds * 1000)
 
 def dictsort(dictionary, key='value'):
     """返回排序之后的字典key列表/value列表

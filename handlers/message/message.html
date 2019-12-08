@@ -87,10 +87,10 @@
                             <!-- task 专用 -->
                             <a class="smallText msg-left-op-link" v-if="message.tag == 'task'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
 
-                            <a class="smallText msg-left-op-link" v-if="message.tag == 'done'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">重做</a>
+                            <a class="smallText msg-left-op-link" v-if="message.show_reopen_btn" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">重做</a>
 
                             <!-- 通用 -->
-                            <a class="smallText msg-left-op-link" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
+                            <a class="smallText msg-left-op-link" v-if="message.show_edit_btn" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
                             
                             <!-- log专用 -->
                             <a class="smallText msg-left-op-link" v-if="message.tag == 'log'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateTag($event, 'task')">转任务</a>
@@ -170,7 +170,11 @@
     }
 
     function wrapMessage(message) {
+        // 默认值
         message.editable = false;
+        message.show_edit_btn = true;
+        message.show_reopen_btn = false;
+
         if (currentTag == "file" || currentTag == "all" || currentTag == "link" || searchKey) {
             // 只有特殊处理的才需要渲染tag
             if (message.tag == "task") {
@@ -181,6 +185,16 @@
         } else {
             message.tag_class = "hide";
         }
+
+        if (message.tag == "done") {
+            message.show_reopen_btn = true;
+        }
+
+        if (message.ref != undefined) {
+            message.show_edit_btn = false;
+            message.show_reopen_btn = false;
+        }
+
         return message;
     }
 

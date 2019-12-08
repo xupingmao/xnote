@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/11/30 18:32:12
+# @modified 2019/12/08 14:32:49
 import os
 import json
 import web
@@ -307,11 +307,11 @@ class BasePlugin:
     header = Panel()
     body   = Panel()
     footer = Panel()
+    btn_text = T("处理")
     
     def __init__(self):
         # 输入框的行数
         self.rows            = 20    
-        self.btn_text        = "处理"
         # 提交请求的方法
         self.method          = "POST"
         self.output          = u("")

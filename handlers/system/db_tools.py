@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/11/25 23:40:17
+# @modified 2019/12/08 14:32:05
 
 import os
 import re
@@ -292,6 +292,7 @@ class DbScanHandler(BasePlugin):
     category = None
 
     placeholder = "主键"
+    btn_text = "查询"
     editable = False
     
     def handle(self, input):
