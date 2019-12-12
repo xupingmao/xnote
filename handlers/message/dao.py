@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2019/12/07 11:47:25
+# @modified 2019/12/10 00:29:15
 import xutils
 import xconfig
 import xmanager
@@ -50,7 +50,7 @@ def search_message(user_name, key, offset, limit):
     def search_func(key, value):
         if value.content is None:
             return False
-        return value.user == user_name and textutil.contains_all(value.content.lower(), words)
+        return textutil.contains_all(value.content.lower(), words)
 
     chatlist = dbutil.prefix_list("message:%s" % user_name, search_func, offset, limit, reverse = True)
     amount   = dbutil.prefix_count("message:%s" % user_name, search_func)
@@ -180,9 +180,17 @@ def list_by_tag(user, tag, offset, limit):
         amount = count_by_tag(user, tag)
     return chatlist, amount
 
+def list_by_date(user, date, offset = 0, limit = xconfig.PAGE_SIZE):
+    def list_by_date_func(key, value):
+        return value.ctime.find(date) == 0
+
+    return dbutil.prefix_list("message:%s" % user, list_by_date_func, offset, limit, reverse = True)
+
 def count_by_tag(user, tag):
     if tag == "key":
         return dbutil.count_table("msg_key:%s" % user)
+    if tag == "all":
+        return dbutil.count_table("message:%s" % user)
     return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
 
 def get_message_stat0(user):
@@ -230,7 +238,8 @@ xutils.register_func("message.get_by_content", get_by_content)
 xutils.register_func("message.list", list_message_page)
 xutils.register_func("message.list_file", list_file_page)
 xutils.register_func("message.list_link", list_link_page)
-xutils.register_func("message.list_by_tag", list_by_tag)
+xutils.register_func("message.list_by_tag",  list_by_tag)
+xutils.register_func("message.list_by_date", list_by_date)
 xutils.register_func("message.get_message_stat", get_message_stat)
 xutils.register_func("message.refresh_message_stat", refresh_message_stat)
 xutils.register_func("message.add_search_history", add_search_history)

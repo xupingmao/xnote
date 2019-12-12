@@ -26,7 +26,7 @@ LAST_TIME_SEQ = -1
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/11/21 14:15:17
+# @modified 2019/12/12 23:22:14
 ###########################################################
 
 def search_escape(text):
@@ -409,22 +409,26 @@ def prefix_scan(prefix, func, reverse = False):
     check_leveldb()
 
     key_from = None
-    key_to = None
+    key_to   = None
 
-    origin_prefix = prefix
-    prefix = prefix.encode("utf-8")
+    if prefix[-1] != ':':
+        prefix += ':'
+
+    prefix_bytes = prefix.encode("utf-8")
 
     if reverse:
-        key_to = prefix
+        key_to   = prefix_bytes
+        key_from = prefix_bytes + b'\xff'
+        iterator = _leveldb.RangeIter(None, key_from, include_value = True, reverse = reverse)
     else:
-        key_from = prefix
-
-    iterator = _leveldb.RangeIter(key_from, key_to, include_value = True, reverse = reverse)
+        key_from = prefix_bytes
+        key_to   = None
+        iterator = _leveldb.RangeIter(key_from, None, include_value = True, reverse = reverse)
 
     offset = 0
     for key, value in iterator:
         key = key.decode("utf-8")
-        if not key.startswith(origin_prefix):
+        if not key.startswith(prefix):
             break
         value = get_object_from_bytes(value)
         if not func(key, value):
@@ -456,9 +460,9 @@ def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = Fa
     
     # print("prefix: %s, origin_prefix: %s, reverse: %s" % (prefix, origin_prefix, reverse))
     if reverse:
-        iterator = _leveldb.RangeIter(None, prefix, include_value = True, reverse = reverse)
+        iterator = _leveldb.RangeIter(None, prefix, include_value = True, reverse = True)
     else:
-        iterator = _leveldb.RangeIter(prefix, None, include_value = True, reverse = reverse)
+        iterator = _leveldb.RangeIter(prefix, None, include_value = True, reverse = False)
 
     position       = 0
     matched_offset = 0

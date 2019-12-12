@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/12/08 14:32:05
+# @modified 2019/12/12 23:11:20
 
 import os
 import re
@@ -299,11 +299,13 @@ class DbScanHandler(BasePlugin):
         # 输入框的行数
         self.rows = 1
         result = []
-        reverse = xutils.get_argument("reverse") == "true"
+        reverse  = xutils.get_argument("reverse") == "true"
         key_from = xutils.get_argument("key_from", "")
+        prefix   = xutils.get_argument("prefix", "")
         last_key = [None]
 
         def func(key, value):
+            print("db_scan:", key, value)
             if input in key:
                 result.append((key, value))
                 if len(result) > 30:
@@ -311,7 +313,11 @@ class DbScanHandler(BasePlugin):
                     return False
             return True
 
-        dbutil.scan(key_from = key_from, func = func, reverse = reverse)
+        if prefix != "" and prefix != None:
+            dbutil.prefix_scan(prefix, func, reverse = reverse)
+        else:
+            dbutil.scan(key_from = key_from, func = func, reverse = reverse)
+
         self.writetemplate(SCAN_HTML, result = result, last_key = last_key[0], key = input)
 
 

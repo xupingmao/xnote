@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2019/11/30 17:50:46
+# @modified 2019/12/12 23:01:30
 import xauth
 import xutils
 from xutils import dbutil
@@ -39,7 +39,7 @@ HTML = """
         </tr>
         {% for key, value in admin_stat_list %}
             <tr>
-                <td><a href="/system/db_scan?key_from={{key}}">{{key}}</a></td>
+                <td><a href="/system/db_scan?prefix={{key}}&reverse=true">{{key}}</a></td>
                 <td>{{value}}</td>
             </tr>
         {% end %}
@@ -61,7 +61,7 @@ class StatHandler(BasePlugin):
         admin_stat_list = []
         stat_list.append(["我的笔记", dbutil.count_table("note_tiny:%s" % user_name)])
         stat_list.append(["笔记本",   xutils.call("note.count_by_type", user_name, "group")])
-        stat_list.append(["备忘总数", dbutil.count_table("message:%s" % user_name)])
+        stat_list.append(["待办事项", dbutil.count_table("message:%s" % user_name)])
         stat_list.append(["搜索记录", dbutil.count_table("search_history:%s" % user_name)])
         if xauth.is_admin():
             admin_stat_list.append(["note_full", dbutil.count_table("note_full")])

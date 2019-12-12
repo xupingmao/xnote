@@ -99,7 +99,12 @@
                             <!-- key专用 -->
                             <a class="smallText msg-left-op-link" v-if="message.tag == 'key'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="touchMessage($event)">置顶</a>
 
-                            <a class="smallText msg-right-op-link red" v-bind:msg-id="message.id" href="javascript:void(0)" v-bind:msg-id="message.id" v-bind:msg-content="message.content" @click="deleteMessage($event)">删除</a>
+                            <a class="smallText msg-right-op-link red" 
+                                v-if="message.show_del_btn"
+                                v-bind:msg-id="message.id" 
+                                href="javascript:void(0)" 
+                                v-bind:msg-content="message.content" 
+                                @click="deleteMessage($event)">删除</a>
 
                             <a class="smallText hide" v-on:click="openMarkDialog(message)" href="javascript:void(0)">标记</a>
                         </p>
@@ -174,6 +179,7 @@
         message.editable = false;
         message.show_edit_btn = true;
         message.show_reopen_btn = false;
+        message.show_del_btn = true;
 
         if (currentTag == "file" || currentTag == "all" || currentTag == "link" || searchKey) {
             // 只有特殊处理的才需要渲染tag

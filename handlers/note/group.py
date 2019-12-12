@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/12/07 11:25:40
+# @modified 2019/12/12 22:52:26
 import math
 import time
 import web
@@ -127,12 +127,12 @@ def load_note_tools():
         SystemFolder("公共笔记", "/note/public"),
         NoteLink("最近", "/note/timeline", "history"),
         NoteLink("标签", "/note/taglist", "fa-tags"),
-        NoteLink("Markdown", "/note/md", "fa-file-text"),
+        NoteLink("文档", "/note/document", "fa-file-text"),
         NoteLink("相册", "/note/gallery", "fa-image"),
         NoteLink("清单", "/note/list", "fa-list"),
         NoteLink("表格", "/note/table", "fa-table"),
         # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
-        NoteLink("富文本", "/note/html", "fa-file-word-o"),
+        # NoteLink("富文本", "/note/html", "fa-file-word-o"),
         NoteLink("回收站", "/note/removed", "fa-trash"),
         NoteLink("时光轴", "/note/tools/timeline", "fa-cube"),
         NoteLink("按月查看", "/note/date", "fa-cube"),
@@ -255,6 +255,12 @@ class GalleryListHandler(BaseListHandler):
         self.title = "相册"
         self.orderby = "ctime_desc"
 
+    @xauth.login_required()
+    def GET(self):
+        return xtemplate.render("note/tools/timeline.html", 
+            title = T("相册"), 
+            type = "gallery")
+
 class TableListHandler(BaseListHandler):
 
     def __init__(self):
@@ -279,11 +285,25 @@ class MarkdownListHandler(BaseListHandler):
         self.note_type = "md"
         self.title = "Markdown"
 
+class DocumentListHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        return xtemplate.render("note/tools/timeline.html", 
+            title = T("文档"), 
+            type = "document")
+
 class ListHandler(BaseListHandler):
 
     def __init__(self):
         self.note_type = "list"
         self.title = "清单"
+
+    @xauth.login_required()
+    def GET(self):
+        return xtemplate.render("note/tools/timeline.html", 
+            title = T("清单"), 
+            type = "list")
 
 class TextHandler(BaseListHandler):
 
@@ -501,9 +521,12 @@ xurls = (
     r"/note/gallery"        , GalleryListHandler,
     r"/note/table"          , TableListHandler,
     r"/note/csv"            , TableListHandler,
+    
+    r"/note/document"       , DocumentListHandler,
     r"/note/html"           , HtmlListHandler,
-    r"/note/addressbook"    , AddressBookHandler,
     r"/note/md"             , MarkdownListHandler,
+
+    r"/note/addressbook"    , AddressBookHandler,
     r"/note/list"           , ListHandler,
     r"/note/text"           , TextHandler,
     r"/note/tools"          , ToolListHandler,

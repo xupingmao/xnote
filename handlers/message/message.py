@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/12/08 15:17:23
+# @modified 2019/12/11 01:26:32
 
 """短消息"""
 import time
@@ -23,8 +23,8 @@ TAG_TEXT_DICT = dict(
     done = "完成",
     cron = "定期",
     task = "任务",
-    log = "记事",
-    key = "话题"
+    log  = "记事",
+    key  = "话题"
 )
 
 def success():
@@ -101,7 +101,13 @@ def format_message_stat(stat):
     stat.cron_count = format_count(stat.cron_count)
     stat.log_count  = format_count(stat.log_count)
     stat.search_count = format_count(stat.search_count)
+    stat.key_count    = format_count(stat.key_count)
     return stat
+
+class SearchContext:
+
+    def __init__(self, key):
+        self.key = key
 
 class ListAjaxHandler:
 
@@ -117,6 +123,8 @@ class ListAjaxHandler:
             # 搜索
             start_time = time.time()
             chatlist, amount = MSG_DAO.search(user_name, key, offset, pagesize)
+
+            xmanager.fire("message.search", SearchContext(key))
 
             cost_time  = functions.second_to_ms(time.time() - start_time)
             MSG_DAO.add_search_history(user_name, key, cost_time)
@@ -291,6 +299,7 @@ def get_remote_ip():
     return web.ctx.env.get("REMOTE_ADDR")
 
 def create_message(user_name, tag, content, ip):
+    content = content.strip()
     ctime = xutils.get_argument("date", xutils.format_datetime())
     message = dict(content = content, 
         user   = user_name, 
@@ -346,11 +355,13 @@ class DateHandler:
 
     @xauth.login_required()
     def GET(self):
-        date = xutils.get_argument("date")
-        db = xtables.get_message_table()
-        data = db.select(where="ctime LIKE $date AND user=$user LIMIT 200", 
-            vars = dict(date = date + '%', user=xauth.get_current_name()))
-        return dict(code="success", data = list(data))
+        date      = xutils.get_argument("date")
+        user_name = xauth.current_name()
+        if date != None:
+            msg_list = MSG_DAO.list_by_date(user_name, date)
+        else:
+            msg_list = []
+        return dict(code="success", data = msg_list)
 
 class MessageHandler:
 
@@ -407,16 +418,17 @@ class StatHandler:
         return stat
 xurls=(
     r"/message", MessageHandler,
+    r"/message/list", ListAjaxHandler,
+    r"/message/calendar", CalendarHandler,
+    r"/message/stat", StatHandler,
+    r"/message/date", DateHandler,
+    
     r"/message/save", SaveHandler,
     r"/message/status", UpdateStatusHandler,
-    r"/message/list", ListAjaxHandler,
     r"/message/delete", DeleteHandler,
     r"/message/update", SaveHandler,
     r"/message/open", OpenMessageHandler,
     r"/message/finish", FinishMessageHandler,
     r"/message/touch", TouchHandler,
-    r"/message/date", DateHandler,
-    r"/message/calendar", CalendarHandler,
-    r"/message/stat", StatHandler,
     r"/message/tag", UpdateTagHandler
 )

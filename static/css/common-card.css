@@ -2,7 +2,7 @@
  * 卡片主题的样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/11/21 15:24:12
+ * @modified 2019/12/12 22:06:37
  */
 
 body {
@@ -73,7 +73,7 @@ body {
     background-color: #fff;
     padding: 5px;
     margin-bottom: 10px;
-    border-radius: 5px;
+    /*border-radius: 5px;*/
     /*box-shadow: 0 0 5px #ccc;*/
 }
 

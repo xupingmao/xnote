@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2019/11/24 16:23:13
+# @modified 2019/12/12 22:52:51
 
 """Description here"""
 import re
@@ -17,7 +17,7 @@ class TimelineAjaxHandler:
     def GET(self):
         offset = xutils.get_argument("offset", 0, type=int)
         limit  = xutils.get_argument("limit", 20, type=int)
-        type   = xutils.get_argument("type")
+        type   = xutils.get_argument("type", "ctime")
         user_name  = xauth.current_name()
 
         if type == "mtime":
@@ -26,6 +26,10 @@ class TimelineAjaxHandler:
             rows = NOTE_DAO.list_public(offset, limit)
         elif type == "gallery":
             rows = NOTE_DAO.list_by_type(user_name, "gallery", offset, limit)
+        elif type == "document":
+            rows = NOTE_DAO.list_by_type(user_name, "document", offset, limit)
+        elif type == "list":
+            rows = NOTE_DAO.list_by_type(user_name, "list", offset, limit)
         else:
             rows = NOTE_DAO.list_recent_created(user_name, offset, limit)
         result = dict()

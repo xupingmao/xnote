@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/11/23 17:00:32
+# @modified 2019/12/12 22:37:41
 
 """资料的DAO操作集合
 
@@ -686,6 +686,13 @@ def list_removed(creator, offset, limit):
 def list_by_type(creator, type, offset, limit, orderby = "name"):
     def list_func(key, value):
         return value.type == type and value.creator == creator and value.is_deleted == 0
+
+    def list_doc_func(key, value):
+        return value.type in ("md", "text", "html", "post") and value.is_deleted == 0
+
+    if type == "document":
+        list_func = list_doc_func
+
     notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
     sort_notes(notes, orderby)
     return notes

@@ -21,7 +21,18 @@
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
 <div id="app" class="card content">
-  <h3 class="card-title">{{title}}</h3>
+  <h3 class="card-title">
+    {{title}}
+
+    {% if type == "gallery" %}
+      <div class="float-right"><a class="btn" href="/note/add?type=gallery">创建相册</a></div>
+    {% elif type == "list" %}
+      <div class="float-right"><a class="btn" href="/note/add?type=list">创建清单</a></div>
+    {% else %}
+      <div class="float-right"><a class="btn" href="/note/add">创建笔记</a></div>
+    {% end %}
+  </h3>
+
   <article class="row" v-for="item in itemList">
     <h3 class="card-title-2">{{!item.title}}</h3>
     <section v-for="file in item.files">
@@ -108,7 +119,8 @@
         }, 
         function (data, status) {
           if (data == "{}") {
-            alert("没有更多了");
+            // alert("没有更多了");
+            layer.msg("没有更多了");
             return;
           }
           var resp = data;
@@ -123,7 +135,8 @@
             // app.itemList.push({title: key, files: files});
           }
           if (count == 0) {
-            alert("没有更多了");
+            // alert("没有更多了");
+            layer.msg("没有更多了");
             return;
           }
           
