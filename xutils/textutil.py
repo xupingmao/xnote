@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2019/02/24 15:53:54
+# @modified 2019/12/14 18:49:03
 import re
 import random
 from .imports import is_str, ConfigParser
@@ -135,6 +135,15 @@ def between(self, start, end):
     if p2 < 0:
         return ""
     return self[p1+len(start):p2]
+
+def replace_between(self, start, end, target):
+    p1 = self.find(start)
+    if p1 < 0:
+        return None
+    p2 = self.find(end, p1)
+    if p2 < 0:
+        return None
+    return self[:p1 + len(start)] + target + self[p2:]
 
 def after(self, start):
     """

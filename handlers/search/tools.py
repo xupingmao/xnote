@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
 # Copyright (c) 2017
-# @modified 2019/12/08 14:18:50
+# @modified 2019/12/14 23:52:43
 """Description here"""
 
 import os
@@ -65,7 +65,7 @@ def search(ctx):
         f.url = "/tools/qrcode?content=" + name
         files.append(f)
     search_menu(files, name)
-    
+
     ctx.tools += files
 
 @xutils.cache(key="ip_list", expire=3600)

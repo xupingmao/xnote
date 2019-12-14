@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2019/12/12 22:52:51
+# @modified 2019/12/14 19:19:06
 
 """Description here"""
 import re
@@ -30,20 +30,31 @@ class TimelineAjaxHandler:
             rows = NOTE_DAO.list_by_type(user_name, "document", offset, limit)
         elif type == "list":
             rows = NOTE_DAO.list_by_type(user_name, "list", offset, limit)
+        elif type == "table" or type == "csv":
+            rows = NOTE_DAO.list_by_type(user_name, "csv", offset, limit)
         else:
             rows = NOTE_DAO.list_recent_created(user_name, offset, limit)
+
+        orderby = "ctime"
         result = dict()
         for row in rows:
             if type == "mtime":
                 date_time = row.mtime
+                orderby = "mtime"
             else:
                 date_time = row.ctime
+                orderby = "ctime"
+
             date = re.match(r"\d+\-\d+", date_time).group(0)
             # 优化数据大小
             row.content = ""
             if date not in result:
                 result[date] = []
             result[date].append(row)
+
+        for key in result:
+            items = result[key]
+            items.sort(key = lambda x: x[orderby], reverse = True)
         return result
 
 class DateTimeline:

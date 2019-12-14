@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/11/23 16:11:26
+# @modified 2019/12/15 00:14:06
 import profile
 import math
 import re
@@ -42,8 +42,9 @@ def handle_left_dir(kw, user_name, file, op):
     if file.type in ("html", "csv"):
         kw.show_aside = False
 
-    if file.type == "group":
+    if file.type in ("group", "gallery", "list"):
         return
+
     if is_iframe == "true":
         return
 
@@ -163,9 +164,6 @@ class ViewHandler:
         template_name  = "note/view.html"
         next_note      = None
         prev_note      = None
-
-        xconfig.note_history.put(dict(user=user_name, 
-            link = "/note/%s" % id, name = file.name))
 
         title  = file.name
         if file.type == "group":

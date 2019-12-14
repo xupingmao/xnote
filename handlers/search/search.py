@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/12/08 14:10:10
+# @modified 2019/12/15 00:01:28
 
 import re
 import os
@@ -182,7 +182,7 @@ class handler:
         user_name = xauth.get_current_name()
         page_url  =  "/search/search?key=%s&category=%s&page="\
             % (key, category)
-        pagesize = xconfig.PAGE_SIZE
+        pagesize = xconfig.SEARCH_PAGE_SIZE
         offset   = (page-1) * pagesize
         limit    = pagesize
 

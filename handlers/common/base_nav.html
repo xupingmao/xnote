@@ -8,7 +8,7 @@
   <div class="menu-box float-left">
     <ul class="nav-ul">
       {% if _has_login %}
-        <li><a class="menu-link" href="/">{{T("笔记")}}</a></li>
+        <li><a class="menu-link" href="/note/index">{{T("笔记")}}</a></li>
         <li><a class="menu-link" href="/message?tag=task">{{T("待办")}}</a></li>
         <li><a class="menu-link" href="/plugins_list">{{T("工具")}}</a></li>
         <li><a class="menu-link" href="/system/settings">{{T("设置")}}</a></li>
@@ -37,6 +37,7 @@
 </div>
 
 <div class="nav-left">
+  <!-- 侧边菜单栏 -->
   <div class="nav-left-inner-box">
     <ul class="navMenu">
       {% if _has_login %}
@@ -45,6 +46,7 @@
         <li><a href="/message?tag=task">待办事项</a></li> 
         <li><a href="/note/public">{{T("公共笔记")}}</a></li>
         <li><a href="/note/gallery">我的相册</a></li>
+        <li><a href="/note/list">我的清单</a></li>
         <li><a href="/plugins_list">工具插件</a></li>
         {% if _is_admin %}
           <li><a href="/fs_list">文件管理</a></li> 
@@ -54,7 +56,6 @@
         <!-- 未登录状态 -->
         <li><a href="/note/public">公开笔记</a></li>
         <li><a href="/login" class="afinve"><span>登陆系统</span></a></li>
-        <li><a href="/system/settings">系统设置</a></li>
       {% end %}
 
     </ul>

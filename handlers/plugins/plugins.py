@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/11/30 17:25:22
+# @modified 2019/12/15 00:04:47
 from io import StringIO
 import xconfig
 import codecs
@@ -168,6 +168,14 @@ def on_search_plugins(ctx):
             result.url       = u(plugin.url)
             result.edit_link = u("/code/edit?path=" + plugin.fpath)
             results.append(result)
+
+    if ctx.category != "plugin" and len(results) > 3:
+        results = results[:3]
+        more = SearchResult()
+        more.name = u("查看更多插件")
+        more.icon = "fa-cube"
+        more.url  = "/search?category=plugin&key=" + ctx.key
+        results.append(more)
     ctx.tools += results
 
 class PluginsListOldHandler:

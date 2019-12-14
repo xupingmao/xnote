@@ -9,6 +9,7 @@
 {% block body %}
 {% init key = "" %}
 {% init default_content = "" %}
+{% init show_tab = True %}
 
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
@@ -20,7 +21,9 @@
 <div id="app" class="col-md-12">
     {# include common/mod_notice.html #}
 
-    {% include message/header.html %}
+    {% if show_tab %}
+        {% include message/header.html %}
+    {% end %}
 
     <div class="message-input-box card" v-if="inputBoxVisible">
         <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" v-bind:placeholder="placeholder">{{default_content}}</textarea>

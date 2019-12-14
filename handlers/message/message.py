@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/12/11 01:26:32
+# @modified 2019/12/15 00:12:04
 
 """短消息"""
 import time
@@ -14,7 +14,7 @@ import xauth
 import xconfig
 import xmanager
 import xtemplate
-from xutils import BaseRule, Storage, cacheutil, dbutil, textutil, functions, u
+from xutils import BaseRule, Storage, cacheutil, dbutil, textutil, functions, u, SearchResult
 from xtemplate import T
 
 MSG_DAO       = xutils.DAO("message")
@@ -103,6 +103,23 @@ def format_message_stat(stat):
     stat.search_count = format_count(stat.search_count)
     stat.key_count    = format_count(stat.key_count)
     return stat
+
+@xmanager.searchable()
+def on_search_scripts(ctx):
+    key = ctx.key
+    messages, count = MSG_DAO.search(ctx.user_name, key, 0, 3)
+    for message in messages:
+        item = SearchResult()
+        process_message(message)
+        item.name = message.ctime
+        item.html = message.html
+        ctx.tools.append(item)
+        # print(message)
+    if count > 3:
+        more = SearchResult()
+        more.name = "查看更多备忘"
+        more.url  = "/message?key=" + ctx.key
+        ctx.tools.append(more)
 
 class SearchContext:
 
@@ -367,9 +384,10 @@ class MessageHandler:
 
     @xauth.login_required()
     def GET(self):
-        user  = xauth.current_name()
-        key   = xutils.get_argument("key", "")
-        from_ = xutils.get_argument("from")
+        user     = xauth.current_name()
+        key      = xutils.get_argument("key", "")
+        from_    = xutils.get_argument("from")
+        show_tab = (xutils.get_argument("show_tab") != "false")
 
         if key != None and key != "":
             if key[0] == '#':
@@ -385,6 +403,7 @@ class MessageHandler:
 
         return xtemplate.render("message/message.html", 
             show_aside         = False,
+            show_tab           = show_tab,
             category           = "message",
             search_action      = "/message", 
             html_title         = T("待办"),

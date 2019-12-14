@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/12/12 22:52:26
+# @modified 2019/12/14 23:37:31
 import math
 import time
 import web
@@ -124,19 +124,22 @@ class GroupListHandler:
 
 def load_note_tools():
     return [
-        SystemFolder("公共笔记", "/note/public"),
+        SystemFolder("公共", "/note/public"),
         NoteLink("最近", "/note/timeline", "history"),
-        NoteLink("标签", "/note/taglist", "fa-tags"),
+        NoteLink("置顶", "/note/sticky", "fa-thumb-tack"),
+        NoteLink("分组", "/note/group_list", "fa-folder"),
+        # NoteLink("标签", "/note/taglist", "fa-tags"),
         NoteLink("文档", "/note/document", "fa-file-text"),
         NoteLink("相册", "/note/gallery", "fa-image"),
         NoteLink("清单", "/note/list", "fa-list"),
         NoteLink("表格", "/note/table", "fa-table"),
+        # NoteLink("词典", "/note/dict",  "fa-dict"),
         # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
         # NoteLink("富文本", "/note/html", "fa-file-word-o"),
         NoteLink("回收站", "/note/removed", "fa-trash"),
-        NoteLink("时光轴", "/note/tools/timeline", "fa-cube"),
-        NoteLink("按月查看", "/note/date", "fa-cube"),
-        NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
+        # NoteLink("时光轴", "/note/tools/timeline", "fa-cube"),
+        # NoteLink("按月查看", "/note/date", "fa-cube"),
+        # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
         NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
         NoteLink("上传管理", "/fs_upload", "fa-upload")
     ]
@@ -248,20 +251,22 @@ class BaseListHandler:
             page_max  = math.ceil(amount / xconfig.PAGE_SIZE),
             page_url  = "/note/%s?page=" % self.note_type)
 
-class GalleryListHandler(BaseListHandler):
+class BaseTimelineHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        return xtemplate.render("note/tools/timeline.html", 
+            title = T(self.title), 
+            type = self.note_type)
+
+class GalleryListHandler(BaseTimelineHandler):
 
     def __init__(self):
         self.note_type = "gallery"
         self.title = "相册"
         self.orderby = "ctime_desc"
 
-    @xauth.login_required()
-    def GET(self):
-        return xtemplate.render("note/tools/timeline.html", 
-            title = T("相册"), 
-            type = "gallery")
-
-class TableListHandler(BaseListHandler):
+class TableListHandler(BaseTimelineHandler):
 
     def __init__(self):
         self.note_type = "csv"
@@ -327,6 +332,26 @@ class ToolListHandler:
             pathlist  = [PathNode(TYPES_NAME, "/note/types")],
             file_type = "group",
             files     = files,
+            show_next  = True)
+
+class NoteIndexHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        page = 1
+
+        limit  = xconfig.PAGE_SIZE
+        offset = (page-1)*limit
+
+        files = load_note_tools()
+        amount = len(files)
+
+        return xtemplate.render(VIEW_TPL,
+            pathlist  = [PathNode(TYPES_NAME, "/note/types")],
+            file_type = "group",
+            files     = files,
+            show_path_list   = False,
+            show_parent_link = False,
             show_next  = True)
 
 class TypesHandler(ToolListHandler):
@@ -530,6 +555,7 @@ xurls = (
     r"/note/list"           , ListHandler,
     r"/note/text"           , TextHandler,
     r"/note/tools"          , ToolListHandler,
-    r"/note/types"          , TypesHandler
+    r"/note/types"          , TypesHandler,
+    r"/note/index"          , NoteIndexHandler
 )
 

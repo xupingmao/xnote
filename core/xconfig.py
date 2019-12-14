@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/11/30 17:11:03
+# @modified 2019/12/15 00:01:22
 
 '''xnote系统配置
 
@@ -44,7 +44,7 @@ DEBUG_HTML_BOX     = False
 PORT               = "1234"
 SITE_HOME          = None
 # 线程数
-MIN_THREADS        = 10
+MIN_THREADS        = 20
 # 打开浏览器
 OPEN_IN_BROWSER    = False
 # 启用数据库的缓存搜索
@@ -129,6 +129,7 @@ MUTE_END_TIME    = None
 PAGE_SIZE        = 20
 # 搜索历史的最大记录数
 SEARCH_HISTORY_MAX_SIZE  = 1000
+SEARCH_PAGE_SIZE = 20
 RECENT_SEARCH_LIMIT = 10
 RECENT_SIZE = 6
 

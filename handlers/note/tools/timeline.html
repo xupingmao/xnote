@@ -17,6 +17,13 @@
 
 {% block body %}
 {% init type = "ctime" %}
+{% init ADD_BTN_TEXT_DICT = {
+  ""       : "创建笔记",
+  "table"  : "创建表格",
+  "csv"    : "创建表格",
+  "gallery": "创建相册",
+  "list"   : "创建清单"
+} %}
 
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
@@ -24,13 +31,10 @@
   <h3 class="card-title">
     {{title}}
 
-    {% if type == "gallery" %}
-      <div class="float-right"><a class="btn" href="/note/add?type=gallery">创建相册</a></div>
-    {% elif type == "list" %}
-      <div class="float-right"><a class="btn" href="/note/add?type=list">创建清单</a></div>
-    {% else %}
-      <div class="float-right"><a class="btn" href="/note/add">创建笔记</a></div>
-    {% end %}
+    <div class="float-right">
+      <a class="btn" href="/note/add?type={{type}}">{{ADD_BTN_TEXT_DICT.get(type, "创建笔记")}}</a>
+    </div>
+
   </h3>
 
   <article class="row" v-for="item in itemList">
