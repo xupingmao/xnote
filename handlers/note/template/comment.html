@@ -14,10 +14,11 @@
     {% if _has_login %}
     <div class="col-md-12">
         <textarea id="commentText" class="col-md-12 no-outline"></textarea>
-        <button class="btn-default" id="saveCommentBtn">{{comment_btn_text}}</button>
 
-        <input type="file" id="filePicker" class="hide" multiple/>
-        <input type="button" id="filePickerBtn" class="btn btn-default" value="添加附件"/>
+        <div id="commentFileUploader" class="hide"></div>
+        <input type="file" id="commentFilePicker" class="hide" multiple/>
+        <input type="button" id="commentFilePickerBtn" class="btn btn-default" value="添加附件"/>
+        <button class="btn" id="saveCommentBtn">{{comment_btn_text}}</button>
     </div>
     {% end %}
 
@@ -40,6 +41,7 @@
 
 <script type="text/javascript">
 $(function () {
+    var loadIndex = 0;
 
     function refreshComments() {    
         $.get("/note/comments", {note_id: "{{file.id}}"}, function (resp) {
@@ -95,103 +97,55 @@ $(function () {
         // 文件上传
     var BASE_URL = "/static/lib/webuploader"
     // 初始化Web Uploader
-    var uploader = xnote.createUploader();
+    var uploader = xnote.createUploader('#commentFileUploader');
 
     // 当有文件添加进来的时候
     uploader.on( 'fileQueued', function( file ) {
-        var $li = $(
-                '<div id="' + file.id + '" class="file-item thumbnail">' +
-                    '<img>' +
-                    '<div class="info">' + file.name +
-                    '<span class="finished-tag" id="' + file.id + '-result"></span>' + 
-                     '</div>' +
-                '</div>'
-                ),
-            $img = $li.find('img');
-
-        $list = $("#fileList");
-        // $list为容器jQuery实例
-        $list.append( $li );
-
-        // 创建缩略图
-        // 如果为非图片文件，可以不用调用此方法。
-        // thumbnailWidth x thumbnailHeight 为 100 x 100
-        var thumbnailWidth = 100;
-        var thumbnailHeight = 100;
-        uploader.makeThumb( file, function( error, src ) {
-            if ( error ) {
-                $img.replaceWith('<span>不能预览</span>');
-                return;
-            }
-
-            $img.attr( 'src', src );
-        }, thumbnailWidth, thumbnailHeight );
+        // 添加文件
     });
 
 
     // 文件上传过程中创建进度条实时显示。
     uploader.on( 'uploadProgress', function( file, percentage ) {
-        var $li = $( '#uploadProgress' ),
-        $percent = $li.find('.progress span');
-
-        // 避免重复创建
-        if ( !$percent.length ) {
-            $percent = $('<div class="progress"><span></span></div>')
-                    .appendTo( $li )
-                    .find('span');
-        }
-
-        $percent.css( 'width', percentage * 100 + '%' );
-        $percent.text( (percentage * 100).toFixed(2) + '%');
+        // 进度条
     });
 
     uploader.on( 'uploadBeforeSend', function (object, data, headers) {
-        $( '#uploadProgress' ).find('.progress').remove();
         data.dirname = "auto";
     })
 
     // 文件上传成功，给item添加成功class, 用样式标记上传成功。
     uploader.on( 'uploadSuccess', function( file, resp) {
-        $( '#uploadProgress' ).find('.progress').remove();
-        var $li = $( '#uploadProgress' );
-        $('<div class="progress"><span>上传完成</span></div>')
-                    .appendTo( $li )
-                    .find('span');
-        file.webpath = resp.webpath;
+        console.log("uploadSuccess", file, resp);
+
+        var webpath = resp.webpath;
+        var content = 'file://$name'.replace(/\$name/g, resp.webpath);
+        appendToInputText(content + "\n");
+        layer.close(loadIndex);
     });
 
     // 文件上传失败，显示上传出错。
     uploader.on( 'uploadError', function( file ) {
-        var $li = $( '#'+file.id ),
-            $error = $li.find('div.error');
-
-        // 避免重复创建
-        if ( !$error.length ) {
-            $error = $('<div class="error"></div>').appendTo( $li );
-        }
-
-        $error.text('上传失败');
+        layer.alert('上传失败');
+        layer.close(loadIndex);
     });
 
     // 完成上传完了，成功或者失败，先删除进度条。
     uploader.on( 'uploadComplete', function( file ) {
-        var webpath = file.webpath;
-        var content = 'file://$name'.replace(/\$name/g, file.webpath);
-        // app.input += content + "\n";
-        appendToInputText(content + "\n");
+        // console.log("uploadComplete", typeof(file), file);
     });
 
-    $("#filePickerBtn").on("click", function (event) {
+    $("#commentFilePickerBtn").on("click", function (event) {
         console.log("select file button click");
-        $("#filePicker").click();
+        $("#commentFilePicker").click();
     })
 
-    $("#filePicker").on("change", function (event) {
+    $("#commentFilePicker").on("change", function (event) {
         console.log(event);
         var fileList = event.target.files; //获取文件对象 
-        console.log(fileList);
         if (fileList && fileList.length > 0) {
             uploader.addFile(fileList);
+            loadIndex = layer.load(2);
         }
     });
 })

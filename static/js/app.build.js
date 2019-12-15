@@ -1118,7 +1118,11 @@ var BASE_URL = "/static/lib/webuploader";
 
 // xnote全局对象
 var xnote = {
-  createUploader: function () {
+  createUploader: function (selector) {
+    if (selector == undefined) {
+      selector = '#filePicker';
+    }
+    
     return WebUploader.create({
             // 选完文件后，是否自动上传。
             auto: true,
@@ -1128,7 +1132,7 @@ var xnote = {
             server: '/fs_upload/range',
             // 选择文件的按钮。可选。
             // 内部根据当前运行是创建，可能是input元素，也可能是flash.
-            pick: '#filePicker',
+            pick: selector,
             // 需要分片
             chunked: true,
             // 默认5M

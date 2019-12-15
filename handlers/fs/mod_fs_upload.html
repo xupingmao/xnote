@@ -13,6 +13,7 @@
 
 <script type="text/javascript">
 
+$(function () {
     // 文件上传逻辑
     var BASE_URL = "/static/lib/webuploader";
     $("#target-path").text(location.hash.substr(1)).attr("href", "/fs/" + location.hash.substr(1));
@@ -148,11 +149,7 @@
     $("#dropArea").on("click", function (event) {
         console.log(event);
         event.preventDefault(); //取消默认浏览器拖拽效果 
-        $("[name=file]").click();
+        $("#filePicker").find("[type=file]").click();
     });
-
-    $.uploadFile = function (path, option) {
-
-    }
-
+});
 </script>

@@ -439,6 +439,12 @@
     // 文件上传成功，给item添加成功class, 用样式标记上传成功。
     uploader.on( 'uploadSuccess', function( file, resp) {
         file.webpath = resp.webpath;
+
+        var webpath = file.webpath;
+        var content = 'file://$name'.replace(/\$name/g, file.webpath);
+        app.input += '\n' + content + "\n";
+
+        layer.close(loadingIndex);
     });
 
     // 文件上传失败，显示上传出错。
@@ -448,11 +454,7 @@
 
     // 完成上传完了，成功或者失败，先删除进度条。
     uploader.on( 'uploadComplete', function( file ) {
-        var webpath = file.webpath;
-        var content = 'file://$name'.replace(/\$name/g, file.webpath);
-        app.input += '\n' + content + "\n";
-
-        layer.close(loadingIndex);
+        
     });
 
     $("#filePickerBtn").on("click", function (event) {
@@ -463,7 +465,6 @@
     $("#filePicker").on("change", function (event) {
         console.log(event);
         var fileList = event.target.files; //获取文件对象 
-        console.log(fileList);
         if (fileList && fileList.length > 0) {
             loadingIndex = layer.load(2);
             uploader.addFile(fileList);
