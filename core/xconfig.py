@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/12/15 00:01:22
+# @modified 2019/12/15 18:50:02
 
 '''xnote系统配置
 
@@ -130,6 +130,8 @@ PAGE_SIZE        = 20
 # 搜索历史的最大记录数
 SEARCH_HISTORY_MAX_SIZE  = 1000
 SEARCH_PAGE_SIZE = 20
+# 搜索摘要长度
+SEARCH_SUMMARY_LEN = 100
 RECENT_SEARCH_LIMIT = 10
 RECENT_SIZE = 6
 

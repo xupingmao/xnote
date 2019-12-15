@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/12/14 23:37:31
+# @modified 2019/12/15 18:12:32
 import math
 import time
 import web
@@ -18,6 +18,7 @@ from xtemplate import T
 VIEW_TPL   = "note/view.html"
 TYPES_NAME = "笔记工具"
 NOTE_DAO   = xutils.DAO("note")
+MSG_DAO    = xutils.DAO("message")
 
 class PathNode(Storage):
 
@@ -47,12 +48,12 @@ class SystemFolder(GroupItem):
         self.icon = "icon-folder-system"
 
 class NoteLink:
-    def __init__(self, name, url, icon = "fa-cube"):
+    def __init__(self, name, url, icon = "fa-cube", size = None):
         self.type = "link"
         self.name = name
         self.url  = url
         self.icon = icon
-        self.size = None
+        self.size = size
         self.priority = 0
 
 def type_node_path(name, url):
@@ -122,10 +123,15 @@ class GroupListHandler:
             fixed_books     = fixed_books,
             files           = normal_books)
 
-def load_note_tools():
+def load_note_tools(user_name):
+    msg_stat = MSG_DAO.get_message_stat(user_name)
+
     return [
-        SystemFolder("公共", "/note/public"),
-        NoteLink("最近", "/note/timeline", "history"),
+        SystemFolder("公共笔记", "/note/public"),
+        NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
+        NoteLink("话题", "/search/rules", "fa-search", size = msg_stat.key_count),
+        NoteLink("记事", "/message?tag=log&show_tab=false", "fa-sticky-note", size = msg_stat.log_count),
+        NoteLink("笔记", "/note/timeline", "history"),
         NoteLink("置顶", "/note/sticky", "fa-thumb-tack"),
         NoteLink("分组", "/note/group_list", "fa-folder"),
         # NoteLink("标签", "/note/taglist", "fa-tags"),
@@ -325,7 +331,7 @@ class ToolListHandler:
         limit  = xconfig.PAGE_SIZE
         offset = (page-1)*limit
 
-        files = load_note_tools()
+        files = load_note_tools(xauth.current_name())
         amount = len(files)
 
         return xtemplate.render(VIEW_TPL,
@@ -343,7 +349,7 @@ class NoteIndexHandler:
         limit  = xconfig.PAGE_SIZE
         offset = (page-1)*limit
 
-        files = load_note_tools()
+        files = load_note_tools(xauth.current_name())
         amount = len(files)
 
         return xtemplate.render(VIEW_TPL,
@@ -475,10 +481,14 @@ class DateHandler:
             month = int(month),
             notes = notes)
 
-class StickyHandler:
+class StickyHandler(BaseTimelineHandler):
+
+    def __init__(self):
+        self.note_type = "sticky"
+        self.title = T("置顶")
 
     @xauth.login_required()
-    def GET(self):
+    def GET_old(self):
         user  = xauth.current_name()
         files = xutils.call("note.list_sticky", user)
         return xtemplate.render(VIEW_TPL,

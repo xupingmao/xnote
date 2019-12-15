@@ -28,13 +28,14 @@
 
 {% block body %}
 
+{% init baseurl = "/plugins_list" %}
  
 <div class="card">
-    <a class="tab tab-link x-tab x-tab-default" href="/plugins_list_old?category=all">全部</a>
-    <a class="tab tab-link x-tab" href="/plugins_list_old?category=note">笔记</a>
-    <a class="tab tab-link x-tab" href="/plugins_list_old?category=dir">文件</a>
-    <a class="tab tab-link x-tab" href="/plugins_list_old?category=network">网络</a>
-    <a class="tab tab-link x-tab" href="/plugins_list_old?category=system">系统</a>
+    <a class="tab tab-link x-tab x-tab-default" href="{{baseurl}}?category=all">全部</a>
+    <a class="tab tab-link x-tab" href="{{baseurl}}?category=note">笔记</a>
+    <a class="tab tab-link x-tab" href="{{baseurl}}?category=dir">文件</a>
+    <a class="tab tab-link x-tab" href="{{baseurl}}?category=network">网络</a>
+    <a class="tab tab-link x-tab" href="{{baseurl}}?category=system">系统</a>
 
     {% if _is_admin %}
         <a class="inline-btn float-right" href="/plugins_new">新增</a>
@@ -62,7 +63,7 @@
                 <a class="float-right item-option" href="{{link.edit_link}}">编辑</a>
                 {% end %}
             </div>
-            <div>
+            <div class="hide">
                 <span>{{link.title}}</span>
                 <span class="plugin-time">{{link.atime}}</span>
             </div>

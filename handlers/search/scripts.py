@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/14
-# @modified 2019/11/12 02:50:40
+# @modified 2019/12/15 18:41:36
 import os
 import six
 import xconfig
@@ -37,7 +37,7 @@ def on_search_scripts(ctx):
     if ctx.search_dict:
         return
     name    = ctx.key
-    ctx.tools += search_scripts(name)
+    ctx.commands += search_scripts(name)
 
 
 @xmanager.searchable()

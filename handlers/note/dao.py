@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/12/12 22:37:41
+# @modified 2019/12/15 16:11:07
 
 """资料的DAO操作集合
 
@@ -702,10 +702,10 @@ def count_by_type(creator, type):
         return value.type == type and value.creator == creator and value.is_deleted == 0
     return dbutil.prefix_count("note_tiny:%s" % creator, count_func)
 
-def list_sticky(creator):
+def list_sticky(creator, offset = 0, limit = 1000):
     def list_func(key, value):
         return value.priority > 0 and value.creator == creator and value.is_deleted == 0
-    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func)
+    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
     sort_notes(notes)
     return notes
 

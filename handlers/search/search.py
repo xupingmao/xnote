@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/12/15 00:01:28
+# @modified 2019/12/15 18:41:18
 
 import re
 import os
@@ -23,6 +23,7 @@ from xutils import textutil, u, cacheutil
 from xutils import Queue, History, Storage
 
 NOTE_DAO = xutils.DAO("note")
+MSG_DAO  = xutils.DAO("message")
 
 config = xconfig
 _RULES = []
@@ -65,6 +66,7 @@ class SearchContext:
         self.stop             = False
         
         # 处理的结果集
+        self.commands = []
         self.dicts    = []
         self.tools    = []
         self.notes    = []
@@ -170,7 +172,7 @@ class handler:
 
         page_ctx.tools = []
 
-        return ctx.dicts + ctx.tools + files
+        return ctx.commands + ctx.dicts + ctx.tools + files
 
     def GET(self, path_key = None):
         """search files by name and content"""
@@ -231,13 +233,16 @@ class RulesHandler:
 
     @xauth.login_required()
     def GET(self):
-        rules = list_search_rules()
+        user_name = xauth.current_name()
+        rules = list_search_rules(user_name)
         return xtemplate.render("search/search_rules.html", rules = rules)
 
-def list_search_rules():
-    # TODO cache
-    table = xtables.get_search_rule_table()
-    return table.select(where=dict(user=xauth.current_name()))
+def list_search_rules(user_name):
+    list, count = MSG_DAO.list_by_tag(user_name, 'key', 0, 1000)
+
+    for item in list:
+        item.url = "/search?key=" + xutils.encode_uri_component(item.content)
+    return list
 
 xutils.register_func("search.list_rules", list_search_rules)
 xutils.register_func("search.list_recent", list_search_history)

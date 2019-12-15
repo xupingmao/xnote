@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2019/12/14 23:57:57
+@modified 2019/12/15 19:47:12
 -->
 
 {% block body %}
@@ -138,11 +138,14 @@
                 </div>
                 <div class="note-content-short">
                     <br/>
-                    <a href="https://www.baidu.com/s?wd={{key}}" target="_blank">百度</a>
-                    <a href="https://www.google.com/search?q={{key}}" target="_blank">谷歌</a>
-                    <a href="https://www.bing.com/search?q={{key}}" target="_blank">必应</a>
+                    <a class="suggest-link" href="https://www.baidu.com/s?wd={{key}}" target="_blank">百度</a>
+                    <a class="suggest-link" href="https://www.google.com/search?q={{key}}" target="_blank">谷歌</a>
+                    <a class="suggest-link" href="https://www.bing.com/search?q={{key}}" target="_blank">必应</a>
+
                     {% if _has_login %}
-                    <a href="/note/add?key={{key}}">创建"{{key}}"</a>
+                        <a class="suggest-link" href="/message?tag=log&key={{key}}">记事</a>                        
+                        <a class="suggest-link" href="/note/add?key={{key}}">写文章</a>
+                        <a class="suggest-link" href="/search?key={{key}}&category=content">深度搜索</a>
                     {% end %}
                 </div>
             </div>

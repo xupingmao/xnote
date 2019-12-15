@@ -6,6 +6,7 @@ cat ./static/css/common.css >> ./static/css/app.build.css
 cat ./static/css/app.css >> ./static/css/app.build.css
 cat ./static/css/message.css >> ./static/css/app.build.css
 cat ./static/css/note.css >> ./static/css/app.build.css
+cat ./static/css/plugins.css >> ./static/css/app.build.css
 
 # build js files
 echo > ./static/js/app.build.js

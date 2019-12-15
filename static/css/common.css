@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/11/24 19:36:18
+ * @modified 2019/12/15 15:03:01
  */
 
 * {
@@ -1194,17 +1194,6 @@ li.menu-item:hover {
 
 .small-device {
     display: none;
-}
-
-/** 插件 **/
-.plugin-item {
-    float: left;
-    width: 100%;
-    padding: 5px;
-    margin-top: 0px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    height: 48px;
 }
 
 .grid-card, .card, .box {

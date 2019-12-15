@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/12/15 00:12:04
+# @modified 2019/12/15 18:49:38
 
 """短消息"""
 import time
@@ -105,19 +105,23 @@ def format_message_stat(stat):
     return stat
 
 @xmanager.searchable()
-def on_search_scripts(ctx):
+def on_search_message(ctx):
     key = ctx.key
+    touch_key_by_content(ctx.user_name, 'key', key)
+
     messages, count = MSG_DAO.search(ctx.user_name, key, 0, 3)
     for message in messages:
         item = SearchResult()
+        if message.content != None and len(message.content) > xconfig.SEARCH_SUMMARY_LEN:
+            message.content = message.content[:xconfig.SEARCH_SUMMARY_LEN] + "......"
         process_message(message)
-        item.name = message.ctime
+        item.name = u('记事 - ') + message.ctime
         item.html = message.html
         ctx.tools.append(item)
         # print(message)
     if count > 3:
         more = SearchResult()
-        more.name = "查看更多备忘"
+        more.name = "查看更多记事(%s)" % count
         more.url  = "/message?key=" + ctx.key
         ctx.tools.append(more)
 
@@ -142,6 +146,9 @@ class ListAjaxHandler:
             chatlist, amount = MSG_DAO.search(user_name, key, offset, pagesize)
 
             xmanager.fire("message.search", SearchContext(key))
+
+            # 自动置顶
+            touch_key_by_content(user_name, "key", key)
 
             cost_time  = functions.second_to_ms(time.time() - start_time)
             MSG_DAO.add_search_history(user_name, key, cost_time)
@@ -336,6 +343,13 @@ def check_content_for_update(user_name, tag, content):
         return MSG_DAO.get_by_content(user_name, tag, content)
     return None
 
+def touch_key_by_content(user_name, tag, content):
+    item = check_content_for_update(user_name, tag, content)
+    if item != None:
+        item.mtime = xutils.format_datetime()
+        MSG_DAO.update(item)
+    return item
+
 def apply_rules(user_name, id, tag, content):
     ctx = Storage(id = id, content = content, user = user_name, type = "")
     for rule in rules:
@@ -356,10 +370,8 @@ class SaveHandler:
         apply_rules(user_name, id, tag, content)
 
         if id == "" or id is None:
-            item = check_content_for_update(user_name, tag, content)
+            item = touch_key_by_content(user_name, tag, content)
             if item != None:
-                item.mtime = xutils.format_datetime()
-                MSG_DAO.update(item)
                 message = item
             else:
                 message = create_message(user_name, tag, content, ip)            

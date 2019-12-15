@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/12/14 18:18:54
+@modified 2019/12/15 16:34:09
 -->
 
 {% init files = [] %}
@@ -45,7 +45,7 @@
                 {% end %}
                 
                 <span>{{item.name}}</span>
-                {% if item.type == "group" %}<span class="black">({{item.size}})</span>{% end %}
+                {% if item.size != None %}<span class="black">({{item.size}})</span>{% end %}
 
                 <span class="book-size">
                     {% if show_cdate %}

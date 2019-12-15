@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/12/15 00:14:06
+# @modified 2019/12/15 14:34:30
 import profile
 import math
 import re
@@ -42,8 +42,11 @@ def handle_left_dir(kw, user_name, file, op):
     if file.type in ("html", "csv"):
         kw.show_aside = False
 
-    if file.type in ("group", "gallery", "list"):
-        return
+    # if file.type in ("group", "gallery", "list"):
+        # return
+
+    # 不显示左边菜单栏了
+    return
 
     if is_iframe == "true":
         return

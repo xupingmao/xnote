@@ -1,0 +1,17 @@
+/**
+ * 插件的CSS样式
+ * @author xupingmao
+ * @since 2019/12/15
+ * @modified 2019/12/15 15:03:11
+*/
+
+/** 插件 **/
+.plugin-item {
+    float: left;
+    width: 100%;
+    padding: 5px;
+    margin-top: 0px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    height: 32px;
+}

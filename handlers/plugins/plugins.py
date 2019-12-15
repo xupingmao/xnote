@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2019/12/15 00:04:47
+# @modified 2019/12/15 17:56:55
 from io import StringIO
 import xconfig
 import codecs
@@ -30,10 +30,23 @@ MAX_HISTORY = 200
 def link(name, url, title = ""):
     if title == "":
         title = name
-    return Storage(name = name, url = url, link = url, title = title, editable = False, atime="")
+    return Storage(name = name, 
+        url = url, 
+        link = url, 
+        title = title, 
+        fname = name,
+        editable = False, 
+        atime = "")
 
 def inner_link(name, url):
-    return Storage(name = name, url = url, link = url, title = name, editable = False, category = "inner", atime="")
+    return Storage(name = name, 
+        url = url, 
+        link = url, 
+        fname = name,
+        title = name, 
+        editable = False, 
+        category = "inner", 
+        atime="")
 
 INNER_TOOLS = [
     inner_link("浏览器信息", "/tools/browser_info"),
@@ -78,6 +91,7 @@ def build_plugin_links(plugins):
 
         item.edit_link = "/code/edit?path=" + fpath
         item.title = plugin.title
+        item.fname = plugin.fname
 
         links.append(item)
 
@@ -169,24 +183,40 @@ def on_search_plugins(ctx):
             result.edit_link = u("/code/edit?path=" + plugin.fpath)
             results.append(result)
 
+    result_count = len(results)
     if ctx.category != "plugin" and len(results) > 3:
         results = results[:3]
         more = SearchResult()
-        more.name = u("查看更多插件")
+        more.name = u("查看更多插件(%s)") % result_count
         more.icon = "fa-cube"
-        more.url  = "/search?category=plugin&key=" + ctx.key
+        more.url  = "/plugins_list?category=plugin&key=" + ctx.key
         results.append(more)
     ctx.tools += results
+
+def search_plugins(key):
+    words   = textutil.split_words(key)
+    plugins = list_plugins("all")
+    result  = []
+    for p in plugins:
+        if textutil.contains_all(p.title, words) or textutil.contains_all(p.url, words) or textutil.contains_all(p.fname, words):
+            result.append(p)
+    return result
+
 
 class PluginsListOldHandler:
 
     @xauth.login_required()
     def GET(self):
         category = xutils.get_argument("category", "")
+        key      = xutils.get_argument("key", "")
 
         if xauth.is_admin():
-            recent   = list_recent_plugins()
-            plugins  = list_plugins(category)
+            if key != "" and key != None:
+                recent  = []
+                plugins = search_plugins(key)
+            else:
+                recent   = list_recent_plugins()
+                plugins  = list_plugins(category)
         else:
             recent = []
             if category == "" or category == "all":
@@ -201,31 +231,41 @@ class PluginsListOldHandler:
             recent     = recent,
             plugins    = plugins)
 
+def get_plugin_category(category):
+    plugin_categories = []
+
+    recent   = list_recent_plugins()
+    plugins  = list_plugins(category)
+    note_plugins = list_plugins("note")
+    dev_plugins  = list_plugins("develop")
+    sys_plugins  = list_plugins("system")
+    dir_plugins  = list_plugins("dir")
+    net_plugins  = list_plugins("network")
+    other_plugins = list(filter(lambda x: x.category not in ("inner", "note", "develop", "system", "dir", "network"), plugins))
+
+    plugin_categories.append(["最近", recent])
+    plugin_categories.append(["默认工具", build_inner_tools()])
+    plugin_categories.append(["笔记", note_plugins])
+    plugin_categories.append(["开发工具", dev_plugins])
+    plugin_categories.append(["系统", sys_plugins])
+    plugin_categories.append(["文件", dir_plugins])
+    plugin_categories.append(["网络", net_plugins])
+    plugin_categories.append(["其他", other_plugins])
+    return plugin_categories
+
 class PluginsListHandler:
 
     @xauth.login_required()
     def GET(self):
         category = xutils.get_argument("category", "")
+        key      = xutils.get_argument("key", "")
         plugin_categories = []
 
         if xauth.is_admin():
-            recent   = list_recent_plugins()
-            plugins  = list_plugins(category)
-            note_plugins = list_plugins("note")
-            dev_plugins  = list_plugins("develop")
-            sys_plugins  = list_plugins("system")
-            dir_plugins  = list_plugins("dir")
-            net_plugins  = list_plugins("network")
-            other_plugins = list(filter(lambda x: x.category not in ("inner", "note", "develop", "system", "dir", "network"), plugins))
-
-            plugin_categories.append(["最近", recent])
-            plugin_categories.append(["默认工具", build_inner_tools()])
-            plugin_categories.append(["笔记", note_plugins])
-            plugin_categories.append(["开发工具", dev_plugins])
-            plugin_categories.append(["系统", sys_plugins])
-            plugin_categories.append(["文件", dir_plugins])
-            plugin_categories.append(["网络", net_plugins])
-            plugin_categories.append(["其他", other_plugins])
+            if key != None and key != "":
+                plugin_categories.append(["搜索", search_plugins(key)])
+            else:
+                plugin_categories = get_plugin_category(category)
         else:
             plugins = build_inner_tools()
             plugin_categories.append(["默认工具", plugins])
@@ -355,8 +395,8 @@ class PluginsHandler:
 
 
 xurls = (
-    r"/plugins_list", PluginsListHandler,
-    r"/plugins_list_old", PluginsListOldHandler,
+    r"/plugins_list_new", PluginsListHandler,
+    r"/plugins_list", PluginsListOldHandler,
     r"/plugins_new", NewPluginHandler,
     r"/plugins_new/command", NewCommandPlugin,
     r"/plugins/(.+)", PluginsHandler

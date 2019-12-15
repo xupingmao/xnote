@@ -7,7 +7,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/11/24 19:36:18
+ * @modified 2019/12/15 15:03:01
  */
 
 * {
@@ -1201,17 +1201,6 @@ li.menu-item:hover {
     display: none;
 }
 
-/** 插件 **/
-.plugin-item {
-    float: left;
-    width: 100%;
-    padding: 5px;
-    margin-top: 0px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    height: 48px;
-}
-
 .grid-card, .card, .box {
     float: left;
     width: 100%;
@@ -1394,7 +1383,7 @@ li.menu-item:hover {
  * 应用相关的CSS样式
  * @author xupingmao
  * @since 2019/06/16
- * @modified 2019/11/24 19:14:22
+ * @modified 2019/12/15 18:26:57
 */
 
 .recent-note-date {
@@ -1487,6 +1476,10 @@ li.menu-item:hover {
 
 .note-group-select {
     padding: 5px;
+}
+
+.suggest-link {
+    padding-right: 10px;
 }
 
 @media screen and (max-width: 950px) {
@@ -1820,4 +1813,20 @@ li.menu-item:hover {
     float: left;
     width: 100%;
     padding: 10px;
+}/**
+ * 插件的CSS样式
+ * @author xupingmao
+ * @since 2019/12/15
+ * @modified 2019/12/15 15:03:11
+*/
+
+/** 插件 **/
+.plugin-item {
+    float: left;
+    width: 100%;
+    padding: 5px;
+    margin-top: 0px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    height: 32px;
 }

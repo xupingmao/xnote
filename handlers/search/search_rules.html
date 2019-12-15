@@ -3,25 +3,63 @@
 {% block body %}
 
 <div class="card">
-    <h3>
-        {{T("Smart Folder")}}
-        <a class="float-right">{{T("Add")}}</a>
-    </h3>
+    <h3 class="card-title">{{T("话题")}}</h3>
 
-    <table class="table">
-        <tr>
-            <th>名称</th>
-            <th>规则</th>
-            <th>操作</th>
-        </tr>
-        {% for rule in rules %}
-            <tr>
-                <td>{{rule.name}}</td>
-                <td>{{rule.get('expression')}}</td>
-                <td></td>
-            </tr>
-        {% end %}
-    </table>
+    <div class="message-input-box card" v-if="inputBoxVisible">
+        <textarea class="col-md-12 input-box" rows="3" placeholder="输入话题关键字"></textarea>
+
+        <input type="button" class="send-button btn" value="保存">
+    </div>
+
+    {% for rule in rules %}
+        <div class="message-row">
+            <a href="{{rule.url}}">{{rule.content}}</a>
+
+            <a class="smallText msg-right-op-link red delete-btn" 
+                msg-content="{{rule.content}}"
+                msg-id="{{rule.id}}">删除</a>
+        </div>
+    {% end %}
 </div>
+
+<script type="text/javascript">
+$(function () {
+    $(".send-button").click(function (e) {
+        var content = $(".input-box").val();
+        $.post("/message/save", 
+            {
+                content:content,
+                tag: "key"
+            },
+            function (respText) {
+                var data = respText;
+                if (data.code == "success") {
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+        }).fail(function (data) {
+            alert("保存失败!");
+        });
+    });
+
+    $(".delete-btn").click(function (event) {
+        var el = event.currentTarget;
+        var self = this;
+        var id = $(el).attr("msg-id");
+        var content = $(el).attr("msg-content");
+        var check = confirm("确认删除 '%s' ?".format(content));
+        if (check) {                
+            $.post("/message/delete", {id: id}, function (resp) {
+                if (resp.code == "success") {
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+    })
+})
+</script>
 
 {% end %}
