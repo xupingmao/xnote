@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/12/15 16:11:07
+# @modified 2019/12/15 23:39:38
 
 """资料的DAO操作集合
 
@@ -186,7 +186,7 @@ def create_note(note_dict):
     note_dict["id"] = note_id
     kv_put_note(note_id, note_dict)
     
-    # 更新分组下面页面的数量 TODO
+    # 更新分组下面页面的数量
     update_children_count(note_dict["parent_id"])
 
     xmanager.fire("note.add", dict(name=name, type=type))
@@ -195,6 +195,10 @@ def create_note(note_dict):
     if type == "gallery":
         dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(note_id))
         xutils.makedirs(dirname)
+
+    # 更新统计数量
+    refresh_note_stat(creator)
+
     return note_id
 
 def update_note_rank(note):
@@ -388,6 +392,9 @@ def delete_note(id):
     book_key = "notebook:%s:%020d" % (note.creator, int(id))
     dbutil.delete(book_key)
 
+    # 更新数量统计
+    refresh_note_stat(note.creator)
+
 def get_vpath(record):
     pathlist = []
     current = record
@@ -442,6 +449,9 @@ def list_group(creator = None, orderby = "name", skip_archived = False):
     notes = dbutil.prefix_list("notebook:", list_group_func)
     sort_notes(notes, orderby)
     return notes
+
+def count_group(creator):
+    return dbutil.count_table("notebook:%s" % creator)
 
 def list_public(offset, limit):
     def list_func(key, value):
@@ -540,7 +550,7 @@ def list_by_date(field, creator, date):
     return files
 
 @xutils.timeit(name = "NoteDao.CountNote", logfile=True, logargs=True, logret=True)
-def count_user_note(creator):
+def count_by_creator(creator):
     if xconfig.DB_ENGINE == "sqlite":
         db    = xtables.get_file_table()
         where = "is_deleted = 0 AND creator = $creator AND type != 'group'"
@@ -552,6 +562,9 @@ def count_user_note(creator):
             return value.creator == creator and type != 'group'
         count = dbutil.prefix_count("note_tiny:%s" % creator, count_func)
     return count
+
+def count_user_note(creator):
+    return count_by_creator(creator)
 
 def count_ungrouped(creator):
     return count_ungrouped(creator, 0)
@@ -698,8 +711,16 @@ def list_by_type(creator, type, offset, limit, orderby = "name"):
     return notes
 
 def count_by_type(creator, type):
-    def count_func(key, value):
+    def base_count_func(key, value):
         return value.type == type and value.creator == creator and value.is_deleted == 0
+
+    def count_doc_func(key, value):
+        return value.type in ("text", "md", "html", "post") and value.is_deleted == 0
+    
+    if type == "doc":
+        count_func = count_doc_func
+    else:
+        count_func = base_count_func
     return dbutil.prefix_count("note_tiny:%s" % creator, count_func)
 
 def list_sticky(creator, offset = 0, limit = 1000):
@@ -708,6 +729,11 @@ def list_sticky(creator, offset = 0, limit = 1000):
     notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
     sort_notes(notes)
     return notes
+
+def count_sticky(creator):
+    def list_func(key, value):
+        return value.priority > 0 and value.creator == creator and value.is_deleted == 0
+    return dbutil.prefix_count("note_tiny:%s" % creator, list_func)
 
 def list_archived(creator):
     def list_func(key, value):
@@ -807,6 +833,30 @@ def list_search_history(user, limit = 1000, orderby = "time_desc"):
         return []
     return dbutil.prefix_list("search_history:%s" % user, reverse = True, limit = limit)
 
+def refresh_note_stat(user_name):
+    stat = Storage()
+
+    if user_name is None:
+        return stat
+
+    stat.total         = count_by_creator(user_name)
+    stat.group_count   = count_group(user_name)
+    stat.doc_count     = count_by_type(user_name, "doc")
+    stat.gallery_count = count_by_type(user_name, "gallery")
+    stat.list_count    = count_by_type(user_name, "list")
+    stat.table_count   = count_by_type(user_name, "csv")
+    stat.sticky_count  = count_sticky(user_name)
+
+    dbutil.put("user_stat:%s:note" % user_name, stat)
+    return stat
+
+
+def get_note_stat(user_name):
+    stat = dbutil.get("user_stat:%s:note" % user_name)
+    if stat is None:
+        stat = refresh_note_stat(user_name)
+    return stat
+
 # write functions
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
@@ -864,6 +914,9 @@ xutils.register_func("note.list_comments", list_comments)
 xutils.register_func("note.get_comment",  get_comment)
 xutils.register_func("note.save_comment", save_comment)
 xutils.register_func("note.delete_comment", delete_comment)
+
+# stat
+xutils.register_func("note.get_note_stat", get_note_stat)
 
 
 

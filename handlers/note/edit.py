@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/11/23 17:49:18
+# @modified 2019/12/15 23:37:23
 
 """笔记编辑相关处理"""
 import os
@@ -99,7 +99,7 @@ def get_heading_by_type(type):
         return T("创建表格")
     return T("创建笔记")
 
-class AddHandler:
+class CreateHandler:
 
     @xauth.login_required()
     def POST(self, method='POST'):
@@ -136,6 +136,9 @@ class AddHandler:
         error = ""
         
         try:
+            if type not in ("md", "html", "csv", "gallery", "list", "group"):
+                raise Exception("无效的类型: %s" % type)
+
             if name == '':
                 if method == 'POST':
                     message = 'name is empty'
@@ -175,6 +178,10 @@ class AddHandler:
 
     def GET(self):
         return self.POST('GET')
+
+class AddHandler(CreateHandler):
+    pass
+
 
 class RemoveAjaxHandler:
 
@@ -446,6 +453,7 @@ class AppendAjaxHandler:
 
 xurls = (
     r"/note/add"         , AddHandler,
+    r"/note/create"      , CreateHandler,
     r"/note/remove"      , RemoveAjaxHandler,
     r"/note/rename"      , RenameAjaxHandler,
     r"/note/update"      , UpdateHandler,

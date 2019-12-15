@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/12/15 18:12:32
+# @modified 2019/12/15 23:40:21
 import math
 import time
 import web
@@ -124,21 +124,22 @@ class GroupListHandler:
             files           = normal_books)
 
 def load_note_tools(user_name):
-    msg_stat = MSG_DAO.get_message_stat(user_name)
+    msg_stat  = MSG_DAO.get_message_stat(user_name)
+    note_stat = NOTE_DAO.get_note_stat(user_name)
 
     return [
         SystemFolder("公共笔记", "/note/public"),
-        NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
+        NoteLink("任务", "/message?tag=task&show_tab=false", "fa-calendar-check-o", size = msg_stat.task_count),
         NoteLink("话题", "/search/rules", "fa-search", size = msg_stat.key_count),
         NoteLink("记事", "/message?tag=log&show_tab=false", "fa-sticky-note", size = msg_stat.log_count),
-        NoteLink("笔记", "/note/timeline", "history"),
-        NoteLink("置顶", "/note/sticky", "fa-thumb-tack"),
-        NoteLink("分组", "/note/group_list", "fa-folder"),
+        NoteLink("笔记", "/note/timeline", "history", size = note_stat.total),
+        NoteLink("置顶", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
+        NoteLink("分组", "/note/group_list", "fa-folder", size = note_stat.group_count),
         # NoteLink("标签", "/note/taglist", "fa-tags"),
-        NoteLink("文档", "/note/document", "fa-file-text"),
-        NoteLink("相册", "/note/gallery", "fa-image"),
-        NoteLink("清单", "/note/list", "fa-list"),
-        NoteLink("表格", "/note/table", "fa-table"),
+        NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
+        NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
+        NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
+        NoteLink("表格", "/note/table", "fa-table", size = note_stat.table_count),
         # NoteLink("词典", "/note/dict",  "fa-dict"),
         # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
         # NoteLink("富文本", "/note/html", "fa-file-word-o"),

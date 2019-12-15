@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2019/12/15 16:10:38
+# @modified 2019/12/15 23:50:00
 
 """Description here"""
 import re
@@ -81,7 +81,7 @@ class DateTimeline:
 class TimelineHandler:
 
     def GET(self):
-        type = xutils.get_argument("type")
+        type  = xutils.get_argument("type")
         title = T("最近创建")
         if type == "public":
             title = T("公共笔记")
@@ -90,6 +90,7 @@ class TimelineHandler:
 
         if type == "gallery":
             title = T("相册")
+
         return xtemplate.render("note/tools/timeline.html", 
             title = title,
             show_aside = False)

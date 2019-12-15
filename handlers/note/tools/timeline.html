@@ -16,7 +16,12 @@
 {% end %}
 
 {% block body %}
+{% init CREATE_TYPE_MAPPING = {
+  "ctime": "md"
+} %}
+
 {% init type = "ctime" %}
+{% init create_type = CREATE_TYPE_MAPPING.get(type, type) %}
 {% init ADD_BTN_TEXT_DICT = {
   ""       : "创建笔记",
   "table"  : "创建表格",
@@ -37,7 +42,7 @@
     <a class="tab tab-link x-tab" href="/note/public">公共</a>
 
     <div class="float-right">
-      <a class="btn" href="/note/add?type={{type}}">{{ADD_BTN_TEXT_DICT.get(type, "创建笔记")}}</a>
+      <a class="btn" href="/note/create?type={{create_type}}">{{ADD_BTN_TEXT_DICT.get(type, "创建笔记")}}</a>
     </div>
   </div>
 
