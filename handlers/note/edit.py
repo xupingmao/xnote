@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/12/15 23:37:23
+# @modified 2019/12/20 00:24:38
 
 """笔记编辑相关处理"""
 import os
@@ -21,6 +21,8 @@ from xutils import textutil
 from xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
+
+TYPE_MAPPING = dict(document = "md")
 
 def get_by_name(db, name):
     return db.select_first(where=dict(name = name, 
@@ -114,6 +116,8 @@ class CreateHandler:
         if key == "":
             key = time.strftime("%Y.%m.%d") + dateutil.current_wday()
 
+        type = TYPE_MAPPING.get(type, type)
+
         creator        = xauth.current_name()
         note           = Storage(name = name)
         note.atime     = xutils.format_datetime()
@@ -136,6 +140,7 @@ class CreateHandler:
         error = ""
         
         try:
+
             if type not in ("md", "html", "csv", "gallery", "list", "group"):
                 raise Exception("无效的类型: %s" % type)
 

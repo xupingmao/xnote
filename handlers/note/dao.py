@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/12/15 23:39:38
+# @modified 2019/12/20 00:20:59
 
 """资料的DAO操作集合
 
@@ -696,15 +696,15 @@ def list_removed(creator, offset, limit):
     sort_notes(notes)
     return notes
 
+def doc_filter_func(key, value):
+    return value.type not in ("csv", "gallery", "list", "table", "group") and value.is_deleted == 0
+
 def list_by_type(creator, type, offset, limit, orderby = "name"):
     def list_func(key, value):
         return value.type == type and value.creator == creator and value.is_deleted == 0
 
-    def list_doc_func(key, value):
-        return value.type in ("md", "text", "html", "post") and value.is_deleted == 0
-
-    if type == "document":
-        list_func = list_doc_func
+    if type == "document" or type == "doc":
+        list_func = doc_filter_func
 
     notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
     sort_notes(notes, orderby)
@@ -714,11 +714,9 @@ def count_by_type(creator, type):
     def base_count_func(key, value):
         return value.type == type and value.creator == creator and value.is_deleted == 0
 
-    def count_doc_func(key, value):
-        return value.type in ("text", "md", "html", "post") and value.is_deleted == 0
-    
+
     if type == "doc":
-        count_func = count_doc_func
+        count_func = doc_filter_func
     else:
         count_func = base_count_func
     return dbutil.prefix_count("note_tiny:%s" % creator, count_func)

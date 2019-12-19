@@ -6,10 +6,10 @@
     {% init tools = [] %}
     {% init fixed_books = [] %}
 
-    <div class="grid-row card book-list">
+    <div class="grid-row card book-list hidden">
         <h3 class="card-title">{{T("常用")}}
             <div class="float-right">
-                <a class="inline-btn" id="addBookBtn">+笔记本</a>
+                <a class="inline-btn" id="addBookBtn">+分组</a>
                 <a class="inline-btn" href="/note/add">+笔记</a>
             </div>
         </h3>
@@ -34,7 +34,13 @@
 
     {% if len(fixed_books) > 0 %}
         <div class="grid-row card book-list">
-            <h3 class="card-title">{{T("置顶")}}</h3>
+            <h3 class="card-title">{{T("置顶")}}
+                <div class="float-right">
+                    <a class="inline-btn" id="addBookBtn">+分组</a>
+                    <a class="inline-btn" href="/note/add">+笔记</a>
+                </div>
+            </h3>
+
             {% for item in fixed_books %}
                 <a href="{{item.url}}">
                 <div class="book-item">
@@ -59,7 +65,7 @@
 
     {% if len(files) > 0 %}
         <div class="grid-row card book-list">
-            <h3 class="card-title">{{T("笔记本")}}</h3>
+            <h3 class="card-title">{{T("分组")}}</h3>
             {% for item in files %}
                 <a href="{{item.url}}">
                 <div class="book-item">

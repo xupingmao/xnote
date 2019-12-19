@@ -2,7 +2,7 @@
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2019/12/07 01:35:54
+ * @modified 2019/12/16 00:33:34
 */
 
 
@@ -71,11 +71,18 @@
 }
 
 .msg-item-content {
+    float: left;
+    width: 100%;
     border-width: 5px;
     border-radius: 5px;
     word-wrap: break-word;
     word-break: break-all;
     padding: 5px 0px;
+}
+
+.msg-item-option {
+    float: left;
+    width: 100%;
 }
 
 .chat-msg-img {

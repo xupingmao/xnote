@@ -41,12 +41,12 @@ label {
                     <option value="csv">表格</option>
                     <option value="gallery">相册</option>
                     <option value="list">清单</option>
-                    <option value="group">笔记本</option>
+                    <option value="group">分组</option>
                 </select>
             </div>
 
             <div class="row top-offset-1">
-                <label>{{T("笔记本")}}</label>
+                <label>{{T("分组")}}</label>
                 <select name="parent_id">
                     {%for item in groups %}
                         <option value="{{item.id}}" {%if str(item.id)==str(parent_id)%} selected {%end%}>{{item.name}}</option>

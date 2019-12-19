@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/12/08 14:32:49
+# @modified 2019/12/18 00:16:09
 import os
 import json
 import web
@@ -271,6 +271,13 @@ class DataTable:
         """
         pass
 
+CATEGORY_NAME_DICT = dict(network = '网络', 
+    file = '文件',
+    dir  = '文件',
+    note = '笔记',
+    system = '系统'
+)
+
 class BasePlugin:
     """插件的基类"""
 
@@ -363,6 +370,7 @@ class BasePlugin:
         output = u("")
         try:
             self.page = self.get_page()
+            self.category_name = CATEGORY_NAME_DICT.get(self.category, '上级目录')
             output = self.handle(input) or u("")
             if self.get_format() == "text":
                 web.header("Content-Type", "text/plain; charset:utf-8")

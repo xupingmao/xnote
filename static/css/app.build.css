@@ -7,7 +7,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/12/15 15:03:01
+ * @modified 2019/12/20 00:03:25
  */
 
 * {
@@ -1307,6 +1307,14 @@ li.menu-item:hover {
     outline: none;
 }
 
+.mobile-hidden {
+    display: block;
+}
+
+.desktop-only {
+    display: block;
+}
+
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 950px) {
     /** mobile **/
@@ -1375,6 +1383,10 @@ li.menu-item:hover {
 
     .mobile-only {
         display: block;
+    }
+
+    .desktop-only {
+        display: none;
     }
 }
 
@@ -1506,7 +1518,7 @@ li.menu-item:hover {
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2019/12/07 01:35:54
+ * @modified 2019/12/16 00:33:34
 */
 
 
@@ -1575,11 +1587,18 @@ li.menu-item:hover {
 }
 
 .msg-item-content {
+    float: left;
+    width: 100%;
     border-width: 5px;
     border-radius: 5px;
     word-wrap: break-word;
     word-break: break-all;
     padding: 5px 0px;
+}
+
+.msg-item-option {
+    float: left;
+    width: 100%;
 }
 
 .chat-msg-img {

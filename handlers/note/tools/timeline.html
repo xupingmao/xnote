@@ -34,12 +34,13 @@
 
 <div id="app" class="card content">
 
-  <div class="note-header row">
-    <a class="tab tab-link x-tab" href="/note/timeline">全部</a>
-    <a class="tab tab-link x-tab" href="/note/sticky">置顶</a>
-    <a class="tab tab-link x-tab" href="/note/document">文档</a>
-    <a class="tab tab-link x-tab" href="/note/gallery">相册</a>
-    <a class="tab tab-link x-tab" href="/note/public">公共</a>
+  <div class="note-header row card-title">
+    {{title}}
+    <!-- <a class="tab tab-link x-tab" href="/note/timeline">全部</a> -->
+    <!-- <a class="tab tab-link x-tab" href="/note/sticky">置顶</a> -->
+    <!-- <a class="tab tab-link x-tab" href="/note/document">文档</a> -->
+    <!-- <a class="tab tab-link x-tab" href="/note/gallery">相册</a> -->
+    <!-- <a class="tab tab-link x-tab" href="/note/public">公共</a> -->
 
     <div class="float-right">
       <a class="btn" href="/note/create?type={{create_type}}">{{ADD_BTN_TEXT_DICT.get(type, "创建笔记")}}</a>

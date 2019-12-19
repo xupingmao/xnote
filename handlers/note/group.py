@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/12/15 23:40:21
+# @modified 2019/12/20 00:40:54
 import math
 import time
 import web
@@ -96,10 +96,10 @@ class GroupListHandler:
         fixed_books = []
         normal_books = []
 
-        tools.append(NoteLink("相册", "/note/gallery", "fa-photo"))
+        # tools.append(NoteLink("相册", "/note/gallery", "fa-photo"))
         # tools.append(NoteLink("清单", "/note/list", "fa-list"))
-        tools.append(NoteLink("最近", "/note/timeline", "fa-history"))
-        tools.append(NoteLink("更多", "/note/tools"))
+        # tools.append(NoteLink("最近", "/note/timeline", "fa-history"))
+        # tools.append(NoteLink("更多", "/note/tools"))
         
         # 默认分组处理
         default_book_count = NOTE_DAO.count(user_name, 0)
@@ -129,10 +129,9 @@ def load_note_tools(user_name):
 
     return [
         SystemFolder("公共笔记", "/note/public"),
-        NoteLink("任务", "/message?tag=task&show_tab=false", "fa-calendar-check-o", size = msg_stat.task_count),
+        NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
         NoteLink("话题", "/search/rules", "fa-search", size = msg_stat.key_count),
-        NoteLink("记事", "/message?tag=log&show_tab=false", "fa-sticky-note", size = msg_stat.log_count),
-        NoteLink("笔记", "/note/timeline", "history", size = note_stat.total),
+        NoteLink("记事", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
         NoteLink("置顶", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
         NoteLink("分组", "/note/group_list", "fa-folder", size = note_stat.group_count),
         # NoteLink("标签", "/note/taglist", "fa-tags"),
@@ -143,7 +142,9 @@ def load_note_tools(user_name):
         # NoteLink("词典", "/note/dict",  "fa-dict"),
         # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
         # NoteLink("富文本", "/note/html", "fa-file-word-o"),
+        # NoteLink("全部笔记", "/note/timeline", "fa-book", size = note_stat.total),
         NoteLink("回收站", "/note/removed", "fa-trash"),
+
         # NoteLink("时光轴", "/note/tools/timeline", "fa-cube"),
         # NoteLink("按月查看", "/note/date", "fa-cube"),
         # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
@@ -158,7 +159,7 @@ def load_category(user_name, include_system = False):
     normal_groups = list(filter(lambda x: x not in sticky_groups and x not in archived_groups, data))
     groups_tuple = [
         ("置顶", sticky_groups),
-        ("笔记本", normal_groups),
+        ("分组", normal_groups),
         ("已归档", archived_groups)
     ]
 
@@ -167,7 +168,7 @@ def load_category(user_name, include_system = False):
             NoteLink("笔记", "/note/add", "fa-file-text-o"),
             NoteLink("相册", "/note/add?type=gallery", "fa-photo"),
             NoteLink("表格", "/note/add?type=csv", "fa-table"),
-            NoteLink("笔记本", "/note/add?type=group", "fa-folder")
+            NoteLink("分组", "/note/add?type=group", "fa-folder")
         ]
 
         default_book_count = NOTE_DAO.count(user_name, 0)
@@ -178,7 +179,7 @@ def load_category(user_name, include_system = False):
         groups_tuple = [
             ("新建", system_folders),
             ("置顶", sticky_groups),
-            ("笔记本", normal_groups),
+            ("分组", normal_groups),
             ("已归档", archived_groups),
         ]
 
