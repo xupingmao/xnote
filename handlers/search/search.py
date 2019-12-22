@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/12/22 11:48:06
+# @modified 2019/12/22 14:19:41
 
 import re
 import os
@@ -71,9 +71,10 @@ class SearchContext:
         self.tools    = []
         self.notes    = []
         self.messages = []
+        self.files    = []
 
     def join_as_files(self):
-        return self.commands + self.dicts + self.tools + self.messages + self.notes
+        return self.commands + self.dicts + self.tools + self.messages + self.notes + self.files
 
 def fill_note_info(files):
     for file in files:
@@ -160,7 +161,7 @@ class handler:
         # 普通的搜索行为
         xmanager.fire("search", ctx)
 
-        files = apply_search_rules(ctx, key)
+        ctx.files = apply_search_rules(ctx, key)
 
         cost_time = int((time.time() - start_time) * 1000)
         
