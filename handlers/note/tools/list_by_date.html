@@ -39,7 +39,10 @@
             </tr>
         {% for note in notes %}
             <tr>
-                <td><a href="/note/view?id={{note.id}}">{{note.name}}</a></td>
+                <td>
+                    <i class="fa {{note.icon}}"></i>
+                    <a href="/note/view?id={{note.id}}">{{note.name}}</a>
+                </td>
                 <td class="option-td">
                     <!--
                     <button class="btn rename-btn">重命名</button>

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/12/22 13:46:11
+# @modified 2019/12/22 21:59:22
 import math
 import time
 import web
@@ -147,8 +147,8 @@ def load_note_tools(user_name):
         NoteLink("回收站", "/note/removed", "fa-trash"),
 
         # NoteLink("时光轴", "/note/tools/timeline", "fa-cube"),
-        # NoteLink("按月查看", "/note/date", "fa-cube"),
         # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
+        NoteLink("按月查看", "/note/date", "fa-cube"),
         NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
         NoteLink("上传管理", "/fs_upload", "fa-upload")
     ]
