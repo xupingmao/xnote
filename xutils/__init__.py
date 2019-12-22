@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/12/02 23:58:50
+# @modified 2019/12/22 12:57:02
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -568,6 +568,16 @@ def exec_command(command, confirmed = False):
 #################################################################
 ##   Web.py Utilities web.py工具类的封装
 #################################################################
+
+def _get_default_by_type(default_value, type):
+    if default_value != None:
+        return default_value
+    if type is bool:
+        return False
+    if type is int:
+        return 0
+    return None
+
 def get_argument(key, default_value=None, type = None, strip=False):
     if not hasattr(web.ctx, "env"):
         return default_value or None
@@ -580,6 +590,7 @@ def get_argument(key, default_value=None, type = None, strip=False):
         web.ctx[ctx_key] = _input
     value = _input.get(key)
     if value is None or value == "":
+        default_value = _get_default_by_type(default_value, type)
         _input[key] = default_value
         return default_value
     if type == bool:

@@ -128,7 +128,7 @@
     <div class="float-left">
         <!-- 查看文件 -->
         <input type="button" class="btn" value="{{T('Select All')}}" id="selectAllBtn"/>
-        <input type="button" class="btn mobile-hidden" value="预览图片" id="previewImg"/>
+        <input type="button" class="btn desktop-only-inline" value="预览图片" id="previewImg"/>
         
         <!-- 导入文件 -->
         <input type="button" class="btn" value="上传" id="uploadFileBtn" >
@@ -136,16 +136,17 @@
         <input type="button" class="btn" value="新建文件夹" id="addDirectory"/>
 
         <!-- 管理文件 -->
-        <input type="button" class="btn mobile-hidden" value="删除" id="deleteBtn"/>
-        <input type="button" class="btn mobile-hidden" value="重命名" id="renameBtn" message="重命名为">
-        <input type="button" class="btn mobile-hidden" value="剪切" id="cutBtn" message="剪切"/>
+        <input type="button" class="btn desktop-only-inline" value="删除" id="deleteBtn"/>
+        <input type="button" class="btn desktop-only-inline" value="重命名" id="renameBtn" message="重命名为">
+        <input type="button" class="btn desktop-only-inline" value="剪切" id="cutBtn" message="剪切"/>
 
         <!-- 其他选项 -->
-        <input type="button" class="btn advanced-opt mobile-hidden" value="本地浏览" id="openDirectory"/>
+        <input type="button" class="btn advanced-opt desktop-only-inline" value="本地浏览" id="openDirectory"/>
     </div>
     
     <div class="float-right">
-        <input type="button" class="link-btn mobile-hidden" href="/code/search?path={{path}}&recursive=on" value="高级搜索"/>
+        <input type="button" class="link-btn desktop-only-inline" 
+            href="/code/search?path={{path}}&recursive=on" value="高级搜索"/>
         <input type="button" data-path="{{path}}" onclick="openFileOption(this)" value="更多"/>
     </div>
 </div>

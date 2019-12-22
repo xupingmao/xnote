@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/12/15 18:49:38
+# @modified 2019/12/22 11:49:12
 
 """短消息"""
 import time
@@ -117,13 +117,13 @@ def on_search_message(ctx):
         process_message(message)
         item.name = u('记事 - ') + message.ctime
         item.html = message.html
-        ctx.tools.append(item)
+        ctx.messages.append(item)
         # print(message)
     if count > 3:
         more = SearchResult()
         more.name = "查看更多记事(%s)" % count
         more.url  = "/message?key=" + ctx.key
-        ctx.tools.append(more)
+        ctx.messages.append(more)
 
 class SearchContext:
 

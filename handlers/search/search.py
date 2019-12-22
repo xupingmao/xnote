@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/12/15 18:41:18
+# @modified 2019/12/22 11:48:06
 
 import re
 import os
@@ -71,6 +71,9 @@ class SearchContext:
         self.tools    = []
         self.notes    = []
         self.messages = []
+
+    def join_as_files(self):
+        return self.commands + self.dicts + self.tools + self.messages + self.notes
 
 def fill_note_info(files):
     for file in files:
@@ -152,7 +155,7 @@ class handler:
         # 阻断性的搜索，比如特定语法的
         xmanager.fire("search.before", ctx)
         if ctx.stop:
-            return ctx.dicts + ctx.tools + ctx.notes
+            return ctx.join_as_files()
 
         # 普通的搜索行为
         xmanager.fire("search", ctx)
@@ -164,7 +167,7 @@ class handler:
         log_search_history(user_name, key, category, cost_time)
 
         if ctx.stop:
-            return ctx.dicts + ctx.tools + files
+            return ctx.join_as_files()
 
         # 慢搜索,如果时间过长,这个服务会被降级
         xmanager.fire("search.slow", ctx)
@@ -172,7 +175,7 @@ class handler:
 
         page_ctx.tools = []
 
-        return ctx.commands + ctx.dicts + ctx.tools + files
+        return ctx.join_as_files()
 
     def GET(self, path_key = None):
         """search files by name and content"""

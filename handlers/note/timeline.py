@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2019/12/15 23:50:00
+# @modified 2019/12/21 20:09:10
 
 """Description here"""
 import re
@@ -34,6 +34,8 @@ class TimelineAjaxHandler:
             rows = NOTE_DAO.list_by_type(user_name, "csv", offset, limit)
         elif type == "sticky":
             rows = NOTE_DAO.list_sticky(user_name, offset, limit)
+        elif type == "removed":
+            rows = NOTE_DAO.list_removed(user_name, offset, limit)
         else:
             rows = NOTE_DAO.list_recent_created(user_name, offset, limit)
 

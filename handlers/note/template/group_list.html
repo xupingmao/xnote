@@ -9,7 +9,7 @@
     <div class="grid-row card book-list hidden">
         <h3 class="card-title">{{T("常用")}}
             <div class="float-right">
-                <a class="inline-btn" id="addBookBtn">+分组</a>
+                <a class="inline-btn add-group-btn">+分组</a>
                 <a class="inline-btn" href="/note/add">+笔记</a>
             </div>
         </h3>
@@ -36,7 +36,7 @@
         <div class="grid-row card book-list">
             <h3 class="card-title">{{T("置顶")}}
                 <div class="float-right">
-                    <a class="inline-btn" id="addBookBtn">+分组</a>
+                    <a class="inline-btn add-group-btn">+分组</a>
                     <a class="inline-btn" href="/note/add">+笔记</a>
                 </div>
             </h3>
@@ -55,7 +55,9 @@
                     {% end %}
                     
                     <span>{{item.name}}</span>
-                    <span class="black">({{item.size}})</span>
+                    {% if item.size!=None %}
+                        <span class="black">({{item.size}})</span>
+                    {% end %}
                     <span class="book-size">{{format_date(item.mtime).replace('-', '/')}}</span>
                 </div>
                 </a>
@@ -90,8 +92,8 @@
 
 <script type="text/javascript">
     $(function () {
-        $("#addBookBtn").click(function () {
-            xnote.prompt("新建笔记本", "", function (newValue) {
+        $(".add-group-btn").click(function () {
+            xnote.prompt("新建分组", "", function (newValue) {
                 $.post("/note/add", {type:"group", name:newValue, _format: "json"}, function (resp) {
                     var code = resp.code;
                     if (code != "success") {

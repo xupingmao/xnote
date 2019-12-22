@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/12/20 00:03:25
+ * @modified 2019/12/21 20:14:04
  */
 
 * {
@@ -1310,6 +1310,10 @@ li.menu-item:hover {
     display: block;
 }
 
+.desktop-only-inline {
+    display: inline-block;
+}
+
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 950px) {
     /** mobile **/
@@ -1380,7 +1384,7 @@ li.menu-item:hover {
         display: block;
     }
 
-    .desktop-only {
+    .desktop-only, .desktop-only-inline {
         display: none;
     }
 }

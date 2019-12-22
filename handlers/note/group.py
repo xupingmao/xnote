@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/12/20 00:40:54
+# @modified 2019/12/22 13:46:11
 import math
 import time
 import web
@@ -16,7 +16,7 @@ from xutils.dateutil import Timer
 from xtemplate import T
 
 VIEW_TPL   = "note/view.html"
-TYPES_NAME = "笔记工具"
+TYPES_NAME = "笔记索引"
 NOTE_DAO   = xutils.DAO("note")
 MSG_DAO    = xutils.DAO("message")
 
@@ -32,7 +32,7 @@ class PathNode(Storage):
 class GroupItem(Storage):
     """笔记本的类型"""
 
-    def __init__(self, name, url, size = 0, type="group"):
+    def __init__(self, name, url, size = None, type="group"):
         self.type     = type
         self.priority = 0
         self.name     = name
@@ -109,7 +109,8 @@ class GroupListHandler:
         # 归档分组处理
         archived_books = NOTE_DAO.list_archived(user_name)
         if len(archived_books) > 0:
-            fixed_books.append(GroupItem("已归档", "/note/archived", len(archived_books), "system"))
+            fixed_books.append(GroupItem("归档分组", "/note/archived", len(archived_books), "system"))
+        fixed_books.append(GroupItem("笔记索引", "/note/index?source=group", None, "system"))
 
         for note in notes:
             if note.priority > 0:
@@ -128,7 +129,7 @@ def load_note_tools(user_name):
     note_stat = NOTE_DAO.get_note_stat(user_name)
 
     return [
-        SystemFolder("公共笔记", "/note/public"),
+        NoteLink("公共笔记", "/note/public", "fa-folder"),
         NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
         NoteLink("话题", "/search/rules", "fa-search", size = msg_stat.key_count),
         NoteLink("记事", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
@@ -209,6 +210,12 @@ class RemovedHandler:
 
     @xauth.login_required()
     def GET(self):
+        return xtemplate.render("note/tools/timeline.html", 
+            title = T("回收站"), 
+            type = "removed")
+
+    @xauth.login_required()
+    def GET_old(self):
         page = xutils.get_argument("page", 1, type=int)
         user_name = xauth.current_name()
 
@@ -292,7 +299,7 @@ class HtmlListHandler(BaseListHandler):
         self.note_type = "html"
         self.title = "富文本"
 
-class MarkdownListHandler(BaseListHandler):
+class MarkdownListHandler(BaseTimelineHandler):
 
     def __init__(self):
         self.note_type = "md"
@@ -324,28 +331,11 @@ class TextHandler(BaseListHandler):
         self.note_type = "text"
         self.title = "文本"
 
-class ToolListHandler:
-
-    @xauth.login_required()
-    def GET(self):
-        page = 1
-
-        limit  = xconfig.PAGE_SIZE
-        offset = (page-1)*limit
-
-        files = load_note_tools(xauth.current_name())
-        amount = len(files)
-
-        return xtemplate.render(VIEW_TPL,
-            pathlist  = [PathNode(TYPES_NAME, "/note/types")],
-            file_type = "group",
-            files     = files,
-            show_next  = True)
-
 class NoteIndexHandler:
 
     @xauth.login_required()
     def GET(self):
+        source = xutils.get_argument("source")
         page = 1
 
         limit  = xconfig.PAGE_SIZE
@@ -354,13 +344,23 @@ class NoteIndexHandler:
         files = load_note_tools(xauth.current_name())
         amount = len(files)
 
+        if source == "group":
+            show_path_list = True
+            show_parent_link = True
+        else:
+            show_path_list = False
+            show_parent_link = False
+
         return xtemplate.render(VIEW_TPL,
             pathlist  = [PathNode(TYPES_NAME, "/note/types")],
             file_type = "group",
             files     = files,
-            show_path_list   = False,
-            show_parent_link = False,
+            show_path_list   = show_path_list,
+            show_parent_link = show_parent_link,
             show_next  = True)
+
+class ToolListHandler(NoteIndexHandler):
+    pass
 
 class TypesHandler(ToolListHandler):
     """A alias for ToolListHandler"""
@@ -508,7 +508,7 @@ class ArchivedHandler:
         user  = xauth.current_name()
         files = NOTE_DAO.list_archived(user)
         return xtemplate.render(VIEW_TPL,
-            pathlist  = [PathNode("归档笔记", "/note/archived")],
+            pathlist  = [PathNode("归档分组", "/note/archived")],
             file_type = "group",
             dir_type  = "archived",
             files     = files,

@@ -8,10 +8,10 @@
   <div class="menu-box float-left">
     <ul class="nav-ul">
       {% if _has_login %}
-        <li><a class="menu-link" href="/note/index">{{T("首页")}}</a></li>
+        <li><a class="menu-link" href="/note/group">{{T("首页")}}</a></li>
         <li><a class="menu-link" href="/message?tag=task">{{T("待办")}}</a></li>
         <li><a class="menu-link" href="/plugins_list">{{T("工具")}}</a></li>
-        <li><a class="menu-link" href="/system/settings">{{T("设置")}}</a></li>
+        <li><a class="menu-link" href="/system/index">{{T("设置")}}</a></li>
       {% end %}
       
       {% if not _has_login %}
@@ -42,7 +42,7 @@
     <ul class="navMenu">
       {% if _has_login %}
         <!-- 登录状态 -->
-        <li><a href="/">{{T("我的笔记")}}</a></li>
+        <li><a href="/note/group">{{T("我的笔记")}}</a></li>
         <li><a href="/message?tag=task">待办事项</a></li>
         <li><a href="/note/public">{{T("公共笔记")}}</a></li>
         <li><a href="/search/rules">{{T("话题搜索")}}</a></li>
@@ -51,7 +51,7 @@
         {% if _is_admin %}
           <li><a href="/fs_list">文件管理</a></li> 
         {% end %}
-        <li><a href="/system/settings">系统设置</a></li>
+        <li><a href="/system/index">系统设置</a></li>
       {% else %}
         <!-- 未登录状态 -->
         <li><a href="/note/public">公开笔记</a></li>

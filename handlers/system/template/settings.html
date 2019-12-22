@@ -27,11 +27,11 @@
         <tr class="">
             <td class="key">{{T("当前用户")}}</td>
             <td>
-                {{_user_name}} <a href="/logout">退出</a>
+                {{_user_name}}
             </td>
         </tr>
 
-        <tr>
+        <tr class="hide">
             <td class="key">关于系统</td>
             <td>
                 <a href="/code/wiki/README.md">查看</a>
@@ -47,14 +47,14 @@
             <td>{{sys_mem_used}} / {{sys_mem_total}}</td>
         </tr>
 
-        <tr class="user-visible">
+        <tr class="user-visible hide">
             <td class="key">功能列表</td>
             <td>
                 <a href="/system/index">查看</a>
             </td>
         </tr>
 
-        <tr class="user-visible">
+        <tr class="user-visible hide">
             <td class="key">数据管理</td>
             <td>
                 <a href="/note/stat">数据统计</a> |
@@ -62,14 +62,14 @@
             </td>
         </tr>
 
-        <tr class="admin-visible">
+        <tr class="admin-visible hide">
             <td class="key">文件管理</td>
             <td>
                 <a href="/fs_list">进入</a>
             </td>
         </tr>
 
-        <tr class="admin-visible">
+        <tr class="admin-visible hide">
             <td class="key">任务管理</td>
             <td>
                 <a href="/system/crontab">定时任务</a> |
@@ -88,7 +88,7 @@
             </td>
         </tr>
 
-        <tr class="admin-visible">
+        <tr class="admin-visible hide">
             <td class="key">日志监控</td>
             <td>
                 <a href="/system/log">系统日志</a> | 
@@ -96,7 +96,7 @@
             </td>
         </tr>
 
-        <tr class="admin-visible">
+        <tr class="admin-visible hide">
             <td class="key">目录管理</td>
             <td>
                 <a href="/fs_link/home">Home</a> |

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/??/??
-# @modified 2019/09/30 11:15:59
+# @modified 2019/12/22 14:07:47
 
 """显示代码原文"""
 import os
@@ -10,7 +10,7 @@ import xutils
 import xtemplate
 import xconfig
 from tornado.escape import xhtml_escape
-from xutils import u, Storage
+from xutils import u, Storage, fsutil
 
 def can_preview(path):
     name, ext = os.path.splitext(path)
@@ -64,6 +64,7 @@ class ViewSourceHandler:
                     warn = "文件过大，只显示部分内容"
                     readonly = True
                 content = xutils.readfile(path, limit = max_file_size)
+                plugin_name = fsutil.get_relative_path(path, xconfig.PLUGINS_DIR)
                 # 使用JavaScript来处理搜索关键字高亮问题
                 # if key != "":
                 #     content = xutils.html_escape(content)
@@ -78,6 +79,7 @@ class ViewSourceHandler:
                     name = os.path.basename(path), 
                     path = path,
                     content = content, 
+                    plugin_name = plugin_name,
                     lines = content.count("\n")+1, **kw)
             except Exception as e:
                 xutils.print_exc()

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/11/19 00:49:43
+# @modified 2019/12/22 13:43:50
 """System functions"""
 from io import StringIO
 import xconfig
@@ -44,9 +44,9 @@ SYS_TOOLS = [
     public_link("关于", "/code/wiki/README.md", "info-circle"),
     user_link("退出", "/logout", "sign-out"),
     guest_link("登录", "/login", "sign-in"),
-    admin_link("Menu_File",       "/fs_list", "file"),
-    admin_link("Menu_Scripts",    "/fs_link/scripts"),
-    admin_link("Menu_Cron",   "/system/crontab"),
+    admin_link("文件",       "/fs_list", "file"),
+    admin_link("脚本",    "/fs_link/scripts"),
+    admin_link("定时任务",   "/system/crontab"),
     admin_link("系统事件", "/system/event"),
     admin_link("Menu_User",   "/system/user/list", "users"),
     admin_link("Menu_Log",    "/system/log"),
@@ -62,22 +62,22 @@ NOTE_TOOLS = [
     user_link("搜索历史", "/search", "history"),
 
     # 笔记
-    user_link("Recent Updated",      "/note/recent_edit", "folder"),
-    user_link("Recent Created",      "/note/recent_created", "folder"),
-    user_link("Recent Viewed",       "/note/recent_viewed", "folder"),
-    user_link("默认分类", "/note/default", "folder"),
-    user_link("笔记本", "/note/group", "book"),
+    user_link("最近更新",      "/note/recent_edit", "folder"),
+    user_link("最近创建",      "/note/recent_created", "folder"),
+    user_link("最近查看",       "/note/recent_viewed", "folder"),
+    user_link("默认分组", "/note/default", "folder"),
+    user_link("分组", "/note/group", "folder"),
     user_link("书架", "/note/category", "book"),
     user_link("标签列表", "/note/taglist", "tags"),
     user_link("时光轴", "/note/tools/timeline"),
     user_link("字典", "/note/dict"),
 
     # 提醒
-    user_link("待办",  "/message?status=created", "calendar-check-o"),
+    user_link("待办",  "/message?tag=task", "calendar-check-o"),
     user_link("日历", "/message/calendar", "calendar"),
     user_link("上传管理", "/fs_upload", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),
-    user_link("笔记工具", "/note/tools", "cubes"),
+    user_link("笔记索引", "/note/index", "cubes"),
 ] 
 
 DATA_TOOLS = [
