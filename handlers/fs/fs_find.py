@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2019/12/28 19:42:09
+# @modified 2019/12/28 20:51:17
 import os
 import sys
 import glob
@@ -61,22 +61,26 @@ class SearchHandler:
         path = xutils.get_argument("path")
         if not path:
             path = xconfig.DATA_DIR
-        find_key = xutils.get_argument("find_key", "")
+
+        path      = os.path.abspath(path)
+        find_key  = xutils.get_argument("find_key", "")
         find_type = xutils.get_argument("type")
-        mode = xutils.get_argument("mode")
+        mode      = xutils.get_argument("mode")
+
         if find_key == "" or find_key is None:
             find_key = xutils.get_argument("key", "")
-        find_key = "*" + find_key + "*"
+        find_key  = "*" + find_key + "*"
         path_name = os.path.join(path, find_key)
+
         if find_key == "**":
             plist = []
-        elif os.path.abspath(path) == os.path.abspath(xconfig.DATA_DIR) and xconfig.USE_CACHE_SEARCH:
+        elif path == os.path.abspath(xconfig.DATA_DIR) and xconfig.USE_CACHE_SEARCH:
             # search in cache
             plist = find_in_cache(find_key)
         else:
             plist = xutils.search_path(path, find_key)
 
-        filelist = FS.process_file_list(plist)
+        filelist = FS.process_file_list(plist, path)
         # TODO max result size
         tpl = "fs/fs.html"
         if mode == "grid":

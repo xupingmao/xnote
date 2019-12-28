@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/12/28 20:18:58
+# @modified 2019/12/28 23:26:36
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -87,12 +87,14 @@ def check_file_auth(path, user_name):
     path = os.path.abspath(path)
     return path.startswith(user_dir)
 
-def process_file_list(pathlist):
-    filelist = [FileItem(fpath) for fpath in pathlist]
+def process_file_list(pathlist, parent = None):
+    filelist = [FileItem(fpath, parent) for fpath in pathlist]
     for item in filelist:
         item.icon = "fa-file-o"
         if item.type == "dir":
             item.icon = "fa-folder orange"
+        elif item.ext in xconfig.FS_VIDEO_EXT_LIST:
+            item.icon = "fa-file-video-o"
         elif item.ext in xconfig.FS_CODE_EXT_LIST:
             item.icon = "fa-file-code-o"
         elif item.ext in xconfig.FS_AUDIO_EXT_LIST:
@@ -507,6 +509,9 @@ class ViewHandler:
         basename, ext = os.path.splitext(fpath)
         encoded_fpath = xutils.encode_uri_component(fpath)
 
+        if ext == ".txt":
+            raise web.found("/tools/txtreader?path=%s" % encoded_fpath)
+
         if ext in (".html", ".htm"):
             raise web.found("/fs/%s" % encoded_fpath)
 
@@ -517,6 +522,7 @@ class ViewHandler:
             raise web.found("/code/edit?path=%s" % encoded_fpath)
 
         raise web.found("/fs/%s" % encoded_fpath)
+
 
 class EditHandler:
 
@@ -529,7 +535,7 @@ class EditHandler:
         if xutils.is_text_file(fpath):
             raise web.found("/code/edit?path=%s" % encoded_fpath)
 
-        raise web.found("/fs/%s" % encoded_fpath)
+        raise web.found("/fs_hex?path=%s" % encoded_fpath)
 
 xutils.register_func("fs.process_file_list", process_file_list)
 

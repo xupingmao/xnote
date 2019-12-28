@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/12/28 20:19:18
+# @modified 2019/12/28 20:56:55
 
 '''xnote系统配置
 
@@ -305,12 +305,14 @@ def load_file_type_config():
     global FS_CODE_EXT_LIST
     global FS_ZIP_EXT_LIST
     global FS_AUDIO_EXT_LIST
+    global FS_VIDEO_EXT_LIST
 
     FS_TEXT_EXT_LIST = load_file_type_config0("./config/file/text.properties")
     FS_IMG_EXT_LIST  = load_file_type_config0("./config/file/image.properties")
     FS_CODE_EXT_LIST = load_file_type_config0("./config/file/code.properties")
     FS_ZIP_EXT_LIST  = load_file_type_config0("./config/file/zip.properties")
     FS_AUDIO_EXT_LIST = load_file_type_config0("./config/file/audio.properties")
+    FS_VIDEO_EXT_LIST = load_file_type_config0("./config/file/video.properties")
 
 
 def get(name, default_value=None):
