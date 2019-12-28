@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/08/03 16:09:04
+# @modified 2019/12/28 20:18:58
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -18,19 +18,13 @@ import xconfig
 import xtemplate
 import shutil
 import xmanager
-from xutils import FileItem, u, Storage
+from xutils import FileItem, u, Storage, fsutil
 
 def is_stared(path):
     return xconfig.has_config("STARED_DIRS", path)
 
 def get_file_size(filepath):
-    try:
-        st = os.stat(filepath)
-        if st and st.st_size > 0:
-            return xutils.get_pretty_file_size(None, size=st.st_size)
-        return "-"
-    except OSError as e:
-        return "-"
+    return fsutil.get_file_size(filepath, format=True)
 
 def get_filesystem_kw():
     """return filesystem utils"""
@@ -61,7 +55,6 @@ def getpathlist2(path):
     for i in range(len(pathsplit)):
         path = "/".join(pathsplit[:i])
         if "" != os.path.basename(path):
-            # pathlist.append(path)
             pathlist.append(FileItem(path))
     return pathlist
 
@@ -70,7 +63,7 @@ def print_env():
         print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
 
 
-def get_win_drives():
+def list_win_drives():
     """获取Windows系统的驱动器列表"""
     try:
         import ctypes
@@ -88,15 +81,31 @@ def get_win_drives():
         return filelist
     except Exception as e:
         return ["C:"]
-    else:
-        pass
-    finally:
-        pass
 
 def check_file_auth(path, user_name):
     user_dir = os.path.join(xconfig.UPLOAD_DIR, user_name)
     path = os.path.abspath(path)
     return path.startswith(user_dir)
+
+def process_file_list(pathlist):
+    filelist = [FileItem(fpath) for fpath in pathlist]
+    for item in filelist:
+        item.icon = "fa-file-o"
+        if item.type == "dir":
+            item.icon = "fa-folder orange"
+        elif item.ext in xconfig.FS_CODE_EXT_LIST:
+            item.icon = "fa-file-code-o"
+        elif item.ext in xconfig.FS_AUDIO_EXT_LIST:
+            item.icon = "fa-file-audio-o"
+        elif item.ext in xconfig.FS_ZIP_EXT_LIST:
+            item.icon = "fa-file-zip-o"
+        elif xutils.is_text_file(item.path):
+            item.icon = "fa-file-text-o"
+        elif xutils.is_img_file(item.path):
+            item.icon = "fa-file-image-o"
+
+    filelist.sort()
+    return filelist
 
 class FileSystemHandler:
 
@@ -153,8 +162,7 @@ class FileSystemHandler:
     def list_directory(self, path):
         try:
             if xutils.is_windows() and path == "/":
-                # return self.list_win_drives()
-                filelist = get_win_drives()
+                filelist = list_win_drives()
             else:
                 filelist = list_abs_dir(path)
         except OSError:
@@ -168,8 +176,7 @@ class FileSystemHandler:
         # 排序：文件夹优先，按字母顺序排列
         # filelist.sort(key=lambda a: a.lower())
         # filelist.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
-        filelist = [FileItem(item) for item in filelist]
-        filelist.sort()
+        filelist = process_file_list(filelist)
 
         # SAE上遇到中文出错
         # Fix bad filenames，修改不生效
@@ -492,8 +499,44 @@ class RecentHandler:
         datapath, webpath = xutils.get_upload_file_path(xauth.current_name(), "")
         raise web.seeother("/fs/%s" % datapath)
 
+class ViewHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        fpath = xutils.get_argument("path")
+        basename, ext = os.path.splitext(fpath)
+        encoded_fpath = xutils.encode_uri_component(fpath)
+
+        if ext in (".html", ".htm"):
+            raise web.found("/fs/%s" % encoded_fpath)
+
+        if ext in (".md", ".csv"):
+            raise web.found("/code/preview?path=%s" % encoded_fpath)
+
+        if xutils.is_text_file(fpath):
+            raise web.found("/code/edit?path=%s" % encoded_fpath)
+
+        raise web.found("/fs/%s" % encoded_fpath)
+
+class EditHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        fpath = xutils.get_argument("path")
+        basename, ext = os.path.splitext(fpath)
+        encoded_fpath = xutils.encode_uri_component(fpath)
+
+        if xutils.is_text_file(fpath):
+            raise web.found("/code/edit?path=%s" % encoded_fpath)
+
+        raise web.found("/fs/%s" % encoded_fpath)
+
+xutils.register_func("fs.process_file_list", process_file_list)
+
 xurls = (
     r"/fs_list/?", ListDirHandler,
+    r"/fs_edit",   EditHandler,
+    r"/fs_view",   ViewHandler,
     r"/fs_api/add_dir", AddDirHandler,
     r"/fs_api/add_file", AddFileHandler,
     r"/fs_api/remove", RemoveHandler,

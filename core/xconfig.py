@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/12/15 18:50:02
+# @modified 2019/12/28 20:19:18
 
 '''xnote系统配置
 
@@ -93,7 +93,7 @@ HANDLERS_DIR = "handlers"
 # 工具目录
 TOOLS_DIR    = "handlers/tools"
 # 语言配置目录
-LANG_DIR     = "lang"
+LANG_DIR     = "config/lang"
 DB_ENGINE    = "leveldb"
 
 WORKING_DIR  = os.path.dirname(__file__)
@@ -149,50 +149,12 @@ FS_LINK          = "/fs_list"
 # 文件浏览模式 list/grid/sidebar
 FS_VIEW_MODE     = "list"
 # 文本文件后缀
-FS_TEXT_EXT_LIST = set([
-    ".java",  # Java
-    ".scala",
-    ".c",     # C语言
-    ".h",
-    ".cpp",   # C++
-    ".hpp",
-    ".cs",    # C#
-    ".vm",    # velocity
-    ".vim",   # VIM文件
-    ".html",  # HTML
-    ".htm",
-    ".js",    # JavaScript
-    ".json",  
-    ".css", 
-    ".xml",   # XML
-    ".xsd",   # XML schema
-    ".csv",   # csv table
-    ".proto", # proto buf
-    ".py",    # Python
-    ".txt",   # Text
-    ".lua",   # Lua
-    ".rb",    # Ruby
-    ".go",    # Go
-    ".m",     # Objective-C, Matlab
-    ".conf",  # configuration
-    ".sh",      # Linux shell
-    ".bat",     # Windows shell
-    ".cmd",     # Windows shell
-    ".command", # Mac shell
-    ".sql",     # sql
-    ".php",
-    ".ini",
-    ".rc",
-    ".properties",
-    ".gradle",
-    ".md",
-    ".yml",
-    ".log"
-])
+FS_TEXT_EXT_LIST = set()
+FS_IMG_EXT_LIST  = set()
+FS_CODE_EXT_LIST = set()
 
 # 后面定义的set函数和系统函数冲突了，所以这里创建一个hashset的别名
 hashset = set
-FS_IMG_EXT_LIST = set([".gif", ".png", ".jpg", ".jpeg", ".bmp", ".webp", ".ico", ".jfif", ".cur"])
 # 剪切板
 FS_CLIP = []
 
@@ -209,7 +171,6 @@ _config = {}
 def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
-
 
 class Storage(dict):
     """
@@ -308,6 +269,7 @@ def init(path = DATA_DIR):
     LOG_DIR      = os.path.join(DATA_DIR, "log")
     DB_FILE      = DB_PATH
     LOG_FILE     = LOG_PATH
+    FILE_EXT_PATH = os.path.join(CONFIG_DIR, "file", "type.properties")
 
     # 一级目录
     makedirs(DATA_DIR)
@@ -323,6 +285,32 @@ def init(path = DATA_DIR):
     # 二级目录
     makedirs(COMMANDS_DIR)
     makedirs(PLUGINS_DIR)
+
+    # 加载文件后缀配置
+    load_file_type_config()
+
+def load_file_type_config0(fpath):
+    from xutils import fsutil, textutil
+    text  = fsutil.readfile(fpath)
+    ext_set = hashset()
+    ext_type_dict = textutil.parse_config_text(text, 'dict')
+    for ext in ext_type_dict:
+        ext_set.add(ext)
+    return ext_set
+
+
+def load_file_type_config():
+    global FS_TEXT_EXT_LIST
+    global FS_IMG_EXT_LIST
+    global FS_CODE_EXT_LIST
+    global FS_ZIP_EXT_LIST
+    global FS_AUDIO_EXT_LIST
+
+    FS_TEXT_EXT_LIST = load_file_type_config0("./config/file/text.properties")
+    FS_IMG_EXT_LIST  = load_file_type_config0("./config/file/image.properties")
+    FS_CODE_EXT_LIST = load_file_type_config0("./config/file/code.properties")
+    FS_ZIP_EXT_LIST  = load_file_type_config0("./config/file/zip.properties")
+    FS_AUDIO_EXT_LIST = load_file_type_config0("./config/file/audio.properties")
 
 
 def get(name, default_value=None):

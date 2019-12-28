@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2019/12/14 18:49:03
+# @modified 2019/12/28 19:12:18
 import re
 import random
 from .imports import is_str, ConfigParser
@@ -330,10 +330,10 @@ def parse_config_text(text, ret_type = 'list'):
     else:
         config = []
     for line in text.split("\n"): 
-        line = line.strip().replace('\n', '') 
+        line = line.strip()
         if line.find("#")!=-1: 
             # 删除注释部分
-            line=line[0:line.find('#')] 
+            line=line[0:line.find('#')]
         eq_pos = line.find('=')
         if eq_pos > 0: 
             key   = line[:eq_pos].strip()

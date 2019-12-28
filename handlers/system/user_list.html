@@ -24,8 +24,10 @@
 {% block body %}
 
 <div class="card">
-    {% set title = "用户管理" %}
-    {% include "tools/base_title.html" %}
+    <h3 class="card-title">
+        <span>用户管理</span>
+        <a class="btn float-right" href="/system/user">新增</a>
+    </h3>
 
     <table class="table col-md-12">
         <tr>
@@ -48,8 +50,6 @@
         </tr>
         {% end %}
     </table>
-
-    <a class="btn" href="/system/user">新增</a>
 </div>
 
 <div id="dialogContent" class="col-md-12 hide">

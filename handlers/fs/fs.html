@@ -46,58 +46,28 @@
     <tr>
         <td class="checkboxTd"><input type="checkbox" data-path="{{item.path}}" data-name="{{item.name}}"></td>
         <td>
-        {% if item.type == "dir" %}
-            <img src="/static/image/folder.gif"/>
-            <a href="/fs/{{item.path}}" class="fs-folder">{{item.name}}</a>
-        {% else %}
-            {# 默认点击按照mimetype处理 #}
-            <a class="fs-file" href="/fs/{{item.path}}">{{item.name}}</a>
-
-            {# 图片浏览器，这个要放在最后 #}
-            {% if xutils.is_img_file(item.path) %}
-                <div class="fs-image-div" img-src="/fs/{{item.path}}"></div>
+            <i class="fa {{item.icon}}"></i>
+            {% if item.type != "dir" %}
+                <a href="/fs_view?path={{url_escape(item.path)}}" class="fs-folder">{{item.name}}</a>
+            {% else %}
+                <a href="/fs/{{item.path}}" class="fs-folder">{{item.name}}</a>
             {% end %}
-
-        {% end %}
         </td>
+
         <td class="options-td">
             {{item.size}}
         </td>
         <td class="options-td">
             <div class="float-right">
                 {% if item.type != "dir" %}
-
-                    {# 文本编辑器 #}
-                    {% if xutils.is_text_file(item.path) %}
-                        <a class="item-option" href="/code/edit?path={{url_escape(item.path)}}">编辑</a>
-                    {% end %}
-
-                    {% if item.ext == ".txt" %}
-                        <a class="item-option" href="/tools/txtreader?path={{item.path}}&from=/fs/{{path}}">阅读</a>
-                    {% end %}
-
-                    {% if item.ext == ".db" %}
-                        <a class="item-option" href="/tools/sql?path={{item.path}}&from=/fs/{{path}}">查看</a>
-                    {% end %}
-
-                    {% if item.ext in (".htm", ".html") %}
-                        <a class="item-option" href="/fs/{{item.path}}">预览</a>
-                    {% end %}
-
-                    {% if item.ext.lower() in (".md", ".csv") %}
-                        <a class="item-option" href="/code/wiki/{{item.path}}">预览</a>
-                    {% end %}
-
-                    {% if item.ext.lower() in (".pdf", ".mp4") %}
-                        <a class="item-option" href="/tools/iframe_viewer?path={{quote(item.path)}}">预览</a>
-                    {% end %}
-
+                    {# 编辑器，主要有两张：文本编辑器和二进制编辑器 #}
+                    <a class="item-option" href="/fs_edit?path={{url_escape(item.path)}}">编辑</a>
                     <a class="item-option" href="/fs/{{item.path}}?type=blob&token={{token}}">下载</a>
+                {% else %}
+                    <a class="item-option" 
+                        data-path="{{item.path}}"
+                        onclick="openFileOption(this)">更多</a>
                 {% end %}
-                <a class="item-option delete-link" data-path="{{item.path}}" href="#">删除</a>
-                <a class="item-option" 
-                    data-path="{{item.path}}"
-                    onclick="openFileOption(this)">更多</a>
             </div>
         </td>
         

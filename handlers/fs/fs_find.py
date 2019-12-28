@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2019/02/23 13:48:43
+# @modified 2019/12/28 19:42:09
 import os
 import sys
 import glob
@@ -12,6 +12,7 @@ import xconfig
 import time
 from fnmatch import fnmatch
 
+FS = xutils.Module("fs")
 
 def update_file_index():
     xutils.cache_del("fs.list")
@@ -74,6 +75,8 @@ class SearchHandler:
             plist = find_in_cache(find_key)
         else:
             plist = xutils.search_path(path, find_key)
+
+        filelist = FS.process_file_list(plist)
         # TODO max result size
         tpl = "fs/fs.html"
         if mode == "grid":
@@ -81,7 +84,7 @@ class SearchHandler:
         return xtemplate.render(tpl, 
             path  = path,
             token = xauth.get_current_user().token,
-            filelist = [xutils.FileItem(p, path) for p in plist])
+            filelist = filelist)
 
 class IndexHandler:
     """文件索引管理"""
