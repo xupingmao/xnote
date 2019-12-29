@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/12/28 22:04:24
-# @modified 2019/12/28 22:39:03
+# @modified 2019/12/29 13:14:10
 
 # -*- coding:utf-8 -*-
 # @since 2019-01-10 00:21:16
@@ -76,7 +76,7 @@ class Main(BasePlugin):
         page   = xutils.get_argument("page", 1, type = int)
         offset = max(page-1, 0) * pagesize
         
-        self.page_url = "?type=%s&path=%s&page=" % (type, path)
+        self.page_url = "?path=%s&page=" % path
         
         if path == "":
             return
@@ -89,7 +89,7 @@ class Main(BasePlugin):
             return "`%s` IS NOT A FILE!" % path
         else:
             filesize = xutils.get_file_size(path, format = False)
-            line_fmt = "%05d"
+            line_fmt = "%05x"
             step = 16
             self.page_max = math.ceil(filesize / pagesize)
             padding = ' ' * 4

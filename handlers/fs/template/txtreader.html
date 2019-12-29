@@ -2,7 +2,7 @@
 
 <!-- 
 @since 2017/12/02
-@modified 2019/12/28 20:46:10
+@modified 2019/12/29 17:02:46
 -->
 
 {% block head %}
@@ -24,31 +24,38 @@
     background-color: #ccc;
 }
 
-.reader-footer {
-    position: fixed;
-    bottom: 0px;
-    height: 30px;
-    width: 100%;
-    background-color: #ccc;
-}
-
 #content {
     padding-bottom: 30px;
     padding-left: 5px;
     padding-right: 5px;
 }
 
+.reader-footer {
+    position: fixed;
+    bottom: 0px;
+    height: 30px;
+    background-color: #ccc;
+    left: 0px;
+    right: 0px;
+}
+
 #progress {
     position: absolute;
+    top: 6px;
     left: 50%;
     margin-left: -30px;
     width: 60px;
     text-align: center;
 }
 
+.backward {
+    position: absolute;
+    left: 5px;
+}
+
 .forward {
     position: absolute;
-    right: 0px;
+    right: 5px;
 }
 
 .read {
@@ -74,28 +81,34 @@
 
 {% block body %}
 {% set path = xutils.get_argument("path") %}
-{% include mod_fs_path.html %}
-<div class="col-md-12 hide" style="text-align: center;">
-    <button class="backward" style="float: left;">上一页</button>
-    <span style="text-align: center;"><button class="read">阅读</button></span>
-    <button class="forward" style="float: right;">下一页</button>
-</div>
 
+<!-- header -->
+{% include mod_fs_path.html %}
+
+<!-- body -->
 <div class="col-md-12 card" id="content"></div>
 
-<span class="read">阅读</span>
-
-<div class="col-md-12 reader-footer" style="text-align: center;">
-    <button class="backward float-left">上一页</button>
-    <button id="progress"></button>
+<!-- footer -->
+<div class="reader-footer">
+    <button class="backward">上一页</button>
+    <span id="progress"></span>
     <button class="forward">下一页</button>
 </div>
 
+<!-- 阅读悬浮按钮 -->
+<span class="read">阅读</span>
+
+
 <script type="text/javascript">
+$(function () {
     var path = getUrlParams().path;
     var _from = getUrlParams().from;
     var autoForward = false;
     var readLength = 1000;
+
+    // 调整底部
+    var mainContentLeft = $(".main-content").offset().left;
+    $(".reader-footer").css("left", mainContentLeft);
 
     $("#backLink").attr("href", _from);
 
@@ -153,6 +166,7 @@
           case 37: readBackward(); break;
         }
     })
+});
 </script>
 
 {% end %}

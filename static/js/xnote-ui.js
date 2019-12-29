@@ -5,7 +5,7 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2019/09/24 11:28:25
+ * @modified 2019/12/29 16:19:23
  */
 var XUI = function (window) {
   // 处理select标签选中情况
@@ -135,10 +135,14 @@ var XUI = function (window) {
           if (el == target) {
             imageIndex = index;
           }
+          var src = $(el).attr("src");
+          if (!src) {
+            src = $(el).attr("data-src");
+          }
           data.push({
             "alt": $(el).attr("alt"),
             "pid": 0,
-            "src": $(el).attr("src"),
+            "src": src,
             "thumb": ""
           });
         });

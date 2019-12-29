@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/12/28 23:26:36
+# @modified 2019/12/29 16:55:07
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -510,7 +510,7 @@ class ViewHandler:
         encoded_fpath = xutils.encode_uri_component(fpath)
 
         if ext == ".txt":
-            raise web.found("/tools/txtreader?path=%s" % encoded_fpath)
+            raise web.found("/fs_text?path=%s" % encoded_fpath)
 
         if ext in (".html", ".htm"):
             raise web.found("/fs/%s" % encoded_fpath)
@@ -537,12 +537,19 @@ class EditHandler:
 
         raise web.found("/fs_hex?path=%s" % encoded_fpath)
 
+class TextHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        return xtemplate.render("fs/template/txtreader.html")
+
 xutils.register_func("fs.process_file_list", process_file_list)
 
 xurls = (
     r"/fs_list/?", ListDirHandler,
     r"/fs_edit",   EditHandler,
     r"/fs_view",   ViewHandler,
+    r"/fs_text",   TextHandler,
     r"/fs_api/add_dir", AddDirHandler,
     r"/fs_api/add_file", AddFileHandler,
     r"/fs_api/remove", RemoveHandler,
@@ -556,7 +563,7 @@ xurls = (
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
     r"/(app/.*)", StaticFileHandler,
-    r"/(tmp/.*)", StaticFileHandler
+    r"/(tmp/.*)", StaticFileHandler,
 )
 
 
