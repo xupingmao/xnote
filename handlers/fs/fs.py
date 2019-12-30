@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/12/29 16:55:07
+# @modified 2019/12/31 01:15:10
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -47,17 +47,6 @@ def get_parent_path(path):
 def list_abs_dir(path):
     return [os.path.join(path, item) for item in os.listdir(path)]
 
-def getpathlist2(path):
-    if not path.endswith("/"):
-        path += "/"
-    pathsplit = path.split("/")
-    pathlist = []
-    for i in range(len(pathsplit)):
-        path = "/".join(pathsplit[:i])
-        if "" != os.path.basename(path):
-            pathlist.append(FileItem(path))
-    return pathlist
-
 def print_env():
     for key in web.ctx.env:
         print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
@@ -88,9 +77,11 @@ def check_file_auth(path, user_name):
     return path.startswith(user_dir)
 
 def process_file_list(pathlist, parent = None):
-    filelist = [FileItem(fpath, parent) for fpath in pathlist]
+    filelist = [FileItem(fpath, parent, merge = True) for fpath in pathlist]
     for item in filelist:
+        item.encoded_path = xutils.encode_uri_component(item.path)
         item.icon = "fa-file-o"
+
         if item.type == "dir":
             item.icon = "fa-folder orange"
         elif item.ext in xconfig.FS_VIDEO_EXT_LIST:
@@ -111,25 +102,7 @@ def process_file_list(pathlist, parent = None):
 
 class FileSystemHandler:
 
-    mime_types = {
-        ""     : 'application/octet-stream', # Default
-        '.jpg' : 'image/jpeg',
-        '.png' : 'image/png',
-        '.gif' : 'image/gif',
-        '.webp': 'image/webp',
-        '.mp4' : 'video/mp4',
-        '.avi' : 'video/avi',
-        '.rmvb': 'video/rmvb',
-        '.mkv' : 'video/x-matroska',
-        '.html': 'text/html; charset=utf-8',
-        '.py'  : 'text/plain; charset=utf-8',
-        '.sh'  : 'text/plain; charset=utf-8',
-        '.txt' : 'text/plain; charset=utf-8',  # 便于文件下载
-        '.md'  : 'text/plain; charset=utf-8',
-        '.ini' : 'text/plain; charset=utf-8',
-        '.js'  : 'application/x-javascript; charset=utf-8',
-        '.css' : 'text/css; charset=utf-8'
-    }
+    mime_types = xconfig.MIME_TYPES
 
     encodings = {
         # 二进制传输的编码格式
@@ -305,6 +278,11 @@ class FileSystemHandler:
 
     @xauth.login_required("admin")
     def GET(self, path):
+        # 文件路径默认都进行urlencode
+        # 如果存储结构不采用urlencode，那么这里也必须unquote回去
+        if not xconfig.USE_URLENCODE:
+            path = xutils.unquote(path)
+
         if not os.path.exists(path):
             # /fs/ 文件名来源是文件系统提供的，尝试unquote不会出现问题
             path = xutils.unquote(path)

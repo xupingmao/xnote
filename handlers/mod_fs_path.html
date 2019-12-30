@@ -7,7 +7,7 @@
 <div class="fs-path">
     <a href="{{fs_path_url.replace('$path', '/')}}">Home</a> /
     {% for item in xutils.splitpath(xutils.get_real_path(path)) %}
-        <a href="{{fs_path_url.replace('$path', item.path)}}">{{ item.name }}</a> / 
+        <a href="{{fs_path_url.replace('$path', xutils.encode_uri_component(item.path))}}">{{ item.name }}</a> / 
     {% end %}
     {% if fs_path_option %}
         {% raw fs_path_option %}

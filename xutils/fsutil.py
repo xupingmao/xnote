@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/11/14 00:44:34
+# @modified 2019/12/31 00:50:07
 import codecs
 import os
 import platform
@@ -255,9 +255,15 @@ def get_relative_path(path, parent):
     relative_path = path1[len(parent1):]
     return relative_path.replace("\\", "/")[1:]
 
+def try_listdir(dirname):
+    try:
+        return os.listdir(dirname)
+    except:
+        return None
+
 class FileItem(Storage):
 
-    def __init__(self, path, parent=None):
+    def __init__(self, path, parent = None, merge = False):
         self.path = path
         self.name = os.path.basename(path)
         self.size = '-'
@@ -272,21 +278,33 @@ class FileItem(Storage):
         if path.endswith(":"):
             self.name = path
 
+        try:
+            st = os.stat(path)
+            self.cdate = xutils.format_date(st.st_ctime)
+        except:
+            st = Storage()
+
         self.name = xutils.unquote(self.name)
         if os.path.isfile(path):
             self.type = "file"
             self.name = decode_name(self.name)
             _, self.ext = os.path.splitext(self.name)
+            self.size = format_size(st.st_size)
         else:
+            children  = try_listdir(path)
             self.type = "dir"
             self.path += "/"
+            if children != None:
+                self.size = len(children)
+            else:
+                self.size = "ERR"
 
-        try:
-            st = os.stat(path)
-            self.size = format_size(st.st_size)
-            self.cdate = xutils.format_date(st.st_ctime)
-        except:
-            pass
+            if merge and self.size == 1:
+                new_path = os.path.join(path, children[0])
+                if parent is None:
+                    parent = os.path.dirname(path)
+                self.__init__(new_path, parent)
+
 
     # sort方法重写__lt__即可
     def __lt__(self, other):
@@ -329,7 +347,7 @@ def splitpath(path):
             continue
         if last is not None:
             vpath = last + "/" + vpath
-        pathlist.append(FileItem(vpath))
+        pathlist.append(FileItem(vpath, merge = False))
         last = vpath
     return pathlist
 

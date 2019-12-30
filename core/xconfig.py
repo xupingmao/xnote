@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/12/28 20:56:55
+# @modified 2019/12/31 00:36:17
 
 '''xnote系统配置
 
@@ -152,6 +152,7 @@ FS_VIEW_MODE     = "list"
 FS_TEXT_EXT_LIST = set()
 FS_IMG_EXT_LIST  = set()
 FS_CODE_EXT_LIST = set()
+MIME_TYPES = dict()
 
 # 后面定义的set函数和系统函数冲突了，所以这里创建一个hashset的别名
 hashset = set
@@ -298,6 +299,12 @@ def load_file_type_config0(fpath):
         ext_set.add(ext)
     return ext_set
 
+def load_config_as_dict(fpath):
+    from xutils import fsutil, textutil
+    text  = fsutil.readfile(fpath)
+    ext_set = hashset()
+    return textutil.parse_config_text(text, 'dict')
+
 
 def load_file_type_config():
     global FS_TEXT_EXT_LIST
@@ -306,13 +313,16 @@ def load_file_type_config():
     global FS_ZIP_EXT_LIST
     global FS_AUDIO_EXT_LIST
     global FS_VIDEO_EXT_LIST
+    global MIME_TYPES
 
-    FS_TEXT_EXT_LIST = load_file_type_config0("./config/file/text.properties")
-    FS_IMG_EXT_LIST  = load_file_type_config0("./config/file/image.properties")
-    FS_CODE_EXT_LIST = load_file_type_config0("./config/file/code.properties")
-    FS_ZIP_EXT_LIST  = load_file_type_config0("./config/file/zip.properties")
+    FS_TEXT_EXT_LIST  = load_file_type_config0("./config/file/text.properties")
+    FS_IMG_EXT_LIST   = load_file_type_config0("./config/file/image.properties")
+    FS_CODE_EXT_LIST  = load_file_type_config0("./config/file/code.properties")
+    FS_ZIP_EXT_LIST   = load_file_type_config0("./config/file/zip.properties")
     FS_AUDIO_EXT_LIST = load_file_type_config0("./config/file/audio.properties")
     FS_VIDEO_EXT_LIST = load_file_type_config0("./config/file/video.properties")
+    MIME_TYPES        = load_config_as_dict("./config/file/mime-types.properties")
+    MIME_TYPES[""]    = "application/octet-stream"
 
 
 def get(name, default_value=None):

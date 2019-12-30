@@ -183,11 +183,13 @@ layer.photos = function(options, loop, key){
       shade: 0.9,
       shadeClose: true,
       closeBtn: false,
-      move: '.layui-layer-phimg img',
+      // move: '.layui-layer-phimg img',
+      move: false,
       moveType: 1,
       scrollbar: false,
-      moveOut: true,
-      //anim: Math.random()*5|0,
+      // 是否移出窗口
+      moveOut: false,
+      // anim: Math.random()*5|0,
       isOutAnim: false,
       skin: 'layui-layer-photos' + skin('photos'),
       content: '<div class="layui-layer-phimg">'

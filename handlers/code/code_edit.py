@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/??/??
-# @modified 2019/12/22 14:07:47
+# @modified 2019/12/31 01:16:43
 
 """显示代码原文"""
 import os
@@ -102,7 +102,7 @@ class UpdateHandler(object):
         else:
             content = content.replace("\r\n", "\n")
             xutils.savetofile(path, content)
-            raise web.seeother("/code/edit?path=" + xutils.quote_unicode(path))
+            raise web.seeother("/code/edit?path=" + xutils.quote(path))
         
 
 xurls = (

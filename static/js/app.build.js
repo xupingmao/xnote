@@ -471,7 +471,7 @@ Date.prototype.format = Date.prototype.format || function (format) {
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2019/09/24 11:28:25
+ * @modified 2019/12/29 16:19:23
  */
 var XUI = function (window) {
   // 处理select标签选中情况
@@ -601,10 +601,14 @@ var XUI = function (window) {
           if (el == target) {
             imageIndex = index;
           }
+          var src = $(el).attr("src");
+          if (!src) {
+            src = $(el).attr("data-src");
+          }
           data.push({
             "alt": $(el).attr("alt"),
             "pid": 0,
-            "src": $(el).attr("src"),
+            "src": src,
             "thumb": ""
           });
         });
@@ -1406,11 +1410,13 @@ layer.photos = function(options, loop, key){
       shade: 0.9,
       shadeClose: true,
       closeBtn: false,
-      move: '.layui-layer-phimg img',
+      // move: '.layui-layer-phimg img',
+      move: false,
       moveType: 1,
       scrollbar: false,
-      moveOut: true,
-      //anim: Math.random()*5|0,
+      // 是否移出窗口
+      moveOut: false,
+      // anim: Math.random()*5|0,
       isOutAnim: false,
       skin: 'layui-layer-photos' + skin('photos'),
       content: '<div class="layui-layer-phimg">'
