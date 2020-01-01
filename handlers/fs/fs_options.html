@@ -143,22 +143,21 @@
         <input type="button" class="btn desktop-only-inline" value="剪切" id="cutBtn" message="剪切"/>
 
         <!-- 视图选项 -->
-        <input type="button" class="btn" value="视图" id="switchView">
+        <div class="dropdown">
+            <span class="dropdown-btn link btn">视图▾</span>
+            <div class="dropdown-content">
+                <a class="dropdown-option" href="/fs/{{path}}?mode=list">列表视图</a>
+                <a class="dropdown-option" href="/fs/{{path}}?mode=grid">网格视图</a>
+                <a class="dropdown-option" href="javascript:openByNative()">本地浏览</a>
+                <a class="dropdown-option" href="javascript:openTerminal()">打开终端</a>
+            </div>
+        </div>
     </div>
     
     <div class="float-right">
         <input type="button" class="link-btn desktop-only-inline" 
             href="/code/search?path={{path}}&recursive=on" value="高级搜索"/>
         <input type="button" data-path="{{path}}" onclick="openFileOption(this)" value="更多"/>
-    </div>
-</div>
-
-<div id="switchViewTpl" class="hide">
-    <div class="card">
-        <a class="tag-span" href="/fs/{{path}}?mode=list">列表视图</a>
-        <a class="tag-span" href="/fs/{{path}}?mode=grid">网格视图</a>
-        <a class="tag-span" href="javascript:openByNative()">本地浏览</a>
-        <a class="tag-span" href="javascript:openTerminal()">打开终端</a>
     </div>
 </div>
 
@@ -455,23 +454,6 @@ $(function () {
     if (isPc()) {
         adjustHeight(".file-list", 30);
     }
-
-    $("#switchView").click(function () {
-        var html = $("#switchViewTpl").html();
-        var area = ['420px', '240px'];
-
-        if (isMobile()) {
-            area = ["100%", "100%"];
-        } 
-
-        layer.open({
-          type: 1,
-          title: '切换视图',
-          // skin: 'layui-layer-rim', //加上边框
-          area: area, //宽高
-          content: html
-        });
-    })
 });
 </script>
 

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/12/31 00:50:07
+# @modified 2020/01/01 00:29:04
 import codecs
 import os
 import platform
@@ -301,6 +301,8 @@ class FileItem(Storage):
 
             if merge and self.size == 1:
                 new_path = os.path.join(path, children[0])
+                if not os.path.isdir(new_path):
+                    return
                 if parent is None:
                     parent = os.path.dirname(path)
                 self.__init__(new_path, parent)
