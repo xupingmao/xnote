@@ -3,23 +3,23 @@
 </div>
 
 <div class="move-link-tpl" style="display: none;">
-    <a class="move-link" data-id="[[item.id]]" data-parent="[[item.parent_id]]">
-        <div class="book-item">
-            <i class="fa [[item.icon]] fa-[[item.icon]] black"></i>                
-            <span>[[item.name]]</span>
-            <span class="black">([[item.size]])</span>
-            <button class="float-right do-move-btn" data-id="[[item.id]]">移到这里</button>
-        </div>
-    </a>
+    <div class="book-item">
+        <a class="move-link" data-id="[[item.id]]" data-parent="[[item.parent_id]]">
+                <i class="fa [[item.icon]] fa-[[item.icon]] black"></i>                
+                <span>[[item.name]]</span>
+                <span class="black">([[item.size]])</span>
+        </a>
+        <button class="float-right do-move-btn" data-id="[[item.id]]">移到这里</button>
+    </div>
 </div>
 
 <div class="move-parent-tpl" style="display: none;">
-    <a class="move-link" data-id="[[item.id]]">
-        <div class="book-item">
+    <div class="book-item">
+        <a class="move-link" data-id="[[item.id]]">
             <i class="fa fa-folder orange"></i>                
             <span>上级目录</span>
-        </div>
-    </a>
+        </a>
+    </div>
 </div>
 
 
@@ -61,7 +61,7 @@ $(function () {
     });
 
     $("body").on("click", ".do-move-btn", function (e) {
-        var selfId = $("#fileId").val();
+        var selfId = "{{id}}";
         var parentId = $(this).attr("data-id");
         $.post("/note/move", 
           { id: selfId, parent_id: parentId}, 

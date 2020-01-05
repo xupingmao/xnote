@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/05 21:47:35
+# @modified 2020/01/05 22:12:43
 import math
 import time
 import web
@@ -91,7 +91,7 @@ class GroupListHandler:
     def GET(self):
         id   = xutils.get_argument("id", "", type=int)
         user_name = xauth.current_name()
-        notes = NOTE_DAO.list_root_group(user_name)
+        notes = NOTE_DAO.list_by_parent(user_name, 0)
         tools = []
         fixed_books = []
         normal_books = []
@@ -101,9 +101,9 @@ class GroupListHandler:
         fixed_books.append(note_link)
 
         # 默认分组处理
-        default_book_count = NOTE_DAO.count(user_name, 0)
-        if default_book_count > 0:
-            fixed_books.append(SystemFolder("默认分组", "/note/default", default_book_count, "system"))
+        # default_book_count = NOTE_DAO.count(user_name, 0)
+        # if default_book_count > 0:
+            # fixed_books.append(SystemFolder("默认分组", "/note/default", default_book_count, "system"))
         fixed_books.append(SystemFolder("笔记索引", "/note/index?source=group", None, "system"))
 
         files = fixed_books + notes
@@ -339,7 +339,7 @@ class NoteIndexHandler:
         amount = len(files)
 
         if source == "group":
-            show_path_list = True
+            show_path_list = False
             show_parent_link = True
         else:
             show_path_list = False

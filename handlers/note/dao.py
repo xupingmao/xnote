@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/05 20:43:43
+# @modified 2020/01/05 22:32:25
 
 """资料的DAO操作集合
 
@@ -25,7 +25,13 @@ from xutils import attrget
 
 MAX_VISITED_CNT = 200
 DB_PATH         = xconfig.DB_PATH
-
+NOTE_ICON_DICT  = {
+    "group": "fa-folder orange",
+    "csv": "fa-table",
+    "html": "fa-file-word-o",
+    "gallery": "fa-photo",
+    "list": "fa-list"
+}
 
 class FileDO(dict):
     """This class behaves like both object and dict"""
@@ -129,23 +135,14 @@ def build_note_info(note):
         note.url = "/note/{}".format(note["id"])
         if note.priority is None:
             note.priority = 0
+
         if note.content is None:
             note.content = ''
+
         if note.data is None:
             note.data = ''
         # process icon
-        if note.type == "group":
-            note.icon = "fa-folder orange"
-        elif note.type == "csv":
-            note.icon = "fa-table"
-        elif note.type == "html":
-            note.icon = "fa-file-word-o"
-        elif note.type == "gallery":
-            note.icon = "fa-photo"
-        elif note.type == "list":
-            note.icon = "fa-list"
-        else:
-            note.icon = "fa-file-text-o"
+        note.icon = NOTE_ICON_DICT.get(note.type, "fa-file-text-o")
 
 @xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
 def list_path(file, limit = 2):
@@ -155,7 +152,7 @@ def list_path(file, limit = 2):
         file.url = "/note/%s" % file.id
         if len(pathlist) >= limit:
             break
-        if file.parent_id == 0:
+        if file.parent_id == 0 or file.parent_id == "0":
             pathlist.insert(0, get_root())
             break
         else:
@@ -513,7 +510,7 @@ def count_public():
     return dbutil.prefix_count("note_tiny:", list_func)
 
 @xutils.timeit(name = "NoteDao.ListNote:leveldb", logfile = True, logargs=True)
-def list_by_parent(creator, parent_id, offset, limit, orderby="name"):
+def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name"):
     parent_id = str(parent_id)
     # TODO 添加索引优化
     def list_note_func(key, value):
@@ -617,8 +614,6 @@ def count_note(creator, parent_id):
     # TODO 添加索引优化
     def list_note_func(key, value):
         if value.is_deleted:
-            return False
-        if value.type == "group":
             return False
         return (value.is_public or value.creator == creator) and str(value.parent_id) == str(parent_id)
 

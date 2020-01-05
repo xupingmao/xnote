@@ -188,8 +188,6 @@
         {% end %}
     </div>
 
-    {% include note/template/view_footer.html %}
-
     {# 评论功能 #}
     {% if file_type != "group" and show_comment %}
         {% include note/template/comment.html %}
@@ -197,7 +195,7 @@
 
     {# 分页 #}
     {% if show_pagination and "page" in globals() %}
-    <div class="card">
+    <div class="card hide">
         {% include mod_pagenation.html %}
     </div>
     {% end %}

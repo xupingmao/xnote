@@ -59,6 +59,7 @@ $(function() {
         if (isMobile()) {
           area = ['100%', '100%'];
         } else {
+          width = 600;
           area = [width + 'px', '80%'];
         }
         
