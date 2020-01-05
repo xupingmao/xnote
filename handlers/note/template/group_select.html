@@ -1,14 +1,76 @@
 <div class="note-group-select col-md-12 scroll-y">
-    {% for category, groups in groups_tuple %}
-        <h3 class="card-title">{{category}}</h3>
-
-        {% for item in groups %}
-            <span class="tag-span">
-                <a class="link" href="javascript:moveTo('{{id}}', '{{item.id}}')">
-                    {{item.name}}
-                </a>
-                <span>{{item.size}}</span>
-            </span>
-        {% end %}
-    {% end %}
+    
 </div>
+
+<div class="move-link-tpl" style="display: none;">
+    <a class="move-link" data-id="[[item.id]]" data-parent="[[item.parent_id]]">
+        <div class="book-item">
+            <i class="fa [[item.icon]] fa-[[item.icon]] black"></i>                
+            <span>[[item.name]]</span>
+            <span class="black">([[item.size]])</span>
+            <button class="float-right do-move-btn" data-id="[[item.id]]">移到这里</button>
+        </div>
+    </a>
+</div>
+
+<div class="move-parent-tpl" style="display: none;">
+    <a class="move-link" data-id="[[item.id]]">
+        <div class="book-item">
+            <i class="fa fa-folder orange"></i>                
+            <span>上级目录</span>
+        </div>
+    </a>
+</div>
+
+
+<script type="text/javascript">
+$(function () {
+    function buildFolderLink(item) {
+        var tpl = $(".move-link-tpl").html();
+        tpl = tpl.replace("[[item.name]]", item.name);
+        tpl = tpl.replace("[[item.icon]]", item.icon);
+        tpl = tpl.replace("[[item.size]]", item.size);
+        tpl = tpl.replace(/\[\[item\.id\]\]/gi, item.id);
+        tpl = tpl.replace("[[item.parent_id]]", item.parent_id);
+
+        return $(tpl);
+    }
+
+    function fetchGroupList(parentId) {
+        $.get("/note/api/group?id=" + parentId, function (resp) {
+            console.log(resp);
+            $(".note-group-select").html("");
+
+            var tpl = $(".move-parent-tpl").html();
+            tpl = tpl.replace("[[item.id]]", resp.parent_id);
+            var element = $(tpl);
+            $(".note-group-select").append(element);
+
+            for (var i = 0; i < resp.data.length; i++) {
+                var item = resp.data[i];
+                // console.log(item);
+                var element = buildFolderLink(item);
+                $(".note-group-select").append(element);
+            }
+        });
+    }
+
+    $("body").on("click", ".move-link", function (e) {
+        var id = $(this).attr("data-id");
+        fetchGroupList(id);
+    });
+
+    $("body").on("click", ".do-move-btn", function (e) {
+        var selfId = $("#fileId").val();
+        var parentId = $(this).attr("data-id");
+        $.post("/note/move", 
+          { id: selfId, parent_id: parentId}, 
+          function (resp){
+              console.log(resp);
+              window.location.reload();
+        });
+    });
+
+    fetchGroupList(0);
+})
+</script>

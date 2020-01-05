@@ -9,7 +9,7 @@
     <ul class="nav-ul">
       {% if _has_login %}
         <li><a class="menu-link" href="/note/group">{{T("首页")}}</a></li>
-        <li><a class="menu-link" href="/message?tag=task">{{T("待办")}}</a></li>
+        <li><a class="menu-link" href="/note/timeline">{{T("最新")}}</a></li>
         <li><a class="menu-link" href="/plugins_list">{{T("工具")}}</a></li>
         <li><a class="menu-link" href="/system/index">{{T("设置")}}</a></li>
       {% end %}
@@ -43,10 +43,9 @@
       {% if _has_login %}
         <!-- 登录状态 -->
         <li><a href="/note/group">{{T("我的笔记")}}</a></li>
-        <li><a href="/message?tag=task">待办事项</a></li>
+        <li><a href="/note/timeline">{{T("最新笔记")}}</a></li>
         <li><a href="/note/public">{{T("公共笔记")}}</a></li>
         <li><a href="/search/rules">{{T("话题搜索")}}</a></li>
-        <li><a href="/note/gallery">我的相册</a></li>
         <li><a href="/plugins_list">工具插件</a></li>
         {% if _is_admin %}
           <li><a href="/fs_list">文件管理</a></li> 

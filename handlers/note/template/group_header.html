@@ -1,0 +1,119 @@
+{% init show_path_list = False %}
+{% init error = None %}
+{% init is_iframe = False %}
+{% init file = Storage(id = 0, parent_id=0) %}
+{% init page = 0 %}
+
+<input id="fileId" type="hidden" value="{{file.id}}"/>
+
+{% if show_path_list %}
+    <div class="grid-title">
+        <a href="{{file.url}}" class="link2 path-link">{{file.name}}</a>
+
+        {% if file != None and _has_login %}
+            {# 文件夹下拉选项 #}
+            <div class="float-right">
+                <div class="dropdown">
+                    <span class="dropdown-btn link btn">新建▾</span>
+                    <div class="dropdown-content">
+                        <a class="dropdown-option" href="javascript:createGroup();">分组</a>
+                        <a class="dropdown-option" href="javascript:createNote();">文档</a>
+                        <a class="dropdown-option" href="javascript:createGallery();">相册</a>
+                        <a class="dropdown-option" href="javascript:uploadFile();">上传文件</a>
+                    </div>
+                </div>
+
+                <div class="dropdown">
+                  <span class="dropdown-btn link btn">更多▾</span>
+                  <div class="dropdown-content">                            
+                    {% if file.id != 0 and file.priority != None and file.priority > 0 %}
+                        <a class="dropdown-option" href="/note/unstick?id={{file.id}}">取消置顶</a>
+                    {% else %}
+                        <a class="dropdown-option" href="/note/stick?id={{file.id}}">置顶</a>
+                    {% end %}
+                    
+                    <a class="dropdown-option" href="/note/management?parent_id={{file.id}}">整理</a>
+
+                    {% if file.id != 0 %}
+                        <a class="dropdown-option move-btn link" data-url="/note/group/select?id={{file.id}}">移动</a>
+                        <a class="dropdown-option" href="javascript:rename('{{file.id}}', '{{file.name}}')">重命名</a>
+                    {% end %}
+
+                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=mtime_desc&page={{page}}">按时间倒序</a>
+                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name&page={{page}}">按名称顺序</a>
+                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name_desc&page={{page}}">按名称倒序</a>
+                    
+                    {% if file.size == 0 %}
+                        <a class="dropdown-option-red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
+                    {% end %}
+                  </div>
+                </div>
+            </div>
+        {% end %}
+    </div>
+{% end %}
+
+{% if error != "" and error != None%}
+    <div class="col-md-12 error">
+        {{error}}
+    </div>
+{% end %}
+
+<script type="text/javascript">
+/** 创建笔记基础 **/
+function createNote0(title, type) {
+    xnote.prompt(title, "", function (noteTitle) {
+        var createOption = {};
+        createOption.name = noteTitle;
+        createOption.parent_id = "{{file.id}}";
+        createOption.type = type;
+        createOption._format = "json";
+        $.post("/note/create", createOption, function (resp) {
+            if (resp.code == "success") {
+                window.location.href = resp.url;
+            } else {
+                alert(title + "失败:" + resp.message);
+            }
+        }).fail(function (e) {
+            console.error(title + "失败", e);
+            alert(title + "失败:" + e);
+        });
+    });
+}
+
+/** 创建相册 **/
+function createGallery() {
+    createNote0("创建相册", "gallery");
+}
+
+/** 创建笔记 **/
+function createNote() {
+    createNote0("创建笔记", "md");
+}
+
+/** 创建分组 **/
+function createGroup() {
+    xnote.prompt("创建分组", "", function (noteTitle) {
+        var createOption = {};
+        createOption.name = noteTitle;
+        createOption.parent_id = "{{file.id}}";
+        createOption.type = "group";
+        createOption._format = "json";
+        $.post("/note/create", createOption, function (resp) {
+            if (resp.code == "success") {
+                window.location.reload();
+            } else {
+                alert("创建笔记失败:" + resp.message);
+            }
+        }).fail(function (e) {
+            console.error("创建分组失败", e);
+            alert("创建分组失败:" + e);
+        });
+    });
+}
+
+/** 上传文件 **/
+function uploadFile() {
+
+}
+</script>

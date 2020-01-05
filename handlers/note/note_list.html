@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2019/12/15 16:34:09
+@modified 2020/01/05 20:07:33
 -->
 
 {% init files = [] %}
@@ -12,14 +12,13 @@
 {% init file = None %}
 {% init dir_type = "" %}
 {% init tags = "" %}
-{% init back_url = "/" %}
 {% init show_parent_link = True %}
 
-{% include note/template/view_header.html %}
+{% include note/template/group_header.html %}
 
 <div class="grid-row note-list">
-    {% if _has_login and show_parent_link %}
-        <a class="dialog-link" href="{{back_url}}">
+    {% if _has_login and show_parent_link and file.id != 0 %}
+        <a class="dialog-link" href="/note/{{file.parent_id}}">
             <div class="book-item">
                 <i class="fa fa-mail-reply black"></i>
                 
@@ -34,17 +33,13 @@
     {% for item in files %}
         <a class="dialog-link" href="{{item.url}}">
             <div class="book-item">
-                {% if item.type == "group" %}
-                    <i class="fa fa-folder orange"></i>
-                {% else %}
-                    <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
-                {% end %}
-
                 {% if item.priority>0 %}
                     <i class="fa fa-thumb-tack black"></i>
                 {% end %}
-                
+
+                <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
                 <span>{{item.name}}</span>
+                
                 {% if item.size != None %}<span class="black">({{item.size}})</span>{% end %}
 
                 <span class="book-size">

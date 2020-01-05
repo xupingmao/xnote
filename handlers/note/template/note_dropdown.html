@@ -10,7 +10,9 @@
         {% else %}
             <a class="dropdown-option link" href="/note/share?id={{file.id}}">分享</a>
         {% end %}
+        
         <a class="dropdown-option move-btn link" data-url="/note/group/select?id={{item.id}}">移动</a>
+
         {% if file.priority > 0 %}
             <a class="dropdown-option link" href="/note/unstick?id={{file.id}}">取消置顶</a>
         {% else %}

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2019/12/22 21:59:22
+# @modified 2020/01/05 21:47:35
 import math
 import time
 import web
@@ -39,12 +39,12 @@ class GroupItem(Storage):
         self.url      = url
         self.size     = size
         self.mtime    = dateutil.format_time()
-        self.icon     = "fa-folder"
+        self.icon     = "fa-folder orange"
 
 class SystemFolder(GroupItem):
 
-    def __init__(self, name, url, size=None):
-        GroupItem.__init__(self, name, url, size, "system")
+    def __init__(self, name, url, size=None, type = "system"):
+        GroupItem.__init__(self, name, url, size, type)
         self.icon = "icon-folder-system"
 
 class NoteLink:
@@ -70,14 +70,14 @@ class DefaultListHandler:
         offset    = (page-1) * pagesize
         files     = NOTE_DAO.list_note(user_name, 0, offset, pagesize)
         amount    = NOTE_DAO.count(user_name, 0);
-        parent    = PathNode(TYPES_NAME, "/note/types")
+        parent    = NOTE_DAO.get_root()
 
         return xtemplate.render(VIEW_TPL,
             file_type  = "group",
             back_url   = xconfig.HOME_PATH,
             pathlist   = [parent, Storage(name="默认分类", type="group", url="/note/default")],
             files      = files,
-            file       = Storage(id = 0, name="默认分类", type="group"),
+            file       = Storage(id = 1, name="默认分类", type="group", parent_id = 0),
             page       = page,
             page_max   = math.ceil(amount / pagesize),
             groups     = NOTE_DAO.list_group(),
@@ -91,38 +91,28 @@ class GroupListHandler:
     def GET(self):
         id   = xutils.get_argument("id", "", type=int)
         user_name = xauth.current_name()
-        notes = NOTE_DAO.list_group(user_name, skip_archived = True)
+        notes = NOTE_DAO.list_root_group(user_name)
         tools = []
         fixed_books = []
         normal_books = []
 
-        # tools.append(NoteLink("相册", "/note/gallery", "fa-photo"))
-        # tools.append(NoteLink("清单", "/note/list", "fa-list"))
-        # tools.append(NoteLink("最近", "/note/timeline", "fa-history"))
-        # tools.append(NoteLink("更多", "/note/tools"))
-        
+        msg_stat  = MSG_DAO.get_message_stat(user_name)
+        note_link = NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count)
+        fixed_books.append(note_link)
+
         # 默认分组处理
         default_book_count = NOTE_DAO.count(user_name, 0)
         if default_book_count > 0:
-            fixed_books.append(GroupItem("默认分组", "/note/default", default_book_count, "system"))
+            fixed_books.append(SystemFolder("默认分组", "/note/default", default_book_count, "system"))
+        fixed_books.append(SystemFolder("笔记索引", "/note/index?source=group", None, "system"))
 
-        # 归档分组处理
-        archived_books = NOTE_DAO.list_archived(user_name)
-        if len(archived_books) > 0:
-            fixed_books.append(GroupItem("归档分组", "/note/archived", len(archived_books), "system"))
-        fixed_books.append(GroupItem("笔记索引", "/note/index?source=group", None, "system"))
+        files = fixed_books + notes
 
-        for note in notes:
-            if note.priority > 0:
-                fixed_books.append(note)
-            else:
-                normal_books.append(note)
-
-        return xtemplate.render("note/template/group_list.html",
-            ungrouped_count = 0,
-            tools = tools,
-            fixed_books     = fixed_books,
-            files           = normal_books)
+        root = NOTE_DAO.get_root()
+        return xtemplate.render("note/note_list_page.html", 
+            file = root, 
+            show_path_list = True,
+            files = files)
 
 def load_note_tools(user_name):
     msg_stat  = MSG_DAO.get_message_stat(user_name)
@@ -191,11 +181,15 @@ class GroupSelectHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id", "")
+        user_name = xauth.current_name()
+        
         filetype = xutils.get_argument("filetype", "")
         groups_tuple = load_category(xauth.current_name())
         web.header("Content-Type", "text/html; charset=utf-8")
+        files = NOTE_DAO.list_root_group(user_name)
         return xtemplate.render("note/template/group_select.html", 
-            id=id, groups_tuple = groups_tuple)
+            id = id, 
+            files = files)
 
 class CategoryHandler:
 

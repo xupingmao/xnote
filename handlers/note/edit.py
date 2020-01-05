@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2019/12/20 00:24:38
+# @modified 2020/01/05 20:42:38
 
 """笔记编辑相关处理"""
 import os
@@ -156,7 +156,7 @@ class CreateHandler:
                     raise Exception(message)
                 inserted_id = NOTE_DAO.create(note)
                 if format == "json":
-                    return dict(code="success", id=inserted_id)
+                    return dict(code="success", id=inserted_id, url = "/note/edit?id=%s" % inserted_id)
                 raise web.seeother("/note/edit?id={}".format(inserted_id))
         except web.HTTPError as e1:
             xutils.print_exc()
@@ -420,7 +420,7 @@ class MoveHandler:
         if file is None:
             return dict(code="fail", message="file not exists")
 
-        NOTE_DAO.update(dict(id=id), parent_id = parent_id)
+        NOTE_DAO.move(file, parent_id)
         return dict(code="success")
 
     def POST(self):

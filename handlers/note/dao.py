@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/12/20 00:20:59
+# @modified 2020/01/05 20:43:43
 
 """资料的DAO操作集合
 
@@ -71,6 +71,18 @@ class FileDO(dict):
         file.url = "/note/view?id={}".format(dict["id"])
         return file
 
+def get_root():
+    root = Storage()
+    root.name = "根目录"
+    root.type = "group"
+    root.size = None
+    root.id   = 0
+    root.parent_id = 0
+    root.content = ""
+    root.priority = 0
+    build_note_info(root)
+    return root
+
 def batch_query(id_list):
     creator = xauth.current_name()
     result = dict()
@@ -89,6 +101,8 @@ def sort_notes(notes, orderby = "name"):
         # mtime_desc
         notes.sort(key = lambda x: x.mtime, reverse = True)
     notes.sort(key = lambda x: x.priority, reverse = True)
+    # 文件夹放在前面
+    notes.sort(key = lambda x: 0 if x.type == "group" else 1)
     for note in notes:
         build_note_info(note)
 
@@ -113,13 +127,15 @@ def build_note_info(note):
     if note:
         # note.url = "/note/view?id={}".format(note["id"])
         note.url = "/note/{}".format(note["id"])
+        if note.priority is None:
+            note.priority = 0
         if note.content is None:
             note.content = ''
         if note.data is None:
             note.data = ''
         # process icon
         if note.type == "group":
-            note.icon = "fa-folder"
+            note.icon = "fa-folder orange"
         elif note.type == "csv":
             note.icon = "fa-table"
         elif note.type == "html":
@@ -140,6 +156,7 @@ def list_path(file, limit = 2):
         if len(pathlist) >= limit:
             break
         if file.parent_id == 0:
+            pathlist.insert(0, get_root())
             break
         else:
             file = get_by_id(file.parent_id, include_full = False)
@@ -163,6 +180,7 @@ def get_by_id(id, include_full = True):
         note.atime = note_index.atime
         note.size  = note_index.size
         note.tags  = note_index.tags
+        note.parent_id = note_index.parent_id
     if note:
         build_note_info(note)
     return note
@@ -335,6 +353,18 @@ def update_note(where, **kw):
         return 1
     return 0
 
+def move_note(note, new_parent_id):
+    old_parent_id = note.parent_id
+    note.parent_id = new_parent_id
+    # 更新索引数据
+    update_index(note)
+    
+    update_children_count(old_parent_id)
+    update_children_count(new_parent_id)
+
+    # 更新新的parent更新时间
+    touch_note(new_parent_id)
+
 def update0(note):
     """更新基本信息，比如name、mtime、content、items、priority等,不处理parent_id更新"""
     current = get_by_id(note.id)
@@ -444,9 +474,20 @@ def list_group(creator = None, orderby = "name", skip_archived = False):
     def list_group_func(key, value):
         if skip_archived and value.archived:
             return False
+        if skip_archived and value.parent_id != 0:
+            return False
         return value.type == "group" and value.creator == creator and value.is_deleted == 0
 
     notes = dbutil.prefix_list("notebook:", list_group_func)
+    sort_notes(notes, orderby)
+    return notes
+
+@xutils.timeit(name = "NoteDao.ListRootGroup:leveldb", logfile = True)
+def list_root_group(creator = None, orderby = "name"):
+    def list_root_group_func(key, value):
+        return value.creator == creator and value.type == "group" and value.parent_id == 0 and value.is_deleted == 0
+
+    notes = dbutil.prefix_list("notebook:", list_root_group_func)
     sort_notes(notes, orderby)
     return notes
 
@@ -477,8 +518,6 @@ def list_by_parent(creator, parent_id, offset, limit, orderby="name"):
     # TODO 添加索引优化
     def list_note_func(key, value):
         if value.is_deleted:
-            return False
-        if value.type == "group":
             return False
         return (value.is_public or value.creator == creator) and str(value.parent_id) == parent_id
 
@@ -859,12 +898,14 @@ def get_note_stat(user_name):
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
 xutils.register_func("note.update0", update0)
+xutils.register_func("note.move", move_note)
 xutils.register_func("note.visit",  visit_note)
 xutils.register_func("note.count",  count_note)
 xutils.register_func("note.delete", delete_note)
 xutils.register_func("note.touch",  touch_note)
 xutils.register_func("note.update_tags", update_tags)
 # query functions
+xutils.register_func("note.get_root", get_root)
 xutils.register_func("note.get_by_id", get_by_id)
 xutils.register_func("note.get_by_id_creator", get_by_id_creator)
 xutils.register_func("note.get_by_name", get_by_name)
@@ -875,6 +916,7 @@ xutils.register_func("note.search_content", search_content)
 # list functions
 xutils.register_func("note.list_path", list_path)
 xutils.register_func("note.list_group", list_group)
+xutils.register_func("note.list_root_group", list_root_group)
 xutils.register_func("note.list_note",  list_by_parent)
 xutils.register_func("note.list_by_parent", list_by_parent)
 xutils.register_func("note.list_by_date", list_by_date)

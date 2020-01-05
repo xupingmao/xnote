@@ -23,38 +23,7 @@
             <a class="btn float-right" href="/note/management?parent_id=0">整理</a>
         {% end %}
 
-        {% if file != None and file.type == "group" and _user_name == file.creator %}
-            {# 文件夹下拉选项 #}
-            <div class="float-right">
-                <a class="btn" href="/note/add?parent_id={{file.id}}">新增</a>
-                <div class="dropdown">
-                  <span class="dropdown-btn link btn">更多▾</span>
-                  <div class="dropdown-content">                            
-                    {% if file.priority > 0 %}
-                        <a class="dropdown-option" href="/note/unstick?id={{file.id}}">取消置顶</a>
-                    {% else %}
-                        <a class="dropdown-option" href="/note/stick?id={{file.id}}">置顶</a>
-                    {% end %}
-
-                    {% if file.archived %}
-                        <a class="dropdown-option" href="/note/unarchive?id={{file.id}}">取消归档</a>
-                    {% else %}
-                        <a class="dropdown-option" href="/note/archive?id={{file.id}}">归档</a>
-                    {% end %}
-
-                    <a class="dropdown-option" href="/note/management?parent_id={{file.id}}">整理</a>
-                    <a class="dropdown-option" href="javascript:rename('{{file.id}}', '{{file.name}}')">重命名</a>
-                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=mtime_desc&page={{page}}">按时间倒序</a>
-                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name&page={{page}}">按名称顺序</a>
-                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name_desc&page={{page}}">按名称倒序</a>
-                    
-                    {% if file.size == 0 %}
-                        <a class="dropdown-option-red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
-                    {% end %}
-                  </div>
-                </div>
-            </div>
-        {% elif group_type == "gallery" %}
+        {% if group_type == "gallery" %}
             <div class="float-right"><a class="btn" href="/note/add?type=gallery">创建相册</a></div>
         {% elif group_type == "list" %}
             <div class="float-right"><a class="btn" href="/note/add?type=list">创建清单</a></div>
