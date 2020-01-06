@@ -14,6 +14,12 @@ echo > ./static/js/app.build.js
 # cat ./static/lib/jquery/jquery-1.12.4.min.js >> ./static/js/app.build.js
 # cat ./static/lib/layer/layer.js >> ./static/js/app.build.js
 cat ./static/js/utils.js >> ./static/js/app.build.js
-cat ./static/js/xnote-ui.js >> ./static/js/app.build.js
+
+# xnote-ui
+cat ./static/js/xnote-ui/core.js >> ./static/js/app.build.js
+cat ./static/js/xnote-ui/layer.photos.js >> ./static/js/app.build.js
+cat ./static/js/xnote-ui/x-photo.js >> ./static/js/app.build.js
+cat ./static/js/xnote-ui/x-audio.js >> ./static/js/app.build.js
+
+# app 
 cat ./static/js/app.js >> ./static/js/app.build.js
-cat ./static/js/layer.photos.js >> ./static/js/app.build.js

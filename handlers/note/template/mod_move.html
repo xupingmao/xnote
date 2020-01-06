@@ -1,7 +1,3 @@
-<div class="note-group-select col-md-12 scroll-y">
-    
-</div>
-
 <div class="move-link-tpl" style="display: none;">
     <div class="book-item">
         <a class="move-link" data-id="[[item.id]]" data-parent="[[item.parent_id]]">
@@ -62,23 +58,30 @@ $(function () {
 
     $("body").on("click", ".do-move-btn", function (e) {
         var parentId = $(this).attr("data-id");
-        var callbackFn = "{{callback}}";
 
         // 使用callback函数
-        if (window[callbackFn]) {
-            window[callbackFn](parentId);
-            return;
-        }
-
-        var selfId = "{{id}}";
-        $.post("/note/move", 
-          { id: selfId, parent_id: parentId}, 
-          function (resp){
-              console.log(resp);
-              window.location.reload();
-        });
+        callbackFn(parentId);
     });
 
-    fetchGroupList(0);
+    window.requestMoveNote = function (callback) {
+        if (isMobile()) {
+          var area = ['100%', '100%'];
+        } else {
+          var area = ['600px', '80%'];
+        }
+
+        var respHtml = '<div class="note-group-select col-md-12 scroll-y"></div>';
+        layer.open({
+          type: 1,
+          title: "移动笔记",
+          shadeClose: true,
+          area: area,
+          content: respHtml,
+          scrollbar: false
+        });
+
+        fetchGroupList(0);
+        callbackFn = callback;
+    }
 })
 </script>

@@ -1,0 +1,90 @@
+{% extends base.html %}
+<!--
+@author xupingmao
+@since 2020/01/06
+@modified 2020/01/07 00:05:00
+-->
+
+{% block body %}
+
+<div class="grid-row note-list">
+
+    <!-- header -->
+    <div class="row card-title">
+        {% for i, path_item in enumerate(pathlist) %}
+            {% if i > 0 %} / {% end %}
+            <a href="{{path_item.url}}" class="link2 path-link">{{ path_item.name }}</a>
+        {% end %}
+
+        <div class="float-right">
+            <button class="reverse-select-btn">反选</button>
+            <button class="batch-move-btn">移动</button>
+        </div>
+    </div>
+
+    {% for item in files %}
+        <div class="book-item">
+            {% if item.priority>0 %}
+                <i class="fa fa-thumb-tack black"></i>
+            {% end %}
+
+            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
+            <a class="link2" href="{{item.url}}">{{item.name}}</a>
+            
+            {% if item.size != None %}<span>({{item.size}})</span>{% end %}
+
+            <span class="float-right">
+                <input type="checkbox" data-id="{{item.id}}"/>
+            </span>
+        </div>
+    {% end %}
+</div>
+
+{% include note/template/mod_move.html %}
+
+<script type="text/javascript">
+$(function () {
+    $(".reverse-select-btn").click(function () {
+        $("input[type=checkbox]").each(function (index, element) {
+            var value = $(element).prop("checked");
+            $(element).prop("checked", !value);
+        });
+    });
+
+    function doMoveTo(idList, selfId, parentId) {
+        $.post("/note/move", 
+          {id:selfId, parent_id: parentId}, 
+          function (resp){
+              console.log(resp);
+              // 不需要关心哪一个，只是用于计数
+              idList.pop();
+
+              if (idList.length == 0) {
+                window.location.reload();
+              }
+        });
+    }
+
+    $(".batch-move-btn").click(function () {
+        requestMoveNote(function (selectedId) {
+            // alert("你选择了: " + selectedId);
+
+            var checked = $(":checked");
+            var idList = [];
+
+            checked.each(function (index, element) {
+                var selfId = $(element).attr("data-id");
+                idList.push(selfId);
+
+                doMoveTo(idList, selfId, selectedId);
+            });
+
+            // alert(names);
+        });
+    });
+
+});
+</script>
+
+{% end %}
+

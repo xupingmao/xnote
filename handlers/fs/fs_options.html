@@ -156,7 +156,7 @@
     
     <div class="float-right">
         <input type="button" class="link-btn desktop-only-inline" 
-            href="/code/search?path={{path}}&recursive=on" value="高级搜索"/>
+            href="/code/search?path={{xutils.quote(path)}}&recursive=on" value="高级搜索"/>
         <input type="button" data-path="{{path}}" onclick="openFileOption(this)" value="更多"/>
     </div>
 </div>
@@ -213,7 +213,8 @@ $(function () {
         if (level == "success") {
             ele = ".success";
         }
-        $(ele).text(message).fadeIn(200).delay(3000).fadeOut(300);
+        // $(ele).text(message).fadeIn(200).delay(3000).fadeOut(300);
+        showToast(message, 3000);
     }
 
     function createFile(type) {
@@ -237,7 +238,7 @@ $(function () {
                     }
                 }).fail(function (data) {
                     console.log(data);
-                    alert(data);
+                    showErrorMessage(data);
                 })
             }
         });

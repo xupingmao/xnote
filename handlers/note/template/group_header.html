@@ -8,7 +8,10 @@
 
 {% if show_path_list %}
     <div class="grid-title">
-        <a href="{{file.url}}" class="link2 path-link">{{file.name}}</a>
+        {% for i, path_item in enumerate(pathlist) %}
+            {% if i > 0 %} / {% end %}
+            <a href="{{path_item.url}}" class="link2 path-link">{{ path_item.name }}</a>
+        {% end %}
 
         {% if file != None and _has_login %}
             {# 文件夹下拉选项 #}

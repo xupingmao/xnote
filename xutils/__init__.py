@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/12/28 19:37:56
+# @modified 2020/01/05 23:47:40
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -180,6 +180,12 @@ def is_text_file(filename):
         filename = fsutil.decode_name(filename)
     name, ext = os.path.splitext(filename)
     return ext.lower() in xconfig.FS_TEXT_EXT_LIST
+
+def is_audio_file(filename):
+    if filename.endswith(".x0"):
+        filename = fsutil.decode_name(filename)
+    name, ext = os.path.splitext(filename)
+    return ext.lower() in xconfig.FS_AUDIO_EXT_LIST
 
 def get_text_ext():
     return xconfig.FS_TEXT_EXT_LIST

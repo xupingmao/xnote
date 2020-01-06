@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/05 22:12:43
+# @modified 2020/01/06 23:38:02
 import math
 import time
 import web
@@ -111,6 +111,7 @@ class GroupListHandler:
         root = NOTE_DAO.get_root()
         return xtemplate.render("note/note_list_page.html", 
             file = root, 
+            pathlist = [root],
             show_path_list = True,
             files = files)
 
@@ -181,6 +182,7 @@ class GroupSelectHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id", "")
+        callback = xutils.get_argument("callback")
         user_name = xauth.current_name()
         
         filetype = xutils.get_argument("filetype", "")
@@ -189,6 +191,7 @@ class GroupSelectHandler:
         files = NOTE_DAO.list_root_group(user_name)
         return xtemplate.render("note/template/group_select.html", 
             id = id, 
+            callback = callback,
             files = files)
 
 class CategoryHandler:
@@ -519,11 +522,12 @@ class ManagementHandler:
         if parent_note != None:
             parent_name = parent_note.name
         else:
-            parent_name = "上级目录"
+            parent_name = NOTE_DAO.get_root()
         notes = NOTE_DAO.list_note(user_name, parent_id, 0, 200)
         parent = Storage(url = "/note/%s" % parent_id, name = parent_name)
         current = Storage(url = "#", name = "整理")
-        return xtemplate.render("search/search_result.html", 
+        return xtemplate.render("note/management.html", 
+            pathlist = NOTE_DAO.list_path(parent_note),
             files = notes,
             show_path = True,
             current = current,

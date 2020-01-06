@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/12/31 01:15:10
+# @modified 2020/01/06 00:03:36
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -495,6 +495,9 @@ class ViewHandler:
 
         if ext in (".md", ".csv"):
             raise web.found("/code/preview?path=%s" % encoded_fpath)
+
+        if ext == ".db":
+            raise web.found("/tools/sql?path=%s" % encoded_fpath)
 
         if xutils.is_text_file(fpath):
             raise web.found("/code/edit?path=%s" % encoded_fpath)
