@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/05 22:32:25
+# @modified 2020/01/07 23:57:21
 
 """资料的DAO操作集合
 
@@ -152,7 +152,9 @@ def list_path(file, limit = 2):
         file.url = "/note/%s" % file.id
         if len(pathlist) >= limit:
             break
-        if file.parent_id == 0 or file.parent_id == "0":
+        if str(file.id) == "0":
+            break
+        if str(file.parent_id) == "0":
             pathlist.insert(0, get_root())
             break
         else:
@@ -161,6 +163,9 @@ def list_path(file, limit = 2):
 
 @xutils.timeit(name = "NoteDao.GetById:leveldb", logfile = True)
 def get_by_id(id, include_full = True):
+    if id == 0 or id == "0":
+        return get_root()
+
     note_index = dbutil.get("note_index:%s" % id)
 
     if not include_full and note_index != None:

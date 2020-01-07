@@ -144,8 +144,8 @@
                         } else {
                             showErrorMessage("重命名失败, %s".format(resp.message));
                         }
-                }).fail(function (resp) {
-                    console.log(resp);
+                }).fail(function (e) {
+                    console.log(e);
                     alert("重命名失败");
                 });
             }

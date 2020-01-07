@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/06 23:38:02
+# @modified 2020/01/08 00:06:04
 import math
 import time
 import web
@@ -29,7 +29,7 @@ class PathNode(Storage):
         self.priority = 0
         self.icon     = type
 
-class GroupItem(Storage):
+class GroupLink(Storage):
     """笔记本的类型"""
 
     def __init__(self, name, url, size = None, type="group"):
@@ -38,13 +38,14 @@ class GroupItem(Storage):
         self.name     = name
         self.url      = url
         self.size     = size
-        self.mtime    = dateutil.format_time()
+        self.mtime    = ""
         self.icon     = "fa-folder orange"
 
-class SystemFolder(GroupItem):
+class SystemLink(GroupLink):
+    """系统列表项"""
 
-    def __init__(self, name, url, size=None, type = "system"):
-        GroupItem.__init__(self, name, url, size, type)
+    def __init__(self, name, url, size=None):
+        GroupLink.__init__(self, name, url, size, "system")
         self.icon = "icon-folder-system"
 
 class NoteLink:
@@ -55,10 +56,11 @@ class NoteLink:
         self.icon = icon
         self.size = size
         self.priority = 0
+        self.ctime = ""
 
 def type_node_path(name, url):
     parent = PathNode(TYPES_NAME, "/note/types")
-    return [parent, GroupItem(T(name), url)]
+    return [parent, GroupLink(T(name), url)]
 
 class DefaultListHandler:
 
@@ -101,10 +103,7 @@ class GroupListHandler:
         fixed_books.append(note_link)
 
         # 默认分组处理
-        # default_book_count = NOTE_DAO.count(user_name, 0)
-        # if default_book_count > 0:
-            # fixed_books.append(SystemFolder("默认分组", "/note/default", default_book_count, "system"))
-        fixed_books.append(SystemFolder("笔记索引", "/note/index?source=group", None, "system"))
+        fixed_books.append(SystemLink("笔记索引", "/note/index?source=group"))
 
         files = fixed_books + notes
 
@@ -113,6 +112,7 @@ class GroupListHandler:
             file = root, 
             pathlist = [root],
             show_path_list = True,
+            show_cdate = True,
             files = files)
 
 def load_note_tools(user_name):
@@ -136,7 +136,6 @@ def load_note_tools(user_name):
         # NoteLink("富文本", "/note/html", "fa-file-word-o"),
         # NoteLink("全部笔记", "/note/timeline", "fa-book", size = note_stat.total),
         NoteLink("回收站", "/note/removed", "fa-trash"),
-
         # NoteLink("时光轴", "/note/tools/timeline", "fa-cube"),
         # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
         NoteLink("按月查看", "/note/date", "fa-cube"),
@@ -165,7 +164,7 @@ def load_category(user_name, include_system = False):
 
         default_book_count = NOTE_DAO.count(user_name, 0)
         if default_book_count > 0:
-            sticky_groups.insert(0, GroupItem("默认分组", "/note/default", default_book_count, "system"))
+            sticky_groups.insert(0, SystemLink("默认分组", "/note/default", default_book_count))
         sticky_groups.insert(0, NoteLink("时光轴", "/note/tools/timeline", "cube"))
 
         groups_tuple = [

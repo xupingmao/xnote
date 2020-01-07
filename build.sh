@@ -1,6 +1,7 @@
 
 # build css files
 echo > ./static/css/app.build.css
+cat ./static/css/reset.css >> ./static/css/app.build.css
 cat ./static/lib/font-awesome-4.7.0/css/font-awesome.min.css >> ./static/css/app.build.css
 cat ./static/css/common.css >> ./static/css/app.build.css
 cat ./static/css/app.css >> ./static/css/app.build.css

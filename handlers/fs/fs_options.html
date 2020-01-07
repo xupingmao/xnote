@@ -126,6 +126,9 @@
     }
 </style>
 
+<input id="currentPath" type="hidden" value="{{path}}"/>
+<input id="currentError" type="hidden" value="{{error}}"/>
+
 <div id="controlArea" class="col-md-12">
     <div class="float-left">
         <!-- 查看文件 -->
@@ -163,8 +166,8 @@
 
 <script type="text/javascript">
 $(function () {
-    var globalPath = "{{path}}";
-    var globalError  = "{{error}}";
+    var globalPath = $("#currentPath").val();
+    var globalError = $("#currentError").val();
 
     function previewImages() {
         $(".fs-image-div").each(function (index, target) {

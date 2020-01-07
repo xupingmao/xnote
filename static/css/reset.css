@@ -1,0 +1,124 @@
+/**
+ * 重写默认浏览器样式
+ * @author xupingmao
+ * @since 2020/01/08
+ * @modified 2020/01/08 00:52:42
+ */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #ccc;
+    font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
+    font-size: 14px;
+    letter-spacing: 1px;
+    -webkit-text-size-adjust: 100%; 
+    margin: 0; 
+    padding: 0;
+    background-repeat:no-repeat ;
+    background-size:100% 100%; 
+    background-attachment: fixed;
+}
+
+pre {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+p,li,a {
+    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
+}
+
+h1,h2,h3 {
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Helvetica, STKaiti, SimSun, serif
+}
+
+input[type=checkbox] {
+    width: 16px;
+    height: 16px;
+}
+
+/* 单选 */
+input[type=radio] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+input {
+    padding: 5px;
+    outline: none;
+}
+
+textarea, input {
+    border: 1px solid #ccc;
+}
+
+textarea:focus, input:focus {
+    border: 1px solid #8cc;
+}
+
+select {
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+
+/** 链接样式 **/
+a {
+    font-size: 14px;
+    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
+    text-decoration: none;
+    word-wrap: break-word;
+    word-break: break-all;
+    color: #08c;
+    cursor: pointer;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+
+blockquote {
+    font-style: italic;
+    display: block;
+    width: 100%;
+    float: left;
+    border-left: 8px solid #d0e5f2;
+    padding: 5px 10px;
+    margin: 10px 0;
+    line-height: 1.4;
+    font-size: 100%;
+    background-color: #f1f1f1;
+}
+
+blockquote p {
+    margin: 0px;
+}
+
+
+/** 表格样式 **/
+table {
+    font-family: verdana,arial,sans-serif;
+    font-size:14px;
+    color:#333333;
+    border-width: 1px;
+    border-color: #ccc;
+    border-collapse: collapse;
+}
+table th {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #ccc;
+    background-color: #eee;
+}
+table td {
+    border-width: 1px;
+    padding: 5px;
+    border-style: solid;
+    border-color: #ccc;
+    background-color: #ffffff;
+}

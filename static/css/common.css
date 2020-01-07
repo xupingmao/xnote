@@ -2,30 +2,8 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/12/22 23:27:17
+ * @modified 2020/01/08 00:56:12
  */
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    background-color: #ccc;
-    font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
-    font-size: 14px;
-    letter-spacing: 1px;
-    -webkit-text-size-adjust: 100%; 
-    margin: 0; 
-    padding: 0;
-    background-repeat:no-repeat ;
-    background-size:100% 100%; 
-    background-attachment: fixed;
-}
-
-pre {
-    word-wrap: break-word;
-    white-space: pre-wrap;
-}
 
 /** marked 样式 **/
 .marked-heading {
@@ -68,18 +46,6 @@ pre {
 
 .marked-strong>a {
     color: red;
-}
-
-/**
- * 全局通用的设置
- */
-
-p,li,a {
-    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
-}
-
-h1,h2,h3 {
-    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Helvetica, STKaiti, SimSun, serif
 }
 
 .col-md-1{float:left;width:8.3%;}
@@ -134,23 +100,6 @@ h1,h2,h3 {
 .label {
     display: inline-block;
     width: 100px;
-}
-
-/** 链接样式 **/
-a {
-    font-size: 14px;
-    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
-    text-decoration: none;
-    word-wrap: break-word;
-    word-break: break-all;
-    color: #08c;
-    cursor: pointer;
-}
-
-a:hover {
-    text-decoration: underline;
-    /*color: white;*/
-    /*background-color: #08c;*/
 }
 
 .button-link {
@@ -257,11 +206,6 @@ a:hover {
     font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
 }
 
-/* 单选 */
-input[type=radio] {
-    cursor: pointer;
-}
-
 .btn:hover, .inline-btn:hover, button:hover, [type=submit]:hover, [type=button]:hover {
     color: #fff;
     background-color: #286090;
@@ -299,48 +243,6 @@ input[type=radio] {
 
 .prompt-btn:hover {
     cursor: pointer;
-}
-
-blockquote {
-    font-style: italic;
-    display: block;
-    width: 100%;
-    float: left;
-    border-left: 8px solid #d0e5f2;
-    padding: 5px 10px;
-    margin: 10px 0;
-    line-height: 1.4;
-    font-size: 100%;
-    background-color: #f1f1f1;
-}
-
-blockquote p {
-    margin: 0px;
-}
-
-
-/** 表格样式 **/
-table {
-    font-family: verdana,arial,sans-serif;
-    font-size:14px;
-    color:#333333;
-    border-width: 1px;
-    border-color: #ccc;
-    border-collapse: collapse;
-}
-table th {
-    border-width: 1px;
-    padding: 8px;
-    border-style: solid;
-    border-color: #ccc;
-    background-color: #eee;
-}
-table td {
-    border-width: 1px;
-    padding: 5px;
-    border-style: solid;
-    border-color: #ccc;
-    background-color: #ffffff;
 }
 
 .no-border-table td {
@@ -1234,7 +1136,7 @@ li.menu-item:hover {
 }
 
 .dropdown-option {
-    padding: 5px;
+    padding: 8px;
     margin: 0px;
     color: black;
     font-weight: bold;
@@ -1247,7 +1149,7 @@ li.menu-item:hover {
 }
 
 .dropdown-option-red {
-    padding: 5px;
+    padding: 8px;
     margin: 0px;
     color: red;
     font-weight: bold;

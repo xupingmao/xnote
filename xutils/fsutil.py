@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2020/01/01 00:29:04
+# @modified 2020/01/08 01:23:32
 import codecs
 import os
 import platform
@@ -131,9 +131,12 @@ def rmfile(path, hard = False):
             fname = os.path.basename(path)
             name, ext = os.path.splitext(fname)
             suffix = 0
+            dirname = os.path.join(dustbin, time.strftime("%Y%m%d"))
+            makedirs(dirname)
+
             while True:
                 suffix += 1
-                destpath = os.path.join(dustbin, "%s@%s@%s%s" % (name, time.strftime("%Y%m%d"), suffix, ext))
+                destpath = os.path.join(dustbin, dirname, "%s@%s%s" % (name, suffix, ext))
                 if not os.path.exists(destpath):
                     break
             # os.rename(path, destpath)
