@@ -66,7 +66,7 @@ $(function () {
     function appendToInputText (line) {
         // body...
         var oldTextValue = $("#commentText").val();
-        $("#commentText").val(oldTextValue + line);
+        $("#commentText").val(oldTextValue + "\n" + line);
     }
 
     refreshComments();
@@ -97,7 +97,7 @@ $(function () {
         // 文件上传
     var BASE_URL = "/static/lib/webuploader"
     // 初始化Web Uploader
-    var uploader = xnote.createUploader('#commentFileUploader');
+    var uploader = xnote.createUploader('#commentFileUploader', false);
 
     // 当有文件添加进来的时候
     uploader.on( 'fileQueued', function( file ) {
@@ -112,6 +112,7 @@ $(function () {
 
     uploader.on( 'uploadBeforeSend', function (object, data, headers) {
         data.dirname = "auto";
+        // data.name = "auto";
     })
 
     // 文件上传成功，给item添加成功class, 用样式标记上传成功。

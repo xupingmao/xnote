@@ -1358,9 +1358,23 @@ var BASE_URL = "/static/lib/webuploader";
 
 // xnote全局对象
 var xnote = {
-  createUploader: function (selector) {
+  createUploader: function (selector, chunked) {
     if (selector == undefined) {
       selector = '#filePicker';
+    }
+
+    var upload_service;
+
+    // 默认分片
+    if (chunked == undefined) {
+      chunked = false;
+    }
+
+    if (chunked) {
+      upload_service = "/fs_upload/range";
+    } else {
+      // 不分片的上传服务
+      upload_service = "/fs_upload";
     }
     
     return WebUploader.create({
@@ -1369,12 +1383,12 @@ var xnote = {
             // swf文件路径
             swf: BASE_URL + '/Uploader.swf',
             // 文件接收服务端。
-            server: '/fs_upload/range',
+            server: upload_service,
             // 选择文件的按钮。可选。
             // 内部根据当前运行是创建，可能是input元素，也可能是flash.
             pick: selector,
             // 需要分片
-            chunked: true,
+            chunked: chunked,
             // 默认5M
             // chunkSize: 1024 * 1024 * 5,
             chunkSize: 1024 * 1024 * 5,

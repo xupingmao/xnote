@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/01/08 00:56:12
+ * @modified 2020/01/08 23:03:29
  */
 
 /** marked 样式 **/
@@ -848,6 +848,7 @@ li.menu-item:hover {
     font-family: arial,"Sim Sun";
     font-size: 14px;
     font-weight: normal;
+    overflow: initial;
 }
 
 .card-title-2 {

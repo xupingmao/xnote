@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2019/12/22 21:46:18
+# @modified 2020/01/09 00:05:04
 
 """Description here"""
 import re
@@ -22,6 +22,8 @@ class TimelineAjaxHandler:
 
         if type == "mtime":
             rows = NOTE_DAO.list_recent_edit(user_name, offset, limit)
+        elif type == "group":
+            rows = NOTE_DAO.list_by_type(user_name, "group", offset, limit)
         elif type == "public":
             rows = NOTE_DAO.list_public(offset, limit)
         elif type == "gallery":
@@ -86,7 +88,7 @@ class TimelineHandler:
 
     def GET(self):
         type  = xutils.get_argument("type")
-        title = T("最近创建")
+        title = T("最新笔记")
         if type == "public":
             title = T("公共笔记")
         else:

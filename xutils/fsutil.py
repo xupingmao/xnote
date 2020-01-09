@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2020/01/08 01:23:32
+# @modified 2020/01/08 01:42:13
 import codecs
 import os
 import platform
@@ -91,10 +91,12 @@ writebytes = writefile
 def writeline(path, content, mode = "wb"):
     writefile(path, content + "\n", mode)
 
+
 def readbytes(path):
     with open(path, "rb") as fp:
         bytes = fp.read()
     return bytes
+
 
 def mvfile(from_path, to_path):
     if not os.path.exists(from_path):
@@ -102,6 +104,11 @@ def mvfile(from_path, to_path):
     to_dirname = os.path.dirname(to_path)
     makedirs(to_dirname)
     os.rename(from_path, to_path)
+
+
+def rename_file(srcname, dstname):
+    return mvfile(srcname, dstname)
+
 
 def rmfile(path, hard = False):
     """删除文件，默认软删除，移动到trash目录中，如果已经在trash目录或者硬删除，从磁盘中抹除
@@ -171,6 +178,7 @@ def rmfile(path, hard = False):
 remove = rmfile
 remove_file = rmfile
 
+
 def copy(src, dest):
     bufsize = 64 * 1024 # 64k
     srcfp = open(src, "rb")
@@ -212,12 +220,6 @@ def format_size(size):
 def format_file_size(fpath):
     """获取文件大小"""
     return get_file_size(fpath, format=True)
-
-def rename_file(srcname, dstname):
-    dest_dirname = os.path.dirname(dstname)
-    if not os.path.exists(dest_dirname):
-        os.makedirs(dest_dirname)
-    os.rename(srcname, dstname)
 
 
 def open_directory(dirname):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2019/10/05 00:44:04
+# @modified 2020/01/09 23:22:48
 import os
 import uuid
 import web
@@ -29,6 +29,8 @@ def get_safe_file_name(filename):
 def generate_filename(filename, prefix, ext = None):
     if prefix:
         prefix = prefix + '@'
+    else:
+        prefix = ''
     if filename is None:
         filename = time.strftime("%Y%m%d_%H%M%S")
     filename = get_safe_file_name(filename)

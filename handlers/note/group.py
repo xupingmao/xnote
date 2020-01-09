@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/08 00:06:04
+# @modified 2020/01/08 22:55:03
 import math
 import time
 import web
@@ -91,7 +91,6 @@ class GroupListHandler:
 
     @xauth.login_required()
     def GET(self):
-        id   = xutils.get_argument("id", "", type=int)
         user_name = xauth.current_name()
         notes = NOTE_DAO.list_by_parent(user_name, 0)
         tools = []
@@ -125,7 +124,7 @@ def load_note_tools(user_name):
         NoteLink("话题", "/search/rules", "fa-search", size = msg_stat.key_count),
         NoteLink("记事", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
         NoteLink("置顶", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
-        NoteLink("分组", "/note/group_list", "fa-folder", size = note_stat.group_count),
+        NoteLink("分组", "/note/timeline?type=group", "fa-folder", size = note_stat.group_count),
         # NoteLink("标签", "/note/taglist", "fa-tags"),
         NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
         NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
