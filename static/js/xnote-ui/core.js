@@ -5,7 +5,7 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2020/01/06 00:07:12
+ * @modified 2020/01/11 00:43:15
  */
 var XUI = function (window) {
   // 处理select标签选中情况
@@ -211,21 +211,7 @@ var XUI = function (window) {
       toast.remove();
     }, time);
   }
-
-  // Dropdown 控件
-  $(".dropdown").click(function (e) {
-      var target = e.target;
-      $(target).next(".dropdown-content").slideToggle("fast");
-  });
-
-  $("body").on("click", function (e) {
-      var target = e.target;
-      if ($(target).hasClass("dropdown") || $(target).hasClass("dropdown-btn")) {
-          return;
-      }
-      $(".dropdown-content").hide();
-  });
-
+  
   // 初始化
   initDefaultValue();
 };

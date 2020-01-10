@@ -11,7 +11,9 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 - 跨平台，支持Windows、Mac、Linux三大平台，可以在云服务上部署，也可以在本地运行
 - 多用户支持
 
-![主页](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v2.4_home2.png)
+![主页](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v2.5_home.png)
+
+![最近](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v2.5_recent.png)
 
 上图采用的是【侧边栏】的主题，可以到【设置】页面进行设置
 
@@ -40,12 +42,12 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 ## 主要功能
 
 ### 笔记管理
-- 支持多种格式：markdown/富文本/表格/相册
+- 支持多种格式：markdown/富文本/表格/相册/列表
 - 组织功能：提供文件夹和标签两种方式来组织文档
-- 搜索功能：按标题和内容搜索
 - 分享功能：在笔记的详情页面，点击【更多】下拉列表里面的分享，可以将文章分享给未登录用户查看
 - 优先级管理：置顶、归档功能
 - 安全功能：修改历史
+- 搜索功能
 - 笔记评论功能
 - 其他文档工具
 

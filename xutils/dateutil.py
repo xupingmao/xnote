@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2019/07/08 23:55:06
+# @modified 2020/01/11 00:33:06
 import time
 import os
 import math
@@ -87,6 +87,16 @@ def format_date(seconds=None, fmt = None):
         st = time.localtime(seconds)
         return time.strftime(fmt, st)
 
+def format_mmdd(seconds=None):
+    if is_str(seconds):
+        date_part = seconds.split(" ")[0]
+        date_part = date_part.replace("-", "/")
+        parts = date_part.split("/")
+        if len(parts) < 2:
+            return date_part
+        return "%s/%s" % (parts[-2], parts[-1])
+    else:
+        return format_date(seconds, "%m/%d")
 
 def format_millis(mills):
     return format_time(mills / 1000)

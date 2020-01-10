@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2020/01/05 20:07:33
+@modified 2020/01/11 00:24:30
 -->
 
 {% init files = [] %}
@@ -40,7 +40,9 @@
                 <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
                 <span>{{item.name}}</span>
                 
-                {% if item.size != None %}<span class="black">({{item.size}})</span>{% end %}
+                {% if item.size != None %}
+                    <span class="black">({{item.size}})</span>
+                {% end %}
 
                 <span class="book-size">
                     {% if show_cdate %}
@@ -55,7 +57,7 @@
                         {{format_date(item.atime).replace('-', '/')}}
                     {% end %}
 
-                    {% if show_next %}
+                    {% if item.show_next %}
                         <i class="fa fa-chevron-right"></i>
                     {% end %}
                 </span>

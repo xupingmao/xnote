@@ -4,7 +4,7 @@
     <span class="dropdown-btn link btn">新建▾</span>
     <div class="dropdown-content">
         <a class="dropdown-option" href="javascript:createGroup();">分组</a>
-        <a class="dropdown-option" href="javascript:createNote();">文档</a>
+        <a class="dropdown-option" href="javascript:createDocument();">文档</a>
         <a class="dropdown-option" href="javascript:createGallery();">相册</a>
         <a class="dropdown-option" href="javascript:createList()();">清单</a>
         <!-- <a class="dropdown-option" href="javascript:uploadFile();">上传文件</a> -->
@@ -35,22 +35,22 @@ function createNote0(title, type) {
 
 /** 创建相册 **/
 function createGallery() {
-    createNote0("创建相册", "gallery");
+    createNote0("新建相册", "gallery");
 }
 
-/** 创建笔记 **/
-function createNote() {
-    createNote0("创建笔记", "md");
+/** 新建文档 **/
+function createDocument() {
+    createNote0("新建文档", "md");
 }
 
 /** 创建清单 **/
 function createList() {
-    createNote0("创建清单", "list");
+    createNote0("新建清单", "list");
 }
 
 /** 创建分组 **/
 function createGroup() {
-    xnote.prompt("创建分组", "", function (noteTitle) {
+    xnote.prompt("新建分组", "", function (noteTitle) {
         var createOption = {};
         createOption.name = noteTitle;
         createOption.parent_id = "{{file.id}}";
@@ -60,11 +60,11 @@ function createGroup() {
             if (resp.code == "success") {
                 window.location.reload();
             } else {
-                alert("创建笔记失败:" + resp.message);
+                alert("新建分组失败:" + resp.message);
             }
         }).fail(function (e) {
-            console.error("创建分组失败", e);
-            alert("创建分组失败:" + e);
+            console.error("新建分组失败", e);
+            alert("新建分组失败:" + e);
         });
     });
 }

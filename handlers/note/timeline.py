@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/01/09 00:05:04
+# @modified 2020/01/10 01:27:41
 
-"""Description here"""
+"""时光轴视图"""
 import re
 import xauth
 import xutils

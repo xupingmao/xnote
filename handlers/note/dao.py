@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/07 23:57:21
+# @modified 2020/01/10 20:59:53
 
 """资料的DAO操作集合
 
@@ -471,7 +471,7 @@ def fill_parent_name(files):
             item.parent_name = None
 
 @xutils.timeit(name = "NoteDao.ListGroup:leveldb", logfile = True)
-def list_group(creator = None, orderby = "name", skip_archived = False):
+def list_group(creator = None, orderby = "mtime_desc", skip_archived = False):
     # TODO 添加索引优化
     def list_group_func(key, value):
         if skip_archived and value.archived:

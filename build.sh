@@ -19,6 +19,7 @@ cat ./static/js/utils.js >> ./static/js/app.build.js
 # xnote-ui
 cat ./static/js/xnote-ui/core.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/layer.photos.js >> ./static/js/app.build.js
+cat ./static/js/xnote-ui/x-dropdown.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-photo.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-audio.js >> ./static/js/app.build.js
 

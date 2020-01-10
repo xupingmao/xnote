@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/08 22:55:03
+# @modified 2020/01/11 00:40:43
 import math
 import time
 import web
@@ -39,6 +39,8 @@ class GroupLink(Storage):
         self.url      = url
         self.size     = size
         self.mtime    = ""
+        self.ctime    = ""
+        self.show_next = True
         self.icon     = "fa-folder orange"
 
 class SystemLink(GroupLink):
@@ -57,6 +59,7 @@ class NoteLink:
         self.size = size
         self.priority = 0
         self.ctime = ""
+        self.show_next = True
 
 def type_node_path(name, url):
     parent = PathNode(TYPES_NAME, "/note/types")
@@ -92,7 +95,7 @@ class GroupListHandler:
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
-        notes = NOTE_DAO.list_by_parent(user_name, 0)
+        notes = NOTE_DAO.list_by_parent(user_name, 0, orderby = "mtime_desc")
         tools = []
         fixed_books = []
         normal_books = []
@@ -133,9 +136,7 @@ def load_note_tools(user_name):
         # NoteLink("词典", "/note/dict",  "fa-dict"),
         # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
         # NoteLink("富文本", "/note/html", "fa-file-word-o"),
-        # NoteLink("全部笔记", "/note/timeline", "fa-book", size = note_stat.total),
         NoteLink("回收站", "/note/removed", "fa-trash"),
-        # NoteLink("时光轴", "/note/tools/timeline", "fa-cube"),
         # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
         NoteLink("按月查看", "/note/date", "fa-cube"),
         NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
@@ -472,7 +473,6 @@ class DateHandler:
             notes.append(v)
 
         return xtemplate.render("note/tools/list_by_date.html", 
-            show_aside = True,
             link_by_month = link_by_month,
             year = int(year),
             month = int(month),

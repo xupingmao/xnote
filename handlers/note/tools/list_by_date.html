@@ -1,15 +1,24 @@
 {% extends base %}
 
 {% block head %}
+
 <style type="text/css">
     .option-td {
         width: 25%;
+        text-align: left;
+    }
+
+    .date-td {
+        width: 25%;
+        text-align: right;
     }
 </style>
 
 {% end %}
 
 {% block body %}
+    {% from xutils import dateutil %}
+
     <div class="card">
         日期
         <select name="year" value="{{year}}">
@@ -35,25 +44,21 @@
             <tr>
                 <th>标题</th>
                 <th>主题</th>
-                <th>创建时间</th>
+                <th style="text-align: right;">时间</th>
             </tr>
         {% for note in notes %}
             <tr>
                 <td>
                     <i class="fa {{note.icon}}"></i>
-                    <a href="/note/view?id={{note.id}}">{{note.name}}</a>
+                    <a href="/note/{{note.id}}">{{note.name}}</a>
                 </td>
                 <td class="option-td">
-                    <!--
-                    <button class="btn rename-btn">重命名</button>
-                    <button class="btn-danger delete-btn">删除</button>
-                    -->
-                    {% if note.parent_id != 0 %}
-                    <a href="/note/view?id={{note.parent_id}}">{{note.parent_name}}</a>
+                    {% if str(note.parent_id) != "0" %}
+                        <a href="/note/view?id={{note.parent_id}}">{{note.parent_name}}</a>
                     {% end %}
                 </td>
-                <td class="option-td">
-                    {{note.ctime}}
+                <td class="date-td">
+                    {{dateutil.format_mmdd(note.ctime)}}
                 </td>
             </tr>
         {% end %}
