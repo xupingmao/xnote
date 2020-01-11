@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2019/11/23 15:18:49
+# @modified 2020/01/11 12:52:50
 import xutils
 
 # cannot perform relative import
@@ -17,11 +17,22 @@ json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
+def create_note_for_test(type, name):
+    data = dict(name = name, type = type, content = "hello,world")
+    file = json_request("/note/add", 
+        method = "POST",
+        data = data)
+    return file["id"]
+
+def delete_note_for_test(name):
+    json_request("/note/remove?name=%s" % name)
+
 class TestMain(BaseTestCase):
 
     def test_note_add_remove(self):
         self.check_200("/note/recent_edit")
-        json_request("/note/remove?name=xnote-unit-test")
+        delete_note_for_test("xnote-unit-test")
+
         file = json_request("/note/add", method="POST", 
             data=dict(name="xnote-unit-test", content="hello"))
         id = file["id"]
@@ -160,6 +171,11 @@ class TestMain(BaseTestCase):
 
     def test_note_category(self):
         self.check_OK("/note/category")
+
+    def test_archive(self):
+        delete_note_for_test("archive-test")
+        id = create_note_for_test("group", "archive-test")
+        self.check_OK("/note/archive?id=%s" % id)
 
     
 

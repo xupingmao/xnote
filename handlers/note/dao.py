@@ -1,11 +1,9 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/10 20:59:53
+# @modified 2020/01/11 12:15:54
 
 """资料的DAO操作集合
-
-由于sqlite是单线程，所以直接使用方法操作
-如果是MySQL等数据库，使用 threadeddict 来操作，直接用webpy的ctx
+DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
 """
 import time
 import math
@@ -25,12 +23,12 @@ from xutils import attrget
 
 MAX_VISITED_CNT = 200
 DB_PATH         = xconfig.DB_PATH
-NOTE_ICON_DICT  = {
-    "group": "fa-folder orange",
-    "csv": "fa-table",
-    "html": "fa-file-word-o",
-    "gallery": "fa-photo",
-    "list": "fa-list"
+NOTE_ICON_DICT = {
+    "group"   : "fa-folder orange",
+    "csv"     : "fa-table",
+    "html"    : "fa-file-word-o",
+    "gallery" : "fa-photo",
+    "list"    : "fa-list"
 }
 
 class FileDO(dict):
@@ -39,7 +37,7 @@ class FileDO(dict):
         self.id          = None
         self.related     = ''
         self.size        = 0
-        now = dateutil.format_time()
+        now              = dateutil.format_time()
         self.mtime       = now
         self.atime       = now
         self.ctime       = now
@@ -106,6 +104,7 @@ def sort_notes(notes, orderby = "name"):
     else:
         # mtime_desc
         notes.sort(key = lambda x: x.mtime, reverse = True)
+    # 置顶笔记
     notes.sort(key = lambda x: x.priority, reverse = True)
     # 文件夹放在前面
     notes.sort(key = lambda x: 0 if x.type == "group" else 1)
@@ -289,9 +288,7 @@ def update_index(note):
     # 更新用户索引
     dbutil.put("note_tiny:%s:%020d" % (note.creator, int(id)), note)
 
-def update_note(where, **kw):
-    note_id   = where['id']
-    creator   = where.get('creator')
+def update_note(note_id, **kw):
     content   = kw.get('content')
     data      = kw.get('data')
     priority  = kw.get('priority')
@@ -302,14 +299,13 @@ def update_note(where, **kw):
     tags      = kw.get("tags")
     orderby   = kw.get("orderby")
     archived  = kw.get("archived")
+    size      = kw.get("size")
 
     old_parent_id = None
     new_parent_id = None
 
     note = get_by_id(note_id)
     if note:
-        if creator and note.creator != creator:
-            return 0
         if content:
             note.content = content
         if data:
@@ -332,6 +328,8 @@ def update_note(where, **kw):
             note.orderby = orderby
         if archived != None:
             note.archived = archived
+        if size != None:
+            note.size = size
 
         old_version  = note.version
         note.mtime   = xutils.format_time()

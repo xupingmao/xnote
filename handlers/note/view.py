@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2019/12/15 14:34:30
+# @modified 2020/01/11 12:12:55
 import profile
 import math
 import re
@@ -176,7 +176,7 @@ class ViewHandler:
                 orderby = file.orderby
 
             files  = NOTE_DAO.list_by_parent(user_name, file.id, (page-1)*pagesize, pagesize, orderby)
-            amount = NOTE_DAO.count(user_name, file.id)
+            amount = file.size
             content         = file.content
             show_search_div = True
             show_add_file   = True
@@ -332,12 +332,12 @@ class DictHandler:
 
         return xtemplate.render("note/view.html", 
             show_aside = True,
-            files = list(items), 
-            file_type = "group",
-            show_opts = False,
-            page = page,
-            page_max = page_max,
-            page_url = "/note/dict?page=")
+            files      = list(items), 
+            file_type  = "group",
+            show_opts  = False,
+            page       = page,
+            page_max   = page_max,
+            page_url   = "/note/dict?page=")
 
 class NoteHistoryHandler:
 
@@ -363,7 +363,7 @@ class HistoryViewHandler:
         version = xutils.get_argument("version")
         
         creator = xauth.current_name()
-        note = xutils.call("note.get_by_id_creator", note_id, creator)
+        note = NOTE_DAO.get_by_id_creator(note_id, creator)
         content = ""
         if note != None:
             note = xutils.call("note.get_history", note_id, version)

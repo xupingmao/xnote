@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/01/05 20:42:38
+# @modified 2020/01/11 12:51:57
 
 """笔记编辑相关处理"""
 import os
@@ -24,59 +24,12 @@ NOTE_DAO = xutils.DAO("note")
 
 TYPE_MAPPING = dict(document = "md")
 
-def get_by_name(db, name):
-    return db.select_first(where=dict(name = name, 
-        is_deleted = 0, 
-        creator = xauth.get_current_name()))
+class NoteException(Exception):
 
-def update_children_count(parent_id, db=None):
-    if parent_id is None or parent_id == "":
-        return
-    if db is None:
-        db = get_file_db()
-    group_count = db.count(where="parent_id=$parent_id AND is_deleted=0", 
-        vars=dict(parent_id=parent_id))
-    db.update(size=group_count, where=dict(id=parent_id))
-
-def update_note_content(id, content, data=''):
-    if id is None:
-        return
-    if content is None:
-        content = ''
-    if data is None:
-        data = ''
-    db = xtables.get_note_content_table()
-    result = db.select_first(where=dict(id=id))
-    if result is None:
-        db.insert(id=id, content=content, data=data)
-    else:
-        db.update(where=dict(id=id), 
-            content=content,
-            data = data)
-
-def update_note(db, where, **kw):
-    note_id = where.get('id')
-    content = kw.get('content')
-    data = kw.get('data')
-
-    kw["mtime"] = dateutil.format_time()
-    kw["atime"] = dateutil.format_time()
-    # 处理乐观锁
-    version = where.get("version")
-    if version != None:
-        kw["version"] = version + 1
-    # 这两个字段废弃，移动到单独的表中
-    if 'content' in kw:
-        del kw['content']
-        kw['content'] = ''
-    if 'data' in kw:
-        del kw['data']
-        kw['data'] = ''
-    rows = db.update(where = where, vars=None, **kw)
-    if rows > 0:
-        # 更新成功后再更新内容，不考虑极端的冲突情况
-        update_note_content(note_id, content, data)
-    return rows
+    def __init__(self, code, message):
+        super(NoteException, self).__init__(message)
+        self.code = code
+        self.message = message
 
 @xmanager.listen(["note.add", "note.updated", "note.rename", "note.remove"])
 def update_note_cache(ctx):
@@ -142,7 +95,7 @@ class CreateHandler:
         try:
 
             if type not in ("md", "html", "csv", "gallery", "list", "group"):
-                raise Exception("无效的类型: %s" % type)
+                raise Exception(u"无效的类型: %s" % type)
 
             if name == '':
                 if method == 'POST':
@@ -156,7 +109,7 @@ class CreateHandler:
                     raise Exception(message)
                 inserted_id = NOTE_DAO.create(note)
                 if format == "json":
-                    return dict(code="success", id=inserted_id, url = "/note/edit?id=%s" % inserted_id)
+                    return dict(code="success", id = inserted_id, url = "/note/edit?id=%s" % inserted_id)
                 raise web.seeother("/note/edit?id={}".format(inserted_id))
         except web.HTTPError as e1:
             xutils.print_exc()
@@ -229,6 +182,7 @@ class DictPutHandler:
 
     @xauth.login_required()
     def POST(self):
+        # TODO 转成KV存储
         key     = xutils.get_argument("key")
         value   = xutils.get_argument("value")
         db      = xtables.get_dict_table()
@@ -262,7 +216,7 @@ class RenameAjaxHandler:
         if file is not None and file.is_deleted == 0:
             return dict(code="fail", message="%r已存在" % name)
 
-        NOTE_DAO.update(dict(id=id), name=name)
+        NOTE_DAO.update(id, name=name)
 
         event_body = dict(action="rename", id=id, name=name, type=old.type)
         xmanager.fire("note.updated", event_body)
@@ -277,8 +231,8 @@ class ShareHandler:
     @xauth.login_required()
     def GET(self):
         id      = xutils.get_argument("id")
-        creator = xauth.current_name()
-        NOTE_DAO.update(dict(id = id, creator = creator), is_public = 1)
+        note    = check_get_note(id)
+        NOTE_DAO.update(id, is_public = 1)
         raise web.seeother("/note/view?id=%s"%id)
 
 
@@ -287,9 +241,32 @@ class UnshareHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
-        creator = xauth.current_name()
-        NOTE_DAO.update(dict(id = id, creator = creator), is_public = 0)
+        note = check_get_note(id)
+        NOTE_DAO.update(id, is_public = 0)
         raise web.seeother("/note/view?id=%s"%id)
+
+def check_get_note(id):
+    if xauth.is_admin():
+        note = NOTE_DAO.get_by_id(id)
+    else:
+        note = NOTE_DAO.get_by_id_creator(id, xauth.current_name())
+
+    if note is None:
+        raise NoteException("404", "笔记不存在")
+    return note
+
+def update_and_notify(file, update_kw):
+    rowcount = NOTE_DAO.update(file.id, **update_kw)
+    if rowcount > 0:
+        xmanager.fire('note.updated', dict(
+            id = file.id, 
+            name = file.name, 
+            mtime = dateutil.format_datetime(),
+            content = update_kw.get("content"), 
+            version = file.version + 1))
+    else:
+        # 更新冲突了
+        raise NoteException("409", "更新失败")
 
 class SaveAjaxHandler:
 
@@ -303,33 +280,29 @@ class SaveAjaxHandler:
         name    = xauth.get_current_name()
         where   = None
 
-        if xauth.is_admin():
-            where = dict(id=id)
-        else:
-            where = dict(id=id, creator=name)
-        kw = dict(size = len(content), 
-            mtime = xutils.format_datetime(), 
-            version = version + 1)
-        if type == "html":
-            kw["data"]    = data
-            kw["content"] = data
-            if xutils.bs4 is not None:
-                soup          = xutils.bs4.BeautifulSoup(data, "html.parser")
-                content       = soup.get_text(separator=" ")
+        try:
+            file = check_get_note(id)
+            kw = dict(size = len(content), 
+                mtime = xutils.format_datetime(), 
+                version = version + 1)
+
+            if type == "html":
+                kw["data"]    = data
+                kw["content"] = data
+                if xutils.bs4 is not None:
+                    soup          = xutils.bs4.BeautifulSoup(data, "html.parser")
+                    content       = soup.get_text(separator=" ")
+                    kw["content"] = content
+                kw["size"] = len(content)
+            else:
                 kw["content"] = content
-            kw["size"] = len(content)
-        else:
-            kw["content"] = content
-            kw['data']    = ''
-            kw["size"]    = len(content)
-        rowcount = NOTE_DAO.update(where, **kw)
-        if rowcount > 0:
-            xmanager.fire('note.updated', dict(id=id, name=name, 
-                mtime = dateutil.format_datetime(),
-                content = content, version=version+1))
-            return dict(code="success")
-        else:
-            return dict(code="fail", message="更新失败")
+                kw['data']    = ''
+                kw["size"]    = len(content)
+
+            update_and_notify(file, kw)
+            return dict(code = "success")
+        except NoteException as e:
+            return dict(code = "fail", message = e.message)
 
 class UpdateHandler:
 
@@ -341,73 +314,60 @@ class UpdateHandler:
         version   = xutils.get_argument("version", 0, type=int)
         file_type = xutils.get_argument("type")
         name      = xutils.get_argument("name", "")
-        file      = NOTE_DAO.get_by_id(id)
 
-        if file is None:
+        try:
+            file = check_get_note(id)
+
+            # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
+            # 所以权限只能是创建者而不是修改者
+            update_kw = dict(content=content, 
+                    type = file_type, 
+                    size = len(content),
+                    version = version);
+            if name != "" and name != None:
+                update_kw["name"] = name
+            # 更新并且发出消息
+            update_and_notify(file, update_kw)
+            raise web.seeother("/note/%s" % id)
+        except NoteException as e:
             return xtemplate.render("note/view.html", 
                 pathlist = [],
                 file     = file, 
                 content  = content, 
-                error    = "笔记不存在")
-
-        # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
-        # 所以权限只能是创建者而不是修改者
-        update_kw = dict(content=content, 
-                type = file_type, 
-                size = len(content),
-                version = version);
-
-        if name != "" and name != None:
-            update_kw["name"] = name
-
-        # 不再处理文件，由JS提交
-        rowcount = NOTE_DAO.update(where = dict(id=id, version=version), **update_kw)
-        if rowcount > 0:
-            xmanager.fire('note.updated', dict(id=id, name=file.name, 
-                mtime = dateutil.format_datetime(),
-                content = content, version=version+1))
-            raise web.seeother("/note/view?id=" + str(id))
-        else:
-            # 传递旧的content
-            cur_version = file.version
-            file.content = content
-            file.version = version
-            return xtemplate.render("note/view.html", 
-                pathlist = [],
-                file     = file, 
-                content  = content, 
-                error    = "更新失败, 版本冲突,当前version={},最新version={}".format(version, cur_version))
+                error    = e.message)
 
 class StickHandler:
 
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
-        user = xauth.current_name()
-        NOTE_DAO.update(dict(id = id, creator = user), priority = 1)
-        raise web.found("/note/view?id=" + str(id))
+        note = check_get_note(id)
+        NOTE_DAO.update(id, priority = 1)
+        raise web.found("/note/%s" % id)
 
 class UnstickHandler:
     
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
-        user = xauth.current_name()
-        NOTE_DAO.update(dict(id = id, creator = user), priority = 0)
-        raise web.found("/note/view?id=" + str(id))
+        note = check_get_note(id)
+        NOTE_DAO.update(id, priority = 0)
+        raise web.found("/note/%s" % id)
 
 class ArchiveHandler:
 
     def GET(self):
         id = xutils.get_argument("id")
-        NOTE_DAO.update(where=dict(id=id), archived=True)
+        note = check_get_note(id)
+        NOTE_DAO.update(id, archived=True)
         raise web.found("/note/%s" % id)
 
 class UnarchiveHandler:
 
     def GET(self):
         id = xutils.get_argument("id")
-        NOTE_DAO.update(where=dict(id=id), archived=False)
+        note = check_get_note(id)
+        NOTE_DAO.update(id, archived=False)
         raise web.found("/note/%s" % id)
 
 class MoveHandler:
@@ -418,7 +378,9 @@ class MoveHandler:
         parent_id = xutils.get_argument("parent_id", "")
         file = NOTE_DAO.get_by_id_creator(id, xauth.current_name())
         if file is None:
-            return dict(code="fail", message="file not exists")
+            return dict(code="fail", message="笔记不存在")
+        if str(id) == str(parent_id):
+            return dict(code="fail", message="不能移动到自身目录")
 
         NOTE_DAO.move(file, parent_id)
         return dict(code="success")
