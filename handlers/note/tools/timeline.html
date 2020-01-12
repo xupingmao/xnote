@@ -43,7 +43,7 @@
 
         {% if type == "default" %}
           {% include note/component/group_option.html %}
-        {% elif type == "root" %}
+        {% elif type != "public" %}
           <div class="dropdown">
               <span class="dropdown-btn link btn">更多▾</span>
               <div class="dropdown-content">
@@ -51,11 +51,12 @@
                   <!-- <a class="dropdown-option" href="{{base_path}}?type=all">所有</a> -->
                   <!-- <a class="dropdown-option" href="{{base_path}}?type=group">分组</a> -->
                   <!-- <a class="dropdown-option" href="{{base_path}}?type=public">公共</a> -->
-                  <a class="dropdown-option" href="{{base_path}}?type=sticky">置顶</a>
-                  <a class="dropdown-option" href="{{base_path}}?type=document">文档</a>
-                  <a class="dropdown-option" href="{{base_path}}?type=gallery">相册</a>
-                  <a class="dropdown-option" href="{{base_path}}?type=list">清单</a>
-                  <a class="dropdown-option" href="{{base_path}}?type=archived">归档</a>
+                  <a class="dropdown-option" href="/message?tag=task">任务</a>
+                  <a class="dropdown-option" href="{{base_path}}?type=sticky">只看置顶</a>
+                  <a class="dropdown-option" href="{{base_path}}?type=document">只看文档</a>
+                  <a class="dropdown-option" href="{{base_path}}?type=gallery">只看相册</a>
+                  <a class="dropdown-option" href="{{base_path}}?type=list">只看清单</a>
+                  <a class="dropdown-option" href="{{base_path}}?type=archived">只看归档</a>
                   <a class="dropdown-option" href="/note/index">统计</a>
               </div>
           </div>
@@ -141,7 +142,7 @@
       list.push({title: key, files: files});
     }
 
-    function loadMore() {
+    function loadMore(showToast) {
       var type = "{{type}}" || getUrlParam("type");
       var parent_id = getUrlParam("parent_id");
 
@@ -154,7 +155,9 @@
         function (data, status) {
           if (data == "{}") {
             // alert("没有更多了");
-            layer.msg("没有更多了");
+            if (showToast) {
+              layer.msg("没有更多了");
+            }
             return;
           }
           var resp = data;
@@ -170,7 +173,9 @@
           }
           if (count == 0) {
             // alert("没有更多了");
-            layer.msg("没有更多了");
+            if (showToast) {
+              layer.msg("没有更多了");
+            }
             return;
           }
           
@@ -188,10 +193,10 @@
 
 
     $("#loadMore").on("click", function() {
-      loadMore();
+      loadMore(true);
     })
 
-    loadMore();
+    loadMore(false);
 
 </script>
 {% end %}
