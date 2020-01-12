@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/01/12 21:07:57
+# @modified 2020/01/12 21:50:17
 
 """时光轴视图"""
 import re
@@ -45,7 +45,7 @@ class TimelineAjaxHandler:
             rows = NOTE_DAO.list_by_func(user_name, list_func, offset, limit)
 
         orderby = "ctime"
-        if type in ("mtime", "group"):
+        if type in ("mtime", "group", "root"):
             orderby = "mtime"
 
         result = dict()
