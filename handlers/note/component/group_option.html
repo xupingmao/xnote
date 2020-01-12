@@ -1,0 +1,71 @@
+<!-- group_option.html -->
+{% init error = None %}
+{% init is_iframe = False %}
+{% init file = Storage(id = 0, parent_id=0) %}
+
+{% if file != None and _has_login %}
+    <div class="dropdown">
+      <span class="dropdown-btn link btn">更多▾</span>
+      <div class="dropdown-content">
+        {% if file.id != 0 and file.priority != None and file.priority > 0 %}
+            <a class="dropdown-option" href="/note/unstick?id={{file.id}}">取消置顶</a>
+        {% elif str(file.id) != "0" %}
+            <a class="dropdown-option" href="/note/stick?id={{file.id}}">置顶</a>
+        {% end %}
+        
+        <a class="dropdown-option" href="/note/management?parent_id={{file.id}}">批量操作</a>
+
+        {% if str(file.id) != "0" %}
+            <a class="dropdown-option" href="javascript:rename('{{file.id}}', '{{file.name}}')">重命名</a>
+        {% end %}
+        
+        {% if file.size == 0 %}
+            <a class="dropdown-option-red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
+        {% end %}
+      </div>
+    </div>
+{% end %}
+
+{% if error != "" and error != None%}
+    <div class="col-md-12 error">
+        {{error}}
+    </div>
+{% end %}
+
+
+<script type="text/javascript">
+function rename(id, oldName) {
+    xnote.prompt("新名称", oldName, function (newName) {
+        console.log(newName);
+        if (newName != "" && newName != null) {
+            $.post("/note/rename", {id:id, name:newName}, function (resp) {
+                var code = resp.code;
+                if (code != "success") {
+                    alert(resp.message);
+                } else {
+                    // $("#file-"+id).text(newName);
+                    window.location.reload();
+                }
+            })
+        }
+    });
+}
+
+function remove(id, name, parentId) {
+    var confirmed = confirm("确定删除'" + name + "'?");
+    if (confirmed) {
+        $.post("/note/remove", {id:id}, function (resp) {
+            var code = resp.code;
+            if (code != "success") {
+                alert(resp.message);
+            } else {
+                if (parentId) {
+                    window.location.href = "/note/view?id="+parentId;
+                } else {
+                    window.location.href = "/";
+                }
+            }
+        })
+    }
+}
+</script>

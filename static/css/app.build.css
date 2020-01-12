@@ -131,7 +131,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/01/12 13:56:35
+ * @modified 2020/01/12 20:30:23
  */
 
 /** marked 样式 **/
@@ -757,6 +757,10 @@ li.menu-item:hover {
 
 .center-text {
     text-align: center;
+}
+
+.gray-text {
+    color: #ccc;
 }
 
 .error {
@@ -1661,7 +1665,7 @@ li.menu-item:hover {
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2020/01/12 13:56:42
+ * @modified 2020/01/12 20:45:07
 */
 
 
@@ -1849,7 +1853,7 @@ li.menu-item:hover {
     margin-bottom: 0px;
     float: left;
     line-height: 25px;
-    /*border-bottom: 1px solid #eee;*/
+    border-bottom: 1px solid #eee;
 }
 
 .book-item:hover {

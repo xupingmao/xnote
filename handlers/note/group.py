@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/12 19:44:43
+# @modified 2020/01/12 20:19:13
 import math
 import time
 import web
@@ -427,6 +427,7 @@ class PublicGroupHandler:
     def GET(self):
         return xtemplate.render("note/tools/timeline.html", 
             title = T("公共笔记"), 
+            show_create = False,
             type = "public")
 
         # 老的分页逻辑

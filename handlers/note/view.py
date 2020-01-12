@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/01/11 12:12:55
+# @modified 2020/01/12 21:17:48
 import profile
 import math
 import re
@@ -154,7 +154,8 @@ class ViewHandler:
         
         if file.type != "group" and not file.is_public and user_name != "admin" and user_name != file.creator:
             raise web.seeother("/unauthorized")
-        pathlist        = xutils.call("note.list_path", file)
+
+        pathlist        = NOTE_DAO.list_path(file)
         can_edit        = (file.creator == user_name) or (user_name == "admin")
         role            = xauth.get_current_role()
 
@@ -170,8 +171,12 @@ class ViewHandler:
 
         title  = file.name
         if file.type == "group":
+            # 直接跳转到timeline模式
+            raise web.found("/note/timeline?type=default&parent_id=%s" % id)
+
+            # 后面代码暂时不用
             if orderby != None and file.orderby != orderby:
-                NOTE_DAO.update(where = dict(id = file.id, creator = file.creator), orderby = orderby)
+                NOTE_DAO.update(file.id, orderby = orderby)
             else:
                 orderby = file.orderby
 

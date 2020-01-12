@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/01/12 13:56:35
+ * @modified 2020/01/12 20:30:23
  */
 
 /** marked 样式 **/
@@ -628,6 +628,10 @@ li.menu-item:hover {
 
 .center-text {
     text-align: center;
+}
+
+.gray-text {
+    color: #ccc;
 }
 
 .error {

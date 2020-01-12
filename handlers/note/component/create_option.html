@@ -1,15 +1,23 @@
-{% init file = Storage(id = 0) %}
+{% init file = Storage(id = "0") %}
+{% init show_create = True %}
 
-<div class="dropdown">
-    <span class="dropdown-btn link btn">新建▾</span>
-    <div class="dropdown-content">
-        <a class="dropdown-option" href="javascript:createGroup();">分组</a>
-        <a class="dropdown-option" href="javascript:createDocument();">文档</a>
-        <a class="dropdown-option" href="javascript:createGallery();">相册</a>
-        <a class="dropdown-option" href="javascript:createList()();">清单</a>
-        <!-- <a class="dropdown-option" href="javascript:uploadFile();">上传文件</a> -->
+{% if not show_create %}
+    
+{% elif file.id == "0" %}
+    <!-- 跟节点 -->
+    <a class="btn" href="javascript:createGroup();">新建项目</a>
+{% else %}
+    <div class="dropdown">
+        <span class="dropdown-btn link btn">新建▾</span>
+        <div class="dropdown-content">
+            <!-- <a class="dropdown-option" href="javascript:createGroup();">分组</a> -->
+            <a class="dropdown-option" href="javascript:createDocument();">文档</a>
+            <a class="dropdown-option" href="javascript:createGallery();">相册</a>
+            <a class="dropdown-option" href="javascript:createList()();">清单</a>
+            <!-- <a class="dropdown-option" href="javascript:uploadFile();">上传文件</a> -->
+        </div>
     </div>
-</div>
+{% end %}
 
 <script type="text/javascript">
 /** 创建笔记基础 **/
@@ -50,7 +58,8 @@ function createList() {
 
 /** 创建分组 **/
 function createGroup() {
-    xnote.prompt("新建分组", "", function (noteTitle) {
+    var opName = "新建项目";
+    xnote.prompt(opName, "", function (noteTitle) {
         var createOption = {};
         createOption.name = noteTitle;
         createOption.parent_id = "{{file.id}}";
@@ -60,11 +69,11 @@ function createGroup() {
             if (resp.code == "success") {
                 window.location.reload();
             } else {
-                alert("新建分组失败:" + resp.message);
+                alert(opName + "失败:" + resp.message);
             }
         }).fail(function (e) {
-            console.error("新建分组失败", e);
-            alert("新建分组失败:" + e);
+            console.error(opName + "失败", e);
+            alert(opName + "失败:" + e);
         });
     });
 }

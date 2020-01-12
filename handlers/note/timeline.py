@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/01/12 19:48:22
+# @modified 2020/01/12 21:07:57
 
 """时光轴视图"""
 import re
@@ -17,13 +17,11 @@ class TimelineAjaxHandler:
     def GET(self):
         offset    = xutils.get_argument("offset", 0, type=int)
         limit     = xutils.get_argument("limit", 20, type=int)
-        type      = xutils.get_argument("type", "default")
+        type      = xutils.get_argument("type", "root")
         parent_id = xutils.get_argument("parent_id", None, type=str)
         user_name = xauth.current_name()
 
-        if type == "mtime":
-            rows = NOTE_DAO.list_recent_edit(user_name, offset, limit)
-        elif type == "public":
+        if type == "public":
             rows = NOTE_DAO.list_public(offset, limit)
         elif type == "sticky":
             rows = NOTE_DAO.list_sticky(user_name, offset, limit)
@@ -36,10 +34,12 @@ class TimelineAjaxHandler:
         elif type == "all":
             rows = NOTE_DAO.list_recent_created(user_name, offset, limit)
         else:
+            if type == "root":
+                parent_id = 0
             def list_func(key, value):
                 if value.is_deleted:
                     return False
-                if parent_id != None and value.parent_id != parent_id:
+                if parent_id != None and str(value.parent_id) != str(parent_id):
                     return False
                 return True
             rows = NOTE_DAO.list_by_func(user_name, list_func, offset, limit)
@@ -61,7 +61,9 @@ class TimelineAjaxHandler:
             if date not in result:
                 result[date] = []
             if row.type == "group":
-                row.url = "/note/timeline?parent_id=%s" % row.id
+                row.url = "/note/timeline?type=default&parent_id=%s" % row.id
+            else:
+                row.url = "/note/%s?source=timeline" % row.id
             result[date].append(row)
 
         for key in result:
@@ -91,7 +93,7 @@ class DateTimeline:
 class TimelineHandler:
 
     def GET(self):
-        type      = xutils.get_argument("type")
+        type      = xutils.get_argument("type", "root")
         parent_id = xutils.get_argument("parent_id")
         title = T("最新笔记")
 
@@ -106,9 +108,11 @@ class TimelineHandler:
         file = None
         if parent_id != None:
             file = NOTE_DAO.get_by_id(parent_id)
+            title = file.name
 
         return xtemplate.render("note/tools/timeline.html", 
             title = title,
+            type  = type,
             file = file,
             show_aside = False)
 
