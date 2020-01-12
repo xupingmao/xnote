@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/01/08 23:03:29
+ * @modified 2020/01/12 13:56:35
  */
 
 /** marked 样式 **/
@@ -885,29 +885,6 @@ li.menu-item:hover {
     margin-bottom: 0px;
     float: left;
     line-height: 25px;
-}
-
-/*.grid-item:hover {
-    background-color: #eee;
-}*/
-
-.book-item {
-    width: 100%;
-    padding: 5px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    float: left;
-    line-height: 25px;
-    border-bottom: 1px solid #eee;
-}
-
-.book-item:hover {
-    background-color: #efefef;
-}
-
-.book-size {
-    float: right;
-    color: black;
 }
 
 .group-div {

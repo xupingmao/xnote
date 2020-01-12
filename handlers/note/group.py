@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/11 13:12:50
+# @modified 2020/01/12 19:44:43
 import math
 import time
 import web
@@ -10,8 +10,9 @@ import xtables
 import xauth
 import xconfig
 import xmanager
+import os
 from xutils import Storage
-from xutils import cacheutil, dateutil
+from xutils import cacheutil, dateutil, fsutil
 from xutils.dateutil import Timer
 from xtemplate import T
 
@@ -73,7 +74,7 @@ class DefaultListHandler:
         user_name = xauth.get_current_name()
         pagesize  = xconfig.PAGE_SIZE
         offset    = (page-1) * pagesize
-        files     = NOTE_DAO.list_note(user_name, 0, offset, pagesize)
+        files     = NOTE_DAO.list_by_parent(user_name, 0, offset, pagesize)
         amount    = NOTE_DAO.count_by_parent(user_name, 0);
         parent    = NOTE_DAO.get_root()
 
@@ -515,15 +516,26 @@ class ManagementHandler:
 
     @xauth.login_required()
     def GET(self):
-        parent_id = xutils.get_argument("parent_id", 0)
+        parent_id = xutils.get_argument("parent_id", "0")
         user_name = xauth.current_name()
-        
-        parent_note = NOTE_DAO.get_by_id(parent_id)
-        if parent_note != None:
-            parent_name = parent_note.name
+
+        if parent_id == "0":
+            parent_note = NOTE_DAO.get_root()
         else:
-            parent_name = NOTE_DAO.get_root()
-        notes = NOTE_DAO.list_note(user_name, parent_id, 0, 200)
+            parent_note = NOTE_DAO.get_by_id(parent_id)
+        
+        if parent_note is None:
+            raise web.seeother("/unauthorized")
+
+        parent_name = parent_note.name
+        if parent_note.type == "gallery":
+            fpath = fsutil.get_gallery_path(parent_note)
+            pathlist = fsutil.listdir_abs(fpath)
+            return xtemplate.render("note/admin/gallery.html", 
+                note = parent_note, 
+                dirname = fpath, 
+                pathlist = pathlist)
+        notes = NOTE_DAO.list_by_parent(user_name, parent_id, 0, 200)
         parent = Storage(url = "/note/%s" % parent_id, name = parent_name)
         current = Storage(url = "#", name = "整理")
         return xtemplate.render("note/management.html", 

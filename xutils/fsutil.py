@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2020/01/08 01:42:13
+# @modified 2020/01/12 19:22:32
 import codecs
 import os
 import platform
@@ -518,4 +518,20 @@ def get_gallery_path(note):
     makedirs(standard_dir)
     return standard_dir
 
+def get_display_name(fpath, parent):
+    """获取文件的显示名称"""
+    path = get_relative_path(fpath, parent)
+    return xutils.unquote(path)
 
+def get_webpath(fpath):
+    rpath = get_relative_path(fpath, xconfig.DATA_DIR)
+    return "/data/" + rpath
+
+def listdir_abs(dirname):
+    pathlist = []
+    for root, dirs, files in os.walk(dirname):
+        for fname in files:
+            fpath = os.path.join(root, fname)
+            pathlist.append(fpath)
+    pathlist = sorted(pathlist)
+    return pathlist

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/01/12 13:08:50
+# @modified 2020/01/12 18:41:12
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -583,8 +583,6 @@ def _get_default_by_type(default_value, type):
         return default_value
     if type is bool:
         return False
-    if type is int:
-        return 0
     return None
 
 def get_argument(key, default_value=None, type = None, strip=False):

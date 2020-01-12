@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2020/01/09 23:22:48
+# @modified 2020/01/12 19:22:57
 import os
 import uuid
 import web
@@ -12,7 +12,7 @@ import xtemplate
 import xmanager
 import time
 import math
-from xutils import quote
+from xutils import quote, fsutil
 from xtemplate import T
 
 def get_link(filename, webpath):
@@ -95,13 +95,7 @@ class UploadHandler:
             month = '0' + month
         
         dirname = os.path.join(xconfig.DATA_DIR, "files", user_name, "upload", year, month)
-        
-        pathlist = []
-        for root, dirs, files in os.walk(dirname):
-            for fname in files:
-                fpath = os.path.join(root, fname)
-                pathlist.append(fpath)
-        pathlist = sorted(pathlist)
+        pathlist = fsutil.listdir_abs(dirname)
         
         return xtemplate.render("fs/fs_upload.html", 
             show_aside = False,

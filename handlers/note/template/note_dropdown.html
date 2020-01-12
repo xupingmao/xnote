@@ -1,6 +1,12 @@
 <div class="float-right">
 {% if file != None and _user_name == file.creator and op == "view" %}
-<a class="btn" href="/note/edit?id={{file.id}}&is_iframe={{is_iframe}}">编辑</a>
+
+{% if file.type == "gallery" %}
+    <a class="btn" href="/note/management?parent_id={{file.id}}">管理</a>
+{% else %}
+    <a class="btn" href="/note/edit?id={{file.id}}&is_iframe={{is_iframe}}">编辑</a>
+{% end %}
+
 <div class="dropdown">
     <span class="dropdown-btn link btn">更多▾</span>
     <div class="dropdown-content">
@@ -26,11 +32,6 @@
         {% end %}
 
         <a class="dropdown-option link" href="/note/history?id={{file_id}}">{{T("History")}}</a>
-
-        {% if _is_admin and file.type == "gallery" %}
-            <a class="dropdown-option link" href="/fs/{{file.path}}">管理文件</a>
-        {% end %}
-
         <a class="dropdown-option link" href="/note/print?id={{file.id}}" target="_blank">打印模式</a>
 
         <a class="dropdown-option-red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>

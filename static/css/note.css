@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2019/11/24 19:14:36
+ * @modified 2020/01/12 13:56:42
 */
 
 
@@ -181,4 +181,23 @@
     float: left;
     width: 100%;
     padding: 10px;
+}
+
+.book-item {
+    width: 100%;
+    padding: 5px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    float: left;
+    line-height: 25px;
+    /*border-bottom: 1px solid #eee;*/
+}
+
+.book-item:hover {
+    background-color: #efefef;
+}
+
+.book-size {
+    float: right;
+    color: black;
 }

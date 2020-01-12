@@ -35,7 +35,7 @@
 {% end %}
 
 {# 笔记的概要信息 #}
-{% if item != None and item.type != "group" %}
+{% if False %}
     <div class="note-detail-head"> 
         <span id="fileId" style="display:none;">{{file.id}}</span>    
         <div class="col-md-12 hide">
@@ -64,7 +64,7 @@
                 {% end %}
 
                 {% if _is_admin and file.type == "gallery" %}
-                    <a class="link" href="/fs/{{file.path}}">管理文件</a>
+                    <a class="link" href="/note/management?parent_id={{file.id}}">管理文件</a>
                 {% end %}
                 <!-- <a class="link" href="/note/print?id={{file.id}}" target="_blank">打印</a> -->
                 <a class="red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/12 13:13:44
+# @modified 2020/01/12 18:36:21
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -108,8 +108,7 @@ def sort_notes(notes, orderby = "name"):
     notes.sort(key = lambda x: x.priority, reverse = True)
     # 文件夹放在前面
     notes.sort(key = lambda x: 0 if x.type == "group" else 1)
-    for note in notes:
-        build_note_info(note)
+    fix_notes_info(notes)
 
 def build_note(dict):
     id   = dict['id']
@@ -127,6 +126,10 @@ def build_note(dict):
         note.data = data
     build_note_info(note)
     return note
+
+def fix_notes_info(notes):
+    for note in notes:
+        build_note_info(note)
 
 def build_note_info(note):
     if note:
@@ -217,6 +220,8 @@ def create_note(note_dict):
 
     # 更新统计数量
     refresh_note_stat(creator)
+    # 更新目录修改时间
+    touch_note(parent_id)
 
     return note_id
 
@@ -340,8 +345,6 @@ def update_note(note_id, **kw):
             note.version = old_version
 
         kv_put_note(note_id, note)
-        # 更新parent更新时间
-        touch_note(note.parent_id)
         return 1
     return 0
 
@@ -829,6 +832,11 @@ def list_tag(user):
     tag_list.sort(key = lambda x: -x.amount)
     return tag_list
 
+def list_by_func(creator, list_func, offset, limit):
+    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
+    fix_notes_info(notes)
+    return notes
+
 def list_comments(note_id):
     comments = []
     for key, value in dbutil.prefix_iter("note_comment:%s" % note_id, reverse = True, include_key = True):
@@ -911,7 +919,6 @@ xutils.register_func("note.search_content", search_content)
 xutils.register_func("note.list_path", list_path)
 xutils.register_func("note.list_group", list_group)
 xutils.register_func("note.list_root_group", list_root_group)
-xutils.register_func("note.list_note",  list_by_parent)
 xutils.register_func("note.list_by_parent", list_by_parent)
 xutils.register_func("note.list_by_date", list_by_date)
 xutils.register_func("note.list_by_tag", list_by_tag)
@@ -924,6 +931,7 @@ xutils.register_func("note.list_public", list_public)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.list_recent_viewed", list_recent_viewed)
+xutils.register_func("note.list_by_func", list_by_func)
 
 # count functions
 xutils.register_func("note.count_public", count_public)

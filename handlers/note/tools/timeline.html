@@ -137,10 +137,13 @@
 
     function loadMore() {
       var type = "{{type}}" || getUrlParam("type");
+      var parent_id = getUrlParam("parent_id");
+
       $.get("/note/api/timeline?_type=json&type=" + type, 
         { 
           offset: window.offset,
-          limit : QUERY_LIMIT
+          limit : QUERY_LIMIT,
+          parent_id: parent_id
         }, 
         function (data, status) {
           if (data == "{}") {

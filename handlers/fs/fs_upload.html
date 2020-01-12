@@ -82,25 +82,7 @@
             空空如也~
         {% end %}
 
-        <table class="table row">
-        {% for fpath in pathlist %}
-            {% set fname = os.path.basename(fpath) %}
-            {% set display_name = get_display_name(fpath, dirname) %}
-            <tr>
-                <td><a href="{{get_webpath(fpath)}}">{{display_name}}</a></td>
-                <td class="option-td">
-                    {{xutils.format_file_size(fpath)}}
-                </td>
-                <td class="option-td">
-                    <!--
-                    <button class="btn">下载</button>
-                    -->
-                    <button class="btn rename-btn" data-name="{{display_name}}">重命名</button>
-                    <button class="btn-danger delete-btn" data-path="{{fpath}}" data-name="{{display_name}}">删除</button>
-                </td>
-            </tr>
-        {% end %}
-        </table>
+        {% include fs/component/filelist_simple.html %}
     </div>
 
     <script>
@@ -110,44 +92,6 @@
             var month = $("[name=month]").val();
             location.href = "?year=" + year + "&month=" + month;
         });
-
-        $(".rename-btn").click(function (e) {
-            var dirname = $("#dirname").val();
-            var oldName = $(this).attr("data-name");
-            xnote.prompt("输入新的文件名", oldName, function (newName) {
-                if (newName != oldName && newName) {
-                    $.post("/fs_api/rename", 
-                        {dirname: dirname, old_name: oldName, new_name: newName}, 
-                        function (resp) {
-                            if (resp.code == "success") {
-                                window.location.reload();
-                            } else {
-                                xnote.alert("重命名失败:" + resp.message);
-                            }
-                    }).fail(function (e) {
-                        xnote.alert("系统繁忙，请稍后重试");
-                    });
-                } else {
-                    xnote.alert("请输入有限文件名");
-                }
-            });
-        });
-
-        $(".delete-btn").click(function (e) {
-            var path = $(this).attr("data-path");
-            var name = $(this).attr("data-name");
-            xnote.confirm("删除【" + name + "】?", function (value) {
-                $.post("/fs_api/remove", {path: path}, function (resp) {
-                    if (resp.code == "success") {
-                        window.location.reload();
-                    } else {
-                        xnote.alert("删除失败:" + resp.message);
-                    }
-                }).fail(function (resp) {
-                    xnote.alert("系统繁忙，请稍后重试");
-                })
-            });
-        })
     })
     </script>
 

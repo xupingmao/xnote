@@ -131,7 +131,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/01/08 23:03:29
+ * @modified 2020/01/12 13:56:35
  */
 
 /** marked 样式 **/
@@ -1016,29 +1016,6 @@ li.menu-item:hover {
     line-height: 25px;
 }
 
-/*.grid-item:hover {
-    background-color: #eee;
-}*/
-
-.book-item {
-    width: 100%;
-    padding: 5px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    float: left;
-    line-height: 25px;
-    border-bottom: 1px solid #eee;
-}
-
-.book-item:hover {
-    background-color: #efefef;
-}
-
-.book-size {
-    float: right;
-    color: black;
-}
-
 .group-div {
     width: 220px;
     padding: 5px;
@@ -1684,7 +1661,7 @@ li.menu-item:hover {
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2019/11/24 19:14:36
+ * @modified 2020/01/12 13:56:42
 */
 
 
@@ -1863,7 +1840,27 @@ li.menu-item:hover {
     float: left;
     width: 100%;
     padding: 10px;
-}/**
+}
+
+.book-item {
+    width: 100%;
+    padding: 5px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    float: left;
+    line-height: 25px;
+    /*border-bottom: 1px solid #eee;*/
+}
+
+.book-item:hover {
+    background-color: #efefef;
+}
+
+.book-size {
+    float: right;
+    color: black;
+}
+/**
  * 插件的CSS样式
  * @author xupingmao
  * @since 2019/12/15
