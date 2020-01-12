@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/10/31 00:45:53
+# @modified 2020/01/12 22:47:44
 import web
 import xtables
 import xtemplate
@@ -65,24 +65,6 @@ class IndexHandler:
             raise web.found(xconfig.HOME_PATH)
         else:
             raise web.found("/note/public")
-
-        # 老的逻辑
-        current_name  = xauth.current_name()
-        groups        = xutils.call("note.list_group")
-        notes         = xutils.call("note.list_recent_edit", limit = xconfig.RECENT_SIZE)
-        tools         = list(filter(tool_filter, list_tools()))[:4]
-        # tags        = xutils.call("note.list_tag", current_name)
-        tags          = []
-        recent_search = xutils.call("search.list_recent", current_name, xconfig.RECENT_SEARCH_LIMIT)
-        return xtemplate.render("index.html", 
-            file_type       = "home",
-            show_aside      = True,
-            recent_search   = recent_search,
-            groups          = groups,
-            notes           = notes,
-            files           = groups,
-            tags            = tags,
-            tools           = tools)
 
 class GridHandler:
 

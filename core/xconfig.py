@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2019/12/31 00:36:17
+# @modified 2020/01/12 22:47:54
 
 '''xnote系统配置
 
@@ -69,7 +69,7 @@ PAGE_OPEN     = "self"
 PAGE_WIDTH    = "1150"
 USER_CSS      = None
 USER_JS       = None
-HOME_PATH     = "/note/books"
+HOME_PATH     = "/note/timeline"
 
 # 插件相关
 LOAD_PLUGINS_ON_INIT = True
