@@ -19,6 +19,12 @@
             <a class="dropdown-option link" href="/note/stick?id={{file.id}}">置顶</a>
         {% end %}
 
+        {% if file.archived %}
+            <a class="dropdown-option link" href="/note/unarchive?id={{file.id}}">取消归档</a>
+        {% else %}
+            <a class="dropdown-option link" href="/note/archive?id={{file.id}}">归档</a>
+        {% end %}
+
         <a class="dropdown-option link" href="/note/history?id={{file_id}}">{{T("History")}}</a>
 
         {% if _is_admin and file.type == "gallery" %}

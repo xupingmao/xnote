@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2019/12/12 23:01:30
+# @modified 2020/01/12 13:01:16
 import xauth
 import xutils
 from xutils import dbutil
@@ -63,15 +63,17 @@ class StatHandler(BasePlugin):
         stat_list.append(["笔记本",   xutils.call("note.count_by_type", user_name, "group")])
         stat_list.append(["待办事项", dbutil.count_table("message:%s" % user_name)])
         stat_list.append(["搜索记录", dbutil.count_table("search_history:%s" % user_name)])
+        stat_list.append(["我的评论", dbutil.count_table("comment_index:%s" % user_name)])
+        
         if xauth.is_admin():
             admin_stat_list.append(["note_full", dbutil.count_table("note_full")])
             admin_stat_list.append(["note_tiny", dbutil.count_table("note_tiny")])
             admin_stat_list.append(["note_index", dbutil.count_table("note_index")])
             admin_stat_list.append(["note_history", dbutil.count_table("note_history")])
             admin_stat_list.append(["note_comment", dbutil.count_table("note_comment")])
+            admin_stat_list.append(["note_deleted", dbutil.count_table("note_deleted")])
             admin_stat_list.append(["notebook", dbutil.count_table("notebook")])
             admin_stat_list.append(["search_history", dbutil.count_table("search_history")])
-            
             admin_stat_list.append(["message",  dbutil.count_table("message")])
             admin_stat_list.append(["msg_search_history", dbutil.count_table("msg_search_history")])
             admin_stat_list.append(["msg_history", dbutil.count_table("msg_history")])

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/01/05 23:47:40
+# @modified 2020/01/12 13:08:50
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -363,8 +363,11 @@ def md5_hex(string):
 #################################################################
 
 def get_log_path():
+    date_time = time.strftime("%Y-%m")
+    dirname = os.path.join(xconfig.LOG_DIR, date_time)
+    fsutil.makedirs(dirname)
     fname = time.strftime("xnote.%Y-%m-%d.log")
-    return os.path.join(xconfig.LOG_DIR, fname)
+    return os.path.join(dirname, fname)
 
 def log(fmt, show_logger = False, fpath = None, *argv):
     fmt = u(fmt)
@@ -393,7 +396,7 @@ def _write_log(level, metric, message, cost):
     if user_name is None:
         user_name = "-"
     full_message = "%s|%s|%s|%s|%sms|%s" % (format_time(), level, user_name, metric, cost, message)
-    print(full_message)
+    # print(full_message)
     # 同步写在SAE上面有巨大的性能损耗
     log_async(fpath, full_message)
 

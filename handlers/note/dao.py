@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/11 12:15:54
+# @modified 2020/01/12 13:13:44
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -271,6 +271,7 @@ def del_dict_key(dict, key):
         del dict[key]
 
 def update_index(note):
+    """更新索引的时候也会更新用户维度的索引(note_tiny)"""
     id = note['id']
 
     note_index = Storage(**note)
@@ -289,12 +290,12 @@ def update_index(note):
     dbutil.put("note_tiny:%s:%020d" % (note.creator, int(id)), note)
 
 def update_note(note_id, **kw):
+    # 移动笔记使用 move_note
     content   = kw.get('content')
     data      = kw.get('data')
     priority  = kw.get('priority')
     name      = kw.get("name")
     atime     = kw.get("atime")
-    parent_id = kw.get("parent_id")
     is_public = kw.get("is_public")
     tags      = kw.get("tags")
     orderby   = kw.get("orderby")
@@ -316,10 +317,6 @@ def update_note(note_id, **kw):
             note.name = name
         if atime:
             note.atime = atime
-        if parent_id != None:
-            old_parent_id  = note.parent_id
-            new_parent_id  = parent_id
-            note.parent_id = parent_id
         if is_public != None:
             note.is_public = is_public
         if tags != None:
@@ -343,11 +340,6 @@ def update_note(note_id, **kw):
             note.version = old_version
 
         kv_put_note(note_id, note)
-
-        # 处理移动分类时的统计
-        if new_parent_id != None and new_parent_id != old_parent_id:
-            update_children_count(old_parent_id)
-            update_children_count(new_parent_id)
         # 更新parent更新时间
         touch_note(note.parent_id)
         return 1
@@ -356,9 +348,10 @@ def update_note(note_id, **kw):
 def move_note(note, new_parent_id):
     old_parent_id = note.parent_id
     note.parent_id = new_parent_id
-    # 更新索引数据
+    # 没有更新内容，只需要更新索引数据
     update_index(note)
     
+    # 更新文件夹的容量
     update_children_count(old_parent_id)
     update_children_count(new_parent_id)
 
@@ -398,27 +391,27 @@ def visit_note(id):
         update_index(note)
 
 def delete_note(id):
-    print("try to delete note", id)
     note = get_by_id(id)
     if note is None:
         return
 
-    if note.is_deleted == 1:
-        # 已经被删除了，执行物理删除
-        tiny_key = "note_tiny:%s:%s" % (note.creator, note.id)
-        full_key = "note_full:%s" % note.id
-        index_key = "note_index:%s" % note.id
-        dbutil.delete(tiny_key)
-        dbutil.delete(full_key)
-        dbutil.delete(index_key)
-        return
+    # 复制到回收站
+    deleted_key = "note_deleted:%s:%s" % (note.creator, note.id)
+    dbutil.put(deleted_key, note)
 
-    note.mtime = xutils.format_datetime()
-    note.is_deleted = 1
-    kv_put_note(id, note)
+    # 删除笔记
+    tiny_key = "note_tiny:%s:%s" % (note.creator, note.id)
+    full_key = "note_full:%s" % note.id
+    index_key = "note_index:%s" % note.id
+    dbutil.delete(tiny_key)
+    dbutil.delete(full_key)
+    dbutil.delete(index_key)
+
+    # 更新数量
     update_children_count(note.parent_id)
     delete_tags(note.creator, id)
 
+    # 删除笔记本
     book_key = "notebook:%s:%020d" % (note.creator, int(id))
     dbutil.delete(book_key)
 
@@ -448,7 +441,7 @@ def update_children_count(parent_id, db=None):
         return
 
     creator        = note.creator
-    children_count = count_note(creator, parent_id)
+    children_count = count_by_parent(creator, parent_id)
     note.size      = children_count
 
     update_index(note)
@@ -526,8 +519,10 @@ def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name")
     return notes[offset:offset+limit]
 
 @xutils.timeit(name = "NoteDao.ListRecentCreated", logfile = True)
-def list_recent_created(creator = None, offset = 0, limit = 10):
+def list_recent_created(creator = None, offset = 0, limit = 10, skip_archived = False):
     def list_func(key, value):
+        if skip_archived and value.archived:
+            return False
         return value.is_deleted != 1
 
     result  = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
@@ -608,8 +603,8 @@ def count_user_note(creator):
 def count_ungrouped(creator):
     return count_ungrouped(creator, 0)
 
-@xutils.timeit(name = "NoteDao.CountNote", logfile = True, logargs = True, logret = True)
-def count_note(creator, parent_id):
+@xutils.timeit(name = "NoteDao.CountNoteByParent", logfile = True, logargs = True, logret = True)
+def count_by_parent(creator, parent_id):
     """统计笔记数量
     @param {string} creator 创建者
     @param {string/number} parent_id 父级节点ID
@@ -736,8 +731,10 @@ def list_removed(creator, offset, limit):
 def doc_filter_func(key, value):
     return value.type not in ("csv", "gallery", "list", "table", "group") and value.is_deleted == 0
 
-def list_by_type(creator, type, offset, limit, orderby = "name"):
+def list_by_type(creator, type, offset, limit, orderby = "name", skip_archived = False):
     def list_func(key, value):
+        if skip_archived and value.archived:
+            return False
         return value.type == type and value.creator == creator and value.is_deleted == 0
 
     if type == "document" or type == "doc":
@@ -750,8 +747,6 @@ def list_by_type(creator, type, offset, limit, orderby = "name"):
 def count_by_type(creator, type):
     def base_count_func(key, value):
         return value.type == type and value.creator == creator and value.is_deleted == 0
-
-
     if type == "doc":
         count_func = doc_filter_func
     else:
@@ -770,10 +765,10 @@ def count_sticky(creator):
         return value.priority > 0 and value.creator == creator and value.is_deleted == 0
     return dbutil.prefix_count("note_tiny:%s" % creator, list_func)
 
-def list_archived(creator):
+def list_archived(creator, offset = 0, limit = 100):
     def list_func(key, value):
         return value.archived and value.creator == creator and value.is_deleted == 0
-    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func)
+    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
     sort_notes(notes)
     return notes
 
@@ -898,10 +893,11 @@ xutils.register_func("note.update", update_note)
 xutils.register_func("note.update0", update0)
 xutils.register_func("note.move", move_note)
 xutils.register_func("note.visit",  visit_note)
-xutils.register_func("note.count",  count_note)
 xutils.register_func("note.delete", delete_note)
 xutils.register_func("note.touch",  touch_note)
 xutils.register_func("note.update_tags", update_tags)
+xutils.register_func("note.update_priority", update_priority)
+
 # query functions
 xutils.register_func("note.get_root", get_root)
 xutils.register_func("note.get_by_id", get_by_id)
@@ -936,11 +932,13 @@ xutils.register_func("note.count_user_note", count_user_note)
 xutils.register_func("note.count_ungrouped", count_ungrouped)
 xutils.register_func("note.count_removed", count_removed)
 xutils.register_func("note.count_by_type", count_by_type)
+xutils.register_func("note.count_by_parent",  count_by_parent)
 
+# others
 xutils.register_func("note.find_prev_note", find_prev_note)
 xutils.register_func("note.find_next_note", find_next_note)
-xutils.register_func("note.update_priority", update_priority)
 
+# history
 xutils.register_func("note.add_history", add_history)
 xutils.register_func("note.list_history", list_history)
 xutils.register_func("note.get_history", get_history)

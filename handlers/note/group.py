@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/11 00:40:43
+# @modified 2020/01/11 13:12:50
 import math
 import time
 import web
@@ -74,7 +74,7 @@ class DefaultListHandler:
         pagesize  = xconfig.PAGE_SIZE
         offset    = (page-1) * pagesize
         files     = NOTE_DAO.list_note(user_name, 0, offset, pagesize)
-        amount    = NOTE_DAO.count(user_name, 0);
+        amount    = NOTE_DAO.count_by_parent(user_name, 0);
         parent    = NOTE_DAO.get_root()
 
         return xtemplate.render(VIEW_TPL,
@@ -120,9 +120,11 @@ class GroupListHandler:
 def load_note_tools(user_name):
     msg_stat  = MSG_DAO.get_message_stat(user_name)
     note_stat = NOTE_DAO.get_note_stat(user_name)
+    public_count = NOTE_DAO.count_public()
+    removed_count = NOTE_DAO.count_removed(user_name)
 
     return [
-        NoteLink("公共笔记", "/note/public", "fa-folder"),
+        NoteLink("公共笔记", "/note/public", "fa-folder", size = public_count),
         NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
         NoteLink("话题", "/search/rules", "fa-search", size = msg_stat.key_count),
         NoteLink("记事", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
@@ -136,7 +138,7 @@ def load_note_tools(user_name):
         # NoteLink("词典", "/note/dict",  "fa-dict"),
         # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
         # NoteLink("富文本", "/note/html", "fa-file-word-o"),
-        NoteLink("回收站", "/note/removed", "fa-trash"),
+        NoteLink("回收站", "/note/removed", "fa-trash", size = removed_count),
         # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
         NoteLink("按月查看", "/note/date", "fa-cube"),
         NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
@@ -162,7 +164,7 @@ def load_category(user_name, include_system = False):
             NoteLink("分组", "/note/add?type=group", "fa-folder")
         ]
 
-        default_book_count = NOTE_DAO.count(user_name, 0)
+        default_book_count = NOTE_DAO.count_by_parent(user_name, 0)
         if default_book_count > 0:
             sticky_groups.insert(0, SystemLink("默认分组", "/note/default", default_book_count))
         sticky_groups.insert(0, NoteLink("时光轴", "/note/tools/timeline", "cube"))

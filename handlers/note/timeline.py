@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/01/10 01:27:41
+# @modified 2020/01/12 13:21:21
 
 """时光轴视图"""
 import re
@@ -17,31 +17,25 @@ class TimelineAjaxHandler:
     def GET(self):
         offset = xutils.get_argument("offset", 0, type=int)
         limit  = xutils.get_argument("limit", 20, type=int)
-        type   = xutils.get_argument("type", "ctime")
+        type   = xutils.get_argument("type", "default")
         user_name  = xauth.current_name()
 
         if type == "mtime":
             rows = NOTE_DAO.list_recent_edit(user_name, offset, limit)
-        elif type == "group":
-            rows = NOTE_DAO.list_by_type(user_name, "group", offset, limit)
         elif type == "public":
             rows = NOTE_DAO.list_public(offset, limit)
-        elif type == "gallery":
-            rows = NOTE_DAO.list_by_type(user_name, "gallery", offset, limit)
-        elif type == "document":
-            rows = NOTE_DAO.list_by_type(user_name, "document", offset, limit)
-        elif type == "list":
-            rows = NOTE_DAO.list_by_type(user_name, "list", offset, limit)
-        elif type == "table" or type == "csv":
-            rows = NOTE_DAO.list_by_type(user_name, "csv", offset, limit)
         elif type == "sticky":
             rows = NOTE_DAO.list_sticky(user_name, offset, limit)
         elif type == "removed":
             rows = NOTE_DAO.list_removed(user_name, offset, limit)
-        elif type == "md":
-            rows = NOTE_DAO.list_by_type(user_name, "md", offset, limit)
-        else:
+        elif type in ("md", "group", "gallery", "document", "list", "table", "csv"):
+            rows = NOTE_DAO.list_by_type(user_name, type, offset, limit)
+        elif type == "archived":
+            rows = NOTE_DAO.list_archived(user_name, offset, limit)
+        elif type == "all":
             rows = NOTE_DAO.list_recent_created(user_name, offset, limit)
+        else:
+            rows = NOTE_DAO.list_recent_created(user_name, offset, limit, skip_archived = True)
 
         orderby = "ctime"
         result = dict()
@@ -53,7 +47,7 @@ class TimelineAjaxHandler:
                 date_time = row.ctime
                 orderby = "ctime"
 
-            date = re.match(r"\d+\-\d+", date_time).group(0)
+            date = re.match(r"\d+\-\d+\-\d+", date_time).group(0)
             # 优化数据大小
             row.content = ""
             if date not in result:

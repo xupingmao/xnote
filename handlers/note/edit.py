@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/01/11 12:51:57
+# @modified 2020/01/11 13:10:36
 
 """笔记编辑相关处理"""
 import os
@@ -148,7 +148,6 @@ class RemoveAjaxHandler:
         id = xutils.get_argument("id", "")
         name = xutils.get_argument("name", "")
         file = None
-        print("remove, id=%s, name=%s" % (id, name))
 
         if id != "" and id != None:
             file = NOTE_DAO.get_by_id(id)
@@ -165,7 +164,7 @@ class RemoveAjaxHandler:
             return dict(code="fail", message="没有删除权限")
 
         if file.type == "group":
-            children_count = NOTE_DAO.count(creator, file.id)
+            children_count = NOTE_DAO.count_by_parent(creator, file.id)
             if children_count > 0:
                 return dict(code="fail", message="分组不为空")
 

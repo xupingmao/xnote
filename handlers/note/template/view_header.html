@@ -42,6 +42,7 @@
             {% if _has_login and  (_is_admin or _user_name == item.creator) %}
                 <a class="link" href="/note/edit?id={{file.id}}">编辑</a>
                 <a class="link" href="javascript:rename('{{item.id}}', '{{item.name}}')">重命名</a>
+
                 {% if file.is_public %}
                     <a class="link" href="/note/share/cancel?id={{file.id}}">取消分享</a>
                 {% else %}
@@ -54,6 +55,12 @@
                     <a class="link" href="/note/unstick?id={{file.id}}">取消置顶</a>
                 {% else %}
                     <a class="link" href="/note/stick?id={{file.id}}">置顶</a>
+                {% end %}
+
+                {% if file.archived %}
+                    <a class="link" href="/note/unarchive?id={{file.id}}">取消归档</a>
+                {% else %}
+                    <a class="link" href="/note/archive?id={{file.id}}">归档</a>
                 {% end %}
 
                 {% if _is_admin and file.type == "gallery" %}

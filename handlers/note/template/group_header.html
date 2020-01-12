@@ -20,10 +20,10 @@
 
                 <div class="dropdown">
                   <span class="dropdown-btn link btn">更多▾</span>
-                  <div class="dropdown-content">                            
+                  <div class="dropdown-content">
                     {% if file.id != 0 and file.priority != None and file.priority > 0 %}
                         <a class="dropdown-option" href="/note/unstick?id={{file.id}}">取消置顶</a>
-                    {% else %}
+                    {% elif str(file.id) != "0" %}
                         <a class="dropdown-option" href="/note/stick?id={{file.id}}">置顶</a>
                     {% end %}
                     
