@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/12 20:19:13
+# @modified 2020/01/12 23:45:28
 import math
 import time
 import web
@@ -130,8 +130,7 @@ def load_note_tools(user_name):
         NoteLink("话题", "/search/rules", "fa-search", size = msg_stat.key_count),
         NoteLink("记事", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
         NoteLink("置顶", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
-        NoteLink("分组", "/note/timeline?type=group", "fa-folder", size = note_stat.group_count),
-        # NoteLink("标签", "/note/taglist", "fa-tags"),
+        NoteLink("项目", "/note/timeline?type=group", "fa-folder", size = note_stat.group_count),
         NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
         NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
         NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),

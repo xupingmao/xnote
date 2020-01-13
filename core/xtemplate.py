@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2019/12/18 00:16:09
+# @modified 2020/01/13 23:11:05
 import os
 import json
 import web
@@ -23,6 +23,7 @@ NAMESPACE    = dict(
 )
 
 _lang_dict = dict()
+_mobile_name_dict = dict()
 
 def load_languages():
     """加载系统语言配置"""
@@ -152,6 +153,33 @@ def pre_render(kw):
 
 def post_render(kw):
     pass
+
+def get_mobile_template(name):
+    global _mobile_name_dict
+    global TEMPLATE_DIR
+
+    mobile_name = _mobile_name_dict.get(name)
+    if mobile_name != None:
+        return mobile_name
+
+    if name.endswith(".html"):
+        # 检查文件是否存在
+        mobile_name = name[:-5] + ".mobile.html"
+        fpath = os.path.join(TEMPLATE_DIR, mobile_name)
+        if os.path.exists(fpath):
+            _mobile_name_dict[name] = mobile_name
+            return mobile_name
+    _mobile_name_dict[name] = name
+    return name
+
+def render_by_ua(name, **kw):
+    user_agent = get_user_agent()
+    print(user_agent)
+    if user_agent != None and user_agent.find("iPhone") >= 0:
+        # iPhone的兼容性不行，要用简化版页面，安卓暂时不用
+        mobile_name = get_mobile_template(name)
+        return render(mobile_name, **kw)
+    return render(name, **kw)
 
 @xutils.timeit(name = "Template.Render", logfile = True)
 def render(template_name, **kw):

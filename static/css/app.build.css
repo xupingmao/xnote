@@ -3,7 +3,7 @@
  * 重写默认浏览器样式
  * @author xupingmao
  * @since 2020/01/08
- * @modified 2020/01/08 00:52:42
+ * @modified 2020/01/13 23:07:38
  */
 
 * {
@@ -55,6 +55,7 @@ input {
 
 textarea, input {
     border: 1px solid #ccc;
+    border-radius: 0px;
 }
 
 textarea:focus, input:focus {

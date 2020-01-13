@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/01/12 21:17:48
+# @modified 2020/01/13 22:56:42
 import profile
 import math
 import re
@@ -225,7 +225,7 @@ class ViewHandler:
         # 如果是页面，需要查出上级目录列表
         handle_left_dir(kw, user_name, file, op)
 
-        return xtemplate.render(template_name,
+        return xtemplate.render_by_ua(template_name,
             html_title    = title,
             file          = file, 
             note_id       = id,
