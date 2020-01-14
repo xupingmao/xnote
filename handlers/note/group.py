@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/12 23:45:28
+# @modified 2020/01/15 00:35:34
 import math
 import time
 import web
@@ -146,14 +146,14 @@ def load_note_tools(user_name):
     ]
 
 def load_category(user_name, include_system = False):
-    data = NOTE_DAO.list_group(user_name, orderby = "name")
+    data = NOTE_DAO.list_group(user_name, orderby = "mtime_desc")
     sticky_groups = list(filter(lambda x: x.priority != None and x.priority > 0, data))
     archived_groups = list(filter(lambda x: x.archived == True, data))
     normal_groups = list(filter(lambda x: x not in sticky_groups and x not in archived_groups, data))
     groups_tuple = [
-        ("置顶", sticky_groups),
-        ("分组", normal_groups),
-        ("已归档", archived_groups)
+        ("置顶项目", sticky_groups),
+        ("普通项目", normal_groups),
+        ("归档项目", archived_groups)
     ]
 
     if include_system:
@@ -190,8 +190,9 @@ class GroupSelectHandler:
         groups_tuple = load_category(xauth.current_name())
         web.header("Content-Type", "text/html; charset=utf-8")
         files = NOTE_DAO.list_root_group(user_name)
-        return xtemplate.render("note/template/group_select.html", 
+        return xtemplate.render("note/component/group_select.html", 
             id = id, 
+            groups_tuple = groups_tuple,
             callback = callback,
             files = files)
 
@@ -421,7 +422,7 @@ class RecentHandler:
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    ="/note/recent_%s?page=" % orderby)
 
-class PublicGroupHandler:
+class PublicGroupHandlerOld:
 
     def GET(self):
         return xtemplate.render("note/tools/timeline.html", 
@@ -552,7 +553,7 @@ xurls = (
     r"/note/category"       , CategoryHandler,
     r"/note/default"        , DefaultListHandler,
     r"/note/ungrouped"      , DefaultListHandler,
-    r"/note/public"         , PublicGroupHandler,
+    # r"/note/public"         , PublicGroupHandler,
     r"/note/removed"        , RemovedHandler,
     r"/note/archived"       , ArchivedHandler,
     r"/note/sticky"         , StickyHandler,

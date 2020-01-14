@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/01/12 20:30:23
+ * @modified 2020/01/15 01:19:44
  */
 
 /** marked 样式 **/
@@ -1146,6 +1146,10 @@ li.menu-item:hover {
 .icon {
     width: 16px;
     height: 16px;
+}
+
+.icon-check {
+    margin: 0px;
 }
 
 .icon-next, .icon-right {

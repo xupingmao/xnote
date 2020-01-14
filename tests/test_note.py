@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/01/11 12:52:50
+# @modified 2020/01/15 01:11:21
 import xutils
 
 # cannot perform relative import
@@ -108,6 +108,7 @@ class TestMain(BaseTestCase):
         self.check_200("/note/recent_edit")
         self.check_200("/note/recent_created")
         self.check_200("/note/group/select")
+        self.check_200("/note/group/select?id=1234")
         self.check_200("/note/date?year=2019&month=1")
         self.check_200("/note/sticky")
 

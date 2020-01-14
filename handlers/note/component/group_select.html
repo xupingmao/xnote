@@ -1,0 +1,15 @@
+<div class="note-group-select col-md-12 scroll-y">
+    {% for category, groups in groups_tuple %}
+        <h3 class="group-select-header">{{category}}</h3>
+
+        {% for item in groups %}
+            <p class="group-select-row">
+                <i class="fa {{item.icon}}"></i>
+                <a class="link" href="javascript:moveTo('{{id}}', '{{item.id}}')">
+                    {{item.name}}
+                </a>
+                <span class="group-select-size">{{item.size}}</span>
+            </p>
+        {% end %}
+    {% end %}
+</div>

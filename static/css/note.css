@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2020/01/12 20:45:07
+ * @modified 2020/01/15 00:34:15
 */
 
 
@@ -201,3 +201,29 @@
     float: right;
     color: black;
 }
+
+
+/** group select **/
+.group-select-header {
+    width: 100%;
+    padding: 5px;
+    margin: 0px;
+    background-color: #eee;
+    /*float: left;*/
+    /*display: block;*/
+}
+
+.group-select-size {
+    float: right;
+    color: #ccc;
+}
+
+.group-select-row {
+    padding-left: 20px;
+    margin: 14px 0px 14px 0px;
+    padding-top: 0px;
+    padding-right: 0px;
+    /*float: left;*/
+    /*width: 100%;*/
+}
+/** group select end **/

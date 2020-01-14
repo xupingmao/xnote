@@ -16,20 +16,10 @@
 {% end %}
 
 {% block body %}
-{% init CREATE_TYPE_MAPPING = {
-  "ctime": "md"
-} %}
 
 {% init type = "ctime" %}
 {% init base_path = "/note/timeline" %}
-{% init create_type = CREATE_TYPE_MAPPING.get(type, type) %}
-{% init ADD_BTN_TEXT_DICT = {
-  ""       : "创建笔记",
-  "table"  : "创建表格",
-  "csv"    : "创建表格",
-  "gallery": "创建相册",
-  "list"   : "创建清单"
-} %}
+{% init key = "" %}
 
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
@@ -39,18 +29,18 @@
     {{title}}
 
     <div class="float-right">
-        {% include note/component/create_option.html %}
+        {% if type not in ("search", "public") %}
+          {% include note/component/create_option.html %}
+        {% end %}
 
         {% if type == "default" %}
           {% include note/component/group_option.html %}
+        {% elif type == "search" %}
+          <a class="btn btn-default" href="/search?key={{quote(key)}}&category=content">高级搜索</a>
         {% elif type != "public" %}
           <div class="dropdown">
               <span class="dropdown-btn link btn">更多▾</span>
               <div class="dropdown-content">
-                  <!-- <a class="dropdown-option" href="{{base_path}}?type=default">综合</a> -->
-                  <!-- <a class="dropdown-option" href="{{base_path}}?type=all">所有</a> -->
-                  <!-- <a class="dropdown-option" href="{{base_path}}?type=group">分组</a> -->
-                  <!-- <a class="dropdown-option" href="{{base_path}}?type=public">公共</a> -->
                   <a class="dropdown-option" href="/message?tag=task">任务</a>
                   <a class="dropdown-option" href="{{base_path}}?type=sticky">只看置顶</a>
                   <a class="dropdown-option" href="{{base_path}}?type=document">只看文档</a>
@@ -73,6 +63,7 @@
       </time>
       <aside>
         <p class="things">
+          <!-- <input type="checkbox" class="icon-check" v-if="file.type == 'gallery'"/> -->
           <i class="fa" v-bind:class="file.icon"></i>
           <a v-bind:href="file.url">{{!file.name}}</a>
           <span v-if="file.type=='group'" class="float-right gray-text">{{!file.size}}</span>
@@ -85,7 +76,7 @@
 
 <header class="site-footer card">
   <div class="wrapper">
-    <a id="loadMore" href="javascript:void(0)">加载更多</a>
+      <a id="loadMore" href="javascript:void(0)">加载更多</a>
   </div>
 </header>
 
@@ -145,12 +136,14 @@
     function loadMore(showToast) {
       var type = "{{type}}" || getUrlParam("type");
       var parent_id = getUrlParam("parent_id");
+      var searchKey = "{{key}}";
 
       $.get("/note/api/timeline?_type=json&type=" + type, 
         { 
           offset: window.offset,
           limit : QUERY_LIMIT,
-          parent_id: parent_id
+          parent_id: parent_id,
+          key: searchKey
         }, 
         function (data, status) {
           if (data == "{}") {

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/12 20:54:52
+# @modified 2020/01/14 00:15:24
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -398,17 +398,20 @@ def delete_note(id):
     if note is None:
         return
 
-    # 复制到回收站
-    deleted_key = "note_deleted:%s:%s" % (note.creator, note.id)
-    dbutil.put(deleted_key, note)
+    if note.is_deleted != 0:
+        # 已经被删除了，执行物理删除
+        tiny_key = "note_tiny:%s:%s" % (note.creator, note.id)
+        full_key = "note_full:%s" % note.id
+        index_key = "note_index:%s" % note.id
+        dbutil.delete(tiny_key)
+        dbutil.delete(full_key)
+        dbutil.delete(index_key)
+        return
 
-    # 删除笔记
-    tiny_key = "note_tiny:%s:%s" % (note.creator, note.id)
-    full_key = "note_full:%s" % note.id
-    index_key = "note_index:%s" % note.id
-    dbutil.delete(tiny_key)
-    dbutil.delete(full_key)
-    dbutil.delete(index_key)
+    # 标记删除
+    note.mtime = xutils.format_datetime()
+    note.is_deleted = 1
+    kv_put_note(id, note)
 
     # 更新数量
     update_children_count(note.parent_id)
