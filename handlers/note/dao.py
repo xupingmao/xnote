@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/14 00:15:24
+# @modified 2020/01/15 23:54:38
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -258,13 +258,6 @@ def kv_put_note(note_id, note):
     # 更新索引
     update_index(note)
 
-    del_dict_key(note, "content")
-    del_dict_key(note, "data")
-    
-    if note.type == "group":
-        # 笔记本的索引
-        dbutil.put("notebook:%s:%020d" % (note.creator, int(note_id)), note)
-
 def touch_note(note_id):
     note = get_by_id(note_id)
     if note != None:
@@ -294,8 +287,11 @@ def update_index(note):
     # 更新用户索引
     dbutil.put("note_tiny:%s:%020d" % (note.creator, int(id)), note)
 
+    if note.type == "group":
+        dbutil.put("notebook:%s:%020d" % (note.creator, int(id)), note)
+
 def update_note(note_id, **kw):
-    # 移动笔记使用 move_note
+    # 这里只更新基本字段，移动笔记使用 move_note
     content   = kw.get('content')
     data      = kw.get('data')
     priority  = kw.get('priority')
@@ -661,13 +657,6 @@ def find_next_note(note, user_name):
     else:
         return None
 
-def update_priority(creator, id, value):
-    table = xtables.get_file_table()
-    rows = table.update(priority = value, where = dict(creator = creator, id = id))
-    cache_key = "[%s]note.recent" % creator
-    cacheutil.prefix_del(cache_key)
-    return rows > 0
-
 def add_history(id, version, note):
     if version is None:
         return
@@ -907,7 +896,6 @@ xutils.register_func("note.visit",  visit_note)
 xutils.register_func("note.delete", delete_note)
 xutils.register_func("note.touch",  touch_note)
 xutils.register_func("note.update_tags", update_tags)
-xutils.register_func("note.update_priority", update_priority)
 
 # query functions
 xutils.register_func("note.get_root", get_root)
