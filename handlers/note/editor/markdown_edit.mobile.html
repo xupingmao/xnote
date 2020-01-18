@@ -1,4 +1,5 @@
 {% extends base.html %} {% block head %}
+<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 
 <style>
     textarea {
@@ -31,12 +32,9 @@
                 {% for i, item in enumerate(pathlist) %}
                     {% if i > 0 %} / {% end %}<a href="{{item.url}}" class="link2">{{ item.name }}</a>
                 {% end %}
-
-                <div class="float-right">
-                    <button class="inline-btn">保存</button>
-                </div>
             </div>
         </div>
+
         <div class="col-md-12">
             <span id="result" style="color:green"></span>
             <div class="col-md-12" id="editor-area">
@@ -51,7 +49,7 @@
                 <div class="col-md-12">
                     <div id="editor" class="col-md-12" style="height: auto; ">
                         <div id="markdown-input-div" class="col-md-12">
-                            <textarea id="markdown-input" class="form-control" name="content" rows=20>{{file.content}}</textarea>
+                            <textarea id="markdown-input" class="form-control" name="content" rows=15>{{file.content}}</textarea>
                         </div>
 
                         <div id="markdown-output-div" class="col-md-6 hide"></div>
@@ -59,11 +57,26 @@
                 </div>
             </div>
         </div>
+
+        <input type="file" id="uploadFileInput" class="hide"/>
+        <input type="button" id="addAttachmentBtn" class="send-button btn btn-default" value="添加附件"/>
+        <input type="submit" class="send-button btn" value="保存">
     </form>
 </div>
 
 <script type="text/javascript">
-    // 支持上传文件
+// 支持上传文件
+$(function () {
+    $("#addAttachmentBtn").click(function () {
+        xnote.requestUpload("#uploadFileInput", false, function (resp) {
+            console.log(resp);
+            var fileLink = resp.link;
+            var oldContent = $("#markdown-input").val();
+            var newContent = oldContent + "\n" + fileLink + "\n";
+            $("#markdown-input").val(newContent);
+        });
+    });
+})
 </script>
 
 <!-- GROUPS: {{file.groups}} -->

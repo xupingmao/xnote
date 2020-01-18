@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/01/13 23:11:05
+# @modified 2020/01/18 20:24:08
 import os
 import json
 import web
@@ -172,10 +172,18 @@ def get_mobile_template(name):
     _mobile_name_dict[name] = name
     return name
 
+def is_mobile_device(user_agent):
+    if user_agent is None:
+        return False
+    for name in ("iPhone", "Android"):
+        if user_agent.find(name) >= 0:
+            return True
+    return False
+
 def render_by_ua(name, **kw):
     user_agent = get_user_agent()
     print(user_agent)
-    if user_agent != None and user_agent.find("iPhone") >= 0:
+    if is_mobile_device(user_agent):
         # iPhone的兼容性不行，要用简化版页面，安卓暂时不用
         mobile_name = get_mobile_template(name)
         return render(mobile_name, **kw)

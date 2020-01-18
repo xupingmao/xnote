@@ -158,10 +158,6 @@
         codeMirror.replaceSelection(code, 'around');
     }
 
-    $("#uploadBtn").on("click", function () {
-        $("#file").click();
-    })
-
     function initMdCodeMirror() {
         if (window.codeMirror) {
             return;
@@ -322,73 +318,17 @@
             console.log(formatedText);
             // codeMirror.replaceSelection(formatedText, "around");
             codeMirror.doc.setValue(formatedText);
-        })
-
-        // 文件上传
-        var BASE_URL = "/static/lib/webuploader"
-        // 初始化Web Uploader
-        var uploader = xnote.createUploader();
-
-        // 文件上传过程中创建进度条实时显示。
-        uploader.on('uploadProgress', function (file, percentage) {
-            var $li = $('#uploadProgress'),
-                $percent = $li.find('.progress span');
-
-            // 避免重复创建
-            if (!$percent.length) {
-                $percent = $('<div class="progress"><span></span></div>')
-                    .appendTo($li)
-                    .find('span');
-            }
-
-            $percent.css('width', percentage * 100 + '%');
-            $percent.text((percentage * 100).toFixed(2) + '%');
         });
 
-        uploader.on('uploadBeforeSend', function (object, data, headers) {
-            $('#uploadProgress').find('.progress').remove();
-            data.dirname = "auto";
-            data.prefix = "N{{file.id}}";
-            data.type = "html5";
-        })
-
-        // 文件上传成功，给item添加成功class, 用样式标记上传成功。
-        uploader.on('uploadSuccess', function (file, resp) {
-            $('#uploadProgress').find('.progress').remove();
-            var $li = $('#uploadProgress');
-            $('<div class="progress"><span>上传完成</span></div>')
-                .appendTo($li)
-                .find('span');
-            console.log(resp);
-            codeInsert(resp.link);
-        });
-
-        // 文件上传失败，显示上传出错。
-        uploader.on('uploadError', function (file) {
-            console.error("上传失败", file)
-            var $li = $('#' + file.id),
-                $error = $li.find('div.error');
-            // 避免重复创建
-            if (!$error.length) {
-                $error = $('<div class="error"></div>').appendTo($li);
-            }
-            $error.text('上传失败');
-        });
-
-        $("#file").on("change", function (event) {
-            console.log(event);
-            var fileList = event.target.files; //获取文件对象 
-            console.log(fileList);
-            if (fileList && fileList.length > 0) {
-                uploader.addFile(fileList);
-            }
+        $("#uploadBtn").click(function () {
+            xnote.requestUpload("#file", false, function (resp) {
+                var fileLink = resp.link;
+                codeInsert(fileLink);
+            });
         });
 
         $(document).on("paste", function (e) {
             console.log(e);
-
-            window.e = e;
-
             var clipboardData = e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {};
 
             // console.log(clipboardData);

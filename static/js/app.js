@@ -374,81 +374,7 @@ window.ContentDialog = {
 var BASE_URL = "/static/lib/webuploader";
 
 // xnote全局对象
-var xnote = {
-  createUploader: function (selector, chunked) {
-    if (selector == undefined) {
-      selector = '#filePicker';
-    }
-
-    var upload_service;
-
-    // 默认分片
-    if (chunked == undefined) {
-      chunked = false;
-    }
-
-    if (chunked) {
-      upload_service = "/fs_upload/range";
-    } else {
-      // 不分片的上传服务
-      upload_service = "/fs_upload";
-    }
-    
-    return WebUploader.create({
-            // 选完文件后，是否自动上传。
-            auto: true,
-            // swf文件路径
-            swf: BASE_URL + '/Uploader.swf',
-            // 文件接收服务端。
-            server: upload_service,
-            // 选择文件的按钮。可选。
-            // 内部根据当前运行是创建，可能是input元素，也可能是flash.
-            pick: selector,
-            // 需要分片
-            chunked: chunked,
-            // 默认5M
-            // chunkSize: 1024 * 1024 * 5,
-            chunkSize: 1024 * 1024 * 5,
-            // 重试次数
-            chunkRetry: 10,
-            // 文件上传域的name
-            fileVal: "file",
-            // 不开启并发
-            threads: 1
-            // 默认压缩是开启的
-            // compress: {}
-        });
-  },
-
-  // 把blob对象转换成文件上传到服务器
-  uploadBlob: function (blob, prefix, successFn, errorFn) {
-    var fd = new FormData();
-    fd.append("file", blob);
-    fd.append("prefix", prefix);
-    fd.append("name", "auto");
-    //创建XMLHttpRequest对象
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST','/fs_upload');
-    xhr.onload = function () {
-        if ( xhr.readyState === 4 ) {
-            if ( xhr.status === 200 ) {
-                var data = JSON.parse( xhr.responseText );
-                if (successFn) {
-                  successFn(data);
-                } else {
-                  console.log(data);
-                }
-            } else {
-                console.error( xhr.statusText );
-            }
-        };
-    };
-    xhr.onerror = function (e) {
-        console.log( xhr.statusText );
-    }
-    xhr.send(fd);
-  },
-
+var xnote0 = {
   // 询问函数，原生prompt的替代方案
   prompt: function (title, defaultValue, callback) {
     if (layer && layer.prompt) {
@@ -491,4 +417,11 @@ var xnote = {
   }
 }
 
+if (window.xnote == undefined) {
+  window.xnote = xnote0;
+} else {
+  window.xnote.confirm = xnote0.confirm;
+  window.xnote.alert = xnote0.alert;
+  window.xnote.prompt = xnote0.prompt;
+}
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/01/13 22:56:42
+# @modified 2020/01/18 20:31:02
 import profile
 import math
 import re
@@ -214,6 +214,7 @@ class ViewHandler:
         xmanager.fire("note.view", file)
         if op == "edit":
             kw.show_aside = False
+            kw.show_search = False
 
         if is_iframe == "true":
             show_menu = False
