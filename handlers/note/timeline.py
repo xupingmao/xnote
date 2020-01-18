@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/01/14 23:56:17
+# @modified 2020/01/18 21:29:54
 
 """时光轴视图"""
 import re
@@ -60,6 +60,9 @@ class TimelineAjaxHandler:
             rows = NOTE_DAO.list_archived(user_name, offset, limit)
         elif type == "all":
             rows = NOTE_DAO.list_recent_created(user_name, offset, limit)
+        elif type == "root":
+            rows = NOTE_DAO.list_group(user_name)
+            orderby = "mtime"
         else:
             if type == "root":
                 parent_id = 0
