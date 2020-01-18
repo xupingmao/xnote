@@ -140,5 +140,7 @@ window.xnote.requestUpload = function (fileSelector, chunked, successFn, errorFn
             uploader.addFile(fileList);
             loadingIndex = layer.load(2);
         }
+        // 清空文件列表，不然下次上传会重复
+        event.target.files = [];
     });
 }
