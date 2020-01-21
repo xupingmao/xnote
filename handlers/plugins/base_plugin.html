@@ -8,6 +8,10 @@
     input[name=input] {
         overflow: inherit;
     }
+    input[name=input]:focus {
+        outline: none;
+        border: 1px solid #8cc;
+    }
 </style>
 <style type="text/css">
     {% raw css_style %}
@@ -49,21 +53,21 @@
         {% end %}
 
         {% if rows > 0 %}
-        <form method="{{method}}">
-            <!-- 输入框区域 BEGIN -->
-            {% if rows == 1 %}
-                <input class="col-md-12" name="input" value="{{input}}" placeholder="{{model.placeholder}}"/>
-            {% else %}
-                <textarea class="col-md-12 code" name="input" rows={{rows}} placeholder="{{model.placeholder}}">{{input}}</textarea>
-            {% end %}
-            <!-- 输入框区域 END -->
+        <div class="row">
+            <form method="{{method}}">
+                <!-- 输入框区域 BEGIN -->
+                {% if rows == 1 %}
+                    <input type="text" name="input" value="{{input}}" placeholder="{{model.placeholder}}"/>
+                {% else %}
+                    <textarea class="col-md-12 code" name="input" rows={{rows}} placeholder="{{model.placeholder}}">{{input}}</textarea>
+                {% end %}
+                <!-- 输入框区域 END -->
 
-            <!-- 按钮区域 BEGIN -->
-            <div class="row">
+                <!-- 按钮区域 BEGIN -->
                 <button>{{model.btn_text}}</button>
-            </div>
-            <!-- 按钮区域 END -->
-        </form>
+                <!-- 按钮区域 END -->
+            </form>
+        </div>
         {% end %}
     </div>
 

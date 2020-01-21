@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/01/06 00:03:36
+# @modified 2020/01/21 18:56:01
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -142,7 +142,7 @@ class FileSystemHandler:
                 filelist = list_abs_dir(path)
         except OSError:
             return xtemplate.render("fs/fs.html", 
-                show_aside = True,
+                show_aside = False,
                 path = path,
                 filelist = [],
                 error = "No permission to list directory")
@@ -164,7 +164,7 @@ class FileSystemHandler:
         kw["token"]        = xauth.get_current_user().token
         kw["parent_path"]  = get_parent_path(path)
         kw["search_action"] = "/fs_find"
-        kw["show_aside"]   = True
+        kw["show_aside"]   = False
 
         mode = xutils.get_argument("mode", xconfig.FS_VIEW_MODE)
         kw["fs_mode"] = mode

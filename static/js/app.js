@@ -265,19 +265,6 @@ $(function () {
     }
 
     /**
-     * 判断是否是PC设备，要求width>=800 && height>=600
-     */
-    window.isPc = function () {
-      return getWindowWidth() >= 800 && getWindowHeight() >= 600;
-    }
-    // alias
-    window.isDesktop = window.isPc;
-
-    window.isMobile = function() {
-      return !isPc();
-    }
-
-    /**
      * 调整高度，通过
      * @param {string} selector 选择器
      * @param {number} bottom 距离窗口底部的距离
@@ -367,61 +354,3 @@ window.ContentDialog = {
     });
   }
 }
-
-/**
- * xnote的公有方法
- */
-var BASE_URL = "/static/lib/webuploader";
-
-// xnote全局对象
-var xnote0 = {
-  // 询问函数，原生prompt的替代方案
-  prompt: function (title, defaultValue, callback) {
-    if (layer && layer.prompt) {
-      // 使用layer弹层
-      layer.prompt({
-        title: title,
-        value: defaultValue,
-        scrollbar: false,
-        area: ['400px', '300px']
-      }, function (value, index, element) {
-        callback(value);
-        layer.close(index);
-      })
-    } else {
-      var result = prompt(title, defaultValue);
-      callback(result);
-    }
-  },
-
-  // 确认函数
-  confirm: function (message, callback) {
-    if (layer && layer.confirm) {
-      layer.confirm(message, function (index) {
-        callback(true);
-        layer.close(index);
-      })
-    } else {
-      var result = confirm(message);
-      callback(result);
-    }
-  },
-
-  // 警告函数
-  alert: function (message) {
-    if (layer && layer.alert) {
-      layer.alert(message);
-    } else {
-      alert(message);
-    }
-  }
-}
-
-if (window.xnote == undefined) {
-  window.xnote = xnote0;
-} else {
-  window.xnote.confirm = xnote0.confirm;
-  window.xnote.alert = xnote0.alert;
-  window.xnote.prompt = xnote0.prompt;
-}
-

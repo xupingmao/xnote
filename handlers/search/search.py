@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2019/12/22 14:19:41
+# @modified 2020/01/21 01:21:09
 
 import re
 import os
@@ -239,7 +239,7 @@ class RulesHandler:
     def GET(self):
         user_name = xauth.current_name()
         rules = list_search_rules(user_name)
-        return xtemplate.render("search/search_rules.html", rules = rules)
+        return xtemplate.render("search/search_rules.html", rules = rules, show_search = False)
 
 def list_search_rules(user_name):
     list, count = MSG_DAO.list_by_tag(user_name, 'key', 0, 1000)

@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/01/15 01:19:44
+ * @modified 2020/01/21 19:00:34
  */
 
 /** marked 样式 **/
@@ -199,7 +199,7 @@
     color: #fff;
     text-decoration: none;
     margin-top: 5px;
-    padding: 1px 7px 2px;
+    padding: 3px 7px 3px;
     font-size: 12px;
     line-height: 18px;
     border-radius: 3px;
@@ -1102,10 +1102,14 @@ li.menu-item:hover {
     display: inline-block;
 }
 
+.dropdown-btn {
+    margin-right: 0px;
+}
+
 .dropdown-content {
     display: none;
     position: absolute;
-    top: 30px;
+    top: 35px;
     left: -67px;
     background-color: #f9f9f9;
     min-width: 120px;

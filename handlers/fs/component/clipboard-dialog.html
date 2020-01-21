@@ -1,0 +1,84 @@
+<!-- 剪切板-->
+<div class="clipboard-dialog hide">
+    {% import os %}
+    {% set clipboard_data = xconfig.get("FS_CLIP") %}
+    {% if clipboard_data != None and len(clipboard_data) > 0 %}
+        {% set get_short_text = xutils.textutil.get_short_text %}
+        <div class="aside-item clipboard">
+            <div class="aside-title">
+                剪切板
+                <a class="float-right link clear-clip-link">清空</a>
+                <a class="float-right link paste-all-link">粘贴所有</a>
+            </div>
+            <div class="aside-content">
+                {% for clip_path in clipboard_data %}
+                    {% set clip_base_name = os.path.basename(clip_path.rstrip("/")) %}
+                    <li>
+                        <a class="link float-right paste-link" data-path="{{clip_path}}">粘贴</a>
+                        <span>{{get_short_text(clip_base_name, 8)}}</span>
+                    </li>
+                {% end %}
+            </div>
+        </div>
+    {% end %}
+</div>
+
+<script type="text/javascript">
+
+function showClipboardDialog() {
+    var respHtml = $(".clipboard-dialog").html();
+    window.xnote.showDialog("剪切板", respHtml);
+}
+
+$(function () {
+    var globalPath = $("#currentPath").val();
+
+    $("body").on("click", ".paste-link", function (e) {
+        var target = e.target;
+        var dataPath = $(target).attr("data-path");
+        var data = {dirname: globalPath, old_path: dataPath};
+        $.post("/fs_api/paste", data, function (resp) {
+            if (resp.code != "success") {
+                alert(resp.message);
+            } else {
+                window.location.reload();
+            }
+        }).fail(function () {
+            // 
+        });
+    });
+
+    $("body").on("click", ".paste-all-link", function () {
+        var failed = 0;
+        var rest = $(".paste-link").length;
+        $(".paste-link").each(function (index, target) {
+            var dataPath = $(target).attr("data-path");
+            var data = {dirname: globalPath, old_path: dataPath};
+            $.post("/fs_api/paste", data, function (resp) {
+                if (resp.code != "success") {
+                    // alert(resp.message);
+                    // failed += 1
+                    showToast("failed to paste " + dataPath);
+                } 
+                rest -= 1;
+                if (rest === 0) {
+                    showToast("success", "paste done!");
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 500);
+                }
+            }).fail(function (err) {
+                console.error(err);
+            });
+        });
+    });
+
+    $("body").on("click", ".clear-clip-link", function(event) {
+        /* 清空剪切板 */
+        $.post("/fs_api/clear_clip", function (resp) {
+            console.log(resp);
+            window.location.reload();
+        });
+    });
+});
+</script>

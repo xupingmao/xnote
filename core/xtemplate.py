@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/01/18 20:24:08
+# @modified 2020/01/21 01:18:30
 import os
 import json
 import web
@@ -351,6 +351,7 @@ class BasePlugin:
     body   = Panel()
     footer = Panel()
     btn_text = T("处理")
+    show_search = True
     
     def __init__(self):
         # 输入框的行数
@@ -439,6 +440,7 @@ class BasePlugin:
             output      = self.output + output,
             css_style   = self.css_style,
             show_aside  = self.show_aside,
+            show_search = self.show_search,
             html        = self.html,
             search_action = self.search_action,
             search_placeholder = self.search_placeholder)

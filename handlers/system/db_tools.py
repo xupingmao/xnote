@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2019/12/12 23:11:20
+# @modified 2020/01/21 01:18:38
 
 import os
 import re
@@ -294,6 +294,7 @@ class DbScanHandler(BasePlugin):
     placeholder = "主键"
     btn_text = "查询"
     editable = False
+    show_search = False
     
     def handle(self, input):
         # 输入框的行数

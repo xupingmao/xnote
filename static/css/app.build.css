@@ -3,7 +3,7 @@
  * 重写默认浏览器样式
  * @author xupingmao
  * @since 2020/01/08
- * @modified 2020/01/13 23:07:38
+ * @modified 2020/01/21 20:29:10
  */
 
 * {
@@ -51,6 +51,10 @@ input[type=radio] {
 input {
     padding: 5px;
     outline: none;
+}
+
+input[type=text] {
+    width: 200px;
 }
 
 textarea, input {
@@ -132,7 +136,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/01/15 01:19:44
+ * @modified 2020/01/21 19:00:34
  */
 
 /** marked 样式 **/
@@ -329,7 +333,7 @@ table td {
     color: #fff;
     text-decoration: none;
     margin-top: 5px;
-    padding: 1px 7px 2px;
+    padding: 3px 7px 3px;
     font-size: 12px;
     line-height: 18px;
     border-radius: 3px;
@@ -1232,10 +1236,14 @@ li.menu-item:hover {
     display: inline-block;
 }
 
+.dropdown-btn {
+    margin-right: 0px;
+}
+
 .dropdown-content {
     display: none;
     position: absolute;
-    top: 30px;
+    top: 35px;
     left: -67px;
     background-color: #f9f9f9;
     min-width: 120px;
@@ -1899,7 +1907,7 @@ li.menu-item:hover {
  * 插件的CSS样式
  * @author xupingmao
  * @since 2019/12/15
- * @modified 2019/12/15 15:03:11
+ * @modified 2020/01/21 01:11:39
 */
 
 /** 插件 **/
@@ -1911,4 +1919,10 @@ li.menu-item:hover {
     margin-bottom: 10px;
     border: 1px solid #ccc;
     height: 32px;
+}
+
+.plugin-head {
+    float: left;
+    width: 100%;
+    margin-bottom: 5px;
 }
