@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/01/15 01:11:21
+# @modified 2020/01/21 23:31:41
 import xutils
 
 # cannot perform relative import
@@ -10,7 +10,7 @@ try:
 except ImportError:
     from tests import test_base
 
-from handlers.note.dao import delete_comment
+from handlers.note.dao import get_by_id
 
 app          = test_base.init()
 json_request = test_base.json_request
@@ -26,6 +26,12 @@ def create_note_for_test(type, name):
 
 def delete_note_for_test(name):
     json_request("/note/remove?name=%s" % name)
+
+def get_note_info(id):
+    return get_by_id(id)
+
+def delete_comment_for_test(id):
+    json_request("/note/comment/delete", method = "POST", data = dict(comment_id = id))
 
 class TestMain(BaseTestCase):
 
@@ -49,6 +55,17 @@ class TestMain(BaseTestCase):
         json_request("/note/save", method="POST",
             data=dict(id=id, content="new-content"))
         json_request("/note/remove?id=" + str(id))
+
+    def test_create_name_empty(self):
+        result = json_request("/note/create", method = "POST", data = dict(name = ""))
+        self.assertEqual(xutils.u('标题为空'), result['message'])
+
+    def test_create_name_exits(self):
+        create_note_for_test("md", "name-test")
+        result = json_request("/note/create", method = "POST", data = dict(name = "name-test"))
+        self.assertEqual(xutils.u('name-test 已存在'), result['message'])
+
+        delete_note_for_test("name-test")
 
     def test_note_group_add_view(self):
         group = json_request("/note/add", method="POST",
@@ -158,7 +175,7 @@ class TestMain(BaseTestCase):
         # clean comments
         data = json_request("/note/comments?note_id=123")
         for comment in data:
-            delete_comment(comment['id'])
+            delete_comment_for_test(comment['id'])
 
         # test flow
         json_request("/note/comment/save", method="POST", data = dict(note_id = "123", content = "hello"))
@@ -177,6 +194,36 @@ class TestMain(BaseTestCase):
         delete_note_for_test("archive-test")
         id = create_note_for_test("group", "archive-test")
         self.check_OK("/note/archive?id=%s" % id)
+        note_info = get_note_info(id)
+        self.assertEqual(True, note_info.archived)
+
+        # 取消归档
+        self.check_OK("/note/unarchive?id=%s" % id)
+        note_info = get_note_info(id)
+        self.assertEqual(False, note_info.archived)
+
+    def test_move(self):
+        delete_note_for_test("move-test")
+        delete_note_for_test("move-group-test")
+
+        id = create_note_for_test("group", "move-test")
+        parent_id = create_note_for_test("group", "move-group-test")
+
+        json_request("/note/move?id=%s&parent_id=%s" % (id, parent_id))
+        group_info = get_note_info(parent_id)
+        self.assertEqual(1, group_info.size)
+
+    def test_rename(self):
+        delete_note_for_test("rename-test")
+        delete_note_for_test("newname-test")
+
+        id = create_note_for_test("md", "rename-test")
+        json_request("/note/rename", method = "POST", data = dict(id = id, name = "newname-test"))
+
+        note_info = get_note_info(id)
+        self.assertEqual("newname-test", note_info.name)
+
+
 
     
 

@@ -2,8 +2,10 @@
 {% init error = "" %}
 
 <script type="text/javascript" src="/static/lib/wangEditor/wangEditor-3.1.1.min.js"></script>
+
+{% include note/template/view_header.html %}
+
 {% if op == "view" %}
-    {% include note/template/view_header.html %}
     <div id="editor" class="row">
         {% raw file.data %}
     </div>
@@ -42,7 +44,7 @@
             console.log(resp);
             if (resp.code == "success") {
                 // window.location.reload();
-                window.location.href = "/note/view?id={{file.id}}";
+                window.location.href = "/note/{{file.id}}";
             } else {
                 alert(resp.message);
             }

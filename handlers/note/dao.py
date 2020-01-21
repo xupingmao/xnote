@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/15 23:54:38
+# @modified 2020/01/21 22:56:50
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -724,7 +724,10 @@ def list_removed(creator, offset, limit):
     return notes
 
 def doc_filter_func(key, value):
-    return value.type not in ("csv", "gallery", "list", "table", "group") and value.is_deleted == 0
+    return value.type in ("md", "text", "html", "post") and value.is_deleted == 0
+
+def table_filter_func(key, value):
+    return value.type in ("csv", "table") and value.is_deleted == 0
 
 def list_by_type(creator, type, offset, limit, orderby = "name", skip_archived = False):
     def list_func(key, value):
@@ -734,6 +737,8 @@ def list_by_type(creator, type, offset, limit, orderby = "name", skip_archived =
 
     if type == "document" or type == "doc":
         list_func = doc_filter_func
+    if type in ("table", "csv"):
+        list_func = table_filter_func
 
     notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
     sort_notes(notes, orderby)

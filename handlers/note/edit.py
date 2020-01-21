@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/01/11 13:10:36
+# @modified 2020/01/21 23:34:06
 
 """笔记编辑相关处理"""
 import os
@@ -54,6 +54,32 @@ def get_heading_by_type(type):
         return T("创建表格")
     return T("创建笔记")
 
+def create_text_func(note, ctx):
+    note.name = time.strftime(u"快捷记事:%Y.%m.%d") + dateutil.current_wday()
+    return NOTE_DAO.create(note)
+
+def default_create_func(note, ctx):
+    method = ctx.method
+    name   = note.name
+
+    if method != "POST":
+        # GET请求直接返回
+        return
+
+    if name == '':
+        message = u'标题为空'
+        raise Exception(message)
+
+    f = NOTE_DAO.get_by_name(name)
+    if f != None:
+        message = u"%s 已存在" % name
+        raise Exception(message)
+    return NOTE_DAO.create(note)
+
+CREATE_FUNC_DICT = {
+    "text": create_text_func
+}
+
 class CreateHandler:
 
     @xauth.login_required()
@@ -91,32 +117,24 @@ class CreateHandler:
         heading = T("创建笔记")
         code = "fail"
         error = ""
+        ctx = Storage(method = method)
         
         try:
-
-            if type not in ("md", "html", "csv", "gallery", "list", "group"):
+            if type not in ("md", "html", "csv", "gallery", "list", "group", "text"):
                 raise Exception(u"无效的类型: %s" % type)
 
-            if name == '':
-                if method == 'POST':
-                    message = 'name is empty'
-                    raise Exception(message)
-            else:
-                f = NOTE_DAO.get_by_name(name)
-                if f != None:
-                    key = name
-                    message = u"%s 已存在" % name
-                    raise Exception(message)
-                inserted_id = NOTE_DAO.create(note)
-                if format == "json":
-                    return dict(code="success", id = inserted_id, url = "/note/edit?id=%s" % inserted_id)
-                raise web.seeother("/note/edit?id={}".format(inserted_id))
+            create_func = CREATE_FUNC_DICT.get(type, default_create_func)
+            inserted_id = create_func(note, ctx)
+            if format == "json":
+                return dict(code="success", id = inserted_id, url = "/note/edit?id=%s" % inserted_id)
+            raise web.seeother("/note/edit?id={}".format(inserted_id))
+
         except web.HTTPError as e1:
             xutils.print_exc()
             raise e1
         except Exception as e:
             xutils.print_exc()
-            error = str(e)
+            error = xutils.u(e)
             if format == 'json':
                 return dict(code = 'fail', message = error)
 
@@ -216,7 +234,6 @@ class RenameAjaxHandler:
             return dict(code="fail", message="%r已存在" % name)
 
         NOTE_DAO.update(id, name=name)
-
         event_body = dict(action="rename", id=id, name=name, type=old.type)
         xmanager.fire("note.updated", event_body)
         xmanager.fire("note.rename", event_body)
@@ -355,6 +372,7 @@ class UnstickHandler:
 
 class ArchiveHandler:
 
+    @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
         note = check_get_note(id)
@@ -363,6 +381,7 @@ class ArchiveHandler:
 
 class UnarchiveHandler:
 
+    @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
         note = check_get_note(id)

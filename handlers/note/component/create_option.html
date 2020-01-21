@@ -11,7 +11,8 @@
             <!-- <a class="dropdown-option" href="javascript:createGroup();">分组</a> -->
             <a class="dropdown-option" href="javascript:createDocument();">文档</a>
             <a class="dropdown-option" href="javascript:createGallery();">相册</a>
-            <a class="dropdown-option" href="javascript:createList()();">清单</a>
+            <a class="dropdown-option" href="javascript:createList();">清单</a>
+            <a class="dropdown-option" href="javascript:createText();">快捷记事</a>
             <!-- <a class="dropdown-option" href="javascript:uploadFile();">上传文件</a> -->
         </div>
     </div>
@@ -54,6 +55,25 @@ function createList() {
     createNote0("新建清单", "list");
 }
 
+/** 创建记事 **/
+function createText() {
+    var title = "创建记事";
+    var createOption = {};
+    createOption.parent_id = "{{file.id}}";
+    createOption.type = "text";
+    createOption._format = "json";
+
+    $.post("/note/create", createOption, function (resp) {
+        if (resp.code == "success") {
+            window.location.href = resp.url;
+        } else {
+            alert(title + "失败:" + resp.message);
+        }
+    }).fail(function (e) {
+        console.error(title + "失败", e);
+        alert(title + "失败:" + e);
+    });
+}
 /** 创建分组 **/
 function createGroup() {
     var opName = "新建项目";

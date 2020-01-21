@@ -2,7 +2,7 @@
 # 专门用来import各种依赖
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
-# @modified 2019/02/16 23:05:31
+# @modified 2020/01/21 23:25:24
 from __future__ import print_function
 import sys
 import os
@@ -53,6 +53,8 @@ if PY2:
             return s.decode(encoding)
         elif isinstance(s, unicode):
             return s
+        elif isinstance(s, Exception):
+            return u(s.message)
         return str(s)
 
     def listdir(dirname):

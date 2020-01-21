@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/01/18 20:31:02
+# @modified 2020/01/21 22:25:02
 import profile
 import math
 import re
@@ -85,7 +85,21 @@ def handle_note_recommend(kw, file, user_name):
     kw.next_note = NOTE_DAO.find_next_note(file, user_name)
     kw.prev_note = NOTE_DAO.find_prev_note(file, user_name)
 
-def handle_note_content(file):
+def view_gallery_func(file, kw):
+    fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(file.id))
+    filelist = []
+    # 处理相册
+    print(file)
+    fpath = fsutil.get_gallery_path(file)
+    print(fpath)
+    if fpath != None:
+        filelist = fsutil.list_files(fpath, webpath = True)
+    file.path     = fpath
+    kw.show_aside = False
+    kw.path       = fpath
+    kw.filelist   = filelist
+
+def default_view_func(file, kw):
     content = file.content
     content = content.replace(u'\xad', '\n')
     content = content.replace(u'\n', '<br/>')
@@ -93,24 +107,55 @@ def handle_note_content(file):
     file.data = file.data.replace(u'\n', '<br/>')
     if file.data == None or file.data == "":
         file.data = content
+    kw.show_recommend = True
+    kw.show_pagination = False
 
+def view_md_func(file, kw):
+    kw.content = file.content
+    kw.show_recommend = True
+    kw.show_pagination = False
+    if kw.op == "edit":
+        kw.show_recommend = False
+        kw.template_name = "note/editor/markdown_edit.html"
 
-def handle_note_files(kw, file):
-    fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(file.id))
-    filelist = []
-    # 处理相册
-    if file.type == "gallery":
-        print(file)
-        fpath = fsutil.get_gallery_path(file)
-        print(fpath)
-        if fpath != None:
-            filelist = fsutil.list_files(fpath, webpath = True)
-        file.path = fpath
-        kw.show_aside = False
+def view_text_func(note, kw):
+    kw.content = note.content
+    kw.show_recommend = True
+    kw.show_pagination = False
+    if kw.op == "edit":
+        kw.show_recommend = False
+        kw.template_name = "note/editor/markdown_edit.mobile.html"
 
-    kw.path = fpath
-    kw.filelist = filelist
-    file.path = fpath
+def view_group_func(note, kw):
+    raise web.found("/note/timeline?type=default&parent_id=%s" % note.id)
+
+def view_group_func_old(file, kw):
+    # 代码暂时不用
+    if orderby != None and file.orderby != orderby:
+        NOTE_DAO.update(file.id, orderby = orderby)
+    else:
+        orderby = file.orderby
+
+    files  = NOTE_DAO.list_by_parent(user_name, file.id, (page-1)*pagesize, pagesize, orderby)
+    amount = file.size
+    kw.content = file.content
+    kw.show_search_div = True
+    kw.show_add_file   = True
+    kw.show_mdate      = True
+    kw.show_aside   = False
+
+def view_list_func(note, kw):
+    kw.show_aside = False
+    kw.show_pagination = False
+
+VIEW_FUNC_DICT = {
+    "group": view_group_func,
+    "md": view_md_func,
+    "text": view_text_func,
+    "memo": view_text_func,
+    "list": view_list_func,
+    "gallery": view_gallery_func
+}
 
 class ViewHandler:
 
@@ -129,9 +174,6 @@ class ViewHandler:
         is_iframe     = xutils.get_argument("is_iframe", "false")
         user_name     = xauth.current_name()
         show_add_file = False
-        title         = None
-        show_pagination = True
-        show_search_div = False
 
         kw = Storage()
         kw.show_left   = False
@@ -139,6 +181,8 @@ class ViewHandler:
         kw.show_aside  = True
         kw.groups = []
         kw.recommended_notes = []
+        kw.op = op
+        kw.template_name  = "note/view.html"
 
         if id == "0":
             raise web.found("/")
@@ -165,75 +209,37 @@ class ViewHandler:
         recent_created = []
         amount         = 0
         show_recommend = False
-        template_name  = "note/view.html"
         next_note      = None
         prev_note      = None
 
-        title  = file.name
-        if file.type == "group":
-            # 直接跳转到timeline模式
-            raise web.found("/note/timeline?type=default&parent_id=%s" % id)
-
-            # 后面代码暂时不用
-            if orderby != None and file.orderby != orderby:
-                NOTE_DAO.update(file.id, orderby = orderby)
-            else:
-                orderby = file.orderby
-
-            files  = NOTE_DAO.list_by_parent(user_name, file.id, (page-1)*pagesize, pagesize, orderby)
-            amount = file.size
-            content         = file.content
-            show_search_div = True
-            show_add_file   = True
-            show_mdate      = True
-            kw.show_aside   = False
-        elif file.type == "md" or file.type == "text":
-            content = file.content
-            show_recommend = True
-            show_pagination = False
-            if op == "edit":
-                show_recommend = False
-                template_name = "note/editor/markdown_edit.html"
-        elif file.type == "list":
-            kw.show_aside = False
-            show_pagination = False
-        else:
-            # post/html 等其他类型
-            handle_note_content(file)
-            show_recommend = True
-            show_pagination = False
-
-        # 处理笔记背后的文件系统
-        handle_note_files(kw, file)
+        view_func = VIEW_FUNC_DICT.get(file.type, default_view_func)
+        view_func(file, kw)
 
         if show_recommend and user_name is not None:
             # 推荐系统
             handle_note_recommend(kw, file, user_name)
-            
         
         xmanager.fire("note.view", file)
         if op == "edit":
             kw.show_aside = False
             kw.show_search = False
+            kw.show_comment = False
 
         if is_iframe == "true":
-            show_menu = False
-            show_search = False
+            kw.show_menu = False
+            kw.show_search = False
 
-        kw.show_menu   = show_menu
-        kw.show_search = show_search
+        template_name = kw['template_name']
+        del kw['template_name']
 
         # 如果是页面，需要查出上级目录列表
         handle_left_dir(kw, user_name, file, op)
-
         return xtemplate.render_by_ua(template_name,
-            html_title    = title,
+            html_title    = file.name,
             file          = file, 
             note_id       = id,
-            op            = op,
             show_mdate    = show_mdate,
             show_add_file = show_add_file,
-            show_pagination = show_pagination,
             can_edit = can_edit,
             pathlist = pathlist,
             page_max = math.ceil(amount/pagesize),
