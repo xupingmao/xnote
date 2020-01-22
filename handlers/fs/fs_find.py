@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2019/12/28 20:51:17
+# @modified 2020/01/22 12:50:12
 import os
 import sys
 import glob
@@ -19,7 +19,8 @@ def update_file_index():
     return get_cached_files()
 
 
-@xutils.cache(key="fs.list", expire=-1)
+# cache占用内存太多
+# @xutils.cache(key="fs.list", expire=-1)
 def get_cached_files():
     count = 0
     file_cache = []
