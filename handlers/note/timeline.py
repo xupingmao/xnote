@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/01/18 21:29:54
+# @modified 2020/01/22 12:36:30
 
 """时光轴视图"""
 import re
@@ -36,7 +36,7 @@ def build_date_result(rows, orderby):
     for key in result:
         items = result[key]
         items.sort(key = lambda x: x[orderby], reverse = True)
-    return result
+    return dict(code = 'success', data = result)
 
 class TimelineAjaxHandler:
 
@@ -72,8 +72,9 @@ class TimelineAjaxHandler:
             if search_key != None and search_key != "":
                 # TODO 公共笔记的搜索
                 search_key = xutils.unquote(search_key)
+                search_key_lower = search_key.lower()
                 parent_id  = None
-                words      = textutil.split_words(search_key)
+                words      = textutil.split_words(search_key_lower)
 
             def list_func(key, value):
                 if value.is_deleted:
@@ -82,7 +83,7 @@ class TimelineAjaxHandler:
                     return False
                 if parent_id != None and str(value.parent_id) != str(parent_id):
                     return False
-                if words != None and not textutil.contains_all(value.name, words):
+                if words != None and not textutil.contains_all(value.name.lower(), words):
                     return False
                 return True
             rows = NOTE_DAO.list_by_func(user_name, list_func, offset, limit)

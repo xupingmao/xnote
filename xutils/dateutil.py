@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/01/11 00:33:06
+# @modified 2020/01/22 12:33:52
 import time
 import os
 import math
@@ -29,14 +29,14 @@ Commonly used format codes:
 _DAY = 3600 * 24
 FORMAT = '%Y-%m-%d %H:%M:%S'
 wday_dict = {
-    "*": "每天",
-    "1": "周一",
-    "2": "周二",
-    "3": "周三",
-    "4": "周四",
-    "5": "周五",
-    "6": "周六",
-    "7": "周日"
+    "*": u"每天",
+    "1": u"周一",
+    "2": u"周二",
+    "3": u"周三",
+    "4": u"周四",
+    "5": u"周五",
+    "6": u"周六",
+    "7": u"周日"
 }
 
 def before(days=None, month=None, format=False):

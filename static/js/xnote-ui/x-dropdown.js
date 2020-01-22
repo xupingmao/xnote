@@ -1,6 +1,6 @@
 /** 下拉组件
  * @since 2020/01/11
- * @modified 2020/01/11 00:48:25
+ * @modified 2020/01/22 00:29:27
  */
 
 $(function () {
@@ -8,7 +8,14 @@ $(function () {
 
     function toggleDropdown(e) {
         var target = e.target;
-        $(target).next(".dropdown-content").slideToggle("fast");
+        var dropdownContent = $(target).next(".dropdown-content");
+        dropdownContent.slideToggle("fast");
+
+        $(".dropdown-content").each(function (index, element) {
+            if (element != dropdownContent[0]) {
+                $(element).slideUp(0);
+            }
+        })
     }
 
     $(".dropdown").click(function (e) {

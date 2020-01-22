@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/01/21 23:31:41
+# @modified 2020/01/22 12:19:46
 import xutils
 
 # cannot perform relative import
@@ -33,6 +33,10 @@ def get_note_info(id):
 def delete_comment_for_test(id):
     json_request("/note/comment/delete", method = "POST", data = dict(comment_id = id))
 
+def assert_json_request_success(test_case, url):
+    result = json_request(url)
+    test_case.assertEqual('success', result['code'])
+
 class TestMain(BaseTestCase):
 
     def test_note_add_remove(self):
@@ -56,6 +60,9 @@ class TestMain(BaseTestCase):
             data=dict(id=id, content="new-content"))
         json_request("/note/remove?id=" + str(id))
 
+    def test_create_page(self):
+        self.check_OK("/note/create")
+
     def test_create_name_empty(self):
         result = json_request("/note/create", method = "POST", data = dict(name = ""))
         self.assertEqual(xutils.u('标题为空'), result['message'])
@@ -66,6 +73,10 @@ class TestMain(BaseTestCase):
         self.assertEqual(xutils.u('name-test 已存在'), result['message'])
 
         delete_note_for_test("name-test")
+
+    def test_create_note_invalid_type(self):
+        result = json_request("/note/create", method = "POST", data = dict(type = "invalid", name = "invalid-test"))
+        self.assertEqual(xutils.u("无效的类型: invalid"), result["message"])
 
     def test_note_group_add_view(self):
         group = json_request("/note/add", method="POST",
@@ -85,8 +96,16 @@ class TestMain(BaseTestCase):
     def test_note_timeline(self):
         self.check_200("/note/timeline")
         self.check_200("/note/timeline?type=public")
-        json_request("/note/api/timeline")
         json_request("/note/timeline/month?year=2018&month=1")
+
+    def test_timeline_api(self):
+        assert_json_request_success(self, "/note/api/timeline")
+        assert_json_request_success(self, "/note/api/timeline?type=public")
+        assert_json_request_success(self, "/note/api/timeline?type=sticky")
+        assert_json_request_success(self, "/note/api/timeline?type=removed")
+        assert_json_request_success(self, "/note/api/timeline?type=archived")
+        assert_json_request_success(self, "/note/api/timeline?type=all")
+        assert_json_request_success(self, "/note/api/timeline?type=search&key=xnote")
 
     def test_note_editor_md(self):
         json_request("/note/remove?name=xnote-md-test")
@@ -186,6 +205,23 @@ class TestMain(BaseTestCase):
     def test_note_management(self):
         self.check_OK("/note/management?parent_id=0")
         self.check_OK("/note/management?parent_id=123")
+
+    def test_gallery_view(self):
+        delete_note_for_test("gallery-test")
+        id = create_note_for_test("gallery", "gallery-test")
+
+        self.check_OK("/note/%s" % id)
+
+    def test_gallery_management(self):
+        delete_note_for_test("gallery-test")
+        id = create_note_for_test("gallery", "gallery-test")
+        self.check_OK("/note/management?parent_id=%s" % id)
+
+    def test_text_view(self):
+        delete_note_for_test("text-test")
+        id = create_note_for_test("text", "text-test")
+
+        self.check_OK("/note/%s" % id)
 
     def test_note_category(self):
         self.check_OK("/note/category")

@@ -2,6 +2,10 @@
 
 {% block head %}
 <style type="text/css">
+  .note-header-span {
+    line-height: 32px;
+  }
+
   .things {
     padding-left: 20px;
   }
@@ -26,7 +30,7 @@
 <div id="app" class="card content">
 
   <div class="note-header row card-title">
-    {{title}}
+    <span class="note-header-span">{{title}}</span>
 
     <div class="float-right">
         {% if type not in ("search", "public") %}
@@ -87,34 +91,8 @@
   // 全局变量
   var QUERY_LIMIT = 100;
 
-    var itemList = {
-        "2016": []
-    }
-
-    var list = [
-        {"title": "1977 Aug. 20", "description": "Voyager 2 launched from Kennedy Space Flight Center"},
-        {"title": "2017 Mar. 17", "description": "This is a test"}
-    ]
-
-    function customWayPoint(className, addClassName, customOffset) {
-        var waypoints = $(className).waypoint({
-            handler: function (direction) {
-                if (direction == "down") {
-                    $(className).addClass(addClassName);
-                } else {
-                    $(className).removeClass(addClassName);
-                }
-            },
-            offset: customOffset
-        });
-    }
-
-    var defaultOffset = '50%';
-
-    for (i = 0; i < itemList.length; i++) {
-        customWayPoint('.timeline__item--' + i, 'timeline__item-bg', defaultOffset);
-    }
-
+    var itemList = {};
+    
     var app = new Vue({
         el: "#app",
         data: {
@@ -148,7 +126,8 @@
           parent_id: parent_id,
           key: searchKey
         }, 
-        function (data, status) {
+        function (resp, status) {
+          var data = resp.data;
           if (data == "{}") {
             // alert("没有更多了");
             if (showToast) {

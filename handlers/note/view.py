@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/01/21 22:25:02
+# @modified 2020/01/22 12:24:52
 import profile
 import math
 import re
@@ -34,6 +34,10 @@ def render_note_list(notes, file):
         file  = file,
         show_search = False)
 
+def check_auth(file, user_name):
+    if file.is_public != 1 and user_name != "admin" and user_name != file.creator:
+        raise web.seeother("/unauthorized")
+
 def handle_left_dir(kw, user_name, file, op):
     is_iframe = xutils.get_argument("is_iframe")
     dir_type = xutils.get_argument("dir_type")
@@ -41,39 +45,6 @@ def handle_left_dir(kw, user_name, file, op):
 
     if file.type in ("html", "csv"):
         kw.show_aside = False
-
-    # if file.type in ("group", "gallery", "list"):
-        # return
-
-    # 不显示左边菜单栏了
-    return
-
-    if is_iframe == "true":
-        return
-
-    parent_id      = file.parent_id
-    kw.show_left   = True
-    kw.show_groups = True
-    kw.dir_type    = dir_type
-
-    if op == "edit":
-        kw.show_search = False
-
-    if tags != "" and tags != None:
-        kw.groups = NOTE_DAO.list_by_tag(user_name, tags)
-    elif dir_type == "sticky":
-        kw.groups = NOTE_DAO.list_sticky(user_name)
-    elif dir_type == "public":
-        kw.groups = NOTE_DAO.list_public(0, xconfig.PAGE_SIZE)
-    elif dir_type == "recent_edit":
-        kw.groups = NOTE_DAO.list_recent_edit(user_name, 0, 200)
-    elif dir_type == "recent_created":
-        kw.groups = NOTE_DAO.list_recent_created(user_name, 0, 200)
-    else:
-        parent = NOTE_DAO.get_by_id(parent_id)
-        if parent is None:
-            return
-        kw.groups = NOTE_DAO.list_by_parent(user_name, parent_id, 0, 200, parent.orderby)
 
 def handle_note_recommend(kw, file, user_name):
     ctx = Storage(id=file.id, name = file.name, creator = file.creator, 
@@ -252,10 +223,10 @@ class ViewHandler:
 class ViewByIdHandler(ViewHandler):
 
     def GET(self, id):
-        return super(ViewByIdHandler, self).GET("view", id)
+        return ViewHandler.GET(self, "view", id)
 
     def POST(self, id):
-        return super(ViewByIdHandler, self).POST("view", id)
+        return ViewHandler.POST(self, "view", id)
 
 class PrintHandler:
 
@@ -264,8 +235,7 @@ class PrintHandler:
         id        = xutils.get_argument("id")
         file      = xutils.call("note.get_by_id", id)
         user_name = xauth.current_name()
-        if file.is_public != 1 and user_name != "admin" and user_name != file.creator:
-            raise web.seeother("/unauthorized")
+        check_auth(file, user_name)
         return xtemplate.render("note/tools/print.html", show_menu = False, note = file)
 
 def sqlite_escape(text):
@@ -283,27 +253,6 @@ def get_link(filename, webpath):
     if xutils.is_img_file(filename):
         return "![%s](%s)" % (filename, webpath)
     return "[%s](%s)" % (filename, webpath)
-
-
-class Upvote:
-
-    @xauth.login_required()
-    def GET(self, id):
-        id = int(id)
-        db = xtables.get_file_table()
-        file = db.select_first(where=dict(id=int(id)))
-        db.update(priority=1, where=dict(id=id))
-        raise web.seeother("/note/view?id=%s" % id)
-
-class Downvote:
-
-    @xauth.login_required()
-    def GET(self, id):
-        id = int(id)
-        db = xtables.get_file_table()
-        file = db.select_first(where=dict(id=int(id)))
-        db.update(priority=0, where=dict(id=id))
-        raise web.seeother("/note/view?id=%s" % id)
 
 class MarkHandler:
 
@@ -420,8 +369,6 @@ xurls = (
     r"/note/notice"        , NoticeHandler,
     r"/note/query/(\w+)"   , QueryHandler,
     
-    r"/file/(\d+)/upvote"  , Upvote,
-    r"/file/(\d+)/downvote", Downvote,
     r"/file/mark"          , MarkHandler,
     r"/file/unmark"        , UnmarkHandler,
     r"/file/markdown"      , ViewHandler

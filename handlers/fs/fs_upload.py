@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2020/01/12 19:22:57
+# @modified 2020/01/22 00:34:42
 import os
 import uuid
 import web
@@ -54,6 +54,9 @@ def upload_link_by_month(year, month, delta = 0):
 def try_touch_note(note_id):
     if note_id != None and note_id != "":
         xutils.call("note.touch", note_id)
+
+def try_lock_file(fpath):
+    return True
 
 class UploadHandler:
 
@@ -159,7 +162,10 @@ class RangeUploadHandler:
                 filename = os.path.basename(filepath)
             else:
                 # TODO check permission.
-                pass
+                filepath = os.path.join(dirname, filename)
+
+            if chunk == 0:
+                lock = try_lock_file(filepath)
 
             if part_file:
                 tmp_name = "%s_%d.part" % (filename, chunk)
@@ -178,7 +184,7 @@ class RangeUploadHandler:
                 for file_chunk in file.file:
                     fp.write(file_chunk)
         else:
-            return dict(code="fail", message="require file")
+            return dict(code="fail", message=u"请选择文件")
         if part_file and chunk+1==chunks:
             self.merge_files(dirname, filename, chunks)
 

@@ -97,6 +97,10 @@ $(function () {
     uploader.on( 'uploadSuccess', function( file ) {
         $( '#'+file.id ).addClass('upload-state-done');
         $( '#'+file.id + "-result" ).text("上传完成");
+        // 移除上传完成的文件
+        setTimeout(function () {
+            $("#" + file.id).remove();
+        }, 500);
     });
 
     // 文件上传失败，显示上传出错。

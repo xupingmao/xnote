@@ -219,21 +219,22 @@ function rename(id, oldName) {
 }
 
 function remove(id, name, parentId) {
-    var confirmed = confirm("确定删除'" + name + "'?");
-    if (confirmed) {
-        $.post("/note/remove", {id:id}, function (resp) {
-            var code = resp.code;
-            if (code != "success") {
-                alert(resp.message);
-            } else {
-                if (parentId) {
-                    window.location.href = "/note/view?id="+parentId;
+    var confirmed = xnote.confirm("确定删除'" + name + "'?", function (confirmed) {
+        if (confirmed) {
+            $.post("/note/remove", {id:id}, function (resp) {
+                var code = resp.code;
+                if (code != "success") {
+                    alert(resp.message);
                 } else {
-                    window.location.href = "/";
+                    if (parentId) {
+                        window.location.href = "/note/" + parentId;
+                    } else {
+                        window.location.href = "/";
+                    }
                 }
-            }
-        })
-    }
+            })
+        }
+    });
 }
 
 $(function () {

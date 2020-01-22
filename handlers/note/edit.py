@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/01/21 23:34:06
+# @modified 2020/01/22 12:38:59
 
 """笔记编辑相关处理"""
 import os
@@ -55,7 +55,8 @@ def get_heading_by_type(type):
     return T("创建笔记")
 
 def create_text_func(note, ctx):
-    note.name = time.strftime(u"快捷记事:%Y.%m.%d") + dateutil.current_wday()
+    date_str  = time.strftime("%Y.%m.%d")
+    note.name = u"记事:" + date_str + dateutil.current_wday()
     return NOTE_DAO.create(note)
 
 def default_create_func(note, ctx):
