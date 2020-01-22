@@ -3,7 +3,7 @@
  * 重写默认浏览器样式
  * @author xupingmao
  * @since 2020/01/08
- * @modified 2020/01/21 20:29:10
+ * @modified 2020/01/22 18:30:57
  */
 
 * {
@@ -51,10 +51,6 @@ input[type=radio] {
 input {
     padding: 5px;
     outline: none;
-}
-
-input[type=text] {
-    width: 200px;
 }
 
 textarea, input {

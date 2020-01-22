@@ -12,6 +12,9 @@
         outline: none;
         border: 1px solid #8cc;
     }
+    .plugin-input {
+        width: 200px;
+    }
 </style>
 <style type="text/css">
     {% raw css_style %}
@@ -57,7 +60,7 @@
             <form method="{{method}}">
                 <!-- 输入框区域 BEGIN -->
                 {% if rows == 1 %}
-                    <input type="text" name="input" value="{{input}}" placeholder="{{model.placeholder}}"/>
+                    <input type="text" class="plugin-input" name="input" value="{{input}}" placeholder="{{model.placeholder}}"/>
                 {% else %}
                     <textarea class="col-md-12 code" name="input" rows={{rows}} placeholder="{{model.placeholder}}">{{input}}</textarea>
                 {% end %}
