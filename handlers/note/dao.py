@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/24 15:57:57
+# @modified 2020/01/24 20:05:28
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -195,6 +195,12 @@ def get_by_id_creator(id, creator, db=None):
         return note
     return None
 
+def get_by_token(token):
+    token_info = dbutil.get("token:%s" % token)
+    if token_info != None and token_info.type == "note":
+        return get_by_id(token_info.id)
+    return None
+
 def create_note(note_dict):
     content   = note_dict["content"]
     data      = note_dict["data"]
@@ -224,6 +230,12 @@ def create_note(note_dict):
     touch_note(parent_id)
 
     return note_id
+
+def create_token(type, id):
+    uuid = textutil.generate_uuid()
+    token_info = Storage(type = type, id = id)
+    dbutil.put("token:%s" % uuid, token_info)
+    return uuid
 
 def update_note_rank(note):
     mtime = note.mtime
@@ -302,6 +314,7 @@ def update_note(note_id, **kw):
     orderby   = kw.get("orderby")
     archived  = kw.get("archived")
     size      = kw.get("size")
+    token     = kw.get("token")
 
     old_parent_id = None
     new_parent_id = None
@@ -328,6 +341,8 @@ def update_note(note_id, **kw):
             note.archived = archived
         if size != None:
             note.size = size
+        if token != None:
+            note.token = token
 
         old_version  = note.version
         note.mtime   = xutils.format_time()
@@ -901,10 +916,12 @@ xutils.register_func("note.visit",  visit_note)
 xutils.register_func("note.delete", delete_note)
 xutils.register_func("note.touch",  touch_note)
 xutils.register_func("note.update_tags", update_tags)
+xutils.register_func("note.create_token", create_token)
 
 # query functions
 xutils.register_func("note.get_root", get_root)
 xutils.register_func("note.get_by_id", get_by_id)
+xutils.register_func("note.get_by_token", get_by_token)
 xutils.register_func("note.get_by_id_creator", get_by_id_creator)
 xutils.register_func("note.get_by_name", get_by_name)
 xutils.register_func("note.get_tags", get_tags)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/01/24 16:22:21
+# @modified 2020/01/24 20:02:52
 import profile
 import math
 import re
@@ -121,6 +121,16 @@ VIEW_FUNC_DICT = {
     "gallery": view_gallery_func
 }
 
+def find_note_for_view(token, id, name):
+    if token != "":
+        return NOTE_DAO.get_by_token(token)
+    if id != "":
+        return NOTE_DAO.get_by_id(id)
+    if name != "":
+        return NOTE_DAO.get_by_name(name)
+
+    raise HTTPError(504)
+
 class ViewHandler:
 
     xconfig.note_history = History("笔记浏览记录", 200)
@@ -136,6 +146,7 @@ class ViewHandler:
         show_search   = xutils.get_argument("show_search", "true") != "false"
         orderby       = xutils.get_argument("orderby", None)
         is_iframe     = xutils.get_argument("is_iframe", "false")
+        token         = xutils.get_argument("token", "")
         user_name     = xauth.current_name()
         show_add_file = False
 
@@ -151,17 +162,13 @@ class ViewHandler:
         if id == "0":
             raise web.found("/")
         # 回收站的笔记也能看到
-        if id == "" and name == "":
-            raise HTTPError(504)
-        if id != "":
-            file = NOTE_DAO.get_by_id(id)
-        elif name is not None:
-            file = NOTE_DAO.get_by_name(name)
+        file = find_note_for_view(token, id, name)
+
         if file is None:
             raise web.notfound()
-        
-        if file.type != "group" and not file.is_public and user_name != "admin" and user_name != file.creator:
-            raise web.seeother("/unauthorized")
+
+        if token == "":
+            check_auth(file, user_name)
 
         pathlist        = NOTE_DAO.list_path(file)
         can_edit        = (file.creator == user_name) or (user_name == "admin")

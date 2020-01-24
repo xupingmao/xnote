@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/01/24 15:58:29
+# @modified 2020/01/24 19:17:55
 
 """时光轴视图"""
 import re
@@ -81,6 +81,8 @@ class TimelineAjaxHandler:
                     return False
                 if value.name is None:
                     return False
+                if value.is_public:
+                    return True
                 if parent_id != None and str(value.parent_id) != str(parent_id):
                     return False
                 if words != None and not textutil.contains_all(value.name.lower(), words):

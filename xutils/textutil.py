@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2019/12/28 19:12:18
+# @modified 2020/01/24 19:23:47
 import re
 import random
 from .imports import is_str, ConfigParser
@@ -462,6 +462,10 @@ def get_underscore(name):
             target += c.lower()
     return target
 to_underscore = get_underscore
+
+def generate_uuid():
+    import uuid
+    return uuid.uuid4().hex
 
 
 if __name__ == '__main__':

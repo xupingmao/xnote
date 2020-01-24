@@ -1,3 +1,5 @@
+<script type="text/javascript" src="/static/lib/clipboard/clipboard-2.0.4.min.js"></script>
+
 <div class="float-right">
 {% if file != None and _user_name == file.creator and op == "view" %}
 
@@ -12,10 +14,12 @@
     <div class="dropdown-content">
         <a class="dropdown-option link" href="javascript:rename('{{item.id}}', '{{item.name}}')">重命名</a>
         {% if file.is_public %}
-            <a class="dropdown-option link" href="/note/share/cancel?id={{file.id}}">取消分享</a>
+            <a class="dropdown-option link" href="/note/share/cancel?id={{file.id}}">取消公开分享</a>
         {% else %}
-            <a class="dropdown-option link" href="/note/share?id={{file.id}}">分享</a>
+            <a class="dropdown-option link" href="/note/share?id={{file.id}}">公开分享</a>
         {% end %}
+
+        <a class="dropdown-option link link-share-option" href="javascript:void(0)" data-clipboard-text="">链接分享</a>
         
         <a class="dropdown-option move-btn link" data-url="/note/group/select?id={{item.id}}">移动</a>
 
@@ -40,3 +44,37 @@
 {% end %}
 <!-- <a href="javascript:history.back()">返回</a> -->
 </div>
+
+<div class="share-tpl hide">
+    <p>分享链接: <span class="share-link-text"></span></p>
+    <div class="row">
+        <button class="share-link-btn btn float-right" data-clipboard-text="">复制</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    $(".link-share-option").click(function(event) {
+        /* Act on the event */
+        $.post("/note/link_share", {id: "{{file.id}}"}, function (resp) {
+            if (resp.code == "success") {
+                var link = window.location.protocol + "//" + window.location.host + resp.data;
+                $(".share-link-text").text(link);
+                $(".share-link-btn").attr("data-clipboard-text", link);
+                var html = $(".share-tpl").html();
+                layer.confirm(html, {
+                    btn: [] //按钮
+                });
+                new ClipboardJS('.share-link-btn', {
+                    text: function(trigger) {
+                        xnote.toast("已经复制到粘贴板");
+                        return trigger.getAttribute('data-clipboard-text');
+                    }
+                });
+            } else {
+                xnote.alert("分享失败!");
+            }
+        });
+    });
+})
+</script>

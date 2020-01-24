@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/01/22 12:38:59
+# @modified 2020/01/24 20:04:55
 
 """笔记编辑相关处理"""
 import os
@@ -243,7 +243,7 @@ class RenameAjaxHandler:
     def GET(self):
         return self.POST()
     
-class ShareHandler:
+class PublicShareHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -252,6 +252,18 @@ class ShareHandler:
         NOTE_DAO.update(id, is_public = 1)
         raise web.seeother("/note/view?id=%s"%id)
 
+class LinkShareHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        id   = xutils.get_argument("id")
+        note = check_get_note(id)
+        if note.token != None:
+            return dict(code = "success", data = "/note/view?token=%s" % note.token)
+        else:
+            token = NOTE_DAO.create_token("note", note.id)
+            NOTE_DAO.update(note.id, token = token)
+        return dict(code = "success", data = "/note/view?token=%s" % token)
 
 class UnshareHandler:
 
@@ -443,10 +455,8 @@ xurls = (
     r"/note/remove"      , RemoveAjaxHandler,
     r"/note/rename"      , RenameAjaxHandler,
     r"/note/update"      , UpdateHandler,
-    r"/note/share"       , ShareHandler,
     r"/note/save"        , SaveAjaxHandler,
     r"/note/append"      , AppendAjaxHandler,
-    r"/note/share/cancel", UnshareHandler,
     r"/note/stick"       , StickHandler,
     r"/note/unstick"     , UnstickHandler,
     r"/note/archive"     , ArchiveHandler,
@@ -454,9 +464,13 @@ xurls = (
     r"/note/move"        , MoveHandler,
     r"/note/group/move"  , MoveHandler,
 
+    # 分享
+    r"/note/share",        PublicShareHandler,
+    r"/note/share/public", PublicShareHandler,
+    r"/note/share/cancel", UnshareHandler,
+    r"/note/link_share",   LinkShareHandler,
+
     r"/file/dict/put"    , DictPutHandler,
-    r"/file/share"       , ShareHandler,
-    r"/file/share/cancel", UnshareHandler,
     r"/file/save"        , SaveAjaxHandler,
     r"/file/autosave"    , SaveAjaxHandler
 )
