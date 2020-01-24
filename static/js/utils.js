@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2017/08/16
-// @modified 2019/03/27 00:36:12
+// @modified 2020/01/24 14:32:05
 
 /**
  * 获取请求参数
@@ -47,7 +47,7 @@ function getWindowWidth() {
         // For IE
         return Math.min(document.body.clientHeight, document.documentElement.clientHeight);
     }
-}
+};
 
 function getWindowHeight() {
     if (window.innerHeight) {
@@ -56,7 +56,7 @@ function getWindowHeight() {
         // For IE
         return Math.min(document.body.clientWidth, document.documentElement.clientWidth);
     }
-}
+};
 
 // 遍历对象
 function objForEach(obj, fn) {
@@ -70,7 +70,7 @@ function objForEach(obj, fn) {
             }
         }
     }
-}
+};
 
 // 遍历类数组
 function arrForEach(fakeArr, fn) {
@@ -85,7 +85,7 @@ function arrForEach(fakeArr, fn) {
             break;
         }
     }
-}
+};
 
 
 //////////////////////////////////////////////////////
@@ -462,4 +462,5 @@ Date.prototype.format = Date.prototype.format || function (format) {
         return sFormat("%2d:%2d:%2d", hour, minute, second);
     }
     return sFormat("%d-%2d-%2d %2d:%2d:%2d", year, month, day, hour, minute, second);
-}
+};
+

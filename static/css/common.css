@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/01/21 19:00:34
+ * @modified 2020/01/24 12:02:27
  */
 
 /** marked 样式 **/
@@ -226,7 +226,6 @@
     background-color: #ccc;
 }
 
-
 .btn-danger {
     background-color: #f00;
     border-radius: 3px;
@@ -234,6 +233,10 @@
 
 .btn-danger:hover {
     background-color: #c00;
+}
+
+.btn-line-height {
+    line-height: 32px;
 }
 
 .inline-btn {
@@ -674,6 +677,8 @@ li.menu-item:hover {
     color: #fff;
     padding: 5px;
     cursor: move;
+    height: 36px;
+    line-height: 26px;
 }
 
 .x-dialog-body {

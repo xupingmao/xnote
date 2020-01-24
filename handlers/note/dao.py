@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/21 22:56:50
+# @modified 2020/01/24 11:08:25
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -464,25 +464,25 @@ def fill_parent_name(files):
             item.parent_name = None
 
 @xutils.timeit(name = "NoteDao.ListGroup:leveldb", logfile = True)
-def list_group(creator = None, orderby = "mtime_desc", skip_archived = False):
+def list_group(creator = None, offset = 0, limit = xconfig.PAGE_SIZE, orderby = "mtime_desc", skip_archived = False):
     # TODO 添加索引优化
     def list_group_func(key, value):
         if skip_archived and value.archived:
             return False
         if skip_archived and value.parent_id != 0:
             return False
-        return value.type == "group" and value.creator == creator and value.is_deleted == 0
+        return value.type == "group" and value.is_deleted == 0
 
-    notes = dbutil.prefix_list("notebook:", list_group_func)
+    notes = dbutil.prefix_list("notebook:%s" % creator, list_group_func)
     sort_notes(notes, orderby)
-    return notes
+    return notes[offset:offset + limit]
 
 @xutils.timeit(name = "NoteDao.ListRootGroup:leveldb", logfile = True)
 def list_root_group(creator = None, orderby = "name"):
     def list_root_group_func(key, value):
         return value.creator == creator and value.type == "group" and value.parent_id == 0 and value.is_deleted == 0
 
-    notes = dbutil.prefix_list("notebook:", list_root_group_func)
+    notes = dbutil.prefix_list("notebook:%s" % creator, list_root_group_func)
     sort_notes(notes, orderby)
     return notes
 

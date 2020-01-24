@@ -17,6 +17,7 @@ echo > ./static/js/app.build.js
 cat ./static/js/utils.js >> ./static/js/app.build.js
 
 # xnote-ui
+cat ./static/js/xnote-ui/EventDispatcher.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/core.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/layer.photos.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-device.js >> ./static/js/app.build.js

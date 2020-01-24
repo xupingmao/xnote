@@ -1,7 +1,23 @@
 {% extends base %}
 
-{% block body %}
+{% block head %}
 
+<style type="text/css">
+    .img-info {
+        display: block;
+        float: left;
+        margin: 5px;
+        width: 200px;
+    }
+
+    .img-info > label {
+        line-height: 27px;
+    }
+</style>
+
+{% end %}
+
+{% block body %}
 
 <div class="col-md-12 card">
     {% set title = "图片灰度化" %}
@@ -11,30 +27,40 @@
     <input type="button" id="selectBtn" class="btn" value="选择图片"/>
     <input class="btn" id="rotateClockwise" type="button" value="顺时针旋转"/>
     <input id="larger" type="button" class="btn" value="刷新"/>
+
     <div class="col-md-12 top-offset-1">
-    <table class="table">
-        <tr>
-            <th>原始大小</th>
-            <th>宽度</th>
-            <th>高度</th>
-            <th>灰度化</th>
-            <th>旋转</th>
-        </tr>
-        <tr>
-            <td id="imgSize"></td>
-            <td><input id="width"></td>
-            <td><input id="height"></td>
-            <td>灰度化<input type="checkbox" id="gray" ></td>
-            <td id="rotate"></td>
-        </tr>
-    </table>
+        <div class="img-info">
+            <label>图片大小</label>
+            <span id="imgSize"></span>
+        </div>
+
+        <div class="img-info">
+            <label>宽度</label>
+            <input id="width"/>
+        </div>
+
+        <div class="img-info">
+            <label>高度</label>
+            <input id="height"/>
+        </div>
+
+        <div class="img-info">
+            <label>灰度化</label>
+            <input type="checkbox" id="gray" >
+        </div>
+
+        <div class="img-info">
+            <label>旋转</label>
+            <span id="rotate"></span>
+        </div>
     </div>
 </div>
 
 <div class="card row">
-    <h3>输出</h3>
+    <h3 class="card-title">输出</h3>
     <canvas id="myCanvas"></canvas>
 </div>
+
 <script type="text/javascript">
 // 转换配置
 var convertOpt = {};

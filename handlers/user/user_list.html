@@ -17,6 +17,10 @@
         padding: 10px;
     }
 
+    .list-heading {
+        line-height: 32px;
+    }
+
 </style>
 
 {% end %}
@@ -24,9 +28,9 @@
 {% block body %}
 
 <div class="card">
-    <h3 class="card-title">
+    <h3 class="card-title list-heading">
         <span>用户管理</span>
-        <a class="btn float-right" href="/system/user">新增</a>
+        <a class="btn float-right add-user-btn">新增</a>
     </h3>
 
     <table class="table col-md-12">
@@ -44,7 +48,7 @@
             <td>
                 <a class="link edit-btn" href="/system/user?name={{name}}">编辑</a>
                 {% if name != "admin" %}
-                    <a data-name="{{name}}" class="red delete-btn">删除</a>
+                    <a data-name="{{name}}" class="red delete-user-btn">删除</a>
                 {% end %}
             </td>
         </tr>
@@ -85,18 +89,21 @@
     </div>
 </div>
 
+{% include user/component/delete_user.html %}
+
 <script type="text/javascript">
 $(function () {
-    $(".delete-btn").click(function (e) {
-        var name = $(this).attr('data-name');
-        var ret = confirm("确定删除[" + name + "]?")
-        if (ret) {
-            $.post("/system/user/remove", 
-                {name: name},
-                function (result) {
-                    window.location.reload();
-                });
-        }
+
+    $(".add-user-btn").click(function (e) {
+        xnote.prompt("新增用户", "", function (name) {
+            $.post("/user/add", {name: name}, function (resp) {
+                if (resp.code == "success") {
+                    window.location = "/system/user?name=" + name;
+                } else {
+                    xnote.alert("新增用户失败:" + resp.message);
+                }
+            });
+        });
     });
 })
 </script>

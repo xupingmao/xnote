@@ -1,0 +1,15 @@
+<script type="text/javascript">
+$(function () {
+    $(".delete-user-btn").click(function (e) {
+        var name = $(this).attr('data-name');
+        var ret = confirm("确定删除[" + name + "]?")
+        if (ret) {
+            $.post("/system/user/remove", 
+                {name: name},
+                function (result) {
+                    window.location = "/user/list";
+                });
+        }
+    });  
+})
+</script>

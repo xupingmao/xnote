@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2020/01/12 19:22:32
+# @modified 2020/01/24 11:15:55
 import codecs
 import os
 import platform
@@ -535,3 +535,15 @@ def listdir_abs(dirname):
             pathlist.append(fpath)
     pathlist = sorted(pathlist)
     return pathlist
+
+def load_list_config(fpath):
+    """加载列表配置文件"""
+    text = readfile(fpath)
+    lines = text.split("\n")
+    return list(map(lambda line: line.strip(), lines))
+
+def load_set_config(fpath):
+    """加载集合配置文件"""
+    text = readfile(fpath)
+    lines = text.split("\n")
+    return set(map(lambda line: line.strip(), lines))

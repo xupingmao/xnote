@@ -5,13 +5,13 @@ import copy
 import web
 import xconfig
 import xutils
-from xutils import ConfigParser, textutil, dbutil
+from xutils import ConfigParser, textutil, dbutil, fsutil
 from xconfig import Storage
 
 config = xconfig
 # 用户配置
 _users = None
-INVALID_NAMES = ["public", "deleted", "system"]
+INVALID_NAMES = fsutil.load_set_config("./config/user/invalid_names.list")
 
 def is_valid_username(name):
     """有效的用户名为字母+数字"""

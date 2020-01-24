@@ -1,7 +1,7 @@
 
 // @author xupingmao
 // @since 2017/08/16
-// @modified 2019/03/27 00:36:12
+// @modified 2020/01/24 14:32:05
 
 /**
  * 获取请求参数
@@ -48,7 +48,7 @@ function getWindowWidth() {
         // For IE
         return Math.min(document.body.clientHeight, document.documentElement.clientHeight);
     }
-}
+};
 
 function getWindowHeight() {
     if (window.innerHeight) {
@@ -57,7 +57,7 @@ function getWindowHeight() {
         // For IE
         return Math.min(document.body.clientWidth, document.documentElement.clientWidth);
     }
-}
+};
 
 // 遍历对象
 function objForEach(obj, fn) {
@@ -71,7 +71,7 @@ function objForEach(obj, fn) {
             }
         }
     }
-}
+};
 
 // 遍历类数组
 function arrForEach(fakeArr, fn) {
@@ -86,7 +86,7 @@ function arrForEach(fakeArr, fn) {
             break;
         }
     }
-}
+};
 
 
 //////////////////////////////////////////////////////
@@ -463,7 +463,136 @@ Date.prototype.format = Date.prototype.format || function (format) {
         return sFormat("%2d:%2d:%2d", hour, minute, second);
     }
     return sFormat("%d-%2d-%2d %2d:%2d:%2d", year, month, day, hour, minute, second);
-}
+};
+
+
+(function(){
+
+    /**
+     * part of quarkjs
+     * 构造函数.
+     * @name EventDispatcher
+     * @class EventDispatcher类是可调度事件的类的基类，它允许显示列表上的任何对象都是一个事件目标。
+     */
+    var EventDispatcher = function()
+    {
+        //事件映射表，格式为：{type1:[listener1, listener2], type2:[listener3, listener4]}
+        this._eventMap = {};
+    };
+
+    /**
+     * 注册事件侦听器对象，以使侦听器能够接收事件通知。
+     */
+    EventDispatcher.prototype.addEventListener = function(type, listener)
+    {
+        var map = this._eventMap[type];
+        if(map == null) map = this._eventMap[type] = [];
+        
+        if(map.indexOf(listener) == -1)
+        {
+            map.push(listener);
+            return true;
+        }
+        return false;
+    };
+
+    /**
+     * 删除事件侦听器。
+     */
+    EventDispatcher.prototype.removeEventListener = function(type, listener)
+    {
+        if(arguments.length == 1) return this.removeEventListenerByType(type);
+
+        var map = this._eventMap[type];
+        if(map == null) return false;
+
+        for(var i = 0; i < map.length; i++)
+        {
+            var li = map[i];
+            if(li === listener)
+            {
+                map.splice(i, 1);
+                if(map.length == 0) delete this._eventMap[type];
+                return true;
+            }
+        }
+        return false;
+    };
+
+    /**
+     * 删除指定类型的所有事件侦听器。
+     */
+    EventDispatcher.prototype.removeEventListenerByType = function(type)
+    {
+        var map = this._eventMap[type];
+        if(map != null)
+        {
+            delete this._eventMap[type];
+            return true;
+        }
+        return false;
+    };
+
+    /**
+     * 删除所有事件侦听器。
+     */
+    EventDispatcher.prototype.removeAllEventListeners = function()
+    {   
+        this._eventMap = {};
+    };
+
+    /**
+     * 派发事件，调用事件侦听器。
+     */
+    EventDispatcher.prototype.dispatchEvent = function(event)
+    {
+        var map = this._eventMap[event.type];
+        if(map == null) return false;   
+        if(!event.target) event.target = this;
+        map = map.slice();
+
+        for(var i = 0; i < map.length; i++)
+        {
+            var listener = map[i];
+            if(typeof(listener) == "function")
+            {
+                listener.call(this, event);
+            }
+        }
+        return true;
+    };
+
+    /**
+     * 检查是否为指定事件类型注册了任何侦听器。
+     */
+    EventDispatcher.prototype.hasEventListener = function(type)
+    {
+        var map = this._eventMap[type];
+        return map != null && map.length > 0;
+    };
+
+    //添加若干的常用的快捷缩写方法
+    EventDispatcher.prototype.on = EventDispatcher.prototype.addEventListener;
+    EventDispatcher.prototype.un = EventDispatcher.prototype.removeEventListener;
+    EventDispatcher.prototype.fire = EventDispatcher.prototype.dispatchEvent;
+
+
+    // xnote事件驱动
+    if (window.xnote == undefined) {
+        window.xnote = {};
+    }
+
+    xnote._eventDispatcher = new EventDispatcher();
+    xnote.addEventListener = xnote.on = function (type, listener) {
+        return xnote._eventDispatcher.addEventListener(type, listener);
+    }
+
+    xnote.dispatchEvent = xnote.fire = function (type, target) {
+        var event = {type: type, target: target};
+        return xnote._eventDispatcher.dispatchEvent(event);
+    }
+    
+})();
 /**
  * xnote专用ui
  * 依赖库
@@ -471,7 +600,7 @@ Date.prototype.format = Date.prototype.format || function (format) {
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2020/01/21 20:15:21
+ * @modified 2020/01/24 14:05:21
  */
 var XUI = function(window) {
     // 处理select标签选中情况
@@ -568,85 +697,10 @@ var XUI = function(window) {
                 window.location.reload();
             })
         }
-    })
-
-    // 点击激活对话框的按钮
-    $(".dialog-btn").click(function() {
-        var dialogUrl = $(this).attr("dialog-url");
-        var dialogId = $(this).attr("dialog-id");
-        if (dialogUrl) {
-            // 通过新的HTML页面获取dialog
-            $.get(dialogUrl,
-            function(respHtml) {
-                $(document.body).append(respHtml);
-                doModal(dialogId);
-                initDefaultValue();
-                // 重新绑定事件
-                $(".x-dialog-close, .x-dialog-cancel").unbind("click");
-                $(".x-dialog-close, .x-dialog-cancel").on("click",
-                function() {
-                    onDialogHide();
-                });
-            })
-        }
     });
-
-    /**
-   * 初始化弹层
-   */
-    function initDialog() {
-        // 初始化样式
-        $(".x-dialog-close").css({
-            "background-color": "red",
-            "float": "right"
-        });
-
-        $(".x-dialog").each(function(index, ele) {
-            var self = $(ele);
-            var width = window.innerWidth;
-            if (width < 600) {
-                dialogWidth = width - 40;
-            } else {
-                dialogWidth = 600;
-            }
-            var top = Math.max((getWindowHeight() - self.height()) / 2, 0);
-            var left = (width - dialogWidth) / 2;
-            self.css({
-                "width": dialogWidth,
-                "left": left
-            }).css("top", top);
-        });
-
-        $("body").css("overflow", "hidden");
-    }
-
-    /**
-   * 隐藏弹层
-   */
-    function onDialogHide() {
-        $(".x-dialog").hide();
-        $(".x-dialog-background").hide();
-        $(".x-dialog-remote").remove(); // 清空远程的dialog
-        $("body").css("overflow", "auto");
-    }
-
-    $(".x-dialog-background").click(function() {
-        onDialogHide();
-    });
-
-    $(".x-dialog-close, .x-dialog-cancel").click(function() {
-        onDialogHide();
-    });
-
-    function doModal(id) {
-        initDialog();
-        $(".x-dialog-background").show();
-        $(".x-dialog-remote").show();
-        $("#" + id).show();
-    }
 
     // 初始化表单控件的默认值
-    function initDefaultValue() {
+    function initDefaultValue(event) {
         initSelect();
         initCheckbox();
         initRadio();
@@ -656,11 +710,14 @@ var XUI = function(window) {
 
     // 初始化
     initDefaultValue();
+    // 注册事件
+    xnote.addEventListener("init-default-value", initDefaultValue);
 };
 
 $(document).ready(function() {
     XUI(window);
-})
+});
+
 //layer相册层修改版, 调整了图片大小的处理
 layer.photos = function(options, loop, key){
   var cache = layer.cache||{}, skin = function(type){
@@ -1262,6 +1319,86 @@ window.xnote.toast = function(message, time) {
 
 // 兼容之前的方法
 window.showToast = window.xnote.toast;
+
+
+// 自定义的dialog
+$(function () {
+    // 点击激活对话框的按钮
+    $(".dialog-btn").click(function() {
+        var dialogUrl = $(this).attr("dialog-url");
+        var dialogId = $(this).attr("dialog-id");
+        if (dialogUrl) {
+            // 通过新的HTML页面获取dialog
+            $.get(dialogUrl, function(respHtml) {
+                $(document.body).append(respHtml);
+                doModal(dialogId);
+                // 重新绑定事件
+                xnote.fire("init-default-value");
+                $(".x-dialog-close, .x-dialog-cancel").unbind("click");
+                $(".x-dialog-close, .x-dialog-cancel").on("click",
+                function() {
+                    onDialogHide();
+                });
+            })
+        }
+    });
+
+
+    /**
+     * 初始化弹层
+     */
+    function initDialog() {
+        // 初始化样式
+        $(".x-dialog-close").css({
+            "background-color": "red",
+            "float": "right"
+        });
+
+        $(".x-dialog").each(function(index, ele) {
+            var self = $(ele);
+            var width = window.innerWidth;
+            if (width < 600) {
+                dialogWidth = width - 40;
+            } else {
+                dialogWidth = 600;
+            }
+            var top = Math.max((getWindowHeight() - self.height()) / 2, 0);
+            var left = (width - dialogWidth) / 2;
+            self.css({
+                "width": dialogWidth,
+                "left": left
+            }).css("top", top);
+        });
+
+        $("body").css("overflow", "hidden");
+    }
+
+    /**
+   * 隐藏弹层
+   */
+    function onDialogHide() {
+        $(".x-dialog").hide();
+        $(".x-dialog-background").hide();
+        $(".x-dialog-remote").remove(); // 清空远程的dialog
+        $("body").css("overflow", "auto");
+    }
+
+    $(".x-dialog-background").click(function() {
+        onDialogHide();
+    });
+
+    $(".x-dialog-close, .x-dialog-cancel").click(function() {
+        onDialogHide();
+    });
+
+    function doModal(id) {
+        initDialog();
+        $(".x-dialog-background").show();
+        $(".x-dialog-remote").show();
+        $("#" + id).show();
+    }
+
+});
 /**
  * 通用的操作函数
  */
