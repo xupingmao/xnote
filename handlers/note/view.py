@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/01/22 12:24:52
+# @modified 2020/01/24 16:22:21
 import profile
 import math
 import re
@@ -26,13 +26,6 @@ NOTE_DAO = xutils.DAO("note")
 def visit_by_id(ctx):
     id = ctx.id
     xutils.call("note.visit", id)
-
-def render_note_list(notes, file):
-    return xtemplate.render("note/note_list_left.html", 
-        notes = notes, 
-        files = notes,
-        file  = file,
-        show_search = False)
 
 def check_auth(file, user_name):
     if file.is_public != 1 and user_name != "admin" and user_name != file.creator:

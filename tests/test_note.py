@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/01/22 12:19:46
+# @modified 2020/01/24 16:36:24
 import xutils
 
 # cannot perform relative import
@@ -258,6 +258,9 @@ class TestMain(BaseTestCase):
 
         note_info = get_note_info(id)
         self.assertEqual("newname-test", note_info.name)
+
+    def test_stat(self):
+        self.check_OK("/note/stat")
 
 
 

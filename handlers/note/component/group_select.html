@@ -1,3 +1,10 @@
+<div class="group-select-search">
+    <input id="groupSelectInput" type="text" class="nav-search-input" placeholder="搜索项目"/>
+    <button class="nav-search-btn btn-default">
+        <i class="fa fa-search"></i>
+    </button>
+</div>
+
 <div class="note-group-select col-md-12 scroll-y">
     {% for category, groups in groups_tuple %}
         <h3 class="group-select-header">{{category}}</h3>
@@ -13,3 +20,25 @@
         {% end %}
     {% end %}
 </div>
+
+<script type="text/javascript">
+$(function () {
+    $("#groupSelectInput").unbind("keyup");
+    $("#groupSelectInput").keyup(function(event) {
+        /* Act on the event */
+        var searchKey = $(this).val();
+        $(".group-select-row").show();
+
+        if (searchKey == "") {
+            return;
+        }
+
+        $(".group-select-row").each(function (index, element) {
+            var noteName = $(element).children("a").text();
+            if (noteName.indexOf(searchKey) < 0) {
+                $(this).hide();
+            }
+        })
+    });
+})
+</script>

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/15 00:35:34
+# @modified 2020/01/24 15:56:13
 import math
 import time
 import web
@@ -189,7 +189,7 @@ class GroupSelectHandler:
         filetype = xutils.get_argument("filetype", "")
         groups_tuple = load_category(xauth.current_name())
         web.header("Content-Type", "text/html; charset=utf-8")
-        files = NOTE_DAO.list_root_group(user_name)
+        files = NOTE_DAO.list_group(user_name)
         return xtemplate.render("note/component/group_select.html", 
             id = id, 
             groups_tuple = groups_tuple,

@@ -1679,7 +1679,7 @@ li.menu-item:hover {
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2020/01/15 00:34:15
+ * @modified 2020/01/24 16:07:20
 */
 
 
@@ -1881,6 +1881,13 @@ li.menu-item:hover {
 
 
 /** group select **/
+
+.group-select-search {
+    float: left;
+    width: 100%;
+    padding: 5px;
+}
+
 .group-select-header {
     width: 100%;
     padding: 5px;
