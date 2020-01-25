@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/01/25 11:17:21
+# @modified 2020/01/25 23:02:47
 
 """时光轴视图"""
 import re
@@ -139,7 +139,7 @@ class TimelineHandler:
             file = NOTE_DAO.get_by_id(parent_id)
             title = file.name
 
-        return xtemplate.render("note/tools/timeline.html", 
+        return xtemplate.render("note/timeline.html", 
             title = title,
             type  = type,
             file  = file,
@@ -159,6 +159,6 @@ xurls = (
     r"/note/public",   PublicTimelineHandler,
     r"/note/tools/timeline", TimelineHandler,
     r"/note/timeline/month", DateTimeline,
-    r"/note/api/timeline", TimelineAjaxHandler,
+    r"/note/api/timeline", TimelineAjaxHandler
 )
 

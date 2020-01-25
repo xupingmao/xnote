@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/07/12 00:52:07
+# @modified 2020/01/25 12:25:38
 import web
 import time
 import hashlib
@@ -23,6 +23,9 @@ def save_login_info(name, value):
             key = name, value = message, 
             ctime = xutils.format_datetime(), 
             cdate = xutils.format_date()))
+
+def save_login_error_count(name, count):
+    cacheutil.set("login.fail.count#%s" % name, count, 60)
 
 class handler:
 
@@ -49,25 +52,27 @@ class handler:
             else:
                 error = "用户名或密码错误"
                 save_login_info(name, pswd)
-                cacheutil.set("login.fail.count#%s" % name, count + 1, 60)
+                save_login_error_count(name, count + 1)
         else:
             error = "用户名或密码错误"
             save_login_info(name, pswd)
-            # 用户名异常的不做限制，防止缓存被刷爆
-            # cacheutil.set("login.fail.count#%s" % name, count+1, 60)
+            save_login_error_count(name, count + 1)
 
-        return xtemplate.render("login.html", 
+        return xtemplate.render("user/login.html", 
             show_aside = False,
-            username=name, 
-            password=pswd,
-            error = error)
+            username   = name, 
+            password   = pswd,
+            error      = error)
 
 
     def GET(self):
-        return xtemplate.render("login.html",
+        return xtemplate.render("user/login.html",
             show_aside=False,
             username="",
             password="",
             error="")
 
 
+xurls = (
+    r"/login", handler
+)

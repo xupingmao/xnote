@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/24 15:56:13
+# @modified 2020/01/25 12:38:55
 import math
 import time
 import web
@@ -65,6 +65,14 @@ class NoteLink:
 def type_node_path(name, url):
     parent = PathNode(TYPES_NAME, "/note/types")
     return [parent, GroupLink(T(name), url)]
+
+class BaseTimelineHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        return xtemplate.render("note/timeline.html", 
+            title = T(self.title), 
+            type = self.note_type)
 
 class DefaultListHandler:
 
@@ -205,13 +213,10 @@ class CategoryHandler:
             id=id, groups_tuple = groups_tuple)
 
 
-class RemovedHandler:
+class RemovedHandler(BaseTimelineHandler):
 
-    @xauth.login_required()
-    def GET(self):
-        return xtemplate.render("note/tools/timeline.html", 
-            title = T("回收站"), 
-            type = "removed")
+    title = T("回收站")
+    note_type = "removed"
 
     @xauth.login_required()
     def GET_old(self):
@@ -265,13 +270,6 @@ class BaseListHandler:
             page_max  = math.ceil(amount / xconfig.PAGE_SIZE),
             page_url  = "/note/%s?page=" % self.note_type)
 
-class BaseTimelineHandler:
-
-    @xauth.login_required()
-    def GET(self):
-        return xtemplate.render("note/tools/timeline.html", 
-            title = T(self.title), 
-            type = self.note_type)
 
 class GalleryListHandler(BaseTimelineHandler):
 
@@ -299,30 +297,19 @@ class HtmlListHandler(BaseListHandler):
         self.title = "富文本"
 
 class MarkdownListHandler(BaseTimelineHandler):
+    note_type = "md"
+    title     = "Markdown"
 
-    def __init__(self):
-        self.note_type = "md"
-        self.title = "Markdown"
+class DocumentListHandler(BaseTimelineHandler):
+    note_type = "document"
+    title     = T("文档")
 
-class DocumentListHandler:
-
-    @xauth.login_required()
-    def GET(self):
-        return xtemplate.render("note/tools/timeline.html", 
-            title = T("文档"), 
-            type = "document")
-
-class ListHandler(BaseListHandler):
+class ListHandler(BaseTimelineHandler):
 
     def __init__(self):
         self.note_type = "list"
         self.title = "清单"
 
-    @xauth.login_required()
-    def GET(self):
-        return xtemplate.render("note/tools/timeline.html", 
-            title = T("清单"), 
-            type = "list")
 
 class TextHandler(BaseListHandler):
 
@@ -422,14 +409,11 @@ class RecentHandler:
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    ="/note/recent_%s?page=" % orderby)
 
-class PublicGroupHandlerOld:
+class PublicGroupHandlerOld(BaseTimelineHandler):
+    title = T("公共笔记"), 
+    note_type = "public"
 
-    def GET(self):
-        return xtemplate.render("note/tools/timeline.html", 
-            title = T("公共笔记"), 
-            show_create = False,
-            type = "public")
-
+    def GET_old(self):
         # 老的分页逻辑
         page = xutils.get_argument("page", 1, type=int)
         page = max(1, page)

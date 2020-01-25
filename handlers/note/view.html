@@ -1,125 +1,12 @@
 {% extends base %}
 
 {% block head %}
-<script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
-<script type="text/javascript" src="/static/lib/marked/marked.js"></script>
-<script type="text/javascript" src="/static/js/marked-ext.js"></script>
-<style>
-.CodeMirror {
-    width: 60rem;
-    font-size:16px;
-    height: auto;
-}
+    <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
+    <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
+    <script type="text/javascript" src="/static/js/marked-ext.js"></script>
 
-#markdown-input {
-    font-family: monospace;
-}
+    {% include note/component/view_css.html %}
 
-.small {
-    font-size: small;
-}
-
-.alert {
-    color: red;
-    background-color: #FFCCCC;
-    width: auto;
-}
-
-.x-code-block {
-    font-family: Consolas,monospace;
-    word-wrap: break-word;
-    border-style: solid;
-    border-radius: 3px;
-    border-width: 1px;
-    padding: 3px;
-    background-color: #ffffcc;
-}
-
-.bottom-fixed-pannel {
-    background-color: white; 
-    position: fixed; 
-    padding-bottom: 5px; 
-    padding-top:5px; 
-    bottom: 0px; 
-    z-index: 100
-}
-
-.pathlist {
-    background-color: #eee;
-    padding:3px;
-}
-
-.hover {
-    color: #AAA;
-}
-
-.hover:hover {
-    color: #000;
-}
-
-.no-border tr td {
-    border: none;
-}
-
-#uploadIframe {
-    border: none;
-    width: 100%;
-    height: 60px;
-}
-
-#markdown-output-div img {
-    max-height: 600px;
-}
-
-.red-border {
-    border-color: red;
-}
-
-/** 分组的标签 **/
-.group-tag {
-    border: 1px solid #ccc;
-    background-color: #69c;
-    padding: 5px;
-    margin: 5px;
-    display: block;
-    float: left;
-    line-height: 20px;
-    color: #fff;
-}
-
-{% init show_left = False %}
-{% if show_left %}
-    .x-left {
-        position: absolute;
-        left: 200px;
-        width: 200px;
-        bottom: 0px;
-        top: 0px;
-        overflow-y: auto;
-        border-right: 1px solid #ccc;
-    }
-
-    .x-left-title {
-        border-bottom: 1px solid #ccc;
-        padding: 5px;
-    }
-
-    .x-left-content {
-        padding: 5px;
-    }
-
-    .x-left-content li {
-        list-style: none;
-        line-height: 20px;
-        padding-bottom: 5px;
-    }
-
-    .x-body {
-        left: 400px;
-    }
-{% end %}
-
-</style>
 {% end %}
 
 {% block left_part %}
