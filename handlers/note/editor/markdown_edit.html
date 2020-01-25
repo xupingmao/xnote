@@ -81,6 +81,7 @@
 
     #markdown-output-div {
         border-left: 1px solid #ccc;
+        padding-left: 3px;
     }
 </style>
 {% end %} 
@@ -258,6 +259,7 @@
             oldContent = input;
             var outtext = marked.parse(input);
             $("#markdown-output-div").html(outtext);
+            $("#markdown-output-div").height($("#editor").height());
         }
 
         function autoSave() {
@@ -368,7 +370,7 @@
             var e = window.event||e;  
             console.log(e);
         　　e.returnValue = "确定离开当前页面吗？";
-        } 
+        };
     });
 
 </script>
