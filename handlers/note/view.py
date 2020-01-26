@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/01/24 20:02:52
+# @modified 2020/01/26 13:01:14
 import profile
 import math
 import re
@@ -218,6 +218,8 @@ class ViewHandler:
             page_url = "/note/view?id=%s&orderby=%s&page=" % (id, orderby),
             files    = files, 
             recent_created    = recent_created,
+            search_action = "/note/timeline",
+            search_placeholder = "搜索笔记",
             is_iframe         = is_iframe, **kw)
 
 class ViewByIdHandler(ViewHandler):
@@ -298,6 +300,8 @@ class DictHandler:
             show_opts  = False,
             page       = page,
             page_max   = page_max,
+            pathlist   = [Storage(name = "词典", url = "#")],
+            show_pagination = True,
             page_url   = "/note/dict?page=")
 
 class NoteHistoryHandler:

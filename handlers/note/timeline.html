@@ -45,7 +45,6 @@
           <div class="dropdown">
               <span class="dropdown-btn link btn">更多▾</span>
               <div class="dropdown-content">
-                  <a class="dropdown-option" href="/message?tag=task">任务</a>
                   <a class="dropdown-option" href="{{base_path}}?type=sticky">只看置顶</a>
                   <a class="dropdown-option" href="{{base_path}}?type=document">只看文档</a>
                   <a class="dropdown-option" href="{{base_path}}?type=gallery">只看相册</a>
@@ -71,7 +70,7 @@
           <!-- <input type="checkbox" class="icon-check" v-if="file.type == 'gallery'"/> -->
           <i class="fa" v-bind:class="file.icon"></i>
           <a v-bind:href="file.url">{{!file.name}}</a>
-          <span v-if="file.type=='group'" class="float-right gray-text">{{!file.size}}</span>
+          <span v-if="file.type=='group' || file.type=='system'" class="float-right gray-text">{{!file.size}}</span>
         </p>
         <p class="brief"><span class="text-green"></span></p>
       </aside>

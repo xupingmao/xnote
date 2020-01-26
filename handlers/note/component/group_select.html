@@ -13,7 +13,7 @@
         {% for item in groups %}
             <p class="group-select-row">
                 <i class="fa {{item.icon}}"></i>
-                <a class="link" href="javascript:moveTo('{{id}}', '{{item.id}}')">
+                <a class="link" href="javascript:{{callback}}('{{item.id}}')">
                     {{item.name}}
                 </a>
                 <span class="group-select-size">{{item.size}}</span>

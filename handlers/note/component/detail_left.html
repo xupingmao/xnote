@@ -1,0 +1,27 @@
+{% init groups = [] %}
+{% init show_groups = False %}
+{% init dir_type = "" %}
+{% init tags = "" %}
+
+{% if show_groups %}
+    <div class="x-left-title">
+        目录
+        {% if _has_login %}
+            <a class="float-right" href="/note/add?parent_id={{file.parent_id}}">{{T("Create")}}</a>
+        {% end %}
+    </div>
+    <div class="x-left-content">
+        {% for item in groups %}
+            <li>
+                <i class="fa {{item.icon}}"></i>
+
+                {%if item.priority>0%}
+                    <i class="fa fa-thumb-tack black"></i>
+                {%end%}
+                <a class="link" href="/note/{{item.id}}?dir_type={{dir_type}}&tags={{tags}}">
+                    {{item.name}}
+                </a>
+            </li>
+        {% end %}
+    </div>
+{% end %}

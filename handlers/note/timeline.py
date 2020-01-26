@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/01/25 23:02:47
+# @modified 2020/01/26 12:57:06
 
 """时光轴视图"""
 import re
@@ -12,7 +12,27 @@ from xutils import Storage, dateutil, textutil
 from xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
+MSG_DAO  = xutils.DAO("message")
 
+class TaskGroup(Storage):
+    def __init__(self):
+        super(TaskGroup, self).__init__()
+        user_name = xauth.current_name()
+        self.type = 'system'
+        self.name = "待办任务"
+        self.icon = "fa-calendar-check-o"
+        self.ctime = dateutil.format_time()
+        self.mtime = dateutil.format_time()
+        self.url  = "/message?tag=task"
+        self.size = MSG_DAO.get_message_stat(user_name).task_count
+
+def search_group(user_name, words):
+    rows = NOTE_DAO.list_group(user_name)
+    result = []
+    for row in rows:
+        if textutil.contains_all(row.name, words):
+            result.append(row)
+    return result
 
 def build_date_result(rows, orderby):
     result = dict()
@@ -27,10 +47,6 @@ def build_date_result(rows, orderby):
         row.content = ""
         if date not in result:
             result[date] = []
-        if row.type == "group":
-            row.url = "/note/timeline?type=default&parent_id=%s" % row.id
-        else:
-            row.url = "/note/%s?source=timeline" % row.id
         result[date].append(row)
 
     for key in result:
@@ -62,12 +78,10 @@ class TimelineAjaxHandler:
             rows = NOTE_DAO.list_recent_created(user_name, offset, limit)
         elif type == "root":
             rows = NOTE_DAO.list_group(user_name)
+            rows.insert(0, TaskGroup())
             orderby = "mtime"
         else:
-            if type == "root":
-                parent_id = 0
-                # TODO 合并待办任务
-
+            # 主要是搜索
             words = None
             if search_key != None and search_key != "":
                 # TODO 公共笔记的搜索
@@ -75,6 +89,7 @@ class TimelineAjaxHandler:
                 search_key_lower = search_key.lower()
                 parent_id  = None
                 words      = textutil.split_words(search_key_lower)
+                # groups = search_group(user_name, words)
 
             def list_func(key, value):
                 if value.is_deleted:
