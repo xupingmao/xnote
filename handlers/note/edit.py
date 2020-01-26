@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/01/24 20:04:55
+# @modified 2020/01/26 16:44:59
 
 """笔记编辑相关处理"""
 import os
@@ -71,7 +71,7 @@ def default_create_func(note, ctx):
         message = u'标题为空'
         raise Exception(message)
 
-    f = NOTE_DAO.get_by_name(name)
+    f = NOTE_DAO.get_by_name(note.creator, name)
     if f != None:
         message = u"%s 已存在" % name
         raise Exception(message)
@@ -171,7 +171,7 @@ class RemoveAjaxHandler:
         if id != "" and id != None:
             file = NOTE_DAO.get_by_id(id)
         elif name != "":
-            file = NOTE_DAO.get_by_name(name)
+            file = NOTE_DAO.get_by_name(xauth.current_name(), name)
         else:
             return dict(code="fail", message="id,name至少一个不为空")
 
@@ -230,7 +230,7 @@ class RenameAjaxHandler:
         if old.creator != xauth.get_current_name():
             return dict(code="fail", message="没有权限")
 
-        file = NOTE_DAO.get_by_name(name)
+        file = NOTE_DAO.get_by_name(xauth.current_name(), name)
         if file is not None and file.is_deleted == 0:
             return dict(code="fail", message="%r已存在" % name)
 

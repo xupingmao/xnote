@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/01/26 13:01:14
+# @modified 2020/01/26 16:45:45
 import profile
 import math
 import re
@@ -127,7 +127,7 @@ def find_note_for_view(token, id, name):
     if id != "":
         return NOTE_DAO.get_by_id(id)
     if name != "":
-        return NOTE_DAO.get_by_name(name)
+        return NOTE_DAO.get_by_name(xauth.current_name(), name)
 
     raise HTTPError(504)
 
@@ -360,7 +360,7 @@ class QueryHandler:
             return dict(code = "success", data = NOTE_DAO.get_by_id(id))
         if action == "get_by_name":
             name = xutils.get_argument("name")
-            return dict(code = "success", data = NOTE_DAO.get_by_name(name))
+            return dict(code = "success", data = NOTE_DAO.get_by_name(xauth.current_name(), name))
         return dict(code="fail", message = "unknown action")
 
 xurls = (

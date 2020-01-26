@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/12/08 15:30:01
+# @modified 2020/01/26 16:53:20
 
 import sys
 import os
@@ -61,6 +61,8 @@ class TestMain(BaseTestCase):
         json_request("/message/list")
         json_request("/message/list?status=created")
         json_request("/message/list?status=suspended")
+        json_request("/message/list?tag=file")
+        json_request("/message/list?tag=link")
         # search
         json_request("/message/list?key=1")
 
@@ -94,6 +96,10 @@ class TestMain(BaseTestCase):
         self.assertEqual(1, len(key_list))
 
         del_msg_by_id(msg_id)
+
+    def test_message_stat(self):
+        result = json_request("/message/stat")
+        self.assertTrue(result.get("cron_count") != None)
 
 
 

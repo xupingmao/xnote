@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/24 20:05:28
+# @modified 2020/01/26 16:43:58
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -384,12 +384,12 @@ def update0(note):
     note.atime   = current_time
     kv_put_note(note.id, note)
 
-def get_by_name(name, db = None):
+def get_by_name(creator, name):
     def find_func(key, value):
         if value.is_deleted:
             return False
         return value.name == name
-    result = dbutil.prefix_list("note_tiny:", find_func, 0, 1)
+    result = dbutil.prefix_list("note_tiny:%s" % creator, find_func, 0, 1)
     if len(result) > 0:
         note = result[0]
         return get_by_id(note.id)
