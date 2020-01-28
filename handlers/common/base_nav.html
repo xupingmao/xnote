@@ -24,15 +24,7 @@
 
   <div class="search-box">
     <form id="searchForm" method="GET" action="{{search_action}}">
-      <input id="key" name="key" class="nav-search-input" 
-        placeholder="{{search_placeholder}}" 
-        value="{{?key}}"/>
-      <button class="nav-search-btn btn-default">
-        <i class="fa fa-search"></i>
-      </button>
-      <input class="hide" name="category" value="{{?category}}" />
-      <input class="hide" name="type" value="search"/>
-      {% block search_form %} {% end %}
+      {% include common/search_box.html %}
     </form>
   </div>
 </div>

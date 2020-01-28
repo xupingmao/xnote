@@ -16,10 +16,12 @@ $(function () {
           if (el == target) {
             imageIndex = index;
           }
-          var src = $(el).attr("src");
+
+          var src = $(el).attr("data-src");
           if (!src) {
-            src = $(el).attr("data-src");
+            src = $(el).attr("src");
           }
+          
           data.push({
             "alt": $(el).attr("alt"),
             "pid": 0,

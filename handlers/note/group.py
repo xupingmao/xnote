@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/25 12:38:55
+# @modified 2020/01/27 12:07:48
 import math
 import time
 import web
@@ -129,11 +129,9 @@ class GroupListHandler:
 def load_note_tools(user_name):
     msg_stat  = MSG_DAO.get_message_stat(user_name)
     note_stat = NOTE_DAO.get_note_stat(user_name)
-    public_count = NOTE_DAO.count_public()
     removed_count = NOTE_DAO.count_removed(user_name)
 
     return [
-        NoteLink("公共笔记", "/note/public", "fa-folder", size = public_count),
         NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
         NoteLink("话题", "/search/rules", "fa-search", size = msg_stat.key_count),
         NoteLink("记事", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),

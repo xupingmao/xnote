@@ -9,6 +9,7 @@ import xconfig
 import xutils
 import xtables
 import xmanager
+import xtemplate
 import web
 import six
 import json
@@ -36,6 +37,8 @@ def init():
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
     mgr = xmanager.init(APP, var_env, last_mapping=last_mapping)
     mgr.reload()
+    # 加载template
+    xtemplate.reload()
     return APP
 
 def json_request(*args, **kw):

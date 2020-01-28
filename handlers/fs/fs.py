@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/01/21 18:56:01
+# @modified 2020/01/26 20:05:29
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -182,6 +182,7 @@ class FileSystemHandler:
         raise web.seeother("/fs//")
 
     def read_range(self, path, http_range, blocksize):
+        xutils.trace("Download", "==> HTTP_RANGE %s" % http_range)
         range_list = http_range.split("bytes=")
         if len(range_list) == 2:
             # 包含完整的范围
@@ -237,6 +238,15 @@ class FileSystemHandler:
                 yield block
                 block = fp.read(blocksize)
 
+    def read_thumbnail(self, path, blocksize):
+        dirname = os.path.dirname(path)
+        fname   = os.path.basename(path)
+        thumbnail_path = os.path.join(dirname, ".thumbnail", fname)
+        if os.path.exists(thumbnail_path):
+            return self.read_all(thumbnail_path, blocksize)
+        else:
+            return self.read_all(path, blocksize)
+
     def read_file(self, path):
         # 强制缓存
         if not xconfig.DEBUG:
@@ -256,12 +266,13 @@ class FileSystemHandler:
         else:
             http_range = environ.get("HTTP_RANGE")
             blocksize = 64 * 1024;
-            # print_env()
 
             if http_range is not None:
-                xutils.trace("Download", "==> HTTP_RANGE %s" % http_range)
                 return self.read_range(path, http_range, blocksize)
             else:
+                mode = xutils.get_argument("mode", "")
+                if mode == "thumbnail":
+                    return self.read_thumbnail(path, blocksize)
                 return self.read_all(path, blocksize)            
 
     def handle_get(self, path):

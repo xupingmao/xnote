@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2019/11/30 17:23:52
+# @modified 2020/01/27 11:06:34
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -258,31 +258,35 @@ class ModelManager:
                 self.add_mapping(url, handler)
         # xurls拥有最高优先级，下面代码兼容旧逻辑
         elif hasattr(module, "handler"):
-            handler = module.handler
-            clz = name.replace(".", "_")
-            self.vars[clz] = module.handler
-            if hasattr(module.handler, "__url__"):
-                url = module.handler.__url__
-            elif hasattr(handler, "__xurl__"):
-                url = handler.__xurl__
-            elif hasattr(handler, "xurl"):
-                url = handler.xurl
-            else:
-                url = self.get_url(name)
-            self.add_mapping(url, handler)
-            if hasattr(module, "searchable"):
-                if not module.searchable:
-                    return
-            wm = WebModel()
-            wm.url = url
-            if hasattr(module, "searchkey"):
-                wm.searchkey = module.searchkey
-            if hasattr(module, "name"):
-                wm.name = module.name
-            if hasattr(module, "description"):
-                wm.description = module.description
-            wm.init()
-            self.model_list.append(wm)
+            self.load_model_old(module, modname)
+
+    def load_model_old(self, module, modname):
+        name = modname
+        handler = module.handler
+        clz = name.replace(".", "_")
+        self.vars[clz] = module.handler
+        if hasattr(module.handler, "__url__"):
+            url = module.handler.__url__
+        elif hasattr(handler, "__xurl__"):
+            url = handler.__xurl__
+        elif hasattr(handler, "xurl"):
+            url = handler.xurl
+        else:
+            url = self.get_url(name)
+        self.add_mapping(url, handler)
+        if hasattr(module, "searchable"):
+            if not module.searchable:
+                return
+        wm = WebModel()
+        wm.url = url
+        if hasattr(module, "searchkey"):
+            wm.searchkey = module.searchkey
+        if hasattr(module, "name"):
+            wm.name = module.name
+        if hasattr(module, "description"):
+            wm.description = module.description
+        wm.init()
+        self.model_list.append(wm)
 
     def load_task(self, module, name):
         if hasattr(module, "task"):

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2019/10/02 10:40:39
+# @modified 2020/01/27 11:04:21
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -35,6 +35,7 @@ import xutils
 import xconfig
 import xtables
 import xmanager
+import xtemplate
 import signal
 from xutils import *
 from autoreload import AutoReloadThread
@@ -156,6 +157,9 @@ def main():
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
     manager = xmanager.init(app, var_env, last_mapping = last_mapping)
     xmanager.reload()
+
+    # 重新加载template
+    xtemplate.reload()
 
     def reload_callback():
         # 重新加载handlers目录下的所有模块

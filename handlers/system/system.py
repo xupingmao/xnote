@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2019/12/22 13:43:50
+# @modified 2020/01/27 17:09:22
 """System functions"""
 from io import StringIO
 import xconfig
@@ -108,6 +108,7 @@ OTHER_TOOLS = [
     # 其他工具
     public_link("分屏模式", "/tools/multi_win"),
     public_link("RunJS", "/tools/runjs"),
+    public_link("摄像头", "/tools/camera"),
 ]
 
 # 所有功能配置

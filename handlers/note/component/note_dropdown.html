@@ -35,6 +35,10 @@
             <a class="dropdown-option link" href="/note/archive?id={{file.id}}">归档</a>
         {% end %}
 
+        {% if _is_admin and file.type == "gallery" %}
+            <a class="dropdown-option link" href="/fs/{{file.path}}">管理文件</a>
+        {% end %}
+
         <a class="dropdown-option link" href="/note/history?id={{file_id}}">{{T("历史")}}</a>
         <a class="dropdown-option link" href="/note/print?id={{file.id}}" target="_blank">打印模式</a>
 

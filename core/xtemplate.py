@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/01/21 01:18:30
+# @modified 2020/01/27 18:44:32
 import os
 import json
 import web
@@ -24,6 +24,7 @@ NAMESPACE    = dict(
 
 _lang_dict = dict()
 _mobile_name_dict = dict()
+_loader = None
 
 def load_languages():
     """加载系统语言配置"""
@@ -175,8 +176,9 @@ def get_mobile_template(name):
 def is_mobile_device(user_agent):
     if user_agent is None:
         return False
-    for name in ("iPhone", "Android"):
-        if user_agent.find(name) >= 0:
+    user_agent_lower = user_agent.lower()
+    for name in ("iphone", "android"):
+        if user_agent_lower.find(name) >= 0:
             return True
     return False
 
@@ -233,6 +235,9 @@ def reload():
     _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
     _loader.reset()
     load_languages()
+
+def init():
+    reload()
 
 class Panel:
 
@@ -482,4 +487,3 @@ class BasePlugin:
 BaseTextPage   = BasePlugin
 BaseTextPlugin = BasePlugin
 
-reload()
