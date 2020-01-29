@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/01/21 01:21:09
+# @modified 2020/01/28 15:12:11
 
 import re
 import os
@@ -245,7 +245,7 @@ def list_search_rules(user_name):
     list, count = MSG_DAO.list_by_tag(user_name, 'key', 0, 1000)
 
     for item in list:
-        item.url = "/search?key=" + xutils.encode_uri_component(item.content)
+        item.url = "/note/timeline?type=search&key=" + xutils.encode_uri_component(item.content)
     return list
 
 xutils.register_func("search.list_rules", list_search_rules)

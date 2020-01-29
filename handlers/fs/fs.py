@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/01/26 20:05:29
+# @modified 2020/01/28 15:50:45
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -332,40 +332,6 @@ class StaticFileHandler(FileSystemHandler):
             return "Not Readable %s" % path
         return self.handle_get(path)
 
-class BaseAddFileHandler:
-
-    @xauth.login_required("admin")
-    def POST(self):
-        path = xutils.get_argument("path", "")
-        filename = xutils.get_argument("filename", "")
-        if path == "":
-            return dict(code="fail", message="path is empty")
-        if xconfig.USE_URLENCODE:
-            filename = xutils.quote_unicode(filename)
-        newpath = os.path.join(path, filename)
-        try:
-            self.create_file(newpath)
-            return dict(code="success")
-        except Exception as e:
-            xutils.print_exc()
-            return dict(code="fail", message=str(e))
-
-    def create_file(self, path):
-        raise NotImplementedError()
-
-class AddDirHandler(BaseAddFileHandler):
-
-    def create_file(self, path):
-        os.makedirs(path)
-
-class AddFileHandler(BaseAddFileHandler):
-
-    def create_file(self, path):
-        if os.path.exists(path):
-            name = os.path.basename(path)
-            raise Exception("file [%s] exists" % name)
-        xutils.touch(path)
-
 class RemoveHandler:
 
     @xauth.login_required()
@@ -533,7 +499,7 @@ class TextHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        return xtemplate.render("fs/template/txtreader.html")
+        return xtemplate.render("fs/page/txtreader.html")
 
 xutils.register_func("fs.process_file_list", process_file_list)
 
@@ -542,8 +508,6 @@ xurls = (
     r"/fs_edit",   EditHandler,
     r"/fs_view",   ViewHandler,
     r"/fs_text",   TextHandler,
-    r"/fs_api/add_dir", AddDirHandler,
-    r"/fs_api/add_file", AddFileHandler,
     r"/fs_api/remove", RemoveHandler,
     r"/fs_api/rename", RenameHandler,
     r"/fs_api/cut", CutHandler,

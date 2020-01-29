@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2020/01/12 22:47:54
+# @modified 2020/01/29 23:51:42
 
 '''xnote系统配置
 
@@ -74,6 +74,7 @@ HOME_PATH     = "/note/timeline"
 # 插件相关
 LOAD_PLUGINS_ON_INIT = True
 PLUGINS_DICT         = {}
+PLUGIN_TEMPLATE      = ""
 
 # 菜单配置
 MENU_LIST    = []
@@ -242,6 +243,7 @@ def init(path = DATA_DIR):
     global LOG_FILE
     global STORAGE_DIR
     global ETC_DIR
+    global PLUGIN_TEMPLATE
 
     DATA_PATH = os.path.abspath(path)
     DATA_DIR  = os.path.abspath(path)
@@ -289,6 +291,9 @@ def init(path = DATA_DIR):
 
     # 加载文件后缀配置
     load_file_type_config()
+
+    from xutils import fsutil
+    PLUGIN_TEMPLATE = fsutil.readfile("./config/template/plugin.tpl")
 
 def load_file_type_config0(fpath):
     from xutils import fsutil, textutil

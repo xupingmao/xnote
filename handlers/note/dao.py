@@ -1,9 +1,23 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/26 16:43:58
+# @modified 2020/01/29 23:24:48
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
+
+一些表的说明
+note_full:<note_id>              = 笔记的内容，包含一些属性（部分属性比如访问时间、访问次数不是实时更新的）
+note_index:<note_id>             = 笔记索引
+note_tiny:<user>:<note_id>       = 用户维度的笔记索引
+note_book:<user>:<note_id>       = 用户维度的笔记本(项目)索引
+token:<uuid>                     = 用于链接分享的令牌
+note_history:<note_id>:<version> = 笔记的历史版本
+note_comment:<note_id>:<timeseq> = 笔记的评论
+comment_index:<user>:<timeseq>   = 用户维度的评论索引
+search_history:<user>:<timeseq>  = 用户维度的搜索历史
+
+TODO:
+note_public:<note_id>            = 公开的笔记索引
 """
 import time
 import math
@@ -26,6 +40,8 @@ DB_PATH         = xconfig.DB_PATH
 NOTE_ICON_DICT = {
     "group"   : "fa-folder orange",
     "csv"     : "fa-table",
+    "table"   : "fa-table",
+    "post"    : "fa-file-word-o",
     "html"    : "fa-file-word-o",
     "gallery" : "fa-photo",
     "list"    : "fa-list"

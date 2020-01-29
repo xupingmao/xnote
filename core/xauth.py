@@ -74,6 +74,15 @@ def get_user_config(name):
         return user.config
     return None
 
+def update_user_config_dict(name, config_dict):
+    user = get_user(name)
+    if user is None:
+        return
+    config = get_user_config(user)
+    config.update(**config_dict)
+    user.config = config
+    update_user(name, user)
+
 def find_by_name(name):
     if name is None:
         return None

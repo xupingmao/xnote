@@ -18,6 +18,7 @@
             <div class="dropdown-content">
                 <a class="dropdown-option" id="addFile">新建文件</a>
                 <a class="dropdown-option" id="addDirectory">新建文件夹</a>
+                <a class="dropdown-option" id="addPluginFile">新建插件</a>
             </div>
         </div>
 
@@ -107,15 +108,7 @@ $(function () {
         showToast(message, 3000);
     }
 
-    function createFile(type) {
-        var promptMessage = "新建文件";
-        var url = "/fs_api/add_file";
-
-        if (type == "directory") {
-            promptMessage = "新建文件夹";
-            url = "/fs_api/add_dir";
-        }
-        
+    function createFile(promptMessage, url) {
         xnote.prompt(promptMessage, "", function (fileName) {
             if (fileName && fileName != "") {
                 $.post(url, {path: globalPath, filename: fileName}, function (respText) {
@@ -136,11 +129,15 @@ $(function () {
     }
 
     $("#addDirectory").on("click", function (target) {
-        createFile("directory");
+        createFile("新建文件夹", "/fs_api/add_dir");
     });
 
     $("#addFile").click(function () {
-        createFile("file");
+        createFile("新建文件", "/fs_api/add_file");
+    });
+
+    $("#addPluginFile").click(function(event) {
+        createFile("新建插件", "/fs_api/add_plugin");
     });
 
     $(".native-opener").on("click", function () {

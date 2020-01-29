@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/01/26 16:45:45
+# @modified 2020/01/28 13:06:59
 import profile
 import math
 import re
@@ -64,6 +64,7 @@ def view_gallery_func(file, kw):
     kw.filelist   = filelist
 
 def default_view_func(file, kw):
+    """处理html/post等类型的文档"""
     content = file.content
     content = content.replace(u'\xad', '\n')
     content = content.replace(u'\n', '<br/>')

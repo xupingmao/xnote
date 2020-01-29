@@ -8,10 +8,10 @@
   <div class="menu-box float-left">
     <ul class="nav-ul">
       {% if _has_login %}
-        <li><a class="menu-link" href="/note/timeline">{{T("最新")}}</a></li>
+        <li><a class="menu-link" href="{{HOME_PATH}}">{{T("笔记")}}</a></li>
         <li><a class="menu-link" href="/note/public">{{T("公共")}}</a></li>
         <li><a class="menu-link" href="/plugins_list">{{T("工具")}}</a></li>
-        <li><a class="menu-link" href="/system/index">{{T("我的")}}</a></li>
+        <li><a class="menu-link" href="/system/index">{{T("系统")}}</a></li>
       {% end %}
       
       {% if not _has_login %}
@@ -35,8 +35,7 @@
     <ul class="navMenu">
       {% if _has_login %}
         <!-- 登录状态 -->
-        <!-- <li><a href="/note/group">{{T("我的笔记")}}</a></li> -->
-        <li><a href="/note/timeline">{{T("最新笔记")}}</a></li>
+        <li><a href="{{HOME_PATH}}">{{T("我的笔记")}}</a></li>
         <li><a href="/note/public">{{T("公共笔记")}}</a></li>
         <li><a href="/search/rules">{{T("话题搜索")}}</a></li>
         <li><a href="/plugins_list">工具插件</a></li>

@@ -117,7 +117,11 @@
       var type = "{{type}}" || getUrlParam("type");
       var parent_id = getUrlParam("parent_id");
       var searchKey = "{{key}}";
-
+      var loadingNoteIndex;
+      layer.ready(function(){
+        // 等待layer的资源加载完再显示，不然样式会漂移
+        loadingNoteIndex = layer.load(2);
+      }); 
       $.get("/note/api/timeline?_type=json&type=" + type, 
         { 
           offset: window.offset,
@@ -126,6 +130,7 @@
           key: searchKey
         }, 
         function (resp, status) {
+          layer.close(loadingNoteIndex);
           var data = resp.data;
           if (data == "{}") {
             // alert("没有更多了");
@@ -162,6 +167,8 @@
             }
             return 0;
           });
+      }).fail(function (error) {
+          layer.close(loadingNoteIndex);
       });
     }
 

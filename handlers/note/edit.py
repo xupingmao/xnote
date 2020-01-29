@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/01/26 16:44:59
+# @modified 2020/01/29 00:25:13
 
 """笔记编辑相关处理"""
 import os
@@ -128,8 +128,8 @@ class CreateHandler:
             inserted_id = create_func(note, ctx)
             if format == "json":
                 return dict(code="success", id = inserted_id, url = "/note/edit?id=%s" % inserted_id)
-            raise web.seeother("/note/edit?id={}".format(inserted_id))
-
+            if inserted_id != None:
+                raise web.seeother("/note/edit?id={}".format(inserted_id))
         except web.HTTPError as e1:
             xutils.print_exc()
             raise e1

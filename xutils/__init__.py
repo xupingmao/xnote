@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/01/12 18:41:12
+# @modified 2020/01/29 23:52:24
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -202,6 +202,7 @@ def attrget(obj, attr, default_value = None):
 ### DB Utilities
 
 def db_execute(path, sql, args = None):
+    from xconfig import Storage
     db = sqlite3.connect(path)
     cursorobj = db.cursor()
     kv_result = []

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/01/27 18:44:32
+# @modified 2020/01/29 14:06:01
 import os
 import json
 import web
@@ -122,6 +122,13 @@ def get_message_count(user):
         xutils.print_exc()
         return 0
 
+def get_home_path(user_name):
+    config = xauth.get_user_config(user_name)
+    if config is None:
+        return xconfig.HOME_PATH
+    else:
+        return config.get("HOME_PATH", xconfig.HOME_PATH)
+
 def pre_render(kw):
     """模板引擎预处理过程"""
     user_name           = xauth.current_name() or ""
@@ -141,6 +148,7 @@ def pre_render(kw):
     kw["_user_config"]   = get_user_config(user_name)
     kw["_notice_count"] = get_message_count(user_name)
     kw["T"]             = T
+    kw["HOME_PATH"]     = get_home_path(user_name)
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
 

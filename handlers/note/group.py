@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/27 12:07:48
+# @modified 2020/01/29 14:16:33
 import math
 import time
 import web
@@ -72,7 +72,9 @@ class BaseTimelineHandler:
     def GET(self):
         return xtemplate.render("note/timeline.html", 
             title = T(self.title), 
-            type = self.note_type)
+            type = self.note_type,
+            search_action = "/note/timeline",
+            search_placeholder = "搜索笔记")
 
 class DefaultListHandler:
 
@@ -341,7 +343,9 @@ class NoteIndexHandler:
             files     = files,
             show_path_list   = show_path_list,
             show_parent_link = show_parent_link,
-            show_next  = True)
+            show_next  = True,
+            search_action = "/note/timeline",
+            search_placeholder = "搜索笔记")
 
 class ToolListHandler(NoteIndexHandler):
     pass
