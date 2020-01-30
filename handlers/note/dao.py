@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/29 23:24:48
+# @modified 2020/01/30 10:11:29
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -652,9 +652,6 @@ def count_by_parent(creator, parent_id):
 
 @xutils.timeit(name = "NoteDao.FindPrev", logfile = True)
 def find_prev_note(note, user_name):
-    # where = "parent_id = $parent_id AND name < $name ORDER BY name DESC LIMIT 1"
-    # table = xtables.get_file_table()
-    # return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
     parent_id = str(note.parent_id)
     note_name = note.name
     def find_prev_func(key, value):
@@ -671,9 +668,6 @@ def find_prev_note(note, user_name):
 
 @xutils.timeit(name = "NoteDao.FindNext", logfile = True)
 def find_next_note(note, user_name):
-    # where = "parent_id = $parent_id AND name > $name ORDER BY name ASC LIMIT 1"
-    # table = xtables.get_file_table()
-    # return table.select_first(where = where, vars = dict(name = note.name, parent_id = note.parent_id))
     parent_id = str(note.parent_id)
     note_name = note.name
     def find_next_func(key, value):
@@ -760,29 +754,29 @@ def doc_filter_func(key, value):
 def table_filter_func(key, value):
     return value.type in ("csv", "table") and value.is_deleted == 0
 
+def get_filter_func(type, default_filter_func):
+    if type == "document" or type == "doc":
+        return doc_filter_func
+    if type in ("csv", "table"):
+        return table_filter_func
+    return default_filter_func
+
 def list_by_type(creator, type, offset, limit, orderby = "name", skip_archived = False):
     def list_func(key, value):
         if skip_archived and value.archived:
             return False
         return value.type == type and value.creator == creator and value.is_deleted == 0
 
-    if type == "document" or type == "doc":
-        list_func = doc_filter_func
-    if type in ("table", "csv"):
-        list_func = table_filter_func
-
-    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
+    filter_func = get_filter_func(type, list_func)
+    notes = dbutil.prefix_list("note_tiny:%s" % creator, filter_func, offset, limit, reverse = True)
     sort_notes(notes, orderby)
     return notes
 
 def count_by_type(creator, type):
-    def base_count_func(key, value):
+    def default_count_func(key, value):
         return value.type == type and value.creator == creator and value.is_deleted == 0
-    if type == "doc":
-        count_func = doc_filter_func
-    else:
-        count_func = base_count_func
-    return dbutil.prefix_count("note_tiny:%s" % creator, count_func)
+    filter_func = get_filter_func(type, default_count_func)
+    return dbutil.prefix_count("note_tiny:%s" % creator, filter_func)
 
 def list_sticky(creator, offset = 0, limit = 1000):
     def list_func(key, value):
@@ -910,7 +904,7 @@ def refresh_note_stat(user_name):
     stat.doc_count     = count_by_type(user_name, "doc")
     stat.gallery_count = count_by_type(user_name, "gallery")
     stat.list_count    = count_by_type(user_name, "list")
-    stat.table_count   = count_by_type(user_name, "csv")
+    stat.table_count   = count_by_type(user_name, "table")
     stat.sticky_count  = count_sticky(user_name)
 
     dbutil.put("user_stat:%s:note" % user_name, stat)

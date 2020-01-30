@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/01/28 15:50:45
+# @modified 2020/01/30 16:38:29
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -165,6 +165,7 @@ class FileSystemHandler:
         kw["parent_path"]  = get_parent_path(path)
         kw["search_action"] = "/fs_find"
         kw["show_aside"]   = False
+        kw["show_hidden_files"] = xutils.get_argument("show_hidden_files", False, type = bool)
 
         mode = xutils.get_argument("mode", xconfig.FS_VIEW_MODE)
         kw["fs_mode"] = mode
@@ -241,7 +242,7 @@ class FileSystemHandler:
     def read_thumbnail(self, path, blocksize):
         dirname = os.path.dirname(path)
         fname   = os.path.basename(path)
-        thumbnail_path = os.path.join(dirname, ".thumbnail", fname)
+        thumbnail_path = os.path.join(dirname, ".thumbnails", fname)
         if os.path.exists(thumbnail_path):
             return self.read_all(thumbnail_path, blocksize)
         else:

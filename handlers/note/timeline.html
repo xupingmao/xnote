@@ -95,12 +95,13 @@
     var app = new Vue({
         el: "#app",
         data: {
-            itemList: itemList
+            itemList: itemList,
+            offset: 0
         }
     });
 
     app.itemList = [];
-    window.offset = 0;
+    app.offset = 0;
 
     function mergeFiles(list, key, files) {
       for (var i = 0; i < list.length; i++) {
@@ -122,9 +123,10 @@
         // 等待layer的资源加载完再显示，不然样式会漂移
         loadingNoteIndex = layer.load(2);
       }); 
+
       $.get("/note/api/timeline?_type=json&type=" + type, 
         { 
-          offset: window.offset,
+          offset: app.offset,
           limit : QUERY_LIMIT,
           parent_id: parent_id,
           key: searchKey
@@ -145,7 +147,7 @@
           for (var key in resp) {
             console.log(key, resp[key]);
             var files = resp[key];
-            window.offset += files.length;
+            app.offset += files.length;
             mergeFiles(app.itemList, key, files);
             count++;
             // app.itemList.push({title: key, files: files});
@@ -177,7 +179,10 @@
       loadMore(true);
     })
 
-    loadMore(false);
+    layer.ready(function () {
+      // 等待layer资源加载
+      loadMore(false);
+    });
 </script>
 {% end %}
 

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/29 14:16:33
+# @modified 2020/01/30 16:16:09
 import math
 import time
 import web
@@ -90,7 +90,7 @@ class DefaultListHandler:
 
         return xtemplate.render(VIEW_TPL,
             file_type  = "group",
-            back_url   = xconfig.HOME_PATH,
+            back_url   = xconfig.get_user_config(user_name, "HOME_PATH"),
             pathlist   = [parent, Storage(name="默认分类", type="group", url="/note/default")],
             files      = files,
             file       = Storage(id = 1, name="默认分类", type="group", parent_id = 0),

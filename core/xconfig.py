@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2020/01/29 23:51:42
+# @modified 2020/01/30 16:13:11
 
 '''xnote系统配置
 
@@ -69,7 +69,6 @@ PAGE_OPEN     = "self"
 PAGE_WIDTH    = "1150"
 USER_CSS      = None
 USER_JS       = None
-HOME_PATH     = "/note/timeline"
 
 # 插件相关
 LOAD_PLUGINS_ON_INIT = True
@@ -169,6 +168,11 @@ note_history = None
 
 # 配置项
 _config = {}
+
+# 默认的用户配置
+DEFAULT_USER_CONFIG = {
+    "HOME_PATH": "/note/timeline"
+}
 
 def makedirs(dirname):
     if not os.path.exists(dirname):
@@ -518,18 +522,11 @@ def get_alias(name, default_value):
     """获取别名，用于扩展命令"""
     return _alias_dict.get(name, default_value)
 
-class MenuItem:
-
-    def __init__(self, name, link=None, role=None):
-        self.name = name
-        self.link = link
-        self.role = role
-        self.children = []
-
-    def is_visible(self):
-        import xauth
-        if self.role != None:
-            user_role = xauth.get_current_role()
-            return user_role == self.role
-        return True
-
+def get_user_config(user_name, config_key):
+    import xauth
+    config = xauth.get_user_config(user_name)
+    default_value = DEFAULT_USER_CONFIG.get(config_key)
+    if config is None:
+        return default_value
+    else:
+        return config.get(config_key, default_value)

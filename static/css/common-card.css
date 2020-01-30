@@ -2,7 +2,7 @@
  * 卡片主题的样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2019/12/12 22:06:37
+ * @modified 2020/01/30 10:00:30
  */
 
 body {
@@ -81,7 +81,7 @@ body {
 .plugin-item {
     background-color: #fff;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    /*border-radius: 5px;*/
 }
 
 .grid-title, .card-title, .card>h1,.card>h2,.card>h3,.card>h4 {

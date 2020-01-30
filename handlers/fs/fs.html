@@ -17,6 +17,7 @@
 {% init error = "" %}
 {% init show_fs_path = True %}
 {% init search_category = "fs" %}
+{% init show_hidden_files = False %}
 
 <div class="hide error row"></div>
 <div class="hide success row"></div>
@@ -38,8 +39,7 @@
         {% continue %}
     {% end %}
 
-    {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." 
-            or item.name.endswith((".pyc", ".class"))) %}
+    {% if not show_hidden_files and (item.name[0] == "." or item.name.endswith((".pyc", ".class"))) %}
         {% continue %}
     {% end %}
 

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/01/12 22:47:44
+# @modified 2020/01/30 16:15:28
 import web
 import xtables
 import xtemplate
@@ -12,7 +12,6 @@ import xconfig
 import time
 from xutils import Storage, cacheutil
 from xutils.dateutil import Timer
-from xutils import History
 
 INDEX_HTML = """
 {% extends base.html %}
@@ -30,57 +29,16 @@ UNAUTHORIZED_HTML = """
 {% end %}
 """
 
-def link(name, link, role = None):
-    return Storage(name = name, link = link, role = role)
-
-def list_tools():
-    tools = []
-    for group in xconfig.MENU_LIST:
-        for link in group.children:
-            tools.append(link)
-    return tools
-
-def tool_filter(item):
-    if item.role is None:
-        return True
-    if xauth.get_current_role() == "admin":
-        return True
-    if xauth.get_current_role() == item.role:
-        return True
-    return False
-
-def list_most_visited():
-    where = "is_deleted = 0 AND (creator = $creator OR is_public = 1)"
-    db = xtables.get_file_table()
-    return list(db.select(where = where, 
-            vars   = dict(creator = xauth.get_current_name()),
-            order  = "visited_cnt DESC",
-            limit  = 5))
 
 class IndexHandler:
 
     @xutils.timeit(name = "Home", logfile = True)
     def GET(self):
         if xauth.has_login():
-            raise web.found(xconfig.HOME_PATH)
+            user_name = xauth.current_name()
+            raise web.found(xconfig.get_user_config(user_name, "HOME_PATH"))
         else:
             raise web.found("/note/public")
-
-class GridHandler:
-
-    def GET(self):
-        type             = xutils.get_argument("type", "tool")
-        items            = []
-        customized_items = []
-        name             = "工具库"
-        if type == "tool":
-            items  = list(filter(tool_filter, list_tools()))
-            db     = xtables.get_storage_table()
-            config = db.select_first(where=dict(key="tools", user=xauth.get_current_name()))
-            if config is not None:
-                config_list = xutils.parse_config_text(config.value)
-                customized_items = map(lambda x: Storage(name=x.get("key"), link=x.get("value")), config_list)
-        return xtemplate.render("grid.html", items=items, name = name, customized_items = customized_items)
 
 class Unauthorized():
     def GET(self):
@@ -95,8 +53,7 @@ class FaviconHandler:
 xurls = (
     r"/", IndexHandler,
     r"/index", IndexHandler,
-    r"/home", IndexHandler,
-    r"/more", GridHandler,
+    r"/home",  IndexHandler,
     r"/unauthorized", Unauthorized,
     r"/favicon.ico", FaviconHandler
 )
