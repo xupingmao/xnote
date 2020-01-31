@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/01/27 18:25:43
+# @modified 2020/01/31 17:07:52
 from io import StringIO
 import xconfig
 import codecs
@@ -72,6 +72,7 @@ INNER_TOOLS = [
     inner_link("RunJS", "/tools/runjs"),
     inner_link("摄像头", "/tools/camera"),
 ]
+
 
 def build_inner_tools():
     return copy.copy(INNER_TOOLS)

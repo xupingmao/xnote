@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2020/01/27 17:09:22
+# @modified 2020/01/31 17:07:24
 """System functions"""
 from io import StringIO
 import xconfig
@@ -48,6 +48,7 @@ SYS_TOOLS = [
     admin_link("脚本",    "/fs_link/scripts"),
     admin_link("定时任务",   "/system/crontab"),
     admin_link("系统事件", "/system/event"),
+    admin_link("线程管理", "/system/thread_info"),
     admin_link("Menu_User",   "/system/user/list", "users"),
     admin_link("Menu_Log",    "/system/log"),
     admin_link("Menu_Refresh",  "/system/reload", "refresh"),
@@ -86,37 +87,11 @@ DATA_TOOLS = [
     admin_link("leveldb", "/system/db_scan", "database")
 ]
 
-OTHER_TOOLS = [
-    public_link("浏览器信息", "/tools/browser_info"),
-    # 文本
-    public_link("代码模板", "/tools/code_template", "code"),
-    public_link("文本对比", "/tools/js_diff", "code"),
-    public_link("文本转换", "/tools/text_processor", "code"),
-    public_link("随机字符串", "/tools/random_string", "code"),
-    # 图片
-    public_link("图片合并", "/tools/img_merge", "image"),
-    public_link("图片拆分", "/tools/img_split", "image"),
-    public_link("图像灰度化", "/tools/img2gray", "image"),
-    # 编解码
-    public_link("base64", "/tools/base64"),
-    public_link("HEX转换", "/tools/hex"),
-    public_link("md5签名", "/tools/md5"),
-    public_link("sha1签名", "/tools/sha1"),
-    public_link("URL编解码", "/tools/urlcoder"),
-    public_link("条形码", "/tools/barcode"),
-    public_link("二维码", "/tools/qrcode"),
-    # 其他工具
-    public_link("分屏模式", "/tools/multi_win"),
-    public_link("RunJS", "/tools/runjs"),
-    public_link("摄像头", "/tools/camera"),
-]
-
 # 所有功能配置
 xconfig.MENU_LIST = [
     Storage(name = "System", children = SYS_TOOLS, need_login = True),
     Storage(name = "Note", children = NOTE_TOOLS, need_login = True),
     Storage(name = "数据管理", children = DATA_TOOLS, need_login = True),
-    Storage(name = "Tools", children = OTHER_TOOLS),
 ]
 
 xconfig.NOTE_OPTIONS = [

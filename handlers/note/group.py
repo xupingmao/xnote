@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/01/30 16:16:09
+# @modified 2020/01/31 12:32:26
 import math
 import time
 import web
@@ -135,9 +135,9 @@ def load_note_tools(user_name):
 
     return [
         NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
+        NoteLink("置顶", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
         NoteLink("话题", "/search/rules", "fa-search", size = msg_stat.key_count),
         NoteLink("记事", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
-        NoteLink("置顶", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
         NoteLink("项目", "/note/timeline?type=group", "fa-folder", size = note_stat.group_count),
         NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
         NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),

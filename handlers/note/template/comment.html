@@ -1,5 +1,6 @@
 {% init comment_class = "" %}
 {% init comment_btn_text = "评论" %}
+{% init comment_placeholder = "请输入评论..." %}
 
 <style type="text/css">
     .chat-msg-img {
@@ -13,7 +14,7 @@
 <div class="card {{comment_class}}">
     {% if _has_login %}
     <div class="col-md-12">
-        <textarea id="commentText" class="col-md-12 no-outline"></textarea>
+        <textarea id="commentText" class="col-md-12 no-outline" placeholder="{{comment_placeholder}}"></textarea>
 
         <div id="commentFileUploader" class="hide"></div>
         <input type="file" id="commentFilePicker" class="hide" multiple/>

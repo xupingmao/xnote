@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/01/29 23:52:24
+# @modified 2020/01/31 12:19:49
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -29,6 +29,8 @@ import logging.handlers
 
 #################################################################
 
+# 输出缓存区
+STDOUT_BUF_SIZE = 1000
 
 wday_map = {
     "no-repeat": "一次性",
@@ -124,8 +126,10 @@ class SearchResult(dict):
             raise AttributeError(k)
 
 class MyStdout:
-    """标准输出的装饰器，用来拦截标准输出内容
-    """
+
+    _instance = None
+
+    """标准输出的装饰器，用来拦截标准输出内容"""
     def __init__(self, stdout, do_print = True):
         self.stdout = stdout
         self.result_dict = dict()
@@ -135,11 +139,15 @@ class MyStdout:
             self.encoding = stdout.encoding
         except:
             print_exc()
+        # 全局对象
+        MyStdout._instance = self
 
     def write(self, value):
         result = self.result_dict.get(current_thread())
         if result != None:
             result.append(value)
+            if len(result) > STDOUT_BUF_SIZE:
+                del result[0]
         if self.do_print:
             print(value, file=self.outfile, end="")
 
@@ -158,9 +166,15 @@ class MyStdout:
 
     def pop_record(self):
         # 非线程池模式下必须pop_record，不然会有内存泄漏的危险
-        # 考虑引入TTL检测机制
+        # TODO 考虑引入TTL检测机制
         result = self.result_dict.pop(current_thread(), [])
         return "".join(result)
+
+    @staticmethod
+    def get_records(thread_obj):
+        if MyStdout._instance == None:
+            return None
+        return MyStdout._instance.result_dict.get(thread_obj)
 
 #################################################################
 ##   File System Utilities
@@ -207,7 +221,7 @@ def db_execute(path, sql, args = None):
     cursorobj = db.cursor()
     kv_result = []
     try:
-        print(sql)
+        # print(sql)
         if args is None:
             cursorobj.execute(sql)
         else:

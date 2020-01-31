@@ -1,9 +1,23 @@
 ## 系统架构
 
-### 目录结构
+### 程序目录结构
 ```
-代码结构
-|-- static/         # 静态文件
+|-- app.py          # 程序入口
+|-- core/
+|   |-- xconfig.py      # 程序配置
+|   |-- xmanager.py     # handlers管理器，负责模块加载，注册URL，以及定时任务触发
+|   |-- xauth.py        # 权限控制
+|   |-- xtables.py      # 数据库表结构
+|   |-- xtemplate.py    # view层的渲染接口   
+|   \-- autoreload.py   # 脚本变更热加载，主要用于调试，生产环境可以关闭
+|
+|-- xutils/         # 工具类集合
+|-- lib/            # 第三方类库，程序启动时添加到sys.path中
+|-- config/         # 系统配置目录
+|   |-- file/       # 文件配置
+|   |-- lang/       # 多语言配置
+|   \-- template/   # 模板配置
+|
 |-- handlers/       # http请求处理器目录，功能实现大部分在这里
 |   |-- api/        # 系统接口，返回JSON格式，供页面、定时任务、搜索调用
 |   |-- system/     # 系统功能目录
@@ -11,30 +25,28 @@
 |   |-- fs/         # 文件功能目录
 |   |-- tools/      # 工具目录
 |   |-- plugins/    # 插件目录
-|   |-- ...         # 其他目录
-|-- tests/          # 测试用例
-|-- xutils/         # 工具类集合
-|-- lib/            # 第三方类库，程序启动时添加到sys.path中
-|-- lang/           # 多语言配置
-|-- app.py          # 程序入口
-|-- xconfig.py      # 程序配置
-|-- xmanager.py     # handlers管理器，负责模块加载，注册URL，以及定时任务触发
-|-- xauth.py        # 权限控制
-|-- xtables.py      # 数据库表结构
-|-- xtemplate.py    # view层的渲染接口   
-|-- autoreload.py   # 脚本变更热加载，主要用于调试，生产环境可以关闭
+|   \-- ...         # 其他目录
+|-- static/         # 静态文件
+\-- tests/          # 测试用例
 
+```
 
-数据区结构
+### 数据区目录结构
+
+```
+
 |-- files/     # 上传的文件
+|   \-- user01 # 用户目录，以用户名作为目录名，支持多个
+|       |-- upload   # 上传文件目录，上传文件以日期作为下级目录，比如 2019/01/
+|       |-- gallery  # 相册文件
+|
 |-- backup/    # 备份目录
 |-- scripts/   # 脚本目录
-|-- storage/   # 其他存储目录（主要是缓存）
+|-- storage/   # 应用存储目录
 |-- db/        # 数据库目录
 |-- log/       # 日志目录
 |-- tmp/       # 临时文件
-|-- trash/     # 回收站
-
+\-- trash/     # 回收站
 
 ```
 

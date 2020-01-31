@@ -21,6 +21,7 @@
             <a class="dropdown-option" href="javascript:createDocument();">文档</a>
             <a class="dropdown-option" href="javascript:createGallery();">相册</a>
             <a class="dropdown-option" href="javascript:createList();">清单</a>
+            <a class="dropdown-option" href="javascript:createTable();">表格</a>
             <a class="dropdown-option" href="javascript:createText();">快捷记事</a>
             <!-- <a class="dropdown-option" href="javascript:uploadFile();">上传文件</a> -->
         </div>
@@ -62,6 +63,11 @@ function createDocument() {
 /** 创建清单 **/
 function createList() {
     createNote0("新建清单", "list");
+}
+
+/** 创建表格 **/
+function createTable() {
+    createNote0("新建表格", "csv");
 }
 
 /** 创建记事 **/

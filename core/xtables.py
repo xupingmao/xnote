@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2019/10/05 00:33:24
+# @modified 2020/01/31 16:46:47
 """Xnote的数据库配置
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -500,7 +500,7 @@ def init():
 
     # init_db_wrapper(xconfig.DB_FILE)
     init_db_wrapper(xconfig.DICT_FILE)
-    init_db_wrapper(xconfig.RECORD_FILE)
+    # init_db_wrapper(xconfig.RECORD_FILE)
 
     # init_user_table()
     # init_file_table()
@@ -515,5 +515,5 @@ def init():
     # init_collection_table()
     # init_search_rule_table()
     # 非核心结构记录各种日志数据
-    init_record_table()
+    # init_record_table()
 

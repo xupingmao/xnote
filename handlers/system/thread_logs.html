@@ -2,25 +2,20 @@
 {% block body %}
 
 <div class="col-md-12 card">
-
     {% include system/thread_nav.html %}
 
     <table class="table" border="border:#ff6600 1px solid">
         <tr>
             <th>编号</th>
             <th>Name</th>
-            <th>is_alive</th>
-            <th>处理器</th>
             <th>操作</th>
         </tr>
-    {% for idx,thread in enumerate(thread_list) %}
+    {% for idx,thread in enumerate(result_dict) %}
         <tr>       
             <td>{{idx+1}}</td>
             <td>{{thread.getName()}}</td> 
-            <td>{{thread.is_alive()}}</td>
-            <td>{{thread.__dict__.get("handler_class")}}</td>
             <td>
-                <a class="view-detail" data-value="{{thread.__dict__}}">详情</a>
+                <a class="view-detail" data-value="{{get_thread_log(thread)}}">详情</a>
             </td>
         </tr>
     {% end %}
