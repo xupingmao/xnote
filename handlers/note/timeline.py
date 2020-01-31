@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/01/26 12:57:06
+# @modified 2020/01/31 18:16:17
 
 """时光轴视图"""
 import re
@@ -34,7 +34,7 @@ def search_group(user_name, words):
             result.append(row)
     return result
 
-def build_date_result(rows, orderby):
+def build_date_result(rows, type, orderby):
     result = dict()
     for row in rows:
         if orderby == "mtime":
@@ -42,12 +42,15 @@ def build_date_result(rows, orderby):
         else:
             date_time = row.ctime
 
-        date = re.match(r"\d+\-\d+\-\d+", date_time).group(0)
+        if type != "sticky" and row.priority != None and row.priority > 0:
+            title = '置顶'
+        else:
+            title = re.match(r"\d+\-\d+\-\d+", date_time).group(0)
         # 优化返回数据大小
         row.content = ""
-        if date not in result:
-            result[date] = []
-        result[date].append(row)
+        if title not in result:
+            result[title] = []
+        result[title].append(row)
 
     for key in result:
         items = result[key]
@@ -108,7 +111,7 @@ class TimelineAjaxHandler:
         if type in ("mtime", "group", "root"):
             orderby = "mtime"
 
-        return build_date_result(rows, orderby)
+        return build_date_result(rows, type, orderby)
 
 class DateTimeline:
     @xauth.login_required()
