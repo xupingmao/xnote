@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2020/01/31 17:07:24
+# @modified 2020/02/01 14:51:00
 """System functions"""
 from io import StringIO
 import xconfig
@@ -66,8 +66,7 @@ NOTE_TOOLS = [
     user_link("最近更新",      "/note/recent_edit", "folder"),
     user_link("最近创建",      "/note/recent_created", "folder"),
     user_link("最近查看",       "/note/recent_viewed", "folder"),
-    user_link("默认分组", "/note/default", "folder"),
-    user_link("分组", "/note/group", "folder"),
+    user_link("根目录", "/note/group", "folder"),
     user_link("书架", "/note/category", "book"),
     user_link("标签列表", "/note/taglist", "tags"),
     user_link("时光轴", "/note/tools/timeline"),

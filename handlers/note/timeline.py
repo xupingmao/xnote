@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/01/31 18:16:17
+# @modified 2020/02/01 15:00:10
 
 """时光轴视图"""
 import re
@@ -42,7 +42,7 @@ def build_date_result(rows, type, orderby):
         else:
             date_time = row.ctime
 
-        if type != "sticky" and row.priority != None and row.priority > 0:
+        if type not in ("sticky", "public") and row.priority != None and row.priority > 0:
             title = '置顶'
         else:
             title = re.match(r"\d+\-\d+\-\d+", date_time).group(0)
@@ -164,7 +164,7 @@ class TimelineHandler:
             key   = key,
             show_create = show_create,
             search_action = "/note/timeline",
-            search_placeholder = "搜索笔记",
+            search_placeholder = T("搜索笔记"),
             show_aside = False)
 
 class PublicTimelineHandler(TimelineHandler):

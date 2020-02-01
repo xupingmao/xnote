@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2020/01/24 16:07:20
+ * @modified 2020/02/01 14:43:37
 */
 
 
@@ -202,6 +202,9 @@
     color: black;
 }
 
+.book-size-span {
+    color: #888;
+}
 
 /** group select **/
 

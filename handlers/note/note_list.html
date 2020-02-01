@@ -1,10 +1,11 @@
 <!-- 
 @since 2018/03/06
-@modified 2020/01/26 12:38:02
+@modified 2020/02/01 14:43:07
 -->
 
 {% init files = [] %}
 {% init show_opts = True %}
+{% init show_size = False %}
 {% init show_cdate = False %}
 {% init show_mdate = False %}
 {% init show_adate = False %}
@@ -40,11 +41,11 @@
                 <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
                 <span>{{item.name}}</span>
                 
-                {% if item.size != None %}
-                    <span class="black">({{item.size}})</span>
-                {% end %}
-
                 <span class="book-size">
+                    {% if show_size and item.size != None %}
+                        <span class="book-size-span">{{item.size}}</span>
+                    {% end %}
+
                     {% if show_cdate %}
                         {{format_date(item.ctime).replace('-', '/')}}
                     {% end %}
@@ -57,7 +58,7 @@
                         {{format_date(item.atime).replace('-', '/')}}
                     {% end %}
 
-                    {% if item.show_next %}
+                    {% if item.show_next or show_size %}
                         <i class="fa fa-chevron-right"></i>
                     {% end %}
                 </span>
