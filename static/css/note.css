@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2020/02/01 14:43:37
+ * @modified 2020/02/02 14:36:13
 */
 
 
@@ -237,3 +237,7 @@
     /*width: 100%;*/
 }
 /** group select end **/
+
+.dict-list-value {
+    color: #000;
+}

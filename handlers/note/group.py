@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/02/01 14:41:54
+# @modified 2020/02/02 14:38:16
 import math
 import time
 import web
@@ -131,22 +131,21 @@ class GroupListHandler:
 def load_note_tools(user_name):
     msg_stat  = MSG_DAO.get_message_stat(user_name)
     note_stat = NOTE_DAO.get_note_stat(user_name)
-    removed_count = NOTE_DAO.count_removed(user_name)
 
     return [
         NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
         NoteLink("置顶", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
         NoteLink("话题", "/search/rules", "fa-search", size = msg_stat.key_count),
         NoteLink("记事", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
-        NoteLink("项目", "/note/timeline?type=group", "fa-folder", size = note_stat.group_count),
+        NoteLink("项目", "/note/timeline", "fa-folder", size = note_stat.group_count),
         NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
         NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
         NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
         NoteLink("表格", "/note/table", "fa-table", size = note_stat.table_count),
-        # NoteLink("词典", "/note/dict",  "fa-dict"),
+        NoteLink("词典", "/note/dict",  "icon-dict", size = note_stat.dict_count),
         # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
         # NoteLink("富文本", "/note/html", "fa-file-word-o"),
-        NoteLink("回收站", "/note/removed", "fa-trash", size = removed_count),
+        NoteLink("回收站", "/note/removed", "fa-trash", size = note_stat.removed_count),
         # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
         NoteLink("按月查看", "/note/date", "fa-cube"),
         NoteLink("数据统计", "/note/stat", "fa-bar-chart"),

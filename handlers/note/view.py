@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/01/28 13:06:59
+# @modified 2020/02/02 12:39:17
 import profile
 import math
 import re
@@ -275,36 +275,6 @@ class UnmarkHandler:
         db.update(is_marked=0, where=dict(id=id))
         raise web.seeother("/note/view?id=%s"%id)
 
-class DictHandler:
-
-    def GET(self):
-        page = xutils.get_argument("page", 1, type=int)
-        db = xtables.get_dict_table()
-        items = db.select(order="id", limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
-        def convert(item):
-            v = Storage()
-            v.name = item.key
-            v.summary = item.value
-            v.mtime = item.mtime
-            v.ctime = item.ctime
-            v.url = "#"
-            v.priority = 0
-            return v
-        items = map(convert, items)
-        count = db.count()
-        page_max = math.ceil(count / PAGE_SIZE)
-
-        return xtemplate.render("note/view.html", 
-            show_aside = True,
-            files      = list(items), 
-            file_type  = "group",
-            show_opts  = False,
-            page       = page,
-            page_max   = page_max,
-            pathlist   = [Storage(name = "词典", url = "#")],
-            show_pagination = True,
-            page_url   = "/note/dict?page=")
-
 class NoteHistoryHandler:
 
     @xauth.login_required()
@@ -368,7 +338,6 @@ xurls = (
     r"/note/(edit|view)"   , ViewHandler,
     r"/note/print"         , PrintHandler,
     r"/note/(\d+)"         , ViewByIdHandler,
-    r"/note/dict"          , DictHandler,
     r"/note/history"       , NoteHistoryHandler,
     r"/note/history_view"  , HistoryViewHandler,
     r"/note/notice"        , NoticeHandler,

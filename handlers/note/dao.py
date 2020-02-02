@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/01/30 10:11:29
+# @modified 2020/02/02 14:46:54
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -618,17 +618,11 @@ def list_by_date(field, creator, date):
 
 @xutils.timeit(name = "NoteDao.CountNote", logfile=True, logargs=True, logret=True)
 def count_by_creator(creator):
-    if xconfig.DB_ENGINE == "sqlite":
-        db    = xtables.get_file_table()
-        where = "is_deleted = 0 AND creator = $creator AND type != 'group'"
-        count = db.count(where, vars = dict(creator = xauth.get_current_name()))
-    else:
-        def count_func(key, value):
-            if value.is_deleted:
-                return False
-            return value.creator == creator and type != 'group'
-        count = dbutil.prefix_count("note_tiny:%s" % creator, count_func)
-    return count
+    def count_func(key, value):
+        if value.is_deleted:
+            return False
+        return value.creator == creator and type != 'group'
+    return dbutil.prefix_count("note_tiny:%s" % creator, count_func)
 
 def count_user_note(creator):
     return count_by_creator(creator)
@@ -649,6 +643,11 @@ def count_by_parent(creator, parent_id):
         return (value.is_public or value.creator == creator) and str(value.parent_id) == str(parent_id)
 
     return dbutil.prefix_count("note_tiny", list_note_func)
+
+@xutils.timeit(name = "NoteDao.CountDict", logfile = True, logargs = True, logret = True)
+def count_dict(user_name):
+    import xtables
+    return xtables.get_dict_table().count()
 
 @xutils.timeit(name = "NoteDao.FindPrev", logfile = True)
 def find_prev_note(note, user_name):
@@ -906,6 +905,8 @@ def refresh_note_stat(user_name):
     stat.list_count    = count_by_type(user_name, "list")
     stat.table_count   = count_by_type(user_name, "table")
     stat.sticky_count  = count_sticky(user_name)
+    stat.removed_count = count_removed(user_name)
+    stat.dict_count    = count_dict(user_name)
 
     dbutil.put("user_stat:%s:note" % user_name, stat)
     return stat

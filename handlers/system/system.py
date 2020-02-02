@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2020/02/01 14:51:00
+# @modified 2020/02/02 13:52:05
 """System functions"""
 from io import StringIO
 import xconfig
@@ -70,7 +70,7 @@ NOTE_TOOLS = [
     user_link("书架", "/note/category", "book"),
     user_link("标签列表", "/note/taglist", "tags"),
     user_link("时光轴", "/note/tools/timeline"),
-    user_link("字典", "/note/dict"),
+    user_link("词典", "/note/dict"),
 
     # 提醒
     user_link("待办",  "/message?tag=task", "calendar-check-o"),

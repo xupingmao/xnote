@@ -303,6 +303,32 @@ class TestMain(unittest.TestCase):
         l2 = [3,4,5]
         self.assertEqual([1,2,3,4,5], xutils.functions.listmerge(l1, l2))
 
+    def test_dbutil_lock(self):
+        from xutils.dbutil import RecordLock
+        lock1 = RecordLock("lock")
+        lock2 = RecordLock("lock")
+        self.assertTrue(lock1.acquire(timeout = 1))
+        self.assertFalse(lock2.acquire(timeout = 1))
+
+        del lock1,lock2
+
+    def test_dbutil_lock_free(self):
+        from xutils.dbutil import RecordLock
+        lock1 = RecordLock("lock#1")
+        lock2 = RecordLock("lock#2")
+
+        self.assertTrue(lock1.acquire())
+        self.assertTrue(lock2.acquire())
+
+        del lock1,lock2
+
+    def test_dbutil_lock_with(self):
+        from xutils.dbutil import RecordLock
+        lock1 = RecordLock("lock")
+        lock2 = RecordLock("lock")
+
+        with lock1 as lock:
+            self.assertFalse(lock2.acquire(timeout = 1))
 
 
         

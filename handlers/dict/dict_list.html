@@ -1,0 +1,29 @@
+{% extends base %}
+
+{% block body %}
+    <div class="card-title">
+        <a class="link" href="/note/dict">词典</a>
+    </div>
+
+    <div class="grid-row note-list">
+        {% for item in files %}
+            <a class="dialog-link" href="{{item.url}}">
+                <div class="book-item">
+                    <span>{{item.name}}</span>
+                    <span class="dict-list-value">{{item.value}}</span>
+                    <span class="book-size">
+                        <i class="fa fa-chevron-right"></i>
+                    </span>
+                </div>
+            </a>
+        {% end %}
+    </div>
+
+    {# 分页 #}
+    {% if show_pagination and "page" in globals() %}
+        <div class="card">
+            {% include mod_pagenation.html %}
+        </div>
+    {% end %}
+
+{% end %}

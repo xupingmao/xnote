@@ -19,7 +19,7 @@
     {% init show_add_file   = False %}
     {% init show_add_group  = False %}
     {% init show_path_list  = True %}
-    {% init show_pagination = True %}
+    {% init show_pagination = False %}
     {% init show_comment    = True %}
     {% init error           = "" %}
 
@@ -53,9 +53,9 @@
 
     {# 分页 #}
     {% if show_pagination and "page" in globals() %}
-    <div class="card hide">
-        {% include mod_pagenation.html %}
-    </div>
+        <div class="card">
+            {% include mod_pagenation.html %}
+        </div>
     {% end %}
 
 <script type="text/javascript">

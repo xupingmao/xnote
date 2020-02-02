@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/01 15:00:10
+# @modified 2020/02/02 11:34:16
 
 """时光轴视图"""
 import re
@@ -24,6 +24,7 @@ class TaskGroup(Storage):
         self.ctime = dateutil.format_time()
         self.mtime = dateutil.format_time()
         self.url  = "/message?tag=task"
+        self.priority = 1
         self.size = MSG_DAO.get_message_stat(user_name).task_count
 
 def search_group(user_name, words):

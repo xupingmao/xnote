@@ -1231,7 +1231,7 @@ window.xnote.showDialog = function(title, html) {
         var area = ['600px', '80%'];
     }
 
-    layer.open({
+    return layer.open({
         type: 1,
         title: title,
         shadeClose: true,

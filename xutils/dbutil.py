@@ -26,8 +26,46 @@ LAST_TIME_SEQ = -1
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2019/12/12 23:22:14
+# @modified 2020/02/02 15:59:20
 ###########################################################
+
+class RecordLock:
+
+    _enter_lock = threading.Lock()
+    _lock_dict  = dict()
+
+    def __init__(self, lock_key):
+        self.lock = None
+        self.lock_key = lock_key
+
+    def acquire(self, timeout = -1):
+        lock_key = self.lock_key
+
+        wait_time_start = time.time()
+        with RecordLock._enter_lock:
+            while RecordLock._lock_dict.get(lock_key) != None:
+                # 如果复用lock，可能导致无法释放锁资源
+                time.sleep(0.001)
+                if timeout > 0:
+                    wait_time = time.time() - wait_time_start
+                    if wait_time > timeout:
+                        return False
+            # 由于_enter_lock已经加锁了，_lock_dict里面不需要再使用锁
+            RecordLock._lock_dict[lock_key] = True
+        return True
+
+    def release(self):
+        del RecordLock._lock_dict[self.lock_key]
+
+    def __enter__(self):
+        self.acquire()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.release()
+
+    def __del__(self):
+        self.release()
 
 def search_escape(text):
     if not (isinstance(text, str) or isinstance(text, unicode)):
@@ -525,7 +563,33 @@ def count_table(table_name):
         count += 1
     return count
 
+def write_op_log(op, event):
+    """开启批量操作前先记录日志
+    @param {string} op 操作类型
+    @param {object} event 操作事件
+    @return 日志ID
+    """
+    pass
+
+def delete_op_log(log_id):
+    """完成批量操作后删除日志
+    @param {string} log_id 操作日志ID
+    @return None
+    """
+    pass
+
+def encode_zscore_key(key, score):
+    pass
+
+def encode_zmember_key(key, member):
+    pass
+
 def zadd(key, score, member):
+    # step1. write log
+    # step2. delete zscore:key:score
+    # step3. write zmember:key:member = score
+    # step4. write zscore:key:score = [key1, key2]
+    # step5. delete log
     obj = get(key)
     # print("zadd %r %r" % (member, score))
     if obj != None:
@@ -585,11 +649,17 @@ def zrem(key, member):
             return 1
     return 0
 
-if __name__ == "__main__":
+def run_obj_db_test():
     db = ObjDB('pkm.db')
     d = {"id":7}
     r = db.select("pkm_data", "*", "id=7")
     for i in r:
         print(i)
+
+def run_test():
+    pass
+
+if __name__ == "__main__":
+    run_test()
     
     

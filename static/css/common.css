@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/01/24 12:02:27
+ * @modified 2020/02/02 14:51:39
  */
 
 /** marked 样式 **/
@@ -46,42 +46,6 @@
 
 .marked-strong>a {
     color: red;
-}
-
-.col-md-1{float:left;width:8.3%;}
-.col-md-2{float:left;width:16.7%;}
-.col-md-3{float:left;width:25%;}
-.col-md-4{float:left;width:33.3%;}
-.col-md-5{float:left;width:41.7%;}
-.col-md-6{float:left;width:50%;}
-.col-md-7{float:left;width:58.3%;}
-.col-md-8{float:left;width:66.7%;}
-.col-md-9{float:left;width:75%;}
-.col-md-10{float:left;width:83.3%;}
-.col-md-11{float:left;width:91.7%;}
-.col-md-12{float:left;width:100%;}
-.col-md-offset-12{margin-left:100%;}
-.col-md-offset-11{margin-left:91.66666666666666%;}
-.col-md-offset-10{margin-left:83.33333333333334%;}
-.col-md-offset-9{margin-left:75%;}
-.col-md-offset-8{margin-left:66.66666666666666%;}
-.col-md-offset-7{margin-left:58.333333333333336%;}
-.col-md-offset-6{margin-left:50%;}
-.col-md-offset-5{margin-left:41.66666666666667%;}
-.col-md-offset-4{margin-left:33.33333333333333%;}
-.col-md-offset-3{margin-left:25%;}
-.col-md-offset-2{margin-left:16.666666666666664%;}
-.col-md-offset-1{margin-left:8.333333333333332%;}
-.col-md-offset-0{margin-left:0;}
-
-.top-offset-1{margin-top:5px;}
-.top-offset-2{margin-top:10px;}
-.bottom-offset-1{margin-bottom:5px;}
-
-.row{float: left;width: 100%;overflow: auto;}
-
-.pad10 {
-    padding: 10px;
 }
 
 /** 标题样式 **/
@@ -130,6 +94,10 @@
 
 .path-link {
     line-height: 28px;
+}
+
+.danger-link {
+    color: red;
 }
 
 .selected-link {
@@ -248,6 +216,7 @@
     cursor: pointer;
 }
 
+/** 表格 **/
 .no-border-table td {
     border: none;
 }
@@ -574,6 +543,7 @@ li.menu-item:hover {
     padding: 5px;
     margin: 5px;
     border: 1px solid #ccc;
+    cursor: pointer;
 }
 
 .tag-span:hover {
@@ -1191,6 +1161,17 @@ li.menu-item:hover {
     background-image: url(/static/image/icon_script.svg);
 }
 
+.icon-dict {
+    display: block;
+    margin-right: 3px;
+    margin-top: 4px; /* line-height是25px */
+    float: left;
+    width: 16px;
+    height: 16px;
+    background-size: cover;
+    background-image: url(/static/image/icon_dict.svg);
+}
+
 .mobile-only {
     display: none;
 }
@@ -1285,5 +1266,38 @@ li.menu-item:hover {
         display: none;
     }
 }
+
+
+/* 高优先级样式 */
+.col-md-1{float:left;width:8.3%;}
+.col-md-2{float:left;width:16.7%;}
+.col-md-3{float:left;width:25%;}
+.col-md-4{float:left;width:33.3%;}
+.col-md-5{float:left;width:41.7%;}
+.col-md-6{float:left;width:50%;}
+.col-md-7{float:left;width:58.3%;}
+.col-md-8{float:left;width:66.7%;}
+.col-md-9{float:left;width:75%;}
+.col-md-10{float:left;width:83.3%;}
+.col-md-11{float:left;width:91.7%;}
+.col-md-12{float:left;width:100%;}
+.col-md-offset-12{margin-left:100%;}
+.col-md-offset-11{margin-left:91.66666666666666%;}
+.col-md-offset-10{margin-left:83.33333333333334%;}
+.col-md-offset-9{margin-left:75%;}
+.col-md-offset-8{margin-left:66.66666666666666%;}
+.col-md-offset-7{margin-left:58.333333333333336%;}
+.col-md-offset-6{margin-left:50%;}
+.col-md-offset-5{margin-left:41.66666666666667%;}
+.col-md-offset-4{margin-left:33.33333333333333%;}
+.col-md-offset-3{margin-left:25%;}
+.col-md-offset-2{margin-left:16.666666666666664%;}
+.col-md-offset-1{margin-left:8.333333333333332%;}
+.col-md-offset-0{margin-left:0;}
+.top-offset-1{margin-top:5px;}
+.top-offset-2{margin-top:10px;}
+.bottom-offset-1{margin-bottom:5px;}
+.row{float: left;width: 100%;overflow: auto;}
+.pad10 {padding: 10px;}
 
 

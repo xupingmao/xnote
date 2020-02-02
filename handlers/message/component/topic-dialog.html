@@ -1,0 +1,29 @@
+<script type="text/javascript">
+$(function () {
+    var dialogIndex = 0;
+    // xnote.showDialog(title, html);
+
+    $(".select-topic-btn").click(function () {
+        window.topic_dialog_tag_click = function (target) {
+            var topic = $(target).text();
+            var oldText = $(".input-box").text();
+            $(".input-box").text("#" + topic + "# " + oldText);
+            layer.close(dialogIndex);
+        };
+
+        $.get("/message/list?pagesize=100&page=1&key=&tag=key", function (resp) {
+            if (resp.code == "success") {
+                var data = resp.data;
+                var html = $("<div>");
+                for (var i = 0; i < data.length; i++) {
+                    var content = data[i].content;
+                    html.append($("<span>").addClass("tag-span").text(content).attr("onclick", "topic_dialog_tag_click(this);"));
+                }
+                dialogIndex = xnote.showDialog("选择话题", html.html());
+            }
+        }).fail(function (error) {
+            xnote.toast("请求失败:" + error);
+        });
+    })
+});
+</script>

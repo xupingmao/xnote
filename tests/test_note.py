@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/01/24 16:36:24
+# @modified 2020/02/02 15:17:01
 import xutils
 
 # cannot perform relative import
@@ -262,7 +262,10 @@ class TestMain(BaseTestCase):
     def test_stat(self):
         self.check_OK("/note/stat")
 
-
+    def test_dict(self):
+        json_request("/dict/edit/name", method = "POST", data = dict(name = "name", value = u"姓名".encode("utf-8")))
+        self.check_OK("/note/dict")
+        self.check_OK("/dict/search?key=name")
 
     
 

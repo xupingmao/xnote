@@ -3,6 +3,6 @@
 {% include note/component/view_header.html %}
 
 {% set globals()["comment_class"] = "top-offset-1" %}
-{% set globals()["comment_btn_text"] = "提交" %}
-{% set globals()["comment_placeholder"] = "请输入清单项..." %}
+{% set globals()["comment_btn_text"] = T("保存") %}
+{% set globals()["comment_placeholder"] = T("请输入清单项...") %}
 {% include note/template/comment.html %}
