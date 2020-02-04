@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2020/01/06
-@modified 2020/01/26 12:49:39
+@modified 2020/02/04 23:21:18
 -->
 
 {% block body %}
@@ -31,8 +31,6 @@
             <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
             <a class="link2" href="{{item.url}}">{{item.name}}</a>
             
-            {% if item.size != None %}<span>({{item.size}})</span>{% end %}
-
             <span class="float-right">
                 <input type="checkbox" data-id="{{item.id}}"/>
             </span>

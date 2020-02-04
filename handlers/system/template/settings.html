@@ -168,8 +168,10 @@ select {
         <tr class="admin-visible">
             <td class="key">页面打开</td>
             <td>
-                <input type="radio" name="PAGE_OPEN" default-value="{{xconfig.PAGE_OPEN}}" value="self">当前页面
-                <input type="radio" name="PAGE_OPEN" default-value="{{xconfig.PAGE_OPEN}}" value="dialog">弹层
+                <select name="PAGE_OPEN" data-type="str" value="{{xconfig.PAGE_OPEN}}">
+                    <option value="self">当前页面</option>
+                    <option value="dialog">弹层</option>
+                </select>
             </td>
         </tr>
 

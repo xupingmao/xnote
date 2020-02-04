@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/02/15 21:46:37
-# @modified 2020/02/02 15:15:48
+# @modified 2020/02/04 11:35:51
 import xtables
 import xtemplate
 import xutils
@@ -77,9 +77,10 @@ class DictSearchHandler:
         key  = xutils.get_argument("key")
         page = xutils.get_argument("page", 1, type=int)
         db   = xtables.get_dict_table()
-        items = db.select(order="key", where = "key LIKE %s" % search_escape(key), limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
+        where_sql = "key LIKE %s" % search_escape(key)
+        items = db.select(order="key", where = where_sql, limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
         items = map(convert_dict_func, items)
-        count = db.count()
+        count = db.count(where = where_sql)
         page_max = math.ceil(count / PAGE_SIZE)
 
         return xtemplate.render("dict/dict_list.html", 

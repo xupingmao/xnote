@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/02/02 14:38:16
+# @modified 2020/02/04 23:20:49
 import math
 import time
 import web
@@ -112,7 +112,7 @@ class GroupListHandler:
         normal_books = []
 
         msg_stat  = MSG_DAO.get_message_stat(user_name)
-        note_link = NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count)
+        note_link = NoteLink("待办任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count)
         fixed_books.append(note_link)
 
         # 默认分组处理
