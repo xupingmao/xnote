@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/02 11:34:16
+# @modified 2020/02/05 13:00:08
 
 """时光轴视图"""
 import re
@@ -91,7 +91,6 @@ class TimelineAjaxHandler:
                 # TODO 公共笔记的搜索
                 search_key = xutils.unquote(search_key)
                 search_key_lower = search_key.lower()
-                parent_id  = None
                 words      = textutil.split_words(search_key_lower)
                 # groups = search_group(user_name, words)
 
@@ -165,7 +164,8 @@ class TimelineHandler:
             key   = key,
             show_create = show_create,
             search_action = "/note/timeline",
-            search_placeholder = T("搜索笔记"),
+            search_placeholder = T("搜索") + title,
+            search_ext_dict = dict(parent_id = parent_id),
             show_aside = False)
 
 class PublicTimelineHandler(TimelineHandler):

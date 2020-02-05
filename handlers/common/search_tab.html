@@ -1,0 +1,23 @@
+<!--
+@since 2018/05/27
+@modified 2020/02/05 10:53:49
+-->
+
+{% init key = "" %}
+{% if key != None and key != "" %}
+<div class="grid-card col-md-12 bottom-offset-1">
+    <a class="link x-radio" href="/search?key={{?key}}&category=default" 
+        data-option="default" data-value="{{?category}}">默认</a>
+    <a class="link x-radio" href="/search?key={{?key}}&category=content" 
+        data-option="content" data-value="{{?category}}">内容</a>
+    <a class="link x-radio" href="/search?key={{?key}}&category=dict" 
+        data-option="dict" data-value="{{?category}}">词典</a>
+    <a class="link x-radio" href="/message?key={{?key}}&category=message&from=note" 
+        data-option="message" data-value="{{?category}}">待办</a>
+
+    {%if _is_admin%}
+        <a class="link x-radio" href="/fs_find?key={{?key}}" 
+            data-option="book" data-value="{{?category}}">文件</a>
+    {%end%}
+</div>
+{% end %}
