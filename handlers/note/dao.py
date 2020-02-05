@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/02/02 14:46:54
+# @modified 2020/02/06 00:32:30
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -181,6 +181,8 @@ def list_path(file, limit = 2):
 
 @xutils.timeit(name = "NoteDao.GetById:leveldb", logfile = True)
 def get_by_id(id, include_full = True):
+    if id == "" or id is None:
+        return None
     if id == 0 or id == "0":
         return get_root()
 

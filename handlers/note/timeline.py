@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/05 13:00:08
+# @modified 2020/02/06 00:31:54
 
 """时光轴视图"""
 import re
@@ -138,7 +138,7 @@ class TimelineHandler:
 
     def GET(self):
         type        = xutils.get_argument("type", self.default_type)
-        parent_id   = xutils.get_argument("parent_id")
+        parent_id   = xutils.get_argument("parent_id", "")
         key         = xutils.get_argument("key", "")
         title       = T("最新笔记")
         show_create = True
@@ -152,9 +152,9 @@ class TimelineHandler:
         if type == "gallery":
             title = T("相册")
 
-        file = None
-        if parent_id != None:
-            file = NOTE_DAO.get_by_id(parent_id)
+        file = NOTE_DAO.get_by_id(parent_id)
+        
+        if file != None:
             title = file.name
 
         return xtemplate.render("note/timeline.html", 
