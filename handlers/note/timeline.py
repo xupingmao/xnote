@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/06 00:31:54
+# @modified 2020/02/06 22:41:05
 
 """时光轴视图"""
 import re
@@ -13,6 +13,10 @@ from xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
+TITLE_DICT = {
+    "gallery" : T("相册"),
+    "public"  : T("公共"),
+}
 
 class TaskGroup(Storage):
     def __init__(self):
@@ -140,22 +144,22 @@ class TimelineHandler:
         type        = xutils.get_argument("type", self.default_type)
         parent_id   = xutils.get_argument("parent_id", "")
         key         = xutils.get_argument("key", "")
-        title       = T("最新笔记")
+        title       = u"最新笔记"
         show_create = True
 
         if type == "public":
-            title = T("公共笔记")
             show_create = False
         else:
             xauth.check_login()
 
-        if type == "gallery":
-            title = T("相册")
+        title = TITLE_DICT.get(type, u"最新笔记")
 
+        search_title = u"笔记"
         file = NOTE_DAO.get_by_id(parent_id)
         
         if file != None:
             title = file.name
+            search_title = file.name
 
         return xtemplate.render("note/timeline.html", 
             title = title,
@@ -164,7 +168,7 @@ class TimelineHandler:
             key   = key,
             show_create = show_create,
             search_action = "/note/timeline",
-            search_placeholder = T("搜索") + title,
+            search_placeholder = T(u"搜索" + search_title),
             search_ext_dict = dict(parent_id = parent_id),
             show_aside = False)
 
