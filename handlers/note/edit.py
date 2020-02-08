@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/01/29 00:25:13
+# @modified 2020/02/08 19:27:51
 
 """笔记编辑相关处理"""
 import os
@@ -54,9 +54,21 @@ def get_heading_by_type(type):
         return T("创建表格")
     return T("创建笔记")
 
+def fire_update_event(note):
+    event_body = dict(id=note.id, 
+            name = note.name, 
+            mtime = dateutil.format_datetime(), 
+            content = note.content, 
+            version = note.version+1)
+    xmanager.fire('note.updated', event_body)
+
+def fire_rename_event(note):
+    event_body = dict(action = "rename", id = note.id, name = note.name, type = note.type)
+    xmanager.fire("note.rename", event_body)
+
 def create_text_func(note, ctx):
     date_str  = time.strftime("%Y.%m.%d")
-    note.name = u"记事:" + date_str + dateutil.current_wday()
+    note.name = u"日志:" + date_str + dateutil.current_wday()
     return NOTE_DAO.create(note)
 
 def default_create_func(note, ctx):
@@ -193,26 +205,6 @@ class RemoveAjaxHandler:
     def POST(self):
         return self.GET()
 
-class DictPutHandler:
-
-    def GET(self):
-        return self.POST()
-
-    @xauth.login_required()
-    def POST(self):
-        # TODO 转成KV存储
-        key     = xutils.get_argument("key")
-        value   = xutils.get_argument("value")
-        db      = xtables.get_dict_table()
-        item    = db.select_first(where=dict(key=key))
-        current = xutils.format_datetime()
-        if key == "" or key is None:
-            return dict(code="fail", message="key is empty")
-        if item is None:
-            db.insert(key=key, value=value, ctime = current, mtime = current)
-        else:
-            db.update(value = value, mtime = current, where = dict(key=key))
-        return db.select_first(where=dict(key=key))
 
 class RenameAjaxHandler:
 
@@ -235,9 +227,10 @@ class RenameAjaxHandler:
             return dict(code="fail", message="%r已存在" % name)
 
         NOTE_DAO.update(id, name=name)
-        event_body = dict(action="rename", id=id, name=name, type=old.type)
-        xmanager.fire("note.updated", event_body)
-        xmanager.fire("note.rename", event_body)
+
+        fire_update_event(old)
+        fire_rename_event(old)
+
         return dict(code="success")
 
     def GET(self):
@@ -287,12 +280,7 @@ def check_get_note(id):
 def update_and_notify(file, update_kw):
     rowcount = NOTE_DAO.update(file.id, **update_kw)
     if rowcount > 0:
-        xmanager.fire('note.updated', dict(
-            id = file.id, 
-            name = file.name, 
-            mtime = dateutil.format_datetime(),
-            content = update_kw.get("content"), 
-            version = file.version + 1))
+        fire_update_event(file)
     else:
         # 更新冲突了
         raise NoteException("409", "更新失败")
@@ -401,7 +389,7 @@ class UnarchiveHandler:
         NOTE_DAO.update(id, archived=False)
         raise web.found("/note/%s" % id)
 
-class MoveHandler:
+class MoveAjaxHandler:
     
     @xauth.login_required()
     def GET(self):
@@ -442,10 +430,8 @@ class AppendAjaxHandler:
             note.list_items = []
         note.list_items.append(content)
         NOTE_DAO.update0(note)
-        xmanager.fire('note.updated', dict(id=note_id, 
-            name = note.name, 
-            mtime = dateutil.format_datetime(), 
-            content = content, version=version+1))
+
+        fire_update_event(note)
         return dict(code = "success")
         
 
@@ -461,8 +447,8 @@ xurls = (
     r"/note/unstick"     , UnstickHandler,
     r"/note/archive"     , ArchiveHandler,
     r"/note/unarchive"   , UnarchiveHandler,
-    r"/note/move"        , MoveHandler,
-    r"/note/group/move"  , MoveHandler,
+    r"/note/move"        , MoveAjaxHandler,
+    r"/note/group/move"  , MoveAjaxHandler,
 
     # 分享
     r"/note/share",        PublicShareHandler,
@@ -470,7 +456,6 @@ xurls = (
     r"/note/share/cancel", UnshareHandler,
     r"/note/link_share",   LinkShareHandler,
 
-    r"/file/dict/put"    , DictPutHandler,
     r"/file/save"        , SaveAjaxHandler,
     r"/file/autosave"    , SaveAjaxHandler
 )

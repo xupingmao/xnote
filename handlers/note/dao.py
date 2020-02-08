@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/02/06 00:32:30
+# @modified 2020/02/08 18:20:09
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -112,14 +112,29 @@ def batch_query(id_list):
             result[id] = note
     return result
 
+def sort_by_name(notes):
+    notes.sort(key = lambda x: x.name)
+
+def sort_by_name_desc(notes):
+    notes.sort(key = lambda x: x.name, reverse = True)
+
+def sort_by_mtime_desc(notes):
+    notes.sort(key = lambda x: x.mtime, reverse = True)
+
+def sort_by_ctime_desc(notes):
+    notes.sort(key = lambda x: x.ctime, reverse = True)
+
+SORT_FUNC_DICT = {
+    "name": sort_by_name,
+    "name_desc": sort_by_name_desc,
+    "mtime_desc": sort_by_mtime_desc,
+    "ctime_desc": sort_by_ctime_desc,
+}
+
 def sort_notes(notes, orderby = "name"):
-    if orderby == "name":
-        notes.sort(key = lambda x: x.name)
-    elif orderby == "name_desc":
-        notes.sort(key = lambda x: x.name, reverse = True)
-    else:
-        # mtime_desc
-        notes.sort(key = lambda x: x.mtime, reverse = True)
+    sort_func = SORT_FUNC_DICT.get(orderby, sort_by_mtime_desc)
+    sort_func(notes)
+
     # 置顶笔记
     notes.sort(key = lambda x: x.priority, reverse = True)
     # 文件夹放在前面
@@ -161,6 +176,7 @@ def build_note_info(note):
             note.data = ''
         # process icon
         note.icon = NOTE_ICON_DICT.get(note.type, "fa-file-text-o")
+    return note
 
 @xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
 def list_path(file, limit = 2):
@@ -715,14 +731,19 @@ def file_wrapper(dict, option=None):
     file.category = "note"
     return file
 
-def search_name(words, creator=None):
+def search_name(words, creator = None, parent_id = None):
     words = [word.lower() for word in words]
+    if parent_id != None:
+        parent_id = str(parent_id)
+
     def search_func(key, value):
         if value.is_deleted:
             return False
+        if parent_id != None and value.parent_id != parent_id:
+                return False
         return (value.creator == creator or value.is_public) and textutil.contains_all(value.name.lower(), words)
-    result = dbutil.prefix_list("note_tiny", search_func, 0, -1)
-    notes  = [file_wrapper(item) for item in result]
+    result = dbutil.prefix_list("note_tiny:%s" % creator, search_func, 0, -1)
+    notes  = [build_note_info(item) for item in result]
     notes.sort(key = lambda x: x.mtime, reverse = True)
     return notes
 

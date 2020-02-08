@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2020/01/24 19:23:47
+# @modified 2020/02/08 20:12:35
 import re
 import random
 from .imports import is_str, ConfigParser
@@ -13,6 +13,7 @@ Text Process Library
 
 
 ALPHA_NUM = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+BLANK_CHAR_SET = set(" \n\t\r")
 
 def contains_all(text, words):
     """
@@ -104,8 +105,26 @@ def isdigit(text):
     """
     return _chk_list(text, _isdigit)
 
+def isblank(text):
+    for c in text:
+        if c not in BLANK_CHAR_SET:
+            return False
+    return True
+
 def issubsetof(text, collection):
     pass
+
+def is_cjk(c):
+    code = ord(c)
+    if 0x3400 <= code and code <= 0x4DB5:
+        return True
+    if 0x4E00 <= code and code <= 0x9FCB:
+        return True
+    if 0x20000 <= code and code <= 0x2A6D6:
+        return True
+    if 0x2A700 <= code and code <= 0x2B734:
+        return True
+    return False
 
 """Methods to parse the text
    Built-in methods
@@ -160,6 +179,13 @@ def split_words(text):
     while words.count('') > 0:
         words.remove('')
     return words
+
+def split_chars(text):
+    chars = []
+    for c in text:
+        if c.isprintable() and c not in BLANK_CHAR_SET:
+            chars.append(c)
+    return chars
 
 def split_first(text, sep = ' '):
     """

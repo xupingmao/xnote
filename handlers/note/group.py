@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/02/04 23:20:49
+# @modified 2020/02/08 15:35:57
 import math
 import time
 import web
@@ -147,7 +147,7 @@ def load_note_tools(user_name):
         # NoteLink("富文本", "/note/html", "fa-file-word-o"),
         NoteLink("回收站", "/note/removed", "fa-trash", size = note_stat.removed_count),
         # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
-        NoteLink("按月查看", "/note/date", "fa-cube"),
+        NoteLink("按月查看", "/note/date", "fa-calendar"),
         NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
         NoteLink("上传管理", "/fs_upload", "fa-upload")
     ]
@@ -338,6 +338,7 @@ class NoteIndexHandler:
 
         return xtemplate.render(VIEW_TPL,
             pathlist  = [PathNode(TYPES_NAME, "/note/types")],
+            html_title = T("索引"),
             file_type = "group",
             files     = files,
             show_path_list   = show_path_list,

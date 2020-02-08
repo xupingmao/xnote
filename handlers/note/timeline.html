@@ -42,18 +42,7 @@
         {% elif type == "search" %}
           <a class="btn btn-default" href="/search?key={{quote(key)}}&category=content">高级搜索</a>
         {% elif type != "public" %}
-          <div class="dropdown">
-              <span class="dropdown-btn link btn">更多▾</span>
-              <div class="dropdown-content">
-                  <a class="dropdown-option" href="{{base_path}}?type=sticky">只看置顶</a>
-                  <a class="dropdown-option" href="{{base_path}}?type=document">只看文档</a>
-                  <a class="dropdown-option" href="{{base_path}}?type=gallery">只看相册</a>
-                  <a class="dropdown-option" href="{{base_path}}?type=list">只看清单</a>
-                  <a class="dropdown-option" href="{{base_path}}?type=table">只看表格</a>
-                  <a class="dropdown-option" href="{{base_path}}?type=archived">只看归档</a>
-                  <a class="dropdown-option" href="/note/index">统计</a>
-              </div>
-          </div>
+          <a class="btn" href="/note/index">索引</a>
         {% end %}
     </div>
   </div>
@@ -160,8 +149,10 @@
             return;
           }
           
+          var pinnedTitle = ["置顶", "项目"];
+
           app.itemList.sort(function (a, b) {
-            if (a.title == "置顶") {
+            if (pinnedTitle.indexOf(a.title) >= 0) {
               return -1;
             }
             if (a.title < b.title) {

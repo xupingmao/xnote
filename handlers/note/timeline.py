@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/06 22:41:05
+# @modified 2020/02/08 20:18:19
 
 """时光轴视图"""
 import re
@@ -39,7 +39,36 @@ def search_group(user_name, words):
             result.append(row)
     return result
 
-def build_date_result(rows, type, orderby):
+def split_words(search_key):
+    search_key_lower = search_key.lower()
+    words = []
+    p_start = 0
+    for p in range(len(search_key_lower) + 1):
+        if p == len(search_key_lower):
+            if p > p_start:
+                word = search_key_lower[p_start:p]
+                words.append(word)
+            break
+
+        c = search_key_lower[p]
+        if textutil.isblank(c):
+            # 空格断字
+            if p > p_start:
+                word = search_key_lower[p_start:p]
+                words.append(word)
+            p_start = p + 1
+        elif textutil.is_cjk(c):
+            # 中日韩字符集
+            words.append(c)
+            p_start = p + 1
+        else:
+            # 其他字符
+            continue
+    # print(words)
+    return words
+
+
+def build_date_result(rows, orderby, sticky_title = False, group_title = False):
     result = dict()
     for row in rows:
         if orderby == "mtime":
@@ -47,8 +76,10 @@ def build_date_result(rows, type, orderby):
         else:
             date_time = row.ctime
 
-        if type not in ("sticky", "public") and row.priority != None and row.priority > 0:
+        if sticky_title and row.priority != None and row.priority > 0:
             title = '置顶'
+        elif group_title and row.type == "group":
+            title = "项目"
         else:
             title = re.match(r"\d+\-\d+\-\d+", date_time).group(0)
         # 优化返回数据大小
@@ -62,6 +93,102 @@ def build_date_result(rows, type, orderby):
         items.sort(key = lambda x: x[orderby], reverse = True)
     return dict(code = 'success', data = result)
 
+def list_search_func(context):
+    # 主要是搜索
+    offset     = context['offset']
+    limit      = context['limit']
+    search_key = context['search_key']
+    type       = context['type']
+    user_name  = context['user_name']
+    parent_id  = xutils.get_argument("parent_id", "")
+    words      = None
+    rows       = []
+
+    if parent_id == "":
+        parent_id = None
+
+    if search_key != None and search_key != "":
+        # TODO 公共笔记的搜索
+        search_key = xutils.unquote(search_key)
+        words      = split_words(search_key)
+        rows       = NOTE_DAO.search_name(words, user_name, parent_id = parent_id)
+        rows       = rows[offset: offset + limit]
+
+    return build_date_result(rows, 'ctime', sticky_title = True, group_title = True)
+
+def list_root_func(context):
+    user_name = context['user_name']
+    rows      = NOTE_DAO.list_group(user_name)
+    rows.insert(0, TaskGroup())
+    return build_date_result(rows, 'mtime', sticky_title = True)
+
+def list_public_func(context):
+    offset = context['offset']
+    limit  = context['limit']
+    rows   = NOTE_DAO.list_public(offset, limit)
+    return build_date_result(rows, 'ctime')
+
+def list_sticky_func(context):
+    offset    = context['offset']
+    limit     = context['limit']
+    user_name = context['user_name']
+    rows      = NOTE_DAO.list_sticky(user_name, offset, limit)
+    return build_date_result(rows, 'ctime')
+
+def list_removed_func(context):
+    offset    = context['offset']
+    limit     = context['limit']
+    user_name = context['user_name']
+    rows      = NOTE_DAO.list_removed(user_name, offset, limit)
+    return build_date_result(rows, 'ctime')
+
+def list_archived_func(context):
+    offset    = context['offset']
+    limit     = context['limit']
+    user_name = context['user_name']
+    rows      = NOTE_DAO.list_archived(user_name, offset, limit)
+    return build_date_result(rows, 'ctime', sticky_title = True)
+
+def list_by_type_func(context):
+    type      = context['type']
+    offset    = context['offset']
+    limit     = context['limit']
+    user_name = context['user_name']
+    rows      = NOTE_DAO.list_by_type(user_name, type, offset, limit)
+    return build_date_result(rows, 'ctime', sticky_title = True)
+
+def list_all_func(context):
+    offset    = context['offset']
+    limit     = context['limit']
+    user_name = context['user_name']
+    rows      = NOTE_DAO.list_recent_created(user_name, offset, limit)
+    return build_date_result(rows, 'ctime')
+
+def default_list_func(context):
+    offset    = context['offset']
+    limit     = context['limit']
+    user_name = context['user_name']
+    parent_id = context['parent_id']
+    rows      = NOTE_DAO.list_by_parent(user_name, parent_id, offset, limit, 'ctime')
+    return build_date_result(rows, 'ctime', sticky_title = True, group_title = True)
+
+LIST_FUNC_DICT = {
+    'root': list_root_func,
+    'public': list_public_func,
+    'sticky': list_sticky_func,
+    'removed': list_removed_func,
+    'archived': list_archived_func,
+    'md': list_by_type_func,
+    'group': list_by_type_func,
+    'gallery': list_by_type_func,
+    'document': list_by_type_func,
+    'list': list_by_type_func,
+    'table': list_by_type_func,
+    'csv': list_by_type_func,
+    'all': list_all_func,
+    "search": list_search_func,
+}
+
 class TimelineAjaxHandler:
 
     def GET(self):
@@ -72,50 +199,8 @@ class TimelineAjaxHandler:
         search_key = xutils.get_argument("key", None, type=str)
         user_name  = xauth.current_name()
 
-        if type == "public":
-            rows = NOTE_DAO.list_public(offset, limit)
-        elif type == "sticky":
-            rows = NOTE_DAO.list_sticky(user_name, offset, limit)
-        elif type == "removed":
-            rows = NOTE_DAO.list_removed(user_name, offset, limit)
-        elif type in ("md", "group", "gallery", "document", "list", "table", "csv"):
-            rows = NOTE_DAO.list_by_type(user_name, type, offset, limit)
-        elif type == "archived":
-            rows = NOTE_DAO.list_archived(user_name, offset, limit)
-        elif type == "all":
-            rows = NOTE_DAO.list_recent_created(user_name, offset, limit)
-        elif type == "root":
-            rows = NOTE_DAO.list_group(user_name)
-            rows.insert(0, TaskGroup())
-            orderby = "mtime"
-        else:
-            # 主要是搜索
-            words = None
-            if search_key != None and search_key != "":
-                # TODO 公共笔记的搜索
-                search_key = xutils.unquote(search_key)
-                search_key_lower = search_key.lower()
-                words      = textutil.split_words(search_key_lower)
-                # groups = search_group(user_name, words)
-
-            def list_func(key, value):
-                if value.is_deleted:
-                    return False
-                if value.name is None:
-                    return False
-                if parent_id != None and str(value.parent_id) != str(parent_id):
-                    return False
-                if words != None and not textutil.contains_all(value.name.lower(), words):
-                    return False
-                return True
-            # TODO 搜索公开内容
-            rows = NOTE_DAO.list_by_func(user_name, list_func, offset, limit)
-
-        orderby = "ctime"
-        if type in ("mtime", "group", "root"):
-            orderby = "mtime"
-
-        return build_date_result(rows, type, orderby)
+        list_func = LIST_FUNC_DICT.get(type, default_list_func)
+        return list_func(locals())
 
 class DateTimeline:
     @xauth.login_required()

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/02/02 12:39:17
+# @modified 2020/02/07 14:24:05
 import profile
 import math
 import re
@@ -83,14 +83,6 @@ def view_md_func(file, kw):
         kw.show_recommend = False
         kw.template_name = "note/editor/markdown_edit.html"
 
-def view_text_func(note, kw):
-    kw.content = note.content
-    kw.show_recommend = True
-    kw.show_pagination = False
-    if kw.op == "edit":
-        kw.show_recommend = False
-        kw.template_name = "note/editor/markdown_edit.mobile.html"
-
 def view_group_func(note, kw):
     raise web.found("/note/timeline?type=default&parent_id=%s" % note.id)
 
@@ -115,9 +107,9 @@ def view_list_func(note, kw):
 
 VIEW_FUNC_DICT = {
     "group": view_group_func,
-    "md": view_md_func,
-    "text": view_text_func,
-    "memo": view_text_func,
+    "md"  : view_md_func,
+    "text": view_md_func,
+    "memo": view_md_func,
     "list": view_list_func,
     "gallery": view_gallery_func
 }

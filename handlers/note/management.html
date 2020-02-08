@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2020/01/06
-@modified 2020/02/04 23:21:18
+@modified 2020/02/08 11:34:22
 -->
 
 {% block body %}
@@ -11,10 +11,7 @@
 
     <!-- header -->
     <div class="row card-title">
-        {% for i, path_item in enumerate(pathlist) %}
-            {% if i > 0 %} / {% end %}
-            <a href="{{path_item.url}}" class="link2 path-link">{{ path_item.name }}</a>
-        {% end %}
+        <a href="{{parent.url}}" class="link2 path-link">{{parent.name}}</a>&nbsp;/&nbsp;<span>管理</span>
 
         <div class="float-right">
             <button class="reverse-select-btn">反选</button>
