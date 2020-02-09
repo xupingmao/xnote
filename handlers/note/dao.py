@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/02/08 18:20:09
+# @modified 2020/02/09 23:13:51
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -91,6 +91,9 @@ class FileDO(dict):
         file.url = "/note/view?id={}".format(dict["id"])
         return file
 
+def format_note_id(id):
+    return "%020d" % int(id)
+
 def get_root():
     root = Storage()
     root.name = "根目录"
@@ -107,7 +110,7 @@ def batch_query(id_list):
     creator = xauth.current_name()
     result = dict()
     for id in id_list:
-        note = dbutil.get("note_tiny:%s:%020d" % (creator, int(id)))
+        note = dbutil.get("note_tiny:%s:%s" % (creator, format_note_id(id)))
         if note:
             result[id] = note
     return result
@@ -278,15 +281,21 @@ def update_note_rank(note):
     note_id = note.id
     
     if note.is_deleted:
-        dbutil.zrem("note_recent:%s" % creator, note_id)
-        dbutil.zrem("note_visit:%s" % creator, note_id)
-        dbutil.zrem("note_recent:public", note_id)
-    elif note.type != "group":
+        # TODO 删除索引
+        return
+        # dbutil.zrem("note_recent:%s" % creator, note_id)
+        # dbutil.zrem("note_visit:%s" % creator, note_id)
+        # dbutil.zrem("note_recent:public", note_id)
+    if note.type != "group":
         # 分组不需要记录
-        dbutil.zadd("note_recent:%s" % creator, mtime, note_id)
-        dbutil.zadd("note_visit:%s" % creator, atime, note_id)
-        if note.is_public:
-            dbutil.zadd("note_recent:public", mtime, note_id)
+        # TODO 增加修改时间和访问时间的索引
+        # dbutil.zadd("note_recent:%s" % creator, mtime, note_id)
+        # dbutil.zadd("note_visit:%s" % creator, atime, note_id)
+        return
+    if note.is_public:
+        # TODO 更新公共笔记的最近更新索引
+        # dbutil.zadd("note_recent:public", mtime, note_id)
+        return
 
 def kv_put_note(note_id, note):
     priority = note.priority
@@ -314,10 +323,7 @@ def del_dict_key(dict, key):
     if key in dict:
         del dict[key]
 
-def update_index(note):
-    """更新索引的时候也会更新用户维度的索引(note_tiny)"""
-    id = note['id']
-
+def convert_to_index(note):
     note_index = Storage(**note)
 
     del_dict_key(note_index, 'path')
@@ -326,15 +332,33 @@ def update_index(note):
     del_dict_key(note_index, 'data')
     del_dict_key(note_index, 'content')
 
+    return note_index
+
+def update_index(note):
+    """更新索引的时候也会更新用户维度的索引(note_tiny)"""
+    id = note['id']
+
+    note_index = convert_to_index(note)
     dbutil.put('note_index:%s' % id, note_index)
     
     # 更新笔记的排序
     update_note_rank(note)
+
     # 更新用户索引
-    dbutil.put("note_tiny:%s:%020d" % (note.creator, int(id)), note)
+    dbutil.put("note_tiny:%s:%s" % (note.creator, format_note_id(id)), note_index)
 
     if note.type == "group":
-        dbutil.put("notebook:%s:%020d" % (note.creator, int(id)), note)
+        dbutil.put("notebook:%s:%s" % (note.creator, format_note_id(id)), note)
+
+    if note.is_public:
+        dbutil.put("note_public:%s" % format_note_id(id), note_index)
+
+def update_public_index(note):
+    if note.is_public:
+        note_index = convert_to_index(note)
+        dbutil.put("note_public:%s" % format_note_id(note.id), note_index)
+    else:
+        dbutil.delete("note_public:%s" % format_note_id(note.id))
 
 def update_note(note_id, **kw):
     # 这里只更新基本字段，移动笔记使用 move_note
@@ -390,6 +414,9 @@ def update_note(note_id, **kw):
             note.version = old_version
 
         kv_put_note(note_id, note)
+        
+        if is_public != None:
+            update_public_index(note)
         return 1
     return 0
 
@@ -463,7 +490,7 @@ def delete_note(id):
     delete_tags(note.creator, id)
 
     # 删除笔记本
-    book_key = "notebook:%s:%020d" % (note.creator, int(id))
+    book_key = "notebook:%s:%s" % (note.creator, format_note_id(id))
     dbutil.delete(book_key)
 
     # 更新数量统计

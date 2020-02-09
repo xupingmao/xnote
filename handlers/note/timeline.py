@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/08 20:18:19
+# @modified 2020/02/09 22:35:20
 
 """时光轴视图"""
 import re
@@ -147,7 +147,7 @@ def list_archived_func(context):
     limit     = context['limit']
     user_name = context['user_name']
     rows      = NOTE_DAO.list_archived(user_name, offset, limit)
-    return build_date_result(rows, 'ctime', sticky_title = True)
+    return build_date_result(rows, 'ctime')
 
 def list_by_type_func(context):
     type      = context['type']
@@ -155,7 +155,7 @@ def list_by_type_func(context):
     limit     = context['limit']
     user_name = context['user_name']
     rows      = NOTE_DAO.list_by_type(user_name, type, offset, limit)
-    return build_date_result(rows, 'ctime', sticky_title = True)
+    return build_date_result(rows, 'ctime')
 
 def list_all_func(context):
     offset    = context['offset']

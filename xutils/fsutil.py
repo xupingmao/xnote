@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2020/01/24 11:15:55
+# @modified 2020/02/09 22:37:49
 import codecs
 import os
 import platform
@@ -540,10 +540,22 @@ def load_list_config(fpath):
     """加载列表配置文件"""
     text = readfile(fpath)
     lines = text.split("\n")
-    return list(map(lambda line: line.strip(), lines))
+    result = []
+    for line in lines:
+        line = line.strip()
+        if line[0] == '#':
+            continue
+        result.append(line)
+    return result
 
 def load_set_config(fpath):
     """加载集合配置文件"""
     text = readfile(fpath)
     lines = text.split("\n")
-    return set(map(lambda line: line.strip(), lines))
+    result = set()
+    for line in lines:
+        line = line.strip()
+        if line[0] == '#':
+            continue
+        result.add(line)
+    return result
