@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2020/02/08 20:12:35
+# @modified 2020/02/08 22:10:21
 import re
 import random
 from .imports import is_str, ConfigParser
@@ -115,14 +115,28 @@ def issubsetof(text, collection):
     pass
 
 def is_cjk(c):
+    """是否是CJK(中日韩统一表意文字)
+    说明来自维基百科 https://zh.wikipedia.org/wiki/CJK
+    @param {char} c 单个字符
+    """
     code = ord(c)
-    if 0x3400 <= code and code <= 0x4DB5:
+    if 0x4E00 <= code and code <= 0x9FFF:
+        # 1993年5月，正式制订最初的中日韩统一表意文字，位于U+4E00–U+9FFF这个区域，共20,902个字。
         return True
-    if 0x4E00 <= code and code <= 0x9FCB:
+    if 0x3400 <= code and code <= 0x4DFF:
+        # 1999年，依据ISO/IEC 10646的第17个修正案（Amendment 17）订定扩展区A，于U+3400–U+4DFF加入6,582个字。
         return True
-    if 0x20000 <= code and code <= 0x2A6D6:
+    if 0x20000 <= code and code <= 0x2A6FF:
+        # 2001年，依据ISO/IEC 10646-2，新增扩展区B，包含42,711个汉字。位于U+20000–U+2A6FF。
+        return True
+    if 0x9FA6 <= code and code <= 0x0FBB:
+        # 2005年，依据ISO/IEC 10646:2003的第1个修正案（Amendment 1），基本多文种平面增加U+9FA6-U+9FBB，共22个汉字。
         return True
     if 0x2A700 <= code and code <= 0x2B734:
+        # 2009年，统一码5.2扩展区C增加U+2A700–U+2B734
+        return True
+    if 0x9FC4 <= code and code <= 0x9FCB:
+        # 2009年，统一码5.2基本多文种平面增加U+9FC4–U+9FCB。
         return True
     return False
 
@@ -349,7 +363,8 @@ def random_string(length, chars=ALPHA_NUM):
 
 def parse_config_text(text, ret_type = 'list'):
     """解析key/value格式的配置文本
-    :arg str ret_type: 返回的格式，包含list, dict
+    @param {string} text 配置文本内容
+    @param {string} ret_type 返回的格式，包含list, dict
     """
     if ret_type == 'dict':
         config = dict()
