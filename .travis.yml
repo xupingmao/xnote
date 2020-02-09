@@ -1,11 +1,12 @@
 language: python
 python:
-  - "2.7"
+  # - "2.7" python2.7在2020年1月1日之后不再被官方支持
   # - "3.3" travis-ci不支持
   # - "3.4" travis-ci不支持
   - "3.5"
   - "3.6"
   - "3.7"
+  - "3.8"
 # command to install dependencies
 install: 
   - pip install pytest==5.1.0

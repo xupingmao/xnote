@@ -22,7 +22,7 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 
 
 ## 安装运行
-- 安装python（支持Python2、3，建议Python3）
+- 安装python（建议Python3，Python2.7版本不再维护）
 - 安装依赖的软件包
     - Mac/Linux执行 ```python -m pip install -r requirements.txt```
     - Windows执行 `python -m pip install -r requirements.win.txt`

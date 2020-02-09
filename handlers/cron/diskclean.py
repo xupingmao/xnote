@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/28 01:01:33
-# @modified 2019/09/18 00:10:27
+# @modified 2020/02/09 14:07:26
 import zipfile
 import os
 import re
@@ -18,6 +18,9 @@ def is_empty_dir(dirname):
     return len(os.listdir(dirname)) == 0
 
 def rm_expired_files(dirname, expired_time, depth=0):
+    if not os.path.exists(dirname):
+        xutils.error("DiskClean", "dirname `%s` not eixsts" % dirname)
+        return
     if depth > MAX_DEPTH:
         xutils.error("DiskClean", "too deep path, dirname: %s" % dirname)
         return
@@ -31,10 +34,11 @@ def rm_expired_files(dirname, expired_time, depth=0):
             rm_expired_files(fpath, expired_time, depth+1)
             if is_empty_dir(fpath):
                 xutils.rmfile(fpath)
-        st = os.stat(fpath)
-        if now - st.st_ctime >= expired_time:
-            xutils.info("DiskClean", "%s is expired" % fname)
-            xutils.rmfile(fpath)
+        else:
+            st = os.stat(fpath)
+            if now - st.st_ctime >= expired_time:
+                xutils.info("DiskClean", "%s is expired" % fname)
+                xutils.rmfile(fpath)
 
 class handler:
 

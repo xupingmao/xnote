@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2019/12/08 14:57:03
+# @modified 2020/02/09 14:04:31
 
 import sys
 import os
@@ -323,6 +323,9 @@ class Main:
 
     def test_plugins_new_command(self):
         self.check_OK("/plugins_new/command?input=cmd-test")
+
+    def test_diskclean(self):
+        self.check_OK("/cron/diskclean")
 
 
 
