@@ -7,7 +7,7 @@
         <a class="link2" href="/note/taglist">标签列表</a> / {{tagname}}
     </div>
     {% set page_url="/note/tagname/"+tagname+"?page=" %}
-    {% include note/note_list.html %}
+    {% include note/editor/note_list.html %}
 </div>
 
 <div class="card">
@@ -17,5 +17,5 @@
 {% end %}
 
 {% block aside %}
-    {% include note/mod_aside.html %}
+    {% include note/component/mod_aside.html %}
 {% end %}

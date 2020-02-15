@@ -1,24 +1,40 @@
 <!-- group_option.html -->
 {% init error = None %}
 {% init is_iframe = False %}
-{% init file = Storage(id = 0, parent_id=0) %}
+{% init file = Storage(id = 0, parent_id=0, priority = 0) %}
 
 {% if file != None and _has_login %}
     <div class="dropdown">
       <span class="dropdown-btn link btn">更多▾</span>
       <div class="dropdown-content">
-        {% if file.id != 0 and file.priority != None and file.priority > 0 %}
-            <a class="dropdown-option" href="/note/unstick?id={{file.id}}">取消置顶</a>
-        {% elif str(file.id) != "0" %}
-            <a class="dropdown-option" href="/note/stick?id={{file.id}}">置顶</a>
-        {% end %}
-        
-        <a class="dropdown-option" href="/note/management?parent_id={{file.id}}">批量操作</a>
+        <a class="dropdown-option" href="/note/stick?id={{file.id}}">
+            置顶
+            {% if file.priority == 1 %}<i class="fa fa-check"></i>{% end %}
+        </a>
 
+        <a class="dropdown-option" href="/note/reset?id={{file.id}}">
+            普通
+            {% if file.priority == 0 %}<i class="fa fa-check"></i>{% end %}
+        </a>
+
+        <a class="dropdown-option link" href="/note/archive?id={{file.id}}">
+            归档
+            {% if file.priority == -1 %}
+                <i class="fa fa-check"></i>
+            {% end %}
+        </a>
+        
         {% if str(file.id) != "0" %}
             <a class="dropdown-option" href="javascript:rename('{{file.id}}', '{{file.name}}')">重命名</a>
         {% end %}
-        
+
+        <a class="dropdown-option" href="/note/management?parent_id={{file.id}}">批量操作</a>
+        <!--
+        <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=mtime_desc&page={{!page}}">按时间倒序</a>
+        <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name&page={{!page}}">按名称顺序</a>
+        <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name_desc&page={{!page}}">按名称倒序</a>
+        -->
+
         {% if file.size == 0 %}
             <a class="dropdown-option-red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
         {% end %}

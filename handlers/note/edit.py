@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/02/09 22:55:52
+# @modified 2020/02/15 12:47:19
 
 """笔记编辑相关处理"""
 import os
@@ -153,7 +153,7 @@ class CreateHandler:
 
         heading = get_heading_by_type(type)
 
-        return xtemplate.render("note/add.html", 
+        return xtemplate.render("note/page/create.html", 
             show_search = False,
             heading  = heading,
             key      = "", 
@@ -359,7 +359,7 @@ class StickHandler:
     def GET(self):
         id = xutils.get_argument("id")
         note = check_get_note(id)
-        NOTE_DAO.update(id, priority = 1)
+        NOTE_DAO.update(id, priority = 1, archived = False)
         raise web.found("/note/%s" % id)
 
 class UnstickHandler:
@@ -377,8 +377,17 @@ class ArchiveHandler:
     def GET(self):
         id = xutils.get_argument("id")
         note = check_get_note(id)
-        NOTE_DAO.update(id, archived=True)
+        NOTE_DAO.update(id, archived=True, priority = -1)
         raise web.found("/note/%s" % id)
+
+class ResetHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id")
+        note = check_get_note(id)
+        NOTE_DAO.update(id, archived=False, priority = 0)
+        raise web.found(note.url)
 
 class UnarchiveHandler:
 
@@ -444,12 +453,14 @@ xurls = (
     r"/note/save"        , SaveAjaxHandler,
     r"/note/append"      , AppendAjaxHandler,
     r"/note/stick"       , StickHandler,
-    r"/note/unstick"     , UnstickHandler,
     r"/note/archive"     , ArchiveHandler,
-    r"/note/unarchive"   , UnarchiveHandler,
+    r"/note/reset"       , ResetHandler,
     r"/note/move"        , MoveAjaxHandler,
     r"/note/group/move"  , MoveAjaxHandler,
 
+    r"/note/unstick"     , UnstickHandler,
+    r"/note/unarchive"   , UnarchiveHandler,
+    
     # 分享
     r"/note/share",        PublicShareHandler,
     r"/note/share/public", PublicShareHandler,

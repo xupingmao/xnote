@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2019/10/20 18:24:52
+# @modified 2020/02/15 12:40:00
 import math
 import xutils
 import xtemplate
@@ -55,7 +55,7 @@ class TagNameHandler:
         count = len(files)
 
         files = files[offset: offset+limit]
-        return xtemplate.render("note/template/tagname.html", 
+        return xtemplate.render("note/page/tagname.html", 
             show_aside = True,
             tagname    = tagname, 
             tags       = tagname,
@@ -73,7 +73,7 @@ class TagListHandler:
             tag_list  = xutils.call("note.list_tag", user_name)
         else:
             tag_list  = xutils.call("note.list_tag", "")
-        return xtemplate.render("note/template/taglist.html", 
+        return xtemplate.render("note/page/taglist.html", 
             html_title = "标签列表",
             show_aside = False,
             tag_list = tag_list)

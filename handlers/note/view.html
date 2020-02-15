@@ -32,7 +32,7 @@
     <div class="col-md-12 card">
         {% comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 %}
         {% if file_type == "group" %}
-            {% include note/note_list.html %}
+            {% include note/editor/note_list.html %}
         {% elif file_type in ("md", "text") %}
             {% include note/editor/markdown.html %}
         {% elif file_type == "csv" %}
@@ -48,7 +48,7 @@
 
     {# 评论功能 #}
     {% if file_type != "group" and show_comment %}
-        {% include note/template/comment.html %}
+        {% include note/page/comment.html %}
     {% end %}
 
     {# 分页 #}
@@ -103,5 +103,5 @@ $(function () {
 {% end %}
 
 {% block aside %}
-    {% include note/mod_aside.html %}
+    {% include note/component/mod_aside.html %}
 {% end %}

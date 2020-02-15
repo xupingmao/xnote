@@ -13,38 +13,9 @@
             <a href="{{path_item.url}}" class="link2 path-link">{{ path_item.name }}</a>
         {% end %}
 
-        {% if file != None and _has_login %}
-            {# 文件夹下拉选项 #}
-            <div class="float-right">
-                {% include note/component/create_option.html %}
-
-                <div class="dropdown">
-                  <span class="dropdown-btn link btn">更多▾</span>
-                  <div class="dropdown-content">
-                    {% if file.id != 0 and file.priority != None and file.priority > 0 %}
-                        <a class="dropdown-option" href="/note/unstick?id={{file.id}}">取消置顶</a>
-                    {% elif str(file.id) != "0" %}
-                        <a class="dropdown-option" href="/note/stick?id={{file.id}}">置顶</a>
-                    {% end %}
-                    
-                    <a class="dropdown-option" href="/note/management?parent_id={{file.id}}">批量操作</a>
-
-                    {% if file.id != 0 %}
-                        <a class="dropdown-option move-btn link" data-url="/note/group/select?id={{file.id}}">移动</a>
-                        <a class="dropdown-option" href="javascript:rename('{{file.id}}', '{{file.name}}')">重命名</a>
-                    {% end %}
-
-                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=mtime_desc&page={{page}}">按时间倒序</a>
-                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name&page={{page}}">按名称顺序</a>
-                    <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name_desc&page={{page}}">按名称倒序</a>
-                    
-                    {% if file.size == 0 %}
-                        <a class="dropdown-option-red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
-                    {% end %}
-                  </div>
-                </div>
-            </div>
-        {% end %}
+        <div class="float-right">
+            {% include note/component/group_option.html %}
+        </div>
     </div>
 {% end %}
 

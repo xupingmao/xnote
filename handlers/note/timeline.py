@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/09 22:35:20
+# @modified 2020/02/10 00:44:59
 
 """时光轴视图"""
 import re
@@ -14,6 +14,7 @@ from xtemplate import T
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
 TITLE_DICT = {
+    "root"    : T("项目"),
     "gallery" : T("相册"),
     "public"  : T("公共"),
 }
@@ -68,8 +69,8 @@ def split_words(search_key):
     return words
 
 
-def build_date_result(rows, orderby, sticky_title = False, group_title = False):
-    result = dict()
+def build_date_result(rows, orderby, sticky_title = False, group_title = False, archived_title = False):
+    tmp_result = dict()
     for row in rows:
         if orderby == "mtime":
             date_time = row.mtime
@@ -78,19 +79,24 @@ def build_date_result(rows, orderby, sticky_title = False, group_title = False):
 
         if sticky_title and row.priority != None and row.priority > 0:
             title = '置顶'
+        elif archived_title and row.archived == True:
+            title = '归档'
         elif group_title and row.type == "group":
             title = "项目"
         else:
             title = re.match(r"\d+\-\d+\-\d+", date_time).group(0)
         # 优化返回数据大小
         row.content = ""
-        if title not in result:
-            result[title] = []
-        result[title].append(row)
+        if title not in tmp_result:
+            tmp_result[title] = []
+        tmp_result[title].append(row)
 
-    for key in result:
-        items = result[key]
+    result = []
+    for key in tmp_result:
+        items = tmp_result[key]
         items.sort(key = lambda x: x[orderby], reverse = True)
+        result.append(dict(title = key, children = items))
+
     return dict(code = 'success', data = result)
 
 def list_search_func(context):
@@ -120,7 +126,7 @@ def list_root_func(context):
     user_name = context['user_name']
     rows      = NOTE_DAO.list_group(user_name)
     rows.insert(0, TaskGroup())
-    return build_date_result(rows, 'mtime', sticky_title = True)
+    return build_date_result(rows, 'mtime', sticky_title = True, archived_title = True)
 
 def list_public_func(context):
     offset = context['offset']

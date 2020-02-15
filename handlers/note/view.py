@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/02/07 14:24:05
+# @modified 2020/02/15 12:46:09
 import profile
 import math
 import re
@@ -231,7 +231,7 @@ class PrintHandler:
         file      = xutils.call("note.get_by_id", id)
         user_name = xauth.current_name()
         check_auth(file, user_name)
-        return xtemplate.render("note/tools/print.html", show_menu = False, note = file)
+        return xtemplate.render("note/page/print.html", show_menu = False, note = file)
 
 def sqlite_escape(text):
     if text is None:
@@ -278,7 +278,7 @@ class NoteHistoryHandler:
             history_list = []
         else:
             history_list = NOTE_DAO.list_history(note_id)
-        return xtemplate.render("note/template/history_list.html", 
+        return xtemplate.render("note/page/history_list.html", 
             current_note = note,
             history_list = history_list,
             show_aside = True)
@@ -312,7 +312,7 @@ class NoticeHandler:
 
         xmanager.fire("notice.update")
         # files  = NOTE_DAO.list_by_type(user_name, "list", offset, limit, orderby)
-        return xtemplate.render("note/notice.html")
+        return xtemplate.render("note/page/notice.html")
 
 class QueryHandler:
 

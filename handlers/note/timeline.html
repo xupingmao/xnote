@@ -123,7 +123,7 @@
         function (resp, status) {
           layer.close(loadingNoteIndex);
           var data = resp.data;
-          if (data == "{}") {
+          if (data.length == 0) {
             // alert("没有更多了");
             if (showToast) {
               layer.msg("没有更多了");
@@ -133,11 +133,13 @@
           var resp = data;
           // app.itemList = [];
           var count = 0;
-          for (var key in resp) {
-            console.log(key, resp[key]);
-            var files = resp[key];
+          for (var i = 0; i < data.length; i++) {
+            // console.log(key, resp[key]);
+            var item  = data[i];
+            var files = item.children;
+            var title = item.title;
             app.offset += files.length;
-            mergeFiles(app.itemList, key, files);
+            mergeFiles(app.itemList, title, files);
             count++;
             // app.itemList.push({title: key, files: files});
           }
@@ -149,15 +151,30 @@
             return;
           }
           
-          var pinnedTitle = ["置顶", "项目"];
+          var pinnedTitle   = ["置顶", "项目"];
+          var archivedTitle = '归档';
 
           app.itemList.sort(function (a, b) {
+            if (a.title == archivedTitle) {
+              return 1;
+            }
+
+            if (b.title == archivedTitle) {
+              return -1;
+            }
+
             if (pinnedTitle.indexOf(a.title) >= 0) {
               return -1;
             }
+
+            if (pinnedTitle.indexOf(b.title) >= 0) {
+              return 1;
+            }
+
             if (a.title < b.title) {
               return 1;
             }
+
             if (a.title > b.title) {
               return -1;
             }
@@ -181,5 +198,5 @@
 {% end %}
 
 {% block aside %}
-  {% include note/mod_aside.html %}
+  {% include note/component/mod_aside.html %}
 {% end %}

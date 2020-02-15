@@ -96,7 +96,7 @@ def clean_whitespace(text):
 
 class handler:
 
-    template_path = "note/tools/html_importer.html"
+    template_path = "note/page/html_importer.html"
 
     def GET(self):
         address = xutils.get_argument("url")

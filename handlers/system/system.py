@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2020/02/02 13:52:05
+# @modified 2020/02/15 13:17:32
 """System functions"""
 from io import StringIO
 import xconfig
@@ -47,7 +47,7 @@ SYS_TOOLS = [
     admin_link("文件",       "/fs_list", "file"),
     admin_link("脚本",    "/fs_link/scripts"),
     admin_link("定时任务",   "/system/crontab"),
-    admin_link("系统事件", "/system/event"),
+    admin_link("事件注册", "/system/event"),
     admin_link("线程管理", "/system/thread_info"),
     admin_link("Menu_User",   "/system/user/list", "users"),
     admin_link("Menu_Log",    "/system/log"),

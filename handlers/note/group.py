@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/02/08 21:55:53
+# @modified 2020/02/15 12:55:39
 import math
 import time
 import web
@@ -121,7 +121,7 @@ class GroupListHandler:
         files = fixed_books + notes
 
         root = NOTE_DAO.get_root()
-        return xtemplate.render("note/note_list_page.html", 
+        return xtemplate.render("note/page/note_list_page.html", 
             file = root, 
             pathlist = [root],
             show_path_list = True,
@@ -208,7 +208,7 @@ class CategoryHandler:
     @xauth.login_required()
     def GET(self):
         groups_tuple = load_category(xauth.current_name(), True)
-        return xtemplate.render("note/template/category.html", 
+        return xtemplate.render("note/page/category.html", 
             id=id, groups_tuple = groups_tuple)
 
 
@@ -379,19 +379,19 @@ class RecentHandler:
         creator = xauth.get_current_name()
         if orderby == "viewed":
             html_title = "Recent Viewed"
-            files = xutils.call("note.list_recent_viewed", creator, offset, limit)
+            files = NOTE_DAO.list_recent_viewed(creator, offset, limit)
             time_attr = "atime"
             show_adate = True
             dir_type = "recent_viewed"
         elif orderby == "created":
             html_title = "Recent Created"
-            files = xutils.call("note.list_recent_created", creator, offset, limit)
+            files = NOTE_DAO.list_recent_created(creator, offset, limit)
             time_attr = "ctime"
             show_cdate = True
             dir_type = "recent_created"
         else:
             html_title = "Recent Updated"
-            files = xutils.call("note.list_recent_edit", creator, offset, limit)
+            files = NOTE_DAO.list_recent_edit(creator, offset, limit)
             time_attr = "mtime"
             show_mdate = True
             dir_type = "recent_edit"
@@ -442,6 +442,18 @@ def link_by_month(year, month, delta = 0):
 
 class DateHandler:
 
+    type_order_dict = {
+        "group": 0,
+        "gallery": 10,
+        "list": 20,
+        "table": 30,
+        "csv": 30,
+        "md": 90,
+    }
+
+    def sort_notes(self, notes):
+        notes.sort(key = lambda x: self.type_order_dict.get(x.type, 100))
+
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
@@ -452,8 +464,8 @@ class DateHandler:
             month = '0' + month
 
         date = year + "-" + month
-        created = xutils.call("note.list_by_date", "ctime", user_name, date)
-        by_name = xutils.call("note.list_by_date", "name", user_name, year + "_" + month)
+        created = NOTE_DAO.list_by_date("ctime", user_name, date)
+        by_name = NOTE_DAO.list_by_date("name", user_name, year + "_" + month)
 
         notes = []
         dup = set()
@@ -462,8 +474,9 @@ class DateHandler:
                 continue
             dup.add(v.id)
             notes.append(v)
+        self.sort_notes(notes)
 
-        return xtemplate.render("note/tools/list_by_date.html", 
+        return xtemplate.render("note/page/list_by_date.html", 
             link_by_month = link_by_month,
             year = int(year),
             month = int(month),

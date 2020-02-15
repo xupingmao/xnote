@@ -100,7 +100,7 @@
     {% if model.category == "dir" %}
         {% include fs/mod_aside.html %}
     {% elif model.category == "note" %}
-        {% include note/mod_aside.html %}
+        {% include note/component/mod_aside.html %}
     {% elif model.category == "system" %}
         {% include system/mod_aside.html %}
     {% else %}
