@@ -24,13 +24,6 @@
             $("#renameDiv").css("display", "none");
         }
     }
-    
-    function delLink() {
-        var r = confirm("确认删除 {{file.name}}?");
-        if (r) {
-            location.href="/note/update?option=del&id={{file.id}}";
-        }
-    }
 
     // autosize textarea rows
     var textContainer = document.getElementById("fileContent");

@@ -1,0 +1,3 @@
+{% for i, path_item in enumerate(pathlist) %}
+    {% if i > 0 %} / {% end %}<a href="{{path_item.url}}" class="link2 path-link">{{ path_item.name }}</a>
+{% end %}

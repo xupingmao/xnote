@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/01/30 16:13:43
+# @modified 2020/02/15 19:29:04
 import os
 import json
 import web
@@ -44,13 +44,7 @@ def load_languages():
 
 def T(text, lang = None):
     if lang is None:
-        lang = web.ctx.get('_lang')
-        if lang is None and hasattr(web.ctx, "env"):
-            # 语言环境
-            lang = web.cookies().get("lang", "zh")
-            web.ctx._lang = lang
-        if lang is None:
-            lang = 'zh'
+        lang = xconfig.get_current_user_config('LANG')
 
     mapping = _lang_dict.get(lang)
     if mapping is None:
@@ -106,10 +100,10 @@ def get_user_agent():
         return ""
     return web.ctx.env.get("HTTP_USER_AGENT")
 
-def get_user_config(user):
+def get_user_config_dict(user):
     if not xauth.has_login():
         return Storage()
-    return xauth.get_user_config(user)
+    return xauth.get_user_config_dict(user)
 
 @xutils.cache(prefix="message.count", expire=360)
 def get_message_count(user):
@@ -138,7 +132,7 @@ def pre_render(kw):
     kw["Storage"]       = Storage
     kw["xutils"]        = xutils
     kw["xconfig"]       = xconfig
-    kw["_user_config"]   = get_user_config(user_name)
+    kw["_user_config"]  = get_user_config_dict(user_name)
     kw["_notice_count"] = get_message_count(user_name)
     kw["T"]             = T
     kw["HOME_PATH"]     = xconfig.get_user_config(user_name, "HOME_PATH")

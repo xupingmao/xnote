@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/02/15 12:47:19
+# @modified 2020/02/15 16:19:23
 
 """笔记编辑相关处理"""
 import os
@@ -22,7 +22,11 @@ from xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
 
-TYPE_MAPPING = dict(document = "md")
+TYPE_MAPPING = {
+    "document": "md",
+    "text": "log",
+    "post": "log",
+}
 
 class NoteException(Exception):
 
@@ -66,7 +70,7 @@ def fire_rename_event(note):
     event_body = dict(action = "rename", id = note.id, name = note.name, type = note.type)
     xmanager.fire("note.rename", event_body)
 
-def create_text_func(note, ctx):
+def create_log_func(note, ctx):
     date_str  = time.strftime("%Y.%m.%d")
     note.name = u"日志:" + date_str + dateutil.current_wday()
     return NOTE_DAO.create(note)
@@ -90,7 +94,7 @@ def default_create_func(note, ctx):
     return NOTE_DAO.create(note)
 
 CREATE_FUNC_DICT = {
-    "text": create_text_func
+    "log": create_log_func
 }
 
 class CreateHandler:
@@ -133,7 +137,7 @@ class CreateHandler:
         ctx = Storage(method = method)
         
         try:
-            if type not in ("md", "html", "csv", "gallery", "list", "group", "text"):
+            if type not in ("md", "html", "csv", "gallery", "list", "group", "log"):
                 raise Exception(u"无效的类型: %s" % type)
 
             create_func = CREATE_FUNC_DICT.get(type, default_create_func)

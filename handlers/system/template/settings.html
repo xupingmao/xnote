@@ -175,11 +175,13 @@ select {
             </td>
         </tr>
 
-        <tr class="admin-visible">
-            <td class="key">{{T('Language')}}</td>
+        <tr class="user-visible">
+            <td class="key">{{T('语言')}}</td>
             <td>
-                <input type="radio" name="LANG" default-value="{{web.cookies().get('lang', 'zh')}}" value="zh">中文
-                <input type="radio" name="LANG" default-value="{{web.cookies().get('lang', 'zh')}}" value="en">English
+                <select name="LANG" data-type="str" value="{{_user_config.LANG}}">
+                    <option value="zh">中文</option>
+                    <option value="en">English</option>
+                </select>
             </td>
         </tr>
         <!--

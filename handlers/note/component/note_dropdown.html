@@ -1,10 +1,11 @@
 <script type="text/javascript" src="/static/lib/clipboard/clipboard-2.0.4.min.js"></script>
 
-<div class="float-right">
 {% if file != None and _user_name == file.creator and op == "view" %}
 
 {% if file.type == "gallery" %}
     <a class="btn" href="/note/management?parent_id={{file.id}}">管理</a>
+{% elif file.type == "csv" %}
+    <!-- nothing here -->
 {% else %}
     <a class="btn" href="/note/edit?id={{file.id}}&is_iframe={{is_iframe}}">编辑</a>
 {% end %}
@@ -40,12 +41,15 @@
         <a class="dropdown-option link" href="/note/history?id={{file_id}}">{{T("历史")}}</a>
         <a class="dropdown-option link" href="/note/print?id={{file.id}}" target="_blank">打印模式</a>
 
+        {% if _is_admin %}
+            <a class="dropdown-option link" href="/note/{{file.id}}?_format=json">查看JSON</a>
+        {% end %}
+
         <a class="dropdown-option-red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>
     </div>
 </div>
 {% end %}
 <!-- <a href="javascript:history.back()">返回</a> -->
-</div>
 
 <div class="share-tpl hide">
     <p>分享链接: <span class="share-link-text"></span></p>

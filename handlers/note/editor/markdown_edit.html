@@ -102,10 +102,7 @@
                 <span id="fileId" class="hide">{{file.id}}</span>
             </div>
             <div class="grid-title">
-                {% for i, item in enumerate(pathlist) %}
-                    {% if i > 0 %} / {% end %}<a href="{{item.url}}" class="link2">{{ item.name }}</a>
-                {% end %}
-
+                {% include note/component/pathlist.html %}
                 <div class="float-right">
                     <button class="inline-btn">保存</button>
                 </div>
@@ -148,13 +145,6 @@
 </div>
 
 <script type="text/javascript">
-    function delLink() {
-        var r = confirm("确认删除 {{file.name}}?");
-        if (r) {
-            location.href = "/note/update?option=del&id={{file.id}}";
-        }
-    }
-
     function codeInsert(code) {
         codeMirror.replaceSelection(code, 'around');
     }
@@ -247,12 +237,18 @@
         var fileId = $("#fileId").text();
         var updatePreviewIntervalId = null;
 
+        function contentUnchanged() {
+            var input = $("#markdown-input").val();
+            return input == oldContent;
+        }
+
         function updatePreview() {
             var input = $("#markdown-input").val();
-            // not modified
-            if (input == oldContent) {
+            
+            if (contentUnchanged()) {
                 return;
             }
+
             if ($("#markdown-output-div").hasClass("hide")) {
                 return;
             }
@@ -363,13 +359,15 @@
 
         // 退出确认的询问
         window.onbeforeunload=function(e){
+            if (contentUnchanged()) {
+                return;
+            }
             if (window.SUBMIT_FORM) {
                 console.log("form is submit");
                 return;
             }
             var e = window.event||e;  
-            console.log(e);
-        　　e.returnValue = "确定离开当前页面吗？";
+            e.returnValue = "确定离开当前页面吗？";
         };
     });
 

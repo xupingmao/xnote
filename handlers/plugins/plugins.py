@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/01/31 17:07:52
+# @modified 2020/02/15 18:39:04
 from io import StringIO
 import xconfig
 import codecs
@@ -51,9 +51,8 @@ def inner_link(name, url):
 INNER_TOOLS = [
     inner_link("浏览器信息", "/tools/browser_info"),
     # 文本
-    inner_link("代码模板", "/tools/code_template"),
-    inner_link("文本对比", "/tools/js_diff"),
-    inner_link("文本转换", "/tools/text_processor"),
+    inner_link("文本对比", "/tools/text_diff"),
+    inner_link("文本转换", "/tools/text_convert"),
     inner_link("随机字符串", "/tools/random_string"),
     # 图片
     inner_link("图片合并", "/tools/img_merge"),

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/02/15 12:46:09
+# @modified 2020/02/15 16:20:46
 import profile
 import math
 import re
@@ -110,6 +110,7 @@ VIEW_FUNC_DICT = {
     "md"  : view_md_func,
     "text": view_md_func,
     "memo": view_md_func,
+    "log" : view_md_func,
     "list": view_list_func,
     "gallery": view_gallery_func
 }

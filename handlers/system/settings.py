@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/01/29 14:07:12
+# @modified 2020/02/15 18:57:44
 import web
 import time
 import os
@@ -26,7 +26,7 @@ except ImportError as e:
     psutil = None
 
 INIT_SCRIPT_URL = "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)
-USER_CONFIG_KEY_SET = set(["TODO_MODE", "SIMPLE_MODE", "HOME_PATH"])
+USER_CONFIG_KEY_SET = set(["TODO_MODE", "SIMPLE_MODE", "HOME_PATH", "LANG"])
 
 def get_xnote_version():
     try:
@@ -244,8 +244,6 @@ class ConfigHandler:
             web.config.debug = xconfig.DEBUG
         if key in ("RECENT_SEARCH_LIMIT", "RECENT_SIZE", "PAGE_SIZE", "TRASH_EXPIRE"):
             value = int(value)
-        if key == "LANG":
-            web.setcookie("lang", value)
 
         if type == "int":
             value = int(value)

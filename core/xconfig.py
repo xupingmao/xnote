@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2020/01/30 16:13:11
+# @modified 2020/02/15 19:28:38
 
 '''xnote系统配置
 
@@ -171,8 +171,11 @@ _config = {}
 
 # 默认的用户配置
 DEFAULT_USER_CONFIG = {
-    "HOME_PATH": "/note/timeline"
+    "HOME_PATH": "/note/timeline",
+    "LANG": "zh",
 }
+
+START_TIME = None
 
 def makedirs(dirname):
     if not os.path.exists(dirname):
@@ -222,9 +225,7 @@ class Storage(dict):
 
 
 def init(path = DATA_DIR):
-    """
-    初始化系统配置项,启动时必须调用
-    """
+    """初始化系统配置项,启动时必须调用"""
     global DATA_PATH
     global DATA_DIR
     global DB_PATH
@@ -298,6 +299,10 @@ def init(path = DATA_DIR):
 
     from xutils import fsutil
     PLUGIN_TEMPLATE = fsutil.readfile("./config/template/plugin.tpl")
+
+def mark_started():
+    global START_TIME
+    START_TIME = time.time()
 
 def load_file_type_config0(fpath):
     from xutils import fsutil, textutil
@@ -523,10 +528,20 @@ def get_alias(name, default_value):
     return _alias_dict.get(name, default_value)
 
 def get_user_config(user_name, config_key):
+    """默认值参考DEFAULT_USER_CONFIG"""
     import xauth
-    config = xauth.get_user_config(user_name)
+    # 未启动，直接返回默认值
+    if START_TIME is None:
+        return DEFAULT_USER_CONFIG.get(config_key)
+
+    config = xauth.get_user_config_dict(user_name)
     default_value = DEFAULT_USER_CONFIG.get(config_key)
     if config is None:
         return default_value
     else:
         return config.get(config_key, default_value)
+
+def get_current_user_config(key):
+    """默认值参考DEFAULT_USER_CONFIG"""
+    import xauth
+    return get_user_config(xauth.current_name(), key)

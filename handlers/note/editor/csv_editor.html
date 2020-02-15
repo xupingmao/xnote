@@ -23,15 +23,20 @@
 }
 </style>
 
-{% include note/component/view_header.html %}
+{% set item = file %}
+
+<div class="grid-title">
+    {% include note/component/pathlist.html %}
+
+    <div class="float-right">
+        <button class="btn" id="saveBtn">保存</button>
+        {% include note/component/note_dropdown.html %}
+    </div>
+</div>
 
 <textarea id="content" class="hide">{{file.content}}</textarea>
 <div id="myParent" class="row">
     <div id="my"></div>
-</div>
-
-<div class="row">
-    <button id="saveBtn">保存</button>
 </div>
 
 <script type="text/javascript">

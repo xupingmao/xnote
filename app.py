@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2020/01/27 11:04:21
+# @modified 2020/02/15 19:37:57
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -137,6 +137,19 @@ def try_load_cache():
         xutils.print_exc()
         xconfig.errors.append("加载缓存失败")
 
+def init_autoreload():
+    def reload_callback():
+        # 重新加载handlers目录下的所有模块
+        xmanager.reload()
+        autoreload_thread.clear_watched_files()
+        autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
+
+    # autoreload just reload models
+    autoreload_thread = AutoReloadThread(reload_callback)
+    autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
+    autoreload_thread.watch_file("core/xtemplate.py")
+    autoreload_thread.start()
+
 def main():
     global app
 
@@ -161,17 +174,9 @@ def main():
     # 重新加载template
     xtemplate.reload()
 
-    def reload_callback():
-        # 重新加载handlers目录下的所有模块
-        xmanager.reload()
-        autoreload_thread.clear_watched_files()
-        autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
+    # 文件修改检测
+    init_autoreload()
 
-    # autoreload just reload models
-    autoreload_thread = AutoReloadThread(reload_callback)
-    autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
-    autoreload_thread.watch_file("core/xtemplate.py")
-    autoreload_thread.start()
     # 启动定时任务检查
     manager.run_task()
 
@@ -188,6 +193,10 @@ def main():
     if xconfig.OPEN_IN_BROWSER:
         webbrowser.open("http://localhost:%s/" % xconfig.PORT)
 
+    # 记录已经启动
+    xconfig.mark_started()
+
+    # 监听端口
     app.run()
 
 class LogMiddleware:

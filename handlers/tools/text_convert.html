@@ -1,0 +1,321 @@
+{% extends base %}
+{% block head %}
+    <script type="text/javascript" src="/static/js/utils.js"></script>
+    <script type="text/javascript" src="/static/js/Lexer.js"></script>
+    <style type="text/css">
+        p {
+            float: left;
+            width: 100%;
+            margin: 0px;
+        }
+
+        .container label {
+            float: left;
+            width: 100px;
+        }
+
+        .regexp-textarea {
+            width: 200px;
+        }
+    </style>
+{% end %}
+
+{% block body %}
+<!-- 
+@since 2016/12/18
+@modified 2020/02/15 18:30:47
+-->
+
+<div class="card">
+    <h3 class="card-title">文本转换</h3>
+    <div class="col-md-12 error hide" id="error"></div>
+
+    <div class="container col-md-6">
+        <textarea id="input" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
+    </div>
+    <div class="container col-md-6">
+        <textarea id="output" rows=20 class="form-control" style="font-family:Consolas, Monospace"></textarea>
+    </div>
+
+    <div class="container">
+        <p>
+            <label>转换结果</label>
+            <input type="radio" name="option" value="buildArrayResult" checked>数组
+            <input type="radio" name="option" value="buildLinesResult">多行
+            <input type="radio" name="option" value="buildStringResult">字符串定义
+            <input type="radio" name="option" value="buildEnumResult">转换成枚举
+        </p>
+        <p>
+            <label>分割符</label>
+            <input type="radio" name="seperator" value="\n" checked/>换行
+            <input type="radio" name="seperator" value=","/>逗号
+            <input type="radio" name="seperator" value=";"/>分号
+            <input type="radio" name="seperator" value=" "/>空格
+        </p>
+        <p>
+            <label>过滤重复</label>
+            <input type="checkbox" id="unique"/>
+        </p>
+        <p>
+            <label>排序</label>
+            <input type="checkbox" id="enableSort"/>
+        </p>
+        <p>
+            <label>引号</label>
+            <input type="radio" name="quote" value="0" checked/>无
+            <input type="radio" name="quote" value="1"/>单引号
+            <input type="radio" name="quote" value="2"/>双引号
+        </p>
+        <p>
+            <label>大小写转换</label>
+            <input type="radio" name="case" value="0" checked />不转换
+            <input type="radio" name="case" value="upper"/>大写
+            <input type="radio" name="case" value="lower"/>小写
+        </p>
+        <p>
+            <label>正则表达式</label>
+            <textarea id="regexp" class="regexp-textarea"></textarea>
+        </p>
+        <p><button onclick="execute()">转换</button></p>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+function select(ident) {
+    if (ident[0]=='#') {
+        return document.getElementById(ident.substring(1));
+    }
+    if (ident[0]=='.') {
+        return document.getElementsByClassName(ident.substring(1));
+    }
+}
+
+function output(str) {
+    document.getElementById("output").innerHTML = str;
+}
+
+function Option () {
+    var LEFT_QUOTE_MAPPING = {
+        "0": "",
+        "1": "'",
+        "2": "\"",
+        "" : ""
+    }
+
+    var RIGHT_QUOTE_MAPPING = {
+        "0": "",
+        "1": "'",
+        "2": "\"",
+        "" : ""
+    }
+
+    this.getInstance = function () {
+        return new Option();
+    }
+    
+    function getQuoteValue() {
+        var value = getRadioValue("quote");
+        if (value == undefined) {
+            return "";
+        }
+        return value;
+    }
+
+    this.getQuote = function () {
+        var value = getQuoteValue();
+        if (value == "2") return '"';
+        else if (value == "1") return "'";
+        return "";
+    }
+
+    this.getQuoteLeft = function () {
+        var value = getQuoteValue();
+        return LEFT_QUOTE_MAPPING[value];
+    }
+
+    this.getQuoteRight = function () {
+        var value = getQuoteValue();
+        return RIGHT_QUOTE_MAPPING[value];
+    }
+
+    this.getSeperator = function () {
+        var value = getRadioValue("seperator");
+        if (value == "\\n") return "\n";
+        return value;
+    }
+    
+    function getCase() {
+        return getRadioValue("case");
+    }
+    
+    this.isUpperCase = function () {
+        return getCase() == "upper";
+    }
+
+    this.isLowerCase = function () {
+        return getCase() == "lower";
+    }
+
+    this.isUnique = function () {
+        return select("#unique").checked;
+    }
+
+    this.isSorted = function() {
+        return select("#enableSort").checked;
+    }
+}
+
+function showError(message) {
+    $("#error").show().text(message);
+}
+
+function parseItemsByOption(inputStr) {
+    var option    = new Option();
+    var seperator = option.getSeperator();
+    return inputStr.split(seperator);
+}
+
+function parseItemsByRegExp(regexpText, input) {
+    var option   = new Option();
+    var reg      = new RegExp(regexpText, "g");
+    var result   = reg.exec(input);
+    var str      = "";
+    var strArray = [];
+
+    while (result) {
+        var match = result[0];
+        if (match) {
+            match = match.trim();
+        }
+        result = reg.exec(input); 
+    }
+
+    return strArray;
+}
+
+function getRadioValue(name) {
+    var radios = document.getElementsByName(name);
+    for (var i = 0; i < radios.length; i++) {
+        var radio = radios[i];
+        if (radio.checked) return radio.value;
+    }
+    return undefined;
+}
+
+function getInputValue() {
+    return document.getElementById("input").value;
+}
+
+function getOptionValue() {
+    return getRadioValue("option");
+}
+
+function clearContext() {
+    $("#error").hide();
+    output("");
+}
+
+function parseItems(input) {
+    var regexpText = $("#regexp").val();
+    if (regexpText) {
+        var items = parseItemsByRegExp(regexpText, input);
+    } else {
+        var items = parseItemsByOption(input);
+    }
+
+    var option = new Option();
+    var strArray = [];
+
+    for (var i = 0; i < items.length; i++) {
+        var itemValue = items[i];
+        
+        // 转换大小写
+        if (option.isUpperCase()) {
+            itemValue = itemValue.toUpperCase();
+        }
+        if (option.isLowerCase()) {
+            itemValue = itemValue.toLowerCase();
+        }
+
+        // 引号
+        if (option.getQuote != null) {
+            itemValue = option.getQuoteLeft() + itemValue + option.getQuoteRight();
+        }
+
+        // 去重
+        if (option.isUnique() && strArray.indexOf(itemValue) >= 0) {
+            continue;
+        }
+        
+        strArray.push(itemValue);
+    }
+
+    // 排序
+    if (option.isSorted()) {
+        strArray.sort();
+    }
+    return strArray;
+}
+
+function buildArrayResult(items) {
+    return items.join(",");
+}
+
+function buildLinesResult(items) {
+    return items.join("\n");
+}
+
+function buildStringResult(items) {
+    var text = "text = \"\";";
+    for (var i = 0; i < items.length; i++) {
+        var itemValue = items[i];
+        text += "\ntext += \"" + itemValue + "\";";
+    }
+    return text;
+}
+
+function buildEnumResult(items) {
+    var list = items;
+    var info = '';
+    var maxlength = 0;
+    var enumIndex = 0;
+
+    for (var i = 0; i < list.length; i++) {
+        var line = list[i];
+        if (line.length > maxlength) {
+            maxlength = line.length;
+        }
+    }
+    for (var i = 0; i < list.length;i++) {
+        var line = list[i];
+        // require string.js
+        line += ' '.repeat(maxlength-line.length);
+        info += line + " = " + enumIndex + "\n";
+        enumIndex ++;
+    }
+    return info;
+}
+
+function buildResult(items) {
+    var functionName = getOptionValue();
+    return window[functionName](items);
+}
+
+function execute() {
+    var input = getInputValue();
+    try {
+        clearContext();
+        var items = parseItems(input);
+        var str   = buildResult(items)
+        output(str);
+    } catch (e) {
+        console.error(e);
+        showError(e);
+    }
+    
+}
+</script>
+
+{% end %}

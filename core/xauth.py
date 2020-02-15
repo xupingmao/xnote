@@ -66,7 +66,7 @@ def get_user(name):
         return users.get("admin")
     return users.get(name)
 
-def get_user_config(name):
+def get_user_config_dict(name):
     user = get_user(name)
     if user != None:
         if user.config is None:
@@ -78,7 +78,7 @@ def update_user_config_dict(name, config_dict):
     user = get_user(name)
     if user is None:
         return
-    config = get_user_config(user)
+    config = get_user_config_dict(user)
     config.update(**config_dict)
     user.config = config
     update_user(name, user)
