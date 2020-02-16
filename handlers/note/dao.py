@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/02/09 23:13:51
+# @modified 2020/02/16 13:00:20
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -44,7 +44,8 @@ NOTE_ICON_DICT = {
     "post"    : "fa-file-word-o",
     "html"    : "fa-file-word-o",
     "gallery" : "fa-photo",
-    "list"    : "fa-list"
+    "list"    : "fa-list",
+    "plan"    : "fa-calendar-check-o",
 }
 
 class FileDO(dict):
@@ -181,18 +182,21 @@ def build_note_info(note):
         note.icon = NOTE_ICON_DICT.get(note.type, "fa-file-text-o")
     return note
 
+def convert_to_path_item(note):
+    return Storage(name = note.name, url = note.url, id = note.id)
+
 @xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
 def list_path(file, limit = 2):
     pathlist = []
     while file is not None:
-        pathlist.insert(0, file)
+        pathlist.insert(0, convert_to_path_item(file))
         file.url = "/note/%s" % file.id
         if len(pathlist) >= limit:
             break
         if str(file.id) == "0":
             break
         if str(file.parent_id) == "0":
-            pathlist.insert(0, get_root())
+            pathlist.insert(0, convert_to_path_item(get_root()))
             break
         else:
             file = get_by_id(file.parent_id, include_full = False)
@@ -954,6 +958,7 @@ def refresh_note_stat(user_name):
     stat.gallery_count = count_by_type(user_name, "gallery")
     stat.list_count    = count_by_type(user_name, "list")
     stat.table_count   = count_by_type(user_name, "table")
+    stat.plan_count    = count_by_type(user_name, "plan")
     stat.sticky_count  = count_sticky(user_name)
     stat.removed_count = count_removed(user_name)
     stat.dict_count    = count_dict(user_name)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/02/15 16:20:46
+# @modified 2020/02/16 12:55:52
 import profile
 import math
 import re
@@ -63,7 +63,7 @@ def view_gallery_func(file, kw):
     kw.path       = fpath
     kw.filelist   = filelist
 
-def default_view_func(file, kw):
+def view_html_func(file, kw):
     """处理html/post等类型的文档"""
     content = file.content
     content = content.replace(u'\xad', '\n')
@@ -112,7 +112,9 @@ VIEW_FUNC_DICT = {
     "memo": view_md_func,
     "log" : view_md_func,
     "list": view_list_func,
-    "gallery": view_gallery_func
+    "gallery": view_gallery_func,
+    "html": view_html_func,
+    "post": view_html_func,
 }
 
 def find_note_for_view(token, id, name):
@@ -151,7 +153,7 @@ class ViewHandler:
         kw.groups = []
         kw.recommended_notes = []
         kw.op = op
-        kw.template_name  = "note/view.html"
+        kw.template_name  = "note/page/view.html"
 
         if id == "0":
             raise web.found("/")
@@ -177,7 +179,7 @@ class ViewHandler:
         next_note      = None
         prev_note      = None
 
-        view_func = VIEW_FUNC_DICT.get(file.type, default_view_func)
+        view_func = VIEW_FUNC_DICT.get(file.type, view_md_func)
         view_func(file, kw)
 
         if show_recommend and user_name is not None:

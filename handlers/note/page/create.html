@@ -36,20 +36,17 @@ label {
             <div class="row top-offset-1">
                 <label>{{T("类型")}}</label>
                 <select name="type" value="{{type}}">
-                    <option value="md">Markdown</option>
-                    <option value="html">富文本</option>
-                    <option value="csv">表格</option>
-                    <option value="gallery">相册</option>
-                    <option value="list">清单</option>
-                    <option value="group">分组</option>
+                    {% for item in NOTE_TYPE_LIST %}
+                        <option value="{{item.type}}">{{T(item.name)}}</option>
+                    {% end %}
                 </select>
             </div>
 
             <div class="row top-offset-1">
-                <label>{{T("分组")}}</label>
-                <select name="parent_id">
+                <label>{{T("项目")}}</label>
+                <select name="parent_id" value="{{parent_id}}">
                     {%for item in groups %}
-                        <option value="{{item.id}}" {%if str(item.id)==str(parent_id)%} selected {%end%}>{{item.name}}</option>
+                        <option value="{{item.id}}">{{item.name}}</option>
                     {% end %}
                 </select>
             </div>

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/10 00:44:59
+# @modified 2020/02/16 12:55:16
 
 """时光轴视图"""
 import re
@@ -10,27 +10,30 @@ import xtables
 import xtemplate
 from xutils import Storage, dateutil, textutil
 from xtemplate import T
+from .constant import *
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
-TITLE_DICT = {
-    "root"    : T("项目"),
-    "gallery" : T("相册"),
-    "public"  : T("公共"),
-}
 
 class TaskGroup(Storage):
-    def __init__(self):
+    def __init__(self, name = "待办任务"):
         super(TaskGroup, self).__init__()
-        user_name = xauth.current_name()
+        self.user = xauth.current_name()
         self.type = 'system'
-        self.name = "待办任务"
+        self.name = name
         self.icon = "fa-calendar-check-o"
         self.ctime = dateutil.format_time()
         self.mtime = dateutil.format_time()
         self.url  = "/message?tag=task"
         self.priority = 1
-        self.size = MSG_DAO.get_message_stat(user_name).task_count
+        self.size = MSG_DAO.get_message_stat(self.user).task_count
+
+class PlanGroup(TaskGroup):
+    """计划类型的笔记, @since 2020/02/16"""
+    def __init__(self):
+        super(PlanGroup, self).__init__("计划列表")
+        self.url = "/note/plan"
+        self.size = NOTE_DAO.get_note_stat(self.user).plan_count
 
 def search_group(user_name, words):
     rows = NOTE_DAO.list_group(user_name)
@@ -125,7 +128,7 @@ def list_search_func(context):
 def list_root_func(context):
     user_name = context['user_name']
     rows      = NOTE_DAO.list_group(user_name)
-    rows.insert(0, TaskGroup())
+    rows.insert(0, PlanGroup())
     return build_date_result(rows, 'mtime', sticky_title = True, archived_title = True)
 
 def list_public_func(context):
@@ -163,6 +166,16 @@ def list_by_type_func(context):
     rows      = NOTE_DAO.list_by_type(user_name, type, offset, limit)
     return build_date_result(rows, 'ctime')
 
+def list_plan_func(context):
+    offset    = context['offset']
+    limit     = context['limit']
+    user_name = context['user_name']
+    rows      = NOTE_DAO.list_by_type(user_name, 'plan', offset, limit)
+    old_task  = TaskGroup("待办任务(旧版)")
+    if old_task.size > 0:
+        rows.append(old_task)
+    return build_date_result(rows, 'ctime')
+
 def list_all_func(context):
     offset    = context['offset']
     limit     = context['limit']
@@ -191,6 +204,7 @@ LIST_FUNC_DICT = {
     'list': list_by_type_func,
     'table': list_by_type_func,
     'csv': list_by_type_func,
+    'plan': list_plan_func,
     'all': list_all_func,
     "search": list_search_func,
 }
@@ -243,7 +257,7 @@ class TimelineHandler:
         else:
             xauth.check_login()
 
-        title = TITLE_DICT.get(type, u"最新笔记")
+        title = NOTE_TYPE_DICT.get(type, u"最新笔记")
 
         search_title = u"笔记"
         file = NOTE_DAO.get_by_id(parent_id)
@@ -252,7 +266,7 @@ class TimelineHandler:
             title = file.name
             search_title = file.name
 
-        return xtemplate.render("note/timeline.html", 
+        return xtemplate.render("note/page/timeline.html", 
             title = title,
             type  = type,
             file  = file,

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/02/15 12:55:39
+# @modified 2020/02/16 12:55:53
 import math
 import time
 import web
@@ -16,7 +16,7 @@ from xutils import cacheutil, dateutil, fsutil
 from xutils.dateutil import Timer
 from xtemplate import T
 
-VIEW_TPL   = "note/view.html"
+VIEW_TPL   = "note/page/view.html"
 TYPES_NAME = "笔记索引"
 NOTE_DAO   = xutils.DAO("note")
 MSG_DAO    = xutils.DAO("message")
@@ -70,7 +70,7 @@ class BaseTimelineHandler:
 
     @xauth.login_required()
     def GET(self):
-        return xtemplate.render("note/timeline.html", 
+        return xtemplate.render("note/page/timeline.html", 
             title = T(self.title), 
             type = self.note_type,
             search_action = "/note/timeline",
@@ -133,7 +133,8 @@ def load_note_tools(user_name):
     note_stat = NOTE_DAO.get_note_stat(user_name)
 
     return [
-        NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
+        # NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
+        NoteLink("计划", "/note/plan", "fa-calendar-check-o", size = note_stat.plan_count),
         NoteLink("置顶", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
         NoteLink("话题", "/search/rules", "fa-search", size = msg_stat.key_count),
         NoteLink("记事", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
@@ -309,6 +310,10 @@ class ListHandler(BaseTimelineHandler):
         self.note_type = "list"
         self.title = "清单"
 
+class PlanListHandler(BaseTimelineHandler):
+
+    note_type = "plan"
+    title = T("计划")
 
 class TextHandler(BaseListHandler):
 
@@ -569,13 +574,13 @@ xurls = (
     r"/note/gallery"        , GalleryListHandler,
     r"/note/table"          , TableListHandler,
     r"/note/csv"            , TableListHandler,
-    
     r"/note/document"       , DocumentListHandler,
     r"/note/html"           , HtmlListHandler,
     r"/note/md"             , MarkdownListHandler,
+    r"/note/list"           , ListHandler,
+    r"/note/plan"           , PlanListHandler,
 
     r"/note/addressbook"    , AddressBookHandler,
-    r"/note/list"           , ListHandler,
     r"/note/text"           , TextHandler,
     r"/note/tools"          , ToolListHandler,
     r"/note/types"          , TypesHandler,

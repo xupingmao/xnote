@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/02/15 16:19:23
+# @modified 2020/02/16 13:04:38
 
 """笔记编辑相关处理"""
 import os
@@ -19,14 +19,8 @@ from xutils import cacheutil
 from xutils import dbutil
 from xutils import textutil
 from xtemplate import T
-
+from .constant import *
 NOTE_DAO = xutils.DAO("note")
-
-TYPE_MAPPING = {
-    "document": "md",
-    "text": "log",
-    "post": "log",
-}
 
 class NoteException(Exception):
 
@@ -50,13 +44,8 @@ def record_history(ctx):
     NOTE_DAO.add_history(id, version, ctx)
 
 def get_heading_by_type(type):
-    if type == "group":
-        return T("创建笔记本")
-    if type == "gallery":
-        return T("创建相册")
-    if type == "csv":
-        return T("创建表格")
-    return T("创建笔记")
+    title = u"创建" + NOTE_TYPE_DICT.get(type, u"笔记")
+    return T(title)
 
 def fire_update_event(note):
     event_body = dict(id=note.id, 
@@ -112,7 +101,7 @@ class CreateHandler:
         if key == "":
             key = time.strftime("%Y.%m.%d") + dateutil.current_wday()
 
-        type = TYPE_MAPPING.get(type, type)
+        type = NOTE_TYPE_MAPPING.get(type, type)
 
         creator        = xauth.current_name()
         note           = Storage(name = name)
@@ -137,7 +126,7 @@ class CreateHandler:
         ctx = Storage(method = method)
         
         try:
-            if type not in ("md", "html", "csv", "gallery", "list", "group", "log"):
+            if type not in VALID_NOTE_TYPE_SET:
                 raise Exception(u"无效的类型: %s" % type)
 
             create_func = CREATE_FUNC_DICT.get(type, default_create_func)
@@ -166,6 +155,7 @@ class CreateHandler:
             tags     = tags, 
             error    = error,
             message  = error,
+            NOTE_TYPE_LIST = NOTE_TYPE_LIST,
             groups   = NOTE_DAO.list_group(creator),
             code     = code)
 
@@ -351,7 +341,7 @@ class UpdateHandler:
             update_and_notify(file, update_kw)
             raise web.seeother("/note/%s" % id)
         except NoteException as e:
-            return xtemplate.render("note/view.html", 
+            return xtemplate.render("note/page/view.html", 
                 pathlist = [],
                 file     = file, 
                 content  = content, 
