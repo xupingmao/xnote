@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/16 12:55:16
+# @modified 2020/02/21 23:59:43
 
 """时光轴视图"""
 import re
@@ -201,6 +201,7 @@ LIST_FUNC_DICT = {
     'group': list_by_type_func,
     'gallery': list_by_type_func,
     'document': list_by_type_func,
+    'html': list_by_type_func,
     'list': list_by_type_func,
     'table': list_by_type_func,
     'csv': list_by_type_func,

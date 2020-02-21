@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/02/16 13:00:20
+# @modified 2020/02/17 01:11:28
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -336,6 +336,8 @@ def convert_to_index(note):
     del_dict_key(note_index, 'data')
     del_dict_key(note_index, 'content')
 
+    note_index.parent_id = str(note_index.parent_id)
+    
     return note_index
 
 def update_index(note):
@@ -770,7 +772,7 @@ def search_name(words, creator = None, parent_id = None):
     def search_func(key, value):
         if value.is_deleted:
             return False
-        if parent_id != None and value.parent_id != parent_id:
+        if parent_id != None and str(value.parent_id) != parent_id:
                 return False
         return (value.creator == creator or value.is_public) and textutil.contains_all(value.name.lower(), words)
     result = dbutil.prefix_list("note_tiny:%s" % creator, search_func, 0, -1)

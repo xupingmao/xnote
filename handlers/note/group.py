@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/02/16 12:55:53
+# @modified 2020/02/21 23:59:12
 import math
 import time
 import web
@@ -290,7 +290,7 @@ class AddressBookHandler(BaseListHandler):
         self.note_type = "address"
         self.title = "通讯录"
 
-class HtmlListHandler(BaseListHandler):
+class HtmlListHandler(BaseTimelineHandler):
 
     def __init__(self):
         self.note_type = "html"

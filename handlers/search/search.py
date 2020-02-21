@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/01/28 15:12:11
+# @modified 2020/02/18 00:12:00
 
 import re
 import os
@@ -79,7 +79,7 @@ class SearchContext:
 def fill_note_info(files):
     for file in files:
         if file.category == "note":
-            parent = xutils.call("note.get_by_id", file.parent_id)
+            parent = NOTE_DAO.get_by_id(file.parent_id)
             if parent is not None:
                 file.parent_name = parent.name
 

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2019/04/29 21:54:40
+# @modified 2020/02/18 00:20:12
 """搜索知识库文件"""
 import re
 import sys
@@ -12,7 +12,8 @@ import xconfig
 import xtables
 from xutils import textutil
 from xutils import SearchResult, text_contains
-config = xconfig
+
+NOTE_DAO = xutils.DAO("note")
 
 def to_sqlite_obj(text):
     if text is None:
@@ -22,25 +23,6 @@ def to_sqlite_obj(text):
     text = text.replace("'", "''")
     return "'" + text + "'"
     
-def file_wrapper(dict, option=None):
-    """build fileDO from dict"""
-    name = dict['name']
-    file = SearchResult()
-    for key in dict:
-        file[key] = dict[key]
-        # setattr(file, key, dict[key])
-    if hasattr(file, "content") and file.content is None:
-        file.content = ""
-    if option:
-        file.option = option
-    file.url = "/note/view?id={}".format(dict["id"])
-    # 文档类型，和文件系统file区分
-    file.category = "note"
-    return file
-
-def file_dict(id, name, related):
-    return dict(id = id, name = name, related = related)
-
 def filter_symbols(words):
     new_words = []
     for word in words:
@@ -60,14 +42,17 @@ def search(ctx, expression=None):
         return files
 
     if ctx.search_note_content:
-        files += xutils.call("note.search_content", words, xauth.current_name())
+        files += NOTE_DAO.search_content(words, xauth.current_name())
     
     if ctx.search_note:
-        files += xutils.call("note.search_name", words, xauth.current_name())
+        files += NOTE_DAO.search_name(words, xauth.current_name())
+
+    for item in files:
+        item.category = 'note'
 
     # group 放前面
-    groups = list(filter(lambda x: x.type == "group", files))
-    text_files  = list(filter(lambda x: x.type != "group", files))
-    files = groups + text_files
+    groups     = list(filter(lambda x: x.type == "group", files))
+    text_files = list(filter(lambda x: x.type != "group", files))
+    files      = groups + text_files
     return files
 
