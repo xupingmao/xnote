@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/22 23:45:07
+# @modified 2020/02/23 00:22:43
 
 """时光轴视图"""
 import re
@@ -84,11 +84,11 @@ def split_words(search_key):
     return words
 
 
-def build_date_result(rows, orderby, sticky_title = False, group_title = False, archived_title = False):
-    tmp_result = dict()
-    sticky_notes = []
+def build_date_result(rows, orderby = 'ctime', sticky_title = False, group_title = False, archived_title = False):
+    tmp_result     = dict()
+    sticky_notes   = []
     archived_notes = []
-    project_notes = []
+    project_notes  = []
 
     for row in rows:
         if sticky_title and row.priority != None and row.priority > 0:
@@ -115,6 +115,13 @@ def build_date_result(rows, orderby, sticky_title = False, group_title = False, 
             tmp_result[title] = []
         tmp_result[title].append(row)
 
+    tmp_sorted_result = []
+    for key in tmp_result:
+        items = tmp_result[key]
+        items.sort(key = lambda x: x[orderby], reverse = True)
+        tmp_sorted_result.append(dict(title = key, children = items))
+    tmp_sorted_result.sort(key = lambda x: x['title'], reverse = True)
+
     result = []
 
     if len(sticky_notes) > 0:
@@ -123,10 +130,7 @@ def build_date_result(rows, orderby, sticky_title = False, group_title = False, 
     if len(project_notes) > 0:
         result.append(dict(title = u'项目', children = project_notes))
 
-    for key in tmp_result:
-        items = tmp_result[key]
-        items.sort(key = lambda x: x[orderby], reverse = True)
-        result.append(dict(title = key, children = items))
+    result += tmp_sorted_result
 
     if len(archived_notes) > 0:
         result.append(dict(title = u'归档', children = archived_notes))

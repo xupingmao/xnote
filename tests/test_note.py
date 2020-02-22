@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/02/22 23:59:11
+# @modified 2020/02/23 00:25:20
 import xutils
 
 # cannot perform relative import
@@ -11,6 +11,7 @@ except ImportError:
     from tests import test_base
 
 from handlers.note.dao import get_by_id
+from xutils import Storage
 
 app          = test_base.init()
 json_request = test_base.json_request
@@ -111,7 +112,20 @@ class TestMain(BaseTestCase):
         assert_json_request_success(self, "/note/api/timeline?type=plan")
         assert_json_request_success(self, "/note/api/timeline?type=list")
         assert_json_request_success(self, "/note/api/timeline?type=gallery")
+        assert_json_request_success(self, u"/note/api/timeline?type=default&parent_id=012345")
         assert_json_request_success(self, u"/note/api/timeline?type=search&key=xnote中文")
+
+    def test_timeline_sort_func(self):
+        from handlers.note.timeline import build_date_result
+        note1 = Storage(name = "note1", ctime = "2015-01-01 00:00:00")
+        note2 = Storage(name = "note2", ctime = "2015-06-01 00:00:00")
+        note3 = Storage(name = "note3", ctime = "2014-01-01 00:00:00")
+        result = build_date_result([note1, note2, note3])
+
+        self.assertEqual("success", result['code'])
+        self.assertEqual("2015-06-01", result['data'][0]['title'])
+        self.assertEqual("2015-01-01", result['data'][1]['title'])
+        self.assertEqual("2014-01-01", result['data'][2]['title'])
 
     def test_note_editor_md(self):
         json_request("/note/remove?name=xnote-md-test")
