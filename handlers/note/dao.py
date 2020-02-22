@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/02/17 01:11:28
+# @modified 2020/02/22 23:55:47
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -748,22 +748,6 @@ def get_history(note_id, version):
     # note = table.select_first(where = dict(note_id = note_id, version = version))
     return dbutil.get("note_history:%s:%s" % (note_id, version))
 
-def file_wrapper(dict, option=None):
-    """build fileDO from dict"""
-    name = dict['name']
-    file = Storage()
-    for key in dict:
-        file[key] = dict[key]
-        # setattr(file, key, dict[key])
-    if hasattr(file, "content") and file.content is None:
-        file.content = ""
-    if option:
-        file.option = option
-    file.url = "/note/view?id={}".format(dict["id"])
-    # 文档类型，和文件系统file区分
-    file.category = "note"
-    return file
-
 def search_name(words, creator = None, parent_id = None):
     words = [word.lower() for word in words]
     if parent_id != None:
@@ -787,7 +771,7 @@ def search_content(words, creator=None):
             return False
         return (value.creator == creator or value.is_public) and textutil.contains_all(value.content.lower(), words)
     result = dbutil.prefix_list("note_full", search_func, 0, -1)
-    notes = [file_wrapper(item) for item in result]
+    notes = [build_note_info(item) for item in result]
     sort_notes(notes)
     return notes
 

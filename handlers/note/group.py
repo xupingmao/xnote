@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/02/22 11:27:20
+# @modified 2020/02/22 23:42:34
 import math
 import time
 import web
@@ -66,15 +66,6 @@ def type_node_path(name, url):
     parent = PathNode(TYPES_NAME, "/note/types")
     return [parent, GroupLink(T(name), url)]
 
-class BaseTimelineHandler:
-
-    @xauth.login_required()
-    def GET(self):
-        return xtemplate.render("note/page/timeline.html", 
-            title = T(self.title), 
-            type = self.note_type,
-            search_action = "/note/timeline",
-            search_placeholder = "搜索笔记")
 
 class DefaultListHandler:
 
@@ -213,33 +204,6 @@ class CategoryHandler:
             id=id, groups_tuple = groups_tuple)
 
 
-class RemovedHandler(BaseTimelineHandler):
-
-    title = T("回收站")
-    note_type = "removed"
-
-    @xauth.login_required()
-    def GET_old(self):
-        page = xutils.get_argument("page", 1, type=int)
-        user_name = xauth.current_name()
-
-        limit  = xconfig.PAGE_SIZE
-        offset = (page-1)*limit
-
-        amount = NOTE_DAO.count_removed(user_name)
-        files  = NOTE_DAO.list_removed(user_name, offset, limit)
-        parent = PathNode(TYPES_NAME, "/note/types")
-
-        return xtemplate.render(VIEW_TPL,
-            pathlist  = [parent, PathNode(T("回收站"), "/note/removed")],
-            file_type = "group",
-            files     = files,
-            page      = page,
-            show_aside = True,
-            show_mdate = True,
-            page_max  = math.ceil(amount / 10),
-            page_url  = "/note/removed?page=")
-
 
 class BaseListHandler:
 
@@ -271,55 +235,16 @@ class BaseListHandler:
             page_url  = "/note/%s?page=" % self.note_type)
 
 
-class GalleryListHandler(BaseTimelineHandler):
-
-    def __init__(self):
-        self.note_type = "gallery"
-        self.title = "相册"
-        self.orderby = "ctime_desc"
-
-class TableListHandler(BaseTimelineHandler):
-
-    def __init__(self):
-        self.note_type = "csv"
-        self.title = "表格"
-
-class AddressBookHandler(BaseListHandler):
-
-    def __init__(self):
-        self.note_type = "address"
-        self.title = "通讯录"
-
-class HtmlListHandler(BaseTimelineHandler):
-
-    def __init__(self):
-        self.note_type = "html"
-        self.title = "富文本"
-
-class MarkdownListHandler(BaseTimelineHandler):
-    note_type = "md"
-    title     = "Markdown"
-
-class DocumentListHandler(BaseTimelineHandler):
-    note_type = "document"
-    title     = T("文档")
-
-class ListHandler(BaseTimelineHandler):
-
-    def __init__(self):
-        self.note_type = "list"
-        self.title = "清单"
-
-class PlanListHandler(BaseTimelineHandler):
-
-    note_type = "plan"
-    title = T("计划")
-
 class TextHandler(BaseListHandler):
 
     def __init__(self):
         self.note_type = "text"
         self.title = "文本"
+
+class AddressBookHandler(BaseListHandler):
+    def __init__(self):
+        self.note_type = "address"
+        self.title     = T("通讯录")
 
 class NoteIndexHandler:
 
@@ -411,28 +336,6 @@ class RecentHandler:
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    ="/note/recent_%s?page=" % orderby)
 
-class PublicGroupHandlerOld(BaseTimelineHandler):
-    title = T("公共笔记"), 
-    note_type = "public"
-
-    def GET_old(self):
-        # 老的分页逻辑
-        page = xutils.get_argument("page", 1, type=int)
-        page = max(1, page)
-        offset = (page - 1) * xconfig.PAGE_SIZE
-        files = NOTE_DAO.list_public(offset, xconfig.PAGE_SIZE)
-        count = NOTE_DAO.count_public()
-        return xtemplate.render(VIEW_TPL, 
-            show_aside = True,
-            pathlist   = [Storage(name="公开笔记", url="/note/public")],
-            file_type  = "group",
-            dir_type   = "public",
-            files      = files,
-            page       = page, 
-            show_cdate = True,
-            groups     = NOTE_DAO.list_group(),
-            page_max   = math.ceil(count/xconfig.PAGE_SIZE), 
-            page_url   = "/note/public?page=")
 
 def link_by_month(year, month, delta = 0):
     tm = Storage(tm_year = year, tm_mon = month, tm_mday = 0)
@@ -480,24 +383,6 @@ class DateHandler:
             year = int(year),
             month = int(month),
             notes = notes)
-
-class StickyHandler(BaseTimelineHandler):
-
-    def __init__(self):
-        self.note_type = "sticky"
-        self.title = T("置顶")
-
-    @xauth.login_required()
-    def GET_old(self):
-        user  = xauth.current_name()
-        files = xutils.call("note.list_sticky", user)
-        return xtemplate.render(VIEW_TPL,
-            pathlist  = [PathNode("置顶笔记", "/note/sticky")],
-            file_type = "group",
-            dir_type  = "sticky",
-            files     = files,
-            show_aside = True,
-            show_mdate = True)
 
 class ArchivedHandler:
 
@@ -552,10 +437,7 @@ xurls = (
     r"/note/category"       , CategoryHandler,
     r"/note/default"        , DefaultListHandler,
     r"/note/ungrouped"      , DefaultListHandler,
-    # r"/note/public"         , PublicGroupHandler,
-    r"/note/removed"        , RemovedHandler,
     r"/note/archived"       , ArchivedHandler,
-    r"/note/sticky"         , StickyHandler,
     r"/note/recent_(created)" , RecentHandler,
     r"/note/recent_edit"    , RecentHandler,
     r"/note/recent_(viewed)", RecentHandler,
@@ -564,17 +446,6 @@ xurls = (
     r"/note/monthly"        , DateHandler,
     r"/note/management"     , ManagementHandler,
 
-    # 笔记分类
-    r"/note/gallery"        , GalleryListHandler,
-    r"/note/table"          , TableListHandler,
-    r"/note/csv"            , TableListHandler,
-    r"/note/document"       , DocumentListHandler,
-    r"/note/html"           , HtmlListHandler,
-    r"/note/md"             , MarkdownListHandler,
-    r"/note/list"           , ListHandler,
-    r"/note/plan"           , PlanListHandler,
-
-    r"/note/addressbook"    , AddressBookHandler,
     r"/note/text"           , TextHandler,
     r"/note/tools"          , NoteIndexHandler,
     r"/note/types"          , NoteIndexHandler,

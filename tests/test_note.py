@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/02/02 15:17:01
+# @modified 2020/02/22 23:59:11
 import xutils
 
 # cannot perform relative import
@@ -89,6 +89,9 @@ class TestMain(BaseTestCase):
         self.check_OK("/note/types")
         self.check_OK("/note/table")
         self.check_OK("/note/gallery")
+        self.check_OK("/note/plan")
+        self.check_OK("/note/list")
+        self.check_OK("/note/html")
 
     def test_note_notice(self):
         self.check_OK("/note/notice")
@@ -105,7 +108,10 @@ class TestMain(BaseTestCase):
         assert_json_request_success(self, "/note/api/timeline?type=removed")
         assert_json_request_success(self, "/note/api/timeline?type=archived")
         assert_json_request_success(self, "/note/api/timeline?type=all")
-        assert_json_request_success(self, "/note/api/timeline?type=search&key=xnote")
+        assert_json_request_success(self, "/note/api/timeline?type=plan")
+        assert_json_request_success(self, "/note/api/timeline?type=list")
+        assert_json_request_success(self, "/note/api/timeline?type=gallery")
+        assert_json_request_success(self, u"/note/api/timeline?type=search&key=xnote中文")
 
     def test_note_editor_md(self):
         json_request("/note/remove?name=xnote-md-test")
@@ -266,6 +272,10 @@ class TestMain(BaseTestCase):
         json_request("/dict/edit/name", method = "POST", data = dict(name = "name", value = u"姓名".encode("utf-8")))
         self.check_OK("/note/dict")
         self.check_OK("/dict/search?key=name")
+
+    def test_note_search(self):
+        assert_json_request_success(self, u"/note/api/timeline?type=search&key=xnote中文")
+        self.check_OK(u"/search?key=test中文&category=content")
 
     
 

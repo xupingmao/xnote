@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/22 21:36:00
+# @modified 2020/02/22 23:45:07
 
 """时光轴视图"""
 import re
@@ -14,6 +14,18 @@ from .constant import *
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
+
+
+class PathLink:
+
+    def __init__(self, name, url):
+        self.name = name
+        self.url  = url
+
+PARENT_LINK_DICT = {
+    "default": PathLink(u"项目列表", "/note/timeline"),
+    "plan": PathLink(u"项目列表", "/note/timeline"),
+}
 
 class TaskGroup(Storage):
     def __init__(self, name = "待办任务"):
@@ -261,12 +273,13 @@ class DateTimeline:
             result[date].append(row)
         return result
 
-class TimelineHandler:
 
-    default_type = "root"
+class BaseTimelineHandler:
+
+    note_type = "root"
 
     def GET(self):
-        type        = xutils.get_argument("type", self.default_type)
+        type        = xutils.get_argument("type", self.note_type)
         parent_id   = xutils.get_argument("parent_id", "")
         key         = xutils.get_argument("key", "")
         title       = u"最新笔记"
@@ -295,19 +308,81 @@ class TimelineHandler:
             search_action = "/note/timeline",
             search_placeholder = T(u"搜索" + search_title),
             search_ext_dict = dict(parent_id = parent_id),
-            show_project_link = (parent_id != ""),
+            parent_link = PARENT_LINK_DICT.get(type),
             show_aside = False)
+
+class TimelineHandler(BaseTimelineHandler):
+    note_type = "root"
 
 class PublicTimelineHandler(TimelineHandler):
     """公共笔记的时光轴视图"""
-    default_type = "public"
+    note_type = "public"
+
+
+class GalleryListHandler(BaseTimelineHandler):
+    def __init__(self):
+        self.note_type = "gallery"
+        self.title     = T("相册")
+        self.orderby   = "ctime_desc"
+
+class TableListHandler(BaseTimelineHandler):
+    def __init__(self):
+        self.note_type = "csv"
+        self.title     = T("表格")
+
+
+class HtmlListHandler(BaseTimelineHandler):
+
+    def __init__(self):
+        self.note_type = "html"
+        self.title     = T("富文本")
+
+class MarkdownListHandler(BaseTimelineHandler):
+    note_type = "md"
+    title     = "Markdown"
+
+class DocumentListHandler(BaseTimelineHandler):
+    note_type = "document"
+    title     = T("文档")
+
+class ListNoteHandler(BaseTimelineHandler):
+    def __init__(self):
+        self.note_type = "list"
+        self.title     = T("清单")
+
+class PlanListHandler(BaseTimelineHandler):
+
+    note_type = "plan"
+    title = T("计划")
+
+
+class StickyHandler(BaseTimelineHandler):
+    def __init__(self):
+        self.note_type = "sticky"
+        self.title     = T("置顶")
+
+
+class RemovedHandler(BaseTimelineHandler):
+    title = T("回收站")
+    note_type = "removed"
 
 
 xurls = (
-    r"/note/timeline", TimelineHandler,
-    r"/note/public",   PublicTimelineHandler,
-    r"/note/tools/timeline", TimelineHandler,
     r"/note/timeline/month", DateTimeline,
-    r"/note/api/timeline", TimelineAjaxHandler
+    r"/note/api/timeline", TimelineAjaxHandler,
+
+    # 时光轴视图
+    r"/note/timeline"       , TimelineHandler,
+    r"/note/public"         , PublicTimelineHandler,
+    r"/note/gallery"        , GalleryListHandler,
+    r"/note/table"          , TableListHandler,
+    r"/note/csv"            , TableListHandler,
+    r"/note/document"       , DocumentListHandler,
+    r"/note/html"           , HtmlListHandler,
+    r"/note/md"             , MarkdownListHandler,
+    r"/note/list"           , ListNoteHandler,
+    r"/note/plan"           , PlanListHandler,
+    r"/note/sticky"         , StickyHandler,
+    r"/note/removed"        , RemovedHandler,
 )
 
