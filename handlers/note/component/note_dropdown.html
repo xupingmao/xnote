@@ -21,6 +21,7 @@
         {% end %}
 
         <a class="dropdown-option link link-share-option" href="javascript:void(0)" data-clipboard-text="">链接分享</a>
+        <a class="dropdown-option link copy-link-option" href="javascript:void(0)" data-clipboard-text="">复制链接</a>
         
         <a class="dropdown-option move-btn link" data-url="/note/group/select?callback=moveNoteCallback">移动</a>
 
@@ -39,7 +40,7 @@
         {% end %}
 
         <a class="dropdown-option link" href="/note/history?id={{file_id}}">{{T("历史")}}</a>
-        <a class="dropdown-option link" href="/note/print?id={{file.id}}" target="_blank">打印模式</a>
+        <a class="dropdown-option link" href="/note/print?id={{file.id}}" target="_blank">打印</a>
 
         {% if _is_admin %}
             <a class="dropdown-option link" href="/note/{{file.id}}?_format=json">查看JSON</a>
@@ -79,6 +80,16 @@ $(function () {
                 });
             } else {
                 xnote.alert("分享失败!");
+            }
+        });
+    });
+
+    $(".copy-link-option").click(function(event) {
+        $(".copy-link-option").attr('data-clipboard-text', window.location.href);
+        new ClipboardJS(".copy-link-option", {
+            text: function (trigger) {
+                xnote.toast("已经复制到粘贴板");
+                return trigger.getAttribute("data-clipboard-text");
             }
         });
     });

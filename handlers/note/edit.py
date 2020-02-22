@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/02/16 13:04:38
+# @modified 2020/02/22 11:28:19
 
 """笔记编辑相关处理"""
 import os
@@ -161,9 +161,6 @@ class CreateHandler:
 
     def GET(self):
         return self.POST('GET')
-
-class AddHandler(CreateHandler):
-    pass
 
 
 class RemoveAjaxHandler:
@@ -439,7 +436,7 @@ class AppendAjaxHandler:
         
 
 xurls = (
-    r"/note/add"         , AddHandler,
+    r"/note/add"         , CreateHandler,
     r"/note/create"      , CreateHandler,
     r"/note/remove"      , RemoveAjaxHandler,
     r"/note/rename"      , RenameAjaxHandler,

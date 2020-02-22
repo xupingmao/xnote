@@ -1,0 +1,37 @@
+
+{% init search_placeholder = "搜索或指令" %}
+{% init search_action = "/search/search" %}
+
+{% if show_menu %}
+
+<div class="nav-left">
+  <!-- 侧边菜单栏 -->
+  <div class="nav-left-inner-box">
+    <ul class="navMenu">
+      {% if _has_login %}
+        <!-- 登录状态 -->
+        <li><a href="/note/timeline?type=all">{{T("我的笔记")}}</a></li>
+        <li><a href="/note/public"><i class="fa fa-bookmark black"></i>{{T("公共笔记")}}</a></li>
+        <li><a href="/note/sticky"><i class="fa fa-bookmark black"></i>{{T("置顶笔记")}}</a></li>
+        <li><a href="/system/index"><i class="fa fa-gear black"></i>系统设置</a></li>
+
+        {% for note in xutils.DAO("note").list_group(_user_name) %}
+          <li><a href="{{note.url}}" id="N{{note.id}}">
+            <i class="fa {{note.icon}}"></i>{{note.name}}<span class="nav-book-size-span">{{note.size}}</span></a>
+          </li>
+        {% end %}
+
+      {% else %}
+        <!-- 未登录状态 -->
+        <li><a href="/note/public">公开笔记</a></li>
+        <li><a href="/login" class="afinve"><span>登陆系统</span></a></li>
+      {% end %}
+
+    </ul>
+    <div id="poweredBy">
+      Powered by <a href="/code/wiki/README.md">Xnote</a>
+    </div>
+  </div>
+</div>
+
+{% end %}

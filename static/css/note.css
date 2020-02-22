@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2020/02/02 14:36:13
+ * @modified 2020/02/22 12:25:46
 */
 
 
@@ -204,6 +204,11 @@
 
 .book-size-span {
     color: #888;
+}
+
+.nav-book-size-span {
+    color: #888;
+    float: right;
 }
 
 /** group select **/

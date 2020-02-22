@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/02/21 23:59:12
+# @modified 2020/02/22 11:27:20
 import math
 import time
 import web
@@ -353,12 +353,6 @@ class NoteIndexHandler:
             search_action = "/note/timeline",
             search_placeholder = "搜索笔记")
 
-class ToolListHandler(NoteIndexHandler):
-    pass
-
-class TypesHandler(ToolListHandler):
-    """A alias for ToolListHandler"""
-    pass
 
 class RecentHandler:
     """show recent notes"""
@@ -582,8 +576,8 @@ xurls = (
 
     r"/note/addressbook"    , AddressBookHandler,
     r"/note/text"           , TextHandler,
-    r"/note/tools"          , ToolListHandler,
-    r"/note/types"          , TypesHandler,
+    r"/note/tools"          , NoteIndexHandler,
+    r"/note/types"          , NoteIndexHandler,
     r"/note/index"          , NoteIndexHandler
 )
 

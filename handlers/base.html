@@ -11,11 +11,6 @@
         <!-- 导航/菜单栏 -->
         {% include common/base_nav.html %}
 
-        <!-- 左侧侧边栏 -->
-        <div class="x-left">
-            {% block left_part %} {% end %}
-        </div>
-
         <div class="x-body">
             <div class="nav-left-search">
                 <form id="searchForm2" method="GET" action="{{search_action}}">
@@ -40,7 +35,8 @@
         <div class="aside">
             {% block aside %} {% end %}
         </div>
-        <!-- Main Part End -->
+
+        <!-- 页脚 -->
         <div class="footer">
         </div>
     </div>

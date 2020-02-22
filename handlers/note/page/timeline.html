@@ -21,6 +21,7 @@
 
 {% block body %}
 
+{% init show_project_link = False %}
 {% init type = "ctime" %}
 {% init base_path = "/note/timeline" %}
 {% init key = "" %}
@@ -30,6 +31,9 @@
 <div id="app" class="card content">
 
   <div class="note-header card-title">
+    {% if show_project_link %}
+      <a href="{{HOME_PATH}}" class="black-link">项目列表</a>&nbsp;/
+    {% end %}
     <span class="note-header-span">{{title}}</span>
 
     <div class="float-right">
@@ -86,7 +90,8 @@
         data: {
             itemList: itemList,
             offset: 0
-        }
+        },
+        isLoading: false
     });
 
     app.itemList = [];
@@ -103,7 +108,13 @@
       list.push({title: key, files: files});
     }
 
+    /** 加载更多笔记
+     * @param {boolean} showToast 是否展示toast信息
+     */
     function loadMore(showToast) {
+      if (app.isLoading) {
+        return;
+      }
       var type = "{{type}}" || getUrlParam("type");
       var parent_id = getUrlParam("parent_id");
       var searchKey = "{{key}}";
@@ -113,6 +124,7 @@
         loadingNoteIndex = layer.load(2);
       }); 
 
+      app.isLoading = true;
       $.get("/note/api/timeline?_type=json&type=" + type, 
         { 
           offset: app.offset,
@@ -121,6 +133,7 @@
           key: searchKey
         }, 
         function (resp, status) {
+          app.isLoading = false;
           layer.close(loadingNoteIndex);
           var data = resp.data;
           if (data.length == 0) {
@@ -150,37 +163,8 @@
             }
             return;
           }
-          
-          var pinnedTitle   = ["置顶", "项目"];
-          var archivedTitle = '归档';
-
-          app.itemList.sort(function (a, b) {
-            if (a.title == archivedTitle) {
-              return 1;
-            }
-
-            if (b.title == archivedTitle) {
-              return -1;
-            }
-
-            if (pinnedTitle.indexOf(a.title) >= 0) {
-              return -1;
-            }
-
-            if (pinnedTitle.indexOf(b.title) >= 0) {
-              return 1;
-            }
-
-            if (a.title < b.title) {
-              return 1;
-            }
-
-            if (a.title > b.title) {
-              return -1;
-            }
-            return 0;
-          });
       }).fail(function (error) {
+          app.isLoading = false;
           layer.close(loadingNoteIndex);
       });
     }
@@ -194,6 +178,25 @@
       // 等待layer资源加载
       loadMore(false);
     });
+
+    var parentId = getUrlParam("parent_id");
+    if (parentId != undefined) {    
+      $("#N" + parentId).css("background", "#eee");
+      window.location.hash = "N" + parentId;
+    }
+
+    //滚动加载
+    /**
+    $(".x-body").scroll(function() {
+      var scrollTop = $(".x-body").scrollTop();
+      var scrollHeight = $("#app").height();
+      var windowHeight = $(window).height();
+      console.log(scrollTop, windowHeight, scrollTop + windowHeight, scrollHeight);
+      if (scrollTop + windowHeight >= scrollHeight + 100) {
+        loadMore(true);
+      }
+    });*/
+
 </script>
 {% end %}
 

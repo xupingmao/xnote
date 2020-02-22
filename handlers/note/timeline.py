@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/21 23:59:43
+# @modified 2020/02/22 21:36:00
 
 """时光轴视图"""
 import re
@@ -74,20 +74,29 @@ def split_words(search_key):
 
 def build_date_result(rows, orderby, sticky_title = False, group_title = False, archived_title = False):
     tmp_result = dict()
+    sticky_notes = []
+    archived_notes = []
+    project_notes = []
+
     for row in rows:
+        if sticky_title and row.priority != None and row.priority > 0:
+            sticky_notes.append(row)
+            continue
+
+        if archived_title and row.archived == True:
+            archived_notes.append(row)
+            continue
+
+        if group_title and row.type == "group":
+            project_notes.append(row)
+            continue
+        
         if orderby == "mtime":
             date_time = row.mtime
         else:
             date_time = row.ctime
 
-        if sticky_title and row.priority != None and row.priority > 0:
-            title = '置顶'
-        elif archived_title and row.archived == True:
-            title = '归档'
-        elif group_title and row.type == "group":
-            title = "项目"
-        else:
-            title = re.match(r"\d+\-\d+\-\d+", date_time).group(0)
+        title = re.match(r"\d+\-\d+\-\d+", date_time).group(0)
         # 优化返回数据大小
         row.content = ""
         if title not in tmp_result:
@@ -95,10 +104,20 @@ def build_date_result(rows, orderby, sticky_title = False, group_title = False, 
         tmp_result[title].append(row)
 
     result = []
+
+    if len(sticky_notes) > 0:
+        result.append(dict(title = u'置顶', children = sticky_notes))
+
+    if len(project_notes) > 0:
+        result.append(dict(title = u'项目', children = project_notes))
+
     for key in tmp_result:
         items = tmp_result[key]
         items.sort(key = lambda x: x[orderby], reverse = True)
         result.append(dict(title = key, children = items))
+
+    if len(archived_notes) > 0:
+        result.append(dict(title = u'归档', children = archived_notes))
 
     return dict(code = 'success', data = result)
 
@@ -276,6 +295,7 @@ class TimelineHandler:
             search_action = "/note/timeline",
             search_placeholder = T(u"搜索" + search_title),
             search_ext_dict = dict(parent_id = parent_id),
+            show_project_link = (parent_id != ""),
             show_aside = False)
 
 class PublicTimelineHandler(TimelineHandler):

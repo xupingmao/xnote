@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/02/09 01:49:23
+ * @modified 2020/02/22 21:37:40
  */
 
 /** marked 样式 **/
@@ -75,17 +75,22 @@
     background: #ccc;
 }
 
-.link {
-    /*color: #37a; */
-    color: #08c;
+.link, .black-link, .link2 {
     margin-right: 5px;
     cursor: pointer;
 }
 
+.link {
+    /*color: #37a; */
+    color: #08c;
+}
+
+.black-link {
+    color: black;
+}
+
 .link2 {
     color: black;
-    margin-right: 5px;
-    cursor: pointer;
 }
 
 .link2:hover {
@@ -1041,6 +1046,10 @@ li.menu-item:hover {
 
 .green {
     color: green;
+}
+
+.gray {
+    color: gray;
 }
 
 .xnote-todo {
