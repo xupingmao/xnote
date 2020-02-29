@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/02/15 19:29:04
+# @modified 2020/02/27 18:29:51
 import os
 import json
 import web
@@ -136,6 +136,7 @@ def pre_render(kw):
     kw["_notice_count"] = get_message_count(user_name)
     kw["T"]             = T
     kw["HOME_PATH"]     = xconfig.get_user_config(user_name, "HOME_PATH")
+    kw["THEME"]         = xconfig.get_user_config(user_name, "THEME")
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
 

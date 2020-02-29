@@ -1,3 +1,38 @@
 {% for i, path_item in enumerate(pathlist) %}
     {% if i > 0 %} / {% end %}<a href="{{path_item.url}}" class="link2 path-link">{{ path_item.name }}</a>
 {% end %}
+
+<!-- {{path_item}} -->
+
+{% if path_item != None %}
+
+    {% if path_item.priority == 1 %}
+        <a class="gray-tag-link" href="/note/sticky">置顶</a>
+    {% end %}
+
+    {% if path_item.type == "plan" %}
+        <a class="gray-tag-link" href="/note/plan">计划</a>
+    {% end %}
+
+    {% if path_item.type == "list" %}
+        <a class="gray-tag-link" href="/note/list">列表</a>
+    {% end %}
+
+    {% if path_item.type in ("csv", "table") %}
+        <a class="gray-tag-link" href="/note/table">表格</a>
+    {% end %}
+
+    {% if path_item.type == "gallery" %}
+        <a class="gray-tag-link" href="/note/gallery">相册</a>
+    {% end %}
+
+    {% if path_item.type == "html" %}
+        <a class="gray-tag-link" href="/note/html">富文本</a>
+    {% end %}
+
+    {% if path_item.type in ("md", "log", "text") %}
+        <a class="gray-tag-link" href="/note/document">文档</a>
+    {% end %}
+
+{% end %}
+

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2020/02/09 22:54:36
+# @modified 2020/02/26 01:14:20
 import xauth
 import xutils
 from xutils import dbutil
@@ -70,6 +70,7 @@ class StatHandler(BasePlugin):
             admin_stat_list.append(["note_tiny", dbutil.count_table("note_tiny")])
             admin_stat_list.append(["note_index", dbutil.count_table("note_index")])
             admin_stat_list.append(["note_public", dbutil.count_table("note_public")])
+            admin_stat_list.append(["note_edit_log", dbutil.count_table("note_edit_log")])
             admin_stat_list.append(["note_history", dbutil.count_table("note_history")])
             admin_stat_list.append(["note_comment", dbutil.count_table("note_comment")])
             admin_stat_list.append(["comment_index", dbutil.count_table("comment_index")])

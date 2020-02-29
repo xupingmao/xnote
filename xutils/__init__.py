@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/01/31 12:19:49
+# @modified 2020/02/23 16:17:43
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -601,6 +601,12 @@ def _get_default_by_type(default_value, type):
     return None
 
 def get_argument(key, default_value=None, type = None, strip=False):
+    """获取请求参数
+    @param {string} key 请求的参数名
+    @param {object} default_value 默认值
+    @param {type} type 参数类型
+    @param {bool} strip 是否过滤空白字符
+    """
     if not hasattr(web.ctx, "env"):
         return default_value or None
     ctx_key = "_xnote.input"

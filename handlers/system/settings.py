@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/02/15 18:57:44
+# @modified 2020/02/27 18:26:51
 import web
 import time
 import os
@@ -26,7 +26,7 @@ except ImportError as e:
     psutil = None
 
 INIT_SCRIPT_URL = "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)
-USER_CONFIG_KEY_SET = set(["TODO_MODE", "SIMPLE_MODE", "HOME_PATH", "LANG"])
+USER_CONFIG_KEY_SET = set(["TODO_MODE", "SIMPLE_MODE", "HOME_PATH", "LANG", "THEME"])
 
 def get_xnote_version():
     try:

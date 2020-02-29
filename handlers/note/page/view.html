@@ -36,7 +36,7 @@
         {% elif file_type in ("md", "text", "log", "plan") %}
             {% include note/editor/markdown.html %}
         {% elif file_type == "csv" %}
-            {% include note/editor/csv_editor.html %}
+            {% include note/editor/table.html %}
         {% elif file_type == "gallery" %}
             {% include note/editor/gallery.html %}
         {% elif file_type == "list" %}

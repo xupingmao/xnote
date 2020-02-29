@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/23 00:22:43
+# @modified 2020/02/29 22:07:29
 
 """时光轴视图"""
 import re
@@ -23,9 +23,21 @@ class PathLink:
         self.url  = url
 
 PARENT_LINK_DICT = {
-    "default": PathLink(u"项目列表", "/note/timeline"),
-    "plan": PathLink(u"项目列表", "/note/timeline"),
+    "default": PathLink(u"项目", "/note/timeline"),
+    "plan"   : PathLink(u"项目", "/note/timeline"),
+    "sticky" : PathLink(u"项目", "/note/timeline"),
+    "removed": PathLink(u"项目", "/note/timeline"),
 }
+class SystemGroup(Storage):
+    def __init__(self, name, url):
+        super(SystemGroup, self).__init__()
+        self.user = xauth.current_name()
+        self.type = 'system'
+        self.icon = "fa fa-gear"
+        self.name = name
+        self.url  = url
+        self.priority = 1
+        self.size = 0
 
 class TaskGroup(Storage):
     def __init__(self, name = "待办任务"):
@@ -40,12 +52,24 @@ class TaskGroup(Storage):
         self.priority = 1
         self.size = MSG_DAO.get_message_stat(self.user).task_count
 
-class PlanGroup(TaskGroup):
+class PlanGroup(SystemGroup):
     """计划类型的笔记, @since 2020/02/16"""
     def __init__(self):
-        super(PlanGroup, self).__init__("计划列表")
-        self.url = "/note/plan"
+        super(PlanGroup, self).__init__(u"计划列表", "/note/plan")
         self.size = NOTE_DAO.get_note_stat(self.user).plan_count
+
+class StickyGroup(SystemGroup):
+
+    def __init__(self):
+        super(StickyGroup, self).__init__(u"置顶笔记", "/note/sticky")
+        self.size = NOTE_DAO.get_note_stat(self.user).sticky_count
+        self.icon = "fa fa-thumb-tack"
+
+class IndexGroup(SystemGroup):
+
+    def __init__(self):
+        super(IndexGroup, self).__init__(u"笔记索引", "/note/index")
+        self.icon = "fa fa-gear"
 
 def search_group(user_name, words):
     rows = NOTE_DAO.list_group(user_name)
@@ -160,10 +184,15 @@ def list_search_func(context):
 
     return build_date_result(rows, 'ctime', sticky_title = True, group_title = True)
 
-def list_root_func(context):
+def list_project_func(context):
+    offset    = context['offset']
+    limit     = context['limit']
     user_name = context['user_name']
-    rows      = NOTE_DAO.list_group(user_name)
-    rows.insert(0, PlanGroup())
+    if offset > 0:
+        rows = []
+    else:
+        rows = NOTE_DAO.list_group(user_name)
+        rows.insert(0, StickyGroup())
     return build_date_result(rows, 'mtime', sticky_title = True, archived_title = True)
 
 def list_public_func(context):
@@ -218,6 +247,13 @@ def list_all_func(context):
     rows      = NOTE_DAO.list_recent_created(user_name, offset, limit)
     return build_date_result(rows, 'ctime')
 
+def list_recent_edit_func(context):
+    offset    = context['offset']
+    limit     = context['limit']
+    user_name = context['user_name']
+    rows      = NOTE_DAO.list_recent_edit(user_name, offset, limit)
+    return build_date_result(rows, 'mtime')
+    
 def default_list_func(context):
     offset    = context['offset']
     limit     = context['limit']
@@ -226,23 +262,28 @@ def default_list_func(context):
     rows      = NOTE_DAO.list_by_parent(user_name, parent_id, offset, limit, 'ctime')
     return build_date_result(rows, 'ctime', sticky_title = True, group_title = True)
 
+
 LIST_FUNC_DICT = {
-    'root': list_root_func,
-    'public': list_public_func,
-    'sticky': list_sticky_func,
-    'removed': list_removed_func,
+    'root'    : list_project_func,
+    'group'   : list_project_func,
+    'public'  : list_public_func,
+    'sticky'  : list_sticky_func,
+    'removed' : list_removed_func,
     'archived': list_archived_func,
-    'md': list_by_type_func,
-    'group': list_by_type_func,
-    'gallery': list_by_type_func,
+
+    'recent_edit': list_recent_edit_func,
+
+    'md'      : list_by_type_func,
+    'gallery' : list_by_type_func,
     'document': list_by_type_func,
-    'html': list_by_type_func,
-    'list': list_by_type_func,
-    'table': list_by_type_func,
-    'csv': list_by_type_func,
-    'plan': list_plan_func,
-    'all': list_all_func,
-    "search": list_search_func,
+    'html'    : list_by_type_func,
+    'list'    : list_by_type_func,
+    'table'   : list_by_type_func,
+    'csv'     : list_by_type_func,
+
+    'plan'    : list_plan_func,
+    'all'     : list_all_func,
+    "search"  : list_search_func,
 }
 
 class TimelineAjaxHandler:
@@ -280,7 +321,7 @@ class DateTimeline:
 
 class BaseTimelineHandler:
 
-    note_type = "root"
+    note_type = "group"
 
     def GET(self):
         type        = xutils.get_argument("type", self.note_type)
@@ -316,7 +357,7 @@ class BaseTimelineHandler:
             show_aside = False)
 
 class TimelineHandler(BaseTimelineHandler):
-    note_type = "root"
+    note_type = "group"
 
 class PublicTimelineHandler(TimelineHandler):
     """公共笔记的时光轴视图"""
@@ -324,50 +365,38 @@ class PublicTimelineHandler(TimelineHandler):
 
 
 class GalleryListHandler(BaseTimelineHandler):
-    def __init__(self):
-        self.note_type = "gallery"
-        self.title     = T("相册")
-        self.orderby   = "ctime_desc"
+    note_type = "gallery"
+
 
 class TableListHandler(BaseTimelineHandler):
-    def __init__(self):
-        self.note_type = "csv"
-        self.title     = T("表格")
+    note_type = "csv"
 
 
 class HtmlListHandler(BaseTimelineHandler):
+    note_type = "html"
 
-    def __init__(self):
-        self.note_type = "html"
-        self.title     = T("富文本")
 
 class MarkdownListHandler(BaseTimelineHandler):
     note_type = "md"
-    title     = "Markdown"
+
 
 class DocumentListHandler(BaseTimelineHandler):
     note_type = "document"
-    title     = T("文档")
+
 
 class ListNoteHandler(BaseTimelineHandler):
-    def __init__(self):
-        self.note_type = "list"
-        self.title     = T("清单")
+    note_type = "list"
+
 
 class PlanListHandler(BaseTimelineHandler):
-
     note_type = "plan"
-    title = T("计划")
 
 
 class StickyHandler(BaseTimelineHandler):
-    def __init__(self):
-        self.note_type = "sticky"
-        self.title     = T("置顶")
+    note_type = "sticky"
 
 
 class RemovedHandler(BaseTimelineHandler):
-    title = T("回收站")
     note_type = "removed"
 
 

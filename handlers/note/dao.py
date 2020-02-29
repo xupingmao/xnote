@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/02/22 23:55:47
+# @modified 2020/02/29 02:05:22
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -180,10 +180,11 @@ def build_note_info(note):
             note.data = ''
         # process icon
         note.icon = NOTE_ICON_DICT.get(note.type, "fa-file-text-o")
+        note.id   = str(note.id)
     return note
 
 def convert_to_path_item(note):
-    return Storage(name = note.name, url = note.url, id = note.id)
+    return Storage(name = note.name, url = note.url, id = note.id, type = note.type, priority = note.priority)
 
 @xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
 def list_path(file, limit = 2):
@@ -278,6 +279,12 @@ def create_token(type, id):
     dbutil.put("token:%s" % uuid, token_info)
     return uuid
 
+def add_edit_log(note):
+    creator = note.creator
+    note_id = note.id
+    key = "note_edit_log:%s:%s" % (creator, dbutil.timeseq())
+    dbutil.put(key, note_id)
+
 def update_note_rank(note):
     mtime = note.mtime
     atime = note.atime
@@ -293,8 +300,6 @@ def update_note_rank(note):
     if note.type != "group":
         # 分组不需要记录
         # TODO 增加修改时间和访问时间的索引
-        # dbutil.zadd("note_recent:%s" % creator, mtime, note_id)
-        # dbutil.zadd("note_visit:%s" % creator, atime, note_id)
         return
     if note.is_public:
         # TODO 更新公共笔记的最近更新索引
@@ -316,6 +321,9 @@ def kv_put_note(note_id, note):
 
     # 更新索引
     update_index(note)
+
+    # 增加编辑日志
+    add_edit_log(note)
 
 def touch_note(note_id):
     note = get_by_id(note_id)
@@ -346,9 +354,6 @@ def update_index(note):
 
     note_index = convert_to_index(note)
     dbutil.put('note_index:%s' % id, note_index)
-    
-    # 更新笔记的排序
-    update_note_rank(note)
 
     # 更新用户索引
     dbutil.put("note_tiny:%s:%s" % (note.creator, format_note_id(id)), note_index)
@@ -478,12 +483,13 @@ def delete_note(id):
 
     if note.is_deleted != 0:
         # 已经被删除了，执行物理删除
-        tiny_key = "note_tiny:%s:%s" % (note.creator, note.id)
-        full_key = "note_full:%s" % note.id
+        tiny_key  = "note_tiny:%s:%s" % (note.creator, note.id)
+        full_key  = "note_full:%s" % note.id
         index_key = "note_index:%s" % note.id
         dbutil.delete(tiny_key)
         dbutil.delete(full_key)
         dbutil.delete(index_key)
+        delete_history(note.id)
         return
 
     # 标记删除
@@ -741,8 +747,11 @@ def add_history(id, version, note):
 def list_history(note_id):
     history_list = dbutil.prefix_list("note_history:%s:" % note_id)
     history_list = sorted(history_list, key = lambda x: x.mtime or "", reverse = True)
-    # history_list = table.select(where=dict(note_id=note_id), order="mtime DESC")
     return history_list
+
+def delete_history(note_id, version = None):
+    pass
+
 
 def get_history(note_id, version):
     # note = table.select_first(where = dict(note_id = note_id, version = version))

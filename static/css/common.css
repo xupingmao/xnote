@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/02/22 21:37:40
+ * @modified 2020/02/29 21:53:58
  */
 
 /** marked 样式 **/
@@ -99,6 +99,14 @@
 
 .path-link {
     line-height: 28px;
+}
+
+.gray-tag-link {
+    background-color: #ccc;
+    color: white;
+    padding: 3px;
+    border-radius: 3px;
+    word-break: keep-all;
 }
 
 .danger-link {
@@ -1198,6 +1206,10 @@ li.menu-item:hover {
 }
 
 .desktop-only-inline {
+    display: inline;
+}
+
+.desktop-only-inline-block {
     display: inline-block;
 }
 
@@ -1271,7 +1283,7 @@ li.menu-item:hover {
         display: block;
     }
 
-    .desktop-only, .desktop-only-inline {
+    .desktop-only, .desktop-only-inline, .desktop-only-inline-block {
         display: none;
     }
 }

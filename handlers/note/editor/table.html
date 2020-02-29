@@ -28,10 +28,12 @@
 <div class="grid-title">
     {% include note/component/pathlist.html %}
 
-    <div class="float-right">
-        <button class="btn" id="saveBtn">保存</button>
-        {% include note/component/note_dropdown.html %}
-    </div>
+    {% if _user_name == file.creator %} 
+        <div class="float-right">
+            <button class="btn" id="saveBtn">保存</button>
+            {% include note/component/note_dropdown.html %}
+        </div>
+    {% end %}
 </div>
 
 <textarea id="content" class="hide">{{file.content}}</textarea>

@@ -35,12 +35,17 @@ select {
             </td>
         </tr>
 
-        <tr class="hide">
+        <tr class="user-visible">
             <td class="key">关于系统</td>
             <td>
                 <a href="/code/wiki/README.md">查看</a>
             </td>
         </tr>
+
+        <tr class="admin-visible">
+            <td class="key">管理后台</td>
+            <td><a href="/system/index">进入</a></td>
+        </tr>   
 
         <tr class="admin-visible">
             <td class="key">系统启动时间</td>
@@ -109,10 +114,10 @@ select {
         </tr>
 
         <!-- UI设置 -->
-        <tr class="admin-visible">
+        <tr class="user-visible">
             <td class="key">主题</td>
             <td>
-                <select name="THEME" data-type="str" value="{{xconfig.THEME}}">
+                <select name="THEME" data-type="str" value="{{_user_config.THEME}}">
                     <option value="standard">默认</option>
                     <option value="card">卡片</option>
                     <option value="left">侧边栏</option>

@@ -15,9 +15,7 @@
 
 {% if show_path_list %}
     <div class="grid-title">
-        {% for i, path_item in enumerate(pathlist) %}
-            {% if i > 0 %} / {% end %}<a href="{{path_item.url}}" class="link2 path-link">{{ path_item.name }}</a>
-        {% end %}
+        {% include note/component/pathlist.html %}
 
         {% if file != None and file.id == 0 %}
             <a class="btn float-right" href="/note/management?parent_id=0">整理</a>
