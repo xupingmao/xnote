@@ -1,8 +1,10 @@
 {% extends base %}
 
 {% block body %}
+
+<div class="card">
     <div class="card-title">
-        <a class="link" href="/note/dict">词典</a>
+        <a class="path-link" href="/note/dict">词典</a>
     </div>
 
     <div class="grid-row note-list">
@@ -21,9 +23,8 @@
 
     {# 分页 #}
     {% if show_pagination and "page" in globals() %}
-        <div class="card">
-            {% include mod_pagenation.html %}
-        </div>
+        {% include mod_pagenation.html %}
     {% end %}
+</div>
 
 {% end %}

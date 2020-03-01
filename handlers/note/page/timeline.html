@@ -44,6 +44,7 @@
         {% if type == "default" %}
           {% include note/component/group_option.html %}
         {% elif type == "search" %}
+          <a class="btn btn-default" href="/search">搜索历史</a>
           <a class="btn btn-default" href="/search?key={{quote(key)}}&category=content">搜索内容</a>
         {% elif type != "public" %}
           <a class="btn" href="/note/index">索引</a>

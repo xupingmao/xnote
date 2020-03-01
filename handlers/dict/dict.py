@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/02/15 21:46:37
-# @modified 2020/02/04 11:35:51
+# @modified 2020/03/01 17:47:31
 import xtables
 import xtemplate
 import xutils
@@ -17,9 +17,7 @@ SEARCH_KEYWORDS = dict(
     search_placeholder = "搜索词典",
 )
 
-def search_escape(text):
-    if not (isinstance(text, str) or isinstance(text, unicode)):
-        return text
+def escape_sqlite_text(text):
     text = text.replace('/', '//')
     text = text.replace("'", '\'\'')
     text = text.replace('[', '/[')
@@ -29,7 +27,17 @@ def search_escape(text):
     #text = text.replace('_', '/_')
     text = text.replace('(', '/(')
     text = text.replace(')', '/)')
+    return text
+
+def search_escape(text):
+    if not (isinstance(text, str) or isinstance(text, unicode)):
+        return text
+    text = escape_sqlite_text(text)
     return "'%" + text + "%'"
+
+def left_match_escape(text):
+    return "'%s%%'" % escape_sqlite_text(text)
+
 
 def convert_dict_func(item):
     v = Storage()
@@ -77,7 +85,7 @@ class DictSearchHandler:
         key  = xutils.get_argument("key")
         page = xutils.get_argument("page", 1, type=int)
         db   = xtables.get_dict_table()
-        where_sql = "key LIKE %s" % search_escape(key)
+        where_sql = "key LIKE %s" % left_match_escape(key)
         items = db.select(order="key", where = where_sql, limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
         items = map(convert_dict_func, items)
         count = db.count(where = where_sql)

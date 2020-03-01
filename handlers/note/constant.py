@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/02/16 12:49:30
-# @modified 2020/02/29 01:38:11
+# @modified 2020/03/01 17:14:30
 
 class NoteType:
 
@@ -13,6 +13,7 @@ NOTE_TYPE_MAPPING = {
     "document": "md",
     "text"    : "log",
     "post"    : "log",
+    "sticky"  : "md",
 }
 
 NOTE_TYPE_LIST = [
@@ -34,9 +35,21 @@ for item in NOTE_TYPE_LIST:
     VALID_NOTE_TYPE_SET.add(item.type)
 
 # 其他特殊类型
-NOTE_TYPE_DICT["sticky"] = u"置顶"
-NOTE_TYPE_DICT["public"] = u"公共笔记"
-NOTE_TYPE_DICT["removed"] = u"回收站"
+NOTE_TYPE_DICT["sticky"]      = u"置顶"
+NOTE_TYPE_DICT["public"]      = u"公共笔记"
+NOTE_TYPE_DICT["removed"]     = u"回收站"
 NOTE_TYPE_DICT["recent_edit"] = u"最近编辑"
-NOTE_TYPE_DICT["search"] = u"笔记搜索"
+NOTE_TYPE_DICT["search"]      = u"笔记搜索"
+
+# 创建按钮文字
+CREATE_BTN_TEXT_DICT = {
+    "gallery" : u"新建相册",
+    "list"    : u"新建清单",
+    "document": u"新建文档",
+    "table"   : u"新建表格",
+    "csv"     : u"新建表格",
+    "plan"    : u"新建计划",
+    "html"    : u"新建富文本",
+    "sticky"  : u"新建文档",
+}
 

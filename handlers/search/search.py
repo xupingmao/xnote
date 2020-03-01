@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/02/18 00:12:00
+# @modified 2020/03/01 23:37:19
 
 import re
 import os
@@ -21,6 +21,7 @@ import xtemplate
 import xtables
 from xutils import textutil, u, cacheutil
 from xutils import Queue, History, Storage
+from xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
@@ -196,14 +197,7 @@ class handler:
             key = xutils.unquote(path_key)
 
         if key == "" or key == None:
-            return xtemplate.render("search/search_result.html", 
-                show_aside = False,
-                recent = list_search_history(user_name),
-                html_title = "Search",
-                category = category, 
-                tools    = [],
-                files    = [], 
-                count    = 0)
+            raise web.found("/search/history")
         key   = key.strip()
         ctx   = Storage()
         files = self.do_search(ctx, key, offset, pagesize)
@@ -220,6 +214,20 @@ class handler:
             page_max = int(math.ceil(count/pagesize)),
             page_url = page_url,
             **ctx)
+
+
+class SearchHistoryHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        user_name = xauth.current_name()
+        return xtemplate.render("search/search_result.html", 
+            show_aside = False,
+            recent = list_search_history(user_name),
+            html_title = "Search",
+            files = [],
+            search_action = "/note/timeline",
+            search_placeholder = T(u"搜索笔记"))
 
 rules_loaded = False
 def load_rules():
@@ -253,6 +261,7 @@ xutils.register_func("search.list_recent", list_search_history)
 
 xurls = (
     r"/search/search", handler, 
+    r"/search/history", SearchHistoryHandler,
     r"/search", handler,
     r"/search/rules", RulesHandler,
     r"/s/(.+)", handler

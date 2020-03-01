@@ -1,0 +1,7 @@
+<div class="col-md-12 card">
+    <h3 class="card-title">搜索历史</h3>
+    {% for value in recent %}
+        <a class="tag-span" href="/note/timeline?type=search&key={{value}}">{{value}}</a>
+    {% end %}
+</div>
+

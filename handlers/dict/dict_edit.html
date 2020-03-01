@@ -9,27 +9,31 @@
 {% init name = "" %}
 {% init value = "" %}
 
-<div class="card" style="max-width: 400px;">
-    <h3 class="card-title"><a href="/note/dict">词典</a>&nbsp;/&nbsp;编辑</h3>
+<div class="card">
+    <h3 class="card-title">
+        <a class="path-link" href="/note/dict">词典</a>&nbsp;/&nbsp;编辑
+    </h3>
 
-    <form method="POST" action="">
-        <table class="table no-border-table">
-            <tr>
-                <td>名称</td>
-                <td><input type="text" class="mid-text col-md-12" name="name" value="{{name}}"/></td>
-            </tr>
-            <tr>
-                <td>解释</td>
-                <td><textarea name="value" rows=5 class="row">{{value}}</textarea></td>
-            </tr>
-            {% if _is_admin %}
+    <div style="max-width: 400px">
+        <form method="POST" action="">
+            <table class="table no-border-table">
                 <tr>
-                    <td></td>
-                    <td><button>保存</button></td>
+                    <td>名称</td>
+                    <td><input type="text" class="mid-text col-md-12" name="name" value="{{name}}"/></td>
                 </tr>
-            {% end %}
-        </table>
-    </form>
+                <tr>
+                    <td>解释</td>
+                    <td><textarea name="value" rows=5 class="row">{{value}}</textarea></td>
+                </tr>
+                {% if _is_admin %}
+                    <tr>
+                        <td></td>
+                        <td><button>保存</button></td>
+                    </tr>
+                {% end %}
+            </table>
+        </form>
+    </div>
 </div>
 {% end %}
 

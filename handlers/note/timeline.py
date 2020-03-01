@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/02/29 22:07:29
+# @modified 2020/03/01 23:32:53
 
 """时光轴视图"""
 import re
@@ -8,6 +8,8 @@ import xauth
 import xutils
 import xtables
 import xtemplate
+import time
+import web
 from xutils import Storage, dateutil, textutil
 from xtemplate import T
 from .constant import *
@@ -175,12 +177,15 @@ def list_search_func(context):
     if parent_id == "":
         parent_id = None
 
+    start_time = time.time()
     if search_key != None and search_key != "":
         # TODO 公共笔记的搜索
         search_key = xutils.unquote(search_key)
         words      = split_words(search_key)
         rows       = NOTE_DAO.search_name(words, user_name, parent_id = parent_id)
         rows       = rows[offset: offset + limit]
+        cost_time  = time.time() - start_time
+        NOTE_DAO.add_search_history(user_name, search_key, "note", cost_time)
 
     return build_date_result(rows, 'ctime', sticky_title = True, group_title = True)
 
@@ -335,6 +340,9 @@ class BaseTimelineHandler:
         else:
             xauth.check_login()
 
+        if type == "search" and key == "":
+            raise web.found("/search")
+
         title = NOTE_TYPE_DICT.get(type, u"最新笔记")
 
         search_title = u"笔记"
@@ -354,6 +362,7 @@ class BaseTimelineHandler:
             search_placeholder = T(u"搜索" + search_title),
             search_ext_dict = dict(parent_id = parent_id),
             parent_link = PARENT_LINK_DICT.get(type),
+            CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT,
             show_aside = False)
 
 class TimelineHandler(BaseTimelineHandler):
