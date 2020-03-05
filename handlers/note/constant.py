@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/02/16 12:49:30
-# @modified 2020/03/01 17:14:30
+# @modified 2020/03/02 12:02:36
 
 class NoteType:
 
@@ -40,6 +40,7 @@ NOTE_TYPE_DICT["public"]      = u"公共笔记"
 NOTE_TYPE_DICT["removed"]     = u"回收站"
 NOTE_TYPE_DICT["recent_edit"] = u"最近编辑"
 NOTE_TYPE_DICT["search"]      = u"笔记搜索"
+NOTE_TYPE_DICT["document"]    = u"文档"
 
 # 创建按钮文字
 CREATE_BTN_TEXT_DICT = {

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/03/01 23:32:53
+# @modified 2020/03/05 23:42:33
 
 """时光轴视图"""
 import re
@@ -100,6 +100,8 @@ def split_words(search_key):
                 words.append(word)
             p_start = p + 1
         elif textutil.is_cjk(c):
+            if p > p_start:
+                words.append(search_key_lower[p_start:p])
             # 中日韩字符集
             words.append(c)
             p_start = p + 1

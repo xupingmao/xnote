@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/02/29 02:05:22
+# @modified 2020/03/04 23:50:05
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -797,7 +797,7 @@ def list_removed(creator, offset, limit):
     return notes
 
 def doc_filter_func(key, value):
-    return value.type in ("md", "text", "html", "post") and value.is_deleted == 0
+    return value.type in ("md", "text", "html", "post", "log") and value.is_deleted == 0
 
 def table_filter_func(key, value):
     return value.type in ("csv", "table") and value.is_deleted == 0
