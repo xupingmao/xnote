@@ -1,11 +1,49 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2019/02/16 11:45:46
+# @modified 2020/03/15 17:01:02
 import os
 import re
 import xauth
 import xutils
 import json
+from xutils import fsutil
+
+def print_blue(msg):
+    print("\033[34m\033[01m%s\033[0m" % msg, end = '')
+
+def print_green(msg):
+    print("\033[32m\033[01m%s\033[0m" % msg, end = '')
+
+def debug_info(*msg):
+    print_green("[DEBUG] ")
+    print(*msg)
+
+def seek_page(fp, bookmark, pagesize):
+    # 缓存
+    mod       = 20
+    page      = bookmark.get("page", 0)
+    startpage = 1
+
+    if page < 0:
+        page = 0
+    fp.seek(0)
+
+    startpage = int(page / mod) * mod
+    pos = bookmark.get("page_%s" % startpage)
+    if pos:
+        debug_info("Hit cache, page=%s, position=%s" % (startpage, pos))
+        fp.seek(pos)
+    else:
+        debug_info("No cache, startpage=0")
+        startpage = 0
+        fp.seek(0)
+
+    for i in range(int(startpage), page):
+        fp.read(pagesize)
+
+    if page % mod == 0:
+        bookmark["page_%s" % page] = fp.tell()
+
 
 class handler:
 
@@ -23,67 +61,36 @@ class handler:
             except UnicodeDecodeError:
                 xutils.print_exc()
 
-    def seek_page(self, fp, bookmark, pagesize):
-        # 缓存
-        mod = 20
-        page = bookmark.get("page", 0)
-        # cache = bookmark.get("cache", {})
-        startpage = 1
-
-        if page < 0:
-            page = 0
-        fp.seek(0)
-
-        startpage = int(page / mod) * mod
-        pos = bookmark.get("page_%s"%startpage)
-        if pos:
-            print("Hit cache, page=%s, position=%s" % (startpage, pos))
-            fp.seek(pos)
-        else:
-            startpage = 0
-
-        for i in range(int(startpage), page):
-            fp.read(pagesize)
-        if page % mod == 0:
-            bookmark["page_%s" % page] = fp.tell()
-
     @xauth.login_required("admin")
     def GET(self):
-        path    = xutils.get_argument("path")
-        length  = 1000
-        read    = xutils.get_argument("read", "false")
+        path      = xutils.get_argument("path")
+        length    = 1000
+        read      = xutils.get_argument("read", "false")
         direction = xutils.get_argument("direction", "forward")
-        encoding = "utf-8"
-        page     = 0
+        page      = 0
 
         if not path:
             return dict(code = "fail", message = "parameter path is empty")
 
-        print("path:", path)
+        debug_info("path:", path)
         path = xutils.get_real_path(path)
-        print("real path:", path)
+        debug_info("real path:", path)
 
         if not os.path.exists(path):
             return dict(code = "fail", message = "file `%s` not exists" % path)
 
-        basename, ext = os.path.splitext(path)
-        key = "bookmark@%s@%s" % (xauth.current_name(), xutils.md5_hex(path))
-        bookmark = xutils.cache_get(key, {})
+        basename, ext    = os.path.splitext(path)
+        key              = "bookmark@%s@%s" % (xauth.current_name(), xutils.md5_hex(path))
+        bookmark         = xutils.cache_get(key, {})
         bookmark['path'] = path
-        # bookmarkpath = '%s@%s.bookmark' % (xauth.get_current_name(), basename)
-        # bookmark = dict()
-        # if os.path.exists(bookmarkpath):
-        #     try:
-        #         bookmark = json.loads(xutils.readfile(bookmarkpath))
-        #         if not isinstance(bookmark, dict):
-        #             bookmark = dict()
-        #     except:
-        #         pass
+        page             = bookmark.get("page", 0)
+        size             = xutils.get_file_size(path, format=False)
+        debug_info("bookmark info:", bookmark)
 
-        page = bookmark.get("page", 0)
-        size = xutils.get_file_size(path, format=False)
-
-        with open(path, encoding=encoding) as fp:
+        encoding = fsutil.detect_encoding(path)
+        debug_info("detected encoding:", encoding)
+        
+        with open(path, encoding = encoding) as fp:
             text = "dummy"
             if direction == "backward":
                 page = page - 1
@@ -91,12 +98,21 @@ class handler:
                 page = page + 1
             if page < 0:
                 page = 0
-            bookmark["page"] = page
-            self.seek_page(fp, bookmark, length)
-            current = fp.tell()
-            text = fp.read(length)
+            try:
+                bookmark["page"] = page
+                seek_page(fp, bookmark, length)
+                current = fp.tell()
+                text    = fp.read(length)
+            except UnicodeDecodeError as e:
+                # xutils.print_exc()
+                bookmark['page'] = 0
+                seek_page(fp, bookmark, length);
+                current = fp.tell()
+                text    = fp.read()
+
             if read == "true":
                 xutils.say(text)
+
             if direction in ("forward", "backward"):
                 # xutils.writefile(bookmarkpath, json.dumps(bookmark))
                 xutils.cache_put(key, bookmark)

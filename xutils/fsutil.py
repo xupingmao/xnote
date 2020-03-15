@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2020/02/09 22:37:49
+# @modified 2020/03/15 16:58:36
 import codecs
 import os
 import platform
@@ -10,6 +10,8 @@ import xconfig
 from .imports import *
 from . import logutil
 from web.utils import Storage
+
+ENCODING_TUPLE = ("utf-8", "gbk", "mbcs", "latin_1")
 
 def get_real_path(path):
     if path == None:
@@ -25,6 +27,17 @@ def makedirs(dirname):
         return True
     return False
 
+def detect_encoding(fpath, raise_error = True):
+    for encoding in ENCODING_TUPLE:
+        try:
+            with open(fpath, encoding = encoding) as fp:
+                fp.read(1024)
+                return encoding
+        except Exception as e:
+            last_err = e
+    if raise_error:
+        raise Exception("can not detect file encoding, path=[%s]" % fpath, last_err)
+    return None
 
 def readfile(path, mode = "r", limit = -1, raise_error = True):
     '''读取文件，尝试多种编码，编码别名参考标准库`Lib/encodings/aliases.py`
@@ -33,7 +46,7 @@ def readfile(path, mode = "r", limit = -1, raise_error = True):
     * latin_1 是iso-8859-1的别名，单字节编码，兼容ASCII
     '''
     last_err = None
-    for encoding in ("utf-8", "gbk", "mbcs", "latin_1"):
+    for encoding in ENCODING_TUPLE:
         try:
             if PY2:
                 with open(path) as fp:

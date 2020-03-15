@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/01/30 16:38:29
+# @modified 2020/03/15 16:00:19
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -431,8 +431,10 @@ class ListDirHandler:
 
     @xauth.login_required("admin")
     def GET(self):
+        user_name = xauth.current_name()
         datapath = u(os.path.abspath(xconfig.DATA_DIR))
-        raise web.seeother("/fs/%s" % datapath)
+        homepath = os.path.join(datapath, "files", user_name)
+        raise web.seeother("/fs/%s" % homepath)
 
 class LinkHandler:
 

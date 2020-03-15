@@ -2,7 +2,7 @@
 
 <!-- 
 @since 2017/12/02
-@modified 2019/12/29 17:02:46
+@modified 2020/03/15 16:26:32
 -->
 
 {% block head %}
@@ -107,8 +107,19 @@ $(function () {
     var readLength = 1000;
 
     // 调整底部
-    var mainContentLeft = $(".main-content").offset().left;
-    $(".reader-footer").css("left", mainContentLeft);
+    function updateFooter() {    
+        var mainContentLeft = $(".main-content").offset().left;
+        var mainContentWidth = $(".main-content").outerWidth();
+        $(".reader-footer")
+            .css("left", mainContentLeft)
+            .css("width", mainContentWidth);
+    }
+
+    function updateFloatingButton() {
+        var mainContentWidth = $(".main-content").outerWidth();
+        var mainContentLeft = $(".main-content").offset().left;
+        $(".read").css("left", mainContentLeft + mainContentWidth - 100);
+    }
 
     $("#backLink").attr("href", _from);
 
@@ -165,7 +176,18 @@ $(function () {
           case 39: readForward(); break;
           case 37: readBackward(); break;
         }
-    })
+    });
+
+    function updateView() {
+        updateFooter();
+        updateFloatingButton();
+    }
+
+    // 更新视图
+    updateView();
+    $(window).on("resize", function (event) {
+        updateView();
+    });
 });
 </script>
 

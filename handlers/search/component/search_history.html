@@ -1,7 +1,12 @@
 <div class="col-md-12 card">
-    <h3 class="card-title">搜索历史</h3>
+    <h3 class="card-title">
+        <span class="path-link">搜索历史</span>
+        <div class="float-right">
+            <!-- <a class="btn btn-default" href="/search/history/top">常用</a> -->
+        </div>
+    </h3>
     {% for value in recent %}
-        <a class="tag-span" href="/note/timeline?type=search&key={{value}}">{{value}}</a>
+        <a class="tag-span" href="/note/timeline?type=search&key={{quote(value)}}">{{value}}</a>
     {% end %}
 </div>
 
