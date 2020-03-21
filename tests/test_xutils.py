@@ -8,7 +8,7 @@ import unittest
 import xutils
 import xconfig
 import doctest
-from xutils import textutil, cacheutil
+from xutils import textutil, cacheutil, fsutil
 
 xconfig.init("./testdata")
 
@@ -17,6 +17,16 @@ def fib(n):
     if n == 1 or n == 2:
         return 1
     return fib(n-1) + fib(n-2)
+
+def get_tmp_fpath():
+    count = 0
+    while count < 100:
+        fpath = os.path.join("./testdata/test_%04d.tmp" % count)
+        if os.path.exists(fpath):
+            count += 1
+        else:
+            return fpath
+    raise Exception("get_tmp_fpath failed, too many retries")
 
 class TestMain(unittest.TestCase):
     def test_quote_unicode(self):
@@ -206,6 +216,18 @@ class TestMain(unittest.TestCase):
     def test_fsutil(self):
         import doctest
         doctest.testmod(m=xutils.fsutil, verbose=True)
+
+    def test_fsutil_read(self):
+        test_content = "Test"
+        fpath   = get_tmp_fpath()
+        fsutil.writefile(fpath, test_content)
+        encoding = fsutil.detect_encoding(fpath)
+        content  = fsutil.readfile(fpath)
+        lines    = fsutil.readlines(fpath)
+
+        self.assertEqual("utf-8", encoding)
+        self.assertEqual("Test",  content)
+        self.assertEqual(["Test"], lines)
 
     def test_htmlutil(self):
         import doctest
