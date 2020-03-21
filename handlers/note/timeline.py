@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/03/05 23:42:33
+# @modified 2020/03/21 19:11:52
 
 """时光轴视图"""
 import re
@@ -266,7 +266,7 @@ def default_list_func(context):
     limit     = context['limit']
     user_name = context['user_name']
     parent_id = context['parent_id']
-    rows      = NOTE_DAO.list_by_parent(user_name, parent_id, offset, limit, 'ctime')
+    rows      = NOTE_DAO.list_by_parent(user_name, parent_id, offset, limit, 'ctime_desc')
     return build_date_result(rows, 'ctime', sticky_title = True, group_title = True)
 
 

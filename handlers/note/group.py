@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/03/01 19:30:46
+# @modified 2020/03/21 19:11:42
 import math
 import time
 import web
@@ -432,7 +432,7 @@ class ManagementHandler:
                 note = parent_note, 
                 dirname = fpath, 
                 pathlist = pathlist)
-        notes = NOTE_DAO.list_by_parent(user_name, parent_id, 0, 200)
+        notes = NOTE_DAO.list_by_parent(user_name, parent_id, 0, 200, orderby = "ctime_desc")
         parent = Storage(url = "/note/%s" % parent_id, name = parent_name)
         current = Storage(url = "#", name = "整理")
         return xtemplate.render("note/batch/management.html", 
