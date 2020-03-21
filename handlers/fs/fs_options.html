@@ -22,11 +22,10 @@
         </div>
 
         <!-- 管理文件 -->
-        <input type="button" class="btn desktop-only-inline-block" value="删除" id="deleteBtn"/>
+        <input type="button" class="btn desktop-only-inline-block delete-btn" value="删除"/>
         <input type="button" class="btn desktop-only-inline-block" value="重命名" id="renameBtn" message="重命名为">
-        <input type="button" class="btn desktop-only-inline-block" value="剪切" id="cutBtn" message="剪切"/>
-        <input type="button" class="btn desktop-only-inline-block" value="剪切板" id="clipboardBtn"/>
-
+        <input type="button" class="btn" value="移动" id="moveFilesBtn"/>
+        
         <!-- 视图选项 -->
         <div class="dropdown">
             <span class="dropdown-btn link btn">视图▾</span>
@@ -45,12 +44,14 @@
                 <a class="dropdown-option" href="/code/search?path={{xutils.quote(path)}}&recursive=on">高级搜索</a>
                 <a class="dropdown-option" href="/code/lines?path={{xutils.quote(path)}}&recursive=on">代码统计</a>
                 <a class="dropdown-option" href="/fs/{{path}}?show_hidden_files=true">显示隐藏文件</a>
+                <a class="dropdown-option delete-btn mobile-only">删除</a>
             </div>
         </div>
     </div>
 </div>
 
 {% include fs/component/clipboard-dialog.html %}
+{% include fs/component/move-files.html %}
 
 <script type="text/javascript">
 $(function () {
@@ -194,7 +195,7 @@ $(function () {
         removeFile(path);
     })
 
-    $("#deleteBtn").on("click", function () {
+    $(".delete-btn").on("click", function () {
         var checked = $(":checked");
         if (checked.length == 0) {
             alert("请选择文件");

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/23 02:07:02
-# @modified 2019/08/03 16:09:57
+# @modified 2020/03/21 17:28:19
 import os
 import web
 import xutils
@@ -24,7 +24,7 @@ class SidebarHandler:
             filelist = []
         else:
             filelist = fsutil.list_files(path)
-        return xtemplate.render("fs/fs_sidebar.html", 
+        return xtemplate.render("fs/page/fs_sidebar.html", 
             error = error,
             path = path, 
             filelist = filelist)

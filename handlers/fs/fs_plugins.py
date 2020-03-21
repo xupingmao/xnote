@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/22 22:57:39
-# @modified 2019/10/05 10:08:43
+# @modified 2020/03/21 17:29:30
 import web
 import os
 import xconfig
@@ -44,7 +44,7 @@ def suggest_commands(name):
         for command in commands:
             print(command)
 
-class ListHandler:
+class PluginsHandler:
 
     @xauth.login_required("admin")
     def GET(self):
@@ -60,7 +60,7 @@ class ListHandler:
             show_menu = False
             show_search = False
 
-        return xtemplate.render("fs/fs_plugins.html", 
+        return xtemplate.render("fs/page/fs_plugins.html", 
             show_aside = False,
             path = path, 
             scripts = scripts, 
@@ -134,8 +134,8 @@ class DownloadHandler:
                 buf = fp.read(bufsize)
 
 xurls = (
-    r"/fs_api/plugins", ListHandler,
-    r"/fs_plugins", ListHandler,
+    r"/fs_api/plugins", PluginsHandler,
+    r"/fs_plugins", PluginsHandler,
     r"/fs_api/run_plugin", RunPluginHandler,
     r"/fs_api/download/(.+)", DownloadHandler
 )

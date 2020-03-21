@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/03/15 16:00:19
+# @modified 2020/03/17 01:06:14
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -71,31 +71,49 @@ def list_win_drives():
     except Exception as e:
         return ["C:"]
 
+def list_file_objects(fpath):
+    if xutils.is_windows() and fpath == "/":
+        filenames = list_win_drives()
+    else:
+        filenames = list_abs_dir(fpath)
+    return process_file_list(filenames)
+
+def get_parent_file_object(fpath):
+    fpath = os.path.abspath(fpath)
+    parent_path = os.path.dirname(fpath)
+    file_object = FileItem(parent_path)
+    file_object.name = u"[上级目录]"
+    return assemble_file_object(file_object)
+
 def check_file_auth(path, user_name):
     user_dir = os.path.join(xconfig.UPLOAD_DIR, user_name)
     path = os.path.abspath(path)
     return path.startswith(user_dir)
 
+def assemble_file_object(item):
+    item.encoded_path = xutils.encode_uri_component(item.path)
+    item.icon = "fa-file-o"
+
+    if item.type == "dir":
+        item.icon = "fa-folder orange"
+    elif item.ext in xconfig.FS_VIDEO_EXT_LIST:
+        item.icon = "fa-file-video-o"
+    elif item.ext in xconfig.FS_CODE_EXT_LIST:
+        item.icon = "fa-file-code-o"
+    elif item.ext in xconfig.FS_AUDIO_EXT_LIST:
+        item.icon = "fa-file-audio-o"
+    elif item.ext in xconfig.FS_ZIP_EXT_LIST:
+        item.icon = "fa-file-zip-o"
+    elif xutils.is_text_file(item.path):
+        item.icon = "fa-file-text-o"
+    elif xutils.is_img_file(item.path):
+        item.icon = "fa-file-image-o"
+    return item
+
 def process_file_list(pathlist, parent = None):
     filelist = [FileItem(fpath, parent, merge = True) for fpath in pathlist]
     for item in filelist:
-        item.encoded_path = xutils.encode_uri_component(item.path)
-        item.icon = "fa-file-o"
-
-        if item.type == "dir":
-            item.icon = "fa-folder orange"
-        elif item.ext in xconfig.FS_VIDEO_EXT_LIST:
-            item.icon = "fa-file-video-o"
-        elif item.ext in xconfig.FS_CODE_EXT_LIST:
-            item.icon = "fa-file-code-o"
-        elif item.ext in xconfig.FS_AUDIO_EXT_LIST:
-            item.icon = "fa-file-audio-o"
-        elif item.ext in xconfig.FS_ZIP_EXT_LIST:
-            item.icon = "fa-file-zip-o"
-        elif xutils.is_text_file(item.path):
-            item.icon = "fa-file-text-o"
-        elif xutils.is_img_file(item.path):
-            item.icon = "fa-file-image-o"
+        assemble_file_object(item)
 
     filelist.sort()
     return filelist
@@ -136,12 +154,9 @@ class FileSystemHandler:
 
     def list_directory(self, path):
         try:
-            if xutils.is_windows() and path == "/":
-                filelist = list_win_drives()
-            else:
-                filelist = list_abs_dir(path)
+            filelist = list_file_objects(path)
         except OSError:
-            return xtemplate.render("fs/fs.html", 
+            return xtemplate.render("fs/page/fs.html", 
                 show_aside = False,
                 path = path,
                 filelist = [],
@@ -151,33 +166,32 @@ class FileSystemHandler:
         # 排序：文件夹优先，按字母顺序排列
         # filelist.sort(key=lambda a: a.lower())
         # filelist.sort(key=lambda a: not os.path.isdir(os.path.join(path,a)))
-        filelist = process_file_list(filelist)
 
         # SAE上遇到中文出错
         # Fix bad filenames，修改不生效
         # filelist = list(map(lambda x: xutils.decode_bytes(x.encode("utf-8", errors='surrogateescape')), filelist))
         # Fix, some `file` in *nix is not file either directory. os.stat方法报错
-        path = path.replace("\\", "/")
-        kw   = get_filesystem_kw()
-        kw["filelist"]     = filelist
-        kw["path"]         = path
-        kw["token"]        = xauth.get_current_user().token
-        kw["parent_path"]  = get_parent_path(path)
+        path           = path.replace("\\", "/")
+        kw             = get_filesystem_kw()
+        kw["filelist"] = filelist
+        kw["path"]     = path
+        kw["token"]         = xauth.get_current_user().token
+        kw["parent_path"]   = get_parent_path(path)
         kw["search_action"] = "/fs_find"
-        kw["show_aside"]   = False
+        kw["show_aside"]    = False
         kw["show_hidden_files"] = xutils.get_argument("show_hidden_files", False, type = bool)
 
         mode = xutils.get_argument("mode", xconfig.FS_VIEW_MODE)
         kw["fs_mode"] = mode
         if mode == "grid":
-            return xtemplate.render("fs/fs_grid.html", **kw)
+            return xtemplate.render("fs/page/fs_grid.html", **kw)
         elif mode == "shell":
-            return xtemplate.render("fs/fs_shell.html", **kw)
+            return xtemplate.render("fs/page/fs_shell.html", **kw)
         elif mode == "sidebar":
             kw["show_aside"] = False
-            return xtemplate.render("fs/fs_sidebar.html", **kw)
+            return xtemplate.render("fs/page/fs_sidebar.html", **kw)
         else:
-            return xtemplate.render("fs/fs.html", **kw)
+            return xtemplate.render("fs/page/fs.html", **kw)
 
     def list_root(self):
         raise web.seeother("/fs//")
@@ -333,7 +347,7 @@ class StaticFileHandler(FileSystemHandler):
             return "Not Readable %s" % path
         return self.handle_get(path)
 
-class RemoveHandler:
+class RemoveAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -355,7 +369,7 @@ class RemoveHandler:
     def GET(self):
         return self.POST()
 
-class RenameHandler:
+class RenameAjaxHandler:
 
     @xauth.login_required("admin")
     def POST(self):
@@ -427,7 +441,7 @@ class ClearClipHandler:
     def GET(self):
         return self.POST()
 
-class ListDirHandler:
+class UserHomeHandler:
 
     @xauth.login_required("admin")
     def GET(self):
@@ -435,6 +449,26 @@ class ListDirHandler:
         datapath = u(os.path.abspath(xconfig.DATA_DIR))
         homepath = os.path.join(datapath, "files", user_name)
         raise web.seeother("/fs/%s" % homepath)
+
+class ListAjaxHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        fpath = xutils.get_argument("fpath")
+        show_parent = xutils.get_argument("show_parent")
+
+        if fpath == "" or fpath == None:
+            return dict(code = "400", message = u"fpath参数为空")
+
+        if not os.path.exists(fpath):
+            return dict(code = "404", message = u"文件不存在")
+
+        files = list_file_objects(fpath)
+        if show_parent == "true":
+            files.insert(0, get_parent_file_object(fpath))
+
+        return dict(code = "success", fpath = fpath, data = files)
+
 
 class LinkHandler:
 
@@ -476,6 +510,12 @@ class ViewHandler:
         if ext in (".md", ".csv"):
             raise web.found("/code/preview?path=%s" % encoded_fpath)
 
+        if ext in (".key", ".numbers"):
+            os.system("open %r" % fpath)
+            parent_fpath = os.path.abspath(os.path.dirname(fpath))
+            encoded_parent = xutils.encode_uri_component(parent_fpath)
+            raise web.found("/fs/%s" % encoded_parent)
+
         if ext == ".db":
             raise web.found("/tools/sql?path=%s" % encoded_fpath)
 
@@ -507,15 +547,16 @@ class TextHandler:
 xutils.register_func("fs.process_file_list", process_file_list)
 
 xurls = (
-    r"/fs_list/?", ListDirHandler,
+    r"/fs_list/?", UserHomeHandler,
     r"/fs_edit",   EditHandler,
     r"/fs_view",   ViewHandler,
     r"/fs_text",   TextHandler,
-    r"/fs_api/remove", RemoveHandler,
-    r"/fs_api/rename", RenameHandler,
+    r"/fs_api/remove", RemoveAjaxHandler,
+    r"/fs_api/rename", RenameAjaxHandler,
     r"/fs_api/cut", CutHandler,
     r"/fs_api/paste", PasteHandler,
     r"/fs_api/clear_clip", ClearClipHandler,
+    r"/fs_api/list", ListAjaxHandler,
     r"/fs_link/(.*)", LinkHandler,
     r"/fs_recent", RecentHandler,
     r"/fs/(.*)", FileSystemHandler,

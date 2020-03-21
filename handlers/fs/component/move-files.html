@@ -1,0 +1,122 @@
+<!-- 移动文件功能 -->
+
+<div class="file-element-tpl hide">
+    <div class="fs-move-row">
+        <i class="fa ${icon}"></i>
+        <a class="fs-move-row-link" data-path="${path}">${name}</a>
+    </div>
+</div>
+
+<input type="hidden" class="current-dirname"/>
+
+<script type="text/javascript">
+$(function () {
+    /**
+     * 简单的模板渲染，这里假设传进来的参数已经进行了html转义
+     */
+    function renderTemplate(templateText, object) {
+        return templateText.replace(/\$\{(.*?)\}/g, function (context, objKey) {
+            return object[objKey.trim()] || '';
+        });
+    }
+
+    function moveFile(fpath, dirname, context) {
+        var data = {old_path: fpath, dirname: dirname};
+
+        $.post("/fs_api/paste", data, function (resp) {
+            if (resp.code != "success") {
+                layer.message("failed to paste " + dataPath);
+            } else {
+                context.count -= 1;
+                if (context.count == 0) {
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 500);
+                }
+            }
+        }).fail(function (err) {
+            console.error(err);
+        });
+    }
+
+    function updateMoveFileDialog(elementId, fpath) {
+        var params = {fpath: fpath, show_parent: true, filter: "dir"};
+        
+        $(".current-dirname").val(fpath);
+        $.get("/fs_api/list", params, function (resp) {
+            console.log(resp);
+            if (resp.code != "success") {
+                layer.alert("查询文件列表失败:" + resp.message);
+            } else {
+                $("#" + elementId).empty();
+                // $("#" + elementId).append($("<span>").text(resp.fpath));
+
+                for (var i = 0; i < resp.data.length; i++) {
+                    var fileObject = resp.data[i];
+                    var templateHtml = $(".file-element-tpl").html();
+                    $("#" + elementId).append(renderTemplate(templateHtml, fileObject));
+                }
+
+                registerDialogLinkEvent(elementId);
+            }
+        }).fail(function (resp) {
+            layer.alert("查询文件列表失败:" + resp);
+        });
+    }
+
+    function registerDialogLinkEvent(elementId) {
+        $(".fs-move-row-link").click(function (event) {
+            var path = $(this).attr("data-path");
+            updateMoveFileDialog(elementId, path);
+        })
+    }
+
+
+    $("#moveFilesBtn").click(function () {
+        // 1. 检查是否选中文件
+        // 2. 弹出选择弹窗
+        // 3. 执行移动
+
+        var selectedFiles = $(":checked");
+        if (selectedFiles.length == 0) {
+            layer.alert("请选择文件");
+            return;
+        }
+
+        if (isMobile()) {
+            var area = ['100%', '100%'];
+        } else {
+            var area = ['600px', '80%'];
+        }
+
+        var elementId = "moveFileDialog" + new Date().getTime();
+        var respHtml = '<div class="move-file-dialog" id="' + elementId + '"></div>';
+
+        layer.open({
+            type: 1,
+            title: "移动文件",
+            shadeClose: true,
+            area: area,
+            content: respHtml,
+            scrollbar: false,
+            btn: ["移动到这里", "取消"],
+            yes: function (index, layero) {
+                console.log(index, layero);
+                layer.close(index);
+
+                var checked = $(":checked");
+                var dirname = $(".current-dirname").val();
+                context = {count: checked.length};
+                // layer.msg("选择了移动");
+                // $.post("")
+                checked.each(function (index, element) {
+                    var fpath = $(element).attr("data-path");
+                    moveFile(fpath, dirname, context);
+                })
+            }
+        });
+
+        updateMoveFileDialog(elementId, "{{path}}");
+    })
+});
+</script>

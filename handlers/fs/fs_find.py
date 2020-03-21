@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2020/01/22 12:50:12
+# @modified 2020/03/15 21:22:18
 import os
 import sys
 import glob
@@ -83,7 +83,7 @@ class SearchHandler:
 
         filelist = FS.process_file_list(plist, path)
         # TODO max result size
-        tpl = "fs/fs.html"
+        tpl = "fs/page/fs.html"
         if mode == "grid":
             tpl = "fs/fs_grid.html"
         return xtemplate.render(tpl, 
