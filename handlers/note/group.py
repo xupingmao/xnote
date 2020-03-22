@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/03/22 14:23:50
+# @modified 2020/03/22 17:07:20
 import math
 import time
 import web
@@ -141,6 +141,8 @@ class GroupListHandler:
             show_path_list = True,
             show_size = True,
             parent_id = 0,
+            search_action = "/note/timeline",
+            search_placeholder = T(u"搜索笔记"),
             files = files)
 
 def load_note_index(user_name):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/02/16 12:55:52
+# @modified 2020/03/22 18:36:57
 import profile
 import math
 import re
@@ -24,8 +24,9 @@ NOTE_DAO = xutils.DAO("note")
 
 @xmanager.listen("note.view", is_async=True)
 def visit_by_id(ctx):
-    id = ctx.id
-    xutils.call("note.visit", id)
+    id        = ctx.id
+    user_name = ctx.user_name
+    NOTE_DAO.visit(user_name, id)
 
 def check_auth(file, user_name):
     if file.is_public != 1 and user_name != "admin" and user_name != file.creator:
@@ -186,7 +187,9 @@ class ViewHandler:
             # 推荐系统
             handle_note_recommend(kw, file, user_name)
         
-        xmanager.fire("note.view", file)
+        event_ctx = Storage(id = file.id, user_name = user_name)
+        xmanager.fire("note.view", event_ctx)
+        
         if op == "edit":
             kw.show_aside = False
             kw.show_search = False

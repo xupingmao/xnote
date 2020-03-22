@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2020/02/09 14:04:31
+# @modified 2020/03/22 18:46:27
 
 import sys
 import os
@@ -218,6 +218,7 @@ class TestMain(BaseTestCase):
     def test_search(self):
         self.check_200("/search?key=测试")
         self.check_200("/search/search?key=测试")
+        self.check_200("/search/history")
 
     def test_search_in_cache(self):
         xconfig.USE_CACHE_SEARCH = True

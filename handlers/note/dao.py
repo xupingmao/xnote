@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/03/22 14:09:02
+# @modified 2020/03/22 18:34:44
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -285,10 +285,21 @@ def add_edit_log(note):
     key = "note_edit_log:%s:%s" % (creator, dbutil.timeseq())
     dbutil.put(key, note_id)
 
-def add_visit_log(note):
-    creator = note.creator
+def delete_old_visit_log(creator, note_id):
+    def filter_func(key, value):
+        return value == note_id
+
+    old_logs = dbutil.prefix_list("note_visit_log:%s:" % creator, filter_func, include_key = True)
+    for key, value in old_logs:
+        dbutil.delete(key)
+
+def add_visit_log(user_name, note):
     note_id = note.id
-    key = "note_visit_log:%s:%s" % (creator, dbutil.timeseq())
+
+    # 先删除历史的浏览记录，只保留最新的
+    delete_old_visit_log(user_name, note_id)
+
+    key = "note_visit_log:%s:%s" % (user_name, dbutil.timeseq())
     dbutil.put(key, note_id)
 
 def update_note_rank(note):
@@ -473,7 +484,7 @@ def get_by_name(creator, name):
         return get_by_id(note.id)
     return None
 
-def visit_note(id):
+def visit_note(user_name, id):
     note = get_by_id(id)
     if note:
         note.atime = xutils.format_datetime()
@@ -481,7 +492,7 @@ def visit_note(id):
             note.visited_cnt = 0
         note.visited_cnt += 1
         update_index(note)
-        add_visit_log(note)
+        add_visit_log(user_name, note)
 
 def delete_note(id):
     note = get_by_id(id)
