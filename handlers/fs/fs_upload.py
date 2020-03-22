@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2020/01/22 00:34:42
+# @modified 2020/03/22 17:02:17
 import os
 import uuid
 import web
@@ -69,7 +69,7 @@ class UploadHandler:
         note_id  = xutils.get_argument("note_id")
         user_name = xauth.current_name()
         if file.filename != None:
-            filename = file.filename
+            filename = get_safe_file_name(file.filename)
             if file.filename == "":
                 return dict(code="fail", message="filename is empty")
             basename, ext = os.path.splitext(filename)
