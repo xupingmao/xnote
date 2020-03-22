@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/03/04 23:50:05
+# @modified 2020/03/22 14:09:02
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -285,6 +285,12 @@ def add_edit_log(note):
     key = "note_edit_log:%s:%s" % (creator, dbutil.timeseq())
     dbutil.put(key, note_id)
 
+def add_visit_log(note):
+    creator = note.creator
+    note_id = note.id
+    key = "note_visit_log:%s:%s" % (creator, dbutil.timeseq())
+    dbutil.put(key, note_id)
+
 def update_note_rank(note):
     mtime = note.mtime
     atime = note.atime
@@ -475,6 +481,7 @@ def visit_note(id):
             note.visited_cnt = 0
         note.visited_cnt += 1
         update_index(note)
+        add_visit_log(note)
 
 def delete_note(id):
     note = get_by_id(id)
@@ -628,7 +635,7 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
     if user is None:
         user = "public"
     
-    id_list   = dbutil.zrange("note_visit:%s" % user, -offset-1, -offset-limit)
+    id_list   = dbutil.prefix_list("note_visit_log:%s" % creator, offset = offset, limit = limit, reverse = True)
     note_dict = batch_query(id_list)
     files     = []
 
@@ -645,7 +652,7 @@ def list_recent_edit(creator = None, offset=0, limit=None):
     if limit is None:
         limit = xconfig.PAGE_SIZE
     
-    id_list   = dbutil.zrange("note_recent:%s" % creator, -offset-1, -offset-limit)
+    id_list   = dbutil.prefix_list("note_edit_log:%s" % creator, offset = offset, limit = limit, reverse = True)
     note_dict = batch_query(id_list)
     files     = []
 

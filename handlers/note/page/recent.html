@@ -10,61 +10,15 @@
 {% end %}
 
 {% block body %}
-    {% if len(files) > 0 %}
-    <div class="card row">
-        <h3>
-            <a class="link2" href="/note/types">笔记分类</a> / {{T(html_title)}}
-            <div class="float-right">
-                <a href="/note/add" class="inline-btn">{{T("创建")}}</a>
-            </div>
-        </h3>
+    <div class="row">
+        <a class="tab-link x-tab" href="/note/recent?orderby=create">最近创建</a>
+        <a class="tab-link x-tab" href="/note/recent?orderby=update">最近更新</a>
+        <a class="tab-link x-tab" href="/note/recent?orderby=view">最近浏览</a>
 
-        <table class="table row">
-            <tr>
-                <td>{{T("Title")}}</td>
-                <td>{{T("笔记本")}}</td>
-                <td class="align-right">{{T(time_attr)}}</td>
-            </tr>
-        {% for note in files %}
-            <tr>
-                <td>
-                    <a href="/note/view?id={{note.id}}">
-                    {% if note.priority > 0 %}[{{T("Sticky")}}]{% end %}
-                    {{note.name}}
-                    </a>
-                </td>
-                <td class="option-td">
-                    {% if note.parent_id != 0 and note.parent_id != "0" %}
-                    <a href="/note/view?id={{note.parent_id}}">{{note.parent_name}}</a>
-                    {% end %}
-                </td>
-                <td class="option-td align-right recent-note-date">
-                    {{format_date(getattr(note, time_attr)).replace("-", "/")}}
-                </td>
-            </tr>
-        {% end %}
-        </table>
+        <div class="float-right">
+        </div>
     </div>
-    {% end %}
-
-    {% init show_pagination = True %}
-    {% if show_pagination and "page" in globals() %}
-    <div class="card">
-        {% include mod_pagenation.html %}
-    </div>
-    {% end %}
-
-    <script>
-    $(function () {
-        $("select").change(function (e) {
-            var year = $("[name=year]").val();
-            var month = $("[name=month]").val();
-            location.href = "?year=" + year + "&month=" + month;
-        });
-
-    })
-    </script>
-
+    {% include note/component/note_list_component.html %}
 {% end %}
 
 {% block aside %}

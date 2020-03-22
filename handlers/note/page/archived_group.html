@@ -1,0 +1,13 @@
+{% extends base %}
+
+{% block body %}
+    <div class="grid-title">
+        <a class="path-link" href="{{HOME_PATH}}">项目</a> / <span class="path-link">归档</span>
+        <div class="float-right">
+            <a class="btn" href="javascript:createGroup();">新建项目</a>
+        </div>
+    </div>
+
+    {% include note/component/create_script.html %}
+    {% include note/component/note_list_component.html %}
+{% end %}

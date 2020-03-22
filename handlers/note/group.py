@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/03/21 19:11:42
+# @modified 2020/03/22 14:23:50
 import math
 import time
 import web
@@ -68,6 +68,17 @@ class NoteCard:
         self.title = title
         self.rows  = rows
 
+class RecentGroup:
+
+    def __init__(self, user_name):
+        self.name = u"最新笔记"
+        self.size = None
+        self.url  = "/note/recent?orderby=create"
+        self.icon = "fa-history"
+        self.priority  = 0
+        self.show_next = True
+
+
 def type_node_path(name, url):
     parent = PathNode(TYPES_NAME, "/note/types")
     return [parent, GroupLink(T(name), url)]
@@ -103,26 +114,33 @@ class GroupListHandler:
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
-        notes = NOTE_DAO.list_by_parent(user_name, 0, orderby = "mtime_desc")
-        tools = []
-        fixed_books = []
+        notes     = NOTE_DAO.list_group(user_name)
+        archived_groups = list(filter(lambda x: x.archived == True, notes))
+        normal_groups   = list(filter(lambda x: x not in archived_groups, notes))
+
+        tools        = []
+        fixed_books  = []
         normal_books = []
 
-        msg_stat  = MSG_DAO.get_message_stat(user_name)
-        note_link = NoteLink("待办任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count)
-        fixed_books.append(note_link)
+        fixed_books.append(RecentGroup(user_name))
+        # 快捷记事
+        fixed_books.append(MSG_DAO.get_message_tag(user_name, "log"))
 
         # 默认分组处理
-        fixed_books.append(SystemLink("笔记索引", "/note/index?source=group"))
+        fixed_books.append(NoteLink("笔记索引", "/note/index?source=group", icon = "fa-th-large"))
+        if len(archived_groups) > 0:
+            fixed_books.append(NoteLink(u"已归档项目", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
 
-        files = fixed_books + notes
+        files = fixed_books + normal_groups
 
         root = NOTE_DAO.get_root()
-        return xtemplate.render("note/page/note_list_page.html", 
+        return xtemplate.render("note/page/project_list.html", 
             file = root, 
+            title = u"项目",
             pathlist = [root],
             show_path_list = True,
             show_size = True,
+            parent_id = 0,
             files = files)
 
 def load_note_index(user_name):
@@ -294,14 +312,15 @@ class NoteIndexHandler:
 class RecentHandler:
     """show recent notes"""
 
-    def GET(self, orderby = "edit", show_notice = True):
+    def GET(self, show_notice = True):
         if not xauth.has_login():
             raise web.seeother("/note/public")
         if xutils.sqlite3 is None:
             raise web.seeother("/fs_list")
-        days     = xutils.get_argument("days", 30, type=int)
+
         page     = xutils.get_argument("page", 1, type=int)
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
+        orderby  = xutils.get_argument("orderby", "create")
         page     = max(1, page)
         offset   = max(0, (page-1) * pagesize)
         limit    = pagesize
@@ -313,13 +332,13 @@ class RecentHandler:
         dir_type   = "recent_edit"
 
         creator = xauth.get_current_name()
-        if orderby == "viewed":
+        if orderby == "view":
             html_title = "Recent Viewed"
             files = NOTE_DAO.list_recent_viewed(creator, offset, limit)
             time_attr = "atime"
             show_adate = True
             dir_type = "recent_viewed"
-        elif orderby == "created":
+        elif orderby == "create":
             html_title = "Recent Created"
             files = NOTE_DAO.list_recent_created(creator, offset, limit)
             time_attr = "ctime"
@@ -334,14 +353,16 @@ class RecentHandler:
         
         count   = NOTE_DAO.count_user_note(creator)
         
-        return xtemplate.render(VIEW_TPL,
+        return xtemplate.render("note/page/recent.html",
             pathlist  = type_node_path(html_title, ""),
             html_title = html_title,
             file_type  = "group",
             dir_type   = dir_type,
             files = files,
             show_aside = True,
+            show_size  = False,
             page = page,
+            time_attr  = time_attr,
             show_cdate = show_cdate,
             show_mdate = show_mdate,
             show_adate = show_adate,
@@ -402,12 +423,15 @@ class ArchivedHandler:
     def GET(self):
         user  = xauth.current_name()
         files = NOTE_DAO.list_archived(user)
-        return xtemplate.render(VIEW_TPL,
+        return xtemplate.render("note/page/archived_group.html",
+            title = u"归档项目",
+            parent_id = -1,
+            show_size = True,
             pathlist  = [PathNode("归档分组", "/note/archived")],
             file_type = "group",
             dir_type  = "archived",
             files     = files,
-            show_mdate = True)
+            show_mdate = False)
 
 class ManagementHandler:
 
@@ -450,6 +474,7 @@ xurls = (
     r"/note/default"        , DefaultListHandler,
     r"/note/ungrouped"      , DefaultListHandler,
     r"/note/archived"       , ArchivedHandler,
+    r"/note/recent"         , RecentHandler,
     r"/note/recent_(created)" , RecentHandler,
     r"/note/recent_edit"    , RecentHandler,
     r"/note/recent_(viewed)", RecentHandler,

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/03/21 19:11:52
+# @modified 2020/03/22 11:27:33
 
 """时光轴视图"""
 import re
@@ -16,6 +16,7 @@ from .constant import *
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
+USER_DAO = xutils.DAO("user")
 
 
 class PathLink:
@@ -24,12 +25,11 @@ class PathLink:
         self.name = name
         self.url  = url
 
-PARENT_LINK_DICT = {
-    "default": PathLink(u"项目", "/note/timeline"),
-    "plan"   : PathLink(u"项目", "/note/timeline"),
-    "sticky" : PathLink(u"项目", "/note/timeline"),
-    "removed": PathLink(u"项目", "/note/timeline"),
-}
+def get_parent_link(user_name, type):
+    if type in ("group", "project"):
+        return None
+    return PathLink(u"项目", USER_DAO.get_config(user_name, "HOME_PATH"))
+
 class SystemGroup(Storage):
     def __init__(self, name, url):
         super(SystemGroup, self).__init__()
@@ -345,10 +345,11 @@ class BaseTimelineHandler:
         if type == "search" and key == "":
             raise web.found("/search")
 
-        title = NOTE_TYPE_DICT.get(type, u"最新笔记")
+        user_name = xauth.current_name()
+        title     = NOTE_TYPE_DICT.get(type, u"最新笔记")
 
         search_title = u"笔记"
-        file = NOTE_DAO.get_by_id(parent_id)
+        file         = NOTE_DAO.get_by_id(parent_id)
         
         if file != None:
             title = file.name
@@ -363,7 +364,7 @@ class BaseTimelineHandler:
             search_action = "/note/timeline",
             search_placeholder = T(u"搜索" + search_title),
             search_ext_dict = dict(parent_id = parent_id),
-            parent_link = PARENT_LINK_DICT.get(type),
+            parent_link = get_parent_link(user_name, type),
             CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT,
             show_aside = False)
 

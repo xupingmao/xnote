@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2019/12/10 00:29:15
+# @modified 2020/03/22 11:47:49
 import xutils
 import xconfig
 import xmanager
@@ -226,20 +226,42 @@ def add_search_history(user, search_key, cost_time = 0):
     key = "msg_search_history:%s:%s" % (user, dbutil.timeseq())
     dbutil.put(key, Storage(key = search_key, cost_time = cost_time))
 
+class MessageTag:
+
+    def __init__(self, tag, size):
+        self.type = type
+        self.size = size
+        self.url  = "/message?tag=" + tag
+        self.priority = 0
+        self.show_next = True
+
+        if tag == "log":
+            self.name = u"快捷记事"
+            self.icon = "fa-file-text-o"
+
+def get_message_tag(user, tag):
+    msg_stat  = get_message_stat(user)
+
+    if tag == "log":
+        return MessageTag(tag, msg_stat.log_count)
 
 xutils.register_func("message.create", create_message)
 xutils.register_func("message.update", update_message)
 xutils.register_func("message.search", search_message)
 xutils.register_func("message.delete", delete_message_by_id)
 xutils.register_func("message.count", count_message)
+
 xutils.register_func("message.find_by_id", get_message_by_id)
 xutils.register_func("message.get_by_id",  get_message_by_id)
 xutils.register_func("message.get_by_content", get_by_content)
+xutils.register_func("message.get_message_tag", get_message_tag)
+
 xutils.register_func("message.list", list_message_page)
 xutils.register_func("message.list_file", list_file_page)
 xutils.register_func("message.list_link", list_link_page)
 xutils.register_func("message.list_by_tag",  list_by_tag)
 xutils.register_func("message.list_by_date", list_by_date)
+
 xutils.register_func("message.get_message_stat", get_message_stat)
 xutils.register_func("message.refresh_message_stat", refresh_message_stat)
 xutils.register_func("message.add_search_history", add_search_history)

@@ -1,0 +1,38 @@
+{% init show_cdate = False %}
+{% init show_mdate = False %}
+{% init show_adate = False %}
+
+{% for item in files %}
+    <a class="dialog-link" href="{{item.url}}">
+        <div class="book-item">
+            {% if item.priority>0 %}
+                <i class="fa fa-thumb-tack black"></i>
+            {% end %}
+
+            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
+            <span>{{item.name}}</span>
+            
+            <span class="book-size">
+                {% if show_size and item.size != None %}
+                    <span class="book-size-span">{{item.size}}</span>
+                {% end %}
+
+                {% if show_cdate %}
+                    {{format_date(item.ctime).replace('-', '/')}}
+                {% end %}
+
+                {% if show_mdate %}
+                    {{format_date(item.mtime).replace('-', '/')}}
+                {% end %}
+
+                {% if show_adate %}
+                    {{format_date(item.atime).replace('-', '/')}}
+                {% end %}
+
+                {% if item.show_next or show_size %}
+                    <i class="fa fa-chevron-right"></i>
+                {% end %}
+            </span>
+        </div>
+    </a>
+{% end %}

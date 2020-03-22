@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/02/22 11:28:19
+# @modified 2020/03/22 11:15:43
 
 """笔记编辑相关处理"""
 import os
@@ -109,7 +109,7 @@ class CreateHandler:
         note.mtime     = xutils.format_datetime()
         note.ctime     = xutils.format_datetime()
         note.creator   = creator
-        note.parent_id = parent_id
+        note.parent_id = str(parent_id)
         note.type      = type
         note.content   = content
         note.data      = ""
@@ -119,6 +119,10 @@ class CreateHandler:
         note.version   = 0
         note.is_deleted = 0
         note.tags       = textutil.split_words(tags)
+
+        if note.parent_id == "-1":
+            note.archived = True
+            note.priority = -1
 
         heading = T("创建笔记")
         code = "fail"

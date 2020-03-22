@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2020/02/01 14:43:07
+@modified 2020/03/22 10:45:51
 -->
 
 {% init files = [] %}
@@ -31,39 +31,6 @@
         </a>
     {% end %}
 
-    {% for item in files %}
-        <a class="dialog-link" href="{{item.url}}">
-            <div class="book-item">
-                {% if item.priority>0 %}
-                    <i class="fa fa-thumb-tack black"></i>
-                {% end %}
-
-                <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
-                <span>{{item.name}}</span>
-                
-                <span class="book-size">
-                    {% if show_size and item.size != None %}
-                        <span class="book-size-span">{{item.size}}</span>
-                    {% end %}
-
-                    {% if show_cdate %}
-                        {{format_date(item.ctime).replace('-', '/')}}
-                    {% end %}
-
-                    {% if show_mdate %}
-                        {{format_date(item.mtime).replace('-', '/')}}
-                    {% end %}
-
-                    {% if show_adate %}
-                        {{format_date(item.atime).replace('-', '/')}}
-                    {% end %}
-
-                    {% if item.show_next or show_size %}
-                        <i class="fa fa-chevron-right"></i>
-                    {% end %}
-                </span>
-            </div>
-        </a>
-    {% end %}
+    {% include note/component/note_list_component.html %}
 </div>
 

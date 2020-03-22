@@ -74,6 +74,12 @@ def get_user_config_dict(name):
         return user.config
     return None
 
+def get_user_config(user_name, config_key):
+    config_dict = get_user_config_dict(user_name)
+    if config_dict is None:
+        return None
+    return config_dict.get(config_key)
+
 def update_user_config_dict(name, config_dict):
     user = get_user(name)
     if user is None:
@@ -274,4 +280,7 @@ def login_required(user_name=None):
             return ret
         return handle
     return deco
+
+xutils.register_func("user.get_config_dict", get_user_config_dict)
+xutils.register_func("user.get_config",      get_user_config)
 
