@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/03/22 17:07:20
+# @modified 2020/03/29 16:01:03
 import math
 import time
 import web
@@ -61,6 +61,7 @@ class NoteLink:
         self.priority = 0
         self.ctime = ""
         self.show_next = True
+        self.is_deleted = 0
 
 class NoteCard:
 
@@ -71,12 +72,13 @@ class NoteCard:
 class RecentGroup:
 
     def __init__(self, user_name):
-        self.name = u"最新笔记"
+        self.name = u"最近"
         self.size = None
         self.url  = "/note/recent?orderby=create"
         self.icon = "fa-history"
         self.priority  = 0
         self.show_next = True
+        self.is_deleted = 0
 
 
 def type_node_path(name, url):
@@ -114,7 +116,7 @@ class GroupListHandler:
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
-        notes     = NOTE_DAO.list_group(user_name)
+        notes     = NOTE_DAO.list_group(user_name, orderby = "name")
         archived_groups = list(filter(lambda x: x.archived == True, notes))
         normal_groups   = list(filter(lambda x: x not in archived_groups, notes))
 
@@ -122,14 +124,13 @@ class GroupListHandler:
         fixed_books  = []
         normal_books = []
 
-        fixed_books.append(RecentGroup(user_name))
         # 快捷记事
         fixed_books.append(MSG_DAO.get_message_tag(user_name, "log"))
 
         # 默认分组处理
-        fixed_books.append(NoteLink("笔记索引", "/note/index?source=group", icon = "fa-th-large"))
+        fixed_books.append(NoteLink(u"分类和工具", "/note/index?source=group", icon = "fa-th-large"))
         if len(archived_groups) > 0:
-            fixed_books.append(NoteLink(u"已归档项目", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
+            fixed_books.append(NoteLink(u"归档", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
 
         files = fixed_books + normal_groups
 
@@ -150,11 +151,7 @@ def load_note_index(user_name):
     note_stat = NOTE_DAO.get_note_stat(user_name)
 
     return [
-        NoteCard(u"标签", [
-            NoteLink("置顶", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
-            NoteLink("回收站", "/note/removed", "fa-trash", size = note_stat.removed_count),
-        ]),
-        NoteCard("类型", [
+        NoteCard("分类", [
             NoteLink("计划", "/note/plan", "fa-calendar-check-o", size = note_stat.plan_count),
             NoteLink("记事", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
             NoteLink("项目", "/note/timeline", "fa-folder", size = note_stat.group_count),
@@ -167,11 +164,13 @@ def load_note_index(user_name):
             # NoteLink("富文本", "/note/html", "fa-file-word-o"),
         ]),
         NoteCard(u"工具", [
+            NoteLink("置顶笔记", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
             NoteLink("搜索历史", "/search", "fa-search", size = None),
             # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
             NoteLink("按月查看", "/note/date", "fa-calendar"),
             NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
-            NoteLink("上传管理", "/fs_upload", "fa-upload")
+            NoteLink("上传管理", "/fs_upload", "fa-upload"),
+            NoteLink("回收站", "/note/removed", "fa-trash", size = note_stat.removed_count),
         ])
     ]
 
@@ -369,7 +368,9 @@ class RecentHandler:
             show_mdate = show_mdate,
             show_adate = show_adate,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
-            page_url    ="/note/recent_%s?page=" % orderby)
+            page_url    ="/note/recent_%s?page=" % orderby,
+            search_action = "/note/timeline",
+            search_placeholder = T(u"搜索笔记"))
 
 
 def link_by_month(year, month, delta = 0):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/03/22 18:36:57
+# @modified 2020/03/29 15:33:24
 import profile
 import math
 import re
@@ -180,15 +180,15 @@ class ViewHandler:
         next_note      = None
         prev_note      = None
 
+        event_ctx = Storage(id = file.id, user_name = user_name)
+        xmanager.fire("note.view", event_ctx)
+
         view_func = VIEW_FUNC_DICT.get(file.type, view_md_func)
         view_func(file, kw)
 
         if show_recommend and user_name is not None:
             # 推荐系统
             handle_note_recommend(kw, file, user_name)
-        
-        event_ctx = Storage(id = file.id, user_name = user_name)
-        xmanager.fire("note.view", event_ctx)
         
         if op == "edit":
             kw.show_aside = False

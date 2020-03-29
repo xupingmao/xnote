@@ -22,6 +22,7 @@
 {% block body %}
 
 {% init parent_link = None %}
+{% init title_link = None %}
 {% init type = "ctime" %}
 {% init base_path = "/note/timeline" %}
 {% init key = "" %}
@@ -32,9 +33,14 @@
 
   <div class="note-header card-title">
     {% if parent_link != None %}
-      <a href="{{parent_link.url}}" class="black-link">{{parent_link.name}}</a>&nbsp;/
+      <a href="{{parent_link.url}}" class="path-link">{{parent_link.name}}</a>&nbsp;/
     {% end %}
-    <span class="note-header-span">{{title}}</span>
+
+    {% if title_link != None %}
+      <a href="{{title_link.url}}" class="path-link">{{title_link.name}}</a>
+    {% else %}
+      <span class="note-header-span">{{title}}</span>
+    {% end %}
 
     <div class="float-right">
         {% if type not in ("search", "public") %}
@@ -47,7 +53,7 @@
           <a class="btn btn-default" href="/search">搜索历史</a>
           <a class="btn btn-default" href="/search?key={{quote(key)}}&category=content">搜索内容</a>
         {% elif type != "public" %}
-          <a class="btn" href="/note/index">索引</a>
+          <a class="btn" href="/note/index">分类</a>
         {% end %}
     </div>
   </div>

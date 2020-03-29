@@ -26,7 +26,7 @@ LAST_TIME_SEQ = -1
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2020/02/02 15:59:20
+# @modified 2020/03/29 15:54:13
 ###########################################################
 
 class RecordLock:
@@ -584,7 +584,7 @@ def encode_zscore_key(key, score):
 def encode_zmember_key(key, member):
     pass
 
-def zadd(key, score, member):
+def _zadd(key, score, member):
     # step1. write log
     # step2. delete zscore:key:score
     # step3. write zmember:key:member = score
@@ -600,7 +600,7 @@ def zadd(key, score, member):
         obj[member] = score
         put(key, obj)
 
-def zrange(key, start, stop):
+def _zrange(key, start, stop):
     """zset分片，不同于Python，这里是左右包含，包含start，包含stop，默认从小到大排序
     :arg int start: 从0开始，负数表示倒数
     :arg int stop: 从0开始，负数表示倒数
@@ -628,19 +628,19 @@ def zrange(key, start, stop):
         return sorted_keys[start: stop]
     return []
 
-def zcount(key):
+def _zcount(key):
     obj = get(key)
     if obj != None:
         return len(obj)
     return 0
 
-def zscore(key, member):
+def _zscore(key, member):
     obj = get(key)
     if obj != None:
         return obj.get(member)
     return None
 
-def zrem(key, member):
+def _zrem(key, member):
     obj = get(key)
     if obj != None:
         if member in obj:

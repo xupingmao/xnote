@@ -1,13 +1,15 @@
 {% extends base %}
 
 {% block body %}
-    <div class="grid-title">
-        <span class="path-link">项目</span>
-        <div class="float-right">
-            <a class="btn" href="javascript:createGroup();">新建项目</a>
+    <div class="card">
+        <div class="grid-title">
+            <span class="path-link">项目</span>
+            <div class="float-right">
+                <a class="btn" href="javascript:createGroup();">新建项目</a>
+            </div>
         </div>
-    </div>
 
-    {% include note/component/create_script.html %}
-    {% include note/component/note_list_component.html %}
+        {% include note/component/create_script.html %}
+        {% include note/component/note_list_component.html %}
+    </div>
 {% end %}

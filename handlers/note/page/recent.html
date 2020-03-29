@@ -10,15 +10,17 @@
 {% end %}
 
 {% block body %}
-    <div class="row">
-        <a class="tab-link x-tab" href="/note/recent?orderby=create">最近创建</a>
-        <a class="tab-link x-tab" href="/note/recent?orderby=update">最近更新</a>
-        <a class="tab-link x-tab" href="/note/recent?orderby=view">最近浏览</a>
+    <div class="card">
+        <div class="row">
+            <a class="tab-link x-tab" href="/note/recent?orderby=create">最近创建</a>
+            <a class="tab-link x-tab" href="/note/recent?orderby=update">最近更新</a>
+            <a class="tab-link x-tab" href="/note/recent?orderby=view">最近浏览</a>
 
-        <div class="float-right">
+            <div class="float-right">
+            </div>
         </div>
+        {% include note/component/note_list_component.html %}
     </div>
-    {% include note/component/note_list_component.html %}
 {% end %}
 
 {% block aside %}

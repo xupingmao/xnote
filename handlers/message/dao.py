@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2020/03/22 11:47:49
+# @modified 2020/03/27 01:18:16
 import xutils
 import xconfig
 import xmanager
@@ -234,6 +234,7 @@ class MessageTag:
         self.url  = "/message?tag=" + tag
         self.priority = 0
         self.show_next = True
+        self.is_deleted = 0
 
         if tag == "log":
             self.name = u"快捷记事"

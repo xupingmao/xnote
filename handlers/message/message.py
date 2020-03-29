@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2019/12/22 11:49:12
+# @modified 2020/03/29 15:01:04
 
 """短消息"""
 import time
@@ -34,7 +34,7 @@ def failure(message, code = "fail"):
     return dict(success = False, code = code, message = message)
 
 def build_search_html(content):
-    fmt = u'搜索 <a href="/message?category=message&key=%s">%s</a>'
+    fmt = u'<a href="/message?category=message&key=%s">%s</a>'
     return fmt % (xutils.encode_uri_component(content), xutils.html_escape(content))
 
 def build_done_html(message):

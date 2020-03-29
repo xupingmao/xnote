@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/03/22 11:27:33
+# @modified 2020/03/29 16:12:42
 
 """时光轴视图"""
 import re
@@ -213,7 +213,7 @@ def list_sticky_func(context):
     limit     = context['limit']
     user_name = context['user_name']
     rows      = NOTE_DAO.list_sticky(user_name, offset, limit)
-    return build_date_result(rows, 'ctime')
+    return build_date_result(rows, 'ctime', group_title = True)
 
 def list_removed_func(context):
     offset    = context['offset']
@@ -345,8 +345,9 @@ class BaseTimelineHandler:
         if type == "search" and key == "":
             raise web.found("/search")
 
-        user_name = xauth.current_name()
-        title     = NOTE_TYPE_DICT.get(type, u"最新笔记")
+        user_name  = xauth.current_name()
+        title      = NOTE_TYPE_DICT.get(type, u"最新笔记")
+        title_link = None
 
         search_title = u"笔记"
         file         = NOTE_DAO.get_by_id(parent_id)
@@ -354,6 +355,7 @@ class BaseTimelineHandler:
         if file != None:
             title = file.name
             search_title = file.name
+            title_link = PathLink(file.name, file.url)
 
         return xtemplate.render("note/page/timeline.html", 
             title = title,
@@ -365,6 +367,7 @@ class BaseTimelineHandler:
             search_placeholder = T(u"搜索" + search_title),
             search_ext_dict = dict(parent_id = parent_id),
             parent_link = get_parent_link(user_name, type),
+            title_link  = title_link,
             CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT,
             show_aside = False)
 

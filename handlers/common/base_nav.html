@@ -9,8 +9,10 @@
     <ul class="nav-ul">
       {% if _has_login %}
         <li><a class="menu-link" href="{{HOME_PATH}}">{{T("笔记")}}</a></li>
+        <li><a class="menu-link" href="/note/recent?orderby=view">{{T("最近")}}</a></li>
+        <!-- <li><a class="menu-link desktop-only-inline" href="/note/index">{{T("分类")}}</a></li> -->
         <li><a class="menu-link" href="/note/public">{{T("公共")}}</a></li>
-        <li><a class="menu-link" href="/plugins_list">{{T("工具")}}</a></li>
+        <li><a class="menu-link desktop-only-inline" href="/plugins_list">{{T("工具")}}</a></li>
         {% if _is_admin %}
           <li><a class="menu-link desktop-only-inline" href="/fs_list">{{T("文件")}}</a></li> 
         {% end %}
@@ -39,6 +41,7 @@
       {% if _has_login %}
         <!-- 登录状态 -->
         <li><a href="{{HOME_PATH}}">{{T("我的笔记")}}</a></li>
+        <li><a href="/note/recent?orderby=create">{{T("最近笔记")}}</a></li>
         <li><a href="/note/public">{{T("公共笔记")}}</a></li>
         <li><a href="/search/history">{{T("搜索历史")}}</a></li>
         <li><a href="/plugins_list">{{T("工具插件")}}</a></li>

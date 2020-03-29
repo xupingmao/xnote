@@ -11,6 +11,9 @@
 
             <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
             <span>{{item.name}}</span>
+            {% if item.is_deleted %}
+                <a class="gray-tag-link" href="/note/removed">删除</a>
+            {% end %}
             
             <span class="book-size">
                 {% if show_size and item.size != None %}

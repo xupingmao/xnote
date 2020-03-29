@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/03/22 18:34:44
+# @modified 2020/03/29 15:48:14
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -31,12 +31,16 @@ import xutils
 import xauth
 import xmanager
 import copy
+from collections import Counter
 from xutils import readfile, savetofile, sqlite3, Storage
 from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
 from xutils import attrget
 
-MAX_VISITED_CNT = 200
 DB_PATH         = xconfig.DB_PATH
+MAX_VISITED_CNT = 200
+MAX_EDIT_LOG    = 200
+MAX_VIEW_LOG    = 200
+
 NOTE_ICON_DICT = {
     "group"   : "fa-folder orange",
     "csv"     : "fa-table",
@@ -279,15 +283,29 @@ def create_token(type, id):
     dbutil.put("token:%s" % uuid, token_info)
     return uuid
 
+def delete_old_edit_log(creator, note_id):
+    counter = Counter()
+    def filter_func(key, value):
+        counter.update("e")
+        return value == note_id or counter["e"] > MAX_EDIT_LOG
+    old_logs = dbutil.prefix_list("note_edit_log:%s:" % creator, filter_func, include_key = True)
+    for key, value in old_logs:
+        dbutil.delete(key)
+
 def add_edit_log(note):
     creator = note.creator
     note_id = note.id
+    
+    delete_old_edit_log(creator, note_id)
+
     key = "note_edit_log:%s:%s" % (creator, dbutil.timeseq())
     dbutil.put(key, note_id)
 
 def delete_old_visit_log(creator, note_id):
+    counter   = Counter()
     def filter_func(key, value):
-        return value == note_id
+        counter.update("v")
+        return value == note_id or counter["v"] > MAX_VIEW_LOG
 
     old_logs = dbutil.prefix_list("note_visit_log:%s:" % creator, filter_func, include_key = True)
     for key, value in old_logs:
