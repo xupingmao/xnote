@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/03/29 15:48:14
+# @modified 2020/03/29 19:11:10
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -592,8 +592,6 @@ def list_group(creator = None, orderby = "mtime_desc", skip_archived = False):
     # TODO 添加索引优化
     def list_group_func(key, value):
         if skip_archived and value.archived:
-            return False
-        if skip_archived and value.parent_id != 0:
             return False
         return value.type == "group" and value.is_deleted == 0
 

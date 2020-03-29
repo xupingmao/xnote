@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/03/29 18:41:31
+# @modified 2020/03/29 19:14:31
 import math
 import time
 import web
@@ -445,10 +445,14 @@ class ManagementHandler:
 
         if parent_id == "0":
             parent_note = NOTE_DAO.get_root()
-            notes = NOTE_DAO.list_group(user_name, orderby = "name")
+            notes = NOTE_DAO.list_group(user_name, orderby = "name", skip_archived = True)
+            parent = Storage(url = "/note/group", name = parent_note.name)
         else:
             parent_note = NOTE_DAO.get_by_id(parent_id)
+            if parent_note == None:
+                raise web.notfound()
             notes = NOTE_DAO.list_by_parent(user_name, parent_id, 0, 200, orderby = "ctime_desc")
+            parent = Storage(url = "/note/%s" % parent_id, name = parent_note.name)
         
         if parent_note is None:
             raise web.seeother("/unauthorized")
@@ -462,7 +466,6 @@ class ManagementHandler:
                 dirname = fpath, 
                 pathlist = pathlist)
 
-        parent  = Storage(url = "/note/%s" % parent_id, name = parent_name)
         current = Storage(url = "#", name = "整理")
         return xtemplate.render("note/batch/management.html", 
             pathlist = NOTE_DAO.list_path(parent_note),
