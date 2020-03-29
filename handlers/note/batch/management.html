@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2020/01/06
-@modified 2020/03/29 18:56:27
+@modified 2020/03/29 21:05:39
 -->
 
 {% block body %}
@@ -16,10 +16,6 @@
         <div class="float-right">
             {% if parent_id != "0" %}
                 <button class="reverse-select-btn">反选</button>
-            {% end %}
-
-            <button class="rename-btn">重命名</button>
-            {% if parent_id != "0" %}
                 <button class="move-btn" data-url="/note/group/select?callback=batchMoveNoteCallback">移动</button>
             {% end %}
         </div>
@@ -35,6 +31,8 @@
             <a class="link2" href="{{item.url}}">{{item.name}}</a>
             
             <span class="float-right">
+                <a class="item-option" data-id="{{item.id}}" data-name="{{item.name}}" 
+                    onclick="renameNoteByAttr(this);" href="javascript:void(0);">重命名</a>
                 <input type="checkbox" data-id="{{item.id}}" data-name="{{item.name}}"/>
             </span>
         </div>

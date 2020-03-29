@@ -1,7 +1,6 @@
 <script type="text/javascript">
     function renameNote(id, oldName) {
-        // var id = $(this).attr("data-id");
-        // var oldName = $(this).attr("data-name");
+        
 
         xnote.prompt("新名称", oldName, function (newName) {
             console.log(newName);
@@ -17,5 +16,11 @@
                 })
             }
         });
+    }
+
+    function renameNoteByAttr(target) {
+        var id = $(target).attr("data-id");
+        var oldName = $(target).attr("data-name");
+        renameNote(id, oldName);
     }
 </script>
