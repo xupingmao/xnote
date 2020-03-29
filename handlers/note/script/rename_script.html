@@ -1,0 +1,21 @@
+<script type="text/javascript">
+    function renameNote(id, oldName) {
+        // var id = $(this).attr("data-id");
+        // var oldName = $(this).attr("data-name");
+
+        xnote.prompt("新名称", oldName, function (newName) {
+            console.log(newName);
+            if (newName != "" && newName != null) {
+                $.post("/note/rename", {id:id, name:newName}, function (resp) {
+                    var code = resp.code;
+                    if (code != "success") {
+                        alert(resp.message);
+                    } else {
+                        // $("#file-"+id).text(newName);
+                        window.location.reload();
+                    }
+                })
+            }
+        });
+    }
+</script>

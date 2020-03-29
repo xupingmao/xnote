@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/05 21:00:07
-# @modified 2020/01/12 22:43:16
+# @modified 2020/03/29 18:48:15
 import xutils
 import xauth
 
@@ -14,7 +14,7 @@ class GroupApiHandler:
         id = xutils.get_argument("id", 0, type = int)
         user_name = xauth.current_name()
 
-        notes = NOTE_DAO.list_by_parent(user_name, parent_id = id, offset = 0, limit = 1000, orderby = "mtime_desc")
+        notes = NOTE_DAO.list_by_parent(user_name, parent_id = id, offset = 0, limit = 1000, orderby = "name")
         notes = list(filter(lambda x: x.type == "group", notes))
 
         parent_id = 0
