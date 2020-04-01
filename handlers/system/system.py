@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2020/03/22 01:03:16
+# @modified 2020/04/01 13:01:56
 """System functions"""
 from io import StringIO
 import xconfig
@@ -46,7 +46,7 @@ SYS_TOOLS = [
     guest_link("登录", "/login", "sign-in"),
     admin_link("文件",       "/fs_list", "file"),
     admin_link("脚本",    "/fs_link/scripts"),
-    admin_link("定时任务",   "/system/crontab"),
+    admin_link("定时任务",   "/system/crontab", "clock-o"),
     admin_link("事件注册", "/system/event"),
     admin_link("线程管理", "/system/thread_info"),
     admin_link("Menu_User",   "/system/user/list", "users"),
@@ -56,7 +56,7 @@ SYS_TOOLS = [
     admin_link("Menu_Configure", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
     admin_link("Menu_CSS", "/code/edit?type=script&path=user.css"),
     admin_link("Menu_Plugin",   "/plugins_list", "cogs"),
-    admin_link("Shell",    "/tools/shell")
+    admin_link("Shell",    "/tools/shell", "terminal")
 ] 
 
 NOTE_TOOLS = [
@@ -77,7 +77,7 @@ NOTE_TOOLS = [
     user_link("日历", "/message/calendar", "calendar"),
     user_link("上传管理", "/fs_upload", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),
-    user_link("笔记索引", "/note/index", "cubes"),
+    user_link("笔记索引", "/note/index", "th-large"),
 ] 
 
 DATA_TOOLS = [

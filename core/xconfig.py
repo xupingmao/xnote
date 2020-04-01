@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2020/02/15 19:28:38
+# @modified 2020/03/29 21:24:17
 
 '''xnote系统配置
 
@@ -171,7 +171,7 @@ _config = {}
 
 # 默认的用户配置
 DEFAULT_USER_CONFIG = {
-    "HOME_PATH": "/note/timeline",
+    "HOME_PATH": "/note/group",
     "LANG": "zh",
 }
 

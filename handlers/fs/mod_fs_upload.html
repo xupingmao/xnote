@@ -119,6 +119,13 @@ $(function () {
     // 完成上传完了，成功或者失败，先删除进度条。
     uploader.on( 'uploadComplete', function( file ) {
         $( '#'+file.id ).find('.progress').remove();
+
+        var initedCount = uploader.getFiles("inited").length;
+        var queuedCount = uploader.getFiles("queued").length;
+        var progressCount = uploader.getFiles("progress").length;
+        if (initedCount + queuedCount + progressCount == 0) {
+            location.reload();
+        }
     });
 
     uploader.on( 'error', function (file) {

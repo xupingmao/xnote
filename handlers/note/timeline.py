@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/03/29 18:18:25
+# @modified 2020/04/01 21:58:04
 
 """时光轴视图"""
 import re
@@ -26,8 +26,6 @@ class PathLink:
         self.url  = url
 
 def get_parent_link(user_name, type):
-    if type in ("group", "project"):
-        return None
     if type == "default":
         return PathLink(u"项目", USER_DAO.get_config(user_name, "HOME_PATH"))
     return PathLink(u"分类和工具", "/note/index")
