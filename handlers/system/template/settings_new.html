@@ -1,36 +1,8 @@
 {% extends base.html %}
 
-{% block head %}
-<style type="text/css">
-.key {
-    width: 30%;
-}
-
-.settings-row {
-    padding: 10px 0px;
-    border-bottom: 1px solid #eee;
-    width: 100%;
-    float: left;
-}
-
-.settings-key {
-    float: left;
-}
-
-.settings-value {
-    float: right;
-}
-
-{% if not _is_admin %}
-    .admin-visible {
-        display: none;
-    }
-{% end %}
-
-</style>
-{% end %}
-
 {% block body %}
+
+{% include system/component/system-css.html %}
 
 <!-- TODO d3.js 展示内存和CPU日志 -->
 {% import web %}
@@ -57,7 +29,7 @@
     <div class="settings-row admin-visible">
         <div class="settings-key">后台管理</div>
         <div class="settings-value">
-            <a href="/system/index">进入</a>
+            <a href="/system/admin">进入</a>
             <i class="fa fa-chevron-right"></i>
         </div>
     </div>

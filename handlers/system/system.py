@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2020/04/01 13:01:56
+# @modified 2020/04/06 17:52:56
 """System functions"""
 from io import StringIO
 import xconfig
@@ -141,6 +141,11 @@ class IndexHandler:
             customized_items = []
         )
 
+class AdminHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        return xtemplate.render("system/template/admin.html")
 
 class ReloadHandler:
     @xauth.login_required("admin")
@@ -196,6 +201,7 @@ class CacheHandler:
 xurls = (
     r"/system/sys",   IndexHandler,
     r"/system/index", IndexHandler,
+    r"/system/admin", AdminHandler,
     r"/system/system", IndexHandler,
     r"/system/reload", ReloadHandler,
     r"/system/user\.css", UserCssHandler,

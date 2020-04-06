@@ -1,0 +1,31 @@
+<style type="text/css">
+.key {
+    width: 30%;
+}
+
+.settings-row {
+    padding: 10px 5px;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+    float: left;
+}
+
+.settings-row:hover {
+    background: #eee;
+}
+
+.settings-key {
+    float: left;
+}
+
+.settings-value {
+    float: right;
+}
+
+{% if not _is_admin %}
+    .admin-visible {
+        display: none;
+    }
+{% end %}
+
+</style>
