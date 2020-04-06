@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/02/27 18:29:51
+# @modified 2020/04/06 12:09:06
 import os
 import json
 import web
@@ -9,6 +9,7 @@ import math
 import inspect
 import six
 import xconfig
+import xuserconfig
 import xauth
 import xutils
 from tornado.template import Template, Loader
@@ -44,7 +45,7 @@ def load_languages():
 
 def T(text, lang = None):
     if lang is None:
-        lang = xconfig.get_current_user_config('LANG')
+        lang = xuserconfig.get_current_lang()
 
     mapping = _lang_dict.get(lang)
     if mapping is None:
@@ -100,11 +101,6 @@ def get_user_agent():
         return ""
     return web.ctx.env.get("HTTP_USER_AGENT")
 
-def get_user_config_dict(user):
-    if not xauth.has_login():
-        return Storage()
-    return xauth.get_user_config_dict(user)
-
 @xutils.cache(prefix="message.count", expire=360)
 def get_message_count(user):
     if user is None:
@@ -132,11 +128,13 @@ def pre_render(kw):
     kw["Storage"]       = Storage
     kw["xutils"]        = xutils
     kw["xconfig"]       = xconfig
-    kw["_user_config"]  = get_user_config_dict(user_name)
     kw["_notice_count"] = get_message_count(user_name)
     kw["T"]             = T
-    kw["HOME_PATH"]     = xconfig.get_user_config(user_name, "HOME_PATH")
-    kw["THEME"]         = xconfig.get_user_config(user_name, "THEME")
+
+    # 用户配置
+    kw["_user_config"]  = xuserconfig.get_config_dict(user_name)
+    kw["HOME_PATH"]     = xuserconfig.get_home_path(user_name)
+    kw["THEME"]         = xuserconfig.get_theme(user_name)
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
 

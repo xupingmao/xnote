@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/03/29 19:14:31
+# @modified 2020/04/06 13:06:50
 import math
 import time
 import web
@@ -8,6 +8,7 @@ import xutils
 import xtemplate
 import xtables
 import xauth
+import xuserconfig
 import xconfig
 import xmanager
 import os
@@ -54,7 +55,7 @@ class SystemLink(GroupLink):
 class NoteLink:
     def __init__(self, name, url, icon = "fa-cube", size = None):
         self.type = "link"
-        self.name = name
+        self.name = T(name)
         self.url  = url
         self.icon = icon
         self.size = size
@@ -100,7 +101,7 @@ class DefaultListHandler:
 
         return xtemplate.render(VIEW_TPL,
             file_type  = "group",
-            back_url   = xconfig.get_user_config(user_name, "HOME_PATH"),
+            back_url   = xuserconfig.get_home_path(user_name),
             pathlist   = [parent, Storage(name="默认分类", type="group", url="/note/default")],
             files      = files,
             file       = Storage(id = 1, name="默认分类", type="group", parent_id = 0),
@@ -152,8 +153,8 @@ def load_note_index(user_name):
 
     return [
         NoteCard("分类", [
-            NoteLink("计划", "/note/plan", "fa-calendar-check-o", size = note_stat.plan_count),
-            NoteLink("记事", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
+            # NoteLink("计划", "/note/plan", "fa-calendar-check-o", size = note_stat.plan_count),
+            NoteLink("memo", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
             NoteLink("项目", "/note/timeline", "fa-folder", size = note_stat.group_count),
             NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
             NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),

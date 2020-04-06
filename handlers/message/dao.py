@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2020/03/27 01:18:16
+# @modified 2020/04/06 11:45:35
 import xutils
 import xconfig
 import xmanager
 import xtables
 from xutils import dbutil, cacheutil, textutil, Storage, functions
+from xtemplate import T
 
 class MessageDO(Storage):
 
@@ -237,7 +238,7 @@ class MessageTag:
         self.is_deleted = 0
 
         if tag == "log":
-            self.name = u"快捷记事"
+            self.name = T("memo")
             self.icon = "fa-file-text-o"
 
 def get_message_tag(user, tag):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/03/29 19:16:59
+# @modified 2020/04/06 13:14:35
 import xutils
 
 # cannot perform relative import
@@ -10,7 +10,7 @@ try:
 except ImportError:
     from tests import test_base
 
-from handlers.note.dao import get_by_id
+from handlers.note.dao import get_by_id, visit_note
 from xutils import Storage
 
 app          = test_base.init()
@@ -55,6 +55,9 @@ class TestMain(BaseTestCase):
             data=dict(id=id, content="new-content2", type="md", version=0))
         json_request("/note/update", method="POST", 
             data=dict(id=id, content="new-content3", type="md", version=1))
+
+        # 访问日志
+        visit_note("test", id)
         
         # 普通更新
         json_request("/note/save", method="POST",
@@ -301,6 +304,11 @@ class TestMain(BaseTestCase):
 
         words = split_words(u"网mac络")
         self.assertEqual([u"网", u"mac", u"络"], words)
+
+    def test_recent(self):
+        self.check_OK("/note/recent?orderby=view")
+        self.check_OK("/note/recent?orderby=update")
+        self.check_OK("/note/recent?orderby=create")
 
     
 

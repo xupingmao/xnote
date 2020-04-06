@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/03/29 19:11:10
+# @modified 2020/04/06 13:09:07
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -52,50 +52,6 @@ NOTE_ICON_DICT = {
     "plan"    : "fa-calendar-check-o",
 }
 
-class FileDO(dict):
-    """This class behaves like both object and dict"""
-    def __init__(self, name):
-        self.id          = None
-        self.related     = ''
-        self.size        = 0
-        now              = dateutil.format_time()
-        self.mtime       = now
-        self.atime       = now
-        self.ctime       = now
-        self.visited_cnt = 0
-        self.name        = name
-
-    def __getattr__(self, key): 
-        try:
-            return self[key]
-        except KeyError as k:
-            # raise AttributeError(k)
-            return None
-    
-    def __setattr__(self, key, value): 
-        self[key] = value
-
-    def __delattr__(self, key):
-        try:
-            del self[key]
-        except KeyError as k:
-            raise AttributeError(k)
-    
-    @staticmethod
-    def fromDict(dict, option=None):
-        """build fileDO from dict"""
-        name = dict['name']
-        file = FileDO(name)
-        for key in dict:
-            file[key] = dict[key]
-            # setattr(file, key, dict[key])
-        if file.get("content", None) is None:
-            file.content = ""
-        if option:
-            file.option = option
-        file.url = "/note/view?id={}".format(dict["id"])
-        return file
-
 def format_note_id(id):
     return "%020d" % int(id)
 
@@ -115,7 +71,7 @@ def batch_query(id_list):
     creator = xauth.current_name()
     result = dict()
     for id in id_list:
-        note = dbutil.get("note_tiny:%s:%s" % (creator, format_note_id(id)))
+        note = dbutil.get("note_index:%s" % id)
         if note:
             result[id] = note
     return result
@@ -149,22 +105,6 @@ def sort_notes(notes, orderby = "name"):
     notes.sort(key = lambda x: 0 if x.type == "group" else 1)
     fix_notes_info(notes)
 
-def build_note(dict):
-    id   = dict['id']
-    name = dict['name']
-    note = FileDO(name)
-    for key in dict:
-        note[key] = dict[key]
-        # setattr(file, key, dict[key])
-    if note.get("content", None) is None:
-        note.content = ""
-    content, data = query_note_conent(id)
-    if content is not None:
-        note.content = content
-    if data is not None:
-        note.data = data
-    build_note_info(note)
-    return note
 
 def fix_notes_info(notes):
     for note in notes:
@@ -283,11 +223,25 @@ def create_token(type, id):
     dbutil.put("token:%s" % uuid, token_info)
     return uuid
 
+def get_id_from_log(log):
+    if isinstance(log, dict):
+        return log.get("id")
+    else:
+        # 老数据，都是id
+        return log
+
+def log_list_to_id_list(log_list):
+    result = []
+    for log in log_list:
+        result.append(get_id_from_log(log))
+    return result
+
 def delete_old_edit_log(creator, note_id):
     counter = Counter()
     def filter_func(key, value):
+        log_id = get_id_from_log(value)
         counter.update("e")
-        return value == note_id or counter["e"] > MAX_EDIT_LOG
+        return log_id == note_id or counter["e"] > MAX_EDIT_LOG
     old_logs = dbutil.prefix_list("note_edit_log:%s:" % creator, filter_func, include_key = True)
     for key, value in old_logs:
         dbutil.delete(key)
@@ -299,13 +253,15 @@ def add_edit_log(note):
     delete_old_edit_log(creator, note_id)
 
     key = "note_edit_log:%s:%s" % (creator, dbutil.timeseq())
-    dbutil.put(key, note_id)
+    edit_log = Storage(id = note_id)
+    dbutil.put(key, edit_log)
 
 def delete_old_visit_log(creator, note_id):
     counter   = Counter()
     def filter_func(key, value):
+        log_id = get_id_from_log(value)
         counter.update("v")
-        return value == note_id or counter["v"] > MAX_VIEW_LOG
+        return log_id == note_id or counter["v"] > MAX_VIEW_LOG
 
     old_logs = dbutil.prefix_list("note_visit_log:%s:" % creator, filter_func, include_key = True)
     for key, value in old_logs:
@@ -318,7 +274,9 @@ def add_visit_log(user_name, note):
     delete_old_visit_log(user_name, note_id)
 
     key = "note_visit_log:%s:%s" % (user_name, dbutil.timeseq())
-    dbutil.put(key, note_id)
+
+    visit_log = Storage(id = note_id)
+    dbutil.put(key, visit_log)
 
 def update_note_rank(note):
     mtime = note.mtime
@@ -653,6 +611,25 @@ def list_recent_created(creator = None, offset = 0, limit = 10, skip_archived = 
     fill_parent_name(result)
     return result
 
+def list_note_by_log(log_prefix, creator, offset, limit):
+    """通过日志来查询笔记列表
+    @param {string} log_prefix 日志表前缀
+    @param {string} creator 用户名称
+    @param {int} offset 开始下标（包含）
+    @param {int} limit 返回数量
+    """
+    log_list  = dbutil.prefix_list("%s:%s" % (log_prefix, creator), offset = offset, limit = limit, reverse = True)
+    id_list   = log_list_to_id_list(log_list)
+    note_dict = batch_query(id_list)
+    files     = []
+
+    for id in id_list:
+        note = note_dict.get(id)
+        if note:
+            files.append(note)
+    fill_parent_name(files)
+    return files
+
 @xutils.timeit(name = "NoteDao.ListRecentViewed", logfile = True, logargs = True)
 def list_recent_viewed(creator = None, offset = 0, limit = 10):
     if limit is None:
@@ -661,17 +638,7 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
     user = xauth.current_name()
     if user is None:
         user = "public"
-    
-    id_list   = dbutil.prefix_list("note_visit_log:%s" % creator, offset = offset, limit = limit, reverse = True)
-    note_dict = batch_query(id_list)
-    files     = []
-
-    for id in id_list:
-        note = note_dict.get(id)
-        if note:
-            files.append(note)
-    fill_parent_name(files)
-    return files
+    return list_note_by_log("note_visit_log", creator, offset, limit)
 
 @xutils.timeit(name = "NoteDao.ListRecentEdit:leveldb", logfile = True, logargs = True)
 def list_recent_edit(creator = None, offset=0, limit=None):
@@ -679,16 +646,7 @@ def list_recent_edit(creator = None, offset=0, limit=None):
     if limit is None:
         limit = xconfig.PAGE_SIZE
     
-    id_list   = dbutil.prefix_list("note_edit_log:%s" % creator, offset = offset, limit = limit, reverse = True)
-    note_dict = batch_query(id_list)
-    files     = []
-
-    for id in id_list:
-        note = note_dict.get(id)
-        if note:
-            files.append(note)
-    fill_parent_name(files)
-    return files
+    return list_note_by_log("note_edit_log", creator, offset, limit)
 
 def list_most_visited(creator):
     pass
@@ -831,7 +789,7 @@ def list_removed(creator, offset, limit):
     return notes
 
 def doc_filter_func(key, value):
-    return value.type in ("md", "text", "html", "post", "log") and value.is_deleted == 0
+    return value.type in ("md", "text", "html", "post", "log", "plan") and value.is_deleted == 0
 
 def table_filter_func(key, value):
     return value.type in ("csv", "table") and value.is_deleted == 0

@@ -10,10 +10,6 @@
         <a class="gray-tag-link" href="/note/sticky">置顶</a>
     {% end %}
 
-    {% if path_item.type == "plan" %}
-        <a class="gray-tag-link" href="/note/plan">计划</a>
-    {% end %}
-
     {% if path_item.type == "list" %}
         <a class="gray-tag-link" href="/note/list">清单</a>
     {% end %}
@@ -30,7 +26,7 @@
         <a class="gray-tag-link" href="/note/html">富文本</a>
     {% end %}
 
-    {% if path_item.type in ("md", "log", "text") %}
+    {% if path_item.type in ("md", "log", "text", "plan") %}
         <a class="gray-tag-link" href="/note/document">文档</a>
     {% end %}
 

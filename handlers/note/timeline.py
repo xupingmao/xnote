@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/04/01 21:58:04
+# @modified 2020/04/06 12:09:45
 
 """时光轴视图"""
 import re
@@ -9,6 +9,8 @@ import xutils
 import xtables
 import xtemplate
 import time
+import xconfig
+import xuserconfig
 import web
 from xutils import Storage, dateutil, textutil
 from xtemplate import T
@@ -27,7 +29,7 @@ class PathLink:
 
 def get_parent_link(user_name, type):
     if type == "default":
-        return PathLink(u"项目", USER_DAO.get_config(user_name, "HOME_PATH"))
+        return PathLink(u"项目", xuserconfig.get_project_path(user_name))
     return PathLink(u"分类和工具", "/note/index")
 
 class SystemGroup(Storage):
@@ -287,6 +289,7 @@ LIST_FUNC_DICT = {
     'list'    : list_by_type_func,
     'table'   : list_by_type_func,
     'csv'     : list_by_type_func,
+    'log'     : list_by_type_func,
 
     'plan'    : list_plan_func,
     'all'     : list_all_func,
@@ -399,6 +402,10 @@ class DocumentListHandler(BaseTimelineHandler):
     note_type = "document"
 
 
+class LogListHandler(BaseTimelineHandler):
+    note_type = "log"
+
+
 class ListNoteHandler(BaseTimelineHandler):
     note_type = "list"
 
@@ -430,6 +437,7 @@ xurls = (
     r"/note/md"             , MarkdownListHandler,
     r"/note/list"           , ListNoteHandler,
     r"/note/plan"           , PlanListHandler,
+    r"/note/log"            , LogListHandler,
     r"/note/sticky"         , StickyHandler,
     r"/note/removed"        , RemovedHandler,
 )

@@ -1,8 +1,10 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2020/03/29 21:24:17
+# @modified 2020/04/06 11:58:58
 
 '''xnote系统配置
+# 用户配置
+- 查看xuserconfig
 
 # 文件配置
 - 约定目录叫 XXX_DIR
@@ -168,12 +170,6 @@ note_history = None
 
 # 配置项
 _config = {}
-
-# 默认的用户配置
-DEFAULT_USER_CONFIG = {
-    "HOME_PATH": "/note/group",
-    "LANG": "zh",
-}
 
 START_TIME = None
 
@@ -526,22 +522,3 @@ def set_alias(name, value):
 def get_alias(name, default_value):
     """获取别名，用于扩展命令"""
     return _alias_dict.get(name, default_value)
-
-def get_user_config(user_name, config_key):
-    """默认值参考DEFAULT_USER_CONFIG"""
-    import xauth
-    # 未启动，直接返回默认值
-    if START_TIME is None:
-        return DEFAULT_USER_CONFIG.get(config_key)
-
-    config = xauth.get_user_config_dict(user_name)
-    default_value = DEFAULT_USER_CONFIG.get(config_key)
-    if config is None:
-        return default_value
-    else:
-        return config.get(config_key, default_value)
-
-def get_current_user_config(key):
-    """默认值参考DEFAULT_USER_CONFIG"""
-    import xauth
-    return get_user_config(xauth.current_name(), key)

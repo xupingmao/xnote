@@ -1,0 +1,208 @@
+{% extends base.html %}
+
+{% block head %}
+<style type="text/css">
+.key {
+    width: 30%;
+}
+
+.settings-row {
+    padding: 10px 0px;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+    float: left;
+}
+
+.settings-key {
+    float: left;
+}
+
+.settings-value {
+    float: right;
+}
+
+{% if not _is_admin %}
+    .admin-visible {
+        display: none;
+    }
+{% end %}
+
+</style>
+{% end %}
+
+{% block body %}
+
+<!-- TODO d3.js 展示内存和CPU日志 -->
+{% import web %}
+
+<div class="col-md-12 card">
+    <h3 class="card-title">{{T("Menu_Settings")}}</h3>
+
+    <div class="settings-row">
+        <div class="settings-key">当前用户</div>
+        <div class="settings-value">
+            {{_user_name}}
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </div>
+
+    <div class="settings-row">
+        <div class="settings-key">关于系统</div>
+        <div class="settings-value">
+            <a href="/code/wiki/README.md">查看</a>
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </div>
+
+    <div class="settings-row admin-visible">
+        <div class="settings-key">后台管理</div>
+        <div class="settings-value">
+            <a href="/system/index">进入</a>
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </div>
+
+    <div class="settings-row admin-visible">
+        <div class="settings-key">文件管理</div>
+        <div class="settings-value">
+            <a href="/fs_list">进入</a>
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </div>
+
+    <div class="settings-row">
+        <div class="settings-key">主题</div>
+        <div class="settings-value">
+            <select name="THEME" data-type="str" value="{{_user_config.THEME}}">
+                <option value="standard">默认</option>
+                <option value="card">卡片</option>
+                <option value="left">侧边栏</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="settings-row">
+        <div class="settings-key">首页</div>
+        <div class="settings-value">
+            <select name="HOME_PATH" data-type="str" value="{{HOME_PATH}}">
+                <option value="/note/index">分类和工具</option>
+                <option value="/note/group">项目列表</option>
+                <option value="/note/timeline">项目时光轴</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="settings-row">
+        <div class="settings-key">{{T("Language")}}</div>
+        <div class="settings-value">
+            <select name="LANG" data-type="str" value="{{_user_config.LANG}}">
+                <option value="zh">中文</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="settings-row admin-visible">
+        <div class="settings-key">分页大小</div>
+        <div class="settings-value">
+            <select name="PAGE_SIZE" data-type="int" value="{{xconfig.PAGE_SIZE}}">
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="settings-row admin-visible">
+        <div class="settings-key">回收站清理周期</div>
+        <div class="settings-value">
+            <select name="TRASH_EXPIRE" data-type="int" value="{{xconfig.TRASH_EXPIRE}}">
+                <option value="2592000">30天</option>
+                <option value="7776000">90天</option>
+                <option value="15552000">180天</option>
+                <option value="31104000">360天</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="settings-row admin-visible">
+        <div class="settings-key">系统文件</div>
+        <div class="settings-value">
+            <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="True">隐藏
+            <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="False">显示
+        </div>
+    </div>
+
+    <div class="settings-row admin-visible">
+        <div class="settings-key">功能调试</div>
+        <div class="settings-value">
+            <input type="radio" name="DEBUG" default-value="{{xconfig.DEBUG}}" value="True">开启
+            <input type="radio" name="DEBUG" default-value="{{xconfig.DEBUG}}" value="False">关闭
+        </div>
+    </div>
+
+    <div class="settings-row admin-visible">
+        <div class="settings-key">页面调试</div>
+        <div class="settings-value">
+            <input type="radio" name="DEBUG_HTML_BOX" default-value="{{xconfig.DEBUG_HTML_BOX}}" value="True">开启
+            <input type="radio" name="DEBUG_HTML_BOX" default-value="{{xconfig.DEBUG_HTML_BOX}}" value="False">关闭
+        </div>
+    </div>
+
+    <div class="settings-row admin-visible">
+        <div class="settings-key">实验室功能</div>
+        <div class="settings-value">
+            <input type="radio" name="DEV_MODE" default-value="{{xconfig.DEV_MODE}}" value="True">开启
+            <input type="radio" name="DEV_MODE" default-value="{{xconfig.DEV_MODE}}" value="False">关闭
+        </div>
+    </div>
+
+    <div class="settings-row admin-visible">
+        <div class="settings-key">启动脚本</div>
+        <div class="settings-value">
+            <a href="{{init_script_url}}">配置</a>
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </div>
+
+    <div class="settings-row admin-visible">
+        <div class="settings-key">自定义CSS</div>
+        <div class="settings-value">
+            <a href="/code/edit?type=script&path=user.css">配置</a>
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    function updateSetting(key, value, type) {
+        $.post("/system/config", 
+            {key: key, value: value, type: type}, 
+            function (data) {
+                window.location.reload();
+        }).fail(function (resp) {
+            console.log(resp);
+            alert("设置失败");
+        });
+    }
+
+    $("[type=radio]").on("change", function (e) {
+        var val = $(e.target).val();
+        var key = $(e.target).attr("name");
+        var type = $(this).attr("data-type");
+        // alert(val);
+        updateSetting(key, val, type);
+    });
+
+    $("select").change(function (e) {
+        var key = $(this).attr("name");
+        var val = $(this).val();
+        var type = $(this).attr("data-type");
+        updateSetting(key, val, type);
+    });
+</script>
+
+{% end %}
