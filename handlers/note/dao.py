@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/04/11 23:11:46
+# @modified 2020/04/11 23:18:14
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -245,7 +245,7 @@ def delete_old_edit_log(creator, note_id):
         log_id = get_id_from_log(value)
         counter.update("e")
         return log_id == note_id or counter["e"] > MAX_EDIT_LOG
-    old_logs = dbutil.prefix_list("note_edit_log:%s:" % creator, filter_func, include_key = True)
+    old_logs = dbutil.prefix_list("note_edit_log:%s:" % creator, filter_func, include_key = True, reverse = True)
     for key, value in old_logs:
         dbutil.delete(key)
 
