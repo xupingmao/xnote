@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/04/06 13:09:07
+# @modified 2020/04/11 23:11:46
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -125,6 +125,9 @@ def build_note_info(note):
         # process icon
         note.icon = NOTE_ICON_DICT.get(note.type, "fa-file-text-o")
         note.id   = str(note.id)
+
+        if note.type in ("list", "csv"):
+            note.show_edit = False
     return note
 
 def convert_to_path_item(note):
@@ -263,7 +266,7 @@ def delete_old_visit_log(creator, note_id):
         counter.update("v")
         return log_id == note_id or counter["v"] > MAX_VIEW_LOG
 
-    old_logs = dbutil.prefix_list("note_visit_log:%s:" % creator, filter_func, include_key = True)
+    old_logs = dbutil.prefix_list("note_visit_log:%s:" % creator, filter_func, include_key = True, reverse = True)
     for key, value in old_logs:
         dbutil.delete(key)
 
@@ -309,6 +312,7 @@ def kv_put_note(note_id, note):
     del_dict_key(note, "path")
     del_dict_key(note, "url")
     del_dict_key(note, "icon")
+    del_dict_key(note, "show_edit")
 
     dbutil.put("note_full:%s" % note_id, note)
 
@@ -336,6 +340,7 @@ def convert_to_index(note):
     del_dict_key(note_index, 'icon')
     del_dict_key(note_index, 'data')
     del_dict_key(note_index, 'content')
+    del_dict_key(note_index, 'show_edit')
 
     note_index.parent_id = str(note_index.parent_id)
     

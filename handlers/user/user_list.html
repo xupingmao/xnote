@@ -43,10 +43,9 @@
         {% for index, name in enumerate(sorted(user_dict)) %}
         <tr>
             <td class="index-td">{{index+1}}</td>
-            <td>{{name}}</td>
+            <td><a class="link edit-btn" href="/system/user?name={{name}}">{{name}}</a></td>
             <td>{{user_dict[name].login_time}}</td>
             <td>
-                <a class="link edit-btn" href="/system/user?name={{name}}">编辑</a>
                 {% if name != "admin" %}
                     <a data-name="{{name}}" class="red delete-user-btn">删除</a>
                 {% end %}
