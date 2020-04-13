@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/04/06 13:06:50
+# @modified 2020/04/14 00:44:55
 import math
 import time
 import web
@@ -168,7 +168,7 @@ def load_note_index(user_name):
             NoteLink("置顶笔记", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
             NoteLink("搜索历史", "/search", "fa-search", size = None),
             # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
-            NoteLink("按月查看", "/note/date", "fa-calendar"),
+            NoteLink("月视图", "/note/date", "fa-calendar"),
             NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
             NoteLink("上传管理", "/fs_upload", "fa-upload"),
             NoteLink("回收站", "/note/removed", "fa-trash", size = note_stat.removed_count),
@@ -331,6 +331,7 @@ class RecentHandler:
         show_mdate = False
         show_cdate = False
         show_adate = False
+        show_visited_cnt = False
         dir_type   = "recent_edit"
 
         creator = xauth.get_current_name()
@@ -346,6 +347,10 @@ class RecentHandler:
             time_attr = "ctime"
             show_cdate = True
             dir_type = "recent_created"
+        elif orderby == "frequence":
+            html_title = "Top"
+            files = NOTE_DAO.list_most_visited(creator, offset, limit)
+            show_visited_cnt = True
         else:
             html_title = "Recent Updated"
             files = NOTE_DAO.list_recent_edit(creator, offset, limit)
@@ -368,6 +373,7 @@ class RecentHandler:
             show_cdate = show_cdate,
             show_mdate = show_mdate,
             show_adate = show_adate,
+            show_visited_cnt = show_visited_cnt,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    ="/note/recent_%s?page=" % orderby,
             search_action = "/note/timeline",

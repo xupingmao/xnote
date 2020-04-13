@@ -2,7 +2,7 @@
  * 重写默认浏览器样式
  * @author xupingmao
  * @since 2020/01/08
- * @modified 2020/01/22 18:30:57
+ * @modified 2020/04/13 01:03:59
  */
 
 * {
@@ -32,7 +32,7 @@ p,li,a {
 }
 
 h1,h2,h3 {
-    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Helvetica, STKaiti, SimSun, serif
+    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
 }
 
 input[type=checkbox] {

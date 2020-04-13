@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/04/11 23:18:14
+# @modified 2020/04/14 00:49:24
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -74,6 +74,7 @@ def batch_query(id_list):
         note = dbutil.get("note_index:%s" % id)
         if note:
             result[id] = note
+            build_note_info(note)
     return result
 
 def sort_by_name(notes):
@@ -128,6 +129,9 @@ def build_note_info(note):
 
         if note.type in ("list", "csv"):
             note.show_edit = False
+
+        if note.visited_cnt is None:
+            note.visited_cnt = 0
     return note
 
 def convert_to_path_item(note):
@@ -174,6 +178,7 @@ def get_by_id(id, include_full = True):
         note.size  = note_index.size
         note.tags  = note_index.tags
         note.parent_id = note_index.parent_id
+        note.visited_cnt = note_index.visited_cnt
     if note:
         build_note_info(note)
     return note
@@ -382,6 +387,7 @@ def update_note(note_id, **kw):
     archived  = kw.get("archived")
     size      = kw.get("size")
     token     = kw.get("token")
+    visited_cnt = kw.get("visited_cnt")
 
     old_parent_id = None
     new_parent_id = None
@@ -410,6 +416,8 @@ def update_note(note_id, **kw):
             note.size = size
         if token != None:
             note.token = token
+        if visited_cnt != None:
+            note.visited_cnt = visited_cnt
 
         old_version  = note.version
         note.mtime   = xutils.format_time()
@@ -616,7 +624,7 @@ def list_recent_created(creator = None, offset = 0, limit = 10, skip_archived = 
     fill_parent_name(result)
     return result
 
-def list_note_by_log(log_prefix, creator, offset, limit):
+def list_note_by_log(log_prefix, creator, offset = 0, limit = -1):
     """通过日志来查询笔记列表
     @param {string} log_prefix 日志表前缀
     @param {string} creator 用户名称
@@ -653,8 +661,10 @@ def list_recent_edit(creator = None, offset=0, limit=None):
     
     return list_note_by_log("note_edit_log", creator, offset, limit)
 
-def list_most_visited(creator):
-    pass
+def list_most_visited(creator, offset, limit):
+    logs = list_note_by_log("note_visit_log", creator)
+    logs.sort(key = lambda x: x.visited_cnt, reverse = True)
+    return logs[offset:offset+limit]
 
 def list_by_date(field, creator, date):
     user = creator
@@ -1002,6 +1012,7 @@ xutils.register_func("note.list_public", list_public)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.list_recent_viewed", list_recent_viewed)
+xutils.register_func("note.list_most_visited", list_most_visited)
 xutils.register_func("note.list_by_func", list_by_func)
 
 # count functions

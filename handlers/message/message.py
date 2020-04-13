@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2020/03/29 15:01:04
+# @modified 2020/04/13 01:01:36
 
 """短消息"""
 import time
@@ -447,6 +447,14 @@ class StatHandler:
         stat = MSG_DAO.get_message_stat(user)
         format_message_stat(stat)
         return stat
+
+class DairyHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        return xtemplate.render("message/page/dairy.html")
+
+
 xurls=(
     r"/message", MessageHandler,
     r"/message/list", ListAjaxHandler,
@@ -461,5 +469,6 @@ xurls=(
     r"/message/open", OpenMessageHandler,
     r"/message/finish", FinishMessageHandler,
     r"/message/touch", TouchHandler,
-    r"/message/tag", UpdateTagHandler
+    r"/message/tag", UpdateTagHandler,
+    r"/message/dairy", DairyHandler,
 )
