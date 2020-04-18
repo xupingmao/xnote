@@ -2,7 +2,7 @@
  * 卡片主题的样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/01/30 10:00:30
+ * @modified 2020/04/19 00:38:42
  */
 
 body {
@@ -110,7 +110,7 @@ body {
 }
 
 /** 移动端样式放在最后 **/
-@media screen and (max-width: 950px) {
+@media screen and (max-width: 1000px) {
     /** mobile **/
 
     .root {

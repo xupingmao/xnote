@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2020/04/06 11:58:58
+# @modified 2020/04/19 00:56:10
 
 '''xnote系统配置
 # 用户配置
@@ -172,6 +172,9 @@ note_history = None
 _config = {}
 
 START_TIME = None
+
+# 是否隐藏词典的入口
+HIDE_DICT_ENTRY = True
 
 def makedirs(dirname):
     if not os.path.exists(dirname):

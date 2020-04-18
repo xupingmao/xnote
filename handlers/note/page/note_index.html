@@ -18,6 +18,9 @@
         {% for card in cards %}
             <h3 class="card-title-2">{{card.title}}</h3>
             {% for row in card.rows %}
+                {% if row.hide == True %}
+                    {% continue %}
+                {% end %}
                 <p class="card-row">
                     <i class="fa {{row.icon}}"></i>
                     <a href="{{row.url}}">{{row.name}}</a>

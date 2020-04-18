@@ -132,6 +132,16 @@
     </div>
 
     <div class="settings-row admin-visible">
+        <div class="settings-key">词典入口</div>
+        <div class="settings-value">
+            <input type="radio" data-type="bool" name="HIDE_DICT_ENTRY" 
+                default-value="{{xconfig.HIDE_DICT_ENTRY}}" value="True">隐藏
+            <input type="radio" data-type="bool" name="HIDE_DICT_ENTRY" 
+                default-value="{{xconfig.HIDE_DICT_ENTRY}}" value="False">显示
+        </div>
+    </div>
+
+    <div class="settings-row admin-visible">
         <div class="settings-key">启动脚本</div>
         <div class="settings-value">
             <a href="{{init_script_url}}">配置</a>

@@ -132,7 +132,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/03/29 15:59:48
+ * @modified 2020/04/19 00:38:14
  */
 
 /** marked 样式 **/
@@ -1353,7 +1353,7 @@ li.menu-item:hover {
 }
 
 /** 移动端样式放在最后 **/
-@media screen and (max-width: 950px) {
+@media screen and (max-width: 1000px) {
     /** mobile **/
 
     .root {

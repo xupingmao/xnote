@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/04/14 00:44:55
+# @modified 2020/04/19 00:56:14
 import math
 import time
 import web
@@ -61,8 +61,15 @@ class NoteLink:
         self.size = size
         self.priority = 0
         self.ctime = ""
-        self.show_next = True
+        self.hide  = False
+        self.show_next  = True
         self.is_deleted = 0
+
+class DictEntryLink(NoteLink):
+    def __init__(self, size):
+        NoteLink.__init__(self, "词典", "/note/dict",  "icon-dict", size = size)
+        self.hide = xconfig.HIDE_DICT_ENTRY
+
 
 class NoteCard:
 
@@ -160,7 +167,7 @@ def load_note_index(user_name):
             NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
             NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
             NoteLink("表格", "/note/table", "fa-table", size = note_stat.table_count),
-            NoteLink("词典", "/note/dict",  "icon-dict", size = note_stat.dict_count),
+            DictEntryLink(size = note_stat.dict_count),
             # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
             # NoteLink("富文本", "/note/html", "fa-file-word-o"),
         ]),

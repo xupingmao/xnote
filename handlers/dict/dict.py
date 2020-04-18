@@ -1,14 +1,14 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/02/15 21:46:37
-# @modified 2020/03/01 17:47:31
+# @modified 2020/04/19 00:44:49
 import xtables
 import xtemplate
 import xutils
 import xauth
 import xconfig
 import math
-from xutils import Storage
+from xutils import Storage, encode_uri_component
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 
@@ -100,7 +100,7 @@ class DictSearchHandler:
             page_max   = page_max,
             pathlist   = [Storage(name = "词典", url = "#")],
             show_pagination = True,
-            page_url   = "/note/dict?page=", 
+            page_url   = "/dict/search?key=%s&page=" % encode_uri_component(key), 
             **SEARCH_KEYWORDS)
 
 

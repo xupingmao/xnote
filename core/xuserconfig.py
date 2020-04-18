@@ -1,9 +1,10 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/04/06 11:55:29
-# @modified 2020/04/06 12:08:39
+# @modified 2020/04/19 00:37:25
 import xconfig
 import xauth
+from xutils import Storage
 
 # 默认的用户配置
 DEFAULT_USER_CONFIG = {

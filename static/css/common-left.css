@@ -2,7 +2,7 @@
  * 侧边栏主题样式
  * @author xupingmao
  * @since 2019/06/18
- * @modified 2020/02/22 11:59:39
+ * @modified 2020/04/19 00:38:33
  */
 
 body {
@@ -188,7 +188,7 @@ body {
 }
 
 
-@media screen and (max-width: 950px) {
+@media screen and (max-width: 1000px) {
     .nav-left {
         display: none;
     }
