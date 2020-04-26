@@ -12,10 +12,6 @@
         width: 25%;
         text-align: right;
     }
-
-    .card-row {
-        padding-left: 20px;
-    }
 </style>
 
 {% end %}
@@ -43,21 +39,33 @@
         </div>
     </div>
 
-    <div class="card">
-        {% for row in notes_by_date %}
-            <h3 class="card-title-2">{{row.date}}</h3>
-            {% for note in row.children %}
-                <p class="card-row">
+    {% if len(notes) > 0 %}
+    <div class="card row">
+        <table class="table row">
+            <tr>
+                <th>标题</th>
+                <th class="hide">项目</th>
+                <th style="text-align: right;">时间</th>
+            </tr>
+        {% for note in notes %}
+            <tr>
+                <td>
                     <i class="fa {{note.icon}}"></i>
-                    <a href="{{note.url}}">{{note.name}}</a>
-                    {% if note.size != None %}
-                        <span class="float-right gray-text">{{note.size}}</a>
+                    <a href="/note/{{note.id}}">{{note.name}}</a>
+                </td>
+                <td class="option-td hide">
+                    {% if str(note.parent_id) != "0" %}
+                        <a href="/note/view?id={{note.parent_id}}">{{note.parent_name}}</a>
                     {% end %}
-                </p>
-            {% end %}
+                </td>
+                <td class="date-td">
+                    {{dateutil.format_mmdd(note.ctime)}}
+                </td>
+            </tr>
         {% end %}
-
+        </table>
     </div>
+    {% end %}
 
     <script>
     $(function () {

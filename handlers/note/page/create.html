@@ -52,12 +52,27 @@ label {
             </div>
         {% end %}
 
+        {% if type == "log" %}
+            <!-- 选择日期 -->
+            <div class="row top-offset-1">
+                <label>日期</label>
+                <input id="selectDate"/>
+            </div>
+        {% end %}
+
         <div class="row top-offset-1">
             <label>&nbsp;</label>
             <button class="mid-text">{{T("创建")}}</button>
         </div>
     </form>
 </div>
+
+<script type="text/javascript" src="https://www.layuicdn.com/layDate-v5.0.9/laydate.js"></script>
+<script type="text/javascript">
+laydate.render({
+  elem: '#selectDate'
+});
+</script>
 {% end %}
 
 {% block aside %}

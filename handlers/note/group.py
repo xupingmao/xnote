@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/04/19 00:56:14
+# @modified 2020/04/27 00:34:24
 import math
 import time
 import web
@@ -139,6 +139,7 @@ class GroupListHandler:
         fixed_books.append(NoteLink(u"分类和工具", "/note/index?source=group", icon = "fa-th-large"))
         if len(archived_groups) > 0:
             fixed_books.append(NoteLink(u"归档", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
+        fixed_books.append(NoteLink(u"时间视图", "/note/date", icon = "fa-calendar"))
 
         files = fixed_books + normal_groups
 
@@ -162,6 +163,7 @@ def load_note_index(user_name):
         NoteCard("分类", [
             # NoteLink("计划", "/note/plan", "fa-calendar-check-o", size = note_stat.plan_count),
             NoteLink("memo", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
+            # NoteLink("日志", "/note/log"),
             NoteLink("项目", "/note/timeline", "fa-folder", size = note_stat.group_count),
             NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
             NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
@@ -175,7 +177,8 @@ def load_note_index(user_name):
             NoteLink("置顶笔记", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
             NoteLink("搜索历史", "/search", "fa-search", size = None),
             # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
-            NoteLink("月视图", "/note/date", "fa-calendar"),
+            # NoteLink("日历视图", "/note/calendar", "fa-calendar"),
+            NoteLink("时间视图", "/note/date", "fa-calendar"),
             NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
             NoteLink("上传管理", "/fs_upload", "fa-upload"),
             NoteLink("回收站", "/note/removed", "fa-trash", size = note_stat.removed_count),
@@ -392,6 +395,30 @@ def link_by_month(year, month, delta = 0):
     t_year, t_mon, t_day = dateutil.date_add(tm, months = delta)
     return "/note/date?year=%d&month=%02d" % (t_year, t_mon)
 
+def assemble_notes_by_date(notes, year_str, month_str):
+    notes_dict = dict()
+    for note in notes:
+        cdate = dateutil.format_date(note.ctime)
+        old   = notes_dict.get(cdate)
+        if old is None:
+            old = []
+        old.append(note)
+        notes_dict[cdate] = old
+
+    # days = dateutil.get_days_of_month(int(year_str), int(month_str))
+    # for n in range(days):
+    #     date_str = "%s-%s-%02d" % (year_str, month_str, n)
+    #     if date_str not in notes_dict:
+    #         notes_dict[date_str] = [NoteLink("创建日记", "/note/add")]
+
+    result = []
+    for date in notes_dict:
+        item = Storage(date = date, children = notes_dict[date])
+        result.append(item)
+
+    result.sort(key = lambda x:x.date, reverse = True)
+    return result
+
 class DateHandler:
 
     type_order_dict = {
@@ -415,24 +442,16 @@ class DateHandler:
         if len(month) == 1:
             month = '0' + month
 
-        date = year + "-" + month
-        created = NOTE_DAO.list_by_date("ctime", user_name, date)
-        by_name = NOTE_DAO.list_by_date("name", user_name, year + "_" + month)
-
-        notes = []
-        dup = set()
-        for v in created + by_name:
-            if v.id in dup:
-                continue
-            dup.add(v.id)
-            notes.append(v)
-        self.sort_notes(notes)
+        date  = year + "-" + month
+        notes = NOTE_DAO.list_by_date("ctime", user_name, date)
+        # by_name = NOTE_DAO.list_by_date("name", user_name, year + "_" + month)
+        notes_by_date = assemble_notes_by_date(notes, year, month)
 
         return xtemplate.render("note/page/list_by_date.html", 
             link_by_month = link_by_month,
             year = int(year),
             month = int(month),
-            notes = notes)
+            notes_by_date = notes_by_date)
 
 class ArchivedHandler:
 
@@ -489,6 +508,11 @@ class ManagementHandler:
             current = current,
             parent  = parent)
 
+class NoteCalendarHandler:
+
+    def GET(self):
+        return xtemplate.render("note/page/calendar.html")
+
 xurls = (
     r"/note/group"          , GroupListHandler,
     r"/note/group_list"     , GroupListHandler,
@@ -509,6 +533,7 @@ xurls = (
     r"/note/text"           , TextHandler,
     r"/note/tools"          , NoteIndexHandler,
     r"/note/types"          , NoteIndexHandler,
-    r"/note/index"          , NoteIndexHandler
+    r"/note/index"          , NoteIndexHandler,
+    r"/note/calendar"       , NoteCalendarHandler,
 )
 

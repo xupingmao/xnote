@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2020/04/13 01:01:36
+# @modified 2020/04/20 00:29:02
 
 """短消息"""
 import time
@@ -71,6 +71,10 @@ def process_message(message):
     if message.tag == "done":
         build_done_html(message)
     return message
+
+def process_message_list(message_list):
+    for message in message_list:
+        process_message(message)
 
 def fuzzy_item(item):
     item = item.replace("'", "''")
@@ -164,7 +168,7 @@ class ListAjaxHandler:
             chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
             
         page_max = math.ceil(amount / pagesize)
-        chatlist = list(map(process_message, chatlist))
+        process_message_list(chatlist)
 
         return dict(code="success", message = "", 
             data   = chatlist, 
@@ -390,6 +394,7 @@ class DateHandler:
             msg_list = MSG_DAO.list_by_date(user_name, date)
         else:
             msg_list = []
+        process_message_list(msg_list)
         return dict(code="success", data = msg_list)
 
 class MessageHandler:

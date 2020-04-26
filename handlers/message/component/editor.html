@@ -1,0 +1,73 @@
+<link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
+<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
+
+<style type="text/css">
+
+</style>
+
+<div class="message-input-box card">
+    <textarea class="col-md-12 input-box"></textarea>
+    <input type="file" id="filePicker" class="hide" multiple/>
+    <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#话题" @click="">
+    <input type="button" class="send-button btn btn-default message-attachment-btn" value="添加附件"/>
+    <input type="button" name="" class="send-button btn" value="创建" @click="createMessage()">
+</div>
+
+{% include message/component/topic-dialog.html %}
+
+<input id="messageFilePicker" class="hide"/>
+
+<script type="text/javascript">
+$(function() {
+    // 文件上传
+    // 初始化Web Uploader
+    var uploader = xnote.createUploader();
+    var loadingIndex = 0;
+
+    // 文件上传过程中创建进度条实时显示。
+    uploader.on( 'uploadProgress', function( file, percentage ) {
+        var percent = (percentage * 100).toFixed(2) + '%';
+        console.log('upload process ' + percent)
+    });
+
+    uploader.on( 'uploadBeforeSend', function (object, data, headers) {
+        $( '#uploadProgress' ).find('.progress').remove();
+        data.dirname = "auto";
+    })
+
+    // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+    uploader.on( 'uploadSuccess', function( file, resp) {
+        file.webpath = resp.webpath;
+
+        var webpath = file.webpath;
+        var content = 'file://$name'.replace(/\$name/g, file.webpath);
+        app.input += '\n' + content + "\n";
+
+        layer.close(loadingIndex);
+    });
+
+    // 文件上传失败，显示上传出错。
+    uploader.on( 'uploadError', function( file ) {
+        layer.alert('上传失败');
+    });
+
+    // 完成上传完了，成功或者失败，先删除进度条。
+    uploader.on( 'uploadComplete', function( file ) {
+        
+    });
+
+    $(".message-attachment-btn").on("click", function (event) {
+        console.log("select file button click");
+        $("#messageFilePicker").click();
+    })
+
+    $("#messageFilePicker").on("change", function (event) {
+        console.log(event);
+        var fileList = event.target.files; //获取文件对象 
+        if (fileList && fileList.length > 0) {
+            loadingIndex = layer.load(2);
+            uploader.addFile(fileList);
+        }
+    });
+})
+</script>
