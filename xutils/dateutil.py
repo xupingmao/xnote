@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/01/22 12:33:52
+# @modified 2020/05/01 22:00:52
 import time
 import os
 import math
@@ -28,7 +28,7 @@ Commonly used format codes:
 
 _DAY = 3600 * 24
 FORMAT = '%Y-%m-%d %H:%M:%S'
-wday_dict = {
+WDAY_DICT = {
     "*": u"每天",
     "1": u"周一",
     "2": u"周二",
@@ -101,6 +101,9 @@ def format_mmdd(seconds=None):
 def format_millis(mills):
     return format_time(mills / 1000)
 
+def parse_date_to_timestamp(date_str):
+    st = time.strptime(date_str, "%Y-%m-%d")
+    return time.mktime(st)
 
 def parse_time(date = None, fmt = None):
     if date is None:
@@ -118,7 +121,12 @@ def get_current_year():
 def current_wday():
     tm = time.localtime()
     wday = str(tm.tm_wday + 1)
-    return wday_dict.get(wday)
+    return WDAY_DICT.get(wday)
+
+def convert_date_to_wday(date_str):
+    tm = time.strptime(date_str, "%Y-%m-%d")
+    wday = str(tm.tm_wday + 1)
+    return WDAY_DICT.get(wday)
 
 def date_add(tm, years = 0, months = 0, days = 0):
     if tm is None:

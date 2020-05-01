@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/04/14 00:49:24
+# @modified 2020/05/01 21:40:46
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -31,6 +31,7 @@ import xutils
 import xauth
 import xmanager
 import copy
+import threading
 from collections import Counter
 from xutils import readfile, savetofile, sqlite3, Storage
 from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
@@ -51,6 +52,8 @@ NOTE_ICON_DICT = {
     "list"    : "fa-list",
     "plan"    : "fa-calendar-check-o",
 }
+
+CREATE_LOCK = threading.RLock()
 
 def format_note_id(id):
     return "%020d" % int(id)
@@ -195,7 +198,31 @@ def get_by_token(token):
         return get_by_id(token_info.id)
     return None
 
-def create_note(note_dict):
+def create_note_base(note_dict, date_str):
+    if date_str is None or date_str == "":
+        note_id = dbutil.timeseq()
+        note_dict["id"] = note_id
+        kv_put_note(note_id, note_dict)
+        return note_id
+    else:
+        timestamp = int(dateutil.parse_date_to_timestamp(date_str) * 1000)
+        try:
+            CREATE_LOCK.acquire()
+
+            while True:
+                note_id = format_note_id(timestamp)
+                note_dict["ctime"] = dateutil.format_datetime(timestamp/1000)
+                old = get_by_id(note_id)
+                if old is None:
+                    note_dict["id"] = note_id
+                    kv_put_note(note_id, note_dict)
+                    return note_id
+                else:
+                    timestamp += 1
+        finally:
+            CREATE_LOCK.release()
+
+def create_note(note_dict, date_str = None):
     content   = note_dict["content"]
     data      = note_dict["data"]
     creator   = note_dict["creator"]
@@ -204,9 +231,8 @@ def create_note(note_dict):
     parent_id = note_dict.get("parent_id", "0")
     name      = note_dict.get("name")
 
-    note_id = dbutil.timeseq()
-    note_dict["id"] = note_id
-    kv_put_note(note_id, note_dict)
+    # 创建笔记的基础信息
+    note_id   = create_note_base(note_dict, date_str)
     
     # 更新分组下面页面的数量
     update_children_count(note_dict["parent_id"])

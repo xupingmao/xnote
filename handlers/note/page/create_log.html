@@ -1,0 +1,62 @@
+{% extends base %}
+
+{% block head %}
+<style type="text/css">
+label {
+    float: left;
+    width: 80px;
+    display: block;
+}
+.label-rest {
+    float: left;
+    width: calc(100% - 80px);
+}
+</style>
+{% end %}
+
+{% block body %}
+
+{% init type = "md" %}
+{% init heading = T("创建笔记") %}
+<div class="card">
+    <h3 class="card-title">{{heading}}</h3>
+    {% if error != "" %}
+        <pre class="col-md-12 error">
+            {{error}}
+        </pre>
+    {% end %}
+
+    <form method="POST" action="">
+        <!-- 选择日期 -->
+        <div class="row top-offset-1">
+            <label>日期</label>
+            <input name="date" id="selectDate" autocomplete="off"/>
+        </div>
+        
+        <div class="row top-offset-1">
+            <label>{{T("项目")}}</label>
+            <select name="parent_id" value="{{parent_id}}">
+                {%for item in groups %}
+                    <option value="{{item.id}}">{{item.name}}</option>
+                {% end %}
+            </select>
+        </div>
+
+        <div class="row top-offset-1">
+            <label>&nbsp;</label>
+            <button class="mid-text">{{T("创建")}}</button>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript" src="/static/lib/layDate-v5.0.9/laydate.js"></script>
+<script type="text/javascript">
+laydate.render({
+  elem: '#selectDate'
+});
+</script>
+{% end %}
+
+{% block aside %}
+    {% include note/component/mod_aside.html %}
+{% end %}

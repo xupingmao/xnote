@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/04/27 00:34:24
+# @modified 2020/05/01 21:52:37
 import math
 import time
 import web
@@ -21,6 +21,11 @@ VIEW_TPL   = "note/page/view.html"
 TYPES_NAME = "笔记索引"
 NOTE_DAO   = xutils.DAO("note")
 MSG_DAO    = xutils.DAO("message")
+
+SEARCH_DOC_DICT = dict(
+    search_action = "/note/timeline",
+    search_placeholder = u"搜索笔记"
+)
 
 class PathNode(Storage):
 
@@ -136,10 +141,10 @@ class GroupListHandler:
         fixed_books.append(MSG_DAO.get_message_tag(user_name, "log"))
 
         # 默认分组处理
+        fixed_books.append(NoteLink(u"时间视图", "/note/date", icon = "fa-calendar"))
         fixed_books.append(NoteLink(u"分类和工具", "/note/index?source=group", icon = "fa-th-large"))
         if len(archived_groups) > 0:
             fixed_books.append(NoteLink(u"归档", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
-        fixed_books.append(NoteLink(u"时间视图", "/note/date", icon = "fa-calendar"))
 
         files = fixed_books + normal_groups
 
@@ -151,8 +156,7 @@ class GroupListHandler:
             show_path_list = True,
             show_size = True,
             parent_id = 0,
-            search_action = "/note/timeline",
-            search_placeholder = T(u"搜索笔记"),
+            **SEARCH_DOC_DICT,
             files = files)
 
 def load_note_index(user_name):
@@ -163,7 +167,6 @@ def load_note_index(user_name):
         NoteCard("分类", [
             # NoteLink("计划", "/note/plan", "fa-calendar-check-o", size = note_stat.plan_count),
             NoteLink("memo", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
-            # NoteLink("日志", "/note/log"),
             NoteLink("项目", "/note/timeline", "fa-folder", size = note_stat.group_count),
             NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
             NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
@@ -317,8 +320,7 @@ class NoteIndexHandler:
             show_parent_link = show_parent_link,
             show_next  = True,
             show_size  = True,
-            search_action = "/note/timeline",
-            search_placeholder = "搜索笔记")
+            **SEARCH_DOC_DICT)
 
 
 class RecentHandler:
@@ -386,8 +388,7 @@ class RecentHandler:
             show_visited_cnt = show_visited_cnt,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    ="/note/recent_%s?page=" % orderby,
-            search_action = "/note/timeline",
-            search_placeholder = T(u"搜索笔记"))
+            **SEARCH_DOC_DICT)
 
 
 def link_by_month(year, month, delta = 0):
@@ -451,7 +452,8 @@ class DateHandler:
             link_by_month = link_by_month,
             year = int(year),
             month = int(month),
-            notes_by_date = notes_by_date)
+            notes_by_date = notes_by_date,
+            **SEARCH_DOC_DICT)
 
 class ArchivedHandler:
 

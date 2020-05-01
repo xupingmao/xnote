@@ -41,8 +41,12 @@ function createTable() {
 }
 
 /** 创建记事 **/
-function createText() {
-    var title = "创建记事";
+function createLog() {
+    window.location.href = "/note/add?type=log";
+}
+
+function createLogOld() {
+    var title = "创建日志";
     var createOption = {};
     createOption.parent_id = "{{parent_id}}";
     createOption.type = "text";

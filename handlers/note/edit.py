@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/03/22 11:15:43
+# @modified 2020/05/01 22:01:11
 
 """笔记编辑相关处理"""
 import os
@@ -21,6 +21,13 @@ from xutils import textutil
 from xtemplate import T
 from .constant import *
 NOTE_DAO = xutils.DAO("note")
+
+# 创建笔记的模板
+CREATE_TEMPLATE_DICT = {
+    "log": "note/page/create_log.html"
+}
+
+DEFAULT_CREATE_TEMPLATE = "note/page/create.html"
 
 class NoteException(Exception):
 
@@ -60,9 +67,18 @@ def fire_rename_event(note):
     xmanager.fire("note.rename", event_body)
 
 def create_log_func(note, ctx):
-    date_str  = time.strftime("%Y.%m.%d")
-    note.name = u"日志:" + date_str + dateutil.current_wday()
-    return NOTE_DAO.create(note)
+    method   = ctx.method
+    date_str = ctx.date
+    name     = note.name
+
+    if method != "POST":
+        # GET请求直接返回
+        return
+
+    if date_str is None:
+        date_str  = time.strftime("%Y-%m-%d")
+    note.name = u"日志:" + date_str + dateutil.convert_date_to_wday(date_str)
+    return NOTE_DAO.create(note, date_str)
 
 def default_create_func(note, ctx):
     method = ctx.method
@@ -95,6 +111,7 @@ class CreateHandler:
         key       = xutils.get_argument("key", "")
         content   = xutils.get_argument("content", "")
         type      = xutils.get_argument("type", "md")
+        date      = xutils.get_argument("date")
         format    = xutils.get_argument("_format", "")
         parent_id = xutils.get_argument("parent_id", "0")
 
@@ -127,7 +144,7 @@ class CreateHandler:
         heading = T("创建笔记")
         code = "fail"
         error = ""
-        ctx = Storage(method = method)
+        ctx = Storage(method = method, date = date)
         
         try:
             if type not in VALID_NOTE_TYPE_SET:
@@ -149,8 +166,9 @@ class CreateHandler:
                 return dict(code = 'fail', message = error)
 
         heading = get_heading_by_type(type)
+        template = CREATE_TEMPLATE_DICT.get(type, DEFAULT_CREATE_TEMPLATE)
 
-        return xtemplate.render("note/page/create.html", 
+        return xtemplate.render(template, 
             show_search = False,
             heading  = heading,
             key      = "", 
