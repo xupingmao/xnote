@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/04/06 13:14:35
+# @modified 2020/05/02 13:58:37
 import xutils
 
 # cannot perform relative import
@@ -238,7 +238,7 @@ class TestMain(BaseTestCase):
     def test_gallery_management(self):
         delete_note_for_test("gallery-test")
         id = create_note_for_test("gallery", "gallery-test")
-        self.check_OK("/note/management?parent_id=%s" % id)
+        self.check_200("/note/management?parent_id=%s" % id)
 
     def test_text_view(self):
         delete_note_for_test("text-test")

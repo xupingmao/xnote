@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/05/01 21:52:37
+# @modified 2020/05/02 12:01:09
 import math
 import time
 import web
@@ -324,8 +324,7 @@ class NoteIndexHandler:
 
 
 class RecentHandler:
-    """show recent notes"""
-
+    """最近的笔记"""
     def GET(self, show_notice = True):
         if not xauth.has_login():
             raise web.seeother("/note/public")
@@ -387,7 +386,7 @@ class RecentHandler:
             show_adate = show_adate,
             show_visited_cnt = show_visited_cnt,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
-            page_url    ="/note/recent_%s?page=" % orderby,
+            page_url    = "/note/recent_%s?page=" % orderby,
             **SEARCH_DOC_DICT)
 
 
@@ -396,28 +395,23 @@ def link_by_month(year, month, delta = 0):
     t_year, t_mon, t_day = dateutil.date_add(tm, months = delta)
     return "/note/date?year=%d&month=%02d" % (t_year, t_mon)
 
-def assemble_notes_by_date(notes, year_str, month_str):
+def assemble_notes_by_date(notes, year_str = None, month_str = None, time_attr = "ctime"):
     notes_dict = dict()
     for note in notes:
-        cdate = dateutil.format_date(note.ctime)
+        datetime_str = note.get(time_attr)
+        cdate = dateutil.format_date(datetime_str)
         old   = notes_dict.get(cdate)
         if old is None:
             old = []
         old.append(note)
         notes_dict[cdate] = old
 
-    # days = dateutil.get_days_of_month(int(year_str), int(month_str))
-    # for n in range(days):
-    #     date_str = "%s-%s-%02d" % (year_str, month_str, n)
-    #     if date_str not in notes_dict:
-    #         notes_dict[date_str] = [NoteLink("创建日记", "/note/add")]
-
     result = []
     for date in notes_dict:
-        item = Storage(date = date, children = notes_dict[date])
+        item = (date, notes_dict[date])
         result.append(item)
 
-    result.sort(key = lambda x:x.date, reverse = True)
+    result.sort(key = lambda x:x[0], reverse = True)
     return result
 
 class DateHandler:
@@ -496,13 +490,13 @@ class ManagementHandler:
         if parent_note.type == "gallery":
             fpath = fsutil.get_gallery_path(parent_note)
             pathlist = fsutil.listdir_abs(fpath)
-            return xtemplate.render("note/batch/gallery.html", 
+            return xtemplate.render("note/page/batch/gallery.html", 
                 note = parent_note, 
                 dirname = fpath, 
                 pathlist = pathlist)
 
         current = Storage(url = "#", name = "整理")
-        return xtemplate.render("note/batch/management.html", 
+        return xtemplate.render("note/page/batch/management.html", 
             pathlist = NOTE_DAO.list_path(parent_note),
             files = notes,
             show_path = True,

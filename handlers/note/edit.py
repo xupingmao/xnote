@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/05/01 22:01:11
+# @modified 2020/05/02 14:00:40
 
 """笔记编辑相关处理"""
 import os
@@ -75,7 +75,7 @@ def create_log_func(note, ctx):
         # GET请求直接返回
         return
 
-    if date_str is None:
+    if date_str is None or date_str == "":
         date_str  = time.strftime("%Y-%m-%d")
     note.name = u"日志:" + date_str + dateutil.convert_date_to_wday(date_str)
     return NOTE_DAO.create(note, date_str)
@@ -111,7 +111,7 @@ class CreateHandler:
         key       = xutils.get_argument("key", "")
         content   = xutils.get_argument("content", "")
         type      = xutils.get_argument("type", "md")
-        date      = xutils.get_argument("date")
+        date      = xutils.get_argument("date", "")
         format    = xutils.get_argument("_format", "")
         parent_id = xutils.get_argument("parent_id", "0")
 

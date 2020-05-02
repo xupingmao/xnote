@@ -44,9 +44,9 @@
     </div>
 
     <div class="card">
-        {% for row in notes_by_date %}
-            <h3 class="card-title-2">{{row.date}}</h3>
-            {% for note in row.children %}
+        {% for date, children in notes_by_date %}
+            <h3 class="card-title-2">{{date}}</h3>
+            {% for note in children %}
                 <p class="card-row">
                     <i class="fa {{note.icon}}"></i>
                     <a href="{{note.url}}">{{note.name}}</a>

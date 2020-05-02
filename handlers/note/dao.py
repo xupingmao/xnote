@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/05/01 21:40:46
+# @modified 2020/05/02 13:56:32
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -232,12 +232,12 @@ def create_note(note_dict, date_str = None):
     name      = note_dict.get("name")
 
     # 创建笔记的基础信息
-    note_id   = create_note_base(note_dict, date_str)
+    note_id = create_note_base(note_dict, date_str)
     
     # 更新分组下面页面的数量
     update_children_count(note_dict["parent_id"])
 
-    xmanager.fire("note.add", dict(name=name, type=type))
+    xmanager.fire("note.add", dict(name=name, type=type, id = note_id))
 
     # 创建对应的文件夹
     if type == "gallery":
@@ -390,8 +390,8 @@ def update_index(note):
     if note.type == "group":
         dbutil.put("notebook:%s:%s" % (note.creator, format_note_id(id)), note)
 
-    if note.is_public:
-        dbutil.put("note_public:%s" % format_note_id(id), note_index)
+    if note.is_public != None:
+        update_public_index(note)
 
 def update_public_index(note):
     if note.is_public:
@@ -457,9 +457,6 @@ def update_note(note_id, **kw):
             note.version = old_version
 
         kv_put_note(note_id, note)
-        
-        if is_public != None:
-            update_public_index(note)
         return 1
     return 0
 
