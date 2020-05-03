@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/04/06 12:09:45
+# @modified 2020/05/03 11:54:00
 
 """时光轴视图"""
 import re
@@ -27,10 +27,12 @@ class PathLink:
         self.name = name
         self.url  = url
 
-def get_parent_link(user_name, type):
+def get_parent_link(user_name, type, priority = 0):
+    if priority < 0:
+        return PathLink(T("Archived_Project"), "/note/archived")
     if type == "default":
         return PathLink(u"项目", xuserconfig.get_project_path(user_name))
-    return PathLink(u"分类和工具", "/note/index")
+    return PathLink(T("Project_List"), "/note/index")
 
 class SystemGroup(Storage):
     def __init__(self, name, url):
@@ -348,17 +350,18 @@ class BaseTimelineHandler:
         if type == "search" and key == "":
             raise web.found("/search")
 
-        user_name  = xauth.current_name()
-        title      = NOTE_TYPE_DICT.get(type, u"最新笔记")
-        title_link = None
-
-        search_title = u"笔记"
-        file         = NOTE_DAO.get_by_id(parent_id)
+        user_name     = xauth.current_name()
+        title         = NOTE_TYPE_DICT.get(type, u"最新笔记")
+        title_link    = None
+        note_priority = 0
+        search_title  = u"笔记"
+        file          = NOTE_DAO.get_by_id(parent_id)
         
         if file != None:
             title = file.name
             search_title = file.name
             title_link = PathLink(file.name, file.url)
+            note_priority = file.priority
 
         return xtemplate.render("note/page/timeline.html", 
             title = title,
@@ -369,7 +372,7 @@ class BaseTimelineHandler:
             search_action = "/note/timeline",
             search_placeholder = T(u"搜索" + search_title),
             search_ext_dict = dict(parent_id = parent_id),
-            parent_link = get_parent_link(user_name, type),
+            parent_link = get_parent_link(user_name, type, note_priority),
             title_link  = title_link,
             CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT,
             show_aside = False)

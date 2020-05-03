@@ -1723,7 +1723,7 @@ li.menu-item:hover {
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2020/02/22 12:25:46
+ * @modified 2020/05/03 11:24:10
 */
 
 
@@ -1906,7 +1906,7 @@ li.menu-item:hover {
 
 .book-item {
     width: 100%;
-    padding: 5px;
+    padding: 10px 5px;
     margin-top: 0px;
     margin-bottom: 0px;
     float: left;

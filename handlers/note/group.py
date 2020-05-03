@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/05/02 12:01:09
+# @modified 2020/05/03 11:55:47
 import math
 import time
 import web
@@ -144,7 +144,7 @@ class GroupListHandler:
         fixed_books.append(NoteLink(u"时间视图", "/note/date", icon = "fa-calendar"))
         fixed_books.append(NoteLink(u"分类和工具", "/note/index?source=group", icon = "fa-th-large"))
         if len(archived_groups) > 0:
-            fixed_books.append(NoteLink(u"归档", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
+            fixed_books.append(NoteLink("Archived_Project", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
 
         files = fixed_books + normal_groups
 
@@ -377,7 +377,7 @@ class RecentHandler:
             file_type  = "group",
             dir_type   = dir_type,
             files = files,
-            show_aside = True,
+            show_aside = False,
             show_size  = False,
             page = page,
             time_attr  = time_attr,
@@ -444,8 +444,8 @@ class DateHandler:
 
         return xtemplate.render("note/page/list_by_date.html", 
             link_by_month = link_by_month,
-            year = int(year),
-            month = int(month),
+            year          = int(year),
+            month         = int(month),
             notes_by_date = notes_by_date,
             **SEARCH_DOC_DICT)
 
@@ -456,13 +456,13 @@ class ArchivedHandler:
         user  = xauth.current_name()
         files = NOTE_DAO.list_archived(user)
         return xtemplate.render("note/page/archived_group.html",
-            title = u"归档项目",
-            parent_id = -1,
-            show_size = True,
-            pathlist  = [PathNode("归档分组", "/note/archived")],
-            file_type = "group",
-            dir_type  = "archived",
-            files     = files,
+            title      = "Archived_Project",
+            parent_id  = -1,
+            show_size  = True,
+            pathlist   = [PathNode("Archived_Project", "/note/archived")],
+            file_type  = "group",
+            dir_type   = "archived",
+            files      = files,
             show_mdate = False)
 
 class ManagementHandler:

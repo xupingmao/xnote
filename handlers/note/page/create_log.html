@@ -7,10 +7,16 @@ label {
     width: 80px;
     display: block;
 }
+
 .label-rest {
     float: left;
     width: calc(100% - 80px);
 }
+
+.create-input {
+    width: 200px;
+}
+
 </style>
 {% end %}
 
@@ -30,7 +36,7 @@ label {
         <!-- 选择日期 -->
         <div class="row top-offset-1">
             <label>日期</label>
-            <input name="date" id="selectDate" autocomplete="off"/>
+            <input name="date" id="selectDate" autocomplete="off" class="create-input"/>
         </div>
         
         <div class="row top-offset-1">
