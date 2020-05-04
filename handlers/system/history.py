@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2019/07/08 00:17:55
+# @modified 2020/05/04 21:24:42
 import os
 import time
 import xtemplate
@@ -71,7 +71,7 @@ class HistoryHandler(object):
         items = []
         if xconfig.search_history:
             items = xconfig.search_history.recent(50);
-        return xtemplate.render("system/history.html", 
+        return xtemplate.render("system/page/history.html", 
             show_aside = False,
             items = items)
         

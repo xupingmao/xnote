@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/05/02 13:58:37
+# @modified 2020/05/04 23:58:13
 import xutils
 
 # cannot perform relative import
@@ -41,7 +41,7 @@ def assert_json_request_success(test_case, url):
 class TestMain(BaseTestCase):
 
     def test_note_add_remove(self):
-        self.check_200("/note/recent_edit")
+        self.check_200_debug("/note/recent_edit")
         delete_note_for_test("xnote-unit-test")
 
         file = json_request("/note/add", method="POST", 
@@ -238,7 +238,7 @@ class TestMain(BaseTestCase):
     def test_gallery_management(self):
         delete_note_for_test("gallery-test")
         id = create_note_for_test("gallery", "gallery-test")
-        self.check_200("/note/management?parent_id=%s" % id)
+        self.check_200_debug("/note/management?parent_id=%s" % id)
 
     def test_text_view(self):
         delete_note_for_test("text-test")
@@ -310,5 +310,8 @@ class TestMain(BaseTestCase):
         self.check_OK("/note/recent?orderby=update")
         self.check_OK("/note/recent?orderby=create")
 
-    
+    def a_test_recent_files(self):
+        json_data = json_request("/note/recent_edit")
+        files = json_data["files"]
+        print("files=%s" % len(files))
 

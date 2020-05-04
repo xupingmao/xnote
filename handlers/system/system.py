@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2020/04/06 17:52:56
+# @modified 2020/05/04 21:23:41
 """System functions"""
 from io import StringIO
 import xconfig
@@ -132,7 +132,7 @@ class IndexHandler:
             children = list(filter(filter_link_func, children))
             menu_list.append(Storage(name = category.name, children = children))
 
-        return xtemplate.render("system/template/system.html",
+        return xtemplate.render("system/page/system.html",
             html_title       = "系统",
             Storage          = Storage,
             os               = os,
@@ -145,7 +145,7 @@ class AdminHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        return xtemplate.render("system/template/admin.html")
+        return xtemplate.render("system/page/admin.html")
 
 class ReloadHandler:
     @xauth.login_required("admin")

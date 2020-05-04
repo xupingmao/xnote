@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2020/03/22 18:46:27
+# @modified 2020/05/04 23:34:57
 
 import sys
 import os
@@ -54,12 +54,6 @@ class TestMain(BaseTestCase):
     def test_render(self):
         value = app.request("/test").data
         self.assertEqual(b"success", value)
-
-    def test_recent_files(self):
-        value = app.request("/note/recent_edit?_format=json").data
-        json_value = value.decode("utf-8")
-        files = json.loads(json_value)["files"]
-        print("files=%s" % len(files))
 
     def test_index(self):
         self.check_OK("/")

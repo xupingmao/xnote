@@ -83,6 +83,12 @@ class BaseTestCase(unittest.TestCase):
         response = APP.request(*args, **kw)
         self.assertEqual("200 OK", response.status)
 
+    def check_200_debug(self, *args, **kw):
+        response = APP.request(*args, **kw)
+        print(args, kw, response)
+        print(APP.mapping)
+        self.assertEqual("200 OK", response.status)
+
     def check_303(self, *args, **kw):
         response = APP.request(*args, **kw)
         self.assertEqual("303 See Other", response.status)

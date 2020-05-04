@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/05/02 13:56:32
+# @modified 2020/05/04 23:55:59
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -677,7 +677,7 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
     return list_note_by_log("note_visit_log", creator, offset, limit)
 
 @xutils.timeit(name = "NoteDao.ListRecentEdit:leveldb", logfile = True, logargs = True)
-def list_recent_edit(creator = None, offset=0, limit=None):
+def list_recent_edit(creator = None, offset = 0, limit = None):
     """通过KV存储实现"""
     if limit is None:
         limit = xconfig.PAGE_SIZE

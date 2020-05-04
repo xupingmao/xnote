@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/03/17 01:06:14
+# @modified 2020/05/04 21:15:16
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -377,8 +377,12 @@ class RenameAjaxHandler:
         old_name = xutils.get_argument("old_name", "")
         new_name = xutils.get_argument("new_name", "")
         user_name = xauth.current_name()
-        if old_name == "":
+
+        if dirname is None or dirname == "":
+            return dict(code="fail", message="dirname is blank")
+        if old_name is None or old_name == "":
             return dict(code="fail", message="old_name is blank")
+
         if ".." in new_name:
             return dict(code="fail", message="invalid new name")
         if new_name == "":
@@ -386,6 +390,7 @@ class RenameAjaxHandler:
         if xconfig.USE_URLENCODE:
             old_name = xutils.quote_unicode(old_name)
             new_name = xutils.quote_unicode(new_name)
+
         old_path = os.path.join(dirname, old_name)
         new_path = os.path.join(dirname, new_name)
         if not xauth.is_admin() and not check_file_auth(old_path, user_name):

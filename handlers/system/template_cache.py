@@ -8,7 +8,7 @@ class handler:
         name = xutils.get_argument("name")
         templates = xtemplate.get_templates()
         if name == "" or name is None:
-            return xtemplate.render("system/template_cache.html", name=name, templates=templates)
+            return xtemplate.render("system/page/template_cache.html", name=name, templates=templates)
         else:
             if not name.endswith(".html"):
                 name += ".html"
@@ -16,5 +16,5 @@ class handler:
                 code = xtemplate.get_code(name)
             except:
                 code = ""
-            return xtemplate.render("system/template_cache.html", code=code, name=name, templates=templates)
+            return xtemplate.render("system/page/template_cache.html", code=code, name=name, templates=templates)
 

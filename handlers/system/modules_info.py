@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2018/12/25 22:23:31
+# @modified 2020/05/04 21:26:10
 import six
 import xutils
 import xtemplate
@@ -46,7 +46,7 @@ def query_modules():
 class handler(object):
     
     def GET(self):
-        return xtemplate.render("system/module_list.html", 
+        return xtemplate.render("system/page/module_list.html", 
             show_aside = False,
             modules = query_modules(),
             sys = sys)
@@ -125,7 +125,7 @@ class ModuleDetailHandler(object):
         doc_info = None
         if name is not None:
             doc_info = ModInfo(name)
-        return xtemplate.render("system/module_detail.html", 
+        return xtemplate.render("system/page/module_detail.html", 
             show_aside = False,
             doc_info = doc_info)
 

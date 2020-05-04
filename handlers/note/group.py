@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/05/03 11:55:47
+# @modified 2020/05/05 00:11:30
 import math
 import time
 import web
@@ -156,8 +156,8 @@ class GroupListHandler:
             show_path_list = True,
             show_size = True,
             parent_id = 0,
-            **SEARCH_DOC_DICT,
-            files = files)
+            files = files,
+            **SEARCH_DOC_DICT)
 
 def load_note_index(user_name):
     msg_stat  = MSG_DAO.get_message_stat(user_name)
@@ -472,7 +472,7 @@ class ManagementHandler:
         parent_id = xutils.get_argument("parent_id", "0")
         user_name = xauth.current_name()
 
-        if parent_id == "0":
+        if parent_id == "0" or parent_id is None:
             parent_note = NOTE_DAO.get_root()
             notes = NOTE_DAO.list_group(user_name, orderby = "name", skip_archived = True)
             parent = Storage(url = "/note/group", name = parent_note.name)
@@ -490,7 +490,7 @@ class ManagementHandler:
         if parent_note.type == "gallery":
             fpath = fsutil.get_gallery_path(parent_note)
             pathlist = fsutil.listdir_abs(fpath)
-            return xtemplate.render("note/page/batch/gallery.html", 
+            return xtemplate.render("note/page/batch/gallery_management.html", 
                 note = parent_note, 
                 dirname = fpath, 
                 pathlist = pathlist)
@@ -517,9 +517,9 @@ xurls = (
     r"/note/default"        , DefaultListHandler,
     r"/note/ungrouped"      , DefaultListHandler,
     r"/note/archived"       , ArchivedHandler,
+    r"/note/recent_edit"    , RecentHandler,
     r"/note/recent"         , RecentHandler,
     r"/note/recent_(created)" , RecentHandler,
-    r"/note/recent_edit"    , RecentHandler,
     r"/note/recent_(viewed)", RecentHandler,
     r"/note/group/select"   , GroupSelectHandler,
     r"/note/date"           , DateHandler,

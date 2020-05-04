@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2019/07/20 22:57:18
+# @modified 2020/05/04 21:25:28
 
 """xnote定时任务配置"""
 import os
@@ -93,7 +93,7 @@ class CronEditHandler:
         id  = xutils.get_argument("id")
         key = "schedule:%s" % id
         sched = dbutil.get(key)
-        return xtemplate.render("system/crontab_edit.html", 
+        return xtemplate.render("system/page/crontab_edit.html", 
             item = sched, 
             links = get_cron_links())
         
@@ -163,7 +163,7 @@ class ListHandler:
                 file.display_name = file.url
             return file
         task_list = list(map(set_display_name, task_list))
-        return xtemplate.render("system/crontab.html", 
+        return xtemplate.render("system/page/crontab.html", 
             show_aside = False,
             task_list = task_list,
             display_time_rule = display_time_rule)
