@@ -94,6 +94,19 @@ def clean_whitespace(text):
     buf.seek(0)
     return buf.read()
 
+def save_to_archive_dir(name):
+    dirname = os.path.join(xconfig.DATA_DIR, time.strftime("archive/%Y/%m/%d"))
+    xutils.makedirs(dirname)
+    path = os.path.join(dirname, "%s_%s.md" % (name, time.strftime("%H%M%S")))
+    xutils.savetofile(path, text)
+    print("save file %s" % path)
+
+def get_html_title(soup):
+    title = soup.title
+    if title != None:
+        return title.get_text()
+
+
 class handler:
 
     template_path = "note/page/html_importer.html"
@@ -137,35 +150,21 @@ class handler:
             plain_text = soup.get_text(separator=" ")
             plain_text = clean_whitespace(plain_text)
 
-            images = soup.find_all("img")
-            links  = soup.find_all("a")
-            csses  = soup.find_all("link")
+            images  = soup.find_all("img")
+            links   = soup.find_all("a")
+            csses   = soup.find_all("link")
             scripts = soup.find_all("script")
-            # texts = soup.find_all(["p", "span", "div", "h1", "h2", "h3", "h4"])
+            title   = get_html_title(soup)
 
             h = HTML2Text(baseurl = address)
             text = "From %s\n\n" % address + h.handle(html)
 
-            texts = [text]
-
+            texts   = [text]
             images  = get_addr_list(images)
             scripts = get_addr_list(scripts)
 
             if name != "" and name != None:
-                dirname = os.path.join(xconfig.DATA_DIR, time.strftime("archive/%Y/%m/%d"))
-                xutils.makedirs(dirname)
-                path = os.path.join(dirname, "%s_%s.md" % (name, time.strftime("%H%M%S")))
-                xutils.savetofile(path, text)
-                print("save file %s" % path)
-
-            if False:
-                user_name = xauth.get_current_name()
-                xutils.call("note.create", 
-                    name = name, 
-                    content = content, 
-                    type = "md", 
-                    tags = ["来自网络"],
-                    creator = user_name)
+                save_to_archive_dir(name)
 
             return xtemplate.render(self.template_path,
                 show_aside = False,
@@ -176,6 +175,7 @@ class handler:
                 texts = texts,
                 address = address,
                 url = address,
+                article_title = title,
                 plain_text = plain_text)
         except Exception as e:
             xutils.print_stacktrace()

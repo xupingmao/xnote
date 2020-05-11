@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/05/05 00:11:30
+# @modified 2020/05/11 23:50:08
 import math
 import time
 import web
@@ -179,7 +179,7 @@ def load_note_index(user_name):
         NoteCard(u"工具", [
             NoteLink("置顶笔记", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
             NoteLink("搜索历史", "/search", "fa-search", size = None),
-            # NoteLink("导入笔记", "/note/html_importer", "fa-cube"),
+            NoteLink("导入笔记", "/note/html_importer", "fa-internet-explorer"),
             # NoteLink("日历视图", "/note/calendar", "fa-calendar"),
             NoteLink("时间视图", "/note/date", "fa-calendar"),
             NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
