@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/05/22 17:13:39
+# @modified 2020/05/22 17:46:25
 
 """时光轴视图"""
 import re
@@ -32,7 +32,7 @@ def get_parent_link(user_name, type, priority = 0):
         return PathLink(T("Archived_Project"), "/note/archived")
     if type == "default":
         return PathLink(u"项目", xuserconfig.get_project_path(user_name))
-    return PathLink(T("Project_List"), "/note/index")
+    return PathLink(T("NoteIndex"), "/note/index")
 
 class SystemGroup(Storage):
     def __init__(self, name, url):
@@ -203,9 +203,8 @@ def list_project_func(context):
     if offset > 0:
         rows = []
     else:
-        rows = NOTE_DAO.list_group(user_name, orderby = orderby)
-        rows.insert(0, StickyGroup())
-    return build_date_result(rows, 'mtime', sticky_title = True, archived_title = True)
+        rows = NOTE_DAO.list_group(user_name, orderby = "name")
+    return build_date_result(rows, 'mtime', sticky_title = True, group_title = True, archived_title = True)
 
 def list_public_func(context):
     offset = context['offset']

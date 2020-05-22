@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/05/22 17:19:22
+# @modified 2020/05/22 17:39:20
 import math
 import time
 import web
@@ -190,9 +190,9 @@ def load_note_index(user_name):
 
 def load_category(user_name, include_system = False):
     data = NOTE_DAO.list_group(user_name, orderby = "name")
-    sticky_groups = list(filter(lambda x: x.priority != None and x.priority > 0, data))
+    sticky_groups   = list(filter(lambda x: x.priority != None and x.priority > 0, data))
     archived_groups = list(filter(lambda x: x.archived == True, data))
-    normal_groups = list(filter(lambda x: x not in sticky_groups and x not in archived_groups, data))
+    normal_groups   = list(filter(lambda x: x not in sticky_groups and x not in archived_groups, data))
     groups_tuple = [
         ("置顶项目", sticky_groups),
         ("普通项目", normal_groups),
