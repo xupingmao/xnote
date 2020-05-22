@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2020/01/06
-@modified 2020/03/29 21:05:39
+@modified 2020/05/22 17:19:01
 -->
 
 {% block body %}
@@ -39,7 +39,6 @@
     {% end %}
 </div>
 
-{% include note/component/batch_move.html %}
 {% include note/script/rename_script.html %}
 
 <script type="text/javascript">
@@ -65,6 +64,7 @@ $(function () {
         });
     }
 
+    /** 批量移动操作的回调, see /note/group/select **/
     window.batchMoveNoteCallback = function (selectedId) {
         var checked = $(":checked");
         var idList = [];

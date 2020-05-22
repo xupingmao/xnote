@@ -3,6 +3,19 @@
  */
 (function (window) {
 
+    // marked 初始化操作
+    var myRenderer = new marked.Renderer();
+    myRenderer.headings = []
+
+    marked.setOptions({
+        renderer: myRenderer,
+        highlight: highlight
+    });
+    
+    marked.showMenu = true;
+    var oldParse = marked.parse;
+
+    // 后面都是定义的函数和重写html生成
     function escape(html, encode) {
       return html
         .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
@@ -71,9 +84,6 @@
             return highlightKeywords(code);
         }
     }
-
-    var myRenderer = new marked.Renderer();
-    myRenderer.headings = []
 
     function processCheckbox(text) {
         var result = {};
@@ -205,25 +215,7 @@
       return out;
     };
 
-    marked.setOptions({
-        renderer: myRenderer,
-        highlight: highlight
-    });
-    var oldParse = marked.parse;
-
-    marked.showMenu = true;
-
-    marked.parse = function (text) {
-        if (!marked.showMenu) {
-            return oldParse(text);
-        }
-        myRenderer.headings = [];
-        var outtext = oldParse(text);
-        if (myRenderer.headings.length==0) {
-            return outtext;
-        }
-
-        // 处理目录
+    function generateMenuHtml(myRenderer) {
         var menuText = '<div class="marked-contents">';
         
         menuText+="<ul>";
@@ -233,22 +225,42 @@
             var link = heading.link;
             var level = heading.level - 1;
             var margin_left = level * 10 + "px";
+            var contentIndex = i + 1;
             menuText += '<li><a href="#link" style="margin-left:mleft">text</a></li>'.replace(/mleft|link|text/g, function (match, index) {
                 // console.log(match, index);
                 if (match == "link") {
+                    // 目录的链接
                     return link;
                 } else if (match == "mleft") {
+                    // 处理缩进
                     return margin_left;
                 } else {
+                    // 目录的文本
                     return text;
                 }
             });
         }
-        menuText+="</ul></div>";
-        // outtext = menuText + outtext;
+        menuText += "</ul></div>";
+        return menuText;
+    }
+
+    marked.parse = function (text) {
+        if (!marked.showMenu) {
+            return oldParse(text);
+        }
+        
+        myRenderer.headings = [];
+        var outtext = oldParse(text);
+        if (myRenderer.headings.length==0) {
+            return outtext;
+        }
+
+        // 处理目录
+        var menuHtml = generateMenuHtml(myRenderer);
+        // outtext = menuHtml + outtext;
 
         $(".menu-aside").show();
-        $("#menuBox").html(menuText);
+        $("#menuBox").html(menuHtml);
         return outtext;
     }
 

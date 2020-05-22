@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/05/03 11:54:00
+# @modified 2020/05/22 17:13:39
 
 """时光轴视图"""
 import re
@@ -199,10 +199,11 @@ def list_project_func(context):
     offset    = context['offset']
     limit     = context['limit']
     user_name = context['user_name']
+    orderby   = context['orderby']
     if offset > 0:
         rows = []
     else:
-        rows = NOTE_DAO.list_group(user_name)
+        rows = NOTE_DAO.list_group(user_name, orderby = orderby)
         rows.insert(0, StickyGroup())
     return build_date_result(rows, 'mtime', sticky_title = True, archived_title = True)
 
@@ -306,6 +307,7 @@ class TimelineAjaxHandler:
         type       = xutils.get_argument("type", "root")
         parent_id  = xutils.get_argument("parent_id", None, type=str)
         search_key = xutils.get_argument("key", None, type=str)
+        orderby    = xutils.get_argument("orderby", "mtime_desc", type=str)
         user_name  = xauth.current_name()
 
         list_func = LIST_FUNC_DICT.get(type, default_list_func)
