@@ -1,89 +1,18 @@
-{% extends base.html %} {% block head %}
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/codemirror.min.css">
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
-<script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
-<script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
-<script type="text/javascript" src="/static/lib/codemirror/keymap/sublime.js"></script>
-<script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
-<script type="text/javascript" src="/static/lib/marked/marked.js"></script>
-<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
-<script type="text/javascript" src="/static/js/upload.js"></script>
-<script type="text/javascript" src="/static/js/marked-ext.js"></script>
-<script type="text/javascript" src="/static/js/editor.js"></script>
+{% extends base.html %} 
 
-<style>
-    .CodeMirror {
-        width: 100%;
-        font-size: 16px;
-        height: auto;
-    }
-
-    #markdown-input {
-        position: relative;
-        font-family: monospace;
-    }
-
-    .alert {
-        color: red;
-        background-color: #FFCCCC;
-        width: initial;
-    }
-
-    .small {
-        font-size: small;
-    }
-
-    #submit-div {
-        background-color: white;
-        top: 0px;
-        z-index: 100
-    }
-
-    #editor-area {
-        border: 1px solid #ccc;
-        height: 500px;
-        overflow-y: scroll;
-    }
-
-    #autosaveResult {
-        color: green;
-        font-size: small;
-    }
-
-    .pathlist {
-        background-color: #eee;
-        padding: 3px;
-    }
-
-    .toolbox {
-        background-color: #eee;
-        border: 1px solid #ccc;
-        border-bottom: none;
-    }
-
-    .toolbox-btn {
-        display: block;
-        float: left;
-        background-color: #eee;
-        color: #000;
-        border-right: 1px solid #ccc;
-        outline: none;
-        margin-top: 0px;
-    }
-
-    .toolbox-btn:hover {
-        display: block;
-        float: left;
-        color: #fff;
-        background-color: #aaa;
-        border: 1px solid #ccc;
-    }
-
-    #markdown-output-div {
-        border-left: 1px solid #ccc;
-        padding-left: 3px;
-    }
-</style>
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/codemirror.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+    <script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
+    <script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
+    <script type="text/javascript" src="/static/lib/codemirror/keymap/sublime.js"></script>
+    <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
+    <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
+    <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
+    <script type="text/javascript" src="/static/js/upload.js"></script>
+    <script type="text/javascript" src="/static/js/marked-ext.js"></script>
+    <script type="text/javascript" src="/static/js/editor.js"></script>
+    {% include note/component/edit_css.html %}
 {% end %} 
 
 {% block body %} 
@@ -318,6 +247,7 @@
             codeMirror.doc.setValue(formatedText);
         });
 
+        // 文件上传
         $("#uploadBtn").click(function () {
             xnote.requestUpload("#file", false, function (resp) {
                 var fileLink = resp.link;
@@ -325,27 +255,13 @@
             });
         });
 
+        // 通过剪切板上传
         $(document).on("paste", function (e) {
-            console.log(e);
-            var clipboardData = e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {};
-
-            // console.log(clipboardData);
-
-            if (clipboardData.items) {
-                arrForEach(clipboardData.items, function (item, index) {
-                    var value = item.value;
-                    // console.log(item, value);
-                    if (/image/i.test(item.type)) {
-                        console.log(item);
-                        var blob = item.getAsFile();
-                        xnote.uploadBlob(blob, 'N' + fileId, function (respJson) {
-                            console.log(respJson);
-                            var link = respJson.link;
-                            codeInsert(link);
-                        });
-                    }
-                })
-            }
+            xnote.requestUploadByClip(e, 'N' + fileId, function (respJson) {
+                console.log(respJson);
+                var link = respJson.link;
+                codeInsert(link);
+            });
         });
 
         adjustHeight("#editor-area", 30);
