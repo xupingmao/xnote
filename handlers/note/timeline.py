@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/06/06 19:44:35
+# @modified 2020/06/06 19:56:38
 
 """时光轴视图"""
 import re
@@ -203,7 +203,7 @@ def list_search_func(context):
     return build_date_result(rows, 'ctime', sticky_title = True, group_title = True)
 
 def insert_default_project(rows, user_name):
-    root_notes = NOTE_DAO.list_by_parent(user_name, 0, 0, 1000)
+    root_notes = NOTE_DAO.list_by_parent(user_name, 0, 0, 1000, skip_group = True)
     if len(root_notes) > 0:
         rows.insert(0, DefaultProjectGroup(root_notes))
 
