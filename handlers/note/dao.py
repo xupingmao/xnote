@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/05/04 23:55:59
+# @modified 2020/06/06 18:53:08
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -624,11 +624,13 @@ def count_public():
     return dbutil.prefix_count("note_tiny:", list_func)
 
 @xutils.timeit(name = "NoteDao.ListNote:leveldb", logfile = True, logargs=True)
-def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name"):
+def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name", skip_group = False):
     parent_id = str(parent_id)
     # TODO 添加索引优化
     def list_note_func(key, value):
         if value.is_deleted:
+            return False
+        if skip_group and value.type == "group":
             return False
         return (value.is_public or value.creator == creator) and str(value.parent_id) == parent_id
 

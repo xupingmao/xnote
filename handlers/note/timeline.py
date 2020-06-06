@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/05/22 17:46:25
+# @modified 2020/06/06 19:44:35
 
 """时光轴视图"""
 import re
@@ -30,7 +30,7 @@ class PathLink:
 def get_parent_link(user_name, type, priority = 0):
     if priority < 0:
         return PathLink(T("Archived_Project"), "/note/archived")
-    if type == "default":
+    if type == "default" or type == "root_notes":
         return PathLink(u"项目", xuserconfig.get_project_path(user_name))
     return PathLink(T("NoteIndex"), "/note/index")
 
@@ -76,6 +76,13 @@ class IndexGroup(SystemGroup):
     def __init__(self):
         super(IndexGroup, self).__init__(u"笔记索引", "/note/index")
         self.icon = "fa fa-gear"
+
+class DefaultProjectGroup(SystemGroup):
+
+    def __init__(self, notes):
+        super(DefaultProjectGroup, self).__init__(u"默认项目", "/project/default")
+        self.icon = "fa fa-th-large"
+        self.size = len(notes)
 
 def search_group(user_name, words):
     rows = NOTE_DAO.list_group(user_name)
@@ -195,6 +202,14 @@ def list_search_func(context):
 
     return build_date_result(rows, 'ctime', sticky_title = True, group_title = True)
 
+def insert_default_project(rows, user_name):
+    root_notes = NOTE_DAO.list_by_parent(user_name, 0, 0, 1000)
+    if len(root_notes) > 0:
+        rows.insert(0, DefaultProjectGroup(root_notes))
+
+def insert_task_project(rows, user_name):
+    rows.insert(0, TaskGroup())
+
 def list_project_func(context):
     offset    = context['offset']
     limit     = context['limit']
@@ -204,6 +219,11 @@ def list_project_func(context):
         rows = []
     else:
         rows = NOTE_DAO.list_group(user_name, orderby = "name")
+        # 处理默认项目
+        insert_default_project(rows, user_name)
+        # 处理备忘录
+        insert_task_project(rows, user_name)
+
     return build_date_result(rows, 'mtime', sticky_title = True, group_title = True, archived_title = True)
 
 def list_public_func(context):
@@ -273,6 +293,12 @@ def default_list_func(context):
     rows      = NOTE_DAO.list_by_parent(user_name, parent_id, offset, limit, 'ctime_desc')
     return build_date_result(rows, 'ctime', sticky_title = True, group_title = True)
 
+def list_root_notes_func(context):
+    offset    = context['offset']
+    limit     = context['limit']
+    user_name = context['user_name']
+    rows = NOTE_DAO.list_by_parent(user_name, 0, offset, limit, orderby = 'ctime_desc', skip_group = True)
+    return build_date_result(rows, 'ctime', sticky_title = True, group_title = True)
 
 LIST_FUNC_DICT = {
     'root'    : list_project_func,
@@ -281,6 +307,7 @@ LIST_FUNC_DICT = {
     'sticky'  : list_sticky_func,
     'removed' : list_removed_func,
     'archived': list_archived_func,
+    'root_notes' : list_root_notes_func,
 
     'recent_edit': list_recent_edit_func,
 
@@ -335,17 +362,17 @@ class DateTimeline:
 class BaseTimelineHandler:
 
     note_type = "group"
+    show_create = True
+    check_login = True
 
     def GET(self):
         type        = xutils.get_argument("type", self.note_type)
         parent_id   = xutils.get_argument("parent_id", "")
         key         = xutils.get_argument("key", "")
         title       = u"最新笔记"
-        show_create = True
 
-        if type == "public":
-            show_create = False
-        else:
+        # 检查登录态
+        if self.check_login:
             xauth.check_login()
 
         if type == "search" and key == "":
@@ -369,7 +396,7 @@ class BaseTimelineHandler:
             type  = type,
             file  = file,
             key   = key,
-            show_create = show_create,
+            show_create = self.show_create,
             search_action = "/note/timeline",
             search_placeholder = T(u"搜索" + search_title),
             search_ext_dict = dict(parent_id = parent_id),
@@ -384,6 +411,8 @@ class TimelineHandler(BaseTimelineHandler):
 class PublicTimelineHandler(TimelineHandler):
     """公共笔记的时光轴视图"""
     note_type = "public"
+    check_login = False
+    show_create = False
 
 
 class GalleryListHandler(BaseTimelineHandler):
@@ -425,6 +454,9 @@ class StickyHandler(BaseTimelineHandler):
 class RemovedHandler(BaseTimelineHandler):
     note_type = "removed"
 
+class DefaultProjectHandler(BaseTimelineHandler):
+    note_type   = "root_notes"
+    show_create = False
 
 xurls = (
     r"/note/timeline/month", DateTimeline,
@@ -444,5 +476,6 @@ xurls = (
     r"/note/log"            , LogListHandler,
     r"/note/sticky"         , StickyHandler,
     r"/note/removed"        , RemovedHandler,
+    r"/project/default"     , DefaultProjectHandler,
 )
 

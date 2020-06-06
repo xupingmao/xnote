@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/05/22 17:39:20
+# @modified 2020/06/06 18:54:00
 import math
 import time
 import web
@@ -107,7 +107,7 @@ class DefaultListHandler:
         user_name = xauth.get_current_name()
         pagesize  = xconfig.PAGE_SIZE
         offset    = (page-1) * pagesize
-        files     = NOTE_DAO.list_by_parent(user_name, 0, offset, pagesize)
+        files     = NOTE_DAO.list_by_parent(user_name, 0, offset, pagesize, skip_group = True)
         amount    = NOTE_DAO.count_by_parent(user_name, 0);
         parent    = NOTE_DAO.get_root()
 
