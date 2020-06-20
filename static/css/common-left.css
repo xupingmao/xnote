@@ -2,7 +2,7 @@
  * 侧边栏主题样式
  * @author xupingmao
  * @since 2019/06/18
- * @modified 2020/04/19 00:38:33
+ * @modified 2020/06/20 16:21:25
  */
 
 body {
@@ -33,10 +33,12 @@ body {
     overflow-y: auto;
     width: auto;
     padding: 0px;
+    margin-top: 0px;
 }
 
 .main-content {
     padding: 10px;
+    width: 100%;
 }
 
 .nav-left-search {

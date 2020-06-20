@@ -10,6 +10,8 @@
     <div class="root">
         <!-- 导航/菜单栏 -->
         {% include common/base_nav.html %}
+        {% include common/base_nav_left.html %}
+        {% include common/mobile_search.html %}
 
         <div class="x-body">
             <div class="nav-left-search">
@@ -43,5 +45,7 @@
 
     <div class="x-dialog-background"></div>
     <div class="aside-background background"></div>
+
+    {% include common/script/adjust.html %}
 </body>
 </html>

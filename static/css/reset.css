@@ -2,7 +2,7 @@
  * 重写默认浏览器样式
  * @author xupingmao
  * @since 2020/01/08
- * @modified 2020/04/13 01:03:59
+ * @modified 2020/06/20 12:48:10
  */
 
 * {
@@ -10,7 +10,7 @@
 }
 
 body {
-    background-color: #ccc;
+    background-color: #DEE2E6;
     font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
     font-size: 14px;
     letter-spacing: 1px;

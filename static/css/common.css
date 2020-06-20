@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/04/19 00:38:14
+ * @modified 2020/06/20 17:04:16
  */
 
 /** marked 样式 **/
@@ -146,7 +146,7 @@
 
 /* 菜单的链接样式 */
 .menu-link {
-    color: black;
+    color: white;
     padding: 3px;
 }
 
@@ -377,21 +377,26 @@ li.menu-item:hover {
 
 
 .root {
+    /*    
     padding-bottom: 10px;
     width: 1000px;
     height: 100%;
     overflow: hidden;
     margin-left: 0px;
-    background-color:#fff; 
     margin: 0 auto;
+    */
 }
 
 .nav {
     float: left;
     width: 100%;
-    padding: 0px 10px;
-    background-color: #fff;
-    border-bottom: 5px solid orange;
+    background-color: #515865;
+    /*border-bottom: 5px solid orange;*/
+}
+
+.nav-container {
+    float: left;
+    width: 1000px;
 }
 
 .nav-left {
@@ -409,8 +414,10 @@ li.menu-item:hover {
 }
 
 .x-body {
+    float: left;
     width: 100%;
     margin: 0 auto;
+    margin-top: 10px;
     min-height: 400px;
     /*padding: 0px 10%;*/
 }
@@ -480,7 +487,7 @@ li.menu-item:hover {
     border-radius: 0px;
 }
 
-.search-box {
+.nav-search {
     width: 345px;
     float: right;
     padding: 5px 0px;
@@ -1003,9 +1010,10 @@ li.menu-item:hover {
 
 .main-content {
     float: left;
-    width: 100%;
+    width: 1000px;
     min-height: 20px;
     padding: 10px;
+    background-color: #fff;
 }
 
 .aside {
@@ -1250,8 +1258,9 @@ li.menu-item:hover {
         text-align: center;
     }
 
-    .search-box {
-        width: 100%;
+    .nav-search {
+        /*width: 100%;*/
+        display: none;
     }
 
     .main-content {

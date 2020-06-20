@@ -5,61 +5,34 @@
 {% if show_menu %}
 <div class="nav">
   <!-- 保持对称 -->
-  <div class="menu-box float-left">
-    <ul class="nav-ul">
-      {% if _has_login %}
-        <li><a class="menu-link" href="{{HOME_PATH}}">{{T("笔记")}}</a></li>
-        <li><a class="menu-link" href="/note/recent?orderby=view">{{T("最近")}}</a></li>
-        <!-- <li><a class="menu-link desktop-only-inline" href="/note/index">{{T("分类")}}</a></li> -->
-        <li><a class="menu-link" href="/note/public">{{T("公共")}}</a></li>
-        <li><a class="menu-link desktop-only-inline" href="/plugins_list">{{T("插件")}}</a></li>
-        {% if _is_admin %}
-          <li><a class="menu-link desktop-only-inline" href="/fs_list">{{T("文件")}}</a></li> 
+  <div class="nav-container">
+    <div class="menu-box float-left">
+      <ul class="nav-ul">
+        {% if _has_login %}
+          <li><a class="menu-link" href="{{HOME_PATH}}">{{T("笔记")}}</a></li>
+          <li><a class="menu-link" href="/note/recent?orderby=view">{{T("最近")}}</a></li>
+          <!-- <li><a class="menu-link desktop-only-inline" href="/note/index">{{T("分类")}}</a></li> -->
+          <li><a class="menu-link" href="/note/public">{{T("公共")}}</a></li>
+          <li><a class="menu-link desktop-only-inline" href="/plugins_list">{{T("插件")}}</a></li>
+          {% if _is_admin %}
+            <li><a class="menu-link desktop-only-inline" href="/fs_list">{{T("文件")}}</a></li> 
+          {% end %}
+          <li><a class="menu-link" href="/system/settings">{{T("设置")}}</a></li>
         {% end %}
-        <li><a class="menu-link" href="/system/settings">{{T("设置")}}</a></li>
-      {% end %}
-      
-      {% if not _has_login %}
-        <li><a class="menu-link" href="/">{{T("笔记")}}</a></li>
-        <li><a class="menu-link" class="link" href="/login">{{T("Login")}}</a></li>
-      {% end %}
-
-    </ul>
-  </div>
-
-  <div class="search-box">
-    <form id="searchForm" method="GET" action="{{search_action}}">
-      {% include common/search_box.html %}
-    </form>
-  </div>
-</div>
-
-<div class="nav-left">
-  <!-- 侧边菜单栏 -->
-  <div class="nav-left-inner-box">
-    <ul class="navMenu">
-      {% if _has_login %}
-        <!-- 登录状态 -->
-        <li><a href="{{HOME_PATH}}">{{T("我的笔记")}}</a></li>
-        <li><a href="/note/recent?orderby=create">{{T("最近笔记")}}</a></li>
-        <li><a href="/note/public">{{T("公共笔记")}}</a></li>
-        <li><a href="/search/history">{{T("搜索历史")}}</a></li>
-        <li><a href="/plugins_list">{{T("工具插件")}}</a></li>
-        {% if _is_admin %}
-          <li><a href="/fs_list">{{T("文件管理")}}</a></li> 
+        
+        {% if not _has_login %}
+          <li><a class="menu-link" href="/">{{T("笔记")}}</a></li>
+          <li><a class="menu-link" class="link" href="/login">{{T("Login")}}</a></li>
         {% end %}
-        <li><a href="/system/settings">{{T("系统设置")}}</a></li>
-      {% else %}
-        <!-- 未登录状态 -->
-        <li><a href="/note/public">公开笔记</a></li>
-        <li><a href="/login" class="afinve"><span>登陆系统</span></a></li>
-      {% end %}
 
-    </ul>
-    <div id="poweredBy">
-      Powered by <a href="/code/wiki/README.md">Xnote</a>
+      </ul>
+    </div>
+
+    <div class="nav-search">
+      <form id="searchForm" method="GET" action="{{search_action}}">
+        {% include common/search_box.html %}
+      </form>
     </div>
   </div>
 </div>
-
 {% end %}

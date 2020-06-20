@@ -1,0 +1,33 @@
+<script type="text/javascript">
+$(function () {
+    var contentWidth = 1000;
+
+    function updateMainFrame() {
+        var winWidth = window.innerWidth;
+        var marginLeft = (winWidth - contentWidth) / 2;
+
+        // 有三种模式：PC默认、PC侧边栏、移动版
+        var isNormalPcMode = winWidth >= 1000 && window.THEME != "left";
+
+        if (winWidth < 1000) {
+            // mobile mode
+            $(".nav-container").css("width", "100%").css("margin-left", 0);
+            $(".main-content").css("width", "100%").css("margin-left", 0);
+            $(".x-search").css("width", "100%").css("margin-left", 0);
+        } else if (window.THEME != "left") {
+            // PC默认
+            $(".nav-container").css("width", "1000px").css("margin-left", marginLeft);
+            $(".main-content").css("width", "1000px").css("margin-left", marginLeft); 
+            $(".x-search").css("width", "500px").css("margin-left", marginLeft);
+        } else {
+            // PC侧边栏
+        }
+    }
+
+    updateMainFrame();
+
+    $(window).on("resize", function () {
+        updateMainFrame();
+    });
+})
+</script>
