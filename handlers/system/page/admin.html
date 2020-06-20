@@ -8,7 +8,12 @@
 {% import web %}
 
 <div class="col-md-12 card">
-    <h3 class="card-title">{{T("后台管理")}}</h3>
+    <h3 class="card-title btn-line-height">
+        <span>{{T("后台管理")}}</span>
+        <div class="float-right">
+             <button class="btn-default" onclick="javascript:history.back()">返回</button>
+        </div>
+    </h3>
 
     <div class="settings-row">
         <div class="settings-key">用户管理</div>

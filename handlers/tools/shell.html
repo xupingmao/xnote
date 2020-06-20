@@ -24,8 +24,14 @@
 {% init output = "" %}
 
 <div class="card">
-    {% set title = "Shell控制台" %}
-    {% include common/base_title.html %}
+    <h3 class="card-title btn-line-height">
+        <span>Shell控制台</span>
+
+        <div class="float-right">
+            <button class="btn-default" onclick="javascript:history.back()">返回</button>
+        </div>
+    </h3>
+
     <div class="col-md-12">
         <textarea id="editor" class="col-md-12" rows="20" id="code">{{code}}</textarea>
         <input type="button" value="Run" id="run"/>

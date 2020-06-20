@@ -132,7 +132,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/06/20 17:04:16
+ * @modified 2020/06/20 18:07:49
  */
 
 /** marked 样式 **/
@@ -1468,6 +1468,7 @@ li.menu-item:hover {
 .bottom-offset-1{margin-bottom:5px;}
 .row{float: left;width: 100%;overflow: auto;}
 .pad10 {padding: 10px;}
+.pad-bottom-10 {padding-bottom: 10px}
 
 
 /**
