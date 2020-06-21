@@ -1,8 +1,10 @@
 {% init right_link = None %}
-<div class="grid-title">
-    <!-- <a href="/system/index" class="link">系统</a> › -->
-    {{title}}
+<div class="card-title btn-line-height">
+    <span>{{title}}</span>
+    <div class="float-right">
     {% if right_link is not None %}
-        <a class="float-right link" href="{{right_link.get('link')}}">{{right_link.get('name')}}</a>
+        <a class="link" href="{{right_link.get('link')}}">{{right_link.get('name')}}</a>
     {% end %}
+        <button class="btn-default" onclick="javascript:history.back()">返回</button>
+    </div>
 </div>

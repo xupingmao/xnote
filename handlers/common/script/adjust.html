@@ -7,17 +7,17 @@ $(function () {
         var marginLeft = (winWidth - contentWidth) / 2;
 
         // 有三种模式：PC默认、PC侧边栏、移动版
-        var isNormalPcMode = winWidth >= 1000 && window.THEME != "left";
+        var isNormalPcMode = winWidth >= contentWidth && window.THEME != "left";
 
-        if (winWidth < 1000) {
+        if (winWidth < contentWidth) {
             // mobile mode
-            $(".nav-container").css("width", "100%").css("margin-left", 0);
+            $(".nav-container").css("width", "100%").css("margin-left", 0)
             $(".main-content").css("width", "100%").css("margin-left", 0);
             $(".x-search").css("width", "100%").css("margin-left", 0);
         } else if (window.THEME != "left") {
             // PC默认模式
-            $(".nav-container").css("width", "1000px").css("margin-left", marginLeft);
-            $(".main-content").css("width", "1000px").css("margin-left", marginLeft); 
+            $(".nav-container").css("width", contentWidth + "px").css("margin-left", marginLeft);
+            $(".main-content").css("width", contentWidth + "px").css("margin-left", marginLeft); 
             $(".x-search").css("width", "500px").css("margin-left", marginLeft);
         } else {
             // PC侧边栏模式

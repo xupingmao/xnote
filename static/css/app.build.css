@@ -132,7 +132,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/06/20 18:07:49
+ * @modified 2020/06/21 16:31:07
  */
 
 /** marked 样式 **/
@@ -527,6 +527,7 @@ li.menu-item:hover {
 .nav-container {
     float: left;
     width: 1000px;
+    margin-left: calc(50% - 500px);
 }
 
 .nav-left {
@@ -1144,6 +1145,7 @@ li.menu-item:hover {
     min-height: 20px;
     padding: 10px;
     background-color: #fff;
+    margin-left: calc(50% - 500px);
 }
 
 .aside {
@@ -1395,6 +1397,7 @@ li.menu-item:hover {
 
     .main-content {
         width: 100%;
+        margin-left: 0px;
     }
 
     .aside {
