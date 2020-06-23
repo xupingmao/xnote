@@ -33,7 +33,7 @@
 
     <div class="plugin-head">
 
-        <div class="grid-title">
+        <div class="grid-title btn-line-height">
             {% if model.category %}
                 <a class="link2" href="/plugins_list?category={{model.category}}">{{model.category_name}}</a> /
             {% end %}
@@ -41,9 +41,9 @@
             <span>{{title}}</span>
             <span class="float-right">
                 {% if _is_admin and model.editable %}
-                    <a href="/code/edit?path={{fpath}}">编辑</a>
+                    <a class="btn" href="/code/edit?path={{fpath}}">编辑</a>
                 {% end %}
-                <a href="javascript:history.back();">返回</a>
+                <a class="btn btn-default" href="javascript:history.back();">返回</a>
             </span>
         </div>
 

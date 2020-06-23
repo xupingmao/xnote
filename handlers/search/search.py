@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/03/01 23:37:19
+# @modified 2020/06/23 10:33:11
 
 import re
 import os
@@ -204,7 +204,7 @@ class handler:
         count = len(files)
         files = files[offset:offset+limit]
         fill_note_info(files)
-        return xtemplate.render("search/search_result.html", 
+        return xtemplate.render("search/page/search_result.html", 
             show_aside = False,
             key = key,
             html_title = "Search",
@@ -221,7 +221,7 @@ class SearchHistoryHandler:
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
-        return xtemplate.render("search/search_result.html", 
+        return xtemplate.render("search/page/search_history.html", 
             show_aside = False,
             recent = list_search_history(user_name),
             html_title = "Search",

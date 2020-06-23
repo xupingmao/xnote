@@ -26,7 +26,8 @@
 {% init article_title = "" %}
 
 <div class="col-md-12 card">
-    <h3 class="card-title">导入网页</h3>
+    {% set title = "导入网页" %}
+    {% include common/base_title.html %}
 
     <form method="POST" enctype="multipart/form-data">
         <p><label>上传文件</label><input type="file" name="file" /></p>

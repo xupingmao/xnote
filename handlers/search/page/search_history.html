@@ -1,0 +1,19 @@
+{% extends base.html %}
+<!--
+@author xupingmao
+@since 2017/11/29
+@modified 2020/06/23 10:31:21
+-->
+
+{% block body %}
+
+    <div class="col-md-12 card">
+        {% set title = "搜索历史" %}
+        {% include common/base_title.html %}
+
+        {% for value in recent %}
+            <a class="tag-span" href="/note/timeline?type=search&key={{quote(value)}}">{{value}}</a>
+        {% end %}
+    </div>
+
+{% end %}

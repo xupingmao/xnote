@@ -1,13 +1,19 @@
 {% init right_link = None %}
 {% init back_link = None %}
-<div class="card">
-    <!-- <a href="/system/index" class="link">系统</a> › -->
-    <h3 class="card-title">{{title}}</a>
-    {% if right_link is not None %}
-        <a class="float-right link" href="{{right_link.get('link')}}">{{right_link.get('name')}}</a>
-    {% end %}
 
-    {% if back_link != None %}
-        <a class="float-right link" href="{{back_link}}">返回</a>
-    {% end %}
-</div>
+<!-- <a href="/system/index" class="link">系统</a> › -->
+<h3 class="card-title btn-line-height">
+    <span>{{title}}</span>
+    
+    <div class="float-right">
+        {% if right_link is not None %}
+            <a class="link" href="{{right_link.get('link')}}">{{right_link.get('name')}}</a>
+        {% end %}
+
+        {% if back_link != None %}
+            <a class="btn btn-default" href="{{back_link}}">返回</a>
+        {% else %}
+            <button class="btn btn-default" onclick="javascript:history.back();">返回</button>
+        {% end %}
+    </div>
+</h3>
