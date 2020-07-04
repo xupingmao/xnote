@@ -72,7 +72,7 @@ $(function () {
         // 调整样式
         $(".note-search-dialog-body").css("padding-top", "10px");
 
-        $.get("http://localhost:1234/note/api/timeline?type=all", 
+        $.get("/note/api/timeline?type=all", 
             renderNoteListCallback).fail(function (e) {
                 alert("异常:" + e);
         });
@@ -95,7 +95,7 @@ $(function () {
             ]}
         ];
 
-        $.get("http://localhost:1234/note/api/timeline?type=all", renderNoteListCallback).fail(function (e) {
+        $.get("/note/api/timeline?type=all", renderNoteListCallback).fail(function (e) {
             alert("异常:" + e);
         });
     }
@@ -111,7 +111,7 @@ $(function () {
         // 清空结果
         $(".note-search-dialog-body").html("");
 
-        $.get("http://localhost:1234/note/api/timeline?type=search&key=" + searchText, renderNoteListCallback);
+        $.get("/note/api/timeline?type=search&key=" + searchText, renderNoteListCallback);
     }
 });
 
