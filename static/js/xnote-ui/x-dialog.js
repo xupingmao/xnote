@@ -2,21 +2,42 @@ if (window.xnote == undefined) {
     window.xnote = {};
 }
 
-window.xnote.showDialog = function(title, html) {
+window.xnote.showDialog = function(title, html, buttons, functions) {
     if (isMobile()) {
         var area = ['100%', '100%'];
     } else {
         var area = ['600px', '80%'];
     }
 
-    return layer.open({
-        type: 1,
-        title: title,
-        shadeClose: true,
-        area: area,
-        content: html,
-        scrollbar: false
-    });
+    if (!(functions instanceof Array)) {
+        functions = [functions];
+    }
+
+    if (buttons == undefined) {    
+        return layer.open({
+            type: 1,
+            title: title,
+            shadeClose: true,
+            area: area,
+            content: html,
+            scrollbar: false
+        });
+    } else {
+        return layer.open({
+            type: 1,
+            title: title,
+            shadeClose: true,
+            area: area,
+            content: html,
+            scrollbar: false,
+            btn: buttons,
+            yes: function (index, layero) {
+                console.log(index, layero);
+                layer.close(index);
+                functions[0](index, layero);
+            }
+        });
+    }
 }
 
 // 询问函数，原生prompt的替代方案
@@ -93,8 +114,7 @@ window.xnote.toast = function(message, time) {
     toast.css("left", left);
     setTimeout(function() {
         toast.remove();
-    },
-    time);
+    }, time);
 }
 
 // 兼容之前的方法

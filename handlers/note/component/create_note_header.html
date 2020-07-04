@@ -1,0 +1,13 @@
+<h3 class="card-title btn-line-height">
+    <span>{{heading}}</span>
+
+    <div class="float-right">
+        <button class="btn btn-default" onclick="javascript:history.back();">返回</button>
+    </div>
+</h3>
+
+{% if error != "" %}
+    <pre class="col-md-12 error">
+        {{error}}
+    </pre>
+{% end %}

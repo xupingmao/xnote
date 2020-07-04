@@ -15,9 +15,9 @@
     <div class="dropdown-content">
         <a class="dropdown-option link" href="javascript:rename('{{item.id}}', '{{item.name}}')">重命名</a>
         {% if file.is_public %}
-            <a class="dropdown-option link" href="/note/share/cancel?id={{file.id}}">取消公开分享</a>
+            <a class="dropdown-option link" onclick="javascript:visitAndRefresh(this)" data-href="/note/share/cancel?id={{file.id}}">取消公开分享</a>
         {% else %}
-            <a class="dropdown-option link" href="/note/share?id={{file.id}}">公开分享</a>
+            <a class="dropdown-option link" onclick="javascript:visitAndRefresh(this)" data-href="/note/share?id={{file.id}}">公开分享</a>
         {% end %}
 
         <a class="dropdown-option link link-share-option" href="javascript:void(0)" data-clipboard-text="">链接分享</a>
@@ -99,6 +99,13 @@ $(function () {
         $.post("/note/move", {id:selfId, parent_id: parentId}, function (resp){
               console.log(resp);
               window.location.reload();
+        });
+    }
+
+    window.visitAndRefresh = function (el) {
+        var url = $(el).attr("data-href");
+        $.get(url, function () {
+            window.location.reload();
         });
     }
 })

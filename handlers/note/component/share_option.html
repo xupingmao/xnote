@@ -1,0 +1,134 @@
+{% if _has_login %}
+    <button onclick="showShareDialog()">分享</button>
+{% end %}
+
+<style type="text/css">
+.note-search-dialog-body {
+    padding-top: 10px;
+}
+</style>
+
+<script type="text/javascript">
+
+$(function () {
+    function HtmlLink(name, url) {
+        return $("<a>").text(name).attr("href", url);
+    }
+
+    function assembleDialogBody(data) {
+        var container = $("<div>");
+        var itemTemplateHtml = '<p class="card-row">\
+                <i class="fa ${icon}"></i>\
+                <a href="${url}">${name}</a>${shared}\
+                <input type="checkbox" class="search-note-checkbox float-right" data-id="${id}">\
+            </p>';
+
+
+        for (var i = 0; i < data.length; i++) {
+            var item = data[i];
+            // 日期
+            var titleElement = $("<h3>").addClass("card-title-2").text(item.title);
+            container.append(titleElement);
+
+            // 当前日期的笔记列表
+            item.children.forEach(function (value, index) {
+                if (value.is_public === 1) {
+                    value.shared = "(已分享)";
+                }
+                var noteRow = $("<p>").addClass("card-row");
+                noteRow.append(renderTemplate(itemTemplateHtml, value));
+                container.append(noteRow);
+            });
+        }
+
+        return container.html();
+    }
+
+    window.showShareDialog = function() {
+        // 显示HTML
+        $(".note-search-dialog-body").html("");
+
+        // 获取HTML
+        var html = $(".note-search-dialog").html();
+
+        // 展示dialog
+        xnote.showDialog("分享笔记", html, ["分享", "取消"], function () {
+            // 处理分享的逻辑
+            var selected = $(".search-note-checkbox:checked");
+            var rest = 0;
+            selected.each(function (index, element) {
+                rest += 1;
+                var noteId = $(element).attr("data-id");
+                $.get("/note/share?id=" + noteId, function (resp) {
+                    console.log(resp);
+                    rest -= 1;
+                    if (rest == 0) {
+                        window.location.reload();
+                    }
+                });
+            });
+        });
+
+        // 调整样式
+        $(".note-search-dialog-body").css("padding-top", "10px");
+
+        $.get("http://localhost:1234/note/api/timeline?type=all", 
+            renderNoteListCallback).fail(function (e) {
+                alert("异常:" + e);
+        });
+    }
+
+    function renderNoteListCallback(resp) {
+        // 组装HTML
+        var dialogBodyHtml = assembleDialogBody(resp.data);
+
+        // 显示HTML
+        $(".note-search-dialog-body").html(dialogBodyHtml);
+    }
+
+    function requestShareNote() {
+        // alert("分享笔记");
+        var data = [
+            {"title": "2020-05-01", "children": [
+                {"name": "test1", "url": "/"},
+                {"name": "test2", "url": "/"},
+            ]}
+        ];
+
+        $.get("http://localhost:1234/note/api/timeline?type=all", renderNoteListCallback).fail(function (e) {
+            alert("异常:" + e);
+        });
+    }
+
+    var searchText = "";
+
+    window.onSearchInputChange = function (input) {
+        searchText = input.value;
+    }
+
+    window.onSearchBtnClick = function (button) {
+        console.log("search", searchText);
+        // 清空结果
+        $(".note-search-dialog-body").html("");
+
+        $.get("http://localhost:1234/note/api/timeline?type=search&key=" + searchText, renderNoteListCallback);
+    }
+});
+
+</script>
+
+<!-- 移动单个笔记 -->
+<div class="note-search-dialog hide">
+    <div class="card pad10">
+        <div class="row">
+            <input type="text" class="nav-search-input" placeholder="搜索笔记" onchange="onSearchInputChange(this)"/>
+            <button class="nav-search-btn btn-default" onclick="onSearchBtnClick(this)">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <div class="row note-search-dialog-body">
+
+        </div>
+    </div>
+</div>
+

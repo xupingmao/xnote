@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/05/02 14:00:40
+# @modified 2020/07/04 16:55:33
 
 """笔记编辑相关处理"""
 import os
@@ -256,7 +256,7 @@ class PublicShareHandler:
         id      = xutils.get_argument("id")
         note    = check_get_note(id)
         NOTE_DAO.update(id, is_public = 1)
-        raise web.seeother(note.url)
+        return dict(code = "success")
 
 class LinkShareHandler:
 
@@ -278,7 +278,7 @@ class UnshareHandler:
         id = xutils.get_argument("id")
         note = check_get_note(id)
         NOTE_DAO.update(id, is_public = 0)
-        raise web.seeother(note.url)
+        return dict(code = "success")
 
 def check_get_note(id):
     if xauth.is_admin():

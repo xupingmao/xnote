@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/06/06 18:53:08
+# @modified 2020/06/26 17:32:05
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -986,6 +986,7 @@ def refresh_note_stat(user_name):
     stat.list_count    = count_by_type(user_name, "list")
     stat.table_count   = count_by_type(user_name, "table")
     stat.plan_count    = count_by_type(user_name, "plan")
+    stat.log_count     = count_by_type(user_name, "log")
     stat.sticky_count  = count_sticky(user_name)
     stat.removed_count = count_removed(user_name)
     stat.dict_count    = count_dict(user_name)

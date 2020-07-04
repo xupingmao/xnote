@@ -25,13 +25,9 @@ label {
 {% init type = "md" %}
 {% init heading = T("创建笔记") %}
 <div class="card">
-    <h3 class="card-title">{{heading}}</h3>
-    {% if error != "" %}
-        <pre class="col-md-12 error">
-            {{error}}
-        </pre>
-    {% end %}
 
+    {% include note/component/create_note_header.html %}
+    
     <form method="POST" action="">
         <!-- 选择日期 -->
         <div class="row top-offset-1">

@@ -1,3 +1,44 @@
+// @author xupingmao
+// @since 2017/08/16
+// @modified 2020/07/04 16:40:55
+
+//////////////////////////////////////////////////////
+// String 增强
+//////////////////////////////////////////////////////
+// 以下是ES5的String对象，from w3c.org
+// 5.1 作为函数调用 String 构造器
+// 5.1.1 String ( [ value ] )
+// 5.2 String 构造器
+// 5.2.1 new String ( [ value ] )
+// 5.3 String 构造器的属性
+// 5.3.1 String.prototype
+// 5.3.2 String.fromCharCode ( [ char0 [ , char1 [ , … ] ] ] )
+// 5.4 字符串原型对象的属性
+// 5.4.1 String.prototype.constructor
+// 5.4.2 String.prototype.toString ( )
+// 5.4.3 String.prototype.valueOf ( )
+// 5.4.4 String.prototype.charAt (pos)
+// 5.4.5 String.prototype.charCodeAt (pos)
+// 5.4.6 String.prototype.concat ( [ string1 [ , string2 [ , … ] ] ] )
+// 5.4.7 String.prototype.indexOf (searchString, position)
+// 5.4.8 String.prototype.lastIndexOf (searchString, position)
+// 5.4.9 String.prototype.localeCompare (that)
+// 5.4.10 String.prototype.match (regexp)
+// 5.4.11 String.prototype.replace (searchValue, replaceValue)
+// 5.4.12 String.prototype.search (regexp)
+// 5.4.13 String.prototype.slice (start, end)
+// 5.4.14 String.prototype.split (separator, limit)
+// 5.4.15 String.prototype.substring (start, end)
+// 5.4.16 String.prototype.toLowerCase ( )
+// 5.4.17 String.prototype.toLocaleLowerCase ( )
+// 5.4.18 String.prototype.toUpperCase ( )
+// 5.4.19 String.prototype.toLocaleUpperCase ( )
+// 5.4.20 String.prototype.trim ( )
+// 5.5 String 实例的属性
+// 5.5.1 length
+// 5.5.2 [[GetOwnProperty]] ( P )
+
+
 function num2hex(num) {
 
 }
@@ -216,3 +257,13 @@ String.prototype.repeat = function (count) {
     }
     return str;
 }
+
+/**
+ * 简单的模板渲染，这里假设传进来的参数已经进行了html转义
+ */
+function renderTemplate(templateText, object) {
+    return templateText.replace(/\$\{(.*?)\}/g, function (context, objKey) {
+        return object[objKey.trim()] || '';
+    });
+}
+

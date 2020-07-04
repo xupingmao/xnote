@@ -4,10 +4,15 @@
 {% init file_type = "history" %}
 
 <div class="card">
-    <h3 class="card-title">
+    <h3 class="card-title btn-line-height">
         <a href="/note/{{current_note.id}}" class="link2">{{current_note.name}}</a> 
         / {{T("History")}}
+
+        <div class="float-right">
+            <button class="btn btn-default" onclick="javascript:history.back();">返回</button>
+        </div>
     </h3>
+
     <table class="table">
         <tr>
             <th>名称</th>

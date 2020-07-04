@@ -49,6 +49,8 @@
 
         {% if type == "default" %}
           {% include note/component/group_option.html %}
+        {% elif type == "public" %}
+          {% include note/component/share_option.html %}
         {% elif type == "search" %}
           <!-- <a class="btn btn-default" href="/search">搜索历史</a> -->
           <a class="btn btn-default" href="/search?key={{quote(key)}}&category=content">高级搜索</a>

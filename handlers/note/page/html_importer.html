@@ -12,6 +12,15 @@
         float: left;
         width: 100px;
     }
+
+    .url-input {
+        width: 50rem;
+        max-width: 100%;
+    }
+
+    .file-input {
+        border: none;
+    }
 </style>
 {% end %}
 
@@ -30,8 +39,14 @@
     {% include common/base_title.html %}
 
     <form method="POST" enctype="multipart/form-data">
-        <p><label>上传文件</label><input type="file" name="file" /></p>
-        <p><label>网址</label><input type="text" name="url" style="width: 50em;" value="{{url}}" /></p>
+        <p>
+            <label>上传文件</label>
+            <input type="file" name="file" class="file-input"/>
+        </p>
+        <p>
+            <label>网址</label>
+            <input type="text" name="url" class="url-input" value="{{url}}" />
+        </p>
         <div>
             <input type="submit" value="抓取网页"/>
             <input type="button" id="saveToDbBtn" class="btn" value="保存到资料库">

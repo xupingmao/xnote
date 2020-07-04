@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/06/06 18:54:00
+# @modified 2020/06/26 16:36:32
 import math
 import time
 import web
@@ -172,6 +172,7 @@ def load_note_index(user_name):
             NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
             NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
             NoteLink("表格", "/note/table", "fa-table", size = note_stat.table_count),
+            NoteLink("日志", "/note/log", "fa-file-text", size = note_stat.log_count),
             DictEntryLink(size = note_stat.dict_count),
             # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
             # NoteLink("富文本", "/note/html", "fa-file-word-o"),
