@@ -1,7 +1,7 @@
 {% init show_cdate = False %}
 {% init show_mdate = False %}
 {% init show_adate = False %}
-{% init show_visited_cnt = False %}
+{% init show_hot_index = False %}
 
 {% for item in files %}
     <a class="dialog-link" href="{{item.url}}">
@@ -33,8 +33,8 @@
                     {{format_date(item.atime).replace('-', '/')}}
                 {% end %}
 
-                {% if show_visited_cnt %}
-                    {{item.visited_cnt}}
+                {% if show_hot_index %}
+                    {{item.hot_index or 0}}
                 {% end %}
 
                 {% if item.show_next or show_size %}

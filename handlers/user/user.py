@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2020/01/24 11:34:04
+# @modified 2020/07/05 18:48:15
 import web
 import xauth
 import xtemplate
@@ -46,14 +46,12 @@ class AddHandler:
 
     @xauth.login_required("admin")
     def POST(self):
-        name     = xutils.get_argument("name")
-        error = xauth.add_user(name, textutil.random_string(6))
-        if error is None:
-            # 先暴力解决
+        name   = xutils.get_argument("name")
+        result = xauth.add_user(name, textutil.random_string(6))
+        if result["code"] == "success":
+            # 重新加载系统
             xmanager.reload()
-            return dict(code = "success")
-        else:
-            return error
+        return result
 
 class RemoveHandler:
 

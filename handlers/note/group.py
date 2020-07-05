@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/06/26 16:36:32
+# @modified 2020/07/05 17:29:38
 import math
 import time
 import web
@@ -343,7 +343,7 @@ class RecentHandler:
         show_mdate = False
         show_cdate = False
         show_adate = False
-        show_visited_cnt = False
+        show_hot_index = False
         dir_type   = "recent_edit"
 
         creator = xauth.get_current_name()
@@ -359,10 +359,10 @@ class RecentHandler:
             time_attr = "ctime"
             show_cdate = True
             dir_type = "recent_created"
-        elif orderby == "frequence":
-            html_title = "Top"
-            files = NOTE_DAO.list_most_visited(creator, offset, limit)
-            show_visited_cnt = True
+        elif orderby == "hot":
+            html_title = "Hot"
+            files = NOTE_DAO.list_hot(creator, offset, limit)
+            show_hot_index = True
         else:
             html_title = "Recent Updated"
             files = NOTE_DAO.list_recent_edit(creator, offset, limit)
@@ -385,7 +385,7 @@ class RecentHandler:
             show_cdate = show_cdate,
             show_mdate = show_mdate,
             show_adate = show_adate,
-            show_visited_cnt = show_visited_cnt,
+            show_hot_index = show_hot_index,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    = "/note/recent_%s?page=" % orderby,
             **SEARCH_DOC_DICT)

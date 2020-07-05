@@ -55,7 +55,7 @@
         <td>{{user_info.login_time}}</td>
     </tr>
 </table>
-<input type="submit" value="更新密码">
+<input type="submit" value="更新用户">
 {% if user_info.name != "admin" %}
     <input class="btn-danger delete-user-btn" type="button" data-name="{{user_info.name}}" value="删除用户">
 {% end %}

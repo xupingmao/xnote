@@ -20,17 +20,17 @@ def is_valid_username(name):
     return name.isalnum()
 
 
-def _get_users():
+def _get_users(force_reload = False):
     """获取用户，内部接口"""
     global _users
 
     # 有并发风险
-    if _users is not None:
+    if _users is not None and not force_reload:
         return _users
 
-    _users = {}
+    temp_users = {}
     # 默认的账号
-    _users["admin"] = Storage(name = "admin", 
+    temp_users["admin"] = Storage(name = "admin", 
         password = "123456", 
         salt = "",
         mtime = "",
@@ -46,24 +46,31 @@ def _get_users():
         else:
             user.config = Storage()
         name = user.name.lower()
-        _users[name] = user
+        temp_users[name] = user
+
+    _users = temp_users
     return _users
 
 def get_users():
     """获取所有用户，返回一个深度拷贝版本"""
     return copy.deepcopy(_get_users())
 
+def list_user_names():
+    users = _get_users()
+    return list(users.keys())
 
 def refresh_users():
-    global _users
-    _users = None
     xutils.trace("ReLoadUsers", "reload users")
-    return _get_users()
+    return _get_users(force_reload = True)
 
 def get_user(name):
+    return find_by_name(name)
+
+def find_by_name(name):
+    if name is None:
+        return None
     users = _get_users()
-    if xconfig.IS_TEST:
-        return users.get("admin")
+    name = name.lower()
     return users.get(name)
 
 def get_user_config_dict(name):
@@ -88,12 +95,6 @@ def update_user_config_dict(name, config_dict):
     config.update(**config_dict)
     user.config = config
     update_user(name, user)
-
-def find_by_name(name):
-    if name is None:
-        return None
-    name = name.lower()
-    return dbutil.get("user:%s" % name)
 
 def select_first(filter_func):
     users = _get_users()
@@ -181,20 +182,16 @@ def gen_new_token():
 
 def add_user(name, password):
     if name == "" or name == None:
-        return
+        return dict(code = "PARAM_ERROR", message = "name为空")
     if password == "" or password == None:
-        return
+        return dict(code = "PARAM_ERROR", message = "password为空")
     if not is_valid_username(name):
-        return dict(code="INVALID_NAME", message="非法的用户名")
+        return dict(code = "INVALID_NAME", message="非法的用户名")
 
     name  = name.lower()
     found = find_by_name(name)
     if found is not None:
-        found.mtime = xutils.format_time()
-        found.salt  = textutil.random_string(6)
-        found.token = gen_new_token()
-        found.password = password
-        update_user(name, found)
+        return dict(code = "fail", message = "用户已存在")
     else:
         user = Storage(name=name,
             password=password,
@@ -204,17 +201,24 @@ def add_user(name, password):
             mtime=xutils.format_time())
         dbutil.put("user:%s" % name, user)
         xutils.trace("UserAdd", name)
-    refresh_users()
+        refresh_users()
+        return dict(code = "success", message = "create success")
 
 def update_user(name, user):
     if name == "" or name == None:
         return
     name = name.lower()
-    mem_user = _users[name]
+
+    mem_user = find_by_name(name)
+    if mem_user is None:
+        raise Exception("user not found")
+
     mem_user.update(user)
 
     dbutil.put("user:%s" % name, mem_user)
     xutils.trace("UserUpdate", mem_user)
+
+    refresh_users()
 
 def remove_user(name):
     if name == "admin":

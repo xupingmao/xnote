@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/06/26 17:32:05
+# @modified 2020/07/05 17:56:51
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -38,9 +38,8 @@ from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
 from xutils import attrget
 
 DB_PATH         = xconfig.DB_PATH
-MAX_VISITED_CNT = 200
-MAX_EDIT_LOG    = 200
-MAX_VIEW_LOG    = 200
+MAX_EDIT_LOG    = 500
+MAX_VIEW_LOG    = 500
 
 NOTE_ICON_DICT = {
     "group"   : "fa-folder orange",
@@ -182,6 +181,7 @@ def get_by_id(id, include_full = True):
         note.tags  = note_index.tags
         note.parent_id = note_index.parent_id
         note.visited_cnt = note_index.visited_cnt
+        note.hot_index = note_index.hot_index
     if note:
         build_note_info(note)
     return note
@@ -500,9 +500,16 @@ def visit_note(user_name, id):
     note = get_by_id(id)
     if note:
         note.atime = xutils.format_datetime()
+        # 访问的总字数
         if note.visited_cnt is None:
             note.visited_cnt = 0
         note.visited_cnt += 1
+
+        # 访问热度
+        if note.hot_index is None:
+            note.hot_index = 0
+        note.hot_index += 1
+
         update_index(note)
         add_visit_log(user_name, note)
 
@@ -689,6 +696,13 @@ def list_recent_edit(creator = None, offset = 0, limit = None):
 def list_most_visited(creator, offset, limit):
     logs = list_note_by_log("note_visit_log", creator)
     logs.sort(key = lambda x: x.visited_cnt, reverse = True)
+    return logs[offset:offset+limit]
+
+def list_hot(creator, offset, limit):
+    if limit < 0:
+        limit = MAX_VIEW_LOG
+    logs = list_note_by_log("note_visit_log", creator)
+    logs.sort(key = lambda x: x.hot_index or 0, reverse = True)
     return logs[offset:offset+limit]
 
 def list_by_date(field, creator, date):
@@ -1005,6 +1019,7 @@ def get_note_stat(user_name):
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
 xutils.register_func("note.update0", update0)
+xutils.register_func("note.update_index", update_index)
 xutils.register_func("note.move", move_note)
 xutils.register_func("note.visit",  visit_note)
 xutils.register_func("note.delete", delete_note)
@@ -1039,6 +1054,7 @@ xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.list_recent_viewed", list_recent_viewed)
 xutils.register_func("note.list_most_visited", list_most_visited)
+xutils.register_func("note.list_hot", list_hot)
 xutils.register_func("note.list_by_func", list_by_func)
 
 # count functions

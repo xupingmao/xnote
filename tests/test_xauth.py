@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/24 16:39:45
-# @modified 2020/02/15 19:47:12
+# @modified 2020/07/05 18:32:13
 
 import sys
 import time
@@ -26,8 +26,21 @@ class TestXauth(BaseTestCase):
         self.assertTrue(xauth.is_valid_username("t1234"))
         self.assertFalse(xauth.is_valid_username("public"))
 
-    def test_add_user(self):
-        xauth.add_user("u123456", "123456")
+    def test_add_and_remove_user(self):
+        # 创建用户
+        result = xauth.add_user("u123456", "123456")
+        print(result)
+
         users = xauth.refresh_users()
+        print(users)
         self.assertEqual(2, len(users))
+
+        # 删除用户
+        xauth.remove_user("u123456")
+        check = xauth.find_by_name("u123456")
+        self.assertEqual(None, check)
+
+    def test_list_user_names(self):
+        user_names = xauth.list_user_names()
+        self.assertTrue(len(user_names) >= 1)
 
