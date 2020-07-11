@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2020/07/05 17:42:10
+# @modified 2020/07/11 18:19:36
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -663,6 +663,7 @@ def load_plugin_file(fpath, fname = None):
             context.clazz = main_class
             xconfig.PLUGINS_DICT[pname] = context
     except:
+        # TODO 增加异常日志
         xutils.print_exc()
 
 def load_sub_plugins(dirname):

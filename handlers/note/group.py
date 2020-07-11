@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/07/05 17:29:38
+# @modified 2020/07/11 17:08:21
 import math
 import time
 import web
@@ -434,11 +434,16 @@ class DateHandler:
         user_name = xauth.current_name()
         
         year  = xutils.get_argument("year", time.strftime("%Y"))
-        month = xutils.get_argument("month", time.strftime("%m"))
+        # 默认查看全年的
+        month = xutils.get_argument("month", "0")
         if len(month) == 1:
             month = '0' + month
 
-        date  = year + "-" + month
+        if month == "00":
+            date = year
+        else:
+            date = year + "-" + month
+
         notes = NOTE_DAO.list_by_date("ctime", user_name, date)
         # by_name = NOTE_DAO.list_by_date("name", user_name, year + "_" + month)
         notes_by_date = assemble_notes_by_date(notes, year, month)

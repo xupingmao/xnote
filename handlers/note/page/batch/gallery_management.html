@@ -2,7 +2,10 @@
 
 {% block body %}
     <div class="card">
-        <h3 class="card-title"><a href="{{note.url}}" class="link2">{{note.name}}</a> / 管理</h3>
+        <h3 class="card-title btn-line-height">
+            <a href="{{note.url}}" class="link2">{{note.name}}</a> / 管理
+            {% include common/back.html %}
+        </h3>
 
         <input type="hidden" id="dirname" value="{{dirname}}"/>
         {% include fs/component/filelist_simple.html %}

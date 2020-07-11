@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/07/04 16:55:33
+# @modified 2020/07/11 20:12:48
 
 """笔记编辑相关处理"""
 import os
@@ -102,6 +102,28 @@ CREATE_FUNC_DICT = {
     "log": create_log_func
 }
 
+def list_groups_for_create(creator):
+    notes = NOTE_DAO.list_group(creator, orderby = "name")
+
+    sticky_groups   = list(filter(lambda x: x.priority != None and x.priority > 0, notes))
+    archived_groups = list(filter(lambda x: x.archived == True, notes))
+    normal_groups   = list(filter(lambda x: x not in sticky_groups and x not in archived_groups, notes))
+
+    groups = []
+
+    for item in sticky_groups:
+        item.name = u"[置顶]" + item.name
+        groups.append(item)
+
+    for item in normal_groups:
+        groups.append(item)
+
+    for item in archived_groups:
+        item.name = u"[归档]" + item.name
+        groups.append(item)
+
+    return groups
+
 class CreateHandler:
 
     @xauth.login_required()
@@ -178,7 +200,7 @@ class CreateHandler:
             error    = error,
             message  = error,
             NOTE_TYPE_LIST = NOTE_TYPE_LIST,
-            groups   = NOTE_DAO.list_group(creator),
+            groups   = list_groups_for_create(creator),
             code     = code)
 
     def GET(self):

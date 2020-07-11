@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2020/01/06
-@modified 2020/05/22 17:19:01
+@modified 2020/07/11 13:17:41
 -->
 
 {% block body %}
@@ -17,6 +17,8 @@
             {% if parent_id != "0" %}
                 <button class="reverse-select-btn">反选</button>
                 <button class="move-btn" data-url="/note/group/select?callback=batchMoveNoteCallback">移动</button>
+            {% else %}
+                <button class="btn btn-default" onclick="javascript:history.back();">返回</button>
             {% end %}
         </div>
     </div>

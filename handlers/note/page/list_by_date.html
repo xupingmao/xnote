@@ -24,22 +24,26 @@
     {% from xutils import dateutil %}
 
     <div class="card">
-        日期
+        <span>日期</span>
         <select name="year" value="{{year}}">
             {% for j in range(year-5,year+6) %}
                 <option value="{{j}}">{{j}}</option>
             {% end %}
         </select>
         <select name="month" value="{{month}}">
-            {% for i in range(1,13) %}
-                <option value="{{i}}">{{i}}</option>
+            {% for i in range(0,13) %}
+                {% if i == 0 %}
+                    <option value="0">全年</option>
+                {% else %}
+                    <option value="{{i}}">{{i}}</option>
+                {% end %}
             {% end %}
         </select>
 
         <div class="float-right">
-            <a class="default-path-link" href="{{link_by_month(year, month, -1)}}">上个月</a>
-            <a class="default-path-link" href="{{link_by_month(year, month, 1)}}">下个月</a>
-            <a class="default-path-link" href="/note/index">索引</a>
+            <a class="btn btn-default desktop-only" href="{{link_by_month(year, month, -1)}}">上月</a>
+            <a class="btn btn-default desktop-only" href="{{link_by_month(year, month, 1)}}">下月</a>
+            <a class="btn btn-default" href="/">返回</a>
         </div>
     </div>
 

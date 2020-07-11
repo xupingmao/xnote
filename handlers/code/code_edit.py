@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/??/??
-# @modified 2019/12/31 01:16:43
+# @modified 2020/07/11 13:49:58
 
 """显示代码原文"""
 import os
@@ -17,6 +17,7 @@ def can_preview(path):
     return ext.lower() in (".md", ".csv")
 
 def handle_embed(kw):
+    """处理嵌入式常见"""
     embed  = xutils.get_argument("embed", type=bool)
 
     kw.show_aside = False
@@ -27,6 +28,11 @@ def handle_embed(kw):
         kw.show_menu  = False
         kw.show_search = False
         kw.show_path = False
+
+def handle_args(kw):
+    show_path = xutils.get_argument("show_path")
+    if show_path:
+        kw.show_path = (show_path == "true")
 
 class ViewSourceHandler:
 
@@ -44,51 +50,51 @@ class ViewSourceHandler:
         type = xutils.get_argument("type", "")
         readonly = False
         
-
         kw = Storage()
-        
         # 处理嵌入页面
         handle_embed(kw)
+        # 处理参数
+        handle_args(kw)
 
         if path == "":
             return xtemplate.render(template_name, 
                 content = "",
                 error = "path is empty")
-        else:
-            error = ""
-            warn  = ""
-            try:
-                path = self.resolve_path(path, type)
-                max_file_size = xconfig.MAX_TEXT_SIZE
-                if xutils.get_file_size(path, format=False) >= max_file_size:
-                    warn = "文件过大，只显示部分内容"
-                    readonly = True
-                content = xutils.readfile(path, limit = max_file_size)
-                plugin_name = fsutil.get_relative_path(path, xconfig.PLUGINS_DIR)
-                # 使用JavaScript来处理搜索关键字高亮问题
-                # if key != "":
-                #     content = xutils.html_escape(content)
-                #     key     = xhtml_escape(key)
-                #     content = textutil.replace(content, key, htmlutil.span("?", "search-key"), ignore_case=True, use_template=True)
-                return xtemplate.render(template_name, 
-                    show_preview = can_preview(path),
-                    readonly = readonly,
-                    error = error,
-                    warn = warn,
-                    pathlist = xutils.splitpath(path),
-                    name = os.path.basename(path), 
-                    path = path,
-                    content = content, 
-                    plugin_name = plugin_name,
-                    lines = content.count("\n")+1, **kw)
-            except Exception as e:
-                xutils.print_exc()
-                error = e
+
+        error = ""
+        warn  = ""
+        try:
+            path = self.resolve_path(path, type)
+            max_file_size = xconfig.MAX_TEXT_SIZE
+            if xutils.get_file_size(path, format=False) >= max_file_size:
+                warn = "文件过大，只显示部分内容"
+                readonly = True
+            content = xutils.readfile(path, limit = max_file_size)
+            plugin_name = fsutil.get_relative_path(path, xconfig.PLUGINS_DIR)
+            # 使用JavaScript来处理搜索关键字高亮问题
+            # if key != "":
+            #     content = xutils.html_escape(content)
+            #     key     = xhtml_escape(key)
+            #     content = textutil.replace(content, key, htmlutil.span("?", "search-key"), ignore_case=True, use_template=True)
             return xtemplate.render(template_name, 
-                path = path,
-                name = "",
+                show_preview = can_preview(path),
                 readonly = readonly,
-                error = error, lines = 0, content="", **kw)
+                error = error,
+                warn = warn,
+                pathlist = xutils.splitpath(path),
+                name = os.path.basename(path), 
+                path = path,
+                content = content, 
+                plugin_name = plugin_name,
+                lines = content.count("\n")+1, **kw)
+        except Exception as e:
+            xutils.print_exc()
+            error = e
+        return xtemplate.render(template_name, 
+            path = path,
+            name = "",
+            readonly = readonly,
+            error = error, lines = 0, content="", **kw)
 
 
 class UpdateHandler(object):
