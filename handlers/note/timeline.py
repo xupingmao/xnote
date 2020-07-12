@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/06/06 19:56:38
+# @modified 2020/07/12 16:18:49
 
 """时光轴视图"""
 import re
@@ -32,6 +32,8 @@ def get_parent_link(user_name, type, priority = 0):
         return PathLink(T("Archived_Project"), "/note/archived")
     if type == "default" or type == "root_notes":
         return PathLink(u"项目", xuserconfig.get_project_path(user_name))
+    if type == "public":
+        return None
     return PathLink(T("NoteIndex"), "/note/index")
 
 class SystemGroup(Storage):

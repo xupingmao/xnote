@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/07/05 17:56:51
+# @modified 2020/07/12 16:55:20
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -693,6 +693,30 @@ def list_recent_edit(creator = None, offset = 0, limit = None):
     
     return list_note_by_log("note_edit_log", creator, offset, limit)
 
+def list_recent_events(creator = None, offset = 0, limit = None):
+    create_events = list_recent_created(creator, offset, limit)
+    edit_events = list_recent_edit(creator, offset, limit)
+    view_events = list_recent_viewed(creator, offset, limit)
+
+    def map_notes(notes, action):
+        for note in notes:
+            note.action = action
+            if action == "create":
+                note.action_time = note.ctime
+            elif action == "edit":
+                note.action_time = note.mtime
+            else:
+                note.action_time = note.atime
+
+    map_notes(create_events, "create")
+    map_notes(edit_events, "edit")
+    map_notes(view_events, "view")
+
+    events = create_events + edit_events + view_events
+    events.sort(key = lambda x: x.action_time, reverse = True)
+    return events[offset: offset + limit]
+
+
 def list_most_visited(creator, offset, limit):
     logs = list_note_by_log("note_visit_log", creator)
     logs.sort(key = lambda x: x.visited_cnt, reverse = True)
@@ -1053,6 +1077,7 @@ xutils.register_func("note.list_public", list_public)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.list_recent_viewed", list_recent_viewed)
+xutils.register_func("note.list_recent_events", list_recent_events)
 xutils.register_func("note.list_most_visited", list_most_visited)
 xutils.register_func("note.list_hot", list_hot)
 xutils.register_func("note.list_by_func", list_by_func)

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/07/11 17:08:21
+# @modified 2020/07/12 16:46:38
 import math
 import time
 import web
@@ -343,14 +343,18 @@ class RecentHandler:
         show_mdate = False
         show_cdate = False
         show_adate = False
+        show_action_time = False
         show_hot_index = False
         dir_type   = "recent_edit"
 
         creator = xauth.get_current_name()
-        if orderby == "view":
+        if orderby == "all":
+            html_title = "All"
+            files = NOTE_DAO.list_recent_events(creator, offset, limit)
+            show_action_time = True
+        elif orderby == "view":
             html_title = "Recent Viewed"
             files = NOTE_DAO.list_recent_viewed(creator, offset, limit)
-            time_attr = "atime"
             show_adate = True
             dir_type = "recent_viewed"
         elif orderby == "create":
@@ -385,6 +389,7 @@ class RecentHandler:
             show_cdate = show_cdate,
             show_mdate = show_mdate,
             show_adate = show_adate,
+            show_action_time = show_action_time,
             show_hot_index = show_hot_index,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    = "/note/recent_%s?page=" % orderby,

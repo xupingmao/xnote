@@ -1,17 +1,35 @@
 {% init show_cdate = False %}
 {% init show_mdate = False %}
 {% init show_adate = False %}
+{% init show_action_time = False %}
 {% init show_hot_index = False %}
+{% init ACTION_TEXT_MAP = {
+    "create": "创建了笔记",
+    "view": "查看了笔记",
+    "edit": "更新了笔记"
+} %}
 
 {% for item in files %}
     <a class="dialog-link" href="{{item.url}}">
         <div class="book-item">
+
+            <!-- 标签 -->
+            {% if hasattr(item, "action") and item.action != None %}
+                <div class="row">
+                    <span class="gray-text small-font">{{ACTION_TEXT_MAP.get(item.action)}}</span>
+                    <div class="float-right">
+                        <span class="book-size-span">{{format_date(item.action_time).replace('-', '/')}}</span>
+                    </div>
+                </div>
+            {% end %}
+
             {% if item.priority>0 %}
                 <i class="fa fa-thumb-tack black"></i>
             {% end %}
 
             <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
             <span>{{item.name}}</span>
+            
             {% if item.is_deleted %}
                 <a class="gray-tag-link" href="/note/removed">删除</a>
             {% end %}
