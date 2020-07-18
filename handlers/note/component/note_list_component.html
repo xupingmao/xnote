@@ -23,10 +23,16 @@
                 </div>
             {% end %}
 
+            <!-- 隐藏的记录 -->
+            {% if hasattr(item, "hide") and item.hide %}
+                {% continue %}
+            {% end %}
+
             {% if item.priority>0 %}
                 <i class="fa fa-thumb-tack black"></i>
             {% end %}
 
+            <!-- 图标和标题 -->
             <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
             <span>{{item.name}}</span>
             

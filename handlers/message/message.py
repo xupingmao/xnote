@@ -1,9 +1,9 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2020/04/20 00:29:02
+# @modified 2020/07/18 18:18:02
 
-"""短消息"""
+"""短消息处理，比如任务、备忘、临时文件等等"""
 import time
 import re
 import math

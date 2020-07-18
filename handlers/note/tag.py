@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/02/15 12:40:00
+# @modified 2020/07/18 18:28:29
 import math
 import xutils
 import xtemplate
@@ -20,7 +20,7 @@ class TagHandler:
             tags = []
         return dict(code="", message="", data=tags)
 
-class UpdateTagHandler:
+class TagUpdateHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -80,7 +80,7 @@ class TagListHandler:
 
 xurls = (
     r"/note/tag/(\d+)"   , TagHandler,
-    r"/note/tag/update"  , UpdateTagHandler,
+    r"/note/tag/update"  , TagUpdateHandler,
     r"/note/tagname/(.*)", TagNameHandler,
     r"/note/taglist"     , TagListHandler
 )

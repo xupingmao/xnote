@@ -82,12 +82,19 @@
 在handlers目录下添加python程序，比如test.py
 
 ```py
-class handler:    
+class MyHandler:    
     def GET(self):
         return "success"
-# 如果配置了xurls全局变量，xnote会注册指定的url pattern否则按照相对handlers的路径注册
+
+class Handler2:
+    def GET(self):
+        return "handler2"
+
+# URL路由规则，支持多个配置
 xurls = (
-    r"/test", handler
+    r"/test", MyHandler,
+    r"/handler2", Handler2
 )
+
 # 启动xnote，访问浏览器localhost:1234/test就会看到success
 ```

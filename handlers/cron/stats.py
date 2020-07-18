@@ -1,10 +1,11 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/07/05 17:35:53
-# @modified 2020/07/05 18:05:09
+# @modified 2020/07/18 18:13:35
 import xutils
 import xauth
 
+"""统计数据更新的定时任务"""
 NOTE_DAO = xutils.DAO("note")
 
 # 衰减单位

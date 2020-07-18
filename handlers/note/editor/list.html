@@ -5,4 +5,6 @@
 {% set globals()["comment_class"] = "top-offset-1" %}
 {% set globals()["comment_btn_text"] = T("保存") %}
 {% set globals()["comment_placeholder"] = T("请输入清单项...") %}
+
+<!-- 清单的底层就是直接复用的评论的能力 -->
 {% include note/page/comment.html %}

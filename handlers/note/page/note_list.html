@@ -1,0 +1,16 @@
+{% extends base %}
+
+{% block head %}
+<style type="text/css">
+    .option-td {
+        width: 25%;
+    }
+</style>
+
+{% end %}
+
+{% block body %}
+    <div class="card">
+        {% include note/component/note_list_component.html %}
+    </div>
+{% end %}

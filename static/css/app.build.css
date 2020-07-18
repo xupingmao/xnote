@@ -132,7 +132,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/06/21 16:31:07
+ * @modified 2020/07/18 19:23:06
  */
 
 /** marked 样式 **/
@@ -168,6 +168,13 @@ table td {
     word-wrap: break-word;
     white-space: pre-wrap;
     margin: 0px;
+}
+
+.marked-codespan {
+    padding: 2px 4px;
+    margin: 0;
+    background-color: rgba(27,31,35,.05);
+    border-radius: 6px;
 }
 
 .marked-strong {

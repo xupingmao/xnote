@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2020/04/01 23:28:26
+# @modified 2020/07/18 18:11:31
 import xauth
 import xutils
 from xutils import dbutil
@@ -86,6 +86,7 @@ class StatHandler(BasePlugin):
             admin_stat_list.append(["schedule", dbutil.count_table("schedule")])
             admin_stat_list.append(["user", dbutil.count_table("user")])
             admin_stat_list.append(["record", dbutil.count_table("record")])
+            admin_stat_list.append(["plugin_visit_log", dbutil.count_table("plugin_visit_log")])
 
         self.writetemplate(HTML, stat_list = stat_list, admin_stat_list = admin_stat_list)
 

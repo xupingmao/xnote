@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/02/15 18:39:04
+# @modified 2020/07/18 20:15:49
 from io import StringIO
 import xconfig
 import codecs
@@ -23,7 +23,7 @@ from xtemplate import BasePlugin
 from xutils import History
 from xutils import cacheutil
 from xutils import Storage
-from xutils import textutil, SearchResult, u
+from xutils import textutil, SearchResult, dateutil, dbutil, u
 
 MAX_HISTORY = 200
 
@@ -98,7 +98,31 @@ def build_plugin_links(plugins):
 
     return links
 
-def list_plugins(category):
+def sorted_plugins(user_name, plugins):
+    # 把最近访问的放在前面
+    logs = list_visit_logs(user_name, 0, 20)
+    
+    url_dict = dict()
+    for p in plugins:
+        url_dict[p.url] = p
+
+    recent_plugins = []
+    recent_urls = []
+
+    for log in logs:
+        if log.url in url_dict:
+            recent_plugins.append(url_dict[log.url])
+            recent_urls.append(log.url)
+            del url_dict[log.url]
+
+    # print(plugins)
+    print("Recent Urls:", recent_urls)
+    print("Recent Plugins:", recent_plugins)
+
+    rest_plugins = list(filter(lambda x:x.url not in recent_urls, plugins))
+    return recent_plugins + rest_plugins
+
+def list_plugins(category, sort = True):
     if category == "other":
         plugins = xmanager.find_plugins(None)
         links = build_plugin_links(plugins)
@@ -109,11 +133,15 @@ def list_plugins(category):
     else:
         # 所有插件
         links = build_inner_tools()
-        links += build_plugin_links(xconfig.PLUGINS_DICT.values())    
+        links += build_plugin_links(xconfig.PLUGINS_DICT.values())
+
+    user_name = xauth.current_name()
+    if sort:
+        return sorted_plugins(user_name, links)
     return links
 
 def find_plugin_by_name(name):
-    plugins = list_plugins("all")
+    plugins = list_plugins("all", sort = False)
     name, ext = os.path.splitext(name)
     for p in plugins:
         if u(p.name) == u(name):
@@ -121,22 +149,28 @@ def find_plugin_by_name(name):
     return None
 
 def list_recent_plugins():
-    items = cacheutil.zrange("plugins.history", -6, -1)
-    print(items)
-    links = [find_plugin_by_name(name) for name in items]
-    links.reverse()
+    user_name = xauth.current_name()
+    items = list_visit_logs(user_name, 0, 5)
+    links = [find_plugin_by_name(log.name) for log in items]
+
     return list(filter(None, links))
 
-def log_plugin_visit(name):
-    try:
-        fname = xutils.unquote(name)
-        cacheutil.zadd("plugins.history", time.time(), fname)
-    except TypeError:
-        cacheutil.delete("plugins.history")
-        cacheutil.zadd("plugins.history", time.time(), fname)
+def list_visit_logs(user_name, offset = 0, limit = -1):
+    return dbutil.prefix_list("plugin_visit_log:%s" % user_name, 
+        offset = offset, limit = limit, reverse = True)
+
+def add_visit_log(user_name, name, url):
+    log = Storage()
+    log.name = name
+    log.url  = url
+    log.time = dateutil.format_datetime()
+
+    dbutil.insert("plugin_visit_log:%s" % user_name, log)
 
 def load_plugin(name):
-    log_plugin_visit(name)
+    user_name = xauth.current_name()
+    add_visit_log(user_name, name, "/plugins/" + name)
+
     context = xconfig.PLUGINS_DICT.get(name)
     if xconfig.DEBUG or context is None:
         script_name = "plugins/" + name
@@ -338,7 +372,9 @@ class NewPluginHandler(BasePlugin):
             code = code.replace("$since", xutils.format_datetime())
             code = code.replace("$author", user_name)
             xutils.writefile(name, code)
-            log_plugin_visit(os.path.basename(name))
+            # 添加一个访问记录，使得新增的插件排在前面
+            basename = os.path.basename(name)
+            add_visit_log(user_name, basename, "/plugins/" + basename)
             raise web.seeother('/code/edit?path=%s' % name)
 
 DEFAULT_COMMAND_TEMPLATE = '''# -*- coding:utf-8 -*-
@@ -374,10 +410,10 @@ class NewCommandPlugin(BasePlugin):
             xutils.writefile(name, code)
             raise web.seeother('/code/edit?path=%s' % name)
 
-
-class PluginsHandler:
+class LoadPluginHandler:
 
     def GET(self, name = ""):
+        user_name = xauth.current_name()
         display_name = xutils.unquote(name)
         name = xutils.get_real_path(display_name)
         if not name.endswith(".py"):
@@ -396,11 +432,19 @@ class PluginsHandler:
     def POST(self, name = ""):
         return self.GET(name)
 
+class PluginLogHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        user_name = xauth.current_name()
+        logs = list_visit_logs(user_name)
+        return logs
 
 xurls = (
     r"/plugins_list_new", PluginsListHandler,
     r"/plugins_list", PluginsListOldHandler,
     r"/plugins_new", NewPluginHandler,
     r"/plugins_new/command", NewCommandPlugin,
-    r"/plugins/(.+)", PluginsHandler
+    r"/plugins_log", PluginLogHandler,
+    r"/plugins/(.+)", LoadPluginHandler
 )

@@ -10,8 +10,10 @@
 
 {% block body %}
 <div class="grid-card">
-    <div class="grid-title">
+    <div class="grid-title btn-line-height">
         {{T("Tag List")}}
+
+        {% include common/back.html %}
     </div>
     <div class="top-offset-1">
     {% for tag_info in tag_list %}

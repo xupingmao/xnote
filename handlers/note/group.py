@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/07/12 16:46:38
+# @modified 2020/07/18 19:47:23
 import math
 import time
 import web
@@ -165,7 +165,7 @@ def load_note_index(user_name):
 
     return [
         NoteCard("分类", [
-            # NoteLink("计划", "/note/plan", "fa-calendar-check-o", size = note_stat.plan_count),
+            NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
             NoteLink("memo", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
             NoteLink("项目", "/note/timeline", "fa-folder", size = note_stat.group_count),
             NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
@@ -295,14 +295,15 @@ class NoteIndexHandler:
 
     @xauth.login_required()
     def GET(self):
-        source = xutils.get_argument("source")
+        source = xutils.get_argument("source", "list")
         page = 1
 
         limit  = xconfig.PAGE_SIZE
         offset = (page-1)*limit
 
-        files = load_note_index(xauth.current_name())
-        amount = len(files)
+        cards = load_note_index(xauth.current_name())
+        files = cards
+        amount = len(cards)
 
         if source == "group":
             show_path_list = False
@@ -311,12 +312,19 @@ class NoteIndexHandler:
             show_path_list = False
             show_parent_link = False
 
-        return xtemplate.render("note/page/note_index.html",
+        template = "note/page/note_index.html"
+        if source == "list":
+            template = "note/page/note_list.html"
+            files = []
+            for card in cards:
+                files += card.rows 
+
+        return xtemplate.render(template,
             pathlist  = [PathNode(TYPES_NAME, "/note/types")],
             html_title = T("索引"),
             file_type = "group",
             files     = files,
-            cards     = files,
+            cards     = cards,
             show_path_list   = show_path_list,
             show_parent_link = show_parent_link,
             show_next  = True,

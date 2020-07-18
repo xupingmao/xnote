@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2020/04/06 11:45:35
+# @modified 2020/07/18 20:10:30
 import xutils
 import xconfig
 import xmanager
@@ -132,7 +132,8 @@ def get_filter_by_tag_func(tag):
         if tag is None or tag == "all":
             return True
         if tag == "task":
-            return value.tag == "task" or value.status == 0 or value.status == 50
+            # 兼容老版本的数据
+            return value.tag == "task" or value.tag == "cron" or value.status == 0 or value.status == 50
         if tag == "done":
             return value.tag == "done" or value.status == 100
         return value.tag == tag

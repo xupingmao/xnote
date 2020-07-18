@@ -177,6 +177,11 @@
         + '\n</code></pre>\n';
     };
 
+    // 单行的code
+    myRenderer.codespan = function(text) {
+        return '<code class="marked-codespan">' + text + '</code>';
+    }
+
     // 重写strong
     myRenderer.strong = function (text) {
         return '<strong class="marked-strong"><a href="/s/' + text + '">' + text + '</a></strong>';
