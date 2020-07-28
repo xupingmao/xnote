@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/07/12 16:55:20
+# @modified 2020/07/28 01:33:12
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -53,6 +53,34 @@ NOTE_ICON_DICT = {
 }
 
 CREATE_LOCK = threading.RLock()
+
+class NoteSchema:
+    """这个类主要是说明结构"""
+
+    # 基本信息
+    id          = "主键ID"
+    name        = "笔记名称"
+    ctime       = "创建时间"
+    mtime       = "修改时间"
+    atime       = "访问时间"
+    type        = "类型"
+    size        = "大小"
+    parent_id   = "父级节点ID"
+    content     = "纯文本内容"
+    data        = "富文本内容"
+    is_deleted  = "是否删除"
+    archived    = "是否归档"
+
+    # 权限控制
+    creator     = "创建者"
+    is_public   = "是否公开"
+    token       = "分享token"
+    
+    # 统计信息
+    priority    = "优先级"
+    visited_cnt = "访问次数"
+    orderby     = "排序方式"
+    hot_index   = "热门指数"
 
 def format_note_id(id):
     return "%020d" % int(id)

@@ -1,12 +1,12 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2020/07/11 18:19:36
+# @modified 2020/07/29 00:37:16
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
  * 定时任务注册和执行
- * 插件注册和查找
+ * 事件管理器
 """
 from __future__ import print_function
 import os
@@ -604,7 +604,6 @@ def reload():
 
     cacheutil.clear_temp()
     load_init_script()
-    load_plugins(xconfig.PLUGINS_DIR)
     fire("sys.reload")
 
 def load_init_script():
@@ -614,99 +613,6 @@ def load_init_script():
         except:
             xutils.print_exc()
             print("Failed to execute script %s" % xconfig.INIT_SCRIPT)
-
-class PluginContext:
-
-    def __init__(self):
-        self.title = ""
-        self.description = ""
-        self.fname = ""
-
-    # sort方法重写__lt__即可
-    def __lt__(self, other):
-        return self.title < other.title
-
-    # 兼容Python2
-    def __cmp__(self, other):
-        return cmp(self.title, other.title)
-
-def is_plugin_file(fpath):
-    return os.path.isfile(fpath) and fpath.endswith(".py")
-
-def load_plugin_file(fpath, fname = None):
-    if fname is None:
-        fname = os.path.basename(fpath)
-    dirname = os.path.dirname(fpath)
-
-    # plugin name
-    pname = fsutil.get_relative_path(fpath, xconfig.PLUGINS_DIR)
-
-    vars = dict()
-    vars["script_name"] = pname
-    vars["fpath"] = fpath
-    try:
-        module = xutils.load_script(fname, vars, dirname = dirname)
-        main_class = vars.get("Main")
-        if main_class != None:
-            main_class.fname = fname
-            main_class.fpath = fpath
-            instance = main_class()
-            context = PluginContext()
-            context.fname = fname
-            context.fpath = fpath
-            context.name = os.path.splitext(fname)[0]
-            context.title = getattr(instance, "title", "")
-            context.category = xutils.attrget(instance, "category")
-            context.url = "/plugins/%s" % pname
-            if hasattr(main_class, 'on_init'):
-                instance.on_init(context)
-            context.clazz = main_class
-            xconfig.PLUGINS_DICT[pname] = context
-    except:
-        # TODO 增加异常日志
-        xutils.print_exc()
-
-def load_sub_plugins(dirname):
-    for fname in os.listdir(dirname):
-        fpath = os.path.join(dirname, fname)
-        if is_plugin_file(fpath):
-            # 支持插件子目录
-            load_plugin_file(fpath, fname)
-
-def load_plugins(dirname):
-    if not xconfig.LOAD_PLUGINS_ON_INIT:
-        return
-    xconfig.PLUGINS_DICT = {}
-    for fname in os.listdir(dirname):
-        fpath = os.path.join(dirname, fname)
-        if os.path.isdir(fpath):
-            load_sub_plugins(fpath)
-        if is_plugin_file(fpath):
-            load_plugin_file(fpath, fname)
-
-@xutils.timeit(logfile=True, logargs=True, name="FindPlugins")
-def find_plugins(category):
-    role = xauth.get_current_role()
-    plugins = []
-
-    if role is None:
-        # not logged in
-        return plugins
-
-    if category == "None":
-        category = None
-
-    for fname in xconfig.PLUGINS_DICT:
-        p = xconfig.PLUGINS_DICT.get(fname)
-        if p and xutils.attrget(p.clazz, "category") == category:
-            required_role = xutils.attrget(p.clazz, "required_role")
-            if role == "admin" or required_role is None or required_role == role:
-                plugins.append(p)
-    plugins.sort()
-    return plugins
-
-def list_plugins(category):
-    return 
 
 def put_task(func, *args, **kw):
     """添加异步任务到队列"""
@@ -776,5 +682,8 @@ def searchable(pattern = r".*", description = None, event_type = "search"):
         _event_manager.add_handler(handler)
         return func
     return deco
+
+def find_plugins(category):
+    return xutils.call("plugin.find_plugins", category)
 
 

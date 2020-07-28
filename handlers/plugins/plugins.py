@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/07/18 20:15:49
+# @modified 2020/07/29 00:43:51
 from io import StringIO
 import xconfig
 import codecs
@@ -23,9 +23,103 @@ from xtemplate import BasePlugin
 from xutils import History
 from xutils import cacheutil
 from xutils import Storage
+from xutils import fsutil
 from xutils import textutil, SearchResult, dateutil, dbutil, u
 
 MAX_HISTORY = 200
+
+class PluginContext:
+
+    def __init__(self):
+        self.title = ""
+        self.description = ""
+        self.fname = ""
+
+    # sort方法重写__lt__即可
+    def __lt__(self, other):
+        return self.title < other.title
+
+    # 兼容Python2
+    def __cmp__(self, other):
+        return cmp(self.title, other.title)
+
+def is_plugin_file(fpath):
+    return os.path.isfile(fpath) and fpath.endswith(".py")
+
+def load_plugin_file(fpath, fname = None):
+    if fname is None:
+        fname = os.path.basename(fpath)
+    dirname = os.path.dirname(fpath)
+
+    # plugin name
+    pname = fsutil.get_relative_path(fpath, xconfig.PLUGINS_DIR)
+
+    vars = dict()
+    vars["script_name"] = pname
+    vars["fpath"] = fpath
+    try:
+        module = xutils.load_script(fname, vars, dirname = dirname)
+        main_class = vars.get("Main")
+        if main_class != None:
+            main_class.fname = fname
+            main_class.fpath = fpath
+            instance = main_class()
+            context = PluginContext()
+            context.fname = fname
+            context.fpath = fpath
+            context.name = os.path.splitext(fname)[0]
+            context.title = getattr(instance, "title", "")
+            context.category = xutils.attrget(instance, "category")
+            context.required_role = xutils.attrget(instance, "required_role")
+
+            context.url = "/plugins/%s" % pname
+            if hasattr(main_class, 'on_init'):
+                instance.on_init(context)
+            context.clazz = main_class
+            xconfig.PLUGINS_DICT[pname] = context
+    except:
+        # TODO 增加异常日志
+        xutils.print_exc()
+
+def load_sub_plugins(dirname):
+    for fname in os.listdir(dirname):
+        fpath = os.path.join(dirname, fname)
+        if is_plugin_file(fpath):
+            # 支持插件子目录
+            load_plugin_file(fpath, fname)
+
+def load_plugins(dirname = None):
+    if dirname is None:
+        dirname = xconfig.PLUGINS_DIR
+
+    xconfig.PLUGINS_DICT = {}
+    for fname in os.listdir(dirname):
+        fpath = os.path.join(dirname, fname)
+        if os.path.isdir(fpath):
+            load_sub_plugins(fpath)
+        if is_plugin_file(fpath):
+            load_plugin_file(fpath, fname)
+
+@xutils.timeit(logfile=True, logargs=True, name="FindPlugins")
+def find_plugins(category):
+    role = xauth.get_current_role()
+    plugins = []
+
+    if role is None:
+        # not logged in
+        return plugins
+
+    if category == "None":
+        category = None
+
+    for fname in xconfig.PLUGINS_DICT:
+        p = xconfig.PLUGINS_DICT.get(fname)
+        if p and p.category == category:
+            required_role = p.required_role
+            if role == "admin" or required_role is None or required_role == role:
+                plugins.append(p)
+    plugins.sort()
+    return plugins
 
 def link(name, url, title = ""):
     if title == "":
@@ -116,19 +210,19 @@ def sorted_plugins(user_name, plugins):
             del url_dict[log.url]
 
     # print(plugins)
-    print("Recent Urls:", recent_urls)
-    print("Recent Plugins:", recent_plugins)
+    # print("Recent Urls:", recent_urls)
+    # print("Recent Plugins:", recent_plugins)
 
     rest_plugins = list(filter(lambda x:x.url not in recent_urls, plugins))
     return recent_plugins + rest_plugins
 
 def list_plugins(category, sort = True):
     if category == "other":
-        plugins = xmanager.find_plugins(None)
+        plugins = find_plugins(None)
         links = build_plugin_links(plugins)
     elif category and category != "all":
         # 某个分类的插件
-        plugins = xmanager.find_plugins(category)
+        plugins = find_plugins(category)
         links = build_plugin_links(plugins)
     else:
         # 所有插件
@@ -156,10 +250,32 @@ def list_recent_plugins():
     return list(filter(None, links))
 
 def list_visit_logs(user_name, offset = 0, limit = -1):
-    return dbutil.prefix_list("plugin_visit_log:%s" % user_name, 
+    logs = dbutil.prefix_list("plugin_visit_log:%s" % user_name, 
         offset = offset, limit = limit, reverse = True)
+    logs.sort(key = lambda x: x.time, reverse = True)
+    return logs
+
+def find_visit_log(user_name, url):
+    for key, log in dbutil.prefix_iter("plugin_visit_log:%s" % user_name, include_key = True):
+        if log.url == url:
+            log.key = key
+            return log
+    return None
+
+def update_visit_log(log, name):
+    log.name = name
+    log.time = dateutil.format_datetime()
+    if log.visit_cnt is None:
+        log.visit_cnt = 1
+    log.visit_cnt += 1
+    dbutil.put(log.key, log)
 
 def add_visit_log(user_name, name, url):
+    exist_log = find_visit_log(user_name, url)
+    if exist_log != None:
+        update_visit_log(exist_log, name)
+        return
+
     log = Storage()
     log.name = name
     log.url  = url
@@ -183,6 +299,10 @@ def load_plugin(name):
         xutils.load_script(script_name, vars)
         main_class = vars.get("Main")
         main_class.fpath = fpath
+        
+        # 发现了新的插件，先临时重新加载一下，后续优化成按需加载的模式
+        load_plugins()
+
         return main_class
     else:
         return context.clazz
@@ -439,6 +559,12 @@ class PluginLogHandler:
         user_name = xauth.current_name()
         logs = list_visit_logs(user_name)
         return logs
+
+@xmanager.listen("sys.reload")
+def reload_plugins(ctx):
+    load_plugins()
+
+xutils.register_func("plugin.find_plugins", find_plugins)
 
 xurls = (
     r"/plugins_list_new", PluginsListHandler,

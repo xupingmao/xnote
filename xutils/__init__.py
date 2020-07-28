@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/02/23 16:17:43
+# @modified 2020/07/28 01:39:02
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -730,6 +730,11 @@ def register_func(name, func):
     _funcs[name] = func
 
 def call(_func_name, *args, **kw):
+    """调用函数
+    @param {string} _func_name 方法名
+    @param {nargs} *args 可变参数
+    @param {kwargs} **kw 关键字参数
+    """
     return _funcs[_func_name](*args, **kw)
 
 def lookup_func(name):

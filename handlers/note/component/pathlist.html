@@ -26,7 +26,11 @@
         <a class="gray-tag-link" href="/note/html">富文本</a>
     {% end %}
 
-    {% if path_item.type in ("md", "log", "text", "plan") %}
+    {% if path_item.type == "log" %}
+        <a class="gray-tag-link" href="/note/log">日志</a>
+    {% end %}
+
+    {% if path_item.type in ("md", "text", "plan") %}
         <a class="gray-tag-link" href="/note/document">文档</a>
     {% end %}
 
