@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2020/07/18 18:18:02
+# @modified 2020/08/09 22:44:41
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -56,6 +56,9 @@ def process_message(message):
         message.tag = "task"
     if message.status == 100:
         message.tag = "done"
+
+    if message.tag == "cron":
+        message.tag = "task"
 
     message.tag_text = TAG_TEXT_DICT.get(message.tag, message.tag)
 

@@ -10,6 +10,12 @@
 } %}
 
 {% for item in files %}
+    
+    <!-- 隐藏的记录 -->
+    {% if hasattr(item, "hide") and item.hide %}
+        {% continue %}
+    {% end %}
+
     <a class="dialog-link" href="{{item.url}}">
         <div class="book-item">
 
@@ -21,11 +27,6 @@
                         <span class="book-size-span">{{format_date(item.action_time).replace('-', '/')}}</span>
                     </div>
                 </div>
-            {% end %}
-
-            <!-- 隐藏的记录 -->
-            {% if hasattr(item, "hide") and item.hide %}
-                {% continue %}
             {% end %}
 
             {% if item.priority>0 %}
