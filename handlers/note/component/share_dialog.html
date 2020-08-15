@@ -1,3 +1,4 @@
+<!-- 分享弹窗 -->
 {% if _has_login %}
     <button onclick="showShareDialog()">分享</button>
 {% end %}
@@ -17,7 +18,7 @@ $(function () {
 
     function assembleDialogBody(data) {
         var container = $("<div>");
-        var itemTemplateHtml = '<p class="card-row">\
+        var itemTemplateHtml = '<p class="card-row share-dialog-row">\
                 <i class="fa ${icon}"></i>\
                 <a href="${url}">${name}</a>${shared}\
                 <input type="checkbox" class="search-note-checkbox float-right" data-id="${id}">\

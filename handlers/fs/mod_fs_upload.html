@@ -17,6 +17,8 @@ $(function () {
     // 文件上传逻辑
     var BASE_URL = "/static/lib/webuploader";
     $("#target-path").text(location.hash.substr(1)).attr("href", "/fs/" + location.hash.substr(1));
+    var uploadFailed = false;
+
     // 初始化Web Uploader
     var uploader = WebUploader.create({
 
@@ -105,15 +107,20 @@ $(function () {
 
     // 文件上传失败，显示上传出错。
     uploader.on( 'uploadError', function( file ) {
-        var $li = $( '#'+file.id ),
-            $error = $li.find('div.error');
 
-        // 避免重复创建
-        if ( !$error.length ) {
-            $error = $('<div class="error"></div>').appendTo( $li );
-        }
+        // 错误处理见 uploadAccept
+        // var $li = $( '#'+file.id ),
+        //     $error = $li.find('div.error');
 
-        $error.text('上传失败');
+        // // 避免重复创建
+        // if ( !$error.length ) {
+        //     $error = $('<div class="error"></div>').appendTo( $li );
+        // }
+
+        // $error.text('上传失败:');
+        // uploadFailed = true;
+
+        // console.log("上传失败");
     });
 
     // 完成上传完了，成功或者失败，先删除进度条。
@@ -123,9 +130,37 @@ $(function () {
         var initedCount = uploader.getFiles("inited").length;
         var queuedCount = uploader.getFiles("queued").length;
         var progressCount = uploader.getFiles("progress").length;
-        if (initedCount + queuedCount + progressCount == 0) {
+        if (initedCount + queuedCount + progressCount == 0 && uploadFailed == false) {
             location.reload();
         }
+    });
+
+    uploader.on( 'uploadAccept', function (object, response) {
+        // 服务端一定要返回 [500,600) 的错误码
+        console.log("uploadAccept");
+
+        if (response.code == "success") {
+            return true;
+        } else {
+            // 上传失败
+            var file = object.file;
+            var $li = $( '#'+file.id ),
+                $error = $li.find('div.error');
+
+            // 避免重复创建
+            if ( !$error.length ) {
+                $error = $('<div class="error"></div>').appendTo( $li );
+            }
+
+            console.log(file);
+            console.log(response);
+
+            $error.text('上传失败:' + response.message);
+            uploadFailed = true;
+
+            return false;
+        }
+        
     });
 
     uploader.on( 'error', function (file) {

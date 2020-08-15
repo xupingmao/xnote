@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2020/05/03 11:24:10
+ * @modified 2020/08/15 11:44:52
 */
 
 
@@ -245,4 +245,8 @@
 
 .dict-list-value {
     color: #000;
+}
+
+.share-dialog-row {
+    padding-left: 20px;
 }

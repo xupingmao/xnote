@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2020/04/01 17:16:37
+# @modified 2020/08/15 18:05:53
 import os
 import uuid
 import web
@@ -150,6 +150,8 @@ class RangeUploadHandler:
         webpath  = ""
         origin_name = ""
 
+        # print(web.ctx.env)
+
         if hasattr(file, "filename"):
             origin_name = file.filename
             xutils.trace("UploadFile", file.filename)
@@ -167,6 +169,11 @@ class RangeUploadHandler:
 
             if chunk == 0:
                 lock = try_lock_file(filepath)
+
+            if os.path.exists(filepath):
+                # return dict(code = "fail", message = "文件已存在")
+                web.ctx.status = "500 Server Error"
+                return dict(code = "fail", message = "文件已存在")
 
             if part_file:
                 tmp_name = "%s_%d.part" % (filename, chunk)
@@ -219,9 +226,16 @@ class UploadSearchHandler:
             upload_link_by_month = upload_link_by_month,
             get_display_name = get_display_name)
 
+class CheckHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        pass
+
 xurls = (
     # 和文件系统的/fs/冲突了
     r"/fs_upload", UploadHandler, 
+    r"/fs_upload/check", CheckHandler,
     r"/fs_upload/search", UploadSearchHandler,
     r"/fs_upload/range", RangeUploadHandler
 )

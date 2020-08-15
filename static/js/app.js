@@ -328,29 +328,3 @@ $(function () {
 
     init();
 });
-
-window.ContentDialog = {
-  open: function (title, content, size) {
-    var width = $(".root").width() - 40;
-    var area;
-
-    if (isMobile()) {
-      area = ['100%', '100%'];
-    } else {
-      if (size == "small") {
-        area = ['400px', '300px'];        
-      } else {
-        area = [width + 'px', '80%'];
-      }
-    }
-
-    layer.open({
-      type: 1,
-      shadeClose: true,
-      title: title,
-      area: area,
-      content: content,
-      scrollbar: false
-    });
-  }
-}
