@@ -34,5 +34,9 @@
         <a class="gray-tag-link" href="/note/document">文档</a>
     {% end %}
 
+    {% if path_item.is_public %}
+        <a class="gray-tag-link" href="/note/public">公开</a>
+    {% end %}
+
 {% end %}
 

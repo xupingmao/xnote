@@ -2,7 +2,7 @@
  * 侧边栏主题样式
  * @author xupingmao
  * @since 2019/06/18
- * @modified 2020/06/20 16:21:25
+ * @modified 2020/08/20 23:33:51
  */
 
 body {
@@ -39,6 +39,7 @@ body {
 .main-content {
     padding: 10px;
     width: 100%;
+    margin-left: 0px;
 }
 
 .nav-left-search {

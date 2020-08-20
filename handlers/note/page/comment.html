@@ -1,4 +1,5 @@
 {% init comment_class = "" %}
+{% init show_comment_title = True %}
 {% init comment_btn_text = "评论" %}
 {% init comment_placeholder = "请输入评论..." %}
 
@@ -12,6 +13,10 @@
 <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 
 <div class="card {{comment_class}}">
+    {% if show_comment_title %}
+        <h3 style="background-color:#f9f9f9;padding:10px;">评论</h3>
+    {% end %}
+
     {% if _has_login %}
     <div class="col-md-12">
         <textarea id="commentText" class="col-md-12 no-outline" placeholder="{{comment_placeholder}}"></textarea>

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/07/28 01:33:12
+# @modified 2020/08/19 00:28:19
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -165,7 +165,8 @@ def build_note_info(note):
     return note
 
 def convert_to_path_item(note):
-    return Storage(name = note.name, url = note.url, id = note.id, type = note.type, priority = note.priority)
+    return Storage(name = note.name, url = note.url, id = note.id, 
+        type = note.type, priority = note.priority, is_public = note.is_public)
 
 @xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
 def list_path(file, limit = 2):
