@@ -13,13 +13,8 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 
 以下是一些页面展示
 
-![笔记](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v2.5_20200502.png)
+![笔记](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v2.6_home.png)
 
-上图采用的是【默认】的主题，可以到【设置】页面进行设置
-
-![最近](https://git.oschina.net/xupingmao/xnote/raw/master/screenshots/xnote_v2.5_recent.png)
-
-上图采用的是【侧边栏】的主题，可以到【设置】页面进行设置
 
 -----
 ## 项目地址

@@ -196,12 +196,12 @@ $(function () {
     })
 
     $(".delete-btn").on("click", function () {
-        var checked = $(":checked");
+        var checked = $(".checkboxTd :checked");
         if (checked.length == 0) {
             alert("请选择文件");
         } else if (checked.length > 1) {
             var pathlist = []
-            $(":checked").each(function (index, element) {
+            $(".checkboxTd :checked").each(function (index, element) {
                 var name = $(element).attr("data-name");
                 var path = $(element).attr("data-path");
                 pathlist.push(path);
@@ -216,7 +216,7 @@ $(function () {
     });
 
     $("#renameBtn").on("click", function () {
-        var checked = $(":checked");
+        var checked = $(".checkboxTd :checked");
         if (checked.length == 0) {
             alert("请选择文件");
         } else if (checked.length > 1) {
