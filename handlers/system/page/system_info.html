@@ -1,0 +1,19 @@
+{% extends base.html %}
+
+{% block body %}
+
+    {% include system/component/system-css.html %}
+
+    {% set title = "系统信息" %}
+    {% include common/base_title.html %}
+
+    {% for item in items %}
+        <div class="settings-row">
+            <div class="settings-key">{{item.name}}</div>
+            <div class="settings-value">
+                {{item.value}}
+            </div>
+        </div>
+    {% end %}
+
+{% end %}

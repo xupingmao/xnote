@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2020/05/04 23:34:57
+# @modified 2020/08/22 22:28:08
 
 import sys
 import os
@@ -141,6 +141,9 @@ class TestMain(BaseTestCase):
         self.check_200("/system/log")
         self.check_200("/system/clipboard-monitor")
         # self.check_200("/system/pydoc")
+
+    def test_sys_info(self):
+        self.check_OK("/system/info")
 
     def test_api(self):
         self.check_200("/api/check_network")
