@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/07/18 19:23:06
+ * @modified 2020/08/27 00:45:45
  */
 
 /** marked 样式 **/
@@ -295,8 +295,13 @@
 
 /** 列表样式 **/
 .list-item {
-    float: left;
     width: 100%;
+    padding: 10px 5px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    float: left;
+    line-height: 25px;
+    border-bottom: 1px solid #eee;
     cursor: pointer;
 }
 

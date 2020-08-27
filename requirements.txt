@@ -3,3 +3,4 @@ psutil==5.6.6
 objgraph==3.1.0
 leveldb==0.201
 Pillow==6.2.2
+requests==2.22.0
