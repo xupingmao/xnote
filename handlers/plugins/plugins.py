@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/08/30 12:42:33
+# @modified 2020/08/30 14:19:44
 from io import StringIO
 import xconfig
 import codecs
@@ -26,7 +26,28 @@ from xutils import Storage
 from xutils import fsutil
 from xutils import textutil, SearchResult, dateutil, dbutil, u
 
-MAX_HISTORY = 200
+
+"""xnote插件模块，由于插件的权限较大，开发权限只开放给管理员，普通用户可以使用
+
+插件的模型：插件包含两部分，程序和数据，程序部分存储在插件目录中的文件，数据存储在数据库或者文件中，使用dbutil/fsutil接口操作数据
+- 插件名称、描述、文件名、文件路径
+- 插件的主类
+- 插件的分类
+- 插件的访问权限
+
+插件的生命周期
+- 插件的注册：debug模式下实时注册，非debug模式：初始化注册+按需注册
+- 插件的卸载：退出应用
+- 插件的刷新：刷新系统的时候重新加载
+- 插件的删除：删除插件文件
+
+插件日志：
+- 日志关系：每个用户保留一个插件访问记录，记录最近访问的时间，访问的总次数
+- 日志的创建：访问的时候创建
+- 日志的更新：访问的时候更新
+- 日志的删除：暂无
+
+"""
 
 class PluginContext:
 
@@ -38,6 +59,9 @@ class PluginContext:
         self.fpath = ""
         self.category = ""
         self.required_role = ""
+        self.atime = ""
+        self.editable = True
+        self.edit_link = ""
 
     # sort方法重写__lt__即可
     def __lt__(self, other):
@@ -81,6 +105,8 @@ def load_plugin_file(fpath, fname = None):
             context.required_role = xutils.attrget(instance, "required_role")
             context.url           = "/plugins/%s" % plugin_name
             context.clazz         = main_class
+            context.edit_link     = "code/edit?path=" + fpath
+            context.link          = context.url
 
             # 初始化插件
             if hasattr(main_class, 'on_init'):
@@ -124,49 +150,38 @@ def find_plugins(category):
     plugins.sort()
     return plugins
 
-def link(name, url, title = ""):
-    if title == "":
-        title = name
-    return Storage(name = name, 
-        url = url, 
-        link = url, 
-        title = title, 
-        fname = name,
-        editable = False, 
-        atime = "")
-
-def inner_link(name, url):
-    return Storage(name = name, 
-        url = url, 
-        link = url, 
-        fname = name,
-        title = name, 
-        editable = False, 
-        category = "inner", 
-        atime="")
+def inner_plugin(name, url):
+    context = PluginContext()
+    context.name = name
+    context.title = name
+    context.url   = url
+    context.link  = url
+    context.editable = False
+    context.category = "inner"
+    return context
 
 INNER_TOOLS = [
-    inner_link("浏览器信息", "/tools/browser_info"),
+    inner_plugin("浏览器信息", "/tools/browser_info"),
     # 文本
-    inner_link("文本对比", "/tools/text_diff"),
-    inner_link("文本转换", "/tools/text_convert"),
-    inner_link("随机字符串", "/tools/random_string"),
+    inner_plugin("文本对比", "/tools/text_diff"),
+    inner_plugin("文本转换", "/tools/text_convert"),
+    inner_plugin("随机字符串", "/tools/random_string"),
     # 图片
-    inner_link("图片合并", "/tools/img_merge"),
-    inner_link("图片拆分", "/tools/img_split"),
-    inner_link("图像灰度化", "/tools/img2gray"),
+    inner_plugin("图片合并", "/tools/img_merge"),
+    inner_plugin("图片拆分", "/tools/img_split"),
+    inner_plugin("图像灰度化", "/tools/img2gray"),
     # 编解码
-    inner_link("base64", "/tools/base64"),
-    inner_link("HEX转换", "/tools/hex"),
-    inner_link("md5签名", "/tools/md5"),
-    inner_link("sha1签名", "/tools/sha1"),
-    inner_link("URL编解码", "/tools/urlcoder"),
-    inner_link("条形码", "/tools/barcode"),
-    inner_link("二维码", "/tools/qrcode"),
+    inner_plugin("base64", "/tools/base64"),
+    inner_plugin("HEX转换", "/tools/hex"),
+    inner_plugin("md5签名", "/tools/md5"),
+    inner_plugin("sha1签名", "/tools/sha1"),
+    inner_plugin("URL编解码", "/tools/urlcoder"),
+    inner_plugin("条形码", "/tools/barcode"),
+    inner_plugin("二维码", "/tools/qrcode"),
     # 其他工具
-    inner_link("分屏模式", "/tools/multi_win"),
-    inner_link("RunJS", "/tools/runjs"),
-    inner_link("摄像头", "/tools/camera"),
+    inner_plugin("分屏模式", "/tools/multi_win"),
+    inner_plugin("RunJS", "/tools/runjs"),
+    inner_plugin("摄像头", "/tools/camera"),
 ]
 
 
@@ -174,47 +189,26 @@ def build_inner_tools():
     return copy.copy(INNER_TOOLS)
 
 def build_plugin_links(plugins):
-    links = []
-    for plugin in plugins:
-        fname = plugin.fname
-        fpath = plugin.fpath
-
-        item = link(plugin.title, plugin.url)
-        item.editable = True
-        atime = cacheutil.zscore("plugins.history", plugin.name)
-        if atime:
-            item.atime = xutils.format_date(atime)
-        else:
-            item.atime = ""
-
-        item.edit_link = "/code/edit?path=" + fpath
-        item.title = plugin.title
-        item.fname = plugin.fname
-
-        links.append(item)
-
-    return links
+    return plugins
 
 def sorted_plugins(user_name, plugins):
     # 把最近访问的放在前面
-    logs = list_visit_logs(user_name, 0, 20)
+    logs = list_visit_logs(user_name)
     
+    # 构造url到插件的映射
     url_dict = dict()
     for p in plugins:
         url_dict[p.url] = p
 
     recent_plugins = []
-    recent_urls = []
+    recent_urls    = []
 
+    # 通过日志里的url找插件
     for log in logs:
         if log.url in url_dict:
             recent_plugins.append(url_dict[log.url])
             recent_urls.append(log.url)
             del url_dict[log.url]
-
-    # print(plugins)
-    # print("Recent Urls:", recent_urls)
-    # print("Recent Plugins:", recent_plugins)
 
     rest_plugins = list(filter(lambda x:x.url not in recent_urls, plugins))
     return recent_plugins + rest_plugins
@@ -222,11 +216,11 @@ def sorted_plugins(user_name, plugins):
 def list_plugins(category, sort = True):
     if category == "other":
         plugins = find_plugins(None)
-        links = build_plugin_links(plugins)
+        links   = build_plugin_links(plugins)
     elif category and category != "all":
         # 某个分类的插件
         plugins = find_plugins(category)
-        links = build_plugin_links(plugins)
+        links   = build_plugin_links(plugins)
     else:
         # 所有插件
         links = build_inner_tools()
@@ -247,7 +241,7 @@ def find_plugin_by_name(name):
 
 def list_recent_plugins():
     user_name = xauth.current_name()
-    items = list_visit_logs(user_name, 0, 5)
+    items = list_visit_logs(user_name)
     links = [find_plugin_by_name(log.name) for log in items]
 
     return list(filter(None, links))
@@ -288,9 +282,7 @@ def add_visit_log(user_name, name, url):
 
 def load_plugin(name):
     user_name = xauth.current_name()
-    add_visit_log(user_name, name, "/plugins/" + name)
-
-    context = xconfig.PLUGINS_DICT.get(name)
+    context   = xconfig.PLUGINS_DICT.get(name)
     if xconfig.DEBUG or context is None:
         script_name = "plugins/" + name
         fpath = os.path.join(xconfig.PLUGINS_DIR, name)
@@ -299,11 +291,11 @@ def load_plugin(name):
         # 发现了新的插件，重新加载一下
         plugin = load_plugin_file(fpath)
         if plugin:
-            return plugin.clazz
+            return plugin
         else:
             return None
     else:
-        return context.clazz
+        return context
 
 @xmanager.searchable()
 def on_search_plugins(ctx):
@@ -313,28 +305,18 @@ def on_search_plugins(ctx):
         return
     if ctx.search_dict:
         return
-    name    = ctx.key
+
     results = []
-    words   = textutil.split_words(name)
-    for name in xconfig.PLUGINS_DICT:
-        plugin = xconfig.PLUGINS_DICT[name]
-        unquote_name = xutils.unquote(plugin.fname)
-        unquote_name, ext = os.path.splitext(unquote_name)
-        plugin_context = plugin
-        if textutil.contains_all(unquote_name, words) \
-                or (textutil.contains_all(plugin_context.title, words)):
-            result           = SearchResult()
-            result.category  = "plugin"
-            result.icon      = "fa-cube"
-            result.name      = u(unquote_name)
-            if plugin_context != None:
-                # result.raw = u(plugin_context.title)
-                # result.name = u("插件 %s (%s)") % (u(plugin_context.title), unquote_name)
-                if plugin_context.title != None:
-                    result.name = u(plugin_context.title + "(" + unquote_name + ")")
-            result.url       = u(plugin.url)
-            result.edit_link = u("/code/edit?path=" + plugin.fpath)
-            results.append(result)
+
+    for plugin in search_plugins(ctx.key):
+        result           = SearchResult()
+        result.category  = "plugin"
+        result.icon      = "fa-cube"
+        result.name      = u(plugin.name)
+        result.name      = u(plugin.title + "(" + plugin.name + ")")
+        result.url       = u(plugin.url)
+        result.edit_link = plugin.edit_link
+        results.append(result)
 
     result_count = len(results)
     if ctx.category != "plugin" and len(results) > 3:
@@ -439,9 +421,14 @@ class LoadPluginHandler:
         if not name.endswith(".py"):
             name += ".py"
         try:
-            main_class = load_plugin(name)
-            if main_class != None:
-                return main_class().render()
+            plugin = load_plugin(name)
+            if plugin != None:
+                # 访问日志
+                add_visit_log(user_name, name, "/plugins/" + name)
+                plugin.atime = dateutil.format_datetime()
+
+                # 渲染页面
+                return plugin.clazz().render()
             else:
                 return xtemplate.render("error.html", 
                     error = "plugin `%s` not found!" % name)

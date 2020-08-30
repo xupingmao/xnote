@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/06/23 10:33:11
+# @modified 2020/08/30 14:14:52
 
 import re
 import os
@@ -106,23 +106,33 @@ def build_search_context(user_name, category, key):
     ctx.input_text          = key
     ctx.words               = words
     ctx.category            = category
-    ctx.search_message      = (category == "message")
-    ctx.search_note_content = (category == "content")
-    ctx.search_dict         = (category == "dict")
+    ctx.search_message      = False
+    ctx.search_note_content = False
+    ctx.search_dict         = False
+    ctx.search_tool         = True
     ctx.user_name           = user_name
 
-    if ctx.search_message:
+    if category == "message":
+        ctx.search_message = True
         ctx.search_note = False
         ctx.search_note_content = False
         ctx.search_tool = False
-    if ctx.search_dict:
-        ctx.search_note = False
-        ctx.search_tool = False
-    if ctx.search_note_content:
-        ctx.search_tool = False
+
     if ctx.category == "book":
         ctx.search_note = False
         ctx.search_tool = False
+
+    if category == "dict":
+        ctx.search_dict = True
+        ctx.search_note = False
+        ctx.search_tool = False
+
+    if category == "content":
+        ctx.search_note_content = True
+        ctx.search_tool         = False
+
+    if category == "tool":
+        ctx.search_tool = True
 
     return ctx
 
