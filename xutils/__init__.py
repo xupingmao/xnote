@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/07/28 01:39:02
+# @modified 2020/08/30 12:33:52
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -575,6 +575,12 @@ def exec_script(name, new_window=True, record_stdout = True, vars = None):
     return ret
 
 def load_script(name, vars = None, dirname = None, code = None):
+    """加载脚本
+    @param {string} name 插件的名词，和脚本目录(/data/scripts)的相对路径
+    @param {dict} vars 全局变量，相当于脚本的globals变量
+    @param {dirname} dirname 自定义脚本目录
+    @param {code} 指定code运行，不加载文件
+    """
     if dirname is None:
         # 必须实时获取dirname
         dirname = xconfig.SCRIPTS_DIR

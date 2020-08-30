@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2019/02/24 23:34:35
+# @modified 2020/08/30 11:30:52
 # decode: bytes -> str
 # encode: str -> bytes
 import os
@@ -17,6 +17,11 @@ try:
 
 except ImportError as e:
     from urllib2 import urlopen, Request
+
+try:
+    import requests
+except ImportError:
+    requests = None
 
 BUFSIZE = 1024 * 512
 
@@ -135,8 +140,14 @@ def do_http(method, url, headers, data=None, charset='utf-8'):
             raise Exception("暂不支持%s编码" % content_encoding)
         return resp.getcode(), response_headers, codecs.decode(buf, charset)
 
+def http_get_by_requests(url, charset = None):
+    resp = requests.get(url, headers = {"User-Agent": USER_AGENT})
+    return resp.text
+
 def http_get(url, charset=None):
     """Http的GET请求"""
+    if requests != None:
+        return http_get_by_requests(url, charset)
     out = []
     bufsize = BUFSIZE
     readsize = 0
@@ -163,19 +174,30 @@ def http_post(url, body='', charset='utf-8'):
     status, headers, body = do_http("POST", url, None, body)
     return body
 
+def http_download_by_requests(url, destpath):
+    resp = requests.get(url, headers = {"User-Agent": USER_AGENT})
+    with open(destpath, "wb") as fp:
+        for chunk in resp.iter_content(chunk_size = BUFSIZE):
+            fp.write(chunk)
+
 def http_download(address, destpath = None, dirname = None):
+    if dirname is not None:
+        basename = os.path.basename(address)
+        destpath = os.path.join(dirname, basename)
+
+    if requests is not None:
+        return http_download_by_requests(address, destpath)
+
     bufsize = BUFSIZE
     address = get_http_url(address)
     headers = {
         "User-Agent": USER_AGENT
     }
     request = Request(address, headers = headers)
-    stream = urlopen(request)
-    chunk = stream.read(bufsize)
-    if dirname is not None:
-        basename = os.path.basename(address)
-        destpath = os.path.join(dirname, basename)
-    dest = open(destpath, "wb")
+    stream  = urlopen(request)
+    chunk   = stream.read(bufsize)
+    dest    = open(destpath, "wb")
+
     try:
         readsize = 0
         while chunk:

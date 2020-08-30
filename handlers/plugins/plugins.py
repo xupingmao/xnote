@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/08/28 00:42:53
+# @modified 2020/08/30 12:42:33
 from io import StringIO
 import xconfig
 import codecs
@@ -32,8 +32,12 @@ class PluginContext:
 
     def __init__(self):
         self.title = ""
+        self.name  = ""
         self.description = ""
         self.fname = ""
+        self.fpath = ""
+        self.category = ""
+        self.required_role = ""
 
     # sort方法重写__lt__即可
     def __lt__(self, other):
@@ -47,58 +51,57 @@ def is_plugin_file(fpath):
     return os.path.isfile(fpath) and fpath.endswith(".py")
 
 def load_plugin_file(fpath, fname = None):
+    if not is_plugin_file(fpath):
+        return
     if fname is None:
         fname = os.path.basename(fpath)
     dirname = os.path.dirname(fpath)
 
-    # plugin name
-    pname = fsutil.get_relative_path(fpath, xconfig.PLUGINS_DIR)
+    # 相对于插件目录的名称
+    plugin_name = fsutil.get_relative_path(fpath, xconfig.PLUGINS_DIR)
 
     vars = dict()
-    vars["script_name"] = pname
+    vars["script_name"] = plugin_name
     vars["fpath"] = fpath
+
     try:
         module = xutils.load_script(fname, vars, dirname = dirname)
         main_class = vars.get("Main")
         if main_class != None:
-            main_class.fname = fname
-            main_class.fpath = fpath
-            instance = main_class()
-            context = PluginContext()
-            context.fname = fname
-            context.fpath = fpath
-            context.name = os.path.splitext(fname)[0]
-            context.title = getattr(instance, "title", "")
-            context.category = xutils.attrget(instance, "category")
+            # 实例化插件
+            main_class.fname      = fname
+            main_class.fpath      = fpath
+            instance              = main_class()
+            context               = PluginContext()
+            context.fname         = fname
+            context.fpath         = fpath
+            context.name          = os.path.splitext(fname)[0]
+            context.title         = getattr(instance, "title", "")
+            context.category      = xutils.attrget(instance, "category")
             context.required_role = xutils.attrget(instance, "required_role")
+            context.url           = "/plugins/%s" % plugin_name
+            context.clazz         = main_class
 
-            context.url = "/plugins/%s" % pname
+            # 初始化插件
             if hasattr(main_class, 'on_init'):
                 instance.on_init(context)
-            context.clazz = main_class
-            xconfig.PLUGINS_DICT[pname] = context
+
+            # 注册插件
+            xconfig.PLUGINS_DICT[plugin_name] = context
+            return context
     except:
         # TODO 增加异常日志
         xutils.print_exc()
-
-def load_sub_plugins(dirname):
-    for fname in os.listdir(dirname):
-        fpath = os.path.join(dirname, fname)
-        if is_plugin_file(fpath):
-            # 支持插件子目录
-            load_plugin_file(fpath, fname)
 
 def load_plugins(dirname = None):
     if dirname is None:
         dirname = xconfig.PLUGINS_DIR
 
     xconfig.PLUGINS_DICT = {}
-    for fname in os.listdir(dirname):
-        fpath = os.path.join(dirname, fname)
-        if os.path.isdir(fpath):
-            load_sub_plugins(fpath)
-        if is_plugin_file(fpath):
-            load_plugin_file(fpath, fname)
+    for root, dirs, files in os.walk(dirname):
+        for fname in files:
+            fpath = os.path.join(root, fname)
+            load_plugin_file(fpath)
 
 @xutils.timeit(logfile=True, logargs=True, name="FindPlugins")
 def find_plugins(category):
@@ -293,17 +296,12 @@ def load_plugin(name):
         fpath = os.path.join(xconfig.PLUGINS_DIR, name)
         if not os.path.exists(fpath):
             return None
-        vars = dict()
-        vars["script_name"] = script_name
-        vars["fpath"] = fpath
-        xutils.load_script(script_name, vars)
-        main_class = vars.get("Main")
-        main_class.fpath = fpath
-        
-        # 发现了新的插件，先临时重新加载一下，后续优化成按需加载的模式
-        load_plugins()
-
-        return main_class
+        # 发现了新的插件，重新加载一下
+        plugin = load_plugin_file(fpath)
+        if plugin:
+            return plugin.clazz
+        else:
+            return None
     else:
         return context.clazz
 
@@ -358,7 +356,7 @@ def search_plugins(key):
     return result
 
 
-class PluginsListOldHandler:
+class PluginsListHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -383,7 +381,7 @@ class PluginsListOldHandler:
             category = category,
             html_title = "插件",
             show_aside = xconfig.OPTION_STYLE == "aside",
-            search_placeholder = "搜索工具",
+            search_placeholder = "搜索插件",
             search_action = "/plugins_list",
             recent     = recent,
             plugins    = plugins)
@@ -410,7 +408,7 @@ def get_plugin_category(category):
     plugin_categories.append(["其他", other_plugins])
     return plugin_categories
 
-class PluginsListHandler:
+class PluginsGridHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -470,8 +468,8 @@ xutils.register_func("plugin.find_plugins", find_plugins)
 xutils.register_func("plugin.add_visit_log", add_visit_log)
 
 xurls = (
-    r"/plugins_list_new", PluginsListHandler,
-    r"/plugins_list", PluginsListOldHandler,
+    r"/plugins_list_new", PluginsGridHandler,
+    r"/plugins_list", PluginsListHandler,
     r"/plugins_log", PluginLogHandler,
     r"/plugins/(.+)", LoadPluginHandler
 )

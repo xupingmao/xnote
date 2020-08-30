@@ -2,7 +2,20 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/08/27 00:45:45
+ * @modified 2020/08/30 12:20:23
+ * 命名规范（主要参考bootstrap）: 包含两部分，
+ * 1：简单的、望文生义的样式，比如颜色 red, blue等等
+ * 2：复杂样式，命名规则为：模块名(可选)-功能外观-子功能外观(可选)-实现方式(可选)-特征或状态(可选)，示例如下：
+ *   1. marked-code (marked模块的code组件)
+ *   2. marked-img (marked模块的图片组件)
+ *   3. list-link（外观是list，通过link实现的）
+ *   4. list-item（外观是list，通过div实现的）
+ *   5. btn-link   (外观是button，通过link实现的)
+ *   6. btn-danger (外观是button，表示危险操作)
+ *   7. btn-default (外观是button，默认样式)
+ *   8. tab-link  （外观是tab，通过link实现)
+ *   9. tab-link-activate (外观是tab，通过link实现，状态是激活)
+ *   10. x-dialog-title-box-activate（x模块下的对话框标题，div实现，状态是激活）
  */
 
 /** marked 样式 **/
@@ -73,12 +86,12 @@
     width: 100px;
 }
 
-.button-link {
+.btn-link, .button-link {
     text-decoration: none;
     cursor: pointer;
 }
 
-.button-link:hover {
+.btn-link:hover, .button-link:hover {
     background: #ccc;
 }
 
@@ -294,7 +307,7 @@
 }
 
 /** 列表样式 **/
-.list-item {
+.list-item, .list-link {
     width: 100%;
     padding: 10px 5px;
     margin-top: 0px;
@@ -305,8 +318,12 @@
     cursor: pointer;
 }
 
-.list-item:hover {
+.list-item:hover, .list-link:hover {
     background-color: #eee;
+}
+
+.list-link i {
+    color: black;
 }
 
 /** 以下为具体场景下的样式 **/
