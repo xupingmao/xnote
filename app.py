@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2020/09/05 11:44:44
+# @modified 2020/09/05 18:32:54
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -166,8 +166,7 @@ def main():
     app = web.application(list(), var_env, autoreload=False)
 
     # 最后的mapping，用于匹配优先级较低的处理器
-    last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
-    manager = xmanager.init(app, var_env, last_mapping = last_mapping)
+    manager = xmanager.init(app, var_env)
     xmanager.reload()
 
     # 重新加载template

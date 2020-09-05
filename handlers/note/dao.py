@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/09/05 15:26:19
+# @modified 2020/09/05 18:08:51
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -176,6 +176,9 @@ def build_note_info(note):
 
         if note.visited_cnt is None:
             note.visited_cnt = 0
+
+        if note.orderby is None:
+            note.orderby = "name"
     return note
 
 def convert_to_path_item(note):

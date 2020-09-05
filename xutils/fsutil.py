@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2020/03/21 18:59:23
+# @modified 2020/09/05 19:16:20
 # 说明：文件工具分为如下部分：
 # 1、path处理，比如判断是否是父级目录
 # 2、文件操作，比如读写文件，创建目录
@@ -19,11 +19,15 @@ from web.utils import Storage
 ENCODING_TUPLE = ("utf-8", "gbk", "mbcs", "latin_1")
 
 def get_real_path(path):
+    """获取真实的path信息，如果配置了urlencode，强制进行urlencode，否则先按原路径检查，如果文件不存在，再进行urlencode
+    之所以要这样做，主要是为了兼容从不支持unicode文件名的服务器同步到本地的文件"""
     if path == None:
         return None
     if xconfig.USE_URLENCODE:
         return quote_unicode(path)
-    return path
+    if os.path.exists(path):
+        return path
+    return quote_unicode(path)
 
 def is_parent_dir(parent, child):
     """判断是否是父级目录

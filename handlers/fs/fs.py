@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/05/04 21:15:16
+# @modified 2020/09/05 19:20:09
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -393,6 +393,10 @@ class RenameAjaxHandler:
 
         old_path = os.path.join(dirname, old_name)
         new_path = os.path.join(dirname, new_name)
+
+        # 获取真实的路径
+        old_path = xutils.get_real_path(old_path)
+
         if not xauth.is_admin() and not check_file_auth(old_path, user_name):
             return dict(code="fail", message="unauthorized")
         if not os.path.exists(old_path):

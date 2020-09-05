@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/09/05 15:14:07
+# @modified 2020/09/05 19:22:59
 from io import StringIO
 import xconfig
 import codecs
@@ -187,6 +187,11 @@ INNER_TOOLS = [
     inner_plugin("摄像头", "/tools/camera"),
 ]
 
+def get_inner_tool_name(url):
+    for tool in INNER_TOOLS:
+        if tool.url == url:
+            return tool.name
+    return url
 
 def build_inner_tools():
     return copy.copy(INNER_TOOLS)
@@ -295,6 +300,7 @@ def load_plugin(name):
     # DEBUG模式下始终重新加载插件
     if xconfig.DEBUG or context is None:
         fpath = os.path.join(xconfig.PLUGINS_DIR, name)
+        fpath = xutils.get_real_path(fpath)
         if not os.path.exists(fpath):
             return None
         # 发现了新的插件，重新加载一下
@@ -425,8 +431,8 @@ class LoadPluginHandler:
 
     def GET(self, name = ""):
         user_name = xauth.current_name()
-        display_name = xutils.unquote(name)
-        name = xutils.get_real_path(display_name)
+        name      = xutils.unquote(name)
+
         if not name.endswith(".py"):
             name += ".py"
         try:
@@ -450,6 +456,28 @@ class LoadPluginHandler:
     def POST(self, name = ""):
         return self.GET(name)
 
+class LoadInnerToolHandler:
+    
+    def GET(self, name):
+        user_name = xauth.current_name()
+        url  = "/tools/" + name
+        fname = xutils.unquote(name)
+        if not name.endswith(".html"):
+            fname += ".html"
+        # Chrome下面 tools/timeline不能正常渲染
+        web.header("Content-Type", "text/html")
+        fpath = os.path.join(xconfig.HANDLERS_DIR, "tools", fname)
+        if os.path.exists(fpath):
+            if user_name != None:
+                tool_name = get_inner_tool_name(url)
+                add_visit_log(user_name, tool_name, url)
+            return xtemplate.render("tools/" + fname, show_aside = False)
+        else:
+            raise web.notfound()
+
+    def POST(self, name):
+        return self.GET(name)
+
 class PluginLogHandler:
 
     @xauth.login_required()
@@ -469,5 +497,6 @@ xurls = (
     r"/plugins_list_new", PluginsGridHandler,
     r"/plugins_list", PluginsListHandler,
     r"/plugins_log", PluginLogHandler,
-    r"/plugins/(.+)", LoadPluginHandler
+    r"/plugins/(.+)", LoadPluginHandler,
+    r"/tools/(.+)", LoadInnerToolHandler,
 )

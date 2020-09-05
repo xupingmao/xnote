@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/08/30 12:33:52
+# @modified 2020/09/05 19:09:52
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -351,8 +351,12 @@ def html_escape(s, quote=True):
 def urlsafe_b64encode(text):
     return base64.urlsafe_b64encode(text.encode("utf-8")).decode("utf-8")
 
+
 def urlsafe_b64decode(text):
     return base64.urlsafe_b64decode(text.encode("utf-8")).decode("utf-8")
+
+b64encode = urlsafe_b64encode
+b64decode = urlsafe_b64decode
 
 def encode_uri_component(text):
     # quoted = quote_unicode(text)

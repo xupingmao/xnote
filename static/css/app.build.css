@@ -132,7 +132,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/09/04 21:23:43
+ * @modified 2020/09/05 18:27:58
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
  * 2：复杂样式，命名规则为：模块名(可选)-功能外观-子功能外观(可选)-实现方式(可选)-特征或状态(可选)，示例如下：
@@ -756,15 +756,38 @@ li.menu-item:hover {
     color: #000;
 }
 
+
+/** 分页的样式 **/
+.pagenation {
+    /*width: 100%;*/
+    margin: 0 auto;
+}
+
+.x-page-disabled {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    text-decoration: none;
+    padding: 3px 10px;
+    color: #dfdfdf;
+}
+
 .x-page-link {
     border: 1px solid #ccc;
+    border-radius: 3px;
     text-decoration: none;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 3px 10px;
     color: #000;
 }
+
+.x-page-link:hover {
+    background-color: #06f;
+    color: #fff;
+    text-decoration: none;
+}
+
 .x-page-active {
-    background-color: red;
+    background-color: #4f88e1;
+    color: #fff;
 }
 
 /** file-list样式 END **/
@@ -1121,11 +1144,6 @@ li.menu-item:hover {
 .nav-item {
     padding-right: 5px;
     display: block;
-    float: left;
-}
-
-.pagenation {
-    width: 100%;
     float: left;
 }
 

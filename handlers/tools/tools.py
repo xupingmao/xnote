@@ -38,25 +38,6 @@ class TccHandler:
             
     def POST(self):
         return self.GET()
-    
-
-class handler:
-    
-    def GET(self, name):
-        name = xutils.unquote(name)
-        if not name.endswith(".html"):
-            name += ".html"
-        # Chrome下面 tools/timeline不能正常渲染
-        web.header("Content-Type", "text/html")
-        fpath = os.path.join(xconfig.HANDLERS_DIR, "tools", name)
-        if os.path.exists(fpath):
-            return xtemplate.render("tools/" + name, show_aside = False)
-        else:
-            raise web.notfound()
-
-    def POST(self, name):
-        return self.GET(name)
-        
             
 xurls = (r"/tools/tcc", TccHandler)
          

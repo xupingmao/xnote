@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/09/01 01:10:32
+# @modified 2020/09/05 18:20:31
 import profile
 import math
 import re
@@ -89,18 +89,25 @@ def view_group_func(note, kw):
 
 def view_group_func_old(file, kw):
     # 代码暂时不用
+    orderby   = kw.orderby
+    user_name = kw.user_name
+    page      = kw.page
+    pagesize  = kw.pagesize
+
     if orderby != None and file.orderby != orderby:
         NOTE_DAO.update(file.id, orderby = orderby)
     else:
         orderby = file.orderby
 
     files  = NOTE_DAO.list_by_parent(user_name, file.id, (page-1)*pagesize, pagesize, orderby)
-    amount = file.size
-    kw.content = file.content
+    amount             = file.size
+    kw.content         = file.content
     kw.show_search_div = True
     kw.show_add_file   = True
-    kw.show_mdate      = True
-    kw.show_aside   = False
+    kw.show_aside      = False
+    kw.show_pagination = True
+    kw.files           = files
+    kw.page_max        = math.ceil(amount/pagesize)
 
 def view_list_func(note, kw):
     kw.show_aside = False
@@ -108,6 +115,7 @@ def view_list_func(note, kw):
 
 VIEW_FUNC_DICT = {
     "group": view_group_func,
+    # "group": view_group_func_old,
     "md"  : view_md_func,
     "text": view_md_func,
     "memo": view_md_func,
@@ -145,16 +153,21 @@ class ViewHandler:
         is_iframe     = xutils.get_argument("is_iframe", "false")
         token         = xutils.get_argument("token", "")
         user_name     = xauth.current_name()
-        show_add_file = False
 
-        kw = Storage()
+        kw             = Storage()
         kw.show_left   = False
         kw.show_groups = False
         kw.show_aside  = True
-        kw.groups = []
+        kw.groups      = []
+        kw.files       = []
+        kw.op          = op
+        kw.user_name   = user_name
+        kw.page        = page
+        kw.orderby     = orderby
+        kw.pagesize    = pagesize
         kw.recommended_notes = []
-        kw.op = op
-        kw.template_name  = "note/page/view.html"
+        kw.show_add_file     = False
+        kw.template_name     = "note/page/view.html"
 
         if id == "0":
             raise web.found("/")
@@ -173,9 +186,7 @@ class ViewHandler:
 
         # 定义一些变量
         show_mdate     = False
-        files          = []
         recent_created = []
-        amount         = 0
         show_recommend = False
         next_note      = None
         prev_note      = None
@@ -209,13 +220,9 @@ class ViewHandler:
             file          = file, 
             note_id       = id,
             show_mdate    = show_mdate,
-            show_add_file = show_add_file,
             can_edit = can_edit,
             pathlist = pathlist,
-            page_max = math.ceil(amount/pagesize),
-            page     = page,
             page_url = "/note/view?id=%s&orderby=%s&page=" % (id, orderby),
-            files    = files, 
             recent_created    = recent_created,
             search_action = "/note/timeline",
             search_placeholder = "搜索笔记",

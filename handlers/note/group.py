@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/07/18 19:47:23
+# @modified 2020/09/05 18:01:15
 import math
 import time
 import web
@@ -275,6 +275,7 @@ class BaseListHandler:
             group_type = self.note_type,
             files     = files,
             page      = page,
+            show_pagination = True,
             show_mdate = True,
             page_max  = math.ceil(amount / xconfig.PAGE_SIZE),
             page_url  = "/note/%s?page=" % self.note_type)
