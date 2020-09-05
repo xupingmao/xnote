@@ -132,7 +132,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/08/30 12:20:23
+ * @modified 2020/09/04 21:23:43
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
  * 2：复杂样式，命名规则为：模块名(可选)-功能外观-子功能外观(可选)-实现方式(可选)-特征或状态(可选)，示例如下：
@@ -146,6 +146,8 @@ table td {
  *   8. tab-link  （外观是tab，通过link实现)
  *   9. tab-link-activate (外观是tab，通过link实现，状态是激活)
  *   10. x-dialog-title-box-activate（x模块下的对话框标题，div实现，状态是激活）
+ * 
+ *  注意：后声明的样式匹配优先级更高
  */
 
 /** marked 样式 **/
@@ -1116,7 +1118,7 @@ li.menu-item:hover {
     line-height: 40px;
 }
 
-.nav-ul li {
+.nav-item {
     padding-right: 5px;
     display: block;
     float: left;
@@ -1414,7 +1416,7 @@ li.menu-item:hover {
         width: 100%;
     }
 
-    .nav-ul li {
+    .nav-item {
         width: 25%;
         text-align: center;
     }

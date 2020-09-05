@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/08/30 14:19:44
+# @modified 2020/09/01 01:00:54
 from io import StringIO
 import xconfig
 import codecs
@@ -62,6 +62,7 @@ class PluginContext:
         self.atime = ""
         self.editable = True
         self.edit_link = ""
+        self.clazz = None
 
     # sort方法重写__lt__即可
     def __lt__(self, other):
@@ -280,11 +281,17 @@ def add_visit_log(user_name, name, url):
 
     dbutil.insert("plugin_visit_log:%s" % user_name, log)
 
+def delete_visit_log(user_name, name, url):
+    exist_log = find_visit_log(user_name, url)
+    if exist_log != None:
+        dbutil.delete(exist_log.key)
+
 def load_plugin(name):
     user_name = xauth.current_name()
     context   = xconfig.PLUGINS_DICT.get(name)
+
+    # DEBUG模式下始终重新加载插件
     if xconfig.DEBUG or context is None:
-        script_name = "plugins/" + name
         fpath = os.path.join(xconfig.PLUGINS_DIR, name)
         if not os.path.exists(fpath):
             return None
@@ -421,15 +428,17 @@ class LoadPluginHandler:
         if not name.endswith(".py"):
             name += ".py"
         try:
+            url = "/plugins/" + name
             plugin = load_plugin(name)
             if plugin != None:
                 # 访问日志
-                add_visit_log(user_name, name, "/plugins/" + name)
+                add_visit_log(user_name, name, url)
                 plugin.atime = dateutil.format_datetime()
-
                 # 渲染页面
                 return plugin.clazz().render()
             else:
+                # 删除日志
+                delete_visit_log(user_name, name, url)
                 return xtemplate.render("error.html", 
                     error = "plugin `%s` not found!" % name)
         except:

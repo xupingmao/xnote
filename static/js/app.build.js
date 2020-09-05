@@ -1038,7 +1038,8 @@ window.isDesktop = window.isPc;
 
 window.isMobile = function() {
     return ! isPc();
-};/** 下拉组件
+};
+/** 下拉组件
  * @since 2020/01/11
  * @modified 2020/01/22 00:29:27
  */

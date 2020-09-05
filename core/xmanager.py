@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2020/07/29 00:37:16
+# @modified 2020/09/04 21:08:01
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -607,7 +607,7 @@ def reload():
     fire("sys.reload")
 
 def load_init_script():
-    if xconfig.INIT_SCRIPT is not None:
+    if xconfig.INIT_SCRIPT is not None and os.path.exists(xconfig.INIT_SCRIPT):
         try:
             xutils.exec_script(xconfig.INIT_SCRIPT)
         except:

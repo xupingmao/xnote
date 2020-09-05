@@ -9,20 +9,19 @@
     <div class="menu-box float-left">
       <ul class="nav-ul">
         {% if _has_login %}
-          <li><a class="menu-link" href="{{HOME_PATH}}">{{T("笔记")}}</a></li>
-          <li><a class="menu-link" href="/note/recent?orderby=all">{{T("动态")}}</a></li>
-          <!-- <li><a class="menu-link desktop-only-inline" href="/note/index">{{T("分类")}}</a></li> -->
-          <li><a class="menu-link" href="/note/public">{{T("公共")}}</a></li>
-          <li><a class="menu-link desktop-only-inline" href="/plugins_list">{{T("插件")}}</a></li>
+          <li class="nav-item"><a class="menu-link" href="{{HOME_PATH}}">{{T("笔记")}}</a></li>
+          <li class="nav-item"><a class="menu-link" href="/note/recent?orderby=all">{{T("动态")}}</a></li>
+          <li class="nav-item"><a class="menu-link" href="/note/public">{{T("公共")}}</a></li>
+          <li class="nav-item desktop-only"><a class="menu-link" href="/plugins_list">{{T("插件")}}</a></li>
           {% if _is_admin %}
-            <li><a class="menu-link desktop-only-inline" href="/fs_list">{{T("文件")}}</a></li> 
+            <li class="nav-item desktop-only"><a class="menu-link" href="/fs_list">{{T("文件")}}</a></li> 
           {% end %}
-          <li><a class="menu-link" href="/system/settings">{{T("设置")}}</a></li>
+          <li class="nav-item"><a class="menu-link" href="/system/settings">{{T("设置")}}</a></li>
         {% end %}
         
         {% if not _has_login %}
-          <li><a class="menu-link" href="/">{{T("笔记")}}</a></li>
-          <li><a class="menu-link" class="link" href="/login">{{T("Login")}}</a></li>
+          <li class="nav-item"><a class="menu-link" href="/">{{T("笔记")}}</a></li>
+          <li class="nav-item"><a class="menu-link" class="link" href="/login">{{T("Login")}}</a></li>
         {% end %}
 
       </ul>

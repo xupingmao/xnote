@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/03/29 15:33:24
+# @modified 2020/09/01 01:10:32
 import profile
 import math
 import re
@@ -54,9 +54,9 @@ def view_gallery_func(file, kw):
     fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(file.id))
     filelist = []
     # 处理相册
-    print(file)
+    # print(file)
     fpath = fsutil.get_gallery_path(file)
-    print(fpath)
+    # print(fpath)
     if fpath != None:
         filelist = fsutil.list_files(fpath, webpath = True)
     file.path     = fpath

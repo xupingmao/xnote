@@ -1,7 +1,9 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/08/28 00:22:51
-# @modified 2020/08/28 00:28:00
+# @modified 2020/09/01 01:06:53
+
+"""插件创建的工具，基于插件开发，但是其实已经不用了，实际创建插件的实现参考 fs/fs_add.py"""
 
 import xauth
 import xutils
@@ -97,7 +99,8 @@ def main(path = "", confirmed = False, **kw):
 '''
 
 class NewCommandPlugin(BasePlugin):
-    """默认的插件声明入口，定义一个叫做Main的类"""
+    """【不推荐】默认的插件声明入口，定义一个叫做Main的类
+    已经不推荐使用命令扩展"""
 
     def handle(self, input):
         self.title = '通过模板创建命令扩展'

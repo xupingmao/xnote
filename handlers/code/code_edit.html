@@ -2,69 +2,73 @@
 
 {% block head %}
 
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/5.41.0/codemirror.min.css">
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/xq-light.css">
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/addon/dialog/dialog.css">
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/addon/hint/show-hint.css">
+    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/5.41.0/codemirror.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/xq-light.css">
+    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/addon/dialog/dialog.css">
+    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/addon/hint/show-hint.css">
 
-<script type="text/javascript" src="/static/lib/codemirror/5.41.0/codemirror.min.js"></script>
-<script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
-<script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
-<script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
-<script type="text/javascript" src="/static/lib/codemirror/keymap/sublime.js"></script>
-<script type="text/javascript" src="/static/lib/codemirror/addon/search/search.js"></script>
-<script type="text/javascript" src="/static/lib/codemirror/addon/search/searchcursor.js"></script>
-<script type="text/javascript" src="/static/lib/codemirror/addon/dialog/dialog.js"></script>
+    <script type="text/javascript" src="/static/lib/codemirror/5.41.0/codemirror.min.js"></script>
+    <script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
+    <script type="text/javascript" src="/static/lib/codemirror/mode/shell.js"></script>
+    <script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
+    <script type="text/javascript" src="/static/lib/codemirror/keymap/sublime.js"></script>
+    <script type="text/javascript" src="/static/lib/codemirror/addon/search/search.js"></script>
+    <script type="text/javascript" src="/static/lib/codemirror/addon/search/searchcursor.js"></script>
+    <script type="text/javascript" src="/static/lib/codemirror/addon/dialog/dialog.js"></script>
 
-<script src="/static/lib/codemirror/addon/hint/show-hint.js"></script>
-<script src="/static/lib/codemirror/addon/hint/anyword-hint.js"></script>
+    <script src="/static/lib/codemirror/addon/hint/show-hint.js"></script>
+    <script src="/static/lib/codemirror/addon/hint/anyword-hint.js"></script>
 
-<script type="text/javascript" src="/static/js/editor.js"></script>
+    <script type="text/javascript" src="/static/js/editor.js"></script>
 
-{% if path.endswith(".py") %}
-<script type="text/javascript" src="/static/lib/codemirror/mode/python.js"></script>
-{% end %}
-{% if path.endswith(".js") %}
-<script type="text/javascript" src="/static/lib/codemirror/mode/javascript.js"></script>
-{% end %}
-{% if path.endswith(".php") %}
-<script type="text/javascript" src="/static/lib/codemirror/mode/php.js"></script>
-{% end %}
-{% if path.endswith(".css") %}
-<script type="text/javascript" src="/static/lib/codemirror/mode/css.min.js"></script>
-{% end %}
+    {% if path.endswith(".py") %}
+        <script type="text/javascript" src="/static/lib/codemirror/mode/python.js"></script>
+    {% end %}
+    {% if path.endswith(".js") %}
+        <script type="text/javascript" src="/static/lib/codemirror/mode/javascript.js"></script>
+    {% end %}
+    {% if path.endswith(".php") %}
+        <script type="text/javascript" src="/static/lib/codemirror/mode/php.js"></script>
+    {% end %}
+    {% if path.endswith(".css") %}
+        <script type="text/javascript" src="/static/lib/codemirror/mode/css.min.js"></script>
+    {% end %}
 
-<style type="text/css">
-    .search-key {
-        background-color: #FF8000;
-        color: #000;
-    }
+    <style type="text/css">
+        .search-key {
+            background-color: #FF8000;
+            color: #000;
+        }
 
-    #result {
-        border: 1px solid #ccc;
-        padding: 4px;
-        background-color: #eee;
-    }
+        #result {
+            border: 1px solid #ccc;
+            padding: 4px;
+            background-color: #eee;
+        }
 
-    #editorArea {
-        border: 1px solid #ccc;
-    }
+        #editorArea {
+            border: 1px solid #ccc;
+        }
 
-    #editor {
-        width: 100%;
-        height: 100%;
-    }
+        #editor {
+            width: 100%;
+            height: 100%;
+        }
 
-    .CodeMirror-search-match {
-      background: gold;
-      border-top: 1px solid orange;
-      border-bottom: 1px solid orange;
-      -moz-box-sizing: border-box;
-      box-sizing: border-box;
-      opacity: .5;
-    }
-</style>
+        .CodeMirror-search-match {
+          background: gold;
+          border-top: 1px solid orange;
+          border-bottom: 1px solid orange;
+          -moz-box-sizing: border-box;
+          box-sizing: border-box;
+          opacity: .5;
+        }
+
+        .CodeMirror {
+            font-family: Fira Code,Menlo,Monaco,Consolas,Liberation Mono,Courier New,Courier,monospace;
+        }
+    </style>
 
 {% end %}
 

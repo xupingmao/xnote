@@ -1,7 +1,10 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/28 13:27:08
-# @modified 2020/01/29 23:55:37
+# @modified 2020/09/01 01:07:26
+
+"""创建文件的选项背后的服务，包括创建文件、文件夹、插件等等"""
+
 import os
 import xauth
 import xutils
