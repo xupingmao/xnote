@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2020/01/25 12:25:38
+# @modified 2020/09/05 15:13:15
 import web
 import time
 import hashlib
@@ -9,6 +9,8 @@ import xtemplate
 from xutils import dateutil, cacheutil, dbutil
 
 RETRY_LIMIT = 3
+
+dbutil.register_table("record", "记录表")
 
 def get_real_ip():
     x_forwarded_for = web.ctx.env.get("HTTP_X_FORWARDED_FOR")

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2020/09/04 21:08:01
+# @modified 2020/09/05 15:18:46
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -35,6 +35,8 @@ __version__      = "1.0"
 __author__       = "xupingmao (578749341@qq.com)"
 __copyright__    = "(C) 2016-2017 xupingmao. GNU GPL 3."
 __contributors__ = []
+
+dbutil.register_table("schedule", "任务调度表 <schedule:id>")
 
 def wrapped_handler(pattern, handler_clz):
     # Py2 自定义类不是type类型

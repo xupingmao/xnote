@@ -1,13 +1,20 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2020/07/18 20:10:30
+# @modified 2020/09/05 15:10:49
 import xutils
 import xconfig
 import xmanager
 import xtables
 from xutils import dbutil, cacheutil, textutil, Storage, functions
 from xtemplate import T
+
+
+dbutil.register_table("message", "短文本")
+dbutil.register_table("msg_search_history", "备忘搜索历史")
+dbutil.register_table("msg_key", "备忘搜索关键字")
+dbutil.register_table("msg_history", "备忘历史")
+dbutil.register_table("user_stat", "用户数据统计")
 
 class MessageDO(Storage):
 

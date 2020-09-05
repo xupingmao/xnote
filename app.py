@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2020/02/15 19:37:57
+# @modified 2020/09/05 11:44:44
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -40,7 +40,6 @@ import signal
 from xutils import *
 from autoreload import AutoReloadThread
 
-config = xconfig
 DEFAULT_PORT = "1234"
 
 def handle_args():

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/09/01 01:00:54
+# @modified 2020/09/05 15:14:07
 from io import StringIO
 import xconfig
 import codecs
@@ -48,6 +48,8 @@ from xutils import textutil, SearchResult, dateutil, dbutil, u
 - 日志的删除：暂无
 
 """
+
+dbutil.register_table("plugin_visit_log", "插件访问日志")
 
 class PluginContext:
 

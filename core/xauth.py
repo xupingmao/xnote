@@ -8,6 +8,9 @@ import xutils
 from xutils import ConfigParser, textutil, dbutil, fsutil
 from xconfig import Storage
 
+
+dbutil.register_table("user", "用户信息表")
+
 config = xconfig
 # 用户配置
 _users = None
