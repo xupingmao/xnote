@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2020/05/04 21:24:42
+# @modified 2020/09/06 12:33:47
 import os
 import time
 import xtemplate
@@ -14,10 +14,9 @@ from xtemplate import BasePlugin
 
 OPTION_HTML = '''
 <div class="row card">
-    <a class="x-tab" href="?type=rev_tail">最近(倒序)</a>
-    <a class="x-tab" href="?type=tail">最近</a>
-    <a class="x-tab" href="?type=head">最早</a>
-    <a class="x-tab" href="?type=all">全部</a>
+    <a class="x-tab-btn x-tab-default" href="?tab=rev_tail">最近</a>
+    <a class="x-tab-btn" href="?tab=head">最早</a>
+    <a class="x-tab-btn" href="?tab=all">全部</a>
 </div>
 
 '''
@@ -29,8 +28,10 @@ def readlines(fpath):
         return fp.readlines()
 
 def get_log_path(date):
-    fname = "xnote.%s.log" % date
-    return os.path.join(xconfig.LOG_DIR, fname)
+    month   = "-".join(date.split("-")[:2])
+    dirname = os.path.join(xconfig.LOG_DIR, month)
+    fname   = "xnote.%s.log" % date
+    return os.path.join(dirname, fname)
     
 class LogHandler(BasePlugin):
     
@@ -48,8 +49,6 @@ class LogHandler(BasePlugin):
         self.title = "xnote日志(%s)" % date
 
         fpath = get_log_path(date)
-        if type == "tail":
-            return ''.join(readlines(fpath)[-100:])
         if type == "rev_tail":
             lines = readlines(fpath)[-100:]
             lines.reverse()

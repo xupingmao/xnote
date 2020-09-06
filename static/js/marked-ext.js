@@ -163,12 +163,19 @@
         }
       }
 
+      // 没有定义语言
       if (!lang) {
         return '<pre class="marked-code"><code>'
           + (escaped ? code : escape(code, true))
           + '\n</code></pre>';
       }
 
+      // csv
+      if ("csv" == lang.toLowerCase()) {
+        return '<div>' + code + '</div>';
+      }
+
+      // 定义语言
       return '<pre class="marked-code"><code class="'
         + this.options.langPrefix
         + escape(lang, true)

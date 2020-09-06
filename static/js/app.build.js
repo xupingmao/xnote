@@ -665,7 +665,7 @@ function getWindowHeight() {
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2020/01/24 14:05:21
+ * @modified 2020/09/06 12:07:03
  */
 var XUI = function(window) {
     // 处理select标签选中情况
@@ -715,23 +715,6 @@ var XUI = function(window) {
         });
     }
 
-    // 类似tab的超链接
-    function initTabLink() {
-        var hasActive = false;
-        $(".x-tab").each(function(index, ele) {
-            var link = $(ele).attr("href");
-            var fullpath = location.href;
-
-            if (fullpath.indexOf(link) >= 0) {
-                $(ele).addClass("tab-link-active");
-                hasActive = true;
-            }
-        });
-        if (!hasActive) {
-            $(".x-tab-default").addClass("tab-link-active");
-        }
-    }
-
     // 点击跳转链接的按钮
     $(".link-btn").click(function() {
         var link = $(this).attr("x-href");
@@ -770,7 +753,6 @@ var XUI = function(window) {
         initCheckbox();
         initRadio();
         initXRadio();
-        initTabLink();
     }
 
     // 初始化
@@ -1556,6 +1538,55 @@ window.ContentDialog = {
   }
 }
 
+/** x-tab.js
+ * tab页功能，依赖jQuery
+ * 有两个样式: tab-link 和 tab-btn
+ */
+
+$(function (e) {
+
+    // 类似tab的超链接
+    function initTabLink() {
+        var hasActive = false;
+        var count = 0;
+        $(".x-tab").each(function(index, ele) {
+            var link = $(ele).attr("href");
+            var fullpath = location.href;
+
+            if (fullpath.indexOf(link) >= 0) {
+                $(ele).addClass("tab-link-active");
+                hasActive = true;
+            }
+            count += 1;
+        });
+        if (count > 0 && !hasActive) {
+            $(".x-tab-default").addClass("tab-link-active");
+        }
+    }
+
+    function initTabBtn() {
+        var hasActive = false;
+        var count = 0;
+        $(".x-tab-btn").each(function(index, ele) {
+            var link = $(ele).attr("href");
+            var fullpath = location.href;
+
+            if (fullpath.indexOf(link) >= 0) {
+                $(ele).addClass("x-tab-btn-active");
+                hasActive = true;
+            }
+
+            count += 1;
+        });
+
+        if (count > 0 && !hasActive) {
+            $(".x-tab-default").addClass("x-tab-btn-active");
+        }
+    }
+
+    initTabLink();
+    initTabBtn();
+});
 /**
  * 通用的操作函数
  */

@@ -14,6 +14,7 @@ import xconfig
 from threading import Timer
 from bs4 import BeautifulSoup
 from html2text import HTML2Text
+from xutils import netutil
 
 def get_addr(src, host):
     if src is None:
@@ -22,17 +23,9 @@ def get_addr(src, host):
         return "http:" + src
     return src
 
-def readhttp(address):
-    address = xutils.quote_unicode(address)
-    req = urllib.request.Request(
-                    address, 
-                    data=None, 
-                    headers={
-                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-                    }
-                )
-    bytes = xutils.urlopen(req).read()
-    return xutils.decode_bytes(bytes)
+def readhttp(url):
+    url = xutils.quote_unicode(url)
+    return netutil.http_get(url)
 
 def get_addr_list(images, host=None):
     dest = set()

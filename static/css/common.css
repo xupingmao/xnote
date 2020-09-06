@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/09/05 18:27:58
+ * @modified 2020/09/06 14:26:31
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
  * 2：复杂样式，命名规则为：模块名(可选)-功能外观-子功能外观(可选)-实现方式(可选)-特征或状态(可选)，示例如下：
@@ -179,30 +179,11 @@
     text-decoration: underline;
 }
 
-/* TAB页的链接样式 */
-.tab-link, .x-tab {
-    float: left;
-    padding: 2px;
-    cursor: pointer;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    line-height: 20px;
-    color: #ccc;
-}
-
-.tab-link:hover, .x-tab:hover {
-    color: #000;
-}
-
-.tab-link-active {
-    color: #000;
-}
-
 
 /** 按钮样式 **/
 
 /* 不能指定input[type=button]不然会覆盖其他class样式(选择器优先级过高) */
-.btn, [type=submit], [type=button], button, .inline-btn {
+.btn, [type=submit], [type=button], button, .inline-btn, .x-tab-btn {
     display: inline-block;
     -webkit-appearance: none; /* 消除IOS默认的按钮样式 */
     background-color: #337ab7;
@@ -318,6 +299,10 @@
     line-height: 25px;
     border-bottom: 1px solid #eee;
     cursor: pointer;
+}
+
+.list-item:last-of-type, .list-link:last-of-type {
+    border-bottom: none;
 }
 
 .list-item:hover, .list-link:hover {
@@ -1279,6 +1264,44 @@ li.menu-item:hover {
 
 .desktop-only-inline-block {
     display: inline-block;
+}
+
+
+/* TAB页的链接样式 */
+.tab-link, .x-tab {
+    float: left;
+    padding: 2px;
+    cursor: pointer;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    line-height: 20px;
+    color: #ccc;
+}
+
+.tab-link:hover, .x-tab:hover {
+    color: #000;
+}
+
+.tab-link-active {
+    color: #000;
+}
+
+.x-tab-btn {
+    color: black;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.x-tab-btn:hover {
+    background-color: #06f;
+    color: #fff;
+    text-decoration: none;
+}
+
+.x-tab-btn-active {
+    background-color: #4f88e1;
+    color: #fff;
 }
 
 /** 移动端样式放在最后 **/
