@@ -1,14 +1,14 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/04/06 11:55:29
-# @modified 2020/05/04 21:20:22
+# @modified 2020/09/12 19:06:02
 import xconfig
 import xauth
 from xutils import Storage
 
 # 默认的用户配置
 DEFAULT_USER_CONFIG = {
-    "HOME_PATH"   : "/note/group",
+    "HOME_PATH"   : "/note/index",
     "PROJECT_PATH": "/note/timeline",
     "LANG"        : "zh",
 }
@@ -42,7 +42,7 @@ def get_home_path(user_name):
 def get_project_path(user_name):
     home_path = get_home_path(user_name)
     if home_path == "/note/index":
-        return "/note/timeline"
+        return "/note/group"
     return home_path
 
 ####### 获取当前用户的信息

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2020/09/05 15:10:49
+# @modified 2020/09/12 13:12:31
 import xutils
 import xconfig
 import xmanager
@@ -244,16 +244,26 @@ class MessageTag:
         self.priority = 0
         self.show_next = True
         self.is_deleted = 0
+        self.name = "Message"
+        self.icon = "fa-file-text-o"
 
         if tag == "log":
             self.name = T("memo")
             self.icon = "fa-file-text-o"
+
+        if tag == "task":
+            self.name = T("任务")
+            self.icon = "fa-calendar-check-o"
 
 def get_message_tag(user, tag):
     msg_stat  = get_message_stat(user)
 
     if tag == "log":
         return MessageTag(tag, msg_stat.log_count)
+    if tag == "task":
+        return MessageTag(tag, msg_stat.task_count)
+
+    raise Exception("unknown tag:%s" % tag)
 
 xutils.register_func("message.create", create_message)
 xutils.register_func("message.update", update_message)

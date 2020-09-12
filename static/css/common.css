@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/09/06 14:26:31
+ * @modified 2020/09/12 13:42:09
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
  * 2：复杂样式，命名规则为：模块名(可选)-功能外观-子功能外观(可选)-实现方式(可选)-特征或状态(可选)，示例如下：
@@ -128,7 +128,7 @@
     color: #888;
 }
 
-.gray-tag-link {
+.gray-tag-link, .gray-tag-span {
     background-color: #ccc;
     color: white;
     padding: 3px;
@@ -624,6 +624,8 @@ li.menu-item:hover {
     text-decoration: none;
     padding: 3px 10px;
     color: #dfdfdf;
+    font-size: 14px;
+    cursor: not-allowed;
 }
 
 .x-page-link {
@@ -636,12 +638,14 @@ li.menu-item:hover {
 
 .x-page-link:hover {
     background-color: #06f;
+    border-color: #06f;
     color: #fff;
     text-decoration: none;
 }
 
 .x-page-active {
     background-color: #4f88e1;
+    border-color: #4f88e1;
     color: #fff;
 }
 

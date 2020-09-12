@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/04/06 12:09:06
+# @modified 2020/09/12 11:42:03
 import os
 import json
 import web
@@ -115,11 +115,13 @@ def get_message_count(user):
 def pre_render(kw):
     """模板引擎预处理过程"""
     user_name           = xauth.current_name() or ""
+    user_role           = xauth.current_role() or ""
 
     kw["math"]          = math
     kw["_is_admin"]     = xauth.is_admin()
     kw["_has_login"]    = xauth.has_login()
     kw["_user_name"]    = user_name
+    kw["_user_role"]    = user_role
     kw["_user_agent"]   = get_user_agent()
     # 处理首页公告
     kw["_top_notice"]   = None

@@ -3,6 +3,7 @@
 {% init show_adate = False %}
 {% init show_action_time = False %}
 {% init show_hot_index = False %}
+{% init show_next = True %}
 {% init ACTION_TEXT_MAP = {
     "create": "创建了笔记",
     "view": "查看了笔记",
@@ -10,62 +11,66 @@
 } %}
 
 {% for item in files %}
-    
     <!-- 隐藏的记录 -->
     {% if hasattr(item, "hide") and item.hide %}
         {% continue %}
     {% end %}
 
-    <a class="dialog-link" href="{{item.url}}">
-        <div class="book-item">
+    <!-- 检查角色 -->
+    {% if hasattr(item, "roles") and item.roles != None and _user_role not in item.roles %}
+        {% continue %}
+    {% end %}
 
-            <!-- 标签 -->
-            {% if hasattr(item, "action") and item.action != None %}
-                <div class="row">
-                    <span class="gray-text small-font">{{ACTION_TEXT_MAP.get(item.action)}}</span>
-                    <div class="float-right">
-                        <span class="book-size-span">{{format_date(item.action_time).replace('-', '/')}}</span>
-                    </div>
+    <a class="list-link" href="{{item.url}}">
+        <!-- 标签 -->
+        {% if hasattr(item, "action") and item.action != None %}
+            <div class="row">
+                <span class="gray-text small-font">{{ACTION_TEXT_MAP.get(item.action)}}</span>
+                <div class="float-right">
+                    <span class="book-size-span">{{format_date(item.action_time).replace('-', '/')}}</span>
                 </div>
+            </div>
+        {% end %}
+
+        {% if item.priority>0 %}
+            <i class="fa fa-thumb-tack black"></i>
+        {% end %}
+
+        <!-- 图标和标题 -->
+        <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
+        <span>{{item.name}}</span>
+        
+        {% if item.is_deleted %}
+            <span class="gray-tag-span" href="/note/removed">删除</span>
+        {% end %}
+        
+        <div class="float-right">
+            {% set sub_info = "" %}
+
+            {% if show_size and item.size != None %}
+                {% set sub_info = item.size %}
             {% end %}
 
-            {% if item.priority>0 %}
-                <i class="fa fa-thumb-tack black"></i>
+            {% if show_cdate %}
+                {% set sub_info = format_date(item.ctime).replace('-', '/') %}
             {% end %}
 
-            <!-- 图标和标题 -->
-            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
-            <span>{{item.name}}</span>
-            
-            {% if item.is_deleted %}
-                <a class="gray-tag-link" href="/note/removed">删除</a>
+            {% if show_mdate %}
+                {% set sub_info = format_date(item.mtime).replace('-', '/') %}
             {% end %}
-            
-            <span class="book-size">
-                {% if show_size and item.size != None %}
-                    <span class="book-size-span">{{item.size}}</span>
-                {% end %}
 
-                {% if show_cdate %}
-                    {{format_date(item.ctime).replace('-', '/')}}
-                {% end %}
+            {% if show_adate %}
+                {% set sub_info = format_date(item.atime).replace('-', '/') %}
+            {% end %}
 
-                {% if show_mdate %}
-                    {{format_date(item.mtime).replace('-', '/')}}
-                {% end %}
+            {% if show_hot_index %}
+                {% set sub_info = item.hot_index or 0 %}
+            {% end %}
 
-                {% if show_adate %}
-                    {{format_date(item.atime).replace('-', '/')}}
-                {% end %}
-
-                {% if show_hot_index %}
-                    {{item.hot_index or 0}}
-                {% end %}
-
-                {% if item.show_next or show_size %}
-                    <i class="fa fa-chevron-right"></i>
-                {% end %}
-            </span>
+            <span class="book-size-span">{{sub_info}}</span>
+            {% if item.show_next or show_next %}
+                <i class="fa fa-chevron-right"></i>
+            {% end %}
         </div>
     </a>
 {% end %}

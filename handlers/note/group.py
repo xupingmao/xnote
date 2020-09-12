@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/09/05 18:01:15
+# @modified 2020/09/12 13:47:00
 import math
 import time
 import web
@@ -58,7 +58,7 @@ class SystemLink(GroupLink):
         self.icon = "icon-folder-system"
 
 class NoteLink:
-    def __init__(self, name, url, icon = "fa-cube", size = None):
+    def __init__(self, name, url, icon = "fa-cube", size = None, roles = None):
         self.type = "link"
         self.name = T(name)
         self.url  = url
@@ -69,6 +69,14 @@ class NoteLink:
         self.hide  = False
         self.show_next  = True
         self.is_deleted = 0
+
+        # 角色
+        if roles is None:
+            roles = ("admin", "user")
+        self.roles = roles
+
+    def __str__(self):
+        return str(self.__dict__)
 
 class DictEntryLink(NoteLink):
     def __init__(self, size):
@@ -138,11 +146,12 @@ class GroupListHandler:
         normal_books = []
 
         # 快捷记事
+        fixed_books.append(MSG_DAO.get_message_tag(user_name, "task"))
         fixed_books.append(MSG_DAO.get_message_tag(user_name, "log"))
 
         # 默认分组处理
         fixed_books.append(NoteLink(u"时间视图", "/note/date", icon = "fa-calendar"))
-        fixed_books.append(NoteLink(u"分类和工具", "/note/index?source=group", icon = "fa-th-large"))
+        fixed_books.append(NoteLink(u"分类视图", "/note/index", icon = "fa-th-large"))
         if len(archived_groups) > 0:
             fixed_books.append(NoteLink("Archived_Project", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
 
@@ -166,17 +175,17 @@ def load_note_index(user_name):
     return [
         NoteCard("分类", [
             NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
-            NoteLink("memo", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
-            NoteLink("项目", "/note/timeline", "fa-folder", size = note_stat.group_count),
+            NoteLink("备忘", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
+            NoteLink("项目", "/note/group", "fa-folder", size = note_stat.group_count),
             NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
             NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
             NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
             NoteLink("表格", "/note/table", "fa-table", size = note_stat.table_count),
             NoteLink("日志", "/note/log", "fa-file-text", size = note_stat.log_count),
             DictEntryLink(size = note_stat.dict_count),
-            # NoteLink("通讯录", "/note/addressbook", "fa-address-book"),
-            # NoteLink("富文本", "/note/html", "fa-file-word-o"),
+            NoteLink("插件", "/plugins_list", "fa-th-large", size = len(xconfig.PLUGINS_DICT), roles = ["admin"]),
         ]),
+        
         NoteCard(u"工具", [
             NoteLink("置顶笔记", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
             NoteLink("搜索历史", "/search", "fa-search", size = None),
@@ -281,16 +290,16 @@ class BaseListHandler:
             page_url  = "/note/%s?page=" % self.note_type)
 
 
-class TextHandler(BaseListHandler):
+class TextListHandler(BaseListHandler):
 
     def __init__(self):
         self.note_type = "text"
         self.title = "文本"
 
-class AddressBookHandler(BaseListHandler):
+class AddressBookListHandler(BaseListHandler):
     def __init__(self):
         self.note_type = "address"
-        self.title     = T("通讯录")
+        self.title     = "通讯录"
 
 class NoteIndexHandler:
 
@@ -315,7 +324,7 @@ class NoteIndexHandler:
 
         template = "note/page/note_index.html"
         if source == "list":
-            template = "note/page/note_list.html"
+            template = "note/page/note_index_list.html"
             files = []
             for card in cards:
                 files += card.rows 
@@ -398,6 +407,7 @@ class RecentHandler:
             show_cdate = show_cdate,
             show_mdate = show_mdate,
             show_adate = show_adate,
+            show_next  = False,
             show_action_time = show_action_time,
             show_hot_index = show_hot_index,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
@@ -475,7 +485,7 @@ class ArchivedHandler:
     def GET(self):
         user  = xauth.current_name()
         files = NOTE_DAO.list_archived(user)
-        return xtemplate.render("note/page/archived_group.html",
+        return xtemplate.render("note/page/project_list_archived.html",
             title      = "Archived_Project",
             parent_id  = -1,
             show_size  = True,
@@ -546,7 +556,7 @@ xurls = (
     r"/note/monthly"        , DateHandler,
     r"/note/management"     , ManagementHandler,
 
-    r"/note/text"           , TextHandler,
+    r"/note/text"           , TextListHandler,
     r"/note/tools"          , NoteIndexHandler,
     r"/note/types"          , NoteIndexHandler,
     r"/note/index"          , NoteIndexHandler,

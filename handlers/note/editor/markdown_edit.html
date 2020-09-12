@@ -161,7 +161,7 @@
     }
 
     $(document).ready(function () {
-        var oldContent = "";
+        var oldContent = $("#markdown-input").val();
         var lastSaved = $("#markdown-input").val();
         var fileId = $("#fileId").text();
         var updatePreviewIntervalId = null;

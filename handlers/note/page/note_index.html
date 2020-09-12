@@ -18,7 +18,7 @@
         {% for card in cards %}
             <h3 class="card-title-2">{{card.title}}</h3>
             {% for row in card.rows %}
-                {% if row.hide == True %}
+                {% if row.hide == True or _user_role not in row.roles %}
                     {% continue %}
                 {% end %}
                 <p class="card-row">

@@ -18,14 +18,16 @@
 {% block body %}
 {% init error     = "" %}
 {% init cost_time = None %}
+{% init path      = "" %}
+
 <div class="col-md-12 grid-card">
     {% set title      = T("SQL") %}
     {% include "tools/base_title.html" %}
 
     {% if error != "" %}
-    <pre class="col-md-12 error">
-    {{error}}
-    </pre>
+        <pre class="col-md-12 error">
+        {{error}}
+        </pre>
     {% end %}
 
 
