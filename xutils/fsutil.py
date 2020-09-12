@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2020/09/05 19:16:20
+# @modified 2020/09/12 20:15:01
 # 说明：文件工具分为如下部分：
 # 1、path处理，比如判断是否是父级目录
 # 2、文件操作，比如读写文件，创建目录
@@ -623,7 +623,7 @@ def get_upload_file_path(user, filename, upload_dir = "files", replace_exists = 
     return os.path.abspath(newfilepath), webpath
 
 def get_gallery_path(note):
-    # 新的位置, 增加一级子目录（100个），对于一个用户应该够用了
+    # 新的位置, 增加一级子目录（100个，二级子目录取决于文件系统，最少的255个，最多无上限，也就是最少2.5万个相册，对于一个用户应该够用了）
     note_id = str(note.id)
     if len(note_id) < 2:
         second_dir = ("00" + note_id)[-2:]

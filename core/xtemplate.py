@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/09/12 11:42:03
+# @modified 2020/09/12 20:18:52
 import os
 import json
 import web
@@ -182,7 +182,7 @@ def render_by_ua(name, **kw):
     user_agent = get_user_agent()
     print(user_agent)
     if is_mobile_device(user_agent):
-        # iPhone的兼容性不行，要用简化版页面，安卓暂时不用
+        # 部分移动设备的兼容性不行，无法使用codeMirror组件，要用简化版页面
         mobile_name = get_mobile_template(name)
         return render(mobile_name, **kw)
     return render(name, **kw)
@@ -348,10 +348,10 @@ class BasePlugin:
     # * header展示输入面板
     # * body展示主数据（包括分页）
     # * footer 展示相关操作
-    header = Panel()
-    body   = Panel()
-    footer = Panel()
-    btn_text = T("处理")
+    header      = Panel()
+    body        = Panel()
+    footer      = Panel()
+    btn_text    = T("处理")
     show_search = True
     
     def __init__(self):
@@ -378,8 +378,9 @@ class BasePlugin:
     def writetext(self, text):
         self.output += u(text)
 
-    def writehtml(self, html):
-        self.html += u(html)
+    def writehtml(self, html, **kw):
+        """这个方法现在和 `writetemplate` 等价"""
+        self.writetemplate(html, **kw)
 
     def writetemplate(self, template, **kw):
         html = render_text(template, **kw)

@@ -20,13 +20,17 @@ from xtemplate import BasePlugin
 
 HTML = """
 <!-- Html -->
+<p>Hello,World!</p>
 """
 
 class Main(BasePlugin):
+
+    title    = "Hello_World"
+    category = "system"
     
     def handle(self, input):
         # 输入框的行数
-        self.rows = 5
+        self.rows = 0
         self.writehtml(HTML)
 
 
