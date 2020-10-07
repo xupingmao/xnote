@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/10/07 14:57:16
+# @modified 2020/10/07 17:04:42
 import os
 import json
 import web
@@ -149,6 +149,7 @@ def pre_render(kw):
         kw.update(_input)
 
 def post_render(kw):
+    """后置渲染"""
     pass
 
 def get_mobile_template(name):
@@ -308,11 +309,14 @@ class DataTable:
         """
         pass
 
-CATEGORY_NAME_DICT = dict(network = '网络', 
-    file = '文件',
-    dir  = '文件',
-    note = '笔记',
-    system = '系统'
+CATEGORY_NAME_DICT = dict(
+    network = '网络', 
+    file    = '文件',
+    dir     = '文件',
+    note    = '笔记',
+    system  = '系统',
+    form    = '表单',
+    develop = '开发',
 )
 
 class BasePlugin:
@@ -335,25 +339,21 @@ class BasePlugin:
     show_aside = False
 
     # 搜索配置
-    search_action = "/search"
+    search_action      = "/search"
     search_placeholder = None
+    show_search        = True
+
     # 插件路径
     fpath = None
 
-    # 输入框默认文案
-    placeholder     = u("")
-    editable        = True
-
-    # 工具分为header、body、footer几个部分
-    # * header展示输入面板
-    # * body展示主数据（包括分页）
-    # * footer 展示相关操作
-    header      = Panel()
-    body        = Panel()
-    footer      = Panel()
+    # 输入的配置
+    placeholder = u("")
     btn_text    = T("处理")
-    show_search = True
+    editable    = True
     
+    # 插件模板路径
+    html_template_path = "plugins/base/base_plugin.html"
+
     def __init__(self):
         # 输入框的行数
         self.rows            = 20    
@@ -387,6 +387,7 @@ class BasePlugin:
         self.html += u(html.decode("utf-8"))
 
     def handle(self, input):
+        """子类实现这个方法"""
         raise NotImplementedError()
 
     def get_input(self):
@@ -428,7 +429,7 @@ class BasePlugin:
         except:
             error = xutils.print_exc()
             web.ctx.status = "500 Internal Server Error"
-        return render("plugins/base/base_plugin.html",
+        return render(self.html_template_path,
             model       = self,
             script_name = globals().get("script_name"),
             fpath       = self.fpath,
@@ -483,4 +484,14 @@ class BasePlugin:
 
 BaseTextPage   = BasePlugin
 BaseTextPlugin = BasePlugin
+
+
+class BaseFormPlugin(BasePlugin):
+    # html模板路径
+    html_template_path = "plugins/base/base_form_plugin.html"
+
+    def get_input_template(self):
+        raise NotImplementedError()
+
+
 

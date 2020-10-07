@@ -40,10 +40,10 @@
             
             <span>{{title}}</span>
             <span class="float-right">
+                <a id="createBtn" class="btn">创建</a>
                 {% if _is_admin and model.editable %}
-                    <a class="btn" href="/code/edit?path={{fpath}}">编辑</a>
+                    <a class="btn btn-default" href="/code/edit?path={{model.fpath}}">编辑</a>
                 {% end %}
-                <a class="btn btn-default" href="javascript:history.back();">返回</a>
             </span>
         </div>
 
@@ -55,24 +55,6 @@
             <pre class="col-md-12 error">
             {{error}}
             </pre>
-        {% end %}
-
-        {% if rows > 0 %}
-        <div class="row">
-            <form method="{{method}}">
-                <!-- 输入框区域 BEGIN -->
-                {% if rows == 1 %}
-                    <input type="text" class="plugin-input" name="input" value="{{input}}" placeholder="{{model.placeholder}}"/>
-                {% else %}
-                    <textarea class="col-md-12 code" name="input" rows={{rows}} placeholder="{{model.placeholder}}">{{input}}</textarea>
-                {% end %}
-                <!-- 输入框区域 END -->
-
-                <!-- 按钮区域 BEGIN -->
-                <button>{{model.btn_text}}</button>
-                <!-- 按钮区域 END -->
-            </form>
-        </div>
         {% end %}
     </div>
 
@@ -95,31 +77,31 @@
         {% include mod_pagenation.html %}
     </div>
     {% end %}
+
+    <div class="hide form-plugin-dialog-tpl">
+        <form id="$formId" method="{{method}}">
+            <!-- 输入框区域 BEGIN -->
+            <textarea class="col-md-12 code" name="input" rows=20 placeholder="{{model.placeholder}}">{{model.get_input_template()}}</textarea>
+            <!-- 输入框区域 END -->
+        </form>
+    </div>
+
+<script type="text/javascript">
+$(function () {
+    $("#createBtn").click(function () {
+        var title = "提交数据";
+        var html  = $(".form-plugin-dialog-tpl").html().replace("$formId", "form-1");
+        var buttons = ["提交", "取消"];
+        var functions = [function (index, layero) {
+            // 提交数据
+            $("#form-1").submit();
+        }];
+
+        xnote.showDialog(title, html, buttons, functions);
+    })
+})
+</script>
+
 {% end %}
 
-{% block aside %}
-    {# 选项 #}
-    {% if model.category == "dir" %}
-        {% include fs/mod_aside.html %}
-    {% elif model.category == "note" %}
-        {% include note/component/mod_aside.html %}
-    {% elif model.category == "system" %}
-        {% include system/mod_aside.html %}
-    {% else %}
-        {% if len(model.option_links) > 0 %}
-            <div class="aside-item">
-                <div class="aside-title">
-                    选项
-                </div>
-                <div class="aside-content">
-                    {% for link in model.option_links %}
-                        <li><a class="link" href="{{link.get('url')}}">{{link.get('name')}}</a></li>
-                    {% end %}
-                </div>
-            </div>
-        {% end %}
-    {% end %}
-
-    {% raw model.aside_html %}
-{% end %}
 

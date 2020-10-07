@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/10/07 14:59:06
+# @modified 2020/10/07 15:25:52
 from io import StringIO
 import xconfig
 import codecs
@@ -54,17 +54,17 @@ dbutil.register_table("plugin_visit_log", "插件访问日志")
 class PluginContext:
 
     def __init__(self):
-        self.title = ""
-        self.name  = ""
-        self.description = ""
-        self.fname = ""
-        self.fpath = ""
-        self.category = ""
+        self.title         = ""
+        self.name          = ""
+        self.description   = ""
+        self.fname         = ""
+        self.fpath         = ""
+        self.category      = ""
         self.required_role = ""
-        self.atime = ""
-        self.editable = True
-        self.edit_link = ""
-        self.clazz = None
+        self.atime         = ""
+        self.editable      = True
+        self.edit_link     = ""
+        self.clazz         = None
 
     # sort方法重写__lt__即可
     def __lt__(self, other):

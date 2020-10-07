@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2020/04/19 00:56:10
+# @modified 2020/10/07 17:08:16
 
 '''xnote系统配置
 # 用户配置

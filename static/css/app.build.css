@@ -132,7 +132,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/09/12 20:09:32
+ * @modified 2020/10/07 15:48:11
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
  * 2：复杂样式，命名规则为：模块名(可选)-功能外观-子功能外观(可选)-实现方式(可选)-特征或状态(可选)，示例如下：
@@ -1552,7 +1552,63 @@ li.menu-item:hover {
 .pad-bottom-10 {padding-bottom: 10px}
 
 
-/**
+/* 响应式工具
+ * @modified 2020/10/07 15:59:08
+ */
+
+/* 参考bootstrap visible-xs-* 的命名 */
+
+/* >1200可见 */
+.visible-lg-block {
+    display: none;
+}
+
+.visible-lg-inline {
+    display: none;
+}
+
+.visible-lg-inline-block {
+    display: none;
+}
+
+
+/* >1200px隐藏 */
+.hidden-lg {
+}
+
+
+/* <768px隐藏 */
+.hidden-xs {
+}
+
+/* 大屏幕设备 >1200px */
+@media screen and (min-width: 1200px) {
+
+    .hidden-lg {
+        display: none;
+    }
+
+    .visible-lg-block {
+        display: block;
+    }
+
+    .visible-lg-inline {
+        display: inline;
+    }
+
+    .visible-lg-inline-block {
+        display: inline-block;
+    }
+}
+
+/* 小屏幕设备 <768px */
+@media screen and (max-width: 768px) {
+
+    .hidden-xs {
+        display: none;
+    }
+
+}/**
  * 应用相关的CSS样式
  * @author xupingmao
  * @since 2019/06/16
@@ -2066,7 +2122,7 @@ li.menu-item:hover {
  * 插件的CSS样式
  * @author xupingmao
  * @since 2019/12/15
- * @modified 2020/01/21 01:11:39
+ * @modified 2020/10/07 16:01:52
 */
 
 /** 插件 **/
@@ -2084,4 +2140,10 @@ li.menu-item:hover {
     float: left;
     width: 100%;
     margin-bottom: 5px;
+}
+
+.plugin-info {
+    padding: 5px;
+    background-color: #eee;
+    color: #555;
 }

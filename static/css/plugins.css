@@ -2,7 +2,7 @@
  * 插件的CSS样式
  * @author xupingmao
  * @since 2019/12/15
- * @modified 2020/01/21 01:11:39
+ * @modified 2020/10/07 16:01:52
 */
 
 /** 插件 **/
@@ -20,4 +20,10 @@
     float: left;
     width: 100%;
     margin-bottom: 5px;
+}
+
+.plugin-info {
+    padding: 5px;
+    background-color: #eee;
+    color: #555;
 }

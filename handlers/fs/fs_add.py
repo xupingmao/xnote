@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/28 13:27:08
-# @modified 2020/09/01 01:07:26
+# @modified 2020/10/07 17:09:47
 
 """创建文件的选项背后的服务，包括创建文件、文件夹、插件等等"""
 
@@ -10,6 +10,10 @@ import xauth
 import xutils
 import xconfig
 from xutils import fsutil
+
+
+PLUGIN_TEMPLATE      = fsutil.readfile("./config/template/plugin.tpl")
+FORM_PLUGIN_TEMPLATE = fsutil.readfile("./config/template/form_plugin.tpl")
 
 class BaseAddFileHandler:
 
@@ -56,6 +60,9 @@ class AddFileHandler(BaseAddFileHandler):
 
 class AddPluginFileHandler(BaseAddFileHandler):
 
+    def get_plugin_template(self):
+        return PLUGIN_TEMPLATE
+
     def handle_path(self, path):
         if not path.endswith(".py"):
             return path + ".py"
@@ -63,13 +70,20 @@ class AddPluginFileHandler(BaseAddFileHandler):
 
     def create_file(self, path):
         user_name = xauth.current_name()
-        code = xconfig.PLUGIN_TEMPLATE
+        code = self.get_plugin_template()
         code = code.replace("$since", xutils.format_datetime())
         code = code.replace("$author", user_name)
         xutils.writefile(path, code)
 
+class AddFormPluginFileHandler(AddPluginFileHandler):
+
+    def get_plugin_template(self):
+        return FORM_PLUGIN_TEMPLATE
+
+
 xurls = (
     r"/fs_api/add_dir", AddDirHandler,
     r"/fs_api/add_file", AddFileHandler,
-    r"/fs_api/add_plugin", AddPluginFileHandler
+    r"/fs_api/add_plugin", AddPluginFileHandler,
+    r"/fs_api/add_form_plugin", AddFormPluginFileHandler,
 )

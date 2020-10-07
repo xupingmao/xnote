@@ -1,0 +1,57 @@
+/* 响应式工具
+ * @modified 2020/10/07 15:59:08
+ */
+
+/* 参考bootstrap visible-xs-* 的命名 */
+
+/* >1200可见 */
+.visible-lg-block {
+    display: none;
+}
+
+.visible-lg-inline {
+    display: none;
+}
+
+.visible-lg-inline-block {
+    display: none;
+}
+
+
+/* >1200px隐藏 */
+.hidden-lg {
+}
+
+
+/* <768px隐藏 */
+.hidden-xs {
+}
+
+/* 大屏幕设备 >1200px */
+@media screen and (min-width: 1200px) {
+
+    .hidden-lg {
+        display: none;
+    }
+
+    .visible-lg-block {
+        display: block;
+    }
+
+    .visible-lg-inline {
+        display: inline;
+    }
+
+    .visible-lg-inline-block {
+        display: inline-block;
+    }
+}
+
+/* 小屏幕设备 <768px */
+@media screen and (max-width: 768px) {
+
+    .hidden-xs {
+        display: none;
+    }
+
+}

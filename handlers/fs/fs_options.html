@@ -15,9 +15,10 @@
         <div class="dropdown">
             <span class="dropdown-btn link btn">新建▾</span>
             <div class="dropdown-content">
-                <a class="dropdown-option" id="addFile">新建文件</a>
-                <a class="dropdown-option" id="addDirectory">新建文件夹</a>
-                <a class="dropdown-option" id="addPluginFile">新建插件</a>
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_file">新建文件</a>
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_dir">新建文件夹</a>
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_plugin">新建插件</a>
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_form_plugin">新建表单插件</a>
             </div>
         </div>
 
@@ -133,13 +134,12 @@ $(function () {
         createFile("新建文件夹", "/fs_api/add_dir");
     });
 
-    $("#addFile").click(function () {
-        createFile("新建文件", "/fs_api/add_file");
-    });
-
-    $("#addPluginFile").click(function(event) {
-        createFile("新建插件", "/fs_api/add_plugin");
-    });
+    $(".add-file-btn").on("click", function (event) {
+        var target = event.target;
+        var title = $(target).text();
+        var api   = $(target).attr("data-api");
+        createFile(title, api);
+    })
 
     $(".native-opener").on("click", function () {
         openByNative();
