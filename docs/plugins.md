@@ -1,30 +1,54 @@
 # xnote插件
 
+## 插件说明
+
+插件统一在 `/${DATA}/scripts/plugins/` 目录下，可以自己创建子目录，一个Python文件代表一个插件，尽量保持插件功能的小巧。
+
+插件需要定义一个Main类作为插件的入口，系统提供`xtemplate.BasePlugin`作为基类，可以参考后面的案例
+
+
 ## 新增插件
 
-点击菜单的【插件】-> 【新增插件】，然后在新增插件页面输入插件名称。（新增插件功能本身就是用插件机制实现的）
+点击菜单的【插件】-> 【管理】 -> 选择【新建】下拉框 -> 【新建插件】
 
 ## 插件示例
 
 ```python
+# -*- coding:utf-8 -*-
+# @since 2020-09-12 20:11:15
+# @author admin
+# @category 文件
+# @title 插件名称
+# @description 插件描述
+# @required_role admin
+import os
+import re
+import math
+import time
+import web
+import xconfig
 import xutils
 import xauth
+import xmanager
+import xtables
+import xtemplate
 from xtemplate import BasePlugin
 
-class Main(BasePlugin):
-    """默认的插件声明入口，定义一个叫做Main的类"""
-    
-    title = '测试插件'
-    # 插件类别
-    category = "system"
-    # 查看权限
-    required_role = "admin"
+HTML = """
+<!-- Html -->
+<p>Hello,World!</p>
+"""
 
-    def render(self):
-        # 处理页面渲染
-        name = xutils.get_argument("name", "defaultName")
-        return "Hello, %s" % name
+class Main(BasePlugin):
+
+    title    = "Hello_World"
+    category = "system"
     
+    def handle(self, input):
+        # 输入框的行数
+        self.rows = 0
+        self.writehtml(HTML)
+
 ```
 
 ## 插件卸载
@@ -38,3 +62,4 @@ class Main(BasePlugin):
 - 初始化：系统启动或者刷新的时候触发
 - 响应客户请求：执行render方法
 - 系统关闭：暂时无
+

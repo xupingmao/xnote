@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/09/05 19:22:59
+# @modified 2020/10/07 14:59:06
 from io import StringIO
 import xconfig
 import codecs
@@ -374,7 +374,7 @@ class PluginsListHandler:
             else:
                 plugins = []
 
-        return xtemplate.render("plugins/plugins_v3.html", 
+        return xtemplate.render("plugins/page/plugins_v3.html", 
             category = category,
             html_title = "插件",
             show_aside = xconfig.OPTION_STYLE == "aside",
@@ -422,7 +422,7 @@ class PluginsGridHandler:
             plugins = build_inner_tools()
             plugin_categories.append(["默认工具", plugins])
 
-        return xtemplate.render("plugins/plugins_v2.html", 
+        return xtemplate.render("plugins/page/plugins_v2.html", 
             category = category,
             html_title = "插件",
             plugin_categories = plugin_categories)

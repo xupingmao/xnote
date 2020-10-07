@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/09/12 20:18:52
+# @modified 2020/10/07 14:57:16
 import os
 import json
 import web
@@ -428,7 +428,7 @@ class BasePlugin:
         except:
             error = xutils.print_exc()
             web.ctx.status = "500 Internal Server Error"
-        return render("plugins/base_plugin.html",
+        return render("plugins/base/base_plugin.html",
             model       = self,
             script_name = globals().get("script_name"),
             fpath       = self.fpath,

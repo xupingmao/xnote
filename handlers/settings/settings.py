@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/08/22 22:11:29
+# @modified 2020/10/07 15:17:36
 import web
 import time
 import os
@@ -19,6 +19,7 @@ import xtables
 import xmanager
 from logging.handlers import TimedRotatingFileHandler
 from xutils import sqlite3, Storage, cacheutil
+from xtemplate import T
 
 try:
     import psutil
@@ -55,9 +56,9 @@ class SettingsHandler:
             Item('sqlite版本', sqlite3.sqlite_version if sqlite3 != None else '')
         ]
 
-        return xtemplate.render("system/page/settings.html", 
+        return xtemplate.render("settings/page/settings.html", 
             show_aside     = False,
-            html_title     = "系统设置",
+            html_title     = T("设置"),
             item_list      = item_list,
             sys_mem_total  = xutils.format_size(sys_mem_total),
             thread_cnt     = thread_cnt,
@@ -217,6 +218,12 @@ class ConfigHandler:
             
         return dict(code="success")
 
+class HomeEntrySettingsHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        pass
+
 @xmanager.listen("sys.reload")
 def on_reload(ctx = None):
     keys = (
@@ -242,8 +249,11 @@ def on_reload(ctx = None):
     # xconfig.THEME = "left"
 
 xurls = (
+    r"/settings/index", SettingsHandler,
+    r"/settings/entry", HomeEntrySettingsHandler,
+
     r"/system/settings", SettingsHandler,
     r"/system/properties", PropertiesHandler,
     r"/system/storage", StorageHandler,
-    r"/system/config", ConfigHandler,
+    r"/system/config",  ConfigHandler,
 )
