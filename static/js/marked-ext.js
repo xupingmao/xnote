@@ -228,9 +228,12 @@
     };
 
     function generateMenuHtml(myRenderer) {
-        var menuText = '<div class="marked-contents">';
-        
-        menuText+="<ul>";
+        var menuText = "";
+        var itemNo = [];
+        menuText += "<span>[目录]</span>"
+        menuText += '<div class="marked-contents">';
+        menuText += "<ul>";
+
         for (var i = 0; i < myRenderer.headings.length; i++) {
             var heading = myRenderer.headings[i];
             var text = heading.text;
@@ -253,6 +256,7 @@
             });
         }
         menuText += "</ul></div>";
+        menuText += "<hr/>";
         return menuText;
     }
 
@@ -269,7 +273,11 @@
 
         // 处理目录
         var menuHtml = generateMenuHtml(myRenderer);
-        // outtext = menuHtml + outtext;
+        // 声明需要目录
+        if (/^\[TOC\]/.test(text)) {
+            console.log("generateMenuHtml");
+            outtext = menuHtml + outtext;
+        }
 
         $(".menu-aside").show();
         $("#menuBox").html(menuHtml);

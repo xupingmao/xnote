@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/09/12 19:03:23
+# @modified 2020/11/01 00:36:07
 import profile
 import math
 import re
@@ -126,7 +126,7 @@ VIEW_FUNC_DICT = {
     "post": view_html_func,
 }
 
-def find_note_for_view(token, id, name):
+def find_note_for_view0(token, id, name):
     if token != "":
         return NOTE_DAO.get_by_token(token)
     if id != "":
@@ -135,6 +135,14 @@ def find_note_for_view(token, id, name):
         return NOTE_DAO.get_by_name(xauth.current_name(), name)
 
     raise HTTPError(504)
+
+def find_note_for_view(token, id, name):
+    note = find_note_for_view0(token, id, name)
+    if note != None:
+        note.mdate = note.mtime.split(" ")[0]
+        note.cdate = note.ctime.split(" ")[0]
+        note.adate = note.atime.split(" ")[0]
+    return note
 
 class ViewHandler:
 

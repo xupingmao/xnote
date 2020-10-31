@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2020/08/15 11:44:52
+ * @modified 2020/11/01 00:26:53
 */
 
 
@@ -44,6 +44,13 @@
 
 .note-head {
     font-size: 20px;
+}
+
+.note-head-info {
+    padding: 5px;
+    background-color: #eee;
+    color: #555;
+    margin: 0px;
 }
 
 .note-name {

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/09/05 19:20:09
+# @modified 2020/10/27 23:47:38
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -19,6 +19,25 @@ import xtemplate
 import shutil
 import xmanager
 from xutils import FileItem, u, Storage, fsutil
+
+def file_post_handler(item):
+    if item.type == "dir":
+        item.icon = "fa-folder orange"
+    elif item.ext in xconfig.FS_VIDEO_EXT_LIST:
+        item.icon = "fa-file-video-o"
+    elif item.ext in xconfig.FS_CODE_EXT_LIST:
+        item.icon = "fa-file-code-o"
+    elif item.ext in xconfig.FS_AUDIO_EXT_LIST:
+        item.icon = "fa-file-audio-o"
+    elif item.ext in xconfig.FS_ZIP_EXT_LIST:
+        item.icon = "fa-file-zip-o"
+    elif xutils.is_text_file(item.path):
+        item.icon = "fa-file-text-o"
+    elif xutils.is_img_file(item.path):
+        item.icon = "fa-file-image-o"
+    return item
+
+FileItem.set_post_handler(file_post_handler)
 
 def is_stared(path):
     return xconfig.has_config("STARED_DIRS", path)
@@ -51,6 +70,9 @@ def print_env():
     for key in web.ctx.env:
         print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
 
+def get_user_home_path(user_name):
+    datapath = u(os.path.abspath(xconfig.DATA_DIR))
+    return os.path.join(datapath, "files", user_name) 
 
 def list_win_drives():
     """获取Windows系统的驱动器列表"""
@@ -83,38 +105,15 @@ def get_parent_file_object(fpath):
     parent_path = os.path.dirname(fpath)
     file_object = FileItem(parent_path)
     file_object.name = u"[上级目录]"
-    return assemble_file_object(file_object)
+    return file_object
 
 def check_file_auth(path, user_name):
     user_dir = os.path.join(xconfig.UPLOAD_DIR, user_name)
     path = os.path.abspath(path)
     return path.startswith(user_dir)
 
-def assemble_file_object(item):
-    item.encoded_path = xutils.encode_uri_component(item.path)
-    item.icon = "fa-file-o"
-
-    if item.type == "dir":
-        item.icon = "fa-folder orange"
-    elif item.ext in xconfig.FS_VIDEO_EXT_LIST:
-        item.icon = "fa-file-video-o"
-    elif item.ext in xconfig.FS_CODE_EXT_LIST:
-        item.icon = "fa-file-code-o"
-    elif item.ext in xconfig.FS_AUDIO_EXT_LIST:
-        item.icon = "fa-file-audio-o"
-    elif item.ext in xconfig.FS_ZIP_EXT_LIST:
-        item.icon = "fa-file-zip-o"
-    elif xutils.is_text_file(item.path):
-        item.icon = "fa-file-text-o"
-    elif xutils.is_img_file(item.path):
-        item.icon = "fa-file-image-o"
-    return item
-
 def process_file_list(pathlist, parent = None):
-    filelist = [FileItem(fpath, parent, merge = True) for fpath in pathlist]
-    for item in filelist:
-        assemble_file_object(item)
-
+    filelist = [FileItem(fpath, parent, merge = False) for fpath in pathlist]
     filelist.sort()
     return filelist
 
@@ -147,8 +146,7 @@ class FileSystemHandler:
         web.header("Content-Type", mime_type)
 
     def handle_content_encoding(self, ext):
-        """Content-Encoding设置，这里应该是二进制编码格式
-        """
+        """Content-Encoding设置，这里应该是二进制编码格式"""
         if ext in self.encodings:
             web.header("Content-Encoding", self.encodings[ext])
 
@@ -455,8 +453,7 @@ class UserHomeHandler:
     @xauth.login_required("admin")
     def GET(self):
         user_name = xauth.current_name()
-        datapath = u(os.path.abspath(xconfig.DATA_DIR))
-        homepath = os.path.join(datapath, "files", user_name)
+        homepath  = get_user_home_path(user_name)
         raise web.seeother("/fs/%s" % homepath)
 
 class ListAjaxHandler:
@@ -553,6 +550,18 @@ class TextHandler:
     def GET(self):
         return xtemplate.render("fs/page/txtreader.html")
 
+
+class BookmarkHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        user_name = xauth.current_name()
+        kw = dict()
+        kw["path"]     = "/"
+        kw["filelist"] = [FileItem(get_user_home_path(user_name))]
+
+        return xtemplate.render("fs/page/fs.html", **kw)
+
 xutils.register_func("fs.process_file_list", process_file_list)
 
 xurls = (
@@ -568,6 +577,7 @@ xurls = (
     r"/fs_api/list", ListAjaxHandler,
     r"/fs_link/(.*)", LinkHandler,
     r"/fs_recent", RecentHandler,
+    r"/fs_bookmark", BookmarkHandler,
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2020/09/12 20:15:01
+# @modified 2020/10/27 23:45:21
 # 说明：文件工具分为如下部分：
 # 1、path处理，比如判断是否是父级目录
 # 2、文件操作，比如读写文件，创建目录
@@ -425,11 +425,14 @@ def try_listdir(dirname):
 
 class FileItem(Storage):
 
-    def __init__(self, path, parent = None, merge = False):
+    post_handler = None
+
+    def __init__(self, path, parent = None, merge = False, encode_path = True):
         self.path = path
         self.name = os.path.basename(path)
         self.size = '-'
         self.cdate = '-'
+        self.icon  = "fa-file-o"
         _, self.ext = os.path.splitext(path)
         self.ext = self.ext.lower()
 
@@ -439,6 +442,9 @@ class FileItem(Storage):
         # 处理Windows盘符
         if path.endswith(":"):
             self.name = path
+
+        if encode_path:
+            self.encoded_path = xutils.encode_uri_component(self.path)
 
         try:
             st = os.stat(path)
@@ -469,6 +475,9 @@ class FileItem(Storage):
                     parent = os.path.dirname(path)
                 self.__init__(new_path, parent)
 
+        if FileItem.post_handler is not None:
+            FileItem.post_handler(self)
+
 
     # sort方法重写__lt__即可
     def __lt__(self, other):
@@ -485,6 +494,10 @@ class FileItem(Storage):
         if self.type == "dir":
             return -1
         return 1
+
+    @staticmethod
+    def set_post_handler(func):
+        FileItem.post_handler = func
 
 
 def touch(path):
