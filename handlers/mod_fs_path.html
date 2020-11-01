@@ -2,6 +2,7 @@
 {% init fs_path_url  = "/fs/$path?mode=" + fs_mode %}
 {% init fs_path_option = None %}
 {% init show_path = True %}
+{% init show_fake_path = False %}
 
 {% if show_path %}
 <div class="fs-path">
@@ -9,6 +10,17 @@
     {% for item in xutils.splitpath(xutils.get_real_path(path)) %}
         <a href="{{fs_path_url.replace('$path', xutils.encode_uri_component(item.path))}}">{{ item.name }}</a> / 
     {% end %}
+
+    {% if fs_path_option %}
+        {% raw fs_path_option %}
+    {% end %}
+</div>
+{% end %}
+
+{% if show_fake_path %}
+<div class="fs-path">
+    <a href="/fs//">Home</a> /
+    <a href="{{fake_path_url}}">{{fake_path_name}}</a>
     {% if fs_path_option %}
         {% raw fs_path_option %}
     {% end %}

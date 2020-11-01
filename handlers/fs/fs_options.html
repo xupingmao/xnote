@@ -1,4 +1,5 @@
 {% init error = "" %}
+{% init path  = "/fake_dir" %}
 
 {% include fs/component/options-css.html %}
 
@@ -292,6 +293,13 @@ $(function () {
     $("#clipboardBtn").click(function () {
         showClipboardDialog();
     });
+
+    window.openFileOption = function (e) {
+        console.log(e);
+        var path = $(e).attr("data-path");
+        window.xnote.showIframeDialog("更多操作", "/fs_api/plugins?embed=true&path=" + path);
+    }
+
 
     // do not adjust height in mobile
     if (isPc()) {

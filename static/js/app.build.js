@@ -1312,12 +1312,29 @@ if (window.xnote == undefined) {
     window.xnote = {};
 }
 
-window.xnote.showDialog = function(title, html, buttons, functions) {
+function getDialogArea() {
     if (isMobile()) {
-        var area = ['100%', '100%'];
+        return ['100%', '100%'];
     } else {
-        var area = ['600px', '80%'];
+        return ['600px', '80%'];
     }
+}
+
+window.xnote.showIframeDialog = function (title, url) {
+    var area = getDialogArea();
+    layer.open({
+        type: 2,
+        shadeClose: true,
+        title: title,
+        maxmin: true,
+        area: area,
+        content: url,
+        scrollbar: false
+    });
+}
+
+window.xnote.showDialog = function(title, html, buttons, functions) {
+    var area = getDialogArea();
 
     if (!(functions instanceof Array)) {
         functions = [functions];
@@ -1837,12 +1854,6 @@ $(function () {
         content: url,
         scrollbar: false
       });
-    }
-
-    window.openFileOption = function (e) {
-      console.log(e);
-      var path = $(e).attr("data-path");
-      openDialog("/fs_api/plugins?embed=true&path=" + path);
     }
 
     window.showIframeDialog = showIframeDialog;

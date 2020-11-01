@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2020/09/12 13:12:31
+# @modified 2020/11/01 01:05:42
 import xutils
 import xconfig
 import xmanager
@@ -17,6 +17,10 @@ dbutil.register_table("msg_history", "备忘历史")
 dbutil.register_table("user_stat", "用户数据统计")
 
 class MessageDO(Storage):
+
+    id   = "主键"
+    tag  = "标签"
+    user = "用户名"
 
     def __init__(self):
         pass

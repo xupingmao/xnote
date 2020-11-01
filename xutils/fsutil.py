@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2020/10/27 23:45:21
+# @modified 2020/11/01 23:06:23
 # 说明：文件工具分为如下部分：
 # 1、path处理，比如判断是否是父级目录
 # 2、文件操作，比如读写文件，创建目录
@@ -427,9 +427,10 @@ class FileItem(Storage):
 
     post_handler = None
 
-    def __init__(self, path, parent = None, merge = False, encode_path = True):
+    def __init__(self, path, parent = None, merge = False, encode_path = True, name = None):
         self.path = path
         self.name = os.path.basename(path)
+
         self.size = '-'
         self.cdate = '-'
         self.icon  = "fa-file-o"
@@ -446,6 +447,17 @@ class FileItem(Storage):
         if encode_path:
             self.encoded_path = xutils.encode_uri_component(self.path)
 
+        # 处理文件属性
+        self.handle_file_stat(merge)
+
+        if name != None:
+            self.name = name
+
+        if FileItem.post_handler is not None:
+            FileItem.post_handler(self)
+
+    def handle_file_stat(self, merge):
+        path = self.path
         try:
             st = os.stat(path)
             self.cdate = xutils.format_date(st.st_ctime)
@@ -474,9 +486,6 @@ class FileItem(Storage):
                 if parent is None:
                     parent = os.path.dirname(path)
                 self.__init__(new_path, parent)
-
-        if FileItem.post_handler is not None:
-            FileItem.post_handler(self)
 
 
     # sort方法重写__lt__即可

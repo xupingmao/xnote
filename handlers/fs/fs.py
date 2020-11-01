@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/10/27 23:47:38
+# @modified 2020/11/01 22:53:48
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -19,6 +19,7 @@ import xtemplate
 import shutil
 import xmanager
 from xutils import FileItem, u, Storage, fsutil
+from xutils import dbutil
 
 def file_post_handler(item):
     if item.type == "dir":
@@ -448,14 +449,6 @@ class ClearClipHandler:
     def GET(self):
         return self.POST()
 
-class UserHomeHandler:
-
-    @xauth.login_required("admin")
-    def GET(self):
-        user_name = xauth.current_name()
-        homepath  = get_user_home_path(user_name)
-        raise web.seeother("/fs/%s" % homepath)
-
 class ListAjaxHandler:
 
     @xauth.login_required("admin")
@@ -550,22 +543,39 @@ class TextHandler:
     def GET(self):
         return xtemplate.render("fs/page/txtreader.html")
 
-
 class BookmarkHandler:
-
     @xauth.login_required("admin")
     def GET(self):
         user_name = xauth.current_name()
         kw = dict()
-        kw["path"]     = "/"
-        kw["filelist"] = [FileItem(get_user_home_path(user_name))]
+        bookmark = dbutil.get("fs_bookmark:%s" % user_name)
+        if bookmark is None:
+            bookmark = []
 
+        filelist = []
+        filelist.append(FileItem("/", name = "文件系统根目录"))
+        filelist.append(FileItem(xconfig.DATA_DIR, name = "Xnote目录"))
+        filelist.append(FileItem(get_user_home_path(user_name), name = "Xnote用户目录"))
+
+        for fpath in bookmark:
+            filelist.append(FileItem(fpath))
+
+        kw["show_path"] = False
+        kw["show_fake_path"] = True
+        kw["fake_path_url"] = "/fs_bookmark"
+        kw["fake_path_name"] = "文件收藏夹"
+
+        kw["filelist"] = filelist
         return xtemplate.render("fs/page/fs.html", **kw)
 
+
+class UserHomeHandler(BookmarkHandler):
+    pass
+
+dbutil.register_table("fs_bookmark", "文件收藏夹")
 xutils.register_func("fs.process_file_list", process_file_list)
 
 xurls = (
-    r"/fs_list/?", UserHomeHandler,
     r"/fs_edit",   EditHandler,
     r"/fs_view",   ViewHandler,
     r"/fs_text",   TextHandler,
@@ -577,7 +587,10 @@ xurls = (
     r"/fs_api/list", ListAjaxHandler,
     r"/fs_link/(.*)", LinkHandler,
     r"/fs_recent", RecentHandler,
+
+    r"/fs_list/?",   UserHomeHandler,
     r"/fs_bookmark", BookmarkHandler,
+
     r"/fs/(.*)", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
