@@ -1,42 +1,7 @@
+<div class="fs-path">
 {% for i, path_item in enumerate(pathlist) %}
-    {% if i > 0 %} / {% end %}<a href="{{path_item.url}}" class="link2 path-link">{{ path_item.name }}</a>
+    {% if i > 0 %} / {% end %}<a href="{{path_item.url}}" class="link">{{ path_item.name }}</a>
 {% end %}
+</div>
 
 <!-- {{path_item}} -->
-
-{% if path_item != None %}
-
-    {% if path_item.priority == 1 %}
-        <a class="gray-tag-link" href="/note/sticky">置顶</a>
-    {% end %}
-
-    {% if path_item.type == "list" %}
-        <a class="gray-tag-link" href="/note/list">清单</a>
-    {% end %}
-
-    {% if path_item.type in ("csv", "table") %}
-        <a class="gray-tag-link" href="/note/table">表格</a>
-    {% end %}
-
-    {% if path_item.type == "gallery" %}
-        <a class="gray-tag-link" href="/note/gallery">相册</a>
-    {% end %}
-
-    {% if path_item.type == "html" %}
-        <a class="gray-tag-link" href="/note/html">富文本</a>
-    {% end %}
-
-    {% if path_item.type == "log" %}
-        <a class="gray-tag-link" href="/note/log">日志</a>
-    {% end %}
-
-    {% if path_item.type in ("md", "text", "plan") %}
-        <a class="gray-tag-link" href="/note/document">文档</a>
-    {% end %}
-
-    {% if path_item.is_public %}
-        <a class="gray-tag-link" href="/note/public">公开</a>
-    {% end %}
-
-{% end %}
-

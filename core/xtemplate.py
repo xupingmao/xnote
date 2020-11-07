@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/10/07 17:04:42
+# @modified 2020/11/05 01:44:44
 import os
 import json
 import web
@@ -323,6 +323,7 @@ class BasePlugin:
     """插件的基类"""
 
     # 插件的标题
+    show_title = True
     title = "PluginName"
     description = ""
     

@@ -2,7 +2,7 @@
 
 <!-- 
 @since 2017/12/02
-@modified 2020/03/21 14:15:24
+@modified 2020/11/07 01:07:16
 -->
 
 {% block head %}
@@ -82,6 +82,9 @@
 
 {% block body %}
 {% set path = xutils.get_argument("path") %}
+
+{% init fs_title = "文本阅读器" %}
+{% include fs/component/fs_title.html %}
 
 <!-- header -->
 {% include mod_fs_path.html %}

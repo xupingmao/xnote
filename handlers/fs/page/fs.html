@@ -24,13 +24,15 @@
 
 <div class="grid-card">
 
+{% include fs/component/fs_title.html %}
+
 {% if show_fs_path %}
     {% include mod_fs_path.html %}
 {% end %}
 
 {% include fs/fs_options.html %}
 
-<div class="col-md-12 file-list">
+<div class="col-md-12 file-list fs-scrollbar">
 <table class="col-md-12 no-border-table">
 {% for item in filelist %}
     {# 隐藏文件 #}

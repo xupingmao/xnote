@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/12/28 22:04:24
-# @modified 2019/12/29 13:14:10
+# @modified 2020/11/05 01:47:27
 
 # -*- coding:utf-8 -*-
 # @since 2019-01-10 00:21:16
@@ -25,6 +25,14 @@ HTML = """
         font-family: monospace;
     }
 </style>
+
+<h3 class="card-title btn-line-height">
+    <span>二进制查看器</span>
+    
+    <div class="float-right">
+        <a class="btn btn-default" href="/code/edit?path={{path}}">编辑本文</a>
+    </div>
+</h3>
 
 {% include mod_fs_path.html %}
 
@@ -56,7 +64,7 @@ def bytes_chars(bytes):
 
 class Main(BasePlugin):
 
-    title = "HEX查看器"
+    show_title = False
     # 提示内容
     description = ""
     # 是否需要管理员权限

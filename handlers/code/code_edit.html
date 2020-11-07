@@ -68,6 +68,10 @@
         .CodeMirror {
             font-family: Fira Code,Menlo,Monaco,Consolas,Liberation Mono,Courier New,Courier,monospace;
         }
+
+        .global-warn {
+            display: none;
+        }
     </style>
 
 {% end %}
@@ -82,12 +86,28 @@
 {% init embed = False %}
 
 <div class="col-md-12 grid-card">
+
+    <h3 class="card-title btn-line-height">
+        <span>文本编辑</span>
+        <div class="float-right">
+            {% if show_preview %}
+                <a class="btn" href="/code/wiki/{{path}}?embed={{embed}}">{{T("Preview")}}</a>
+            {% end %}
+        </div>
+    </h3>
+
     {% include "mod_fs_path.html" %}
 
     {% if error != "" %}
-    <div class="col-md-12 error">
-        {{?error}}
-    </div>
+        <div class="col-md-12 error">
+            {{?error}}
+        </div>
+    {% end %}
+
+    {% if warn != "" and warn != None %}
+        <pre class="col-md-12 warn">
+            {{warn}}
+        </pre>
     {% end %}
 
     <form method="POST" action="/code/update">

@@ -1,0 +1,38 @@
+{% init file = None %}
+
+{% if file != None %}
+
+    {% if file.priority == 1 %}
+        <a class="btn btn-default" href="/note/sticky">置顶</a>
+    {% end %}
+
+    {% if file.type == "list" %}
+        <a class="btn btn-default" href="/note/list">清单</a>
+    {% end %}
+
+    {% if file.type in ("csv", "table") %}
+        <a class="btn btn-default" href="/note/table">表格</a>
+    {% end %}
+
+    {% if file.type == "gallery" %}
+        <a class="btn btn-default" href="/note/gallery">相册</a>
+    {% end %}
+
+    {% if file.type == "html" %}
+        <a class="btn btn-default" href="/note/html">富文本</a>
+    {% end %}
+
+    {% if file.type == "log" %}
+        <a class="btn btn-default" href="/note/log">日志</a>
+    {% end %}
+
+    {% if file.type in ("md", "text", "plan") %}
+        <a class="btn btn-default" href="/note/document">文档</a>
+    {% end %}
+
+    {% if file.is_public %}
+        <a class="btn btn-default" href="/note/public">公开</a>
+    {% end %}
+
+{% end %}
+

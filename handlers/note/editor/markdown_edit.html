@@ -30,12 +30,13 @@
             <div>
                 <span id="fileId" class="hide">{{file.id}}</span>
             </div>
-            <div class="grid-title">
-                {% include note/component/pathlist.html %}
+            <div class="grid-title btn-line-height">
+                <span>文档编辑器</span>
                 <div class="float-right">
                     <button class="inline-btn">保存</button>
                 </div>
             </div>
+            {% include note/component/pathlist.html %}
         </div>
         <div class="col-md-12">
             <span id="result" style="color:green"></span>

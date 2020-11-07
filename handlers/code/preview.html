@@ -33,13 +33,18 @@
     </div>
     {% end %}
 
-    <div class="col-md-12">
-        <span id="result" style="color:green"></span>
-    </div>
-
     <div class="grid-card">
+        <h3 class="card-title btn-line-height">
+            <span>文本预览</span>
+
+            {% if _is_admin and path != "" %}  
+                <div class="float-right">
+                    <a class="btn btn-default" href="/code/edit?path={{path}}&embed={{embed}}">编辑</a>
+                </div>
+            {% end %}
+        </h3>
+
         {% if _is_admin and path != "" %}
-            {% set fs_path_option = '<a class="float-right" href="/code/edit?path={}&embed={}">[编辑]</a>'.format(path, embed) %}
             {% include "mod_fs_path.html" %}
         {% end %}
         

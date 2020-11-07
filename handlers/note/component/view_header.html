@@ -14,25 +14,30 @@
 ) %}
 
 {% if show_path_list %}
-    <div class="grid-title">
-        {% include note/component/pathlist.html %}
+    <div class="grid-title btn-line-height">
+        <span>文档查看</span>
 
-        {% if file != None and file.id == 0 %}
-            <a class="btn float-right" href="/note/management?parent_id=0">整理</a>
-        {% end %}
+        <div class="float-right">
+            {% include note/component/view_header_tag.html %}
 
-        {% if group_type == "gallery" %}
-            <div class="float-right"><a class="btn" href="/note/add?type=gallery">创建相册</a></div>
-        {% elif group_type == "list" %}
-            <div class="float-right"><a class="btn" href="/note/add?type=list">创建清单</a></div>
-        {% else %}
-            {# 其他普通笔记 #}
-            <div class="float-right">
+            {% if file != None and file.id == 0 %}
+                <a href="/note/management?parent_id=0">整理</a>
+            {% end %}
+
+            {% if group_type == "gallery" %}
+                <a class="btn" href="/note/add?type=gallery">创建相册</a>
+            {% elif group_type == "list" %}
+                <a class="btn" href="/note/add?type=list">创建清单</a>
+            {% else %}
+                {# 其他普通笔记 #}
                 {% include note/component/note_dropdown.html %}
-            </div>
-        {% end %}
+            {% end %}
+        </div>
     </div>
-    <pre class="col-md-12 note-head-info">{{file.creator}}修改于{{file.mdate}}</pre>
+    
+    {% include note/component/pathlist.html %}
+
+    <!-- <pre class="col-md-12 note-head-info">{{file.creator}}修改于{{file.mdate}}</pre> -->
 {% end %}
 
 {% if error != "" and error != None%}
