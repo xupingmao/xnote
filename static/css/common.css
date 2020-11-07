@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/10/07 15:48:11
+ * @modified 2020/11/07 13:13:01
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
  * 2：复杂样式，命名规则为：模块名(可选)-功能外观-子功能外观(可选)-实现方式(可选)-特征或状态(可选)，示例如下：
@@ -1309,6 +1309,26 @@ li.menu-item:hover {
     border-color: #4f88e1;
     color: #fff;
 }
+
+/** 滚动条样式 **/
+.scrollbar::-webkit-scrollbar {
+    /*滚动条整体样式*/
+    width: 10px;
+    height: 10px;
+    background-color: #eee;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+    /*滚动条里面小方块*/
+    background-color: #999;
+}
+
+
+.scrollbar::-webkit-scrollbar-track { 
+    /*滚动条里面轨道*/
+    /*border-radius: 10px; */
+    /*background: #eee; */
+ } 
 
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 1000px) {
