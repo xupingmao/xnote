@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/09/12 13:47:00
+# @modified 2020/11/08 22:51:23
 import math
 import time
 import web
@@ -160,7 +160,7 @@ class GroupListHandler:
         root = NOTE_DAO.get_root()
         return xtemplate.render("note/page/project_list.html", 
             file = root, 
-            title = u"项目",
+            title = u"项目列表",
             pathlist = [root],
             show_path_list = True,
             show_size = True,

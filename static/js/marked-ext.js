@@ -227,36 +227,58 @@
       return out;
     };
 
+    function buildMenuLink(text, link) {
+        return '<li><a href="#link">text</a></li>'.replace(/mleft|link|text/g, function (match, index) {
+            // console.log(match, index);
+            if (match == "link") {
+                // 目录的链接
+                return link;
+            } else {
+                // 目录的文本
+                return text;
+            }
+        });
+    }
+
+    function repeatElement(element, times) {
+        var text = "";
+        for (var i = 0; i < times; i++) {
+            text += element;
+        }
+        return text;
+    }
+
     function generateMenuHtml(myRenderer) {
         var menuText = "";
         var itemNo = [];
-        menuText += "<span>[目录]</span>"
         menuText += '<div class="marked-contents">';
-        menuText += "<ul>";
+        menuText += "<span>[目录]</span>"
 
+        var currentLevel = 0;
         for (var i = 0; i < myRenderer.headings.length; i++) {
             var heading = myRenderer.headings[i];
             var text = heading.text;
             var link = heading.link;
-            var level = heading.level - 1;
-            var margin_left = level * 10 + "px";
+            var level = heading.level;
             var contentIndex = i + 1;
-            menuText += '<li><a href="#link" style="margin-left:mleft">text</a></li>'.replace(/mleft|link|text/g, function (match, index) {
-                // console.log(match, index);
-                if (match == "link") {
-                    // 目录的链接
-                    return link;
-                } else if (match == "mleft") {
-                    // 处理缩进
-                    return margin_left;
-                } else {
-                    // 目录的文本
-                    return text;
-                }
-            });
+
+            if (level == currentLevel) {
+                menuText += buildMenuLink(text, link);
+            } else if (level > currentLevel) {
+                // 加深一层
+                menuText += repeatElement("<ul>", level - currentLevel);
+                menuText += buildMenuLink(text, link);
+            } else {
+                // 退出一层
+                menuText += repeatElement("</ul>", currentLevel - level);
+                menuText += buildMenuLink(text, link);
+            }
+
+            // 更新当前的层级
+            currentLevel = level;
         }
-        menuText += "</ul></div>";
-        menuText += "<hr/>";
+        menuText += repeatElement("</ul>", currentLevel);
+        menuText += "</div>";
         return menuText;
     }
 
@@ -273,11 +295,10 @@
 
         // 处理目录
         var menuHtml = generateMenuHtml(myRenderer);
+        
         // 声明需要目录
-        if (/^\[TOC\]/.test(text)) {
-            console.log("generateMenuHtml");
-            outtext = menuHtml + outtext;
-        }
+        console.log("generateMenuHtml");
+        outtext = menuHtml + outtext;
 
         $(".menu-aside").show();
         $("#menuBox").html(menuHtml);
