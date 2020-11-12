@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/11/08 22:51:23
+# @modified 2020/11/12 21:20:01
 import math
 import time
 import web
@@ -26,6 +26,18 @@ SEARCH_DOC_DICT = dict(
     search_action = "/note/timeline",
     search_placeholder = u"搜索笔记"
 )
+
+class NoteCategory:
+
+    def __init__(self, name):
+        self.name = name
+        self.url  = "#"
+        self.icon = ""
+        self.priority = 0
+        self.is_deleted = 0
+        self.size = 0
+        self.show_next = True
+        self.icon = "fa-folder"
 
 class PathNode(Storage):
 
@@ -131,6 +143,21 @@ class DefaultListHandler:
             show_mdate = True,
             page_url   = "/note/default?page=")
 
+def get_category_list():
+    # TODO 下个版本将分类法应用到笔记中
+    # 主要参考的是：杜威十进制分类法和国际十进制分类法
+    category_list = []
+    category_list.append(NoteCategory("0-知识和分类"))
+    category_list.append(NoteCategory("1-哲学和心理学"))
+    category_list.append(NoteCategory("2-宗教"))
+    category_list.append(NoteCategory("3-社会科学"))
+    category_list.append(NoteCategory("4-个人记事"))
+    category_list.append(NoteCategory("5-数学和自然科学"))
+    category_list.append(NoteCategory("6-应用科学、医学、技术"))
+    category_list.append(NoteCategory("7-艺术与休闲"))
+    category_list.append(NoteCategory("8-语言和文学"))
+    category_list.append(NoteCategory("9-历史、地理和传记"))
+    return category_list
 
 class GroupListHandler:
 
@@ -156,6 +183,7 @@ class GroupListHandler:
             fixed_books.append(NoteLink("Archived_Project", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
 
         files = fixed_books + normal_groups
+        # files = get_category_list()
 
         root = NOTE_DAO.get_root()
         return xtemplate.render("note/page/project_list.html", 
