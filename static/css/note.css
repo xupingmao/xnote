@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2020/11/01 00:26:53
+ * @modified 2020/11/22 16:46:04
 */
 
 
@@ -256,4 +256,19 @@
 
 .share-dialog-row {
     padding-left: 20px;
+}
+
+.note-path {
+    /*background-color: #eee;*/
+    float: left;
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+
+
+.note-timeline-body {
+    width: 100%;
+    float: left;
+    margin-top: 5px;
 }

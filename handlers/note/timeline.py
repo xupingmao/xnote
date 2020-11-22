@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/11/22 15:01:49
+# @modified 2020/11/22 16:47:06
 
 """时光轴视图"""
 import re
@@ -388,7 +388,8 @@ class BaseTimelineHandler:
         file          = NOTE_DAO.get_by_id(parent_id)
         
         if file != None:
-            title = file.name
+            # title = file.name
+            title = "笔记目录"
             search_title = file.name
             title_link = PathLink(file.name, file.url)
             note_priority = file.priority

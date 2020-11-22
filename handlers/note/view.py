@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/11/22 13:49:45
+# @modified 2020/11/22 16:41:10
 import profile
 import math
 import re
@@ -119,8 +119,8 @@ def view_list_func(note, kw):
     kw.show_pagination = False
 
 VIEW_FUNC_DICT = {
-    # "group": view_group_func,
-    "group": view_group_func_old,
+    "group": view_group_func,
+    # "group": view_group_func_old,
     "md"  : view_md_func,
     "text": view_md_func,
     "memo": view_md_func,

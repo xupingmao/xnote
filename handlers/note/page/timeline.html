@@ -32,15 +32,7 @@
 <div id="app" class="card content">
 
   <div class="note-header card-title">
-    {% if parent_link != None %}
-      <a href="{{parent_link.url}}" class="path-link">{{parent_link.name}}</a>&nbsp;/
-    {% end %}
-
-    {% if title_link != None %}
-      <a href="{{title_link.url}}" class="path-link">{{title_link.name}}</a>
-    {% else %}
-      <span class="note-header-span">{{title}}</span>
-    {% end %}
+    <span class="note-header-span">{{title}}</span>
 
     <div class="float-right">
         {% if type not in ("search", "public") %}
@@ -57,26 +49,31 @@
           <button class="btn-default" onclick="javascript:history.back();">返回</button>
         {% end %}
     </div>
+
   </div>
+
+  {% include note/component/pathlist.html %}
   
-  <article class="row" v-for="item in itemList">
-    <h3 class="card-title-2">{{!item.title}}</h3>
-    <section v-for="file in item.files">
-      <span class="point-time point-green"></span>
-      <time datetime="">
-        <span>{{!item.ctime}}</span>
-      </time>
-      <aside>
-        <p class="things">
-          <!-- <input type="checkbox" class="icon-check" v-if="file.type == 'gallery'"/> -->
-          <i class="fa" v-bind:class="file.icon"></i>
-          <a v-bind:href="file.url">{{!file.name}}</a>
-          <span v-if="file.type=='group' || file.type=='system'" class="float-right gray-text">{{!file.size}}</span>
-        </p>
-        <p class="brief"><span class="text-green"></span></p>
-      </aside>
-    </section>
-  </article>
+  <div class="note-timeline-body">
+    <article class="row" v-for="item in itemList">
+      <h3 class="card-title-2">{{!item.title}}</h3>
+      <section v-for="file in item.files">
+        <span class="point-time point-green"></span>
+        <time datetime="">
+          <span>{{!item.ctime}}</span>
+        </time>
+        <aside>
+          <p class="things">
+            <!-- <input type="checkbox" class="icon-check" v-if="file.type == 'gallery'"/> -->
+            <i class="fa" v-bind:class="file.icon"></i>
+            <a v-bind:href="file.url">{{!file.name}}</a>
+            <span v-if="file.type=='group' || file.type=='system'" class="float-right gray-text">{{!file.size}}</span>
+          </p>
+          <p class="brief"><span class="text-green"></span></p>
+        </aside>
+      </section>
+    </article>
+  </div>
 </div>
 
 <header class="site-footer card">
