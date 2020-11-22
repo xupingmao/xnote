@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/11/01 00:36:07
+# @modified 2020/11/22 13:49:45
 import profile
 import math
 import re
@@ -18,6 +18,7 @@ from xconfig import Storage
 from xutils import History
 from xutils import dbutil
 from xutils import fsutil
+from .constant import CREATE_BTN_TEXT_DICT
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
@@ -92,7 +93,8 @@ def view_group_func_old(file, kw):
     orderby   = kw.orderby
     user_name = kw.user_name
     page      = kw.page
-    pagesize  = kw.pagesize
+    # pagesize  = kw.pagesize
+    pagesize  = 1000
 
     if orderby != None and file.orderby != orderby:
         NOTE_DAO.update(file.id, orderby = orderby)
@@ -105,17 +107,20 @@ def view_group_func_old(file, kw):
     kw.show_search_div = True
     kw.show_add_file   = True
     kw.show_aside      = False
-    kw.show_pagination = True
+    kw.show_pagination = False
     kw.files           = files
+    kw.show_parent_link = False
     kw.page_max        = math.ceil(amount/pagesize)
+    kw.show_cdate = True
+    kw.parent_id  = file.id
 
 def view_list_func(note, kw):
     kw.show_aside = False
     kw.show_pagination = False
 
 VIEW_FUNC_DICT = {
-    "group": view_group_func,
-    # "group": view_group_func_old,
+    # "group": view_group_func,
+    "group": view_group_func_old,
     "md"  : view_md_func,
     "text": view_md_func,
     "memo": view_md_func,
@@ -176,6 +181,8 @@ class ViewHandler:
         kw.recommended_notes = []
         kw.show_add_file     = False
         kw.template_name     = "note/page/view.html"
+        kw.search_action = "/note/timeline"
+        kw.search_placeholder = "搜索笔记"
 
         if id == "0":
             raise web.found("/")
@@ -232,8 +239,7 @@ class ViewHandler:
             pathlist = pathlist,
             page_url = "/note/view?id=%s&orderby=%s&page=" % (id, orderby),
             recent_created    = recent_created,
-            search_action = "/note/timeline",
-            search_placeholder = "搜索笔记",
+            CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT,
             is_iframe         = is_iframe, **kw)
 
 class ViewByIdHandler(ViewHandler):

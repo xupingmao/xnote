@@ -1,6 +1,6 @@
 <!-- 
 @since 2018/03/06
-@modified 2020/03/22 10:45:51
+@modified 2020/11/22 13:27:13
 -->
 
 {% init files = [] %}
@@ -15,7 +15,7 @@
 {% init tags = "" %}
 {% init show_parent_link = True %}
 
-{% include note/component/group_header.html %}
+{% include note/component/view_group_header.html %}
 
 <div class="grid-row note-list">
     {% if _has_login and show_parent_link and file.id != 0 %}

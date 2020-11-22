@@ -1,7 +1,16 @@
-<div class="fs-path">
-{% for i, path_item in enumerate(pathlist) %}
-    {% if i > 0 %} / {% end %}<a href="{{path_item.url}}" class="link">{{ path_item.name }}</a>
+<style type="text/css">
+.note-path {
+    /*background-color: #eee;*/
+    float: left;
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+</style>
+
+<div class="note-path">
+{% for i, item_local in enumerate(pathlist) %}
+    {% if i > 0 %} / {% end %}<a href="{{item_local.url}}" class="link">{{ item_local.name }}</a>
 {% end %}
 </div>
 
-<!-- {{path_item}} -->

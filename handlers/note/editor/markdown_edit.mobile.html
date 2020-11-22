@@ -28,10 +28,11 @@
             <div>
                 <span id="fileId" class="hide">{{file.id}}</span>
             </div>
-            <div class="grid-title">
-                {% for i, item in enumerate(pathlist) %}
-                    {% if i > 0 %} / {% end %}<a href="{{item.url}}" class="link2">{{ item.name }}</a>
-                {% end %}
+            <div class="grid-title btn-line-height">
+                <span>文档编辑</span>
+                <div class="float-right">
+                    <a class="btn btn-default" href="/note/{{file.id}}">取消</a>
+                </div>
             </div>
         </div>
 

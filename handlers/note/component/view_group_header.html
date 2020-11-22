@@ -3,20 +3,23 @@
 {% init is_iframe = False %}
 {% init file = Storage(id = 0, parent_id=0) %}
 {% init page = 0 %}
+{% init show_create_option = True %}
 
 <input id="fileId" type="hidden" value="{{file.id}}"/>
 
 {% if show_path_list %}
-    <div class="grid-title">
-        {% for i, path_item in enumerate(pathlist) %}
-            {% if i > 0 %} / {% end %}
-            <a href="{{path_item.url}}" class="link2 path-link">{{ path_item.name }}</a>
-        {% end %}
-
+    <div class="grid-title btn-line-height">
+        <span>目录</span>
         <div class="float-right">
+            {% if show_create_option %}
+                {% include note/component/create_option.html %}
+            {% end %}
             {% include note/component/group_option.html %}
         </div>
     </div>
+
+    {% include note/component/pathlist.html %}
+
 {% end %}
 
 {% if error != "" and error != None%}

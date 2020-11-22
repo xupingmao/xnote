@@ -26,6 +26,7 @@
 
 <div class="grid-card">
     <form id="mainFrame" action="/note/update" enctype="multipart/form-data" method="POST" class="col-md-12">
+        <!-- note-edit-header -->
         <div class="col-md-12" id="submit-div">
             <div>
                 <span id="fileId" class="hide">{{file.id}}</span>
@@ -38,7 +39,9 @@
             </div>
             {% include note/component/pathlist.html %}
         </div>
-        <div class="col-md-12">
+
+        <!-- note-edit-body -->
+        <div class="col-md-12 note-edit-body">
             <span id="result" style="color:green"></span>
             <div class="col-md-12 toolbox">
                 <input type="button" id="insertCode" class="toolbox-btn" value="代码" />

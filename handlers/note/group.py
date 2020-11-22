@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/11/12 21:20:01
+# @modified 2020/11/22 15:54:18
 import math
 import time
 import web
@@ -16,6 +16,8 @@ from xutils import Storage
 from xutils import cacheutil, dateutil, fsutil
 from xutils.dateutil import Timer
 from xtemplate import T
+from .constant import CREATE_BTN_TEXT_DICT
+
 
 VIEW_TPL   = "note/page/view.html"
 TYPES_NAME = "笔记索引"
@@ -29,9 +31,9 @@ SEARCH_DOC_DICT = dict(
 
 class NoteCategory:
 
-    def __init__(self, name):
-        self.name = name
-        self.url  = "#"
+    def __init__(self, code, name):
+        self.name = "%s-%s" % (code, name)
+        self.url  = "/note/group?category=" + code
         self.icon = ""
         self.priority = 0
         self.is_deleted = 0
@@ -70,7 +72,7 @@ class SystemLink(GroupLink):
         self.icon = "icon-folder-system"
 
 class NoteLink:
-    def __init__(self, name, url, icon = "fa-cube", size = None, roles = None):
+    def __init__(self, name, url, icon = "fa-cube", size = None, roles = None, category = "000"):
         self.type = "link"
         self.name = T(name)
         self.url  = url
@@ -81,6 +83,7 @@ class NoteLink:
         self.hide  = False
         self.show_next  = True
         self.is_deleted = 0
+        self.category = category
 
         # 角色
         if roles is None:
@@ -127,7 +130,7 @@ class DefaultListHandler:
         user_name = xauth.get_current_name()
         pagesize  = xconfig.PAGE_SIZE
         offset    = (page-1) * pagesize
-        files     = NOTE_DAO.list_by_parent(user_name, 0, offset, pagesize, skip_group = True)
+        files     = NOTE_DAO.list_default_notes(user_name, offset, pagesize)
         amount    = NOTE_DAO.count_by_parent(user_name, 0);
         parent    = NOTE_DAO.get_root()
 
@@ -136,33 +139,38 @@ class DefaultListHandler:
             back_url   = xuserconfig.get_home_path(user_name),
             pathlist   = [parent, Storage(name="默认分类", type="group", url="/note/default")],
             files      = files,
-            file       = Storage(id = 1, name="默认分类", type="group", parent_id = 0),
+            file       = Storage(id = "default", name="默认分类", type="group", parent_id = 0),
             page       = page,
             page_max   = math.ceil(amount / pagesize),
             groups     = NOTE_DAO.list_group(),
             show_mdate = True,
+            show_pagination = True,
+            show_parent_link = False,
+            show_create_option = False,
+            CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT,
             page_url   = "/note/default?page=")
 
 def get_category_list():
-    # TODO 下个版本将分类法应用到笔记中
+    # TODO 配置化
     # 主要参考的是：杜威十进制分类法和国际十进制分类法
     category_list = []
-    category_list.append(NoteCategory("0-知识和分类"))
-    category_list.append(NoteCategory("1-哲学和心理学"))
-    category_list.append(NoteCategory("2-宗教"))
-    category_list.append(NoteCategory("3-社会科学"))
-    category_list.append(NoteCategory("4-个人记事"))
-    category_list.append(NoteCategory("5-数学和自然科学"))
-    category_list.append(NoteCategory("6-应用科学、医学、技术"))
-    category_list.append(NoteCategory("7-艺术与休闲"))
-    category_list.append(NoteCategory("8-语言和文学"))
-    category_list.append(NoteCategory("9-历史、地理和传记"))
+    category_list.append(NoteCategory("000", "知识和分类"))
+    category_list.append(NoteCategory("100", "哲学和心理学"))
+    category_list.append(NoteCategory("200", "宗教"))
+    category_list.append(NoteCategory("300", "社会科学"))
+    category_list.append(NoteCategory("400", "个人记事"))
+    category_list.append(NoteCategory("500", "数学和自然科学"))
+    category_list.append(NoteCategory("600", "应用科学、医学、技术"))
+    category_list.append(NoteCategory("700", "艺术与休闲"))
+    category_list.append(NoteCategory("800", "语言和文学"))
+    category_list.append(NoteCategory("900", "历史、地理和传记"))
     return category_list
 
 class GroupListHandler:
 
     @xauth.login_required()
     def GET(self):
+        category  = xutils.get_argument("category")
         user_name = xauth.current_name()
         notes     = NOTE_DAO.list_group(user_name, orderby = "name")
         archived_groups = list(filter(lambda x: x.archived == True, notes))
@@ -172,23 +180,30 @@ class GroupListHandler:
         fixed_books  = []
         normal_books = []
 
-        # 快捷记事
+        # 短消息：任务、通知和备忘
         fixed_books.append(MSG_DAO.get_message_tag(user_name, "task"))
         fixed_books.append(MSG_DAO.get_message_tag(user_name, "log"))
 
+        # 未分类信息
+        files = NOTE_DAO.list_by_parent(user_name, 0, 0, 1000, skip_group = True)
+        if len(files) > 0:
+            fixed_books.append(NoteLink("默认分组", "/note/default", size=len(files), icon = "fa-th-large"))
+
+
         # 默认分组处理
-        fixed_books.append(NoteLink(u"时间视图", "/note/date", icon = "fa-calendar"))
-        fixed_books.append(NoteLink(u"分类视图", "/note/index", icon = "fa-th-large"))
+        # fixed_books.append(NoteLink(u"时间视图", "/note/date", icon = "fa-calendar"))
+        # fixed_books.append(NoteLink(u"分类视图", "/note/index", icon = "fa-th-large"))
+        # fixed_books.append(NoteLink(u"日志", "/note/log", icon = "fa-folder", category = "400"))
         if len(archived_groups) > 0:
             fixed_books.append(NoteLink("Archived_Project", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
 
         files = fixed_books + normal_groups
-        # files = get_category_list()
+        # files = list(filter(lambda x: x.category == category, files))
 
         root = NOTE_DAO.get_root()
         return xtemplate.render("note/page/project_list.html", 
             file = root, 
-            title = u"项目列表",
+            title = u"笔记分类",
             pathlist = [root],
             show_path_list = True,
             show_size = True,
@@ -281,10 +296,18 @@ class CategoryHandler:
 
     @xauth.login_required()
     def GET(self):
-        groups_tuple = load_category(xauth.current_name(), True)
-        return xtemplate.render("note/page/category.html", 
-            id=id, groups_tuple = groups_tuple)
+        files = get_category_list()
 
+        root = NOTE_DAO.get_root()
+        return xtemplate.render("note/page/category.html", 
+            file = root, 
+            title = u"目录",
+            pathlist = [root],
+            show_path_list = True,
+            show_size = True,
+            parent_id = 0,
+            files = files,
+            **SEARCH_DOC_DICT)
 
 
 class BaseListHandler:
@@ -352,7 +375,7 @@ class NoteIndexHandler:
 
         template = "note/page/note_index.html"
         if source == "list":
-            template = "note/page/note_index_list.html"
+            template = "note/page/note_tools.html"
             files = []
             for card in cards:
                 files += card.rows 
@@ -534,6 +557,9 @@ class ManagementHandler:
             parent_note = NOTE_DAO.get_root()
             notes = NOTE_DAO.list_group(user_name, orderby = "name", skip_archived = True)
             parent = Storage(url = "/note/group", name = parent_note.name)
+        elif parent_id == "default":
+            parent_note = NOTE_DAO.get_default_group()
+            notes = NOTE_DAO.list_default_notes(user_name)
         else:
             parent_note = NOTE_DAO.get_by_id(parent_id)
             if parent_note == None:
@@ -560,7 +586,7 @@ class ManagementHandler:
             show_path = True,
             parent_id = parent_id,
             current = current,
-            parent  = parent)
+            parent  = parent_note)
 
 class NoteCalendarHandler:
 

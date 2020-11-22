@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/11/07 22:29:30
+# @modified 2020/11/22 15:01:49
 
 """时光轴视图"""
 import re
@@ -393,16 +393,25 @@ class BaseTimelineHandler:
             title_link = PathLink(file.name, file.url)
             note_priority = file.priority
 
+        pathlist = []
+        parent_link = get_parent_link(user_name, type, note_priority)
+
+        if parent_link != None:
+            pathlist.append(parent_link)
+        if title_link != None:
+            pathlist.append(title_link)
+
         return xtemplate.render("note/page/timeline.html", 
             title = title,
             type  = type,
             file  = file,
             key   = key,
+            pathlist = pathlist,
             show_create = self.show_create,
             search_action = "/note/timeline",
             search_placeholder = T(u"搜索" + search_title),
             search_ext_dict = dict(parent_id = parent_id),
-            parent_link = get_parent_link(user_name, type, note_priority),
+            parent_link = parent_link,
             title_link  = title_link,
             CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT,
             show_aside = False)

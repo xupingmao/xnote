@@ -1,20 +1,15 @@
 {% extends base %}
 
 {% block body %}
-    <div class="col-md-12">
-        {% for category, groups in groups_tuple %}
-            {% if len(groups) > 0 %}
-                <div class="card">
-                    <h3 class="card-title">{{category}}</h3>
-                    {% for item in groups %}
-                        <span class="tag-span">
-                            <i class="fa {{item.icon}} fa-{{item.icon}}"></i>
-                            <a href="{{item.url}}">{{item.name}}</a>
-                            {% if item.size != None %}<span>{{item.size}}</span>{% end %}
-                        </span>
-                    {% end %}
-                </div>
-            {% end %}
-        {% end %}
+    <div class="card">
+        <div class="grid-title">
+            <span class="path-link">{{title}}</span>
+            <div class="float-right">
+                <a class="btn btn-default" href="/note/tools">工具</a>
+            </div>
+        </div>
+
+        {% include note/script/create_script.html %}
+        {% include note/component/note_list_component.html %}
     </div>
 {% end %}

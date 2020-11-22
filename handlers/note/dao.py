@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/09/05 18:08:51
+# @modified 2020/11/22 15:56:04
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -78,6 +78,7 @@ class NoteSchema:
     mtime       = "修改时间"
     atime       = "访问时间"
     type        = "类型"
+    category    = "所属分类"  # 一级图书分类
     size        = "大小"
     parent_id   = "父级节点ID"
     content     = "纯文本内容"
@@ -110,6 +111,34 @@ def get_root():
     root.priority = 0
     build_note_info(root)
     return root
+
+def get_default_group():
+    group = Storage()
+    group.name = "默认分组"
+    group.type = "group"
+    group.size = None
+    group.id   = "default"
+    group.parent_id = 0
+    group.content = ""
+    group.priority = 0
+    build_note_info(group)
+    group.url = "/note/default"
+    return group
+
+def get_archived_group():
+    group = Storage()
+    group.name = "归档分组"
+    group.type = "group"
+    group.size = None
+    group.id   = "archived"
+    group.parent_id = 0
+    group.content = ""
+    group.priority = 0
+    build_note_info(group)
+    group.url = "/note/archived"
+    return group
+
+
 
 def batch_query(id_list):
     creator = xauth.current_name()
@@ -179,6 +208,10 @@ def build_note_info(note):
 
         if note.orderby is None:
             note.orderby = "name"
+
+        if note.category is None:
+            note.category = "000"
+            
     return note
 
 def convert_to_path_item(note):
@@ -186,7 +219,7 @@ def convert_to_path_item(note):
         type = note.type, priority = note.priority, is_public = note.is_public)
 
 @xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
-def list_path(file, limit = 2):
+def list_path(file, limit = 5):
     pathlist = []
     while file is not None:
         pathlist.insert(0, convert_to_path_item(file))
@@ -195,11 +228,17 @@ def list_path(file, limit = 2):
             break
         if str(file.id) == "0":
             break
+
+        # 处理根目录
         if str(file.parent_id) == "0":
+            if file.type != "group":
+                pathlist.insert(0, get_default_group())
+            elif file.archived:
+                pathlist.insert(0, get_archived_group())
             pathlist.insert(0, convert_to_path_item(get_root()))
             break
-        else:
-            file = get_by_id(file.parent_id, include_full = False)
+        
+        file = get_by_id(file.parent_id, include_full = False)
     return pathlist
 
 @xutils.timeit(name = "NoteDao.GetById:leveldb", logfile = True)
@@ -248,7 +287,7 @@ def create_note_base(note_dict, date_str):
     if date_str is None or date_str == "":
         note_id = dbutil.timeseq()
         note_dict["id"] = note_id
-        kv_put_note(note_id, note_dict)
+        put_note_to_db(note_id, note_dict)
         return note_id
     else:
         timestamp = int(dateutil.parse_date_to_timestamp(date_str) * 1000)
@@ -261,7 +300,7 @@ def create_note_base(note_dict, date_str):
                 old = get_by_id(note_id)
                 if old is None:
                     note_dict["id"] = note_id
-                    kv_put_note(note_id, note_dict)
+                    put_note_to_db(note_id, note_dict)
                     return note_id
                 else:
                     timestamp += 1
@@ -379,7 +418,7 @@ def update_note_rank(note):
         # dbutil.zadd("note_recent:public", mtime, note_id)
         return
 
-def kv_put_note(note_id, note):
+def put_note_to_db(note_id, note):
     priority = note.priority
     mtime    = note.mtime
     creator  = note.creator
@@ -502,7 +541,7 @@ def update_note(note_id, **kw):
         if len(kw) == 1 and kw.get('name') != None:
             note.version = old_version
 
-        kv_put_note(note_id, note)
+        put_note_to_db(note_id, note)
         return 1
     return 0
 
@@ -529,7 +568,7 @@ def update0(note):
     note.version = current.version + 1
     note.mtime   = current_time
     note.atime   = current_time
-    kv_put_note(note.id, note)
+    put_note_to_db(note.id, note)
 
 def get_by_name(creator, name):
     def find_func(key, value):
@@ -578,7 +617,7 @@ def delete_note(id):
     # 标记删除
     note.mtime = xutils.format_datetime()
     note.is_deleted = 1
-    kv_put_note(id, note)
+    put_note_to_db(id, note)
 
     # 更新数量
     update_children_count(note.parent_id)
@@ -590,20 +629,6 @@ def delete_note(id):
 
     # 更新数量统计
     refresh_note_stat(note.creator)
-
-def get_vpath(record):
-    pathlist = []
-    current = record
-    db = FileDB()
-    while current is not None:
-        pathlist.append(current)
-        if current.parent_id is not None and current.parent_id != "":
-            current = get_by_id(current.parent_id, db)
-        else:
-            current = None
-
-    pathlist.reverse()
-    return pathlist
 
 def update_children_count(parent_id, db=None):
     if parent_id is None or parent_id == "" or parent_id == 0:
@@ -654,6 +679,9 @@ def list_root_group(creator = None, orderby = "name"):
     notes = dbutil.prefix_list("notebook:%s" % creator, list_root_group_func)
     sort_notes(notes, orderby)
     return notes
+
+def list_default_notes(creator, offset = 0, limit = -1):
+    return list_by_parent(creator, 0, offset, limit, skip_group = True)
 
 def count_group(creator):
     return dbutil.count_table("notebook:%s" % creator)
@@ -1099,6 +1127,7 @@ xutils.register_func("note.create_token", create_token)
 
 # query functions
 xutils.register_func("note.get_root", get_root)
+xutils.register_func("note.get_default_group", get_default_group)
 xutils.register_func("note.get_by_id", get_by_id)
 xutils.register_func("note.get_by_token", get_by_token)
 xutils.register_func("note.get_by_id_creator", get_by_id_creator)
@@ -1110,6 +1139,7 @@ xutils.register_func("note.search_content", search_content)
 # list functions
 xutils.register_func("note.list_path", list_path)
 xutils.register_func("note.list_group", list_group)
+xutils.register_func("note.list_default_notes", list_default_notes)
 xutils.register_func("note.list_root_group", list_root_group)
 xutils.register_func("note.list_by_parent", list_by_parent)
 xutils.register_func("note.list_by_date", list_by_date)

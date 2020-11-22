@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2020/01/06
-@modified 2020/07/11 13:17:41
+@modified 2020/11/22 15:48:36
 -->
 
 {% block body %}
@@ -10,18 +10,21 @@
 <div class="grid-row note-list">
 
     <!-- header -->
-    <div class="row card-title">
-        <a href="{{parent.url}}" class="link2 path-link">{{parent.name}}</a>&nbsp;/&nbsp;<span>管理</span>
-
+    <div class="row card-title btn-line-height">
+        <span>批量操作</span>
         <div class="float-right">
             {% if parent_id != "0" %}
                 <button class="reverse-select-btn">反选</button>
                 <button class="move-btn" data-url="/note/group/select?callback=batchMoveNoteCallback">移动</button>
             {% else %}
+                <!-- 根目录 -->
+                <button class="btn btn-default batch-move-btn">移动</button>
                 <button class="btn btn-default" onclick="javascript:history.back();">返回</button>
             {% end %}
         </div>
     </div>
+
+    {% include note/component/pathlist.html %}
 
     {% for item in files %}
         <div class="book-item">

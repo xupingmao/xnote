@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2020/11/01 01:05:42
+# @modified 2020/11/22 13:19:21
 import xutils
 import xconfig
 import xmanager
@@ -250,6 +250,7 @@ class MessageTag:
         self.is_deleted = 0
         self.name = "Message"
         self.icon = "fa-file-text-o"
+        self.category = None
 
         if tag == "log":
             self.name = T("memo")
