@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2020/09/05 15:18:46
+# @modified 2020/11/22 18:26:52
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -479,7 +479,7 @@ class WorkerThread(Thread):
 
 class EventHandler:
 
-    def __init__(self, event_type, func, is_async = False, description = ''):
+    def __init__(self, event_type, func, is_async = True, description = ''):
         self.event_type  = event_type
         self.key         = None
         self.func        = func
@@ -644,7 +644,7 @@ def remove_handlers(event_type=None):
     _event_manager.remove_handlers(event_type)
 
 
-def set_handlers0(event_type, handlers, is_async=False):
+def set_handlers0(event_type, handlers, is_async=True):
     _event_manager.remove_handlers(event_type)
     for handler in handlers:
         _event_manager.add_handler(event_type, handler, is_async)
@@ -655,7 +655,7 @@ def fire(event_type, ctx=None):
     _event_manager.fire(event_type, ctx)
 
 
-def listen(event_type_list, is_async = False, description = None):
+def listen(event_type_list, is_async = True, description = None):
     """事件监听器注解"""
     def deco(func):
         if isinstance(event_type_list, list):
