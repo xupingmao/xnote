@@ -33,7 +33,9 @@
 
     <div class="plugin-head">
 
-        {% if model.show_title %}
+        {% if model.html_header != None %}
+            {% raw model.html_header %}
+        {% elif model.show_title %}
             <div class="grid-title btn-line-height">
                 {% if model.category %}
                     <a class="link2" href="/plugins_list?category={{model.category}}">{{model.category_name}}</a> /

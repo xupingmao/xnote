@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/11/22 15:54:18
+# @modified 2020/11/26 01:17:09
 import math
 import time
 import web
@@ -203,7 +203,7 @@ class GroupListHandler:
         root = NOTE_DAO.get_root()
         return xtemplate.render("note/page/project_list.html", 
             file = root, 
-            title = u"笔记分类",
+            title = u"笔记目录",
             pathlist = [root],
             show_path_list = True,
             show_size = True,
@@ -378,7 +378,8 @@ class NoteIndexHandler:
             template = "note/page/note_tools.html"
             files = []
             for card in cards:
-                files += card.rows 
+                files += card.rows
+            # files += xutils.call("plugin.find_plugins", "note")
 
         return xtemplate.render(template,
             pathlist  = [PathNode(TYPES_NAME, "/note/types")],
@@ -392,6 +393,9 @@ class NoteIndexHandler:
             show_size  = True,
             **SEARCH_DOC_DICT)
 
+
+class NoteToolHandler(NoteIndexHandler):
+    pass
 
 class RecentHandler:
     """最近的笔记"""

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2020/08/09 22:44:41
+# @modified 2020/11/26 00:57:06
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -427,7 +427,7 @@ class MessageHandler:
             category           = "message",
             search_action      = "/message", 
             html_title         = T("待办"),
-            search_placeholder = T("搜索待办事项"),
+            search_placeholder = T("搜索任务和便签"),
             default_content    = default_content,
             message_stat       = stat,
             key                = key,

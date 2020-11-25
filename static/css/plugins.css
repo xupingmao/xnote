@@ -2,7 +2,7 @@
  * 插件的CSS样式
  * @author xupingmao
  * @since 2019/12/15
- * @modified 2020/10/07 16:01:52
+ * @modified 2020/11/26 00:45:51
 */
 
 /** 插件 **/
@@ -26,4 +26,13 @@
     padding: 5px;
     background-color: #eee;
     color: #555;
+}
+
+.plugin-right-box {
+    float: right;
+    line-height: 25px;
+}
+
+.plugin-right-span {
+    color: #888;
 }

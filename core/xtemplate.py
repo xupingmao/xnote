@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/11/05 01:44:44
+# @modified 2020/11/26 01:09:39
 import os
 import json
 import web
@@ -362,6 +362,7 @@ class BasePlugin:
         self.method          = "POST"
         self.output          = u("")
         self.html            = u("")
+        self.html_header     = None
         self.css_style       = u("")
         self.show_pagenation = False
         self.page_url        = "?page="
@@ -378,6 +379,9 @@ class BasePlugin:
 
     def writetext(self, text):
         self.output += u(text)
+
+    def writeheader(self, html, **kw):
+        self.html_header = render_text(html, **kw)
 
     def writehtml(self, html, **kw):
         """这个方法现在和 `writetemplate` 等价"""

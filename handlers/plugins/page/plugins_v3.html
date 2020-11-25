@@ -2,28 +2,25 @@
 
 {% block body %}
 
-{% init baseurl = "/plugins_list" %}
- 
-<div class="card">
-    <a class="tab tab-link x-tab x-tab-default" href="{{baseurl}}?category=all">全部</a>
-    <a class="tab tab-link x-tab" href="{{baseurl}}?category=note">笔记</a>
-    <a class="tab tab-link x-tab" href="{{baseurl}}?category=dir">文件</a>
-    <a class="tab tab-link x-tab" href="{{baseurl}}?category=network">网络</a>
-    <a class="tab tab-link x-tab" href="{{baseurl}}?category=system">系统</a>
+{% init header = "normal" %}
 
-    <!-- 手机上不展示 -->
-    <a class="tab tab-link x-tab hidden-xs" href="{{baseurl}}?category=form">表单</a>
-
-    {% if _is_admin %}
-        <a class="inline-btn float-right" href="/fs_link/scripts/plugins">管理</a>
-    {% end %}
-</div> 
+{% if header == "note" %}
+    {% include plugins/header/note_header.html %}
+{% else %}
+    {% include plugins/header/normal_header.html %}
+{% end %}
 
 <div class="plugin-list col-md-12">
     {% for index, link in enumerate(plugins) %}
         <a class="list-link" href="{{link.link}}">
             <span>{{link.title}}</span>
-            <i class="fa fa-chevron-right float-right"></i>
+
+            <div class="plugin-right-box">
+                {% if link.size != None %}
+                    <span class="plugin-right-span">{{link.size}}</span>
+                {% end %}
+                <i class="fa fa-chevron-right"></i>
+            </div>
         </a>
     {% end %}
 </div>

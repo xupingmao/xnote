@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/10/07 15:25:52
+# @modified 2020/11/25 01:58:11
 from io import StringIO
 import xconfig
 import codecs
@@ -51,7 +51,7 @@ from xutils import textutil, SearchResult, dateutil, dbutil, u
 
 dbutil.register_table("plugin_visit_log", "插件访问日志")
 
-class PluginContext:
+class PluginContext(Storage):
 
     def __init__(self):
         self.title         = ""
@@ -65,6 +65,7 @@ class PluginContext:
         self.editable      = True
         self.edit_link     = ""
         self.clazz         = None
+        self.priority      = 0
 
     # sort方法重写__lt__即可
     def __lt__(self, other):
@@ -122,6 +123,10 @@ def load_plugin_file(fpath, fname = None):
         # TODO 增加异常日志
         xutils.print_exc()
 
+def load_inner_plugins():
+    for tool in INNER_TOOLS:
+        xconfig.PLUGINS_DICT[tool.url] = tool
+
 def load_plugins(dirname = None):
     if dirname is None:
         dirname = xconfig.PLUGINS_DIR
@@ -131,6 +136,8 @@ def load_plugins(dirname = None):
         for fname in files:
             fpath = os.path.join(root, fname)
             load_plugin_file(fpath)
+
+    load_inner_plugins()
 
 @xutils.timeit(logfile=True, logargs=True, name="FindPlugins")
 def find_plugins(category):
@@ -153,14 +160,14 @@ def find_plugins(category):
     plugins.sort()
     return plugins
 
-def inner_plugin(name, url):
+def inner_plugin(name, url, category = "inner"):
     context = PluginContext()
     context.name = name
     context.title = name
     context.url   = url
     context.link  = url
     context.editable = False
-    context.category = "inner"
+    context.category = category
     return context
 
 INNER_TOOLS = [
@@ -185,6 +192,10 @@ INNER_TOOLS = [
     inner_plugin("分屏模式", "/tools/multi_win"),
     inner_plugin("RunJS", "/tools/runjs"),
     inner_plugin("摄像头", "/tools/camera"),
+
+    # 笔记工具
+    inner_plugin("导入笔记", "/note/html_importer", "note"),
+    inner_plugin("上传管理", "/fs_upload", "note")
 ]
 
 def get_inner_tool_name(url):
@@ -359,6 +370,7 @@ class PluginsListHandler:
     def GET(self):
         category = xutils.get_argument("category", "")
         key      = xutils.get_argument("key", "")
+        header   = xutils.get_argument("header", "")
 
         if xauth.is_admin():
             if key != "" and key != None:
@@ -377,6 +389,7 @@ class PluginsListHandler:
         return xtemplate.render("plugins/page/plugins_v3.html", 
             category = category,
             html_title = "插件",
+            header     = header,
             show_aside = xconfig.OPTION_STYLE == "aside",
             search_placeholder = "搜索插件",
             search_action = "/plugins_list",
