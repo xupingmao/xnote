@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/11/07 01:04:52
+# @modified 2020/11/29 14:26:29
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -543,21 +543,42 @@ class TextHandler:
     def GET(self):
         return xtemplate.render("fs/page/fs_text.html")
 
+
+class Bookmark:
+
+    def __init__(self, user_name):
+        self.user_name = user_name
+        bookmark = dbutil.get("fs_bookmark:%s" % user_name)
+        if bookmark is None:
+            bookmark = []
+        self.bookmark = bookmark
+
+    def append(self, path):
+        if path not in self.bookmark:
+            self.bookmark.append(path)
+
+    def get(self):
+        self.bookmark = list(filter(lambda x:x!=None and os.path.exists(x), self.bookmark))
+        return self.bookmark
+
+    def save(self):
+        print("save: ", self.bookmark)
+        dbutil.put("fs_bookmark:%s" % self.user_name, self.bookmark)
+
+
 class BookmarkHandler:
     @xauth.login_required("admin")
     def GET(self):
         user_name = xauth.current_name()
         kw = dict()
-        bookmark = dbutil.get("fs_bookmark:%s" % user_name)
-        if bookmark is None:
-            bookmark = []
+        bookmark = Bookmark(user_name)
 
         filelist = []
         filelist.append(FileItem("/", name = "文件系统根目录"))
         filelist.append(FileItem(xconfig.DATA_DIR, name = "Xnote目录"))
         filelist.append(FileItem(get_user_home_path(user_name), name = "Xnote用户目录"))
 
-        for fpath in bookmark:
+        for fpath in bookmark.get():
             filelist.append(FileItem(fpath))
 
         kw["show_path"] = False
@@ -568,9 +589,21 @@ class BookmarkHandler:
         kw["filelist"] = filelist
         return xtemplate.render("fs/page/fs.html", **kw)
 
-
 class UserHomeHandler(BookmarkHandler):
     pass
+
+class BookmarkAjaxHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        user_name = xauth.current_name()
+        path = xutils.get_argument("path")
+
+        bookmark = Bookmark(user_name)
+        bookmark.append(path)
+        bookmark.save()
+
+        return dict(code = "success")
 
 dbutil.register_table("fs_bookmark", "文件收藏夹")
 xutils.register_func("fs.process_file_list", process_file_list)
@@ -584,6 +617,7 @@ xurls = (
     r"/fs_api/cut", CutHandler,
     r"/fs_api/paste", PasteHandler,
     r"/fs_api/clear_clip", ClearClipHandler,
+    r"/fs_api/bookmark", BookmarkAjaxHandler,
     r"/fs_api/list", ListAjaxHandler,
     r"/fs_link/(.*)", LinkHandler,
     r"/fs_recent", RecentHandler,

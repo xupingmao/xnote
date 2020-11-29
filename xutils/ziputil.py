@@ -1,16 +1,16 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017
-# @modified 2018/05/05 11:35:58
+# @modified 2020/11/29 13:51:58
 """
 压缩文件，对非ASCII码进行urlencode处理
 """
 import zipfile
 import os
 import sys
-import xconfig
 
 def quote_unicode(url):
+    import xconfig
     if not xconfig.USE_URLENCODE:
         return url
     def quote_char(c):

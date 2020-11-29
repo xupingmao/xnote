@@ -40,12 +40,16 @@
             </div>
         </div>
 
+        <!-- 其他选项 -->
         <div class="dropdown">
             <span class="dropdown-btn link btn">更多▾</span>
             <div class="dropdown-content">
                 <a class="dropdown-option" href="/code/search?path={{xutils.quote(path)}}&recursive=on">高级搜索</a>
                 <a class="dropdown-option" href="/code/lines?path={{xutils.quote(path)}}&recursive=on">代码统计</a>
                 <a class="dropdown-option" href="/fs/{{path}}?show_hidden_files=true">显示隐藏文件</a>
+                <a class="dropdown-option" id="addToBookmarkBtn">收藏</a>
+
+                <!-- 移动端选项 -->
                 <a class="dropdown-option delete-btn mobile-only">删除</a>
             </div>
         </div>
@@ -59,6 +63,10 @@
 $(function () {
     var globalPath = $("#currentPath").val();
     var globalError = $("#currentError").val();
+
+    function getCurrentPath() {
+        return $("#currentPath").val();
+    }
 
     function previewImages() {
         $(".fs-image-div").each(function (index, target) {
@@ -292,6 +300,16 @@ $(function () {
 
     $("#clipboardBtn").click(function () {
         showClipboardDialog();
+    });
+
+    $("#addToBookmarkBtn").click(function (event) {
+        var path = getCurrentPath();
+        var params = {"path": path};
+        $.post("/fs_api/bookmark", params, function (resp) {
+            layer.msg("收藏成功");
+        }).fail(function (e) {
+            layer.alert("收藏失败:" + e);
+        });
     });
 
     window.openFileOption = function (e) {

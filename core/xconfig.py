@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2020/10/07 17:08:16
+# @modified 2020/11/29 13:13:47
 
 '''xnote系统配置
 # 用户配置
@@ -24,6 +24,7 @@
 import os
 import time
 from collections import OrderedDict
+from xutils.base import Storage
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
@@ -179,49 +180,6 @@ HIDE_DICT_ENTRY = True
 def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
-
-class Storage(dict):
-    """
-    A Storage object is like a dictionary except `obj.foo` can be used
-    in addition to `obj['foo']`.
-    
-        >>> o = storage(a=1)
-        >>> o.a
-        1
-        >>> o['a']
-        1
-        >>> o.a = 2
-        >>> o['a']
-        2
-        >>> o.noSuchKey
-        None
-    """
-    def __init__(self, **kw):
-        # default_value会导致items等函数出问题
-        # self.default_value = default_value
-        super(Storage, self).__init__(**kw)
-
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError as k:
-            return None
-    
-    def __setattr__(self, key, value): 
-        self[key] = value
-    
-    def __delattr__(self, key):
-        try:
-            del self[key]
-        except KeyError as k:
-            raise AttributeError(k)
-
-    def __deepcopy__(self, memo):
-        return Storage(**self)
-    
-    def __repr__(self):     
-        return '<MyStorage ' + dict.__repr__(self) + '>'
-
 
 def init(path = DATA_DIR):
     """初始化系统配置项,启动时必须调用"""

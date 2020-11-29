@@ -1,9 +1,8 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2019/12/08 14:12:22
-import xconfig
-from xconfig import Storage
+# @modified 2020/11/29 13:51:36
+from xutils.base import Storage
 from collections import deque
 from .dateutil import format_time
 

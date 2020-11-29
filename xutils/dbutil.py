@@ -29,6 +29,7 @@ import time
 import json
 import xutils
 import threading
+from xutils.base import Storage
 
 try:
     import sqlite3
@@ -40,7 +41,6 @@ try:
 except ImportError:
     leveldb = None
 
-from xconfig import Storage
 
 TIME_SEQ_LOCK = threading.Lock()
 LAST_TIME_SEQ = -1
@@ -53,7 +53,7 @@ TABLES = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2020/09/05 12:09:41
+# @modified 2020/11/29 13:51:19
 ###########################################################
 
 class DBException(Exception):

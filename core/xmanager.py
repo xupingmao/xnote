@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2020/11/22 18:26:52
+# @modified 2020/11/29 13:34:17
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -124,7 +124,7 @@ def warn(msg):
     # six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
     xutils.warn("INIT", msg)
 
-class ModelManager:
+class HandlerManager:
     """模块管理器
     启动时自动加载`handlers`目录下的处理器以及定时任务
     """
@@ -586,11 +586,12 @@ class EventManager:
 # 对外接口
 _manager       = None
 _event_manager = None
+
 def init(app, vars, last_mapping = None):
     global _manager
     global _event_manager
     _event_manager = EventManager()
-    _manager       = ModelManager(app, vars, last_mapping = last_mapping)
+    _manager       = HandlerManager(app, vars, last_mapping = last_mapping)
     return _manager
 
 def instance():

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/05/04 23:58:13
+# @modified 2020/11/29 14:34:50
 import xutils
 
 # cannot perform relative import
@@ -314,4 +314,8 @@ class TestMain(BaseTestCase):
         json_data = json_request("/note/recent_edit")
         files = json_data["files"]
         print("files=%s" % len(files))
+
+    def test_note_api_group(self):
+        json_data = json_request("/note/api/group")
+        self.assertEqual("success", json_data["code"])
 

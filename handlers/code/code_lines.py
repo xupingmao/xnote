@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2018/11/25 19:58:54
+# @modified 2020/11/28 23:13:24
 import os
 import web
 import re
@@ -108,7 +108,7 @@ class LineCounter:
         return line_infos
 
 
-class handler:
+class CodeLinesHandler:
 
     @xauth.login_required("admin")
     def GET(self):
@@ -153,7 +153,7 @@ class handler:
 
 
         # return xtemplate.render("code/lines.html", **locals())
-        return xtemplate.render("code/lines.html", 
+        return xtemplate.render("code/code_lines.html", 
             show_aside = False,
             typedict = typedict,
             line_infos = line_infos,
@@ -176,8 +176,15 @@ class handler:
         
         typedict = CODE_EXT_DICT
         # return xtemplate.render("code/lines.html", **locals())
-        return xtemplate.render("code/lines.html", 
+        return xtemplate.render("code/code_lines.html", 
             show_aside = False,
             typedict = typedict,
             line_infos = line_infos,
             **args)
+
+# code_lines.py
+
+xurls = (
+    r"/code/lines", CodeLinesHandler,
+    r"/code/code_lines", CodeLinesHandler,
+)

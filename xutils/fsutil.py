@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2020/11/01 23:06:23
+# @modified 2020/11/29 15:11:32
 # 说明：文件工具分为如下部分：
 # 1、path处理，比如判断是否是父级目录
 # 2、文件操作，比如读写文件，创建目录
@@ -12,13 +12,13 @@ import platform
 import xutils
 import base64
 import time
-import xconfig
-from .imports import *
-from web.utils import Storage
+from xutils.imports import *
+from xutils.base import Storage
 
 ENCODING_TUPLE = ("utf-8", "gbk", "mbcs", "latin_1")
 
 def get_real_path(path):
+    import xconfig
     """获取真实的path信息，如果配置了urlencode，强制进行urlencode，否则先按原路径检查，如果文件不存在，再进行urlencode
     之所以要这样做，主要是为了兼容从不支持unicode文件名的服务器同步到本地的文件"""
     if path == None:
@@ -123,6 +123,7 @@ def get_file_size(fpath, format=False):
         return -1
 
 def list_file_objects(dirname, webpath = False):
+    import xconfig
     filelist = [FileItem(os.path.join(dirname, child)) for child in os.listdir(dirname)]
     if webpath:
         for item in filelist:
@@ -324,6 +325,7 @@ def rmdir(path, hard = False):
     if hard:
         shutil.rmtree(path)
         return
+    import xconfig
     path     = path.rstrip("/")
     basename = os.path.basename(path)
     target   = os.path.join(xconfig.TRASH_DIR, basename)
@@ -352,6 +354,7 @@ def rmfile(path, hard = False):
     @param {bool} hard=False 是否硬删除
     @return {str} path in trash.
     """
+    import xconfig
     if not os.path.exists(path):
         # 尝试转换一下path
         path = get_real_path(path)
@@ -423,13 +426,23 @@ def try_listdir(dirname):
     except:
         return None
 
+def fixed_dir_path(dirname):
+    if not dirname.endswith("/"):
+        return dirname + "/"
+    return dirname
+
+def fixed_basename(path):
+    if path.endswith("/"):
+        path = path[:-1]
+    return os.path.basename(path)
+
 class FileItem(Storage):
 
     post_handler = None
 
     def __init__(self, path, parent = None, merge = False, encode_path = True, name = None):
         self.path = path
-        self.name = os.path.basename(path)
+        self.name = fixed_basename(path)
 
         self.size = '-'
         self.cdate = '-'
@@ -473,7 +486,8 @@ class FileItem(Storage):
         else:
             children  = try_listdir(path)
             self.type = "dir"
-            self.path += "/"
+            self.path = fixed_dir_path(self.path)
+            
             if children != None:
                 self.size = len(children)
             else:
@@ -600,6 +614,7 @@ def load_set_config(fpath):
 
 
 def get_webpath(fpath):
+    import xconfig
     rpath = get_relative_path(fpath, xconfig.DATA_DIR)
     return "/data/" + rpath
 
@@ -619,6 +634,7 @@ def backupfile(path, backup_dir = None, rename=False):
 ### 业务上用到的函数
 def get_upload_file_path(user, filename, upload_dir = "files", replace_exists = False):
     """生成上传文件名"""
+    import xconfig
     if xconfig.USE_URLENCODE:
         filename = quote_unicode(filename)
     basename, ext = os.path.splitext(filename)
@@ -645,6 +661,7 @@ def get_upload_file_path(user, filename, upload_dir = "files", replace_exists = 
     return os.path.abspath(newfilepath), webpath
 
 def get_gallery_path(note):
+    import xconfig
     # 新的位置, 增加一级子目录（100个，二级子目录取决于文件系统，最少的255个，最多无上限，也就是最少2.5万个相册，对于一个用户应该够用了）
     note_id = str(note.id)
     if len(note_id) < 2:

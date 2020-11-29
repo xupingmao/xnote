@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/09/05 19:09:52
+# @modified 2020/11/29 13:41:33
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -9,20 +9,33 @@ xutils是暴露出去的统一接口，类似于windows.h一样
 
 """
 from __future__ import print_function
+from __future__ import absolute_import
+
 from threading import current_thread
 from .imports import *
+
 # xnote工具
-from . import textutil, ziputil, fsutil, logutil, dateutil, htmlutil
-from .ziputil import *
-from .netutil import splithost, http_get, http_post
-from .textutil import edit_distance, get_short_text, short_text
-from .dateutil import *
-from .netutil  import *
-from .fsutil   import *
-from .textutil import text_contains, parse_config_text
-from .cacheutil import cache, cache_get, cache_put, cache_del
-from .functions import History, MemTable, listremove
-from xconfig import Storage
+import xutils.textutil as textutil
+import xutils.ziputil as ziputil
+import xutils.fsutil as fsutil
+import xutils.logutil as logutil
+import xutils.dateutil as dateutil
+import xutils.htmlutil as htmlutil
+
+# from . import textutil, ziputil, fsutil, logutil, dateutil, htmlutil
+from xutils.ziputil import *
+from xutils.netutil import splithost, http_get, http_post
+from xutils.textutil import edit_distance, get_short_text, short_text
+from xutils.dateutil import *
+from xutils.netutil  import *
+from xutils.fsutil   import *
+from xutils.textutil  import text_contains, parse_config_text
+from xutils.cacheutil import cache, cache_get, cache_put, cache_del
+from xutils.functions import History, MemTable, listremove
+
+# TODO xutils是最基础的库，后续会移除对xconfig的依赖，xutils会提供配置的函数出去在上层进行配置
+from xutils.base import Storage
+
 import shutil
 import logging
 import logging.handlers
