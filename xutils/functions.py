@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2020/12/05 17:46:43
+# @modified 2020/12/05 21:23:12
 from xutils.base import Storage
 from collections import deque
 from .dateutil import format_time
@@ -268,6 +268,9 @@ def dictsort(dictionary, key='value'):
     if key == 'value':
         return sorted(dictionary.items(), key = lambda item: item[1])
     return sorted(dictionary.items(), key = lambda item: item[0])
+
+def dictvalues(dict):
+    return list(dict.values())
 
 if __name__ == '__main__':
     import doctest

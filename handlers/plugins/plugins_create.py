@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/08/28 00:22:51
-# @modified 2020/09/01 01:06:53
+# @modified 2020/12/05 21:29:26
 
 """插件创建的工具，基于插件开发，但是其实已经不用了，实际创建插件的实现参考 fs/fs_add.py"""
 
@@ -83,7 +83,7 @@ class NewPluginHandler(BasePlugin):
             xutils.writefile(name, code)
             # 添加一个访问记录，使得新增的插件排在前面
             basename = os.path.basename(name)
-            PLUGIN_API.add_visit_log(user_name, basename, "/plugins/" + basename)
+            PLUGIN_API.add_visit_log(user_name, "/plugins/" + basename)
             raise web.seeother('/code/edit?path=%s' % name)
 
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/12/05 17:08:34
+# @modified 2020/12/05 21:31:47
 from io import StringIO
 import xconfig
 import codecs
@@ -56,6 +56,7 @@ class PluginContext(Storage):
     def __init__(self):
         self.title         = ""
         self.name          = ""
+        self.url           = ""
         self.description   = ""
         self.fname         = ""
         self.fpath         = ""
@@ -185,6 +186,9 @@ def note_plugin(name, url, icon=None, size = None):
 
 
 INNER_TOOLS = [
+    # 工具集/插件集
+    inner_plugin("笔记工具", "/note/tools"),
+
     inner_plugin("浏览器信息", "/tools/browser_info"),
     # 文本
     inner_plugin("文本对比", "/tools/text_diff"),
@@ -270,18 +274,17 @@ def list_plugins(category, sort = True):
         return sorted_plugins(user_name, links)
     return links
 
-def find_plugin_by_name(name):
+def find_plugin_by_url(url):
     plugins = list_plugins("all", sort = False)
-    name, ext = os.path.splitext(name)
     for p in plugins:
-        if u(p.name) == u(name):
+        if u(p.url) == u(url):
             return p
     return None
 
 def list_recent_plugins():
     user_name = xauth.current_name()
     items = list_visit_logs(user_name)
-    links = [find_plugin_by_name(log.name) for log in items]
+    links = [find_plugin_by_url(log.url) for log in items]
 
     return list(filter(None, links))
 
@@ -306,7 +309,7 @@ def update_visit_log(log, name):
     log.visit_cnt += 1
     dbutil.put(log.key, log)
 
-def add_visit_log(user_name, name, url):
+def add_visit_log(user_name, url, name = None):
     exist_log = find_visit_log(user_name, url)
     if exist_log != None:
         update_visit_log(exist_log, name)
@@ -374,14 +377,21 @@ def on_search_plugins(ctx):
         results.append(more)
     ctx.tools += results
 
+def is_plugin_matched(p, words):
+    return textutil.contains_all(p.title, words) \
+        or textutil.contains_all(p.url, words) \
+        or textutil.contains_all(p.fname, words)
+
+
 def search_plugins(key):
+    from xutils.functions import dictvalues
     words   = textutil.split_words(key)
     plugins = list_plugins("all")
-    result  = []
+    result  = dict()
     for p in plugins:
-        if textutil.contains_all(p.title, words) or textutil.contains_all(p.url, words) or textutil.contains_all(p.fname, words):
-            result.append(p)
-    return result
+        if is_plugin_matched(p, words):
+            result[p.url] = p
+    return dictvalues(result)
 
 
 class PluginsListHandler:
@@ -411,8 +421,7 @@ class PluginsListHandler:
             html_title = "插件",
             header     = header,
             show_aside = xconfig.OPTION_STYLE == "aside",
-            search_placeholder = "搜索插件",
-            search_action = "/plugins_list",
+            search_type = "plugin",
             recent     = recent,
             plugins    = plugins)
 

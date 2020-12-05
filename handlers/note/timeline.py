@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/12/05 18:00:22
+# @modified 2020/12/05 21:29:11
 
 """时光轴视图"""
 import re
@@ -359,7 +359,7 @@ class BaseTimelineHandler:
         search_title  = u"笔记"
         file          = NOTE_DAO.get_by_id(parent_id)
 
-        xmanager.add_visit_log(user_name, title, "/note/%s" % self.note_type)
+        xmanager.add_visit_log(user_name, "/note/%s" % self.note_type)
         
         if file != None:
             # title = file.name

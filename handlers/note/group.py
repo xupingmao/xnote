@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/12/05 16:18:28
+# @modified 2020/12/05 21:27:20
 import math
 import time
 import web
@@ -357,8 +357,11 @@ class NoteIndexHandler:
 
     @xauth.login_required()
     def GET(self):
-        plugins = PLUGIN.find_plugins("note")
+        user_name = xauth.current_name()
+        plugins  = PLUGIN.find_plugins("note")
         template = "note/page/note_tools.html"
+
+        xmanager.add_visit_log(user_name, "/note/tools")
 
         return xtemplate.render(template,
             html_title = T("笔记工具"),

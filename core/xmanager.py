@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2020/12/05 17:31:26
+# @modified 2020/12/05 21:28:26
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -689,8 +689,8 @@ def searchable(pattern = r".*", description = None, event_type = "search"):
 def find_plugins(category, orderby=None):
     return xutils.call("plugin.find_plugins", category, orderby=orderby)
 
-def add_visit_log(user_name, name, url):
-    return xutils.call("plugin.add_visit_log", user_name, name, url)
+def add_visit_log(user_name, url):
+    return xutils.call("plugin.add_visit_log", user_name, url)
 
 
 

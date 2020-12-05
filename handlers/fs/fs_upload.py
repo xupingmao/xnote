@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2020/12/05 17:18:33
+# @modified 2020/12/05 21:28:54
 import os
 import uuid
 import web
@@ -93,7 +93,7 @@ class UploadHandler:
     def GET(self):
         user_name = xauth.current_name()
         
-        xmanager.add_visit_log(user_name, u"上传管理", "/fs_upload")
+        xmanager.add_visit_log(user_name, "/fs_upload")
 
         year  = xutils.get_argument("year", time.strftime("%Y"))
         month = xutils.get_argument("month", time.strftime("%m"))

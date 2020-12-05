@@ -111,7 +111,7 @@ class handler:
         user_name = xauth.current_name()
 
         # 添加日志
-        xmanager.add_visit_log(user_name, u"导入笔记", "/note/html_importer")
+        xmanager.add_visit_log(user_name, "/note/html_importer")
 
         if save != "" and save != None:
             return self.POST()
