@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/12/05 21:31:47
+# @modified 2020/12/05 21:57:59
 from io import StringIO
 import xconfig
 import codecs
@@ -482,7 +482,7 @@ class LoadPluginHandler:
             plugin = load_plugin(name)
             if plugin != None:
                 # 访问日志
-                add_visit_log(user_name, name, url)
+                add_visit_log(user_name, url)
                 plugin.atime = dateutil.format_datetime()
                 # 渲染页面
                 return plugin.clazz().render()
@@ -512,7 +512,7 @@ class LoadInnerToolHandler:
         if os.path.exists(fpath):
             if user_name != None:
                 tool_name = get_inner_tool_name(url)
-                add_visit_log(user_name, tool_name, url)
+                add_visit_log(user_name, url)
             return xtemplate.render("tools/" + fname, show_aside = False)
         else:
             raise web.notfound()
