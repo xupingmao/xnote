@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/11/26 01:18:41
+# @modified 2020/12/05 18:00:22
 
 """时光轴视图"""
 import re
@@ -13,8 +13,10 @@ import xconfig
 import xuserconfig
 import web
 from xutils import Storage, dateutil, textutil
+from xutils.textutil import split_words
 from xtemplate import T
 from .constant import *
+import xmanager
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
@@ -93,36 +95,6 @@ def search_group(user_name, words):
         if textutil.contains_all(row.name, words):
             result.append(row)
     return result
-
-def split_words(search_key):
-    search_key_lower = search_key.lower()
-    words = []
-    p_start = 0
-    for p in range(len(search_key_lower) + 1):
-        if p == len(search_key_lower):
-            if p > p_start:
-                word = search_key_lower[p_start:p]
-                words.append(word)
-            break
-
-        c = search_key_lower[p]
-        if textutil.isblank(c):
-            # 空格断字
-            if p > p_start:
-                word = search_key_lower[p_start:p]
-                words.append(word)
-            p_start = p + 1
-        elif textutil.is_cjk(c):
-            if p > p_start:
-                words.append(search_key_lower[p_start:p])
-            # 中日韩字符集
-            words.append(c)
-            p_start = p + 1
-        else:
-            # 其他字符
-            continue
-    # print(words)
-    return words
 
 
 def build_date_result(rows, orderby = 'ctime', sticky_title = False, group_title = False, archived_title = False):
@@ -386,6 +358,8 @@ class BaseTimelineHandler:
         note_priority = 0
         search_title  = u"笔记"
         file          = NOTE_DAO.get_by_id(parent_id)
+
+        xmanager.add_visit_log(user_name, title, "/note/%s" % self.note_type)
         
         if file != None:
             # title = file.name

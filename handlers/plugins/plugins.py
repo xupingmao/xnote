@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/11/25 01:58:11
+# @modified 2020/12/05 17:08:34
 from io import StringIO
 import xconfig
 import codecs
@@ -66,6 +66,7 @@ class PluginContext(Storage):
         self.edit_link     = ""
         self.clazz         = None
         self.priority      = 0
+        self.icon          = "fa fa-cube"
 
     # sort方法重写__lt__即可
     def __lt__(self, other):
@@ -140,8 +141,9 @@ def load_plugins(dirname = None):
     load_inner_plugins()
 
 @xutils.timeit(logfile=True, logargs=True, name="FindPlugins")
-def find_plugins(category):
+def find_plugins(category, orderby=None):
     role = xauth.get_current_role()
+    user_name = xauth.current_name()
     plugins = []
 
     if role is None:
@@ -157,8 +159,7 @@ def find_plugins(category):
             required_role = p.required_role
             if role == "admin" or required_role is None or required_role == role:
                 plugins.append(p)
-    plugins.sort()
-    return plugins
+    return sorted_plugins(user_name, plugins, orderby)
 
 def inner_plugin(name, url, category = "inner"):
     context = PluginContext()
@@ -169,6 +170,19 @@ def inner_plugin(name, url, category = "inner"):
     context.editable = False
     context.category = category
     return context
+
+def note_plugin(name, url, icon=None, size = None):
+    context = PluginContext()
+    context.name = name
+    context.title = name
+    context.url   = url
+    context.link  = url
+    context.icon  = icon
+    context.size  = size
+    context.editable = False
+    context.category = "note"
+    return context
+
 
 INNER_TOOLS = [
     inner_plugin("浏览器信息", "/tools/browser_info"),
@@ -194,8 +208,14 @@ INNER_TOOLS = [
     inner_plugin("摄像头", "/tools/camera"),
 
     # 笔记工具
-    inner_plugin("导入笔记", "/note/html_importer", "note"),
-    inner_plugin("上传管理", "/fs_upload", "note")
+    note_plugin("置顶笔记", "/note/sticky", "fa-thumb-tack"),
+    note_plugin("搜索历史", "/search", "fa-search"),
+    note_plugin("导入笔记", "/note/html_importer", "fa-internet-explorer"),
+    note_plugin("日历视图", "/note/calendar", "fa-calendar"),
+    note_plugin("时间视图", "/note/date", "fa-calendar"),
+    note_plugin("数据统计", "/note/stat", "fa-bar-chart"),
+    note_plugin("上传管理", "/fs_upload", "fa-upload"),
+    note_plugin("回收站", "/note/removed", "fa-trash"),
 ]
 
 def get_inner_tool_name(url):
@@ -210,7 +230,7 @@ def build_inner_tools():
 def build_plugin_links(plugins):
     return plugins
 
-def sorted_plugins(user_name, plugins):
+def sorted_plugins(user_name, plugins, orderby=None):
     # 把最近访问的放在前面
     logs = list_visit_logs(user_name)
     

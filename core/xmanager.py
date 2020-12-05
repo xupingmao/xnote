@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2020/11/29 13:34:17
+# @modified 2020/12/05 17:31:26
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -33,7 +33,7 @@ from xutils import Storage, Queue, tojson, MyStdout, cacheutil, u, dbutil, fsuti
 
 __version__      = "1.0"
 __author__       = "xupingmao (578749341@qq.com)"
-__copyright__    = "(C) 2016-2017 xupingmao. GNU GPL 3."
+__copyright__    = "(C) 2016-2020 xupingmao. GNU GPL 3."
 __contributors__ = []
 
 dbutil.register_table("schedule", "任务调度表 <schedule:id>")
@@ -232,7 +232,7 @@ class HandlerManager:
                     # mod = __import__(modname, fromlist=1, level=0)
                     # six的这种方式也不错
                     mod = six._import_module(modname)
-                    self.load_model(mod, modname)
+                    self.resolve_module(mod, modname)
             except Exception as e:
                 self.failed_mods.append([filepath, e])
                 log("Fail to load module '%s'" % filepath)
@@ -245,7 +245,7 @@ class HandlerManager:
         for info in self.failed_mods:
             log("Failed info: %s" % info)
 
-    def load_model(self, module, modname):
+    def resolve_module(self, module, modname):
         name = modname
         modpath = "/".join(modname.split(".")[1:-1])
         if not modpath.startswith("/"):
@@ -260,9 +260,9 @@ class HandlerManager:
                 self.add_mapping(url, handler)
         # xurls拥有最高优先级，下面代码兼容旧逻辑
         elif hasattr(module, "handler"):
-            self.load_model_old(module, modname)
+            self.resolve_module_old(module, modname)
 
-    def load_model_old(self, module, modname):
+    def resolve_module_old(self, module, modname):
         name = modname
         handler = module.handler
         clz = name.replace(".", "_")
@@ -686,7 +686,11 @@ def searchable(pattern = r".*", description = None, event_type = "search"):
         return func
     return deco
 
-def find_plugins(category):
-    return xutils.call("plugin.find_plugins", category)
+def find_plugins(category, orderby=None):
+    return xutils.call("plugin.find_plugins", category, orderby=orderby)
+
+def add_visit_log(user_name, name, url):
+    return xutils.call("plugin.add_visit_log", user_name, name, url)
+
 
 

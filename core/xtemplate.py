@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/11/26 01:09:39
+# @modified 2020/12/05 16:44:27
 import os
 import json
 import web
@@ -150,7 +150,7 @@ def pre_render(kw):
 
 def post_render(kw):
     """后置渲染"""
-    pass
+    render_search(kw)
 
 def get_mobile_template(name):
     global _mobile_name_dict
@@ -181,16 +181,29 @@ def is_mobile_device(user_agent):
 
 def render_by_ua(name, **kw):
     user_agent = get_user_agent()
-    print(user_agent)
     if is_mobile_device(user_agent):
         # 部分移动设备的兼容性不行，无法使用codeMirror组件，要用简化版页面
         mobile_name = get_mobile_template(name)
         return render(mobile_name, **kw)
     return render(name, **kw)
 
+def render_search(kw):
+    search_type        = kw.get("search_type")
+    search_action      = "/note/timeline"
+    search_placeholder = u"搜索笔记"
+
+    if search_type == "plugin":
+        search_placeholder = u"搜索插件"
+        search_action = "/plugins_list"
+
+    kw["search_action"] = search_action
+    kw["search_placeholder"] = search_placeholder
+    
+
 @xutils.timeit(name = "Template.Render", logfile = True)
 def render(template_name, **kw):
     nkw = {}
+    # 预处理
     pre_render(nkw)
     nkw.update(kw)
     post_render(nkw)
@@ -210,6 +223,7 @@ def render_text(text, template_name = "<string>", **kw):
     nkw = {}
     pre_render(nkw)
     nkw.update(kw)
+    post_render(nkw)
 
     # 热加载模式下str的id会变化
     name = "template@%s.str" % hash(text)

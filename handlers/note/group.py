@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/11/26 01:17:09
+# @modified 2020/12/05 16:18:28
 import math
 import time
 import web
@@ -23,6 +23,7 @@ VIEW_TPL   = "note/page/view.html"
 TYPES_NAME = "笔记索引"
 NOTE_DAO   = xutils.DAO("note")
 MSG_DAO    = xutils.DAO("message")
+PLUGIN     = xutils.Module("plugin")
 
 SEARCH_DOC_DICT = dict(
     search_action = "/note/timeline",
@@ -356,42 +357,13 @@ class NoteIndexHandler:
 
     @xauth.login_required()
     def GET(self):
-        source = xutils.get_argument("source", "list")
-        page = 1
-
-        limit  = xconfig.PAGE_SIZE
-        offset = (page-1)*limit
-
-        cards = load_note_index(xauth.current_name())
-        files = cards
-        amount = len(cards)
-
-        if source == "group":
-            show_path_list = False
-            show_parent_link = True
-        else:
-            show_path_list = False
-            show_parent_link = False
-
-        template = "note/page/note_index.html"
-        if source == "list":
-            template = "note/page/note_tools.html"
-            files = []
-            for card in cards:
-                files += card.rows
-            # files += xutils.call("plugin.find_plugins", "note")
+        plugins = PLUGIN.find_plugins("note")
+        template = "note/page/note_tools.html"
 
         return xtemplate.render(template,
-            pathlist  = [PathNode(TYPES_NAME, "/note/types")],
-            html_title = T("索引"),
-            file_type = "group",
-            files     = files,
-            cards     = cards,
-            show_path_list   = show_path_list,
-            show_parent_link = show_parent_link,
-            show_next  = True,
-            show_size  = True,
-            **SEARCH_DOC_DICT)
+            html_title = T("笔记工具"),
+            plugins     = plugins,
+            search_type = "plugin")
 
 
 class NoteToolHandler(NoteIndexHandler):

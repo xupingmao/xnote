@@ -1,16 +1,22 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2020/02/08 22:10:21
+# @modified 2020/12/05 18:06:52
 import re
 import random
-from .imports import is_str, ConfigParser
+import json
+import inspect
+from xutils.imports import is_str, ConfigParser
+
+try:
+    from urllib.parse import quote, unquote
+except ImportError:
+    from urllib import quote, unquote
 
 __doc__ = """文本处理函数库
 
 Text Process Library
 """
-
 
 ALPHA_NUM = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 BLANK_CHAR_SET = set(" \n\t\r")
@@ -186,13 +192,6 @@ def after(self, start):
     p1 = self.find(start)
     if p1 >= 0:
         return self[p1+len(start):]
-
-def split_words(text):
-    text  = text.replace("\t", ' ')
-    words = text.split(' ')
-    while words.count('') > 0:
-        words.remove('')
-    return words
 
 def split_chars(text):
     chars = []
@@ -508,7 +507,123 @@ def generate_uuid():
     import uuid
     return uuid.uuid4().hex
 
+def _encode_json(obj):
+    """基本类型不会拦截"""
+    if inspect.isfunction(obj):
+        return "<function>"
+    elif inspect.isclass(obj):
+        return "<class>"
+    elif inspect.ismodule(obj):
+        return "<module>"
+    return str(obj)
 
+def tojson(obj, format=False):
+    if format:
+        return json.dumps(obj, sort_keys=True, default=_encode_json, indent=2)
+    else:
+        return json.dumps(obj, default=_encode_json)
+
+
+
+def set_doctype(type):
+    print("#!%s\n" % type)
+
+def get_doctype(text):
+    if text.startswith("#!html"):
+        return "html"
+    return "text"
+
+
+def is_img_file(filename):
+    """根据文件后缀判断是否是图片"""
+    import os
+    import xconfig
+    name, ext = os.path.splitext(filename)
+    return ext.lower() in xconfig.FS_IMG_EXT_LIST
+
+def mark_text(content):
+    """简单的处理HTML"""
+    # \xad (Soft hyphen), 用来处理断句的
+    content = content.replace(u'\xad', '\n')
+    lines = []
+    # markdown的LINK样式
+    # pat = re.compile(r"\[(.*)\]\((.+)\)")
+    for line in content.split("\n"):
+        tokens = line.split(" ")
+        for index, item in enumerate(tokens):
+            if item == "":
+                continue
+            elif item.startswith(("https://", "http://")):
+                tokens[index] = '<a target="_blank" href="%s">%s</a>' % (item, item)
+            elif item.startswith("file://"):
+                href = item[7:]
+                if is_img_file(href):
+                    tokens[index] = '<img class="chat-msg-img x-photo" alt="%s" src="%s">' % (href, href)
+                else:
+                    name = href[href.rfind("/")+1:]
+                    # 尝试urldecode名称
+                    name = unquote(name)
+                    tokens[index] = '<a href="%s">%s</a>' % (href, name)
+            elif item.count("#") >=1:
+                tokens[index] = re.sub(r"#([^#]+)(#?)", 
+                    "<a class=\"link\" href=\"/message?category=message&key=\\g<1>\">#\\g<1>\\g<2></a>", item)
+            # elif pat.match(item):
+            #     ret = pat.match(item)
+            #     name, link = ret.groups()
+            #     tokens[index] = '<a href="%s">%s</a>' % (link, name)
+            else:
+                token = tokens[index]
+                token = token.replace("&", "&amp;")
+                token = token.replace("<", "&lt;")
+                token = token.replace(">", "&gt;")
+                tokens[index] = token
+
+        line = '&nbsp;'.join(tokens)
+        line = line.replace("\t", '&nbsp;&nbsp;&nbsp;&nbsp;')
+        lines.append(line)
+    return "<br/>".join(lines)
+
+def split_words(search_key):
+    """拆分字符
+        >>> split_words("abc is good")
+        ["abc", "is", "good"]
+        >>> split_words("中文测试")
+        ["中", "文", "测", "试"]
+        >>> split_words("中文123")
+        ["中", "文", "123"]
+        >>> split_words("中文123测试")
+        ["中", "文", "123", "测", "试"]
+    """
+    search_key_lower = search_key.lower()
+    words = []
+    p_start = 0
+    for p in range(len(search_key_lower) + 1):
+        if p == len(search_key_lower):
+            if p > p_start:
+                word = search_key_lower[p_start:p]
+                words.append(word)
+            break
+
+        c = search_key_lower[p]
+        if isblank(c):
+            # 空格断字
+            if p > p_start:
+                word = search_key_lower[p_start:p]
+                words.append(word)
+            p_start = p + 1
+        elif is_cjk(c):
+            # 中日韩字符集采用单字模式
+            if p > p_start:
+                words.append(search_key_lower[p_start:p])
+            words.append(c)
+            p_start = p + 1
+        else:
+            # 其他字符
+            continue
+    # print(words)
+    return words
+
+ 
 if __name__ == '__main__':
     import doctest
     doctest.testmod(verbose=True)

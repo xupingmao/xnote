@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/11/29 13:41:33
+# @modified 2020/12/05 17:36:44
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -26,10 +26,13 @@ import xutils.htmlutil as htmlutil
 from xutils.ziputil import *
 from xutils.netutil import splithost, http_get, http_post
 from xutils.textutil import edit_distance, get_short_text, short_text
+from xutils.textutil import text_contains, parse_config_text
+from xutils.textutil import tojson
+from xutils.textutil import mark_text
+
 from xutils.dateutil import *
 from xutils.netutil  import *
 from xutils.fsutil   import *
-from xutils.textutil  import text_contains, parse_config_text
 from xutils.cacheutil import cache, cache_get, cache_put, cache_del
 from xutils.functions import History, MemTable, listremove
 
@@ -278,73 +281,9 @@ def obj2dict(obj):
             v[k] = getattr(obj, k)
     return v
 
-def _encode_json(obj):
-    """基本类型不会拦截"""
-    if inspect.isfunction(obj):
-        return "<function>"
-    elif inspect.isclass(obj):
-        return "<class>"
-    elif inspect.ismodule(obj):
-        return "<module>"
-    return str(obj)
-
-
-def tojson(obj):
-    return json.dumps(obj, default=_encode_json)
-
 #################################################################
 ##   Html Utilities, Python 2 do not have this file
 #################################################################
-
-def set_doctype(type):
-    print("#!%s\n" % type)
-
-def get_doctype(text):
-    if text.startswith("#!html"):
-        return "html"
-    return "text"
-
-def mark_text(content):
-    """简单的处理HTML"""
-    # \xad (Soft hyphen), 用来处理断句的
-    content = content.replace(u'\xad', '\n')
-    lines = []
-    # markdown的LINK样式
-    # pat = re.compile(r"\[(.*)\]\((.+)\)")
-    for line in content.split("\n"):
-        tokens = line.split(" ")
-        for index, item in enumerate(tokens):
-            if item == "":
-                continue
-            elif item.startswith(("https://", "http://")):
-                tokens[index] = '<a target="_blank" href="%s">%s</a>' % (item, item)
-            elif item.startswith("file://"):
-                href = item[7:]
-                if is_img_file(href):
-                    tokens[index] = '<img class="chat-msg-img x-photo" alt="%s" src="%s">' % (href, href)
-                else:
-                    name = href[href.rfind("/")+1:]
-                    # 尝试urldecode名称
-                    name = unquote(name)
-                    tokens[index] = '<a href="%s">%s</a>' % (href, name)
-            elif item.count("#") >=1:
-                tokens[index] = re.sub(r"#([^#]+)(#?)", 
-                    "<a class=\"link\" href=\"/message?category=message&key=\\g<1>\">#\\g<1>\\g<2></a>", item)
-            # elif pat.match(item):
-            #     ret = pat.match(item)
-            #     name, link = ret.groups()
-            #     tokens[index] = '<a href="%s">%s</a>' % (link, name)
-            else:
-                token = tokens[index]
-                token = token.replace("&", "&amp;")
-                token = token.replace("<", "&lt;")
-                token = token.replace(">", "&gt;")
-                tokens[index] = token
-
-        line = '&nbsp;'.join(tokens)
-        line = line.replace("\t", '&nbsp;&nbsp;&nbsp;&nbsp;')
-        lines.append(line)
-    return "<br/>".join(lines)
 
 def html_escape(s, quote=True):
     """

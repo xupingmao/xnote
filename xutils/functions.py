@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2020/11/29 13:51:36
+# @modified 2020/12/05 17:46:43
 from xutils.base import Storage
 from collections import deque
 from .dateutil import format_time
@@ -57,10 +57,11 @@ class ListProcessor:
 
 def xfilter(func, iterables, offset=0, limit=-1):
     """filter增强，支持offset，limit
-    >>> list(xfilter(lambda x:x>1, [1,2,3,4]))
-    [2, 3, 4]
-    >>> list(xfilter(lambda x:x>1, [1,2,3,4], 0, 1))
-    [2]
+
+        >>> list(xfilter(lambda x:x>1, [1,2,3,4]))
+        [2, 3, 4]
+        >>> list(xfilter(lambda x:x>1, [1,2,3,4], 0, 1))
+        [2]
     """
     current = 0
     total = 0
@@ -227,6 +228,11 @@ def listmerge(list1, list2):
     @param {list} list1
     @param {list} list2
     @return {list}
+
+        >>> listmerge([1], [2])
+        [1,2]
+        >>> listmerge([1,2,3], [2,3,4])
+        [1,2,3,4]
     """
     target = []
     for c in list1:
@@ -238,6 +244,13 @@ def listmerge(list1, list2):
     return target
 
 def first_or_none(list):
+    """返回第一个元素
+
+        >>> first_or_none([])
+        None
+        >>> first_or_none([1,2,3])
+        1
+    """
     if len(list) > 0:
         return list[0]
     else:
