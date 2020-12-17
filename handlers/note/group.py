@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/12/05 21:27:20
+# @modified 2020/12/17 23:38:16
 import math
 import time
 import web
@@ -210,7 +210,7 @@ class GroupListHandler:
             show_size = True,
             parent_id = 0,
             files = files,
-            **SEARCH_DOC_DICT)
+            search_type = "note")
 
 def load_note_index(user_name):
     msg_stat  = MSG_DAO.get_message_stat(user_name)
@@ -486,6 +486,7 @@ class DateHandler:
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
+        xmanager.add_visit_log(user_name, "/note/date")
         
         year  = xutils.get_argument("year", time.strftime("%Y"))
         # 默认查看全年的
@@ -567,10 +568,6 @@ class ManagementHandler:
             current = current,
             parent  = parent_note)
 
-class NoteCalendarHandler:
-
-    def GET(self):
-        return xtemplate.render("note/page/calendar.html")
 
 xurls = (
     r"/note/group"          , GroupListHandler,
@@ -593,6 +590,5 @@ xurls = (
     r"/note/tools"          , NoteIndexHandler,
     r"/note/types"          , NoteIndexHandler,
     r"/note/index"          , NoteIndexHandler,
-    r"/note/calendar"       , NoteCalendarHandler,
 )
 

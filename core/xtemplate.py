@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/12/05 16:44:27
+# @modified 2020/12/17 23:29:08
 import os
 import json
 import web
@@ -188,6 +188,10 @@ def render_by_ua(name, **kw):
     return render(name, **kw)
 
 def render_search(kw):
+    # 已经定义了搜索行为
+    if "search_action" in kw:
+        return
+
     search_type        = kw.get("search_type")
     search_action      = "/note/timeline"
     search_placeholder = u"搜索笔记"
@@ -195,6 +199,9 @@ def render_search(kw):
     if search_type == "plugin":
         search_placeholder = u"搜索插件"
         search_action = "/plugins_list"
+    if search_type == "message":
+        search_placeholder = u"搜索任务和便签";
+        search_action = "/message"
 
     kw["search_action"] = search_action
     kw["search_placeholder"] = search_placeholder
@@ -365,13 +372,13 @@ class BasePlugin:
     placeholder = u("")
     btn_text    = T("处理")
     editable    = True
+    # 输入框的行数
+    rows        = 20  
     
     # 插件模板路径
     html_template_path = "plugins/base/base_plugin.html"
 
-    def __init__(self):
-        # 输入框的行数
-        self.rows            = 20    
+    def __init__(self):  
         # 提交请求的方法
         self.method          = "POST"
         self.output          = u("")

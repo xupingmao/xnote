@@ -41,10 +41,10 @@ class Main(BasePlugin):
 
     title    = "Hello_World"
     category = "system"
+    # 输入框的行数
+    rows     = 0
     
     def handle(self, input):
-        # 输入框的行数
-        self.rows = 0
         self.writeheader(HEADER, plugin = self)
         self.writehtml(BODY)
 

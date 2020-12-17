@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/12/05 21:57:59
+# @modified 2020/12/17 23:34:49
 from io import StringIO
 import xconfig
 import codecs
@@ -187,7 +187,8 @@ def note_plugin(name, url, icon=None, size = None):
 
 INNER_TOOLS = [
     # 工具集/插件集
-    inner_plugin("笔记工具", "/note/tools"),
+    inner_plugin("笔记工具集合", "/note/tools"),
+    inner_plugin("文件工具集合", "/fs_tools"),
 
     inner_plugin("浏览器信息", "/tools/browser_info"),
     # 文本
