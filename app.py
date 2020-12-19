@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2020/09/05 18:32:54
+# @modified 2020/12/19 19:22:07
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -119,15 +119,21 @@ def handle_signal(signum, frame):
     xmanager.fire("sys.exit")
     exit(0)
 
-def try_init_db():
+def try_init_sqlite():
     try:
         # 初始化数据库
         xtables.init()
+    except:
+        xutils.print_exc()
+        xconfig.errors.append("初始化sqlite失败")
+
+def try_init_ldb():
+    try:
         # 初始化leveldb数据库
         dbutil.init()
     except:
         xutils.print_exc()
-        xconfig.errors.append("数据库初始化失败")
+        xconfig.errors.append("初始化ldb失败")
 
 def try_load_cache():
     try:
@@ -157,7 +163,9 @@ def main():
     # 初始化日志
     xutils.init_logger()
     # 初始化数据库
-    try_init_db()
+    try_init_sqlite()
+    try_init_ldb()
+
     # 加载缓存
     try_load_cache()
 
