@@ -53,7 +53,7 @@ TABLES = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2020/11/29 13:51:19
+# @modified 2020/12/19 19:43:13
 ###########################################################
 
 class DBException(Exception):
@@ -155,9 +155,10 @@ class LevelDBPy:
 # 初始化KV存储
 _leveldb = None
 
+
+@xutils.log_init_deco("leveldb")
 def init():
     global _leveldb
-    print("init leveldb start ...")
     if leveldb:
         import xconfig
         _leveldb = leveldb.LevelDB(xconfig.DB_DIR)
@@ -166,7 +167,8 @@ def init():
         os.environ["PATH"] += os.pathsep + "lib"
         import leveldbpy, xconfig
         _leveldb = LevelDBPy(xconfig.DB_DIR)
-    print("init leveldb done, leveldb =", _leveldb)
+    
+    xutils.log("init leveldb done, leveldb =", _leveldb)
 
 class Table:
 

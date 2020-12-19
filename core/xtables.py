@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03/15
-# @modified 2020/10/07 15:19:37
+# @modified 2020/12/19 19:43:59
 """Xnote的数据库配置(此模块已经废弃)
     考虑到持续运行的维护，增加表结构需要非常慎重
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
@@ -38,7 +38,7 @@ class SqliteTableManager:
         cursorobj = self.db.cursor()
         try:
             if not silent:
-                print(sql)
+                xutils.log(sql)
             cursorobj.execute(sql)
             kv_result = []
             result = cursorobj.fetchall()
@@ -493,6 +493,8 @@ def init_db_wrapper(dbpath):
     db.query("PRAGMA synchronous = NORMAL;")
     DBWrapper._pool[dbpath] = db
 
+
+@xutils.log_init_deco("xtables")
 def init():
     if sqlite3 is None:
         xconfig.errors.append("sqlite3依赖丢失,部分功能不可用")

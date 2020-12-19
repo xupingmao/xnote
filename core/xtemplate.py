@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/12/17 23:29:08
+# @modified 2020/12/19 19:57:13
 import os
 import json
 import web
@@ -246,7 +246,8 @@ def get_templates():
     """获取所有模板的浅拷贝"""
     return _loader.templates.copy()
 
-    
+
+@xutils.log_init_deco("xtemplate.reload")    
 def reload():
     """reload template manager"""
     global _loader

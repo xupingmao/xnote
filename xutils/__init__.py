@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/12/05 17:36:44
+# @modified 2020/12/19 19:34:13
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -38,6 +38,7 @@ from xutils.functions import History, MemTable, listremove
 
 # TODO xutils是最基础的库，后续会移除对xconfig的依赖，xutils会提供配置的函数出去在上层进行配置
 from xutils.base import Storage
+from xutils.logutil import *
 
 import shutil
 import logging
@@ -59,22 +60,6 @@ wday_map = {
     "6": "周六",
     "7": "周日"
 }
-
-logger = None
-def init_logger():
-    global logger
-    # filename = os.path.join(xconfig.LOG_DIR, "xnote.log")
-    # fmt_str  = '%(asctime)s %(levelname)s %(message)s'
-    # fileshandle = logging.handlers.TimedRotatingFileHandler(filename, when='MIDNIGHT', interval=1, backupCount=0)
-    # fileshandle.suffix = "%Y-%m-%d"
-    # fileshandle.setLevel(logging.DEBUG)
-    # formatter = logging.Formatter(fmt_str)
-    # fileshandle.setFormatter(formatter)
-    # logger = logging.getLogger('')
-    # logger.setLevel(logging.INFO)
-    # logger.addHandler(fileshandle)
-
-    # logger.info("logger inited!")
 
 def async_func():
     """同步调用转化成异步调用的装饰器"""
@@ -332,62 +317,6 @@ def md5_hex(string):
 #################################################################
 ##   Platform/OS Utilities, Python 2 do not have this file
 #################################################################
-
-def get_log_path():
-    date_time = time.strftime("%Y-%m")
-    dirname = os.path.join(xconfig.LOG_DIR, date_time)
-    fsutil.makedirs(dirname)
-    fname = time.strftime("xnote.%Y-%m-%d.log")
-    return os.path.join(dirname, fname)
-
-def log(fmt, show_logger = False, fpath = None, *argv):
-    fmt = u(fmt)
-    if len(argv) > 0:
-        message = fmt.format(*argv)
-    else:
-        message = fmt
-    if show_logger:
-        f_back    = inspect.currentframe().f_back
-        f_code    = f_back.f_code
-        f_modname = f_back.f_globals.get("__name__")
-        f_name    = f_code.co_name
-        f_lineno  = f_back.f_lineno
-        message = "%s %s.%s:%s %s" % (format_time(), f_modname, f_name, f_lineno, message)
-    else:
-        message = "%s %s" % (format_time(), message)
-    print(message)
-    if fpath is None:
-        fpath = get_log_path()
-    log_async(fpath, message)
-
-def _write_log(level, metric, message, cost):
-    import xauth
-    fpath = get_log_path()
-    user_name = xauth.current_name()
-    if user_name is None:
-        user_name = "-"
-    full_message = "%s|%s|%s|%s|%sms|%s" % (format_time(), level, user_name, metric, cost, message)
-    # print(full_message)
-    # 同步写在SAE上面有巨大的性能损耗
-    log_async(fpath, full_message)
-
-def trace(metric, message, cost=0):
-    _write_log("TRACE", metric, message, cost)
-    
-
-def info(metric, message, cost=0):
-    _write_log("INFO", metric, message, cost)
-
-def warn(metric, message, cost=0):
-    _write_log("WARN", metric, message, cost)
-
-def error(metric, message, cost=0):
-    _write_log("ERROR", metric, message, cost)
-
-@async_func()
-def log_async(fpath, full_message):
-    with open(fpath, "ab") as fp:
-        fp.write((full_message+"\n").encode("utf-8"))
 
 def system(cmd, cwd = None):
     p = subprocess.Popen(cmd, cwd=cwd, 

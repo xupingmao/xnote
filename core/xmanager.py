@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2020/12/05 21:28:26
+# @modified 2020/12/19 19:56:53
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -587,6 +587,7 @@ class EventManager:
 _manager       = None
 _event_manager = None
 
+@xutils.log_init_deco("xmanager.init")
 def init(app, vars, last_mapping = None):
     global _manager
     global _event_manager
@@ -597,7 +598,8 @@ def init(app, vars, last_mapping = None):
 def instance():
     global _manager
     return _manager
-    
+
+@xutils.log_init_deco("xmanager.reload")
 def reload():
     _event_manager.remove_handlers()
     xauth.refresh_users()

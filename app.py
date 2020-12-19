@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2020/12/19 19:22:07
+# @modified 2020/12/19 19:57:43
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -160,8 +160,7 @@ def main():
 
     # 处理初始化参数
     handle_args()
-    # 初始化日志
-    xutils.init_logger()
+
     # 初始化数据库
     try_init_sqlite()
     try_init_ldb()
@@ -174,7 +173,7 @@ def main():
     app = web.application(list(), var_env, autoreload=False)
 
     # 最后的mapping，用于匹配优先级较低的处理器
-    manager = xmanager.init(app, var_env)
+    manager_obj = xmanager.init(app, var_env)
     xmanager.reload()
 
     # 重新加载template
@@ -184,7 +183,7 @@ def main():
     init_autoreload()
 
     # 启动定时任务检查
-    manager.run_task()
+    manager_obj.run_task()
 
     # 注册信号响应
     # 键盘终止信号
