@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2020/12/19 19:57:43
+# @modified 2020/12/19 20:01:41
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -200,6 +200,7 @@ def main():
 
     # 记录已经启动
     xconfig.mark_started()
+    xutils.log("app started")
 
     # 监听端口
     app.run()
