@@ -23,7 +23,7 @@
 {% block body %}
     {% from xutils import dateutil %}
 
-    <div class="card">
+    <div class="card btn-line-height">
         <span>日期</span>
         <select name="year" value="{{year}}">
             {% for j in range(year-5,year+6) %}
@@ -35,16 +35,13 @@
                 {% if i == 0 %}
                     <option value="0">全年</option>
                 {% else %}
-                    <option value="{{i}}">{{i}}</option>
+                    <option value="{{i}}">{{i}}月</option>
                 {% end %}
             {% end %}
         </select>
 
         <div class="float-right">
-            <!-- 没什么必要
-            <a class="btn btn-default" href="{{link_by_month(year, month, -1)}}">上月</a>
-            <a class="btn btn-default" href="{{link_by_month(year, month, 1)}}">下月</a>
-            -->
+            <a class="btn" href="/note/add">新建</a>
             <a class="btn btn-default" href="/note/tools">笔记工具</a>
         </div>
     </div>
@@ -67,10 +64,20 @@
 
     <script>
     $(function () {
+        function formatDate(year, month) {
+            if (month == "0") {
+                return year;
+            }
+            if (month < 10) {
+                return year + "-0" + month;
+            }
+            return year + "-" + month;
+        }
         $("select").change(function (e) {
             var year = $("[name=year]").val();
             var month = $("[name=month]").val();
-            location.href = "?year=" + year + "&month=" + month;
+            var date = formatDate(year, month);
+            location.href = "?date=" + date;
         });
 
     })

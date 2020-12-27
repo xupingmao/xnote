@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/11/29 14:34:50
+# @modified 2020/12/27 17:47:34
 import xutils
 
 # cannot perform relative import
@@ -119,7 +119,7 @@ class TestMain(BaseTestCase):
         assert_json_request_success(self, u"/note/api/timeline?type=search&key=xnote中文")
 
     def test_timeline_sort_func(self):
-        from handlers.note.timeline import build_date_result
+        build_date_result = xutils.Module("note").build_date_result
         note1 = Storage(name = "note1", ctime = "2015-01-01 00:00:00")
         note2 = Storage(name = "note2", ctime = "2015-06-01 00:00:00")
         note3 = Storage(name = "note3", ctime = "2014-01-01 00:00:00")
@@ -295,7 +295,7 @@ class TestMain(BaseTestCase):
         self.check_OK(u"/search?key=test中文&category=content")
 
     def test_split_words(self):
-        from handlers.note.timeline import split_words
+        from xutils.textutil import split_words
         words = split_words(u"mac网络")
         self.assertEqual(["mac", u"网", u"络"], words)
 

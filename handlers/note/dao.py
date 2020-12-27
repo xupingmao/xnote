@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/11/22 15:56:04
+# @modified 2020/12/27 17:41:52
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -284,12 +284,16 @@ def get_by_token(token):
     return None
 
 def create_note_base(note_dict, date_str):
+    # 真实的创建时间
+    note_dict["ctime0"] = dateutil.format_datetime()
+    
     if date_str is None or date_str == "":
         note_id = dbutil.timeseq()
         note_dict["id"] = note_id
         put_note_to_db(note_id, note_dict)
         return note_id
     else:
+        date_str = date_str.replace(".", "-")
         timestamp = int(dateutil.parse_date_to_timestamp(date_str) * 1000)
         try:
             CREATE_LOCK.acquire()

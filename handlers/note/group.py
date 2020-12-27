@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/12/17 23:38:16
+# @modified 2020/12/27 17:27:33
 import math
 import time
 import web
@@ -180,6 +180,8 @@ class GroupListHandler:
         tools        = []
         fixed_books  = []
         normal_books = []
+
+        xmanager.add_visit_log(user_name, "/note/group")
 
         # 短消息：任务、通知和备忘
         fixed_books.append(MSG_DAO.get_message_tag(user_name, "task"))
@@ -444,72 +446,6 @@ class RecentHandler:
             page_url    = "/note/recent_%s?page=" % orderby,
             **SEARCH_DOC_DICT)
 
-
-def link_by_month(year, month, delta = 0):
-    tm = Storage(tm_year = year, tm_mon = month, tm_mday = 0)
-    t_year, t_mon, t_day = dateutil.date_add(tm, months = delta)
-    return "/note/date?year=%d&month=%02d" % (t_year, t_mon)
-
-def assemble_notes_by_date(notes, year_str = None, month_str = None, time_attr = "ctime"):
-    notes_dict = dict()
-    for note in notes:
-        datetime_str = note.get(time_attr)
-        cdate = dateutil.format_date(datetime_str)
-        old   = notes_dict.get(cdate)
-        if old is None:
-            old = []
-        old.append(note)
-        notes_dict[cdate] = old
-
-    result = []
-    for date in notes_dict:
-        item = (date, notes_dict[date])
-        result.append(item)
-
-    result.sort(key = lambda x:x[0], reverse = True)
-    return result
-
-class DateHandler:
-
-    type_order_dict = {
-        "group": 0,
-        "gallery": 10,
-        "list": 20,
-        "table": 30,
-        "csv": 30,
-        "md": 90,
-    }
-
-    def sort_notes(self, notes):
-        notes.sort(key = lambda x: self.type_order_dict.get(x.type, 100))
-
-    @xauth.login_required()
-    def GET(self):
-        user_name = xauth.current_name()
-        xmanager.add_visit_log(user_name, "/note/date")
-        
-        year  = xutils.get_argument("year", time.strftime("%Y"))
-        # 默认查看全年的
-        month = xutils.get_argument("month", "0")
-        if len(month) == 1:
-            month = '0' + month
-
-        if month == "00":
-            date = year
-        else:
-            date = year + "-" + month
-
-        notes = NOTE_DAO.list_by_date("ctime", user_name, date)
-        # by_name = NOTE_DAO.list_by_date("name", user_name, year + "_" + month)
-        notes_by_date = assemble_notes_by_date(notes, year, month)
-
-        return xtemplate.render("note/page/list_by_date.html", 
-            link_by_month = link_by_month,
-            year          = int(year),
-            month         = int(month),
-            notes_by_date = notes_by_date,
-            **SEARCH_DOC_DICT)
-
 class ArchivedHandler:
 
     @xauth.login_required()
@@ -582,8 +518,6 @@ xurls = (
     r"/note/recent_(created)" , RecentHandler,
     r"/note/recent_(viewed)", RecentHandler,
     r"/note/group/select"   , GroupSelectHandler,
-    r"/note/date"           , DateHandler,
-    r"/note/monthly"        , DateHandler,
     r"/note/management"     , ManagementHandler,
 
     r"/note/text"           , TextListHandler,

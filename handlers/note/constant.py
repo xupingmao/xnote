@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/02/16 12:49:30
-# @modified 2020/06/06 19:25:30
+# @modified 2020/12/27 16:38:50
 
 class NoteType:
 
@@ -18,7 +18,7 @@ NOTE_TYPE_MAPPING = {
 
 NOTE_TYPE_LIST = [
     NoteType("group"  , u"项目"),
-    NoteType("md"     , u"Markdown"),
+    NoteType("md"     , u"markdown"),
     NoteType("html"   , u"富文本"),
     NoteType("csv"    , u"表格"),
     NoteType("list"   , u"清单"),

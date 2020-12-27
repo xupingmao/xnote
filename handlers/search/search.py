@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/08/30 14:14:52
+# @modified 2020/12/27 16:26:20
 
 import re
 import os
@@ -231,6 +231,7 @@ class SearchHistoryHandler:
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
+        xmanager.add_visit_log(user_name, "/search/history")
         return xtemplate.render("search/page/search_history.html", 
             show_aside = False,
             recent = list_search_history(user_name),

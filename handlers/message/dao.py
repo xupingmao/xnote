@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2020/11/22 13:19:21
+# @modified 2020/12/27 17:37:23
 import xutils
 import xconfig
 import xmanager
@@ -239,13 +239,13 @@ def add_search_history(user, search_key, cost_time = 0):
     key = "msg_search_history:%s:%s" % (user, dbutil.timeseq())
     dbutil.put(key, Storage(key = search_key, cost_time = cost_time))
 
-class MessageTag:
+class MessageTag(Storage):
 
-    def __init__(self, tag, size):
+    def __init__(self, tag, size, priority = 0):
         self.type = type
         self.size = size
         self.url  = "/message?tag=" + tag
-        self.priority = 0
+        self.priority = priority
         self.show_next = True
         self.is_deleted = 0
         self.name = "Message"
@@ -260,13 +260,13 @@ class MessageTag:
             self.name = T("任务")
             self.icon = "fa-calendar-check-o"
 
-def get_message_tag(user, tag):
+def get_message_tag(user, tag, priority = 0):
     msg_stat  = get_message_stat(user)
 
     if tag == "log":
-        return MessageTag(tag, msg_stat.log_count)
+        return MessageTag(tag, msg_stat.log_count, priority = priority)
     if tag == "task":
-        return MessageTag(tag, msg_stat.task_count)
+        return MessageTag(tag, msg_stat.task_count, priority = priority)
 
     raise Exception("unknown tag:%s" % tag)
 

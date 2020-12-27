@@ -1,9 +1,10 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2020/09/05 15:25:08
+# @modified 2020/12/27 16:21:24
 import xauth
 import xutils
+import xmanager
 from xutils import dbutil
 from xtemplate import BasePlugin
 
@@ -60,6 +61,9 @@ class StatHandler(BasePlugin):
     def handle(self, input):
         self.rows = 0
         user_name = xauth.current_name()
+
+        xmanager.add_visit_log(user_name, "/note/stat")
+        
         stat_list = []
         admin_stat_list = []
         stat_list.append(["我的项目", xutils.call("note.count_by_type", user_name, "group")])

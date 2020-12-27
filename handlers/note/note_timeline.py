@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/12/05 21:29:11
+# @modified 2020/12/27 17:48:05
 
 """时光轴视图"""
 import re
@@ -444,6 +444,68 @@ class DefaultProjectHandler(BaseTimelineHandler):
     note_type   = "root_notes"
     show_create = False
 
+def assemble_notes_by_date(notes, time_attr = "ctime"):
+    from collections import defaultdict
+    notes_dict = defaultdict(list)
+    for note in notes:
+        if note.priority > 0:
+            notes_dict["置顶"].append(note)
+            continue
+        datetime_str = note.get(time_attr)
+        cdate = dateutil.format_date(datetime_str)
+        notes_dict[cdate].append(note)
+
+    result = []
+    for date in notes_dict:
+        item = (date, notes_dict[date])
+        result.append(item)
+
+    result.sort(key = lambda x:x[0], reverse = True)
+    return result
+
+class DateHandler:
+
+    type_order_dict = {
+        "group": 0,
+        "gallery": 10,
+        "list": 20,
+        "table": 30,
+        "csv": 30,
+        "md": 90,
+    }
+
+    def sort_notes(self, notes):
+        notes.sort(key = lambda x: self.type_order_dict.get(x.type, 100))
+
+    @xauth.login_required()
+    def GET(self):
+        user_name = xauth.current_name()
+        xmanager.add_visit_log(user_name, "/note/date")
+        
+        date  = xutils.get_argument("date", time.strftime("%Y"))
+        notes = NOTE_DAO.list_by_date("ctime", user_name, date)
+        # 待办任务
+        notes.insert(0, MSG_DAO.get_message_tag(user_name, "task", priority = 1))
+        notes.insert(1, MSG_DAO.get_message_tag(user_name, "log", priority = 1))
+
+        notes_by_date = assemble_notes_by_date(notes)
+        parts = date.split("-")
+        if len(parts) == 2:
+            year = int(parts[0])
+            month = int(parts[1])
+        else:
+            year = int(parts[0])
+            month = 0
+
+        return xtemplate.render("note/page/list_by_date.html", 
+            date          = date,
+            year          = year,
+            month         = month,
+            notes_by_date = notes_by_date,
+            search_type   = "note")
+
+xutils.register_func("note.build_date_result", build_date_result)
+
 xurls = (
     r"/note/timeline/month", DateTimeline,
     r"/note/api/timeline", TimelineAjaxHandler,
@@ -463,5 +525,9 @@ xurls = (
     r"/note/sticky"         , StickyHandler,
     r"/note/removed"        , RemovedHandler,
     r"/project/default"     , DefaultProjectHandler,
+
+    # 日期视图
+    r"/note/date"           , DateHandler,
+    r"/note/monthly"        , DateHandler,
 )
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/07/11 20:12:48
+# @modified 2020/12/27 17:22:16
 
 """笔记编辑相关处理"""
 import os
@@ -21,11 +21,6 @@ from xutils import textutil
 from xtemplate import T
 from .constant import *
 NOTE_DAO = xutils.DAO("note")
-
-# 创建笔记的模板
-CREATE_TEMPLATE_DICT = {
-    "log": "note/page/create_log.html"
-}
 
 DEFAULT_CREATE_TEMPLATE = "note/page/create.html"
 
@@ -81,8 +76,9 @@ def create_log_func(note, ctx):
     return NOTE_DAO.create(note, date_str)
 
 def default_create_func(note, ctx):
-    method = ctx.method
-    name   = note.name
+    method   = ctx.method
+    date_str = ctx.date
+    name     = note.name
 
     if method != "POST":
         # GET请求直接返回
@@ -96,10 +92,10 @@ def default_create_func(note, ctx):
     if f != None:
         message = u"%s 已存在" % name
         raise Exception(message)
-    return NOTE_DAO.create(note)
+    return NOTE_DAO.create(note, date_str)
 
 CREATE_FUNC_DICT = {
-    "log": create_log_func
+    "log.bak": create_log_func
 }
 
 def list_groups_for_create(creator):
@@ -187,8 +183,8 @@ class CreateHandler:
             if format == 'json':
                 return dict(code = 'fail', message = error)
 
-        heading = get_heading_by_type(type)
-        template = CREATE_TEMPLATE_DICT.get(type, DEFAULT_CREATE_TEMPLATE)
+        heading  = get_heading_by_type(type)
+        template = DEFAULT_CREATE_TEMPLATE
 
         return xtemplate.render(template, 
             show_search = False,
