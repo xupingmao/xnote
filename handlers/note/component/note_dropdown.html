@@ -26,11 +26,18 @@
         
         <a class="dropdown-option move-btn link" data-url="/note/group/select?callback=moveNoteCallback">移动</a>
 
-        {% if file.priority > 0 %}
-            <a class="dropdown-option link" href="/note/unstick?id={{file.id}}">取消置顶</a>
-        {% else %}
-            <a class="dropdown-option link" href="/note/stick?id={{file.id}}">置顶</a>
-        {% end %}
+        <a class="dropdown-option link" href="/note/stick?id={{file.id}}&level=2">
+            超级置顶
+            {% if file.priority == 2 %}<i class="fa fa-check"></i>{% end %}
+        </a>
+        <a class="dropdown-option link" href="/note/stick?id={{file.id}}">
+            置顶
+            {% if file.priority == 1 %}<i class="fa fa-check"></i>{% end %}
+        </a>
+        <a class="dropdown-option link" href="/note/stick?id={{file.id}}&level=0">
+            普通
+            {% if file.priority == 0 %}<i class="fa fa-check"></i>{% end %}
+        </a>
 
         {% if file.archived %}
             <a class="dropdown-option link" href="/note/unarchive?id={{file.id}}">取消归档</a>

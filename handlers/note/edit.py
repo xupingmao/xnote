@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/12/27 17:22:16
+# @modified 2020/12/27 18:49:58
 
 """笔记编辑相关处理"""
 import os
@@ -389,8 +389,13 @@ class StickHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
+        level = xutils.get_argument("level")
+        priority = 1
+        if level in ("0", "2"):
+            priority = int(level)
+
         note = check_get_note(id)
-        NOTE_DAO.update(id, priority = 1, archived = False)
+        NOTE_DAO.update(id, priority = priority, archived = False)
         raise web.found("/note/%s" % id)
 
 class UnstickHandler:

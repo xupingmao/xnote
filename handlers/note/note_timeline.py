@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2020/12/27 17:48:05
+# @modified 2020/12/27 18:52:01
 
 """时光轴视图"""
 import re
@@ -448,8 +448,11 @@ def assemble_notes_by_date(notes, time_attr = "ctime"):
     from collections import defaultdict
     notes_dict = defaultdict(list)
     for note in notes:
-        if note.priority > 0:
+        if note.priority == 1:
             notes_dict["置顶"].append(note)
+            continue
+        if note.priority == 2:
+            notes_dict["超级置顶"].append(note)
             continue
         datetime_str = note.get(time_attr)
         cdate = dateutil.format_date(datetime_str)
@@ -485,8 +488,8 @@ class DateHandler:
         date  = xutils.get_argument("date", time.strftime("%Y"))
         notes = NOTE_DAO.list_by_date("ctime", user_name, date)
         # 待办任务
-        notes.insert(0, MSG_DAO.get_message_tag(user_name, "task", priority = 1))
-        notes.insert(1, MSG_DAO.get_message_tag(user_name, "log", priority = 1))
+        notes.insert(0, MSG_DAO.get_message_tag(user_name, "task", priority = 2))
+        notes.insert(1, MSG_DAO.get_message_tag(user_name, "log",  priority = 2))
 
         notes_by_date = assemble_notes_by_date(notes)
         parts = date.split("-")
