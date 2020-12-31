@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2020/12/27 17:26:45
+# @modified 2021/01/01 00:58:20
 from io import StringIO
 import xconfig
 import codecs
@@ -222,6 +222,8 @@ INNER_TOOLS = [
     note_plugin("上传管理", "/fs_upload", "fa-upload"),
     note_plugin("回收站", "/note/removed", "fa-trash"),
     note_plugin("笔记目录", "/note/group", "fa-th-large"),
+    note_plugin("任务列表", "/message?tag=task", "fa-calendar-check-o"),
+    note_plugin("相册", "/note/gallery", "fa-photo"),
 ]
 
 def get_inner_tool_name(url):

@@ -7,9 +7,11 @@
 <!-- TODO d3.js 展示内存和CPU日志 -->
 {% import web %}
 
-<div class="col-md-12 card">
+<div class="card">
     <h3 class="card-title">{{T("设置")}}</h3>
+</div>
 
+<div class="col-md-12 card">
     <div class="settings-row">
         <div class="settings-key">当前用户</div>
         <div class="settings-value">
@@ -55,6 +57,7 @@
         <div class="settings-value">
             <select name="THEME" data-type="str" value="{{_user_config.THEME}}">
                 <option value="standard">默认</option>
+                <option value="card">卡片</option>
                 <option value="left">侧边栏</option>
             </select>
         </div>

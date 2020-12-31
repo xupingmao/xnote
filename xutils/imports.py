@@ -2,7 +2,7 @@
 # 专门用来import各种依赖
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
-# @modified 2020/11/29 13:37:34
+# @modified 2021/01/01 01:11:43
 from __future__ import print_function
 import sys
 import os
@@ -17,7 +17,6 @@ import gc
 import shutil
 import profile as pf
 import six
-import web
 import xconfig
 import subprocess
 import pickle
@@ -26,7 +25,9 @@ import codecs
 from xutils.base import Storage
 from collections import deque
 from fnmatch import fnmatch
-from tornado.escape import xhtml_escape        
+from tornado.escape import xhtml_escape
+
+import web
 from web.utils import safestr, safeunicode
 
 try:

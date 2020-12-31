@@ -2,26 +2,30 @@
 
 {% block body %}
 
-<h3 class="card-title btn-line-height">
-    <span>笔记工具</span>
-    <div class="float-right">
-        <a class="btn btn-default" href="/note/group">笔记目录</a>
+<div class="card">
+    <h3 class="card-title btn-line-height">
+        <span>笔记工具</span>
+        <div class="float-right">
+            <a class="btn btn-default" href="/note/group">笔记目录</a>
+        </div>
+    </h3>
+</div>
+
+<div class="card">
+    <div class="plugin-list col-md-12">
+        {% for index, link in enumerate(plugins) %}
+            <a class="list-link" href="{{link.link}}">
+                <i class="fa {{link.icon}}"></i>
+                <span>{{link.title}}</span>
+
+                <div class="plugin-right-box">
+                    {% if link.size != None %}
+                        <span class="plugin-right-span">{{link.size}}</span>
+                    {% end %}
+                    <i class="fa fa-chevron-right"></i>
+                </div>
+            </a>
+        {% end %}
     </div>
-</h3>
-
-<div class="plugin-list col-md-12">
-    {% for index, link in enumerate(plugins) %}
-        <a class="list-link" href="{{link.link}}">
-            <i class="fa {{link.icon}}"></i>
-            <span>{{link.title}}</span>
-
-            <div class="plugin-right-box">
-                {% if link.size != None %}
-                    <span class="plugin-right-span">{{link.size}}</span>
-                {% end %}
-                <i class="fa fa-chevron-right"></i>
-            </div>
-        </a>
-    {% end %}
 </div>
 {% end %}

@@ -41,7 +41,8 @@
         <div class="message-row" v-if="messageList.length == 0">
             空空如也~
         </div>
-        <div class="message-row" v-for="message in messageList">
+
+        <div class="card" v-for="message in messageList">
             <div class="chat-avatar col-md-12">
                 <!-- {{! message.ctime }} -->
                 <!-- <span class="tag-span" v-if="message.status==100">已完成</span> -->
@@ -120,7 +121,7 @@
         </div>
     </div>
 
-    <div class="col-md-12 grid-card">
+    <div class="col-md-12 card">
         <a class="x-page-link" href="#">共{{!page_max}}页/{{!amount}}条</a> 
         <a v-if="page > 1" class="x-page-link" v-bind:href="page_prev_url">上一页</a>
         <a class="x-page-link x-page-active" href="#">{{!page}}</a>

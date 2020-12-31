@@ -1,11 +1,11 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/05/01 22:00:52
+# @modified 2021/01/01 01:14:15
 import time
 import os
 import math
-from .imports import is_str
+
 """处理时间的工具类
 Commonly used format codes:
 
@@ -39,6 +39,9 @@ WDAY_DICT = {
     "7": u"周日"
 }
 
+def is_str(s):
+    return isinstance(s, str)
+
 def before(days=None, month=None, format=False):
     if days is not None:
         fasttime = time.time() - days * _DAY
@@ -56,6 +59,10 @@ def days_before(days, format=False):
 
 
 def format_datetime(seconds=None):
+    """格式化日期时间
+    >>> format_datetime(0)
+    '1970-01-01 08:00:00'
+    """
     if seconds == None:
         return time.strftime('%Y-%m-%d %H:%M:%S')
     else:
@@ -66,6 +73,10 @@ format_time = format_datetime
 
 
 def format_time_only(seconds=None):
+    """只格式化时间 TODO 时区问题
+    >>> format_time_only(0)
+    '08:00:00'
+    """
     if seconds == None:
         return time.strftime('%H:%M:%S')
     else:

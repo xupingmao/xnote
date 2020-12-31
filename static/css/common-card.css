@@ -2,23 +2,17 @@
  * 卡片主题的样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2020/04/19 00:38:42
+ * @modified 2020/12/31 21:50:27
  */
 
 body {
     background-color: #eee;
 }
 
-.root {
-    background-color: transparent;
-    padding: 0px;
-    width: 1000px;
-}
-
 .nav {
-    padding: 0px;
-    background-color: transparent;
-    border: none;
+    /*padding: 0px;*/
+    /*background-color: transparent;*/
+    /*border: none;*/
 }
 
 .x-body {
@@ -27,6 +21,7 @@ body {
 
 .main-content {
     padding: 0px;
+    background-color: transparent;
 }
 
 /* 不能指定input[type=button]不然会覆盖其他class样式(选择器优先级过高) */
@@ -84,18 +79,18 @@ body {
     /*border-radius: 5px;*/
 }
 
-.grid-title, .card-title, .card>h1,.card>h2,.card>h3,.card>h4 {
+.card-title, .grid-title, .card>h1,.card>h2,.card>h3,.card>h4 {
     background-color: #fff;
 }
 
-.plugin-head,.grid-card,.card, .box {
+.card, .plugin-head,.grid-card, .box {
     float: left;
     width: 100%;
     background-color: #fff;
     margin-bottom: 10px;
     padding: 5px;
-    /*border-radius: 5px;*/
-    border: 1px solid #ccc;
+    border-radius: 5px;
+    /*border: 1px solid #ccc;*/
     /*阴影不是很好看*/
     /*box-shadow: 0 0 5px #ccc;*/
 }
@@ -107,14 +102,5 @@ body {
 .aside-item {
     border: 1px solid #ccc;
     box-shadow: none;
-}
-
-/** 移动端样式放在最后 **/
-@media screen and (max-width: 1000px) {
-    /** mobile **/
-
-    .root {
-        width: 100%;
-    }
 }
 
