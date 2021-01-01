@@ -58,7 +58,7 @@
 
 <input type="hidden" id="articleTitle" value="{{article_title}}"/>
 <div class="card">
-    <h2>Markdown 文本</h2>
+    <h2 class="card-title">Markdown 文本</h2>
     <textarea rows="30" class="content" id="content">
     {% for text in texts%}{{text}}
     {% end %}
@@ -66,25 +66,21 @@
 </div>
 
 <div class="card">
-    <h2>纯文本</h2>
+    <h2 class="card-title">纯文本</h2>
     <textarea rows="30" class="content" id="plainText">{{?plain_text}}</textarea>
     <div><button id="readText">阅读</button></div>
 </div>
 
 <div class="card">
-    <h2>Images</h2>
+    <h2 class="card-title">Images</h2>
     <textarea rows={{len(images)+2}} class="content">
     {% for image in images %}{{image}}
     {% end %}
     </textarea>
 </div>
 
-<!-- {% for image in images %}
-<img src="{{image}}"/>
-{% end %} -->
-
 <div class="card">
-    <h2>Scripts</h2>
+    <h2 class="card-title">Scripts</h2>
     <textarea rows="{{len(scripts)+2}}" class="content">
     {% for script in scripts%}{{script}}
     {% end %}

@@ -3,7 +3,9 @@
 {% init parent_id = 0 %}
 
 {% if type in CREATE_BTN_TEXT_DICT.keys() %}
+    <!-- 分类节点 -->
     <a class="btn" href="/note/add?type={{type}}">{{CREATE_BTN_TEXT_DICT[type]}}</a>
+    <a class="btn btn-default" href="/note/tools">笔记工具</a>
 {% elif type == "removed" %}
     <!-- 空的 -->
 {% elif file.id == "0" %}

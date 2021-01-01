@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/01/01 12:16:50
+# @modified 2021/01/01 19:49:08
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -428,9 +428,8 @@ class MessageHandler:
             show_aside         = False,
             show_tab           = show_tab,
             category           = "message",
-            search_action      = "/message", 
-            html_title         = T("待办"),
-            search_placeholder = T("搜索任务和便签"),
+            search_type        = "message",
+            html_title         = T("任务和备忘"),
             default_content    = default_content,
             message_stat       = stat,
             key                = key,
@@ -447,8 +446,7 @@ class CalendarHandler:
         return xtemplate.render("message/calendar.html", 
             show_aside = False,
             message_stat = stat,
-            search_action      = "/message", 
-            search_placeholder = T("搜索待办事项"))
+            search_type = "message")
 
 class StatHandler:
 

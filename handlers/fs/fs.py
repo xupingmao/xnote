@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2020/12/19 19:52:18
+# @modified 2021/01/01 20:01:41
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -299,7 +299,11 @@ class FileSystemHandler:
         elif os.path.isfile(path):
             return self.read_file(path)
         else:
-            return "Not Readable %s" % path
+            # return "Not Readable %s" % path
+            return self.not_readable(path)
+
+    def not_readable(self, path):
+        return xtemplate.render("fs/page/fs_not_readable.html", path = path)
 
     @xauth.login_required("admin")
     def GET(self, path):

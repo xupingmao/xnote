@@ -8,7 +8,14 @@
 {% import web %}
 
 <div class="card">
-    <h3 class="card-title">{{T("设置")}}</h3>
+    <div class="card-title btn-line-height">
+        <span>{{T("设置")}}</span>
+        <div class="float-right">
+            {% if _is_admin %}
+                <a class="btn btn-default" href="/system/admin">后台管理</a>
+            {% end %}
+        </div>
+    </div>
 </div>
 
 <div class="col-md-12 card">
@@ -24,14 +31,6 @@
         <div class="settings-key">关于系统</div>
         <div class="settings-value">
             <a href="/code/wiki/README.md">查看</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
-
-    <div class="settings-row admin-visible">
-        <div class="settings-key">后台管理</div>
-        <div class="settings-value">
-            <a href="/system/admin">进入</a>
             <i class="fa fa-chevron-right"></i>
         </div>
     </div>

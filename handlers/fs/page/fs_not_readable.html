@@ -1,0 +1,18 @@
+{% extends base %}
+
+{% block body %}
+
+<div class="card">
+    <div class="card-title btn-line-height">
+        <span>文件管理</span>
+        <div class="float-right">
+            <a class="btn btn-default" href="javascript:history.back();">返回</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    无效路径：{{path}}
+</div>
+
+{% end %}

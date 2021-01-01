@@ -12,6 +12,12 @@
 
 <div class="card">
     <div class="plugin-list col-md-12">
+        {% if len(plugins) == 0 %}
+            <div class="list-item">
+                <span>空空如也~</span>
+            </div>
+        {% end %}
+
         {% for index, link in enumerate(plugins) %}
             <a class="list-link" href="{{link.link}}">
                 <span>{{link.title}}</span>

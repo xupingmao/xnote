@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/12/08 01:46:35
-# @modified 2021/01/01 01:00:24
+# @modified 2021/01/01 21:34:32
 # -*- coding:utf-8 -*-
 # @since 2018-11-22 00:46:26
 import os
@@ -22,12 +22,14 @@ from xtemplate import BasePlugin
 
 HEADER = """
 <!-- 插件头部 -->
-<div class="grid-title btn-line-height">
-    <span>{{plugin.title}}</span>
-    <span class="float-right">
-        <a class="btn btn-default" href="/plugins_list">插件中心</a>
-        <a class="btn btn-default" href="/fs_list">收藏夹</a>
-    </span>
+<div class="card">
+    <div class="grid-title btn-line-height">
+        <span>{{plugin.title}}</span>
+        <div class="float-right">
+            <a class="btn btn-default" href="/plugins_list">插件中心</a>
+            <a class="btn btn-default" href="/fs_list">收藏夹</a>
+        </div>
+    </div>
 </div>
 """
 

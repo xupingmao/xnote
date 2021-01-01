@@ -29,7 +29,7 @@
 
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
-<div id="app" class="card content">
+<div id="app" class="content card">
 
   <div class="note-header card-title">
     <span class="note-header-span">{{title}}</span>
@@ -49,12 +49,15 @@
           <button class="btn-default" onclick="javascript:history.back();">返回</button>
         {% end %}
     </div>
-
   </div>
-
   {% include note/component/pathlist.html %}
+
   
   <div class="note-timeline-body">
+    <article v-if="itemList.length == 0">
+      <p>空空如也~</p>
+    </article>
+    
     <article class="row" v-for="item in itemList">
       <h3 class="card-title-2">{{!item.title}}</h3>
       <section v-for="file in item.files">
