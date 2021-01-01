@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2020/12/19 19:57:13
+# @modified 2021/01/01 12:09:53
 import os
 import json
 import web
@@ -199,6 +199,7 @@ def render_search(kw):
     if search_type == "plugin":
         search_placeholder = u"搜索插件"
         search_action = "/plugins_list"
+
     if search_type == "message":
         search_placeholder = u"搜索任务和便签";
         search_action = "/message"

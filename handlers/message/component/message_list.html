@@ -1,6 +1,6 @@
 
 <div class="message-list-item-tpl hide">
-    <div class="message-row">
+    <div class="message-row card">
         <div class="msg-item-header">
             <span class="chat-msg-time">${ctime}</span>
         </div>
@@ -64,6 +64,12 @@
                         item = wrapMessage(item);
                         $(".message-list").append(renderTemplate(templateText, item));
                     });
+
+                    if (data.data.length == 0) {
+                        var item = {"html": "空空如也~"};
+                        item = wrapMessage(item);
+                        $(".message-list").append(renderTemplate(templateText, item));
+                    }
 
                     // console.log(messageList);
                 }

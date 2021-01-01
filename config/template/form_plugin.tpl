@@ -14,7 +14,6 @@ import xconfig
 import xutils
 import xauth
 import xmanager
-import xtables
 import xtemplate
 from xtemplate import BaseFormPlugin
 

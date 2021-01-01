@@ -149,16 +149,18 @@ td.currentMonth:hover {
 
 {% block body %}
 
-<h3 class="card-title btn-line-height">
-    <span>笔记日历</span>
-    
-    <div class="float-right">
-      <a class="btn btn-default" href="/note/calendar">今天</a>
-      <a class="btn btn-default" href="/note/tools">笔记工具</a>
-    </div>
-</h3>
+<div class="card">
+  <h3 class="card-title btn-line-height">
+      <span>笔记日历</span>
+      
+      <div class="float-right">
+        <a class="btn btn-default" href="/note/calendar">今天</a>
+        <a class="btn btn-default" href="/note/tools">笔记工具</a>
+      </div>
+  </h3>
+</div>
 
-<div id="calendar" class="calendar grid-card">
+<div id="calendar" class="calendar card">
 </div>
 
 <div class="hide new-event col-md-12">

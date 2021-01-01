@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2020/11/26 00:57:06
+# @modified 2021/01/01 12:16:50
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -407,7 +407,8 @@ class MessageHandler:
         user     = xauth.current_name()
         key      = xutils.get_argument("key", "")
         from_    = xutils.get_argument("from")
-        show_tab = (xutils.get_argument("show_tab") != "false")
+        show_tab = xutils.get_argument("show_tab", default_value = True, type = bool)
+        tag      = xutils.get_argument("tag")
 
         if key != None and key != "":
             if key[0] == '#':
@@ -420,6 +421,8 @@ class MessageHandler:
 
         stat = MSG_DAO.get_message_stat(user)
         stat = format_message_stat(stat)
+
+        xmanager.add_visit_log(user, "/message?tag=%s" % tag)
 
         return xtemplate.render("message/message.html", 
             show_aside         = False,
