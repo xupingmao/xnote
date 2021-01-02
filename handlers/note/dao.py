@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/01/02 19:55:03
+# @modified 2021/01/02 20:20:47
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -55,6 +55,7 @@ dbutil.register_table("note_tags", "笔记标签 <note_tags:user:note_id>")
 DB_PATH         = xconfig.DB_PATH
 MAX_EDIT_LOG    = 500
 MAX_VIEW_LOG    = 500
+MAX_STICKY_SIZE = 1000
 
 NOTE_ICON_DICT = {
     "group"   : "fa-folder orange",
@@ -1018,9 +1019,9 @@ def count_by_type(creator, type):
 def list_sticky(creator, offset = 0, limit = 1000, orderby = None):
     def list_func(key, value):
         return value.priority > 0 and value.creator == creator and value.is_deleted == 0
-    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
+    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, MAX_STICKY_SIZE)
     sort_notes(notes, orderby = orderby)
-    return notes
+    return notes[:limit]
 
 def count_sticky(creator):
     def list_func(key, value):

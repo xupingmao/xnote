@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/02/15 21:46:37
-# @modified 2020/04/19 00:44:49
+# @modified 2021/01/02 20:24:00
 import xtables
 import xtemplate
 import xutils
 import xauth
 import xconfig
+import xmanager
 import math
 from xutils import Storage, encode_uri_component
 
@@ -113,6 +114,9 @@ class DictHandler:
         items = map(convert_dict_func, items)
         count = db.count()
         page_max = math.ceil(count / PAGE_SIZE)
+
+        user_name = xauth.current_name()
+        xmanager.add_visit_log(user_name, "/note/dict")
 
         return xtemplate.render("dict/dict_list.html", 
             show_aside = True,
