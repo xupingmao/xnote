@@ -1,0 +1,36 @@
+<!-- 任务和备忘 -->
+
+<div class="card">
+    <div class="card-title">
+        <span>任务和备忘</span>
+        <div class="float-right">
+            <!-- 右侧按钮 -->
+        </div>
+    </div>
+
+    {% for item in memos %}
+        <!-- 隐藏的记录 -->
+        {% if hasattr(item, "hide") and item.hide %}
+            {% continue %}
+        {% end %}
+
+        <a class="list-link" href="{{item.url}}">
+            {% if item.priority>0 %}
+                <i class="fa fa-thumb-tack black"></i>
+            {% end %}
+
+            <!-- 图标和标题 -->
+            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
+            <span>{{item.name}}</span>
+            
+            {% if item.is_deleted %}
+                <span class="gray-tag-span" href="/note/removed">删除</span>
+            {% end %}
+            
+            <div class="float-right">
+                <span class="book-size-span">{{item.size}}</span>
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+    {% end %}
+</div>

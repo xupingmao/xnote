@@ -1,0 +1,65 @@
+{% extends base %}
+
+{% block head %}
+<style type="text/css">
+    .option-td {
+        width: 25%;
+    }
+
+    .content-left {
+        float: left;
+        width: 700px;
+    }
+
+    .content-right {
+        padding-left: 10px;
+        float: left;
+        width: 300px;
+    }
+
+    /** 移动端样式放在最后 **/
+    @media screen and (max-width: 1000px) {
+        /** mobile **/
+        .content-left {
+            width: 100%;
+        }
+
+        .content-right {
+            padding-left: 0px;
+            width: 100%;
+        }
+    }
+</style>
+
+{% end %}
+
+{% block body %}
+    <div class="card">
+        <div class="card-title btn-line-height">
+            <span>笔记工作台</span>
+
+            <div class="float-right">
+                <!-- 右侧控制区 -->
+                <a class="btn" href="/note/create">新建</a>
+                <a class="btn btn-default" href="/note/tools">笔记工具</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="content-left">
+        {% include note/card/task_memo.html %}
+        {% include note/card/sticky_notes.html %}
+        {% include note/card/note_groups.html %}
+    </div>
+
+    <div class="content-right">
+        {% include note/card/recent_update_notes.html %}
+        {% include note/card/hot_notes.html %}
+        {% include note/card/note_types.html %}
+    </div>
+
+{% end %}
+
+{% block aside %}
+    {% include note/component/mod_aside.html %}
+{% end %}

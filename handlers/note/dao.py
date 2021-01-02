@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/12/27 17:41:52
+# @modified 2021/01/02 19:55:03
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -46,6 +46,7 @@ dbutil.register_table("note_history", "笔记的历史版本")
 dbutil.register_table("note_comment", "笔记的评论")
 dbutil.register_table("comment_index", "用户维度的评论索引")
 dbutil.register_table("search_history", "搜索历史")
+dbutil.register_table("note_create_log", "笔记创建日志")
 dbutil.register_table("note_edit_log", "笔记编辑日志")
 dbutil.register_table("note_visit_log", "笔记访问日志")
 dbutil.register_table("note_public", "公共笔记索引")
@@ -162,55 +163,68 @@ def sort_by_mtime_desc(notes):
 def sort_by_ctime_desc(notes):
     notes.sort(key = lambda x: x.ctime, reverse = True)
 
+def sort_by_default(notes):
+    # 先按照名称排序
+    sort_by_name(notes)
+
+    # 置顶笔记
+    notes.sort(key = lambda x: x.priority, reverse = True)
+
+    # 文件夹放在前面
+    notes.sort(key = lambda x: 0 if x.type == "group" else 1)
+
 SORT_FUNC_DICT = {
     "name": sort_by_name,
     "name_desc": sort_by_name_desc,
     "mtime_desc": sort_by_mtime_desc,
     "ctime_desc": sort_by_ctime_desc,
+    "default": sort_by_default
 }
 
 def sort_notes(notes, orderby = "name"):
     sort_func = SORT_FUNC_DICT.get(orderby, sort_by_mtime_desc)
     sort_func(notes)
+    build_note_list_info(notes)
 
-    # 置顶笔记
-    notes.sort(key = lambda x: x.priority, reverse = True)
-    # 文件夹放在前面
-    notes.sort(key = lambda x: 0 if x.type == "group" else 1)
-    fix_notes_info(notes)
-
-
-def fix_notes_info(notes):
+def build_note_list_info(notes):
     for note in notes:
         build_note_info(note)
 
 def build_note_info(note):
-    if note:
-        # note.url = "/note/view?id={}".format(note["id"])
-        note.url = "/note/{}".format(note["id"])
-        if note.priority is None:
-            note.priority = 0
+    if note is None:
+        return None
 
-        if note.content is None:
-            note.content = ''
+    # note.url = "/note/view?id={}".format(note["id"])
+    note.url = "/note/{}".format(note["id"])
+    if note.priority is None:
+        note.priority = 0
 
-        if note.data is None:
-            note.data = ''
-        # process icon
-        note.icon = NOTE_ICON_DICT.get(note.type, "fa-file-text-o")
-        note.id   = str(note.id)
+    if note.content is None:
+        note.content = ''
 
-        if note.type in ("list", "csv"):
-            note.show_edit = False
+    if note.data is None:
+        note.data = ''
+    # process icon
+    note.icon = NOTE_ICON_DICT.get(note.type, "fa-file-text-o")
+    note.id   = str(note.id)
 
-        if note.visited_cnt is None:
-            note.visited_cnt = 0
+    if note.type in ("list", "csv"):
+        note.show_edit = False
 
-        if note.orderby is None:
-            note.orderby = "name"
+    if note.visited_cnt is None:
+        note.visited_cnt = 0
 
-        if note.category is None:
-            note.category = "000"
+    if note.orderby is None:
+        note.orderby = "name"
+
+    if note.category is None:
+        note.category = "000"
+
+    if note.ctime != None:
+        note.create_date = note.ctime.split(" ")[0]
+
+    if note.mtime != None:
+        note.update_date = note.mtime.split(" ")[0]
             
     return note
 
@@ -258,6 +272,7 @@ def get_by_id(id, include_full = True):
     if note and not include_full:
         del note.content
         del note.data
+
     if note_index:
         note.name = note_index.name
         note.mtime = note_index.mtime
@@ -267,8 +282,8 @@ def get_by_id(id, include_full = True):
         note.parent_id = note_index.parent_id
         note.visited_cnt = note_index.visited_cnt
         note.hot_index = note_index.hot_index
-    if note:
-        build_note_info(note)
+    
+    build_note_info(note)
     return note
 
 def get_by_id_creator(id, creator, db=None):
@@ -305,6 +320,9 @@ def create_note_base(note_dict, date_str):
                 if old is None:
                     note_dict["id"] = note_id
                     put_note_to_db(note_id, note_dict)
+
+                    # 创建日志
+                    add_create_log(note_dict)
                     return note_id
                 else:
                     timestamp += 1
@@ -369,6 +387,13 @@ def delete_old_edit_log(creator, note_id):
     for key, value in old_logs:
         dbutil.delete(key)
 
+def add_create_log(note):
+    creator = note.creator
+    note_id = note.id
+    key = "note_create_log:%s:%s" % (creator, dbutil.timeseq())
+    create_log = Storage(id = note_id)
+    dbutil.put(key, create_log)
+
 def add_edit_log(note):
     creator = note.creator
     note_id = note.id
@@ -422,6 +447,13 @@ def update_note_rank(note):
         # dbutil.zadd("note_recent:public", mtime, note_id)
         return
 
+def remove_virtual_fields(note):
+    del_dict_key(note, "path")
+    del_dict_key(note, "url")
+    del_dict_key(note, "icon")
+    del_dict_key(note, "show_edit")
+    del_dict_key(note, "create_date")
+
 def put_note_to_db(note_id, note):
     priority = note.priority
     mtime    = note.mtime
@@ -429,11 +461,9 @@ def put_note_to_db(note_id, note):
     atime    = note.atime
 
     # 删除不需要持久化的数据
-    del_dict_key(note, "path")
-    del_dict_key(note, "url")
-    del_dict_key(note, "icon")
-    del_dict_key(note, "show_edit")
+    remove_virtual_fields(note)
 
+    # 保存到DB
     dbutil.put("note_full:%s" % note_id, note)
 
     # 更新索引
@@ -455,12 +485,12 @@ def del_dict_key(dict, key):
 def convert_to_index(note):
     note_index = Storage(**note)
 
-    del_dict_key(note_index, 'path')
-    del_dict_key(note_index, 'url')
-    del_dict_key(note_index, 'icon')
+    # 删除虚拟字段
+    remove_virtual_fields(note_index)
+
+    # 删除内容字段
     del_dict_key(note_index, 'data')
     del_dict_key(note_index, 'content')
-    del_dict_key(note_index, 'show_edit')
 
     note_index.parent_id = str(note_index.parent_id)
     
@@ -663,8 +693,9 @@ def fill_parent_name(files):
         else:
             item.parent_name = None
 
+
 @xutils.timeit(name = "NoteDao.ListGroup:leveldb", logfile = True)
-def list_group(creator = None, orderby = "mtime_desc", skip_archived = False):
+def list_group(creator = None, orderby = "mtime_desc", skip_archived = False, limit = None):
     # TODO 添加索引优化
     def list_group_func(key, value):
         if skip_archived and value.archived:
@@ -673,6 +704,8 @@ def list_group(creator = None, orderby = "mtime_desc", skip_archived = False):
 
     notes = dbutil.prefix_list("notebook:%s" % creator, list_group_func)
     sort_notes(notes, orderby)
+    if limit is not None:
+        return notes[:limit]
     return notes
 
 @xutils.timeit(name = "NoteDao.ListRootGroup:leveldb", logfile = True)
@@ -734,24 +767,32 @@ def list_recent_created(creator = None, offset = 0, limit = 10, skip_archived = 
     fill_parent_name(result)
     return result
 
-def list_note_by_log(log_prefix, creator, offset = 0, limit = -1):
+def list_note_by_log(log_prefix, creator, offset = 0, limit = -1, skip_deleted = False):
     """通过日志来查询笔记列表
     @param {string} log_prefix 日志表前缀
     @param {string} creator 用户名称
     @param {int} offset 开始下标（包含）
     @param {int} limit 返回数量
     """
-    log_list  = dbutil.prefix_list("%s:%s" % (log_prefix, creator), offset = offset, limit = limit, reverse = True)
-    id_list   = log_list_to_id_list(log_list)
-    note_dict = batch_query(id_list)
-    files     = []
+    result = []
 
-    for id in id_list:
-        note = note_dict.get(id)
-        if note:
-            files.append(note)
-    fill_parent_name(files)
-    return files
+    def list_func(key, value):
+        if limit > 0 and len(result) >= limit:
+            return False
+
+        note_id = get_id_from_log(value)
+        note = get_by_id(note_id)
+        if note != None:
+            if skip_deleted and note.is_deleted:
+                return False
+            result.append(note)
+            
+        return True
+
+    log_list  = dbutil.prefix_list("%s:%s" % (log_prefix, creator), list_func, 
+        offset = offset, limit = limit, reverse = True)
+
+    return result
 
 @xutils.timeit(name = "NoteDao.ListRecentViewed", logfile = True, logargs = True)
 def list_recent_viewed(creator = None, offset = 0, limit = 10):
@@ -764,12 +805,12 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
     return list_note_by_log("note_visit_log", creator, offset, limit)
 
 @xutils.timeit(name = "NoteDao.ListRecentEdit:leveldb", logfile = True, logargs = True)
-def list_recent_edit(creator = None, offset = 0, limit = None):
+def list_recent_edit(creator = None, offset = 0, limit = None, skip_deleted = False):
     """通过KV存储实现"""
     if limit is None:
         limit = xconfig.PAGE_SIZE
     
-    return list_note_by_log("note_edit_log", creator, offset, limit)
+    return list_note_by_log("note_edit_log", creator, offset, limit, skip_deleted = skip_deleted)
 
 def list_recent_events(creator = None, offset = 0, limit = None):
     create_events = list_recent_created(creator, offset, limit)
@@ -800,7 +841,7 @@ def list_most_visited(creator, offset, limit):
     logs.sort(key = lambda x: x.visited_cnt, reverse = True)
     return logs[offset:offset+limit]
 
-def list_hot(creator, offset, limit):
+def list_hot(creator, offset = 0, limit = 100):
     if limit < 0:
         limit = MAX_VIEW_LOG
     logs = list_note_by_log("note_visit_log", creator)
@@ -974,11 +1015,11 @@ def count_by_type(creator, type):
     filter_func = get_filter_func(type, default_count_func)
     return dbutil.prefix_count("note_tiny:%s" % creator, filter_func)
 
-def list_sticky(creator, offset = 0, limit = 1000):
+def list_sticky(creator, offset = 0, limit = 1000, orderby = None):
     def list_func(key, value):
         return value.priority > 0 and value.creator == creator and value.is_deleted == 0
     notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
-    sort_notes(notes)
+    sort_notes(notes, orderby = orderby)
     return notes
 
 def count_sticky(creator):
@@ -1052,7 +1093,7 @@ def list_tag(user):
 
 def list_by_func(creator, list_func, offset, limit):
     notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
-    fix_notes_info(notes)
+    build_note_list_info(notes)
     return notes
 
 def list_comments(note_id):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/01/01 22:24:07
+# @modified 2021/01/02 19:10:52
 from io import StringIO
 import xconfig
 import codecs
@@ -221,7 +221,7 @@ INNER_TOOLS = [
     note_plugin("数据统计", "/note/stat", "fa-bar-chart"),
     note_plugin("上传管理", "/fs_upload", "fa-upload"),
     note_plugin("回收站", "/note/removed", "fa-trash"),
-    note_plugin("笔记目录", "/note/group", "fa-th-large"),
+    note_plugin("笔记本", "/note/group", "fa-th-large"),
     note_plugin("任务列表", "/message?tag=task", "fa-calendar-check-o"),
     note_plugin("备忘记事", "/message?tag=log", "fa-sticky-note"),
     note_plugin("相册", "/note/gallery", "fa-photo"),

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2020/12/27 17:47:34
+# @modified 2021/01/02 20:06:02
 import xutils
 
 # cannot perform relative import
@@ -318,4 +318,8 @@ class TestMain(BaseTestCase):
     def test_note_api_group(self):
         json_data = json_request("/note/api/group")
         self.assertEqual("success", json_data["code"])
+
+    def test_workspace(self):
+        self.check_OK("/note/workspace")
+        
 

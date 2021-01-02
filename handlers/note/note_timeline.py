@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/01/01 22:14:02
+# @modified 2021/01/02 19:32:22
 
 """时光轴视图"""
 import re
@@ -33,7 +33,7 @@ def get_parent_link(user_name, type, priority = 0):
     if priority < 0:
         return PathLink(T("Archived_Project"), "/note/archived")
     if type == "default" or type == "root_notes":
-        return PathLink(u"根目录", xuserconfig.get_project_path(user_name))
+        return PathLink(u"根目录", "/note/group")
     if type == "public":
         return None
     return None
@@ -212,7 +212,7 @@ def list_sticky_func(context):
     limit     = context['limit']
     user_name = context['user_name']
     rows      = NOTE_DAO.list_sticky(user_name, offset, limit)
-    return build_date_result(rows, 'ctime', group_title = True)
+    return build_date_result(rows, 'ctime', group_title = False)
 
 def list_removed_func(context):
     offset    = context['offset']
@@ -363,8 +363,7 @@ class BaseTimelineHandler:
         xmanager.add_visit_log(user_name, "/note/%s" % self.note_type)
         
         if file != None:
-            # title = file.name
-            title = "笔记目录"
+            title = T("笔记列表")
             search_title = file.name
             title_link = PathLink(file.name, file.url)
             note_priority = file.priority

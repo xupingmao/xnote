@@ -2,7 +2,7 @@
  * 卡片主题的样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2021/01/01 12:11:33
+ * @modified 2021/01/02 15:54:36
  */
 
 body {
@@ -77,6 +77,7 @@ body {
     background-color: #fff;
     font-weight: bold;
     border-left: none;
+    line-height: 32px;
 }
 
 .card, .plugin-head,.grid-card, .box {

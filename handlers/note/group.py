@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2020/12/27 17:27:33
+# @modified 2021/01/02 19:21:48
 import math
 import time
 import web
@@ -201,12 +201,11 @@ class GroupListHandler:
             fixed_books.append(NoteLink("Archived_Project", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
 
         files = fixed_books + normal_groups
-        # files = list(filter(lambda x: x.category == category, files))
-
-        root = NOTE_DAO.get_root()
-        return xtemplate.render("note/page/project_list.html", 
+        root  = NOTE_DAO.get_root()
+        
+        return xtemplate.render("note/page/group_list.html", 
             file = root, 
-            title = u"笔记目录",
+            title = u"笔记本",
             pathlist = [root],
             show_path_list = True,
             show_size = True,
