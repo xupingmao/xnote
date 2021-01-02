@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2020/12/27 18:49:58
+# @modified 2021/01/02 21:59:42
 
 """笔记编辑相关处理"""
 import os
@@ -478,6 +478,19 @@ class AppendAjaxHandler:
 
         fire_update_event(note)
         return dict(code = "success")
+
+class TouchHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id")
+        user_name = xauth.current_name()
+        # TODO 创建一个watch日志记录即可
+        note = NOTE_DAO.get_by_id_creator(id, user_name)
+        if note != None:
+            update_and_notify(note, dict())
+
+        raise web.found("/note/%s" % id)
         
 
 xurls = (
@@ -496,6 +509,7 @@ xurls = (
 
     r"/note/unstick"     , UnstickHandler,
     r"/note/unarchive"   , UnarchiveHandler,
+    r"/note/touch"       , TouchHandler,
     
     # 分享
     r"/note/share",        PublicShareHandler,
@@ -504,7 +518,8 @@ xurls = (
     r"/note/link_share",   LinkShareHandler,
 
     r"/file/save"        , SaveAjaxHandler,
-    r"/file/autosave"    , SaveAjaxHandler
+    r"/file/autosave"    , SaveAjaxHandler,
+
 )
 
 

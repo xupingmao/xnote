@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/01/01 19:49:30
+# @modified 2021/01/02 21:45:57
 import os
 import json
 import web
@@ -170,7 +170,10 @@ def get_mobile_template(name):
     _mobile_name_dict[name] = name
     return name
 
-def is_mobile_device(user_agent):
+def is_mobile_device(user_agent = None):
+    if user_agent is None:
+        user_agent = get_user_agent()
+
     if user_agent is None:
         return False
     user_agent_lower = user_agent.lower()
@@ -180,8 +183,7 @@ def is_mobile_device(user_agent):
     return False
 
 def render_by_ua(name, **kw):
-    user_agent = get_user_agent()
-    if is_mobile_device(user_agent):
+    if is_mobile_device():
         # 部分移动设备的兼容性不行，无法使用codeMirror组件，要用简化版页面
         mobile_name = get_mobile_template(name)
         return render(mobile_name, **kw)

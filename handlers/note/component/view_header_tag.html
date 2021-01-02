@@ -1,5 +1,12 @@
 {% init file = None %}
 
+<!-- 
+{% if file != None %}
+    <a class="btn btn-default" href="/note/touch?id={{file.id}}">在看</a>
+{% end %}
+ -->
+
+<!-- 这个功能使用频率太低了 -->
 {% if file != None %}
 
     {% if file.priority == 1 %}

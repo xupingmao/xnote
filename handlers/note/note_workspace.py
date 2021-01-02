@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2021/01/02 20:22:10
+# @modified 2021/01/02 21:46:36
 
 import xauth
 import xtemplate
@@ -61,15 +61,19 @@ class NoteWorkspaceHandler:
 
     @xauth.login_required()
     def GET(self):
+        recent_update_limit = 50
+        if xtemplate.is_mobile_device():
+            recent_update_limit = 10
+
         creator = xauth.current_name()
         memos   = [MSG_DAO.get_message_tag(creator, "task"), MSG_DAO.get_message_tag(creator, "log")]
         sticky_notes = NOTE_DAO.list_sticky(creator, limit = 5, orderby = "mtime_desc")
         hot_notes    = NOTE_DAO.list_hot(creator, limit = 5)
-        note_groups  = NOTE_DAO.list_group(creator, orderby = "name")
-        recent_update_notes = NOTE_DAO.list_recent_edit(creator, limit = 10, skip_deleted = True)
+        note_groups  = NOTE_DAO.list_group(creator, orderby = "name", limit = 5)
+        recent_update_notes = NOTE_DAO.list_recent_edit(creator, limit = recent_update_limit, skip_deleted = True)
         note_types = list_note_types(creator)
 
-        return xtemplate.render("note/page/note_workspace.html",
+        return xtemplate.render_by_ua("note/page/note_workspace.html",
             html_title = T("笔记工作台"),
             hot_notes = hot_notes,
             memos = memos,
