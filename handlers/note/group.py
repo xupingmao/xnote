@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/01/02 19:21:48
+# @modified 2021/01/02 23:55:08
 import math
 import time
 import web
@@ -174,8 +174,9 @@ class GroupListHandler:
         category  = xutils.get_argument("category")
         user_name = xauth.current_name()
         notes     = NOTE_DAO.list_group(user_name, orderby = "name")
+        sticky_groups   = list(filter(lambda x:x.priority > 0, notes))
         archived_groups = list(filter(lambda x: x.archived == True, notes))
-        normal_groups   = list(filter(lambda x: x not in archived_groups, notes))
+        normal_groups   = list(filter(lambda x: x not in archived_groups and x not in sticky_groups, notes))
 
         tools        = []
         fixed_books  = []
@@ -192,17 +193,19 @@ class GroupListHandler:
         if len(files) > 0:
             fixed_books.append(NoteLink("默认分组", "/note/default", size=len(files), icon = "fa-th-large"))
 
-
-        # 默认分组处理
-        # fixed_books.append(NoteLink(u"时间视图", "/note/date", icon = "fa-calendar"))
-        # fixed_books.append(NoteLink(u"分类视图", "/note/index", icon = "fa-th-large"))
-        # fixed_books.append(NoteLink(u"日志", "/note/log", icon = "fa-folder", category = "400"))
         if len(archived_groups) > 0:
             fixed_books.append(NoteLink("Archived_Project", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
 
         files = fixed_books + normal_groups
         root  = NOTE_DAO.get_root()
-        
+
+        group_cards = [
+            ("", fixed_books),
+            ("置顶", sticky_groups),
+            ("普通", normal_groups),
+            ("归档", archived_groups),
+        ]
+
         return xtemplate.render("note/page/group_list.html", 
             file = root, 
             title = u"笔记本",
@@ -211,6 +214,7 @@ class GroupListHandler:
             show_size = True,
             parent_id = 0,
             files = files,
+            group_cards = group_cards,
             search_type = "note")
 
 def load_note_index(user_name):
@@ -451,7 +455,7 @@ class ArchivedHandler:
     def GET(self):
         user  = xauth.current_name()
         files = NOTE_DAO.list_archived(user)
-        return xtemplate.render("note/page/project_list_archived.html",
+        return xtemplate.render("note/page/group_list_archived.html",
             title      = "Archived_Project",
             parent_id  = -1,
             show_size  = True,

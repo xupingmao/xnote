@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2021/01/02 21:46:36
+# @modified 2021/01/02 23:35:01
 
 import xauth
 import xtemplate
@@ -69,7 +69,7 @@ class NoteWorkspaceHandler:
         memos   = [MSG_DAO.get_message_tag(creator, "task"), MSG_DAO.get_message_tag(creator, "log")]
         sticky_notes = NOTE_DAO.list_sticky(creator, limit = 5, orderby = "mtime_desc")
         hot_notes    = NOTE_DAO.list_hot(creator, limit = 5)
-        note_groups  = NOTE_DAO.list_group(creator, orderby = "name", limit = 5)
+        note_groups  = NOTE_DAO.list_group(creator, orderby = "mtime_desc", limit = 5)
         recent_update_notes = NOTE_DAO.list_recent_edit(creator, limit = recent_update_limit, skip_deleted = True)
         note_types = list_note_types(creator)
 
