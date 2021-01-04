@@ -10,20 +10,9 @@
     <!-- 空的 -->
 {% elif file.id == "0" %}
     <!-- 跟节点 -->
-    <a class="btn" href="javascript:createGroup();">新建项目</a>
+    <a class="btn" href="javascript:createGroup();">新建笔记本</a>
 {% else %}
-    <div class="dropdown">
-        <span class="dropdown-btn link btn">新建▾</span>
-        <div class="dropdown-content">
-            <!-- <a class="dropdown-option" href="javascript:createGroup();">分组</a> -->
-            <a class="dropdown-option" href="javascript:createDocument();">文档</a>
-            <a class="dropdown-option" href="javascript:createGallery();">相册</a>
-            <a class="dropdown-option" href="javascript:createList();">清单</a>
-            <a class="dropdown-option" href="javascript:createTable();">表格</a>
-            <a class="dropdown-option" href="javascript:createLog();">日志</a>
-            <!-- <a class="dropdown-option" href="javascript:uploadFile();">上传文件</a> -->
-        </div>
-    </div>
+    <a class="btn" href="/note/create?parent_id={{parent_id}}">新建笔记</a>
 {% end %}
 
 {% include note/script/create_script.html %}
