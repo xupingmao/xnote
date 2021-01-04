@@ -1,5 +1,5 @@
 <!-- 笔记类型 -->
-{% init note_types = [] %}
+{% init note_types = xutils.call("page.list_note_types") %}
 
 <div class="card">
     <div class="card-title">

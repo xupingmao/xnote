@@ -37,8 +37,7 @@
     <div class="float-right">
         {% if type not in ("search", "public") %}
           <!-- 原来使用 create_option.html 弹窗创建并没有预期的方便，而且不好做扩展 -->
-          <a class="btn" href="/note/create">新建</a>
-          <a class="btn btn-default" href="javascript:history.back();">返回</a>
+          {% include note/option/timeline_create_option.html %}
         {% end %}
 
         {% if type == "default" %}

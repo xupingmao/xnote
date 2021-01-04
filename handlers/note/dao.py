@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/01/02 20:20:47
+# @modified 2021/01/05 00:31:49
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -718,8 +718,8 @@ def list_root_group(creator = None, orderby = "name"):
     sort_notes(notes, orderby)
     return notes
 
-def list_default_notes(creator, offset = 0, limit = -1):
-    return list_by_parent(creator, 0, offset, limit, skip_group = True)
+def list_default_notes(creator, offset = 0, limit = -1, orderby = "mtime_desc"):
+    return list_by_parent(creator, 0, offset, limit, skip_group = True, orderby = orderby)
 
 def count_group(creator):
     return dbutil.count_table("notebook:%s" % creator)

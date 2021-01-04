@@ -1,0 +1,29 @@
+{% init file = Storage(id = "0") %}
+{% init show_create = True %}
+{% init parent_id = 0 %}
+
+{% if type in CREATE_BTN_TEXT_DICT.keys() %}
+    <!-- 分类节点 -->
+    <a class="btn" href="/note/add?type={{type}}">{{CREATE_BTN_TEXT_DICT[type]}}</a>
+    <a class="btn btn-default" href="javascript:history.back();">返回</a>
+{% elif type == "removed" %}
+    <!-- 空的 -->
+{% elif file.id == "0" %}
+    <!-- 跟节点 -->
+    <a class="btn" href="javascript:createGroup();">新建项目</a>
+{% else %}
+    <div class="dropdown">
+        <span class="dropdown-btn link btn">新建▾</span>
+        <div class="dropdown-content">
+            <!-- <a class="dropdown-option" href="javascript:createGroup();">分组</a> -->
+            <a class="dropdown-option" href="javascript:createDocument();">文档</a>
+            <a class="dropdown-option" href="javascript:createGallery();">相册</a>
+            <a class="dropdown-option" href="javascript:createList();">清单</a>
+            <a class="dropdown-option" href="javascript:createTable();">表格</a>
+            <a class="dropdown-option" href="javascript:createLog();">日志</a>
+            <!-- <a class="dropdown-option" href="javascript:uploadFile();">上传文件</a> -->
+        </div>
+    </div>
+{% end %}
+
+{% include note/script/create_script.html %}

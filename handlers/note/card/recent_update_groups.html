@@ -1,4 +1,4 @@
-{% init recent_update_groups = [] %}
+{% init recent_update_groups = xutils.call("page.list_recent_groups", 10) %}
 
 <div class="card">
     <div class="card-title">

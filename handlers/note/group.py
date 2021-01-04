@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/01/02 23:55:08
+# @modified 2021/01/05 00:33:11
 import math
 import time
 import web
@@ -135,20 +135,10 @@ class DefaultListHandler:
         amount    = NOTE_DAO.count_by_parent(user_name, 0);
         parent    = NOTE_DAO.get_root()
 
-        return xtemplate.render(VIEW_TPL,
-            file_type  = "group",
-            back_url   = xuserconfig.get_home_path(user_name),
-            pathlist   = [parent, Storage(name="默认分类", type="group", url="/note/default")],
-            files      = files,
-            file       = Storage(id = "default", name="默认分类", type="group", parent_id = 0),
+        return xtemplate.render("note/page/note_default.html",
+            notes      = files,
             page       = page,
             page_max   = math.ceil(amount / pagesize),
-            groups     = NOTE_DAO.list_group(),
-            show_mdate = True,
-            show_pagination = True,
-            show_parent_link = False,
-            show_create_option = False,
-            CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT,
             page_url   = "/note/default?page=")
 
 def get_category_list():
@@ -191,10 +181,10 @@ class GroupListHandler:
         # 未分类信息
         files = NOTE_DAO.list_by_parent(user_name, 0, 0, 1000, skip_group = True)
         if len(files) > 0:
-            fixed_books.append(NoteLink("默认分组", "/note/default", size=len(files), icon = "fa-th-large"))
+            fixed_books.append(NoteLink("默认笔记本", "/note/default", size=len(files), icon = "fa-th-large"))
 
         if len(archived_groups) > 0:
-            fixed_books.append(NoteLink("Archived_Project", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
+            fixed_books.append(NoteLink("归档笔记本", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
 
         files = fixed_books + normal_groups
         root  = NOTE_DAO.get_root()
