@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/12/19 19:34:13
+# @modified 2021/01/08 01:10:41
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -60,15 +60,6 @@ wday_map = {
     "6": "周六",
     "7": "周日"
 }
-
-def async_func():
-    """同步调用转化成异步调用的装饰器"""
-    def deco(func):
-        def handle(*args, **kw):
-            import xmanager
-            xmanager.put_task(func, *args, **kw)
-        return handle
-    return deco
 
 def print_exc():
     """打印系统异常堆栈"""
@@ -522,48 +513,6 @@ def get_argument(key, default_value=None, type = None, strip=False):
     if strip and isinstance(value, str):
         value = value.strip()
     return value
-
-
-#################################################################
-##   各种装饰器
-#################################################################
-
-def timeit(repeat=1, logfile=False, logargs=False, name="", logret=False):
-    """简单的计时装饰器，可以指定执行次数"""
-    def deco(func):
-        def handle(*args, **kw):
-            t1 = time.time()
-            for i in range(repeat):
-                ret = func(*args, **kw)
-            t2 = time.time()
-            if logfile:
-                message = ""
-
-                if logargs:
-                    message = str(args)
-                if logret:
-                    message = message + "|" + str(ret)
-                trace(name, message, int((t2-t1)*1000))
-            else:
-                print(name, "cost time: ", int((t2-t1)*1000), "ms")
-            return ret
-        return handle
-    return deco
-
-def profile():
-    """Profile装饰器,打印信息到标准输出,不支持递归函数"""
-    def deco(func):
-        def handle(*args, **kw):
-            if xconfig.OPEN_PROFILE:
-                vars = dict()
-                vars["_f"] = func
-                vars["_args"] = args
-                vars["_kw"] = kw
-                pf.runctx("r=_f(*_args, **_kw)", globals(), vars, sort="time")
-                return vars["r"]
-            return func(*args, **kw)
-        return handle
-    return deco
 
 #################################################################
 ##   规则引擎组件

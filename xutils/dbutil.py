@@ -53,7 +53,7 @@ TABLES = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2020/12/19 19:43:13
+# @modified 2021/01/08 01:17:19
 ###########################################################
 
 class DBException(Exception):
@@ -168,7 +168,7 @@ def init():
         import leveldbpy, xconfig
         _leveldb = LevelDBPy(xconfig.DB_DIR)
     
-    xutils.log("init leveldb done, leveldb =", _leveldb)
+    xutils.log("init leveldb done, leveldb = %s" % _leveldb)
 
 class Table:
 

@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2019/03/15 00:45:27
-"""缓存的实现，API列表如下
+# @modified 2021/01/08 01:19:43
+"""基本废弃了，请使用dbutil
+缓存的实现，API列表如下
 
 * cache(key = None, prefix = None, expire = 600) 缓存装饰器，用于加速函数调用
 * cache_put(key, value, expire = -1) 写入缓存

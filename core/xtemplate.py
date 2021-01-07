@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/01/02 21:45:57
+# @modified 2021/01/08 01:07:07
 import os
 import json
 import web
@@ -210,7 +210,7 @@ def render_search(kw):
     kw["search_placeholder"] = search_placeholder
     
 
-@xutils.timeit(name = "Template.Render", logfile = True)
+@xutils.timeit_deco(name = "Template.Render", logfile = True)
 def render(template_name, **kw):
     nkw = {}
     # 预处理

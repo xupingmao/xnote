@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/01/01 19:49:08
+# @modified 2021/01/07 01:08:21
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -165,6 +165,8 @@ class ListAjaxHandler:
         elif tag == "link":
             # 链接
             chatlist, amount = MSG_DAO.list_link(user_name, offset, pagesize)
+        elif tag == "book":
+            chatlist, amount = MSG_DAO.list_book(user_name, offset, pagesize)
         else:
             if tag == "task" or tag == "key":
                 pagesize = 1000
@@ -432,6 +434,7 @@ class MessageHandler:
             html_title         = T("任务和备忘"),
             default_content    = default_content,
             message_stat       = stat,
+            tag                = tag,
             key                = key,
             from_              = from_)
 

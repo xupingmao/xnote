@@ -1,7 +1,7 @@
+{% init title = "任务和备忘" %}
+
 <!-- header.html -->
-<div class="card">
-    
-    {% init title = "任务和备忘" %}
+<div class="card">    
     <div class="card-title btn-line-height">
         <span>{{title}}</span>
         <div class="float-right">
@@ -12,21 +12,22 @@
 
 <!-- 桌面版菜单 -->
 <div class="col-md-12 message-status card desktop-only">
-    <a class="tab tab-link x-tab" href="/message?tag=task">
+    <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">
         任务(<span class="task-count">{{message_stat.task_count}}</span>)
     </a>
-    <a class="tab tab-link x-tab" href="/message?tag=done">
+    <a class="tab tab-link x-tab" href="/message?tag=done" data-tag="done">
         完成(<span class="done-count">{{message_stat.done_count}}</span>)
     </a>
-    <a class="tab tab-link x-tab mobile-hidden" href="/message?tag=log">
+    <a class="tab tab-link x-tab mobile-hidden" href="/message?tag=log" data-tag="log">
         记事(<span class="log-count">{{message_stat.log_count}}</span>)
     </a>
-    <a class="tab tab-link x-tab mobile-hidden" href="/message?tag=key">
+    <a class="tab tab-link x-tab mobile-hidden" href="/message?tag=key" data-tag="key">
         话题(<span class="key-count">{{message_stat.key_count}}</span>)
     </a>
-    <a class="tab tab-link x-tab" href="/message?tag=file">文件</a>
-    <a class="tab tab-link x-tab" href="/message?tag=link">链接</a>
-    <a class="tab tab-link x-tab" href="/message?tag=all">全部</a>
+    <a class="tab tab-link x-tab" href="/message?tag=file" data-tag="file">文件</a>
+    <a class="tab tab-link x-tab" href="/message?tag=link" data-tag="link">链接</a>
+    <a class="tab tab-link x-tab" href="/message?tag=book" data-tag="book">书籍</a>
+    <a class="tab tab-link x-tab" href="/message?tag=all"  data-tag="all">全部</a>
     <a class="tab tab-link x-tab" href="/message/calendar">日历</a>
 
     <!-- <button class="float-right">新建</button> -->
@@ -34,12 +35,20 @@
 
 <!-- 移动端菜单 -->
 <div class="col-md-12 message-status card mobile-only parent-6">
-    <a class="tab tab-link x-tab" href="/message?tag=task">任务</a>
-    <a class="tab tab-link x-tab" href="/message?tag=done">完成</a>
-    <a class="tab tab-link x-tab" href="/message?tag=log">记事</a>
-    <a class="tab tab-link x-tab" href="/message?tag=file">文件</a>
-    <a class="tab tab-link x-tab" href="/message?tag=link">链接</a>
+    <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">任务</a>
+    <a class="tab tab-link x-tab" href="/message?tag=done" data-tag="done">完成</a>
+    <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">记事</a>
+    <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">话题</a>
+    <a class="tab tab-link x-tab" href="/message?tag=file" data-tag="file">文件</a>
+    <a class="tab tab-link x-tab" href="/message?tag=link" data-tag="link">链接</a>
 
     <a class="tab tab-link x-tab float-right" href="/message/calendar">日历</a>
     <!-- <button class="float-right">新建</button> -->
 </div>
+
+<script type="text/javascript">
+$(function() {
+    var tag = getUrlParam("tag");
+    $("[data-tag=" + tag + "]").addClass("tab-link-active");
+});
+</script>

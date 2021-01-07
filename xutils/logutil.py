@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2020/12/19 19:58:42
+# @modified 2021/01/08 01:27:44
 import logging
 import time
 import inspect
@@ -63,20 +63,22 @@ def init_logger():
 
     # logger.info("logger inited!")
 
-def get_log_path():
+def get_log_path(level = "INFO"):
     import xconfig
     date_time = time.strftime("%Y-%m")
     dirname = os.path.join(xconfig.LOG_DIR, date_time)
     fsutil.makedirs(dirname)
-    fname = time.strftime("xnote.%Y-%m-%d.log")
+    date_str = time.strftime("%Y-%m-%d")
+    fname = "xnote.%s.%s.log" % (date_str, level)
     return os.path.join(dirname, fname)
 
-def log(fmt, show_logger = False, fpath = None, *argv):
+def log(fmt, show_logger = False, print_std = True, fpath = None, *argv):
     fmt = u(fmt)
     if len(argv) > 0:
         message = fmt.format(*argv)
     else:
         message = fmt
+    
     if show_logger:
         f_back    = inspect.currentframe().f_back
         f_code    = f_back.f_code
@@ -86,14 +88,18 @@ def log(fmt, show_logger = False, fpath = None, *argv):
         message = "%s %s.%s:%s %s" % (format_time(), f_modname, f_name, f_lineno, message)
     else:
         message = "%s %s" % (format_time(), message)
-    print(message)
+
+    if print_std:
+        print(message)
+
     if fpath is None:
         fpath = get_log_path()
+
     log_async(fpath, message)
 
 def _write_log(level, metric, message, cost):
     import xauth
-    fpath = get_log_path()
+    fpath = get_log_path(level)
     user_name = xauth.current_name()
     if user_name is None:
         user_name = "-"
@@ -135,5 +141,47 @@ def log_init_deco(message):
                 raise e
         return handle
     return deco
+
+
+def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False):
+    """简单的计时装饰器，可以指定执行次数"""
+    def deco(func):
+        def handle(*args, **kw):
+            t1 = time.time()
+            for i in range(repeat):
+                ret = func(*args, **kw)
+            t2 = time.time()
+            if logfile:
+                message = ""
+
+                if logargs:
+                    message = str(args)
+                if logret:
+                    message = message + "|" + str(ret)
+                trace(name, message, int((t2-t1)*1000))
+            else:
+                print(name, "cost time: ", int((t2-t1)*1000), "ms")
+            return ret
+        return handle
+    return deco
+
+def profile_deco():
+    """Profile装饰器,打印信息到标准输出,不支持递归函数"""
+    def deco(func):
+        def handle(*args, **kw):
+            if xconfig.OPEN_PROFILE:
+                vars = dict()
+                vars["_f"] = func
+                vars["_args"] = args
+                vars["_kw"] = kw
+                pf.runctx("r=_f(*_args, **_kw)", globals(), vars, sort="time")
+                return vars["r"]
+            return func(*args, **kw)
+        return handle
+    return deco
+
+# 别名
+timeit  = timeit_deco
+profile = profile_deco
 
 
