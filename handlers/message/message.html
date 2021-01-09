@@ -48,12 +48,15 @@
                 <!-- <span class="tag-span" v-if="message.status==100">已完成</span> -->
             </div>
             <div class="chat-msg col-md-12">
+                <!-- 编辑状态 -->
                 <template v-if="message.editable">
                     <textarea class="input-box col-md-12" v-bind:rows="message.content.count('\n')+3" v-model="message.content"></textarea>
                     <input type="button" value="更新" v-on:click="updateMessage(message)">
                     <input type="button" value="删除" class="btn-danger hide" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" @click="deleteMessage($event)">
                     <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel">
                 </template>
+
+                <!-- 关键字 -->
                 <div v-else-if="message.tag == 'key'">
                     <div v-if="message.html" class="msg-item-content">
                         <div class="float-left" v-html="message.html"></div>
@@ -70,6 +73,7 @@
                     </div>
                 </div>
                 <div v-else>
+                    <!-- 正常状态 -->
                     <div v-if="message.link">
                         <a v-bind:href="message.link">{{! message.link }}</a>
                     </div>
@@ -82,6 +86,11 @@
                     <div class="msg-item-header">
                         <span class="chat-msg-time">{{! message.ctime }}</span>
                         <span v-bind:class="[message.tag_class]">{{! message.tag_text }}</span>
+                        <div class="float-right">
+                            {% if xconfig.DEV_MODE and _is_admin %}
+                                <span class="msg-item-ip">ip:{{! message.ip }}</span>
+                            {% end %}
+                        </div>
                     </div>
                     
                     <!-- 解析出的html -->
@@ -133,6 +142,8 @@
         <a class="tag-span" href="javascript:markMessage($id, '')">记录</a>
     </div>
 </div>
+
+{% include base/script/geo_location.html %}
 
 <script type="text/javascript">
     // 获取地址

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/10/07 15:17:36
+# @modified 2021/01/09 15:03:51
 import web
 import time
 import os
@@ -196,20 +196,23 @@ class ConfigHandler:
         type  = xutils.get_argument("type")
         xutils.info("UpdateConfig", "%s,%s,%s" % (type, key, value))
 
-        if key == "BASE_TEMPLATE":
-            xmanager.reload()
-        if key in ("FS_HIDE_FILES", "DEBUG_HTML_BOX", "RECORD_LOCATION"):
-            value = value.lower() in ("true", "yes", "on")
-        if key == "DEBUG":
-            setattr(xconfig, key, value == "True")
-            web.config.debug = xconfig.DEBUG
-        if key in ("RECENT_SEARCH_LIMIT", "RECENT_SIZE", "PAGE_SIZE", "TRASH_EXPIRE"):
-            value = int(value)
-
         if type == "int":
             value = int(value)
         if type == "bool":
             value = value.lower() in ("true", "yes", "on")
+
+        if key == "BASE_TEMPLATE":
+            xmanager.reload()
+        if key in ("FS_HIDE_FILES", "DEBUG_HTML_BOX", "RECORD_LOCATION"):
+            value = value.lower() in ("true", "yes", "on")
+
+        if key in ("DEV_MODE", "DEBUG"):
+            xconfig.DEBUG = value
+            xconfig.DEV_MODE = value
+            web.config.debug = value
+
+        if key in ("RECENT_SEARCH_LIMIT", "RECENT_SIZE", "PAGE_SIZE", "TRASH_EXPIRE"):
+            value = int(value)
 
         if key in USER_CONFIG_KEY_SET:
             set_user_config(key, value)

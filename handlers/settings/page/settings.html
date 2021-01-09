@@ -118,14 +118,6 @@
     </div>
 
     <div class="settings-row admin-visible">
-        <div class="settings-key">功能调试</div>
-        <div class="settings-value">
-            <input type="radio" name="DEBUG" default-value="{{xconfig.DEBUG}}" value="True">开启
-            <input type="radio" name="DEBUG" default-value="{{xconfig.DEBUG}}" value="False">关闭
-        </div>
-    </div>
-
-    <div class="settings-row admin-visible">
         <div class="settings-key">页面调试</div>
         <div class="settings-value">
             <input type="radio" name="DEBUG_HTML_BOX" default-value="{{xconfig.DEBUG_HTML_BOX}}" value="True">开启
@@ -134,10 +126,12 @@
     </div>
 
     <div class="settings-row admin-visible">
-        <div class="settings-key">实验室功能</div>
+        <div class="settings-key">开发者模式</div>
         <div class="settings-value">
-            <input type="radio" name="DEV_MODE" default-value="{{xconfig.DEV_MODE}}" value="True">开启
-            <input type="radio" name="DEV_MODE" default-value="{{xconfig.DEV_MODE}}" value="False">关闭
+            <input type="radio" data-type="bool" 
+                name="DEV_MODE" default-value="{{xconfig.DEV_MODE}}" value="True">开启
+            <input type="radio" data-type="bool" 
+                name="DEV_MODE" default-value="{{xconfig.DEV_MODE}}" value="False">关闭
         </div>
     </div>
 

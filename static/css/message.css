@@ -2,7 +2,7 @@
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2019/12/16 00:33:34
+ * @modified 2021/01/09 14:00:04
 */
 
 
@@ -27,6 +27,10 @@
     padding: 2px;
     background-color: #eee;
     border-radius: 2px;
+}
+
+.msg-item-ip {
+    color: #888;
 }
 
 .msg-left-op-link:hover, .msg-right-op-link:hover {

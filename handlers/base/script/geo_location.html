@@ -1,0 +1,30 @@
+<script type="text/javascript">
+if (navigator.geolocation && window.xuser != "") {
+    navigator.geolocation.getCurrentPosition(function (pos) {
+        console.log("current position:", pos);
+        if (pos && pos.coords) {
+            // JSON.stringify 无效
+            var latitude = pos.coords.latitude;
+            var longitude = pos.coords.longitude;
+            var accuracy = pos.coords.accuracy;
+
+            var coords = {
+                latitude: latitude, 
+                longitude:longitude, 
+                accuracy: accuracy,
+                heading: pos.coords.heading,
+                speed: pos.coords.speed,
+                altitude: pos.coords.altitude,
+                altitudeAccuracy: pos.coords.altitudeAccuracy
+            };
+
+            console.log("coords:", coords);
+
+            if (window.xnote) {
+                window.xnote.geoLocation = coords;
+            }
+        }
+    });
+}
+</script>
+

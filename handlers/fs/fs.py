@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2021/01/01 20:01:41
+# @modified 2021/01/09 15:22:12
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -305,16 +305,26 @@ class FileSystemHandler:
     def not_readable(self, path):
         return xtemplate.render("fs/page/fs_not_readable.html", path = path)
 
-    @xauth.login_required("admin")
-    def GET(self, path):
-        # 文件路径默认都进行urlencode
-        # 如果存储结构不采用urlencode，那么这里也必须unquote回去
+    def resolve_fpath(self, path):
+        # fpath参数使用b64编码
+        fpath = xutils.get_argument("fpath")
+        if fpath != None:
+            return xutils.urlsafe_b64decode(fpath)
+
         if not xconfig.USE_URLENCODE:
             path = xutils.unquote(path)
 
         if not os.path.exists(path):
             # /fs/ 文件名来源是文件系统提供的，尝试unquote不会出现问题
             path = xutils.unquote(path)
+
+        return path
+
+    @xauth.login_required("admin")
+    def GET(self, path = None):
+        # 文件路径默认都进行urlencode
+        # 如果存储结构不采用urlencode，那么这里也必须unquote回去
+        path = self.resolve_fpath(path)
         return self.handle_get(path)
         
 
@@ -630,6 +640,7 @@ xurls = (
     r"/fs_bookmark", BookmarkHandler,
 
     r"/fs/(.*)", FileSystemHandler,
+    r"/fs_download", FileSystemHandler,
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
     r"/(app/.*)", StaticFileHandler,
