@@ -13,10 +13,6 @@
 
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
-{% if from_ == "note" %}
-    {% include common/search_tab.html %}
-{% end %}
-
 <input class="default-content-input" type="hidden" value="{{default_content}}"/>
 <div id="app" class="col-md-12">
     {# include common/mod_notice.html #}
@@ -27,6 +23,7 @@
 
     {% include message/component/topic-dialog.html %}
 
+    <!-- 编辑器 -->
     <div class="message-input-box card" v-if="inputBoxVisible">
         <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" v-bind:placeholder="placeholder">{{default_content}}</textarea>
 
@@ -37,8 +34,9 @@
         <input type="button" name="" class="send-button btn" value="创建" @click="createMessage()">
     </div>
 
+    <!-- 内容列表 -->
     <div class="chat-box col-md-12">
-        <div class="message-row" v-if="messageList.length == 0">
+        <div class="card" v-if="messageList.length == 0">
             空空如也~
         </div>
 
@@ -171,7 +169,7 @@
 
     var currentTag = getUrlParam("tag");
     var searchKey  = getUrlParam("key");
-    var hiddenInputBoxTags = ["file", "link", "done", "notice", "all"];
+    var hiddenInputBoxTags = ["file", "link", "done", "notice", "book", "all"];
     var placeholder = "记录发生的事情、产生的想法";
     var defaultContent = $(".default-content-input").val();
 

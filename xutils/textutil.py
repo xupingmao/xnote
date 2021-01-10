@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2020/12/05 18:06:52
+# @modified 2021/01/10 18:24:40
 import re
 import random
 import json
@@ -542,14 +542,23 @@ def is_img_file(filename):
     return ext.lower() in xconfig.FS_IMG_EXT_LIST
 
 def mark_text(content):
+    import xconfig
+    from xutils.marked_text_parser import TextParser, set_img_file_ext
+    # 设置图片文集后缀
+    set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
+
+    parser = TextParser()
+    tokens = parser.parse(content)
+    return "".join(tokens)
+
+def mark_text_old(content):
     """简单的处理HTML"""
     # \xad (Soft hyphen), 用来处理断句的
     content = content.replace(u'\xad', '\n')
     lines = []
     # markdown的LINK样式
-    # pat = re.compile(r"\[(.*)\]\((.+)\)")
     for line in content.split("\n"):
-        tokens = line.split(" ")
+        tokens = line.split()
         for index, item in enumerate(tokens):
             if item == "":
                 continue
@@ -567,10 +576,6 @@ def mark_text(content):
             elif item.count("#") >=1:
                 tokens[index] = re.sub(r"#([^#]+)(#?)", 
                     "<a class=\"link\" href=\"/message?category=message&key=\\g<1>\">#\\g<1>\\g<2></a>", item)
-            # elif pat.match(item):
-            #     ret = pat.match(item)
-            #     name, link = ret.groups()
-            #     tokens[index] = '<a href="%s">%s</a>' % (link, name)
             else:
                 token = tokens[index]
                 token = token.replace("&", "&amp;")

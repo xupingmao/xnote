@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2021/01/09 15:22:12
+# @modified 2021/01/10 18:34:59
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -340,10 +340,9 @@ class StaticFileHandler(FileSystemHandler):
     """外置数据的静态文件支持"""
     def GET(self, path):
         path = xutils.unquote(path)
-        path = xutils.get_real_path(path)
-        path = u(path)
         if not self.is_path_allowed(path):
             xauth.check_login("admin")
+
         data_prefix = u(xconfig.DATA_DIR)
         if not path.startswith("static"):
             newpath = os.path.join(data_prefix, path)
@@ -353,7 +352,8 @@ class StaticFileHandler(FileSystemHandler):
             if not os.path.exists(newpath):
                 # len("static/") = 7
                 newpath = os.path.join(data_prefix, newpath[7:])
-        path = newpath
+
+        path = xutils.get_real_path(newpath)
         if not os.path.isfile(path):
             # 静态文件不允许访问文件夹
             web.ctx.status = "404 Not Found"

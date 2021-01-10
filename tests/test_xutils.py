@@ -193,6 +193,10 @@ class TestMain(unittest.TestCase):
         # html = xutils.mark_text(text)
         # self.assertEqual('Link&nbsp;<a href="/http">name</a>', html)
 
+    def test_marked_text_parser(self):
+        from xutils.marked_text_parser import runtest
+        runtest()
+
     def test_count_alpha(self):
         text = "abc def 123"
         self.assertEqual(6, textutil.count_alpha(text))

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/01/07 01:08:21
+# @modified 2021/01/10 18:25:59
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -24,7 +24,8 @@ TAG_TEXT_DICT = dict(
     cron = "定期",
     task = "任务",
     log  = "记事",
-    key  = "话题"
+    key  = "话题",
+    search = "话题",
 )
 
 def success():
@@ -431,7 +432,7 @@ class MessageHandler:
             show_tab           = show_tab,
             category           = "message",
             search_type        = "message",
-            html_title         = T("任务和备忘"),
+            html_title         = T("任务和记事"),
             default_content    = default_content,
             message_stat       = stat,
             tag                = tag,
