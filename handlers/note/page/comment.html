@@ -14,7 +14,9 @@
 
 <div class="card {{comment_class}}">
     {% if show_comment_title %}
-        <h3 style="background-color:#f9f9f9;padding:10px;">评论</h3>
+    <div class="card-title">
+        <span>评论</span>
+    </div>
     {% end %}
 
     {% if _has_login %}

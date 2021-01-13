@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2020/06/23 10:30:22
+@modified 2021/01/13 00:51:37
 -->
 
 {% block body %}
@@ -28,8 +28,10 @@
 
 <div class="col-md-12 result-list">
 
-    {% set title = "高级搜索" %}
-    {% include common/base_title.html %}
+    <div class="card">
+        {% set title = "高级搜索" %}
+        {% include common/base_title.html %}
+    </div>
     
     {% if len(tools) > 0 %}
         <div class="card">

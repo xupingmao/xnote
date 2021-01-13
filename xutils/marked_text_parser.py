@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/10 14:36:09
-# @modified 2021/01/10 18:25:12
+# @modified 2021/01/14 00:26:58
 
 """标记文本解析"""
 import os
@@ -134,8 +134,29 @@ class TextParser(TextParserBase):
 
     mark_book_single_flag = False
 
+    mark_number_flag = False
+
+    def read_till_target(self, end_char):
+        end = self.text.find(end_char, self.i+1)
+        if end < 0:
+            key = self.text[self.i:]
+            self.i = self.max_index
+        else:
+            key = self.text[self.i:end+1]
+            # 包含end_char
+            self.i = end
+        return key
+
     def mark_topic(self):
-        return self.mark_tag_single("#")
+        """话题转为搜索关键字的时候去掉前后的#符号"""
+        self.save_str_token()
+        key0 = self.read_till_target("#")
+        key = key0.lstrip("#")
+        key = key.rstrip("#")
+        quoted_key = quote(key)
+        value = escape_html(key0)
+        token = "<a class=\"link\" href=\"/message?category=message&key=%s\">%s</a>" % (quoted_key, value)
+        self.tokens.append(token)
 
     def mark_http(self):
         self.save_str_token()
@@ -161,14 +182,7 @@ class TextParser(TextParserBase):
 
     def mark_tag_single(self, end_char):
         self.save_str_token()
-        end = self.text.find(end_char, self.i+1)
-        if end < 0:
-            key = self.text[self.i:]
-            self.i = self.max_index
-        else:
-            key = self.text[self.i:end+1]
-            # 包含end_char
-            self.i = end
+        key = self.read_till_target(end_char)
         quoted_key = quote(key)
         value = escape_html(key)
         token = "<a class=\"link\" href=\"/message?category=message&key=%s\">%s</a>" % (quoted_key, value)
@@ -202,7 +216,7 @@ class TextParser(TextParserBase):
             elif c == '\n':
                 self.stash_char(c)
                 self.save_str_token()
-            elif c.isdigit():
+            elif self.mark_number_flag and c.isdigit():
                 self.mark_number()
             elif self.startswith("http://"):
                 self.mark_http()
