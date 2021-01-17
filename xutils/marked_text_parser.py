@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/10 14:36:09
-# @modified 2021/01/14 00:26:58
+# @modified 2021/01/17 10:52:42
 
 """标记文本解析"""
 import os
@@ -64,25 +64,35 @@ class TextParserBase(object):
             return self.text[self.i]
         return None
 
-    def next(self):
-        """往后读取一个字符，返回读取的字符，如果已经读完了，返回None"""
+    def read_next(self):
+        """往后读取一个字符，返回读取的字符，如果已经读完了，返回None，改变索引下标"""
         if self.i < self.max_index:
             self.i += 1
             return self.text[self.i]
         return None
 
-    def hasnext(self):
-        return self.i < self.length
+    def next(self):
+        """读取下一个字符，如果没有返回None，不改变当前索引下标"""
+        if self.i < self.max_index:
+            return self.text[self.i+1]
+        return None
 
     def startswith(self, target):
+        """当前字符是否以{target}开头"""
         length = len(target)
         return self.text[self.i:self.i+length] == target
 
     def find(self, target):
+        """找到目标字符串
+        @param {string} target 
+        @return 目标字符串的索引下标，如果找不到返回-1
+        """
         return self.text.find(target, self.i)
 
     def find_blank(self):
-        """找到一个空白字符"""
+        """找到一个空白字符
+        @return 第一个空白字符的索引，如果找不到返回-1
+        """
         i = self.i
         for i in range(self.i, self.length):
             c = self.text[i]
@@ -226,7 +236,9 @@ class TextParser(TextParserBase):
                 self.mark_file()
             else:
                 self.stash_char(c)
-            c = self.next()
+
+            # 再读取一个字符
+            c = self.read_next()
 
         self.save_str_token()
         return self.tokens

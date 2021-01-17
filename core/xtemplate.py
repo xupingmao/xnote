@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/01/10 17:07:39
+# @modified 2021/01/17 11:09:49
 import os
 import json
 import web
@@ -352,30 +352,33 @@ class BasePlugin:
     title = "PluginName"
     description = ""
     
+    # {权限配置}
     # 默认需要管理员权限访问
     require_admin = True
     # 要求的访问权限
     required_role = "admin"
 
+    # {分类的配置}
     # 插件分类 {note, dir, system, network}
+    show_category = True
     category = None
 
-    # 侧边栏自定义HTML
-    aside_html = u("")
+    # {侧边栏自定义HTML}
     show_aside = False
+    aside_html = u("")
 
-    # 搜索配置
+    # {搜索配置}
+    show_search        = True
     search_action      = "/search"
     search_placeholder = None
-    show_search        = True
 
-    # 插件路径
+    # {插件路径} 系统自动填充
     fpath = None
 
-    # 输入的配置
+    # {输入配置}
     placeholder = u("")
     btn_text    = T("处理")
-    editable    = True
+    editable    = True    
     # 输入框的行数
     rows        = 20  
     
@@ -408,8 +411,17 @@ class BasePlugin:
     def writeheader(self, html, **kw):
         self.html_header = render_text(html, **kw)
 
+    def writebody(self, html, **kw):
+        """写内容区"""
+        self.writetemplate(html, **kw)
+
+    def writefooter(self, html, **kw):
+        """TODO: 模板上还没有渲染"""
+        self.html_footer = render_text(html, **kw)
+
     def writehtml(self, html, **kw):
-        """这个方法现在和 `writetemplate` 等价"""
+        """@deprecated 请使用 #writebody
+        这个方法现在和 `writetemplate` 等价"""
         self.writetemplate(html, **kw)
 
     def writetemplate(self, template, **kw):

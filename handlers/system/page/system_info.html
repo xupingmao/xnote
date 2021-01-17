@@ -4,9 +4,16 @@
 
     {% include system/component/system-css.html %}
 
-    {% set title = "系统信息" %}
-    {% include common/base_title.html %}
+<div class="card">
+    <div class="card-title">
+        <span>系统信息</span>
+        <div class="float-right">
+            <button class="btn btn-default" onclick="javascript:history.back();">返回</button>
+        </div>
+    </div>
+</div>
 
+<div class="card">
     {% for item in items %}
         <div class="settings-row">
             <div class="settings-key">{{item.name}}</div>
@@ -15,5 +22,6 @@
             </div>
         </div>
     {% end %}
+</div>
 
 {% end %}

@@ -2,9 +2,6 @@
 
 {% block body %}
 
-{% include system/component/system-css.html %}
-
-<!-- TODO d3.js 展示内存和CPU日志 -->
 {% import web %}
 
 <div class="col-md-12 card">
@@ -16,70 +13,28 @@
     </h3>
 </div>
 
-<div class="card">
-    <div class="settings-row">
-        <div class="settings-key">系统信息</div>
-        <div class="settings-value">
-            <a href="/system/info">进入</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
+{% set data_list = [
+    Storage(name = "系统信息", url = "/system/info"),
+    Storage(name = "用户管理", url = "/system/user/list"),
+    Storage(name = "定时任务", url = "/system/crontab"),
+    Storage(name = "系统注册事件", url = "/system/event"),
+    Storage(name = "线程管理", url = "/system/thread_info"),
+    Storage(name = "系统日志", url = "/system/log"),
+    Storage(name = "Shell控制台", url = "/tools/shell"),
+    Storage(name = "LevelDB查询", url = "/system/db_scan"),
+] %}
 
-    <div class="settings-row">
-        <div class="settings-key">用户管理</div>
-        <div class="settings-value">
-            <a href="/system/user/list">进入</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
-    
-    <div class="settings-row">
-        <div class="settings-key">定时任务</div>
-        <div class="settings-value">
-            <a href="/system/crontab">进入</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
+<div class="card list">
 
-    <div class="settings-row">
-        <div class="settings-key">系统注册事件</div>
-        <div class="settings-value">
-            <a href="/system/event">进入</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
+    {% for item in data_list %}
+        <a class="list-link" href="{{item.url}}">
+            <span>{{item.name}}</span>
+            <div class="float-right">
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+    {% end %}
 
-    <div class="settings-row">
-        <div class="settings-key">线程管理</div>
-        <div class="settings-value">
-            <a href="/system/thread_info">进入</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
-
-    <div class="settings-row">
-        <div class="settings-key">系统日志</div>
-        <div class="settings-value">
-            <a href="/system/log">进入</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
-
-    <div class="settings-row">
-        <div class="settings-key">Shell控制台</div>
-        <div class="settings-value">
-            <a href="/tools/shell">进入</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
-
-    <div class="settings-row">
-        <div class="settings-key">LevelDB查询</div>
-        <div class="settings-value">
-            <a href="/system/db_scan">进入</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
 </div>
 
 {% end %}

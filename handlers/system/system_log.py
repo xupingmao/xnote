@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2020/09/06 12:33:47
+# @modified 2021/01/17 11:10:49
 import os
 import time
 import xtemplate
@@ -30,20 +30,23 @@ def readlines(fpath):
 def get_log_path(date):
     month   = "-".join(date.split("-")[:2])
     dirname = os.path.join(xconfig.LOG_DIR, month)
-    fname   = "xnote.%s.log" % date
+    fname   = "xnote.%s.INFO.log" % date
     return os.path.join(dirname, fname)
     
 class LogHandler(BasePlugin):
     
-    title = 'xnote日志'
+    title    = 'xnote日志'
+    description = "查看系统日志"
+    show_category = False
     category = 'system'
     editable = False
+    rows = 0
     
     def handle(self, content):
-        self.rows = 0
         self.render_options()
         type = xutils.get_argument("type", "rev_tail")
         date = xutils.get_argument("date")
+
         if not date:
             date = time.strftime("%Y-%m-%d")
         self.title = "xnote日志(%s)" % date

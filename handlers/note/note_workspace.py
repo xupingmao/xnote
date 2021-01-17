@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2021/01/05 00:17:22
+# @modified 2021/01/17 11:28:32
 
 import xauth
 import xtemplate
@@ -45,13 +45,9 @@ def list_note_types(user_name = None):
     if user_name is None:
         user_name = xauth.current_name()
 
-    # msg_stat  = MSG_DAO.get_message_stat(user_name)
     note_stat = NOTE_DAO.get_note_stat(user_name)
 
     return [
-        # NoteLink("任务", "/message?tag=task", "fa-calendar-check-o", size = msg_stat.task_count),
-        # NoteLink("备忘", "/message?tag=log", "fa-sticky-note", size = msg_stat.log_count),
-        # NoteLink("笔记本", "/note/group", "fa-folder", size = note_stat.group_count),
         NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
         NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
         NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
