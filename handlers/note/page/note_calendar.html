@@ -358,8 +358,8 @@ td.currentMonth:hover {
     }
     // 显示当月添加的资料
     // fetchEvents(_year, _month);
-
-    refreshMessageList();
+    var date = window.location.hash.substr(1);
+    refreshMessageList(date);
   }
 
   /**

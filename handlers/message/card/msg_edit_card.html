@@ -1,0 +1,39 @@
+
+<div id="msgEditBox" class="row">
+
+    <!-- 编辑器 -->
+    <div class="message-input-box card" v-if="inputBoxVisible">
+        <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" v-bind:placeholder="placeholder">{{default_content}}</textarea>
+
+        <input type="file" id="filePicker" class="hide" multiple/>
+
+        <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#话题" @click="">
+        <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
+        <input type="button" name="" class="send-button btn" value="创建" @click="createMessage()">
+    </div>
+
+</div>
+
+<script type="text/javascript">
+(function() {
+    var currentTag = getUrlParam("tag");
+    var searchKey  = getUrlParam("key");
+    var hiddenInputBoxTags = ["file", "link", "done", "notice", "book", "all"];
+    var placeholder = "记录发生的事情、产生的想法";
+    var defaultContent = $(".default-content-input").val();
+
+    if (currentTag == "task") {
+        placeholder = "记录要完成的任务";
+    }
+    if (currentTag == "cron") {
+        placeholder = "记录需要定期回顾的事情、长期规划";
+    }
+    if (currentTag == "idea") {
+        placeholder = "记录自己的奇思妙想";
+    }
+    if (currentTag == "key") {
+        placeholder = "保存话题（关键字）";
+    }
+
+})();
+</script>

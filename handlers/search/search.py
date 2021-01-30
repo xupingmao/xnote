@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/12/27 16:26:20
+# @modified 2021/01/30 17:07:35
 
 import re
 import os
@@ -237,8 +237,7 @@ class SearchHistoryHandler:
             recent = list_search_history(user_name),
             html_title = "Search",
             files = [],
-            search_action = "/note/timeline",
-            search_placeholder = T(u"搜索笔记"))
+            search_tpye = "note")
 
 rules_loaded = False
 def load_rules():

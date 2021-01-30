@@ -163,10 +163,10 @@ td.currentMonth:hover {
     <div id="uploadProgress" style="float: right;" ></div>
 </div>
 
-<div class="col-md-12 hide">
-  <h3>事件</h3>
-  <div id="events" class="col-md-12"></div>
+<div class="card">
+  {% include message/component/message_list.html %}
 </div>
+
 <div id="notes">
   <div id="file-history"></div>
 </div>
@@ -243,11 +243,11 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
  
     // 设置标题盒子中的html
     titleBox.className = 'calendar-title-box';
-    titleBox.innerHTML = '<a id="prevMonth" class="prev-month2" href="#">上个月</a>' +
+    titleBox.innerHTML = '<a id="prevMonth" class="prev-month2" href="javascript:void();">上个月</a>' +
     // "<span class='prev-month2 span-btn' id='prevMonth'>上个月</span>" +
       "<span class='calendar-title' id='calendarTitle'></span>" +
       // "<span id='nextMonth' class='next-month2 span-btn'>下个月</span>";
-      '<a id="nextMonth" class="next-month2" href="#">下个月</a>';
+      '<a id="nextMonth" class="next-month2" href="javascript:void();">下个月</a>';
     calendar.appendChild(titleBox);    // 添加到calendar div中
  
     // 设置表格区的html结构
@@ -333,7 +333,7 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
   function showCalendarData() {
     var _year = dateObj.getDate().getFullYear();
     var _month = dateObj.getDate().getMonth() + 1;
-    // var _dateStr = getDateStr(dateObj.getDate());
+    var _dateStr = getDateStr(dateObj.getDate());
  
     // 设置顶部标题栏中的 年、月信息
     var calendarTitle = document.getElementById("calendarTitle");
@@ -360,9 +360,19 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
         _tds[i].className = 'otherMonth';
       }
     }
+
+    var yearMonth = formatYearMonth(_year, _month);
+
+    window.location.hash = yearMonth;
+
     // 显示当月添加的资料
-    // fetchEvents(_year, _month);
+    refreshMessageList(yearMonth);
   }
+
+  function formatYearMonth(year, month) {
+    return year + "-" + formatNum(month);
+  }
+
 
   /**
    * 获取当月事件

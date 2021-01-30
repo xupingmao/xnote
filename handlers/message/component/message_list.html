@@ -10,8 +10,14 @@
     </div>
 </div>
 
-<div class="message-list row">
+<div class="message-list-card card">
+    <div class="card-title">
+        <span>随手记</span>
+    </div>
 
+    <div class="message-list">
+
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -44,8 +50,7 @@
         return message;
     }
 
-    function refreshMessageList() {
-        var date = window.location.hash.substr(1);
+    function refreshMessageList(date) {
         var params = {
             date: date
         };

@@ -21,8 +21,6 @@
         {% include message/header.html %}
     {% end %}
 
-    {% include message/component/topic-dialog.html %}
-
     <!-- 编辑器 -->
     <div class="message-input-box card" v-if="inputBoxVisible">
         <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" v-bind:placeholder="placeholder">{{default_content}}</textarea>
@@ -183,7 +181,7 @@
         placeholder = "记录自己的奇思妙想";
     }
     if (currentTag == "key") {
-        placeholder = "存储话题（关键字）";
+        placeholder = "保存话题（关键字）";
     }
 
     function newMessage(content, user, status) {
