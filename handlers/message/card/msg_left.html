@@ -1,0 +1,494 @@
+<!-- 话题选择器 -->
+{% include message/component/topic_dialog.html %}
+
+
+<!-- 编辑器 -->
+<div class="message-input-box card" v-if="inputBoxVisible">
+    <textarea class="col-md-12 input-box" v-model="input" v-bind:rows="input.count('\n')+3" v-bind:placeholder="placeholder">{{default_content}}</textarea>
+
+    <input type="file" id="filePicker" class="hide" multiple/>
+
+    <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#话题" @click="">
+    <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
+    <input type="button" name="" class="send-button btn" value="创建" @click="createMessage()">
+</div>
+
+<!-- 内容列表 -->
+<div class="chat-box col-md-12">
+    <div class="card" v-if="messageList.length == 0">
+        空空如也~
+    </div>
+
+    <div class="card" v-for="message in messageList">
+        <div class="chat-avatar col-md-12">
+            <!-- {{! message.ctime }} -->
+            <!-- <span class="tag-span" v-if="message.status==100">已完成</span> -->
+        </div>
+        <div class="chat-msg col-md-12">
+            <!-- 编辑状态 -->
+            <template v-if="message.editable">
+                <textarea class="input-box col-md-12" v-bind:rows="message.content.count('\n')+3" v-model="message.content"></textarea>
+                <input type="button" value="更新" v-on:click="updateMessage(message)">
+                <input type="button" value="删除" class="btn-danger hide" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" @click="deleteMessage($event)">
+                <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel">
+            </template>
+
+            <!-- 关键字 -->
+            <div v-else-if="message.tag == 'key'">
+                <div v-if="message.html" class="msg-item-content">
+                    <div class="float-left" v-html="message.html"></div>
+                    
+                    <a class="smallText msg-right-op-link red" v-bind:msg-id="message.id" href="javascript:void(0)" 
+                        v-bind:msg-id="message.id" 
+                        v-bind:msg-content="message.content" 
+                        @click="deleteMessage($event)">删除</a>
+
+                    <a class="smallText msg-right-op-link" v-if="message.tag == 'key1'" 
+                        v-bind:msg-id="message.id" 
+                        href="javascript:void(0)" 
+                        @click="touchMessage($event)">置顶</a>
+                </div>
+            </div>
+            <div v-else>
+                <!-- 正常状态 -->
+                <div v-if="message.link">
+                    <a v-bind:href="message.link">{{! message.link }}</a>
+                </div>
+                <div v-if="message.imgSrc">
+                    <a v-bind:href="message.imgSrc">
+                        <img v-bind:src="message.imgSrc" class="chat-msg-img x-photo"/>
+                    </a>
+                </div>
+                <!-- 时间 -->
+                <div class="msg-item-header">
+                    <span class="chat-msg-time">{{! message.ctime }}</span>
+                    <span v-bind:class="[message.tag_class]">{{! message.tag_text }}</span>
+                    <div class="float-right">
+                        {% if xconfig.DEV_MODE and _is_admin %}
+                            <span class="msg-item-ip">ip:{{! message.ip }}</span>
+                        {% end %}
+                    </div>
+                </div>
+                
+                <!-- 解析出的html -->
+                <div v-if="message.html" class="msg-item-content" v-html="message.html">
+                </div>
+
+                <!-- 操作 -->
+                <div class="msg-item-option">
+                    <!-- task 专用 -->
+                    <a class="smallText msg-left-op-link" v-if="message.tag == 'task'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="finishMessage($event)">完成</a>
+
+                    <a class="smallText msg-left-op-link" v-if="message.tag == 'task'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateTag($event, 'log')">取消</a>
+
+                    <a class="smallText msg-left-op-link" v-if="message.show_reopen_btn" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">重做</a>
+
+                    <!-- 通用 -->
+                    <a class="smallText msg-left-op-link" v-if="message.show_edit_btn" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
+                    
+                    <!-- log专用 -->
+                    <a class="smallText msg-left-op-link" v-if="message.tag == 'log'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateTag($event, 'task')">转任务</a>
+                    <!-- log专用END -->
+
+                    <!-- key专用 -->
+                    <a class="smallText msg-left-op-link" v-if="message.tag == 'key'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="touchMessage($event)">置顶</a>
+
+                    <a class="smallText msg-right-op-link red" 
+                        v-if="message.show_del_btn"
+                        v-bind:msg-id="message.id" 
+                        href="javascript:void(0)" 
+                        v-bind:msg-content="message.content" 
+                        @click="deleteMessage($event)">删除</a>
+
+                    <a class="smallText hide" v-on:click="openMarkDialog(message)" href="javascript:void(0)">标记</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 card">
+    <a class="x-page-link" href="#">共{{!page_max}}页/{{!amount}}条</a> 
+    <a v-if="page > 1" class="x-page-link" v-bind:href="page_prev_url">上一页</a>
+    <a class="x-page-link x-page-active" href="#">{{!page}}</a>
+    <a v-if="page < page_max" class="x-page-link" v-bind:href="page_next_url">下一页</a>
+</div>
+
+<div class="mark-dialog-tpl hide">
+    <a class="tag-span" href="javascript:markMessage($id, 'task')">任务</a>
+    <a class="tag-span" href="javascript:markMessage($id, '')">记录</a>
+</div>
+
+
+{% include base/script/geo_location.html %}
+
+<script type="text/javascript">
+    // 获取地址
+    if (false && navigator.geolocation && window.xuser != "") {
+        navigator.geolocation.getCurrentPosition(function (pos) {
+            console.log(pos);
+            if (pos && pos.coords) {
+                // JSON.stringify 无效
+                var latitude = pos.coords.latitude;
+                var longitude = pos.coords.longitude;
+                var accuracy = pos.coords.accuracy;
+
+                var coords = {
+                    latitude: latitude, 
+                    longitude:longitude, 
+                    accuracy: accuracy,
+                    heading: pos.coords.heading,
+                    speed: pos.coords.speed,
+                    altitude: pos.coords.altitude,
+                    altitudeAccuracy: pos.coords.altitudeAccuracy
+                };
+            }
+        });
+    }
+
+    var currentTag = getUrlParam("tag");
+    var searchKey  = getUrlParam("key");
+    var hiddenInputBoxTags = ["file", "link", "done", "notice", "book", "all"];
+    var placeholder = "记录发生的事情、产生的想法";
+    var defaultContent = $(".default-content-input").val();
+
+    if (currentTag == "task") {
+        placeholder = "记录要完成的任务";
+    }
+    if (currentTag == "cron") {
+        placeholder = "记录需要定期回顾的事情、长期规划";
+    }
+    if (currentTag == "idea") {
+        placeholder = "记录自己的奇思妙想";
+    }
+    if (currentTag == "key") {
+        placeholder = "保存话题（关键字）";
+    }
+
+    function newMessage(content, user, status) {
+        return {"content": content, html: content, user:user, status:status, editable: false}
+    }
+
+    function wrapMessage(message) {
+        // 默认值
+        message.editable = false;
+        message.show_edit_btn = true;
+        message.show_reopen_btn = false;
+        message.show_del_btn = true;
+
+        if (currentTag == "file" || currentTag == "all" || currentTag == "link" || searchKey) {
+            // 只有特殊处理的才需要渲染tag
+            if (message.tag == "task") {
+                message.tag_class = "msg-tag-orange";
+            } else {
+                message.tag_class = "msg-tag";
+            }
+        } else {
+            message.tag_class = "hide";
+        }
+
+        if (message.tag == "done") {
+            message.show_reopen_btn = true;
+        }
+
+        if (message.ref != undefined) {
+            message.show_edit_btn = false;
+            message.show_reopen_btn = false;
+        }
+
+        return message;
+    }
+
+    var app = new Vue({
+        el: "#app",
+        data: {
+            title: "消息",
+            message: "Hello, Vue!",
+            inputBoxVisible: hiddenInputBoxTags.indexOf(currentTag) < 0,
+            placeholder: placeholder,
+            messageList: [newMessage("空空如也~")],
+            person: {
+                name:"Jhon",
+                age: 20,
+            },
+            bindmessage: "页面加载于 " + new Date(),
+            seen: false,
+            rawHtml: "{{!message}}",
+            url: "https://www.baidu.com",
+            input: defaultContent,
+            attachments: [],
+            page_max: 2,
+            page: 1,
+            page_url: "/message?pagesize=20&page=",
+            page_next_url:"#",
+            page_prev_url:"#",
+            current_user:"",
+            status: "",
+            amount: 0
+        },
+        methods: {
+
+            init: function () {
+                this.status = getUrlParams().status;
+                var tag = getUrlParam("tag");
+                this.page_url = "/message?status=%s&pagesize=20&key={{key}}&tag=%s&page=".format(this.status, tag);
+
+                if (tag == "file") {
+                    $("#tabFile").addClass("tab-link-active");
+                }
+            },
+
+            refreshCount: function () {
+                $.get("/message/stat", function (resp) {
+                    $(".task-count").text(resp.task_count);
+                    $(".done-count").text(resp.done_count);
+                    $(".log-count").text(resp.log_count);
+                    $(".idea-count").text(resp.idea_count);
+                    $(".cron-count").text(resp.cron_count);
+                    $(".key-count").text(resp.key_count);
+                })
+            },
+
+            refreshMessage: function () {
+                var self = this;
+                var page = getUrlParams().page || 1;
+                var tag  = getUrlParam("tag");
+                app.page = page;
+                app.page_next_url = app.page_url + (parseInt(page)+1);
+                app.page_prev_url = app.page_url + (page-1);
+                $.get("/message/list", 
+                    {pagesize:20,page:page,status:self.status,key:"{{key}}",tag:tag}, 
+                    function (respText) {
+                        var data = respText;
+                        app.page_max = data.page_max;
+                        app.current_user = data.current_user;
+                        if (data.code == "success") {
+                            var messageList = [];
+                            data.data.forEach(function (item, index) {
+                                // console.log(item, index);
+                                messageList.push(wrapMessage(item));
+                            })
+                            self.messageList = messageList;
+                            self.amount = data.amount;
+
+                            app.refreshCount();
+
+                            // 渲染图片
+                            renderMessageImageBox();
+                        }
+                });
+            },
+
+            createMessage: function () {
+                if (this.input == "") {
+                    return;
+                }
+                var self = this;
+                $.post("/message/save", 
+                    {
+                        content:self.input, 
+                        attachments: self.attachments,
+                        tag: getUrlParam("tag")
+                    },
+                    function (respText) {
+                        var data = respText;
+                        if (data.code == "success") {
+                            var msg = wrapMessage(data.data);
+                            self.messageList.push(msg);
+                            self.input = defaultContent;
+                        } else {
+                            alert(data.message);
+                        }
+                        app.refreshMessage();
+                }).fail(function (data) {
+
+                })
+            },
+
+            deleteMessage: function (event) {
+                var el = event.currentTarget;
+                var self = this;
+                var id = $(el).attr("msg-id");
+                var content = $(el).attr("msg-content");
+                var check = confirm("确认删除 '%s' ?".format(content));
+                if (check) {                
+                    $.post("/message/delete", {id: id}, function (resp) {
+                        if (resp.code == "success") {
+                            app.refreshMessage();
+                        } else {
+                            alert(data.message);
+                        }
+                    });
+                }
+            },
+
+            finishMessage: function (event) {
+                var el = event.currentTarget;
+                var self = this;
+                var id = $(el).attr("msg-id");
+                $.post("/message/finish", {id: id}, function (resp) {
+                    if (resp.code == "success") {
+                        app.refreshMessage();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            },
+
+            updateTag: function (event, tag) {
+                var el = event.currentTarget;
+                var self = this;
+                var id = $(el).attr("msg-id");
+                $.post("/message/tag", {id: id, tag: tag}, function (resp) {
+                    if (resp.code == "success") {
+                        app.refreshMessage();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            },
+
+            openMessage: function (event) {
+                var el = event.currentTarget;
+                var id = $(el).attr("msg-id");
+                $.post("/message/open", {id: id}, function (resp) {
+                    if (resp.code == "success") {
+                        app.refreshMessage();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            },
+
+            updateMessage: function (message) {
+                $.post("/message/update", message, function (resp) {
+                    console.log(resp);
+                    app.refreshMessage();
+                })
+            },
+
+            touchMessage: function (message) {
+                var el = event.currentTarget;
+                var id = $(el).attr("msg-id");
+                $.post("/message/touch", {id: id}, function (resp) {
+                    console.log(resp);
+                    if (resp.code == "success") {
+                        app.refreshMessage();
+                    } else {
+                        alert(resp.message);
+                    }
+                })
+            },
+
+            updateStatus: function (event, status) {
+                var id = $(event.currentTarget).attr("msg-id");
+                var message = {id: id, status: status};
+                $.post("/message/status", message, function (resp) {
+                    console.log(resp);
+                    app.refreshMessage();
+                });
+            },
+
+            markMessage: function (id, tag) {
+                $.post("/message/mark", {id: id, tag: tag}, function (resp) {
+                    app.refreshMessage();
+                }).fail(function (err) {
+                    alert("标记失败:" + err);
+                })
+            },
+
+            openMarkDialog: function (message) {
+                var tpl = $(".mark-dialog-tpl").html();
+                var html = tpl.replace("$id", message.id);
+                ContentDialog.open("标记为", html, "small");
+            }
+        }
+    });
+
+    app.init();
+    app.refreshMessage();
+
+    // 文件上传
+    var BASE_URL = "/static/lib/webuploader"
+    // 初始化Web Uploader
+    var uploader = xnote.createUploader();
+    var loadingIndex = 0;
+
+    // 当有文件添加进来的时候
+    uploader.on( 'fileQueued', function( file ) {
+        // 接受文件
+    });
+
+
+    // 文件上传过程中创建进度条实时显示。
+    uploader.on( 'uploadProgress', function( file, percentage ) {
+        var percent = (percentage * 100).toFixed(2) + '%';
+        console.log('upload process ' + percent)
+    });
+
+    uploader.on( 'uploadBeforeSend', function (object, data, headers) {
+        $( '#uploadProgress' ).find('.progress').remove();
+        data.dirname = "auto";
+    })
+
+    // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+    uploader.on( 'uploadSuccess', function( file, resp) {
+        file.webpath = resp.webpath;
+
+        var webpath = file.webpath;
+        var content = 'file://$name'.replace(/\$name/g, file.webpath);
+        app.input += '\n' + content + "\n";
+
+        layer.close(loadingIndex);
+    });
+
+    // 文件上传失败，显示上传出错。
+    uploader.on( 'uploadError', function( file ) {
+        layer.alert('上传失败');
+    });
+
+    // 完成上传完了，成功或者失败，先删除进度条。
+    uploader.on( 'uploadComplete', function( file ) {
+        
+    });
+
+    $("#filePickerBtn").on("click", function (event) {
+        console.log("select file button click");
+        $("#filePicker").click();
+    })
+
+    $("#filePicker").on("change", function (event) {
+        console.log(event);
+        var fileList = event.target.files; //获取文件对象 
+        if (fileList && fileList.length > 0) {
+            loadingIndex = layer.load(2);
+            uploader.addFile(fileList);
+        }
+    });
+
+    $(document).on("paste", function (e) {
+        console.log(e);
+        var clipboardData = e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {};
+        // console.log(clipboardData);
+
+        if (clipboardData.items) {
+            arrForEach(clipboardData.items, function (item, index) {
+                var value = item.value;
+                // console.log(item, value);
+                if (/image/i.test(item.type)) {
+                    // 阻断编辑
+                    var index = layer.load(1);
+                    console.log(item);
+                    var blob = item.getAsFile();
+                    xnote.uploadBlob(blob, 'msg', function (respJson) {
+                        console.log(respJson);
+                        var link = "file://" + respJson.webpath;
+                        app.input += '\n' + link + '\n';
+                        layer.close(index);
+                    });
+                }
+            })
+        }
+    });
+
+</script>

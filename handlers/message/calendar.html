@@ -150,25 +150,16 @@ td.currentMonth:hover {
 
 {% block body %}
 
+<!-- 菜单区域 -->
 {% include "message/header.html" %}
-<div id="calendar" class="calendar grid-card">
+
+<!-- 日历区域 -->
+<div id="calendar" class="calendar card">
 </div>
 
-<div class="hide new-event col-md-12">
-    <textarea name="content" class="col-md-12 input-box" rows=4></textarea>
-    <input id="newFeedDate" type="input" name="date" />
-    <input id="newFeedSaveBtn" type="button" class="send-button btn" value="添加">
-    <input type="file" id="filePicker" class="hide" />
-    <input type="button" id="filePickerBtn" class="send-button btn hide" value="上传文件"/>
-    <div id="uploadProgress" style="float: right;" ></div>
-</div>
-
+<!-- 文字区域 -->
 <div class="card">
   {% include message/component/message_list.html %}
-</div>
-
-<div id="notes">
-  <div id="file-history"></div>
 </div>
 
 <script type="text/javascript">
@@ -280,6 +271,8 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
               "</table>";
     // 添加到calendar div中
     calendar.appendChild(bodyBox);
+
+    // 展开收起选项
   }
 
   /**
@@ -363,44 +356,16 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
 
     var yearMonth = formatYearMonth(_year, _month);
 
+    // 更新到hash
     window.location.hash = yearMonth;
 
-    // 显示当月添加的资料
+    // 显示当月添加的资料，这个方法实现在 message_list.html 中
     refreshMessageList(yearMonth);
   }
 
   function formatYearMonth(year, month) {
     return year + "-" + formatNum(month);
   }
-
-
-  /**
-   * 获取当月事件
-   */
-  function fetchEvents(year, month) {
-    var root = $("#events");
-    root.html("查询中...")
-    $.get("/message/date", 
-        {date: year + "-" + formatNum(month)},
-        function (data) {
-          console.log(data);
-          root.html("");
-          var list = data.data;
-          for (var i = 0; i < list.length; i++) {
-            var item = list[i];
-            var element = $("<p>").addClass("event-feed").html(item.ctime + " - " + item.content);
-            root.append(element);
-          }
-          if (list.length == 0) {
-            root.html("无事件");
-          }
-        }
-    ).fail(function (data) {
-        console.log(data);
-        root.html("查询失败");
-    })
-  }
-
 
   /**
    * 绑定上个月下个月事件
@@ -496,20 +461,6 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     $("#newFeedDate").val(selectedDate);
   });
 
-  $("#newFeedDate").val(getDateStr(new Date()));
-
-  $("#newFeedSaveBtn").click(function () {
-    $.post("/message/add", 
-      {
-        date: $("[name=date]").val(),
-        content: $("[name=content]").val()
-      },
-      function (data) {
-        showCalendarData();
-        $("[name=content]").val("");
-      });
-  });
-
   // 修改日历
   $("body").on("change", "select", function (e) {
     var year = $("#yearSelect").val();
@@ -517,7 +468,9 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     var date = dateObj.getDate();
     dateObj.setDate(new Date(parseInt(year), parseInt(month) - 1, 1));
     showCalendarData();
-  })
+  });
+
+
 })();
 
 </script>

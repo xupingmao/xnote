@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/10 14:36:09
-# @modified 2021/01/31 00:19:34
+# @modified 2021/01/31 15:13:27
 
 """标记文本解析"""
 import os
@@ -325,7 +325,7 @@ class TextParser(TextParserBase):
         href = self.read_before_blank()
         href = href[7:]
         if is_img_file(href):
-            token = '<img class="chat-msg-img x-photo" alt="%s" src="%s">' % (href, href)
+            token = '<div class="msg-img-box"><img class="msg-img x-photo" alt="%s" src="%s"></div>' % (href, href)
             self.tokens.append(token)
         else:
             name = href[href.rfind("/")+1:]
@@ -402,6 +402,7 @@ def runtest_topic3():
     tokens = parser.parse(text)
     print("text=%r" % text)
     print(tokens)
+    print("keywords=%s" % parser.keywords)
 
 
 def runtest():
