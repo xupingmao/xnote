@@ -19,7 +19,7 @@ $(function () {
                     var content = data[i].content;
                     html.append($("<span>").addClass("tag-span").text(content).attr("onclick", "topic_dialog_tag_click(this);"));
                 }
-                dialogIndex = xnote.showDialog("选择话题", html.html());
+                dialogIndex = xnote.showDialog("选择话题", html.html(), ["确认", "取消"]);
             }
         }).fail(function (error) {
             xnote.toast("请求失败:" + error);

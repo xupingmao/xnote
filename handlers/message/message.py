@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/01/10 18:25:59
+# @modified 2021/01/31 22:21:15
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -14,8 +14,9 @@ import xauth
 import xconfig
 import xmanager
 import xtemplate
-from xutils import BaseRule, Storage, cacheutil, dbutil, textutil, functions, u, SearchResult
+from xutils import BaseRule, Storage, dbutil, textutil, functions, u, SearchResult
 from xtemplate import T
+from xutils.textutil import escape_html, quote
 
 MSG_DAO       = xutils.DAO("message")
 DEFAULT_TAG   = "log"
@@ -34,6 +35,11 @@ def success():
 def failure(message, code = "fail"):
     return dict(success = False, code = code, message = message)
 
+def build_search_url(keyword):
+    key = quote(keyword)
+    return "/message?category=message&key=%s" % key
+
+
 def build_search_html(content):
     fmt = u'<a href="/message?category=message&key=%s">%s</a>'
     return fmt % (xutils.encode_uri_component(content), xutils.html_escape(content))
@@ -46,10 +52,22 @@ def build_done_html(message):
         task = MSG_DAO.get_by_id(message.ref)
 
     if task != None:
-        message.html = u("完成任务:<br>&gt;&nbsp;") + xutils.mark_text(task.content)
+        html, keywords = mark_text(task.content)
+        message.html = u("完成任务:<br>&gt;&nbsp;") + html
+        message.keywords = keywords
     elif done_time is None:
         done_time = message.mtime
         message.html += u("<br>------<br>完成于 %s") % done_time
+
+def mark_text(content):
+    import xconfig
+    from xutils.marked_text_parser import TextParser, set_img_file_ext
+    # 设置图片文集后缀
+    set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
+
+    parser = TextParser()
+    tokens = parser.parse(content)
+    return "".join(tokens), parser.keywords
 
 def process_message(message):
     if message.status == 0 or message.status == 50:
@@ -70,15 +88,14 @@ def process_message(message):
     if message.tag == "key" or message.tag == "search":
         message.html = build_search_html(message.content)
     else:
-        message.html = xutils.mark_text(message.content)
+        html, keywords = mark_text(message.content)
+        message.html = html
+        message.keywords = keywords
 
     if message.tag == "done":
         build_done_html(message)
     return message
 
-def process_message_list(message_list):
-    for message in message_list:
-        process_message(message)
 
 def fuzzy_item(item):
     item = item.replace("'", "''")
@@ -138,8 +155,36 @@ class SearchContext:
     def __init__(self, key):
         self.key = key
 
+class MessageListParser(object):
+
+    def __init__(self, chatlist):
+        self.chatlist = chatlist
+
+    def parse(self):
+        self.process_message_list(self.chatlist)
+
+    def process_message_list(self, message_list):
+        keywords = set()
+        for message in message_list:
+            process_message(message)
+            if message.keywords != None:
+                keywords = message.keywords.union(keywords)
+        
+        self.keywords = []
+        for word in keywords:
+            keyword_info = Storage(name = word, url = build_search_url(word))
+            self.keywords.append(keyword_info)
+
+    def get_message_list(self):
+        return self.chatlist
+
+    def get_keywords(self):
+        return self.keywords
+
+
 class ListAjaxHandler:
 
+    @xauth.login_required()
     def GET(self):
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         page   = xutils.get_argument("page", 1, type=int)
@@ -153,6 +198,7 @@ class ListAjaxHandler:
             start_time = time.time()
             chatlist, amount = MSG_DAO.search(user_name, key, offset, pagesize)
 
+            # 搜索扩展
             xmanager.fire("message.search", SearchContext(key))
 
             # 自动置顶
@@ -174,10 +220,14 @@ class ListAjaxHandler:
             chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
             
         page_max = math.ceil(amount / pagesize)
-        process_message_list(chatlist)
+
+        parser = MessageListParser(chatlist)
+        parser.parse()
+        chatlist = parser.get_message_list()
 
         return dict(code="success", message = "", 
             data   = chatlist, 
+            keywords = parser.get_keywords(),
             amount = amount, 
             page_max = page_max, 
             pagesize = pagesize,
@@ -357,6 +407,10 @@ def touch_key_by_content(user_name, tag, content):
     item = check_content_for_update(user_name, tag, content)
     if item != None:
         item.mtime = xutils.format_datetime()
+        if item.visit_cnt is None:
+            item.visit_cnt = 0
+        item.visit_cnt += 1
+
         MSG_DAO.update(item)
     return item
 
@@ -400,7 +454,8 @@ class DateHandler:
             msg_list = MSG_DAO.list_by_date(user_name, date)
         else:
             msg_list = []
-        process_message_list(msg_list)
+        parser = MessageListParser(msg_list)
+        parser.parse()
         return dict(code="success", data = msg_list)
 
 class MessageHandler:

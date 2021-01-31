@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2021/01/10 18:24:40
+# @modified 2021/01/31 21:04:18
 import re
 import random
 import json
@@ -629,6 +629,17 @@ def split_words(search_key):
     return words
 
  
+def escape_html(text):
+    # 必须先处理&
+    text = text.replace("&", "&amp;")
+    text = text.replace("<", "&lt;")
+    text = text.replace(">", "&gt;")
+    text = text.replace('"', "&quot;")
+    text = text.replace(" ", "&nbsp;")
+    text = text.replace("'", "&#39;")
+    text = text.replace("\n", "<br/>")
+    return text
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod(verbose=True)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/10 14:36:09
-# @modified 2021/01/31 15:13:27
+# @modified 2021/01/31 21:31:18
 
 """标记文本解析"""
 import os
@@ -220,6 +220,9 @@ class TextParser(TextParserBase):
     # 是否记录关键字，关键字包括话题、书籍、@值等等
     record_keyword_flag = True
 
+    # 话题的长度限制
+    topic_len_limit = 100
+
     def init2(self, text):
         self.keywords = set()
 
@@ -247,6 +250,7 @@ class TextParser(TextParserBase):
         """话题转为搜索关键字的时候去掉前后的#符号"""
         self.profile("mark_topic")
 
+        start_index = self.i
         self.save_str_token()
         end_tuple = ("#", "\n")
         key0 = None
@@ -262,6 +266,11 @@ class TextParser(TextParserBase):
         if key0 is None:
             key0 = self.read_rest()
 
+        if len(key0) > self.topic_len_limit:
+            # 超过限制，不认为是话题
+            self.stash_char('#')
+            self.i = start_index + 1
+            return
         # 记录关键字
         self.record_keyword(key0)
 
@@ -288,10 +297,14 @@ class TextParser(TextParserBase):
 
     def mark_at(self):
         self.profile("mark_at")
-
-        link  = self.read_before_blank()
-        token = self.build_search_link(link)
+        self.save_str_token()
+        
+        word  = self.read_before_blank()
+        token = self.build_search_link(word)
         self.tokens.append(token)
+
+        # 记录关键字
+        self.record_keyword(word)
 
     def mark_book_single(self):
         return self.mark_tag_single(">")

@@ -19,6 +19,11 @@
         空空如也~
     </div>
 
+    <div class="card" v-if="messageKeywords.length != 0">
+        <div class="card-title">关键字</div>
+        <a class="tag-span" v-for="word in messageKeywords" v-bind:href="word.url">{{!word.name}}</a>
+    </div>
+
     <div class="card" v-for="message in messageList">
         <div class="chat-avatar col-md-12">
             <!-- {{! message.ctime }} -->
@@ -28,9 +33,12 @@
             <!-- 编辑状态 -->
             <template v-if="message.editable">
                 <textarea class="input-box col-md-12" v-bind:rows="message.content.count('\n')+3" v-model="message.content"></textarea>
-                <input type="button" value="更新" v-on:click="updateMessage(message)">
-                <input type="button" value="删除" class="btn-danger hide" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" @click="deleteMessage($event)">
-                <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel">
+
+                <input class="msg-update-btn" type="button" value="更新" v-on:click="updateMessage(message)">
+                
+                <input type="button" value="删除" class="btn-danger hide msg-update-btn" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" @click="deleteMessage($event)">
+
+                <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel msg-update-btn">
             </template>
 
             <!-- 关键字 -->
@@ -207,6 +215,7 @@
             inputBoxVisible: hiddenInputBoxTags.indexOf(currentTag) < 0,
             placeholder: placeholder,
             messageList: [newMessage("空空如也~")],
+            messageKeywords: [],
             person: {
                 name:"Jhon",
                 age: 20,
@@ -219,7 +228,7 @@
             attachments: [],
             page_max: 2,
             page: 1,
-            page_url: "/message?pagesize=20&page=",
+            page_url: "/message?page=",
             page_next_url:"#",
             page_prev_url:"#",
             current_user:"",
@@ -231,7 +240,7 @@
             init: function () {
                 this.status = getUrlParams().status;
                 var tag = getUrlParam("tag");
-                this.page_url = "/message?status=%s&pagesize=20&key={{key}}&tag=%s&page=".format(this.status, tag);
+                this.page_url = "/message?status=%s&key={{key}}&tag=%s&page=".format(this.status, tag);
 
                 if (tag == "file") {
                     $("#tabFile").addClass("tab-link-active");
@@ -257,7 +266,7 @@
                 app.page_next_url = app.page_url + (parseInt(page)+1);
                 app.page_prev_url = app.page_url + (page-1);
                 $.get("/message/list", 
-                    {pagesize:20,page:page,status:self.status,key:"{{key}}",tag:tag}, 
+                    {page:page,status:self.status,key:"{{key}}",tag:tag}, 
                     function (respText) {
                         var data = respText;
                         app.page_max = data.page_max;
@@ -269,6 +278,7 @@
                                 messageList.push(wrapMessage(item));
                             })
                             self.messageList = messageList;
+                            self.messageKeywords = data.keywords || [];
                             self.amount = data.amount;
 
                             app.refreshCount();
