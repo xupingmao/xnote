@@ -1,0 +1,29 @@
+<style type="text/css">
+#msgKeywordCard {
+    min-height: 500px;
+}
+</style>
+
+<div class="card" id="msgKeywordCard">
+    <div class="card-title">
+        <span>关键字</span>
+    </div>
+
+    <a class="tag-span" v-bind:href="keyword.url" v-for="keyword in keywords">{{!keyword.name}}</a>
+</div>
+
+<script type="text/javascript">
+var msgKeywordApp = new Vue({
+    el: "#msgKeywordCard",
+    data: {
+        keywords: []
+    }
+});
+
+xnote.on("msg.keywords.update", function (e) {
+    var keywords = e.target;
+    msgKeywordApp.keywords = keywords;
+    console.log(keywords);
+});
+
+</script>

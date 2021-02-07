@@ -11,6 +11,8 @@
     {
         //事件映射表，格式为：{type1:[listener1, listener2], type2:[listener3, listener4]}
         this._eventMap = {};
+        //事件注册表，格式为: {type1:文字说明, type2:文字说明}
+        this._eventDescription = {};
     };
 
     /**
@@ -103,6 +105,14 @@
         var map = this._eventMap[type];
         return map != null && map.length > 0;
     };
+
+    /**
+     * 声明一个事件，在严格模式下，如果不声明无法使用，为了避免消息过多无法管理的问题
+     */
+    EventDispatcher.prototype.defineEvent = function(type, description)
+    {
+        this._eventDescription[type] = description;
+    }
 
     //添加若干的常用的快捷缩写方法
     EventDispatcher.prototype.on = EventDispatcher.prototype.addEventListener;

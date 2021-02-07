@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/01/31 22:21:15
+# @modified 2021/02/06 17:27:57
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -214,6 +214,8 @@ class ListAjaxHandler:
             chatlist, amount = MSG_DAO.list_link(user_name, offset, pagesize)
         elif tag == "book":
             chatlist, amount = MSG_DAO.list_book(user_name, offset, pagesize)
+        elif tag == "people":
+            chatlist, amount = MSG_DAO.list_people(user_name, offset, pagesize)
         else:
             if tag == "task" or tag == "key":
                 pagesize = 1000
@@ -458,6 +460,20 @@ class DateHandler:
         parser.parse()
         return dict(code="success", data = msg_list)
 
+def filter_key(key):
+    if key == None or key == "":
+        return ""
+    if key[0] == '#':
+        return key
+
+    if key[0] == '@':
+        return key
+
+    if key[0] == '《' and key[-1] == '》':
+        return key
+        
+    return "#%s#" % key
+
 class MessageHandler:
 
     @xauth.login_required()
@@ -468,14 +484,7 @@ class MessageHandler:
         show_tab = xutils.get_argument("show_tab", default_value = True, type = bool)
         tag      = xutils.get_argument("tag")
 
-        if key != None and key != "":
-            if key[0] == '#':
-                # 精确搜索
-                default_content = key
-            else:
-                default_content = "#%s# " % key
-        else:
-            default_content = ""
+        default_content = filter_key(key)
 
         stat = MSG_DAO.get_message_stat(user)
         stat = format_message_stat(stat)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/01/07 01:05:58
+# @modified 2021/02/06 17:29:18
 import xutils
 import xconfig
 import xmanager
@@ -145,6 +145,17 @@ def list_book_page(user, offset, limit, key = None):
         if value.content is None:
             return False
         return pattern.search(value.content)
+
+    msg_list = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    # TODO 后续可以用message_stat加速
+    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+    return msg_list, amount
+
+def list_people_page(user, offset, limit, key = None):
+    def filter_func(key, value):
+        if value.content is None:
+            return False
+        return value.content.find("@") >= 0
 
     msg_list = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
     # TODO 后续可以用message_stat加速
@@ -298,6 +309,7 @@ xutils.register_func("message.list", list_message_page)
 xutils.register_func("message.list_file", list_file_page)
 xutils.register_func("message.list_link", list_link_page)
 xutils.register_func("message.list_book", list_book_page)
+xutils.register_func("message.list_people", list_people_page)
 xutils.register_func("message.list_by_tag",  list_by_tag)
 xutils.register_func("message.list_by_date", list_by_date)
 
