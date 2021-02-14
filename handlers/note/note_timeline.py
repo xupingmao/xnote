@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/01/02 19:32:22
+# @modified 2021/02/14 10:35:19
 
 """时光轴视图"""
 import re
@@ -158,6 +158,7 @@ def list_search_func(context):
     search_key = context['search_key']
     type       = context['type']
     user_name  = context['user_name']
+    search_tag = context["search_tag"]
     parent_id  = xutils.get_argument("parent_id", "")
     words      = None
     rows       = []
@@ -170,7 +171,12 @@ def list_search_func(context):
         # TODO 公共笔记的搜索
         search_key = xutils.unquote(search_key)
         words      = split_words(search_key)
-        rows       = NOTE_DAO.search_name(words, user_name, parent_id = parent_id)
+
+        if search_tag == "public":
+            rows = NOTE_DAO.search_public(words)
+        else:
+            rows = NOTE_DAO.search_name(words, user_name, parent_id = parent_id)
+
         rows       = rows[offset: offset + limit]
         cost_time  = time.time() - start_time
         NOTE_DAO.add_search_history(user_name, search_key, "note", cost_time)
@@ -309,6 +315,7 @@ class TimelineAjaxHandler:
         parent_id  = xutils.get_argument("parent_id", None, type=str)
         search_key = xutils.get_argument("key", None, type=str)
         orderby    = xutils.get_argument("orderby", "mtime_desc", type=str)
+        search_tag = xutils.get_argument("search_tag", None, type=str)
         user_name  = xauth.current_name()
 
         list_func = LIST_FUNC_DICT.get(type, default_list_func)
@@ -337,6 +344,7 @@ class DateTimeline:
 class BaseTimelineHandler:
 
     note_type = "group"
+    search_type = "note"
     show_create = True
     check_login = True
 
@@ -383,8 +391,7 @@ class BaseTimelineHandler:
             key   = key,
             pathlist = pathlist,
             show_create = self.show_create,
-            search_action = "/note/timeline",
-            search_placeholder = T(u"搜索" + search_title),
+            search_type = self.search_type,
             search_ext_dict = dict(parent_id = parent_id),
             parent_link = parent_link,
             title_link  = title_link,
@@ -399,6 +406,7 @@ class PublicTimelineHandler(TimelineHandler):
     note_type = "public"
     check_login = False
     show_create = False
+    search_type = "note.public"
 
 
 class GalleryListHandler(BaseTimelineHandler):

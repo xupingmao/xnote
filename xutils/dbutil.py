@@ -53,7 +53,7 @@ TABLES = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/01/08 01:17:19
+# @modified 2021/02/14 11:11:55
 ###########################################################
 
 class DBException(Exception):
@@ -211,10 +211,14 @@ def timeseq():
 def new_id(prefix):
     return "%s:%s" % (prefix, timeseq())
 
-def get_object_from_bytes(bytes):
+def get_object_from_bytes(bytes, parse_json = True):
     if bytes is None:
         return None
     str_value = bytes.decode("utf-8")
+    
+    if not parse_json:
+        return str_value
+
     try:
         obj = json.loads(str_value)
     except:
@@ -235,6 +239,9 @@ def check_get_leveldb():
 
 def register_table(table_name, description):
     TABLES[table_name] = description
+
+def get_registry_dict():
+    return TABLES.copy()
 
 def get(key):
     check_leveldb()
@@ -290,7 +297,7 @@ def scan(key_from = None, key_to = None, func = None, reverse = False):
         if not func(key, value):
             break
 
-def prefix_scan(prefix, func, reverse = False):
+def prefix_scan(prefix, func, reverse = False, parse_json = True):
     check_leveldb()
 
     key_from = None
@@ -315,7 +322,7 @@ def prefix_scan(prefix, func, reverse = False):
         key = key.decode("utf-8")
         if not key.startswith(prefix):
             break
-        value = get_object_from_bytes(value)
+        value = get_object_from_bytes(value, parse_json)
         if not func(key, value):
             break
         offset += 1

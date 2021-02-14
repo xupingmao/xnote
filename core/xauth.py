@@ -94,7 +94,7 @@ def update_user_config_dict(name, config_dict):
     user = get_user(name)
     if user is None:
         return
-    config = get_user_config_dict(user)
+    config = get_user_config_dict(name)
     config.update(**config_dict)
     user.config = config
     update_user(name, user)

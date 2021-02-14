@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/01/17 11:09:49
+# @modified 2021/02/14 10:56:46
 import os
 import json
 import web
@@ -112,7 +112,7 @@ def get_message_count(user):
         xutils.print_exc()
         return 0
 
-def pre_render(kw):
+def render_before_kw(kw):
     """模板引擎预处理过程"""
     user_name           = xauth.current_name() or ""
     user_role           = xauth.current_role() or ""
@@ -148,8 +148,8 @@ def pre_render(kw):
     if _input is not None:
         kw.update(_input)
 
-def post_render(kw):
-    """后置渲染"""
+def render_after_kw(kw):
+    """后置渲染，可以覆盖前面的数据"""
     render_search(kw)
 
 def get_mobile_template(name):
@@ -195,6 +195,7 @@ def render_search(kw):
         return
 
     search_type        = kw.get("search_type")
+    search_tag         = kw.get("search_tag", "")
     search_action      = "/note/timeline"
     search_placeholder = u"搜索笔记"
 
@@ -206,17 +207,23 @@ def render_search(kw):
         search_placeholder = u"搜索任务和记事";
         search_action = "/message"
 
+    if search_type == "note.public":
+        search_placeholder = u"搜索公共笔记"
+        search_action = "/note/timeline"
+        search_tag = "public"
+
     kw["search_action"] = search_action
     kw["search_placeholder"] = search_placeholder
+    kw["search_tag"] = search_tag
     
 
 @xutils.timeit_deco(name = "Template.Render", logfile = True)
 def render(template_name, **kw):
     nkw = {}
     # 预处理
-    pre_render(nkw)
+    render_before_kw(nkw)
     nkw.update(kw)
-    post_render(nkw)
+    render_after_kw(nkw)
 
     if hasattr(web.ctx, "env"):
         # 不一定是WEB过来的请求
@@ -231,9 +238,9 @@ def render_text(text, template_name = "<string>", **kw):
     TODO 控制缓存大小，使用FIFO或者LRU淘汰
     """
     nkw = {}
-    pre_render(nkw)
+    render_before_kw(nkw)
     nkw.update(kw)
-    post_render(nkw)
+    render_after_kw(nkw)
 
     # 热加载模式下str的id会变化
     name = "template@%s.str" % hash(text)

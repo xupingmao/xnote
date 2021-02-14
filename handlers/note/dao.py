@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/01/05 00:31:49
+# @modified 2021/02/14 10:47:09
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -956,7 +956,7 @@ def search_name(words, creator = None, parent_id = None):
         if value.is_deleted:
             return False
         if parent_id != None and str(value.parent_id) != parent_id:
-                return False
+            return False
         return (value.creator == creator or value.is_public) and textutil.contains_all(value.name.lower(), words)
     result = dbutil.prefix_list("note_tiny:%s" % creator, search_func, 0, -1)
     notes  = [build_note_info(item) for item in result]
@@ -970,6 +970,20 @@ def search_content(words, creator=None):
             return False
         return (value.creator == creator or value.is_public) and textutil.contains_all(value.content.lower(), words)
     result = dbutil.prefix_list("note_full", search_func, 0, -1)
+    notes = [build_note_info(item) for item in result]
+    sort_notes(notes)
+    return notes
+
+def search_public(words):
+    print("search_public")
+    words = [word.lower() for word in words]
+    def search_public_func(key, value):
+        if value.content is None:
+            return False
+        if not value.is_public:
+            return False
+        return textutil.contains_all(value.name.lower(), words)
+    result = dbutil.prefix_list("note_full", search_public_func, 0, -1)
     notes = [build_note_info(item) for item in result]
     sort_notes(notes)
     return notes
@@ -1181,6 +1195,7 @@ xutils.register_func("note.get_by_name", get_by_name)
 xutils.register_func("note.get_tags", get_tags)
 xutils.register_func("note.search_name", search_name)
 xutils.register_func("note.search_content", search_content)
+xutils.register_func("note.search_public", search_public)
 
 # list functions
 xutils.register_func("note.list_path", list_path)

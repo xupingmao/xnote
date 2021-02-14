@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/02/06 17:27:57
+# @modified 2021/02/14 10:56:12
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -500,6 +500,7 @@ class MessageHandler:
             default_content    = default_content,
             message_stat       = stat,
             tag                = tag,
+            search_tag         = tag,
             key                = key,
             from_              = from_)
 

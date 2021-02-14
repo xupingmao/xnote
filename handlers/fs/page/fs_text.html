@@ -2,7 +2,7 @@
 
 <!-- 
 @since 2017/12/02
-@modified 2020/11/07 13:15:32
+@modified 2021/02/13 20:56:18
 -->
 
 {% block head %}
@@ -84,22 +84,23 @@
 {% block body %}
 {% set path = xutils.get_argument("path") %}
 
-{% init fs_title = "文本阅读" %}
-{% include fs/component/fs_title.html %}
+<div class="card">
+    {% init fs_title = "文本阅读" %}
+    {% include fs/component/fs_title.html %}
 
-<!-- header -->
-{% include mod_fs_path.html %}
+    <!-- header -->
+    {% include mod_fs_path.html %}
 
-<!-- body -->
-<div class="col-md-12 card reader-content scrollbar" id="content"></div>
+    <!-- body -->
+    <div class="col-md-12 card reader-content scrollbar" id="content"></div>
 
-<!-- footer -->
-<div class="reader-footer">
-    <button class="backward">上一页</button>
-    <span id="progress"></span>
-    <button class="forward">下一页</button>
+    <!-- footer -->
+    <div class="reader-footer">
+        <button class="backward">上一页</button>
+        <span id="progress"></span>
+        <button class="forward">下一页</button>
+    </div>
 </div>
-
 <!-- 阅读悬浮按钮 -->
 <span class="read">阅读</span>
 

@@ -126,6 +126,7 @@
       }
       var type = "{{type}}" || getUrlParam("type");
       var parent_id = getUrlParam("parent_id");
+      var searchTag = getUrlParam("search_tag");
       var searchKey = "{{quote(key)}}";
       var loadingNoteIndex;
       layer.ready(function(){
@@ -139,7 +140,8 @@
           offset: app.offset,
           limit : QUERY_LIMIT,
           parent_id: parent_id,
-          key: searchKey
+          key: searchKey,
+          search_tag: searchTag,
         }, 
         function (resp, status) {
           app.isLoading = false;

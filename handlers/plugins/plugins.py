@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/01/17 11:16:16
+# @modified 2021/02/13 20:42:09
 from io import StringIO
 import xconfig
 import codecs
@@ -184,11 +184,16 @@ def note_plugin(name, url, icon=None, size = None):
     context.category = "note"
     return context
 
+def index_plugin(name, url):
+    return inner_plugin(name, url, "index")
+
+def file_plugin(name, url):
+    return inner_plugin(name, url, "dir")
 
 INNER_TOOLS = [
     # 工具集/插件集
-    inner_plugin("笔记工具集合", "/note/tools"),
-    inner_plugin("文件工具集合", "/fs_tools"),
+    index_plugin("笔记工具集合", "/note/tools"),
+    index_plugin("文件工具集合", "/fs_tools"),
 
     inner_plugin("浏览器信息", "/tools/browser_info"),
     # 文本
@@ -227,6 +232,9 @@ INNER_TOOLS = [
     note_plugin("相册", "/note/gallery", "fa-photo"),
     note_plugin("清单", "/note/list", "fa-list"),
     note_plugin("词典", "/note/dict", "icon-dict"),
+
+    # 文件工具
+    file_plugin("文件索引", "/fs_index"),
 ]
 
 def get_inner_tool_name(url):
@@ -263,7 +271,16 @@ def sorted_plugins(user_name, plugins, orderby=None):
     rest_plugins = list(filter(lambda x:x.url not in recent_urls, plugins))
     return recent_plugins + rest_plugins
 
+def list_all_plugins(user_name, sort = True):
+    links = build_inner_tools()
+    links += build_plugin_links(xconfig.PLUGINS_DICT.values())
+    if sort:
+        return sorted_plugins(user_name, links)
+    return links
+
 def list_plugins(category, sort = True):
+    user_name = xauth.current_name()
+
     if category == "other":
         plugins = find_plugins(None)
         links   = build_plugin_links(plugins)
@@ -273,10 +290,8 @@ def list_plugins(category, sort = True):
         links   = build_plugin_links(plugins)
     else:
         # 所有插件
-        links = build_inner_tools()
-        links += build_plugin_links(xconfig.PLUGINS_DICT.values())
+        links = list_all_plugins(user_name)
 
-    user_name = xauth.current_name()
     if sort:
         return sorted_plugins(user_name, links)
     return links
@@ -424,7 +439,7 @@ class PluginsListHandler:
                 plugins = []
 
         return xtemplate.render("plugins/page/plugins_v3.html", 
-            category = category,
+            category   = category,
             html_title = "插件",
             header     = header,
             show_aside = xconfig.OPTION_STYLE == "aside",

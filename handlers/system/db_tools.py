@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/04/27 02:09:28
-# @modified 2020/01/21 01:18:38
+# @modified 2021/02/12 23:04:21
 
 import os
 import re
@@ -267,62 +267,7 @@ def migrate_search():
     count = 0
     return "Not Implemented Yet"
 
-SCAN_HTML = """
-<div class="card">
-    <table class="table">
-        {% for key, value in result %}
-            <tr>
-                <td style="width:20%">{{key}}</td>
-                <td style="width:80%">{{value}}</td>
-            </tr>
-        {% end %}
-    </table>
-    <a href="?key_from={{last_key}}">下一页</a>
-</div>
-"""
-
-class DbScanHandler(BasePlugin):
-
-    title = "数据库扫描"
-    # 提示内容
-    description = ""
-    # 访问权限
-    required_role = "admin"
-    # 插件分类 {note, dir, system, network}
-    category = None
-
-    placeholder = "主键"
-    btn_text = "查询"
-    editable = False
-    show_search = False
-    
-    def handle(self, input):
-        # 输入框的行数
-        self.rows = 1
-        result = []
-        reverse  = xutils.get_argument("reverse") == "true"
-        key_from = xutils.get_argument("key_from", "")
-        prefix   = xutils.get_argument("prefix", "")
-        last_key = [None]
-
-        def func(key, value):
-            print("db_scan:", key, value)
-            if input in key:
-                result.append((key, value))
-                if len(result) > 30:
-                    last_key[0] = key
-                    return False
-            return True
-
-        if prefix != "" and prefix != None:
-            dbutil.prefix_scan(prefix, func, reverse = reverse)
-        else:
-            dbutil.scan(key_from = key_from, func = func, reverse = reverse)
-
-        self.writetemplate(SCAN_HTML, result = result, last_key = last_key[0], key = input)
-
 
 xurls = (
-    "/system/db_migrate", MigrateHandler,
-    "/system/db_scan", DbScanHandler,
+    "/system/db_migrate", MigrateHandler
 )

@@ -13,20 +13,23 @@ p {
 {% init action = "" %}
 {% init index_size = 0 %}
 
-<div class="box">
+<div class="card">
+    <div class="card-title">
+        <span>文件索引</span>
+
+        <div class="float-right">
+            {% include common/button/back_button.html %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
     <p>索引数量: {{index_size}}</p>
 
     {% if action == "reindex" %}
     <p>重建索引耗时: {{"%.2f"%cost}}秒</p>
     {% end %}
-
-    <div class="row">
-        <p>外部索引目录:</p>
-        {% for fpath in xconfig.get('INDEX_DIRS', []) %}
-            <div>{{fpath}}</div>
-        {% end %}
-    </div>
-
+    
     <div class="row">
         <form method="POST">
             <input type="hidden" name="action" value="reindex">
@@ -34,8 +37,17 @@ p {
         </form>
     </div>
 </div>
-{% end %}
 
-{% block aside %}
-    {% include fs/mod_aside.html %}
+<div class="card">
+    <div class="card-title">
+        <span>索引目录</span>
+    </div>
+
+    <form method="POST">
+        <textarea name="index_config" class="row" rows=10>{{"\n".join(index_dirs)}}</textarea>
+        <input type="hidden" name="action" value="config">
+        <button>更新索引目录</button>
+    </form>
+</div>
+
 {% end %}
