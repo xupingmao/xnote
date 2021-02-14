@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2020/12/19 20:01:41
+# @modified 2021/02/14 15:51:18
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -206,7 +206,10 @@ def main():
     app.run()
 
 class LogMiddleware:
-    """WSGI middleware for logging the status."""
+    """WSGI middleware for logging the status.
+
+    中间件的实现参考 web/httpservers.py
+    """
 
     PROFILE_SET = set()
 

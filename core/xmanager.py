@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2020/12/19 19:56:53
+# @modified 2021/02/14 17:46:50
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -77,7 +77,44 @@ def wrapped_handler(pattern, handler_clz):
             threading.current_thread().handler_class = self.target
             result = wrap(self.target.POST(*args))
             threading.current_thread().handler_class = None
-            return result
+            return result            
+
+        def HEAD(self, *args):
+            return wrap(self.target.HEAD(*args))
+
+        def OPTIONS(self, *args):
+            return wrap(self.target.OPTIONS(*args))
+
+        def PROPFIND(self, *args):
+            return wrap(self.target.PROPFIND(*args))
+
+        def PROPPATCH(self, *args):
+            return wrap(self.target.PROPPATCH(*args))
+
+        def PUT(self, *args):
+            return wrap(self.target.PUT(*args))
+
+        def LOCK(self, *args):
+            return wrap(self.target.LOCK(*args))
+
+        def UNLOCK(self, *args):
+            return wrap(self.target.UNLOCK(*args))
+
+        def MKCOL(self, *args):
+            return wrap(self.target.MKCOL(*args))
+
+        def COPY(self, *args):
+            return wrap(self.target.COPY(*args))
+
+        def MOVE(self, *args):
+            return wrap(self.target.MOVE(*args))
+
+        def DELETE(self, *args):
+            return wrap(self.target.DELETE(*args))
+
+        def __getattr__(self, name):
+            print("unknown method %s" % name)
+            return getattr(self.target, name)
 
         def search_priority(self):
             return 0
