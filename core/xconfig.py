@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2020/11/29 13:13:47
+# @modified 2021/02/15 19:39:41
 
 '''xnote系统配置
 # 用户配置
@@ -28,7 +28,7 @@ from xutils.base import Storage
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
-__copyright__ = "(C) 2016-2017 xupingmao. GNU GPL 3."
+__copyright__ = "(C) 2016-2021 xupingmao. GNU GPL 3."
 __contributors__ = []
 
 # 系统错误信息
@@ -44,6 +44,7 @@ DEV_MODE           = False
 DEBUG              = False
 # 调试盒子模型，针对某些不方便调试的浏览器
 DEBUG_HTML_BOX     = False
+
 PORT               = "1234"
 SITE_HOME          = None
 # 线程数
@@ -388,91 +389,6 @@ class Properties(object):
 def is_mute():
     """是否静音"""
     return MUTE_END_TIME is not None and time.time() < MUTE_END_TIME
-
-def add_notice(user=None,
-        message=None, 
-        link=None,
-        year=None, 
-        month=None, 
-        day=None,
-        wday=None):
-    """
-    添加通知事件, 条件为None默认永真，比如user为None，向所有用户推送
-    """
-    if link is None:
-        link = '#'
-    _notice_list.append(Storage(user=user, year=year, month=month, day=day, wday=wday, message=message, link=link))
-
-
-def create_tomorrow_filter(user):
-    tm = time.localtime(time.time() + 24 * 3600)
-    message_set = hashset()
-    def tomorrow_filter(todo):
-        if todo.message in message_set:
-            return False
-        message_set.add(todo.message)
-        year  = tm.tm_year
-        month = tm.tm_mon
-        day  = tm.tm_mday
-        wday = tm.tm_wday + 1
-        if todo.day == None:
-            # 每天都提醒的不重复
-            return False
-        if todo.user != None and user != todo.user:
-            return False
-        if todo.year != None and todo.year != year:
-            return False
-        if todo.month != None and todo.month != month:
-            return False
-        if todo.day != None and todo.day != day:
-            return False
-        if todo.wday != None and todo.wday != wday:
-            return False
-        return True
-    return tomorrow_filter
-
-def create_filter(user):
-    tm = time.localtime()
-    message_set = hashset()
-    def filter_handler(todo):
-        if todo.message in message_set:
-            return False
-        message_set.add(todo.message)
-        year  = tm.tm_year
-        month = tm.tm_mon
-        day  = tm.tm_mday
-        wday = tm.tm_wday + 1
-        if todo.user != None and user != todo.user:
-            return False
-        if todo.year != None and todo.year != year:
-            return False
-        if todo.month != None and todo.month != month:
-            return False
-        if todo.day != None and todo.day != day:
-            return False
-        if todo.wday != None and todo.wday != wday:
-            return False
-        return True
-    return filter_handler
-
-def get_notice_list(type='today', user=None):
-    """
-    获取通知列表,user不为空时通过它过滤
-    - today 今天的通知
-    - all 所有的通知
-    """
-
-    if type == "all":
-        return _notice_list
-
-    if type == 'today':
-        return list(filter(create_filter(user), _notice_list))
-    if type == "tomorrow":
-        return list(filter(create_tomorrow_filter(user), _notice_list))
-
-def clear_notice_list():
-    global _notice_list
-    _notice_list = [] # Py2 do not have clear method
 
 # 设置别名
 _alias_dict = {}

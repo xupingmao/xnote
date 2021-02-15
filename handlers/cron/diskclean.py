@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/28 01:01:33
-# @modified 2020/02/09 14:07:26
+# @modified 2021/02/15 21:48:33
 import zipfile
 import os
 import re
@@ -29,6 +29,7 @@ def rm_expired_files(dirname, expired_time, depth=0):
     for fname in os.listdir(dirname):
         fpath = os.path.join(dirname, fname)
         if os.path.islink(fpath):
+            xutils.info("DiskClean", "%s is a link" % fname)
             continue
         if os.path.isdir(fpath):
             rm_expired_files(fpath, expired_time, depth+1)

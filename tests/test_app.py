@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2020/08/22 22:28:08
+# @modified 2021/02/15 23:19:40
 
 import sys
 import os
@@ -282,19 +282,6 @@ class TestMain(BaseTestCase):
             data=dict(script_url="script://test.py", tm_wday="1", tm_hour="*", tm_min="*"))
         sched_id = result["data"]["id"]
         self.check_OK("/system/crontab/remove?id={}".format(sched_id))
-
-    
-    def test_notice_list(self):
-        xconfig.clear_notice_list()
-        xconfig.add_notice(message="Everyone can see it")
-        notice_list = xconfig.get_notice_list(user='admin')
-        self.assertEqual(1, len(notice_list))
-    
-    def test_notice_list_user(self):
-        xconfig.clear_notice_list()
-        xconfig.add_notice(user="nobody", message="Nobody can see it")
-        notice_list = xconfig.get_notice_list(user='admin')
-        self.assertEqual(0, len(notice_list))
 
     def test_BaseTextPlugin(self):
         TextPage().render()

@@ -1,13 +1,17 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/17 10:51:22
-# @modified 2021/01/17 10:52:18
+# @modified 2021/02/15 23:16:41
 
 import web
 
 #################################################################
 ##   Web.py Utilities web.py工具类的封装
 #################################################################
+
+def print_web_ctx_env():
+    for key in web.ctx.env:
+        print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
 
 def _get_default_by_type(default_value, type):
     if default_value != None:

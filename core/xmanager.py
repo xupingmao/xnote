@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/02/14 17:46:50
+# @modified 2021/02/15 23:04:26
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -39,7 +39,8 @@ __contributors__ = []
 dbutil.register_table("schedule", "任务调度表 <schedule:id>")
 
 def wrapped_handler(pattern, handler_clz):
-    # Py2 自定义类不是type类型
+    # Python2中自定义类不是type类型
+    # 这里只能处理类，不处理字符串
     if not inspect.isclass(handler_clz):
         return handler_clz
 
@@ -50,13 +51,13 @@ def wrapped_handler(pattern, handler_clz):
         return result
 
     class WrappedHandler:
-        """ 默认的handler装饰器
+        """默认的handler装饰器
         1. 装饰器相对于继承来说，性能略差一些，但是更加安全，父类的方法不会被子类所覆盖
         2. 为什么不用Python的装饰器语法
            1. 作为一个通用的封装，所有子类必须通过这层安全过滤，而不是声明才过滤
            2. 子类不用引入额外的模块
         """
-        # 防止自动转大数，浮点数不会转
+        # 使用浮点数是为了防止自动转大数
         visited_count = 0.0
         handler_class = handler_clz
 
@@ -73,6 +74,7 @@ def wrapped_handler(pattern, handler_clz):
             return result
             
         def POST(self, *args):
+            """常用于提交HTML FORM表单、新增资源等"""
             WrappedHandler.visited_count += 1.0
             threading.current_thread().handler_class = self.target
             result = wrap(self.target.POST(*args))
@@ -92,6 +94,7 @@ def wrapped_handler(pattern, handler_clz):
             return wrap(self.target.PROPPATCH(*args))
 
         def PUT(self, *args):
+            """更新资源，带条件时是幂等方法"""
             return wrap(self.target.PUT(*args))
 
         def LOCK(self, *args):
@@ -112,8 +115,15 @@ def wrapped_handler(pattern, handler_clz):
         def DELETE(self, *args):
             return wrap(self.target.DELETE(*args))
 
+        def SEARCH(self, *args):
+            return wrap(self.target.SEARCH(*args))
+
+        def CONNECT(self, *args):
+            """建立tunnel隧道"""
+            return wrap(self.target.CONNECT(*args))
+
         def __getattr__(self, name):
-            print("unknown method %s" % name)
+            xutils.error("xmanager", "unknown method %s" % name)
             return getattr(self.target, name)
 
         def search_priority(self):

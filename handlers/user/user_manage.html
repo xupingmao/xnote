@@ -26,52 +26,52 @@
     </h3>
 
 
-<form method="POST" class="col-md-12" action="/system/user/list">
+<form method="POST" class="col-md-12" action="/system/user">
 
 {% if user_info != None %}
-<input type="hidden" name="name" value="{{user_info.name}}">
-<table class="table col-md-12">
-    <tr>
-        <td class="label">用户名</td>
-        <td>{{user_info.name}}</td>
-    </tr>
-    <tr>
-        <td class="label">密码</td>
-        <td><input name="password" value="{{user_info.password}}"></td>
-    </tr>
-    <tr>
-        <td class="label">salt</td>
-        <td>{{user_info.salt}}</td>
-    </tr>
-    <tr>
-        <td class="label">token</td>
-        <td>{{user_info.token}}</td>
-    </tr>
-    <tr>
-        <td class="label">上次更新</td>
-        <td>{{user_info.mtime}}</td>
-    </tr>
-    <tr>
-        <td class="label">上次登录</td>
-        <td>{{user_info.login_time}}</td>
-    </tr>
-</table>
-<input type="submit" value="更新用户">
-{% if user_info.name != "admin" %}
-    <input class="btn-danger delete-user-btn" type="button" data-name="{{user_info.name}}" value="删除用户">
-{% end %}
+    <input type="hidden" name="name" value="{{user_info.name}}">
+    <table class="table col-md-12">
+        <tr>
+            <td class="label">用户名</td>
+            <td>{{user_info.name}}</td>
+        </tr>
+        <tr>
+            <td class="label">密码</td>
+            <td><input name="password" value="{{user_info.password}}"></td>
+        </tr>
+        <tr>
+            <td class="label">salt</td>
+            <td>{{user_info.salt}}</td>
+        </tr>
+        <tr>
+            <td class="label">token</td>
+            <td>{{user_info.token}}</td>
+        </tr>
+        <tr>
+            <td class="label">上次更新</td>
+            <td>{{user_info.mtime}}</td>
+        </tr>
+        <tr>
+            <td class="label">上次登录</td>
+            <td>{{user_info.login_time}}</td>
+        </tr>
+    </table>
+    <input type="submit" value="更新用户">
+    {% if user_info.name != "admin" %}
+        <input class="btn-danger delete-user-btn" type="button" data-name="{{user_info.name}}" value="删除用户">
+    {% end %}
 {% else %}
-<table class="table col-md-12">
-    <tr>
-        <td class="label">用户名</td>
-        <td><input name="name"></td>
-    </tr>
-    <tr>
-        <td class="label">密码</td>
-        <td><input name="password" value=""></td>
-    </tr>
-</table>
-<input type="submit" value="新增用户">
+    <table class="table col-md-12">
+        <tr>
+            <td class="label">用户名</td>
+            <td><input name="name"></td>
+        </tr>
+        <tr>
+            <td class="label">密码</td>
+            <td><input name="password" value=""></td>
+        </tr>
+    </table>
+    <input type="submit" value="新增用户">
 {% end %}
 
 </div>

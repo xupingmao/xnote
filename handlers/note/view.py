@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2020/11/22 16:41:10
+# @modified 2021/02/15 23:22:02
 import profile
 import math
 import re
@@ -328,6 +328,7 @@ class HistoryViewHandler:
 
 
 class NoticeHandler:
+    """TODO 提醒的功能重新基于数据库来实现"""
 
     @xauth.login_required()
     def GET(self):

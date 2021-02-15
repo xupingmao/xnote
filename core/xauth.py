@@ -5,8 +5,9 @@ import copy
 import web
 import xconfig
 import xutils
+import xmanager
 from xutils import ConfigParser, textutil, dbutil, fsutil
-from xconfig import Storage
+from xutils import Storage
 
 
 dbutil.register_table("user", "用户信息表")
@@ -22,6 +23,12 @@ def is_valid_username(name):
         return False
     return name.isalnum()
 
+def _add_temp_user(temp_users, user_name):
+    temp_users[user_name] = Storage(name = user_name, 
+        password = "123456",
+        salt = "",
+        mtime = "",
+        token = gen_new_token())
 
 def _get_users(force_reload = False):
     """获取用户，内部接口"""
@@ -32,12 +39,10 @@ def _get_users(force_reload = False):
         return _users
 
     temp_users = {}
-    # 默认的账号
-    temp_users["admin"] = Storage(name = "admin", 
-        password = "123456", 
-        salt = "",
-        mtime = "",
-        token = gen_new_token())
+
+    # 初始化默认的用户
+    _add_temp_user(temp_users, "admin")
+    _add_temp_user(temp_users, "test")
 
     user_list = dbutil.prefix_list("user")
     for user in user_list:
@@ -74,7 +79,10 @@ def find_by_name(name):
         return None
     users = _get_users()
     name = name.lower()
-    return users.get(name)
+    user_info = users.get(name)
+    if user_info != None:
+        return Storage(**user_info)
+    return None
 
 def get_user_config_dict(name):
     user = get_user(name)
@@ -114,9 +122,21 @@ def get_user_password(name):
     users = _get_users()
     return users[name]["password"]
 
+def get_user_password_md5(user_name, use_salt = True):
+    user     = get_user(user_name)
+    password = user.password
+    salt     = user.salt
+
+    if use_salt:
+        return encode_password(password, salt)
+    else:
+        return encode_password(password, None)
+
+
 def current_user():
     if xconfig.IS_TEST:
-        return get_user("admin")
+        return get_user("test")
+
     user = get_user_from_token()
     if user != None:
         return user
@@ -154,7 +174,7 @@ def get_md5_hex(pswd):
     pswd_md5.update(pswd.encode("utf-8"))
     return pswd_md5.hexdigest()
 
-def get_password_md5(password, salt):
+def encode_password(password, salt):
     # 加上日期防止cookie泄露意义不大
     # 考虑使用session失效检测或者定时提醒更新密码
     # password = password + xutils.format_date()
@@ -162,22 +182,18 @@ def get_password_md5(password, salt):
         password = ""
     pswd_md5 = hashlib.md5()
     pswd_md5.update(password.encode("utf-8"))
-    pswd_md5.update(salt.encode("utf-8"))
+
+    if salt != None:
+        pswd_md5.update(salt.encode("utf-8"))
     return pswd_md5.hexdigest()
 
 def write_cookie(name):
     web.setcookie("xuser", name, expires= 24*3600*30)
-    user     = get_user(name)
-    password = user.password
-    salt     = user.salt
-    pswd_md5 = get_password_md5(password, salt)
+    pswd_md5 = get_user_password_md5(name)
     web.setcookie("xpass", pswd_md5, expires=24*3600*30)
 
 def get_user_cookie(name):
-    user = get_user(name)
-    password = user.get("password")
-    salt = user.get("salt")
-    return "xuser=%s; xpass=%s;" % (name, get_password_md5(password, salt))
+    return "xuser=%s; xpass=%s;" % (name, get_user_password_md5(name))
 
 def gen_new_token():
     import uuid
@@ -216,12 +232,22 @@ def update_user(name, user):
     if mem_user is None:
         raise Exception("user not found")
 
+    password_old = mem_user.get("password")
     mem_user.update(user)
+
+    mem_user.mtime = xutils.format_time()
+    if password_old != user.get("password"):
+        # 修改密码
+        mem_user.salt = textutil.random_string(6)
+        mem_user.token = gen_new_token()
 
     dbutil.put("user:%s" % name, mem_user)
     xutils.trace("UserUpdate", mem_user)
 
     refresh_users()
+
+    # 刷新完成之后再发送消息
+    xmanager.fire("user.update", dict(user_name = name))
 
 def remove_user(name):
     if name == "admin":
@@ -260,7 +286,7 @@ def has_login(name=None):
     if user is None:
         return False
 
-    password_md5 = get_password_md5(user["password"], user["salt"])
+    password_md5 = encode_password(user["password"], user["salt"])
     return password_md5 == pswd_in_cookie
 
 def is_admin():
@@ -287,6 +313,12 @@ def login_required(user_name=None):
             return ret
         return handle
     return deco
+
+def get_user_data_dir(user_name, mkdirs = False):
+    fpath = os.path.join(xconfig.DATA_DIR, "files", user_name)
+    if mkdirs:
+        fsutil.makedirs(fpath)
+    return fpath
 
 xutils.register_func("user.get_config_dict", get_user_config_dict)
 xutils.register_func("user.get_config",      get_user_config)

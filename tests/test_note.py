@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2021/01/02 20:06:02
+# @modified 2021/02/15 23:21:15
 import xutils
 
 # cannot perform relative import
@@ -96,9 +96,6 @@ class TestMain(BaseTestCase):
         self.check_OK("/note/plan")
         self.check_OK("/note/list")
         self.check_OK("/note/html")
-
-    def test_note_notice(self):
-        self.check_OK("/note/notice")
 
     def test_note_timeline(self):
         self.check_200("/note/timeline")

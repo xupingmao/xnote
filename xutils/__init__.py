@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/01/17 10:54:44
+# @modified 2021/02/15 23:17:37
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -12,7 +12,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 from threading import current_thread
-from .imports import *
+from xutils.imports import *
 
 # xnote工具
 import xutils.textutil as textutil
@@ -22,7 +22,6 @@ import xutils.logutil as logutil
 import xutils.dateutil as dateutil
 import xutils.htmlutil as htmlutil
 
-# from . import textutil, ziputil, fsutil, logutil, dateutil, htmlutil
 from xutils.ziputil import *
 from xutils.netutil import splithost, http_get, http_post
 from xutils.textutil import edit_distance, get_short_text, short_text
@@ -71,11 +70,6 @@ def print_exc():
     return exc_info
 
 print_stacktrace = print_exc
-
-def print_web_ctx_env():
-    for key in web.ctx.env:
-        print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
-
 
 def print_table_row(row, max_length):
     for item in row:
@@ -210,7 +204,7 @@ def attrget(obj, attr, default_value = None):
 ### DB Utilities
 
 def db_execute(path, sql, args = None):
-    from xconfig import Storage
+    from xutils.base import Storage
     db = sqlite3.connect(path)
     cursorobj = db.cursor()
     kv_result = []
@@ -384,11 +378,21 @@ def say(msg):
         # 防止调用语音API的程序没有正确处理循环
         time.sleep(0.5)
 
-def exec_python_code(name, code, 
+def exec_python_code(
+        name, 
+        code, 
         record_stdout = True, 
         raise_err     = False, 
         do_gc         = True, 
         vars          = None):
+    """执行python代码
+    @param {string} name 脚本的名称
+    @param {string} code 脚本代码
+    @param {bool} record_stdout 是否记录标准输出
+    @param {bool} raise_err 是否抛出异常
+    @param {bool} do_gc 是否执行GC
+    @param {dict} vars 执行的参数
+    """
     ret = None
     try:
         if vars is None:

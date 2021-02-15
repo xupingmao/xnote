@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2020/09/05 15:13:24
+# @modified 2021/02/15 23:51:27
 import web
 import xauth
 import xtemplate
@@ -41,6 +41,19 @@ class UserHandler:
             name = name,
             user_info = user_info, 
             user_dict = xauth.get_users())
+
+    @xauth.login_required("admin")
+    def POST(self):
+        name     = xutils.get_argument("name")
+        password = xutils.get_argument("password")
+        user_info = xauth.get_user(name)
+        if user_info is None:
+            raise Exception("用户不存在:%s" % name)
+
+        user_info.password = password
+        xauth.update_user(name, user_info)
+
+        raise web.seeother("/system/user?name=%s" % name)
 
 class AddHandler:
 

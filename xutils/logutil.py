@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/01/08 01:27:44
+# @modified 2021/02/15 23:08:44
 import logging
 import time
 import inspect
@@ -9,34 +9,6 @@ import os
 from xutils import fsutil
 from xutils.dateutil import format_time
 from xutils.imports import u
-
-# def get_prefix():
-#     return time.strftime("%Y-%m-%d %H:%M:%S")
-
-# def debug(fmt, *argv):
-#     msg = fmt.format(*argv)
-#     prefix = get_prefix()
-#     print(prefix, msg)
-
-# def info(fmt, *argv):
-#     msg = fmt.format(*argv)
-#     prefix = get_prefix()
-#     print(prefix, msg)
-
-# def warn(fmt, *argv):
-#     msg = fmt.format(*argv)
-#     prefix = get_prefix()
-#     print(prefix, msg)
-
-# def error(fmt, *argv):
-#     msg = fmt.format(*argv)
-#     prefix = get_prefix()
-#     print(prefix, msg)
-
-# def fatal(fmt, *argv):
-#     msg = fmt.format(*argv)
-#     prefix = get_prefix()
-#     print(prefix, msg)
 
 def async_func_deco():
     """同步调用转化成异步调用的装饰器"""
@@ -60,8 +32,27 @@ def init_logger():
     # logger = logging.getLogger('')
     # logger.setLevel(logging.INFO)
     # logger.addHandler(fileshandle)
-
     # logger.info("logger inited!")
+
+class SimpleLogger:
+
+    def __init__(self, metric):
+        self.metric = metric
+
+    def trace(message, cost=0):
+        trace(self.metric, message, cost)
+
+    def info(message, cost=0):
+        info(self.metric, message, cost)
+
+    def warn(message, cost=0):
+        warn(self.metric, message, cost)
+
+    def error(message, cost=0):
+        error(self.metric, message, cost)
+
+def get_logger(name):
+    return SimpleLogger(name)
 
 def get_log_path(level = "INFO"):
     import xconfig

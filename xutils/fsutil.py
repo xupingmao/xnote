@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2021/01/10 18:38:19
+# @modified 2021/02/15 11:17:28
 # 说明：文件工具分为如下部分：
 # 1、path处理，比如判断是否是父级目录
 # 2、文件操作，比如读写文件，创建目录
@@ -603,16 +603,25 @@ def listdir_abs(dirname):
     pathlist = sorted(pathlist)
     return pathlist
 
+def _parse_line(line):
+    if line == None:
+        return None
+    line = line.strip()
+    if line == "":
+        return None
+    if line[0] == "#":
+        return None
+    return line
+
 def load_list_config(fpath):
     """加载列表配置文件"""
     text = readfile(fpath)
     lines = text.split("\n")
     result = []
     for line in lines:
-        line = line.strip()
-        if line[0] == '#':
-            continue
-        result.append(line)
+        line = _parse_line(line)
+        if line != None:
+            result.append(line)
     return result
 
 def load_set_config(fpath):
@@ -621,10 +630,9 @@ def load_set_config(fpath):
     lines = text.split("\n")
     result = set()
     for line in lines:
-        line = line.strip()
-        if line[0] == '#':
-            continue
-        result.add(line)
+        line = _parse_line(line)
+        if line != None:
+            result.add(line)
     return result
 
 

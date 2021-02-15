@@ -63,6 +63,7 @@
 - webpy(修改版，xnote内置)
 - tornado template(修改版，xnote内置)
 - sqlite3 (Python自带文件型数据库)
+- wsgidav 支持webdav的功能，用于挂载网络磁盘
 - psutil(可选，采集系统运行数据)
 - comtypes(可选，用于调用微软语音API)
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/24 16:39:45
-# @modified 2020/07/05 18:32:13
+# @modified 2021/02/15 23:20:21
 
 import sys
 import time
@@ -33,7 +33,7 @@ class TestXauth(BaseTestCase):
 
         users = xauth.refresh_users()
         print(users)
-        self.assertEqual(2, len(users))
+        self.assertEqual(3, len(users))
 
         # 删除用户
         xauth.remove_user("u123456")
