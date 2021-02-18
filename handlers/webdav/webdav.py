@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/14 15:26:54
-# @modified 2021/02/16 01:04:23
+# @modified 2021/02/16 11:36:40
 import web
 import xauth
 import xmanager
@@ -79,7 +79,7 @@ WEBDAV_CONFIG = {
 
     "dir_browser": {
         "enable": True,
-        "icon": True
+        # "icon": True,
     },
 
     "lock_manager": True,

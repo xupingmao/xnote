@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/02/15 23:17:37
+# @modified 2021/02/18 13:54:01
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -551,6 +551,9 @@ def call(_func_name, *args, **kw):
 
 def lookup_func(name):
     return _funcs[name]
+
+def get_func_dict():
+    return _funcs.copy()
 
 class Module:
     """Module封装"""

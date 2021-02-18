@@ -53,7 +53,7 @@ TABLES = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/02/14 11:11:55
+# @modified 2021/02/18 13:59:40
 ###########################################################
 
 class DBException(Exception):
@@ -252,6 +252,10 @@ def get(key):
     except KeyError:
         return None
 
+def obj_to_json(obj):
+    # ensure_ascii默认为True，会把非ascii码的字符转成\u1234的格式
+    return json.dumps(obj, ensure_ascii=False)
+
 def put(key, obj_value, sync = False):
     check_leveldb()
     table_name = key.split(":")[0]
@@ -260,8 +264,8 @@ def put(key, obj_value, sync = False):
         raise DBException("table %s not registered!" % table_name)
     
     key = key.encode("utf-8")
-    # 注意json序列化有个问题，会把数字开头的key转成字符串
-    value = json.dumps(obj_value)
+    # 注意json序列化有个问题，会把dict中数字开头的key转成字符串
+    value = obj_to_json(obj_value)
     # print("Put %s = %s" % (key, value))
     _leveldb.Put(key, value.encode("utf-8"), sync = sync)
 

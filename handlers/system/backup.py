@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2019/06/28 01:02:27
+# @modified 2021/02/18 14:10:47
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -42,7 +42,7 @@ def zip_xnote(nameblacklist = [_zipname]):
             path = os.path.join(root, fname)
             try:
                 st = os.stat(path)
-                if st.st_size > config.MAX_FILE_SIZE:
+                if st.st_size > xconfig.MAX_FILE_SIZE:
                     continue
             except:
                 continue
@@ -137,7 +137,7 @@ def chk_db_backup():
     xutils.zip_dir(dirname, destfile)
 
 
-class handler:
+class BackupHandler:
 
     @xauth.login_required("admin")
     def GET(self):
@@ -149,3 +149,6 @@ class handler:
     
 # chk_backup()
 
+xurls = (
+    r"/system/backup", BackupHandler,
+)

@@ -2,7 +2,7 @@
 # 专门用来import各种依赖
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
-# @modified 2021/01/01 01:11:43
+# @modified 2021/02/17 20:08:34
 from __future__ import print_function
 import sys
 import os
@@ -109,7 +109,7 @@ def quote_unicode(url):
     #    数字符号    #
     # 根据最新的RFC3986，方括号[]也是非转义字符
     # JavaScript的encodeURIComponent会编码+,&,=等字符
-    def quote_char(c):
+    def quote_char_by_code(c):
         # ASCII 范围 [0-127]
         # 32=空格
         if c == 32: 
@@ -120,10 +120,10 @@ def quote_unicode(url):
 
     if six.PY2:
         bytes = url
-        return ''.join([quote_char(ord(c)) for c in bytes])
+        return ''.join([quote_char_by_code(ord(c)) for c in bytes])
     else:
         bytes = url.encode("utf-8")
-        return ''.join([quote_char(c) for c in bytes])
+        return ''.join([quote_char_by_code(c) for c in bytes])
 
     # def urlencode(matched):
     #     text = matched.group()

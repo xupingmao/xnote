@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/02/14 10:47:09
+# @modified 2021/02/17 19:52:44
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -1173,6 +1173,28 @@ def get_note_stat(user_name):
         stat = refresh_note_stat(user_name)
     return stat
 
+def get_gallery_path(note):
+    import xconfig
+    # 新的位置, 增加一级子目录（100个，二级子目录取决于文件系统，最少的255个，最多无上限，也就是最少2.5万个相册，对于一个用户应该够用了）
+    note_id = str(note.id)
+    if len(note_id) < 2:
+        second_dir = ("00" + note_id)[-2:]
+    else:
+        second_dir = note_id[-2:]
+    standard_dir = os.path.join(xconfig.UPLOAD_DIR, note.creator, "gallery", second_dir, note_id)
+    if os.path.exists(standard_dir):
+        return standard_dir
+    # TODO 归档的位置
+    # 老的位置
+    fpath = os.path.join(xconfig.UPLOAD_DIR, note.creator, str(note.parent_id), note_id)
+    if os.path.exists(fpath):
+        # 修复数据另外通过工具实现
+        return fpath
+
+    # 如果依然不存在，创建一个地址
+    fsutil.makedirs(standard_dir)
+    return standard_dir
+
 # write functions
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
@@ -1247,6 +1269,7 @@ xutils.register_func("note.delete_comment", delete_comment)
 
 # stat
 xutils.register_func("note.get_note_stat", get_note_stat)
+xutils.register_func("note.get_gallery_path", get_gallery_path)
 
 
 

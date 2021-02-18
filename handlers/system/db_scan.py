@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2021/02/14 11:12:32
+# @modified 2021/02/18 14:01:30
 import xutils
 import xtemplate
 from xutils import dbutil
@@ -41,10 +41,16 @@ SCAN_HTML = """
 
 <div class="card">
     <table class="table">
+        <tr>
+            <th>主键</th>
+            <th>值</th>
+            <th>操作</th>
+        </tr>
         {% for key, value in result %}
             <tr>
                 <td style="width:20%">{{key}}</td>
-                <td style="width:80%">{{value}}</td>
+                <td style="width:60%">{{value}}</td>
+                <td style="width:20%"></td>
             </tr>
         {% end %}
     </table>

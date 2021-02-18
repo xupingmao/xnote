@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2021/01/31 21:04:18
+# @modified 2021/02/18 11:09:04
 import re
 import random
 import json
@@ -146,12 +146,25 @@ def is_cjk(c):
         return True
     return False
 
-"""Methods to parse the text
-   Built-in methods
-   - split, rsplit, splitlines
-   - strip, lstrip, rstrip
-   - partition, rpartition
-   - ljust, rjust, center
+def is_number(value):
+    try:
+        float(value)
+        return True
+    except:
+        return False
+
+def is_json(value):
+    try:
+        json.loads(value)
+        return True
+    except:
+        return False
+
+"""解析文本的方法
+- split, rsplit, splitlines
+- strip, lstrip, rstrip
+- partition, rpartition
+- ljust, rjust, center
 """
 
 
@@ -283,7 +296,7 @@ def replace(text, origin, dest, ignore_case = False, use_template = False):
         return new_text
 
 def like(text, pattern):
-    """
+    """这个其实就是通配符，参考 fnmatch 模块
         >>> like("hello,world", "hello*")
         True
         >>> like ("yes", "y?s")
@@ -639,6 +652,25 @@ def escape_html(text):
     text = text.replace("'", "&#39;")
     text = text.replace("\n", "<br/>")
     return text
+
+
+def try_split_key_value(line, token=":"):
+    if line is None:
+        return None, None
+    line = line.strip()
+    if line.startswith("#"):
+        return None, None
+    cols = line.split(token, 1)
+    if len(cols) != 2:
+        return None, None
+    return cols[0].strip(), cols[1].strip()
+
+def split_key_value(line):
+    for token in (":", "=", " "):
+        key, value = try_split_key_value(line, token)
+        if key != None:
+            return key, value
+    return None, None
 
 if __name__ == '__main__':
     import doctest

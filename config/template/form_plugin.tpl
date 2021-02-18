@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 # @since $since
 # @author $author
+# @version 1.0.0
 # @category 文件
 # @title 插件名称
 # @description 插件描述

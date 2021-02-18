@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2021/02/15 11:17:28
+# @modified 2021/02/17 19:51:10
 # 说明：文件工具分为如下部分：
 # 1、path处理，比如判断是否是父级目录
 # 2、文件操作，比如读写文件，创建目录
@@ -14,6 +14,7 @@ import base64
 import time
 from xutils.imports import *
 from xutils.base import Storage
+from fnmatch import fnmatch
 
 ENCODING_TUPLE = ("utf-8", "gbk", "mbcs", "latin_1")
 
@@ -682,26 +683,4 @@ def get_upload_file_path(user, filename, upload_dir = "files", replace_exists = 
         webpath = "/data/{}/{}/{}/{}".format(upload_dir, user, date, temp_filename)
         fileindex += 1
     return os.path.abspath(newfilepath), webpath
-
-def get_gallery_path(note):
-    import xconfig
-    # 新的位置, 增加一级子目录（100个，二级子目录取决于文件系统，最少的255个，最多无上限，也就是最少2.5万个相册，对于一个用户应该够用了）
-    note_id = str(note.id)
-    if len(note_id) < 2:
-        second_dir = ("00" + note_id)[-2:]
-    else:
-        second_dir = note_id[-2:]
-    standard_dir = os.path.join(xconfig.UPLOAD_DIR, note.creator, "gallery", second_dir, note_id)
-    if os.path.exists(standard_dir):
-        return standard_dir
-    # TODO 归档的位置
-    # 老的位置
-    fpath = os.path.join(xconfig.UPLOAD_DIR, note.creator, str(note.parent_id), note_id)
-    if os.path.exists(fpath):
-        # 修复数据另外通过工具实现
-        return fpath
-
-    # 如果依然不存在，创建一个地址
-    makedirs(standard_dir)
-    return standard_dir
 

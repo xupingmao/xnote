@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/02/15 23:22:02
+# @modified 2021/02/17 19:52:02
 import profile
 import math
 import re
@@ -56,7 +56,7 @@ def view_gallery_func(file, kw):
     filelist = []
     # 处理相册
     # print(file)
-    fpath = fsutil.get_gallery_path(file)
+    fpath = NOTE_DAO.get_gallery_path(file)
     # print(fpath)
     if fpath != None:
         filelist = fsutil.list_files(fpath, webpath = True)

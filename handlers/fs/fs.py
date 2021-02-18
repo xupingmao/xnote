@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2021/02/13 20:49:56
+# @modified 2021/02/17 20:09:09
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -129,14 +129,18 @@ class FileSystemHandler:
     def handle_content_type(self, path):
         """Content-Type设置, 优先级从高到低依次是：参数配置、系统配置、默认配置"""
         type = xutils.get_argument("type")
+        path = xutils.decode_name(path)
+
         if type == "text":
             web.header("Content-Type", 'text/plain; charset=utf-8')
             return
         if type == "blob":
             web.header("Content-Type", self.mime_types[""])
+            fname = os.path.basename(path)
+            fname = xutils.quote_unicode(fname)
+            web.header("Content-Disposition", "attachment; filename=\"%s\"" % fname)
             return
         
-        path = xutils.decode_name(path)
         name, ext = os.path.splitext(path)
         mime_type = self.mime_types.get(ext.lower())
         if mime_type is None:
