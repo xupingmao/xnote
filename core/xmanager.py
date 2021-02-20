@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/02/15 23:04:26
+# @modified 2021/02/19 17:18:15
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -590,12 +590,15 @@ def get_func_abs_name(func):
     if module is not None:
         return module.__name__ + "." + func.__name__
     else:
-        return "<string>." + func.__name__
+        # print(dir(func))
+        # print(func.__qualname__)
+        func_globals = func.__globals__
+        script_name  = func_globals.get("script_name", "unknown")
+        script_name  = xutils.unquote(script_name)
+        return script_name + "." + func.__name__
 
-    # filepath = inspect.getfile(func)
-    # filename = os.path.basename(filepath)
-    # basename, ext = os.path.splitext(filename)
-    # return basename + "." + func.__name__
+        # inspect.getfile(func)
+        # return "<string>." + func.__name__
 
 class EventManager:
     """事件管理器，每个事件由一个执行器链组成，执行器之间有一定的依赖性

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/02/15 19:39:41
+# @modified 2021/02/19 16:05:38
 
 '''xnote系统配置
 # 用户配置
@@ -74,7 +74,7 @@ PAGE_WIDTH    = "1150"
 USER_CSS      = None
 USER_JS       = None
 
-# 插件相关
+# 插件相关 具体的代码参考 handlers/plugins 目录
 LOAD_PLUGINS_ON_INIT = True
 PLUGINS_DICT         = {}
 PLUGIN_TEMPLATE      = ""

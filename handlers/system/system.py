@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2020/08/22 21:55:18
+# @modified 2021/02/19 15:56:23
 """System functions"""
 from io import StringIO
 import xconfig
@@ -145,7 +145,7 @@ class AdminHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        return xtemplate.render("system/page/admin.html")
+        return xtemplate.render("system/page/system_admin.html")
 
 class ReloadHandler:
     @xauth.login_required("admin")

@@ -20,6 +20,9 @@
 # 类命名
 
 - 首字母大写驼峰命名，示例: `MyClass`
+- 领域+性质(类型)，示例:
+    - NoteHandlerBase 笔记处理器的基类
+    - NoteListHandler 笔记列表处理器
 
 # 函数命名
 

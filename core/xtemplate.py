@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/02/14 10:56:46
+# @modified 2021/02/20 11:39:07
 import os
 import json
 import web
@@ -390,7 +390,7 @@ class BasePlugin:
     rows        = 20  
     
     # 插件模板路径
-    html_template_path = "plugins/base/base_plugin.html"
+    html_template_path = "plugin/base/base_plugin.html"
 
     def __init__(self):  
         # 提交请求的方法
@@ -537,10 +537,14 @@ BaseTextPlugin = BasePlugin
 
 class BaseFormPlugin(BasePlugin):
     # html模板路径
-    html_template_path = "plugins/base/base_form_plugin.html"
+    html_template_path = "plugin/base/base_form_plugin.html"
 
     def get_input_template(self):
         raise NotImplementedError()
 
+
+class PluginBase(BasePlugin):
+    """这种命名规则更好一些 [领域-组成部分]"""
+    pass
 
 

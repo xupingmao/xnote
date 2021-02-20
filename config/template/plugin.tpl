@@ -6,6 +6,9 @@
 # @title 插件名称
 # @description 插件描述
 # @required_role admin
+# @tags system test
+# @status active
+# @icon_class fa-cube
 import os
 import re
 import math
@@ -27,10 +30,9 @@ BODY_HTML = """
 
 class Main(BasePlugin):
 
-    title    = "Hello_World"
-    category = "system"
-    # 输入框的行数
-    rows     = 0
+    title    = "Hello_World" # 插件的名称
+    category = "system"      # 插件的分类
+    rows     = 0             # 输入框的行数
     
     def handle(self, input):
         self.writehtml(BODY_HTML)

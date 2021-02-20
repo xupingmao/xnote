@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2021/02/17 19:51:10
+# @modified 2021/02/19 15:23:34
 # 说明：文件工具分为如下部分：
 # 1、path处理，比如判断是否是父级目录
 # 2、文件操作，比如读写文件，创建目录
@@ -39,6 +39,7 @@ def get_real_path(path):
     return path
 
 def get_real_path_encode_first(path):
+    """获取真实路径，优先使用encode版本的path"""
     quoted = quote_unicode(path)
     if os.path.exists(quoted):
         return quoted

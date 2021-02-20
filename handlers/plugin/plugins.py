@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/02/13 20:42:09
+# @modified 2021/02/20 11:35:34
 from io import StringIO
 import xconfig
 import codecs
@@ -95,6 +95,7 @@ def load_plugin_file(fpath, fname = None):
     vars["fpath"] = fpath
 
     try:
+        meta   = xutils.load_script_meta(fpath)
         module = xutils.load_script(fname, vars, dirname = dirname)
         main_class = vars.get("Main")
         if main_class != None:
@@ -113,6 +114,7 @@ def load_plugin_file(fpath, fname = None):
             context.clazz         = main_class
             context.edit_link     = "code/edit?path=" + fpath
             context.link          = context.url
+            context.meta          = meta
 
             # 初始化插件
             if hasattr(main_class, 'on_init'):
@@ -416,7 +418,7 @@ def search_plugins(key):
     return dictvalues(result)
 
 
-class PluginsListHandler:
+class PluginListHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -438,14 +440,13 @@ class PluginsListHandler:
             else:
                 plugins = []
 
-        return xtemplate.render("plugins/page/plugins_v3.html", 
-            category   = category,
-            html_title = "插件",
-            header     = header,
-            show_aside = xconfig.OPTION_STYLE == "aside",
+        return xtemplate.render("plugin/page/plugins_v3.html", 
+            category    = category,
+            html_title  = "插件",
+            header      = header,
             search_type = "plugin",
-            recent     = recent,
-            plugins    = plugins)
+            recent      = recent,
+            plugins     = plugins)
 
 def get_plugin_category(category):
     plugin_categories = []
@@ -469,7 +470,7 @@ def get_plugin_category(category):
     plugin_categories.append(["其他", other_plugins])
     return plugin_categories
 
-class PluginsGridHandler:
+class PluginGridHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -486,7 +487,7 @@ class PluginsGridHandler:
             plugins = build_inner_tools()
             plugin_categories.append(["默认工具", plugins])
 
-        return xtemplate.render("plugins/page/plugins_v2.html", 
+        return xtemplate.render("plugin/page/plugins_v2.html", 
             category = category,
             html_title = "插件",
             plugin_categories = plugin_categories)
@@ -509,7 +510,7 @@ class LoadPluginHandler:
                 # 渲染页面
                 return plugin.clazz().render()
             else:
-                # 删除日志
+                # 加载插件失败，删除日志
                 delete_visit_log(user_name, name, url)
                 return xtemplate.render("error.html", 
                     error = "plugin `%s` not found!" % name)
@@ -558,8 +559,8 @@ xutils.register_func("plugin.find_plugins", find_plugins)
 xutils.register_func("plugin.add_visit_log", add_visit_log)
 
 xurls = (
-    r"/plugins_list_new", PluginsGridHandler,
-    r"/plugins_list", PluginsListHandler,
+    r"/plugins_list_new", PluginGridHandler,
+    r"/plugins_list", PluginListHandler,
     r"/plugins_log", PluginLogHandler,
     r"/plugins/(.+)", LoadPluginHandler,
     r"/tools/(.+)", LoadInnerToolHandler,

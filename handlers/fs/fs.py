@@ -1,12 +1,14 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2021/02/17 20:09:09
+# @modified 2021/02/20 12:02:30
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
 2. 文件浏览器
 3. 文件下载，支持断点续传
 4. 文件上传
+
+PS. 类似的功能可以参考 webdav
 """
 import os
 import mimetypes
@@ -332,6 +334,12 @@ class FileSystemHandler:
         return self.handle_get(path)
         
 
+class DownloadHandler(FileSystemHandler):
+    pass
+
+class GetFileHandler(FileSystemHandler):
+    pass
+
 class StaticFileHandler(FileSystemHandler):
     allowed_prefix = ["static", "img", "app", "files", "tmp", "scripts"]
 
@@ -361,7 +369,7 @@ class StaticFileHandler(FileSystemHandler):
         if not os.path.isfile(path):
             # 静态文件不允许访问文件夹
             web.ctx.status = "404 Not Found"
-            return "Not Readable %s" % path
+            return "Invalid File Path: %s" % path
         return self.handle_get(path)
 
 class RemoveAjaxHandler:
@@ -644,7 +652,8 @@ xurls = (
     r"/fs_bookmark", BookmarkHandler,
 
     r"/fs/(.*)", FileSystemHandler,
-    r"/fs_download", FileSystemHandler,
+    r"/fs_download", DownloadHandler,
+    r"/fs_get"     , GetFileHandler,
     r"/(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
     r"/(app/.*)", StaticFileHandler,

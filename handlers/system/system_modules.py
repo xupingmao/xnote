@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2020/05/04 21:26:10
+# @modified 2021/02/19 15:54:07
 import six
 import xutils
 import xtemplate
@@ -42,14 +42,6 @@ def query_modules():
             # Py2中出现这种情况
             six.print_("%s is None" % modname)
     return sorted(modules)
-
-class handler(object):
-    
-    def GET(self):
-        return xtemplate.render("system/page/module_list.html", 
-            show_aside = False,
-            modules = query_modules(),
-            sys = sys)
 
 class DocInfo:
 
@@ -129,9 +121,17 @@ class ModuleDetailHandler(object):
             show_aside = False,
             doc_info = doc_info)
 
+class ModuleListHandler(object):
+    
+    def GET(self):
+        return xtemplate.render("system/page/module_list.html", 
+            show_aside = False,
+            modules = query_modules(),
+            sys = sys)
+
 xurls = (
-    r"/system/pydoc", handler,
-    r"/system/modules_info", handler,
+    r"/system/pydoc", ModuleListHandler,
+    r"/system/modules_info", ModuleListHandler,
     r"/system/document", ModuleDetailHandler
 )
         

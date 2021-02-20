@@ -5,9 +5,9 @@
 {% init header = "normal" %}
 
 {% if header == "note" %}
-    {% include plugins/header/note_header.html %}
+    {% include plugin/header/plugin_header_note.html %}
 {% else %}
-    {% include plugins/header/normal_header.html %}
+    {% include plugin/header/plugin_header_normal.html %}
 {% end %}
 
 <div class="card">

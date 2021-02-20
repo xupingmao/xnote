@@ -56,37 +56,42 @@
 {% end %}
 
 {% if op != "edit" %}
-<div>
-<form action="/system/script/search" method="GET">
-    <input type="button" value="添加" id="addBtn"/>
-</form>
-</div>
+    <div class="card">
+        <div class="card-title">
+            <span>脚本管理</span>
+            <div class="float-right">
+                <form action="/system/script/search" method="GET">
+                    <input type="button" value="添加" id="addBtn"/>
+                </form>
+            </div>
+        </div>
+    </div>
 {% end %}
 
 {% if op == "edit" %}
-<div class="card">
-    <!-- <h3>{{name}}</h3> -->
-    {% set title = name %}
-    {% include "tools/base_title.html" %}
-    {# 编辑 #}
-    <form method="POST" action="/system/script_admin/save">
-        <div id="editorArea" class="col-md-12">
-            <input type="text" name="name" value="{{name}}" class="hide">
-            <textarea id="editor" class="col-md-12" name="content" rows=10>{{content}}</textarea>
-        </div>
-        <div class="col-md-12">
-            <input type="submit" id="save" class="btn" value="保存"/>
-            <input type="button" id="rename" class="btn renameScript" value="重命名"/>
-            <input type="button" scriptName="{{name}}" class="executeScript btn" value="执行"/>
-        </div>
-    </form>
+    <div class="card">
+        <!-- <h3>{{name}}</h3> -->
+        {% set title = name %}
+        {% include "tools/base_title.html" %}
+        {# 编辑 #}
+        <form method="POST" action="/system/script_admin/save">
+            <div id="editorArea" class="col-md-12">
+                <input type="text" name="name" value="{{name}}" class="hide">
+                <textarea id="editor" class="col-md-12" name="content" rows=10>{{content}}</textarea>
+            </div>
+            <div class="col-md-12">
+                <input type="submit" id="save" class="btn" value="保存"/>
+                <input type="button" id="rename" class="btn renameScript" value="重命名"/>
+                <input type="button" scriptName="{{name}}" class="executeScript btn" value="执行"/>
+            </div>
+        </form>
 
-    <div id="resultDiv" class="col-md-12">
-        <div class="output-title">结果</div>
-        <pre id="result" class="output-body col-md-12">
-        </pre>
+        <div id="resultDiv" class="col-md-12">
+            <div class="output-title">结果</div>
+            <pre id="result" class="output-body col-md-12">
+            </pre>
+        </div>
     </div>
-</div>
 
     <script>
         $(function () {
@@ -98,20 +103,22 @@
 
 {% else %}
     {% comment 列表 %}
-    <table class="table col-md-12 top-offset-1">
-        {% for index, script in enumerate(shell_list) %}
-            <tr>
-                <td class="index-td">{{index+1}}</td>
-                <td>
-                    <a href="/system/script/edit?name={{script}}">{{script}}</a>
-                </td>
-                <td class="option-td">
-                    <input type="button" value="删除" class="deleteScript btn btn-danger" scriptName="{{script}}"/>
-                    <input type="button" value="执行" class="executeScript btn" scriptName="{{script}}"/> 
-                </td>
-            </tr>
-        {% end %}
-    </table>
+    <div class="card">
+        <table class="table col-md-12 top-offset-1">
+            {% for index, script in enumerate(shell_list) %}
+                <tr>
+                    <td class="index-td">{{index+1}}</td>
+                    <td>
+                        <a href="/system/script/edit?name={{script}}">{{script}}</a>
+                    </td>
+                    <td class="option-td">
+                        <input type="button" value="删除" class="deleteScript btn btn-danger" scriptName="{{script}}"/>
+                        <input type="button" value="执行" class="executeScript btn" scriptName="{{script}}"/> 
+                    </td>
+                </tr>
+            {% end %}
+        </table>
+    </div>
 {% end %}
 
 <script type="text/javascript">
