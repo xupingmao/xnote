@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/02/06 17:29:18
+# @modified 2021/02/21 18:02:06
 import xutils
 import xconfig
 import xmanager
@@ -162,6 +162,23 @@ def list_people_page(user, offset, limit, key = None):
     amount   = dbutil.prefix_count("message:%s" % user, filter_func)
     return msg_list, amount
 
+
+def list_phone_page(user, offset, limit, key = None):
+    pattern = re.compile(r"([0-9]+)")
+    def filter_func(key, value):
+        if value.content is None:
+            return False
+        result = pattern.findall(value.content)
+        for item in result:
+            if len(item) == 11:
+                return True
+        return False
+
+    msg_list = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    # TODO 后续可以用message_stat加速
+    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+    return msg_list, amount
+
 def get_filter_by_tag_func(tag):
     def filter_func(key, value):
         if tag is None or tag == "all":
@@ -310,6 +327,7 @@ xutils.register_func("message.list_file", list_file_page)
 xutils.register_func("message.list_link", list_link_page)
 xutils.register_func("message.list_book", list_book_page)
 xutils.register_func("message.list_people", list_people_page)
+xutils.register_func("message.list_phone", list_phone_page)
 xutils.register_func("message.list_by_tag",  list_by_tag)
 xutils.register_func("message.list_by_date", list_by_date)
 

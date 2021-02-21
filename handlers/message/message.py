@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/02/14 10:56:12
+# @modified 2021/02/21 17:54:25
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -206,21 +206,16 @@ class ListAjaxHandler:
 
             cost_time  = functions.second_to_ms(time.time() - start_time)
             MSG_DAO.add_search_history(user_name, key, cost_time)
-        elif tag == "file":
-            # 文件
-            chatlist, amount = MSG_DAO.list_file(user_name, offset, pagesize)
-        elif tag == "link":
-            # 链接
-            chatlist, amount = MSG_DAO.list_link(user_name, offset, pagesize)
-        elif tag == "book":
-            chatlist, amount = MSG_DAO.list_book(user_name, offset, pagesize)
-        elif tag == "people":
-            chatlist, amount = MSG_DAO.list_people(user_name, offset, pagesize)
-        else:
-            if tag == "task" or tag == "key":
-                pagesize = 1000
+        elif tag == "task" or tag == "key":
+            pagesize = 1000
             chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
-            
+        else:
+            list_func = xutils.lookup_func("message.list_%s" % tag)
+            if list_func != None:
+                chatlist, amount = list_func(user_name, offset, pagesize)
+            else:
+                chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
+
         page_max = math.ceil(amount / pagesize)
 
         parser = MessageListParser(chatlist)

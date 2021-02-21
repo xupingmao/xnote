@@ -1,0 +1,38 @@
+{% extends base %}
+
+{% block head %}
+<style type="text/css">
+    .option-td {
+        width: 25%;
+    }
+</style>
+
+{% end %}
+
+{% block body %}
+    <div class="card">
+        <div class="card-title">
+            <span>我的动态</span>
+            
+            <div class="float-right">
+                <!-- 右侧控制区 -->
+                <a class="btn btn-default" href="/note/tools">笔记工具</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card">
+        <!-- <a class="tab-link x-tab" href="/note/recent?orderby=all">全部</a> -->
+        <a class="tab-link x-tab" href="/note/recent?orderby=view">查看</a>
+        <a class="tab-link x-tab" href="/note/recent?orderby=create">创建</a>
+        <a class="tab-link x-tab" href="/note/recent?orderby=update">更新</a>
+        <a class="tab-link x-tab" href="/note/recent?orderby=hot">常用</a>
+    </div>
+
+    {% include note/component/note_list_component.html %}
+{% end %}
+
+{% block aside %}
+    {% include note/component/mod_aside.html %}
+{% end %}

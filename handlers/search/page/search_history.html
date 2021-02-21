@@ -2,14 +2,19 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2020/06/23 10:31:21
+@modified 2021/02/21 17:06:01
 -->
 
 {% block body %}
 
     <div class="col-md-12 card">
-        {% set title = "搜索历史" %}
-        {% include common/base_title.html %}
+        <div class="card-title">
+            <span>搜索历史</span>
+
+            <div class="float-right">
+                {% include common/button/back_button.html %}
+            </div>
+        </div>
 
         {% for value in recent %}
             <a class="tag-span" href="/note/timeline?type=search&key={{quote(value)}}">{{value}}</a>

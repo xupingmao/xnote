@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2021/02/13 10:46:41
+ * @modified 2021/02/21 16:58:32
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
  * 2：复杂样式，命名规则为：模块名(可选)-功能外观-子功能外观(可选)-实现方式(可选)-特征或状态(可选)，示例如下：
@@ -829,7 +829,7 @@ li.menu-item:hover {
     text-align: right;
 }
 
-.input-group input, select {
+.input-group input, .input-group select {
     width: 160px;
 }
 

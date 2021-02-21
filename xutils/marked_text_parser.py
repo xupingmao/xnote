@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/10 14:36:09
-# @modified 2021/01/31 21:31:18
+# @modified 2021/02/21 17:27:38
 
 """标记文本解析"""
 import os
@@ -149,10 +149,11 @@ class TextParserBase(object):
         end = self.find_blank()
         if end < 0:
             found = self.text[self.i:]
+            # 全部读完，当前索引处于有效范围外
             self.i = self.length
         else:
             found = self.text[self.i:end]
-            # 当前处于空白字符前的一个字符
+            # 位于第一个空白字符
             self.i = end
         return found
 

@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2021/02/14 10:51:20
+@modified 2021/02/21 17:02:36
 -->
 
 {% block body %}
@@ -11,8 +11,6 @@
 {% init recent = [] %}
 {% init tools = [] %}
 {% init show_path = False %}
-
-{% comment include common/search_tab.html %}
 
 <div id="executeResult">
 </div>
@@ -32,6 +30,10 @@
         {% set title = "高级搜索" %}
         {% include common/base_title.html %}
     </div>
+
+
+    {% include search/component/search_tab.html %}
+
     
     {% if len(tools) > 0 %}
         <div class="card">

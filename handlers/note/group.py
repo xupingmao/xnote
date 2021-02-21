@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/02/17 19:52:17
+# @modified 2021/02/21 16:42:33
 import math
 import time
 import web
@@ -419,7 +419,7 @@ class RecentHandler:
         
         count   = NOTE_DAO.count_user_note(creator)
         
-        return xtemplate.render("note/page/recent.html",
+        return xtemplate.render("note/page/note_recent.html",
             pathlist  = type_node_path(html_title, ""),
             html_title = html_title,
             file_type  = "group",

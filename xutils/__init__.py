@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/02/19 16:47:32
+# @modified 2021/02/21 17:47:35
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -376,9 +376,9 @@ class RecordList:
     def most(self, count):
         return []
 
-_funcs = dict()
+_FUNC_DICT = dict()
 def register_func(name, func):
-    _funcs[name] = func
+    _FUNC_DICT[name] = func
 
 def call(_func_name, *args, **kw):
     """调用函数
@@ -386,13 +386,13 @@ def call(_func_name, *args, **kw):
     @param {nargs} *args 可变参数
     @param {kwargs} **kw 关键字参数
     """
-    return _funcs[_func_name](*args, **kw)
+    return _FUNC_DICT[_func_name](*args, **kw)
 
-def lookup_func(name):
-    return _funcs[name]
+def lookup_func(func_name):
+    return _FUNC_DICT.get(func_name)
 
 def get_func_dict():
-    return _funcs.copy()
+    return _FUNC_DICT.copy()
 
 class Module:
     """Module封装"""
@@ -405,7 +405,7 @@ class Module:
         if func:
             return func
         method = self.domain + "." + key
-        func = _funcs[method]
+        func = _FUNC_DICT[method]
         self._meth[method] = func
         return func
 # DAO是模块的别名
