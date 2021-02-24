@@ -232,11 +232,12 @@ def update_user(name, user):
     if mem_user is None:
         raise Exception("user not found")
 
+    password_new = user.get("password")
     password_old = mem_user.get("password")
     mem_user.update(user)
 
     mem_user.mtime = xutils.format_time()
-    if password_old != user.get("password"):
+    if password_new != None and password_old != password_new:
         # 修改密码
         mem_user.salt = textutil.random_string(6)
         mem_user.token = gen_new_token()
