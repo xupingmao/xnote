@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/02/20 11:35:34
+# @modified 2021/02/27 14:49:06
 from io import StringIO
 import xconfig
 import codecs
@@ -49,7 +49,31 @@ from xutils import textutil, SearchResult, dateutil, dbutil, u
 
 """
 
+PLUGIN_TYPES = list()
+
 dbutil.register_table("plugin_visit_log", "插件访问日志")
+
+class PluginType:
+
+    def __init__(self, code, name):
+        self.code = code
+        self.name = name
+
+
+def define_plugin_type(code, name, raise_duplication = True):
+    global PLUGIN_TYPES
+    for item in PLUGIN_TYPES:
+        if item.code == code:
+            if raise_duplication:
+                raise Exception("code: %s is defined" % code)
+            else:
+                return
+        if item.name == name:
+            if raise_duplication:
+                raise Exception("name: %s is defined" % name)
+            else:
+                return
+    PLUGIN_TYPES.append(PluginType(code, name))
 
 class PluginContext(Storage):
 
@@ -280,11 +304,24 @@ def list_all_plugins(user_name, sort = True):
         return sorted_plugins(user_name, links)
     return links
 
+def list_other_plugins(user_name, sort = True):
+    plugins = list_all_plugins(user_name, sort)
+    defined_types = set()
+    for item in PLUGIN_TYPES:
+        defined_types.add(item.code)
+
+    result = []
+    for plugin in plugins:
+        if plugin.category not in defined_types:
+            result.append(plugin)
+    return result
+
+
 def list_plugins(category, sort = True):
     user_name = xauth.current_name()
 
     if category == "other":
-        plugins = find_plugins(None)
+        plugins = list_other_plugins(user_name)
         links   = build_plugin_links(plugins)
     elif category and category != "all":
         # 某个分类的插件
@@ -417,6 +454,14 @@ def search_plugins(key):
             result[p.url] = p
     return dictvalues(result)
 
+def get_template_by_version(version):
+    if version == "1":
+        return "plugin/page/plugins_v1.html"
+    if version == "2":
+        return "plugin/page/plugins_v2.html"
+
+    # 最新版本
+    return "plugin/page/plugins_v3.html"
 
 class PluginListHandler:
 
@@ -425,6 +470,7 @@ class PluginListHandler:
         category = xutils.get_argument("category", "")
         key      = xutils.get_argument("key", "")
         header   = xutils.get_argument("header", "")
+        version  = xutils.get_argument("version", "")
 
         if xauth.is_admin():
             if key != "" and key != None:
@@ -440,13 +486,15 @@ class PluginListHandler:
             else:
                 plugins = []
 
-        return xtemplate.render("plugin/page/plugins_v3.html", 
-            category    = category,
-            html_title  = "插件",
-            header      = header,
-            search_type = "plugin",
-            recent      = recent,
-            plugins     = plugins)
+        template_file = get_template_by_version(version)
+        return xtemplate.render(template_file, 
+            category     = category,
+            html_title   = "插件",
+            header       = header,
+            search_type  = "plugin",
+            plugin_types = PLUGIN_TYPES,
+            recent       = recent,
+            plugins      = plugins)
 
 def get_plugin_category(category):
     plugin_categories = []
@@ -557,6 +605,12 @@ def reload_plugins(ctx):
 
 xutils.register_func("plugin.find_plugins", find_plugins)
 xutils.register_func("plugin.add_visit_log", add_visit_log)
+
+define_plugin_type("note", u"笔记")
+define_plugin_type("dir",  u"文件")
+define_plugin_type("system",  u"系统")
+define_plugin_type("network", u"网络")
+define_plugin_type("develop", u"开发")
 
 xurls = (
     r"/plugins_list_new", PluginGridHandler,

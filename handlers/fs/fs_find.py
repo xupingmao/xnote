@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2021/02/14 11:35:09
+# @modified 2021/02/27 16:09:15
 import os
 import sys
 import glob
@@ -165,6 +165,8 @@ class IndexHandler:
             index_size = index_size,
             action = action, 
             cost = cost)
+
+xutils.register_func("fs.get_index_dirs", get_index_dirs)
 
 xurls = (
     r"/fs_find", SearchHandler,

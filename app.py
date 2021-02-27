@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2021/02/14 15:51:18
+# @modified 2021/02/27 15:05:04
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -50,7 +50,7 @@ def handle_args():
     parser.add_argument("--port", default=DEFAULT_PORT)
     parser.add_argument("--webbrowser", default="no")
     parser.add_argument("--debug", default="yes")
-    parser.add_argument("--minthreads", default="10")
+    parser.add_argument("--minthreads", default="15")
     parser.add_argument("--useCacheSearch", default="no")
     parser.add_argument("--useUrlencode", default="no")
     parser.add_argument("--devMode", default="no")

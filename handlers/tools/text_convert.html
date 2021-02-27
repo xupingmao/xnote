@@ -23,11 +23,16 @@
 {% block body %}
 <!-- 
 @since 2016/12/18
-@modified 2020/02/15 18:30:47
+@modified 2021/02/27 14:48:07
 -->
 
 <div class="card">
-    <h3 class="card-title">文本转换</h3>
+    <h3 class="card-title">
+        <span>文本转换</span>
+        <div class="float-right">
+            {% include common/button/back_button.html %}
+        </div>
+    </h3>
     <div class="col-md-12 error hide" id="error"></div>
 
     <div class="container col-md-6">
