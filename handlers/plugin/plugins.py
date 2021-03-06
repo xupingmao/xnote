@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/03/06 17:11:10
+# @modified 2021/03/06 17:39:48
 from io import StringIO
 import xconfig
 import codecs
@@ -83,6 +83,14 @@ def define_plugin_category(code, name, url = None, raise_duplication = True):
 def get_plugin_category_list():
     global PLUGIN_CATEGORY_LIST
     return PLUGIN_CATEGORY_LIST
+
+def get_category_url_by_code(code):
+    if code is None:
+        return "/plugins_list?category=all"
+    for item in PLUGIN_CATEGORY_LIST:
+        if item.code == code:
+            return item.url
+    return "/plugins_list?category=%s" % code
 
 class PluginContext(Storage):
 
@@ -244,28 +252,34 @@ def index_plugin(name, url):
 def file_plugin(name, url):
     return inner_plugin(name, url, "dir")
 
+def dev_plugin(name, url):
+    return inner_plugin(name, url, "develop")
+
 INNER_TOOLS = [
     # 工具集/插件集
     index_plugin("笔记工具集合", "/note/tools"),
     index_plugin("文件工具集合", "/fs_tools"),
 
-    inner_plugin("浏览器信息", "/tools/browser_info"),
+    dev_plugin("浏览器信息", "/tools/browser_info"),
     # 文本
-    inner_plugin("文本对比", "/tools/text_diff"),
-    inner_plugin("文本转换", "/tools/text_convert"),
-    inner_plugin("随机字符串", "/tools/random_string"),
+    dev_plugin("文本对比", "/tools/text_diff"),
+    dev_plugin("文本转换", "/tools/text_convert"),
+    dev_plugin("随机字符串", "/tools/random_string"),
+
     # 图片
-    inner_plugin("图片合并", "/tools/img_merge"),
-    inner_plugin("图片拆分", "/tools/img_split"),
-    inner_plugin("图像灰度化", "/tools/img2gray"),
+    dev_plugin("图片合并", "/tools/img_merge"),
+    dev_plugin("图片拆分", "/tools/img_split"),
+    dev_plugin("图像灰度化", "/tools/img2gray"),
+
     # 编解码
-    inner_plugin("base64", "/tools/base64"),
-    inner_plugin("HEX转换", "/tools/hex"),
-    inner_plugin("md5签名", "/tools/md5"),
-    inner_plugin("sha1签名", "/tools/sha1"),
-    inner_plugin("URL编解码", "/tools/urlcoder"),
-    inner_plugin("条形码", "/tools/barcode"),
-    inner_plugin("二维码", "/tools/qrcode"),
+    dev_plugin("base64", "/tools/base64"),
+    dev_plugin("HEX转换", "/tools/hex"),
+    dev_plugin("md5签名", "/tools/md5"),
+    dev_plugin("sha1签名", "/tools/sha1"),
+    dev_plugin("URL编解码", "/tools/urlcoder"),
+    dev_plugin("条形码", "/tools/barcode"),
+    dev_plugin("二维码", "/tools/qrcode"),
+    
     # 其他工具
     inner_plugin("分屏模式", "/tools/multi_win"),
     inner_plugin("RunJS", "/tools/runjs"),
@@ -638,7 +652,8 @@ def reload_plugins(ctx):
 
 xutils.register_func("plugin.find_plugins", find_plugins)
 xutils.register_func("plugin.add_visit_log", add_visit_log)
-xutils.register_func("plugin.get_plugin_category_list", get_plugin_category_list)
+xutils.register_func("plugin.get_category_list", get_plugin_category_list)
+xutils.register_func("plugin.get_category_url_by_code", get_category_url_by_code)
 
 define_plugin_category("note", u"笔记", url = "/note/tools")
 define_plugin_category("dir",  u"文件", url = "/fs_tools")

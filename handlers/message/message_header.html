@@ -5,6 +5,7 @@
     <div class="card-title btn-line-height">
         <span>{{title}}</span>
         <div class="float-right">
+            <a class="btn btn-default show-topic-btn" href="#">关键字</a>
             <a class="btn btn-default" href="/note/tools">工具</a>
             <a class="btn btn-default" href="/note/group">笔记</a>
         </div>
@@ -54,3 +55,5 @@ $(function() {
     $("[data-tag=" + tag + "]").addClass("tab-link-active");
 });
 </script>
+
+{% include message/component/show_topic_dialog.html %}

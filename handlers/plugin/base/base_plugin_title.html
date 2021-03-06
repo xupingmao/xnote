@@ -1,3 +1,5 @@
+{% init category_url = xutils.call("plugin.get_category_url_by_code", model.category) %}
+
 {% if model.html_header != None %}
     <!-- 自定义Header -->
     {% raw model.html_header %}
@@ -6,7 +8,7 @@
     <div class="plugin-head card">
         <div class="card-title btn-line-height">
             {% if model.show_category and model.category %}
-                <a class="link2" href="/plugins_list?category={{model.category}}">{{model.category_name}}</a>
+                <a class="link2" href="{{category_url}}">{{model.category_name}}</a>
                 <span>/</span>
             {% end %}
             <span>{{title}}</span>

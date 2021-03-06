@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/02/21 17:54:25
+# @modified 2021/03/06 18:09:37
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -486,8 +486,7 @@ class MessageHandler:
 
         xmanager.add_visit_log(user, "/message?tag=%s" % tag)
 
-        return xtemplate.render("message/message.html", 
-            show_aside         = False,
+        return xtemplate.render("message/page/message.html", 
             show_tab           = show_tab,
             category           = "message",
             search_type        = "message",
@@ -507,7 +506,7 @@ class CalendarHandler:
         stat = MSG_DAO.get_message_stat(user)
         stat = format_message_stat(stat)
 
-        return xtemplate.render("message/calendar.html", 
+        return xtemplate.render("message/page/calendar.html", 
             show_aside = False,
             message_stat = stat,
             search_type = "message")

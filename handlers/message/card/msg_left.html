@@ -19,10 +19,13 @@
         空空如也~
     </div>
 
+    <!--
+    关键字通过弹窗的方式实现了，参考 show_topic_dialog.html 
     <div class="card" v-if="messageKeywords.length != 0">
         <div class="card-title">关键字</div>
         <a class="tag-span" v-for="word in messageKeywords" v-bind:href="word.url">{{!word.name}}</a>
     </div>
+    -->
 
     <div class="card" v-for="message in messageList">
         <div class="chat-avatar col-md-12">

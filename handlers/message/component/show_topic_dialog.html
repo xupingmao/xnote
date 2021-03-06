@@ -1,0 +1,24 @@
+<script type="text/javascript">
+$(function () {
+    var keywords = [];
+    var dialogIndex = 0;
+    // xnote.showDialog(title, html);
+
+    $(".show-topic-btn").click(function () {
+        var html = $("<div>");
+        for (var i = 0; i < keywords.length; i++) {
+            var word = keywords[i];
+            html.append($("<a>")
+                .addClass("tag-span")
+                .text(word.name)
+                .attr("href", word.url));
+        }
+        dialogIndex = xnote.showDialog("列表中的关键字", html.html(), ["确认", "取消"]);
+    });
+
+    // 监听关键字更新消息
+    xnote.on("msg.keywords.update", function (e) {
+        keywords = e.target;
+    });
+});
+</script>

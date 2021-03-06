@@ -43,10 +43,10 @@ class Main(BasePlugin):
 
     title    = "Hello_World"
     category = "system"
+    # 设置为0，不展示输入框
+    rows     = 0
     
     def handle(self, input):
-        # 输入框的行数
-        self.rows = 0
         self.writehtml(HTML)
 
 ```
