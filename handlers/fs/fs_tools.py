@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/12/08 01:46:35
-# @modified 2021/01/01 21:34:32
+# @modified 2021/03/06 16:55:30
 # -*- coding:utf-8 -*-
 # @since 2018-11-22 00:46:26
 import os
@@ -31,6 +31,8 @@ HEADER = """
         </div>
     </div>
 </div>
+
+{% include plugin/header/plugin_category.html %}
 """
 
 HTML = '''
@@ -49,7 +51,7 @@ HTML = '''
 
 class Main(BasePlugin):
 
-    title = "文件类工具"
+    title = u"文件工具"
     category = "dir"
     rows = 0
     editable = False

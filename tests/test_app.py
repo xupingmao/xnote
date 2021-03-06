@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/02/15 23:19:40
+# @modified 2021/03/06 16:57:59
 
 import sys
 import os
@@ -302,6 +302,9 @@ class Main:
 
     def test_plugins_list(self):
         self.check_200("/plugins_list")
+
+    def test_plugins_other(self):
+        self.check_OK("/plugins_list?category=other")
 
     def test_plugins_new_plugin(self):
         self.check_OK("/plugins_new?input=tpl-test")

@@ -53,7 +53,7 @@ TABLE_DICT = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/03/06 12:39:16
+# @modified 2021/03/06 15:32:38
 ###########################################################
 
 class DBException(Exception):
@@ -447,6 +447,7 @@ def delete_op_log(log_id):
 
 
 def rename_table(old_name, new_name):
+    # TODO 还没实现
     for key, value in prefix_iter(old_name, include_key = True):
         name, rest = key.split(":", 1)
         new_key = new_name + ":" + rest

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/03/06 11:04:12
+# @modified 2021/03/06 17:11:10
 from io import StringIO
 import xconfig
 import codecs
@@ -50,20 +50,24 @@ from xutils import textutil, SearchResult, dateutil, dbutil, u
 
 """
 
-PLUGIN_TYPES = list()
+PLUGIN_CATEGORY_LIST = list()
 
 dbutil.register_table("plugin_visit_log", "插件访问日志")
 
-class PluginType:
-
-    def __init__(self, code, name):
+class PluginCategory:
+    """插件类型"""
+    def __init__(self, code, name, url = None):
         self.code = code
         self.name = name
+        if url is None:
+            self.url = "/plugins_list?category=%s" % self.code
+        else:
+            self.url = url
 
 
-def define_plugin_type(code, name, raise_duplication = True):
-    global PLUGIN_TYPES
-    for item in PLUGIN_TYPES:
+def define_plugin_category(code, name, url = None, raise_duplication = True):
+    global PLUGIN_CATEGORY_LIST
+    for item in PLUGIN_CATEGORY_LIST:
         if item.code == code:
             if raise_duplication:
                 raise Exception("code: %s is defined" % code)
@@ -74,7 +78,11 @@ def define_plugin_type(code, name, raise_duplication = True):
                 raise Exception("name: %s is defined" % name)
             else:
                 return
-    PLUGIN_TYPES.append(PluginType(code, name))
+    PLUGIN_CATEGORY_LIST.append(PluginCategory(code, name, url))
+
+def get_plugin_category_list():
+    global PLUGIN_CATEGORY_LIST
+    return PLUGIN_CATEGORY_LIST
 
 class PluginContext(Storage):
 
@@ -93,6 +101,8 @@ class PluginContext(Storage):
         self.clazz         = None
         self.priority      = 0
         self.icon          = "fa fa-cube"
+        self.author        = None
+        self.version       = None
 
     # sort方法重写__lt__即可
     def __lt__(self, other):
@@ -101,6 +111,20 @@ class PluginContext(Storage):
     # 兼容Python2
     def __cmp__(self, other):
         return cmp(self.title, other.title)
+
+    def load_from_meta(self, meta_dict):
+
+        def meta_value_to_str(meta_key):
+            meta_value = meta_dict.get(meta_key)
+            if meta_value == None:
+                return ""
+            else:
+                return "".join(meta_value)
+
+        self.title = meta_value_to_str("title")
+        self.description = meta_value_to_str("description")
+        self.author = meta_value_to_str("author")
+        self.version = meta_value_to_str("version")
 
 def is_plugin_file(fpath):
     return os.path.isfile(fpath) and fpath.endswith(".py")
@@ -129,6 +153,9 @@ def load_plugin_file(fpath, fname = None):
             main_class.fpath      = fpath
             instance              = main_class()
             context               = PluginContext()
+            # 读取meta信息
+            context.load_from_meta(meta)
+
             context.fname         = fname
             context.fpath         = fpath
             context.name          = os.path.splitext(fname)[0]
@@ -310,7 +337,7 @@ def list_all_plugins(user_name, sort = True):
 def list_other_plugins(user_name, sort = True):
     plugins = list_all_plugins(user_name, sort)
     defined_types = set()
-    for item in PLUGIN_TYPES:
+    for item in get_plugin_category_list():
         defined_types.add(item.code)
 
     result = []
@@ -468,6 +495,7 @@ def get_template_by_version(version):
     # 最新版本
     return "plugin/page/plugins_v3.html"
 
+
 class PluginListHandler:
 
     @logutil.timeit_deco(name = "PluginListHandler")
@@ -498,7 +526,6 @@ class PluginListHandler:
             html_title   = "插件",
             header       = header,
             search_type  = "plugin",
-            plugin_types = PLUGIN_TYPES,
             recent       = recent,
             plugins      = plugins)
 
@@ -611,12 +638,13 @@ def reload_plugins(ctx):
 
 xutils.register_func("plugin.find_plugins", find_plugins)
 xutils.register_func("plugin.add_visit_log", add_visit_log)
+xutils.register_func("plugin.get_plugin_category_list", get_plugin_category_list)
 
-define_plugin_type("note", u"笔记")
-define_plugin_type("dir",  u"文件")
-define_plugin_type("system",  u"系统")
-define_plugin_type("network", u"网络")
-define_plugin_type("develop", u"开发")
+define_plugin_category("note", u"笔记", url = "/note/tools")
+define_plugin_category("dir",  u"文件", url = "/fs_tools")
+define_plugin_category("system",  u"系统")
+define_plugin_category("network", u"网络")
+define_plugin_category("develop", u"开发")
 
 xurls = (
     r"/plugins_list_new", PluginGridHandler,

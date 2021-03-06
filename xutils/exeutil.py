@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/19 16:09:13
-# @modified 2021/02/19 16:50:19
+# @modified 2021/03/06 16:06:51
 
 
 """脚本执行相关的代码"""
@@ -208,6 +208,7 @@ def load_script_meta(fpath):
         if not line.startswith("@"):
             continue
 
+        line = line.lstrip("@")
         # 去掉注释部分
         meta_line  = line.split("#", 1)[0]
         # 拆分元数据

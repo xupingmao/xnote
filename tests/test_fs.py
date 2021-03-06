@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/11/29 14:45:21
-# @modified 2020/11/29 14:48:04
+# @modified 2021/03/06 17:10:24
 
 import sys
 import os
@@ -34,4 +34,7 @@ class TestMain(BaseTestCase):
 
     def test_fs_hex(self):
         self.check_OK("/fs/fs_hex")
-        self.check_OK("/fs/fs_hex?path=" + "./README.md")
+        self.check_OK("/fs/fs_hex?path=./README.md")
+
+    def test_fs_tools(self):
+        self.check_OK("/fs_tools")

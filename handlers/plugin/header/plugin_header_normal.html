@@ -1,5 +1,4 @@
 {% init baseurl = "/plugins_list" %}
-{% init plugin_types = [] %}
  
 <div class="card">
     <div class="card-title">
@@ -12,13 +11,4 @@
     </div>
 </div> 
 
-<div class="card">
-    <a class="tab tab-link x-tab x-tab-default" href="{{baseurl}}?category=all">全部</a>
-
-    {% for ptype in plugin_types %}
-        <a class="tab tab-link x-tab" href="{{baseurl}}?category={{ptype.code}}">{{ptype.name}}</a>
-    {% end %}
-    
-    <a class="tab tab-link x-tab" href="{{baseurl}}?category=other">其他</a>
-
-</div>
+{% include plugin/header/plugin_category.html %}
