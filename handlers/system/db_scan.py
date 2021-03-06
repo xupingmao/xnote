@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2021/02/21 17:11:51
+# @modified 2021/03/06 12:07:24
 import xutils
 import xtemplate
 from xutils import dbutil
@@ -101,7 +101,7 @@ class DbScanHandler(BasePlugin):
 
         self.writetemplate(SCAN_HTML, 
             result = result, 
-            table_dict = dbutil.get_registry_dict(), 
+            table_dict = dbutil.get_table_dict_copy(), 
             prefix = prefix,
             db_key = db_key,
             last_key = last_key[0]

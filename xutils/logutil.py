@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/02/15 23:08:44
+# @modified 2021/03/06 12:40:59
 import logging
 import time
 import inspect
@@ -136,6 +136,9 @@ def log_init_deco(message):
 
 def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False):
     """简单的计时装饰器，可以指定执行次数"""
+    from xutils import dbutil
+    dbutil.register_table("log_timeit", "耗时统计日志")
+
     def deco(func):
         def handle(*args, **kw):
             t1 = time.time()
@@ -151,13 +154,14 @@ def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False):
                     message = message + "|" + str(ret)
                 trace(name, message, int((t2-t1)*1000))
             else:
-                print(name, "cost time: ", int((t2-t1)*1000), "ms")
+                print("[timeit]", name, "cost time: ", int((t2-t1)*1000), "ms")
             return ret
         return handle
     return deco
 
 def profile_deco():
     """Profile装饰器,打印信息到标准输出,不支持递归函数"""
+    import xconfig
     def deco(func):
         def handle(*args, **kw):
             if xconfig.OPEN_PROFILE:

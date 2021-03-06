@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/02/17 19:52:44
+# @modified 2021/03/06 12:14:22
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -37,20 +37,24 @@ from xutils import readfile, savetofile, sqlite3, Storage
 from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
 from xutils import attrget
 
-dbutil.register_table("note_full", "笔记完整信息 <note_full:note_id>")
-dbutil.register_table("note_index", "笔记索引，不包含内容 <note_index:note_id>")
-dbutil.register_table("note_tiny", "用户维度的笔记索引 <note_tiny:user:note_id>")
-dbutil.register_table("notebook", "笔记分组")
-dbutil.register_table("token", "用于分享的令牌")
-dbutil.register_table("note_history", "笔记的历史版本")
-dbutil.register_table("note_comment", "笔记的评论")
-dbutil.register_table("comment_index", "用户维度的评论索引")
+def register_note_table(name, description):
+    dbutil.register_table(name, description, "note")
+
+register_note_table("note_full", "笔记完整信息 <note_full:note_id>")
+register_note_table("note_index", "笔记索引，不包含内容 <note_index:note_id>")
+register_note_table("note_tiny", "用户维度的笔记索引 <note_tiny:user:note_id>")
+register_note_table("notebook", "笔记分组")
+register_note_table("token", "用于分享的令牌")
+register_note_table("note_history", "笔记的历史版本")
+register_note_table("note_comment", "笔记的评论")
+register_note_table("comment_index", "用户维度的评论索引")
+register_note_table("note_create_log", "笔记创建日志")
+register_note_table("note_edit_log", "笔记编辑日志")
+register_note_table("note_visit_log", "笔记访问日志")
+register_note_table("note_public", "公共笔记索引")
+register_note_table("note_tags", "笔记标签 <note_tags:user:note_id>")
+
 dbutil.register_table("search_history", "搜索历史")
-dbutil.register_table("note_create_log", "笔记创建日志")
-dbutil.register_table("note_edit_log", "笔记编辑日志")
-dbutil.register_table("note_visit_log", "笔记访问日志")
-dbutil.register_table("note_public", "公共笔记索引")
-dbutil.register_table("note_tags", "笔记标签 <note_tags:user:note_id>")
 
 DB_PATH         = xconfig.DB_PATH
 MAX_EDIT_LOG    = 500

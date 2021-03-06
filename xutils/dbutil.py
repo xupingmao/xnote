@@ -42,18 +42,18 @@ except ImportError:
     leveldb = None
 
 
-TIME_SEQ_LOCK = threading.Lock()
+WRITE_LOCK = threading.Lock()
 LAST_TIME_SEQ = -1
 
 # 注册的数据库表名，如果不注册，无法进行写操作
-TABLES = dict()
+TABLE_DICT = dict()
 
 ###########################################################
 # @desc db utilties
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/02/18 13:59:40
+# @modified 2021/03/06 12:39:16
 ###########################################################
 
 class DBException(Exception):
@@ -128,9 +128,10 @@ def escape(text):
     return "'" + text + "'"
 
 
-class LevelDBPy:
+class LevelDBProxy:
 
     def __init__(self, path):
+        """通过leveldbpy来实现leveldb的接口代理"""
         import leveldbpy
         self._db = leveldbpy.DB(path.encode("utf-8"), create_if_missing=True)
 
@@ -166,7 +167,7 @@ def init():
     if xutils.is_windows():
         os.environ["PATH"] += os.pathsep + "lib"
         import leveldbpy, xconfig
-        _leveldb = LevelDBPy(xconfig.DB_DIR)
+        _leveldb = LevelDBProxy(xconfig.DB_DIR)
     
     xutils.log("init leveldb done, leveldb = %s" % _leveldb)
 
@@ -195,10 +196,11 @@ class Table:
 
 def timeseq():
     # 加锁防止并发生成一样的值
+    # TODO 提高存储效率
     global LAST_TIME_SEQ
-    global TIME_SEQ_LOCK
+    global WRITE_LOCK
 
-    with TIME_SEQ_LOCK:
+    with WRITE_LOCK:
         t = int(time.time() * 1000)
         if t == LAST_TIME_SEQ:
             # 等于上次生成的值，说明太快了，sleep一下进行控速
@@ -237,11 +239,18 @@ def check_get_leveldb():
         raise Exception("leveldb not found!")
     return _leveldb
 
-def register_table(table_name, description):
-    TABLES[table_name] = description
+class TableInfo:
 
-def get_registry_dict():
-    return TABLES.copy()
+    def __init__(self, name, description, category):
+        self.name = name
+        self.description = description
+        self.category = category
+
+def register_table(table_name, description, category = "default"):
+    TABLE_DICT[table_name] = TableInfo(table_name, description, category)
+
+def get_table_dict_copy():
+    return TABLE_DICT.copy()
 
 def get(key):
     check_leveldb()
@@ -260,7 +269,7 @@ def put(key, obj_value, sync = False):
     check_leveldb()
     table_name = key.split(":")[0]
 
-    if table_name not in TABLES:
+    if table_name not in TABLE_DICT:
         raise DBException("table %s not registered!" % table_name)
     
     key = key.encode("utf-8")
@@ -436,11 +445,12 @@ def delete_op_log(log_id):
     """
     pass
 
-def encode_zscore_key(key, score):
-    pass
 
-def encode_zmember_key(key, member):
-    pass
+def rename_table(old_name, new_name):
+    for key, value in prefix_iter(old_name, include_key = True):
+        name, rest = key.split(":", 1)
+        new_key = new_name + ":" + rest
+
 
 def _zadd(key, score, member):
     # step1. write log

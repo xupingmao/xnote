@@ -356,5 +356,14 @@ class TestMain(unittest.TestCase):
         with lock1 as lock:
             self.assertFalse(lock2.acquire(timeout = 1))
 
+    def test_b64encode(self):
+        text_input = "测试1234"
+        text_output = xutils.b64encode(text_input)
+        self.assertEqual("5rWL6K-VMTIzNA", text_output)
+
+    def test_b64decode(self):
+        text_input = "5rWL6K-VMTIzNA"
+        text_output = xutils.b64decode(text_input)
+        self.assertEqual("测试1234", text_output)
 
         

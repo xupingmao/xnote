@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/02/27 14:49:06
+# @modified 2021/03/06 11:04:12
 from io import StringIO
 import xconfig
 import codecs
@@ -24,6 +24,7 @@ from xutils import History
 from xutils import cacheutil
 from xutils import Storage
 from xutils import fsutil
+from xutils import logutil
 from xutils import textutil, SearchResult, dateutil, dbutil, u
 
 
@@ -297,6 +298,8 @@ def sorted_plugins(user_name, plugins, orderby=None):
     rest_plugins = list(filter(lambda x:x.url not in recent_urls, plugins))
     return recent_plugins + rest_plugins
 
+
+@logutil.timeit_deco(name = "list_all_plugins")
 def list_all_plugins(user_name, sort = True):
     links = build_inner_tools()
     links += build_plugin_links(xconfig.PLUGINS_DICT.values())
@@ -317,6 +320,7 @@ def list_other_plugins(user_name, sort = True):
     return result
 
 
+@logutil.timeit_deco(name = "list_plugins")
 def list_plugins(category, sort = True):
     user_name = xauth.current_name()
 
@@ -335,17 +339,18 @@ def list_plugins(category, sort = True):
         return sorted_plugins(user_name, links)
     return links
 
-def find_plugin_by_url(url):
-    plugins = list_plugins("all", sort = False)
+def find_plugin_by_url(url, plugins):
     for p in plugins:
         if u(p.url) == u(url):
             return p
     return None
 
+@logutil.timeit_deco(name = "list_recent_plugins")
 def list_recent_plugins():
     user_name = xauth.current_name()
     items = list_visit_logs(user_name)
-    links = [find_plugin_by_url(log.url) for log in items]
+    plugins = list_all_plugins(user_name)
+    links = [find_plugin_by_url(log.url, plugins) for log in items]
 
     return list(filter(None, links))
 
@@ -465,6 +470,7 @@ def get_template_by_version(version):
 
 class PluginListHandler:
 
+    @logutil.timeit_deco(name = "PluginListHandler")
     @xauth.login_required()
     def GET(self):
         category = xutils.get_argument("category", "")

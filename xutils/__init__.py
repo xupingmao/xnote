@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/02/21 17:47:35
+# @modified 2021/03/06 11:56:18
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -24,11 +24,7 @@ import xutils.htmlutil as htmlutil
 
 from xutils.ziputil import *
 from xutils.netutil import splithost, http_get, http_post
-from xutils.textutil import edit_distance, get_short_text, short_text
-from xutils.textutil import text_contains, parse_config_text
-from xutils.textutil import tojson
-from xutils.textutil import mark_text
-
+from xutils.textutil import *
 from xutils.dateutil import *
 from xutils.netutil  import *
 from xutils.fsutil   import *
@@ -200,53 +196,6 @@ def obj2dict(obj):
             v[k] = getattr(obj, k)
     return v
 
-#################################################################
-##   Html Utilities, Python 2 do not have this file
-#################################################################
-
-def html_escape(s, quote=True):
-    """
-    Replace special characters "&", "<" and ">" to HTML-safe sequences.
-    If the optional flag quote is true (the default), the quotation mark
-    characters, both double quote (") and single quote (') characters are also
-    translated.
-    """
-    s = s.replace("&", "&amp;") # Must be done first!
-    s = s.replace("<", "&lt;")
-    s = s.replace(">", "&gt;")
-    if quote:
-        s = s.replace('"', "&quot;")
-        s = s.replace('\'', "&#x27;")
-    return s
-
-def urlsafe_b64encode(text):
-    """URL安全的base64编码，注意Python自带的方法没有处理填充字符=
-    @param {str} text 待编码的字符
-    """
-    b64result = base64.urlsafe_b64encode(text.encode("utf-8")).decode("utf-8")
-    return b64result.rstrip("=")
-
-
-def urlsafe_b64decode(text):
-    """URL安全的base64解码，注意Python自带的方法没有处理填充字符=
-    @param {str} text 编码后的字符
-    """
-    padding = len(text) % 4
-    text = text + '=' * padding
-    return base64.urlsafe_b64decode(text).decode("utf-8")
-
-b64encode = urlsafe_b64encode
-b64decode = urlsafe_b64decode
-
-def encode_uri_component(text):
-    # quoted = quote_unicode(text)
-    # quoted = quoted.replace("?", "%3F")
-    # quoted = quoted.replace("&", "%26")
-    # quoted = quoted.replace(" ", "%20")
-    # quoted = quoted.replace("=", "%3D")
-    # quoted = quoted.replace("+", "%2B")
-    # quoted = quoted.replace("#", "%23")
-    return quote(text)
 
 def get_safe_file_name(filename):
     """处理文件名中的特殊符号"""
@@ -254,8 +203,6 @@ def get_safe_file_name(filename):
         filename = filename.replace(c, "_")
     return filename
 
-def md5_hex(string):
-    return hashlib.md5(string.encode("utf-8")).hexdigest()
 
 #################################################################
 ##   Platform/OS Utilities, Python 2 do not have this file

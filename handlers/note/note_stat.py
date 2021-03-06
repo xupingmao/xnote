@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2020/12/27 16:21:24
+# @modified 2021/03/06 12:12:12
 import xauth
 import xutils
 import xmanager
@@ -13,7 +13,7 @@ HTML = """
 <style>
     .key { width: 75%; }
     .admin-stat { margin-top: 10px; }
-    .admin-stat-th { width: 33.33% }
+    .admin-stat-th { width: 25% }
 </style>
 
 <div class="card">
@@ -36,12 +36,14 @@ HTML = """
     <h3 class="card-title admin-stat">全局统计</h3>
     <table class="table">
         <tr>
+            <th class="admin-stat-th">类别</th>
             <th class="admin-stat-th">项目</th>
             <th class="admin-stat-th">说明</th>
             <th class="admin-stat-th">数量</th>
         </tr>
-        {% for key, description, value in admin_stat_list %}
+        {% for category, key, description, value in admin_stat_list %}
             <tr>
+                <td>{{category}}</td>
                 <td><a href="/system/db_scan?prefix={{key}}&reverse=true">{{key}}</a></td>
                 <td>{{description}}</td>
                 <td>{{value}}</td>
@@ -73,32 +75,11 @@ class StatHandler(BasePlugin):
         stat_list.append(["我的评论", dbutil.count_table("comment_index:%s" % user_name)])
         
         if xauth.is_admin():
-            table_names = sorted(dbutil.TABLES.keys())
-            for name in table_names:
-                admin_stat_list.append([name, dbutil.TABLES[name], dbutil.count_table(name)])
-
-            # admin_stat_list.append(["note_full", dbutil.count_table("note_full")])
-            # admin_stat_list.append(["note_tiny", dbutil.count_table("note_tiny")])
-            # admin_stat_list.append(["note_index", dbutil.count_table("note_index")])
-            # admin_stat_list.append(["note_public", dbutil.count_table("note_public")])
-            # admin_stat_list.append(["note_edit_log", dbutil.count_table("note_edit_log")])
-            # admin_stat_list.append(["note_visit_log", dbutil.count_table("note_visit_log")])
-            # admin_stat_list.append(["note_history", dbutil.count_table("note_history")])
-            # admin_stat_list.append(["note_comment", dbutil.count_table("note_comment")])
-            # admin_stat_list.append(["comment_index", dbutil.count_table("comment_index")])
-            # admin_stat_list.append(["notebook", dbutil.count_table("notebook")])
-            # admin_stat_list.append(["search_history", dbutil.count_table("search_history")])
-            # admin_stat_list.append(["message",  dbutil.count_table("message")])
-            # admin_stat_list.append(["msg_search_history", dbutil.count_table("msg_search_history")])
-            # admin_stat_list.append(["msg_history", dbutil.count_table("msg_history")])
-            # admin_stat_list.append(["msg_key", dbutil.count_table("msg_key")])
-            # admin_stat_list.append(["user_stat", dbutil.count_table("user_stat")])
-
-            # admin_stat_list.append(["schedule", dbutil.count_table("schedule")])
-            # admin_stat_list.append(["user", dbutil.count_table("user")])
-            # admin_stat_list.append(["record", dbutil.count_table("record")])
-            # admin_stat_list.append(["plugin_visit_log", dbutil.count_table("plugin_visit_log")])
-
+            table_dict = dbutil.get_table_dict_copy()
+            table_values = sorted(table_dict.values(), key = lambda x:x.category)
+            for table_info in table_values:
+                name = table_info.name
+                admin_stat_list.append([table_info.category, table_info.name, table_info.description, dbutil.count_table(name)])
         self.writetemplate(HTML, stat_list = stat_list, admin_stat_list = admin_stat_list)
 
 
