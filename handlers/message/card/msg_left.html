@@ -1,5 +1,5 @@
 <!-- 话题选择器 -->
-{% include message/component/topic_dialog.html %}
+{% include message/component/select_topic_dialog.html %}
 
 
 <!-- 编辑器 -->
@@ -26,6 +26,13 @@
         <a class="tag-span" v-for="word in messageKeywords" v-bind:href="word.url">{{!word.name}}</a>
     </div>
     -->
+
+    <div class="card toolbox btn-line-height">
+        <span>工具栏</span>
+        <div class="float-right">
+            <button class="show-topic-btn btn-default">关键字</button>
+        </div>
+    </div>
 
     <div class="card" v-for="message in messageList">
         <div class="chat-avatar col-md-12">
@@ -303,16 +310,16 @@
                 var self = this;
                 var id = $(el).attr("msg-id");
                 var content = $(el).attr("msg-content");
-                var check = confirm("确认删除 '%s' ?".format(content));
-                if (check) {                
+
+                xnote.confirm("确认删除 '%s' ?".format(content), function (result) {
                     $.post("/message/delete", {id: id}, function (resp) {
                         if (resp.code == "success") {
                             app.refreshMessage();
                         } else {
-                            alert(data.message);
+                            xnote.alert(data.message);
                         }
-                    });
-                }
+                    });                    
+                });
             },
 
             finishMessage: function (event) {

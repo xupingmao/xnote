@@ -167,21 +167,14 @@ $(function () {
         $.get("/system/command", {command: command, path: globalPath});
     })
 
-    window.removeFile = function(path) {
-        var pathlist = path;
+    function doDeleteFile(path) {
+        var pathlist;
         if (path instanceof Array) {
-            if (!confirm("确认删除%s个文件?".format(path.length))) {
-                return;
-            }
+            pathlist = path
         } else {
-            // 从path中获取文件名
-            var name = /([^\/\\]+)[\\\/]?$/.exec(path)[1];
-            name = decodeURI(name);
-            if (!confirm("确认删除 '%s' ?".format(name))) {
-                return;
-            }
-            pathlist = [path];
+            pathlist = [path]
         }
+
         var rest = pathlist.length;
         for (var i = 0; i < pathlist.length; i++) {
             rest--;
@@ -196,6 +189,22 @@ $(function () {
                 console.log(resp);
                 showErrorMessage("删除失败");
             })
+        }
+    }
+
+    window.removeFile = function(path) {
+        if (path instanceof Array) {
+            xnote.confirm("确认删除%s个文件?".format(path.length), function (result) {
+                doDeleteFile(path);
+            });
+        } else {
+            // 从path中获取文件名
+            var name = /([^\/\\]+)[\\\/]?$/.exec(path)[1];
+            name = decodeURI(name);
+
+            xnote.confirm("确认删除 '%s' ?".format(name), function (result) {
+                doDeleteFile(path);
+            });
         }
     }
 
