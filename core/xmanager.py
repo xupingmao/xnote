@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/02/19 17:18:15
+# @modified 2021/03/14 15:11:10
 
 """Xnote 模块管理器
  * 请求处理器加载和注册
@@ -245,11 +245,6 @@ class HandlerManager:
             mod = getattr(mod, name)
         return mod
         
-    def get_url(self, name):
-        namelist = name.split(".")
-        del namelist[0]
-        return "/" + "/".join(namelist)
-        
     def load_model_dir(self, parent = xconfig.HANDLERS_DIR):
         dirname = parent.replace(".", "/")
         if not os.path.exists(dirname):
@@ -309,11 +304,17 @@ class HandlerManager:
         elif hasattr(module, "handler"):
             self.resolve_module_old(module, modname)
 
+    def get_url_old(self, name):
+        namelist = name.split(".")
+        del namelist[0]
+        return "/" + "/".join(namelist)
+
     def resolve_module_old(self, module, modname):
         name = modname
         handler = module.handler
         clz = name.replace(".", "_")
         self.vars[clz] = module.handler
+
         if hasattr(module.handler, "__url__"):
             url = module.handler.__url__
         elif hasattr(handler, "__xurl__"):
@@ -321,13 +322,17 @@ class HandlerManager:
         elif hasattr(handler, "xurl"):
             url = handler.xurl
         else:
-            url = self.get_url(name)
+            url = self.get_url_old(name)
+
         self.add_mapping(url, handler)
+        
         if hasattr(module, "searchable"):
             if not module.searchable:
                 return
+
         wm = WebModel()
         wm.url = url
+
         if hasattr(module, "searchkey"):
             wm.searchkey = module.searchkey
         if hasattr(module, "name"):
@@ -335,15 +340,18 @@ class HandlerManager:
         if hasattr(module, "description"):
             wm.description = module.description
         wm.init()
+
         self.model_list.append(wm)
 
     def load_task(self, module, name):
-        if hasattr(module, "task"):
-            task = module.task
-            if hasattr(task, "taskname"):
-                taskname = task.taskname
-                self.task_dict[taskname] = task()
-                log("Load task (%s,%s)" % (taskname, module.__name__))
+        if not hasattr(module, "task"):
+            return
+
+        task = module.task
+        if hasattr(task, "taskname"):
+            taskname = task.taskname
+            self.task_dict[taskname] = task()
+            log("Load task (%s,%s)" % (taskname, module.__name__))
 
     def get_mapping(self):
         return self.mapping

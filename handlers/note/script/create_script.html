@@ -74,7 +74,7 @@ function createGroup() {
         createOption._format = "json";
         $.post("/note/create", createOption, function (resp) {
             if (resp.code == "success") {
-                window.location.reload();
+                window.location = resp.url;
             } else {
                 alert(opName + "失败:" + resp.message);
             }

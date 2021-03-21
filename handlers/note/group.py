@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/02/21 16:42:33
+# @modified 2021/03/21 18:28:29
 import math
 import time
 import web
@@ -192,13 +192,13 @@ class GroupListHandler:
         group_cards = [
             ("", fixed_books),
             ("置顶", sticky_groups),
-            ("普通", normal_groups),
+            ("笔记本", normal_groups),
             ("归档", archived_groups),
         ]
 
         return xtemplate.render("note/page/group_list.html", 
             file = root, 
-            title = u"笔记本",
+            title = u"我的笔记",
             pathlist = [root],
             show_path_list = True,
             show_size = True,
@@ -461,6 +461,8 @@ class ManagementHandler:
     def GET(self):
         parent_id = xutils.get_argument("parent_id", "0")
         user_name = xauth.current_name()
+
+        xmanager.add_visit_log(user_name, "/note/management")
 
         if parent_id == "0" or parent_id is None:
             parent_note = NOTE_DAO.get_root()

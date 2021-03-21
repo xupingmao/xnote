@@ -36,13 +36,13 @@
     <div class="grid-card">
         <h3 class="card-title btn-line-height">
             <span>文本预览</span>
-
-            {% if _is_admin and path != "" %}  
-                <div class="float-right">
+            <div class="float-right">
+                {% if _is_admin and path != "" %}
                     <a class="btn btn-default" href="/code/edit?path={{path}}&embed={{embed}}">编辑</a>
-                    <a class="btn btn-default" href="javascript:history.back()">返回</a>
-                </div>
-            {% end %}
+                {% end %}
+                
+                <a class="btn btn-default" href="javascript:history.back()">返回</a>
+            </div>
         </h3>
 
         {% if _is_admin and path != "" %}

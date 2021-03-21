@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/03/06 17:39:48
+# @modified 2021/03/21 18:12:45
 from io import StringIO
 import xconfig
 import codecs
@@ -152,18 +152,18 @@ def load_plugin_file(fpath, fname = None):
     vars["fpath"] = fpath
 
     try:
-        meta   = xutils.load_script_meta(fpath)
-        module = xutils.load_script(fname, vars, dirname = dirname)
+        meta    = xutils.load_script_meta(fpath)
+        module  = xutils.load_script(fname, vars, dirname = dirname)
+        context = PluginContext()
+        # 读取meta信息
+        context.load_from_meta(meta)
+
         main_class = vars.get("Main")
         if main_class != None:
             # 实例化插件
             main_class.fname      = fname
             main_class.fpath      = fpath
             instance              = main_class()
-            context               = PluginContext()
-            # 读取meta信息
-            context.load_from_meta(meta)
-
             context.fname         = fname
             context.fpath         = fpath
             context.name          = os.path.splitext(fname)[0]
@@ -234,7 +234,7 @@ def inner_plugin(name, url, category = "inner"):
     context.category = category
     return context
 
-def note_plugin(name, url, icon=None, size = None):
+def note_plugin(name, url, icon=None, size = None, required_role = "user"):
     context = PluginContext()
     context.name = name
     context.title = name
@@ -244,6 +244,7 @@ def note_plugin(name, url, icon=None, size = None):
     context.size  = size
     context.editable = False
     context.category = "note"
+    context.required_role = required_role
     return context
 
 def index_plugin(name, url):
@@ -288,11 +289,12 @@ INNER_TOOLS = [
     # 笔记工具
     note_plugin("置顶笔记", "/note/sticky", "fa-thumb-tack"),
     note_plugin("搜索历史", "/search/history", "fa-search"),
-    note_plugin("导入笔记", "/note/html_importer", "fa-internet-explorer"),
+    note_plugin("导入笔记", "/note/html_importer", "fa-internet-explorer", required_role = "admin"),
     note_plugin("日历视图", "/note/calendar", "fa-calendar"),
     note_plugin("时间视图", "/note/date", "fa-clock-o"),
     note_plugin("数据统计", "/note/stat", "fa-bar-chart"),
     note_plugin("上传管理", "/fs_upload", "fa-upload"),
+    note_plugin("笔记批量管理", "/note/management", "fa-gear"),
     note_plugin("回收站", "/note/removed", "fa-trash"),
     note_plugin("笔记本", "/note/group", "fa-th-large"),
     note_plugin("任务列表", "/message?tag=task", "fa-calendar-check-o"),
@@ -416,7 +418,7 @@ def update_visit_log(log, name):
     log.visit_cnt += 1
     dbutil.put(log.key, log)
 
-def add_visit_log(user_name, url, name = None):
+def add_visit_log(user_name, url, name = None, args = None):
     exist_log = find_visit_log(user_name, url)
     if exist_log != None:
         update_visit_log(exist_log, name)
@@ -425,6 +427,7 @@ def add_visit_log(user_name, url, name = None):
     log = Storage()
     log.name = name
     log.url  = url
+    log.args = args
     log.time = dateutil.format_datetime()
 
     dbutil.insert("plugin_visit_log:%s" % user_name, log)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2021/02/15 23:21:15
+# @modified 2021/03/21 17:49:31
 import xutils
 
 # cannot perform relative import
@@ -79,7 +79,10 @@ class TestMain(BaseTestCase):
         delete_note_for_test("name-test")
 
     def test_create_note_invalid_type(self):
-        result = json_request("/note/create", method = "POST", data = dict(type = "invalid", name = "invalid-test"))
+        result = json_request("/note/create", 
+            method = "POST", 
+            data = dict(type = "invalid", name = "invalid-test"))
+        
         self.assertEqual(xutils.u("无效的类型: invalid"), result["message"])
 
     def test_note_group_add_view(self):
@@ -239,7 +242,7 @@ class TestMain(BaseTestCase):
 
     def test_text_view(self):
         delete_note_for_test("text-test")
-        id = create_note_for_test("text", "text-test")
+        id = create_note_for_test("md", "text-test")
 
         self.check_OK("/note/%s" % id)
 

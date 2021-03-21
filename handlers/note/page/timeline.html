@@ -51,12 +51,12 @@
         {% end %}
     </div>
   </div>
-  {% include note/component/pathlist.html %}
+  {% include note/component/note_path.html %}
 
   
   <div class="note-timeline-body">
     <article v-if="itemList.length == 0">
-      <p>空空如也~</p>
+      {% include common/text/empty_text.html %}
     </article>
     
     <article class="row" v-for="item in itemList">

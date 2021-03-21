@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2021/01/02 21:59:42
+# @modified 2021/03/21 17:47:34
 
 """笔记编辑相关处理"""
 import os
@@ -128,7 +128,7 @@ class CreateHandler:
         tags      = xutils.get_argument("tags", "")
         key       = xutils.get_argument("key", "")
         content   = xutils.get_argument("content", "")
-        type      = xutils.get_argument("type", "md")
+        type0     = xutils.get_argument("type", "md")
         date      = xutils.get_argument("date", "")
         format    = xutils.get_argument("_format", "")
         parent_id = xutils.get_argument("parent_id", "0")
@@ -136,7 +136,7 @@ class CreateHandler:
         if key == "":
             key = time.strftime("%Y.%m.%d") + dateutil.current_wday()
 
-        type = NOTE_TYPE_MAPPING.get(type, type)
+        type = NOTE_TYPE_MAPPING.get(type0, type0)
 
         creator        = xauth.current_name()
         note           = Storage(name = name)
@@ -166,7 +166,7 @@ class CreateHandler:
         
         try:
             if type not in VALID_NOTE_TYPE_SET:
-                raise Exception(u"无效的类型: %s" % type)
+                raise Exception(u"无效的类型: %s" % type0)
 
             create_func = CREATE_FUNC_DICT.get(type, default_create_func)
             inserted_id = create_func(note, ctx)

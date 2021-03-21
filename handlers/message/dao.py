@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/02/21 18:02:06
+# @modified 2021/03/21 18:26:33
 import xutils
 import xconfig
 import xmanager
@@ -232,6 +232,9 @@ def list_by_tag(user, tag, offset, limit):
         amount = get_message_stat(user).key_count
     else:
         amount = count_by_tag(user, tag)
+
+    if amount is None:
+        amount = 0
     return chatlist, amount
 
 def list_by_date(user, date, offset = 0, limit = xconfig.PAGE_SIZE):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2021/01/17 11:28:32
+# @modified 2021/03/14 15:20:21
 
 import xauth
 import xtemplate
@@ -52,7 +52,7 @@ def list_note_types(user_name = None):
         NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
         NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
         NoteLink("表格", "/note/table", "fa-table", size = note_stat.table_count),
-        NoteLink("日志", "/note/log", "fa-file-text", size = note_stat.log_count),
+        # NoteLink("日志", "/note/log", "fa-file-text", size = note_stat.log_count),
         DictEntryLink(size = note_stat.dict_count),
     ]
 

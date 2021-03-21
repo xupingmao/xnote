@@ -15,10 +15,6 @@
 
 <!-- 内容列表 -->
 <div class="chat-box col-md-12">
-    <div class="card" v-if="messageList.length == 0">
-        空空如也~
-    </div>
-
     <!--
     关键字通过弹窗的方式实现了，参考 show_topic_dialog.html 
     <div class="card" v-if="messageKeywords.length != 0">
@@ -32,6 +28,11 @@
         <div class="float-right">
             <button class="show-topic-btn btn-default">关键字</button>
         </div>
+    </div>
+
+    <!-- 内容为空的提示 -->
+    <div class="card" v-if="messageList.length == 0">
+        {% include common/text/empty_text.html %}
     </div>
 
     <div class="card" v-for="message in messageList">

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/03/06 12:14:22
+# @modified 2021/03/21 18:32:58
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -722,8 +722,18 @@ def list_root_group(creator = None, orderby = "name"):
     sort_notes(notes, orderby)
     return notes
 
-def list_default_notes(creator, offset = 0, limit = -1, orderby = "mtime_desc"):
-    return list_by_parent(creator, 0, offset, limit, skip_group = True, orderby = orderby)
+def list_default_notes(creator, offset = 0, limit = 1000, orderby = "mtime_desc"):
+    # TODO 添加索引优化
+    def list_default_func(key, value):
+        if value.is_deleted:
+            return False
+        if value.type == "group":
+            return False
+        return value.creator == creator and str(value.parent_id) == "0"
+
+    notes = dbutil.prefix_list("note_tiny:", list_default_func)
+    sort_notes(notes, orderby)
+    return notes[offset:offset+limit]
 
 def count_group(creator):
     return dbutil.count_table("notebook:%s" % creator)
@@ -1004,7 +1014,7 @@ def list_removed(creator, offset, limit):
     sort_notes(notes)
     return notes
 
-def doc_filter_func(key, value):
+def document_filter_func(key, value):
     return value.type in ("md", "text", "html", "post", "log", "plan") and value.is_deleted == 0
 
 def table_filter_func(key, value):
@@ -1012,7 +1022,7 @@ def table_filter_func(key, value):
 
 def get_filter_func(type, default_filter_func):
     if type == "document" or type == "doc":
-        return doc_filter_func
+        return document_filter_func
     if type in ("csv", "table"):
         return table_filter_func
     return default_filter_func

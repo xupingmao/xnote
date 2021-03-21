@@ -11,6 +11,10 @@
     "edit": "更新了笔记"
 } %}
 
+{% if len(files) == 0 %}
+    {% include common/text/empty_text.html %}
+{% end %}
+
 {% for item in files %}
     <!-- 隐藏的记录 -->
     {% if hasattr(item, "hide") and item.hide %}

@@ -11,6 +11,7 @@ label {
     float: left;
     width: calc(100% - 80px);
 }
+
 </style>
 {% end %}
 
@@ -22,20 +23,20 @@ label {
     {% include note/component/create_note_header.html %}
 
     <form method="POST" action="">
-        <div class="row top-offset-1">
+        <div class="input-group-row">
             <label>{{T("标题")}}</label> 
-            <input type="text" class="mid-text" name="name" value="{{name}}" style="width:200px;"/>
+            <input type="text" class="mid-text" name="name" value="{{name}}"/>
         </div>
 
         <!-- 选择日期 -->
-        <div class="row top-offset-1">
+        <div class="input-group-row">
             <label>日期</label>
             <input name="date" id="selectDate" autocomplete="off" class="create-input"/>
         </div>
         
         
         {% if type != "group" %}
-            <div class="row top-offset-1">
+            <div class="input-group-row">
                 <label>{{T("类型")}}</label>
                 <select name="type" value="{{type}}">
                     {% for item in NOTE_TYPE_LIST %}
@@ -44,8 +45,8 @@ label {
                 </select>
             </div>
 
-            <div class="row top-offset-1">
-                <label>{{T("项目")}}</label>
+            <div class="input-group-row">
+                <label>{{T("笔记本")}}</label>
                 <select name="parent_id" value="{{parent_id}}">
                     {%for item in groups %}
                         <option value="{{item.id}}">{{item.name}}</option>

@@ -79,10 +79,11 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 
 ### 相关文档
 - [更新日志](./docs/changelog.md)
+- [系统架构](./docs/architecture.md)
+- [编码规范](./docs/code_style.md)
 - [插件扩展](./docs/plugins.md)
 - [搜索扩展](./docs/search_extension.md)
 - [命令扩展](./docs/commands.md)
-- [系统架构](./docs/architecture.md)
 
 ## 协议
 

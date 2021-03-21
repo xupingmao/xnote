@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2021/02/21 17:06:01
+@modified 2021/03/21 18:14:59
 -->
 
 {% block body %}
@@ -15,6 +15,10 @@
                 {% include common/button/back_button.html %}
             </div>
         </div>
+
+        {% if len(recent) == 0 %}
+            {% include common/text/empty_text.html %}
+        {% end %}
 
         {% for value in recent %}
             <a class="tag-span" href="/note/timeline?type=search&key={{quote(value)}}">{{value}}</a>

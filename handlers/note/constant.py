@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/02/16 12:49:30
-# @modified 2021/03/13 11:44:13
+# @modified 2021/03/14 15:19:15
 
 class NoteType:
 
@@ -14,6 +14,7 @@ NOTE_TYPE_MAPPING = {
     "text"    : "log",
     "post"    : "log",
     "sticky"  : "md",
+    "plan"    : "md",
 }
 
 NOTE_TYPE_LIST = [
@@ -23,8 +24,6 @@ NOTE_TYPE_LIST = [
     NoteType("csv"    , u"表格"),
     NoteType("list"   , u"清单"),
     NoteType("gallery", u"相册"),
-    NoteType("log"    , u"日志"),
-    NoteType("plan"   , u"计划"),
 ]
 
 NOTE_TYPE_DICT = {}

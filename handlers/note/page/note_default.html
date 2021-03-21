@@ -11,6 +11,10 @@
         </div>
     </div>
 
+    {% if len(notes) == 0 %}
+        {% include common/text/empty_text.html %}
+    {% end %}
+
     {% for item in notes %}
         <!-- 隐藏的记录 -->
         {% if hasattr(item, "hide") and item.hide %}

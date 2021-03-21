@@ -1,14 +1,5 @@
 {% init recent_update_notes = xutils.call("page.list_recent_notes", 10) %}
 
-<style type="text/css">
-    @media screen and (min-width: 1000px) {
-        /** desktop **/
-        .recent-notes {
-            min-height: 600px;
-        }
-    }
-</style>
-
 <div class="card recent-notes">
     <div class="card-title">
         <span>最近更新</span>
@@ -16,29 +7,34 @@
             <a class="btn btn-default" href="/note/recent?orderby=update">更多</a>
         </div>
     </div>
-{% for item in recent_update_notes %}
-    <!-- 隐藏的记录 -->
-    {% if hasattr(item, "hide") and item.hide %}
-        {% continue %}
+
+    {% if len(recent_update_notes) == 0 %}
+        <p class="align-center">空空如也~</p>
     {% end %}
 
-    <a class="list-link" href="{{item.url}}">
-        {% if item.priority>0 %}
-            <i class="fa fa-thumb-tack black"></i>
+    {% for item in recent_update_notes %}
+        <!-- 隐藏的记录 -->
+        {% if hasattr(item, "hide") and item.hide %}
+            {% continue %}
         {% end %}
 
-        <!-- 图标和标题 -->
-        <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
-        <span>{{item.name}}</span>
-        
-        {% if item.is_deleted %}
-            <span class="gray-tag-span" href="/note/removed">删除</span>
-        {% end %}
-        
-        <div class="float-right">
-            <span class="book-size-span">{{item.update_date}}</span>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </a>
-{% end %}
+        <a class="list-link" href="{{item.url}}">
+            {% if item.priority>0 %}
+                <i class="fa fa-thumb-tack black"></i>
+            {% end %}
+
+            <!-- 图标和标题 -->
+            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
+            <span>{{item.name}}</span>
+            
+            {% if item.is_deleted %}
+                <span class="gray-tag-span" href="/note/removed">删除</span>
+            {% end %}
+            
+            <div class="float-right">
+                <span class="book-size-span">{{item.update_date}}</span>
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+    {% end %}
 </div>
