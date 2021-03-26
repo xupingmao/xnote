@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2021/03/21 17:47:34
+# @modified 2021/03/27 00:38:12
 
 """笔记编辑相关处理"""
 import os
@@ -49,12 +49,18 @@ def get_heading_by_type(type):
     title = u"创建" + NOTE_TYPE_DICT.get(type, u"笔记")
     return T(title)
 
-def fire_update_event(note):
+def fire_update_event(note_old):
+    """
+    @param {note} note_old 旧版本的笔记
+    """
+    note = NOTE_DAO.get_by_id(note_old.id)
+    if note is None:
+        return
     event_body = dict(id=note.id, 
             name = note.name, 
             mtime = dateutil.format_datetime(), 
             content = note.content, 
-            version = note.version+1)
+            version = note.version)
     xmanager.fire('note.updated', event_body)
 
 def fire_rename_event(note):
