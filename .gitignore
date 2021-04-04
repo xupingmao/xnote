@@ -50,3 +50,7 @@ tools.md
 /htmlcov/
 gitpush.sh
 
+# 脚本
+run-local.sh
+
+

@@ -1,0 +1,27 @@
+{% extends base.html %}
+
+{% block body %}
+
+<div class="card">
+    <div class="grid-title">
+        <span>账号信息</span>
+        <div class="float-right">
+            <a class="btn btn-default" href="/logout">登出</a>
+        </div>
+    </div>
+</div>
+
+<div class="card list">
+
+    <a class="list-link" href="#">
+        <span>用户名</span>
+        <div class="float-right">
+            <span>{{user.name}}</span>
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </a>
+
+</div>
+
+
+{% end %}

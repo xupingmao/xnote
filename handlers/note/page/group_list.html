@@ -43,15 +43,16 @@
 
     <div class="content-left">
     {% for title0, groups in group_cards %}
-
-        {% if len(groups) > 0 %}
-            <div class="card">
-                
-                <div class="card-title">
-                    <span>{{title0}}</span>
-                    <div class="float-right">
-                    </div>
+        <div class="card">
+            
+            <div class="card-title">
+                <span>{{title0}}</span>
+                <div class="float-right">
                 </div>
+            </div>
+            {% if len(groups) == 0 %}
+                {% include common/text/empty_text.html %}
+            {% end %}
 
             {% for item in groups %}
                 <a class="list-link" href="{{item.url}}">
@@ -69,9 +70,7 @@
                     </div>
                 </a>
             {% end %}
-            </div>
-        {% end %}
-
+        </div>
     {% end %}
     </div>
 

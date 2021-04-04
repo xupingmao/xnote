@@ -74,9 +74,18 @@ class RemoveHandler:
         xauth.remove_user(name)
         return dict(code="success")
 
+class UserInfoHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        user = xauth.current_user()
+        return xtemplate.render("user/page/userinfo.html", user = user)
+
+
 xurls = (
     r"/user/add",  AddHandler,
     r"/user/list",  ListHandler,
+    r"/user/info",   UserInfoHandler,
     
     r"/system/user", UserHandler,
     r"/system/user/list", ListHandler,

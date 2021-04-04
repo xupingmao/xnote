@@ -251,10 +251,7 @@ def count_by_tag(user, tag):
     return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
 
 def get_message_stat0(user):
-    value = dbutil.get("user_stat:%s:message" % user)
-    if value is None:
-        return Storage()
-    return value
+    return dbutil.get("user_stat:%s:message" % user)
 
 def get_message_stat(user):
     value = get_message_stat0(user)
@@ -270,6 +267,8 @@ def refresh_message_stat(user):
     cron_count = count_by_tag(user, "cron")
     key_count  = count_by_tag(user, "key")
     stat       = get_message_stat0(user)
+    if stat is None:
+        stat = Storage()
 
     stat.task_count = task_count
     stat.log_count  = log_count
