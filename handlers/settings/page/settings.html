@@ -102,36 +102,40 @@
     <div class="settings-row admin-visible">
         <div class="settings-key">系统文件</div>
         <div class="settings-value">
-            <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="True">隐藏
-            <input type="radio" name="FS_HIDE_FILES" default-value="{{xconfig.FS_HIDE_FILES}}" value="False">显示
+            <select name="FS_HIDE_FILES" data-type="bool" value="{{xconfig.FS_HIDE_FILES}}">
+                <option value="True">隐藏</option>
+                <option value="False">显示</option>
+            </select>
         </div>
     </div>
 
     <div class="settings-row admin-visible">
         <div class="settings-key">页面调试</div>
         <div class="settings-value">
-            <input type="radio" name="DEBUG_HTML_BOX" default-value="{{xconfig.DEBUG_HTML_BOX}}" value="True">开启
-            <input type="radio" name="DEBUG_HTML_BOX" default-value="{{xconfig.DEBUG_HTML_BOX}}" value="False">关闭
+            <select name="DEBUG_HTML_BOX" data-type="bool" value="{{xconfig.DEBUG_HTML_BOX}}">
+                <option value="True">开启</option>
+                <option value="False">关闭</option>
+            </select>
         </div>
     </div>
 
     <div class="settings-row admin-visible">
         <div class="settings-key">开发者模式</div>
         <div class="settings-value">
-            <input type="radio" data-type="bool" 
-                name="DEV_MODE" default-value="{{xconfig.DEV_MODE}}" value="True">开启
-            <input type="radio" data-type="bool" 
-                name="DEV_MODE" default-value="{{xconfig.DEV_MODE}}" value="False">关闭
+            <select name="DEV_MODE" data-type="bool" value="{{xconfig.DEV_MODE}}">
+                <option value="True">开启</option>
+                <option value="False">关闭</option>
+            </select>
         </div>
     </div>
 
     <div class="settings-row admin-visible">
         <div class="settings-key">词典入口</div>
         <div class="settings-value">
-            <input type="radio" data-type="bool" name="HIDE_DICT_ENTRY" 
-                default-value="{{xconfig.HIDE_DICT_ENTRY}}" value="True">隐藏
-            <input type="radio" data-type="bool" name="HIDE_DICT_ENTRY" 
-                default-value="{{xconfig.HIDE_DICT_ENTRY}}" value="False">显示
+            <select name="HIDE_DICT_ENTRY" data-type="bool" value="{{xconfig.HIDE_DICT_ENTRY}}">
+                <option value="True">隐藏</option>
+                <option value="False">显示</option>
+            </select>
         </div>
     </div>
 

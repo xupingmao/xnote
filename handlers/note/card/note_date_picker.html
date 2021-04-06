@@ -1,0 +1,36 @@
+<style type="text/css">
+    .date-box {
+        text-align: center;
+    }
+
+    .prev-month-link {
+        float: left;
+        padding-left: 5px;
+    }
+
+    .next-month-link {
+        float: right;
+        padding-right: 5px;
+    }
+</style>
+
+<div class="card btn-line-height">
+    <div class="date-box">
+        <a class="prev-month-link">上个月</a>
+        <select name="year" value="{{year}}">
+            {% for j in range(year-5,year+6) %}
+                <option value="{{j}}">{{j}}年</option>
+            {% end %}
+        </select>
+        <select name="month" value="{{month}}">
+            {% for i in range(0,13) %}
+                {% if i == 0 %}
+                    <option value="0">全年</option>
+                {% else %}
+                    <option value="{{i}}">{{i}}月</option>
+                {% end %}
+            {% end %}
+        </select>
+        <a class="next-month-link">下个月</a>
+    </div>
+</div>

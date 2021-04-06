@@ -16,6 +16,44 @@
     .card-row {
         padding-left: 20px;
     }
+
+    .date-box {
+        text-align: center;
+    }
+
+    .prev-month-link {
+        float: left;
+        padding-left: 5px;
+    }
+
+    .next-month-link {
+        float: right;
+        padding-right: 5px;
+    }
+
+    .content-left {
+        float: left;
+        width: 300px;
+    }
+
+    .content-right {
+        padding-left: 10px;
+        float: left;
+        width: 700px;
+    }
+
+    /** 移动端样式放在最后 **/
+    @media screen and (max-width: 1000px) {
+        /** mobile **/
+        .content-left {
+            width: 100%;
+        }
+
+        .content-right {
+            padding-left: 0px;
+            width: 100%;
+        }
+    }
 </style>
 
 {% end %}
@@ -23,37 +61,23 @@
 {% block body %}
     {% from xutils import dateutil %}
 
-
-    <div class="card btn-line-height">
+    <div class="card">
         <div class="card-title">
             <span>我的笔记</span>
             <div class="float-right">
-                <a class="btn" href="/note/add">新建</a>
-                <a class="btn btn-default" href="/note/tools">笔记工具</a>
+                <a href="/note/tools" class="btn btn-default">工具</a>
             </div>
         </div>
     </div>
-
-    {% include note/card/note_date_picker.html %}
-
-    <div class="card">
-        {% for date, children in notes_by_date %}
-            <div class="card-title">
-                <span>{{date}}</span>
-            </div>
-            {% for note in children %}
-                <p class="card-row">
-                    <i class="fa {{note.icon}}"></i>
-                    <a href="{{note.url}}">{{note.name}}</a>
-                    {% if note.size != None %}
-                        <span class="float-right gray-text">{{note.size}}</a>
-                    {% end %}
-                </p>
-            {% end %}
-        {% end %}
+    <div class="content-left">
+        {% include note/card/note_date_picker.html %}
+        {% include note/card/note_contents_left.html %}
     </div>
 
-    {% include message/component/message_list.html %}
+    <div class="content-right">
+        {% include note/card/plan_detail.html %}
+        {% include message/component/message_list.html %}
+    </div>
 
     <script>
     $(function () {
@@ -96,7 +120,6 @@
             return formatDate(year, month);
         }
 
-
         function updateMonthLink() {
             var year  = parseInt("{{year}}");
             var month = parseInt("{{month}}");
@@ -108,11 +131,12 @@
             $(".next-month-link").attr("href", "?date=" + nextMonth);
         }
 
+
         var date = getCurrentMonth();
 
-        // 刷新短文本
+        // 刷新记事
         refreshMessageList(date);
-        // 刷新链接
+
         updateMonthLink();
     })
     </script>

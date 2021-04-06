@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/01/09 15:03:51
+# @modified 2021/04/06 18:25:34
 import web
 import time
 import os
@@ -198,13 +198,12 @@ class ConfigHandler:
 
         if type == "int":
             value = int(value)
+
         if type == "bool":
             value = value.lower() in ("true", "yes", "on")
 
         if key == "BASE_TEMPLATE":
             xmanager.reload()
-        if key in ("FS_HIDE_FILES", "DEBUG_HTML_BOX", "RECORD_LOCATION"):
-            value = value.lower() in ("true", "yes", "on")
 
         if key in ("DEV_MODE", "DEBUG"):
             xconfig.DEBUG = value
