@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2021/03/27 00:38:12
+# @modified 2021/04/08 00:01:04
 
 """笔记编辑相关处理"""
 import os
@@ -382,7 +382,7 @@ class UpdateHandler:
                 update_kw["name"] = name
             # 更新并且发出消息
             update_and_notify(file, update_kw)
-            raise web.seeother("/note/%s" % id)
+            raise web.seeother(file.url)
         except NoteException as e:
             return xtemplate.render("note/page/view.html", 
                 pathlist = [],

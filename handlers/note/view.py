@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/02/17 19:52:02
+# @modified 2021/04/08 00:16:39
 import profile
 import math
 import re
@@ -165,6 +165,7 @@ class ViewHandler:
         orderby       = xutils.get_argument("orderby", None)
         is_iframe     = xutils.get_argument("is_iframe", "false")
         token         = xutils.get_argument("token", "")
+        auto_create   = xutils.get_argument("auto_create", "false") == "true"
         user_name     = xauth.current_name()
 
         kw             = Storage()
@@ -190,7 +191,10 @@ class ViewHandler:
         file = find_note_for_view(token, id, name)
 
         if file is None:
-            raise web.notfound()
+            if auto_create:
+                file = NOTE_DAO.get_or_create(id, user_name)
+            else:
+                raise web.notfound()
 
         if token == "":
             check_auth(file, user_name)
@@ -358,6 +362,7 @@ xurls = (
     r"/note/(edit|view)"   , ViewHandler,
     r"/note/print"         , PrintHandler,
     r"/note/(\d+)"         , ViewByIdHandler,
+    r"/note/view/([\w\-]+)"    , ViewByIdHandler,
     r"/note/history"       , NoteHistoryHandler,
     r"/note/history_view"  , HistoryViewHandler,
     r"/note/notice"        , NoticeHandler,

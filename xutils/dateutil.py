@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/04/06 19:50:40
+# @modified 2021/04/07 23:00:13
 import time
 import os
 import math
@@ -127,10 +127,12 @@ def parse_time(date = None, fmt = None):
 get_seconds = parse_time
 
 def get_current_year():
-    return time.strftime("%Y")
+    tm = time.localtime()
+    return tm.tm_year
 
 def get_current_month():
-    return time.strftime("%m")
+    tm = time.localtime()
+    return tm.tm_mon
 
 def current_wday():
     tm = time.localtime()

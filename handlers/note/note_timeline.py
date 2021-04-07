@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/04/07 00:34:30
+# @modified 2021/04/07 23:49:56
 
 """时光轴视图"""
 import re
@@ -40,14 +40,14 @@ def get_parent_link(user_name, type, priority = 0):
     # return PathLink(T("NoteIndex"), "/note/index")
 
 class SystemGroup(Storage):
-    def __init__(self, name, url):
+    def __init__(self, name, url, priority = 1, icon = "fa fa-file-text-o"):
         super(SystemGroup, self).__init__()
         self.user = xauth.current_name()
         self.type = 'system'
-        self.icon = "fa fa-gear"
+        self.icon = icon
         self.name = name
         self.url  = url
-        self.priority = 1
+        self.priority = priority
         self.size = 0
 
 class TaskGroup(Storage):
@@ -349,6 +349,9 @@ class BaseTimelineHandler:
     check_login = True
 
     def GET(self):
+        return self.do_get()
+
+    def do_get(self):
         type        = xutils.get_argument("type", self.note_type)
         parent_id   = xutils.get_argument("parent_id", "")
         key         = xutils.get_argument("key", "")
@@ -493,21 +496,26 @@ class DateHandler:
         user_name = xauth.current_name()
         xmanager.add_visit_log(user_name, "/note/date")
         
-        date  = xutils.get_argument("date", time.strftime("%Y"))
-        notes = NOTE_DAO.list_by_date("ctime", user_name, date)
-        
-        # 待办任务
-        notes.append(MSG_DAO.get_message_tag(user_name, "task", priority = 2))
-        notes.append(MSG_DAO.get_message_tag(user_name, "log",  priority = 2))
-
-        notes_by_date = assemble_notes_by_date(notes)
+        date  = xutils.get_argument("date", time.strftime("%Y-%m"))
         parts = date.split("-")
         if len(parts) == 2:
             year = int(parts[0])
             month = int(parts[1])
         else:
             year = int(parts[0])
-            month = int(dateutil.get_current_month())
+            month = dateutil.get_current_month()
+
+        notes = NOTE_DAO.list_by_date("ctime", user_name, date)
+
+        # 待办任务
+        notes.append(MSG_DAO.get_message_tag(user_name, "task", priority = 2))
+        notes.append(MSG_DAO.get_message_tag(user_name, "log",  priority = 2))
+        notes.append(SystemGroup("我的年报:%s" % year, "/note/view?auto_create=true&id=log%s" % year, 
+            priority = 2))
+        notes.append(SystemGroup("我的月报:%s" % date, "/note/view?auto_create=true&id=log%s" % date, 
+            priority = 2))
+
+        notes_by_date = assemble_notes_by_date(notes)
 
         return xtemplate.render("note/page/list_by_date.html", 
             date          = date,

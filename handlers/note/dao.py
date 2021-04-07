@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/03/21 18:32:58
+# @modified 2021/04/08 00:05:24
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -104,7 +104,10 @@ class NoteSchema:
     hot_index   = "热门指数"
 
 def format_note_id(id):
-    return "%020d" % int(id)
+    try:
+        return "%020d" % int(id)
+    except ValueError:
+        return id
 
 def get_root():
     root = Storage()
@@ -116,6 +119,7 @@ def get_root():
     root.content = ""
     root.priority = 0
     build_note_info(root)
+    root.url = "/note/group"
     return root
 
 def get_default_group():
@@ -200,7 +204,7 @@ def build_note_info(note):
         return None
 
     # note.url = "/note/view?id={}".format(note["id"])
-    note.url = "/note/{}".format(note["id"])
+    note.url = "/note/view/{}".format(note["id"])
     if note.priority is None:
         note.priority = 0
 
@@ -302,6 +306,29 @@ def get_by_token(token):
     if token_info != None and token_info.type == "note":
         return get_by_id(token_info.id)
     return None
+
+def get_or_create_note(note_id, creator):
+    note = get_by_id(note_id)
+    if note != None:
+        return note
+    note_dict           = Storage()
+    note_dict.id        = note_id
+    note_dict.name      = note_id
+    note_dict.creator   = creator
+    note_dict.ctime     = dateutil.format_datetime()
+    note_dict.mtime     = dateutil.format_datetime()
+    note_dict.atime     = dateutil.format_datetime()
+    note_dict.content   = ""
+    note_dict.type      = "md"
+    note_dict.parent_id = "0"
+    note_dict.priority  = 1
+    note_dict.version   = 0
+
+    put_note_to_db(note_id, note_dict)
+
+    return get_by_id(note_id)
+
+
 
 def create_note_base(note_dict, date_str):
     # 真实的创建时间
@@ -568,6 +595,8 @@ def update_note(note_id, **kw):
             note.token = token
         if visited_cnt != None:
             note.visited_cnt = visited_cnt
+        if note.version is None:
+            note.version = 1
 
         old_version  = note.version
         note.mtime   = xutils.format_time()
@@ -1229,6 +1258,7 @@ xutils.register_func("note.get_by_token", get_by_token)
 xutils.register_func("note.get_by_id_creator", get_by_id_creator)
 xutils.register_func("note.get_by_name", get_by_name)
 xutils.register_func("note.get_tags", get_tags)
+xutils.register_func("note.get_or_create", get_or_create_note)
 xutils.register_func("note.search_name", search_name)
 xutils.register_func("note.search_content", search_content)
 xutils.register_func("note.search_public", search_public)
