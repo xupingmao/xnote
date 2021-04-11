@@ -33,6 +33,9 @@ def init():
     xconfig.init("./testdata")
     xtables.init()
     dbutil.init()
+    xutils.init(xconfig)
+    xutils.cacheutil.init(xconfig.STORAGE_DIR)
+    
     APP = web.application(list(), var_env, autoreload=False)
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
     mgr = xmanager.init(APP, var_env, last_mapping=last_mapping)

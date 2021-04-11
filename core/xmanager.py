@@ -1,12 +1,12 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/03/14 15:11:10
+# @modified 2021/04/11 14:05:47
 
 """Xnote 模块管理器
- * 请求处理器加载和注册
- * 定时任务注册和执行
- * 事件管理器
+ * HandlerManager HTTP请求处理器加载和注册
+ * CronTaskManager 定时任务注册和执行
+ * EventManager 事件管理器
 """
 from __future__ import print_function
 import os
@@ -199,7 +199,7 @@ class HandlerManager:
         self.debug          = True
         self.report_loading = False
         self.report_unload  = True
-        self.task_manager   = TaskManager(app)
+        self.task_manager   = CronTaskManager(app)
         # stdout装饰器，方便读取print内容
         if not isinstance(sys.stdout, MyStdout):
             sys.stdout = MyStdout(sys.stdout)
@@ -363,16 +363,16 @@ class HandlerManager:
             log("Load mapping (%s, %s)" % (url, handler))
 
     def run_task(self):
-        self.task_manager.run_task()
+        self.task_manager.do_run_task()
 
     def load_tasks(self):
-        self.task_manager.load_tasks()
+        self.task_manager.do_load_tasks()
 
     def get_task_list(self):
         return self.task_manager.get_task_list()
 
 
-class TaskManager:
+class CronTaskManager:
     """定时任务管理器，模拟crontab"""
     def __init__(self, app):
         self.task_list = []
@@ -394,7 +394,7 @@ class TaskManager:
             return True
         return False
 
-    def run_task(self):
+    def do_run_task(self):
         """执行定时任务"""
         def request_url(task):
             url = task.url
@@ -443,12 +443,12 @@ class TaskManager:
                 if sleep_sec > 0:
                     time.sleep(sleep_sec)
         
-        self.load_tasks()
+        self.do_load_tasks()
         # 任务队列处理线程，开启两个线程
         WorkerThread("WorkerThread-1").start()
         WorkerThread("WorkerThread-2").start()
 
-        chk_thread = TaskThread(run)
+        chk_thread = CronTaskThread(run)
         chk_thread.start()
         
     def add_task(self, url, interval):
@@ -467,7 +467,7 @@ class TaskManager:
             print("Add task %s failed, %s" % (url, e))
             return False
         
-    def load_tasks(self):
+    def do_load_tasks(self):
         # schedule       = xtables.get_schedule_table()
         # tasks          = schedule.select(order="url")
         tasks = dbutil.prefix_list("schedule")
@@ -496,10 +496,10 @@ class TaskManager:
         return copy.deepcopy(self.task_list)
 
 
-class TaskThread(Thread):
+class CronTaskThread(Thread):
     """检查定时任务触发条件线程"""
     def __init__(self, func, *args):
-        super(TaskThread, self).__init__(name="TaskDispatcher")
+        super(CronTaskThread, self).__init__(name="CronTaskDispatcher")
         # 守护线程，防止卡死
         self.setDaemon(True)
         self.func = func
@@ -651,6 +651,13 @@ def init(app, vars, last_mapping = None):
     global _event_manager
     _event_manager = EventManager()
     _manager       = HandlerManager(app, vars, last_mapping = last_mapping)
+
+    # 初始化
+    reload()
+
+    # 启动任务
+    _manager.run_task()
+
     return _manager
 
 def instance():

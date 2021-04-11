@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2021/03/14 15:20:21
+# @modified 2021/04/11 13:19:42
 
 import xauth
 import xtemplate
@@ -81,6 +81,7 @@ class NoteWorkspaceHandler:
 
 
 xutils.register_func("page.list_note_types", list_note_types)
+xutils.register_func("url:/note/workspace", NoteWorkspaceHandler)
 
 xurls = (
     r"/note/workspace", NoteWorkspaceHandler

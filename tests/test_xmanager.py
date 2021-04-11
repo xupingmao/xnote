@@ -6,12 +6,12 @@ sys.path.insert(1, "lib")
 sys.path.insert(1, "core")
 import xmanager
 from xutils   import Storage
-from xmanager import TaskManager
+from xmanager import CronTaskManager
 
 class TestMain(unittest.TestCase):
 
     def test_match(self):
-        task_manager = TaskManager(None)
+        task_manager = CronTaskManager(None)
 
         tm = time.localtime()
 
@@ -23,7 +23,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual(True, r)
 
     def test_not_match(self):
-        task_manager = TaskManager(None)
+        task_manager = CronTaskManager(None)
 
         tm = time.strptime("2017-01-01 10:10:00", "%Y-%m-%d %H:%M:%S")
         task = Storage()

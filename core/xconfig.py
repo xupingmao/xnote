@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/02/19 16:05:38
+# @modified 2021/04/11 13:09:42
 
 '''xnote系统配置
 # 用户配置
@@ -25,6 +25,7 @@ import os
 import time
 from collections import OrderedDict
 from xutils.base import Storage
+from xutils.textutil import Properties
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
@@ -178,6 +179,15 @@ START_TIME = None
 # 是否隐藏词典的入口
 HIDE_DICT_ENTRY = True
 
+
+# 默认的用户配置
+DEFAULT_USER_CONFIG = {
+    "HOME_PATH"   : "/note/group",
+    "PROJECT_PATH": "/note/timeline",
+    "LANG"        : "zh",
+}
+
+
 def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -330,61 +340,7 @@ def has_config(key, subkey = None):
     
 def has(key):
     return has_config(key)
-        
-class Properties(object): 
-    """Properties 文件处理器"""
-    def __init__(self, fileName, ordered = True): 
-        self.ordered = ordered
-        self.fileName = fileName
-        self.properties = None
-        self.properties_list = None
-        self.load_properties()
 
-    def new_dict(self):
-        if self.ordered:
-            return OrderedDict()
-        else:
-            return {}
-
-    def _set_dict(self, strName, dict, value): 
-        strName = strName.strip()
-        value = value.strip()
-
-        if strName == "":
-            return
-
-        if(strName.find('.')>0): 
-            k = strName.split('.')[0] 
-            dict.setdefault(k, self.new_dict()) 
-            self._set_dict(strName[len(k)+1:], dict[k], value)
-            return
-        else: 
-            dict[strName] = value 
-            return 
-
-    def load_properties(self): 
-        self.properties = self.new_dict()
-        self.properties_list = self.new_dict()
-        with open(self.fileName, 'r', encoding="utf-8") as pro_file: 
-            for line in pro_file.readlines(): 
-                line = line.strip().replace('\n', '') 
-                if line.find("#")!=-1: 
-                    line=line[0:line.find('#')] 
-                if line.find('=') > 0: 
-                    strs = line.split('=') 
-                    strs[1]= line[len(strs[0])+1:] 
-                    self._set_dict(strs[0], self.properties,strs[1]) 
-                    self.properties_list[strs[0].strip()] = strs[1].strip()
-        return self.properties
-
-    def get_properties(self):
-        return self.properties
-
-    def get_property(self, key, default_value=None):
-        return self.properties_list.get(key, default_value)
-
-    def reload(self):
-        self.load_properties()
 
 def is_mute():
     """是否静音"""
@@ -399,3 +355,23 @@ def set_alias(name, value):
 def get_alias(name, default_value):
     """获取别名，用于扩展命令"""
     return _alias_dict.get(name, default_value)
+
+def get_global_config(key):
+    if key in _config:
+        return _config.get(key)
+    return globals().get(key)
+
+
+def get_user_config(user_name, config_key):
+    """默认值参考DEFAULT_USER_CONFIG"""
+    # 未启动，直接返回默认值
+    if START_TIME is None:
+        return DEFAULT_USER_CONFIG.get(config_key)
+
+    import xauth
+    config = xauth.get_user_config_dict(user_name)
+    default_value = DEFAULT_USER_CONFIG.get(config_key)
+    if config is None:
+        return default_value
+    else:
+        return config.get(config_key, default_value)

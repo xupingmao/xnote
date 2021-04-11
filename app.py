@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2021/02/27 15:05:04
+# @modified 2021/04/11 13:50:32
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -137,6 +137,7 @@ def try_init_ldb():
 
 def try_load_cache():
     try:
+        xutils.cacheutil.init(xconfig.STORAGE_DIR)
         xutils.cacheutil.load_dump()
     except:
         xutils.print_exc()
@@ -164,6 +165,9 @@ def main():
     # 初始化数据库
     try_init_sqlite()
     try_init_ldb()
+    
+    # 初始化工具箱
+    xutils.init(xconfig)
 
     # 加载缓存
     try_load_cache()
@@ -172,18 +176,14 @@ def main():
     var_env = dict()
     app = web.application(list(), var_env, autoreload=False)
 
-    # 最后的mapping，用于匹配优先级较低的处理器
-    manager_obj = xmanager.init(app, var_env)
-    xmanager.reload()
+    # 初始化模板管理
+    xtemplate.init()
 
-    # 重新加载template
-    xtemplate.reload()
+    # 初始化主管理器
+    xmanager.init(app, var_env)
 
     # 文件修改检测
     init_autoreload()
-
-    # 启动定时任务检查
-    manager_obj.run_task()
 
     # 注册信号响应
     # 键盘终止信号

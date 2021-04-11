@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/03/21 18:28:29
+# @modified 2021/04/11 13:23:57
 import math
 import time
 import web
@@ -348,7 +348,7 @@ class AddressBookListHandler(BaseListHandler):
         self.note_type = "address"
         self.title     = "通讯录"
 
-class NoteIndexHandler:
+class NotePluginHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -363,9 +363,6 @@ class NoteIndexHandler:
             plugins     = plugins,
             search_type = "plugin")
 
-
-class NoteToolHandler(NoteIndexHandler):
-    pass
 
 class RecentHandler:
     """最近的笔记"""
@@ -499,6 +496,26 @@ class ManagementHandler:
             current = current,
             parent  = parent_note)
 
+class NoteIndexHandler:
+
+    def find_class(self):
+        user_name = xauth.current_name()
+        home_path = xconfig.get_user_config(user_name, "HOME_PATH")
+        clazz = xutils.lookup_func("url:" + home_path)
+        if clazz is None:
+            return GroupListHandler
+        return clazz
+
+    def GET(self):
+        clazz = self.find_class()
+        return clazz().GET()
+
+    def POST(self):
+        clazz = self.find_class()
+        return clazz().POST() 
+
+xutils.register_func("url:/note/group", GroupListHandler)
+xutils.register_func("url:/note/tools", NotePluginHandler)
 
 xurls = (
     r"/note/group"          , GroupListHandler,
@@ -516,8 +533,8 @@ xurls = (
     r"/note/management"     , ManagementHandler,
 
     r"/note/text"           , TextListHandler,
-    r"/note/tools"          , NoteIndexHandler,
-    r"/note/types"          , NoteIndexHandler,
+    r"/note/tools"          , NotePluginHandler,
+    r"/note/types"          , NotePluginHandler,
     r"/note/index"          , NoteIndexHandler,
 )
 

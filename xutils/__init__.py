@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/03/06 11:56:18
+# @modified 2021/04/11 13:45:10
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -41,6 +41,10 @@ import shutil
 import logging
 import logging.handlers
 
+FS_IMG_EXT_LIST = None
+FS_TEXT_EXT_LIST = None
+FS_AUDIO_EXT_LIST = None
+IS_TEST = False
 
 #################################################################
 
@@ -117,23 +121,23 @@ def is_img_file(filename):
     if filename.endswith(".x0"):
         filename = fsutil.decode_name(filename)
     name, ext = os.path.splitext(filename)
-    return ext.lower() in xconfig.FS_IMG_EXT_LIST
+    return ext.lower() in FS_IMG_EXT_LIST
 
 def is_text_file(filename):
     """根据文件后缀判断是否是文本文件"""
     if filename.endswith(".x0"):
         filename = fsutil.decode_name(filename)
     name, ext = os.path.splitext(filename)
-    return ext.lower() in xconfig.FS_TEXT_EXT_LIST
+    return ext.lower() in FS_TEXT_EXT_LIST
 
 def is_audio_file(filename):
     if filename.endswith(".x0"):
         filename = fsutil.decode_name(filename)
     name, ext = os.path.splitext(filename)
-    return ext.lower() in xconfig.FS_AUDIO_EXT_LIST
+    return ext.lower() in FS_AUDIO_EXT_LIST
 
 def get_text_ext():
-    return xconfig.FS_TEXT_EXT_LIST
+    return FS_TEXT_EXT_LIST
 
 def is_editable(fpath):
     return is_text_file(fpath)
@@ -262,7 +266,7 @@ def windows_say(msg):
         print_exc()
 
 def say(msg):
-    if xconfig.IS_TEST:
+    if IS_TEST:
         return
     if is_windows():
         windows_say(msg)
@@ -325,6 +329,10 @@ class RecordList:
 
 _FUNC_DICT = dict()
 def register_func(name, func):
+    """注册函数
+    @param {string} name 函数名称，格式为 [protocol:] + [module] + name
+    @param {func} func 函数
+    """
     _FUNC_DICT[name] = func
 
 def call(_func_name, *args, **kw):
@@ -357,4 +365,16 @@ class Module:
         return func
 # DAO是模块的别名
 DAO = Module
+
+
+def init(xconfig):
+    global FS_IMG_EXT_LIST
+    global FS_TEXT_EXT_LIST
+    global FS_AUDIO_EXT_LIST
+    global IS_TEST
+
+    FS_TEXT_EXT_LIST = xconfig.FS_TEXT_EXT_LIST
+    FS_IMG_EXT_LIST = xconfig.FS_IMG_EXT_LIST
+    FS_AUDIO_EXT_LIST = xconfig.FS_AUDIO_EXT_LIST
+    IS_TEST = xconfig.IS_TEST
 

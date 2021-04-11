@@ -2,7 +2,7 @@
 # 专门用来import各种依赖
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
-# @modified 2021/02/17 20:08:34
+# @modified 2021/04/11 13:07:02
 from __future__ import print_function
 import sys
 import os
@@ -17,7 +17,6 @@ import gc
 import shutil
 import profile as pf
 import six
-import xconfig
 import subprocess
 import pickle
 import hashlib

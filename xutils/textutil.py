@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2021/03/06 11:54:04
+# @modified 2021/04/11 12:39:03
 import re
 import random
 import json
@@ -735,6 +735,63 @@ def encode_uri_component(text):
 
 def md5_hex(string):
     return hashlib.md5(string.encode("utf-8")).hexdigest()
+
+        
+class Properties(object): 
+    
+    """Properties 文件处理器"""
+    def __init__(self, fileName, ordered = True): 
+        self.ordered = ordered
+        self.fileName = fileName
+        self.properties = None
+        self.properties_list = None
+        self.load_properties()
+
+    def new_dict(self):
+        if self.ordered:
+            return OrderedDict()
+        else:
+            return {}
+
+    def _set_dict(self, strName, dict, value): 
+        strName = strName.strip()
+        value = value.strip()
+
+        if strName == "":
+            return
+
+        if(strName.find('.')>0): 
+            k = strName.split('.')[0] 
+            dict.setdefault(k, self.new_dict()) 
+            self._set_dict(strName[len(k)+1:], dict[k], value)
+            return
+        else: 
+            dict[strName] = value 
+            return 
+
+    def load_properties(self): 
+        self.properties = self.new_dict()
+        self.properties_list = self.new_dict()
+        with open(self.fileName, 'r', encoding="utf-8") as pro_file: 
+            for line in pro_file.readlines(): 
+                line = line.strip().replace('\n', '') 
+                if line.find("#")!=-1: 
+                    line=line[0:line.find('#')] 
+                if line.find('=') > 0: 
+                    strs = line.split('=') 
+                    strs[1]= line[len(strs[0])+1:] 
+                    self._set_dict(strs[0], self.properties,strs[1]) 
+                    self.properties_list[strs[0].strip()] = strs[1].strip()
+        return self.properties
+
+    def get_properties(self):
+        return self.properties
+
+    def get_property(self, key, default_value=None):
+        return self.properties_list.get(key, default_value)
+
+    def reload(self):
+        self.load_properties()
 
 if __name__ == '__main__':
     import doctest

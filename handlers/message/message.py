@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/03/06 18:09:37
+# @modified 2021/04/11 13:22:58
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -472,12 +472,11 @@ def filter_key(key):
 class MessageHandler:
 
     @xauth.login_required()
-    def GET(self):
+    def do_get(self, tag = "task"):
         user     = xauth.current_name()
         key      = xutils.get_argument("key", "")
         from_    = xutils.get_argument("from")
         show_tab = xutils.get_argument("show_tab", default_value = True, type = bool)
-        tag      = xutils.get_argument("tag")
 
         default_content = filter_key(key)
 
@@ -497,6 +496,10 @@ class MessageHandler:
             search_tag         = tag,
             key                = key,
             from_              = from_)
+
+    def GET(self):
+        tag = xutils.get_argument("tag")
+        return self.do_get(tag)
 
 
 class CalendarHandler:
@@ -526,6 +529,12 @@ class DairyHandler:
     def GET(self):
         return xtemplate.render("message/page/dairy.html")
 
+class MessageLogHandler(MessageHandler):
+
+    def GET(self):
+        return self.do_get("log")
+
+xutils.register_func("url:/message?tag=log", MessageLogHandler)
 
 xurls=(
     r"/message", MessageHandler,

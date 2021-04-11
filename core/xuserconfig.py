@@ -1,31 +1,16 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/04/06 11:55:29
-# @modified 2020/11/22 13:18:14
+# @modified 2021/04/11 14:08:02
 import xconfig
 import xauth
 from xutils import Storage
-
-# 默认的用户配置
-DEFAULT_USER_CONFIG = {
-    "HOME_PATH"   : "/note/group",
-    "PROJECT_PATH": "/note/timeline",
-    "LANG"        : "zh",
-}
+from xconfig import DEFAULT_USER_CONFIG
 
 ###### 获取指定用户信息
 def get_user_config(user_name, config_key):
     """默认值参考DEFAULT_USER_CONFIG"""
-    # 未启动，直接返回默认值
-    if xconfig.START_TIME is None:
-        return DEFAULT_USER_CONFIG.get(config_key)
-
-    config = xauth.get_user_config_dict(user_name)
-    default_value = DEFAULT_USER_CONFIG.get(config_key)
-    if config is None:
-        return default_value
-    else:
-        return config.get(config_key, default_value)
+    return xconfig.get_user_config(user_name, config_key)
 
 def get_config_dict(user_name):
     value = xauth.get_user_config_dict(user_name)

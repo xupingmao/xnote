@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/04/07 23:49:56
+# @modified 2021/04/11 13:13:58
 
 """时光轴视图"""
 import re
@@ -525,6 +525,7 @@ class DateHandler:
             search_type   = "note")
 
 xutils.register_func("note.build_date_result", build_date_result)
+xutils.register_func("url:/note/date", DateHandler)
 
 xurls = (
     r"/note/timeline/month", DateTimeline,

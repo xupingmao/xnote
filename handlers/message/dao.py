@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/03/21 18:26:33
+# @modified 2021/04/11 13:24:38
 import xutils
 import xconfig
 import xmanager
@@ -300,7 +300,7 @@ class MessageTag(Storage):
             self.icon = "fa-file-text-o"
 
         if tag == "task":
-            self.name = T("任务")
+            self.name = T("待办任务")
             self.icon = "fa-calendar-check-o"
 
 def get_message_tag(user, tag, priority = 0):

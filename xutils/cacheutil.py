@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2021/01/08 01:19:43
+# @modified 2021/04/11 13:44:16
 """基本废弃了，请使用dbutil
 缓存的实现，API列表如下
 
@@ -32,6 +32,7 @@ from .imports import *
 
 _cache_dict = dict()
 _cache_queue = deque()
+STORAGE_DIR = None
 
 def encode_key(text):
     """编码key为文件名"""
@@ -114,7 +115,7 @@ class CacheObj:
         return self.valid_key_pattern.match(key) != None
 
     def _get_path(self, key):
-        return os.path.join(xconfig.STORAGE_DIR, key + ".json")
+        return os.path.join(STORAGE_DIR, key + ".json")
 
     def get_dump_value(self):
         if self.type == "zset":
@@ -482,7 +483,7 @@ def json_object_hook(dict_obj):
     return Storage(**dict_obj)
 
 def load_dump():
-    dirname = xconfig.STORAGE_DIR
+    dirname = STORAGE_DIR
     valid_ext_tuple = (".json")
     for fname in os.listdir(dirname):
         if not fname.endswith(valid_ext_tuple):
@@ -512,3 +513,6 @@ def clear_temp():
         if value != None and value.is_temp():
             value.clear()
 
+def init(storage_dir):
+    global STORAGE_DIR
+    STORAGE_DIR = storage_dir
