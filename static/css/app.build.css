@@ -1791,7 +1791,7 @@ li.menu-item:hover {
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/01/31 22:05:25
+ * @modified 2021/04/17 17:31:47
 */
 
 
@@ -1874,6 +1874,7 @@ li.menu-item:hover {
 }
 
 .msg-item-option {
+    padding-top: 10px;
     float: left;
     width: 100%;
 }

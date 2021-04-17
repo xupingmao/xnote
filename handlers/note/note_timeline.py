@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/04/11 13:13:58
+# @modified 2021/04/17 22:01:13
 
 """时光轴视图"""
 import re
@@ -321,7 +321,7 @@ class TimelineAjaxHandler:
         list_func = LIST_FUNC_DICT.get(type, default_list_func)
         return list_func(locals())
 
-class DateTimeline:
+class DateTimelineAjaxHandler:
     @xauth.login_required()
     def GET(self):
         year  = xutils.get_argument("year")
@@ -480,12 +480,12 @@ def assemble_notes_by_date(notes, time_attr = "ctime"):
 class DateHandler:
 
     type_order_dict = {
-        "group": 0,
-        "gallery": 10,
-        "list": 20,
-        "table": 30,
-        "csv": 30,
-        "md": 90,
+        "group"   :  0,
+        "gallery" : 10,
+        "list"    : 20,
+        "table"   : 30,
+        "csv"     : 30,
+        "md"      : 90,
     }
 
     def sort_notes(self, notes):
@@ -510,14 +510,16 @@ class DateHandler:
         # 待办任务
         notes.append(MSG_DAO.get_message_tag(user_name, "task", priority = 2))
         notes.append(MSG_DAO.get_message_tag(user_name, "log",  priority = 2))
-        notes.append(SystemGroup("我的年报:%s" % year, "/note/view?auto_create=true&id=log%s" % year, 
+        notes.append(SystemGroup("我的人生", "/note/view?auto_create=true&id=my_life", priority = 2))
+        notes.append(SystemGroup("我的年报:%s" % year, "/note/view?auto_create=true&id=year_%s" % year, 
             priority = 2))
-        notes.append(SystemGroup("我的月报:%s" % date, "/note/view?auto_create=true&id=log%s" % date, 
+        notes.append(SystemGroup("我的月报:%s" % date, "/note/view?auto_create=true&id=month_%s" % date, 
             priority = 2))
 
         notes_by_date = assemble_notes_by_date(notes)
 
         return xtemplate.render("note/page/list_by_date.html", 
+            html_title    = T("我的笔记"),
             date          = date,
             year          = year,
             month         = month,
@@ -528,7 +530,7 @@ xutils.register_func("note.build_date_result", build_date_result)
 xutils.register_func("url:/note/date", DateHandler)
 
 xurls = (
-    r"/note/timeline/month", DateTimeline,
+    r"/note/timeline/month", DateTimelineAjaxHandler,
     r"/note/api/timeline", TimelineAjaxHandler,
 
     # 时光轴视图

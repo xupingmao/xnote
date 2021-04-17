@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2021/04/08 00:01:04
+# @modified 2021/04/17 22:09:42
 
 """笔记编辑相关处理"""
 import os
@@ -146,9 +146,6 @@ class CreateHandler:
 
         creator        = xauth.current_name()
         note           = Storage(name = name)
-        note.atime     = xutils.format_datetime()
-        note.mtime     = xutils.format_datetime()
-        note.ctime     = xutils.format_datetime()
         note.creator   = creator
         note.parent_id = str(parent_id)
         note.type      = type

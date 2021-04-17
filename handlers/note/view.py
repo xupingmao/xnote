@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/04/08 00:16:39
+# @modified 2021/04/17 21:39:17
 import profile
 import math
 import re
@@ -23,7 +23,7 @@ from .constant import CREATE_BTN_TEXT_DICT
 PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
 
-@xmanager.listen("note.view", is_async=True)
+@xmanager.listen("note.view", is_async=False)
 def visit_by_id(ctx):
     id        = ctx.id
     user_name = ctx.user_name
@@ -182,8 +182,7 @@ class ViewHandler:
         kw.recommended_notes = []
         kw.show_add_file     = False
         kw.template_name     = "note/page/view.html"
-        kw.search_action = "/note/timeline"
-        kw.search_placeholder = "搜索笔记"
+        kw.search_type       = "note"
 
         if id == "0":
             raise web.found("/")
@@ -362,7 +361,7 @@ xurls = (
     r"/note/(edit|view)"   , ViewHandler,
     r"/note/print"         , PrintHandler,
     r"/note/(\d+)"         , ViewByIdHandler,
-    r"/note/view/([\w\-]+)"    , ViewByIdHandler,
+    r"/note/view/([\w\-]+)", ViewByIdHandler,
     r"/note/history"       , NoteHistoryHandler,
     r"/note/history_view"  , HistoryViewHandler,
     r"/note/notice"        , NoticeHandler,

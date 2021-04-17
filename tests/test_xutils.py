@@ -366,4 +366,10 @@ class TestMain(unittest.TestCase):
         text_output = xutils.b64decode(text_input)
         self.assertEqual("测试1234", text_output)
 
+    def test_count_end_nl(self):
+        text_input = "abc\n\n"
+        self.assertEqual(2, textutil.count_end_nl(text_input))
+
+    
+
         

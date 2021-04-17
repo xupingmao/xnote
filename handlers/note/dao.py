@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/04/08 00:05:24
+# @modified 2021/04/17 22:17:15
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -308,36 +308,50 @@ def get_by_token(token):
     return None
 
 def get_or_create_note(note_id, creator):
+    note_id = note_id.replace("-", "_")
+
     note = get_by_id(note_id)
     if note != None:
         return note
+
     note_dict           = Storage()
     note_dict.id        = note_id
     note_dict.name      = note_id
     note_dict.creator   = creator
-    note_dict.ctime     = dateutil.format_datetime()
-    note_dict.mtime     = dateutil.format_datetime()
-    note_dict.atime     = dateutil.format_datetime()
     note_dict.content   = ""
+    note_dict.data      = ""
     note_dict.type      = "md"
+    note_dict.sub_type  = "log"
     note_dict.parent_id = "0"
-    note_dict.priority  = 1
-    note_dict.version   = 0
 
-    put_note_to_db(note_id, note_dict)
+    create_note(note_dict, note_id = note_id)
 
     return get_by_id(note_id)
 
 
 
-def create_note_base(note_dict, date_str):
+def create_note_base(note_dict, date_str = None, note_id = None):
     # 真实的创建时间
-    note_dict["ctime0"] = dateutil.format_datetime()
+    ctime0 = dateutil.format_datetime()
+    note_dict["ctime0"]  = ctime0
+    note_dict["atime"]   = ctime0
+    note_dict["mtime"]   = ctime0
+    note_dict["ctime"]   = ctime0
+    note_dict["version"] = 0
     
-    if date_str is None or date_str == "":
+    if note_id is not None:
+        # 指定id创建笔记
+        note_dict["id"] = note_id
+        put_note_to_db(note_id, note_dict)
+        # 创建日志
+        add_create_log(note_dict)
+        return note_id
+    elif date_str is None or date_str == "":
         note_id = dbutil.timeseq()
         note_dict["id"] = note_id
         put_note_to_db(note_id, note_dict)
+        # 创建日志
+        add_create_log(note_dict)
         return note_id
     else:
         date_str = date_str.replace(".", "-")
@@ -361,22 +375,23 @@ def create_note_base(note_dict, date_str):
         finally:
             CREATE_LOCK.release()
 
-def create_note(note_dict, date_str = None):
+def create_note(note_dict, date_str = None, note_id = None):
     content   = note_dict["content"]
-    data      = note_dict["data"]
     creator   = note_dict["creator"]
-    priority  = note_dict["priority"]
-    mtime     = note_dict["mtime"]
-    parent_id = note_dict.get("parent_id", "0")
     name      = note_dict.get("name")
 
+    if "parent_id" not in note_dict:
+        note_dict["parent_id"] = "0"
+    if "priority" not in note_dict:
+        note_dict["priority"] = 0
+    if "data" not in note_dict:
+        note_dict["data"] = ""
+
     # 创建笔记的基础信息
-    note_id = create_note_base(note_dict, date_str)
+    note_id = create_note_base(note_dict, date_str, note_id)
     
     # 更新分组下面页面的数量
     update_children_count(note_dict["parent_id"])
-
-    xmanager.fire("note.add", dict(name=name, type=type, id = note_id))
 
     # 创建对应的文件夹
     if type == "gallery":
@@ -385,8 +400,12 @@ def create_note(note_dict, date_str = None):
 
     # 更新统计数量
     refresh_note_stat(creator)
+
     # 更新目录修改时间
-    touch_note(parent_id)
+    touch_note(note_dict["parent_id"])
+
+    # 最后发送创建笔记成功的消息
+    xmanager.fire("note.add", dict(name=name, type=type, id = note_id))
 
     return note_id
 
@@ -834,7 +853,7 @@ def list_note_by_log(log_prefix, creator, offset = 0, limit = -1, skip_deleted =
         return True
 
     log_list  = dbutil.prefix_list("%s:%s" % (log_prefix, creator), list_func, 
-        offset = offset, limit = limit, reverse = True)
+        offset = offset, limit = -1, reverse = True)
 
     return result
 

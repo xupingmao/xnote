@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2021/04/11 12:39:03
+# @modified 2021/04/17 22:19:52
 import re
 import random
 import json
@@ -67,6 +67,19 @@ def count_digit(text):
     for c in text:
         if _isdigit(c):
             count += 1
+    return count
+
+def count_end_nl(content):
+    count = 0
+    i = len(content) - 1
+    for i in range(i, -1, -1):
+        c = content[i]
+        if c == '\n':
+            count += 1
+        elif c == '\r':
+            continue
+        else:
+            break
     return count
 
 def _isalpha(c):
