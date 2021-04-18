@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/04/18 16:31:21
+# @modified 2021/04/18 17:59:25
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -704,9 +704,9 @@ def get_by_name(creator, name):
     return None
 
 def check_by_name(creator, name):
-    note_by_name = get_by_name(creator, skey)
+    note_by_name = get_by_name(creator, name)
     if note_by_name != None:
-        raise Exception("笔记【%s】已存在" % skey)
+        raise Exception("笔记【%s】已存在" % name)
 
 def visit_note(user_name, id):
     note = get_by_id(id)
