@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/04/17 21:39:17
+# @modified 2021/04/18 16:08:11
 import profile
 import math
 import re
@@ -151,8 +151,6 @@ def find_note_for_view(token, id, name):
 
 class ViewHandler:
 
-    xconfig.note_history = History("笔记浏览记录", 200)
-
     @xutils.timeit(name = "Note.View", logfile = True)
     def GET(self, op, id = None):
         if id is None:
@@ -165,8 +163,8 @@ class ViewHandler:
         orderby       = xutils.get_argument("orderby", None)
         is_iframe     = xutils.get_argument("is_iframe", "false")
         token         = xutils.get_argument("token", "")
-        auto_create   = xutils.get_argument("auto_create", "false") == "true"
         user_name     = xauth.current_name()
+        skey          = xutils.get_argument("skey")
 
         kw             = Storage()
         kw.show_left   = False
@@ -184,16 +182,22 @@ class ViewHandler:
         kw.template_name     = "note/page/view.html"
         kw.search_type       = "note"
 
+        # print("skey:", skey)
+
         if id == "0":
             raise web.found("/")
-        # 回收站的笔记也能看到
-        file = find_note_for_view(token, id, name)
+
+        if skey != None and skey != "":
+            try:
+                file = NOTE_DAO.get_or_create(skey, user_name)
+            except Exception as e:
+                return xtemplate.render("error.html", error = e)
+        else:
+            # 回收站的笔记也能看到
+            file = find_note_for_view(token, id, name)
 
         if file is None:
-            if auto_create:
-                file = NOTE_DAO.get_or_create(id, user_name)
-            else:
-                raise web.notfound()
+            raise web.notfound()
 
         if token == "":
             check_auth(file, user_name)

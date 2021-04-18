@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/04/17 22:01:13
+# @modified 2021/04/17 23:22:33
 
 """时光轴视图"""
 import re
@@ -510,10 +510,10 @@ class DateHandler:
         # 待办任务
         notes.append(MSG_DAO.get_message_tag(user_name, "task", priority = 2))
         notes.append(MSG_DAO.get_message_tag(user_name, "log",  priority = 2))
-        notes.append(SystemGroup("我的人生", "/note/view?auto_create=true&id=my_life", priority = 2))
-        notes.append(SystemGroup("我的年报:%s" % year, "/note/view?auto_create=true&id=year_%s" % year, 
+        notes.append(SystemGroup("我的人生", "/note/view?skey=my_life", priority = 2))
+        notes.append(SystemGroup("我的年报:%s" % year, "/note/view?skey=year_%s" % year, 
             priority = 2))
-        notes.append(SystemGroup("我的月报:%s" % date, "/note/view?auto_create=true&id=month_%s" % date, 
+        notes.append(SystemGroup("我的月报:%s" % date, "/note/view?skey=month_%s" % date, 
             priority = 2))
 
         notes_by_date = assemble_notes_by_date(notes)

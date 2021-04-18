@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2021/03/21 17:49:31
+# @modified 2021/04/18 16:26:32
 import xutils
 
 # cannot perform relative import
@@ -10,8 +10,9 @@ try:
 except ImportError:
     from tests import test_base
 
-from handlers.note.dao import get_by_id, visit_note
+from handlers.note.dao import get_by_id, visit_note, get_by_user_skey
 from xutils import Storage
+import xauth
 
 app          = test_base.init()
 json_request = test_base.json_request
@@ -72,9 +73,11 @@ class TestMain(BaseTestCase):
         self.assertEqual(xutils.u('标题为空'), result['message'])
 
     def test_create_name_exits(self):
+        delete_note_for_test("name-test")
         create_note_for_test("md", "name-test")
+
         result = json_request("/note/create", method = "POST", data = dict(name = "name-test"))
-        self.assertEqual(xutils.u('name-test 已存在'), result['message'])
+        self.assertEqual(xutils.u('笔记【name-test】已存在'), result['message'])
 
         delete_note_for_test("name-test")
 
@@ -321,5 +324,14 @@ class TestMain(BaseTestCase):
 
     def test_workspace(self):
         self.check_OK("/note/workspace")
+
+    def test_view_by_skey(self):
+        self.check_OK("/note/view?skey=skey_test")
+
+        note = get_by_user_skey(xauth.current_name(), "skey_test")
+        self.assertTrue(note != None)
+
+        delete_note_for_test("skey_test")
+
         
 

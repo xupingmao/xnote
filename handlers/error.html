@@ -1,11 +1,21 @@
 {% extends base.html %}
 {% block body %}
+
     {% init error = "" %}
 
-    {% if error != "" %}
-        <pre class="col-md-12 error">
-            {{error}}
-        </pre>
-    {% end %}
+    <div class="card">
+        <div class="card-title">
+            <span>系统错误</span>
+            <div class="float-right">
+                {% include common/button/back_button.html %}
+            </div>
+        </div>
+
+        {% if error != "" %}
+            <pre class="col-md-12 error">
+                {{error}}
+            </pre>
+        {% end %}
+    </div>
 
 {% end %}

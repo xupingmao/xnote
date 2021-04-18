@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/04/11 13:09:42
+# @modified 2021/04/18 11:53:33
 
 '''xnote系统配置
 # 用户配置
@@ -375,3 +375,4 @@ def get_user_config(user_name, config_key):
         return default_value
     else:
         return config.get(config_key, default_value)
+

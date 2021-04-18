@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/02/15 21:46:37
-# @modified 2021/01/02 20:24:00
+# @modified 2021/04/18 15:49:04
 import xtables
 import xtemplate
 import xutils
@@ -12,11 +12,6 @@ import math
 from xutils import Storage, encode_uri_component
 
 PAGE_SIZE = xconfig.PAGE_SIZE
-
-SEARCH_KEYWORDS = dict(
-    search_action = "/dict/search?key=",
-    search_placeholder = "搜索词典",
-)
 
 def escape_sqlite_text(text):
     text = text.replace('/', '//')
@@ -64,7 +59,7 @@ class DictEditHandler:
         if item != None:
             value = item.value
         return xtemplate.render("dict/dict_edit.html", 
-            name = name, value = value, **SEARCH_KEYWORDS)
+            name = name, value = value, search_type = "dict")
 
     @xauth.login_required("admin")
     def POST(self, name=""):
@@ -102,7 +97,7 @@ class DictSearchHandler:
             pathlist   = [Storage(name = "词典", url = "#")],
             show_pagination = True,
             page_url   = "/dict/search?key=%s&page=" % encode_uri_component(key), 
-            **SEARCH_KEYWORDS)
+            search_type = "dict")
 
 
 class DictHandler:
@@ -128,7 +123,7 @@ class DictHandler:
             pathlist   = [Storage(name = "词典", url = "#")],
             show_pagination = True,
             page_url   = "/note/dict?page=",
-            **SEARCH_KEYWORDS)
+            search_type = "dict")
 
 xurls = (
     r"/dict/edit/(.+)", DictEditHandler,

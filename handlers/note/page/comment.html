@@ -1,6 +1,10 @@
 {% init comment_class = "" %}
-{% init show_comment_title = True %}
-{% init comment_btn_text = "评论" %}
+{% init file = Storage() %}
+{% init show_comment_title  = True %}
+{% init show_comment_create = True %}
+{% init comment_list_type   = "note_id" %}
+{% init comment_list_date   = "" %}
+{% init comment_btn_text    = "评论" %}
 {% init comment_placeholder = "请输入评论..." %}
 
 <style type="text/css">
@@ -19,7 +23,7 @@
     </div>
     {% end %}
 
-    {% if _has_login %}
+    {% if _has_login and show_comment_create %}
     <div class="col-md-12">
         <textarea id="commentText" class="col-md-12 no-outline" placeholder="{{comment_placeholder}}"></textarea>
 
@@ -47,6 +51,10 @@
     </div>
 </div>
 
+<div class="comment-empty-tpl hide">
+    <p class="align-center">暂无评论~</p>
+</div>
+
 <script type="text/javascript">
 $(function () {
     var loadIndex = 0;
@@ -60,9 +68,20 @@ $(function () {
         });
     }
 
-    function refreshComments() {    
-        $.get("/note/comments", {note_id: "{{file.id}}"}, function (resp) {
+    function getEmptyHtml() {
+        return $(".comment-empty-tpl").html();
+    }
+
+    function refreshComments() {
+        var list_param = {
+            note_id: "{{file.id}}",
+            list_type: "{{comment_list_type}}",
+            list_date: "{{comment_list_date}}"
+        };
+
+        $.get("/note/comments", list_param, function (resp) {
             $("#comments").empty();
+
             for (var i = 0; i < resp.length; i++) {
                 var item = resp[i];
                 if (item.user != "{{_user_name}}") {
@@ -73,6 +92,10 @@ $(function () {
                 var element = $(tpl);
                 var html = renderTemplate(tpl, item);
                 $("#comments").append(html);
+            }
+
+            if (resp.length == 0) {
+                $("#comments").append(getEmptyHtml());
             }
             
         }).fail(function (resp) {

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2021/04/17 22:09:42
+# @modified 2021/04/18 16:11:54
 
 """笔记编辑相关处理"""
 import os
@@ -94,10 +94,6 @@ def default_create_func(note, ctx):
         message = u'标题为空'
         raise Exception(message)
 
-    f = NOTE_DAO.get_by_name(note.creator, name)
-    if f != None:
-        message = u"%s 已存在" % name
-        raise Exception(message)
     return NOTE_DAO.create(note, date_str)
 
 CREATE_FUNC_DICT = {
@@ -171,6 +167,11 @@ class CreateHandler:
             if type not in VALID_NOTE_TYPE_SET:
                 raise Exception(u"无效的类型: %s" % type0)
 
+            check_by_name = NOTE_DAO.get_by_name(note.creator, name)
+            if check_by_name != None:
+                message = u"笔记【%s】已存在" % name
+                raise Exception(message)
+
             create_func = CREATE_FUNC_DICT.get(type, default_create_func)
             inserted_id = create_func(note, ctx)
             if format == "json":
@@ -194,7 +195,7 @@ class CreateHandler:
             heading  = heading,
             key      = "", 
             type     = type,
-            name     = key, 
+            name     = name, 
             tags     = tags, 
             error    = error,
             message  = error,
@@ -257,7 +258,7 @@ class RenameAjaxHandler:
             return dict(code="fail", message="没有权限")
 
         file = NOTE_DAO.get_by_name(xauth.current_name(), name)
-        if file is not None and file.is_deleted == 0:
+        if file is not None:
             return dict(code="fail", message="%r已存在" % name)
 
         NOTE_DAO.update(id, name=name)

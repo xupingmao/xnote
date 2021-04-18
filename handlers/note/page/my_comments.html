@@ -1,0 +1,15 @@
+{% extends base %}
+
+{% block body %}
+
+    <div class="card">
+        <div class="card-title">
+            <span>我的评论</span>
+            <div class="float-right">
+                {% include common/button/back_button.html %}
+            </div>
+        </div>
+    </div>
+
+    {% include note/page/comment.html %}
+{% end %}

@@ -1,13 +1,13 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/04/17 22:17:15
+# @modified 2021/04/18 16:31:21
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
 
 一些表的说明
 note_full:<note_id>              = 笔记的内容，包含一些属性（部分属性比如访问时间、访问次数不是实时更新的）
-note_index:<note_id>             = 笔记索引
+note_index:<note_id>             = 笔记索引，不包含内容
 note_tiny:<user>:<note_id>       = 用户维度的笔记索引
 notebook:<user>:<note_id>        = 用户维度的笔记本(项目)索引
 token:<uuid>                     = 用于链接分享的令牌
@@ -15,8 +15,6 @@ note_history:<note_id>:<version> = 笔记的历史版本
 note_comment:<note_id>:<timeseq> = 笔记的评论
 comment_index:<user>:<timeseq>   = 用户维度的评论索引
 search_history:<user>:<timeseq>  = 用户维度的搜索历史
-
-TODO:
 note_public:<note_id>            = 公开的笔记索引
 """
 import time
@@ -43,6 +41,8 @@ def register_note_table(name, description):
 register_note_table("note_full", "笔记完整信息 <note_full:note_id>")
 register_note_table("note_index", "笔记索引，不包含内容 <note_index:note_id>")
 register_note_table("note_tiny", "用户维度的笔记索引 <note_tiny:user:note_id>")
+register_note_table("note_skey", "用户维度的skey索引 <note_skey:user:skey>")
+register_note_table("note_name", "用户维度的name索引 <note_name:user:name>")
 register_note_table("notebook", "笔记分组")
 register_note_table("token", "用于分享的令牌")
 register_note_table("note_history", "笔记的历史版本")
@@ -307,16 +307,47 @@ def get_by_token(token):
         return get_by_id(token_info.id)
     return None
 
-def get_or_create_note(note_id, creator):
-    note_id = note_id.replace("-", "_")
+def get_by_user_skey(user_name, skey):
+    skey      = skey.replace("-", "_")
+    note_info = dbutil.get("note_skey:%s:%s" % (user_name, skey))
+    if note_info != None:
+        return get_by_id(note_info.note_id)
+    else:
+        return None
 
-    note = get_by_id(note_id)
+def save_note_skey(note):
+    if note.skey is None or note.skey == "":
+        return
+    key = "note_skey:%s:%s" % (note.creator, note.skey)
+    dbutil.put(key, Storage(note_id = note.id))
+
+def delete_note_skey(note):
+    skey = note.skey
+    if skey is None or skey == "":
+        return
+    key = "note_skey:%s:%s" % (note.creator, note.skey)
+    dbutil.delete(key)
+
+def get_or_create_note(skey, creator):
+    """根据skey查询或者创建笔记
+    @param {string} skey 笔记的特殊key，用户维度唯一
+    @param {string} creator 笔记的创建者
+    @throws {exception} 创建异常
+    """
+    if skey is None or skey == "":
+        return None
+    skey = skey.replace("-", "_")
+
+    note = get_by_user_skey(creator, skey)
     if note != None:
         return note
 
+    # 检查笔记名称
+    check_by_name(creator, skey)
+
     note_dict           = Storage()
-    note_dict.id        = note_id
-    note_dict.name      = note_id
+    note_dict.name      = skey
+    note_dict.skey      = skey
     note_dict.creator   = creator
     note_dict.content   = ""
     note_dict.data      = ""
@@ -324,7 +355,7 @@ def get_or_create_note(note_id, creator):
     note_dict.sub_type  = "log"
     note_dict.parent_id = "0"
 
-    create_note(note_dict, note_id = note_id)
+    note_id = create_note(note_dict)
 
     return get_by_id(note_id)
 
@@ -403,6 +434,9 @@ def create_note(note_dict, date_str = None, note_id = None):
 
     # 更新目录修改时间
     touch_note(note_dict["parent_id"])
+
+    # 保存skey索引
+    save_note_skey(note_dict)
 
     # 最后发送创建笔记成功的消息
     xmanager.fire("note.add", dict(name=name, type=type, id = note_id))
@@ -589,48 +623,49 @@ def update_note(note_id, **kw):
     new_parent_id = None
 
     note = get_by_id(note_id)
-    if note:
-        if content:
-            note.content = content
-        if data:
-            note.data = data
-        if priority != None:
-            note.priority = priority
-        if name:
-            note.name = name
-        if atime:
-            note.atime = atime
-        if is_public != None:
-            note.is_public = is_public
-        if tags != None:
-            note.tags = tags
-        if orderby != None:
-            note.orderby = orderby
-        if archived != None:
-            note.archived = archived
-        if size != None:
-            note.size = size
-        if token != None:
-            note.token = token
-        if visited_cnt != None:
-            note.visited_cnt = visited_cnt
-        if note.version is None:
-            note.version = 1
+    if note is None:
+        return 0
 
-        old_version  = note.version
-        note.mtime   = xutils.format_time()
-        note.version += 1
-        
-        # 只修改优先级
-        if len(kw) == 1 and kw.get('priority') != None:
-            note.version = old_version
-        # 只修改名称
-        if len(kw) == 1 and kw.get('name') != None:
-            note.version = old_version
+    if content:
+        note.content = content
+    if data:
+        note.data = data
+    if priority != None:
+        note.priority = priority
+    if name:
+        note.name = name
+    if atime:
+        note.atime = atime
+    if is_public != None:
+        note.is_public = is_public
+    if tags != None:
+        note.tags = tags
+    if orderby != None:
+        note.orderby = orderby
+    if archived != None:
+        note.archived = archived
+    if size != None:
+        note.size = size
+    if token != None:
+        note.token = token
+    if visited_cnt != None:
+        note.visited_cnt = visited_cnt
+    if note.version is None:
+        note.version = 1
 
-        put_note_to_db(note_id, note)
-        return 1
-    return 0
+    old_version  = note.version
+    note.mtime   = xutils.format_time()
+    note.version += 1
+    
+    # 只修改优先级
+    if len(kw) == 1 and kw.get('priority') != None:
+        note.version = old_version
+    # 只修改名称
+    if len(kw) == 1 and kw.get('name') != None:
+        note.version = old_version
+
+    put_note_to_db(note_id, note)
+    return 1
 
 def move_note(note, new_parent_id):
     old_parent_id = note.parent_id
@@ -667,6 +702,11 @@ def get_by_name(creator, name):
         note = result[0]
         return get_by_id(note.id)
     return None
+
+def check_by_name(creator, name):
+    note_by_name = get_by_name(creator, skey)
+    if note_by_name != None:
+        raise Exception("笔记【%s】已存在" % skey)
 
 def visit_note(user_name, id):
     note = get_by_id(id)
@@ -713,6 +753,9 @@ def delete_note(id):
     # 删除笔记本
     book_key = "notebook:%s:%s" % (note.creator, format_note_id(id))
     dbutil.delete(book_key)
+
+    # 删除skey索引
+    delete_note_skey(note)
 
     # 更新数量统计
     refresh_note_stat(note.creator)
@@ -1181,10 +1224,24 @@ def list_comments(note_id):
         comments.append(comment)
     return comments
 
+def list_comments_by_user(user_name, date = None, offset = 0, limit = 100):
+    list_func = None
+
+    if date is not None and date != "":
+        def list_func(key, value):
+            if value.ctime is None:
+                return False
+            return value.ctime.startswith(date)
+
+    return dbutil.prefix_list("comment_index:%s" % user_name, list_func, 
+        offset = offset, limit = limit, reverse = True)
+
 def save_comment(comment):
     timeseq = dbutil.timeseq()
 
     comment["timeseq"] = timeseq
+    comment["ctime"]   = dateutil.format_time()
+
     key = "note_comment:%s:%s" % (comment["note_id"], timeseq)
     dbutil.put(key, comment)
 
@@ -1193,7 +1250,10 @@ def save_comment(comment):
     dbutil.put(key2, comment_index)
 
 def delete_comment(comment_id):
-    dbutil.delete(comment_id)
+    comment = get_comment(comment_id)
+    if comment != None:
+        dbutil.delete(comment_id)
+        dbutil.delete("comment_index:%s:%s" % (comment.user, comment.timeseq))
 
 def get_comment(comment_id):
     return dbutil.get(comment_id)
@@ -1326,6 +1386,7 @@ xutils.register_func("note.list_search_history", list_search_history)
 
 # comments
 xutils.register_func("note.list_comments", list_comments)
+xutils.register_func("note.list_comments_by_user", list_comments_by_user)
 xutils.register_func("note.get_comment",  get_comment)
 xutils.register_func("note.save_comment", save_comment)
 xutils.register_func("note.delete_comment", delete_comment)

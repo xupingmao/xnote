@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2021/02/19 15:23:34
+# @modified 2021/04/18 11:36:52
 # 说明：文件工具分为如下部分：
 # 1、path处理，比如判断是否是父级目录
 # 2、文件操作，比如读写文件，创建目录
@@ -637,6 +637,8 @@ def load_set_config(fpath):
             result.add(line)
     return result
 
+def load_properties(fpath):
+    pass
 
 def get_webpath(fpath):
     import xconfig

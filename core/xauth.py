@@ -12,14 +12,16 @@ from xutils import Storage
 
 dbutil.register_table("user", "用户信息表")
 
-config = xconfig
 # 用户配置
 _users = None
-INVALID_NAMES = fsutil.load_set_config("./config/user/invalid_names.list")
+NAME_LENGTH_MIN = 4
+INVALID_NAMES   = fsutil.load_set_config("./config/user/invalid_names.list")
 
 def is_valid_username(name):
     """有效的用户名为字母+数字"""
     if name in INVALID_NAMES:
+        return False
+    if len(name) < NAME_LENGTH_MIN:
         return False
     return name.isalnum()
 
@@ -167,7 +169,9 @@ def current_role():
         return "admin"
     else:
         return "user"
-get_current_role = current_role
+
+def get_current_role():
+    return current_role()
 
 def get_md5_hex(pswd):
     pswd_md5 = hashlib.md5()
@@ -261,7 +265,7 @@ def has_login(name=None):
     """验证是否登陆
     如果``name``指定,则只能该用户名通过验证
     """
-    if config.IS_TEST:
+    if xconfig.IS_TEST:
         return True
     
     # 优先使用token
@@ -291,7 +295,7 @@ def has_login(name=None):
     return password_md5 == pswd_in_cookie
 
 def is_admin():
-    return config.IS_TEST or has_login("admin")
+    return xconfig.IS_TEST or has_login("admin")
 
 def check_login(user_name=None):
     if has_login(user_name):

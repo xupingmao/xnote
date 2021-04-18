@@ -11,8 +11,15 @@
             <button class="btn-default" onclick="javascript:history.back();">返回</button>
         </div>
     </div>
+</div>
+
+<div class="card">
 
     <div class="grid-row note-list">
+        {% if len(files) == 0 %}
+            {% include common/text/empty_text.html %}
+        {% end %}
+
         {% for item in files %}
             <a class="dialog-link" href="{{item.url}}">
                 <div class="book-item">
