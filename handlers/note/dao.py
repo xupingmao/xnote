@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/04/18 17:59:25
+# @modified 2021/04/18 18:13:29
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -864,14 +864,13 @@ def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name",
 
 @xutils.timeit(name = "NoteDao.ListRecentCreated", logfile = True)
 def list_recent_created(creator = None, offset = 0, limit = 10, skip_archived = False):
-    def list_func(key, value):
-        if skip_archived and value.archived:
-            return False
-        return value.is_deleted != 1
+    if limit is None:
+        limit = xconfig.PAGE_SIZE
 
-    result  = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
-    fill_parent_name(result)
-    return result
+    user = xauth.current_name()
+    if user is None:
+        user = "public"
+    return list_note_by_log("note_create_log", creator, offset, limit)
 
 def list_note_by_log(log_prefix, creator, offset = 0, limit = -1, skip_deleted = False):
     """通过日志来查询笔记列表

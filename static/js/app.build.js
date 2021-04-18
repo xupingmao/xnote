@@ -1420,11 +1420,20 @@ xnote.alert = function(message) {
     }
 };
 
-window.xnote.toast = function(message, time) {
-    if (time == undefined) {
-        time = 1000;
+window.xnote.toast = function (message, time) {
+    if (layer && layer.msg) {
+        layer.msg(message, {time: time});
+    } else {
+        myToast(message, time);
+    }
+}
+
+var myToast = function(message, timeout) {
+    if (timeout == undefined) {
+        timeout = 1000;
     }
     var maxWidth = $(document.body).width();
+    var maxHeight = $(document.body).height()
     var fontSize = 14;
     var toast = $("<div>").css({
         "margin": "0 auto",
@@ -1443,15 +1452,26 @@ window.xnote.toast = function(message, time) {
     toast.text(message);
 
     $(document.body).append(toast);
+
+    // 宽度
     var width = toast.outerWidth();
     var left = (maxWidth - width) / 2;
     if (left < 0) {
         left = 0;
     }
     toast.css("left", left);
+
+    // 高度
+    var height = toast.outerHeight();
+    var top = (maxHeight - height) / 2;
+    if (top < 0) {
+        top = 0;
+    }
+    toast.css("top", top);
+
     setTimeout(function() {
         toast.remove();
-    }, time);
+    }, timeout);
 }
 
 // 兼容之前的方法
