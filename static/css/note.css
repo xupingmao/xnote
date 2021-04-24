@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/04/18 11:46:29
+ * @modified 2021/04/24 23:03:23
 */
 
 
@@ -30,6 +30,7 @@
     font-size: small;
     padding-top: 3px;
 }
+
 .note {
     float: left;
     border: solid 1px;
@@ -38,8 +39,9 @@
     margin-bottom: 10px;
     width: 100%;
 }
+
 .note-body {
-    padding: 10px;
+    padding: 5px;
 }
 
 .note-head {
@@ -171,6 +173,7 @@
 }
 
 .comment-foot {
+    float: left;
     width: 100%;
     font-size: 10px;
 }

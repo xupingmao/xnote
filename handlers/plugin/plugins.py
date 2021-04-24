@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/04/18 15:21:40
+# @modified 2021/04/24 16:50:35
 from io import StringIO
 import xconfig
 import codecs
@@ -290,7 +290,7 @@ INNER_TOOLS = [
     note_plugin("置顶笔记", "/note/sticky", "fa-thumb-tack"),
     note_plugin("搜索历史", "/search/history", "fa-search"),
     note_plugin("导入笔记", "/note/html_importer", "fa-internet-explorer", required_role = "admin"),
-    note_plugin("日历视图", "/note/calendar", "fa-calendar"),
+    # note_plugin("日历视图", "/note/calendar", "fa-calendar"),
     note_plugin("时间视图", "/note/date", "fa-clock-o"),
     note_plugin("数据统计", "/note/stat", "fa-bar-chart"),
     note_plugin("上传管理", "/fs_upload", "fa-upload"),

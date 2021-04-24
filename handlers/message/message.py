@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/04/17 22:19:41
+# @modified 2021/04/24 22:55:52
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -142,6 +142,7 @@ def on_search_message(ctx):
         process_message(message)
         item.name = u('记事 - ') + message.ctime
         item.html = message.html
+        item.icon = "hide"
         ctx.messages.append(item)
         # print(message)
     if count > 3:

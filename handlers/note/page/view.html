@@ -29,22 +29,21 @@
     {% end %}
 
     {# 收藏一下这个符号 › #}
-    <div class="col-md-12 card">
-        {% comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 %}
-        {% if file_type == "group" %}
-            {% include note/editor/note_list.html %}
-        {% elif file_type in ("md", "text", "log", "plan") %}
-            {% include note/editor/markdown.html %}
-        {% elif file_type == "csv" %}
-            {% include note/editor/table.html %}
-        {% elif file_type == "gallery" %}
-            {% include note/editor/gallery.html %}
-        {% elif file_type == "list" %}
-            {% include note/editor/list.html %}
-        {% else %}
-            {% include note/editor/post.html %}
-        {% end %}
-    </div>
+
+    <!-- comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 -->
+    {% if file_type == "group" %}
+        {% include note/editor/note_list.html %}
+    {% elif file_type in ("md", "text", "log", "plan") %}
+        {% include note/editor/markdown.html %}
+    {% elif file_type == "csv" %}
+        {% include note/editor/table.html %}
+    {% elif file_type == "gallery" %}
+        {% include note/editor/gallery.html %}
+    {% elif file_type == "list" %}
+        {% include note/editor/list.html %}
+    {% else %}
+        {% include note/editor/post.html %}
+    {% end %}
 
     {# 评论功能 #}
     {% if file_type != "group" and show_comment %}

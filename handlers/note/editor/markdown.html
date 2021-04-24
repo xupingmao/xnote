@@ -1,7 +1,8 @@
 {% init can_edit = False %}
-{% include "note/component/view_header.html" %}
 
-<div class="col-md-12">
+<div class="card col-md-12">
+    {% include "note/component/view_header.html" %}
+    
     <div id="epiceditor" class="row">
         <div id="markdown-input-div" class="col-md-6">
             <textarea id="markdown-input" class="form-control" name="content" rows=50>{{file.content}}</textarea>

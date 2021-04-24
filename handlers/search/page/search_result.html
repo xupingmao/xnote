@@ -2,14 +2,14 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2021/02/21 17:02:36
+@modified 2021/04/24 21:55:00
 -->
 
 {% block body %}
 
-{% init page_max = 0 %}
 {% init recent = [] %}
-{% init tools = [] %}
+{% init tools  = [] %}
+{% init page_max  = 0 %}
 {% init show_path = False %}
 
 <div id="executeResult">
@@ -27,14 +27,17 @@
 <div class="col-md-12 result-list">
 
     <div class="card">
-        {% set title = "高级搜索" %}
-        {% include common/base_title.html %}
+        <div class="card-title">
+            <span>综合搜索</span>
+            <div class="float-right">
+                <a class="btn btn-default" href="/search/history">搜索历史</a>
+                {% include common/button/back_button.html %}
+            </div>
+        </div>
     </div>
-
 
     {% include search/component/search_tab.html %}
 
-    
     {% if len(tools) > 0 %}
         <div class="card">
             <h3 class="card-title">脚本</h3>
@@ -45,7 +48,7 @@
     {% end %}
 
     {% for i, file in enumerate(files) %}
-    <div class="note"> 
+    <div class="card"> 
         <div class="note-body">
             {# 右侧操作选项 #}
             <div class="note-visited-cnt">
@@ -112,8 +115,8 @@
                         </span>
                     {% end %}
 
-                    {% if file.mtime != None %}
-                        <span class="float-right note-last-visit-time">更新:{{file.mtime}}</span>
+                    {% if file.mdate != None %}
+                        <span class="float-right note-last-visit-time">更新:{{file.mdate}}</span>
                     {% end %}
                 </div>
                 <div class="note-related">
@@ -125,31 +128,7 @@
     {% end %}
 </div>
 
-{% if "page" in globals() %}
-    {% init key = "" %}
-    {% if key != "" %}
-        {# TODO 移动端优化 #}
-        <div class="note">
-            <div class="note-body">
-                <div class="note-name">
-                    没找到结果?试试这些吧~
-                </div>
-                <div class="note-content-short">
-                    <br/>
-                    <a class="suggest-link" href="https://www.baidu.com/s?wd={{key}}" target="_blank">百度</a>
-                    <a class="suggest-link" href="https://www.google.com/search?q={{key}}" target="_blank">谷歌</a>
-                    <a class="suggest-link" href="https://www.bing.com/search?q={{key}}" target="_blank">必应</a>
-
-                    {% if _has_login %}
-                        <a class="suggest-link" href="/search?key={{key}}&category=content">全文搜索</a>
-                    {% end %}
-                </div>
-            </div>
-        </div>
-    {% end %}
-<div class="card">
-    {% include mod_pagenation.html %}
-</div>
+{% include search/component/search_pagination.html %}
 
 <script>
     $(".execute-btn").on("click", function (e) {
@@ -164,8 +143,6 @@
         });
     })
 </script>
-
-{% end %} 
 
 {% end %}
 

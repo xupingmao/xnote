@@ -25,22 +25,24 @@
 
 {% set item = file %}
 
-<div class="grid-title btn-line-height">
-    <span>表格查看</span>
-    {% if _user_name == file.creator %} 
-        <div class="float-right">
-            {% include note/component/view_header_tag.html %}
-            <button class="btn" id="saveBtn">保存</button>
-            {% include note/component/note_dropdown.html %}
-        </div>
-    {% end %}
-</div>
+<div class="card">
+    <div class="grid-title btn-line-height">
+        <span>表格查看</span>
+        {% if _user_name == file.creator %} 
+            <div class="float-right">
+                {% include note/component/view_header_tag.html %}
+                <button class="btn" id="saveBtn">保存</button>
+                {% include note/component/note_dropdown.html %}
+            </div>
+        {% end %}
+    </div>
 
-{% include note/component/note_path.html %}
+    {% include note/component/note_path.html %}
 
-<textarea id="content" class="hide">{{file.content}}</textarea>
-<div id="myParent" class="row">
-    <div id="my"></div>
+    <textarea id="content" class="hide">{{file.content}}</textarea>
+    <div id="myParent" class="row">
+        <div id="my"></div>
+    </div>
 </div>
 
 <script type="text/javascript">

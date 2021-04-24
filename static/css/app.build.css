@@ -132,7 +132,8 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2021/03/21 17:55:14
+ * @modified 2021/04/24 21:19:53
+ * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
  * 2：复杂样式，命名规则为：模块名(可选)-功能外观-子功能外观(可选)-实现方式(可选)-特征或状态(可选)，示例如下：
@@ -1048,7 +1049,6 @@ li.menu-item:hover {
 .grid-title, .card-title {
     width: 100%;
     float: left;
-    padding-left: 5px;
     border-left: 5px solid #039BE5;
     margin-top: 0px;
     margin-bottom: 5px;
@@ -1056,6 +1056,7 @@ li.menu-item:hover {
     font-size: 14px;
     font-weight: normal;
     overflow: initial;
+    padding-left: 5px;
 }
 
 .card-title-2 {
@@ -1954,7 +1955,7 @@ li.menu-item:hover {
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/04/18 11:46:29
+ * @modified 2021/04/24 23:03:23
 */
 
 
@@ -1982,6 +1983,7 @@ li.menu-item:hover {
     font-size: small;
     padding-top: 3px;
 }
+
 .note {
     float: left;
     border: solid 1px;
@@ -1990,8 +1992,9 @@ li.menu-item:hover {
     margin-bottom: 10px;
     width: 100%;
 }
+
 .note-body {
-    padding: 10px;
+    padding: 5px;
 }
 
 .note-head {
@@ -2123,6 +2126,7 @@ li.menu-item:hover {
 }
 
 .comment-foot {
+    float: left;
     width: 100%;
     font-size: 10px;
 }
@@ -2271,4 +2275,14 @@ li.menu-item:hover {
 
 .plugin-right-span {
     color: #888;
-}
+}/**
+ * 搜索的样式
+ * @author xupingmao
+ * @since 2021/04/24 17:35:43
+ * @modified 2021/04/24 21:21:24
+ * @filename search.css
+ */
+
+ .search-tab {
+    padding: 5px;
+ }

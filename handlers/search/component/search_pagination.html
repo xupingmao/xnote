@@ -1,0 +1,28 @@
+{% if "page" in globals() %}
+    {% init key = "" %}
+    {% if key != "" %}
+        {# TODO 移动端优化 #}
+        <div class="card">
+            <div class="note-body">
+                <div class="note-name">
+                    没找到结果?试试这些吧~
+                </div>
+                <div class="note-content-short">
+                    <br/>
+                    <a class="suggest-link" href="https://www.baidu.com/s?wd={{key}}" target="_blank">百度</a>
+                    <a class="suggest-link" href="https://www.google.com/search?q={{key}}" target="_blank">谷歌</a>
+                    <a class="suggest-link" href="https://www.bing.com/search?q={{key}}" target="_blank">必应</a>
+
+                    {% if _has_login %}
+                        <a class="suggest-link" href="/search?key={{key}}&category=content">全文搜索</a>
+                    {% end %}
+                </div>
+            </div>
+        </div>
+    {% end %}
+
+    <div class="card">
+        {% include mod_pagenation.html %}
+    </div>
+
+{% end %} 

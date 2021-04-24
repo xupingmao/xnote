@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/10 23:44:48
-# @modified 2021/04/18 15:39:22
+# @modified 2021/04/24 22:24:15
 import xutils
 import xauth
 import xtemplate
@@ -11,11 +11,17 @@ from xutils import DAO
 NOTE_DAO = DAO("note")
 
 
-def process_comments(comments):
+def process_comments(comments, show_note = False):
     for comment in comments:
         if comment.content is None:
             continue
         comment.html = xutils.mark_text(comment.content)
+
+        if show_note:
+            note = NOTE_DAO.get_by_id(comment.note_id, False)
+            if note != None:
+                comment.note_name = note.name
+                comment.note_url  = note.url
 
 class CommentListAjaxHandler:
 
@@ -23,6 +29,7 @@ class CommentListAjaxHandler:
         note_id   = xutils.get_argument("note_id")
         list_type = xutils.get_argument("list_type")
         list_date = xutils.get_argument("list_date")
+        show_note = xutils.get_argument("show_note", type=bool)
         user_name = xauth.current_name()
 
         if list_type == "user":
@@ -31,7 +38,7 @@ class CommentListAjaxHandler:
             comments  = NOTE_DAO.list_comments(note_id)
 
         # 处理评论列表
-        process_comments(comments)
+        process_comments(comments, show_note)
         return comments
 
 class SaveCommentAjaxHandler:
@@ -75,6 +82,7 @@ class MyCommentsHandler:
         return xtemplate.render("note/page/my_comments.html", 
             show_comment_title = False,
             show_comment_create = False,
+            show_comment_note = True,
             comment_list_date = date,
             comment_list_type = "user")
 

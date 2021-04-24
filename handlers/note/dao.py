@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/04/18 18:13:29
+# @modified 2021/04/24 22:17:17
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -1051,9 +1051,9 @@ def get_history(note_id, version):
     # note = table.select_first(where = dict(note_id = note_id, version = version))
     return dbutil.get("note_history:%s:%s" % (note_id, version))
 
-def search_name(words, creator = None, parent_id = None):
+def search_name(words, creator = None, parent_id = None, orderby = "mtime_desc"):
     words = [word.lower() for word in words]
-    if parent_id != None:
+    if parent_id != None and parent_id != "":
         parent_id = str(parent_id)
 
     def search_func(key, value):
@@ -1063,9 +1063,13 @@ def search_name(words, creator = None, parent_id = None):
             return False
         return (value.creator == creator or value.is_public) and textutil.contains_all(value.name.lower(), words)
     result = dbutil.prefix_list("note_tiny:%s" % creator, search_func, 0, -1)
-    notes  = [build_note_info(item) for item in result]
-    notes.sort(key = lambda x: x.mtime, reverse = True)
-    return notes
+
+    # 补全信息
+    build_note_list_info(result)
+
+    # 对笔记进行排序
+    sort_notes(result, orderby)
+    return result
 
 def search_content(words, creator=None):
     words = [word.lower() for word in words]
@@ -1074,9 +1078,13 @@ def search_content(words, creator=None):
             return False
         return (value.creator == creator or value.is_public) and textutil.contains_all(value.content.lower(), words)
     result = dbutil.prefix_list("note_full", search_func, 0, -1)
-    notes = [build_note_info(item) for item in result]
-    sort_notes(notes)
-    return notes
+    
+    # 补全信息
+    build_note_list_info(result)
+
+    # 对笔记进行排序
+    sort_notes(result)
+    return result
 
 def search_public(words):
     print("search_public")
@@ -1244,9 +1252,9 @@ def save_comment(comment):
     key = "note_comment:%s:%s" % (comment["note_id"], timeseq)
     dbutil.put(key, comment)
 
-    key2 = "comment_index:%s:%s" % (comment["user"], timeseq)
+    index_key = "comment_index:%s:%s" % (comment["user"], timeseq)
     comment_index = comment.copy()
-    dbutil.put(key2, comment_index)
+    dbutil.put(index_key, comment_index)
 
 def delete_comment(comment_id):
     comment = get_comment(comment_id)

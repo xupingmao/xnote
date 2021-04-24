@@ -2,12 +2,12 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2021/03/21 18:14:59
+@modified 2021/04/24 20:55:24
 -->
 
 {% block body %}
 
-    <div class="col-md-12 card">
+    <div class="card">
         <div class="card-title">
             <span>搜索历史</span>
 
@@ -15,7 +15,9 @@
                 {% include common/button/back_button.html %}
             </div>
         </div>
+    </div>
 
+    <div class="card">
         {% if len(recent) == 0 %}
             {% include common/text/empty_text.html %}
         {% end %}

@@ -6,10 +6,11 @@ cat ./static/css/reset.css >> ./static/css/app.build.css
 cat ./static/lib/font-awesome-4.7.0/css/font-awesome.min.css >> ./static/css/app.build.css
 cat ./static/css/common.css >> ./static/css/app.build.css
 cat ./static/css/common-react.css >> ./static/css/app.build.css
-cat ./static/css/app.css >> ./static/css/app.build.css
+cat ./static/css/app.css     >> ./static/css/app.build.css
 cat ./static/css/message.css >> ./static/css/app.build.css
-cat ./static/css/note.css >> ./static/css/app.build.css
+cat ./static/css/note.css    >> ./static/css/app.build.css
 cat ./static/css/plugins.css >> ./static/css/app.build.css
+cat ./static/css/search.css  >> ./static/css/app.build.css
 echo "打包app.build.css ... [OK]"
 
 # build js files

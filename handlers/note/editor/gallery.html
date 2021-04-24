@@ -1,9 +1,3 @@
-{% include note/component/view_header.html %}
-
-<!-- 上传文件组件 -->
-{% if file.creator == _user_name %} 
-    {% include fs/mod_fs_upload.html %}
-{% end %}
 
 {% import xutils.textutil as textutil %}
 {% init parent_path = None %}
@@ -56,36 +50,46 @@
     }
 </style>
 
-<div class="file-list">
-    {% for item in filelist %}
-        {# 隐藏文件 #}
-        {% if item.name == "" %}
-            {% continue %}
-        {% end %}
-        
-        {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." or item.name.endswith((".pyc", ".class"))) %}
-            {% continue %}
-        {% end %}
+<div class="card">
+    {% include note/component/view_header.html %}
 
-        {% if not item.name.startswith("._") %}
-            <div class="gallery-item context-menu-one">
-                <div class="icon-box">
-                    {% if item.type == "dir" %}
-                        <img class="fs-icon" src="/static/image/folder2.png">
-                    {% elif xutils.is_img_file(item.path) %}
-                        <img class="x-photo" src="/data/files/{{item.path}}?mode=thumbnail" 
-                            data-src="/data/files/{{item.path}}">
-                    {% elif xutils.is_text_file(item.path) %}
-                        <img class="fs-icon" src="/static/image/icon_txt.png">
-                    {% else %}
-                        <img class="fs-icon" src="/static/image/file2.png">
-                    {% end %}
-                </div>
-                {# TODO 要使用web路径 #}
-                <a href="/data/files/{{item.path}}?mode=grid">{{textutil.get_short_text(item.name, 10)}}</a>
-            </div>
-        {% end %}
+    <!-- 上传文件组件 -->
+    {% if file.creator == _user_name %} 
+        {% include fs/mod_fs_upload.html %}
     {% end %}
+
+
+    <div class="file-list">
+        {% for item in filelist %}
+            {# 隐藏文件 #}
+            {% if item.name == "" %}
+                {% continue %}
+            {% end %}
+            
+            {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." or item.name.endswith((".pyc", ".class"))) %}
+                {% continue %}
+            {% end %}
+
+            {% if not item.name.startswith("._") %}
+                <div class="gallery-item context-menu-one">
+                    <div class="icon-box">
+                        {% if item.type == "dir" %}
+                            <img class="fs-icon" src="/static/image/folder2.png">
+                        {% elif xutils.is_img_file(item.path) %}
+                            <img class="x-photo" src="/data/files/{{item.path}}?mode=thumbnail" 
+                                data-src="/data/files/{{item.path}}">
+                        {% elif xutils.is_text_file(item.path) %}
+                            <img class="fs-icon" src="/static/image/icon_txt.png">
+                        {% else %}
+                            <img class="fs-icon" src="/static/image/file2.png">
+                        {% end %}
+                    </div>
+                    {# TODO 要使用web路径 #}
+                    <a href="/data/files/{{item.path}}?mode=grid">{{textutil.get_short_text(item.name, 10)}}</a>
+                </div>
+            {% end %}
+        {% end %}
+    </div>
 </div>
 
 <script type="text/javascript">

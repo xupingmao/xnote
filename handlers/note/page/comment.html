@@ -2,6 +2,7 @@
 {% init file = Storage() %}
 {% init show_comment_title  = True %}
 {% init show_comment_create = True %}
+{% init show_comment_note   = False %}
 {% init comment_list_type   = "note_id" %}
 {% init comment_list_date   = "" %}
 {% init comment_btn_text    = "评论" %}
@@ -44,6 +45,7 @@
         <div class="comment-time">${ctime}</div>
         <div class="comment-content">${html}</div>
         <div class="comment-foot">
+            <a class="link" href="${note_url}">${note_name}</a>
             <div class="float-right ${deleteBtnClass}">
                 <a class="delete-comment-btn" data-id="${id}" data-content="${content}">删除</a>
             </div>
@@ -76,7 +78,8 @@ $(function () {
         var list_param = {
             note_id: "{{file.id}}",
             list_type: "{{comment_list_type}}",
-            list_date: "{{comment_list_date}}"
+            list_date: "{{comment_list_date}}",
+            show_note: "{{show_comment_note}}",
         };
 
         $.get("/note/comments", list_param, function (resp) {
@@ -134,7 +137,7 @@ $(function () {
         }
     });
 
-        // 文件上传
+    // 文件上传
     var BASE_URL = "/static/lib/webuploader"
     // 初始化Web Uploader
     var uploader = xnote.createUploader('#commentFileUploader', false);

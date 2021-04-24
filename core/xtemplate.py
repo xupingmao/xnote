@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/04/18 15:48:37
+# @modified 2021/04/24 22:50:49
 import os
 import json
 import web
@@ -196,7 +196,7 @@ def render_search(kw):
 
     search_type        = kw.get("search_type")
     search_tag         = kw.get("search_tag", "")
-    search_action      = "/note/timeline"
+    search_action      = "/search"
     search_placeholder = u"搜索笔记"
 
     if search_type == "plugin":
@@ -214,7 +214,7 @@ def render_search(kw):
 
     if search_type == "dict":
         search_placeholder = "搜索词典"
-        search_action = "/dict/search?key="
+        search_action = "/search"
 
     kw["search_action"] = search_action
     kw["search_placeholder"] = search_placeholder

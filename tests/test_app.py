@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/03/06 16:57:59
+# @modified 2021/04/24 23:06:50
 
 import sys
 import os
@@ -315,6 +315,8 @@ class Main:
     def test_diskclean(self):
         self.check_OK("/cron/diskclean")
 
+    def test_backup(self):
+        self.check_OK("/system/backup")
 
 
 

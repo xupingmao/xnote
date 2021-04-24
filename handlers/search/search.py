@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/01/30 17:07:35
+# @modified 2021/04/24 22:46:56
 
 import re
 import os
@@ -19,12 +19,14 @@ import xauth
 import xmanager
 import xtemplate
 import xtables
-from xutils import textutil, u, cacheutil
-from xutils import Queue, History, Storage
+from xutils import textutil, u
+from xutils import Queue, Storage
+from xutils import dateutil
 from xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
+DICT_DAO = xutils.DAO("dict")
 
 config = xconfig
 _RULES = []
@@ -155,14 +157,18 @@ def apply_search_rules(ctx, key):
                 xutils.print_exc()
     return files
 
-class handler:
+class SearchHandler:
 
     def do_search(self, page_ctx, key, offset, limit):
-        category   = xutils.get_argument("category", "")
+        category    = xutils.get_argument("category", "")
+        search_type = xutils.get_argument("search_type", "")
         words      = textutil.split_words(key)
         user_name  = xauth.get_current_name()
-        start_time = time.time()
         ctx        = build_search_context(user_name, category, key)
+
+        # 优先使用 search_type
+        if search_type != None and search_type != "":
+            return self.do_search_by_type(page_ctx, key, search_type)
         
         # 阻断性的搜索，比如特定语法的
         xmanager.fire("search.before", ctx)
@@ -174,10 +180,6 @@ class handler:
 
         ctx.files = apply_search_rules(ctx, key)
 
-        cost_time = int((time.time() - start_time) * 1000)
-        
-        log_search_history(user_name, key, category, cost_time)
-
         if ctx.stop:
             return ctx.join_as_files()
 
@@ -186,8 +188,59 @@ class handler:
         xmanager.fire("search.after", ctx)
 
         page_ctx.tools = []
+        
+        search_result = ctx.join_as_files()
+        
+        fill_note_info(search_result)
 
-        return ctx.join_as_files()
+        return search_result
+
+    def do_search_with_profile(self, page_ctx, key, offset, limit):
+        user_name = xauth.current_name()
+        category  = xutils.get_argument("category", "")
+        search_type = xutils.get_argument("search_type", "")
+
+        start_time = time.time()
+
+        result = self.do_search(page_ctx, key, offset, limit)
+
+        cost_time = int((time.time() - start_time) * 1000)
+
+        if category is None:
+            category = search_type
+        log_search_history(user_name, key, category, cost_time)
+
+        return result
+
+    def do_search_dict(self, ctx, key):
+        notes, count = DICT_DAO.search(key)
+        for note in notes:
+            note.raw = note.value
+            note.icon = "hide"
+        return notes
+
+    def do_search_note(self, ctx, key):
+        user_name = xauth.get_current_name()
+        parent_id = xutils.get_argument("parent_id")
+        words = textutil.split_words(key)
+        notes = NOTE_DAO.search_name(words, user_name, parent_id = parent_id)
+        for note in notes:
+            note.category = "note"
+            note.mdate = dateutil.format_date(note.mtime)
+        fill_note_info(notes)
+
+        if parent_id != "" and parent_id != None:
+            ctx.parent_note = NOTE_DAO.get_by_id(parent_id)
+        return notes
+
+
+    def do_search_by_type(self, ctx, key, search_type):
+        if search_type == "note":
+            return self.do_search_note(ctx, key)
+        elif search_type == "dict":
+            return self.do_search_dict(ctx, key)
+        else:
+            return []
 
     def GET(self, path_key = None):
         """search files by name and content"""
@@ -196,24 +249,28 @@ class handler:
         title     = xutils.get_argument("title", "")
         category  = xutils.get_argument("category", "default")
         page      = xutils.get_argument("page", 1, type = int)
+        search_type = xutils.get_argument("search_type", "")
         user_name = xauth.get_current_name()
-        page_url  =  "/search/search?key=%s&category=%s&page="\
-            % (key, category)
+        page_url  =  "/search/search?key=%s&category=%s&search_type=%s&page="\
+            % (key, category, search_type)
         pagesize = xconfig.SEARCH_PAGE_SIZE
         offset   = (page-1) * pagesize
         limit    = pagesize
+        ctx      = Storage()
 
         if path_key:
             key = xutils.unquote(path_key)
 
         if key == "" or key == None:
             raise web.found("/search/history")
-        key   = key.strip()
-        ctx   = Storage()
-        files = self.do_search(ctx, key, offset, pagesize)
+
+        key = key.strip()
+
+        files = self.do_search_with_profile(ctx, key, offset, pagesize)
+
         count = len(files)
         files = files[offset:offset+limit]
-        fill_note_info(files)
+
         return xtemplate.render("search/page/search_result.html", 
             show_aside = False,
             key = key,
@@ -244,10 +301,10 @@ def load_rules():
     global rules_loaded
     if rules_loaded:
         return
-    add_rule(r"([^ ]*)",                "api.search")
-    add_rule(r"静音(.*)",               "mute.search")
-    add_rule(r"mute(.*)",               "mute.search")
-    add_rule(r"取消静音",               "mute.cancel")
+    add_rule(r"([^ ]*)",  "api.search")
+    add_rule(r"静音(.*)", "mute.search")
+    add_rule(r"mute(.*)", "mute.search")
+    add_rule(r"取消静音",  "mute.cancel")
     add_rule(r"(.*)", "note.search")
     rules_loaded = True
 
@@ -270,10 +327,10 @@ xutils.register_func("search.list_rules", list_search_rules)
 xutils.register_func("search.list_recent", list_search_history)
 
 xurls = (
-    r"/search/search", handler, 
+    r"/search/search", SearchHandler, 
+    r"/search"       , SearchHandler,
+    r"/s/(.+)"       , SearchHandler,
     r"/search/history", SearchHistoryHandler,
-    r"/search", handler,
     r"/search/rules", RulesHandler,
-    r"/s/(.+)", handler
 )
 

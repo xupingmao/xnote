@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/02/15 21:46:37
-# @modified 2021/04/18 15:49:04
+# @modified 2021/04/24 22:41:11
 import xtables
 import xtemplate
 import xutils
@@ -47,6 +47,15 @@ def convert_dict_func(item):
     v.show_next = True
     return v
 
+def search_dict(key, page = 1):
+    db = xtables.get_dict_table()
+    where_sql = "key LIKE %s" % left_match_escape(key)
+    items = db.select(order="key", where = where_sql, limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
+    items = list(map(convert_dict_func, items))
+    count = db.count(where = where_sql)
+    return items, count
+
+
 class DictEditHandler:
 
     def GET(self, name=""):
@@ -80,16 +89,19 @@ class DictSearchHandler:
     def GET(self):
         key  = xutils.get_argument("key")
         page = xutils.get_argument("page", 1, type=int)
-        db   = xtables.get_dict_table()
-        where_sql = "key LIKE %s" % left_match_escape(key)
-        items = db.select(order="key", where = where_sql, limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
-        items = map(convert_dict_func, items)
-        count = db.count(where = where_sql)
+        # db   = xtables.get_dict_table()
+        # where_sql = "key LIKE %s" % left_match_escape(key)
+        # items = db.select(order="key", where = where_sql, limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
+        # items = map(convert_dict_func, items)
+        # count = db.count(where = where_sql)
+        # page_max = math.ceil(count / PAGE_SIZE)
+
+        items, count = search_dict(key, page)
         page_max = math.ceil(count / PAGE_SIZE)
 
         return xtemplate.render("dict/dict_list.html", 
             show_aside = True,
-            files      = list(items), 
+            files      = items, 
             file_type  = "group",
             show_opts  = False,
             page       = page,
@@ -124,6 +136,8 @@ class DictHandler:
             show_pagination = True,
             page_url   = "/note/dict?page=",
             search_type = "dict")
+
+xutils.register_func("dict.search", search_dict)
 
 xurls = (
     r"/dict/edit/(.+)", DictEditHandler,

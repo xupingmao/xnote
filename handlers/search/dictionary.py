@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2019/02/16 12:49:38
+# @modified 2021/04/24 22:38:51
 
 """英汉、汉英词典
 
@@ -76,6 +76,7 @@ def translate_english(ctx):
         value = item.value.replace("\\n", "\n")
         ctx.dicts.append(Storage(name=u("翻译 - %s") % item.key, key = item.key,
             raw = value, url = "#", category = "dict"))
+
 
 
 
