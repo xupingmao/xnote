@@ -15,6 +15,7 @@ from threading import Timer
 from bs4 import BeautifulSoup
 from html2text import HTML2Text
 from xutils import netutil
+from xutils import Storage
 
 
 def get_addr(src, host):
@@ -100,6 +101,34 @@ def get_html_title(soup):
     if title != None:
         return title.get_text()
 
+def import_from_html(html, baseurl = ""):
+    soup = BeautifulSoup(html, "html.parser")
+    element_list = soup.find_all(["script", "style"])
+    for element in element_list:
+        element.extract()
+    plain_text = soup.get_text(separator=" ")
+    plain_text = clean_whitespace(plain_text)
+
+    images  = soup.find_all("img")
+    links   = soup.find_all("a")
+    csses   = soup.find_all("link")
+    scripts = soup.find_all("script")
+    title   = get_html_title(soup)
+
+    h = HTML2Text(baseurl = baseurl)
+    text = "From %s\n\n" % baseurl + h.handle(html)
+
+    texts   = [text]
+    images  = get_addr_list(images)
+    scripts = get_addr_list(scripts)
+
+    return Storage(plain_text = plain_text, 
+            title = title,
+            links = links,
+            csses = csses,
+            scripts = scripts,
+            texts = texts
+        )
 
 class handler:
 
@@ -129,9 +158,9 @@ class handler:
 
             if hasattr(file, "filename"):
                 filename = file.filename
-            plain_text = ""
 
             if not isempty(address):
+                address = address.strip()
                 html = readhttp(address)
             else:
                 # 读取文件
@@ -141,41 +170,22 @@ class handler:
 
             print("Read html, filename={}, length={}".format(filename, len(html)))
 
-
-            soup = BeautifulSoup(html, "html.parser")
-            element_list = soup.find_all(["script", "style"])
-            for element in element_list:
-                element.extract()
-            plain_text = soup.get_text(separator=" ")
-            plain_text = clean_whitespace(plain_text)
-
-            images  = soup.find_all("img")
-            links   = soup.find_all("a")
-            csses   = soup.find_all("link")
-            scripts = soup.find_all("script")
-            title   = get_html_title(soup)
-
-            h = HTML2Text(baseurl = address)
-            text = "From %s\n\n" % address + h.handle(html)
-
-            texts   = [text]
-            images  = get_addr_list(images)
-            scripts = get_addr_list(scripts)
+            result = import_from_html(html, address)
 
             if name != "" and name != None:
                 save_to_archive_dir(name)
 
             return xtemplate.render(self.template_path,
-                show_aside = False,
-                images = images,
-                links = links,
-                csses = csses,
-                scripts = scripts,
-                texts = texts,
-                address = address,
-                url = address,
-                article_title = title,
-                plain_text = plain_text)
+                show_aside    = False,
+                address       = address,
+                url           = address,
+                images        = result.images,
+                links         = result.links,
+                csses         = result.csses,
+                scripts       = result.scripts,
+                texts         = result.texts,
+                article_title = result.title,
+                plain_text    = result.plain_text)
         except Exception as e:
             xutils.print_stacktrace()
             return xtemplate.render(self.template_path,
@@ -183,5 +193,5 @@ class handler:
                 error = str(e))
 
 
-
+xutils.register_func("note.import_from_html", import_from_html)
 

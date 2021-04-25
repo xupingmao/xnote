@@ -1,6 +1,6 @@
 <!--
 @since 2018/05/27
-@modified 2021/04/24 22:53:53
+@modified 2021/04/25 10:38:00
 -->
 
 {% init key = "" %}
@@ -47,10 +47,16 @@ $(function () {
     var searchType = getUrlParam("search_type");
     var category   = getUrlParam("category");
 
-    if (searchType != "" && searchType != undefined) {
+    function isEmpty(value) {
+        return value === "" || value === undefined || value === null
+    }
+
+    if (!isEmpty(searchType)) {
         $("[data-option=" + searchType + "]").addClass("selected-link");
-    } else {
+    } else if (!isEmpty(category)) {
         $("[data-option=" + category + "]").addClass("selected-link");
+    } else {
+        $("[data-option=default]").addClass("selected-link");
     }
 })
 </script>

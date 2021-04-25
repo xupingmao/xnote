@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/04/24 22:46:56
+# @modified 2021/04/25 10:47:55
 
 import re
 import os
@@ -193,7 +193,7 @@ class SearchHandler:
         
         fill_note_info(search_result)
 
-        return search_result
+        return search_result[offset:offset+limit], len(search_result)
 
     def do_search_with_profile(self, page_ctx, key, offset, limit):
         user_name = xauth.current_name()
@@ -213,11 +213,13 @@ class SearchHandler:
         return result
 
     def do_search_dict(self, ctx, key):
-        notes, count = DICT_DAO.search(key)
+        offset = ctx.offset
+        limit  = ctx.limit
+        notes, count = DICT_DAO.search(key, offset, limit)
         for note in notes:
             note.raw = note.value
             note.icon = "hide"
-        return notes
+        return notes, count
 
     def do_search_note(self, ctx, key):
         user_name = xauth.get_current_name()
@@ -231,7 +233,10 @@ class SearchHandler:
 
         if parent_id != "" and parent_id != None:
             ctx.parent_note = NOTE_DAO.get_by_id(parent_id)
-        return notes
+
+        offset = ctx.offset
+        limit  = ctx.limit
+        return notes[offset:offset+limit], len(notes)
 
 
     def do_search_by_type(self, ctx, key, search_type):
@@ -257,6 +262,8 @@ class SearchHandler:
         offset   = (page-1) * pagesize
         limit    = pagesize
         ctx      = Storage()
+        ctx.offset = offset
+        ctx.limit  = limit
 
         if path_key:
             key = xutils.unquote(path_key)
@@ -266,10 +273,7 @@ class SearchHandler:
 
         key = key.strip()
 
-        files = self.do_search_with_profile(ctx, key, offset, pagesize)
-
-        count = len(files)
-        files = files[offset:offset+limit]
+        files, count = self.do_search_with_profile(ctx, key, offset, pagesize)
 
         return xtemplate.render("search/page/search_result.html", 
             show_aside = False,

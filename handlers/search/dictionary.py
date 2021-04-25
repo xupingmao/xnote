@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2021/04/24 22:38:51
+# @modified 2021/04/25 10:38:38
 
 """英汉、汉英词典
 
@@ -27,6 +27,7 @@ def wrap_results(dicts, origin_key):
         f.name = u("翻译 - ") + u(f0[origin_key])
         f.raw = f0["value"].replace("\\n", "\n")
         f.url = "#"
+        f.icon = "hide"
         files.append(f)
     return files
 

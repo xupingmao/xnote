@@ -3,6 +3,7 @@
 
 <script type="text/javascript" src="/static/lib/wangEditor/wangEditor-3.1.1.min.js"></script>
 
+<div class="card">
 {% include note/component/view_header.html %}
 
 {% if op == "view" %}
@@ -25,7 +26,6 @@
     <div style="margin-top: 5px;">
         <input id="saveBtn" type="button" value="保存">
     </div>
-
 
     <script type="text/javascript">
     var editor = new wangEditor('#toolbar', "#editor");
@@ -53,3 +53,6 @@
     </script>
 
 {% end %}
+
+</div>
+

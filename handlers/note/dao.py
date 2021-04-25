@@ -1,6 +1,7 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/04/24 22:17:17
+# @modified 2021/04/25 10:33:31
+# @filename dao.py
 
 """资料的DAO操作集合
 DAO层只做最基础的数据库交互，不做权限校验（空校验要做），业务状态检查之类的工作
@@ -60,6 +61,7 @@ DB_PATH         = xconfig.DB_PATH
 MAX_EDIT_LOG    = 500
 MAX_VIEW_LOG    = 500
 MAX_STICKY_SIZE = 1000
+MAX_SEARCH_SIZE = 1000
 
 NOTE_ICON_DICT = {
     "group"   : "fa-folder orange",
@@ -1052,6 +1054,7 @@ def get_history(note_id, version):
     return dbutil.get("note_history:%s:%s" % (note_id, version))
 
 def search_name(words, creator = None, parent_id = None, orderby = "mtime_desc"):
+    assert isinstance(words, list)
     words = [word.lower() for word in words]
     if parent_id != None and parent_id != "":
         parent_id = str(parent_id)
@@ -1062,7 +1065,7 @@ def search_name(words, creator = None, parent_id = None, orderby = "mtime_desc")
         if parent_id != None and str(value.parent_id) != parent_id:
             return False
         return (value.creator == creator or value.is_public) and textutil.contains_all(value.name.lower(), words)
-    result = dbutil.prefix_list("note_tiny:%s" % creator, search_func, 0, -1)
+    result = dbutil.prefix_list("note_tiny:%s" % creator, search_func, 0, MAX_SEARCH_SIZE)
 
     # 补全信息
     build_note_list_info(result)
@@ -1072,12 +1075,13 @@ def search_name(words, creator = None, parent_id = None, orderby = "mtime_desc")
     return result
 
 def search_content(words, creator=None):
+    assert isinstance(words, list)
     words = [word.lower() for word in words]
     def search_func(key, value):
         if value.content is None:
             return False
         return (value.creator == creator or value.is_public) and textutil.contains_all(value.content.lower(), words)
-    result = dbutil.prefix_list("note_full", search_func, 0, -1)
+    result = dbutil.prefix_list("note_full", search_func, 0, MAX_SEARCH_SIZE)
     
     # 补全信息
     build_note_list_info(result)
@@ -1087,7 +1091,7 @@ def search_content(words, creator=None):
     return result
 
 def search_public(words):
-    print("search_public")
+    assert isinstance(words, list)
     words = [word.lower() for word in words]
     def search_public_func(key, value):
         if value.content is None:
@@ -1095,7 +1099,7 @@ def search_public(words):
         if not value.is_public:
             return False
         return textutil.contains_all(value.name.lower(), words)
-    result = dbutil.prefix_list("note_full", search_public_func, 0, -1)
+    result = dbutil.prefix_list("note_full", search_public_func, 0, MAX_SEARCH_SIZE)
     notes = [build_note_info(item) for item in result]
     sort_notes(notes)
     return notes

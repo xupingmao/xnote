@@ -1,7 +1,9 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2021/04/18 16:26:32
+# @modified 2021/04/25 12:17:35
+# @filename test_note.py
+
 import xutils
 
 # cannot perform relative import
@@ -18,6 +20,8 @@ app          = test_base.init()
 json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
+
+NOTE_DAO = xutils.DAO("note")
 
 def create_note_for_test(type, name):
     data = dict(name = name, type = type, content = "hello,world")
@@ -333,5 +337,20 @@ class TestMain(BaseTestCase):
 
         delete_note_for_test("skey_test")
 
-        
+    def test_import_from_html(self):
+        html = """<html>
+        <title>MyTitle</title>
+        <body>
+            <h1>Head1</h1>
+            <p>Text</p>
+        </body>
+        </html>"""
+        result = NOTE_DAO.import_from_html(html)
+
+        print(result)
+
+        self.assertEqual("MyTitle", result.title)
+        self.assertTrue(result.texts[0].find("# Head1") >= 0)
+
+
 

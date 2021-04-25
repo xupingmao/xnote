@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/04/11 13:45:10
+# @modified 2021/04/25 12:15:32
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -359,6 +359,10 @@ class Module:
         func = self._meth.get(key)
         if func:
             return func
+
+        if key == "__wrapped__":
+            return None
+            
         method = self.domain + "." + key
         func = _FUNC_DICT[method]
         self._meth[method] = func

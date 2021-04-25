@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2021/04/24 20:55:24
+@modified 2021/04/25 10:14:27
 -->
 
 {% block body %}
@@ -23,7 +23,7 @@
         {% end %}
 
         {% for value in recent %}
-            <a class="tag-span" href="/note/timeline?type=search&key={{quote(value)}}">{{value}}</a>
+            <a class="tag-span" href="/search?key={{quote(value)}}&search_type=note">{{value}}</a>
         {% end %}
     </div>
 

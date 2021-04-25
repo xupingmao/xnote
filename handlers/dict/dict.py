@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/02/15 21:46:37
-# @modified 2021/04/24 22:41:11
+# @modified 2021/04/25 10:47:26
 import xtables
 import xtemplate
 import xutils
@@ -47,10 +47,12 @@ def convert_dict_func(item):
     v.show_next = True
     return v
 
-def search_dict(key, page = 1):
+def search_dict(key, offset = 0, limit = None):
+    if limit is None:
+        limit = PAGE_SIZE
     db = xtables.get_dict_table()
     where_sql = "key LIKE %s" % left_match_escape(key)
-    items = db.select(order="key", where = where_sql, limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
+    items = db.select(order="key", where = where_sql, limit=limit, offset=offset)
     items = list(map(convert_dict_func, items))
     count = db.count(where = where_sql)
     return items, count
@@ -67,7 +69,7 @@ class DictEditHandler:
         value = ""
         if item != None:
             value = item.value
-        return xtemplate.render("dict/dict_edit.html", 
+        return xtemplate.render("dict/page/dict_edit.html", 
             name = name, value = value, search_type = "dict")
 
     @xauth.login_required("admin")
@@ -89,24 +91,16 @@ class DictSearchHandler:
     def GET(self):
         key  = xutils.get_argument("key")
         page = xutils.get_argument("page", 1, type=int)
-        # db   = xtables.get_dict_table()
-        # where_sql = "key LIKE %s" % left_match_escape(key)
-        # items = db.select(order="key", where = where_sql, limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
-        # items = map(convert_dict_func, items)
-        # count = db.count(where = where_sql)
-        # page_max = math.ceil(count / PAGE_SIZE)
-
-        items, count = search_dict(key, page)
+        items, count = search_dict(key, (page-1) * PAGE_SIZE)
         page_max = math.ceil(count / PAGE_SIZE)
 
-        return xtemplate.render("dict/dict_list.html", 
+        return xtemplate.render("dict/page/dict_list.html", 
             show_aside = True,
             files      = items, 
             file_type  = "group",
             show_opts  = False,
             page       = page,
             page_max   = page_max,
-            pathlist   = [Storage(name = "词典", url = "#")],
             show_pagination = True,
             page_url   = "/dict/search?key=%s&page=" % encode_uri_component(key), 
             search_type = "dict")
@@ -125,7 +119,7 @@ class DictHandler:
         user_name = xauth.current_name()
         xmanager.add_visit_log(user_name, "/note/dict")
 
-        return xtemplate.render("dict/dict_list.html", 
+        return xtemplate.render("dict/page/dict_list.html", 
             show_aside = True,
             files      = list(items), 
             file_type  = "group",
