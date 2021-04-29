@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/04/11 14:05:47
+# @modified 2021/04/30 01:23:25
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -29,7 +29,8 @@ import xauth
 import threading
 from collections import deque
 from threading import Thread, Timer, current_thread
-from xutils import Storage, Queue, tojson, MyStdout, cacheutil, u, dbutil, fsutil
+from xutils import Storage
+from xutils import Queue, tojson, MyStdout, cacheutil, u, dbutil, fsutil
 
 __version__      = "1.0"
 __author__       = "xupingmao (578749341@qq.com)"
@@ -37,6 +38,8 @@ __copyright__    = "(C) 2016-2020 xupingmao. GNU GPL 3."
 __contributors__ = []
 
 dbutil.register_table("schedule", "任务调度表 <schedule:id>")
+
+TASK_POOL_SIZE = 500
 
 def wrapped_handler(pattern, handler_clz):
     # Python2中自定义类不是type类型
@@ -165,11 +168,11 @@ class WebModel:
 
 def log(msg):
     # six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
-    xutils.info("INIT", msg)
+    xutils.info("xmanager", msg)
 
 def warn(msg):
     # six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
-    xutils.warn("INIT", msg)
+    xutils.warn("xmanager", msg)
 
 class HandlerManager:
     """模块管理器
@@ -686,7 +689,13 @@ def load_init_script():
 
 def put_task(func, *args, **kw):
     """添加异步任务到队列"""
-    WorkerThread._task_queue.append([func, args, kw])
+    if len(WorkerThread._task_queue) > TASK_POOL_SIZE:
+        # TODO 大部分是写日志的任务，日志任务单独加一个线程处理
+        func_name = get_func_abs_name(func)
+        xutils.warn_sync("xmanager", "task deque is full func_name=%s" % func_name)
+        func(*args, **kw)
+    else:
+        WorkerThread._task_queue.append([func, args, kw])
 
 
 def load_tasks():

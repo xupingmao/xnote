@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/04/18 16:08:11
+# @modified 2021/04/29 22:41:57
 import profile
 import math
 import re
@@ -18,6 +18,7 @@ from xconfig import Storage
 from xutils import History
 from xutils import dbutil
 from xutils import fsutil
+from xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
 
 PAGE_SIZE = xconfig.PAGE_SIZE
@@ -117,6 +118,8 @@ def view_group_func_old(file, kw):
 def view_list_func(note, kw):
     kw.show_aside = False
     kw.show_pagination = False
+    kw.show_comment_title = True
+    kw.comment_title = T("清单项")
 
 VIEW_FUNC_DICT = {
     "group": view_group_func,

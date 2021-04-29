@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/04/25 10:33:31
+# @modified 2021/04/29 23:08:16
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -174,21 +174,43 @@ def sort_by_mtime_desc(notes):
 def sort_by_ctime_desc(notes):
     notes.sort(key = lambda x: x.ctime, reverse = True)
 
+def sort_by_atime_desc(notes):
+    notes.sort(key = lambda x: x.atime, reverse = True)
+
+def sort_by_priority(notes):
+    # 置顶笔记
+    notes.sort(key = lambda x: x.priority, reverse = True)
+
 def sort_by_default(notes):
     # 先按照名称排序
     sort_by_name(notes)
 
     # 置顶笔记
-    notes.sort(key = lambda x: x.priority, reverse = True)
+    sort_by_priority(notes)
 
     # 文件夹放在前面
+    sort_by_type(notes)
+
+def sort_by_type(notes):
+    # 文件夹放在前面
     notes.sort(key = lambda x: 0 if x.type == "group" else 1)
+
+def sort_by_type_mtime_desc(notes):
+    sort_by_mtime_desc(notes)
+    sort_by_type(notes)
+
+def sort_by_type_ctime_desc(notes):
+    sort_by_ctime_desc(notes)
+    sort_by_type(notes)
 
 SORT_FUNC_DICT = {
     "name": sort_by_name,
     "name_desc": sort_by_name_desc,
     "mtime_desc": sort_by_mtime_desc,
     "ctime_desc": sort_by_ctime_desc,
+    "atime_desc": sort_by_atime_desc,
+    "type_mtime_desc": sort_by_type_mtime_desc,
+    "type_ctime_desc": sort_by_type_ctime_desc,
     "default": sort_by_default
 }
 
@@ -432,7 +454,7 @@ def create_note(note_dict, date_str = None, note_id = None):
         xutils.makedirs(dirname)
 
     # 更新统计数量
-    refresh_note_stat(creator)
+    refresh_note_stat_async(creator)
 
     # 更新目录修改时间
     touch_note(note_dict["parent_id"])
@@ -1053,7 +1075,7 @@ def get_history(note_id, version):
     # note = table.select_first(where = dict(note_id = note_id, version = version))
     return dbutil.get("note_history:%s:%s" % (note_id, version))
 
-def search_name(words, creator = None, parent_id = None, orderby = "mtime_desc"):
+def search_name(words, creator = None, parent_id = None, orderby = "type_mtime_desc"):
     assert isinstance(words, list)
     words = [word.lower() for word in words]
     if parent_id != None and parent_id != "":
@@ -1260,14 +1282,21 @@ def save_comment(comment):
     comment_index = comment.copy()
     dbutil.put(index_key, comment_index)
 
+    refresh_note_stat_async(comment["user"])
+
 def delete_comment(comment_id):
     comment = get_comment(comment_id)
     if comment != None:
         dbutil.delete(comment_id)
         dbutil.delete("comment_index:%s:%s" % (comment.user, comment.timeseq))
 
+        refresh_note_stat_async(comment.user)
+
 def get_comment(comment_id):
     return dbutil.get(comment_id)
+
+def count_comment(user_name):
+    return dbutil.count_table("comment_index:%s" % user_name)
 
 def add_search_history(user, search_key, category = "default", cost_time = 0):
     key = "search_history:%s:%s" % (user, dbutil.timeseq())
@@ -1277,6 +1306,12 @@ def list_search_history(user, limit = 1000, orderby = "time_desc"):
     if user is None or user == "":
         return []
     return dbutil.prefix_list("search_history:%s" % user, reverse = True, limit = limit)
+
+
+@xutils.async_func_deco()
+def refresh_note_stat_async(user_name):
+    """异步刷新笔记统计"""
+    refresh_note_stat(user_name)
 
 def refresh_note_stat(user_name):
     stat = Storage()
@@ -1295,6 +1330,7 @@ def refresh_note_stat(user_name):
     stat.sticky_count  = count_sticky(user_name)
     stat.removed_count = count_removed(user_name)
     stat.dict_count    = count_dict(user_name)
+    stat.comment_count = count_comment(user_name)
 
     dbutil.put("user_stat:%s:note" % user_name, stat)
     return stat

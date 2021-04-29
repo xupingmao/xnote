@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/04/24 16:50:35
+# @modified 2021/04/30 01:03:55
 from io import StringIO
 import xconfig
 import codecs
@@ -256,6 +256,9 @@ def file_plugin(name, url):
 def dev_plugin(name, url):
     return inner_plugin(name, url, "develop")
 
+def system_plugin(name, url):
+    return inner_plugin(name, url, "system")
+
 INNER_TOOLS = [
     # 工具集/插件集
     index_plugin("笔记工具集合", "/note/tools"),
@@ -306,6 +309,9 @@ INNER_TOOLS = [
 
     # 文件工具
     file_plugin("文件索引", "/fs_index"),
+
+    # 系统工具
+    system_plugin("系统日志", "/system/log"),
 ]
 
 def get_inner_tool_name(url):

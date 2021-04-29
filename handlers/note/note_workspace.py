@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2021/04/11 13:19:42
+# @modified 2021/04/29 23:10:04
 
 import xauth
 import xtemplate
@@ -54,6 +54,7 @@ def list_note_types(user_name = None):
         NoteLink("表格", "/note/table", "fa-table", size = note_stat.table_count),
         # NoteLink("日志", "/note/log", "fa-file-text", size = note_stat.log_count),
         DictEntryLink(size = note_stat.dict_count),
+        NoteLink("评论", "/note/mycomments", "fa-file-text", size = note_stat.comment_count),
     ]
 
 class NoteWorkspaceHandler:

@@ -3,6 +3,7 @@
 {% init show_comment_title  = True %}
 {% init show_comment_create = True %}
 {% init show_comment_note   = False %}
+{% init comment_title = "评论" %}
 {% init comment_list_type   = "note_id" %}
 {% init comment_list_date   = "" %}
 {% init comment_btn_text    = "评论" %}
@@ -20,7 +21,7 @@
 <div class="card {{comment_class}}">
     {% if show_comment_title %}
     <div class="card-title">
-        <span>评论</span>
+        <span>{{comment_title}}</span>
     </div>
     {% end %}
 
@@ -45,7 +46,7 @@
         <div class="comment-time">${ctime}</div>
         <div class="comment-content">${html}</div>
         <div class="comment-foot">
-            <a class="link" href="${note_url}">${note_name}</a>
+            <a class="comment-foot-link" href="${note_url}">${note_name}</a>
             <div class="float-right ${deleteBtnClass}">
                 <a class="delete-comment-btn" data-id="${id}" data-content="${content}">删除</a>
             </div>
@@ -129,12 +130,13 @@ $(function () {
     $("#comments").on("click", ".delete-comment-btn", function () {
         var id = $(this).attr("data-id");
         var content = $(this).attr("data-content");
-        var conf = confirm("确定删除`" + content + "`?");
-        if (conf) {
-            $.post("/note/comment/delete", {comment_id: id}, function (resp) {
-                refreshComments();
-            });
-        }
+        xnote.confirm("确定删除`" + content + "`?", function (conf) {
+            if (conf) {
+                $.post("/note/comment/delete", {comment_id: id}, function (resp) {
+                    refreshComments();
+                });
+            }
+        });
     });
 
     // 文件上传

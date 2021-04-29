@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/03/06 12:40:59
+# @modified 2021/04/29 23:08:44
 import logging
 import time
 import inspect
@@ -88,6 +88,17 @@ def log(fmt, show_logger = False, print_std = True, fpath = None, *argv):
 
     log_async(fpath, message)
 
+def _write_log_sync(level, metric, message, cost):
+    import xauth
+    fpath = get_log_path(level)
+    user_name = xauth.current_name()
+    if user_name is None:
+        user_name = "-"
+    full_message = "%s|%s|%s|%s|%sms|%s" % (format_time(), level, user_name, metric, cost, message)
+    # print(full_message)
+    # 同步写在SAE上面有巨大的性能损耗
+    do_log_sync(fpath, full_message)
+
 def _write_log(level, metric, message, cost):
     import xauth
     fpath = get_log_path(level)
@@ -112,11 +123,16 @@ def warn(metric, message, cost=0):
 def error(metric, message, cost=0):
     _write_log("ERROR", metric, message, cost)
 
+def warn_sync(metric, message, cost = 0):
+    _write_log_sync("WARN", metric, message, cost)
+
 @async_func_deco()
 def log_async(fpath, full_message):
+    do_log_sync(fpath, full_message)
+
+def do_log_sync(fpath, full_message):
     with open(fpath, "ab") as fp:
         fp.write((full_message+"\n").encode("utf-8"))
-
 
 def log_init_deco(message):
     """日志装饰器"""

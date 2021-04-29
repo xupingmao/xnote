@@ -1,13 +1,14 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2021/01/17 11:10:49
+# @modified 2021/04/30 01:00:36
 import os
 import time
 import xtemplate
 import xauth
 import xutils
 import xconfig
+import xmanager
 from xutils import History
 from xutils.imports import *
 from xtemplate import BasePlugin
@@ -17,6 +18,17 @@ OPTION_HTML = '''
     <a class="x-tab-btn x-tab-default" href="?tab=rev_tail">最近</a>
     <a class="x-tab-btn" href="?tab=head">最早</a>
     <a class="x-tab-btn" href="?tab=all">全部</a>
+
+    <p>
+        <span>直接查看文件</span>
+        <a href="/code/edit?path={{info_log_path}}">INFO日志</a>
+        <span>|</span>
+        <a href="/code/edit?path={{warn_log_path}}">WARN日志</a>
+        <span>|</span>
+        <a href="/code/edit?path={{error_log_path}}">ERROR日志</a>
+        <span>|</span>
+        <a href="/code/edit?path={{trace_log_path}}">TRACE日志</a>
+    </p>
 </div>
 
 '''
@@ -27,10 +39,10 @@ def readlines(fpath):
     with open(fpath, encoding="utf-8") as fp:
         return fp.readlines()
 
-def get_log_path(date):
+def get_log_path(date, level = "INFO"):
     month   = "-".join(date.split("-")[:2])
     dirname = os.path.join(xconfig.LOG_DIR, month)
-    fname   = "xnote.%s.INFO.log" % date
+    fname   = "xnote.%s.%s.log" % (date, level)
     return os.path.join(dirname, fname)
     
 class LogHandler(BasePlugin):
@@ -43,7 +55,9 @@ class LogHandler(BasePlugin):
     rows = 0
     
     def handle(self, content):
-        self.render_options()
+        user_name = xauth.current_name()
+        xmanager.add_visit_log(user_name, "/system/log")
+
         type = xutils.get_argument("type", "rev_tail")
         date = xutils.get_argument("date")
 
@@ -52,6 +66,8 @@ class LogHandler(BasePlugin):
         self.title = "xnote日志(%s)" % date
 
         fpath = get_log_path(date)
+        self.render_options(date)
+
         if type == "rev_tail":
             lines = readlines(fpath)[-100:]
             lines.reverse()
@@ -60,8 +76,13 @@ class LogHandler(BasePlugin):
             return ''.join(readlines(fpath)[:100])
         return xutils.readfile(fpath)
     
-    def render_options(self):
-        self.writehtml(OPTION_HTML)
+    def render_options(self, date):
+
+        self.writehtml(OPTION_HTML, 
+            info_log_path = get_log_path(date),
+            warn_log_path = get_log_path(date, "WARN"),
+            error_log_path = get_log_path(date, "ERROR"),
+            trace_log_path = get_log_path(date, "TRACE"))
         
 
 class HistoryHandler(object):

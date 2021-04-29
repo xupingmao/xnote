@@ -18,8 +18,6 @@
         <span>文档查看</span>
 
         <div class="float-right">
-            {% include note/component/view_header_tag.html %}
-
             {% if file != None and file.id == 0 %}
                 <a href="/note/management?parent_id=0">整理</a>
             {% end %}
@@ -31,6 +29,7 @@
             {% else %}
                 {# 其他普通笔记 #}
                 {% include note/component/note_dropdown.html %}
+                {% include common/button/back_button.html %}
             {% end %}
         </div>
     </div>

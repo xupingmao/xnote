@@ -8,6 +8,7 @@
     <a class="btn btn-default" href="javascript:history.back();">返回</a>
 {% elif type == "removed" %}
     <!-- 空的 -->
+    {% include common/button/back_button.html %}
 {% elif file.id == "0" %}
     <!-- 跟节点 -->
     <a class="btn" href="javascript:createGroup();">新建笔记本</a>

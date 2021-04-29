@@ -30,9 +30,9 @@
         <span>表格查看</span>
         {% if _user_name == file.creator %} 
             <div class="float-right">
-                {% include note/component/view_header_tag.html %}
                 <button class="btn" id="saveBtn">保存</button>
                 {% include note/component/note_dropdown.html %}
+                {% include common/button/back_button.html %}
             </div>
         {% end %}
     </div>

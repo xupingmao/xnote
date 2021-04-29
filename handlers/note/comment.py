@@ -1,12 +1,14 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/10 23:44:48
-# @modified 2021/04/24 22:24:15
+# @modified 2021/04/29 22:59:58
 import xutils
 import xauth
 import xtemplate
 import xmanager
 from xutils import DAO
+from xutils import Storage
+from xtemplate import T
 
 NOTE_DAO = DAO("note")
 
@@ -49,7 +51,7 @@ class SaveCommentAjaxHandler:
         content = xutils.get_argument("content")
         user    = xauth.current_name()
 
-        NOTE_DAO.save_comment(dict(note_id = note_id, 
+        NOTE_DAO.save_comment(Storage(note_id = note_id, 
             user = user, 
             content = content))
         return dict(success = True)

@@ -1955,7 +1955,7 @@ li.menu-item:hover {
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/04/24 23:03:23
+ * @modified 2021/04/29 22:35:04
 */
 
 
@@ -2131,9 +2131,13 @@ li.menu-item:hover {
     font-size: 10px;
 }
 
+.comment-foot>.comment-foot-link {
+    color: #08c;
+}
+
 .comment-foot a {
     font-size: 10px;
-    color: #666
+    color: #666;
 }
 
 .comment-time {
