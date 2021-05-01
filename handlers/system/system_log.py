@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2021/04/30 01:00:36
+# @modified 2021/05/01 13:38:56
 import os
 import time
 import xtemplate
@@ -47,8 +47,8 @@ def get_log_path(date, level = "INFO"):
     
 class LogHandler(BasePlugin):
     
-    title    = 'xnote日志'
-    description = "查看系统日志"
+    title    = 'xnote系统日志'
+    # description = "查看系统日志"
     show_category = False
     category = 'system'
     editable = False
@@ -63,7 +63,6 @@ class LogHandler(BasePlugin):
 
         if not date:
             date = time.strftime("%Y-%m-%d")
-        self.title = "xnote日志(%s)" % date
 
         fpath = get_log_path(date)
         self.render_options(date)

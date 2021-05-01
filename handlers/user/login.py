@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2020/09/05 15:13:15
+# @modified 2021/05/01 19:42:40
 import web
 import time
 import hashlib
@@ -29,7 +29,7 @@ def save_login_info(name, value):
 def save_login_error_count(name, count):
     cacheutil.set("login.fail.count#%s" % name, count, 60)
 
-class handler:
+class LoginHandler:
 
     def POST(self):
         name = xutils.get_argument("username", "")
@@ -46,8 +46,9 @@ class handler:
             user = users[name]
             if pswd == user["password"]:
                 save_login_info(name, "success")
-                xauth.write_cookie(name)
-                xauth.update_user(name, dict(login_time=xutils.format_datetime()))                
+                
+                xauth.login_user_by_name(name)
+
                 if target is None:
                     raise web.seeother("/")
                 raise web.seeother(target)
@@ -76,5 +77,5 @@ class handler:
 
 
 xurls = (
-    r"/login", handler
+    r"/login", LoginHandler
 )

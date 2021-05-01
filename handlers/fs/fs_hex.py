@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/12/28 22:04:24
-# @modified 2021/01/01 20:11:29
+# @modified 2021/05/01 13:45:38
 
 # -*- coding:utf-8 -*-
 # @since 2019-01-10 00:21:16
@@ -32,6 +32,7 @@ HTML = """
         
         <div class="float-right">
             <a class="btn btn-default" href="/code/edit?path={{path}}">编辑本文</a>
+            {% include common/button/back_button.html %}
         </div>
     </h3>
     

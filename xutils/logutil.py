@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/04/29 23:08:44
+# @modified 2021/05/01 11:01:16
 import logging
 import time
 import inspect
@@ -9,6 +9,9 @@ import os
 from xutils import fsutil
 from xutils.dateutil import format_time
 from xutils.imports import u
+
+# TODO
+# 改造成日志线程池
 
 def async_func_deco():
     """同步调用转化成异步调用的装饰器"""

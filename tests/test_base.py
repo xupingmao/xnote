@@ -13,13 +13,15 @@ import xtemplate
 import web
 import six
 import json
-from xutils import get_upload_file_path
 from xutils import dbutil
+from handlers.fs.fs_upload import get_upload_file_path
 
 config = xconfig
 date = time.strftime("%Y/%m")
 
 APP = None
+
+DEFAULT_HEADERS = dict()
 
 def init():
     global APP
@@ -52,6 +54,8 @@ def json_request(*args, **kw):
     else:
         kw["data"] = dict(_format="json")
     kw["_format"] = "json"
+    kw["headers"] = DEFAULT_HEADERS
+
     ret = APP.request(*args, **kw)
     if ret.status == "303 See Other":
         return

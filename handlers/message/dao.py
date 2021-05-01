@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/04/11 13:24:38
+# @modified 2021/05/01 17:53:30
 import xutils
 import xconfig
 import xmanager
@@ -179,13 +179,17 @@ def list_phone_page(user, offset, limit, key = None):
     amount   = dbutil.prefix_count("message:%s" % user, filter_func)
     return msg_list, amount
 
+def filter_todo_func(key, value):
+    # 兼容老版本的数据
+    return value.tag in ("task", "cron", "todo") or value.status == 0 or value.status == 50
+
 def get_filter_by_tag_func(tag):
+    if tag in ("task", "todo"):
+        return filter_todo_func
+        
     def filter_func(key, value):
         if tag is None or tag == "all":
             return True
-        if tag == "task":
-            # 兼容老版本的数据
-            return value.tag == "task" or value.tag == "cron" or value.status == 0 or value.status == 50
         if tag == "done":
             return value.tag == "done" or value.status == 100
         return value.tag == tag
@@ -222,7 +226,7 @@ def list_by_tag(user, tag, offset, limit):
     # 利用message_stat优化count查询
     if tag == "done":
         amount = get_message_stat(user).done_count
-    elif tag == "task":
+    elif tag == "task" or tag == "todo":
         amount = get_message_stat(user).task_count
     elif tag == "cron":
         amount = get_message_stat(user).cron_count
@@ -238,6 +242,9 @@ def list_by_tag(user, tag, offset, limit):
     return chatlist, amount
 
 def list_by_date(user, date, offset = 0, limit = xconfig.PAGE_SIZE):
+    if date is None or date == "":
+        return []
+
     def list_by_date_func(key, value):
         return value.ctime.find(date) == 0
 
@@ -302,6 +309,8 @@ class MessageTag(Storage):
         if tag == "task":
             self.name = T("待办任务")
             self.icon = "fa-calendar-check-o"
+            # TODO 完成todo功能之后再切换
+            # self.url  = "/message/todo"
 
 def get_message_tag(user, tag, priority = 0):
     msg_stat  = get_message_stat(user)

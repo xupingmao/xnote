@@ -17,6 +17,16 @@
 {% block body %}
 
 <div class="col-md-12 card">
+    <div class="card-title">
+        <span>模块详情</span>
+        <div class="float-right">
+            {% include common/button/back_button.html %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+
 {% if doc_info is not None %}
     <h2>模块: {{doc_info.name}}</h2>
 

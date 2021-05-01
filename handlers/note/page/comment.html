@@ -62,15 +62,6 @@
 $(function () {
     var loadIndex = 0;
 
-    /**
-     * 简单的模板渲染，这里假设传进来的参数已经进行了html转义
-     */
-    function renderTemplate(templateText, object) {
-        return templateText.replace(/\$\{(.*?)\}/g, function (context, objKey) {
-            return object[objKey.trim()] || '';
-        });
-    }
-
     function getEmptyHtml() {
         return $(".comment-empty-tpl").html();
     }
@@ -94,7 +85,7 @@ $(function () {
 
                 var tpl = $(".comment-item-tpl").html();
                 var element = $(tpl);
-                var html = renderTemplate(tpl, item);
+                var html = xnote.renderTemplate(tpl, item);
                 $("#comments").append(html);
             }
 

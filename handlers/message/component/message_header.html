@@ -1,4 +1,4 @@
-{% init title = "任务和记事" %}
+{% init title = "随手记" %}
 
 <!-- header.html -->
 <div class="card">    
@@ -14,7 +14,7 @@
 <!-- 桌面版菜单 -->
 <div class="col-md-12 message-status card desktop-only">
     <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">
-        任务(<span class="task-count">{{message_stat.task_count}}</span>)
+        待办(<span class="task-count">{{message_stat.task_count}}</span>)
     </a>
     <a class="tab tab-link x-tab" href="/message?tag=done" data-tag="done">
         完成(<span class="done-count">{{message_stat.done_count}}</span>)
@@ -36,7 +36,7 @@
 
 <!-- 移动端菜单 -->
 <div class="col-md-12 message-status card mobile-only parent-6">
-    <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">任务</a>
+    <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">待办</a>
     <a class="tab tab-link x-tab" href="/message?tag=done" data-tag="done">完成</a>
     <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">记事</a>
     <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">话题</a>

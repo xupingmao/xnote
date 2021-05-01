@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/04/30 01:03:55
+# @modified 2021/05/01 19:58:28
 from io import StringIO
 import xconfig
 import codecs
@@ -290,7 +290,7 @@ INNER_TOOLS = [
     inner_plugin("摄像头", "/tools/camera"),
 
     # 笔记工具
-    note_plugin("置顶笔记", "/note/sticky", "fa-thumb-tack"),
+    note_plugin("我的置顶", "/note/sticky", "fa-thumb-tack"),
     note_plugin("搜索历史", "/search/history", "fa-search"),
     note_plugin("导入笔记", "/note/html_importer", "fa-internet-explorer", required_role = "admin"),
     # note_plugin("日历视图", "/note/calendar", "fa-calendar"),
@@ -301,6 +301,7 @@ INNER_TOOLS = [
     note_plugin("回收站", "/note/removed", "fa-trash"),
     note_plugin("笔记本", "/note/group", "fa-th-large"),
     note_plugin("待办任务", "/message?tag=task", "fa-calendar-check-o"),
+    note_plugin("待办任务(开发中)", "/message/todo", "fa-calendar-check-o"),
     note_plugin("随手记", "/message?tag=log", "fa-file-text-o"),
     note_plugin("相册", "/note/gallery", "fa-photo"),
     note_plugin("清单", "/note/list", "fa-list"),

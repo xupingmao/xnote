@@ -1,7 +1,16 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/04/24 22:50:49
+# @modified 2021/05/01 18:16:37
+# @filename xtemplate.py
+
+
+"""这个模块的主要作用是提供模板处理的统一接口，包括
+- 渲染模板，封装了对tornado模板的魔改版本
+    - 支持多语言配置
+    - 支持多设备适配
+- 插件模板，定义了插件的基类
+"""
 import os
 import json
 import web
@@ -123,14 +132,11 @@ def render_before_kw(kw):
     kw["_user_name"]    = user_name
     kw["_user_role"]    = user_role
     kw["_user_agent"]   = get_user_agent()
-    # 处理首页公告
-    kw["_top_notice"]   = None
     # 用于渲染其他组件
     kw["_render"]       = render
     kw["Storage"]       = Storage
     kw["xutils"]        = xutils
     kw["xconfig"]       = xconfig
-    kw["_notice_count"] = get_message_count(user_name)
     kw["T"]             = T
 
     # 用户配置
@@ -143,7 +149,7 @@ def render_before_kw(kw):
     if len(xconfig.errors) > 0:
         kw["warn"] = "; ".join(xconfig.errors)
 
-    # render input
+    # 处理用户输入
     _input = web.ctx.get("_xnote.input")
     if _input is not None:
         kw.update(_input)
@@ -221,13 +227,23 @@ def render_search(kw):
     kw["search_tag"] = search_tag
     
 
-@xutils.timeit_deco(name = "Template.Render", logfile = True)
-def render(template_name, **kw):
+def do_render_kw(kw):
     nkw = {}
     # 预处理
     render_before_kw(nkw)
+
+    # 传入的kw生效
     nkw.update(kw)
+
+    # 后置处理
     render_after_kw(nkw)
+
+    return nkw
+
+@xutils.timeit_deco(name = "Template.Render", logfile = True)
+def render(template_name, **kw):
+    # 处理上下文渲染
+    nkw = do_render_kw(kw)
 
     if hasattr(web.ctx, "env"):
         # 不一定是WEB过来的请求
@@ -241,10 +257,7 @@ def render_text(text, template_name = "<string>", **kw):
     """使用模板引擎渲染文本信息,使用缓存
     TODO 控制缓存大小，使用FIFO或者LRU淘汰
     """
-    nkw = {}
-    render_before_kw(nkw)
-    nkw.update(kw)
-    render_after_kw(nkw)
+    nkw = do_render_kw(kw)
 
     # 热加载模式下str的id会变化
     name = "template@%s.str" % hash(text)

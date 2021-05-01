@@ -2289,4 +2289,25 @@ li.menu-item:hover {
 
  .search-tab {
     padding: 5px;
- }
+ }/**
+ * description here
+ * @author xupingmao
+ * @since 2021/05/01 15:36:08
+ * @modified 2021/05/01 17:17:55
+ * @filename todo.css
+ */
+
+.todo-time {
+    display: inline-block;
+    padding: 2px;
+    color: #888;
+}
+
+
+.todo-delete-btn {
+    color: red;
+}
+
+.todo-content {
+    padding-bottom: 10px;
+}

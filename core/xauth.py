@@ -6,16 +6,27 @@ import web
 import xconfig
 import xutils
 import xmanager
+import warnings
+import time
 from xutils import ConfigParser, textutil, dbutil, fsutil
 from xutils import Storage
-
+from xutils.functions import listremove
 
 dbutil.register_table("user", "用户信息表")
+dbutil.register_table("session", "用户会话信息")
+dbutil.register_table("user_session_rel", "用户会话关系")
 
 # 用户配置
 _users = None
 NAME_LENGTH_MIN = 4
-INVALID_NAMES   = fsutil.load_set_config("./config/user/invalid_names.list")
+INVALID_NAMES = fsutil.load_set_config("./config/user/invalid_names.list")
+MAX_SESSION_SIZE = 10
+SESSION_EXPIRE = 24 * 3600 * 7
+PRINT_DEBUG_LOG = False
+
+def log_debug(fmt, *args):
+    if PRINT_DEBUG_LOG:
+        print("[xauth]", fmt.format(*args))
 
 def is_valid_username(name):
     """有效的用户名为字母+数字"""
@@ -74,7 +85,76 @@ def refresh_users():
     return _get_users(force_reload = True)
 
 def get_user(name):
+    warnings.warn("get_user已经过时，请使用 get_user_by_name", DeprecationWarning)
     return find_by_name(name)
+
+def get_user_by_name(user_name):
+    return find_by_name(user_name)
+
+def create_uuid():
+    import uuid
+    return uuid.uuid4().hex
+
+def get_valid_session_by_id(sid):
+    session_info = dbutil.get("session:%s" % sid)
+    if session_info is None:
+        return None
+
+    if session_info.user_name is None:
+        dbutil.delete("session:%s" % sid)
+        return None
+
+    if time.time() > session_info.expire_time:
+        dbutil.delete("session:%s" % sid)
+        return None
+
+    return session_info
+
+def list_user_session_id(user_name):
+    session_id_list = dbutil.get("user_session_rel:%s" % user_name)
+    if session_id_list is None:
+        return []
+
+    expire_id_set = set()
+    for sid in session_id_list:
+        session_info = get_valid_session_by_id(sid)
+        if session_info is None:
+            expire_id_set.add(sid)
+
+    for sid in expire_id_set:
+        listremove(session_id_list, sid)
+
+    return session_id_list
+
+def create_user_session(user_name, expires = SESSION_EXPIRE):
+    user_detail = get_user_by_name(user_name)
+    if user_detail is None:
+        raise Exception("user not found: %s" % user_name)
+
+    session_id = create_uuid()
+
+    session_id_list = list_user_session_id(user_name)
+
+    if len(session_id_list) > MAX_SESSION_SIZE:
+        raise Exception("user login too many devices: %s" % user_name)
+
+    # 保存用户和会话关系
+    session_id_list.append(session_id)
+    dbutil.put("user_session_rel:%s" % user_name, session_id_list)
+
+    # 保存会话信息
+    session_info = Storage(user_name = user_name, 
+        sid   = session_id,
+        token = user_detail.token, 
+        expire_time = time.time() + expires)
+    dbutil.put("session:%s" % session_id, session_info)
+
+    print("session_info:", session_info)
+    return session_id
+
+def delete_user_session_by_id(sid):
+    # 登录的时候会自动清理无效的sid关系
+    dbutil.delete("session:%s" % sid)
 
 def find_by_name(name):
     if name is None:
@@ -134,8 +214,22 @@ def get_user_password_md5(user_name, use_salt = True):
     else:
         return encode_password(password, None)
 
+def get_session_id_from_cookie():
+    cookies = web.cookies()
+    return cookies.get("sid")
 
-def current_user():
+def get_user_from_cookie():
+    session_id = get_session_id_from_cookie()
+    session_info = get_valid_session_by_id(session_id)
+
+    if session_info is None:
+        return None
+
+    log_debug("get_user_from_cookie: sid={}, session_info={}", session_id, session_info)
+
+    return get_user_by_name(session_info.user_name)
+
+def get_current_user():
     if xconfig.IS_TEST:
         return get_user("test")
 
@@ -145,21 +239,22 @@ def current_user():
     if not hasattr(web.ctx, "env"):
         # 尚未完成初始化
         return None
-    xuser = web.cookies().get("xuser")
-    if has_login(xuser):
-        return get_user(xuser)
-    return None
-get_current_user = current_user
+    return get_user_from_cookie()
 
-def current_name():
+def current_user():
+    return get_current_user()
+
+def get_current_name():
     """获取当前用户名"""
     user = get_current_user()
     if user is None:
         return None
     return user.get("name")
-get_current_name = current_name
 
-def current_role():
+def current_name():
+    return get_current_name()
+
+def get_current_role():
     """获取当前用户的角色"""
     user = get_current_user()
     if user is None:
@@ -170,8 +265,8 @@ def current_role():
     else:
         return "user"
 
-def get_current_role():
-    return current_role()
+def current_role():
+    return get_current_role()
 
 def get_md5_hex(pswd):
     pswd_md5 = hashlib.md5()
@@ -191,10 +286,15 @@ def encode_password(password, salt):
         pswd_md5.update(salt.encode("utf-8"))
     return pswd_md5.hexdigest()
 
-def write_cookie(name):
+def write_cookie_old(name):
     web.setcookie("xuser", name, expires= 24*3600*30)
     pswd_md5 = get_user_password_md5(name)
     web.setcookie("xpass", pswd_md5, expires=24*3600*30)
+
+def write_cookie(user_name):
+    session_id = create_user_session(user_name)
+    web.setcookie("sid", session_id)
+
 
 def get_user_cookie(name):
     return "xuser=%s; xpass=%s;" % (name, get_user_password_md5(name))
@@ -247,6 +347,7 @@ def update_user(name, user):
         mem_user.token = gen_new_token()
 
     dbutil.put("user:%s" % name, mem_user)
+
     xutils.trace("UserUpdate", mem_user)
 
     refresh_users()
@@ -260,6 +361,51 @@ def remove_user(name):
     name = name.lower()
     dbutil.delete("user:%s" % name)
     refresh_users()
+
+def has_login_by_cookie_old(name = None):
+    cookies = web.cookies()
+    name_in_cookie = cookies.get("xuser")
+    pswd_in_cookie = cookies.get("xpass")
+
+    # TODO 不同地方调用结果不一致
+    # print(name, name_in_cookie)
+    if name is not None and name_in_cookie != name:
+        return False
+    name = name_in_cookie
+    if name == "" or name is None:
+        return False
+    user = get_user_by_name(name)
+    if user is None:
+        return False
+
+    password_md5 = encode_password(user["password"], user["salt"])
+    return password_md5 == pswd_in_cookie
+
+
+def has_login_by_cookie(name = None):
+    cookies = web.cookies()
+    session_id = cookies.get("sid")
+    session_info = get_valid_session_by_id(session_id)
+
+    if session_info is None:
+        return False
+
+    name_in_cookie = session_info.user_name
+
+    log_debug("has_login_by_cookie: name={}, name_in_cookie={}", name, name_in_cookie)
+
+    if name is not None and name_in_cookie != name:
+        return False
+
+    name = name_in_cookie
+    if name == "" or name is None:
+        return False
+
+    user = get_user_by_name(name)
+    if user is None:
+        return False
+
+    return user.token == session_info.token
 
 def has_login(name=None):
     """验证是否登陆
@@ -275,24 +421,7 @@ def has_login(name=None):
             return True
         return user.get("name") == name
 
-    cookies = web.cookies()
-    name_in_cookie = cookies.get("xuser")
-    pswd_in_cookie = cookies.get("xpass")
-
-    # TODO 不同地方调用结果不一致
-    # print(name, name_in_cookie)
-    if name is not None and name_in_cookie != name:
-        return False
-    name = name_in_cookie
-    if name == "" or name is None:
-        return False
-    user = get_user(name)
-    # print(threading.current_thread().name, " -- User --", user)
-    if user is None:
-        return False
-
-    password_md5 = encode_password(user["password"], user["salt"])
-    return password_md5 == pswd_in_cookie
+    return has_login_by_cookie(name)
 
 def is_admin():
     return xconfig.IS_TEST or has_login("admin")
@@ -324,6 +453,15 @@ def get_user_data_dir(user_name, mkdirs = False):
     if mkdirs:
         fsutil.makedirs(fpath)
     return fpath
+
+def login_user_by_name(user_name):
+    write_cookie(user_name)
+    update_user(user_name, dict(login_time=xutils.format_datetime()))   
+
+def logout_current_user():
+    sid = get_session_id_from_cookie()
+    delete_user_session_by_id(sid)
+
 
 xutils.register_func("user.get_config_dict", get_user_config_dict)
 xutils.register_func("user.get_config",      get_user_config)

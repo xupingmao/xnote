@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2021/04/18 11:36:52
+# @modified 2021/05/01 11:49:24
 # 说明：文件工具分为如下部分：
 # 1、path处理，比如判断是否是父级目录
 # 2、文件操作，比如读写文件，创建目录
@@ -47,7 +47,7 @@ def get_real_path_encode_first(path):
     return path
 
 def is_parent_dir(parent, child):
-    """判断是否是父级目录
+    """判断是否是父级目录 arg0.is_parent_dir_of(arg1)
     @param {string} parent 父级路径
     @param {string} child 子路径
 
@@ -96,7 +96,8 @@ def detect_encoding(fpath, raise_error = True):
     return None
 
 def get_file_ext(fname):
-    if '.' not in fname:return ''
+    if '.' not in fname:
+        return ''
     return fname.split('.')[-1]
 
 def format_size(size):
@@ -106,6 +107,8 @@ def format_size(size):
     '10.00K'
     >>> format_size(1429365116108)
     '1.3T'
+    >>> format_size(1429365116108000)
+    '1.3P'
     """
     if size < 1024:
         return '%sB' % size
@@ -115,8 +118,10 @@ def format_size(size):
         return '%.2fM' % (float(size) / 1024 ** 2)
     elif size < 1024 ** 4:
         return '%.2fG' % (float(size) / 1024 ** 3)
-    else:
+    elif size < 1024 ** 5:
         return '%.2fT' % (float(size) / 1024 ** 4)
+    else:
+        return "%.2fP" % (float(size) / 1024 ** 5)
 
 
 def format_file_size(fpath):
@@ -595,8 +600,7 @@ def get_display_name(fpath, parent):
     path = get_relative_path(fpath, parent)
     return xutils.unquote(path)
 
-
-def listdir_abs(dirname):
+def do_list_dir_abs_recursive(dirname):
     pathlist = []
     for root, dirs, files in os.walk(dirname):
         for fname in files:
@@ -604,6 +608,17 @@ def listdir_abs(dirname):
             pathlist.append(fpath)
     pathlist = sorted(pathlist)
     return pathlist
+
+def listdir_abs(dirname, recursive = True):
+    if recursive:
+        return do_list_dir_abs_recursive(dirname)
+    else:
+        pathlist = []
+        for fname in os.listdir(dirname):
+            fpath = os.path.join(dirname, fname)
+            pathlist.append(fpath)
+        pathlist.sort()
+        return pathlist
 
 def _parse_line(line):
     if line == None:
@@ -656,34 +671,4 @@ def backupfile(path, backup_dir = None, rename=False):
         # need to handle case that bakup file exists
         import shutil
         shutil.copyfile(path, newpath)
-
-
-### 业务上用到的函数
-def get_upload_file_path(user, filename, upload_dir = "files", replace_exists = False):
-    """生成上传文件名"""
-    import xconfig
-    if xconfig.USE_URLENCODE:
-        filename = quote_unicode(filename)
-    basename, ext = os.path.splitext(filename)
-    date = time.strftime("upload/%Y/%m")
-    dirname = os.path.join(xconfig.DATA_PATH, upload_dir, user, date)
-    makedirs(dirname)
-
-    origin_filename = os.path.join(dirname, filename)
-    fileindex = 1
-
-    newfilepath = origin_filename
-    webpath = "/data/{}/{}/{}/{}".format(upload_dir, user, date, filename)
-    if filename == "":
-        # get upload directory
-        return os.path.abspath(dirname), webpath
-
-    while not replace_exists and os.path.exists(newfilepath):
-        name, ext = os.path.splitext(filename)
-        # 使用下划线，括号会使marked.js解析图片url失败
-        temp_filename = "{}_{}{}".format(name, fileindex, ext)
-        newfilepath = os.path.join(dirname, temp_filename)
-        webpath = "/data/{}/{}/{}/{}".format(upload_dir, user, date, temp_filename)
-        fileindex += 1
-    return os.path.abspath(newfilepath), webpath
 

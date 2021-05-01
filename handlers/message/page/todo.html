@@ -1,0 +1,181 @@
+{% extends base %}
+
+{% block body %}
+
+    {% include message/component/select_topic_dialog.html %}
+
+    <!-- 文件上传的组件 -->
+    {% include message/component/message_upload.html %}
+
+    {% init tag = "todo" %}
+    {% init title = "待办任务" %}
+    {% init show_input_box = True %}
+
+    <div class="card">
+        <div class="card-title">
+            <span>{{title}}</span>
+            <div class="float-right">
+                {% include common/button/back_button.html %}
+            </div>
+        </div>
+    </div>
+
+    {% if show_input_box %}
+        <div class="card">
+            <!-- 编辑器 -->
+            <div class="card">
+                <textarea class="col-md-12 input-box" placeholder="请输入待办任务..."></textarea>
+
+                <input type="file" id="filePicker" class="hide" multiple/>
+
+                <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#话题">
+                <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
+                <input type="button" id="createTodoBtn" class="send-button btn" value="创建">
+            </div>
+        </div>
+    {% end %}
+
+    {% if tag == "todo" %}
+        <div class="card">
+            <a class="list-link" href="/message/done">
+                <span>已完成任务</span>
+                <div class="float-right">
+                    <span class="book-size-span">{{message_stat.done_count}}</span>
+                    <i class="fa fa-chevron-right"></i>
+                </div>
+            </a>
+        </div>
+    {% end %}
+
+    <div class="col-md-12" id="todoItemList">
+        <!-- 待办任务 AJAX加载 -->
+    </div>
+
+    <div class="todo-empty-tpl hide">
+        <div class="card">
+            {% include common/text/empty_text.html %}
+        </div>
+    </div>
+
+    <div class="todo-item-tpl hide">
+        <div class="card">
+            <div class="todo-row">
+                <!-- <div class="todo-user">${user}</div> -->
+                <div class="row">
+                    <div class="todo-time">${ctime}</div>
+                    <div class="float-right">
+                        {% if tag == "todo" %}
+                            <input type="checkbox" class="todo-checkbox">
+                        {% end %}
+                    </div>
+                </div>
+
+                <div class="todo-content">${html}</div>
+                <div class="todo-foot">
+                    <a class="todo-foot-link" href="${note_url}">${note_name}</a>
+                    <div class="float-right ${deleteBtnClass}">
+                        <a class="todo-delete-btn" data-id="${id}" data-content="${content}">删除</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(function () {
+
+            function initTodoList() {
+                var emptyHtml = $(".todo-empty-tpl").html();
+                $("#todoItemList").html(emptyHtml);
+            }
+
+
+            function loadTodoList() {
+                var params = {
+                    tag: "{{tag}}"
+                };
+                $.get("/message/list", params, function (resp) {
+                    console.log(resp);
+                    // xnote.alert(resp.toString());
+                    if (resp.code != "success") {
+                        xnote.alert(resp.message);
+                    } else {
+                        // 先清空内容
+                        $("#todoItemList").empty();
+
+                        var todoList = resp.data;
+
+                        var tpl = $(".todo-item-tpl").html();
+                        for (var i = 0; i < todoList.length; i++) {
+                            var item = todoList[i];                       
+                            var html = xnote.renderTemplate(tpl, item);
+                            $("#todoItemList").append(html);
+                        }
+                    }
+                }).fail(function (e) {
+                    console.error(e);
+                    xnote.alert("调用接口失败，请重试");
+                });
+            }
+
+            function onFileUploaded(event) {
+                var inputText = event.target;
+                var oldText = $(".input-box").val();
+                var newText = oldText + inputText;
+                $(".input-box").val(newText);
+            }
+
+            $("#createTodoBtn").click(function () {
+                var content = $(".input-box").val();
+                $.post("/message/save", 
+                    {
+                        content:content, 
+                        tag: "task"
+                    },
+                    function (respText) {
+                        var data = respText;
+                        if (data.code != "success") {
+                            xnote.alert(data.message);
+                        } else {
+                            $(".input-box").val("");
+                        }
+
+                        loadTodoList();
+                }).fail(function (data) {
+                    console.log(data);
+                    xnote.alert("创建TODO失败，请稍后重试");
+                })
+            });
+
+            $("#todoItemList").on("click", ".todo-delete-btn", function (e) {
+                var target = e.target;
+                var id = $(target).attr("data-id");
+                var content = $(target).attr("data-content");
+
+                xnote.confirm("确认删除 '%s' ?".format(content), function (result) {
+                    $.post("/message/delete", {id: id}, function (resp) {
+                        if (resp.code == "success") {
+                            // 重新刷新页面
+                            loadTodoList();
+                        } else {
+                            xnote.alert(data.message);
+                        }
+                    });                    
+                });
+            });
+
+            $("#todoItemList").on("click", ".todo-checkbox", function (e) {
+                // todo完成的声音
+                // var audio = new Audio("/static/audio/todo_done.mp3");
+                // audio.play();
+            });
+
+            xnote.on("message.upload", onFileUploaded);
+
+            initTodoList();
+            // 加载todo列表
+            loadTodoList();
+        });
+    </script>
+
+{% end %}

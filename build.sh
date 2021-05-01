@@ -11,6 +11,7 @@ cat ./static/css/message.css >> ./static/css/app.build.css
 cat ./static/css/note.css    >> ./static/css/app.build.css
 cat ./static/css/plugins.css >> ./static/css/app.build.css
 cat ./static/css/search.css  >> ./static/css/app.build.css
+cat ./static/css/todo.css    >> ./static/css/app.build.css
 echo "打包app.build.css ... [OK]"
 
 # build js files
@@ -32,6 +33,7 @@ cat ./static/js/xnote-ui/x-audio.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-upload.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-dialog.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-tab.js >> ./static/js/app.build.js
+cat ./static/js/xnote-ui/x-template.js >> ./static/js/app.build.js
 
 # app 
 cat ./static/js/app.js >> ./static/js/app.build.js

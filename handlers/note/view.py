@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/04/29 22:41:57
+# @modified 2021/05/01 11:30:53
 import profile
 import math
 import re
@@ -24,11 +24,11 @@ from .constant import CREATE_BTN_TEXT_DICT
 PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
 
-@xmanager.listen("note.view", is_async=False)
+@xmanager.listen("note.view")
 def visit_by_id(ctx):
-    id        = ctx.id
+    note_id   = ctx.id
     user_name = ctx.user_name
-    NOTE_DAO.visit(user_name, id)
+    NOTE_DAO.visit(user_name, note_id)
 
 def check_auth(file, user_name):
     if file.is_public != 1 and user_name != "admin" and user_name != file.creator:

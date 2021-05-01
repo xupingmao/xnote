@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2021/02/06 17:31:03
+# @modified 2021/05/01 11:39:06
 import os
 import uuid
 import web
@@ -16,13 +16,14 @@ from xutils import quote, fsutil
 from xtemplate import T
 
 def get_link(filename, webpath):
+    """返回Markdown的链接"""
     if xutils.is_img_file(filename):
         return "![%s](%s)" % (filename, webpath)
     return "[%s](%s)" % (filename, webpath)
 
 def get_safe_file_name(filename):
     """处理文件名中的特殊符号"""
-    for c in " @$:#\\|":
+    for c in " @$:#\\|=&?":
         filename = filename.replace(c, "_")
     return filename
 
@@ -58,6 +59,35 @@ def try_touch_note(note_id):
 def try_lock_file(fpath):
     return True
 
+### 业务上用到的函数
+def get_upload_file_path(user, filename, upload_dir = "files", replace_exists = False):
+    """生成上传文件名"""
+    import xconfig
+    if xconfig.USE_URLENCODE:
+        filename = xutils.quote_unicode(filename)
+    basename, ext = os.path.splitext(filename)
+    date = time.strftime("upload/%Y/%m")
+    dirname = os.path.join(xconfig.DATA_PATH, upload_dir, user, date)
+    fsutil.makedirs(dirname)
+
+    origin_filename = os.path.join(dirname, filename)
+    fileindex = 1
+
+    newfilepath = origin_filename
+    webpath = "/data/{}/{}/{}/{}".format(upload_dir, user, date, filename)
+    if filename == "":
+        # get upload directory
+        return os.path.abspath(dirname), webpath
+
+    while not replace_exists and os.path.exists(newfilepath):
+        name, ext = os.path.splitext(filename)
+        # 使用下划线，括号会使marked.js解析图片url失败
+        temp_filename = "{}_{}{}".format(name, fileindex, ext)
+        newfilepath = os.path.join(dirname, temp_filename)
+        webpath = "/data/{}/{}/{}/{}".format(upload_dir, user, date, temp_filename)
+        fileindex += 1
+    return os.path.abspath(newfilepath), webpath
+
 class UploadHandler:
 
     @xauth.login_required()
@@ -78,7 +108,7 @@ class UploadHandler:
                 # filename = str(uuid.uuid1()) + ext
                 filename = generate_filename(None, prefix, ext)
             # xutils.makedirs(dirname)
-            filepath, webpath = xutils.get_upload_file_path(user_name, filename)
+            filepath, webpath = get_upload_file_path(user_name, filename)
             # filename = xutils.quote(os.path.basename(x.file.filename))
             with open(filepath, "wb") as fout:
                 # fout.write(x.file.file.read())
@@ -163,7 +193,7 @@ class RangeUploadHandler:
             filename = xutils.get_real_path(filename)
             if dirname == "auto":
                 filename = generate_filename(filename, prefix)
-                filepath, webpath = xutils.get_upload_file_path(user_name, filename, replace_exists=True)
+                filepath, webpath = get_upload_file_path(user_name, filename, replace_exists=True)
                 dirname  = os.path.dirname(filepath)
                 filename = os.path.basename(filepath)
             else:
@@ -234,6 +264,8 @@ class CheckHandler:
     @xauth.login_required()
     def GET(self):
         pass
+
+xutils.register_func("fs.get_upload_file_path", get_upload_file_path)
 
 xurls = (
     # 和文件系统的/fs/冲突了

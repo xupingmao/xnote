@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/04/11 13:23:57
+# @modified 2021/05/01 11:43:41
 import math
 import time
 import web
@@ -481,7 +481,7 @@ class ManagementHandler:
         parent_name = parent_note.name
         if parent_note.type == "gallery":
             fpath = NOTE_DAO.get_gallery_path(parent_note)
-            pathlist = fsutil.listdir_abs(fpath)
+            pathlist = fsutil.listdir_abs(fpath, False)
             return xtemplate.render("note/page/batch/gallery_management.html", 
                 note = parent_note, 
                 dirname = fpath, 

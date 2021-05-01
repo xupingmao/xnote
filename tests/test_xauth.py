@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/24 16:39:45
-# @modified 2021/02/15 23:20:21
+# @modified 2021/05/01 20:25:30
 
 import sys
 import time
@@ -43,4 +43,11 @@ class TestXauth(BaseTestCase):
     def test_list_user_names(self):
         user_names = xauth.list_user_names()
         self.assertTrue(len(user_names) >= 1)
+
+    def test_login_logout(self):
+        self.check_OK("/")
+        # TODO 待修复
+        # AttributeError: 'ThreadedDict' object has no attribute 'homepath'
+        # xauth.login_user_by_name("test")
+        # xauth.logout_current_user()
 

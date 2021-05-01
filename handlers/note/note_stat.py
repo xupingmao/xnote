@@ -1,18 +1,18 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2021/03/06 12:12:12
+# @modified 2021/05/01 17:27:45
 import xauth
 import xutils
 import xmanager
 from xutils import dbutil
 from xtemplate import BasePlugin
 
+MSG_DAO = xutils.DAO("message")
 
 HTML = """
 <style>
     .key { width: 75%; }
-    .admin-stat { margin-top: 10px; }
     .admin-stat-th { width: 25% }
 </style>
 
@@ -65,12 +65,15 @@ class StatHandler(BasePlugin):
         user_name = xauth.current_name()
 
         xmanager.add_visit_log(user_name, "/note/stat")
+
+        message_stat = MSG_DAO.get_message_stat(user_name)
         
         stat_list = []
         admin_stat_list = []
-        stat_list.append(["我的项目", xutils.call("note.count_by_type", user_name, "group")])
+        stat_list.append(["我的笔记本", xutils.call("note.count_by_type", user_name, "group")])
         stat_list.append(["我的笔记", dbutil.count_table("note_tiny:%s" % user_name)])
-        stat_list.append(["待办事项", dbutil.count_table("message:%s" % user_name)])
+        stat_list.append(["我的待办", message_stat.task_count])
+        stat_list.append(["我的记事", message_stat.log_count])
         stat_list.append(["搜索记录", dbutil.count_table("search_history:%s" % user_name)])
         stat_list.append(["我的评论", dbutil.count_table("comment_index:%s" % user_name)])
         

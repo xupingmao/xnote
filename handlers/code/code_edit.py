@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/??/??
-# @modified 2020/07/11 13:49:58
+# @modified 2021/05/01 13:41:51
 
 """显示代码原文"""
 import os
@@ -61,14 +61,20 @@ class ViewSourceHandler:
                 content = "",
                 error = "path is empty")
 
+        path = self.resolve_path(path, type)
+        if not os.path.exists(path):
+            return xtemplate.render(template_name, 
+                content = "",
+                warn = "文件不存在")
+
         error = ""
         warn  = ""
         try:
-            path = self.resolve_path(path, type)
             max_file_size = xconfig.MAX_TEXT_SIZE
             if xutils.get_file_size(path, format=False) >= max_file_size:
                 warn = "文件过大，只显示部分内容"
                 readonly = True
+
             content = xutils.readfile(path, limit = max_file_size)
             plugin_name = fsutil.get_relative_path(path, xconfig.PLUGINS_DIR)
             # 使用JavaScript来处理搜索关键字高亮问题

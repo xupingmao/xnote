@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2020/01/26 16:53:20
+# @modified 2021/05/01 17:45:35
 
 import sys
 import os
@@ -63,6 +63,7 @@ class TestMain(BaseTestCase):
         json_request("/message/list?status=suspended")
         json_request("/message/list?tag=file")
         json_request("/message/list?tag=link")
+        json_request("/message/list?tag=todo")
         # search
         json_request("/message/list?key=1")
 
@@ -100,6 +101,10 @@ class TestMain(BaseTestCase):
     def test_message_stat(self):
         result = json_request("/message/stat")
         self.assertTrue(result.get("cron_count") != None)
+
+    def test_message_todo(self):
+        self.check_OK("/message/todo")
+        self.check_OK("/message/done")
 
 
 

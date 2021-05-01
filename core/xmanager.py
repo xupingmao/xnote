@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/04/30 01:23:25
+# @modified 2021/05/01 11:01:53
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -471,8 +471,6 @@ class CronTaskManager:
             return False
         
     def do_load_tasks(self):
-        # schedule       = xtables.get_schedule_table()
-        # tasks          = schedule.select(order="url")
         tasks = dbutil.prefix_list("schedule")
         self.task_list = list(tasks)
         # 系统默认的任务

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/04/24 22:55:52
+# @modified 2021/05/01 17:55:24
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -207,7 +207,7 @@ class ListAjaxHandler:
 
             cost_time  = functions.second_to_ms(time.time() - start_time)
             MSG_DAO.add_search_history(user_name, key, cost_time)
-        elif tag == "task" or tag == "key":
+        elif tag in ("task", "todo", "key"):
             pagesize = 1000
             chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
         else:
@@ -289,7 +289,7 @@ def update_message_tag(id, tag):
 
     return dict(code="success")
 
-class FinishMessageHandler:
+class FinishMessageAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -298,7 +298,7 @@ class FinishMessageHandler:
             return
         return update_message_tag(id, "done")
 
-class OpenMessageHandler:
+class OpenMessageAjaxHandler:
 
     def POST(self):
         id = xutils.get_argument("id")
@@ -306,7 +306,7 @@ class OpenMessageHandler:
             return
         return update_message_tag(id, "task")
 
-class UpdateTagHandler:
+class UpdateTagAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -319,7 +319,7 @@ class UpdateTagHandler:
         else:
             return failure(message = "invalid tag")
 
-class UpdateStatusHandler:
+class UpdateStatusAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -327,7 +327,7 @@ class UpdateStatusHandler:
         status = xutils.get_argument("status", type=int)
         return update_message_status(id, status)
 
-class TouchHandler:
+class TouchAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -341,7 +341,7 @@ class TouchHandler:
         MSG_DAO.update(msg)
         return success()
 
-class DeleteHandler:
+class DeleteAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -417,7 +417,7 @@ def apply_rules(user_name, id, tag, content):
     for rule in rules:
         rule.match_execute(ctx, content)
 
-class SaveHandler:
+class SaveAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -427,6 +427,9 @@ class SaveHandler:
         location  = xutils.get_argument("location", "")
         user_name = xauth.get_current_name()
         ip        = get_remote_ip()
+
+        if content == None or content == "":
+            return dict(code = "fail", message = "输入内容为空!");
 
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
         apply_rules(user_name, id, tag, content)
@@ -442,16 +445,13 @@ class SaveHandler:
             update_message_content(id, user_name, content)
         return dict(code="success", data=dict(id=id))
 
-class DateHandler:
+class DateAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
         date      = xutils.get_argument("date")
         user_name = xauth.current_name()
-        if date != None:
-            msg_list = MSG_DAO.list_by_date(user_name, date)
-        else:
-            msg_list = []
+        msg_list = MSG_DAO.list_by_date(user_name, date)
         parser = MessageListParser(msg_list)
         parser.parse()
         return dict(code="success", data = msg_list)
@@ -490,7 +490,7 @@ class MessageHandler:
             show_tab           = show_tab,
             category           = "message",
             search_type        = "message",
-            html_title         = T("任务和记事"),
+            html_title         = T("随手记"),
             default_content    = default_content,
             message_stat       = stat,
             tag                = tag,
@@ -515,7 +515,7 @@ class CalendarHandler:
             message_stat = stat,
             search_type = "message")
 
-class StatHandler:
+class StatAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -535,22 +535,47 @@ class MessageLogHandler(MessageHandler):
     def GET(self):
         return self.do_get("log")
 
+class TodoHandler(MessageHandler):
+
+    @xauth.login_required()
+    def do_get(self, tag = "todo", title = "待办任务", show_input_box = True):
+        user_name = xauth.current_name()
+        message_stat = MSG_DAO.get_message_stat(user_name)
+        xmanager.add_visit_log(user_name, "/message/todo")
+        
+        return xtemplate.render("message/page/todo.html", 
+            tag = tag,
+            title = T(title),
+            show_input_box = show_input_box,
+            message_stat = message_stat)
+
+    def GET(self):
+        return self.do_get("todo")
+
+class TodoDoneHandler(TodoHandler):
+
+    def GET(self):
+        return self.do_get("done", "已完成任务", show_input_box = False)
+
 xutils.register_func("url:/message?tag=log", MessageLogHandler)
 
 xurls=(
     r"/message", MessageHandler,
-    r"/message/list", ListAjaxHandler,
     r"/message/calendar", CalendarHandler,
-    r"/message/stat", StatHandler,
-    r"/message/date", DateHandler,
-    
-    r"/message/save", SaveHandler,
-    r"/message/status", UpdateStatusHandler,
-    r"/message/delete", DeleteHandler,
-    r"/message/update", SaveHandler,
-    r"/message/open", OpenMessageHandler,
-    r"/message/finish", FinishMessageHandler,
-    r"/message/touch", TouchHandler,
-    r"/message/tag", UpdateTagHandler,
     r"/message/dairy", DairyHandler,
+    r"/message/todo", TodoHandler,
+    r"/message/done", TodoDoneHandler,
+
+    # Ajax处理
+    r"/message/list", ListAjaxHandler,
+    r"/message/date", DateAjaxHandler,
+    r"/message/stat", StatAjaxHandler,
+    r"/message/save", SaveAjaxHandler,
+    r"/message/status", UpdateStatusAjaxHandler,
+    r"/message/delete", DeleteAjaxHandler,
+    r"/message/update", SaveAjaxHandler,
+    r"/message/open", OpenMessageAjaxHandler,
+    r"/message/finish", FinishMessageAjaxHandler,
+    r"/message/touch", TouchAjaxHandler,
+    r"/message/tag", UpdateTagAjaxHandler,
 )

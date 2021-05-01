@@ -1,13 +1,15 @@
 # encoding=utf-8
 import xtemplate
 import web
+import xauth
 
-class handler:
+class LogoutHandler:
 
     def GET(self):
-        web.setcookie("xuser", "", expires=-1)
+        xauth.logout_current_user()
+        web.setcookie("sid", "", expires=-1)
         raise web.seeother("/")
 
 xurls = (
-    r"/logout", handler
+    r"/logout", LogoutHandler
 )

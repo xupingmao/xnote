@@ -11,8 +11,10 @@
                 {{xutils.format_file_size(fpath)}}
             </td>
             <td class="option-td">
-                <a class="rename-btn" data-name="{{display_name}}">重命名</a>
-                <a class="delete-btn danger-link" data-path="{{fpath}}" data-name="{{display_name}}">删除</a>
+                <div class="float-right">
+                    <a class="rename-btn" data-name="{{display_name}}">重命名</a>
+                    <a class="delete-btn danger-link" data-path="{{fpath}}" data-name="{{display_name}}">删除</a>
+                </div>
             </td>
         </tr>
     {% end %}
