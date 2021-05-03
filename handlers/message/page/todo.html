@@ -44,6 +44,15 @@
                     <i class="fa fa-chevron-right"></i>
                 </div>
             </a>
+
+            <a class="list-link" href="/message/canceled">
+                <span>已取消任务</span>
+                <div class="float-right">
+                    <span class="book-size-span">{{message_stat.canceled_count}}</span>
+                    <i class="fa fa-chevron-right"></i>
+                </div>
+            </a>
+
         </div>
     {% end %}
 
@@ -51,67 +60,23 @@
         <!-- 待办任务 AJAX加载 -->
     </div>
 
-    <div class="todo-empty-tpl hide">
-        <div class="card">
-            {% include common/text/empty_text.html %}
-        </div>
-    </div>
-
-    <div class="todo-item-tpl hide">
-        <div class="card">
-            <div class="todo-row">
-                <!-- <div class="todo-user">${user}</div> -->
-                <div class="row">
-                    <div class="todo-time">${ctime}</div>
-                    <div class="float-right">
-                        {% if tag == "todo" %}
-                            <input type="checkbox" class="todo-checkbox">
-                        {% end %}
-                    </div>
-                </div>
-
-                <div class="todo-content">${html}</div>
-                <div class="todo-foot">
-                    <a class="todo-foot-link" href="${note_url}">${note_name}</a>
-                    <div class="float-right ${deleteBtnClass}">
-                        <a class="todo-delete-btn" data-id="${id}" data-content="${content}">删除</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script type="text/javascript">
         $(function () {
 
-            function initTodoList() {
-                var emptyHtml = $(".todo-empty-tpl").html();
-                $("#todoItemList").html(emptyHtml);
-            }
-
-
             function loadTodoList() {
+                var page = getUrlParam("page");
+                if (page == undefined) {
+                    page = 1;
+                }
+
                 var params = {
-                    tag: "{{tag}}"
+                    tag: "{{tag}}",
+                    format: "html",
+                    page: page,
                 };
                 $.get("/message/list", params, function (resp) {
-                    console.log(resp);
-                    // xnote.alert(resp.toString());
-                    if (resp.code != "success") {
-                        xnote.alert(resp.message);
-                    } else {
-                        // 先清空内容
-                        $("#todoItemList").empty();
-
-                        var todoList = resp.data;
-
-                        var tpl = $(".todo-item-tpl").html();
-                        for (var i = 0; i < todoList.length; i++) {
-                            var item = todoList[i];                       
-                            var html = xnote.renderTemplate(tpl, item);
-                            $("#todoItemList").append(html);
-                        }
-                    }
+                    // console.log(resp);
+                    $("#todoItemList").html(resp);
                 }).fail(function (e) {
                     console.error(e);
                     xnote.alert("调用接口失败，请重试");
@@ -123,6 +88,28 @@
                 var oldText = $(".input-box").val();
                 var newText = oldText + inputText;
                 $(".input-box").val(newText);
+            }
+
+            function onMessageReceived(event) {
+                var data = event.data;
+                if (data == "message.updated") {
+                    loadTodoList();
+                    xnote.closeAllDialog();
+                }
+            }
+
+            function onMessageRefresh(event) {
+                loadTodoList();
+            }
+
+            function updateMessageTag(id, tag) {
+                $.post("/message/tag", {id: id, tag: tag}, function (resp) {
+                    if (resp.code == "success") {
+                        loadTodoList();
+                    } else {
+                        alert(resp.message);
+                    }
+                });
             }
 
             $("#createTodoBtn").click(function () {
@@ -164,17 +151,29 @@
                 });
             });
 
+
             $("#todoItemList").on("click", ".todo-checkbox", function (e) {
                 // todo完成的声音
-                // var audio = new Audio("/static/audio/todo_done.mp3");
-                // audio.play();
+                xnote.playAudio("todo_done");
+
+                // 标记为完成
+                var id = $(e.target).attr("data-id");
+                updateMessageTag(id, "done");
             });
 
-            xnote.on("message.upload", onFileUploaded);
 
-            initTodoList();
+
+            // 监听上传事件
+            xnote.on("message.upload", onFileUploaded);
+            xnote.on("message.refresh", onMessageRefresh);
+
             // 加载todo列表
             loadTodoList();
+
+            // 加载音频文件
+            xnote.loadAudio("todo_done", "/static/audio/todo_done.mp3");
+
+            window.addEventListener("message", onMessageReceived, false);
         });
     </script>
 

@@ -32,7 +32,7 @@
 
 ## 3.1 manager和service的区别
 
-- service提供具体的服务（外部使用），manager是service下面一层，为service提供通用服务（内部使用）
+- service提供具体的服务（外部使用），manager（内部使用）是service下面一层，为service提供通用服务
 
 # 4. 函数命名
 
@@ -46,3 +46,13 @@
 - type和category
     - type是偏向于客观边界比较清晰的分类，比如动植物的类型、建筑材料类型、数据结构类型等等
     - category是偏向于主观的分类，比如文章分类、活动类型等等
+
+# 6. 模块内部的命名
+
+- `handlers/note` note模块的根目录
+- `handlers/note/page` 页面，页面的入口
+- `handlers/note/ajax` ajax页面
+- `handlers/note/component` 页面的组件
+- `handlers/note/*.py` 后台处理程序
+
+

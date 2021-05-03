@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2021/04/30 22:02:46
+@modified 2021/05/03 17:48:36
 -->
 
 {% block body %}
@@ -57,8 +57,8 @@
                     <input type="button" class="btn execute-btn float-right" value="执行" href="{{file.command}}"/>
                 {% end %}
 
-                {% if file.id != None %}
-                <a class="item-option move-btn" data-url="/note/group/select?id={{file.id}}&filetype=xml">移动</a>
+                {% if file.show_move == True %}
+                    <a class="item-option move-btn" data-url="/note/group/select?id={{file.id}}&filetype=xml">移动</a>
                 {% end %}
 
                 {# 插件 #}

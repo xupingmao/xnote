@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2021/04/11 13:50:32
+# @modified 2021/05/03 17:14:26
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -184,6 +184,8 @@ def main():
 
     # 文件修改检测
     init_autoreload()
+
+    xmanager.fire("sys.init", None)
 
     # 注册信号响应
     # 键盘终止信号

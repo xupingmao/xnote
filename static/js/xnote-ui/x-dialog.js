@@ -235,6 +235,7 @@ $(function () {
         $("#" + id).show();
     }
 
+    xnote.initDialog = initDialog;
 });
 
 
@@ -263,5 +264,9 @@ window.ContentDialog = {
       scrollbar: false
     });
   }
+}
+
+window.xnote.closeAllDialog = function() {
+    layer.closeAll();
 }
 

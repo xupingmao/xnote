@@ -36,7 +36,7 @@ def is_valid_username(name):
         return False
     return name.isalnum()
 
-def _add_temp_user(temp_users, user_name):
+def _create_temp_user(temp_users, user_name):
     temp_users[user_name] = Storage(name = user_name, 
         password = "123456",
         salt = "",
@@ -54,8 +54,8 @@ def _get_users(force_reload = False):
     temp_users = {}
 
     # 初始化默认的用户
-    _add_temp_user(temp_users, "admin")
-    _add_temp_user(temp_users, "test")
+    _create_temp_user(temp_users, "admin")
+    _create_temp_user(temp_users, "test")
 
     user_list = dbutil.prefix_list("user")
     for user in user_list:
@@ -126,7 +126,16 @@ def list_user_session_id(user_name):
 
     return session_id_list
 
-def create_user_session(user_name, expires = SESSION_EXPIRE):
+def list_user_session_detail(user_name):
+    session_id_list = list_user_session_id(user_name)
+    session_detail_list = []
+    for sid in session_id_list:
+        detail = get_valid_session_by_id(sid)
+        if detail != None:
+            session_detail_list.append(detail)
+    return session_detail_list
+
+def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = None):
     user_detail = get_user_by_name(user_name)
     if user_detail is None:
         raise Exception("user not found: %s" % user_name)
@@ -146,6 +155,8 @@ def create_user_session(user_name, expires = SESSION_EXPIRE):
     session_info = Storage(user_name = user_name, 
         sid   = session_id,
         token = user_detail.token, 
+        login_time  = time.time(),
+        login_ip = login_ip,
         expire_time = time.time() + expires)
     dbutil.put("session:%s" % session_id, session_info)
 
@@ -303,7 +314,7 @@ def gen_new_token():
     import uuid
     return uuid.uuid4().hex
 
-def add_user(name, password):
+def create_user(name, password):
     if name == "" or name == None:
         return dict(code = "PARAM_ERROR", message = "name为空")
     if password == "" or password == None:
@@ -355,11 +366,12 @@ def update_user(name, user):
     # 刷新完成之后再发送消息
     xmanager.fire("user.update", dict(user_name = name))
 
-def remove_user(name):
+def delete_user(name):
     if name == "admin":
         return
     name = name.lower()
     dbutil.delete("user:%s" % name)
+    
     refresh_users()
 
 def has_login_by_cookie_old(name = None):
@@ -454,8 +466,11 @@ def get_user_data_dir(user_name, mkdirs = False):
         fsutil.makedirs(fpath)
     return fpath
 
-def login_user_by_name(user_name):
-    write_cookie(user_name)
+def login_user_by_name(user_name, login_ip = None):
+    session_id = create_user_session(user_name, login_ip = login_ip)
+    web.setcookie("sid", session_id)
+
+    # 更新最近的登录时间
     update_user(user_name, dict(login_time=xutils.format_datetime()))   
 
 def logout_current_user():

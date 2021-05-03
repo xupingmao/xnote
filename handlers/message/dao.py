@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/05/01 17:53:30
+# @modified 2021/05/03 17:32:52
 import xutils
 import xconfig
 import xmanager
@@ -53,7 +53,7 @@ def add_message_history(message):
 def expire_message_cache(ctx):
     cacheutil.prefix_del("message.count")
 
-def search_message(user_name, key, offset, limit):
+def search_message(user_name, key, offset, limit, search_tags = None):
     words = []
     for item in key.split(" "):
         if item == "":
@@ -62,6 +62,8 @@ def search_message(user_name, key, offset, limit):
 
     def search_func(key, value):
         if value.content is None:
+            return False
+        if search_tags != None and value.tag not in search_tags:
             return False
         return textutil.contains_all(value.content.lower(), words)
 
@@ -258,7 +260,10 @@ def count_by_tag(user, tag):
     return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
 
 def get_message_stat0(user):
-    return dbutil.get("user_stat:%s:message" % user)
+    stat = dbutil.get("user_stat:%s:message" % user)
+    if stat != None and stat.canceled_count is None:
+        stat.canceled_count = 0
+    return stat
 
 def get_message_stat(user):
     value = get_message_stat0(user)
@@ -273,6 +278,7 @@ def refresh_message_stat(user):
     done_count = count_by_tag(user, "done")
     cron_count = count_by_tag(user, "cron")
     key_count  = count_by_tag(user, "key")
+    canceled_count = count_by_tag(user, "canceled")
     stat       = get_message_stat0(user)
     if stat is None:
         stat = Storage()
@@ -282,6 +288,7 @@ def refresh_message_stat(user):
     stat.done_count = done_count
     stat.cron_count = cron_count
     stat.key_count  = key_count
+    stat.canceled_count = canceled_count
     dbutil.put("user_stat:%s:message" % user, stat)
     return stat
 
@@ -310,7 +317,7 @@ class MessageTag(Storage):
             self.name = T("待办任务")
             self.icon = "fa-calendar-check-o"
             # TODO 完成todo功能之后再切换
-            # self.url  = "/message/todo"
+            self.url  = "/message/todo"
 
 def get_message_tag(user, tag, priority = 0):
     msg_stat  = get_message_stat(user)

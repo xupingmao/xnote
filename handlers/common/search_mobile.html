@@ -15,8 +15,13 @@
 
 </style>
 
-<div class="mobile-search">
-    <form id="searchForm" method="GET" action="{{search_action}}">
-        {% include common/search_box.html %}
-    </form>
-</div>
+{% init show_nav = True %}
+{% init show_menu = True %}
+
+{% if show_nav and show_menu %}
+    <div class="mobile-search">
+        <form id="searchForm" method="GET" action="{{search_action}}">
+            {% include common/search_box.html %}
+        </form>
+    </div>
+{% end %}

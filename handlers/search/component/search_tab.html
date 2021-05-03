@@ -1,6 +1,6 @@
 <!--
 @since 2018/05/27
-@modified 2021/04/25 10:38:00
+@modified 2021/05/03 17:42:03
 -->
 
 {% init key = "" %}
@@ -21,8 +21,11 @@
             <a class="link" href="/search?key={{?key}}&search_type=dict" 
                 data-option="dict" data-value="{{?category}}">词典</a>
             
+            <a class="link" href="/search?key={{?key}}&search_type=task"
+                data-option="task" data-value="{{?category}}">待办</a>
+
             <a class="link" href="/message?key={{?key}}&category=message&from=note" 
-                data-option="message" data-value="{{?category}}">待办</a>
+                data-option="message" data-value="{{?category}}">记事</a>
 
             {%if _is_admin%}
                 <a class="link" href="/fs_find?key={{?key}}" 

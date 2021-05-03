@@ -1,0 +1,67 @@
+{% extends base %}
+
+
+{% block body %}
+
+    <!-- 选择话题组件 -->
+    {% include message/component/select_topic_dialog.html %}
+
+    <!-- 文件上传的组件 -->
+    {% include message/component/message_upload.html %}
+
+    <div class="card">
+        <!-- 编辑器 -->
+        <div class="card">
+            <textarea id="messageEditContent" 
+                class="col-md-12 input-box" rows=20
+                placeholder="请输入内容...">{{detail.content}}</textarea>
+
+            <input type="hidden" id="messageEditId" value="{{detail.id}}"/>
+            <input type="file" id="filePicker" class="hide" multiple/>
+
+            <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#话题">
+            <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
+            <input type="button" id="createTodoBtn" class="send-button btn" value="更新">
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#createTodoBtn").click(function () {
+                var id = $("#messageEditId").val();
+                var content = $("#messageEditContent").val();
+
+                var params = {
+                    id: id,
+                    content: content
+                }
+
+                $.post("/message/update", params, function (resp) {
+                    if (resp.code == "success") {
+                        xnote.toast("更新成功");
+
+                        if (top) {
+                            // iframe中通知父级节点更新
+                            top.postMessage("message.updated", "*");
+                        }
+
+                    } else {
+                        xnote.alert("更新失败:" + resp.message);
+                    }
+                }).fail(function (e) {
+                    console.error(e);
+                    xnote.alert("系统繁忙，请稍后重试");
+                });
+            });
+
+            function onFileUploaded(event) {
+                var inputText = event.target;
+                var oldText = $(".input-box").val();
+                var newText = oldText + inputText;
+                $(".input-box").val(newText);
+            }
+
+            xnote.on("message.upload", onFileUploaded);
+        });
+    </script>
+{% end %}

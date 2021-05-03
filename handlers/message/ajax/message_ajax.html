@@ -1,0 +1,60 @@
+{% init item_list = [] %}
+{% init show_todo_check = False %}
+{% init show_edit_btn   = True %}
+
+{% if len(item_list) == 0 %}
+    <div class="card">
+        {% include common/text/empty_text.html %}
+    </div>
+{% end %}
+
+{% for item in item_list %}
+    <div class="card">
+        <div class="todo-row">
+            <!-- <div class="todo-user">${user}</div> -->
+            <div class="row">
+                <div class="todo-time">{{item.ctime}}</div>
+                <div class="float-right">
+                    {% if show_todo_check %}
+                        <input type="checkbox" data-id="{{item.id}}" class="todo-checkbox">
+                    {% end %}
+
+                    {% if item.tag == "done1" %}
+                        <a class="update-tag-btn btn btn-default" data-id="{{item.id}}" data-tag="task">重做</a>
+                    {% end %}
+                </div>
+            </div>
+
+            <div class="todo-content">{% raw item.html %}</div>
+            <div class="todo-foot">
+                {% if show_edit_btn %}
+                    <a class="todo-edit-btn btn btn-default" 
+                        data-url="/message/edit?id={{item.id}}">编辑</a>
+                {% end %}
+                <div class="float-right">
+                    <a class="todo-delete-btn btn btn-default" data-id="{{item.id}}" data-content="{{item.content}}">删除</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% end %}
+
+
+<script type="text/javascript">
+$(function () {
+    $(".todo-edit-btn").click(function (e) {
+        var url = $(e.target).attr("data-url");
+        var layerId = xnote.showIframeDialog("编辑", url);
+    });
+
+    $(".update-tag-btn").click(function (e) {
+        var id = $(e.target).attr("data-id");
+        var tag = $(e.target).attr("data-tag");
+        console.log(id, tag);
+    });
+});
+</script>
+
+<div class="card">
+    {% include common/pagination.html %}
+</div>

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2021/02/15 23:51:27
+# @modified 2021/05/02 13:14:35
 import web
 import xauth
 import xtemplate
@@ -60,7 +60,7 @@ class AddHandler:
     @xauth.login_required("admin")
     def POST(self):
         name   = xutils.get_argument("name")
-        result = xauth.add_user(name, textutil.random_string(6))
+        result = xauth.create_user(name, textutil.random_string(6))
         if result["code"] == "success":
             # 重新加载系统
             xmanager.reload()
@@ -71,7 +71,7 @@ class RemoveHandler:
     @xauth.login_required("admin")
     def POST(self):
         name = xutils.get_argument("name")
-        xauth.remove_user(name)
+        xauth.delete_user(name)
         return dict(code="success")
 
 class UserInfoHandler:
@@ -81,13 +81,20 @@ class UserInfoHandler:
         user = xauth.current_user()
         return xtemplate.render("user/page/userinfo.html", user = user)
 
+class SessionInfoAjaxHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        user_name = xauth.current_name()
+        return xauth.list_user_session_detail(user_name)
 
 xurls = (
     r"/user/add",  AddHandler,
     r"/user/list",  ListHandler,
     r"/user/info",   UserInfoHandler,
+    r"/user/session", SessionInfoAjaxHandler,
     
     r"/system/user", UserHandler,
     r"/system/user/list", ListHandler,
-    r"/system/user/remove", RemoveHandler
+    r"/system/user/remove", RemoveHandler,
 )

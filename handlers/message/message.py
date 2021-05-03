@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/01 17:55:24
+# @modified 2021/05/03 17:44:19
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -191,6 +191,7 @@ class ListAjaxHandler:
         page   = xutils.get_argument("page", 1, type=int)
         key    = xutils.get_argument("key")
         tag    = xutils.get_argument("tag", "task")
+        format = xutils.get_argument("format")
         offset = (page-1) * pagesize
         user_name = xauth.get_current_name()
 
@@ -222,6 +223,18 @@ class ListAjaxHandler:
         parser = MessageListParser(chatlist)
         parser.parse()
         chatlist = parser.get_message_list()
+
+        if format == "html":
+            show_todo_check = False
+
+            if tag == "todo":
+                show_todo_check = True
+
+            return xtemplate.render("message/ajax/message_ajax.html", 
+                show_todo_check = show_todo_check,
+                page = page,
+                page_max = page_max,
+                item_list = chatlist)
 
         return dict(code="success", message = "", 
             data   = chatlist, 
@@ -314,7 +327,7 @@ class UpdateTagAjaxHandler:
         tag = xutils.get_argument("tag")
         if id == "":
             return
-        if tag in ("task", "cron", "log", "key"):
+        if tag in ("task", "cron", "log", "key", "done"):
             return update_message_tag(id, tag)
         else:
             return failure(message = "invalid tag")
@@ -503,6 +516,17 @@ class MessageHandler:
         return self.do_get(tag)
 
 
+class MessageEditHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id")
+        detail = MSG_DAO.get_by_id(id)
+
+        return xtemplate.render("message/page/message_edit.html", 
+            show_nav = False,
+            detail = detail)
+
 class CalendarHandler:
 
     def GET(self):
@@ -544,6 +568,7 @@ class TodoHandler(MessageHandler):
         xmanager.add_visit_log(user_name, "/message/todo")
         
         return xtemplate.render("message/page/todo.html", 
+            search_type = "task",
             tag = tag,
             title = T(title),
             show_input_box = show_input_box,
@@ -557,6 +582,12 @@ class TodoDoneHandler(TodoHandler):
     def GET(self):
         return self.do_get("done", "已完成任务", show_input_box = False)
 
+class TodoCanceledHandler(TodoHandler):
+
+    def GET(self):
+        return self.do_get("canceled", "已取消任务", show_input_box = False)
+
+xutils.register_func("message.process_message", process_message)
 xutils.register_func("url:/message?tag=log", MessageLogHandler)
 
 xurls=(
@@ -565,6 +596,8 @@ xurls=(
     r"/message/dairy", DairyHandler,
     r"/message/todo", TodoHandler,
     r"/message/done", TodoDoneHandler,
+    r"/message/canceled", TodoCanceledHandler,
+    r"/message/edit", MessageEditHandler,
 
     # Ajax处理
     r"/message/list", ListAjaxHandler,

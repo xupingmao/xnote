@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/05/01 18:16:37
+# @modified 2021/05/03 17:17:28
 # @filename xtemplate.py
 
 
@@ -23,7 +23,8 @@ import xauth
 import xutils
 from tornado.template import Template, Loader
 from xutils import dateutil, quote, u
-from xutils import ConfigParser, Storage, tojson
+from xutils import ConfigParser, tojson
+from xutils import Storage
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE    = dict(
@@ -35,6 +36,8 @@ NAMESPACE    = dict(
 _lang_dict = dict()
 _mobile_name_dict = dict()
 _loader = None
+
+SEARCH_DAO = xutils.DAO("search")
 
 def load_languages():
     """加载系统语言配置"""
@@ -205,22 +208,12 @@ def render_search(kw):
     search_action      = "/search"
     search_placeholder = u"搜索笔记"
 
-    if search_type == "plugin":
-        search_placeholder = u"搜索插件"
-        search_action = "/plugins_list"
-
-    if search_type == "message":
-        search_placeholder = u"搜索任务和记事";
-        search_action = "/message"
-
-    if search_type == "note.public":
-        search_placeholder = u"搜索公共笔记"
-        search_action = "/note/timeline"
-        search_tag = "public"
-
-    if search_type == "dict":
-        search_placeholder = "搜索词典"
-        search_action = "/search"
+    if search_type != None:
+        handler = SEARCH_DAO.get_search_handler(search_type)
+        if handler != None:
+            search_action      = handler.action
+            search_tag         = handler.tag
+            search_placeholder = handler.placeholder
 
     kw["search_action"] = search_action
     kw["search_placeholder"] = search_placeholder
@@ -358,6 +351,11 @@ class DataTable:
         """
         pass
 
+class TextResponse:
+
+    def __init__(self, text):
+        self.text = text
+
 CATEGORY_NAME_DICT = dict(
     network = '网络', 
     file    = '文件',
@@ -446,11 +444,17 @@ class BasePlugin:
     def writehtml(self, html, **kw):
         """@deprecated 请使用 #writebody
         这个方法现在和 `writetemplate` 等价"""
-        self.writetemplate(html, **kw)
+        return self.writetemplate(html, **kw)
 
     def writetemplate(self, template, **kw):
         html = render_text(template, **kw)
         self.html += u(html.decode("utf-8"))
+        return self.html
+
+    def do_render_text(self, template, **kw):
+        """这个方法用于渲染动态的HTML，用于局部刷新的场景"""
+        html = render_text(template, **kw)
+        return TextResponse(html)
 
     def handle(self, input):
         """子类实现这个方法"""
@@ -468,7 +472,7 @@ class BasePlugin:
         return xutils.get_argument("page", 1, type=int)
 
     def render(self):
-        """图形界面入口"""
+        """图形界面入口,实际的调用入口请查看`plugins.py`文件"""
         if self.require_admin:
             xauth.check_login("admin")
         input  = self.get_input()
@@ -482,7 +486,11 @@ class BasePlugin:
                 web.header("Content-Type", "text/plain; charset:utf-8")
                 return self.output + output
 
-            # 复杂对象交给框架处理
+            # 直接返回文本
+            if isinstance(output, TextResponse):
+                return output.text
+
+            # 结构化对象交给框架处理
             if isinstance(output, (dict, list)):
                 return output
 

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/04/25 10:47:55
+# @modified 2021/05/03 23:51:53
 
 import re
 import os
@@ -30,6 +30,21 @@ DICT_DAO = xutils.DAO("dict")
 
 config = xconfig
 _RULES = []
+
+SEARCH_TYPE_DICT = dict()
+
+
+def register_search_handler(search_type, placeholder = None, action = None, tag = None):
+    global SEARCH_TYPE_DICT
+    SEARCH_TYPE_DICT[search_type] = Storage(
+        placeholder = placeholder,
+        action = action,
+        tag = tag
+    )
+
+def get_search_handler(search_type):
+    return SEARCH_TYPE_DICT.get(search_type)
+
 
 class BaseRule:
 
@@ -85,6 +100,7 @@ def fill_note_info(files):
             parent = NOTE_DAO.get_by_id(file.parent_id)
             if parent is not None:
                 file.parent_name = parent.name
+        file.show_move = True
 
 def log_search_history(user, key, category = "default", cost_time = 0):
     NOTE_DAO.add_search_history(user, key, category, cost_time)
@@ -238,12 +254,35 @@ class SearchHandler:
         limit  = ctx.limit
         return notes[offset:offset+limit], len(notes)
 
+    def do_search_task(self, ctx, key):
+        user_name = xauth.get_current_name()
+        offset = ctx.offset
+        limit  = ctx.limit
+
+        search_tags = set(["task", "done"])
+        item_list, amount = MSG_DAO.search(user_name, key, offset, limit, search_tags = search_tags)
+
+        for item in item_list:
+            MSG_DAO.process_message(item)
+            prefix = u("待办 - ")
+
+            if item.tag == "done":
+                prefix = u("完成 - ")
+
+            item.name = prefix + item.ctime
+            item.icon = "hide"
+            item.url  = "#"
+
+        return item_list, amount
+
 
     def do_search_by_type(self, ctx, key, search_type):
         if search_type == "note":
             return self.do_search_note(ctx, key)
         elif search_type == "dict":
             return self.do_search_dict(ctx, key)
+        elif search_type == "task":
+            return self.do_search_task(ctx, key)
         else:
             return []
 
@@ -327,8 +366,17 @@ def list_search_rules(user_name):
         item.url = "/note/timeline?type=search&key=" + xutils.encode_uri_component(item.content)
     return list
 
+
+@xmanager.listen("sys.init", is_async = False)
+def init_search(event_type, ctx = None):
+    register_search_handler("plugin", placeholder = u"搜索插件", action = "/plugins_list")
+    register_search_handler("note.public", placeholder = u"搜索公共笔记", action = "/note/timeline", tag = "public")
+    register_search_handler("dict", placeholder = u"搜索词典", action = "/search")
+
+
 xutils.register_func("search.list_rules", list_search_rules)
 xutils.register_func("search.list_recent", list_search_history)
+xutils.register_func("search.get_search_handler", get_search_handler)
 
 xurls = (
     r"/search/search", SearchHandler, 

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2021/05/01 19:42:40
+# @modified 2021/05/02 13:17:05
 import web
 import time
 import hashlib
@@ -47,7 +47,7 @@ class LoginHandler:
             if pswd == user["password"]:
                 save_login_info(name, "success")
                 
-                xauth.login_user_by_name(name)
+                xauth.login_user_by_name(name, login_ip = get_real_ip())
 
                 if target is None:
                     raise web.seeother("/")
