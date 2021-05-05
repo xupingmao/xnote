@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/05/01 11:43:41
+# @modified 2021/05/05 18:01:39
 import math
 import time
 import web
@@ -8,7 +8,6 @@ import xutils
 import xtemplate
 import xtables
 import xauth
-import xuserconfig
 import xconfig
 import xmanager
 import os

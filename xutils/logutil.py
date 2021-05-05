@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/05/01 11:01:16
+# @modified 2021/05/05 16:57:09
 import logging
 import time
 import inspect
@@ -141,17 +141,30 @@ def log_init_deco(message):
     """日志装饰器"""
     def deco(func):
         def handle(*args, **kw):
-            log(message + " starting ...")
+            log("%-30s..." % message)
             try:
                 result = func(*args, **kw)
-                log(message + " finished")
+                log("%-30s[OK]" % message)
                 return result
             except Exception as e:
-                log(message + " failed")
+                log("%-30s[FAIL]" % message)
                 raise e
         return handle
     return deco
 
+def log_deco(message):
+    """日志装饰器"""
+    def deco(func):
+        def handle(*args, **kw):
+            try:
+                result = func(*args, **kw)
+                log(message + " [OK]")
+                return result
+            except Exception as e:
+                log(message + " [FAIL]")
+                raise e
+        return handle
+    return deco
 
 def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False):
     """简单的计时装饰器，可以指定执行次数"""

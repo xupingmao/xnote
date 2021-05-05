@@ -1,10 +1,11 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/05/05 11:23:30
+# @modified 2021/05/05 18:03:48
 
 '''xnote系统配置
 # 用户配置
-- 查看xuserconfig
+- get_user_config
+- get_user_config_dict
 
 # 文件配置
 - 约定目录叫 XXX_DIR
@@ -362,7 +363,7 @@ def get_global_config(key):
     return globals().get(key)
 
 
-def get_user_config(user_name, config_key):
+def get_user_config(user_name, config_key, default_value = None):
     """默认值参考DEFAULT_USER_CONFIG"""
     # 未启动，直接返回默认值
     if START_TIME is None:
@@ -376,3 +377,14 @@ def get_user_config(user_name, config_key):
     else:
         return config.get(config_key, default_value)
 
+def get_user_config_dict(user_name):
+    import xauth
+    value = xauth.get_user_config_dict(user_name)
+    if value is None:
+        return Storage()
+    return value
+
+def get_current_user_config(key):
+    import xauth
+    """默认值参考DEFAULT_USER_CONFIG"""
+    return get_user_config(xauth.current_name(), key)

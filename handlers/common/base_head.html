@@ -1,12 +1,20 @@
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0,user-scalable=0"/>
 {% init html_title = None %}
 {% init _user_name = None %}
+{% init FONT_SCALE = 100 %}
 {% init show_menu  = True %}
 {% init show_aside = False %}
 {% init show_search = True %}
 {% import xconfig %}
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+{% if FONT_SCALE == 80 %}
+  <meta name="viewport" content="width=device-width,initial-scale=0.8,maximum-scale=0.8,user-scalable=0"/>
+{% elif FONT_SCALE == 120 %}
+  <meta name="viewport" content="width=300,initial-scale=1.2,maximum-scale=1.2,user-scalable=0"/>
+{% else %}
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1.0,user-scalable=0"/>
+{% end %}
 
 <title>Xnote{%if html_title%} | {{T(html_title)}}{%end%}</title>
 

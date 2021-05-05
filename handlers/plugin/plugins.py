@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/05/05 11:19:59
+# @modified 2021/05/05 17:16:45
 from io import StringIO
 import xconfig
 import codecs
@@ -57,6 +57,8 @@ except ImportError:
 """
 
 PLUGIN_CATEGORY_LIST = list()
+
+CONFIG_TOOLS = list()
 
 dbutil.register_table("plugin_visit_log", "插件访问日志")
 
@@ -669,12 +671,38 @@ def reload_plugins(ctx):
     load_plugins()
 
 @xmanager.listen("sys.init")
-def init_plugins(event_type = None, ctx = None):
+@xutils.log_deco("init_plugins")
+def init_plugins(ctx = None):
+    global CONFIG_TOOLS
     parser = ConfigParser()
-    parser.read(os.path.join(xconfig.CONFIG_DIR, "plugin/plugins.ini"))
 
+    fpath = "config/plugin/plugins.ini"
+    sections = parser.read(fpath)
+
+    tmp_tools = []
     for section in parser.sections():
-        print("PLUGIN", section)
+        name = parser.get(section, "name", fallback = None)
+        icon = parser.get(section, "icon", fallback = None)
+        url  = parser.get(section, "url", fallback = None)
+        category = parser.get(section, "category", fallback = None)
+        editable = parser.getboolean(section, "editable", fallback = False)
+    
+        # 构建上下文
+        context = PluginContext()
+        context.name = name
+        context.title = name
+        context.url   = url
+        context.link  = url
+        context.editable = editable
+        context.category = category
+
+        tmp_tools.append(context)
+
+    CONFIG_TOOLS = tmp_tools
+
+    for plugin in tmp_tools:
+        print(plugin)
+
 
 
 xutils.register_func("plugin.find_plugins", find_plugins)

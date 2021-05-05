@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/05/03 17:17:28
+# @modified 2021/05/05 18:03:15
 # @filename xtemplate.py
 
 
@@ -18,7 +18,6 @@ import math
 import inspect
 import six
 import xconfig
-import xuserconfig
 import xauth
 import xutils
 from tornado.template import Template, Loader
@@ -57,7 +56,7 @@ def load_languages():
 
 def T(text, lang = None):
     if lang is None:
-        lang = xuserconfig.get_current_lang()
+        lang = xconfig.get_current_user_config("LANG")
 
     mapping = _lang_dict.get(lang)
     if mapping is None:
@@ -143,9 +142,11 @@ def render_before_kw(kw):
     kw["T"]             = T
 
     # 用户配置
-    kw["_user_config"]  = xuserconfig.get_config_dict(user_name)
-    kw["HOME_PATH"]     = xuserconfig.get_home_path(user_name)
-    kw["THEME"]         = xuserconfig.get_theme(user_name)
+    kw["_user_config"]  = xconfig.get_user_config_dict(user_name)
+    kw["FONT_SCALE"]    = xconfig.get_user_config(user_name, "FONT_SCALE")
+    kw["HOME_PATH"]     = xconfig.get_user_config(user_name, "HOME_PATH")
+    kw["THEME"]         = xconfig.get_user_config(user_name, "THEME")
+
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
 

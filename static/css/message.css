@@ -2,7 +2,7 @@
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/04/17 17:31:47
+ * @modified 2021/05/05 17:50:35
 */
 
 
@@ -107,6 +107,7 @@
 
 .input-box {
     width: 100%;
+    font-size: 14px;
     outline: none;
 }
 

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/04/17 23:22:33
+# @modified 2021/05/05 18:01:54
 
 """时光轴视图"""
 import re
@@ -10,7 +10,6 @@ import xtables
 import xtemplate
 import time
 import xconfig
-import xuserconfig
 import web
 from xutils import Storage, dateutil, textutil
 from xutils.textutil import split_words
