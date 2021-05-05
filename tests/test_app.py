@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/04/24 23:06:50
+# @modified 2021/05/05 19:46:04
 
 import sys
 import os
@@ -27,6 +27,8 @@ app          = test_base.init()
 json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
+
+SEARCH_DAO = xutils.DAO("search")
 
 def get_script_path(name):
     return os.path.join(xconfig.SCRIPTS_DIR, name)
@@ -230,6 +232,9 @@ class TestMain(BaseTestCase):
 
     def test_search_message(self):
         self.check_200("/message?key=test&category=message")
+
+        handler = SEARCH_DAO.get_search_handler("message")
+        self.assertEqual(u"搜索随手记", handler.placeholder)
 
     def test_search_mute(self):
         self.check_200(xutils.quote_unicode("/search?key=静音"))

@@ -44,6 +44,10 @@ def init():
     mgr.reload()
     # 加载template
     xtemplate.reload()
+
+    # 发送启动消息
+    xmanager.fire("sys.reload")
+
     return APP
 
 def json_request(*args, **kw):

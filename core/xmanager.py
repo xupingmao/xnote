@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/05/01 11:01:53
+# @modified 2021/05/05 19:08:52
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -691,7 +691,10 @@ def put_task(func, *args, **kw):
         # TODO 大部分是写日志的任务，日志任务单独加一个线程处理
         func_name = get_func_abs_name(func)
         xutils.warn_sync("xmanager", "task deque is full func_name=%s" % func_name)
-        func(*args, **kw)
+        try:
+            func(*args, **kw)
+        except Exception:
+            xutils.print_exc()
     else:
         WorkerThread._task_queue.append([func, args, kw])
 

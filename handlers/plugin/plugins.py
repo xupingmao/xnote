@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/05/05 17:16:45
+# @modified 2021/05/05 19:15:10
 from io import StringIO
 import xconfig
 import codecs
@@ -666,13 +666,12 @@ class PluginLogHandler:
 
 @xmanager.listen("sys.reload")
 def reload_plugins(ctx):
-    init_plugins()
+    do_reload_config_plugins()
 
     load_plugins()
 
-@xmanager.listen("sys.init")
-@xutils.log_deco("init_plugins")
-def init_plugins(ctx = None):
+@xutils.log_deco("reload_config_plugins")
+def do_reload_config_plugins(ctx = None):
     global CONFIG_TOOLS
     parser = ConfigParser()
 
@@ -699,9 +698,6 @@ def init_plugins(ctx = None):
         tmp_tools.append(context)
 
     CONFIG_TOOLS = tmp_tools
-
-    for plugin in tmp_tools:
-        print(plugin)
 
 
 

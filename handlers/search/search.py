@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/05/05 10:40:16
+# @modified 2021/05/05 19:14:10
 
 import re
 import os
@@ -370,12 +370,16 @@ def list_search_rules(user_name):
     return list
 
 
-@xmanager.listen("sys.init", is_async = False)
-@xutils.log_init_deco("init_search")
-def init_search(event_type, ctx = None):
+@xmanager.listen("sys.reload")
+def reload_search(ctx = None):
+    do_reload_search(ctx)
+
+@xutils.log_deco("reload_search")
+def do_reload_search(ctx = None):
     register_search_handler("plugin", placeholder = u"搜索插件", action = "/plugins_list")
     register_search_handler("note.public", placeholder = u"搜索公共笔记", action = "/note/timeline", tag = "public")
     register_search_handler("dict", placeholder = u"搜索词典", action = "/search")
+    register_search_handler("message", placeholder = u"搜索随手记", action = "/message")
 
 
 xutils.register_func("search.list_rules", list_search_rules)
