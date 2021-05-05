@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/04/18 11:53:33
+# @modified 2021/05/05 11:23:30
 
 '''xnote系统配置
 # 用户配置
@@ -266,7 +266,7 @@ def init(path = DATA_DIR):
     load_file_type_config()
 
     from xutils import fsutil
-    PLUGIN_TEMPLATE = fsutil.readfile("./config/template/plugin.tpl")
+    PLUGIN_TEMPLATE = fsutil.readfile("./config/plugin/plugin.tpl")
 
 def mark_started():
     global START_TIME

@@ -32,7 +32,7 @@ $(function () {
 
         var webpath = file.webpath;
         var content = 'file://$name'.replace(/\$name/g, file.webpath);
-        var inputText = '\n' + content + "\n";
+        var inputText = content;
 
         layer.close(loadingIndex);
 
@@ -81,7 +81,7 @@ $(function () {
                     xnote.uploadBlob(blob, 'msg', function (respJson) {
                         console.log(respJson);
                         var link = "file://" + respJson.webpath;
-                        app.input += '\n' + link + '\n';
+                        xnote.fire("message.upload", link);
                         layer.close(index);
                     });
                 }

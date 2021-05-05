@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/03 17:44:19
+# @modified 2021/05/04 19:56:08
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -523,6 +523,9 @@ class MessageEditHandler:
         id = xutils.get_argument("id")
         detail = MSG_DAO.get_by_id(id)
 
+        if detail.ref != None:
+            detail = MSG_DAO.get_by_id(detail.ref)
+
         return xtemplate.render("message/page/message_edit.html", 
             show_nav = False,
             detail = detail)
@@ -535,6 +538,7 @@ class CalendarHandler:
         stat = format_message_stat(stat)
 
         return xtemplate.render("message/page/calendar.html", 
+            tag = "calendar",
             show_aside = False,
             message_stat = stat,
             search_type = "message")
@@ -595,6 +599,7 @@ xurls=(
     r"/message/calendar", CalendarHandler,
     r"/message/dairy", DairyHandler,
     r"/message/todo", TodoHandler,
+    r"/message/log", MessageLogHandler,
     r"/message/done", TodoDoneHandler,
     r"/message/canceled", TodoCanceledHandler,
     r"/message/edit", MessageEditHandler,

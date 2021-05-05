@@ -1,5 +1,6 @@
-<!-- 话题选择器 -->
+<!-- 话题/标签选择器 -->
 {% include message/component/select_topic_dialog.html %}
+<!-- 文件上传 -->
 {% include message/component/message_upload.html %}
 
 
@@ -16,14 +17,6 @@
 
 <!-- 内容列表 -->
 <div class="chat-box col-md-12">
-    <!--
-    关键字通过弹窗的方式实现了，参考 show_topic_dialog.html 
-    <div class="card" v-if="messageKeywords.length != 0">
-        <div class="card-title">关键字</div>
-        <a class="tag-span" v-for="word in messageKeywords" v-bind:href="word.url">{{!word.name}}</a>
-    </div>
-    -->
-
     <div class="card toolbox btn-line-height">
         <span>工具栏</span>
         <div class="float-right">
@@ -104,7 +97,7 @@
                     <a class="smallText msg-left-op-link" v-if="message.show_reopen_btn" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">重做</a>
 
                     <!-- 通用 -->
-                    <a class="smallText msg-left-op-link" v-if="message.show_edit_btn" v-on:click="(message.editable = true) && console.log(message, messageList)" href="javascript:void(0)">编辑</a>
+                    <a class="smallText msg-left-op-link" v-if="message.show_edit_btn" v-bind:msg-id="message.id" @click="openEditDialog($event)" href="javascript:void(0)">编辑</a>
                     
                     <!-- log专用 -->
                     <a class="smallText msg-left-op-link" v-if="message.tag == 'log'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateTag($event, 'task')">转待办</a>
@@ -159,7 +152,7 @@
         placeholder = "记录自己的奇思妙想";
     }
     if (currentTag == "key") {
-        placeholder = "保存话题（关键字）";
+        placeholder = "保存话题/标签/关键字";
     }
 
     function newMessage(content, user, status) {
@@ -250,7 +243,7 @@
             refreshMessage: function () {
                 var self = this;
                 var page = getUrlParams().page || 1;
-                var tag  = getUrlParam("tag");
+                var tag  = "{{tag}}";
                 app.page = page;
                 app.page_next_url = app.page_url + (parseInt(page)+1);
                 app.page_prev_url = app.page_url + (page-1);
@@ -403,11 +396,34 @@
                 var tpl = $(".mark-dialog-tpl").html();
                 var html = tpl.replace("$id", message.id);
                 ContentDialog.open("标记为", html, "small");
+            },
+
+            openEditDialog: function (event) {
+                var id = $(event.currentTarget).attr("msg-id");
+                var editUrl = "/message/edit?id=" + id;
+                xnote.showIframeDialog("编辑", editUrl);
             }
         }
     });
 
+    function onMessageReceived(event) {
+        var data = event.data;
+        if (data == "message.updated") {
+            app.refreshMessage();
+            xnote.closeAllDialog();
+        }
+    }
+
+    function onFileUploaded(event) {
+        var inputText = event.target;
+        app.input += "\n" + inputText + "\n";
+    }
+
     app.init();
     app.refreshMessage();
+
+    xnote.on("message.upload", onFileUploaded);
+
+    window.addEventListener("message", onMessageReceived, false);
 
 </script>

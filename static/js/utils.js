@@ -436,13 +436,18 @@ Date.prototype.format = Date.prototype.format || function (format) {
 
 
 function parseUrl(src) {
+    // URL的完整格式如下
+    // 协议://用户名:密码@子域名.域名.顶级域名:端口号/目录/文件名.文件后缀?参数=值#标志
     var path = '';
     var args = {};
-    var state = 0; //  path 
+    // 0: path状态; 1: argName状态; 2: argValue状态;
+    var state = 0;
     var name = '';
     var value = '';
     for(var i = 0; i < src.length; i++) {
         var c = src[i]
+
+        // 状态判断
         if (c == '?' || c == '&') {
             state = 1; // arg name;
             if (name != '') {
@@ -455,6 +460,8 @@ function parseUrl(src) {
             value = '';
             continue;
         }
+
+        // 状态处理
         if (state == 0) {
             path += c; // path state
         } else if (state == 1) {

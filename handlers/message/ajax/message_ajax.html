@@ -14,6 +14,8 @@
             <!-- <div class="todo-user">${user}</div> -->
             <div class="row">
                 <div class="todo-time">{{item.ctime}}</div>
+                <span class="todo-tag">{{item.tag}}</span>
+
                 <div class="float-right">
                     {% if show_todo_check %}
                         <input type="checkbox" data-id="{{item.id}}" class="todo-checkbox">
@@ -27,10 +29,12 @@
 
             <div class="todo-content">{% raw item.html %}</div>
             <div class="todo-foot">
+                
                 {% if show_edit_btn %}
                     <a class="todo-edit-btn btn btn-default" 
                         data-url="/message/edit?id={{item.id}}">编辑</a>
                 {% end %}
+
                 <div class="float-right">
                     <a class="todo-delete-btn btn btn-default" data-id="{{item.id}}" data-content="{{item.content}}">删除</a>
                 </div>
@@ -42,9 +46,12 @@
 
 <script type="text/javascript">
 $(function () {
+
+    // 编辑弹窗
     $(".todo-edit-btn").click(function (e) {
         var url = $(e.target).attr("data-url");
         var layerId = xnote.showIframeDialog("编辑", url);
+        // 更新后会调用 postMessage 发送消息
     });
 
     $(".update-tag-btn").click(function (e) {
@@ -52,6 +59,7 @@ $(function () {
         var tag = $(e.target).attr("data-tag");
         console.log(id, tag);
     });
+    
 });
 </script>
 

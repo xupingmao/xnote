@@ -57,7 +57,7 @@
             function onFileUploaded(event) {
                 var inputText = event.target;
                 var oldText = $(".input-box").val();
-                var newText = oldText + inputText;
+                var newText = oldText + "\n" + inputText + "\n";
                 $(".input-box").val(newText);
             }
 

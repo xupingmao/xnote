@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/05/01 19:58:28
+# @modified 2021/05/05 11:19:59
 from io import StringIO
 import xconfig
 import codecs
@@ -19,6 +19,7 @@ import xmanager
 import xtables
 import web
 import copy
+
 from xtemplate import BasePlugin
 from xutils import History
 from xutils import cacheutil
@@ -26,6 +27,11 @@ from xutils import Storage
 from xutils import fsutil
 from xutils import logutil
 from xutils import textutil, SearchResult, dateutil, dbutil, u
+
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 
 
 """xnote插件模块，由于插件的权限较大，开发权限只开放给管理员，普通用户可以使用
@@ -293,7 +299,6 @@ INNER_TOOLS = [
     note_plugin("我的置顶", "/note/sticky", "fa-thumb-tack"),
     note_plugin("搜索历史", "/search/history", "fa-search"),
     note_plugin("导入笔记", "/note/html_importer", "fa-internet-explorer", required_role = "admin"),
-    # note_plugin("日历视图", "/note/calendar", "fa-calendar"),
     note_plugin("时间视图", "/note/date", "fa-clock-o"),
     note_plugin("数据统计", "/note/stat", "fa-bar-chart"),
     note_plugin("上传管理", "/fs_upload", "fa-upload"),
@@ -301,7 +306,7 @@ INNER_TOOLS = [
     note_plugin("回收站", "/note/removed", "fa-trash"),
     note_plugin("笔记本", "/note/group", "fa-th-large"),
     note_plugin("待办任务", "/message?tag=task", "fa-calendar-check-o"),
-    note_plugin("待办任务(开发中)", "/message/todo", "fa-calendar-check-o"),
+    note_plugin("待办任务", "/message/todo", "fa-calendar-check-o"),
     note_plugin("随手记", "/message?tag=log", "fa-file-text-o"),
     note_plugin("相册", "/note/gallery", "fa-photo"),
     note_plugin("清单", "/note/list", "fa-list"),
@@ -659,7 +664,18 @@ class PluginLogHandler:
 
 @xmanager.listen("sys.reload")
 def reload_plugins(ctx):
+    init_plugins()
+
     load_plugins()
+
+@xmanager.listen("sys.init")
+def init_plugins(event_type = None, ctx = None):
+    parser = ConfigParser()
+    parser.read(os.path.join(xconfig.CONFIG_DIR, "plugin/plugins.ini"))
+
+    for section in parser.sections():
+        print("PLUGIN", section)
+
 
 xutils.register_func("plugin.find_plugins", find_plugins)
 xutils.register_func("plugin.add_visit_log", add_visit_log)

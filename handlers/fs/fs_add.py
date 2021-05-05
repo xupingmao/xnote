@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/28 13:27:08
-# @modified 2020/10/07 17:09:47
+# @modified 2021/05/05 11:03:27
 
 """创建文件的选项背后的服务，包括创建文件、文件夹、插件等等"""
 
@@ -12,8 +12,8 @@ import xconfig
 from xutils import fsutil
 
 
-PLUGIN_TEMPLATE      = fsutil.readfile("./config/template/plugin.tpl")
-FORM_PLUGIN_TEMPLATE = fsutil.readfile("./config/template/form_plugin.tpl")
+PLUGIN_TEMPLATE      = fsutil.readfile("./config/plugin/plugin.tpl")
+FORM_PLUGIN_TEMPLATE = fsutil.readfile("./config/plugin/form_plugin.tpl")
 
 class BaseAddFileHandler:
 

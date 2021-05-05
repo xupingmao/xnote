@@ -8,7 +8,7 @@
     {% include message/component/message_upload.html %}
 
     {% init tag = "todo" %}
-    {% init title = "待办任务" %}
+    {% init title = "随手记" %}
     {% init show_input_box = True %}
 
     <div class="card">
@@ -24,7 +24,7 @@
         <div class="card">
             <!-- 编辑器 -->
             <div class="card">
-                <textarea class="col-md-12 input-box" placeholder="请输入待办任务..."></textarea>
+                <textarea class="col-md-12 input-box" placeholder="请输入记事..."></textarea>
 
                 <input type="file" id="filePicker" class="hide" multiple/>
 
@@ -32,27 +32,6 @@
                 <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
                 <input type="button" id="createTodoBtn" class="send-button btn" value="创建">
             </div>
-        </div>
-    {% end %}
-
-    {% if tag == "todo" %}
-        <div class="card">
-            <a class="list-link" href="/message/done">
-                <span>已完成任务</span>
-                <div class="float-right">
-                    <span class="book-size-span">{{message_stat.done_count}}</span>
-                    <i class="fa fa-chevron-right"></i>
-                </div>
-            </a>
-
-            <a class="list-link" href="/message/canceled">
-                <span>已取消任务</span>
-                <div class="float-right">
-                    <span class="book-size-span">{{message_stat.canceled_count}}</span>
-                    <i class="fa fa-chevron-right"></i>
-                </div>
-            </a>
-
         </div>
     {% end %}
 
@@ -86,7 +65,7 @@
             function onFileUploaded(event) {
                 var inputText = event.target;
                 var oldText = $(".input-box").val();
-                var newText = oldText + "\n" + inputText + "\n";
+                var newText = oldText + inputText;
                 $(".input-box").val(newText);
             }
 
@@ -117,7 +96,7 @@
                 $.post("/message/save", 
                     {
                         content:content, 
-                        tag: "task"
+                        tag: "{{tag}}"
                     },
                     function (respText) {
                         var data = respText;

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/04/25 12:15:32
+# @modified 2021/05/05 10:48:07
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -44,6 +44,7 @@ import logging.handlers
 FS_IMG_EXT_LIST = None
 FS_TEXT_EXT_LIST = None
 FS_AUDIO_EXT_LIST = None
+FS_CODE_EXT_LIST = None
 IS_TEST = False
 
 #################################################################
@@ -116,31 +117,32 @@ class SearchResult(dict):
 ##   @see fsutil
 #################################################################
 
-def is_img_file(filename):
+def do_check_file_type(filename, target_set):
     """根据文件后缀判断是否是图片"""
     if filename.endswith(".x0"):
         filename = fsutil.decode_name(filename)
     name, ext = os.path.splitext(filename)
-    return ext.lower() in FS_IMG_EXT_LIST
+    return ext.lower() in target_set
+
+def is_img_file(filename):
+    """根据文件后缀判断是否是图片"""
+    return do_check_file_type(filename, FS_IMG_EXT_LIST)
 
 def is_text_file(filename):
     """根据文件后缀判断是否是文本文件"""
-    if filename.endswith(".x0"):
-        filename = fsutil.decode_name(filename)
-    name, ext = os.path.splitext(filename)
-    return ext.lower() in FS_TEXT_EXT_LIST
+    return do_check_file_type(filename, FS_TEXT_EXT_LIST)
 
 def is_audio_file(filename):
-    if filename.endswith(".x0"):
-        filename = fsutil.decode_name(filename)
-    name, ext = os.path.splitext(filename)
-    return ext.lower() in FS_AUDIO_EXT_LIST
+    return do_check_file_type(filename, FS_AUDIO_EXT_LIST)
+
+def is_code_file(filename):
+    return do_check_file_type(filename, FS_CODE_EXT_LIST)
 
 def get_text_ext():
     return FS_TEXT_EXT_LIST
 
 def is_editable(fpath):
-    return is_text_file(fpath)
+    return is_text_file(fpath) or is_code_file(fpath)
 
 def attrget(obj, attr, default_value = None):
     if hasattr(obj, attr):
@@ -375,10 +377,12 @@ def init(xconfig):
     global FS_IMG_EXT_LIST
     global FS_TEXT_EXT_LIST
     global FS_AUDIO_EXT_LIST
+    global FS_CODE_EXT_LIST
     global IS_TEST
 
     FS_TEXT_EXT_LIST = xconfig.FS_TEXT_EXT_LIST
     FS_IMG_EXT_LIST = xconfig.FS_IMG_EXT_LIST
     FS_AUDIO_EXT_LIST = xconfig.FS_AUDIO_EXT_LIST
+    FS_CODE_EXT_LIST  = xconfig.FS_CODE_EXT_LIST
     IS_TEST = xconfig.IS_TEST
 

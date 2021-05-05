@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/05/03 23:51:53
+# @modified 2021/05/05 10:40:16
 
 import re
 import os
@@ -189,7 +189,8 @@ class SearchHandler:
         # 阻断性的搜索，比如特定语法的
         xmanager.fire("search.before", ctx)
         if ctx.stop:
-            return ctx.join_as_files()
+            files = ctx.join_as_files()
+            return files, len(files)
 
         # 普通的搜索行为
         xmanager.fire("search", ctx)
@@ -197,7 +198,8 @@ class SearchHandler:
         ctx.files = apply_search_rules(ctx, key)
 
         if ctx.stop:
-            return ctx.join_as_files()
+            files = ctx.join_as_files()
+            return files, len(files)
 
         # 慢搜索,如果时间过长,这个服务会被降级
         xmanager.fire("search.slow", ctx)
@@ -224,6 +226,7 @@ class SearchHandler:
 
         if category is None:
             category = search_type
+
         log_search_history(user_name, key, category, cost_time)
 
         return result
@@ -284,7 +287,7 @@ class SearchHandler:
         elif search_type == "task":
             return self.do_search_task(ctx, key)
         else:
-            return []
+            raise Exception("不支持的搜索类型:%s" % search_type)
 
     def GET(self, path_key = None):
         """search files by name and content"""
@@ -368,6 +371,7 @@ def list_search_rules(user_name):
 
 
 @xmanager.listen("sys.init", is_async = False)
+@xutils.log_init_deco("init_search")
 def init_search(event_type, ctx = None):
     register_search_handler("plugin", placeholder = u"搜索插件", action = "/plugins_list")
     register_search_handler("note.public", placeholder = u"搜索公共笔记", action = "/note/timeline", tag = "public")

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2021/02/20 12:02:30
+# @modified 2021/05/05 10:48:55
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -432,7 +432,7 @@ class RenameAjaxHandler:
         xmanager.fire("fs.rename", Storage(user = user_name, path = new_path, new_path = new_path, old_path = old_path))
         return dict(code="success")
 
-class CutHandler:
+class CutAjaxHandler:
 
     @xauth.login_required("admin")
     def POST(self):
@@ -446,7 +446,7 @@ class CutHandler:
         return self.POST()
 
 
-class PasteHandler:
+class PasteAjaxHandler:
 
     @xauth.login_required("admin")
     def POST(self):
@@ -465,7 +465,7 @@ class PasteHandler:
             xutils.listremove(xconfig.FS_CLIP, old_path)
         return dict(code="success")
 
-class ClearClipHandler:
+class ClearClipAjaxHandler:
 
     @xauth.login_required("admin")
     def POST(self):
@@ -544,7 +544,7 @@ class ViewHandler:
         if ext == ".db":
             raise web.found("/tools/sql?path=%s" % encoded_fpath)
 
-        if xutils.is_text_file(fpath):
+        if xutils.is_text_file(fpath) or xutils.is_code_file(fpath):
             raise web.found("/code/edit?path=%s" % encoded_fpath)
 
         raise web.found("/fs/%s" % encoded_fpath)
@@ -638,15 +638,17 @@ xurls = (
     r"/fs_edit",   EditHandler,
     r"/fs_view",   ViewHandler,
     r"/fs_text",   TextHandler,
-    r"/fs_api/remove", RemoveAjaxHandler,
-    r"/fs_api/rename", RenameAjaxHandler,
-    r"/fs_api/cut", CutHandler,
-    r"/fs_api/paste", PasteHandler,
-    r"/fs_api/clear_clip", ClearClipHandler,
-    r"/fs_api/bookmark", BookmarkAjaxHandler,
-    r"/fs_api/list", ListAjaxHandler,
     r"/fs_link/(.*)", LinkHandler,
     r"/fs_recent", RecentHandler,
+
+    # Ajax服务
+    r"/fs_api/remove", RemoveAjaxHandler,
+    r"/fs_api/rename", RenameAjaxHandler,
+    r"/fs_api/cut",   CutAjaxHandler,
+    r"/fs_api/paste", PasteAjaxHandler,
+    r"/fs_api/clear_clip", ClearClipAjaxHandler,
+    r"/fs_api/bookmark", BookmarkAjaxHandler,
+    r"/fs_api/list", ListAjaxHandler,
 
     r"/fs_list/?",   UserHomeHandler,
     r"/fs_bookmark", BookmarkHandler,

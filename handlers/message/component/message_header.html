@@ -1,4 +1,5 @@
 {% init title = "随手记" %}
+{% init tag = "log" %}
 
 <!-- header.html -->
 <div class="card">    
@@ -36,19 +37,26 @@
 
 <!-- 移动端菜单 -->
 <div class="col-md-12 message-status card mobile-only parent-6">
-    <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">待办</a>
-    <a class="tab tab-link x-tab" href="/message?tag=done" data-tag="done">完成</a>
     <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">记事</a>
     <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">话题</a>
     <a class="tab tab-link x-tab" href="/message?tag=file" data-tag="file">文件</a>
     <a class="tab tab-link x-tab" href="/message?tag=link" data-tag="link">链接</a>
+    <a class="tab tab-link x-tab" href="/message?tag=book" data-tag="book">书籍</a>
     <a class="tab tab-link x-tab" href="/message/calendar">日期</a>
     <!-- <button class="float-right">新建</button> -->
 </div>
 
 <script type="text/javascript">
 $(function() {
-    var tag = getUrlParam("tag");
+    function isEmpty(value) {
+        return value === "" || value === undefined || value === null
+    }
+
+    var tag = "{{tag}}";
+    if (isEmpty(tag)) {
+        tag = "log";
+    }  
+
     $("[data-tag=" + tag + "]").addClass("tab-link-active");
 });
 </script>
