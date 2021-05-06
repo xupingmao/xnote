@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/06 23:05:58
+# @modified 2021/05/06 23:21:20
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -482,7 +482,10 @@ class DateAjaxHandler:
         msg_list = MSG_DAO.list_by_date(user_name, date)
         parser = MessageListParser(msg_list)
         parser.parse()
-        return dict(code="success", data = msg_list)
+
+        # return dict(code="success", data = msg_list)
+        return xtemplate.render("message/ajax/message_ajax.html", 
+            page = 0, item_list = msg_list)
 
 def filter_key(key):
     if key == None or key == "":

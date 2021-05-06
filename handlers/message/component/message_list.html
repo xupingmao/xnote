@@ -14,75 +14,41 @@
     <div class="card-title">
         <span>随手记</span>
     </div>
+</div>
 
-    <div class="message-list">
+<div class="message-list">
 
-    </div>
 </div>
 
 <script type="text/javascript">
 (function () {
-    /**
-     * 简单的模板渲染，这里假设传进来的参数已经进行了html转义
-     */
-    function renderTemplate(templateText, object) {
-        return templateText.replace(/\$\{(.*?)\}/g, function (context, objKey) {
-            return object[objKey.trim()] || '';
-        });
-    }
 
-    function wrapMessage(message) {
-        // 默认值
-        message.editable = false;
-        message.show_edit_btn = true;
-        message.show_reopen_btn = false;
-        message.show_del_btn = true;
-
-        if (message.tag == "done") {
-            message.show_reopen_btn = true;
-        }
-
-        if (message.ref != undefined) {
-            message.show_edit_btn = false;
-            message.show_reopen_btn = false;
-        }
-
-        return message;
-    }
+    var LAST_DATE;
 
     function refreshMessageList(date) {
+        LAST_DATE = date;
         var params = {
             date: date
         };
 
-        // 清空消息列表
-        $(".message-list").empty();
-        $.get("/message/date", 
-            params,
-            function (respText) {
-                var data = respText;
-                if (data.code == "success") {
-                    var messageList = [];
-                    var templateText = $(".message-list-item-tpl").html();
-                    data.data.forEach(function (item, index) {
-                        // console.log(item, index);
-                        item = wrapMessage(item);
-                        $(".message-list").append(renderTemplate(templateText, item));
-                    });
-
-                    if (data.data.length == 0) {
-                        var item = {"html": "空空如也~"};
-                        item = wrapMessage(item);
-                        $(".message-list").append(renderTemplate(templateText, item));
-                    }
-
-                    // console.log(messageList);
-                }
+        $.get("/message/date", params,function (respText) {
+            $(".message-list").html(respText);
+        }).fail(function (e) {
+            console.error(e);
+            xnote.alert("调用接口失败");
         });
     };
 
-    window.refreshMessageList = refreshMessageList;
+    function onMessageReceived(event) {
+        var data = event.data;
+        if (data == "message.updated") {
+            xnote.closeAllDialog();
+            refreshMessageList(LAST_DATE);
+        }
+    }
 
-    // refreshMessageList();
+    window.refreshMessageList = refreshMessageList;
+    window.addEventListener("message", onMessageReceived, false);
+
 })();
 </script>

@@ -21,17 +21,15 @@
     </div>
 
     {% if show_input_box %}
+        <!-- 编辑器 -->
         <div class="card">
-            <!-- 编辑器 -->
-            <div class="card">
-                <textarea class="col-md-12 input-box" placeholder="请输入待办任务..."></textarea>
+            <textarea class="col-md-12 input-box" placeholder="请输入待办任务..."></textarea>
 
-                <input type="file" id="filePicker" class="hide" multiple/>
+            <input type="file" id="filePicker" class="hide" multiple/>
 
-                <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#话题">
-                <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
-                <input type="button" id="createTodoBtn" class="send-button btn" value="创建">
-            </div>
+            <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#话题">
+            <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
+            <input type="button" id="createTodoBtn" class="send-button btn" value="创建">
         </div>
     {% end %}
 
