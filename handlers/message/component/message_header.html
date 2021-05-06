@@ -17,7 +17,7 @@
     <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">
         待办(<span class="task-count">{{message_stat.task_count}}</span>)
     </a>
-    <a class="tab tab-link x-tab" href="/message?tag=done" data-tag="done">
+    <a class="tab tab-link x-tab hide" href="/message?tag=done" data-tag="done">
         完成(<span class="done-count">{{message_stat.done_count}}</span>)
     </a>
     <a class="tab tab-link x-tab mobile-hidden" href="/message?tag=log" data-tag="log">
@@ -37,6 +37,7 @@
 
 <!-- 移动端菜单 -->
 <div class="col-md-12 message-status card mobile-only parent-6">
+    <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">待办</a>
     <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">记事</a>
     <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">话题</a>
     <a class="tab tab-link x-tab" href="/message?tag=file" data-tag="file">文件</a>

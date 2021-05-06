@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/05/05 18:01:39
+# @modified 2021/05/06 23:00:20
 import math
 import time
 import web
@@ -163,7 +163,7 @@ class GroupListHandler:
         category  = xutils.get_argument("category")
         user_name = xauth.current_name()
         notes     = NOTE_DAO.list_group(user_name, orderby = "name")
-        sticky_groups   = list(filter(lambda x:x.priority > 0, notes))
+        sticky_groups   = list(filter(lambda x: x.priority > 0, notes))
         archived_groups = list(filter(lambda x: x.archived == True, notes))
         normal_groups   = list(filter(lambda x: x not in archived_groups and x not in sticky_groups, notes))
 
@@ -188,12 +188,13 @@ class GroupListHandler:
         files = fixed_books + normal_groups
         root  = NOTE_DAO.get_root()
 
-        group_cards = [
-            ("", fixed_books),
-            ("置顶", sticky_groups),
-            ("笔记本", normal_groups),
-            ("归档", archived_groups),
-        ]
+        group_cards = []
+        group_cards.append(("", fixed_books))
+
+        if len(sticky_groups) > 0:
+            group_cards.append(("置顶", sticky_groups))
+
+        group_cards.append(("笔记本", normal_groups))
 
         return xtemplate.render("note/page/group_list.html", 
             file = root, 

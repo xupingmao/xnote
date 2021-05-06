@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/05/01 17:45:35
+# @modified 2021/05/06 23:03:25
 
 import sys
 import os
@@ -66,6 +66,8 @@ class TestMain(BaseTestCase):
         json_request("/message/list?tag=todo")
         # search
         json_request("/message/list?key=1")
+
+        self.check_OK("/message/list?format=html")
 
     def test_message_finish(self):
         response = json_request("/message/save", method="POST", data=dict(content="Xnote-Unit-Test", tag="task"))

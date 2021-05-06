@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/04 19:56:08
+# @modified 2021/05/06 23:05:58
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -185,6 +185,30 @@ class MessageListParser(object):
 
 class ListAjaxHandler:
 
+    def do_get_html(self, chatlist, page, page_max, tag = "task"):
+        show_todo_check = False
+        show_edit_btn   = True
+        show_to_log_btn = False
+
+        if tag == "todo":
+            show_todo_check = True
+            show_to_log_btn = True
+
+        if tag == "done":
+            show_to_log_btn = True
+
+        if tag == "key":
+            show_edit_btn = False
+
+        return xtemplate.render("message/ajax/message_ajax.html", 
+            show_todo_check = show_todo_check,
+            show_edit_btn = show_edit_btn,
+            show_to_log_btn = show_to_log_btn,
+            page = page,
+            page_max = page_max,
+            item_list = chatlist)
+
+
     @xauth.login_required()
     def GET(self):
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
@@ -225,16 +249,7 @@ class ListAjaxHandler:
         chatlist = parser.get_message_list()
 
         if format == "html":
-            show_todo_check = False
-
-            if tag == "todo":
-                show_todo_check = True
-
-            return xtemplate.render("message/ajax/message_ajax.html", 
-                show_todo_check = show_todo_check,
-                page = page,
-                page_max = page_max,
-                item_list = chatlist)
+            return self.do_get_html(chatlist, page, page_max, tag)
 
         return dict(code="success", message = "", 
             data   = chatlist, 

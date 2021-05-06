@@ -1,6 +1,7 @@
 {% init item_list = [] %}
 {% init show_todo_check = False %}
 {% init show_edit_btn   = True %}
+{% init show_to_log_btn = False %}
 
 {% if len(item_list) == 0 %}
     <div class="card">
@@ -35,6 +36,11 @@
                         data-url="/message/edit?id={{item.id}}">编辑</a>
                 {% end %}
 
+                {% if show_to_log_btn and item.content != "" %}
+                    <a class="update-tag-btn btn btn-default" data-id="{{item.id}}" data-tag="log">转记事</a>
+                {% end %}
+
+
                 <div class="float-right">
                     <a class="todo-delete-btn btn btn-default" data-id="{{item.id}}" data-content="{{item.content}}">删除</a>
                 </div>
@@ -58,6 +64,14 @@ $(function () {
         var id = $(e.target).attr("data-id");
         var tag = $(e.target).attr("data-tag");
         console.log(id, tag);
+
+        $.post("/message/tag", {id: id, tag: tag}, function (resp) {
+            if (resp.code == "success") {
+                xnote.fire("message.refresh");
+            } else {
+                xnote.alert(data.message);
+            }
+        });
     });
     
 });
