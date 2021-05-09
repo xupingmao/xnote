@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/05/05 19:14:10
+# @modified 2021/05/08 21:01:43
 
 import re
 import os
@@ -380,6 +380,7 @@ def do_reload_search(ctx = None):
     register_search_handler("note.public", placeholder = u"搜索公共笔记", action = "/note/timeline", tag = "public")
     register_search_handler("dict", placeholder = u"搜索词典", action = "/search")
     register_search_handler("message", placeholder = u"搜索随手记", action = "/message")
+    register_search_handler("task", placeholder = u"搜索待办", action = "/search")
 
 
 xutils.register_func("search.list_rules", list_search_rules)

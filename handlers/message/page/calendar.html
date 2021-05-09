@@ -195,6 +195,8 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     "10-01": "国庆节"
   }
 
+  var SHOW_BODY = false;
+
   var getHolidayInfo = function (date) {
     var monthDay = getMonthDayStr(date);
     return HOLIDAY_MAP[monthDay];
@@ -214,31 +216,9 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
       }
     };
   })();
- 
-  // 设置calendar div中的html部分
-  renderHtml();
-  // 表格中显示日期
-  showCalendarData();
-  // 绑定事件
-  bindEvent();
- 
-  /**
-   * 渲染html结构
-   */
-  function renderHtml() {
-    var calendar = document.getElementById("calendar");
-    var titleBox = document.createElement("div");  // 标题盒子 设置上一月 下一月 标题
+
+  function buildBodyBox() {
     var bodyBox = document.createElement("div");  // 表格区 显示数据
- 
-    // 设置标题盒子中的html
-    titleBox.className = 'calendar-title-box';
-    titleBox.innerHTML = '<a id="prevMonth" class="prev-month2" href="javascript:void();">上个月</a>' +
-    // "<span class='prev-month2 span-btn' id='prevMonth'>上个月</span>" +
-      "<span class='calendar-title' id='calendarTitle'></span>" +
-      // "<span id='nextMonth' class='next-month2 span-btn'>下个月</span>";
-      '<a id="nextMonth" class="next-month2" href="javascript:void();">下个月</a>';
-    calendar.appendChild(titleBox);    // 添加到calendar div中
- 
     // 设置表格区的html结构
     bodyBox.className = 'calendar-body-box';
     var _headHtml = "<tr>" + 
@@ -268,8 +248,30 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
               _headHtml + _bodyHtml +
               "</table>";
     // 添加到calendar div中
-    calendar.appendChild(bodyBox);
-
+    return bodyBox;
+  }
+ 
+  /**
+   * 渲染html结构
+   */
+  function renderHtml() {
+    var calendar = document.getElementById("calendar");
+    var titleBox = document.createElement("div");  // 标题盒子 设置上一月 下一月 标题
+    
+ 
+    // 设置标题盒子中的html
+    titleBox.className = 'calendar-title-box';
+    titleBox.innerHTML = '<a id="prevMonth" class="prev-month2">上个月</a>' +
+    // "<span class='prev-month2 span-btn' id='prevMonth'>上个月</span>" +
+      "<span class='calendar-title' id='calendarTitle'></span>" +
+      // "<span id='nextMonth' class='next-month2 span-btn'>下个月</span>";
+      '<a id="nextMonth" class="next-month2">下个月</a>';
+    calendar.appendChild(titleBox);    // 添加到calendar div中
+ 
+    if (SHOW_BODY) {
+      var bodyBox = buildBodyBox();
+      calendar.appendChild(bodyBox);
+    }
     // 展开收起选项
   }
 
@@ -306,6 +308,7 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
       }
     }
     html += '</select>';
+    html += '&nbsp;';
     html += '<select id="monthSelect" name="month">'
     for (var j = 1; j <= 12; j++) {
       if (j == month) {
@@ -318,19 +321,7 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     return html;
   }
 
-  /**
-   * 表格中显示数据，并设置类名
-   */
-  function showCalendarData() {
-    var _year = dateObj.getDate().getFullYear();
-    var _month = dateObj.getDate().getMonth() + 1;
-    var _dateStr = getDateStr(dateObj.getDate());
- 
-    // 设置顶部标题栏中的 年、月信息
-    var calendarTitle = document.getElementById("calendarTitle");
-    var titleStr = _year + "年" + _month + "月";
-    calendarTitle.innerHTML = createCalendarTitle(_year, _month);
- 
+  function showCalendarBody(_year, _month) {
     // 设置表格中的日期数据
     var _table = document.getElementById("calendarTable");
     var _tds = _table.getElementsByTagName("td");
@@ -351,7 +342,25 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
         _tds[i].className = 'otherMonth';
       }
     }
+  }
 
+  /**
+   * 表格中显示数据，并设置类名
+   */
+  function showCalendarData() {
+    var _year = dateObj.getDate().getFullYear();
+    var _month = dateObj.getDate().getMonth() + 1;
+    var _dateStr = getDateStr(dateObj.getDate());
+ 
+    // 设置顶部标题栏中的 年、月信息
+    var calendarTitle = document.getElementById("calendarTitle");
+    var titleStr = _year + "年" + _month + "月";
+    calendarTitle.innerHTML = createCalendarTitle(_year, _month);
+
+    if (SHOW_BODY) {
+      showCalendarBody(_year, _month);
+    }
+ 
     var yearMonth = formatYearMonth(_year, _month);
 
     // 更新到hash
@@ -458,6 +467,15 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     $(".calendarDate").val(selectedDate);
     $("#newFeedDate").val(selectedDate);
   });
+
+
+ 
+  // 设置calendar div中的html部分
+  renderHtml();
+  // 表格中显示日期
+  showCalendarData();
+  // 绑定事件
+  bindEvent();
 
   // 修改日历
   $("body").on("change", "select", function (e) {

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/06 23:21:20
+# @modified 2021/05/08 21:21:56
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -610,7 +610,7 @@ class TodoCanceledHandler(TodoHandler):
         return self.do_get("canceled", "已取消任务", show_input_box = False)
 
 xutils.register_func("message.process_message", process_message)
-xutils.register_func("url:/message?tag=log", MessageLogHandler)
+xutils.register_func("url:/message/log", MessageLogHandler)
 
 xurls=(
     r"/message", MessageHandler,

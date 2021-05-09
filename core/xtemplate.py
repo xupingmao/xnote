@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/05/05 18:03:15
+# @modified 2021/05/09 19:22:22
 # @filename xtemplate.py
 
 
@@ -207,7 +207,7 @@ def render_search(kw):
     search_type        = kw.get("search_type")
     search_tag         = kw.get("search_tag", "")
     search_action      = "/search"
-    search_placeholder = u"搜索笔记"
+    search_placeholder = u"综合搜索"
 
     if search_type != None:
         handler = SEARCH_DAO.get_search_handler(search_type)
