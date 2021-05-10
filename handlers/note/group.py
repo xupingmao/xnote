@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/05/06 23:00:20
+# @modified 2021/05/10 23:56:11
 import math
 import time
 import web
@@ -205,7 +205,7 @@ class GroupListHandler:
             parent_id = 0,
             files = files,
             group_cards = group_cards,
-            search_type = "note")
+            search_type = "default")
 
 def load_note_index(user_name):
     msg_stat  = MSG_DAO.get_message_stat(user_name)

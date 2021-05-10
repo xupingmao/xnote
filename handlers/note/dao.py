@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/05/01 11:23:10
+# @modified 2021/05/11 00:03:53
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -896,7 +896,7 @@ def list_recent_created(creator = None, offset = 0, limit = 10, skip_archived = 
         user = "public"
     return list_note_by_log("note_create_log", creator, offset, limit)
 
-def list_note_by_log(log_prefix, creator, offset = 0, limit = -1, skip_deleted = False):
+def list_note_by_log(log_prefix, creator, offset = 0, limit = -1, skip_deleted = True):
     """通过日志来查询笔记列表
     @param {string} log_prefix 日志表前缀
     @param {string} creator 用户名称
@@ -934,7 +934,7 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
     return list_note_by_log("note_visit_log", creator, offset, limit)
 
 @xutils.timeit(name = "NoteDao.ListRecentEdit:leveldb", logfile = True, logargs = True)
-def list_recent_edit(creator = None, offset = 0, limit = None, skip_deleted = False):
+def list_recent_edit(creator = None, offset = 0, limit = None, skip_deleted = True):
     """通过KV存储实现"""
     if limit is None:
         limit = xconfig.PAGE_SIZE

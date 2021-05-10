@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/05/09 19:22:22
+# @modified 2021/05/10 23:54:10
 # @filename xtemplate.py
 
 
@@ -204,21 +204,11 @@ def render_search(kw):
     if "search_action" in kw:
         return
 
-    search_type        = kw.get("search_type")
-    search_tag         = kw.get("search_tag", "")
-    search_action      = "/search"
-    search_placeholder = u"综合搜索"
-
-    if search_type != None:
-        handler = SEARCH_DAO.get_search_handler(search_type)
-        if handler != None:
-            search_action      = handler.action
-            search_tag         = handler.tag
-            search_placeholder = handler.placeholder
-
-    kw["search_action"] = search_action
-    kw["search_placeholder"] = search_placeholder
-    kw["search_tag"] = search_tag
+    search_type = kw.get("search_type")
+    handler = SEARCH_DAO.get_search_handler(search_type)
+    kw["search_action"] = handler.action
+    kw["search_placeholder"] = handler.placeholder
+    kw["search_tag"] = handler.tag
     
 
 def do_render_kw(kw):

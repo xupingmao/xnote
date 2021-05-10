@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/05/08 21:01:43
+# @modified 2021/05/10 23:56:41
 
 import re
 import os
@@ -43,7 +43,12 @@ def register_search_handler(search_type, placeholder = None, action = None, tag 
     )
 
 def get_search_handler(search_type):
-    return SEARCH_TYPE_DICT.get(search_type)
+    handler = SEARCH_TYPE_DICT.get(search_type)
+    if handler != None:
+        return handler
+
+    return SEARCH_TYPE_DICT.get("default")
+
 
 
 class BaseRule:
@@ -183,7 +188,7 @@ class SearchHandler:
         ctx        = build_search_context(user_name, category, key)
 
         # 优先使用 search_type
-        if search_type != None and search_type != "":
+        if search_type != None and search_type != "" and search_type != "default":
             return self.do_search_by_type(page_ctx, key, search_type)
         
         # 阻断性的搜索，比如特定语法的
@@ -381,6 +386,8 @@ def do_reload_search(ctx = None):
     register_search_handler("dict", placeholder = u"搜索词典", action = "/search")
     register_search_handler("message", placeholder = u"搜索随手记", action = "/message")
     register_search_handler("task", placeholder = u"搜索待办", action = "/search")
+    register_search_handler("note", placeholder = u"搜索笔记", action = "/search")
+    register_search_handler("default", placeholder = u"综合搜索", action = "/search")
 
 
 xutils.register_func("search.list_rules", list_search_rules)

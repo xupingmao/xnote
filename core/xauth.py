@@ -20,7 +20,7 @@ dbutil.register_table("user_session_rel", "用户会话关系")
 _users = None
 NAME_LENGTH_MIN = 4
 INVALID_NAMES = fsutil.load_set_config("./config/user/invalid_names.list")
-MAX_SESSION_SIZE = 10
+MAX_SESSION_SIZE = 20
 SESSION_EXPIRE = 24 * 3600 * 7
 PRINT_DEBUG_LOG = False
 
@@ -145,6 +145,7 @@ def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = None):
     session_id_list = list_user_session_id(user_name)
 
     if len(session_id_list) > MAX_SESSION_SIZE:
+        # TODO 踢出最早的登录
         raise Exception("user login too many devices: %s" % user_name)
 
     # 保存用户和会话关系
