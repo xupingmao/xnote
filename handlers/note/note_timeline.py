@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/05/05 18:01:54
+# @modified 2021/05/16 23:45:42
 
 """时光轴视图"""
 import re
@@ -523,7 +523,7 @@ class DateHandler:
             year          = year,
             month         = month,
             notes_by_date = notes_by_date,
-            search_type   = "note")
+            search_type   = "default")
 
 xutils.register_func("note.build_date_result", build_date_result)
 xutils.register_func("url:/note/date", DateHandler)

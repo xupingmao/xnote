@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/05/03 17:32:52
+# @modified 2021/05/16 23:17:29
 import xutils
 import xconfig
 import xmanager
@@ -13,7 +13,7 @@ from xtemplate import T
 
 dbutil.register_table("message", "短文本")
 dbutil.register_table("msg_search_history", "备忘搜索历史")
-dbutil.register_table("msg_key", "备忘搜索关键字")
+dbutil.register_table("msg_key", "备忘关键字/标签")
 dbutil.register_table("msg_history", "备忘历史")
 dbutil.register_table("user_stat", "用户数据统计")
 

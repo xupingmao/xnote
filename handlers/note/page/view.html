@@ -32,7 +32,7 @@
 
     <!-- comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 -->
     {% if file_type == "group" %}
-        {% include note/editor/note_list.html %}
+        {% include note/editor/view_group.html %}
     {% elif file_type in ("md", "text", "log", "plan") %}
         {% include note/editor/markdown.html %}
     {% elif file_type == "csv" %}

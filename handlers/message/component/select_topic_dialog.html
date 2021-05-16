@@ -4,10 +4,22 @@ $(function () {
     // xnote.showDialog(title, html);
 
     $(".select-topic-btn").click(function () {
+
+        function createTopicText(topic) {
+            if (topic.Get(0) == '#' && topic.Get(-1) == '#') {
+                return topic;
+            } else {
+                return '#' + topic + '#';
+            }
+        }
+
         window.topic_dialog_tag_click = function (target) {
             var topic = $(target).text();
             var oldText = $(".input-box").val();
-            $(".input-box").val("#" + topic + "# " + oldText);
+
+            var topicText = createTopicText(topic);
+
+            $(".input-box").val(topicText + " " + oldText);
             layer.close(dialogIndex);
         };
 

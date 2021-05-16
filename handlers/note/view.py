@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/05/01 11:30:53
+# @modified 2021/05/16 23:43:49
 import profile
 import math
 import re
@@ -102,13 +102,15 @@ def view_group_func_old(file, kw):
     else:
         orderby = file.orderby
 
+    orderby = "ctime_priority"
+
     files  = NOTE_DAO.list_by_parent(user_name, file.id, (page-1)*pagesize, pagesize, orderby)
     amount             = file.size
     kw.content         = file.content
     kw.show_search_div = True
     kw.show_add_file   = True
     kw.show_aside      = False
-    kw.show_pagination = False
+    kw.show_pagination = True
     kw.files           = files
     kw.show_parent_link = False
     kw.page_max        = math.ceil(amount/pagesize)
@@ -122,8 +124,8 @@ def view_list_func(note, kw):
     kw.comment_title = T("清单项")
 
 VIEW_FUNC_DICT = {
-    "group": view_group_func,
-    # "group": view_group_func_old,
+    # "group": view_group_func,
+    "group": view_group_func_old,
     "md"  : view_md_func,
     "text": view_md_func,
     "memo": view_md_func,
@@ -152,6 +154,21 @@ def find_note_for_view(token, id, name):
         note.adate = note.atime.split(" ")[0]
     return note
 
+def create_view_kw():
+    kw = Storage()
+    kw.show_left   = False
+    kw.show_groups = False
+    kw.show_aside  = True
+    kw.groups      = []
+    kw.files       = []
+    kw.show_mdate  = False
+    kw.recommended_notes = []
+    kw.show_add_file     = False
+    kw.template_name     = "note/page/view.html"
+    kw.search_type       = "note"
+
+    return kw
+
 class ViewHandler:
 
     @xutils.timeit(name = "Note.View", logfile = True)
@@ -169,21 +186,13 @@ class ViewHandler:
         user_name     = xauth.current_name()
         skey          = xutils.get_argument("skey")
 
-        kw             = Storage()
-        kw.show_left   = False
-        kw.show_groups = False
-        kw.show_aside  = True
-        kw.groups      = []
-        kw.files       = []
+        kw = create_view_kw()
+
         kw.op          = op
         kw.user_name   = user_name
         kw.page        = page
         kw.orderby     = orderby
         kw.pagesize    = pagesize
-        kw.recommended_notes = []
-        kw.show_add_file     = False
-        kw.template_name     = "note/page/view.html"
-        kw.search_type       = "note"
 
         # print("skey:", skey)
 
@@ -210,7 +219,6 @@ class ViewHandler:
         role            = xauth.get_current_role()
 
         # 定义一些变量
-        show_mdate     = False
         recent_created = []
         show_recommend = False
         next_note      = None
@@ -244,7 +252,6 @@ class ViewHandler:
             html_title    = file.name,
             file          = file, 
             note_id       = id,
-            show_mdate    = show_mdate,
             can_edit = can_edit,
             pathlist = pathlist,
             page_url = "/note/view?id=%s&orderby=%s&page=" % (id, orderby),

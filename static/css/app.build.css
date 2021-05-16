@@ -2294,7 +2294,7 @@ li.menu-item:hover {
  * description here
  * @author xupingmao
  * @since 2021/05/01 15:36:08
- * @modified 2021/05/06 22:22:59
+ * @modified 2021/05/16 23:15:44
  * @filename todo.css
  */
 
@@ -2311,11 +2311,12 @@ li.menu-item:hover {
 
 .todo-content {
     padding-bottom: 10px;
+    word-break: break-all;
 }
 
 .todo-tag {
     padding: 5px;
-    /*border-radius: 3px;*/
+    border-radius: 3px;
     background: #ccc;
     color: white;
 }

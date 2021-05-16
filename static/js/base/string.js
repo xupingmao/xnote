@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2017/08/16
-// @modified 2020/07/04 16:40:55
+// @modified 2021/05/16 23:28:03
 
 //////////////////////////////////////////////////////
 // String 增强
@@ -246,8 +246,8 @@ String.prototype.format = String.prototype.format || function () {
     return dest;
 }
 /**
- * @param count int
- * @return string
+ * @param {int} count
+ * @return {string}
  */
 String.prototype.repeat = function (count) {
     var value = this;
@@ -256,6 +256,20 @@ String.prototype.repeat = function (count) {
         str += value;
     }
     return str;
+}
+
+/**
+ * 访问字符串的某个下标字符
+ * @param {int} index
+ * @return {string}
+ */
+String.prototype.Get = function (index) {
+    if (index >= 0) {
+        return this[index];
+    } else {
+        var realIndex = this.length + index;
+        return this[realIndex];
+    }
 }
 
 /**

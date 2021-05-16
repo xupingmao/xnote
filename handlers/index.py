@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2020/04/06 13:05:22
+# @modified 2021/05/16 23:06:21
 import web
 import xtables
 import xtemplate
@@ -37,7 +37,7 @@ class IndexHandler:
     def GET(self):
         if xauth.has_login():
             user_name = xauth.current_name()
-            raise web.found(xuserconfig.get_home_path(user_name))
+            raise web.found("/note/index")
         else:
             raise web.found("/note/public")
 

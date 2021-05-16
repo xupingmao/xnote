@@ -468,8 +468,32 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     $("#newFeedDate").val(selectedDate);
   });
 
+  function initDate() {
+    var hash = window.location.hash;
+    if (hash) {
+      console.log("initDate", hash);
 
- 
+      var value = hash.substring(1);
+      var parts = value.split("-");
+      if (parts.length != 2) {
+        return;
+      }
+      var year = parseInt(parts[0]);
+      var month = parseInt(parts[1]);
+      var date = dateObj.getDate();
+
+      // (NaN == NaN) = false
+      if (isNaN(year) || isNaN(month)) {
+        return;
+      }
+
+      console.log("initDate", year, month)
+
+      dateObj.setDate(new Date(year, month - 1, 1));
+    }
+  }
+
+  initDate();
   // 设置calendar div中的html部分
   renderHtml();
   // 表格中显示日期

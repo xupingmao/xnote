@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/05/11 00:03:53
+# @modified 2021/05/16 23:43:31
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -191,6 +191,17 @@ def sort_by_default(notes):
     # 文件夹放在前面
     sort_by_type(notes)
 
+def sort_by_ctime_priority(notes):
+    # 先按照名称排序
+    sort_by_ctime_desc(notes)
+
+    # 置顶笔记
+    sort_by_priority(notes)
+
+    # 文件夹放在前面
+    sort_by_type(notes)
+
+
 def sort_by_type(notes):
     # 文件夹放在前面
     notes.sort(key = lambda x: 0 if x.type == "group" else 1)
@@ -208,15 +219,16 @@ SORT_FUNC_DICT = {
     "name_desc": sort_by_name_desc,
     "mtime_desc": sort_by_mtime_desc,
     "ctime_desc": sort_by_ctime_desc,
+    "ctime_priority": sort_by_ctime_priority,
     "atime_desc": sort_by_atime_desc,
     "type_mtime_desc": sort_by_type_mtime_desc,
     "type_ctime_desc": sort_by_type_ctime_desc,
-    "default": sort_by_default
+    "default": sort_by_default,
 }
 
 def sort_notes(notes, orderby = "name"):
     sort_func = SORT_FUNC_DICT.get(orderby, sort_by_mtime_desc)
-    sort_func(notes)
+    sort_func(notes)    
     build_note_list_info(notes)
 
 def build_note_list_info(notes):

@@ -1,6 +1,6 @@
 <!--
 @since 2018/05/27
-@modified 2021/05/03 17:42:03
+@modified 2021/05/16 23:44:33
 -->
 
 {% init key = "" %}
@@ -26,11 +26,6 @@
 
             <a class="link" href="/message?key={{?key}}&category=message&from=note" 
                 data-option="message" data-value="{{?category}}">记事</a>
-
-            {%if _is_admin%}
-                <a class="link" href="/fs_find?key={{?key}}" 
-                    data-option="book" data-value="{{?category}}">文件</a>
-            {%end%}
         </div>
     </div>
 {% end %}

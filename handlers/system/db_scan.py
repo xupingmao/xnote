@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2021/03/06 12:07:24
+# @modified 2021/05/16 23:49:42
 import xutils
 import xtemplate
 from xutils import dbutil
@@ -10,7 +10,7 @@ from xtemplate import BasePlugin
 SCAN_HTML = """
 <div class="card">
     <div class="card-title">
-        <span>数据库扫描</span>
+        <span>数据库工具</span>
 
         <div class="float-right">
             {% include common/button/back_button.html %}
@@ -60,7 +60,7 @@ SCAN_HTML = """
 
 class DbScanHandler(BasePlugin):
 
-    title = "数据库扫描"
+    title = "数据库工具"
     # 提示内容
     description = ""
     # 访问权限
