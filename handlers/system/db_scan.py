@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2021/05/16 23:49:42
+# @modified 2021/05/18 00:48:39
 import xutils
 import xtemplate
 from xutils import dbutil
@@ -35,6 +35,10 @@ SCAN_HTML = """
 
         <div class="input-group">
             <button type="submit">查询</button>
+
+            <div class="float-right btn-line-height">
+                <a href="/fs_link/db">数据库目录</a>
+            </div>
         </div>
     </form>
 </div>
