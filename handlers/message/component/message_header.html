@@ -1,5 +1,6 @@
 {% init title = "随手记" %}
 {% init tag = "log" %}
+{% init message_stat = xutils.DAO("message").get_current_message_stat() %}
 
 <!-- header.html -->
 <div class="card">    
@@ -40,7 +41,7 @@
         <a class="tab tab-link x-tab" href="/message?tag=all"  data-tag="all">全部</a>
     </div>
     
-    <a class="tab tab-link x-tab" href="/message/calendar">日期</a>
+    <a class="tab tab-link x-tab" href="/message/calendar" data-tag="date">日期</a>
 </div>
 
 <!-- 移动端菜单 -->

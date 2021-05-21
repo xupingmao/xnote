@@ -157,6 +157,15 @@ td.currentMonth:hover {
 <div id="calendar" class="calendar card">
 </div>
 
+<div class="card">
+  <a id="viewByDayLink" href="/message/list_by_day" class="list-link">
+      <span>按天查看</span>
+      <div class="float-right">
+          <i class="fa fa-chevron-right"></i>
+      </div>
+  </a>
+</div>
+
 <!-- 文字区域 -->
 {% include message/component/message_list.html %}
 
@@ -366,6 +375,9 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     // 更新到hash
     window.location.hash = yearMonth;
 
+    // 通知监听器
+    onDateChanged();
+
     // 显示当月添加的资料，这个方法实现在 message_list.html 中
     refreshMessageList(yearMonth);
   }
@@ -410,6 +422,7 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     var date = dateObj.getDate();
     dateObj.setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1));
     showCalendarData();
+    onDateChanged();
   }
  
   /**
@@ -419,6 +432,7 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     var date = dateObj.getDate();
     dateObj.setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1));
     showCalendarData();
+    onDateChanged();
   }
  
   /**
@@ -468,6 +482,15 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
     $("#newFeedDate").val(selectedDate);
   });
 
+  function onDateChanged() {
+    var hash = window.location.hash;
+
+    if (hash) {
+      var date = hash.substring(1);
+      $("#viewByDayLink").attr("href", "/message/list_by_day?date=" + date);
+    }
+  }
+
   function initDate() {
     var hash = window.location.hash;
     if (hash) {
@@ -475,7 +498,7 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
 
       var value = hash.substring(1);
       var parts = value.split("-");
-      if (parts.length != 2) {
+      if (parts.length < 2) {
         return;
       }
       var year = parseInt(parts[0]);
@@ -490,9 +513,12 @@ d2.toLocaleDateString();      // "2016/3/15" 证明设置正确
       console.log("initDate", year, month)
 
       dateObj.setDate(new Date(year, month - 1, 1));
+
+      onDateChanged();
     }
   }
 
+  // 初始化日期
   initDate();
   // 设置calendar div中的html部分
   renderHtml();

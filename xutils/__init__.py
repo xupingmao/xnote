@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/05/05 10:48:07
+# @modified 2021/05/21 21:33:51
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -369,8 +369,10 @@ class Module:
         func = _FUNC_DICT[method]
         self._meth[method] = func
         return func
+
 # DAO是模块的别名
-DAO = Module
+class DAO(Module):
+    pass
 
 
 def init(xconfig):

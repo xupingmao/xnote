@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/04/07 23:00:13
+# @modified 2021/05/21 22:14:11
 import time
 import os
 import math
@@ -83,6 +83,12 @@ def format_time_only(seconds=None):
         st = time.localtime(seconds)
         return time.strftime('%H:%M:%S', st)
 
+def format_wday(date_str, fmt = None):
+    if fmt is None:
+        tm = time.strptime(date_str, "%Y-%m-%d")
+    wday = str(tm.tm_wday + 1)
+    return WDAY_DICT.get(wday)
+
 
 def format_date(seconds=None, fmt = None):
     if fmt is None:
@@ -140,9 +146,7 @@ def current_wday():
     return WDAY_DICT.get(wday)
 
 def convert_date_to_wday(date_str):
-    tm = time.strptime(date_str, "%Y-%m-%d")
-    wday = str(tm.tm_wday + 1)
-    return WDAY_DICT.get(wday)
+    return format_wday(date_str)
 
 def date_add(tm, years = 0, months = 0, days = 0):
     if tm is None:

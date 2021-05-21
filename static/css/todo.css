@@ -2,7 +2,7 @@
  * description here
  * @author xupingmao
  * @since 2021/05/01 15:36:08
- * @modified 2021/05/16 23:15:44
+ * @modified 2021/05/21 22:05:55
  * @filename todo.css
  */
 
@@ -23,7 +23,7 @@
 }
 
 .todo-tag {
-    padding: 5px;
+    padding: 3px;
     border-radius: 3px;
     background: #ccc;
     color: white;

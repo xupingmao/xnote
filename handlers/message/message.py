@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/08 21:21:56
+# @modified 2021/05/21 22:10:05
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -15,6 +15,7 @@ import xconfig
 import xmanager
 import xtemplate
 from xutils import BaseRule, Storage, dbutil, textutil, functions, u, SearchResult
+from xutils import dateutil
 from xtemplate import T
 from xutils.textutil import escape_html, quote
 
@@ -151,6 +152,13 @@ def on_search_message(ctx):
         more.url  = "/message?key=" + ctx.key
         ctx.messages.append(more)
 
+
+def get_current_message_stat():
+    user_name = xauth.current_name()
+    return MSG_DAO.get_message_stat(user_name)
+
+############  -- class --
+
 class SearchContext:
 
     def __init__(self, key):
@@ -231,8 +239,11 @@ class ListAjaxHandler:
             touch_key_by_content(user_name, "key", key)
 
             cost_time  = functions.second_to_ms(time.time() - start_time)
+
             MSG_DAO.add_search_history(user_name, key, cost_time)
+        
         elif tag in ("task", "todo", "key"):
+            # 任务
             pagesize = 1000
             chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
         else:
@@ -559,6 +570,7 @@ class CalendarHandler:
             tag = "calendar",
             show_aside = False,
             message_stat = stat,
+            html_title = T("随手记"),
             search_type = "message")
 
 class StatAjaxHandler:
@@ -609,7 +621,39 @@ class TodoCanceledHandler(TodoHandler):
     def GET(self):
         return self.do_get("canceled", "已取消任务", show_input_box = False)
 
+
+class MessageListByDayHandler():
+
+    @xauth.login_required()
+    def GET(self):
+        user_name = xauth.current_name()
+        date = xutils.get_argument("date")
+        item_list = MSG_DAO.list_by_date(user_name, date)
+        message_list = []
+
+        for item in item_list:
+            date = dateutil.format_date(item.ctime)
+            has_found = False
+            for key, value, wday in message_list:
+                if key == date:
+                    value.append(item)
+                    has_found = True
+            if not has_found:
+                message_list.append((date, [item], dateutil.format_wday(date)))
+
+        return xtemplate.render("message/page/message_list_by_day.html", 
+            message_list = message_list,
+            tag = "date")
+
+class MessageDetailHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        date = xutils.get_argument("date")
+        return xtemplate.render("message/page/message_detail.html", tag = "date", date = date)
+
 xutils.register_func("message.process_message", process_message)
+xutils.register_func("message.get_current_message_stat", get_current_message_stat)
 xutils.register_func("url:/message/log", MessageLogHandler)
 
 xurls=(
@@ -621,6 +665,8 @@ xurls=(
     r"/message/done", TodoDoneHandler,
     r"/message/canceled", TodoCanceledHandler,
     r"/message/edit", MessageEditHandler,
+    r"/message/list_by_day", MessageListByDayHandler,
+    r"/message/detail", MessageDetailHandler,
 
     # Ajax处理
     r"/message/list", ListAjaxHandler,

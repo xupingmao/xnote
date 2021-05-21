@@ -1792,7 +1792,7 @@ li.menu-item:hover {
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/05/05 17:50:35
+ * @modified 2021/05/21 22:08:52
 */
 
 
@@ -1926,13 +1926,13 @@ li.menu-item:hover {
 
 .msg-img-box {
     width: 200px;
-    height: 200px;
     background: #eee;
     overflow: hidden;
     /* 水平居中 */
     text-align: center;
     /* 垂直居中 需要配合子容器的vertical-align:middle; */
-    line-height: 200px;
+    /*height: 200px;*/
+    /*line-height: 200px;*/
 }
 
 .msg-img {
@@ -2294,7 +2294,7 @@ li.menu-item:hover {
  * description here
  * @author xupingmao
  * @since 2021/05/01 15:36:08
- * @modified 2021/05/16 23:15:44
+ * @modified 2021/05/21 22:05:55
  * @filename todo.css
  */
 
@@ -2315,7 +2315,7 @@ li.menu-item:hover {
 }
 
 .todo-tag {
-    padding: 5px;
+    padding: 3px;
     border-radius: 3px;
     background: #ccc;
     color: white;

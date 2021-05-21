@@ -1,0 +1,23 @@
+{% extends base %}
+
+{% block body %}
+    {% include message/component/message_header.html %}
+
+    <div class="card">
+        {% if len(message_list) == 0 %}
+            {% include common/text/empty_text.html %}
+        {% end %}
+
+        {% for date, item_list, wday in message_list %}
+            <a href="/message/detail?date={{date}}" class="list-link">
+                <span>{{date}} {{wday}}</span>
+                <div class="float-right">
+                    <span class="book-size-span">{{ len(item_list) }}</span>
+                    <i class="fa fa-chevron-right"></i>
+                </div>
+            </a>
+        {% end %}
+    </div>
+
+{% end %}
+  
