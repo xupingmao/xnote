@@ -15,13 +15,20 @@
 
         {% include common/back.html %}
     </div>
+</div>
+
+<div class="card">
     <div class="top-offset-1">
-    {% for tag_info in tag_list %}
-        <span class="tag-span">
-            <a class="tag-link" href="/note/tagname/{{tag_info.name}}">{{tag_info.name}}</a>
-            {{tag_info.amount}}
-        </span>
-    {% end %}
+        {% if len(tag_list) == 0 %}
+            {% include common/text/empty_text.html %}
+        {% end %}
+
+        {% for tag_info in tag_list %}
+            <span class="tag-span">
+                <a class="tag-link" href="/note/tagname/{{tag_info.name}}">{{tag_info.name}}</a>
+                {{tag_info.amount}}
+            </span>
+        {% end %}
     </div>
 </div>
 {% end %}

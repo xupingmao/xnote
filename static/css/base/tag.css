@@ -1,0 +1,101 @@
+/**
+ * description here
+ * @author xupingmao
+ * @since 2021/05/22 12:56:05
+ * @modified 2021/05/22 13:00:32
+ * @filename tag.css
+ */
+
+/** Tags **/
+.tag {
+    font-size: small;
+    background-color: green;
+    color: white;
+    border-radius: 0px;
+    padding: 3px;
+    margin-right: 2px;
+}
+
+.tag-link {
+    text-decoration: none;
+    color: white;
+}
+
+.tag-link:hover {
+    background-color: initial;
+    text-decoration: underline;
+}
+
+.inline-tag {
+    display: inline-block;
+    padding: 2px;
+}
+
+.pink-tag {
+    background-color: pink;
+}
+
+.red-tag {
+    font-size: small;
+    background-color: red;
+    color: white;
+    border-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.orange-tag {
+    font-size: small;
+    background-color: orange;
+    color: white;
+    border-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.gray-tag {
+    color: #000;
+    background-color: #eee;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+.tag-span {
+    display: block;
+    float: left;
+    font-size: small;
+    line-height: 20px;
+    border-radius: 2px;
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.tag-span:hover {
+    background-color: #eee;
+}
+
+.tag-span-light {
+    border: 1px solid #ccc;
+    background-color: #cf9;
+    padding: 5px;
+    color: #000;
+    margin: 2px;
+    display: block;
+    float: left;
+    line-height: 20px;
+}
+
+.tag-span-light a {
+    color: #000;
+}
+
+.gray-tag-link, .gray-tag-span {
+    background-color: #ccc;
+    color: white;
+    padding: 3px;
+    border-radius: 3px;
+    word-break: keep-all;
+}
+

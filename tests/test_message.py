@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/05/06 23:03:25
+# @modified 2021/05/22 14:39:34
 
 import sys
 import os
@@ -107,6 +107,11 @@ class TestMain(BaseTestCase):
     def test_message_todo(self):
         self.check_OK("/message/todo")
         self.check_OK("/message/done")
+
+    def test_list_by_day(self):
+        self.check_OK("/message/list_by_day?date=2021-05")
+        self.check_OK("/message/detail?date=2021-05-22")
+        
 
 
 

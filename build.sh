@@ -2,9 +2,14 @@
 # build css files
 echo "打包app.build.css ..."
 echo > ./static/css/app.build.css
-cat ./static/css/reset.css >> ./static/css/app.build.css
 cat ./static/lib/font-awesome-4.7.0/css/font-awesome.min.css >> ./static/css/app.build.css
-cat ./static/css/common.css >> ./static/css/app.build.css
+
+# 基础css
+cat ./static/css/base/reset.css >> ./static/css/app.build.css
+cat ./static/css/base/common.css >> ./static/css/app.build.css
+cat ./static/css/base/tag.css >> ./static/css/app.build.css
+
+# 场景化的css
 cat ./static/css/common-react.css >> ./static/css/app.build.css
 cat ./static/css/app.css     >> ./static/css/app.build.css
 cat ./static/css/message.css >> ./static/css/app.build.css

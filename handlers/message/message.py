@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/21 22:10:05
+# @modified 2021/05/22 14:34:19
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -216,6 +216,23 @@ class ListAjaxHandler:
             page_max = page_max,
             item_list = chatlist)
 
+    def do_search(self, user_name, key, offset, pagesize):
+        # 搜索
+        start_time = time.time()
+        chatlist, amount = MSG_DAO.search(user_name, key, offset, pagesize)
+
+        # 搜索扩展
+        xmanager.fire("message.search", SearchContext(key))
+
+        # 自动置顶
+        touch_key_by_content(user_name, "key", key)
+
+        cost_time  = functions.second_to_ms(time.time() - start_time)
+
+        MSG_DAO.add_search_history(user_name, key, cost_time)
+
+        return chatlist, amount
+
 
     @xauth.login_required()
     def GET(self):
@@ -229,19 +246,7 @@ class ListAjaxHandler:
 
         if key != "" and key != None:
             # 搜索
-            start_time = time.time()
-            chatlist, amount = MSG_DAO.search(user_name, key, offset, pagesize)
-
-            # 搜索扩展
-            xmanager.fire("message.search", SearchContext(key))
-
-            # 自动置顶
-            touch_key_by_content(user_name, "key", key)
-
-            cost_time  = functions.second_to_ms(time.time() - start_time)
-
-            MSG_DAO.add_search_history(user_name, key, cost_time)
-        
+            chatlist, amount = self.do_search(user_name, key, offset, pagesize)
         elif tag in ("task", "todo", "key"):
             # 任务
             pagesize = 1000
@@ -297,14 +302,15 @@ def update_message_content(id, user_name, content):
 
         xmanager.fire("message.update", dict(id=id, user=user_name, content=content))
 
-def add_done_message(old_message):
+def create_done_message(old_message):
     old_id = old_message['id']
 
-    new_message = old_message.copy()
-    new_message['id'] = None
+    new_message = Storage()
     new_message['content'] = ''
     new_message['ref']  = old_id
-    new_message['type'] = 'done'
+    new_message['tag'] = 'done'
+    new_message['user'] = old_message['user']
+    new_message['ctime'] = xutils.format_datetime()
 
     MSG_DAO.create(**new_message)
 
@@ -320,7 +326,7 @@ def update_message_tag(id, tag):
         if tag == "done":
             data.done_time = xutils.format_datetime()
             # 任务完成时除了标记原来任务的完成时间，还要新建一条消息
-            add_done_message(data)
+            create_done_message(data)
 
         MSG_DAO.update(data)
         MSG_DAO.refresh_message_stat(user_name)
@@ -491,6 +497,7 @@ class DateAjaxHandler:
         date      = xutils.get_argument("date")
         user_name = xauth.current_name()
         msg_list = MSG_DAO.list_by_date(user_name, date)
+
         parser = MessageListParser(msg_list)
         parser.parse()
 
@@ -640,6 +647,8 @@ class MessageListByDayHandler():
                     has_found = True
             if not has_found:
                 message_list.append((date, [item], dateutil.format_wday(date)))
+
+        message_list.sort(key = lambda x: x[0], reverse = True)
 
         return xtemplate.render("message/page/message_list_by_day.html", 
             message_list = message_list,

@@ -100,6 +100,12 @@
                 loadTodoList();
             }
 
+            function onTopicSelected(event) {
+                var topic = event.target;
+                var oldText = $(".input-box").val();
+                $(".input-box").val(topic + " " + oldText);
+            }
+
             function updateMessageTag(id, tag) {
                 $.post("/message/tag", {id: id, tag: tag}, function (resp) {
                     if (resp.code == "success") {
@@ -164,6 +170,7 @@
             // 监听上传事件
             xnote.on("message.upload", onFileUploaded);
             xnote.on("message.refresh", onMessageRefresh);
+            xnote.on("message.topic.selected", onTopicSelected);
 
             // 加载todo列表
             loadTodoList();

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/05/16 23:17:29
+# @modified 2021/05/22 12:29:25
 import xutils
 import xconfig
 import xmanager
@@ -26,7 +26,15 @@ class MessageDO(Storage):
     def __init__(self):
         pass
 
+def check_before_create(kw):
+    if "id" in kw:
+        raise Exception("[message.dao.create] can not set id")
+    if "user" not in kw:
+        raise Exception("[message.dao.create] key `user` is missing")
+
 def create_message(**kw):
+    check_before_create(kw)
+
     tag = kw['tag']
     if tag == 'key':
         key = "msg_key:%s:%s" % (kw['user'], dbutil.timeseq())

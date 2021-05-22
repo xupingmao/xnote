@@ -15,11 +15,12 @@ $(function () {
 
         window.topic_dialog_tag_click = function (target) {
             var topic = $(target).text();
-            var oldText = $(".input-box").val();
 
             var topicText = createTopicText(topic);
 
-            $(".input-box").val(topicText + " " + oldText);
+            // 发布选择消息的事件
+            xnote.fire("message.topic.selected", topicText);
+
             layer.close(dialogIndex);
         };
 

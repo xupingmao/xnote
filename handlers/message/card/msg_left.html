@@ -52,19 +52,9 @@
             <!-- <span class="tag-span" v-if="message.status==100">已完成</span> -->
         </div>
         <div class="chat-msg col-md-12">
-            <!-- 编辑状态 -->
-            <template v-if="message.editable">
-                <textarea class="input-box col-md-12" v-bind:rows="message.content.count('\n')+3" v-model="message.content"></textarea>
-
-                <input class="msg-update-btn" type="button" value="更新" v-on:click="updateMessage(message)">
-                
-                <input type="button" value="删除" class="btn-danger hide msg-update-btn" v-if="message.user==current_user" v-bind:msg-id="message.id" v-bind:msg-content="message.content" href="javascript:void(0)" @click="deleteMessage($event)">
-
-                <input type="button" value="取消" v-on:click="message.editable = false" class="btn-cancel msg-update-btn">
-            </template>
 
             <!-- 关键字 -->
-            <div v-else-if="message.tag == 'key'">
+            <div v-if="message.tag == 'key'">
                 <div v-if="message.html" class="msg-item-content">
                     <div class="float-left" v-html="message.html"></div>
                     
@@ -153,9 +143,9 @@
 {% include base/script/geo_location.html %}
 
 <script type="text/javascript">
-    var currentTag = getUrlParam("tag");
+    var currentTag = "{{tag}}" || getUrlParam("tag");
     var searchKey  = getUrlParam("key");
-    var hiddenInputBoxTags = ["file", "link", "done", "notice", "book", "people", "all"];
+    var hiddenInputBoxTags = ["file", "link", "done", "notice", "book", "people", "phone", "all"];
     var placeholder = "记录发生的事情/产生的想法";
     var defaultContent = $(".default-content-input").val();
 
@@ -443,11 +433,18 @@
         app.input += "\n" + inputText + "\n";
     }
 
+    function onTopicSelected(event) {
+        var topicText = event.target;
+        app.input = topicText + " " + app.input;
+    }
+
     app.init();
     app.refreshMessage();
 
     xnote.on("message.upload", onFileUploaded);
+    xnote.on("message.topic.selected", onTopicSelected);
 
+    // 监听iframe的更新操作
     window.addEventListener("message", onMessageReceived, false);
 
 </script>

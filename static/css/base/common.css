@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2021/04/24 21:19:53
+ * @modified 2021/05/22 12:57:59
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -127,14 +127,6 @@
 
 .path-link:hover, .default-path-link:hover {
     color: #888;
-}
-
-.gray-tag-link, .gray-tag-span {
-    background-color: #ccc;
-    color: white;
-    padding: 3px;
-    border-radius: 3px;
-    word-break: keep-all;
 }
 
 .default-path-link {
@@ -527,89 +519,6 @@ li.menu-item:hover {
 
 .form-control {
     width: 100%;
-}
-
-/** Tags **/
-.tag {
-    font-size: small;
-    background-color: green;
-    color: white;
-    border-radius: 0px;
-    padding: 3px;
-    margin-right: 2px;
-}
-
-.tag-link {
-    text-decoration: none;
-    color: white;
-}
-
-.tag-link:hover {
-    background-color: initial;
-    text-decoration: underline;
-}
-
-.inline-tag {
-    display: inline-block;
-    padding: 2px;
-}
-
-.pink-tag {
-    background-color: pink;
-}
-
-.red-tag {
-    font-size: small;
-    background-color: red;
-    color: white;
-    border-radius: 2px;
-    padding-left: 2px;
-    padding-right: 2px;
-}
-
-.orange-tag {
-    font-size: small;
-    background-color: orange;
-    color: white;
-    border-radius: 2px;
-    padding-left: 2px;
-    padding-right: 2px;
-}
-
-.gray-tag {
-    color: #000;
-    background-color: #eee;
-}
-
-.tag-span {
-    display: block;
-    float: left;
-    font-size: small;
-    line-height: 20px;
-    border-radius: 2px;
-    padding: 5px;
-    margin: 5px;
-    border: 1px solid #ccc;
-    cursor: pointer;
-}
-
-.tag-span:hover {
-    background-color: #eee;
-}
-
-.tag-span-light {
-    border: 1px solid #ccc;
-    background-color: #cf9;
-    padding: 5px;
-    color: #000;
-    margin: 2px;
-    display: block;
-    float: left;
-    line-height: 20px;
-}
-
-.tag-span-light a {
-    color: #000;
 }
 
 

@@ -64,13 +64,17 @@ $(function() {
     function isEmpty(value) {
         return value === "" || value === undefined || value === null
     }
+    
+    var displayTag = getUrlParam("displayTag");
+    if (isEmpty(displayTag)) {
+        var tag = "{{tag}}";
+        if (isEmpty(tag)) {
+            tag = "log";
+        }
+        displayTag = tag;
+    }
 
-    var tag = "{{tag}}";
-    if (isEmpty(tag)) {
-        tag = "log";
-    }  
-
-    $("[data-tag=" + tag + "]").addClass("tab-link-active");
+    $("[data-tag=" + displayTag + "]").addClass("tab-link-active");
 });
 </script>
 

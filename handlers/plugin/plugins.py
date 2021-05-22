@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/05/06 22:33:57
+# @modified 2021/05/22 14:30:31
 from io import StringIO
 import xconfig
 import codecs
@@ -313,6 +313,7 @@ INNER_TOOLS = [
     note_plugin("清单", "/note/list", "fa-list"),
     note_plugin("词典", "/note/dict", "icon-dict"),
     note_plugin("我的评论", "/note/mycomments", "fa-file-text-o"),
+    note_plugin("标签列表", "/note/taglist", "fa-tags"),
 
     # 文件工具
     file_plugin("文件索引", "/fs_index"),
