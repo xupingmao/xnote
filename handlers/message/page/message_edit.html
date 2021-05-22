@@ -61,7 +61,14 @@
                 $(".input-box").val(newText);
             }
 
+            function onTopicSelected(event) {
+                var topic = event.target;
+                var oldText = $(".input-box").val();
+                $(".input-box").val(topic + " " + oldText);
+            }
+
             xnote.on("message.upload", onFileUploaded);
+            xnote.on("message.topic.selected", onTopicSelected);
         });
     </script>
 {% end %}
