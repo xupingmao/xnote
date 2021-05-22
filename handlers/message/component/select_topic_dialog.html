@@ -13,8 +13,20 @@ $(function () {
             }
         }
 
+        function touchTopic(topic) {
+            var params = {"key": topic};
+            $.post("/message/touch", params, function (resp) {
+                console.log(resp);
+            }).fail(function (error) {
+                console.error(error);
+            })
+        }
+
         window.topic_dialog_tag_click = function (target) {
             var topic = $(target).text();
+
+            // 将话题置顶
+            touchTopic(topic);
 
             var topicText = createTopicText(topic);
 

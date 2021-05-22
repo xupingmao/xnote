@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/22 14:34:19
+# @modified 2021/05/22 16:49:22
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -29,6 +29,7 @@ TAG_TEXT_DICT = dict(
     key  = "话题",
     search = "话题",
 )
+LIST_LIMIT = 1000
 
 def success():
     return dict(success = True, code = "success")
@@ -374,9 +375,7 @@ class UpdateStatusAjaxHandler:
 
 class TouchAjaxHandler:
 
-    @xauth.login_required()
-    def POST(self):
-        id = xutils.get_argument("id")
+    def do_touch_by_id(self, id):
         msg = MSG_DAO.get_by_id(id)
         if msg is None:
             return failure(message = "message not found, id:%s" % id)
@@ -385,6 +384,23 @@ class TouchAjaxHandler:
         msg.mtime = xutils.format_datetime()
         MSG_DAO.update(msg)
         return success()
+
+    def do_touch_by_key(self, key):
+        user_name = xauth.current_name()
+        touch_key_by_content(user_name, "key", key)
+        return success()
+
+    @xauth.login_required()
+    def POST(self):
+        id  = xutils.get_argument("id")
+        key = xutils.get_argument("key")
+
+        if id != None and id != "":
+            return self.do_touch_by_id(id)
+        elif key != "":
+            return self.do_touch_by_key(key)
+        else:
+            return failure(message = "id or key is missing")
 
 class DeleteAjaxHandler:
 
@@ -635,7 +651,7 @@ class MessageListByDayHandler():
     def GET(self):
         user_name = xauth.current_name()
         date = xutils.get_argument("date")
-        item_list = MSG_DAO.list_by_date(user_name, date)
+        item_list = MSG_DAO.list_by_date(user_name, date, limit = LIST_LIMIT)
         message_list = []
 
         for item in item_list:

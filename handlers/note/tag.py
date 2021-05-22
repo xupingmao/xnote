@@ -1,16 +1,18 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2020/07/18 18:28:29
+# @modified 2021/05/22 15:29:04
 import math
 import xutils
 import xtemplate
 import xauth
 import xtables
 import xconfig
+import xmanager
 from xutils import Storage
 
-class TagHandler:
+class TagAjaxHandler:
     
+    @xauth.login_required()
     def GET(self, id):
         creator = xauth.current_name()
         tags    = xutils.call("note.get_tags", creator, id)
@@ -20,7 +22,7 @@ class TagHandler:
             tags = []
         return dict(code="", message="", data=tags)
 
-class TagUpdateHandler:
+class TagUpdateAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
@@ -71,6 +73,8 @@ class TagListHandler:
         if xauth.has_login():
             user_name = xauth.get_current_name()
             tag_list  = xutils.call("note.list_tag", user_name)
+
+            xmanager.add_visit_log(user_name, "/note/taglist")
         else:
             tag_list  = xutils.call("note.list_tag", "")
         return xtemplate.render("note/page/taglist.html", 
@@ -79,8 +83,11 @@ class TagListHandler:
             tag_list = tag_list)
 
 xurls = (
-    r"/note/tag/(\d+)"   , TagHandler,
-    r"/note/tag/update"  , TagUpdateHandler,
+    # ajax
+    r"/note/tag/(\d+)"   , TagAjaxHandler,
+    r"/note/tag/update"  , TagUpdateAjaxHandler,
+
+    # 页面
     r"/note/tagname/(.*)", TagNameHandler,
     r"/note/taglist"     , TagListHandler
 )
