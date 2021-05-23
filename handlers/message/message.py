@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/23 12:31:49
+# @modified 2021/05/23 14:23:18
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -61,13 +61,25 @@ def build_done_html(message):
         done_time = message.mtime
         message.html += u("<br>------<br>完成于 %s") % done_time
 
+def do_mark_topic(parser, key0):
+    key = key0.lstrip("")
+    key = key.rstrip("")
+    quoted_key = textutil.quote(key)
+    value = textutil.escape_html(key0)
+    token = "<a class=\"link\" href=\"/message?key=%s\">%s</a>" % (quoted_key, value)
+    parser.tokens.append(token)
+
+
 def mark_text(content):
     import xconfig
-    from xutils.marked_text_parser import TextParser, set_img_file_ext
+    from xutils.marked_text_parser import TextParser
+    from xutils.marked_text_parser import set_img_file_ext
     # 设置图片文集后缀
     set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
 
     parser = TextParser()
+    parser.set_topic_marker(do_mark_topic)
+
     tokens = parser.parse(content)
     return "".join(tokens), parser.keywords
 
@@ -158,7 +170,7 @@ def get_current_message_stat():
     user_name = xauth.current_name()
     return MSG_DAO.get_message_stat(user_name)
 
-############  -- class --
+############  class
 
 class SearchContext:
 

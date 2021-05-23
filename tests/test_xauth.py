@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/24 16:39:45
-# @modified 2021/05/03 17:55:58
+# @modified 2021/05/23 14:49:34
 
 import sys
 import time
@@ -51,4 +51,15 @@ class TestXauth(BaseTestCase):
         # AttributeError: 'ThreadedDict' object has no attribute 'homepath'
         # xauth.login_user_by_name("test")
         # xauth.logout_current_user()
+
+    def test_create_and_list_user_session(self):
+        # 先清理
+        for sid in xauth.list_user_session_id("admin"):
+            xauth.delete_user_session_by_id(sid)
+
+        # 创建并且查询
+        xauth.create_user_session("admin")
+        result = xauth.list_user_session_detail("admin")
+        self.assertTrue(len(result) == 1)
+
 

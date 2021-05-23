@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/10 14:36:09
-# @modified 2021/02/21 17:27:38
+# @modified 2021/05/23 14:30:49
 
 """标记文本解析"""
 import os
@@ -115,7 +115,7 @@ class TextParserBase(object):
         return self.text[self.i:self.i+length] == target
 
     def find(self, target):
-        """找到目标字符串
+        """以{self.i}作为开始下标，寻找目标字符串
         @param {string} target 
         @return 目标字符串的索引下标，如果找不到返回-1
         """
@@ -214,8 +214,10 @@ class TextParserBase(object):
 
 class TextParser(TextParserBase):
 
+    # 是否标记单书名号<书籍名>
     mark_book_single_flag = False
 
+    # 是否标记数字
     mark_number_flag = False
 
     # 是否记录关键字，关键字包括话题、书籍、@值等等
@@ -224,8 +226,14 @@ class TextParser(TextParserBase):
     # 话题的长度限制
     topic_len_limit = 100
 
+    # 话题转换器
+    topic_marker = None
+
     def init2(self, text):
         self.keywords = set()
+
+    def set_topic_marker(self, topic_marker):
+        self.topic_marker = topic_marker
 
     def record_keyword(self, keyword):
         self.keywords.add(keyword)
@@ -246,6 +254,14 @@ class TextParser(TextParserBase):
         key = quote(keyword)
         value = escape_html(keyword)
         return "<a class=\"link\" href=\"/message?category=message&key=%s\">%s</a>" % (key, value)
+
+    def do_mark_topic_default(self, key0):
+        key = key0.lstrip("#\n")
+        key = key.rstrip("#\n")
+        quoted_key = quote(key)
+        value = escape_html(key0)
+        token = "<a class=\"link\" href=\"/message?category=message&key=%s\">%s</a>" % (quoted_key, value)
+        self.tokens.append(token)
 
     def mark_topic(self):
         """话题转为搜索关键字的时候去掉前后的#符号"""
@@ -275,12 +291,10 @@ class TextParser(TextParserBase):
         # 记录关键字
         self.record_keyword(key0)
 
-        key = key0.lstrip("#\n")
-        key = key.rstrip("#\n")
-        quoted_key = quote(key)
-        value = escape_html(key0)
-        token = "<a class=\"link\" href=\"/message?category=message&key=%s\">%s</a>" % (quoted_key, value)
-        self.tokens.append(token)
+        if self.topic_marker != None:
+            self.topic_marker(self, key0)
+        else:
+            self.do_mark_topic_default(key0)
 
     def mark_http(self):
         self.profile("mark_http")
