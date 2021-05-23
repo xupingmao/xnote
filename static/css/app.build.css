@@ -1523,7 +1523,7 @@ li.menu-item:hover {
  * description here
  * @author xupingmao
  * @since 2021/05/22 12:56:05
- * @modified 2021/05/22 13:00:32
+ * @modified 2021/05/22 17:19:27
  * @filename tag.css
  */
 
@@ -1576,7 +1576,7 @@ li.menu-item:hover {
 
 .gray-tag {
     color: #000;
-    background-color: #eee;
+    background-color: #ccc;
     padding: 3px;
     border-radius: 3px;
 }
@@ -1803,7 +1803,7 @@ li.menu-item:hover {
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/05/21 22:08:52
+ * @modified 2021/05/22 17:23:15
 */
 
 
@@ -1924,13 +1924,16 @@ li.menu-item:hover {
 }
 
 .msg-tag,.msg-tag-orange {
-    padding-left: 5px;
-    padding-right: 5px;
+    padding:3px;
+    border-radius: 3px;
     color: white;
     background-color: #ccc;
 }
 
 .msg-tag-orange {
+    padding: 3px;
+    border-radius: 3px;
+    color: white;
     background-color: orange;
 }
 
@@ -2305,7 +2308,7 @@ li.menu-item:hover {
  * description here
  * @author xupingmao
  * @since 2021/05/01 15:36:08
- * @modified 2021/05/21 22:05:55
+ * @modified 2021/05/22 17:38:19
  * @filename todo.css
  */
 
@@ -2330,4 +2333,15 @@ li.menu-item:hover {
     border-radius: 3px;
     background: #ccc;
     color: white;
+}
+
+.task-tag {
+    padding: 3px;
+    border-radius: 3px;
+    background: orange;
+    color: #fff;
+}
+
+.second-btn {
+    margin-left: 50px;
 }

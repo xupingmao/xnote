@@ -442,6 +442,7 @@
     app.refreshMessage();
 
     xnote.on("message.upload", onFileUploaded);
+    xnote.on("message.refresh", function () { app.refreshMessage() });
     xnote.on("message.topic.selected", onTopicSelected);
 
     // 监听iframe的更新操作

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/22 16:49:22
+# @modified 2021/05/23 12:31:49
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -39,11 +39,11 @@ def failure(message, code = "fail"):
 
 def build_search_url(keyword):
     key = quote(keyword)
-    return "/message?category=message&key=%s" % key
+    return u"/message?category=message&key=%s" % key
 
 
 def build_search_html(content):
-    fmt = u'<a href="/message?category=message&key=%s">%s</a>'
+    fmt = u'<a href="/message?key=%s">%s</a>'
     return fmt % (xutils.encode_uri_component(content), xutils.html_escape(content))
 
 def build_done_html(message):
@@ -171,9 +171,9 @@ class MessageListParser(object):
         self.chatlist = chatlist
 
     def parse(self):
-        self.process_message_list(self.chatlist)
+        self.do_process_message_list(self.chatlist)
 
-    def process_message_list(self, message_list):
+    def do_process_message_list(self, message_list):
         keywords = set()
         for message in message_list:
             process_message(message)
@@ -647,10 +647,23 @@ class TodoCanceledHandler(TodoHandler):
 
 class MessageListByDayHandler():
 
+    def do_split_date(self, date):
+        parts = date.split("-")
+        if len(parts) >= 2:
+            year = int(parts[0])
+            month = int(parts[1])
+        elif len(parts) == 1:
+            year = int(parts[0])
+            month = dateutil.get_current_month()
+        return year, month
+
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
         date = xutils.get_argument("date")
+
+        year, month = self.do_split_date(date)
+
         item_list = MSG_DAO.list_by_date(user_name, date, limit = LIST_LIMIT)
         message_list = []
 
@@ -667,6 +680,8 @@ class MessageListByDayHandler():
         message_list.sort(key = lambda x: x[0], reverse = True)
 
         return xtemplate.render("message/page/message_list_by_day.html", 
+            year = year,
+            month = month,
             message_list = message_list,
             tag = "date")
 

@@ -2,7 +2,7 @@
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/05/21 22:08:52
+ * @modified 2021/05/22 17:23:15
 */
 
 
@@ -123,13 +123,16 @@
 }
 
 .msg-tag,.msg-tag-orange {
-    padding-left: 5px;
-    padding-right: 5px;
+    padding:3px;
+    border-radius: 3px;
     color: white;
     background-color: #ccc;
 }
 
 .msg-tag-orange {
+    padding: 3px;
+    border-radius: 3px;
+    color: white;
     background-color: orange;
 }
 

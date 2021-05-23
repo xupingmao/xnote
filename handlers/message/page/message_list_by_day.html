@@ -3,6 +3,8 @@
 {% block body %}
     {% include message/component/message_header.html %}
 
+    {% include common/date/month_picker.html %}
+
     <div class="card">
         {% if len(message_list) == 0 %}
             {% include common/text/empty_text.html %}
@@ -18,6 +20,17 @@
             </a>
         {% end %}
     </div>
+
+    <script type="text/javascript">
+        $(function (e) {
+            function onMonthSelected(event) {
+                var date = event.target;
+                window.location.href = "?date=" + date;
+            }
+
+            xnote.on("date.month.selected", onMonthSelected);
+        })
+    </script>
 
 {% end %}
   

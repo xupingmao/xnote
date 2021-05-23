@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2021/05/02 13:14:35
+# @modified 2021/05/23 12:26:10
 import web
 import xauth
 import xtemplate
@@ -13,7 +13,7 @@ class ListHandler:
     @xauth.login_required("admin")
     def GET(self):
         user_dict = xauth.get_users()
-        return xtemplate.render("user/user_list.html", 
+        return xtemplate.render("user/page/user_list.html", 
             show_aside = False,
             user_info = None,
             user_dict=user_dict)
@@ -36,7 +36,7 @@ class UserHandler:
         user_info = None
         if name != "":
             user_info = xauth.get_user(name)
-        return xtemplate.render("user/user_manage.html", 
+        return xtemplate.render("user/page/user_manage.html", 
             show_aside = False,
             name = name,
             user_info = user_info, 

@@ -1,0 +1,105 @@
+{% init year  = 2021 %}
+{% init month = 1 %}
+{% init show_full_year = False %}
+
+<style type="text/css">
+    .date-box {
+        text-align: center;
+    }
+
+    .prev-month-link {
+        float: left;
+        padding-left: 5px;
+    }
+
+    .next-month-link {
+        float: right;
+        padding-right: 5px;
+    }
+</style>
+
+<div class="card btn-line-height">
+    <div class="date-box">
+        <a class="prev-month-link">上个月</a>
+        <select name="year" value="{{year}}">
+            {% for j in range(year-5,year+6) %}
+                <option value="{{j}}">{{j}}年</option>
+            {% end %}
+        </select>
+        <select name="month" value="{{month}}">
+            {% for i in range(0,13) %}
+                {% if i == 0 %}
+                    {% if show_full_year %}
+                        <option value="0">全年</option>
+                    {% end %}
+                {% else %}
+                    <option value="{{i}}">{{i}}月</option>
+                {% end %}
+            {% end %}
+        </select>
+        <a class="next-month-link">下个月</a>
+    </div>
+</div>
+
+
+<script>
+    $(function () {
+        function formatDate(year, month) {
+            if (month == "0") {
+                return year;
+            }
+            if (month < 10) {
+                return year + "-0" + month;
+            }
+            return year + "-" + month;
+        }
+
+        function getPrevMonth(year, month) {
+            if (month > 1) {
+                return formatDate(year, month - 1);
+            } else {
+                return formatDate(year - 1, 12);
+            }
+        }
+
+        function getNextMonth(year, month) {
+            if (month < 12) {
+                return formatDate(year, month + 1);
+            } else {
+                return formatDate(year + 1, 1);
+            }
+        }
+
+        function getCurrentMonth() {
+            var year  = parseInt("{{year}}");
+            var month = parseInt("{{month}}");
+            return formatDate(year, month);
+        }
+
+        $(".next-month-link").click(function (e) {
+            var year  = parseInt("{{year}}");
+            var month = parseInt("{{month}}");
+
+            var prevMonth = getPrevMonth(year, month);
+
+            xnote.fire("date.month.selected", prevMonth);
+        })
+
+        $(".prev-month-link").click(function (e) {
+            var year  = parseInt("{{year}}");
+            var month = parseInt("{{month}}");
+
+            var prevMonth = getPrevMonth(year, month);
+
+            xnote.fire("date.month.selected", prevMonth);
+        });
+
+        $("select").change(function (e) {
+            var year = $("[name=year]").val();
+            var month = $("[name=month]").val();
+            var date = formatDate(year, month);
+
+            xnote.fire("date.month.selected", date);
+        });
+    })
+</script>
