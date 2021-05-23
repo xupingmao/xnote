@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/05/16 23:06:21
+# @modified 2021/05/23 19:33:48
 import web
 import xtables
 import xtemplate
@@ -24,7 +24,16 @@ INDEX_HTML = """
 UNAUTHORIZED_HTML = """
 {% extends base.html %}
 {% block body %}
-    <div class="box">
+    <div class="card">
+        <div class="card-title">
+            <span>无访问权限</span>
+            <div class="float-right">
+                {% include common/button/back_button.html %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
         <h3>抱歉,您没有访问的权限</h3>
     </div>
 {% end %}

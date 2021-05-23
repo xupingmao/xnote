@@ -309,7 +309,14 @@ def write_cookie(user_name):
 
 
 def get_user_cookie(name):
-    return "xuser=%s; xpass=%s;" % (name, get_user_password_md5(name))
+    session_list = list_user_session_detail(name)
+
+    if len(session_list) == 0:
+        sid = create_user_session(name, login_ip = "system")
+    else:
+        sid = session_list[0].sid
+
+    return "sid=%s" % sid
 
 def gen_new_token():
     import uuid
@@ -442,8 +449,11 @@ def is_admin():
 def check_login(user_name=None):
     if has_login(user_name):
         return
-    elif has_login():
+    
+    if has_login():
+        xutils.log("unauthorized visit, user:%s, url:%s" % (user_name, web.ctx.path))
         raise web.seeother("/unauthorized")
+
     # 跳转到登陆URL
     redirect_to_login()
 

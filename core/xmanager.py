@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/05/23 17:56:00
+# @modified 2021/05/23 19:59:18
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -423,8 +423,10 @@ class CronTaskManager:
             elif url.startswith("script://"):
                 name = url[len("script://"):]
                 return xutils.exec_script(name, False)
+
             cookie = xauth.get_user_cookie("admin")
             url = url + "?content=" + xutils.quote_unicode(str(task.message))
+
             return self.app.request(url, headers=dict(COOKIE=cookie))
 
         def check_and_run(task, tm):
@@ -507,7 +509,7 @@ class CronTaskManager:
             message = "", sound=0, webpage=0, id=None)
 
         msg_refresh_task = xutils.Storage(name = "[系统]随手记后台刷新信息", url = "/message/refresh",
-            tm_wday = "*", tm_hour="*", tm_min="5",
+            tm_wday = "*", tm_hour="*", tm_min="29",
             message = "", sound=0, webpage=0, id=None)
 
         self.task_list.append(backup_task)
