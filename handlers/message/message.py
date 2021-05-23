@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/23 14:23:18
+# @modified 2021/05/23 18:08:52
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -169,6 +169,36 @@ def on_search_message(ctx):
 def get_current_message_stat():
     user_name = xauth.current_name()
     return MSG_DAO.get_message_stat(user_name)
+
+
+def do_split_date(date):
+    year  = dateutil.get_current_year()
+    month = dateutil.get_current_month()
+    day   = dateutil.get_current_mday()
+
+    if date == None or date == "":
+        return year, month, day
+
+    parts = date.split("-")
+    if len(parts) >= 1:
+        year = int(parts[0])
+    if len(parts) >= 2:
+        month = int(parts[1])
+    if len(parts) >= 3:
+        day = int(parts[2])
+    return year, month, day
+
+
+@xutils.timeit(name = "message.refresh", logfile = True)
+def refresh_key_amount():
+    for user_name in xauth.list_user_names():
+        msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, -1)
+        for index, message in enumerate(msg_list):
+            key = message.content
+            msg_list, amount = MSG_DAO.search(user_name, key, 0, 1)
+            message.amount = amount
+            MSG_DAO.update(message)
+            xutils.log("[message.refresh] %s,user:%s,key:%s,amount:%s" % (index, user_name, key, amount))
 
 ############  class
 
@@ -598,13 +628,17 @@ class CalendarHandler:
 
     def GET(self):
         user = xauth.current_name()
-        stat = MSG_DAO.get_message_stat(user)
-        stat = format_message_stat(stat)
+        date = xutils.get_argument("date")
 
-        return xtemplate.render("message/page/calendar.html", 
+        year, month, mday = do_split_date(date)
+
+        date = "%s-%02d" % (year, month)
+
+        return xtemplate.render("message/page/message_calendar.html", 
             tag = "calendar",
-            show_aside = False,
-            message_stat = stat,
+            year = year,
+            month = month,
+            date = date,
             html_title = T("随手记"),
             search_type = "message")
 
@@ -636,7 +670,7 @@ class TodoHandler(MessageHandler):
         message_stat = MSG_DAO.get_message_stat(user_name)
         xmanager.add_visit_log(user_name, "/message/todo")
         
-        return xtemplate.render("message/page/todo.html", 
+        return xtemplate.render("message/page/message_todo.html", 
             search_type = "task",
             tag = tag,
             title = T(title),
@@ -659,22 +693,12 @@ class TodoCanceledHandler(TodoHandler):
 
 class MessageListByDayHandler():
 
-    def do_split_date(self, date):
-        parts = date.split("-")
-        if len(parts) >= 2:
-            year = int(parts[0])
-            month = int(parts[1])
-        elif len(parts) == 1:
-            year = int(parts[0])
-            month = dateutil.get_current_month()
-        return year, month
-
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
         date = xutils.get_argument("date")
 
-        year, month = self.do_split_date(date)
+        year, month, day = do_split_date(date)
 
         item_list = MSG_DAO.list_by_date(user_name, date, limit = LIST_LIMIT)
         message_list = []
@@ -704,6 +728,13 @@ class MessageDetailHandler:
         date = xutils.get_argument("date")
         return xtemplate.render("message/page/message_detail.html", tag = "date", date = date)
 
+class MessageRefreshHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        refresh_key_amount()
+        return "success"
+
 xutils.register_func("message.process_message", process_message)
 xutils.register_func("message.get_current_message_stat", get_current_message_stat)
 xutils.register_func("url:/message/log", MessageLogHandler)
@@ -719,6 +750,7 @@ xurls=(
     r"/message/edit", MessageEditHandler,
     r"/message/list_by_day", MessageListByDayHandler,
     r"/message/detail", MessageDetailHandler,
+    r"/message/refresh", MessageRefreshHandler,
 
     # Ajax处理
     r"/message/list", ListAjaxHandler,

@@ -35,7 +35,7 @@ class TestMain(unittest.TestCase):
 
     def test_event_handler(self):
         ctx = Storage()
-        xmanager.remove_handlers('test')
+        xmanager.remove_event_handlers('test')
         
         @xmanager.listen("test", is_async = False)
         def my_handler(ctx):

@@ -1,0 +1,37 @@
+{% extends base %}
+
+{% block body %}
+    {% include message/component/message_header.html %}
+
+    <!-- 月份选择器 -->
+    {% include common/date/month_picker.html %}
+
+    <div class="card">
+      <a id="viewByDayLink" href="/message/list_by_day?date={{date}}" class="list-link">
+          <span>按天查看</span>
+          <div class="float-right">
+              <i class="fa fa-chevron-right"></i>
+          </div>
+      </a>
+    </div>
+
+    <!-- 文字区域 -->
+    {% include message/component/message_list.html %}
+
+    <script type="text/javascript">
+        $(function (e) {
+            var date = "{{date}}";
+
+            function onMonthSelected(event) {
+                var date = event.target;
+                window.location.href = "?date=" + date;
+            }
+
+            xnote.on("date.month.selected", onMonthSelected);
+
+            refreshMessageList(date);
+        })
+    </script>
+
+{% end %}
+  

@@ -1803,7 +1803,7 @@ li.menu-item:hover {
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/05/22 17:23:15
+ * @modified 2021/05/23 18:15:40
 */
 
 
@@ -1958,6 +1958,13 @@ li.menu-item:hover {
 
 .msg-update-btn {
     width: 60px;
+}
+
+
+.msg-amount-text {
+    display: inline-block;
+    padding: 3px 8px;
+    color: #666;
 }
 
 /** 移动端样式放在最后 **/
@@ -2308,7 +2315,7 @@ li.menu-item:hover {
  * description here
  * @author xupingmao
  * @since 2021/05/01 15:36:08
- * @modified 2021/05/22 17:38:19
+ * @modified 2021/05/23 17:12:20
  * @filename todo.css
  */
 
@@ -2329,6 +2336,7 @@ li.menu-item:hover {
 }
 
 .todo-tag {
+    display: inline-block;
     padding: 3px;
     border-radius: 3px;
     background: #ccc;

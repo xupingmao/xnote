@@ -1,13 +1,16 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/05/21 22:14:11
+# @modified 2021/05/23 17:09:22
 import time
 import os
 import math
 
 """处理时间的工具类
-Commonly used format codes:
+
+==========
+格式化的参数
+==========
 
 %Y  Year with century as a decimal number.
 %m  Month as a decimal number [01,12].
@@ -23,6 +26,17 @@ Commonly used format codes:
 %c  Locale's appropriate date and time representation.
 %I  Hour (12-hour clock) as a decimal number [01,12].
 %p  Locale's equivalent of either AM or PM.
+
+=======
+tm结构体
+=======
+tm_year  实际的年份
+tm_mon   月份（从一月开始，0代表一月） - 取值区间为[0,11]
+tm_mday  一个月中的日期 - 取值区间为[1,31]
+tm_wday  星期 – 取值区间为[0,6]，其中0代表星期天，1代表星期一，以此类推
+tm_yday  从每年的1月1日开始的天数 – 取值区间为[0,365]，其中0代表1月1日，1代表1月2日，以此类推
+
+
 """
 
 
@@ -69,8 +83,8 @@ def format_datetime(seconds=None):
         st = time.localtime(seconds)
         return time.strftime('%Y-%m-%d %H:%M:%S', st)
 
-format_time = format_datetime
-
+def format_time(seconds = None):
+    return format_datetime(seconds)
 
 def format_time_only(seconds=None):
     """只格式化时间 TODO 时区问题
@@ -130,7 +144,8 @@ def parse_time(date = None, fmt = None):
     st = time.strptime(date, fmt)
     return time.mktime(st)
 
-get_seconds = parse_time
+def get_seconds(date = None, fmt = None):
+    return parse_time(date, fmt)
 
 def get_current_year():
     tm = time.localtime()
@@ -139,6 +154,10 @@ def get_current_year():
 def get_current_month():
     tm = time.localtime()
     return tm.tm_mon
+
+def get_current_mday():
+    tm = time.localtime()
+    return tm.tm_mday
 
 def current_wday():
     tm = time.localtime()
@@ -163,6 +182,9 @@ def date_add(tm, years = 0, months = 0, days = 0):
     # TODO days
     return int(year), month, day
 
+def is_leap_year(year):
+    return ((year % 4 == 0) and (year % 100 != 0)) or (year % 400 == 0)
+
 def get_days_of_month(y, month):
     """get days of a month
         >>> get_days_of_month(2000, 2)
@@ -171,10 +193,12 @@ def get_days_of_month(y, month):
         28
         >>> get_days_of_month(2002, 1)
         31
+        >>> get_days_of_month(1900, 2)
+        28
     """
     days = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ]
     if 2 == month:
-        if (0 == y % 4) and (0 != y % 100) or (0 == y % 400):
+        if is_leap_year(year):
             d = 29
         else:
             d = 28

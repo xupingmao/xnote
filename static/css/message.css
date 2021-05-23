@@ -2,7 +2,7 @@
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/05/22 17:23:15
+ * @modified 2021/05/23 18:15:40
 */
 
 
@@ -157,6 +157,13 @@
 
 .msg-update-btn {
     width: 60px;
+}
+
+
+.msg-amount-text {
+    display: inline-block;
+    padding: 3px 8px;
+    color: #666;
 }
 
 /** 移动端样式放在最后 **/

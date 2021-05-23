@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/05/22 12:29:25
+# @modified 2021/05/23 17:28:00
 import xutils
 import xconfig
 import xmanager
@@ -205,9 +205,13 @@ def get_filter_by_tag_func(tag):
         return value.tag == tag
     return filter_func
 
-def list_key(user, offset, limit):
+def list_key(user, offset, limit = -1):
     items = dbutil.prefix_list("msg_key:%s" % user)
     items.sort(key = lambda x: x.mtime, reverse = True)
+    
+    if limit < 0:
+        return items[offset:]
+
     return items[offset: offset+limit]
 
 def get_content_filter_func(tag, content):

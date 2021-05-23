@@ -80,7 +80,7 @@
             var year  = parseInt("{{year}}");
             var month = parseInt("{{month}}");
 
-            var prevMonth = getPrevMonth(year, month);
+            var prevMonth = getNextMonth(year, month);
 
             xnote.fire("date.month.selected", prevMonth);
         })

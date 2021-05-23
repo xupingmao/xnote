@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/05/05 19:08:52
+# @modified 2021/05/23 17:56:00
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -41,13 +41,17 @@ dbutil.register_table("schedule", "任务调度表 <schedule:id>")
 
 TASK_POOL_SIZE = 500
 
-def wrapped_handler(pattern, handler_clz):
+# 对外接口
+_manager       = None
+_event_manager = None
+
+def do_wrap_handler(pattern, handler_clz):
     # Python2中自定义类不是type类型
     # 这里只能处理类，不处理字符串
     if not inspect.isclass(handler_clz):
         return handler_clz
 
-    def wrap(result):
+    def wrap_result(result):
         if isinstance(result, (list, dict)):
             web.header("Content-Type", "application/json")
             return tojson(result)
@@ -72,7 +76,7 @@ def wrapped_handler(pattern, handler_clz):
         def GET(self, *args):
             WrappedHandler.visited_count += 1.0
             threading.current_thread().handler_class = self.target
-            result = wrap(self.target.GET(*args))
+            result = wrap_result(self.target.GET(*args))
             threading.current_thread().handler_class = None
             return result
             
@@ -80,50 +84,50 @@ def wrapped_handler(pattern, handler_clz):
             """常用于提交HTML FORM表单、新增资源等"""
             WrappedHandler.visited_count += 1.0
             threading.current_thread().handler_class = self.target
-            result = wrap(self.target.POST(*args))
+            result = wrap_result(self.target.POST(*args))
             threading.current_thread().handler_class = None
             return result            
 
         def HEAD(self, *args):
-            return wrap(self.target.HEAD(*args))
+            return wrap_result(self.target.HEAD(*args))
 
         def OPTIONS(self, *args):
-            return wrap(self.target.OPTIONS(*args))
+            return wrap_result(self.target.OPTIONS(*args))
 
         def PROPFIND(self, *args):
-            return wrap(self.target.PROPFIND(*args))
+            return wrap_result(self.target.PROPFIND(*args))
 
         def PROPPATCH(self, *args):
-            return wrap(self.target.PROPPATCH(*args))
+            return wrap_result(self.target.PROPPATCH(*args))
 
         def PUT(self, *args):
             """更新资源，带条件时是幂等方法"""
-            return wrap(self.target.PUT(*args))
+            return wrap_result(self.target.PUT(*args))
 
         def LOCK(self, *args):
-            return wrap(self.target.LOCK(*args))
+            return wrap_result(self.target.LOCK(*args))
 
         def UNLOCK(self, *args):
-            return wrap(self.target.UNLOCK(*args))
+            return wrap_result(self.target.UNLOCK(*args))
 
         def MKCOL(self, *args):
-            return wrap(self.target.MKCOL(*args))
+            return wrap_result(self.target.MKCOL(*args))
 
         def COPY(self, *args):
-            return wrap(self.target.COPY(*args))
+            return wrap_result(self.target.COPY(*args))
 
         def MOVE(self, *args):
-            return wrap(self.target.MOVE(*args))
+            return wrap_result(self.target.MOVE(*args))
 
         def DELETE(self, *args):
-            return wrap(self.target.DELETE(*args))
+            return wrap_result(self.target.DELETE(*args))
 
         def SEARCH(self, *args):
-            return wrap(self.target.SEARCH(*args))
+            return wrap_result(self.target.SEARCH(*args))
 
         def CONNECT(self, *args):
             """建立tunnel隧道"""
-            return wrap(self.target.CONNECT(*args))
+            return wrap_result(self.target.CONNECT(*args))
 
         def __getattr__(self, name):
             xutils.error("xmanager", "unknown method %s" % name)
@@ -220,22 +224,29 @@ class HandlerManager:
         finally:
             pass
 
+    def do_reload_inner_modules(self):
+        del sys.modules['xtemplate']
+        import xtemplate
+        xtemplate.reload()
+
     def reload(self):
         """重启handlers目录下的所有的模块"""
         self.mapping     = []
         self.model_list  = []
         self.failed_mods = []
-        # remove all event handlers
-        remove_handlers()
+        
+        # 移除所有的事件处理器
+        remove_event_handlers()
+
+        # 重新加载内部模块
+        self.do_reload_inner_modules()
+
+        # 重新加载HTTP处理器
         self.load_model_dir(xconfig.HANDLERS_DIR)
         
         self.mapping += self.basic_mapping
         self.mapping += self.last_mapping
         self.app.init_mapping(self.mapping)
-        
-        del sys.modules['xtemplate']
-        import xtemplate
-        xtemplate.reload()
 
         # set 404 page
         self.app.notfound = notfound
@@ -361,7 +372,7 @@ class HandlerManager:
 
     def add_mapping(self, url, handler):
         self.mapping.append(url)
-        self.mapping.append(wrapped_handler(url, handler))
+        self.mapping.append(do_wrap_handler(url, handler))
         if self.report_loading:
             log("Load mapping (%s, %s)" % (url, handler))
 
@@ -380,6 +391,7 @@ class CronTaskManager:
     def __init__(self, app):
         self.task_list = []
         self.app = app
+        self.thread_started = False
 
     def _match(self, current, pattern):
         if pattern == "mod5":
@@ -417,7 +429,7 @@ class CronTaskManager:
 
         def check_and_run(task, tm):
             if self.match(task, tm):
-                put_task(request_url, task)
+                put_task_async(request_url, task)
                 try:
                     xutils.trace("RunTask",  task.url)
                     if task.tm_wday == "no-repeat":
@@ -436,24 +448,32 @@ class CronTaskManager:
             while True:
                 # 获取时间信息
                 tm = time.localtime()
+
+                # 定时任务
                 for task in self.task_list:
                     check_and_run(task, tm)
+
                 # cron.* 事件
-                put_task(fire_cron_events, tm)
+                put_task_async(fire_cron_events, tm)
                 tm = time.localtime()
+
                 # 等待下一个分钟
                 sleep_sec = 60 - tm.tm_sec % 60
                 if sleep_sec > 0:
                     time.sleep(sleep_sec)
         
         self.do_load_tasks()
-        # 任务队列处理线程，开启两个线程
-        WorkerThread("WorkerThread-1").start()
-        WorkerThread("WorkerThread-2").start()
 
-        chk_thread = CronTaskThread(run)
-        chk_thread.start()
         
+        if not self.thread_started:
+            # 任务队列处理线程，开启两个线程
+            WorkerThread("WorkerThread-1").start()
+            WorkerThread("WorkerThread-2").start()
+
+            # 定时任务调度线程
+            CronTaskThread(run).start()
+            self.thread_started = True
+            
     def add_task(self, url, interval):
         if self._add_task(url, interval):
             self.save_tasks()
@@ -486,9 +506,14 @@ class CronTaskManager:
             tm_wday = "*", tm_hour="10", tm_min="0",
             message = "", sound=0, webpage=0, id=None)
 
+        msg_refresh_task = xutils.Storage(name = "[系统]随手记后台刷新信息", url = "/message/refresh",
+            tm_wday = "*", tm_hour="*", tm_min="5",
+            message = "", sound=0, webpage=0, id=None)
+
         self.task_list.append(backup_task)
         self.task_list.append(clean_task)
         self.task_list.append(stats_task)
+        self.task_list.append(msg_refresh_task)
 
     def save_tasks(self):
         self.load_tasks()
@@ -513,6 +538,7 @@ class WorkerThread(Thread):
     """执行任务队列的线程，内部有一个队列，所有线程共享
     """
     
+    # deque是线程安全的
     _task_queue = deque()
     
     def __init__(self, name="WorkerThread"):
@@ -534,6 +560,7 @@ class WorkerThread(Thread):
                 xutils.print_exc()
 
 class EventHandler:
+    """事件处理器"""
 
     def __init__(self, event_type, func, is_async = True, description = ''):
         self.event_type  = event_type
@@ -642,9 +669,6 @@ class EventManager:
         else:
             self._handlers[event_type] = []
 
-# 对外接口
-_manager       = None
-_event_manager = None
 
 @xutils.log_init_deco("xmanager.init")
 def init(app, vars, last_mapping = None):
@@ -669,7 +693,10 @@ def instance():
 def reload():
     _event_manager.remove_handlers()
     xauth.refresh_users()
+    
+    # 重载处理器
     _manager.reload()
+
     # 重新加载定时任务
     _manager.load_tasks()
 
@@ -686,7 +713,7 @@ def load_init_script():
             print("Failed to execute script %s" % xconfig.INIT_SCRIPT)
 
 def put_task(func, *args, **kw):
-    """添加异步任务到队列"""
+    """添加异步任务到队列，如果队列满了会自动降级成同步执行"""
     if len(WorkerThread._task_queue) > TASK_POOL_SIZE:
         # TODO 大部分是写日志的任务，日志任务单独加一个线程处理
         func_name = get_func_abs_name(func)
@@ -696,7 +723,12 @@ def put_task(func, *args, **kw):
         except Exception:
             xutils.print_exc()
     else:
-        WorkerThread._task_queue.append([func, args, kw])
+        put_task_async(func, *args, **kw)
+
+
+def put_task_async(func, *args, **kw):
+    """添加异步任务到队列"""
+    WorkerThread._task_queue.append([func, args, kw])
 
 
 def load_tasks():
@@ -714,15 +746,15 @@ def request(*args, **kw):
     return _manager.app.request(*args, **kw)
 
 
-def add_handler(handler):
+def add_event_handler(handler):
     _event_manager.add_handler(handler)
 
 
-def remove_handlers(event_type=None):
+def remove_event_handlers(event_type=None):
     _event_manager.remove_handlers(event_type)
 
 
-def set_handlers0(event_type, handlers, is_async=True):
+def set_event_handlers0(event_type, handlers, is_async=True):
     _event_manager.remove_handlers(event_type)
     for handler in handlers:
         _event_manager.add_handler(event_type, handler, is_async)
@@ -736,6 +768,7 @@ def fire(event_type, ctx=None):
 def listen(event_type_list, is_async = True, description = None):
     """事件监听器注解"""
     def deco(func):
+        global _event_manager
         if isinstance(event_type_list, list):
             for event_type in event_type_list:
                 handler = EventHandler(event_type, func, 

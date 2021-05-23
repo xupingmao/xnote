@@ -58,15 +58,13 @@
                 <div v-if="message.html" class="msg-item-content">
                     <div class="float-left" v-html="message.html"></div>
                     
-                    <a class="smallText msg-right-op-link red" v-bind:msg-id="message.id" href="javascript:void(0)" 
-                        v-bind:msg-id="message.id" 
-                        v-bind:msg-content="message.content" 
-                        @click="deleteMessage($event)">删除</a>
-
-                    <a class="smallText msg-right-op-link" v-if="message.tag == 'key1'" 
-                        v-bind:msg-id="message.id" 
-                        href="javascript:void(0)" 
-                        @click="touchMessage($event)">置顶</a>
+                    <div class="float-right">
+                        <span class="msg-amount-text" v-html="message.amount"></span>
+                        <a class="smallText msg-right-op-link red" v-bind:msg-id="message.id" href="javascript:void(0)" 
+                            v-bind:msg-id="message.id" 
+                            v-bind:msg-content="message.content" 
+                            @click="deleteMessage($event)">删除</a>
+                    </div>
                 </div>
             </div>
             <div v-else>
@@ -102,6 +100,7 @@
                     <a class="smallText msg-left-op-link" v-if="message.show_to_log_btn" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateTag($event, 'log')">转记事</a>
 
                     <a class="smallText msg-left-op-link" v-if="message.show_reopen_btn" v-bind:msg-id="message.id" href="javascript:void(0)" @click="openMessage($event)">重做</a>
+                    <!-- task 专用 END -->
 
                     <!-- 通用 -->
                     <a class="smallText msg-left-op-link" v-if="message.show_edit_btn" v-bind:msg-id="message.id" @click="openEditDialog($event)" href="javascript:void(0)">编辑</a>
@@ -109,9 +108,6 @@
                     <!-- log专用 -->
                     <a class="smallText msg-left-op-link" v-if="message.tag == 'log'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="updateTag($event, 'task')">转待办</a>
                     <!-- log专用END -->
-
-                    <!-- key专用 -->
-                    <a class="smallText msg-left-op-link" v-if="message.tag == 'key'" v-bind:msg-id="message.id" href="javascript:void(0)" @click="touchMessage($event)">置顶</a>
 
                     <a class="smallText msg-right-op-link red" 
                         v-if="message.show_del_btn"
@@ -198,6 +194,10 @@
             message.show_edit_btn = false;
             message.show_reopen_btn = false;
             message.show_to_log_btn = false;
+        }
+
+        if (message.amount == undefined) {
+            message.amount = "更新中...";
         }
 
         return message;
