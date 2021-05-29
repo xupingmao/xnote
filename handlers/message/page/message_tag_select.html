@@ -1,0 +1,75 @@
+{% extends base %}
+
+{% block body %}
+
+    {% init msg_list = [] %}
+
+    <div class="row">
+        <input type="text" class="nav-search-input" placeholder="搜索标签" onchange="onSearchInputChange(this)"/>
+        <button class="nav-search-btn btn-default">
+            <i class="fa fa-search"></i>
+        </button>
+    </div>
+   
+   <div class="card top-offset-1">
+       {% for msg in msg_list %}
+            <a onclick="on_msg_click(this);" class="list-item">{{msg.content}}</a>
+       {% end %}
+    </div>
+
+    <script type="text/javascript">
+
+        $(function () {
+
+            function touchTopic(topic) {
+                var params = {"key": topic};
+                $.post("/message/touch", params, function (resp) {
+                    console.log(resp);
+                }).fail(function (error) {
+                    console.error(error);
+                })
+            }
+
+            function createTopicText(topic) {
+                if (topic.Get(0) == '#' && topic.Get(-1) == '#') {
+                    return topic;
+                } else {
+                    return '#' + topic + '#';
+                }
+            }
+
+    
+            window.on_msg_click = function (target) {
+                var topic = $(target).text();
+
+                // 将话题置顶
+                touchTopic(topic);
+
+                var topicText = createTopicText(topic);
+
+                // 发布选择消息的事件
+                if (top) {
+                    var msg = {type: "message.topic.selected", content: topicText};
+
+                    // iframe中通知父级节点更新
+                    top.postMessage(JSON.stringify(msg), "*");
+                }
+            }
+
+            $(".nav-search-input").on("keyup", function (e) {
+                var inputText = $(e.target).val();
+                
+                $(".list-item").each(function (index, element) {
+                    var text = $(element).text();
+                    if (text.indexOf(inputText) < 0) {
+                        $(element).hide();
+                    } else {
+                        $(element).show();
+                    }
+                })
+            });
+        })
+
+    </script>
+
+{% end %}

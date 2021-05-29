@@ -39,12 +39,14 @@ $(function () {
         $.get("/message/list?pagesize=100&page=1&key=&tag=key", function (resp) {
             if (resp.code == "success") {
                 var data = resp.data;
-                var html = $("<div>");
+                var html = $("<div>").addClass("card");
                 for (var i = 0; i < data.length; i++) {
                     var content = data[i].content;
-                    html.append($("<span>").addClass("tag-span").text(content).attr("onclick", "topic_dialog_tag_click(this);"));
+                    var tagRow = $("<span>").addClass("tag-span")
+                        .text(content).attr("onclick", "topic_dialog_tag_click(this);");
+                    html.append(tagRow);
                 }
-                dialogIndex = xnote.showDialog("选择话题", html.html(), ["确认", "取消"]);
+                dialogIndex = xnote.showDialog("选择标签", html.html(), ["确认", "取消"]);
             }
         }).fail(function (error) {
             xnote.toast("请求失败:" + error);

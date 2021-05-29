@@ -2,7 +2,7 @@
 
 {% block body %}
 
-    {% include message/component/select_topic_dialog.html %}
+    <!-- {% include message/component/select_topic_dialog.html %} -->
 
     <!-- 文件上传的组件 -->
     {% include message/component/message_upload.html %}
@@ -84,6 +84,16 @@
                 if (data == "message.updated") {
                     loadTodoList();
                     xnote.closeAllDialog();
+                } else {
+                    try {
+                        var msg = JSON.parse(data);
+                        if (msg.type == "message.topic.selected") {
+                            onTopicSelected({target:msg.content});
+                            xnote.closeAllDialog();
+                        }
+                    } catch (e) {
+                        console.error("parse window message failed", e);
+                    }
                 }
             }
 
@@ -155,6 +165,10 @@
                 var id = $(e.target).attr("data-id");
                 updateMessageTag(id, "done");
             });
+
+            $(".select-topic-btn").click(function (e) {
+                xnote.showIframeDialog("选择标签", "/message?op=select&tag=key")
+            })
 
 
 

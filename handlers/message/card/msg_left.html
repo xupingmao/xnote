@@ -9,7 +9,7 @@
 
     <input type="file" id="filePicker" class="hide" multiple/>
 
-    <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#话题" @click="">
+    <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#标签" @click="">
     <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
     <input type="button" name="" class="send-button btn" value="创建" @click="createMessage()">
 </div>
@@ -155,7 +155,7 @@
         placeholder = "记录自己的奇思妙想";
     }
     if (currentTag == "key") {
-        placeholder = "保存话题/标签/关键字";
+        placeholder = "保存标签/关键字/话题";
     }
 
     function newMessage(content, user, status) {

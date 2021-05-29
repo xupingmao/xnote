@@ -1525,13 +1525,17 @@ $(function () {
         if (dialogUrl) {
             // 通过新的HTML页面获取dialog
             $.get(dialogUrl, function(respHtml) {
+
                 $(document.body).append(respHtml);
+                
+                // 模态
                 doModal(dialogId);
+
                 // 重新绑定事件
                 xnote.fire("init-default-value");
+
                 $(".x-dialog-close, .x-dialog-cancel").unbind("click");
-                $(".x-dialog-close, .x-dialog-cancel").on("click",
-                function() {
+                $(".x-dialog-close, .x-dialog-cancel").on("click", function() {
                     onDialogHide();
                 });
             })

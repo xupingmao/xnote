@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/23 18:08:52
+# @modified 2021/05/30 01:12:29
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -200,6 +200,16 @@ def refresh_key_amount():
             MSG_DAO.update(message)
             xutils.log("[message.refresh] %s,user:%s,key:%s,amount:%s" % (index, user_name, key, amount))
 
+
+def get_similar_key(key):
+    assert key != None
+    if key.startswith("#"):
+        key = key.lstrip("#")
+        key = key.rstrip("#")
+        return key
+    else:
+        return "#" + key + "#"
+
 ############  class
 
 class SearchContext:
@@ -269,6 +279,7 @@ class ListAjaxHandler:
 
         # 自动置顶
         touch_key_by_content(user_name, "key", key)
+        touch_key_by_content(user_name, "key", get_similar_key(key))
 
         cost_time  = functions.second_to_ms(time.time() - start_time)
 
@@ -290,10 +301,6 @@ class ListAjaxHandler:
         if key != "" and key != None:
             # 搜索
             chatlist, amount = self.do_search(user_name, key, offset, pagesize)
-        elif tag in ("task", "todo", "key"):
-            # 任务
-            pagesize = 1000
-            chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
         else:
             list_func = xutils.lookup_func("message.list_%s" % tag)
             if list_func != None:
@@ -561,7 +568,7 @@ class DateAjaxHandler:
 
         # return dict(code="success", data = msg_list)
         return xtemplate.render("message/ajax/message_ajax.html", 
-            page = 0, item_list = msg_list)
+            page = 1, item_list = msg_list)
 
 def filter_key(key):
     if key == None or key == "":
@@ -579,12 +586,27 @@ def filter_key(key):
 
 class MessageHandler:
 
+    def do_select_key(self):
+        user_name = xauth.current_name()
+        offset = 0
+        pagesize = 1000
+        
+        msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", offset, pagesize)
+
+        return xtemplate.render("message/page/message_tag_select.html", 
+            msg_list = msg_list,
+            show_nav = False)
+
     @xauth.login_required()
     def do_get(self, tag = "task"):
         user     = xauth.current_name()
         key      = xutils.get_argument("key", "")
         from_    = xutils.get_argument("from")
         show_tab = xutils.get_argument("show_tab", default_value = True, type = bool)
+        op       = xutils.get_argument("op")
+
+        if tag == "key" and op == "select":
+            return self.do_select_key()
 
         default_content = filter_key(key)
 
