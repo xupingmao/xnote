@@ -27,7 +27,7 @@
 
             <input type="file" id="filePicker" class="hide" multiple/>
 
-            <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#话题">
+            <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#标签">
             <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
             <input type="button" id="createTodoBtn" class="send-button btn" value="创建">
         </div>
@@ -79,21 +79,30 @@
                 $(".input-box").val(newText);
             }
 
+            function onMessageReceivedByJson(data) {
+                try {
+                    var msg = JSON.parse(data);
+                    if (msg.type == "message.topic.selected") {
+                        onTopicSelected({target:msg.content});
+                        xnote.closeAllDialog();
+                    }
+
+                    if (msg.type == "message.updated") {
+                        loadTodoList();
+                        xnote.closeAllDialog();
+                    }
+                } catch (e) {
+                    console.error("parse window message failed", e);
+                }
+            }
+
             function onMessageReceived(event) {
                 var data = event.data;
                 if (data == "message.updated") {
                     loadTodoList();
                     xnote.closeAllDialog();
                 } else {
-                    try {
-                        var msg = JSON.parse(data);
-                        if (msg.type == "message.topic.selected") {
-                            onTopicSelected({target:msg.content});
-                            xnote.closeAllDialog();
-                        }
-                    } catch (e) {
-                        console.error("parse window message failed", e);
-                    }
+                    onMessageReceivedByJson(data);
                 }
             }
 
@@ -183,6 +192,7 @@
             // 加载音频文件
             xnote.loadAudio("todo_done", "/static/audio/todo_done.mp3");
 
+            // 监听iframe消息
             window.addEventListener("message", onMessageReceived, false);
         });
     </script>

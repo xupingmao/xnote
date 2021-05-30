@@ -1,0 +1,78 @@
+{% extends base %}
+
+{% block body %}
+
+    {% init message_tag = "" %}
+    {% init default_content = "" %}
+    {% init show_tab = True %}
+    {% init show_input_box = True %}
+
+    <script type="text/javascript" src="/static/js/message/message.js"></script>
+
+    <input class="default-content-input" type="hidden" value="{{default_content}}"/>
+
+    {% if show_tab %}
+        {% include message/component/message_header.html %}
+    {% end %}
+
+    <!-- 编辑器 -->
+    {% if show_input_box %}
+        {% include message/component/message_input.html %}
+    {% end %}
+
+    <!-- 系统标签 -->
+    {% include message/card/message_system_tag.html %}
+
+    <!-- 文字区域 -->
+    {% include message/component/message_list.html %}
+
+    <script type="text/javascript">
+        $(function (e) {
+            function getPage() {
+                var page = getUrlParam("page");
+                if (page == undefined) {
+                    return 1;
+                } else {
+                    return page;
+                }
+            }
+
+            function onMessageRefresh() {
+                var params = {page:1, tag:"{{message_tag}}", page:getPage()};
+                window.doRefreshMessageList(params);
+            }
+
+            function onMessageCreated() {
+                onMessageRefresh();
+            }
+
+            function onMessageReceived(event) {
+                var data = event.data;
+                try {
+                    var msg = JSON.parse(data);
+                    if (msg.type == "message.topic.selected") {
+                        onTopicSelected({target:msg.content});
+                        xnote.closeAllDialog();
+                    }
+
+                    if (msg.type == "message.updated") {
+                        onMessageRefresh();
+                        xnote.closeAllDialog();
+                    }
+                } catch (e) {
+                    console.error("parse window message failed", e);
+                }
+            }
+
+            xnote.on("message.updated", onMessageRefresh);
+            xnote.on("message.created", onMessageCreated);
+
+            xnote.fire("message.updated");
+
+            // 监听iframe消息
+            window.addEventListener("message", onMessageReceived, false);
+        })
+    </script>
+
+{% end %}
+

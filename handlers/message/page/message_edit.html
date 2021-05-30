@@ -42,7 +42,8 @@
 
                         if (top) {
                             // iframe中通知父级节点更新
-                            top.postMessage("message.updated", "*");
+                            var msg = {type: "message.updated"};
+                            top.postMessage(JSON.stringify(msg), "*");
                         }
 
                     } else {

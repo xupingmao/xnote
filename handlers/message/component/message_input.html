@@ -1,0 +1,70 @@
+<link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
+<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
+
+{% init message_tag = "log" %}
+{% init message_placeholder = "记录发生的事情/产生的想法" %}
+{% init show_tag_btn = True %}
+{% init show_attachment_btn = True %}
+
+<div class="message-input-box card">
+    <textarea class="col-md-12 input-box" rows=3 placeholder="{{message_placeholder}}"></textarea>
+    <input type="file" id="filePicker" class="hide" multiple/>
+    
+    {% if show_tag_btn %}
+        <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#标签" @click="">
+    {% end %}
+
+    {% if show_attachment_btn %}
+        <input type="button" id="filePickerBtn" class="send-button btn btn-default message-attachment-btn" value="添加附件"/>
+    {% end %}
+    
+    <input type="button" name="" class="send-button btn create-btn" value="创建">
+</div>
+
+<!-- 选择话题组件 -->
+{% include message/component/select_topic_dialog.html %}
+
+<!-- 文件上传的组件 -->
+{% include message/component/message_upload.html %}
+
+<script type="text/javascript">
+$(function () {
+    function onFileUploaded(event) {
+        var inputText = event.target;
+        var oldText = $(".input-box").val();
+        var newText = oldText + "\n" + inputText + "\n";
+        $(".input-box").val(newText);
+    }
+
+    function onTopicSelected(event) {
+        var topic = event.target;
+        var oldText = $(".input-box").val();
+        $(".input-box").val(topic + " " + oldText);
+    }
+
+
+    $(".create-btn").click(function () {
+        var content = $(".input-box").val();
+        var params = {content:content, tag: "{{tag}}"};
+        $.post("/message/save", 
+            params,
+            function (respText) {
+                var data = respText;
+                if (data.code != "success") {
+                    xnote.alert(data.message);
+                } else {
+                    $(".input-box").val("");
+                }
+                // 发布创建消息
+                xnote.fire("message.created", "");
+        }).fail(function (data) {
+            console.log(data);
+            xnote.alert("创建记事失败，请稍后重试");
+        })
+    });
+
+    // 监听上传事件
+    xnote.on("message.upload", onFileUploaded);
+    xnote.on("message.topic.selected", onTopicSelected);
+})
+</script>

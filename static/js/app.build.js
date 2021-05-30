@@ -696,8 +696,14 @@ function getWindowHeight() {
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2020/09/06 12:07:03
+ * @modified 2021/05/30 11:33:47
  */
+
+
+if (window.xnote == undefined) {
+    window.xnote = {};
+}
+
 var XUI = function(window) {
     // 处理select标签选中情况
     function initSelect() {
@@ -784,6 +790,12 @@ var XUI = function(window) {
         initCheckbox();
         initRadio();
         initXRadio();
+    }
+
+    window.xnote.assert = function (expression, message) {
+        if (!expression) {
+            xnote.alert(message);
+        }
     }
 
     // 初始化

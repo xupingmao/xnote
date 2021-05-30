@@ -33,6 +33,23 @@
         });
     };
 
+    function doRefreshMessageList(params) {
+        xnote.assert(typeof(params) == "object", "expect params to be object");
+        xnote.assert(params.page, "params.page expected");
+        xnote.assert(params.tag, "params.tag expected");
+
+        params.format = "html";
+        params.displayTag = getUrlParam("displayTag");
+
+        $.get("/message/list", params, function (resp) {
+            // console.log(resp);
+            $(".message-list").html(resp);
+        }).fail(function (e) {
+            console.error(e);
+            xnote.alert("调用接口失败，请重试");
+        });
+    }
+
     function onMessageReceived(event) {
         var data = event.data;
         if (data == "message.updated") {
@@ -42,6 +59,8 @@
     }
 
     window.refreshMessageList = refreshMessageList;
+    window.doRefreshMessageList = doRefreshMessageList;
+
     window.addEventListener("message", onMessageReceived, false);
 
 })();

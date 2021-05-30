@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/30 01:12:29
+# @modified 2021/05/30 13:40:51
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -83,6 +83,12 @@ def mark_text(content):
     tokens = parser.parse(content)
     return "".join(tokens), parser.keywords
 
+def process_tag_message(message):
+    message.html = build_search_html(message.content)
+
+    if message.amount is None:
+        message.amount = T("更新中...")
+
 def process_message(message):
     if message.status == 0 or message.status == 50:
         # 兼容历史数据
@@ -100,7 +106,7 @@ def process_message(message):
         return message
 
     if message.tag == "key" or message.tag == "search":
-        message.html = build_search_html(message.content)
+        process_tag_message(message)
     else:
         html, keywords = mark_text(message.content)
         message.html = html
@@ -250,6 +256,7 @@ class ListAjaxHandler:
         show_todo_check = False
         show_edit_btn   = True
         show_to_log_btn = False
+        display_tag     = xutils.get_argument("displayTag")
 
         if tag == "todo":
             show_todo_check = True
@@ -261,11 +268,18 @@ class ListAjaxHandler:
         if tag == "key":
             show_edit_btn = False
 
-        return xtemplate.render("message/ajax/message_ajax.html", 
+
+        if tag == "key":
+            template_file = "message/ajax/message_tag_ajax.html"
+        else:
+            template_file = "message/ajax/message_ajax.html"
+
+        return xtemplate.render(template_file,
             show_todo_check = show_todo_check,
             show_edit_btn = show_edit_btn,
             show_to_log_btn = show_to_log_btn,
             page = page,
+            page_url = "?tag=%s&displayTag=%s&page=" % (tag, display_tag),
             page_max = page_max,
             item_list = chatlist)
 
@@ -597,6 +611,18 @@ class MessageHandler:
             msg_list = msg_list,
             show_nav = False)
 
+    def do_view_tags(self):
+        return xtemplate.render("message/page/message_list_view.html", 
+            message_tag = "key",
+            show_tag_btn = False,
+            show_attachment_btn = False,
+            message_placeholder="保存标签/关键字/话题")
+
+    def do_view_by_system_tag(self, tag):
+        return xtemplate.render("message/page/message_list_view.html", 
+            message_tag = tag,
+            show_input_box = False)
+
     @xauth.login_required()
     def do_get(self, tag = "task"):
         user     = xauth.current_name()
@@ -605,15 +631,22 @@ class MessageHandler:
         show_tab = xutils.get_argument("show_tab", default_value = True, type = bool)
         op       = xutils.get_argument("op")
 
+        # 记录日志
+        xmanager.add_visit_log(user, "/message?tag=%s" % tag)
+
         if tag == "key" and op == "select":
             return self.do_select_key()
+
+        if tag == "key":
+            return self.do_view_tags()
+
+        if tag in ("book", "people", "file", "phone", "link"):
+            return self.do_view_by_system_tag(tag)
 
         default_content = filter_key(key)
 
         stat = MSG_DAO.get_message_stat(user)
         stat = format_message_stat(stat)
-
-        xmanager.add_visit_log(user, "/message?tag=%s" % tag)
 
         return xtemplate.render("message/page/message.html", 
             show_tab           = show_tab,
@@ -648,6 +681,7 @@ class MessageEditHandler:
 
 class CalendarHandler:
 
+    @xauth.login_required()
     def GET(self):
         user = xauth.current_name()
         date = xutils.get_argument("date")
