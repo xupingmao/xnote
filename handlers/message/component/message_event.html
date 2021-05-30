@@ -1,0 +1,26 @@
+<!-- 所有的 postMessage 事件都在这里做转换 -->
+<script type="text/javascript">
+$(function () {
+    function onMessageReceivedByJson(data) {
+        try {
+            var msg = JSON.parse(data);
+            xnote.fire(msg.type, msg);
+        } catch (e) {
+            console.error("parse window message failed", e);
+        }
+    }
+
+    function onMessageReceived(event) {
+        var data = event.data;
+        if (data == "message.updated") {
+            xnote.fire("message.updated", "");
+        } else {
+            onMessageReceivedByJson(data);
+        }
+    }
+
+    // 监听iframe消息
+    window.addEventListener("message", onMessageReceived, false);
+});
+
+</script>

@@ -70,6 +70,8 @@
 
             xnote.on("message.updated", onMessageRefresh);
             xnote.on("message.created", onMessageCreated);
+
+            // 定义刷新消息列表函数
             xnote.setExtFunc("message.refreshMessageList", onMessageRefresh);
             // 监听iframe消息
             window.addEventListener("message", onMessageReceived, false);

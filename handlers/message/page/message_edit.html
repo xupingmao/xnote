@@ -21,13 +21,13 @@
 
             <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#标签">
             <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
-            <input type="button" id="createTodoBtn" class="send-button btn" value="更新">
+            <input type="button" id="updateMessageBtn" class="send-button btn" value="更新">
         </div>
     </div>
 
     <script type="text/javascript">
         $(function () {
-            $("#createTodoBtn").click(function () {
+            $("#updateMessageBtn").click(function () {
                 var id = $("#messageEditId").val();
                 var content = $("#messageEditContent").val();
 

@@ -2,6 +2,8 @@
 {% include message/component/select_topic_dialog.html %}
 <!-- 文件上传 -->
 {% include message/component/message_upload.html %}
+<!-- 随手记事件 -->
+{% include message/component/message_event.html %}
 
 <!-- 编辑器 -->
 <div class="message-input-box card" v-if="inputBoxVisible">
@@ -415,12 +417,9 @@
         }
     });
 
-    function onMessageReceived(event) {
-        var data = event.data;
-        if (data == "message.updated") {
-            app.refreshMessage();
-            xnote.closeAllDialog();
-        }
+    function onMessageUpdated(event) {
+        app.refreshMessage();
+        xnote.closeAllDialog();
     }
 
     function onFileUploaded(event) {
@@ -439,8 +438,5 @@
     xnote.on("message.upload", onFileUploaded);
     xnote.on("message.refresh", function () { app.refreshMessage() });
     xnote.on("message.topic.selected", onTopicSelected);
-
-    // 监听iframe的更新操作
-    window.addEventListener("message", onMessageReceived, false);
-
+    xnote.on("message.updated", onMessageUpdated);
 </script>
