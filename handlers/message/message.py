@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/30 13:40:51
+# @modified 2021/05/30 14:54:23
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -258,7 +258,7 @@ class ListAjaxHandler:
         show_to_log_btn = False
         display_tag     = xutils.get_argument("displayTag")
 
-        if tag == "todo":
+        if tag == "todo" or tag == "task":
             show_todo_check = True
             show_to_log_btn = True
 
@@ -614,14 +614,25 @@ class MessageHandler:
     def do_view_tags(self):
         return xtemplate.render("message/page/message_list_view.html", 
             message_tag = "key",
+            search_type = "message",
             show_tag_btn = False,
             show_attachment_btn = False,
-            message_placeholder="保存标签/关键字/话题")
+            show_system_tag = True,
+            message_placeholder = "添加标签/关键字/话题")
 
     def do_view_by_system_tag(self, tag):
         return xtemplate.render("message/page/message_list_view.html", 
             message_tag = tag,
+            search_type = "message",
             show_input_box = False)
+
+    def do_view_task(self):
+        return xtemplate.render("message/page/message_list_view.html", 
+            message_tag = "task",
+            search_type = "message",
+            show_system_tag = False,
+            show_sub_link = True,
+            message_placeholder = "添加待办任务")
 
     @xauth.login_required()
     def do_get(self, tag = "task"):
@@ -642,6 +653,9 @@ class MessageHandler:
 
         if tag in ("book", "people", "file", "phone", "link"):
             return self.do_view_by_system_tag(tag)
+
+        if tag == "task":
+            return self.do_view_task()
 
         default_content = filter_key(key)
 

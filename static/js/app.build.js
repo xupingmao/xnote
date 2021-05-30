@@ -551,6 +551,19 @@ function getWindowHeight() {
         return Math.min(document.body.clientWidth, document.documentElement.clientWidth);
     }
 };
+/**
+ * xnote扩展事件
+ * @author xupingmao
+ * @since 2021/05/30 14:39:39
+ * @modified 2021/05/30 14:42:56
+ * @filename x-event.js
+ */
+
+// xnote事件驱动
+if (window.xnote == undefined) {
+    window.xnote = {};
+}
+
 
 (function(){
 
@@ -672,12 +685,6 @@ function getWindowHeight() {
     EventDispatcher.prototype.un = EventDispatcher.prototype.removeEventListener;
     EventDispatcher.prototype.fire = EventDispatcher.prototype.dispatchEvent;
 
-
-    // xnote事件驱动
-    if (window.xnote == undefined) {
-        window.xnote = {};
-    }
-
     xnote._eventDispatcher = new EventDispatcher();
     xnote.addEventListener = xnote.on = function (type, listener) {
         return xnote._eventDispatcher.addEventListener(type, listener);
@@ -690,6 +697,26 @@ function getWindowHeight() {
     
 })();
 /**
+ * xnote扩展函数
+ * @author xupingmao
+ * @since 2021/05/30 14:39:39
+ * @modified 2021/05/30 14:42:19
+ * @filename x-ext.js
+ */
+
+if (window.xnote == undefined) {
+    window.xnote = {};
+}
+
+xnote.EXT_DICT = {};
+
+window.xnote.getExtFunc = function (funcName) {
+    return xnote.EXT_DICT[funcName];
+}
+
+window.xnote.setExtFunc = function (funcName, func) {
+    xnote.EXT_DICT[funcName] = func;
+}/**
  * xnote专用ui
  * 依赖库
  *   jquery

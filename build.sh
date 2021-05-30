@@ -40,6 +40,7 @@ cat ./static/js/utils.build.js >> ./static/js/app.build.js
 
 # xnote-ui
 cat ./static/js/xnote-ui/x-event.js >> ./static/js/app.build.js
+cat ./static/js/xnote-ui/x-ext.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/core.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/layer.photos.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-device.js >> ./static/js/app.build.js

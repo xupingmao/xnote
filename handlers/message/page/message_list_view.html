@@ -6,6 +6,8 @@
     {% init default_content = "" %}
     {% init show_tab = True %}
     {% init show_input_box = True %}
+    {% init show_system_tag = True %}
+    {% init show_sub_link = False %}
 
     <script type="text/javascript" src="/static/js/message/message.js"></script>
 
@@ -20,8 +22,15 @@
         {% include message/component/message_input.html %}
     {% end %}
 
+    <!-- 二级目录 -->
+    {% if show_sub_link %}
+        {% include message/component/message_sub_link.html %}
+    {% end %}
+
     <!-- 系统标签 -->
-    {% include message/card/message_system_tag.html %}
+    {% if show_system_tag %}
+        {% include message/card/message_system_tag.html %}
+    {% end %}
 
     <!-- 文字区域 -->
     {% include message/component/message_list.html %}
@@ -54,11 +63,6 @@
                         onTopicSelected({target:msg.content});
                         xnote.closeAllDialog();
                     }
-
-                    if (msg.type == "message.updated") {
-                        onMessageRefresh();
-                        xnote.closeAllDialog();
-                    }
                 } catch (e) {
                     console.error("parse window message failed", e);
                 }
@@ -66,11 +70,12 @@
 
             xnote.on("message.updated", onMessageRefresh);
             xnote.on("message.created", onMessageCreated);
-
-            xnote.fire("message.updated");
-
+            xnote.setExtFunc("message.refreshMessageList", onMessageRefresh);
             // 监听iframe消息
             window.addEventListener("message", onMessageReceived, false);
+
+            // 触发更新事件
+            xnote.fire("message.updated");
         })
     </script>
 

@@ -166,14 +166,14 @@
             });
 
 
-            $("#todoItemList").on("click", ".todo-checkbox", function (e) {
-                // todo完成的声音
-                xnote.playAudio("todo_done");
+            // $("#todoItemList").on("click", ".todo-checkbox", function (e) {
+            //     // todo完成的声音
+            //     xnote.playAudio("todo_done");
 
-                // 标记为完成
-                var id = $(e.target).attr("data-id");
-                updateMessageTag(id, "done");
-            });
+            //     // 标记为完成
+            //     var id = $(e.target).attr("data-id");
+            //     updateMessageTag(id, "done");
+            // });
 
             $(".select-topic-btn").click(function (e) {
                 xnote.showIframeDialog("选择标签", "/message?op=select&tag=key")
@@ -184,6 +184,7 @@
             // 监听上传事件
             xnote.on("message.upload", onFileUploaded);
             xnote.on("message.refresh", onMessageRefresh);
+            xnote.on("message.updated", onMessageRefresh);
             xnote.on("message.topic.selected", onTopicSelected);
 
             // 加载todo列表

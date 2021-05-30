@@ -46,21 +46,35 @@
             $(".message-list").html(resp);
         }).fail(function (e) {
             console.error(e);
-            xnote.alert("调用接口失败，请重试");
+            xnote.alert("调用接口失败，请稍后重试");
         });
     }
 
     function onMessageReceived(event) {
         var data = event.data;
-        if (data == "message.updated") {
-            xnote.closeAllDialog();
-            refreshMessageList(LAST_DATE);
+        try {
+            var msg = JSON.parse(data);
+            if (msg.type == "message.updated") {
+                // 优先读取扩展函数
+                var refreshExtFunc = xnote.getExtFunc("message.refreshMessageList");
+                if (refreshExtFunc != undefined) {
+                    refreshExtFunc(LAST_DATE);
+                } else {
+                    refreshMessageList(LAST_DATE);
+                }
+
+                xnote.closeAllDialog();
+            }
+        } catch (e) {
+            console.error("parse window message failed", e);
         }
     }
 
+    // 注册到window对象上
     window.refreshMessageList = refreshMessageList;
     window.doRefreshMessageList = doRefreshMessageList;
 
+    // 处理编辑/删除事件
     window.addEventListener("message", onMessageReceived, false);
 
 })();

@@ -75,6 +75,20 @@ $(function() {
     }
 
     $("[data-tag=" + displayTag + "]").addClass("tab-link-active");
+
+    function onMessageUpdated() {
+        $.get("/message/stat", function (resp) {
+            $(".task-count").text(resp.task_count);
+            $(".done-count").text(resp.done_count);
+            $(".log-count").text(resp.log_count);
+            $(".idea-count").text(resp.idea_count);
+            $(".cron-count").text(resp.cron_count);
+            $(".key-count").text(resp.key_count);
+        });
+    }
+
+    xnote.on("message.created", onMessageUpdated);
+    xnote.on("message.updated", onMessageUpdated);
 });
 </script>
 

@@ -24,7 +24,7 @@
 
                 <div class="float-right">
                     {% if show_todo_check %}
-                        <input type="checkbox" data-id="{{item.id}}" class="todo-checkbox">
+                        <input type="checkbox" data-id="{{item.id}}" class="todo-checkbox" onclick="onMessageDone(this)">
                     {% end %}
 
                     {% if item.tag == "done1" %}
@@ -65,18 +65,22 @@ $(function () {
         // 更新后会调用 postMessage 发送消息
     });
 
+    function updateMessageTag(id, tag) {
+        $.post("/message/tag", {id: id, tag: tag}, function (resp) {
+            if (resp.code == "success") {
+                xnote.fire("message.updated");
+            } else {
+                alert(resp.message);
+            }
+        });
+    }
+
     $(".update-tag-btn").click(function (e) {
         var id = $(e.target).attr("data-id");
         var tag = $(e.target).attr("data-tag");
         console.log(id, tag);
 
-        $.post("/message/tag", {id: id, tag: tag}, function (resp) {
-            if (resp.code == "success") {
-                xnote.fire("message.refresh");
-            } else {
-                xnote.alert(data.message);
-            }
-        });
+        updateMessageTag(id, tag);
     });
 
     $(".todo-delete-btn").click(function (e) {
@@ -86,14 +90,27 @@ $(function () {
         xnote.confirm("确认删除[" + content + "]吗?", function (result) {
             $.post("/message/delete", {id: id}, function (resp) {
                 if (resp.code == "success") {
-                    window.postMessage("message.updated", "*");
+                    var msg = {type: "message.updated"};
+                    window.postMessage(JSON.stringify(msg), "*");
                 } else {
                     xnote.alert(data.message);
                 }
             });
         });
-    })
+    });
+
+    window.onMessageDone = function(target) {
+        // todo完成的声音
+        xnote.playAudio("todo_done");
+
+        // 标记为完成
+        var id = $(target).attr("data-id");
+
+        updateMessageTag(id, "done");
+    }
     
+    // 加载音频文件
+    xnote.loadAudio("todo_done", "/static/audio/todo_done.mp3");
 });
 </script>
 

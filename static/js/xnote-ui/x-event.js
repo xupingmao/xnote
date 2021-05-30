@@ -1,3 +1,16 @@
+/**
+ * xnote扩展事件
+ * @author xupingmao
+ * @since 2021/05/30 14:39:39
+ * @modified 2021/05/30 14:42:56
+ * @filename x-event.js
+ */
+
+// xnote事件驱动
+if (window.xnote == undefined) {
+    window.xnote = {};
+}
+
 
 (function(){
 
@@ -118,12 +131,6 @@
     EventDispatcher.prototype.on = EventDispatcher.prototype.addEventListener;
     EventDispatcher.prototype.un = EventDispatcher.prototype.removeEventListener;
     EventDispatcher.prototype.fire = EventDispatcher.prototype.dispatchEvent;
-
-
-    // xnote事件驱动
-    if (window.xnote == undefined) {
-        window.xnote = {};
-    }
 
     xnote._eventDispatcher = new EventDispatcher();
     xnote.addEventListener = xnote.on = function (type, listener) {
