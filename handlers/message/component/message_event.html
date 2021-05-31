@@ -4,6 +4,9 @@ $(function () {
     function onMessageReceivedByJson(data) {
         try {
             var msg = JSON.parse(data);
+            
+            console.log("convert event", msg.type);
+
             xnote.fire(msg.type, msg);
         } catch (e) {
             console.error("parse window message failed", e);

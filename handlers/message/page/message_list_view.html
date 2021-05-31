@@ -13,6 +13,10 @@
 
     <input class="default-content-input" type="hidden" value="{{default_content}}"/>
 
+    <!-- 事件转换 -->
+    {% include message/component/message_event.html %}
+
+    <!-- 菜单 -->
     {% if show_tab %}
         {% include message/component/message_header.html %}
     {% end %}
@@ -22,14 +26,14 @@
         {% include message/component/message_input.html %}
     {% end %}
 
-    <!-- 二级目录 -->
-    {% if show_sub_link %}
-        {% include message/component/message_sub_link.html %}
-    {% end %}
-
     <!-- 系统标签 -->
     {% if show_system_tag %}
         {% include message/card/message_system_tag.html %}
+    {% end %}
+
+    <!-- 二级目录 -->
+    {% if show_sub_link %}
+        {% include message/component/message_sub_link.html %}
     {% end %}
 
     <!-- 文字区域 -->
@@ -55,26 +59,11 @@
                 onMessageRefresh();
             }
 
-            function onMessageReceived(event) {
-                var data = event.data;
-                try {
-                    var msg = JSON.parse(data);
-                    if (msg.type == "message.topic.selected") {
-                        onTopicSelected({target:msg.content});
-                        xnote.closeAllDialog();
-                    }
-                } catch (e) {
-                    console.error("parse window message failed", e);
-                }
-            }
-
             xnote.on("message.updated", onMessageRefresh);
             xnote.on("message.created", onMessageCreated);
 
             // 定义刷新消息列表函数
             xnote.setExtFunc("message.refreshMessageList", onMessageRefresh);
-            // 监听iframe消息
-            window.addEventListener("message", onMessageReceived, false);
 
             // 触发更新事件
             xnote.fire("message.updated");

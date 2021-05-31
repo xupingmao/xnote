@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/05/23 17:28:00
+# @modified 2021/05/30 21:05:11
 import xutils
 import xconfig
 import xmanager
@@ -14,6 +14,7 @@ from xtemplate import T
 dbutil.register_table("message", "短文本")
 dbutil.register_table("msg_search_history", "备忘搜索历史")
 dbutil.register_table("msg_key", "备忘关键字/标签")
+dbutil.register_table("msg_key_rel", "标签关系")
 dbutil.register_table("msg_history", "备忘历史")
 dbutil.register_table("user_stat", "用户数据统计")
 
@@ -63,7 +64,7 @@ def expire_message_cache(ctx):
 
 def search_message(user_name, key, offset, limit, search_tags = None):
     words = []
-    for item in key.split(" "):
+    for item in key.split():
         if item == "":
             continue
         words.append(item.lower())
