@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/05/30 21:05:11
+# @modified 2021/06/02 23:06:11
 import xutils
 import xconfig
 import xmanager
@@ -263,7 +263,11 @@ def list_by_date(user, date, offset = 0, limit = xconfig.PAGE_SIZE):
     def list_by_date_func(key, value):
         return value.ctime.find(date) == 0
 
-    return dbutil.prefix_list("message:%s" % user, list_by_date_func, offset, limit, reverse = True)
+    amount = dbutil.prefix_count("message:%s" % user, list_by_date_func)
+
+    msg_list = dbutil.prefix_list("message:%s" % user, list_by_date_func, offset, limit, reverse = True)
+
+    return msg_list, amount
 
 def count_by_tag(user, tag):
     if tag == "key":

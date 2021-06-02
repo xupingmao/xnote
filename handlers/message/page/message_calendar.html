@@ -7,12 +7,12 @@
     {% include common/date/month_picker.html %}
 
     <div class="card">
-      <a id="viewByDayLink" href="/message/list_by_day?date={{date}}" class="list-link">
-          <span>按天查看</span>
-          <div class="float-right">
-              <i class="fa fa-chevron-right"></i>
-          </div>
-      </a>
+        <a id="viewByDayLink" href="/message/list_by_day?date={{date}}" class="list-link">
+            <span>按天查看</span>
+            <div class="float-right">
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
     </div>
 
     <!-- 文字区域 -->
@@ -21,6 +21,15 @@
     <script type="text/javascript">
         $(function (e) {
             var date = "{{date}}";
+
+            function getPage() {
+                var page = getUrlParam("page");
+                if (page == undefined) {
+                    return 1;
+                } else {
+                    return parseInt(page);
+                }
+            }
 
             function onMonthSelected(event) {
                 var date = event.target;

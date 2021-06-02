@@ -1,13 +1,14 @@
 {% init title = "随手记" %}
 {% init tag = "log" %}
 {% init message_stat = xutils.DAO("message").get_current_message_stat() %}
+{% init show_back_btn = False %}
 
 <!-- header.html -->
 <div class="card">    
     <div class="card-title btn-line-height">
         <span>{{title}}</span>
         <div class="float-right">
-            {% if HOME_PATH == "/message/log" %}
+            {% if HOME_PATH == "/message/log" and not show_back_btn %}
                 <a class="btn btn-default" href="/note/group">笔记</a>
                 <a class="btn btn-default" href="/note/tools">工具</a>
             {% else %}

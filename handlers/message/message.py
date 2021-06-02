@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/05/30 14:54:23
+# @modified 2021/06/02 23:22:08
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -216,6 +216,13 @@ def get_similar_key(key):
     else:
         return "#" + key + "#"
 
+
+def get_page_max(amount, pagesize = None):
+    if pagesize is None:
+        pagesize = xconfig.PAGE_SIZE
+    return math.ceil(amount / pagesize)
+
+
 ############  class
 
 class SearchContext:
@@ -322,7 +329,7 @@ class ListAjaxHandler:
             else:
                 chatlist, amount = MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
 
-        page_max = math.ceil(amount / pagesize)
+        page_max = get_page_max(amount, pagesize)
 
         parser = MessageListParser(chatlist)
         parser.parse()
@@ -574,15 +581,24 @@ class DateAjaxHandler:
     @xauth.login_required()
     def GET(self):
         date      = xutils.get_argument("date")
+        page      = xutils.get_argument("page", 1, type = int)
         user_name = xauth.current_name()
-        msg_list = MSG_DAO.list_by_date(user_name, date)
+
+        offset = (page - 1) * xconfig.PAGE_SIZE
+        limit  = xconfig.PAGE_SIZE
+
+        msg_list, msg_count  = MSG_DAO.list_by_date(user_name, date, offset, limit)
 
         parser = MessageListParser(msg_list)
         parser.parse()
 
-        # return dict(code="success", data = msg_list)
+        page_max = get_page_max(msg_count, xconfig.PAGE_SIZE)
+
         return xtemplate.render("message/ajax/message_ajax.html", 
-            page = 1, item_list = msg_list)
+            page_max = page_max,
+            page = page, 
+            page_url = "?date=%s&page=" % date,
+            item_list = msg_list)
 
 def filter_key(key):
     if key == None or key == "":
@@ -770,7 +786,7 @@ class MessageListByDayHandler():
 
         year, month, day = do_split_date(date)
 
-        item_list = MSG_DAO.list_by_date(user_name, date, limit = LIST_LIMIT)
+        item_list, amount = MSG_DAO.list_by_date(user_name, date, limit = LIST_LIMIT)
         message_list = []
 
         for item in item_list:
@@ -789,6 +805,7 @@ class MessageListByDayHandler():
             year = year,
             month = month,
             message_list = message_list,
+            show_back_btn = True,
             tag = "date")
 
 class MessageDetailHandler:
@@ -796,7 +813,10 @@ class MessageDetailHandler:
     @xauth.login_required()
     def GET(self):
         date = xutils.get_argument("date")
-        return xtemplate.render("message/page/message_detail.html", tag = "date", date = date)
+        return xtemplate.render("message/page/message_detail.html", 
+            tag = "date", 
+            show_back_btn = True,
+            date = date)
 
 class MessageRefreshHandler:
 

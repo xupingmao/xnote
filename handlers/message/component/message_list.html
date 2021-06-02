@@ -19,10 +19,20 @@
 
     var LAST_DATE;
 
+    function getCurrentPage() {
+        var page = getUrlParam("page");
+        if (page == undefined) {
+            return 1;
+        } else {
+            return parseInt(page);
+        }
+    }
+
     function refreshMessageList(date) {
         LAST_DATE = date;
         var params = {
-            date: date
+            date: date,
+            page: getCurrentPage()
         };
 
         $.get("/message/date", params,function (respText) {
