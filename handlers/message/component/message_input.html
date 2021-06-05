@@ -5,9 +5,10 @@
 {% init message_placeholder = "记录发生的事情/产生的想法" %}
 {% init show_tag_btn = True %}
 {% init show_attachment_btn = True %}
+{% init default_content = "" %}
 
 <div class="message-input-box card">
-    <textarea class="col-md-12 input-box" rows=3 placeholder="{{message_placeholder}}"></textarea>
+    <textarea class="col-md-12 input-box" rows=3 autoHeight=true placeholder="{{message_placeholder}}">{{default_content}}</textarea>
     <input type="file" id="filePicker" class="hide" multiple/>
     
     {% if show_tag_btn %}
@@ -53,7 +54,8 @@ $(function () {
                 if (data.code != "success") {
                     xnote.alert(data.message);
                 } else {
-                    $(".input-box").val("");
+                    $(".input-box").val("{{default_content}}");
+                    $(".input-box")[0].style.height = "52px";
                 }
                 // 发布创建消息
                 xnote.fire("message.created", "");
@@ -62,6 +64,22 @@ $(function () {
             xnote.alert("创建记事失败，请稍后重试");
         })
     });
+
+    $.fn.autoHeight = function(){    
+        function autoHeight(elem){
+            elem.style.height = 'auto';
+            elem.scrollTop = 0; //防抖动
+            elem.style.height = elem.scrollHeight + 'px';
+        }
+
+        this.each(function(){
+            autoHeight(this);
+            $(this).on('keyup', function(){
+                autoHeight(this);
+            });
+        });     
+    }                
+    $('textarea[autoHeight]').autoHeight();    
 
     // 监听上传事件
     xnote.on("message.upload", onFileUploaded);

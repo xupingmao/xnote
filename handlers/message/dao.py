@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/06/02 23:06:11
+# @modified 2021/06/05 16:08:10
 import xutils
 import xconfig
 import xmanager
@@ -62,19 +62,37 @@ def add_message_history(message):
 def expire_message_cache(ctx):
     cacheutil.prefix_del("message.count")
 
-def search_message(user_name, key, offset, limit, search_tags = None):
+def get_words_from_key(key):
     words = []
     for item in key.split():
         if item == "":
             continue
         words.append(item.lower())
+    return words
 
-    def search_func(key, value):
+def search_message(user_name, key, offset, limit, search_tags = None, no_tag = None):
+    words = get_words_from_key(key)
+
+    def search_func_default(key, value):
         if value.content is None:
             return False
-        if search_tags != None and value.tag not in search_tags:
+        if no_tag is True and value.content.find("#") >= 0:
             return False
         return textutil.contains_all(value.content.lower(), words)
+
+    def search_func_with_tags(key, value):
+        if value.content is None:
+            return False
+        if value.tag not in search_tags:
+            return False
+        if no_tag is True and value.content.find("#") >= 0:
+            return False
+        return textutil.contains_all(value.content.lower(), words)
+
+    if search_tags != None:
+        search_func = search_func_with_tags
+    else:
+        search_func = search_func_default
 
     chatlist = dbutil.prefix_list("message:%s" % user_name, search_func, offset, limit, reverse = True)
     amount   = dbutil.prefix_count("message:%s" % user_name, search_func)

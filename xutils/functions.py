@@ -1,10 +1,10 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2020/12/27 16:52:23
-from xutils.base import Storage
+# @modified 2021/06/05 12:48:45
 from collections import deque
-from .dateutil import format_time
+from xutils.base import Storage
+from xutils.dateutil import format_time
 
 class Counter:
 
@@ -22,6 +22,9 @@ class Counter:
             self.dict[key] -= 1
         else:
             self.dict[key] = -1
+
+    def get_count(self, key):
+        return self.dict.get(key, 0)
             
     def __iter__(self):
         return list(self.dict.keys())

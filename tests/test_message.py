@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/06/02 23:26:59
+# @modified 2021/06/05 16:31:08
 
 import sys
 import os
@@ -16,6 +16,7 @@ import xtemplate
 import xconfig
 import xtables
 from xutils import u, dbutil
+from xutils import dateutil
 
 # cannot perform relative import
 try:
@@ -112,11 +113,25 @@ class TestMain(BaseTestCase):
         self.check_OK("/message/date?date=2021-05")
         
     def test_list_by_day(self):
-        self.check_OK("/message/list_by_day?date=2021-05")
-        self.check_OK("/message/detail?date=2021-05-22")
+        # 创建一条记录
+        response = json_request("/message/save", method="POST", 
+            data=dict(content="Xnote-Unit-Test", tag="log"))
+
+        month = dateutil.format_date(fmt = "%Y-%m")
+        date = dateutil.format_date()
+        self.check_OK("/message/list_by_day?date=" + month)
+        self.check_OK("/message?date=" + date)
         
     def test_message_refresh(self):
         self.check_OK("/message/refresh")
+
+    def test_message_task_tags(self):
+        # 创建一条记录
+        response = json_request("/message/save", method="POST", 
+            data=dict(content="#TEST# Xnote-Unit-Test", tag="task"))
+
+        self.check_OK("/message?tag=task_tags")
+
 
 
 

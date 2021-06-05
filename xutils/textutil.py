@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2021/04/17 22:19:52
+# @modified 2021/06/05 16:32:45
 import re
 import random
 import json
@@ -189,6 +189,12 @@ def remove(self, target):
         'this is a '
     """
     return self.replace(target, "")
+
+def remove_head(text, head):
+    raise NotImplementedError("remove_head")
+
+def remove_tail(text, tail):
+    raise NotImplementedError("remove_tail")
 
 def between(self, start, end):
     """Get the text between start end end

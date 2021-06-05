@@ -50,8 +50,32 @@
                 }
             }
 
+            function getKey() {
+                return getUrlParam("key", "");
+            }
+
+            function getSearchTags() {
+                return getUrlParam("searchTags", "");
+            }
+
+            function getParamDate() {
+                return getUrlParam("date", "");
+            }
+
+            function getParamNoTag() {
+                return getUrlParam("noTag", "");
+            }
+
             function onMessageRefresh() {
-                var params = {page:1, tag:"{{message_tag}}", page:getPage()};
+                var params = {};
+
+                params.tag  = "{{message_tag}}";
+                params.page = getPage();
+                params.key = getKey();
+                params.searchTags = getSearchTags();
+                params.date = getParamDate();
+                params.noTag = getParamNoTag();
+
                 window.doRefreshMessageList(params);
             }
 

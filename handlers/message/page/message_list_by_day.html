@@ -11,7 +11,7 @@
         {% end %}
 
         {% for date, item_list, wday in message_list %}
-            <a href="/message/detail?date={{date}}" class="list-link">
+            <a href="/message?date={{date}}" class="list-link">
                 <span>{{date}} {{wday}}</span>
                 <div class="float-right">
                     <span class="book-size-span">{{ len(item_list) }}</span>

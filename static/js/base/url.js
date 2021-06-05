@@ -73,6 +73,11 @@ var getUrlParams = function() {
  * 根据key获取url参数值 
  * @param {string} key
  */
-var getUrlParam = function (key) {
-    return getUrlParams()[key];
+var getUrlParam = function (key, defaultValue) {
+    var paramValue = getUrlParams()[key];
+    if (paramValue == undefined) {
+        return defaultValue;
+    } else {
+        return paramValue;
+    }
 }

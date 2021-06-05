@@ -63,16 +63,20 @@
 <script type="text/javascript">
 $(function() {
     function isEmpty(value) {
-        return value === "" || value === undefined || value === null
+        return value === "" || value === undefined || value === null;
     }
     
     var displayTag = getUrlParam("displayTag");
     if (isEmpty(displayTag)) {
-        var tag = "{{tag}}";
-        if (isEmpty(tag)) {
-            tag = "log";
-        }
-        displayTag = tag;
+        displayTag = "{{tag}}";
+    }
+
+    if (isEmpty(displayTag)) {
+        displayTag = "log";
+    }
+
+    if (displayTag == "search") {
+        displayTag = "log";
     }
 
     $("[data-tag=" + displayTag + "]").addClass("tab-link-active");

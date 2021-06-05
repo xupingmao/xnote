@@ -1,3 +1,7 @@
+<!-- deprecated -->
+
+<script src="/static/lib/vue/vue-2.2.6.min.js"></script>
+
 <!-- 话题/标签选择器 -->
 {% include message/component/select_topic_dialog.html %}
 <!-- 文件上传 -->
@@ -255,11 +259,12 @@
                 var self = this;
                 var page = getUrlParams().page || 1;
                 var tag  = "{{tag}}";
+                var searchTags = getUrlParam("searchTags");
                 app.page = page;
                 app.page_next_url = app.page_url + (parseInt(page)+1);
                 app.page_prev_url = app.page_url + (page-1);
                 $.get("/message/list", 
-                    {page:page,status:self.status,key:"{{key}}",tag:tag}, 
+                    {page:page,status:self.status,key:"{{key}}",tag:tag,searchTags:searchTags}, 
                     function (respText) {
                         var data = respText;
                         app.page_max = data.page_max;
