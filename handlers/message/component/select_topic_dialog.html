@@ -8,9 +8,13 @@ $(function () {
         function createTopicText(topic) {
             if (topic.Get(0) == '#' && topic.Get(-1) == '#') {
                 return topic;
-            } else {
-                return '#' + topic + '#';
             }
+
+            if (topic.Get(0) == '《' && topic.Get(-1) == '》') {
+                return topic;
+            }
+            
+            return '#' + topic + '#';
         }
 
         function touchTopic(topic) {

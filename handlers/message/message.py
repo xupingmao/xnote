@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/05 16:17:02
+# @modified 2021/06/06 12:05:32
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -223,6 +223,12 @@ def get_page_max(amount, pagesize = None):
         pagesize = xconfig.PAGE_SIZE
     return math.ceil(amount / pagesize)
 
+def get_offset_from_page(page, pagesize = None):
+    if pagesize is None:
+        pagesize = xconfig.PAGE_SIZE
+
+    offset = (page - 1) * pagesize
+    return max(offset, 0)
 
 def get_tags_from_message_list(msg_list, input_tag = "task"):
     tag_counter = Counter()
@@ -251,6 +257,23 @@ def get_tags_from_message_list(msg_list, input_tag = "task"):
     tag_list.sort(key = lambda x: x.amount, reverse = True)
 
     return tag_list
+
+def get_length(item):
+    if isinstance(item, (tuple, list, set, str)):
+        return len(item)
+    else:
+        return -1
+
+def after_message_create_or_update(msg_item):
+    process_message(msg_item)
+
+    if get_length(msg_item.keywords) == 0:
+        msg_item.no_tag = True
+        msg_item.keywords = None
+        MSG_DAO.update(msg_item)
+
+def function_and_class_split_line():
+    pass
 
 ############  class
 
@@ -289,7 +312,7 @@ class MessageListParser(object):
 class ListAjaxHandler:
 
     def do_get_html(self, chatlist, page, page_max, tag = "task"):
-        show_todo_check = False
+        show_todo_check = True
         show_edit_btn   = True
         show_to_log_btn = False
         display_tag     = xutils.get_argument("displayTag", "")
@@ -379,7 +402,8 @@ class ListAjaxHandler:
         format = xutils.get_argument("format")
         date   = xutils.get_argument("date", "")
 
-        offset = (page-1) * pagesize
+        offset = get_offset_from_page(page, pagesize)
+
         user_name = xauth.get_current_name()
 
         chatlist, amount = self.do_list_message(user_name, tag, offset, pagesize)
@@ -427,6 +451,8 @@ def update_message_content(id, user_name, content):
         MSG_DAO.update(data)
 
         xmanager.fire("message.update", dict(id=id, user=user_name, content=content))
+
+        after_message_create_or_update(data)
 
 def create_done_message(old_message):
     old_id = old_message['id']
@@ -578,8 +604,11 @@ def create_message(user_name, tag, content, ip):
     id = MSG_DAO.create(**message)
     message['id'] = id
     MSG_DAO.refresh_message_stat(user_name)
+
+    after_message_create_or_update(MSG_DAO.get_by_id(id))
     
     xmanager.fire('message.add', dict(id=id, user=user_name, content=content, ctime=ctime))
+
     return message
 
 def check_content_for_update(user_name, tag, content):

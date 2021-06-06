@@ -1,15 +1,4 @@
-
-<div class="message-list-item-tpl hide">
-    <div class="message-row card">
-        <div class="msg-item-header">
-            <span class="chat-msg-time">${ctime}</span>
-        </div>
-        <div class="msg-item-content">
-            ${html}
-        </div>
-    </div>
-</div>
-
+<!-- 随手记列表 -->
 <div class="message-list">
 
 </div>
@@ -49,7 +38,7 @@
         xnote.assert(params.tag, "params.tag expected");
 
         params.format = "html";
-        params.displayTag = getUrlParam("displayTag");
+        params.displayTag = getUrlParam("displayTag", "");
 
         $.get("/message/list", params, function (resp) {
             // console.log(resp);

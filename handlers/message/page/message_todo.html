@@ -7,6 +7,9 @@
     <!-- 文件上传的组件 -->
     {% include message/component/message_upload.html %}
 
+    <!-- 消息处理组件 -->
+    {% include message/component/message_event.html %}
+
     {% init tag = "todo" %}
     {% init title = "待办任务" %}
     {% init show_input_box = True %}
@@ -79,35 +82,9 @@
                 $(".input-box").val(newText);
             }
 
-            function onMessageReceivedByJson(data) {
-                try {
-                    var msg = JSON.parse(data);
-                    if (msg.type == "message.topic.selected") {
-                        onTopicSelected({target:msg.content});
-                        xnote.closeAllDialog();
-                    }
-
-                    if (msg.type == "message.updated") {
-                        loadTodoList();
-                        xnote.closeAllDialog();
-                    }
-                } catch (e) {
-                    console.error("parse window message failed", e);
-                }
-            }
-
-            function onMessageReceived(event) {
-                var data = event.data;
-                if (data == "message.updated") {
-                    loadTodoList();
-                    xnote.closeAllDialog();
-                } else {
-                    onMessageReceivedByJson(data);
-                }
-            }
-
             function onMessageRefresh(event) {
                 loadTodoList();
+                xnote.closeAllDialog();
             }
 
             function onTopicSelected(event) {
@@ -165,16 +142,6 @@
                 });
             });
 
-
-            // $("#todoItemList").on("click", ".todo-checkbox", function (e) {
-            //     // todo完成的声音
-            //     xnote.playAudio("todo_done");
-
-            //     // 标记为完成
-            //     var id = $(e.target).attr("data-id");
-            //     updateMessageTag(id, "done");
-            // });
-
             $(".select-topic-btn").click(function (e) {
                 xnote.showIframeDialog("选择标签", "/message?op=select&tag=key")
             })
@@ -192,9 +159,6 @@
 
             // 加载音频文件
             xnote.loadAudio("todo_done", "/static/audio/todo_done.mp3");
-
-            // 监听iframe消息
-            window.addEventListener("message", onMessageReceived, false);
         });
     </script>
 

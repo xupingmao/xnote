@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/06/05 16:08:10
+# @modified 2021/06/06 12:01:54
 import xutils
 import xconfig
 import xmanager
@@ -17,6 +17,8 @@ dbutil.register_table("msg_key", "备忘关键字/标签")
 dbutil.register_table("msg_key_rel", "标签关系")
 dbutil.register_table("msg_history", "备忘历史")
 dbutil.register_table("user_stat", "用户数据统计")
+
+VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:")
 
 class MessageDO(Storage):
 
@@ -45,12 +47,16 @@ def create_message(**kw):
     dbutil.put(key, kw)
     return key
 
-def update_message(message):
+def check_before_update(message):
     id = message['id']
-    if id.startswith(("msg_key:", "message:")):
-        dbutil.put(id, message)
-    else:
-        raise Exception("invalid message id:%s" % id)
+    if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
+        raise Exception("[msg.update] invalid message id:%s" % id)
+
+def update_message(message):
+    check_before_update(message)
+
+    id = message['id']
+    dbutil.put(id, message)
 
 def add_message_history(message):
     id_str = message['id']
@@ -98,7 +104,12 @@ def search_message(user_name, key, offset, limit, search_tags = None, no_tag = N
     amount   = dbutil.prefix_count("message:%s" % user_name, search_func)
     return chatlist, amount
 
+def check_before_delete(id):
+    if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
+        raise Exception("invalid message id:%s" % id)
+
 def delete_message_by_id(id):
+    check_before_delete(id)
     dbutil.delete(id)
     xmanager.fire("message.remove", Storage(id=id))
 
