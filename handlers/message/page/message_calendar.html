@@ -6,14 +6,8 @@
     <!-- 月份选择器 -->
     {% include common/date/month_picker.html %}
 
-    <div class="card">
-        <a id="viewByDayLink" href="/message/list_by_day?date={{date}}" class="list-link">
-            <span>按天查看</span>
-            <div class="float-right">
-                <i class="fa fa-chevron-right"></i>
-            </div>
-        </a>
-    </div>
+    <!-- 二级目录 -->
+    {% include message/component/message_sub_link.html %}
 
     <!-- 文字区域 -->
     {% include message/component/message_list.html %}

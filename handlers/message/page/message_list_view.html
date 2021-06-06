@@ -66,6 +66,14 @@
                 return getUrlParam("noTag", "");
             }
 
+            function getParamFilterKey() {
+                return getUrlParam("filterKey", "");
+            }
+
+            function getParamFilterDate() {
+                return getUrlParam("filterDate", "");
+            }
+
             function onMessageRefresh() {
                 var params = {};
 
@@ -75,6 +83,8 @@
                 params.searchTags = getSearchTags();
                 params.date = getParamDate();
                 params.noTag = getParamNoTag();
+                params.filterKey = getParamFilterKey();
+                params.filterDate = getParamFilterDate();
 
                 window.doRefreshMessageList(params);
             }

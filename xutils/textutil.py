@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2021/06/05 16:32:45
+# @modified 2021/06/06 15:56:14
 import re
 import random
 import json
@@ -191,10 +191,34 @@ def remove(self, target):
     return self.replace(target, "")
 
 def remove_head(text, head):
-    raise NotImplementedError("remove_head")
+    """移除头部的字符
+        >>> remove_head("person.age", "person.")
+        "age"
+        >>> remove_head("person.age", "test")
+        "person.age"
+    """
+    if text is None or head is None:
+        return text
+
+    if not text.startswith(head):
+        return text
+
+    return text[len(head):]
 
 def remove_tail(text, tail):
-    raise NotImplementedError("remove_tail")
+    """移除尾部的字符
+        >>> remove_tail("person.age", ".age")
+        "person"
+        >>> remove_tail("person.age", "name")
+        "person.age"
+    """
+    if text is None or tail is None:
+        return text
+
+    if not text.endswith(tail):
+        return text
+
+    return text[:-len(tail)]
 
 def between(self, start, end):
     """Get the text between start end end

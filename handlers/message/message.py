@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/06 12:05:32
+# @modified 2021/06/06 21:30:31
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -30,7 +30,10 @@ TAG_TEXT_DICT = dict(
     key  = "话题",
     search = "话题",
 )
+
 LIST_LIMIT = 1000
+# 系统标签
+SYSTEM_TAG_TUPLE = ("book", "people", "file", "phone", "link")
 
 def success():
     return dict(success = True, code = "success")
@@ -230,12 +233,32 @@ def get_offset_from_page(page, pagesize = None):
     offset = (page - 1) * pagesize
     return max(offset, 0)
 
-def get_tags_from_message_list(msg_list, input_tag = "task"):
+def filter_msg_list_by_key(msg_list, filter_key):
+    result = []
+
+    for msg_item in msg_list:
+        process_message(msg_item)
+        
+        if msg_item.keywords is None:
+            msg_item.keywords = set()
+
+        if filter_key == "$no_tag" and len(msg_item.keywords) == 0:
+            result.append(msg_item)
+        elif filter_key in msg_item.keywords:
+            result.append(msg_item)
+
+    return result
+
+
+def get_tags_from_message_list(msg_list, input_tag = "", input_date = ""):
     tag_counter = Counter()
 
     for msg_item in msg_list:
         process_message(msg_item)
         
+        if msg_item.keywords is None:
+            msg_item.keywords = set()
+
         if len(msg_item.keywords) == 0:
             tag_counter.incr("$no_tag")
 
@@ -245,11 +268,12 @@ def get_tags_from_message_list(msg_list, input_tag = "task"):
     tag_list = []
     for tag_name in tag_counter.dict:
         amount = tag_counter.get_count(tag_name)
-        url = "/message?searchTags=%s&key=%s" % (input_tag, textutil.encode_uri_component(tag_name))
+        # url = "/message?searchTags=%s&key=%s" % (input_tag, textutil.encode_uri_component(tag_name))
+        url = "/message?tag=%s&filterKey=%s&filterDate=%s" % (input_tag, textutil.encode_uri_component(tag_name), input_date)
 
         if tag_name == "$no_tag":
-            tag_name = "$无标签$"
-            url = "/message?tag=search&searchTags=%s&noTag=true" % input_tag
+            tag_name = "<无标签>"
+            # url = "/message?tag=search&searchTags=%s&noTag=true" % input_tag
 
         tag_item = Storage(name = tag_name, tag = input_tag, amount = amount, url = url)
         tag_list.append(tag_item)
@@ -374,6 +398,15 @@ class ListAjaxHandler:
 
         return chatlist, amount
 
+    def do_list_task(self, user_name, offset, limit):
+        filter_key = xutils.get_argument("filterKey", "")
+        if filter_key != "":
+            msg_list, amount = MSG_DAO.list_by_tag(user_name, "task", offset = 0, limit = LIST_LIMIT)
+            msg_list = filter_msg_list_by_key(msg_list, filter_key)
+            return msg_list, len(msg_list)
+        else:
+            return MSG_DAO.list_by_tag(user_name, "task", offset, limit)
+
     def do_list_message(self, user_name, tag, offset, pagesize):
         key = xutils.get_argument("key", "")
         date = xutils.get_argument("date", "")
@@ -386,6 +419,8 @@ class ListAjaxHandler:
             # 日期
             return MSG_DAO.list_by_date(user_name, date, offset, pagesize)
 
+        if tag == "task":
+            return self.do_list_task(user_name, offset, pagesize)
 
         list_func = xutils.lookup_func("message.list_%s" % tag)
         if list_func != None:
@@ -727,22 +762,54 @@ class MessageHandler:
             show_input_box = False)
 
     def do_view_task(self):
+        filter_key = xutils.get_argument("filterKey", "")
+        show_input_box = True
+        show_sub_link = True
+        show_back_btn = False
+
+        if filter_key != "":
+            show_input_box = False
+            show_sub_link = False
+            show_back_btn = True
+
         return xtemplate.render("message/page/message_list_view.html", 
+            html_title = T("待办任务"),
             message_tag = "task",
             search_type = "message",
             show_system_tag = False,
-            show_sub_link = True,
-            html_title = T("待办任务"),
+            show_sub_link = show_sub_link,
+            show_input_box = show_input_box,
+            show_back_btn = show_back_btn,
             message_placeholder = "添加待办任务")
 
     def do_view_task_tags(self):
         user_name = xauth.current_name()
         msg_list, amount = MSG_DAO.list_by_tag(user_name, "task", 0, -1)
 
-        tag_list = get_tags_from_message_list(msg_list)
+        tag_list = get_tags_from_message_list(msg_list, "task")
 
         return xtemplate.render("message/page/message_tag_view.html", 
             message_tag = "task",
+            search_type = "message",
+            show_back_btn = True,
+            tag_list = tag_list,
+            html_title = T("待办任务"),
+            message_placeholder = "添加待办任务")
+
+    def do_view_month_tags(self):
+        user_name = xauth.current_name()
+        date = xutils.get_argument("date", "")
+
+        year, month, mday = do_split_date(date)
+
+        msg_list, amount = MSG_DAO.list_by_date(user_name, date, limit = LIST_LIMIT)
+
+        tag_list = get_tags_from_message_list(msg_list, "date", date)
+
+        return xtemplate.render("message/page/message_tag_view.html", 
+            year = year,
+            month = month,
+            message_tag = "calendar",
             search_type = "message",
             show_back_btn = True,
             tag_list = tag_list,
@@ -794,6 +861,9 @@ class MessageHandler:
         xmanager.add_visit_log(user, "/message?tag=%s" % tag)
 
         if date != "":
+            if tag == "month_tags":
+                return self.do_view_month_tags()
+
             return self.do_view_by_date(date)
 
         if tag == "key" and op == "select":
@@ -802,7 +872,7 @@ class MessageHandler:
         if tag == "key":
             return self.do_view_tags()
 
-        if tag in ("book", "people", "file", "phone", "link"):
+        if tag in SYSTEM_TAG_TUPLE:
             return self.do_view_by_system_tag(tag)
 
         if tag == "task":

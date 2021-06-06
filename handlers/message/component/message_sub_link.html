@@ -1,3 +1,5 @@
+{% init message_tag = "" %}
+
 {% if message_tag == "task" %}
     <div class="card">
         <a class="list-link" href="/message/done">
@@ -16,5 +18,28 @@
             </div>
         </a>
 
+    </div>
+{% end %}
+
+{% if tag == "calendar" %}
+    <!-- 日期视图 -->
+    <div class="card">
+        <a id="viewByDayLink" href="/message/list_by_day?date={{date}}" class="list-link">
+            <span>按天查看</span>
+            <div class="float-right">
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+
+        <!--
+        <a class="list-link" href="/message?tag=month_tags&date={{date}}&displayTag=date">
+            <span>按标签查看</span>
+            <div class="float-right">
+                <span class="book-size-span"></span>
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+        -->
+        
     </div>
 {% end %}

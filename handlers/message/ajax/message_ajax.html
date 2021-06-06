@@ -23,7 +23,7 @@
                 {% end %}
 
                 <div class="float-right">
-                    {% if show_todo_check %}
+                    {% if item.tag == "task" %}
                         <input type="checkbox" data-id="{{item.id}}" class="todo-checkbox" onclick="onMessageDone(this)">
                     {% end %}
 

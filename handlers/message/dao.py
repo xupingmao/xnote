@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/06/06 12:01:54
+# @modified 2021/06/06 21:42:45
 import xutils
 import xconfig
 import xmanager
@@ -76,13 +76,16 @@ def get_words_from_key(key):
         words.append(item.lower())
     return words
 
+def has_tag_fast(content):
+    return content.find("#") >= 0 or content.find("@") >= 0
+
 def search_message(user_name, key, offset, limit, search_tags = None, no_tag = None):
     words = get_words_from_key(key)
 
     def search_func_default(key, value):
         if value.content is None:
             return False
-        if no_tag is True and value.content.find("#") >= 0:
+        if no_tag is True and has_tag_fast(value.content):
             return False
         return textutil.contains_all(value.content.lower(), words)
 
@@ -91,7 +94,7 @@ def search_message(user_name, key, offset, limit, search_tags = None, no_tag = N
             return False
         if value.tag not in search_tags:
             return False
-        if no_tag is True and value.content.find("#") >= 0:
+        if no_tag is True and has_tag_fast(value.content):
             return False
         return textutil.contains_all(value.content.lower(), words)
 
@@ -260,7 +263,7 @@ def get_by_content(user, tag, content):
     else:
         return None
 
-def list_by_tag(user, tag, offset, limit):
+def list_by_tag(user, tag, offset = 0, limit = xconfig.PAGE_SIZE):
     if tag == "key":
         chatlist = list_key(user, offset, limit)
     else:
