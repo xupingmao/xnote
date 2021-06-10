@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/11 00:09:16
+# @modified 2021/06/11 00:36:10
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -121,7 +121,7 @@ def process_message(message):
 
     if message.keywords is None:
         message.keywords = set()
-        
+
     return message
 
 
@@ -349,6 +349,9 @@ class ListAjaxHandler:
         display_tag     = xutils.get_argument("displayTag", "")
         date = xutils.get_argument("date", "")
         key  = xutils.get_argument("key", "")
+        encoded_key = xutils.encode_uri_component(key)
+        filter_key = xutils.get_argument("filterKey", "")
+        encoded_filter_key = xutils.encode_uri_component(filter_key)
 
         if tag == "todo" or tag == "task":
             show_todo_check = True
@@ -371,7 +374,7 @@ class ListAjaxHandler:
             show_edit_btn = show_edit_btn,
             show_to_log_btn = show_to_log_btn,
             page = page,
-            page_url = "?tag=%s&displayTag=%s&date=%s&key=%s&page=" % (tag, display_tag, date, key),
+            page_url = "?tag=%s&displayTag=%s&date=%s&key=%s&filterKey=%s&page=" % (tag, display_tag, date, encoded_key, encoded_filter_key),
             page_max = page_max,
             item_list = chatlist)
 
@@ -410,17 +413,17 @@ class ListAjaxHandler:
         if filter_key != "":
             msg_list, amount = MSG_DAO.list_by_tag(user_name, "task", offset = 0, limit = LIST_LIMIT)
             msg_list = filter_msg_list_by_key(msg_list, filter_key)
-            return msg_list, len(msg_list)
+            return msg_list[offset:offset+limit], len(msg_list)
         else:
             return MSG_DAO.list_by_tag(user_name, "task", offset, limit)
 
     def do_list_by_date(self, user_name, date, offset, pagesize):
-
         filter_key = xutils.get_argument("filterKey", "")
+
         if filter_key != "":
             msg_list, amount = MSG_DAO.list_by_date(user_name, date, 0, LIST_LIMIT)
             msg_list = filter_msg_list_by_key(msg_list, filter_key)
-            return msg_list, len(msg_list)
+            return msg_list[offset:offset+pagesize], len(msg_list)
         else:
             return MSG_DAO.list_by_date(user_name, date, offset, pagesize)
 
