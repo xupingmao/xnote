@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/06 21:30:31
+# @modified 2021/06/11 00:09:16
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -118,6 +118,10 @@ def process_message(message):
 
     if message.tag == "done":
         build_done_html(message)
+
+    if message.keywords is None:
+        message.keywords = set()
+        
     return message
 
 
@@ -238,9 +242,6 @@ def filter_msg_list_by_key(msg_list, filter_key):
 
     for msg_item in msg_list:
         process_message(msg_item)
-        
-        if msg_item.keywords is None:
-            msg_item.keywords = set()
 
         if filter_key == "$no_tag" and len(msg_item.keywords) == 0:
             result.append(msg_item)
@@ -269,7 +270,13 @@ def get_tags_from_message_list(msg_list, input_tag = "", input_date = ""):
     for tag_name in tag_counter.dict:
         amount = tag_counter.get_count(tag_name)
         # url = "/message?searchTags=%s&key=%s" % (input_tag, textutil.encode_uri_component(tag_name))
-        url = "/message?tag=%s&filterKey=%s&filterDate=%s" % (input_tag, textutil.encode_uri_component(tag_name), input_date)
+
+        encoded_tag = textutil.encode_uri_component(tag_name)
+
+        if input_date == "":
+            url = "/message?tag=%s&filterKey=%s&filterDate=%s" % (input_tag, encoded_tag, input_date)
+        else:
+            url = "/message?tag=%s&date=%s&filterKey=%s" % (input_tag, input_date, encoded_tag)
 
         if tag_name == "$no_tag":
             tag_name = "<无标签>"
@@ -407,9 +414,20 @@ class ListAjaxHandler:
         else:
             return MSG_DAO.list_by_tag(user_name, "task", offset, limit)
 
+    def do_list_by_date(self, user_name, date, offset, pagesize):
+
+        filter_key = xutils.get_argument("filterKey", "")
+        if filter_key != "":
+            msg_list, amount = MSG_DAO.list_by_date(user_name, date, 0, LIST_LIMIT)
+            msg_list = filter_msg_list_by_key(msg_list, filter_key)
+            return msg_list, len(msg_list)
+        else:
+            return MSG_DAO.list_by_date(user_name, date, offset, pagesize)
+
     def do_list_message(self, user_name, tag, offset, pagesize):
         key = xutils.get_argument("key", "")
         date = xutils.get_argument("date", "")
+        filter_date = xutils.get_argument("filterDate", "")
 
         if (tag == "search") or (key != "" and key != None):
             # 搜索
@@ -417,7 +435,10 @@ class ListAjaxHandler:
 
         if date != "" and date != None:
             # 日期
-            return MSG_DAO.list_by_date(user_name, date, offset, pagesize)
+            return self.do_list_by_date(user_name, date, offset, pagesize)
+
+        if filter_date != "":
+            return self.do_list_by_date(user_name, filter_date, offset, pagesize)
 
         if tag == "task":
             return self.do_list_task(user_name, offset, pagesize)
@@ -733,7 +754,7 @@ def filter_key(key):
         
     return "#%s#" % key
 
-class MessageHandler:
+class MessageListHandler:
 
     def do_select_key(self):
         user_name = xauth.current_name()
@@ -860,10 +881,10 @@ class MessageHandler:
         # 记录日志
         xmanager.add_visit_log(user, "/message?tag=%s" % tag)
 
-        if date != "":
-            if tag == "month_tags":
-                return self.do_view_month_tags()
+        if tag == "month_tags":
+            return self.do_view_month_tags()
 
+        if date != "":
             return self.do_view_by_date(date)
 
         if tag == "key" and op == "select":
@@ -935,6 +956,9 @@ class DairyHandler:
     @xauth.login_required()
     def GET(self):
         return xtemplate.render("message/page/dairy.html")
+
+class MessageHandler(MessageListHandler):
+    pass
 
 class MessageLogHandler(MessageHandler):
 
