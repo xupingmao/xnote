@@ -50,8 +50,10 @@
                 }
             }
 
-            function getKey() {
-                return getUrlParam("key", "");
+            function getParamKey() {
+                // getUrlParam 获取参数空格会被处理成`+`
+                // return getUrlParam("key", "");
+                return "{{key}}";
             }
 
             function getSearchTags() {
@@ -79,7 +81,7 @@
 
                 params.tag  = "{{message_tag}}";
                 params.page = getPage();
-                params.key = getKey();
+                params.key = getParamKey();
                 params.searchTags = getSearchTags();
                 params.date = getParamDate();
                 params.noTag = getParamNoTag();

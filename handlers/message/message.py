@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/11 00:36:10
+# @modified 2021/06/12 00:54:02
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -1026,6 +1026,7 @@ class MessageListByDayHandler():
             month = month,
             message_list = message_list,
             show_back_btn = True,
+            search_type = "message",
             tag = "date")
 
 class MessageRefreshHandler:
