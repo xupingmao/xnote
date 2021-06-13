@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/12 00:54:02
+# @modified 2021/06/12 13:22:19
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -214,6 +214,9 @@ def refresh_key_amount():
             MSG_DAO.update(message)
             xutils.log("[message.refresh] %s,user:%s,key:%s,amount:%s" % (index, user_name, key, amount))
 
+def refresh_message_index():
+    """刷新随手记的索引"""
+    pass
 
 def get_similar_key(key):
     assert key != None
@@ -1034,6 +1037,7 @@ class MessageRefreshHandler:
     @xauth.login_required("admin")
     def GET(self):
         refresh_key_amount()
+        refresh_message_index()
         return "success"
 
 xutils.register_func("message.process_message", process_message)

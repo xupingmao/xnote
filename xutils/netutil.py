@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2020/08/30 11:30:52
+# @modified 2021/06/12 17:12:00
 # decode: bytes -> str
 # encode: str -> bytes
 import os
@@ -7,7 +7,7 @@ import re
 import codecs
 import six
 import socket
-from .imports import try_decode
+from xutils.imports import try_decode
 
 # TODO fix SSLV3_ALERT_HANDSHAKE_FAILURE on MacOS
 try:

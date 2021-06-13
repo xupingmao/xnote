@@ -371,5 +371,20 @@ class TestMain(unittest.TestCase):
         self.assertEqual(2, textutil.count_end_nl(text_input))
 
     
+    def test_module_call(self):
+        def module_method(name):
+            print("my name is", name)
+            return True
+
+        xutils.register_func("test.method", module_method)
+
+        mod = xutils.Module("test")
+
+        # 运行两次触发缓存
+        mod.method("test")
+        method_result = mod.method("test")
+        self.assertTrue(method_result)
+        self.assertTrue(len(mod._meth) == 1)
+
 
         

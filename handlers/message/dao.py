@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/06/06 21:42:45
+# @modified 2021/06/12 13:29:43
 import xutils
 import xconfig
 import xmanager
@@ -14,11 +14,13 @@ from xtemplate import T
 dbutil.register_table("message", "短文本")
 dbutil.register_table("msg_search_history", "备忘搜索历史")
 dbutil.register_table("msg_key", "备忘关键字/标签")
+dbutil.register_table("msg_task_idx", "待办索引")
 dbutil.register_table("msg_key_rel", "标签关系")
 dbutil.register_table("msg_history", "备忘历史")
 dbutil.register_table("user_stat", "用户数据统计")
 
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:")
+MOBILE_LENGTH = 11
 
 class MessageDO(Storage):
 
@@ -109,24 +111,12 @@ def search_message(user_name, key, offset, limit, search_tags = None, no_tag = N
 
 def check_before_delete(id):
     if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
-        raise Exception("invalid message id:%s" % id)
+        raise Exception("[delete] invalid message id:%s" % id)
 
 def delete_message_by_id(id):
     check_before_delete(id)
     dbutil.delete(id)
     xmanager.fire("message.remove", Storage(id=id))
-
-def db_call(name, *args):
-    if xconfig.DB_ENGINE == "sqlite":
-        return globals()["rdb_" + name](*args)
-    else:
-        return globals()["kv_" + name](*args)
-
-@xutils.timeit(name = "Rdb.Message.Count", logfile = True)
-def rdb_count_message(user, status):
-    count = xtables.get_message_table().count(where="user=$user AND status=$status",
-        vars = dict(user = user, status = status))
-    return count
 
 @xutils.timeit(name = "Kv.Message.Count", logfile = True)
 def kv_count_message(user, status):
@@ -136,20 +126,21 @@ def kv_count_message(user, status):
 
 @xutils.cache(prefix="message.count.status", expire=60)
 def count_message(user, status):
-    return db_call("count_message", user, status)
+    return kv_count_message(user, status)
 
 def get_message_by_id(id):
-    if id is None:
-        return None
+    check_param_id(id)
     return dbutil.get(id)
 
+def check_param_user(user_name):
+    if user_name is None or user_name == "":
+        raise Exception("[query] invalid user_name:%s" % user_name)
 
-def rdb_list_message_page(user, status, offset, limit):
-    db = xtables.get_message_table()
-    kw = dict(user=user, status=status)
-    chatlist = list(db.select(where=kw, order="ctime DESC", limit=limit, offset=offset))
-    amount = db.count(where=kw)
-    return chatlist, amount
+def check_param_id(id):
+    if id is None:
+        raise Exception("param id is None")
+    if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
+        raise Exception("param id invalid: %s" % id)
 
 @xutils.timeit(name = "kv.message.list", logfile = True, logargs = True)
 def list_message_page(user, status, offset, limit):
@@ -213,7 +204,7 @@ def list_phone_page(user, offset, limit, key = None):
             return False
         result = pattern.findall(value.content)
         for item in result:
-            if len(item) == 11:
+            if len(item) == MOBILE_LENGTH:
                 return True
         return False
 
@@ -264,6 +255,8 @@ def get_by_content(user, tag, content):
         return None
 
 def list_by_tag(user, tag, offset = 0, limit = xconfig.PAGE_SIZE):
+    check_param_user(user)
+
     if tag == "key":
         chatlist = list_key(user, offset, limit)
     else:
@@ -302,6 +295,7 @@ def list_by_date(user, date, offset = 0, limit = xconfig.PAGE_SIZE):
     return msg_list, amount
 
 def count_by_tag(user, tag):
+    """内部方法"""
     if tag == "key":
         return dbutil.count_table("msg_key:%s" % user)
     if tag == "all":
@@ -315,6 +309,8 @@ def get_message_stat0(user):
     return stat
 
 def get_message_stat(user):
+    check_param_user(user)
+
     value = get_message_stat0(user)
     if value is None:
         return refresh_message_stat(user)

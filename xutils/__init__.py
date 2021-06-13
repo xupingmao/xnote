@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/05/21 21:33:51
+# @modified 2021/06/12 16:54:09
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -36,6 +36,7 @@ from xutils.base import Storage
 from xutils.logutil import *
 from xutils.webutil import *
 from xutils.exeutil import *
+from xutils.funcutil import *
 
 import shutil
 import logging
@@ -328,52 +329,6 @@ class RecordList:
 
     def most(self, count):
         return []
-
-_FUNC_DICT = dict()
-def register_func(name, func):
-    """注册函数
-    @param {string} name 函数名称，格式为 [protocol:] + [module] + name
-    @param {func} func 函数
-    """
-    _FUNC_DICT[name] = func
-
-def call(_func_name, *args, **kw):
-    """调用函数
-    @param {string} _func_name 方法名
-    @param {nargs} *args 可变参数
-    @param {kwargs} **kw 关键字参数
-    """
-    return _FUNC_DICT[_func_name](*args, **kw)
-
-def lookup_func(func_name):
-    return _FUNC_DICT.get(func_name)
-
-def get_func_dict():
-    return _FUNC_DICT.copy()
-
-class Module:
-    """Module封装"""
-    def __init__(self, domain):
-        self.domain = domain
-        self._meth  = dict()
-
-    def __getattr__(self, key):
-        func = self._meth.get(key)
-        if func:
-            return func
-
-        if key == "__wrapped__":
-            return None
-            
-        method = self.domain + "." + key
-        func = _FUNC_DICT[method]
-        self._meth[method] = func
-        return func
-
-# DAO是模块的别名
-class DAO(Module):
-    pass
-
 
 def init(xconfig):
     global FS_IMG_EXT_LIST

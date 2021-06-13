@@ -1132,7 +1132,9 @@ $(function () {
         $(".dropdown-content").hide();
     });
 });
-/** photo.js, part of xnote-ui **/
+/** 图片处理 part of xnote-ui 
+ * @filename x-photo.js
+ */
 
 $(function () {
   // 图片处理
