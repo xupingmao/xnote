@@ -52,7 +52,7 @@
 
             function onMonthSelected(event) {
                 var date = event.target;
-                window.location.href = copyFromUrl("tag", "displayTag") + "&date=" + date;
+                window.location.href = copyFromUrl("tag", "displayTag", "orderby") + "&date=" + date;
             }
 
             xnote.on("date.month.selected", onMonthSelected);

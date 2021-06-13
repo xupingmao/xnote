@@ -21,6 +21,18 @@
     </div>
 {% end %}
 
+{% if tag == "key" %}
+    <div class="card">
+        <a class="list-link" href="/message?tag=key&orderby=visit">
+            <span>常用标签</span>
+            <div class="float-right">
+                <span class="book-size-span"></span>
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+    </div>
+{% end %}
+
 {% if tag == "calendar" %}
     <!-- 日期视图 -->
     <div class="card">

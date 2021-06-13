@@ -41,7 +41,15 @@
 
     <script type="text/javascript">
         $(function (e) {
-            function getPage() {
+            function getParamTag() {
+                var tag = "{{message_tag}}";
+                if (tag != "") {
+                    return tag;
+                }
+                return "{{tag}}";
+            }
+
+            function getParamPage() {
                 var page = getUrlParam("page");
                 if (page == undefined) {
                     return 1;
@@ -76,17 +84,22 @@
                 return getUrlParam("filterDate", "");
             }
 
+            function getParamOrderBy() {
+                return getUrlParam("orderby", "");
+            }
+
             function onMessageRefresh() {
                 var params = {};
 
-                params.tag  = "{{message_tag}}";
-                params.page = getPage();
+                params.tag  = getParamTag();
+                params.page = getParamPage();
                 params.key = getParamKey();
                 params.searchTags = getSearchTags();
                 params.date = getParamDate();
                 params.noTag = getParamNoTag();
                 params.filterKey = getParamFilterKey();
                 params.filterDate = getParamFilterDate();
+                params.orderby = getParamOrderBy();
 
                 window.doRefreshMessageList(params);
             }

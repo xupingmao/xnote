@@ -1803,7 +1803,7 @@ li.menu-item:hover {
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/05/23 18:15:40
+ * @modified 2021/06/13 16:37:58
 */
 
 
@@ -1914,9 +1914,9 @@ li.menu-item:hover {
 
 .send-button {
     float: left;
-    width: 4rem;
-    margin-top: 0.5rem;
-    margin-right: 0.5rem;
+    width: 64px;
+    margin-top: 5px;
+    margin-right: 5px;
 }
 
 .right {

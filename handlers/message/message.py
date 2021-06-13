@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/12 13:22:19
+# @modified 2021/06/13 17:40:25
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -31,9 +31,11 @@ TAG_TEXT_DICT = dict(
     search = "话题",
 )
 
-LIST_LIMIT = 1000
+MAX_LIST_LIMIT = 1000
 # 系统标签
 SYSTEM_TAG_TUPLE = ("book", "people", "file", "phone", "link")
+
+LIST_VIEW_TPL = "message/page/message_list_view.html"
 
 def success():
     return dict(success = True, code = "success")
@@ -141,6 +143,8 @@ def get_status_by_code(code):
 def format_count(count):
     if count is None:
         return "0"
+    if count >= 1000 and count < 10000:
+        return '%0.1fk' % float(count / 1000)
     if count >= 1000 and count < 1000000:
         return '%dk' % int(count / 1000)
     if count > 1000000:
@@ -309,6 +313,14 @@ def after_message_create_or_update(msg_item):
 def function_and_class_split_line():
     pass
 
+
+def sort_message_list(msg_list, orderby = ""):
+    if orderby == "":
+        return
+
+    if orderby == "visit":
+        msg_list.sort(key = lambda x: x.visit_cnt or 0, reverse = True)
+
 ############  class
 
 class SearchContext:
@@ -349,11 +361,13 @@ class ListAjaxHandler:
         show_todo_check = True
         show_edit_btn   = True
         show_to_log_btn = False
-        display_tag     = xutils.get_argument("displayTag", "")
+        display_tag  = xutils.get_argument("displayTag", "")
         date = xutils.get_argument("date", "")
         key  = xutils.get_argument("key", "")
-        encoded_key = xutils.encode_uri_component(key)
         filter_key = xutils.get_argument("filterKey", "")
+        orderby = xutils.get_argument("orderby", "")
+
+        encoded_key = xutils.encode_uri_component(key)
         encoded_filter_key = xutils.encode_uri_component(filter_key)
 
         if tag == "todo" or tag == "task":
@@ -372,12 +386,14 @@ class ListAjaxHandler:
         else:
             template_file = "message/ajax/message_ajax.html"
 
+        page_url = "?tag={tag}&displayTag={display_tag}&date={date}&key={encoded_key}&filterKey={encoded_filter_key}&orderby={orderby}&page=".format(**locals())
+
         return xtemplate.render(template_file,
             show_todo_check = show_todo_check,
             show_edit_btn = show_edit_btn,
             show_to_log_btn = show_to_log_btn,
             page = page,
-            page_url = "?tag=%s&displayTag=%s&date=%s&key=%s&filterKey=%s&page=" % (tag, display_tag, date, encoded_key, encoded_filter_key),
+            page_url =  page_url,
             page_max = page_max,
             item_list = chatlist)
 
@@ -414,7 +430,7 @@ class ListAjaxHandler:
     def do_list_task(self, user_name, offset, limit):
         filter_key = xutils.get_argument("filterKey", "")
         if filter_key != "":
-            msg_list, amount = MSG_DAO.list_by_tag(user_name, "task", offset = 0, limit = LIST_LIMIT)
+            msg_list, amount = MSG_DAO.list_by_tag(user_name, "task", offset = 0, limit = MAX_LIST_LIMIT)
             msg_list = filter_msg_list_by_key(msg_list, filter_key)
             return msg_list[offset:offset+limit], len(msg_list)
         else:
@@ -424,11 +440,20 @@ class ListAjaxHandler:
         filter_key = xutils.get_argument("filterKey", "")
 
         if filter_key != "":
-            msg_list, amount = MSG_DAO.list_by_date(user_name, date, 0, LIST_LIMIT)
+            msg_list, amount = MSG_DAO.list_by_date(user_name, date, 0, MAX_LIST_LIMIT)
             msg_list = filter_msg_list_by_key(msg_list, filter_key)
             return msg_list[offset:offset+pagesize], len(msg_list)
         else:
             return MSG_DAO.list_by_date(user_name, date, offset, pagesize)
+
+    def do_list_key(self, user_name, offset, limit):
+        orderby = xutils.get_argument("orderby", "")
+        msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
+
+        if orderby != "":
+            sort_message_list(msg_list, orderby)
+
+        return msg_list[offset:offset+limit], len(msg_list)
 
     def do_list_message(self, user_name, tag, offset, pagesize):
         key = xutils.get_argument("key", "")
@@ -448,6 +473,9 @@ class ListAjaxHandler:
 
         if tag == "task":
             return self.do_list_task(user_name, offset, pagesize)
+
+        if tag == "key":
+            return self.do_list_key(user_name, offset, pagesize)
 
         list_func = xutils.lookup_func("message.list_%s" % tag)
         if list_func != None:
@@ -774,10 +802,22 @@ class MessageListHandler:
             show_nav = False)
 
     def do_view_tags(self):
+        orderby = xutils.get_argument("orderby", "")
+        
+        if orderby == "visit":
+            return xtemplate.render(LIST_VIEW_TPL, 
+                title = T("随手记-常用标签"),
+                tag = "key",
+                show_system_tag = False,
+                show_back_btn = True,
+                show_sub_link = False,
+                show_input_box = False)
+
         return xtemplate.render("message/page/message_list_view.html", 
-            message_tag = "key",
+            tag = "key",
             search_type = "message",
             show_tag_btn = False,
+            show_sub_link = True,
             show_attachment_btn = False,
             show_system_tag = True,
             message_placeholder = "添加标签/关键字/话题")
@@ -829,7 +869,7 @@ class MessageListHandler:
 
         year, month, mday = do_split_date(date)
 
-        msg_list, amount = MSG_DAO.list_by_date(user_name, date, limit = LIST_LIMIT)
+        msg_list, amount = MSG_DAO.list_by_date(user_name, date, limit = MAX_LIST_LIMIT)
 
         tag_list = get_tags_from_message_list(msg_list, "date", date)
 
@@ -1009,7 +1049,7 @@ class MessageListByDayHandler():
 
         year, month, day = do_split_date(date)
 
-        item_list, amount = MSG_DAO.list_by_date(user_name, date, limit = LIST_LIMIT)
+        item_list, amount = MSG_DAO.list_by_date(user_name, date, limit = MAX_LIST_LIMIT)
         message_list = []
 
         for item in item_list:
