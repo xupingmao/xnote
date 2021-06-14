@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/13 17:40:25
+# @modified 2021/06/14 00:59:13
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -792,10 +792,8 @@ class MessageListHandler:
 
     def do_select_key(self):
         user_name = xauth.current_name()
-        offset = 0
-        pagesize = 1000
-        
-        msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", offset, pagesize)
+        offset = 0        
+        msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", offset, MAX_LIST_LIMIT)
 
         return xtemplate.render("message/page/message_tag_select.html", 
             msg_list = msg_list,
@@ -803,24 +801,25 @@ class MessageListHandler:
 
     def do_view_tags(self):
         orderby = xutils.get_argument("orderby", "")
-        
-        if orderby == "visit":
-            return xtemplate.render(LIST_VIEW_TPL, 
-                title = T("随手记-常用标签"),
-                tag = "key",
-                show_system_tag = False,
-                show_back_btn = True,
-                show_sub_link = False,
-                show_input_box = False)
 
-        return xtemplate.render("message/page/message_list_view.html", 
+        kw = dict(
             tag = "key",
             search_type = "message",
             show_tag_btn = False,
             show_sub_link = True,
             show_attachment_btn = False,
             show_system_tag = True,
-            message_placeholder = "添加标签/关键字/话题")
+            message_placeholder = "添加标签/关键字/话题"
+        )
+        
+        if orderby == "visit":
+            kw["title"] = T("随手记-常用标签")
+            kw["show_system_tag"] = False
+            kw["show_back_btn"] = True
+            kw["show_sub_link"] = False
+            kw["show_input_box"] = False
+
+        return xtemplate.render("message/page/message_list_view.html", **kw)
 
     def do_view_by_system_tag(self, tag):
         return xtemplate.render("message/page/message_list_view.html", 
@@ -830,24 +829,24 @@ class MessageListHandler:
 
     def do_view_task(self):
         filter_key = xutils.get_argument("filterKey", "")
-        show_input_box = True
-        show_sub_link = True
-        show_back_btn = False
 
-        if filter_key != "":
-            show_input_box = False
-            show_sub_link = False
-            show_back_btn = True
-
-        return xtemplate.render("message/page/message_list_view.html", 
+        kw = dict(
             html_title = T("待办任务"),
             message_tag = "task",
             search_type = "message",
             show_system_tag = False,
-            show_sub_link = show_sub_link,
-            show_input_box = show_input_box,
-            show_back_btn = show_back_btn,
-            message_placeholder = "添加待办任务")
+            show_sub_link = True,
+            show_input_box = True,
+            show_back_btn = False,
+            message_placeholder = "添加待办任务"
+        )
+
+        if filter_key != "":
+            kw["show_input_box"] = False
+            kw["show_sub_link"] = True
+            kw["show_back_btn"] = True
+
+        return xtemplate.render("message/page/message_list_view.html", **kw)
 
     def do_view_task_tags(self):
         user_name = xauth.current_name()
@@ -884,15 +883,11 @@ class MessageListHandler:
             message_placeholder = "添加待办任务")
 
     def do_view_default(self):
-        show_back_btn = False
         key = xutils.get_argument("key", "")
         input_tag = xutils.get_argument("tag", "log")
         default_content = filter_key(key)
 
-        if key != "" or input_tag == "search":
-            show_back_btn = True
-
-        return xtemplate.render("message/page/message_list_view.html", 
+        kw = dict(
             tag = input_tag,
             message_tag = input_tag,
             search_type = "message",
@@ -900,8 +895,17 @@ class MessageListHandler:
             show_sub_link = False,
             html_title = T("随手记"),
             default_content = default_content,
-            show_back_btn = show_back_btn,
-            message_placeholder = "记录发生的事情/产生的想法")
+            show_back_btn = False,
+            message_placeholder = "记录发生的事情/产生的想法"
+        )
+
+        if key != "" or input_tag == "search":
+            # 搜索操作
+            kw["title"] = T("随手记-搜索")
+            kw["html_title"] = T("随手记-搜索")
+            kw["show_back_btn"] = True
+
+        return xtemplate.render("message/page/message_list_view.html", **kw)
 
     def do_view_by_date(self, date):
         return xtemplate.render("message/page/message_list_view.html", 

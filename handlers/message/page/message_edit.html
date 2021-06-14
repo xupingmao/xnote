@@ -2,6 +2,9 @@
 
 
 {% block body %}
+    
+    <!-- 事件转换 -->
+    {% include message/component/message_event.html %}
 
     <!-- 选择话题组件 -->
     {% include message/component/select_topic_dialog.html %}
@@ -19,7 +22,7 @@
             <input type="hidden" id="messageEditId" value="{{detail.id}}"/>
             <input type="file" id="filePicker" class="hide" multiple/>
 
-            <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#标签">
+            <input type="button" class="send-button btn btn-default select-topic-btn" value="#标签">
             <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
             <input type="button" id="updateMessageBtn" class="send-button btn" value="更新">
         </div>
@@ -40,11 +43,9 @@
                     if (resp.code == "success") {
                         xnote.toast("更新成功");
 
-                        if (top) {
-                            // iframe中通知父级节点更新
-                            var msg = {type: "message.updated"};
-                            top.postMessage(JSON.stringify(msg), "*");
-                        }
+                        // iframe中通知父级节点更新
+                        var msg = {type: "message.updated"};
+                        window.parent.postMessage(JSON.stringify(msg), "*");
 
                     } else {
                         xnote.alert("更新失败:" + resp.message);
@@ -63,6 +64,7 @@
             }
 
             function onTopicSelected(event) {
+                xnote.closeAllDialog();
                 var topic = event.target;
                 var oldText = $(".input-box").val();
                 $(".input-box").val(topic + " " + oldText);

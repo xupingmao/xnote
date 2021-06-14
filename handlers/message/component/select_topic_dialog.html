@@ -3,8 +3,7 @@ $(function () {
     var dialogIndex = 0;
     // xnote.showDialog(title, html);
 
-    $(".select-topic-btn").click(function () {
-
+    function onSelectTopicBtnClicked() {
         function createTopicText(topic) {
             if (topic.Get(0) == '#' && topic.Get(-1) == '#') {
                 return topic;
@@ -55,6 +54,11 @@ $(function () {
         }).fail(function (error) {
             xnote.toast("请求失败:" + error);
         });
+    }
+
+    $(".select-topic-btn").click(function () {
+        // 打开iframe选择标签
+        xnote.showIframeDialog("选择标签", "/message?tag=key&op=select");
     })
 });
 </script>

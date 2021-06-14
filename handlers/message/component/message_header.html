@@ -1,7 +1,8 @@
 {% init title = "随手记" %}
 {% init tag = "log" %}
-{% init message_stat = xutils.DAO("message").get_current_message_stat() %}
+{% init message_stat = xutils.call("message.get_current_message_stat") %}
 {% init show_back_btn = False %}
+{% init show_message_tab = True %}
 
 <!-- header.html -->
 <div class="card">    
@@ -18,47 +19,30 @@
     </div>
 </div>
 
-<!-- 桌面版菜单 -->
-<div class="col-md-12 message-status card">
-    <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">
-        待办(<span class="task-count">{{message_stat.task_count}}</span>)
-    </a>
-    <a class="tab tab-link x-tab hide" href="/message?tag=done" data-tag="done">
-        完成(<span class="done-count">{{message_stat.done_count}}</span>)
-    </a>
-    <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">
-        记事(<span class="log-count">{{message_stat.log_count}}</span>)
-    </a>
-    <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">
-        标签(<span class="key-count">{{message_stat.key_count}}</span>)
-    </a>
+{% if show_message_tab %}
+    <!-- 桌面版菜单 -->
+    <div class="col-md-12 card">
+        <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">
+            待办(<span class="task-count">{{message_stat.task_count}}</span>)
+        </a>
 
-    <div class="hide">
-        <a class="tab tab-link x-tab" href="/message?tag=file" data-tag="file">文件</a>
-        <a class="tab tab-link x-tab" href="/message?tag=link" data-tag="link">链接</a>
-        <a class="tab tab-link x-tab" href="/message?tag=book" data-tag="book">书籍</a>
-        <a class="tab tab-link x-tab" href="/message?tag=people" data-tag="people">人物</a>
-        <a class="tab tab-link x-tab" href="/message?tag=phone" data-tag="phone">电话</a>
-        <a class="tab tab-link x-tab" href="/message?tag=all"  data-tag="all">全部</a>
+        <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">
+            记事(<span class="log-count">{{message_stat.log_count}}</span>)
+        </a>
+        <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">
+            标签(<span class="key-count">{{message_stat.key_count}}</span>)
+        </a>
+        <a class="tab tab-link x-tab" href="/message/calendar" data-tag="date">日期</a>
     </div>
-    
-    <a class="tab tab-link x-tab" href="/message/calendar" data-tag="date">日期</a>
-</div>
 
-<!-- 移动端菜单 -->
-<div class="col-md-12 message-status card hide">
-    <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">待办</a>
-    <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">记事</a>
-    <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">标签</a>
-    <a class="tab tab-link x-tab" href="/message/calendar">日期</a>
-
-    <div class="hide">
-        <a class="tab tab-link x-tab" href="/message?tag=file" data-tag="file">文件</a>
-        <a class="tab tab-link x-tab" href="/message?tag=link" data-tag="link">链接</a>
-        <a class="tab tab-link x-tab" href="/message?tag=book" data-tag="book">书籍</a>
-        <!-- <button class="float-right">新建</button> -->
+    <!-- 移动端菜单 -->
+    <div class="col-md-12 card hide">
+        <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">待办</a>
+        <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">记事</a>
+        <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">标签</a>
+        <a class="tab tab-link x-tab" href="/message/calendar">日期</a>
     </div>
-</div>
+{% end %}
 
 <script type="text/javascript">
 $(function() {

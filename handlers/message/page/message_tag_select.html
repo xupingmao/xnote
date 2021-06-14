@@ -12,9 +12,13 @@
     </div>
    
    <div class="card top-offset-1">
+       
+       <a class="list-item empty-item">&lt;无匹配标签&gt;</a>
+
        {% for msg in msg_list %}
-            <a onclick="on_msg_click(this);" class="list-item">{{msg.content}}</a>
+            <a onclick="on_msg_click(this);" class="list-item topic-item">{{msg.content}}</a>
        {% end %}
+
     </div>
 
     <script type="text/javascript">
@@ -33,9 +37,13 @@
             function createTopicText(topic) {
                 if (topic.Get(0) == '#' && topic.Get(-1) == '#') {
                     return topic;
-                } else {
-                    return '#' + topic + '#';
                 }
+
+                if (topic.Get(0) == '《' && topic.Get(-1) == '》') {
+                    return topic;
+                }
+                
+                return '#' + topic + '#';
             }
 
     
@@ -48,26 +56,38 @@
                 var topicText = createTopicText(topic);
 
                 // 发布选择消息的事件
-                if (top) {
-                    var msg = {type: "message.topic.selected", content: topicText};
+                var msg = {type: "message.topic.selected", __value: topicText};
 
-                    // iframe中通知父级节点更新
-                    top.postMessage(JSON.stringify(msg), "*");
-                }
+                // iframe中通知父级节点更新
+                window.parent.postMessage(JSON.stringify(msg), "*");
             }
 
-            $(".nav-search-input").on("keyup", function (e) {
-                var inputText = $(e.target).val();
+            function doSearchTopic(inputText) {
+                var showCount = 0;
+
+                $(".empty-item").hide();
                 
-                $(".list-item").each(function (index, element) {
+                $(".topic-item").each(function (index, element) {
                     var text = $(element).text();
                     if (text.indexOf(inputText) < 0) {
                         $(element).hide();
                     } else {
                         $(element).show();
+                        showCount++;
                     }
-                })
+                });
+
+                if (showCount == 0) {
+                    $(".empty-item").show();
+                }
+            }
+
+            $(".nav-search-input").on("keyup", function (e) {
+                var inputText = $(e.target).val();
+                doSearchTopic(inputText);
             });
+
+            doSearchTopic("");
         })
 
     </script>

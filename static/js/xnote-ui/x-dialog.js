@@ -12,7 +12,7 @@ function getDialogArea() {
 
 window.xnote.showIframeDialog = function (title, url) {
     var area = getDialogArea();
-    layer.open({
+    return layer.open({
         type: 2,
         shadeClose: true,
         title: title,

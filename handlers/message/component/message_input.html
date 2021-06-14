@@ -12,7 +12,8 @@
 
     <div class="col-md-12 btn-line-height">
         {% if show_tag_btn %}
-            <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#标签" @click="">
+            <!-- <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#标签" @click=""> -->
+            <input type="button" class="send-button btn btn-default select-topic-btn" value="#标签">
         {% end %}
 
         {% if show_attachment_btn %}
@@ -46,6 +47,7 @@ $(function () {
     }
 
     function onTopicSelected(event) {
+        xnote.closeAllDialog();
         var topic = event.target;
         var oldText = $(".input-box").val();
         $(".input-box").val(topic + " " + oldText);
