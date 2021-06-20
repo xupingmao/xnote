@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/06/12 13:29:43
+# @modified 2021/06/20 15:31:05
 import xutils
 import xconfig
 import xmanager
@@ -21,6 +21,7 @@ dbutil.register_table("user_stat", "用户数据统计")
 
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:")
 MOBILE_LENGTH = 11
+VALID_TAG_TUPLE = ("task", "done", "log", "key")
 
 class MessageDO(Storage):
 
@@ -36,6 +37,13 @@ def check_before_create(kw):
         raise Exception("[message.dao.create] can not set id")
     if "user" not in kw:
         raise Exception("[message.dao.create] key `user` is missing")
+
+    if 'tag' not in kw:
+        raise Exception("[message.dao.create] key `tag` is missing")
+
+    tag = kw["tag"]
+    if tag not in VALID_TAG_TUPLE:
+        raise Exception("[message.dao.create] tag `%s` is invalid" % tag)
 
 def create_message(**kw):
     check_before_create(kw)

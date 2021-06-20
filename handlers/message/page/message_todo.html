@@ -23,20 +23,12 @@
         </div>
     </div>
 
-    {% if show_input_box %}
-        <!-- 编辑器 -->
-        <div class="card">
-            <textarea class="col-md-12 input-box" placeholder="请输入待办任务..."></textarea>
-
-            <input type="file" id="filePicker" class="hide" multiple/>
-
-            <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#标签">
-            <input type="button" id="filePickerBtn" class="send-button btn btn-default" value="添加附件"/>
-            <input type="button" id="createTodoBtn" class="send-button btn" value="创建">
-        </div>
+    {% if tag != "done" %}
+        <!-- 完成的页面不需要创建输入框 -->
+        {% include message/component/message_input.html %}
     {% end %}
 
-    {% if tag == "todo" %}
+    {% if tag == "todo" or tag == "task" %}
         <div class="card">
             <a class="list-link" href="/message/done">
                 <span>已完成任务</span>
@@ -91,6 +83,7 @@
                 var topic = event.target;
                 var oldText = $(".input-box").val();
                 $(".input-box").val(topic + " " + oldText);
+                xnote.closeAllDialog();
             }
 
             function updateMessageTag(id, tag) {
@@ -102,28 +95,6 @@
                     }
                 });
             }
-
-            $("#createTodoBtn").click(function () {
-                var content = $(".input-box").val();
-                $.post("/message/save", 
-                    {
-                        content:content, 
-                        tag: "task"
-                    },
-                    function (respText) {
-                        var data = respText;
-                        if (data.code != "success") {
-                            xnote.alert(data.message);
-                        } else {
-                            $(".input-box").val("");
-                        }
-
-                        loadTodoList();
-                }).fail(function (data) {
-                    console.log(data);
-                    xnote.alert("创建TODO失败，请稍后重试");
-                })
-            });
 
             $("#todoItemList").on("click", ".todo-delete-btn", function (e) {
                 var target = e.target;
@@ -143,7 +114,7 @@
             });
 
             $(".select-topic-btn").click(function (e) {
-                xnote.showIframeDialog("选择标签", "/message?op=select&tag=key")
+                xnote.showIframeDialog("选择标签", "/message?op=select&tag=key");
             })
 
 
@@ -152,6 +123,7 @@
             xnote.on("message.upload", onFileUploaded);
             xnote.on("message.refresh", onMessageRefresh);
             xnote.on("message.updated", onMessageRefresh);
+            xnote.on("message.created", onMessageRefresh);
             xnote.on("message.topic.selected", onTopicSelected);
 
             // 加载todo列表

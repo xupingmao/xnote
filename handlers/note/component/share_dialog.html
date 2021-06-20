@@ -73,7 +73,7 @@ $(function () {
         // 调整样式
         $(".note-search-dialog-body").css("padding-top", "10px");
 
-        $.get("/note/api/timeline?type=all", 
+        $.get("/note/api/timeline?type=all&limit=100", 
             renderNoteListCallback).fail(function (e) {
                 alert("异常:" + e);
         });
@@ -96,7 +96,7 @@ $(function () {
             ]}
         ];
 
-        $.get("/note/api/timeline?type=all", renderNoteListCallback).fail(function (e) {
+        $.get("/note/api/timeline?type=all&limit=100", renderNoteListCallback).fail(function (e) {
             alert("异常:" + e);
         });
     }

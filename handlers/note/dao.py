@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/05/16 23:43:31
+# @modified 2021/06/20 15:08:58
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -872,7 +872,7 @@ def list_public(offset, limit):
         return value.is_public
 
     notes = dbutil.prefix_list("note_tiny:", list_func, offset, limit)
-    sort_notes(notes)
+    sort_notes(notes, "ctime_desc")
     return notes
 
 def count_public():

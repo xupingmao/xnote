@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/14 00:59:13
+# @modified 2021/06/20 15:35:57
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -725,7 +725,7 @@ def apply_rules(user_name, id, tag, content):
 class SaveAjaxHandler:
 
     @xauth.login_required()
-    def POST(self):
+    def do_post(self):
         id        = xutils.get_argument("id")
         content   = xutils.get_argument("content")
         tag       = xutils.get_argument("tag", DEFAULT_TAG)
@@ -749,6 +749,13 @@ class SaveAjaxHandler:
         else:
             update_message_content(id, user_name, content)
         return dict(code="success", data=dict(id=id))
+
+    def POST(self):
+        try:
+            return self.do_post()
+        except Exception as e:
+            xutils.print_exc()
+            return dict(code = "fail", message = str(e))
 
 class DateAjaxHandler:
 

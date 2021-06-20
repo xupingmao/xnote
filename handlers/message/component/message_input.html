@@ -66,9 +66,9 @@ $(function () {
                 } else {
                     $(".input-box").val("{{default_content}}");
                     $(".input-box")[0].style.height = "52px";
+                    // 发布创建消息
+                    xnote.fire("message.created", "");
                 }
-                // 发布创建消息
-                xnote.fire("message.created", "");
         }).fail(function (data) {
             console.log(data);
             xnote.alert("创建记事失败，请稍后重试");

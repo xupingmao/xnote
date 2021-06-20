@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2021/05/03 17:48:36
+@modified 2021/06/20 15:22:08
 -->
 
 {% block body %}
@@ -98,7 +98,7 @@
             {% if file.category == "note" %}
                 <div class="item-ext-info">
                     {% if file.creator != None %}
-                        <span class="tag gray-tag">{{file.creator}}</span>
+                        <span class="lightgray-tag">{{file.creator}}</span>
                     {% end %}
 
                     {% if file.priority is not None and file.priority > 0 %}
@@ -110,7 +110,7 @@
                     {% end %}
 
                     {% if file.parent_name != None %}
-                        <span class="tag gray-tag">
+                        <span class="lightgray-tag">
                             <a class="link" href="/note/view?id={{file.parent_id}}">{{file.parent_name}}</a>
                         </span>
                     {% end %}

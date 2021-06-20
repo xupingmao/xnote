@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/05/10 23:56:11
+# @modified 2021/06/20 15:40:34
 import math
 import time
 import web
@@ -139,6 +139,26 @@ class DefaultListHandler:
             page       = page,
             page_max   = math.ceil(amount / pagesize),
             page_url   = "/note/default?page=")
+
+
+class PublicListHandler:
+
+    def GET(self):
+        page      = xutils.get_argument("page", 1, type=int)
+        user_name = xauth.get_current_name()
+        pagesize  = xconfig.PAGE_SIZE
+        offset    = (page-1) * pagesize
+        files     = NOTE_DAO.list_public(offset, pagesize)
+        amount    = NOTE_DAO.count_public();
+        parent    = NOTE_DAO.get_root()
+
+        xmanager.add_visit_log(user_name, "/note/public")
+
+        return xtemplate.render("note/page/note_public.html",
+            notes      = files,
+            page       = page,
+            page_max   = math.ceil(amount / pagesize),
+            page_url   = "/note/public?page=")
 
 def get_category_list():
     # TODO 配置化
@@ -531,6 +551,7 @@ xurls = (
     r"/note/recent_(viewed)", RecentHandler,
     r"/note/group/select"   , GroupSelectHandler,
     r"/note/management"     , ManagementHandler,
+    r"/note/public"         , PublicListHandler,
 
     r"/note/text"           , TextListHandler,
     r"/note/tools"          , NotePluginHandler,

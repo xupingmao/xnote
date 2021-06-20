@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/05/10 23:54:10
+# @modified 2021/06/20 14:31:08
 # @filename xtemplate.py
 
 
@@ -187,7 +187,7 @@ def is_mobile_device(user_agent = None):
     if user_agent is None:
         return False
     user_agent_lower = user_agent.lower()
-    for name in ("iphone", "android"):
+    for name in ("iphone", "android", "webos"):
         if user_agent_lower.find(name) >= 0:
             return True
     return False

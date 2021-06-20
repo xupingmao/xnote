@@ -2,7 +2,7 @@
  * description here
  * @author xupingmao
  * @since 2021/05/22 12:56:05
- * @modified 2021/05/22 17:19:27
+ * @modified 2021/06/20 15:22:56
  * @filename tag.css
  */
 
@@ -54,11 +54,19 @@
 }
 
 .gray-tag {
-    color: #000;
+    color: white;
     background-color: #ccc;
     padding: 3px;
     border-radius: 3px;
 }
+
+
+.lightgray-tag {
+    background-color: #eee;
+    padding: 3px;
+    border-radius: 3px;
+}
+
 
 .tag-span {
     display: block;
