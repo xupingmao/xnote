@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/20 15:35:57
+# @modified 2021/06/24 00:11:22
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -683,6 +683,9 @@ def get_remote_ip():
     return web.ctx.env.get("REMOTE_ADDR")
 
 def create_message(user_name, tag, content, ip):
+    if tag == "todo":
+        tag = "task"
+        
     content = content.strip()
     ctime = xutils.get_argument("date", xutils.format_datetime())
     message = dict(content = content, 

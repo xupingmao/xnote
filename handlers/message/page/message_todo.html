@@ -4,9 +4,6 @@
 
     <!-- {% include message/component/select_topic_dialog.html %} -->
 
-    <!-- 文件上传的组件 -->
-    {% include message/component/message_upload.html %}
-
     <!-- 消息处理组件 -->
     {% include message/component/message_event.html %}
 
@@ -67,22 +64,8 @@
                 });
             }
 
-            function onFileUploaded(event) {
-                var inputText = event.target;
-                var oldText = $(".input-box").val();
-                var newText = oldText + "\n" + inputText + "\n";
-                $(".input-box").val(newText);
-            }
-
             function onMessageRefresh(event) {
                 loadTodoList();
-                xnote.closeAllDialog();
-            }
-
-            function onTopicSelected(event) {
-                var topic = event.target;
-                var oldText = $(".input-box").val();
-                $(".input-box").val(topic + " " + oldText);
                 xnote.closeAllDialog();
             }
 
@@ -120,11 +103,9 @@
 
 
             // 监听上传事件
-            xnote.on("message.upload", onFileUploaded);
             xnote.on("message.refresh", onMessageRefresh);
             xnote.on("message.updated", onMessageRefresh);
             xnote.on("message.created", onMessageRefresh);
-            xnote.on("message.topic.selected", onTopicSelected);
 
             // 加载todo列表
             loadTodoList();
