@@ -33,6 +33,9 @@
 
 {% set search_action = '/fs_upload/search' %}
 {% set search_placeholder = '搜索文件' %}
+{% init show_rename_file_link = False %}
+
+{% include fs/component/css/fs_css.html %}
 
 {% end %}
 
@@ -46,6 +49,9 @@
         <h3 class="card-title btn-line-height">
             <span>上传管理</span>
             <div class="float-right">
+                {% if _is_admin %}
+                    <a class="btn btn-default" href="/fs_list">文件管理</a>
+                {% end %}
                 <a class="btn btn-default" href="javascript:history.back();">返回</a>
             </div>
         </h3>
@@ -68,9 +74,6 @@
         <div class="float-right">
             <a href="{{upload_link_by_month(year, month, -1)}}" class="default-path-link">上个月</a>
             <a href="{{upload_link_by_month(year, month, 1)}}" class="default-path-link">下个月</a>
-            {% if _is_admin %}
-                <a href="/fs_list">文件管理</a>
-            {% end %}
         </div>
     </div>
     {% end %}
@@ -91,7 +94,7 @@
             {% include common/text/empty_text.html %}
         {% end %}
 
-        {% include fs/component/filelist_simple.html %}
+        {% include fs/component/filelist_gallery.html %}
     </div>
 
     <script>

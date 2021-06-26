@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/06/26 00:46:06
+# @modified 2021/06/27 00:19:47
 
 """时光轴视图"""
 import re
@@ -545,7 +545,7 @@ xurls = (
     r"/note/plan"           , PlanListHandler,
     r"/note/log"            , LogListHandler,
     r"/note/sticky"         , StickyHandler,
-    r"/note/removed"        , RemovedHandler,
+    # r"/note/removed"        , RemovedHandler,
     r"/project/default"     , DefaultProjectHandler,
 
     # 日期视图

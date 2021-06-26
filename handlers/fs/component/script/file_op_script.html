@@ -1,0 +1,42 @@
+
+<script type="text/javascript">
+$(function () {
+    $(".rename-btn").click(function (e) {
+        var dirname = $("#dirname").val();
+        var oldName = $(this).attr("data-name");
+        xnote.prompt("输入新的文件名", oldName, function (newName) {
+            if (newName != oldName && newName) {
+                $.post("/fs_api/rename", 
+                    {dirname: dirname, old_name: oldName, new_name: newName}, 
+                    function (resp) {
+                        if (resp.code == "success") {
+                            window.location.reload();
+                        } else {
+                            xnote.alert("重命名失败:" + resp.message);
+                        }
+                }).fail(function (e) {
+                    xnote.alert("系统繁忙，请稍后重试");
+                });
+            } else {
+                xnote.alert("请输入有限文件名");
+            }
+        });
+    });
+
+    $(".delete-btn").click(function (e) {
+        var path = $(this).attr("data-path");
+        var name = $(this).attr("data-name");
+        xnote.confirm("删除【" + name + "】?", function (value) {
+            $.post("/fs_api/remove", {path: path}, function (resp) {
+                if (resp.code == "success") {
+                    window.location.reload();
+                } else {
+                    xnote.alert("删除失败:" + resp.message);
+                }
+            }).fail(function (resp) {
+                xnote.alert("系统繁忙，请稍后重试");
+            })
+        });
+    })
+})
+</script>

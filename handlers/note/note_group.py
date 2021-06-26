@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/06/26 14:10:56
+# @modified 2021/06/27 00:33:16
 import math
 import time
 import web
@@ -333,6 +333,13 @@ class BaseListHandler:
     orderby   = "ctime_desc"
     create_type = ""
     create_text = T("创建笔记")
+    date_type = "cdate"
+
+    def count_notes(self, user_name):
+        return NOTE_DAO.count_by_type(user_name, self.note_type)
+
+    def list_notes(self, user_name, offset, limit):
+        return NOTE_DAO.list_by_type(user_name, self.note_type, offset, limit, self.orderby)
 
     @xauth.login_required()
     def GET(self):
@@ -342,8 +349,8 @@ class BaseListHandler:
         limit  = xconfig.PAGE_SIZE
         offset = (page-1)*limit
 
-        amount = NOTE_DAO.count_by_type(user_name, self.note_type)
-        files  = NOTE_DAO.list_by_type(user_name, self.note_type, offset, limit, self.orderby)
+        amount = self.count_notes(user_name)
+        files  = self.list_notes(user_name, offset, limit)
 
         # 上级菜单
         parent = PathNode(T("根目录"), "/note/group")
@@ -355,7 +362,7 @@ class BaseListHandler:
             files     = files,
             page      = page,
             show_pagination = True,
-            show_cdate = True,
+            date_type = self.date_type,
             show_group_option = False,
             create_text = self.create_text,
             create_type = self.create_type,
@@ -403,6 +410,18 @@ class TableListHandler(BaseListHandler):
     create_type = "csv"
     create_text = T("创建表格")
     title = T("我的表格")
+
+class RemovedListHandler(BaseListHandler):
+
+    note_type = "removed"
+    title = T("回收站")
+    date_type = "ddate"
+
+    def count_notes(self, user_name):
+        return NOTE_DAO.count_removed(user_name)
+
+    def list_notes(self, user_name, offset, limit):
+        return NOTE_DAO.list_removed(user_name, offset, limit, self.orderby)
 
 class NotePluginHandler:
 
@@ -592,6 +611,7 @@ xurls = (
     r"/note/gallery"        , GalleryListHandler,
     r"/note/list"           , CheckListHandler,
     r"/note/table"          , TableListHandler,
+    r"/note/removed"        , RemovedListHandler,
 
     r"/note/text"           , TextListHandler,
     r"/note/tools"          , NotePluginHandler,

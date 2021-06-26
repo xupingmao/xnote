@@ -1,15 +1,33 @@
-<div class="card">
 {% init show_cdate = False %}
 {% init show_mdate = False %}
 {% init show_adate = False %}
 {% init show_action_time = False %}
 {% init show_hot_index = False %}
 {% init show_next = True %}
+{% init show_size = False %}
+{% init date_type = "" %}
 {% init ACTION_TEXT_MAP = {
     "create": "创建了笔记",
     "view": "查看了笔记",
     "edit": "更新了笔记"
 } %}
+{% init get_date_by_type = xutils.get_func_by_name("note.get_date_by_type") %}
+
+{% if False %}
+    <a class="dialog-link" href="/note/{{file.parent_id}}">
+        <div class="book-item">
+            <i class="fa fa-mail-reply black"></i>
+            
+            <span>上级目录</span>
+            <span class="book-size">
+                <i class="fa fa-chevron-right"></i>
+            </span>
+        </div>
+    </a>
+{% end %}
+
+
+<div class="card">
 
 {% if len(files) == 0 %}
     {% include common/text/empty_text.html %}
@@ -45,31 +63,36 @@
         <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
         <span>{{item.name}}</span>
         
-        {% if item.is_deleted %}
-            <span class="gray-tag-span" href="/note/removed">删除</span>
-        {% end %}
         
         <div class="float-right">
+            {% if item.is_deleted %}
+                <span class="gray-tag-span" href="/note/removed">删除</span>
+            {% end %}
+            
             {% set sub_info = "" %}
 
             {% if show_size and item.size != None %}
                 {% set sub_info = item.size %}
             {% end %}
 
-            {% if show_cdate %}
+            {% if show_cdate or date_type == "cdate" %}
                 {% set sub_info = format_date(item.ctime).replace('-', '/') %}
             {% end %}
 
-            {% if show_mdate %}
+            {% if show_mdate or date_type == "mdate" %}
                 {% set sub_info = format_date(item.mtime).replace('-', '/') %}
             {% end %}
 
-            {% if show_adate %}
+            {% if show_adate or date_type == "adate" %}
                 {% set sub_info = format_date(item.atime).replace('-', '/') %}
             {% end %}
 
-            {% if show_hot_index %}
+            {% if show_hot_index or date_type == "hot_index" %}
                 {% set sub_info = item.hot_index or 0 %}
+            {% end %}
+
+            {% if date_type == "ddate" %}
+                {% set sub_info = get_date_by_type(item, date_type) %}
             {% end %}
 
             <span class="book-size-span">{{sub_info}}</span>

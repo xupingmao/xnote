@@ -107,20 +107,8 @@ $(function () {
 
     // 文件上传失败，显示上传出错。
     uploader.on( 'uploadError', function( file ) {
-
-        // 错误处理见 uploadAccept
-        // var $li = $( '#'+file.id ),
-        //     $error = $li.find('div.error');
-
-        // // 避免重复创建
-        // if ( !$error.length ) {
-        //     $error = $('<div class="error"></div>').appendTo( $li );
-        // }
-
-        // $error.text('上传失败:');
-        // uploadFailed = true;
-
-        // console.log("上传失败");
+        console.error("uploadError", file);
+        xnote.alert("上传文件失败");
     });
 
     // 完成上传完了，成功或者失败，先删除进度条。

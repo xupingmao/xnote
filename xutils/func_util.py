@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/06/12 16:53:55
-# @modified 2021/06/26 11:12:27
+# @modified 2021/06/26 21:39:26
 # @filename func_util.py
 import warnings
 
@@ -28,6 +28,9 @@ def call(func_name, *args, **kw):
 
 def lookup_func(func_name):
     return _FUNC_DICT.get(func_name)
+
+def get_func_by_name(func_name):
+    return lookup_func(func_name)
 
 def get_func_dict():
     return _FUNC_DICT.copy()

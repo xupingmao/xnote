@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/06/20 15:08:58
+# @modified 2021/06/27 00:39:09
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -62,6 +62,7 @@ MAX_EDIT_LOG    = 500
 MAX_VIEW_LOG    = 500
 MAX_STICKY_SIZE = 1000
 MAX_SEARCH_SIZE = 1000
+MAX_LIST_SIZE   = 1000
 
 NOTE_ICON_DICT = {
     "group"   : "fa-folder orange",
@@ -214,6 +215,9 @@ def sort_by_type_ctime_desc(notes):
     sort_by_ctime_desc(notes)
     sort_by_type(notes)
 
+def sort_by_dtime_desc(notes):
+    notes.sort(key = lambda x: x.dtime, reverse = True)
+
 SORT_FUNC_DICT = {
     "name": sort_by_name,
     "name_desc": sort_by_name_desc,
@@ -223,10 +227,14 @@ SORT_FUNC_DICT = {
     "atime_desc": sort_by_atime_desc,
     "type_mtime_desc": sort_by_type_mtime_desc,
     "type_ctime_desc": sort_by_type_ctime_desc,
+    "dtime_desc": sort_by_dtime_desc,
     "default": sort_by_default,
 }
 
 def sort_notes(notes, orderby = "name"):
+    if orderby is None:
+        orderby = "name"
+
     sort_func = SORT_FUNC_DICT.get(orderby, sort_by_mtime_desc)
     sort_func(notes)    
     build_note_list_info(notes)
@@ -779,6 +787,7 @@ def delete_note(id):
 
     # 标记删除
     note.mtime = xutils.format_datetime()
+    note.dtime = xutils.format_datetime()
     note.is_deleted = 1
     put_note_to_db(id, note)
 
@@ -1143,12 +1152,12 @@ def count_removed(creator):
         return value.is_deleted and value.creator == creator
     return dbutil.prefix_count("note_tiny:%s" % creator, count_func)
 
-def list_removed(creator, offset, limit):
+def list_removed(creator, offset, limit, orderby = None):
     def list_func(key, value):
         return value.is_deleted and value.creator == creator
-    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
-    sort_notes(notes)
-    return notes
+    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, MAX_LIST_SIZE)
+    sort_notes(notes, orderby)
+    return notes[offset: offset + limit]
 
 def document_filter_func(key, value):
     return value.type in ("md", "text", "html", "post", "log", "plan") and value.is_deleted == 0

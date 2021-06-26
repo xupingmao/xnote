@@ -14,10 +14,8 @@
     </div>
 </div>
 
-<div class="card">
-    {% set page_url="/note/tagname/"+tagname+"?page=" %}
-    {% include note/editor/note_list.html %}
-</div>
+{% set page_url="/note/tagname/"+tagname+"?page=" %}
+{% include note/component/note_list_component.html %}
 
 <div class="card">
     {% include mod_pagenation.html %}

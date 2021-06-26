@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/05/16 23:43:49
+# @modified 2021/06/27 00:17:58
 import profile
 import math
 import re
@@ -123,6 +123,9 @@ def view_list_func(note, kw):
     kw.show_comment_title = True
     kw.comment_title = T("清单项")
 
+def view_table_func(note, kw):
+    kw.show_aside = False
+
 VIEW_FUNC_DICT = {
     # "group": view_group_func,
     "group": view_group_func_old,
@@ -131,6 +134,7 @@ VIEW_FUNC_DICT = {
     "memo": view_md_func,
     "log" : view_md_func,
     "list": view_list_func,
+    "csv" : view_table_func,
     "gallery": view_gallery_func,
     "html": view_html_func,
     "post": view_html_func,

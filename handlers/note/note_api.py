@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/05 21:00:07
-# @modified 2021/01/05 00:20:59
+# @modified 2021/06/27 00:39:39
 import xutils
 import xauth
 
@@ -33,8 +33,17 @@ def list_recent_notes(limit = 5):
     creator = xauth.current_name()
     return NOTE_DAO.list_recent_edit(creator, limit = limit)
 
+def get_date_by_type(note, type):
+    if type == "ddate":
+        dtime = note.dtime
+        if dtime is None:
+            return note.mtime.split()[0]
+        return dtime.split()[0]
+    return note.ctime.split()[0]
+
 xutils.register_func("page.list_recent_groups", list_recent_groups)
 xutils.register_func("page.list_recent_notes", list_recent_notes)
+xutils.register_func("note.get_date_by_type", get_date_by_type)
 
 xurls = (
     r"/note/api/group", GroupApiHandler
