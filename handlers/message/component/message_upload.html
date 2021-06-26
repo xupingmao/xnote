@@ -41,6 +41,7 @@ $(function () {
 
     // 文件上传失败，显示上传出错。
     uploader.on( 'uploadError', function( file ) {
+        console.error("uploadError", file);
         layer.close(loadingIndex);
         layer.alert('上传失败');
     });
