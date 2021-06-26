@@ -1,0 +1,17 @@
+<!-- 调试组件 -->
+<script type="text/javascript">
+
+$(function () {
+    var erudaFlag = getUrlParam("eruda");
+    if (erudaFlag === "true") {
+        var script = document.createElement("script");
+        script.src = "https://cdn.bootcdn.net/ajax/libs/eruda/2.4.1/eruda.min.js";
+        script.onload = function () {
+            eruda.init();
+        }
+
+        document.body.appendChild(script);
+    }
+})
+
+</script>

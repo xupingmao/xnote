@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/06/12 16:54:09
+# @modified 2021/06/26 13:29:44
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -36,7 +36,7 @@ from xutils.base import Storage
 from xutils.logutil import *
 from xutils.webutil import *
 from xutils.exeutil import *
-from xutils.funcutil import *
+from xutils.func_util import *
 
 import shutil
 import logging

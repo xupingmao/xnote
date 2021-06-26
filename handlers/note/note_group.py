@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/06/20 15:40:34
+# @modified 2021/06/26 14:10:56
 import math
 import time
 import web
@@ -168,7 +168,7 @@ def get_category_list():
     category_list.append(NoteCategory("100", "哲学和心理学"))
     category_list.append(NoteCategory("200", "宗教"))
     category_list.append(NoteCategory("300", "社会科学"))
-    category_list.append(NoteCategory("400", "个人记事"))
+    category_list.append(NoteCategory("400", "<空缺>"))
     category_list.append(NoteCategory("500", "数学和自然科学"))
     category_list.append(NoteCategory("600", "应用科学、医学、技术"))
     category_list.append(NoteCategory("700", "艺术与休闲"))
@@ -200,7 +200,7 @@ class GroupListHandler:
         # 未分类信息
         files = NOTE_DAO.list_by_parent(user_name, 0, 0, 1000, skip_group = True)
         if len(files) > 0:
-            fixed_books.append(NoteLink("默认笔记本", "/note/default", size=len(files), icon = "fa-th-large"))
+            fixed_books.append(NoteLink("未分类笔记", "/note/default", size=len(files), icon = "fa-folder"))
 
         if len(archived_groups) > 0:
             fixed_books.append(NoteLink("归档笔记本", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
@@ -317,7 +317,7 @@ class CategoryHandler:
         root = NOTE_DAO.get_root()
         return xtemplate.render("note/page/category.html", 
             file = root, 
-            title = u"目录",
+            title = u"笔记分类",
             pathlist = [root],
             show_path_list = True,
             show_size = True,
@@ -331,6 +331,8 @@ class BaseListHandler:
     note_type = "gallery"
     title     = "相册"
     orderby   = "ctime_desc"
+    create_type = ""
+    create_text = T("创建笔记")
 
     @xauth.login_required()
     def GET(self):
@@ -344,29 +346,63 @@ class BaseListHandler:
         files  = NOTE_DAO.list_by_type(user_name, self.note_type, offset, limit, self.orderby)
 
         # 上级菜单
-        parent = PathNode(TYPES_NAME, "/note/types")
+        parent = PathNode(T("根目录"), "/note/group")
         return xtemplate.render(VIEW_TPL,
             pathlist  = [parent, PathNode(self.title, "/note/" + self.note_type)],
             file_type = "group",
+            title     = self.title,
             group_type = self.note_type,
             files     = files,
             page      = page,
             show_pagination = True,
-            show_mdate = True,
+            show_cdate = True,
+            show_group_option = False,
+            create_text = self.create_text,
+            create_type = self.create_type,
             page_max  = math.ceil(amount / xconfig.PAGE_SIZE),
             page_url  = "/note/%s?page=" % self.note_type)
 
 
 class TextListHandler(BaseListHandler):
 
-    def __init__(self):
-        self.note_type = "text"
-        self.title = "文本"
+    note_type = "text"
+    title = "文本"
 
 class AddressBookListHandler(BaseListHandler):
-    def __init__(self):
-        self.note_type = "address"
-        self.title     = "通讯录"
+    
+    note_type = "address"
+    title     = "通讯录"
+
+
+class DocumentListHandler(BaseListHandler):
+
+    note_type = "document"
+    create_type = "md"
+    create_text = T("创建文档")
+    title     = "我的文档"
+
+class GalleryListHandler(BaseListHandler):
+
+    note_type = "gallery"
+    create_type = "gallery"
+    create_text = "创建相册"
+    title     = "我的相册"
+
+
+class CheckListHandler(BaseListHandler):
+
+    note_type = "list"
+    create_type = "list"
+    create_text = T("创建清单")
+    title = T("我的清单")
+
+
+class TableListHandler(BaseListHandler):
+
+    note_type = "table"
+    create_type = "csv"
+    create_text = T("创建表格")
+    title = T("我的表格")
 
 class NotePluginHandler:
 
@@ -552,6 +588,10 @@ xurls = (
     r"/note/group/select"   , GroupSelectHandler,
     r"/note/management"     , ManagementHandler,
     r"/note/public"         , PublicListHandler,
+    r"/note/document"       , DocumentListHandler,
+    r"/note/gallery"        , GalleryListHandler,
+    r"/note/list"           , CheckListHandler,
+    r"/note/table"          , TableListHandler,
 
     r"/note/text"           , TextListHandler,
     r"/note/tools"          , NotePluginHandler,

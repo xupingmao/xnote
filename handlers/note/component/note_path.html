@@ -1,7 +1,7 @@
 
 
 {% if len(pathlist) > 0 %}
-    <div class="note-path">
+    <div class="col-row-12 pad5">
     {% for i, item_local in enumerate(pathlist) %}
         {% if i > 0 %} / {% end %}<a href="{{item_local.url}}" class="link">{{ item_local.name }}</a>
     {% end %}

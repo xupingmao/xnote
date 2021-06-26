@@ -2,8 +2,9 @@
 {% init error = None %}
 {% init is_iframe = False %}
 {% init file = Storage(id = 0, parent_id=0, priority = 0) %}
+{% init show_group_option = True %}
 
-{% if file != None and _has_login %}
+{% if file != None and _has_login and show_group_option %}
     <div class="dropdown">
       <span class="dropdown-btn link btn btn-default">更多▾</span>
       <div class="dropdown-content">
@@ -40,8 +41,9 @@
         {% end %}
       </div>
     </div>
-    <a class="btn btn-default" href="javascript:history.back();">返回</a>
 {% end %}
+
+<a class="btn btn-default" href="javascript:history.back();">返回</a>
 
 {% if error != "" and error != None%}
     <div class="col-md-12 error">

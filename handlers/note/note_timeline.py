@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/06/20 12:25:42
+# @modified 2021/06/26 00:46:06
 
 """时光轴视图"""
 import re
@@ -535,13 +535,13 @@ xurls = (
     # 时光轴视图
     r"/note/timeline"       , TimelineHandler,
     # r"/note/public"         , PublicTimelineHandler,
-    r"/note/gallery"        , GalleryListHandler,
-    r"/note/table"          , TableListHandler,
-    r"/note/csv"            , TableListHandler,
-    r"/note/document"       , DocumentListHandler,
+    # r"/note/gallery"        , GalleryListHandler,
+    # r"/note/table"          , TableListHandler,
+    # r"/note/csv"            , TableListHandler,
+    # r"/note/document"       , DocumentListHandler,
     r"/note/html"           , HtmlListHandler,
-    r"/note/md"             , MarkdownListHandler,
-    r"/note/list"           , ListNoteHandler,
+    # r"/note/md"             , MarkdownListHandler,
+    # r"/note/list"           , ListNoteHandler,
     r"/note/plan"           , PlanListHandler,
     r"/note/log"            , LogListHandler,
     r"/note/sticky"         , StickyHandler,

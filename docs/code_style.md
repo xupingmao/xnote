@@ -53,6 +53,7 @@
 - `handlers/note/page` 页面，页面的入口
 - `handlers/note/ajax` ajax页面
 - `handlers/note/component` 页面的组件
+- `handlers/note/component/css` CSS组件
+- `handlers/note/component/script` JS脚本组件
 - `handlers/note/*.py` 后台处理程序
-
 

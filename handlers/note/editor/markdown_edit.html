@@ -12,7 +12,7 @@
     <script type="text/javascript" src="/static/js/upload.js"></script>
     <script type="text/javascript" src="/static/js/marked-ext.js"></script>
     <script type="text/javascript" src="/static/js/editor.js"></script>
-    {% include note/component/edit_css.html %}
+    {% include note/component/css/edit_css.html %}
 {% end %} 
 
 {% block body %} 
@@ -35,9 +35,9 @@
                 <span>文档编辑器</span>
                 <div class="float-right">
                     <button class="inline-btn">保存</button>
+                    {% include common/button/back_button.html %}
                 </div>
             </div>
-            {% include note/component/note_path.html %}
         </div>
 
         <!-- note-edit-body -->

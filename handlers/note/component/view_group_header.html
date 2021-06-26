@@ -4,22 +4,23 @@
 {% init file = Storage(id = 0, parent_id=0) %}
 {% init page = 0 %}
 {% init show_create_option = True %}
+{% init parent_id = 0 %}
+{% init title = "目录" %}
+{% init create_type = "" %}
+{% init create_text = T("创建笔记") %}
 
 <input id="fileId" type="hidden" value="{{file.id}}"/>
 
 {% if show_path_list %}
     <div class="grid-title btn-line-height">
-        <span>目录</span>
+        <span>{{title}}</span>
         <div class="float-right">
             {% if show_create_option %}
-                <a class="btn" href="/note/create?parent_id={{parent_id}}">新建笔记</a>
+                <a class="btn" href="/note/create?parent_id={{parent_id}}&type={{create_type}}">{{create_text}}</a>
             {% end %}
             {% include note/component/group_option.html %}
         </div>
     </div>
-
-    {% include note/component/note_path.html %}
-
 {% end %}
 
 {% if error != "" and error != None%}

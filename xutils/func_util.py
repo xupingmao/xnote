@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/06/12 16:53:55
-# @modified 2021/06/12 17:08:04
-# @filename funcutil.py
+# @modified 2021/06/26 11:12:27
+# @filename func_util.py
 import warnings
 
 _FUNC_DICT = dict()
@@ -12,7 +12,7 @@ def register_func(name, func):
     @param {func} func 函数
     """
     if name in _FUNC_DICT:
-        warnings.warn("[register_func] name registered: %s" % name)
+        warnings.warn("[xutils.register_func] name registered: %s" % name)
     _FUNC_DICT[name] = func
 
 def call(func_name, *args, **kw):

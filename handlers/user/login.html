@@ -14,18 +14,17 @@
 
  	.login-submit {
     padding: 12px 24px;
- 		border-radius: 0px;
- 		background-color: lightblue;
+ 		border-radius: 5px;
  	}
 	
   .login-submit:hover {
-		background-color: #27A9E3;
-    border-radius: 0px;
+    border-radius: 5px;
 	}
   
   .input-header {
     padding-top: 3px;
     size: 14px;
+    background-color: transparent;
   }
 
   .nav {
@@ -47,15 +46,18 @@
     margin-top: 100px;
     border-radius: 5px;
   }
+
+  .login-box-inner {
+    background-color: #fff;
+    border-radius: 5px;
+  }
   
   .login-header {
     float: left;
     width: 100%;
     padding: 10px;
-    background-color: #337ab7;
-    color: white;
-    border-radius: 5px 5px 0px 0px;
-    /*border-radius: 0px;*/
+    color: black;
+    font-size: 16px;
     text-align: center;
   }
 
@@ -95,6 +97,11 @@
       margin-bottom: 0px;
     }
 
+    .login-box-inner {
+      background-color: transparent;
+      border-radius: 0px;
+    }
+
     .login-body {
       position: absolute;
       background-color: transparent;
@@ -113,23 +120,25 @@
 {% block body %}
     
 <div class="login-box">
-  <div class="login-header">登录</div>
-  
-  {% if error != "" and error != None %}
-    <div class="col-md-12 error">{{error}}</div>
-  {% end %}
+  <div class="col-md-12 login-box-inner">
+    <div class="login-header">登录Xnote</div>
+    
+    {% if error != "" and error != None %}
+      <div class="col-md-12 error">{{error}}</div>
+    {% end %}
 
-  <div class="login-body">
-    <form id="loginForm" name="loginForm" method="POST">
-  		<input class="login-input" type="text" name="username" value="{{username}}" placeholder="账户名"/>
-  		<input class="login-input" type="password" name="password" value="{{password}}" placeholder="密码"/>
-      <input type="text" name="test" value="Test" class="hide">
-  		<button class="login-submit login-input" type="submit" value="Login" id="loginBtn">登录</button>
-  	</form>
-  </div>
+    <div class="login-body">
+      <form id="loginForm" name="loginForm" method="POST">
+    		<input class="login-input" type="text" name="username" value="{{username}}" placeholder="账户名"/>
+    		<input class="login-input" type="password" name="password" value="{{password}}" placeholder="密码"/>
+        <input type="text" name="test" value="Test" class="hide">
+    		<button class="btn login-submit login-input" type="submit" value="Login" id="loginBtn">登录</button>
+    	</form>
+    </div>
 
-  <div class="login-footer">
-    <a href="/" class="link">返回首页</a>
+    <div class="login-footer">
+      <a href="/" class="link">返回首页</a>
+    </div>
   </div>
 </div>
 
