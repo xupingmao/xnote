@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2021/06/27 00:42:23
+# @modified 2021/06/27 16:45:41
 
 import xauth
 import xtemplate
@@ -73,7 +73,7 @@ class NoteWorkspaceHandler:
         note_groups  = NOTE_DAO.list_group(creator, orderby = "mtime_desc", limit = 5)
         recent_update_notes = NOTE_DAO.list_recent_edit(creator, limit = recent_update_limit, skip_deleted = True)
 
-        return xtemplate.render_by_ua("note/page/note_workspace.html",
+        return xtemplate.render_by_ua("note/page/index/note_workspace.html",
             html_title = T("笔记工作台"),
             hot_notes = hot_notes,
             memos = memos,

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/06/27 00:19:47
+# @modified 2021/06/27 16:06:26
 
 """时光轴视图"""
 import re
@@ -504,8 +504,7 @@ class DateHandler:
             year = int(parts[0])
             month = dateutil.get_current_month()
 
-        notes = NOTE_DAO.list_by_date("ctime", user_name, date)
-
+        notes = []
         # 待办任务
         notes.append(MSG_DAO.get_message_tag(user_name, "task", priority = 2))
         notes.append(MSG_DAO.get_message_tag(user_name, "log",  priority = 2))
@@ -515,6 +514,8 @@ class DateHandler:
         notes.append(SystemGroup("我的月报:%s" % date, "/note/view?skey=month_%s" % date, 
             priority = 2))
 
+        notes_new = NOTE_DAO.list_by_date("ctime", user_name, date)
+        notes = notes + notes_new
         notes_by_date = assemble_notes_by_date(notes)
 
         return xtemplate.render("note/page/list_by_date.html", 

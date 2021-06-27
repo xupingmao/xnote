@@ -1,13 +1,17 @@
 <!-- 笔记类型 -->
 {% init note_types = xutils.call("page.list_note_types") %}
+{% init show_note_types_title = True %}
 
 <div class="card">
-    <div class="card-title">
-        <span>笔记类型</span>
-        <div class="float-right">
-            <!-- 更多按钮 -->
+
+    {% if show_note_types_title %}
+        <div class="card-title">
+            <span>笔记类型</span>
+            <div class="float-right">
+                <!-- 更多按钮 -->
+            </div>
         </div>
-    </div>
+    {% end %}
 
 {% for item in note_types %}
     <!-- 隐藏的记录 -->

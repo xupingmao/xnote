@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/24 00:11:22
+# @modified 2021/06/27 16:42:29
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -167,6 +167,7 @@ def on_search_message(ctx):
     touch_key_by_content(ctx.user_name, 'key', key)
 
     messages, count = MSG_DAO.search(ctx.user_name, key, 0, 3)
+    search_result = []
     for message in messages:
         item = SearchResult()
         if message.content != None and len(message.content) > xconfig.SEARCH_SUMMARY_LEN:
@@ -175,13 +176,17 @@ def on_search_message(ctx):
         item.name = u('记事 - ') + message.ctime
         item.html = message.html
         item.icon = "hide"
-        ctx.messages.append(item)
+        search_result.append(item)
         # print(message)
-    if count > 3:
+    if count > 0:
         more = SearchResult()
-        more.name = "查看更多记事(%s)" % count
+        more.name = "搜索到[%s]条记事" % count
         more.url  = "/message?key=" + ctx.key
-        ctx.messages.append(more)
+        more.icon = "fa-file-text-o"
+        search_result.insert(0, more)
+
+    if len(search_result) > 0:
+        ctx.messages = search_result
 
 
 def get_current_message_stat():

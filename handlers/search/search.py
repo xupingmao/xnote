@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/05/10 23:56:41
+# @modified 2021/06/27 16:38:02
 
 import re
 import os
@@ -105,7 +105,7 @@ def fill_note_info(files):
             parent = NOTE_DAO.get_by_id(file.parent_id)
             if parent is not None:
                 file.parent_name = parent.name
-        file.show_move = True
+            file.show_move = True
 
 def log_search_history(user, key, category = "default", cost_time = 0):
     NOTE_DAO.add_search_history(user, key, category, cost_time)
@@ -303,8 +303,7 @@ class SearchHandler:
         page      = xutils.get_argument("page", 1, type = int)
         search_type = xutils.get_argument("search_type", "")
         user_name = xauth.get_current_name()
-        page_url  =  "/search/search?key=%s&category=%s&search_type=%s&page="\
-            % (key, category, search_type)
+        page_url  =  "/search/search?key={key}&category={category}&search_type={search_type}&page=".format(**locals())
         pagesize = xconfig.SEARCH_PAGE_SIZE
         offset   = (page-1) * pagesize
         limit    = pagesize

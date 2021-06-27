@@ -30,27 +30,18 @@
 {% end %}
 
 {% block body %}
-    <div class="card">
-        <div class="card-title btn-line-height">
-            <span>笔记工作台</span>
 
-            <div class="float-right">
-                <!-- 右侧控制区 -->
-                <a class="btn" href="/note/create">新建笔记</a>
-                <a class="btn btn-default" href="/note/tools">笔记工具</a>
-            </div>
-        </div>
-    </div>
-    
+    {% init show_note_types_title = False %}
+
     <div class="content-left">
         {% include note/card/note_types.html %}
     </div>
 
     <div class="content-right">
+        {% include message/component/message_todo_inner.html %}
         {% include note/card/task_memo.html %}
         {% include note/card/note_groups.html %}
         {% include note/card/hot_notes.html %}
-        {% include note/card/note_types.html %}
     </div>
 
 {% end %}
