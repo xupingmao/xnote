@@ -144,7 +144,7 @@ function arrForEach(fakeArr, fn) {
 
 // @author xupingmao
 // @since 2017/08/16
-// @modified 2021/05/16 23:28:03
+// @modified 2021/07/04 13:54:23
 
 //////////////////////////////////////////////////////
 // String 增强
@@ -424,6 +424,26 @@ function renderTemplate(templateText, object) {
         return object[objKey.trim()] || '';
     });
 }
+
+/**
+ * 原型：字符串格式化
+ * @param args 格式化参数值
+ */
+// String.prototype.format = function(args) {
+//     var result = this;
+//     if (arguments.length < 1) {
+//         return result;
+//     }
+
+//     var data = arguments; // 如果模板参数是数组
+//     if (arguments.length == 1 && typeof (args) == "object") {
+//         // 如果模板参数是对象
+//         data = args;
+//     }
+//     return result.replace(/\{(.*?)\}/g, function (context, objKey) {
+//         return object[objKey.trim()] || '';
+//     });
+// }
 
 // @author xupingmao
 // @since 2017/08/16

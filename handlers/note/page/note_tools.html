@@ -4,7 +4,7 @@
 
 <div class="card">
     <h3 class="card-title btn-line-height">
-        <span>笔记工具</span>
+        <span>笔记应用</span>
         <div class="float-right">
             <a class="btn btn-default" href="/note/create">新建</a>
             <a class="btn btn-default" href="/note/group">笔记本</a>
@@ -25,6 +25,12 @@
                     {% if link.size != None %}
                         <span class="plugin-right-span">{{link.size}}</span>
                     {% end %}
+                    
+                    {% if link.visit_cnt != None %}
+                        <i class="fa fa-eye-o"></i>
+                        <span class="plugin-right-span">热度: {{link.visit_cnt}}</span>
+                    {% end %}
+
                     <i class="fa fa-chevron-right"></i>
                 </div>
             </a>

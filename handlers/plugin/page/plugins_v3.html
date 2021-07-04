@@ -10,6 +10,8 @@
     {% include plugin/header/plugin_header_normal.html %}
 {% end %}
 
+<!-- plugins_v3.html -->
+
 <div class="card">
     <div class="plugin-list col-md-12">
         {% if len(plugins) == 0 %}
@@ -26,6 +28,11 @@
                     {% if link.size != None %}
                         <span class="plugin-right-span">{{link.size}}</span>
                     {% end %}
+
+                    {% if link.visit_cnt != None %}
+                        <span class="plugin-right-span">热度: {{link.visit_cnt}}</span>
+                    {% end %}
+                    
                     <i class="fa fa-chevron-right"></i>
                 </div>
             </a>

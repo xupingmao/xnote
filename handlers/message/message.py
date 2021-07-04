@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/06/27 16:42:29
+# @modified 2021/07/04 17:08:58
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -183,6 +183,7 @@ def on_search_message(ctx):
         more.name = "搜索到[%s]条记事" % count
         more.url  = "/message?key=" + ctx.key
         more.icon = "fa-file-text-o"
+        more.show_more_link = True
         search_result.insert(0, more)
 
     if len(search_result) > 0:
@@ -191,7 +192,9 @@ def on_search_message(ctx):
 
 def get_current_message_stat():
     user_name = xauth.current_name()
-    return MSG_DAO.get_message_stat(user_name)
+    message_stat = MSG_DAO.get_message_stat(user_name)
+    return format_message_stat(message_stat)
+
 
 
 def do_split_date(date):
@@ -846,6 +849,7 @@ class MessageListHandler:
         filter_key = xutils.get_argument("filterKey", "")
 
         kw = dict(
+            title = T("待办任务"),
             html_title = T("待办任务"),
             message_tag = "task",
             search_type = "message",

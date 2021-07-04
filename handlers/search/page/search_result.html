@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2021/06/20 15:22:08
+@modified 2021/07/04 17:08:26
 -->
 
 {% block body %}
@@ -69,6 +69,11 @@
                 {# 词典 #}
                 {% if _is_admin and file.category == "dict" %}
                     <a class="item-option" href="/dict/edit/{{file.key}}">编辑</a>
+                {% end %}
+
+                {% if file.show_more_link %}
+                    <!-- 分类导航 -->
+                    <a href="{{file.url}}">查看全部</a>
                 {% end %}
             </div>
 

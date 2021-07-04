@@ -4,7 +4,7 @@
 source build.sh
 
 rm -rf testdata
-echo $(date "+v2.7-dev-%Y.%m.%d") > version.txt
+echo $(date "+v2.8-dev-%Y.%m.%d") > version.txt
 
 # echo -e '\n\nrun test in python-2.7'
 # python2 -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core

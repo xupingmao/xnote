@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2021/06/27 16:45:41
+# @modified 2021/06/29 23:14:58
 
 import xauth
 import xtemplate
@@ -48,6 +48,7 @@ def list_note_types(user_name = None):
     note_stat = NOTE_DAO.get_note_stat(user_name)
 
     return [
+        NoteLink("笔记本", "/note/group", "fa-folder", size = note_stat.group_count),
         NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
         NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
         NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
@@ -57,6 +58,50 @@ def list_note_types(user_name = None):
         NoteLink("评论", "/note/mycomments", "fa-file-text", size = note_stat.comment_count),
         NoteLink("回收站", "/note/removed", "fa-trash", size = note_stat.removed_count),
     ]
+
+def list_msg_types(user_name = None):
+    if user_name is None:
+        user_name = xauth.current_name()
+
+    msg_stat  = MSG_DAO.get_message_stat(user_name)
+
+    return [
+        NoteLink("待办任务", "/message/todo", "fa-calendar-check-o", size = msg_stat.task_count),
+        NoteLink("随手记", "/message?tag=log", "fa-file-text-o", size = msg_stat.log_count),
+    ]
+
+def list_system_types(user_name = None):
+    if user_name is None:
+        user_name = xauth.current_name()
+
+    msg_stat  = MSG_DAO.get_message_stat(user_name)
+
+    return [
+        NoteLink("插件", "/plugins_list", "fa-th-large", size = msg_stat.task_count),
+        NoteLink("设置", "/system/settings", "fa-gear", size = ""),
+    ]
+
+def list_special_groups(user_name = None):
+    if user_name is None:
+        user_name = xauth.current_name()
+
+    # 短消息：任务、通知和备忘
+    fixed_books = []
+    fixed_books.append(MSG_DAO.get_message_tag(user_name, "task"))
+    fixed_books.append(MSG_DAO.get_message_tag(user_name, "log"))
+
+    notes = NOTE_DAO.list_group(user_name, orderby = "name")
+    archived_groups = list(filter(lambda x: x.archived == True, notes))
+
+    # 未分类信息
+    files = NOTE_DAO.list_by_parent(user_name, 0, 0, 1000, skip_group = True)
+    if len(files) > 0:
+        fixed_books.append(NoteLink("未分类笔记", "/note/default", size=len(files), icon = "fa-folder"))
+
+    if len(archived_groups) > 0:
+        fixed_books.append(NoteLink("归档笔记本", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
+
+    return fixed_books
 
 class NoteWorkspaceHandler:
 
@@ -83,6 +128,9 @@ class NoteWorkspaceHandler:
 
 
 xutils.register_func("page.list_note_types", list_note_types)
+xutils.register_func("page.list_msg_types", list_msg_types)
+xutils.register_func("page.list_system_types", list_system_types)
+xutils.register_func("page.list_special_groups", list_special_groups)
 xutils.register_func("url:/note/workspace", NoteWorkspaceHandler)
 
 xurls = (

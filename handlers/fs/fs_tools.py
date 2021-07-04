@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/12/08 01:46:35
-# @modified 2021/03/21 17:59:36
+# @modified 2021/07/04 17:09:54
 # -*- coding:utf-8 -*-
 # @since 2018-11-22 00:46:26
 import os
@@ -41,6 +41,10 @@ HTML = '''
     <a class="list-link" href="{{note.url}}">
         <span>{{note.title}}</span>
         <div class="float-right">
+            {% if note.visit_cnt != None %}
+                <i class="fa fa-eye-o"></i>
+                <span class="plugin-right-span">热度: {{note.visit_cnt}}</span>
+            {% end %}
             <i class="fa fa-chevron-right"></i>
         </div>
     </a>
@@ -61,7 +65,7 @@ class Main(BasePlugin):
         notes = xmanager.find_plugins("dir")
 
         xmanager.add_visit_log(user, "/fs_tools")
-        self.writeheader(HEADER, plugin = self)
+        self.writeheader(HEADER, plugin = self, plugin_category = "dir")
         self.writetemplate(HTML, notes = notes)
         
 

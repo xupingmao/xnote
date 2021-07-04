@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/05/22 14:30:31
+# @modified 2021/07/04 17:12:20
 from io import StringIO
 import xconfig
 import codecs
@@ -21,6 +21,7 @@ import web
 import copy
 
 from xtemplate import BasePlugin
+from xtemplate import T
 from xutils import History
 from xutils import cacheutil
 from xutils import Storage
@@ -64,16 +65,25 @@ dbutil.register_table("plugin_visit_log", "插件访问日志")
 
 class PluginCategory:
     """插件类型"""
-    def __init__(self, code, name, url = None):
+
+    required_roles = None
+
+    def __init__(self, code, name, url = None, required_roles = None):
         self.code = code
         self.name = name
+        self.required_roles = required_roles
         if url is None:
             self.url = "/plugins_list?category=%s" % self.code
         else:
             self.url = url
 
+    def is_visible(self):
+        if self.required_roles is None:
+            return True
+        return xauth.current_role() in self.required_roles
 
-def define_plugin_category(code, name, url = None, raise_duplication = True):
+
+def define_plugin_category(code, name, url = None, raise_duplication = True, required_roles = None):
     global PLUGIN_CATEGORY_LIST
     for item in PLUGIN_CATEGORY_LIST:
         if item.code == code:
@@ -86,7 +96,7 @@ def define_plugin_category(code, name, url = None, raise_duplication = True):
                 raise Exception("name: %s is defined" % name)
             else:
                 return
-    PLUGIN_CATEGORY_LIST.append(PluginCategory(code, name, url))
+    PLUGIN_CATEGORY_LIST.append(PluginCategory(code, name, url, required_roles))
 
 def get_plugin_category_list():
     global PLUGIN_CATEGORY_LIST
@@ -307,13 +317,14 @@ INNER_TOOLS = [
     note_plugin("笔记批量管理", "/note/management", "fa-gear"),
     note_plugin("回收站", "/note/removed", "fa-trash"),
     note_plugin("笔记本", "/note/group", "fa-th-large"),
-    note_plugin("待办任务", "/message/todo", "fa-calendar-check-o"),
+    note_plugin("待办任务", "/message?tag=task", "fa-calendar-check-o"),
     note_plugin("随手记", "/message?tag=log", "fa-file-text-o"),
     note_plugin("相册", "/note/gallery", "fa-photo"),
     note_plugin("清单", "/note/list", "fa-list"),
     note_plugin("词典", "/note/dict", "icon-dict"),
-    note_plugin("我的评论", "/note/mycomments", "fa-file-text-o"),
+    note_plugin("我的评论", "/note/mycomments", "fa-comments"),
     note_plugin("标签列表", "/note/taglist", "fa-tags"),
+    note_plugin("常用笔记", "/note/recent?orderby=hot", "fa-file-text-o"),
 
     # 文件工具
     file_plugin("文件索引", "/fs_index"),
@@ -328,13 +339,55 @@ def get_inner_tool_name(url):
             return tool.name
     return url
 
-def build_inner_tools():
-    return copy.copy(INNER_TOOLS)
+def build_inner_tools(user_name = None):
+    if user_name is None:
+        user_name = xauth.current_name()
+    tools_copy = copy.copy(INNER_TOOLS)
+    sort_plugins(user_name, tools_copy)
+    return tools_copy
 
 def build_plugin_links(plugins):
     return plugins
 
+def get_plugin_values():
+    values = xconfig.PLUGINS_DICT.values()
+    return list(values)
+
+class PluginSort:
+
+    def __init__(self, user_name):
+        self.user_name = user_name
+        self.logs = list_visit_logs(user_name)
+
+    def get_log_by_url(self, url):
+        for log in self.logs:
+            if log.url == url:
+                return log
+        return None
+
+    def sort_by_visit_cnt_desc(self, plugins):
+        for p in plugins:
+            log = self.get_log_by_url(p.url)
+            if log:
+                p.visit_cnt = log.visit_cnt
+            
+            if p.visit_cnt is None:
+                p.visit_cnt = 0
+
+        plugins.sort(key = lambda x:x.visit_cnt, reverse = True)
+
+    def sort_by_recent(self, plugins):
+        pass
+
+def sort_plugins(user_name, plugins, orderby = None):
+    sort_obj = PluginSort(user_name)
+    sort_obj.sort_by_visit_cnt_desc(plugins)
+    return plugins  
+
 def sorted_plugins(user_name, plugins, orderby=None):
+    sort_plugins(user_name, plugins, orderby)
+    return plugins
+
     # 把最近访问的放在前面
     logs = list_visit_logs(user_name)
     
@@ -356,13 +409,27 @@ def sorted_plugins(user_name, plugins, orderby=None):
     rest_plugins = list(filter(lambda x:x.url not in recent_urls, plugins))
     return recent_plugins + rest_plugins
 
+def debug_print_plugins(plugins, ctx = None):
+    if False:
+        print("\n" * 5)
+        print(ctx)
+        for p in plugins:
+            print(p)
 
 @logutil.timeit_deco(name = "list_all_plugins")
 def list_all_plugins(user_name, sort = True):
-    links = build_inner_tools()
-    links += build_plugin_links(xconfig.PLUGINS_DICT.values())
+    # links = build_inner_tools()
+    
+    # debug_print_plugins(links, "#416")
+
+    links = get_plugin_values()
+    
+    debug_print_plugins(links, "#420")
+
     if sort:
-        return sorted_plugins(user_name, links)
+        result = sorted_plugins(user_name, links)
+        debug_print_plugins(result, "#424")
+        return result
     return links
 
 def list_other_plugins(user_name, sort = True):
@@ -480,7 +547,8 @@ def on_search_plugins(ctx):
     if ctx.search_dict:
         return
 
-    results = []
+    result_list = []
+    temp_result = []
 
     for plugin in search_plugins(ctx.key):
         result           = SearchResult()
@@ -490,17 +558,20 @@ def on_search_plugins(ctx):
         result.name      = u(plugin.title + "(" + plugin.name + ")")
         result.url       = u(plugin.url)
         result.edit_link = plugin.edit_link
-        results.append(result)
+        temp_result.append(result)
 
-    result_count = len(results)
-    if ctx.category != "plugin" and len(results) > 3:
-        results = results[:3]
+    result_count = len(temp_result)
+    if ctx.category != "plugin" and len(temp_result) > 0:
         more = SearchResult()
-        more.name = u("查看更多插件(%s)") % result_count
-        more.icon = "fa-cube"
+        more.name = u("搜索到[%s]个插件") % result_count
+        more.icon = "fa-th-large"
         more.url  = "/plugins_list?category=plugin&key=" + ctx.key
-        results.append(more)
-    ctx.tools += results
+        more.show_more_link = True
+        result_list.append(more)
+
+    result_list += temp_result[:2]
+
+    ctx.tools += result_list
 
 def is_plugin_matched(p, words):
     return textutil.contains_all(p.title, words) \
@@ -510,8 +581,9 @@ def is_plugin_matched(p, words):
 
 def search_plugins(key):
     from xutils.functions import dictvalues
+    user_name = xauth.current_name()
     words   = textutil.split_words(key)
-    plugins = list_plugins("all")
+    plugins = list_all_plugins(user_name, True)
     result  = dict()
     for p in plugins:
         if is_plugin_matched(p, words):
@@ -538,10 +610,18 @@ class PluginListHandler:
         header   = xutils.get_argument("header", "")
         version  = xutils.get_argument("version", "")
 
+        context = Storage()
+        context.category = category
+        context.html_title = "插件"
+        context.header = header
+
         if xauth.is_admin():
             if key != "" and key != None:
                 recent  = []
                 plugins = search_plugins(key)
+                context.show_category = False
+                context.show_back_btn = True
+                context.title = T("搜索插件")
             else:
                 recent   = list_recent_plugins()
                 plugins  = list_plugins(category)
@@ -552,14 +632,14 @@ class PluginListHandler:
             else:
                 plugins = []
 
+        context.plugins = plugins
+        context.recent = recent
+
+        if category == "":
+            context.plugin_category = "all"
+
         template_file = get_template_by_version(version)
-        return xtemplate.render(template_file, 
-            category     = category,
-            html_title   = "插件",
-            header       = header,
-            search_type  = "plugin",
-            recent       = recent,
-            plugins      = plugins)
+        return xtemplate.render(template_file, **context)
 
 def get_plugin_category(category):
     plugin_categories = []
@@ -707,10 +787,10 @@ xutils.register_func("plugin.get_category_list", get_plugin_category_list)
 xutils.register_func("plugin.get_category_url_by_code", get_category_url_by_code)
 
 define_plugin_category("note", u"笔记", url = "/note/tools")
-define_plugin_category("dir",  u"文件", url = "/fs_tools")
-define_plugin_category("system",  u"系统")
-define_plugin_category("network", u"网络")
-define_plugin_category("develop", u"开发")
+define_plugin_category("dir",  u"文件", url = "/fs_tools", required_roles = ["admin"])
+define_plugin_category("system",  u"系统", required_roles = ["admin"])
+define_plugin_category("network", u"网络", required_roles = ["admin"])
+define_plugin_category("develop", u"开发", required_roles = ["user"])
 
 xurls = (
     r"/plugins_list_new", PluginGridHandler,

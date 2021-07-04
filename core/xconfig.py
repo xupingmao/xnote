@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/05/05 18:03:48
+# @modified 2021/06/27 19:32:54
 
 '''xnote系统配置
 # 用户配置
@@ -64,6 +64,7 @@ RECORD_LOCATION    = False
 
 
 # *** 样式设置 ***
+# BASE_TEMPLATE = "common/theme/sidebar.html"
 BASE_TEMPLATE = "base.html"
 # 主题样式
 THEME         = "standard"

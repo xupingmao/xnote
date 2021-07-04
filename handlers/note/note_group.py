@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/06/27 00:33:16
+# @modified 2021/07/04 16:47:49
 import math
 import time
 import web
@@ -193,30 +193,17 @@ class GroupListHandler:
 
         xmanager.add_visit_log(user_name, "/note/group")
 
-        # 短消息：任务、通知和备忘
-        fixed_books.append(MSG_DAO.get_message_tag(user_name, "task"))
-        fixed_books.append(MSG_DAO.get_message_tag(user_name, "log"))
-
-        # 未分类信息
-        files = NOTE_DAO.list_by_parent(user_name, 0, 0, 1000, skip_group = True)
-        if len(files) > 0:
-            fixed_books.append(NoteLink("未分类笔记", "/note/default", size=len(files), icon = "fa-folder"))
-
-        if len(archived_groups) > 0:
-            fixed_books.append(NoteLink("归档笔记本", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
-
-        files = fixed_books + normal_groups
+        files = normal_groups
         root  = NOTE_DAO.get_root()
 
         group_cards = []
-        group_cards.append(("", fixed_books))
 
         if len(sticky_groups) > 0:
             group_cards.append(("置顶", sticky_groups))
 
         group_cards.append(("笔记本", normal_groups))
 
-        return xtemplate.render("note/page/group_list.html", 
+        return xtemplate.render("note/page/group_list_old.html", 
             file = root, 
             title = u"我的笔记",
             pathlist = [root],
@@ -434,9 +421,10 @@ class NotePluginHandler:
         xmanager.add_visit_log(user_name, "/note/tools")
 
         return xtemplate.render(template,
-            html_title = T("笔记工具"),
+            html_title = T("笔记应用"),
+            plugin_category = "note",
             plugins     = plugins,
-            search_type = "plugin")
+            search_type = "default")
 
 
 class RecentHandler:
@@ -461,8 +449,10 @@ class RecentHandler:
         show_action_time = False
         show_hot_index = False
         dir_type   = "recent_edit"
-
         creator = xauth.get_current_name()
+
+        xmanager.add_visit_log(creator, "/note/recent?orderby=%s" % orderby)
+
         if orderby == "all":
             html_title = "All"
             files = NOTE_DAO.list_recent_events(creator, offset, limit)
