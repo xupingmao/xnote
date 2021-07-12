@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2020/01/06
-@modified 2021/03/14 14:36:30
+@modified 2021/07/12 23:51:24
 -->
 
 {% block body %}
@@ -16,16 +16,18 @@
             {% if parent_id != "0" %}
                 <button class="reverse-select-btn">反选</button>
                 <button class="move-btn" data-url="/note/group/select?callback=batchMoveNoteCallback">移动</button>
+                {% include common/button/back_button.html %}
             {% else %}
                 <!-- 根目录 -->
                 <button class="btn btn-default batch-move-btn">移动</button>
-                <button class="btn btn-default" onclick="javascript:history.back();">返回</button>
+                {% include common/button/back_button.html %}
             {% end %}
         </div>
     </div>
+</div>
 
+<div class="card">
     {% include note/component/note_path.html %}
-
 </div>
 
 <div class="card">

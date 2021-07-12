@@ -2,17 +2,19 @@
 
 {% block body %}
 
+{% init plugin_categories = [] %}
+
 <div class="card">
     <div class="card-title">
         <span>插件中心</span>
 
         {% if _is_admin %}
-        <div class="float-right">
-            <a class="btn" href="/plugins_new">新增</a>
-            <a class="btn" href="/fs_link/scripts/plugins">管理</a>
-            <a class="btn" href="/fs_api/download/plugins">下载</a>
-            <a class="btn" href="/plugins_list_old">旧版工具箱</a>
-        </div>
+            <div class="float-right">
+                <a class="btn btn-default" href="/plugins_new">新增</a>
+                <a class="btn btn-default" href="/fs_link/scripts/plugins">管理</a>
+                <a class="btn btn-default" href="/fs_api/download/plugins">下载</a>
+                <a class="btn btn-default" href="/plugins_list_old">旧版工具箱</a>
+            </div>
         {% end %}
 
     </div>

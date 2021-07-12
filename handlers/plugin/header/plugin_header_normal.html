@@ -1,6 +1,6 @@
 {% init baseurl = "/plugins_list" %}
 {% init show_category = True %}
-{% init show_back_btn = False %}
+{% init show_back = "false" %}
 {% init title = "插件中心" %} 
 
 <div class="card">
@@ -11,7 +11,7 @@
                 <a class="btn btn-default" href="/fs_link/scripts/plugins">管理</a>
             {% end %}
 
-            {% if show_back_btn %}
+            {% if show_back == "true" %}
                 {% include common/button/back_button.html %}
             {% end %}
         </div>

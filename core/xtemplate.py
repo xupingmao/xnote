@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/07/04 11:50:35
+# @modified 2021/07/13 00:25:47
 # @filename xtemplate.py
 
 
@@ -186,11 +186,27 @@ def is_mobile_device(user_agent = None):
 
     if user_agent is None:
         return False
+
     user_agent_lower = user_agent.lower()
     for name in ("iphone", "android", "webos"):
         if user_agent_lower.find(name) >= 0:
             return True
     return False
+
+def get_device_platform():
+    platform = web.ctx.get("xnote_platform")
+    if platform != None:
+        return platform
+
+    platform = do_get_device_platform()
+    web.ctx.xnote_platform = platform
+    return platform
+
+def do_get_device_platform():
+    if is_mobile_device():
+        return "mobile"
+    else:
+        return "desktop"
 
 def render_by_ua(name, **kw):
     if is_mobile_device():

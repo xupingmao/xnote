@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/07/04 17:12:20
+# @modified 2021/07/13 00:31:44
 from io import StringIO
 import xconfig
 import codecs
@@ -61,7 +61,14 @@ PLUGIN_CATEGORY_LIST = list()
 
 CONFIG_TOOLS = list()
 
+PLUGINS_STATUS = "loading"
+
+DEFAULT_PLUGIN_ICON_CLASS = "fa fa-cube"
+
 dbutil.register_table("plugin_visit_log", "插件访问日志")
+
+def get_current_platform():
+    return xtemplate.get_device_platform()
 
 class PluginCategory:
     """插件类型"""
@@ -72,18 +79,27 @@ class PluginCategory:
         self.code = code
         self.name = name
         self.required_roles = required_roles
+        self.platforms = None
         if url is None:
             self.url = "/plugins_list?category=%s" % self.code
         else:
             self.url = url
 
     def is_visible(self):
+        return self.is_visible_by_roles() and self.is_visible_by_platform()
+
+    def is_visible_by_platform(self):
+        if self.platforms is None:
+            return True
+        return get_current_platform() in self.platforms
+
+    def is_visible_by_roles(self):
         if self.required_roles is None:
             return True
         return xauth.current_role() in self.required_roles
 
 
-def define_plugin_category(code, name, url = None, raise_duplication = True, required_roles = None):
+def define_plugin_category(code, name, url = None, raise_duplication = True, required_roles = None, platforms = None):
     global PLUGIN_CATEGORY_LIST
     for item in PLUGIN_CATEGORY_LIST:
         if item.code == code:
@@ -96,7 +112,9 @@ def define_plugin_category(code, name, url = None, raise_duplication = True, req
                 raise Exception("name: %s is defined" % name)
             else:
                 return
-    PLUGIN_CATEGORY_LIST.append(PluginCategory(code, name, url, required_roles))
+    category = PluginCategory(code, name, url, required_roles)
+    category.platforms = platforms
+    PLUGIN_CATEGORY_LIST.append(category)
 
 def get_plugin_category_list():
     global PLUGIN_CATEGORY_LIST
@@ -126,7 +144,7 @@ class PluginContext(Storage):
         self.edit_link     = ""
         self.clazz         = None
         self.priority      = 0
-        self.icon          = "fa fa-cube"
+        self.icon          = DEFAULT_PLUGIN_ICON_CLASS
         self.author        = None
         self.version       = None
 
@@ -173,6 +191,7 @@ def load_plugin_file(fpath, fname = None):
         meta    = xutils.load_script_meta(fpath)
         module  = xutils.load_script(fname, vars, dirname = dirname)
         context = PluginContext()
+        context.icon_class = DEFAULT_PLUGIN_ICON_CLASS
         # 读取meta信息
         context.load_from_meta(meta)
 
@@ -250,6 +269,7 @@ def inner_plugin(name, url, category = "inner"):
     context.link  = url
     context.editable = False
     context.category = category
+    context.icon_class = "fa fa-cube"
     return context
 
 def note_plugin(name, url, icon=None, size = None, required_role = "user"):
@@ -259,6 +279,7 @@ def note_plugin(name, url, icon=None, size = None, required_role = "user"):
     context.url   = url
     context.link  = url
     context.icon  = icon
+    context.icon_class = "fa %s" % icon
     context.size  = size
     context.editable = False
     context.category = "note"
@@ -279,10 +300,14 @@ def system_plugin(name, url):
 
 INNER_TOOLS = [
     # 工具集/插件集
-    index_plugin("笔记工具集合", "/note/tools"),
-    index_plugin("文件工具集合", "/fs_tools"),
+    index_plugin("笔记工具", "/note/tools"),
+    index_plugin("文件工具", "/fs_tools"),
+    index_plugin("开发工具", "/plugins_list?category=develop&show_back=true"),
+    index_plugin("网络工具", "/plugins_list?category=network&show_back=true"),
 
+    # 开发工具
     dev_plugin("浏览器信息", "/tools/browser_info"),
+
     # 文本
     dev_plugin("文本对比", "/tools/text_diff"),
     dev_plugin("文本转换", "/tools/text_convert"),
@@ -311,7 +336,7 @@ INNER_TOOLS = [
     note_plugin("我的置顶", "/note/sticky", "fa-thumb-tack"),
     note_plugin("搜索历史", "/search/history", "fa-search"),
     note_plugin("导入笔记", "/note/html_importer", "fa-internet-explorer", required_role = "admin"),
-    note_plugin("时间视图", "/note/date", "fa-clock-o"),
+    note_plugin("时间视图", "/note/date?show_back=true", "fa-clock-o"),
     note_plugin("数据统计", "/note/stat", "fa-bar-chart"),
     note_plugin("上传管理", "/fs_upload", "fa-upload"),
     note_plugin("笔记批量管理", "/note/management", "fa-gear"),
@@ -605,22 +630,28 @@ class PluginListHandler:
     @logutil.timeit_deco(name = "PluginListHandler")
     @xauth.login_required()
     def GET(self):
+        global PLUGINS_STATUS
         category = xutils.get_argument("category", "")
         key      = xutils.get_argument("key", "")
         header   = xutils.get_argument("header", "")
         version  = xutils.get_argument("version", "")
+        show_back = xutils.get_argument("show_back", "")
 
         context = Storage()
         context.category = category
         context.html_title = "插件"
         context.header = header
+        context.show_back = show_back
+
+        user_name = xauth.current_name()
+        xmanager.add_visit_log(user_name, "/plugins_list?category=%s" % category)
 
         if xauth.is_admin():
             if key != "" and key != None:
                 recent  = []
                 plugins = search_plugins(key)
                 context.show_category = False
-                context.show_back_btn = True
+                context.show_back = "true"
                 context.title = T("搜索插件")
             else:
                 recent   = list_recent_plugins()
@@ -634,6 +665,7 @@ class PluginListHandler:
 
         context.plugins = plugins
         context.recent = recent
+        context.plugins_status = PLUGINS_STATUS
 
         if category == "":
             context.plugin_category = "all"
@@ -746,9 +778,14 @@ class PluginLogHandler:
 
 @xmanager.listen("sys.reload")
 def reload_plugins(ctx):
+    global PLUGINS_STATUS
+    PLUGINS_STATUS = "loading"
+
     do_reload_config_plugins()
 
     load_plugins()
+
+    PLUGINS_STATUS = "done"
 
 @xutils.log_deco("reload_config_plugins")
 def do_reload_config_plugins(ctx = None):
@@ -789,8 +826,9 @@ xutils.register_func("plugin.get_category_url_by_code", get_category_url_by_code
 define_plugin_category("note", u"笔记", url = "/note/tools")
 define_plugin_category("dir",  u"文件", url = "/fs_tools", required_roles = ["admin"])
 define_plugin_category("system",  u"系统", required_roles = ["admin"])
-define_plugin_category("network", u"网络", required_roles = ["admin"])
-define_plugin_category("develop", u"开发", required_roles = ["user"])
+define_plugin_category("network", u"网络", required_roles = ["admin"], platforms = ["desktop"])
+define_plugin_category("develop", u"开发", required_roles = ["admin", "user"], platforms = ["desktop"])
+define_plugin_category("index",   u"分类")
 
 xurls = (
     r"/plugins_list_new", PluginGridHandler,

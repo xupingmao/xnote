@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/06/27 16:06:26
+# @modified 2021/07/09 19:19:01
 
 """时光轴视图"""
 import re
@@ -493,7 +493,9 @@ class DateHandler:
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
-        xmanager.add_visit_log(user_name, "/note/date")
+        show_back = xutils.get_argument("show_back", "")
+
+        xmanager.add_visit_log(user_name, "/note/date?show_back=%s" % show_back)
         
         date  = xutils.get_argument("date", time.strftime("%Y-%m"))
         parts = date.split("-")
@@ -524,6 +526,7 @@ class DateHandler:
             year          = year,
             month         = month,
             notes_by_date = notes_by_date,
+            show_back     = show_back,
             search_type   = "default")
 
 xutils.register_func("note.build_date_result", build_date_result)

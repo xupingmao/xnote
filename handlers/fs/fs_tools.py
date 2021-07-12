@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/12/08 01:46:35
-# @modified 2021/07/04 17:09:54
+# @modified 2021/07/13 00:01:33
 # -*- coding:utf-8 -*-
 # @since 2018-11-22 00:46:26
 import os
@@ -39,6 +39,7 @@ HTML = '''
 <div class="card">
 {% for note in notes %}
     <a class="list-link" href="{{note.url}}">
+        <i class="{{note.icon_class}}"></i>
         <span>{{note.title}}</span>
         <div class="float-right">
             {% if note.visit_cnt != None %}
