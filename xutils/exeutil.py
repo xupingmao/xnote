@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/19 16:09:13
-# @modified 2021/03/06 16:06:51
+# @modified 2021/07/17 19:13:15
 
 
 """脚本执行相关的代码"""
@@ -212,9 +212,14 @@ def load_script_meta(fpath):
         # 去掉注释部分
         meta_line  = line.split("#", 1)[0]
         # 拆分元数据
-        meta_parts = meta_line.split()
+        meta_parts = meta_line.split(maxsplit = 1)
         meta_key   = meta_parts[0]
-        meta_value = meta_parts[1:]
+        # meta_value = meta_parts[1:]
+        if len(meta_parts) == 1:
+            meta_value = ''
+        else:
+            meta_value = meta_parts[1]
+            
         meta[meta_key] = meta_value
     return meta
 

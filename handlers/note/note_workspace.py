@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2021/06/29 23:14:58
+# @modified 2021/07/17 10:47:09
 
 import xauth
 import xtemplate
@@ -48,7 +48,7 @@ def list_note_types(user_name = None):
     note_stat = NOTE_DAO.get_note_stat(user_name)
 
     return [
-        NoteLink("笔记本", "/note/group", "fa-folder", size = note_stat.group_count),
+        # NoteLink("笔记本", "/note/group", "fa-folder", size = note_stat.group_count),
         NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
         NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
         NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
@@ -94,7 +94,7 @@ def list_special_groups(user_name = None):
     archived_groups = list(filter(lambda x: x.archived == True, notes))
 
     # 未分类信息
-    files = NOTE_DAO.list_by_parent(user_name, 0, 0, 1000, skip_group = True)
+    files = NOTE_DAO.list_by_parent(user_name, 0, 0, 1000, skip_group = True, include_public = False)
     if len(files) > 0:
         fixed_books.append(NoteLink("未分类笔记", "/note/default", size=len(files), icon = "fa-folder"))
 

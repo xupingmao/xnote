@@ -5,13 +5,17 @@
 
 <div class="card">
     <h3 class="card-title btn-line-height">
-        <a href="{{current_note.url}}" class="link2">{{current_note.name}}</a> 
-        / {{T("History")}}
+        <a href="{{current_note.url}}" class="link2">{{current_note.name}}</a>
+        <span>/</span>
+        <span>{{T("History")}}</span>
 
         <div class="float-right">
             <button class="btn btn-default" onclick="javascript:history.back();">返回</button>
         </div>
     </h3>
+</div>
+
+<div class="card">
 
     <table class="table">
         <tr>

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/06/20 15:31:05
+# @modified 2021/07/16 21:29:06
 import xutils
 import xconfig
 import xmanager
@@ -369,8 +369,7 @@ class MessageTag(Storage):
         if tag == "task":
             self.name = T("待办任务")
             self.icon = "fa-calendar-check-o"
-            # TODO 完成todo功能之后再切换
-            self.url  = "/message/todo"
+
 
 def get_message_tag(user, tag, priority = 0):
     msg_stat  = get_message_stat(user)

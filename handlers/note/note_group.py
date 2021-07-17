@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/07/04 16:47:49
+# @modified 2021/07/17 12:11:29
 import math
 import time
 import web
@@ -160,19 +160,19 @@ class PublicListHandler:
             page_max   = math.ceil(amount / pagesize),
             page_url   = "/note/public?page=")
 
-def get_category_list():
+def get_ddc_category_list():
     # TODO 配置化
     # 主要参考的是：杜威十进制分类法和国际十进制分类法
     category_list = []
-    category_list.append(NoteCategory("000", "知识和分类"))
+    category_list.append(NoteCategory("000", "计算机科学、资讯和总类"))
     category_list.append(NoteCategory("100", "哲学和心理学"))
     category_list.append(NoteCategory("200", "宗教"))
     category_list.append(NoteCategory("300", "社会科学"))
-    category_list.append(NoteCategory("400", "<空缺>"))
+    category_list.append(NoteCategory("400", "语言"))
     category_list.append(NoteCategory("500", "数学和自然科学"))
     category_list.append(NoteCategory("600", "应用科学、医学、技术"))
     category_list.append(NoteCategory("700", "艺术与休闲"))
-    category_list.append(NoteCategory("800", "语言和文学"))
+    category_list.append(NoteCategory("800", "文学"))
     category_list.append(NoteCategory("900", "历史、地理和传记"))
     return category_list
 
@@ -182,37 +182,19 @@ class GroupListHandler:
     def GET(self):
         category  = xutils.get_argument("category")
         user_name = xauth.current_name()
-        notes     = NOTE_DAO.list_group(user_name, orderby = "name")
-        sticky_groups   = list(filter(lambda x: x.priority > 0, notes))
-        archived_groups = list(filter(lambda x: x.archived == True, notes))
-        normal_groups   = list(filter(lambda x: x not in archived_groups and x not in sticky_groups, notes))
-
-        tools        = []
-        fixed_books  = []
-        normal_books = []
+        notes     = NOTE_DAO.list_group(user_name, skip_archived = True, orderby = "default")
 
         xmanager.add_visit_log(user_name, "/note/group")
 
-        files = normal_groups
         root  = NOTE_DAO.get_root()
 
-        group_cards = []
+        kw = Storage()
+        kw.title     = T("我的笔记")
+        kw.file      = root
+        kw.groups    = notes
+        kw.parent_id = 0
 
-        if len(sticky_groups) > 0:
-            group_cards.append(("置顶", sticky_groups))
-
-        group_cards.append(("笔记本", normal_groups))
-
-        return xtemplate.render("note/page/group_list_old.html", 
-            file = root, 
-            title = u"我的笔记",
-            pathlist = [root],
-            show_path_list = True,
-            show_size = True,
-            parent_id = 0,
-            files = files,
-            group_cards = group_cards,
-            search_type = "default")
+        return xtemplate.render("note/page/group_list_old.html", **kw)
 
 def load_note_index(user_name):
     msg_stat  = MSG_DAO.get_message_stat(user_name)
@@ -299,18 +281,17 @@ class CategoryHandler:
 
     @xauth.login_required()
     def GET(self):
-        files = get_category_list()
+        files = get_ddc_category_list()
 
         root = NOTE_DAO.get_root()
         return xtemplate.render("note/page/category.html", 
             file = root, 
-            title = u"笔记分类",
+            title = u"杜威十进制分类法(DDC)",
             pathlist = [root],
             show_path_list = True,
             show_size = True,
             parent_id = 0,
-            files = files,
-            **SEARCH_DOC_DICT)
+            files = files)
 
 
 class BaseListHandler:
@@ -409,6 +390,26 @@ class RemovedListHandler(BaseListHandler):
 
     def list_notes(self, user_name, offset, limit):
         return NOTE_DAO.list_removed(user_name, offset, limit, self.orderby)
+
+class StickyListHandler(BaseListHandler):
+
+    note_type = "sticky"
+    title = T("我的置顶")
+
+    def count_notes(self, user_name):
+        note_stat = NOTE_DAO.get_note_stat(user_name)
+        if note_stat:
+            return note_stat.sticky_count
+        else:
+            return 0
+
+    def list_notes(self, user_name, offset, limit):
+        return NOTE_DAO.list_sticky(user_name, offset, limit)
+
+class LogListHandler(BaseListHandler):
+
+    note_type = "log"
+    title = T("我的日志")
 
 class NotePluginHandler:
 
@@ -602,6 +603,8 @@ xurls = (
     r"/note/list"           , CheckListHandler,
     r"/note/table"          , TableListHandler,
     r"/note/removed"        , RemovedListHandler,
+    r"/note/sticky"         , StickyListHandler,
+    r"/note/log"            , LogListHandler,
 
     r"/note/text"           , TextListHandler,
     r"/note/tools"          , NotePluginHandler,

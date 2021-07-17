@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/06/27 16:38:02
+# @modified 2021/07/16 23:50:56
 
 import re
 import os
@@ -153,6 +153,7 @@ def build_search_context(user_name, category, key):
     if category == "content":
         ctx.search_note_content = True
         ctx.search_tool         = False
+        ctx.search_message      = False
 
     if category == "tool":
         ctx.search_tool = True

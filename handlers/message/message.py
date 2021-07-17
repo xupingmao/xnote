@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/07/04 17:08:58
+# @modified 2021/07/16 23:51:52
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -163,6 +163,9 @@ def format_message_stat(stat):
 
 @xmanager.searchable()
 def on_search_message(ctx):
+    if ctx.search_message is False:
+        return
+
     key = ctx.key
     touch_key_by_content(ctx.user_name, 'key', key)
 

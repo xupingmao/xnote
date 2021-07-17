@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/06/27 00:39:09
+# @modified 2021/07/17 10:46:52
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -836,7 +836,7 @@ def fill_parent_name(files):
 
 
 @xutils.timeit(name = "NoteDao.ListGroup:leveldb", logfile = True)
-def list_group(creator = None, orderby = "mtime_desc", skip_archived = False, limit = None):
+def list_group(creator = None, orderby = "mtime_desc", skip_archived = False, offset = 0, limit = None):
     # TODO 添加索引优化
     def list_group_func(key, value):
         if skip_archived and value.archived:
@@ -846,7 +846,7 @@ def list_group(creator = None, orderby = "mtime_desc", skip_archived = False, li
     notes = dbutil.prefix_list("notebook:%s" % creator, list_group_func)
     sort_notes(notes, orderby)
     if limit is not None:
-        return notes[:limit]
+        return notes[offset:offset + limit]
     return notes
 
 @xutils.timeit(name = "NoteDao.ListRootGroup:leveldb", logfile = True)
@@ -893,7 +893,7 @@ def count_public():
     return dbutil.prefix_count("note_tiny:", list_func)
 
 @xutils.timeit(name = "NoteDao.ListNote:leveldb", logfile = True, logargs=True)
-def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name", skip_group = False):
+def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name", skip_group = False, include_public = True):
     parent_id = str(parent_id)
     # TODO 添加索引优化
     def list_note_func(key, value):
@@ -901,7 +901,13 @@ def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name",
             return False
         if skip_group and value.type == "group":
             return False
-        return (value.is_public or value.creator == creator) and str(value.parent_id) == parent_id
+        if str(value.parent_id) != parent_id:
+            return False
+
+        if include_public:
+            return (value.is_public or value.creator == creator)
+        else:
+            return value.creator == creator
 
     notes = dbutil.prefix_list("note_tiny:", list_note_func)
     sort_notes(notes, orderby)

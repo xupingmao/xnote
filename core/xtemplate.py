@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/07/13 00:25:47
+# @modified 2021/07/17 10:58:57
 # @filename xtemplate.py
 
 
@@ -37,6 +37,7 @@ _mobile_name_dict = dict()
 _loader = None
 
 SEARCH_DAO = xutils.DAO("search")
+PLUGIN_DAO = xutils.DAO("plugin")
 
 def load_languages():
     """加载系统语言配置"""
@@ -377,8 +378,8 @@ class BasePlugin:
     """插件的基类"""
 
     # 插件的标题
-    show_title = True
-    title = "PluginName"
+    show_title  = True
+    title       = u"插件名称"
     description = ""
     
     # {权限配置}
@@ -398,6 +399,7 @@ class BasePlugin:
 
     # {搜索配置}
     show_search        = True
+    search_type        = "default"
     search_action      = "/search"
     search_placeholder = None
 
@@ -487,7 +489,7 @@ class BasePlugin:
         output = u("")
         try:
             self.page = self.get_page()
-            self.category_name = CATEGORY_NAME_DICT.get(self.category, '上级目录')
+            self.category_name = PLUGIN_DAO.get_category_name_by_code(self.category)
             output = self.handle(input) or u("")
             if self.get_format() == "text":
                 web.header("Content-Type", "text/plain; charset:utf-8")

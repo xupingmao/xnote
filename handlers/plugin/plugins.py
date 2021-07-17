@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/07/13 00:31:44
+# @modified 2021/07/17 19:10:15
 from io import StringIO
 import xconfig
 import codecs
@@ -128,6 +128,14 @@ def get_category_url_by_code(code):
             return item.url
     return "/plugins_list?category=%s" % code
 
+def get_category_name_by_code(code):
+    for item in PLUGIN_CATEGORY_LIST:
+        if item.code == code:
+            return item.name
+
+    return "上级目录"
+
+
 class PluginContext(Storage):
 
     def __init__(self):
@@ -138,7 +146,8 @@ class PluginContext(Storage):
         self.fname         = ""
         self.fpath         = ""
         self.category      = ""
-        self.required_role = ""
+        self.require_admin = True
+        self.required_role = "" 
         self.atime         = ""
         self.editable      = True
         self.edit_link     = ""
@@ -162,8 +171,10 @@ class PluginContext(Storage):
             meta_value = meta_dict.get(meta_key)
             if meta_value == None:
                 return ""
-            else:
+            elif isinstance(meta_value, list):
                 return "".join(meta_value)
+            else:
+                return meta_value
 
         self.title = meta_value_to_str("title")
         self.description = meta_value_to_str("description")
@@ -347,6 +358,7 @@ INNER_TOOLS = [
     note_plugin("相册", "/note/gallery", "fa-photo"),
     note_plugin("清单", "/note/list", "fa-list"),
     note_plugin("词典", "/note/dict", "icon-dict"),
+    note_plugin("我的日志", "/note/log", "fa-file-text-o"),
     note_plugin("我的评论", "/note/mycomments", "fa-comments"),
     note_plugin("标签列表", "/note/taglist", "fa-tags"),
     note_plugin("常用笔记", "/note/recent?orderby=hot", "fa-file-text-o"),
@@ -822,6 +834,7 @@ xutils.register_func("plugin.find_plugins", find_plugins)
 xutils.register_func("plugin.add_visit_log", add_visit_log)
 xutils.register_func("plugin.get_category_list", get_plugin_category_list)
 xutils.register_func("plugin.get_category_url_by_code", get_category_url_by_code)
+xutils.register_func("plugin.get_category_name_by_code", get_category_name_by_code)
 
 define_plugin_category("note", u"笔记", url = "/note/tools")
 define_plugin_category("dir",  u"文件", url = "/fs_tools", required_roles = ["admin"])

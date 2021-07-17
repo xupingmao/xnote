@@ -45,12 +45,16 @@
 
         {% include note/component/group_special_folder.html %}
 
-    {% for title0, groups in group_cards %}
         <div class="card">
             
             <div class="card-title">
-                <span>{{title0}}</span>
+                <span>{{T("笔记本")}}</span>
                 <div class="float-right">
+                    <!--
+                    <a href="?orderby=ctime_desc">最近</a>
+                    <span>/</span>
+                    <a href="?orderby=hot">常用</a>
+                    -->
                 </div>
             </div>
             {% if len(groups) == 0 %}
@@ -74,7 +78,7 @@
                 </a>
             {% end %}
         </div>
-    {% end %}
+
     </div>
 
     <div class="content-right">
