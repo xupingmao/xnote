@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2021/04/25 10:38:38
+# @modified 2021/07/18 19:13:02
 
 """英汉、汉英词典
 
@@ -17,6 +17,7 @@ import xmanager
 import xconfig
 import xtables
 from xutils import u, Storage, SearchResult, textutil
+from xtemplate import T
 
 def wrap_results(dicts, origin_key):
     files = []
@@ -63,20 +64,47 @@ def do_translate(ctx):
             vars = dict(value = '%' + word + '%', user = user_name))
     ctx.dicts += wrap_results(dicts, "key")
 
+@xmanager.searchable(r".+")
+def do_translate_strict(ctx):
+    if not ctx.search_dict_strict:
+        return
+
+    user_name = ctx.user_name
+    db = xtables.get_dictionary_table()
+    results = db.select(where="key = $key AND (user=$user OR user='')", vars=dict(key=ctx.input_text, user=user_name))
+    for item in results:
+        value = item.value.replace("\\n", "\n")
+
+        result = Storage()
+        result.name = T("search_definition") % item.key
+        result.key = item.key
+        result.raw = value
+        result.url = "#"
+        result.icon = "icon-dict"
+        result.category = "dict"
+
+        ctx.dicts.append(result)
+
 @xmanager.searchable(r"[a-zA-Z\-]+")
 def translate_english(ctx):
     """使用词库进行部分模糊匹配"""
     if not ctx.search_dict:
         return
-    if not xconfig.DEV_MODE:
-        return
+
     user_name = ctx.user_name
     db = xtables.get_dictionary_table()
     results = db.select(where="key like $key AND (user=$user OR user='')", vars=dict(key=ctx.input_text + "%", user=user_name))
     for item in results:
         value = item.value.replace("\\n", "\n")
-        ctx.dicts.append(Storage(name=u("翻译 - %s") % item.key, key = item.key,
-            raw = value, url = "#", category = "dict"))
+
+        result = Storage()
+        result.name = u("翻译 - %s") % item.key
+        result.key = item.key
+        result.raw = value
+        result.url = "#"
+        result.category = "dict"
+
+        ctx.dicts.append(result)
 
 
 

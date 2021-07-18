@@ -1,11 +1,10 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2019/01/26 16:22:43
+# @modified 2021/07/18 17:57:33
 import re
 import xmanager
 import xutils
-
-SearchResult = xutils.SearchResult
+from xutils import Storage
 
 def safe_check(expression):
     p = re.compile(r"^[.0-9+\-*\/% \(\)\~]*\Z")
@@ -28,10 +27,11 @@ def do_calc(ctx):
         value = eval(exp)
         if str(value) == exp:
             return
-        f = SearchResult()
+        f = Storage()
         f.url = "#"
         f.name = "计算结果"
-        f.raw = str(value)
+        f.icon = "fa-calculator"
+        f.raw = "{expression}={value}".format(**locals())
         ctx.tools.append(f)
     except Exception as e:
         xutils.print_exc()

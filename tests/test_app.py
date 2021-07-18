@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/05/05 19:46:04
+# @modified 2021/07/18 19:42:53
 
 import sys
 import os
@@ -224,11 +224,6 @@ class TestMain(BaseTestCase):
         self.check_200("/search?key=测试")
         self.check_200("/fs_find?find_key=xnote&path=" + xconfig.DATA_DIR)
         xconfig.USE_CACHE_SEARCH = False
-    
-    def test_search_calc(self):
-        result = json_request("/search?key=1%2B2&_format=json")
-        value = result['files'][0]['raw']
-        self.assertEqual("3", value)
 
     def test_search_message(self):
         self.check_200("/message?key=test&category=message")

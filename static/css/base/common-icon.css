@@ -1,0 +1,57 @@
+/**
+ * description here
+ * @author xupingmao
+ * @since 2021/07/18 19:08:04
+ * @modified 2021/07/18 19:08:17
+ * @filename common-icon.css
+ */
+
+.icon {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-check {
+    margin: 0px;
+}
+
+.icon-next, .icon-right {
+    display: block;
+    background-image: url(/static/image/icon_right.png);
+    background-size: cover;
+    width: 16px;
+    height: 16px;
+}
+
+.icon-folder-system {
+    display: inline-block;
+    background-image: url(/static/image/icon_folder_settings.png);
+    background-size: cover;
+    width: 16px;
+    height: 16px;
+    margin-left: -1px;
+    float: left;
+    margin-top: 4px;
+    margin-right: 4px;
+}
+
+.icon-script {
+    display: block;
+    margin-right: 3px;
+    float: left;
+    width: 16px;
+    height: 16px;
+    background-size: cover;
+    background-image: url(/static/image/icon_script.svg);
+}
+
+.icon-dict {
+    display: block;
+    margin-right: 3px;
+    margin-top: 4px; /* line-height是25px */
+    float: left;
+    width: 16px;
+    height: 16px;
+    background-size: cover;
+    background-image: url(/static/image/icon_dict.svg);
+}

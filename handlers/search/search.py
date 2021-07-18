@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/07/16 23:50:56
+# @modified 2021/07/18 19:22:53
 
 import re
 import os
@@ -84,20 +84,22 @@ class SearchContext:
         self.search_note      = True
         self.search_note_content = False
         self.search_dict      = False
+        # 精确搜索字典
+        self.search_dict_strict = True
         self.search_tool      = True
         # 是否继续执行，用于最后兜底的搜索，一般是性能消耗比较大的
         self.stop             = False
         
-        # 处理的结果集
+        # 处理的结果集，优先级: 系统功能 > 字典 > 个人数据
         self.commands = []
-        self.dicts    = []
         self.tools    = []
-        self.notes    = []
+        self.dicts    = []
         self.messages = []
+        self.notes    = []
         self.files    = []
 
     def join_as_files(self):
-        return self.commands + self.dicts + self.tools + self.messages + self.notes + self.files
+        return self.commands + self.tools + self.dicts + self.messages + self.notes + self.files
 
 def fill_note_info(files):
     for file in files:
@@ -129,10 +131,11 @@ def build_search_context(user_name, category, key):
     ctx.input_text          = key
     ctx.words               = words
     ctx.category            = category
-    ctx.search_message      = False
+    ctx.search_tool         = True
+    ctx.search_message      = True
+    ctx.search_note         = True
     ctx.search_note_content = False
     ctx.search_dict         = False
-    ctx.search_tool         = True
     ctx.user_name           = user_name
 
     if category == "message":
@@ -140,13 +143,16 @@ def build_search_context(user_name, category, key):
         ctx.search_note = False
         ctx.search_note_content = False
         ctx.search_tool = False
+        ctx.search_dict_strict = False
 
     if ctx.category == "book":
         ctx.search_note = False
         ctx.search_tool = False
+        ctx.search_dict_strict = False
 
     if category == "dict":
         ctx.search_dict = True
+        ctx.search_dict_strict = False
         ctx.search_note = False
         ctx.search_tool = False
 
@@ -154,9 +160,11 @@ def build_search_context(user_name, category, key):
         ctx.search_note_content = True
         ctx.search_tool         = False
         ctx.search_message      = False
+        ctx.search_dict_strict = False
 
     if category == "tool":
         ctx.search_tool = True
+        ctx.search_dict_strict = False
 
     return ctx
 
@@ -208,6 +216,7 @@ class SearchHandler:
             return files, len(files)
 
         # 慢搜索,如果时间过长,这个服务会被降级
+        # TODO: 异步操作需要其他线程辅助执行
         xmanager.fire("search.slow", ctx)
         xmanager.fire("search.after", ctx)
 

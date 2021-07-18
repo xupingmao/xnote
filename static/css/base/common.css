@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2021/07/04 11:27:06
+ * @modified 2021/07/18 19:08:14
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -1129,56 +1129,6 @@ li.menu-item:hover {
 .dropdown-option-red:hover {
     background-color: #09f;
     color: red;
-}
-
-.icon {
-    width: 16px;
-    height: 16px;
-}
-
-.icon-check {
-    margin: 0px;
-}
-
-.icon-next, .icon-right {
-    display: block;
-    background-image: url(/static/image/icon_right.png);
-    background-size: cover;
-    width: 16px;
-    height: 16px;
-}
-
-.icon-folder-system {
-    display: inline-block;
-    background-image: url(/static/image/icon_folder_settings.png);
-    background-size: cover;
-    width: 16px;
-    height: 16px;
-    margin-left: -1px;
-    float: left;
-    margin-top: 4px;
-    margin-right: 4px;
-}
-
-.icon-script {
-    display: block;
-    margin-right: 3px;
-    float: left;
-    width: 16px;
-    height: 16px;
-    background-size: cover;
-    background-image: url(/static/image/icon_script.svg);
-}
-
-.icon-dict {
-    display: block;
-    margin-right: 3px;
-    margin-top: 4px; /* line-height是25px */
-    float: left;
-    width: 16px;
-    height: 16px;
-    background-size: cover;
-    background-image: url(/static/image/icon_dict.svg);
 }
 
 .mobile-only {

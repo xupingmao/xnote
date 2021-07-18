@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/07/17 19:10:15
+# @modified 2021/07/18 18:47:20
 from io import StringIO
 import xconfig
 import codecs
@@ -165,21 +165,11 @@ class PluginContext(Storage):
     def __cmp__(self, other):
         return cmp(self.title, other.title)
 
-    def load_from_meta(self, meta_dict):
-
-        def meta_value_to_str(meta_key):
-            meta_value = meta_dict.get(meta_key)
-            if meta_value == None:
-                return ""
-            elif isinstance(meta_value, list):
-                return "".join(meta_value)
-            else:
-                return meta_value
-
-        self.title = meta_value_to_str("title")
-        self.description = meta_value_to_str("description")
-        self.author = meta_value_to_str("author")
-        self.version = meta_value_to_str("version")
+    def load_from_meta(self, meta_obj):
+        self.title = meta_obj.get_str_value("title")
+        self.description = meta_obj.get_str_value("description")
+        self.author = meta_obj.get_str_value("author")
+        self.version = meta_obj.get_str_value("version")
 
 def is_plugin_file(fpath):
     return os.path.isfile(fpath) and fpath.endswith(".py")
@@ -579,9 +569,21 @@ def load_plugin(name):
 def on_search_plugins(ctx):
     if not xauth.is_admin():
         return
+
     if not ctx.search_tool:
         return
+
     if ctx.search_dict:
+        return
+
+    global PLUGINS_STATUS
+    if PLUGINS_STATUS == "loading":
+        result = Storage()
+        result.name = "插件加载中，暂时不可用"
+        result.icon = "fa-th-large"
+        result.url  = "#"
+
+        ctx.tools.append(result)
         return
 
     result_list = []
@@ -606,7 +608,7 @@ def on_search_plugins(ctx):
         more.show_more_link = True
         result_list.append(more)
 
-    result_list += temp_result[:2]
+    result_list += temp_result[:3]
 
     ctx.tools += result_list
 

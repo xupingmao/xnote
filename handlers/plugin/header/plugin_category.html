@@ -5,10 +5,10 @@
     <a class="tab tab-link x-tab x-tab-default" href="/plugins_list?category=all"
         data-category="all">全部</a>
 
-    {% for category in plugin_category_list %}
-        {% if category.is_visible() %}
-            <a class="tab tab-link x-tab" href="{{category.url}}" 
-                data-category="{{category.code}}">{{category.name}}</a>
+    {% for category_temp in plugin_category_list %}
+        {% if category_temp.is_visible() %}
+            <a class="tab tab-link x-tab" href="{{category_temp.url}}" 
+                data-category="{{category_temp.code}}">{{category_temp.name}}</a>
         {% end %}
     {% end %}
     

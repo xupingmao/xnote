@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/19 16:09:13
-# @modified 2021/07/17 19:13:15
+# @modified 2021/07/18 18:17:41
 
 
 """脚本执行相关的代码"""
@@ -197,31 +197,106 @@ def load_script(name, vars = None, dirname = None, code = None):
     return exec_python_code(name, code, 
         record_stdout = False, raise_err = True, vars = vars)
 
-def load_script_meta(fpath):
-    code = _load_script_code_by_fpath(fpath)
-    meta = dict()
 
-    for line in code.split("\n"):
-        if not line.startswith("#"):
-            continue
-        line = line.lstrip("#\t ")
-        if not line.startswith("@"):
-            continue
+class ScriptMeta:
 
-        line = line.lstrip("@")
-        # 去掉注释部分
-        meta_line  = line.split("#", 1)[0]
-        # 拆分元数据
-        meta_parts = meta_line.split(maxsplit = 1)
-        meta_key   = meta_parts[0]
-        # meta_value = meta_parts[1:]
-        if len(meta_parts) == 1:
-            meta_value = ''
+    def __init__(self):
+        self.meta_dict = dict()
+        # list的meta信息，比如
+        # @category file
+        # @category code
+        # 解析为 category = [file, code]
+        self.meta_list_dict = dict()
+
+    def add_item(self, key, value):
+        # 如果有多个，取第一个
+        if key not in self.meta_dict:
+            self.meta_dict[key] = value
+
+    def add_list_item(self, key, value):
+        item_list = self.meta_list_dict.get(key)
+        if item_list is None:
+            item_list = []
+
+        item_list.append(value)
+
+        self.meta_list_dict[key] = item_list
+
+    def load_meta(self, fpath):
+        code = _load_script_code_by_fpath(fpath)
+
+        for line in code.split("\n"):
+            if not line.startswith("#"):
+                continue
+            line = line.lstrip("#\t ")
+            if not line.startswith("@"):
+                continue
+
+            line = line.lstrip("@")
+            # 去掉注释部分
+            meta_line  = line.split("#", 1)[0]
+            # 拆分元数据
+            meta_parts = meta_line.split(maxsplit = 1)
+            meta_key   = meta_parts[0]
+            # meta_value = meta_parts[1:]
+            if len(meta_parts) == 1:
+                meta_value = ''
+            else:
+                meta_value = meta_parts[1]
+
+            self.add_item(meta_key, meta_value)
+            self.add_list_item(meta_key, meta_value)
+
+        return self.meta_dict
+
+    def get_raw_value(self, key):
+        return self.meta_dict.get(key)
+
+    def get_str_value(self, key):
+        value = self.meta_dict.get(key)
+        if value is None:
+            return None
         else:
-            meta_value = meta_parts[1]
-            
-        meta[meta_key] = meta_value
-    return meta
+            return str(value)
+
+    def get_list_value(self, key):
+        value = self.meta_list_dict.get(key)
+        if value != None:
+            return value
+
+        value = self.meta_dict.get(key)
+        if value is None:
+            return []
+        return [value]
+
+    def get_bool_value(self, key):
+        value = self.meta_dict.get(key)
+        if value is None:
+            return None
+        return "true" == value.lower()
+
+    def get_int_value(self, key):
+        value = self.get_raw_value(key)
+        if value is None:
+            return None
+        try:
+            return int(value)
+        except:
+            return None
+
+    def get_float_value(self, key):
+        value = self.get_raw_value(key)
+        if value is None:
+            return None
+        try:
+            return float(value)
+        except:
+            return None
+
+def load_script_meta(fpath):
+    meta_object = ScriptMeta()
+    meta_object.load_meta(fpath)
+    return meta_object
 
 def exec_command(command, confirmed = False):
     pass

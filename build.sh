@@ -7,7 +7,8 @@ cat ./static/lib/font-awesome-4.7.0/css/font-awesome.min.css >> ./static/css/app
 # 基础css
 cat ./static/css/base/reset.css >> ./static/css/app.build.css
 cat ./static/css/base/common.css >> ./static/css/app.build.css
-cat ./static/css/base/tag.css >> ./static/css/app.build.css
+cat ./static/css/base/common-icon.css >> ./static/css/app.build.css
+cat ./static/css/base/common-tag.css >> ./static/css/app.build.css
 
 # 场景化的css
 cat ./static/css/common-react.css >> ./static/css/app.build.css

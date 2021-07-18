@@ -2,7 +2,7 @@
 
 <!--
     @since 2017/09/14
-    @modified 2019/12/12 22:25:46
+    @modified 2021/07/18 19:46:39
 -->
 
 {% block head %}
@@ -49,13 +49,13 @@
 
 {% block body %}
 
-{% for category in menu_list %}
+{% for category_temp in menu_list %}
 
-    {% if len(category.children) > 0 %}
+    {% if len(category_temp.children) > 0 %}
         <div class="col-md-12 bottom-offset-1 grid-card">
-            <div class="grid-title">{{T(category.name)}}</div>
+            <div class="grid-title">{{T(category_temp.name)}}</div>
             <div class="col-md-12">
-                {% for link in category.children %}
+                {% for link in category_temp.children %}
                     <div class="item">
                         <i class="fa fa-{{link.icon}}"></i>
                         <a href="{{link.url}}">{{T(link.name)}}</a>
