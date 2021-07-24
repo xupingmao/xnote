@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/19 16:09:13
-# @modified 2021/07/18 18:17:41
+# @modified 2021/07/19 23:58:26
 
 
 """脚本执行相关的代码"""
@@ -222,9 +222,11 @@ class ScriptMeta:
 
         self.meta_list_dict[key] = item_list
 
-    def load_meta(self, fpath):
+    def load_meta_by_fpath(self, fpath):
         code = _load_script_code_by_fpath(fpath)
+        return self.load_meta_by_code(code)
 
+    def load_meta_by_code(self, code):
         for line in code.split("\n"):
             if not line.startswith("#"):
                 continue
@@ -293,9 +295,17 @@ class ScriptMeta:
         except:
             return None
 
+    def has_tag(self, key):
+        return key in self.meta_dict
+
 def load_script_meta(fpath):
     meta_object = ScriptMeta()
-    meta_object.load_meta(fpath)
+    meta_object.load_meta_by_fpath(fpath)
+    return meta_object
+
+def load_script_meta_by_code(code):
+    meta_object = ScriptMeta()
+    meta_object.load_meta_by_code(code)
     return meta_object
 
 def exec_command(command, confirmed = False):

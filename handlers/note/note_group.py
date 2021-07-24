@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/07/17 12:11:29
+# @modified 2021/07/21 00:32:28
 import math
 import time
 import web
@@ -411,6 +411,19 @@ class LogListHandler(BaseListHandler):
     note_type = "log"
     title = T("我的日志")
 
+class AllNoteListHandler(BaseListHandler):
+
+    note_type = "all"
+    title = T("我的笔记")
+
+    def count_notes(self, user_name):
+        note_stat = NOTE_DAO.get_note_stat(user_name)
+        if note_stat:
+            return note_stat.total
+        else:
+            return 0
+
+
 class NotePluginHandler:
 
     @xauth.login_required()
@@ -605,6 +618,7 @@ xurls = (
     r"/note/removed"        , RemovedListHandler,
     r"/note/sticky"         , StickyListHandler,
     r"/note/log"            , LogListHandler,
+    r"/note/all"            , AllNoteListHandler,
 
     r"/note/text"           , TextListHandler,
     r"/note/tools"          , NotePluginHandler,

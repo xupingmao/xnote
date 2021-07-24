@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/07/18 18:47:20
+# @modified 2021/07/21 00:39:30
 from io import StringIO
 import xconfig
 import codecs
@@ -145,7 +145,7 @@ class PluginContext(Storage):
         self.description   = ""
         self.fname         = ""
         self.fpath         = ""
-        self.category      = ""
+        self.category      = None
         self.require_admin = True
         self.required_role = "" 
         self.atime         = ""
@@ -170,6 +170,7 @@ class PluginContext(Storage):
         self.description = meta_obj.get_str_value("description")
         self.author = meta_obj.get_str_value("author")
         self.version = meta_obj.get_str_value("version")
+        self.category = meta_obj.get_str_value("category")
 
 def is_plugin_file(fpath):
     return os.path.isfile(fpath) and fpath.endswith(".py")
@@ -190,12 +191,15 @@ def load_plugin_file(fpath, fname = None):
 
     try:
         meta    = xutils.load_script_meta(fpath)
-        module  = xutils.load_script(fname, vars, dirname = dirname)
         context = PluginContext()
         context.icon_class = DEFAULT_PLUGIN_ICON_CLASS
         # 读取meta信息
         context.load_from_meta(meta)
 
+        if meta.has_tag("disabled"):
+            return
+
+        module  = xutils.load_script(fname, vars, dirname = dirname)
         main_class = vars.get("Main")
         if main_class != None:
             # 实例化插件
@@ -206,8 +210,12 @@ def load_plugin_file(fpath, fname = None):
             context.fpath         = fpath
             context.name          = os.path.splitext(fname)[0]
             context.title         = getattr(instance, "title", "")
-            context.category      = xutils.attrget(instance, "category")
-            context.required_role = xutils.attrget(instance, "required_role")
+            if context.category is None:
+                context.category = xutils.attrget(instance, "category")
+
+            if context.required_role is None:
+                context.required_role = xutils.attrget(instance, "required_role")
+            
             context.url           = "/plugins/%s" % plugin_name
             context.clazz         = main_class
             context.edit_link     = "code/edit?path=" + fpath

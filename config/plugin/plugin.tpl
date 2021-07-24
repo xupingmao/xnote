@@ -2,12 +2,12 @@
 # @since $since
 # @author $author
 # @version 1.0.0
-# @category 文件
+# @category note
 # @title 插件名称
 # @description 插件描述
 # @required_role admin
 # @tags system test
-# @status active
+# @enabled
 # @icon_class fa-cube
 import os
 import re

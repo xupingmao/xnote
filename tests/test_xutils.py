@@ -386,5 +386,11 @@ class TestMain(unittest.TestCase):
         self.assertTrue(method_result)
         self.assertTrue(len(mod._meth) == 1)
 
+    def test_has_tag(self):
+        code = "# @disabled"
+        meta = xutils.load_script_meta_by_code(code)
+        self.assertTrue(meta.has_tag("disabled"))
+
+
 
         

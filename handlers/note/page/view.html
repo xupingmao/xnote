@@ -45,6 +45,11 @@
         {% include note/editor/post.html %}
     {% end %}
 
+    {# 文章信息 #}
+    <div class="card">
+        <div class="pad5">{{file.creator}} 创建于 {{file.cdate}} 更新于 {{file.mdate}}</div>
+    </div>
+
     {# 评论功能 #}
     {% if file_type != "group" and show_comment %}
         {% include note/page/comment.html %}

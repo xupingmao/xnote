@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/07/17 10:46:52
+# @modified 2021/07/21 00:33:07
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -1179,10 +1179,23 @@ def get_filter_func(type, default_filter_func):
     return default_filter_func
 
 def list_by_type(creator, type, offset, limit, orderby = "name", skip_archived = False):
+    """按照类型查询笔记列表
+    @param {str} creator 笔记作者
+    @param {str|None} type  笔记类型
+    @param {int} offset 下标
+    @param {int} limit 返回的最大列数
+    @param {str} orderby 排序
+    @param {bool} skip_archived 是否跳过归档笔记
+    """
+
+    assert type != None, "note.dao.list_by_type: type is None"
+    
     def list_func(key, value):
         if skip_archived and value.archived:
             return False
-        return value.type == type and value.creator == creator and value.is_deleted == 0
+        if type != "all" and value.type != type:
+            return False
+        return value.creator == creator and value.is_deleted == 0
 
     filter_func = get_filter_func(type, list_func)
     notes = dbutil.prefix_list("note_tiny:%s" % creator, filter_func, offset, limit, reverse = True)
