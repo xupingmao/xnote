@@ -22,6 +22,7 @@
     {% init show_pagination = False %}
     {% init show_comment    = True %}
     {% init error           = "" %}
+    {% init show_ext_info   = True %}
 
     {% if file != None %}
         {% set globals()['file_type'] = file.type %}
@@ -46,9 +47,11 @@
     {% end %}
 
     {# 文章信息 #}
-    <div class="card">
-        <div class="pad5">{{file.creator}} 创建于 {{file.cdate}} 更新于 {{file.mdate}}</div>
-    </div>
+    {% if show_ext_info %}
+        <div class="card">
+            <div class="pad5">{{file.creator}} 创建于 {{file.cdate}} 更新于 {{file.mdate}}</div>
+        </div>
+    {% end %}
 
     {# 评论功能 #}
     {% if file_type != "group" and show_comment %}

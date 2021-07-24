@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/07/16 21:29:06
+# @modified 2021/07/24 17:50:27
 import xutils
 import xconfig
 import xmanager
@@ -361,6 +361,7 @@ class MessageTag(Storage):
         self.name = "Message"
         self.icon = "fa-file-text-o"
         self.category = None
+        self.badge_info = size
 
         if tag == "log":
             self.name = T("随手记")

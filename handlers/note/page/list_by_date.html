@@ -45,14 +45,24 @@
             <div class="card-title">
                 <span>{{date}}</span>
             </div>
-            {% for note in children %}
-                <p class="card-row">
-                    <i class="fa {{note.icon}}"></i>
-                    <a href="{{note.url}}">{{note.name}}</a>
-                    {% if note.size != None %}
-                        <span class="float-right gray-text">{{note.size}}</a>
+
+            {% for note_temp in children %}
+
+                <a class="list-link" href="{{note_temp.url}}">
+                    
+                    {% if note_temp.priority>0 %}
+                        <i class="fa fa-thumb-tack black"></i>
                     {% end %}
-                </p>
+
+                    <!-- 图标和标题 -->
+                    <i class="fa {{note_temp.icon}} fa-{{note_temp.icon}} black"></i>                
+                    <span>{{note_temp.name}}</span>
+                    <div class="float-right">
+                        <span class="book-size-span">{{note_temp.badge_info}}</span>
+                        <i class="fa fa-chevron-right"></i>
+                    </div>
+                </a>
+
             {% end %}
         {% end %}
     </div>

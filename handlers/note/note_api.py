@@ -1,9 +1,10 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/05 21:00:07
-# @modified 2021/06/27 00:39:39
+# @modified 2021/07/24 17:51:17
 import xutils
 import xauth
+from xutils import dateutil
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -41,9 +42,34 @@ def get_date_by_type(note, type):
         return dtime.split()[0]
     return note.ctime.split()[0]
 
+
+def assemble_notes_by_date(notes, time_attr = "ctime"):
+    from collections import defaultdict
+    notes_dict = defaultdict(list)
+    for note in notes:
+        if note.priority == 1:
+            notes_dict["置顶"].append(note)
+            continue
+        if note.priority == 2:
+            notes_dict["超级置顶"].append(note)
+            continue
+        datetime_str = note.get(time_attr)
+        cdate = dateutil.format_date(datetime_str)
+        notes_dict[cdate].append(note)
+        note.badge_info = cdate
+
+    result = []
+    for date in notes_dict:
+        item = (date, notes_dict[date])
+        result.append(item)
+
+    result.sort(key = lambda x:x[0], reverse = True)
+    return result
+
 xutils.register_func("page.list_recent_groups", list_recent_groups)
 xutils.register_func("page.list_recent_notes", list_recent_notes)
 xutils.register_func("note.get_date_by_type", get_date_by_type)
+xutils.register_func("note.assemble_notes_by_date", assemble_notes_by_date)
 
 xurls = (
     r"/note/api/group", GroupApiHandler

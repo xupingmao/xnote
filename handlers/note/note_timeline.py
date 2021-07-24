@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/07/17 12:10:42
+# @modified 2021/07/24 17:33:40
 
 """时光轴视图"""
 import re
@@ -454,27 +454,6 @@ class DefaultProjectHandler(BaseTimelineHandler):
     note_type   = "root_notes"
     show_create = False
 
-def assemble_notes_by_date(notes, time_attr = "ctime"):
-    from collections import defaultdict
-    notes_dict = defaultdict(list)
-    for note in notes:
-        if note.priority == 1:
-            notes_dict["置顶"].append(note)
-            continue
-        if note.priority == 2:
-            notes_dict["超级置顶"].append(note)
-            continue
-        datetime_str = note.get(time_attr)
-        cdate = dateutil.format_date(datetime_str)
-        notes_dict[cdate].append(note)
-
-    result = []
-    for date in notes_dict:
-        item = (date, notes_dict[date])
-        result.append(item)
-
-    result.sort(key = lambda x:x[0], reverse = True)
-    return result
 
 class DateHandler:
 
@@ -518,7 +497,7 @@ class DateHandler:
 
         notes_new = NOTE_DAO.list_by_date("ctime", user_name, date)
         notes = notes + notes_new
-        notes_by_date = assemble_notes_by_date(notes)
+        notes_by_date = NOTE_DAO.assemble_notes_by_date(notes)
 
         return xtemplate.render("note/page/list_by_date.html", 
             html_title    = T("我的笔记"),
@@ -530,7 +509,7 @@ class DateHandler:
             search_type   = "default")
 
 xutils.register_func("note.build_date_result", build_date_result)
-xutils.register_func("url:/note/date", DateHandler)
+# xutils.register_func("url:/note/date", DateHandler)
 
 xurls = (
     r"/note/timeline/month", DateTimelineAjaxHandler,
@@ -553,7 +532,7 @@ xurls = (
     r"/project/default"     , DefaultProjectHandler,
 
     # 日期视图
-    r"/note/date"           , DateHandler,
+    # r"/note/date"           , DateHandler,
     r"/note/monthly"        , DateHandler,
 )
 

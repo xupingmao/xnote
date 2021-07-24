@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/07/21 00:32:28
+# @modified 2021/07/24 23:27:29
 import math
 import time
 import web
@@ -72,18 +72,19 @@ class SystemLink(GroupLink):
         self.icon = "icon-folder-system"
 
 class NoteLink:
-    def __init__(self, name, url, icon = "fa-cube", size = None, roles = None, category = "000"):
+    def __init__(self, name, url, icon = "fa-cube", size = None, roles = None, category = "000", priority = 0):
         self.type = "link"
         self.name = T(name)
         self.url  = url
         self.icon = icon
         self.size = size
-        self.priority = 0
+        self.priority = priority
         self.ctime = ""
         self.hide  = False
         self.show_next  = True
         self.is_deleted = 0
         self.category = category
+        self.badge_info = ""
 
         # 角色
         if roles is None:
@@ -302,6 +303,7 @@ class BaseListHandler:
     create_type = ""
     create_text = T("创建笔记")
     date_type = "cdate"
+    show_ext_info = True
 
     def count_notes(self, user_name):
         return NOTE_DAO.count_by_type(user_name, self.note_type)
@@ -314,11 +316,17 @@ class BaseListHandler:
         page = xutils.get_argument("page", 1, type=int)
         user_name = xauth.current_name()
 
+
         limit  = xconfig.PAGE_SIZE
         offset = (page-1)*limit
 
         amount = self.count_notes(user_name)
         files  = self.list_notes(user_name, offset, limit)
+
+        kw = Storage()
+        kw.show_ext_info = self.show_ext_info
+        kw.page_max = math.ceil(amount / xconfig.PAGE_SIZE)
+        kw.page_url = "/note/%s?page=" % self.note_type
 
         # 上级菜单
         parent = PathNode(T("根目录"), "/note/group")
@@ -334,8 +342,7 @@ class BaseListHandler:
             show_group_option = False,
             create_text = self.create_text,
             create_type = self.create_type,
-            page_max  = math.ceil(amount / xconfig.PAGE_SIZE),
-            page_url  = "/note/%s?page=" % self.note_type)
+            **kw)
 
 
 class TextListHandler(BaseListHandler):
@@ -415,6 +422,7 @@ class AllNoteListHandler(BaseListHandler):
 
     note_type = "all"
     title = T("我的笔记")
+    show_ext_info = False
 
     def count_notes(self, user_name):
         note_stat = NOTE_DAO.get_note_stat(user_name)
@@ -593,8 +601,69 @@ class NoteIndexHandler:
         clazz = self.find_class()
         return clazz().POST() 
 
+
+class DateListHandler:
+
+    type_order_dict = {
+        "group"   :  0,
+        "gallery" : 10,
+        "list"    : 20,
+        "table"   : 30,
+        "csv"     : 30,
+        "md"      : 90,
+    }
+
+    def sort_notes(self, notes):
+        notes.sort(key = lambda x: self.type_order_dict.get(x.type, 100))
+
+    @xauth.login_required()
+    def GET(self):
+        user_name = xauth.current_name()
+        show_back = xutils.get_argument("show_back", "")
+
+        xmanager.add_visit_log(user_name, "/note/date?show_back=%s" % show_back)
+        
+        date  = xutils.get_argument("date", time.strftime("%Y-%m"))
+        parts = date.split("-")
+        if len(parts) == 2:
+            year = int(parts[0])
+            month = int(parts[1])
+        else:
+            year = int(parts[0])
+            month = dateutil.get_current_month()
+
+        notes = []
+        # 待办任务
+        notes.append(MSG_DAO.get_message_tag(user_name, "task", priority = 2))
+        notes.append(MSG_DAO.get_message_tag(user_name, "log",  priority = 2))
+        notes.append(NoteLink("我的人生", "/note/view?skey=my_life", priority = 2))
+        notes.append(NoteLink("我的年报:%s" % year, "/note/view?skey=year_%s" % year, 
+            priority = 2))
+        notes.append(NoteLink("我的月报:%s" % date, "/note/view?skey=month_%s" % date, 
+            priority = 2))
+
+        notes_new = NOTE_DAO.list_by_date("ctime", user_name, date, orderby = "ctime_desc")
+        for note in notes_new:
+            note.badge_info = dateutil.format_date(note.ctime)
+
+
+        notes = notes + notes_new
+        notes_by_date = [("置顶", notes)]
+        # notes_by_date = NOTE_DAO.assemble_notes_by_date(notes)
+
+        return xtemplate.render("note/page/list_by_date.html", 
+            html_title    = T("我的笔记"),
+            date          = date,
+            year          = year,
+            month         = month,
+            notes_by_date = notes_by_date,
+            show_back     = show_back,
+            search_type   = "default")
+
+
 xutils.register_func("url:/note/group", GroupListHandler)
 xutils.register_func("url:/note/tools", NotePluginHandler)
+xutils.register_func("url:/note/date",  DateListHandler)
 
 xurls = (
     r"/note/group"          , GroupListHandler,
@@ -619,6 +688,7 @@ xurls = (
     r"/note/sticky"         , StickyListHandler,
     r"/note/log"            , LogListHandler,
     r"/note/all"            , AllNoteListHandler,
+    r"/note/date"           , DateListHandler,
 
     r"/note/text"           , TextListHandler,
     r"/note/tools"          , NotePluginHandler,

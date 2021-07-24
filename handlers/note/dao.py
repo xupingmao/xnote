@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/07/21 00:33:07
+# @modified 2021/07/24 21:06:19
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -1004,7 +1004,7 @@ def list_hot(creator, offset = 0, limit = 100):
     logs.sort(key = lambda x: x.hot_index or 0, reverse = True)
     return logs[offset:offset+limit]
 
-def list_by_date(field, creator, date):
+def list_by_date(field, creator, date, orderby = "ctime_desc"):
     user = creator
     if user is None:
         user = "public"
@@ -1016,6 +1016,7 @@ def list_by_date(field, creator, date):
     
     files = dbutil.prefix_list("note_tiny:%s" % user, list_func)
     fill_parent_name(files)
+    sort_notes(files, orderby)
     return files
 
 @xutils.timeit(name = "NoteDao.CountNote", logfile=True, logargs=True, logret=True)
