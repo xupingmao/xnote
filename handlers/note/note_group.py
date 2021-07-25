@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/07/25 11:39:11
+# @modified 2021/07/25 21:43:36
 import math
 import time
 import web
@@ -186,6 +186,10 @@ class GroupListHandler:
         user_name = xauth.current_name()
 
         notes = NOTE_DAO.list_group(user_name, status = status, orderby = "default")
+        group = NOTE_DAO.get_virtual_group(user_name, "ungrouped")
+
+        if status == "active" and group.size > 0:
+            notes.insert(0, group)
 
         xmanager.add_visit_log(user_name, "/note/group")
 

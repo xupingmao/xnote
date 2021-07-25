@@ -1,7 +1,6 @@
-{% extends base %}
+{% extends base/base2.html %}
 
-{% block body %}
-
+{% block body_top %}
     <div class="card">
         <div class="card-title">
             <span>我的评论</span>
@@ -10,6 +9,13 @@
             </div>
         </div>
     </div>
+{% end %}
 
+{% block body_left %}
     {% include note/page/comment.html %}
+{% end %}
+
+{% block body_right %}
+    {% include note/component/group_special_folder.html %}
+    {% include note/card/note_types.html %}
 {% end %}

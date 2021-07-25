@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/07/25 11:35:54
+# @modified 2021/07/25 21:41:59
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -1429,6 +1429,20 @@ def get_gallery_path(note):
     fsutil.makedirs(standard_dir)
     return standard_dir
 
+
+def get_virtual_group(user_name, name):
+    if name == "ungrouped":
+        files = list_by_parent(user_name, 0, 0, 1000, skip_group = True, include_public = False)
+        group = Storage()
+        group.name = "未分类笔记"
+        group.url  = "/note/default"
+        group.size = len(files)
+        group.icon = "fa-folder"
+        group.priority = 1
+        return group
+    else:
+        raise Exception("[get_virtual_group] invalid name: %s" % name)
+
 # write functions
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
@@ -1450,6 +1464,7 @@ xutils.register_func("note.get_by_id_creator", get_by_id_creator)
 xutils.register_func("note.get_by_name", get_by_name)
 xutils.register_func("note.get_tags", get_tags)
 xutils.register_func("note.get_or_create", get_or_create_note)
+xutils.register_func("note.get_virtual_group", get_virtual_group)
 xutils.register_func("note.search_name", search_name)
 xutils.register_func("note.search_content", search_content)
 xutils.register_func("note.search_public", search_public)
