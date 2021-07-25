@@ -1,0 +1,33 @@
+{% init page_max = 0 %}
+{% init page_url = "?page=" %}
+
+{% if page_max >= 0 %}
+    <div class="pagenation">        
+        <a class="x-page-link" href="{{page_url}}1">首页</a>
+
+        {% if page <= 1 %}
+            <span class="x-page-disabled">上一页</span>
+        {% else %}
+            <a class="x-page-link" href="{{page_url}}{{page-1}}">上一页</a>
+        {% end %}
+
+        {% for j in range(max(1, page-2), page) %}
+            <a class="x-page-link desktop-only-inline" href="{{page_url}}{{j}}">{{j}}</a>
+        {% end %}
+
+        <!-- 当前页 -->
+        <a class="x-page-link x-page-active" href="#">{{page}}</a>
+        
+        {% for j in range(page+1, int(min(page+3, page_max+1))) %}
+            <a class="x-page-link desktop-only-inline" href="{{page_url}}{{j}}">{{j}}</a>
+        {% end %}
+
+        {% if page >= page_max %}
+            <span class="x-page-disabled">下一页</span>
+        {% else %}
+            <a class="x-page-link" href="{{page_url}}{{page+1}}">下一页</a>
+        {% end %}
+
+        <a class="x-page-link" href="{{page_url}}{{page_max}}">尾页</a>
+    </div>
+{% end %}

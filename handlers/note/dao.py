@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/07/24 21:06:19
+# @modified 2021/07/25 11:35:54
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -834,20 +834,47 @@ def fill_parent_name(files):
         else:
             item.parent_name = None
 
+def check_group_status(status):
+    if status is None:
+        return
+    if status not in ("all", "active", "archived"):
+        raise Exception("[check_group_status] invalid status: %s" % status)
+
 
 @xutils.timeit(name = "NoteDao.ListGroup:leveldb", logfile = True)
-def list_group(creator = None, orderby = "mtime_desc", skip_archived = False, offset = 0, limit = None):
+def list_group(creator = None, orderby = "mtime_desc", skip_archived = False, status = "all", offset = 0, limit = None):
+    check_group_status(status)
+
     # TODO 添加索引优化
     def list_group_func(key, value):
+        if value.type != "group" or value.is_deleted != 0:
+            return False
+
         if skip_archived and value.archived:
             return False
-        return value.type == "group" and value.is_deleted == 0
+        
+        if status == "archived":
+            return value.archived
+
+        if status == "active":
+            return not value.archived
+
+        return True
 
     notes = dbutil.prefix_list("notebook:%s" % creator, list_group_func)
     sort_notes(notes, orderby)
     if limit is not None:
         return notes[offset:offset + limit]
     return notes
+
+def count_group(creator, status = None):
+    check_group_status(status)
+
+    if status is None:
+        return dbutil.count_table("notebook:%s" % creator)
+    
+    return len(list_group(creator, status = status))
+
 
 @xutils.timeit(name = "NoteDao.ListRootGroup:leveldb", logfile = True)
 def list_root_group(creator = None, orderby = "name"):
@@ -870,9 +897,6 @@ def list_default_notes(creator, offset = 0, limit = 1000, orderby = "mtime_desc"
     notes = dbutil.prefix_list("note_tiny:", list_default_func)
     sort_notes(notes, orderby)
     return notes[offset:offset+limit]
-
-def count_group(creator):
-    return dbutil.count_table("notebook:%s" % creator)
 
 def list_public(offset, limit):
     def list_func(key, value):
@@ -1460,6 +1484,7 @@ xutils.register_func("note.count_ungrouped", count_ungrouped)
 xutils.register_func("note.count_removed", count_removed)
 xutils.register_func("note.count_by_type", count_by_type)
 xutils.register_func("note.count_by_parent",  count_by_parent)
+xutils.register_func("note.count_group", count_group)
 
 # others
 xutils.register_func("note.find_prev_note", find_prev_note)

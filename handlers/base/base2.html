@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+{% include common/base_head.html %}
+
+{% init search_placeholder = "综合搜索" %}
+{% init search_action = "/search/search" %}
+{% init warn = "" %}
+
+<body>
+    <noscript>
+        <strong class="align-center row">抱歉，您的浏览器不支持访问该网站，建议更换更新版本的浏览器，例如Chrome/Firefox/Safari等</strong>
+    </noscript>
+    
+    <div class="root">
+        <!-- 导航/菜单栏 -->
+        {% include common/base_nav.html %}
+        {% include common/search_mobile.html %}
+
+        <div class="x-body">
+            <div class="nav-left-search">
+                <form id="searchForm2" method="GET" action="{{search_action}}">
+                    {% include common/search_box.html %}
+                </form>
+            </div>
+
+
+            <div class="main-content">
+                <div class="col-md-12">
+                    {% if warn != "" and warn != None %}
+                    <pre class="col-md-12 warn global-warn">
+                        {{warn}}
+                    </pre>
+                    {% end %}
+
+                    {% block body_top %} {% end %}
+                    
+                    <div class="content-left">
+                        {% block body_left %} {% end %}
+                    </div>
+
+                    <div class="content-right">
+                        {% block body_right %} {% end %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+        </div>
+    </div>
+
+    <!-- 弹窗的蒙版 -->
+    <div class="x-dialog-background"></div>
+    <div class="aside-background background"></div>
+
+    <!-- 调整样式的js -->
+    {% include common/script/adjust.html %}
+    {% include common/script/debug_script.html %}
+</body>
+</html>

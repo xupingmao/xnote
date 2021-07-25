@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/07/24 23:27:29
+# @modified 2021/07/25 11:39:11
 import math
 import time
 import web
@@ -182,20 +182,24 @@ class GroupListHandler:
     @xauth.login_required()
     def GET(self):
         category  = xutils.get_argument("category")
+        status    = xutils.get_argument("status", "active")
         user_name = xauth.current_name()
-        notes     = NOTE_DAO.list_group(user_name, skip_archived = True, orderby = "default")
+
+        notes = NOTE_DAO.list_group(user_name, status = status, orderby = "default")
 
         xmanager.add_visit_log(user_name, "/note/group")
 
         root  = NOTE_DAO.get_root()
 
         kw = Storage()
-        kw.title     = T("我的笔记")
+        kw.title     = T("我的笔记本")
         kw.file      = root
         kw.groups    = notes
         kw.parent_id = 0
+        kw.archived_count = NOTE_DAO.count_group(user_name, status = "archived")
+        kw.active_count   = NOTE_DAO.count_group(user_name, status = "active")
 
-        return xtemplate.render("note/page/group_list_old.html", **kw)
+        return xtemplate.render("note/page/group_list.html", **kw)
 
 def load_note_index(user_name):
     msg_stat  = MSG_DAO.get_message_stat(user_name)
@@ -297,12 +301,12 @@ class CategoryHandler:
 
 class BaseListHandler:
 
-    note_type = "gallery"
-    title     = "相册"
-    orderby   = "ctime_desc"
-    create_type = ""
-    create_text = T("创建笔记")
-    date_type = "cdate"
+    note_type     = "gallery"
+    title         = "相册"
+    orderby       = "ctime_desc"
+    create_type   = ""
+    create_text   = T("创建笔记")
+    date_type     = "cdate"
     show_ext_info = True
 
     def count_notes(self, user_name):
@@ -310,6 +314,12 @@ class BaseListHandler:
 
     def list_notes(self, user_name, offset, limit):
         return NOTE_DAO.list_by_type(user_name, self.note_type, offset, limit, self.orderby)
+
+    def map_notes(self, notes):
+        for note in notes:
+            note.badge_info = dateutil.format_date(note.ctime)
+
+        return notes
 
     @xauth.login_required()
     def GET(self):
@@ -321,23 +331,25 @@ class BaseListHandler:
         offset = (page-1)*limit
 
         amount = self.count_notes(user_name)
-        files  = self.list_notes(user_name, offset, limit)
+        notes  = self.list_notes(user_name, offset, limit)
+        notes  = self.map_notes(notes)
 
         kw = Storage()
-        kw.show_ext_info = self.show_ext_info
-        kw.page_max = math.ceil(amount / xconfig.PAGE_SIZE)
-        kw.page_url = "/note/%s?page=" % self.note_type
+        kw.show_ext_info   = self.show_ext_info
+        kw.show_pagination = True
+        kw.page            = page
+        kw.page_max        = math.ceil(amount / xconfig.PAGE_SIZE)
+        kw.page_url        = "/note/%s?page=" % self.note_type
+        kw.parent_id       = "0"
+        kw.notes           = notes
 
         # 上级菜单
         parent = PathNode(T("根目录"), "/note/group")
-        return xtemplate.render(VIEW_TPL,
+        return xtemplate.render("note/page/note_list.html",
             pathlist  = [parent, PathNode(self.title, "/note/" + self.note_type)],
             file_type = "group",
             title     = self.title,
             group_type = self.note_type,
-            files     = files,
-            page      = page,
-            show_pagination = True,
             date_type = self.date_type,
             show_group_option = False,
             create_text = self.create_text,
@@ -389,7 +401,7 @@ class TableListHandler(BaseListHandler):
 class RemovedListHandler(BaseListHandler):
 
     note_type = "removed"
-    title = T("回收站")
+    title     = T("回收站")
     date_type = "ddate"
 
     def count_notes(self, user_name):
@@ -397,6 +409,11 @@ class RemovedListHandler(BaseListHandler):
 
     def list_notes(self, user_name, offset, limit):
         return NOTE_DAO.list_removed(user_name, offset, limit, self.orderby)
+
+    def map_notes(self, notes):
+        for note in notes:
+            note.badge_info = dateutil.format_date(note.dtime)
+        return notes
 
 class StickyListHandler(BaseListHandler):
 

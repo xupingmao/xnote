@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
 # Copyright (c) 2017
-# @modified 2019/12/14 23:52:43
+# @modified 2021/07/25 10:11:58
 """Description here"""
 
 import os
@@ -99,12 +99,13 @@ def get_server_ip():
 @xmanager.searchable('addr')
 def show_addr_qrcode(ctx):
     r = SearchResult()
+    r.icon = "icon-barcode"
     addr = "http://" + get_server_ip() + ":" + str(xconfig.PORT)
     r.url = addr
     r.name = '地址 - %s' % addr
-    r.html = '''<script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
+    r.html = """<script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
     <div id='qrcode'></div>
-    <script>$("#qrcode").qrcode('%s');</script>
-    ''' % addr
-    ctx.tools.append(r)
+    <script>$("#qrcode").qrcode('{addr}');</script>
+    <div class="top-offset-1">相关工具: <a href="/tools/qrcode">二维码生成器</a></div>""".format(addr = addr)
+    ctx.commands.append(r)
 

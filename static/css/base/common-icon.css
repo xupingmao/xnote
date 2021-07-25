@@ -2,7 +2,7 @@
  * description here
  * @author xupingmao
  * @since 2021/07/18 19:08:04
- * @modified 2021/07/18 19:08:17
+ * @modified 2021/07/25 10:12:17
  * @filename common-icon.css
  */
 
@@ -54,4 +54,15 @@
     height: 16px;
     background-size: cover;
     background-image: url(/static/image/icon_dict.svg);
+}
+
+.icon-barcode {
+    display: block;
+    margin-right: 3px;
+    margin-top: 4px; /* line-height是25px */
+    float: left;
+    width: 16px;
+    height: 16px;
+    background-size: cover;
+    background-image: url(/static/image/icons/icon_barcode.png);
 }

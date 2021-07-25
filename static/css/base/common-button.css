@@ -1,0 +1,57 @@
+/**
+ * description here
+ * @author xupingmao
+ * @since 2021/07/25 12:04:40
+ * @modified 2021/07/25 12:41:47
+ * @filename common-button.css
+ */
+
+
+.fixed-button-box {
+    position: fixed;
+    right: 20px;
+    bottom: 20%;
+}
+
+.fixed-bottom-box {
+    position: fixed;
+    width: 80%;
+    left: 10%;
+    bottom: 0px;
+}
+
+.fixed-button {
+    color: white;
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: black;
+    margin-top: 20px;
+    padding: 5px;
+    border-radius: 5px;
+    opacity: 0.6;
+    box-shadow: 2px 2px 2px #888;
+}
+
+.fixed-button:hover {
+    opacity: 1.0;
+}
+
+.fixed-button-inner-box {
+    float: left;
+    width: 50%;
+    padding: 10px;
+}
+
+.fixed-button-2 {
+    color: white;
+    display: block;
+    width: 100%;
+    float: left;
+    text-align: center;
+    background-color: black;
+    padding: 5px;
+    border-radius: 5px;
+    opacity: 0.6;
+    box-shadow: 2px 2px 2px #888;
+}

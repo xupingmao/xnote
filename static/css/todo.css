@@ -2,7 +2,7 @@
  * description here
  * @author xupingmao
  * @since 2021/05/01 15:36:08
- * @modified 2021/05/23 17:12:20
+ * @modified 2021/07/25 10:54:02
  * @filename todo.css
  */
 
@@ -20,6 +20,13 @@
 .todo-content {
     padding-bottom: 10px;
     word-break: break-all;
+    float: left;
+    width: 100%;
+}
+
+.todo-foot {
+    float: left;
+    width: 100%;
 }
 
 .todo-tag {

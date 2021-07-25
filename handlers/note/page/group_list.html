@@ -1,7 +1,6 @@
-{% extends base %}
+{% extends base/base2.html %}
 
-
-{% block body %}
+{% block body_top %}
     <div class="card">
         <div class="grid-title">
             <span>{{title}}</span>
@@ -13,35 +12,57 @@
 
         {% include note/script/create_script.html %}
     </div>
+{% end %}
 
-    {% for title0, groups in group_cards %}
-        <div class="card">
-            
-            <div class="card-title">
-                <span>{{title0}}</span>
-                <div class="float-right">
-                </div>
-            </div>
-            {% if len(groups) == 0 %}
-                {% include common/text/empty_text.html %}
-            {% end %}
 
-            {% for item in groups %}
-                <a class="list-link" href="{{item.url}}">
-                    
-                    {% if item.priority>0 %}
-                        <i class="fa fa-thumb-tack black"></i>
-                    {% end %}
+{% block body_left %}
+    <link rel="stylesheet" type="text/css" href="/static/css/base/common-button.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/base/common-layout.css">
 
-                    <!-- 图标和标题 -->
-                    <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
-                    <span>{{item.name}}</span>
-                    <div class="float-right">
-                        <span class="book-size-span">{{item.size}}</span>
-                        <i class="fa fa-chevron-right"></i>
-                    </div>
-                </a>
-            {% end %}
+    <div class="card">
+        <a class="tab tab-link x-tab x-tab-default" href="/note/group?status=active">
+            活跃(<span class="task-count">{{active_count}}</span>)
+        </a>
+        <a class="tab tab-link x-tab" href="/note/group?status=archived">
+            归档(<span class="task-count">{{archived_count}}</span>)
+        </a>
+    </div>
+
+    {% if status == "active" %}
+        <div class="mobile-only">
+            {% include note/component/group_special_folder.html %}
         </div>
     {% end %}
+
+    <div class="card">
+        {% if len(groups) == 0 %}
+            {% include common/text/empty_text.html %}
+        {% end %}
+
+        {% for item in groups %}
+            <a class="list-link" href="{{item.url}}">
+                
+                {% if item.priority>0 %}
+                    <i class="fa fa-thumb-tack black"></i>
+                {% end %}
+
+                <!-- 图标和标题 -->
+                <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
+                <span>{{item.name}}</span>
+                <div class="float-right">
+                    <span class="book-size-span">{{item.size}}</span>
+                    <i class="fa fa-chevron-right"></i>
+                </div>
+            </a>
+        {% end %}
+    </div>
 {% end %}
+
+{% block body_right %}
+    <div class="desktop-only">
+        {% include note/component/group_special_folder.html %}
+        {% include note/card/note_types.html %}
+        {% include note/card/recent_update_notes.html %}
+    </div>
+{% end %}
+

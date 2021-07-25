@@ -1,0 +1,38 @@
+/**
+ * description here
+ * @author xupingmao
+ * @since 2021/07/25 09:22:04
+ * @modified 2021/07/25 12:40:19
+ * @filename common-layout.css
+ */
+
+
+.content-left {
+    float: left;
+    width: 700px;
+}
+
+.content-right {
+    padding-left: 10px;
+    float: left;
+    width: 300px;
+}
+
+.foot-placeholder {
+    float: left;
+    width: 100%;
+    height: 50px;
+}
+
+/** 移动端样式放在最后 **/
+@media screen and (max-width: 1000px) {
+    /** mobile **/
+    .content-left {
+        width: 100%;
+    }
+
+    .content-right {
+        padding-left: 0px;
+        width: 100%;
+    }
+}
