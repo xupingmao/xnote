@@ -1,13 +1,17 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/17 10:51:22
-# @modified 2021/02/15 23:16:41
+# @modified 2021/07/26 12:04:30
 
 import web
 
 #################################################################
 ##   Web.py Utilities web.py工具类的封装
 #################################################################
+
+IS_TEST = False
+MOBILE_UA_NAMES = ("iphone", "android", "webos")
+
 
 def print_web_ctx_env():
     for key in web.ctx.env:
@@ -42,7 +46,7 @@ def get_argument(key, default_value=None, type = None, strip=False):
         _input[key] = default_value
         return default_value
     if type == bool:
-        # bool函数对飞空字符串都默认返回true，需要处理一下
+        # bool函数对非空字符串都默认返回true，需要处理一下
         value = value in ("true", "True", "yes", "Y", "on")
         _input[key] = value
     elif type != None:
@@ -51,4 +55,34 @@ def get_argument(key, default_value=None, type = None, strip=False):
     if strip and isinstance(value, str):
         value = value.strip()
     return value
+
+def get_client_user_agent():
+    if IS_TEST:
+        return ""
+    return web.ctx.env.get("HTTP_USER_AGENT")
+
+def get_client_platform(user_agent = None):
+    if user_agent is None:
+        user_agent = get_client_user_agent()
+
+    if user_agent is None:
+        return False
+
+    user_agent_lower = user_agent.lower()
+    for name in MOBILE_UA_NAMES:
+        if user_agent_lower.find(name) >= 0:
+            return "mobile"
+    return "desktop"
+
+
+def is_mobile_client(user_agent = None):
+    return get_client_platform(user_agent) == "mobile"
+
+
+def is_desktop_client(user_agent = None):
+    return get_client_platform(user_agent) == "desktop"
+
+def init_webutil_env(is_test = False):
+    global IS_TEST
+    IS_TEST = is_test
 

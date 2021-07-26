@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/06/26 13:29:44
+# @modified 2021/07/26 11:54:37
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -337,9 +337,11 @@ def init(xconfig):
     global FS_CODE_EXT_LIST
     global IS_TEST
 
-    FS_TEXT_EXT_LIST = xconfig.FS_TEXT_EXT_LIST
-    FS_IMG_EXT_LIST = xconfig.FS_IMG_EXT_LIST
+    FS_TEXT_EXT_LIST  = xconfig.FS_TEXT_EXT_LIST
+    FS_IMG_EXT_LIST   = xconfig.FS_IMG_EXT_LIST
     FS_AUDIO_EXT_LIST = xconfig.FS_AUDIO_EXT_LIST
     FS_CODE_EXT_LIST  = xconfig.FS_CODE_EXT_LIST
-    IS_TEST = xconfig.IS_TEST
+    IS_TEST           = xconfig.IS_TEST
+    
+    xutils.webutil.init_webutil_env(is_test = IS_TEST)
 

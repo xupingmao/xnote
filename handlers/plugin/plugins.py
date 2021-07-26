@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/07/21 00:39:30
+# @modified 2021/07/26 12:19:01
 from io import StringIO
 import xconfig
 import codecs
@@ -166,11 +166,12 @@ class PluginContext(Storage):
         return cmp(self.title, other.title)
 
     def load_from_meta(self, meta_obj):
-        self.title = meta_obj.get_str_value("title")
+        self.title       = meta_obj.get_str_value("title")
         self.description = meta_obj.get_str_value("description")
-        self.author = meta_obj.get_str_value("author")
-        self.version = meta_obj.get_str_value("version")
-        self.category = meta_obj.get_str_value("category")
+        self.author      = meta_obj.get_str_value("author")
+        self.version     = meta_obj.get_str_value("version")
+        self.category    = meta_obj.get_str_value("category")
+        self.icon        = meta_obj.get_str_value("icon-class")
 
 def is_plugin_file(fpath):
     return os.path.isfile(fpath) and fpath.endswith(".py")

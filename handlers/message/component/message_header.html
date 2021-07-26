@@ -5,80 +5,10 @@
 {% init show_message_tab = True %}
 
 <!-- header.html -->
-<div class="card">    
-    <div class="card-title btn-line-height">
-        <span>{{title}}</span>
-        <div class="float-right">
-            {% if HOME_PATH == "/message/log" and not show_back_btn %}
-                <a class="btn btn-default" href="/note/group">笔记</a>
-                <a class="btn btn-default" href="/note/tools">工具</a>
-            {% else %}
-                {% include common/button/back_button.html %}
-            {% end %}
-        </div>
-    </div>
-</div>
+{% include message/component/message_title.html %}
 
 {% if show_message_tab %}
-    <!-- 桌面版菜单 -->
-    <div class="col-md-12 card">
-        <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">
-            待办(<span class="task-count">{{message_stat.task_count}}</span>)
-        </a>
-
-        <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">
-            记事(<span class="log-count">{{message_stat.log_count}}</span>)
-        </a>
-        <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">
-            标签(<span class="key-count">{{message_stat.key_count}}</span>)
-        </a>
-        <a class="tab tab-link x-tab" href="/message/calendar" data-tag="date">日期</a>
-    </div>
-
-    <!-- 移动端菜单 -->
-    <div class="col-md-12 card hide">
-        <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">待办</a>
-        <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">记事</a>
-        <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">标签</a>
-        <a class="tab tab-link x-tab" href="/message/calendar">日期</a>
-    </div>
+    {% include message/component/message_tab.html %}
 {% end %}
-
-<script type="text/javascript">
-$(function() {
-    function isEmpty(value) {
-        return value === "" || value === undefined || value === null;
-    }
-    
-    var displayTag = getUrlParam("displayTag");
-    if (isEmpty(displayTag)) {
-        displayTag = "{{tag}}";
-    }
-
-    if (isEmpty(displayTag)) {
-        displayTag = "log";
-    }
-
-    if (displayTag == "search") {
-        displayTag = "log";
-    }
-
-    $("[data-tag=" + displayTag + "]").addClass("tab-link-active");
-
-    function onMessageUpdated() {
-        $.get("/message/stat", function (resp) {
-            $(".task-count").text(resp.task_count);
-            $(".done-count").text(resp.done_count);
-            $(".log-count").text(resp.log_count);
-            $(".idea-count").text(resp.idea_count);
-            $(".cron-count").text(resp.cron_count);
-            $(".key-count").text(resp.key_count);
-        });
-    }
-
-    xnote.on("message.created", onMessageUpdated);
-    xnote.on("message.updated", onMessageUpdated);
-});
-</script>
 
 {% include message/component/show_topic_dialog.html %}

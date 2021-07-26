@@ -1,0 +1,63 @@
+{% init message_stat = xutils.call("message.get_current_message_stat") %}
+
+<!-- 桌面版菜单 -->
+<div class="col-md-12 card">
+    <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">
+        待办(<span class="task-count">{{message_stat.task_count}}</span>)
+    </a>
+
+    <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">
+        记事(<span class="log-count">{{message_stat.log_count}}</span>)
+    </a>
+    <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">
+        标签(<span class="key-count">{{message_stat.key_count}}</span>)
+    </a>
+    <a class="tab tab-link x-tab" href="/message/calendar" data-tag="date">日期</a>
+</div>
+
+<!-- 移动端菜单 -->
+<div class="col-md-12 card hide">
+    <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">待办</a>
+    <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">记事</a>
+    <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">标签</a>
+    <a class="tab tab-link x-tab" href="/message/calendar">日期</a>
+</div>
+
+
+
+<script type="text/javascript">
+$(function() {
+    function isEmpty(value) {
+        return value === "" || value === undefined || value === null;
+    }
+    
+    var displayTag = getUrlParam("displayTag");
+    if (isEmpty(displayTag)) {
+        displayTag = "{{tag}}";
+    }
+
+    if (isEmpty(displayTag)) {
+        displayTag = "log";
+    }
+
+    if (displayTag == "search") {
+        displayTag = "log";
+    }
+
+    $("[data-tag=" + displayTag + "]").addClass("tab-link-active");
+
+    function onMessageUpdated() {
+        $.get("/message/stat", function (resp) {
+            $(".task-count").text(resp.task_count);
+            $(".done-count").text(resp.done_count);
+            $(".log-count").text(resp.log_count);
+            $(".idea-count").text(resp.idea_count);
+            $(".cron-count").text(resp.cron_count);
+            $(".key-count").text(resp.key_count);
+        });
+    }
+
+    xnote.on("message.created", onMessageUpdated);
+    xnote.on("message.updated", onMessageUpdated);
+});
+</script>

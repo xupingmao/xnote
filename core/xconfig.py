@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/06/27 19:32:54
+# @modified 2021/07/26 12:16:08
 
 '''xnote系统配置
 # 用户配置
@@ -309,12 +309,13 @@ def load_file_type_config():
     MIME_TYPES[""]    = "application/octet-stream"
 
 
-def get(name, default_value=None):
+def get_global_config(name, default_value=None):
     """获取配置，如果不存在返回default值"""
-    value = globals().get(name)
+    value = _config.get(name)
     if value is not None:
         return value
-    value = _config.get(name)
+
+    value = globals().get(name)
     if value is not None:
         return value
 
@@ -322,27 +323,35 @@ def get(name, default_value=None):
         return default_value
     return value
 
+def get(key, default_value = None):
+    return get_global_config(key, default_value)
+
 def set(name, value):
-    """和set函数冲突了，建议使用put"""
-    _config[name] = value
+    """和set函数冲突了，建议使用 set_global_config"""
+    return set_global_config(name, value)
 
 def put(name, value):
+    return set_global_config(name, value)
+
+def set_global_config(name, value):
     _config[name] = value
 
 def get_config():
     return _config
-    
+
 def has_config(key, subkey = None):
-    group_value = get(key)
+    return has_global_config(key, subkey)
+
+def has(key):
+    return has_global_config(key)
+
+def has_global_config(key, subkey = None):
+    group_value = get_global_config(key)
     if group_value is None:
         return False
     if subkey is None:
         return True
     return subkey in group_value
-    
-def has(key):
-    return has_config(key)
-
 
 def is_mute():
     """是否静音"""
@@ -357,11 +366,6 @@ def set_alias(name, value):
 def get_alias(name, default_value):
     """获取别名，用于扩展命令"""
     return _alias_dict.get(name, default_value)
-
-def get_global_config(key):
-    if key in _config:
-        return _config.get(key)
-    return globals().get(key)
 
 
 def get_user_config(user_name, config_key, default_value = None):

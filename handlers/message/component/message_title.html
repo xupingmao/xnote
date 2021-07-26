@@ -1,0 +1,16 @@
+{% init title = "随手记" %}
+{% init show_back_btn = False %}
+
+<div class="card">    
+    <div class="card-title btn-line-height">
+        <span>{{title}}</span>
+        <div class="float-right">
+            {% if HOME_PATH == "/message/log" and not show_back_btn %}
+                <a class="btn btn-default" href="/note/group">笔记</a>
+                <a class="btn btn-default" href="/note/tools">工具</a>
+            {% else %}
+                {% include common/button/back_button.html %}
+            {% end %}
+        </div>
+    </div>
+</div>

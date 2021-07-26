@@ -1,6 +1,22 @@
-{% extends base %}
+{% extends base/base2.html %}
 
-{% block body %}
+{% block body_top %}
+
+    {% init default_content = "" %}
+    {% init show_tab = True %}
+
+    <script type="text/javascript" src="/static/js/message/message.js"></script>
+
+    <input class="default-content-input" type="hidden" value="{{default_content}}"/>
+
+    {% include message/component/message_title.html %}
+
+    <!-- 事件转换 -->
+    {% include message/component/message_event.html %}
+
+{% end %}
+
+{% block body_left %}
 
     {% init message_tag = "" %}
     {% init default_content = "" %}
@@ -9,16 +25,9 @@
     {% init show_system_tag = True %}
     {% init show_sub_link = False %}
 
-    <script type="text/javascript" src="/static/js/message/message.js"></script>
-
-    <input class="default-content-input" type="hidden" value="{{default_content}}"/>
-
-    <!-- 事件转换 -->
-    {% include message/component/message_event.html %}
-
-    <!-- 菜单 -->
+    <!-- Tab页 -->
     {% if show_tab %}
-        {% include message/component/message_header.html %}
+        {% include message/component/message_tab.html %}
     {% end %}
 
     <!-- 编辑器 -->
@@ -121,3 +130,8 @@
 
 {% end %}
 
+
+{% block body_right %}
+    {% include note/component/group_special_folder.html %}
+
+{% end %}

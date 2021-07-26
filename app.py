@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2021/05/05 19:10:39
+# @modified 2021/07/26 12:14:34
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -57,6 +57,8 @@ def handle_args():
     parser.add_argument("--initScript", default="init.py")
     parser.add_argument("--master", default="no")
     parser.add_argument("--test", default="no")
+    # TODO
+    parser.add_argument("--disabledPlugins", default="no")
 
     web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
@@ -77,22 +79,28 @@ def handle_args():
     # 启动提醒
     if args.ringtone == "yes":
         xutils.say("系统启动")
+    
     if args.webbrowser == "yes":
         xconfig.OPEN_IN_BROWSER = True
+    
     if args.debug == "yes":
         xconfig.DEBUG = True
         web.config.debug = True
+    
     if args.useCacheSearch == "yes":
         xconfig.USE_CACHE_SEARCH = True
+    
     if args.useUrlencode == "yes":
         xconfig.USE_URLENCODE = True
+    
     if args.devMode == "yes":
         xconfig.DEV_MODE = True
+
     if args.test == "yes":
         xconfig.IS_TEST = True
 
-    xconfig.MIN_THREADS = int(args.minthreads)
-    xconfig.INIT_SCRIPT = args.initScript
+    xconfig.MIN_THREADS   = int(args.minthreads)
+    xconfig.INIT_SCRIPT   = args.initScript
     web.config.minthreads = xconfig.MIN_THREADS
 
     port = xconfig.PORT
@@ -103,8 +111,8 @@ def handle_args():
     if not os.environ.get("PORT"):
         os.environ["PORT"] = port
 
-    xconfig.set("port", port)
-    xconfig.set("start_time", xutils.format_datetime())
+    xconfig.set_global_config("port", port)
+    xconfig.set_global_config("start_time", xutils.format_datetime())
 
 def handle_signal(signum, frame):
     """处理系统消息

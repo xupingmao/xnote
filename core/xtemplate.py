@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/07/17 10:58:57
+# @modified 2021/07/26 11:57:32
 # @filename xtemplate.py
 
 
@@ -109,9 +109,7 @@ def set_loader_namespace(namespace):
     _loader.namespace = namespace
 
 def get_user_agent():
-    if xconfig.IS_TEST:
-        return ""
-    return web.ctx.env.get("HTTP_USER_AGENT")
+    return xutils.get_client_user_agent()
 
 @xutils.cache(prefix="message.count", expire=360)
 def get_message_count(user):
@@ -182,17 +180,7 @@ def get_mobile_template(name):
     return name
 
 def is_mobile_device(user_agent = None):
-    if user_agent is None:
-        user_agent = get_user_agent()
-
-    if user_agent is None:
-        return False
-
-    user_agent_lower = user_agent.lower()
-    for name in ("iphone", "android", "webos"):
-        if user_agent_lower.find(name) >= 0:
-            return True
-    return False
+    return xutils.is_mobile_client(user_agent)
 
 def get_device_platform():
     platform = web.ctx.get("xnote_platform")
@@ -363,16 +351,6 @@ class TextResponse:
 
     def __init__(self, text):
         self.text = text
-
-CATEGORY_NAME_DICT = dict(
-    network = '网络', 
-    file    = '文件',
-    dir     = '文件',
-    note    = '笔记',
-    system  = '系统',
-    form    = '表单',
-    develop = '开发',
-)
 
 class BasePlugin:
     """插件的基类"""
