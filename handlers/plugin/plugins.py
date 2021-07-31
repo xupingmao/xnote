@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/07/26 12:19:01
+# @modified 2021/07/31 15:17:15
 from io import StringIO
 import xconfig
 import codecs
@@ -810,7 +810,7 @@ def reload_plugins(ctx):
 
     PLUGINS_STATUS = "done"
 
-@xutils.log_deco("reload_config_plugins")
+@xutils.log_init_deco("reload_config_plugins")
 def do_reload_config_plugins(ctx = None):
     global CONFIG_TOOLS
     parser = ConfigParser()

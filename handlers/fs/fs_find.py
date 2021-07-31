@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2021/02/27 16:09:15
+# @modified 2021/07/31 14:27:58
 import os
 import sys
 import glob
@@ -134,7 +134,7 @@ class IndexHandler:
         user_name = xauth.current_name()
         xmanager.add_visit_log(user_name, "/fs_index")
 
-        tpl = "fs/fs_index.html"
+        tpl = "fs/page/fs_index.html"
         index_size = dbutil.count_table("fs_index")
         return xtemplate.render(tpl, 
             index_dirs = get_index_dirs(),
@@ -142,7 +142,7 @@ class IndexHandler:
 
     @xauth.login_required("admin")
     def POST(self):
-        tpl = "fs/fs_index.html"
+        tpl = "fs/page/fs_index.html"
         index_dirs = get_index_dirs()
         cost = 0
 

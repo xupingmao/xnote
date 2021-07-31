@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/07/18 19:22:53
+# @modified 2021/07/31 15:16:22
 
 import re
 import os
@@ -388,7 +388,7 @@ def list_search_rules(user_name):
 def reload_search(ctx = None):
     do_reload_search(ctx)
 
-@xutils.log_deco("reload_search")
+@xutils.log_init_deco("reload_search")
 def do_reload_search(ctx = None):
     register_search_handler("plugin", placeholder = u"搜索插件", action = "/plugins_list")
     register_search_handler("note.public", placeholder = u"搜索公共笔记", action = "/note/timeline", tag = "public")

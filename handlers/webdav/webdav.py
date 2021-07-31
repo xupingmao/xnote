@@ -1,10 +1,11 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/14 15:26:54
-# @modified 2021/02/16 11:36:40
+# @modified 2021/07/31 15:15:39
 import web
 import xauth
 import xmanager
+import xutils
 from xutils import logutil
 
 from wsgidav.debug_filter import WsgiDavDebugFilter
@@ -124,9 +125,13 @@ def reload_on_user_update(ctx = None):
     global webdav_app
     webdav_app = WsgiDAVApp(WEBDAV_CONFIG)
 
-# 启动的时候设置一下
-init_user_mapping()
-webdav_app = WsgiDAVApp(WEBDAV_CONFIG)
+@xmanager.listen("sys.init")
+@xutils.log_init_deco("webdav")
+def init_webdav(ctx = None):
+    # 启动的时候设置一下
+    init_user_mapping()
+    global webdav_app
+    webdav_app = WsgiDAVApp(WEBDAV_CONFIG)
 
 class WebDavHandler:
 

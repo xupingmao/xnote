@@ -133,7 +133,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2021/07/30 20:59:47
+ * @modified 2021/07/31 14:08:39
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -311,6 +311,8 @@ table td {
     display: inline-block;
     -webkit-appearance: none; /* 消除IOS默认的按钮样式 */
     background-color: #337ab7;
+    /*background-color: #067bef;*/
+    /*background-color: #06f;*/
     border-color: #2e6da4;
     border: 1px solid transparent;
     color: #fff;
@@ -1266,23 +1268,6 @@ li.menu-item:hover {
     outline: none;
 }
 
-.mobile-hidden {
-    display: block;
-}
-
-.desktop-only {
-    display: block;
-}
-
-.desktop-only-inline {
-    display: inline;
-}
-
-.desktop-only-inline-block {
-    display: inline-block;
-}
-
-
 /* TAB页的链接样式 */
 .tab-link, .x-tab {
     float: left;
@@ -1405,17 +1390,9 @@ li.menu-item:hover {
         width: 50%;
     }
 
-    .mobile-hidden {
-        display: none;
-    }
-
     .plugin-item {
         width: 100%;
         margin-left: 0px;
-    }
-
-    .desktop-only, .desktop-only-inline, .desktop-only-inline-block {
-        display: none;
     }
 
     .input-group {
@@ -1642,10 +1619,10 @@ li.menu-item:hover {
 }
 
 /**
- * description here
+ * 布局相关的样式
  * @author xupingmao
  * @since 2021/07/25 09:22:04
- * @modified 2021/07/30 20:59:52
+ * @modified 2021/07/31 14:09:11
  * @filename common-layout.css
  */
 
@@ -1671,6 +1648,22 @@ li.menu-item:hover {
     display: none;
 }
 
+.mobile-hidden {
+    display: block;
+}
+
+.desktop-only {
+    display: block;
+}
+
+.desktop-only-inline {
+    display: inline;
+}
+
+.desktop-only-inline-block {
+    display: inline-block;
+}
+
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 1000px) {
     /** mobile **/
@@ -1686,6 +1679,15 @@ li.menu-item:hover {
     .mobile-only {
         display: block;
     }
+
+    .mobile-hidden {
+        display: none;
+    }
+
+    .desktop-only, .desktop-only-inline, .desktop-only-inline-block {
+        display: none;
+    }
+
 }
 /**
  * description here

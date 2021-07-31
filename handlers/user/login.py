@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2021/05/02 13:17:05
+# @modified 2021/07/31 14:28:22
 import web
 import time
 import hashlib
@@ -61,7 +61,7 @@ class LoginHandler:
             save_login_info(name, pswd)
             save_login_error_count(name, count + 1)
 
-        return xtemplate.render("user/login.html", 
+        return xtemplate.render("user/page/login.html", 
             show_aside = False,
             username   = name, 
             password   = pswd,
@@ -69,7 +69,7 @@ class LoginHandler:
 
 
     def GET(self):
-        return xtemplate.render("user/login.html",
+        return xtemplate.render("user/page/login.html",
             show_aside=False,
             username="",
             password="",

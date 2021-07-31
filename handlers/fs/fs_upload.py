@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017
-# @modified 2021/05/01 11:39:06
+# @modified 2021/07/31 14:27:13
 import os
 import uuid
 import web
@@ -133,7 +133,7 @@ class UploadHandler:
         dirname = os.path.join(xconfig.DATA_DIR, "files", user_name, "upload", year, month)
         pathlist = fsutil.listdir_abs(dirname)
         
-        return xtemplate.render("fs/fs_upload.html", 
+        return xtemplate.render("fs/page/fs_upload.html", 
             show_aside = False,
             html_title = T("文件"),
             pathlist = pathlist, 
@@ -248,7 +248,7 @@ class UploadSearchHandler:
         else:
             plist = sorted(xutils.search_path(user_dir, find_key, "file"))
 
-        return xtemplate.render("fs/fs_upload.html", 
+        return xtemplate.render("fs/page/fs_upload.html", 
             show_aside = False,
             html_title = T("文件"),
             page = "search",

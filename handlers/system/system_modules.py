@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/02/19 15:54:07
+# @modified 2021/07/31 15:02:04
 import six
 import xutils
 import xtemplate
@@ -132,6 +132,8 @@ class ModuleListHandler(object):
 xurls = (
     r"/system/pydoc", ModuleListHandler,
     r"/system/modules_info", ModuleListHandler,
-    r"/system/document", ModuleDetailHandler
+    r"/system/document", ModuleDetailHandler,
+    r"/system/module_list", ModuleListHandler,
+    r"/system/module_detail", ModuleDetailHandler
 )
         

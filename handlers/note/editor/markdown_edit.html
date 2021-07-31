@@ -24,8 +24,8 @@
     {{error}}
 </div>
 
-<div class="grid-card">
-    <form id="mainFrame" action="/note/update" enctype="multipart/form-data" method="POST" class="col-md-12">
+<form id="mainFrame" action="/note/update" enctype="multipart/form-data" method="POST" class="col-md-12">
+    <div class="card">
         <!-- note-edit-header -->
         <div class="col-md-12" id="submit-div">
             <div>
@@ -39,7 +39,9 @@
                 </div>
             </div>
         </div>
+    </div>
 
+    <div class="card">
         <!-- note-edit-body -->
         <div class="col-md-12 note-edit-body">
             <span id="result" style="color:green"></span>
@@ -73,9 +75,10 @@
                     </div>
                 </div>
             </div>
+            
         </div>
-    </form>
-</div>
+    </div>
+</form>
 
 <script type="text/javascript">
     function codeInsert(code) {

@@ -1,8 +1,8 @@
 /**
- * description here
+ * 布局相关的样式
  * @author xupingmao
  * @since 2021/07/25 09:22:04
- * @modified 2021/07/30 20:59:52
+ * @modified 2021/07/31 14:09:11
  * @filename common-layout.css
  */
 
@@ -28,6 +28,22 @@
     display: none;
 }
 
+.mobile-hidden {
+    display: block;
+}
+
+.desktop-only {
+    display: block;
+}
+
+.desktop-only-inline {
+    display: inline;
+}
+
+.desktop-only-inline-block {
+    display: inline-block;
+}
+
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 1000px) {
     /** mobile **/
@@ -43,4 +59,13 @@
     .mobile-only {
         display: block;
     }
+
+    .mobile-hidden {
+        display: none;
+    }
+
+    .desktop-only, .desktop-only-inline, .desktop-only-inline-block {
+        display: none;
+    }
+
 }

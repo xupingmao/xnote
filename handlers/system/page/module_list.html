@@ -9,16 +9,17 @@
 
 <div class="card">
     <div class="col-md-12">
-        <h3>sys.path</h3>
+        <p>系统路径(sys.path)</p>
         <table class="table">
             {% for p in sys.path %}
                 <tr><td>{{p}}</td></tr>
             {% end %}
         </table>
-        <p>模块数 {{len(modules)}} </p>
     </div>
+</div>
 
-    <div class="col-md-12">
+<div class="col-md-12 card">
+    <p>模块数 {{len(modules)}} </p>
     <table class="table col-md-12">
         <tr>
             <th class="index-td">编号</th>
