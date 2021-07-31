@@ -131,7 +131,7 @@ class TestMain(unittest.TestCase):
         self.assertTrue(xutils.cache_del("fib(1,)"))
 
     def test_cache_set_delete(self):
-        cacheutil.set("name", 123)
+        cacheutil.set("name", 123, expire = 600)
         self.assertEqual(123, cacheutil.get("name"))
         cacheutil.delete("name")
         self.assertEqual(None, cacheutil.get("name"))
@@ -140,7 +140,7 @@ class TestMain(unittest.TestCase):
         xutils.cacheutil.load_dump()
 
     def test_cache_hash(self):
-        xutils.cacheutil.hset("h01", "key", "value")
+        xutils.cacheutil.hset("h01", "key", "value", expire = 600)
         value = xutils.cacheutil.hget("h01", "key")
         self.assertEqual("value", value)
         self.assertEqual(None, xutils.cacheutil.hget("h01", "key02"))

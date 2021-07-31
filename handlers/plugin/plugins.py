@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/07/31 15:17:15
+# @modified 2021/07/31 18:47:20
 from io import StringIO
 import xconfig
 import codecs
@@ -816,7 +816,7 @@ def do_reload_config_plugins(ctx = None):
     parser = ConfigParser()
 
     fpath = "config/plugin/plugins.ini"
-    sections = parser.read(fpath)
+    sections = parser.read(fpath, encoding = "utf-8")
 
     tmp_tools = []
     for section in parser.sections():

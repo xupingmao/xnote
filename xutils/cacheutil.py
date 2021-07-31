@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2021/04/11 13:44:16
+# @modified 2021/07/31 19:01:00
 """基本废弃了，请使用dbutil
 缓存的实现，API列表如下
 
@@ -28,7 +28,7 @@
 参考redis的API
 """
 from collections import OrderedDict, deque
-from .imports import *
+from xutils.imports import *
 
 _cache_dict = dict()
 _cache_queue = deque()
@@ -123,11 +123,14 @@ class CacheObj:
         else:
             return self.value
 
-    def save(self):
+    def save(self, method_name = "save"):
         _cache_dict[self.key] = self
         if self.is_temp():
             return
+
         # save to disk
+        raise Exception("cacheutil.%s to disk is no longer supprted, please use dbutil" % method_name)
+
         path = self._get_path(self.key)
         obj = dict(key = self.key, 
                 type = self.type,
@@ -432,11 +435,11 @@ def hset(key, field, value, expire=-1):
         if obj != None and obj.value != None:
             obj.value[field] = value
             obj.type = "hash"
-            obj.save()
+            obj.save("hset")
         else:
-            obj = CacheObj(key, dict(), type = "hash")
+            obj = CacheObj(key, dict(), type = "hash", expire = expire)
             obj.value[field] = value
-            obj.save()
+            obj.save("hset")
     except:
         print_exc()
         return None
