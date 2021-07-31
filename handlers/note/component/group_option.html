@@ -51,24 +51,5 @@
     </div>
 {% end %}
 
-{% include note/script/rename_script.html %}
-
-<script type="text/javascript">
-function remove(id, name, parentId) {
-    var confirmed = confirm("确定删除'" + name + "'?");
-    if (confirmed) {
-        $.post("/note/remove", {id:id}, function (resp) {
-            var code = resp.code;
-            if (code != "success") {
-                alert(resp.message);
-            } else {
-                if (parentId) {
-                    window.location.href = "/note/view?id="+parentId;
-                } else {
-                    window.location.href = "/";
-                }
-            }
-        })
-    }
-}
-</script>
+{% include note/component/script/rename_script.html %}
+{% include note/component/script/note_option_script.html %}

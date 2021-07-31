@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2021/04/18 16:11:54
+# @modified 2021/07/31 11:28:52
 
 """笔记编辑相关处理"""
 import os
@@ -134,9 +134,13 @@ class CreateHandler:
         date      = xutils.get_argument("date", "")
         format    = xutils.get_argument("_format", "")
         parent_id = xutils.get_argument("parent_id", "0")
+        deafult_name = xutils.get_argument("default_name", "")
 
         if key == "":
             key = time.strftime("%Y.%m.%d") + dateutil.current_wday()
+
+        if name == "":
+            name = deafult_name
 
         type = NOTE_TYPE_MAPPING.get(type0, type0)
 
@@ -193,7 +197,6 @@ class CreateHandler:
         return xtemplate.render(template, 
             show_search = False,
             heading  = heading,
-            key      = "", 
             type     = type,
             name     = name, 
             tags     = tags, 
@@ -435,8 +438,22 @@ class UnarchiveHandler:
     def GET(self):
         id = xutils.get_argument("id")
         note = check_get_note(id)
-        NOTE_DAO.update(id, archived=False)
+        NOTE_DAO.update(id, archived=False, priority = 0)
         raise web.found("/note/%s" % id)
+
+class UpdateStatusHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        id = xutils.get_argument("id")
+        status = xutils.get_argument("status")
+        if status not in ("0", "-1", "1"):
+            return dict(code = "fail", message = "无效的状态: %s" % status)
+        note = check_get_note(id)
+        
+        archived = (status == "-1")
+        NOTE_DAO.update(id, priority = int(status), archived = archived)
+        return dict(code = "success", message = "更新状态成功")
 
 class MoveAjaxHandler:
     
@@ -514,6 +531,7 @@ xurls = (
     r"/note/unstick"     , UnstickHandler,
     r"/note/unarchive"   , UnarchiveHandler,
     r"/note/touch"       , TouchHandler,
+    r"/note/status"      , UpdateStatusHandler,
     
     # 分享
     r"/note/share",        PublicShareHandler,
@@ -521,9 +539,9 @@ xurls = (
     r"/note/share/cancel", UnshareHandler,
     r"/note/link_share",   LinkShareHandler,
 
+    # 不建议使用的
     r"/file/save"        , SaveAjaxHandler,
     r"/file/autosave"    , SaveAjaxHandler,
-
 )
 
 

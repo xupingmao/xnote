@@ -5,7 +5,13 @@
 
 <div class="card">
 {% include note/component/view_header.html %}
+</div>
 
+<div class="card">
+    {% include note/component/note_path.html %}
+</div>
+
+<div class="card">
 {% if op == "view" %}
     <div id="editor" class="row">
         {% raw file.data %}

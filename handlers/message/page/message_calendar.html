@@ -1,7 +1,13 @@
-{% extends base %}
+{% extends base/base2.html %}
 
-{% block body %}
-    {% include message/component/message_header.html %}
+{% block body_top %}
+    {% include message/component/message_title.html %}
+{% end %}
+
+{% block body_left %}
+
+    <!-- Tab页 -->
+    {% include message/component/message_tab.html %}
 
     <!-- 月份选择器 -->
     {% include common/date/month_picker.html %}
@@ -38,3 +44,6 @@
 
 {% end %}
   
+{% block body_right %}
+    {% include message/component/message_date_right.html %}
+{% end %}

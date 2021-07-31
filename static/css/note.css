@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/07/18 19:18:48
+ * @modified 2021/07/31 11:09:12
 */
 
 
@@ -16,6 +16,9 @@
     border-bottom: none;
 }
 
+.card>.book-item:last-child {
+    border-bottom: none;
+}
 
 .tool-div {
     font-size: medium;

@@ -1,7 +1,13 @@
 {% extends base %}
 
-{% block body %}
-    {% include message/component/message_header.html %}
+{% block body_top %}
+    {% include message/component/message_title.html %}
+{% end %}
+
+
+{% block body_left %}
+    <!-- Tab页 -->
+    {% include message/component/message_tab.html %}
 
     {% include common/date/month_picker.html %}
 
@@ -33,4 +39,7 @@
     </script>
 
 {% end %}
-  
+
+{% block body_right %}
+    {% include message/component/message_date_right.html %}
+{% end %}

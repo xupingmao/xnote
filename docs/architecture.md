@@ -52,7 +52,7 @@
 
 ### 层次架构
 
-![架构图](https://gitee.com/xupingmao/xnote/raw/master/screenshots/architecture.png)
+![架构图](https://gitee.com/xupingmao/xnote/raw/master/screenshots/architecture_2.png)
 
 
 

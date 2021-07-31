@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2021/07/18 19:08:14
+ * @modified 2021/07/30 20:59:47
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -1131,10 +1131,6 @@ li.menu-item:hover {
     color: red;
 }
 
-.mobile-only {
-    display: none;
-}
-
 .no-outline {
     outline: none;
 }
@@ -1285,10 +1281,6 @@ li.menu-item:hover {
     .plugin-item {
         width: 100%;
         margin-left: 0px;
-    }
-
-    .mobile-only {
-        display: block;
     }
 
     .desktop-only, .desktop-only-inline, .desktop-only-inline-block {

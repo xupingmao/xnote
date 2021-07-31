@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/07/25 21:43:36
+# @modified 2021/07/28 23:30:10
 import math
 import time
 import web
@@ -439,6 +439,11 @@ class LogListHandler(BaseListHandler):
     note_type = "log"
     title = T("我的日志")
 
+class HtmlListHandler(BaseListHandler):
+
+    note_type = "html"
+    title = T("我的富文本")
+
 class AllNoteListHandler(BaseListHandler):
 
     note_type = "all"
@@ -709,6 +714,7 @@ xurls = (
     r"/note/sticky"         , StickyListHandler,
     r"/note/log"            , LogListHandler,
     r"/note/all"            , AllNoteListHandler,
+    r"/note/html"           , HtmlListHandler,
     r"/note/date"           , DateListHandler,
 
     r"/note/text"           , TextListHandler,

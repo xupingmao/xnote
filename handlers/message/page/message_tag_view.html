@@ -1,9 +1,12 @@
 {% extends base %}
 
 <!-- 查看标签视图 -->
+{% block body_top %}
+    {% include message/component/message_title.html %}
+{% end %}
 
-{% block body %}
-    {% include message/component/message_header.html %}
+{% block body_left %}
+    {% include message/component/message_tab.html %}
 
     {% if message_tag == "calendar" %}
         <!-- 月份选择器 -->
@@ -61,4 +64,9 @@
 
 
 {% end %}
+
+{% block body_right %}
+    {% include message/component/message_date_right.html %}
+{% end %}
+
   

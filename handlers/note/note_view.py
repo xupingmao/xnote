@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/06/27 00:17:58
+# @modified 2021/07/31 10:16:30
 import profile
 import math
 import re
@@ -116,6 +116,7 @@ def view_group_func_old(file, kw):
     kw.page_max        = math.ceil(amount/pagesize)
     kw.show_cdate = True
     kw.parent_id  = file.id
+    kw.template_name = "note/page/detail/group_detail.html"
 
 def view_list_func(note, kw):
     kw.show_aside = False
@@ -197,6 +198,7 @@ class ViewHandler:
         kw.page        = page
         kw.orderby     = orderby
         kw.pagesize    = pagesize
+        kw.page_url    = "/note/view?id=%s&orderby=%s&page=" % (id, orderby)
 
         # print("skey:", skey)
 
@@ -258,7 +260,6 @@ class ViewHandler:
             note_id       = id,
             can_edit = can_edit,
             pathlist = pathlist,
-            page_url = "/note/view?id=%s&orderby=%s&page=" % (id, orderby),
             recent_created    = recent_created,
             CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT,
             is_iframe         = is_iframe, **kw)

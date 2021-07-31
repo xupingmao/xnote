@@ -1,6 +1,6 @@
 {% extends base %}
 
-{% block body %}
+{% block body_top %}
 
 <div class="card">
     <div class="card-title">
@@ -12,6 +12,10 @@
         </div>
     </div>
 </div>
+
+{% end %}
+
+{% block body_left %}
 
 <div class="card">
 
@@ -43,4 +47,10 @@
     </div>
 {% end %}
 
+{% end %}
+
+{% block body_right %}
+    <div class="desktop-only">
+        {% include note/component/group_special_folder.html %}
+    </div>
 {% end %}

@@ -1,3 +1,7 @@
+{% init show_tab = True %}
+
+{% if show_tab %}
+
 {% init message_stat = xutils.call("message.get_current_message_stat") %}
 
 <!-- 桌面版菜单 -->
@@ -61,3 +65,5 @@ $(function() {
     xnote.on("message.updated", onMessageUpdated);
 });
 </script>
+
+{% end %} <!-- show_tab end -->

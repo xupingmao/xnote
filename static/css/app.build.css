@@ -133,7 +133,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2021/07/18 19:08:14
+ * @modified 2021/07/30 20:59:47
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -1262,10 +1262,6 @@ li.menu-item:hover {
     color: red;
 }
 
-.mobile-only {
-    display: none;
-}
-
 .no-outline {
     outline: none;
 }
@@ -1416,10 +1412,6 @@ li.menu-item:hover {
     .plugin-item {
         width: 100%;
         margin-left: 0px;
-    }
-
-    .mobile-only {
-        display: block;
     }
 
     .desktop-only, .desktop-only-inline, .desktop-only-inline-block {
@@ -1653,7 +1645,7 @@ li.menu-item:hover {
  * description here
  * @author xupingmao
  * @since 2021/07/25 09:22:04
- * @modified 2021/07/25 12:40:19
+ * @modified 2021/07/30 20:59:52
  * @filename common-layout.css
  */
 
@@ -1675,6 +1667,10 @@ li.menu-item:hover {
     height: 50px;
 }
 
+.mobile-only {
+    display: none;
+}
+
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 1000px) {
     /** mobile **/
@@ -1685,6 +1681,10 @@ li.menu-item:hover {
     .content-right {
         padding-left: 0px;
         width: 100%;
+    }
+
+    .mobile-only {
+        display: block;
     }
 }
 /**
@@ -2100,7 +2100,7 @@ li.menu-item:hover {
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/07/18 19:18:48
+ * @modified 2021/07/31 11:09:12
 */
 
 
@@ -2114,6 +2114,9 @@ li.menu-item:hover {
     border-bottom: none;
 }
 
+.card>.book-item:last-child {
+    border-bottom: none;
+}
 
 .tool-div {
     font-size: medium;

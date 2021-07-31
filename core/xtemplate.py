@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/07/26 11:57:32
+# @modified 2021/07/28 23:14:09
 # @filename xtemplate.py
 
 
@@ -192,10 +192,7 @@ def get_device_platform():
     return platform
 
 def do_get_device_platform():
-    if is_mobile_device():
-        return "mobile"
-    else:
-        return "desktop"
+    return xutils.get_client_platform()
 
 def render_by_ua(name, **kw):
     if is_mobile_device():

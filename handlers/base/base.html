@@ -15,8 +15,9 @@
         <!-- 导航/菜单栏 -->
         {% include common/base_nav.html %}
         {% include common/base_nav_left.html %}
-        {% include common/search_mobile.html %}
+        {% include base/search/search_mobile.html %}
 
+        <!-- 主体部分（内容） -->
         <div class="x-body">
             <div class="nav-left-search">
                 <form id="searchForm2" method="GET" action="{{search_action}}">
@@ -33,8 +34,19 @@
                     </pre>
                     {% end %}
 
-                    <!-- 主要内容 -->
+                    <!-- 标题栏 -->
+                    {% block body_top %} {% end %}
+
+                    <!-- 经典居中布局 -->
                     {% block body %} {% end %}
+                    
+                    <div class="content-left">
+                        {% block body_left %} {% end %}
+                    </div>
+
+                    <div class="content-right">
+                        {% block body_right %} {% end %}
+                    </div>
                 </div>
             </div>
         </div>

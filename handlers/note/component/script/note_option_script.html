@@ -1,0 +1,95 @@
+
+<script type="text/javascript">
+    function remove(id, name, parentId) {
+        var confirmed = confirm("确定删除'" + name + "'?");
+        if (confirmed) {
+            $.post("/note/remove", {id:id}, function (resp) {
+                var code = resp.code;
+                if (code != "success") {
+                    alert(resp.message);
+                } else {
+                    if (parentId) {
+                        window.location.href = "/note/view?id="+parentId;
+                    } else {
+                        window.location.href = "/";
+                    }
+                }
+            })
+        }
+    }
+
+    function renameNote(id, oldName) {
+        xnote.prompt("新名称", oldName, function (newName) {
+            console.log(newName);
+            if (newName != "" && newName != null) {
+                $.post("/note/rename", {id:id, name:newName}, function (resp) {
+                    var code = resp.code;
+                    if (code != "success") {
+                        alert(resp.message);
+                    } else {
+                        // $("#file-"+id).text(newName);
+                        window.location.reload();
+                    }
+                })
+            }
+        });
+    }
+
+    function renameNoteByAttr(target) {
+        var id = $(target).attr("data-id");
+        var oldName = $(target).attr("data-name");
+        if (id == undefined || id == "") {
+            xnote.alert("data-id为空");
+            return;
+        }
+
+        if (oldName == undefined || oldName == "") {
+            xnote.alert("data-name为空");
+            return;
+        }
+
+        renameNote(id, oldName);
+    }
+
+    function checkNotEmpty(object, message) {
+        if (object === undefined || object === null || object === "") {
+            xnote.alert(message);
+            throw new Error(message);
+        }
+    }
+
+    $(function () {
+        
+        $(".rename-btn").click(function(event) {
+            console.log("rename");
+            var target = event.target;
+            renameNoteByAttr(target);
+        });
+
+        $(".status-btn").each(function (index, element) {
+            var status = $(element).attr("data-status");
+            if (status == "{{file.priority}}") {
+                $(element).addClass("x-tab-btn-active");
+            }
+        });
+
+        $(".status-btn").click(function(event) {
+            var id = $(event.target).attr("data-id");
+            var status = $(event.target).attr("data-status");
+
+            checkNotEmpty(id, "data-id为空");
+            checkNotEmpty(status, "data-status为空");
+
+            $.post("/note/status", {id: id, status: status}, function (resp) {
+                var code = resp.code;
+                if (code != "success") {
+                    xnote.alert(resp.message);
+                } else {
+                    xnote.toast(resp.message);
+                    window.location.reload();
+                }
+            })
+        });
+    })
+</script>
+

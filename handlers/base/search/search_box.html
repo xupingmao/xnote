@@ -1,0 +1,22 @@
+<!-- 搜索组件 -->
+{% init search_ext_dict = dict() %}
+{% init search_type = "" %}
+{% init search_tag = "" %}
+{% init category = "" %}
+
+<input name="key" class="nav-search-input" placeholder="{{search_placeholder}}" value="{{?key}}" />
+<button class="nav-search-btn btn-default">
+    <i class="fa fa-search">
+    </i>
+</button>
+<input class="hide" name="type" value="search" />
+<input class="hide" name="category" value="{{category}}" />
+<input class="hide" name="search_type" value="{{search_type}}"/>
+<input class="hide" name="search_tag" value="{{search_tag}}"/>
+
+<!-- 扩展属性 -->
+{% for dict_key in search_ext_dict %}
+    <input class="hide" name="{{dict_key}}" value="{{search_ext_dict[dict_key]}}"/>
+{% end %}
+
+{% block search_form %} {% end %}

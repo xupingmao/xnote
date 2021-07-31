@@ -2,7 +2,7 @@
  * description here
  * @author xupingmao
  * @since 2021/07/25 09:22:04
- * @modified 2021/07/25 12:40:19
+ * @modified 2021/07/30 20:59:52
  * @filename common-layout.css
  */
 
@@ -24,6 +24,10 @@
     height: 50px;
 }
 
+.mobile-only {
+    display: none;
+}
+
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 1000px) {
     /** mobile **/
@@ -34,5 +38,9 @@
     .content-right {
         padding-left: 0px;
         width: 100%;
+    }
+
+    .mobile-only {
+        display: block;
     }
 }

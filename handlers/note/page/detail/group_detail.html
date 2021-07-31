@@ -1,0 +1,86 @@
+{% extends base %}
+
+{% block head %}
+    <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
+    <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
+    <script type="text/javascript" src="/static/js/marked-ext.js"></script>
+
+    {% include note/component/view_css.html %}
+
+{% end %}
+
+{% block body_top %}
+    <div class="card">
+        {% include note/component/view_group_header.html %}
+    </div>
+{% end %}
+
+{% block body_left %}
+    {% init file_type       = "md" %}
+    {% init pathlist        = [] %}
+    {% init file            = None %}
+    {% init show_notice     = False %}
+    {% init show_search_div = True %}
+    {% init show_add_file   = False %}
+    {% init show_add_group  = False %}
+    {% init show_path_list  = True %}
+    {% init show_pagination = False %}
+    {% init show_comment    = True %}
+    {% init error           = "" %}
+    {% init show_ext_info   = True %}
+
+    {% include note/editor/view_group.html %}
+
+    {# 文章信息 #}
+    {% if show_ext_info %}
+        <div class="card">
+            <div class="pad5">{{file.creator}} 创建于 {{file.cdate}} 更新于 {{file.mdate}}</div>
+        </div>
+    {% end %}
+
+    {# 分页 #}
+    {% if show_pagination and "page" in globals() %}
+        <div class="card">
+            {% include mod_pagenation.html %}
+        </div>
+    {% end %}
+{% end %}
+
+{% block body_right %}
+<div class="desktop-only">
+    <div class="card">
+        <div class="card-title">
+            <span>简介</span>
+            <div class="float-right">
+                <a href="/note/group_detail">编辑(TODO)</a>
+            </div>
+        </div>
+        {% if file.description == None %}
+            {% include base/text/empty_text.html %}
+        {% else %}
+            <div>{{file.description}}</div>
+        {% end %}
+    </div>
+
+    <div class="card">
+        <span class="btn-line-height">状态</span>
+        <div class="float-right">
+            <a class="btn btn-default status-btn" data-id="{{file.id}}" data-status="1">置顶</a>
+            <a class="btn btn-default status-btn" data-id="{{file.id}}" data-status="0">活跃</a>
+            <a class="btn btn-default status-btn" data-id="{{file.id}}" data-status="-1">归档</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="pad5">
+            <a class="btn btn-default">分享(TODO)</a>
+            <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>
+            <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">批量操作</a>
+        </div>
+    </div>
+</div>
+{% end %}
+
+{% block aside %}
+    {% include note/component/mod_aside.html %}
+{% end %}

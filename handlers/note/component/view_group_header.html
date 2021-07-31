@@ -11,17 +11,15 @@
 
 <input id="fileId" type="hidden" value="{{file.id}}"/>
 
-{% if show_path_list %}
-    <div class="grid-title btn-line-height">
-        <span>{{title}}</span>
-        <div class="float-right">
-            {% if show_create_option %}
-                <a class="btn" href="/note/create?parent_id={{parent_id}}&type={{create_type}}">{{create_text}}</a>
-            {% end %}
-            {% include note/component/group_option.html %}
-        </div>
+<div class="grid-title btn-line-height">
+    <span>{{title}}</span>
+    <div class="float-right">
+        {% if show_create_option %}
+            <a class="btn" href="/note/create?parent_id={{parent_id}}&type={{create_type}}">{{create_text}}</a>
+        {% end %}
+        {% include note/component/group_option.html %}
     </div>
-{% end %}
+</div>
 
 {% if error != "" and error != None%}
     <div class="col-md-12 error">
