@@ -105,6 +105,7 @@ $(function () {
     window.onMessageDone = function(target) {
         // todo完成的声音
         xnote.playAudio("todo_done");
+        xnote.toast("更新任务状态成功");
 
         // 标记为完成
         var id = $(target).attr("data-id");

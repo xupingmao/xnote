@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/19 16:09:13
-# @modified 2021/07/19 23:58:26
+# @modified 2021/08/01 13:57:41
 
 
 """脚本执行相关的代码"""
@@ -254,10 +254,10 @@ class ScriptMeta:
     def get_raw_value(self, key):
         return self.meta_dict.get(key)
 
-    def get_str_value(self, key):
+    def get_str_value(self, key, default_value = None):
         value = self.meta_dict.get(key)
         if value is None:
-            return None
+            return default_value
         else:
             return str(value)
 
@@ -271,29 +271,29 @@ class ScriptMeta:
             return []
         return [value]
 
-    def get_bool_value(self, key):
+    def get_bool_value(self, key, default_value = None):
         value = self.meta_dict.get(key)
         if value is None:
-            return None
+            return default_value
         return "true" == value.lower()
 
-    def get_int_value(self, key):
+    def get_int_value(self, key, default_value = None):
         value = self.get_raw_value(key)
         if value is None:
-            return None
+            return default_value
         try:
             return int(value)
         except:
-            return None
+            return default_value
 
-    def get_float_value(self, key):
+    def get_float_value(self, key, default_value = None):
         value = self.get_raw_value(key)
         if value is None:
-            return None
+            return default_value
         try:
             return float(value)
         except:
-            return None
+            return default_value
 
     def has_tag(self, key):
         return key in self.meta_dict

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/07/31 10:16:30
+# @modified 2021/08/01 17:19:31
 import profile
 import math
 import re
@@ -31,8 +31,24 @@ def visit_by_id(ctx):
     NOTE_DAO.visit(user_name, note_id)
 
 def check_auth(file, user_name):
-    if file.is_public != 1 and user_name != "admin" and user_name != file.creator:
-        raise web.seeother("/unauthorized")
+    if user_name == "admin":
+        return
+
+    if user_name == file.creator:
+        return
+
+    if file.is_public == 1:
+        return
+
+    # 笔记的分享
+    if NOTE_DAO.get_share_to(user_name, file.id) != None:
+        return
+
+    # 笔记本的分享
+    if NOTE_DAO.get_share_to(user_name, file.parent_id) != None:
+        return
+    
+    raise web.seeother("/unauthorized")
 
 def handle_left_dir(kw, user_name, file, op):
     is_iframe = xutils.get_argument("is_iframe")
@@ -86,10 +102,10 @@ def view_md_func(file, kw):
         kw.show_recommend = False
         kw.template_name = "note/editor/markdown_edit.html"
 
-def view_group_func(note, kw):
+def view_group_timeline_func(note, kw):
     raise web.found("/note/timeline?type=default&parent_id=%s" % note.id)
 
-def view_group_func_old(file, kw):
+def view_group_list_func(file, kw):
     # 代码暂时不用
     orderby   = kw.orderby
     user_name = kw.user_name
@@ -97,14 +113,21 @@ def view_group_func_old(file, kw):
     # pagesize  = kw.pagesize
     pagesize  = 1000
 
-    if orderby != None and file.orderby != orderby:
+    if kw.op == "edit":
+        # 编辑笔记本的简介
+        kw.show_recommend = False
+        kw.template_name = "note/editor/markdown_edit.html"
+        return
+
+    if orderby != None and orderby != "" and file.orderby != orderby:
         NOTE_DAO.update(file.id, orderby = orderby)
     else:
         orderby = file.orderby
 
-    orderby = "ctime_priority"
+    if orderby not in ("ctime_priority", "name"):
+        orderby = "ctime_priority"
 
-    files  = NOTE_DAO.list_by_parent(user_name, file.id, (page-1)*pagesize, pagesize, orderby)
+    files  = NOTE_DAO.list_by_parent(file.creator, file.id, (page-1)*pagesize, pagesize, orderby)
     amount             = file.size
     kw.content         = file.content
     kw.show_search_div = True
@@ -118,6 +141,12 @@ def view_group_func_old(file, kw):
     kw.parent_id  = file.id
     kw.template_name = "note/page/detail/group_detail.html"
 
+    share_from_info = NOTE_DAO.get_share_from(user_name, file.id)
+    if share_from_info != None:
+        kw.share_to_list = share_from_info.share_to_list
+    else:
+        kw.share_to_list = []
+
 def view_list_func(note, kw):
     kw.show_aside = False
     kw.show_pagination = False
@@ -128,8 +157,7 @@ def view_table_func(note, kw):
     kw.show_aside = False
 
 VIEW_FUNC_DICT = {
-    # "group": view_group_func,
-    "group": view_group_func_old,
+    "group": view_group_list_func,
     "md"  : view_md_func,
     "text": view_md_func,
     "memo": view_md_func,
@@ -185,7 +213,7 @@ class ViewHandler:
         pagesize      = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         show_menu     = xutils.get_argument("show_menu", "true") != "false"
         show_search   = xutils.get_argument("show_search", "true") != "false"
-        orderby       = xutils.get_argument("orderby", None)
+        orderby       = xutils.get_argument("orderby", "")
         is_iframe     = xutils.get_argument("is_iframe", "false")
         token         = xutils.get_argument("token", "")
         user_name     = xauth.current_name()

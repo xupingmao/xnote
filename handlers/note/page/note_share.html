@@ -4,7 +4,7 @@
 
 <div class="card">
     <div class="card-title">
-        <span>共享笔记</span>
+        <span>{{title}}</span>
         <div class="float-right">
             {% include note/component/share_dialog.html %}
         </div>
@@ -13,7 +13,14 @@
 
 {% end %}
 
-{% block body_left %}
+{% block body %}
+
+{% if _has_login %}
+    <div class="card">
+        <a class="tab tab-link x-tab x-tab-default" href="/note/public">公开分享</a>
+        <a class="tab tab-link x-tab" href="/note/share_to_me">分享给我</a>
+    </div>
+{% end %}
 
 <div class="card">
 
@@ -59,7 +66,7 @@
 {% end %}
 
 {% block body_right %}
-    <div class="card desktop-only">
+    <div class="card hide">
         <a class="list-link" href="/note/public">
             <span>公共分享</span>
             <div class="float-right">

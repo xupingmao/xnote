@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2021/04/25 12:17:35
+# @modified 2021/08/01 17:38:17
 # @filename test_note.py
 
 import xutils
@@ -93,6 +93,7 @@ class TestMain(BaseTestCase):
         self.assertEqual(xutils.u("无效的类型: invalid"), result["message"])
 
     def test_note_group_add_view(self):
+        delete_note_for_test("xnote-unit-group")
         group = json_request("/note/add", method="POST",
             data = dict(name="xnote-unit-group", type="group"))
         id = group['id']

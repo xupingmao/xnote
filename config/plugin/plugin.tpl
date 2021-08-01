@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+# @api_level 2.8
 # @since $since
 # @author $author
 # @version 1.0.0
@@ -30,9 +31,7 @@ BODY_HTML = """
 
 class Main(BasePlugin):
 
-    title    = "Hello_World" # 插件的名称
-    category = "system"      # 插件的分类
-    rows     = 0             # 输入框的行数
+    rows = 0  # 输入框的行数
     
     def handle(self, input):
         self.writehtml(BODY_HTML)

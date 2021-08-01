@@ -488,6 +488,9 @@ def logout_current_user():
     sid = get_session_id_from_cookie()
     delete_user_session_by_id(sid)
 
+def is_user_exist(user_name):
+    user = get_user_by_name(user_name)
+    return user != None
 
 xutils.register_func("user.get_config_dict", get_user_config_dict)
 xutils.register_func("user.get_config",      get_user_config)

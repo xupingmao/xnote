@@ -9,8 +9,8 @@ echo $(date "+v2.8-dev-%Y.%m.%d") > version.txt
 # echo -e '\n\nrun test in python-2.7'
 # python2 -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core
 
-echo 'run test in python-3.4'
-/usr/local/bin/python3.4 -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core
+# echo 'run test in python-3.4'
+# /usr/local/bin/python3.4 -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core
 
 echo -e '\n\nrun test in python-3.7'
 python3 -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core

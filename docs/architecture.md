@@ -1,5 +1,10 @@
 ## 系统架构
 
+### 层次架构
+
+![架构图](https://gitee.com/xupingmao/xnote/raw/master/screenshots/architecture_2.png)
+
+
 ### 程序目录结构
 ```
 |-- app.py          # 程序入口
@@ -49,12 +54,6 @@
 \-- trash/     # 回收站
 
 ```
-
-### 层次架构
-
-![架构图](https://gitee.com/xupingmao/xnote/raw/master/screenshots/architecture_2.png)
-
-
 
 ## 开发框架/软件库
 

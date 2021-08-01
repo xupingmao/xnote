@@ -1745,7 +1745,19 @@ li.menu-item:hover {
     border-radius: 5px;
     opacity: 0.6;
     box-shadow: 2px 2px 2px #888;
-}/* 响应式工具
+}/**
+ * markdown的样式扩展
+ * @author xupingmao
+ * @since 2021/08/01 14:25:17
+ * @modified 2021/08/01 14:25:41
+ * @filename common-markdown.css
+ */
+
+.markdown-box img {
+    width: 100%;
+    text-align: center;
+}
+/* 响应式工具
  * @modified 2020/10/07 15:59:08
  */
 

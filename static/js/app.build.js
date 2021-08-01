@@ -1199,7 +1199,7 @@ $(function () {
 });
 /** audio.js, part of xnote-ui 
  * @since 2020/01/05
- * @modified 2021/05/03 12:58:59
+ * @modified 2021/08/01 17:03:58
  **/
 
 $(function(e) {
@@ -1207,6 +1207,9 @@ $(function(e) {
     if (window.xnote === undefined) {
         window.xnote = {}
     }
+
+    // 默认不启用
+    var audioEnabled = false;
 
     $("body").on("click", ".x-audio", function(e) {
         var src = $(this).attr("data-src");
@@ -1224,6 +1227,10 @@ $(function(e) {
     }
 
     xnote.playAudio = function (id) {
+        if (!audioEnabled) {
+            return;
+        }
+
         var audioObject = AUDIO_MAP[id];
         if (audioObject) {
             audioObject.play();

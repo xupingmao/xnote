@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/07/31 18:47:20
+# @modified 2021/08/01 13:55:36
 from io import StringIO
 import xconfig
 import codecs
@@ -28,6 +28,7 @@ from xutils import Storage
 from xutils import fsutil
 from xutils import logutil
 from xutils import textutil, SearchResult, dateutil, dbutil, u
+from xutils import attrget
 
 try:
     from ConfigParser import ConfigParser
@@ -166,12 +167,17 @@ class PluginContext(Storage):
         return cmp(self.title, other.title)
 
     def load_from_meta(self, meta_obj):
-        self.title       = meta_obj.get_str_value("title")
-        self.description = meta_obj.get_str_value("description")
-        self.author      = meta_obj.get_str_value("author")
-        self.version     = meta_obj.get_str_value("version")
-        self.category    = meta_obj.get_str_value("category")
-        self.icon        = meta_obj.get_str_value("icon-class")
+        self.api_level = meta_obj.get_float_value("api-level", 0.0)
+
+        if self.api_level >= 2.8:
+            self.title       = meta_obj.get_str_value("title")
+            self.description = meta_obj.get_str_value("description")
+            self.author      = meta_obj.get_str_value("author")
+            self.version     = meta_obj.get_str_value("version")
+            self.category    = meta_obj.get_str_value("category")
+            self.icon        = meta_obj.get_str_value("icon_class")
+            self.required_role = meta_obj.get_str_value("required_role")
+            self.since       = meta_obj.get_str_value("since")
 
 def is_plugin_file(fpath):
     return os.path.isfile(fpath) and fpath.endswith(".py")
@@ -196,10 +202,12 @@ def load_plugin_file(fpath, fname = None):
         context.icon_class = DEFAULT_PLUGIN_ICON_CLASS
         # 读取meta信息
         context.load_from_meta(meta)
+        context.fpath = fpath
 
         if meta.has_tag("disabled"):
             return
 
+        # 2.8版本之后从注解中获取插件信息
         module  = xutils.load_script(fname, vars, dirname = dirname)
         main_class = vars.get("Main")
         if main_class != None:
@@ -208,15 +216,18 @@ def load_plugin_file(fpath, fname = None):
             main_class.fpath      = fpath
             instance              = main_class()
             context.fname         = fname
-            context.fpath         = fpath
             context.name          = os.path.splitext(fname)[0]
-            context.title         = getattr(instance, "title", "")
-            if context.category is None:
-                context.category = xutils.attrget(instance, "category")
 
-            if context.required_role is None:
-                context.required_role = xutils.attrget(instance, "required_role")
+            if context.api_level < 2.8:
+                context.title = getattr(instance, "title", "")
+                context.category = attrget(instance, "category")
+                context.required_role = attrget(instance, "required_role")
             
+            if context.api_level >= 2.8:
+                main_class.title = context.title
+                main_class.category = context.category
+                main_class.required_role = context.required_role
+
             context.url           = "/plugins/%s" % plugin_name
             context.clazz         = main_class
             context.edit_link     = "code/edit?path=" + fpath
@@ -233,6 +244,13 @@ def load_plugin_file(fpath, fname = None):
     except:
         # TODO 增加异常日志
         xutils.print_exc()
+
+
+def check_and_load_class(plugin):
+    if plugin.clazz is not None:
+        return
+
+    load_plugin_file()
 
 def load_inner_plugins():
     for tool in INNER_TOOLS:
@@ -307,6 +325,10 @@ def dev_plugin(name, url):
 
 def system_plugin(name, url):
     return inner_plugin(name, url, "system")
+
+
+def load_inner_tools():
+    pass
 
 INNER_TOOLS = [
     # 工具集/插件集
@@ -755,6 +777,7 @@ class LoadPluginHandler:
                 # 访问日志
                 add_visit_log(user_name, url)
                 plugin.atime = dateutil.format_datetime()
+                check_and_load_class(plugin)
                 # 渲染页面
                 return plugin.clazz().render()
             else:
@@ -804,14 +827,14 @@ def reload_plugins(ctx):
     global PLUGINS_STATUS
     PLUGINS_STATUS = "loading"
 
-    do_reload_config_plugins()
+    reload_plugins_by_config()
 
     load_plugins()
 
     PLUGINS_STATUS = "done"
 
-@xutils.log_init_deco("reload_config_plugins")
-def do_reload_config_plugins(ctx = None):
+@xutils.log_init_deco("reload_plugins_by_config")
+def reload_plugins_by_config(ctx = None):
     global CONFIG_TOOLS
     parser = ConfigParser()
 

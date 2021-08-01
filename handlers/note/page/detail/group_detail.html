@@ -29,6 +29,10 @@
     {% init error           = "" %}
     {% init show_ext_info   = True %}
 
+    <div class="mobile-only">
+        {% include note/component/note_orderby.html %}
+    </div>
+
     {% include note/editor/view_group.html %}
 
     {# 文章信息 #}
@@ -48,6 +52,37 @@
 
 {% block body_right %}
 <div class="desktop-only">
+    {% import markdown %}
+    {% init share_to_list = [] %}
+
+    <div class="card">
+        <span class="btn-line-height">状态</span>
+        <div class="float-right">
+            <a class="x-tab-btn status-btn" data-id="{{file.id}}" data-status="1">置顶</a>
+            <a class="x-tab-btn status-btn" data-id="{{file.id}}" data-status="0">活跃</a>
+            <a class="x-tab-btn status-btn" data-id="{{file.id}}" data-status="-1">归档</a>
+        </div>
+    </div>
+
+    {% include note/component/note_orderby.html %}
+
+    <div class="card">
+        <div class="pad5">
+            <a class="btn btn-default note-share-btn" data-id="{{file.id}}">分享</a>
+            <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>
+            <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">批量操作</a>
+        </div>
+    </div>
+
+    {% if len(share_to_list) > 0 %}
+        <div class="card">
+            <div class="pad5">
+                已分享给以下用户: {{",".join(share_to_list)}}
+            </div>
+        </div>
+    {% end %}
+
+
     <div class="card">
         <div class="card-title">
             <span>简介</span>
@@ -55,29 +90,13 @@
                 <a href="/note/edit?id={{file.id}}">编辑</a>
             </div>
         </div>
-        {% if file.description == None %}
+        {% if file.content == None or file.content == "" %}
             {% include base/text/empty_text.html %}
         {% else %}
-            <div>{{file.description}}</div>
+            <div class="pad5 markdown-box">{% raw markdown.markdown(file.content) %}</div>
         {% end %}
     </div>
 
-    <div class="card">
-        <span class="btn-line-height">状态</span>
-        <div class="float-right">
-            <a class="btn btn-default status-btn" data-id="{{file.id}}" data-status="1">置顶</a>
-            <a class="btn btn-default status-btn" data-id="{{file.id}}" data-status="0">活跃</a>
-            <a class="btn btn-default status-btn" data-id="{{file.id}}" data-status="-1">归档</a>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="pad5">
-            <a class="btn btn-default">分享(TODO)</a>
-            <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>
-            <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">批量操作</a>
-        </div>
-    </div>
 </div>
 {% end %}
 

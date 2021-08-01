@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/07/28 23:30:10
+# @modified 2021/08/01 17:30:29
 import math
 import time
 import web
@@ -142,24 +142,47 @@ class DefaultListHandler:
             page_url   = "/note/default?page=")
 
 
-class PublicListHandler:
+class ShareListHandler:
+
+    share_type = "public"
+    title      = T("公开分享")
+
+    def list_notes(self, user_name, offset, limit):
+        return NOTE_DAO.list_public(offset, limit)
+
+    def count_notes(self, user_name):
+        return NOTE_DAO.count_public()
 
     def GET(self):
         page      = xutils.get_argument("page", 1, type=int)
         user_name = xauth.get_current_name()
-        pagesize  = xconfig.PAGE_SIZE
-        offset    = (page-1) * pagesize
-        files     = NOTE_DAO.list_public(offset, pagesize)
-        amount    = NOTE_DAO.count_public();
+        limit     = xconfig.PAGE_SIZE
+        offset    = (page-1) * limit
+        
+        files     = self.list_notes(user_name, offset, limit)
+        amount    = self.count_notes(user_name)
         parent    = NOTE_DAO.get_root()
 
-        xmanager.add_visit_log(user_name, "/note/public")
+        xmanager.add_visit_log(user_name, "/note/%s" % self.share_type)
 
-        return xtemplate.render("note/page/note_public.html",
+        return xtemplate.render("note/page/note_share.html",
+            title      = self.title,
             notes      = files,
             page       = page,
-            page_max   = math.ceil(amount / pagesize),
-            page_url   = "/note/public?page=")
+            page_max   = math.ceil(amount / limit),
+            page_url   = "/note/%s?page=" % self.share_type)
+
+class ShareToMeListHandler(ShareListHandler):
+    
+    share_type = "share_to_me"
+    title   = T("分享给我")
+    orderby = "ctime_desc"
+
+    def count_notes(self, user_name):
+        return NOTE_DAO.count_share_to(user_name)
+
+    def list_notes(self, user_name, offset, limit):
+        return NOTE_DAO.list_share_to(user_name, offset, limit, self.orderby)
 
 def get_ddc_category_list():
     # TODO 配置化
@@ -457,7 +480,6 @@ class AllNoteListHandler(BaseListHandler):
         else:
             return 0
 
-
 class NotePluginHandler:
 
     @xauth.login_required()
@@ -627,7 +649,6 @@ class NoteIndexHandler:
         clazz = self.find_class()
         return clazz().POST() 
 
-
 class DateListHandler:
 
     type_order_dict = {
@@ -647,7 +668,7 @@ class DateListHandler:
         user_name = xauth.current_name()
         show_back = xutils.get_argument("show_back", "")
 
-        xmanager.add_visit_log(user_name, "/note/date?show_back=%s" % show_back)
+        xmanager.add_visit_log(user_name, "/note/date")
         
         date  = xutils.get_argument("date", time.strftime("%Y-%m"))
         parts = date.split("-")
@@ -690,6 +711,7 @@ class DateListHandler:
 xutils.register_func("url:/note/group", GroupListHandler)
 xutils.register_func("url:/note/tools", NotePluginHandler)
 xutils.register_func("url:/note/date",  DateListHandler)
+xutils.register_func("url:/note/all", AllNoteListHandler)
 
 xurls = (
     r"/note/group"          , GroupListHandler,
@@ -705,7 +727,7 @@ xurls = (
     r"/note/recent_(viewed)", RecentHandler,
     r"/note/group/select"   , GroupSelectHandler,
     r"/note/management"     , ManagementHandler,
-    r"/note/public"         , PublicListHandler,
+    r"/note/public"         , ShareListHandler,
     r"/note/document"       , DocumentListHandler,
     r"/note/gallery"        , GalleryListHandler,
     r"/note/list"           , CheckListHandler,
@@ -716,6 +738,7 @@ xurls = (
     r"/note/all"            , AllNoteListHandler,
     r"/note/html"           , HtmlListHandler,
     r"/note/date"           , DateListHandler,
+    r"/note/share_to_me"    , ShareToMeListHandler,
 
     r"/note/text"           , TextListHandler,
     r"/note/tools"          , NotePluginHandler,

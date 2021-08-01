@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2021/07/31 11:28:52
+# @modified 2021/08/01 17:10:26
 
 """笔记编辑相关处理"""
 import os
@@ -178,10 +178,18 @@ class CreateHandler:
 
             create_func = CREATE_FUNC_DICT.get(type, default_create_func)
             inserted_id = create_func(note, ctx)
+
+            if type == "group":
+                redirect_url = "/note/view?id=%s" % inserted_id
+            else:
+                redirect_url = "/note/edit?id=%s" % inserted_id
+
             if format == "json":
-                return dict(code="success", id = inserted_id, url = "/note/edit?id=%s" % inserted_id)
+                return dict(code="success", id = inserted_id, url = redirect_url)
+
             if inserted_id != None:
-                raise web.seeother("/note/edit?id={}".format(inserted_id))
+                raise web.seeother(redirect_url)
+
         except web.HTTPError as e1:
             xutils.print_exc()
             raise e1
@@ -274,7 +282,7 @@ class RenameAjaxHandler:
     def GET(self):
         return self.POST()
     
-class PublicShareHandler:
+class NoteShareHandler:
 
     @xauth.login_required()
     def GET(self):
@@ -282,6 +290,22 @@ class PublicShareHandler:
         note    = check_get_note(id)
         NOTE_DAO.update(id, is_public = 1)
         return dict(code = "success")
+
+    @xauth.login_required()
+    def POST(self):
+        id   = xutils.get_argument("id")
+        share_to = xutils.get_argument("share_to")
+        note = check_get_note(id)
+
+        if not xauth.is_user_exist(share_to):
+            return dict(code = "fail", message = "用户[%s]不存在" % share_to)
+
+        share_from = xauth.current_name()
+        if share_to == share_from:
+            return dict(code = "fail", message = "不需要分享给自己")
+
+        NOTE_DAO.share_to(note, share_from, share_to)
+        return dict(code = "success", message = "分享成功")
 
 class LinkShareHandler:
 
@@ -306,6 +330,9 @@ class UnshareHandler:
         return dict(code = "success")
 
 def check_get_note(id):
+    if id == "" or id == 0:
+        raise NoteException("400", "笔记ID为空")
+
     if xauth.is_admin():
         note = NOTE_DAO.get_by_id(id)
     else:
@@ -455,6 +482,19 @@ class UpdateStatusHandler:
         NOTE_DAO.update(id, priority = int(status), archived = archived)
         return dict(code = "success", message = "更新状态成功")
 
+class UpdateOrderByHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        id = xutils.get_argument("id")
+        orderby = xutils.get_argument("orderby")
+        if orderby not in ("ctime_priority", "name"):
+            return dict(code = "fail", message = "无效的排序方式: %s" % orderby)
+        note = check_get_note(id)
+        
+        NOTE_DAO.update(id, orderby = orderby)
+        return dict(code = "success", message = "更新排序方式成功")
+
 class MoveAjaxHandler:
     
     @xauth.login_required()
@@ -532,10 +572,11 @@ xurls = (
     r"/note/unarchive"   , UnarchiveHandler,
     r"/note/touch"       , TouchHandler,
     r"/note/status"      , UpdateStatusHandler,
+    r"/note/orderby"     , UpdateOrderByHandler,
     
     # 分享
-    r"/note/share",        PublicShareHandler,
-    r"/note/share/public", PublicShareHandler,
+    r"/note/share",        NoteShareHandler,
+    r"/note/share/public", NoteShareHandler,
     r"/note/share/cancel", UnshareHandler,
     r"/note/link_share",   LinkShareHandler,
 

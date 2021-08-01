@@ -5,3 +5,4 @@ leveldb>=0.201
 Pillow>=6.2.2
 requests>=2.22.0
 wsgidav>=3.1.0
+markdown>=3.3.4
