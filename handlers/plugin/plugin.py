@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/08/06 20:06:18
+# @modified 2021/08/07 17:21:20
 from io import StringIO
 import xconfig
 import codecs
@@ -134,7 +134,8 @@ def get_category_name_by_code(code):
         if item.code == code:
             return item.name
 
-    return "上级目录"
+    # 如果没有定义，就返回code
+    return code
 
 
 class PluginContext(Storage):
@@ -142,7 +143,9 @@ class PluginContext(Storage):
     def __init__(self):
         self.title         = ""
         self.name          = ""
-        self.url           = ""
+        self.url           = "" # 这个应该算是基础url，用于匹配访问日志
+        self.url_query     = "" # 查询参数部分
+        self.link          = "" # URL的别名
         self.description   = ""
         self.fname         = ""
         self.fpath         = ""
@@ -228,7 +231,7 @@ def load_plugin_file(fpath, fname = None):
                 main_class.category = context.category
                 main_class.required_role = context.required_role
 
-            context.url           = "/plugins/%s" % plugin_name
+            context.url           = "/plugin/%s" % plugin_name
             context.clazz         = main_class
             context.edit_link     = "code/edit?path=" + fpath
             context.link          = context.url
@@ -289,22 +292,24 @@ def find_plugins(category, orderby=None):
                 plugins.append(p)
     return sorted_plugins(user_name, plugins, orderby)
 
-def inner_plugin(name, url, category = "inner"):
+def inner_plugin(name, url, category = "inner", url_query = ""):
     context = PluginContext()
     context.name = name
     context.title = name
     context.url   = url
     context.link  = url
+    context.url_query = url_query
     context.editable = False
     context.category = category
     context.icon_class = "fa fa-cube"
     return context
 
-def note_plugin(name, url, icon=None, size = None, required_role = "user"):
+def note_plugin(name, url, icon=None, size = None, required_role = "user", url_query = ""):
     context = PluginContext()
     context.name = name
     context.title = name
     context.url   = url
+    context.url_query = url_query
     context.link  = url
     context.icon  = icon
     context.icon_class = "fa %s" % icon
@@ -314,8 +319,8 @@ def note_plugin(name, url, icon=None, size = None, required_role = "user"):
     context.required_role = required_role
     return context
 
-def index_plugin(name, url):
-    return inner_plugin(name, url, "index")
+def index_plugin(name, url, url_query = ""):
+    return inner_plugin(name, url, "index", url_query = url_query)
 
 def file_plugin(name, url):
     return inner_plugin(name, url, "dir")
@@ -334,8 +339,8 @@ INNER_TOOLS = [
     # 工具集/插件集
     index_plugin("笔记工具", "/note/tools"),
     index_plugin("文件工具", "/fs_tools"),
-    index_plugin("开发工具", "/plugins_list?category=develop&show_back=true"),
-    index_plugin("网络工具", "/plugins_list?category=network&show_back=true"),
+    index_plugin("开发工具", "/plugins_list?category=develop", url_query = "&show_back=true"),
+    index_plugin("网络工具", "/plugins_list?category=network", url_query = "&show_back=true"),
 
     # 开发工具
     dev_plugin("浏览器信息", "/tools/browser_info"),
@@ -368,7 +373,7 @@ INNER_TOOLS = [
     note_plugin("我的置顶", "/note/sticky", "fa-thumb-tack"),
     note_plugin("搜索历史", "/search/history", "fa-search"),
     note_plugin("导入笔记", "/note/html_importer", "fa-internet-explorer", required_role = "admin"),
-    note_plugin("时间视图", "/note/date?show_back=true", "fa-clock-o"),
+    note_plugin("时间视图", "/note/date", "fa-clock-o", url_query = "?show_back=true"),
     note_plugin("数据统计", "/note/stat", "fa-bar-chart"),
     note_plugin("上传管理", "/fs_upload", "fa-upload"),
     note_plugin("笔记批量管理", "/note/management", "fa-gear"),
@@ -771,7 +776,7 @@ class LoadPluginHandler:
         if not name.endswith(".py"):
             name += ".py"
         try:
-            url = "/plugins/" + name
+            url = "/plugin/" + name
             plugin = load_plugin(name)
             if plugin != None:
                 # 访问日志
@@ -878,6 +883,9 @@ define_plugin_category("develop", u"开发", required_roles = ["admin", "user"],
 define_plugin_category("index",   u"分类")
 
 xurls = (
+    r"/plugin/(.+)", LoadPluginHandler,
+    r"/plugin_list", PluginListHandler,
+    
     r"/plugins_list_new", PluginGridHandler,
     r"/plugins_list", PluginListHandler,
     r"/plugins_log", PluginLogHandler,

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/07/26 12:16:08
+# @modified 2021/08/07 17:40:33
 
 '''xnote系统配置
 # 用户配置
@@ -122,6 +122,8 @@ BACKUP_EXPIRE = 24 * 3600 * 365
 TRASH_EXPIRE  = 24 * 3600 * 90
 # 临时文件失效时间
 TMP_EXPIRE    = 24 * 3600 * 90
+# 删除的笔记有效期
+NOTE_REMOVED_EXPIRE = 24 * 3600 * 90
 
 # 其他标记
 # 测试用的flag,开启会拥有admin权限

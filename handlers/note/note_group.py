@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/08/01 17:30:29
+# @modified 2021/08/07 17:02:22
 import math
 import time
 import web
@@ -556,6 +556,7 @@ class RecentHandler:
             html_title = html_title,
             file_type  = "group",
             dir_type   = dir_type,
+            search_type = "note",
             files = files,
             show_aside = False,
             show_size  = False,
@@ -568,8 +569,7 @@ class RecentHandler:
             show_action_time = show_action_time,
             show_hot_index = show_hot_index,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
-            page_url    = "/note/recent_%s?page=" % orderby,
-            **SEARCH_DOC_DICT)
+            page_url    = "/note/recent_%s?page=" % orderby)
 
 class ArchivedHandler:
 

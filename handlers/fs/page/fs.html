@@ -51,6 +51,7 @@
         <td class="checkboxTd"><input type="checkbox" data-path="{{item.path}}" data-name="{{item.name}}"></td>
         <td>
             <i class="fa {{item.icon}}"></i>
+
             {% if item.type == "dir" %}
                 <a href="/fs/{{item.encoded_path}}" class="fs-folder">{{item.name}}</a>
             {% elif xutils.is_img_file(item.path) %}

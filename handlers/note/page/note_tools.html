@@ -17,7 +17,7 @@
 <div class="card">
     <div class="plugin-list col-md-12">
         {% for index, link in enumerate(plugins) %}
-            <a class="list-link" href="{{link.link}}">
+            <a class="list-link" href="{{link.link + link.url_query}}">
                 <i class="fa {{link.icon}}"></i>
                 <span>{{link.title}}</span>
 

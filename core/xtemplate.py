@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/08/05 23:12:43
+# @modified 2021/08/07 17:21:35
 # @filename xtemplate.py
 
 
@@ -82,7 +82,7 @@ def load_nav_list():
     NAV_LIST.append(NavItem(text = "首页", need_login = True,  require_admin = False, url = "/note/index"))
     NAV_LIST.append(NavItem(text = "动态", need_login = True,  require_admin = False, url = "/note/recent?orderby=view"))
     NAV_LIST.append(NavItem(text = "分享", need_login = False, require_admin = False, url = "/note/public"))
-    NAV_LIST.append(NavItem(text = "插件", need_login = True,  require_admin = False, desktop_only = True, url = "/plugins_list"))
+    NAV_LIST.append(NavItem(text = "插件", need_login = True,  require_admin = False, desktop_only = True, url = "/plugin_list"))
     NAV_LIST.append(NavItem(text = "文件", need_login = True,  require_admin = True , desktop_only = True, url = "/fs_bookmark"))
     NAV_LIST.append(NavItem(text = "设置", need_login = True,  require_admin = False, url = "/system/settings"))
     NAV_LIST.append(NavItem(text = "登录", need_logout = True, require_admin = False, url = "/login"))

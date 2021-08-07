@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/08/07 10:01:13
+# @modified 2021/08/07 19:08:08
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -219,6 +219,9 @@ def sort_by_type_ctime_desc(notes):
 def sort_by_dtime_desc(notes):
     notes.sort(key = lambda x: x.dtime, reverse = True)
 
+def sort_by_dtime_asc(notes):
+    notes.sort(key = lambda x: x.dtime)
+
 SORT_FUNC_DICT = {
     "name": sort_by_name,
     "name_desc": sort_by_name_desc,
@@ -229,6 +232,7 @@ SORT_FUNC_DICT = {
     "type_mtime_desc": sort_by_type_mtime_desc,
     "type_ctime_desc": sort_by_type_ctime_desc,
     "dtime_desc": sort_by_dtime_desc,
+    "dtime_asc" : sort_by_dtime_asc,
     "default": sort_by_default,
 }
 
@@ -237,8 +241,8 @@ def sort_notes(notes, orderby = "name"):
         orderby = "name"
 
     sort_func = SORT_FUNC_DICT.get(orderby, sort_by_mtime_desc)
-    sort_func(notes)    
     build_note_list_info(notes)
+    sort_func(notes)
 
 def build_note_list_info(notes):
     for note in notes:
@@ -279,7 +283,11 @@ def build_note_info(note):
 
     if note.mtime != None:
         note.update_date = note.mtime.split(" ")[0]
-            
+
+    # 处理删除时间
+    if note.is_deleted == 1 and note.dtime == None:
+        note.dtime = note.mtime
+
     return note
 
 def convert_to_path_item(note):
@@ -780,6 +788,23 @@ def visit_note(user_name, id):
         update_index(note)
         add_visit_log(user_name, note)
 
+def delete_note_physically(creator, note_id):
+    assert creator != None, "creator can not be null"
+    assert note_id != None, "note_id can not be null"
+
+    tiny_key = "note_tiny:%s:%s" % (creator, note_id)
+    full_key  = "note_full:%s" % note_id
+    index_key = "note_index:%s" % note_id
+
+    dbutil.delete(tiny_key)
+    dbutil.delete(full_key)
+    dbutil.delete(index_key)
+
+    delete_history(note_id)
+
+    # 刷新数量
+    refresh_note_stat_async(creator)
+
 def delete_note(id):
     note = get_by_id(id)
     if note is None:
@@ -787,13 +812,7 @@ def delete_note(id):
 
     if note.is_deleted != 0:
         # 已经被删除了，执行物理删除
-        tiny_key  = "note_tiny:%s:%s" % (note.creator, note.id)
-        full_key  = "note_full:%s" % note.id
-        index_key = "note_index:%s" % note.id
-        dbutil.delete(tiny_key)
-        dbutil.delete(full_key)
-        dbutil.delete(index_key)
-        delete_history(note.id)
+        delete_note_physically(note.creator, note.id)
         return
 
     # 标记删除
@@ -1197,6 +1216,7 @@ def count_removed(creator):
 def list_removed(creator, offset, limit, orderby = None):
     def list_func(key, value):
         return value.is_deleted and value.creator == creator
+
     notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, MAX_LIST_SIZE)
     sort_notes(notes, orderby)
     return notes[offset: offset + limit]
@@ -1521,6 +1541,7 @@ xutils.register_func("note.touch",  touch_note)
 xutils.register_func("note.update_tags", update_tags)
 xutils.register_func("note.create_token", create_token)
 xutils.register_func("note.share_to", share_note_to)
+xutils.register_func("note.delete_physically", delete_note_physically)
 
 # query functions
 xutils.register_func("note.get_root", get_root)

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/05/23 17:09:22
+# @modified 2021/08/07 17:57:27
 import time
 import os
 import math
@@ -40,8 +40,10 @@ tm_yday  从每年的1月1日开始的天数 – 取值区间为[0,365]，其中
 """
 
 
-_DAY = 3600 * 24
-FORMAT = '%Y-%m-%d %H:%M:%S'
+_DAY           = 3600 * 24
+DEFAULT_FORMAT = '%Y-%m-%d %H:%M:%S'
+FORMAT         = DEFAULT_FORMAT
+
 WDAY_DICT = {
     "*": u"每天",
     "1": u"周一",
@@ -140,11 +142,13 @@ def parse_time(date = None, fmt = None):
     if date is None:
         return int(time.time())
     if fmt is None:
-        fmt = '%Y-%m-%d %H:%M:%S'
+        fmt = DEFAULT_FORMAT
     st = time.strptime(date, fmt)
     return time.mktime(st)
 
 def get_seconds(date = None, fmt = None):
+    if fmt is None:
+        fmt = DEFAULT_FORMAT
     return parse_time(date, fmt)
 
 def get_current_year():

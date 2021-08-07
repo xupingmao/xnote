@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/12/28 22:04:24
-# @modified 2021/05/01 13:45:38
+# @modified 2021/08/07 16:30:56
 
 # -*- coding:utf-8 -*-
 # @since 2019-01-10 00:21:16
@@ -27,20 +27,19 @@ HTML = """
 </style>
 
 <div class="card">
-    <h3 class="card-title btn-line-height">
+    <div class="card-title btn-line-height">
         <span>二进制查看</span>
         
         <div class="float-right">
             <a class="btn btn-default" href="/code/edit?path={{path}}">编辑本文</a>
             {% include common/button/back_button.html %}
         </div>
-    </h3>
+    </div>
     
-    {% include mod_fs_path.html %}
 </div>
 
-
 <div class="card">
+    {% include mod_fs_path.html %}
     <textarea class="row hex-text" rows=32>{{hex_text}}</textarea>
 </div>
 
