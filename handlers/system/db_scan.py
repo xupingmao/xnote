@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2021/05/18 00:48:39
+# @modified 2021/08/06 20:03:49
 import xutils
 import xtemplate
 from xutils import dbutil
@@ -21,7 +21,7 @@ SCAN_HTML = """
         <div class="input-group">
             <label>数据库表</label>
             <select name="prefix" value="{{prefix}}">
-                <option value="*">全部</option>
+                <option value="">全部</option>
                 {% for key in table_dict %}
                     <option value="{{key}}">{{key}}</option>
                 {% end %}
@@ -58,8 +58,14 @@ SCAN_HTML = """
             </tr>
         {% end %}
     </table>
-    <a href="?key_from={{last_key}}&prefix={{prefix}}&&db_key={{db_key}}">下一页</a>
 </div>
+
+<div class="card">
+    <div class="pad5">
+        <a href="?key_from={{last_key}}&prefix={{prefix}}&&db_key={{db_key}}">下一页</a>
+    </div>
+</div>
+
 """
 
 class DbScanHandler(BasePlugin):
@@ -87,7 +93,7 @@ class DbScanHandler(BasePlugin):
         result = []
         reverse  = xutils.get_argument("reverse") == "true"
         key_from = xutils.get_argument("key_from", "")
-        last_key = [None]
+        last_key = [""]
 
         def func(key, value):
             # print("db_scan:", key, value)

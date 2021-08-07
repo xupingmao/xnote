@@ -6,7 +6,9 @@
             <a href="{{note.url}}" class="link2">{{note.name}}</a> / 管理
             {% include common/back.html %}
         </h3>
+    </div>
 
+    <div class="card">
         <input type="hidden" id="dirname" value="{{dirname}}"/>
         {% include fs/component/filelist_simple.html %}
     </div>

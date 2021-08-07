@@ -10,22 +10,11 @@
   <div class="nav-container">
     <div class="menu-box float-left">
       <ul class="nav-ul">
-        {% if _has_login %}
-          <li class="nav-item"><a class="menu-link" href="/note/index">{{T("首页")}}</a></li>
-          <li class="nav-item"><a class="menu-link" href="/note/recent?orderby=view">{{T("动态")}}</a></li>
-          <li class="nav-item"><a class="menu-link" href="/note/public">{{T("分享")}}</a></li>
-          <li class="nav-item desktop-only"><a class="menu-link" href="/plugins_list">{{T("插件")}}</a></li>
-          {% if _is_admin %}
-            <li class="nav-item desktop-only"><a class="menu-link" href="/fs_bookmark">{{T("文件")}}</a></li> 
+        {% for nav in _nav_list %}
+          {% if nav.is_visible() %}
+            <li class="nav-item"><a class="menu-link nav-link" href="{{nav.url}}">{{T(nav.text)}}</a></li>
           {% end %}
-          <li class="nav-item"><a class="menu-link" href="/system/settings">{{T("设置")}}</a></li>
         {% end %}
-        
-        {% if not _has_login %}
-          <li class="nav-item"><a class="menu-link" href="/">{{T("首页")}}</a></li>
-          <li class="nav-item"><a class="menu-link" class="link" href="/login">{{T("Login")}}</a></li>
-        {% end %}
-
       </ul>
     </div>
 

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/08/01 17:28:56
+# @modified 2021/08/07 10:01:13
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -431,7 +431,11 @@ def create_note_base(note_dict, date_str = None, note_id = None):
         return note_id
     else:
         date_str = date_str.replace(".", "-")
-        timestamp = int(dateutil.parse_date_to_timestamp(date_str) * 1000)
+        if date_str == dateutil.format_date():
+            # 当天创建的，保留秒级
+            timestamp = int(time.time() * 1000)
+        else:
+            timestamp = int(dateutil.parse_date_to_timestamp(date_str) * 1000)
         try:
             CREATE_LOCK.acquire()
 

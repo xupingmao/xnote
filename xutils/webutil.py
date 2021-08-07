@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/17 10:51:22
-# @modified 2021/07/26 12:04:30
+# @modified 2021/08/01 19:53:59
 
 import web
 
@@ -16,6 +16,9 @@ MOBILE_UA_NAMES = ("iphone", "android", "webos")
 def print_web_ctx_env():
     for key in web.ctx.env:
         print(" - - %-20s = %s" % (key, web.ctx.env.get(key)))
+
+def get_web_ctx_env():
+    return web.ctx.env
 
 def _get_default_by_type(default_value, type):
     if default_value != None:

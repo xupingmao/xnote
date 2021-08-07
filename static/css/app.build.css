@@ -2401,7 +2401,7 @@ li.menu-item:hover {
  * 插件的CSS样式
  * @author xupingmao
  * @since 2019/12/15
- * @modified 2021/01/17 11:11:36
+ * @modified 2021/08/03 23:47:06
 */
 
 /** 插件 **/
@@ -2431,7 +2431,7 @@ li.menu-item:hover {
     padding: 5px;
     background-color: #eee;
     color: #555;
-    border-radius: 5px;
+    /*border-radius: 5px;*/
 }
 
 

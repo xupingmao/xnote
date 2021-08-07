@@ -1,20 +1,20 @@
 # -*- coding:utf-8 -*-
-# @api_level 2.8
+# @api-level 2.8
 # @since $since
 # @author $author
 # @version 1.0.0
 # @category note
 # @title 插件名称
 # @description 插件描述
-# @required_role admin
+# @required-role admin
 # @tags system test
 # @enabled
-# @icon_class fa-cube
+# @icon-class fa-cube
+
 import os
 import re
 import math
 import time
-import web
 import xconfig
 import xutils
 import xauth

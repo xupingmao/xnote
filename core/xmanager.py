@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/06/12 16:51:12
+# @modified 2021/08/07 10:26:37
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -51,11 +51,17 @@ def do_wrap_handler(pattern, handler_clz):
     if not inspect.isclass(handler_clz):
         return handler_clz
 
-    def wrap_result(result):
-        if isinstance(result, (list, dict)):
-            web.header("Content-Type", "application/json")
-            return tojson(result)
-        return result
+    def wrap_result(result, start_time = -1):
+        try:
+            if isinstance(result, (list, dict)):
+                web.header("Content-Type", "application/json")
+                return tojson(result)
+            return result
+        finally:
+            if start_time > 0:
+                cost_time = time.time() - start_time
+                # print("page load time: %s" % int(cost_time * 1000))
+
 
     class WrappedHandler:
         """默认的handler装饰器
@@ -74,9 +80,10 @@ def do_wrap_handler(pattern, handler_clz):
             self.pattern = pattern
 
         def GET(self, *args):
+            start_time = time.time()
             WrappedHandler.visited_count += 1.0
             threading.current_thread().handler_class = self.target
-            result = wrap_result(self.target.GET(*args))
+            result = wrap_result(self.target.GET(*args), start_time)
             threading.current_thread().handler_class = None
             return result
             
@@ -132,20 +139,6 @@ def do_wrap_handler(pattern, handler_clz):
         def __getattr__(self, name):
             xutils.error("xmanager", "unknown method %s" % name)
             return getattr(self.target, name)
-
-        def search_priority(self):
-            return 0
-
-        def search_match(self, input):
-            if hasattr(self.target, "search_match"):
-                return self.search_match(input)
-            return False
-
-        def search(self, *args):
-            """ 如果子类实现了搜索接口，通过该方法调用 """
-            if hasattr(self.target, "search"):
-                return self.search(*args)
-            return None
 
     return WrappedHandler
 

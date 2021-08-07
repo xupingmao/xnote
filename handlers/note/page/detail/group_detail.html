@@ -67,7 +67,7 @@
     {% include note/component/note_orderby.html %}
 
     <div class="card">
-        <div class="pad5">
+        <div class="pad5 group-detail-btn-box">
             <a class="btn btn-default note-share-btn" data-id="{{file.id}}">分享</a>
             <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>
             <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">批量操作</a>

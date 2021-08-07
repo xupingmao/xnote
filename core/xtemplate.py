@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/07/28 23:14:09
+# @modified 2021/08/05 23:12:43
 # @filename xtemplate.py
 
 
@@ -35,10 +35,10 @@ NAMESPACE    = dict(
 _lang_dict = dict()
 _mobile_name_dict = dict()
 _loader = None
+NAV_LIST = []
 
 SEARCH_DAO = xutils.DAO("search")
 PLUGIN_DAO = xutils.DAO("plugin")
-
 def load_languages():
     """加载系统语言配置"""
     global _lang_dict
@@ -54,6 +54,38 @@ def load_languages():
         config  = xutils.parse_config_text(content, ret_type = 'dict')
         _lang_dict[name] = config
 
+class NavItem(Storage):
+
+    field_text = "导航文字"
+    field_url  = "导航URL"
+
+    def check_platform(self):
+        if self.desktop_only:
+            return not is_mobile_device()
+        return True
+
+    def is_visible(self):
+        if self.require_admin:
+            return xauth.is_admin() and self.check_platform()
+
+        if self.need_login:
+            return xauth.has_login() and self.check_platform()
+
+        if self.need_logout:
+            return not xauth.has_login() and self.check_platform()
+
+        return self.check_platform()
+
+def load_nav_list():
+    global NAV_LIST
+    NAV_LIST = []
+    NAV_LIST.append(NavItem(text = "首页", need_login = True,  require_admin = False, url = "/note/index"))
+    NAV_LIST.append(NavItem(text = "动态", need_login = True,  require_admin = False, url = "/note/recent?orderby=view"))
+    NAV_LIST.append(NavItem(text = "分享", need_login = False, require_admin = False, url = "/note/public"))
+    NAV_LIST.append(NavItem(text = "插件", need_login = True,  require_admin = False, desktop_only = True, url = "/plugins_list"))
+    NAV_LIST.append(NavItem(text = "文件", need_login = True,  require_admin = True , desktop_only = True, url = "/fs_bookmark"))
+    NAV_LIST.append(NavItem(text = "设置", need_login = True,  require_admin = False, url = "/system/settings"))
+    NAV_LIST.append(NavItem(text = "登录", need_logout = True, require_admin = False, url = "/login"))
 
 def T(text, lang = None):
     if lang is None:
@@ -122,6 +154,9 @@ def get_message_count(user):
         xutils.print_exc()
         return 0
 
+def get_nav_list():
+    return NAV_LIST
+
 def render_before_kw(kw):
     """模板引擎预处理过程"""
     user_name           = xauth.current_name() or ""
@@ -135,6 +170,7 @@ def render_before_kw(kw):
     kw["_user_agent"]   = get_user_agent()
     # 用于渲染其他组件
     kw["_render"]       = render
+    kw["_nav_list"]     = get_nav_list()
     kw["Storage"]       = Storage
     kw["xutils"]        = xutils
     kw["xconfig"]       = xconfig
@@ -259,17 +295,23 @@ def get_templates():
     """获取所有模板的浅拷贝"""
     return _loader.templates.copy()
 
+def _do_init():
+    global _loader
+    _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
+    _loader.reset()
+
+    # 加载语言
+    load_languages()
+    # 加载菜单
+    load_nav_list()
 
 @xutils.log_init_deco("xtemplate.reload")    
 def reload():
     """reload template manager"""
-    global _loader
-    _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
-    _loader.reset()
-    load_languages()
+    _do_init()
 
 def init():
-    reload()
+    _do_init()
 
 class Panel:
 

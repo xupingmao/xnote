@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/08/01 13:55:36
+# @modified 2021/08/06 20:06:18
 from io import StringIO
 import xconfig
 import codecs
@@ -175,8 +175,8 @@ class PluginContext(Storage):
             self.author      = meta_obj.get_str_value("author")
             self.version     = meta_obj.get_str_value("version")
             self.category    = meta_obj.get_str_value("category")
-            self.icon        = meta_obj.get_str_value("icon_class")
-            self.required_role = meta_obj.get_str_value("required_role")
+            self.icon        = meta_obj.get_str_value("icon-class")
+            self.required_role = meta_obj.get_str_value("required-role")
             self.since       = meta_obj.get_str_value("since")
 
 def is_plugin_file(fpath):

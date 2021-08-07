@@ -53,7 +53,7 @@ TABLE_DICT = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/03/06 15:32:38
+# @modified 2021/08/07 10:51:28
 ###########################################################
 
 class DBException(Exception):
@@ -171,13 +171,23 @@ def init():
     
     xutils.log("init leveldb done, leveldb = %s" % _leveldb)
 
-class Table:
+def check_not_empty(value, message):
+    if value == None or value == "":
+        raise Exception(message)
 
-    def __init__(self, name):
+class LdbTable:
+    """基于leveldb的表"""
+
+    def __init__(self, table_name):
+        check_not_empty(table_name, "dbutil.Table: table_name can not be empty")
+
+        if table_name[-1] != ':':
+            table_name += ':'
         self.table_name = table_name
 
     def get_key(self, id):
-        return self.table_name + ":" + id
+        check_not_empty(id, "dbutil.Table.get_key: id can not be empty")
+        return self.table_name + id
 
     def get_by_id(self, id):
         key = self.get_key(id)
@@ -192,7 +202,11 @@ class Table:
         delete(key)
 
     def count(self, func):
-        pass
+        return count_table(self.table_name)
+
+class PrefixedDb(LdbTable):
+    """plyvel中叫做prefixed_db"""
+    pass
 
 def timeseq():
     # 加锁防止并发生成一样的值
@@ -324,11 +338,11 @@ def prefix_scan(prefix, func, reverse = False, parse_json = True):
     if reverse:
         key_to   = prefix_bytes
         key_from = prefix_bytes + b'\xff'
-        iterator = _leveldb.RangeIter(None, key_from, include_value = True, reverse = reverse)
+        iterator = _leveldb.RangeIter(None, key_from, include_value = True, reverse = True)
     else:
         key_from = prefix_bytes
         key_to   = None
-        iterator = _leveldb.RangeIter(key_from, None, include_value = True, reverse = reverse)
+        iterator = _leveldb.RangeIter(key_from, None, include_value = True, reverse = False)
 
     offset = 0
     for key, value in iterator:

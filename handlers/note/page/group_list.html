@@ -1,6 +1,9 @@
 {% extends base/base2.html %}
 
 {% block body_top %}
+
+    {% include note/component/view_css.html %}
+
     <div class="card">
         <div class="grid-title">
             <span>{{title}}</span>
@@ -34,7 +37,7 @@
         </div>
     {% end %}
 
-    <div class="card">
+    <div class="card group-list-box">
         {% if len(groups) == 0 %}
             {% include common/text/empty_text.html %}
         {% end %}
