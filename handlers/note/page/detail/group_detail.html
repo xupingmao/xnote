@@ -91,7 +91,7 @@
             </div>
         </div>
         {% if file.content == None or file.content == "" %}
-            {% include base/text/empty_text.html %}
+            {% include common/text/empty_text.html %}
         {% else %}
             <div class="pad5 markdown-box">{% raw markdown.markdown(file.content) %}</div>
         {% end %}

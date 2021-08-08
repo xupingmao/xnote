@@ -1,0 +1,11 @@
+<!-- 安全相关的脚本 -->
+
+
+{% if xconfig.FORCE_HTTPS %}
+<script type="text/javascript">
+    // 强制跳转HTTPS
+    if (window.location.protocol == "http:") {
+        window.location.protocol = "https:";
+    }
+</script>
+{% end %}

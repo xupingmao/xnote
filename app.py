@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2021/07/26 12:14:34
+# @modified 2021/08/08 10:10:21
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -42,6 +42,10 @@ from autoreload import AutoReloadThread
 
 DEFAULT_PORT = "1234"
 
+
+def get_bool_by_sys_arg(value):
+    return value == "yes" or value == "true"
+
 def handle_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="./data")
@@ -57,7 +61,8 @@ def handle_args():
     parser.add_argument("--initScript", default="init.py")
     parser.add_argument("--master", default="no")
     parser.add_argument("--test", default="no")
-    # TODO
+    parser.add_argument("--forceHttps", default="no")
+    # TODO 禁用插件
     parser.add_argument("--disabledPlugins", default="no")
 
     web.config.debug = False
@@ -80,28 +85,20 @@ def handle_args():
     if args.ringtone == "yes":
         xutils.say("系统启动")
     
-    if args.webbrowser == "yes":
-        xconfig.OPEN_IN_BROWSER = True
-    
-    if args.debug == "yes":
-        xconfig.DEBUG = True
-        web.config.debug = True
-    
-    if args.useCacheSearch == "yes":
-        xconfig.USE_CACHE_SEARCH = True
-    
-    if args.useUrlencode == "yes":
-        xconfig.USE_URLENCODE = True
-    
-    if args.devMode == "yes":
-        xconfig.DEV_MODE = True
-
-    if args.test == "yes":
-        xconfig.IS_TEST = True
 
     xconfig.MIN_THREADS   = int(args.minthreads)
     xconfig.INIT_SCRIPT   = args.initScript
     web.config.minthreads = xconfig.MIN_THREADS
+
+    xconfig.OPEN_IN_BROWSER  = get_bool_by_sys_arg(args.webbrowser)
+    xconfig.USE_CACHE_SEARCH = get_bool_by_sys_arg(args.useCacheSearch)
+    xconfig.USE_URLENCODE    = get_bool_by_sys_arg(args.useUrlencode)
+    xconfig.DEV_MODE         = get_bool_by_sys_arg(args.devMode)
+    xconfig.IS_TEST          = get_bool_by_sys_arg(args.test)
+    xconfig.FORCE_HTTPS      = get_bool_by_sys_arg(args.forceHttps)
+    # 调试配置
+    xconfig.DEBUG            = get_bool_by_sys_arg(args.debug)
+    web.config.debug         = xconfig.DEBUG
 
     port = xconfig.PORT
     if port != DEFAULT_PORT:

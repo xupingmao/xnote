@@ -15,13 +15,13 @@
         <!-- 导航/菜单栏 -->
         {% include common/base_nav.html %}
         {% include common/base_nav_left.html %}
-        {% include base/search/search_mobile.html %}
+        {% include common/search/search_mobile.html %}
 
         <!-- 主体部分（内容） -->
         <div class="x-body">
             <div class="nav-left-search">
                 <form id="searchForm2" method="GET" action="{{search_action}}">
-                    {% include common/search_box.html %}
+                    {% include common/search/search_box.html %}
                 </form>
             </div>
 
@@ -66,6 +66,7 @@
     <div class="aside-background background"></div>
 
     <!-- 调整样式的js -->
+    {% include common/script/safe_script.html %}
     {% include common/script/adjust.html %}
     {% include common/script/debug_script.html %}
 </body>

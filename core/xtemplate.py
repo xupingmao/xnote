@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/08/07 17:21:35
+# @modified 2021/08/08 10:51:09
 # @filename xtemplate.py
 
 
@@ -394,6 +394,7 @@ class TextResponse:
 class BasePlugin:
     """插件的基类"""
 
+    api_level   = 0.0  # 插件的API版本 用于处理各种兼容性问题
     # 插件的标题
     show_title  = True
     title       = u"插件名称"

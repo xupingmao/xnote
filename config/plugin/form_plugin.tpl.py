@@ -1,11 +1,13 @@
 # -*- coding:utf-8 -*-
+# @api-level 2.8
 # @since $since
 # @author $author
 # @version 1.0.0
-# @category 文件
-# @title 插件名称
+# @category note
+# @title 我的表单插件-$date
 # @description 插件描述
-# @required_role admin
+# @icon-class fa-cube
+
 import os
 import re
 import math

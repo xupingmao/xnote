@@ -4,10 +4,11 @@
 # @author $author
 # @version 1.0.0
 # @category note
-# @title 插件名称
+# @title 我的插件-$date
 # @description 插件描述
 # @required-role admin
-# @tags system test
+# @tag system
+# @tag test
 # @enabled
 # @icon-class fa-cube
 

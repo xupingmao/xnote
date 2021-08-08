@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/08/07 17:40:33
+# @modified 2021/08/08 10:51:57
 
 '''xnote系统配置
 # 用户配置
@@ -41,26 +41,26 @@ errors = []
 ##################################
 
 # 开发者模式,会展示更多的选项和信息,会开启实验性功能
-DEV_MODE           = False
+DEV_MODE         = False
 # 开启调试
-DEBUG              = False
+DEBUG            = False
 # 调试盒子模型，针对某些不方便调试的浏览器
-DEBUG_HTML_BOX     = False
+DEBUG_HTML_BOX   = False
 
-PORT               = "1234"
-SITE_HOME          = None
+PORT             = "1234"
+SITE_HOME        = None
 # 线程数
-MIN_THREADS        = 20
+MIN_THREADS      = 20
 # 打开浏览器
-OPEN_IN_BROWSER    = False
+OPEN_IN_BROWSER  = False
 # 启用数据库的缓存搜索
-USE_CACHE_SEARCH   = False
+USE_CACHE_SEARCH = False
 # 文件系统使用urlencode方式,适用于只支持ASCII字符的系统
-USE_URLENCODE      = False
+USE_URLENCODE    = False
 # 初始化脚本
-INIT_SCRIPT        = "init.py"
-# 是否记录位置信息，可通过脚本配置打开
-RECORD_LOCATION    = False
+INIT_SCRIPT      = "init.py"
+RECORD_LOCATION  = False  # 是否记录位置信息，可通过脚本配置打开
+FORCE_HTTPS      = False  # 强制 HTTPS
 
 
 # *** 样式设置 ***
@@ -270,7 +270,7 @@ def init(path = DATA_DIR):
     load_file_type_config()
 
     from xutils import fsutil
-    PLUGIN_TEMPLATE = fsutil.readfile("./config/plugin/plugin.tpl")
+    PLUGIN_TEMPLATE = fsutil.readfile("./config/plugin/plugin.tpl.py")
 
 def mark_started():
     global START_TIME
