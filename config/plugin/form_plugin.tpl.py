@@ -7,6 +7,7 @@
 # @title 我的表单插件-$date
 # @description 插件描述
 # @icon-class fa-cube
+# @require-admin true   # 仅对admin用户开放
 
 import os
 import re

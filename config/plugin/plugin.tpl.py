@@ -6,7 +6,7 @@
 # @category note
 # @title 我的插件-$date
 # @description 插件描述
-# @required-role admin
+# @require-admin true  # 仅对admin用户开放
 # @tag system
 # @tag test
 # @enabled

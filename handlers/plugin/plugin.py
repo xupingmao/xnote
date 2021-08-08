@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/08/08 11:02:39
+# @modified 2021/08/08 11:33:15
 from io import StringIO
 import xconfig
 import codecs
@@ -182,7 +182,8 @@ class PluginContext(Storage):
             
             self.category      = meta_obj.get_str_value("category")  # 这里取第一个分类
             self.category_list = meta_obj.get_list_value("category") # 获取分类列表
-            self.required_role = meta_obj.get_str_value("required-role")
+            self.require_admin = meta_obj.get_bool_value("require-admin", True)  # 访问是否要求管理员权限
+            self.permitted_role_list = meta_obj.get_list_value("permitted-role") # 允许访问的角色-TODO
 
 def is_plugin_file(fpath):
     return os.path.isfile(fpath) and fpath.endswith(".py")
