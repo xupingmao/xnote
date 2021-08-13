@@ -93,7 +93,11 @@
         {% if file.content == None or file.content == "" %}
             {% include common/text/empty_text.html %}
         {% else %}
-            <div class="pad5 markdown-box">{% raw markdown.markdown(file.content) %}</div>
+            {% try %}
+                <div class="pad5 markdown-box">{% raw markdown.markdown(file.content) %}</div>
+            {% except %}
+                <div class="pad5 markdown-box">抱歉,markdown解析出错!</div>
+            {% end %}
         {% end %}
     </div>
 

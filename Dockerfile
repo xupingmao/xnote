@@ -13,6 +13,6 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' 
 
 COPY . .
 
-CMD ["python", "app.py", "--data", "/data", "--port", "5050", "--forceHttps", "yes"]
+CMD ["python", "app.py", "--data", "/data", "--port", "5050", "--forceHttps", "yes", "--debug", "no"]
 
 
