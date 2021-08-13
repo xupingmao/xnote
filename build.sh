@@ -54,6 +54,7 @@ cat ./static/js/xnote-ui/x-audio.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-upload.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-dialog.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-tab.js >> ./static/js/app.build.js
+cat ./static/js/xnote-ui/x-layout.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-template.js >> ./static/js/app.build.js
 
 # app 

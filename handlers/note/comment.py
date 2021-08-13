@@ -1,13 +1,14 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/10 23:44:48
-# @modified 2021/04/29 22:59:58
+# @modified 2021/08/14 00:15:10
 import xutils
 import xauth
 import xtemplate
 import xmanager
 from xutils import DAO
 from xutils import Storage
+from xutils import quote
 from xtemplate import T
 
 NOTE_DAO = DAO("note")
@@ -24,6 +25,39 @@ def process_comments(comments, show_note = False):
             if note != None:
                 comment.note_name = note.name
                 comment.note_url  = note.url
+
+def search_comment_summary(ctx):
+    comments = NOTE_DAO.search_comment(user_name = ctx.user_name, keywords = ctx.words)
+    if len(comments) > 0:
+        result = Storage()
+        result.name = "搜索到[%s]条评论" % len(comments)
+        result.url  = "/search?key=%s&search_type=comment" % quote(ctx.key)
+        result.icon = "fa-comments-o"
+        result.show_more_link = True
+        ctx.tools.append(result)
+
+def search_comment_detail(ctx):
+    result = []
+    comments = NOTE_DAO.search_comment(user_name = ctx.user_name, keywords = ctx.words)
+
+    process_comments(comments, show_note = True)
+
+    for item in comments:
+        item.icon = "fa-comment-o"
+        item.name = "#评论 %s" % item.note_name
+        item.url  = item.note_url
+        result.append(item)
+
+    ctx.notes += result
+
+@xmanager.searchable(r".+")
+def on_search_comments(ctx):
+    if ctx.category == "default":
+        search_comment_summary(ctx)
+
+    if ctx.category == "comment":
+        search_comment_detail(ctx)
+
 
 class CommentListAjaxHandler:
 
@@ -49,10 +83,12 @@ class SaveCommentAjaxHandler:
     def POST(self):
         note_id = xutils.get_argument("note_id")
         content = xutils.get_argument("content")
+        type    = xutils.get_argument("type")
         user    = xauth.current_name()
 
         NOTE_DAO.save_comment(Storage(note_id = note_id, 
             user = user, 
+            type = type,
             content = content))
         return dict(success = True)
 
@@ -88,6 +124,7 @@ class MyCommentsHandler:
             comment_list_date = date,
             comment_list_type = "user")
 
+xutils.register_func("note.search_comment_detail", search_comment_detail)
 
 xurls = (
     r"/note/comments", CommentListAjaxHandler,

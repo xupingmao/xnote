@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/07/31 15:16:22
+# @modified 2021/08/14 00:19:44
 
 import re
 import os
@@ -36,6 +36,10 @@ SEARCH_TYPE_DICT = dict()
 
 def register_search_handler(search_type, placeholder = None, action = None, tag = None):
     global SEARCH_TYPE_DICT
+
+    if action is None:
+        action = "/search"
+
     SEARCH_TYPE_DICT[search_type] = Storage(
         placeholder = placeholder,
         action = action,
@@ -91,12 +95,13 @@ class SearchContext:
         self.stop             = False
         
         # 处理的结果集，优先级: 系统功能 > 字典 > 个人数据
-        self.commands = []
-        self.tools    = []
+        self.commands = [] # 命令
+        self.tools    = [] # 工具
         self.dicts    = []
         self.messages = []
         self.notes    = []
         self.files    = []
+        # self.comments = [] # 评论
 
     def join_as_files(self):
         return self.commands + self.tools + self.dicts + self.messages + self.notes + self.files
@@ -198,7 +203,9 @@ class SearchHandler:
 
         # 优先使用 search_type
         if search_type != None and search_type != "" and search_type != "default":
-            return self.do_search_by_type(page_ctx, key, search_type)
+            ctx.offset = page_ctx.offset
+            ctx.limit  = page_ctx.limit
+            return self.do_search_by_type(ctx, key, search_type)
         
         # 阻断性的搜索，比如特定语法的
         xmanager.fire("search.before", ctx)
@@ -293,6 +300,9 @@ class SearchHandler:
 
         return item_list, amount
 
+    def do_search_comment(self, ctx, key):
+        NOTE_DAO.search_comment_detail(ctx)
+        return ctx.notes, len(ctx.notes)
 
     def do_search_by_type(self, ctx, key, search_type):
         if search_type == "note":
@@ -301,6 +311,8 @@ class SearchHandler:
             return self.do_search_dict(ctx, key)
         elif search_type == "task":
             return self.do_search_task(ctx, key)
+        elif search_type == "comment":
+            return self.do_search_comment(ctx, key)
         else:
             raise Exception("不支持的搜索类型:%s" % search_type)
 
@@ -396,6 +408,7 @@ def do_reload_search(ctx = None):
     register_search_handler("message", placeholder = u"搜索随手记", action = "/message")
     register_search_handler("task", placeholder = u"搜索待办", action = "/search")
     register_search_handler("note", placeholder = u"搜索笔记", action = "/search")
+    register_search_handler("comment", placeholder = u"搜索评论")
     register_search_handler("default", placeholder = u"综合搜索", action = "/search")
 
 

@@ -1,5 +1,13 @@
 {% extends base %}
 
+{% block head %}
+<style type="text/css">
+    .note-list-box {
+        min-height: 450px;
+    }
+</style>
+{% end %}
+
 {% block body_top %}
     {% init show_back = True %}
     {% init show_create_option = True %}
@@ -35,7 +43,7 @@
         {% include note/component/note_path.html %}
     </div>
 
-    <div class="card">
+    <div class="card note-list-box">
         {% if len(notes) == 0 %}
             {% include common/text/empty_text.html %}
         {% end %}

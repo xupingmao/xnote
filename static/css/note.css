@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/07/31 11:09:12
+ * @modified 2021/08/14 00:00:43
 */
 
 
@@ -165,10 +165,11 @@
 .comment-row {
     width: 100%;
     float: left;
-    margin-top: 20px;
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 2px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .comment-user {
@@ -285,3 +286,4 @@
     float: left;
     margin-top: 5px;
 }
+

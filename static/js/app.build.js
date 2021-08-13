@@ -1754,7 +1754,20 @@ $(function (e) {
     initTabLink();
     initTabBtn();
 });
-/**
+$.fn.autoHeight = function(){    
+    function autoHeight(elem){
+        elem.style.height = 'auto';
+        elem.scrollTop = 0; //防抖动
+        elem.style.height = elem.scrollHeight + 'px';
+    }
+
+    this.each(function(){
+        autoHeight(this);
+        $(this).on('keyup', function(){
+            autoHeight(this);
+        });
+    });     
+} /**
  * description here
  * @author xupingmao
  * @since 2021/05/01 14:56:59

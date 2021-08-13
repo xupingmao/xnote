@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/07/05 17:35:53
-# @modified 2020/07/18 18:13:35
+# @modified 2021/08/14 00:03:16
 import xutils
 import xauth
 
@@ -26,6 +26,8 @@ class StatsHandler:
 
     @xauth.login_required("admin")
     def GET(self):
+        return u"功能暂时停用"
+
         user_names = xauth.list_user_names()
         for user_name in user_names:
             notes = NOTE_DAO.list_hot(user_name, 0, -1)

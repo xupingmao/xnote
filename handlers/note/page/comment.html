@@ -8,6 +8,8 @@
 {% init comment_list_date   = "" %}
 {% init comment_btn_text    = "评论" %}
 {% init comment_placeholder = "请输入评论..." %}
+{% init comment_empty_text  = "暂无评论~" %}
+{% init comment_source_class = "" %}
 
 <style type="text/css">
     .chat-msg-img {
@@ -18,24 +20,30 @@
 <link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
 <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 
-<div class="card {{comment_class}}">
-    {% if show_comment_title %}
-    <div class="card-title">
-        <span>{{comment_title}}</span>
+
+{% if _has_login and show_comment_create %}
+    <div class="card {{comment_class}}">
+        {% if show_comment_title %}
+        <div class="card-title">
+            <span>{{comment_title}}</span>
+        </div>
+        {% end %}
+
+        <div class="col-md-12">
+            <textarea id="commentText" 
+                autoHeight=true
+                class="col-md-12 no-outline" 
+                placeholder="{{comment_placeholder}}"></textarea>
+
+            <div id="commentFileUploader" class="hide"></div>
+            <input type="file" id="commentFilePicker" class="hide" multiple/>
+            <input type="button" id="commentFilePickerBtn" class="btn btn-default" value="添加附件"/>
+            <button class="btn" id="saveCommentBtn">{{comment_btn_text}}</button>
+        </div>
     </div>
-    {% end %}
+{% end %}
 
-    {% if _has_login and show_comment_create %}
-    <div class="col-md-12">
-        <textarea id="commentText" class="col-md-12 no-outline" placeholder="{{comment_placeholder}}"></textarea>
-
-        <div id="commentFileUploader" class="hide"></div>
-        <input type="file" id="commentFilePicker" class="hide" multiple/>
-        <input type="button" id="commentFilePickerBtn" class="btn btn-default" value="添加附件"/>
-        <button class="btn" id="saveCommentBtn">{{comment_btn_text}}</button>
-    </div>
-    {% end %}
-
+<div class="card">
     <div class="col-md-12" id="comments">
         <p class="align-center">加载中...</p>
     </div>
@@ -47,6 +55,7 @@
         <div class="comment-time">${ctime}</div>
         <div class="comment-content">${html}</div>
         <div class="comment-foot">
+            <span class="{{comment_source_class}}">[来源]</span>
             <a class="comment-foot-link" href="${note_url}">${note_name}</a>
             <div class="float-right ${deleteBtnClass}">
                 <a class="delete-comment-btn" data-id="${id}" data-content="${content}">删除</a>
@@ -56,7 +65,7 @@
 </div>
 
 <div class="comment-empty-tpl hide">
-    <p class="align-center">暂无评论~</p>
+    <p class="align-center">{{comment_empty_text}}</p>
 </div>
 
 <script type="text/javascript">
@@ -104,6 +113,9 @@ $(function () {
         var oldTextValue = $("#commentText").val();
         $("#commentText").val(oldTextValue + "\n" + line);
     }
+
+    // 自动调整高度
+    $('textarea[autoHeight]').autoHeight();
 
     refreshComments();
 

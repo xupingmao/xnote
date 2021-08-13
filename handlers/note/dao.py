@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/08/07 19:08:08
+# @modified 2021/08/13 23:00:50
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -1365,7 +1365,13 @@ def list_comments_by_user(user_name, date = None, offset = 0, limit = 100):
     return dbutil.prefix_list("comment_index:%s" % user_name, list_func, 
         offset = offset, limit = limit, reverse = True)
 
+def check_comment(comment):
+    assert comment != None, "comment is None"
+    assert comment.type in (None, "list_item"), "comment.type is invalid"
+
 def save_comment(comment):
+    check_comment(comment)
+
     timeseq = dbutil.timeseq()
 
     comment["timeseq"] = timeseq
@@ -1393,6 +1399,21 @@ def get_comment(comment_id):
 
 def count_comment(user_name):
     return dbutil.count_table("comment_index:%s" % user_name)
+
+
+def search_comment(user_name, keywords, offset = 0, limit = None):
+    assert user_name != None, "user_name is None"
+
+    if limit is None:
+        limit = xconfig.PAGE_SIZE
+
+    def search_comment_func(key, value):
+        if textutil.contains_all(value.content, keywords):
+            return True
+        else:
+            return False
+
+    return dbutil.prefix_list("comment_index:%s" % user_name, search_comment_func, offset = offset, limit = limit)
 
 def add_search_history(user, search_key, category = "default", cost_time = 0):
     key = "search_history:%s:%s" % (user, dbutil.timeseq())
@@ -1610,6 +1631,7 @@ xutils.register_func("note.list_comments_by_user", list_comments_by_user)
 xutils.register_func("note.get_comment",  get_comment)
 xutils.register_func("note.save_comment", save_comment)
 xutils.register_func("note.delete_comment", delete_comment)
+xutils.register_func("note.search_comment", search_comment)
 
 # stat
 xutils.register_func("note.get_note_stat", get_note_stat)
