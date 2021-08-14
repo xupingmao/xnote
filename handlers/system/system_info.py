@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/08/22 21:54:56
-# @modified 2020/08/22 22:26:13
+# @modified 2021/08/14 10:21:00
 import xauth
 import xtemplate
 import xutils
@@ -9,6 +9,8 @@ import os
 import re
 import sys
 import platform
+import xconfig
+from xutils import dateutil
 
 try:
     import psutil
@@ -51,6 +53,9 @@ def get_mem_info():
 def get_python_version():
     return sys.version
 
+def get_startup_time():
+    return dateutil.format_time(xconfig.START_TIME)
+
 class SystemInfoItem:
 
     def __init__(self, name = "", value = ""):
@@ -69,6 +74,7 @@ class InfoHandler:
             SystemInfoItem("CPU型号", platform.processor()),
             SystemInfoItem("操作系统", platform.system()),
             SystemInfoItem("操作系统版本", platform.version()),
+            SystemInfoItem("系统启动时间", get_startup_time()),
         ]
 
         return xtemplate.render("system/page/system_info.html", items = items)

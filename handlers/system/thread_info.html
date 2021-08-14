@@ -1,10 +1,8 @@
 {% extends base.html %}
 {% block body %}
 
-<div class="col-md-12 card">
-
-    {% include system/thread_nav.html %}
-</div>
+{% init title = T("线程列表") %}
+{% include system/thread_nav.html %}
 
 <div class="card">
 

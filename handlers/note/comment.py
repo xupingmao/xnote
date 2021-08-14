@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/10 23:44:48
-# @modified 2021/08/14 00:15:10
+# @modified 2021/08/14 12:24:42
 import xutils
 import xauth
 import xtemplate
@@ -34,7 +34,7 @@ def search_comment_summary(ctx):
         result.url  = "/search?key=%s&search_type=comment" % quote(ctx.key)
         result.icon = "fa-comments-o"
         result.show_more_link = True
-        ctx.tools.append(result)
+        ctx.messages.append(result)
 
 def search_comment_detail(ctx):
     result = []
@@ -46,9 +46,10 @@ def search_comment_detail(ctx):
         item.icon = "fa-comment-o"
         item.name = "#评论 %s" % item.note_name
         item.url  = item.note_url
+        item.mtime = item.ctime
         result.append(item)
 
-    ctx.notes += result
+    ctx.messages += result
 
 @xmanager.searchable(r".+")
 def on_search_comments(ctx):

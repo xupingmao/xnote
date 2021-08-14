@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/08/08 10:51:09
+# @modified 2021/08/14 13:25:04
 # @filename xtemplate.py
 
 
@@ -430,6 +430,7 @@ class BasePlugin:
     editable    = True    
     # 输入框的行数
     rows        = 20  
+    CONTENT_WIDTH = 1000 # 内容的宽度
     
     # 插件模板路径
     html_template_path = "plugin/base/base_plugin.html"
@@ -477,6 +478,12 @@ class BasePlugin:
         html = render_text(template, **kw)
         self.html += u(html.decode("utf-8"))
         return self.html
+
+    def ajax_response(self, template, **kw):
+        return self.do_render_text(template, **kw)
+
+    def text_response(self, template, **kw):
+        return self.do_render_text(template, **kw)
 
     def do_render_text(self, template, **kw):
         """这个方法用于渲染动态的HTML，用于局部刷新的场景"""
@@ -547,6 +554,7 @@ class BasePlugin:
             show_search = self.show_search,
             html        = self.html,
             search_action = self.search_action,
+            CONTENT_WIDTH = self.CONTENT_WIDTH,
             search_placeholder = self.search_placeholder)
 
     def on_action(self, name, context, input):
@@ -557,7 +565,7 @@ class BasePlugin:
         """
         pass
 
-    def on_command(self, command):
+    def on_command(self, context=None):
         """命令行入口"""
         pass
 

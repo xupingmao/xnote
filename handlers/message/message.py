@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/07/16 23:51:52
+# @modified 2021/08/14 10:13:44
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -190,7 +190,7 @@ def on_search_message(ctx):
         search_result.insert(0, more)
 
     if len(search_result) > 0:
-        ctx.messages = search_result
+        ctx.messages += search_result
 
 
 def get_current_message_stat():

@@ -1,9 +1,10 @@
 {% extends base.html %}
 {% block body %}
 
-<div class="col-md-12 card">
-    {% include system/thread_nav.html %}
+{% init title = T("线程日志") %}
+{% include system/thread_nav.html %}
 
+<div class="card">
     <table class="table" border="border:#ff6600 1px solid">
         <tr>
             <th>编号</th>

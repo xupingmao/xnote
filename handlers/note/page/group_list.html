@@ -23,12 +23,14 @@
     <link rel="stylesheet" type="text/css" href="/static/css/base/common-layout.css">
 
     <div class="card">
-        <a class="tab tab-link x-tab x-tab-default" href="/note/group?status=active">
-            活跃(<span class="task-count">{{active_count}}</span>)
-        </a>
-        <a class="tab tab-link x-tab" href="/note/group?status=archived">
-            归档(<span class="task-count">{{archived_count}}</span>)
-        </a>
+        <div class="pad5">
+            <a class="tab tab-link x-tab x-tab-default" href="/note/group?status=active">
+                活跃(<span class="task-count">{{active_count}}</span>)
+            </a>
+            <a class="tab tab-link x-tab" href="/note/group?status=archived">
+                归档(<span class="task-count">{{archived_count}}</span>)
+            </a>
+        </div>
     </div>
 
     {% if status == "active" %}

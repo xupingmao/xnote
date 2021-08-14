@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/08/14 00:19:44
+# @modified 2021/08/14 13:16:42
 
 import re
 import os
@@ -97,11 +97,10 @@ class SearchContext:
         # 处理的结果集，优先级: 系统功能 > 字典 > 个人数据
         self.commands = [] # 命令
         self.tools    = [] # 工具
-        self.dicts    = []
-        self.messages = []
-        self.notes    = []
-        self.files    = []
-        # self.comments = [] # 评论
+        self.dicts    = [] # 词典 -- 公共
+        self.messages = [] # 待办/记事/通知/评论
+        self.notes    = [] # 笔记
+        self.files    = [] # 文件
 
     def join_as_files(self):
         return self.commands + self.tools + self.dicts + self.messages + self.notes + self.files
@@ -302,7 +301,7 @@ class SearchHandler:
 
     def do_search_comment(self, ctx, key):
         NOTE_DAO.search_comment_detail(ctx)
-        return ctx.notes, len(ctx.notes)
+        return ctx.messages, len(ctx.messages)
 
     def do_search_by_type(self, ctx, key, search_type):
         if search_type == "note":

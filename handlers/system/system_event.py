@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/05/18 09:44:13
-# @modified 2021/02/18 14:03:48
+# @modified 2021/08/14 10:21:56
 
 import xutils
 import xmanager
@@ -13,6 +13,7 @@ class EventHandler(BasePlugin):
     title = '系统事件'
     category = "system"
     editable = False
+    show_category = False
     
     def handle(self, content):
         self.rows = 0

@@ -2114,7 +2114,7 @@ li.menu-item:hover {
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/08/14 00:00:43
+ * @modified 2021/08/14 10:09:17
 */
 
 
@@ -2157,6 +2157,7 @@ li.menu-item:hover {
 
 .note-body {
     padding: 5px;
+    word-break: break-all;
 }
 
 .note-head {
