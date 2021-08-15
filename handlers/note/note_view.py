@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/08/13 22:47:37
+# @modified 2021/08/15 12:02:48
 import profile
 import math
 import re
@@ -405,6 +405,12 @@ class QueryHandler:
             return dict(code = "success", data = NOTE_DAO.get_by_name(xauth.current_name(), name))
         return dict(code="fail", message = "unknown action")
 
+class GetSymbolDialogHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        return xtemplate.render("note/ajax/symbol_dialog.html")
+
 xurls = (
     r"/note/(edit|view)"   , ViewHandler,
     r"/note/print"         , PrintHandler,
@@ -414,7 +420,7 @@ xurls = (
     r"/note/history_view"  , HistoryViewHandler,
     r"/note/notice"        , NoticeHandler,
     r"/note/query/(\w+)"   , QueryHandler,
-    
+    r"/note/symbol_dialog" , GetSymbolDialogHandler,
     r"/file/mark"          , MarkHandler,
     r"/file/unmark"        , UnmarkHandler,
     r"/file/markdown"      , ViewHandler

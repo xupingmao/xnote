@@ -1,4 +1,6 @@
-{% extends base.html %} {% block head %}
+{% extends base.html %} 
+
+{% block head %}
 <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 
 <style>
@@ -16,13 +18,14 @@
 
 {% block body %} 
 
+{% init back_btn_text = T("返回") %}
 {% init error = "" %} 
 
 <div class="alert">
     {{error}}
 </div>
 
-<div class="grid-card">
+<div class="card">
     <form id="mainFrame" action="/note/update" enctype="multipart/form-data" method="POST" class="col-md-12">
         <div class="col-md-12" id="submit-div">
             <div>
@@ -31,7 +34,8 @@
             <div class="grid-title btn-line-height">
                 <span>文档编辑</span>
                 <div class="float-right">
-                    <a class="btn btn-default" href="/note/{{file.id}}">取消</a>
+                    <input type="button" id="actionBtn" class="btn btn-default" value="快捷操作"/>
+                    <input type="button" id="backBtn"   class="btn btn-default" value="{{back_btn_text}}"/>
                 </div>
             </div>
         </div>
@@ -65,17 +69,95 @@
     </form>
 </div>
 
+{% include common/script/textarea_script.html %}
+
 <script type="text/javascript">
 // 支持上传文件
 $(function () {
+    function getContent() {
+        return $("#markdown-input").val();
+    }
+
+    function getEditor() {
+        return $("#markdown-input")[0];
+    }
+
+    // 记录初始内容
+    var INITIAL_CONTENT = getContent();
+    var IS_FORM_SUBMITTED = false;
+    var DIALOG_INDEX = 0;
+
     $("#addAttachmentBtn").click(function () {
         xnote.requestUpload("#uploadFileInput", false, function (resp) {
             console.log(resp);
             var fileLink = resp.link;
-            var oldContent = $("#markdown-input").val();
+            var oldContent = getContent();
             var newContent = oldContent + "\n" + fileLink + "\n";
             $("#markdown-input").val(newContent);
         });
+    });
+
+    function isContentChanged() {
+        return getContent() !== INITIAL_CONTENT;
+    }
+
+    $("#mainFrame").on("submit", function (e) {
+        console.log(e);
+        IS_FORM_SUBMITTED = true;
+    });
+
+    function checkExit() {
+        if (!isContentChanged()) {
+            return;
+        }
+
+        if (IS_FORM_SUBMITTED) {
+            return;
+        }
+
+        return "修改尚未提交, 确定离开当前页面吗？";
+    }
+
+    $("#backBtn").click(function() {
+        var message = checkExit();
+        if (message) {
+            xnote.confirm(message, function() {
+                history.back();
+            });
+        } else {
+            history.back();
+        }
+    });
+
+    $("#actionBtn").click(function () {
+        $.get("/note/symbol_dialog", function (resp) {
+            DIALOG_INDEX = xnote.showDialog("请选择符号", resp);
+        });
+    });
+
+    $("body").on("click", ".symbol-item-btn", function (e) {
+        var target = e.target;
+        var text = $(target).text();
+        var editor = getEditor();
+        console.log(text);
+        textarea_insert(editor, text);
+        layer.close(DIALOG_INDEX);
+    });
+
+    $("body").on("click", ".symbol-action-btn", function (e) {
+        var target = e.target;
+        var action = $(target).attr("data-action");
+
+        var editor = getEditor();
+        
+        if (action == "finish_task") {
+            textarea_replace_line(editor, "[]", "[x]");
+        }
+        if (action == "redo_task") {
+            textarea_replace_line(editor, "[x]", "[]");
+        }
+
+        layer.close(DIALOG_INDEX);
     });
 })
 </script>

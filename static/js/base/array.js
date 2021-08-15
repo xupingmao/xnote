@@ -1,6 +1,6 @@
 // @author xupingmao
 // @since 2017/08/16
-// @modified 2020/07/04 16:40:58
+// @modified 2021/08/15 12:19:12
 
 ////////////////////////////////////////////////////////////////////////////
 /**
@@ -50,18 +50,18 @@ Array.prototype.startsWith = Array.prototype.startsWith || function (start) {
     var array = this;
     for (var key in array) {
         var item = array[key];
-        if (item.startsWith(start)) return true;
+        if (item === start) return true;
     }
     return false;
 }
 
-Array.prototype.each = Array.prototype.each || function (callback) {
-    var self = this;
-    for (var i = 0; i < self.length; i++) {
-        var item = self[i];
-        callback(i, item);
-    }
-}
+// Array.prototype.each = Array.prototype.each || function (callback) {
+//     var self = this;
+//     for (var i = 0; i < self.length; i++) {
+//         var item = self[i];
+//         callback(i, item);
+//     }
+// }
 
 /**
  * forEach遍历

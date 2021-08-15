@@ -1,0 +1,90 @@
+<script type="text/javascript">
+// 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLTextAreaElement
+// selectionStart: 开始光标右侧的第一个字符
+// selectionEnd:   结束光标右侧的第一个字符
+
+function textarea_insert(textarea, value) {
+    if (document.selection) {  
+        //IE 浏览器  
+        textarea.focus();  
+        sel = document.selection.createRange();
+        sel.text = value;  
+        sel.select();
+    }  else if (textarea.selectionStart || textarea.selectionStart == '0') { 
+        // FireFox、Chrome等
+        var startPos = textarea.selectionStart;  
+        var endPos   = textarea.selectionEnd; 
+
+        var textLeft = textarea.value.substring(0, startPos);
+        var textRight = textarea.value.substring(endPos, textarea.value.length);
+
+        textarea.value = textLeft + value + textRight;
+
+        // 设置完之后会自动失去焦点，需要重新取得焦点
+        textarea.focus();  
+        textarea.selectionStart = startPos + value.length;  
+        textarea.selectionEnd = startPos + value.length;
+    } else {  
+        // 没有选中
+        textarea.value += value;
+        textarea.focus();
+    }  
+}  
+
+/**
+ * 返回当前行的位置
+ * @param {textarea} textarea 文本框对象
+ * @return {array} 返回位置信息 [startPos, endPos]
+ */
+function textarea_current_line_pos(textarea) {
+    var startPos = textarea.selectionStart;  
+    var endPos   = textarea.selectionEnd; 
+    var length   = textarea.value.length;
+    var textValue = textarea.value;
+
+    var indexLeft = 0;
+    var indexRight = length - 1;
+
+    // 从光标左边的一个字符开始
+    for (var i = startPos - 1; i >= 0; i--) {
+        if (textValue[i] == '\n') {
+            indexLeft = i + 1;
+            break;
+        }
+    }
+
+    for (var i = endPos; i < length; i++) {
+        if (textValue[i] == '\n') {
+            indexRight = i;
+            break;
+        }
+    }
+    // indexLeft: 当前行的开始位置
+    // indexRight: 当前行结束的位置，包括换行
+    return [indexLeft, indexRight];
+}
+
+function textarea_current_line(textarea) {
+    var textValue = textarea.value;
+    var pos = textarea_current_line_pos(textarea);
+
+    return textValue.substring(pos[0], pos[1]);
+}
+
+function textarea_replace_line(textarea, source, target) {
+    var textValue = textarea.value;
+    var pos = textarea_current_line_pos(textarea);
+    var line = textValue.substring(pos[0], pos[1]);
+    var lineNew = line.replace(source, target);
+
+    var valueLeft = textValue.substring(0, pos[0]);
+    var valueRight = textValue.substring(pos[1], textarea.value.length);
+
+    textarea.value = valueLeft + lineNew + valueRight;
+
+    textarea.focus();  
+    textarea.selectionStart = pos[0]
+    textarea.selectionEnd = pos[0] + lineNew.length;
+}
+
+</script>

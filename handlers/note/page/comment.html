@@ -21,6 +21,8 @@
 <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 
 
+{% include common/upload/upload_file_component.html %}
+
 {% if _has_login and show_comment_create %}
     <div class="card {{comment_class}}">
         {% if show_comment_title %}
@@ -143,60 +145,15 @@ $(function () {
         });
     });
 
-    // 文件上传
-    var BASE_URL = "/static/lib/webuploader"
-    // 初始化Web Uploader
-    var uploader = xnote.createUploader('#commentFileUploader', false);
-
-    // 当有文件添加进来的时候
-    uploader.on( 'fileQueued', function( file ) {
-        // 添加文件
-    });
-
-
-    // 文件上传过程中创建进度条实时显示。
-    uploader.on( 'uploadProgress', function( file, percentage ) {
-        // 进度条
-    });
-
-    uploader.on( 'uploadBeforeSend', function (object, data, headers) {
-        data.dirname = "auto";
-        // data.name = "auto";
-    })
-
-    // 文件上传成功，给item添加成功class, 用样式标记上传成功。
-    uploader.on( 'uploadSuccess', function( file, resp) {
-        console.log("uploadSuccess", file, resp);
-
-        var webpath = resp.webpath;
-        var content = 'file://$name'.replace(/\$name/g, resp.webpath);
-        appendToInputText(content + "\n");
-        layer.close(loadIndex);
-    });
-
-    // 文件上传失败，显示上传出错。
-    uploader.on( 'uploadError', function( file ) {
-        layer.alert('上传失败');
-        layer.close(loadIndex);
-    });
-
-    // 完成上传完了，成功或者失败，先删除进度条。
-    uploader.on( 'uploadComplete', function( file ) {
-        // console.log("uploadComplete", typeof(file), file);
-    });
-
     $("#commentFilePickerBtn").on("click", function (event) {
         console.log("select file button click");
-        $("#commentFilePicker").click();
-    })
-
-    $("#commentFilePicker").on("change", function (event) {
-        console.log(event);
-        var fileList = event.target.files; //获取文件对象 
-        if (fileList && fileList.length > 0) {
-            uploader.addFile(fileList);
-            loadIndex = layer.load(2);
-        }
+        $("#globalFilePicker").click();
     });
+
+    xnote.on("file.upload", function (result) {
+        console.log("receive file upload event, ", result);
+        var link = result.target.link;
+        appendToInputText(link);
+    })
 })
 </script>

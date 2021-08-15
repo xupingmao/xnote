@@ -1,10 +1,13 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2021/05/05 11:06:56
-# 说明：文件工具分为如下部分：
-# 1、path处理，比如判断是否是父级目录
-# 2、文件操作，比如读写文件，创建目录
+# @modified 2021/08/14 21:23:07
+
+
+"""fsutil: 文件操作工具，文件工具分为如下部分：
+1、path处理，比如判断是否是父级目录
+2、文件操作，比如读写文件，创建目录
+"""
 
 import codecs
 import os
@@ -70,6 +73,10 @@ def is_parent_dir(parent, child):
 
 def get_relative_path(path, parent):
     """获取文件相对parent的路径
+    @param {str} path 当前文件路径
+    @param {str} parent 父级文件路径
+    @return {str} 相对路径
+    
         >>> get_relative_path('/users/xxx/test/hello.html', '/users/xxx')
         'test/hello.html'
     """
@@ -264,11 +271,11 @@ def _try_readfile(path, mode = "r", limit = -1, encoding = 'utf-8'):
             return content
 
 def readfile(path, mode = "r", limit = -1, raise_error = True):
-    '''读取文件，尝试多种编码，编码别名参考标准库`Lib/encodings/aliases.py`
+    """读取文件，尝试多种编码，编码别名参考标准库`Lib/encodings/aliases.py`
     * utf-8 是一种边长编码，兼容ASCII
     * GBK 是一种双字节编码，全称《汉字内码扩展规范》，兼容GB2312
     * latin_1 是iso-8859-1的别名，单字节编码，兼容ASCII
-    '''
+    """
     last_err = None
     for encoding in ENCODING_TUPLE:
         try:
@@ -345,6 +352,10 @@ def rename_file(srcname, dstname):
 
 
 def rmdir(path, hard = False):
+    """删除文件夹
+    @param {str} path 文件路径
+    @param {bool} hard 是否是物理删除
+    """
     if hard:
         shutil.rmtree(path)
         return
@@ -460,8 +471,9 @@ def fixed_basename(path):
     return os.path.basename(path)
 
 class FileItem(Storage):
+    """文件对象"""
 
-    post_handler = None
+    post_handler = None  # hook: 后置处理器
 
     def __init__(self, path, parent = None, merge = False, encode_path = True, name = None):
         self.path = path
