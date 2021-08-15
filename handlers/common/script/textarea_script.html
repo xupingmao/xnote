@@ -3,6 +3,20 @@
 // selectionStart: 开始光标右侧的第一个字符
 // selectionEnd:   结束光标右侧的第一个字符
 
+function textarea_focus_with_select(textarea, startPos, endPos) {
+    // 重新设置位置会导致偏移，要记录偏移位置用于恢复
+    // 记录位置
+    var scrollTop = textarea.scrollTop;
+
+    // 执行
+    textarea.focus();  
+    textarea.selectionStart = startPos;
+    textarea.selectionEnd   = endPos;
+
+    // 恢复位置
+    textarea.scrollTop = scrollTop;
+}
+
 function textarea_insert(textarea, value) {
     if (document.selection) {  
         //IE 浏览器  
@@ -21,9 +35,7 @@ function textarea_insert(textarea, value) {
         textarea.value = textLeft + value + textRight;
 
         // 设置完之后会自动失去焦点，需要重新取得焦点
-        textarea.focus();  
-        textarea.selectionStart = startPos + value.length;  
-        textarea.selectionEnd = startPos + value.length;
+        textarea_focus_with_select(textarea, startPos + value.length, startPos + value.length);
     } else {  
         // 没有选中
         textarea.value += value;
@@ -82,9 +94,8 @@ function textarea_replace_line(textarea, source, target) {
 
     textarea.value = valueLeft + lineNew + valueRight;
 
-    textarea.focus();  
-    textarea.selectionStart = pos[0]
-    textarea.selectionEnd = pos[0] + lineNew.length;
+    // 重新获取焦点
+    textarea_focus_with_select(textarea, pos[0], pos[0] + lineNew.length);
 }
 
 </script>
