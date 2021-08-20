@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2021/08/01 17:38:17
+# @modified 2021/08/21 00:26:35
 # @filename test_note.py
 
 import xutils
@@ -24,6 +24,9 @@ BaseTestCase = test_base.BaseTestCase
 NOTE_DAO = xutils.DAO("note")
 
 def create_note_for_test(type, name):
+    assert type != None, "type cannot be None"
+    assert name != None, "name cannot be None"
+
     data = dict(name = name, type = type, content = "hello,world")
     file = json_request("/note/add", 
         method = "POST",
@@ -352,6 +355,16 @@ class TestMain(BaseTestCase):
 
         self.assertEqual("MyTitle", result.title)
         self.assertTrue(result.texts[0].find("# Head1") >= 0)
+
+    def test_get_dialog(self):
+        delete_note_for_test("xnote-dialog-group")
+
+        note_id = create_note_for_test("group", "xnote-dialog-group")
+
+        self.check_OK("/note/ajax/group_option_dialog?note_id=%s" % note_id)
+        self.check_OK("/note/ajax/share_group_dialog?note_id=%s"  % note_id)
+        self.check_OK("/note/ajax/symbol_dialog")
+
 
 
 

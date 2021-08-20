@@ -32,21 +32,6 @@
             <a class="dropdown-option link" href="/note/stick?id={{file.id}}&level=1">置顶</a>
         {% end %}
 
-        <!--
-        <a class="dropdown-option link" href="/note/stick?id={{file.id}}&level=2">
-            超级置顶
-            {% if file.priority == 2 %}<i class="fa fa-check"></i>{% end %}
-        </a>
-        <a class="dropdown-option link" href="/note/stick?id={{file.id}}">
-            置顶
-            {% if file.priority == 1 %}<i class="fa fa-check"></i>{% end %}
-        </a>
-        <a class="dropdown-option link" href="/note/stick?id={{file.id}}&level=0">
-            普通
-            {% if file.priority == 0 %}<i class="fa fa-check"></i>{% end %}
-        </a>
-        -->
-
         {% if file.archived %}
             <a class="dropdown-option link" href="/note/unarchive?id={{file.id}}">取消归档</a>
         {% end %}
@@ -126,3 +111,5 @@ $(function () {
     }
 })
 </script>
+
+{% include note/component/script/note_option_script.html %}

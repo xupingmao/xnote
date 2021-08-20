@@ -391,6 +391,10 @@ class TestMain(unittest.TestCase):
         meta = xutils.load_script_meta_by_code(code)
         self.assertTrue(meta.has_tag("disabled"))
 
+    def test_md5(self):
+        input_text = "hello"
+        self.assertEqual("5d41402abc4b2a76b9719d911017c592", textutil.md5_hex(input_text))
+
 
 
         

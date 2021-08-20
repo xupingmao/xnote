@@ -1,0 +1,29 @@
+
+<div class="card">
+    <p>已分享用户:</p>
+
+    {% if len(share_to_list) == 0 %}
+        <p>无</p>
+    {% end %}
+
+    {% for share_to in share_to_list %}
+        <span class="tag-span">{{share_to}}</span>
+    {% end %}
+</div>
+
+<div class="card">
+    <p>分享给用户</p>
+
+    <input id="shareTo">
+    <input type="button" value="确认分享" onclick="on_share_group_click()" />
+</div>
+
+
+<script type="text/javascript">
+function on_share_group_click() {
+    var share_to = $("#shareTo").val();
+    var note_id  = "{{file.id}}";
+
+    call_xnote_api("/note/share", {id: note_id, share_to: share_to});
+}
+</script>

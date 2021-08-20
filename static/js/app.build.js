@@ -1454,8 +1454,15 @@ window.xnote.showIframeDialog = function (title, url) {
     });
 }
 
-window.xnote.showDialog = function(title, html, buttons, functions) {
+window.xnote.showDialogEx = function (options) {
     var area = getDialogArea();
+    var title = options.title;
+    var html  = options.html;
+    var buttons = options.buttons;
+    var functions = options.functions;
+    var anim = options.anim;
+
+    // 关于动画：undefined: 默认动画、0：出现、1：上面出现、2：下面出现、3：左边出现、4：滚动出现、5：出现、6：抖动出现、7：浮现
 
     if (!(functions instanceof Array)) {
         functions = [functions];
@@ -1468,6 +1475,7 @@ window.xnote.showDialog = function(title, html, buttons, functions) {
             shadeClose: true,
             area: area,
             content: html,
+            anim: anim,
             scrollbar: false
         });
     } else {
@@ -1479,6 +1487,7 @@ window.xnote.showDialog = function(title, html, buttons, functions) {
             content: html,
             scrollbar: false,
             btn: buttons,
+            anim: anim,
             yes: function (index, layero) {
                 console.log(index, layero);
                 layer.close(index);
@@ -1486,6 +1495,15 @@ window.xnote.showDialog = function(title, html, buttons, functions) {
             }
         });
     }
+}
+
+window.xnote.showDialog = function(title, html, buttons, functions) {
+    var options = {};
+    options.title = title;
+    options.html  = html;
+    options.buttons = buttons;
+    options.functions = functions;
+    xnote.showDialogEx(options);
 }
 
 // 询问函数，原生prompt的替代方案

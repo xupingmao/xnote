@@ -30,7 +30,7 @@
     {% init show_ext_info   = True %}
 
     <div class="mobile-only">
-        {% include note/component/note_orderby.html %}
+        {% include note/component/note_orderby_select.html %}
     </div>
 
     {% include note/editor/view_group.html %}
@@ -52,36 +52,27 @@
 
 {% block body_right %}
 <div class="desktop-only">
-    {% import markdown %}
-    {% init share_to_list = [] %}
 
-    <div class="card">
-        <span class="btn-line-height">状态</span>
-        <div class="float-right">
-            <a class="x-tab-btn status-btn" data-id="{{file.id}}" data-status="1">置顶</a>
-            <a class="x-tab-btn status-btn" data-id="{{file.id}}" data-status="0">活跃</a>
-            <a class="x-tab-btn status-btn" data-id="{{file.id}}" data-status="-1">归档</a>
-        </div>
-    </div>
-
-    {% include note/component/note_orderby.html %}
-
-    <div class="card">
-        <div class="pad5 group-detail-btn-box">
-            <a class="btn btn-default note-share-btn" data-id="{{file.id}}">分享</a>
-            <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>
-            <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">批量操作</a>
-        </div>
-    </div>
-
-    {% if len(share_to_list) > 0 %}
+    <div class="card group-option-card">
         <div class="card">
-            <div class="pad5">
-                已分享给以下用户: {{",".join(share_to_list)}}
+            <span class="btn-line-height">状态</span>
+            <div class="float-right">
+                <select class="status-select" data-id="{{file.id}}" value="{{file.priority}}">
+                    <option value="1">置顶</option>
+                    <option value="0">活跃</option>
+                    <option value="-1">归档</option>
+                </select>
             </div>
         </div>
-    {% end %}
 
+        {% include note/component/note_orderby_select.html %}
+
+        <div class="pad5 group-detail-btn-box">
+            <a class="btn btn-default note-share-btn" data-id="{{file.id}}">分享</a>
+        </div>
+    </div>
+
+    {% import markdown %}
 
     <div class="card">
         <div class="card-title">
@@ -91,7 +82,7 @@
             </div>
         </div>
         {% if file.content == None or file.content == "" %}
-            {% include common/text/empty_text.html %}
+            <p class="align-center">暂无简介</p>
         {% else %}
             {% try %}
                 <div class="pad5 markdown-box">{% raw markdown.markdown(file.content) %}</div>

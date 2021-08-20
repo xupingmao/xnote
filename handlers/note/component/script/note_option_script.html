@@ -73,11 +73,19 @@
     }
 
     $(function () {
-        
-        $(".rename-btn").click(function(event) {
+
+        function onNoteRenameEvent(event) {
             console.log("rename");
             var target = event.target;
             renameNoteByAttr(target);
+        }
+        
+        $(".rename-btn").click(function(event) {
+            onNoteRenameEvent(event);
+        });
+
+        $(".note-rename-btn").click(function(event) {
+            onNoteRenameEvent(event);
         });
 
         $(".status-btn").each(function (index, element) {
@@ -90,6 +98,24 @@
         $(".status-btn").click(function(event) {
             var id = $(event.target).attr("data-id");
             var status = $(event.target).attr("data-status");
+
+            checkNotEmpty(id, "data-id为空");
+            checkNotEmpty(status, "data-status为空");
+
+            $.post("/note/status", {id: id, status: status}, function (resp) {
+                var code = resp.code;
+                if (code != "success") {
+                    xnote.alert(resp.message);
+                } else {
+                    xnote.toast(resp.message);
+                    window.location.reload();
+                }
+            })
+        });
+
+        $(".status-select").change(function(event) {
+            var id = $(event.target).attr("data-id");
+            var status = $(event.target).val();
 
             checkNotEmpty(id, "data-id为空");
             checkNotEmpty(status, "data-status为空");
@@ -130,12 +156,36 @@
             })
         });
 
+        $(".orderby-select").change(function (event) {
+            var id = $(event.target).attr("data-id");
+            var orderby = $(event.target).val();
+
+            checkNotEmpty(id, "data-id为空");
+            checkNotEmpty(orderby, "data-orderby为空");
+
+            $.post("/note/orderby", {id: id, orderby: orderby}, function (resp) {
+                var code = resp.code;
+                if (code != "success") {
+                    xnote.alert(resp.message);
+                } else {
+                    xnote.toast(resp.message);
+                    window.location.reload();
+                }
+            })
+        });
+
         $(".note-share-btn").click(function (event) {
             var id = $(event.target).attr("data-id");
-            xnote.prompt("分享给", "", function (resp) {
-                // xnote.toast(resp);
-                call_xnote_api("/note/share", {id: id, share_to: resp});
-            })
+            var params = {note_id: id};
+
+            $.get("/note/ajax/share_group_dialog", params, function (resp) {
+                xnote.showDialog("分享笔记本", resp);
+            });
+
+            // xnote.prompt("分享给", "", function (resp) {
+            //     // xnote.toast(resp);
+            //     call_xnote_api("/note/share", {id: id, share_to: resp});
+            // })
         });
     })
 </script>

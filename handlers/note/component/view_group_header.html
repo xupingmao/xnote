@@ -17,6 +17,7 @@
         {% if show_create_option %}
             <a class="btn" href="/note/create?parent_id={{parent_id}}&type={{create_type}}">{{create_text}}</a>
         {% end %}
+        <!-- <a class="btn btn-default group-option-btn">选项</a> -->
         {% include note/component/group_option.html %}
     </div>
 </div>
@@ -27,3 +28,15 @@
     </div>
 {% end %}
 
+
+
+<script type="text/javascript">
+    $(function () {
+        $("body").on("click", ".group-option-btn", function (event) {
+            var params = {note_id: "{{file.id}}"};
+            $.get("/note/ajax/group_option_dialog", params, function (resp) {
+                xnote.showDialog("选项", resp);
+            })
+        });
+    })
+</script>

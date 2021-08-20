@@ -1,12 +1,15 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2020/03/15 17:01:02
+# @modified 2021/08/21 00:33:20
 import os
 import re
 import xauth
 import xutils
 import json
 from xutils import fsutil
+from xutils import dbutil
+
+dbutil.register_table("bookmark", "TXT书签")
 
 def print_blue(msg):
     print("\033[34m\033[01m%s\033[0m" % msg, end = '')
@@ -80,8 +83,8 @@ class handler:
             return dict(code = "fail", message = "file `%s` not exists" % path)
 
         basename, ext    = os.path.splitext(path)
-        key              = "bookmark@%s@%s" % (xauth.current_name(), xutils.md5_hex(path))
-        bookmark         = xutils.cache_get(key, {})
+        key              = "bookmark:%s:%s" % (xauth.current_name(), xutils.md5_hex(path))
+        bookmark         = dbutil.get(key, {})
         bookmark['path'] = path
         page             = bookmark.get("page", 0)
         size             = xutils.get_file_size(path, format=False)
@@ -115,6 +118,6 @@ class handler:
 
             if direction in ("forward", "backward"):
                 # xutils.writefile(bookmarkpath, json.dumps(bookmark))
-                xutils.cache_put(key, bookmark)
+                dbutil(key, bookmark)
         return dict(code="success", data=text, page=page, current=current, size=size)
 

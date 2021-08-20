@@ -29,6 +29,7 @@
             {% else %}
                 {# 其他普通笔记 #}
                 {% include note/component/note_dropdown.html %}
+                <!-- <a class="btn btn-default note-option-btn">选项</a> -->
                 {% include common/button/back_button.html %}
             {% end %}
         </div>
@@ -40,3 +41,13 @@
         {{error}}
     </div>
 {% end %}
+
+<script type="text/javascript">
+    $(function () {
+        $("body").on("click", ".note-option-btn", function (event) {
+            $.get("/note/ajax/option_dialog", function (resp) {
+                xnote.showDialog("选项", resp);
+            })
+        });
+    })
+</script>

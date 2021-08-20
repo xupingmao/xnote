@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/08/14 13:25:04
+# @modified 2021/08/21 00:28:03
 # @filename xtemplate.py
 
 
@@ -395,6 +395,8 @@ class BasePlugin:
     """插件的基类"""
 
     api_level   = 0.0  # 插件的API版本 用于处理各种兼容性问题
+    show_nav    = True # 是否展示菜单
+
     # 插件的标题
     show_title  = True
     title       = u"插件名称"
@@ -550,6 +552,7 @@ class BasePlugin:
             input       = input, 
             output      = self.output + output,
             css_style   = self.css_style,
+            show_nav    = self.show_nav,
             show_aside  = self.show_aside,
             show_search = self.show_search,
             html        = self.html,

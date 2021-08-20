@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/08/15 12:02:48
+# @modified 2021/08/20 23:30:39
 import profile
 import math
 import re
@@ -405,11 +405,37 @@ class QueryHandler:
             return dict(code = "success", data = NOTE_DAO.get_by_name(xauth.current_name(), name))
         return dict(code="fail", message = "unknown action")
 
-class GetSymbolDialogHandler:
+class GetDialogHandler:
+
+    def get_group_option_dialog(self, kw):
+        note_id = xutils.get_argument("note_id")
+        file    = NOTE_DAO.get_by_id(note_id)
+        kw.file = file
+
+    def get_share_group_dialog(self, kw):
+        user_name = xauth.current_name()
+        note_id = xutils.get_argument("note_id")
+        file    = NOTE_DAO.get_by_id(note_id)
+        kw.file = file
+        kw.share_to_list = []
+
+        if file != None:
+            share_from_info = NOTE_DAO.get_share_from(user_name, file.id)
+            if share_from_info != None:
+                kw.share_to_list = share_from_info.share_to_list
+
 
     @xauth.login_required()
-    def GET(self):
-        return xtemplate.render("note/ajax/symbol_dialog.html")
+    def GET(self, name = ""):
+        kw = Storage()
+
+        if name == "group_option_dialog":
+            self.get_group_option_dialog(kw)
+
+        if name == "share_group_dialog":
+            self.get_share_group_dialog(kw)
+
+        return xtemplate.render("note/ajax/%s.html" % name, **kw)
 
 xurls = (
     r"/note/(edit|view)"   , ViewHandler,
@@ -420,7 +446,7 @@ xurls = (
     r"/note/history_view"  , HistoryViewHandler,
     r"/note/notice"        , NoticeHandler,
     r"/note/query/(\w+)"   , QueryHandler,
-    r"/note/symbol_dialog" , GetSymbolDialogHandler,
+    r"/note/ajax/(.+)"     , GetDialogHandler,
     r"/file/mark"          , MarkHandler,
     r"/file/unmark"        , UnmarkHandler,
     r"/file/markdown"      , ViewHandler

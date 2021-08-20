@@ -53,7 +53,7 @@ TABLE_DICT = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/08/07 10:51:28
+# @modified 2021/08/21 00:34:58
 ###########################################################
 
 class DBException(Exception):
@@ -266,14 +266,17 @@ def register_table(table_name, description, category = "default"):
 def get_table_dict_copy():
     return TABLE_DICT.copy()
 
-def get(key):
+def get(key, default_value = None):
     check_leveldb()
     try:
         key = key.encode("utf-8")
         value = _leveldb.Get(key)
-        return get_object_from_bytes(value)
+        result = get_object_from_bytes(value)
+        if result is None:
+            return default_value
+        return result
     except KeyError:
-        return None
+        return default_value
 
 def obj_to_json(obj):
     # ensure_ascii默认为True，会把非ascii码的字符转成\u1234的格式
