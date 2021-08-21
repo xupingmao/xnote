@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao
-# @modified 2021/08/21 00:33:20
+# @modified 2021/08/21 09:31:27
 import os
 import re
 import xauth
@@ -118,6 +118,6 @@ class handler:
 
             if direction in ("forward", "backward"):
                 # xutils.writefile(bookmarkpath, json.dumps(bookmark))
-                dbutil(key, bookmark)
+                dbutil.put(key, bookmark)
         return dict(code="success", data=text, page=page, current=current, size=size)
 
