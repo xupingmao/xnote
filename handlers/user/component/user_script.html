@@ -12,5 +12,10 @@ $(function () {
             }
         })
     });  
+
+    $(".show-password-link").click(function (e) {
+        var data = $(this).attr("data-value");
+        xnote.alert(data);
+    });
 })
 </script>

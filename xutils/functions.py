@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2021/06/05 12:48:45
+# @modified 2021/08/21 12:19:23
 from collections import deque
 from xutils.base import Storage
 from xutils.dateutil import format_time
@@ -220,6 +220,19 @@ class History(MemTable):
         found.time = format_time()
         self.data.append(found)
 
+
+class SortedSet:
+    """仿照redis的SortedSet，但是是基于内存的，不会持久化"""
+
+    def __init__(self):
+        raise NotImplementedError()
+    
+    def zadd(self, member, score):
+        pass
+
+    def zrange(self, start_index, stop_index):
+        pass
+
 def listremove(list, obj):
     if list is None:
         return
@@ -266,11 +279,14 @@ def dictsort(dictionary, key='value'):
     """返回排序之后的字典key列表/value列表
     @param {dict} dictionary
     @param {str} key 默认返回value，如果传值返回key
-    @return {list}
+    @return {list} 返回字典items的列表
     """
     if key == 'value':
         return sorted(dictionary.items(), key = lambda item: item[1])
-    return sorted(dictionary.items(), key = lambda item: item[0])
+    if key == "key":
+        return sorted(dictionary.items(), key = lambda item: item[0])
+
+    raise Exception("dictsort: unsupported key: %s" % key)
 
 def dictvalues(dict):
     return list(dict.values())

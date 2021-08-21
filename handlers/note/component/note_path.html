@@ -1,7 +1,7 @@
 {% init file = None %}
 
 {% if len(pathlist) > 0 %}
-    <div class="btn-line-height">
+    <div class="btn-line-height pad-left-5">
     {% for i, item_local in enumerate(pathlist) %}
         {% if i > 0 %} / {% end %}<a href="{{item_local.url}}" class="link">{{ item_local.name }}</a>
     {% end %}

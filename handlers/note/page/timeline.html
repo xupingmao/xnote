@@ -37,7 +37,7 @@
     <div class="float-right">
         {% if type not in ("search", "public") %}
           <!-- 原来使用 create_option.html 弹窗创建并没有预期的方便，而且不好做扩展 -->
-          {% include note/option/timeline_create_option.html %}
+          {% include note/component/option/timeline_create_option.html %}
         {% end %}
 
         {% if type == "default" %}

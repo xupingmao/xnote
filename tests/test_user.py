@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/25 12:48:47
-# @modified 2020/01/25 12:49:41
+# @modified 2021/08/21 14:29:17
 
 import sys
 import time
@@ -25,3 +25,6 @@ class TestUser(BaseTestCase):
     def test_login_page(self):
         self.check_OK("/login")
 
+
+    def test_change_password(self):
+        self.check_OK("/user/change_password")

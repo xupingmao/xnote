@@ -40,7 +40,10 @@
         </tr>
         <tr>
             <td class="label">密码</td>
-            <td><input name="password" value="{{user_info.password}}"></td>
+            <td>
+                <input name="password" type="password" value="{{user_info.password}}">
+                <a class="show-password-link" data-value="{{user_info.password}}">查看</a>
+            </td>
         </tr>
         <tr>
             <td class="label">salt</td>
@@ -79,7 +82,7 @@
 
 </div>
 
-{% include user/component/delete_user.html %}
+{% include user/component/user_script.html %}
 
 {% end %}
 

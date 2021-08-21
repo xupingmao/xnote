@@ -1,4 +1,13 @@
 # encoding=utf-8
+
+"""用户和权限控制,主要的方法包括
+- check_login(user_name=None)     检查用户是否登录,可以指定用户或者不指定用户
+- login_required(user_name=None)  检查登录态的注解
+- current_name()    获取当前登录的用户名，别名 get_current_name()
+- current_user()    获取当前登录的用户详情，别名 get_current_user()
+- current_role()    获取当前登录的用户角色，别名 get_current_role()
+"""
+
 import os
 import hashlib
 import copy
@@ -12,17 +21,19 @@ from xutils import ConfigParser, textutil, dbutil, fsutil
 from xutils import Storage
 from xutils.functions import listremove
 
+
 dbutil.register_table("user", "用户信息表")
 dbutil.register_table("session", "用户会话信息")
 dbutil.register_table("user_session_rel", "用户会话关系")
 
 # 用户配置
-_users = None
-NAME_LENGTH_MIN = 4
-INVALID_NAMES = fsutil.load_set_config("./config/user/invalid_names.list")
+_USER_LIST       = None
+NAME_LENGTH_MIN  = 4
+PASSWORD_LEN_MIN = 6
+INVALID_NAMES    = fsutil.load_set_config("./config/user/invalid_names.list")
 MAX_SESSION_SIZE = 20
-SESSION_EXPIRE = 24 * 3600 * 7
-PRINT_DEBUG_LOG = False
+SESSION_EXPIRE   = 24 * 3600 * 7
+PRINT_DEBUG_LOG  = False
 
 def log_debug(fmt, *args):
     if PRINT_DEBUG_LOG:
@@ -36,6 +47,11 @@ def is_valid_username(name):
         return False
     return name.isalnum()
 
+def validate_password_error(password):
+    if len(password) < PASSWORD_LEN_MIN:
+        return "密码不能少于6位"
+    return None
+
 def _create_temp_user(temp_users, user_name):
     temp_users[user_name] = Storage(name = user_name, 
         password = "123456",
@@ -45,11 +61,11 @@ def _create_temp_user(temp_users, user_name):
 
 def _get_users(force_reload = False):
     """获取用户，内部接口"""
-    global _users
+    global _USER_LIST
 
     # 有并发风险
-    if _users is not None and not force_reload:
-        return _users
+    if _USER_LIST is not None and not force_reload:
+        return _USER_LIST
 
     temp_users = {}
 
@@ -69,8 +85,8 @@ def _get_users(force_reload = False):
         name = user.name.lower()
         temp_users[name] = user
 
-    _users = temp_users
-    return _users
+    _USER_LIST = temp_users
+    return _USER_LIST
 
 def get_users():
     """获取所有用户，返回一个深度拷贝版本"""
@@ -346,6 +362,11 @@ def create_user(name, password):
         refresh_users()
         return dict(code = "success", message = "create success")
 
+def _check_password(password):
+    error = validate_password_error(password)
+    if error != None:
+        raise Exception(error)
+
 def update_user(name, user):
     if name == "" or name == None:
         return
@@ -357,8 +378,11 @@ def update_user(name, user):
 
     password_new = user.get("password")
     password_old = mem_user.get("password")
-    mem_user.update(user)
 
+    if password_new != None:
+        _check_password(password_new)
+    
+    mem_user.update(user)
     mem_user.mtime = xutils.format_time()
     if password_new != None and password_old != password_new:
         # 修改密码
@@ -491,6 +515,14 @@ def logout_current_user():
 def is_user_exist(user_name):
     user = get_user_by_name(user_name)
     return user != None
+
+def check_old_password(user_name, password):
+    user_info = get_user_by_name(user_name)
+    if user_info is None:
+        raise Exception("用户不存在")
+    
+    if user_info.password != password:
+        raise Exception("旧的密码不匹配")
 
 xutils.register_func("user.get_config_dict", get_user_config_dict)
 xutils.register_func("user.get_config",      get_user_config)

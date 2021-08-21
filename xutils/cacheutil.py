@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2021/07/31 19:01:00
-"""基本废弃了，请使用dbutil
+# @modified 2021/08/21 11:09:56
+"""持久化操作已经禁用，请使用dbutil
 缓存的实现，API列表如下
 
 * cache(key = None, prefix = None, expire = 600) 缓存装饰器，用于加速函数调用

@@ -30,14 +30,8 @@
         {% end %}
 
         <a class="dropdown-option note-share-btn" data-id="{{file.id}}">分享</a>
-
         <a class="dropdown-option" href="/note/management?parent_id={{file.id}}">批量操作</a>
-        <!--
-        <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=mtime_desc&page={{!page}}">按时间倒序</a>
-        <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name&page={{!page}}">按名称顺序</a>
-        <a class="dropdown-option" href="/note/view?id={{file.id}}&orderby=name_desc&page={{!page}}">按名称倒序</a>
-        -->
-
+        
         {% if file.size == 0 %}
             <a class="dropdown-option-red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
         {% end %}

@@ -133,7 +133,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2021/07/31 14:08:39
+ * @modified 2021/08/21 13:55:19
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -862,6 +862,7 @@ li.menu-item:hover {
     width:300px;
     padding-bottom:5px;
     max-width: 700px;
+    line-height: 29px;
 }
 
 .input-group label {
@@ -872,7 +873,7 @@ li.menu-item:hover {
     text-align: right;
 }
 
-.input-group input, .input-group select {
+.input-group input[type=text], .input-group input[type=password], .input-group select {
     width: 160px;
 }
 
@@ -1399,7 +1400,7 @@ li.menu-item:hover {
         width: 100%;
     }
 
-    .input-group label, .input-group input, .input-group select {
+    .input-group label, .input-group input[type=text], .input-group input[type=password], .input-group select {
         width: 100%;
         text-align: left;
         padding-left: 5px;
@@ -1438,6 +1439,7 @@ li.menu-item:hover {
 .row{float: left;width: 100%;overflow: auto;}
 .pad5 {padding: 5px;}
 .pad10 {padding: 10px;}
+.pad-left-5 {padding-left: 5px;}
 .pad-bottom-10 {padding-bottom: 10px}
 
 

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/08/07 10:26:37
+# @modified 2021/08/21 14:02:56
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -221,6 +221,9 @@ class HandlerManager:
         del sys.modules['xtemplate']
         import xtemplate
         xtemplate.reload()
+
+        del sys.modules["xauth"]
+        import xauth
 
     def reload(self):
         """重启handlers目录下的所有的模块"""

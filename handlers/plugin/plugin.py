@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/08/08 17:13:49
+# @modified 2021/08/21 12:16:32
 from io import StringIO
 import xconfig
 import codecs
@@ -150,6 +150,7 @@ class PluginContext(Storage):
         self.fname         = ""
         self.fpath         = ""
         self.category      = None
+        self.category_list = []
         self.require_admin = True
         self.required_role = "" 
         self.atime         = ""
@@ -169,6 +170,16 @@ class PluginContext(Storage):
     def __cmp__(self, other):
         return cmp(self.title, other.title)
 
+    def load_category_info(self, meta_obj):
+        self.category      = meta_obj.get_str_value("category")  # 这里取第一个分类
+        self.category_list = meta_obj.get_list_value("category") # 获取分类列表
+        self.build_category()
+
+    def load_permission_info(self, meta_obj):
+        self.require_admin = meta_obj.get_bool_value("require-admin", True)  # 访问是否要求管理员权限
+        self.permitted_role_list = meta_obj.get_list_value("permitted-role") # 允许访问的角色-TODO
+
+
     def load_from_meta(self, meta_obj):
         self.api_level = meta_obj.get_float_value("api-level", 0.0)
 
@@ -180,10 +191,24 @@ class PluginContext(Storage):
             self.icon        = meta_obj.get_str_value("icon-class")
             self.since       = meta_obj.get_str_value("since")
             
-            self.category      = meta_obj.get_str_value("category")  # 这里取第一个分类
-            self.category_list = meta_obj.get_list_value("category") # 获取分类列表
-            self.require_admin = meta_obj.get_bool_value("require-admin", True)  # 访问是否要求管理员权限
-            self.permitted_role_list = meta_obj.get_list_value("permitted-role") # 允许访问的角色-TODO
+            self.load_category_info(meta_obj)
+            self.load_permission_info(meta_obj)
+
+    def build_category(self):
+        if self.category is None and len(self.category_list) > 0:
+            self.category = self.category_list[0]
+
+        if self.category is None and len(self.category_list) == 0:
+            self.category_list.append(self.category)
+        
+        if self.category != None and self.category not in self.category_list:
+            self.category_list.append(self.category)
+
+    def build(self):
+        """构建完整的对象"""
+        self.build_category()
+
+
 
 def is_plugin_file(fpath):
     return os.path.isfile(fpath) and fpath.endswith(".py")
@@ -246,6 +271,7 @@ def load_plugin_file(fpath, fname = None):
 
             # 注册插件
             xconfig.PLUGINS_DICT[plugin_name] = context
+            context.build()
             return context
     except:
         # TODO 增加异常日志
@@ -305,6 +331,7 @@ def inner_plugin(name, url, category = "inner", url_query = ""):
     context.editable = False
     context.category = category
     context.icon_class = "fa fa-cube"
+    context.build()
     return context
 
 def note_plugin(name, url, icon=None, size = None, required_role = "user", url_query = ""):
@@ -320,6 +347,7 @@ def note_plugin(name, url, icon=None, size = None, required_role = "user", url_q
     context.editable = False
     context.category = "note"
     context.required_role = required_role
+    context.build()
     return context
 
 def index_plugin(name, url, url_query = ""):
