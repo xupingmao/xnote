@@ -15,6 +15,10 @@
     <span class="dropdown-btn btn btn-default">更多▾</span>
     <div class="dropdown-content">
         <a class="dropdown-option link" href="javascript:rename('{{item.id}}', '{{item.name}}')">重命名</a>
+        
+        <a class="dropdown-option link note-share-btn" data-id="{{item.id}}">分享</a>
+
+        <!--
         {% if file.is_public %}
             <a class="dropdown-option link" onclick="javascript:visitAndRefresh(this)" data-href="/note/share/cancel?id={{file.id}}">取消公开分享</a>
         {% else %}
@@ -23,7 +27,8 @@
 
         <a class="dropdown-option link link-share-option" href="javascript:void(0)" data-clipboard-text="">链接分享</a>
         <a class="dropdown-option link copy-link-option" href="javascript:void(0)" data-clipboard-text="">复制链接</a>
-        
+        -->
+
         <a class="dropdown-option move-btn link" data-url="/note/group/select?callback=moveNoteCallback">移动</a>
 
         {% if file.priority > 0 %}
@@ -42,23 +47,10 @@
 
         <a class="dropdown-option link" href="/note/history?id={{file_id}}">{{T("历史")}}</a>
         <a class="dropdown-option link" href="/note/print?id={{file.id}}" target="_blank">打印</a>
-
-        {% if _is_admin %}
-            <a class="dropdown-option link" href="/note/{{file.id}}?_format=json">查看JSON</a>
-        {% end %}
-
         <a class="dropdown-option-red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>
     </div>
 </div>
 {% end %}
-<!-- <a href="javascript:history.back()">返回</a> -->
-
-<div class="share-tpl hide">
-    <p>分享链接: <span class="share-link-text"></span></p>
-    <div class="row">
-        <button class="share-link-btn btn float-right" data-clipboard-text="">复制</button>
-    </div>
-</div>
 
 <script type="text/javascript">
 $(function () {
@@ -94,21 +86,6 @@ $(function () {
             }
         });
     });
-
-    window.moveNoteCallback = function (parentId) {
-        var selfId = "{{file.id}}";
-        $.post("/note/move", {id:selfId, parent_id: parentId}, function (resp){
-              console.log(resp);
-              window.location.reload();
-        });
-    }
-
-    window.visitAndRefresh = function (el) {
-        var url = $(el).attr("data-href");
-        $.get(url, function () {
-            window.location.reload();
-        });
-    }
 })
 </script>
 

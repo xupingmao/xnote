@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/08/20 23:30:39
+# @modified 2021/08/21 18:03:13
 import profile
 import math
 import re
@@ -424,6 +424,11 @@ class GetDialogHandler:
             if share_from_info != None:
                 kw.share_to_list = share_from_info.share_to_list
 
+    def get_share_note_dialog(self, kw):
+        user_name = xauth.current_name()
+        note_id = xutils.get_argument("note_id")
+        file    = NOTE_DAO.get_by_id(note_id)
+        kw.file = file
 
     @xauth.login_required()
     def GET(self, name = ""):
@@ -434,6 +439,9 @@ class GetDialogHandler:
 
         if name == "share_group_dialog":
             self.get_share_group_dialog(kw)
+
+        if name == "share_note_dialog":
+            self.get_share_note_dialog(kw)
 
         return xtemplate.render("note/ajax/%s.html" % name, **kw)
 

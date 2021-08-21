@@ -72,7 +72,7 @@ window.xnote.showDialog = function(title, html, buttons, functions) {
     options.html  = html;
     options.buttons = buttons;
     options.functions = functions;
-    xnote.showDialogEx(options);
+    return xnote.showDialogEx(options);
 }
 
 // 询问函数，原生prompt的替代方案

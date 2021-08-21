@@ -1,5 +1,29 @@
 
+<div class="share-tpl hide">
+    <p>分享链接: <span class="note-share-link-text"></span></p>
+    <div class="row">
+        <button class="note-share-link-btn btn" data-clipboard-text="">复制</button>
+    </div>
+</div>
+
+
 <script type="text/javascript">
+    
+    window.moveNoteCallback = function (parentId) {
+        var selfId = "{{file.id}}";
+        $.post("/note/move", {id:selfId, parent_id: parentId}, function (resp){
+              console.log(resp);
+              window.location.reload();
+        });
+    }
+
+    window.visitAndRefresh = function (el) {
+        var url = $(el).attr("data-href");
+        $.get(url, function () {
+            window.location.reload();
+        });
+    }
+
     function remove(id, name, parentId) {
         var confirmed = confirm("确定删除'" + name + "'?");
         if (confirmed) {
@@ -174,18 +198,61 @@
             })
         });
 
-        $(".note-share-btn").click(function (event) {
-            var id = $(event.target).attr("data-id");
+        function note_open_share_dialog(target) {
+            var id = $(target).attr("data-id");
+            var type = "{{file.type}}";
             var params = {note_id: id};
+            var ajax_dialog_url   = "/note/ajax/share_group_dialog";
+            var ajax_dialog_title = "分享笔记本";
 
-            $.get("/note/ajax/share_group_dialog", params, function (resp) {
-                xnote.showDialog("分享笔记本", resp);
+            if (type != "group") {
+                ajax_dialog_url = "/note/ajax/share_note_dialog";
+                ajax_dialog_title = "分享笔记";
+            }
+
+            $.get(ajax_dialog_url, params, function (resp) {
+                xnote.showDialog(ajax_dialog_title, resp);
             });
+        }
 
-            // xnote.prompt("分享给", "", function (resp) {
-            //     // xnote.toast(resp);
-            //     call_xnote_api("/note/share", {id: id, share_to: resp});
-            // })
+        $(".note-share-btn").click(function (event) {
+            note_open_share_dialog(event.target);
+        });
+
+        function note_share_by_link(target) {
+            /* Act on the event */
+            $.post("/note/link_share", {id: "{{file.id}}"}, function (resp) {
+                if (resp.code == "success") {
+                    var link = window.location.protocol + "//" + window.location.host + resp.data;
+                    $(".note-share-link-text").text(link);
+                    $(".note-share-link-btn").attr("data-clipboard-text", link);
+
+                    var html = $(".share-tpl").html();
+                    layer.confirm(html, {
+                        btn: [] //按钮
+                    });
+                    new ClipboardJS('.note-share-link-btn', {
+                        text: function(trigger) {
+                            xnote.toast("已经复制到粘贴板");
+                            return trigger.getAttribute('data-clipboard-text');
+                        }
+                    });
+                } else {
+                    xnote.alert("分享失败!");
+                }
+            });
+        }
+
+        window.note_share_by_link = note_share_by_link;
+
+        $(".copy-link-option").click(function(event) {
+            $(".copy-link-option").attr('data-clipboard-text', window.location.href);
+            new ClipboardJS(".copy-link-option", {
+                text: function (trigger) {
+                    xnote.toast("已经复制到粘贴板");
+                    return trigger.getAttribute("data-clipboard-text");
+                }
+            });
         });
     })
 </script>
