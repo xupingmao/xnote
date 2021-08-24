@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/08/21 18:03:13
+# @modified 2021/08/24 23:07:12
 import profile
 import math
 import re
@@ -39,6 +39,9 @@ def check_auth(file, user_name):
 
     if file.is_public == 1:
         return
+
+    if user_name is None:
+        xauth.redirect_to_login();
 
     # 笔记的分享
     if NOTE_DAO.get_share_to(user_name, file.id) != None:

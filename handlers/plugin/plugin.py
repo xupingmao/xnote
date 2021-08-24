@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/08/21 12:16:32
+# @modified 2021/08/22 11:35:24
 from io import StringIO
 import xconfig
 import codecs
@@ -82,7 +82,7 @@ class PluginCategory:
         self.required_roles = required_roles
         self.platforms = None
         if url is None:
-            self.url = "/plugins_list?category=%s" % self.code
+            self.url = "/plugin_list?category=%s" % self.code
         else:
             self.url = url
 
@@ -123,11 +123,11 @@ def get_plugin_category_list():
 
 def get_category_url_by_code(code):
     if code is None:
-        return "/plugins_list?category=all"
+        return "/plugin_list?category=all"
     for item in PLUGIN_CATEGORY_LIST:
         if item.code == code:
             return item.url
-    return "/plugins_list?category=%s" % code
+    return "/plugin_list?category=%s" % code
 
 def get_category_name_by_code(code):
     for item in PLUGIN_CATEGORY_LIST:
@@ -725,7 +725,7 @@ class PluginListHandler:
         context.show_back = show_back
 
         user_name = xauth.current_name()
-        xmanager.add_visit_log(user_name, "/plugins_list?category=%s" % category)
+        xmanager.add_visit_log(user_name, "/plugin_list?category=%s" % category)
 
         if xauth.is_admin():
             if key != "" and key != None:
