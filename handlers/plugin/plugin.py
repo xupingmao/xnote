@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/08/22 11:35:24
+# @modified 2021/08/31 19:22:06
 from io import StringIO
 import xconfig
 import codecs
@@ -905,6 +905,7 @@ xutils.register_func("plugin.add_visit_log", add_visit_log)
 xutils.register_func("plugin.get_category_list", get_plugin_category_list)
 xutils.register_func("plugin.get_category_url_by_code", get_category_url_by_code)
 xutils.register_func("plugin.get_category_name_by_code", get_category_name_by_code)
+xutils.register_func("plugin.define_category", define_plugin_category)
 
 define_plugin_category("note", u"笔记", url = "/note/tools")
 define_plugin_category("dir",  u"文件", url = "/fs_tools", required_roles = ["admin"])

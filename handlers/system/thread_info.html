@@ -32,9 +32,8 @@
 $(function () {
     $(".view-detail").click(function (e) {
         var value = $(this).attr("data-value");
-        layer.open({
-            content: value
-        });
+        var html  = $("<div>").addClass("card").text(value);
+        xnote.showDialog("线程详情", html.prop("outerHTML"));
     });
 })
 </script>

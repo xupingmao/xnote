@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/08/07 17:02:22
+# @modified 2021/08/29 22:33:54
 import math
 import time
 import web
@@ -575,17 +575,7 @@ class ArchivedHandler:
 
     @xauth.login_required()
     def GET(self):
-        user  = xauth.current_name()
-        files = NOTE_DAO.list_archived(user)
-        return xtemplate.render("note/page/group_list_archived.html",
-            title      = "Archived_Project",
-            parent_id  = -1,
-            show_size  = True,
-            pathlist   = [PathNode("Archived_Project", "/note/archived")],
-            file_type  = "group",
-            dir_type   = "archived",
-            files      = files,
-            show_mdate = False)
+        raise web.found("/note/group?status=archived")
 
 class ManagementHandler:
 

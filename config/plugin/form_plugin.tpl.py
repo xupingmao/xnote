@@ -9,11 +9,6 @@
 # @icon-class fa-cube
 # @require-admin true   # 仅对admin用户开放
 
-import os
-import re
-import math
-import time
-import web
 import xconfig
 import xutils
 import xauth
@@ -23,13 +18,14 @@ from xtemplate import BaseFormPlugin
 
 HTML = """
 <!-- Html -->
-<p>Hello,World!</p>
+<div class="card">
+    <p>Hello,World!</p>
+</div>
 """
 
 class Main(BaseFormPlugin):
 
-    title    = "Hello_World_Form"
-    category = "form"
+    rows = 0
 
     def get_input_template(self):
         return "Input Template"

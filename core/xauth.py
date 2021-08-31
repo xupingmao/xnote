@@ -406,26 +406,6 @@ def delete_user(name):
     
     refresh_users()
 
-def has_login_by_cookie_old(name = None):
-    cookies = web.cookies()
-    name_in_cookie = cookies.get("xuser")
-    pswd_in_cookie = cookies.get("xpass")
-
-    # TODO 不同地方调用结果不一致
-    # print(name, name_in_cookie)
-    if name is not None and name_in_cookie != name:
-        return False
-    name = name_in_cookie
-    if name == "" or name is None:
-        return False
-    user = get_user_by_name(name)
-    if user is None:
-        return False
-
-    password_md5 = encode_password(user["password"], user["salt"])
-    return password_md5 == pswd_in_cookie
-
-
 def has_login_by_cookie(name = None):
     cookies = web.cookies()
     session_id = cookies.get("sid")
@@ -438,11 +418,10 @@ def has_login_by_cookie(name = None):
 
     log_debug("has_login_by_cookie: name={}, name_in_cookie={}", name, name_in_cookie)
 
-    if name is not None and name_in_cookie != name:
-        return False
+    if name is None:
+        return True
 
-    name = name_in_cookie
-    if name == "" or name is None:
+    if name_in_cookie != name:
         return False
 
     user = get_user_by_name(name)
