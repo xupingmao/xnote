@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/08/31 19:22:06
+# @modified 2021/09/04 22:57:15
 from io import StringIO
 import xconfig
 import codecs
@@ -139,6 +139,7 @@ def get_category_name_by_code(code):
 
 
 class PluginContext(Storage):
+    """插件上下文"""
 
     def __init__(self):
         self.title         = ""
@@ -153,6 +154,7 @@ class PluginContext(Storage):
         self.category_list = []
         self.require_admin = True
         self.required_role = "" 
+        self.permitted_role_list = [] # 允许访问的权限列表
         self.atime         = ""
         self.editable      = True
         self.edit_link     = ""
@@ -161,6 +163,7 @@ class PluginContext(Storage):
         self.icon          = DEFAULT_PLUGIN_ICON_CLASS
         self.author        = None
         self.version       = None
+        self.debug         = False
 
     # sort方法重写__lt__即可
     def __lt__(self, other):
@@ -177,7 +180,7 @@ class PluginContext(Storage):
 
     def load_permission_info(self, meta_obj):
         self.require_admin = meta_obj.get_bool_value("require-admin", True)  # 访问是否要求管理员权限
-        self.permitted_role_list = meta_obj.get_list_value("permitted-role") # 允许访问的角色-TODO
+        self.permitted_role_list = meta_obj.get_list_value("permitted-role") # 允许访问的角色
 
 
     def load_from_meta(self, meta_obj):
@@ -190,9 +193,11 @@ class PluginContext(Storage):
             self.version     = meta_obj.get_str_value("version")
             self.icon        = meta_obj.get_str_value("icon-class")
             self.since       = meta_obj.get_str_value("since")
+            self.debug       = meta_obj.get_bool_value("debug")
             
             self.load_category_info(meta_obj)
             self.load_permission_info(meta_obj)
+
 
     def build_category(self):
         if self.category is None and len(self.category_list) > 0:
@@ -204,9 +209,14 @@ class PluginContext(Storage):
         if self.category != None and self.category not in self.category_list:
             self.category_list.append(self.category)
 
+    def build_permission_info(self):
+        if self.clazz != None:
+            self.clazz.permitted_role_list = self.permitted_role_list
+
     def build(self):
         """构建完整的对象"""
         self.build_category()
+        self.build_permission_info()
 
 
 
@@ -288,7 +298,8 @@ def load_inner_plugins():
     for tool in INNER_TOOLS:
         xconfig.PLUGINS_DICT[tool.url] = tool
 
-def load_plugins(dirname = None):
+def load_plugin_dir(dirname = None):
+    """加载插件目录"""
     if dirname is None:
         dirname = xconfig.PLUGINS_DIR
 
@@ -300,13 +311,28 @@ def load_plugins(dirname = None):
 
     load_inner_plugins()
 
+def can_visit_by_role(plugin, current_role):
+    if current_role == "admin":
+        return True
+
+    if plugin.required_role is None:
+        return True
+
+    if plugin.required_role == current_role:
+        return True
+
+    if current_role in plugin.permitted_role_list:
+        return True
+
+    return False
+
 @xutils.timeit(logfile=True, logargs=True, name="FindPlugins")
 def find_plugins(category, orderby=None):
-    role = xauth.get_current_role()
+    current_role = xauth.get_current_role()
     user_name = xauth.current_name()
     plugins = []
 
-    if role is None:
+    if current_role is None:
         # not logged in
         return plugins
 
@@ -316,8 +342,7 @@ def find_plugins(category, orderby=None):
     for fname in xconfig.PLUGINS_DICT:
         p = xconfig.PLUGINS_DICT.get(fname)
         if p and p.category == category:
-            required_role = p.required_role
-            if role == "admin" or required_role is None or required_role == role:
+            if can_visit_by_role(p, current_role):
                 plugins.append(p)
     return sorted_plugins(user_name, plugins, orderby)
 
@@ -331,6 +356,7 @@ def inner_plugin(name, url, category = "inner", url_query = ""):
     context.editable = False
     context.category = category
     context.icon_class = "fa fa-cube"
+    context.permitted_role_list = ["admin", "user"]
     context.build()
     return context
 
@@ -347,6 +373,7 @@ def note_plugin(name, url, icon=None, size = None, required_role = "user", url_q
     context.editable = False
     context.category = "note"
     context.required_role = required_role
+    context.permitted_role_list = ["admin", "user"]
     context.build()
     return context
 
@@ -401,6 +428,7 @@ INNER_TOOLS = [
     inner_plugin("摄像头", "/tools/camera"),
 
     # 笔记工具
+    note_plugin("新建笔记", "/note/create", "fa-plus-square"),
     note_plugin("我的置顶", "/note/sticky", "fa-thumb-tack"),
     note_plugin("搜索历史", "/search/history", "fa-search"),
     note_plugin("导入笔记", "/note/html_importer", "fa-internet-explorer", required_role = "admin"),
@@ -471,37 +499,24 @@ class PluginSort:
         plugins.sort(key = lambda x:x.visit_cnt, reverse = True)
 
     def sort_by_recent(self, plugins):
-        pass
+        for p in plugins:
+            log = self.get_log_by_url(p.url)
+            if log:
+                p.visit_time = log.time
+            
+            if p.visit_time is None:
+                p.visit_time = ""
+
+        plugins.sort(key = lambda x:x.visit_time, reverse = True)
 
 def sort_plugins(user_name, plugins, orderby = None):
     sort_obj = PluginSort(user_name)
     sort_obj.sort_by_visit_cnt_desc(plugins)
-    return plugins  
+    return plugins
 
 def sorted_plugins(user_name, plugins, orderby=None):
     sort_plugins(user_name, plugins, orderby)
     return plugins
-
-    # 把最近访问的放在前面
-    logs = list_visit_logs(user_name)
-    
-    # 构造url到插件的映射
-    url_dict = dict()
-    for p in plugins:
-        url_dict[p.url] = p
-
-    recent_plugins = []
-    recent_urls    = []
-
-    # 通过日志里的url找插件
-    for log in logs:
-        if log.url in url_dict:
-            recent_plugins.append(url_dict[log.url])
-            recent_urls.append(log.url)
-            del url_dict[log.url]
-
-    rest_plugins = list(filter(lambda x:x.url not in recent_urls, plugins))
-    return recent_plugins + rest_plugins
 
 def debug_print_plugins(plugins, ctx = None):
     if False:
@@ -512,18 +527,11 @@ def debug_print_plugins(plugins, ctx = None):
 
 @logutil.timeit_deco(name = "list_all_plugins")
 def list_all_plugins(user_name, sort = True):
-    # links = build_inner_tools()
-    
-    # debug_print_plugins(links, "#416")
-
     links = get_plugin_values()
     
-    debug_print_plugins(links, "#420")
-
     if sort:
-        result = sorted_plugins(user_name, links)
-        debug_print_plugins(result, "#424")
-        return result
+        return sorted_plugins(user_name, links)
+
     return links
 
 def list_other_plugins(user_name, sort = True):
@@ -618,7 +626,7 @@ def load_plugin(name):
     context   = xconfig.PLUGINS_DICT.get(name)
 
     # DEBUG模式下始终重新加载插件
-    if xconfig.DEBUG or context is None:
+    if xconfig.DEBUG or context is None or context.debug is True:
         fpath = os.path.join(xconfig.PLUGINS_DIR, name)
         fpath = xutils.get_real_path(fpath)
         if not os.path.exists(fpath):
@@ -705,6 +713,12 @@ def get_template_by_version(version):
     # 最新版本
     return "plugin/page/plugins_v3.html"
 
+def filter_plugins_by_role(plugins, user_role):
+    result = []
+    for p in plugins:
+        if user_role in p.permitted_role_list:
+            result.append(p)
+    return result
 
 class PluginListHandler:
 
@@ -738,11 +752,11 @@ class PluginListHandler:
                 recent   = list_recent_plugins()
                 plugins  = list_plugins(category)
         else:
+            # 普通用户插件访问
             recent = []
-            if category == "" or category == "all":
-                plugins = build_inner_tools()
-            else:
-                plugins = []
+            user_role = xauth.current_role()
+            plugins = list_plugins(category)
+            plugins = filter_plugins_by_role(plugins, user_role)
 
         context.plugins = plugins
         context.recent = recent
@@ -865,7 +879,7 @@ def reload_plugins(ctx):
 
     reload_plugins_by_config()
 
-    load_plugins()
+    load_plugin_dir()
 
     PLUGINS_STATUS = "done"
 

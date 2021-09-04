@@ -5,7 +5,7 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2021/05/30 11:33:47
+ * @modified 2021/09/04 18:28:46
  */
 
 
@@ -69,10 +69,9 @@ var XUI = function(window) {
         }
         var confirmMessage = $(this).attr("confirm-message");
         if (confirmMessage) {
-            var check = confirm(confirmMessage);
-            if (check) {
+            xnote.confirm(confirmMessage, function (result) {
                 window.location.href = link;
-            }
+            });
         } else {
             window.location.href = link;
         }
@@ -84,10 +83,10 @@ var XUI = function(window) {
         var action = $(this).attr("action");
         var message = $(this).attr("message");
         var defaultValue = $(this).attr("default-value");
-        var message = prompt(message, defaultValue);
-        if (message != "" && message) {
-            $.get(action + encodeURIComponent(message),
-            function() {
+        var inputValue = prompt(message, defaultValue);
+        if (inputValue != "" && inputValue) {
+            var actionUrl = action + encodeURIComponent(inputValue);
+            $.get(actionUrl, function(resp) {
                 window.location.reload();
             })
         }

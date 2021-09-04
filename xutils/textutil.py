@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2021/06/06 15:56:14
+# @modified 2021/09/04 19:20:00
 import re
 import random
 import json
@@ -562,8 +562,13 @@ def get_underscore(name):
 to_underscore = get_underscore
 
 def generate_uuid():
+    """生成UUID"""
     import uuid
     return uuid.uuid4().hex
+
+def create_uuid():
+    """生成UUID"""
+    return generate_uuid()
 
 def _encode_json(obj):
     """基本类型不会拦截"""

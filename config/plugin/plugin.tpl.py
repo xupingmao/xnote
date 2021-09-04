@@ -6,10 +6,11 @@
 # @category note
 # @title 我的插件-$date
 # @description 插件描述
-# @require-admin true  # 仅对admin用户开放
+# @permitted-role admin  # 对admin用户开放
 # @tag system
 # @tag test
 # @enabled
+# @debug  # 开启调试
 # @icon-class fa-cube
 
 import os

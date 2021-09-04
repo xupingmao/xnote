@@ -8,7 +8,11 @@ import unittest
 import xutils
 import xconfig
 import doctest
-from xutils import textutil, cacheutil, fsutil
+from xutils import textutil
+from xutils import cacheutil
+from xutils import fsutil
+from xutils import dbutil
+from xutils import Storage
 
 xconfig.init("./testdata")
 
@@ -355,6 +359,66 @@ class TestMain(unittest.TestCase):
 
         with lock1 as lock:
             self.assertFalse(lock2.acquire(timeout = 1))
+
+    def test_dbutil_ldb_table(self):
+        dbutil.register_table("unit_test", "单元测试")
+        table = dbutil.LdbTable("unit_test")
+
+        # 先清空测试数据
+        rows = table.list()
+        for row in rows:
+            table.delete(row)
+
+        # 插入测试
+        row = Storage(name = "system-test", value = "value")
+        new_key = table.insert(row, id_type = "timeseq")
+        # 查询测试
+        new_row = table.get_by_key(new_key)
+        self.assertTrue(new_row != None)
+
+        # 更新测试
+        table.update_by_key(new_key, Storage(value = "value333"))
+        # 确认更新成功
+        self.assertEqual("value333", table.get_by_key(new_key).value)
+
+        # 删除测试
+        table.delete_by_key(new_key)
+        # 确认删除成功
+        self.assertTrue(table.get_by_key(new_key) == None)
+
+    def test_dbutil_ldb_table_user(self):
+        dbutil.register_table("unit_test_user", "用户维度单元测试")
+        table = dbutil.LdbTable("unit_test_user")
+        user_name = "test_user"
+
+        # 先清空测试数据
+        rows = table.list()
+        for row in rows:
+            table.delete(row)
+
+        # 插入数据测试
+        row = Storage(name = "test", value = "value")
+        table.insert_by_user(user_name, row)
+        self.assertEqual(1, table.count())
+
+        # 查询测试
+        found_row = table.list_by_user(user_name)[0]
+        self.assertTrue(found_row != None)
+        self.assertTrue(table.get_by_key(found_row._key) != None)
+        self.assertEqual(1, table.count_by_user(user_name))
+
+        # 判断方法测试
+        self.assertTrue(table.is_valid_key("unit_test_user:222"))
+        self.assertTrue(table.is_valid_key("unit_test_user:test_user:222", user_name = "test_user"))
+
+        # 更新测试
+        found_row.value = "value222"
+        table.update(found_row)
+        self.assertEqual("value222", table.get_by_key(found_row._key).value)
+
+        # 删除测试
+        table.delete(found_row)
+        self.assertEqual(0, table.count())
 
     def test_b64encode(self):
         text_input = "测试1234"

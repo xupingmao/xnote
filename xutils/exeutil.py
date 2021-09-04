@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/19 16:09:13
-# @modified 2021/08/01 13:57:41
+# @modified 2021/09/04 22:15:21
 
 
 """脚本执行相关的代码"""
@@ -246,6 +246,7 @@ class ScriptMeta:
             else:
                 meta_value = meta_parts[1]
 
+            meta_value = meta_value.strip()
             self.add_item(meta_key, meta_value)
             self.add_list_item(meta_key, meta_value)
 

@@ -580,7 +580,7 @@ function getWindowHeight() {
  * xnote扩展事件
  * @author xupingmao
  * @since 2021/05/30 14:39:39
- * @modified 2021/05/30 14:42:56
+ * @modified 2021/09/04 18:34:04
  * @filename x-event.js
  */
 
@@ -593,7 +593,7 @@ if (window.xnote == undefined) {
 (function(){
 
     /**
-     * part of quarkjs
+     * 代码来自 quarkjs
      * 构造函数.
      * @name EventDispatcher
      * @class EventDispatcher类是可调度事件的类的基类，它允许显示列表上的任何对象都是一个事件目标。
@@ -748,7 +748,7 @@ window.xnote.setExtFunc = function (funcName, func) {
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2021/05/30 11:33:47
+ * @modified 2021/09/04 18:28:46
  */
 
 
@@ -812,10 +812,9 @@ var XUI = function(window) {
         }
         var confirmMessage = $(this).attr("confirm-message");
         if (confirmMessage) {
-            var check = confirm(confirmMessage);
-            if (check) {
+            xnote.confirm(confirmMessage, function (result) {
                 window.location.href = link;
-            }
+            });
         } else {
             window.location.href = link;
         }
@@ -827,10 +826,10 @@ var XUI = function(window) {
         var action = $(this).attr("action");
         var message = $(this).attr("message");
         var defaultValue = $(this).attr("default-value");
-        var message = prompt(message, defaultValue);
-        if (message != "" && message) {
-            $.get(action + encodeURIComponent(message),
-            function() {
+        var inputValue = prompt(message, defaultValue);
+        if (inputValue != "" && inputValue) {
+            var actionUrl = action + encodeURIComponent(inputValue);
+            $.get(actionUrl, function(resp) {
                 window.location.reload();
             })
         }
@@ -1613,22 +1612,16 @@ $(function () {
     $(".dialog-btn").click(function() {
         var dialogUrl = $(this).attr("dialog-url");
         var dialogId = $(this).attr("dialog-id");
+        var dailogTitle = $(this).attr("dialog-title");
         if (dialogUrl) {
             // 通过新的HTML页面获取dialog
             $.get(dialogUrl, function(respHtml) {
 
-                $(document.body).append(respHtml);
-                
-                // 模态
-                doModal(dialogId);
+                // 展示对话框
+                xnote.showDialog(dailogTitle, respHtml);
 
                 // 重新绑定事件
                 xnote.fire("init-default-value");
-
-                $(".x-dialog-close, .x-dialog-cancel").unbind("click");
-                $(".x-dialog-close, .x-dialog-cancel").on("click", function() {
-                    onDialogHide();
-                });
             })
         }
     });
@@ -1772,6 +1765,8 @@ $(function (e) {
     initTabLink();
     initTabBtn();
 });
+
+// 根据内容自动调整高度
 $.fn.autoHeight = function(){    
     function autoHeight(elem){
         elem.style.height = 'auto';

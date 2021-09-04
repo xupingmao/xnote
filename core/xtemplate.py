@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/08/21 00:28:03
+# @modified 2021/09/04 14:09:57
 # @filename xtemplate.py
 
 
@@ -405,8 +405,8 @@ class BasePlugin:
     # {权限配置}
     # 默认需要管理员权限访问
     require_admin = True
-    # 要求的访问权限
-    required_role = "admin"
+    # 允许访问的权限列表
+    permitted_role_list = []
 
     # {分类的配置}
     # 插件分类 {note, dir, system, network}
@@ -507,10 +507,21 @@ class BasePlugin:
         """返回当前页码"""
         return xutils.get_argument("page", 1, type=int)
 
-    def render(self):
-        """图形界面入口,实际的调用入口请查看`plugins.py`文件"""
+    def check_access(self):
+        role = xauth.get_current_role()
+        if role in self.permitted_role_list:
+            return
+
         if self.require_admin:
             xauth.check_login("admin")
+
+
+    def render(self):
+        """图形界面入口,实际的调用入口请查看`plugins.py`文件"""
+        
+        # 访问检查
+        self.check_access()
+        
         input  = self.get_input()
         error  = u("")
         output = u("")

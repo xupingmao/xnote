@@ -1,10 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/08/07 17:57:27
-import time
-import os
-import math
+# @modified 2021/09/04 20:51:16
 
 """处理时间的工具类
 
@@ -38,6 +35,10 @@ tm_yday  从每年的1月1日开始的天数 – 取值区间为[0,365]，其中
 
 
 """
+
+import time
+import os
+import math
 
 
 _DAY           = 3600 * 24
@@ -190,7 +191,7 @@ def is_leap_year(year):
     return ((year % 4 == 0) and (year % 100 != 0)) or (year % 400 == 0)
 
 def get_days_of_month(y, month):
-    """get days of a month
+    """获取指定月份的天数 (get days of a month)
         >>> get_days_of_month(2000, 2)
         29
         >>> get_days_of_month(2001, 2)

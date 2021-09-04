@@ -1,3 +1,5 @@
+
+// 根据内容自动调整高度
 $.fn.autoHeight = function(){    
     function autoHeight(elem){
         elem.style.height = 'auto';

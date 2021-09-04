@@ -182,22 +182,16 @@ $(function () {
     $(".dialog-btn").click(function() {
         var dialogUrl = $(this).attr("dialog-url");
         var dialogId = $(this).attr("dialog-id");
+        var dailogTitle = $(this).attr("dialog-title");
         if (dialogUrl) {
             // 通过新的HTML页面获取dialog
             $.get(dialogUrl, function(respHtml) {
 
-                $(document.body).append(respHtml);
-                
-                // 模态
-                doModal(dialogId);
+                // 展示对话框
+                xnote.showDialog(dailogTitle, respHtml);
 
                 // 重新绑定事件
                 xnote.fire("init-default-value");
-
-                $(".x-dialog-close, .x-dialog-cancel").unbind("click");
-                $(".x-dialog-close, .x-dialog-cancel").on("click", function() {
-                    onDialogHide();
-                });
             })
         }
     });

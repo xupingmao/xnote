@@ -2,7 +2,7 @@
  * xnote扩展事件
  * @author xupingmao
  * @since 2021/05/30 14:39:39
- * @modified 2021/05/30 14:42:56
+ * @modified 2021/09/04 18:34:04
  * @filename x-event.js
  */
 
@@ -15,7 +15,7 @@ if (window.xnote == undefined) {
 (function(){
 
     /**
-     * part of quarkjs
+     * 代码来自 quarkjs
      * 构造函数.
      * @name EventDispatcher
      * @class EventDispatcher类是可调度事件的类的基类，它允许显示列表上的任何对象都是一个事件目标。

@@ -12,8 +12,8 @@
 注意：读写数据前要先调用register_table来注册表，不然会失败！
 
 包含的方法如下
-* register_table
-* count_table
+* register_table  注册表，如果没注册系统会拒绝写入
+* count_table     统计表记录数
 * put
 * get
 * delete
@@ -23,18 +23,21 @@
 * prefix_count
 
 """
+# 先加载标准库
 from __future__ import print_function, with_statement
 import os
 import time
 import json
-import xutils
 import threading
-from xutils.base import Storage
-
 try:
     import sqlite3
 except ImportError:
+    # 部分运行时环境可能没有sqlite3
     sqlite3 = None
+
+# 加载第三方的库
+import xutils
+from xutils.base import Storage
 
 try:
     import leveldb
@@ -42,7 +45,7 @@ except ImportError:
     leveldb = None
 
 
-WRITE_LOCK = threading.Lock()
+WRITE_LOCK    = threading.Lock()
 LAST_TIME_SEQ = -1
 
 # 注册的数据库表名，如果不注册，无法进行写操作
@@ -53,7 +56,7 @@ TABLE_DICT = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/08/21 00:34:58
+# @modified 2021/09/05 00:42:24
 ###########################################################
 
 class DBException(Exception):
@@ -175,39 +178,6 @@ def check_not_empty(value, message):
     if value == None or value == "":
         raise Exception(message)
 
-class LdbTable:
-    """基于leveldb的表"""
-
-    def __init__(self, table_name):
-        check_not_empty(table_name, "dbutil.Table: table_name can not be empty")
-
-        if table_name[-1] != ':':
-            table_name += ':'
-        self.table_name = table_name
-
-    def get_key(self, id):
-        check_not_empty(id, "dbutil.Table.get_key: id can not be empty")
-        return self.table_name + id
-
-    def get_by_id(self, id):
-        key = self.get_key(id)
-        return get(key)
-
-    def update(self, id, obj):
-        key = self.get_key(id)
-        put(key, obj)
-
-    def delete(self, id):
-        key = self.get_key(id)
-        delete(key)
-
-    def count(self, func):
-        return count_table(self.table_name)
-
-class PrefixedDb(LdbTable):
-    """plyvel中叫做prefixed_db"""
-    pass
-
 def timeseq():
     # 加锁防止并发生成一样的值
     # TODO 提高存储效率
@@ -253,6 +223,126 @@ def check_get_leveldb():
         raise Exception("leveldb not found!")
     return _leveldb
 
+class LdbTable:
+    """基于leveldb的表，比较常见的是以下两种
+    * key = prefix:id_value           全局数据库
+    * key = prefix:user_name:id_value 用户维度数据
+    """
+
+    def __init__(self, table_name, key_name = "_key"):
+        # 参数检查
+        check_not_empty(table_name, "dbutil.Table: table_name can not be empty")
+
+        self.table_name = table_name
+        self.key_name = key_name
+
+        self.prefix = table_name
+        if self.prefix[-1] != ":":
+            self.prefix += ":"
+
+    def build_key(self, *argv):
+        return self.prefix + ":".join(argv)
+
+    def _get_key_from_obj(self, obj):
+        if obj is None:
+            raise Exception("obj can not be None")
+
+        return getattr(obj, self.key_name)
+
+    def _get_result_from_tuple_list(self, tuple_list):
+        result = []
+        for key, value in tuple_list:
+            setattr(value, self.key_name, key)
+            result.append(value)
+        return result
+
+    def _get_update_obj(self, obj):
+        return obj
+
+    def _get_id_value(self, id_type = "uuid"):
+        if id_type == "uuid":
+            return xutils.create_uuid()
+        elif id_type == "timeseq":
+            return timeseq()
+        else:
+            raise Exception("unknown id_type:%s" % id_type)
+
+    def _check_before_delete(self, key):
+        if not key.startswith(self.prefix):
+            raise Exception("invalid key:%s" % key)
+
+    def _check_value(self, obj):
+        if not isinstance(obj, dict):
+            raise Exception("invalid obj:%s, expected dict" % type(obj))
+
+    def is_valid_key(self, key = None, user_name = None):
+        if user_name is None:
+            return key.startswith(self.prefix)
+        else:
+            return key.startswith(self.prefix + user_name)
+
+    def get_by_key(self, key, default_value = None):
+        value = get(key, default_value)
+        if value != None:
+            setattr(value, self.key_name, key)
+        return value
+
+    def insert(self, obj, id_type = "uuid"):
+        self._check_value(obj)
+        id_value = self._get_id_value(id_type)
+        key  = self.build_key(id_value)
+        put(key, obj)
+        return key
+
+    def insert_by_user(self, user_name, obj, id_type = "uuid"):
+        self._check_value(obj)
+        id_value = self._get_id_value(id_type)
+        key  = self.build_key(user_name, id_value)
+        put(key, obj)
+        return key
+
+    def update(self, obj):
+        """从`obj`中获取主键`key`进行更新"""
+        self._check_value(obj)
+        obj_key = self._get_key_from_obj(obj)
+        update_obj = self._get_update_obj(obj)
+        put(obj_key, update_obj)
+
+    def update_by_key(self, key, obj):
+        """直接通过`key`进行更新"""
+        self._check_value(obj)
+        update_obj = self._get_update_obj(obj)
+        put(key, update_obj)
+
+    def delete(self, obj):
+        obj_key = self._get_key_from_obj(obj)
+        self._check_before_delete(obj_key)
+        delete(obj_key)
+
+    def delete_by_key(self, key):
+        self._check_before_delete(key)
+        delete(key)
+
+    def list(self, offset = 0, limit = 20, reverse = False):
+        tuple_list = prefix_list(self.prefix, None, offset, limit, reverse = reverse, include_key = True)
+        return self._get_result_from_tuple_list(tuple_list)
+
+    def list_by_user(self, user_name, offset = 0, limit = 20, reverse = False):
+        tuple_list = prefix_list(self.prefix + user_name, None, offset, limit, reverse = reverse, include_key = True)
+        return self._get_result_from_tuple_list(tuple_list)
+
+    def count(self):
+        return count_table(self.table_name)
+
+    def count_by_user(self, user_name):
+        return count_table(self.prefix + user_name)
+
+
+class PrefixedDb(LdbTable):
+    """plyvel中叫做prefixed_db"""
+    pass
+
+
 class TableInfo:
 
     def __init__(self, name, description, category):
@@ -261,6 +351,8 @@ class TableInfo:
         self.category = category
 
 def register_table(table_name, description, category = "default"):
+    # TODO 考虑过这个方法直接返回一个 LdbTable 实例
+    # LdbTable可能针对同一个`table`会有不同的实例
     TABLE_DICT[table_name] = TableInfo(table_name, description, category)
 
 def get_table_dict_copy():
@@ -269,6 +361,9 @@ def get_table_dict_copy():
 def get(key, default_value = None):
     check_leveldb()
     try:
+        if key == "" or key == None:
+            return None
+
         key = key.encode("utf-8")
         value = _leveldb.Get(key)
         result = get_object_from_bytes(value)
@@ -284,6 +379,8 @@ def obj_to_json(obj):
 
 def put(key, obj_value, sync = False):
     check_leveldb()
+    check_not_empty(key, "[dbutil.put] key can not be None")
+
     table_name = key.split(":")[0]
 
     if table_name not in TABLE_DICT:
@@ -373,8 +470,9 @@ def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = Fa
 
     if prefix[-1] != ':':
         prefix += ':'
+
     origin_prefix = prefix
-    prefix   = prefix.encode("utf-8")
+    prefix = prefix.encode("utf-8")
 
     if reverse:
         # 时序表的主键为 表名:用户名:时间序列 时间序列长度为20

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2021/08/01 17:10:26
+# @modified 2021/09/01 00:09:36
 
 """笔记编辑相关处理"""
 import os
@@ -136,6 +136,9 @@ class CreateHandler:
         parent_id = xutils.get_argument("parent_id", "0")
         deafult_name = xutils.get_argument("default_name", "")
 
+        creator = xauth.current_name()
+        xmanager.add_visit_log(creator, "/note/create")
+
         if key == "":
             key = time.strftime("%Y.%m.%d") + dateutil.current_wday()
 
@@ -144,7 +147,6 @@ class CreateHandler:
 
         type = NOTE_TYPE_MAPPING.get(type0, type0)
 
-        creator        = xauth.current_name()
         note           = Storage(name = name)
         note.creator   = creator
         note.parent_id = str(parent_id)
