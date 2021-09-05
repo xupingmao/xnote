@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/09/04 22:57:15
+# @modified 2021/09/05 11:58:23
 from io import StringIO
 import xconfig
 import codecs
@@ -292,7 +292,7 @@ def check_and_load_class(plugin):
     if plugin.clazz is not None:
         return
 
-    load_plugin_file()
+    load_plugin_file(plugin.fpath)
 
 def load_inner_plugins():
     for tool in INNER_TOOLS:
@@ -315,6 +315,9 @@ def can_visit_by_role(plugin, current_role):
     if current_role == "admin":
         return True
 
+    if plugin.require_admin:
+        return False
+
     if plugin.required_role is None:
         return True
 
@@ -329,7 +332,7 @@ def can_visit_by_role(plugin, current_role):
 @xutils.timeit(logfile=True, logargs=True, name="FindPlugins")
 def find_plugins(category, orderby=None):
     current_role = xauth.get_current_role()
-    user_name = xauth.current_name()
+    user_name    = xauth.current_name()
     plugins = []
 
     if current_role is None:
@@ -357,6 +360,7 @@ def inner_plugin(name, url, category = "inner", url_query = ""):
     context.category = category
     context.icon_class = "fa fa-cube"
     context.permitted_role_list = ["admin", "user"]
+    context.require_admin = False
     context.build()
     return context
 
@@ -372,6 +376,7 @@ def note_plugin(name, url, icon=None, size = None, required_role = "user", url_q
     context.size  = size
     context.editable = False
     context.category = "note"
+    context.require_admin = False
     context.required_role = required_role
     context.permitted_role_list = ["admin", "user"]
     context.build()
@@ -395,10 +400,11 @@ def load_inner_tools():
 
 INNER_TOOLS = [
     # 工具集/插件集
-    index_plugin("笔记工具", "/note/tools"),
-    index_plugin("文件工具", "/fs_tools"),
-    index_plugin("开发工具", "/plugins_list?category=develop", url_query = "&show_back=true"),
-    index_plugin("网络工具", "/plugins_list?category=network", url_query = "&show_back=true"),
+    # index_plugin("笔记工具", "/plugin_list?category=note", url_query = "&show_back=true"),
+    # index_plugin("文件工具", "/plugin_list?category=dir" , url_query = "&show_back=true"),
+    # index_plugin("开发工具", "/plugin_list?category=develop", url_query = "&show_back=true"),
+    # index_plugin("网络工具", "/plugin_list?category=network", url_query = "&show_back=true"),
+    # index_plugin("系统工具", "/plugin_list?category=system" , url_query = "&show_back=true"),
 
     # 开发工具
     dev_plugin("浏览器信息", "/tools/browser_info"),
@@ -468,7 +474,7 @@ def build_inner_tools(user_name = None):
     sort_plugins(user_name, tools_copy)
     return tools_copy
 
-def build_plugin_links(plugins):
+def convert_plugins_to_links(plugins):
     return plugins
 
 def get_plugin_values():
@@ -511,7 +517,13 @@ class PluginSort:
 
 def sort_plugins(user_name, plugins, orderby = None):
     sort_obj = PluginSort(user_name)
-    sort_obj.sort_by_visit_cnt_desc(plugins)
+    if orderby is None or orderby == "":
+        sort_obj.sort_by_visit_cnt_desc(plugins)
+    elif orderby == "recent":
+        sort_obj.sort_by_recent(plugins)
+    else:
+        raise Exception("invalid orderby:%s" % orderby)
+
     return plugins
 
 def sorted_plugins(user_name, plugins, orderby=None):
@@ -526,11 +538,11 @@ def debug_print_plugins(plugins, ctx = None):
             print(p)
 
 @logutil.timeit_deco(name = "list_all_plugins")
-def list_all_plugins(user_name, sort = True):
+def list_all_plugins(user_name, sort = True, orderby = None):
     links = get_plugin_values()
     
     if sort:
-        return sorted_plugins(user_name, links)
+        return sorted_plugins(user_name, links, orderby)
 
     return links
 
@@ -548,22 +560,21 @@ def list_other_plugins(user_name, sort = True):
 
 
 @logutil.timeit_deco(name = "list_plugins")
-def list_plugins(category, sort = True):
+def list_plugins(category, sort = True, orderby = None):
     user_name = xauth.current_name()
 
     if category == "other":
         plugins = list_other_plugins(user_name)
-        links   = build_plugin_links(plugins)
     elif category and category != "all":
         # 某个分类的插件
         plugins = find_plugins(category)
-        links   = build_plugin_links(plugins)
     else:
         # 所有插件
-        links = list_all_plugins(user_name)
+        plugins = list_all_plugins(user_name)
 
+    links = convert_plugins_to_links(plugins)
     if sort:
-        return sorted_plugins(user_name, links)
+        return sorted_plugins(user_name, links, orderby = orderby)
     return links
 
 def find_plugin_by_url(url, plugins):
@@ -575,11 +586,11 @@ def find_plugin_by_url(url, plugins):
 @logutil.timeit_deco(name = "list_recent_plugins")
 def list_recent_plugins():
     user_name = xauth.current_name()
-    items = list_visit_logs(user_name)
-    plugins = list_all_plugins(user_name)
-    links = [find_plugin_by_url(log.url, plugins) for log in items]
+    plugins   = list_all_plugins(user_name, sort = False)
+    links = convert_plugins_to_links(plugins)
 
-    return list(filter(None, links))
+    sort_plugins(user_name, links, "recent")
+    return links
 
 def list_visit_logs(user_name, offset = 0, limit = -1):
     logs = dbutil.prefix_list("plugin_visit_log:%s" % user_name, 
@@ -720,6 +731,16 @@ def filter_plugins_by_role(plugins, user_role):
             result.append(p)
     return result
 
+def fill_plugins_badge_info(plugins, orderby):
+    if orderby == "" or orderby is None:
+        # 默认按热度访问
+        for p in plugins:
+            p.badge_info = "热度: %s" % p.visit_cnt
+    else:
+        # 最近访问的
+        for p in plugins:
+            p.badge_info = dateutil.format_date(p.visit_time)
+
 class PluginListHandler:
 
     @logutil.timeit_deco(name = "PluginListHandler")
@@ -731,6 +752,7 @@ class PluginListHandler:
         header   = xutils.get_argument("header", "")
         version  = xutils.get_argument("version", "")
         show_back = xutils.get_argument("show_back", "")
+        orderby  = xutils.get_argument("orderby", "")
 
         context = Storage()
         context.category = category
@@ -741,6 +763,10 @@ class PluginListHandler:
         user_name = xauth.current_name()
         xmanager.add_visit_log(user_name, "/plugin_list?category=%s" % category)
 
+        if category == "recent":
+            category = "all"
+            orderby  = "recent"
+
         if xauth.is_admin():
             if key != "" and key != None:
                 recent  = []
@@ -749,8 +775,7 @@ class PluginListHandler:
                 context.show_back = "true"
                 context.title = T("搜索插件")
             else:
-                recent   = list_recent_plugins()
-                plugins  = list_plugins(category)
+                plugins  = list_plugins(category, orderby = orderby)
         else:
             # 普通用户插件访问
             recent = []
@@ -758,8 +783,9 @@ class PluginListHandler:
             plugins = list_plugins(category)
             plugins = filter_plugins_by_role(plugins, user_role)
 
+        fill_plugins_badge_info(plugins, orderby)
+
         context.plugins = plugins
-        context.recent = recent
         context.plugins_status = PLUGINS_STATUS
 
         if category == "":
@@ -767,6 +793,50 @@ class PluginListHandler:
 
         template_file = get_template_by_version(version)
         return xtemplate.render(template_file, **context)
+
+class PluginCategoryListHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        version  = xutils.get_argument("version", "")
+        current_role = xauth.current_role()
+        total_count = 0
+        count_dict = dict()
+
+        for k in xconfig.PLUGINS_DICT:
+            p = xconfig.PLUGINS_DICT[k]
+            if not can_visit_by_role(p, current_role):
+                continue
+            
+            total_count += 1
+            for category in p.category_list:
+                count = count_dict.get(category, 0)
+                count += 1
+                count_dict[category] = count
+        
+        sorted_items = sorted(count_dict.items(), key = lambda x:x[1], reverse = True)
+        category_keys = list(map(lambda x:x[0], sorted_items))
+
+        plugins = []
+
+        # 全部插件
+        root = PluginContext()
+        root.title = T("全部")
+        root.url   = "/plugin_list?category=all&show_back=true"
+        root.badge_info = total_count
+        plugins.append(root)
+
+        for key in category_keys:
+            p = PluginContext()
+            p.title = get_category_name_by_code(key)
+            p.url   = get_category_url_by_code(key)
+            p.link  = p.url
+            p.badge_info = count_dict[key]
+            plugins.append(p)
+
+        template_file = get_template_by_version(version)
+        return xtemplate.render(template_file, plugins = plugins, plugin_category = "index")
+        
 
 def get_plugin_category(category):
     plugin_categories = []
@@ -826,7 +896,6 @@ class LoadPluginHandler:
             if plugin != None:
                 # 访问日志
                 add_visit_log(user_name, url)
-                plugin.atime = dateutil.format_datetime()
                 check_and_load_class(plugin)
                 # 渲染页面
                 return plugin.clazz().render()
@@ -921,16 +990,18 @@ xutils.register_func("plugin.get_category_url_by_code", get_category_url_by_code
 xutils.register_func("plugin.get_category_name_by_code", get_category_name_by_code)
 xutils.register_func("plugin.define_category", define_plugin_category)
 
-define_plugin_category("note", u"笔记", url = "/note/tools")
+define_plugin_category("recent", u"最近")
+define_plugin_category("note"  , u"笔记")
 define_plugin_category("dir",  u"文件", url = "/fs_tools", required_roles = ["admin"])
-define_plugin_category("system",  u"系统", required_roles = ["admin"])
+define_plugin_category("system",  u"系统", required_roles = ["admin"], platforms = ["desktop"])
 define_plugin_category("network", u"网络", required_roles = ["admin"], platforms = ["desktop"])
 define_plugin_category("develop", u"开发", required_roles = ["admin", "user"], platforms = ["desktop"])
-define_plugin_category("index",   u"分类")
+define_plugin_category("index",   u"分类", url = "/plugin_category_list")
 
 xurls = (
     r"/plugin/(.+)", LoadPluginHandler,
     r"/plugin_list", PluginListHandler,
+    r"/plugin_category_list", PluginCategoryListHandler,
     
     r"/plugins_list_new", PluginGridHandler,
     r"/plugins_list", PluginListHandler,

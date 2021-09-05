@@ -8,7 +8,7 @@
 # @description 插件描述
 # @icon-class fa-cube
 # @permitted-role admin # 对admin用户开放
-# @debug # 调试模式，开发完成后记得关闭
+# @debug true # 开启调试模式，开发完成后记得关闭
 
 import xconfig
 import xutils
@@ -17,7 +17,7 @@ import xmanager
 import xtemplate
 from xutils import Storage
 from xutils import dbutil
-from xtemplate import BaseFormPlugin
+from xtemplate import BasePlugin
 
 HTML = """
 <!-- Html -->
@@ -107,7 +107,7 @@ EDIT_HTML = """
 dbutil.register_table("form_test_data", "表单测试数据")
 TABLE = dbutil.LdbTable("form_test_data")
 
-class Main(BaseFormPlugin):
+class Main(BasePlugin):
 
     rows = 0
 
@@ -126,10 +126,10 @@ class Main(BaseFormPlugin):
         user_name = xauth.current_name()
         if key != "":
             row = Storage(content = content)
-            TABLE.update_by_key(key, row, id_type = "timeseq")
+            TABLE.update_by_key(key, row)
             return dict(code = "success", message = "更新成功")
         else:
-            TABLE.insert_by_user(user_name, Storage(content = content))
+            TABLE.insert_by_user(user_name, Storage(content = content), id_type = "timeseq")
             return dict(code = "success", message = "创建成功")
 
     def delete_row(self):
