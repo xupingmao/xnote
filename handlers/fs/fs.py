@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2021/06/26 21:45:19
+# @modified 2021/09/11 22:53:10
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -596,6 +596,9 @@ class BookmarkHandler:
     @xauth.login_required("admin")
     def GET(self):
         user_name = xauth.current_name()
+
+        xmanager.add_visit_log(user_name, "/fs_bookmark")
+
         kw = dict()
         bookmark = Bookmark(user_name)
 
@@ -631,6 +634,12 @@ class BookmarkAjaxHandler:
 
         return dict(code = "success")
 
+class ToolListHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        raise web.found("/plugin_list?category=dir&show_back=true")
+
 dbutil.register_table("fs_bookmark", "文件收藏夹")
 xutils.register_func("fs.process_file_list", process_file_list)
 
@@ -640,6 +649,7 @@ xurls = (
     r"/fs_text",   TextHandler,
     r"/fs_link/(.*)", LinkHandler,
     r"/fs_recent", RecentHandler,
+    r"/fs_tools",  ToolListHandler,
 
     # Ajax服务
     r"/fs_api/remove", RemoveAjaxHandler,

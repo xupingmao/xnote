@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/09/11 14:00:17
+# @modified 2021/09/11 22:38:50
 import math
 import time
 import web
@@ -487,17 +487,7 @@ class NotePluginHandler:
 
     @xauth.login_required()
     def GET(self):
-        user_name = xauth.current_name()
-        plugins  = PLUGIN.find_plugins("note")
-        template = "note/page/note_tools.html"
-
-        xmanager.add_visit_log(user_name, "/note/tools")
-
-        return xtemplate.render(template,
-            html_title = T("笔记应用"),
-            plugin_category = "note",
-            plugins     = plugins,
-            search_type = "default")
+        raise web.found("/plugin_list?category=note&show_back=true")
 
 
 class RecentHandler:
@@ -552,7 +542,7 @@ class RecentHandler:
             show_mdate = True
             dir_type = "recent_edit"
         
-        count   = NOTE_DAO.count_user_note(creator)
+        count = NOTE_DAO.count_user_note(creator)
         
         return xtemplate.render("note/page/note_recent.html",
             pathlist  = type_node_path(html_title, ""),
@@ -572,7 +562,7 @@ class RecentHandler:
             show_action_time = show_action_time,
             show_hot_index = show_hot_index,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
-            page_url    = "/note/recent_%s?page=" % orderby)
+            page_url    = "/note/recent?orderby=%s&page=" % orderby)
 
 class ArchivedHandler:
 

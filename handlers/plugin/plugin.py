@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/09/11 13:55:59
+# @modified 2021/09/11 22:26:05
 from io import StringIO
 import xconfig
 import codecs
@@ -237,6 +237,10 @@ class PluginContext(Storage):
         self.build_category()
         self.build_permission_info()
 
+        if self.icon is None:
+            self.icon = DEFAULT_PLUGIN_ICON_CLASS
+            self.icon_class = DEFAULT_PLUGIN_ICON_CLASS
+
 
 
 def is_plugin_file(fpath):
@@ -368,7 +372,7 @@ def find_plugins(category, orderby=None):
                 plugins.append(p)
     return sorted_plugins(user_name, plugins, orderby)
 
-def inner_plugin(name, url, category = "inner", url_query = ""):
+def inner_plugin(name, url, category = "inner", url_query = "", icon = None):
     context = PluginContext()
     context.name = name
     context.title = name
@@ -380,6 +384,8 @@ def inner_plugin(name, url, category = "inner", url_query = ""):
     context.icon_class = "fa fa-cube"
     context.permitted_role_list = ["admin", "user"]
     context.require_admin = False
+    context.icon = icon
+    context.icon_class = icon
     context.build()
     return context
 
@@ -404,8 +410,8 @@ def note_plugin(name, url, icon=None, size = None, required_role = "user", url_q
 def index_plugin(name, url, url_query = ""):
     return inner_plugin(name, url, "index", url_query = url_query)
 
-def file_plugin(name, url):
-    return inner_plugin(name, url, "dir")
+def file_plugin(name, url, icon = None):
+    return inner_plugin(name, url, "dir", icon = icon)
 
 def dev_plugin(name, url):
     return inner_plugin(name, url, "develop")
@@ -475,6 +481,7 @@ INNER_TOOLS = [
 
     # 文件工具
     file_plugin("文件索引", "/fs_index"),
+    file_plugin("我的收藏夹", "/fs_bookmark", icon = "fa fa-folder"),
 
     # 系统工具
     system_plugin("系统日志", "/system/log"),
@@ -1008,7 +1015,7 @@ xutils.register_func("plugin.define_category", define_plugin_category)
 define_plugin_category("all",      u"全部", icon_class = "fa fa-th-large")
 define_plugin_category("recent",   u"最近")
 define_plugin_category("note"  ,   u"笔记")
-define_plugin_category("dir",      u"文件", url = "/fs_tools?category=dir", required_roles = ["admin"], icon_class="fa fa-folder")
+define_plugin_category("dir",      u"文件", required_roles = ["admin"], icon_class="fa fa-folder")
 define_plugin_category("system",   u"系统", required_roles = ["admin"], platforms = ["desktop"],  icon_class = "fa fa-gear")
 define_plugin_category("network",  u"网络", required_roles = ["admin"], platforms = ["desktop"], icon_class = "icon-network-14px")
 define_plugin_category("develop",  u"开发", required_roles = ["admin", "user"], platforms = ["desktop"])

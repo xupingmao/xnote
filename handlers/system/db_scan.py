@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2021/08/06 20:03:49
+# @modified 2021/09/11 21:46:15
 import xutils
 import xtemplate
 from xutils import dbutil
@@ -16,7 +16,9 @@ SCAN_HTML = """
             {% include common/button/back_button.html %}
         </div>
     </div>
+</div>
 
+<div class="card">
     <form class="row">
         <div class="input-group">
             <label>数据库表</label>

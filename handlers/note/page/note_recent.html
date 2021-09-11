@@ -33,8 +33,9 @@
     </div>
 
     {% include note/component/note_list_component.html %}
-{% end %}
 
-{% block aside %}
-    {% include note/component/mod_aside.html %}
+    <div class="card">
+        {% include base/pagination.html %}
+    </div>
+
 {% end %}

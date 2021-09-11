@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/09/11 11:25:06
+# @modified 2021/09/11 22:14:56
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -986,24 +986,23 @@ def list_note_by_log(log_prefix, creator, offset = 0, limit = -1, skip_deleted =
     @param {string} creator 用户名称
     @param {int} offset 开始下标（包含）
     @param {int} limit 返回数量
+    @return {list} 笔记列表
     """
+
+    # TODO 需要清理无用的日志
+    filter_log_func = None
+    log_tuple_list  = dbutil.prefix_list("%s:%s" % (log_prefix, creator), None, 
+        offset = offset, limit = limit, reverse = True, include_key = True)
+
     result = []
-
-    def list_func(key, value):
-        if limit > 0 and len(result) >= limit:
-            return False
-
-        note_id = get_id_from_log(value)
-        note = get_by_id(note_id)
+    for log_key, log in log_tuple_list:
+        id = get_id_from_log(log)
+        note = get_by_id(id)
         if note != None:
-            if skip_deleted and note.is_deleted:
-                return False
-            result.append(note)
-            
-        return True
-
-    log_list  = dbutil.prefix_list("%s:%s" % (log_prefix, creator), list_func, 
-        offset = offset, limit = -1, reverse = True)
+            if note.is_deleted:
+                dbutil.delete(log_key)
+            else:
+                result.append(note)
 
     return result
 

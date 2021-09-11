@@ -31,7 +31,16 @@ window.xnote.showDialogEx = function (options) {
     var functions = options.functions;
     var anim = options.anim;
 
-    // 关于动画：undefined: 默认动画、0：出现、1：上面出现、2：下面出现、3：左边出现、4：滚动出现、5：出现、6：抖动出现、7：浮现
+    // 详细文档 https://www.layui.com/doc/modules/layer.html
+    // @param {int} anim 动画的参数
+    // undefined: 默认动画
+    // 0：平滑放大。默认
+    // 1：从上掉落
+    // 2：从最底部往上滑入
+    // 3：从左滑入
+    // 4：从左翻滚
+    // 5：渐显
+    // 6：抖动出现
 
     if (!(functions instanceof Array)) {
         functions = [functions];

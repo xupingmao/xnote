@@ -1,7 +1,7 @@
 {% init error = "" %}
 {% init path  = "/fake_dir" %}
 
-{% include fs/component/options-css.html %}
+{% include fs/component/options_css.html %}
 
 <input id="currentPath" type="hidden" value="{{path}}"/>
 <input id="currentError" type="hidden" value="{{error}}"/>
@@ -57,7 +57,7 @@
 </div>
 
 {% include fs/component/clipboard-dialog.html %}
-{% include fs/component/move-files.html %}
+{% include fs/component/move_file_dialog.html %}
 
 <script type="text/javascript">
 $(function () {
@@ -243,21 +243,22 @@ $(function () {
             var name = checked.attr("data-name");
             var path = checked.attr("data-path");
             var dirname = "{{path}}";
-            var new_name = prompt("重命名为", name);
-            if (new_name) {
-                $.post("/fs_api/rename", 
-                    {dirname: dirname, old_name: name, new_name: new_name}, 
-                    function (resp) {
-                        if (resp.code == "success") {
-                            location.reload();
-                        } else {
-                            showErrorMessage("重命名失败, %s".format(resp.message));
-                        }
-                }).fail(function (resp) {
-                    console.log(resp);
-                    alert("重命名失败");
-                })
-            }
+            xnote.prompt("重命名为", name, function (new_name) {
+                if (new_name) {
+                    $.post("/fs_api/rename", 
+                        {dirname: dirname, old_name: name, new_name: new_name}, 
+                        function (resp) {
+                            if (resp.code == "success") {
+                                location.reload();
+                            } else {
+                                showErrorMessage("重命名失败, %s".format(resp.message));
+                            }
+                    }).fail(function (resp) {
+                        console.log(resp);
+                        alert("重命名失败");
+                    })
+                }
+            });
         }
     });
 
