@@ -36,12 +36,12 @@
 {% end %}
 
 <div class="plugin-list col-md-12">
-    {% for category, plugins in plugin_categories %}
+    {% for temp_category, plugins in plugin_categories %}
         {% if len(plugins) == 0 %}
             {% continue %}
         {% end %}
         <div class="card">
-            <h3 class="card-title">{{category}}</h3>
+            <h3 class="card-title">{{temp_category}}</h3>
             {% for item in plugins %}
                 <span class="tag-span">
                     <a href="{{item.link}}">{{item.title}}</a>

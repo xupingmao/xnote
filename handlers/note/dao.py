@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/08/13 23:00:50
+# @modified 2021/09/11 11:25:06
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -317,6 +317,9 @@ def list_path(file, limit = 5):
         file = get_by_id(file.parent_id, include_full = False)
     return pathlist
 
+def get_full_by_id(id):
+    return dbutil.get("note_full:%s" % id)
+
 @xutils.timeit(name = "NoteDao.GetById:leveldb", logfile = True)
 def get_by_id(id, include_full = True):
     if id == "" or id is None:
@@ -330,7 +333,7 @@ def get_by_id(id, include_full = True):
         build_note_info(note_index)
         return note_index
 
-    note = dbutil.get("note_full:%s" % id)
+    note = get_full_by_id(id)
     if note and not include_full:
         del note.content
         del note.data
@@ -1208,6 +1211,21 @@ def search_public(words):
     sort_notes(notes)
     return notes
 
+def check_and_remove_broken_notes(notes, user_name):
+    result = []
+    has_broken = False
+    for note in notes:
+        full = get_full_by_id(note.id)
+        if full != None:
+            result.append(note)
+        else:
+            delete_note(note.id)
+            has_broken = True
+
+    if has_broken:
+        refresh_note_stat(user_name)
+    return result
+
 def count_removed(creator):
     def count_func(key, value):
         return value.is_deleted and value.creator == creator
@@ -1218,6 +1236,7 @@ def list_removed(creator, offset, limit, orderby = None):
         return value.is_deleted and value.creator == creator
 
     notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, MAX_LIST_SIZE)
+    notes = check_and_remove_broken_notes(notes, creator)
     sort_notes(notes, orderby)
     return notes[offset: offset + limit]
 
@@ -1431,6 +1450,8 @@ def refresh_note_stat_async(user_name):
     refresh_note_stat(user_name)
 
 def refresh_note_stat(user_name):
+    assert user_name != None, "[refresh_note_stat.assert] user_name != None"
+
     stat = Storage()
 
     if user_name is None:

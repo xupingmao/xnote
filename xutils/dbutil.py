@@ -56,7 +56,7 @@ TABLE_DICT = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/09/05 00:42:24
+# @modified 2021/09/11 11:43:01
 ###########################################################
 
 class DBException(Exception):
@@ -224,9 +224,16 @@ def check_get_leveldb():
     return _leveldb
 
 class LdbTable:
-    """基于leveldb的表，比较常见的是以下两种
-    * key = prefix:id_value           全局数据库
-    * key = prefix:user_name:id_value 用户维度数据
+    """基于leveldb的表，比较常见的是以下几种
+    * key = prefix:record_id           全局数据库
+    * key = prefix:user_name:record_id 用户维度数据
+    * key = prefix:user_name:folder_id:record_id 用户+文件夹维度数据
+
+    字段说明: 
+    * prefix    代表的是功能类型，比如猫和狗是两种不同的动物，锤子和手机是两种不同的工具
+    * user_name 代表用户名，比如张三和李四
+    * folder_id 代表用户定义的目录，比如张三有两个不同的项目
+    * record_id 代表一条记录的ID
     """
 
     def __init__(self, table_name, key_name = "_key"):
@@ -331,11 +338,19 @@ class LdbTable:
         tuple_list = prefix_list(self.prefix + user_name, None, offset, limit, reverse = reverse, include_key = True)
         return self._get_result_from_tuple_list(tuple_list)
 
+    def list_by_func(self, user_name, filter_func = None, offset = 0, limit = 20, reverse = False):
+        tuple_list = prefix_list(self.prefix + user_name, filter_func, offset, limit, reverse = reverse, include_key = True)
+        return self._get_result_from_tuple_list(tuple_list)
+
     def count(self):
         return count_table(self.table_name)
 
     def count_by_user(self, user_name):
         return count_table(self.prefix + user_name)
+
+    def count_by_func(self, user_name, filter_func):
+        assert filter_func != None, "[count_by_func.assert] filter_func != None"
+        return prefix_count(self.prefix + user_name, filter_func)
 
 
 class PrefixedDb(LdbTable):

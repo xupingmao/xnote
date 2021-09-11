@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2021/06/12 17:12:00
+# @modified 2021/09/11 11:53:31
 # decode: bytes -> str
 # encode: str -> bytes
 import os
@@ -111,7 +111,7 @@ class HttpResponse:
         self.headers = headers
         self.content = content
 
-def do_http(method, url, headers, data=None, charset='utf-8'):
+def do_http(method, url, headers, data = None, charset = 'utf-8'):
     """使用低级API访问HTTP，可以任意设置header，data等
     """
     addr = get_host(url)

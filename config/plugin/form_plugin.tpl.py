@@ -145,21 +145,25 @@ class Main(BasePlugin):
         user_name = xauth.current_name()
         offset = xutils.get_argument("offset", 0, type = int)
         limit  = xutils.get_argument("limit", 20, type = int)
-        return TABLE.list_by_user(user_name, offset, limit)
+        data_list = TABLE.list_by_user(user_name, offset, limit)
+        self.writehtml(HTML, data_list = data_list)
     
     def handle(self, input):
         action  = xutils.get_argument("action", "")
         if action == "get_template":
+            # 获取编辑对象
             return self.get_input_template()
         
         if action == "edit":
+            # 编辑操作
             return self.edit_row()
 
         if action == "delete":
+            # 删除操作
             return self.delete_row()
         
         # 加载数据列表
-        self.writehtml(HTML, data_list = self.load_data_list())
+        return self.load_data_list()
 
 
 if __name__ == "__main__":

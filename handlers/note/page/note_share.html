@@ -17,9 +17,9 @@
 
 {% if _has_login %}
     <div class="card">
-        <div class="pad5">
-            <a class="tab tab-link x-tab x-tab-default" href="/note/public">公开分享</a>
-            <a class="tab tab-link x-tab" href="/note/share_to_me">分享给我</a>
+        <div class="pad5 x-tab-box" data-tab-default="public" data-tab-key="tab">
+            <a class="tab tab-link x-tab" href="/note/public" data-tab-value="public">公开分享</a>
+            <a class="tab tab-link x-tab" href="/note/share_to_me?tab=to_me" data-tab-value="to_me">分享给我</a>
         </div>
     </div>
 {% end %}

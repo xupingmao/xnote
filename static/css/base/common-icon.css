@@ -2,7 +2,7 @@
  * description here
  * @author xupingmao
  * @since 2021/07/18 19:08:04
- * @modified 2021/07/25 10:12:17
+ * @modified 2021/09/11 13:49:23
  * @filename common-icon.css
  */
 
@@ -66,3 +66,38 @@
     background-size: cover;
     background-image: url(/static/image/icons/icon_barcode.png);
 }
+
+.icon-network {
+    display: block;
+    margin-right: 3px;
+    margin-top: 4px; /* line-height是25px */
+    float: left;
+    width: 16px;
+    height: 16px;
+    background-size: cover;
+    background-image: url(/static/image/icons/icon_network.png);
+}
+
+.icon-network-14px {
+    display: block;
+    margin-right: 5px;
+    margin-top: 5px; /* line-height是25px */
+    float: left;
+    width: 14px;
+    height: 14px;
+    background-size: cover;
+    background-image: url(/static/image/icons/icon_network.png);
+}
+
+
+.icon-work {
+    display: block;
+    margin-right: 5px;
+    margin-top: 5px; /* line-height是25px */
+    float: left;
+    width: 16px;
+    height: 16px;
+    background-size: cover;
+    background-image: url(/static/image/icons/icon_work.png);
+}
+

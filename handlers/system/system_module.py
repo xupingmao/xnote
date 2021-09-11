@@ -1,13 +1,14 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/07/31 15:02:04
+# @modified 2021/09/11 12:11:02
 import six
 import xutils
 import xtemplate
 import sys
 import inspect
 import web
+from xutils import Storage
 
 class ModuleInfo:
     def __init__(self, mod, sysname):
@@ -31,17 +32,17 @@ class ModuleInfo:
     def __lt__(self, info):
         return self.sysname < info.sysname
 
-def query_modules():
-    modules = []
-    for modname in sys.modules.copy():
+def list_modules():
+    result = []
+    for modname in sys.modules:
         module = sys.modules[modname]
         if module != None:
             mod = ModuleInfo(module, modname)
-            modules.append(mod)
+            result.append(mod)
         else:
             # Py2中出现这种情况
             six.print_("%s is None" % modname)
-    return sorted(modules)
+    return sorted(result)
 
 class DocInfo:
 
@@ -50,16 +51,30 @@ class DocInfo:
         self.doc = doc
         self.type = type
 
+class ErrorModule:
+
+    """无法找到该模块"""
+
+    def __init__(self, name):
+        self.name = name
+        self.__file__ = "文件不存在"
+
+
 class ModInfo:
 
     def __init__(self, name):
         self.name = name
-        mod = sys.modules[name]
-        functions = []
-        self.mod = mod
+        if name not in sys.modules:
+            mod = ErrorModule(name)
+        else:
+            mod = sys.modules[name]
+        
+        functions      = []
+        self.mod       = mod
         self.functions = functions
-        self.doc = mod.__doc__
-        self.file = ""
+        self.doc       = mod.__doc__
+        self.file      = ""
+
         if hasattr(mod, "__file__"):
             self.file = mod.__file__
             # process with Py2
@@ -126,7 +141,7 @@ class ModuleListHandler(object):
     def GET(self):
         return xtemplate.render("system/page/module_list.html", 
             show_aside = False,
-            modules = query_modules(),
+            modules = list_modules(),
             sys = sys)
 
 xurls = (

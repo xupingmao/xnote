@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/09/05 12:01:25
+# @modified 2021/09/11 14:27:39
 
 import sys
 import os
@@ -288,6 +288,9 @@ class TestMain(BaseTestCase):
 
     def test_plugin(self):
         code  = '''
+# @api-level 2.8
+# @title Unit-Test-Plugin
+# @category test
 class Main:
     def render(self):
         return "hello,world"
@@ -302,9 +305,13 @@ class Main:
 
     def test_plugins_list(self):
         self.check_200("/plugins_list")
+        self.check_200("/plugin_list")
 
     def test_plugin_category_list(self):
         self.check_200("/plugin_category_list")
+
+    def test_plugin_search(self):
+        self.check_200("/plugin_list?key=123")
 
     def test_plugins_other(self):
         self.check_OK("/plugins_list?category=other")

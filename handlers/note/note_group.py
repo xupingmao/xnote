@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/08/29 22:33:54
+# @modified 2021/09/11 14:00:17
 import math
 import time
 import web
@@ -171,6 +171,9 @@ class ShareListHandler:
             page       = page,
             page_max   = math.ceil(amount / limit),
             page_url   = "/note/%s?page=" % self.share_type)
+
+class PublicListHandler(ShareListHandler):
+    pass
 
 class ShareToMeListHandler(ShareListHandler):
     

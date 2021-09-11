@@ -664,9 +664,8 @@ class _Init(_Node):
         self.line = line
 
     def generate(self, writer):
-        values = self.expression.split("=")
-        name = values[0].strip()
-        value = ("=").join(values[1:])
+        name, value = self.expression.split("=", 1)
+        name = name.strip()
         line = "if globals().get(%r) == None: globals()[%r] = %s" % (name, name, value)
         writer.write_line(line, self.line)
 

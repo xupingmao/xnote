@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2021/09/04 19:20:00
+# @modified 2021/09/11 12:18:17
 import re
 import random
 import json
@@ -9,6 +9,7 @@ import inspect
 import hashlib
 import base64
 from xutils.imports import is_str, ConfigParser
+from xutils.textutil_url import *
 
 try:
     from urllib.parse import quote, unquote
@@ -419,6 +420,9 @@ def random_string(length, chars=ALPHA_NUM):
 
 
 def parse_config_text(text, ret_type = 'list'):
+    return parse_prop_text(text, ret_type)
+
+def parse_prop_text(text, ret_type = "dict"):
     """解析key/value格式的配置文本
     @param {string} text 配置文本内容
     @param {string} ret_type 返回的格式，包含list, dict
@@ -427,11 +431,16 @@ def parse_config_text(text, ret_type = 'list'):
         config = dict()
     else:
         config = []
+
+    if text == None or text == "":
+        return config
+
     for line in text.split("\n"): 
         line = line.strip()
         if line.find("#")!=-1: 
             # 删除注释部分
             line=line[0:line.find('#')]
+        # TODO properties文件还支持``:``作为分隔符
         eq_pos = line.find('=')
         if eq_pos > 0: 
             key   = line[:eq_pos].strip()
@@ -441,6 +450,7 @@ def parse_config_text(text, ret_type = 'list'):
             else:
                 config.append(dict(key=key, value=value))
     return config
+
 
 def parse_ini_text(text):
     """解析INI文件内容"""

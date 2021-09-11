@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/09/05 11:58:23
+# @modified 2021/09/11 13:55:59
 from io import StringIO
 import xconfig
 import codecs
@@ -72,9 +72,9 @@ def get_current_platform():
     return xtemplate.get_device_platform()
 
 class PluginCategory:
-    """插件类型"""
-
+    """插件分类"""
     required_roles = None
+    icon_class = "fa fa-cube"
 
     def __init__(self, code, name, url = None, required_roles = None):
         self.code = code
@@ -100,7 +100,11 @@ class PluginCategory:
         return xauth.current_role() in self.required_roles
 
 
-def define_plugin_category(code, name, url = None, raise_duplication = True, required_roles = None, platforms = None):
+def define_plugin_category(code, name, url = None, 
+        raise_duplication = True, 
+        required_roles = None, 
+        platforms = None, 
+        icon_class = None):
     global PLUGIN_CATEGORY_LIST
     for item in PLUGIN_CATEGORY_LIST:
         if item.code == code:
@@ -115,6 +119,8 @@ def define_plugin_category(code, name, url = None, raise_duplication = True, req
                 return
     category = PluginCategory(code, name, url, required_roles)
     category.platforms = platforms
+    if icon_class != None:
+        category.icon_class = icon_class
     PLUGIN_CATEGORY_LIST.append(category)
 
 def get_plugin_category_list():
@@ -137,6 +143,18 @@ def get_category_name_by_code(code):
     # 如果没有定义，就返回code
     return code
 
+def get_category_by_code(code):
+    for item in PLUGIN_CATEGORY_LIST:
+        if item.code == code:
+            return item
+    return None
+
+
+def get_category_icon_class_by_code(code):
+    category = get_category_by_code(code)
+    if category is None:
+        return DEFAULT_PLUGIN_ICON_CLASS
+    return category.icon_class
 
 class PluginContext(Storage):
     """插件上下文"""
@@ -202,11 +220,12 @@ class PluginContext(Storage):
     def build_category(self):
         if self.category is None and len(self.category_list) > 0:
             self.category = self.category_list[0]
-
-        if self.category is None and len(self.category_list) == 0:
-            self.category_list.append(self.category)
         
         if self.category != None and self.category not in self.category_list:
+            self.category_list.append(self.category)
+
+        if self.category is None and len(self.category_list) == 0:
+            self.category = "other"
             self.category_list.append(self.category)
 
     def build_permission_info(self):
@@ -340,11 +359,11 @@ def find_plugins(category, orderby=None):
         return plugins
 
     if category == "None":
-        category = None
+        category = "other"
 
     for fname in xconfig.PLUGINS_DICT:
         p = xconfig.PLUGINS_DICT.get(fname)
-        if p and p.category == category:
+        if p and category in p.category_list:
             if can_visit_by_role(p, current_role):
                 plugins.append(p)
     return sorted_plugins(user_name, plugins, orderby)
@@ -547,16 +566,7 @@ def list_all_plugins(user_name, sort = True, orderby = None):
     return links
 
 def list_other_plugins(user_name, sort = True):
-    plugins = list_all_plugins(user_name, sort)
-    defined_types = set()
-    for item in get_plugin_category_list():
-        defined_types.add(item.code)
-
-    result = []
-    for plugin in plugins:
-        if plugin.category not in defined_types:
-            result.append(plugin)
-    return result
+    return find_plugins("other")
 
 
 @logutil.timeit_deco(name = "list_plugins")
@@ -823,14 +833,19 @@ class PluginCategoryListHandler:
         root = PluginContext()
         root.title = T("全部")
         root.url   = "/plugin_list?category=all&show_back=true"
+        root.link  = root.url
         root.badge_info = total_count
+        root.icon_class = DEFAULT_PLUGIN_ICON_CLASS
         plugins.append(root)
 
         for key in category_keys:
             p = PluginContext()
             p.title = get_category_name_by_code(key)
-            p.url   = get_category_url_by_code(key)
-            p.link  = p.url
+            url     = get_category_url_by_code(key)
+            url     = textutil.add_url_param(url, "show_back", "true")
+            p.url   = url
+            p.link  = url
+            p.icon_class = get_category_icon_class_by_code(key)
             p.badge_info = count_dict[key]
             plugins.append(p)
 
@@ -990,13 +1005,17 @@ xutils.register_func("plugin.get_category_url_by_code", get_category_url_by_code
 xutils.register_func("plugin.get_category_name_by_code", get_category_name_by_code)
 xutils.register_func("plugin.define_category", define_plugin_category)
 
-define_plugin_category("recent", u"最近")
-define_plugin_category("note"  , u"笔记")
-define_plugin_category("dir",  u"文件", url = "/fs_tools", required_roles = ["admin"])
-define_plugin_category("system",  u"系统", required_roles = ["admin"], platforms = ["desktop"])
-define_plugin_category("network", u"网络", required_roles = ["admin"], platforms = ["desktop"])
-define_plugin_category("develop", u"开发", required_roles = ["admin", "user"], platforms = ["desktop"])
-define_plugin_category("index",   u"分类", url = "/plugin_category_list")
+define_plugin_category("all",      u"全部", icon_class = "fa fa-th-large")
+define_plugin_category("recent",   u"最近")
+define_plugin_category("note"  ,   u"笔记")
+define_plugin_category("dir",      u"文件", url = "/fs_tools?category=dir", required_roles = ["admin"], icon_class="fa fa-folder")
+define_plugin_category("system",   u"系统", required_roles = ["admin"], platforms = ["desktop"],  icon_class = "fa fa-gear")
+define_plugin_category("network",  u"网络", required_roles = ["admin"], platforms = ["desktop"], icon_class = "icon-network-14px")
+define_plugin_category("develop",  u"开发", required_roles = ["admin", "user"], platforms = ["desktop"])
+define_plugin_category("datetime", u"日期和时间", platforms = [], icon_class = "fa fa-clock-o")
+define_plugin_category("work",     u"工作", platforms = ["desktop"], icon_class = "icon-work")
+define_plugin_category("index",    u"分类", url = "/plugin_category_list?category=index", icon_class = "fa fa-th-large")
+define_plugin_category("other",    u"其他", platforms = [])
 
 xurls = (
     r"/plugin/(.+)", LoadPluginHandler,

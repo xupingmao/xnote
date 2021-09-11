@@ -3,28 +3,15 @@
 
 <div class="card">
     <div class="pad5">
-        <a class="tab tab-link x-tab x-tab-default" href="/plugin_list?category=all"
-            data-category="all">全部</a>
 
-        {% for category_temp in plugin_category_list %}
-            {% if category_temp.is_visible() %}
-                <a class="tab tab-link x-tab" href="{{category_temp.url}}" 
-                    data-category="{{category_temp.code}}">{{category_temp.name}}</a>
+        <div class="x-tab-box" data-tab-default="all" data-tab-key="category">
+            {% for category_temp in plugin_category_list %}
+                {% if category_temp.is_visible() %}
+                    <a class="tab tab-link x-tab" href="{{category_temp.url}}" 
+                        data-tab-value="{{category_temp.code}}">{{category_temp.name}}</a>
+                {% end %}
             {% end %}
-        {% end %}
-        
-        <a class="tab tab-link x-tab" href="/plugin_list?category=other"
-            data-category="other">其他</a>
+        </div>
+
     </div>
 </div>
-
-<script type="text/javascript">
-    $(function () {
-        var plugin_category = "{{plugin_category}}";
-        if (plugin_category == "") {
-            plugin_category = getUrlParam("category");
-        }
-        $("[data-category]").removeClass("tab-link-active")
-        $("[data-category=" + plugin_category + "]").addClass("tab-link-active");
-    })
-</script>

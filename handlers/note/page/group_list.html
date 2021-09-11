@@ -9,7 +9,7 @@
             <span>{{title}}</span>
             <div class="float-right">
                 <a class="btn" href="javascript:createGroup();">新建笔记本</a>
-                <a class="btn btn-default" href="/note/tools">工具</a>
+                <a class="btn btn-default" href="/note/tools?category=note">工具</a>
             </div>
         </div>
 
@@ -24,12 +24,14 @@
 
     <div class="card">
         <div class="pad5">
-            <a class="tab tab-link x-tab x-tab-default" href="/note/group?status=active">
-                活跃(<span class="task-count">{{active_count}}</span>)
-            </a>
-            <a class="tab tab-link x-tab" href="/note/group?status=archived">
-                归档(<span class="task-count">{{archived_count}}</span>)
-            </a>
+            <div class="x-tab-box" data-tab-default="active" data-tab-key="status">
+                <a class="tab tab-link x-tab x-tab-default" href="/note/group?status=active" data-tab-value="active">
+                    活跃(<span class="task-count">{{active_count}}</span>)
+                </a>
+                <a class="tab tab-link x-tab" href="/note/group?status=archived" data-tab-value="archived">
+                    归档(<span class="task-count">{{archived_count}}</span>)
+                </a>
+            </div>
         </div>
     </div>
 
