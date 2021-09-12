@@ -379,7 +379,7 @@ def update_user(name, user):
     password_new = user.get("password")
     password_old = mem_user.get("password")
 
-    if password_new != None:
+    if password_new != None and password_new != password_old:
         _check_password(password_new)
     
     mem_user.update(user)

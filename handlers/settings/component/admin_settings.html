@@ -1,0 +1,73 @@
+
+<div class="settings-row admin-visible">
+    <div class="settings-key">分页大小</div>
+    <div class="settings-value">
+        <select name="PAGE_SIZE" data-type="int" value="{{xconfig.PAGE_SIZE}}">
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+        </select>
+    </div>
+</div>
+
+<div class="settings-row admin-visible">
+    <div class="settings-key">回收站清理周期</div>
+    <div class="settings-value">
+        <select name="TRASH_EXPIRE" data-type="int" value="{{xconfig.TRASH_EXPIRE}}">
+            <option value="2592000">30天</option>
+            <option value="7776000">90天</option>
+            <option value="15552000">180天</option>
+            <option value="31104000">360天</option>
+        </select>
+    </div>
+</div>
+
+<div class="settings-row admin-visible">
+    <div class="settings-key">系统文件</div>
+    <div class="settings-value">
+        <select name="FS_HIDE_FILES" data-type="bool" value="{{xconfig.FS_HIDE_FILES}}">
+            <option value="True">隐藏</option>
+            <option value="False">显示</option>
+        </select>
+    </div>
+</div>
+
+<div class="settings-row admin-visible">
+    <div class="settings-key">页面调试</div>
+    <div class="settings-value">
+        <select name="DEBUG_HTML_BOX" data-type="bool" value="{{xconfig.DEBUG_HTML_BOX}}">
+            <option value="True">开启</option>
+            <option value="False">关闭</option>
+        </select>
+    </div>
+</div>
+
+<div class="settings-row admin-visible">
+    <div class="settings-key">开发者模式</div>
+    <div class="settings-value">
+        <select name="DEV_MODE" data-type="bool" value="{{xconfig.DEV_MODE}}">
+            <option value="True">开启</option>
+            <option value="False">关闭</option>
+        </select>
+    </div>
+</div>
+
+<div class="settings-row admin-visible">
+    <div class="settings-key">词典入口</div>
+    <div class="settings-value">
+        <select name="HIDE_DICT_ENTRY" data-type="bool" value="{{xconfig.HIDE_DICT_ENTRY}}">
+            <option value="True">隐藏</option>
+            <option value="False">显示</option>
+        </select>
+    </div>
+</div>
+
+<div class="settings-row admin-visible">
+    <div class="settings-key">自定义CSS</div>
+    <div class="settings-value">
+        <a href="/code/edit?type=script&path=user.css">配置</a>
+        <i class="fa fa-chevron-right"></i>
+    </div>
+</div>

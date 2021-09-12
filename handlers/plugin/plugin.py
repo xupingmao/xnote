@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/09/11 22:26:05
+# @modified 2021/09/12 00:53:30
 from io import StringIO
 import xconfig
 import codecs
@@ -338,6 +338,10 @@ def can_visit_by_role(plugin, current_role):
     if current_role == "admin":
         return True
 
+    # permitted_role_list 优先级更高
+    if current_role in plugin.permitted_role_list:
+        return True
+
     if plugin.require_admin:
         return False
 
@@ -345,9 +349,6 @@ def can_visit_by_role(plugin, current_role):
         return True
 
     if plugin.required_role == current_role:
-        return True
-
-    if current_role in plugin.permitted_role_list:
         return True
 
     return False

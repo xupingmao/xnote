@@ -1,3 +1,8 @@
+/** 
+ * 对话框实现
+ * 参考 https://www.layui.com/doc/modules/layer.html
+ */
+
 if (window.xnote == undefined) {
     window.xnote = {};
 }
@@ -30,6 +35,7 @@ window.xnote.showDialogEx = function (options) {
     var buttons = options.buttons;
     var functions = options.functions;
     var anim = options.anim;
+    var closeBtn = options.closeBtn;
 
     // 详细文档 https://www.layui.com/doc/modules/layer.html
     // @param {int} anim 动画的参数
@@ -51,6 +57,7 @@ window.xnote.showDialogEx = function (options) {
             type: 1,
             title: title,
             shadeClose: true,
+            closeBtn: closeBtn,
             area: area,
             content: html,
             anim: anim,
@@ -61,6 +68,7 @@ window.xnote.showDialogEx = function (options) {
             type: 1,
             title: title,
             shadeClose: true,
+            closeBtn: closeBtn,
             area: area,
             content: html,
             scrollbar: false,
@@ -184,14 +192,63 @@ var myToast = function(message, timeout) {
 // 兼容之前的方法
 window.showToast = window.xnote.toast;
 
+/**
+ * 展示选项对话框
+ */
+xnote.showOptionDialog = function (option) {
+    var content = option.html;
+
+    layer.open({
+        title: false,
+        closeBtn: false,
+        shadeClose: true,
+        btn: [],
+        content: content,
+        skin: "x-option-dialog"
+    });
+}
+
+// 老版本的对话框，先保留在这里
+window.ContentDialog = {
+  open: function (title, content, size) {
+    var width = $(".root").width() - 40;
+    var area;
+
+    if (isMobile()) {
+      area = ['100%', '100%'];
+    } else {
+      if (size == "small") {
+        area = ['400px', '300px'];        
+      } else {
+        area = [width + 'px', '80%'];
+      }
+    }
+
+    layer.open({
+      type: 1,
+      shadeClose: true,
+      title: title,
+      area: area,
+      content: content,
+      scrollbar: false
+    });
+  }
+}
+
+window.xnote.closeAllDialog = function() {
+    layer.closeAll();
+}
+
 
 // 自定义的dialog
 $(function () {
+
     // 点击激活对话框的按钮
-    $(".dialog-btn").click(function() {
+    $("body").on("click", ".dialog-btn", function() {
         var dialogUrl = $(this).attr("dialog-url");
         var dialogId = $(this).attr("dialog-id");
         var dailogTitle = $(this).attr("dialog-title");
+        var optionSelector = $(this).attr("dialog-option-selector");
         if (dialogUrl) {
             // 通过新的HTML页面获取dialog
             $.get(dialogUrl, function(respHtml) {
@@ -202,6 +259,13 @@ $(function () {
                 // 重新绑定事件
                 xnote.fire("init-default-value");
             })
+        } else if (optionSelector) {
+            var html = $(optionSelector).html();
+            var option = {};
+            option.html = html;
+            xnote.showOptionDialog(option);
+        } else {
+            xnote.alert("请定义[dialog-url]或者[dialog-option-selector]属性");
         }
     });
 
@@ -262,36 +326,3 @@ $(function () {
 
     xnote.initDialog = initDialog;
 });
-
-
-// 老版本的对话框，先保留在这里
-window.ContentDialog = {
-  open: function (title, content, size) {
-    var width = $(".root").width() - 40;
-    var area;
-
-    if (isMobile()) {
-      area = ['100%', '100%'];
-    } else {
-      if (size == "small") {
-        area = ['400px', '300px'];        
-      } else {
-        area = [width + 'px', '80%'];
-      }
-    }
-
-    layer.open({
-      type: 1,
-      shadeClose: true,
-      title: title,
-      area: area,
-      content: content,
-      scrollbar: false
-    });
-  }
-}
-
-window.xnote.closeAllDialog = function() {
-    layer.closeAll();
-}
-

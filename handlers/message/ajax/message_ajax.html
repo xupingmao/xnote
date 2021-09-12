@@ -24,6 +24,7 @@
 
                 <div class="float-right">
                     {% if item.tag == "task" %}
+                        <!-- <button class="dialog-btn btn-default">编辑</button> -->
                         <input type="checkbox" data-id="{{item.id}}" class="todo-checkbox" onclick="onMessageDone(this)">
                     {% end %}
 
@@ -41,10 +42,6 @@
                         data-url="/message/edit?id={{item.id}}">编辑</a>
                 {% end %}
 
-                {% if show_to_log_btn and item.content != "" %}
-                    <a class="update-tag-btn btn btn-default second-btn" data-id="{{item.id}}" data-tag="log">转记事</a>
-                {% end %}
-
                 {% if item.tag == "log" %}
                     <a class="update-tag-btn btn btn-default second-btn" data-id="{{item.id}}" data-tag="task">转待办</a>
                 {% end %}
@@ -56,6 +53,22 @@
         </div>
     </div>
 {% end %}
+
+<div class="hide edit-option-dialog">
+    <div class="list-item">
+        <span>完成任务</span>
+        <div class="float-right">
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </div>
+    
+    <div class="list-item">
+        <span class="red">删除任务</span>
+        <div class="float-right">
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </div>
+</div>
 
 
 <script type="text/javascript">
