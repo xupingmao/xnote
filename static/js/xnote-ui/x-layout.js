@@ -12,5 +12,5 @@ $.fn.autoHeight = function(){
         $(this).on('keyup', function(){
             autoHeight(this);
         });
-    });     
+    });
 } 

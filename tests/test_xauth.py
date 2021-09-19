@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/24 16:39:45
-# @modified 2021/05/23 14:49:34
+# @modified 2021/09/19 23:01:11
 
 import sys
 import time
@@ -9,6 +9,8 @@ import unittest
 sys.path.insert(1, "lib")
 sys.path.insert(1, "core")
 import xauth
+from xutils import Storage
+from xutils import dateutil
 
 # cannot perform relative import
 try:
@@ -61,5 +63,18 @@ class TestXauth(BaseTestCase):
         xauth.create_user_session("admin")
         result = xauth.list_user_session_detail("admin")
         self.assertTrue(len(result) == 1)
+
+    def test_update_user(self):
+        result = xauth.create_user("u123456", "123456")
+        print(result)
+
+        datetime = dateutil.format_time()
+        user_info = Storage(login_time = datetime)
+        xauth.update_user("u123456", user_info)
+
+        self.assertTrue(datetime, xauth.get_user_by_name("u123456").login_time)
+
+        xauth.delete_user("u123456")
+
 
 

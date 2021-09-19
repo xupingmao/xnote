@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/08/14 10:13:44
+# @modified 2021/09/19 22:43:40
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -78,8 +78,8 @@ def do_mark_topic(parser, key0):
 
 def mark_text(content):
     import xconfig
-    from xutils.marked_text_parser import TextParser
-    from xutils.marked_text_parser import set_img_file_ext
+    from xutils.text_parser import TextParser
+    from xutils.text_parser import set_img_file_ext
     # 设置图片文集后缀
     set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
 

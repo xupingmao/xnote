@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/09/04 14:09:57
+# @modified 2021/09/19 14:55:23
 # @filename xtemplate.py
 
 
@@ -13,9 +13,10 @@
 """
 import os
 import json
-import web
+import warnings
 import math
 import inspect
+import web
 import six
 import xconfig
 import xauth
@@ -482,9 +483,19 @@ class BasePlugin:
         return self.html
 
     def ajax_response(self, template, **kw):
+        warnings.warn("use response_ajax instead", DeprecationWarning)
         return self.do_render_text(template, **kw)
 
     def text_response(self, template, **kw):
+        """返回纯文本格式的内容"""
+        warnings.warn("use response_text instead", DeprecationWarning)
+        return self.do_render_text(template, **kw)
+
+    def response_ajax(self, template, **kw):
+        return self.do_render_text(template, **kw)
+
+    def response_text(self, template, **kw):
+        """返回纯文本格式的内容"""
         return self.do_render_text(template, **kw)
 
     def do_render_text(self, template, **kw):
@@ -550,26 +561,35 @@ class BasePlugin:
         except:
             error = xutils.print_exc()
             web.ctx.status = "500 Internal Server Error"
-        return render(self.html_template_path,
-            model       = self,
-            script_name = globals().get("script_name"),
-            fpath       = self.fpath,
-            description = self.description,
-            error       = error,
-            html_title  = self.title,
-            title       = self.title,
-            method      = self.method,
-            rows        = self.rows,
-            input       = input, 
-            output      = self.output + output,
-            css_style   = self.css_style,
-            show_nav    = self.show_nav,
-            show_aside  = self.show_aside,
-            show_search = self.show_search,
-            html        = self.html,
-            search_action = self.search_action,
-            CONTENT_WIDTH = self.CONTENT_WIDTH,
-            search_placeholder = self.search_placeholder)
+
+        # 转换内部属性
+        kw = self.convert_attr_to_kw()
+        kw.error = error
+        kw.input = input
+        kw.script_name = globals().get("script_name")
+        kw.output = self.output + output
+
+
+        return render(self.html_template_path, **kw)
+
+    def convert_attr_to_kw(self):
+        kw = Storage()
+        kw.model = self
+        kw.fpath = self.fpath
+        kw.description = self.description
+        kw.html_title  = self.title
+        kw.title  = self.title
+        kw.method = self.method
+        kw.rows   = self.rows
+        kw.html = self.html
+        kw.css_style = self.css_style
+        kw.show_nav  = self.show_nav
+        kw.show_aside = self.show_aside
+        kw.show_search = self.show_search
+        kw.search_action = self.search_action
+        kw.search_placeholder = self.search_placeholder
+        kw.CONTENT_WIDTH = self.CONTENT_WIDTH
+        return kw
 
     def on_action(self, name, context, input):
         """处理各种按钮行为，包括 action/confirm/prompt 等按钮

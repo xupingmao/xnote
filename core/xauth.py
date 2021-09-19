@@ -6,6 +6,9 @@
 - current_name()    获取当前登录的用户名，别名 get_current_name()
 - current_user()    获取当前登录的用户详情，别名 get_current_user()
 - current_role()    获取当前登录的用户角色，别名 get_current_role()
+- create_user       创建用户
+- update_user       更新用户
+- delete_user       删除用户
 """
 
 import os
@@ -34,6 +37,16 @@ INVALID_NAMES    = fsutil.load_set_config("./config/user/invalid_names.list")
 MAX_SESSION_SIZE = 20
 SESSION_EXPIRE   = 24 * 3600 * 7
 PRINT_DEBUG_LOG  = False
+
+class UserModel:
+    # TODO 用户模型
+    name = "登录名"
+    password = "密码"
+    token = "授权令牌"
+    ctime = "创建时间"
+    mtime = "修改时间"
+    login_time = "登录时间"
+
 
 def log_debug(fmt, *args):
     if PRINT_DEBUG_LOG:

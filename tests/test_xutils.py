@@ -198,7 +198,7 @@ class TestMain(unittest.TestCase):
         # self.assertEqual('Link&nbsp;<a href="/http">name</a>', html)
 
     def test_marked_text_parser(self):
-        from xutils.marked_text_parser import runtest
+        from xutils.text_parser import runtest
         runtest()
 
     def test_count_alpha(self):

@@ -1,9 +1,18 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/10 14:36:09
-# @modified 2021/05/23 14:30:49
+# @modified 2021/09/19 13:02:28
 
-"""标记文本解析"""
+"""标记文本解析
+
+类
+- 文本解析器的基类      TextParserBase(text:str)
+- 文本解析器           TextParser
+
+函数
+- HTML转义            escape_html(text:str)
+
+"""
 import os
 from urllib.parse import quote, unquote
 
@@ -67,7 +76,6 @@ class TextParserBase(object):
     # 调试的开关
     debug_flag = False
 
-
     def init(self, text):
         text = text.replace("\r", "")
         text = text.replace(u'\xad', '\n')
@@ -75,7 +83,7 @@ class TextParserBase(object):
         self.text = text
         self.str_token = ""
         self.tokens = []
-        # 当前读取的字符下标
+        # 当前读取的字符下标，默认初始化为第一个字符
         self.i = 0
         self.length = len(text)
         self.max_index = self.length - 1

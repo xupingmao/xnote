@@ -32,6 +32,7 @@ cat ./static/js/base/string.js >> ./static/js/utils.build.js
 cat ./static/js/base/datetime.js >> ./static/js/utils.build.js
 cat ./static/js/base/url.js >> ./static/js/utils.build.js
 cat ./static/js/base/misc.js >> ./static/js/utils.build.js
+cat ./static/js/base/jq-ext.js >> ./static/js/utils.build.js
 echo "打包utils.build.js ... [OK]"
 
 # build js files

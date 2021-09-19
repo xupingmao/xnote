@@ -17,10 +17,10 @@ import xmanager
 import xtemplate
 from xutils import Storage
 from xutils import dbutil
+from xutils import textutil
 from xtemplate import BasePlugin
 
 HTML = """
-<!-- Html -->
 <!-- 操作区域 -->
 <div class="card btn-line-height">
     <span>功能说明1234</span>
@@ -33,15 +33,17 @@ HTML = """
 <div class="card">
     <table class="table">
         <tr>
-            <th>主键</th>
-            <th>内容</th>
+            <th>姓名</th>
+            <th>年龄</th>
+            <th>职业</th>
             <th>操作</th>
         </tr>
         
         {% for row in data_list %}
             <tr>
-                <td>{{row._key}}</td>
-                <td>{{row.content}}</td>
+                <td>{{row.name}}</td>
+                <td>{{row.age}}</td>
+                <td>{{row.job}}</td>
                 <td>
                     <button class="edit-btn btn-default" data-key="{{row._key}}">编辑</button>
                     <button class="delete-btn btn-danger" data-key="{{row._key}}">删除</button>
@@ -51,16 +53,18 @@ HTML = """
     </table>
 </div>
 
+<!-- 编辑脚本 -->
 <script>
 $(function(){
-    // 编辑事件处理
+    // 编辑事件处理(创建和更新)
     $(".edit-btn").click(function (event) {
         var rowKey  = $(event.target).attr("data-key");
         $.get("?action=get_template", {key: rowKey}, function(resp) {
             var buttons = ["确认", "取消"];
             var functions = [function (index, layero) {
                 var content = $("[name=content]").val();
-                var params = {content: content, key: rowKey};
+                var params = $(".x-form").formData();
+                params.key = rowKey;
                 $.post("?action=edit", params, function (resp) {
                     if (resp.code != "success") {
                         xnote.alert(resp.message);
@@ -102,10 +106,37 @@ EDIT_HTML = """
 </form>
 """
 
+DEFAULT_EDIT_CONTENT = """
+name = 张三
+age  = 20
+job  = 学生
+"""
+
 
 # 注册存储
 dbutil.register_table("form_test_data", "表单测试数据")
 TABLE = dbutil.LdbTable("form_test_data")
+
+
+def convert_content_to_row(content):
+    """把纯文本转换为键值对属性
+    @param {str} content 输入的文本
+    @return {Storage} 行对象
+    """
+    if content is None or content == "":
+        return Storage(_content = content)
+
+    row = Storage()
+    properties = textutil.parse_prop_text(content)
+    row.update(properties)
+    row._content = content
+    return row
+
+def convert_row_to_content(row):
+    """把键值对属性转换为文本"""
+    if row is None:
+        return DEFAULT_EDIT_CONTENT
+    return row._content
 
 class Main(BasePlugin):
 
@@ -113,23 +144,26 @@ class Main(BasePlugin):
 
     def get_input_template(self):
         key = xutils.get_argument("key", "")
-        value = TABLE.get_by_key(key)
-        content = "输入示例"
+        row = TABLE.get_by_key(key)        
         
-        if value != None:
-            content = value.content
+        # 转换成文本对象
+        content = convert_row_to_content(row)
+            
         return self.ajax_response(EDIT_HTML, content = content)
     
     def edit_row(self):
         key = xutils.get_argument("key", "")
         content = xutils.get_argument("content", "")
         user_name = xauth.current_name()
+
+        # 转换对象
+        row = convert_content_to_row(content)
+
         if key != "":
-            row = Storage(content = content)
             TABLE.update_by_key(key, row)
             return dict(code = "success", message = "更新成功")
         else:
-            TABLE.insert_by_user(user_name, Storage(content = content), id_type = "timeseq")
+            TABLE.insert_by_user(user_name, row, id_type = "timeseq")
             return dict(code = "success", message = "创建成功")
 
     def delete_row(self):

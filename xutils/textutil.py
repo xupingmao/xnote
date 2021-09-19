@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2021/09/11 12:18:17
+# @modified 2021/09/19 22:43:28
 import re
 import random
 import json
@@ -423,34 +423,8 @@ def parse_config_text(text, ret_type = 'list'):
     return parse_prop_text(text, ret_type)
 
 def parse_prop_text(text, ret_type = "dict"):
-    """解析key/value格式的配置文本
-    @param {string} text 配置文本内容
-    @param {string} ret_type 返回的格式，包含list, dict
-    """
-    if ret_type == 'dict':
-        config = dict()
-    else:
-        config = []
-
-    if text == None or text == "":
-        return config
-
-    for line in text.split("\n"): 
-        line = line.strip()
-        if line.find("#")!=-1: 
-            # 删除注释部分
-            line=line[0:line.find('#')]
-        # TODO properties文件还支持``:``作为分隔符
-        eq_pos = line.find('=')
-        if eq_pos > 0: 
-            key   = line[:eq_pos].strip()
-            value = line[eq_pos+1:].strip()
-            if ret_type == 'dict':
-                config[key] = value
-            else:
-                config.append(dict(key=key, value=value))
-    return config
-
+    from xutils.text_parser_properties import parse_prop_text as parse_prop_text_impl
+    return parse_prop_text_impl(text, ret_type)
 
 def parse_ini_text(text):
     """解析INI文件内容"""
@@ -616,7 +590,7 @@ def is_img_file(filename):
 
 def mark_text(content):
     import xconfig
-    from xutils.marked_text_parser import TextParser, set_img_file_ext
+    from xutils.text_parser import TextParser, set_img_file_ext
     # 设置图片文集后缀
     set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
 

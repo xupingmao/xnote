@@ -12,6 +12,7 @@
 注意：读写数据前要先调用register_table来注册表，不然会失败！
 
 包含的方法如下
+* get_table       获取一个表对象
 * register_table  注册表，如果没注册系统会拒绝写入
 * count_table     统计表记录数
 * put
@@ -50,13 +51,14 @@ LAST_TIME_SEQ = -1
 
 # 注册的数据库表名，如果不注册，无法进行写操作
 TABLE_DICT = dict()
+LDB_TABLE_DICT = dict()
 
 ###########################################################
 # @desc db utilties
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/09/11 11:43:01
+# @modified 2021/09/19 13:14:23
 ###########################################################
 
 class DBException(Exception):
@@ -369,6 +371,18 @@ def register_table(table_name, description, category = "default"):
     # TODO 考虑过这个方法直接返回一个 LdbTable 实例
     # LdbTable可能针对同一个`table`会有不同的实例
     TABLE_DICT[table_name] = TableInfo(table_name, description, category)
+
+def get_table(table_name):
+    """获取table对象
+    @param {str} table_name 表名
+    @return {LdbTable}
+    """
+    assert table_name != None
+    table = LDB_TABLE_DICT.get(table_name)
+    if table is None:
+        table = LdbTable(table_name)
+        LDB_TABLE_DICT[table_name] = table
+    return table
 
 def get_table_dict_copy():
     return TABLE_DICT.copy()
