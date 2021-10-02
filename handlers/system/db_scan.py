@@ -1,16 +1,17 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2021/09/11 21:46:15
+# @modified 2021/10/02 21:14:19
 import xutils
 import xtemplate
+import xauth
 from xutils import dbutil
 from xtemplate import BasePlugin
 
 SCAN_HTML = """
 <div class="card">
     <div class="card-title">
-        <span>数据库工具</span>
+        <span>leveldb工具</span>
 
         <div class="float-right">
             {% include common/button/back_button.html %}
@@ -50,13 +51,17 @@ SCAN_HTML = """
         <tr>
             <th>主键</th>
             <th>值</th>
-            <th>操作</th>
+            <th><div class="float-right">操作</div></th>
         </tr>
         {% for key, value in result %}
             <tr>
                 <td style="width:20%">{{key}}</td>
                 <td style="width:60%">{{value}}</td>
-                <td style="width:20%"></td>
+                <td style="width:20%">
+                    <div class="float-right">
+                        <button class="btn btn-danger delete-btn" data-key="{{key}}">删除</button>
+                    </div>
+                </td>
             </tr>
         {% end %}
     </table>
@@ -67,6 +72,20 @@ SCAN_HTML = """
         <a href="?key_from={{last_key}}&prefix={{prefix}}&&db_key={{db_key}}">下一页</a>
     </div>
 </div>
+
+<script>
+$(function () {
+    $(".delete-btn").click(function (e) {
+        var key = $(this).attr("data-key");
+        xnote.confirm("准备删除【" + key + "】，请确认", function (confirmed) {
+            var params = {key: key};
+            $.post("?action=delete", params, function (resp) {
+                window.location.reload();
+            });
+        });
+    }); 
+});
+</script>
 
 """
 
@@ -87,10 +106,20 @@ class DbScanHandler(BasePlugin):
     show_title = False
 
     rows = 0
+
+    @xauth.login_required("admin")
+    def do_delete(self):
+        key = xutils.get_argument("key", "")
+        dbutil.delete(key)
+        return dict(code = "success")
     
     def handle(self, input):
+        action = xutils.get_argument("action", "")
         db_key = xutils.get_argument("db_key", "")
         prefix = xutils.get_argument("prefix", "")
+
+        if action == "delete":
+            return self.do_delete()
 
         result = []
         reverse  = xutils.get_argument("reverse") == "true"

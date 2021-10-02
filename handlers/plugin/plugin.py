@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/09/12 00:53:30
+# @modified 2021/10/02 21:03:10
 from io import StringIO
 import xconfig
 import codecs
@@ -926,7 +926,7 @@ class LoadPluginHandler:
                 # 加载插件失败，删除日志
                 delete_visit_log(user_name, name, url)
                 return xtemplate.render("error.html", 
-                    error = "plugin `%s` not found!" % name)
+                    error = "插件[%s]不存在!" % name)
         except:
             error = xutils.print_exc()
             return xtemplate.render("error.html", error=error)

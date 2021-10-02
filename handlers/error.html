@@ -10,12 +10,14 @@
                 {% include common/button/back_button.html %}
             </div>
         </div>
+    </div>
 
-        {% if error != "" %}
+    {% if error != "" %}
+        <div class="card">
             <pre class="col-md-12 error">
                 {{error}}
             </pre>
-        {% end %}
-    </div>
+        </div>
+    {% end %}
 
 {% end %}
