@@ -58,7 +58,7 @@ LDB_TABLE_DICT = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/09/19 13:14:23
+# @modified 2021/10/02 12:19:52
 ###########################################################
 
 class DBException(Exception):
@@ -261,6 +261,9 @@ class LdbTable:
     def _get_result_from_tuple_list(self, tuple_list):
         result = []
         for key, value in tuple_list:
+            if not isinstance(value, dict):
+                value = Storage(_raw = value)
+
             setattr(value, self.key_name, key)
             result.append(value)
         return result
@@ -292,8 +295,15 @@ class LdbTable:
 
     def get_by_key(self, key, default_value = None):
         value = get(key, default_value)
-        if value != None:
+        if value is None:
+            return None
+
+        if isinstance(value, dict):
             setattr(value, self.key_name, key)
+        else:
+            value = Storage(_raw = value)
+            setattr(value, self.key_name, key)
+
         return value
 
     def insert(self, obj, id_type = "uuid"):
@@ -407,6 +417,11 @@ def obj_to_json(obj):
     return json.dumps(obj, ensure_ascii=False)
 
 def put(key, obj_value, sync = False):
+    """往数据库中写入键值对
+    @param {string} key 数据库主键
+    @param {object} obj_value 值，会转换成JSON格式
+    @param {boolean} sync 是否同步写入，默认为False
+    """
     check_leveldb()
     check_not_empty(key, "[dbutil.put] key can not be None")
 

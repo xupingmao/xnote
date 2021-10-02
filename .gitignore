@@ -49,6 +49,7 @@ tools.md
 /py3.8/
 /htmlcov/
 gitpush.sh
+id_rsa*
 
 # 脚本
 run-local.sh

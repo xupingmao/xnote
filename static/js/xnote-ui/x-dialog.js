@@ -1,6 +1,23 @@
 /** 
  * 对话框实现
  * 参考 https://www.layui.com/doc/modules/layer.html
+ * 
+ * 对外接口:
+ * 1. 展示对话框并且自适应设备
+ *    xnote.showDialog(title, html, buttons = [], functions = [])
+ * 
+ * 2. 展示iframe页面
+ *    xnote.showIframeDialog(title, url)
+ * 
+ * 3. 展示选项的对话框
+ *    xnote.showOptionDialog(option)
+ *      option参数的定义 {html, title = false}
+ * 
+ * 4. 系统自带的弹窗替换
+ *    xnote.alert(message)
+ *    xnote.confirm(message, callback)
+ *    xnote.prompt(title, defaultValue, callback)
+ * 
  */
 
 if (window.xnote == undefined) {
@@ -61,6 +78,7 @@ window.xnote.showDialogEx = function (options) {
             area: area,
             content: html,
             anim: anim,
+            // scrollbar是弹层本身的滚动条，不是整个页面的
             scrollbar: false
         });
     } else {
@@ -83,7 +101,7 @@ window.xnote.showDialogEx = function (options) {
     }
 }
 
-window.xnote.showDialog = function(title, html, buttons, functions) {
+xnote.showDialog = function(title, html, buttons, functions) {
     var options = {};
     options.title = title;
     options.html  = html;
@@ -135,7 +153,7 @@ xnote.alert = function(message) {
     }
 };
 
-window.xnote.toast = function (message, time) {
+xnote.toast = function (message, time) {
     if (layer && layer.msg) {
         layer.msg(message, {time: time});
     } else {
@@ -197,14 +215,41 @@ window.showToast = window.xnote.toast;
  */
 xnote.showOptionDialog = function (option) {
     var content = option.html;
+    if (option.title === undefined) {
+        option.title = false;
+    }
 
-    layer.open({
-        title: false,
+    var oldStyle = $("body").css("overflow");
+    $("body").css("overflow", "hidden");
+
+    function recoveryStyle() {
+        $("body").css("overflow", oldStyle);
+    }
+
+    var dialogIndex = layer.open({
+        title: option.title,
         closeBtn: false,
         shadeClose: true,
         btn: [],
         content: content,
-        skin: "x-option-dialog"
+        skin: "x-option-dialog",
+        yes: function (index, layero) {
+            layer.close(index);
+            // 恢复样式
+            recoveryStyle();
+        },
+        cancel: function() {
+            layer.close(index);
+            // 恢复样式
+            recoveryStyle();
+        }
+    });
+
+    // 原组件点遮罩关闭没有回调事件，要重新一下
+    $('#layui-layer-shade'+ dialogIndex).on('click', function(){
+        console.log("xnote.showOptionDialog: shadowClose event")
+        layer.close(dialogIndex);
+        recoveryStyle();
     });
 }
 
@@ -235,7 +280,7 @@ window.ContentDialog = {
   }
 }
 
-window.xnote.closeAllDialog = function() {
+xnote.closeAllDialog = function() {
     layer.closeAll();
 }
 
@@ -299,9 +344,7 @@ $(function () {
         $("body").css("overflow", "hidden");
     }
 
-    /**
-   * 隐藏弹层
-   */
+    /** 隐藏弹层 **/
     function onDialogHide() {
         $(".x-dialog").hide();
         $(".x-dialog-background").hide();

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/09/19 14:55:23
+# @modified 2021/10/02 12:28:34
 # @filename xtemplate.py
 
 
@@ -435,6 +435,13 @@ class BasePlugin:
     rows        = 20  
     CONTENT_WIDTH = 1000 # 内容的宽度
     
+    # 分页配置
+    show_pagenation = False
+    page_url        = "?page="
+    page            = 1 # 当前分页，需要扩展方设置
+    page_max        = 1 # 最大分页，需要扩展方设置
+
+
     # 插件模板路径
     html_template_path = "plugin/base/base_plugin.html"
 
@@ -445,8 +452,6 @@ class BasePlugin:
         self.html            = u("")
         self.html_header     = None
         self.css_style       = u("")
-        self.show_pagenation = False
-        self.page_url        = "?page="
         self.option_links    = []
         
     def add_option_link(name, url):

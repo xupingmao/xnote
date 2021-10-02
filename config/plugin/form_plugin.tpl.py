@@ -23,9 +23,10 @@ from xtemplate import BasePlugin
 HTML = """
 <!-- 操作区域 -->
 <div class="card btn-line-height">
-    <span>功能说明1234</span>
+    <span>插件功能说明...</span>
     <div class="float-right">
         <button class="edit-btn">添加记录</button>
+        <button class="option-btn btn-default">选项</button>
     </div>
 </div>
 
@@ -53,6 +54,14 @@ HTML = """
     </table>
 </div>
 
+<!-- 选项的HTML -->
+<div class="option-html hide">
+    <ul>
+        <li>选项1</li>
+        <li>选项2</li>
+    </ul>
+</div>
+
 <!-- 编辑脚本 -->
 <script>
 $(function(){
@@ -62,7 +71,6 @@ $(function(){
         $.get("?action=get_template", {key: rowKey}, function(resp) {
             var buttons = ["确认", "取消"];
             var functions = [function (index, layero) {
-                var content = $("[name=content]").val();
                 var params = $(".x-form").formData();
                 params.key = rowKey;
                 $.post("?action=edit", params, function (resp) {
@@ -95,6 +103,13 @@ $(function(){
                 xnote.alert("请求删除接口失败");
             });
         });
+    });
+
+    // 选项事件处理
+    $(".option-btn").click(function (event) {
+        var option = {};
+        option.html = $(".option-html").html();
+        xnote.showOptionDialog(option);
     });
 });
 </script>
@@ -138,6 +153,10 @@ def convert_row_to_content(row):
         return DEFAULT_EDIT_CONTENT
     return row._content
 
+def convert_data_list(data_list):
+    """数据列表转换"""
+    return data_list
+
 class Main(BasePlugin):
 
     rows = 0
@@ -179,7 +198,8 @@ class Main(BasePlugin):
         user_name = xauth.current_name()
         offset = xutils.get_argument("offset", 0, type = int)
         limit  = xutils.get_argument("limit", 20, type = int)
-        data_list = TABLE.list_by_user(user_name, offset, limit)
+        data_list = TABLE.list_by_user(user_name, offset, limit, reverse = True)
+        data_list = convert_data_list(data_list)
         self.writehtml(HTML, data_list = data_list)
     
     def handle(self, input):
