@@ -545,7 +545,7 @@ var getUrlParams = function() {
  */
 var getUrlParam = function (key, defaultValue) {
     var paramValue = getUrlParams()[key];
-    if (paramValue == undefined) {
+    if (paramValue === undefined) {
         return defaultValue;
     } else {
         return paramValue;

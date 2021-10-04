@@ -58,7 +58,7 @@ LDB_TABLE_DICT = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/10/02 12:19:52
+# @modified 2021/10/04 18:11:37
 ###########################################################
 
 class DBException(Exception):
@@ -180,17 +180,31 @@ def check_not_empty(value, message):
     if value == None or value == "":
         raise Exception(message)
 
-def timeseq():
-    # 加锁防止并发生成一样的值
-    # TODO 提高存储效率
+def get_write_lock():
+    global WRITE_LOCK
+    return WRITE_LOCK
+
+def timeseq(value = None):
+    """生成一个时间序列
+    @param {float|None} value 时间序列，单位是秒，可选
+    @return {string} 20位的时间序列
+    """
     global LAST_TIME_SEQ
     global WRITE_LOCK
 
+    if value != None:
+        assert isinstance(value, float), "expect <class 'float'> but see %r" % type(value)
+        value = int(value * 1000)
+        return "%020d" % value
+
+    t = int(time.time() * 1000)
+    # 加锁防止并发生成一样的值
+    # 注意这里的锁是单个进程级别的
     with WRITE_LOCK:
-        t = int(time.time() * 1000)
         if t == LAST_TIME_SEQ:
             # 等于上次生成的值，说明太快了，sleep一下进行控速
             # print("too fast, sleep 0.001")
+            # 如果不sleep，下次还可能会重复
             time.sleep(0.001)
             t = int(time.time() * 1000)
         LAST_TIME_SEQ = t
@@ -306,14 +320,14 @@ class LdbTable:
 
         return value
 
-    def insert(self, obj, id_type = "uuid"):
+    def insert(self, obj, id_type = "timeseq"):
         self._check_value(obj)
         id_value = self._get_id_value(id_type)
         key  = self.build_key(id_value)
         put(key, obj)
         return key
 
-    def insert_by_user(self, user_name, obj, id_type = "uuid"):
+    def insert_by_user(self, user_name, obj, id_type = "timeseq"):
         self._check_value(obj)
         id_value = self._get_id_value(id_type)
         key  = self.build_key(user_name, id_value)

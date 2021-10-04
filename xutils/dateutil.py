@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/09/04 20:51:16
+# @modified 2021/10/04 19:17:59
 
 """处理时间的工具类
 
@@ -40,10 +40,9 @@ import time
 import os
 import math
 
-
-_DAY           = 3600 * 24
-DEFAULT_FORMAT = '%Y-%m-%d %H:%M:%S'
-FORMAT         = DEFAULT_FORMAT
+SECONDS_PER_DAY = 3600 * 24
+DEFAULT_FORMAT  = '%Y-%m-%d %H:%M:%S'
+FORMAT          = DEFAULT_FORMAT
 
 WDAY_DICT = {
     "*": u"每天",
@@ -56,12 +55,24 @@ WDAY_DICT = {
     "7": u"周日"
 }
 
+class DateClass:
+
+    def __init__(self):
+        self.year = None
+        self.month = None
+        self.day = None
+        self.wday = None
+
+    def __repr__(self):
+        return "(%r,%r,%r)" % (self.year, self.month, self.day)
+
+
 def is_str(s):
     return isinstance(s, str)
 
 def before(days=None, month=None, format=False):
     if days is not None:
-        fasttime = time.time() - days * _DAY
+        fasttime = time.time() - days * SECONDS_PER_DAY
         if format:
             return format_time(fasttime)
         return fasttime
@@ -139,7 +150,51 @@ def parse_date_to_timestamp(date_str):
     st = time.strptime(date_str, "%Y-%m-%d")
     return time.mktime(st)
 
+
+def parse_date_to_object(date_str):
+    """解析日期结构
+    @param {string} date_str 日期的格式
+
+        >>> parse_date_to_object("2020-01")
+        (2020,1,None)
+        >>> parse_date_to_object("2020")
+        (2020,None,None)
+        >>> parse_date_to_object("2020-01-01")
+        (2020,1,1)
+    """
+    assert date_str != None
+    assert is_str(date_str)
+    parts = date_str.split("-")
+    
+    date_object = DateClass()
+
+    def _parse_int(value):
+        try:
+            return int(value)
+        except:
+            raise Exception("parse_date: invalid date str %r" % date_str)
+
+    if len(parts) == 0:
+        raise Exception("parse_date: invalid date str %r" % date_str)
+        
+    if len(parts) >= 1:
+        date_object.year = _parse_int(parts[0])
+
+    if len(parts) >= 2:
+        date_object.month = _parse_int(parts[1])
+
+    if len(parts) >= 3:
+        date_object.date = _parse_int(parts[2])
+
+    return date_object
+
+
 def parse_time(date = None, fmt = None):
+    """解析时间字符串为unix时间戳
+    @param {string|None} date 时间
+    @param {string} fmt 时间的格式
+    @return {int} 时间戳，单位是秒
+    """
     if date is None:
         return int(time.time())
     if fmt is None:
@@ -153,14 +208,17 @@ def get_seconds(date = None, fmt = None):
     return parse_time(date, fmt)
 
 def get_current_year():
+    """获取当前年份"""
     tm = time.localtime()
     return tm.tm_year
 
 def get_current_month():
+    """获取当前月份"""
     tm = time.localtime()
     return tm.tm_mon
 
 def get_current_mday():
+    """返回今天在当前月份的日子"""
     tm = time.localtime()
     return tm.tm_mday
 
@@ -251,3 +309,7 @@ def match_time(year = None, month = None, day = None, wday = None, tm = None):
     if wday is not None and wday != tm.tm_wday:
         return False
     return True
+
+def get_today():
+    return format_date()
+

@@ -56,7 +56,8 @@ $(function () {
 
     $(".create-btn").click(function () {
         var content = $(".input-box").val();
-        var params = {content:content, tag: "{{tag}}"};
+        var date = getUrlParam("date");
+        var params = {content:content, tag: "{{tag}}", date: date};
         $.post("/message/save", 
             params,
             function (respText) {

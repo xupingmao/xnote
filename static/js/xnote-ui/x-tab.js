@@ -23,25 +23,25 @@ $(function (e) {
     //     }
     // }
 
-    // function initTabBtn() {
-    //     var hasActive = false;
-    //     var count = 0;
-    //     $(".x-tab-btn").each(function(index, ele) {
-    //         var link = $(ele).attr("href");
-    //         var fullpath = location.href;
+    function initTabBtn() {
+        var hasActive = false;
+        var count = 0;
+        var pathAndSearch = location.pathname + location.search;
 
-    //         if (fullpath.indexOf(link) >= 0) {
-    //             $(ele).addClass("x-tab-btn-active");
-    //             hasActive = true;
-    //         }
+        $(".x-tab-btn").each(function(index, ele) {
+            var link = $(ele).attr("href");
+            if (pathAndSearch == link) {
+                $(ele).addClass("x-tab-btn-active");
+                hasActive = true;
+            }
 
-    //         count += 1;
-    //     });
+            count += 1;
+        });
 
-    //     if (count > 0 && !hasActive) {
-    //         $(".x-tab-default").addClass("x-tab-btn-active");
-    //     }
-    // }
+        if (count > 0 && !hasActive) {
+            $(".x-tab-default").addClass("x-tab-btn-active");
+        }
+    }
 
     function initTabBox() {
         $(".x-tab-box").each(function (index, ele) {
@@ -58,6 +58,6 @@ $(function (e) {
     }
 
     // initTabLink();
-    // initTabBtn();
+    initTabBtn();
     initTabBox();
 });

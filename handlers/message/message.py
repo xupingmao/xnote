@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/09/19 22:43:40
+# @modified 2021/10/04 19:45:16
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -696,13 +696,14 @@ def get_remote_ip():
 def create_message(user_name, tag, content, ip):
     if tag == "todo":
         tag = "task"
-        
+    date = xutils.get_argument("date", "")
     content = content.strip()
     ctime = xutils.get_argument("date", xutils.format_datetime())
     message = dict(content = content, 
         user   = user_name, 
         tag    = tag,
         ip     = ip,
+        date   = date,
         mtime  = ctime,
         ctime  = ctime)
     id = MSG_DAO.create(**message)
@@ -855,7 +856,7 @@ class MessageListHandler:
             title = T("待办任务"),
             html_title = T("待办任务"),
             message_tag = "task",
-            search_type = "message",
+            search_type = "task",
             show_system_tag = False,
             show_sub_link = True,
             show_input_box = True,
@@ -930,16 +931,22 @@ class MessageListHandler:
         return xtemplate.render("message/page/message_list_view.html", **kw)
 
     def do_view_by_date(self, date):
+        kw = Storage()
+        kw.message_placeholder = "补充%s发生的事情" % date
+
+        filter_key = xutils.get_argument("filterKey", "")
+        if filter_key != "":
+            kw.show_input_box = False
+
         return xtemplate.render("message/page/message_list_view.html", 
             tag = "date",
             message_tag = "date",
             search_type = "message",
-            show_input_box = False,
             show_system_tag = False,
             show_sub_link = False,
             html_title = T("随手记"),
             show_back_btn = True,
-            message_placeholder = "记录发生的事情/产生的想法")
+            **kw)
 
     @xauth.login_required()
     def do_get(self, tag = "task"):
@@ -1007,7 +1014,7 @@ class CalendarHandler:
         date = "%s-%02d" % (year, month)
 
         return xtemplate.render("message/page/message_calendar.html", 
-            tag = "calendar",
+            tag = "date",
             year = year,
             month = month,
             date = date,
@@ -1022,12 +1029,6 @@ class StatAjaxHandler:
         stat = MSG_DAO.get_message_stat(user)
         format_message_stat(stat)
         return stat
-
-class DairyHandler:
-
-    @xauth.login_required()
-    def GET(self):
-        return xtemplate.render("message/page/dairy.html")
 
 class MessageHandler(MessageListHandler):
     pass
@@ -1066,34 +1067,67 @@ class TodoCanceledHandler(TodoHandler):
         return self.do_get("canceled", "已取消任务", show_input_box = False)
 
 
+class MessageFolder:
+
+    def __init__(self):
+        self.date = ""
+        self.wday = ""
+        self.item_list = []
+
+def convert_message_list_to_day_folder(item_list, date, show_empty = False):
+    result = []
+    date_object = dateutil.parse_date_to_object(date)
+    max_days = dateutil.get_days_of_month(date_object.year, date_object.month)
+    today = dateutil.get_today()
+
+    for i in range(max_days, 0, -1):
+        temp_date = "%s-%02d-%02d" % (date_object.year, date_object.month, i)
+
+        if temp_date > today:
+            continue
+
+        folder = MessageFolder()
+        folder.date = temp_date
+        folder.wday = dateutil.format_wday(temp_date)
+        folder.item_list = []
+        folder.title = f"{folder.date} {folder.wday}"
+        if today == temp_date:
+            folder.title += "【今天】"
+
+        for item in item_list:
+            if temp_date == dateutil.format_date(item.ctime):
+                folder.item_list.append(item)
+        
+        if show_empty or len(folder.item_list) > 0:
+            result.append(folder)
+
+    return result
+
+def get_default_year_and_month():
+    return dateutil.format_date(None, "%Y-%m")
+
 class MessageListByDayHandler():
 
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
-        date = xutils.get_argument("date")
+        date = xutils.get_argument("date", "")
+        show_empty = xutils.get_argument("show_empty", False, type = bool)
+
+        if date == "":
+            date = get_default_year_and_month()
 
         year, month, day = do_split_date(date)
 
         item_list, amount = MSG_DAO.list_by_date(user_name, date, limit = MAX_LIST_LIMIT)
-        message_list = []
-
-        for item in item_list:
-            date = dateutil.format_date(item.ctime)
-            has_found = False
-            for key, value, wday in message_list:
-                if key == date:
-                    value.append(item)
-                    has_found = True
-            if not has_found:
-                message_list.append((date, [item], dateutil.format_wday(date)))
-
-        message_list.sort(key = lambda x: x[0], reverse = True)
+        message_list = convert_message_list_to_day_folder(item_list, date, show_empty)
 
         return xtemplate.render("message/page/message_list_by_day.html", 
+            date = date,
             year = year,
             month = month,
             message_list = message_list,
+            show_empty = show_empty,
             show_back_btn = True,
             search_type = "message",
             tag = "date")
@@ -1113,15 +1147,17 @@ xutils.register_func("url:/message/log", MessageLogHandler)
 xurls=(
     r"/message", MessageHandler,
     r"/message/calendar", CalendarHandler,
-    r"/message/dairy", DairyHandler,
     r"/message/todo", TodoHandler,
     r"/message/log", MessageLogHandler,
     r"/message/done", TodoDoneHandler,
     r"/message/canceled", TodoCanceledHandler,
     r"/message/edit", MessageEditHandler,
-    r"/message/list_by_day", MessageListByDayHandler,
-    r"/message/refresh", MessageRefreshHandler,
 
+    # 日记
+    r"/message/dairy", MessageListByDayHandler,
+    r"/message/list_by_day", MessageListByDayHandler,
+
+    r"/message/refresh", MessageRefreshHandler,
     # Ajax处理
     r"/message/list", ListAjaxHandler,
     r"/message/date", DateAjaxHandler,

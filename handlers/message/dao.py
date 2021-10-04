@@ -1,13 +1,15 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/07/24 17:50:27
+# @modified 2021/10/04 18:20:20
 import xutils
 import xconfig
 import xmanager
 import xtables
 import re
+import random
 from xutils import dbutil, cacheutil, textutil, Storage, functions
+from xutils import dateutil
 from xtemplate import T
 
 
@@ -20,8 +22,10 @@ dbutil.register_table("msg_history", "备忘历史")
 dbutil.register_table("user_stat", "用户数据统计")
 
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:")
-MOBILE_LENGTH = 11
-VALID_TAG_TUPLE = ("task", "done", "log", "key")
+# 带日期创建的最大重试次数
+CREATE_MAX_RETRY = 10
+MOBILE_LENGTH    = 11
+VALID_TAG_TUPLE = ("task", "done", "log", "key", "date")
 
 class MessageDO(Storage):
 
@@ -41,14 +45,64 @@ def check_before_create(kw):
     if 'tag' not in kw:
         raise Exception("[message.dao.create] key `tag` is missing")
 
+    if "ctime" not in kw:
+        raise Exception("[message.dao.create] key `ctime` is missing")
+
     tag = kw["tag"]
     if tag not in VALID_TAG_TUPLE:
         raise Exception("[message.dao.create] tag `%s` is invalid" % tag)
 
-def create_message(**kw):
-    check_before_create(kw)
+def get_message_key(user_name, timestamp = None):
+    assert user_name != None
+    assert timestamp != None
+    return "message:%s:%s" % (user_name, dbutil.timeseq(timestamp))
 
+def create_message_with_date(kw):
+    user_name = kw["user"]
+    date = kw["date"]
+    old_ctime = kw["ctime"]
+
+    timestamp = dateutil.parse_date_to_timestamp(date)
+    timestamp += 60 * 60 * 21 # 追加日志的开始时间默认为21点
+    # 加上一个小时的随机数，减少冲突
+    timestamp += random.randint(0, 60 * 60)
+
+    kw["ctime0"] = old_ctime
+    # 调整类型为记事
+    kw["tag"] = "log"
+    retry = 0
+
+    while True:
+        with dbutil.get_write_lock():
+            if retry > CREATE_MAX_RETRY:
+                raise Exception("create_message: too many retry")
+
+            key = get_message_key(user_name, timestamp)
+            kw["ctime"] = dateutil.format_time(timestamp)
+            kw["id"] = key
+            result = dbutil.get(key)
+            if result is None:
+                dbutil.put(key, kw)
+                return key
+            else:
+                timestamp += 1
+
+            retry += 1
+
+def create_message(**kw):
+    """创建信息
+    @param {string} user 用户名
+    @param {string} tag 类型
+    @param {string} ctime 创建时间
+    @param {string|None} date 日期，可选的
+    @param {string} content 文本的内容
+    """
+    check_before_create(kw)
     tag = kw['tag']
+
+    if tag == "date":
+        return create_message_with_date(kw)
+
     if tag == 'key':
         key = "msg_key:%s:%s" % (kw['user'], dbutil.timeseq())
     else:
