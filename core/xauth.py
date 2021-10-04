@@ -328,13 +328,13 @@ def encode_password(password, salt):
     return pswd_md5.hexdigest()
 
 def write_cookie_old(name):
-    web.setcookie("xuser", name, expires= 24*3600*30)
+    web.setcookie("xuser", name, expires=24*3600*30)
     pswd_md5 = get_user_password_md5(name)
     web.setcookie("xpass", pswd_md5, expires=24*3600*30)
 
 def write_cookie(user_name):
     session_id = create_user_session(user_name)
-    web.setcookie("sid", session_id)
+    web.setcookie("sid", session_id, expires=24*3600*30)
 
 
 def get_user_cookie(name):
