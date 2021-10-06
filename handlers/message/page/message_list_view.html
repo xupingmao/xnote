@@ -97,6 +97,10 @@
                 return getUrlParam("orderby", "");
             }
 
+            function getParamP() {
+                return getUrlParam("p", "");
+            }
+
             function onMessageRefresh() {
                 var params = {};
 
@@ -109,6 +113,7 @@
                 params.filterKey = getParamFilterKey();
                 params.filterDate = getParamFilterDate();
                 params.orderby = getParamOrderBy();
+                params.p = getParamP();
 
                 window.doRefreshMessageList(params);
             }

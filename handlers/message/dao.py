@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/10/04 18:20:20
+# @modified 2021/10/06 20:15:30
 import xutils
 import xconfig
 import xmanager
@@ -21,9 +21,9 @@ dbutil.register_table("msg_key_rel", "标签关系")
 dbutil.register_table("msg_history", "备忘历史")
 dbutil.register_table("user_stat", "用户数据统计")
 
-VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:")
+VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
 # 带日期创建的最大重试次数
-CREATE_MAX_RETRY = 10
+CREATE_MAX_RETRY = 20
 MOBILE_LENGTH    = 11
 VALID_TAG_TUPLE = ("task", "done", "log", "key", "date")
 
@@ -38,44 +38,74 @@ class MessageDO(Storage):
 
 def check_before_create(kw):
     if "id" in kw:
-        raise Exception("[message.dao.create] can not set id")
+        raise Exception("message.dao.create: can not set id")
     if "user" not in kw:
-        raise Exception("[message.dao.create] key `user` is missing")
+        raise Exception("message.dao.create: key `user` is missing")
 
     if 'tag' not in kw:
-        raise Exception("[message.dao.create] key `tag` is missing")
+        raise Exception("message.dao.create: key `tag` is missing")
 
     if "ctime" not in kw:
-        raise Exception("[message.dao.create] key `ctime` is missing")
+        raise Exception("message.dao.create: key `ctime` is missing")
+
+    if "content" not in kw:
+        raise Exception("message.dao.create: key `content` is missing")
 
     tag = kw["tag"]
     if tag not in VALID_TAG_TUPLE:
-        raise Exception("[message.dao.create] tag `%s` is invalid" % tag)
+        raise Exception("message.dao.create: tag `%s` is invalid" % tag)
 
-def get_message_key(user_name, timestamp = None):
+def convert_to_task_idx_key(key):
+    assert isinstance(key, str)
+    prefix, user_name, timeseq = key.split(":")
+    return "msg_task_idx:%s:%s" % (user_name, timeseq)
+
+
+def build_task_index(kw):
+    tag = kw["tag"]
+
+    if tag == "task" or tag == "done" or tag == "todo":
+        task_key = convert_to_task_idx_key(kw["id"])
+        dbutil.put(task_key, kw)
+
+
+def execute_after_create(kw):
+    build_task_index(kw)
+
+def execute_after_update(kw):
+    build_task_index(kw)
+
+def execute_after_delete(kw):
+    build_task_index(kw)
+
+
+def get_message_key(user_name, timestamp):
     assert user_name != None
     assert timestamp != None
     return "message:%s:%s" % (user_name, dbutil.timeseq(timestamp))
 
-def create_message_with_date(kw):
+def _create_message_with_date(kw):
     user_name = kw["user"]
     date = kw["date"]
     old_ctime = kw["ctime"]
+    kw["tag"] = "log"
+
+    today = dateutil.get_today()
+
+    if today == date:
+        return _create_message_without_date(kw)
 
     timestamp = dateutil.parse_date_to_timestamp(date)
     timestamp += 60 * 60 * 21 # 追加日志的开始时间默认为21点
-    # 加上一个小时的随机数，减少冲突
-    timestamp += random.randint(0, 60 * 60)
 
     kw["ctime0"] = old_ctime
     # 调整类型为记事
-    kw["tag"] = "log"
     retry = 0
 
     while True:
         with dbutil.get_write_lock():
             if retry > CREATE_MAX_RETRY:
-                raise Exception("create_message: too many retry")
+                raise Exception("message.dao.create: too many retry")
 
             key = get_message_key(user_name, timestamp)
             kw["ctime"] = dateutil.format_time(timestamp)
@@ -83,11 +113,25 @@ def create_message_with_date(kw):
             result = dbutil.get(key)
             if result is None:
                 dbutil.put(key, kw)
+
+                execute_after_create(kw)
                 return key
             else:
                 timestamp += 1
 
             retry += 1
+
+def _create_message_without_date(kw):
+    tag = kw['tag']
+    if tag == 'key':
+        key = "msg_key:%s:%s" % (kw['user'], dbutil.timeseq())
+    else:
+        key = "message:%s:%s" % (kw['user'], dbutil.timeseq())
+    kw['id'] = key
+    dbutil.put(key, kw)
+
+    execute_after_create(kw)
+    return key
 
 def create_message(**kw):
     """创建信息
@@ -98,18 +142,13 @@ def create_message(**kw):
     @param {string} content 文本的内容
     """
     check_before_create(kw)
+    kw["version"] = 0
     tag = kw['tag']
 
     if tag == "date":
-        return create_message_with_date(kw)
-
-    if tag == 'key':
-        key = "msg_key:%s:%s" % (kw['user'], dbutil.timeseq())
+        return _create_message_with_date(kw)
     else:
-        key = "message:%s:%s" % (kw['user'], dbutil.timeseq())
-    kw['id'] = key
-    dbutil.put(key, kw)
-    return key
+        return _create_message_without_date(kw)
 
 def check_before_update(message):
     id = message['id']
@@ -121,6 +160,8 @@ def update_message(message):
 
     id = message['id']
     dbutil.put(id, message)
+
+    execute_after_update(message)
 
 def add_message_history(message):
     id_str = message['id']
@@ -177,8 +218,13 @@ def check_before_delete(id):
 
 def delete_message_by_id(id):
     check_before_delete(id)
+    old = get_message_by_id(id)
+    
     dbutil.delete(id)
     xmanager.fire("message.remove", Storage(id=id))
+
+    if old != None:
+        execute_after_delete(old)
 
 @xutils.timeit(name = "Kv.Message.Count", logfile = True)
 def kv_count_message(user, status):

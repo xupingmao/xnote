@@ -2,7 +2,7 @@
 
 {% if message_tag == "task" %}
     <div class="card">
-        <a class="list-link" href="/message?tag=task&action=create">
+        <a class="list-link" href="/message?tag=task&p=create">
             <span>创建新待办</span>
             <div class="float-right">
                 <span class="book-size-span"></span>
@@ -10,13 +10,22 @@
             </div>
         </a>
 
-        <a class="list-link" href="/message/done">
-            <span>已完成任务</span>
+        <a class="list-link" href="/message?tag=task&p=create">
+            <span>查看全部待办任务</span>
             <div class="float-right">
-                <span class="book-size-span">{{message_stat.done_count}}</span>
+                <span class="book-size-span">{{message_stat.task_count}}</span>
                 <i class="fa fa-chevron-right"></i>
             </div>
         </a>
+
+        <a class="list-item" href="/message?tag=task&p=done">
+            <span>查看已完成任务</span>
+            <div class="float-right">
+                <span class="list-item-badge">{{message_stat.done_count}}</span>
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+
     </div>
 {% end %}
 

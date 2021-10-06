@@ -1,9 +1,10 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:48:09
-# @modified 2021/10/06 13:44:28
+# @modified 2021/10/06 19:14:54
 # @filename message_utils.py
 import xutils
+import web
 from xtemplate import T
 from xutils import textutil
 from xutils import dateutil
@@ -252,6 +253,13 @@ def convert_message_list_to_day_folder(item_list, date, show_empty = False):
 
     return result
 
+def count_month_size(folder_list):
+    result = 0
+    for foler in folder_list:
+        result += len(foler.item_list)
+
+    return result
+
 
 def get_length(item):
     if isinstance(item, (tuple, list, set, str)):
@@ -271,5 +279,64 @@ def filter_msg_list_by_key(msg_list, filter_key):
             result.append(msg_item)
 
     return result
+
+def filter_key(key):
+    if key == None or key == "":
+        return ""
+    if key[0] == '#':
+        return key
+
+    if key[0] == '@':
+        return key
+
+    if key[0] == '《' and key[-1] == '》':
+        return key
+        
+    return "#%s#" % key
+
+
+def get_remote_ip():
+    x_forwarded_for = web.ctx.env.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for != None:
+        return x_forwarded_for.split(",")[0]
+    return web.ctx.env.get("REMOTE_ADDR")
+
+
+def get_similar_key(key):
+    assert key != None
+    if key.startswith("#"):
+        key = key.lstrip("#")
+        key = key.rstrip("#")
+        return key
+    else:
+        return "#" + key + "#"
+
+
+class MessageListParser(object):
+
+    def __init__(self, chatlist):
+        self.chatlist = chatlist
+
+    def parse(self):
+        self.do_process_message_list(self.chatlist)
+
+    def do_process_message_list(self, message_list):
+        keywords = set()
+        for message in message_list:
+            process_message(message)
+            if message.keywords != None:
+                keywords = message.keywords.union(keywords)
+        
+        self.keywords = []
+        for word in keywords:
+            keyword_info = Storage(name = word, url = build_search_url(word))
+            self.keywords.append(keyword_info)
+
+    def get_message_list(self):
+        return self.chatlist
+
+    def get_keywords(self):
+        return self.keywords
+
 
 xutils.register_func("message.filter_default_content", filter_default_content)

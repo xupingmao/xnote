@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/10/06 13:42:16
+# @modified 2021/10/06 19:47:17
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -23,6 +23,9 @@ from handlers.message.message_class import MessageFolder
 from handlers.message.message_utils import *
 
 MSG_DAO       = xutils.DAO("message")
+# 消息处理规则
+MSG_RULES     = []
+# 默认的标签
 DEFAULT_TAG   = "log"
 MAX_LIST_LIMIT = 1000
 # 系统标签
@@ -83,16 +86,6 @@ def refresh_message_index():
     """刷新随手记的索引"""
     pass
 
-def get_similar_key(key):
-    assert key != None
-    if key.startswith("#"):
-        key = key.lstrip("#")
-        key = key.rstrip("#")
-        return key
-    else:
-        return "#" + key + "#"
-
-
 def get_page_max(amount, pagesize = None):
     if pagesize is None:
         pagesize = xconfig.PAGE_SIZE
@@ -131,33 +124,6 @@ class SearchContext:
     def __init__(self, key):
         self.key = key
 
-class MessageListParser(object):
-
-    def __init__(self, chatlist):
-        self.chatlist = chatlist
-
-    def parse(self):
-        self.do_process_message_list(self.chatlist)
-
-    def do_process_message_list(self, message_list):
-        keywords = set()
-        for message in message_list:
-            process_message(message)
-            if message.keywords != None:
-                keywords = message.keywords.union(keywords)
-        
-        self.keywords = []
-        for word in keywords:
-            keyword_info = Storage(name = word, url = build_search_url(word))
-            self.keywords.append(keyword_info)
-
-    def get_message_list(self):
-        return self.chatlist
-
-    def get_keywords(self):
-        return self.keywords
-
-
 class ListAjaxHandler:
 
     def do_get_html(self, chatlist, page, page_max, tag = "task"):
@@ -169,6 +135,7 @@ class ListAjaxHandler:
         key  = xutils.get_argument("key", "")
         filter_key = xutils.get_argument("filterKey", "")
         orderby = xutils.get_argument("orderby", "")
+        p = xutils.get_argument("p", "")
 
         encoded_key = xutils.encode_uri_component(key)
         encoded_filter_key = xutils.encode_uri_component(filter_key)
@@ -188,7 +155,7 @@ class ListAjaxHandler:
         else:
             template_file = "message/ajax/message_ajax.html"
 
-        page_url = "?tag={tag}&displayTag={display_tag}&date={date}&key={encoded_key}&filterKey={encoded_filter_key}&orderby={orderby}&page=".format(**locals())
+        page_url = "?tag={tag}&displayTag={display_tag}&date={date}&key={encoded_key}&filterKey={encoded_filter_key}&orderby={orderby}&p={p}&page=".format(**locals())
 
         return xtemplate.render(template_file,
             show_todo_check = show_todo_check,
@@ -230,7 +197,12 @@ class ListAjaxHandler:
         return chatlist, amount
 
     def do_list_task(self, user_name, offset, limit):
+        p = xutils.get_argument("p", "")
         filter_key = xutils.get_argument("filterKey", "")
+
+        if p == "done":
+            return MSG_DAO.list_by_tag(user_name, "done", offset, limit)
+
         if filter_key != "":
             msg_list, amount = MSG_DAO.list_by_tag(user_name, "task", offset = 0, limit = MAX_LIST_LIMIT)
             msg_list = filter_msg_list_by_key(msg_list, filter_key)
@@ -266,7 +238,7 @@ class ListAjaxHandler:
             # 搜索
             return self.do_search(user_name, key, offset, pagesize)
 
-        if date != "" and date != None:
+        if tag == "date":
             # 日期
             return self.do_list_by_date(user_name, date, offset, pagesize)
 
@@ -474,31 +446,26 @@ class CalendarRule(BaseRule):
         print(date, month, day)
         ctx.type = "calendar"
 
-rules = [
-    CalendarRule(r"(\d+)年(\d+)月(\d+)日"),
-]
-
-def get_remote_ip():
-    x_forwarded_for = web.ctx.env.get("HTTP_X_FORWARDED_FOR")
-    if x_forwarded_for != None:
-        return x_forwarded_for.split(",")[0]
-    return web.ctx.env.get("REMOTE_ADDR")
-
 def create_message(user_name, tag, content, ip):
     if tag == "todo":
         tag = "task"
     date = xutils.get_argument("date", "")
     content = content.strip()
-    ctime = xutils.get_argument("date", xutils.format_datetime())
-    message = dict(content = content, 
-        user   = user_name, 
-        tag    = tag,
-        ip     = ip,
-        date   = date,
-        mtime  = ctime,
-        ctime  = ctime)
+    ctime = xutils.format_datetime()
+
+    message = Storage()
+    message.user = user_name
+    message.tag = tag
+    message.ip = ip
+    message.date = date
+    message.ctime = ctime
+    message.mtime = ctime
+    message.content = content
+
     id = MSG_DAO.create(**message)
-    message['id'] = id
+
+    message.id = id
+
     MSG_DAO.refresh_message_stat(user_name)
 
     after_message_create_or_update(MSG_DAO.get_by_id(id))
@@ -524,8 +491,9 @@ def touch_key_by_content(user_name, tag, content):
     return item
 
 def apply_rules(user_name, id, tag, content):
+    global MSG_RULES
     ctx = Storage(id = id, content = content, user = user_name, type = "")
-    for rule in rules:
+    for rule in MSG_RULES:
         rule.match_execute(ctx, content)
 
 class SaveAjaxHandler:
@@ -567,11 +535,14 @@ class DateAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
-        date      = xutils.get_argument("date")
+        date      = xutils.get_argument("date", "")
         page      = xutils.get_argument("page", 1, type = int)
         user_name = xauth.current_name()
 
-        offset = (page - 1) * xconfig.PAGE_SIZE
+        if date == "":
+            return xtemplate.render("error.html", error = "date参数为空")
+
+        offset = get_offset_from_page(page)
         limit  = xconfig.PAGE_SIZE
 
         msg_list, msg_count  = MSG_DAO.list_by_date(user_name, date, offset, limit)
@@ -586,20 +557,6 @@ class DateAjaxHandler:
             page = page, 
             page_url = "?date=%s&page=" % date,
             item_list = msg_list)
-
-def filter_key(key):
-    if key == None or key == "":
-        return ""
-    if key[0] == '#':
-        return key
-
-    if key[0] == '@':
-        return key
-
-    if key[0] == '《' and key[-1] == '》':
-        return key
-        
-    return "#%s#" % key
 
 class MessageListHandler:
 
@@ -669,12 +626,21 @@ class MessageListHandler:
 
         return xtemplate.render("message/page/message_list_view.html", **kw)
 
+    def get_task_done_page(self):
+        kw = self.get_task_kw()
+        kw.show_system_tag = False
+        kw.show_input_box = False
+        return xtemplate.render("message/page/message_list_view.html", **kw)
+
     def do_view_task(self):
         filter_key = xutils.get_argument("filterKey", "")
-        action = xutils.get_argument("action", "")
+        page_name = xutils.get_argument("p", "")
 
-        if action == "create":
+        if page_name == "create":
             return self.get_create_task_page()
+
+        if page_name == "done":
+            return self.get_task_done_page()
 
         if filter_key != "":
             return self.get_task_tag_page(filter_key)
@@ -903,6 +869,7 @@ class MessageListByDayHandler():
             show_empty = show_empty,
             show_back_btn = True,
             search_type = "message",
+            month_size = count_month_size(message_list),
             tag = "date")
 
 class MessageRefreshHandler:
@@ -916,6 +883,11 @@ class MessageRefreshHandler:
 xutils.register_func("message.process_message", process_message)
 xutils.register_func("message.get_current_message_stat", get_current_message_stat)
 xutils.register_func("url:/message/log", MessageLogHandler)
+
+
+MSG_RULES = [
+    CalendarRule(r"(\d+)年(\d+)月(\d+)日"),
+]
 
 xurls=(
     r"/message", MessageHandler,
