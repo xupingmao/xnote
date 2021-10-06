@@ -101,6 +101,11 @@ def _get_users(force_reload = False):
     _USER_LIST = temp_users
     return _USER_LIST
 
+def _setcookie(key, value, expires=24*3600*30):
+    assert isinstance(key, str)
+    assert isinstance(value, str)
+    web.setcookie(key, value, expires)
+
 def get_users():
     """获取所有用户，返回一个深度拷贝版本"""
     return copy.deepcopy(_get_users())
@@ -327,14 +332,9 @@ def encode_password(password, salt):
         pswd_md5.update(salt.encode("utf-8"))
     return pswd_md5.hexdigest()
 
-def write_cookie_old(name):
-    web.setcookie("xuser", name, expires=24*3600*30)
-    pswd_md5 = get_user_password_md5(name)
-    web.setcookie("xpass", pswd_md5, expires=24*3600*30)
-
 def write_cookie(user_name):
     session_id = create_user_session(user_name)
-    web.setcookie("sid", session_id, expires=24*3600*30)
+    _setcookie("sid", session_id, expires=24*3600*30)
 
 
 def get_user_cookie(name):
@@ -495,7 +495,7 @@ def get_user_data_dir(user_name, mkdirs = False):
 
 def login_user_by_name(user_name, login_ip = None):
     session_id = create_user_session(user_name, login_ip = login_ip)
-    web.setcookie("sid", session_id)
+    _setcookie("sid", session_id)
 
     # 更新最近的登录时间
     update_user(user_name, dict(login_time=xutils.format_datetime()))   
