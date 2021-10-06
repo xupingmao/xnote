@@ -8,6 +8,8 @@
 {% block body_left %}
     {% include message/component/message_tab.html %}
 
+    {% include message/component/message_sub_link.html %}
+
     {% if message_tag == "calendar" %}
         <!-- 月份选择器 -->
         {% include common/date/month_picker.html %}

@@ -5,9 +5,10 @@
 {% init show_tag_btn = True %}
 {% init show_attachment_btn = True %}
 {% init default_content = "" %}
+{% init filter_default_content = xutils.get_func_by_name("message.filter_default_content") %}
 
 <div class="message-input-box card">
-    <textarea class="col-md-12 input-box" rows=3 autoHeight=true placeholder="{{message_placeholder}}">{{default_content}}</textarea>
+    <textarea class="col-md-12 input-box" rows=3 autoHeight=true placeholder="{{message_placeholder}}">{{filter_default_content(default_content)}}</textarea>
     <input type="file" id="filePicker" class="hide" multiple/>
 
     <div class="col-md-12 btn-line-height">

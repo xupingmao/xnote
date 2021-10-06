@@ -19,24 +19,14 @@
                 <i class="fa fa-chevron-right"></i>
             </div>
         </a>
-
-        {% if show_empty %}
-            <a class="list-link" href="/message/dairy?date={{date}}&show_empty=false">
-                <span>隐藏无记事日期</span>
-                <div class="float-right">
-                    <span class="book-size-span"></span>
-                    <i class="fa fa-chevron-right"></i>
-                </div>
-            </a>
-        {% else %}
-            <a class="list-link" href="/message/dairy?date={{date}}&show_empty=true">
-                <span>展示所有日期</span>
-                <div class="float-right">
-                    <span class="book-size-span"></span>
-                    <i class="fa fa-chevron-right"></i>
-                </div>
-            </a>
-        {% end %}
+        
+        <a class="list-link" href="/message/calendar?date={{date}}">
+            <span>按月查看</span>
+            <div class="float-right">
+                <span class="book-size-span"></span>
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
 
     </div>
         
@@ -46,7 +36,7 @@
         {% end %}
 
         {% for folder in message_list %}
-            <a href="/message?date={{folder.date}}" class="list-link">
+            <a href="/message?tag=date&date={{folder.date}}" class="list-link {{folder.css_class}}">
                 <span>{{folder.title}}</span>
                 <div class="float-right">
                     <span class="book-size-span">{{ len(folder.item_list) }}</span>
@@ -60,7 +50,7 @@
         $(function (e) {
             function onMonthSelected(event) {
                 var date = event.target;
-                var show_empty = getUrlParam("show_empty");
+                var show_empty = getUrlParam("show_empty", "");
                 window.location.href = "?date=" + date + "&show_empty=" + show_empty;
             }
 

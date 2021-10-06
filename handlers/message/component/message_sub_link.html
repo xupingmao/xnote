@@ -2,6 +2,14 @@
 
 {% if message_tag == "task" %}
     <div class="card">
+        <a class="list-link" href="/message?tag=task&action=create">
+            <span>创建新待办</span>
+            <div class="float-right">
+                <span class="book-size-span"></span>
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+
         <a class="list-link" href="/message/done">
             <span>已完成任务</span>
             <div class="float-right">
@@ -9,15 +17,6 @@
                 <i class="fa fa-chevron-right"></i>
             </div>
         </a>
-
-        <a class="list-link" href="/message?tag=task_tags">
-            <span>按标签查看</span>
-            <div class="float-right">
-                <span class="book-size-span"></span>
-                <i class="fa fa-chevron-right"></i>
-            </div>
-        </a>
-
     </div>
 {% end %}
 

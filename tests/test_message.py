@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/06/05 16:31:08
+# @modified 2021/10/06 13:47:04
 
 import sys
 import os
@@ -131,6 +131,11 @@ class TestMain(BaseTestCase):
             data=dict(content="#TEST# Xnote-Unit-Test", tag="task"))
 
         self.check_OK("/message?tag=task_tags")
+
+    def test_message_task(self):
+        self.check_OK("/message?tag=task")
+        self.check_OK("/message?tag=task&action=create")
+        self.check_OK("/message?tag=task&filterKey=test")
 
 
 

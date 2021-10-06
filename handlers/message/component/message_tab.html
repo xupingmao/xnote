@@ -5,7 +5,7 @@
 {% init message_stat = xutils.call("message.get_current_message_stat") %}
 
 <!-- 桌面版菜单 -->
-<div class="col-md-12 card">
+<div class="card">
     <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">
         待办(<span class="task-count">{{message_stat.task_count}}</span>)
     </a>
@@ -20,11 +20,11 @@
 </div>
 
 <!-- 移动端菜单 -->
-<div class="col-md-12 card hide">
-    <a class="tab tab-link x-tab" href="/message?tag=task" data-tag="task">待办</a>
-    <a class="tab tab-link x-tab" href="/message?tag=log" data-tag="log">记事</a>
-    <a class="tab tab-link x-tab" href="/message?tag=key" data-tag="key">标签</a>
-    <a class="tab tab-link x-tab" href="/message/dairy">日期</a>
+<div class="card hide">
+    <a class="tab-link" href="/message?tag=task" data-tag="task">待办</a>
+    <a class="tab-link" href="/message?tag=log" data-tag="log">记事</a>
+    <a class="tab-link" href="/message?tag=key" data-tag="key">标签</a>
+    <a class="tab-link" href="/message/dairy">日期</a>
 </div>
 
 
