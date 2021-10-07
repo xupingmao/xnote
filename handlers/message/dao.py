@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/10/06 20:15:30
+# @modified 2021/10/07 14:53:16
 import xutils
 import xconfig
 import xmanager
@@ -10,6 +10,7 @@ import re
 import random
 from xutils import dbutil, cacheutil, textutil, Storage, functions
 from xutils import dateutil
+from xutils.functions import del_dict_key
 from xtemplate import T
 
 
@@ -60,13 +61,20 @@ def convert_to_task_idx_key(key):
     prefix, user_name, timeseq = key.split(":")
     return "msg_task_idx:%s:%s" % (user_name, timeseq)
 
+def convert_to_task_index(kw):
+    index = Storage()
+    index.tag = kw["tag"]
+    index.user = kw["user"]
+    index.content = kw["content"]
+    return index
 
 def build_task_index(kw):
     tag = kw["tag"]
 
     if tag == "task" or tag == "done" or tag == "todo":
         task_key = convert_to_task_idx_key(kw["id"])
-        dbutil.put(task_key, kw)
+        task_index = convert_to_task_index(kw)
+        dbutil.put(task_key, task_index)
 
 
 def execute_after_create(kw):
@@ -155,8 +163,20 @@ def check_before_update(message):
     if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
         raise Exception("[msg.update] invalid message id:%s" % id)
 
+def fix_before_update(message):
+    if message.tag is None:
+        # 修复tag为空的情况，这种一般是之前的待办任务，只有状态没有tag
+        if message.status == 100:
+            message.tag = "done"
+        else:
+            message.tag = "task"
+
+    del_dict_key(message, "html")
+    del_dict_key(message, "tag_text")
+
 def update_message(message):
     check_before_update(message)
+    fix_before_update(message)
 
     id = message['id']
     dbutil.put(id, message)

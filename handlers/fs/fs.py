@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2021/09/11 22:53:10
+# @modified 2021/10/07 13:52:32
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -50,7 +50,7 @@ def get_file_size(filepath):
 
 def get_filesystem_kw():
     """return filesystem utils"""
-    kw = {}
+    kw = Storage()
     kw["os"]            = os
     kw["search_type"]   = "fs"
     kw["get_file_size"] = get_file_size
@@ -178,8 +178,10 @@ class FileSystemHandler:
         # Fix, some `file` in *nix is not file either directory. os.stat方法报错
         path           = path.replace("\\", "/")
         kw             = get_filesystem_kw()
-        kw["filelist"] = filelist
-        kw["path"]     = path
+        kw.filelist    = filelist
+        kw.path        = path
+        kw.quoted_path = xutils.quote(path)
+
         kw["token"]         = xauth.get_current_user().token
         kw["parent_path"]   = get_parent_path(path)
         kw["search_action"] = "/fs_find"

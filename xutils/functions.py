@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2021/08/21 12:19:23
+# @modified 2021/10/07 14:49:44
 from collections import deque
 from xutils.base import Storage
 from xutils.dateutil import format_time
@@ -234,6 +234,10 @@ class SortedSet:
         pass
 
 def listremove(list, obj):
+    return remove_list_item(list, obj)
+
+def remove_list_item(list, obj):
+    """删除列表中的所有元素,list自带的remove方法只删除一个，而且如果不包含目标对象会抛出异常"""
     if list is None:
         return
     while obj in list:
@@ -260,7 +264,7 @@ def listmerge(list1, list2):
     return target
 
 def first_or_none(list):
-    """返回第一个元素
+    """返回集合的第一个元素
 
         >>> first_or_none([])
         None
@@ -289,7 +293,17 @@ def dictsort(dictionary, key='value'):
     raise Exception("dictsort: unsupported key: %s" % key)
 
 def dictvalues(dict):
+    return get_dict_values(dict)
+
+def get_dict_values(dict):
+    """获取字典的值，返回一个列表"""
     return list(dict.values())
+
+def del_dict_key(dict_obj, key):
+    """删除字典的key，如果key不存在也不抛异常"""
+    assert isinstance(dict_obj, dict)
+    if key in dict_obj:
+        del dict_obj[key]
 
 if __name__ == '__main__':
     import doctest

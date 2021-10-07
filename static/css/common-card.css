@@ -2,7 +2,7 @@
  * 卡片主题的样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2021/04/24 21:19:07
+ * @modified 2021/10/07 13:57:09
  * @filename common-card.css
  */
 
@@ -88,6 +88,8 @@ body {
     margin-bottom: 10px;
     padding: 5px;
     border-radius: 5px;
+    word-break: break-all;
+    word-wrap: break-word;
     /*border: 1px solid #ccc;*/
     /*阴影不是很好看*/
     /*box-shadow: 0 0 5px #ccc;*/

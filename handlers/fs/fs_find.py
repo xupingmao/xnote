@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2021/07/31 14:27:58
+# @modified 2021/10/07 14:52:04
 import os
 import sys
 import glob
@@ -13,7 +13,7 @@ import xmanager
 import time
 from fnmatch import fnmatch
 from xutils import dbutil
-
+from xutils import Storage
 
 dbutil.register_table("fs_index", "文件索引")
 
@@ -121,10 +121,14 @@ class SearchHandler:
         tpl = "fs/page/fs.html"
         if mode == "grid":
             tpl = "fs/fs_grid.html"
-        return xtemplate.render(tpl, 
-            path  = path,
-            token = xauth.get_current_user().token,
-            filelist = filelist)
+
+        kw = Storage()
+        kw.path = path
+        kw.quoted_path = xutils.quote(path)
+        kw.token = xauth.get_current_user().token
+        kw.filelist = filelist
+
+        return xtemplate.render(tpl, **kw)
 
 class IndexHandler:
     """文件索引管理"""
