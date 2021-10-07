@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2021/10/07 13:52:32
+# @modified 2021/10/07 15:06:04
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -601,7 +601,7 @@ class BookmarkHandler:
 
         xmanager.add_visit_log(user_name, "/fs_bookmark")
 
-        kw = dict()
+        kw = Storage()
         bookmark = Bookmark(user_name)
 
         filelist = []
@@ -612,12 +612,12 @@ class BookmarkHandler:
         for fpath in bookmark.get():
             filelist.append(FileItem(fpath))
 
-        kw["show_path"] = False
-        kw["show_fake_path"] = True
-        kw["fake_path_url"] = "/fs_bookmark"
-        kw["fake_path_name"] = "文件收藏夹"
-
-        kw["filelist"] = filelist
+        kw.show_path = False
+        kw.show_fake_path = True
+        kw.fake_path_url = "/fs_bookmark"
+        kw.fake_path_name = "文件收藏夹"
+        kw.filelist = filelist
+        
         return xtemplate.render("fs/page/fs.html", **kw)
 
 class UserHomeHandler(BookmarkHandler):
