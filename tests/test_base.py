@@ -13,6 +13,7 @@ import xtemplate
 import web
 import six
 import json
+import xauth
 from xutils import dbutil
 from handlers.fs.fs_upload import get_upload_file_path
 
@@ -36,6 +37,7 @@ def init():
     xtables.init()
     dbutil.init()
     xutils.init(xconfig)
+    xauth.init()
     xutils.cacheutil.init(xconfig.STORAGE_DIR)
     
     APP = web.application(list(), var_env, autoreload=False)

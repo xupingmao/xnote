@@ -1,12 +1,24 @@
 # encoding=utf-8
-# @modified 2021/08/21 13:52:22
+# @modified 2021/10/24 12:41:47
 import web
 import xauth
 import xtemplate
 import xmanager
 import xutils
+import xconfig
 from xutils import textutil
 from xutils import Storage
+from xutils import dbutil
+from xutils import webutil
+
+dbutil.register_table("user_op_log", "用户操作日志表")
+OP_LOG_TABLE = dbutil.get_table("user_op_log")
+
+def create_op_log(user_name, op_type, detail):
+    now = xutils.format_datetime()
+    ip  = webutil.get_real_ip()
+    log = Storage(ctime = now, user_name = user_name, type = op_type, detail = detail, ip = ip)
+    OP_LOG_TABLE.insert_by_user(user_name, log)
 
 class ListHandler:
     """用户管理"""
@@ -113,10 +125,20 @@ class ChangePasswordHandler:
         try:
             xauth.check_old_password(user_name, old_password)
             xauth.update_user(user_name, Storage(password = new_password))
+            create_op_log(user_name, "change_password", "修改密码")
         except Exception as e:
             return self.GET(error = str(e))
 
         return self.GET(error = error)
+
+
+class UserOpLogHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        user_name = xauth.current_name()
+        log_list = OP_LOG_TABLE.list_by_user(user_name, 0, 100, reverse = True)
+        return xtemplate.render("user/page/user_op_log.html", log_list = log_list)
 
 xurls = (
     r"/user/add",  AddHandler,
@@ -124,6 +146,7 @@ xurls = (
     r"/user/info",   UserInfoHandler,
     r"/user/session", SessionInfoAjaxHandler,
     r"/user/change_password", ChangePasswordHandler,
+    r"/user/op_log", UserOpLogHandler,
     
     r"/system/user", UserHandler,
     r"/system/user/list", ListHandler,

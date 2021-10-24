@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2021/08/08 10:10:21
+# @modified 2021/10/24 11:55:00
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -184,7 +184,7 @@ def main():
     # 初始化模板管理
     xtemplate.init()
 
-    # 初始化主管理器
+    # 初始化主管理器，包括用户及权限、定时任务、各功能模块
     xmanager.init(app, var_env)
 
     # 文件修改检测

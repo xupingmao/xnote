@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/09/11 22:14:56
+# @modified 2021/10/24 13:13:12
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -170,6 +170,10 @@ def sort_by_name(notes):
 def sort_by_name_desc(notes):
     notes.sort(key = lambda x: x.name, reverse = True)
 
+def sort_by_name_priority(notes):
+    sort_by_name(notes)
+    sort_by_priority(notes)
+
 def sort_by_mtime_desc(notes):
     notes.sort(key = lambda x: x.mtime, reverse = True)
 
@@ -225,6 +229,7 @@ def sort_by_dtime_asc(notes):
 SORT_FUNC_DICT = {
     "name": sort_by_name,
     "name_desc": sort_by_name_desc,
+    "name_priority": sort_by_name_priority,
     "mtime_desc": sort_by_mtime_desc,
     "ctime_desc": sort_by_ctime_desc,
     "ctime_priority": sort_by_ctime_priority,

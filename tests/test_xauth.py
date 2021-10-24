@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/24 16:39:45
-# @modified 2021/09/19 23:01:11
+# @modified 2021/10/24 16:47:44
 
 import sys
 import time
@@ -23,6 +23,9 @@ BaseTestCase = test_base.BaseTestCase
 app = test_base.init()
 
 class TestXauth(BaseTestCase):
+
+    def test_current_user(self):
+        self.assertEqual("test", xauth.current_name())
 
     def test_check_invalid_names(self):
         self.assertTrue(xauth.is_valid_username("t1234"))

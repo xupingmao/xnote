@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/17 10:51:22
-# @modified 2021/08/01 19:53:59
+# @modified 2021/10/24 12:40:57
 
 import web
 
@@ -84,6 +84,12 @@ def is_mobile_client(user_agent = None):
 
 def is_desktop_client(user_agent = None):
     return get_client_platform(user_agent) == "desktop"
+
+def get_real_ip():
+    x_forwarded_for = web.ctx.env.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for != None:
+        return x_forwarded_for.split(",")[0]
+    return web.ctx.env.get("REMOTE_ADDR")
 
 def init_webutil_env(is_test = False):
     global IS_TEST

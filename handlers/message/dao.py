@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2021/10/07 14:53:16
+# @modified 2021/10/24 13:07:13
 import xutils
 import xconfig
 import xmanager
@@ -104,7 +104,7 @@ def _create_message_with_date(kw):
         return _create_message_without_date(kw)
 
     timestamp = dateutil.parse_date_to_timestamp(date)
-    timestamp += 60 * 60 * 21 # 追加日志的开始时间默认为21点
+    timestamp += 60 * 60 * 23 # 追加日志的开始时间默认为23点
 
     kw["ctime0"] = old_ctime
     # 调整类型为记事

@@ -39,6 +39,7 @@ except ImportError:
 # 加载第三方的库
 import xutils
 from xutils.base import Storage
+from xutils.dbutil_sqlite import *
 
 try:
     import leveldb
@@ -47,10 +48,11 @@ except ImportError:
 
 
 WRITE_LOCK    = threading.Lock()
+READ_LOCK     = threading.Lock()
 LAST_TIME_SEQ = -1
 
 # 注册的数据库表名，如果不注册，无法进行写操作
-TABLE_DICT = dict()
+TABLE_INFO_DICT = dict()
 LDB_TABLE_DICT = dict()
 
 ###########################################################
@@ -58,7 +60,7 @@ LDB_TABLE_DICT = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/10/04 18:11:37
+# @modified 2021/10/24 11:14:49
 ###########################################################
 
 class DBException(Exception):
@@ -101,37 +103,6 @@ class RecordLock:
 
     def __del__(self):
         self.release()
-
-def search_escape(text):
-    if not (isinstance(text, str) or isinstance(text, unicode)):
-        return text
-    text = text.replace('/', '//')
-    text = text.replace("'", '\'\'')
-    text = text.replace('[', '/[')
-    text = text.replace(']', '/]')
-    #text = text.replace('%', '/%')
-    #text = text.replace('&', '/&')
-    #text = text.replace('_', '/_')
-    text = text.replace('(', '/(')
-    text = text.replace(')', '/)')
-    return "'%" + text + "%'"
-
-def to_sqlite_obj(text):
-    if text is None:
-        return "NULL"
-    if not (isinstance(text, str)):
-        return repr(text)
-    # text = text.replace('\\', '\\')
-    text = text.replace("'", "''")
-    return "'" + text + "'"
-    
-def escape(text):
-    if not (isinstance(text, str)):
-        return text
-    #text = text.replace('\\', '\\\\')
-    text = text.replace("'", "''")
-    return "'" + text + "'"
-
 
 class LevelDBProxy:
 
@@ -239,6 +210,10 @@ def check_get_leveldb():
         raise Exception("leveldb not found!")
     return _leveldb
 
+def check_table_name(table_name):
+    if table_name not in TABLE_INFO_DICT:
+        raise DBException("table %s not registered!" % table_name)
+
 class LdbTable:
     """基于leveldb的表，比较常见的是以下几种
     * key = prefix:record_id           全局数据库
@@ -254,7 +229,7 @@ class LdbTable:
 
     def __init__(self, table_name, key_name = "_key"):
         # 参数检查
-        check_not_empty(table_name, "dbutil.Table: table_name can not be empty")
+        check_table_name(table_name)
 
         self.table_name = table_name
         self.key_name = key_name
@@ -328,6 +303,7 @@ class LdbTable:
         return key
 
     def insert_by_user(self, user_name, obj, id_type = "timeseq"):
+        assert user_name != None
         self._check_value(obj)
         id_value = self._get_id_value(id_type)
         key  = self.build_key(user_name, id_value)
@@ -394,22 +370,30 @@ class TableInfo:
 def register_table(table_name, description, category = "default"):
     # TODO 考虑过这个方法直接返回一个 LdbTable 实例
     # LdbTable可能针对同一个`table`会有不同的实例
-    TABLE_DICT[table_name] = TableInfo(table_name, description, category)
+    TABLE_INFO_DICT[table_name] = TableInfo(table_name, description, category)
+
+def _get_table_no_lock(table_name):
+    table = LDB_TABLE_DICT.get(table_name)
+    if table is None:
+        table = LdbTable(table_name)
+    return table
 
 def get_table(table_name):
     """获取table对象
     @param {str} table_name 表名
     @return {LdbTable}
     """
-    assert table_name != None
+    check_table_name(table_name)
+
     table = LDB_TABLE_DICT.get(table_name)
     if table is None:
-        table = LdbTable(table_name)
-        LDB_TABLE_DICT[table_name] = table
+        with READ_LOCK:
+            table = _get_table_no_lock(table_name)
+            LDB_TABLE_DICT[table_name] = table
     return table
 
 def get_table_dict_copy():
-    return TABLE_DICT.copy()
+    return TABLE_INFO_DICT.copy()
 
 def get(key, default_value = None):
     check_leveldb()
@@ -441,8 +425,7 @@ def put(key, obj_value, sync = False):
 
     table_name = key.split(":")[0]
 
-    if table_name not in TABLE_DICT:
-        raise DBException("table %s not registered!" % table_name)
+    check_table_name(table_name)
     
     key = key.encode("utf-8")
     # 注意json序列化有个问题，会把dict中数字开头的key转成字符串

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2021/07/31 14:28:22
+# @modified 2021/10/24 16:36:19
 import web
 import time
 import hashlib
@@ -7,24 +7,27 @@ import xutils
 import xauth
 import xtemplate
 from xutils import dateutil, cacheutil, dbutil
+from xutils import Storage
+from xutils import webutil
 
 RETRY_LIMIT = 3
 
 dbutil.register_table("record", "记录表")
+dbutil.register_table("user_op_log", "用户操作日志表")
+USER_LOG_TABLE = dbutil.get_table("user_op_log")
 
 def get_real_ip():
-    x_forwarded_for = web.ctx.env.get("HTTP_X_FORWARDED_FOR")
-    if x_forwarded_for != None:
-        return x_forwarded_for.split(",")[0]
-    return web.ctx.env.get("REMOTE_ADDR")
+    return webutil.get_real_ip()
 
-def save_login_info(name, value):
-    message = "%s-%s" % (get_real_ip(), value)
+def save_login_info(name, value, error = None):
     if name != "":
-        dbutil.insert("record:login", dict(type="login", 
-            key = name, value = message, 
-            ctime = xutils.format_datetime(), 
-            cdate = xutils.format_date()))
+        real_ip = get_real_ip()
+        now = xutils.format_datetime()
+        detail = "登录IP: %s" % real_ip
+        if error != None:
+            detail += ",登录失败:%s" % error
+        login_log = Storage(type = "login", user_name = name, ip = real_ip, ctime = now, detail = detail)
+        USER_LOG_TABLE.insert_by_user(name, login_log)
 
 def save_login_error_count(name, count):
     cacheutil.set("login.fail.count#%s" % name, count, 60)
@@ -54,11 +57,11 @@ class LoginHandler:
                 raise web.seeother(target)
             else:
                 error = "用户名或密码错误"
-                save_login_info(name, pswd)
+                save_login_info(name, pswd, error)
                 save_login_error_count(name, count + 1)
         else:
             error = "用户名或密码错误"
-            save_login_info(name, pswd)
+            save_login_info(name, pswd, error)
             save_login_error_count(name, count + 1)
 
         return xtemplate.render("user/page/login.html", 

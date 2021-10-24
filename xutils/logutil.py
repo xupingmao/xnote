@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/05/05 16:57:09
+# @modified 2021/10/24 12:17:39
 import logging
 import time
 import inspect
@@ -166,27 +166,44 @@ def log_deco(message):
         return handle
     return deco
 
-def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False):
+def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False,switch_func=None):
     """简单的计时装饰器，可以指定执行次数"""
     from xutils import dbutil
     dbutil.register_table("log_timeit", "耗时统计日志")
 
     def deco(func):
         def handle(*args, **kw):
+            if switch_func != None:
+                need_log = switch_func()
+            else:
+                need_log = True
+
+            if not need_log:
+                return func(*args, **kw)
+
             t1 = time.time()
             for i in range(repeat):
                 ret = func(*args, **kw)
             t2 = time.time()
-            if logfile:
-                message = ""
 
-                if logargs:
-                    message = str(args)
-                if logret:
-                    message = message + "|" + str(ret)
-                trace(name, message, int((t2-t1)*1000))
+            func_name = name
+
+            if func_name == "":
+                func_name = func.__name__
+
+            msg_buf = []
+            msg_buf.append(func_name)
+            if logargs:
+                msg_buf.append("args:" + str(args))
+            if logret:
+                msg_buf.append("result:" + str(ret))
+
+            message = "|".join(msg_buf)
+
+            if logfile:
+                trace(message, int((t2-t1)*1000))
             else:
-                print("[timeit]", name, "cost time: ", int((t2-t1)*1000), "ms")
+                print("[timeit]", message, "cost time: ", int((t2-t1)*1000), "ms")
             return ret
         return handle
     return deco

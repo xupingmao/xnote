@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/08/21 14:02:56
+# @modified 2021/10/24 17:44:37
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -34,7 +34,7 @@ from xutils import Queue, tojson, MyStdout, cacheutil, u, dbutil, fsutil
 
 __version__      = "1.0"
 __author__       = "xupingmao (578749341@qq.com)"
-__copyright__    = "(C) 2016-2020 xupingmao. GNU GPL 3."
+__copyright__    = "(C) 2016-2021 xupingmao. GNU GPL 3."
 __contributors__ = []
 
 dbutil.register_table("schedule", "任务调度表 <schedule:id>")
@@ -224,6 +224,7 @@ class HandlerManager:
 
         del sys.modules["xauth"]
         import xauth
+        xauth.init()
 
     def reload(self):
         """重启handlers目录下的所有的模块"""
@@ -672,6 +673,7 @@ class EventManager:
 def init(app, vars, last_mapping = None):
     global _manager
     global _event_manager
+
     _event_manager = EventManager()
     _manager       = HandlerManager(app, vars, last_mapping = last_mapping)
 
@@ -690,7 +692,6 @@ def instance():
 @xutils.log_init_deco("xmanager.reload")
 def reload():
     _event_manager.remove_handlers()
-    xauth.refresh_users()
     
     # 重载处理器
     _manager.reload()

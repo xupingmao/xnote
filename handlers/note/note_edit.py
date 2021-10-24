@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2021/09/01 00:09:36
+# @modified 2021/10/24 13:19:51
 
 """笔记编辑相关处理"""
 import os
@@ -490,7 +490,7 @@ class UpdateOrderByHandler:
     def POST(self):
         id = xutils.get_argument("id")
         orderby = xutils.get_argument("orderby")
-        if orderby not in ("ctime_priority", "name"):
+        if orderby not in ("ctime_priority", "name", "name_priority"):
             return dict(code = "fail", message = "无效的排序方式: %s" % orderby)
         note = check_get_note(id)
         

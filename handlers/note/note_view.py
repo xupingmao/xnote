@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/08/24 23:07:12
+# @modified 2021/10/24 13:18:50
 import profile
 import math
 import re
@@ -108,7 +108,7 @@ def view_md_func(file, kw):
 def view_group_timeline_func(note, kw):
     raise web.found("/note/timeline?type=default&parent_id=%s" % note.id)
 
-def view_group_list_func(file, kw):
+def view_group_detail_func(file, kw):
     # 代码暂时不用
     orderby   = kw.orderby
     user_name = kw.user_name
@@ -127,7 +127,7 @@ def view_group_list_func(file, kw):
     else:
         orderby = file.orderby
 
-    if orderby not in ("ctime_priority", "name"):
+    if orderby not in ("ctime_priority", "name", "name_priority"):
         orderby = "ctime_priority"
 
     files  = NOTE_DAO.list_by_parent(file.creator, file.id, (page-1)*pagesize, pagesize, orderby)
@@ -160,7 +160,7 @@ def view_table_func(note, kw):
     kw.show_aside = False
 
 VIEW_FUNC_DICT = {
-    "group": view_group_list_func,
+    "group": view_group_detail_func,
     "md"  : view_md_func,
     "text": view_md_func,
     "memo": view_md_func,

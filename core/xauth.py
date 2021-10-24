@@ -22,6 +22,7 @@ import warnings
 import time
 from xutils import ConfigParser, textutil, dbutil, fsutil
 from xutils import Storage
+from xutils import logutil
 from xutils.functions import listremove
 
 
@@ -29,7 +30,11 @@ dbutil.register_table("user", "用户信息表")
 dbutil.register_table("session", "用户会话信息")
 dbutil.register_table("user_session_rel", "用户会话关系")
 
+USER_TABLE = dbutil.get_table("user")
+
 # 用户配置
+# 通过init方法完成初始化
+BUILTIN_USER_DICT = None
 _USER_LIST       = None
 NAME_LENGTH_MIN  = 4
 PASSWORD_LEN_MIN = 6
@@ -47,6 +52,8 @@ class UserModel:
     mtime = "修改时间"
     login_time = "登录时间"
 
+def _is_debug_enabled():
+    return PRINT_DEBUG_LOG
 
 def log_debug(fmt, *args):
     if PRINT_DEBUG_LOG:
@@ -86,7 +93,7 @@ def _get_users(force_reload = False):
     _create_temp_user(temp_users, "admin")
     _create_temp_user(temp_users, "test")
 
-    user_list = dbutil.prefix_list("user")
+    user_list = USER_TABLE.list(offset = 0, limit = 20)
     for user in user_list:
         if user.name is None:
             xutils.trace("UserList", "invalid user %s" % user)
@@ -202,21 +209,30 @@ def delete_user_session_by_id(sid):
     # 登录的时候会自动清理无效的sid关系
     dbutil.delete("session:%s" % sid)
 
+def _get_user_from_db(name):
+    user_detail = USER_TABLE.get_by_key("user:" + name)
+    return user_detail
+
+def _get_builtin_user(name):
+    assert BUILTIN_USER_DICT != None
+    return BUILTIN_USER_DICT.get(name)
+
 def find_by_name(name):
     if name is None:
         return None
-    users = _get_users()
-    name = name.lower()
-    user_info = users.get(name)
-    if user_info != None:
-        return Storage(**user_info)
-    return None
+
+    user = _get_user_from_db(name)
+    if user != None:
+        return user
+    return _get_builtin_user(name)
 
 def get_user_config_dict(name):
-    user = get_user(name)
+    user = get_user_by_name(name)
     if user != None:
         if user.config is None:
             user.config = Storage()
+        elif isinstance(user.config, dict):
+            user.config = Storage(**user.config)
         return user.config
     return None
 
@@ -277,7 +293,7 @@ def get_user_from_cookie():
 
 def get_current_user():
     if xconfig.IS_TEST:
-        return get_user("test")
+        return get_user_by_name("test")
 
     user = get_user_from_token()
     if user != None:
@@ -431,18 +447,20 @@ def has_login_by_cookie(name = None):
 
     log_debug("has_login_by_cookie: name={}, name_in_cookie={}", name, name_in_cookie)
 
-    if name is None:
-        return True
-
-    if name_in_cookie != name:
-        return False
-
-    user = get_user_by_name(name)
+    user = get_user_by_name(name_in_cookie)
     if user is None:
         return False
 
-    return user.token == session_info.token
+    if user.token != session_info.token:
+        return False
 
+    if name is None:
+        return True
+    else:
+        return name_in_cookie == name
+
+
+@logutil.timeit_deco(logargs=True,logret=True,switch_func=_is_debug_enabled)
 def has_login(name=None):
     """验证是否登陆
     如果``name``指定,则只能该用户名通过验证
@@ -459,6 +477,7 @@ def has_login(name=None):
 
     return has_login_by_cookie(name)
 
+@logutil.timeit_deco(logargs=True,logret=True,switch_func=_is_debug_enabled)
 def is_admin():
     return xconfig.IS_TEST or has_login("admin")
 
@@ -494,6 +513,7 @@ def get_user_data_dir(user_name, mkdirs = False):
     return fpath
 
 def login_user_by_name(user_name, login_ip = None):
+    assert user_name != None
     session_id = create_user_session(user_name, login_ip = login_ip)
     _setcookie("sid", session_id)
 
@@ -515,6 +535,12 @@ def check_old_password(user_name, password):
     
     if user_info.password != password:
         raise Exception("旧的密码不匹配")
+
+def init():
+    global BUILTIN_USER_DICT
+    BUILTIN_USER_DICT = dict()
+    _create_temp_user(BUILTIN_USER_DICT, "admin")
+    _create_temp_user(BUILTIN_USER_DICT, "test")
 
 xutils.register_func("user.get_config_dict", get_user_config_dict)
 xutils.register_func("user.get_config",      get_user_config)
