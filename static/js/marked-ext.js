@@ -248,36 +248,60 @@
         return text;
     }
 
+
     function generateMenuHtml(myRenderer) {
         var menuText = "";
         var itemNo = [];
-        menuText += '<div class="marked-contents">';
-        menuText += "<span>[目录]</span>"
+        var menuList = [];
+        var minLevel = 1;
+        var prevLevel = 1;
 
-        var currentLevel = 0;
+        menuText += '<div class="marked-contents">';
+        menuText += '<span class="marked-contents-title">目录</span>';
+        menuText += "<ul>";
+
+        // 先把基础层级计算好
         for (var i = 0; i < myRenderer.headings.length; i++) {
             var heading = myRenderer.headings[i];
             var text = heading.text;
             var link = heading.link;
             var level = heading.level;
-            var contentIndex = i + 1;
+            minLevel = Math.min(minLevel, level);
+            menuList.push([level, text, link]);
+        }
 
-            if (level == currentLevel) {
-                menuText += buildMenuLink(text, link);
-            } else if (level > currentLevel) {
-                // 加深一层
-                menuText += repeatElement("<ul>", level - currentLevel);
-                menuText += buildMenuLink(text, link);
-            } else {
-                // 退出一层
-                menuText += repeatElement("</ul>", currentLevel - level);
+        // 准备渲染目录
+        for (var i = 0; i < menuList.length; i++) {
+            var item = menuList[i];
+            var level = item[0];
+            var text = item[1];
+            var link = item[2];
+
+            // 调整层级
+            level = level - minLevel + 1;
+
+            if (level === prevLevel) {
                 menuText += buildMenuLink(text, link);
             }
 
-            // 更新当前的层级
-            currentLevel = level;
+            if (level > prevLevel) {
+                // 进入下一层
+                menuText += repeatElement("<ul>", level - prevLevel);
+                menuText += buildMenuLink(text, link);
+            }
+
+            if (level < prevLevel) {
+                // 退出下一层
+                menuText += repeatElement("</ul>", prevLevel - level);
+                menuText += buildMenuLink(text, link);
+            }
+
+            // 更新之前的层级
+            prevLevel = level;
         }
-        menuText += repeatElement("</ul>", currentLevel);
+
+        menuText += repeatElement("</ul>", prevLevel);
+        menuText += "</ul>";
         menuText += "</div>";
         return menuText;
     }

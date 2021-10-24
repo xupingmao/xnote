@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2021/10/24 13:19:51
+# @modified 2021/10/24 18:03:21
 
 """笔记编辑相关处理"""
 import os
@@ -394,7 +394,7 @@ class UpdateHandler:
     def POST(self):
         is_public = xutils.get_argument("public", "")
         id        = xutils.get_argument("id")
-        content   = xutils.get_argument("content")
+        content   = xutils.get_argument("content", "")
         version   = xutils.get_argument("version", 0, type=int)
         file_type = xutils.get_argument("type")
         name      = xutils.get_argument("name", "")

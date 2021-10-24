@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/10/02 21:03:10
+# @modified 2021/10/24 18:17:30
 from io import StringIO
 import xconfig
 import codecs
@@ -1023,6 +1023,8 @@ define_plugin_category("develop",  u"开发", required_roles = ["admin", "user"]
 define_plugin_category("datetime", u"日期和时间", platforms = [], icon_class = "fa fa-clock-o")
 define_plugin_category("work",     u"工作", platforms = ["desktop"], icon_class = "icon-work")
 define_plugin_category("index",    u"分类", url = "/plugin_category_list?category=index", icon_class = "fa fa-th-large")
+define_plugin_category("inner",    u"内置工具", platforms = [])
+define_plugin_category("test",     u"测试", platforms = [])
 define_plugin_category("other",    u"其他", platforms = [])
 
 xurls = (
