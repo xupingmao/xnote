@@ -60,7 +60,7 @@ LDB_TABLE_DICT = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/10/24 11:14:49
+# @modified 2021/10/29 00:17:34
 ###########################################################
 
 class DBException(Exception):
@@ -445,7 +445,7 @@ def delete(key, sync = False):
     key = key.encode("utf-8")
     _leveldb.Delete(key, sync = sync)
 
-def scan(key_from = None, key_to = None, func = None, reverse = False):
+def scan(key_from = None, key_to = None, func = None, reverse = False, parse_json = True):
     """扫描数据库
     @param {string} key_from
     @param {string} key_to
@@ -456,17 +456,21 @@ def scan(key_from = None, key_to = None, func = None, reverse = False):
 
     if key_from != None:
         key_from = key_from.encode("utf-8")
+
     if key_to != None:
         key_to = key_to.encode("utf-8")
+
     iterator = _leveldb.RangeIter(key_from, key_to, include_value = True, reverse = reverse)
+
     for key, value in iterator:
         key = key.decode("utf-8")
-        value = get_object_from_bytes(value)
+        value = get_object_from_bytes(value, parse_json)
         if not func(key, value):
             break
 
 def prefix_scan(prefix, func, reverse = False, parse_json = True):
     check_leveldb()
+    assert len(prefix) > 0
 
     key_from = None
     key_to   = None

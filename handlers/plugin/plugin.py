@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/10/24 18:17:30
+# @modified 2021/10/28 22:58:10
 from io import StringIO
 import xconfig
 import codecs
@@ -690,6 +690,7 @@ def on_search_plugins(ctx):
         ctx.tools.append(result)
         return
 
+    user_name = ctx.user_name
     result_list = []
     temp_result = []
 
@@ -712,7 +713,8 @@ def on_search_plugins(ctx):
         more.show_more_link = True
         result_list.append(more)
 
-    result_list += temp_result[:3]
+    if xconfig.get_user_config(user_name, "search.show_plugin_detail") == "true":
+        result_list += temp_result[:3]
 
     ctx.tools += result_list
 

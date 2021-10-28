@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/05/05 11:05:29
-# @modified 2021/09/19 13:16:26
+# @modified 2021/10/28 00:24:29
 # @filename text_parser_properties.py
 
 
@@ -29,6 +29,9 @@ def parse_prop_text(text, ret_type = "dict"):
     for line in text.split("\n"):
         line = line.strip()
         if line == "":
+            continue
+
+        if line.startswith("#"):
             continue
 
         key = None

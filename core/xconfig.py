@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/08/08 10:51:57
+# @modified 2021/10/28 00:53:06
 
 '''xnote系统配置
 # 用户配置
@@ -377,12 +377,7 @@ def get_user_config(user_name, config_key, default_value = None):
         return DEFAULT_USER_CONFIG.get(config_key)
 
     import xauth
-    config = xauth.get_user_config_dict(user_name)
-    default_value = DEFAULT_USER_CONFIG.get(config_key)
-    if config is None:
-        return default_value
-    else:
-        return config.get(config_key, default_value)
+    return xauth.get_user_config(user_name, config_key)
 
 def get_user_config_dict(user_name):
     import xauth

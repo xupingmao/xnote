@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/05/05 17:43:23
+# @modified 2021/10/28 23:32:45
 import web
 import time
 import os
@@ -34,6 +34,8 @@ USER_CONFIG_KEY_SET = set([
     "LANG", 
     "THEME",
     "FONT_SCALE",
+    "search.show_plugin_detail",
+    "search.show_message_detail"
 ])
 
 def get_xnote_version():
@@ -63,16 +65,40 @@ class SettingsHandler:
             Item('sqlite版本', sqlite3.sqlite_version if sqlite3 != None else '')
         ]
 
-        return xtemplate.render("settings/page/settings.html", 
-            show_aside     = False,
-            html_title     = T("设置"),
-            item_list      = item_list,
-            sys_mem_total  = xutils.format_size(sys_mem_total),
-            thread_cnt     = thread_cnt,
-            xconfig        = xconfig,
-            xnote_version  = get_xnote_version(),
-            start_time     = xconfig.START_TIME,
-            init_script_url = INIT_SCRIPT_URL)
+        user_name = xauth.current_name()
+        category = xutils.get_argument("category", "")
+
+        def get_user_config(key):
+            return xauth.get_user_config(user_name, key)
+
+        kw = Storage()
+        kw.show_aside = False
+        kw.html_title = T("设置")
+        kw.item_list = item_list
+        kw.sys_mem_total  = xutils.format_size(sys_mem_total)
+        kw.thread_cnt     = thread_cnt
+        kw.xconfig        = xconfig
+        kw.category       = category
+        kw.xnote_version  = get_xnote_version()
+        kw.start_time     = xconfig.START_TIME
+        kw.init_script_url = INIT_SCRIPT_URL
+        kw.show_admin_btn = False
+        kw.show_back_btn = True
+        kw.get_user_config = get_user_config
+
+        if category == "":
+            kw.show_back_btn = False
+
+        if xauth.is_admin() and category == "":
+            kw.show_admin_btn = True
+
+        if category == "search":
+            kw.html_title = T("搜索设置")
+
+        if category == "admin":
+            kw.html_title = T("管理员设置")
+
+        return xtemplate.render("settings/page/settings.html", **kw)
 
 
 
@@ -180,19 +206,18 @@ class PropertiesHandler:
 
 
 @xauth.login_required()
-def set_user_config(key, value):
+def update_user_config(key, value):
     if key not in USER_CONFIG_KEY_SET:
         return
-    user = xauth.current_user()
-    if user.config is None:
-        user.config = Storage()
-    user.config[key] = value
-    xauth.update_user(user["name"], user)
+
+    user_name = xauth.current_name()
+    config_dict = Storage()
+    config_dict[key] = value
+    xauth.update_user_config_dict(user_name, config_dict)
 
 @xauth.login_required("admin")
-def set_sys_config(key, value):
+def update_sys_config(key, value):
     setattr(xconfig, key, value)
-    cacheutil.hset('sys.config', key, value)
 
 class ConfigHandler:
 
@@ -201,7 +226,10 @@ class ConfigHandler:
         key   = xutils.get_argument("key")
         value = xutils.get_argument("value")
         type  = xutils.get_argument("type")
-        xutils.info("UpdateConfig", "%s,%s,%s" % (type, key, value))
+
+        update_msg = "%s,%s,%s" % (type, key, value)
+        print(update_msg)
+        xutils.info("UpdateConfig", update_msg)
 
         if type == "int":
             value = int(value)
@@ -220,10 +248,13 @@ class ConfigHandler:
         if key in ("RECENT_SEARCH_LIMIT", "RECENT_SIZE", "PAGE_SIZE", "TRASH_EXPIRE"):
             value = int(value)
 
-        if key in USER_CONFIG_KEY_SET:
-            set_user_config(key, value)
-        else:
-            set_sys_config(key, value)
+        try:
+            if key in USER_CONFIG_KEY_SET:
+                update_user_config(key, value)
+            else:
+                update_sys_config(key, value)
+        except Exception as e:
+            return dict(code = "fail", message = "设置失败:" + str(e))
             
         return dict(code="success")
 

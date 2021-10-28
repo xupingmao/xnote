@@ -9,87 +9,34 @@
 
 <div class="card">
     <div class="card-title btn-line-height">
-        <span>{{T("设置")}}</span>
+        <span>{{html_title}}</span>
         <div class="float-right">
-            {% if _is_admin %}
+            {% if show_admin_btn %}
                 <a class="btn btn-default" href="/system/admin">后台管理</a>
+            {% end %}
+
+            {% if show_back_btn %}
+                {% include common/button/back_button.html %}
             {% end %}
         </div>
     </div>
 </div>
 
 <div class="col-md-12 card">
-    <div class="settings-row">
-        <div class="settings-key">我的账号</div>
-        <div class="settings-value">
-            <a href="/user/info">{{_user_name}}</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
 
-    <div class="settings-row">
-        <div class="settings-key">关于系统</div>
-        <div class="settings-value">
-            <a href="/code/wiki/README.md">查看</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
+    {% if category == "search" %}
 
-    <div class="settings-row admin-visible mobile-only">
-        <div class="settings-key">文件管理</div>
-        <div class="settings-value">
-            <a href="/fs_list">进入</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
+        {% include settings/component/search_settings.html %}
 
-    <div class="settings-row admin-visible mobile-only">
-        <div class="settings-key">插件管理</div>
-        <div class="settings-value">
-            <a href="/plugins_list">进入</a>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </div>
+    {% elif category == "admin" %}
 
-    <div class="settings-row">
-        <div class="settings-key">首页</div>
-        <div class="settings-value">
-            <select name="HOME_PATH" data-type="str" value="{{HOME_PATH}}">
-                <option value="/note/group">笔记本列表</option>
-                <option value="/note/all">笔记列表</option>
-                <option value="/note/date">时间轴</option>
-                <option value="/note/tools">功能列表</option>
-                <option value="/message/log">随手记</option>
-                <option value="/note/workspace">工作台</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="settings-row">
-        <div class="settings-key">字体大小</div>
-        <div class="settings-value">
-            <select name="FONT_SCALE" data-type="int" value="{{_user_config.FONT_SCALE}}">
-                <option value="80">缩小</option>
-                <option value="100">正常</option>
-                <option value="120">放大</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="settings-row">
-        <div class="settings-key">{{T("Language")}}</div>
-        <div class="settings-value">
-            <select name="LANG" data-type="str" value="{{_user_config.LANG}}">
-                <option value="zh">中文</option>
-                <option value="en">English</option>
-            </select>
-        </div>
-    </div>
-
-    {% if _is_admin %}
         {% include settings/component/admin_settings.html %}
-    {% end %}
 
+    {% else %}
+
+        {% include settings/component/note_settings.html %}
+
+    {% end %}
 </div>
 
 <script type="text/javascript">
@@ -97,10 +44,14 @@
         $.post("/system/config", 
             {key: key, value: value, type: type}, 
             function (data) {
-                window.location.reload();
+                if (data.code == "success") {
+                    window.location.reload();
+                } else {
+                    xnote.alert(data.message);
+                }
         }).fail(function (resp) {
             console.log(resp);
-            alert("设置失败");
+            xnote.alert("设置失败");
         });
     }
 

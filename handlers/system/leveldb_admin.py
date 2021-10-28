@@ -1,14 +1,22 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2021/10/02 21:14:19
+# @modified 2021/10/29 00:26:30
 import xutils
 import xtemplate
 import xauth
 from xutils import dbutil
+from xutils import Storage
 from xtemplate import BasePlugin
 
 SCAN_HTML = """
+<style>
+    .value-detail {
+        width:100%;
+        height:95%;
+    }
+</style>
+
 <div class="card">
     <div class="card-title">
         <span>leveldb工具</span>
@@ -26,7 +34,7 @@ SCAN_HTML = """
             <select name="prefix" value="{{prefix}}">
                 <option value="">全部</option>
                 {% for key in table_dict %}
-                    <option value="{{key}}">{{key}}</option>
+                    <option value="{{key+':'}}">{{key}}</option>
                 {% end %}
             </select>
         </div>
@@ -46,6 +54,14 @@ SCAN_HTML = """
     </form>
 </div>
 
+{% if error != "" %}
+    <div class="card error">
+        <div class="col-md-12 error">
+            {{error}}
+        </div>
+    </div>
+{% end %}
+
 <div class="card">
     <table class="table">
         <tr>
@@ -56,9 +72,10 @@ SCAN_HTML = """
         {% for key, value in result %}
             <tr>
                 <td style="width:20%">{{key}}</td>
-                <td style="width:60%">{{value}}</td>
+                <td style="width:60%">{{get_display_value(value)}}</td>
                 <td style="width:20%">
                     <div class="float-right">
+                        <button class="btn btn-default view-btn" data-key="{{key}}" data-value="{{value}}">查看</button>
                         <button class="btn btn-danger delete-btn" data-key="{{key}}">删除</button>
                     </div>
                 </td>
@@ -68,8 +85,8 @@ SCAN_HTML = """
 </div>
 
 <div class="card">
-    <div class="pad5">
-        <a href="?key_from={{last_key}}&prefix={{prefix}}&&db_key={{db_key}}">下一页</a>
+    <div class="pad5 align-center">
+        <a href="?key_from={{last_key}}&prefix={{prefix}}&&db_key={{db_key}}&reverse={{reverse}}">下一页</a>
     </div>
 </div>
 
@@ -84,10 +101,27 @@ $(function () {
             });
         });
     }); 
+
+    $(".view-btn").click(function (e) {
+        var value = $(this).attr("data-value");
+        var text = $("<textarea>").text(value).addClass("value-detail");
+        xnote.showDialog("数据详情", text.prop("outerHTML"));
+    }); 
 });
 </script>
 
 """
+
+def get_display_value(value):
+    if value is None:
+        return value
+
+    if len(value) > 100:
+        return value[:100] + "..."
+    return value
+
+def parse_bool(value):
+    return value == "true"
 
 class DbScanHandler(BasePlugin):
 
@@ -117,39 +151,60 @@ class DbScanHandler(BasePlugin):
         action = xutils.get_argument("action", "")
         db_key = xutils.get_argument("db_key", "")
         prefix = xutils.get_argument("prefix", "")
+        reverse = xutils.get_argument("reverse", "")
+        key_from = xutils.get_argument("key_from", "")
 
         if action == "delete":
             return self.do_delete()
 
         result = []
-        reverse  = xutils.get_argument("reverse") == "true"
-        key_from = xutils.get_argument("key_from", "")
-        last_key = [""]
+        need_reverse = parse_bool(reverse)
+        max_scan = 1000
+        self.scan_count = 0
+        self.error = ""
+        self.last_key = ""
 
         def func(key, value):
             # print("db_scan:", key, value)
+            self.scan_count += 1
+            if self.scan_count > max_scan:
+                self.error = "too many scan"
+                return False
+
+            if not key.startswith(prefix):
+                return False
+
             if db_key in value:
                 result.append((key, value))
                 if len(result) > 30:
-                    last_key[0] = key
                     return False
+            
+            self.last_key = key
             return True
 
-        if prefix != "" and prefix != None:
-            dbutil.prefix_scan(prefix, func, reverse = reverse, parse_json = False)
-        else:
-            dbutil.scan(key_from = key_from, func = func, reverse = reverse)
+        if key_from == "" and prefix == "":
+            key_from = ""
 
-        self.writetemplate(SCAN_HTML, 
-            result = result, 
-            table_dict = dbutil.get_table_dict_copy(), 
-            prefix = prefix,
-            db_key = db_key,
-            last_key = last_key[0]
-        )
+        if key_from == "" and prefix != "":
+            key_from = prefix
+
+        dbutil.scan(key_from = key_from, func = func, reverse = need_reverse, parse_json = False)
+
+        kw = Storage()
+        kw.result = result
+        kw.table_dict = dbutil.get_table_dict_copy()
+        kw.prefix = prefix
+        kw.db_key = db_key
+        kw.reverse = reverse
+        kw.get_display_value = get_display_value
+        kw.error = self.error
+        kw.last_key = self.last_key
+
+        self.writetemplate(SCAN_HTML, **kw)
 
 
 
 xurls = (
-    "/system/db_scan", DbScanHandler
+    "/system/db_scan", DbScanHandler,
+    "/system/leveldb_admin", DbScanHandler,
 )

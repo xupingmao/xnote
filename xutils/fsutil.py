@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2021/08/14 21:23:07
+# @modified 2021/10/28 00:10:20
 
 
 """fsutil: 文件操作工具，文件工具分为如下部分：
@@ -665,8 +665,10 @@ def load_set_config(fpath):
             result.add(line)
     return result
 
-def load_properties(fpath):
-    pass
+def load_prop_config(fpath):
+    text = readfile(fpath)
+    from xutils.text_parser_properties import parse_prop_text
+    return parse_prop_text(text, "dict")
 
 def get_webpath(fpath):
     import xconfig

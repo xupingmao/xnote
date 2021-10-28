@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/10/06 19:47:17
+# @modified 2021/10/29 00:42:18
 
 """短消息处理，比如任务、备忘、临时文件等等"""
 import time
@@ -54,6 +54,12 @@ def on_search_message(ctx):
         item.icon = "hide"
         search_result.append(item)
         # print(message)
+
+    show_message_detail = xconfig.get_user_config(ctx.user_name, "search.show_message_detail") 
+    
+    if show_message_detail == "false":
+        search_result = []
+
     if count > 0:
         more = SearchResult()
         more.name = "搜索到[%s]条记事" % count

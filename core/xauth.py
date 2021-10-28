@@ -39,9 +39,12 @@ _USER_LIST       = None
 NAME_LENGTH_MIN  = 4
 PASSWORD_LEN_MIN = 6
 INVALID_NAMES    = fsutil.load_set_config("./config/user/invalid_names.list")
+USER_CONFIG_PROP = fsutil.load_prop_config("./config/user/user_config.default.properties")
 MAX_SESSION_SIZE = 20
 SESSION_EXPIRE   = 24 * 3600 * 7
 PRINT_DEBUG_LOG  = False
+
+print("USER_CONFIG_PROP", USER_CONFIG_PROP)
 
 class UserModel:
     # TODO 用户模型
@@ -237,15 +240,21 @@ def get_user_config_dict(name):
     return None
 
 def get_user_config(user_name, config_key):
+    default_value = USER_CONFIG_PROP.get(config_key)
     config_dict = get_user_config_dict(user_name)
     if config_dict is None:
-        return None
-    return config_dict.get(config_key)
+        return default_value
+    return config_dict.get(config_key, default_value)
 
 def update_user_config_dict(name, config_dict):
     user = get_user(name)
     if user is None:
         return
+
+    for key in config_dict:
+        if key not in USER_CONFIG_PROP:
+            raise Exception("invalid user config: %s" % key)
+
     config = get_user_config_dict(name)
     config.update(**config_dict)
     user.config = config

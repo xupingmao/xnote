@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/09/11 14:27:39
+# @modified 2021/10/29 00:33:59
 
 import sys
 import os
@@ -151,6 +151,11 @@ class TestMain(BaseTestCase):
         self.check_200("/api/check_network")
         self.check_200("/api/getip")
         self.check_200("/api/ipv6")
+
+    def test_settings(self):
+        self.check_200("/system/settings")
+        self.check_200("/system/settings?category=admin")
+        self.check_200("/system/settings?category=search")
 
     def skip_test_sys_storage(self):
         data = json_request("/system/storage?key=unit-test&_format=json", method="POST", data=dict(key="unit-test", value="hello"))
