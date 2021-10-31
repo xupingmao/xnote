@@ -445,19 +445,20 @@ def delete(key, sync = False):
     key = key.encode("utf-8")
     _leveldb.Delete(key, sync = sync)
 
-def scan(key_from = None, key_to = None, func = None, reverse = False, parse_json = True):
+def scan(key_from = None, key_to = None, func = None, reverse = False, 
+        parse_json = True):
     """扫描数据库
-    @param {string} key_from
-    @param {string} key_to
+    @param {string|bytes} key_from
+    @param {string|bytes} key_to
     @param {function} func
     @param {boolean} reverse
     """
     check_leveldb()
 
-    if key_from != None:
+    if key_from != None and isinstance(key_from, str):
         key_from = key_from.encode("utf-8")
 
-    if key_to != None:
+    if key_to != None and isinstance(key_to, str):
         key_to = key_to.encode("utf-8")
 
     iterator = _leveldb.RangeIter(key_from, key_to, include_value = True, reverse = reverse)

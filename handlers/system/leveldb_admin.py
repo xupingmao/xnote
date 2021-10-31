@@ -34,14 +34,14 @@ SCAN_HTML = """
             <select name="prefix" value="{{prefix}}">
                 <option value="">全部</option>
                 {% for key in table_dict %}
-                    <option value="{{key+':'}}">{{key}}</option>
+                    <option value="{{key}}">{{key}}</option>
                 {% end %}
             </select>
         </div>
 
         <div class="input-group">
             <label>关键字</label>
-            <input name="db_key" value="{{db_key}}"/>
+            <input name="db_key" value="{{db_key}}" type="text"/>
         </div>
 
         <div class="input-group">
@@ -182,13 +182,14 @@ class DbScanHandler(BasePlugin):
             self.last_key = key
             return True
 
-        if key_from == "" and prefix == "":
-            key_from = ""
-
         if key_from == "" and prefix != "":
-            key_from = prefix
+            key_from = prefix + ":"
 
-        dbutil.scan(key_from = key_from, func = func, reverse = need_reverse, parse_json = False)
+        if need_reverse:
+            key_to = key_from.encode("utf8") + b'\xff'
+            dbutil.scan(key_to = key_to, func = func, reverse = True, parse_json = False)
+        else:
+            dbutil.scan(key_from = key_from, func = func, reverse = False, parse_json = False)
 
         kw = Storage()
         kw.result = result

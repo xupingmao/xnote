@@ -25,8 +25,8 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 ## 安装运行
 - 安装python（建议Python3，Python2.7版本不再维护）
 - 安装依赖的软件包
-    - Mac/Linux执行 ```python -m pip install -r requirements.txt```
-    - Windows执行 `python -m pip install -r requirements.win.txt`
+    - Mac/Linux执行 ```python -m pip install -r config/requirements.txt```
+    - Windows执行 `python -m pip install -r config/requirements.win.txt`
 - 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 无需额外配置，初始化的管理员账号是admin/123456
 - 可以直接部署在新浪云应用SAE上面
 - 如果安装老版本后更新启动失败参考 [数据库迁移](./docs/db_migrate.md)

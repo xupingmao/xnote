@@ -1,10 +1,10 @@
 FROM python:3.7.2
 
-COPY requirements.txt ./
+COPY config/requirements.txt ./
 
 RUN pip install --upgrade pip
 
-# RUN pip install --no-cache-dir -r requirements.txt
+# install required packages
 RUN pip install -r requirements.txt
 
 # set timezone
