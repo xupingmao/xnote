@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/10/28 23:32:45
+# @modified 2021/10/31 17:08:35
 import web
 import time
 import os
@@ -40,7 +40,7 @@ USER_CONFIG_KEY_SET = set([
 
 def get_xnote_version():
     try:
-        return xutils.readfile("version.txt")
+        return xutils.readfile("config/version.txt")
     except:
         return ""
 

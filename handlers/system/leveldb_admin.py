@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2021/10/29 00:26:30
+# @modified 2021/10/31 17:08:12
 import xutils
 import xtemplate
 import xauth
@@ -175,11 +175,11 @@ class DbScanHandler(BasePlugin):
                 return False
 
             if db_key in value:
+                self.last_key = key
                 result.append((key, value))
                 if len(result) > 30:
                     return False
             
-            self.last_key = key
             return True
 
         if key_from == "" and prefix != "":
