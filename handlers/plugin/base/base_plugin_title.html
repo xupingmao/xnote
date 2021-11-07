@@ -19,31 +19,36 @@
                 <a class="btn btn-default" href="javascript:history.back();">返回</a>
             </span>
         </div>
-
-        {% if description != "" %}
-            <pre class="col-md-12 plugin-description">{{description}}</pre>
-        {% end %}
-
-        {% if error != "" %}
-            <pre class="col-md-12 error">{{error}}</pre>
-        {% end %}
-
-        {% if rows > 0 %}
-            <div class="row">
-                <form method="{{method}}">
-                    <!-- 输入框区域 BEGIN -->
-                    {% if rows == 1 %}
-                        <input type="text" class="plugin-input" name="input" value="{{input}}" placeholder="{{model.placeholder}}"/>
-                    {% else %}
-                        <textarea class="col-md-12 code" name="input" rows={{rows}} placeholder="{{model.placeholder}}">{{input}}</textarea>
-                    {% end %}
-                    <!-- 输入框区域 END -->
-
-                    <!-- 按钮区域 BEGIN -->
-                    <button>{{model.btn_text}}</button>
-                    <!-- 按钮区域 END -->
-                </form>
-            </div>
-        {% end %}
     </div>
+
+    {% if description != "" or error != "" or rows > 0 %}
+        <div class="card">
+            {% if description != "" %}
+                <pre class="col-md-12 plugin-description">{{description}}</pre>
+            {% end %}
+
+            {% if error != "" %}
+                <pre class="col-md-12 error">{{error}}</pre>
+            {% end %}
+
+            {% if rows > 0 %}
+                <div class="row">
+                    <form method="{{method}}">
+                        <!-- 输入框区域 BEGIN -->
+                        {% if rows == 1 %}
+                            <input type="text" class="plugin-input" name="input" value="{{input}}" placeholder="{{model.placeholder}}"/>
+                        {% else %}
+                            <textarea class="col-md-12 code" name="input" rows={{rows}} placeholder="{{model.placeholder}}">{{input}}</textarea>
+                        {% end %}
+                        <!-- 输入框区域 END -->
+
+                        <!-- 按钮区域 BEGIN -->
+                        <button>{{model.btn_text}}</button>
+                        <!-- 按钮区域 END -->
+                    </form>
+                </div>
+            {% end %}
+        </div>
+    {% end %}
+    
 {% end %}

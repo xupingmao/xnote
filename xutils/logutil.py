@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/10/24 12:17:39
+# @modified 2021/11/07 14:03:36
 import logging
 import time
 import inspect
@@ -141,13 +141,13 @@ def log_init_deco(message):
     """日志装饰器"""
     def deco(func):
         def handle(*args, **kw):
-            log("%-30s..." % message)
+            log("%-30s ..." % message)
             try:
                 result = func(*args, **kw)
-                log("%-30s[OK]" % message)
+                log("%-30s [OK]" % message)
                 return result
             except Exception as e:
-                log("%-30s[FAIL]" % message)
+                log("%-30s [FAIL]" % message)
                 raise e
         return handle
     return deco

@@ -1,19 +1,33 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/06/12 16:53:55
-# @modified 2021/06/26 21:39:26
+# @modified 2021/11/07 19:29:43
 # @filename func_util.py
 import warnings
 
+# 函数映射
 _FUNC_DICT = dict()
-def register_func(name, func):
+# 函数注册的来源
+_FUNC_SOURCE_DICT = dict()
+
+def register_func(name, func, source = None):
     """注册函数
     @param {string} name 函数名称，格式为 [protocol:] + [module] + name
     @param {func} func 函数
     """
     if name in _FUNC_DICT:
-        warnings.warn("[xutils.register_func] name registered: %s" % name)
+        warn_message = "[xutils.register_func] name registered: %s" % name
+        old_source = _FUNC_SOURCE_DICT.get(name)
+        if old_source != None:
+            warn_message += " by %s" % old_source
+
+        if old_source != source:
+            warnings.warn(warn_message)
+
     _FUNC_DICT[name] = func
+    
+    if source != None:
+        _FUNC_SOURCE_DICT[name] = source
 
 def call(func_name, *args, **kw):
     """调用函数

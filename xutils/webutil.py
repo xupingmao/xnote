@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/17 10:51:22
-# @modified 2021/10/24 12:40:57
+# @modified 2021/11/07 12:53:19
 
 import web
 
@@ -90,6 +90,9 @@ def get_real_ip():
     if x_forwarded_for != None:
         return x_forwarded_for.split(",")[0]
     return web.ctx.env.get("REMOTE_ADDR")
+
+def get_client_ip():
+    return get_real_ip()
 
 def init_webutil_env(is_test = False):
     global IS_TEST

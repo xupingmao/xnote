@@ -35,7 +35,7 @@ def init():
     xutils.remove_file("./testdata/data.db", hard = True)
     xconfig.init("./testdata")
     xtables.init()
-    dbutil.init()
+    dbutil.init(xconfig.DB_DIR)
     xutils.init(xconfig)
     xauth.init()
     xutils.cacheutil.init(xconfig.STORAGE_DIR)

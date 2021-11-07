@@ -60,7 +60,7 @@ LDB_TABLE_DICT = dict()
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/10/29 00:17:34
+# @modified 2021/11/07 14:10:21
 ###########################################################
 
 class DBException(Exception):
@@ -134,18 +134,17 @@ _leveldb = None
 
 
 @xutils.log_init_deco("leveldb")
-def init():
+def init(DB_DIR):
     global _leveldb
     if leveldb:
-        import xconfig
-        _leveldb = leveldb.LevelDB(xconfig.DB_DIR)
+        _leveldb = leveldb.LevelDB(DB_DIR)
 
     if xutils.is_windows():
         os.environ["PATH"] += os.pathsep + "lib"
-        import leveldbpy, xconfig
-        _leveldb = LevelDBProxy(xconfig.DB_DIR)
+        import leveldbpy
+        _leveldb = LevelDBProxy(DB_DIR)
     
-    xutils.log("init leveldb done, leveldb = %s" % _leveldb)
+    xutils.log("leveldb: %s" % _leveldb)
 
 def check_not_empty(value, message):
     if value == None or value == "":

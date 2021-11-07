@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2021/10/24 11:55:00
+# @modified 2021/11/07 18:59:29
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -46,7 +46,7 @@ DEFAULT_PORT = "1234"
 def get_bool_by_sys_arg(value):
     return value == "yes" or value == "true"
 
-def handle_args():
+def handle_args_and_init_config():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="./data")
     parser.add_argument("--delay", default="0")
@@ -64,6 +64,8 @@ def handle_args():
     parser.add_argument("--forceHttps", default="no")
     # TODO 禁用插件
     parser.add_argument("--disabledPlugins", default="no")
+    # 节点角色
+    parser.add_argument("--role", default = "leader")
 
     web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
@@ -110,6 +112,7 @@ def handle_args():
 
     xconfig.set_global_config("port", port)
     xconfig.set_global_config("start_time", xutils.format_datetime())
+    xconfig.set_global_config("system.node.role", args.role)
 
 def handle_signal(signum, frame):
     """处理系统消息
@@ -135,7 +138,7 @@ def try_init_sqlite():
 def try_init_ldb():
     try:
         # 初始化leveldb数据库
-        dbutil.init()
+        dbutil.init(xconfig.DB_DIR)
     except:
         xutils.print_exc()
         xconfig.errors.append("初始化ldb失败")
@@ -161,11 +164,11 @@ def init_autoreload():
     autoreload_thread.watch_file("core/xtemplate.py")
     autoreload_thread.start()
 
-def main():
+def init_app():
     global app
 
     # 处理初始化参数
-    handle_args()
+    handle_args_and_init_config()
 
     # 初始化数据库
     try_init_sqlite()
@@ -201,6 +204,10 @@ def main():
     # 时钟信号
     # signal.signal(signal.SIGALRM, handle_signal)
     # signal.alarm(5)
+
+def main():
+    global app
+    init_app()
 
     # 启动打开浏览器选项
     if xconfig.OPEN_IN_BROWSER:

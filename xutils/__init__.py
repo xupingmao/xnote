@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/07/26 11:54:37
+# @modified 2021/11/07 14:07:47
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -330,18 +330,18 @@ class RecordList:
     def most(self, count):
         return []
 
-def init(xconfig):
+def init(config):
     global FS_IMG_EXT_LIST
     global FS_TEXT_EXT_LIST
     global FS_AUDIO_EXT_LIST
     global FS_CODE_EXT_LIST
     global IS_TEST
 
-    FS_TEXT_EXT_LIST  = xconfig.FS_TEXT_EXT_LIST
-    FS_IMG_EXT_LIST   = xconfig.FS_IMG_EXT_LIST
-    FS_AUDIO_EXT_LIST = xconfig.FS_AUDIO_EXT_LIST
-    FS_CODE_EXT_LIST  = xconfig.FS_CODE_EXT_LIST
-    IS_TEST           = xconfig.IS_TEST
+    FS_TEXT_EXT_LIST  = config.FS_TEXT_EXT_LIST
+    FS_IMG_EXT_LIST   = config.FS_IMG_EXT_LIST
+    FS_AUDIO_EXT_LIST = config.FS_AUDIO_EXT_LIST
+    FS_CODE_EXT_LIST  = config.FS_CODE_EXT_LIST
+    IS_TEST           = config.IS_TEST
     
     xutils.webutil.init_webutil_env(is_test = IS_TEST)
 

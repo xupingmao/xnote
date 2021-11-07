@@ -33,17 +33,29 @@
     <p>位于 <a href="/code/edit?path={{doc_info.file}}">{{doc_info.file}}</a></p>
     <pre class="doc-detail">{{doc_info.doc}}</pre>
 
-    <h2>方法</h2>
+    {% if len(doc_info.functions) > 0 %}
+        <h2>方法目录</h2>
+        <ul>
+            {% for func in doc_info.functions %}
+                {% if func.type == "method" %}
+                    <ul><li><a href="#{{func.uuid}}">{{func.name}}</a></li></ul>
+                {% else %}
+                    <li><a href="#{{func.uuid}}">{{func.name}}</a></li>
+                {% end %}
+            {% end %}
+        </ul>
+        
+        <h2>方法详情</h2>
 
-    {% for func in doc_info.functions %}
-
-    <div>
-        <span>{{func.name}}</span>
-        <span class="doc-type">{{func.type}}</span>
-        <pre class="doc-detail">{{func.doc}}</pre>
-    </div>
-
+        {% for func in doc_info.functions %}
+            <div id="{{func.uuid}}">
+                <span class="doc-type">{{func.type}}</span>
+                <span>{{func.name}}</span>
+                <pre class="doc-detail">{{func.doc}}</pre>
+            </div>
+        {% end %}
     {% end %}
+
 
 {% end %}
 </div>

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/08/22 21:54:56
-# @modified 2021/08/14 10:21:00
+# @modified 2021/11/07 21:54:06
 import xauth
 import xtemplate
 import xutils
@@ -23,10 +23,7 @@ except ImportError:
     sqlite3 = None
 
 def get_xnote_version():
-    try:
-        return xutils.readfile("version.txt")
-    except:
-        return ""
+    return xconfig.get_global_config("system.version")
 
 def get_mem_info():
     mem_used = 0

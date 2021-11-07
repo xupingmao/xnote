@@ -44,8 +44,6 @@ MAX_SESSION_SIZE = 20
 SESSION_EXPIRE   = 24 * 3600 * 7
 PRINT_DEBUG_LOG  = False
 
-print("USER_CONFIG_PROP", USER_CONFIG_PROP)
-
 class UserModel:
     # TODO 用户模型
     name = "登录名"
@@ -551,6 +549,6 @@ def init():
     _create_temp_user(BUILTIN_USER_DICT, "admin")
     _create_temp_user(BUILTIN_USER_DICT, "test")
 
-xutils.register_func("user.get_config_dict", get_user_config_dict)
-xutils.register_func("user.get_config",      get_user_config)
+xutils.register_func("user.get_config_dict", get_user_config_dict, "xauth")
+xutils.register_func("user.get_config",      get_user_config,      "xauth")
 

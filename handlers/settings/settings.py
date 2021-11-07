@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/10/31 17:08:35
+# @modified 2021/11/07 13:17:51
 import web
 import time
 import os
@@ -20,6 +20,7 @@ import xmanager
 from logging.handlers import TimedRotatingFileHandler
 from xutils import sqlite3, Storage, cacheutil
 from xtemplate import T
+from xutils import logutil
 
 try:
     import psutil
@@ -38,11 +39,9 @@ USER_CONFIG_KEY_SET = set([
     "search.show_message_detail"
 ])
 
+@logutil.timeit_deco(logargs=True,logret=True)
 def get_xnote_version():
-    try:
-        return xutils.readfile("config/version.txt")
-    except:
-        return ""
+    return xconfig.get_global_config("system.version")
 
 class Item:
     def __init__(self, key, value):
@@ -167,7 +166,7 @@ class PropertiesHandler:
 
         if config is None:
             config = Storage(key=key, value="")
-        return xtemplate.render("system/properties.html", 
+        return xtemplate.render("settings/page/properties.html", 
             show_aside = False,
             config = config)
     
@@ -183,7 +182,7 @@ class PropertiesHandler:
             self.update_settings(value)
         
         config = Storage(key = key, value = value)
-        return xtemplate.render("system/properties.html", 
+        return xtemplate.render("settings/page/properties.html", 
             show_aside = False,
             config = config)
 

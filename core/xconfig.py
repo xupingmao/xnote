@@ -1,19 +1,26 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/10/28 00:53:06
+# @modified 2021/11/07 21:54:50
+# @filename xconfig.py
 
 '''xnote系统配置
+
+TODO: 系统配置需要注册之后才能使用
+
+# 配置型函数
+- init(path = DATA_DIR)
+
+# 全局配置（系统配置）
+- get_global_config(key, default_value = None, type = None)
+- set_global_config(key, value)
+
 # 用户配置
-- get_user_config
-- get_user_config_dict
+- get_user_config(user_name, key, default_value = None)
+- get_user_config_dict(user_name)
 
-# 文件配置
-- 约定目录叫 XXX_DIR
-- 文件叫 XXX_FILE
-
-# 通知的配置
-- add_notice
-- get_notice_list
+# 文件配置约定
+- 目录 XXX_DIR
+- 文件 XXX_FILE
 
 # 别名配置
 - set_alias
@@ -37,7 +44,7 @@ __contributors__ = []
 errors = []
 
 ##################################
-# 系统配置项
+# 系统配置项（不建议添加属性，建议通过 set_global_config 设置）
 ##################################
 
 # 开发者模式,会展示更多的选项和信息,会开启实验性功能
@@ -269,8 +276,19 @@ def init(path = DATA_DIR):
     # 加载文件后缀配置
     load_file_type_config()
 
+    # 初始化系统配置
+    init_system_config()
+
     from xutils import fsutil
     PLUGIN_TEMPLATE = fsutil.readfile("./config/plugin/plugin.tpl.py")
+
+
+def init_system_config():
+    from xutils import fsutil
+    system_version = fsutil.readfile("./config/version.txt", limit = 1000)
+    if system_version != None:
+        system_version = system_version.strip()
+    set_global_config("system.version", system_version)
 
 def mark_started():
     global START_TIME
@@ -311,7 +329,7 @@ def load_file_type_config():
     MIME_TYPES[""]    = "application/octet-stream"
 
 
-def get_global_config(name, default_value=None):
+def get_global_config(name, default_value=None, type = None):
     """获取配置，如果不存在返回default值"""
     value = _config.get(name)
     if value is not None:
@@ -339,6 +357,10 @@ def set_global_config(name, value):
     _config[name] = value
 
 def get_config():
+    raise Exception("deprecated: use xconfig.get_config_dict")
+    return _config
+
+def get_config_dict():
     return _config
 
 def has_config(key, subkey = None):

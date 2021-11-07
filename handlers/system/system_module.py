@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/09/11 12:11:02
+# @modified 2021/11/07 22:01:00
 import six
 import xutils
 import xtemplate
@@ -9,6 +9,7 @@ import sys
 import inspect
 import web
 from xutils import Storage
+from xutils import textutil
 
 class ModuleInfo:
     def __init__(self, mod, sysname):
@@ -50,6 +51,7 @@ class DocInfo:
         self.name = name
         self.doc = doc
         self.type = type
+        self.uuid = textutil.create_uuid()
 
 class ErrorModule:
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2021/08/21 11:09:56
+# @modified 2021/11/07 13:59:56
 """持久化操作已经禁用，请使用dbutil
 缓存的实现，API列表如下
 
@@ -60,7 +60,7 @@ class CacheObj:
     max_size = -1
     valid_key_pattern = re.compile(r"^[0-9a-zA-Z\[\]_\-\.\(\)\@\#,'\"\$ ]+$")
 
-    def __init__(self, key, value, expire = -1, type = "object"):
+    def __init__(self, key, value, expire = -1, type = "object", need_save = True):
         global _cache_dict
         global _cache_queue
         
@@ -91,7 +91,9 @@ class CacheObj:
         if obj is not None:
             obj.is_force_expired = True
 
-        self.save()
+        if need_save:
+            self.save()
+
         _cache_queue.append(self)
 
         # find and clear expired cache objects
@@ -502,8 +504,8 @@ def load_dump():
                 else:
                     dict_obj = pickle.loads(pickled)
                 # 持久化的都是不失效的数据
-                obj = CacheObj(dict_obj["key"], 
-                    dict_obj["value"], -1, dict_obj.get("type", "object"))
+                obj_type = dict_obj.get("type", "object")
+                obj = CacheObj(dict_obj["key"], dict_obj["value"], -1, type = obj_type, need_save = False)
                 if obj.is_temp():
                     os.remove(fpath)
         except:
