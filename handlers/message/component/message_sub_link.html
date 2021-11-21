@@ -1,47 +1,56 @@
 {% init message_tag = "" %}
+{% init show_sub_link = False %}
 
-{% if message_tag == "task" %}
+{% init show_task_tag_entry = False %}
+{% init show_task_done_entry = False %}
+{% init show_task_create_entry = False %}
+
+{% if show_sub_link %}
     <div class="card">
-        <a class="list-link" href="/message?tag=task&p=create">
-            <span>创建新待办</span>
-            <div class="float-right">
-                <span class="book-size-span"></span>
-                <i class="fa fa-chevron-right"></i>
-            </div>
-        </a>
-
-        <a class="list-link" href="/message?tag=task&p=create">
-            <span>查看全部待办任务</span>
-            <div class="float-right">
-                <span class="book-size-span">{{message_stat.task_count}}</span>
-                <i class="fa fa-chevron-right"></i>
-            </div>
-        </a>
-
-        <a class="list-item" href="/message?tag=task&p=done">
-            <span>查看已完成任务</span>
-            <div class="float-right">
-                <span class="list-item-badge">{{message_stat.done_count}}</span>
-                <i class="fa fa-chevron-right"></i>
-            </div>
-        </a>
-
-    </div>
 {% end %}
 
-{% if tag == "key" %}
-    <div class="card">
-        <a class="list-link" href="/message?tag=key&orderby=visit">
-            <span>常用标签</span>
-            <div class="float-right">
-                <span class="book-size-span"></span>
-                <i class="fa fa-chevron-right"></i>
-            </div>
-        </a>
-    </div>
+{% if show_task_tag_entry %}
+    <a class="list-link" href="/message?tag=task&p=taglist">
+        <span>任务标签</span>
+        <div class="float-right">
+            <span class="book-size-span"></span>
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </a>
 {% end %}
 
-{% if tag == "calendar" %}
+{% if show_task_create_entry %}
+    <a class="list-link" href="/message?tag=task&p=create">
+        <span>创建待办任务</span>
+        <div class="float-right">
+            <span class="list-item-badge">{{message_stat.task_count}}</span>
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </a>
+{% end %}
+
+{% if show_task_done_entry %}
+    <a class="list-item" href="/message?tag=task&p=done">
+        <span>查看已完成任务</span>
+        <div class="float-right">
+            <span class="list-item-badge">{{message_stat.done_count}}</span>
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </a>
+{% end %}
+
+
+{% if tag == "key" and show_sub_link %}
+    <a class="list-link" href="/message?tag=key&orderby=visit">
+        <span>常用标签</span>
+        <div class="float-right">
+            <span class="book-size-span"></span>
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </a>
+{% end %}
+
+{% if tag == "calendar" and show_sub_link %}
     <!-- 日期视图 -->
     <div class="card">
         <a id="viewByDayLink" href="/message/list_by_day?date={{date}}" class="list-link">
@@ -59,5 +68,9 @@
             </div>
         </a>
         
+    </div>
+{% end %}
+
+{% if show_sub_link %}
     </div>
 {% end %}

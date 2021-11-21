@@ -669,6 +669,18 @@ class _Init(_Node):
         line = "if globals().get(%r) == None: globals()[%r] = %s" % (name, name, value)
         writer.write_line(line, self.line)
 
+class _SetGlobal(_Node):
+
+    def __init__(self, expression, line):
+        self.expression = expression
+        self.line = line
+
+    def generate(self, writer):
+        name, value = self.expression.split("=", 1)
+        name = name.strip()
+        line = "globals()[%r] = %s" % (name, value)
+        writer.write_line(line, self.line)
+
 class _Module(_Expression):
     def __init__(self, expression, line):
         super(_Module, self).__init__("_tt_modules." + expression, line,
@@ -937,7 +949,7 @@ def _parse(reader, template, in_block=None, in_loop=None):
 
         elif operator in ("extends", "include", "set", "import", "from",
                           "comment", "autoescape", "whitespace", "raw",
-                          "module", "init"):
+                          "module", "init", "set-global"):
             if operator == "comment":
                 continue
             if operator == "extends":
@@ -975,7 +987,13 @@ def _parse(reader, template, in_block=None, in_loop=None):
             elif operator == "module":
                 block = _Module(suffix, line)
             elif operator == "init":
+                if not suffix:
+                    reader.raise_parse_error("init missing statement")
                 block = _Init(suffix, line)
+            elif operator == "set-global":
+                if not suffix:
+                    reader.raise_parse_error("set-global missing statement")
+                block = _SetGlobal(suffix, line)
             body.chunks.append(block)
             continue
 

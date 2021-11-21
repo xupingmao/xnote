@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/09/11 22:38:50
+# @modified 2021/11/21 19:38:00
 import math
 import time
 import web
@@ -24,10 +24,11 @@ NOTE_DAO   = xutils.DAO("note")
 MSG_DAO    = xutils.DAO("message")
 PLUGIN     = xutils.Module("plugin")
 
-SEARCH_DOC_DICT = dict(
-    search_action = "/note/timeline",
-    search_placeholder = u"搜索笔记"
-)
+def SmartNote(name, url, icon = "fa-folder"):
+    note = Storage(name = name, url = url)
+    note.priority = 0
+    note.icon = icon
+    return note
 
 class NoteCategory:
 
@@ -123,6 +124,12 @@ def type_node_path(name, url):
     return [parent, GroupLink(T(name), url)]
 
 
+def list_smart_group(user_name):
+    smart_group_list = []
+    # TODO 通过关键字配置的智能文件夹
+    # smart_group_list.append(SmartNote("置顶笔记", "/note/sticky"))
+    return smart_group_list
+
 class DefaultListHandler:
 
     @xauth.login_required()
@@ -205,19 +212,28 @@ def get_ddc_category_list():
 
 class GroupListHandler:
 
+    def load_group_list(self, user_name, status):
+        if status in ("active", "archived"):
+            notes = NOTE_DAO.list_group(user_name, status = status, orderby = "default")
+        else:
+            notes = NOTE_DAO.list_smart_group(user_name)
+
+        if status == "active":
+            group = NOTE_DAO.get_virtual_group(user_name, "ungrouped")
+            if group.size > 0:
+                notes.insert(0, group)
+
+        return notes
+
     @xauth.login_required()
     def GET(self):
         category  = xutils.get_argument("category")
         status    = xutils.get_argument("status", "active")
         user_name = xauth.current_name()
 
-        notes = NOTE_DAO.list_group(user_name, status = status, orderby = "default")
-        group = NOTE_DAO.get_virtual_group(user_name, "ungrouped")
-
-        if status == "active" and group.size > 0:
-            notes.insert(0, group)
-
         xmanager.add_visit_log(user_name, "/note/group")
+
+        notes = self.load_group_list(user_name, status)
 
         root  = NOTE_DAO.get_root()
 
@@ -695,6 +711,7 @@ xutils.register_func("url:/note/group", GroupListHandler)
 xutils.register_func("url:/note/tools", NotePluginHandler)
 xutils.register_func("url:/note/date",  DateListHandler)
 xutils.register_func("url:/note/all", AllNoteListHandler)
+xutils.register_func("note.list_smart_group", list_smart_group)
 
 xurls = (
     r"/note/group"          , GroupListHandler,

@@ -1,0 +1,27 @@
+{% init comment_source_class = "" %}
+
+{% if len(comments) == 0 %}
+    <div class="card">
+        {% include common/text/empty_text.html %}
+    </div>
+{% end %}
+
+{% for comment in comments %}
+    <div class="comment-row">
+        <div class="comment-user">{{comment.user}}</div>
+        <div class="comment-time">{{comment.ctime}}</div>
+        <div class="comment-content">{% raw comment.html %}</div>
+        <div class="comment-foot">
+            {% if show_note %}
+                <span>[来源]</span>
+                <a class="comment-foot-link" href="{{comment.note_url}}">{{comment.note_name}}</a>
+            {% end %}
+
+            {% if comment.user == _user_name %}
+                <div class="float-right">
+                    <a class="delete-comment-btn" data-id="{{comment.id}}" data-content="{{comment.content}}">删除</a>
+                </div>
+            {% end %}
+        </div>
+    </div>
+{% end %}

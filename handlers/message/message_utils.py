@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:48:09
-# @modified 2021/10/06 19:14:54
+# @modified 2021/11/21 22:46:33
 # @filename message_utils.py
 import xutils
 import web
@@ -167,9 +167,25 @@ def do_split_date(date):
         day = int(parts[2])
     return year, month, day
 
+class TagSorter:
+
+    def __init__(self):
+        self.data = dict()
+
+    def update(self, tag, mtime):
+        old_mtime = self.data.get(tag)
+        if old_mtime is None:
+            self.data[tag] = mtime
+        else:
+            self.data[tag] = max(old_mtime, mtime)
+
+    def get_mtime(self, tag):
+        return self.data.get(tag, "")
+
 
 def get_tags_from_message_list(msg_list, input_tag = "", input_date = ""):
     tag_counter = Counter()
+    tag_sorter = TagSorter()
 
     for msg_item in msg_list:
         process_message(msg_item)
@@ -182,7 +198,9 @@ def get_tags_from_message_list(msg_list, input_tag = "", input_date = ""):
 
         for tag in msg_item.keywords:
             tag_counter.incr(tag)
+            tag_sorter.update(tag, msg_item.mtime)
 
+            
     tag_list = []
     for tag_name in tag_counter.dict:
         amount = tag_counter.get_count(tag_name)
@@ -199,7 +217,13 @@ def get_tags_from_message_list(msg_list, input_tag = "", input_date = ""):
             tag_name = "<无标签>"
             # url = "/message?tag=search&searchTags=%s&noTag=true" % input_tag
 
-        tag_item = Storage(name = tag_name, tag = input_tag, amount = amount, url = url)
+        mtime = tag_sorter.get_mtime(tag_name)
+
+        tag_item = Storage(name = tag_name, 
+            tag = input_tag, 
+            amount = amount, 
+            url = url, 
+            mtime = mtime)
         tag_list.append(tag_item)
 
     tag_list.sort(key = lambda x: x.amount, reverse = True)

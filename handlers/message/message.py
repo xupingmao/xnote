@@ -1,9 +1,14 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/10/29 00:42:18
+# @modified 2021/11/21 23:33:39
 
-"""短消息处理，比如任务、备忘、临时文件等等"""
+"""短消息处理，比如任务、备忘、临时文件等等
+
+tag: 短消息的类型
+key/keyword: 短消息关键字
+
+"""
 import time
 import re
 import math
@@ -122,6 +127,10 @@ def sort_message_list(msg_list, orderby = ""):
 
     if orderby == "visit":
         msg_list.sort(key = lambda x: x.visit_cnt or 0, reverse = True)
+
+def is_marked_keyword(user_name, keyword):
+    obj = MSG_DAO.get_by_content(user_name, "key", keyword)
+    return obj != None and obj.is_marked
 
 ############  class
 
@@ -564,7 +573,43 @@ class DateAjaxHandler:
             page_url = "?date=%s&page=" % date,
             item_list = msg_list)
 
+
 class MessageListHandler:
+
+    @xauth.login_required()
+    def do_get(self, tag = "task"):
+        user     = xauth.current_name()
+        key      = xutils.get_argument("key", "")
+        from_    = xutils.get_argument("from", "")
+        show_tab = xutils.get_argument("show_tab", default_value = True, type = bool)
+        op       = xutils.get_argument("op", "")
+        date     = xutils.get_argument("date", "")
+
+        # 记录日志
+        xmanager.add_visit_log(user, "/message?tag=%s" % tag)
+
+        if tag == "month_tags":
+            return self.do_view_month_tags()
+
+        if tag == "date":
+            return self.do_view_by_date(date)
+
+        if tag == "key" and op == "select":
+            return self.do_select_key()
+
+        if tag == "key":
+            return self.do_view_tags()
+
+        if tag in SYSTEM_TAG_TUPLE:
+            return self.do_view_by_system_tag(tag)
+
+        if tag == "task":
+            return self.get_task_page()
+
+        if tag == "task_tags":
+            return self.get_task_tag_list()
+
+        return self.do_view_default()
 
     def do_select_key(self):
         user_name = xauth.current_name()
@@ -613,19 +658,26 @@ class MessageListHandler:
         kw.message_placeholder = T("添加待办任务")
         return kw
 
-    def get_create_task_page(self):
+    def get_task_create_page(self):
         kw = self.get_task_kw()
         kw.show_input_box = True
         kw.show_system_tag = False
 
         return xtemplate.render("message/page/message_list_view.html", **kw)
 
-    def get_task_tag_page(self, filter_key):
+    def get_task_by_keyword(self, filter_key):
+        user_name = xauth.current_name()
         kw = self.get_task_kw()
         kw.message_tag = "task"
         kw.show_system_tag = False
         kw.show_sub_link = False
         kw.show_input_box = True
+
+        if filter_key != "$no_tag":
+            kw.show_keyword_info = True
+
+        kw.is_keyword_marked = is_marked_keyword(user_name, filter_key)
+        kw.keyword = filter_key
 
         if not is_system_tag(filter_key):
             kw.default_content = filter_key
@@ -639,31 +691,60 @@ class MessageListHandler:
         return xtemplate.render("message/page/message_list_view.html", **kw)
 
     def do_view_task(self):
+        return self.get_task_page()
+
+    def get_task_page(self):
         filter_key = xutils.get_argument("filterKey", "")
-        page_name = xutils.get_argument("p", "")
+        page_name  = xutils.get_argument("p", "")
 
         if page_name == "create":
-            return self.get_create_task_page()
+            return self.get_task_create_page()
 
         if page_name == "done":
             return self.get_task_done_page()
 
-        if filter_key != "":
-            return self.get_task_tag_page(filter_key)
-        else:
-            return self.do_view_task_tags()
+        if page_name == "taglist":
+            return self.get_task_tag_list()
 
-    def do_view_task_tags(self):
+        if filter_key != "":
+            return self.get_task_by_keyword(filter_key)
+        else:
+            # 任务的首页
+            return self.get_task_home_page()
+
+    def get_task_home_page(self):
+        # kw = self.get_task_kw()
+        # kw.show_input_box = True
+        # kw.show_system_tag = False
+        # kw.show_task_tag_entry  = True
+
+        # return xtemplate.render("message/page/message_list_view.html", **kw)
+        return self.get_task_tag_list()
+
+
+    def get_task_tag_list(self):
+        return self.get_task_keyword_list()
+
+    def get_task_keyword_list(self):
         user_name = xauth.current_name()
         msg_list, amount = MSG_DAO.list_by_tag(user_name, "task", 0, -1)
 
         tag_list = get_tags_from_message_list(msg_list, "task")
+
+        for tag in tag_list:
+            tag.is_marked = is_marked_keyword(user_name, tag.name)
+
+        tag_list.sort(key = lambda x: 0 if x.is_marked else 1)
 
         kw = self.get_task_kw()
         kw.message_tag = "task"
         kw.tag_list = tag_list
         kw.html_title = T("待办任务")
         kw.message_placeholder = T("添加待办任务")
+
+        kw.show_sub_link = True
+        kw.show_task_create_entry = True
+        kw.show_task_done_entry = True
 
         return xtemplate.render("message/page/message_tag_view.html", **kw)
 
@@ -729,41 +810,6 @@ class MessageListHandler:
             html_title = T("随手记"),
             show_back_btn = True,
             **kw)
-
-    @xauth.login_required()
-    def do_get(self, tag = "task"):
-        user     = xauth.current_name()
-        key      = xutils.get_argument("key", "")
-        from_    = xutils.get_argument("from", "")
-        show_tab = xutils.get_argument("show_tab", default_value = True, type = bool)
-        op       = xutils.get_argument("op", "")
-        date     = xutils.get_argument("date", "")
-
-        # 记录日志
-        xmanager.add_visit_log(user, "/message?tag=%s" % tag)
-
-        if tag == "month_tags":
-            return self.do_view_month_tags()
-
-        if tag == "date":
-            return self.do_view_by_date(date)
-
-        if tag == "key" and op == "select":
-            return self.do_select_key()
-
-        if tag == "key":
-            return self.do_view_tags()
-
-        if tag in SYSTEM_TAG_TUPLE:
-            return self.do_view_by_system_tag(tag)
-
-        if tag == "task":
-            return self.do_view_task()
-
-        if tag == "task_tags":
-            return self.do_view_task_tags()
-
-        return self.do_view_default()
 
     def GET(self):
         tag = xutils.get_argument("tag")
@@ -886,6 +932,39 @@ class MessageRefreshHandler:
         refresh_message_index()
         return "success"
 
+class MessageKeywordAjaxHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        keyword = xutils.get_argument("keyword", "")
+        action  = xutils.get_argument("action", "")
+
+        assert keyword != ""
+        assert action != ""
+
+        if action in ("mark", "unmark"):
+            return self.do_mark_or_unmark(keyword, action)
+
+        return dict(code = "404", message = "指定动作不存在")
+
+    def do_mark_or_unmark(self, keyword, action):
+        user_name = xauth.current_name()
+        key_obj = MSG_DAO.get_by_content(user_name, "key", keyword)
+
+        if key_obj == None:
+            # 不存在，创建新的标签
+            ip = get_remote_ip()
+            key_obj = create_message(user_name, "key", keyword, ip)
+
+        if action == "unmark":
+            key_obj.is_marked = None
+        else:
+            key_obj.is_marked = True
+
+        MSG_DAO.update(key_obj)
+        return dict(code = "success")
+
+
 xutils.register_func("message.process_message", process_message)
 xutils.register_func("message.get_current_message_stat", get_current_message_stat)
 xutils.register_func("url:/message/log", MessageLogHandler)
@@ -921,4 +1000,5 @@ xurls=(
     r"/message/finish", FinishMessageAjaxHandler,
     r"/message/touch", TouchAjaxHandler,
     r"/message/tag", UpdateTagAjaxHandler,
+    r"/message/keyword", MessageKeywordAjaxHandler,
 )

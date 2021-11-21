@@ -51,32 +51,9 @@
     </div>
 </div>
 
-<div class="comment-item-tpl hide">
-    <div class="comment-row">
-        <div class="comment-user">${user}</div>
-        <div class="comment-time">${ctime}</div>
-        <div class="comment-content">${html}</div>
-        <div class="comment-foot">
-            <span class="{{comment_source_class}}">[来源]</span>
-            <a class="comment-foot-link" href="${note_url}">${note_name}</a>
-            <div class="float-right ${deleteBtnClass}">
-                <a class="delete-comment-btn" data-id="${id}" data-content="${content}">删除</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="comment-empty-tpl hide">
-    <p class="align-center">{{comment_empty_text}}</p>
-</div>
-
 <script type="text/javascript">
 $(function () {
     var loadIndex = 0;
-
-    function getEmptyHtml() {
-        return $(".comment-empty-tpl").html();
-    }
 
     function refreshComments() {
         var list_param = {
@@ -84,27 +61,11 @@ $(function () {
             list_type: "{{comment_list_type}}",
             list_date: "{{comment_list_date}}",
             show_note: "{{show_comment_note}}",
+            resp_type: "html"
         };
 
         $.get("/note/comments", list_param, function (resp) {
-            $("#comments").empty();
-
-            for (var i = 0; i < resp.length; i++) {
-                var item = resp[i];
-                if (item.user != "{{_user_name}}") {
-                    item.deleteBtnClass = "hide";
-                }
-
-                var tpl = $(".comment-item-tpl").html();
-                var element = $(tpl);
-                var html = xnote.renderTemplate(tpl, item);
-                $("#comments").append(html);
-            }
-
-            if (resp.length == 0) {
-                $("#comments").append(getEmptyHtml());
-            }
-            
+            $("#comments").html(resp);
         }).fail(function (resp) {
             console.log("请求失败", resp);
         });

@@ -1,0 +1,30 @@
+{% init is_keyword_marked = False %}
+<div class="card btn-line-height">
+    <span class="keyword-span">{{keyword}}</span>
+    <div class="float-right">
+        {% if is_keyword_marked %}
+            <button class="btn-default mark-btn" data-action="unmark">取消置顶</button>
+        {% else %}
+            <button class="btn-default mark-btn" data-action="mark">置顶</button>
+        {% end %}
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $(".mark-btn").click(function (e) {
+            var params = {};
+            params.keyword = $(".keyword-span").text();
+            params.action = $(e.target).attr("data-action");
+
+            $.post("/message/keyword", params, function (resp) {
+                if (resp.code == "success") {
+                    xnote.toast("标记成功");
+                    window.location.reload();
+                } else {
+                    xnote.alert("标记失败:" + resp.message);
+                }
+            });
+        });
+    });
+</script>

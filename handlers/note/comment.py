@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/10 23:44:48
-# @modified 2021/08/14 12:24:42
+# @modified 2021/11/20 22:52:19
 import xutils
 import xauth
 import xtemplate
@@ -59,12 +59,17 @@ def on_search_comments(ctx):
     if ctx.category == "comment":
         search_comment_detail(ctx)
 
+def convert_to_html(comments, show_note = False):
+    return xtemplate.render("note/ajax/comment_list.html", 
+        comments = comments, 
+        show_note = show_note)
 
 class CommentListAjaxHandler:
 
     def GET(self):
         note_id   = xutils.get_argument("note_id")
         list_type = xutils.get_argument("list_type")
+        resp_type = xutils.get_argument("resp_type")
         list_date = xutils.get_argument("list_date")
         show_note = xutils.get_argument("show_note", type=bool)
         user_name = xauth.current_name()
@@ -76,7 +81,11 @@ class CommentListAjaxHandler:
 
         # 处理评论列表
         process_comments(comments, show_note)
-        return comments
+
+        if resp_type == "html":
+            return convert_to_html(comments, show_note)
+        else:
+            return comments
 
 class SaveCommentAjaxHandler:
 

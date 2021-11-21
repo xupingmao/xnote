@@ -23,7 +23,7 @@
     {% init show_tab = True %}
     {% init show_input_box = True %}
     {% init show_system_tag = True %}
-    {% init show_sub_link = False %}
+    {% init show_keyword_info = False %}
 
     <!-- Tab页 -->
     {% if show_tab %}
@@ -41,11 +41,14 @@
     {% end %}
 
     <!-- 二级目录 -->
-    {% if show_sub_link %}
-        {% include message/component/message_sub_link.html %}
+    {% include message/component/message_sub_link.html %}
+
+    <!-- 标签信息 -->
+    {% if show_keyword_info %}
+        {% include message/component/message_keyword_info.html %}
     {% end %}
 
-    <!-- 文字区域 -->
+    <!-- 内容区域 -->
     {% include message/component/message_list.html %}
 
     <script type="text/javascript">
