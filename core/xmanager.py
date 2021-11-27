@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/10/24 17:44:37
+# @modified 2021/11/26 21:07:32
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -410,7 +410,9 @@ class CronTaskManager:
         """执行定时任务"""
         def request_url(task):
             url = task.url
-            if url is None: url = ""
+            if url is None: 
+                url = ""
+
             quoted_url = xutils.quote_unicode(url)
             if quoted_url.startswith(("http://", "https://")):
                 # 处理外部HTTP请求

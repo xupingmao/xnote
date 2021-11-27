@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/11/21 23:33:39
+# @modified 2021/11/22 23:22:58
 
 """短消息处理，比如任务、备忘、临时文件等等
 
@@ -128,6 +128,15 @@ def sort_message_list(msg_list, orderby = ""):
     if orderby == "visit":
         msg_list.sort(key = lambda x: x.visit_cnt or 0, reverse = True)
 
+def sort_keywords_by_marked(msg_list):
+    def key_func(item):
+        if item.is_marked:
+            return 0
+        else:
+            return 1
+
+    msg_list.sort(key = key_func)
+
 def is_marked_keyword(user_name, keyword):
     obj = MSG_DAO.get_by_content(user_name, "key", keyword)
     return obj != None and obj.is_marked
@@ -172,14 +181,20 @@ class ListAjaxHandler:
 
         page_url = "?tag={tag}&displayTag={display_tag}&date={date}&key={encoded_key}&filterKey={encoded_filter_key}&orderby={orderby}&p={p}&page=".format(**locals())
 
-        return xtemplate.render(template_file,
+        kw = Storage(
             show_todo_check = show_todo_check,
             show_edit_btn = show_edit_btn,
             show_to_log_btn = show_to_log_btn,
             page = page,
             page_url =  page_url,
             page_max = page_max,
-            item_list = chatlist)
+            item_list = chatlist
+        )
+
+        if orderby != "":
+            kw.show_marked_tag = False
+
+        return xtemplate.render(template_file, **kw)
 
     def do_search(self, user_name, key, offset, pagesize):
         # 搜索
@@ -241,6 +256,8 @@ class ListAjaxHandler:
 
         if orderby != "":
             sort_message_list(msg_list, orderby)
+        else:
+            sort_keywords_by_marked(msg_list)
 
         return msg_list[offset:offset+limit], len(msg_list)
 
@@ -734,7 +751,7 @@ class MessageListHandler:
         for tag in tag_list:
             tag.is_marked = is_marked_keyword(user_name, tag.name)
 
-        tag_list.sort(key = lambda x: 0 if x.is_marked else 1)
+        sort_keywords_by_marked(tag_list)
 
         kw = self.get_task_kw()
         kw.message_tag = "task"
@@ -771,9 +788,10 @@ class MessageListHandler:
     def do_view_default(self):
         key = xutils.get_argument("key", "")
         input_tag = xutils.get_argument("tag", "log")
+        user_name = xauth.current_name()
         default_content = filter_key(key)
 
-        kw = dict(
+        kw = Storage(
             tag = input_tag,
             message_tag = input_tag,
             search_type = "message",
@@ -789,7 +807,10 @@ class MessageListHandler:
             # 搜索操作
             kw["title"] = T("随手记-搜索")
             kw["html_title"] = T("随手记-搜索")
-            kw["show_back_btn"] = True
+            kw.show_back_btn = True
+            kw.show_keyword_info = True
+            kw.keyword = key
+            kw.is_keyword_marked = is_marked_keyword(user_name, key)
 
         return xtemplate.render("message/page/message_list_view.html", **kw)
 

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2021/11/07 18:59:29
+# @modified 2021/11/27 10:13:45
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -76,6 +76,7 @@ def handle_args_and_init_config():
     except Exception as e:
         xconfig.errors.append("创建目录失败")
         xutils.print_exc()
+
     # 端口号
     xconfig.PORT = args.port
 
@@ -110,9 +111,13 @@ def handle_args_and_init_config():
     if not os.environ.get("PORT"):
         os.environ["PORT"] = port
 
+    start_time = xutils.format_datetime()
     xconfig.set_global_config("port", port)
-    xconfig.set_global_config("start_time", xutils.format_datetime())
+    xconfig.set_global_config("start_time", start_time)
+    xconfig.set_global_config("system.port", port)
+    xconfig.set_global_config("system.start_time", start_time)
     xconfig.set_global_config("system.node.role", args.role)
+
 
 def handle_signal(signum, frame):
     """处理系统消息
@@ -143,7 +148,7 @@ def try_init_ldb():
         xutils.print_exc()
         xconfig.errors.append("初始化ldb失败")
 
-def try_load_cache():
+def init_cache():
     try:
         xutils.cacheutil.init(xconfig.STORAGE_DIR)
         xutils.cacheutil.load_dump()
@@ -164,6 +169,11 @@ def init_autoreload():
     autoreload_thread.watch_file("core/xtemplate.py")
     autoreload_thread.start()
 
+def init_cluster():
+    # 初始化集群配置
+    if xconfig.get_global_config("system.node.role") == "follower":
+        print("当前以从节点身份运行")
+
 def init_app():
     global app
 
@@ -178,7 +188,7 @@ def init_app():
     xutils.init(xconfig)
 
     # 加载缓存
-    try_load_cache()
+    init_cache()
 
     # 关闭autoreload使用自己实现的版本
     var_env = dict()
@@ -192,6 +202,9 @@ def init_app():
 
     # 文件修改检测
     init_autoreload()
+
+    # 初始化集群
+    init_cluster()
 
     # 触发handler里面定义的启动函数
     xmanager.fire("sys.init", None)

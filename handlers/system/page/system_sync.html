@@ -1,0 +1,153 @@
+{% extends base.html %}
+
+{% block body %}
+
+{% import web %}
+
+<div class="col-md-12 card">
+    <h3 class="card-title btn-line-height">
+        <span>{{T("集群管理")}}</span>
+        <div class="float-right">
+             {% include common/button/back_button.html %}
+        </div>
+    </h3>
+</div>
+
+<div class="card">
+    <div class="list">
+        <div class="list-item">
+            <span>当前节点类型</span>
+            <div class="float-right">
+                <span>{{node_role}}</span>
+                <!-- <i class="fa fa-chevron-right"></i> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="list">
+        {% if node_role == "follower" %}
+            <div class="list-item">
+                <span>主节点服务器({{leader_host}})</span>
+                <div class="float-right">
+                    <a class="btn btn-default config-btn" 
+                        data-title="设置主服务器"
+                        data-key="leader.host"
+                        data-default="{{leader_host}}">设置</a>
+                    <!-- <i class="fa fa-chevron-right"></i> -->
+                </div>
+            </div>
+
+            <div class="list-item">
+                <span>主服务器token</span>
+                <div class="float-right">
+                    <a class="btn btn-default config-btn" 
+                        data-title="设置主服务器token"
+                        data-key="leader.token"
+                        data-default="{{leader_token}}">设置</a>
+                    <!-- <i class="fa fa-chevron-right"></i> -->
+                </div>
+            </div>
+        {% end %}
+
+        {% if node_role == "leader" %}
+
+            <div class="list-item">
+                <span>授权token</span>
+                <div class="float-right">
+                    <a class="btn btn-default config-btn" 
+                        data-title="更新token"
+                        data-key="leader.token"
+                        data-default="{{leader_token}}">设置</a>
+                </div>
+            </div>
+
+            <div class="list-item">
+                <span>子节点IP白名单</span>
+                <div class="float-right">
+                    <span>TODO</span>
+                    <!-- <i class="fa fa-chevron-right"></i> -->
+                </div>
+            </div>
+
+        {% end %}
+
+    </div>
+</div>
+
+
+<div class="card">
+    <div class="list">
+        <div class="list-item">
+            <span>集群信息</span>
+            <div class="float-right">
+                <a class="btn btn-default refresh-btn">刷新</a>
+            </div>
+        </div>
+        
+        {% if ping_error != None %}
+        <div class="list-item">
+            <span>错误信息</span>
+            <div class="float-right">
+                <span class="error">{{ping_error}}</span>
+            </div>
+        </div>
+        {% end %}
+
+        <div class="list-item">
+            <span>主节点</span>
+            <div class="float-right">
+                <a href="{{leader_url}}">{{leader_url}}</a>
+                <!-- <i class="fa fa-chevron-right"></i> -->
+            </div>
+        </div>
+
+
+        {% for info in follower_list %}
+            <div class="list-item">
+                <span>从节点</span>
+                <div class="float-right">
+                    <a href="{{info.url}}">{{info.url}}</a>
+                    <!-- <i class="fa fa-chevron-right"></i> -->
+                </div>
+            </div>
+        {% end %}
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    $(".config-btn").click(function (e) {
+        var configKey = $(e.target).attr("data-key");
+        var promptTitle = $(e.target).attr("data-title");
+        var defaultValue = $(e.target).attr("data-default");
+        xnote.prompt(promptTitle, defaultValue, function (inputValue) {
+            var params = {};
+            params.p = "set-config";
+            params.key = configKey;
+            params.value = inputValue;
+
+            $.post("/system/sync", params, function (resp) {
+                if (resp.code == "success") {
+                    window.location.reload();
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
+        });
+    });
+
+    $(".refresh-btn").click(function(e) {
+        $.get("/system/sync?p=ping", function (resp) {
+            window.location.reload();
+        });
+    });
+
+    $(".view-btn").click(function (e) {
+        var value = $(e.target).attr("data-value");
+        xnote.alert(value);
+    });
+});
+</script>
+{% end %}

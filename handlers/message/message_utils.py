@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:48:09
-# @modified 2021/11/21 22:46:33
+# @modified 2021/11/22 23:25:33
 # @filename message_utils.py
 import xutils
 import web
@@ -174,6 +174,10 @@ class TagSorter:
 
     def update(self, tag, mtime):
         old_mtime = self.data.get(tag)
+
+        if mtime is None:
+            mtime = ""
+            
         if old_mtime is None:
             self.data[tag] = mtime
         else:

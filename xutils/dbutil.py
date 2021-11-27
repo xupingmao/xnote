@@ -3,11 +3,14 @@
 """xnote的数据库封装，基于键值对数据库（目前是基于leveldb，键值对功能比较简单，方便在不同引擎之间切换）
 
 由于KV数据库没有表的概念，dbutil基于KV模拟了表，基本结构如下
-* <table_name>:[subkey1]:[subkey2]:id
+* <table_name>:[subkey1]:[subkey2]...[subkeyN]
 
-示例：
-案例1： <表名:用户名:主键> note:admin:0001
-案例2： <表名:标签:主键> note_public:tag1:0001
+编号  |      结构描述      | 示例
+---- | ------------------|---------------------------
+案例1 | <表名:用户名:主键>  | note:admin:0001
+案例2 | <表名:标签:主键>    | note_public:tag1:0001
+案例3 | <表名:属性名>       |  system_config:config1
+案例4 | <表名:用户名:属性名> | user_config:user01:config1
 
 注意：读写数据前要先调用register_table来注册表，不然会失败！
 
@@ -55,12 +58,15 @@ LAST_TIME_SEQ = -1
 TABLE_INFO_DICT = dict()
 LDB_TABLE_DICT = dict()
 
+# 只读模式
+WRITE_ONLY = False
+
 ###########################################################
 # @desc db utilties
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/11/07 14:10:21
+# @modified 2021/11/27 11:23:13
 ###########################################################
 
 class DBException(Exception):
@@ -107,7 +113,7 @@ class RecordLock:
 class LevelDBProxy:
 
     def __init__(self, path):
-        """通过leveldbpy来实现leveldb的接口代理"""
+        """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
         import leveldbpy
         self._db = leveldbpy.DB(path.encode("utf-8"), create_if_missing=True)
 
@@ -133,9 +139,16 @@ class LevelDBProxy:
 _leveldb = None
 
 
+def config(**kw):
+    global WRITE_ONLY
+
+    if "write_only" in kw:
+        WRITE_ONLY = kw["write_only"]
+
 @xutils.log_init_deco("leveldb")
 def init(DB_DIR):
     global _leveldb
+
     if leveldb:
         _leveldb = leveldb.LevelDB(DB_DIR)
 
@@ -183,7 +196,11 @@ def timeseq(value = None):
 def new_id(prefix):
     return "%s:%s" % (prefix, timeseq())
 
-def get_object_from_bytes(bytes, parse_json = True):
+def convert_object_to_json(obj):
+    # ensure_ascii默认为True，会把非ascii码的字符转成\u1234的格式
+    return json.dumps(obj, ensure_ascii=False)
+
+def convert_bytes_to_object(bytes, parse_json = True):
     if bytes is None:
         return None
     str_value = bytes.decode("utf-8")
@@ -204,6 +221,10 @@ def check_leveldb():
     if _leveldb is None:
         raise Exception("leveldb not found!")
 
+def check_write_state():
+    if WRITE_ONLY:
+        raise Exception("write_only mode!")
+
 def check_get_leveldb():
     if _leveldb is None:
         raise Exception("leveldb not found!")
@@ -212,6 +233,51 @@ def check_get_leveldb():
 def check_table_name(table_name):
     if table_name not in TABLE_INFO_DICT:
         raise DBException("table %s not registered!" % table_name)
+
+class LdbHashTable:
+
+    def __init__(self, table_name, key_name = "_key"):
+        check_table_name(table_name)
+
+        self.table_name = table_name
+        self.key_name = key_name
+
+        self.prefix = table_name
+        if self.prefix[-1] != ":":
+            self.prefix += ":"
+
+    def _check_key(self, key):
+        if not isinstance(key, str):
+            raise Exception("LdbHashTable_param_error: expect str key")
+        if ":" in key:
+            raise Exception("LdbHashTable_param_error: invalid char `:` in key")
+
+    def _check_value(self, obj):
+        pass
+
+    def build_key(self, key):
+        return self.prefix + key
+
+    def put(self, key, value):
+        self._check_key(key)
+        self._check_value(value)
+
+        row_key = self.build_key(key)
+        put(row_key, value)
+
+    def get(self, key, default_value = None):
+        row_key = self.build_key(key)
+        return get(row_key, default_value)
+
+    def list(self):
+        raise Exception("暂未实现")
+
+    def delete(self, key):
+        row_key = self.build_key(key)
+        delete(row_key)
+
+    def count(self):
+        raise Exception("暂未实现")
 
 class LdbTable:
     """基于leveldb的表，比较常见的是以下几种
@@ -377,12 +443,15 @@ def _get_table_no_lock(table_name):
         table = LdbTable(table_name)
     return table
 
-def get_table(table_name):
+def get_table(table_name, type = "rdb"):
     """获取table对象
     @param {str} table_name 表名
     @return {LdbTable}
     """
     check_table_name(table_name)
+
+    if type == "hash":
+        return get_hash_table(table_name)
 
     table = LDB_TABLE_DICT.get(table_name)
     if table is None:
@@ -390,6 +459,9 @@ def get_table(table_name):
             table = _get_table_no_lock(table_name)
             LDB_TABLE_DICT[table_name] = table
     return table
+
+def get_hash_table(table_name):
+    return LdbHashTable(table_name)
 
 def get_table_dict_copy():
     return TABLE_INFO_DICT.copy()
@@ -402,16 +474,12 @@ def get(key, default_value = None):
 
         key = key.encode("utf-8")
         value = _leveldb.Get(key)
-        result = get_object_from_bytes(value)
+        result = convert_bytes_to_object(value)
         if result is None:
             return default_value
         return result
     except KeyError:
         return default_value
-
-def obj_to_json(obj):
-    # ensure_ascii默认为True，会把非ascii码的字符转成\u1234的格式
-    return json.dumps(obj, ensure_ascii=False)
 
 def put(key, obj_value, sync = False):
     """往数据库中写入键值对
@@ -420,6 +488,7 @@ def put(key, obj_value, sync = False):
     @param {boolean} sync 是否同步写入，默认为False
     """
     check_leveldb()
+    check_write_state()
     check_not_empty(key, "[dbutil.put] key can not be None")
 
     table_name = key.split(":")[0]
@@ -428,7 +497,7 @@ def put(key, obj_value, sync = False):
     
     key = key.encode("utf-8")
     # 注意json序列化有个问题，会把dict中数字开头的key转成字符串
-    value = obj_to_json(obj_value)
+    value = convert_object_to_json(obj_value)
     # print("Put %s = %s" % (key, value))
     _leveldb.Put(key, value.encode("utf-8"), sync = sync)
 
@@ -439,6 +508,7 @@ def insert(table_name, obj_value, sync = False):
 
 def delete(key, sync = False):
     check_leveldb()
+    check_write_state()
 
     print("Delete %s" % key)
     key = key.encode("utf-8")
@@ -464,7 +534,7 @@ def scan(key_from = None, key_to = None, func = None, reverse = False,
 
     for key, value in iterator:
         key = key.decode("utf-8")
-        value = get_object_from_bytes(value, parse_json)
+        value = convert_bytes_to_object(value, parse_json)
         if not func(key, value):
             break
 
@@ -494,7 +564,7 @@ def prefix_scan(prefix, func, reverse = False, parse_json = True):
         key = key.decode("utf-8")
         if not key.startswith(prefix):
             break
-        value = get_object_from_bytes(value, parse_json)
+        value = convert_bytes_to_object(value, parse_json)
         if not func(key, value):
             break
         offset += 1
@@ -537,7 +607,7 @@ def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = Fa
         key = key.decode("utf-8")
         if not key.startswith(origin_prefix):
             break
-        value = get_object_from_bytes(value)
+        value = convert_bytes_to_object(value)
         if filter_func is None or filter_func(key, value):
             if matched_offset >= offset:
                 result_size += 1
@@ -563,7 +633,7 @@ def count(key_from = None, key_to = None, filter_func = None):
     count = 0
     for key, value in iterator:
         key = key.decode("utf-8")
-        value = get_object_from_bytes(value)
+        value = convert_bytes_to_object(value)
         if filter_func(key, value):
             count += 1
     return count

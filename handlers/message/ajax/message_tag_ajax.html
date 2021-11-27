@@ -1,3 +1,5 @@
+{% init show_marked_tag = True %}
+
 {% if len(item_list) == 0 %}
     <div class="card">
         {% include common/text/empty_text.html %}
@@ -8,6 +10,11 @@
 {% for item in item_list %}
     <div class="card">
         <div class="todo-row btn-line-height">
+            
+            {% if show_marked_tag and item.is_marked %}
+                <span class="task-tag">置顶</span>
+            {% end %}
+
             <span>{% raw item.html %}</span>
 
             <div class="float-right">

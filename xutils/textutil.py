@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2021/09/19 22:43:28
+# @modified 2021/11/27 10:45:17
 import re
 import random
 import json
@@ -564,13 +564,26 @@ def _encode_json(obj):
         return "<module>"
     return str(obj)
 
-def tojson(obj, format=False):
-    if format:
-        return json.dumps(obj, sort_keys=True, default=_encode_json, indent=2)
-    else:
-        return json.dumps(obj, default=_encode_json)
+def tojson(obj, format=False, ignore_error = False):
+    try:
+        if format:
+            return json.dumps(obj, sort_keys=True, default=_encode_json, indent=2)
+        else:
+            return json.dumps(obj, default=_encode_json)
+    except Exception as e:
+        if ignore_error:
+            return None
+        else:
+            raise e
 
-
+def parse_json(json_str, ignore_error = False):
+    try:
+        return json.loads(json_str)
+    except Exception as e:
+        if ignore_error:
+            return None
+        else:
+            raise e
 
 def set_doctype(type):
     print("#!%s\n" % type)

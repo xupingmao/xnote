@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/11/07 21:54:50
+# @modified 2021/11/26 20:55:10
 # @filename xconfig.py
 
 '''xnote系统配置
@@ -390,7 +390,6 @@ def set_alias(name, value):
 def get_alias(name, default_value):
     """获取别名，用于扩展命令"""
     return _alias_dict.get(name, default_value)
-
 
 def get_user_config(user_name, config_key, default_value = None):
     """默认值参考DEFAULT_USER_CONFIG"""

@@ -2,8 +2,8 @@
  * description here
  * @author xupingmao
  * @since 2021/05/22 12:56:05
- * @modified 2021/06/20 15:22:56
- * @filename tag.css
+ * @modified 2021/11/22 23:35:59
+ * @filename common-tag.css
  */
 
 /** Tags **/
@@ -49,8 +49,7 @@
     background-color: orange;
     color: white;
     border-radius: 2px;
-    padding-left: 2px;
-    padding-right: 2px;
+    padding: 2px;
 }
 
 .gray-tag {
@@ -105,5 +104,12 @@
     padding: 3px;
     border-radius: 3px;
     word-break: keep-all;
+}
+
+.info-tag {
+    padding: 3px;
+    border-radius: 3px;
+    background: rgb(13, 202, 240);
+    color: #fff;
 }
 
