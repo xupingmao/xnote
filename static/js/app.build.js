@@ -1565,6 +1565,15 @@ xnote.showDialog = function(title, html, buttons, functions) {
     return xnote.showDialogEx(options);
 }
 
+xnote.showTextDialog = function(title, text, buttons, functions) {
+    var options = {};
+    options.title = title;
+    options.html  = "<textarea class=\"dialog-textarea\">" + text + "</textarea>";
+    options.buttons = buttons;
+    options.functions = functions;
+    return xnote.showDialogEx(options);
+}
+
 // 询问函数，原生prompt的替代方案
 xnote.prompt = function(title, defaultValue, callback) {
     if (layer && layer.prompt) {

@@ -1814,6 +1814,19 @@ li.menu-item:hover {
     width: 100%;
     text-align: center;
 }
+/**
+ * description here
+ * @author xupingmao
+ * @since 2021/11/28 19:24:44
+ * @modified 2021/11/28 19:28:07
+ * @filename common-dialog.css
+ */
+
+.dialog-textarea {
+    width: 100%;
+    height: 80%;
+    font-size: 14px;
+}
 /* 响应式工具
  * @modified 2020/10/07 15:59:08
  */

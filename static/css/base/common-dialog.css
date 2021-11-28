@@ -1,0 +1,13 @@
+/**
+ * description here
+ * @author xupingmao
+ * @since 2021/11/28 19:24:44
+ * @modified 2021/11/28 19:28:07
+ * @filename common-dialog.css
+ */
+
+.dialog-textarea {
+    width: 100%;
+    height: 80%;
+    font-size: 14px;
+}

@@ -66,7 +66,7 @@ WRITE_ONLY = False
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/11/27 11:23:13
+# @modified 2021/11/28 21:22:18
 ###########################################################
 
 class DBException(Exception):
@@ -312,13 +312,17 @@ class LdbTable:
 
         return getattr(obj, self.key_name)
 
+    def _format_value(self, key, value):
+        if not isinstance(value, dict):
+            value = Storage(_raw = value)
+
+        setattr(value, self.key_name, key)
+        return value
+
     def _get_result_from_tuple_list(self, tuple_list):
         result = []
         for key, value in tuple_list:
-            if not isinstance(value, dict):
-                value = Storage(_raw = value)
-
-            setattr(value, self.key_name, key)
+            self._format_value(key, value)
             result.append(value)
         return result
 
@@ -396,6 +400,18 @@ class LdbTable:
     def delete_by_key(self, key):
         self._check_before_delete(key)
         delete(key)
+
+    def iter(self, offset = 0, limit = 20, reverse = False, key_from = None):
+        if key_from == "":
+            key_from = None
+
+        if key_from != None:
+            key_from = self.build_key(key_from)
+
+        for key, value in prefix_iter(self.prefix, None, offset, limit, 
+                reverse = reverse, include_key = True, key_from = key_from):
+            self._format_value(key, value)
+            yield key, value
 
     def list(self, offset = 0, limit = 20, reverse = False):
         tuple_list = prefix_list(self.prefix, None, offset, limit, reverse = reverse, include_key = True)
@@ -572,7 +588,13 @@ def prefix_scan(prefix, func, reverse = False, parse_json = True):
 def prefix_list(prefix, filter_func = None, offset = 0, limit = -1, reverse = False, include_key = False):
     return list(prefix_iter(prefix, filter_func, offset, limit, reverse, include_key))
 
-def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = False, include_key = False):
+def prefix_iter(prefix, 
+        filter_func = None, 
+        offset = 0, 
+        limit = -1, 
+        reverse = False, 
+        include_key = False,
+        key_from = None):
     """通过前缀查询
     @param {string} prefix 遍历前缀
     @param {function} filter_func 过滤函数
@@ -582,6 +604,8 @@ def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = Fa
     @param {boolean} include_key 返回的数据是否包含key，默认只有value
     """
     check_leveldb()
+    if key_from != None and reverse == True:
+        raise Exception("不允许反向遍历时设置key_from")
 
     if prefix[-1] != ':':
         prefix += ':'
@@ -592,12 +616,18 @@ def prefix_iter(prefix, filter_func = None, offset = 0, limit = -1, reverse = Fa
     if reverse:
         # 时序表的主键为 表名:用户名:时间序列 时间序列长度为20
         prefix += b'\xff'
-    
+
+
+    if key_from is None:
+        key_from = prefix
+    else:
+        key_from = key_from.encode("utf-8")
+
     # print("prefix: %s, origin_prefix: %s, reverse: %s" % (prefix, origin_prefix, reverse))
     if reverse:
         iterator = _leveldb.RangeIter(None, prefix, include_value = True, reverse = True)
     else:
-        iterator = _leveldb.RangeIter(prefix, None, include_value = True, reverse = False)
+        iterator = _leveldb.RangeIter(key_from, None, include_value = True, reverse = False)
 
     position       = 0
     matched_offset = 0

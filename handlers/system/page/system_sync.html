@@ -29,7 +29,7 @@
     <div class="list">
         {% if node_role == "follower" %}
             <div class="list-item">
-                <span>主节点服务器({{leader_host}})</span>
+                <span>主节点服务器(<a href="{{leader_host}}">{{leader_host}}</a>)</span>
                 <div class="float-right">
                     <a class="btn btn-default config-btn" 
                         data-title="设置主服务器"
@@ -46,6 +46,16 @@
                         data-title="设置主服务器token"
                         data-key="leader.token"
                         data-default="{{leader_token}}">设置</a>
+                    <!-- <i class="fa fa-chevron-right"></i> -->
+                </div>
+            </div>
+
+            <div class="list-item">
+                <span>重置当前位点</span>
+                <div class="float-right">
+                    <a class="btn btn-default confirm-btn" 
+                        data-title="确认重置当前位点?"
+                        data-key="reset_offset">重置</a>
                     <!-- <i class="fa fa-chevron-right"></i> -->
                 </div>
             </div>
@@ -66,8 +76,10 @@
             <div class="list-item">
                 <span>子节点IP白名单</span>
                 <div class="float-right">
-                    <span>TODO</span>
-                    <!-- <i class="fa fa-chevron-right"></i> -->
+                    <a class="btn btn-default config-btn" 
+                        data-title="更新白名单"
+                        data-key="follower.whitelist"
+                        data-default="{{whitelist}}">设置</a>
                 </div>
             </div>
 
@@ -96,20 +108,20 @@
         {% end %}
 
         <div class="list-item">
-            <span>主节点</span>
+            <span>主节点(<a href="{{leader_url}}">{{leader_url}}</a>)<span class="task-tag">主</span></span>
             <div class="float-right">
-                <a href="{{leader_url}}">{{leader_url}}</a>
-                <!-- <i class="fa fa-chevron-right"></i> -->
+                <!-- <a class="btn btn-default">查看</a> -->
             </div>
         </div>
 
 
         {% for info in follower_list %}
             <div class="list-item">
-                <span>从节点</span>
+                <span>从节点(<a href="{{info.http_url}}">{{info.http_url}}</a>)</span>
                 <div class="float-right">
-                    <a href="{{info.url}}">{{info.url}}</a>
-                    <!-- <i class="fa fa-chevron-right"></i> -->
+                    <a class="btn btn-default view-ajax-btn" 
+                        data-type="follower" 
+                        data-key="{{info.http_url}}">查看</a>
                 </div>
             </div>
         {% end %}
@@ -124,7 +136,28 @@ $(function () {
         var defaultValue = $(e.target).attr("data-default");
         xnote.prompt(promptTitle, defaultValue, function (inputValue) {
             var params = {};
-            params.p = "set-config";
+            params.p = "set_config";
+            params.key = configKey;
+            params.value = inputValue;
+
+            $.post("/system/sync", params, function (resp) {
+                if (resp.code == "success") {
+                    window.location.reload();
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
+        });
+    });
+
+    $(".confirm-btn").click(function(e) {
+        var configKey = $(e.target).attr("data-key");
+        var promptTitle = $(e.target).attr("data-title");
+        var defaultValue = $(e.target).attr("data-default");
+
+        xnote.confirm(promptTitle, function (inputValue) {
+            var params = {};
+            params.p = "set_config";
             params.key = configKey;
             params.value = inputValue;
 
@@ -147,6 +180,15 @@ $(function () {
     $(".view-btn").click(function (e) {
         var value = $(e.target).attr("data-value");
         xnote.alert(value);
+    });
+
+    $(".view-ajax-btn").click(function (e) {
+        var dataType = $(e.target).attr("data-type");
+        var dataKey  = $(e.target).attr("data-key");
+        var params = {type: dataType, key: dataKey};
+        $.get("/system/sync?p=get_detail", params, function (resp) {
+            xnote.showTextDialog("详情", resp.text);
+        });
     });
 });
 </script>

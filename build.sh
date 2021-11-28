@@ -12,6 +12,7 @@ cat ./static/css/base/common-tag.css >> ./static/css/app.build.css
 cat ./static/css/base/common-layout.css >> ./static/css/app.build.css
 cat ./static/css/base/common-button.css >> ./static/css/app.build.css
 cat ./static/css/base/common-markdown.css >> ./static/css/app.build.css
+cat ./static/css/base/common-dialog.css >> ./static/css/app.build.css
 
 # 场景化的css
 cat ./static/css/common-react.css >> ./static/css/app.build.css

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2021/09/11 11:53:31
+# @modified 2021/11/28 19:47:17
 # decode: bytes -> str
 # encode: str -> bytes
 import os
@@ -144,8 +144,25 @@ def http_get_by_requests(url, charset = None):
     resp = requests.get(url, headers = {"User-Agent": USER_AGENT})
     return resp.text
 
-def http_get(url, charset=None):
+def _join_url_and_params(url, params):
+    if params is None:
+        return url
+
+    temp = []
+    for key in params:
+        value = params[key]
+        # TODO quote value
+        temp.append("%s=%s" % (key, value))
+
+    query_string = "&".join(temp)
+    if "?" in url:
+        return url + "&" + query_string
+    else:
+        return url + "?" + query_string
+
+def http_get(url, charset=None, params = None):
     """Http的GET请求"""
+    url = _join_url_and_params(url, params)
     if requests != None:
         return http_get_by_requests(url, charset)
     out = []

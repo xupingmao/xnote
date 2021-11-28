@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/11/26 20:55:10
+# @modified 2021/11/28 18:23:11
 # @filename xconfig.py
 
 '''xnote系统配置
@@ -411,3 +411,11 @@ def get_current_user_config(key):
     import xauth
     """默认值参考DEFAULT_USER_CONFIG"""
     return get_user_config(xauth.current_name(), key)
+
+
+def get_system_dir(name):
+    if name == "files":
+        return UPLOAD_DIR
+
+    raise Exception("未知的系统目录:" + name)
+    

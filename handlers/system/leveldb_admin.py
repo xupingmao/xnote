@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2021/10/31 17:08:12
+# @modified 2021/11/28 21:26:56
 import xutils
 import xtemplate
 import xauth
@@ -86,7 +86,7 @@ SCAN_HTML = """
 
 <div class="card">
     <div class="pad5 align-center">
-        <a href="?key_from={{last_key}}&prefix={{prefix}}&&db_key={{db_key}}&reverse={{reverse}}">下一页</a>
+        <a href="?key_from={{quote(last_key)}}&prefix={{prefix}}&&db_key={{quote(db_key)}}&reverse={{reverse}}">下一页</a>
     </div>
 </div>
 
