@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2021/10/28 00:10:20
+# @modified 2021/11/30 23:50:11
 
 
 """fsutil: 文件操作工具，文件工具分为如下部分：
@@ -11,10 +11,12 @@
 
 import codecs
 import os
+import sys
 import platform
 import xutils
 import base64
 import time
+import ctypes
 
 from xutils.imports import *
 from xutils.base import Storage
@@ -686,4 +688,19 @@ def backupfile(path, backup_dir = None, rename=False):
         # need to handle case that bakup file exists
         import shutil
         shutil.copyfile(path, newpath)
+
+
+def get_free_space(folder):
+    """返回文件夹的可用空间
+    参考来源: https://www.jb51.net/article/115604.htm
+    """
+    if platform.system() == 'Windows':
+        free_bytes = ctypes.c_ulonglong(0)
+        c_folder = ctypes.c_wchar_p(folder)
+        ctypes.windll.kernel32.GetDiskFreeSpaceExW(c_folder, None, None, ctypes.pointer(free_bytes))
+        return free_bytes.value/1024/1024/1024
+    else:
+        st = os.statvfs(folder)
+        return st.f_bavail * st.f_frsize
+
 

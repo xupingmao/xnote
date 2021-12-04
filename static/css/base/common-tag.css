@@ -1,20 +1,21 @@
 /**
- * description here
+ * 标签的样式
  * @author xupingmao
  * @since 2021/05/22 12:56:05
- * @modified 2021/11/22 23:35:59
+ * @modified 2021/12/04 15:20:58
  * @filename common-tag.css
  */
 
-/** Tags **/
+/** .tag的优先级最低，要放在最前面 **/
 .tag {
-    font-size: small;
+    font-size: 12px;
     background-color: green;
     color: white;
-    border-radius: 0px;
+    border-radius: 3px;
     padding: 3px;
     margin-right: 2px;
 }
+
 
 .tag-link {
     text-decoration: none;
@@ -28,7 +29,6 @@
 
 .inline-tag {
     display: inline-block;
-    padding: 2px;
 }
 
 .pink-tag {
@@ -36,41 +36,31 @@
 }
 
 .red-tag {
-    font-size: small;
     background-color: red;
     color: white;
-    border-radius: 2px;
-    padding-left: 2px;
-    padding-right: 2px;
 }
 
 .orange-tag {
-    font-size: small;
     background-color: orange;
     color: white;
-    border-radius: 2px;
-    padding: 2px;
 }
 
 .gray-tag {
     color: white;
     background-color: #ccc;
-    padding: 3px;
-    border-radius: 3px;
 }
 
 
 .lightgray-tag {
     background-color: #eee;
-    padding: 3px;
-    border-radius: 3px;
+    color: black;
 }
 
 
-.tag-span {
+.tag-span, .tag-span-danger {
     display: block;
     float: left;
-    font-size: small;
+    font-size: 12px;
     line-height: 20px;
     border-radius: 2px;
     padding: 5px;
@@ -81,6 +71,10 @@
 
 .tag-span:hover {
     background-color: #eee;
+}
+
+.tag-span-danger {
+    color: red;
 }
 
 .tag-span-light {
@@ -112,4 +106,3 @@
     background: rgb(13, 202, 240);
     color: #fff;
 }
-

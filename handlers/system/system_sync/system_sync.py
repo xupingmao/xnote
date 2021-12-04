@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/07 12:38:32
-# @modified 2021/11/28 22:07:26
+# @modified 2021/11/30 23:44:23
 # @filename system_sync.py
 
 """系统数据同步功能，目前提供主从同步的能力
@@ -126,20 +126,24 @@ class Follower(NodeManagerBase):
     def __init__(self):
         self.follower_list = []
         self.ping_error = None
+        self.admin_token = None
 
+    def get_client(self):
+        leader_host = self.get_leader_url()
+        leader_token = self.get_leader_token()
+        return xutils.call("system_sync.HttpClient", leader_host, leader_token, self.admin_token)
 
     def ping_leader(self):
         port = xconfig.get_global_config("system.port")
-        leader_host  = CONFIG.get("leader.host")
-        leader_token = CONFIG.get("leader.token")
+        
         fs_sync_offset = CONFIG.get("fs_sync_offset", "")
 
+        leader_host = self.get_leader_url()
         if leader_host != None:
-            url = "{host}/system/sync?p=get_stat".format(host = leader_host)
-            params = dict(port = port, token = leader_token, fs_sync_offset = fs_sync_offset)
-            result = netutil.http_get(url, params = params)
-            result_obj = textutil.parse_json(result, ignore_error = True)
-            
+            client = self.get_client()
+            params = dict(port = port, fs_sync_offset = fs_sync_offset)
+            result_obj = client.get_stat(params)
+
             print_debug_info("PING主节点:", result_obj)
             
             self.update_ping_result(result_obj)
@@ -161,6 +165,10 @@ class Follower(NodeManagerBase):
         follower_dict = result.get("follower_dict", {})
         self.follower_list = convert_follower_dict_to_list(follower_dict)
 
+        if len(self.follower_list) > 0:
+            item = self.follower_list[0]
+            self.admin_token = item.admin_token
+
     def get_follower_list(self):
         return self.follower_list
 
@@ -172,25 +180,12 @@ class Follower(NodeManagerBase):
 
     def sync_files_from_leader(self):
         offset = CONFIG.get("fs_sync_offset", "")
-        leader_host = self.get_leader_url()
-        leader_token = self.get_leader_token()
-
-        url = "{host}/system/sync?p=list_files&token={token}&offset={offset}".format(
-            host = leader_host, token = leader_token, offset = offset)
-
-        content = netutil.http_get(url)
-        result = textutil.parse_json(content, ignore_error = True)
+        client = self.get_client()
+        result = client.list_files(offset)
         if result is None:
-            print_debug_info("原始内容", content)
-            print_debug_info("接口返回为空")
             return
 
-        result = Storage(**result)
-        if result.code != "success":
-            print_debug_info("接口请求失败", result)
-
-        data = result.data
-        print_debug_info("接口数据", data)
+        client.download_files(result)
 
         if result.sync_offset != None:
             CONFIG.put("fs_sync_offset", result.sync_offset)
@@ -378,10 +373,14 @@ class SyncHandler:
 
     def get_stat(self):
         port = xutils.get_argument("port", "")
+
+        admin_token = xauth.get_user_by_name("admin").token
+
         result = Storage()
         result.code = "success"
         result.timestamp = int(time.time())
         result.system_version = xconfig.get_global_config("system.version")
+        result.admin_token = admin_token
 
         client_ip = webutil.get_client_ip()
         url = client_ip + ":" + port
@@ -396,7 +395,8 @@ class SyncHandler:
             follower.ping_time = dateutil.format_datetime()
             follower.fs_sync_offset = xutils.get_argument("fs_sync_offset", "")
             follower.fs_index_count = xutils.call("system_sync.count_index")
-            follower.admin_token = xauth.get_user_by_name("admin").token
+            follower.admin_token = admin_token
+
             LEADER.update_follower_info(follower)
 
         result.follower_dict = LEADER.get_follower_dict()

@@ -56,12 +56,14 @@ $(function () {
     var loadIndex = 0;
 
     function refreshComments() {
+        var page = getUrlParam("page", 1);
         var list_param = {
             note_id: "{{file.id}}",
             list_type: "{{comment_list_type}}",
             list_date: "{{comment_list_date}}",
             show_note: "{{show_comment_note}}",
-            resp_type: "html"
+            resp_type: "html",
+            page: page
         };
 
         $.get("/note/comments", list_param, function (resp) {

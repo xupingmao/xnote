@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2021/10/28 23:34:53
+@modified 2021/12/04 21:13:05
 -->
 
 {% block body %}
@@ -26,6 +26,23 @@
         {% for value in recent %}
             <a class="tag-span" href="/search?key={{quote(value)}}">{{value}}</a>
         {% end %}
+
+        {% if len(recent) > 0 %}
+            <a class="tag-span-danger clear-history-link">清空历史记录</a>
+        {% end %}
     </div>
 
+<script type="text/javascript">
+    $(".clear-history-link").click(function (e) {
+        xnote.confirm("确定清空历史记录吗?", function (resp) {
+            $.post("/search/history?p=clear", function(resp) {
+                if (resp.code == "success") {
+                    location.reload();
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
+        });
+    })
+</script>
 {% end %}

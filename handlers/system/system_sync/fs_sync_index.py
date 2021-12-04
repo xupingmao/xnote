@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/28 18:07:31
-# @modified 2021/11/28 21:35:08
+# @modified 2021/11/28 23:10:50
 # @filename fs_sync_index.py
 
 import os
@@ -176,6 +176,9 @@ def on_build_index(ctx = None):
 # 子节点同步的时候会检查，不需要单独加一个任务检查
 @xmanager.listen("cron.minute")
 def on_check_index(ctx = None):
+    if get_system_role() == "follower":
+        return
+
     print_debug_info("检查文件同步索引...")
 
     manager = FileIndexCheckManager()

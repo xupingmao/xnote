@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/10/24 13:13:12
+# @modified 2021/12/04 22:11:19
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -1183,6 +1183,7 @@ def search_name(words, creator = None, parent_id = None, orderby = "type_mtime_d
 
     # 对笔记进行排序
     sort_notes(result, orderby)
+    sort_by_priority(result)
     return result
 
 def search_content(words, creator=None):
@@ -1376,7 +1377,7 @@ def list_comments(note_id):
         comments.append(comment)
     return comments
 
-def list_comments_by_user(user_name, date = None, offset = 0, limit = 100):
+def handle_comments_by_user(handle_func, user_name, date = None, offset = 0, limit = 100):
     list_func = None
 
     if date is not None and date != "":
@@ -1385,8 +1386,14 @@ def list_comments_by_user(user_name, date = None, offset = 0, limit = 100):
                 return False
             return value.ctime.startswith(date)
 
-    return dbutil.prefix_list("comment_index:%s" % user_name, list_func, 
+    return handle_func("comment_index:%s" % user_name, list_func, 
         offset = offset, limit = limit, reverse = True)
+
+def list_comments_by_user(*args, **kw):
+    return handle_comments_by_user(dbutil.prefix_list, *args, **kw)
+
+def count_comments_by_user(*args, **kw):
+    return handle_comments_by_user(dbutil.prefix_count, *args, **kw)
 
 def check_comment(comment):
     assert comment != None, "comment is None"
@@ -1447,6 +1454,12 @@ def list_search_history(user, limit = 1000, orderby = "time_desc"):
         return []
     return dbutil.prefix_list("search_history:%s" % user, reverse = True, limit = limit)
 
+def clear_search_history(user_name):
+    assert user_name != None
+    assert user_name != ""
+    db = dbutil.get_list_table("search_history", user_name = user_name)
+    for item in db.iter(reverse = True, limit = -1):
+        db.delete(item)
 
 @xutils.async_func_deco()
 def refresh_note_stat_async(user_name):
@@ -1649,10 +1662,12 @@ xutils.register_func("note.list_history", list_history)
 xutils.register_func("note.get_history", get_history)
 xutils.register_func("note.add_search_history", add_search_history)
 xutils.register_func("note.list_search_history", list_search_history)
+xutils.register_func("note.clear_search_history", clear_search_history)
 
 # comments
 xutils.register_func("note.list_comments", list_comments)
 xutils.register_func("note.list_comments_by_user", list_comments_by_user)
+xutils.register_func("note.count_comments_by_user", count_comments_by_user)
 xutils.register_func("note.get_comment",  get_comment)
 xutils.register_func("note.save_comment", save_comment)
 xutils.register_func("note.delete_comment", delete_comment)

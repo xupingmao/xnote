@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2021/10/28 23:18:37
+@modified 2021/12/04 13:06:27
 -->
 
 {% block body %}
@@ -104,7 +104,13 @@
             {% if file.category == "note" %}
                 <div class="item-ext-info">
                     {% if file.creator != None %}
-                        <span class="lightgray-tag">{{file.creator}}</span>
+                        <span class="tag lightgray-tag">{{file.creator}}</span>
+                    {% end %}
+
+                    {% if file.parent_name != None %}
+                        <span class="tag lightgray-tag">
+                            <a class="link" href="/note/view?id={{file.parent_id}}">{{file.parent_name}}</a>
+                        </span>
                     {% end %}
 
                     {% if file.priority is not None and file.priority > 0 %}
@@ -112,13 +118,7 @@
                     {% end %}
 
                     {% if file.is_public %}
-                        <span class="tag">公开</span>
-                    {% end %}
-
-                    {% if file.parent_name != None %}
-                        <span class="lightgray-tag">
-                            <a class="link" href="/note/view?id={{file.parent_id}}">{{file.parent_name}}</a>
-                        </span>
+                        <span class="tag green-tag">公开</span>
                     {% end %}
 
                     {% if file.mdate != None %}

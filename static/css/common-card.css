@@ -2,7 +2,7 @@
  * 卡片主题的样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2021/10/07 13:57:09
+ * @modified 2021/12/04 12:58:15
  * @filename common-card.css
  */
 
@@ -22,18 +22,6 @@ body {
 /* 不能指定input[type=button]不然会覆盖其他class样式(选择器优先级过高) */
 .btn, .inline-btn, [type=submit], [type=button], button {
     border-radius: 3px;
-}
-
-.tag {
-    border-radius: 0px;
-}
-
-.red-tag {
-    border-radius: 2px;
-}
-
-.orange-tag {
-    border-radius: 2px;
 }
 
 .tag-span {

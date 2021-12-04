@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/08/14 13:16:42
+# @modified 2021/12/04 21:11:42
 
 import re
 import os
@@ -366,6 +366,17 @@ class SearchHistoryHandler:
             html_title = "Search",
             files = [],
             search_tpye = "note")
+
+    @xauth.login_required()
+    def POST(self):
+        p = xutils.get_argument("p", "")
+        user_name = xauth.current_name()
+        if p == "clear":
+            NOTE_DAO.clear_search_history(user_name)
+            return dict(code = "success")
+
+        return dict(code = "500", message = "无效的操作")
+
 
 rules_loaded = False
 def load_rules():

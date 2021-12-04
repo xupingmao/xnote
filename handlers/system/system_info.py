@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/08/22 21:54:56
-# @modified 2021/11/07 21:54:06
+# @modified 2021/12/04 22:40:25
 import xauth
 import xtemplate
 import xutils
@@ -11,6 +11,7 @@ import sys
 import platform
 import xconfig
 from xutils import dateutil
+from xutils import fsutil
 
 try:
     import psutil
@@ -53,6 +54,14 @@ def get_python_version():
 def get_startup_time():
     return dateutil.format_time(xconfig.START_TIME)
 
+def get_free_space():
+    try:
+        size = fsutil.get_free_space(".")
+        return xutils.format_size(size)
+    except:
+        xutils.print_exc()
+        return "<未知>"
+
 class SystemInfoItem:
 
     def __init__(self, name = "", value = ""):
@@ -67,6 +76,7 @@ class InfoHandler:
             SystemInfoItem("Python版本", value = get_python_version()),
             SystemInfoItem("Xnote版本", value = get_xnote_version()),
             SystemInfoItem("内存信息", value = get_mem_info()),
+            SystemInfoItem("磁盘空闲容量", get_free_space()),
             SystemInfoItem("sqlite版本", sqlite3.sqlite_version if sqlite3 != None else ''),
             SystemInfoItem("CPU型号", platform.processor()),
             SystemInfoItem("操作系统", platform.system()),

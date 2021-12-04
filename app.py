@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2021/11/27 10:13:45
+# @modified 2021/12/04 21:58:49
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -42,6 +42,11 @@ from autoreload import AutoReloadThread
 
 DEFAULT_PORT = "1234"
 
+
+def print_debug_info(*args):
+    new_args = [dateutil.format_time(), "[init]"]
+    new_args += args
+    print(*new_args)
 
 def get_bool_by_sys_arg(value):
     return value == "yes" or value == "true"
@@ -172,7 +177,7 @@ def init_autoreload():
 def init_cluster():
     # 初始化集群配置
     if xconfig.get_global_config("system.node.role") == "follower":
-        print("当前以从节点身份运行")
+        print_debug_info("当前以从节点身份运行")
 
 def init_app():
     global app

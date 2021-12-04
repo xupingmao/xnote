@@ -420,6 +420,23 @@ class TestMain(unittest.TestCase):
         table.delete(found_row)
         self.assertEqual(0, table.count())
 
+    def test_dbutil_hash(self):
+        dbutil.register_table("hash_test", "hash表测试")
+        db = dbutil.get_hash_table("hash_test")
+        for key, value in db.iter(limit = -1):
+            db.delete(key)
+
+        db.put("key1", "value1")
+        db.put("key2", "value2")
+
+        self.assertEqual("value1", db.get("key1"))
+        self.assertEqual(2, db.count())
+
+        for key, value in db.iter(limit = -1):
+            db.delete(key)
+
+        self.assertEqual(0, db.count())
+
     def test_b64encode(self):
         text_input = "测试1234"
         text_output = xutils.b64encode(text_input)

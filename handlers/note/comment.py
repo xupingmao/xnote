@@ -1,7 +1,9 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/10 23:44:48
-# @modified 2021/11/20 22:52:19
+# @modified 2021/12/04 22:22:07
+import math
+import xconfig
 import xutils
 import xauth
 import xtemplate
@@ -13,6 +15,8 @@ from xtemplate import T
 
 NOTE_DAO = DAO("note")
 
+def get_page_max(count):
+    return math.ceil(count/xconfig.PAGE_SIZE)//1
 
 def process_comments(comments, show_note = False):
     for comment in comments:
@@ -59,8 +63,10 @@ def on_search_comments(ctx):
     if ctx.category == "comment":
         search_comment_detail(ctx)
 
-def convert_to_html(comments, show_note = False):
+def convert_to_html(comments, show_note = False, page = 1, page_max = 1):
     return xtemplate.render("note/ajax/comment_list.html", 
+        page = page,
+        page_max = page_max,
         comments = comments, 
         show_note = show_note)
 
@@ -72,10 +78,17 @@ class CommentListAjaxHandler:
         resp_type = xutils.get_argument("resp_type")
         list_date = xutils.get_argument("list_date")
         show_note = xutils.get_argument("show_note", type=bool)
+        page = xutils.get_argument("page", 1, type = int)
+        page_max = 1
         user_name = xauth.current_name()
 
         if list_type == "user":
-            comments = NOTE_DAO.list_comments_by_user(user_name, date = list_date)
+            offset = max(0, page-1) * xconfig.PAGE_SIZE
+            count  = NOTE_DAO.count_comments_by_user(user_name, list_date)
+            comments = NOTE_DAO.list_comments_by_user(user_name, 
+                date = list_date, offset = offset, 
+                limit = xconfig.PAGE_SIZE)
+            page_max = get_page_max(count)
         else:
             comments  = NOTE_DAO.list_comments(note_id)
 
@@ -83,7 +96,7 @@ class CommentListAjaxHandler:
         process_comments(comments, show_note)
 
         if resp_type == "html":
-            return convert_to_html(comments, show_note)
+            return convert_to_html(comments, show_note, page = page, page_max = page_max)
         else:
             return comments
 

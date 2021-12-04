@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/11/28 18:23:11
+# @modified 2021/12/01 23:10:34
 # @filename xconfig.py
 
 '''xnote系统配置
@@ -416,6 +416,18 @@ def get_current_user_config(key):
 def get_system_dir(name):
     if name == "files":
         return UPLOAD_DIR
+
+    if name == "data":
+        return DATA_DIR
+
+    if name == "tmp":
+        return TMP_DIR
+
+    if name == "storage":
+        return STORAGE_DIR
+
+    if name == "scripts":
+        return SCRIPTS_DIR
 
     raise Exception("未知的系统目录:" + name)
     
