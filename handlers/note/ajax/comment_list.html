@@ -1,4 +1,5 @@
 {% init comment_source_class = "" %}
+{% init show_comment_edit = False %}
 
 {% if len(comments) == 0 %}
     <div class="card">
@@ -19,6 +20,10 @@
 
             {% if comment.user == _user_name %}
                 <div class="float-right">
+                    {% if show_comment_edit %}
+                        <a class="edit-comment-btn" data-id="{{comment.id}}">编辑</a>
+                    {% end %}
+
                     <a class="delete-comment-btn" data-id="{{comment.id}}" data-content="{{comment.content}}">删除</a>
                 </div>
             {% end %}
@@ -26,4 +31,6 @@
     </div>
 {% end %}
 
-{% include common/pagination.html %}
+{% if page_max > 1 %}
+    {% include common/pagination.html %}
+{% end %}

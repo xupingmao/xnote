@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2021/12/04 21:59:27
+# @modified 2021/12/05 12:30:53
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -76,11 +76,19 @@ class LdbTable:
         if not isinstance(obj, dict):
             raise Exception("invalid obj:%s, expected dict" % type(obj))
 
+    def _check_key(self, key):
+        if not key.startswith(self.prefix):
+            raise Exception("invalid key:%s" % key)
+
     def is_valid_key(self, key = None, user_name = None):
         if user_name is None:
             return key.startswith(self.prefix)
         else:
             return key.startswith(self.prefix + user_name)
+
+    def get_by_id(self, row_id, default_value = None):
+        key = self.build_key(row_id)
+        return self.get_by_key(key, default_value)
 
     def get_by_key(self, key, default_value = None):
         value = get(key, default_value)
@@ -98,6 +106,7 @@ class LdbTable:
         return key
 
     def insert_by_user(self, user_name, obj, id_type = "timeseq"):
+        """不建议使用，建议初始化时设置user_name"""
         assert user_name != None
         self._check_value(obj)
         id_value = self._get_id_value(id_type)
@@ -109,12 +118,20 @@ class LdbTable:
         """从`obj`中获取主键`key`进行更新"""
         self._check_value(obj)
         obj_key = self._get_key_from_obj(obj)
+        self._check_key(obj_key)
+
         update_obj = self._get_update_obj(obj)
         put(obj_key, update_obj)
 
+    def update_by_id(self, id, obj):
+        key = self.build_key(id)
+        self.update_by_key(key, obj)
+
     def update_by_key(self, key, obj):
         """直接通过`key`进行更新"""
+        self._check_key(key)
         self._check_value(obj)
+        
         update_obj = self._get_update_obj(obj)
         put(key, update_obj)
 
@@ -122,6 +139,10 @@ class LdbTable:
         obj_key = self._get_key_from_obj(obj)
         self._check_before_delete(obj_key)
         delete(obj_key)
+
+    def delete_by_id(self, id):
+        key = self.build_key(id)
+        self.delete_by_key(key)
 
     def delete_by_key(self, key):
         self._check_before_delete(key)
@@ -134,7 +155,7 @@ class LdbTable:
         if key_from != None:
             key_from = self.build_key(key_from)
 
-        for key, value in prefix_iter(self.prefix, None, offset, limit, 
+        for key, value in prefix_iter(self.prefix, filter_func, offset, limit, 
                 reverse = reverse, include_key = True, key_from = key_from):
             self._format_value(key, value)
             yield value

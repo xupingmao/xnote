@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/10 23:44:48
-# @modified 2021/12/04 22:22:07
+# @modified 2021/12/05 12:01:19
 import math
 import xconfig
 import xutils
@@ -16,7 +16,7 @@ from xtemplate import T
 NOTE_DAO = DAO("note")
 
 def get_page_max(count):
-    return math.ceil(count/xconfig.PAGE_SIZE)//1
+    return int(math.ceil(count/xconfig.PAGE_SIZE))
 
 def process_comments(comments, show_note = False):
     for comment in comments:
@@ -63,8 +63,9 @@ def on_search_comments(ctx):
     if ctx.category == "comment":
         search_comment_detail(ctx)
 
-def convert_to_html(comments, show_note = False, page = 1, page_max = 1):
+def convert_to_html(comments, show_note = False, page = 1, page_max = 1, show_edit = False):
     return xtemplate.render("note/ajax/comment_list.html", 
+        show_comment_edit = show_edit,
         page = page,
         page_max = page_max,
         comments = comments, 
@@ -78,25 +79,30 @@ class CommentListAjaxHandler:
         resp_type = xutils.get_argument("resp_type")
         list_date = xutils.get_argument("list_date")
         show_note = xutils.get_argument("show_note", type=bool)
+        show_edit = xutils.get_argument("show_edit", type=bool)
         page = xutils.get_argument("page", 1, type = int)
-        page_max = 1
+        page_max  = 1
+        page_size = xconfig.PAGE_SIZE
         user_name = xauth.current_name()
+        offset = max(0, page-1) * xconfig.PAGE_SIZE
 
         if list_type == "user":
-            offset = max(0, page-1) * xconfig.PAGE_SIZE
-            count  = NOTE_DAO.count_comments_by_user(user_name, list_date)
+            count  = NOTE_DAO.count_comment_by_user(user_name, list_date)
             comments = NOTE_DAO.list_comments_by_user(user_name, 
                 date = list_date, offset = offset, 
-                limit = xconfig.PAGE_SIZE)
+                limit = page_size)
             page_max = get_page_max(count)
         else:
-            comments  = NOTE_DAO.list_comments(note_id)
+            comments  = NOTE_DAO.list_comments(note_id, offset = offset, limit = page_size)
+            count = NOTE_DAO.count_comment_by_note(note_id)
+            page_max = get_page_max(count)
 
         # 处理评论列表
         process_comments(comments, show_note)
 
         if resp_type == "html":
-            return convert_to_html(comments, show_note, page = page, page_max = page_max)
+            return convert_to_html(comments, show_note, 
+                page = page, page_max = page_max, show_edit = show_edit)
         else:
             return comments
 
@@ -147,11 +153,43 @@ class MyCommentsHandler:
             comment_list_date = date,
             comment_list_type = "user")
 
+class CommentAjaxHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        p = xutils.get_argument("p")
+        user_name = xauth.current_name()
+        comment_id = xutils.get_argument("comment_id", "")
+
+        if p == "edit":
+            comment = NOTE_DAO.get_comment(comment_id)
+            if comment == None:
+                return "评论不存在"
+            if comment.user != user_name:
+                return "无操作权限"
+            return xtemplate.render("note/ajax/comment_edit_dialog.html", comment = comment)
+        
+        if p == "update":
+            comment = NOTE_DAO.get_comment(comment_id)
+            if comment == None:
+                return dict(code = "404", message = "评论不存在")
+            if comment.user != user_name:
+                return dict(code = "403", message = "无权限操作")
+            content = xutils.get_argument("content", "")
+            comment.content = content
+            NOTE_DAO.update_comment(comment)
+            return dict(code = "success")
+        return "未知的操作"
+
+    def POST(self):
+        return self.GET()
+
 xutils.register_func("note.search_comment_detail", search_comment_detail)
 
 xurls = (
     r"/note/comments", CommentListAjaxHandler,
     r"/note/comment/save", SaveCommentAjaxHandler,
     r"/note/comment/delete", DeleteCommentAjaxHandler,
+    r"/note/comment", CommentAjaxHandler,
     r"/note/mycomments", MyCommentsHandler,
 )

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 15:35:23
-# @modified 2021/12/04 22:34:24
+# @modified 2021/12/05 10:55:24
 # @filename dbutil_hash.py
 
 from xutils.dbutil_base import *
@@ -35,6 +35,10 @@ class LdbHashTable:
         return self.prefix + key
 
     def put(self, key, value):
+        """通过key来设置value，这个key是hash的key，不是ldb的key
+        @param {string} key hash的key
+        @param {object} value hash的value
+        """
         self._check_key(key)
         self._check_value(value)
 
@@ -42,6 +46,10 @@ class LdbHashTable:
         put(row_key, value)
 
     def get(self, key, default_value = None):
+        """通过key来查询value，这个key是hash的key，不是ldb的key
+        @param {string} key hash的key
+        @param {object} default_value 如果值不存在，返回默认值
+        """
         row_key = self.build_key(key)
         return get(row_key, default_value)
 
@@ -51,8 +59,8 @@ class LdbHashTable:
                 offset = offset, limit = limit, reverse = reverse, include_key = True):
             yield key[prefix_len:], value
 
-    def list(self, **kw):
-        return list(self.iter(**kw))
+    def list(self, *args, **kw):
+        return list(self.iter(*args, **kw))
 
     def delete(self, key):
         row_key = self.build_key(key)

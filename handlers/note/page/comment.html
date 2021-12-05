@@ -3,6 +3,7 @@
 {% init show_comment_title  = True %}
 {% init show_comment_create = True %}
 {% init show_comment_note   = False %}
+{% init show_comment_edit   = False %}
 {% init comment_title = "评论" %}
 {% init comment_list_type   = "note_id" %}
 {% init comment_list_date   = "" %}
@@ -54,6 +55,7 @@
 <script type="text/javascript">
 $(function () {
     var loadIndex = 0;
+    var editIndex = 0;
 
     function refreshComments() {
         var page = getUrlParam("page", 1);
@@ -62,6 +64,7 @@ $(function () {
             list_type: "{{comment_list_type}}",
             list_date: "{{comment_list_date}}",
             show_note: "{{show_comment_note}}",
+            show_edit: "{{show_comment_edit}}",
             resp_type: "html",
             page: page
         };
@@ -108,6 +111,13 @@ $(function () {
         });
     });
 
+    $("#comments").on("click", ".edit-comment-btn", function () {
+        var id = $(this).attr("data-id");
+        $.get("/note/comment?p=edit&comment_id=" + id, function (resp) {
+            editIndex = xnote.showDialog("编辑", resp);
+        });
+    });
+
     $("#commentFilePickerBtn").on("click", function (event) {
         console.log("select file button click");
         $("#globalFilePicker").click();
@@ -117,6 +127,11 @@ $(function () {
         console.log("receive file upload event, ", result);
         var link = result.target.link;
         appendToInputText(link);
+    });
+
+    xnote.on("comment.refresh", refreshComments);
+    xnote.on("comment.closeEditDialog", function () {
+        layer.close(editIndex);
     })
 })
 </script>

@@ -1,0 +1,41 @@
+<div class="card">
+    <div class="col-md-12">
+        <textarea autoHeight=true class="col-md-12 no-outline" 
+            id="commentUpdateContent"
+            rows=20>{{comment.content}}</textarea>
+
+        <input type="file" id="commentFilePicker2" class="hide" multiple/>
+        <input type="button" class="btn btn-default attachment-btn" value="添加附件"/>
+        <button class="btn" id="updateCommentBtn">更新</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $("#updateCommentBtn").click(function (e) {
+        var params = {};
+        params.p = "update";
+        params.comment_id = "{{comment.id}}";
+        params.content = $("#commentUpdateContent").val();
+        $.post("/note/comment", params, function (resp) {
+            if (resp.code == "success") {
+                xnote.toast("更新成功");
+                xnote.fire("comment.refresh");
+                xnote.fire("comment.closeEditDialog");
+            } else {
+                xnote.alert(resp.message);
+            }
+        });
+    });
+
+    $(".attachment-btn").click(function (e) {
+        $("#commentFilePicker2").click();
+    });
+
+    xnote.createUploader("#commentFilePicker2", false, function (resp) {
+        console.log("文件上传成功", resp);
+        var link = "file://" + resp.webpath;
+        var oldValue = $("#commentUpdateContent").val();
+        $("#commentUpdateContent").val(oldValue + "\n" + link);
+    });
+
+</script>

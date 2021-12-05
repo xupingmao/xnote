@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/12/04 22:11:19
+# @modified 2021/12/05 10:41:15
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -47,8 +47,6 @@ register_note_table("note_name", "用户维度的name索引 <note_name:user:name
 register_note_table("notebook", "笔记分组")
 register_note_table("token", "用于分享的令牌")
 register_note_table("note_history", "笔记的历史版本")
-register_note_table("note_comment", "笔记的评论")
-register_note_table("comment_index", "用户维度的评论索引")
 register_note_table("note_create_log", "笔记创建日志")
 register_note_table("note_edit_log", "笔记编辑日志")
 register_note_table("note_visit_log", "笔记访问日志")
@@ -59,6 +57,8 @@ register_note_table("note_share_from", "分享发送者关系表 <note_share_fro
 register_note_table("note_share_to", "分享接受关系表 <note_share_to:to_user:note_id>")
 
 dbutil.register_table("search_history", "搜索历史")
+
+NOTE_DAO = xutils.DAO("note")
 
 DB_PATH         = xconfig.DB_PATH
 MAX_EDIT_LOG    = 500
@@ -1369,82 +1369,6 @@ def list_by_func(creator, list_func, offset, limit):
     build_note_list_info(notes)
     return notes
 
-def list_comments(note_id):
-    comments = []
-    for key, value in dbutil.prefix_iter("note_comment:%s" % note_id, reverse = True, include_key = True):
-        comment = value
-        comment['id'] = key
-        comments.append(comment)
-    return comments
-
-def handle_comments_by_user(handle_func, user_name, date = None, offset = 0, limit = 100):
-    list_func = None
-
-    if date is not None and date != "":
-        def list_func(key, value):
-            if value.ctime is None:
-                return False
-            return value.ctime.startswith(date)
-
-    return handle_func("comment_index:%s" % user_name, list_func, 
-        offset = offset, limit = limit, reverse = True)
-
-def list_comments_by_user(*args, **kw):
-    return handle_comments_by_user(dbutil.prefix_list, *args, **kw)
-
-def count_comments_by_user(*args, **kw):
-    return handle_comments_by_user(dbutil.prefix_count, *args, **kw)
-
-def check_comment(comment):
-    assert comment != None, "comment is None"
-    assert comment.type in (None, "list_item"), "comment.type is invalid"
-
-def save_comment(comment):
-    check_comment(comment)
-
-    timeseq = dbutil.timeseq()
-
-    comment["timeseq"] = timeseq
-    comment["ctime"]   = dateutil.format_time()
-
-    key = "note_comment:%s:%s" % (comment["note_id"], timeseq)
-    dbutil.put(key, comment)
-
-    index_key = "comment_index:%s:%s" % (comment["user"], timeseq)
-    comment_index = comment.copy()
-    dbutil.put(index_key, comment_index)
-
-    refresh_note_stat_async(comment["user"])
-
-def delete_comment(comment_id):
-    comment = get_comment(comment_id)
-    if comment != None:
-        dbutil.delete(comment_id)
-        dbutil.delete("comment_index:%s:%s" % (comment.user, comment.timeseq))
-
-        refresh_note_stat_async(comment.user)
-
-def get_comment(comment_id):
-    return dbutil.get(comment_id)
-
-def count_comment(user_name):
-    return dbutil.count_table("comment_index:%s" % user_name)
-
-
-def search_comment(user_name, keywords, offset = 0, limit = None):
-    assert user_name != None, "user_name is None"
-
-    if limit is None:
-        limit = xconfig.PAGE_SIZE
-
-    def search_comment_func(key, value):
-        if textutil.contains_all(value.content, keywords):
-            return True
-        else:
-            return False
-
-    return dbutil.prefix_list("comment_index:%s" % user_name, search_comment_func, offset = offset, limit = limit)
-
 def add_search_history(user, search_key, category = "default", cost_time = 0):
     key = "search_history:%s:%s" % (user, dbutil.timeseq())
     dbutil.put(key, Storage(key = search_key, category = category, cost_time = cost_time))
@@ -1485,7 +1409,7 @@ def refresh_note_stat(user_name):
     stat.sticky_count  = count_sticky(user_name)
     stat.removed_count = count_removed(user_name)
     stat.dict_count    = count_dict(user_name)
-    stat.comment_count = count_comment(user_name)
+    stat.comment_count = NOTE_DAO.count_comment(user_name)
 
     dbutil.put("user_stat:%s:note" % user_name, stat)
     return stat
@@ -1664,18 +1588,9 @@ xutils.register_func("note.add_search_history", add_search_history)
 xutils.register_func("note.list_search_history", list_search_history)
 xutils.register_func("note.clear_search_history", clear_search_history)
 
-# comments
-xutils.register_func("note.list_comments", list_comments)
-xutils.register_func("note.list_comments_by_user", list_comments_by_user)
-xutils.register_func("note.count_comments_by_user", count_comments_by_user)
-xutils.register_func("note.get_comment",  get_comment)
-xutils.register_func("note.save_comment", save_comment)
-xutils.register_func("note.delete_comment", delete_comment)
-xutils.register_func("note.search_comment", search_comment)
-
 # stat
 xutils.register_func("note.get_note_stat", get_note_stat)
 xutils.register_func("note.get_gallery_path", get_gallery_path)
-
+xutils.register_func("note.refresh_note_stat_async", refresh_note_stat_async)
 
 

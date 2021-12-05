@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/28 18:07:31
-# @modified 2021/11/28 23:10:50
+# @modified 2021/12/05 10:44:07
 # @filename fs_sync_index.py
 
 import os
@@ -81,8 +81,9 @@ class FileSyncIndexManager:
         MAX_LIMIT = limit * 5
         db = dbutil.get_table("fs_sync_index")
 
-        for key, value in db.iter(offset = offset, limit = MAX_LIMIT, key_from = key_from):
+        for value in db.iter(offset = offset, limit = MAX_LIMIT, key_from = key_from):
             fpath = value.fpath
+            key   = value._key
 
             if check_index(key, value, db):
                 result.append(value)

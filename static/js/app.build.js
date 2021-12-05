@@ -1264,6 +1264,7 @@ $(function(e) {
 })/**
  * xnote的公有方法
  */
+
 var BASE_URL = "/static/lib/webuploader";
 
 if (window.xnote == undefined) {
@@ -1278,8 +1279,58 @@ function closeXnoteLoading(index) {
     layer.close(index);
 }
 
+xnote._initUploadEvent = function(uploader, fileSelector, successFn) {
+    // 加载进度条索引
+    var loadingIndex = 0;
+
+    // 当有文件添加进来的时候
+    uploader.on( 'fileQueued', function( file ) {
+        // 接受文件
+    });
+
+
+    // 文件上传过程中创建进度条实时显示。
+    uploader.on( 'uploadProgress', function( file, percentage ) {
+        var percent = (percentage * 100).toFixed(2) + '%';
+        console.log('upload process ' + percent)
+    });
+
+    uploader.on( 'uploadBeforeSend', function (object, data, headers) {
+        $( '#uploadProgress' ).find('.progress').remove();
+        data.dirname = "auto";
+    })
+
+    // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+    uploader.on( 'uploadSuccess', function( file, resp) {
+        layer.close(loadingIndex);
+        successFn(resp);
+    });
+
+    // 文件上传失败，显示上传出错。
+    uploader.on( 'uploadError', function( file ) {
+        console.error("uploadError", file);
+        layer.close(loadingIndex);
+        layer.alert('上传失败');
+    });
+
+    // 完成上传完了，成功或者失败，先删除进度条。
+    uploader.on( 'uploadComplete', function( file ) {
+        
+    });
+
+    // 监听文件上传事件
+    $(fileSelector).on("change", function (event) {
+        console.log(event);
+        var fileList = event.target.files; //获取文件对象 
+        if (fileList && fileList.length > 0) {
+            loadingIndex = layer.load(2);
+            uploader.addFile(fileList);
+        }
+    });
+};
+
 /** 创建上传器 **/
-window.xnote.createUploader = function(fileSelector, chunked) {
+window.xnote.createUploader = function(fileSelector, chunked, successFn) {
     if (fileSelector == undefined) {
         fileSelector = '#filePicker';
     }
@@ -1298,7 +1349,7 @@ window.xnote.createUploader = function(fileSelector, chunked) {
         upload_service = "/fs_upload";
     }
 
-    return WebUploader.create({
+    var uploader = WebUploader.create({
         // 选完文件后，是否自动上传。
         auto: true,
         // swf文件路径
@@ -1322,6 +1373,12 @@ window.xnote.createUploader = function(fileSelector, chunked) {
         // 默认压缩是开启的
         // compress: {}
     });
+
+    if (successFn) {
+        xnote._initUploadEvent(uploader, fileSelector, successFn);
+    }
+
+    return uploader;
 };
 
 // 把blob对象转换成文件上传到服务器

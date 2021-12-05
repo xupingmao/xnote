@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/29 22:48:26
-# @modified 2021/12/01 23:09:35
+# @modified 2021/12/05 11:04:16
 # @filename system_sync_http.py
 
 import os
@@ -42,8 +42,10 @@ class HttpClient:
         content = netutil.http_get(url)
         result = textutil.parse_json(content, ignore_error = True)
         if result is None:
-            print_debug_info("原始内容", content)
-            print_debug_info("接口返回为空")
+            error = Storage()
+            error.url = url
+            error.content = content
+            print_debug_info("接口返回为空", error)
             return
 
         result = Storage(**result)

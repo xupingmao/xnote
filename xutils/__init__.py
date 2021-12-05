@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/11/07 14:07:47
+# @modified 2021/12/05 11:23:34
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -69,7 +69,8 @@ def print_exc():
     print(exc_info)
     return exc_info
 
-print_stacktrace = print_exc
+def print_stacktrace():
+    print_exc()
 
 def print_table_row(row, max_length):
     for item in row:

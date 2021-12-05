@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2021/08/21 00:26:35
+# @modified 2021/12/05 10:59:08
 # @filename test_note.py
 
 import xutils
@@ -230,8 +230,11 @@ class TestMain(BaseTestCase):
         for comment in data:
             delete_comment_for_test(comment['id'])
 
-        # test flow
-        json_request("/note/comment/save", method="POST", data = dict(note_id = "123", content = "hello"))
+        # 创建一个评论
+        request = dict(note_id = "123", content = "hello")
+        json_request("/note/comment/save", method="POST", data = request)
+
+        # 查询评论
         data = json_request("/note/comments?note_id=123")
         self.assertEqual(1, len(data))
         self.assertEqual("hello", data[0]['content'])
