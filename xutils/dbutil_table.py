@@ -1,22 +1,24 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2021/12/05 12:30:53
+# @modified 2021/12/11 14:24:05
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
+
+register_table("_index", "通用索引")
 
 class LdbTable:
     """基于leveldb的表，比较常见的是以下几种
     * key = prefix:record_id           全局数据库
     * key = prefix:user_name:record_id 用户维度数据
-    * key = prefix:user_name:folder_id:record_id 用户+文件夹维度数据
 
     字段说明: 
     * prefix    代表的是功能类型，比如猫和狗是两种不同的动物，锤子和手机是两种不同的工具
     * user_name 代表用户名，比如张三和李四
-    * folder_id 代表用户定义的目录，比如张三有两个不同的项目
     * record_id 代表一条记录的ID
+
+    注: record_id建议使用全局ID，尽量避免多级主键
     """
 
     def __init__(self, table_name, user_name = None, key_name = "_key"):
@@ -80,6 +82,17 @@ class LdbTable:
         if not key.startswith(self.prefix):
             raise Exception("invalid key:%s" % key)
 
+    def _update_index(self, old_obj, new_obj):
+        pass
+
+    def _put_obj(self, key, obj):
+        # TODO 写redo-log
+        # TODO 更新索引
+        with get_write_lock(key):
+            old_obj = get(key)
+            put(key, obj)
+            self._update_index(old_obj, obj)
+
     def is_valid_key(self, key = None, user_name = None):
         if user_name is None:
             return key.startswith(self.prefix)
@@ -102,7 +115,7 @@ class LdbTable:
         self._check_value(obj)
         id_value = self._get_id_value(id_type)
         key  = self.build_key(id_value)
-        put(key, obj)
+        self._put_obj(key, obj)
         return key
 
     def insert_by_user(self, user_name, obj, id_type = "timeseq"):
@@ -111,7 +124,7 @@ class LdbTable:
         self._check_value(obj)
         id_value = self._get_id_value(id_type)
         key  = self.build_key(user_name, id_value)
-        put(key, obj)
+        self._put_obj(key, obj)
         return key
 
     def update(self, obj):
@@ -121,7 +134,8 @@ class LdbTable:
         self._check_key(obj_key)
 
         update_obj = self._get_update_obj(obj)
-        put(obj_key, update_obj)
+
+        self._put_obj(obj_key, update_obj)
 
     def update_by_id(self, id, obj):
         key = self.build_key(id)
@@ -133,7 +147,7 @@ class LdbTable:
         self._check_value(obj)
         
         update_obj = self._get_update_obj(obj)
-        put(key, update_obj)
+        self._put_obj(key, update_obj)
 
     def delete(self, obj):
         obj_key = self._get_key_from_obj(obj)
@@ -141,10 +155,12 @@ class LdbTable:
         delete(obj_key)
 
     def delete_by_id(self, id):
+        assert id != None, "delete_by_id: id is None"
         key = self.build_key(id)
         self.delete_by_key(key)
 
     def delete_by_key(self, key):
+        assert key != None, "delete_by_key: key is None"
         self._check_before_delete(key)
         delete(key)
 
@@ -188,4 +204,7 @@ class LdbTable:
 class PrefixedDb(LdbTable):
     """plyvel中叫做prefixed_db"""
     pass
+
+
+
 

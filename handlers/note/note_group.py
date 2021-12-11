@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/11/21 19:38:00
+# @modified 2021/12/11 13:48:55
 import math
 import time
 import web
@@ -155,13 +155,21 @@ class ShareListHandler:
     title      = T("公开分享")
 
     def list_notes(self, user_name, offset, limit):
-        return NOTE_DAO.list_public(offset, limit)
+        orderby = xutils.get_argument("tab", "ctime_desc")
+        notes = NOTE_DAO.list_public(offset, limit, orderby)
+        for note in notes:
+            if orderby == "hot":
+                note.badge_info = note.hot_index
+            else:
+                note.badge_info = note.create_date
+        return notes
 
     def count_notes(self, user_name):
         return NOTE_DAO.count_public()
 
     def GET(self):
         page      = xutils.get_argument("page", 1, type=int)
+        tab       = xutils.get_argument("tab", "")
         user_name = xauth.get_current_name()
         limit     = xconfig.PAGE_SIZE
         offset    = (page-1) * limit
@@ -171,13 +179,15 @@ class ShareListHandler:
         parent    = NOTE_DAO.get_root()
 
         xmanager.add_visit_log(user_name, "/note/%s" % self.share_type)
+        page_url = "/note/{share_type}?tab={tab}&page=".format(
+            share_type=self.share_type, tab = tab)
 
         return xtemplate.render("note/page/note_share.html",
             title      = self.title,
             notes      = files,
             page       = page,
             page_max   = math.ceil(amount / limit),
-            page_url   = "/note/%s?page=" % self.share_type)
+            page_url   = page_url)
 
 class PublicListHandler(ShareListHandler):
     pass

@@ -1,11 +1,12 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 15:36:42
-# @modified 2021/12/04 21:44:45
+# @modified 2021/12/11 11:10:20
 # @filename dbutil.py
 from xutils.dbutil_base import *
 from xutils.dbutil_table import *
 from xutils.dbutil_hash import *
+from xutils.dbutil_sortedset import *
 
 
 def _get_table_no_lock(table_name):

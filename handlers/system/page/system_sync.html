@@ -108,7 +108,8 @@
         {% end %}
 
         <div class="list-item">
-            <span>主节点(<a href="{{leader_url}}">{{leader_url}}</a>)<span class="task-tag">主</span></span>
+            <span class="task-tag">主节点</span>
+            <span>(<a href="{{leader_url}}">{{leader_url}}</a>)</span>
             <div class="float-right">
                 <!-- <a class="btn btn-default">查看</a> -->
             </div>
@@ -117,7 +118,8 @@
 
         {% for info in follower_list %}
             <div class="list-item">
-                <span>从节点(<a href="{{info.http_url}}">{{info.http_url}}</a>)</span>
+                <span class="info-tag">从节点</span>
+                <span>(<a href="{{info.http_url}}">{{info.http_url}}</a>)</span>
                 <div class="float-right">
                     <a class="btn btn-default view-ajax-btn" 
                         data-type="follower" 

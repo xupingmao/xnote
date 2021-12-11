@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/11/26 21:07:32
+# @modified 2021/12/11 13:28:51
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -494,8 +494,11 @@ class CronTaskManager:
     def do_load_tasks(self):
         tasks = dbutil.prefix_list("schedule")
         self.task_list = list(tasks)
+        self.load_system_cron_task()
+
+    def load_system_cron_task(self):
         # 系统默认的任务
-        backup_task = xutils.Storage(name="[系统]备份", url="/system/backup", 
+        backup_task = xutils.Storage(name="[系统]系统备份", url="/system/backup", 
             tm_wday = "*", tm_hour="11", tm_min="0", 
             message = "", sound=0, webpage=0, id=None)
 
@@ -503,7 +506,7 @@ class CronTaskManager:
             tm_wday = "*", tm_hour="*", tm_min="0",
             message = "", sound=0, webpage=0, id=None)
 
-        stats_task = xutils.Storage(name = "[系统]数据统计", url = "/cron/stats",
+        stats_task = xutils.Storage(name = "[系统]笔记定时更新", url = "/cron/stats",
             tm_wday = "*", tm_hour="10", tm_min="0",
             message = "", sound=0, webpage=0, id=None)
 
@@ -627,15 +630,10 @@ def get_func_abs_name(func):
     if module is not None:
         return module.__name__ + "." + func.__name__
     else:
-        # print(dir(func))
-        # print(func.__qualname__)
         func_globals = func.__globals__
         script_name  = func_globals.get("script_name", "unknown")
         script_name  = xutils.unquote(script_name)
         return script_name + "." + func.__name__
-
-        # inspect.getfile(func)
-        # return "<string>." + func.__name__
 
 class EventManager:
     """事件管理器，每个事件由一个执行器链组成，执行器之间有一定的依赖性

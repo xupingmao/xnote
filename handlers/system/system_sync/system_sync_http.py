@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/29 22:48:26
-# @modified 2021/12/05 11:04:16
+# @modified 2021/12/11 12:34:57
 # @filename system_sync_http.py
 
 import os
@@ -12,6 +12,9 @@ from xutils import netutil
 from xutils import textutil
 from xutils import dateutil
 from xutils import fsutil
+from xutils import dbutil
+
+dbutil.register_table("fs_sync_index_copy", "文件索引拷贝")
 
 def print_debug_info(*args):
     new_args = [dateutil.format_time(), "[system_sync_http]"]
@@ -24,6 +27,9 @@ class HttpClient:
         self.host = host
         self.token = token
         self.admin_token = admin_token
+
+    def get_table(self):
+        return dbutil.get_hash_table("fs_sync_index_copy")
 
     def get_stat(self, params):
         self.check_disk_space()
@@ -81,11 +87,13 @@ class HttpClient:
             print_debug_info("磁盘容量不足，跳过")
             return
 
-        # TODO 检查磁盘容量
-
         fpath = item.fpath
         web_path = item.web_path
         mtime = item.mtime
+
+        # 保存文件索引信息
+        table = self.get_table()
+        table.put(web_path, item)
 
         encoded_fpath = xutils.urlsafe_b64encode(fpath)
         url = "{host}/fs_download".format(host = self.host)

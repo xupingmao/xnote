@@ -18,7 +18,8 @@
 {% if _has_login %}
     <div class="card">
         <div class="pad5 x-tab-box" data-tab-default="public" data-tab-key="tab">
-            <a class="tab tab-link x-tab" href="/note/public" data-tab-value="public">公开分享</a>
+            <a class="tab tab-link x-tab" href="/note/public" data-tab-value="public">最近分享</a>
+            <a class="tab tab-link x-tab" href="/note/public?tab=hot" data-tab-value="hot">热门分享</a>
             <a class="tab tab-link x-tab" href="/note/share_to_me?tab=to_me" data-tab-value="to_me">分享给我</a>
         </div>
     </div>
@@ -37,21 +38,17 @@
         {% end %}
 
         <a class="list-link" href="{{item.url}}">
-            {% if item.priority>0 %}
-                <i class="fa fa-thumb-tack black"></i>
-            {% end %}
-
             <!-- 图标和标题 -->
             <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
             <span>{{item.name}}</span>
-            
+
             {% if item.is_deleted %}
                 <span class="gray-tag-span" href="/note/removed">删除</span>
             {% end %}
             
             <div class="float-right">
-                <span class="gray-tag">{{item.creator}}</span>    
-                <span class="book-size-span">{{item.create_date}}</span>
+                <span class="tag gray-tag">{{item.creator}}</span>
+                <span class="book-size-span">{{item.badge_info}}</span>
                 <i class="fa fa-chevron-right"></i>
             </div>
         </a>

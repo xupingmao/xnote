@@ -94,8 +94,12 @@ $(function () {
         };
         $.post("/note/comment/save", comment, function (resp) {
             console.log(resp);
-            $("#commentText").val("");
-            refreshComments();
+            if (resp.code == "success") {
+                $("#commentText").val("");
+                refreshComments();
+            } else {
+                xnote.alert(resp.message);
+            }
         });
     });
 

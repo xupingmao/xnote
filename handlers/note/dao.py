@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/12/05 10:41:15
+# @modified 2021/12/11 13:45:06
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -51,6 +51,7 @@ register_note_table("note_create_log", "笔记创建日志")
 register_note_table("note_edit_log", "笔记编辑日志")
 register_note_table("note_visit_log", "笔记访问日志")
 register_note_table("note_public", "公共笔记索引")
+register_note_table("note_public_hot_index", "公共笔记热度索引")
 register_note_table("note_tags", "笔记标签 <note_tags:user:note_id>")
 # 分享关系
 register_note_table("note_share_from", "分享发送者关系表 <note_share_from:from_user:note_id>")
@@ -162,6 +163,16 @@ def batch_query(id_list):
         if note:
             result[id] = note
             build_note_info(note)
+    return result
+
+def batch_query_list(id_list):
+    creator = xauth.current_name()
+    result = []
+    for id in id_list:
+        note = dbutil.get("note_index:%s" % id)
+        if note:
+            build_note_info(note)
+            result.append(note)
     return result
 
 def sort_by_name(notes):
@@ -936,7 +947,13 @@ def list_default_notes(creator, offset = 0, limit = 1000, orderby = "mtime_desc"
     sort_notes(notes, orderby)
     return notes[offset:offset+limit]
 
-def list_public(offset, limit):
+def list_public(offset, limit, orderby = "ctime_desc"):
+    if orderby == "hot":
+        # 定时更新
+        note_ids = dbutil.prefix_list("note_public_hot_index", 
+            offset = offset, limit = limit, reverse = True)
+        return batch_query_list(note_ids)
+
     def list_func(key, value):
         if value.is_deleted:
             return False

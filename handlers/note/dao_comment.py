@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 22:07:44
-# @modified 2021/12/05 12:01:53
+# @modified 2021/12/05 17:29:04
 # @filename dao_comment.py
 
 
@@ -66,7 +66,7 @@ def check_comment(comment):
     assert comment.user != None, "comment.user is None"
     assert comment.type in (None, "list_item"), "comment.type is invalid"
 
-def create_comment(comment):
+def create_comment(comment):    
     check_comment(comment)
 
     timeseq = dbutil.timeseq()
@@ -102,7 +102,8 @@ def delete_comment(comment_id):
     if comment != None:
         dbutil.delete(comment_id)
         index_db = get_index_table(comment.user)
-        index_db.delete_by_id(comment.timeseq)
+        if comment.timeseq != None:
+            index_db.delete_by_id(comment.timeseq)
         NOTE_DAO.refresh_note_stat_async(comment.user)
 
 def count_comment(user_name):

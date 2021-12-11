@@ -62,8 +62,11 @@
         <!-- 图标和标题 -->
         <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
         <span>{{item.name}}</span>
-        
-        
+
+        {% if hasattr(item, "is_public") and item.is_public %}
+            <span class="info-tag">分享中</span>
+        {% end %}
+
         <div class="float-right">
             {% if item.is_deleted %}
                 <span class="gray-tag-span" href="/note/removed">删除</span>

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/10 23:44:48
-# @modified 2021/12/05 12:01:19
+# @modified 2021/12/11 14:19:42
 import math
 import xconfig
 import xutils
@@ -110,16 +110,19 @@ class SaveCommentAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        note_id = xutils.get_argument("note_id")
-        content = xutils.get_argument("content")
+        note_id = xutils.get_argument("note_id", "")
+        content = xutils.get_argument("content", "")
         type    = xutils.get_argument("type")
         user    = xauth.current_name()
+
+        if content == "":
+            return dict(code = "400", message = "content参数为空")
 
         NOTE_DAO.save_comment(Storage(note_id = note_id, 
             user = user, 
             type = type,
             content = content))
-        return dict(success = True)
+        return dict(code = "success", success = True)
 
 class DeleteCommentAjaxHandler:
 

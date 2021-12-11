@@ -20,7 +20,7 @@ $(function () {
         var container = $("<div>");
         var itemTemplateHtml = '<p class="card-row share-dialog-row">\
                 <i class="fa ${icon}"></i>\
-                <a href="${url}">${name}</a>${shared}\
+                <a href="${url}">${name}</a>&nbsp;${shared}\
                 <input type="checkbox" class="search-note-checkbox float-right" data-id="${id}">\
             </p>';
 
@@ -34,7 +34,7 @@ $(function () {
             // 当前日期的笔记列表
             item.children.forEach(function (value, index) {
                 if (value.is_public === 1) {
-                    value.shared = "(已分享)";
+                    value.shared = "<a class=\"tag orange-tag\">已分享</a>";
                 }
                 var noteRow = $("<p>").addClass("card-row");
                 noteRow.append(renderTemplate(itemTemplateHtml, value));

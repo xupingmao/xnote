@@ -54,6 +54,9 @@ WRITE_LOCK    = threading.Lock()
 READ_LOCK     = threading.Lock()
 LAST_TIME_SEQ = -1
 
+LOCK_SIZE = 10
+LOCK_LIST = [threading.Lock() for i in range(LOCK_SIZE)]
+
 # 注册的数据库表名，如果不注册，无法进行写操作
 TABLE_INFO_DICT = dict()
 LDB_TABLE_DICT = dict()
@@ -66,7 +69,7 @@ WRITE_ONLY = False
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/12/05 11:25:30
+# @modified 2021/12/11 11:46:08
 ###########################################################
 
 class DBException(Exception):
@@ -163,9 +166,15 @@ def check_not_empty(value, message):
     if value == None or value == "":
         raise Exception(message)
 
-def get_write_lock():
+def get_write_lock(key = None):
     global WRITE_LOCK
-    return WRITE_LOCK
+    global LOCK_LIST
+
+    if key is None:
+        return WRITE_LOCK
+
+    h = hash(key)
+    return LOCK_LIST[h%LOCK_SIZE]
 
 def timeseq(value = None):
     """生成一个时间序列
@@ -173,7 +182,6 @@ def timeseq(value = None):
     @return {string} 20位的时间序列
     """
     global LAST_TIME_SEQ
-    global WRITE_LOCK
 
     if value != None:
         assert isinstance(value, float), "expect <class 'float'> but see %r" % type(value)
@@ -183,7 +191,7 @@ def timeseq(value = None):
     t = int(time.time() * 1000)
     # 加锁防止并发生成一样的值
     # 注意这里的锁是单个进程级别的
-    with WRITE_LOCK:
+    with get_write_lock():
         if t == LAST_TIME_SEQ:
             # 等于上次生成的值，说明太快了，sleep一下进行控速
             # print("too fast, sleep 0.001")

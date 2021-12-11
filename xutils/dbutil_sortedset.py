@@ -1,13 +1,95 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/05 11:25:18
-# @modified 2021/12/05 11:26:36
+# @modified 2021/12/11 11:42:50
 # @filename dbutil_sortedset.py
 
 """【待实现】有序集合，用于各种需要排名的场景，比如
 - 最近编辑的笔记
 - 访问次数最多的笔记
 """
+
+from xutils.dbutil_base import *
+from xutils.dbutil_hash import LdbHashTable
+
+register_table("_rank", "排名表")
+
+class RankTable:
+
+    def __init__(self, table_name, user_name = None):
+        check_table_name(table_name)
+        self.table_name = table_name
+
+        self.prefix = "_rank:" + table_name
+        if user_name != None and user_name != "":
+            self.prefix += ":" + user_name
+
+        if self.prefix[-1] != ":":
+            self.prefix += ":"
+
+    def _format_score(self, score):
+        if isinstance(score, int):
+            return "%020d" % score
+        if isinstance(score, str):
+            return "%020s" % score
+        raise Exception("_format_score: unsupported score (%r)" % score)
+
+    def put(self, member, score):
+        score_str = self._format_score(score)
+        put(self.prefix + str(score) + ":" + member, member)
+
+    def delete(self, member, score):
+        score_str = self._format_score(score)
+        delete(self.prefix + str(score) + ":" + member)
+
+    def list(self, offset = 0, limit = 10, reverse = False):
+        return prefix_list(self.prefix, offset = offset, limit = limit, reverse = reverse)
+
+
+class LdbSortedSet:
+
+    def __init__(self, table_name, user_name = None, key_name = "_key"):
+        # key-value的映射
+        self.member_dict = LdbHashTable(table_name, user_name)
+        # score的排名
+        self.rank = RankTable(table_name, user_name)
+
+    def create_redo_log(self, member, score):
+        # TODO: 重做日志，用于故障恢复
+        pass
+
+    def delete_redo_log(self, log_id):
+        # TODO: 重做日志，用于故障恢复
+        pass
+
+    def put(self, member, score):
+        """设置成员分值"""
+        with get_write_lock(member):
+            log_id = self.create_redo_log(member, score)
+            old_score = self.member_dict.get(member)
+            self.member_dict.put(member, score)
+            self.rank.put(member, score)
+
+            if old_score != None:
+                self.rank.delete(member, old_score)
+            self.delete_redo_log(log_id)
+
+    def get(self, member):
+        return self.member_dict.get(member)
+
+    def delete(self, member):
+        with get_write_lock(member):
+            old_score = self.member_dict.get(member)
+            if old_score != None:
+                self.member_dict.delete(member)
+                self.rank.delete(member, old_score)
+
+    def list_by_score(self, *args, **kw):
+        result = []
+        for member in self.rank.list(*args, **kw):
+            item = (member, self.get(member))
+            result.append(item)
+        return result
 
 def _zadd(key, score, member):
     # step1. write log

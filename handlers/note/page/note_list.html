@@ -55,6 +55,10 @@
                     <i class="fa fa-thumb-tack black"></i>
                 {% end %}
 
+                {% if item_temp.is_public %}
+                    <span class="info-tag">分享中</span>
+                {% end %}
+
                 <!-- 图标和标题 -->
                 <i class="fa {{item_temp.icon}} fa-{{item_temp.icon}} black"></i>                
                 <span>{{item_temp.name}}</span>

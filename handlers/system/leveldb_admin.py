@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2021/11/28 21:26:56
+# @modified 2021/12/11 12:39:10
 import xutils
 import xtemplate
 import xauth
@@ -48,6 +48,8 @@ SCAN_HTML = """
             <button type="submit">查询</button>
 
             <div class="float-right btn-line-height">
+                <a href="/note/stat?p=system">元数据</a>
+                <span>|</span>
                 <a href="/fs_link/db">数据库目录</a>
             </div>
         </div>
