@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2021/12/11 13:28:51
+# @modified 2021/12/12 21:49:26
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -507,7 +507,7 @@ class CronTaskManager:
             message = "", sound=0, webpage=0, id=None)
 
         stats_task = xutils.Storage(name = "[系统]笔记定时更新", url = "/cron/stats",
-            tm_wday = "*", tm_hour="10", tm_min="0",
+            tm_wday = "*", tm_hour="*", tm_min="43",
             message = "", sound=0, webpage=0, id=None)
 
         msg_refresh_task = xutils.Storage(name = "[系统]随手记后台刷新信息", url = "/message/refresh",

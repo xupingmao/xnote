@@ -1,11 +1,12 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2021/12/11 14:24:05
+# @modified 2021/12/12 21:50:49
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
 
+register_table("_redo_log", "重做日志")
 register_table("_index", "通用索引")
 
 class LdbTable:
@@ -55,7 +56,7 @@ class LdbTable:
     def _get_result_from_tuple_list(self, tuple_list):
         result = []
         for key, value in tuple_list:
-            self._format_value(key, value)
+            value = self._format_value(key, value)
             result.append(value)
         return result
 
@@ -108,8 +109,7 @@ class LdbTable:
         if value is None:
             return None
 
-        self._format_value(key, value)
-        return value
+        return self._format_value(key, value)
 
     def insert(self, obj, id_type = "timeseq"):
         self._check_value(obj)
@@ -173,8 +173,7 @@ class LdbTable:
 
         for key, value in prefix_iter(self.prefix, filter_func, offset, limit, 
                 reverse = reverse, include_key = True, key_from = key_from):
-            self._format_value(key, value)
-            yield value
+            yield self._format_value(key, value)
 
     def list(self, *args, **kw):
         result = []
