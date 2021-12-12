@@ -27,6 +27,7 @@ from xutils.functions import listremove
 
 
 dbutil.register_table("user", "用户信息表")
+dbutil.register_table("user_config", "用户配置表")
 dbutil.register_table("session", "用户会话信息")
 dbutil.register_table("user_session_rel", "用户会话关系")
 
@@ -116,6 +117,7 @@ def _setcookie(key, value, expires=24*3600*30):
 
 def get_users():
     """获取所有用户，返回一个深度拷贝版本"""
+    warnings.warn("get_users已经过时，请停止使用", DeprecationWarning)
     return copy.deepcopy(_get_users())
 
 def list_user_names():
@@ -227,7 +229,21 @@ def find_by_name(name):
         return user
     return _get_builtin_user(name)
 
+def get_user_config_db(name):
+    assert name != None
+    assert name != ""
+    return dbutil.get_hash_table("user_config", user_name = name)
+
 def get_user_config_dict(name):
+    if name is None:
+        return None
+
+    db = get_user_config_db(name)
+
+    config_dict = db.dict(limit = -1)
+    if len(config_dict) > 0:
+        return config_dict
+
     user = get_user_by_name(name)
     if user != None:
         if user.config is None:
@@ -236,6 +252,9 @@ def get_user_config_dict(name):
             user.config = Storage(**user.config)
         return user.config
     return None
+
+def get_user_config_valid_keys():
+    return USER_CONFIG_PROP.keys()
 
 def get_user_config(user_name, config_key):
     default_value = USER_CONFIG_PROP.get(config_key)
@@ -253,10 +272,11 @@ def update_user_config_dict(name, config_dict):
         if key not in USER_CONFIG_PROP:
             raise Exception("invalid user config: %s" % key)
 
-    config = get_user_config_dict(name)
-    config.update(**config_dict)
-    user.config = config
-    update_user(name, user)
+    db = get_user_config_db(name)
+
+    for key in config_dict:
+        value = config_dict.get(key)
+        db.put(key, value)
 
 def select_first(filter_func):
     users = _get_users()

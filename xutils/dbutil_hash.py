@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 15:35:23
-# @modified 2021/12/05 10:55:24
+# @modified 2021/12/12 19:27:12
 # @filename dbutil_hash.py
 
 from xutils.dbutil_base import *
@@ -61,6 +61,12 @@ class LdbHashTable:
 
     def list(self, *args, **kw):
         return list(self.iter(*args, **kw))
+
+    def dict(self, *args, **kw):
+        result = Storage()
+        for key, value in self.iter(*args, **kw):
+            result[key] = value
+        return result
 
     def delete(self, key):
         row_key = self.build_key(key)

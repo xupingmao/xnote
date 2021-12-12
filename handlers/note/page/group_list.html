@@ -19,9 +19,6 @@
 
 
 {% block body_left %}
-    <link rel="stylesheet" type="text/css" href="/static/css/base/common-button.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/base/common-layout.css">
-
     <div class="card">
         <div class="pad5">
             <div class="x-tab-box" data-tab-default="active" data-tab-key="status">
@@ -36,9 +33,9 @@
     </div>
 
     {% if status == "active" %}
-        <div class="mobile-only">
+        {% if _user_config.show_sidebar == "false" or _is_mobile %}
             {% include note/component/group_special_folder.html %}
-        </div>
+        {% end %}
     {% end %}
 
     <div class="card group-list-box">

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/12/01 23:10:34
+# @modified 2021/12/12 19:43:35
 # @filename xconfig.py
 
 '''xnote系统配置

@@ -1,0 +1,66 @@
+
+{% if not show_menu %}
+<style type="text/css">
+  body {
+    background: transparent;
+  }
+  .main {
+    padding: 0px;
+  }
+  .nav {
+    display: none;
+  }
+  .nav-left {
+    display: none;
+  }
+  .x-body {
+    left: 0px;
+  }
+</style>
+{% end %}
+
+{% if not show_search %}
+  <style type="text/css">
+    .nav-left-search {
+      display: none;
+    }
+    .search-box {
+      display: none;
+    }
+  </style>
+{% end %}
+
+{% if xconfig.DEBUG_HTML_BOX %}
+  <!-- 用于移动端或者其他不方便调试设备的样式调试 -->
+  <style type="text/css">
+    * {
+      box-sizing: border-box;
+      border: solid 1px red;
+    }
+  </style>
+{% end %}
+
+
+{# 侧边栏(右侧)是否显示 #}
+{% if not show_aside %}
+  <style type="text/css">
+    .x-body {
+      right: 0px;
+    }
+    .aside {
+      display: none;
+    }
+  </style>
+{% end %}
+
+{% if _user_config.show_sidebar == "false" %}
+<style type="text/css">
+  .content-left {
+    width: 100%;
+  }
+
+  .content-right {
+    display: none;
+  }
+</style>
+{% end %}

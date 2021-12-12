@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/10/02 12:28:34
+# @modified 2021/12/12 19:51:13
 # @filename xtemplate.py
 
 
@@ -172,6 +172,7 @@ def render_before_kw(kw):
     # 用于渲染其他组件
     kw["_render"]       = render
     kw["_nav_list"]     = get_nav_list()
+    kw["_is_mobile"]    = is_mobile_device()
     kw["Storage"]       = Storage
     kw["xutils"]        = xutils
     kw["xconfig"]       = xconfig

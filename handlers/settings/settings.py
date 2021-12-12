@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/11/07 13:17:51
+# @modified 2021/12/12 19:46:19
 import web
 import time
 import os
@@ -28,16 +28,7 @@ except ImportError as e:
     psutil = None
 
 INIT_SCRIPT_URL = "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)
-USER_CONFIG_KEY_SET = set([
-    "TODO_MODE", 
-    "SIMPLE_MODE", 
-    "HOME_PATH", 
-    "LANG", 
-    "THEME",
-    "FONT_SCALE",
-    "search.show_plugin_detail",
-    "search.show_message_detail"
-])
+USER_CONFIG_KEY_SET = xauth.get_user_config_valid_keys()
 
 @logutil.timeit_deco(logargs=True,logret=True)
 def get_xnote_version():
@@ -207,7 +198,7 @@ class PropertiesHandler:
 @xauth.login_required()
 def update_user_config(key, value):
     if key not in USER_CONFIG_KEY_SET:
-        return
+        raise Exception("无效的配置项:%s" % key)
 
     user_name = xauth.current_name()
     config_dict = Storage()
@@ -225,6 +216,7 @@ class ConfigHandler:
         key   = xutils.get_argument("key")
         value = xutils.get_argument("value")
         type  = xutils.get_argument("type")
+        p     = xutils.get_argument("p")
 
         update_msg = "%s,%s,%s" % (type, key, value)
         print(update_msg)
@@ -248,7 +240,7 @@ class ConfigHandler:
             value = int(value)
 
         try:
-            if key in USER_CONFIG_KEY_SET:
+            if p == "user" or key in USER_CONFIG_KEY_SET:
                 update_user_config(key, value)
             else:
                 update_sys_config(key, value)

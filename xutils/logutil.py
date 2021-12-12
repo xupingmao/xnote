@@ -1,24 +1,57 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/11/07 14:03:36
+# @modified 2021/12/11 22:52:24
 import logging
 import time
 import inspect
 import os
+import threading
+import xutils
+from collections import deque
 from xutils import fsutil
 from xutils.dateutil import format_time
 from xutils.imports import u
 
-# TODO
-# 改造成日志线程池
+
+class LogThread(threading.Thread):
+    
+    task_queue = deque()
+    MAX_TASK_QUEUE = 1000
+
+    def __init__(self, name="LogThread"):
+        super(LogThread, self).__init__()
+        self.setDaemon(True)
+        self.setName(name)
+
+    def put_task(self, func, *args, **kw):
+        if len(self.task_queue) > self.MAX_TASK_QUEUE:
+            print(format_time(), "Too many log task")
+            func(*args, **kw)
+        else:
+            self.task_queue.append([func, args, kw])
+
+    def run(self):
+        while True:
+            # queue.Queue默认是block模式
+            # 但是deque没有block模式，popleft可能抛出IndexError异常
+            try:
+                if self.task_queue:
+                    func, args, kw = self.task_queue.popleft()
+                    func(*args, **kw)
+                else:
+                    time.sleep(0.01)
+            except Exception as e:
+                xutils.print_exc()
+
+LOG_THREAD = LogThread()
+LOG_THREAD.start()
 
 def async_func_deco():
     """同步调用转化成异步调用的装饰器"""
     def deco(func):
         def handle(*args, **kw):
-            import xmanager
-            xmanager.put_task(func, *args, **kw)
+            LOG_THREAD.put_task(func, *args, **kw)
         return handle
     return deco
 

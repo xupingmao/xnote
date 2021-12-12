@@ -65,6 +65,27 @@
     </div>
 </div>
 
+<div class="settings-row">
+    <div class="settings-key">{{T("展示侧边栏")}}</div>
+    <div class="settings-value">
+        <select name="show_sidebar"
+                data-p="user"
+                data-type="str"
+                value="{{_user_config.show_sidebar}}">
+            <option value="true">展示</option>
+            <option value="false">不展示</option>
+        </select>
+    </div>
+</div>
+
+<div class="settings-row">
+    <div class="settings-key">搜索设置</div>
+    <div class="settings-value">
+        <a href="/system/settings?category=search">进入</a>
+        <i class="fa fa-chevron-right"></i>
+    </div>
+</div>
+
 {% if _is_admin %}
     <div class="settings-row">
         <div class="settings-key">管理员设置</div>
@@ -74,13 +95,4 @@
         </div>
     </div>
 {% end %}
-
-
-<div class="settings-row">
-    <div class="settings-key">搜索设置</div>
-    <div class="settings-value">
-        <a href="/system/settings?category=search">进入</a>
-        <i class="fa fa-chevron-right"></i>
-    </div>
-</div>
 

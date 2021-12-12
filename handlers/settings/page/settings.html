@@ -40,9 +40,9 @@
 </div>
 
 <script type="text/javascript">
-    function updateSetting(key, value, type) {
+    function updateSetting(key, value, type, p) {
         $.post("/system/config", 
-            {key: key, value: value, type: type}, 
+            {key: key, value: value, type: type, p:p}, 
             function (data) {
                 if (data.code == "success") {
                     window.location.reload();
@@ -59,15 +59,17 @@
         var val = $(e.target).val();
         var key = $(e.target).attr("name");
         var type = $(this).attr("data-type");
+        var p = $(this).attr("data-p");
         // alert(val);
-        updateSetting(key, val, type);
+        updateSetting(key, val, type, p);
     });
 
     $("select").change(function (e) {
         var key = $(this).attr("name");
         var val = $(this).val();
         var type = $(this).attr("data-type");
-        updateSetting(key, val, type);
+        var p = $(this).attr("data-p");
+        updateSetting(key, val, type, p);
     });
 </script>
 
