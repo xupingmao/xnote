@@ -235,7 +235,7 @@ def get_user_config_db(name):
     return dbutil.get_hash_table("user_config", user_name = name)
 
 def get_user_config_dict(name):
-    if name is None:
+    if name is None or name == "":
         return None
 
     db = get_user_config_db(name)
