@@ -119,6 +119,19 @@ xnote.showTextDialog = function(title, text, buttons, functions) {
     return xnote.showDialogEx(options);
 }
 
+xnote.showAjaxDialog = function(title, url, buttons, functions) {
+    $.get(url, function (resp) {
+        var options = {};
+        options.title = title;
+        options.buttons = buttons;
+        options.functions = functions;
+        options.html = resp;
+        xnote.showDialogEx(options);
+    }).fail(function (error) {
+        xnote.alert("调用接口失败，请重试");
+    })
+}
+
 // 询问函数，原生prompt的替代方案
 xnote.prompt = function(title, defaultValue, callback) {
     if (layer && layer.prompt) {

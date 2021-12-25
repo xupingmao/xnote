@@ -1,6 +1,7 @@
 # encoding=utf-8
 
-"""xnote的数据库封装，基于键值对数据库（目前是基于leveldb，键值对功能比较简单，方便在不同引擎之间切换）
+"""xnote的数据库封装，基于键值对数据库（目前是基于leveldb，键值对功能比较简单，
+方便在不同引擎之间切换）
 
 由于KV数据库没有表的概念，dbutil基于KV模拟了表，基本结构如下
 * <table_name>:[subkey1]:[subkey2]...[subkeyN]
@@ -43,10 +44,12 @@ except ImportError:
 import xutils
 from xutils.base import Storage
 from xutils.dbutil_sqlite import *
+from xutils import dateutil
 
 try:
     import leveldb
 except ImportError:
+    # Windows环境没有leveldb，需要使用leveldbpy的代理实现
     leveldb = None
 
 
@@ -64,13 +67,22 @@ LDB_TABLE_DICT = dict()
 # 只读模式
 WRITE_ONLY = False
 
+# leveldb的全局实例
+_leveldb = None
+
 ###########################################################
 # @desc db utilties
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/12/11 11:46:08
+# @modified 2021/12/25 23:21:12
 ###########################################################
+
+
+def print_debug_info(fmt, *args):
+    new_args = [dateutil.format_time(), "[dbutil]"]
+    new_args.append(fmt.format(*args))
+    print(*new_args)
 
 class DBException(Exception):
     pass
@@ -115,10 +127,13 @@ class RecordLock:
 
 class LevelDBProxy:
 
-    def __init__(self, path):
+    def __init__(self, path, snapshot = None):
         """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
-        import leveldbpy
-        self._db = leveldbpy.DB(path.encode("utf-8"), create_if_missing=True)
+        if snapshot != None:
+            self._db = snapshot
+        else:
+            import leveldbpy
+            self._db = leveldbpy.DB(path.encode("utf-8"), create_if_missing=True)
 
     def Get(self, key):
         return self._db.get(key)
@@ -129,18 +144,45 @@ class LevelDBProxy:
     def Delete(self, key, sync = False):
         return self._db.delete(key, sync = sync)
 
-    def RangeIter(self, key_from = None, key_to = None, reverse = False, include_value = False):
+    def RangeIter(self, key_from = None, key_to = None, 
+            reverse = False, include_value = False):
+        """返回区间迭代器
+        @param {str}  key_from       开始的key（包含）
+        @param {str}  key_to         结束的key（包含）
+        @param {bool} reverse        是否反向查询
+        @param {bool} include_value  是否包含值
+        """
         if include_value:
             keys_only = False
         else:
             keys_only = True
 
         iterator = self._db.iterator(keys_only = keys_only)
-        return iterator.RangeIter(key_from, key_to, include_value = include_value, reverse = reverse)
 
-# 初始化KV存储
-_leveldb = None
+        return iterator.RangeIter(key_from, key_to, 
+            include_value = include_value, reverse = reverse)
 
+    def CreateSnapshot(self):
+        return LevelDBProxy(snapshot = self._db.snapshot())
+
+    def WriteBatch(self):
+        """返回一个批量操作对象"""
+        class WriteBatchProxy:
+
+            def __init__(self):
+                self.target = leveldbpy.WriteBatch()
+
+            def Put(self, key, value):
+                return self.target.put(key, value)
+
+            def Delete(self, key):
+                return self.target.delete(key)
+        
+        return WriteBatchProxy()
+
+    def Write(self, batch, sync = False):
+        """执行批量操作"""
+        return self._db.write(batch.target, sync)
 
 def config(**kw):
     global WRITE_ONLY
@@ -179,12 +221,14 @@ def get_write_lock(key = None):
 def timeseq(value = None):
     """生成一个时间序列
     @param {float|None} value 时间序列，单位是秒，可选
-    @return {string} 20位的时间序列
+    @return {string}    20位的时间序列
     """
     global LAST_TIME_SEQ
 
     if value != None:
-        assert isinstance(value, float), "expect <class 'float'> but see %r" % type(value)
+        error_msg = "expect <class 'float'> but see %r" % type(value)
+        assert isinstance(value, float), error_msg
+
         value = int(value * 1000)
         return "%020d" % value
 
@@ -239,8 +283,24 @@ def check_get_leveldb():
     return _leveldb
 
 def check_table_name(table_name):
+    validate_str(table_name, "invalid table_name")
     if table_name not in TABLE_INFO_DICT:
-        raise DBException("table %s not registered!" % table_name)
+        raise DBException("table %r not registered!" % table_name)
+
+def validate_none(obj, msg):
+    assert obj == None, msg
+
+def validate_obj(obj, msg):
+    assert obj != None, msg
+
+def validate_str(obj, msg):
+    assert isinstance(obj, str), msg
+
+def validate_list(obj, msg):
+    assert isinstance(obj, list), msg
+
+def validate_dict(obj, msg):
+    assert isinstance(obj, dict), msg
 
 class TableInfo:
 
@@ -302,7 +362,8 @@ def delete(key, sync = False):
     check_leveldb()
     check_write_state()
 
-    print("Delete %s" % key)
+    print_debug_info("Delete {}", key)
+
     key = key.encode("utf-8")
     _leveldb.Delete(key, sync = sync)
 
@@ -322,7 +383,8 @@ def scan(key_from = None, key_to = None, func = None, reverse = False,
     if key_to != None and isinstance(key_to, str):
         key_to = key_to.encode("utf-8")
 
-    iterator = _leveldb.RangeIter(key_from, key_to, include_value = True, reverse = reverse)
+    iterator = _leveldb.RangeIter(key_from, key_to, 
+        include_value = True, reverse = reverse)
 
     for key, value in iterator:
         key = key.decode("utf-8")
@@ -343,13 +405,16 @@ def prefix_scan(prefix, func, reverse = False, parse_json = True):
     prefix_bytes = prefix.encode("utf-8")
 
     if reverse:
-        key_to   = prefix_bytes
+        # 反向查询
         key_from = prefix_bytes + b'\xff'
-        iterator = _leveldb.RangeIter(None, key_from, include_value = True, reverse = True)
+        key_to   = prefix_bytes
     else:
+        # 正向查询
         key_from = prefix_bytes
         key_to   = None
-        iterator = _leveldb.RangeIter(key_from, None, include_value = True, reverse = False)
+    
+    iterator = _leveldb.RangeIter(key_from, key_to, 
+        include_value = True, reverse = reverse)
 
     offset = 0
     for key, value in iterator:
@@ -399,11 +464,15 @@ def prefix_iter(prefix,
     else:
         key_from = key_from.encode("utf-8")
 
-    # print("prefix: %s, origin_prefix: %s, reverse: %s" % (prefix, origin_prefix, reverse))
+    # print("prefix: %s, origin_prefix: %s, reverse: %s" % 
+    #      (prefix, origin_prefix, reverse))
+
     if reverse:
-        iterator = _leveldb.RangeIter(None, prefix, include_value = True, reverse = True)
+        iterator = _leveldb.RangeIter(None, prefix, 
+            include_value = True, reverse = True)
     else:
-        iterator = _leveldb.RangeIter(key_from, None, include_value = True, reverse = False)
+        iterator = _leveldb.RangeIter(key_from, None, 
+            include_value = True, reverse = False)
 
     position       = 0
     matched_offset = 0
@@ -435,7 +504,9 @@ def count(key_from = None, key_to = None, filter_func = None):
         key_from = key_from.encode("utf-8")
     if key_to:
         key_to = key_to.encode("utf-8")
-    iterator = _leveldb.RangeIter(key_from, key_to, include_value = True)
+    iterator = _leveldb.RangeIter(key_from, key_to, 
+        include_value = True)
+    
     count = 0
     for key, value in iterator:
         key = key.decode("utf-8")
@@ -445,7 +516,8 @@ def count(key_from = None, key_to = None, filter_func = None):
     return count
 
 def prefix_count(prefix, filter_func = None, 
-        offset = None, limit = None, reverse = None, include_key = None):
+        offset = None, limit = None, reverse = None, 
+        include_key = None):
     """通过前缀统计行数
     @param {string} prefix 数据前缀
     @param {function} filter_func 过滤函数
@@ -473,33 +545,26 @@ def count_table(table_name):
 
     key_from = table_name.encode("utf-8")
     key_to   = table_name.encode("utf-8") + b'\xff'
-    iterator = check_get_leveldb().RangeIter(key_from, key_to, include_value = False)
+    iterator = check_get_leveldb().RangeIter(key_from, key_to, 
+        include_value = False)
+
     count = 0
     for key in iterator:
         count += 1
     return count
 
-def write_op_log(op, event):
-    """开启批量操作前先记录日志
-    @param {string} op 操作类型
-    @param {object} event 操作事件
-    @return 日志ID
-    """
-    pass
-
-def delete_op_log(log_id):
-    """完成批量操作后删除日志
-    @param {string} log_id 操作日志ID
-    @return None
-    """
-    pass
+def _rename_table_no_lock(old_name, new_name):
+    for key, value in prefix_iter(old_name, include_key = True):
+        name, rest = key.split(":", 1)
+        new_key = new_name + ":" + rest
+        put(new_key, value)
 
 
 def rename_table(old_name, new_name):
     # TODO 还没实现
-    for key, value in prefix_iter(old_name, include_key = True):
-        name, rest = key.split(":", 1)
-        new_key = new_name + ":" + rest
+    with get_write_lock(old_name):
+        with get_write_lock(new_name):
+            _rename_table_no_lock(old_name, new_name)
 
 def run_test():
     pass

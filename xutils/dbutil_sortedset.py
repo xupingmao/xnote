@@ -1,12 +1,14 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/05 11:25:18
-# @modified 2021/12/11 11:42:50
+# @modified 2021/12/25 22:45:38
 # @filename dbutil_sortedset.py
 
 """【待实现】有序集合，用于各种需要排名的场景，比如
 - 最近编辑的笔记
 - 访问次数最多的笔记
+
+如果使用了LdbTable的索引功能，其实就不需要这个了
 """
 
 from xutils.dbutil_base import *

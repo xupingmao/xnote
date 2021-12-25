@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2021/10/24 13:18:50
+# @modified 2021/12/25 22:17:10
 import profile
 import math
 import re
@@ -116,6 +116,8 @@ def view_group_detail_func(file, kw):
     # pagesize  = kw.pagesize
     pagesize  = 1000
 
+    dialog = xutils.get_argument("dialog", "false")
+
     if kw.op == "edit":
         # 编辑笔记本的简介
         kw.show_recommend = False
@@ -142,7 +144,12 @@ def view_group_detail_func(file, kw):
     kw.page_max        = math.ceil(amount/pagesize)
     kw.show_cdate = True
     kw.parent_id  = file.id
-    kw.template_name = "note/page/detail/group_detail.html"
+
+    if dialog == "true":
+        # 对话框的样式
+        kw.template_name = "note/ajax/group_detail_dialog.html"
+    else:
+        kw.template_name = "note/page/detail/group_detail.html"
 
     share_from_info = NOTE_DAO.get_share_from(user_name, file.id)
     if share_from_info != None:

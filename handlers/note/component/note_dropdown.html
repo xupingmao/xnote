@@ -18,17 +18,6 @@
         
         <a class="dropdown-option link note-share-btn" data-id="{{item.id}}">分享</a>
 
-        <!--
-        {% if file.is_public %}
-            <a class="dropdown-option link" onclick="javascript:visitAndRefresh(this)" data-href="/note/share/cancel?id={{file.id}}">取消公开分享</a>
-        {% else %}
-            <a class="dropdown-option link" onclick="javascript:visitAndRefresh(this)" data-href="/note/share?id={{file.id}}">公开分享</a>
-        {% end %}
-
-        <a class="dropdown-option link link-share-option" href="javascript:void(0)" data-clipboard-text="">链接分享</a>
-        <a class="dropdown-option link copy-link-option" href="javascript:void(0)" data-clipboard-text="">复制链接</a>
-        -->
-
         <a class="dropdown-option move-btn link" data-url="/note/group/select?callback=moveNoteCallback">移动</a>
 
         {% if file.priority > 0 %}

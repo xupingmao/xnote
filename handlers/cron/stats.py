@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/07/05 17:35:53
-# @modified 2021/12/11 15:27:01
+# @modified 2021/12/25 22:37:40
 import xutils
 import xauth
 from xutils import dbutil
@@ -31,6 +31,7 @@ def update_note_index_by_notes(notes):
 
 def update_public_index():
     # TODO: 加快切换速度
+    # 方案1: 使用两个index表进行切换
     table = dbutil.get_hash_table("note_public_hot_index")
     for key in table.iter():
         table.delete(key)

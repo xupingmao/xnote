@@ -10,9 +10,14 @@
         <span class="info-tag">分享中</span>
     {% end %}
 
-    <div class="float-right desktop-only">
+    <div class="float-right">
         {% if file != None %}
-            <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>
+            {% if file.type != "group" %}
+                <a class="btn btn-default note-contents-btn" data-parent="{{file.parent_id}}">目录</a>
+            {% end %}
+            {% if _is_desktop %}
+                <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>
+            {% end %}
         {% end %}
     </div>
     </div>
