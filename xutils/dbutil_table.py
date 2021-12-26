@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2021/12/25 22:57:12
+# @modified 2021/12/26 23:21:32
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -138,7 +138,7 @@ class LdbTable:
     def _escape_key(self, key):
         return quote(key)
 
-    def _update_index(self, old_obj, new_obj):
+    def _update_index(self, old_obj, new_obj, batch):
         if len(self.index_names) == 0:
             return
 
@@ -165,22 +165,24 @@ class LdbTable:
 
             if old_value != None:
                 old_value = self._format_index_value(old_value)
-                delete(index_prefix + ":" + old_value + ":" + escaped_obj_key)
+                batch.delete(index_prefix + ":" + old_value + ":" + escaped_obj_key)
 
             if new_value != None:
                 new_value = self._format_index_value(new_value)
-                put(index_prefix + ":" + new_value + ":" + escaped_obj_key, obj_key)
+                batch.put(index_prefix + ":" + new_value + ":" + escaped_obj_key, obj_key)
 
 
     def _put_obj(self, key, obj):
-        # TODO ~~写redo-log，启动的时候要先锁定检查redo-log，恢复异常关闭的数据~~
+        # ~~写redo-log，启动的时候要先锁定检查redo-log，恢复异常关闭的数据~~
         # 不需要重新实现redo-log，直接用leveldb的批量处理功能即可
-        # TODO 创建一个全局SNAPSHOT，防止读到未提交的数据，完成更新之后再更新全局SNAPSHOT
-        # TODO 读接口需要从全局SNAPSHOT读取数据
+        # 使用leveldb的批量操作可以确保不会读到未提交的数据
+        batch = create_write_batch()
         with get_write_lock(key):
             old_obj = get(key)
-            put(key, self._convert_to_db_row(obj))
-            self._update_index(old_obj, obj)
+            batch.put(key, self._convert_to_db_row(obj))
+            self._update_index(old_obj, obj, batch)
+            # 更新批量操作
+            commit_write_batch(batch)
 
     def is_valid_key(self, key = None, user_name = None):
         if user_name is None:

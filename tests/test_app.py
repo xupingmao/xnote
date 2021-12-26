@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/10/29 00:33:59
+# @modified 2021/12/26 23:19:21
 
 import sys
 import os
@@ -332,6 +332,9 @@ class Main:
 
     def test_backup(self):
         self.check_OK("/system/backup")
+
+    def test_dbutil_test(self):
+        self.check_OK("/test/test_dbutil")
 
 
 

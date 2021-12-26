@@ -456,7 +456,6 @@ class TestMain(unittest.TestCase):
         self.assertEqual(2, len(result))
         self.assertEqual(20, result[0][1])
 
-
     def test_b64encode(self):
         text_input = "测试1234"
         text_output = xutils.b64encode(text_input)

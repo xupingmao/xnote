@@ -75,7 +75,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/12/25 23:21:12
+# @modified 2021/12/26 23:22:05
 ###########################################################
 
 
@@ -125,6 +125,56 @@ class RecordLock:
     def __del__(self):
         self.release()
 
+class WriteBatchProxy:
+
+    """批量操作代理"""
+
+    def __init__(self):
+        self._puts = {}
+        self._deletes = set()
+
+    def put(self, key, val):
+        check_before_write(key)
+
+        key_bytes = key.encode("utf-8")
+        val_bytes = convert_object_to_json(val).encode("utf-8")
+
+        self._deletes.discard(key_bytes)
+        self._puts[key_bytes] = val_bytes
+
+    def delete(self, key):
+        key_bytes = key.encode("utf-8")
+        self._puts.pop(key_bytes, None)
+        self._deletes.add(key_bytes)
+
+    def log_debug_info(self):
+        print_debug_info("----- batch.begin -----")
+        for key in self._puts:
+            value = self._puts[key]
+            print_debug_info("batch.put key={}, value={}", key, value)
+        for key in self._deletes:
+            print_debug_info("batch.delete key={}", key)
+        print_debug_info("-----  batch.end  -----")
+
+    def convert_to_ldb_batch(self):
+        if leveldb is None:
+            batch = leveldbpy.WriteBatch()
+            for key in self._puts:
+                value = self._puts[key]
+                batch.put(key, value)
+            for key in self._deletes:
+                batch.delete(key)
+            return batch            
+        else:
+            batch = leveldb.WriteBatch()
+            for key in self._puts:
+                value = self._puts[key]
+                batch.Put(key, value)
+            for key in self._deletes:
+                batch.Delete(key)
+            return batch
+
+
 class LevelDBProxy:
 
     def __init__(self, path, snapshot = None):
@@ -164,21 +214,6 @@ class LevelDBProxy:
 
     def CreateSnapshot(self):
         return LevelDBProxy(snapshot = self._db.snapshot())
-
-    def WriteBatch(self):
-        """返回一个批量操作对象"""
-        class WriteBatchProxy:
-
-            def __init__(self):
-                self.target = leveldbpy.WriteBatch()
-
-            def Put(self, key, value):
-                return self.target.put(key, value)
-
-            def Delete(self, key):
-                return self.target.delete(key)
-        
-        return WriteBatchProxy()
 
     def Write(self, batch, sync = False):
         """执行批量操作"""
@@ -277,6 +312,15 @@ def check_write_state():
     if WRITE_ONLY:
         raise Exception("write_only mode!")
 
+def check_before_write(key):
+    check_leveldb()
+    check_write_state()
+    check_not_empty(key, "[dbutil.put] key can not be None")
+
+    table_name = key.split(":", 1)[0]
+    check_table_name(table_name)
+
+
 def check_get_leveldb():
     if _leveldb is None:
         raise Exception("leveldb not found!")
@@ -339,13 +383,7 @@ def put(key, obj_value, sync = False):
     @param {object} obj_value 值，会转换成JSON格式
     @param {boolean} sync 是否同步写入，默认为False
     """
-    check_leveldb()
-    check_write_state()
-    check_not_empty(key, "[dbutil.put] key can not be None")
-
-    table_name = key.split(":")[0]
-
-    check_table_name(table_name)
+    check_before_write(key)
     
     key = key.encode("utf-8")
     # 注意json序列化有个问题，会把dict中数字开头的key转成字符串
@@ -355,8 +393,12 @@ def put(key, obj_value, sync = False):
 
 def insert(table_name, obj_value, sync = False):
     key = new_id(table_name)
-    put(key, obj_value, sync)
-    return key
+    with get_write_lock(key):
+        old_value = get(key)
+        if old_value != None:
+            raise DBException("insert conflict")
+        put(key, obj_value, sync)
+        return key
 
 def delete(key, sync = False):
     check_leveldb()
@@ -366,6 +408,14 @@ def delete(key, sync = False):
 
     key = key.encode("utf-8")
     _leveldb.Delete(key, sync = sync)
+
+def create_write_batch():
+    return WriteBatchProxy()
+
+def commit_write_batch(batch, sync = False):
+    # batch.log_debug_info()
+    ldb_batch = batch.convert_to_ldb_batch()
+    check_get_leveldb().Write(ldb_batch, sync)
 
 def scan(key_from = None, key_to = None, func = None, reverse = False, 
         parse_json = True):

@@ -12,7 +12,7 @@
 
     <div class="float-right">
         {% if file != None %}
-            {% if file.type != "group" %}
+            {% if file.type != "group" and file.parent_id != "0" %}
                 <a class="btn btn-default note-contents-btn" data-parent="{{file.parent_id}}">目录</a>
             {% end %}
             {% if _is_desktop %}

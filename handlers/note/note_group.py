@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/12/11 13:48:55
+# @modified 2021/12/26 21:41:31
 import math
 import time
 import web
@@ -597,6 +597,44 @@ class ArchivedHandler:
         raise web.found("/note/group?status=archived")
 
 class ManagementHandler:
+    """批量管理处理器"""
+
+    def handle_root(self, kw):
+        user_name = kw.user_name
+        parent_note = NOTE_DAO.get_root()
+        notes = NOTE_DAO.list_group(user_name, orderby = "name", 
+            skip_archived = True)
+        parent = Storage(url = "/note/group", name = parent_note.name)
+        
+        kw.parent_note = parent_note
+        kw.parent = parent
+        kw.notes = notes
+
+    def handle_group(self, kw):
+        parent_id = kw.parent_id
+        user_name = kw.user_name
+
+        parent_note = NOTE_DAO.get_by_id(parent_id)
+        if parent_note == None:
+            raise web.notfound()
+        
+        notes = NOTE_DAO.list_by_parent(user_name, parent_id, 
+            0, 200, orderby = parent_note.orderby)
+        
+        parent = Storage(url = "/note/%s" % parent_id, 
+            name = parent_note.name)
+
+        kw.parent_note = parent_note
+        kw.parent = parent
+        kw.notes = notes
+
+    def handle_default(self, kw):
+        user_name = kw.user_name
+        parent_note = NOTE_DAO.get_default_group()
+        notes = NOTE_DAO.list_default_notes(user_name)
+
+        kw.parent_note = parent_note
+        kw.notes = notes
 
     @xauth.login_required()
     def GET(self):
@@ -605,19 +643,18 @@ class ManagementHandler:
 
         xmanager.add_visit_log(user_name, "/note/management")
 
+        kw = Storage(user_name = user_name, parent_id = parent_id)
+
         if parent_id == "0" or parent_id is None:
-            parent_note = NOTE_DAO.get_root()
-            notes = NOTE_DAO.list_group(user_name, orderby = "name", skip_archived = True)
-            parent = Storage(url = "/note/group", name = parent_note.name)
+            self.handle_root(kw)
         elif parent_id == "default":
-            parent_note = NOTE_DAO.get_default_group()
-            notes = NOTE_DAO.list_default_notes(user_name)
+            self.handle_default(kw)
         else:
-            parent_note = NOTE_DAO.get_by_id(parent_id)
-            if parent_note == None:
-                raise web.notfound()
-            notes = NOTE_DAO.list_by_parent(user_name, parent_id, 0, 200, orderby = "ctime_desc")
-            parent = Storage(url = "/note/%s" % parent_id, name = parent_note.name)
+            self.handle_group(kw)
+        
+        parent_note = kw.parent_note
+        parent = kw.parent
+        notes = kw.notes
         
         if parent_note is None:
             raise web.seeother("/unauthorized")
