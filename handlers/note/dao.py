@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/12/11 13:45:06
+# @modified 2021/12/30 22:50:51
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -47,9 +47,6 @@ register_note_table("note_name", "用户维度的name索引 <note_name:user:name
 register_note_table("notebook", "笔记分组")
 register_note_table("token", "用于分享的令牌")
 register_note_table("note_history", "笔记的历史版本")
-register_note_table("note_create_log", "笔记创建日志")
-register_note_table("note_edit_log", "笔记编辑日志")
-register_note_table("note_visit_log", "笔记访问日志")
 register_note_table("note_public", "公共笔记索引")
 register_note_table("note_public_hot_index", "公共笔记热度索引")
 register_note_table("note_tags", "笔记标签 <note_tags:user:note_id>")
@@ -538,75 +535,11 @@ def log_list_to_id_list(log_list):
         result.append(get_id_from_log(log))
     return result
 
-def delete_old_edit_log(creator, note_id):
-    counter = Counter()
-    def filter_func(key, value):
-        log_id = get_id_from_log(value)
-        counter.update("e")
-        return log_id == note_id or counter["e"] > MAX_EDIT_LOG
-    old_logs = dbutil.prefix_list("note_edit_log:%s:" % creator, filter_func, include_key = True, reverse = True)
-    for key, value in old_logs:
-        dbutil.delete(key)
-
 def add_create_log(note):
-    creator = note.creator
-    note_id = note.id
-    key = "note_create_log:%s:%s" % (creator, dbutil.timeseq())
-    create_log = Storage(id = note_id)
-    dbutil.put(key, create_log)
-
-def add_edit_log(note):
-    creator = note.creator
-    note_id = note.id
-    
-    delete_old_edit_log(creator, note_id)
-
-    key = "note_edit_log:%s:%s" % (creator, dbutil.timeseq())
-    edit_log = Storage(id = note_id)
-    dbutil.put(key, edit_log)
-
-def delete_old_visit_log(creator, note_id):
-    counter   = Counter()
-    def filter_func(key, value):
-        log_id = get_id_from_log(value)
-        counter.update("v")
-        return log_id == note_id or counter["v"] > MAX_VIEW_LOG
-
-    old_logs = dbutil.prefix_list("note_visit_log:%s:" % creator, filter_func, include_key = True, reverse = True)
-    for key, value in old_logs:
-        dbutil.delete(key)
+    NOTE_DAO.add_create_log(note.creator, note)
 
 def add_visit_log(user_name, note):
-    note_id = note.id
-
-    # 先删除历史的浏览记录，只保留最新的
-    delete_old_visit_log(user_name, note_id)
-
-    key = "note_visit_log:%s:%s" % (user_name, dbutil.timeseq())
-
-    visit_log = Storage(id = note_id)
-    dbutil.put(key, visit_log)
-
-def update_note_rank(note):
-    mtime = note.mtime
-    atime = note.atime
-    creator = note.creator
-    note_id = note.id
-    
-    if note.is_deleted:
-        # TODO 删除索引
-        return
-        # dbutil.zrem("note_recent:%s" % creator, note_id)
-        # dbutil.zrem("note_visit:%s" % creator, note_id)
-        # dbutil.zrem("note_recent:public", note_id)
-    if note.type != "group":
-        # 分组不需要记录
-        # TODO 增加修改时间和访问时间的索引
-        return
-    if note.is_public:
-        # TODO 更新公共笔记的最近更新索引
-        # dbutil.zadd("note_recent:public", mtime, note_id)
-        return
+    NOTE_DAO.add_visit_log(user_name, note)
 
 def remove_virtual_fields(note):
     del_dict_key(note, "path")
@@ -631,9 +564,7 @@ def put_note_to_db(note_id, note):
     update_index(note)
 
     # 增加编辑日志
-    add_edit_log(note)
-
-    print(note)
+    NOTE_DAO.add_edit_log(creator, note)
 
 def touch_note(note_id):
     note = get_by_id(note_id)
@@ -851,6 +782,9 @@ def delete_note(id):
     # 删除skey索引
     delete_note_skey(note)
 
+    # 删除访问日志
+    NOTE_DAO.delete_visit_log(note.creator, note.id)
+
     # 更新数量统计
     refresh_note_stat(note.creator)
 
@@ -992,15 +926,6 @@ def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name",
     sort_notes(notes, orderby)
     return notes[offset:offset+limit]
 
-@xutils.timeit(name = "NoteDao.ListRecentCreated", logfile = True)
-def list_recent_created(creator = None, offset = 0, limit = 10, skip_archived = False):
-    if limit is None:
-        limit = xconfig.PAGE_SIZE
-
-    user = xauth.current_name()
-    if user is None:
-        user = "public"
-    return list_note_by_log("note_create_log", creator, offset, limit)
 
 def list_note_by_log(log_prefix, creator, offset = 0, limit = -1, skip_deleted = True):
     """通过日志来查询笔记列表
@@ -1028,28 +953,10 @@ def list_note_by_log(log_prefix, creator, offset = 0, limit = -1, skip_deleted =
 
     return result
 
-@xutils.timeit(name = "NoteDao.ListRecentViewed", logfile = True, logargs = True)
-def list_recent_viewed(creator = None, offset = 0, limit = 10):
-    if limit is None:
-        limit = xconfig.PAGE_SIZE
-
-    user = xauth.current_name()
-    if user is None:
-        user = "public"
-    return list_note_by_log("note_visit_log", creator, offset, limit)
-
-@xutils.timeit(name = "NoteDao.ListRecentEdit:leveldb", logfile = True, logargs = True)
-def list_recent_edit(creator = None, offset = 0, limit = None, skip_deleted = True):
-    """通过KV存储实现"""
-    if limit is None:
-        limit = xconfig.PAGE_SIZE
-    
-    return list_note_by_log("note_edit_log", creator, offset, limit, skip_deleted = skip_deleted)
-
 def list_recent_events(creator = None, offset = 0, limit = None):
-    create_events = list_recent_created(creator, offset, limit)
-    edit_events = list_recent_edit(creator, offset, limit)
-    view_events = list_recent_viewed(creator, offset, limit)
+    create_events = NOTE_DAO.list_recent_created(creator, offset, limit)
+    edit_events = NOTE_DAO.list_recent_edit(creator, offset, limit)
+    view_events = NOTE_DAO.list_recent_viewed(creator, offset, limit)
 
     def map_notes(notes, action):
         for note in notes:
@@ -1068,19 +975,6 @@ def list_recent_events(creator = None, offset = 0, limit = None):
     events = create_events + edit_events + view_events
     events.sort(key = lambda x: x.action_time, reverse = True)
     return events[offset: offset + limit]
-
-
-def list_most_visited(creator, offset, limit):
-    logs = list_note_by_log("note_visit_log", creator)
-    logs.sort(key = lambda x: x.visited_cnt, reverse = True)
-    return logs[offset:offset+limit]
-
-def list_hot(creator, offset = 0, limit = 100):
-    if limit < 0:
-        limit = MAX_VIEW_LOG
-    logs = list_note_by_log("note_visit_log", creator)
-    logs.sort(key = lambda x: x.hot_index or 0, reverse = True)
-    return logs[offset:offset+limit]
 
 def list_by_date(field, creator, date, orderby = "ctime_desc"):
     user = creator
@@ -1558,6 +1452,7 @@ xutils.register_func("note.search_content", search_content)
 xutils.register_func("note.search_public", search_public)
 xutils.register_func("note.get_share_from", get_share_from)
 xutils.register_func("note.get_share_to", get_share_to)
+xutils.register_func("note.batch_query_list", batch_query_list)
 
 # list functions
 xutils.register_func("note.list_path", list_path)
@@ -1573,12 +1468,7 @@ xutils.register_func("note.list_sticky",  list_sticky)
 xutils.register_func("note.list_archived", list_archived)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_public", list_public)
-xutils.register_func("note.list_recent_created", list_recent_created)
-xutils.register_func("note.list_recent_edit", list_recent_edit)
-xutils.register_func("note.list_recent_viewed", list_recent_viewed)
 xutils.register_func("note.list_recent_events", list_recent_events)
-xutils.register_func("note.list_most_visited", list_most_visited)
-xutils.register_func("note.list_hot", list_hot)
 xutils.register_func("note.list_by_func", list_by_func)
 xutils.register_func("note.list_share_to", list_share_to)
 

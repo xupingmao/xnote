@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/12/11 22:52:24
+# @modified 2021/12/30 22:46:46
 import logging
 import time
 import inspect
@@ -199,7 +199,7 @@ def log_deco(message):
         return handle
     return deco
 
-def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False,switch_func=None):
+def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False, switch_func=None):
     """简单的计时装饰器，可以指定执行次数"""
     from xutils import dbutil
     dbutil.register_table("log_timeit", "耗时统计日志")

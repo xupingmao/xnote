@@ -31,6 +31,7 @@
 # 先加载标准库
 from __future__ import print_function, with_statement
 import os
+import re
 import time
 import json
 import threading
@@ -62,6 +63,10 @@ LOCK_LIST = [threading.Lock() for i in range(LOCK_SIZE)]
 
 # 注册的数据库表名，如果不注册，无法进行写操作
 TABLE_INFO_DICT = dict()
+# 表的索引信息
+INDEX_INFO_DICT = dict()
+
+# leveldb表的缓存
 LDB_TABLE_DICT = dict()
 
 # 只读模式
@@ -75,7 +80,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/12/26 23:22:05
+# @modified 2021/12/30 23:07:09
 ###########################################################
 
 
@@ -174,6 +179,13 @@ class WriteBatchProxy:
                 batch.Delete(key)
             return batch
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        if traceback is None:
+            commit_write_batch(self)
+
 
 class LevelDBProxy:
 
@@ -250,7 +262,7 @@ def get_write_lock(key = None):
     if key is None:
         return WRITE_LOCK
 
-    h = hash(key)
+    h = abs(hash(key))
     return LOCK_LIST[h%LOCK_SIZE]
 
 def timeseq(value = None):
@@ -337,8 +349,9 @@ def validate_none(obj, msg):
 def validate_obj(obj, msg):
     assert obj != None, msg
 
-def validate_str(obj, msg):
-    assert isinstance(obj, str), msg
+def validate_str(obj, msg, *argv):
+    if not isinstance(obj, str):
+        raise DBException(msg.format(*argv))
 
 def validate_list(obj, msg):
     assert isinstance(obj, list), msg
@@ -356,8 +369,36 @@ class TableInfo:
 def register_table(table_name, description, category = "default"):
     # TODO 考虑过这个方法直接返回一个 LdbTable 实例
     # LdbTable可能针对同一个`table`会有不同的实例
+    if not re.match(r"^[0-9a-z_]+$", table_name):
+        raise Exception("无效的表名:%r" % table_name)
+
+    register_table_inner(table_name, description, category)
+
+def register_table_inner(table_name, description, category = "default"):
+    if not re.match(r"^[0-9a-z_\$]+$", table_name):
+        raise Exception("无效的表名:%r" % table_name)
+
+    if table_name in TABLE_INFO_DICT:
+        # 已经注册了
+        return
+
     TABLE_INFO_DICT[table_name] = TableInfo(table_name, description, category)
 
+def register_table_index(table_name, index_name):
+    """注册表的索引"""
+    validate_str(table_name, "invalid table_name")
+    validate_str(index_name, "invalid index_name")
+    check_table_name(table_name)
+    index_info = INDEX_INFO_DICT.get(table_name)
+    if index_info is None:
+        index_info = set()
+    index_info.add(index_name)
+    INDEX_INFO_DICT[table_name] = index_info
+
+    # 注册索引表
+    index_table = "_index$%s$%s" % (table_name, index_name)
+    description = "%s表索引" % table_name
+    register_table_inner(index_table, description)
 
 def get_table_dict_copy():
     return TABLE_INFO_DICT.copy()
@@ -413,7 +454,7 @@ def create_write_batch():
     return WriteBatchProxy()
 
 def commit_write_batch(batch, sync = False):
-    # batch.log_debug_info()
+    batch.log_debug_info()
     ldb_batch = batch.convert_to_ldb_batch()
     check_get_leveldb().Write(ldb_batch, sync)
 
@@ -485,10 +526,12 @@ def prefix_iter(prefix,
         limit = -1, 
         reverse = False, 
         include_key = False,
-        key_from = None):
+        key_from = None,
+        map_func = None,):
     """通过前缀迭代查询
     @param {string} prefix 遍历前缀
     @param {function} filter_func 过滤函数
+    @param {function} map_func 映射函数，如果返回不为空则认为匹配
     @param {int} offset 选择的开始下标，包含
     @param {int} limit  选择的数据行数
     @param {boolean} reverse 是否反向遍历
@@ -497,6 +540,9 @@ def prefix_iter(prefix,
     check_leveldb()
     if key_from != None and reverse == True:
         raise Exception("不允许反向遍历时设置key_from")
+
+    if filter_func != None and map_func != None:
+        raise Exception("不允许同时设置filter_func和map_func")
 
     if prefix[-1] != ':':
         prefix += ':'
@@ -533,7 +579,17 @@ def prefix_iter(prefix,
         if not key.startswith(origin_prefix):
             break
         value = convert_bytes_to_object(value)
-        if filter_func is None or filter_func(key, value):
+
+        is_match = True
+
+        if filter_func:
+            is_match = filter_func(key, value)
+        
+        if map_func:
+            value = map_func(key, value)
+            is_match = value != None
+
+        if is_match:
             if matched_offset >= offset:
                 result_size += 1
                 if include_key:

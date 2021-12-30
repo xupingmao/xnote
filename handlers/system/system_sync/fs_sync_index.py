@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/28 18:07:31
-# @modified 2021/12/05 10:44:07
+# @modified 2021/12/28 23:46:11
 # @filename fs_sync_index.py
 
 import os
@@ -151,8 +151,8 @@ class FileIndexCheckManager:
         key_from_copy = self.get_key_from()
 
         db = dbutil.get_table("fs_sync_index")
-        for key, value in db.iter(offset = 0, limit = 10, key_from = self.get_key_from()):
-            
+        for value in db.iter(offset = 0, limit = 10, key_from = self.get_key_from()):
+            key = value._key
             check_index(key, value, db)
 
             if value.ts != None:

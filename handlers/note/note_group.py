@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/12/26 21:41:31
+# @modified 2021/12/30 22:02:08
 import math
 import time
 import web
@@ -518,6 +518,10 @@ class NotePluginHandler:
 
 class RecentHandler:
     """最近的笔记"""
+
+    def count_note(self, user_name, orderby):
+        return NOTE_DAO.count_visit_log(user_name)
+
     def GET(self, show_notice = True):
         if not xauth.has_login():
             raise web.seeother("/note/public")
@@ -568,7 +572,7 @@ class RecentHandler:
             show_mdate = True
             dir_type = "recent_edit"
         
-        count = NOTE_DAO.count_user_note(creator)
+        count = self.count_note(creator, orderby)
         
         return xtemplate.render("note/page/note_recent.html",
             pathlist  = type_node_path(html_title, ""),

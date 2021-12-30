@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2021/12/11 12:43:32
+# @modified 2021/12/30 10:45:30
 import xauth
 import xutils
 import xmanager
@@ -78,7 +78,7 @@ class StatHandler(BasePlugin):
         admin_stat_list = []
         if xauth.is_admin():
             table_dict = dbutil.get_table_dict_copy()
-            table_values = sorted(table_dict.values(), key = lambda x:x.category)
+            table_values = sorted(table_dict.values(), key = lambda x:(x.category,x.name))
             for table_info in table_values:
                 name = table_info.name
                 admin_stat_list.append([table_info.category, table_info.name, table_info.description, dbutil.count_table(name)])

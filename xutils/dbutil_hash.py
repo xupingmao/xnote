@@ -1,13 +1,15 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 15:35:23
-# @modified 2021/12/12 19:27:12
+# @modified 2021/12/30 10:53:50
 # @filename dbutil_hash.py
 
 from xutils.dbutil_base import *
 
 class LdbHashTable:
-    """基于leveldb的key-value结构"""
+    """基于leveldb的key-value结构
+    注: 其实LdbTable可以覆盖LdbHashTable的功能
+    """
 
     def __init__(self, table_name, user_name = None, key_name = "_key"):
         check_table_name(table_name)
@@ -34,7 +36,7 @@ class LdbHashTable:
     def build_key(self, key):
         return self.prefix + key
 
-    def put(self, key, value):
+    def put(self, key, value, batch = None):
         """通过key来设置value，这个key是hash的key，不是ldb的key
         @param {string} key hash的key
         @param {object} value hash的value
@@ -43,7 +45,11 @@ class LdbHashTable:
         self._check_value(value)
 
         row_key = self.build_key(key)
-        put(row_key, value)
+        
+        if batch != None:
+            batch.put(row_key, value)
+        else:
+            put(row_key, value)
 
     def get(self, key, default_value = None):
         """通过key来查询value，这个key是hash的key，不是ldb的key
@@ -54,6 +60,9 @@ class LdbHashTable:
         return get(row_key, default_value)
 
     def iter(self, offset = 0, limit = 20, reverse = False, filter_func = None):
+        """hash表的迭代器
+        @yield key, value
+        """
         prefix_len = len(self.prefix)
         for key, value in prefix_iter(self.prefix, filter_func = filter_func, 
                 offset = offset, limit = limit, reverse = reverse, include_key = True):
@@ -68,9 +77,13 @@ class LdbHashTable:
             result[key] = value
         return result
 
-    def delete(self, key):
+    def delete(self, key, batch = None):
         row_key = self.build_key(key)
-        delete(row_key)
+
+        if batch != None:
+            batch.delete(row_key)
+        else:
+            delete(row_key)
 
     def count(self):
         return count_table(self.prefix)
