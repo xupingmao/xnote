@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2021/12/30 22:50:51
+# @modified 2022/01/01 01:27:02
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -41,20 +41,26 @@ def register_note_table(name, description):
 
 register_note_table("note_full", "笔记完整信息 <note_full:note_id>")
 register_note_table("note_index", "笔记索引，不包含内容 <note_index:note_id>")
-register_note_table("note_tiny", "用户维度的笔记索引 <note_tiny:user:note_id>")
 register_note_table("note_skey", "用户维度的skey索引 <note_skey:user:skey>")
-register_note_table("note_name", "用户维度的name索引 <note_name:user:name>")
 register_note_table("notebook", "笔记分组")
 register_note_table("token", "用于分享的令牌")
 register_note_table("note_history", "笔记的历史版本")
-register_note_table("note_public", "公共笔记索引")
-register_note_table("note_public_hot_index", "公共笔记热度索引")
 register_note_table("note_tags", "笔记标签 <note_tags:user:note_id>")
 # 分享关系
 register_note_table("note_share_from", "分享发送者关系表 <note_share_from:from_user:note_id>")
 register_note_table("note_share_to", "分享接受关系表 <note_share_to:to_user:note_id>")
 
 dbutil.register_table("search_history", "搜索历史")
+
+# 公开分享的笔记索引
+register_note_table("note_public", "公共笔记索引")
+dbutil.register_table_index("note_public", "hot_index")
+dbutil.register_table_index("note_public", "share_time")
+
+# 用户维度索引
+register_note_table("note_tiny", "用户维度的笔记索引 <note_tiny:user:note_id>")
+dbutil.register_table_index("note_tiny", "name")
+
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -108,10 +114,7 @@ class NoteSchema:
     hot_index   = "热门指数"
 
 def format_note_id(id):
-    try:
-        return "%020d" % int(id)
-    except ValueError:
-        return id
+    return str(id)
 
 def get_root():
     root = Storage()
@@ -151,6 +154,12 @@ def get_archived_group():
     build_note_info(group)
     group.url = "/note/archived"
     return group
+
+def get_note_public_table():
+    return dbutil.get_table("note_public")
+
+def get_note_tiny_table(user_name):
+    return dbutil.get_table("note_tiny", user_name = user_name)
 
 def batch_query(id_list):
     creator = xauth.current_name()
@@ -234,6 +243,9 @@ def sort_by_dtime_desc(notes):
 def sort_by_dtime_asc(notes):
     notes.sort(key = lambda x: x.dtime)
 
+def sort_by_hot_index(notes):
+    notes.sort(key = lambda x: x.visited_cnt, reverse = True)
+
 SORT_FUNC_DICT = {
     "name": sort_by_name,
     "name_desc": sort_by_name_desc,
@@ -246,6 +258,7 @@ SORT_FUNC_DICT = {
     "type_ctime_desc": sort_by_type_ctime_desc,
     "dtime_desc": sort_by_dtime_desc,
     "dtime_asc" : sort_by_dtime_asc,
+    "hot_index" : sort_by_hot_index,
     "default": sort_by_default,
 }
 
@@ -529,12 +542,6 @@ def get_id_from_log(log):
         # 老数据，都是id
         return log
 
-def log_list_to_id_list(log_list):
-    result = []
-    for log in log_list:
-        result.append(get_id_from_log(log))
-    return result
-
 def add_create_log(note):
     NOTE_DAO.add_create_log(note.creator, note)
 
@@ -593,12 +600,14 @@ def convert_to_index(note):
 def update_index(note):
     """更新索引的时候也会更新用户维度的索引(note_tiny)"""
     id = note['id']
+    note_id = format_note_id(id)
 
     note_index = convert_to_index(note)
     dbutil.put('note_index:%s' % id, note_index)
 
-    # 更新用户索引
-    dbutil.put("note_tiny:%s:%s" % (note.creator, format_note_id(id)), note_index)
+    # 更新用户维度的笔记索引
+    note_tiny_db = get_note_tiny_table(note.creator)
+    note_tiny_db.update_by_id(note_id, note_index)
 
     if note.type == "group":
         dbutil.put("notebook:%s:%s" % (note.creator, format_note_id(id)), note_index)
@@ -607,11 +616,15 @@ def update_index(note):
         update_public_index(note)
 
 def update_public_index(note):
+    db = get_note_public_table()
+    note_id = format_note_id(note.id)
+
     if note.is_public:
         note_index = convert_to_index(note)
-        dbutil.put("note_public:%s" % format_note_id(note.id), note_index)
+        db.update_by_id(note_id, note_index)
     else:
-        dbutil.delete("note_public:%s" % format_note_id(note.id))
+        db.delete_by_id(note_id)
+
 
 def update_note(note_id, **kw):
     # 这里只更新基本字段，移动笔记使用 move_note
@@ -649,8 +662,15 @@ def update_note(note_id, **kw):
         note.name = name
     if atime:
         note.atime = atime
+    
+    # 分享相关的更新
     if is_public != None:
         note.is_public = is_public
+    if is_public == 1:
+        note.share_time = dateutil.format_time()
+    if is_public == 0:
+        note.share_time = None
+
     if tags != None:
         note.tags = tags
     if orderby != None:
@@ -663,6 +683,7 @@ def update_note(note_id, **kw):
         note.token = token
     if visited_cnt != None:
         note.visited_cnt = visited_cnt
+
     if note.version is None:
         note.version = 1
 
@@ -729,6 +750,7 @@ def visit_note(user_name, id):
         if note.visited_cnt is None:
             note.visited_cnt = 0
         note.visited_cnt += 1
+        note.visit_cnt = note.visited_cnt
 
         # 访问热度
         if note.hot_index is None:
@@ -883,19 +905,17 @@ def list_default_notes(creator, offset = 0, limit = 1000, orderby = "mtime_desc"
 
 def list_public(offset, limit, orderby = "ctime_desc"):
     if orderby == "hot":
-        # 定时更新
-        note_ids = dbutil.prefix_list("note_public_hot_index", 
-            offset = offset, limit = limit, reverse = True)
-        return batch_query_list(note_ids)
+        index_name = "hot_index"
+    else:
+        index_name = "share_time"
 
-    def list_func(key, value):
-        if value.is_deleted:
-            return False
-        return value.is_public
+    db = dbutil.get_table("note_public")
+    notes = db.list_by_index(index_name,
+        offset = offset, limit = limit, reverse = True)
 
-    notes = dbutil.prefix_list("note_tiny:", list_func, offset, limit)
-    sort_notes(notes, "ctime_desc")
+    build_note_list_info(notes)
     return notes
+
 
 def count_public():
     def list_func(key, value):
@@ -925,33 +945,6 @@ def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name",
     notes = dbutil.prefix_list("note_tiny:", list_note_func)
     sort_notes(notes, orderby)
     return notes[offset:offset+limit]
-
-
-def list_note_by_log(log_prefix, creator, offset = 0, limit = -1, skip_deleted = True):
-    """通过日志来查询笔记列表
-    @param {string} log_prefix 日志表前缀
-    @param {string} creator 用户名称
-    @param {int} offset 开始下标（包含）
-    @param {int} limit 返回数量
-    @return {list} 笔记列表
-    """
-
-    # TODO 需要清理无用的日志
-    filter_log_func = None
-    log_tuple_list  = dbutil.prefix_list("%s:%s" % (log_prefix, creator), None, 
-        offset = offset, limit = limit, reverse = True, include_key = True)
-
-    result = []
-    for log_key, log in log_tuple_list:
-        id = get_id_from_log(log)
-        note = get_by_id(id)
-        if note != None:
-            if note.is_deleted:
-                dbutil.delete(log_key)
-            else:
-                result.append(note)
-
-    return result
 
 def list_recent_events(creator = None, offset = 0, limit = None):
     create_events = NOTE_DAO.list_recent_created(creator, offset, limit)
@@ -1075,7 +1068,7 @@ def get_history(note_id, version):
     # note = table.select_first(where = dict(note_id = note_id, version = version))
     return dbutil.get("note_history:%s:%s" % (note_id, version))
 
-def search_name(words, creator = None, parent_id = None, orderby = "type_mtime_desc"):
+def search_name(words, creator = None, parent_id = None, orderby = "hot_index"):
     assert isinstance(words, list)
     words = [word.lower() for word in words]
     if parent_id != None and parent_id != "":
@@ -1097,7 +1090,7 @@ def search_name(words, creator = None, parent_id = None, orderby = "type_mtime_d
     sort_by_priority(result)
     return result
 
-def search_content(words, creator=None):
+def search_content(words, creator=None, orderby = "hot_index"):
     assert isinstance(words, list)
     words = [word.lower() for word in words]
     def search_func(key, value):
@@ -1110,7 +1103,7 @@ def search_content(words, creator=None):
     build_note_list_info(result)
 
     # 对笔记进行排序
-    sort_notes(result)
+    sort_notes(result, orderby)
     return result
 
 def search_public(words):
@@ -1436,6 +1429,7 @@ xutils.register_func("note.update_tags", update_tags)
 xutils.register_func("note.create_token", create_token)
 xutils.register_func("note.share_to", share_note_to)
 xutils.register_func("note.delete_physically", delete_note_physically)
+xutils.register_func("note.update_public_index", update_public_index)
 
 # query functions
 xutils.register_func("note.get_root", get_root)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2021/12/30 10:45:30
+# @modified 2021/12/30 23:57:54
 import xauth
 import xutils
 import xmanager
@@ -34,8 +34,18 @@ HTML = """
 {% end %}
 
 {% if _is_admin %}
-<div class="card">
-    <h3 class="card-title admin-stat">全局统计</h3>
+<div class="card admin-stat">
+    <div class="card-title"> 
+        <span>全局统计</span>
+
+        <div class="float-right">
+            {% if hide_index != "true" %}
+                <a class="btn btn-default" href="?p={{p}}&hide_index=true">隐藏索引</a>
+            {% else %}
+                <a class="btn btn-default" href="?p={{p}}">展示索引</a>
+            {% end %}
+        </div>
+    </div>
     <table class="table">
         <tr>
             <th class="admin-stat-th">类别</th>
@@ -74,28 +84,31 @@ class StatHandler(BasePlugin):
         stat_list.append(["我的评论", dbutil.count_table("comment_index:%s" % user_name)])
         return stat_list
 
-    def get_admin_stat_list(self):
+    def get_admin_stat_list(self, hide_index):
         admin_stat_list = []
         if xauth.is_admin():
             table_dict = dbutil.get_table_dict_copy()
             table_values = sorted(table_dict.values(), key = lambda x:(x.category,x.name))
             for table_info in table_values:
                 name = table_info.name
+                if hide_index == "true" and name.startswith("_index"):
+                    continue
                 admin_stat_list.append([table_info.category, table_info.name, table_info.description, dbutil.count_table(name)])
         return admin_stat_list
 
     def handle(self, input):
         p = xutils.get_argument("p", "")
+        hide_index = xutils.get_argument("hide_index", "")
         user_name = xauth.current_name()
 
         xmanager.add_visit_log(user_name, "/note/stat")
         
         if p == "system":
             stat_list = None
-            admin_stat_list = self.get_admin_stat_list()
+            admin_stat_list = self.get_admin_stat_list(hide_index)
         else:
             stat_list = self.get_stat_list(user_name)
-            admin_stat_list = self.get_admin_stat_list()
+            admin_stat_list = self.get_admin_stat_list(hide_index)
         
         self.writetemplate(HTML, stat_list = stat_list, admin_stat_list = admin_stat_list)
 

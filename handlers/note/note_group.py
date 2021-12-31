@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2021/12/30 22:02:08
+# @modified 2022/01/01 01:15:18
 import math
 import time
 import web
@@ -161,7 +161,7 @@ class ShareListHandler:
             if orderby == "hot":
                 note.badge_info = note.hot_index
             else:
-                note.badge_info = note.create_date
+                note.badge_info = dateutil.format_date(note.share_time)
         return notes
 
     def count_notes(self, user_name):

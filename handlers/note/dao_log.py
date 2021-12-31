@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/29 23:48:27
-# @modified 2021/12/30 22:57:29
+# @modified 2021/12/31 23:02:39
 # @filename dao_log.py
 
 """笔记相关的访问日志有两个部分：
@@ -21,8 +21,6 @@ from xutils import dateutil
 from xutils import Storage
 
 dbutil.register_table("user_note_log", "用户笔记操作日志")
-dbutil.register_table("note_migrate_log", "笔记迁移日志")
-
 dbutil.register_table_index("user_note_log", "visit_cnt")
 dbutil.register_table_index("user_note_log", "atime")
 dbutil.register_table_index("user_note_log", "mtime")
@@ -42,17 +40,6 @@ def is_debug_enabled():
 def get_user_note_log_table(user_name):
     assert user_name != None, "invalid user_name:%r" % user_name
     return dbutil.get_table("user_note_log", user_name = user_name)
-
-def get_note_migrate_log_table():
-    return dbutil.get_hash_table("note_migrate_log")
-
-def is_migrate_done(op_flag):
-    db = get_note_migrate_log_table()
-    return db.get(op_flag) == "1"
-
-def mark_migrate_done(op_flag):
-    db = get_note_migrate_log_table()
-    db.put(op_flag, "1")
 
 @xutils.timeit_deco(name = "_update_log", switch_func = is_debug_enabled)
 def _update_log(user_name, note, increment = 1, insert_only = False):
@@ -169,30 +156,6 @@ def add_edit_log(user_name, note):
 def add_create_log(user_name, note):
     return _update_log(user_name, note)
 
-#### 重建访问日志
-def rebuild_visit_log():
-    if is_migrate_done("note_visit_log"):
-        print("note_visit_log migrate done")
-        return
-
-    db = dbutil.get_table("note_index")
-    for note in db.iter(limit = -1):
-        note_id = str(note.id)
-        if note.creator is None:
-            print("invalid note:%r", note.id)
-            continue
-        if note.is_deleted:
-            delete_visit_log(note.creator, note_id)
-            continue
-        increment = note.visited_cnt or 1
-        _update_log(note.creator, note, increment)
-
-    mark_migrate_done("note_visit_log")
-
-
-@xmanager.listen("sys.reload")
-def check_and_rebuild_note_log(ctx):
-    rebuild_visit_log()
 
 # 读操作
 xutils.register_func("note.count_visit_log", count_visit_log)
@@ -207,3 +170,5 @@ xutils.register_func("note.add_edit_log", add_edit_log)
 xutils.register_func("note.add_visit_log", add_visit_log)
 xutils.register_func("note.add_create_log", add_create_log)
 xutils.register_func("note.delete_visit_log", delete_visit_log)
+xutils.register_func("note._update_log", _update_log)
+

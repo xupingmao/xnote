@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/07/05 17:35:53
-# @modified 2021/12/29 22:45:33
+# @modified 2021/12/31 00:07:01
 import xutils
 import xauth
 from xutils import dbutil
@@ -29,30 +29,10 @@ def update_note_index_by_notes(notes):
             note.hot_index = new_index
             NOTE_DAO.update_index(note)
 
-def update_public_index():
-    # TODO: 加快切换速度
-    # 方案1: 使用两个index表进行切换
-    table = dbutil.get_hash_table("note_public_hot_index")
-    for key, value in table.iter():
-        table.delete(key)
-
-    note_table = dbutil.get_hash_table("note_index")
-    for key, note in note_table.iter(offset = 0, limit = -1):
-        print_debug_info("public_index", key, note)
-
-        if note.is_deleted:
-            continue
-        if note.is_public:
-            key = "%010d_%s" % (note.hot_index, note.id)
-            table.put(key, note.id)
-            print_debug_info("public_index", note.id)
-
-
 class StatsHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        update_public_index()
         return u"功能暂时停用"
 
         user_names = xauth.list_user_names()
