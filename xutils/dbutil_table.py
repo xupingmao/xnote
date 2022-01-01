@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/01/01 23:24:32
+# @modified 2022/01/02 00:00:43
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -31,6 +31,7 @@ class LdbTable:
 
     def __init__(self, table_name, user_name = None, 
             key_name = "_key", id_name = "_id"):
+        global INDEX_INFO_DICT
         # 参数检查
         check_table_name(table_name)
 

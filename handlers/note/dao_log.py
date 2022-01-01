@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/29 23:48:27
-# @modified 2022/01/01 22:53:09
+# @modified 2022/01/01 23:48:31
 # @filename dao_log.py
 
 """笔记相关的访问日志有两个部分：
@@ -87,7 +87,13 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
 
     note_ids = get_note_ids_from_logs(logs)
 
-    return NOTE_DAO.batch_query_list(note_ids)
+    notes = NOTE_DAO.batch_query_list(note_ids)
+
+    for note in notes:
+        note.badge_info = dateutil.format_date(note.atime)
+
+    return notes
+
 
 def list_hot(user_name, offset = 0, limit = 100):
     if limit < 0:
@@ -105,7 +111,7 @@ def list_hot(user_name, offset = 0, limit = 100):
 
     notes = NOTE_DAO.batch_query_list(note_ids)
     for note in notes:
-        note.hot_index = hot_dict.get(note.id)
+        note.badge_info = hot_dict.get(note.id)
     return notes
 
 def list_most_visited(user_name, offset, limit):
@@ -124,7 +130,12 @@ def list_recent_edit(user_name = None, offset = 0, limit = None, skip_deleted = 
     db = get_user_note_log_table(user_name)
     logs = db.list_by_index("mtime", offset = offset, limit = limit, reverse = True)
     note_ids = get_note_ids_from_logs(logs)
-    return NOTE_DAO.batch_query_list(note_ids)
+    notes = NOTE_DAO.batch_query_list(note_ids)
+
+    for note in notes:
+        note.badge_info = dateutil.format_date(note.mtime)
+
+    return notes
 
 @xutils.timeit(name = "NoteDao.ListRecentCreated", logfile = True)
 def list_recent_created(user_name = None, offset = 0, limit = 10, skip_archived = False):
@@ -138,7 +149,12 @@ def list_recent_created(user_name = None, offset = 0, limit = 10, skip_archived 
     db = get_user_note_log_table(user_name)
     logs = db.list_by_index("ctime", offset = offset, limit = limit, reverse = True)
     note_ids = get_note_ids_from_logs(logs)
-    return NOTE_DAO.batch_query_list(note_ids)
+    notes = NOTE_DAO.batch_query_list(note_ids)
+
+    for note in notes:
+        note.badge_info = dateutil.format_date(note.mtime)
+
+    return notes
 
 def count_visit_log(user_name):
     return get_user_note_log_table(user_name).count()

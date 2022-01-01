@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2022/01/01 23:22:23
+# @modified 2022/01/01 23:37:25
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -245,7 +245,7 @@ def sort_by_dtime_asc(notes):
     notes.sort(key = lambda x: x.dtime)
 
 def sort_by_hot_index(notes):
-    notes.sort(key = lambda x: x.visited_cnt, reverse = True)
+    notes.sort(key = lambda x: x.hot_index or 1, reverse = True)
 
 SORT_FUNC_DICT = {
     "name": sort_by_name,

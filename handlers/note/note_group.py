@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2022/01/01 01:15:18
+# @modified 2022/01/01 23:52:28
 import math
 import time
 import web
@@ -517,7 +517,7 @@ class NotePluginHandler:
 
 
 class RecentHandler:
-    """最近的笔记"""
+    """最近的笔记/常用的笔记"""
 
     def count_note(self, user_name, orderby):
         return NOTE_DAO.count_visit_log(user_name)
@@ -534,14 +534,7 @@ class RecentHandler:
         page     = max(1, page)
         offset   = max(0, (page-1) * pagesize)
         limit    = pagesize
-        time_attr = "ctime"
-
-        show_mdate = False
-        show_cdate = False
-        show_adate = False
-        show_action_time = False
-        show_hot_index = False
-        dir_type   = "recent_edit"
+        dir_type = "recent_edit"
         creator = xauth.get_current_name()
 
         xmanager.add_visit_log(creator, "/note/recent?orderby=%s" % orderby)
@@ -549,28 +542,18 @@ class RecentHandler:
         if orderby == "all":
             html_title = "All"
             files = NOTE_DAO.list_recent_events(creator, offset, limit)
-            show_action_time = True
         elif orderby == "view":
             html_title = "Recent Viewed"
             files = NOTE_DAO.list_recent_viewed(creator, offset, limit)
-            show_adate = True
-            dir_type = "recent_viewed"
         elif orderby == "create":
             html_title = "Recent Created"
             files = NOTE_DAO.list_recent_created(creator, offset, limit)
-            time_attr = "ctime"
-            show_cdate = True
-            dir_type = "recent_created"
-        elif orderby == "hot":
+        elif orderby == "myhot":
             html_title = "Hot"
             files = NOTE_DAO.list_hot(creator, offset, limit)
-            show_hot_index = True
         else:
             html_title = "Recent Updated"
             files = NOTE_DAO.list_recent_edit(creator, offset, limit)
-            time_attr = "mtime"
-            show_mdate = True
-            dir_type = "recent_edit"
         
         count = self.count_note(creator, orderby)
         
@@ -584,13 +567,7 @@ class RecentHandler:
             show_aside = False,
             show_size  = False,
             page = page,
-            time_attr  = time_attr,
-            show_cdate = show_cdate,
-            show_mdate = show_mdate,
-            show_adate = show_adate,
             show_next  = False,
-            show_action_time = show_action_time,
-            show_hot_index = show_hot_index,
             page_max    = math.ceil(count/xconfig.PAGE_SIZE), 
             page_url    = "/note/recent?orderby=%s&page=" % orderby)
 

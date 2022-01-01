@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/12/26 23:19:21
+# @modified 2022/01/01 23:58:51
 
 import sys
 import os
@@ -335,6 +335,7 @@ class Main:
 
     def test_dbutil_test(self):
         self.check_OK("/test/test_dbutil")
+        self.check_OK("/test/test_dbutil?p=clear")
 
 
 
