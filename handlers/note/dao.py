@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2022/01/01 01:27:02
+# @modified 2022/01/01 23:22:23
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -60,6 +60,7 @@ dbutil.register_table_index("note_public", "share_time")
 # 用户维度索引
 register_note_table("note_tiny", "用户维度的笔记索引 <note_tiny:user:note_id>")
 dbutil.register_table_index("note_tiny", "name")
+dbutil.register_table_index("note_tiny", "ctime")
 
 
 NOTE_DAO = xutils.DAO("note")
@@ -535,13 +536,6 @@ def create_token(type, id):
     dbutil.put("token:%s" % uuid, token_info)
     return uuid
 
-def get_id_from_log(log):
-    if isinstance(log, dict):
-        return log.get("id")
-    else:
-        # 老数据，都是id
-        return log
-
 def add_create_log(note):
     NOTE_DAO.add_create_log(note.creator, note)
 
@@ -731,7 +725,8 @@ def get_by_name(creator, name):
         if value.is_deleted:
             return False
         return value.name == name
-    result = dbutil.prefix_list("note_tiny:%s" % creator, find_func, 0, 1)
+    db = get_note_tiny_table(creator)
+    result = db.list(offset = 0, limit = 1, filter_func = find_func)
     if len(result) > 0:
         note = result[0]
         return get_by_id(note.id)
@@ -764,13 +759,14 @@ def delete_note_physically(creator, note_id):
     assert creator != None, "creator can not be null"
     assert note_id != None, "note_id can not be null"
 
-    tiny_key = "note_tiny:%s:%s" % (creator, note_id)
     full_key  = "note_full:%s" % note_id
     index_key = "note_index:%s" % note_id
 
-    dbutil.delete(tiny_key)
     dbutil.delete(full_key)
     dbutil.delete(index_key)
+
+    note_tiny_db = get_note_tiny_table(creator)
+    note_tiny_db.delete_by_id(note_id)
 
     delete_history(note_id)
 
@@ -847,7 +843,11 @@ def check_group_status(status):
 
 
 @xutils.timeit(name = "NoteDao.ListGroup:leveldb", logfile = True)
-def list_group(creator = None, orderby = "mtime_desc", skip_archived = False, status = "all", offset = 0, limit = None):
+def list_group(creator = None, orderby = "mtime_desc", 
+        skip_archived = False, 
+        status = "all", 
+        offset = 0, limit = None):
+    """查询笔记本列表"""
     check_group_status(status)
 
     # TODO 添加索引优化
@@ -918,15 +918,16 @@ def list_public(offset, limit, orderby = "ctime_desc"):
 
 
 def count_public():
-    def list_func(key, value):
-        if value.is_deleted:
-            return False
-        return value.is_public
-
-    return dbutil.prefix_count("note_tiny:", list_func)
+    db = get_note_public_table()
+    return db.count()
 
 @xutils.timeit(name = "NoteDao.ListNote:leveldb", logfile = True, logargs=True)
-def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name", skip_group = False, include_public = True):
+def list_by_parent(creator, parent_id, offset = 0, limit = 1000, 
+        orderby="name", skip_group = False, include_public = True):
+    """通过父级节点ID查询笔记列表"""
+    if parent_id is None:
+        raise Exception("list_by_parent: parent_id is None")
+        
     parent_id = str(parent_id)
     # TODO 添加索引优化
     def list_note_func(key, value):
@@ -942,32 +943,10 @@ def list_by_parent(creator, parent_id, offset = 0, limit = 1000, orderby="name",
         else:
             return value.creator == creator
 
-    notes = dbutil.prefix_list("note_tiny:", list_note_func)
+    db = get_note_tiny_table(creator)
+    notes = db.list(offset = 0, limit = limit, filter_func = list_note_func)
     sort_notes(notes, orderby)
     return notes[offset:offset+limit]
-
-def list_recent_events(creator = None, offset = 0, limit = None):
-    create_events = NOTE_DAO.list_recent_created(creator, offset, limit)
-    edit_events = NOTE_DAO.list_recent_edit(creator, offset, limit)
-    view_events = NOTE_DAO.list_recent_viewed(creator, offset, limit)
-
-    def map_notes(notes, action):
-        for note in notes:
-            note.action = action
-            if action == "create":
-                note.action_time = note.ctime
-            elif action == "edit":
-                note.action_time = note.mtime
-            else:
-                note.action_time = note.atime
-
-    map_notes(create_events, "create")
-    map_notes(edit_events, "edit")
-    map_notes(view_events, "view")
-
-    events = create_events + edit_events + view_events
-    events.sort(key = lambda x: x.action_time, reverse = True)
-    return events[offset: offset + limit]
 
 def list_by_date(field, creator, date, orderby = "ctime_desc"):
     user = creator
@@ -1070,6 +1049,7 @@ def get_history(note_id, version):
 
 def search_name(words, creator = None, parent_id = None, orderby = "hot_index"):
     assert isinstance(words, list)
+
     words = [word.lower() for word in words]
     if parent_id != None and parent_id != "":
         parent_id = str(parent_id)
@@ -1079,8 +1059,13 @@ def search_name(words, creator = None, parent_id = None, orderby = "hot_index"):
             return False
         if parent_id != None and str(value.parent_id) != parent_id:
             return False
-        return (value.creator == creator or value.is_public) and textutil.contains_all(value.name.lower(), words)
-    result = dbutil.prefix_list("note_tiny:%s" % creator, search_func, 0, MAX_SEARCH_SIZE)
+        is_user_match = (value.creator == creator or value.is_public)
+        is_words_match = textutil.contains_all(value.name.lower(), words)
+        return is_user_match and is_words_match
+
+    db = get_note_tiny_table(creator)
+
+    result = db.list(filter_func = search_func, offset = 0, limit = MAX_SEARCH_SIZE)
 
     # 补全信息
     build_note_list_info(result)
@@ -1420,7 +1405,6 @@ def check_not_empty(value, method_name):
 xutils.register_func("note.create", create_note)
 xutils.register_func("note.update", update_note)
 xutils.register_func("note.update0", update0)
-xutils.register_func("note.update_index", update_index)
 xutils.register_func("note.move", move_note)
 xutils.register_func("note.visit",  visit_note)
 xutils.register_func("note.delete", delete_note)
@@ -1429,6 +1413,9 @@ xutils.register_func("note.update_tags", update_tags)
 xutils.register_func("note.create_token", create_token)
 xutils.register_func("note.share_to", share_note_to)
 xutils.register_func("note.delete_physically", delete_note_physically)
+
+## 内部更新索引的接口，外部不要使用
+xutils.register_func("note.update_index", update_index)
 xutils.register_func("note.update_public_index", update_public_index)
 
 # query functions
@@ -1462,7 +1449,6 @@ xutils.register_func("note.list_sticky",  list_sticky)
 xutils.register_func("note.list_archived", list_archived)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_public", list_public)
-xutils.register_func("note.list_recent_events", list_recent_events)
 xutils.register_func("note.list_by_func", list_by_func)
 xutils.register_func("note.list_share_to", list_share_to)
 

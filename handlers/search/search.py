@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2021/12/04 21:11:42
+# @modified 2022/01/01 23:19:28
 
 import re
 import os
@@ -112,6 +112,7 @@ def fill_note_info(files):
             if parent is not None:
                 file.parent_name = parent.name
             file.show_move = True
+            file.badge_info = "热度:%s" % file.hot_index
 
 def log_search_history(user, key, category = "default", cost_time = 0):
     NOTE_DAO.add_search_history(user, key, category, cost_time)

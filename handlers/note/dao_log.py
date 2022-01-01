@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/29 23:48:27
-# @modified 2021/12/31 23:02:39
+# @modified 2022/01/01 22:53:09
 # @filename dao_log.py
 
 """笔记相关的访问日志有两个部分：
@@ -156,6 +156,28 @@ def add_edit_log(user_name, note):
 def add_create_log(user_name, note):
     return _update_log(user_name, note)
 
+def list_recent_events(user_name = None, offset = 0, limit = None):
+    create_events = list_recent_created(user_name, offset, limit)
+    edit_events = list_recent_edit(user_name, offset, limit)
+    view_events = list_recent_viewed(user_name, offset, limit)
+
+    def map_notes(notes, action):
+        for note in notes:
+            note.action = action
+            if action == "create":
+                note.action_time = note.ctime
+            elif action == "edit":
+                note.action_time = note.mtime
+            else:
+                note.action_time = note.atime
+
+    map_notes(create_events, "create")
+    map_notes(edit_events, "edit")
+    map_notes(view_events, "view")
+
+    events = create_events + edit_events + view_events
+    events.sort(key = lambda x: x.action_time, reverse = True)
+    return events[offset: offset + limit]
 
 # 读操作
 xutils.register_func("note.count_visit_log", count_visit_log)
@@ -164,6 +186,7 @@ xutils.register_func("note.list_hot", list_hot)
 xutils.register_func("note.list_recent_edit", list_recent_edit)
 xutils.register_func("note.list_recent_created", list_recent_created)
 xutils.register_func("note.list_most_visited", list_most_visited)
+xutils.register_func("note.list_recent_events", list_recent_events)
 
 # 写操作
 xutils.register_func("note.add_edit_log", add_edit_log)

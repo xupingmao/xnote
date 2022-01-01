@@ -1,8 +1,10 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/31 22:53:27
-# @modified 2022/01/01 00:00:15
+# @modified 2022/01/01 23:00:59
 # @filename upgrade_001.py
+
+"""user_note_log日志重建"""
 
 import xmanager
 import xutils

@@ -1,13 +1,12 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2021/12/30 23:01:44
+# @modified 2022/01/01 23:24:32
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
 from urllib.request import quote
 
-register_table("_redo_log", "重做日志")
 register_table("_index", "通用索引")
 
 
@@ -301,7 +300,15 @@ class LdbTable:
             commit_write_batch(batch)
 
 
-    def iter(self, offset = 0, limit = 20, reverse = False, key_from = None, filter_func = None):
+    def iter(self, offset = 0, limit = 20, reverse = False, key_from = None, 
+            filter_func = None):
+        """返回一个遍历的迭代器
+        @param {int} offset 返回结果下标开始
+        @param {int} limit  返回结果最大数量
+        @param {bool} reverse 返回结果是否逆序
+        @param {str} key_from 开始的key
+        @param {func} filter_func 过滤函数
+        """
         if key_from == "":
             key_from = None
 

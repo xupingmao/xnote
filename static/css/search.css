@@ -2,10 +2,16 @@
  * 搜索的样式
  * @author xupingmao
  * @since 2021/04/24 17:35:43
- * @modified 2021/04/24 21:21:24
+ * @modified 2022/01/01 23:19:06
  * @filename search.css
  */
 
  .search-tab {
     padding: 5px;
+ }
+
+ .search-badge-info {
+    padding:2px;
+    font-size: 12px;
+    color: green;
  }

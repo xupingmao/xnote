@@ -1,8 +1,10 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/31 23:22:49
-# @modified 2022/01/01 01:25:13
+# @modified 2022/01/01 23:00:39
 # @filename upgrade_002.py
+
+"""note_index索引重建"""
 
 import xutils
 from xutils import dbutil
@@ -22,6 +24,8 @@ def do_upgrade():
 
     db = dbutil.get_table("note_index")
     for note in db.iter(limit = -1):
+        if note.is_deleted:
+            continue
         if note.is_public:
             log_info("Fix public index:{}", note.id)
             if note.share_time is None:

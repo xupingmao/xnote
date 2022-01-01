@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2021/12/04 13:06:27
+@modified 2022/01/01 23:18:11
 -->
 
 {% block body %}
@@ -121,9 +121,11 @@
                         <span class="tag green-tag">公开</span>
                     {% end %}
 
-                    {% if file.mdate != None %}
-                        <span class="float-right note-last-visit-time">更新:{{file.mdate}}</span>
-                    {% end %}
+                    <div class="float-right">
+                        {% if file.badge_info %}
+                            <span class="search-badge-info">{{file.badge_info}}</span>
+                        {% end %}
+                    </div>
                 </div>
                 <div class="note-related">
                     <input type="text" data-role="tagsinput" value="{{file.related}}"/>
