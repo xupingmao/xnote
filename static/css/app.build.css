@@ -1564,7 +1564,7 @@ li.menu-item:hover {
  * 标签的样式
  * @author xupingmao
  * @since 2021/05/22 12:56:05
- * @modified 2021/12/04 15:20:58
+ * @modified 2022/01/02 12:23:54
  * @filename common-tag.css
  */
 
@@ -1665,6 +1665,7 @@ li.menu-item:hover {
 .info-tag {
     padding: 3px;
     border-radius: 3px;
+    font-size: 12px;
     background: rgb(13, 202, 240);
     color: #fff;
 }
@@ -2177,7 +2178,7 @@ li.menu-item:hover {
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/08/14 10:09:17
+ * @modified 2022/01/02 14:44:19
 */
 
 
@@ -2463,6 +2464,13 @@ li.menu-item:hover {
     margin-top: 5px;
 }
 
+.edit-comment-btn, .delete-comment-btn {
+    color: black;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 2px;
+}
 /**
  * 插件的CSS样式
  * @author xupingmao

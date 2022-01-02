@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2022/01/01 01:31:03
+# @modified 2022/01/02 11:52:09
 import xutils
 import xtemplate
 import xauth
@@ -202,11 +202,7 @@ class DbScanHandler(BasePlugin):
         kw.get_display_value = get_display_value
         kw.error = self.error
         kw.last_key = self.last_key
-
-        table_values = sorted(dbutil.get_table_dict_copy().values(),
-            key = lambda x:(x.category,x.name))
-
-        kw.table_names = list(map(lambda x:x.name, table_values))
+        kw.table_names = dbutil.get_table_names()
 
         self.writetemplate(SCAN_HTML, **kw)
 

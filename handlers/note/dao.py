@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2022/01/01 23:37:25
+# @modified 2022/01/02 14:34:25
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -36,13 +36,13 @@ from xutils import readfile, savetofile, sqlite3, Storage
 from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
 from xutils import attrget
 
-def register_note_table(name, description):
-    dbutil.register_table(name, description, "note")
+def register_note_table(name, description, check_user = False):
+    dbutil.register_table(name, description, "note", check_user = check_user)
 
 register_note_table("note_full", "笔记完整信息 <note_full:note_id>")
 register_note_table("note_index", "笔记索引，不包含内容 <note_index:note_id>")
 register_note_table("note_skey", "用户维度的skey索引 <note_skey:user:skey>")
-register_note_table("notebook", "笔记分组")
+register_note_table("notebook", "笔记分组", check_user = True)
 register_note_table("token", "用于分享的令牌")
 register_note_table("note_history", "笔记的历史版本")
 register_note_table("note_tags", "笔记标签 <note_tags:user:note_id>")
@@ -58,7 +58,7 @@ dbutil.register_table_index("note_public", "hot_index")
 dbutil.register_table_index("note_public", "share_time")
 
 # 用户维度索引
-register_note_table("note_tiny", "用户维度的笔记索引 <note_tiny:user:note_id>")
+register_note_table("note_tiny", "用户维度的笔记索引 <table:user:id>", check_user = True)
 dbutil.register_table_index("note_tiny", "name")
 dbutil.register_table_index("note_tiny", "ctime")
 
@@ -461,6 +461,7 @@ def create_note_base(note_dict, date_str = None, note_id = None):
         add_create_log(note_dict)
         return note_id
     elif date_str is None or date_str == "":
+        # 默认创建规则
         note_id = dbutil.timeseq()
         note_dict["id"] = note_id
         put_note_to_db(note_id, note_dict)
@@ -468,6 +469,7 @@ def create_note_base(note_dict, date_str = None, note_id = None):
         add_create_log(note_dict)
         return note_id
     else:
+        # 指定日期创建
         date_str = date_str.replace(".", "-")
         if date_str == dateutil.format_date():
             # 当天创建的，保留秒级
@@ -478,7 +480,7 @@ def create_note_base(note_dict, date_str = None, note_id = None):
             CREATE_LOCK.acquire()
 
             while True:
-                note_id = format_note_id(timestamp)
+                note_id = "%020d" % timestamp
                 note_dict["ctime"] = dateutil.format_datetime(timestamp/1000)
                 old = get_by_id(note_id)
                 if old is None:
@@ -595,6 +597,10 @@ def update_index(note):
     """更新索引的时候也会更新用户维度的索引(note_tiny)"""
     id = note['id']
     note_id = format_note_id(id)
+
+    if note_id == "0":
+        # 根目录，不需要更新
+        return
 
     note_index = convert_to_index(note)
     dbutil.put('note_index:%s' % id, note_index)
@@ -1164,10 +1170,14 @@ def list_by_type(creator, type, offset, limit, orderby = "name", skip_archived =
             return False
         if type != "all" and value.type != type:
             return False
-        return value.creator == creator and value.is_deleted == 0
+        return value.is_deleted == 0
 
     filter_func = get_filter_func(type, list_func)
-    notes = dbutil.prefix_list("note_tiny:%s" % creator, filter_func, offset, limit, reverse = True)
+
+    db = get_note_tiny_table(creator)
+    notes = db.list_by_index("ctime", filter_func = filter_func, offset = offset, 
+        limit = limit, reverse = True)
+
     sort_notes(notes, orderby)
     return notes
 
@@ -1177,17 +1187,21 @@ def count_by_type(creator, type):
     filter_func = get_filter_func(type, default_count_func)
     return dbutil.prefix_count("note_tiny:%s" % creator, filter_func)
 
-def list_sticky(creator, offset = 0, limit = 1000, orderby = None):
+def list_sticky(creator, offset = 0, limit = 1000, orderby = "ctime_desc"):
     def list_func(key, value):
         return value.priority > 0 and value.creator == creator and value.is_deleted == 0
-    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, MAX_STICKY_SIZE)
+
+    db = get_note_tiny_table(creator)
+
+    notes = db.list(filter_func = list_func, offset = offset, limit = MAX_STICKY_SIZE)
     sort_notes(notes, orderby = orderby)
-    return notes[:limit]
+    return notes[offset:offset+limit]
 
 def count_sticky(creator):
     def list_func(key, value):
         return value.priority > 0 and value.creator == creator and value.is_deleted == 0
-    return dbutil.prefix_count("note_tiny:%s" % creator, list_func)
+    db = get_note_tiny_table(creator)
+    return db.count(filter_func = list_func)
 
 def list_archived(creator, offset = 0, limit = 100):
     def list_func(key, value):

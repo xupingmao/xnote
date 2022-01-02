@@ -1,10 +1,10 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2022/01/01 22:23:26
-# @modified 2022/01/01 23:13:32
+# @modified 2022/01/02 11:35:16
 # @filename upgrade_003.py
 
-"""note_tiny索引重建"""
+"""note_tiny/notebook索引重建"""
 
 import xutils
 from xutils import dbutil
@@ -38,7 +38,7 @@ def do_upgrade_book():
 
 
 def do_upgrade():
-    if is_upgrade_done("upgrade_003"):
+    if is_upgrade_done("upgrade_003.2"):
         log_info("upgrade_003 done")
         return
 
@@ -60,11 +60,13 @@ def do_upgrade():
         else:
             valid_count += 1
 
+        db.rebuild_index(value, user_name = value.creator)
+
     do_upgrade_book()
 
     log_info("[note_tiny] 无效索引数量:{}, 有效索引数量:{}", count, valid_count)
 
-    mark_upgrade_done("upgrade_003")
+    mark_upgrade_done("upgrade_003.2")
 
 
 

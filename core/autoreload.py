@@ -13,6 +13,7 @@ import types
 import os
 import sys
 import traceback
+from xutils import dateutil
 
 BLOCKED_EXT_LIST = [".pyc", ".class"]
 
@@ -26,7 +27,9 @@ def print_exception(e):
     ex_type, ex, tb = sys.exc_info()
     print(ex)
     traceback.print_tb(tb)
-    
+
+def log_info(fmt, *args):
+    print(dateutil.format_time(), "[autoreload]", fmt.format(*args))
 
 def force_reload():
     _reload_attempt = True
@@ -132,7 +135,7 @@ def _check_file(modify_times, path):
         modify_times[path] = modified
         return
     if modify_times[path] != modified:
-        print("file %s modified, reload" % path)
+        log_info("file {!r} modified, reload...", path)
         raise ReloadError()
 
 def reload():

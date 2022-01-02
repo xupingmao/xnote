@@ -2,7 +2,7 @@
  * 标签的样式
  * @author xupingmao
  * @since 2021/05/22 12:56:05
- * @modified 2021/12/04 15:20:58
+ * @modified 2022/01/02 12:23:54
  * @filename common-tag.css
  */
 
@@ -103,6 +103,7 @@
 .info-tag {
     padding: 3px;
     border-radius: 3px;
+    font-size: 12px;
     background: rgb(13, 202, 240);
     color: #fff;
 }

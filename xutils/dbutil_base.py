@@ -80,7 +80,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2021/12/30 23:07:09
+# @modified 2022/01/02 11:53:31
 ###########################################################
 
 
@@ -343,21 +343,29 @@ def check_table_name(table_name):
     if table_name not in TABLE_INFO_DICT:
         raise DBException("table %r not registered!" % table_name)
 
-def validate_none(obj, msg):
-    assert obj == None, msg
+def get_table_info(table_name):
+    global TABLE_INFO_DICT
+    return TABLE_INFO_DICT.get(table_name)
 
-def validate_obj(obj, msg):
-    assert obj != None, msg
+def validate_none(obj, msg, *argv):
+    if obj != None:
+        raise DBException(msg.format(*argv))
+
+def validate_obj(obj, msg, *argv):
+    if obj is None:
+        raise DBException(msg.format(*argv))
 
 def validate_str(obj, msg, *argv):
     if not isinstance(obj, str):
         raise DBException(msg.format(*argv))
 
-def validate_list(obj, msg):
-    assert isinstance(obj, list), msg
+def validate_list(obj, msg, *argv):
+    if not isinstance(obj, list):
+        raise DBException(msg.format(*argv))
 
-def validate_dict(obj, msg):
-    assert isinstance(obj, dict), msg
+def validate_dict(obj, msg, *argv):
+    if not isinstance(obj, dict):
+        raise DBException(msg.format(*argv))
 
 class TableInfo:
 
@@ -365,16 +373,17 @@ class TableInfo:
         self.name = name
         self.description = description
         self.category = category
+        self.check_user = False
 
-def register_table(table_name, description, category = "default"):
+def register_table(table_name, description, category = "default", check_user = False):
     # TODO 考虑过这个方法直接返回一个 LdbTable 实例
     # LdbTable可能针对同一个`table`会有不同的实例
     if not re.match(r"^[0-9a-z_]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
-    register_table_inner(table_name, description, category)
+    register_table_inner(table_name, description, category, check_user)
 
-def register_table_inner(table_name, description, category = "default"):
+def register_table_inner(table_name, description, category = "default", check_user = False):
     if not re.match(r"^[0-9a-z_\$]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
@@ -382,7 +391,10 @@ def register_table_inner(table_name, description, category = "default"):
         # 已经注册了
         return
 
-    TABLE_INFO_DICT[table_name] = TableInfo(table_name, description, category)
+    info = TableInfo(table_name, description, category)
+    info.check_user = check_user
+
+    TABLE_INFO_DICT[table_name] = info
 
 def register_table_index(table_name, index_name):
     """注册表的索引"""
@@ -402,6 +414,12 @@ def register_table_index(table_name, index_name):
 
 def get_table_dict_copy():
     return TABLE_INFO_DICT.copy()
+
+def get_table_names():
+    """获取表名称"""
+    global TABLE_INFO_DICT
+    values = sorted(TABLE_INFO_DICT.values(), key = lambda x:(x.category,x.name))
+    return list(map(lambda x:x.name, values))
 
 def get(key, default_value = None):
     check_leveldb()

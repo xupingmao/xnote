@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/08/14 10:09:17
+ * @modified 2022/01/02 14:44:19
 */
 
 
@@ -288,3 +288,10 @@
     margin-top: 5px;
 }
 
+.edit-comment-btn, .delete-comment-btn {
+    color: black;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 2px;
+}

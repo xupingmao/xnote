@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2022/01/01 23:52:28
+# @modified 2022/01/02 13:12:42
 import math
 import time
 import web
@@ -23,11 +23,13 @@ TYPES_NAME = "笔记索引"
 NOTE_DAO   = xutils.DAO("note")
 MSG_DAO    = xutils.DAO("message")
 PLUGIN     = xutils.Module("plugin")
+SMART_GROUP_COUNT = 0
 
-def SmartNote(name, url, icon = "fa-folder"):
+def SmartNote(name, url, icon = "fa-folder", size = None):
     note = Storage(name = name, url = url)
     note.priority = 0
     note.icon = icon
+    note.size = size
     return note
 
 class NoteCategory:
@@ -125,9 +127,19 @@ def type_node_path(name, url):
 
 
 def list_smart_group(user_name):
+    global SMART_GROUP_COUNT
+
+    note_stat = NOTE_DAO.get_note_stat(user_name)
     smart_group_list = []
     # TODO 通过关键字配置的智能文件夹
-    # smart_group_list.append(SmartNote("置顶笔记", "/note/sticky"))
+    smart_group_list.append(SmartNote("置顶笔记", "/note/sticky", size = note_stat.sticky_count))
+    smart_group_list.append(SmartNote("全部笔记", "/note/all", size = note_stat.total))
+    smart_group_list.append(SmartNote("文档", "/note/document", size = note_stat.doc_count))
+    smart_group_list.append(SmartNote("清单", "/note/list", size = note_stat.list_count))
+    smart_group_list.append(SmartNote("相册", "/note/gallery", size = note_stat.gallery_count))
+    smart_group_list.append(SmartNote("回收站", "/note/removed", size = note_stat.removed_count))
+
+    SMART_GROUP_COUNT = len(smart_group_list)
     return smart_group_list
 
 class DefaultListHandler:
@@ -243,9 +255,8 @@ class GroupListHandler:
 
         xmanager.add_visit_log(user_name, "/note/group")
 
-        notes = self.load_group_list(user_name, status)
-
         root  = NOTE_DAO.get_root()
+        notes = self.load_group_list(user_name, status)
 
         kw = Storage()
         kw.title     = T("我的笔记本")
@@ -254,6 +265,7 @@ class GroupListHandler:
         kw.parent_id = 0
         kw.archived_count = NOTE_DAO.count_group(user_name, status = "archived")
         kw.active_count   = NOTE_DAO.count_group(user_name, status = "active")
+        kw.smart_count    = SMART_GROUP_COUNT
 
         return xtemplate.render("note/page/group_list.html", **kw)
 
@@ -740,6 +752,8 @@ xutils.register_func("url:/note/tools", NotePluginHandler)
 xutils.register_func("url:/note/date",  DateListHandler)
 xutils.register_func("url:/note/all", AllNoteListHandler)
 xutils.register_func("note.list_smart_group", list_smart_group)
+
+list_smart_group("admin")
 
 xurls = (
     r"/note/group"          , GroupListHandler,
