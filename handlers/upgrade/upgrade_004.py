@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2022/01/08 11:04:03
-# @modified 2022/01/08 12:00:44
+# @modified 2022/01/08 12:15:00
 # @filename upgrade_004.py
 
 """note_public索引重建"""
@@ -23,7 +23,7 @@ def do_upgrade():
         if value.share_time is None:
             value.share_time = value.ctime
             db.update(value)
-        db.rebuild_index(value, value.creator)
+        db.rebuild_index(value)
 
     mark_upgrade_done("upgrade_004.2")
 
