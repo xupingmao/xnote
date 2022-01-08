@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2022/01/01 22:23:26
-# @modified 2022/01/02 11:35:16
+# @modified 2022/01/08 15:26:03
 # @filename upgrade_003.py
 
 """note_tiny/notebook索引重建"""
@@ -59,6 +59,10 @@ def do_upgrade():
             count += 1
         else:
             valid_count += 1
+
+        if value.creator is None:
+            log_info("creator is None, id:{!r}", note_id)
+            continue
 
         db.rebuild_index(value, user_name = value.creator)
 
