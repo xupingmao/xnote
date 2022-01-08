@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/31 23:06:44
-# @modified 2022/01/01 01:26:03
+# @modified 2022/01/08 11:08:16
 # @filename upgrade_main.py
 
 """系统升级相关的自动化脚本
@@ -20,6 +20,7 @@ import xutils
 from xutils import dbutil
 from xutils import dateutil
 
+MAX_FILE_COUNT = 10
 dbutil.register_table("db_upgrade_log", "数据库升级日志")
 
 def get_upgrade_log_table():
@@ -47,7 +48,7 @@ def check_upgrade(ctx):
     log_info("check_upgrade...")
 
     i = 0
-    for i in range(10):
+    for i in range(MAX_FILE_COUNT):
         mod_name = "handlers.upgrade.upgrade_%03d" % i
         try:
             mod = six._import_module(mod_name)

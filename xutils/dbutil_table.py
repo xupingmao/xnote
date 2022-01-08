@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/01/02 14:37:17
+# @modified 2022/01/02 16:25:17
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -130,6 +130,7 @@ class LdbTable:
             validate_str(user_name, "invalid user_name:{!r}", user_name)
 
     def _get_prefix(self, user_name = None):
+        user_name = self.user_name or user_name
         if user_name is None:
             return self.table_name + ":"
         else:
