@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/31 23:06:44
-# @modified 2022/01/08 11:08:16
+# @modified 2022/01/08 15:16:45
 # @filename upgrade_main.py
 
 """系统升级相关的自动化脚本
@@ -17,6 +17,7 @@
 import six
 import xmanager
 import xutils
+import xauth
 from xutils import dbutil
 from xutils import dateutil
 
@@ -44,7 +45,7 @@ def log_warn(fmt, *args):
     print(dateutil.format_time(), "[upgrade]", fmt.format(*args))
 
 @xmanager.listen("sys.reload")
-def check_upgrade(ctx):
+def check_upgrade(ctx = None):
     log_info("check_upgrade...")
 
     i = 0
@@ -62,6 +63,20 @@ def check_upgrade(ctx):
 
     log_info("check_upgrade done")
 
+class UpgradeHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        try:
+            check_upgrade()
+            return "success"
+        except:
+            return xutils.print_exc()
+
 xutils.register_func("upgrade.is_upgrade_done", is_upgrade_done)
 xutils.register_func("upgrade.mark_upgrade_done", mark_upgrade_done)
+xutils.register_func("upgrade.main", check_upgrade)
 
+xurls = (
+    r"/upgrade/main", UpgradeHandler
+)
