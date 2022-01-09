@@ -2,13 +2,9 @@
  * xnote扩展函数
  * @author xupingmao
  * @since 2021/05/30 14:39:39
- * @modified 2021/05/30 14:42:19
+ * @modified 2022/01/09 16:08:42
  * @filename x-ext.js
  */
-
-if (window.xnote == undefined) {
-    window.xnote = {};
-}
 
 xnote.EXT_DICT = {};
 

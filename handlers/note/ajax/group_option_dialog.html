@@ -2,21 +2,60 @@
 {% init share_to_list = [] %}
 
 <div class="card">
-    <span class="btn-line-height">状态</span>
-    <div class="float-right">
-        <a class="x-tab-btn status-btn" data-id="{{file.id}}" data-status="1">置顶</a>
-        <a class="x-tab-btn status-btn" data-id="{{file.id}}" data-status="0">活跃</a>
-        <a class="x-tab-btn status-btn" data-id="{{file.id}}" data-status="-1">归档</a>
+    <div class="list-item">
+        <span>状态</span>
+        <div class="float-right">
+            <select value="{{file.priority}}"
+                data-id="{{file.id}}"
+                onchange="xnote.api.note.changeStatus(this)">
+                <option value="1">置顶</option>
+                <option value="0">活跃</option>
+                <option valud="-1">归档</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="list-item">
+        <span class="btn-line-height">排序</span>
+        <div class="float-right">
+            <select class="orderby-select" 
+                onchange="xnote.api.note.changeOrderBySelect(this)"
+                data-id="{{file.id}}" value="{{file.orderby}}">
+                <option value="ctime_priority">最近创建</option>
+                <option value="name_priority">名称</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="list-item">
+        <span>重命名</span>
+        <div class="float-right">
+            <a class="btn btn-default" 
+                data-id="{{file.id}}" 
+                data-name="{{file.name}}" 
+                onclick="renameNoteByAttr(this);">重命名</a>
+        </div>
+    </div>
+
+    <div class="list-item">
+        <span>分享</span>
+        <div class="float-right">
+            {% if file.is_public %}
+                <a class="btn btn-default" 
+                    data-id="{{file.id}}"
+                    onclick="xnote.api.note.cancelPublicShare(this)">取消分享</a>
+            {% else %}
+                <a class="btn btn-default" 
+                    data-id="{{file.id}}"
+                    onclick="xnote.api.note.shareToPublic(this)">分享</a>
+            {% end %}
+        </div>
+    </div>
+
+    <div class="list-item">
+        <span>批量操作</span>
+        <div class="float-right">
+            <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">进入</a>
+        </div>
     </div>
 </div>
-
-{% include note/component/note_orderby.html %}
-
-<div class="card">
-    <div class="pad5 group-detail-btn-box">
-        <a class="btn btn-default note-share-btn" data-id="{{file.id}}">分享</a>
-        <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>
-        <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">批量操作</a>
-    </div>
-</div>
-

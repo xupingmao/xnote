@@ -1,13 +1,9 @@
 /** audio.js, part of xnote-ui 
  * @since 2020/01/05
- * @modified 2021/08/01 17:03:58
+ * @modified 2022/01/09 16:09:02
  **/
 
 $(function(e) {
-
-    if (window.xnote === undefined) {
-        window.xnote = {}
-    }
 
     // 默认不启用
     var audioEnabled = false;

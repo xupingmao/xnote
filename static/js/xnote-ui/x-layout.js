@@ -5,7 +5,7 @@ $.fn.autoHeight = function(){
         elem.style.height = 'auto';
         elem.scrollTop = 0; //防抖动
         elem.style.height = elem.scrollHeight + 'px';
-    }
+    };
 
     this.each(function(){
         autoHeight(this);
@@ -13,4 +13,5 @@ $.fn.autoHeight = function(){
             autoHeight(this);
         });
     });
-} 
+};
+

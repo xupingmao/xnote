@@ -6,6 +6,7 @@
     <script type="text/javascript" src="/static/js/marked-ext.js"></script>
 
     {% include note/component/view_css.html %}
+    {% include note/component/script/all_script.html %}
 
 {% end %}
 
@@ -28,10 +29,6 @@
     {% init show_comment    = True %}
     {% init error           = "" %}
     {% init show_ext_info   = True %}
-
-    <div class="mobile-only">
-        {% include note/component/note_orderby_select.html %}
-    </div>
 
     {% include note/editor/view_group.html %}
 

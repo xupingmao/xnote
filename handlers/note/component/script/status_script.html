@@ -1,0 +1,24 @@
+<script type="text/javascript">
+$(function () {
+    // 注册API模块
+    xnote.registerApiModule("note");
+
+    // 修改笔记本的排序
+    xnote.api.note.changeStatus = function(target) {
+        var id = $(target).attr("data-id");
+        var status = $(target).val();
+        
+        checkNotEmpty(id, "data-id为空");
+
+        $.post("/note/status", {id: id, status: status}, function (resp) {
+            var code = resp.code;
+            if (code != "success") {
+                xnote.alert(resp.message);
+            } else {
+                xnote.toast(resp.message);
+                window.location.reload();
+            }
+        })
+    }
+})
+</script>

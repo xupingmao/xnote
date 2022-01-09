@@ -602,18 +602,36 @@ $.fn.extend({
     }
 });
 /**
+ * description here
+ * @author xupingmao
+ * @since 2022/01/09 16:17:02
+ * @modified 2022/01/09 16:30:37
+ * @filename x-init.js
+ */
+
+/** 初始化全局对象 **/
+if (window.xnote === undefined) {
+    // 全局对象
+    window.xnote = {};
+    // 初始化API对象
+    window.xnote.api = {};
+}
+
+
+window.xnote.registerApiModule = function (name) {
+    if (xnote.api[name] === undefined) {
+        xnote.api[name] = {};
+    }
+};
+
+
+/**
  * xnote扩展事件
  * @author xupingmao
  * @since 2021/05/30 14:39:39
- * @modified 2021/09/04 18:34:04
+ * @modified 2022/01/09 16:31:57
  * @filename x-event.js
  */
-
-// xnote事件驱动
-if (window.xnote == undefined) {
-    window.xnote = {};
-}
-
 
 (function(){
 
@@ -728,7 +746,7 @@ if (window.xnote == undefined) {
     EventDispatcher.prototype.defineEvent = function(type, description)
     {
         this._eventDescription[type] = description;
-    }
+    };
 
     //添加若干的常用的快捷缩写方法
     EventDispatcher.prototype.on = EventDispatcher.prototype.addEventListener;
@@ -738,25 +756,21 @@ if (window.xnote == undefined) {
     xnote._eventDispatcher = new EventDispatcher();
     xnote.addEventListener = xnote.on = function (type, listener) {
         return xnote._eventDispatcher.addEventListener(type, listener);
-    }
+    };
 
     xnote.dispatchEvent = xnote.fire = function (type, target) {
         var event = {type: type, target: target};
         return xnote._eventDispatcher.dispatchEvent(event);
-    }
+    };
     
 })();
 /**
  * xnote扩展函数
  * @author xupingmao
  * @since 2021/05/30 14:39:39
- * @modified 2021/05/30 14:42:19
+ * @modified 2022/01/09 16:08:42
  * @filename x-ext.js
  */
-
-if (window.xnote == undefined) {
-    window.xnote = {};
-}
 
 xnote.EXT_DICT = {};
 
@@ -773,13 +787,8 @@ window.xnote.setExtFunc = function (funcName, func) {
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2021/09/04 18:28:46
+ * @modified 2022/01/09 16:41:00
  */
-
-
-if (window.xnote == undefined) {
-    window.xnote = {};
-}
 
 var XUI = function(window) {
     // 处理select标签选中情况
@@ -874,10 +883,15 @@ var XUI = function(window) {
         }
     }
 
-    // 初始化
-    initDefaultValue();
-    // 注册事件
-    xnote.addEventListener("init-default-value", initDefaultValue);
+    // 刷新各种默认值
+    xnote.refresh = function () {
+        // 初始化
+        initDefaultValue();
+        // 注册事件
+        xnote.addEventListener("init-default-value", initDefaultValue);
+    }
+
+    xnote.refresh();
 };
 
 $(document).ready(function() {
@@ -1223,14 +1237,10 @@ $(function () {
 });
 /** audio.js, part of xnote-ui 
  * @since 2020/01/05
- * @modified 2021/08/01 17:03:58
+ * @modified 2022/01/09 16:09:02
  **/
 
 $(function(e) {
-
-    if (window.xnote === undefined) {
-        window.xnote = {}
-    }
 
     // 默认不启用
     var audioEnabled = false;
@@ -1266,10 +1276,6 @@ $(function(e) {
  */
 
 var BASE_URL = "/static/lib/webuploader";
-
-if (window.xnote == undefined) {
-    window.xnote = {};
-}
 
 function createXnoteLoading() {
     return loadingIndex = layer.load(2);
@@ -1639,6 +1645,8 @@ xnote.showAjaxDialog = function(title, url, buttons, functions) {
         options.functions = functions;
         options.html = resp;
         xnote.showDialogEx(options);
+        // 刷新各种组件的默认值
+        xnote.refresh();
     }).fail(function (error) {
         xnote.alert("调用接口失败，请重试");
     })
@@ -1973,7 +1981,7 @@ $.fn.autoHeight = function(){
         elem.style.height = 'auto';
         elem.scrollTop = 0; //防抖动
         elem.style.height = elem.scrollHeight + 'px';
-    }
+    };
 
     this.each(function(){
         autoHeight(this);
@@ -1981,31 +1989,28 @@ $.fn.autoHeight = function(){
             autoHeight(this);
         });
     });
-} /**
+};
+
+/**
  * description here
  * @author xupingmao
  * @since 2021/05/01 14:56:59
- * @modified 2021/05/01 15:17:19
+ * @modified 2022/01/09 16:42:27
  * @filename x-template.js
  */
-
-if (window.xnote == undefined) {
-    window.xnote = {};
-}
-
+ 
 (function (xnote) {
     /**
      * 简单的模板渲染，这里假设传进来的参数已经进行了html转义
      */
-    function renderTemplate(templateText, object) {
+    xnote.renderTemplate = function(templateText, object) {
         return templateText.replace(/\$\{(.*?)\}/g, function (context, objKey) {
             return object[objKey.trim()] || '';
         });
     }
 
-    xnote.renderTemplate = renderTemplate;
-
-})(window.xnote);/**
+})(window.xnote);
+/**
  * 通用的操作函数
  */
 $(function() {

@@ -1,0 +1,24 @@
+<script type="text/javascript">
+$(function () {
+    // 注册API模块
+    xnote.registerApiModule("note");
+
+    // 修改笔记本的排序
+    xnote.api.note.changeOrderBySelect = function(target) {
+        var id = $(target).attr("data-id");
+        var orderby = $(target).val();
+        
+        checkNotEmpty(id, "data-id为空");
+
+        $.post("/note/orderby", {id: id, orderby: orderby}, function (resp) {
+            var code = resp.code;
+            if (code != "success") {
+                xnote.alert(resp.message);
+            } else {
+                xnote.toast(resp.message);
+                window.location.reload();
+            }
+        })
+    }
+})
+</script>

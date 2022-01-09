@@ -2,15 +2,9 @@
  * xnote扩展事件
  * @author xupingmao
  * @since 2021/05/30 14:39:39
- * @modified 2021/09/04 18:34:04
+ * @modified 2022/01/09 16:31:57
  * @filename x-event.js
  */
-
-// xnote事件驱动
-if (window.xnote == undefined) {
-    window.xnote = {};
-}
-
 
 (function(){
 
@@ -125,7 +119,7 @@ if (window.xnote == undefined) {
     EventDispatcher.prototype.defineEvent = function(type, description)
     {
         this._eventDescription[type] = description;
-    }
+    };
 
     //添加若干的常用的快捷缩写方法
     EventDispatcher.prototype.on = EventDispatcher.prototype.addEventListener;
@@ -135,11 +129,11 @@ if (window.xnote == undefined) {
     xnote._eventDispatcher = new EventDispatcher();
     xnote.addEventListener = xnote.on = function (type, listener) {
         return xnote._eventDispatcher.addEventListener(type, listener);
-    }
+    };
 
     xnote.dispatchEvent = xnote.fire = function (type, target) {
         var event = {type: type, target: target};
         return xnote._eventDispatcher.dispatchEvent(event);
-    }
+    };
     
 })();

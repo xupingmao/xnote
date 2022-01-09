@@ -127,6 +127,8 @@ xnote.showAjaxDialog = function(title, url, buttons, functions) {
         options.functions = functions;
         options.html = resp;
         xnote.showDialogEx(options);
+        // 刷新各种组件的默认值
+        xnote.refresh();
     }).fail(function (error) {
         xnote.alert("调用接口失败，请重试");
     })

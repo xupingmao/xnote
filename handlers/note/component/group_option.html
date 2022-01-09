@@ -5,38 +5,8 @@
 {% init show_group_option = True %}
 
 {% if file != None and _has_login and show_group_option %}
-    <div class="dropdown">
-      <span class="dropdown-btn link btn btn-default">更多▾</span>
-      <div class="dropdown-content">
-        <a class="dropdown-option" href="/note/stick?id={{file.id}}">
-            置顶
-            {% if file.priority == 1 %}<i class="fa fa-check"></i>{% end %}
-        </a>
-
-        <a class="dropdown-option" href="/note/reset?id={{file.id}}">
-            普通
-            {% if file.priority == 0 %}<i class="fa fa-check"></i>{% end %}
-        </a>
-
-        <a class="dropdown-option link" href="/note/archive?id={{file.id}}">
-            归档
-            {% if file.priority == -1 %}
-                <i class="fa fa-check"></i>
-            {% end %}
-        </a>
-        
-        {% if str(file.id) != "0" %}
-            <a class="dropdown-option" href="javascript:renameNote('{{file.id}}', '{{file.name}}')">重命名</a>
-        {% end %}
-
-        <a class="dropdown-option note-share-btn" data-id="{{file.id}}">分享</a>
-        <a class="dropdown-option" href="/note/management?parent_id={{file.id}}">批量操作</a>
-        
-        {% if file.size == 0 %}
-            <a class="dropdown-option-red" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
-        {% end %}
-      </div>
-    </div>
+    <button class="btn btn-default note-group-option-btn">设置</button>
+    {% comment include note/component/group_option_dropdown.html %}
 {% end %}
 
 <a class="btn btn-default" href="javascript:history.back();">返回</a>
@@ -47,5 +17,10 @@
     </div>
 {% end %}
 
-{% include note/component/script/rename_script.html %}
 {% include note/component/script/note_option_script.html %}
+
+<script type="text/javascript">
+    $(".note-group-option-btn").click(function () {
+        xnote.showAjaxDialog("笔记本设置", "/note/ajax/group_option_dialog?note_id={{file.id}}");
+    })
+</script>

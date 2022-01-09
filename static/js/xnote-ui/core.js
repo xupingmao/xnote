@@ -5,13 +5,8 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2021/09/04 18:28:46
+ * @modified 2022/01/09 16:41:00
  */
-
-
-if (window.xnote == undefined) {
-    window.xnote = {};
-}
 
 var XUI = function(window) {
     // 处理select标签选中情况
@@ -106,10 +101,15 @@ var XUI = function(window) {
         }
     }
 
-    // 初始化
-    initDefaultValue();
-    // 注册事件
-    xnote.addEventListener("init-default-value", initDefaultValue);
+    // 刷新各种默认值
+    xnote.refresh = function () {
+        // 初始化
+        initDefaultValue();
+        // 注册事件
+        xnote.addEventListener("init-default-value", initDefaultValue);
+    }
+
+    xnote.refresh();
 };
 
 $(document).ready(function() {

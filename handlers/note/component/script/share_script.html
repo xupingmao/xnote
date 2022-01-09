@@ -1,0 +1,49 @@
+<script type="text/javascript">
+$(function () {
+    // 注册API模块
+    xnote.registerApiModule("note");
+
+    function note_open_share_dialog(target) {
+        var id = $(target).attr("data-id");
+        var type = "{{file.type}}";
+        var params = {note_id: id};
+        var ajax_dialog_url   = "/note/ajax/share_group_dialog";
+        var ajax_dialog_title = "分享笔记本";
+
+        if (type != "group") {
+            ajax_dialog_url = "/note/ajax/share_note_dialog";
+            ajax_dialog_title = "分享笔记";
+        }
+
+        $.get(ajax_dialog_url, params, function (resp) {
+            xnote.showDialog(ajax_dialog_title, resp);
+        });
+    }
+
+
+    xnote.api.note.shareToPublic = function(target) {
+        var id = $(target).attr("data-id");
+
+        note_open_share_dialog(target);
+        
+        // $.get("/note/share/public?id=" + id, function (resp) {
+        //     if (resp.code == "success") {
+        //         window.location.reload();
+        //     } else {
+        //         xnote.alert(resp.message);
+        //     }
+        // });
+    }
+
+    xnote.api.note.cancelPublicShare = function(target) {
+        var id = $(target).attr("data-id");
+        $.get("/note/share/cancel?id=" + id, function (resp) {
+            if (resp.code == "success") {
+                window.location.reload();
+            } else {
+                xnote.alert(resp.message);
+            }
+        });
+    }
+})
+</script>

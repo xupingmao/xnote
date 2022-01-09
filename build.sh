@@ -45,6 +45,7 @@ echo > ./static/js/app.build.js
 cat ./static/js/utils.build.js >> ./static/js/app.build.js
 
 # xnote-ui
+cat ./static/js/xnote-ui/x-init.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-event.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/x-ext.js >> ./static/js/app.build.js
 cat ./static/js/xnote-ui/core.js >> ./static/js/app.build.js

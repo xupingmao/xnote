@@ -2536,7 +2536,7 @@ li.menu-item:hover {
  * description here
  * @author xupingmao
  * @since 2021/05/01 15:36:08
- * @modified 2021/07/25 10:54:02
+ * @modified 2022/01/09 15:45:16
  * @filename todo.css
  */
 
@@ -2568,6 +2568,7 @@ li.menu-item:hover {
     padding: 3px;
     border-radius: 3px;
     background: #ccc;
+    font-size: 12px;
     color: white;
 }
 
@@ -2575,6 +2576,7 @@ li.menu-item:hover {
     padding: 3px;
     border-radius: 3px;
     background: orange;
+    font-size: 12px;
     color: #fff;
 }
 

@@ -4,10 +4,6 @@
 
 var BASE_URL = "/static/lib/webuploader";
 
-if (window.xnote == undefined) {
-    window.xnote = {};
-}
-
 function createXnoteLoading() {
     return loadingIndex = layer.load(2);
 }
