@@ -80,7 +80,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/01/02 11:53:31
+# @modified 2022/01/23 15:55:14
 ###########################################################
 
 
@@ -132,11 +132,18 @@ class RecordLock:
 
 class WriteBatchProxy:
 
-    """批量操作代理"""
+    """批量操作代理，批量操作必须在同步块中执行（必须加锁）"""
 
     def __init__(self):
         self._puts = {}
         self._deletes = set()
+
+    def check_and_put(self, key, val):
+        old_val = get(key)
+        if old_val == val:
+            # 值相同，不需要更新
+            return
+        self.put(key, val)
 
     def put(self, key, val):
         check_before_write(key)
@@ -147,12 +154,23 @@ class WriteBatchProxy:
         self._deletes.discard(key_bytes)
         self._puts[key_bytes] = val_bytes
 
+    def check_and_delete(self, key):
+        old_val = get(key)
+        if old_val == None:
+            # 值为空，不需要删除
+            return
+        self.delete(key)
+
     def delete(self, key):
         key_bytes = key.encode("utf-8")
         self._puts.pop(key_bytes, None)
         self._deletes.add(key_bytes)
 
     def log_debug_info(self):
+        # 没有更新直接返回
+        if len(self._puts) + len(self._deletes) == 0:
+            return
+
         print_debug_info("----- batch.begin -----")
         for key in self._puts:
             value = self._puts[key]

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/01/02 16:25:17
+# @modified 2022/01/23 15:54:11
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -13,6 +13,36 @@ register_table("_index", "通用索引")
 def dict_del(dict, key):
     if key in dict:
         del dict[key]
+
+def format_int(int_val):
+    if not isinstance(int_val, int):
+        raise Exception("format_int: expect int but see %r" % int_val)
+    if abs(int_val) > 10**20:
+        raise Exception("format_int: int value must between [-10**20, 10**20]")
+    
+    # 负数需要放在前面
+    # 直接加一个值把负数全部转成正数
+    if int_val < 0:
+        int_val += 10**20
+        return "A%020d" % int_val
+    else:
+        return "B%020d" % int_val
+
+
+def format_index_value(value):
+    if value is None:
+        return "NULL"
+    if isinstance(value, str):
+        return quote(value)
+    if isinstance(value, int):
+        return format_int(value)
+    if isinstance(value, float):
+        if value < 0:
+            value += 10**20
+            return "A%020.10f" % value
+        else:
+            return "B%020.10f" % value
+    raise Exception("unknown index_type:%r" % type(value))
 
 class LdbTable:
     """基于leveldb的表，比较常见的是以下几种
@@ -144,20 +174,7 @@ class LdbTable:
         return self.build_key_no_prefix(index_prefix, self.user_name or user_name)
 
     def _format_index_value(self, value):
-        if isinstance(value, str):
-            return quote(value)
-        if isinstance(value, int):
-            # 负数需要放在前面
-            if value < 0:
-                return "A%020d" % value
-            else:
-                return "B%020d" % value
-        if isinstance(value, float):
-            if value < 0:
-                return "A%020.10f" % value
-            else:
-                return "B%020.10f" % value
-        raise Exception("unknown index_type:%r" % type(value))
+        return format_index_value(value)
 
     def _escape_key(self, key):
         return quote(key)
@@ -189,19 +206,24 @@ class LdbTable:
             if new_obj != None:
                 new_value = new_obj.get(index_name)
 
-            if new_value == old_value:
-                print_debug_info("index value unchanged, index_name:{!r}, value:{!r}", index_name, old_value)
+            # 索引值是否变化
+            index_changed = (new_value != old_value)
+
+            if not index_changed:
+                print_debug_info("index value unchanged, index_name:{!r}, value:{!r}", 
+                    index_name, old_value)
                 if not force_update:
                     continue
                 # else: 强制更新
 
-            if old_value != None:
+            # 只要有旧的记录，就要清空旧索引值
+            if old_obj != None and index_changed:
                 old_value = self._format_index_value(old_value)
-                batch.delete(index_prefix + ":" + old_value + ":" + escaped_obj_id)
+                batch.check_and_delete(index_prefix + ":" + old_value + ":" + escaped_obj_id)
 
-            if new_value != None:
-                new_value = self._format_index_value(new_value)
-                batch.put(index_prefix + ":" + new_value + ":" + escaped_obj_id, obj_key)
+            # 新的索引值始终更新
+            new_value = self._format_index_value(new_value)
+            batch.check_and_put(index_prefix + ":" + new_value + ":" + escaped_obj_id, obj_key)
 
     def _delete_index(self, old_obj, batch, user_name = None):
         obj_id  = self._get_id_from_obj(old_obj)
@@ -303,16 +325,22 @@ class LdbTable:
         with get_write_lock(key):
             old_obj = get(key)
             self._format_value(key, obj)
-            self._update_index(old_obj, obj, batch, force_update = True, user_name = user_name)
+            self._update_index(old_obj, obj, batch, 
+                force_update = True, 
+                user_name = user_name)
             # 更新批量操作
             commit_write_batch(batch)
+
+    def repair_index(self):
+        repair = TableIndexRepair(self)
+        repair.repair_index()
 
     def delete(self, obj):
         obj_key = self._get_key_from_obj(obj)
         self.delete_by_key(obj_key)
 
     def delete_by_id(self, id):
-        validate_str(id, "delete_by_id: id is None")
+        validate_str(id, "delete_by_id: id is not str")
         key = self.build_key(id)
         self.delete_by_key(key)
 
@@ -444,6 +472,50 @@ class PrefixedDb(LdbTable):
     """plyvel中叫做prefixed_db"""
     pass
 
+
+class TableIndexRepair:
+    """表索引修复工具，不是标准功能，所以抽象到一个新的类里面"""
+
+    def __init__(self, db):
+        self.db = db
+
+    def repair_index(self):
+        db = self.db
+        for value in db.iter(limit = -1):
+            db.rebuild_index(value)
+
+        for name in db.index_names:
+            self.delete_invalid_index(name)
+
+    def do_delete(self, key):
+        print_debug_info("Delete {!r}", key)
+
+        if not key.startswith("_index$"):
+            print_debug_info("Invalid index key {!r}", key)
+            return
+        delete(key)
+
+    def delete_invalid_index(self, name):
+        db = self.db
+        index_prefix = db._get_index_prefix(name)
+        for old_key, record_key in prefix_iter(index_prefix, include_key = True):
+            record = get(record_key)
+            if record is None:
+                print_debug_info("empty record, key:{!r}, record_id:{!r}", 
+                    old_key, record_key)
+                self.do_delete(old_key)
+                continue
+
+            record_id   = db._get_id_from_key(record_key)
+            record_id   = db._escape_key(record_id)
+            index_value = getattr(record, name)
+            index_value = format_index_value(index_value)
+            new_key = index_prefix + ":" + index_value + ":" + record_id
+
+            if new_key != old_key:
+                print_debug_info("index dismatch, key:{!r}, record_id:{!r}, correct_key:{!r}", 
+                    old_key, record_key, new_key)
+                self.do_delete(old_key)
 
 
 

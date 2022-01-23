@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2022/01/02 13:12:42
+# @modified 2022/01/23 15:28:22
 import math
 import time
 import web
@@ -470,7 +470,6 @@ class RemovedListHandler(BaseListHandler):
 
     note_type = "removed"
     title     = T("回收站")
-    date_type = "ddate"
 
     def count_notes(self, user_name):
         return NOTE_DAO.count_removed(user_name)

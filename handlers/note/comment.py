@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/10 23:44:48
-# @modified 2021/12/11 14:19:42
+# @modified 2022/01/23 15:49:49
 import math
 import xconfig
 import xutils
@@ -149,7 +149,7 @@ class MyCommentsHandler:
         xmanager.add_visit_log(user_name, "/note/mycomments")
         date = xutils.get_argument("date", "")
 
-        return xtemplate.render("note/page/my_comments.html", 
+        return xtemplate.render("note/page/comment_user_page.html", 
             show_comment_title = False,
             show_comment_create = False,
             show_comment_note = True,

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2022/01/02 14:34:25
+# @modified 2022/01/23 15:43:21
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -31,10 +31,15 @@ import xauth
 import xmanager
 import copy
 import threading
+import logging 
 from collections import Counter
 from xutils import readfile, savetofile, sqlite3, Storage
 from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
 from xutils import attrget
+
+# 配置日志模块
+logging.basicConfig(level=logging.DEBUG,
+    format='%(asctime)s|%(levelname)s|%(filename)s:%(lineno)d|%(message)s')
 
 def register_note_table(name, description, check_user = False):
     dbutil.register_table(name, description, "note", check_user = check_user)
@@ -1119,7 +1124,11 @@ def check_and_remove_broken_notes(notes, user_name):
         if full != None:
             result.append(note)
         else:
+            logging.error("node=%s", note)
             delete_note(note.id)
+            # 如果note_index被删除，delete_note也无法删除它，所以需要再删除一下
+            db = get_note_tiny_table(note.creator)
+            db.delete(note)
             has_broken = True
 
     if has_broken:
@@ -1135,7 +1144,8 @@ def list_removed(creator, offset, limit, orderby = None):
     def list_func(key, value):
         return value.is_deleted and value.creator == creator
 
-    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, MAX_LIST_SIZE)
+    db = get_note_tiny_table(creator)
+    notes = db.list(filter_func = list_func, offset = offset, limit = MAX_LIST_SIZE)
     notes = check_and_remove_broken_notes(notes, creator)
     sort_notes(notes, orderby)
     return notes[offset: offset + limit]

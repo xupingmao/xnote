@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/18 17:37:52
-# @modified 2022/01/01 23:59:17
+# @modified 2022/01/16 20:22:26
 # @filename test_dbutil_handler.py
 
 import xauth
@@ -47,6 +47,17 @@ class TestHandler:
 
         return dict(count = count)
 
+class RepairHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        table_name = xutils.get_argument("table_name", "")
+        user_name  = xutils.get_argument("user_name",  "")
+        db = dbutil.get_table(table_name, user_name = user_name)
+        db.repair_index()
+        return "done"
+
 xurls = (
-    r"/test/test_dbutil", TestHandler
+    r"/test/test_dbutil", TestHandler,
+    r"/test/db_repair", RepairHandler
 )
