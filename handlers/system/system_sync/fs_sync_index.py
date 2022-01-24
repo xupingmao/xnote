@@ -1,13 +1,14 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/28 18:07:31
-# @modified 2021/12/28 23:46:11
+# @modified 2022/01/24 14:28:44
 # @filename fs_sync_index.py
 
 import os
 import xmanager
 import xutils
 import xconfig
+import logging
 from collections import deque
 from xutils import Storage
 from xutils import dbutil
@@ -35,7 +36,7 @@ class FileSyncIndexManager:
     def step(self):
         if len(self.data) == 0:
             self.data.append(xconfig.get_system_dir("files"))
-            print_debug_info("初始化文件队列")
+            logging.debug("初始化文件队列")
             return
 
         db = dbutil.get_table("fs_sync_index", type = "hash")
@@ -74,7 +75,7 @@ class FileSyncIndexManager:
                 self.data.append(temp_path)
                 size += 1
 
-            print_debug_info("文件夹进队列", fpath, size)
+            logging.debug("文件夹进队列 fpath:%s, size:%s", fpath, size)
 
     def list_files(self, key_from = None, offset = 0, limit = 20):
         result = []

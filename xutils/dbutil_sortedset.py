@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/05 11:25:18
-# @modified 2021/12/30 22:28:36
+# @modified 2022/01/24 14:47:38
 # @filename dbutil_sortedset.py
 
 """【待实现】有序集合，用于各种需要排名的场景，比如
@@ -30,6 +30,8 @@ class RankTable:
             self.prefix += ":"
 
     def _format_score(self, score):
+        if score is None:
+            return "$"
         if isinstance(score, int):
             return "%020d" % score
         if isinstance(score, str):
@@ -55,7 +57,8 @@ class RankTable:
             delete(key)
 
     def list(self, offset = 0, limit = 10, reverse = False):
-        return prefix_list(self.prefix, offset = offset, limit = limit, reverse = reverse)
+        return prefix_list(self.prefix, offset = offset, 
+            limit = limit, reverse = reverse)
 
 
 class LdbSortedSet:
@@ -72,11 +75,9 @@ class LdbSortedSet:
             batch = create_write_batch()
             old_score = self.member_dict.get(member)
             self.member_dict.put(member, score, batch = batch)
-            self.rank.put(member, score, batch = batch)
-
-            if old_score != None:
+            if old_score != score:
                 self.rank.delete(member, old_score, batch = batch)
-
+                self.rank.put(member, score, batch = batch)
             commit_write_batch(batch)
 
     def get(self, member):

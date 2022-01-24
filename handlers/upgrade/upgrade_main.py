@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/31 23:06:44
-# @modified 2022/01/08 15:16:45
+# @modified 2022/01/24 14:34:46
 # @filename upgrade_main.py
 
 """系统升级相关的自动化脚本
@@ -18,6 +18,7 @@ import six
 import xmanager
 import xutils
 import xauth
+import logging
 from xutils import dbutil
 from xutils import dateutil
 
@@ -46,7 +47,7 @@ def log_warn(fmt, *args):
 
 @xmanager.listen("sys.reload")
 def check_upgrade(ctx = None):
-    log_info("check_upgrade...")
+    logging.info("check_upgrade...")
 
     i = 0
     for i in range(MAX_FILE_COUNT):
@@ -54,14 +55,14 @@ def check_upgrade(ctx = None):
         try:
             mod = six._import_module(mod_name)
         except ImportError:
-            log_warn("加载模块失败: {}", mod_name)
+            logging.warning("加载模块失败: %s", mod_name)
             continue
 
         if hasattr(mod, "do_upgrade"):
-            log_info("执行升级:{}", mod_name)
+            logging.info("执行升级: %s", mod_name)
             mod.do_upgrade()
 
-    log_info("check_upgrade done")
+    logging.info("check_upgrade done")
 
 class UpgradeHandler:
 

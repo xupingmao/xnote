@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2021/07/25 11:18:58
+# @modified 2022/01/24 15:01:14
 
 import xauth
 import xtemplate
@@ -89,23 +89,9 @@ def list_special_groups(user_name = None):
     fixed_books = []
     fixed_books.append(MSG_DAO.get_message_tag(user_name, "task"))
     fixed_books.append(MSG_DAO.get_message_tag(user_name, "log"))
-
-    groups = NOTE_DAO.list_group(user_name, orderby = "name")
-    archived_groups = list(filter(lambda x: x.archived == True, groups))
-
-    # 全部笔记
-    note_stat = NOTE_DAO.get_note_stat(user_name)
-    fixed_books.append(NoteLink("全部笔记", "/note/all", size = note_stat.total, icon = "fa-folder"))
-
-    # 未分类信息
-    # files = NOTE_DAO.list_by_parent(user_name, 0, 0, 1000, skip_group = True, include_public = False)
-    # if len(files) > 0:
-    #     fixed_books.append(NoteLink("未分类笔记", "/note/default", size=len(files), icon = "fa-folder"))
-
-    fixed_books.append(NoteLink("全部笔记本", "/note/group", size = len(groups), icon = "fa-th-large"))
-    # if len(archived_groups) > 0:
-    #     fixed_books.append(NoteLink("归档笔记本", "/note/archived", size = len(archived_groups), icon = "fa-th-large"))
-
+    fixed_books.append(NoteLink("智能笔记本", "/note/group_list?tab=smart", 
+        size = NOTE_DAO.count_smart_group(), 
+        icon = "fa-folder"))
 
     return fixed_books
 

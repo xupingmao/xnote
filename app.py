@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2021/12/04 21:58:49
+# @modified 2022/01/23 23:58:28
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -37,16 +37,22 @@ import xtables
 import xmanager
 import xtemplate
 import signal
+import logging
+import multiprocessing
 from xutils import *
+from xutils.lockutil import FileLock
 from autoreload import AutoReloadThread
 
 DEFAULT_PORT = "1234"
+FILE_LOCK = FileLock("pid.lock")
+
+# 配置日志模块
+logging.basicConfig(level=logging.DEBUG,
+    format='%(asctime)s|%(levelname)s|%(filename)s:%(lineno)d|%(message)s')
 
 
 def print_debug_info(*args):
-    new_args = [dateutil.format_time(), "[init]"]
-    new_args += args
-    print(*new_args)
+    logging.info("%s" % args)
 
 def get_bool_by_sys_arg(value):
     return value == "yes" or value == "true"
@@ -179,7 +185,7 @@ def init_cluster():
     if xconfig.get_global_config("system.node.role") == "follower":
         print_debug_info("当前以从节点身份运行")
 
-def init_app():
+def init_app_no_lock():
     global app
 
     # 处理初始化参数
@@ -223,10 +229,6 @@ def init_app():
     # signal.signal(signal.SIGALRM, handle_signal)
     # signal.alarm(5)
 
-def main():
-    global app
-    init_app()
-
     # 启动打开浏览器选项
     if xconfig.OPEN_IN_BROWSER:
         webbrowser.open("http://localhost:%s/" % xconfig.PORT)
@@ -235,8 +237,26 @@ def main():
     xconfig.mark_started()
     xutils.log("app started")
 
-    # 监听端口
-    app.run()
+
+
+
+def main():
+    global app
+    global FILE_LOCK
+
+    try:
+        if FILE_LOCK.acquire():
+            # 初始化
+            init_app_no_lock()
+            # 监听端口
+            app.run()
+        else:
+            logging.error("get lock failed")
+            logging.error("xnote进程已启动，请不要重复启动!")
+            sys.exit(1)
+    finally:
+        FILE_LOCK.release()
+
 
 class LogMiddleware:
     """WSGI middleware for logging the status.

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/01/23 15:54:11
+# @modified 2022/01/24 14:40:09
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -263,6 +263,8 @@ class LdbTable:
         return self.get_by_key(key, default_value)
 
     def get_by_key(self, key, default_value = None):
+        if key == "":
+            return None
         self._check_key(key)
         value = get(key, default_value)
         if value is None:

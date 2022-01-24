@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2022/01/23 15:28:22
+# @modified 2022/01/24 15:00:55
 import math
 import time
 import web
@@ -142,6 +142,9 @@ def list_smart_group(user_name):
     SMART_GROUP_COUNT = len(smart_group_list)
     return smart_group_list
 
+def count_smart_group(user_name = None):
+    return SMART_GROUP_COUNT
+
 class DefaultListHandler:
 
     @xauth.login_required()
@@ -250,7 +253,7 @@ class GroupListHandler:
     @xauth.login_required()
     def GET(self):
         category  = xutils.get_argument("category")
-        status    = xutils.get_argument("status", "active")
+        status    = xutils.get_argument("tab", "active")
         user_name = xauth.current_name()
 
         xmanager.add_visit_log(user_name, "/note/group")
@@ -259,6 +262,7 @@ class GroupListHandler:
         notes = self.load_group_list(user_name, status)
 
         kw = Storage()
+        kw.status    = status
         kw.title     = T("我的笔记本")
         kw.file      = root
         kw.groups    = notes
@@ -750,9 +754,13 @@ xutils.register_func("url:/note/group", GroupListHandler)
 xutils.register_func("url:/note/tools", NotePluginHandler)
 xutils.register_func("url:/note/date",  DateListHandler)
 xutils.register_func("url:/note/all", AllNoteListHandler)
+xutils.register_func("note.count_smart_group", count_smart_group)
 xutils.register_func("note.list_smart_group", list_smart_group)
 
-list_smart_group("admin")
+
+@xmanager.listen("sys.reload")
+def on_reload(ctx):
+    list_smart_group("admin")
 
 xurls = (
     r"/note/group"          , GroupListHandler,

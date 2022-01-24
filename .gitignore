@@ -55,3 +55,5 @@ id_rsa*
 run-local.sh
 run-follower*
 
+# 锁文件
+pid.lock
