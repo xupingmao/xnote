@@ -133,7 +133,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2022/01/23 15:19:11
+ * @modified 2022/01/24 16:12:55
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -155,9 +155,23 @@ table td {
 /** marked 样式 **/
 .marked-heading {
     /* 避免顶部fixed菜单遮挡 */
+    display: inline-block;
+    width: 100%;
     padding-top: 50px;
     margin-top: -40px;
     font-family: "Microsoft YaHei", "黑体";
+}
+
+h1.marked-heading {
+    font-size: 24px;
+}
+
+h2.marked-heading {
+    font-size: 20px;
+}
+
+h3.marked-heading {
+    font-size: 16px;
 }
 
 .marked-img {
