@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2022/01/27 13:38:09
+# @modified 2022/01/27 21:25:09
 import profile
 import math
 import re
@@ -137,7 +137,10 @@ def view_group_detail_func(file, kw):
     if orderby not in ("ctime_priority", "name", "name_priority"):
         orderby = "ctime_priority"
 
-    files  = NOTE_DAO.list_by_parent(file.creator, file.id, (page-1)*pagesize, pagesize, orderby)
+    offset = max(page-1, 0) * pagesize
+    files  = NOTE_DAO.list_by_parent(file.creator, file.id, 
+        offset, pagesize, orderby)
+
     amount             = file.size
     kw.content         = file.content
     kw.show_search_div = True
@@ -220,6 +223,12 @@ def create_view_kw():
 
 class ViewHandler:
 
+    def handle_contents_btn(self, kw):
+        file = kw.file
+        can_edit = kw.can_edit
+        is_valid_type = (file.type != "group") and (file.parent_id != "0")
+        kw.show_contents_btn = is_valid_type and can_edit
+
     @xutils.timeit(name = "Note.View", logfile = True)
     def GET(self, op, id = None):
         if id is None:
@@ -294,13 +303,18 @@ class ViewHandler:
         template_name = kw['template_name']
         del kw['template_name']
 
+        kw.file = file
+        kw.can_edit = can_edit
+
         # 如果是页面，需要查出上级目录列表
         handle_left_dir(kw, user_name, file, op)
+        
+        # 处理目录按钮的展示
+        self.handle_contents_btn(kw)
+
         return xtemplate.render_by_ua(template_name,
             html_title    = file.name,
-            file          = file, 
             note_id       = id,
-            can_edit = can_edit,
             pathlist = pathlist,
             recent_created    = recent_created,
             CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT,

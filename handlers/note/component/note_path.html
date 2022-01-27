@@ -1,4 +1,5 @@
 {% init file = None %}
+{% init show_contents_btn = False %}
 
 {% if len(pathlist) > 0 %}
     <div class="btn-line-height pad-left-5">
@@ -12,7 +13,7 @@
 
     <div class="float-right">
         {% if file != None %}
-            {% if file.type != "group" and file.parent_id != "0" %}
+            {% if show_contents_btn %}
                 <a class="btn btn-default note-contents-btn" data-parent="{{file.parent_id}}">目录</a>
             {% end %}
             {% if _is_desktop %}

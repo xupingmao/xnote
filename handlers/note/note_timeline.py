@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/18
-# @modified 2021/07/28 23:30:26
+# @modified 2022/01/27 21:40:22
 
 """时光轴视图"""
 import re
@@ -386,7 +386,7 @@ class BaseTimelineHandler:
         if title_link != None:
             pathlist.append(title_link)
 
-        return xtemplate.render("note/page/timeline.html", 
+        return xtemplate.render("note/page/timeline/timeline.html", 
             title = title,
             type  = type,
             file  = file,

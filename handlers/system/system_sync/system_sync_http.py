@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/29 22:48:26
-# @modified 2021/12/11 12:34:57
+# @modified 2022/01/27 21:44:30
 # @filename system_sync_http.py
 
 import os
 import xutils
 import xconfig
+import logging
 from xutils import Storage
 from xutils import netutil
 from xutils import textutil
@@ -75,7 +76,7 @@ class HttpClient:
     def check_disk_space(self):
         data_dir = xconfig.get_system_dir("data")
         free_space = fsutil.get_free_space(data_dir)
-        print_debug_info("磁盘剩余容量:", fsutil.format_size(free_space))
+        logging.debug("磁盘剩余容量:%s", fsutil.format_size(free_space))
         return free_space >= 1024 ** 3 # 要大于1G
 
     def download_file(self, item):
@@ -84,7 +85,7 @@ class HttpClient:
             return
 
         if not self.check_disk_space():
-            print_debug_info("磁盘容量不足，跳过")
+            logging.error("磁盘容量不足，跳过")
             return
 
         fpath = item.fpath
@@ -106,7 +107,7 @@ class HttpClient:
         dirname   = os.path.dirname(dest_path)
 
         if self.is_same_file(dest_path, item):
-            print_debug_info("文件没有变化，跳过")
+            logging.debug("文件没有变化，跳过")
             return
 
         fsutil.makedirs(dirname)

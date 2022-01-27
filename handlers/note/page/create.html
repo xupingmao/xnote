@@ -42,7 +42,9 @@ label {
                 <label>{{T("类型")}}</label>
                 <select name="type" value="{{type}}">
                     {% for item in NOTE_TYPE_LIST %}
-                        <option value="{{item.type}}">{{T(item.name)}}</option>
+                        {% if item.visible %}
+                            <option value="{{item.type}}">{{T(item.name)}}</option>
+                        {% end %}
                     {% end %}
                 </select>
             </div>

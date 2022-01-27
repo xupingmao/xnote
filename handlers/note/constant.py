@@ -1,13 +1,14 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/02/16 12:49:30
-# @modified 2021/03/14 15:19:15
+# @modified 2022/01/27 21:28:24
 
 class NoteType:
 
-    def __init__(self, type, name):
+    def __init__(self, type, name, visible = True):
         self.type = type
         self.name = name
+        self.visible = visible
 
 NOTE_TYPE_MAPPING = {
     "document": "md",
@@ -20,8 +21,8 @@ NOTE_TYPE_MAPPING = {
 NOTE_TYPE_LIST = [
     NoteType("group"  , u"笔记本"),
     NoteType("md"     , u"markdown文档"),
-    NoteType("html"   , u"富文本"),
-    NoteType("csv"    , u"表格"),
+    NoteType("html"   , u"富文本", False),
+    NoteType("csv"    , u"表格", False),
     NoteType("list"   , u"清单"),
     NoteType("gallery", u"相册"),
 ]
