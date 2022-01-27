@@ -137,8 +137,13 @@ $(function () {
 
     $("body").on("click", ".symbol-item-btn", function (e) {
         var target = e.target;
-        var text = $(target).text();
         var editor = getEditor();
+        var text = $(target).attr("data-text");
+        
+        if (text === "" || text === undefined) {
+            text = $(target).text();
+        }
+
         console.log(text);
         textarea_insert(editor, text);
         layer.close(DIALOG_INDEX);

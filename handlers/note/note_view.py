@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2022/01/09 15:36:10
+# @modified 2022/01/27 13:38:09
 import profile
 import math
 import re
@@ -98,12 +98,17 @@ def view_html_func(file, kw):
     kw.show_pagination = False
 
 def view_md_func(file, kw):
+    device = xutils.get_argument("device", "desktop")
     kw.content = file.content
     kw.show_recommend = True
     kw.show_pagination = False
     if kw.op == "edit":
         kw.show_recommend = False
         kw.template_name = "note/editor/markdown_edit.html"
+
+    if kw.op == "edit" and device == "mobile":
+        # 强制使用移动端编辑器
+        kw.template_name = "note/editor/markdown_edit.mobile.html"
 
 def view_group_timeline_func(note, kw):
     raise web.found("/note/timeline?type=default&parent_id=%s" % note.id)
@@ -239,8 +244,6 @@ class ViewHandler:
         kw.pagesize    = pagesize
         kw.page_url    = "/note/view?id=%s&orderby=%s&page=" % (id, orderby)
 
-        # print("skey:", skey)
-
         if id == "0":
             raise web.found("/")
 
@@ -259,9 +262,9 @@ class ViewHandler:
         if token == "":
             check_auth(file, user_name)
 
-        pathlist        = NOTE_DAO.list_path(file)
-        can_edit        = (file.creator == user_name) or (user_name == "admin")
-        role            = xauth.get_current_role()
+        pathlist = NOTE_DAO.list_path(file)
+        can_edit = (file.creator == user_name) or (user_name == "admin")
+        role     = xauth.get_current_role()
 
         # 定义一些变量
         recent_created = []

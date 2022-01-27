@@ -195,7 +195,7 @@
     }
 
     myRenderer.table = function(header, body) {
-      return '<table class="table">\n'
+      return '<table class="table marked-table">\n'
         + '<thead>\n'
         + header
         + '</thead>\n'
@@ -306,6 +306,16 @@
         return menuText;
     }
 
+    function adjustTableWidth() {
+        $(".marked-table").each(function (element, index) {
+            var headings = $(this).find("th");
+            if (headings.length > 0) {
+                var width = 100 / headings.length;
+                headings.css("width", width + "%");
+            }
+        });
+    }
+
     marked.parse = function (text) {
         if (!marked.showMenu) {
             return oldParse(text);
@@ -327,6 +337,12 @@
         $(".menu-aside").show();
         $("#menuBox").html(menuHtml);
         return outtext;
-    }
+    };
+
+    marked.parseAndRender = function (text, target) {
+        var html = marked.parse(text);
+        $(target).html(html);
+        adjustTableWidth();
+    };
 
 })(window);

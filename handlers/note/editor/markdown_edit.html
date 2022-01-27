@@ -118,34 +118,20 @@
         initMdCodeMirror();
     }
 
-    /**
-     * 使用textarea编辑，对于CodeMirror支持不好的场景下使用
-     */
-    function simpleEdit() {
-        $("#markdown-input-div").removeClass("hide").addClass("col-md-12");
-        $("#markdown-output-div").removeClass("col-md-12").addClass("hide");
-        var height = Math.max(500, $("#markdown-output-div").height());
-        $("#markdown-input").css({ height: height + "px" });
-        $("#edit-div").show();
-        $("#edit-btns").hide();
-    }
-
     function mobileEdit() {
-        $("#markdown-input-div").removeClass("hide").addClass("col-md-12");
-        $("#markdown-output-div").removeClass("col-md-12").addClass("hide");
-        var height = Math.max(500, $("#markdown-output-div").height());
-        $("#markdown-input").css({ height: height + "px" });
-        $("#edit-div").show();
-        $("#edit-btns").hide();
-        initMdCodeMirror();
+        window.location.href = "/note/edit?id={{file.id}}&device=mobile";
     }
 
     function togglePreview(target) {
         if ($("#markdown-input-div").hasClass("col-md-12")) {
+            // 开启预览
             // 全屏模式
             $("#markdown-input-div").addClass("col-md-6").removeClass("col-md-12");
             $("#markdown-output-div").removeClass("hide");
             $(target).val("关闭预览");
+
+            // 强制刷新页面
+            updatePreview(true);
         } else {
             // 半屏模式
             $("#markdown-input-div").removeClass("col-md-6").addClass("col-md-12");
@@ -178,10 +164,14 @@
             return input == oldContent;
         }
 
-        function updatePreview() {
+        window.updatePreview = function(force) {
             var input = $("#markdown-input").val();
+
+            if (force === undefined) {
+                force = false;
+            }
             
-            if (contentUnchanged()) {
+            if (!force && contentUnchanged()) {
                 return;
             }
 
@@ -189,8 +179,7 @@
                 return;
             }
             oldContent = input;
-            var outtext = marked.parse(input);
-            $("#markdown-output-div").html(outtext);
+            marked.parseAndRender(input, "#markdown-output-div");
             $("#markdown-output-div").height($("#editor").height());
         }
 
@@ -208,12 +197,6 @@
                 }
             })
         }
-
-        updatePreview();
-        edit();
-
-        updatePreviewIntervalId = setInterval(updatePreview, 200);
-        // setInterval(autoSave, 1000*30);
 
         $("#insertCode").on("click", function () {
             var selection = codeMirror.getSelection();
@@ -271,10 +254,6 @@
             });
         });
 
-        adjustHeight("#editor-area", 30);
-
-        window.SUBMIT_FORM = false;
-
         $("#mainFrame").on("submit", function (e) {
             console.log(e);
             window.SUBMIT_FORM = true;
@@ -292,6 +271,18 @@
             var e = window.event||e;  
             e.returnValue = "确定离开当前页面吗？";
         };
+
+        function onPageLoad() {
+            updatePreview();
+
+            edit();
+            updatePreviewIntervalId = setInterval(updatePreview, 200);
+            // 调整高度
+            adjustHeight("#editor-area", 30);
+            window.SUBMIT_FORM = false;
+        }
+
+        onPageLoad();
     });
 
 </script>

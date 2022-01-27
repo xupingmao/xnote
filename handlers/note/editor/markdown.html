@@ -13,8 +13,9 @@
     {% if file.content == "" %}
         {% include common/text/empty_text.html %}
     {% end %}
-    <div id="epiceditor" class="row">
-        <div id="markdown-input-div" class="col-md-6">
+    
+    <div class="row">
+        <div id="markdown-input-div" class="col-md-6 hide">
             <textarea id="markdown-input" class="form-control" name="content" rows=50>{{file.content}}</textarea>
         </div>
 
@@ -25,117 +26,8 @@
 </div>
 
 <script type="text/javascript">
-    function switchRename() {
-        if ($("#renameDiv").css("display") == "none") {
-            $("#oldName").hide();
-            $("#renameDiv").css("display", "block");
-            $("#newName").val($("#oldName").html());
-        } else {
-            $("#oldName").show();
-            $("#renameDiv").css("display", "none");
-        }
-    }
-
-    // autosize textarea rows
-    var textContainer = document.getElementById("fileContent");
-
-    function edit() {
-        location.href = "/note/view?id={{file.id}}";
-    }
-
-    function medit() {
-        $("#markdown-input-div").removeClass("hide").addClass("col-md-12");
-        $("#markdown-output-div").removeClass("col-md-12").addClass("hide");
-        var height = Math.max(500, $("#markdown-output-div").height());
-        $("#markdown-input").css({height:height+"px"});
-        $("#edit-div").addClass("hide");
-        $("#update-div").removeClass("hide");
-    }
-    
-    function preview() {
-        if (!$("#markdown-input-div").hasClass("hide")) {
-            $("#markdown-input-div").addClass("hide");
-            $("#markdown-output-div").removeClass("hide").removeClass("col-md-6").addClass("col-md-12");
-
-            $("#update-div").addClass("hide");
-            $("#edit-div").removeClass("hide");
-        }
-    }
-    
-    function renameFile() {
-        var fileId = $("#fileId").text();
-        var oldName = $("#oldName").html();
-        var newName = $("#newName").val();
-        if (newName) {
-            $.post("/note/update", {
-                option: "rename",
-                fileId: fileId,
-                newName: newName
-            }, function (msg) {
-                var result = msg;
-                if (result.success)
-                {
-                    switchRename();
-                    window.location.reload();
-                } else {
-                    alert("修改失败, " + result.msg);
-                }
-            })
-        }
-    }
-    // set marked code highlight function
-    // marked.defaults.highlight = highlight;
-    function escape(html, encode) {
-      return html
-        .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/\n/g, '<br/>')
-        .replace(/ /g, '&nbsp;');
-    }
-
     $(function () {
-        var old_content = $("#markdown-input-div").val();
-        setInterval(function () {
-            var input = $("#markdown-input").val();
-            // not modified
-            if (input == old_content) {
-                return;
-            }
-            if ($("#markdown-output-div").hasClass("hide")) {
-                return;
-            }
-            old_content = input;
-            var outtext = marked.parse(input);
-            $("#markdown-output-div").html(outtext); 
-            // 尽量多用原生CSS实现布局和交互
-            // registerScrollEvent();
-        }, 200);
-        preview();
-    })
-
-    function registerScrollEvent() {    
-        $("a").each(function (index, element) {
-            // console.log(element);
-            var href = $(element).attr("href");
-            if (href && href[0] == '#') {
-                console.log("register " + element);
-                $(element).on("click", function (event) {
-                    var element = document.getElementById(this.hash.slice(1));
-                    // 形如 [x]-name 的ID不能用JQuery获取
-                    var $target = $(element);
-                    if ($target.length) {
-                        var targetOffset = $target.offset().top;
-                        $('html,body').animate({
-                            scrollTop: targetOffset-50
-                        },
-                        500);
-                        return false;
-                    }
-                })
-            }
-        })
-    }
+        var input = $("#markdown-input").val();
+        marked.parseAndRender(input, "#markdown-output-div");
+    });
 </script>
