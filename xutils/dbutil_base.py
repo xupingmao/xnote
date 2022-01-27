@@ -52,6 +52,7 @@ try:
 except ImportError:
     # Windows环境没有leveldb，需要使用leveldbpy的代理实现
     leveldb = None
+    import leveldbpy
 
 
 WRITE_LOCK    = threading.Lock()
@@ -247,7 +248,7 @@ class LevelDBProxy:
 
     def Write(self, batch, sync = False):
         """执行批量操作"""
-        return self._db.write(batch.target, sync)
+        return self._db.write(batch, sync)
 
 def config(**kw):
     global WRITE_ONLY

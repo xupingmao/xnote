@@ -222,12 +222,13 @@ def init_app_no_lock():
 
     # 注册信号响应
     # 键盘终止信号
-    signal.signal(signal.SIGINT, handle_signal)
-    # kill终止信号
-    signal.signal(signal.SIGTERM, handle_signal)
-    # 时钟信号
-    # signal.signal(signal.SIGALRM, handle_signal)
-    # signal.alarm(5)
+    if not xutils.is_windows():
+        signal.signal(signal.SIGINT, handle_signal)
+        # kill终止信号
+        signal.signal(signal.SIGTERM, handle_signal)
+        # 时钟信号
+        # signal.signal(signal.SIGALRM, handle_signal)
+        # signal.alarm(5)
 
     # 启动打开浏览器选项
     if xconfig.OPEN_IN_BROWSER:

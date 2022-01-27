@@ -56,16 +56,23 @@ import ctypes.util
 import weakref
 import threading
 import platform
+import logging
 from collections import namedtuple
 
 _dll_name = "leveldb"
 
 if platform.architecture()[0] == "64bit":
-    _dll_name = "leveldb-x64"
+    _dll_name = "./lib/leveldb-x64"
 else:
-    _dll_name = "leveldb"
+    _dll_name = "./lib/leveldb"
 
-_ldb = ctypes.CDLL(ctypes.util.find_library(_dll_name))
+dll_path = ctypes.util.find_library(_dll_name)
+if dll_path is None:
+    raise Exception("leveldb.dll not found")
+
+print("leveldb.dll.path=%r" % dll_path)
+
+_ldb = ctypes.CDLL(dll_path)
 # _ldb = ctypes.CDLL('./lib/leveldb.dll')
 
 _ldb.leveldb_filterpolicy_create_bloom.argtypes = [ctypes.c_int]
@@ -1017,7 +1024,7 @@ class _LevelDBImpl(object):
         if self._snapshot is not None:
             raise TypeError("cannot delete on leveldb snapshot")
         real_batch = _ldb.leveldb_writebatch_create()
-        for key, val in batch._puts.iteritems():
+        for key, val in batch._puts.items(): # Fixed: Python3.x中iteritems()方法已经被废弃
             _ldb.leveldb_writebatch_put(real_batch, key, len(key), val,
                     len(val))
         for key in batch._deletes:

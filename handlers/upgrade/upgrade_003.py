@@ -28,7 +28,10 @@ def do_upgrade_book():
         if key_id != str(value.id):
             log_info("无效索引: {!r} note_id:{!r}", key_id, note_id)
             NOTE_DAO.update_index(value)
-            db.delete_by_key(key)
+            if value.creator != None:
+                db.delete_by_key(key, user_name = value.creator)
+            else:
+                dbutil.delete(key)
             count += 1
         else:
             valid_count += 1
@@ -55,7 +58,10 @@ def do_upgrade():
         if key_id != str(value.id):
             log_info("无效索引: {!r} note_id:{!r}", key_id, note_id)
             NOTE_DAO.update_index(value)
-            db.delete_by_key(key)
+            if value.creator != None:
+                db.delete_by_key(key, user_name = value.creator)
+            else:
+                dbutil.delete(key)
             count += 1
         else:
             valid_count += 1
