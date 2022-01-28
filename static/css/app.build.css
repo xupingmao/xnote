@@ -7,7 +7,7 @@
  * 重写默认浏览器样式
  * @author xupingmao
  * @since 2020/01/08
- * @modified 2021/05/22 12:56:47
+ * @modified 2022/01/27 22:33:24
  * @filename reset.css
  */
 
@@ -31,14 +31,31 @@ body {
 pre {
     word-wrap: break-word;
     white-space: pre-wrap;
+    display: block;
+    width: 100%;
 }
 
 p,li,a {
     font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
 }
 
+
+/* display: inline; 此元素会被显示为内联元素，元素前后没有换行符。*/
+/* margin: 块级元素的垂直相邻外边距会合并 */
+
+p {
+    display: block;
+    width: 100%;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 h1,h2,h3 {
     font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 input[type=checkbox] {
@@ -92,7 +109,6 @@ blockquote {
     font-style: italic;
     display: block;
     width: 100%;
-    float: left;
     border-left: 8px solid #d0e5f2;
     padding: 5px 10px;
     margin: 10px 0;
@@ -115,6 +131,7 @@ table {
     border-color: #ccc;
     border-collapse: collapse;
 }
+
 table th {
     border-width: 1px;
     padding: 8px;
@@ -133,7 +150,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2022/01/27 12:45:57
+ * @modified 2022/01/27 23:04:50
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -155,7 +172,6 @@ table td {
 /** marked 样式 **/
 .marked-heading {
     /* 避免顶部fixed菜单遮挡 */
-    display: inline-block;
     width: 100%;
     font-family: "Microsoft YaHei", "黑体";
 }
@@ -197,7 +213,6 @@ h3.marked-heading {
 
 .marked-code {
     width: 100%;
-    float: left;
     background: #ffd;
     padding: 0.5rem;
     border: 1px solid #ddd;
