@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/10/04 19:17:59
+# @modified 2022/02/05 21:54:58
 
 """处理时间的工具类
 
@@ -248,7 +248,7 @@ def date_add(tm, years = 0, months = 0, days = 0):
 def is_leap_year(year):
     return ((year % 4 == 0) and (year % 100 != 0)) or (year % 400 == 0)
 
-def get_days_of_month(y, month):
+def get_days_of_month(year, month):
     """获取指定月份的天数 (get days of a month)
         >>> get_days_of_month(2000, 2)
         29

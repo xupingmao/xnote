@@ -2,6 +2,7 @@
 import sys
 import os
 import time
+import random
 sys.path.insert(1, "lib")
 sys.path.insert(1, "core")
 import unittest
@@ -220,6 +221,11 @@ class TestMain(unittest.TestCase):
     def test_dateutil(self):
         import doctest
         doctest.testmod(m=xutils.dateutil, verbose=True)
+
+    def test_dateutil_get_days_of_month(self):
+        year = random.randint(2000, 3000)
+        for month in range(1,13):
+            xutils.dateutil.get_days_of_month(year, month)
 
     def test_fsutil(self):
         import doctest

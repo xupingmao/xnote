@@ -325,7 +325,7 @@ $(function () {
 
     window.openFileOption = function (e) {
         console.log(e);
-        var path = $(e).attr("data-path");
+        var path = getCurrentPath();
         window.xnote.showIframeDialog("更多操作", "/fs_api/plugins?embed=true&path=" + path);
     }
 
