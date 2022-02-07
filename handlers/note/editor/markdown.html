@@ -27,7 +27,41 @@
 
 <script type="text/javascript">
     $(function () {
+        
+        function onCheckboxClicked(e) {
+            // 按下单选项的行为
+            var text = $(e.target).attr("data-text");
+            console.log("onCheckboxClicked", text);
+            var params = {};
+
+            var newText = text.trimLeft();
+
+            if (text.startsWith("[]")) {
+                newText = "[x]" + newText.substring(2);
+            }
+            if (text.startsWith("[x]")) {
+                newText = "[]" + newText.substring(3);
+            }
+
+            var oldContent = $("#markdown-input").val();
+            // TODO: 先简单处理一下
+            newContent = oldContent.replace(text, newText);
+            params.id = "{{file.id}}";
+            params.content = newContent;
+
+            console.log("newContent:", newContent);
+
+            $.post("/note/update", params, function (resp) {
+                xnote.toast("更新成功，跳转中");
+                window.location.reload();
+            });
+        }
+
         var input = $("#markdown-input").val();
-        marked.parseAndRender(input, "#markdown-output-div");
+
+        // 扩展选项
+        var options = {};
+        options.onCheckboxClicked = onCheckboxClicked;
+        marked.parseAndRender(input, "#markdown-output-div", options);
     });
 </script>

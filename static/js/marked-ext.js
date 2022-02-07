@@ -5,7 +5,7 @@
 
     // marked 初始化操作
     var myRenderer = new marked.Renderer();
-    myRenderer.headings = []
+    myRenderer.headings = [];
 
     marked.setOptions({
         renderer: myRenderer,
@@ -14,6 +14,9 @@
     
     marked.showMenu = true;
     var oldParse = marked.parse;
+
+    // 扩展选项
+    var extOptions = {};
 
     // 后面都是定义的函数和重写html生成
     function escape(html, encode) {
@@ -85,16 +88,42 @@
         }
     }
 
-    function processCheckbox(text) {
+    function processCheckbox(text, clickable) {
         var result = {};
+        var disabled = true;
+        var disabledText = "";
+
+        if (clickable !== undefined) {
+            disabled = !clickable;
+        }
+
+        if (disabled) {
+            disabledText = "disabled";
+        }
+
+        // 多选框选项索引
+        extOptions.checkboxIndex++;
+
+        var checkbox = ('<input type="checkbox" class="marked"'
+            + ' $disabled $checked data-text="$data-text"/>')
+                .replace("$disabled", disabledText)
+                .replace("$data-text", escape(text));
+
+        // 调试日志
+        console.log(extOptions.checkboxIndex, checkbox);
+
         if (/^\[\]/.test(text)) {
-            result.checkbox = '<input type="checkbox" disabled="true"/>';
+            checkbox = checkbox.replace("$checked", "");
+            // console.log("checkbox", checkbox);
+            result.checkbox = checkbox;
             result.text = '<span class="xnote-todo">' + text.substring(2) + '</span>';
         } else if (/^\[ \]/.test(text)) {
-            result.checkbox = '<input type="checkbox" disabled="true"/>';
+            checkbox = checkbox.replace("$checked", "");
+            result.checkbox = checkbox;
             result.text = text.substring(3);
         } else if (/^\[[Xx]\]/.test(text)) {
-            result.checkbox = '<input type="checkbox" checked disabled="true"/>';
+            checkbox = checkbox.replace("$checked", "checked");
+            result.checkbox = checkbox;
             result.text = '<span class="xnote-done">' + text.substring(3) + '</span>';
         } else {
             result.checkbox = '';
@@ -104,7 +133,7 @@
     }
 
     myRenderer.listitem = function (text) {
-        var result = processCheckbox(text);
+        var result = processCheckbox(text, true);
         return '<li>' + result.checkbox + result.text + '</li>\n';
     }
 
@@ -307,13 +336,7 @@
     }
 
     function adjustTableWidth() {
-        $(".marked-table").each(function (element, index) {
-            var headings = $(this).find("th");
-            if (headings.length > 0) {
-                var width = 100 / headings.length;
-                headings.css("width", width + "%");
-            }
-        });
+        xnote.table.adjustWidth(".marked-table");
     }
 
     marked.parse = function (text) {
@@ -339,10 +362,25 @@
         return outtext;
     };
 
-    marked.parseAndRender = function (text, target) {
+    marked.parseAndRender = function (text, target, options) {
+        // 处理扩展选项
+        extOptions = options;
+        if (extOptions === undefined) {
+            extOptions = {};
+        }
+        extOptions.checkboxIndex = 0;
+
         var html = marked.parse(text);
         $(target).html(html);
         adjustTableWidth();
+
+        // 注册点击事件
+        $("input[type=checkbox].marked").click(function (e) {
+            var onCheckboxClicked = extOptions.onCheckboxClicked;
+            if (onCheckboxClicked) {
+                onCheckboxClicked(e);
+            }
+        });
     };
 
 })(window);

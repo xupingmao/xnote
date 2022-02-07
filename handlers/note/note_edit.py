@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2022/02/07 12:58:23
+# @modified 2022/02/07 23:14:13
 
 """笔记编辑相关处理"""
 import os
@@ -398,6 +398,7 @@ class UpdateHandler:
         version   = xutils.get_argument("version", 0, type=int)
         file_type = xutils.get_argument("type")
         name      = xutils.get_argument("name", "")
+        resp_type = xutils.get_argument("resp_type", "html")
 
         try:
             file = check_get_note(id)
@@ -412,6 +413,10 @@ class UpdateHandler:
                 update_kw["name"] = name
             # 更新并且发出消息
             update_and_notify(file, update_kw)
+
+            if resp_type == "json":
+                return dict(code = "success")
+
             raise web.seeother(file.url)
         except NoteException as e:
             return xtemplate.render("note/page/view.html", 
