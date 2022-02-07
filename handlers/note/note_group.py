@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2022/02/07 13:14:39
+# @modified 2022/02/07 17:05:33
 import math
 import time
 import web
@@ -255,6 +255,7 @@ class GroupListHandler:
         category  = xutils.get_argument("category")
         status    = xutils.get_argument("tab", "active")
         user_name = xauth.current_name()
+        show_back = xutils.get_argument("show_back", type = bool)
 
         xmanager.add_visit_log(user_name, "/note/group")
 
@@ -267,6 +268,7 @@ class GroupListHandler:
         kw.file      = root
         kw.groups    = notes
         kw.parent_id = 0
+        kw.show_back = show_back
         kw.archived_count = NOTE_DAO.count_group(user_name, status = "archived")
         kw.active_count   = NOTE_DAO.count_group(user_name, status = "active")
         kw.smart_count    = SMART_GROUP_COUNT

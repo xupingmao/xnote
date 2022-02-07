@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2022/02/07 13:09:21
+# @modified 2022/02/07 13:58:52
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -259,7 +259,7 @@ def sort_by_dtime_asc(notes):
     notes.sort(key = lambda x: x.dtime)
 
 def sort_by_hot_index(notes):
-    notes.sort(key = lambda x: x.hot_index or 1, reverse = True)
+    notes.sort(key = lambda x: x.hot_index or 0, reverse = True)
 
 SORT_FUNC_DICT = {
     "name": sort_by_name,
@@ -318,6 +318,9 @@ def build_note_info(note, orderby = None):
 
     if note.category is None:
         note.category = "000"
+
+    if note.hot_index is None:
+        note.hot_index = 0
 
     if note.ctime != None:
         note.create_date = format_date(note.ctime)
@@ -765,21 +768,23 @@ def check_by_name(creator, name):
 
 def visit_note(user_name, id):
     note = get_by_id(id)
-    if note:
-        note.atime = xutils.format_datetime()
-        # 访问的总字数
-        if note.visited_cnt is None:
-            note.visited_cnt = 0
-        note.visited_cnt += 1
-        note.visit_cnt = note.visited_cnt
+    if note is None:
+        return
+  
+    note.atime = xutils.format_datetime()
+    # 访问的总字数
+    if note.visited_cnt is None:
+        note.visited_cnt = 0
+    note.visited_cnt += 1
+    note.visit_cnt = note.visited_cnt
 
-        # 访问热度
-        if note.hot_index is None:
-            note.hot_index = 0
-        note.hot_index += 1
+    # 访问热度
+    if note.hot_index is None:
+        note.hot_index = 0
+    note.hot_index += 1
 
-        update_index(note)
-        add_visit_log(user_name, note)
+    update_index(note)
+    add_visit_log(user_name, note)
 
 def delete_note_physically(creator, note_id):
     assert creator != None, "creator can not be null"

@@ -51,9 +51,23 @@
                 <input type="button" id="insertDel" class="toolbox-btn" value="删除线" />
                 <input type="file" id="file" name="file" class="hide" />
                 <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" />
-                <input type="button" class="toolbox-btn btn-primary" onclick="togglePreview(this)" value="预览" />
-                <span id="uploadProgress" class="upload-progress"></span>
-                <span id="autosaveResult" class="hide">自动保存成功</span>
+                <input type="button" id="insertNoteLink" class="toolbox-btn" value="笔记链接" />
+
+                <!--
+                <div class="dropdown">
+                    <span class="dropdown-btn toolbox-btn">链接▾</span>
+                    <div class="dropdown-content">
+                        <a class="dropdown-option">笔记链接</a>
+                    </div>
+                </div>
+                -->
+
+                <div class="float-right">
+                    <span id="uploadProgress" class="upload-progress"></span>
+                    <span id="autosaveResult" class="hide">自动保存成功</span>
+                    <input type="button" class="toolbox-btn toolbox-btn-right btn-primary" 
+                        onclick="togglePreview(this)" value="预览" />
+                </div>
             </div>
 
             <div class="col-md-12" id="editor-area">
@@ -84,6 +98,9 @@
     function codeInsert(code) {
         codeMirror.replaceSelection(code, 'around');
     }
+
+    // 注册到xnote的接口中
+    xnote.editor.codeInsert = codeInsert;
 
     function initMdCodeMirror() {
         if (window.codeMirror) {
@@ -226,7 +243,18 @@
 
         $("#insertDel").click(function () {
             toggleSurround("~~");
-        })
+        });
+
+        $("#insertNoteLink").click(function () {
+            // showAjaxDialog是异步的，没有返回值
+            xnote.showAjaxDialog("选择笔记", "/search/dialog?search_type=note&callback=insertNoteLinkCallback");
+
+            window.insertNoteLinkCallback = function (param) {
+                var link = "[" + param.name + "](" + param.url + ")";
+                codeInsert(link);
+                xnote.closeDialog("last");
+            };
+        });
 
         $("#formatTable").click(function () {
             // var selection = codeMirror.getSelection();

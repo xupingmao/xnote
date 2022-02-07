@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2022/01/24 15:01:14
+# @modified 2022/02/07 17:07:06
 
 import xauth
 import xtemplate
@@ -89,7 +89,7 @@ def list_special_groups(user_name = None):
     fixed_books = []
     fixed_books.append(MSG_DAO.get_message_tag(user_name, "task"))
     fixed_books.append(MSG_DAO.get_message_tag(user_name, "log"))
-    fixed_books.append(NoteLink("智能笔记本", "/note/group_list?tab=smart", 
+    fixed_books.append(NoteLink("智能笔记本", "/note/group_list?tab=smart&show_back=true", 
         size = NOTE_DAO.count_smart_group(), 
         icon = "fa-folder"))
 

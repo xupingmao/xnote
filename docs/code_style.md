@@ -19,7 +19,7 @@ MY_GLOBAL_VAR = 1
 ```py
 my_local_var = 1
 # 没有歧义的也可以不加下划线
-filename     = "myfile.txt" 
+filename = "myfile.txt" 
 ```
 
 # 2. 包命名
@@ -29,6 +29,13 @@ filename     = "myfile.txt"
     - `my_package` 带下划线的包名
     - `simplepackage` 没有歧义的也可以不加下划线
 
+> 示例如下
+
+```py
+core # 简单包名
+simplepackage # 无歧义的包名
+my_package # 带下划线的包名
+```
 
 # 3. 类命名
 
@@ -67,10 +74,32 @@ filename     = "myfile.txt"
 # 6. 模块内部的命名
 
 - `handlers/note` note模块的根目录
-- `handlers/note/page` 页面，页面的入口
-- `handlers/note/ajax` ajax页面
-- `handlers/note/component` 页面的组件
+- `handlers/note/page/` 页面目录
+- `handlers/note/ajax/` ajax页面目录
+- `handlers/note/component/` 页面的组件
 - `handlers/note/component/css` CSS组件
 - `handlers/note/component/script` JS脚本组件
 - `handlers/note/*.py` 后台处理程序
 
+> 示例
+
+```text
+handlers/note/
+|-- page
+|   |-- note_index.html
+|   `-- note_create.html
+|-- ajax
+|   |-- note_option_dialog.html
+|   `-- note_select_dialog.html
+|-- component
+|   |-- css
+|   |   |-- layout_css.html
+|   |   `-- header_css.html
+|   |-- script
+|   |   |-- option_script.html
+|   |   `-- search_script.html
+|   `-- header.html
+|-- note_dao.py   # 数据访问对象
+|-- note_page.py  # 页面的controller
+`-- note_ajax.py  # AJAX请求的controller
+```

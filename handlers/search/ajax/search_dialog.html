@@ -1,0 +1,24 @@
+
+<div class="card searchDialog">
+
+    <form id="searchDialogForm" method="GET" action="/search/dialog">
+        {% include common/search/search_box.html %}
+    </form>
+
+    <div class="col-md-12 result-list">
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#searchDialogForm").submit(function (e) {
+            e.preventDefault();
+            var formData = $(e.target).formData();
+            formData.callback = "{{callback}}";
+            $.get("/search/dialog", formData, function (resp) {
+                $(".searchDialog").find(".result-list").html(resp);
+            });
+        })
+    });
+</script>

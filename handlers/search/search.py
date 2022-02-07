@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2022/01/01 23:19:28
+# @modified 2022/02/07 19:20:04
 
 import re
 import os
@@ -422,6 +422,24 @@ def do_reload_search(ctx = None):
     register_search_handler("comment", placeholder = u"搜索评论")
     register_search_handler("default", placeholder = u"综合搜索", action = "/search")
 
+class SearchDialogAjaxHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        key = xutils.get_argument("key", "")
+        offset = xutils.get_argument("offset", 0, type = int)
+        limit = xutils.get_argument("limit", 100, type = int)
+        xutils.get_argument("callback", "")
+
+        if key != "":
+            searcher = SearchHandler()
+            ctx = Storage()
+            ctx.offset = offset
+            ctx.limit = limit
+            result, length = searcher.do_search(ctx, key, offset, limit)
+            return xtemplate.render("search/ajax/search_dialog_detail.html", 
+                result = result)
+        return xtemplate.render("search/ajax/search_dialog.html")
 
 xutils.register_func("search.list_rules", list_search_rules)
 xutils.register_func("search.list_recent", list_search_history)
@@ -433,5 +451,6 @@ xurls = (
     r"/s/(.+)"       , SearchHandler,
     r"/search/history", SearchHistoryHandler,
     r"/search/rules", RulesHandler,
+    r"/search/dialog", SearchDialogAjaxHandler,
 )
 

@@ -5,23 +5,28 @@
  * 对外接口:
  * 1. 展示对话框并且自适应设备
  *    xnote.showDialog(title, html, buttons = [], functions = [])
+ *    xnote.showDialogEx(options)
  * 
  * 2. 展示iframe页面
  *    xnote.showIframeDialog(title, url)
+ *    xnote.showAjaxDialog(title, url, buttons, functions)
  * 
  * 3. 展示选项的对话框
+ *    // option参数的定义 {html, title = false}
  *    xnote.showOptionDialog(option)
- *      option参数的定义 {html, title = false}
  * 
  * 4. 系统自带的弹窗替换
  *    xnote.alert(message)
  *    xnote.confirm(message, callback)
  *    xnote.prompt(title, defaultValue, callback)
+ *    // 打开文本编辑的对话框
+ *    xnote.showTextDialog(title, text, buttons, functions)
  * 
  */
 
-if (window.xnote == undefined) {
-    window.xnote = {};
+
+if (window.xnote === undefined) {
+    throw new Error("xnote is undefined!");
 }
 
 function getDialogArea() {
@@ -45,7 +50,26 @@ window.xnote.showIframeDialog = function (title, url) {
     });
 }
 
+// 关闭对话框的入口方法
+window.xnote.closeDialog = function (flag) {
+    if (flag === "last") {
+        var lastId = xnote._dialogIdStack.pop();
+        layer.close(lastId);
+    }
+
+    if (flag instanceof Number) {
+        layer.close(flag);
+        // TODO 移除_dialogIdStack中的元素
+    }
+}
+
 window.xnote.showDialogEx = function (options) {
+    var dialogId = xnote.showDialogExInner(options);
+    xnote._dialogIdStack.push(dialogId);
+    return dialogId;
+}
+
+window.xnote.showDialogExInner = function (options) {
     var area = getDialogArea();
     var title = options.title;
     var html  = options.html;
@@ -126,7 +150,7 @@ xnote.showAjaxDialog = function(title, url, buttons, functions) {
         options.buttons = buttons;
         options.functions = functions;
         options.html = resp;
-        xnote.showDialogEx(options);
+        var index = xnote.showDialogEx(options);
         // 刷新各种组件的默认值
         xnote.refresh();
     }).fail(function (error) {

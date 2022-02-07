@@ -162,6 +162,16 @@ $(function () {
             textarea_replace_line(editor, "[x]", "[]");
         }
 
+        if (action == "note_link") {
+            xnote.showAjaxDialog("选择笔记", "/search/dialog?search_type=note&callback=insertNoteLinkCallback");
+
+            window.insertNoteLinkCallback = function (param) {
+                var link = "[" + param.name + "](" + param.url + ")";
+                textarea_insert(editor, link);
+                xnote.closeDialog("last");
+            };
+        }
+
         layer.close(DIALOG_INDEX);
     });
 })
