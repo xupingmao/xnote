@@ -12,7 +12,7 @@
 
 {% block body_top %}
     <div class="card">
-        {% include note/component/header/group_header.html %}
+        {% include "note/component/header/common_header.html" %}
     </div>
 {% end %}
 
@@ -28,9 +28,44 @@
     {% init show_pagination = False %}
     {% init show_comment    = True %}
     {% init error           = "" %}
-    {% init show_ext_info   = True %}
+    {% init data_list       = [] %}
 
-    {% include note/editor/view_group.html %}
+    <div class="card">
+        {% include note/component/note_path.html %}
+    </div>
+
+    <div class="card btn-line-height">
+        <span>表单功能说明</span>
+        <div class="float-right">
+            <button class="option-btn btn-default">编辑</button>
+        </div>
+    </div>
+
+    <div class="card form-body">
+        <table class="table">
+            <tr>
+                <th>A</th>
+                <th>B</th>
+                <th>C</th>
+                <th>D</th>
+            </tr>
+            
+            {% for row in data_list %}
+                <tr>
+                    <td>{{row.name}}</td>
+                    <td>{{row.age}}</td>
+                    <td>{{row.job}}</td>
+                    <td>
+                        <button class="edit-btn btn-default" data-key="{{row._key}}">编辑</button>
+                        <button class="delete-btn btn-danger" data-key="{{row._key}}">删除</button>
+                    </td>
+                </tr>
+            {% end %}
+        </table>
+    </div>
+
+
+    {# 文章扩展信息 #}
     {% include note/component/note_ext_info.html %}
 
     {# 分页 #}
@@ -39,12 +74,6 @@
             {% include mod_pagenation.html %}
         </div>
     {% end %}
-{% end %}
-
-{% block body_right %}
-<div class="desktop-only">
-    {% include note/page/detail/group_detail_right.html %}
-</div>
 {% end %}
 
 {% block aside %}

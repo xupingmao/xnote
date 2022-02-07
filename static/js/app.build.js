@@ -470,7 +470,7 @@ Date.prototype.format = Date.prototype.format || function (format) {
 };
 
 
-function parseUrl(src) {
+function parseUrl(src, doDecode) {
     // URL的完整格式如下
     // 协议://用户名:密码@子域名.域名.顶级域名:端口号/目录/文件名.文件后缀?参数=值#标志
     var path = '';
@@ -479,6 +479,12 @@ function parseUrl(src) {
     var state = 0;
     var name = '';
     var value = '';
+
+    // 默认不进行decode（兼容原来的逻辑）
+    if (doDecode === undefined) {
+        doDecode = false;
+    }
+
     for(var i = 0; i < src.length; i++) {
         var c = src[i]
 
@@ -505,8 +511,17 @@ function parseUrl(src) {
             value += c;
         }
     }
+
+    function formatValue(value) {
+        if (doDecode) {
+            return decodeURIComponent(value);
+        } else {
+            return value;
+        }
+    }
+
     if (name != '') {
-        args[name] = value;
+        args[name] = formatValue(value);
     }
     return {'path': path, 'param': args};
 }
@@ -551,6 +566,32 @@ var getUrlParam = function (key, defaultValue) {
     } else {
         return paramValue;
     }
+}
+
+/**
+ * 给指定的url添加参数
+ * @param {string} url 指定的url
+ * @param {string} key 参数的key
+ * @param {string} value 参数的value
+ */
+var addUrlParam = function(url, key, value) {
+    var parsed = parseUrl(url);
+    var result = parsed.path;
+    var params = parsed.param;
+    var isFirst = true;
+    
+    params[key] = value;
+    // 组装新的url
+    for (var key in params) {
+        var paramValue = params[key];
+        if (isFirst) {
+            result += "?" + key + "=" + paramValue;
+            isFirst = false;
+        } else {
+            result += "&" + key + "=" + paramValue;
+        }
+    }
+    return result;
 }
 // @author xupingmao
 // @since 2017/08/16
@@ -602,10 +643,10 @@ $.fn.extend({
     }
 });
 /**
- * description here
+ * xnote全局初始化
  * @author xupingmao
  * @since 2022/01/09 16:17:02
- * @modified 2022/01/09 16:30:37
+ * @modified 2022/02/07 12:21:11
  * @filename x-init.js
  */
 
@@ -613,8 +654,10 @@ $.fn.extend({
 if (window.xnote === undefined) {
     // 全局对象
     window.xnote = {};
-    // 初始化API对象
+    // 后端接口API模块
     window.xnote.api = {};
+    // 表格模块
+    window.xnote.table = {};
 }
 
 
@@ -787,8 +830,20 @@ window.xnote.setExtFunc = function (funcName, func) {
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2022/01/09 16:41:00
+ * @modified 2022/02/07 12:19:35
  */
+
+
+// 调整表格宽度
+xnote.table.adjustWidth = function(selector) {
+    $(selector).each(function (element, index) {
+        var headings = $(this).find("th");
+        if (headings.length > 0) {
+            var width = 100 / headings.length;
+            headings.css("width", width + "%");
+        }
+    });
+};
 
 var XUI = function(window) {
     // 处理select标签选中情况
@@ -836,7 +891,7 @@ var XUI = function(window) {
                 self.addClass("selected-link");
             }
         });
-    }
+    };
 
     // 点击跳转链接的按钮
     $(".link-btn").click(function() {
@@ -875,6 +930,7 @@ var XUI = function(window) {
         initCheckbox();
         initRadio();
         initXRadio();
+        xnote.table.adjustWidth(".default-table");
     }
 
     window.xnote.assert = function (expression, message) {
@@ -889,6 +945,7 @@ var XUI = function(window) {
         initDefaultValue();
         // 注册事件
         xnote.addEventListener("init-default-value", initDefaultValue);
+        xnote.addEventListener("xnote.reload", initDefaultValue);
     }
 
     xnote.refresh();

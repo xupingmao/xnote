@@ -71,7 +71,13 @@
             {% if item.is_deleted %}
                 <span class="gray-tag-span" href="/note/removed">删除</span>
             {% end %}
-            
+
+            {% comment 新的统一使用badge_info %}
+            {% if hasattr(item, "badge_info") and item.badge_info != None %}
+                <span class="book-size-span">{{item.badge_info}}</span>
+            {% end %}
+
+            {% comment 兼容老的展示逻辑 %}
             {% set sub_info = "" %}
 
             {% if show_size and item.size != None %}
@@ -99,10 +105,6 @@
             {% end %}
 
             <span class="book-size-span">{{sub_info}}</span>
-
-            {% if hasattr(item, "badge_info") and item.badge_info != None %}
-                <span class="book-size-span">{{item.badge_info}}</span>
-            {% end %}
 
             {% if item.show_next or show_next %}
                 <i class="fa fa-chevron-right"></i>

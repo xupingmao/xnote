@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2022/01/23 15:43:21
+# @modified 2022/02/07 13:09:21
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -79,13 +79,17 @@ MAX_LIST_SIZE   = 1000
 
 NOTE_ICON_DICT = {
     "group"   : "fa-folder orange",
-    "csv"     : "fa-table",
-    "table"   : "fa-table",
-    "post"    : "fa-file-word-o",
-    "html"    : "fa-file-word-o",
+
+    "post"    : "fa-file-word-o", # 废弃
+    "html"    : "fa-file-word-o", # 废弃
     "gallery" : "fa-photo",
     "list"    : "fa-list",
     "plan"    : "fa-calendar-check-o",
+
+    # 表格类
+    "csv"     : "fa-table", # 废弃
+    "table"   : "fa-table", # 废弃
+    "form"    : "fa-table", # 开发中
 }
 
 CREATE_LOCK = threading.RLock()
@@ -121,6 +125,11 @@ class NoteSchema:
 
 def format_note_id(id):
     return str(id)
+
+def format_date(date):
+    if date is None:
+        return date
+    return date.split(" ")[0].replace("-", "/")
 
 def get_root():
     root = Storage()
@@ -273,14 +282,14 @@ def sort_notes(notes, orderby = "name"):
         orderby = "name"
 
     sort_func = SORT_FUNC_DICT.get(orderby, sort_by_mtime_desc)
-    build_note_list_info(notes)
+    build_note_list_info(notes, orderby)
     sort_func(notes)
 
-def build_note_list_info(notes):
+def build_note_list_info(notes, orderby = None):
     for note in notes:
-        build_note_info(note)
+        build_note_info(note, orderby)
 
-def build_note_info(note):
+def build_note_info(note, orderby = None):
     if note is None:
         return None
 
@@ -311,14 +320,20 @@ def build_note_info(note):
         note.category = "000"
 
     if note.ctime != None:
-        note.create_date = note.ctime.split(" ")[0]
+        note.create_date = format_date(note.ctime)
 
     if note.mtime != None:
-        note.update_date = note.mtime.split(" ")[0]
+        note.update_date = format_date(note.mtime)
 
     # 处理删除时间
     if note.is_deleted == 1 and note.dtime == None:
         note.dtime = note.mtime
+
+    if orderby == "hot_index":
+        note.badge_info = "热度: %s" % note.hot_index
+
+    if note.badge_info is None:
+        note.badge_info = note.create_date
 
     return note
 

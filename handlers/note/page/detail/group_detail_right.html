@@ -1,0 +1,39 @@
+
+<div class="card group-option-card">
+    <div class="card">
+        <span class="btn-line-height">状态</span>
+        <div class="float-right">
+            <select class="status-select" data-id="{{file.id}}" value="{{file.priority}}">
+                <option value="1">置顶</option>
+                <option value="0">活跃</option>
+                <option value="-1">归档</option>
+            </select>
+        </div>
+    </div>
+
+    {% include note/component/note_orderby_select.html %}
+
+    <div class="pad5 group-detail-btn-box">
+        <a class="btn btn-default note-share-btn" data-id="{{file.id}}">分享</a>
+    </div>
+</div>
+
+{% import markdown %}
+
+<div class="card">
+    <div class="card-title">
+        <span>简介</span>
+        <div class="float-right">
+            <a href="/note/edit?id={{file.id}}">编辑</a>
+        </div>
+    </div>
+    {% if file.content == None or file.content == "" %}
+        <p class="align-center">暂无简介</p>
+    {% else %}
+        {% try %}
+            <div class="pad5 markdown-box">{% raw markdown.markdown(file.content) %}</div>
+        {% except %}
+            <div class="pad5 markdown-box">抱歉,markdown解析出错!</div>
+        {% end %}
+    {% end %}
+</div>

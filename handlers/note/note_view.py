@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2022/01/27 21:25:09
+# @modified 2022/02/07 13:04:50
 import profile
 import math
 import re
@@ -129,13 +129,8 @@ def view_group_detail_func(file, kw):
         kw.template_name = "note/editor/markdown_edit.html"
         return
 
-    if orderby != None and orderby != "" and file.orderby != orderby:
-        NOTE_DAO.update(file.id, orderby = orderby)
-    else:
+    if orderby == None or orderby == "":
         orderby = file.orderby
-
-    if orderby not in ("ctime_priority", "name", "name_priority"):
-        orderby = "ctime_priority"
 
     offset = max(page-1, 0) * pagesize
     files  = NOTE_DAO.list_by_parent(file.creator, file.id, 
@@ -150,7 +145,6 @@ def view_group_detail_func(file, kw):
     kw.files           = files
     kw.show_parent_link = False
     kw.page_max        = math.ceil(amount/pagesize)
-    kw.show_cdate = True
     kw.parent_id  = file.id
 
     if dialog == "true":
@@ -174,6 +168,11 @@ def view_list_func(note, kw):
 def view_table_func(note, kw):
     kw.show_aside = False
 
+def view_form_func(note, kw):
+    # 表单支持脚本处理，可以实现一些标准化的表单工具
+    kw.template_name = "note/page/detail/form_detail.html"
+    kw.file_id = note.id
+
 VIEW_FUNC_DICT = {
     "group": view_group_detail_func,
     "md"  : view_md_func,
@@ -185,6 +184,7 @@ VIEW_FUNC_DICT = {
     "gallery": view_gallery_func,
     "html": view_html_func,
     "post": view_html_func,
+    "form": view_form_func,
 }
 
 def find_note_for_view0(token, id, name):

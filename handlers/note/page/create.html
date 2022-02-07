@@ -36,19 +36,18 @@ label {
             <input name="date" id="selectDate" autocomplete="off" class="create-input"/>
         </div>
         
-        
-        {% if type != "group" %}
-            <div class="input-group-row">
-                <label>{{T("类型")}}</label>
-                <select name="type" value="{{type}}">
-                    {% for item in NOTE_TYPE_LIST %}
-                        {% if item.visible %}
-                            <option value="{{item.type}}">{{T(item.name)}}</option>
-                        {% end %}
+        <div class="input-group-row">
+            <label>{{T("类型")}}</label>
+            <select class="note-type-select" name="type" value="{{type}}">
+                {% for item in NOTE_TYPE_LIST %}
+                    {% if item.visible %}
+                        <option value="{{item.type}}">{{T(item.name)}}</option>
                     {% end %}
-                </select>
-            </div>
+                {% end %}
+            </select>
+        </div>
 
+        {% if type != "group" %}
             <div class="input-group-row">
                 <label>{{T("笔记本")}}</label>
                 <select name="parent_id" value="{{parent_id}}">
@@ -97,6 +96,15 @@ label {
             $("input[name=name]").val(value + getWeekDayFromLayDate(date));
         }
     });
+
+    $(function () {
+        $(".note-type-select").change(function (e) {
+            var oldHref = window.location.href;
+            var selectedType = $(this).val();
+            var newHref = addUrlParam(oldHref, "type", selectedType);
+            window.location.href = newHref;
+        });
+    })
 </script>
 
 {% end %}

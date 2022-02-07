@@ -1,5 +1,5 @@
 
-function parseUrl(src) {
+function parseUrl(src, doDecode) {
     // URL的完整格式如下
     // 协议://用户名:密码@子域名.域名.顶级域名:端口号/目录/文件名.文件后缀?参数=值#标志
     var path = '';
@@ -8,6 +8,12 @@ function parseUrl(src) {
     var state = 0;
     var name = '';
     var value = '';
+
+    // 默认不进行decode（兼容原来的逻辑）
+    if (doDecode === undefined) {
+        doDecode = false;
+    }
+
     for(var i = 0; i < src.length; i++) {
         var c = src[i]
 
@@ -34,8 +40,17 @@ function parseUrl(src) {
             value += c;
         }
     }
+
+    function formatValue(value) {
+        if (doDecode) {
+            return decodeURIComponent(value);
+        } else {
+            return value;
+        }
+    }
+
     if (name != '') {
-        args[name] = value;
+        args[name] = formatValue(value);
     }
     return {'path': path, 'param': args};
 }
@@ -80,4 +95,30 @@ var getUrlParam = function (key, defaultValue) {
     } else {
         return paramValue;
     }
+}
+
+/**
+ * 给指定的url添加参数
+ * @param {string} url 指定的url
+ * @param {string} key 参数的key
+ * @param {string} value 参数的value
+ */
+var addUrlParam = function(url, key, value) {
+    var parsed = parseUrl(url);
+    var result = parsed.path;
+    var params = parsed.param;
+    var isFirst = true;
+    
+    params[key] = value;
+    // 组装新的url
+    for (var key in params) {
+        var paramValue = params[key];
+        if (isFirst) {
+            result += "?" + key + "=" + paramValue;
+            isFirst = false;
+        } else {
+            result += "&" + key + "=" + paramValue;
+        }
+    }
+    return result;
 }

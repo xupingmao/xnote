@@ -1,0 +1,43 @@
+{% init show_path_list = True %}
+{% init error = None %}
+{% init group_type = None %}
+{% init op = "view" %}
+{% init is_iframe = False %}
+
+{% set item = file %}
+{% set type_dict = dict(
+    md = "Markdown",
+    gallery = "相册",
+    html = "富文本",
+    csv = "表格",
+    list = "清单"
+) %}
+
+{% if show_path_list %}
+    <div class="grid-title btn-line-height">
+        <span>文档查看</span>
+
+        <div class="float-right">
+            {# 普通笔记 #}
+            {% include note/component/option/note_dropdown.html %}
+            <!-- <a class="btn btn-default note-option-btn">选项</a> -->
+            {% include common/button/back_button.html %}
+        </div>
+    </div>
+{% end %}
+
+{% if error != "" and error != None%}
+    <div class="col-md-12 error">
+        {{error}}
+    </div>
+{% end %}
+
+<script type="text/javascript">
+    $(function () {
+        $("body").on("click", ".note-option-btn", function (event) {
+            $.get("/note/ajax/option_dialog", function (resp) {
+                xnote.showDialog("选项", resp);
+            })
+        });
+    })
+</script>

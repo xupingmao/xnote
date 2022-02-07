@@ -1,8 +1,8 @@
 /**
- * description here
+ * xnote全局初始化
  * @author xupingmao
  * @since 2022/01/09 16:17:02
- * @modified 2022/01/09 16:30:37
+ * @modified 2022/02/07 12:21:11
  * @filename x-init.js
  */
 
@@ -10,8 +10,10 @@
 if (window.xnote === undefined) {
     // 全局对象
     window.xnote = {};
-    // 初始化API对象
+    // 后端接口API模块
     window.xnote.api = {};
+    // 表格模块
+    window.xnote.table = {};
 }
 
 

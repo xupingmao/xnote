@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/02/16 12:49:30
-# @modified 2022/01/27 21:28:24
+# @modified 2022/02/07 12:30:44
 
 class NoteType:
 
@@ -25,6 +25,7 @@ NOTE_TYPE_LIST = [
     NoteType("csv"    , u"表格", False),
     NoteType("list"   , u"清单"),
     NoteType("gallery", u"相册"),
+    NoteType("form"   , u"表单", False),
 ]
 
 NOTE_TYPE_DICT = {}
@@ -55,5 +56,6 @@ CREATE_BTN_TEXT_DICT = {
     "html"    : u"新建富文本",
     "sticky"  : u"新建文档",
     "log"     : u"新建日志",
+    "form"    : u"新建表单",
 }
 

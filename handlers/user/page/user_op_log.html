@@ -1,22 +1,21 @@
 {% extends base.html %}
 
 {% block body %}
+    {% init common_title = "用户日志" %}
+    {% include common/title/base_title.html %}
 
     <style type="text/css">
         .op-log-table td {
             width: 33.33%;
         }
     </style>
-    
-    {% init common_title = "用户日志" %}
-    {% include common/title/base_title.html %}
 
     <div class="card">
-        <table class="row op-log-table">
+        <table class="table op-log-table">
             <tr>
-                <td>操作时间</td>
-                <td>操作类型</td>
-                <td>详情</td>
+                <th>操作时间</th>
+                <th>操作类型</th>
+                <th>详情</th>
             </tr>
 
             {% for log in log_list %}

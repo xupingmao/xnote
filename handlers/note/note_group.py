@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2022/01/24 15:00:55
+# @modified 2022/02/07 13:14:39
 import math
 import time
 import web
@@ -511,6 +511,11 @@ class HtmlListHandler(BaseListHandler):
     note_type = "html"
     title = T("我的富文本")
 
+class FormListHandler(BaseListHandler):
+
+    note_type = "form"
+    title = T("我的表单")
+
 class AllNoteListHandler(BaseListHandler):
 
     note_type = "all"
@@ -537,6 +542,33 @@ class RecentHandler:
     def count_note(self, user_name, orderby):
         return NOTE_DAO.count_visit_log(user_name)
 
+    def list_notes(self, creator, offset, limit, orderby):
+        if orderby == "all":
+            return NOTE_DAO.list_recent_events(creator, offset, limit)
+        elif orderby == "view":
+            return NOTE_DAO.list_recent_viewed(creator, offset, limit)
+        elif orderby == "create":
+            return NOTE_DAO.list_recent_created(creator, offset, limit)
+        elif orderby == "myhot":
+            return NOTE_DAO.list_hot(creator, offset, limit)
+
+        return NOTE_DAO.list_recent_edit(creator, offset, limit)
+
+    def get_html_title(self, orderby):
+        if orderby == "all":
+            return "All"
+
+        if orderby == "view":
+            return "Recent Viewed"
+
+        if orderby == "create":
+            return "Recent Created"
+        
+        if orderby == "myhot":
+            return "Hot"
+        
+        return "Recent Updated"
+
     def GET(self, show_notice = True):
         if not xauth.has_login():
             raise web.seeother("/note/public")
@@ -554,22 +586,8 @@ class RecentHandler:
 
         xmanager.add_visit_log(creator, "/note/recent?orderby=%s" % orderby)
 
-        if orderby == "all":
-            html_title = "All"
-            files = NOTE_DAO.list_recent_events(creator, offset, limit)
-        elif orderby == "view":
-            html_title = "Recent Viewed"
-            files = NOTE_DAO.list_recent_viewed(creator, offset, limit)
-        elif orderby == "create":
-            html_title = "Recent Created"
-            files = NOTE_DAO.list_recent_created(creator, offset, limit)
-        elif orderby == "myhot":
-            html_title = "Hot"
-            files = NOTE_DAO.list_hot(creator, offset, limit)
-        else:
-            html_title = "Recent Updated"
-            files = NOTE_DAO.list_recent_edit(creator, offset, limit)
-        
+        html_title = self.get_html_title(orderby)
+        files = self.list_notes(creator, offset, limit, orderby)
         count = self.count_note(creator, orderby)
         
         return xtemplate.render("note/page/note_recent.html",
@@ -786,6 +804,7 @@ xurls = (
     r"/note/log"            , LogListHandler,
     r"/note/all"            , AllNoteListHandler,
     r"/note/html"           , HtmlListHandler,
+    r"/note/form"           , FormListHandler,
     r"/note/date"           , DateListHandler,
     r"/note/share_to_me"    , ShareToMeListHandler,
 

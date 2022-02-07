@@ -5,8 +5,20 @@
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2022/01/09 16:41:00
+ * @modified 2022/02/07 12:19:35
  */
+
+
+// 调整表格宽度
+xnote.table.adjustWidth = function(selector) {
+    $(selector).each(function (element, index) {
+        var headings = $(this).find("th");
+        if (headings.length > 0) {
+            var width = 100 / headings.length;
+            headings.css("width", width + "%");
+        }
+    });
+};
 
 var XUI = function(window) {
     // 处理select标签选中情况
@@ -54,7 +66,7 @@ var XUI = function(window) {
                 self.addClass("selected-link");
             }
         });
-    }
+    };
 
     // 点击跳转链接的按钮
     $(".link-btn").click(function() {
@@ -93,6 +105,7 @@ var XUI = function(window) {
         initCheckbox();
         initRadio();
         initXRadio();
+        xnote.table.adjustWidth(".default-table");
     }
 
     window.xnote.assert = function (expression, message) {
@@ -107,6 +120,7 @@ var XUI = function(window) {
         initDefaultValue();
         // 注册事件
         xnote.addEventListener("init-default-value", initDefaultValue);
+        xnote.addEventListener("xnote.reload", initDefaultValue);
     }
 
     xnote.refresh();

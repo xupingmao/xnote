@@ -1,0 +1,9 @@
+{# 文章信息 #}
+
+{% init show_ext_info   = True %}
+
+{% if show_ext_info %}
+    <div class="card">
+        <div class="pad5">{{file.creator}} 创建于 {{file.cdate}} 更新于 {{file.mdate}}</div>
+    </div>
+{% end %}

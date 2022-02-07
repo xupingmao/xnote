@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/01/24 14:40:09
+# @modified 2022/02/07 13:49:36
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -440,6 +440,9 @@ class LdbTable:
             if obj_id != key_obj_id:
                 print_debug_info("invalid obj_id:{}, obj_id:{}", obj_id, key_obj_id)
                 return None
+
+            # 用于调试
+            # setattr(obj, "_idx_key", key)
 
             if filter_func is None:
                 return obj

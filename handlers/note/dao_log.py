@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/29 23:48:27
-# @modified 2022/01/01 23:48:31
+# @modified 2022/02/07 13:49:53
 # @filename dao_log.py
 
 """笔记相关的访问日志有两个部分：
@@ -16,6 +16,7 @@ import xauth
 import xutils
 import xmanager
 import xconfig
+import logging
 from xutils import dbutil
 from xutils import dateutil
 from xutils import Storage
@@ -129,13 +130,20 @@ def list_recent_edit(user_name = None, offset = 0, limit = None, skip_deleted = 
 
     db = get_user_note_log_table(user_name)
     logs = db.list_by_index("mtime", offset = offset, limit = limit, reverse = True)
-    note_ids = get_note_ids_from_logs(logs)
-    notes = NOTE_DAO.batch_query_list(note_ids)
+    # note_ids = get_note_ids_from_logs(logs)
+    # notes = NOTE_DAO.batch_query_list(note_ids)
 
-    for note in notes:
+    result = []
+    for log in logs:
+        note_id = log.note_id
+        note = NOTE_DAO.get_by_id(note_id)
+        if note is None:
+            continue
+
         note.badge_info = dateutil.format_date(note.mtime)
+        result.append(note)
 
-    return notes
+    return result
 
 @xutils.timeit(name = "NoteDao.ListRecentCreated", logfile = True)
 def list_recent_created(user_name = None, offset = 0, limit = 10, skip_archived = False):
