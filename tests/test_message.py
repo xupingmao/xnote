@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2021/10/06 13:47:04
+# @modified 2022/02/08 10:24:30
 
 import sys
 import os
@@ -136,6 +136,9 @@ class TestMain(BaseTestCase):
         self.check_OK("/message?tag=task")
         self.check_OK("/message?tag=task&action=create")
         self.check_OK("/message?tag=task&filterKey=test")
+
+    def test_message_dairy(self):
+        self.check_OK("/message/dairy")
 
 
 

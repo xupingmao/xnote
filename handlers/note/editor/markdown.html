@@ -27,24 +27,47 @@
 
 <script type="text/javascript">
     $(function () {
+
+        function trimText(text) {
+            text = text.trimLeft();
+            if (text.indexOf("<ul>") >= 0) {
+                return text.split("<ul>")[0];
+            }
+            if (text.indexOf("<ol>") >= 0) {
+                return text.split("<ol>")[0];
+            }
+            return text;
+        }
+
+        function convertTextToNew(text) {
+            var newText = text;
+            if (newText.startsWith("[]")) {
+                return "[x]" + newText.substring(2);
+            }
+            if (newText.startsWith("[x]") || newText.startsWith("[X]")) {
+                return "[]" + newText.substring(3);
+            }
+            return newText;
+        }
         
         function onCheckboxClicked(e) {
             // 按下单选项的行为
             var text = $(e.target).attr("data-text");
             console.log("onCheckboxClicked", text);
+            text = trimText(text);
             var params = {};
-
-            var newText = text.trimLeft();
-
-            if (text.startsWith("[]")) {
-                newText = "[x]" + newText.substring(2);
-            }
-            if (text.startsWith("[x]")) {
-                newText = "[]" + newText.substring(3);
-            }
+            var newText = convertTextToNew(text);
 
             var oldContent = $("#markdown-input").val();
-            // TODO: 先简单处理一下
+            if (oldContent.indexOf(text) < 0) {
+                console.log("text not match:", text);
+                xnote.alert("标记任务失败，请刷新后重试");
+                return;
+            }
+
+            // console.log("text:", text, "newText:", newText);
+
+            // TODO: 先简单用replace处理一下
             newContent = oldContent.replace(text, newText);
             params.id = "{{file.id}}";
             params.content = newContent;
@@ -52,7 +75,7 @@
             console.log("newContent:", newContent);
 
             $.post("/note/update", params, function (resp) {
-                xnote.toast("更新成功，跳转中");
+                xnote.toast("更新成功，正在刷新页面");
                 window.location.reload();
             });
         }

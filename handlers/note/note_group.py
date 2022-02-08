@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2022/02/07 17:05:33
+# @modified 2022/02/08 10:34:55
 import math
 import time
 import web
@@ -138,6 +138,7 @@ def list_smart_group(user_name):
     smart_group_list.append(SmartNote("清单", "/note/list", size = note_stat.list_count))
     smart_group_list.append(SmartNote("相册", "/note/gallery", size = note_stat.gallery_count))
     smart_group_list.append(SmartNote("回收站", "/note/removed", size = note_stat.removed_count))
+    # smart_group_list.append(SmartNote("杜威十进制分类法", "/note/category", size = 10))
 
     SMART_GROUP_COUNT = len(smart_group_list)
     return smart_group_list
@@ -361,6 +362,7 @@ class CategoryHandler:
     @xauth.login_required()
     def GET(self):
         files = get_ddc_category_list()
+        cat_type = xutils.get_argument("type", "ddc")
 
         root = NOTE_DAO.get_root()
         return xtemplate.render("note/page/category.html", 

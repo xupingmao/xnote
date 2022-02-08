@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2021/11/30 23:50:11
+# @modified 2022/02/08 11:12:48
 
 
 """fsutil: 文件操作工具，文件工具分为如下部分：
@@ -515,9 +515,9 @@ class FileItem(Storage):
             st = Storage()
 
         self.name = xutils.unquote(self.name)
+        self.name = decode_name(self.name)
         if os.path.isfile(path):
             self.type = "file"
-            self.name = decode_name(self.name)
             _, self.ext = os.path.splitext(self.name)
             self.size = format_size(st.st_size)
         else:
