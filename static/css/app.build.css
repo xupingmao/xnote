@@ -150,7 +150,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2022/02/07 17:37:53
+ * @modified 2022/02/08 22:28:51
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -194,7 +194,6 @@ h3.marked-heading {
 
 .marked-contents {
     width: 100%;
-    float: left;
     border: 1px solid #ccc;
     margin-bottom: 10px;
 }
@@ -222,10 +221,12 @@ h3.marked-heading {
 }
 
 .marked-codespan {
-    padding: 2px 4px;
+    padding-left: 4px;
+    padding-right: 4px;
     margin: 0;
-    background-color: rgba(27,31,35,.05);
-    border-radius: 6px;
+    /*background-color: rgba(27,31,35,.05);*/
+    background-color: pink;
+    border-radius: 4px;
 }
 
 .marked-strong {
@@ -493,6 +494,10 @@ h3.marked-heading {
 }
 
 .hide, .hidden {
+    display: none;
+}
+
+.hidden-file {
     display: none;
 }
 

@@ -226,7 +226,7 @@ window.xnote.requestUploadByClip = function (e, filePrefix, successFn, errorFn) 
         for (var index = 0; index < items.length; index++) {
             var item  = items[index];
             var value = item.value;
-            // console.log(item, value);
+            // console.log("requestUploadByClip", item, value);
             if (/image/i.test(item.type)) {
                 console.log(item);
                 var blob = item.getAsFile();

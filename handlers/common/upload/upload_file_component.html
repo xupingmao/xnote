@@ -67,7 +67,10 @@ $(function () {
 
     // 监听剪切板
     $(document).on("paste", function (e) {
+        // 取消默认的粘贴动作
+        e.preventDefault();
         console.log(e);
+
         var clipboardData = e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {};
         // console.log(clipboardData);
 

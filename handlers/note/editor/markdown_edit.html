@@ -49,7 +49,7 @@
                 <input type="button" id="insertCode" class="toolbox-btn" value="代码" />
                 <input type="button" id="insertStrong" class="toolbox-btn" value="加粗" />
                 <input type="button" id="insertDel" class="toolbox-btn" value="删除线" />
-                <input type="file" id="file" name="file" class="hide" />
+                <input type="file" id="file" name="file" class="hidden-file" />
                 <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" />
                 <input type="button" id="insertNoteLink" class="toolbox-btn" value="笔记链接" />
 
@@ -267,7 +267,9 @@
 
         // 文件上传
         $("#uploadBtn").click(function () {
+            console.log("准备上传文件...");
             xnote.requestUpload("#file", false, function (resp) {
+                console.log("上传文件:", resp);
                 var fileLink = resp.link;
                 codeInsert(fileLink);
             });
@@ -275,6 +277,7 @@
 
         // 通过剪切板上传
         $(document).on("paste", function (e) {
+            e.preventDefault();
             xnote.requestUploadByClip(e, 'N' + fileId, function (respJson) {
                 console.log(respJson);
                 var link = respJson.link;
