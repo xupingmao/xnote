@@ -181,7 +181,7 @@ def on_check_index(ctx = None):
     if get_system_role() == "follower":
         return
 
-    print_debug_info("检查文件同步索引...")
+    logging.debug("检查文件同步索引...")
 
     manager = FileIndexCheckManager()
 

@@ -198,12 +198,18 @@ class WriteBatchProxy:
                 batch.Delete(key)
             return batch
 
+    def commit(self, sync = False):
+        self.log_debug_info()
+        ldb_batch = self.convert_to_ldb_batch()
+        check_get_leveldb().Write(ldb_batch, sync)
+
+
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, traceback):
         if traceback is None:
-            commit_write_batch(self)
+            self.commit()
 
 
 class LevelDBProxy:
@@ -491,9 +497,7 @@ def create_write_batch():
     return WriteBatchProxy()
 
 def commit_write_batch(batch, sync = False):
-    batch.log_debug_info()
-    ldb_batch = batch.convert_to_ldb_batch()
-    check_get_leveldb().Write(ldb_batch, sync)
+    batch.commit(sync)
 
 def scan(key_from = None, key_to = None, func = None, reverse = False, 
         parse_json = True):

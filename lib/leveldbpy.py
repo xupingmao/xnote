@@ -57,22 +57,30 @@ import weakref
 import threading
 import platform
 import logging
+import os
 from collections import namedtuple
 
-_dll_name = "leveldb"
 
-if platform.architecture()[0] == "64bit":
-    _dll_name = "./lib/leveldb-x64"
-else:
-    _dll_name = "./lib/leveldb"
+def load_dll():
+    dll_path = "leveldb.dll"
+    print("workingdir:", os.getcwd())
+    print("platform.architecture:", platform.architecture())
 
-dll_path = ctypes.util.find_library(_dll_name)
-if dll_path is None:
-    raise Exception("leveldb.dll not found")
+    if platform.architecture()[0] == "64bit":
+        dll_path = "./lib/leveldb-x64.dll"
+    else:
+        dll_path = "./lib/leveldb.dll"
 
-print("leveldb.dll.path=%r" % dll_path)
+    # dll_path = ctypes.util.find_library(_dll_name)
+    # if dll_path is None:
+    #     raise Exception("leveldb.dll not found")
+    if not os.path.exists(dll_path):
+        raise Exception("invalid dll_path:" + dll_path)
 
-_ldb = ctypes.CDLL(dll_path)
+    print("leveldb.dll.path: %r" % dll_path)
+    return ctypes.CDLL(dll_path)
+
+_ldb = load_dll()
 # _ldb = ctypes.CDLL('./lib/leveldb.dll')
 
 _ldb.leveldb_filterpolicy_create_bloom.argtypes = [ctypes.c_int]

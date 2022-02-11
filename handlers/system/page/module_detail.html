@@ -31,7 +31,10 @@
     <h2>模块: {{doc_info.name}}</h2>
 
     <p>位于 <a href="/code/edit?path={{doc_info.file}}">{{doc_info.file}}</a></p>
+
+    {% if doc_info.doc != None %}
     <pre class="doc-detail">{{doc_info.doc}}</pre>
+    {% end %}
 
     {% if len(doc_info.functions) > 0 %}
         <h2>方法目录</h2>
@@ -49,7 +52,7 @@
 
         {% for func in doc_info.functions %}
             <div id="{{func.uuid}}">
-                <span class="doc-type">{{func.type}}</span>
+                <span class="tag">{{func.type}}</span>
                 <span>{{func.name}}</span>
                 <pre class="doc-detail">{{func.doc}}</pre>
             </div>

@@ -698,7 +698,7 @@ def get_free_space(folder):
         free_bytes = ctypes.c_ulonglong(0)
         c_folder = ctypes.c_wchar_p(folder)
         ctypes.windll.kernel32.GetDiskFreeSpaceExW(c_folder, None, None, ctypes.pointer(free_bytes))
-        return free_bytes.value/1024/1024/1024
+        return free_bytes.value
     else:
         st = os.statvfs(folder)
         return st.f_bavail * st.f_frsize

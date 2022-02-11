@@ -12,6 +12,7 @@ import platform
 import xconfig
 from xutils import dateutil
 from xutils import fsutil
+from xutils import Storage
 
 try:
     import psutil
@@ -26,27 +27,39 @@ except ImportError:
 def get_xnote_version():
     return xconfig.get_global_config("system.version")
 
+def get_mem_info_by_psutil():
+    p                 = psutil.Process(pid=os.getpid())
+    mem_info          = p.memory_info()
+    mem_used          = xutils.format_size(mem_info.rss)
+    sys_mem           = psutil.virtual_memory()
+    sys_mem_used      = xutils.format_size(sys_mem.used)
+    sys_mem_total     = xutils.format_size(sys_mem.total)
+    formated_mem_size = xutils.format_size(mem_used)
+    return Storage(mem_used = mem_used, sys_mem_used = sys_mem_used, sys_mem_total = sys_mem_total)
+
+def get_mem_info_by_tasklist():
+    mem_usage         = os.popen("tasklist /FI \"PID eq %s\" /FO csv" % os.getpid()).read()
+    str_list          = mem_usage.split(",")
+    pattern           = re.compile(r"[0-9,]+ [kK]")
+    mem_list          = pattern.findall(mem_usage)
+    formated_mem_size = mem_list[-1]
+    return Storage(mem_used = formated_mem_size, sys_mem_used = "-1", sys_mem_total = "-1")
+
 def get_mem_info():
     mem_used = 0
     mem_total = 0
     if psutil:
-        p                 = psutil.Process(pid=os.getpid())
-        mem_info          = p.memory_info()
-        mem_used          = mem_info.rss
-        sys_mem           = psutil.virtual_memory()
-        sys_mem_used      = sys_mem.used
-        sys_mem_total     = sys_mem.total
-        formated_mem_size = xutils.format_size(mem_used)
+        result = get_mem_info_by_psutil()
     elif xutils.is_windows():
-        mem_usage         = os.popen("tasklist /FI \"PID eq %s\" /FO csv" % os.getpid()).read()
-        str_list          = mem_usage.split(",")
-        pattern           = re.compile(r"[0-9,]+ [kK]")
-        mem_list          = pattern.findall(mem_usage)
-        formated_mem_size = mem_list[-1]
+        result = get_mem_info_by_tasklist()
     else:
         # ps -C -p 10538
-        formated_mem_size = ""
-    return "%s/%s/%s" % (xutils.format_size(mem_used), xutils.format_size(sys_mem_used), xutils.format_size(sys_mem_total))
+        result = Storage(mem_used = "-1", sys_mem_used = "-1", sys_mem_total = "-1")
+
+    mem_used = result.mem_used
+    sys_mem_used = result.sys_mem_used
+    sys_mem_total = result.sys_mem_total
+    return "%s/%s/%s" % (mem_used, sys_mem_used, sys_mem_total)
 
 def get_python_version():
     return sys.version

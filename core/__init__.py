@@ -1,3 +1,4 @@
+# encoding=utf-8
 # 为了兼容Python 2.x，Python 3.x是不需要这个文件的
 
 __doc__ = """core模块的作用主要是为应用层提供一些通用的能力，包括但不限于
