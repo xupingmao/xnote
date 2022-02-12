@@ -44,6 +44,7 @@ TASK_POOL_SIZE = 500
 # 对外接口
 _manager       = None
 _event_manager = None
+LOCK = threading.RLock()
 
 def do_wrap_handler(pattern, handler_clz):
     # Python2中自定义类不是type类型
@@ -538,9 +539,21 @@ class CronTaskThread(Thread):
     def run(self):
         self.func(*self.args)
 
+class SyncTaskThread(Thread):
+    """同步的线程，文件同步的频率较高，单独开启一个线程"""
+
+    def __init__(self, name = "SyncTaskThread"):
+        super(SyncTaskThread, self).__init__()
+        self.setName(name)
+        self.setDaemon(True)
+
+    def run(self):
+        while True:
+            fire("sync.step")
+            time.sleep(0.1)
+
 class WorkerThread(Thread):
-    """执行任务队列的线程，内部有一个队列，所有线程共享
-    """
+    """执行任务队列的线程，内部有一个队列，所有线程共享"""
     
     # deque是线程安全的
     _task_queue = deque()
@@ -564,7 +577,7 @@ class WorkerThread(Thread):
                 xutils.print_exc()
 
 class EventHandler:
-    """事件处理器"""
+    """事件处理器,执行的时候不抛出异常"""
 
     def __init__(self, event_type, func, is_async = True, description = ''):
         self.event_type  = event_type
@@ -583,8 +596,10 @@ class EventHandler:
 
     def execute(self, ctx=None):
         if self.is_async:
+            # 异步执行
             put_task(self.func, ctx)
         else:
+            # 同步执行
             try:
                 if self.profile:
                     start = time.time()
@@ -642,8 +657,7 @@ class EventManager:
     _handlers = dict()
 
     def add_handler(self, handler):
-        """
-        注册事件处理器
+        """注册事件处理器
         事件处理器的去重,通过判断是不是同一个函数，不通过函数名，如果修改初始化脚本需要执行【重新加载模块】功能
         """
         event_type = handler.event_type
@@ -683,6 +697,9 @@ def init(app, vars, last_mapping = None):
     # 启动任务
     _manager.run_task()
 
+    # 同步任务线程
+    SyncTaskThread().start()
+
     return _manager
 
 def instance():
@@ -691,17 +708,18 @@ def instance():
 
 @xutils.log_init_deco("xmanager.reload")
 def reload():
-    _event_manager.remove_handlers()
-    
-    # 重载处理器
-    _manager.reload()
+    with LOCK:
+        _event_manager.remove_handlers()
+        
+        # 重载处理器
+        _manager.reload()
 
-    # 重新加载定时任务
-    _manager.load_tasks()
+        # 重新加载定时任务
+        _manager.load_tasks()
 
-    cacheutil.clear_temp()
-    load_init_script()
-    fire("sys.reload")
+        cacheutil.clear_temp()
+        load_init_script()
+        fire("sys.reload")
 
 def load_init_script():
     if xconfig.INIT_SCRIPT is not None and os.path.exists(xconfig.INIT_SCRIPT):
@@ -766,6 +784,11 @@ def fire(event_type, ctx=None):
 
 def listen(event_type_list, is_async = True, description = None):
     """事件监听器注解"""
+
+    # 同步任务有专门的线程执行
+    if event_type_list == "sync.step":
+        is_async = False
+
     def deco(func):
         global _event_manager
         if isinstance(event_type_list, list):

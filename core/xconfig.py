@@ -430,4 +430,10 @@ def get_system_dir(name):
         return SCRIPTS_DIR
 
     raise Exception("未知的系统目录:" + name)
-    
+
+def get_upload_dir(username):
+    if username is None:
+        raise Exception("username is None")
+
+    upload_dir_root = get_system_dir("files")
+    return os.path.join(upload_dir_root, username)

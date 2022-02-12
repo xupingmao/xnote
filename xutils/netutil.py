@@ -7,7 +7,7 @@ import re
 import codecs
 import six
 import socket
-from xutils.imports import try_decode
+from xutils.imports import try_decode, quote
 
 # TODO fix SSLV3_ALERT_HANDSHAKE_FAILURE on MacOS
 try:
@@ -152,7 +152,7 @@ def _join_url_and_params(url, params):
     for key in params:
         value = params[key]
         # TODO quote value
-        temp.append("%s=%s" % (key, value))
+        temp.append("%s=%s" % (key, quote(value)))
 
     query_string = "&".join(temp)
     if "?" in url:
@@ -201,6 +201,8 @@ def http_download(address, destpath = None, dirname = None):
     if dirname is not None:
         basename = os.path.basename(address)
         destpath = os.path.join(dirname, basename)
+
+    destpath = os.path.abspath(destpath)
 
     if requests is not None:
         return http_download_by_requests(address, destpath)

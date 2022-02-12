@@ -14,8 +14,10 @@ from xutils import textutil
 from xutils import dateutil
 from xutils import fsutil
 from xutils import dbutil
+from xutils.imports import quote
 
 dbutil.register_table("fs_sync_index_copy", "文件索引拷贝")
+dbutil.register_table("fs_sync_index_failed", "文件索引拷贝失败")
 
 def print_debug_info(*args):
     new_args = [dateutil.format_time(), "[system_sync_http]"]
@@ -32,6 +34,9 @@ class HttpClient:
     def get_table(self):
         return dbutil.get_hash_table("fs_sync_index_copy")
 
+    def get_failed_table(self):
+        return dbutil.get_hash_table("fs_sync_index_failed")
+
     def get_stat(self, params):
         self.check_disk_space()
 
@@ -44,7 +49,7 @@ class HttpClient:
 
     def list_files(self, offset):
         url = "{host}/system/sync?p=list_files&token={token}&offset={offset}".format(
-            host = self.host, token = self.token, offset = offset)
+            host = self.host, token = self.token, offset = quote(offset))
 
         content = netutil.http_get(url)
         result = textutil.parse_json(content, ignore_error = True)
@@ -76,12 +81,16 @@ class HttpClient:
     def check_disk_space(self):
         data_dir = xconfig.get_system_dir("data")
         free_space = fsutil.get_free_space(data_dir)
-        logging.debug("磁盘剩余容量:%s", fsutil.format_size(free_space))
-        return free_space >= 1024 ** 3 # 要大于1G
+        result = free_space >= 1024 ** 3 # 要大于1G
+
+        if not result:
+            logging.debug("磁盘容量不足, 当前容量:%s", fsutil.format_size(free_space))
+
+        return result
 
     def download_file(self, item):
         if self.admin_token is None:
-            print_debug_info("admin_token为空，跳过")
+            logging.warn("admin_token为空，跳过")
             return
 
         if not self.check_disk_space():
@@ -107,16 +116,21 @@ class HttpClient:
         dirname   = os.path.dirname(dest_path)
 
         if self.is_same_file(dest_path, item):
-            logging.debug("文件没有变化，跳过")
+            logging.debug("文件没有变化，跳过:%s", web_path)
             return
 
         fsutil.makedirs(dirname)
 
-        print_debug_info("原始文件:", url)
-        print_debug_info("目标文件:", dest_path)
+        logging.debug("原始文件:%s", url)
+        logging.debug("目标文件:%s", dest_path)
 
-        netutil.http_download(url, dest_path)
-        os.utime(dest_path, times=(mtime, mtime))
+        try:
+            netutil.http_download(url, dest_path)
+            os.utime(dest_path, times=(mtime, mtime))
+        except:
+            xutils.print_exc()
+            logging.error("下载文件失败:%s", dest_path)
+            self.get_failed_table().put(web_path, item)
 
     def download_files(self, result):
         for item in result.data:

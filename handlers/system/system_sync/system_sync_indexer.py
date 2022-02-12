@@ -4,18 +4,26 @@
 # @modified 2022/01/24 14:28:44
 # @filename fs_sync_index.py
 
+"""文件同步索引管理器"""
+
 import os
+import logging
+import time
+from collections import deque
+
 import xmanager
 import xutils
 import xconfig
-import logging
-from collections import deque
 from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil
 from xutils import fsutil
+from xutils import textutil
 
 dbutil.register_table("fs_sync_index", "文件同步索引信息")
+
+# 临时文件
+TEMP_FNAME_SET = set([".DS_Store"])
 
 def get_system_role():
     return xconfig.get_global_config("system.node.role")
@@ -28,15 +36,23 @@ def print_debug_info(*args):
 def convert_time_to_str(mtime):
     return "%020d" % (mtime * 1000)
 
+def is_temp_file(fname):
+    return fname in TEMP_FNAME_SET
+
 class FileSyncIndexManager:
 
     # 文件队列
     data = deque()
 
+    def init_file_queue(self):
+        logging.debug("初始化文件队列")
+        self.data.append(xconfig.get_system_dir("files"))
+        self.data.append(xconfig.get_system_dir("storage"))
+
+
     def step(self):
         if len(self.data) == 0:
-            self.data.append(xconfig.get_system_dir("files"))
-            logging.debug("初始化文件队列")
+            self.init_file_queue()
             return
 
         db = dbutil.get_table("fs_sync_index", type = "hash")
@@ -71,6 +87,8 @@ class FileSyncIndexManager:
         if os.path.isdir(fpath):
             size = 0
             for fname in os.listdir(fpath):
+                if is_temp_file(fname):
+                    continue
                 temp_path = os.path.join(fpath, fname)
                 self.data.append(temp_path)
                 size += 1
@@ -80,6 +98,7 @@ class FileSyncIndexManager:
     def list_files(self, key_from = None, offset = 0, limit = 20):
         result = []
         MAX_LIMIT = limit * 5
+        # 这里故意没有用hash_table，是为了使用table的接口
         db = dbutil.get_table("fs_sync_index")
 
         for value in db.iter(offset = offset, limit = MAX_LIMIT, key_from = key_from):
@@ -121,12 +140,12 @@ def check_index(key, value, db):
         return False
 
     if parts[1] != value.web_path:
-        print_debug_info("check_index", "web_path不匹配")
+        logging.debug("check_index:%s", "web_path不匹配")
         db.delete(value)
         return False
 
     if value.size is None or value.mtime is None or value.ts is None:
-        print_debug_info("check_index", "关键信息缺失")
+        logging.debug("check_index:%s", "关键信息缺失")
         db.delete(value)
         return False
 
@@ -160,7 +179,7 @@ class FileIndexCheckManager:
                 self.update_key_from(value.ts)
 
         if self.get_key_from() != "" and self.get_key_from() == key_from_copy:
-            print_debug_info("已完成一次全量检查")
+            logging.debug("已完成一次全量检查")
             self.update_key_from("")
 
 @xmanager.listen("cron.minute")
@@ -168,22 +187,8 @@ def on_build_index(ctx = None):
     if get_system_role() == "follower":
         return
 
-    print_debug_info("构建文件同步索引...")
+    logging.debug("构建文件同步索引...")
     manager = FileSyncIndexManager()
-
-    for i in range(10):
-        manager.step()
-
-
-# 子节点同步的时候会检查，不需要单独加一个任务检查
-@xmanager.listen("cron.minute")
-def on_check_index(ctx = None):
-    if get_system_role() == "follower":
-        return
-
-    logging.debug("检查文件同步索引...")
-
-    manager = FileIndexCheckManager()
 
     for i in range(10):
         manager.step()
@@ -195,6 +200,15 @@ def list_files(key_from = None):
 def count_index():
     manager = FileSyncIndexManager()
     return manager.count_index()
+
+@xmanager.listen("sync.step")
+def on_sync_step(ctx = None):
+    logging.debug("检查文件同步索引...")
+
+    manager = FileIndexCheckManager()
+    for i in range(10):
+        manager.step()
+    time.sleep(0.1)
 
 xutils.register_func("system_sync.build_index", on_build_index)
 xutils.register_func("system_sync.list_files", list_files)

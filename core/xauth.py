@@ -81,6 +81,9 @@ def _create_temp_user(temp_users, user_name):
         mtime = "",
         token = gen_new_token())
 
+    upload_dirname = xconfig.get_upload_dir(user_name)
+    fsutil.makedirs(upload_dirname)
+
 def _get_users(force_reload = False):
     """获取用户，内部接口"""
     global _USER_LIST

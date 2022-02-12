@@ -370,7 +370,7 @@ class LdbTable:
         @param {int} offset 返回结果下标开始
         @param {int} limit  返回结果最大数量
         @param {bool} reverse 返回结果是否逆序
-        @param {str} key_from 开始的key
+        @param {str} key_from 开始的key，这里是相对的key，也就是不包含table_name
         @param {func} filter_func 过滤函数
         """
         if key_from == "":

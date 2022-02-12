@@ -51,11 +51,42 @@
             </div>
 
             <div class="list-item">
+                <span>主节点文件索引数</span>
+                <div class="float-right">
+                    <span>{{fs_index_count}}</span>
+                </div>
+            </div>
+
+            <div class="list-item">
+                <span>同步进度</span>
+                <div class="float-right">
+                    <span>{{sync_process}}</span>
+                </div>
+            </div>
+
+            <div class="list-item">
+                <span>同步失败</span>
+                <div class="float-right">
+                    <a href="/system/db_scan?prefix=fs_sync_index_failed&reverse=true">{{sync_failed_count}}</a>
+                </div>
+            </div>
+
+            <div class="list-item">
                 <span>重置当前位点</span>
                 <div class="float-right">
                     <a class="btn btn-default confirm-btn" 
                         data-title="确认重置当前位点?"
                         data-key="reset_offset">重置</a>
+                    <!-- <i class="fa fa-chevron-right"></i> -->
+                </div>
+            </div>
+
+            <div class="list-item">
+                <span>触发同步</span>
+                <div class="float-right">
+                    <a class="btn btn-default confirm-btn" 
+                        data-title="确认同步一次?"
+                        data-key="trigger_sync">同步一次</a>
                     <!-- <i class="fa fa-chevron-right"></i> -->
                 </div>
             </div>

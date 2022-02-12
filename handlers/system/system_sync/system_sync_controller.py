@@ -17,17 +17,24 @@
 
 import time
 import threading
+import logging
+
 import xauth
 import xutils
 import xconfig
 import xtemplate
 import xmanager
+
 from xutils import webutil
 from xutils import Storage
 from xutils import dbutil
 from xutils import netutil
 from xutils import dateutil
 from xutils import textutil 
+
+from .node_base import NodeManagerBase, convert_follower_dict_to_list
+from .node_follower import Follower
+from .node_leader import Leader
 
 LOCK = threading.Lock()
 
@@ -43,154 +50,13 @@ def get_system_port():
     return xconfig.get_global_config("port")
 
 
-def format_http_url(url):
-    if url.startswith("http://") or url.startswith("https://"):
-        return url
-    return "http://" + url
-
 def print_debug_info(*args):
     new_args = [dateutil.format_time(), "[system_sync]"]
     new_args += args
     print(*new_args)
 
-def convert_follower_dict_to_list(follower_dict):
-    follower_list = []
-    for key in sorted(follower_dict.keys()):
-        info = follower_dict.get(key)
-        info = Storage(**info)
-        info.http_url = format_http_url(info.url)
-        follower_list.append(info)
-    return follower_list
-
 def convert_dict_to_text(dict):
     return textutil.tojson(dict, format = True)
-
-class NodeManagerBase:
-
-    def get_leader_token(self):
-        return CONFIG.get("leader.token")
-
-    def get_ping_error(self):
-        return None
-
-    def get_follower_info_by_url(self, url):
-        for info in self.get_follower_list():
-            if info.url == url or info.http_url == url:
-                return info
-        return None
-
-class Leader(NodeManagerBase):
-    FOLLOWER_DICT = dict()
-
-    def get_follower_info(self, url):
-        client_info = self.FOLLOWER_DICT.get(url)
-        if client_info == None:
-            client_info = Storage()
-            client_info.url = url
-            client_info.connected_time = dateutil.format_datetime()
-        return client_info
-
-    def check_follower_count(self, url):
-        if url not in self.FOLLOWER_DICT:
-            return len(self.FOLLOWER_DICT) <= MAX_FOLLOWER_SIZE
-        return True
-
-    def update_follower_info(self, client_info):
-        url = client_info.url
-        self.FOLLOWER_DICT[url] = client_info
-
-    def get_follower_list(self):
-        follower_dict = self.FOLLOWER_DICT
-        return convert_follower_dict_to_list(follower_dict)
-
-    def get_follower_dict(self):
-        return self.FOLLOWER_DICT
-
-    def get_leader_url(self):
-        return "http://127.0.0.1:%s" % get_system_port()
-
-    def get_leader_token(self):
-        token = CONFIG.get("leader.token")
-        if token is None or token == "":
-            token = textutil.create_uuid()
-            CONFIG.put("leader.token", token)
-
-        return token
-
-    def get_ip_whitelist(self):
-        return CONFIG.get("follower.whitelist", "")
-
-
-class Follower(NodeManagerBase):
-
-    def __init__(self):
-        self.follower_list = []
-        self.ping_error = None
-        self.admin_token = None
-
-    def get_client(self):
-        leader_host = self.get_leader_url()
-        leader_token = self.get_leader_token()
-        return xutils.call("system_sync.HttpClient", leader_host, leader_token, self.admin_token)
-
-    def ping_leader(self):
-        port = xconfig.get_global_config("system.port")
-        
-        fs_sync_offset = CONFIG.get("fs_sync_offset", "")
-
-        leader_host = self.get_leader_url()
-        if leader_host != None:
-            client = self.get_client()
-            params = dict(port = port, fs_sync_offset = fs_sync_offset)
-            result_obj = client.get_stat(params)
-
-            print_debug_info("PING主节点:", result_obj)
-            
-            self.update_ping_result(result_obj)
-
-            return result_obj
-
-        return None
-    
-    def update_ping_result(self, result0):
-        if result0 is None:
-            return
-
-        result = Storage(**result0)
-        if result.code != "success":
-            self.ping_error = result.message
-            return
-
-        self.ping_error = None
-        follower_dict = result.get("follower_dict", {})
-        self.follower_list = convert_follower_dict_to_list(follower_dict)
-
-        if len(self.follower_list) > 0:
-            item = self.follower_list[0]
-            self.admin_token = item.admin_token
-
-    def get_follower_list(self):
-        return self.follower_list
-
-    def get_leader_url(self):
-        return CONFIG.get("leader.host")
-
-    def get_ping_error(self):
-        return self.ping_error
-
-    def sync_files_from_leader(self):
-        offset = CONFIG.get("fs_sync_offset", "")
-        client = self.get_client()
-        result = client.list_files(offset)
-        if result is None:
-            return
-
-        client.download_files(result)
-
-        if result.sync_offset != None:
-            CONFIG.put("fs_sync_offset", result.sync_offset)
-
-        return result
 
 LEADER = Leader()
 FOLLOWER = Follower()
@@ -216,11 +82,18 @@ class ConfigHandler:
         if key == "reset_offset":
             return self.reset_offset()
 
+        if key == "trigger_sync":
+            return self.trigger_sync()
+
         return dict(code = "success")
 
     def reset_offset(self):
-        CONFIG.put("fs_sync_offset", "")
-        CONFIG.put("db_sync_offset", "")
+        FOLLOWER.reset_sync()
+        return dict(code = "success")
+
+    def trigger_sync(self):
+        FOLLOWER.ping_leader()
+        FOLLOWER.sync_files_from_leader()
         return dict(code = "success")
 
     def set_leader_host(self, host):
@@ -310,6 +183,7 @@ class SyncHandler:
         kw = Storage()
 
         role_manager = get_system_role_manager()
+        role_manager.sync_for_home_page()
 
         kw.node_role = get_system_role()
         kw.leader_host = CONFIG.get("leader.host", "未设置")
@@ -318,6 +192,9 @@ class SyncHandler:
         kw.follower_list = role_manager.get_follower_list()
         kw.ping_error    = role_manager.get_ping_error()
         kw.whitelist     = LEADER.get_ip_whitelist()
+        kw.sync_process  = FOLLOWER.get_sync_process()
+        kw.fs_index_count = FOLLOWER.get_fs_index_count()
+        kw.sync_failed_count = FOLLOWER.count_sync_failed()
 
         return xtemplate.render("system/page/system_sync.html", **kw)
 
@@ -353,7 +230,7 @@ class SyncHandler:
         return result
 
     def list_files(self):
-        """读取文件列表"""
+        """(主节点)读取文件列表"""
         offset = xutils.get_argument("offset", "")
         result = Storage()
         result.code = "success"
@@ -411,22 +288,24 @@ class SyncHandler:
 def init(ctx = None):
     LEADER.get_leader_token()
 
-@xmanager.listen("cron.minute")
-def ping_leader(ctx = None):
+@xmanager.listen("sync.step")
+def on_ping_leader(ctx = None):
     role = get_system_role()
     if role == "leader":
         return None
 
     return FOLLOWER.ping_leader()
 
-@xmanager.listen("cron.minute")
+@xmanager.listen("sync.step")
 def event_sync_files_from_leader(ctx = None):
     role = get_system_role()
     if role == "leader":
         return None
 
-    print_debug_info("开始同步文件")
+    logging.debug("开始同步文件...")
+    logging.debug("-" * 50)
     FOLLOWER.sync_files_from_leader()
+    time.sleep(10)
 
 xurls = (
     r"/system/sync", SyncHandler
