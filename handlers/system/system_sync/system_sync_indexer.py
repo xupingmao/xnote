@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/28 18:07:31
-# @modified 2022/02/12 18:11:14
+# @modified 2022/02/12 22:42:16
 # @filename system_sync_indexer.py
 
 """文件同步索引管理器"""
@@ -48,6 +48,8 @@ class FileSyncIndexManager:
         logging.debug("初始化文件队列")
         self.data.append(xconfig.get_system_dir("files"))
         self.data.append(xconfig.get_system_dir("storage"))
+        self.data.append(xconfig.get_system_dir("app"))
+        self.data.append(xconfig.get_system_dir("archive"))
 
 
     def step(self):
@@ -71,7 +73,7 @@ class FileSyncIndexManager:
 
             old_info = db.get(key)
             if old_info != None and old_info.ts == ts and old_info.size == file_size:
-                print_debug_info("文件已处理:", fpath)
+                logging.debug("文件已处理:%s", fpath)
                 return
 
             file_info = Storage()
@@ -82,7 +84,7 @@ class FileSyncIndexManager:
             file_info.size = file_size
 
             db.put(key, file_info)
-            print_debug_info("更新文件索引:", fpath)
+            logging.debug("更新文件索引:%s", web_path)
 
         if os.path.isdir(fpath):
             size = 0
@@ -221,3 +223,4 @@ def on_sync_step(ctx = None):
 xutils.register_func("system_sync.build_index", on_build_index)
 xutils.register_func("system_sync.list_files", list_files)
 xutils.register_func("system_sync.count_index", count_index)
+

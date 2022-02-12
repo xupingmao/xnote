@@ -1,17 +1,20 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2021/02/18 14:10:47
+# @modified 2022/02/12 21:34:53
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
 import os
 import re
 import time
+import logging
+
 import xutils
 import xconfig
 import xauth
 from xutils import Storage
+from xutils import dbutil
 from xutils import dateutil, fsutil, logutil
 
 config = xconfig
@@ -131,17 +134,71 @@ def chk_scripts_backup():
     destfile = os.path.join(xconfig.BACKUP_DIR, time.strftime("scripts.%Y-%m.zip"))
     xutils.zip_dir(dirname, destfile)
 
-def chk_db_backup():
+class DBBackup:
+    """数据库备份"""
+
+    def __init__(self):
+        self.db_backup_dir = os.path.join(xconfig.TMP_DIR, "db.temp")
+
+    def clean(self):
+        db_backup_dir = self.db_backup_dir
+        if os.path.exists(db_backup_dir):
+            logging.info("删除db备份目录:%s", db_backup_dir)
+            xutils.rmdir(db_backup_dir)
+
+    def dump_db(self):
+        db2 = dbutil.create_db_instance(self.db_backup_dir)
+        count = 0
+        try:
+            for key, value in dbutil.get_instance().RangeIter():
+                db2.Put(key, value)
+                count += 1
+        finally:
+            db2 = None
+        return count
+
+    def execute(self):
+        # Windows环境在db运行期间无法读取（无读取权限）
+        db_backup_dir = self.db_backup_dir
+        # 先做清理工作
+        self.clean()
+
+        start_time = time.time()
+        # 执行备份
+        count = self.dump_db()
+
+        cost_time = (time.time() - start_time) * 1000.0
+        logging.info("数据库记录总数:%s", count)
+
+        # 保存为压缩文件
+        destfile = os.path.join(xconfig.BACKUP_DIR, time.strftime("db.%Y-%m-%d.zip"))
+        xutils.zip_dir(db_backup_dir, destfile)
+
+        # 再次清理
+        self.clean()
+
+        return dict(count = count, cost_time = "%sms" % cost_time)
+
+def chk_db_backup_old():
     dirname = xconfig.DB_DIR
     destfile = os.path.join(xconfig.BACKUP_DIR, time.strftime("db.%Y-%m.zip"))
     xutils.zip_dir(dirname, destfile)
 
+def chk_db_backup():
+    backup = DBBackup()
+    return backup.execute()
 
 class BackupHandler:
 
     @xauth.login_required("admin")
     def GET(self):
         """触发备份事件"""
+        p = xutils.get_argument("p", "")
+
+        if p == "db":
+            return chk_db_backup()
+
+        # 备份所有的
         chk_backup()
         chk_db_backup()
         chk_scripts_backup()

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2022/02/12 18:13:41
-# @modified 2022/02/12 18:26:14
+# @modified 2022/02/12 21:36:13
 # @filename node_follower.py
 
 """从节点管理"""
@@ -24,7 +24,7 @@ def filter_result(result, offset):
     offset = "fs_sync_index:" + offset
     for item in result.data:
         if item.get("_key", "") == offset:
-            logging.debug("跳过offset:%s", offset)
+            # logging.debug("跳过offset:%s", offset)
             continue
         data.append(item)
 
@@ -42,6 +42,8 @@ class Follower(NodeManagerBase):
         self.admin_token = None
         self.last_ping_time = -1
         self.fs_index_count = -1
+        # 同步完成的时间
+        self.fs_sync_done_time = -1
 
     def get_client(self):
         leader_host = self.get_leader_url()
@@ -103,8 +105,19 @@ class Follower(NodeManagerBase):
     def get_ping_error(self):
         return self.ping_error
 
+    def need_sync(self):
+        if self.fs_sync_done_time < 0:
+            return True
+
+        last_sync = time.time() - self.fs_sync_done_time
+        return last_sync >= self.PING_INTERVAL
+
     def sync_files_from_leader(self):
         self.ping_leader()
+
+        if not self.need_sync():
+            # logging.debug("没到SYNC时间")
+            return
 
         offset = CONFIG.get("fs_sync_offset", "")
         offset = textutil.remove_head(offset, "fs_sync_index:")
@@ -121,6 +134,7 @@ class Follower(NodeManagerBase):
         result = filter_result(result, offset)
         if len(result.data) == 0:
             logging.debug("返回文件列表为空")
+            self.fs_sync_done_time = time.time()
             return
 
         max_offset = offset
@@ -166,6 +180,7 @@ class Follower(NodeManagerBase):
     def reset_sync(self):
         CONFIG.put("fs_sync_offset", "")
         CONFIG.put("db_sync_offset", "")
+        self.fs_sync_done_time = -1
 
         db = dbutil.get_hash_table("fs_sync_index_copy")
         for key, value in db.iter(limit = -1):

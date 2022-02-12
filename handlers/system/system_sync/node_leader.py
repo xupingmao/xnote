@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2022/02/12 18:13:41
-# @modified 2022/02/12 18:32:29
+# @modified 2022/02/12 21:40:36
 # @filename node_leader.py
 
 import threading
@@ -66,14 +66,19 @@ class Leader(NodeManagerBase):
     def sync_for_home_page(self):
         pass
 
+    def get_fs_index_count(self):
+        return xutils.call("system_sync.count_index")
+
     def get_stat(self, port):
         admin_token = xauth.get_user_by_name("admin").token
+        fs_index_count = self.get_fs_index_count()
 
         result = Storage()
         result.code = "success"
         result.timestamp = int(time.time())
         result.system_version = xconfig.get_global_config("system.version")
         result.admin_token = admin_token
+        result.fs_index_count = fs_index_count
 
         client_ip = webutil.get_client_ip()
         url = client_ip + ":" + port
@@ -87,7 +92,7 @@ class Leader(NodeManagerBase):
             follower = self.get_follower_info(url)
             follower.ping_time = dateutil.format_datetime()
             follower.fs_sync_offset = xutils.get_argument("fs_sync_offset", "")
-            follower.fs_index_count = xutils.call("system_sync.count_index")
+            follower.fs_index_count = fs_index_count
             follower.admin_token = admin_token
 
             self.update_follower_info(follower)

@@ -81,7 +81,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/01/23 15:55:14
+# @modified 2022/02/12 20:50:00
 ###########################################################
 
 
@@ -262,18 +262,26 @@ def config(**kw):
     if "write_only" in kw:
         WRITE_ONLY = kw["write_only"]
 
-@xutils.log_init_deco("leveldb")
-def init(DB_DIR):
-    global _leveldb
+def get_instance():
+    if _leveldb is None:
+        raise Exception("leveldb instance is None!")
+    return _leveldb
 
+def create_db_instance(db_dir):
     if leveldb:
-        _leveldb = leveldb.LevelDB(DB_DIR)
+        return leveldb.LevelDB(db_dir)
 
     if xutils.is_windows():
-        os.environ["PATH"] += os.pathsep + "lib"
         import leveldbpy
-        _leveldb = LevelDBProxy(DB_DIR)
-    
+        return LevelDBProxy(db_dir)
+
+    raise Exception("create_db_instance failed: not supported")
+
+@xutils.log_init_deco("leveldb")
+def init(db_dir):
+    global _leveldb
+
+    _leveldb = create_db_instance(db_dir)
     xutils.log("leveldb: %s" % _leveldb)
 
 def check_not_empty(value, message):
@@ -359,9 +367,7 @@ def check_before_write(key):
 
 
 def check_get_leveldb():
-    if _leveldb is None:
-        raise Exception("leveldb not found!")
-    return _leveldb
+    return get_instance()
 
 def check_table_name(table_name):
     validate_str(table_name, "invalid table_name")

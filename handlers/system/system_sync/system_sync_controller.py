@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/07 12:38:32
-# @modified 2022/02/12 18:32:11
+# @modified 2022/02/12 21:40:10
 # @filename system_sync_controller.py
 
 """系统数据同步功能，目前提供主从同步的能力
@@ -114,12 +114,6 @@ class SyncHandler:
         client_ip = webutil.get_client_ip()
         system_role = get_system_role()
 
-        # TODO：检查白名单和token
-        # print("client_ip", client_ip)
-        # client_ip_whitelist = xconfig.get_global_config("client.ip.whitelist", type = list)
-        # if client_ip not in client_ip_whitelist:
-        #     return dict(code = "403", message = "无权访问")
-
         if p == "home" or p == "":
             return self.get_home_page()
 
@@ -139,9 +133,10 @@ class SyncHandler:
             xauth.check_login("admin")
             return FOLLOWER.sync_files_from_leader()
 
-        return self.handle_sync_action()
+        return self.handle_leader_action()
 
-    def handle_sync_action(self):
+    def handle_leader_action(self):
+        """主节点的提供的功能"""
         p = xutils.get_argument("p", "")
         error = self.check_token()
         if error != None:
@@ -185,9 +180,10 @@ class SyncHandler:
         kw.leader_url    = role_manager.get_leader_url()
         kw.follower_list = role_manager.get_follower_list()
         kw.ping_error    = role_manager.get_ping_error()
+        kw.fs_index_count = role_manager.get_fs_index_count()
+        
         kw.whitelist     = LEADER.get_ip_whitelist()
         kw.sync_process  = FOLLOWER.get_sync_process()
-        kw.fs_index_count = FOLLOWER.get_fs_index_count()
         kw.sync_failed_count = FOLLOWER.count_sync_failed()
 
         return xtemplate.render("system/page/system_sync.html", **kw)
@@ -247,7 +243,7 @@ class SyncHandler:
         return LEADER.get_stat(port)
 
     def do_ping(self):
-        data = ping_leader()
+        data = FOLLOWER.ping_leader()
         return dict(code = "success", data = data)
 
 @xmanager.listen("sys.init")

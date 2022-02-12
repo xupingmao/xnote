@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/29 22:48:26
-# @modified 2022/02/12 18:18:53
+# @modified 2022/02/12 21:44:25
 # @filename system_sync_client.py
 
 import os
@@ -38,8 +38,8 @@ class HttpClient:
         return dbutil.get_hash_table("fs_sync_index_failed")
 
     def check_failed(self):
-        if self.token is None:
-            logging.warn("token为空")
+        if self.host is None:
+            logging.warn("host为空")
             return True
 
         return False

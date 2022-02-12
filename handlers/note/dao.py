@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2022/02/07 13:58:52
+# @modified 2022/02/12 22:39:05
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -945,6 +945,11 @@ def list_public(offset, limit, orderby = "ctime_desc"):
         offset = offset, limit = limit, reverse = True)
 
     build_note_list_info(notes)
+    for note in notes:
+        if note.is_deleted:
+            logging.warning("笔记已删除:%s,name:%s", note.id, note.name)
+            db.delete_by_id(note.id)
+
     return notes
 
 

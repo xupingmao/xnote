@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2022/02/12 17:51:50
+# @modified 2022/02/12 20:01:03
 # @filename xconfig.py
 
 '''xnote系统配置
@@ -443,3 +443,10 @@ def get_upload_dir(username):
 
     upload_dir_root = get_system_dir("files")
     return os.path.join(upload_dir_root, username)
+
+def get_backup_dir(name = None):
+    if name == None:
+        return BACKUP_DIR
+
+    assert isinstance(name, str)
+    return os.path.join(BACKUP_DIR, name)
