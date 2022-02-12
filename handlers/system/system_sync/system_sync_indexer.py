@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/28 18:07:31
-# @modified 2022/01/24 14:28:44
-# @filename fs_sync_index.py
+# @modified 2022/02/12 18:11:14
+# @filename system_sync_indexer.py
 
 """文件同步索引管理器"""
 
@@ -23,7 +23,7 @@ from xutils import textutil
 dbutil.register_table("fs_sync_index", "文件同步索引信息")
 
 # 临时文件
-TEMP_FNAME_SET = set([".DS_Store"])
+TEMP_FNAME_SET = set([".DS_Store", ".thumbnail", ".git"])
 
 def get_system_role():
     return xconfig.get_global_config("system.node.role")
@@ -107,6 +107,9 @@ class FileSyncIndexManager:
 
             if check_index(key, value, db):
                 result.append(value)
+
+            hash_key = textutil.remove_head(key, "fs_sync_index:")
+            value.hash_key = hash_key
 
             if value.ts is None:
                 value.ts = convert_time_to_str(value.mtime)
@@ -203,8 +206,13 @@ def count_index():
 
 @xmanager.listen("sync.step")
 def on_sync_step(ctx = None):
-    logging.debug("检查文件同步索引...")
 
+    tm = time.localtime()
+    if tm.tm_sec != 0:
+        # logging.debug("未到检查索引时间")
+        return
+
+    logging.debug("检查文件同步索引...")
     manager = FileIndexCheckManager()
     for i in range(10):
         manager.step()

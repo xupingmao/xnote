@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/07 12:38:32
-# @modified 2021/11/30 23:44:23
-# @filename system_sync.py
+# @modified 2022/02/12 18:12:23
+# @filename system_sync_controller.py
 
 """系统数据同步功能，目前提供主从同步的能力
 
@@ -45,10 +45,6 @@ MAX_FOLLOWER_SIZE = 100
 
 def get_system_role():
     return xconfig.get_global_config("system.node.role")
-
-def get_system_port():
-    return xconfig.get_global_config("port")
-
 
 def print_debug_info(*args):
     new_args = [dateutil.format_time(), "[system_sync]"]

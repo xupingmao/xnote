@@ -67,8 +67,6 @@ $(function () {
 
     // 监听剪切板
     $(document).on("paste", function (e) {
-        // 取消默认的粘贴动作
-        e.preventDefault();
         console.log(e);
 
         var clipboardData = e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {};
@@ -79,6 +77,9 @@ $(function () {
                 var value = item.value;
                 // console.log(item, value);
                 if (/image/i.test(item.type)) {
+                    // 取消默认的粘贴动作
+                    e.preventDefault();
+
                     // 阻断编辑
                     var index = layer.load(1);
                     console.log(item);

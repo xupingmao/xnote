@@ -1,8 +1,14 @@
+# -*- coding:utf-8 -*-
+# @author xupingmao
+# @since 2022/02/12 18:13:41
+# @modified 2022/02/12 18:13:57
+# @filename node_leader.py
 
 from xutils import dateutil
 from xutils import textutil
 from .node_base import NodeManagerBase, convert_follower_dict_to_list
 from .node_base import CONFIG
+from .node_base import get_system_port
 
 class Leader(NodeManagerBase):
     FOLLOWER_DICT = dict()

@@ -1,4 +1,9 @@
-# encoding=utf-8
+# -*- coding:utf-8 -*-
+# @author xupingmao
+# @since 2022/02/12 18:13:41
+# @modified 2022/02/12 18:13:53
+# @filename node_follower.py
+
 """从节点管理"""
 
 import time
@@ -10,6 +15,19 @@ from xutils import Storage
 from xutils import textutil
 from xutils import dbutil
 from .node_base import NodeManagerBase, convert_follower_dict_to_list, CONFIG
+
+
+def filter_result(result, offset):
+    data = []
+    offset = "fs_sync_index:" + offset
+    for item in result.data:
+        if item.get("_key", "") == offset:
+            logging.debug("跳过offset:%s", offset)
+            continue
+        data.append(item)
+
+    result.data = data
+    return result
 
 class Follower(NodeManagerBase):
 
@@ -30,7 +48,8 @@ class Follower(NodeManagerBase):
 
     def ping_leader(self):
         now = time.time()
-        if now - self.last_ping_time < self.PING_INTERVAL:
+        is_valid_time = now - self.last_ping_time >= self.PING_INTERVAL
+        if self.admin_token != None and not is_valid_time:
             logging.debug("没到PING时间")
             return
 
@@ -84,20 +103,19 @@ class Follower(NodeManagerBase):
     def sync_files_from_leader(self):
         self.ping_leader()
 
-        if self.count_sync_done() >= self.fs_index_count:
-            logging.debug("同步已经完成")
-            return
-
         offset = CONFIG.get("fs_sync_offset", "")
         offset = textutil.remove_head(offset, "fs_sync_index:")
 
         logging.debug("offset:%s", offset)
         client = self.get_client()
         result = client.list_files(offset)
+
         if result is None:
             logging.error("返回结果为空")
             return
 
+        # 不需要包含offset的结果
+        result = filter_result(result, offset)
         if len(result.data) == 0:
             logging.debug("返回文件列表为空")
             return

@@ -1,10 +1,21 @@
+# -*- coding:utf-8 -*-
+# @author xupingmao
+# @since 2022/02/12 18:13:41
+# @modified 2022/02/12 18:13:46
+# @filename node_base.py
+
+
 from xutils import dbutil
 from xutils import Storage
+import xconfig
 
 """节点管理的基类"""
 
 dbutil.register_table("cluster_config", "集群配置")
 CONFIG = dbutil.get_table("cluster_config", type = "hash")
+
+def get_system_port():
+    return xconfig.get_global_config("port")
 
 def format_http_url(url):
     if url.startswith("http://") or url.startswith("https://"):

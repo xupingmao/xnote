@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2021/12/12 19:43:35
+# @modified 2022/02/12 17:51:50
 # @filename xconfig.py
 
 '''xnote系统配置
@@ -428,6 +428,12 @@ def get_system_dir(name):
 
     if name == "scripts":
         return SCRIPTS_DIR
+
+    if name == "app":
+        return APP_DIR
+
+    if name == "archive":
+        return os.path.join(DATA_DIR, "archive")
 
     raise Exception("未知的系统目录:" + name)
 

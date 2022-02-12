@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2022/01/01 23:58:51
+# @modified 2022/02/12 18:09:38
 
 import sys
 import os
@@ -336,6 +336,9 @@ class Main:
     def test_dbutil_test(self):
         self.check_OK("/test/test_dbutil")
         self.check_OK("/test/test_dbutil?p=clear")
+
+    def test_system_sync(self):
+        self.check_OK("/system/sync?p=home")
 
 
 

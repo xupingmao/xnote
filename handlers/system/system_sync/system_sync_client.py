@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/29 22:48:26
-# @modified 2022/01/27 21:44:30
-# @filename system_sync_http.py
+# @modified 2022/02/12 18:18:53
+# @filename system_sync_client.py
 
 import os
 import xutils
@@ -37,8 +37,17 @@ class HttpClient:
     def get_failed_table(self):
         return dbutil.get_hash_table("fs_sync_index_failed")
 
+    def check_failed(self):
+        if self.token is None:
+            logging.warn("token为空")
+            return True
+
+        return False
+
     def get_stat(self, params):
         self.check_disk_space()
+        if self.check_failed():
+            return
 
         params["token"] = self.token
 
@@ -48,6 +57,9 @@ class HttpClient:
         return result_obj    
 
     def list_files(self, offset):
+        if self.check_failed():
+            return
+
         url = "{host}/system/sync?p=list_files&token={token}&offset={offset}".format(
             host = self.host, token = self.token, offset = quote(offset))
 

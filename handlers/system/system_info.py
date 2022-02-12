@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/08/22 21:54:56
-# @modified 2021/12/04 22:56:48
+# @modified 2022/02/12 18:19:56
 import xauth
 import xtemplate
 import xutils
@@ -34,7 +34,6 @@ def get_mem_info_by_psutil():
     sys_mem           = psutil.virtual_memory()
     sys_mem_used      = xutils.format_size(sys_mem.used)
     sys_mem_total     = xutils.format_size(sys_mem.total)
-    formated_mem_size = xutils.format_size(mem_used)
     return Storage(mem_used = mem_used, sys_mem_used = sys_mem_used, sys_mem_total = sys_mem_total)
 
 def get_mem_info_by_tasklist():
