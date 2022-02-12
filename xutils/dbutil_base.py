@@ -232,7 +232,7 @@ class LevelDBProxy:
         return self._db.delete(key, sync = sync)
 
     def RangeIter(self, key_from = None, key_to = None, 
-            reverse = False, include_value = False):
+            reverse = False, include_value = True):
         """返回区间迭代器
         @param {str}  key_from       开始的key（包含）
         @param {str}  key_to         结束的key（包含）
