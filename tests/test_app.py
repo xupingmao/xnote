@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2022/02/12 18:09:38
+# @modified 2022/02/12 18:34:14
 
 import sys
 import os
@@ -15,6 +15,7 @@ import xutils
 import xtemplate
 import xconfig
 import xtables
+import xauth
 from xutils import u, dbutil
 
 # cannot perform relative import
@@ -338,7 +339,9 @@ class Main:
         self.check_OK("/test/test_dbutil?p=clear")
 
     def test_system_sync(self):
+        admin_token = xauth.get_user_by_name("admin").token
         self.check_OK("/system/sync?p=home")
+        self.check_OK("/system/sync?p=get_stat&token=" + admin_token)
 
 
 

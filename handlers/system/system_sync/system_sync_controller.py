@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/07 12:38:32
-# @modified 2022/02/12 18:12:23
+# @modified 2022/02/12 18:32:11
 # @filename system_sync_controller.py
 
 """系统数据同步功能，目前提供主从同步的能力
@@ -40,8 +40,6 @@ LOCK = threading.Lock()
 
 dbutil.register_table("cluster_config", "集群配置")
 CONFIG = dbutil.get_table("cluster_config", type = "hash")
-
-MAX_FOLLOWER_SIZE = 100
 
 def get_system_role():
     return xconfig.get_global_config("system.node.role")
@@ -246,35 +244,7 @@ class SyncHandler:
 
     def get_stat(self):
         port = xutils.get_argument("port", "")
-
-        admin_token = xauth.get_user_by_name("admin").token
-
-        result = Storage()
-        result.code = "success"
-        result.timestamp = int(time.time())
-        result.system_version = xconfig.get_global_config("system.version")
-        result.admin_token = admin_token
-
-        client_ip = webutil.get_client_ip()
-        url = client_ip + ":" + port
-
-        with LOCK:
-            if not LEADER.check_follower_count(url):
-                result.code = "403"
-                result.message = "Too many connects"
-                return result
-
-            follower = LEADER.get_follower_info(url)
-            follower.ping_time = dateutil.format_datetime()
-            follower.fs_sync_offset = xutils.get_argument("fs_sync_offset", "")
-            follower.fs_index_count = xutils.call("system_sync.count_index")
-            follower.admin_token = admin_token
-
-            LEADER.update_follower_info(follower)
-
-        result.follower_dict = LEADER.get_follower_dict()
-
-        return result
+        return LEADER.get_stat(port)
 
     def do_ping(self):
         data = ping_leader()

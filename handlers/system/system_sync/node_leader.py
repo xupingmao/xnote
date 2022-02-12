@@ -1,14 +1,26 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2022/02/12 18:13:41
-# @modified 2022/02/12 18:13:57
+# @modified 2022/02/12 18:32:29
 # @filename node_leader.py
+
+import threading
+import time
+
+import xauth
+import xconfig
+import xutils
 
 from xutils import dateutil
 from xutils import textutil
+from xutils import Storage
+from xutils import webutil
 from .node_base import NodeManagerBase, convert_follower_dict_to_list
 from .node_base import CONFIG
 from .node_base import get_system_port
+
+LOCK = threading.RLock()
+MAX_FOLLOWER_SIZE = 100
 
 class Leader(NodeManagerBase):
     FOLLOWER_DICT = dict()
@@ -53,4 +65,34 @@ class Leader(NodeManagerBase):
 
     def sync_for_home_page(self):
         pass
+
+    def get_stat(self, port):
+        admin_token = xauth.get_user_by_name("admin").token
+
+        result = Storage()
+        result.code = "success"
+        result.timestamp = int(time.time())
+        result.system_version = xconfig.get_global_config("system.version")
+        result.admin_token = admin_token
+
+        client_ip = webutil.get_client_ip()
+        url = client_ip + ":" + port
+
+        with LOCK:
+            if not self.check_follower_count(url):
+                result.code = "403"
+                result.message = "Too many connects"
+                return result
+
+            follower = self.get_follower_info(url)
+            follower.ping_time = dateutil.format_datetime()
+            follower.fs_sync_offset = xutils.get_argument("fs_sync_offset", "")
+            follower.fs_index_count = xutils.call("system_sync.count_index")
+            follower.admin_token = admin_token
+
+            self.update_follower_info(follower)
+
+        result.follower_dict = self.get_follower_dict()
+
+        return result
 

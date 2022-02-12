@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2022/02/12 18:13:41
-# @modified 2022/02/12 18:13:53
+# @modified 2022/02/12 18:26:14
 # @filename node_follower.py
 
 """从节点管理"""
@@ -14,7 +14,9 @@ import xconfig
 from xutils import Storage
 from xutils import textutil
 from xutils import dbutil
-from .node_base import NodeManagerBase, convert_follower_dict_to_list, CONFIG
+from .node_base import NodeManagerBase
+from .node_base import convert_follower_dict_to_list
+from .node_base import CONFIG
 
 
 def filter_result(result, offset):
@@ -44,7 +46,8 @@ class Follower(NodeManagerBase):
     def get_client(self):
         leader_host = self.get_leader_url()
         leader_token = self.get_leader_token()
-        return xutils.call("system_sync.HttpClient", leader_host, leader_token, self.admin_token)
+        return xutils.call("system_sync.HttpClient", leader_host, 
+            leader_token, self.admin_token)
 
     def ping_leader(self):
         now = time.time()
