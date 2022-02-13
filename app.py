@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/02/13 13:34:25
+# @modified 2022/02/13 21:10:35
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -238,8 +238,8 @@ def init_app_no_lock():
     xconfig.mark_started()
     xutils.log("app started")
 
-
-
+def init_app():
+    return init_app_no_lock()
 
 def main():
     global app
