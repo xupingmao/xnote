@@ -1,3 +1,5 @@
+// 上传功能实现
+// 已废弃: 请查看x-upload.js
 (function (window) {
     // check whether browser support HTML5 file API
 

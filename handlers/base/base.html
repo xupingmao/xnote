@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
-{% include common/base_head.html %}
-
 {% init search_placeholder = "综合搜索" %}
 {% init search_action = "/search/search" %}
 {% init warn = "" %}
+{% init CONTENT_WIDTH = 1000 %}
+
+{% comment HTML的head部分 %}
+{% include common/base_head.html %}
 
 <body>
     <noscript>

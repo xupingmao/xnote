@@ -1,14 +1,8 @@
 <!-- 调整页面布局组件 -->
-{% init CONTENT_WIDTH = 1000 %}
 <script type="text/javascript">
-$(function () {
-    var contentWidth;
-    try {
-        contentWidth = parseInt("{{CONTENT_WIDTH}}");
-    } catch (e) {
-        contentWidth = 1000;
-    }
 
+$(function () {
+    var contentWidth = parseInt("{{CONTENT_WIDTH}}");
     function updateMainFrame() {
         var winWidth = window.innerWidth;
         var marginLeft = (winWidth - contentWidth) / 2;

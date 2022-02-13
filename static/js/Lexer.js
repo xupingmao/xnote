@@ -1,4 +1,4 @@
-
+// 词法分析器
 function Token (type, value, length) {
 	this.type = type;
 	this.value = value;

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/01/23 23:58:28
+# @modified 2022/02/13 13:34:25
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -183,7 +183,7 @@ def init_autoreload():
 def init_cluster():
     # 初始化集群配置
     if xconfig.get_global_config("system.node.role") == "follower":
-        print_debug_info("当前以从节点身份运行")
+        logging.info("当前系统以从节点身份运行")
 
 def init_app_no_lock():
     global app

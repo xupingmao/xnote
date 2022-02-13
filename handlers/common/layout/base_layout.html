@@ -64,3 +64,37 @@
   }
 </style>
 {% end %}
+
+<script type="text/javascript">
+// JavaScript执行的顺序和<script>标签定义的顺序有关
+// 这里动态生成<style>不会导致闪烁
+(function () {
+    var contentWidth = parseInt("{{CONTENT_WIDTH}}");
+    var winWidth = window.innerWidth;
+    var marginLeft = (winWidth - contentWidth) / 2;
+
+    if (winWidth < contentWidth) {
+      contentWidth = winWidth;
+      marginLeft = 0;
+    }
+
+    var styleText = ".x-center, .nav-container {"
+      + "width:" + contentWidth + "px;"
+      + "margin-left:" + marginLeft + "px;"
+      + "}"
+
+    // 居中的样式
+    var style = document.createElement("style");
+    style.type = "text/css";
+    if (style.styleSheet) {
+      // 兼容IE
+      style.styleSheet.cssText = styleText;  
+    } else {  
+      style.innerHTML = styleText;
+    } 
+
+    document.head.appendChild(style);
+})();
+</script>
+
+
