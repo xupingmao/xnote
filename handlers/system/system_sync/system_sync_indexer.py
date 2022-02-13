@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/28 18:07:31
-# @modified 2022/02/12 22:42:16
+# @modified 2022/02/13 16:34:15
 # @filename system_sync_indexer.py
 
 """文件同步索引管理器"""
@@ -60,7 +60,7 @@ class FileSyncIndexManager:
         db = dbutil.get_table("fs_sync_index", type = "hash")
         fpath = self.data.popleft()
         if not os.path.exists(fpath):
-            print_debug_info("文件不存在:", fpath)
+            logging.error("文件不存在:%s", fpath)
             return
 
         if os.path.isfile(fpath):
@@ -129,18 +129,18 @@ def check_index(key, value, db):
     fpath = value.fpath
 
     if fpath is None:
-        print_debug_info("check_index", "fpath为空")
+        logging.debug("check_index:%s", "fpath为空")
         db.delete(value)
         return False
     
     if not os.path.exists(fpath):
-        print_debug_info("check_index", "文件不存在")
+        logging.debug("check_index:%s", "文件不存在")
         db.delete(value)
         return False
 
     parts = key.split("#")
     if len(parts) != 2:
-        print_debug_info("check_index", "key的格式不匹配")
+        logging.debug("check_index:%s", "key的格式不匹配")
         db.delete(value)
         return False
 
@@ -163,8 +163,10 @@ class Refrence:
         self.value = value
 
 class FileIndexCheckManager:
+    """索引检查器"""
 
     key_from = Refrence("")
+    last_check_time = -1
 
     def get_key_from(self):
         return self.key_from.value
@@ -187,9 +189,11 @@ class FileIndexCheckManager:
             logging.debug("已完成一次全量检查")
             self.update_key_from("")
 
+        FileIndexCheckManager.last_check_time = time.time()
+
 @xmanager.listen("cron.minute")
 def on_build_index(ctx = None):
-    if get_system_role() == "follower":
+    if get_system_role() != "leader":
         return
 
     logging.debug("构建文件同步索引...")
