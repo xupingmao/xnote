@@ -150,7 +150,7 @@ class DBBackup:
         db2 = dbutil.create_db_instance(self.db_backup_dir)
         count = 0
         try:
-            for key, value in dbutil.get_instance().RangeIter():
+            for key, value in dbutil.get_instance().RangeIter(include_value = True):
                 db2.Put(key, value)
                 count += 1
         finally:
