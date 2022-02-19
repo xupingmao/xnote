@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2021/11/22 23:22:58
+# @modified 2022/02/19 16:23:09
 
 """短消息处理，比如任务、备忘、临时文件等等
 
@@ -673,6 +673,7 @@ class MessageListHandler:
         kw.show_back_btn = True
         kw.tag = "task"
         kw.message_placeholder = T("添加待办任务")
+        kw.message_tab = "task"
         return kw
 
     def get_task_create_page(self):
@@ -736,7 +737,7 @@ class MessageListHandler:
         # kw.show_task_tag_entry  = True
 
         # return xtemplate.render("message/page/message_list_view.html", **kw)
-        return self.get_task_tag_list()
+        return self.get_task_create_page()
 
 
     def get_task_tag_list(self):
@@ -746,7 +747,7 @@ class MessageListHandler:
         user_name = xauth.current_name()
         msg_list, amount = MSG_DAO.list_by_tag(user_name, "task", 0, -1)
 
-        tag_list = get_tags_from_message_list(msg_list, "task")
+        tag_list = get_tags_from_message_list(msg_list, "task", display_tag = "taglist")
 
         for tag in tag_list:
             tag.is_marked = is_marked_keyword(user_name, tag.name)
@@ -759,7 +760,7 @@ class MessageListHandler:
         kw.html_title = T("待办任务")
         kw.message_placeholder = T("添加待办任务")
 
-        kw.show_sub_link = True
+        kw.show_sub_link = False
         kw.show_task_create_entry = True
         kw.show_task_done_entry = True
 
@@ -800,7 +801,8 @@ class MessageListHandler:
             html_title = T("随手记"),
             default_content = default_content,
             show_back_btn = False,
-            message_placeholder = "记录发生的事情/产生的想法"
+            message_tab = "log",
+            message_placeholder = "记录发生的事情/产生的想法",
         )
 
         if key != "" or input_tag == "search":

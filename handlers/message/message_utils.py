@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:48:09
-# @modified 2021/11/22 23:25:33
+# @modified 2022/02/19 16:22:57
 # @filename message_utils.py
 import xutils
 import web
@@ -187,7 +187,7 @@ class TagSorter:
         return self.data.get(tag, "")
 
 
-def get_tags_from_message_list(msg_list, input_tag = "", input_date = ""):
+def get_tags_from_message_list(msg_list, input_tag = "", input_date = "", display_tag = None):
     tag_counter = Counter()
     tag_sorter = TagSorter()
 
@@ -216,6 +216,9 @@ def get_tags_from_message_list(msg_list, input_tag = "", input_date = ""):
             url = "/message?tag=%s&filterKey=%s&filterDate=%s" % (input_tag, encoded_tag, input_date)
         else:
             url = "/message?tag=%s&date=%s&filterKey=%s" % (input_tag, input_date, encoded_tag)
+
+        if display_tag != None:
+            url += "&displayTag=%s" % display_tag
 
         if tag_name == "$no_tag":
             tag_name = "<无标签>"

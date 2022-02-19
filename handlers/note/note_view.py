@@ -164,6 +164,7 @@ def view_list_func(note, kw):
     kw.show_pagination = False
     kw.show_comment_title = True
     kw.comment_title = T("清单项")
+    kw.op = "view"
 
 def view_table_func(note, kw):
     kw.show_aside = False

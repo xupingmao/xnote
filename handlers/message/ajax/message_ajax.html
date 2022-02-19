@@ -41,10 +41,6 @@
                         data-url="/message/edit?id={{item.id}}">编辑</a>
                 {% end %}
 
-                {% if item.tag == "log" %}
-                    <a class="update-tag-btn btn btn-default second-btn" data-id="{{item.id}}" data-tag="task">转待办</a>
-                {% end %}
-
                 <div class="float-right">
                     <a class="todo-delete-btn btn btn-default" data-id="{{item.id}}" data-content="{{item.content}}">删除</a>
                 </div>

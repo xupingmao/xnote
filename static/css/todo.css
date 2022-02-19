@@ -18,6 +18,7 @@
 }
 
 .todo-content {
+    margin-top: 10px;
     padding-bottom: 10px;
     word-break: break-all;
     float: left;

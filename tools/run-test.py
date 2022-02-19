@@ -14,7 +14,7 @@ def update_version():
 	version = "v2.8-dev-" + time.strftime("%Y.%m.%d")
 	print("版本号:", version)
 	with open("config/version.txt", "w+") as fp:
-		fp.write(version)
+		fp.write(version + "\n")
 
 
 def check_and_install_pkg(pkg, version = ""):

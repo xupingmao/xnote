@@ -19,6 +19,8 @@
 {% block body_left %}
 
     {% init message_tag = "" %}
+    <!-- Tab页 -->
+    {% init message_tab = "log" %}
     {% init default_content = "" %}
     {% init show_tab = True %}
     {% init show_input_box = True %}
@@ -27,7 +29,11 @@
 
     <!-- Tab页 -->
     {% if show_tab %}
-        {% include message/component/message_tab.html %}
+        {% if message_tab == "log" %}
+            {% include message/component/message_tab_log.html %}
+        {% else %}
+            {% include message/component/message_tab_task.html %}
+        {% end %}
     {% end %}
 
     <!-- 编辑器 -->

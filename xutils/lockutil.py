@@ -44,6 +44,7 @@ class UnixLock:
 			fcntl.flock(self.fp, fcntl.LOCK_UN)
 			# 不需要重置为空
 			self.fp.close()
+			self.got_lock = False
 		return True
 
 class WinLock:

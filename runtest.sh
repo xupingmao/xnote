@@ -1,7 +1,7 @@
 
 # 目前只适用于Mac本地环境的测试
 # 构建最新的css、js文件
-source build.sh
+python3 tools/build.py
 
 rm -rf testdata
 echo $(date "+v2.8-dev-%Y.%m.%d") > config/version.txt
