@@ -68,8 +68,6 @@ class Follower(NodeManagerBase):
             params = dict(port = port, fs_sync_offset = fs_sync_offset)
             result_obj = client.get_stat(params)
 
-            logging.debug("PING主节点:%s", result_obj)
-            
             self.update_ping_result(result_obj)
 
             self.last_ping_time = time.time()
@@ -80,12 +78,16 @@ class Follower(NodeManagerBase):
     
     def update_ping_result(self, result0):
         if result0 is None:
+            logging.debug("PING主节点:返回None")
             return
 
         result = Storage(**result0)
         if result.code != "success":
             self.ping_error = result.message
+            logging.debug("PING主节点失败:%s", self.ping_error)
             return
+
+        logging.debug("PING主节点成功")
 
         self.ping_error = None
         follower_dict = result.get("follower_dict", {})

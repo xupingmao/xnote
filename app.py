@@ -27,6 +27,7 @@ import socket
 import logging
 import traceback
 import argparse
+import atexit
 # insert after working dir
 sys.path.insert(1, "lib")
 sys.path.insert(1, "core")
@@ -143,6 +144,12 @@ def handle_signal(signum, frame):
     xmanager.fire("sys.exit")
     exit(0)
 
+def exit_hook():
+    global FILE_LOCK
+    logging.info("退出中...")
+    # xmanager.fire("sys.exit")
+    FILE_LOCK.release()
+
 def try_init_sqlite():
     try:
         # 初始化数据库
@@ -244,6 +251,8 @@ def init_app():
 def main():
     global app
     global FILE_LOCK
+
+    atexit.register(exit_hook)
 
     try:
         if FILE_LOCK.acquire():
