@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2022/02/12 20:01:03
+# @modified 2022/02/26 11:30:00
 # @filename xconfig.py
 
 '''xnote系统配置
@@ -32,6 +32,8 @@ TODO: 系统配置需要注册之后才能使用
 import os
 import time
 from collections import OrderedDict
+
+from xutils import textutil
 from xutils.base import Storage
 from xutils.textutil import Properties
 
@@ -190,6 +192,11 @@ START_TIME = None
 # 是否隐藏词典的入口
 HIDE_DICT_ENTRY = True
 
+# 运行时ID
+RUNTIME_ID = None
+# 退出的编码
+EXIT_CODE = 0
+
 
 # 默认的用户配置
 DEFAULT_USER_CONFIG = {
@@ -228,6 +235,7 @@ def init(path = DATA_DIR):
     global STORAGE_DIR
     global ETC_DIR
     global PLUGIN_TEMPLATE
+    global RUNTIME_ID
 
     DATA_PATH = os.path.abspath(path)
     DATA_DIR  = os.path.abspath(path)
@@ -281,6 +289,8 @@ def init(path = DATA_DIR):
 
     from xutils import fsutil
     PLUGIN_TEMPLATE = fsutil.readfile("./config/plugin/plugin.tpl.py")
+
+    RUNTIME_ID = textutil.generate_uuid()
 
 
 def init_system_config():

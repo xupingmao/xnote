@@ -1,13 +1,14 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/02/12 21:34:53
+# @modified 2022/02/20 20:29:07
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
 import os
 import re
 import time
+import sys
 import logging
 
 import xutils
@@ -188,6 +189,24 @@ def chk_db_backup():
     backup = DBBackup()
     return backup.execute()
 
+def calc_key_size():
+    count = 0
+    key_size = 0
+    mem_db = dict()
+    for key in dbutil.get_instance().RangeIter(include_value = False):
+        key_size += sys.getsizeof(key)
+        mem_db[key] = 1
+        count += 1
+    mem_db_size = sys.getsizeof(mem_db)
+
+    result = Storage()
+    result.count = count
+    result.mem_db_size = xutils.format_size(sys.getsizeof(mem_db))
+    result.key_size = xutils.format_size(key_size)
+    result.avg_key_size = xutils.format_size(key_size // count)
+
+    return result
+
 class BackupHandler:
 
     @xauth.login_required("admin")
@@ -197,6 +216,9 @@ class BackupHandler:
 
         if p == "db":
             return chk_db_backup()
+
+        if p == "calc_key_size":
+            return calc_key_size()
 
         # 备份所有的
         chk_backup()

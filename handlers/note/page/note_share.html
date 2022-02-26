@@ -15,15 +15,15 @@
 
 {% block body %}
 
-{% if _has_login %}
-    <div class="card">
-        <div class="pad5 x-tab-box" data-tab-default="public" data-tab-key="tab">
-            <a class="tab tab-link x-tab" href="/note/public" data-tab-value="public">最近分享</a>
-            <a class="tab tab-link x-tab" href="/note/public?tab=hot" data-tab-value="hot">热门分享</a>
-            <a class="tab tab-link x-tab" href="/note/share_to_me?tab=to_me" data-tab-value="to_me">分享给我</a>
-        </div>
+<div class="card">
+    <div class="pad5 x-tab-box" data-tab-default="public" data-tab-key="tab">
+        <a class="tab tab-link x-tab" href="/note/public" data-tab-value="public">最近分享</a>
+        <a class="tab tab-link x-tab" href="/note/public?tab=hot" data-tab-value="hot">热门分享</a>
+        {% if _has_login %}
+        <a class="tab tab-link x-tab" href="/note/share_to_me?tab=to_me" data-tab-value="to_me">分享给我</a>
+        {% end %}
     </div>
-{% end %}
+</div>
 
 <div class="card">
 

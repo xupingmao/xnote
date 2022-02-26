@@ -67,15 +67,7 @@
         {% end %}
     </div>
 
-    <div class="card">
-        <div class="card-title">
-            <span>随手记</span>
-        </div>
-    </div>
-
-    {% include message/component/message_list.html %}
-
-    <script>
+<script>
     $(function () {
         function formatDate(year, month) {
             if (month == "0") {
@@ -130,13 +122,10 @@
 
         var date = getCurrentMonth();
 
-        // 刷新短文本
-        refreshMessageList(date);
-
         // 刷新链接
         updateMonthLink();
     })
-    </script>
+</script>
 
 {% end %}
 

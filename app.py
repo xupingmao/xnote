@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/02/13 21:10:35
+# @modified 2022/02/26 12:19:16
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -41,6 +41,8 @@ import signal
 import logging
 import multiprocessing
 from xutils import *
+from xutils import mem_util
+from xutils.mem_util import log_mem_info_deco
 from xutils.lockutil import FileLock
 from autoreload import AutoReloadThread
 
@@ -149,7 +151,9 @@ def exit_hook():
     logging.info("退出中...")
     # xmanager.fire("sys.exit")
     FILE_LOCK.release()
+    return xconfig.EXIT_CODE
 
+@log_mem_info_deco("try_init_sqlite")
 def try_init_sqlite():
     try:
         # 初始化数据库
@@ -158,6 +162,7 @@ def try_init_sqlite():
         xutils.print_exc()
         xconfig.errors.append("初始化sqlite失败")
 
+@log_mem_info_deco("try_init_ldb")
 def try_init_ldb():
     try:
         # 初始化leveldb数据库
@@ -166,6 +171,7 @@ def try_init_ldb():
         xutils.print_exc()
         xconfig.errors.append("初始化ldb失败")
 
+@log_mem_info_deco("init_cache")
 def init_cache():
     try:
         xutils.cacheutil.init(xconfig.STORAGE_DIR)
@@ -177,7 +183,7 @@ def init_cache():
 def init_autoreload():
     def reload_callback():
         # 重新加载handlers目录下的所有模块
-        xmanager.reload()
+        xmanager.restart()
         autoreload_thread.clear_watched_files()
         autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
 
@@ -191,6 +197,20 @@ def init_cluster():
     # 初始化集群配置
     if xconfig.get_global_config("system.node.role") == "follower":
         logging.info("当前系统以从节点身份运行")
+
+@log_mem_info_deco("init_web_app")
+def init_web_app():
+    # 关闭autoreload使用自己实现的版本
+    var_env = dict()
+    app = web.application(list(), var_env, autoreload=False)
+
+    # 初始化模板管理
+    xtemplate.init()
+
+    # 初始化主管理器，包括用户及权限、定时任务、各功能模块
+    xmanager.init(app, var_env)
+    return app
+
 
 def init_app_no_lock():
     global app
@@ -208,15 +228,7 @@ def init_app_no_lock():
     # 加载缓存
     init_cache()
 
-    # 关闭autoreload使用自己实现的版本
-    var_env = dict()
-    app = web.application(list(), var_env, autoreload=False)
-
-    # 初始化模板管理
-    xtemplate.init()
-
-    # 初始化主管理器，包括用户及权限、定时任务、各功能模块
-    xmanager.init(app, var_env)
+    app = init_web_app()
 
     # 文件修改检测
     init_autoreload()
@@ -243,16 +255,33 @@ def init_app_no_lock():
 
     # 记录已经启动
     xconfig.mark_started()
-    xutils.log("app started")
+    logging.info("app started")
 
 def init_app():
     return init_app_no_lock()
+
+def count_worker_thread():
+    count = 0
+    for t in threading.enumerate():
+        if t.isDaemon():
+            continue
+        count += 1
+    return count
+
+def wait_thread_exit():
+    while True:
+        count = count_worker_thread()
+        logging.debug("线程数量:%s", count)
+        if count > 1:
+            time.sleep(0.1)
+        else:
+            return
 
 def main():
     global app
     global FILE_LOCK
 
-    atexit.register(exit_hook)
+    # atexit.register(exit_hook)
 
     try:
         if FILE_LOCK.acquire():
@@ -260,12 +289,16 @@ def main():
             init_app_no_lock()
             # 监听端口
             app.run()
+            logging.info("服务器已关闭")
+            wait_thread_exit()
+            sys.exit(xconfig.EXIT_CODE)
         else:
             logging.error("get lock failed")
             logging.error("xnote进程已启动，请不要重复启动!")
             sys.exit(1)
     finally:
         FILE_LOCK.release()
+
 
 
 class LogMiddleware:

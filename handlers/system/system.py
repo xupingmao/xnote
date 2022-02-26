@@ -1,16 +1,19 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2016/10
-# @modified 2021/02/19 15:56:23
+# @modified 2022/02/26 11:27:37
 """System functions"""
 from io import StringIO
-import xconfig
 import codecs
 import time
-import functools
 import os
 import json
 import socket
 import os
+import sys
+import threading
+
+import xconfig
+import functools
 import autoreload
 import xtemplate
 import xutils
@@ -148,13 +151,23 @@ class AdminHandler:
         return xtemplate.render("system/page/system_admin.html")
 
 class ReloadHandler:
+
     @xauth.login_required("admin")
     def GET(self):
         # autoreload will load new handlers
         import autoreload
         import web
-        autoreload.reload()
-        raise web.seeother("/system/index")
+
+        runtime_id = xutils.get_argument("runtime_id")
+        if runtime_id == xconfig.RUNTIME_ID:
+            # autoreload.reload()
+            xmanager.restart()
+            raise web.seeother("/system/index")
+        else:
+            return dict(code = "success", status = "running")
+
+    def POST(self):
+        return self.GET()
 
 class UserCssHandler:
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/31 23:06:44
-# @modified 2022/01/24 14:34:46
+# @modified 2022/02/20 23:03:42
 # @filename upgrade_main.py
 
 """系统升级相关的自动化脚本
@@ -21,6 +21,7 @@ import xauth
 import logging
 from xutils import dbutil
 from xutils import dateutil
+from xutils import mem_util
 
 MAX_FILE_COUNT = 10
 dbutil.register_table("db_upgrade_log", "数据库升级日志")

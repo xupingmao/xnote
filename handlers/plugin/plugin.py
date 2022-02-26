@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2021/10/28 22:58:10
+# @modified 2022/02/20 22:57:00
 from io import StringIO
 import xconfig
 import codecs
@@ -29,6 +29,7 @@ from xutils import fsutil
 from xutils import logutil
 from xutils import textutil, SearchResult, dateutil, dbutil, u
 from xutils import attrget
+from xutils import mem_util
 
 try:
     from ConfigParser import ConfigParser
@@ -967,6 +968,7 @@ class PluginLogHandler:
         return logs
 
 @xmanager.listen("sys.reload")
+@mem_util.log_mem_info_deco("reload_plugins")
 def reload_plugins(ctx):
     global PLUGINS_STATUS
     PLUGINS_STATUS = "loading"
