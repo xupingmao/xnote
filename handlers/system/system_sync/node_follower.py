@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2022/02/12 18:13:41
-# @modified 2022/02/12 21:36:13
+# @modified 2022/02/26 18:55:14
 # @filename node_follower.py
 
 """从节点管理"""
@@ -121,11 +121,14 @@ class Follower(NodeManagerBase):
             # logging.debug("没到SYNC时间")
             return
 
+        client = self.get_client()
+        # 先重试失败的任务
+        client.retry_failed()
+
         offset = CONFIG.get("fs_sync_offset", "")
         offset = textutil.remove_head(offset, "fs_sync_index:")
 
         logging.debug("offset:%s", offset)
-        client = self.get_client()
         result = client.list_files(offset)
 
         if result is None:
