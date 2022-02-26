@@ -23,7 +23,8 @@ def main():
 	cmd = " ".join(args)
 	print("Command", cmd)
 	while True:
-		exit_code = subprocess.call(args, shell = True)
+		# exit_code = subprocess.call(args, shell = True)
+		exit_code = os.system(cmd)
 		print("exit_code:", exit_code)
 		if exit_code == 0:
 			return
