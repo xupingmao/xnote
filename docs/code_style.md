@@ -74,7 +74,7 @@ my_package # 带下划线的包名
 # 6. 模块内部的命名
 
 - `handlers/note` note模块的根目录
-- `handlers/note/page/` 页面目录
+- `handlers/note/page/` 静态页面目录
 - `handlers/note/ajax/` ajax页面目录
 - `handlers/note/component/` 页面的组件
 - `handlers/note/component/css` CSS组件

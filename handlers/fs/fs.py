@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2021/10/07 15:06:04
+# @modified 2022/02/27 16:08:20
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -22,25 +22,6 @@ import shutil
 import xmanager
 from xutils import FileItem, u, Storage, fsutil
 from xutils import dbutil
-
-def file_post_handler(item):
-    if item.type == "dir":
-        item.icon = "fa-folder orange"
-    elif item.ext in xconfig.FS_VIDEO_EXT_LIST:
-        item.icon = "fa-file-video-o"
-    elif item.ext in xconfig.FS_CODE_EXT_LIST:
-        item.icon = "fa-file-code-o"
-    elif item.ext in xconfig.FS_AUDIO_EXT_LIST:
-        item.icon = "fa-file-audio-o"
-    elif item.ext in xconfig.FS_ZIP_EXT_LIST:
-        item.icon = "fa-file-zip-o"
-    elif xutils.is_text_file(item.path):
-        item.icon = "fa-file-text-o"
-    elif xutils.is_img_file(item.path):
-        item.icon = "fa-file-image-o"
-    return item
-
-FileItem.set_post_handler(file_post_handler)
 
 def is_stared(path):
     return xconfig.has_config("STARED_DIRS", path)
@@ -618,7 +599,7 @@ class BookmarkHandler:
         kw.fake_path_name = "文件收藏夹"
         kw.filelist = filelist
         
-        return xtemplate.render("fs/page/fs.html", **kw)
+        return xtemplate.render("fs/page/fs_bookmark.html", **kw)
 
 class UserHomeHandler(BookmarkHandler):
     pass

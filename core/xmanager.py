@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2022/02/26 11:30:24
+# @modified 2022/02/27 22:28:39
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -827,5 +827,5 @@ def add_visit_log(user_name, url):
 
 def restart():
     _manager.app.stop()
-    xconfig.EXIT_CODE = 5
-    sys.exit(5)
+    xconfig.EXIT_CODE = 205
+    sys.exit(205)

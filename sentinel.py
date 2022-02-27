@@ -26,12 +26,12 @@ def main():
 		# exit_code = subprocess.call(args, shell = True)
 		exit_code = os.system(cmd)
 		print("exit_code:", exit_code)
-		if exit_code == 0:
-			return
 		if exit_code == 205:
 			print("restart ...")
 			print("-" * 50)
 			print("-" * 50)
+		else:
+			return
 
 
 if __name__ == '__main__':

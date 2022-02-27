@@ -1,0 +1,39 @@
+{% extends base %}
+
+{% block head %}
+
+{% set search_action = '/fs_find' %}
+{% set search_placeholder = '搜索文件' %}
+
+{% end %}
+
+{% block search_form %}
+    <input type="text" name="path" class="hide" value="{{?path}}"/>
+{% end %}
+
+
+{% block body %}
+
+    {% init find_key = "" %}
+    {% init error = "" %}
+    {% init show_fs_path = True %}
+    {% init search_category = "fs" %}
+    {% init show_hidden_files = False %}
+
+    <div class="hide error row"></div>
+    <div class="hide success row"></div>
+
+    <div class="grid-card">
+        {% include fs/component/fs_title.html %}
+    </div>
+
+    <div class="card">
+        {% for _item in filelist %}
+            <a class="list-item" href="{{_item.url}}">
+                <i class="fa {{_item.icon}}"></i>
+                <span>{{_item.name}}</span>
+            </a>
+        {% end %}
+    </div>
+
+{% end %}

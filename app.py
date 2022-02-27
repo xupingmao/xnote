@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/02/26 12:19:16
+# @modified 2022/02/27 22:20:53
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -60,6 +60,11 @@ def print_debug_info(*args):
 def get_bool_by_sys_arg(value):
     return value == "yes" or value == "true"
 
+def get_int_by_sys_arg(value):
+    if value is None:
+        return value
+    return int(value)
+
 def handle_args_and_init_config():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="./data")
@@ -80,6 +85,7 @@ def handle_args_and_init_config():
     parser.add_argument("--disabledPlugins", default="no")
     # 节点角色
     parser.add_argument("--role", default = "leader")
+    parser.add_argument("--blockCacheSize", default = None)
 
     web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
@@ -131,6 +137,7 @@ def handle_args_and_init_config():
     xconfig.set_global_config("system.port", port)
     xconfig.set_global_config("system.start_time", start_time)
     xconfig.set_global_config("system.node.role", args.role)
+    xconfig.set_global_config("block_cache_size", get_int_by_sys_arg(args.blockCacheSize))
 
 
 def handle_signal(signum, frame):
@@ -166,7 +173,7 @@ def try_init_sqlite():
 def try_init_ldb():
     try:
         # 初始化leveldb数据库
-        dbutil.init(xconfig.DB_DIR)
+        dbutil.init(xconfig.DB_DIR, block_cache_size = xconfig.get_global_config("block_cache_size"))
     except:
         xutils.print_exc()
         xconfig.errors.append("初始化ldb失败")

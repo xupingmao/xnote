@@ -1,13 +1,16 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/29 22:48:26
-# @modified 2022/02/26 19:30:21
+# @modified 2022/02/27 16:36:45
 # @filename system_sync_client.py
 
 import os
+import time
+import logging
+
 import xutils
 import xconfig
-import logging
+
 from xutils import Storage
 from xutils import netutil
 from xutils import textutil
@@ -41,7 +44,7 @@ class HttpClient:
 
     def check_failed(self):
         if self.host is None:
-            logging.warn("host为空")
+            logging.warning("host为空")
             return True
 
         return False
