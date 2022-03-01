@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/02/20 20:29:07
+# @modified 2022/03/01 23:24:46
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -172,7 +172,10 @@ class DBBackup:
         logging.info("数据库记录总数:%s", count)
 
         # 保存为压缩文件
-        destfile = os.path.join(xconfig.BACKUP_DIR, time.strftime("db.%Y-%m-%d.zip"))
+        dirname = os.path.join(xconfig.BACKUP_DIR, "db")
+        xutils.makedirs(dirname)
+        
+        destfile = os.path.join(dirname, time.strftime("db.%Y-%m.zip"))
         xutils.zip_dir(db_backup_dir, destfile)
 
         # 再次清理

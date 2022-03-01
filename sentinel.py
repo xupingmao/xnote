@@ -26,7 +26,8 @@ def main():
 		# exit_code = subprocess.call(args, shell = True)
 		exit_code = os.system(cmd)
 		print("exit_code:", exit_code)
-		if exit_code == 205:
+		# Mac返回 52480
+		if exit_code in (205, 52480):
 			print("restart ...")
 			print("-" * 50)
 			print("-" * 50)
