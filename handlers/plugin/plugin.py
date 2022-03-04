@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
-# @modified 2022/02/20 22:57:00
+# @modified 2022/03/04 23:02:45
 from io import StringIO
 import xconfig
 import codecs
@@ -247,6 +247,8 @@ class PluginContext(Storage):
 def is_plugin_file(fpath):
     return os.path.isfile(fpath) and fpath.endswith(".py")
 
+
+@mem_util.log_mem_info_deco("load_plugin_file", log_args = True)
 def load_plugin_file(fpath, fname = None):
     if not is_plugin_file(fpath):
         return

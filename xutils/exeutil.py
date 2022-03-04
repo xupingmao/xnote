@@ -1,20 +1,22 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/19 16:09:13
-# @modified 2021/09/04 22:15:21
+# @modified 2022/03/04 23:30:38
 
 
 """脚本执行相关的代码"""
-import six
 import gc
 import sys
 import os
-import web
 import threading
+
+
+import six
+import web
 from xutils.imports import PY2
 
 # 输出缓存区
-STDOUT_BUF_SIZE = 1000
+STDOUT_BUF_SIZE = 200
 
 def get_current_thread():
     return threading.current_thread()
@@ -23,25 +25,25 @@ def xutils_print_exc():
     import xutils
     xutils.print_exc()
 
-class MyStdout:
+class MyStdout(threading.local):
 
-    _instance = None
-
-    """标准输出的装饰器，用来拦截标准输出内容"""
+    """标准输出的装饰器，用来拦截标准输出内容
+       
+    *本类是线程安全的*
+    """
     def __init__(self, stdout, do_print = True):
-        self.stdout = stdout
-        self.result_dict = dict()
-        self.outfile = web.debug
+        self.stdout   = stdout
+        self.outfile  = web.debug
         self.do_print = do_print
+        self.buf      = []
         try:
             self.encoding = stdout.encoding
         except:
             xutils_print_exc()
         # 全局对象
-        MyStdout._instance = self
 
     def write(self, value):
-        result = self.result_dict.get(get_current_thread())
+        result = self.buf
         if result != None:
             result.append(value)
             if len(result) > STDOUT_BUF_SIZE:
@@ -59,20 +61,14 @@ class MyStdout:
         return self.stdout.close()
 
     def record(self):
-        # 这里检测TTL
-        self.result_dict[get_current_thread()] = []
+        self.buf = []
 
     def pop_record(self):
-        # 非线程池模式下必须pop_record，不然会有内存泄漏的危险
-        # TODO 考虑引入TTL检测机制
-        result = self.result_dict.pop(get_current_thread(), [])
-        return "".join(result)
+        return "".join(self.buf)
 
     @staticmethod
     def get_records(thread_obj):
-        if MyStdout._instance == None:
-            return None
-        return MyStdout._instance.result_dict.get(thread_obj)
+        raise Exception("deprecated!!!")
 
 def exec_python_code(
         name, 

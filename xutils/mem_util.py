@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author mark
 # @since 2022/02/20 22:36:31
-# @modified 2022/02/20 23:01:19
+# @modified 2022/03/04 23:10:37
 # @filename mem_util.py
 
 import os
@@ -44,14 +44,20 @@ def get_mem_info():
         result = Storage(mem_used = "-1", sys_mem_used = "-1", sys_mem_total = "-1")
     return result
 
-def log_mem_info_deco(name):
+def log_mem_info_deco(name, log_args = False):
     """打印内存日志的装饰器"""
+    
     def deco(func):
         def handle(*args, **kw):
+            args0 = ""
+            
             try:
-                logging.debug("(%s) start|mem_info:%s", name, get_mem_info())
+                before = get_mem_info().mem_used
                 return func(*args, **kw)
             finally:
-                logging.debug("(%s) done|mem_info:%s", name, get_mem_info())
+                if log_args:
+                    args0 = args
+                after = get_mem_info().mem_used
+                logging.debug("(%s)%s|mem_used:%s -> %s", name, args0, before, after)
         return handle
     return deco

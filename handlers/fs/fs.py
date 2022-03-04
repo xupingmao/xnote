@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2022/02/27 16:08:20
+# @modified 2022/03/02 21:02:28
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -587,8 +587,7 @@ class BookmarkHandler:
 
         filelist = []
         filelist.append(FileItem("/", name = "操作系统根目录"))
-        filelist.append(FileItem(xconfig.DATA_DIR, name = "Xnote系统根目录"))
-        filelist.append(FileItem(get_user_home_path(user_name), name = "我的数据目录"))
+        filelist.append(FileItem(xconfig.DATA_DIR, name = "Xnote数据目录"))
 
         for fpath in bookmark.get():
             filelist.append(FileItem(fpath))

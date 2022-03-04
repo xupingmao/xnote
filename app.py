@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/02/27 22:20:53
+# @modified 2022/03/04 22:59:18
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -27,7 +27,6 @@ import socket
 import logging
 import traceback
 import argparse
-import atexit
 # insert after working dir
 sys.path.insert(1, "lib")
 sys.path.insert(1, "core")
@@ -39,7 +38,6 @@ import xmanager
 import xtemplate
 import signal
 import logging
-import multiprocessing
 from xutils import *
 from xutils import mem_util
 from xutils.mem_util import log_mem_info_deco
@@ -85,7 +83,8 @@ def handle_args_and_init_config():
     parser.add_argument("--disabledPlugins", default="no")
     # 节点角色
     parser.add_argument("--role", default = "leader")
-    parser.add_argument("--blockCacheSize", default = None)
+    parser.add_argument("--block_cache_size", default = None)
+    parser.add_argument("--webdav", default = "yes")
 
     web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
@@ -137,8 +136,11 @@ def handle_args_and_init_config():
     xconfig.set_global_config("system.port", port)
     xconfig.set_global_config("system.start_time", start_time)
     xconfig.set_global_config("system.node.role", args.role)
-    xconfig.set_global_config("block_cache_size", get_int_by_sys_arg(args.blockCacheSize))
+    xconfig.set_global_config("system.block_cache_size", 
+        get_int_by_sys_arg(args.block_cache_size))
 
+    xconfig.set_global_config("system.webdav", 
+        get_bool_by_sys_arg(args.webdav))
 
 def handle_signal(signum, frame):
     """处理系统消息
@@ -151,14 +153,8 @@ def handle_signal(signum, frame):
         return
     # 优雅下线
     xmanager.fire("sys.exit")
-    exit(0)
+    sys.exit(0)
 
-def exit_hook():
-    global FILE_LOCK
-    logging.info("退出中...")
-    # xmanager.fire("sys.exit")
-    FILE_LOCK.release()
-    return xconfig.EXIT_CODE
 
 @log_mem_info_deco("try_init_sqlite")
 def try_init_sqlite():
@@ -173,19 +169,11 @@ def try_init_sqlite():
 def try_init_ldb():
     try:
         # 初始化leveldb数据库
-        dbutil.init(xconfig.DB_DIR, block_cache_size = xconfig.get_global_config("block_cache_size"))
+        dbutil.init(xconfig.DB_DIR, 
+            block_cache_size = xconfig.get_global_config("system.block_cache_size"))
     except:
         xutils.print_exc()
         xconfig.errors.append("初始化ldb失败")
-
-@log_mem_info_deco("init_cache")
-def init_cache():
-    try:
-        xutils.cacheutil.init(xconfig.STORAGE_DIR)
-        xutils.cacheutil.load_dump()
-    except:
-        xutils.print_exc()
-        xconfig.errors.append("加载缓存失败")
 
 def init_autoreload():
     def reload_callback():
@@ -231,9 +219,6 @@ def init_app_no_lock():
     
     # 初始化工具箱
     xutils.init(xconfig)
-
-    # 加载缓存
-    init_cache()
 
     app = init_web_app()
 
@@ -287,8 +272,6 @@ def wait_thread_exit():
 def main():
     global app
     global FILE_LOCK
-
-    # atexit.register(exit_hook)
 
     try:
         if FILE_LOCK.acquire():

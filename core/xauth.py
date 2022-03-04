@@ -86,6 +86,8 @@ def _create_temp_user(temp_users, user_name):
 
 def _get_users(force_reload = False):
     """获取用户，内部接口"""
+    warnings.warn("_get_users(查询所有用户)已经过时，请停止使用", DeprecationWarning)
+
     global _USER_LIST
 
     # 有并发风险
@@ -293,8 +295,11 @@ def get_user_from_token():
         return select_first(lambda x: x.token == token)
 
 def get_user_password(name):
-    users = _get_users()
-    return users[name]["password"]
+    user = get_user_by_name(name)
+    if user != None:
+        return user.password
+    raise Exception("user not found")
+
 
 def get_user_password_md5(user_name, use_salt = True):
     user     = get_user(user_name)
