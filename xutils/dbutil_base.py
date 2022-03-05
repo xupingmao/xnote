@@ -62,9 +62,6 @@ WRITE_LOCK    = threading.Lock()
 READ_LOCK     = threading.Lock()
 LAST_TIME_SEQ = -1
 
-LOCK_SIZE = 10
-LOCK_LIST = [threading.Lock() for i in range(LOCK_SIZE)]
-
 # 注册的数据库表名，如果不注册，无法进行写操作
 TABLE_INFO_DICT = dict()
 # 表的索引信息
@@ -84,7 +81,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/02/27 22:25:44
+# @modified 2022/03/05 09:54:24
 ###########################################################
 
 
@@ -303,13 +300,7 @@ def check_not_empty(value, message):
 
 def get_write_lock(key = None):
     global WRITE_LOCK
-    global LOCK_LIST
-
-    if key is None:
-        return WRITE_LOCK
-
-    h = abs(hash(key))
-    return LOCK_LIST[h%LOCK_SIZE]
+    return WRITE_LOCK
 
 def timeseq(value = None):
     """生成一个时间序列

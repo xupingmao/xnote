@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2022/03/02 21:02:28
+# @modified 2022/03/05 00:20:23
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -562,9 +562,16 @@ class Bookmark:
             bookmark = []
         self.bookmark = bookmark
 
+        for i, value in enumerate(bookmark):
+            bookmark[i] = fsutil.normalize_path(value)
+
     def append(self, path):
         if path not in self.bookmark:
             self.bookmark.append(path)
+
+    def remove(self, path):
+        if path in self.bookmark:
+            self.bookmark.remove(path)
 
     def get(self):
         self.bookmark = list(filter(lambda x:x!=None and os.path.exists(x), self.bookmark))
@@ -590,7 +597,9 @@ class BookmarkHandler:
         filelist.append(FileItem(xconfig.DATA_DIR, name = "Xnote数据目录"))
 
         for fpath in bookmark.get():
-            filelist.append(FileItem(fpath))
+            item = FileItem(fpath)
+            item.is_user_defined = True
+            filelist.append(item)
 
         kw.show_path = False
         kw.show_fake_path = True
@@ -609,11 +618,15 @@ class BookmarkAjaxHandler:
     def POST(self):
         user_name = xauth.current_name()
         path = xutils.get_argument("path")
-
+        action = xutils.get_argument("action")
         bookmark = Bookmark(user_name)
-        bookmark.append(path)
-        bookmark.save()
 
+        if action == "remove":
+            bookmark.remove(path)
+        else:
+            bookmark.append(path)
+        
+        bookmark.save()
         return dict(code = "success")
 
 class ToolListHandler:

@@ -5,6 +5,12 @@
 {% set search_action = '/fs_find' %}
 {% set search_placeholder = '搜索文件' %}
 
+<style type="text/css">
+    [color=red] {
+        color: red;
+    }
+</style>
+
 {% end %}
 
 {% block search_form %}
@@ -32,8 +38,37 @@
             <a class="list-item" href="{{_item.url}}">
                 <i class="fa {{_item.icon}}"></i>
                 <span>{{_item.name}}</span>
+
+                {% if _item.is_user_defined %}
+                    <div class="float-right">
+                        <button data-path="{{_item.path}}" class="btn btn-default remove-btn">{{T("移除")}}</button>
+                    </div>
+                {% end %}
             </a>
         {% end %}
     </div>
 
+<script type="text/javascript">
+$(function () {
+    $(".remove-btn").click(function (e) {
+        e.preventDefault();
+        var path = $(e.target).attr("data-path")
+        var params = {
+            action:"remove",
+            path: path,
+        }
+
+        xnote.confirm("确定要取消收藏文件<code color=red>" + path + "</code>?", function () {        
+            $.post("/fs_api/bookmark", params, function (resp) {
+                if (resp.code == "success") {
+                    window.location.reload()
+                } else {
+                    xnote.alert("取消收藏失败，请稍后重试!")
+                }
+            })
+        })
+
+    })
+})
+</script>
 {% end %}

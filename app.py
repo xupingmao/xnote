@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/03/04 22:59:18
+# @modified 2022/03/04 23:59:23
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -85,6 +85,7 @@ def handle_args_and_init_config():
     parser.add_argument("--role", default = "leader")
     parser.add_argument("--block_cache_size", default = None)
     parser.add_argument("--webdav", default = "yes")
+    parser.add_argument("--fast_reload", default = "no")
 
     web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
@@ -142,6 +143,9 @@ def handle_args_and_init_config():
     xconfig.set_global_config("system.webdav", 
         get_bool_by_sys_arg(args.webdav))
 
+    xconfig.set_global_config("system.fast_reload",
+        get_bool_by_sys_arg(args.fast_reload))
+
 def handle_signal(signum, frame):
     """处理系统消息
     :arg int signum:
@@ -178,7 +182,11 @@ def try_init_ldb():
 def init_autoreload():
     def reload_callback():
         # 重新加载handlers目录下的所有模块
-        xmanager.restart()
+        if xconfig.get_global_config("system.fast_reload"):
+            xmanager.reload()
+        else:
+            xmanager.restart()
+        
         autoreload_thread.clear_watched_files()
         autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
 

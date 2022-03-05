@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2022/02/08 11:12:48
+# @modified 2022/03/05 00:21:13
 
 
 """fsutil: 文件操作工具，文件工具分为如下部分：
@@ -466,6 +466,13 @@ def fixed_dir_path(dirname):
     if not dirname.endswith("/"):
         return dirname + "/"
     return dirname
+
+def normalize_path(fpath):
+    """标准化文件路径"""
+    fpath = os.path.abspath(fpath)
+    if os.path.isdir(fpath):
+        return fixed_dir_path(fpath)
+    return fpath
 
 def fixed_basename(path):
     if path.endswith("/"):

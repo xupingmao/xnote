@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2021/11/07 13:59:56
+# @modified 2022/03/05 00:25:04
 """持久化操作已经禁用，请使用dbutil
 缓存的实现，API列表如下
 
@@ -25,7 +25,8 @@
 2. LRU, Least Recently Used
 3. LFU, Least Frequently Used
 
-参考redis的API
+* 参考redis的API
+* TODO: 可以使用 BitCask 存储模型实现
 """
 from collections import OrderedDict, deque
 from xutils.imports import *
