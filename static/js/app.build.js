@@ -2002,24 +2002,6 @@ $(function () {
  */
 
 $(function (e) {
-    // 类似tab的超链接
-    // function initTabLink() {
-    //     var hasActive = false;
-    //     var count = 0;
-    //     $(".x-tab").each(function(index, ele) {
-    //         var link = $(ele).attr("href");
-    //         var fullpath = location.href;
-
-    //         if (fullpath.indexOf(link) >= 0) {
-    //             $(ele).addClass("tab-link-active");
-    //             hasActive = true;
-    //         }
-    //         count += 1;
-    //     });
-    //     if (count > 0 && !hasActive) {
-    //         $(".x-tab-default").addClass("tab-link-active");
-    //     }
-    // }
 
     function initTabBtn() {
         var hasActive = false;
@@ -2052,12 +2034,28 @@ $(function (e) {
             console.log("tab-value=",value);
             $(ele).find(".x-tab[data-tab-value=" + value + "]").addClass("x-tab-link-active");
             $(ele).find(".x-tab-btn[data-tab-value=" + value + "]").addClass("x-tab-btn-active");
+
+            var autoHref = $(ele).attr("data-auto-href");
+            console.debug("----- autoHref:", autoHref);
+            if (autoHref === "true") {
+                $(ele).find(".x-tab").each(function (index, child) {
+                    console.debug("----- autoHref:", child)
+                    var tabValue = $(child).attr("data-tab-value")
+                    $(child).attr("href", addUrlParam(window.location.href, key, tabValue))
+                })
+            }
         });
     }
 
-    // initTabLink();
-    initTabBtn();
-    initTabBox();
+
+    function initTabDefault() {
+        // initTabLink();
+        initTabBtn();
+        initTabBox();
+    }
+
+    initTabDefault();
+    xnote.addEventListener("init-default-value", initTabDefault);
 });
 
 // 根据内容自动调整高度

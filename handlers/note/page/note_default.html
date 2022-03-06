@@ -12,38 +12,8 @@
     </div>
 </div>
 
-<div class="card">
-
-    {% if len(notes) == 0 %}
-        {% include common/text/empty_text.html %}
-    {% end %}
-
-    {% for item in notes %}
-        <!-- 隐藏的记录 -->
-        {% if hasattr(item, "hide") and item.hide %}
-            {% continue %}
-        {% end %}
-
-        <a class="list-link" href="{{item.url}}">
-            {% if item.priority>0 %}
-                <i class="fa fa-thumb-tack black"></i>
-            {% end %}
-
-            <!-- 图标和标题 -->
-            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
-            <span>{{item.name}}</span>
-            
-            {% if item.is_deleted %}
-                <span class="gray-tag-span" href="/note/removed">删除</span>
-            {% end %}
-            
-            <div class="float-right">
-                <span class="book-size-span">{{item.update_date}}</span>
-                <i class="fa fa-chevron-right"></i>
-            </div>
-        </a>
-    {% end %}
-</div>
+{% set files = notes %}
+{% include note/component/note_list_component.html %}
 
 {# 分页 #}
 {% if "page" in globals() %}

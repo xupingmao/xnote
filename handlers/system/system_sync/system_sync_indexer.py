@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/28 18:07:31
-# @modified 2022/02/13 16:34:15
+# @modified 2022/03/06 11:23:30
 # @filename system_sync_indexer.py
 
 """文件同步索引管理器"""
@@ -50,6 +50,7 @@ class FileSyncIndexManager:
         self.data.append(xconfig.get_system_dir("storage"))
         self.data.append(xconfig.get_system_dir("app"))
         self.data.append(xconfig.get_system_dir("archive"))
+        self.data.append(xconfig.get_system_dir("scripts"))
 
 
     def step(self):

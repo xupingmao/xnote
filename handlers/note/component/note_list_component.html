@@ -5,6 +5,7 @@
 {% init show_hot_index = False %}
 {% init show_next = True %}
 {% init show_size = False %}
+{% init show_orderby = False %}
 {% init date_type = "" %}
 {% init ACTION_TEXT_MAP = {
     "create": "创建了笔记",
@@ -33,6 +34,18 @@
     {% include common/text/empty_text.html %}
 {% end %}
 
+{% if show_orderby and len(files) > 0 %}
+    <div class="pad5">
+        <div class="x-tab-box" 
+                data-auto-href=true
+                data-tab-default="name_desc" 
+                data-tab-key="orderby">
+            <a class="x-tab" data-tab-value="name_desc">字母顺序</a>
+            <a class="x-tab" data-tab-value="hot_desc">热度优先</a>
+        </div>
+    </div>
+{% end %}
+
 {% for item in files %}
     <!-- 隐藏的记录 -->
     {% if hasattr(item, "hide") and item.hide %}
@@ -55,13 +68,14 @@
             </div>
         {% end %}
 
-        {% if item.priority>0 %}
-            <i class="fa fa-thumb-tack black"></i>
-        {% end %}
-
         <!-- 图标和标题 -->
         <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
         <span>{{item.name}}</span>
+
+        {% if item.priority>0 %}
+            <span class="tag orange-tag">置顶</span>
+        {% end %}
+
 
         {% if hasattr(item, "is_public") and item.is_public %}
             <span class="info-tag">分享中</span>
@@ -75,36 +89,11 @@
             {% comment 新的统一使用badge_info %}
             {% if hasattr(item, "badge_info") and item.badge_info != None %}
                 <span class="book-size-span">{{item.badge_info}}</span>
+            {% else %}
+                {% comment 兼容老的展示逻辑 %}
+                {% include note/component/note_list_com_sub.html %}
             {% end %}
 
-            {% comment 兼容老的展示逻辑 %}
-            {% set sub_info = "" %}
-
-            {% if show_size and item.size != None %}
-                {% set sub_info = item.size %}
-            {% end %}
-
-            {% if show_cdate or date_type == "cdate" %}
-                {% set sub_info = format_date(item.ctime).replace('-', '/') %}
-            {% end %}
-
-            {% if show_mdate or date_type == "mdate" %}
-                {% set sub_info = format_date(item.mtime).replace('-', '/') %}
-            {% end %}
-
-            {% if show_adate or date_type == "adate" %}
-                {% set sub_info = format_date(item.atime).replace('-', '/') %}
-            {% end %}
-
-            {% if show_hot_index or date_type == "hot_index" %}
-                {% set sub_info = item.hot_index or 0 %}
-            {% end %}
-
-            {% if date_type == "ddate" %}
-                {% set sub_info = get_date_by_type(item, date_type) %}
-            {% end %}
-
-            <span class="book-size-span">{{sub_info}}</span>
 
             {% if item.show_next or show_next %}
                 <i class="fa fa-chevron-right"></i>

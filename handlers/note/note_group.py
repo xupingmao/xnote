@@ -1,8 +1,12 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2022/02/08 10:34:55
+# @modified 2022/03/06 16:13:52
 import math
 import time
+import os
+import copy
+
+
 import web
 import xutils
 import xtemplate
@@ -10,7 +14,6 @@ import xtables
 import xauth
 import xconfig
 import xmanager
-import os
 from xutils import Storage
 from xutils import cacheutil, dateutil, fsutil
 from xutils.dateutil import Timer
@@ -25,11 +28,12 @@ MSG_DAO    = xutils.DAO("message")
 PLUGIN     = xutils.Module("plugin")
 SMART_GROUP_COUNT = 0
 
-def SmartNote(name, url, icon = "fa-folder", size = None):
+def SmartNote(name, url, icon = "fa-folder", size = None, size_attr = None):
     note = Storage(name = name, url = url)
     note.priority = 0
     note.icon = icon
     note.size = size
+    note.size_attr = size_attr
     return note
 
 class NoteCategory:
@@ -125,20 +129,29 @@ def type_node_path(name, url):
     parent = PathNode(TYPES_NAME, "/note/types")
     return [parent, GroupLink(T(name), url)]
 
+def load_smart_groups_template():
+    config = fsutil.load_ini_config("config/note/smart_group.ini")
+    result = []
+    for key in config.sections:
+        item = config.items[key]
+        if item.visible == "false":
+            continue
+        note = SmartNote(item.name, item.url, size_attr = item.size_attr)
+        result.append(note)
+    return result
 
+_smart_groups = load_smart_groups_template()
 def list_smart_group(user_name):
     global SMART_GROUP_COUNT
 
     note_stat = NOTE_DAO.get_note_stat(user_name)
-    smart_group_list = []
-    # TODO 通过关键字配置的智能文件夹
-    smart_group_list.append(SmartNote("置顶笔记", "/note/sticky", size = note_stat.sticky_count))
-    smart_group_list.append(SmartNote("全部笔记", "/note/all", size = note_stat.total))
-    smart_group_list.append(SmartNote("文档", "/note/document", size = note_stat.doc_count))
-    smart_group_list.append(SmartNote("清单", "/note/list", size = note_stat.list_count))
-    smart_group_list.append(SmartNote("相册", "/note/gallery", size = note_stat.gallery_count))
-    smart_group_list.append(SmartNote("回收站", "/note/removed", size = note_stat.removed_count))
-    # smart_group_list.append(SmartNote("杜威十进制分类法", "/note/category", size = 10))
+    smart_group_list = copy.deepcopy(_smart_groups)
+
+    for item in smart_group_list:
+        if item.size_attr != None:
+            size = getattr(note_stat, item.size_attr)
+            item.size = size
+            item.badge_info = size
 
     SMART_GROUP_COUNT = len(smart_group_list)
     return smart_group_list
@@ -240,7 +253,8 @@ class GroupListHandler:
 
     def load_group_list(self, user_name, status):
         if status in ("active", "archived"):
-            notes = NOTE_DAO.list_group(user_name, status = status, orderby = "default")
+            notes = NOTE_DAO.list_group(user_name, 
+                status = status, orderby = "default")
         else:
             notes = NOTE_DAO.list_smart_group(user_name)
 
@@ -251,28 +265,58 @@ class GroupListHandler:
 
         return notes
 
+    def handle_badge_info(self, notes, tab):
+        if tab in ("active", "archived"):
+            for note in notes:
+                note.badge_info = note.size
+
+    def sort_notes(self, notes, kw):
+        tab = kw.tab
+        orderby = kw.orderby
+
+        if tab == "smart":
+            return
+
+        kw.show_orderby = True
+        
+        if orderby == "name_desc":
+            notes.sort(key = lambda x:x.name, reverse = True)
+
+        if orderby == "hot_desc":
+            for note in notes:
+                note.hot_index = note.hot_index or 0
+                note.badge_info = "热度(%s)" % note.hot_index
+            notes.sort(key = lambda x:x.hot_index, reverse = True)
+
+        notes.sort(key = lambda x:x.priority, reverse = True)
+
     @xauth.login_required()
     def GET(self):
         category  = xutils.get_argument("category")
-        status    = xutils.get_argument("tab", "active")
+        tab    = xutils.get_argument("tab", "active")
+        orderby   = xutils.get_argument("orderby", "name_desc")
         user_name = xauth.current_name()
         show_back = xutils.get_argument("show_back", type = bool)
 
         xmanager.add_visit_log(user_name, "/note/group")
 
         root  = NOTE_DAO.get_root()
-        notes = self.load_group_list(user_name, status)
+        notes = self.load_group_list(user_name, tab)
 
         kw = Storage()
-        kw.status    = status
-        kw.title     = T("我的笔记本")
-        kw.file      = root
-        kw.groups    = notes
+        kw.tab     = tab
+        kw.orderby = orderby
+        kw.title   = T("我的笔记本")
+        kw.file    = root
+        kw.groups  = notes
         kw.parent_id = 0
         kw.show_back = show_back
         kw.archived_count = NOTE_DAO.count_group(user_name, status = "archived")
         kw.active_count   = NOTE_DAO.count_group(user_name, status = "active")
         kw.smart_count    = SMART_GROUP_COUNT
+
+        self.handle_badge_info(notes, tab = tab)
+        self.sort_notes(notes, kw)
 
         return xtemplate.render("note/page/group_list.html", **kw)
 
@@ -539,7 +583,6 @@ class NotePluginHandler:
     def GET(self):
         raise web.found("/plugin_list?category=note&show_back=true")
 
-
 class RecentHandler:
     """最近的笔记/常用的笔记"""
 
@@ -556,7 +599,11 @@ class RecentHandler:
         elif orderby == "myhot":
             return NOTE_DAO.list_hot(creator, offset, limit)
 
-        return NOTE_DAO.list_recent_edit(creator, offset, limit)
+        # 最近更新的
+        notes = NOTE_DAO.list_recent_edit(creator, offset, limit)
+        for note in notes:
+            note.badge_info = dateutil.format_date(note.mtime)
+        return notes
 
     def get_html_title(self, orderby):
         if orderby == "all":
@@ -612,7 +659,7 @@ class ArchivedHandler:
 
     @xauth.login_required()
     def GET(self):
-        raise web.found("/note/group?status=archived")
+        raise web.found("/note/group?tab=archived")
 
 class ManagementHandler:
     """批量管理处理器"""

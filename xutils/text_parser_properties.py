@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/05/05 11:05:29
-# @modified 2021/10/28 00:24:29
+# @modified 2022/03/06 11:35:51
 # @filename text_parser_properties.py
 
 
@@ -9,7 +9,8 @@
 
 方法列表
 
-解析properties文件     parse_prop_text(text:str, ret_type="dict") -> {dict|list}
+parse_prop_text(text:str, ret_type="dict") -> {dict|list}
+    * 解析properties文件
 
 """
 

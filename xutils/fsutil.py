@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2022/03/05 00:21:13
+# @modified 2022/03/06 14:45:35
 
 
 """fsutil: 文件操作工具，文件工具分为如下部分：
@@ -23,6 +23,9 @@ from xutils.base import Storage
 from fnmatch import fnmatch
 
 ENCODING_TUPLE = ("utf-8", "gbk", "mbcs", "latin_1")
+
+# 配置文件最大大小
+CONFIG_FILE_MAX_SIZE = 1024 * 1024
 
 def get_real_path(path):
     import xconfig
@@ -678,6 +681,28 @@ def load_prop_config(fpath):
     text = readfile(fpath)
     from xutils.text_parser_properties import parse_prop_text
     return parse_prop_text(text, "dict")
+
+class IniConfigData:
+
+    def __init__(self):
+        self.sections = []
+        self.items = Storage()
+
+def load_ini_config(fpath):
+    """加载ini文件，转换为Storage对象"""
+    text = readfile(fpath, limit = CONFIG_FILE_MAX_SIZE)
+    parser = ConfigParser()
+    parser.read_string(text)
+
+    result = IniConfigData()
+    result.sections = parser.sections()
+
+    for section in parser.sections():
+        item = Storage()
+        for key, value in parser.items(section):
+            setattr(item, key, value)
+        setattr(result.items, section, item)
+    return result
 
 def get_webpath(fpath):
     import xconfig

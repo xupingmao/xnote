@@ -1,0 +1,27 @@
+{% set sub_info = "" %}
+
+{% if show_size and item.size != None %}
+    {% set sub_info = item.size %}
+{% end %}
+
+{% if show_cdate or date_type == "cdate" %}
+    {% set sub_info = format_date(item.ctime).replace('-', '/') %}
+{% end %}
+
+{% if show_mdate or date_type == "mdate" %}
+    {% set sub_info = format_date(item.mtime).replace('-', '/') %}
+{% end %}
+
+{% if show_adate or date_type == "adate" %}
+    {% set sub_info = format_date(item.atime).replace('-', '/') %}
+{% end %}
+
+{% if show_hot_index or date_type == "hot_index" %}
+    {% set sub_info = item.hot_index or 0 %}
+{% end %}
+
+{% if date_type == "ddate" %}
+    {% set sub_info = get_date_by_type(item, date_type) %}
+{% end %}
+
+<span class="book-size-span">{{sub_info}}</span>
