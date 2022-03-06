@@ -1,11 +1,11 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2022/03/06 16:13:52
+# @modified 2022/03/06 17:44:22
 import math
 import time
 import os
 import copy
-
+import logging
 
 import web
 import xutils
@@ -282,23 +282,45 @@ class GroupListHandler:
         if orderby == "name_desc":
             notes.sort(key = lambda x:x.name, reverse = True)
 
+        if orderby == "name_asc":
+            notes.sort(key = lambda x:x.name)
+
         if orderby == "hot_desc":
             for note in notes:
                 note.hot_index = note.hot_index or 0
                 note.badge_info = "热度(%s)" % note.hot_index
             notes.sort(key = lambda x:x.hot_index, reverse = True)
 
+        if orderby == "size_desc":
+            for note in notes:
+                note.badge_info = note.size
+
+            notes.sort(key = lambda x:x.size, reverse = True)
+
+        if orderby == "ctime_desc":
+            for note in notes:
+                note.ctime = note.ctime or ""
+                note.badge_info = dateutil.format_date(note.ctime)
+            notes.sort(key = lambda x:x.ctime, reverse = True)
+
         notes.sort(key = lambda x:x.priority, reverse = True)
 
     @xauth.login_required()
     def GET(self):
+        user_name = xauth.current_name()        
+        orderby_default = xconfig.get_user_config(user_name, "group_list_order_by", "name_asc")
+        logging.debug("orderby_default:%s", orderby_default)
+
         category  = xutils.get_argument("category")
         tab    = xutils.get_argument("tab", "active")
-        orderby   = xutils.get_argument("orderby", "name_desc")
+        orderby   = xutils.get_argument("orderby", orderby_default)
         user_name = xauth.current_name()
         show_back = xutils.get_argument("show_back", type = bool)
 
         xmanager.add_visit_log(user_name, "/note/group")
+
+        if orderby != orderby_default:
+            xconfig.update_user_config(user_name, "group_list_order_by", orderby)
 
         root  = NOTE_DAO.get_root()
         notes = self.load_group_list(user_name, tab)

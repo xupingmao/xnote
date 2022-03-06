@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/03/04 23:59:23
+# @modified 2022/03/06 18:06:41
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -83,9 +83,13 @@ def handle_args_and_init_config():
     parser.add_argument("--disabledPlugins", default="no")
     # 节点角色
     parser.add_argument("--role", default = "leader")
-    parser.add_argument("--block_cache_size", default = None)
+
     parser.add_argument("--webdav", default = "yes")
     parser.add_argument("--fast_reload", default = "no")
+
+    # leveldb配置
+    parser.add_argument("--block_cache_size", default = None)
+    parser.add_argument("--write_buffer_size", default = None)
 
     web.config.debug = False
     args = parser.parse_args(sys.argv[1:])
@@ -137,8 +141,12 @@ def handle_args_and_init_config():
     xconfig.set_global_config("system.port", port)
     xconfig.set_global_config("system.start_time", start_time)
     xconfig.set_global_config("system.node.role", args.role)
+
+    # leveldb config
     xconfig.set_global_config("system.block_cache_size", 
         get_int_by_sys_arg(args.block_cache_size))
+    xconfig.set_global_config("system.write_buffer_size",
+        get_int_by_sys_arg(args.write_buffer_size))
 
     xconfig.set_global_config("system.webdav", 
         get_bool_by_sys_arg(args.webdav))
@@ -174,7 +182,8 @@ def try_init_ldb():
     try:
         # 初始化leveldb数据库
         dbutil.init(xconfig.DB_DIR, 
-            block_cache_size = xconfig.get_global_config("system.block_cache_size"))
+            block_cache_size = xconfig.get_global_config("system.block_cache_size"),
+            write_buffer_size = xconfig.get_global_config("system.write_buffer_size"))
     except:
         xutils.print_exc()
         xconfig.errors.append("初始化ldb失败")

@@ -6,6 +6,8 @@
 {% init show_next = True %}
 {% init show_size = False %}
 {% init show_orderby = False %}
+{% init orderby = "ctime_asc" %}
+
 {% init date_type = "" %}
 {% init ACTION_TEXT_MAP = {
     "create": "创建了笔记",
@@ -35,13 +37,26 @@
 {% end %}
 
 {% if show_orderby and len(files) > 0 %}
+    <div class="card-title hide">
+        <span>笔记列表</span>
+        <div class="float-right">
+            <select>
+                <option>名称</option>
+                <option>热度</option>
+                <option>数量</option>
+            </select>
+        </div>
+    </div>
+
     <div class="pad5">
         <div class="x-tab-box" 
                 data-auto-href=true
-                data-tab-default="name_desc" 
+                data-tab-default="{{orderby}}" 
                 data-tab-key="orderby">
-            <a class="x-tab" data-tab-value="name_desc">字母顺序</a>
+            <a class="x-tab" data-tab-value="name_asc">默认排序</a>
             <a class="x-tab" data-tab-value="hot_desc">热度优先</a>
+            <a class="x-tab" data-tab-value="size_desc">数量优先</a>
+            <a class="x-tab" data-tab-value="ctime_desc">最近创建</a>
         </div>
     </div>
 {% end %}

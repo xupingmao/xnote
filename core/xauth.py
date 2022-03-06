@@ -261,6 +261,11 @@ def get_user_config_dict(name):
 def get_user_config_valid_keys():
     return USER_CONFIG_PROP.keys()
 
+def check_user_config_key(key):
+    if key not in USER_CONFIG_PROP:
+        raise Exception("invalid user config: %s" % key)
+
+
 def get_user_config(user_name, config_key):
     default_value = USER_CONFIG_PROP.get(config_key)
     config_dict = get_user_config_dict(user_name)
@@ -268,14 +273,19 @@ def get_user_config(user_name, config_key):
         return default_value
     return config_dict.get(config_key, default_value)
 
+@logutil.log_deco("update_user_config", log_args = True)
+def update_user_config(user_name, key, value):
+    check_user_config_key(key)
+    db = get_user_config_db(user_name)
+    return db.put(key, value)
+
 def update_user_config_dict(name, config_dict):
     user = get_user(name)
     if user is None:
         return
 
     for key in config_dict:
-        if key not in USER_CONFIG_PROP:
-            raise Exception("invalid user config: %s" % key)
+        check_user_config_key(key)
 
     db = get_user_config_db(name)
 

@@ -57,6 +57,7 @@ except ImportError:
     import leveldbpy
 
 DEFAULT_BLOCK_CACHE_SIZE = 8 * (2<<20) # 16M
+DEFAULT_WRITE_BUFFER_SIZE = 2 * (2<<20) # 4M
 
 WRITE_LOCK    = threading.Lock()
 READ_LOCK     = threading.Lock()
@@ -81,7 +82,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/03/05 09:54:24
+# @modified 2022/03/06 18:10:12
 ###########################################################
 
 
@@ -214,10 +215,10 @@ class WriteBatchProxy:
 
 class LevelDBProxy:
 
-    def __init__(self, path, snapshot = None, block_cache_size = None):
+    def __init__(self, path, snapshot = None, 
+            block_cache_size = None, 
+            write_buffer_size = None):
         """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
-        if block_cache_size == None:
-            block_cache_size = DEFAULT_BLOCK_CACHE_SIZE
 
         if snapshot != None:
             self._db = snapshot
@@ -272,26 +273,34 @@ def get_instance():
         raise Exception("leveldb instance is None!")
     return _leveldb
 
-def create_db_instance(db_dir, block_cache_size = None):
+def create_db_instance(db_dir, block_cache_size = None, write_buffer_size = None):
     if block_cache_size is None:
         block_cache_size = DEFAULT_BLOCK_CACHE_SIZE
+
+    if write_buffer_size is None:
+        write_buffer_size = DEFAULT_WRITE_BUFFER_SIZE
 
     logging.info("block_cache_size=%s", block_cache_size)
 
     if leveldb:
-        return leveldb.LevelDB(db_dir, block_cache_size = block_cache_size)
+        return leveldb.LevelDB(db_dir, block_cache_size = block_cache_size, 
+            write_buffer_size = write_buffer_size)
 
     if xutils.is_windows():
         import leveldbpy
-        return LevelDBProxy(db_dir, block_cache_size = block_cache_size)
+        return LevelDBProxy(db_dir, block_cache_size = block_cache_size, 
+            write_buffer_size = write_buffer_size)
 
     raise Exception("create_db_instance failed: not supported")
 
 @xutils.log_init_deco("leveldb")
-def init(db_dir, block_cache_size = None):
+def init(db_dir, block_cache_size = None, write_buffer_size = None):
     global _leveldb
 
-    _leveldb = create_db_instance(db_dir, block_cache_size = block_cache_size)
+    _leveldb = create_db_instance(db_dir, 
+        block_cache_size = block_cache_size, 
+        write_buffer_size = write_buffer_size)
+
     xutils.log("leveldb: %s" % _leveldb)
 
 def check_not_empty(value, message):

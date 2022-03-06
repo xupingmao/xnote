@@ -1,23 +1,32 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/12/30 22:46:46
+# @modified 2022/03/06 18:38:20
 import logging
 import time
 import inspect
 import os
 import threading
-import xutils
+import json
 from collections import deque
+
+# 非标准库
+import xutils
 from xutils import fsutil
-from xutils.dateutil import format_time
 from xutils.imports import u
 
+def format_time():
+    ct = time.time()
+    msecs = (ct - int(ct)) * 1000
+
+    st = time.localtime(ct)
+    tf_base = time.strftime('%Y-%m-%d %H:%M:%S', st)
+    return "%s,%03d" % (tf_base, msecs)
 
 class LogThread(threading.Thread):
     
     task_queue = deque()
-    MAX_TASK_QUEUE = 1000
+    MAX_TASK_QUEUE = 200
 
     def __init__(self, name="LogThread"):
         super(LogThread, self).__init__()
@@ -112,9 +121,9 @@ def log(fmt, show_logger = False, print_std = True, fpath = None, *argv):
         f_modname = f_back.f_globals.get("__name__")
         f_name    = f_code.co_name
         f_lineno  = f_back.f_lineno
-        message = "%s %s.%s:%s %s" % (format_time(), f_modname, f_name, f_lineno, message)
+        message = "%s|%s.%s:%s %s" % (format_time(), f_modname, f_name, f_lineno, message)
     else:
-        message = "%s %s" % (format_time(), message)
+        message = "%s|%s" % (format_time(), message)
 
     if print_std:
         print(message)
@@ -123,6 +132,10 @@ def log(fmt, show_logger = False, print_std = True, fpath = None, *argv):
         fpath = get_log_path()
 
     log_async(fpath, message)
+
+def log_simple(fmt, *args):
+    return log(fmt, False, True, None, *args)
+
 
 def _write_log_sync(level, metric, message, cost):
     import xauth
@@ -167,6 +180,7 @@ def log_async(fpath, full_message):
     do_log_sync(fpath, full_message)
 
 def do_log_sync(fpath, full_message):
+    # TODO 使用缓存优化日志
     with open(fpath, "ab") as fp:
         fp.write((full_message+"\n").encode("utf-8"))
 
@@ -185,16 +199,22 @@ def log_init_deco(message):
         return handle
     return deco
 
-def log_deco(message):
+def log_deco(message, log_args = False):
     """日志装饰器"""
     def deco(func):
         def handle(*args, **kw):
+            args_str = ""
+            if log_args:
+                args_str = json.dumps(dict(args = args, kw = kw))
+
             try:
+                start_time = time.time()
                 result = func(*args, **kw)
-                log(message + " [OK]")
+                cost_time = (time.time() - start_time) * 1000
+                log_simple("{}|{}|{}|{}ms", message, args_str, "success", cost_time)
                 return result
             except Exception as e:
-                log(message + " [FAIL]")
+                log_simple("{}|{}|{}|{}ms", message, args_str, "exception", cost_time)
                 raise e
         return handle
     return deco

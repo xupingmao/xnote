@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2022/02/26 11:30:00
+# @modified 2022/03/06 17:34:35
 # @filename xconfig.py
 
 '''xnote系统配置
@@ -410,6 +410,10 @@ def get_user_config(user_name, config_key, default_value = None):
     import xauth
     return xauth.get_user_config(user_name, config_key)
 
+def update_user_config(user_name, key, value):
+    import xauth
+    return xauth.update_user_config(user_name, key, value)
+
 def get_user_config_dict(user_name):
     import xauth
     value = xauth.get_user_config_dict(user_name)
@@ -417,10 +421,10 @@ def get_user_config_dict(user_name):
         return Storage()
     return value
 
-def get_current_user_config(key):
+def get_current_user_config(key, default_value = None):
     import xauth
     """默认值参考DEFAULT_USER_CONFIG"""
-    return get_user_config(xauth.current_name(), key)
+    return get_user_config(xauth.current_name(), key, default_value)
 
 
 def get_system_dir(name):
