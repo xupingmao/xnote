@@ -1,0 +1,26 @@
+<script type="text/javascript">
+	
+function remove(id, name, parentId) {
+    var confirmed = xnote.confirm("确定删除'" + name + "'?", function (confirmed) {
+        if (confirmed) {
+            $.post("/note/remove", {id:id}, function (resp) {
+                var code = resp.code;
+                if (code != "success") {
+                    alert(resp.message);
+                } else {
+                    if (parentId) {
+                        window.location.href = "/note/" + parentId;
+                    } else {
+                        window.location.href = "/";
+                    }
+                }
+            })
+        }
+    });
+}
+
+// 注册API模块
+xnote.registerApiModule("note")
+xnote.api.note.remove = remove
+    
+</script>

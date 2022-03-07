@@ -84,19 +84,19 @@
         {% end %}
 
         <!-- 图标和标题 -->
-        <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
+        <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
+
         <span>{{item.name}}</span>
-
-        {% if item.priority>0 %}
-            <span class="tag orange-tag">置顶</span>
-        {% end %}
-
 
         {% if hasattr(item, "is_public") and item.is_public %}
             <span class="info-tag">分享中</span>
         {% end %}
 
         <div class="float-right">
+            {% if item.priority>0 %}
+                <span class="tag orange-tag">置顶</span>
+            {% end %}
+
             {% if item.is_deleted %}
                 <span class="gray-tag-span" href="/note/removed">删除</span>
             {% end %}
@@ -108,7 +108,6 @@
                 {% comment 兼容老的展示逻辑 %}
                 {% include note/component/note_list_com_sub.html %}
             {% end %}
-
 
             {% if item.show_next or show_next %}
                 <i class="fa fa-chevron-right"></i>

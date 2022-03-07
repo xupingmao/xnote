@@ -61,42 +61,10 @@
         </div>
     {% end %}
 
-<script type="text/javascript">
-function rename(id, oldName) {
-    xnote.prompt("新名称", oldName, function (newName) {
-        console.log(newName);
-        if (newName != "" && newName != null) {
-            $.post("/note/rename", {id:id, name:newName}, function (resp) {
-                var code = resp.code;
-                if (code != "success") {
-                    alert(resp.message);
-                } else {
-                    // $("#file-"+id).text(newName);
-                    window.location.reload();
-                }
-            })
-        }
-    });
-}
+{% include note/component/script/delete_script.html %}
+{% include note/component/script/rename_script.html %}
 
-function remove(id, name, parentId) {
-    var confirmed = xnote.confirm("确定删除'" + name + "'?", function (confirmed) {
-        if (confirmed) {
-            $.post("/note/remove", {id:id}, function (resp) {
-                var code = resp.code;
-                if (code != "success") {
-                    alert(resp.message);
-                } else {
-                    if (parentId) {
-                        window.location.href = "/note/" + parentId;
-                    } else {
-                        window.location.href = "/";
-                    }
-                }
-            })
-        }
-    });
-}
+<script type="text/javascript">
 
 $(function () {
     window.adjustTable();

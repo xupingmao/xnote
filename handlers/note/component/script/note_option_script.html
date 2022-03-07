@@ -24,24 +24,6 @@
         });
     }
 
-    function remove(id, name, parentId) {
-        var confirmed = confirm("确定删除'" + name + "'?");
-        if (confirmed) {
-            $.post("/note/remove", {id:id}, function (resp) {
-                var code = resp.code;
-                if (code != "success") {
-                    alert(resp.message);
-                } else {
-                    if (parentId) {
-                        window.location.href = "/note/view?id="+parentId;
-                    } else {
-                        window.location.href = "/";
-                    }
-                }
-            })
-        }
-    }
-
     function renameNote(id, oldName) {
         xnote.prompt("新名称", oldName, function (newName) {
             console.log(newName);
@@ -262,3 +244,4 @@
     })
 </script>
 
+{% include note/component/script/delete_script.html %}

@@ -61,4 +61,13 @@
             <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">进入</a>
         </div>
     </div>
+
+    {% if file.size == 0 %}
+        <div class="list-item btn-line-height">
+            <span>删除</span>
+            <div class="float-right">
+                <a class="btn btn-danger" href="javascript:remove('{{file.id}}', '{{file.name}}')">删除</a>
+            </div>
+        </div>
+    {% end %}
 </div>

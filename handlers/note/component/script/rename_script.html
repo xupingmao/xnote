@@ -21,4 +21,10 @@
         var oldName = $(target).attr("data-name");
         renameNote(id, oldName);
     }
+
+    window.rename = renameNote
+
+    xnote.registerApiModule("note")
+    xnote.api.note.rename = renameNote
+
 </script>
