@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/02/07 13:49:36
+# @modified 2022/03/08 22:17:50
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -365,7 +365,7 @@ class LdbTable:
 
 
     def iter(self, offset = 0, limit = 20, reverse = False, key_from = None, 
-            filter_func = None):
+            filter_func = None, fill_cache = True):
         """返回一个遍历的迭代器
         @param {int} offset 返回结果下标开始
         @param {int} limit  返回结果最大数量
@@ -380,7 +380,8 @@ class LdbTable:
             key_from = self.build_key(key_from)
 
         for key, value in prefix_iter(self.prefix, filter_func, offset, limit, 
-                reverse = reverse, include_key = True, key_from = key_from):
+                reverse = reverse, include_key = True, key_from = key_from, 
+                fill_cache = fill_cache):
             yield self._format_value(key, value)
 
     def list(self, *args, **kw):

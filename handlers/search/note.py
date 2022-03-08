@@ -1,10 +1,12 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/06/11
-# @modified 2020/02/18 00:20:12
+# @modified 2022/03/08 23:05:51
 """搜索知识库文件"""
 import re
 import sys
 import six
+import logging
+
 import xutils
 import xauth
 import xmanager
@@ -54,5 +56,7 @@ def search(ctx, expression=None):
     groups     = list(filter(lambda x: x.type == "group", files))
     text_files = list(filter(lambda x: x.type != "group", files))
     files      = groups + text_files
+
+    logging.debug("len(files)=%s", len(files))
     return files
 

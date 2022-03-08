@@ -82,7 +82,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/03/06 18:10:12
+# @modified 2022/03/08 23:14:26
 ###########################################################
 
 
@@ -238,7 +238,8 @@ class LevelDBProxy:
         return self._db.delete(key, sync = sync)
 
     def RangeIter(self, key_from = None, key_to = None, 
-            reverse = False, include_value = True):
+            reverse = False, include_value = True, 
+            fill_cache = True):
         """返回区间迭代器
         @param {str}  key_from       开始的key（包含）
         @param {str}  key_to         结束的key（包含）
@@ -587,7 +588,8 @@ def prefix_iter(prefix,
         reverse = False, 
         include_key = False,
         key_from = None,
-        map_func = None,):
+        map_func = None,
+        fill_cache = True):
     """通过前缀迭代查询
     @param {string} prefix 遍历前缀
     @param {function} filter_func 过滤函数
@@ -624,11 +626,14 @@ def prefix_iter(prefix,
     #      (prefix, origin_prefix, reverse))
 
     if reverse:
-        iterator = _leveldb.RangeIter(None, prefix, 
-            include_value = True, reverse = True)
+        key_from = None
+        key_to = prefix
     else:
-        iterator = _leveldb.RangeIter(key_from, None, 
-            include_value = True, reverse = False)
+        key_to = None
+    
+    iterator = _leveldb.RangeIter(key_from, key_to, 
+        include_value = True, reverse = reverse,
+        fill_cache = fill_cache)
 
     position       = 0
     matched_offset = 0

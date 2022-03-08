@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2022/02/07 19:20:04
+# @modified 2022/03/08 23:16:49
 
 import re
 import os
@@ -22,6 +22,7 @@ import xtables
 from xutils import textutil, u
 from xutils import Queue, Storage
 from xutils import dateutil
+from xutils import mem_util
 from xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
@@ -71,6 +72,7 @@ def add_rule(pattern, func_str):
         func = getattr(mod, func_name)
         func.modfunc = func_str
         rule = BaseRule(r"^%s\Z" % u(pattern), func)
+        rule.func_str = func_str
         _RULES.append(rule)
     except Exception as e:
         xutils.print_exc()
@@ -173,6 +175,7 @@ def build_search_context(user_name, category, key):
 
     return ctx
 
+
 def apply_search_rules(ctx, key):
     files = []
     for rule in _RULES:
@@ -182,12 +185,15 @@ def apply_search_rules(ctx, key):
         m = re.match(pattern, key)
         if m:
             try:
+                logger = mem_util.MemLogger("rule:%r:%r" % (pattern, rule.func_str))
+
                 start_time0 = time.time()
                 results     = func(ctx, *m.groups())
                 cost_time0  = time.time() - start_time0
                 xutils.trace("SearchHandler", func.modfunc, int(cost_time0*1000))
                 if results is not None:
                     files += results
+                logger.done()
             except Exception as e:
                 xutils.print_exc()
     return files
@@ -201,6 +207,8 @@ class SearchHandler:
         user_name  = xauth.get_current_name()
         ctx        = build_search_context(user_name, category, key)
 
+        logger = mem_util.MemLogger("do_search")
+
         # 优先使用 search_type
         if search_type != None and search_type != "" and search_type != "default":
             ctx.offset = page_ctx.offset
@@ -213,10 +221,16 @@ class SearchHandler:
             files = ctx.join_as_files()
             return files, len(files)
 
+        logger.info("after fire search.before")
+
         # 普通的搜索行为
         xmanager.fire("search", ctx)
 
+        logger.info("after fire search")
+
         ctx.files = apply_search_rules(ctx, key)
+
+        logger.info("after apply_search_rules")
 
         if ctx.stop:
             files = ctx.join_as_files()
@@ -225,7 +239,12 @@ class SearchHandler:
         # 慢搜索,如果时间过长,这个服务会被降级
         # TODO: 异步操作需要其他线程辅助执行
         xmanager.fire("search.slow", ctx)
+
+        logger.info("after fire search.slow")
+
         xmanager.fire("search.after", ctx)
+
+        logger.info("after fire search.after")
 
         page_ctx.tools = []
         
@@ -235,6 +254,7 @@ class SearchHandler:
 
         return search_result[offset:offset+limit], len(search_result)
 
+    @mem_util.log_mem_info_deco("do_search_with_profile", log_args = True)
     def do_search_with_profile(self, page_ctx, key, offset, limit):
         user_name = xauth.current_name()
         category  = xutils.get_argument("category", "")

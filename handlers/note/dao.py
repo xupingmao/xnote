@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2022/02/12 22:39:05
+# @modified 2022/03/08 22:18:33
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -1101,7 +1101,8 @@ def search_name(words, creator = None, parent_id = None, orderby = "hot_index"):
 
     db = get_note_tiny_table(creator)
 
-    result = db.list(filter_func = search_func, offset = 0, limit = MAX_SEARCH_SIZE)
+    result = db.list(filter_func = search_func, 
+        offset = 0, limit = MAX_SEARCH_SIZE, fill_cache = False)
 
     # 补全信息
     build_note_list_info(result)
@@ -1117,8 +1118,11 @@ def search_content(words, creator=None, orderby = "hot_index"):
     def search_func(key, value):
         if value.content is None:
             return False
-        return (value.creator == creator or value.is_public) and textutil.contains_all(value.content.lower(), words)
-    result = dbutil.prefix_list("note_full", search_func, 0, MAX_SEARCH_SIZE)
+        return (value.creator == creator or value.is_public) \
+            and textutil.contains_all(value.content.lower(), words)
+    
+    result = dbutil.prefix_list("note_full", search_func, 0, MAX_SEARCH_SIZE, 
+        fill_cache = False)
     
     # 补全信息
     build_note_list_info(result)

@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-
 # @author mark
 # @since 2022/02/20 22:36:31
-# @modified 2022/03/04 23:10:37
+# @modified 2022/03/08 23:22:45
 # @filename mem_util.py
 
 import os
 import re
 import logging
+import time
 
 try:
     import psutil
@@ -61,3 +62,33 @@ def log_mem_info_deco(name, log_args = False):
                 logging.debug("(%s)%s|mem_used:%s -> %s", name, args0, before, after)
         return handle
     return deco
+
+
+class MemLogger:
+
+    def __init__(self, name, args = ""):
+        self.name = name
+        self.start_time = time.time()
+        self.prev_time = self.start_time
+        self.args = args
+        self.start_mem = get_mem_info().mem_used
+        self.prev_mem = self.start_mem
+
+    def done(self):
+        current = get_mem_info().mem_used
+        cost_time = int((time.time() - self.start_time) * 1000)
+        logging.debug("(%s)%s|mem_used:%s -> %s (%sms)", self.name, self.args, 
+            self.start_mem, current, cost_time)
+
+    def info(self, message):
+        current = get_mem_info().mem_used
+        cost_time = int((time.time() - self.prev_time) * 1000)
+
+        logging.debug("(%s)%s|%s|mem_used:%s -> %s (%sms)", 
+            self.name, self.args, message,
+            self.prev_mem, current, cost_time) 
+
+        self.prev_mem = current
+        self.prev_time = time.time()
+
+

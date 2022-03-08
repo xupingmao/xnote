@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/03/01 23:24:46
+# @modified 2022/03/08 23:29:08
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -145,7 +145,7 @@ class DBBackup:
         db_backup_dir = self.db_backup_dir
         if os.path.exists(db_backup_dir):
             logging.info("删除db备份目录:%s", db_backup_dir)
-            xutils.rmdir(db_backup_dir)
+            xutils.rmdir(db_backup_dir, hard = True)
 
     def dump_db(self):
         db2 = dbutil.create_db_instance(self.db_backup_dir)
