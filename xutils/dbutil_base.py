@@ -82,7 +82,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/03/08 23:14:26
+# @modified 2022/03/09 23:03:46
 ###########################################################
 
 
@@ -239,7 +239,7 @@ class LevelDBProxy:
 
     def RangeIter(self, key_from = None, key_to = None, 
             reverse = False, include_value = True, 
-            fill_cache = True):
+            fill_cache = False):
         """返回区间迭代器
         @param {str}  key_from       开始的key（包含）
         @param {str}  key_to         结束的key（包含）
@@ -566,7 +566,8 @@ def prefix_scan(prefix, func, reverse = False, parse_json = True):
         key_to   = None
     
     iterator = _leveldb.RangeIter(key_from, key_to, 
-        include_value = True, reverse = reverse)
+        include_value = True, reverse = reverse, 
+        fill_cache = False)
 
     offset = 0
     for key, value in iterator:
@@ -589,7 +590,7 @@ def prefix_iter(prefix,
         include_key = False,
         key_from = None,
         map_func = None,
-        fill_cache = True):
+        fill_cache = False):
     """通过前缀迭代查询
     @param {string} prefix 遍历前缀
     @param {function} filter_func 过滤函数
@@ -717,7 +718,8 @@ def count_table(table_name):
     key_from = table_name.encode("utf-8")
     key_to   = table_name.encode("utf-8") + b'\xff'
     iterator = check_get_leveldb().RangeIter(key_from, key_to, 
-        include_value = False)
+        include_value = False, 
+        fill_cache = False)
 
     count = 0
     for key in iterator:
