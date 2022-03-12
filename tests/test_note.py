@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2021/12/05 10:59:08
+# @modified 2022/03/12 10:49:49
 # @filename test_note.py
 
 import xutils
@@ -366,7 +366,7 @@ class TestMain(BaseTestCase):
 
         self.check_OK("/note/ajax/group_option_dialog?note_id=%s" % note_id)
         self.check_OK("/note/ajax/share_group_dialog?note_id=%s"  % note_id)
-        self.check_OK("/note/ajax/symbol_dialog")
+        self.check_OK("/note/ajax/edit_symbol_dialog")
 
 
 

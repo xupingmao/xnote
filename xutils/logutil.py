@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2022/03/06 18:38:20
+# @modified 2022/03/12 10:59:32
 import logging
 import time
 import inspect
@@ -14,6 +14,9 @@ from collections import deque
 import xutils
 from xutils import fsutil
 from xutils.imports import u
+
+
+_write_log_lock = threading.RLock()
 
 def format_time():
     ct = time.time()
@@ -180,9 +183,11 @@ def log_async(fpath, full_message):
     do_log_sync(fpath, full_message)
 
 def do_log_sync(fpath, full_message):
-    # TODO 使用缓存优化日志
-    with open(fpath, "ab") as fp:
-        fp.write((full_message+"\n").encode("utf-8"))
+    # 写日志文件要加锁防止冲突
+    with _write_log_lock:
+        # TODO 使用缓存优化日志
+        with open(fpath, "ab") as fp:
+            fp.write((full_message+"\n").encode("utf-8"))
 
 def log_init_deco(message):
     """日志装饰器"""

@@ -2,7 +2,7 @@
  * xnote全局初始化
  * @author xupingmao
  * @since 2022/01/09 16:17:02
- * @modified 2022/02/07 20:39:14
+ * @modified 2022/03/11 20:05:56
  * @filename x-init.js
  */
 
@@ -22,10 +22,17 @@ if (window.xnote === undefined) {
 }
 
 
-window.xnote.registerApiModule = function (name) {
+xnote.registerApiModule = function (name) {
     if (xnote.api[name] === undefined) {
         xnote.api[name] = {};
     }
 };
 
 
+xnote.isEmpty = function (value) {
+    return value === undefined || value === null || value === "";
+};
+
+xnote.isNotEmpty = function (value) {
+    return !xnote.isEmpty(value);
+};

@@ -29,7 +29,6 @@
     </a>
 {% end %}
 
-
 <div class="card">
 
 {% if len(files) == 0 %}
@@ -50,7 +49,6 @@
 
     <div class="pad5">
         <div class="x-tab-box" 
-                data-auto-href=true
                 data-tab-default="{{orderby}}" 
                 data-tab-key="orderby">
             <a class="x-tab" data-tab-value="name_asc">默认排序</a>
@@ -59,6 +57,7 @@
             <a class="x-tab" data-tab-value="ctime_desc">最近创建</a>
         </div>
     </div>
+
 {% end %}
 
 {% for item in files %}
@@ -98,7 +97,7 @@
             {% end %}
 
             {% if item.is_deleted %}
-                <span class="gray-tag-span" href="/note/removed">删除</span>
+                <span class="tag gray" href="/note/removed">删除</span>
             {% end %}
 
             {% comment 新的统一使用badge_info %}

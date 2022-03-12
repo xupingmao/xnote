@@ -645,7 +645,7 @@ $.fn.extend({
  * xnote全局初始化
  * @author xupingmao
  * @since 2022/01/09 16:17:02
- * @modified 2022/02/07 20:39:14
+ * @modified 2022/03/11 20:05:56
  * @filename x-init.js
  */
 
@@ -665,13 +665,20 @@ if (window.xnote === undefined) {
 }
 
 
-window.xnote.registerApiModule = function (name) {
+xnote.registerApiModule = function (name) {
     if (xnote.api[name] === undefined) {
         xnote.api[name] = {};
     }
 };
 
 
+xnote.isEmpty = function (value) {
+    return value === undefined || value === null || value === "";
+};
+
+xnote.isNotEmpty = function (value) {
+    return !xnote.isEmpty(value);
+};
 /**
  * xnote扩展事件
  * @author xupingmao
@@ -2023,27 +2030,46 @@ $(function (e) {
         }
     }
 
+    var tabStyleHook = {};
+    tabStyleHook.btn = function (ele) {
+         $(ele).find(".x-tab").addClass("x-tab-btn");
+    }
+
     function initTabBox() {
         $(".x-tab-box").each(function (index, ele) {
             var key = $(ele).attr("data-tab-key");
             var defaultValue = $(ele).attr("data-tab-default");
+            var tabStyle = $(ele).attr("data-tab-style");
+
             var value = getUrlParam(key);
-            if (value == "" || value == undefined) {
+            if ( xnote.isEmpty(value) ) {
                 value = defaultValue;
             }
+
             console.log("tab-value=",value);
-            $(ele).find(".x-tab[data-tab-value=" + value + "]").addClass("x-tab-link-active");
+
+            // 样式的扩展点
+            styleHook = tabStyleHook[tabStyle]
+            console.log("styleHook", styleHook);
+
+            if ( xnote.isNotEmpty(styleHook) ) {
+                styleHook(ele);
+            }
+            
+            $(ele).find(".x-tab[data-tab-value=" + value + "]")
+                .addClass("x-tab-link-active")
+                .addClass("active");
+                
             $(ele).find(".x-tab-btn[data-tab-value=" + value + "]").addClass("x-tab-btn-active");
 
-            var autoHref = $(ele).attr("data-auto-href");
-            console.debug("----- autoHref:", autoHref);
-            if (autoHref === "true") {
-                $(ele).find(".x-tab").each(function (index, child) {
-                    console.debug("----- autoHref:", child)
-                    var tabValue = $(child).attr("data-tab-value")
-                    $(child).attr("href", addUrlParam(window.location.href, key, tabValue))
-                })
-            }
+            $(ele).find(".x-tab").each(function (index, child) {
+                var oldHref = $(child).attr("href");
+                if ( xnote.isNotEmpty(oldHref) ) {
+                    return;
+                }
+                var tabValue = $(child).attr("data-tab-value")
+                $(child).attr("href", addUrlParam(window.location.href, key, tabValue))
+            })
         });
     }
 

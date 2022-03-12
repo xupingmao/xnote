@@ -130,7 +130,7 @@ $(function () {
     });
 
     $("#actionBtn").click(function () {
-        $.get("/note/ajax/symbol_dialog", function (resp) {
+        $.get("/note/ajax/edit_symbol_dialog", function (resp) {
             DIALOG_INDEX = xnote.showDialog("请选择符号", resp);
         });
     });

@@ -1,0 +1,65 @@
+/**
+ * description here
+ * @author mark
+ * @since 2022/03/11 21:46:22
+ * @modified 2022/03/12 10:30:04
+ * @filename common-tab.css
+ */
+
+
+/* TAB页的链接样式 */
+.tab-link, .x-tab {
+    float: left;
+    padding: 2px;
+    cursor: pointer;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    line-height: 20px;
+    color: #ccc;
+}
+
+.tab-link:hover, .x-tab:hover {
+    color: #000;
+}
+
+.x-tab.active {
+    color: #000;
+}
+
+.x-tab-btn {
+    color: black;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.x-tab-btn:hover {
+    /*background-color: #4f88e1;*/
+    /*border-color: #4f88e1;*/
+    /* #05c 深蓝色 */
+    /* #06f 亮蓝色 */
+    background-color: #06f;
+    color: #fff;
+    text-decoration: none;
+}
+
+.x-tab-btn.active {
+    background-color: #06f;
+    border-color: #06f;
+    color: #fff;
+}
+
+/** Dark 模式 **/
+.x-tab-box.dark>.x-tab-btn.active {
+	background-color: gray;
+	color: #fff;
+}
+
+.x-tab-box.dark>.x-tab-btn:hover {
+    background-color: gray;
+    border-color: #ccc;
+}
+
+.x-tab-box.dark>.x-tab-btn {
+    border-color: #ccc;
+}

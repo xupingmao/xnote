@@ -25,27 +25,46 @@ $(function (e) {
         }
     }
 
+    var tabStyleHook = {};
+    tabStyleHook.btn = function (ele) {
+         $(ele).find(".x-tab").addClass("x-tab-btn");
+    }
+
     function initTabBox() {
         $(".x-tab-box").each(function (index, ele) {
             var key = $(ele).attr("data-tab-key");
             var defaultValue = $(ele).attr("data-tab-default");
+            var tabStyle = $(ele).attr("data-tab-style");
+
             var value = getUrlParam(key);
-            if (value == "" || value == undefined) {
+            if ( xnote.isEmpty(value) ) {
                 value = defaultValue;
             }
+
             console.log("tab-value=",value);
-            $(ele).find(".x-tab[data-tab-value=" + value + "]").addClass("x-tab-link-active");
+
+            // 样式的扩展点
+            styleHook = tabStyleHook[tabStyle]
+            console.log("styleHook", styleHook);
+
+            if ( xnote.isNotEmpty(styleHook) ) {
+                styleHook(ele);
+            }
+            
+            $(ele).find(".x-tab[data-tab-value=" + value + "]")
+                .addClass("x-tab-link-active")
+                .addClass("active");
+                
             $(ele).find(".x-tab-btn[data-tab-value=" + value + "]").addClass("x-tab-btn-active");
 
-            var autoHref = $(ele).attr("data-auto-href");
-            console.debug("----- autoHref:", autoHref);
-            if (autoHref === "true") {
-                $(ele).find(".x-tab").each(function (index, child) {
-                    console.debug("----- autoHref:", child)
-                    var tabValue = $(child).attr("data-tab-value")
-                    $(child).attr("href", addUrlParam(window.location.href, key, tabValue))
-                })
-            }
+            $(ele).find(".x-tab").each(function (index, child) {
+                var oldHref = $(child).attr("href");
+                if ( xnote.isNotEmpty(oldHref) ) {
+                    return;
+                }
+                var tabValue = $(child).attr("data-tab-value")
+                $(child).attr("href", addUrlParam(window.location.href, key, tabValue))
+            })
         });
     }
 

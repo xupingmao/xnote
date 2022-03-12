@@ -1,0 +1,56 @@
+{% extends base %}
+
+{% block body %}
+
+	{% include test/component/example_nav.html %}
+
+
+{% init tab_html1 = """
+<div class="x-tab-box" 
+		data-tab-style="btn" 
+		data-tab-key="tab_test1" 
+		data-tab-default="tab1">
+	<a class="x-tab" data-tab-value="tab1">TAB1</a>
+	<a class="x-tab" data-tab-value="tab2">TAB2</a>
+    <a class="x-tab" data-tab-value="tab3">TAB3</a>
+</div>""" %}
+
+{% init tab_html2 = """
+<div class="x-tab-box" 
+		data-tab-key="tab_test2" 
+		data-tab-default="tab1">
+	<a class="x-tab" data-tab-value="tab1">TAB1</a>
+	<a class="x-tab" data-tab-value="tab2">TAB2</a>
+	<a class="x-tab" data-tab-value="tab3">TAB3</a>
+</div>""" %}
+
+{% init html3 = """
+<div class="x-tab-box dark" 
+		data-tab-style="btn"
+		data-tab-key="tab_test3" 
+		data-tab-default="tab1">
+	<a class="x-tab" data-tab-value="tab1">TAB1</a>
+	<a class="x-tab" data-tab-value="tab2">TAB2</a>
+	<a class="x-tab" data-tab-value="tab3">TAB3</a>
+</div>""" %}
+
+<div class="card">
+	<p>按钮tab</p>
+	<pre class="marked-code">{{tab_html1}}</pre>
+	{% raw tab_html1 %}
+</div>
+
+
+<div class="card">
+	<p>链接tab</p>
+	<pre class="marked-code">{{tab_html2}}</pre>
+	{% raw tab_html2 %}
+</div>
+
+<div class="card">
+	<p>按钮tab（深色模式）</p>
+	<pre class="marked-code">{{html3}}</pre>
+	{% raw html3 %}
+</div>
+
+{% end %}

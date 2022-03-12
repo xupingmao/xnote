@@ -2,7 +2,7 @@
  * 标签的样式
  * @author xupingmao
  * @since 2021/05/22 12:56:05
- * @modified 2022/03/06 16:19:37
+ * @modified 2022/03/12 10:52:50
  * @filename common-tag.css
  */
 
@@ -17,12 +17,12 @@
 }
 
 
-.tag-link {
+a.tag {
     text-decoration: none;
     color: white;
 }
 
-.tag-link:hover {
+a.tag:hover {
     background-color: initial;
     text-decoration: underline;
 }
@@ -31,27 +31,27 @@
     display: inline-block;
 }
 
-.pink-tag {
+.tag.pink {
     background-color: pink;
 }
 
-.red-tag {
+.tag.red, .red-tag {
     background-color: red;
     color: white;
 }
 
-.orange-tag {
+.tag.orange, .orange-tag {
     background-color: orange;
     color: white;
 }
 
-.gray-tag {
+.gray-tag, .tag.gray, .tag.grey {
     color: white;
     background-color: #ccc;
 }
 
 
-.lightgray-tag {
+.tag.lightgray {
     background-color: #eee;
     color: black;
 }
@@ -100,7 +100,7 @@
     word-break: keep-all;
 }
 
-.info-tag, .tag-info {
+.info-tag, .tag-info, .tag.info {
     padding: 3px;
     border-radius: 3px;
     font-size: 12px;

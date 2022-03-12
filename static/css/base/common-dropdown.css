@@ -1,0 +1,65 @@
+/**
+ * 下拉选项列表控件
+ * @author mark
+ * @since 2022/03/12 10:32:46
+ * @modified 2022/03/12 10:33:16
+ * @filename common-dropdown.css
+ */
+
+
+.x-dropdown, .dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+
+.dropdown-btn {
+    margin-right: 0px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 35px;
+    left: -67px;
+    background-color: #f9f9f9;
+    min-width: 120px;
+    border: 1px solid #ccc;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    cursor: pointer;
+}
+
+.x-dropdown.align-right > .dropdown-content {
+    left: 0px;
+    text-align: left;
+}
+
+
+.dropdown-option {
+    padding: 8px;
+    margin: 0px;
+    color: black;
+    font-weight: bold;
+    display: block;
+}
+
+.dropdown-option:hover {
+    background-color: #09f;
+    color: white;
+}
+
+.dropdown-option-red {
+    padding: 8px;
+    margin: 0px;
+    color: red;
+    font-weight: bold;
+    display: block;
+}
+
+.dropdown-option-red:hover {
+    background-color: #09f;
+    color: red;
+}

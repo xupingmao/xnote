@@ -1,0 +1,40 @@
+{% extends base %}
+
+{% block body %}
+
+	{% include test/component/example_nav.html %}
+
+{% init html1 = """
+<div class="x-dropdown">
+    <span class="dropdown-btn btn">更多▾</span>
+    <div class="dropdown-content">
+        <a class="dropdown-option">选项1</a>
+        <a class="dropdown-option">选项2</a>
+    </div>
+</div>
+""" %}
+
+{% init html2 = """
+<div class="x-dropdown align-right">
+    <span class="dropdown-btn btn">更多▾</span>
+    <div class="dropdown-content">
+        <a class="dropdown-option">选项1</a>
+        <a class="dropdown-option">选项2</a>
+    </div>
+</div>
+""" %}
+
+<div class="card">
+	<p>dropdown</p>
+	<pre class="marked-code">{{html1}}</pre>
+	{% raw html1 %}
+</div>
+
+<div class="card">
+	<p>dropdown右对其</p>
+	<pre class="marked-code">{{html2}}</pre>
+	{% raw html2 %}
+</div>
+
+
+{% end %}
