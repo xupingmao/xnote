@@ -2,7 +2,7 @@
 <!--
 @author xupingmao
 @since 2017/11/29
-@modified 2022/01/01 23:18:11
+@modified 2022/03/12 11:04:23
 -->
 
 {% block body %}
@@ -104,11 +104,11 @@
             {% if file.category == "note" %}
                 <div class="item-ext-info">
                     {% if file.creator != None %}
-                        <span class="tag lightgray-tag">{{file.creator}}</span>
+                        <span class="tag lightgray">{{file.creator}}</span>
                     {% end %}
 
                     {% if file.parent_name != None %}
-                        <span class="tag lightgray-tag">
+                        <span class="tag lightgray">
                             <a class="link" href="/note/view?id={{file.parent_id}}">{{file.parent_name}}</a>
                         </span>
                     {% end %}

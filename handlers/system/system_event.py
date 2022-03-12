@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/05/18 09:44:13
-# @modified 2021/08/14 10:21:56
+# @modified 2022/03/12 11:07:34
 
 import xutils
 import xmanager
@@ -17,37 +17,27 @@ HTML = r"""
     }
 </style>
 
-<div class="content-left">
-    <div class="card btn-line-height">
-        <span>系统一共注册{{event_handler_count}}个事件处理器</span>
-    </div>
-    
-    {% for index, event_type in enumerate(event_type_list) %}
-        {% set temp_handler_list = handlers.get(event_type) %}
-        <div class="card">
-            <div class="card-title">
-                <a id="{{event_type}}">{{event_type}}</a>
-                <span>({{len(temp_handler_list)}})</span>
-                <div class="float-right">
-                    <button class="toggle-btn btn-default" data-index="{{index}}" data-toggle="折叠">展开</button>
-                </div>
-            </div>
-            <div class="card-body event-body-{{index}}">
-            {% for temp_handler in temp_handler_list %}
-                <div class="list-item">{{temp_handler}}</div>
-            {% end %}
-            </div>
-        </div>
-    {% end %}
+<div class="card btn-line-height">
+    <span>系统一共注册{{event_handler_count}}个事件处理器</span>
 </div>
 
-<div class="content-right">
+{% for index, event_type in enumerate(event_type_list) %}
+    {% set temp_handler_list = handlers.get(event_type) %}
     <div class="card">
-        {% for event_type in event_type_list %}
-            <a class="list-item" href="#{{event_type}}">{{event_type}}</a>
+        <div class="card-title">
+            <a id="{{event_type}}">{{event_type}}</a>
+            <span>({{len(temp_handler_list)}})</span>
+            <div class="float-right">
+                <button class="toggle-btn btn-default" data-index="{{index}}" data-toggle="折叠">展开</button>
+            </div>
+        </div>
+        <div class="card-body event-body-{{index}}">
+        {% for temp_handler in temp_handler_list %}
+            <div class="list-item">{{temp_handler}}</div>
         {% end %}
+        </div>
     </div>
-</div>
+{% end %}
 
 <script>
 $(function () {
