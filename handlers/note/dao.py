@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2022/03/08 22:18:33
+# @modified 2022/03/12 19:01:01
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -51,9 +51,6 @@ register_note_table("notebook", "笔记分组", check_user = True)
 register_note_table("token", "用于分享的令牌")
 register_note_table("note_history", "笔记的历史版本")
 register_note_table("note_tags", "笔记标签 <note_tags:user:note_id>")
-# 分享关系
-register_note_table("note_share_from", "分享发送者关系表 <note_share_from:from_user:note_id>")
-register_note_table("note_share_to", "分享接受关系表 <note_share_to:to_user:note_id>")
 
 dbutil.register_table("search_history", "搜索历史")
 
@@ -1399,57 +1396,6 @@ def get_virtual_group(user_name, name):
     else:
         raise Exception("[get_virtual_group] invalid name: %s" % name)
 
-def record_share_from_info(note, from_user, to_user):
-    share_from_key = "note_share_from:%s:%s" % (from_user, note.id)
-    from_info = dbutil.get(share_from_key)
-
-    if from_info == None:
-        from_info = Storage(note_id = note.id, share_to_list = [])
-
-    if to_user not in from_info.share_to_list:
-        from_info.share_to_list.append(to_user)
-        dbutil.put(share_from_key, from_info)
-
-def share_note_to(note, from_user, to_user):
-    # TODO 记录到笔记表中
-    if not xauth.is_user_exist(to_user):
-        raise Exception("[share_note_to] user not exist: %s" % to_user)
-
-    record_share_from_info(note, from_user, to_user)
-    share_to_key = "note_share_to:%s:%s" % (to_user, note.id)
-
-    old = dbutil.get(share_to_key)
-    if old is not None:
-        # 已经分享了
-        return
-
-    note_index = convert_to_index(note)
-    note_index.share_time = dateutil.format_datetime()
-    dbutil.put(share_to_key, note_index)
-
-def get_share_from(from_user, note_id):
-    share_from_key = "note_share_from:%s:%s" % (from_user, note_id)
-    return dbutil.get(share_from_key)
-
-def list_share_to(to_user, offset = 0, limit = None, orderby = None):
-    if limit is None:
-        limit = xconfig.PAGE_SIZE
-
-    notes = dbutil.prefix_list("note_share_to:%s" % to_user, offset = offset, limit = limit)
-    sort_notes(notes, orderby = orderby)
-    return notes
-
-def get_share_to(to_user, note_id):
-    check_not_empty(to_user, "get_share_to.to_user")
-    check_not_empty(note_id, "get_share_to.note_id")
-
-    share_to_key = "note_share_to:%s:%s" % (to_user, note_id)
-    return dbutil.get(share_to_key)
-
-def count_share_to(to_user):
-    check_not_empty(to_user, "count_share_to")
-    return dbutil.count_table("note_share_to:%s" % to_user)
-
 def check_not_empty(value, method_name):
     if value == None or value == "":
         raise Exception("[%s] can not be empty" % method_name)
@@ -1464,7 +1410,6 @@ xutils.register_func("note.delete", delete_note)
 xutils.register_func("note.touch",  touch_note)
 xutils.register_func("note.update_tags", update_tags)
 xutils.register_func("note.create_token", create_token)
-xutils.register_func("note.share_to", share_note_to)
 xutils.register_func("note.delete_physically", delete_note_physically)
 
 ## 内部更新索引的接口，外部不要使用
@@ -1484,8 +1429,6 @@ xutils.register_func("note.get_virtual_group", get_virtual_group)
 xutils.register_func("note.search_name", search_name)
 xutils.register_func("note.search_content", search_content)
 xutils.register_func("note.search_public", search_public)
-xutils.register_func("note.get_share_from", get_share_from)
-xutils.register_func("note.get_share_to", get_share_to)
 xutils.register_func("note.batch_query_list", batch_query_list)
 
 # list functions
@@ -1503,7 +1446,6 @@ xutils.register_func("note.list_archived", list_archived)
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_public", list_public)
 xutils.register_func("note.list_by_func", list_by_func)
-xutils.register_func("note.list_share_to", list_share_to)
 
 # count functions
 xutils.register_func("note.count_public", count_public)
@@ -1514,7 +1456,6 @@ xutils.register_func("note.count_removed", count_removed)
 xutils.register_func("note.count_by_type", count_by_type)
 xutils.register_func("note.count_by_parent",  count_by_parent)
 xutils.register_func("note.count_group", count_group)
-xutils.register_func("note.count_share_to", count_share_to)
 
 # others
 xutils.register_func("note.find_prev_note", find_prev_note)

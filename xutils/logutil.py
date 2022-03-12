@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2022/03/12 10:59:32
+# @modified 2022/03/12 23:04:15
 import logging
 import time
 import inspect
@@ -204,22 +204,26 @@ def log_init_deco(message):
         return handle
     return deco
 
-def log_deco(message, log_args = False):
+def log_deco(message, log_args = False, args_convert_func = None):
     """日志装饰器"""
     def deco(func):
         def handle(*args, **kw):
             args_str = ""
             if log_args:
-                args_str = json.dumps(dict(args = args, kw = kw))
+                if args_convert_func != None:
+                    args_str = args_convert_func(*args, **kw)
+                else:
+                    args_str = json.dumps(dict(args = args, kw = kw))
 
+            start_time = time.time()
             try:
-                start_time = time.time()
                 result = func(*args, **kw)
                 cost_time = (time.time() - start_time) * 1000
-                log_simple("{}|{}|{}|{}ms", message, args_str, "success", cost_time)
+                log_simple("{}|{}|{}|{:.2f}ms", message, args_str, "success", cost_time)
                 return result
             except Exception as e:
-                log_simple("{}|{}|{}|{}ms", message, args_str, "exception", cost_time)
+                cost_time = (time.time() - start_time) * 1000
+                log_simple("{}|{}|{}|{:.2f}ms", message, args_str, "exception", cost_time)
                 raise e
         return handle
     return deco

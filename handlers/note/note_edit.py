@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2022/02/07 23:14:13
+# @modified 2022/03/12 23:11:24
 
 """笔记编辑相关处理"""
 import os
@@ -327,9 +327,16 @@ class UnshareHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
+        to_user = xutils.get_argument("share_to", "")
         note = check_get_note(id)
-        NOTE_DAO.update(id, is_public = 0)
-        return dict(code = "success")
+        if to_user != "":
+            NOTE_DAO.delete_share(id, to_user = to_user)
+        else:
+            NOTE_DAO.update(id, is_public = 0)
+        return dict(code = "success", message = "取消分享成功")
+
+    def POST(self):
+        return self.GET()
 
 def check_get_note(id):
     if id == "" or id == 0:

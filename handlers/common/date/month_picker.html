@@ -9,18 +9,16 @@
 
     .prev-month-link {
         float: left;
-        padding-left: 5px;
     }
 
     .next-month-link {
         float: right;
-        padding-right: 5px;
     }
 </style>
 
 <div class="card btn-line-height">
     <div class="date-box">
-        <a class="prev-month-link">上个月</a>
+        <a class="prev-month-link btn btn-default">上个月</a>
         <select name="year" value="{{year}}">
             {% for j in range(year-5,year+6) %}
                 <option value="{{j}}">{{j}}年</option>
@@ -37,7 +35,7 @@
                 {% end %}
             {% end %}
         </select>
-        <a class="next-month-link">下个月</a>
+        <a class="next-month-link btn btn-default">下个月</a>
     </div>
 </div>
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/03/08 22:17:50
+# @modified 2022/03/12 21:10:59
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -415,17 +415,7 @@ class LdbTable:
             offset, limit, reverse = reverse, include_key = True)
         return self._get_result_from_tuple_list(tuple_list)
 
-    def list_by_index(self, index_name, filter_func = None, 
-            offset = 0, limit = 20, reverse = False):
-        """通过索引查询结果列表
-        @param {str}  index_name 索引名称
-        @param {func} filter_func 过滤函数
-        @param {int}  offset 开始索引
-        @param {int}  limit  返回记录限制
-        @param {bool} reverse 是否逆向查询
-        """
-        prefix = self._get_index_prefix(index_name)
-
+    def create_index_map_func(self, filter_func):
         def map_func(key, value):
             # 先判断实例是否存在
             obj = self.get_by_key(value)
@@ -453,7 +443,36 @@ class LdbTable:
                 if is_match:
                     return obj
                 return None
+        return map_func
 
+
+    def count_by_index(self, index_name, filter_func = None, index_value = None):
+        if index_value != None:
+            index_value = self._format_index_value(index_value)
+            prefix = self._get_index_prefix(index_name) + ":" + index_value
+        else:
+            prefix = self._get_index_prefix(index_name)
+
+        map_func = self.create_index_map_func(filter_func)
+        return prefix_count(prefix, map_func = map_func)
+
+    def list_by_index(self, index_name, filter_func = None, 
+            offset = 0, limit = 20, reverse = False, 
+            index_value = None):
+        """通过索引查询结果列表
+        @param {str}  index_name 索引名称
+        @param {func} filter_func 过滤函数
+        @param {int}  offset 开始索引
+        @param {int}  limit  返回记录限制
+        @param {bool} reverse 是否逆向查询
+        """
+        if index_value != None:
+            index_value = self._format_index_value(index_value)
+            prefix = self._get_index_prefix(index_name) + ":" + index_value
+        else:
+            prefix = self._get_index_prefix(index_name)
+
+        map_func = self.create_index_map_func(filter_func)
         return list(prefix_iter(prefix, offset = offset, limit = limit, 
             map_func = map_func,
             reverse = reverse, include_key = False))

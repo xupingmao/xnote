@@ -1,9 +1,17 @@
+<style type="text/css">
+    .user-item {
+        padding: 5px;
+        border: 1px solid #ccc;
+        float: left;
+        margin-right: 5px;
+    }
+</style>
 
 <div class="card">
     <p>分享给用户</p>
 
     <input id="shareTo">
-    <input type="button" value="确认分享" onclick="on_share_group_click()" />
+    <input type="button" value="确认分享" onclick="onShareGroupClick()" />
 </div>
 
 <div class="card">
@@ -13,16 +21,26 @@
         <p>无</p>
     {% end %}
 
-    {% for share_to in share_to_list %}
-        <span class="tag-span">{{share_to}}</span>
+    {% for share in share_to_list %}
+        <div class="user-item">
+            <span class="tag gray">{{share.to_user}}</span>
+            <a class="link" data-user="{{share.to_user}}" onclick="onCancelShare(this)">取消分享</a>
+        </div>
     {% end %}
 </div>
 
 <script type="text/javascript">
-function on_share_group_click() {
+function onShareGroupClick() {
     var share_to = $("#shareTo").val();
     var note_id  = "{{file.id}}";
 
     call_xnote_api("/note/share", {id: note_id, share_to: share_to});
+}
+
+function onCancelShare(target) {
+    var userName = $(target).attr("data-user");
+    var note_id = "{{file.id}}";
+    // xnote.alert("取消用户(" + userName + ")的访问权限?");
+    call_xnote_api("/note/share/cancel", {id: note_id, share_to: userName});
 }
 </script>

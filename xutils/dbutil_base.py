@@ -82,7 +82,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/03/09 23:03:46
+# @modified 2022/03/12 20:55:33
 ###########################################################
 
 
@@ -689,7 +689,7 @@ def count(key_from = None, key_to = None, filter_func = None):
 
 def prefix_count(prefix, filter_func = None, 
         offset = None, limit = None, reverse = None, 
-        include_key = None):
+        include_key = None, map_func = None):
     """通过前缀统计行数
     @param {string} prefix 数据前缀
     @param {function} filter_func 过滤函数
@@ -698,15 +698,26 @@ def prefix_count(prefix, filter_func = None,
     @param {object} reverse 无意义参数，为了方便调用
     @param {object} include_key 无意义参数，为了方便调用
     """
+    if filter_func != None and map_func != None:
+        raise Exception("不允许同时设置filter_func和map_func")
+
     count = [0]
     def func(key, value):
         if not key.startswith(prefix):
             return False
-        if filter_func is None:
-            count[0] += 1
-        elif filter_func(key, value):
-            count[0] += 1
+        if filter_func != None:
+            if filter_func(key, value):
+                count[0] += 1
+            return True
+
+        if map_func != None:
+            if map_func(key, value) != None:
+                count[0] += 1
+            return True
+
+        count[0] += 1
         return True
+        
     prefix_scan(prefix, func)
     return count[0]
 

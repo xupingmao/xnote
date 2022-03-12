@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2022/02/07 13:04:50
+# @modified 2022/03/12 23:52:24
 import profile
 import math
 import re
@@ -152,12 +152,6 @@ def view_group_detail_func(file, kw):
         kw.template_name = "note/ajax/group_detail_dialog.html"
     else:
         kw.template_name = "note/page/detail/group_detail.html"
-
-    share_from_info = NOTE_DAO.get_share_from(user_name, file.id)
-    if share_from_info != None:
-        kw.share_to_list = share_from_info.share_to_list
-    else:
-        kw.share_to_list = []
 
 def view_list_func(note, kw):
     kw.show_aside = False
@@ -448,9 +442,7 @@ class GetDialogHandler:
         kw.share_to_list = []
 
         if file != None:
-            share_from_info = NOTE_DAO.get_share_from(user_name, file.id)
-            if share_from_info != None:
-                kw.share_to_list = share_from_info.share_to_list
+            kw.share_to_list = NOTE_DAO.list_share_by_note_id(file.id)
 
     def get_share_note_dialog(self, kw):
         user_name = xauth.current_name()

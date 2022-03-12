@@ -1,7 +1,7 @@
 <script type="text/javascript">
 $(function() {
     function isEmpty(value) {
-        return value === "" || value === undefined || value === null;
+        return xnote.isEmpty(value);
     }
     
     var displayTag = getUrlParam("displayTag");
