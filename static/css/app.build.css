@@ -1764,10 +1764,17 @@ a.tag:hover {
  * description here
  * @author mark
  * @since 2022/03/11 21:46:22
- * @modified 2022/03/12 10:30:04
+ * @modified 2022/03/12 15:15:12
  * @filename common-tab.css
  */
 
+/** TAB页的容器 **/
+.x-tab-box {
+}
+
+.x-tab-box.pad0 {
+    padding: 0px;
+}
 
 /* TAB页的链接样式 */
 .tab-link, .x-tab {
@@ -1776,6 +1783,7 @@ a.tag:hover {
     cursor: pointer;
     margin-right: 5px;
     margin-bottom: 5px;
+    margin-top: 5px;
     line-height: 20px;
     color: #ccc;
 }
@@ -1788,14 +1796,17 @@ a.tag:hover {
     color: #000;
 }
 
-.x-tab-btn {
+/** 按钮模式 **/
+.x-tab-btn, .x-tab.btn, .x-tab-box[data-style=btn]>.x-tab {
     color: black;
     background-color: #eee;
     border: 1px solid #ccc;
     border-radius: 3px;
+    margin-top: 5px;
 }
 
-.x-tab-btn:hover {
+/** 按钮hover **/
+.x-tab-btn:hover, .x-tab.btn:hover, .x-tab-box[data-style=btn]>.x-tab:hover {
     /*background-color: #4f88e1;*/
     /*border-color: #4f88e1;*/
     /* #05c 深蓝色 */
@@ -1805,24 +1816,25 @@ a.tag:hover {
     text-decoration: none;
 }
 
-.x-tab-btn.active {
+/** 按钮被选中 **/
+.x-tab-btn.active, .x-tab.btn.active, .x-tab-box[data-style=btn]>.x-tab.active {
     background-color: #06f;
     border-color: #06f;
     color: #fff;
 }
 
 /** Dark 模式 **/
-.x-tab-box.dark>.x-tab-btn.active {
+.x-tab-box[data-style=btn].dark>.x-tab.active {
 	background-color: gray;
 	color: #fff;
 }
 
-.x-tab-box.dark>.x-tab-btn:hover {
+.x-tab-box[data-style=btn].dark>.x-tab:hover {
     background-color: gray;
     border-color: #ccc;
 }
 
-.x-tab-box.dark>.x-tab-btn {
+.x-tab-box[data-style=btn].dark>.x-tab {
     border-color: #ccc;
 }
 /**

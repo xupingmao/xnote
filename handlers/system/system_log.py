@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2022/03/11 20:07:31
+# @modified 2022/03/12 15:17:03
 import os
 import time
 import xtemplate
@@ -16,7 +16,7 @@ from xtemplate import BasePlugin
 OPTION_HTML = '''
 <div class="row card">
 
-    <div class="x-tab-box row" data-tab-key="type" data-tab-style="btn" data-tab-default="tail">
+    <div class="x-tab-box row" data-style="btn" data-tab-key="type" data-tab-default="tail">
         <a class="x-tab" data-tab-value="tail">最近</a>
         <a class="x-tab" data-tab-value="head">最早</a>
         <a class="x-tab" data-tab-value="all">全部</a>

@@ -2,16 +2,12 @@
 {% init plugin_category = "" %}
 
 <div class="card">
-    <div class="pad5">
-
-        <div class="x-tab-box" data-tab-default="all" data-tab-key="category">
-            {% for category_temp in plugin_category_list %}
-                {% if category_temp.is_visible() %}
-                    <a class="tab tab-link x-tab" href="{{category_temp.url}}" 
-                        data-tab-value="{{category_temp.code}}">{{category_temp.name}}</a>
-                {% end %}
+    <div class="x-tab-box" data-tab-default="all" data-tab-key="category">
+        {% for category_temp in plugin_category_list %}
+            {% if category_temp.is_visible() %}
+                <a class="tab tab-link x-tab" href="{{category_temp.url}}" 
+                    data-tab-value="{{category_temp.code}}">{{category_temp.name}}</a>
             {% end %}
-        </div>
-
+        {% end %}
     </div>
 </div>

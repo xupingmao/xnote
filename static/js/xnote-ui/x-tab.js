@@ -13,7 +13,7 @@ $(function (e) {
         $(".x-tab-btn").each(function(index, ele) {
             var link = $(ele).attr("href");
             if (pathAndSearch == link) {
-                $(ele).addClass("x-tab-btn-active");
+                $(ele).addClass("active");
                 hasActive = true;
             }
 
@@ -21,13 +21,8 @@ $(function (e) {
         });
 
         if (count > 0 && !hasActive) {
-            $(".x-tab-default").addClass("x-tab-btn-active");
+            $(".x-tab-default").addClass("active");
         }
-    }
-
-    var tabStyleHook = {};
-    tabStyleHook.btn = function (ele) {
-         $(ele).find(".x-tab").addClass("x-tab-btn");
     }
 
     function initTabBox() {
@@ -41,21 +36,11 @@ $(function (e) {
                 value = defaultValue;
             }
 
+            // 样式通过CSS控制即可
             console.log("tab-value=",value);
 
-            // 样式的扩展点
-            styleHook = tabStyleHook[tabStyle]
-            console.log("styleHook", styleHook);
-
-            if ( xnote.isNotEmpty(styleHook) ) {
-                styleHook(ele);
-            }
-            
-            $(ele).find(".x-tab[data-tab-value=" + value + "]")
-                .addClass("x-tab-link-active")
-                .addClass("active");
-                
-            $(ele).find(".x-tab-btn[data-tab-value=" + value + "]").addClass("x-tab-btn-active");
+            $(ele).find(".x-tab[data-tab-value=" + value + "]").addClass("active");
+            $(ele).find(".x-tab-btn[data-tab-value=" + value + "]").addClass("active");
 
             $(ele).find(".x-tab").each(function (index, child) {
                 var oldHref = $(child).attr("href");
