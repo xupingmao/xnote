@@ -48,7 +48,7 @@ $(function (e) {
                 if ( xnote.isNotEmpty(oldHref) ) {
                     return;
                 }
-                var tabValue = $(child).attr("data-tab-value")
+                var tabValue = $(child).attr("data-tab-value");
                 $(child).attr("href", addUrlParam(window.location.href, key, tabValue))
             })
         });

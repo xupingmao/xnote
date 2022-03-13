@@ -17,7 +17,7 @@ $(function() {
         displayTag = "log";
     }
 
-    $(".x-tab.active").removeClass("active")
+    $(".message-tab>.x-tab.active").removeClass("active")
     $("[data-tab-value=" + displayTag + "]").addClass("active");
 
     function onMessageUpdated() {

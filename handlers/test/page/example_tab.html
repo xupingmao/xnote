@@ -34,6 +34,17 @@
 	<a class="x-tab" data-tab-value="tab3">TAB3</a>
 </div>""" %}
 
+
+{% init html4 = """
+<div class="x-tab-box underline-tab" 
+		data-tab-key="tab_test4" 
+		data-tab-default="tab1">
+	<a class="x-tab" data-tab-value="tab1">TAB1</a>
+	<a class="x-tab" data-tab-value="tab2">TAB2</a>
+	<a class="x-tab" data-tab-value="tab3">TAB3</a>
+</div>""" %}
+
+
 <div class="card">
 	<p>按钮tab</p>
 	<pre class="marked-code">{{tab_html1}}</pre>
@@ -51,6 +62,12 @@
 	<p>按钮tab（深色模式）</p>
 	<pre class="marked-code">{{html3}}</pre>
 	{% raw html3 %}
+</div>
+
+<div class="card">
+	<p>下划线tab</p>
+	<pre class="marked-code">{{html4}}</pre>
+	{% raw html4 %}
 </div>
 
 {% end %}

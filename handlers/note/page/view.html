@@ -32,18 +32,16 @@
     {# 收藏一下这个符号 › #}
 
     <!-- comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 -->
-    {% if file_type == "group" %}
-        {% include note/editor/view_group.html %}
-    {% elif file_type in ("md", "text", "log", "plan") %}
-        {% include note/editor/markdown.html %}
+    {% if file_type in ("md", "text", "log", "plan") %}
+        {% include note/component/editor/markdown.html %}
     {% elif file_type == "csv" %}
-        {% include note/editor/table.html %}
+        {% include note/component/editor/table.html %}
     {% elif file_type == "gallery" %}
-        {% include note/editor/gallery.html %}
+        {% include note/component/editor/gallery.html %}
     {% elif file_type == "list" %}
-        {% include note/editor/list.html %}
+        {% include note/component/editor/list.html %}
     {% else %}
-        {% include note/editor/post.html %}
+        {% include note/component/editor/post.html %}
     {% end %}
 
     {# 文章信息 #}

@@ -5,7 +5,7 @@
 {% init message_stat = xutils.call("message.get_current_message_stat") %}
 
 <!-- 桌面版菜单 -->
-<div class="card x-tab-box" data-tab-key="tag" data-tab-default="log">
+<div class="card x-tab-box message-tab" data-tab-key="tag" data-tab-default="log">
     <a class="x-tab" data-tab-value="log" href="/message?tag=log">
         记事(<span class="log-count">{{message_stat.log_count}}</span>)
     </a>

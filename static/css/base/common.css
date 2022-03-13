@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2022/03/12 10:33:01
+ * @modified 2022/03/13 16:38:15
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -188,71 +188,6 @@ h3.marked-heading {
     /*background-color: #08c;*/
     /*text-decoration: none;*/
     text-decoration: underline;
-}
-
-
-/** 按钮样式 **/
-
-/* 不能指定input[type=button]不然会覆盖其他class样式(选择器优先级过高) */
-.btn, [type=submit], [type=button], button, .inline-btn, .x-tab-btn {
-    display: inline-block;
-    -webkit-appearance: none; /* 消除IOS默认的按钮样式 */
-    background-color: #337ab7;
-    /*background-color: #067bef;*/
-    /*background-color: #06f;*/
-    border-color: #2e6da4;
-    border: 1px solid transparent;
-    color: #fff;
-    text-decoration: none;
-    margin-top: 5px;
-    padding: 3px 7px 3px;
-    font-size: 12px;
-    font-weight: bold;
-    line-height: 18px;
-    border-radius: 3px;
-    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
-}
-
-.btn:hover, .inline-btn:hover, button:hover, [type=submit]:hover, [type=button]:hover {
-    color: #fff;
-    background-color: #286090;
-    border-color: #204d74;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.btn-default, .btn-cancel {
-    color: black;
-    background-color: #eee;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-}
-
-.btn-default:hover, .btn-cancel:hover {
-    color: black;
-    background-color: #ccc;
-}
-
-.btn-danger {
-    background-color: #f00;
-    border-radius: 3px;
-}
-
-.btn-danger:hover {
-    background-color: #c00;
-}
-
-.btn-line-height {
-    line-height: 32px;
-}
-
-.inline-btn {
-    margin-top: 0px;
-    border-radius: 3px;
-}
-
-.prompt-btn:hover {
-    cursor: pointer;
 }
 
 /** 表格 **/

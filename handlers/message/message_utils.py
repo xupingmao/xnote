@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:48:09
-# @modified 2022/02/19 16:22:57
+# @modified 2022/03/13 16:12:27
 # @filename message_utils.py
 import xutils
 import web
@@ -24,6 +24,7 @@ TAG_TEXT_DICT = dict(
     key  = "话题",
     search = "话题",
 )
+MAX_LIST_LIMIT = 1000
 
 def success():
     return dict(success = True, code = "success")
@@ -370,4 +371,26 @@ class MessageListParser(object):
         return self.keywords
 
 
+def sort_message_list(msg_list, orderby = ""):
+    if orderby == "":
+        return
+
+    if orderby == "visit":
+        msg_list.sort(key = lambda x: x.visit_cnt or 0, reverse = True)
+
+def sort_keywords_by_marked(msg_list):
+    def key_func(item):
+        if item.is_marked:
+            return 0
+        else:
+            return 1
+
+    msg_list.sort(key = key_func)
+
+def list_top_tags(user_name, limit = 10):
+    msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
+    sort_message_list(msg_list, "visit")
+    return msg_list[:limit]
+
+xutils.register_func("message.list_top_tags", list_top_tags)
 xutils.register_func("message.filter_default_content", filter_default_content)

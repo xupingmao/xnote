@@ -109,7 +109,7 @@ var addUrlParam = function(url, key, value) {
     var params = parsed.param;
     var isFirst = true;
     
-    params[key] = value;
+    params[key] = encodeURIComponent(value);
     // 组装新的url
     for (var key in params) {
         var paramValue = params[key];

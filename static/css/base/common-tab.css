@@ -2,7 +2,7 @@
  * description here
  * @author mark
  * @since 2022/03/11 21:46:22
- * @modified 2022/03/12 15:15:12
+ * @modified 2022/03/13 16:48:50
  * @filename common-tab.css
  */
 
@@ -74,4 +74,41 @@
 
 .x-tab-box[data-style=btn].dark>.x-tab {
     border-color: #ccc;
+}
+
+/** Dark 模式 **/
+.x-tab-box.dark-style>.x-tab.active, .x-tab-box.dark-style>.x-tab:hover {
+    background-color: gray;
+    color: #fff;
+    border: 2px solid gray;
+    border-radius: 5px;
+}
+
+.x-tab-box.dark-style>.x-tab {
+    border-color: #ccc;
+    border: 2px solid transparent;
+}
+
+/** 下划线模式 **/
+.x-tab-box.underline-style>.x-tab.active {
+    border-bottom: 3px solid red;
+    text-decoration: none;
+}
+
+.x-tab-box.underline-style>.x-tab:hover {
+    border-bottom: 3px solid red;
+    text-decoration: none;
+}
+
+/** border-style **/
+.x-tab-box.border-style>.x-tab.active,.x-tab-box.border-style>.x-tab:hover {
+    border: 2px solid #06f;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.x-tab-box.border-style>.x-tab {
+    border: 2px solid transparent;
+    text-decoration: none;
+    border-radius: ;
 }

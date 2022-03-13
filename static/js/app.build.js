@@ -579,7 +579,7 @@ var addUrlParam = function(url, key, value) {
     var params = parsed.param;
     var isFirst = true;
     
-    params[key] = value;
+    params[key] = encodeURIComponent(value);
     // 组装新的url
     for (var key in params) {
         var paramValue = params[key];
@@ -2043,16 +2043,17 @@ $(function (e) {
 
             // 样式通过CSS控制即可
             console.log("tab-value=",value);
+            var qValue = '"' + value + '"'; // 加引号quote
 
-            $(ele).find(".x-tab[data-tab-value=" + value + "]").addClass("active");
-            $(ele).find(".x-tab-btn[data-tab-value=" + value + "]").addClass("active");
+            $(ele).find(".x-tab[data-tab-value=" + qValue + "]").addClass("active");
+            $(ele).find(".x-tab-btn[data-tab-value=" + qValue + "]").addClass("active");
 
             $(ele).find(".x-tab").each(function (index, child) {
                 var oldHref = $(child).attr("href");
                 if ( xnote.isNotEmpty(oldHref) ) {
                     return;
                 }
-                var tabValue = $(child).attr("data-tab-value")
+                var tabValue = $(child).attr("data-tab-value");
                 $(child).attr("href", addUrlParam(window.location.href, key, tabValue))
             })
         });

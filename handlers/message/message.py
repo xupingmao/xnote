@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2022/02/19 16:23:09
+# @modified 2022/03/13 16:12:15
 
 """短消息处理，比如任务、备忘、临时文件等等
 
@@ -26,6 +26,9 @@ from xutils.textutil import escape_html, quote
 from xutils.functions import Counter
 from handlers.message.message_class import MessageFolder
 from handlers.message.message_utils import *
+
+from .message_utils import sort_message_list
+from .message_utils import sort_keywords_by_marked
 
 MSG_DAO       = xutils.DAO("message")
 # 消息处理规则
@@ -119,23 +122,6 @@ def after_message_create_or_update(msg_item):
 
 def function_and_class_split_line():
     pass
-
-
-def sort_message_list(msg_list, orderby = ""):
-    if orderby == "":
-        return
-
-    if orderby == "visit":
-        msg_list.sort(key = lambda x: x.visit_cnt or 0, reverse = True)
-
-def sort_keywords_by_marked(msg_list):
-    def key_func(item):
-        if item.is_marked:
-            return 0
-        else:
-            return 1
-
-    msg_list.sort(key = key_func)
 
 def is_marked_keyword(user_name, keyword):
     obj = MSG_DAO.get_by_content(user_name, "key", keyword)

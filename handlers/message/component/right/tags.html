@@ -1,0 +1,23 @@
+{% init tags = xutils.DAO("message").list_top_tags(_user_name, 10) %}
+
+<div class="card">
+    <div class="card-title">
+        <span>常用标签</span>
+    </div>
+
+    <div class="x-tab-box dark-style" data-tab-key="tag">
+        <a class="x-tab" href="/message?tag=file&displayTag=key" data-tab-value="file">文件</a>
+        <a class="x-tab" href="/message?tag=link&displayTag=key" data-tab-value="link">链接</a>
+        <a class="x-tab" href="/message?tag=book&displayTag=key" data-tab-value="book">书籍</a>
+        <a class="x-tab" href="/message?tag=people&displayTag=key" data-tab-value="people">人物</a>
+        <a class="x-tab" href="/message?tag=phone&displayTag=key" data-tab-value="phone">电话</a>
+        <!-- <a class="tag-span" href="/message?tag=all"  data-tag="all">全部</a> -->
+    </div>
+
+    <div class="x-tab-box dark-style" data-tab-key="key">
+        {% for temp_tag in tags %}
+            <a class="x-tab" data-tab-value="{{temp_tag.content}}" href="/message?key={{quote(temp_tag.content)}}&tag=log">{{temp_tag.content}}</a>
+        {% end %}
+    </div>
+
+</div>
