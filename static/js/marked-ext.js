@@ -19,7 +19,7 @@
     var extOptions = {};
 
     // 进度的正则匹配
-    var regexPercent = /\d+(\.\d+)?\%/gi;
+    var regexPercent = /\d+(\.\d+)?\%/;
 
     // 后面都是定义的函数和重写html生成
     function escape(html, encode) {
