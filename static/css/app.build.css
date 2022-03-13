@@ -1773,7 +1773,7 @@ a.tag:hover {
  * description here
  * @author mark
  * @since 2022/03/11 21:46:22
- * @modified 2022/03/13 16:48:50
+ * @modified 2022/03/13 22:05:58
  * @filename common-tab.css
  */
 
@@ -1806,7 +1806,7 @@ a.tag:hover {
 }
 
 /** 按钮模式 **/
-.x-tab-btn, .x-tab.btn, .x-tab-box[data-style=btn]>.x-tab {
+.x-tab-btn, .x-tab.btn, .x-tab-box.btn-style>.x-tab {
     color: black;
     background-color: #eee;
     border: 1px solid #ccc;
@@ -1815,7 +1815,7 @@ a.tag:hover {
 }
 
 /** 按钮hover **/
-.x-tab-btn:hover, .x-tab.btn:hover, .x-tab-box[data-style=btn]>.x-tab:hover {
+.x-tab-btn:hover, .x-tab.btn:hover, .x-tab-box.btn-style>.x-tab:hover {
     /*background-color: #4f88e1;*/
     /*border-color: #4f88e1;*/
     /* #05c 深蓝色 */
@@ -1826,24 +1826,20 @@ a.tag:hover {
 }
 
 /** 按钮被选中 **/
-.x-tab-btn.active, .x-tab.btn.active, .x-tab-box[data-style=btn]>.x-tab.active {
+.x-tab-btn.active, .x-tab.btn.active, .x-tab-box.btn-style>.x-tab.active {
     background-color: #06f;
     border-color: #06f;
     color: #fff;
 }
 
 /** Dark 模式 **/
-.x-tab-box[data-style=btn].dark>.x-tab.active {
+.x-tab-box.dark>.x-tab.active,.x-tab-box.dark>.x-tab:hover {
 	background-color: gray;
 	color: #fff;
+    border: 1px solid gray;
 }
 
-.x-tab-box[data-style=btn].dark>.x-tab:hover {
-    background-color: gray;
-    border-color: #ccc;
-}
-
-.x-tab-box[data-style=btn].dark>.x-tab {
+.x-tab-box.dark>.x-tab {
     border-color: #ccc;
 }
 
@@ -1851,13 +1847,13 @@ a.tag:hover {
 .x-tab-box.dark-style>.x-tab.active, .x-tab-box.dark-style>.x-tab:hover {
     background-color: gray;
     color: #fff;
-    border: 2px solid gray;
-    border-radius: 5px;
+    border: 1px solid gray;
+    border-radius: 2px;
 }
 
 .x-tab-box.dark-style>.x-tab {
     border-color: #ccc;
-    border: 2px solid transparent;
+    border: 1px solid transparent;
 }
 
 /** 下划线模式 **/
@@ -1875,18 +1871,18 @@ a.tag:hover {
 .x-tab-box.border-style>.x-tab.active,.x-tab-box.border-style>.x-tab:hover {
     border: 2px solid #06f;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 2px;
 }
 
 .x-tab-box.border-style>.x-tab {
     border: 2px solid transparent;
     text-decoration: none;
-    border-radius: ;
+    border-radius: 2px;
 }/**
  * 下拉选项列表控件
  * @author mark
  * @since 2022/03/12 10:32:46
- * @modified 2022/03/12 10:33:16
+ * @modified 2022/03/13 21:51:08
  * @filename common-dropdown.css
  */
 
@@ -1916,7 +1912,7 @@ a.tag:hover {
     cursor: pointer;
 }
 
-.x-dropdown.align-right > .dropdown-content {
+.x-dropdown.align-left > .dropdown-content {
     left: 0px;
     text-align: left;
 }

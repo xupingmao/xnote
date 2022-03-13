@@ -2,7 +2,7 @@
  * 下拉选项列表控件
  * @author mark
  * @since 2022/03/12 10:32:46
- * @modified 2022/03/12 10:33:16
+ * @modified 2022/03/13 21:51:08
  * @filename common-dropdown.css
  */
 
@@ -32,7 +32,7 @@
     cursor: pointer;
 }
 
-.x-dropdown.align-right > .dropdown-content {
+.x-dropdown.align-left > .dropdown-content {
     left: 0px;
     text-align: left;
 }

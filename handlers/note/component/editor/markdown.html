@@ -71,12 +71,17 @@
             newContent = oldContent.replace(text, newText);
             params.id = "{{file.id}}";
             params.content = newContent;
+            params.resp_type = "json";
 
             console.log("newContent:", newContent);
 
             $.post("/note/update", params, function (resp) {
-                xnote.toast("更新成功，正在刷新页面");
-                window.location.reload();
+                if (resp.code == "success") {                    
+                    xnote.toast("更新成功，正在刷新页面");
+                    window.location.reload();
+                } else {
+                    xnote.toast("更新失败:" + resp.message);
+                }
             });
         }
 

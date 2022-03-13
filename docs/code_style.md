@@ -2,6 +2,9 @@
 
 这个文档主要描述xnote的编码规范，基于 [PEP8](https://www.python.org/dev/peps/pep-0008/) 的基础进行补充
 
+其他命名规范
+- [CSS命名规范](./code_style_css.md)
+
 # 1. 变量命名
 
 全局变量全大写+下划线命名

@@ -1,0 +1,19 @@
+{% extends base %}
+
+{% block body %}
+
+    {% include test/component/example_nav.html %}
+
+{% init html1 = """
+<button class="btn">按钮1</button>
+<button class="btn btn-default">按钮2</button>
+<button class="btn btn-danger">按钮3</button>
+""" %}
+
+<div class="card">
+    <p>按钮</p>
+    <pre class="marked-code">{{html1}}</pre>
+    {% raw html1 %}
+</div>
+
+{% end %}

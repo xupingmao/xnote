@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2022/03/13 21:39:19
+# @modified 2022/03/13 21:58:43
 
 """笔记编辑相关处理"""
 import os
@@ -342,10 +342,14 @@ def check_get_note(id):
     if id == "" or id == 0:
         raise NoteException("400", "笔记ID为空")
 
-    note = NOTE_DAO.get_by_id_creator(id, xauth.current_name())
+    note = NOTE_DAO.get_by_id(id)
 
     if note is None:
         raise NoteException("404", "笔记不存在")
+
+    if note.creator != xauth.current_name():
+        raise NoteException("403", "无权编辑")
+    
     return note
 
 def update_and_notify(file, update_kw):
@@ -403,6 +407,7 @@ class UpdateHandler:
         file_type = xutils.get_argument("type")
         name      = xutils.get_argument("name", "")
         resp_type = xutils.get_argument("resp_type", "html")
+        file = None
 
         try:
             file = check_get_note(id)
@@ -423,11 +428,7 @@ class UpdateHandler:
 
             raise web.seeother(file.url)
         except NoteException as e:
-            return xtemplate.render("note/page/view.html", 
-                pathlist = [],
-                file     = file, 
-                content  = content, 
-                error    = e.message)
+            return dict(code = "fail", message = e.message)
 
 class StickHandler:
 
