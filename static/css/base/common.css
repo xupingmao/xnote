@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2022/03/13 16:38:15
+ * @modified 2022/03/13 21:12:43
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -1013,14 +1013,6 @@ li.menu-item:hover {
 
 .gray {
     color: gray;
-}
-
-.xnote-todo {
-    background-color: orange;
-}
-
-.xnote-done {
-    color: #aaa;
 }
 
 .small-device {

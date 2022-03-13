@@ -2,11 +2,28 @@
  * markdown的样式扩展
  * @author xupingmao
  * @since 2021/08/01 14:25:17
- * @modified 2021/08/01 14:25:41
+ * @modified 2022/03/13 21:18:05
  * @filename common-markdown.css
  */
 
 .markdown-box img {
     width: 100%;
     text-align: center;
+}
+
+.xnote-todo {
+    background-color: #FFDEAD;
+    padding: 2px;
+    border-radius: 2px;
+}
+
+.xnote-done {
+    color: #aaa;
+    padding: 2px;
+    border-radius: 2px;
+}
+
+.xnote-todo.doing {
+    color: black;
+    background-color: #98FB98;
 }

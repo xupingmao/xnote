@@ -18,6 +18,9 @@
     // 扩展选项
     var extOptions = {};
 
+    // 进度的正则匹配
+    var regexPercent = /\d+(\.\d+)?\%/gi;
+
     // 后面都是定义的函数和重写html生成
     function escape(html, encode) {
       return html
@@ -113,10 +116,19 @@
         console.log(extOptions.checkboxIndex, checkbox);
 
         if (/^\[\]/.test(text)) {
+            var content = text.substring(2);
+
             checkbox = checkbox.replace("$checked", "");
-            // console.log("checkbox", checkbox);
             result.checkbox = checkbox;
-            result.text = '<span class="xnote-todo">' + text.substring(2) + '</span>';
+
+            var element = $("<span>").text(content).addClass("xnote-todo");
+            
+            if (regexPercent.test(content)) {
+                // 包含百分比的加上进行中的进度
+                element = element.addClass("doing");
+            }
+
+            result.text = element.prop("outerHTML");
         } else if (/^\[ \]/.test(text)) {
             checkbox = checkbox.replace("$checked", "");
             result.checkbox = checkbox;
