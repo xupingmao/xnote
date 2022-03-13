@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2022/03/12 23:11:24
+# @modified 2022/03/13 21:39:19
 
 """笔记编辑相关处理"""
 import os
@@ -342,10 +342,7 @@ def check_get_note(id):
     if id == "" or id == 0:
         raise NoteException("400", "笔记ID为空")
 
-    if xauth.is_admin():
-        note = NOTE_DAO.get_by_id(id)
-    else:
-        note = NOTE_DAO.get_by_id_creator(id, xauth.current_name())
+    note = NOTE_DAO.get_by_id_creator(id, xauth.current_name())
 
     if note is None:
         raise NoteException("404", "笔记不存在")
