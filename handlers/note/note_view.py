@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2022/03/12 23:52:24
+# @modified 2022/03/13 17:03:12
 import profile
 import math
 import re
@@ -104,11 +104,11 @@ def view_md_func(file, kw):
     kw.show_pagination = False
     if kw.op == "edit":
         kw.show_recommend = False
-        kw.template_name = "note/editor/markdown_edit.html"
+        kw.template_name = "note/component/editor/markdown_edit.html"
 
     if kw.op == "edit" and device == "mobile":
         # 强制使用移动端编辑器
-        kw.template_name = "note/editor/markdown_edit.mobile.html"
+        kw.template_name = "note/component/editor/markdown_edit.mobile.html"
 
 def view_group_timeline_func(note, kw):
     raise web.found("/note/timeline?type=default&parent_id=%s" % note.id)
@@ -126,7 +126,7 @@ def view_group_detail_func(file, kw):
     if kw.op == "edit":
         # 编辑笔记本的简介
         kw.show_recommend = False
-        kw.template_name = "note/editor/markdown_edit.html"
+        kw.template_name = "note/component/editor/markdown_edit.html"
         return
 
     if orderby == None or orderby == "":

@@ -1,9 +1,10 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2022/03/12 10:49:49
+# @modified 2022/03/13 17:24:13
 # @filename test_note.py
 
+import logging
 import xutils
 
 # cannot perform relative import
@@ -197,6 +198,22 @@ class TestMain(BaseTestCase):
 
         # clean up
         json_request("/note/remove?id=" + str(id))
+
+    def test_note_share_to(self):
+        delete_note_for_test("xnote-share-test")
+        note = json_request("/note/add", method="POST", 
+            data=dict(name="xnote-share-test", content="hello"))
+        id = note["id"]
+        share_resp = json_request("/note/share", method="POST",
+            data=dict(id=id, share_to="test2"))
+        logging.info("share_resp:%s", share_resp)
+        self.assertEqual("success", share_resp["code"])
+
+        delete_share_resp = json_request("/note/share/cancel", method="POST",
+            data=dict(id=id, share_to="test2"))
+        
+        logging.info("delete_share_resp:%s", delete_share_resp)
+        self.assertEqual("success", delete_share_resp["code"])
 
     def test_note_tag(self):
         json_request("/note/remove?name=xnote-tag-test")

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/24 16:39:45
-# @modified 2021/10/24 16:47:44
+# @modified 2022/03/13 17:15:12
 
 import sys
 import time
@@ -32,13 +32,16 @@ class TestXauth(BaseTestCase):
         self.assertFalse(xauth.is_valid_username("public"))
 
     def test_create_and_delete_user(self):
+        old_users = xauth.refresh_users()
+
         # 创建用户
         result = xauth.create_user("u123456", "123456")
         print(result)
 
         users = xauth.refresh_users()
         print(users)
-        self.assertEqual(3, len(users))
+        
+        self.assertEqual(len(old_users)+1, len(users))
 
         # 删除用户
         xauth.delete_user("u123456")

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2022/03/12 19:01:01
+# @modified 2022/03/13 17:05:36
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -385,7 +385,7 @@ def get_by_id(id, include_full = True):
         del note.content
         del note.data
 
-    if note_index:
+    if note != None and note_index != None:
         note.name = note_index.name
         note.mtime = note_index.mtime
         note.atime = note_index.atime

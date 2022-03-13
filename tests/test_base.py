@@ -47,6 +47,8 @@ def init():
     # 加载template
     xtemplate.reload()
 
+    xauth.create_user("test2", "123456")
+
     # 发送启动消息
     xmanager.fire("sys.reload")
 
