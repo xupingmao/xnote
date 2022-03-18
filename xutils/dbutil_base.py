@@ -81,7 +81,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/03/18 13:14:21
+# @modified 2022/03/19 00:00:57
 ###########################################################
 
 
@@ -770,6 +770,8 @@ def prefix_count(prefix, filter_func = None,
 
 def count_table(table_name):
     assert table_name != None
+    assert table_name != ""
+
     if table_name[-1] != ":":
         table_name += ":"
 
@@ -783,6 +785,19 @@ def count_table(table_name):
     for key in iterator:
         count += 1
     return count
+
+
+def count_all():
+    """统计全部的KV数量"""
+    iterator = check_get_leveldb().RangeIter(
+        include_value = False, 
+        fill_cache = False)
+
+    count = 0
+    for key in iterator:
+        count += 1
+    return count
+
 
 def _rename_table_no_lock(old_name, new_name):
     for key, value in prefix_iter(old_name, include_key = True):

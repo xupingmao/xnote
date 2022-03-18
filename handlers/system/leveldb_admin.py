@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2022/01/02 11:52:09
+# @modified 2022/03/18 23:46:59
 import xutils
 import xtemplate
 import xauth
@@ -51,6 +51,8 @@ SCAN_HTML = """
                 <a href="/note/stat?p=system">元数据</a>
                 <span>|</span>
                 <a href="/fs_link/db">数据库目录</a>
+                <span>|</span>
+                <a href="/system/backup?p=home">备份管理</a>
             </div>
         </div>
     </form>

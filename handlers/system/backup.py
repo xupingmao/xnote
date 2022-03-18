@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/03/18 21:23:42
+# @modified 2022/03/19 00:15:17
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -10,10 +10,12 @@ import re
 import time
 import sys
 import logging
+import threading
 
 import xutils
 import xconfig
 import xauth
+import xtemplate
 from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil, fsutil, logutil
@@ -31,6 +33,9 @@ _remove_old = False
 _MAX_BACKUP_COUNT = 10
 # 10天备份一次
 _BACKUP_INTERVAL = 10 * 3600 * 24
+
+# 备份的锁
+_backup_lock = threading.RLock()
 
 def zip_xnote(nameblacklist = [_zipname]):
     dirname = "./"
@@ -139,8 +144,39 @@ def chk_scripts_backup():
 class DBBackup:
     """数据库备份"""
 
+    _progress = 0.0
+    _start_time = -1
+    _total = 0
+
     def __init__(self):
         self.db_backup_file = os.path.join(xconfig.TMP_DIR, "temp.db")
+
+    @staticmethod
+    def progress():
+        return "%.2f%%" % (DBBackup._progress * 100.0)
+
+    @staticmethod
+    def run_time():
+        start_time = DBBackup._start_time
+        if start_time < 0:
+            return "-1"
+
+        return "%.2fs" % (time.time() - start_time)
+
+    @staticmethod
+    def rest_time():
+        progress = DBBackup._progress
+        if progress == 0:
+            return "-1"
+
+        cost_time = time.time() - DBBackup._start_time
+        total_time = cost_time / progress
+        rest_time = total_time - cost_time
+        return "%.2fs" % rest_time
+
+    @staticmethod
+    def total():
+        return DBBackup._total
 
     def clean(self):
         db_backup_file = self.db_backup_file
@@ -149,18 +185,32 @@ class DBBackup:
             fsutil.rmfile(db_backup_file, hard = True)
 
     def dump_db(self):
+        total_count = dbutil.count_all()
+
+        DBBackup._start_time = time.time()
+        DBBackup._total = total_count
+
         db2 = SqliteKV(self.db_backup_file)
         count = 0
         try:
             for key, value in dbutil.get_instance().RangeIter(include_value = True):
                 db2.Put(key, value)
                 count += 1
+                # 更新进度
+                DBBackup._progress = count / total_count
             db2.Close()
         finally:
             db2 = None
+            DBBackup._start_time = -1
+            DBBackup._count = -1
+            DBBackup._progress = 0.0
         return count
 
     def execute(self):
+        with _backup_lock:
+            self.do_execute()
+
+    def do_execute(self):
         # 先做清理工作
         self.clean()
 
@@ -220,6 +270,13 @@ class BackupHandler:
     def GET(self):
         """触发备份事件"""
         p = xutils.get_argument("p", "")
+
+        if p == "home":
+            return xtemplate.render("system/page/backup.html", 
+                total = DBBackup.total(),
+                run_time = DBBackup.run_time(),
+                rest_time = DBBackup.rest_time(),
+                progress = DBBackup.progress())
 
         if p == "db":
             return chk_db_backup()

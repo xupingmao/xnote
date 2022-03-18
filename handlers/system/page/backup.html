@@ -1,0 +1,59 @@
+{% extends base.html %}
+
+{% block body %}
+
+{% include system/component/system_css.html %}
+
+{% init total = "-1" %}
+{% init run_time = "-1" %}
+{% init rest_time = "-1" %}
+{% init progress = "0.0" %}
+
+<div class="card">
+    <div class="card-title">
+        <span>系统备份</span>
+        <div class="float-right">
+            {% include common/button/back_button.html %}
+        </div>
+    </div>
+</div>
+
+
+<div class="card">
+    <div class="settings-row btn-line-height">
+        <div class="settings-key">备份数据库</div>
+        <div class="settings-value">
+            <a class="btn backup-btn" target="_blank" href="/system/backup?p=db">备份</a>
+        </div>
+    </div>
+
+    <div class="settings-row btn-line-height">
+        <div class="settings-key">数据总量</div>
+        <div class="settings-value">
+            <span>{{total}}</span>
+        </div>
+    </div>
+
+    <div class="settings-row btn-line-height">
+        <div class="settings-key">备份进度</div>
+        <div class="settings-value">
+            <span>{{progress}}</span>
+        </div>
+    </div>
+
+    <div class="settings-row btn-line-height">
+        <div class="settings-key">运行时间</div>
+        <div class="settings-value">
+            <span>{{run_time}}</span>
+        </div>
+    </div>
+
+    <div class="settings-row btn-line-height">
+        <div class="settings-key">剩余时间</div>
+        <div class="settings-value">
+            <span>{{rest_time}}</span>
+        </div>
+    </div>
+</div>
+
+{% end %}
