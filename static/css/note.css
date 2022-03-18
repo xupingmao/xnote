@@ -2,7 +2,7 @@
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2022/01/02 14:44:19
+ * @modified 2022/03/16 18:52:34
 */
 
 
@@ -181,16 +181,10 @@
 .comment-foot {
     float: left;
     width: 100%;
-    font-size: 10px;
 }
 
 .comment-foot>.comment-foot-link {
     color: #08c;
-}
-
-.comment-foot a {
-    font-size: 10px;
-    color: #666;
 }
 
 .comment-time {
@@ -288,10 +282,14 @@
     margin-top: 5px;
 }
 
+.comment-source-info {
+    float: left;
+    line-height: 20px;
+    padding: 5px;
+}
+
 .edit-comment-btn, .delete-comment-btn {
     color: black;
     background-color: #eee;
     border: 1px solid #ccc;
-    border-radius: 3px;
-    padding: 2px;
 }

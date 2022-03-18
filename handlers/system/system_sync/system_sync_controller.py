@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/07 12:38:32
-# @modified 2022/02/13 16:30:45
+# @modified 2022/03/18 14:17:02
 # @filename system_sync_controller.py
 
 """系统数据同步功能，目前提供主从同步的能力
@@ -170,10 +170,13 @@ class SyncHandler:
     @xauth.login_required("admin")
     def get_home_page(self):
         kw = Storage()
-
         role_manager = get_system_role_manager()
-        role_manager.sync_for_home_page()
 
+        try:
+            role_manager.sync_for_home_page()
+        except:
+            xutils.print_exc()
+            
         kw.node_role = get_system_role()
         kw.leader_host = CONFIG.get("leader.host", "未设置")
         kw.leader_token  = role_manager.get_leader_token()

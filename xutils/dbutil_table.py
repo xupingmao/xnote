@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/03/12 21:10:59
+# @modified 2022/03/18 16:17:14
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -9,6 +9,7 @@ from urllib.request import quote
 
 register_table("_index", "通用索引")
 
+MAX_INT = (1 << 63)-1
 
 def dict_del(dict, key):
     if key in dict:
@@ -17,21 +18,23 @@ def dict_del(dict, key):
 def format_int(int_val):
     if not isinstance(int_val, int):
         raise Exception("format_int: expect int but see %r" % int_val)
-    if abs(int_val) > 10**20:
-        raise Exception("format_int: int value must between [-10**20, 10**20]")
+    if abs(int_val) > MAX_INT:
+        raise Exception("format_int: int value must between [-%s, %s]" % (MAX_INT, MAX_INT))
     
     # 负数需要放在前面
-    # 直接加一个值把负数全部转成正数
+    # 使用64位二进制存储
+    # 第一位数字表示符号，1表示正数，0表示负数，其余63位可以用于存储数字
+    flag = 1 << 63
     if int_val < 0:
-        int_val += 10**20
-        return "A%020d" % int_val
+        int_val = abs(int_val)
     else:
-        return "B%020d" % int_val
-
+        int_val = int_val | flag
+    
+    return "%016X" % int_val
 
 def format_index_value(value):
     if value is None:
-        return "NULL"
+        return chr(0)
     if isinstance(value, str):
         return quote(value)
     if isinstance(value, int):
@@ -146,7 +149,7 @@ class LdbTable:
 
     def _check_key(self, key):
         if not key.startswith(self.prefix):
-            raise Exception("invalid key:%s" % key)
+            raise Exception("invalid key:(%s), prefix:(%s)" % (key, self.prefix))
 
     def _check_index_name(self, index_name):
         validate_str(index_name, "invalid index_name:%r" % index_name)
@@ -210,7 +213,7 @@ class LdbTable:
             index_changed = (new_value != old_value)
 
             if not index_changed:
-                print_debug_info("index value unchanged, index_name:{!r}, value:{!r}", 
+                logging.debug("index value unchanged, index_name:(%s), value:(%s)", 
                     index_name, old_value)
                 if not force_update:
                     continue
@@ -421,7 +424,7 @@ class LdbTable:
             obj = self.get_by_key(value)
             if obj is None:
                 # delete(key)
-                print("invalid key:", key)
+                logging.warning("invalid key:(%s)", key)
                 return None
 
             # 检查key是否匹配
@@ -429,7 +432,7 @@ class LdbTable:
             key_obj_id_temp = self._get_id_from_obj(obj)
             key_obj_id = quote(key_obj_id_temp)
             if obj_id != key_obj_id:
-                print_debug_info("invalid obj_id:{}, obj_id:{}", obj_id, key_obj_id)
+                logging.warning("invalid obj_id:{}, obj_id:{}", obj_id, key_obj_id)
                 return None
 
             # 用于调试
@@ -513,7 +516,7 @@ class TableIndexRepair:
             self.delete_invalid_index(name)
 
     def do_delete(self, key):
-        print_debug_info("Delete {!r}", key)
+        logging.info("Delete {%s}", key)
 
         if not key.startswith("_index$"):
             print_debug_info("Invalid index key {!r}", key)
@@ -526,7 +529,7 @@ class TableIndexRepair:
         for old_key, record_key in prefix_iter(index_prefix, include_key = True):
             record = get(record_key)
             if record is None:
-                print_debug_info("empty record, key:{!r}, record_id:{!r}", 
+                logging.debug("empty record, key:(%s), record_id:(%s)", 
                     old_key, record_key)
                 self.do_delete(old_key)
                 continue
@@ -538,7 +541,7 @@ class TableIndexRepair:
             new_key = index_prefix + ":" + index_value + ":" + record_id
 
             if new_key != old_key:
-                print_debug_info("index dismatch, key:{!r}, record_id:{!r}, correct_key:{!r}", 
+                logging.debug("index dismatch, key:(%s), record_id:(%s), correct_key:(%s)", 
                     old_key, record_key, new_key)
                 self.do_delete(old_key)
 

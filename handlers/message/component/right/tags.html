@@ -5,11 +5,11 @@
         <span>常用标签</span>
     </div>
 
-    <div class="x-tab-box dark-style" data-tab-key="tag">
+    <div class="x-tab-box btn-style dark-style" data-tab-key="tag">
         <a class="x-tab" href="/message?tag=file&displayTag=key" data-tab-value="file">系统标签</a>
     </div>
 
-    <div class="x-tab-box dark-style" data-tab-key="key">
+    <div class="x-tab-box btn-style dark-style" data-tab-key="key">
         {% for temp_tag in tags %}
             <a class="x-tab" data-tab-value="{{temp_tag.content}}" href="/message?key={{quote(temp_tag.content)}}&tag=log">{{temp_tag.content}}</a>
         {% end %}

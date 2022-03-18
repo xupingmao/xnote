@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2017/02/19
-# @modified 2019/02/16 11:36:16
+# @modified 2022/03/18 12:42:43
 import sqlite3
 import os
 import xutils
@@ -23,7 +23,6 @@ def db_execute(path, sql, args = None):
         else:
             cursorobj.execute(sql, args)
         result = cursorobj.fetchall()
-        db.commit()
         for single in result:
             # 保持字段顺序
             resultMap = OrderedDict()
@@ -35,6 +34,7 @@ def db_execute(path, sql, args = None):
     except Exception as e:
         raise e
     finally:
+        db.commit()
         db.close()
     return kv_result
 

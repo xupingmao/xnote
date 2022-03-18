@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/03/06 18:06:41
+# @modified 2022/03/18 20:54:15
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -156,8 +156,8 @@ def handle_args_and_init_config():
 
 def handle_signal(signum, frame):
     """处理系统消息
-    :arg int signum:
-    :arg object frame, current stack frame:
+    @param {int} signum
+    @param {frame} current stack frame
     """
     xutils.log("Signal received: %s" % signum)
     if signum == signal.SIGALRM:
@@ -180,10 +180,17 @@ def try_init_sqlite():
 @log_mem_info_deco("try_init_ldb")
 def try_init_ldb():
     try:
+        db_instance = None
+        db_engine = xconfig.get_global_config("system.db_engine")
+        if db_engine == "sqlite":
+            from xutils.dbutil_sqlite import SqliteKV
+            db_instance = SqliteKV(xconfig.DB_DIR)
+
         # 初始化leveldb数据库
         dbutil.init(xconfig.DB_DIR, 
             block_cache_size = xconfig.get_global_config("system.block_cache_size"),
-            write_buffer_size = xconfig.get_global_config("system.write_buffer_size"))
+            write_buffer_size = xconfig.get_global_config("system.write_buffer_size"),
+            db_instance = db_instance)
     except:
         xutils.print_exc()
         xconfig.errors.append("初始化ldb失败")

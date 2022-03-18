@@ -2,7 +2,7 @@
  * description here
  * @author mark
  * @since 2022/03/11 21:46:22
- * @modified 2022/03/13 22:05:58
+ * @modified 2022/03/16 18:10:23
  * @filename common-tab.css
  */
 
@@ -24,6 +24,7 @@
     margin-top: 5px;
     line-height: 20px;
     color: #ccc;
+    border: 1px solid transparent;
 }
 
 .tab-link:hover, .x-tab:hover {
@@ -82,7 +83,6 @@
 
 .x-tab-box.dark-style>.x-tab {
     border-color: #ccc;
-    border: 1px solid transparent;
 }
 
 /** 下划线模式 **/

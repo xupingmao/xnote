@@ -2,7 +2,7 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2022/03/13 21:12:43
+ * @modified 2022/03/16 18:57:15
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -483,43 +483,6 @@ li.menu-item:hover {
     width: 100%;
 }
 
-
-/** 分页的样式 **/
-.pagenation {
-    /*width: 100%;*/
-    margin: 0 auto;
-}
-
-.x-page-disabled {
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    text-decoration: none;
-    padding: 3px 10px;
-    color: #dfdfdf;
-    font-size: 14px;
-    cursor: not-allowed;
-}
-
-.x-page-link {
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    text-decoration: none;
-    padding: 3px 10px;
-    color: #000;
-}
-
-.x-page-link:hover {
-    background-color: #06f;
-    border-color: #06f;
-    color: #fff;
-    text-decoration: none;
-}
-
-.x-page-active {
-    background-color: #4f88e1;
-    border-color: #4f88e1;
-    color: #fff;
-}
 
 /** file-list样式 END **/
 

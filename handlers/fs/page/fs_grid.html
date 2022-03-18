@@ -112,7 +112,7 @@
                         {% if item.type == "dir" %}
                             <img class="fs-icon" src="/static/image/folder2.png">
                         {% elif xutils.is_img_file(item.path) %}
-                            <img class="x-photo" src="/fs/{{item.path}}">
+                            <img class="x-photo" src="/fs/{{item.encoded_path}}">
                         {% elif xutils.is_text_file(item.path) %}
                             <img class="fs-icon" src="/static/image/icon_txt.png">
                         {% else %}

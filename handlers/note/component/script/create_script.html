@@ -56,11 +56,11 @@ function createLogOld() {
         if (resp.code == "success") {
             window.location.href = resp.url;
         } else {
-            alert(title + "失败:" + resp.message);
+            xnote.alert(title + "失败:" + resp.message);
         }
     }).fail(function (e) {
         console.error(title + "失败", e);
-        alert(title + "失败:" + e);
+        xnote.alert(title + "失败:" + e);
     });
 }
 /** 创建分组 **/
@@ -76,11 +76,11 @@ function createGroup() {
             if (resp.code == "success") {
                 window.location = resp.url;
             } else {
-                alert(opName + "失败:" + resp.message);
+                xnote.alert(opName + "失败:" + resp.message);
             }
         }).fail(function (e) {
             console.error(opName + "失败", e);
-            alert(opName + "失败:" + e);
+            xnote.alert(opName + "失败:" + e);
         });
     });
 }

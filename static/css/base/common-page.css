@@ -1,0 +1,51 @@
+/**
+ * description here
+ * @author mark
+ * @since 2022/03/16 18:57:05
+ * @modified 2022/03/16 19:05:08
+ * @filename common-page.css
+ */
+
+
+/** 分页的样式 **/
+.pagenation {
+    /*width: 100%;*/
+    margin: 0 auto;
+}
+
+.x-page-link {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    text-decoration: none;
+    padding: 3px 10px;
+    color: #000;
+    font-size: 12px;
+}
+
+.x-page-link:hover {
+    background-color: #06f;
+    border-color: #06f;
+    color: #fff;
+    text-decoration: none;
+}
+
+.x-page-link.disabled:hover {
+    background-color: #fff;
+    border-color: #ccc;
+    color: #dfdfdf;
+}
+
+.x-page-link.disabled {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    text-decoration: none;
+    padding: 3px 10px;
+    color: #dfdfdf;
+    cursor: not-allowed;
+}
+
+.x-page-link.active {
+    background-color: #4f88e1;
+    border-color: #4f88e1;
+    color: #fff;
+}

@@ -14,17 +14,19 @@
         <div class="comment-content">{% raw comment.html %}</div>
         <div class="comment-foot">
             {% if show_note %}
-                <span>[来源]</span>
-                <a class="comment-foot-link" href="{{comment.note_url}}">{{comment.note_name}}</a>
+                <div class="comment-source-info">
+                    <span>[来源]</span>
+                    <a class="comment-foot-link" href="{{comment.note_url}}">{{comment.note_name}}</a>
+                </div>
             {% end %}
 
             {% if comment.user == _user_name %}
                 <div class="float-right">
                     {% if show_comment_edit %}
-                        <a class="edit-comment-btn" data-id="{{comment.id}}">编辑</a>
+                        <a class="btn btn-default edit-comment-btn" data-id="{{comment.id}}">编辑</a>
                     {% end %}
 
-                    <a class="delete-comment-btn" data-id="{{comment.id}}" data-content="{{comment.content}}">删除</a>
+                    <a class="btn btn-default delete-comment-btn" data-id="{{comment.id}}" data-content="{{comment.content}}">删除</a>
                 </div>
             {% end %}
         </div>

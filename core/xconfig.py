@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2022/03/06 17:34:35
+# @modified 2022/03/18 10:21:26
 # @filename xconfig.py
 
 '''xnote系统配置
@@ -239,11 +239,9 @@ def init(path = DATA_DIR):
 
     DATA_PATH = os.path.abspath(path)
     DATA_DIR  = os.path.abspath(path)
+
     # 数据库地址
-    DB_DIR       = os.path.join(DATA_DIR, "db")
-    DB_PATH      = os.path.join(DATA_DIR, "data.db")
-    DICT_FILE    = os.path.join(DATA_DIR, "dictionary.db")
-    RECORD_FILE  = os.path.join(DATA_DIR, "record.db")
+    init_db_config()
     
     # 备份数据地址
     BACKUP_DIR   = os.path.join(DATA_DIR, "backup")
@@ -275,7 +273,7 @@ def init(path = DATA_DIR):
     makedirs(STORAGE_DIR)
     makedirs(ETC_DIR)
     makedirs(LOG_DIR)
-    makedirs(DB_DIR)
+
 
     # 二级目录
     makedirs(COMMANDS_DIR)
@@ -291,6 +289,23 @@ def init(path = DATA_DIR):
     PLUGIN_TEMPLATE = fsutil.readfile("./config/plugin/plugin.tpl.py")
 
     RUNTIME_ID = textutil.generate_uuid()
+
+
+def init_db_config():
+    global DB_DIR
+    global DB_PATH
+    global DICT_FILE
+    global RECORD_FILE
+
+    DB_DIR       = os.path.join(DATA_DIR, "db")
+    DB_PATH      = os.path.join(DATA_DIR, "data.db")
+    DICT_FILE    = os.path.join(DATA_DIR, "dictionary.db")
+    RECORD_FILE  = os.path.join(DATA_DIR, "record.db")
+
+    makedirs(DB_DIR)
+
+    sqlite_dir = os.path.join(DB_DIR, "sqlite")
+    makedirs(sqlite_dir)
 
 
 def init_system_config():

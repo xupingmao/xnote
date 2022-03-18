@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/04/16
-# @modified 2022/03/13 17:05:36
+# @modified 2022/03/16 19:07:21
 # @filename dao.py
 
 """资料的DAO操作集合
@@ -465,6 +465,7 @@ def get_or_create_note(skey, creator):
 
 
 def create_note_base(note_dict, date_str = None, note_id = None):
+    """创建笔记的基础部分，无锁"""
     # 真实的创建时间
     ctime0 = dateutil.format_datetime()
     note_dict["ctime0"]  = ctime0
@@ -496,24 +497,20 @@ def create_note_base(note_dict, date_str = None, note_id = None):
             timestamp = int(time.time() * 1000)
         else:
             timestamp = int(dateutil.parse_date_to_timestamp(date_str) * 1000)
-        try:
-            CREATE_LOCK.acquire()
 
-            while True:
-                note_id = "%020d" % timestamp
-                note_dict["ctime"] = dateutil.format_datetime(timestamp/1000)
-                old = get_by_id(note_id)
-                if old is None:
-                    note_dict["id"] = note_id
-                    put_note_to_db(note_id, note_dict)
+        while True:
+            note_id = "%020d" % timestamp
+            note_dict["ctime"] = dateutil.format_datetime(timestamp/1000)
+            old = get_by_id(note_id)
+            if old is None:
+                note_dict["id"] = note_id
+                put_note_to_db(note_id, note_dict)
 
-                    # 创建日志
-                    add_create_log(note_dict)
-                    return note_id
-                else:
-                    timestamp += 1
-        finally:
-            CREATE_LOCK.release()
+                # 创建日志
+                add_create_log(note_dict)
+                return note_id
+            else:
+                timestamp += 1
 
 def create_note(note_dict, date_str = None, note_id = None):
     content   = note_dict["content"]
@@ -527,8 +524,11 @@ def create_note(note_dict, date_str = None, note_id = None):
     if "data" not in note_dict:
         note_dict["data"] = ""
 
-    # 创建笔记的基础信息
-    note_id = create_note_base(note_dict, date_str, note_id)
+    with CREATE_LOCK:
+        # 检查名称是否冲突
+        check_by_name(creator, name)
+        # 创建笔记的基础信息
+        note_id = create_note_base(note_dict, date_str, note_id)
     
     # 更新分组下面页面的数量
     update_children_count(note_dict["parent_id"])
@@ -747,6 +747,9 @@ def update0(note):
     put_note_to_db(note.id, note)
 
 def get_by_name(creator, name):
+    if creator == None:
+        raise Exception("get_by_name:creator is None")
+        
     def find_func(key, value):
         if value.is_deleted:
             return False

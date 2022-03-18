@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2021/12/25 22:31:18
+# @modified 2022/03/16 17:52:49
 # @filename xtemplate.py
 
 
@@ -271,7 +271,7 @@ def render(template_name, **kw):
     nkw = do_render_kw(kw)
 
     if hasattr(web.ctx, "env"):
-        # 不一定是WEB过来的请求
+        # 非web请求（比如单元测试等）
         _input = web.input()
         if _input.get("_format") == "json":
             web.header("Content-Type", "application/json")

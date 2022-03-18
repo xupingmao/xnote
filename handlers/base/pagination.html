@@ -6,7 +6,7 @@
         <a class="x-page-link" href="{{page_url}}1">首页</a>
 
         {% if page <= 1 %}
-            <span class="x-page-disabled">上一页</span>
+            <a class="x-page-link disabled">上一页</a>
         {% else %}
             <a class="x-page-link" href="{{page_url}}{{page-1}}">上一页</a>
         {% end %}
@@ -16,14 +16,14 @@
         {% end %}
 
         <!-- 当前页 -->
-        <a class="x-page-link x-page-active" href="#">{{page}}</a>
+        <a class="x-page-link active" href="#">{{page}}</a>
         
         {% for j in range(page+1, int(min(page+3, page_max+1))) %}
             <a class="x-page-link desktop-only-inline" href="{{page_url}}{{j}}">{{j}}</a>
         {% end %}
 
         {% if page >= page_max %}
-            <span class="x-page-disabled">下一页</span>
+            <a class="x-page-link disabled">下一页</a>
         {% else %}
             <a class="x-page-link" href="{{page_url}}{{page+1}}">下一页</a>
         {% end %}

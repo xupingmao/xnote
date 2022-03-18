@@ -46,7 +46,6 @@ except ImportError:
 # 加载第三方的库
 import xutils
 from xutils.base import Storage
-from xutils.dbutil_sqlite import *
 from xutils import dateutil
 
 try:
@@ -59,8 +58,8 @@ except ImportError:
 DEFAULT_BLOCK_CACHE_SIZE = 8 * (2<<20) # 16M
 DEFAULT_WRITE_BUFFER_SIZE = 2 * (2<<20) # 4M
 
-WRITE_LOCK    = threading.Lock()
-READ_LOCK     = threading.Lock()
+WRITE_LOCK    = threading.RLock()
+READ_LOCK     = threading.RLock()
 LAST_TIME_SEQ = -1
 
 # 注册的数据库表名，如果不注册，无法进行写操作
@@ -82,8 +81,46 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/03/12 20:55:33
+# @modified 2022/03/18 13:14:21
 ###########################################################
+
+
+
+class DBInterface:
+
+    def __init__(self, path, snapshot = None, 
+            block_cache_size = None, 
+            write_buffer_size = None):
+        raise NotImplementedError("__init__")
+
+    def Get(self, key):
+        raise NotImplementedError("Get")
+
+    def Put(self, key, value, sync = False):
+        raise NotImplementedError("Put")
+
+    def Delete(self, key, sync = False):
+        raise NotImplementedError("Delete")
+
+    def RangeIter(self, 
+            key_from = None, 
+            key_to = None, 
+            reverse = False,
+            include_value = True, 
+            fill_cache = False):
+        """返回区间迭代器
+        @param {str}  key_from       开始的key（包含）FirstKey
+        @param {str}  key_to         结束的key（包含）LastKey
+        @param {bool} reverse        是否反向查询
+        @param {bool} include_value  是否包含值
+        """
+        raise NotImplementedError("RangeIter")
+
+    def CreateSnapshot(self):
+        raise NotImplementedError("CreateSnapshot")
+
+    def Write(self, batch_interface, sync = False):
+        raise NotImplementedError("Write")
 
 
 def print_debug_info(fmt, *args):
@@ -182,14 +219,8 @@ class WriteBatchProxy:
         print_debug_info("-----  batch.end  -----")
 
     def convert_to_ldb_batch(self):
-        if leveldb is None:
-            batch = leveldbpy.WriteBatch()
-            for key in self._puts:
-                value = self._puts[key]
-                batch.put(key, value)
-            for key in self._deletes:
-                batch.delete(key)
-            return batch            
+        if hasattr(_leveldb, "convert_to_ldb_batch"):
+            return _leveldb.convert_to_ldb_batch(self)
         else:
             batch = leveldb.WriteBatch()
             for key in self._puts:
@@ -263,6 +294,15 @@ class LevelDBProxy:
         """执行批量操作"""
         return self._db.write(batch, sync)
 
+    def convert_to_ldb_batch(self, batch_proxy):
+        batch = leveldbpy.WriteBatch()
+        for key in batch_proxy._puts:
+            value = batch_proxy._puts[key]
+            batch.put(key, value)
+        for key in batch_proxy._deletes:
+            batch.delete(key)
+        return batch  
+
 def config(**kw):
     global WRITE_ONLY
 
@@ -295,12 +335,15 @@ def create_db_instance(db_dir, block_cache_size = None, write_buffer_size = None
     raise Exception("create_db_instance failed: not supported")
 
 @xutils.log_init_deco("leveldb")
-def init(db_dir, block_cache_size = None, write_buffer_size = None):
+def init(db_dir, block_cache_size = None, write_buffer_size = None, db_instance = None):
     global _leveldb
 
-    _leveldb = create_db_instance(db_dir, 
-        block_cache_size = block_cache_size, 
-        write_buffer_size = write_buffer_size)
+    if db_instance != None:
+        _leveldb = db_instance
+    else:
+        _leveldb = create_db_instance(db_dir, 
+            block_cache_size = block_cache_size, 
+            write_buffer_size = write_buffer_size)
 
     xutils.log("leveldb: %s" % _leveldb)
 
@@ -494,6 +537,10 @@ def put(key, obj_value, sync = False):
     value = convert_object_to_json(obj_value)
     # print("Put %s = %s" % (key, value))
     _leveldb.Put(key, value.encode("utf-8"), sync = sync)
+
+def put_bytes(key, value, sync = False):
+    check_before_write(key.decode("utf-8"))
+    _leveldb.Put(key, value, sync = sync)
 
 def insert(table_name, obj_value, sync = False):
     key = new_id(table_name)

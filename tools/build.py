@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author mark
 # @since 2022/02/19 12:45:23
-# @modified 2022/03/12 11:12:08
+# @modified 2022/03/16 18:57:53
 # @filename build.py
 try:
 	import termcolor
@@ -60,6 +60,7 @@ def build_app_css():
 		builder.append("./static/css/base/common-dialog.css")
 		builder.append("./static/css/base/common-tab.css")
 		builder.append("./static/css/base/common-dropdown.css")
+		builder.append("./static/css/base/common-page.css")
 
 		# 场景化的css
 		builder.append("./static/css/common-react.css")

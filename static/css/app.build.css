@@ -149,7 +149,7 @@ table td {
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2022/03/13 21:12:43
+ * @modified 2022/03/16 18:57:15
  * @filename common.css
  * 命名规范（主要参考bootstrap）: 包含两部分，
  * 1：简单的、望文生义的样式，比如颜色 red, blue等等
@@ -630,43 +630,6 @@ li.menu-item:hover {
     width: 100%;
 }
 
-
-/** 分页的样式 **/
-.pagenation {
-    /*width: 100%;*/
-    margin: 0 auto;
-}
-
-.x-page-disabled {
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    text-decoration: none;
-    padding: 3px 10px;
-    color: #dfdfdf;
-    font-size: 14px;
-    cursor: not-allowed;
-}
-
-.x-page-link {
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    text-decoration: none;
-    padding: 3px 10px;
-    color: #000;
-}
-
-.x-page-link:hover {
-    background-color: #06f;
-    border-color: #06f;
-    color: #fff;
-    text-decoration: none;
-}
-
-.x-page-active {
-    background-color: #4f88e1;
-    border-color: #4f88e1;
-    color: #fff;
-}
 
 /** file-list样式 END **/
 
@@ -1773,7 +1736,7 @@ a.tag:hover {
  * description here
  * @author mark
  * @since 2022/03/11 21:46:22
- * @modified 2022/03/13 22:05:58
+ * @modified 2022/03/16 18:10:23
  * @filename common-tab.css
  */
 
@@ -1795,6 +1758,7 @@ a.tag:hover {
     margin-top: 5px;
     line-height: 20px;
     color: #ccc;
+    border: 1px solid transparent;
 }
 
 .tab-link:hover, .x-tab:hover {
@@ -1853,7 +1817,6 @@ a.tag:hover {
 
 .x-tab-box.dark-style>.x-tab {
     border-color: #ccc;
-    border: 1px solid transparent;
 }
 
 /** 下划线模式 **/
@@ -1942,6 +1905,57 @@ a.tag:hover {
 .dropdown-option-red:hover {
     background-color: #09f;
     color: red;
+}
+/**
+ * description here
+ * @author mark
+ * @since 2022/03/16 18:57:05
+ * @modified 2022/03/16 19:05:08
+ * @filename common-page.css
+ */
+
+
+/** 分页的样式 **/
+.pagenation {
+    /*width: 100%;*/
+    margin: 0 auto;
+}
+
+.x-page-link {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    text-decoration: none;
+    padding: 3px 10px;
+    color: #000;
+    font-size: 12px;
+}
+
+.x-page-link:hover {
+    background-color: #06f;
+    border-color: #06f;
+    color: #fff;
+    text-decoration: none;
+}
+
+.x-page-link.disabled:hover {
+    background-color: #fff;
+    border-color: #ccc;
+    color: #dfdfdf;
+}
+
+.x-page-link.disabled {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    text-decoration: none;
+    padding: 3px 10px;
+    color: #dfdfdf;
+    cursor: not-allowed;
+}
+
+.x-page-link.active {
+    background-color: #4f88e1;
+    border-color: #4f88e1;
+    color: #fff;
 }
 /* 响应式工具
  * @modified 2020/10/07 15:59:08
@@ -2300,7 +2314,7 @@ a.tag:hover {
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2022/01/02 14:44:19
+ * @modified 2022/03/16 18:52:34
 */
 
 
@@ -2479,16 +2493,10 @@ a.tag:hover {
 .comment-foot {
     float: left;
     width: 100%;
-    font-size: 10px;
 }
 
 .comment-foot>.comment-foot-link {
     color: #08c;
-}
-
-.comment-foot a {
-    font-size: 10px;
-    color: #666;
 }
 
 .comment-time {
@@ -2586,12 +2594,16 @@ a.tag:hover {
     margin-top: 5px;
 }
 
+.comment-source-info {
+    float: left;
+    line-height: 20px;
+    padding: 5px;
+}
+
 .edit-comment-btn, .delete-comment-btn {
     color: black;
     background-color: #eee;
     border: 1px solid #ccc;
-    border-radius: 3px;
-    padding: 2px;
 }
 /**
  * 插件的CSS样式

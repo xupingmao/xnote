@@ -40,6 +40,9 @@
                 {% for p in path_list %}
                     <option value="{{p}}">{{p}}</option>
                 {% end %}
+                {% if path not in path_list %}
+                    <option value="{{path}}">{{path}}</option>
+                {% end %}
             </select>
         </p>
         <textarea id="editor" name="sql" style="width:100%;">{{sql}}</textarea>
