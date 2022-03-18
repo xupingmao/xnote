@@ -15,8 +15,6 @@ from xutils import fsutil
 from xutils import dbutil
 from xutils import Storage
 
-xconfig.init("./testdata")
-
 @xutils.cache(prefix='fib')
 def fib(n):
     if n == 1 or n == 2:

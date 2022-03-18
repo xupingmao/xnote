@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/07 12:38:32
-# @modified 2022/03/18 14:17:02
+# @modified 2022/03/18 22:13:10
 # @filename system_sync_controller.py
 
 """系统数据同步功能，目前提供主从同步的能力
@@ -42,7 +42,7 @@ dbutil.register_table("cluster_config", "集群配置")
 CONFIG = dbutil.get_table("cluster_config", type = "hash")
 
 def get_system_role():
-    return xconfig.get_global_config("system.node.role")
+    return xconfig.get_global_config("system.node_role")
 
 def print_debug_info(*args):
     new_args = [dateutil.format_time(), "[system_sync]"]

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/03/18 20:54:15
+# @modified 2022/03/18 23:17:10
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2019  xupingmao 578749341@qq.com
 
@@ -65,44 +65,22 @@ def get_int_by_sys_arg(value):
 
 def handle_args_and_init_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", default="./data")
+    parser.add_argument("--config", default = "./config/boot/boot.default.properties")
     parser.add_argument("--delay", default="0")
     parser.add_argument("--ringtone", default="no")
-    parser.add_argument("--port", default=DEFAULT_PORT)
-    parser.add_argument("--webbrowser", default="no")
     parser.add_argument("--debug", default="yes")
     parser.add_argument("--minthreads", default="15")
     parser.add_argument("--useCacheSearch", default="no")
     parser.add_argument("--useUrlencode", default="no")
     parser.add_argument("--devMode", default="no")
     parser.add_argument("--initScript", default="init.py")
-    parser.add_argument("--master", default="no")
     parser.add_argument("--test", default="no")
-    parser.add_argument("--forceHttps", default="no")
-    # TODO 禁用插件
-    parser.add_argument("--disabledPlugins", default="no")
-    # 节点角色
-    parser.add_argument("--role", default = "leader")
-
-    parser.add_argument("--webdav", default = "yes")
-    parser.add_argument("--fast_reload", default = "no")
-
-    # leveldb配置
-    parser.add_argument("--block_cache_size", default = None)
-    parser.add_argument("--write_buffer_size", default = None)
 
     web.config.debug = False
-    args = parser.parse_args(sys.argv[1:])
+    args = parser.parse_args()
 
     # 处理Data目录，创建各种目录
-    try:
-        xconfig.init(args.data)
-    except Exception as e:
-        xconfig.errors.append("创建目录失败")
-        xutils.print_exc()
-
-    # 端口号
-    xconfig.PORT = args.port
+    xconfig.init(args.config)
 
     # 延迟加载，避免定时任务重复执行
     delay = int(args.delay)
@@ -117,12 +95,10 @@ def handle_args_and_init_config():
     xconfig.INIT_SCRIPT   = args.initScript
     web.config.minthreads = xconfig.MIN_THREADS
 
-    xconfig.OPEN_IN_BROWSER  = get_bool_by_sys_arg(args.webbrowser)
     xconfig.USE_CACHE_SEARCH = get_bool_by_sys_arg(args.useCacheSearch)
     xconfig.USE_URLENCODE    = get_bool_by_sys_arg(args.useUrlencode)
     xconfig.DEV_MODE         = get_bool_by_sys_arg(args.devMode)
     xconfig.IS_TEST          = get_bool_by_sys_arg(args.test)
-    xconfig.FORCE_HTTPS      = get_bool_by_sys_arg(args.forceHttps)
     # 调试配置
     xconfig.DEBUG            = get_bool_by_sys_arg(args.debug)
     web.config.debug         = xconfig.DEBUG
@@ -136,23 +112,9 @@ def handle_args_and_init_config():
         os.environ["PORT"] = port
 
     start_time = xutils.format_datetime()
-    xconfig.set_global_config("port", port)
     xconfig.set_global_config("start_time", start_time)
     xconfig.set_global_config("system.port", port)
     xconfig.set_global_config("system.start_time", start_time)
-    xconfig.set_global_config("system.node.role", args.role)
-
-    # leveldb config
-    xconfig.set_global_config("system.block_cache_size", 
-        get_int_by_sys_arg(args.block_cache_size))
-    xconfig.set_global_config("system.write_buffer_size",
-        get_int_by_sys_arg(args.write_buffer_size))
-
-    xconfig.set_global_config("system.webdav", 
-        get_bool_by_sys_arg(args.webdav))
-
-    xconfig.set_global_config("system.fast_reload",
-        get_bool_by_sys_arg(args.fast_reload))
 
 def handle_signal(signum, frame):
     """处理系统消息
@@ -184,7 +146,8 @@ def try_init_ldb():
         db_engine = xconfig.get_global_config("system.db_engine")
         if db_engine == "sqlite":
             from xutils.dbutil_sqlite import SqliteKV
-            db_instance = SqliteKV(xconfig.DB_DIR)
+            db_file = os.path.join(xconfig.DB_DIR, "sqlite", "kv_store.db")
+            db_instance = SqliteKV(db_file)
 
         # 初始化leveldb数据库
         dbutil.init(xconfig.DB_DIR, 
@@ -214,7 +177,7 @@ def init_autoreload():
 
 def init_cluster():
     # 初始化集群配置
-    if xconfig.get_global_config("system.node.role") == "follower":
+    if xconfig.get_global_config("system.node_role") == "follower":
         logging.info("当前系统以从节点身份运行")
 
 @log_mem_info_deco("init_web_app")
@@ -266,7 +229,7 @@ def init_app_no_lock():
         # signal.alarm(5)
 
     # 启动打开浏览器选项
-    if xconfig.OPEN_IN_BROWSER:
+    if xconfig.get_global_config("system.open_browser"):
         webbrowser.open("http://localhost:%s/" % xconfig.PORT)
 
     # 记录已经启动

@@ -4,7 +4,7 @@
 {% init search_action = "/search/search" %}
 {% init nav_type = "default" %}
 
-{% if xconfig.get_global_config("system.node.role") == "follower" %}
+{% if xconfig.get_global_config("system.node_role") == "follower" %}
 <div class="row warn">
   <div class="x-center">
     当前系统以从节点身份运行，请勿编辑

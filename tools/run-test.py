@@ -40,7 +40,7 @@ def main():
 
 	run_test()
 
-	do_clean()
+	# do_clean()
 
 if __name__ == '__main__':
 	main()

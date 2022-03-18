@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2022/03/18 10:21:26
+# @modified 2022/03/18 23:16:14
 # @filename xconfig.py
 
 '''xnote系统配置
@@ -34,6 +34,7 @@ import time
 from collections import OrderedDict
 
 from xutils import textutil
+from xutils import fsutil
 from xutils.base import Storage
 from xutils.textutil import Properties
 
@@ -210,7 +211,7 @@ def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-def init(path = DATA_DIR):
+def init(boot_config_file = None):
     """初始化系统配置项,启动时必须调用"""
     global DATA_PATH
     global DATA_DIR
@@ -237,6 +238,10 @@ def init(path = DATA_DIR):
     global PLUGIN_TEMPLATE
     global RUNTIME_ID
 
+    if boot_config_file != None:
+        init_boot_config(boot_config_file)
+
+    path = get_global_config("system.data")
     DATA_PATH = os.path.abspath(path)
     DATA_DIR  = os.path.abspath(path)
 
@@ -283,12 +288,45 @@ def init(path = DATA_DIR):
     load_file_type_config()
 
     # 初始化系统配置
-    init_system_config()
+    init_system_version()
 
     from xutils import fsutil
     PLUGIN_TEMPLATE = fsutil.readfile("./config/plugin/plugin.tpl.py")
 
     RUNTIME_ID = textutil.generate_uuid()
+
+
+def load_default_boot_config():
+    text = fsutil.readfile("config/boot/boot.default.properties")
+    return textutil.parse_config_text(text, "dict")
+
+
+def init_boot_config(fpath):
+    text = fsutil.readfile(fpath)
+
+    # 读取默认的配置
+    config_dict = load_default_boot_config()
+    
+    # 使用用户配置覆盖
+    user_config = textutil.parse_config_text(text, 'dict')
+    config_dict.update(user_config)
+
+    for key in config_dict:
+        value = config_dict[key]
+        value_type = config_dict.get(key + ".type")
+        
+        if value_type == "bool":
+            value = (value == "true" or value == "yes")
+        if value_type == "int":
+            value = int(value)
+
+        set_global_config("system.%s" % key, value)
+
+    global PORT
+    global FORCE_HTTPS
+
+    PORT = get_global_config("system.port")
+    FORCE_HTTPS = get_global_config("system.force_https")
 
 
 def init_db_config():
@@ -308,7 +346,7 @@ def init_db_config():
     makedirs(sqlite_dir)
 
 
-def init_system_config():
+def init_system_version():
     from xutils import fsutil
     system_version = fsutil.readfile("./config/version.txt", limit = 1000)
     if system_version != None:

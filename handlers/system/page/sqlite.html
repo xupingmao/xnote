@@ -23,39 +23,37 @@
 {% init sql       = "" %}
 {% init keys      = [] %}
 
-<div class="col-md-12 grid-card">
-    {% set title      = T("SQL") %}
-    {% include "tools/base_title.html" %}
+<div class="card">
+    <div class="card-title">
+        <span>{{T("SQLite管理器")}}</span>
+        <div class="float-right">
+            {% include common/button/back_button.html %}
+        </div>
+    </div>
+</div>
 
-    {% if error != "" %}
-        <pre class="col-md-12 error">
-        {{error}}
-        </pre>
-    {% end %}
-
-
+<div class="card">
+    {% include mod_fs_path.html %}
     <form>
-        <p>Path
-            <select name="path" value="{{path}}">
-                {% for p in path_list %}
-                    <option value="{{p}}">{{p}}</option>
-                {% end %}
-                {% if path not in path_list %}
-                    <option value="{{path}}">{{path}}</option>
-                {% end %}
-            </select>
-        </p>
         <textarea id="editor" name="sql" style="width:100%;">{{sql}}</textarea>
         <button>Run</button>
+        <a class="btn btn-default" href="?path={{path}}&action=show_tables">展示表</a>
+        <a class="btn btn-default" href="?path={{path}}&action=count_tables">记录数统计</a>
     </form>
 </div>
 
-<div class="grid-card">
+<div class="card">
 
     {% if cost_time is not None %}
     <div class="col-md-12">
     耗时: {{cost_time}} ms
     </div>
+    {% end %}
+
+    {% if error != "" %}
+        <pre class="col-md-12 error">
+        {{error}}
+        </pre>
     {% end %}
 
     <div class="row">
@@ -90,6 +88,8 @@ $(function () {
         lineNumbers:true,
         mode: "text/x-sql"
     });
+
+    xnote.table.adjustWidth(".table");
 })
 </script>
 

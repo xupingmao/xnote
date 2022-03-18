@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/28 18:07:31
-# @modified 2022/03/06 11:23:30
+# @modified 2022/03/18 22:13:48
 # @filename system_sync_indexer.py
 
 """文件同步索引管理器"""
@@ -26,7 +26,7 @@ dbutil.register_table("fs_sync_index", "文件同步索引信息")
 TEMP_FNAME_SET = set([".DS_Store", ".thumbnail", ".git"])
 
 def get_system_role():
-    return xconfig.get_global_config("system.node.role")
+    return xconfig.get_global_config("system.node_role")
 
 def print_debug_info(*args):
     new_args = [dateutil.format_time(), "[fs_sync_index]"]

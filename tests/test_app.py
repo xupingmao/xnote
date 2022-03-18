@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2022/02/12 18:34:14
+# @modified 2022/03/18 23:24:59
 
 import sys
 import os
@@ -176,8 +176,10 @@ class TestMain(BaseTestCase):
         self.check_OK("/system/user?name=admin")
 
     def test_tools(self):
-        self.check_200("/tools/sql")
         self.check_200("/tools/color")
+
+    def test_system_sqlite(self):
+        self.check_200("/system/sqlite")
 
     def test_notfound(self):
         self.check_404("/nosuchfile")

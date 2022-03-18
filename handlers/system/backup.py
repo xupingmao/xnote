@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/03/08 23:29:08
+# @modified 2022/03/18 21:23:42
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -17,6 +17,7 @@ import xauth
 from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil, fsutil, logutil
+from xutils.dbutil_sqlite import SqliteKV
 
 config = xconfig
 
@@ -139,28 +140,27 @@ class DBBackup:
     """数据库备份"""
 
     def __init__(self):
-        self.db_backup_dir = os.path.join(xconfig.TMP_DIR, "db.temp")
+        self.db_backup_file = os.path.join(xconfig.TMP_DIR, "temp.db")
 
     def clean(self):
-        db_backup_dir = self.db_backup_dir
-        if os.path.exists(db_backup_dir):
-            logging.info("删除db备份目录:%s", db_backup_dir)
-            xutils.rmdir(db_backup_dir, hard = True)
+        db_backup_file = self.db_backup_file
+        if os.path.exists(db_backup_file):
+            logging.info("删除db备份文件:%s", db_backup_file)
+            fsutil.rmfile(db_backup_file, hard = True)
 
     def dump_db(self):
-        db2 = dbutil.create_db_instance(self.db_backup_dir)
+        db2 = SqliteKV(self.db_backup_file)
         count = 0
         try:
             for key, value in dbutil.get_instance().RangeIter(include_value = True):
                 db2.Put(key, value)
                 count += 1
+            db2.Close()
         finally:
             db2 = None
         return count
 
     def execute(self):
-        # Windows环境在db运行期间无法读取（无读取权限）
-        db_backup_dir = self.db_backup_dir
         # 先做清理工作
         self.clean()
 
@@ -175,8 +175,12 @@ class DBBackup:
         dirname = os.path.join(xconfig.BACKUP_DIR, "db")
         xutils.makedirs(dirname)
         
-        destfile = os.path.join(dirname, time.strftime("db.%Y-%m.zip"))
-        xutils.zip_dir(db_backup_dir, destfile)
+        destfile = os.path.join(dirname, time.strftime("%Y-%m.db"))
+
+        if os.path.exists(destfile):
+            fsutil.rmfile(destfile)
+
+        fsutil.mvfile(self.db_backup_file, destfile)
 
         # 再次清理
         self.clean()

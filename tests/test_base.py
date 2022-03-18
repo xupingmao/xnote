@@ -29,15 +29,16 @@ def init():
     global APP
     if APP is not None:
         return APP
+    xconfig.init("./config/boot/boot.test.properties")
     xconfig.IS_TEST = True
     xconfig.port = "1234"
     xconfig.DEV_MODE = True
     var_env = dict()
     xutils.remove_file("./testdata/data.db", hard = True)
-    xconfig.init("./testdata")
     xtables.init()
 
-    db_instance = SqliteKV(xconfig.DB_DIR)
+    db_file = os.path.join(xconfig.DB_DIR, "sqlite", "test.db")
+    db_instance = SqliteKV(db_file)
     dbutil.init(xconfig.DB_DIR, db_instance = db_instance)
 
     xutils.init(xconfig)

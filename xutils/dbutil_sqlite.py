@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/24 11:11:04
-# @modified 2022/03/18 15:51:25
+# @modified 2022/03/18 21:18:05
 # @filename dbutil_sqlite.py
 
 """Sqlite对KV接口的实现"""
@@ -10,7 +10,11 @@ import sqlite3
 import threading
 import logging
 
-from xutils.dbutil_base import *
+
+_write_lock = threading.RLock()
+
+def get_write_lock():
+    return _write_lock
 
 def db_execute(db, sql, *args):
     cursorobj = db.cursor()
@@ -39,12 +43,10 @@ class Holder(threading.local):
 
 class SqliteKV:
 
-    def __init__(self, path, snapshot = None, 
+    def __init__(self, db_file, snapshot = None, 
             block_cache_size = None, 
             write_buffer_size = None):
         """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
-        db_file = os.path.join(path, "sqlite", "kv_store.db")
-        self.path = path
         self.db_file = db_file
         self.db_holder = Holder()
 
@@ -194,5 +196,11 @@ class SqliteKV:
 
     def convert_to_ldb_batch(self, batch_proxy):
         return batch_proxy
+
+    def Close(self):
+        if self._db != None:
+            self._db.close()
+        else:
+            self.db_holder.db.close()
 
 

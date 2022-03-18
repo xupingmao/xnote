@@ -13,6 +13,6 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' 
 
 COPY . .
 
-CMD ["python", "sentinel.py", "app.py", "--data", "/data", "--port", "5050", "--forceHttps", "yes", "--debug", "no", "--block_cache_size", "1"]
+CMD ["python", "sentinel.py", "app.py", "--config", "config/boot/boot.sae.properties"]
 
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/08/22 21:54:56
-# @modified 2022/02/26 10:40:22
+# @modified 2022/03/18 22:45:46
 import xauth
 import xtemplate
 import xutils
@@ -63,6 +63,7 @@ class InfoHandler:
             SystemInfoItem("Xnote版本", value = get_xnote_version()),
             SystemInfoItem("内存信息", value = get_mem_info()),
             SystemInfoItem("磁盘可用容量", get_free_data_space()),
+            SystemInfoItem("数据库引擎", xconfig.get_global_config("system.db_engine")),
             SystemInfoItem("sqlite版本", sqlite3.sqlite_version if sqlite3 != None else ''),
             SystemInfoItem("CPU型号", platform.processor()),
             SystemInfoItem("操作系统", platform.system()),
