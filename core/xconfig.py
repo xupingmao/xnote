@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @author xupingmao 
-# @modified 2022/03/18 23:16:14
+# @modified 2022/03/19 18:10:06
 # @filename xconfig.py
 
 '''xnote系统配置
@@ -245,6 +245,9 @@ def init(boot_config_file = None):
     DATA_PATH = os.path.abspath(path)
     DATA_DIR  = os.path.abspath(path)
 
+    # 初始HTTP端口号
+    init_http_port()
+
     # 数据库地址
     init_db_config()
     
@@ -327,6 +330,19 @@ def init_boot_config(fpath):
 
     PORT = get_global_config("system.port")
     FORCE_HTTPS = get_global_config("system.force_https")
+
+def init_http_port():
+    port = get_global_config("system.port")
+
+    if port != None:
+        # 指定端口优先级最高
+        os.environ["PORT"] = port
+
+    if not os.environ.get("PORT"):
+        os.environ["PORT"] = port
+
+    # 兼容
+    set_global_config("port", port)
 
 
 def init_db_config():

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/03/19 13:13:35
+# @modified 2022/03/19 18:13:59
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2022  xupingmao 578749341@qq.com
 
@@ -44,7 +44,6 @@ from xutils.mem_util import log_mem_info_deco
 from xutils.lockutil import FileLock
 from autoreload import AutoReloadThread
 
-DEFAULT_PORT = "1234"
 FILE_LOCK = FileLock("pid.lock")
 
 # 配置日志模块
@@ -103,17 +102,8 @@ def handle_args_and_init_config():
     xconfig.DEBUG            = get_bool_by_sys_arg(args.debug)
     web.config.debug         = xconfig.DEBUG
 
-    port = xconfig.PORT
-    if port != DEFAULT_PORT:
-        # 指定端口优先级最高
-        os.environ["PORT"] = port
-
-    if not os.environ.get("PORT"):
-        os.environ["PORT"] = port
-
     start_time = xutils.format_datetime()
     xconfig.set_global_config("start_time", start_time)
-    xconfig.set_global_config("system.port", port)
     xconfig.set_global_config("system.start_time", start_time)
 
 def handle_signal(signum, frame):
