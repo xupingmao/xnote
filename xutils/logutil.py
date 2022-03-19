@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2022/03/12 23:04:15
+# @modified 2022/03/19 13:10:45
 import logging
 import time
 import inspect
@@ -291,3 +291,62 @@ timeit  = timeit_deco
 profile = profile_deco
 
 
+def new_mem_logger(name, size = 200, ttl = 60*60):
+    with MemLogger._lock:
+        for logger in MemLogger._instances:
+            if logger.name == name:
+                return logger
+
+        return MemLogger(name, size, ttl)
+
+class MemLogger:
+
+    _instances = set()
+    _lock = threading.RLock()
+
+    def __init__(self, name, size = 200, ttl = 60*60):
+        self.name = name
+        self.size = size
+        self.data = deque()
+        self.ttl = ttl
+        self.st = time.time() # start_time
+        MemLogger._instances.add(self)
+        MemLogger.clear_expired()
+
+    def __del__(self):
+        MemLogger._instances.remove(self)
+
+    def clear_expired():
+        for logger in MemLogger._instances:
+            if logger.is_expired():
+                del logger
+
+    def is_expired(self):
+        if self.ttl < 0:
+            return False
+        return time.time() > (self.st+self.ttl)
+
+    def log(self, message, *args):
+        MemLogger.clear_expired()
+
+        f_back    = inspect.currentframe().f_back
+        f_code    = f_back.f_code
+        f_modname = f_back.f_globals.get("__name__")
+        func_name    = f_code.co_name
+        func_lineno  = f_back.f_lineno
+
+        head = "%s|%s:%s" % (format_time(), func_name, func_lineno)
+        if len(args) > 0:
+            body = message % args
+        else:
+            body = message
+
+        line = "%s|%s" % (head, body)
+
+        self.data.append(line)
+        if len(self.data) > self.size:
+            self.data.popleft()
+
+
+    def text(self):
+        return "\n".join(self.data)

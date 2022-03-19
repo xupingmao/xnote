@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/03/19 10:38:16
+# @modified 2022/03/19 13:10:56
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -11,6 +11,7 @@ import time
 import sys
 import logging
 import threading
+import sqlite3
 
 import xutils
 import xconfig
@@ -264,8 +265,39 @@ def calc_key_size():
 
     return result
 
+def calc_qps(count, cost_time):
+    if cost_time > 0:
+        return count/cost_time
+    return -1
+
 def import_db(db_file):
-    pass
+    with _backup_lock:
+        count = 0
+        logger = logutil.new_mem_logger("import_db")
+
+        db = sqlite3.connect(db_file)
+        total_count = list(db.execute("SELECT COUNT(1) FROM kv_store"))[0][0]
+
+        if total_count == 0:
+            logger.log("db is empty")
+            return
+
+        sql = "SELECT key, value FROM kv_store ORDER BY key"
+
+        db_instance = dbutil.get_instance()
+        start_time = time.time()
+
+        for key, value in db.execute(sql):
+            db_instance.Put(key, value)
+            count += 1
+            if count % 100 == 0:
+                cost_time = time.time() - start_time
+                progress = count/total_count*100.0
+                qps = calc_qps(count, cost_time)
+                logger.log("progress:(%.2f%%), qps:(%.2f)" % (progress, qps))
+            
+        logger.log("[done] records:%s", count)
+    return "records:%s" % count
 
 class BackupHandler:
 

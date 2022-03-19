@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/03/19 10:35:54
+# @modified 2022/03/19 13:13:35
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2022  xupingmao 578749341@qq.com
 
@@ -174,6 +174,8 @@ def try_init_ldb():
                     logging.warning("检测到Windows环境，自动切换到leveldbpy驱动")
                     from xutils.db.driver_leveldbpy import LevelDBProxy
                     db_instance = LevelDBProxy(xconfig.DB_DIR, **leveldb_kw)
+                    # 更新驱动名称
+                    xconfig.set_global_config("system.db_driver", "leveldbpy")
                 else:
                     logging.error("启动失败,请安装leveldb依赖")
                     sys.exit(1)
