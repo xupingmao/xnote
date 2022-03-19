@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/03/19 13:10:56
+# @modified 2022/03/19 14:48:41
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -186,12 +186,15 @@ class DBBackup:
             fsutil.rmfile(db_backup_file, hard = True)
 
     def dump_db(self):
+        logger = logutil.new_mem_logger("backup_db", size = 20)
+
         total_count = dbutil.count_all()
+        start_time = time.time()
 
         DBBackup._start_time = time.time()
         DBBackup._total = total_count
 
-        db2 = SqliteKV(self.db_backup_file)
+        db2 = SqliteKV(self.db_backup_file, debug = False)
         count = 0
         try:
             for key, value in dbutil.get_instance().RangeIter(include_value = True):
@@ -199,7 +202,14 @@ class DBBackup:
                 count += 1
                 # 更新进度
                 DBBackup._progress = count / total_count
+                if count % 100 == 0:
+                    cost_time = time.time() - start_time
+                    progress = count/total_count*100.0
+                    qps = calc_qps(count, cost_time)
+                    logger.log("proceed:(%d), progress:(%.2f%%), qps:(%.2f)" % (count, progress, qps))
             db2.Close()
+
+            logger.log("backup done, total:(%d), cost_time:(%.2fs)", count, time.time()-start_time)
         finally:
             db2 = None
             DBBackup._start_time = -1
@@ -273,7 +283,7 @@ def calc_qps(count, cost_time):
 def import_db(db_file):
     with _backup_lock:
         count = 0
-        logger = logutil.new_mem_logger("import_db")
+        logger = logutil.new_mem_logger("import_db", size = 20)
 
         db = sqlite3.connect(db_file)
         total_count = list(db.execute("SELECT COUNT(1) FROM kv_store"))[0][0]
@@ -294,7 +304,7 @@ def import_db(db_file):
                 cost_time = time.time() - start_time
                 progress = count/total_count*100.0
                 qps = calc_qps(count, cost_time)
-                logger.log("progress:(%.2f%%), qps:(%.2f)" % (progress, qps))
+                logger.log("proceed:(%d), progress:(%.2f%%), qps:(%.2f)" % (count, progress, qps))
             
         logger.log("[done] records:%s", count)
     return "records:%s" % count

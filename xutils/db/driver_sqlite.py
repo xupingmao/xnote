@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/24 11:11:04
-# @modified 2022/03/18 21:18:05
-# @filename dbutil_sqlite.py
+# @modified 2022/03/19 14:47:46
+# @filename driver_sqlite.py
 
 """Sqlite对KV接口的实现"""
 
@@ -45,10 +45,12 @@ class SqliteKV:
 
     def __init__(self, db_file, snapshot = None, 
             block_cache_size = None, 
-            write_buffer_size = None):
+            write_buffer_size = None,
+            debug = True):
         """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
         self.db_file = db_file
         self.db_holder = Holder()
+        self.debug = debug
 
         if snapshot != None:
             self._db = snapshot
@@ -94,7 +96,9 @@ class SqliteKV:
 
     def Put(self, key, value, sync = False, cursor = None):
         arg_cursor = cursor
-        logging.debug("Put: key(%s), value(%s)", key, value)
+
+        if self.debug:
+            logging.debug("Put: key(%s), value(%s)", key, value)
 
         if value is None:
             return self.Delete(key, cursor = cursor)
@@ -113,7 +117,9 @@ class SqliteKV:
 
     def Delete(self, key, sync = False, cursor = None):
         arg_cursor = cursor
-        logging.debug("Delete: key(%s)", key)
+        if self.debug:
+            logging.debug("Delete: key(%s)", key)
+        
         with get_write_lock():
             if cursor == None:
                 cursor = self.cursor()
@@ -161,7 +167,8 @@ class SqliteKV:
 
         sql = " ".join(sql_builder)
 
-        logging.debug("SQL:%s (%s)", sql, params)
+        if self.debug:
+            logging.debug("SQL:%s (%s)", sql, params)
 
         # return cur.execute(sql, tuple(params))
         for item in cur.execute(sql, tuple(params)):

@@ -23,7 +23,7 @@
     <div class="settings-row btn-line-height">
         <div class="settings-key">备份数据库</div>
         <div class="settings-value">
-            <a class="btn backup-btn" target="_blank" href="/system/backup?p=db">备份</a>
+            <a class="btn backup-btn">备份</a>
         </div>
     </div>
 
@@ -56,4 +56,12 @@
     </div>
 </div>
 
+<script type="text/javascript">
+$(function () {
+    $(".backup-btn").click(function () {
+        $.get("/system/backup?p=db");
+        xnote.alert("执行中... <a target=\"_blank\" href=\"/system/log?log_type=mem&log_name=backup_db\">查看执行日志</a>");
+    });
+})
+</script>
 {% end %}
