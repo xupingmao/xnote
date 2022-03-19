@@ -32,11 +32,13 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 - 如果安装老版本后更新启动失败参考 [数据库迁移](./docs/db_migrate.md)
 
 ### 启动参数
-- `--data {data_path}` 指定数据存储的data目录，比如`python app.py --data D:/data`
-- `--port 1234`启动端口号，注意优先使用环境变量{PORT}设置的端口号，这是为了自适应云服务容器的端口
-- `--useUrlencode yes`针对只支持ASCII编码的文件系统开启urlencode转换非ASCII码字符
-- `--minthreads {number}` web请求处理线程数
 
+默认的配置文件位于`config/boot/boot.default.properties`，具体的功能参考配置的注释
+
+```sh
+# 指定自定义的配置文件
+python3 app.py --config config/boot/自定义名称.properties
+```
 
 ## 主要功能
 

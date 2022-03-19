@@ -81,7 +81,7 @@ _leveldb = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/03/19 00:00:57
+# @modified 2022/03/19 10:19:59
 ###########################################################
 
 
@@ -130,44 +130,6 @@ def print_debug_info(fmt, *args):
 
 class DBException(Exception):
     pass
-
-class RecordLock:
-
-    _enter_lock = threading.Lock()
-    _lock_dict  = dict()
-
-    def __init__(self, lock_key):
-        self.lock = None
-        self.lock_key = lock_key
-
-    def acquire(self, timeout = -1):
-        lock_key = self.lock_key
-
-        wait_time_start = time.time()
-        with RecordLock._enter_lock:
-            while RecordLock._lock_dict.get(lock_key) != None:
-                # 如果复用lock，可能导致无法释放锁资源
-                time.sleep(0.001)
-                if timeout > 0:
-                    wait_time = time.time() - wait_time_start
-                    if wait_time > timeout:
-                        return False
-            # 由于_enter_lock已经加锁了，_lock_dict里面不需要再使用锁
-            RecordLock._lock_dict[lock_key] = True
-        return True
-
-    def release(self):
-        del RecordLock._lock_dict[self.lock_key]
-
-    def __enter__(self):
-        self.acquire()
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.release()
-
-    def __del__(self):
-        self.release()
 
 class WriteBatchProxy:
 
@@ -218,22 +180,10 @@ class WriteBatchProxy:
             print_debug_info("batch.delete key={}", key)
         print_debug_info("-----  batch.end  -----")
 
-    def convert_to_ldb_batch(self):
-        if hasattr(_leveldb, "convert_to_ldb_batch"):
-            return _leveldb.convert_to_ldb_batch(self)
-        else:
-            batch = leveldb.WriteBatch()
-            for key in self._puts:
-                value = self._puts[key]
-                batch.Put(key, value)
-            for key in self._deletes:
-                batch.Delete(key)
-            return batch
 
     def commit(self, sync = False):
         self.log_debug_info()
-        ldb_batch = self.convert_to_ldb_batch()
-        check_get_leveldb().Write(ldb_batch, sync)
+        check_get_leveldb().Write(self, sync)
 
 
     def __enter__(self):
@@ -243,65 +193,6 @@ class WriteBatchProxy:
         if traceback is None:
             self.commit()
 
-
-class LevelDBProxy:
-
-    def __init__(self, path, snapshot = None, 
-            block_cache_size = None, 
-            write_buffer_size = None):
-        """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
-
-        if snapshot != None:
-            self._db = snapshot
-        else:
-            import leveldbpy
-            self._db = leveldbpy.DB(path.encode("utf-8"), 
-                create_if_missing = True, 
-                block_cache_size = block_cache_size)
-
-    def Get(self, key):
-        return self._db.get(key)
-
-    def Put(self, key, value, sync = False):
-        return self._db.put(key, value, sync = sync)
-
-    def Delete(self, key, sync = False):
-        return self._db.delete(key, sync = sync)
-
-    def RangeIter(self, key_from = None, key_to = None, 
-            reverse = False, include_value = True, 
-            fill_cache = False):
-        """返回区间迭代器
-        @param {str}  key_from       开始的key（包含）
-        @param {str}  key_to         结束的key（包含）
-        @param {bool} reverse        是否反向查询
-        @param {bool} include_value  是否包含值
-        """
-        if include_value:
-            keys_only = False
-        else:
-            keys_only = True
-
-        iterator = self._db.iterator(keys_only = keys_only)
-
-        return iterator.RangeIter(key_from, key_to, 
-            include_value = include_value, reverse = reverse)
-
-    def CreateSnapshot(self):
-        return LevelDBProxy(snapshot = self._db.snapshot())
-
-    def Write(self, batch, sync = False):
-        """执行批量操作"""
-        return self._db.write(batch, sync)
-
-    def convert_to_ldb_batch(self, batch_proxy):
-        batch = leveldbpy.WriteBatch()
-        for key in batch_proxy._puts:
-            value = batch_proxy._puts[key]
-            batch.put(key, value)
-        for key in batch_proxy._deletes:
-            batch.delete(key)
-        return batch  
 
 def config(**kw):
     global WRITE_ONLY

@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/03/19 00:15:17
+# @modified 2022/03/19 10:38:16
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -19,7 +19,7 @@ import xtemplate
 from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil, fsutil, logutil
-from xutils.dbutil_sqlite import SqliteKV
+from xutils.db.driver_sqlite import SqliteKV
 
 config = xconfig
 
@@ -264,6 +264,9 @@ def calc_key_size():
 
     return result
 
+def import_db(db_file):
+    pass
+
 class BackupHandler:
 
     @xauth.login_required("admin")
@@ -283,6 +286,10 @@ class BackupHandler:
 
         if p == "calc_key_size":
             return calc_key_size()
+
+        if p == "import_db":
+            path = xutils.get_argument("path", "")
+            return import_db(path)
 
         # 备份所有的
         chk_backup()

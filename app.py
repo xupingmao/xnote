@@ -1,8 +1,8 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/03/18 23:17:10
+# @modified 2022/03/19 10:35:54
 """xnote - Xnote is Not Only Text Editor
-Copyright (C) 2016-2019  xupingmao 578749341@qq.com
+Copyright (C) 2016-2022  xupingmao 578749341@qq.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -142,18 +142,44 @@ def try_init_sqlite():
 @log_mem_info_deco("try_init_ldb")
 def try_init_ldb():
     try:
+
+        block_cache_size = xconfig.get_global_config("system.block_cache_size")
+        write_buffer_size = xconfig.get_global_config("system.write_buffer_size")
+        max_open_files = xconfig.get_global_config("system.max_open_files")
+
+        leveldb_kw = dict(block_cache_size = block_cache_size, 
+            write_buffer_size = write_buffer_size, 
+            max_open_files = max_open_files)
+
         db_instance = None
-        db_engine = xconfig.get_global_config("system.db_engine")
-        if db_engine == "sqlite":
-            from xutils.dbutil_sqlite import SqliteKV
+        db_driver = xconfig.get_global_config("system.db_driver")
+
+        if db_driver == "sqlite":
+            from xutils.db.driver_sqlite import SqliteKV
             db_file = os.path.join(xconfig.DB_DIR, "sqlite", "kv_store.db")
             db_instance = SqliteKV(db_file)
 
+        if db_driver == "leveldbpy":
+            from xutils.db.driver_leveldbpy import LevelDBProxy
+            db_instance = LevelDBProxy(xconfig.DB_DIR, **leveldb_kw)            
+
+        # 默认使用leveldb启动
+        if db_instance is None:
+            try:
+                import leveldb
+                from xutils.db.driver_leveldb import LevelDBImpl
+                db_instance = LevelDBImpl(xconfig.DB_DIR, **leveldb_kw)
+            except ImportError:
+                if xutils.is_windows():
+                    logging.warning("检测到Windows环境，自动切换到leveldbpy驱动")
+                    from xutils.db.driver_leveldbpy import LevelDBProxy
+                    db_instance = LevelDBProxy(xconfig.DB_DIR, **leveldb_kw)
+                else:
+                    logging.error("启动失败,请安装leveldb依赖")
+                    sys.exit(1)
+
         # 初始化leveldb数据库
-        dbutil.init(xconfig.DB_DIR, 
-            block_cache_size = xconfig.get_global_config("system.block_cache_size"),
-            write_buffer_size = xconfig.get_global_config("system.write_buffer_size"),
-            db_instance = db_instance)
+        dbutil.init(xconfig.DB_DIR, db_instance = db_instance)
     except:
         xutils.print_exc()
         xconfig.errors.append("初始化ldb失败")

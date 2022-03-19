@@ -1,9 +1,11 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2022/03/13 22:01:16
+# @modified 2022/03/19 10:48:04
 import os
 import time
+from collections import deque
+
 import xtemplate
 import xauth
 import xutils
@@ -17,7 +19,7 @@ OPTION_HTML = '''
 <div class="row card">
 
     <div class="x-tab-box row btn-style dark" data-tab-key="type" data-tab-default="tail">
-        <a class="x-tab" data-tab-value="tail">最近</a>
+        <a class="x-tab" data-tab-value="tail">最新</a>
         <a class="x-tab" data-tab-value="head">最早</a>
         <a class="x-tab" data-tab-value="all">全部</a>
     </div>
@@ -48,6 +50,24 @@ def get_log_path(date, level = "INFO"):
     fname   = "xnote.%s.%s.log" % (date, level)
     return os.path.join(dirname, fname)
     
+def read_tail_lines(fpath, lines):
+    if not os.path.exists(fpath):
+        return []
+
+    q = deque()
+
+    with open(fpath, encoding="utf-8") as fp:
+        while True:
+            line = fp.readline(1024)
+            if line is None or len(line) == 0:
+                break
+            q.append(line)
+            if len(q) > lines:
+                q.popleft()
+
+    return "".join(q)
+
+
 class LogHandler(BasePlugin):
     
     title    = 'xnote系统日志'
@@ -61,7 +81,7 @@ class LogHandler(BasePlugin):
         user_name = xauth.current_name()
         xmanager.add_visit_log(user_name, "/system/log")
 
-        type = xutils.get_argument("type", "rev_tail")
+        type = xutils.get_argument("type", "tail")
         date = xutils.get_argument("date")
 
         if not date:
@@ -70,13 +90,13 @@ class LogHandler(BasePlugin):
         fpath = get_log_path(date)
         self.render_options(date)
 
-        if type == "rev_tail":
-            lines = readlines(fpath)[-100:]
-            lines.reverse()
-            return "".join(lines)
+        if type == "tail":
+            return read_tail_lines(fpath, 100)
+
         if type == "head":
             return ''.join(readlines(fpath)[:100])
-        return xutils.readfile(fpath)
+
+        return xutils.readfile(fpath, limit = 1024 * 1024)
     
     def render_options(self, date):
 

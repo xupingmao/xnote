@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2016/12/05
-# @modified 2022/03/18 22:47:49
+# @modified 2022/03/19 01:13:01
 # @filename xtemplate.py
 
 
@@ -86,8 +86,8 @@ def load_nav_list():
     NAV_LIST.append(NavItem(text = "插件", need_login = True,  require_admin = False, desktop_only = True, url = "/plugin_list"))
     NAV_LIST.append(NavItem(text = "文件", need_login = True,  require_admin = True , desktop_only = True, url = "/fs_bookmark"))
     NAV_LIST.append(NavItem(text = "设置", need_login = True,  require_admin = False, url = "/system/settings"))
+    NAV_LIST.append(NavItem(text = "后台", need_login = True, require_admin = True, desktop_only = True, url = "/system/admin"))
     NAV_LIST.append(NavItem(text = "登录", need_logout = True, require_admin = False, url = "/login"))
-    NAV_LIST.append(NavItem(text = "后台", need_login = True, require_admin = True, url = "/system/admin"))
 
 def T(text, lang = None):
     if lang is None:
