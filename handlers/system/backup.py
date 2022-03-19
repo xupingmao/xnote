@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/03/19 14:48:41
+# @modified 2022/03/19 17:55:28
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -218,8 +218,16 @@ class DBBackup:
         return count
 
     def execute(self):
-        with _backup_lock:
-            self.do_execute()
+        try:
+            got_lock = False
+            if _backup_lock.acquire(blocking = False):
+                self.do_execute()
+            else:
+                logging.warning("backup is busy")
+                return "backup is busy"
+        finally:
+            if got_lock:
+                _backup_lock.release()
 
     def do_execute(self):
         # 先做清理工作
@@ -280,33 +288,46 @@ def calc_qps(count, cost_time):
         return count/cost_time
     return -1
 
+
 def import_db(db_file):
-    with _backup_lock:
-        count = 0
-        logger = logutil.new_mem_logger("import_db", size = 20)
+    got_lock = False
+    try:
+        if _backup_lock.acquire(blocking = False):
+            got_lock = True
+            return _import_db(db_file)
+        else:
+            logging.warning("import_db is busy")
+            return "import_db is busy"
+    finally:
+        if got_lock:
+            _backup_lock.release()
 
-        db = sqlite3.connect(db_file)
-        total_count = list(db.execute("SELECT COUNT(1) FROM kv_store"))[0][0]
+def _import_db(db_file):
+    count = 0
+    logger = logutil.new_mem_logger("import_db", size = 20)
 
-        if total_count == 0:
-            logger.log("db is empty")
-            return
+    db = sqlite3.connect(db_file)
+    total_count = list(db.execute("SELECT COUNT(1) FROM kv_store"))[0][0]
 
-        sql = "SELECT key, value FROM kv_store ORDER BY key"
+    if total_count == 0:
+        logger.log("db is empty")
+        return
 
-        db_instance = dbutil.get_instance()
-        start_time = time.time()
+    sql = "SELECT key, value FROM kv_store ORDER BY key"
 
-        for key, value in db.execute(sql):
-            db_instance.Put(key, value)
-            count += 1
-            if count % 100 == 0:
-                cost_time = time.time() - start_time
-                progress = count/total_count*100.0
-                qps = calc_qps(count, cost_time)
-                logger.log("proceed:(%d), progress:(%.2f%%), qps:(%.2f)" % (count, progress, qps))
-            
-        logger.log("[done] records:%s", count)
+    db_instance = dbutil.get_instance()
+    start_time = time.time()
+
+    for key, value in db.execute(sql):
+        db_instance.Put(key, value)
+        count += 1
+        if count % 100 == 0:
+            cost_time = time.time() - start_time
+            progress = count/total_count*100.0
+            qps = calc_qps(count, cost_time)
+            logger.log("proceed:(%d), progress:(%.2f%%), qps:(%.2f)" % (count, progress, qps))
+        
+    logger.log("[done] records:%s", count)
     return "records:%s" % count
 
 class BackupHandler:
