@@ -16,7 +16,7 @@ import json
 import xauth
 from xutils import dbutil
 from handlers.fs.fs_upload import get_upload_file_path
-from xutils.dbutil_sqlite import SqliteKV
+from xutils.db.driver_sqlite import SqliteKV
 
 config = xconfig
 date = time.strftime("%Y/%m")

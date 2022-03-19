@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2022/03/18 21:36:18
+# @modified 2022/03/19 11:06:42
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -506,6 +506,8 @@ class ViewHandler:
     @xauth.login_required("admin")
     def GET(self):
         fpath = xutils.get_argument("path")
+        fpath = fpath.replace("\\", "/")
+        
         basename, ext = os.path.splitext(fpath)
         encoded_fpath = xutils.encode_uri_component(fpath)
 

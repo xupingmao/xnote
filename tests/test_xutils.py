@@ -338,7 +338,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual([1,2,3,4,5], xutils.functions.listmerge(l1, l2))
 
     def test_dbutil_lock(self):
-        from xutils.dbutil import RecordLock
+        from xutils.db.lock import RecordLock
         lock1 = RecordLock("lock")
         lock2 = RecordLock("lock")
         self.assertTrue(lock1.acquire(timeout = 1))
@@ -347,7 +347,7 @@ class TestMain(unittest.TestCase):
         del lock1,lock2
 
     def test_dbutil_lock_free(self):
-        from xutils.dbutil import RecordLock
+        from xutils.db.lock import RecordLock
         lock1 = RecordLock("lock#1")
         lock2 = RecordLock("lock#2")
 
@@ -357,7 +357,7 @@ class TestMain(unittest.TestCase):
         del lock1,lock2
 
     def test_dbutil_lock_with(self):
-        from xutils.dbutil import RecordLock
+        from xutils.db.lock import RecordLock
         lock1 = RecordLock("lock")
         lock2 = RecordLock("lock")
 
