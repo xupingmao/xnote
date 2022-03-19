@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/24 11:11:04
-# @modified 2022/03/19 14:47:46
+# @modified 2022/03/19 23:32:48
 # @filename driver_sqlite.py
 
 """Sqlite对KV接口的实现"""
@@ -82,8 +82,6 @@ class SqliteKV:
         cursor = self.cursor()
         r_iter = cursor.execute("SELECT value FROM kv_store WHERE `key` = ?;", (key,))
         result = list(r_iter)
-        # logging.debug("result:%s", result)
-        # result = [("1111",)]
         if len(result) > 0:
             return result[0][0]
         return None
@@ -200,9 +198,6 @@ class SqliteKV:
                 cur.execute("commit;")
             finally:
                 self.commit()
-
-    def convert_to_ldb_batch(self, batch_proxy):
-        return batch_proxy
 
     def Close(self):
         if self._db != None:

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/12 23:04:00
-# @modified 2022/03/18 23:46:59
+# @modified 2022/03/19 18:54:15
 import xutils
 import xtemplate
 import xauth
@@ -19,13 +19,15 @@ SCAN_HTML = """
 
 <div class="card">
     <div class="card-title">
-        <span>leveldb工具</span>
+        <span>数据库工具</span>
 
         <div class="float-right">
             {% include common/button/back_button.html %}
         </div>
     </div>
 </div>
+
+{% include system/component/db_nav.html %}
 
 <div class="card">
     <form class="row">
@@ -48,8 +50,6 @@ SCAN_HTML = """
             <button type="submit">查询</button>
 
             <div class="float-right btn-line-height">
-                <a href="/note/stat?p=system">元数据</a>
-                <span>|</span>
                 <a href="/fs_link/db">数据库目录</a>
                 <span>|</span>
                 <a href="/system/backup?p=home">备份管理</a>

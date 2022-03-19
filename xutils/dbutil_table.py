@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/03/18 16:17:14
+# @modified 2022/03/19 23:26:16
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -15,40 +15,64 @@ def dict_del(dict, key):
     if key in dict:
         del dict[key]
 
-def format_int(int_val):
+def encode_int(int_val):
+    """把整型转换成字符串，比较性保持不变
+    >>> encode_int(10) > encode_int(1)
+    True
+    >>> encode_int(12) == encode_int(12)
+    True
+    >>> encode_int(-1) > encode_int(-10)
+    True
+    >>> encode_int(12) > encode_int(-1)
+    True
+    >>> encode_int(10**5) > encode_int(1)
+    True
+    """
     if not isinstance(int_val, int):
-        raise Exception("format_int: expect int but see %r" % int_val)
+        raise Exception("encode_int: expect int but see: (%r)" % int_val)
     if abs(int_val) > MAX_INT:
-        raise Exception("format_int: int value must between [-%s, %s]" % (MAX_INT, MAX_INT))
+        raise Exception("encode_int: int value must between [-%s, %s]" % (MAX_INT, MAX_INT))
     
     # 负数需要放在前面
     # 使用64位二进制存储
     # 第一位数字表示符号，1表示正数，0表示负数，其余63位可以用于存储数字
     flag = 1 << 63
     if int_val < 0:
-        int_val = abs(int_val)
+        int_val = MAX_INT + int_val
     else:
         int_val = int_val | flag
     
     return "%016X" % int_val
 
-def format_index_value(value):
+def encode_float(value):
+    """把浮点数编码成字符串
+    >>> encode_float(10.5) > encode_float(5.5)
+    True
+    >>> encode_float(10.5) > encode_float(-10.5)
+    True
+    >>> encode_float(-0.5) > encode_float(-1.5)
+    True
+    """
+
+    if value < 0:
+        value += 10**20
+        return "A%020.10f" % value
+    else:
+        return "B%020.10f" % value
+
+def encode_index_value(value):
     if value is None:
         return chr(0)
     if isinstance(value, str):
         return quote(value)
     if isinstance(value, int):
-        return format_int(value)
+        return encode_int(value)
     if isinstance(value, float):
-        if value < 0:
-            value += 10**20
-            return "A%020.10f" % value
-        else:
-            return "B%020.10f" % value
+        return encode_float(value)
     raise Exception("unknown index_type:%r" % type(value))
 
 class LdbTable:
-    """基于leveldb的表，比较常见的是以下几种
+    """基于leveldb的表，比较常见的是以下2种
     * key = prefix:record_id           全局数据库
     * key = prefix:user_name:record_id 用户维度数据
 
@@ -176,9 +200,6 @@ class LdbTable:
         index_prefix = "_index$%s$%s" % (self.table_name, index_name)
         return self.build_key_no_prefix(index_prefix, self.user_name or user_name)
 
-    def _format_index_value(self, value):
-        return format_index_value(value)
-
     def _escape_key(self, key):
         return quote(key)
 
@@ -221,11 +242,11 @@ class LdbTable:
 
             # 只要有旧的记录，就要清空旧索引值
             if old_obj != None and index_changed:
-                old_value = self._format_index_value(old_value)
+                old_value = encode_index_value(old_value)
                 batch.check_and_delete(index_prefix + ":" + old_value + ":" + escaped_obj_id)
 
             # 新的索引值始终更新
-            new_value = self._format_index_value(new_value)
+            new_value = encode_index_value(new_value)
             batch.check_and_put(index_prefix + ":" + new_value + ":" + escaped_obj_id, obj_key)
 
     def _delete_index(self, old_obj, batch, user_name = None):
@@ -236,7 +257,7 @@ class LdbTable:
             old_value = old_obj.get(index_name)
             if old_value is None:
                 continue
-            old_value = self._format_index_value(old_value)
+            old_value = encode_index_value(old_value)
             index_prefix = self._get_index_prefix(index_name, user_name = user_name)
             index_key = index_prefix + ":" + old_value + ":" + escaped_obj_id
             batch.delete(index_key)
@@ -451,7 +472,7 @@ class LdbTable:
 
     def count_by_index(self, index_name, filter_func = None, index_value = None):
         if index_value != None:
-            index_value = self._format_index_value(index_value)
+            index_value = encode_index_value(index_value)
             prefix = self._get_index_prefix(index_name) + ":" + index_value
         else:
             prefix = self._get_index_prefix(index_name)
@@ -470,7 +491,7 @@ class LdbTable:
         @param {bool} reverse 是否逆向查询
         """
         if index_value != None:
-            index_value = self._format_index_value(index_value)
+            index_value = encode_index_value(index_value)
             prefix = self._get_index_prefix(index_name) + ":" + index_value
         else:
             prefix = self._get_index_prefix(index_name)
@@ -519,7 +540,7 @@ class TableIndexRepair:
         logging.info("Delete {%s}", key)
 
         if not key.startswith("_index$"):
-            print_debug_info("Invalid index key {!r}", key)
+            logging.warning("Invalid index key:(%s)", key)
             return
         delete(key)
 
@@ -537,7 +558,7 @@ class TableIndexRepair:
             record_id   = db._get_id_from_key(record_key)
             record_id   = db._escape_key(record_id)
             index_value = getattr(record, name)
-            index_value = format_index_value(index_value)
+            index_value = encode_index_value(index_value)
             new_key = index_prefix + ":" + index_value + ":" + record_id
 
             if new_key != old_key:

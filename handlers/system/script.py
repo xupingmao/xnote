@@ -21,7 +21,7 @@ SCRIPT_EXT_LIST = (
     ".py"
 )
 
-template_file = "system/script.html"
+template_file = "system/page/script.html"
 
 def get_default_shell_ext():
     if xutils.is_mac():

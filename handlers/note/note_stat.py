@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2021/12/30 23:57:54
+# @modified 2022/03/19 18:53:17
 import xauth
 import xutils
 import xmanager
@@ -15,6 +15,8 @@ HTML = """
     .key { width: 75%; }
     .admin-stat-th { width: 25% }
 </style>
+
+{% include system/component/db_nav.html %}
 
 {% if stat_list != None %}
 <div class="card">
