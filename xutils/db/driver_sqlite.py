@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/24 11:11:04
-# @modified 2022/03/19 23:32:48
+# @modified 2022/03/20 19:39:03
 # @filename driver_sqlite.py
 
 """Sqlite对KV接口的实现"""
@@ -145,7 +145,8 @@ class SqliteKV:
         if include_value:
             sql_builder.append("SELECT key, value FROM kv_store")
         else:
-            sql_builder.append("SELECT value FROM kv_store")
+            # 只包含key
+            sql_builder.append("SELECT key FROM kv_store")
 
         if key_from != None or key_to != None:
             sql_builder.append("WHERE 1=1")

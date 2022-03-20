@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/03/20 13:34:03
+# @modified 2022/03/20 18:18:14
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2022  xupingmao 578749341@qq.com
 
@@ -151,7 +151,12 @@ def try_init_ldb():
 
         if db_driver == "leveldbpy":
             from xutils.db.driver_leveldbpy import LevelDBProxy
-            db_instance = LevelDBProxy(xconfig.DB_DIR, **leveldb_kw)            
+            db_instance = LevelDBProxy(xconfig.DB_DIR, **leveldb_kw)
+
+        if db_driver == "lmdb":
+            from xutils.db.driver_lmdb import LmdbKV
+            db_dir = os.path.join(xconfig.DB_DIR, "lmdb")
+            db_instance = LmdbKV(db_dir)
 
         # 默认使用leveldb启动
         if db_instance is None:

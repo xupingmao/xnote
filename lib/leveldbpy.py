@@ -389,52 +389,10 @@ class Iterator(object):
                 break
             yield row
 
-    def reversed_RangeIter(self, key_from = None, key_to = None):
-        if key_to:
-            self.seek(key_to)
-
-            def try_seek_prev():
-                try:
-                    self.prev()
-                except StopIteration:
-                    return
-
-            # 反向遍历有三种情况:
-            # 1. 没有命中key并且后面也没有任何值，需要往前移动
-            # 2. 找到key后面的一个值，需要往前移动
-            # 3. 刚好命中key，不需要处理
-
-            if not self.valid():
-                # print("DEBUG: invalid key")
-                try_seek_prev()
-            else:
-                # print("DEBUG: key_to=%s, current_key=%s" % (key_to, self.key()))
-                if self.key() > key_to:
-                    try_seek_prev()
-                # else 刚好命中，不需要处理
-        else:
-            self.seekLast()
-
-        while True:
-            if not self.valid():
-                # raise StopIteration()
-                return
-            key = self.key()
-            # print(key, key_from)
-            if key_from and key < key_from:
-                # raise StopIteration()
-                return
-            try:
-                prev_value = self.prev()
-            except StopIteration:
-                return
-            yield prev_value
-
     def RangeIter(self, 
             key_from = None, 
             key_to = None, 
             include_value = True, 
-            reverse = False, 
             verify_checksums = False, 
             fill_cache = True):
         """return RangeIter of py-leveldb style.
@@ -447,29 +405,35 @@ class Iterator(object):
         else:
             self._keys_only = False
 
-        if reverse:
-            for value in self.reversed_RangeIter(key_from, key_to):
-                yield value
+        if key_from:
+            self.seek(key_from)
         else:
-            if key_from:
-                self.seek(key_from)
-            else:
-                self.seekFirst()
+            self.seekFirst()
 
-            while True:
-                if not self.valid():
-                    # raise StopIteration()
-                    return
-                key = self.key()
-                # print(key, key_to)
-                if key_to and key > key_to:
-                    # raise StopIteration()
-                    return
-                try:
-                    next_value = self.next()
-                except StopIteration:
-                    return
-                yield next_value
+        if not self.valid():
+            return
+
+        if include_value:
+            item = (self.key(), self.value())
+        else:
+            item = self.key()
+
+        while True:
+            if not self.valid():
+                # raise StopIteration()
+                return
+            key = self.key()
+            # print(key, key_to)
+            if key_to and key > key_to:
+                # raise StopIteration()
+                return
+            
+            yield item
+
+            try:
+                item = self.next()
+            except StopIteration:
+                return
 
     def keys(self):
         while self.valid():
