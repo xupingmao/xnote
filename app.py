@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/03/19 18:13:59
+# @modified 2022/03/20 13:34:03
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2022  xupingmao 578749341@qq.com
 
@@ -171,10 +171,11 @@ def try_init_ldb():
                     sys.exit(1)
 
         # 初始化leveldb数据库
-        dbutil.init(xconfig.DB_DIR, db_instance = db_instance)
+        dbutil.init(xconfig.DB_DIR, db_instance = db_instance, db_cache = cacheutil)
     except:
         xutils.print_exc()
-        xconfig.errors.append("初始化ldb失败")
+        logging.error("初始化数据库失败...")
+        sys.exit(1)
 
 def init_autoreload():
     def reload_callback():

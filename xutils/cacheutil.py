@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2022/03/05 00:25:04
+# @modified 2022/03/20 13:32:03
 """持久化操作已经禁用，请使用dbutil
 缓存的实现，API列表如下
 
@@ -45,6 +45,20 @@ def decode_key(text):
     return base64.urlsafe_b64decode(text[:-3].encode("utf-8")).decode("utf-8")
 
 
+def format_key(key):
+    """格式化key，先简单实现一版"""
+    result = []
+    for c in key:
+        if c == "/":
+            result.append("%47")
+        elif c == "%":
+            result.append("%25")
+        elif c == ":":
+            result.append("%58")
+        else:
+            result.append(c)
+    return "".join(result)
+
 def log_debug(msg):
     # print(msg)
     pass
@@ -64,15 +78,8 @@ class CacheObj:
     def __init__(self, key, value, expire = -1, type = "object", need_save = True):
         global _cache_dict
         global _cache_queue
-        
-        if key is None:
-            raise ValueError("key cannot be None")
-        if value is None:
-            raise ValueError("value cannot be None")
-        if key.find("/") >= 0:
-            raise ValueError("cannot contains / in key")
-        if not self.is_valid_key(key):
-            raise ValueError("invalid key `%s`" % key)
+
+        self.check_key_value(key, value)
 
         self.key              = key
         self.value            = value
@@ -113,6 +120,14 @@ class CacheObj:
         except:
             # queue.Empty异常
             print_exc()
+
+    def check_key_value(self, key, value):
+        if key is None:
+            raise ValueError("key cannot be None")
+        if value is None:
+            raise ValueError("invalid key: value is None")
+        if len(key) > 200:
+            raise ValueError("invalid key: len(key)>200")
 
     def is_valid_key(self, key):
         return self.valid_key_pattern.match(key) != None

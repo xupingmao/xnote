@@ -75,13 +75,15 @@ WRITE_ONLY = False
 
 # leveldb的全局实例
 _leveldb = None
+# 缓存对象（拥有put/get两个方法）
+_cache = None
 
 ###########################################################
 # @desc db utilties
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/03/19 23:28:25
+# @modified 2022/03/20 13:17:54
 ###########################################################
 
 
@@ -109,6 +111,10 @@ class WriteBatchProxy:
         self.put(key, val)
 
     def put(self, key, val):
+        """put一个value
+        @param {str} key
+        @param {str} val
+        """
         check_before_write(key)
 
         key_bytes = key.encode("utf-8")
@@ -188,8 +194,13 @@ def create_db_instance(db_dir, block_cache_size = None, write_buffer_size = None
     raise Exception("create_db_instance failed: not supported")
 
 @xutils.log_init_deco("leveldb")
-def init(db_dir, block_cache_size = None, write_buffer_size = None, db_instance = None):
+def init(db_dir, 
+        block_cache_size = None, 
+        write_buffer_size = None, 
+        db_instance = None, 
+        db_cache = None):
     global _leveldb
+    global _cache
 
     if db_instance != None:
         _leveldb = db_instance
@@ -198,6 +209,7 @@ def init(db_dir, block_cache_size = None, write_buffer_size = None, db_instance 
             block_cache_size = block_cache_size, 
             write_buffer_size = write_buffer_size)
 
+    _cache = db_cache
     xutils.log("leveldb: %s" % _leveldb)
 
 def check_not_empty(value, message):
@@ -621,12 +633,21 @@ def prefix_count(prefix, filter_func = None,
     prefix_scan(prefix, func)
     return count[0]
 
-def count_table(table_name):
+def count_table(table_name, use_cache = False):
     assert table_name != None
     assert table_name != ""
 
     if table_name[-1] != ":":
         table_name += ":"
+
+    cache_key = "table_count:%s" % table_name
+    
+    if use_cache and _cache != None:
+        value = _cache.get(cache_key)
+        if value != None:
+            logging.debug("count_table by cache, table_name:(%s), count:(%s)", 
+                table_name, value)
+            return value
 
     key_from = table_name.encode("utf-8")
     key_to   = table_name.encode("utf-8") + b'\xff'
@@ -637,6 +658,9 @@ def count_table(table_name):
     count = 0
     for key in iterator:
         count += 1
+
+    if _cache != None:
+        _cache.put(cache_key, count, expire = 60)
     return count
 
 

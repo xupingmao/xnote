@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/03/19 23:26:16
+# @modified 2022/03/20 13:36:55
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -53,7 +53,6 @@ def encode_float(value):
     >>> encode_float(-0.5) > encode_float(-1.5)
     True
     """
-
     if value < 0:
         value += 10**20
         return "A%020.10f" % value
@@ -99,7 +98,8 @@ class LdbTable:
         self.user_name = user_name
         self.index_names = INDEX_INFO_DICT.get(table_name) or set()
 
-        if user_name != None and user_name != "":
+        if user_name != None:
+            assert user_name != ""
             self.prefix += ":" + user_name
 
         if self.prefix[-1] != ":":
@@ -453,7 +453,7 @@ class LdbTable:
             key_obj_id_temp = self._get_id_from_obj(obj)
             key_obj_id = quote(key_obj_id_temp)
             if obj_id != key_obj_id:
-                logging.warning("invalid obj_id:{}, obj_id:{}", obj_id, key_obj_id)
+                logging.warning("invalid obj_id:(%s), obj_id:(%s)", obj_id, key_obj_id)
                 return None
 
             # 用于调试

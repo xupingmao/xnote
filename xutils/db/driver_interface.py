@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author mark
 # @since 2022/03/19 23:28:08
-# @modified 2022/03/19 23:34:41
+# @modified 2022/03/20 14:42:16
 # @filename driver_interface.py
 
 """这里定义一个通用的K-V数据库接口
@@ -14,12 +14,23 @@ class DBInterface:
         raise NotImplementedError("__init__")
 
     def Get(self, key):
+        """通过key读取Value
+        @param {bytes} key
+        @return {bytes|None} value
+        """
         raise NotImplementedError("Get")
 
     def Put(self, key, value, sync = False):
+        """写入Key-Value键值对
+        @param {bytes} key
+        @param {bytes} value
+        """
         raise NotImplementedError("Put")
 
     def Delete(self, key, sync = False):
+        """删除Key-Value键值对
+        @param {bytes} key
+        """
         raise NotImplementedError("Delete")
 
     def RangeIter(self, 

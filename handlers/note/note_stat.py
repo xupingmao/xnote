@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2022/03/19 18:53:17
+# @modified 2022/03/20 13:20:25
 import xauth
 import xutils
 import xmanager
@@ -95,7 +95,10 @@ class StatHandler(BasePlugin):
                 name = table_info.name
                 if hide_index == "true" and name.startswith("_index"):
                     continue
-                admin_stat_list.append([table_info.category, table_info.name, table_info.description, dbutil.count_table(name)])
+                admin_stat_list.append([table_info.category, 
+                    table_info.name, 
+                    table_info.description, 
+                    dbutil.count_table(name, use_cache = True)])
         return admin_stat_list
 
     def handle(self, input):
