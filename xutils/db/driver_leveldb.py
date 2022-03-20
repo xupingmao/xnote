@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author mark
 # @since 2022/03/19 10:15:30
-# @modified 2022/03/19 10:18:02
+# @modified 2022/03/20 21:42:58
 # @filename driver_leveldb.py
 
 import leveldb
@@ -13,7 +13,10 @@ class LevelDBImpl:
         self._db = leveldb.LevelDB(path, **kw)
 
     def Get(self, key):
-        return self._db.Get(key)
+        try:
+            return self._db.Get(key)
+        except KeyError:
+            return None
 
     def Put(self, key, value, sync = False):
         return self._db.Put(key, value, sync = sync)
