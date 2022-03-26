@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/03/25 22:39:11
+# @modified 2022/03/26 23:44:44
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -199,6 +199,9 @@ class DBBackup:
         try:
             batch = dbutil.create_write_batch()
             for key, value in dbutil.get_instance().RangeIter(include_value = True):
+                # 可能是bytearray
+                key = bytes(key)
+                value = bytes(value)
                 batch.put_bytes(key, value)
                 count += 1
                 # 更新进度
