@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author mark
 # @since 2022/03/20 14:43:04
-# @modified 2022/03/20 21:12:53
+# @modified 2022/03/20 23:31:24
 # @filename driver_lmdb.py
 
 import lmdb
@@ -139,4 +139,7 @@ class LmdbKV:
 
             for key in batch_proxy._deletes:
                 tx.delete(key)
+
+    def Stat(self):
+        return self.env.stat()
 

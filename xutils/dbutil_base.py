@@ -57,6 +57,7 @@ except ImportError:
 
 DEFAULT_BLOCK_CACHE_SIZE = 8 * (2<<20) # 16M
 DEFAULT_WRITE_BUFFER_SIZE = 2 * (2<<20) # 4M
+DEFAULT_CACHE_EXPIRE = 60 * 60 # 1小时
 
 WRITE_LOCK    = threading.RLock()
 READ_LOCK     = threading.RLock()
@@ -83,7 +84,7 @@ _cache = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/03/20 13:17:54
+# @modified 2022/03/25 22:39:03
 ###########################################################
 
 
@@ -122,6 +123,13 @@ class WriteBatchProxy:
 
         self._deletes.discard(key_bytes)
         self._puts[key_bytes] = val_bytes
+
+    def put_bytes(self, key, value):
+        assert isinstance(key, bytes)
+        assert isinstance(value, bytes)
+
+        self._deletes.discard(key)
+        self._puts[key] = value
 
     def check_and_delete(self, key):
         old_val = get(key)
@@ -660,7 +668,7 @@ def count_table(table_name, use_cache = False):
         count += 1
 
     if _cache != None:
-        _cache.put(cache_key, count, expire = 60)
+        _cache.put(cache_key, count, expire = DEFAULT_CACHE_EXPIRE)
     return count
 
 

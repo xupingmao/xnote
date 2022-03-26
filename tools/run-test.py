@@ -40,7 +40,7 @@ def run_test(target = None):
 
 def main():
 	parser = argparse.ArgumentParser()
-	parser.add_argument("target", default="all")
+	parser.add_argument("target", default="all", nargs="?")
 	args = parser.parse_args()
 
 	do_clean()

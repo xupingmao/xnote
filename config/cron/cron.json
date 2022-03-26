@@ -1,0 +1,46 @@
+[
+    {
+        "name": "[系统]系统备份",
+        "url": "/system/backup",
+        "tm_wday": "*",
+        "tm_hour": "11",
+        "tm_min": "0",
+        "message": "",
+        "sound":0,
+        "webpage":0,
+        "id":null
+    },
+    {
+        "name": "[系统]磁盘清理",
+        "url": "/cron/diskclean",
+        "tm_wday": "*",
+        "tm_hour": "*",
+        "tm_min": "0",
+        "message": "",
+        "sound":0,
+        "webpage":0,
+        "id":null
+    },
+    {
+        "name": "[系统]笔记定时更新",
+        "url": "/cron/stats",
+        "tm_wday": "*",
+        "tm_hour": "*",
+        "tm_min": "43",
+        "message": "",
+        "sound":0,
+        "webpage":0,
+        "id":null
+    },
+    {
+        "name": "[系统]随手记后台刷新信息",
+        "url": "/message/refresh",
+        "tm_wday": "*",
+        "tm_hour": "*",
+        "tm_min": "29",
+        "message": "",
+        "sound":0,
+        "webpage":0,
+        "id":null
+    }
+]

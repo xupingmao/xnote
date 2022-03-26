@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/18 17:37:52
-# @modified 2022/01/16 20:22:26
+# @modified 2022/03/20 23:28:21
 # @filename test_dbutil_handler.py
 
 import xauth
@@ -25,6 +25,9 @@ class TestHandler:
         if p == "clear":
             return self.clear_data()
 
+        if p == "stat":
+            return self.stat()
+
         db = get_test_db()
 
         for i in range(1,11):
@@ -46,6 +49,10 @@ class TestHandler:
             count += 1
 
         return dict(count = count)
+
+    def stat(self):
+        db = dbutil.get_instance()
+        return db.Stat()
 
 class RepairHandler:
 

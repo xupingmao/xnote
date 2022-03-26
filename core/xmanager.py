@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2022/02/27 22:28:39
+# @modified 2022/03/26 23:09:03
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -499,26 +499,9 @@ class CronTaskManager:
 
     def load_system_cron_task(self):
         # 系统默认的任务
-        backup_task = xutils.Storage(name="[系统]系统备份", url="/system/backup", 
-            tm_wday = "*", tm_hour="11", tm_min="0", 
-            message = "", sound=0, webpage=0, id=None)
-
-        clean_task  = xutils.Storage(name = "[系统]磁盘清理", url="/cron/diskclean",
-            tm_wday = "*", tm_hour="*", tm_min="0",
-            message = "", sound=0, webpage=0, id=None)
-
-        stats_task = xutils.Storage(name = "[系统]笔记定时更新", url = "/cron/stats",
-            tm_wday = "*", tm_hour="*", tm_min="43",
-            message = "", sound=0, webpage=0, id=None)
-
-        msg_refresh_task = xutils.Storage(name = "[系统]随手记后台刷新信息", url = "/message/refresh",
-            tm_wday = "*", tm_hour="*", tm_min="29",
-            message = "", sound=0, webpage=0, id=None)
-
-        self.task_list.append(backup_task)
-        self.task_list.append(clean_task)
-        self.task_list.append(stats_task)
-        self.task_list.append(msg_refresh_task)
+        task_config = fsutil.load_json_config("config/cron/cron.json")
+        for task in task_config:
+            self.task_list.append(Storage(**task))
 
     def save_tasks(self):
         self.load_tasks()

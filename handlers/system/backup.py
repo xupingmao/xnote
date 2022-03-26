@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/03/19 17:55:28
+# @modified 2022/03/25 22:39:11
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -197,20 +197,28 @@ class DBBackup:
         db2 = SqliteKV(self.db_backup_file, debug = False)
         count = 0
         try:
+            batch = dbutil.create_write_batch()
             for key, value in dbutil.get_instance().RangeIter(include_value = True):
-                db2.Put(key, value)
+                batch.put_bytes(key, value)
                 count += 1
                 # 更新进度
                 DBBackup._progress = count / total_count
                 if count % 100 == 0:
+                    db2.Write(batch)
+                    batch = dbutil.create_write_batch()
+
                     cost_time = time.time() - start_time
                     progress = count/total_count*100.0
                     qps = calc_qps(count, cost_time)
                     logger.log("proceed:(%d), progress:(%.2f%%), qps:(%.2f)" % (count, progress, qps))
+
+            db2.Write(batch)
             db2.Close()
 
             logger.log("backup done, total:(%d), cost_time:(%.2fs)", count, time.time()-start_time)
         finally:
+            stack_info = xutils.print_exc()
+            logger.log("backup failed, err:%s", stack_info)
             db2 = None
             DBBackup._start_time = -1
             DBBackup._count = -1

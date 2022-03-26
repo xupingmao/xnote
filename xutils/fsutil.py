@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2022/03/06 14:45:35
+# @modified 2022/03/25 22:41:22
 
 
 """fsutil: 文件操作工具，文件工具分为如下部分：
@@ -681,6 +681,10 @@ def load_prop_config(fpath):
     text = readfile(fpath)
     from xutils.text_parser_properties import parse_prop_text
     return parse_prop_text(text, "dict")
+
+def load_json_config(fpath):
+    text = readfile(fpath)
+    return json.loads(text)
 
 class IniConfigData:
 
