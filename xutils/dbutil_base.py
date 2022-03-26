@@ -84,7 +84,7 @@ _cache = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/03/25 22:39:03
+# @modified 2022/03/26 23:34:19
 ###########################################################
 
 
@@ -114,7 +114,7 @@ class WriteBatchProxy:
     def put(self, key, val):
         """put一个value
         @param {str} key
-        @param {str} val
+        @param {object} val
         """
         check_before_write(key)
 
@@ -125,8 +125,8 @@ class WriteBatchProxy:
         self._puts[key_bytes] = val_bytes
 
     def put_bytes(self, key, value):
-        assert isinstance(key, bytes)
-        assert isinstance(value, bytes)
+        assert isinstance(key, bytes), key
+        assert isinstance(value, bytes), value
 
         self._deletes.discard(key)
         self._puts[key] = value
