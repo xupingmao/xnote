@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/03/26 23:44:44
+# @modified 2022/03/27 10:53:16
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -219,9 +219,10 @@ class DBBackup:
             db2.Close()
 
             logger.log("backup done, total:(%d), cost_time:(%.2fs)", count, time.time()-start_time)
-        finally:
+        except:            
             stack_info = xutils.print_exc()
             logger.log("backup failed, err:%s", stack_info)
+        finally:
             db2 = None
             DBBackup._start_time = -1
             DBBackup._count = -1

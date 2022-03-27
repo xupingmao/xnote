@@ -2,7 +2,7 @@
  * markdown的样式扩展
  * @author xupingmao
  * @since 2021/08/01 14:25:17
- * @modified 2022/03/13 21:18:05
+ * @modified 2022/03/27 16:53:38
  * @filename common-markdown.css
  */
 
@@ -15,6 +15,16 @@
     background-color: #FFDEAD;
     padding: 2px;
     border-radius: 2px;
+}
+
+div.xnote-todo {
+    display: inline-block;
+    margin-top: 5px;
+}
+
+div.xnote-done {
+    display: inline-block;
+    margin-top: 5px;
 }
 
 .xnote-done {

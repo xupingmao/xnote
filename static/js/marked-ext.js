@@ -1,5 +1,6 @@
 /**
  * marked.js 插件扩展
+ * 依赖: marked.js/jquery
  */
 (function (window) {
 
@@ -16,7 +17,9 @@
     var oldParse = marked.parse;
 
     // 扩展选项
-    var extOptions = {};
+    var extOptions = {
+        hideMenu: false
+    };
 
     // 进度的正则匹配
     var regexPercent = /\d+(\.\d+)?\%/;
@@ -73,7 +76,7 @@
         return html;
     }
 
-    function highlight (code, lang) {
+    function highlight(code, lang) {
         console.log(code, lang);
         if (lang) {
             lang = lang.toUpperCase();
@@ -93,49 +96,53 @@
 
     function processCheckbox(text, clickable) {
         var result = {};
-        var disabled = true;
         var disabledText = "";
+        var disabled = false;
 
         if (clickable !== undefined) {
             disabled = !clickable;
         }
 
-        if (disabled) {
-            disabledText = "disabled";
-        }
-
         // 多选框选项索引
         extOptions.checkboxIndex++;
 
-        var checkbox = ('<input type="checkbox" class="marked"'
-            + ' $disabled $checked data-text="$data-text"/>')
-                .replace("$disabled", disabledText)
-                .replace("$data-text", escape(text));
+        var checkbox = $("<input>")
+            .attr("type", "checkbox")
+            .addClass("marked")
+            .attr("data-text", text);
+
+        if (disabled) {
+            checkbox.attr("disabled", true);
+        }
 
         // 调试日志
-        console.log(extOptions.checkboxIndex, checkbox);
+        console.info(extOptions.checkboxIndex, checkbox);
 
         if (/^\[\]/.test(text)) {
             var content = text.substring(2);
+            var tail = "";
 
-            checkbox = checkbox.replace("$checked", "");
-            result.checkbox = checkbox;
+            var parts = content.split("<ul>", 2); // content可能包含HTML
+            if (parts.length == 2) {
+                content = parts[0];
+                tail = "<ul>" + parts[1];
+            }
 
-            var element = $("<span>").text(content).addClass("xnote-todo");
+            var element = $("<span>").html(content).addClass("xnote-todo");
             
             if (regexPercent.test(content)) {
                 // 包含百分比的加上进行中的进度
                 element = element.addClass("doing");
             }
-
-            result.text = element.prop("outerHTML");
+            result.checkbox = checkbox.prop("outerHTML");
+            result.text = element.prop("outerHTML") + tail;
         } else if (/^\[ \]/.test(text)) {
-            checkbox = checkbox.replace("$checked", "");
-            result.checkbox = checkbox;
+            result.checkbox = checkbox.prop("outerHTML");
             result.text = text.substring(3);
         } else if (/^\[[Xx]\]/.test(text)) {
-            checkbox = checkbox.replace("$checked", "checked");
-            result.checkbox = checkbox;
+            checkbox.attr("checked", true);
+            console.info("set checked", checkbox);
+            result.checkbox = checkbox.prop("outerHTML");
             result.text = '<span class="xnote-done">' + text.substring(3) + '</span>';
         } else {
             result.checkbox = '';
@@ -291,6 +298,10 @@
 
 
     function generateMenuHtml(myRenderer) {
+        if (extOptions.hideMenu) {
+            return ""
+        }
+
         var menuText = "";
         var itemNo = [];
         var menuList = [];
