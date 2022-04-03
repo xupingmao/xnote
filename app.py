@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/03/31 12:22:36
+# @modified 2022/04/03 21:46:38
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2022  xupingmao 578749341@qq.com
 
@@ -65,8 +65,8 @@ def get_int_by_sys_arg(value):
 def handle_args_and_init_config():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default = "./config/boot/boot.default.properties")
+    parser.add_argument("--data", default="")
     parser.add_argument("--delay", default="0")
-    parser.add_argument("--ringtone", default="no")
     parser.add_argument("--debug", default="yes")
     parser.add_argument("--minthreads", default="15")
     parser.add_argument("--useCacheSearch", default="no")
@@ -78,16 +78,16 @@ def handle_args_and_init_config():
     web.config.debug = False
     args = parser.parse_args()
 
+    if args.data != "":
+        logging.error("--data配置已经废弃，请使用--config配置")
+        sys.exit(1)
+
     # 处理Data目录，创建各种目录
     xconfig.init(args.config)
 
     # 延迟加载，避免定时任务重复执行
     delay = int(args.delay)
     time.sleep(delay)
-
-    # 启动提醒
-    if args.ringtone == "yes":
-        xutils.say("系统启动")
     
 
     xconfig.MIN_THREADS   = int(args.minthreads)
@@ -251,10 +251,6 @@ def init_app_no_lock():
         # 时钟信号
         # signal.signal(signal.SIGALRM, handle_signal)
         # signal.alarm(5)
-
-    # 启动打开浏览器选项
-    if xconfig.get_global_config("system.open_browser"):
-        webbrowser.open("http://localhost:%s/" % xconfig.PORT)
 
     # 记录已经启动
     xconfig.mark_started()

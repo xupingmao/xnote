@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2022/03/19 13:07:13
+# @modified 2022/04/03 21:23:49
 import os
 import time
 from collections import deque
@@ -17,13 +17,16 @@ from xutils.imports import *
 from xtemplate import BasePlugin
 
 OPTION_HTML = '''
-<div class="card">
+<script src="/static/js/base/jq-ext.js"></script>
 
+<div class="card">
     <div class="x-tab-box row" data-tab-key="log_type" data-tab-default="file">
         <a class="x-tab" data-tab-value="file">文件日志</a>
         <a class="x-tab" data-tab-value="mem">内存日志</a>
     </div>
+</div>
 
+<div class="card">
     {% if log_type == "file" %}
         <div class="x-tab-box btn-style dark row" data-tab-key="type" data-tab-default="tail">
             <a class="x-tab" data-tab-value="tail">最新</a>
@@ -51,7 +54,11 @@ OPTION_HTML = '''
         </div>
     {% end %}
 </div>
-
+<script>
+$(function () {
+    $(".output-textarea").scrollBottom();
+})
+</script>
 '''
 
 def readlines(fpath):

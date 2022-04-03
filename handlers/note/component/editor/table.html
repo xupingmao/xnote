@@ -81,7 +81,7 @@ $(function () {
     width = Math.max(width, MIN_WIDTH);
     
     head.forEach(function () {
-        columns.push({type: "text"});
+        columns.push({type: "text", align:"left"});
     });
 
     head.forEach(function () {
@@ -136,6 +136,7 @@ $(function () {
         }
 
         var params = {
+            version:"v2",
             id:"{{file.id}}",
             version: {{file.version}},
             content: JSON.stringify(jsonData)

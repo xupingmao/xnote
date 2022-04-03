@@ -56,7 +56,7 @@
                     <span id="uploadProgress" class="upload-progress"></span>
                     <span id="autosaveResult" class="hide">自动保存成功</span>
                     <input type="button" class="toolbox-btn toolbox-btn-right btn-primary" 
-                        onclick="togglePreview(this)" value="收起预览" />
+                        onclick="togglePreview(this)" value="预览" />
                 </div>
             </div>
 
@@ -69,11 +69,11 @@
 
                 <div class="col-md-12">
                     <div id="editor" class="col-md-12" style="height: auto; ">
-                        <div id="markdown-input-div" class="col-md-6">
+                        <div id="markdown-input-div" class="col-md-12">
                             <textarea id="markdown-input" class="form-control" name="content" rows=50>{{file.content}}</textarea>
                         </div>
 
-                        <div id="markdown-output-div" class="col-md-6"></div>
+                        <div id="markdown-output-div" class="col-md-6 hide"></div>
                     </div>
                 </div>
             </div>
@@ -107,7 +107,7 @@
         });
     }
 
-    function edit() {
+    function initEditor() {
         var clientWidth = document.body.clientWidth;
         if (clientWidth < 1000) {
             // 至少需要500px方便编写
@@ -287,9 +287,15 @@
         };
 
         function onPageLoad() {
-            updatePreview(true);
+            initEditor();
 
-            edit();
+            if ("{{_user_config.show_md_preview}}" == "true") {
+                togglePreview();
+                updatePreview(true);
+            } else {
+                // do nothing
+            }
+
             updatePreviewIntervalId = setInterval(updatePreview, 200);
             // 调整高度
             adjustHeight("#editor-area", 30);

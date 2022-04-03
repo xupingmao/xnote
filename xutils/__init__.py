@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2021/12/05 11:23:34
+# @modified 2022/04/03 22:15:46
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
@@ -11,9 +11,12 @@ xutils是暴露出去的统一接口，类似于windows.h一样
 from __future__ import print_function
 from __future__ import absolute_import
 
+import shutil
+import logging
+import logging.handlers
 from threading import current_thread
-from xutils.imports import *
 
+from xutils.imports import *
 # xnote工具
 import xutils.textutil as textutil
 import xutils.ziputil as ziputil
@@ -37,10 +40,6 @@ from xutils.logutil import *
 from xutils.webutil import *
 from xutils.exeutil import *
 from xutils.func_util import *
-
-import shutil
-import logging
-import logging.handlers
 
 FS_IMG_EXT_LIST = None
 FS_TEXT_EXT_LIST = None
@@ -265,7 +264,7 @@ def windows_say(msg):
         voice = cc.CreateObject("SAPI.SpVoice", dynamic=True)
         voice.Speak(msg)
     except ImportError:
-        pass
+        logging.warning("没有安装comtypes")
     except:
         print_exc()
 

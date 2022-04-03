@@ -78,6 +78,19 @@
 </div>
 
 <div class="settings-row">
+    <div class="settings-key">Markdown预览</div>
+    <div class="settings-value">
+        <select name="show_md_preview"
+                data-p="user"
+                data-type="str"
+                value="{{_user_config.show_md_preview}}">
+            <option value="true">默认打开</option>
+            <option value="false">默认关闭</option>
+        </select>
+    </div>
+</div>
+
+<div class="settings-row">
     <div class="settings-key">搜索设置</div>
     <div class="settings-value">
         <a href="/system/settings?category=search">进入</a>

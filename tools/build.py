@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author mark
 # @since 2022/02/19 12:45:23
-# @modified 2022/03/16 18:57:53
+# @modified 2022/04/03 21:26:42
 # @filename build.py
 try:
 	import termcolor
@@ -99,7 +99,7 @@ def build_app_js():
 		builder.append("./static/js/xnote-ui/x-init.js")
 		builder.append("./static/js/xnote-ui/x-event.js")
 		builder.append("./static/js/xnote-ui/x-ext.js")
-		builder.append("./static/js/xnote-ui/core.js")
+		builder.append("./static/js/xnote-ui/x-core.js")
 		builder.append("./static/js/xnote-ui/layer.photos.js")
 		builder.append("./static/js/xnote-ui/x-device.js")
 		builder.append("./static/js/xnote-ui/x-dropdown.js")

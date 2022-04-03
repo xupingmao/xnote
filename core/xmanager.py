@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since
-# @modified 2022/03/26 23:09:03
+# @modified 2022/04/03 22:09:50
 
 """Xnote 模块管理器
  * HandlerManager HTTP请求处理器加载和注册
@@ -30,6 +30,7 @@ import threading
 from collections import deque
 from threading import Thread, Timer, current_thread
 from xutils import Storage
+from xutils import logutil
 from xutils import Queue, tojson, MyStdout, cacheutil, u, dbutil, fsutil
 
 __version__      = "1.0"
@@ -45,6 +46,9 @@ TASK_POOL_SIZE = 500
 _manager       = None
 _event_manager = None
 LOCK = threading.RLock()
+_event_logger = logutil.new_mem_logger("xmanager.event")
+_async_logger = logutil.new_mem_logger("xmanager.async")
+_debug_logger = logutil.new_mem_logger("xmanager.debug")
 
 def do_wrap_handler(pattern, handler_clz):
     # Python2中自定义类不是type类型
@@ -553,11 +557,20 @@ class WorkerThread(Thread):
             try:
                 if self._task_queue:
                     func, args, kw = self._task_queue.popleft()
+                    
+                    _async_logger.log("qsize:(%d), execute:(%s)", len(self._task_queue), func)
+
                     func(*args, **kw)
                 else:
                     time.sleep(0.01)
             except Exception as e:
-                xutils.print_exc()
+                err = xutils.print_exc()
+                _async_logger.log("exception: %s", err)
+
+    @staticmethod
+    def add_task(func, args, kw):
+        _async_logger.log("add_task, key:(%s)", func)
+        WorkerThread._task_queue.append([func, args, kw])
 
 class EventHandler:
     """事件处理器,执行的时候不抛出异常"""
@@ -578,6 +591,8 @@ class EventHandler:
             self.key = func_name
 
     def execute(self, ctx=None):
+        _debug_logger.log("event:(%s) key:(%s), is_async:(%s)", self.event_type, self.key, self.is_async)
+
         if self.is_async:
             # 异步执行
             put_task(self.func, ctx)
@@ -588,8 +603,9 @@ class EventHandler:
                     start = time.time()
                 self.func(ctx)
                 if self.profile:
-                    stop  = time.time()
-                    xutils.trace("EventHandler", self.key, int((stop-start)*1000))
+                    cost_time = (time.time()-start)*1000
+                    # xutils.trace("EventHandler", self.key, int((stop-start)*1000))
+                    _event_logger.log("key:(%s), cost_time:(%.2fms)", self.key, cost_time)
             except:
                 xutils.print_exc()
 
@@ -728,7 +744,7 @@ def put_task(func, *args, **kw):
 
 def put_task_async(func, *args, **kw):
     """添加异步任务到队列"""
-    WorkerThread._task_queue.append([func, args, kw])
+    WorkerThread.add_task(func, args, kw)
 
 
 def load_tasks():

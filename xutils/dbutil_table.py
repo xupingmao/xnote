@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/03/20 13:36:55
+# @modified 2022/04/03 21:09:24
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -59,11 +59,29 @@ def encode_float(value):
     else:
         return "B%020.10f" % value
 
+def encode_str(value):
+    """编码字符串
+    >>> encode_str("a:b")
+    'a%58b'
+    >>> encode_str("a%b")
+    'a%20b'
+    >>> encode_str("中文123")
+    '中文123'
+    """
+    value = value.replace("%", "%20")
+    value = value.replace(":", "%58")
+    return value
+
+def decode_str(value):
+    value = value.replace("%58", ":")
+    value = value.replace("%20", "%")
+    return value
+
 def encode_index_value(value):
     if value is None:
         return chr(0)
     if isinstance(value, str):
-        return quote(value)
+        return encode_str(value)
     if isinstance(value, int):
         return encode_int(value)
     if isinstance(value, float):

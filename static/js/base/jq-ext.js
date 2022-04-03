@@ -2,7 +2,7 @@
  * JQuery 扩展
  * @author xupingmao
  * @since 2021/09/19 19:41:58
- * @modified 2021/10/02 11:30:29
+ * @modified 2022/04/03 21:16:04
  * @filename jq-ext.js
  */
 
@@ -21,5 +21,11 @@ $.fn.extend({
         });
 
         return data;
+    },
+
+    /* 滚动到底部 */
+    "scrollBottom": function() {
+        var height = this[0].scrollHeight;
+        $(this).scrollTop(height);
     }
 });

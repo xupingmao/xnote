@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/19 16:09:13
-# @modified 2022/03/04 23:30:38
+# @modified 2022/04/03 20:33:26
 
 
 """脚本执行相关的代码"""
@@ -9,7 +9,7 @@ import gc
 import sys
 import os
 import threading
-
+from collections import deque
 
 import six
 import web
@@ -35,7 +35,7 @@ class MyStdout(threading.local):
         self.stdout   = stdout
         self.outfile  = web.debug
         self.do_print = do_print
-        self.buf      = []
+        self.buf      = deque()
         try:
             self.encoding = stdout.encoding
         except:
@@ -47,7 +47,7 @@ class MyStdout(threading.local):
         if result != None:
             result.append(value)
             if len(result) > STDOUT_BUF_SIZE:
-                del result[0]
+                result.popleft()
         if self.do_print:
             print(value, file=self.outfile, end="")
 
@@ -61,7 +61,7 @@ class MyStdout(threading.local):
         return self.stdout.close()
 
     def record(self):
-        self.buf = []
+        self.buf = deque()
 
     def pop_record(self):
         return "".join(self.buf)
