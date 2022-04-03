@@ -1,0 +1,31 @@
+{
+    "name": "jspreadsheet-ce",
+    "title": "The Javascript Spreadsheet",
+    "description": "Jspreadsheet is a lightweight, vanilla javascript plugin to create amazing web-based interactive tables and spreadsheets compatible with Excel, Google Spreadsheets and any other spreadsheet software.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jspreadsheet/ce.git"
+    },
+    "author": {
+        "name": "Contact <contact@spreadsheet.com>"
+    },
+    "keywords": [
+        "spreadsheet",
+        "tables",
+        "table",
+        "excel",
+        "grid",
+        "grid-editor",
+        "data-table",
+        "data-grid",
+        "data-spreadsheet"
+    ],
+    "dependencies": {
+        "jsuites": "^4.0.0"
+    },
+    "main": "dist/jexcel.js",
+    "version": "4.6.0",
+    "bugs": "https://github.com/jspreadsheet/ce/issues",
+    "homepage": "https://github.com/jspreadsheet/ce",
+    "download": "https://github.com/jspreadsheet/ce/archive/master.zip"
+}

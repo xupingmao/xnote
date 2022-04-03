@@ -4,14 +4,29 @@
 {% init title = T("线程列表") %}
 {% include system/component/thread_nav.html %}
 
+<style type="text/css">
+    th.no {
+        width: 10%;
+    }
+    th.name {
+        width: 40%;
+    }
+    th.detail {
+        width: 30%;
+    }
+    th.options {
+        width: 20%;
+    }
+</style>
+
 <div class="card">
 
     <table class="table" border="border:#ff6600 1px solid">
         <tr>
-            <th>编号</th>
-            <th>Name</th>
-            <th>处理器</th>
-            <th>操作</th>
+            <th class="no">编号</th>
+            <th class="name">Name</th>
+            <th class="detail">处理器</th>
+            <th class="options">操作</th>
         </tr>
     {% for idx,thread in enumerate(thread_list) %}
         <tr>       

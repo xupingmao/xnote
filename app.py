@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12/04
-# @modified 2022/03/20 18:18:14
+# @modified 2022/03/31 12:22:36
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2022  xupingmao 578749341@qq.com
 
@@ -233,7 +233,7 @@ def init_app_no_lock():
 
     app = init_web_app()
 
-    # 文件修改检测
+    # 初始化自动加载功能
     init_autoreload()
 
     # 初始化集群

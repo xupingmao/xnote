@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/07/29
-# @modified 2022/03/27 10:53:16
+# @modified 2022/03/31 12:33:26
 """备份相关，系统默认会添加到定时任务中，参考system/crontab
 """
 import zipfile
@@ -185,6 +185,8 @@ class DBBackup:
             logging.info("删除db备份文件:%s", db_backup_file)
             fsutil.rmfile(db_backup_file, hard = True)
 
+        # TODO 删除多余的备份文件
+
     def dump_db(self):
         logger = logutil.new_mem_logger("backup_db", size = 20)
 
@@ -256,7 +258,7 @@ class DBBackup:
         dirname = os.path.join(xconfig.BACKUP_DIR, "db")
         xutils.makedirs(dirname)
         
-        destfile = os.path.join(dirname, time.strftime("%Y-%m.db"))
+        destfile = os.path.join(dirname, time.strftime("%Y-%m-%d.db"))
 
         if os.path.exists(destfile):
             fsutil.rmfile(destfile)

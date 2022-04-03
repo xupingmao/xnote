@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/11/07 12:38:32
-# @modified 2022/03/18 22:13:10
+# @modified 2022/03/31 12:21:54
 # @filename system_sync_controller.py
 
 """系统数据同步功能，目前提供主从同步的能力
@@ -259,7 +259,12 @@ def on_ping_leader(ctx = None):
     if role == "leader":
         return None
 
-    return FOLLOWER.ping_leader()
+    try:
+        return FOLLOWER.ping_leader()
+    except:
+        xutils.print_exc()
+        logging.error("ping_leader failed, wait 60 seconds...")
+        time.sleep(60)
 
 @xmanager.listen("sync.step")
 def event_sync_files_from_leader(ctx = None):
@@ -267,10 +272,16 @@ def event_sync_files_from_leader(ctx = None):
     if role == "leader":
         return None
 
-    logging.debug("开始同步文件...")
-    logging.debug("-" * 50)
-    FOLLOWER.sync_files_from_leader()
-    time.sleep(10)
+    try:
+        logging.debug("开始同步文件...")
+        logging.debug("-" * 50)
+        FOLLOWER.sync_files_from_leader()
+        time.sleep(10)
+    except:
+        xutils.print_exc()
+        logging.error("sync_files_from_leader failed, wait 60 seconds...")
+        time.sleep(60)
+
 
 xurls = (
     r"/system/sync", SyncHandler

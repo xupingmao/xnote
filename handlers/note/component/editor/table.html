@@ -1,13 +1,11 @@
+<script src="/static/lib/jspreadsheet-ce-4.6.0/deps/jsuites.js"></script>
+<link rel="stylesheet" href="/static/lib/jspreadsheet-ce-4.6.0/deps/jsuites.css" type="text/css" />
 
-<script src="/static/lib/jexcel/2.0.2/jquery.jexcel.js"></script>
-<link rel="stylesheet" href="/static/lib/jexcel/2.0.2/jquery.jexcel.min.css" type="text/css" />
+<script src="/static/lib/jspreadsheet-ce-4.6.0/dist/jexcel.js"></script>
+<link rel="stylesheet" href="/static/lib/jspreadsheet-ce-4.6.0/dist/jexcel.css" type="text/css" />
 
-<!--
-<script src="/static/lib/jexcel/2.0.2/jquery.jdropdown.js"></script>
-<script src="/static/lib/jexcel/2.0.2/jquery.jcalendar.js"></script>
-<link rel="stylesheet" href="/static/lib/jexcel/2.0.2/jquery.jdropdown.min.css" type="text/css" />
-<link rel="stylesheet" href="/static/lib/jexcel/2.0.2/jquery.jcalendar.min.css" type="text/css" />
--->
+{% include note/component/editor/table_lang.html %}
+{% include note/component/editor/table_myexcel.html %}
 
 <style type="text/css">
 /** 用于编辑时的换行 **/
@@ -53,7 +51,18 @@
 
 $(function () {
     var content = $("#content").val();
-    var rows  = CSV.parse(content);
+    var rows = [];
+    var jsonData = null;
+    var MIN_WIDTH = 50;
+
+    try {
+        jsonData = JSON.parse(content);
+        content = jsonData.content;
+        rows = CSV.parse(content);
+        console.log("新版本", jsonData);
+    } catch (e) {
+        rows = CSV.parse(content);
+    }
 
     if (rows.length == 0) {
         rows = [
@@ -67,8 +76,9 @@ $(function () {
     var columns = [];
     var colWidths = [];
 
-    var width = ($("#myParent").width() - 35) / head.length;
-    width = Math.max(width, 50);
+    var visibleWidth = $("#myParent").width() - 60;
+    var width = visibleWidth / head.length;
+    width = Math.max(width, MIN_WIDTH);
     
     head.forEach(function () {
         columns.push({type: "text"});
@@ -78,6 +88,16 @@ $(function () {
         colWidths.push(width);
     });
 
+    if (jsonData != null && jsonData.widthInfo) {
+        colWidths = [];
+        jsonData.widthInfo.forEach(function (widthRatio) {
+            var width = Math.max(visibleWidth*widthRatio, MIN_WIDTH);
+            colWidths.push(width);
+        });
+    }
+
+    var myExcel = new MyExcel();
+
     var excel = $('#my').jexcel({
         // csv: $("#content").val(),
         data: data,
@@ -85,22 +105,51 @@ $(function () {
         colWidths: colWidths,
         columns: columns,
         wordWrap: true,
-        columnSorting: false
+        columnSorting: false,
+        text: jexcelTextCN,
+        onevent: function (eventType) {
+            console.log(arguments);
+            if (eventType == "onload") {
+                myExcel.init(this);
+                myExcel.onload();
+            }
+            if (eventType == "onresizecolumn") {
+                console.log("调整单元格大小");
+                myExcel.onresizecolumn();
+            }
+        },
     });
 
+    myExcel.init(excel);
+    
+
     $("#saveBtn").click(function () {
-        var head = $("#my").jexcel("getHeaders");
+        var head = $("#my").jexcel("getHeaders", true);
         var data = $("#my").jexcel('getData');
         data.splice(0, 0, head);
+
         var csvData = CSV.encode(data);
-        console.log(csvData);
-        $.post("/note/save?type=csv", {id:"{{file.id}}", version:{{file.version}}, content:csvData}, function (resp) {
+
+        var jsonData = {
+            widthInfo: myExcel.getWidthInfo(),
+            content: csvData
+        }
+
+        var params = {
+            id:"{{file.id}}",
+            version: {{file.version}},
+            content: JSON.stringify(jsonData)
+        }
+
+        console.log(params);
+
+        $.post("/note/save?type=csv", params, function (resp) {
             console.log(resp);
             if (resp.code == "success") {
                 // window.location.reload();
                 window.location.href = "/note/view?id={{file.id}}";
             } else {
-                alert(resp.message);
+                xnote.alert(resp.message);
             }
         })
     });

@@ -1,0 +1,68 @@
+<script type="text/javascript">
+    function MyExcel() {
+        this.totalWidth = 0;
+        this.jexcel = null;
+        this.widthList = null;
+    }
+
+    MyExcel.prototype.init = function (instance) {
+        this.jexcel = instance;
+    }
+
+    MyExcel.prototype.onload = function() {
+        var headers = this.jexcel.headers;
+        console.log("headers", headers);
+        
+        var totalWidth = 0;
+        for (var i = 0; i < headers.length; i++) {
+            width = $(headers[i]).width()
+            totalWidth += width;
+        }
+        this.totalWidth = totalWidth;
+        console.log("totalWidth:", totalWidth);
+    }
+
+    MyExcel.prototype.updateWidthInfo = function() {
+        if (this.jexcel == null) {
+            throw new Error("jexcel is null");
+        }
+        var headers = this.jexcel.headers;
+        var widthList = [];
+        for (var i = 0; i < headers.length; i++) {
+            width = $(headers[i]).width()
+            widthList.push(width);
+        }
+        console.log("widthList:", widthList);
+        this.widthList = widthList;
+    }
+
+    MyExcel.prototype.onresizecolumn = function() {
+        this.updateWidthInfo();
+    }
+
+    MyExcel.prototype.getSafeTotalWidth = function() {
+        if (this.totalWidth > 0) {
+            return this.totalWidth;
+        }
+        var totalWidth = 0;
+        for (var i = 0; i < this.widthList.length; i++) {
+            var width = this.widthList[i];
+            totalWidth += width;
+        }
+        return totalWidth;
+    } 
+
+    MyExcel.prototype.getWidthInfo = function() {
+        if (this.widthList == null) {
+            this.updateWidthInfo();
+        }
+        this.totalWidth = 0;
+        var totalWidth = this.getSafeTotalWidth();
+        var widthInfo = [];
+        for (var i = 0; i < this.widthList.length; i++) {
+            var width = this.widthList[i];
+            widthInfo.push(width/totalWidth);
+        }
+        return widthInfo;
+    }
+</script>
