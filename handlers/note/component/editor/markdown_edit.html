@@ -65,9 +65,10 @@
 
             <div class="col-md-12" id="editor-area">
                 <div id="edit-div">
-                    <input style="display:none" name="id" value="{{file.id}}" />
+                    <input class="hide" name="id" value="{{file.id}}" />
                     <input type="text" name="version" value="{{file.version}}" class="hide" />
                     <input type="text" name="type" value="md" class="hide" />
+                    <input type="hidden" name="edit_token", value="{{edit_token}}">
                 </div>
 
                 <div class="col-md-12">
@@ -219,7 +220,7 @@
                 } else {
                     xnote.alert(resp.message);
                 }
-            })
+            });
         }
 
         $("#insertCode").on("click", function () {

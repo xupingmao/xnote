@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2022/04/04 16:18:19
+# @modified 2022/04/04 20:19:31
 
 """笔记编辑相关处理"""
 import os
@@ -359,7 +359,8 @@ def check_get_note(id):
 def update_and_notify(file, update_kw):
     edit_token = update_kw.get("edit_token", "")
     if edit_token != None and edit_token != "":
-        if not NOTE_DAO.refresh_edit_lock(file.id, edit_token, time.time() + EDIT_LOCK_EXPIRE):
+        # 这里只加一个2秒的锁，基本相当于更新完之后锁就释放了
+        if not NOTE_DAO.refresh_edit_lock(file.id, edit_token, time.time() + 2):
             raise NoteException("conflict", "当前笔记正在被其他设备编辑")
 
     rowcount = NOTE_DAO.update(file.id, **update_kw)
@@ -598,7 +599,10 @@ class DraftHandler:
                 return dict(code = "success")
         if action == "steal_lock":
             NOTE_DAO.steal_edit_lock(note_id, token, time.time() + EDIT_LOCK_EXPIRE)
-            return dict(code = "success", data = NOTE_DAO.get_draft(note_id))
+            draft_content = NOTE_DAO.get_draft(note_id)
+            if draft_content == None:
+                draft_content = note.content
+            return dict(code = "success", data = draft_content)
 
         return dict(code = "biz.error", message = "未知的action:%s" % action)
 
