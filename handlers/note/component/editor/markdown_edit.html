@@ -93,6 +93,7 @@
 
     // 注册到xnote的接口中
     xnote.editor.codeInsert = codeInsert;
+    xnote.state.reloadDraft = false;
 
     function initMdCodeMirror() {
         if (window.codeMirror) {
@@ -178,18 +179,20 @@
             $("#markdown-output-div").height($("#editor").height());
         }
 
-        function autoSave() {
+        function autoSave(force) {
             var input = $("#markdown-input").val();
             // not modified
-            if (input == lastSaved) {
+            if (force != true && input == lastSaved) {
                 return;
             }
+
             lastSaved = input;
             var params = {
                 action: "lock_and_save",
                 id: fileId,
                 content: input,
-                token: "{{edit_token}}"
+                token: "{{edit_token}}",
+                version: "{{file.version}}"
             };
             $.post("/note/draft", params, function (resp) {
                 console.log(resp);
@@ -201,6 +204,12 @@
                         // 偷锁编辑
                         stealLockAndEdit();
                     });
+                } else if (resp.code == "version_too_low") {
+                    xnote.editor.options.readOnly = "nocursor"; // 不允许编辑了
+                    xnote.confirm(resp.message, function() {
+                        // 重新加载草稿
+                        reloadDraft();
+                    })
                 } else {
                     xnote.toast(resp.message)
                 };
@@ -215,12 +224,19 @@
             }
             $.post("/note/draft", params, function (resp) {
                 if (resp.code == "success") {
-                    xnote.editor.setValue(resp.data);
+                    if (resp.data != null) {
+                        xnote.editor.setValue(resp.data);
+                    }
                     xnote.editor.options.readOnly = false; // 开启编辑
                 } else {
                     xnote.alert(resp.message);
                 }
             });
+        }
+
+        function reloadDraft() {
+            xnote.state.reloadDraft = true;
+            window.location.reload();
         }
 
         $("#insertCode").on("click", function () {
@@ -303,10 +319,17 @@
             if (contentUnchanged()) {
                 return;
             }
+            
+            if (xnote.state.reloadDraft) {
+                console.log("reload draft");
+                return;
+            }
+
             if (window.SUBMIT_FORM) {
                 console.log("form is submit");
                 return;
             }
+            
             var e = window.event||e;  
             e.returnValue = "确定离开当前页面吗？";
         };
@@ -327,6 +350,9 @@
             window.SUBMIT_FORM = false;
 
             setInterval(autoSave, 500);
+
+            // 强制执行一次
+            autoSave(true);
         }
 
         onPageLoad();

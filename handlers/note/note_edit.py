@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2022/04/04 20:19:31
+# @modified 2022/04/04 20:47:41
 
 """笔记编辑相关处理"""
 import os
@@ -359,8 +359,8 @@ def check_get_note(id):
 def update_and_notify(file, update_kw):
     edit_token = update_kw.get("edit_token", "")
     if edit_token != None and edit_token != "":
-        # 这里只加一个2秒的锁，基本相当于更新完之后锁就释放了
-        if not NOTE_DAO.refresh_edit_lock(file.id, edit_token, time.time() + 2):
+        # 这里只加一个0秒的锁，相当于更新完之后锁就释放了
+        if not NOTE_DAO.refresh_edit_lock(file.id, edit_token, time.time()):
             raise NoteException("conflict", "当前笔记正在被其他设备编辑")
 
     rowcount = NOTE_DAO.update(file.id, **update_kw)
@@ -589,12 +589,17 @@ class DraftHandler:
         note_id = xutils.get_argument("id")
         content = xutils.get_argument("content")
         token   = xutils.get_argument("token")
+        version = xutils.get_argument("version", 0, type=int)
 
         note = check_get_note(note_id)
         if action == "lock_and_save":
             with dbutil.get_write_lock(note_id):
                 if not NOTE_DAO.refresh_edit_lock(note_id, token, time.time() + EDIT_LOCK_EXPIRE):
                     return dict(code = "conflict", message = "该文章正在被其他设备编辑，是否偷锁编辑")
+                
+                if version < note.version:
+                    return dict(code = "version_too_low", message = "当前编辑的版本过低，是否加载最新的草稿")
+
                 NOTE_DAO.save_draft(note_id, content)
                 return dict(code = "success")
         if action == "steal_lock":

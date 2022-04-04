@@ -2,7 +2,7 @@
  * xnote全局初始化
  * @author xupingmao
  * @since 2022/01/09 16:17:02
- * @modified 2022/03/11 20:05:56
+ * @modified 2022/04/04 20:35:00
  * @filename x-init.js
  */
 
@@ -16,6 +16,8 @@ if (window.xnote === undefined) {
     window.xnote.table = {};
     // 编辑器模块
     window.xnote.editor = {};
+    // 状态
+    window.xnote.state = {};
 
     // 内部属性
     window.xnote._dialogIdStack = [];
