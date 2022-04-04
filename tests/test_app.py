@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2022/03/18 23:24:59
+# @modified 2022/04/04 15:47:28
 
 import sys
 import os
@@ -344,6 +344,3 @@ class Main:
         admin_token = xauth.get_user_by_name("admin").token
         self.check_OK("/system/sync?p=home")
         self.check_OK("/system/sync?p=get_stat&token=" + admin_token)
-
-
-

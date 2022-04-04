@@ -19,6 +19,7 @@
 
 {% init error = "" %} 
 {% init download_csv = False %}
+{% init edit_token = "" %}
 
 <div class="alert">
     {{error}}
@@ -53,10 +54,12 @@
                 <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" />
                 <input type="button" id="insertNoteLink" class="toolbox-btn" value="笔记链接" />
                 <div class="float-right">
-                    <span id="uploadProgress" class="upload-progress"></span>
-                    <span id="autosaveResult" class="hide">自动保存成功</span>
-                    <input type="button" class="toolbox-btn toolbox-btn-right btn-primary" 
-                        onclick="togglePreview(this)" value="预览" />
+                    <div class="float-left">
+                        <span id="uploadProgress" class="upload-progress"></span>
+                        <span id="autosaveResult" class="hide float-left">自动保存草稿成功</span>
+                        <input type="button" class="toolbox-btn right btn-primary" 
+                            onclick="togglePreview(this)" value="预览" />
+                    </div>
                 </div>
             </div>
 
@@ -105,6 +108,8 @@
             mode: "text/x-markdown",
             height: "auto"
         });
+
+        xnote.editor = window.codeMirror;
     }
 
     function initEditor() {
@@ -139,17 +144,6 @@
         }
         // 重新初始化codeMirror
         codeMirror.setSize("auto", "auto");
-    }
-
-    function escape(html, encode) {
-        return html
-            .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;')
-            .replace(/\n/g, '<br/>')
-            .replace(/ /g, '&nbsp;');
     }
 
     $(document).ready(function () {
@@ -190,10 +184,40 @@
                 return;
             }
             lastSaved = input;
-            $.post("/note/save", { id: fileId, content: input }, function (resp) {
+            var params = {
+                action: "lock_and_save",
+                id: fileId,
+                content: input,
+                token: "{{edit_token}}"
+            };
+            $.post("/note/draft", params, function (resp) {
                 console.log(resp);
                 if (resp.code == "success") {
                     $("#autosaveResult").show().fadeOut(1000);
+                } else if (resp.code == "conflict") {
+                    xnote.editor.options.readOnly = "nocursor"; // 不允许编辑了
+                    xnote.confirm(resp.message, function () {
+                        // 偷锁编辑
+                        stealLockAndEdit();
+                    });
+                } else {
+                    xnote.toast(resp.message)
+                };
+            });
+        };
+
+        function stealLockAndEdit() {
+            var params = {
+                action: "steal_lock",
+                id: fileId,
+                token: "{{edit_token}}"
+            }
+            $.post("/note/draft", params, function (resp) {
+                if (resp.code == "success") {
+                    xnote.editor.setValue(resp.data);
+                    xnote.editor.options.readOnly = false; // 开启编辑
+                } else {
+                    xnote.alert(resp.message);
                 }
             })
         }
@@ -300,6 +324,8 @@
             // 调整高度
             adjustHeight("#editor-area", 30);
             window.SUBMIT_FORM = false;
+
+            setInterval(autoSave, 500);
         }
 
         onPageLoad();

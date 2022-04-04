@@ -1,23 +1,26 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2022/04/04 13:18:26
+# @modified 2022/04/04 16:11:32
 import profile
 import math
 import re
 import web
+import os
+
 import xauth
 import xutils
 import xconfig
 import xtables
 import xtemplate
 import xmanager
-import os
 from web import HTTPError
+
 from xconfig import Storage
 from xutils import History
 from xutils import dbutil
 from xutils import fsutil
+from xutils import textutil
 from xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
 
@@ -97,13 +100,22 @@ def view_html_func(file, kw):
     kw.show_recommend = True
     kw.show_pagination = False
 
-def view_md_func(file, kw):
+def view_or_edit_md_func(file, kw):
     device = xutils.get_argument("device", "desktop")
     kw.content = file.content
     kw.show_recommend = True
     kw.show_pagination = False
     kw.show_comment_edit = (xconfig.get_user_config(file.creator, "show_comment_edit") == "true")
+    kw.edit_token = textutil.create_uuid()
+    
     if kw.op == "edit":
+        # 读取草稿
+        draft_content = NOTE_DAO.get_draft(file.id)
+
+        if draft_content != "" and draft_content != None:
+            kw.content = draft_content
+            file.content = draft_content
+
         kw.show_recommend = False
         kw.template_name = "note/component/editor/markdown_edit.html"
 
@@ -171,10 +183,10 @@ def view_form_func(note, kw):
 
 VIEW_FUNC_DICT = {
     "group": view_group_detail_func,
-    "md"  : view_md_func,
-    "text": view_md_func,
-    "memo": view_md_func,
-    "log" : view_md_func,
+    "md"  : view_or_edit_md_func,
+    "text": view_or_edit_md_func,
+    "memo": view_or_edit_md_func,
+    "log" : view_or_edit_md_func,
     "list": view_list_func,
     "csv" : view_table_func,
     "gallery": view_gallery_func,
@@ -280,7 +292,7 @@ class ViewHandler:
         event_ctx = Storage(id = file.id, user_name = user_name)
         xmanager.fire("note.view", event_ctx)
 
-        view_func = VIEW_FUNC_DICT.get(file.type, view_md_func)
+        view_func = VIEW_FUNC_DICT.get(file.type, view_or_edit_md_func)
         view_func(file, kw)
 
         if show_recommend and user_name is not None:

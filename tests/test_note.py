@@ -1,21 +1,24 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2022/03/13 17:24:13
+# @modified 2022/04/04 15:47:48
 # @filename test_note.py
 
 import logging
-import xutils
+import time
 
+import xutils
 # cannot perform relative import
 try:
     import test_base
 except ImportError:
     from tests import test_base
 
+import xauth
+
 from handlers.note.dao import get_by_id, visit_note, get_by_user_skey
 from xutils import Storage
-import xauth
+from xutils import textutil
 
 app          = test_base.init()
 json_request = test_base.json_request
@@ -386,5 +389,26 @@ class TestMain(BaseTestCase):
         self.check_OK("/note/ajax/edit_symbol_dialog")
 
 
+    def test_lock_success(self):
+        note_id = "001"
+        token = textutil.create_uuid()
+
+        r1 = NOTE_DAO.refresh_edit_lock(note_id, token, time.time() + 60)
+        self.assertTrue(r1)
+
+        r2 = NOTE_DAO.refresh_edit_lock(note_id, token, time.time() + 60)
+        self.assertTrue(r2)
+
+
+    def test_lock_conflict(self):
+        note_id = "002"
+        token1 = textutil.create_uuid()
+        token2 = textutil.create_uuid()
+
+        r1 = NOTE_DAO.refresh_edit_lock(note_id, token1, time.time() + 60)
+        self.assertTrue(r1)
+
+        r2 = NOTE_DAO.refresh_edit_lock(note_id, token2, time.time() + 60)
+        self.assertFalse(r2)
 
 

@@ -185,7 +185,7 @@ xnote.confirm = function(message, callback) {
         function(index) {
             callback(true);
             layer.close(index);
-        })
+        });
     } else {
         var result = confirm(message);
         callback(result);

@@ -288,7 +288,7 @@ def update_user_config_dict(name, config_dict):
     cacheutil.delete(prefix = "user_config_dict", args = (name, ))
 
 def select_first(filter_func):
-    for user_name, item in iter_user(limit = -1):
+    for item in iter_user(limit = -1):
         if filter_func(item):
             return item
 

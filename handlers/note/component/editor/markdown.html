@@ -1,5 +1,5 @@
 {% init can_edit = False %}
-
+{% init edit_token = "" %}
 
 <div class="card">
     {% include "note/component/view_header.html" %}
@@ -72,6 +72,7 @@
             params.id = "{{file.id}}";
             params.content = newContent;
             params.resp_type = "json";
+            params.edit_token = "{{edit_token}}";
 
             console.log("newContent:", newContent);
 

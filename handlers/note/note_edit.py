@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2022/04/04 12:58:18
+# @modified 2022/04/04 16:18:19
 
 """笔记编辑相关处理"""
 import os
@@ -23,6 +23,9 @@ from .constant import *
 NOTE_DAO = xutils.DAO("note")
 
 DEFAULT_CREATE_TEMPLATE = "note/page/create.html"
+
+# 编辑锁有效期
+EDIT_LOCK_EXPIRE = 600
 
 class NoteException(Exception):
 
@@ -354,6 +357,11 @@ def check_get_note(id):
     return note
 
 def update_and_notify(file, update_kw):
+    edit_token = update_kw.get("edit_token", "")
+    if edit_token != None and edit_token != "":
+        if not NOTE_DAO.refresh_edit_lock(file.id, edit_token, time.time() + EDIT_LOCK_EXPIRE):
+            raise NoteException("conflict", "当前笔记正在被其他设备编辑")
+
     rowcount = NOTE_DAO.update(file.id, **update_kw)
     if rowcount > 0:
         fire_update_event(file)
@@ -370,6 +378,7 @@ class SaveAjaxHandler:
         id      = xutils.get_argument("id")
         type    = xutils.get_argument("type")
         version = xutils.get_argument("version", 0, type=int)
+        edit_token = xutils.get_argument("edit_token", "")
         name    = xauth.get_current_name()
         where   = None
 
@@ -377,7 +386,8 @@ class SaveAjaxHandler:
             file = check_get_note(id)
             kw = dict(size = len(content), 
                 mtime = xutils.format_datetime(), 
-                version = version + 1)
+                version = version + 1,
+                edit_token = edit_token)
 
             if type == "html":
                 kw["data"]    = data
@@ -408,6 +418,8 @@ class UpdateHandler:
         file_type = xutils.get_argument("type")
         name      = xutils.get_argument("name", "")
         resp_type = xutils.get_argument("resp_type", "html")
+        edit_token = xutils.get_argument("edit_token", "")
+
         file = None
 
         try:
@@ -418,7 +430,9 @@ class UpdateHandler:
             update_kw = dict(content=content, 
                     type = file_type, 
                     size = len(content),
-                    version = version);
+                    version = version,
+                    edit_token = edit_token)
+
             if name != "" and name != None:
                 update_kw["name"] = name
             # 更新并且发出消息
@@ -565,7 +579,28 @@ class TouchHandler:
             update_and_notify(note, dict())
 
         raise web.found("/note/%s" % id)
-        
+
+class DraftHandler:
+    """保存草稿功能"""
+
+    def POST(self):
+        action = xutils.get_argument("action")
+        note_id = xutils.get_argument("id")
+        content = xutils.get_argument("content")
+        token   = xutils.get_argument("token")
+
+        note = check_get_note(note_id)
+        if action == "lock_and_save":
+            with dbutil.get_write_lock(note_id):
+                if not NOTE_DAO.refresh_edit_lock(note_id, token, time.time() + EDIT_LOCK_EXPIRE):
+                    return dict(code = "conflict", message = "该文章正在被其他设备编辑，是否偷锁编辑")
+                NOTE_DAO.save_draft(note_id, content)
+                return dict(code = "success")
+        if action == "steal_lock":
+            NOTE_DAO.steal_edit_lock(note_id, token, time.time() + EDIT_LOCK_EXPIRE)
+            return dict(code = "success", data = NOTE_DAO.get_draft(note_id))
+
+        return dict(code = "biz.error", message = "未知的action:%s" % action)
 
 xurls = (
     r"/note/add"         , CreateHandler,
@@ -574,6 +609,8 @@ xurls = (
     r"/note/rename"      , RenameAjaxHandler,
     r"/note/update"      , UpdateHandler,
     r"/note/save"        , SaveAjaxHandler,
+    r"/note/draft"       , DraftHandler,
+
     r"/note/append"      , AppendAjaxHandler,
     r"/note/stick"       , StickHandler,
     r"/note/archive"     , ArchiveHandler,
