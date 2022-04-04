@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017
-# @modified 2022/03/13 21:58:43
+# @modified 2022/04/04 12:58:18
 
 """笔记编辑相关处理"""
 import os
@@ -61,7 +61,8 @@ def fire_update_event(note_old):
             mtime = dateutil.format_datetime(), 
             content = note.content, 
             version = note.version)
-    xmanager.fire('note.updated', event_body)
+    xmanager.fire("note.updated", event_body)
+    xmanager.fire("note.update", event_body)
 
 def fire_rename_event(note):
     event_body = dict(action = "rename", id = note.id, name = note.name, type = note.type)

@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2021/10/24 12:41:47
+# @modified 2022/04/04 14:01:57
 import web
 import xauth
 import xtemplate
@@ -20,12 +20,19 @@ def create_op_log(user_name, op_type, detail):
     log = Storage(ctime = now, user_name = user_name, type = op_type, detail = detail, ip = ip)
     OP_LOG_TABLE.insert_by_user(user_name, log)
 
+
+def get_user_dict():
+    result = dict()
+    for item in xauth.iter_user(limit = 100):
+        result[item.name] = item
+    return result
+
 class ListHandler:
     """用户管理"""
 
     @xauth.login_required("admin")
     def GET(self):
-        user_dict = xauth.get_users()
+        user_dict = get_user_dict()
         return xtemplate.render("user/page/user_list.html", 
             show_aside = False,
             user_info = None,
@@ -53,7 +60,7 @@ class UserHandler:
             show_aside = False,
             name = name,
             user_info = user_info, 
-            user_dict = xauth.get_users())
+            user_dict = get_user_dict())
 
     @xauth.login_required("admin")
     def POST(self):

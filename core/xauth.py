@@ -23,6 +23,7 @@ import time
 from xutils import ConfigParser, textutil, dbutil, fsutil
 from xutils import Storage
 from xutils import logutil
+from xutils import cacheutil
 from xutils.functions import listremove
 
 
@@ -31,7 +32,7 @@ dbutil.register_table("user_config", "用户配置表")
 dbutil.register_table("session", "用户会话信息")
 dbutil.register_table("user_session_rel", "用户会话关系")
 
-USER_TABLE = dbutil.get_table("user")
+USER_TABLE = dbutil.get_hash_table("user")
 
 # 用户配置
 # 通过init方法完成初始化
@@ -44,6 +45,15 @@ USER_CONFIG_PROP = fsutil.load_prop_config("./config/user/user_config.default.pr
 MAX_SESSION_SIZE = 20
 SESSION_EXPIRE   = 24 * 3600 * 7
 PRINT_DEBUG_LOG  = False
+
+def get_user_db():
+    return USER_TABLE
+
+def get_user_config_db(name):
+    assert name != None
+    assert name != ""
+    return dbutil.get_hash_table("user_config", user_name = name)
+
 
 class UserModel:
     # TODO 用户模型
@@ -87,33 +97,7 @@ def _create_temp_user(temp_users, user_name):
 def _get_users(force_reload = False):
     """获取用户，内部接口"""
     warnings.warn("_get_users(查询所有用户)已经过时，请停止使用", DeprecationWarning)
-
-    global _USER_LIST
-
-    # 有并发风险
-    if _USER_LIST is not None and not force_reload:
-        return _USER_LIST
-
-    temp_users = {}
-
-    # 初始化默认的用户
-    _create_temp_user(temp_users, "admin")
-    _create_temp_user(temp_users, "test")
-
-    user_list = USER_TABLE.list(offset = 0, limit = 20)
-    for user in user_list:
-        if user.name is None:
-            xutils.trace("UserList", "invalid user %s" % user)
-            continue
-        if isinstance(user.config, dict):
-            user.config = Storage(**user.config)
-        else:
-            user.config = Storage()
-        name = user.name.lower()
-        temp_users[name] = user
-
-    _USER_LIST = temp_users
-    return _USER_LIST
+    raise Exception("_get_users已经废弃")
 
 def _setcookie(key, value, expires=24*3600*30):
     assert isinstance(key, str)
@@ -129,9 +113,17 @@ def list_user_names():
     users = _get_users()
     return list(users.keys())
 
+def iter_user(limit = 20):
+    db = get_user_db()
+    for user_name, user_info in db.iter(limit = limit):
+        yield user_info
+
+def count_user():
+    db = get_user_db()
+    return db.count()
+
 def refresh_users():
     xutils.trace("ReLoadUsers", "reload users")
-    return _get_users(force_reload = True)
 
 def get_user(name):
     warnings.warn("get_user已经过时，请使用 get_user_by_name", DeprecationWarning)
@@ -218,8 +210,8 @@ def delete_user_session_by_id(sid):
     dbutil.delete("session:%s" % sid)
 
 def _get_user_from_db(name):
-    user_detail = USER_TABLE.get_by_key("user:" + name)
-    return user_detail
+    db = get_user_db()
+    return db.get(name)
 
 def _get_builtin_user(name):
     assert BUILTIN_USER_DICT != None
@@ -234,28 +226,24 @@ def find_by_name(name):
         return user
     return _get_builtin_user(name)
 
-def get_user_config_db(name):
-    assert name != None
-    assert name != ""
-    return dbutil.get_hash_table("user_config", user_name = name)
-
+@cacheutil.cache_deco(prefix = "user_config_dict", expire = 600)
 def get_user_config_dict(name):
     if name is None or name == "":
         return None
 
     db = get_user_config_db(name)
+    config_dict = Storage(**USER_CONFIG_PROP)
 
-    config_dict = db.dict(limit = -1)
-    if len(config_dict) > 0:
+    db_records = db.dict(limit = -1)
+    if len(db_records) > 0:
+        config_dict.update(db_records)
         return config_dict
 
     user = get_user_by_name(name)
     if user != None:
-        if user.config is None:
-            user.config = Storage()
-        elif isinstance(user.config, dict):
-            user.config = Storage(**user.config)
-        return user.config
+        if isinstance(user.config, dict):
+            config_dict.update(user.config)
+        return config_dict
     return None
 
 def get_user_config_valid_keys():
@@ -273,11 +261,15 @@ def get_user_config(user_name, config_key):
         return default_value
     return config_dict.get(config_key, default_value)
 
+
 @logutil.log_deco("update_user_config", log_args = True)
 def update_user_config(user_name, key, value):
     check_user_config_key(key)
+
     db = get_user_config_db(user_name)
-    return db.put(key, value)
+    result = db.put(key, value)
+    cacheutil.delete(prefix = "user_config_dict", args = (user_name,))
+    return result
 
 def update_user_config_dict(name, config_dict):
     user = get_user(name)
@@ -293,9 +285,10 @@ def update_user_config_dict(name, config_dict):
         value = config_dict.get(key)
         db.put(key, value)
 
+    cacheutil.delete(prefix = "user_config_dict", args = (name, ))
+
 def select_first(filter_func):
-    users = _get_users()
-    for item in users.values():
+    for user_name, item in iter_user(limit = -1):
         if filter_func(item):
             return item
 
@@ -425,15 +418,17 @@ def create_user(name, password):
     if found is not None:
         return dict(code = "fail", message = "用户已存在")
     else:
+        db = get_user_db()
         user = Storage(name=name,
             password=password,
             token=gen_new_token(),
             ctime=xutils.format_time(),
             salt=textutil.random_string(6),
             mtime=xutils.format_time())
-        dbutil.put("user:%s" % name, user)
+        db.put(name, user)
+
         xutils.trace("UserAdd", name)
-        refresh_users()
+
         return dict(code = "success", message = "create success")
 
 def _check_password(password):
@@ -463,11 +458,10 @@ def update_user(name, user):
         mem_user.salt = textutil.random_string(6)
         mem_user.token = gen_new_token()
 
-    dbutil.put("user:%s" % name, mem_user)
+    db = get_user_db()
+    db.put(name, mem_user)
 
     xutils.trace("UserUpdate", mem_user)
-
-    refresh_users()
 
     # 刷新完成之后再发送消息
     xmanager.fire("user.update", dict(user_name = name))
@@ -478,7 +472,6 @@ def delete_user(name):
     name = name.lower()
     dbutil.delete("user:%s" % name)
     
-    refresh_users()
 
 def has_login_by_cookie(name = None):
     cookies = web.cookies()

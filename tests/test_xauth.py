@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/01/24 16:39:45
-# @modified 2022/03/13 17:15:12
+# @modified 2022/04/04 14:11:51
 
 import sys
 import time
@@ -32,16 +32,13 @@ class TestXauth(BaseTestCase):
         self.assertFalse(xauth.is_valid_username("public"))
 
     def test_create_and_delete_user(self):
-        old_users = xauth.refresh_users()
+        old_count = xauth.count_user()
 
         # 创建用户
         result = xauth.create_user("u123456", "123456")
         print(result)
-
-        users = xauth.refresh_users()
-        print(users)
         
-        self.assertEqual(len(old_users)+1, len(users))
+        self.assertEqual(old_count+1, xauth.count_user())
 
         # 删除用户
         xauth.delete_user("u123456")
@@ -49,9 +46,8 @@ class TestXauth(BaseTestCase):
         check = xauth.find_by_name("u123456")
         self.assertEqual(None, check)
 
-    def test_list_user_names(self):
-        user_names = xauth.list_user_names()
-        self.assertTrue(len(user_names) >= 1)
+    def test_count_user(self):
+        self.assertTrue(xauth.count_user() >= 1)
 
     def test_login_logout(self):
         self.check_OK("/")
@@ -81,6 +77,21 @@ class TestXauth(BaseTestCase):
         self.assertTrue(datetime, xauth.get_user_by_name("u123456").login_time)
 
         xauth.delete_user("u123456")
+
+    def test_user_config(self):
+        user_name = "u123456"
+        result = xauth.create_user(user_name, user_name)
+        print(result)
+
+        config = xauth.get_user_config_dict(user_name)
+        self.assertEqual("false", config.show_comment_edit)
+
+        xauth.update_user_config(user_name, "show_comment_edit", "true")
+
+        config = xauth.get_user_config_dict(user_name)
+        self.assertEqual("true", config.show_comment_edit)
+
+        xauth.delete_user(user_name)
 
 
 

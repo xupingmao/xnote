@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2022/03/13 17:03:12
+# @modified 2022/04/04 13:18:26
 import profile
 import math
 import re
@@ -102,6 +102,7 @@ def view_md_func(file, kw):
     kw.content = file.content
     kw.show_recommend = True
     kw.show_pagination = False
+    kw.show_comment_edit = (xconfig.get_user_config(file.creator, "show_comment_edit") == "true")
     if kw.op == "edit":
         kw.show_recommend = False
         kw.template_name = "note/component/editor/markdown_edit.html"

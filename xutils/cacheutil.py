@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:10:11
-# @modified 2022/03/20 13:32:03
+# @modified 2022/04/04 13:42:52
 """持久化操作已经禁用，请使用dbutil
 缓存的实现，API列表如下
 
@@ -187,10 +187,16 @@ class CacheObj:
         if os.path.exists(path):
             os.remove(path)
 
-def cache(key=None, prefix=None, expire=600):
+def cache_deco(key=None, prefix=None, expire=600):
     """缓存的装饰器，会自动清理失效的缓存
-    TODO 可以考虑缓存持久化的问题
+    注意：不考虑持久化，如果有持久化需要使用db实现
+    @param {str} key    指定缓存的key，也就是使用固定的key
+    @param {str} prefix 指定缓存的前缀，使用前缀+函数参数的方式，也就是动态的key
+    如果 key 和prefix 都不指定，使用函数签名+函数参数的方式，生成动态的key
     """
+    if key != None and prefix != None:
+        raise Exception("不能同时设置key和prefix参数")
+
     def deco(func):
         # 先不支持keywords参数
         def handle(*args):
@@ -202,6 +208,7 @@ def cache(key=None, prefix=None, expire=600):
                 cache_key = "%s.%s%s" % (mod.__name__, funcname, args)
             else:
                 cache_key = "%s%s" % (prefix, args)
+            
             obj = get_cache_obj(cache_key)
             if obj is not None:
                 return obj.value
@@ -209,12 +216,16 @@ def cache(key=None, prefix=None, expire=600):
             if value is None:
                 delete(cache_key)
                 return None
+
             cache_obj = CacheObj(cache_key, value, expire)
             cache_obj.func = func
             cache_obj.args = args
             return value
         return handle
     return deco
+
+def cache(*args, **kw):
+    return cache_deco(*args, **kw)
 
 def put(key, value = None, expire = -1):
     """设置缓存的值

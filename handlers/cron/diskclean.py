@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/28 01:01:33
-# @modified 2021/08/07 19:08:21
+# @modified 2022/04/04 14:07:12
 import zipfile
 import os
 import re
@@ -43,7 +43,8 @@ def rm_expired_files(dirname, expired_time, depth=0):
                 xutils.rmfile(fpath)
 
 def rm_expired_notes(expired_time):
-    for user_name in xauth.list_user_names():
+    for user_info in xauth.iter_user(limit = -1):
+        user_name = user_info.name
         notes = NOTE_DAO.list_removed(user_name, offset = 0, limit = 20, orderby = "dtime_asc")
         for note in notes:
             print("id:{note.id},dtime:{note.dtime},name:{note.name}".format(note = note))

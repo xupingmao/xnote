@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2022/03/13 16:12:15
+# @modified 2022/04/04 14:05:03
 
 """短消息处理，比如任务、备忘、临时文件等等
 
@@ -87,7 +87,8 @@ def get_current_message_stat():
 
 @xutils.timeit(name = "message.refresh", logfile = True)
 def refresh_key_amount():
-    for user_name in xauth.list_user_names():
+    for user_info in xauth.iter_user(limit = -1):
+        user_name = user_info.name
         msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, -1)
         for index, message in enumerate(msg_list):
             key = message.content
