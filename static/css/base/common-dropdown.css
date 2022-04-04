@@ -2,7 +2,7 @@
  * 下拉选项列表控件
  * @author mark
  * @since 2022/03/12 10:32:46
- * @modified 2022/03/13 21:51:08
+ * @modified 2022/04/04 23:56:22
  * @filename common-dropdown.css
  */
 
@@ -28,7 +28,7 @@
     padding-top: 5px;
     padding-bottom: 5px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
+    z-index: 10;
     cursor: pointer;
 }
 
