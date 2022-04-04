@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:48:09
-# @modified 2022/03/13 16:12:27
+# @modified 2022/04/04 21:50:02
 # @filename message_utils.py
 import xutils
 import web
@@ -268,7 +268,7 @@ def convert_message_list_to_day_folder(item_list, date, show_empty = False):
         folder.date = temp_date
         folder.wday = dateutil.format_wday(temp_date)
         folder.item_list = []
-        folder.title = f"{folder.date} {folder.wday}"
+        folder.title = "{folder.date} {folder.wday}".format(folder = folder)
         folder.css_class = ""
         if today == temp_date:
             folder.title += "【今天】"

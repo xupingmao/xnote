@@ -15,7 +15,7 @@
         
         var totalWidth = 0;
         for (var i = 0; i < headers.length; i++) {
-            width = $(headers[i]).width()
+            width = $(headers[i]).outerWidth()
             totalWidth += width;
         }
         this.totalWidth = totalWidth;
@@ -29,7 +29,7 @@
         var headers = this.jexcel.headers;
         var widthList = [];
         for (var i = 0; i < headers.length; i++) {
-            width = $(headers[i]).width()
+            width = $(headers[i]).outerWidth()
             widthList.push(width);
         }
         console.log("widthList:", widthList);
@@ -58,11 +58,29 @@
         }
         this.totalWidth = 0;
         var totalWidth = this.getSafeTotalWidth();
+
         var widthInfo = [];
         for (var i = 0; i < this.widthList.length; i++) {
             var width = this.widthList[i];
-            widthInfo.push(width/totalWidth);
+            widthInfo.push(width);
         }
         return widthInfo;
+    }
+
+    MyExcel.prototype.getWidthInfoFromData = function(data, visibleWidth) {
+        var totalWidth = 0;
+        for (var i = 0; i < data.length; i++) {
+            totalWidth += data[i];
+        }
+        if (totalWidth == 0) {
+            totalWidth = 1;
+        }
+
+        var result = [];
+        for (var i = 0; i < data.length; i++) {
+            var width = Math.max(50, data[i]*visibleWidth/totalWidth);
+            result.push(width);
+        }
+        return result;
     }
 </script>

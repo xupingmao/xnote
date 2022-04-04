@@ -56,10 +56,19 @@ $(function () {
     var MIN_WIDTH = 50;
 
     try {
-        jsonData = JSON.parse(content);
-        content = jsonData.content;
-        rows = CSV.parse(content);
-        console.log("新版本", jsonData);
+        if (content != "") {        
+            jsonData = JSON.parse(content);
+            content = jsonData.content;
+            if (jsonData.version == "v2") {
+                rows = jsonData.rows;
+            } else if (typeof(content) === "string") {
+                // 兼容历史数据
+                rows = CSV.parse(content);
+            } else {
+                alert("非法版本:", jsonData.version);
+            }
+            console.log("新版本", jsonData);
+        }
     } catch (e) {
         rows = CSV.parse(content);
     }
@@ -88,15 +97,13 @@ $(function () {
         colWidths.push(width);
     });
 
+    var myExcel = new MyExcel();
+
     if (jsonData != null && jsonData.widthInfo) {
-        colWidths = [];
-        jsonData.widthInfo.forEach(function (widthRatio) {
-            var width = Math.max(visibleWidth*widthRatio, MIN_WIDTH);
-            colWidths.push(width);
-        });
+        colWidths = myExcel.getWidthInfoFromData(jsonData.widthInfo, visibleWidth);
     }
 
-    var myExcel = new MyExcel();
+    console.log("colWidths:", colWidths);
 
     var excel = $('#my').jexcel({
         // csv: $("#content").val(),
@@ -122,21 +129,21 @@ $(function () {
 
     myExcel.init(excel);
     
+    xnote.excel = excel;
+    xnote.myExcel = myExcel;
 
     $("#saveBtn").click(function () {
         var head = $("#my").jexcel("getHeaders", true);
         var data = $("#my").jexcel('getData');
         data.splice(0, 0, head);
 
-        var csvData = CSV.encode(data);
-
         var jsonData = {
             widthInfo: myExcel.getWidthInfo(),
-            content: csvData
+            rows: data,
+            version: "v2"
         }
 
         var params = {
-            version:"v2",
             id:"{{file.id}}",
             version: {{file.version}},
             content: JSON.stringify(jsonData)
