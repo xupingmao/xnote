@@ -1,5 +1,5 @@
 # encoding=utf-8
-# @modified 2021/10/24 16:36:19
+# @modified 2022/04/06 12:39:18
 import web
 import time
 import hashlib
@@ -38,31 +38,31 @@ class LoginHandler:
         name = xutils.get_argument("username", "")
         pswd = xutils.get_argument("password", "")
         target = xutils.get_argument("target")
-        users = xauth.get_users()
         error = ""
         count = cacheutil.get("login.fail.count#%s" % name, 0)
         name  = name.strip()
         pswd  = pswd.strip()
         if count >= RETRY_LIMIT:
             error = "重试次数过多"
-        elif name in users:
-            user = users[name]
-            if pswd == user["password"]:
-                save_login_info(name, "success")
-                
-                xauth.login_user_by_name(name, login_ip = get_real_ip())
-
-                if target is None:
-                    raise web.seeother("/")
-                raise web.seeother(target)
-            else:
+        else:
+            user = xauth.get_user_by_name(name)
+            if user == None:
                 error = "用户名或密码错误"
                 save_login_info(name, pswd, error)
                 save_login_error_count(name, count + 1)
-        else:
-            error = "用户名或密码错误"
-            save_login_info(name, pswd, error)
-            save_login_error_count(name, count + 1)
+            else:
+                if pswd == user["password"]:
+                    save_login_info(name, "success")
+                    
+                    xauth.login_user_by_name(name, login_ip = get_real_ip())
+
+                    if target is None:
+                        raise web.seeother("/")
+                    raise web.seeother(target)
+                else:
+                    error = "用户名或密码错误"
+                    save_login_info(name, pswd, error)
+                    save_login_error_count(name, count + 1)
 
         return xtemplate.render("user/page/login.html", 
             show_aside = False,
