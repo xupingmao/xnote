@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:48:09
-# @modified 2022/04/09 10:20:07
+# @modified 2022/04/09 13:42:48
 # @filename message_utils.py
 import xutils
 import web
@@ -13,7 +13,7 @@ from xutils import u
 from xutils.functions import Counter
 from xutils.textutil import escape_html
 from xutils.textutil import quote
-from handlers.message.message_class import MessageFolder
+from handlers.message.message_model import MessageFolder, MessageTag
 
 MSG_DAO = xutils.DAO("message")
 TAG_TEXT_DICT = dict(
@@ -56,24 +56,36 @@ def build_done_html(message):
         done_time = message.mtime
         message.html += u("<br>------<br>完成于 %s") % done_time
 
-def do_mark_topic(parser, key0):
-    key = key0.lstrip("")
-    key = key.rstrip("")
-    quoted_key = textutil.quote(key)
-    value = textutil.escape_html(key0)
-    token = "<a class=\"link\" href=\"/message?key=%s\">%s</a>" % (quoted_key, value)
-    parser.tokens.append(token)
+class TopicMarker:
+
+    def __init__(self, tag = None):
+        self.tag = tag
+
+    def mark(self, parser, key0):
+        key = key0.lstrip("")
+        key = key.rstrip("")
+        quoted_key = textutil.quote(key)
+        value = textutil.escape_html(key0)
+        if self.tag == "task":
+            fmt = "<a class=\"link\" href=\"/message?tag=task&filterKey={quoted_key}\">{value}</a>"
+        else:
+            fmt = "<a class=\"link\" href=\"/message?key={quoted_key}\">{value}</a>"
+
+        return fmt.format(quoted_key=quoted_key, value=value)
 
 
-def mark_text(content):
+def mark_text(content, tag = "log"):
     import xconfig
     from xutils.text_parser import TextParser
     from xutils.text_parser import set_img_file_ext
     # 设置图片文集后缀
     set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
 
+    marker = TopicMarker(tag = tag)
+
     parser = TextParser()
-    parser.set_topic_marker(do_mark_topic)
+    parser.set_topic_translator(marker.mark)
+    parser.set_search_translator(marker.mark)
 
     tokens = parser.parse(content)
     return "".join(tokens), parser.keywords
@@ -103,7 +115,7 @@ def process_message(message):
     if message.tag == "key" or message.tag == "search":
         process_tag_message(message)
     else:
-        html, keywords = mark_text(message.content)
+        html, keywords = mark_text(message.content, message.tag)
         message.html = html
         message.keywords = keywords
 
@@ -188,7 +200,16 @@ class TagSorter:
         return self.data.get(tag, "")
 
 
-def get_tags_from_message_list(msg_list, input_tag = "", input_date = "", display_tag = None):
+def get_tags_from_message_list(
+        msg_list, 
+        input_tag = "", 
+        input_date = "", 
+        display_tag = None):
+
+    assert isinstance(msg_list, list)
+    assert isinstance(input_tag, str)
+    assert isinstance(input_date, str)
+
     tag_counter = Counter()
     tag_sorter = TagSorter()
 
@@ -227,7 +248,7 @@ def get_tags_from_message_list(msg_list, input_tag = "", input_date = "", displa
 
         mtime = tag_sorter.get_mtime(tag_name)
 
-        tag_item = Storage(name = tag_name, 
+        tag_item = MessageTag(name = tag_name, 
             tag = input_tag, 
             amount = amount, 
             url = url, 
@@ -379,22 +400,18 @@ def sort_message_list(msg_list, orderby = ""):
         msg_list.sort(key = lambda x: x.visit_cnt or 0, reverse = True)
         for item in msg_list:
             item.badge_info = "访问次数(%s)" % item.visit_cnt
-        return
 
     if orderby == "amount_desc":
         msg_list.sort(key = lambda x: x.amount or 0, reverse = True)
-        sort_keywords_by_marked(msg_list)
         for item in msg_list:
             item.badge_info = "%s" % item.amount
-        return
+        sort_keywords_by_marked(msg_list)
     
     if orderby == "recent":
         msg_list.sort(key = lambda x: x.mtime, reverse = True)
         for item in msg_list:
             item.badge_info = "%s" % xutils.format_date(item.mtime)
-        return
-
-    sort_keywords_by_marked(msg_list)
+        
 
 def sort_keywords_by_marked(msg_list):
     def key_func(item):
@@ -405,10 +422,21 @@ def sort_keywords_by_marked(msg_list):
 
     msg_list.sort(key = key_func)
 
-def list_top_tags(user_name, limit = 10):
+def list_hot_tags(user_name, limit = 20):
+    assert isinstance(user_name, str)
+
     msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
-    sort_message_list(msg_list, "visit")
+    sort_message_list(msg_list, "amount_desc")
+    for msg in msg_list:
+        msg.url = "/message?key={key}&tag=log".format(key = quote(msg.content))
     return msg_list[:limit]
 
-xutils.register_func("message.list_top_tags", list_top_tags)
+def list_task_tags(user_name, limit = 20, offset = 0):
+    assert isinstance(user_name, str)
+
+    msg_list, amount = MSG_DAO.list_task(user_name, offset = 0, limit = MAX_LIST_LIMIT)
+    return get_tags_from_message_list(msg_list, "task", display_tag = "taglist")
+
+xutils.register_func("message.list_hot_tags", list_hot_tags)
 xutils.register_func("message.filter_default_content", filter_default_content)
+

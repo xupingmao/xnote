@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/04/09 11:00:22
+# @modified 2022/04/09 11:41:19
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
@@ -426,7 +426,7 @@ class LdbTable:
 
     def list_by_index(self, index_name, filter_func = None, 
             offset = 0, limit = 20, reverse = False, 
-            index_value = None):
+            index_value = None, match_type = "prefix"):
         """通过索引查询结果列表
         @param {str}  index_name 索引名称
         @param {func} filter_func 过滤函数

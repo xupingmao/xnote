@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/10 14:36:09
-# @modified 2021/09/19 13:02:28
+# @modified 2022/04/09 13:42:24
 
 """标记文本解析
 
@@ -235,13 +235,22 @@ class TextParser(TextParserBase):
     topic_len_limit = 100
 
     # 话题转换器
-    topic_marker = None
+    topic_translator = None
+
+    # 搜索转换器
+    search_translator = None
 
     def init2(self, text):
         self.keywords = set()
 
     def set_topic_marker(self, topic_marker):
-        self.topic_marker = topic_marker
+        self.topic_translator = topic_marker
+
+    def set_topic_translator(self, topic_translator):
+        self.topic_translator = topic_translator
+
+    def set_search_translator(self, translator):
+        self.search_translator = translator
 
     def record_keyword(self, keyword):
         self.keywords.add(keyword)
@@ -259,17 +268,20 @@ class TextParser(TextParserBase):
         return key
 
     def build_search_link(self, keyword):
+        if self.search_translator != None:
+            return self.search_translator(self, keyword)
         key = quote(keyword)
         value = escape_html(keyword)
         return "<a class=\"link\" href=\"/message?category=message&key=%s\">%s</a>" % (key, value)
 
-    def do_mark_topic_default(self, key0):
+    def translate_topic(self, key0):
+        if self.topic_translator != None:
+            return self.topic_translator(self, key0)
         key = key0.lstrip("#\n")
         key = key.rstrip("#\n")
         quoted_key = quote(key)
         value = escape_html(key0)
-        token = "<a class=\"link\" href=\"/message?category=message&key=%s\">%s</a>" % (quoted_key, value)
-        self.tokens.append(token)
+        return "<a class=\"link\" href=\"/message?category=message&key=%s\">%s</a>" % (quoted_key, value)
 
     def mark_topic(self):
         """话题转为搜索关键字的时候去掉前后的#符号"""
@@ -298,11 +310,10 @@ class TextParser(TextParserBase):
             return
         # 记录关键字
         self.record_keyword(key0)
+        # 处理转换逻辑
+        token = self.translate_topic(key0)
+        self.tokens.append(token)
 
-        if self.topic_marker != None:
-            self.topic_marker(self, key0)
-        else:
-            self.do_mark_topic_default(key0)
 
     def mark_http(self):
         self.profile("mark_http")

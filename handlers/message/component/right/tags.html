@@ -1,18 +1,24 @@
-{% init tags = xutils.DAO("message").list_top_tags(_user_name, 20) %}
+{% init side_tags = [] %}
+{% init side_tag_tab_key = "key" %}
+{% init show_side_system_tags = False %}
+{% init show_side_tags = True %}
 
+{% if show_side_tags %}
 <div class="card">
     <div class="card-title">
-        <span>常用标签</span>
+        <span>热门标签</span>
     </div>
 
+    {% if show_side_system_tags %}
     <div class="x-tab-box btn-style dark-style" data-tab-key="tag">
         <a class="x-tab" href="/message?tag=file&displayTag=key" data-tab-value="file">系统标签</a>
     </div>
+    {% end %}
 
-    <div class="x-tab-box btn-style dark-style" data-tab-key="key">
-        {% for temp_tag in tags %}
-            <a class="x-tab" data-tab-value="{{temp_tag.content}}" href="/message?key={{quote(temp_tag.content)}}&tag=log">{{temp_tag.content}}</a>
+    <div class="x-tab-box btn-style dark-style" data-tab-key="{{side_tag_tab_key}}">
+        {% for temp_tag in side_tags %}
+            <a class="x-tab" data-tab-value="{{temp_tag.content}}" href="{{temp_tag.url}}">{{temp_tag.content}}</a>
         {% end %}
     </div>
-
 </div>
+{% end %}

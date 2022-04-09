@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2022/04/09 10:43:59
+# @modified 2022/04/09 14:07:02
 
 """短消息处理，比如任务、备忘、临时文件等等
 
@@ -24,8 +24,25 @@ from xutils import dateutil
 from xtemplate import T
 from xutils.textutil import escape_html, quote
 from xutils.functions import Counter
-from handlers.message.message_class import MessageFolder
-from handlers.message.message_utils import *
+from handlers.message.message_model import MessageFolder
+from handlers.message.message_utils import (
+    list_task_tags, 
+    process_message, 
+    filter_key, 
+    filter_msg_list_by_key,
+    format_message_stat,
+    MessageListParser,
+    get_remote_ip,
+    get_length,
+    get_tags_from_message_list,
+    get_similar_key,
+    is_system_tag,
+    do_split_date,
+    success,
+    failure,
+    convert_message_list_to_day_folder,
+    count_month_size,
+)
 
 from .message_utils import sort_message_list
 from .message_utils import sort_keywords_by_marked
@@ -137,6 +154,67 @@ class SearchContext:
 
 class ListAjaxHandler:
 
+    @xauth.login_required()
+    def GET(self):
+        pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
+        page   = xutils.get_argument("page", 1, type=int)
+        key    = xutils.get_argument("key", "")
+        tag    = xutils.get_argument("tag", "task")
+        format = xutils.get_argument("format")
+        date   = xutils.get_argument("date", "")
+
+        offset = get_offset_from_page(page, pagesize)
+
+        user_name = xauth.get_current_name()
+
+        chatlist, amount = self.do_list_message(user_name, tag, offset, pagesize)
+
+        page_max = get_page_max(amount, pagesize)
+
+        parser = MessageListParser(chatlist)
+        parser.parse()
+        chatlist = parser.get_message_list()
+
+        if format == "html":
+            return self.do_get_html(chatlist, page, page_max, tag)
+
+        return dict(code="success", message = "", 
+            data   = chatlist, 
+            keywords = parser.get_keywords(),
+            amount = amount, 
+            page_max = page_max, 
+            pagesize = pagesize,
+            current_user = xauth.current_name())
+
+    def do_list_message(self, user_name, tag, offset, pagesize):
+        key = xutils.get_argument("key", "")
+        date = xutils.get_argument("date", "")
+        filter_date = xutils.get_argument("filterDate", "")
+
+        if (tag == "search") or (key != "" and key != None):
+            # 搜索
+            return self.do_search(user_name, key, offset, pagesize)
+
+        if tag == "date":
+            # 日期
+            return self.do_list_by_date(user_name, date, offset, pagesize)
+
+        if filter_date != "":
+            return self.do_list_by_date(user_name, filter_date, offset, pagesize)
+
+        if tag == "task":
+            return self.do_list_task(user_name, offset, pagesize)
+
+        if tag == "key":
+            return self.do_list_key(user_name, offset, pagesize)
+
+        list_func = xutils.lookup_func("message.list_%s" % tag)
+        if list_func != None:
+            return list_func(user_name, offset, pagesize)
+        else:
+            return MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
+
+
     def do_get_html(self, chatlist, page, page_max, tag = "task"):
         show_todo_check = True
         show_edit_btn   = True
@@ -217,16 +295,17 @@ class ListAjaxHandler:
     def do_list_task(self, user_name, offset, limit):
         p = xutils.get_argument("p", "")
         filter_key = xutils.get_argument("filterKey", "")
+        status = xutils.get_argument("status", "")
 
         if p == "done":
-            return MSG_DAO.list_by_tag(user_name, "done", offset, limit)
+            return MSG_DAO.list_task_done(user_name, offset, limit)
 
         if filter_key != "":
-            msg_list, amount = MSG_DAO.list_by_tag(user_name, "task", offset = 0, limit = MAX_LIST_LIMIT)
+            msg_list, amount = MSG_DAO.list_task(user_name, offset = 0, limit = MAX_LIST_LIMIT)
             msg_list = filter_msg_list_by_key(msg_list, filter_key)
             return msg_list[offset:offset+limit], len(msg_list)
         else:
-            return MSG_DAO.list_by_tag(user_name, "task", offset, limit)
+            return MSG_DAO.list_task(user_name, offset, limit)
 
     def do_list_by_date(self, user_name, date, offset, pagesize):
         filter_key = xutils.get_argument("filterKey", "")
@@ -244,66 +323,7 @@ class ListAjaxHandler:
         sort_message_list(msg_list, orderby)
         return msg_list[offset:offset+limit], len(msg_list)
 
-    def do_list_message(self, user_name, tag, offset, pagesize):
-        key = xutils.get_argument("key", "")
-        date = xutils.get_argument("date", "")
-        filter_date = xutils.get_argument("filterDate", "")
-
-        if (tag == "search") or (key != "" and key != None):
-            # 搜索
-            return self.do_search(user_name, key, offset, pagesize)
-
-        if tag == "date":
-            # 日期
-            return self.do_list_by_date(user_name, date, offset, pagesize)
-
-        if filter_date != "":
-            return self.do_list_by_date(user_name, filter_date, offset, pagesize)
-
-        if tag == "task":
-            return self.do_list_task(user_name, offset, pagesize)
-
-        if tag == "key":
-            return self.do_list_key(user_name, offset, pagesize)
-
-        list_func = xutils.lookup_func("message.list_%s" % tag)
-        if list_func != None:
-            return list_func(user_name, offset, pagesize)
-        else:
-            return MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
-
-    @xauth.login_required()
-    def GET(self):
-        pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
-        page   = xutils.get_argument("page", 1, type=int)
-        key    = xutils.get_argument("key", "")
-        tag    = xutils.get_argument("tag", "task")
-        format = xutils.get_argument("format")
-        date   = xutils.get_argument("date", "")
-
-        offset = get_offset_from_page(page, pagesize)
-
-        user_name = xauth.get_current_name()
-
-        chatlist, amount = self.do_list_message(user_name, tag, offset, pagesize)
-
-        page_max = get_page_max(amount, pagesize)
-
-        parser = MessageListParser(chatlist)
-        parser.parse()
-        chatlist = parser.get_message_list()
-
-        if format == "html":
-            return self.do_get_html(chatlist, page, page_max, tag)
-
-        return dict(code="success", message = "", 
-            data   = chatlist, 
-            keywords = parser.get_keywords(),
-            amount = amount, 
-            page_max = page_max, 
-            pagesize = pagesize,
-            current_user = xauth.current_name())
-
+ 
 def update_message_status(id, status):
     user_name = xauth.current_name()
     data = dbutil.get(id)
@@ -314,9 +334,11 @@ def update_message_status(id, status):
         MSG_DAO.update(data)
         MSG_DAO.refresh_message_stat(user_name)
 
-        xmanager.fire("message.updated", Storage(id=id, user=user_name, status = status, content = data.content))
-
-    return dict(code="success")
+        event = Storage(id=id, user=user_name, status = status, content = data.content)
+        xmanager.fire("message.updated", event)
+        return dict(code="success")
+    else:
+        return failure(message = "无操作权限")
 
 def update_message_content(id, user_name, content):
     data = dbutil.get(id)
@@ -560,7 +582,7 @@ class DateAjaxHandler:
         offset = get_offset_from_page(page)
         limit  = xconfig.PAGE_SIZE
 
-        msg_list, msg_count  = MSG_DAO.list_by_date(user_name, date, offset, limit)
+        msg_list, msg_count = MSG_DAO.list_by_date(user_name, date, offset, limit)
 
         parser = MessageListParser(msg_list)
         parser.parse()
@@ -598,16 +620,16 @@ class MessageListHandler:
             return self.do_select_key()
 
         if tag == "key":
-            return self.do_view_tags()
+            return self.get_log_tags_page()
 
         if tag in SYSTEM_TAG_TUPLE:
-            return self.do_view_by_system_tag(tag)
+            return self.get_system_tag_page(tag)
 
         if tag == "task":
             return self.get_task_page()
 
         if tag == "task_tags":
-            return self.get_task_tag_list()
+            return self.get_task_tag_list_page()
 
         return self.get_log_page()
 
@@ -620,7 +642,7 @@ class MessageListHandler:
             msg_list = msg_list,
             show_nav = False)
 
-    def do_view_tags(self):
+    def get_log_tags_page(self):
         orderby = xutils.get_argument("orderby", "")
 
         kw = dict(
@@ -630,16 +652,21 @@ class MessageListHandler:
             show_sub_link = True,
             show_attachment_btn = False,
             show_system_tag = True,
-            message_placeholder = "添加标签/关键字/话题"
+            message_placeholder = "添加标签/关键字/话题",
+            show_side_tags = False,
         )
         
         return xtemplate.render("message/page/message_list_view.html", **kw)
 
-    def do_view_by_system_tag(self, tag):
-        return xtemplate.render("message/page/message_list_view.html", 
+    def get_system_tag_page(self, tag):
+        kw = Storage(
             message_tag = tag,
             search_type = "message",
-            show_input_box = False)
+            show_input_box = False,
+            show_side_tags = False,
+        )
+
+        return xtemplate.render("message/page/message_list_view.html", **kw)
 
     def get_task_kw(self):
         kw = Storage()
@@ -656,22 +683,26 @@ class MessageListHandler:
         kw = self.get_task_kw()
         kw.show_input_box = True
         kw.show_system_tag = False
+        kw.side_tags = list_task_tags(xauth.current_name())
+        kw.side_tag_tab_key = "filterKey"
 
         return xtemplate.render("message/page/message_list_view.html", **kw)
 
-    def get_task_by_keyword(self, filter_key):
+    def get_task_by_keyword_page(self, filter_key):
         user_name = xauth.current_name()
         kw = self.get_task_kw()
         kw.message_tag = "task"
         kw.show_system_tag = False
         kw.show_sub_link = False
         kw.show_input_box = True
+        kw.side_tag_tab_key = "filterKey"
 
         if filter_key != "$no_tag":
             kw.show_keyword_info = True
 
         kw.is_keyword_marked = is_marked_keyword(user_name, filter_key)
         kw.keyword = filter_key
+        kw.side_tags = list_task_tags(user_name)
 
         if not is_system_tag(filter_key):
             kw.default_content = filter_key
@@ -682,10 +713,8 @@ class MessageListHandler:
         kw = self.get_task_kw()
         kw.show_system_tag = False
         kw.show_input_box = False
+        kw.show_side_tags = False
         return xtemplate.render("message/page/message_list_view.html", **kw)
-
-    def do_view_task(self):
-        return self.get_task_page()
 
     def get_task_page(self):
         filter_key = xutils.get_argument("filterKey", "")
@@ -698,30 +727,20 @@ class MessageListHandler:
             return self.get_task_done_page()
 
         if page_name == "taglist":
-            return self.get_task_tag_list()
+            return self.get_task_tag_list_page()
 
         if filter_key != "":
-            return self.get_task_by_keyword(filter_key)
+            return self.get_task_by_keyword_page(filter_key)
         else:
             # 任务的首页
             return self.get_task_home_page()
 
     def get_task_home_page(self):
-        # kw = self.get_task_kw()
-        # kw.show_input_box = True
-        # kw.show_system_tag = False
-        # kw.show_task_tag_entry  = True
-
-        # return xtemplate.render("message/page/message_list_view.html", **kw)
         return self.get_task_create_page()
 
-
-    def get_task_tag_list(self):
-        return self.get_task_keyword_list()
-
-    def get_task_keyword_list(self):
+    def get_task_tag_list_page(self):
         user_name = xauth.current_name()
-        msg_list, amount = MSG_DAO.list_by_tag(user_name, "task", 0, -1)
+        msg_list, amount = MSG_DAO.list_task(user_name, 0, -1)
 
         tag_list = get_tags_from_message_list(msg_list, "task", display_tag = "taglist")
 
@@ -773,12 +792,14 @@ class MessageListHandler:
             message_tag = input_tag,
             search_type = "message",
             show_system_tag = False,
+            show_side_system_tags = True,
             show_sub_link = False,
             html_title = T("随手记"),
             default_content = default_content,
             show_back_btn = False,
             message_tab = "log",
             message_placeholder = "记录发生的事情/产生的想法",
+            side_tags = MSG_DAO.list_hot_tags(user_name, 20),
         )
 
         if key != "" or input_tag == "search":

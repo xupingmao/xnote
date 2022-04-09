@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2022/02/08 10:24:30
+# @modified 2022/04/09 14:03:43
 
 import sys
 import os
@@ -136,6 +136,23 @@ class TestMain(BaseTestCase):
         self.check_OK("/message?tag=task")
         self.check_OK("/message?tag=task&action=create")
         self.check_OK("/message?tag=task&filterKey=test")
+
+    def test_task_create_and_done(self):
+        # Py2: webpy会自动把str对象转成unicode对象，data参数传unicode反而会有问题
+        response = json_request("/message/save", method="POST", 
+            data=dict(content="Xnote-Unit-Test-Task", tag = "task"))
+        self.assertEqual("success", response.get("code"))
+        data = response.get("data")
+        # Py2: 判断的时候必须使用unicode
+        self.assertEqual(u"Xnote-Unit-Test-Task", data.get("content"))
+        
+        task_id = data["id"]
+
+        update_result = json_request("/message/status", method="POST", 
+            data=dict(id = task_id, status = 100))
+        self.assertEqual("success", update_result.get("code"))
+
+        self.check_OK("/message/edit?id=%s" % task_id)
 
     def test_message_dairy(self):
         self.check_OK("/message/dairy")

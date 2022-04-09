@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2022/02/26 10:15:45
+# @modified 2022/04/09 11:53:35
 import xutils
 import xconfig
 import xmanager
@@ -381,6 +381,12 @@ def get_by_content(user, tag, content):
     else:
         return None
 
+def list_task(user, offset = 0, limit = xconfig.PAGE_SIZE):
+    return list_by_tag(user, "task", offset, limit)
+
+def list_task_done(user, offset = 0, limit = xconfig.PAGE_SIZE):
+    return list_by_tag(user, "done", offset, limit)
+
 def list_by_tag(user, tag, offset = 0, limit = xconfig.PAGE_SIZE):
     check_param_user(user)
 
@@ -518,6 +524,8 @@ xutils.register_func("message.list_link", list_link_page)
 xutils.register_func("message.list_book", list_book_page)
 xutils.register_func("message.list_people", list_people_page)
 xutils.register_func("message.list_phone", list_phone_page)
+xutils.register_func("message.list_task", list_task)
+xutils.register_func("message.list_task_done", list_task_done)
 xutils.register_func("message.list_by_tag",  list_by_tag)
 xutils.register_func("message.list_by_date", list_by_date)
 
