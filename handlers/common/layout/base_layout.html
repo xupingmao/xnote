@@ -81,7 +81,11 @@
     var styleText = ".x-center, .nav-container {"
       + "width:" + contentWidth + "px;"
       + "margin-left:" + marginLeft + "px;"
-      + "}"
+      + "}";
+
+    if (winWidth > contentWidth) {
+      styleText += ".mobile-only {display: none;}"
+    }
 
     // 居中的样式
     var style = document.createElement("style");

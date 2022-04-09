@@ -1,10 +1,11 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 15:35:23
-# @modified 2021/12/30 10:53:50
+# @modified 2022/04/05 21:15:18
 # @filename dbutil_hash.py
 
 from xutils.dbutil_base import *
+from xutils.db.encode import encode_str, decode_str
 
 class LdbHashTable:
     """基于leveldb的key-value结构
@@ -27,14 +28,12 @@ class LdbHashTable:
     def _check_key(self, key):
         if not isinstance(key, str):
             raise Exception("LdbHashTable_param_error: expect str key")
-        if ":" in key:
-            raise Exception("LdbHashTable_param_error: invalid char `:` in key")
 
     def _check_value(self, obj):
         pass
 
     def build_key(self, key):
-        return self.prefix + key
+        return self.prefix + encode_str(key)
 
     def put(self, key, value, batch = None):
         """通过key来设置value，这个key是hash的key，不是ldb的key
@@ -66,7 +65,7 @@ class LdbHashTable:
         prefix_len = len(self.prefix)
         for key, value in prefix_iter(self.prefix, filter_func = filter_func, 
                 offset = offset, limit = limit, reverse = reverse, include_key = True):
-            yield key[prefix_len:], value
+            yield decode_str(key[prefix_len:]), value
 
     def list(self, *args, **kw):
         return list(self.iter(*args, **kw))

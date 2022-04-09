@@ -82,47 +82,12 @@
                 return "{{key}}";
             }
 
-            function getSearchTags() {
-                return getUrlParam("searchTags", "");
-            }
-
-            function getParamDate() {
-                return getUrlParam("date", "");
-            }
-
-            function getParamNoTag() {
-                return getUrlParam("noTag", "");
-            }
-
-            function getParamFilterKey() {
-                return getUrlParam("filterKey", "");
-            }
-
-            function getParamFilterDate() {
-                return getUrlParam("filterDate", "");
-            }
-
-            function getParamOrderBy() {
-                return getUrlParam("orderby", "");
-            }
-
-            function getParamP() {
-                return getUrlParam("p", "");
-            }
-
             function onMessageRefresh() {
-                var params = {};
+                var params = getUrlParams();
 
                 params.tag  = getParamTag();
                 params.page = getParamPage();
                 params.key = getParamKey();
-                params.searchTags = getSearchTags();
-                params.date = getParamDate();
-                params.noTag = getParamNoTag();
-                params.filterKey = getParamFilterKey();
-                params.filterDate = getParamFilterDate();
-                params.orderby = getParamOrderBy();
-                params.p = getParamP();
 
                 window.doRefreshMessageList(params);
             }

@@ -18,12 +18,7 @@
             <span>{% raw item.html %}</span>
 
             <div class="float-right">
-                {% if orderby == "visit" %}
-                    <span class="msg-amount-text">访问次数 {{item.visit_cnt}}</span>
-                {% else %}
-                    <span class="msg-amount-text">{{item.amount}}</span>
-                {% end %}
-
+                <span class="msg-amount-text">{{item.badge_info}}</span>
                 <a class="todo-delete-btn btn btn-default" data-id="{{item.id}}" data-content="{{item.content}}">删除</a>
             </div>
         </div>

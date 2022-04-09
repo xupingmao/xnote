@@ -58,6 +58,8 @@ run-local.bat
 run-follower*
 tools/git-push.sh
 config/boot/boot.local.properties
+config/boot/boot.winxp.properties
+
 
 # 锁文件
 pid.lock

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:48:09
-# @modified 2022/04/04 21:50:02
+# @modified 2022/04/09 10:20:07
 # @filename message_utils.py
 import xutils
 import web
@@ -377,6 +377,24 @@ def sort_message_list(msg_list, orderby = ""):
 
     if orderby == "visit":
         msg_list.sort(key = lambda x: x.visit_cnt or 0, reverse = True)
+        for item in msg_list:
+            item.badge_info = "访问次数(%s)" % item.visit_cnt
+        return
+
+    if orderby == "amount_desc":
+        msg_list.sort(key = lambda x: x.amount or 0, reverse = True)
+        sort_keywords_by_marked(msg_list)
+        for item in msg_list:
+            item.badge_info = "%s" % item.amount
+        return
+    
+    if orderby == "recent":
+        msg_list.sort(key = lambda x: x.mtime, reverse = True)
+        for item in msg_list:
+            item.badge_info = "%s" % xutils.format_date(item.mtime)
+        return
+
+    sort_keywords_by_marked(msg_list)
 
 def sort_keywords_by_marked(msg_list):
     def key_func(item):

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2022/04/04 14:05:03
+# @modified 2022/04/09 10:43:59
 
 """短消息处理，比如任务、备忘、临时文件等等
 
@@ -147,6 +147,7 @@ class ListAjaxHandler:
         filter_key = xutils.get_argument("filterKey", "")
         orderby = xutils.get_argument("orderby", "")
         p = xutils.get_argument("p", "")
+        xutils.get_argument("show_marked_tag", "true", type = bool)
 
         encoded_key = xutils.encode_uri_component(key)
         encoded_filter_key = xutils.encode_uri_component(filter_key)
@@ -166,7 +167,10 @@ class ListAjaxHandler:
         else:
             template_file = "message/ajax/message_ajax.html"
 
-        page_url = "?tag={tag}&displayTag={display_tag}&date={date}&key={encoded_key}&filterKey={encoded_filter_key}&orderby={orderby}&p={p}&page=".format(**locals())
+        page_url = ("?tag={tag}&displayTag={display_tag}"
+            + "&date={date}&key={encoded_key}"
+            + "&filterKey={encoded_filter_key}"
+            + "&orderby={orderby}&p={p}&page=").format(**locals())
 
         kw = Storage(
             show_todo_check = show_todo_check,
@@ -177,9 +181,6 @@ class ListAjaxHandler:
             page_max = page_max,
             item_list = chatlist
         )
-
-        if orderby != "":
-            kw.show_marked_tag = False
 
         return xtemplate.render(template_file, **kw)
 
@@ -240,12 +241,7 @@ class ListAjaxHandler:
     def do_list_key(self, user_name, offset, limit):
         orderby = xutils.get_argument("orderby", "")
         msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
-
-        if orderby != "":
-            sort_message_list(msg_list, orderby)
-        else:
-            sort_keywords_by_marked(msg_list)
-
+        sort_message_list(msg_list, orderby)
         return msg_list[offset:offset+limit], len(msg_list)
 
     def do_list_message(self, user_name, tag, offset, pagesize):
@@ -613,7 +609,7 @@ class MessageListHandler:
         if tag == "task_tags":
             return self.get_task_tag_list()
 
-        return self.do_view_default()
+        return self.get_log_page()
 
     def do_select_key(self):
         user_name = xauth.current_name()
@@ -637,13 +633,6 @@ class MessageListHandler:
             message_placeholder = "添加标签/关键字/话题"
         )
         
-        if orderby == "visit":
-            kw["title"] = T("随手记-常用标签")
-            kw["show_system_tag"] = False
-            kw["show_back_btn"] = True
-            kw["show_sub_link"] = False
-            kw["show_input_box"] = False
-
         return xtemplate.render("message/page/message_list_view.html", **kw)
 
     def do_view_by_system_tag(self, tag):
@@ -773,7 +762,7 @@ class MessageListHandler:
             html_title = T("待办任务"),
             message_placeholder = "添加待办任务")
 
-    def do_view_default(self):
+    def get_log_page(self):
         key = xutils.get_argument("key", "")
         input_tag = xutils.get_argument("tag", "log")
         user_name = xauth.current_name()

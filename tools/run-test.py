@@ -30,6 +30,7 @@ def run_test(target = None):
 	os.system("python3 -m pip install pytest-cov==2.7.1")
 	os.system("python3 -m pip install python-coveralls==2.9.3")
 	os.system("python3 -m pip install coverage==4.5.4")
+	os.system("python3 -m pip install lmdb")
 
 	if target == "xutils_db":
 		os.system("python3 -m pytest tests/test_xutils_db.py --doctest-modules --cov xutils.db")

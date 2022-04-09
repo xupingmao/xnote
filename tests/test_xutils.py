@@ -395,6 +395,9 @@ class TestMain(unittest.TestCase):
         from xutils import dbutil_table
         doctest.testmod(m=dbutil_table, verbose=True)
 
+        from xutils.db import encode
+        doctest.testmod(m=encode, verbose=True)
+
     def test_dbutil_ldb_table_user(self):
         dbutil.register_table("unit_test_user", "用户维度单元测试")
         table = dbutil.LdbTable("unit_test_user")

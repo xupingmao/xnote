@@ -1,10 +1,12 @@
 # -*- coding:utf-8 -*-
 # @author mark
 # @since 2022/02/27 16:07:55
-# @modified 2022/02/27 16:20:06
+# @modified 2022/04/09 10:54:40
 # @filename fs_helpers.py
 
-"""文件管理模块的工具"""
+"""文件管理模块的工具
+注: 叫fs_helpers是为了和fsutil名称混淆
+"""
 
 import xutils
 import xconfig

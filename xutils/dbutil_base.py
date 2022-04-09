@@ -53,7 +53,6 @@ try:
 except ImportError:
     # Windows环境没有leveldb，需要使用leveldbpy的代理实现
     leveldb = None
-    import leveldbpy
 
 DEFAULT_BLOCK_CACHE_SIZE = 8 * (2<<20) # 16M
 DEFAULT_WRITE_BUFFER_SIZE = 2 * (2<<20) # 4M
@@ -84,7 +83,7 @@ _cache = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/03/26 23:43:50
+# @modified 2022/04/05 09:42:48
 ###########################################################
 
 

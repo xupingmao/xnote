@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/24 11:11:04
-# @modified 2022/03/20 19:39:03
+# @modified 2022/04/06 12:46:25
 # @filename driver_sqlite.py
 
 """Sqlite对KV接口的实现"""
@@ -186,6 +186,9 @@ class SqliteKV:
     def Write(self, batch, sync = False):
         """执行批量操作"""
         # return self._db.write(batch, sync)
+        if len(batch._puts) + len(batch._deletes) == 0:
+            return
+
         with get_write_lock():
             cur = self.cursor()
             try:
@@ -196,7 +199,6 @@ class SqliteKV:
 
                 for key in batch._deletes:
                     self.Delete(key, cursor = cur)
-                cur.execute("commit;")
             finally:
                 self.commit()
 

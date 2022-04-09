@@ -38,15 +38,8 @@
     </a>
 {% end %}
 
-
 {% if tag == "key" and show_sub_link %}
-    <a class="list-link" href="/message?tag=key&orderby=visit">
-        <span>常用标签</span>
-        <div class="float-right">
-            <span class="book-size-span"></span>
-            <i class="fa fa-chevron-right"></i>
-        </div>
-    </a>
+    {% include message/component/tag/orderby_tab.html %}
 {% end %}
 
 {% if tag == "calendar" and show_sub_link %}
