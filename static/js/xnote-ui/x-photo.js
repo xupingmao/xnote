@@ -32,14 +32,23 @@ $(function () {
           });
         });
 
+        // 触控接口
+        var hammer;
+        if (window.Hammer) {
+          hammer = new Hammer(document.body);
+        }
+
         layer.photos({
             "photos": {
                   "title": "", //相册标题
-                  "id": 123, //相册id
+                  "id": 123,   //相册id
                   "start": imageIndex, //初始显示的图片序号，默认0
                   "data": data
                 },
-            "anim":5
+            "anim":5,
+            "hideBar": false,
+            "isMobile": xnote.isMobile(),
+            "hammer": hammer,
         });
   });
 });

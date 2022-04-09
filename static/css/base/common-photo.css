@@ -1,0 +1,22 @@
+/**
+ * description here
+ * @author xupingmao
+ * @since 2022/04/09 18:42:06
+ * @modified 2022/04/09 19:07:19
+ * @filename common-photo.css
+ */
+
+.layui-layer-imgbar.imgbar-top {
+    bottom: unset;
+    top: 0px;
+    text-align: right;
+    font-size: 14px;
+    padding-right: 5px;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 1;
+}
+
+.layui-layer-imgbar.imgbar-top>.close-span {
+    cursor: pointer;
+}
+

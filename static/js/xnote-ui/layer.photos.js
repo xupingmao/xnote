@@ -1,4 +1,4 @@
-
+//源文件: https://gitee.com/sentsin/layer/blob/master/src/layer.js
 //layer相册层修改版, 调整了图片大小的处理
 layer.photos = function(options, loop, key){
   var cache = layer.cache||{}, skin = function(type){
@@ -14,12 +14,15 @@ layer.photos = function(options, loop, key){
   dict.imgIndex = (start|0) + 1;
   
   options.img = options.img || 'img';
+  // 是否是移动设备
+  options.isMobile = options.isMobile || false;
   
   var success = options.success;
   delete options.success;
 
   if(!type){ //页面直接获取
-    var parent = $(options.photos), pushData = function(){
+    var parent = $(options.photos);
+    var pushData = function(){
       data = [];
       parent.find(options.img).each(function(index){
         var othis = $(this);
@@ -104,14 +107,20 @@ layer.photos = function(options, loop, key){
   
   //一些动作
   dict.event = function(){
-    // dict.bigimg.hover(function(){
+    
+    // dict.bigimgPic.hover(function(){
     //   dict.imgsee.show();
     // }, function(){
     //   dict.imgsee.hide();
     // });
-    dict.imgsee.show();
-    $(".layui-layer-imgprev").css("position", "fixed");
-    $(".layui-layer-imgnext").css("position", "fixed");
+
+    dict.bigimgPic.click(function() {
+      dict.imgsee.toggle();
+    });
+
+    // dict.imgsee.show();
+    // $(".layui-layer-imgprev").css("position", "fixed");
+    // $(".layui-layer-imgnext").css("position", "fixed");
     
     dict.bigimg.find('.layui-layer-imgprev').on('click', function(event){
       event.preventDefault();
@@ -122,8 +131,23 @@ layer.photos = function(options, loop, key){
       event.preventDefault();
       dict.imgnext();
     });
+
+    dict.bigimg.find(".close-span").on("click", function(event) {
+      layer.close(dict.index);
+    });
     
     $(document).on('keyup', dict.keyup);
+
+    // 触控事件
+    var hammer = options.hammer;
+    if (hammer) {
+      hammer.on('swipeleft', function(e) {
+        dict.imgprev();
+      });
+      hammer.on('swiperight', function(e) {
+        dict.imgnext();
+      });
+    }
   };
   
   //图片预加载
@@ -148,6 +172,26 @@ layer.photos = function(options, loop, key){
     scrollbar: false
   });
 
+  function imgBarTop() {
+    if (options.hideBar) {
+      return "";
+    }
+    return '<div class="layui-layer-imgbar imgbar-top" style="display:none;">'
+      + '<span class="close-span">关闭</span>'
+      + '</div>';
+  }
+
+  function imgBarBottom() {
+    if (options.hideBar) {
+      return "";
+    }
+    return '<div class="layui-layer-imgbar" style="display:'
+      + (key ? 'block' : '') 
+      + '"><span class="layui-layer-imgtit"><a target="_blank" href="' 
+      + data[start].src +  '">'+ (data[start].alt||'') 
+      + '</a><em>'+ dict.imgIndex +'/'+ data.length +'</em></span></div>';
+  }
+
   loadImage(data[start].src, function(img){
     layer.close(dict.loadi);
     dict.index = layer.open($.extend({
@@ -155,7 +199,14 @@ layer.photos = function(options, loop, key){
       id: 'layui-layer-photos',
       area: function(){
         var imgarea = [img.width, img.height];
-        var winarea = [$(window).width() - 100, $(window).height() - 100];
+        var winarea;
+
+        if (options.isMobile) {
+          // 移动端不需要预留空间，直接填满屏幕即可
+          winarea = [$(window).width(), $(window).height()];
+        } else {
+          winarea = [$(window).width() - 100, $(window).height() - 100];
+        }
         
         //如果 实际图片的宽或者高比 屏幕大（那么进行缩放）
         if(!options.full && (imgarea[0]>winarea[0]||imgarea[1]>winarea[1])){
@@ -193,15 +244,25 @@ layer.photos = function(options, loop, key){
       isOutAnim: false,
       skin: 'layui-layer-photos' + skin('photos'),
       content: '<div class="layui-layer-phimg">'
+        +imgBarTop()
         +'<img src="'+ data[start].src +'" alt="'+ (data[start].alt||'') +'" layer-pid="'+ data[start].pid +'">'
         +'<div class="layui-layer-imgsee">'
           +(data.length > 1 ? '<span class="layui-layer-imguide"><a href="javascript:;" class="layui-layer-iconext layui-layer-imgprev"></a><a href="javascript:;" class="layui-layer-iconext layui-layer-imgnext"></a></span>' : '')
-          +'<div class="layui-layer-imgbar" style="display:'+ (key ? 'block' : '') +'"><span class="layui-layer-imgtit"><a target="_blank" href="' + data[start].src +  '">'+ (data[start].alt||'') +'</a><em>'+ dict.imgIndex +'/'+ data.length +'</em></span></div>'
+          +imgBarBottom()
         +'</div>'
       +'</div>',
       success: function(layero, index){
         dict.bigimg = layero.find('.layui-layer-phimg');
-        dict.imgsee = layero.find('.layui-layer-imguide,.layui-layer-imgbar');
+        dict.bigimgPic = layero.find('.layui-layer-phimg img');
+        // dict.imgsee = layero.find('.layui-layer-imguide,.layui-layer-imgbar');
+        dict.imgsee = layero.find(".layui-layer-imgbar");
+
+        // 左右方向图标始终展示
+        layero.find(".layui-layer-imgnext,.layui-layer-imgprev").
+          css("position", "fixed").show();
+        layero.find(".layui-layer-imguide").show();
+        layero.find(".layui-layer-imgbar").hide();
+
         dict.event(layero);
         options.tab && options.tab(data[start], layero);
         typeof success === 'function' && success(layero);

@@ -1,0 +1,72 @@
+{% extends base %}
+
+{% block body %}
+
+    {% include test/component/example_nav.html %}
+
+<!-- 触控组件 -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+
+
+<style type="text/css">
+    .hammer-box {
+        width: 100%;
+        height: 200px;
+        background-color: blue;
+        text-align: center;
+        color: white;
+    }
+</style>
+
+<div class="card">
+    <div class="hammer-box">
+        <span>触控测试区域</span>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+$(function () {
+  // Create an instance of Hammer with the reference.
+  var hammer = new Hammer($(".hammer-box")[0]);
+
+  // Subscribe to a quick start event: press, tap, or doubletap.
+  // For a full list of quick start events, read the documentation.
+  hammer.on('press', function(e) {
+    console.log(e);
+    xnote.toast("长按操作!");
+    e.preventDefault();
+  });
+
+  hammer.on('tap', function(e) {
+    console.log(e);
+    xnote.toast("点击操作!");
+  });
+
+  hammer.on('swipeleft', function(e) {
+    console.log(e);
+    xnote.toast("向左滑动!");
+  });
+
+  hammer.on('swiperight', function(e) {
+    console.log(e);
+    xnote.toast("向右滑动!");
+  });
+
+  // pinch默认是关闭的，需要主动开启
+  hammer.get('pinch').set({ enable: true });
+
+  hammer.on('pinchin', function(e) {
+    console.log(e);
+    xnote.toast("缩小操作!");
+  });
+  hammer.on('pinchout', function(e) {
+    console.log(e);
+    xnote.toast("放大操作!");
+  });
+});
+</script>
+
+
+{% end %}

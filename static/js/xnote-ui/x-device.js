@@ -30,5 +30,9 @@ window.isPc = function() {
 window.isDesktop = window.isPc;
 
 window.isMobile = function() {
-    return ! isPc();
+    return !isPc();
+};
+
+xnote.isMobile = function() {
+    return $(window).width() < xnote.MOBILE_MAX_WIDTH;
 };
