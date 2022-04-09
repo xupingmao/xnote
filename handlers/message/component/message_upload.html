@@ -1,16 +1,25 @@
-{% include common/upload/upload_file_component.html %}
-
+<link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
+<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 <script type="text/javascript">
     $(function () {
+        // 触发文件上传操作
         $("#filePickerBtn").on("click", function (event) {
             console.log("select file button click");
-            $("#globalFilePicker").click();
+            $("#filePicker").click();
         });
 
-        xnote.on("file.upload", function (result) {
-            var link = result.target.link;
+        // 上传文件
+        xnote.createUploader("#filePicker", false, function (resp) {
+            console.log("文件上传成功", resp);
+            xnote.fire("message.upload", "file://" + resp.webpath);
+        });
 
-            xnote.fire("message.upload", link);
+        // 通过剪切板上传
+        $(".input-box").on("paste", function (e) {
+            xnote.requestUploadByClip(e, "msg", function (resp) {
+                console.log(resp);
+                xnote.fire("message.upload", "file://" + resp.webpath);
+            });
         });
     });
 </script>

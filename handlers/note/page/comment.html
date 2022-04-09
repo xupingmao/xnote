@@ -21,9 +21,6 @@
 <link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
 <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 
-
-{% include common/upload/upload_file_component.html %}
-
 {% if _has_login and show_comment_create %}
     <div class="card {{comment_class}}">
         {% if show_comment_title %}
@@ -122,15 +119,26 @@ $(function () {
         });
     });
 
+    // 触发文件上传操作
     $("#commentFilePickerBtn").on("click", function (event) {
         console.log("select file button click");
-        $("#globalFilePicker").click();
+        $("#commentFilePicker").click();
     });
 
-    xnote.on("file.upload", function (result) {
-        console.log("receive file upload event, ", result);
-        var link = result.target.link;
+    // 上传文件
+    xnote.createUploader("#commentFilePicker", false, function (resp) {
+        console.log("文件上传成功", resp);
+        var link = "file://" + resp.webpath;
         appendToInputText(link);
+    });
+
+    // 通过剪切板上传
+    $("#commentText").on("paste", function (e) {
+        xnote.requestUploadByClip(e, "msg", function (respJson) {
+            console.log(respJson);
+            var link = "file://" + respJson.webpath;
+            appendToInputText(link);
+        });
     });
 
     xnote.on("comment.refresh", refreshComments);

@@ -1644,7 +1644,8 @@ window.xnote.requestUpload = function(fileSelector, chunked, successFn, errorFn)
 // @param {function} errorFn 失败的回调函数
 window.xnote.requestUploadByClip = function (e, filePrefix, successFn, errorFn) {
     console.log(e);
-    var clipboardData = e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {};
+    var clipboardData = e.clipboardData || e.originalEvent 
+        && e.originalEvent.clipboardData || {};
 
     // console.log(clipboardData);
     if (clipboardData.items) {
@@ -1655,13 +1656,22 @@ window.xnote.requestUploadByClip = function (e, filePrefix, successFn, errorFn) 
             // console.log("requestUploadByClip", item, value);
             if (/image/i.test(item.type)) {
                 console.log(item);
+
+                // 取消默认的粘贴动作（默认会粘贴文本）
+                e.preventDefault();
+
+                // 创建加载页，阻止用户操作
+                var loadingIndex = createXnoteLoading();
+
                 var blob = item.getAsFile();
                 xnote.uploadBlob(blob, filePrefix, function (resp) {
                     successFn(resp);
+                    closeXnoteLoading(loadingIndex);
                 }, function (resp) {
                     if (errorFn) {
                         errorFn(resp);
                     }
+                    closeXnoteLoading(loadingIndex);
                 });
             }
         }

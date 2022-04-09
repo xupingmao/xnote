@@ -11,6 +11,13 @@
 </div>
 
 <script type="text/javascript">
+$(function () {
+
+    function appendToEditBox(appendText) {
+        var oldValue = $("#commentUpdateContent").val();
+        $("#commentUpdateContent").val(oldValue + appendText);
+    }
+
     $("#updateCommentBtn").click(function (e) {
         var params = {};
         params.p = "update";
@@ -34,8 +41,16 @@
     xnote.createUploader("#commentFilePicker2", false, function (resp) {
         console.log("文件上传成功", resp);
         var link = "file://" + resp.webpath;
-        var oldValue = $("#commentUpdateContent").val();
-        $("#commentUpdateContent").val(oldValue + "\n" + link);
+        appendToEditBox("\n" + link);
     });
 
+    // 通过剪切板上传
+    $("#commentUpdateContent").on("paste", function (e) {
+        xnote.requestUploadByClip(e, "msg", function (respJson) {
+            console.log(respJson);
+            var link = "file://" + respJson.webpath;
+            appendToEditBox(link);
+        });
+    });
+});
 </script>
