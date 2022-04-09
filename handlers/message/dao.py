@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2022/04/09 11:53:35
+# @modified 2022/04/09 22:08:51
 import xutils
 import xconfig
 import xmanager
@@ -17,7 +17,6 @@ dbutil.register_table("message", "短文本")
 dbutil.register_table("msg_search_history", "备忘搜索历史")
 dbutil.register_table("msg_key", "备忘关键字/标签")
 dbutil.register_table("msg_task_idx", "待办索引")
-dbutil.register_table("msg_key_rel", "标签关系")
 dbutil.register_table("msg_history", "备忘历史")
 dbutil.register_table("user_stat", "用户数据统计")
 
@@ -120,7 +119,6 @@ def _create_message_with_date(kw):
             result = dbutil.get(key)
             if result is None:
                 dbutil.put(key, kw)
-
                 execute_after_create(kw)
                 return key
             else:

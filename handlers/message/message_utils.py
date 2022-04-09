@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:48:09
-# @modified 2022/04/09 13:42:48
+# @modified 2022/04/09 22:15:22
 # @filename message_utils.py
 import xutils
 import web
@@ -94,7 +94,7 @@ def process_tag_message(message):
     message.html = build_search_html(message.content)
 
     if message.amount is None:
-        message.amount = T("更新中...")
+        message.amount = 0
 
 def process_message(message):
     if message.status == 0 or message.status == 50:
@@ -402,7 +402,14 @@ def sort_message_list(msg_list, orderby = ""):
             item.badge_info = "访问次数(%s)" % item.visit_cnt
 
     if orderby == "amount_desc":
-        msg_list.sort(key = lambda x: x.amount or 0, reverse = True)
+        def amount_key_func(item):
+            if isinstance(item.amount, str):
+                return 0
+            if item.amount == None:
+                return 0
+            return item.amount
+
+        msg_list.sort(key = amount_key_func, reverse = True)
         for item in msg_list:
             item.badge_info = "%s" % item.amount
         sort_keywords_by_marked(msg_list)

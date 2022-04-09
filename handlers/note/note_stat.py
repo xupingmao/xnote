@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2022/03/20 13:20:25
+# @modified 2022/04/09 22:05:07
 import xauth
 import xutils
 import xmanager
@@ -103,7 +103,7 @@ class StatHandler(BasePlugin):
 
     def handle(self, input):
         p = xutils.get_argument("p", "")
-        hide_index = xutils.get_argument("hide_index", "")
+        hide_index = xutils.get_argument("hide_index", "true")
         user_name = xauth.current_name()
 
         xmanager.add_visit_log(user_name, "/note/stat")

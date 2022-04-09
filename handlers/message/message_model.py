@@ -1,17 +1,19 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:24:41
-# @modified 2022/04/09 12:35:28
+# @modified 2022/04/09 22:10:00
 # @filename message_model.py
 
-class MessageFolder:
+from xutils import Storage
+
+class MessageFolder(Storage):
 
     def __init__(self):
         self.date = ""
         self.wday = ""
         self.item_list = []
 
-class MessageTag:
+class MessageTag(Storage):
 
     def __init__(self, 
             name = None, 
