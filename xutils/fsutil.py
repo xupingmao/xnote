@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2022/03/25 22:41:22
+# @modified 2022/04/10 23:13:58
 
 
 """fsutil: 文件操作工具，文件工具分为如下部分：
@@ -94,7 +94,9 @@ def get_relative_path(path, parent):
     # 相减的结果是         -> /test/hello.html
     # 需要除去第一个/
     relative_path = path1[len(parent1):]
-    return relative_path.replace("\\", "/")[1:]
+    if relative_path[0] == "/":
+        relative_path = relative_path[1:]
+    return relative_path.replace("\\", "/")
 
 def detect_encoding(fpath, raise_error = True):
     for encoding in ENCODING_TUPLE:
