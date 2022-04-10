@@ -21,6 +21,7 @@ def main():
 	args = sys.argv[1:]
 	args.insert(0, sys.executable)
 	cmd = " ".join(args)
+	cmd += " >>/data/log/stdout.log"
 	print("Command", cmd)
 	while True:
 		# exit_code = subprocess.call(args, shell = True)
