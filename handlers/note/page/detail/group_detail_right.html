@@ -18,8 +18,6 @@
     </div>
 </div>
 
-{% import markdown %}
-
 <div class="card">
     <div class="card-title">
         <span>简介</span>
@@ -31,6 +29,7 @@
         <p class="align-center">暂无简介</p>
     {% else %}
         {% try %}
+            {% import markdown %}
             <div class="pad5 markdown-box">{% raw markdown.markdown(file.content) %}</div>
         {% except %}
             <div class="pad5 markdown-box">抱歉,markdown解析出错!</div>
