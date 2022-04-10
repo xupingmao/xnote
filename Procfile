@@ -1,1 +1,0 @@
-web: python sentinel.py app.py --data /data --debug no --useUrlencode yes --initScript init.py --minthreads 20
