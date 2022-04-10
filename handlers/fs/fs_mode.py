@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2022/04/10 18:30:25
-# @modified 2022/04/10 21:49:03
+# @modified 2022/04/10 23:59:24
 # @filename fs_mode.py
 
 import os
@@ -11,6 +11,7 @@ from xtemplate import T
 from xutils import dbutil
 from xutils import format_size
 
+dbutil.register_table("fs_index", "文件索引")
 _index_db = dbutil.get_hash_table("fs_index")
 
 def get_grid_page(mode, kw):
