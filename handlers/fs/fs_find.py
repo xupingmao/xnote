@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2022/04/10 21:43:30
+# @modified 2022/04/10 23:56:20
 import os
 import sys
 import glob
@@ -16,6 +16,7 @@ from xutils import dbutil
 from xutils import Storage
 from .fs_index import build_fs_index
 
+dbutil.register_table("fs_index", "文件索引")
 _index_db = dbutil.get_hash_table("fs_index")
 
 FS = xutils.Module("fs")
