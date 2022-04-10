@@ -53,7 +53,7 @@
             <i class="fa {{item.icon}}"></i>
 
             {% if item.type == "dir" %}
-                <a href="/fs/{{item.encoded_path}}" class="fs-folder">{{item.name}}</a>
+                <a href="/fs/{{item.encoded_path}}?mode={{mode}}" class="fs-folder">{{item.name}}</a>
             {% elif xutils.is_img_file(item.path) %}
                 <a href="#" class="x-photo" src="/fs/{{item.encoded_path}}">{{item.name}}</a>
             {% elif xutils.is_audio_file(item.path) %}

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2017/??/??
-# @modified 2021/10/07 14:52:04
+# @modified 2022/04/10 21:43:30
 import os
 import sys
 import glob
@@ -14,44 +14,28 @@ import time
 from fnmatch import fnmatch
 from xutils import dbutil
 from xutils import Storage
+from .fs_index import build_fs_index
 
-dbutil.register_table("fs_index", "文件索引")
+_index_db = dbutil.get_hash_table("fs_index")
 
 FS = xutils.Module("fs")
 
-def rebuild_file_index(dirname):
-    count = 0
-    # 构建新的索引
-    for root, dirs, files in os.walk(dirname):
-        for item in dirs:
-            path = os.path.join(root, item)
-            dbutil.put("fs_index:%s" % path, "1")
-            count += 1
-        for item in files:
-            path = os.path.join(root, item)
-            dbutil.put("fs_index:%s" % path, "1")
-            count += 1
-    xutils.log("files count = {}", count)
-
 def get_fpath_from_key(key):
-    left = len("fs_index") + 1
+    left = len("fs_index")+1
     return key[left:]
 
 def clear_file_index():
-    for key, value in dbutil.prefix_iter("fs_index", include_key = True):
+    for key, value in _index_db.iter(limit = -1):
         # key的格式为 fs_index:fpath
-        dbutil.delete(key)
+        _index_db.delete(key)
 
 def update_file_index():
-    # 清理旧的索引
-    clear_file_index()
-
     # 创建新的索引
-    rebuild_file_index(xconfig.DATA_DIR)
+    build_fs_index(xconfig.DATA_DIR)
 
     # 构建外部索引目录的索引
     for dirname in get_index_dirs():
-        rebuild_file_index(dirname)
+        build_fs_index(dirname)
 
 def find_in_cache0(key):
     input_key = key.upper()
@@ -139,7 +123,7 @@ class IndexHandler:
         xmanager.add_visit_log(user_name, "/fs_index")
 
         tpl = "fs/page/fs_index.html"
-        index_size = dbutil.count_table("fs_index")
+        index_size = _index_db.count()
         return xtemplate.render(tpl, 
             index_dirs = get_index_dirs(),
             index_size = index_size)
@@ -163,7 +147,7 @@ class IndexHandler:
             update_index_config(index_config)
             index_dirs = get_index_dirs()
         
-        index_size = dbutil.count_table("fs_index")
+        index_size = _index_db.count()
         return xtemplate.render(tpl, 
             index_dirs = index_dirs,
             index_size = index_size,

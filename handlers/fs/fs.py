@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/03
-# @modified 2022/03/19 11:06:42
+# @modified 2022/04/10 18:33:45
 
 """xnote文件服务，主要功能:
 1. 静态文件服务器，生产模式使用强制缓存，开发模式使用协商缓存
@@ -22,6 +22,7 @@ import shutil
 import xmanager
 from xutils import FileItem, u, Storage, fsutil
 from xutils import dbutil
+from .fs_mode import get_fs_page_by_mode
 
 def is_stared(path):
     return xconfig.has_config("STARED_DIRS", path)
@@ -171,15 +172,8 @@ class FileSystemHandler:
 
         mode = xutils.get_argument("mode", xconfig.FS_VIEW_MODE)
         kw["fs_mode"] = mode
-        if mode == "grid":
-            return xtemplate.render("fs/page/fs_grid.html", **kw)
-        elif mode == "shell":
-            return xtemplate.render("fs/page/fs_shell.html", **kw)
-        elif mode == "sidebar":
-            kw["show_aside"] = False
-            return xtemplate.render("fs/page/fs_sidebar.html", **kw)
-        else:
-            return xtemplate.render("fs/page/fs.html", **kw)
+
+        return get_fs_page_by_mode(mode, kw)
 
     def list_root(self):
         raise web.seeother("/fs//")
