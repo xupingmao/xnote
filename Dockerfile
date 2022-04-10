@@ -13,6 +13,6 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' 
 
 COPY . .
 
-CMD ["python", "sentinel.py", "app.py", "--config", "config/boot/boot.sae.properties" ">> data/log/stdout.log"]
+CMD ["/bin/sh" "-c" "python sentinel.py app.py --config config/boot/boot.sae.properties >> /data/log/stdout.log" ]
 
 
