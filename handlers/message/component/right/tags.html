@@ -16,10 +16,13 @@
     </div>
 
 
-    <div class="x-tab-box sidebar-style" data-tab-key="{{side_tag_tab_key}}">
+    <div class="x-tab-box sidebar-list-style" data-tab-key="{{side_tag_tab_key}}">
         {% for temp_tag in side_tags %}
             <div class="x-tab-item">
                 <a class="x-tab" data-tab-value="{{temp_tag.content}}" href="{{temp_tag.url}}">
+                    {% if temp_tag.is_marked %}
+                        <span class="tag orange">置顶</span>
+                    {% end %}
                     <span>{{temp_tag.content}}</span>
                     <div class="float-right secondary">
                         {{temp_tag.amount}}

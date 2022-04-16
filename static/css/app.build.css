@@ -2172,7 +2172,7 @@ div.xnote-done {
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2022/04/16 09:54:00
+ * @modified 2022/04/16 10:35:15
 */
 
 
@@ -2338,13 +2338,13 @@ div.xnote-done {
 
 
 /* 侧边栏的tab样式 */
-.sidebar-style>.x-tab-item {
+.sidebar-btn-style>.x-tab-item {
     width: 50%;
     float: left;
     padding: 5px;
 }
 
-.sidebar-style .x-tab {
+.sidebar-btn-style .x-tab {
     width: 100%;
     color: black;
     background-color: #eee;
@@ -2352,21 +2352,50 @@ div.xnote-done {
     margin: 0px;
 }
 
-.sidebar-style .x-tab.active {
+.sidebar-btn-style .x-tab.active {
     background-color: gray;
     color: #fff;
     border: 1px solid gray;
+}
+
+.sidebar-btn-style .secondary.active {
+    color: #fff;
 }
 
 .secondary {
     color: #888;
 }
 
-.x-tab.active .secondary {
-    color: #fff;
+
+/* 列表样式 */
+.sidebar-list-style>.x-tab-item {
+    width: 100%;
+    float: left;
+    padding: 5px;
+    color: #08c;
+    border-bottom: 1px solid #eee;
 }
 
-.sidebar-style>.x-tab:last-child {
+.sidebar-list-style>.x-tab-item:hover {
+    background-color: #eee;
+}
+
+.sidebar-list-style>.x-tab-item:last-child {
+    border-bottom: none;
+}
+
+
+.sidebar-list-style .x-tab {
+    width: 100%;
+    padding: 0px;
+    color: #08c;
+}
+
+.sidebar-list-style .x-tab.active {
+    color: red;
+}
+
+.sidebar-list-style>.x-tab:last-child {
     border-bottom: none;
 }
 
