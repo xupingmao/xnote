@@ -1,7 +1,9 @@
 <!-- 笔记类型 -->
 {% init note_types = xutils.call("page.list_note_types") %}
+{% init show_note_types = True %}
 {% init show_note_types_title = True %}
 
+{% if show_note_types %}
 <div class="card">
 
     {% if show_note_types_title %}
@@ -31,3 +33,5 @@
     </a>
 {% end %}
 </div>
+{% end %}
+

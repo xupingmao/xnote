@@ -84,7 +84,9 @@
       + "}";
 
     if (winWidth > contentWidth) {
-      styleText += ".mobile-only {display: none;}"
+      styleText += ".mobile-only {display: none;}";
+    } else {
+      styleText += ".desktop-only {display: none;}";
     }
 
     // 居中的样式

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/10 23:44:48
-# @modified 2022/01/23 15:49:49
+# @modified 2022/04/16 22:36:45
 import math
 import xconfig
 import xutils
@@ -11,6 +11,7 @@ import xmanager
 from xutils import DAO
 from xutils import Storage
 from xutils import quote
+from xutils import textutil
 from xtemplate import T
 
 NOTE_DAO = DAO("note")
@@ -18,11 +19,33 @@ NOTE_DAO = DAO("note")
 def get_page_max(count):
     return int(math.ceil(count/xconfig.PAGE_SIZE))
 
+
+def search_translator(parser, key0):
+    key = key0.lstrip("")
+    key = key.rstrip("")
+    quoted_key = textutil.quote(key)
+    value = textutil.escape_html(key0)
+    fmt = "<a class=\"link\" href=\"/search?search_type=comment&key={quoted_key}\">{value}</a>"
+    return fmt.format(quoted_key=quoted_key, value=value)
+
+def mark_text(content):
+    from xutils.text_parser import TextParser
+    from xutils.text_parser import set_img_file_ext
+    # 设置图片文集后缀
+    set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
+
+    parser = TextParser()
+    parser.set_topic_translator(search_translator)
+    parser.set_search_translator(search_translator)
+
+    tokens = parser.parse(content)
+    return "".join(tokens)
+
 def process_comments(comments, show_note = False):
     for comment in comments:
         if comment.content is None:
             continue
-        comment.html = xutils.mark_text(comment.content)
+        comment.html = mark_text(comment.content)
 
         if show_note:
             note = NOTE_DAO.get_by_id(comment.note_id, False)
@@ -41,6 +64,10 @@ def search_comment_summary(ctx):
         ctx.messages.append(result)
 
 def search_comment_detail(ctx):
+    """搜索评论详细列表接口
+    @param {SearchContext} ctx 搜索上下文
+    @return None
+    """
     result = []
     comments = NOTE_DAO.search_comment(user_name = ctx.user_name, keywords = ctx.words)
 
@@ -139,14 +166,14 @@ class DeleteCommentAjaxHandler:
         if user != comment.user:
             return dict(success = False, message = "unauthorized")
         NOTE_DAO.delete_comment(comment_id)
-        return dict(success = True)
+        return dict(success = True, code = "success")
 
 class MyCommentsHandler:
 
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
-        xmanager.add_visit_log(user_name, "/note/mycomments")
+        xmanager.add_visit_log(user_name, "/note/comment/mine")
         date = xutils.get_argument("date", "")
 
         return xtemplate.render("note/page/comment_user_page.html", 
@@ -190,9 +217,10 @@ class CommentAjaxHandler:
 xutils.register_func("note.search_comment_detail", search_comment_detail)
 
 xurls = (
+    r"/note/comment", CommentAjaxHandler,
     r"/note/comments", CommentListAjaxHandler,
+    r"/note/comment/list", CommentListAjaxHandler,
     r"/note/comment/save", SaveCommentAjaxHandler,
     r"/note/comment/delete", DeleteCommentAjaxHandler,
-    r"/note/comment", CommentAjaxHandler,
-    r"/note/mycomments", MyCommentsHandler,
+    r"/note/comment/mine", MyCommentsHandler,
 )

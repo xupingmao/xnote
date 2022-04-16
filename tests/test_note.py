@@ -1,11 +1,12 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2022/04/04 15:47:48
+# @modified 2022/04/16 22:39:56
 # @filename test_note.py
 
 import logging
 import time
+import copy
 
 import xutils
 # cannot perform relative import
@@ -258,6 +259,49 @@ class TestMain(BaseTestCase):
         data = json_request("/note/comments?note_id=123")
         self.assertEqual(1, len(data))
         self.assertEqual("hello", data[0]['content'])
+
+        comment_id = data[0]["id"]
+
+        # 获取编辑对话框
+        self.check_OK("/note/comment?comment_id=%s&p=edit" % comment_id)
+
+        # 更新评论
+        data = json_request("/note/comment?comment_id=%s&p=update&content=%s" % (comment_id, "#TOPIC# hello"))
+        self.assertEqual("success", data["code"])
+
+        # 查询用户维度评论列表
+        data = json_request("/note/comment/list?list_type=user")
+        self.assertEqual(1, len(data))
+
+        # 我的所有评论
+        self.check_OK("/note/comment/mine")
+
+        # 搜索评论
+        from handlers.note.comment import search_comment_detail, search_comment_summary
+        ctx = Storage(user_name = xauth.current_name(), 
+            key = "hello", 
+            words = ["hello"], 
+            messages = [])
+        summary_ctx = copy.deepcopy(ctx)
+
+        search_comment_detail(ctx)
+        self.assertEqual(1, len(ctx.messages))
+
+        search_comment_summary(summary_ctx)
+        
+        print("搜索评论汇总结果:", summary_ctx)
+
+        self.assertEqual(1, len(summary_ctx.messages))
+
+
+        # 删除评论
+        result = json_request("/note/comment/delete", method = "POST", 
+            data = dict(comment_id = comment_id))
+        self.assertEqual("success", result["code"])
+
+        data = json_request("/note/comment/list?list_type=user")
+        self.assertEqual(0, len(data))
+
 
     def test_note_management(self):
         self.check_OK("/note/management?parent_id=0")

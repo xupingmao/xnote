@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2017/?/?
-# @modified 2021/11/27 10:45:17
+# @modified 2022/04/16 18:18:24
 import re
 import random
 import json
@@ -41,7 +41,7 @@ def contains_all(text, words):
                 return False
         return True
     else:
-        raise TypeError("unsupported type")
+        raise TypeError("unsupported type:%s" % type(words))
 
 text_contains = contains_all
 
@@ -611,42 +611,6 @@ def mark_text(content):
     tokens = parser.parse(content)
     return "".join(tokens)
 
-def mark_text_old(content):
-    """简单的处理HTML"""
-    # \xad (Soft hyphen), 用来处理断句的
-    content = content.replace(u'\xad', '\n')
-    lines = []
-    # markdown的LINK样式
-    for line in content.split("\n"):
-        tokens = line.split()
-        for index, item in enumerate(tokens):
-            if item == "":
-                continue
-            elif item.startswith(("https://", "http://")):
-                tokens[index] = '<a target="_blank" href="%s">%s</a>' % (item, item)
-            elif item.startswith("file://"):
-                href = item[7:]
-                if is_img_file(href):
-                    tokens[index] = '<img class="chat-msg-img x-photo" alt="%s" src="%s">' % (href, href)
-                else:
-                    name = href[href.rfind("/")+1:]
-                    # 尝试urldecode名称
-                    name = unquote(name)
-                    tokens[index] = '<a href="%s">%s</a>' % (href, name)
-            elif item.count("#") >=1:
-                tokens[index] = re.sub(r"#([^#]+)(#?)", 
-                    "<a class=\"link\" href=\"/message?category=message&key=\\g<1>\">#\\g<1>\\g<2></a>", item)
-            else:
-                token = tokens[index]
-                token = token.replace("&", "&amp;")
-                token = token.replace("<", "&lt;")
-                token = token.replace(">", "&gt;")
-                tokens[index] = token
-
-        line = '&nbsp;'.join(tokens)
-        line = line.replace("\t", '&nbsp;&nbsp;&nbsp;&nbsp;')
-        lines.append(line)
-    return "<br/>".join(lines)
 
 def split_words(search_key):
     """拆分字符

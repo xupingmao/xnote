@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 22:07:44
-# @modified 2021/12/05 17:29:04
+# @modified 2022/04/16 21:57:34
 # @filename dao_comment.py
 
 
@@ -114,19 +114,20 @@ def count_comment_by_note(note_id):
     return db.count()
 
 def search_comment(user_name, keywords, offset = 0, limit = None):
-    assert user_name != None, "user_name is None"
+    assert user_name != None, "user_name can not be None"
 
     if limit is None:
         limit = xconfig.PAGE_SIZE
 
-    def search_comment_func(key, value):
-        if textutil.contains_all(value.content, keywords):
+    def search_comment_filter(key, value):
+        content = value.content.lower()
+        if textutil.contains_all(content, keywords):
             return True
         else:
             return False
 
     db = get_index_table(user_name)
-    return db.list(filter_func = search_comment_func, offset = offset, limit = limit)
+    return db.list(filter_func = search_comment_filter, offset = offset, limit = limit)
 
 # comments
 xutils.register_func("note.save_comment", create_comment)

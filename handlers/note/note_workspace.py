@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/02 00:31:58
-# @modified 2022/02/07 17:07:06
+# @modified 2022/04/16 20:35:44
 
 import xauth
 import xtemplate
@@ -55,7 +55,7 @@ def list_note_types(user_name = None):
         NoteLink("表格", "/note/table", "fa-table", size = note_stat.table_count),
         # NoteLink("日志", "/note/log", "fa-file-text", size = note_stat.log_count),
         DictEntryLink(size = note_stat.dict_count),
-        NoteLink("评论", "/note/mycomments", "fa-file-text", size = note_stat.comment_count),
+        NoteLink("评论", "/note/comment/mine", "fa-file-text", size = note_stat.comment_count),
         NoteLink("回收站", "/note/removed", "fa-trash", size = note_stat.removed_count),
     ]
 
@@ -89,7 +89,7 @@ def list_special_groups(user_name = None):
     fixed_books = []
     fixed_books.append(MSG_DAO.get_message_tag(user_name, "task"))
     fixed_books.append(MSG_DAO.get_message_tag(user_name, "log"))
-    fixed_books.append(NoteLink("智能笔记本", "/note/group_list?tab=smart&show_back=true", 
+    fixed_books.append(NoteLink("智能笔记本", "/note/group_list?tab=smart&show_back=true&show_note_types=false", 
         size = NOTE_DAO.count_smart_group(), 
         icon = "fa-folder"))
 

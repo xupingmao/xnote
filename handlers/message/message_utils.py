@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:48:09
-# @modified 2022/04/16 09:55:31
+# @modified 2022/04/16 17:40:40
 # @filename message_utils.py
 import xutils
 import web
@@ -55,7 +55,7 @@ def build_done_html(message):
         done_time = message.mtime
         message.html += u("<br>------<br>完成于 %s") % done_time
 
-class TopicMarker:
+class TopicTranslator:
 
     def __init__(self, tag = None):
         self.tag = tag
@@ -82,7 +82,7 @@ def mark_text(content, tag = "log"):
     # 设置图片文集后缀
     set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
 
-    marker = TopicMarker(tag = tag)
+    marker = TopicTranslator(tag = tag)
 
     parser = TextParser()
     parser.set_topic_translator(marker.mark)

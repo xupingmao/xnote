@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/11/28 23:23:13
-# @modified 2020/11/28 23:24:04
-
+# @modified 2022/04/16 22:47:23
+import copy
 
 class Storage(dict):
     """
@@ -41,7 +41,17 @@ class Storage(dict):
             raise AttributeError(k)
 
     def __deepcopy__(self, memo):
-        return Storage(**self)
+        if memo is None:
+            memo = {}
+        old_value = memo.get(id(self))
+        if old_value != None:
+            return old_value
+
+        result = Storage()
+        for key in self:
+            value = self[key]
+            result[key] = copy.deepcopy(value)
+        return result
     
     def __repr__(self):     
         return '<MyStorage ' + dict.__repr__(self) + '>'

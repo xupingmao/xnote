@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/24 11:11:04
-# @modified 2022/04/06 12:46:25
+# @modified 2022/04/16 22:22:16
 # @filename driver_sqlite.py
 
 """Sqlite对KV接口的实现"""
@@ -14,6 +14,10 @@ import logging
 _write_lock = threading.RLock()
 
 def get_write_lock():
+    return _write_lock
+
+def get_read_lock():
+    # TODO: 优化成读写锁
     return _write_lock
 
 def db_execute(db, sql, *args):
@@ -79,12 +83,13 @@ class SqliteKV:
             self.db_holder.db.commit()
 
     def Get(self, key):
-        cursor = self.cursor()
-        r_iter = cursor.execute("SELECT value FROM kv_store WHERE `key` = ?;", (key,))
-        result = list(r_iter)
-        if len(result) > 0:
-            return result[0][0]
-        return None
+        with get_read_lock():
+            cursor = self.cursor()
+            r_iter = cursor.execute("SELECT value FROM kv_store WHERE `key` = ?;", (key,))
+            result = list(r_iter)
+            if len(result) > 0:
+                return result[0][0]
+            return None
 
     def _exists(self, key):
         cursor = self.cursor()
@@ -138,46 +143,47 @@ class SqliteKV:
         @param {bool} reverse        是否反向查询
         @param {bool} include_value  是否包含值
         """
-        cur = self.cursor()
-        sql_builder = []
-        params = []
+        with get_read_lock():
+            cur = self.cursor()
+            sql_builder = []
+            params = []
 
-        if include_value:
-            sql_builder.append("SELECT key, value FROM kv_store")
-        else:
-            # 只包含key
-            sql_builder.append("SELECT key FROM kv_store")
-
-        if key_from != None or key_to != None:
-            sql_builder.append("WHERE 1=1")
-
-        if key_from != None:
-            sql_builder.append("AND key >= ?")
-            params.append(key_from)
-
-        if key_to != None:
-            sql_builder.append("AND key <= ?")
-            params.append(key_to)
-
-        if reverse:
-            sql_builder.append("ORDER BY key DESC")
-
-        sql_builder.append(";")
-
-        sql = " ".join(sql_builder)
-
-        if self.debug:
-            logging.debug("SQL:%s (%s)", sql, params)
-
-        # return cur.execute(sql, tuple(params))
-        for item in cur.execute(sql, tuple(params)):
-            # logging.debug("include_value(%s), item:%s", include_value, item)
             if include_value:
-                if item[1] == None:
-                    continue
-                yield item
+                sql_builder.append("SELECT key, value FROM kv_store")
             else:
-                yield item[0]
+                # 只包含key
+                sql_builder.append("SELECT key FROM kv_store")
+
+            if key_from != None or key_to != None:
+                sql_builder.append("WHERE 1=1")
+
+            if key_from != None:
+                sql_builder.append("AND key >= ?")
+                params.append(key_from)
+
+            if key_to != None:
+                sql_builder.append("AND key <= ?")
+                params.append(key_to)
+
+            if reverse:
+                sql_builder.append("ORDER BY key DESC")
+
+            sql_builder.append(";")
+
+            sql = " ".join(sql_builder)
+
+            if self.debug:
+                logging.debug("SQL:%s (%s)", sql, params)
+
+            # return cur.execute(sql, tuple(params))
+            for item in cur.execute(sql, tuple(params)):
+                # logging.debug("include_value(%s), item:%s", include_value, item)
+                if include_value:
+                    if item[1] == None:
+                        continue
+                    yield item
+                else:
+                    yield item[0]
 
 
     def CreateSnapshot(self):

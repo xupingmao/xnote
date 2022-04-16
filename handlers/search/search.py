@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2017/02/19
-# @modified 2022/03/08 23:16:49
+# @modified 2022/04/16 18:03:13
 
 import re
 import os
@@ -339,19 +339,19 @@ class SearchHandler:
     def GET(self, path_key = None):
         """search files by name and content"""
         load_rules()
-        key       = xutils.get_argument("key", "")
-        title     = xutils.get_argument("title", "")
-        category  = xutils.get_argument("category", "default")
-        page      = xutils.get_argument("page", 1, type = int)
+        key         = xutils.get_argument("key", "")
+        title       = xutils.get_argument("title", "")
+        category    = xutils.get_argument("category", "default")
+        page        = xutils.get_argument("page", 1, type = int)
         search_type = xutils.get_argument("search_type", "")
-        user_name = xauth.get_current_name()
-        page_url  =  "/search/search?key={key}&category={category}&search_type={search_type}&page=".format(**locals())
-        pagesize = xconfig.SEARCH_PAGE_SIZE
-        offset   = (page-1) * pagesize
-        limit    = pagesize
-        ctx      = Storage()
-        ctx.offset = offset
-        ctx.limit  = limit
+        user_name   = xauth.get_current_name()
+        page_url    =  "/search/search?key={key}&category={category}&search_type={search_type}&page=".format(**locals())
+        pagesize    = xconfig.SEARCH_PAGE_SIZE
+        offset      = (page-1) * pagesize
+        limit       = pagesize
+        ctx         = Storage()
+        ctx.offset  = offset
+        ctx.limit   = limit
 
         if path_key:
             key = xutils.unquote(path_key)
