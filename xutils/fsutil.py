@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2022/04/16 09:19:49
+# @modified 2022/04/16 10:46:47
 
 
 """fsutil: 文件操作工具，文件工具分为如下部分：
@@ -16,7 +16,12 @@ import platform
 import xutils
 import base64
 import time
-import ctypes
+
+# 部分系统没有ctypes（比如SAE的云引擎）
+try:
+    import ctypes
+except ImportError:
+    ctypes = None
 
 import six
 from xutils.imports import *
