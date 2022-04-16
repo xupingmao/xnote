@@ -2172,7 +2172,7 @@ div.xnote-done {
  * 备忘消息的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2021/06/13 16:37:58
+ * @modified 2022/04/16 09:54:00
 */
 
 
@@ -2336,11 +2336,47 @@ div.xnote-done {
     color: #666;
 }
 
+
+/* 侧边栏的tab样式 */
+.sidebar-style>.x-tab-item {
+    width: 50%;
+    float: left;
+    padding: 5px;
+}
+
+.sidebar-style .x-tab {
+    width: 100%;
+    color: black;
+    background-color: #eee;
+    border-radius: 3px;
+    margin: 0px;
+}
+
+.sidebar-style .x-tab.active {
+    background-color: gray;
+    color: #fff;
+    border: 1px solid gray;
+}
+
+.secondary {
+    color: #888;
+}
+
+.x-tab.active .secondary {
+    color: #fff;
+}
+
+.sidebar-style>.x-tab:last-child {
+    border-bottom: none;
+}
+
+
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 360px) {
     /** mobile **/
 
 }
+
 
 /**
  * 笔记的CSS样式
@@ -2702,7 +2738,7 @@ div.xnote-done {
  * description here
  * @author xupingmao
  * @since 2021/05/01 15:36:08
- * @modified 2022/01/09 15:45:16
+ * @modified 2022/04/11 21:27:08
  * @filename todo.css
  */
 
@@ -2723,6 +2759,10 @@ div.xnote-done {
     word-break: break-all;
     float: left;
     width: 100%;
+}
+
+.todo-content blockquote {
+    margin-bottom: 0px;
 }
 
 .todo-foot {

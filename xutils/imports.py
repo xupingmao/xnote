@@ -2,8 +2,16 @@
 # 专门用来import各种依赖
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
-# @modified 2021/04/11 13:07:02
+# @modified 2022/04/16 09:05:41
 from __future__ import print_function
+
+
+import six
+from six.moves.configparser import ConfigParser
+from six.moves.urllib.parse import quote, unquote
+from six.moves.urllib.request import urlopen
+from six import StringIO
+
 import sys
 import os
 import traceback
@@ -16,7 +24,6 @@ import re
 import gc
 import shutil
 import profile as pf
-import six
 import subprocess
 import pickle
 import hashlib
@@ -42,9 +49,6 @@ except ImportError:
 PY2 = sys.version_info[0] == 2
 
 if PY2:
-    from urllib import quote, unquote, urlopen
-    from ConfigParser import ConfigParser
-    from StringIO import StringIO
     from Queue import Queue, PriorityQueue
     # from commands import getstatusoutput
 
@@ -66,11 +70,7 @@ if PY2:
         return isinstance(s, (str, unicode))
 else:
     # Py3 and later
-    from urllib.parse import quote, unquote
-    from urllib.request import urlopen
     from subprocess import getstatusoutput
-    from configparser import ConfigParser
-    from io import StringIO
     from queue import Queue, PriorityQueue
 
     u = str

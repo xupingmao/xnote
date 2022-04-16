@@ -2,7 +2,6 @@
 # created by xupingmao on 2017/04/22
 from __future__ import print_function
 import os
-import urllib.request
 import web
 import time
 import xtemplate

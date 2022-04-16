@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
-# @modified 2022/04/09 22:08:51
+# @modified 2022/04/11 23:29:47
 import xutils
 import xconfig
 import xmanager
@@ -24,7 +24,9 @@ VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
 # 带日期创建的最大重试次数
 CREATE_MAX_RETRY = 20
 MOBILE_LENGTH    = 11
-VALID_TAG_TUPLE = ("task", "done", "log", "key", "date")
+VALID_TAG_SET = set(["task", "done", "log", "key", "date"])
+
+_keyword_db = dbutil.get_hash_table("msg_key")
 
 class MessageDO(Storage):
 
@@ -51,7 +53,7 @@ def check_before_create(kw):
         raise Exception("message.dao.create: key `content` is missing")
 
     tag = kw["tag"]
-    if tag not in VALID_TAG_TUPLE:
+    if tag not in VALID_TAG_SET:
         raise Exception("message.dao.create: tag `%s` is invalid" % tag)
 
 def convert_to_task_idx_key(key):

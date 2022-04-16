@@ -1,10 +1,10 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/09/11 12:14:28
-# @modified 2021/09/11 15:23:43
+# @modified 2022/04/16 08:51:27
 # @filename textutil_url.py
 
-from urllib.parse import quote
+from six.moves.urllib.parse import quote
 
 def add_url_param(url, param_key, param_value):
     """给URL增加参数，返回新的URL

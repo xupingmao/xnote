@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/03/21 18:04:32
-# @modified 2022/04/10 23:13:58
+# @modified 2022/04/16 09:19:49
 
 
 """fsutil: 文件操作工具，文件工具分为如下部分：
@@ -18,9 +18,11 @@ import base64
 import time
 import ctypes
 
+import six
 from xutils.imports import *
 from xutils.base import Storage
 from fnmatch import fnmatch
+from six.moves.configparser import ConfigParser
 
 ENCODING_TUPLE = ("utf-8", "gbk", "mbcs", "latin_1")
 
@@ -696,9 +698,13 @@ class IniConfigData:
 
 def load_ini_config(fpath):
     """加载ini文件，转换为Storage对象"""
-    text = readfile(fpath, limit = CONFIG_FILE_MAX_SIZE)
     parser = ConfigParser()
-    parser.read_string(text)
+
+    if six.PY2:
+        parser.read(fpath)
+    else:
+        text = readfile(fpath, limit = CONFIG_FILE_MAX_SIZE)
+        parser.read_string(text)
 
     result = IniConfigData()
     result.sections = parser.sections()

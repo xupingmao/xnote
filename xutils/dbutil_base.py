@@ -46,6 +46,7 @@ except ImportError:
 # 加载第三方的库
 import xutils
 from xutils.base import Storage
+from xutils.imports import is_str
 from xutils import dateutil
 
 try:
@@ -83,7 +84,7 @@ _cache = None
 # @author xupingmao
 # @email 578749341@qq.com
 # @since 2015-11-02 20:09:44
-# @modified 2022/04/05 09:42:48
+# @modified 2022/04/16 09:26:49
 ###########################################################
 
 
@@ -299,7 +300,7 @@ def check_get_leveldb():
     return get_instance()
 
 def check_table_name(table_name):
-    validate_str(table_name, "invalid table_name")
+    validate_str(table_name, "invalid table_name:{}", table_name)
     if table_name not in TABLE_INFO_DICT:
         raise DBException("table %r not registered!" % table_name)
 
@@ -316,7 +317,7 @@ def validate_obj(obj, msg, *argv):
         raise DBException(msg.format(*argv))
 
 def validate_str(obj, msg, *argv):
-    if not isinstance(obj, str):
+    if not is_str(obj):
         raise DBException(msg.format(*argv))
 
 def validate_list(obj, msg, *argv):

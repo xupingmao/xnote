@@ -1,11 +1,11 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/04 21:22:40
-# @modified 2022/04/09 11:41:19
+# @modified 2022/04/16 08:53:11
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
-from urllib.request import quote
+from six.moves.urllib.parse import quote
 from xutils.db.encode import encode_index_value
 
 register_table("_index", "通用索引")

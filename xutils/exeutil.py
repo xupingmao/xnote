@@ -1,10 +1,12 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2021/02/19 16:09:13
-# @modified 2022/04/03 20:33:26
+# @modified 2022/04/16 08:43:45
 
 
 """脚本执行相关的代码"""
+from __future__ import print_function
+
 import gc
 import sys
 import os

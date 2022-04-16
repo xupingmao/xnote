@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2017/05/29
 # @since 2017/08/04
-# @modified 2022/04/09 14:07:02
+# @modified 2022/04/11 23:23:57
 
 """短消息处理，比如任务、备忘、临时文件等等
 
@@ -23,7 +23,7 @@ from xutils import BaseRule, Storage, dbutil, textutil, functions, u, SearchResu
 from xutils import dateutil
 from xtemplate import T
 from xutils.textutil import escape_html, quote
-from xutils.functions import Counter
+from xutils.functions import Counter, safe_list
 from handlers.message.message_model import MessageFolder
 from handlers.message.message_utils import (
     list_task_tags, 
@@ -102,6 +102,13 @@ def get_current_message_stat():
     message_stat = MSG_DAO.get_message_stat(user_name)
     return format_message_stat(message_stat)
 
+def update_keyword_amount(message, user_name, key):
+    msg_list, amount = MSG_DAO.search(user_name, key, 0, 1)
+    message.amount = amount
+    MSG_DAO.update(message)
+    xutils.log("[message.refresh] user:%s,key:%s,amount:%s" % (user_name, key, amount))
+
+
 @xutils.timeit(name = "message.refresh", logfile = True)
 def refresh_key_amount():
     for user_info in xauth.iter_user(limit = -1):
@@ -109,10 +116,7 @@ def refresh_key_amount():
         msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, -1)
         for index, message in enumerate(msg_list):
             key = message.content
-            msg_list, amount = MSG_DAO.search(user_name, key, 0, 1)
-            message.amount = amount
-            MSG_DAO.update(message)
-            xutils.log("[message.refresh] %s,user:%s,key:%s,amount:%s" % (index, user_name, key, amount))
+            update_keyword_amount(message, user_name, key)
 
 def refresh_message_index():
     """刷新随手记的索引"""
@@ -137,9 +141,18 @@ def after_message_create_or_update(msg_item):
         msg_item.no_tag = True
         msg_item.keywords = None
         MSG_DAO.update(msg_item)
+    after_upsert_async(msg_item)
 
-def function_and_class_split_line():
-    pass
+
+@xutils.async_func_deco()
+def after_upsert_async(msg_item):
+    """插入或者更新异步处理"""
+    user_name = msg_item.user
+
+    for keyword in safe_list(msg_item.keywords):
+        message = get_or_create_keyword(user_name, keyword, msg_item.ip)
+        update_keyword_amount(message, user_name, keyword)
+
 
 def is_marked_keyword(user_name, keyword):
     obj = MSG_DAO.get_by_content(user_name, "key", keyword)
@@ -484,8 +497,16 @@ class CalendarRule(BaseRule):
         ctx.type = "calendar"
 
 def create_message(user_name, tag, content, ip):
+    assert isinstance(user_name, str)
+    assert isinstance(tag, str)
+    assert isinstance(content, str)
+
     if tag == "todo":
         tag = "task"
+
+    if tag == "key":
+        content = filter_key(content)
+
     date = xutils.get_argument("date", "")
     content = content.strip()
     ctime = xutils.format_datetime()
@@ -507,7 +528,9 @@ def create_message(user_name, tag, content, ip):
 
     after_message_create_or_update(MSG_DAO.get_by_id(id))
     
-    xmanager.fire('message.add', dict(id=id, user=user_name, content=content, ctime=ctime))
+    create_event = dict(id=id, user=user_name, content=content, ctime=ctime)
+    xmanager.fire('message.add', create_event)
+    xmanager.fire('message.create', create_event)
 
     return message
 
@@ -526,6 +549,12 @@ def touch_key_by_content(user_name, tag, content):
 
         MSG_DAO.update(item)
     return item
+
+def get_or_create_keyword(user_name, content, ip):
+    item = MSG_DAO.get_by_content(user_name, "key", content)
+    if item != None:
+        return item
+    return create_message(user_name, "key", content, ip)
 
 def apply_rules(user_name, id, tag, content):
     global MSG_RULES
@@ -629,7 +658,7 @@ class MessageListHandler:
             return self.get_task_page()
 
         if tag == "task_tags":
-            return self.get_task_tag_list_page()
+            return self.get_task_taglist_page()
 
         return self.get_log_page()
 
@@ -727,7 +756,7 @@ class MessageListHandler:
             return self.get_task_done_page()
 
         if page_name == "taglist":
-            return self.get_task_tag_list_page()
+            return self.get_task_taglist_page()
 
         if filter_key != "":
             return self.get_task_by_keyword_page(filter_key)
@@ -738,7 +767,7 @@ class MessageListHandler:
     def get_task_home_page(self):
         return self.get_task_create_page()
 
-    def get_task_tag_list_page(self):
+    def get_task_taglist_page(self):
         user_name = xauth.current_name()
         msg_list, amount = MSG_DAO.list_task(user_name, 0, -1)
 

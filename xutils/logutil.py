@@ -1,7 +1,7 @@
 # encoding=utf-8
 # @author xupingmao
 # @since 2016/12/09
-# @modified 2022/03/19 13:10:45
+# @modified 2022/04/16 08:53:48
 import logging
 import time
 import inspect
@@ -316,6 +316,7 @@ class MemLogger:
     def __del__(self):
         MemLogger._instances.remove(self)
 
+    @staticmethod
     def clear_expired():
         for logger in MemLogger._instances:
             if logger.is_expired():

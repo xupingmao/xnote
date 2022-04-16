@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
-# @modified 2021/10/07 14:49:44
+# @modified 2022/04/11 23:05:34
 from collections import deque
 from xutils.base import Storage
 from xutils.dateutil import format_time
@@ -304,6 +304,13 @@ def del_dict_key(dict_obj, key):
     assert isinstance(dict_obj, dict)
     if key in dict_obj:
         del dict_obj[key]
+
+def safe_list(item):
+    if isinstance(item, list):
+        return item
+    if isinstance(item, set):
+        return list(item)
+    return []
 
 if __name__ == '__main__':
     import doctest

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/06 12:48:09
-# @modified 2022/04/09 22:15:22
+# @modified 2022/04/16 09:55:31
 # @filename message_utils.py
 import xutils
 import web
@@ -36,7 +36,6 @@ def build_search_url(keyword):
     key = quote(keyword)
     return u"/message?category=message&key=%s" % key
 
-
 def build_search_html(content):
     fmt = u'<a href="/message?key=%s">%s</a>'
     return fmt % (xutils.encode_uri_component(content), xutils.html_escape(content))
@@ -49,8 +48,8 @@ def build_done_html(message):
         task = MSG_DAO.get_by_id(message.ref)
 
     if task != None:
-        html, keywords = mark_text(task.content)
-        message.html = u("完成任务:<br>&gt;&nbsp;") + html
+        html, keywords = mark_text(task.content, "done")
+        message.html = u("完成任务:<blockquote>") + html + "</blockquote>"
         message.keywords = keywords
     elif done_time is None:
         done_time = message.mtime
@@ -66,12 +65,14 @@ class TopicMarker:
         key = key.rstrip("")
         quoted_key = textutil.quote(key)
         value = textutil.escape_html(key0)
-        if self.tag == "task":
-            fmt = "<a class=\"link\" href=\"/message?tag=task&filterKey={quoted_key}\">{value}</a>"
+        if self.tag == "done":
+            fmt = "<a class=\"link\" href=\"/message?key={quoted_key}&searchTags={tag}\">{value}</a>"
+        elif self.tag in ("task", "done"):
+            fmt = "<a class=\"link\" href=\"/message?tag={tag}&filterKey={quoted_key}\">{value}</a>"
         else:
             fmt = "<a class=\"link\" href=\"/message?key={quoted_key}\">{value}</a>"
 
-        return fmt.format(quoted_key=quoted_key, value=value)
+        return fmt.format(quoted_key=quoted_key, value=value, tag = self.tag)
 
 
 def mark_text(content, tag = "log"):
@@ -127,10 +128,6 @@ def process_message(message):
 
     return message
 
-
-def fuzzy_item(item):
-    item = item.replace("'", "''")
-    return "'%%%s%%'" % item
 
 def get_status_by_code(code):
     if code == "created":
@@ -408,7 +405,7 @@ def sort_message_list(msg_list, orderby = ""):
             if item.amount == None:
                 return 0
             return item.amount
-
+        msg_list.sort(key = lambda x:x.content)
         msg_list.sort(key = amount_key_func, reverse = True)
         for item in msg_list:
             item.badge_info = "%s" % item.amount

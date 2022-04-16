@@ -2,7 +2,7 @@
  * description here
  * @author xupingmao
  * @since 2021/05/01 15:36:08
- * @modified 2022/01/09 15:45:16
+ * @modified 2022/04/11 21:27:08
  * @filename todo.css
  */
 
@@ -23,6 +23,10 @@
     word-break: break-all;
     float: left;
     width: 100%;
+}
+
+.todo-content blockquote {
+    margin-bottom: 0px;
 }
 
 .todo-foot {
