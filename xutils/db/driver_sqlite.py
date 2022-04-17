@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/10/24 11:11:04
-# @modified 2022/04/16 22:22:16
+# @modified 2022/04/17 14:15:34
 # @filename driver_sqlite.py
 
 """Sqlite对KV接口的实现"""
@@ -11,14 +11,25 @@ import threading
 import logging
 
 
+class FreeLock:
+    
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        # print("__exit__", type, value, traceback)
+        pass
+
 _write_lock = threading.RLock()
+_read_lock = FreeLock()
+
 
 def get_write_lock():
     return _write_lock
 
 def get_read_lock():
     # TODO: 优化成读写锁
-    return _write_lock
+    return _read_lock
 
 def db_execute(db, sql, *args):
     cursorobj = db.cursor()
@@ -32,11 +43,13 @@ def db_execute(db, sql, *args):
                 name = desc[0]
                 resultMap[name] = single[i]
             kv_result.append(resultMap)
+        db.commit()
         return kv_result
     except Exception:
+        db.rollback()
         raise
     finally:
-        db.commit()
+        cursorobj.close()
 
 class Holder(threading.local):
     db = None
@@ -44,6 +57,33 @@ class Holder(threading.local):
     def __del__(self):
         if self.db != None:
             self.db.close()
+
+class CursorWrapper:
+
+    def __init__(self, db, cursor = None):
+        if cursor is None:
+            self.cursor = db.cursor()
+            self.is_new = True
+        else:
+            self.cursor = cursor
+            self.is_new = False
+
+    def close(self):
+        if self.is_new:
+            self.cursor.close()
+
+    def commit(self):
+        if self.is_new:
+            self.cursor.commit()
+
+    def rollback(self):
+        if self.is_new:
+            self.cursor.rollback()
+
+
+def close_cursor(cursor, is_new):
+    if is_new:
+        cursor.close()
 
 class SqliteKV:
 
@@ -61,9 +101,9 @@ class SqliteKV:
         else:
             self._db = None
 
-    def cursor(self):
+    def _get_db(self):
         if self._db != None:
-            return self._db.cursor()
+            return self._db
 
         if self.db_holder.db == None:
             # db_holder是threadlocal对象，这里是线程安全的
@@ -74,7 +114,11 @@ class SqliteKV:
                 # db_execute(self.db_holder.db, "PRAGMA journal_mode = DELETE;") # 默认模式
                 db_execute(self.db_holder.db, "CREATE TABLE IF NOT EXISTS `kv_store` (`key` blob primary key, value blob);")
 
-        return self.db_holder.db.cursor()
+        return self.db_holder.db
+
+    def cursor(self):
+        db = self._get_db()
+        return db.cursor()
 
     def commit(self):
         if self._db != None:
@@ -82,14 +126,31 @@ class SqliteKV:
         else:
             self.db_holder.db.commit()
 
+    def check_and_commit(self, is_new):
+        if is_new:
+            self.commit()
+
+    def rollback(self):
+        if self._db != None:
+            self._db.rollback()
+        else:
+            self.db_holder.db.rollback()
+
+    def check_and_rollback(self, is_new):
+        if is_new:
+            self.rollback()
+
     def Get(self, key):
         with get_read_lock():
             cursor = self.cursor()
-            r_iter = cursor.execute("SELECT value FROM kv_store WHERE `key` = ?;", (key,))
-            result = list(r_iter)
-            if len(result) > 0:
-                return result[0][0]
-            return None
+            try:
+                r_iter = cursor.execute("SELECT value FROM kv_store WHERE `key` = ?;", (key,))
+                result = list(r_iter)
+                if len(result) > 0:
+                    return result[0][0]
+                return None
+            finally:
+                cursor.close()
 
     def _exists(self, key):
         cursor = self.cursor()
@@ -98,40 +159,50 @@ class SqliteKV:
         return len(result) > 0
 
     def Put(self, key, value, sync = False, cursor = None):
-        arg_cursor = cursor
-
         if self.debug:
             logging.debug("Put: key(%s), value(%s)", key, value)
 
         if value is None:
             return self.Delete(key, cursor = cursor)
 
+        is_new = False
+        if cursor == None:
+            is_new = True
+            cursor = self.cursor()
+
         with get_write_lock():
-            if cursor == None:
-                cursor = self.cursor()
             try:
                 if self._exists(key):
                     cursor.execute("UPDATE kv_store SET value = ? WHERE `key` = ?;", (value, key))
                 else:
                     cursor.execute("INSERT INTO kv_store (`key`, value) VALUES (?,?);", (key, value))
+
+                self.check_and_commit(is_new)
+            except Exception as e:
+                self.check_and_rollback(is_new)
+                raise e
             finally:
-                if arg_cursor is None:
-                    self.commit()
+                close_cursor(cursor, is_new)
 
     def Delete(self, key, sync = False, cursor = None):
         arg_cursor = cursor
         if self.debug:
             logging.debug("Delete: key(%s)", key)
         
-        with get_write_lock():
-            if cursor == None:
-                cursor = self.cursor()
+        is_new = False
+        if cursor == None:
+            cursor = self.cursor()
+            is_new = True
 
+        with get_write_lock():
             try:
                 cursor.execute("DELETE FROM kv_store WHERE key = ?;", (key,))
+                self.check_and_commit(is_new)
+            except Exception as e:
+                self.check_and_rollback(is_new)
+                raise e
             finally:
-                if arg_cursor is None:
-                    self.commit()
+                close_cursor(cursor, is_new)
 
 
     def RangeIter(self, key_from = None, key_to = None, 
@@ -175,15 +246,18 @@ class SqliteKV:
             if self.debug:
                 logging.debug("SQL:%s (%s)", sql, params)
 
-            # return cur.execute(sql, tuple(params))
-            for item in cur.execute(sql, tuple(params)):
-                # logging.debug("include_value(%s), item:%s", include_value, item)
-                if include_value:
-                    if item[1] == None:
-                        continue
-                    yield item
-                else:
-                    yield item[0]
+            try:
+                # return cur.execute(sql, tuple(params))
+                for item in cur.execute(sql, tuple(params)):
+                    # logging.debug("include_value(%s), item:%s", include_value, item)
+                    if include_value:
+                        if item[1] == None:
+                            continue
+                        yield item
+                    else:
+                        yield item[0]
+            finally:
+                cur.close()
 
 
     def CreateSnapshot(self):
@@ -205,8 +279,12 @@ class SqliteKV:
 
                 for key in batch._deletes:
                     self.Delete(key, cursor = cur)
-            finally:
                 self.commit()
+            except Exception as e:
+                self.rollback()
+                raise e
+            finally:
+                cur.close()
 
     def Close(self):
         if self._db != None:

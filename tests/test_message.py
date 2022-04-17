@@ -1,6 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/23
-# @modified 2022/04/09 14:03:43
+# @modified 2022/04/17 14:28:57
 
 import sys
 import os
@@ -15,8 +15,11 @@ import xutils
 import xtemplate
 import xconfig
 import xtables
+import xauth
+
+from xutils import Storage
 from xutils import u, dbutil
-from xutils import dateutil
+from xutils import dateutil, dbutil
 
 # cannot perform relative import
 try:
@@ -29,11 +32,17 @@ json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
+MSG_DB = dbutil.get_table("message")
+
 def get_script_path(name):
     return os.path.join(xconfig.SCRIPTS_DIR, name)
 
 def del_msg_by_id(id):
     json_request("/message/delete", method="POST", data=dict(id=id))
+
+def delete_all_messages():
+    for record in MSG_DB.iter(limit = -1):
+        MSG_DB.delete_by_key(record._key)
 
 class TextPage(xtemplate.BaseTextPlugin):
 
@@ -158,6 +167,18 @@ class TestMain(BaseTestCase):
         self.check_OK("/message/dairy")
 
 
+    def test_message_search(self):
+        delete_all_messages()
+        
+        create_data = dict(content="Xnote-Unit-Test")
+        response = json_request("/message/save", method="POST", data = create_data)
+        self.assertEqual("success", response.get("code"))
 
+        from handlers.message.message import on_search_message
+        ctx = Storage(key = "xnote", user_name = xauth.current_name(), messages = [])
+        on_search_message(ctx)
+        # 两条记录（第一个是汇总，第二个是实际数据）
+        self.assertEqual(2, len(ctx.messages))
+        self.assertEqual("Xnote-Unit-Test", ctx.messages[1].html)
 
 

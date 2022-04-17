@@ -1,11 +1,15 @@
 # -*- coding:utf-8 -*-
 # @author mark
 # @since 2022/03/20 19:01:28
-# @modified 2022/03/20 21:36:21
+# @modified 2022/04/17 13:58:29
 # @filename test_xutils_db.py
 
 import sys
 import os
+import threading
+import sqlite3
+import time
+
 sys.path.insert(1, "lib")
 sys.path.insert(1, "core")
 import unittest
@@ -169,3 +173,74 @@ class TestMain(BaseTestCase):
         db = LevelDBImpl(db_dir)
         run_test_db_engine(self, db)
         run_snapshot_test(self, db.CreateSnapshot())
+
+    def triggle_database_locked(self):
+        test_self = self
+        from xutils.db.driver_sqlite import db_execute
+
+        dbfile = os.path.join(xconfig.DB_DIR, "sqlite", "conflict_test.db")
+
+        if os.path.exists(dbfile):
+            os.remove(dbfile)
+
+        con = sqlite3.connect(dbfile)
+        # WAL模式，并发度更高，可以允许1写多读，这种模式不会触发数据库锁
+        # DELETE模式，写操作是排他的，读操作是共享的
+        db_execute(con, "PRAGMA journal_mode = DELETE;")
+        db_execute(con, "CREATE TABLE IF NOT EXISTS `kv_store` (`key` blob primary key, value blob);")
+        con.close()
+
+        class WriteThread(threading.Thread):
+
+            def run(self):
+                try:
+                    con = sqlite3.connect(dbfile)
+                    cur = con.cursor()
+                    cur.execute("begin;")
+                    cur.execute("DELETE FROM kv_store")
+                    cur.execute("COMMIT;")
+                    for i in range(100):
+                        cur.execute("begin;")
+                        cur.execute("INSERT INTO kv_store (key, value) VALUES (?,?)", ("key_%s" % i, "value"))
+                        cur.execute("COMMIT;")
+                        print("写入(%d)中..." % i)
+                except:
+                    xutils.print_exc()
+                finally:
+                    cur.close()
+                    con.commit()
+                    con.close()
+
+        class ReadThread(threading.Thread):
+            def run(self):
+                try:
+                    con = sqlite3.connect(dbfile)
+                    cur = con.cursor()
+                    result = cur.execute("SELECT * FROM kv_store;")
+                    for item in result:
+                        print("读取执行成功:", item)
+                        time.sleep(10)
+                        break
+                    print("读取结束")
+                except:
+                    xutils.print_exc()
+                finally:
+                    cur.close()
+                    # con.close()
+                    pass
+
+        threads = []
+
+        t = WriteThread()
+        t.start()
+        threads.append(t)
+
+        for i in range(10):
+            t = ReadThread()
+            t.start()
+            threads.append(t)
+
+        for t in threads:
+            t.join()
+
+
