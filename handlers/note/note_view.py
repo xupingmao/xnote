@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2022/04/04 16:11:32
+# @modified 2022/04/19 23:13:30
 import profile
 import math
 import re
@@ -172,6 +172,7 @@ def view_list_func(note, kw):
     kw.show_comment_title = True
     kw.comment_title = T("清单项")
     kw.op = "view"
+    kw.template_name = "note/page/detail/list_detail.html"
 
 def view_table_func(note, kw):
     kw.show_aside = False

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
-# @modified 2022/04/03 21:23:49
+# @modified 2022/04/20 22:50:10
 import os
 import time
 from collections import deque
@@ -47,16 +47,22 @@ OPTION_HTML = '''
     {% end %}
 
     {% if log_type == "mem" %}
-        <div class="x-tab-box btn-style dark" data-tab-key="log_name">
+        <span>日志名称</span>
+        <select value="{{log_name}}" class="logger-name-select">
             {% for logger in mem_loggers %}
-                <a class="x-tab" data-tab-value="{{logger.name}}">{{logger.name}}</a>
+                <option value="{{logger.name}}">{{logger.name}}</option>
             {% end %}
-        </div>
+        </select>
     {% end %}
 </div>
 <script>
 $(function () {
     $(".output-textarea").scrollBottom();
+    $(".logger-name-select").change(function (e) {
+        var oldHref = window.location.href;
+        var newHref = addUrlParam(oldHref, "log_name", $(e.target).val());
+        window.location.href = newHref;
+    });
 })
 </script>
 '''

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/02/15 21:46:37
-# @modified 2021/04/25 10:47:26
+# @modified 2022/04/18 23:25:56
 import xtables
 import xtemplate
 import xutils
@@ -18,9 +18,6 @@ def escape_sqlite_text(text):
     text = text.replace("'", '\'\'')
     text = text.replace('[', '/[')
     text = text.replace(']', '/]')
-    #text = text.replace('%', '/%')
-    #text = text.replace('&', '/&')
-    #text = text.replace('_', '/_')
     text = text.replace('(', '/(')
     text = text.replace(')', '/)')
     return text
@@ -136,5 +133,6 @@ xutils.register_func("dict.search", search_dict)
 xurls = (
     r"/dict/edit/(.+)", DictEditHandler,
     r"/dict/search",    DictSearchHandler,
+    r"/dict/list",      DictHandler,
     r"/note/dict",      DictHandler,
 )

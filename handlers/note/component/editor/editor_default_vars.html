@@ -1,0 +1,17 @@
+{% init file_type       = "md" %}
+{% init pathlist        = [] %}
+{% init file            = None %}
+{% init show_notice     = False %}
+{% init show_search_div = True %}
+{% init show_add_file   = False %}
+{% init show_add_group  = False %}
+{% init show_path_list  = True %}
+{% init show_pagination = False %}
+{% init show_comment    = True %}
+{% init error           = "" %}
+{% init show_ext_info   = True %}
+
+{% if file != None %}
+    {% set globals()['file_type'] = file.type %}
+    {% set globals()['file_id'] = file.id %}
+{% end %}

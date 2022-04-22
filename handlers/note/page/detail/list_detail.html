@@ -1,0 +1,55 @@
+{% extends base %}
+
+{% block head %}
+
+    {% include note/component/view_css.html %}
+
+{% end %}
+
+{% block body_top %}
+
+    {% include note/component/editor/editor_default_vars.html %}
+
+    {% init show_tags = False %}
+    {% set globals()["show_comment"] = False %}
+
+    <div class="card">
+        {% include note/component/view_header.html %}
+    </div>
+
+{% end %}
+
+{% block body_left %}
+    <div class="card">
+        {% include note/component/note_path.html %}
+    </div>
+
+    {% set-global comment_btn_text = T("添加清单项") %}
+    {% set-global comment_placeholder = T("请输入清单项...") %}
+    {% set-global comment_empty_text = T("暂无清单项~") %}
+    {% set-global show_comment_edit = True %}
+
+    <!-- 清单的底层就是直接复用的评论的能力 -->
+    {% include note/page/comment.html %}
+
+    {# 文章信息 #}
+    {% include note/component/note_ext_info.html %}
+
+    {# 分页 #}
+    {% if show_pagination and "page" in globals() %}
+        <div class="card">
+            {% include mod_pagenation.html %}
+        </div>
+    {% end %}
+
+{% include note/component/script/delete_script.html %}
+{% include note/component/script/rename_script.html %}
+
+<script type="text/javascript">
+
+$(function () {
+    window.adjustTable();
+})
+</script>
+
+{% end %}

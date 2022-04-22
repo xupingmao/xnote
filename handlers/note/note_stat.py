@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
-# @modified 2022/04/09 22:05:07
+# @modified 2022/04/20 23:03:49
 import xauth
 import xutils
 import xmanager
@@ -42,9 +42,9 @@ HTML = """
 
         <div class="float-right">
             {% if hide_index != "true" %}
-                <a class="btn btn-default" href="?p={{p}}&hide_index=true">隐藏索引</a>
+                <a class="btn btn-default" href="?p={{p}}&hide_index=true&tab=meta">隐藏索引</a>
             {% else %}
-                <a class="btn btn-default" href="?p={{p}}">展示索引</a>
+                <a class="btn btn-default" href="?p={{p}}&hide_index=false&tab=meta">展示索引</a>
             {% end %}
         </div>
     </div>
