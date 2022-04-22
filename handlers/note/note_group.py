@@ -1,6 +1,6 @@
 # encoding=utf-8
 # @since 2016/12
-# @modified 2022/04/16 20:31:57
+# @modified 2022/04/22 23:30:02
 import math
 import time
 import os
@@ -307,7 +307,6 @@ class GroupListHandler:
 
     @xauth.login_required()
     def GET(self):
-        xutils.get_argument("show_note_types", "true", type = bool)
         user_name = xauth.current_name()        
         orderby_default = xconfig.get_user_config(user_name, "group_list_order_by", "name_asc")
         logging.debug("orderby_default:%s", orderby_default)
@@ -340,6 +339,9 @@ class GroupListHandler:
 
         self.handle_badge_info(notes, tab = tab)
         self.sort_notes(notes, kw)
+
+        if tab == "smart":
+            kw.show_note_types = False
 
         return xtemplate.render("note/page/group_list.html", **kw)
 

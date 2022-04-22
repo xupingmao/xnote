@@ -35,7 +35,7 @@
             <div class="grid-title btn-line-height">
                 <span>文档编辑器</span>
                 <div class="float-right">
-                    <button class="inline-btn">保存</button>
+                    <button class="inline-btn save-note-btn">保存</button>
                     {% include common/button/back_button.html %}
                 </div>
             </div>
@@ -194,6 +194,7 @@
                 token: "{{edit_token}}",
                 version: "{{file.version}}"
             };
+
             $.post("/note/draft", params, function (resp) {
                 console.log(resp);
                 if (resp.code == "success") {
@@ -280,6 +281,7 @@
             };
         });
 
+        // 格式化表格
         $("#formatTable").click(function () {
             // var selection = codeMirror.getSelection();
             var selection = codeMirror.doc.getValue();
@@ -308,6 +310,33 @@
                 codeInsert(link);
             });
         });
+
+        // 保存文件操作
+        $(".save-note-btn").click(function (e) {
+            e.preventDefault();
+            var input = $("#markdown-input").val();
+
+            var params = {
+                id: fileId,
+                content: input,
+                type: "md",
+                edit_token: "{{edit_token}}",
+                version: "{{file.version}}"
+            };
+            
+
+            $.post("/note/save", params, function (resp) {
+                if (resp.code == "success") {
+                    window.SUBMIT_FORM = true;
+                    xnote.toast("保存文件成功");
+                    window.location.href = "/note/view/" + fileId;
+                } else {
+                    xnote.alert("保存文件失败:" + resp.message);
+                }
+            }).fail(function (err) {
+                xnote.alert("保存文件失败:" + err);
+            })
+        })
 
         $("#mainFrame").on("submit", function (e) {
             console.log(e);

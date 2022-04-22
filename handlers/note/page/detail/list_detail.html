@@ -53,3 +53,10 @@ $(function () {
 </script>
 
 {% end %}
+
+
+{% block body_right %}
+<div class="desktop-only">
+    {% include note/component/sidebar/note_sidebar.html %}
+</div>
+{% end %}
