@@ -6,7 +6,7 @@
 
 {% end %}
 
-{% block body_top %}
+{% block body_left %}
 
     {% include note/component/editor/editor_default_vars.html %}
 
@@ -17,9 +17,6 @@
         {% include note/component/view_header.html %}
     </div>
 
-{% end %}
-
-{% block body_left %}
     <div class="card">
         {% include note/component/note_path.html %}
     </div>
@@ -57,6 +54,8 @@ $(function () {
 
 {% block body_right %}
 <div class="desktop-only">
+    {% init show_sidebar_group_entry = False %}
+    {% init show_sidebar_note_brothers = True %}
     {% include note/component/sidebar/note_sidebar.html %}
 </div>
 {% end %}

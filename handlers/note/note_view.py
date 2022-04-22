@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2016/12
-# @modified 2022/04/19 23:13:30
+# @modified 2022/04/22 23:44:25
 import profile
 import math
 import re
@@ -224,7 +224,7 @@ def create_view_kw():
     kw.show_mdate  = False
     kw.recommended_notes = []
     kw.show_add_file     = False
-    kw.template_name     = "note/page/view.html"
+    kw.template_name     = "note/page/detail/note_detail.html"
     kw.search_type       = "note"
     kw.comment_source_class = "hide"
 

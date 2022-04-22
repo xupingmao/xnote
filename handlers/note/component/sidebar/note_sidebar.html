@@ -1,5 +1,8 @@
 {% init special_groups = xutils.call("page.list_special_groups") %}
+{% init show_sidebar_group_entry = True %}
+{% init show_sidebar_note_brothers = False %}
 
+{% if show_sidebar_group_entry %}
 <div class="card">
     {% for item in special_groups %}
         <a class="list-link" href="{{item.url}}">
@@ -18,3 +21,20 @@
         </a>
     {% end %}
 </div>
+{% end %}
+
+{% if show_sidebar_note_brothers %}
+<!-- TODO: 固定高度，自动定位到当前的笔记 -->
+<!-- TODO: 考虑无权限用户的视图 -->
+<div class="card">
+    <div class="card-title">
+        <span>其他笔记</span>
+    </div>
+    {% for item in xutils.call("note.list_by_parent", _user_name, file.parent_id) %}
+        <a class="list-item" href="{{item.url}}">
+            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
+            <span>{{item.name}}</span>
+        </a>
+    {% end %}
+</div>
+{% end %}
