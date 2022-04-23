@@ -26,6 +26,7 @@ __pycache__
 /static/deprecated/
 /static/wiki/
 /static/archive/
+/static/css/app.build.css
 /data/
 /testdata/
 /log/

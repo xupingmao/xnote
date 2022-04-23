@@ -34,6 +34,9 @@ from xutils.lockutil import FileLock
 from xutils.mem_util import log_mem_info_deco
 from xutils import dbutil
 from xutils import cacheutil
+from core import code_builder
+
+import threading
 import signal
 import xtemplate
 import xmanager
@@ -41,7 +44,6 @@ import xtables
 import xconfig
 import xutils
 import web
-import builder
 
 FILE_LOCK = FileLock("pid.lock")
 
@@ -193,7 +195,7 @@ def try_init_ldb():
 def init_autoreload():
 
     def reload_callback():
-        builder.main()
+        code_builder.build()
         # 重新加载handlers目录下的所有模块
         if xconfig.get_global_config("system.fast_reload"):
             xmanager.reload()
@@ -237,7 +239,7 @@ def init_app_no_lock():
     handle_args_and_init_config()
 
     # 构建静态文件
-    builder.main()
+    code_builder.build()
 
     # 初始化数据库
     try_init_sqlite()

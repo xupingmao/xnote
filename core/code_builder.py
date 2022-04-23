@@ -48,7 +48,7 @@ class FileBuilder:
             for fpath in self.source_path_list:
                 self.append_file_to(fpath, fp)
         
-        print("文件构建完成:%s", self.target_path)
+        print("文件构建完成:%s" % self.target_path)
 
     def __exit__(self, type, value, traceback):
         if not os.path.exists(self.target_path):
@@ -125,6 +125,11 @@ def build_app_js():
         # app.js
         builder.append("./static/js/app.js")
 
+
+def build():
+    build_app_css()
+    build_utils_js()
+    build_app_js()
 
 def main():
     build_app_css()
