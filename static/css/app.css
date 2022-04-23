@@ -72,6 +72,14 @@
     margin-top: 10px;
 }
 
+.option-name {
+    width: 60%;
+}
+
+.option-td {
+    width: 20%;
+}
+
 #poweredBy {
     position: absolute; 
     bottom: 0px; 

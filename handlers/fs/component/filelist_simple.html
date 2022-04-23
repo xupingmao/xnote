@@ -7,7 +7,7 @@
         {% set fname = os.path.basename(fpath) %}
         {% set display_name = fsutil.get_display_name(fpath, dirname) %}
         <tr>
-            <td><a href="{{fsutil.get_webpath(fpath)}}">{{display_name}}</a></td>
+            <td class="option-name"><a href="{{fsutil.get_webpath(fpath)}}">{{display_name}}</a></td>
             <td class="option-td">
                 {{xutils.format_file_size(fpath)}}
             </td>

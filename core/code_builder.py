@@ -6,6 +6,7 @@
 
 import os
 import shutil
+import threading
 
 try:
     import termcolor
@@ -17,6 +18,7 @@ except ImportError:
             return text
 
 BLOCKSIZE = 4 * 1024 # 4K
+_lock = threading.RLock()
 
 def green_text(text):
     return termcolor.colored(text, "green")
@@ -58,7 +60,7 @@ class FileBuilder:
         target_mtime = os.stat(self.target_path).st_mtime
         for fpath in self.source_path_list:
             source_mtime = os.stat(fpath).st_mtime
-            if source_mtime > target_mtime:
+            if source_mtime >= target_mtime:
                 print("文件发生了修改:%s" % fpath)
                 self.do_build()
                 return
@@ -127,21 +129,23 @@ def build_app_js():
 
 
 def build():
-    build_app_css()
-    build_utils_js()
-    build_app_js()
+    with _lock:
+        build_app_css()
+        build_utils_js()
+        build_app_js()
 
 def main():
-    build_app_css()
-    print("-"*50)
+    with _lock:
+        build_app_css()
+        print("-"*50)
 
-    build_utils_js()
-    print("-"*50)
+        build_utils_js()
+        print("-"*50)
 
-    build_app_js()
-    print("-"*50)
+        build_app_js()
+        print("-"*50)
 
-    print(green_text("全部打包完成!"))
+        print(green_text("全部打包完成!"))
 
 if __name__ == '__main__':
     main()

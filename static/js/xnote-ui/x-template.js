@@ -5,8 +5,8 @@
  * @modified 2022/01/09 16:42:27
  * @filename x-template.js
  */
- 
-(function (xnote) {
+
+;(function (xnote) {
     /**
      * 简单的模板渲染，这里假设传进来的参数已经进行了html转义
      */
