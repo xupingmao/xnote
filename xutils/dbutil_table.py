@@ -14,6 +14,14 @@ def dict_del(dict, key):
     if key in dict:
         del dict[key]
 
+class TableValidator:
+
+    def __init__(self, table_name, has_user_name = False):
+        pass
+
+    def validate_key(self, key, user_name = None):
+        pass
+
 class LdbTable:
     """基于leveldb的表，比较常见的是以下2种
     * key = prefix:record_id           全局数据库
@@ -358,15 +366,17 @@ class LdbTable:
             result.append(value)
         return result
 
-    def get_first(self):
-        result = self.list(limit = 1)
+    def get_first(self, filter_func = None):
+        """读取第一个满足条件的数据"""
+        result = self.list(limit = 1, filter_func = filter_func)
         if len(result) > 0:
             return result[0]
         else:
             return None
 
-    def get_last(self):
-        result = self.list(limit = 1, reverse = True)
+    def get_last(self, filter_func = None):
+        """读取最后一个满足条件的数据"""
+        result = self.list(limit = 1, reverse = True, filter_func = filter_func)
         if len(result) > 0:
             return result[0]
         else:

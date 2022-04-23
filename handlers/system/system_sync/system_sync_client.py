@@ -20,6 +20,7 @@ from xutils import dbutil
 from xutils.imports import quote
 
 RETRY_INTERVAL = 60
+MAX_KEY_SIZE = 511
 
 dbutil.register_table("fs_sync_index_copy", "文件索引拷贝")
 dbutil.register_table("fs_sync_index_failed", "文件索引拷贝失败")
@@ -40,7 +41,21 @@ class HttpClient:
         return dbutil.get_hash_table("fs_sync_index_copy")
 
     def get_failed_table(self):
-        return dbutil.get_hash_table("fs_sync_index_failed")
+        return dbutil.get_table("fs_sync_index_failed")
+
+    def delete_retry_task(self, item):
+        db = self.get_failed_table()
+        result = db.list(filter_func = lambda k,x:x.webpath==item.webpath)
+        for result_item in result:
+            db.delete(result_item)
+    
+    def upsert_retry_task(self, item):
+        db = self.get_failed_table()
+        first = db.get_first(filter_func=lambda k,x:x.webpath==item.webpath)
+        if first == None:
+            db.insert(item)
+        else:
+            db.update_by_key(first._key, item)
 
     def check_failed(self):
         if self.host is None:
@@ -118,13 +133,19 @@ class HttpClient:
         web_path = item.web_path
         mtime = item.mtime
 
-        # 保存文件索引信息
-        table = self.get_table()
-        item.last_try_time = time.time()
-        table.put(web_path, item)
 
         # 先保存失败记录，成功后再删除
-        self.get_failed_table().put(web_path, item)
+        self.upsert_retry_task(item)
+
+        try:
+            # 文件名太长会导致保存失败
+            # 保存文件索引信息
+            table = self.get_table()
+            item.last_try_time = time.time()
+            table.put(web_path, item)
+        except:
+            item.err_msg = xutils.print_exc()
+            self.upsert_retry_task(item)
 
         encoded_fpath = xutils.urlsafe_b64encode(fpath)
         url = "{host}/fs_download".format(host = self.host)
@@ -138,7 +159,7 @@ class HttpClient:
 
         if self.is_same_file(dest_path, item):
             logging.debug("文件没有变化，跳过:%s", web_path)
-            self.get_failed_table().delete(web_path)
+            self.delete_retry_task(item)
             return
 
         fsutil.makedirs(dirname)
@@ -149,9 +170,10 @@ class HttpClient:
         try:
             netutil.http_download(url, dest_path)
             os.utime(dest_path, times=(mtime, mtime))
-            self.get_failed_table().delete(web_path)
+            self.delete_retry_task(item)
         except:
-            xutils.print_exc()
+            item.err_msg = xutils.print_exc()
+            self.upsert_retry_task(item)
             logging.error("下载文件失败:%s", dest_path)
 
     def download_files(self, result):
@@ -159,7 +181,7 @@ class HttpClient:
             self.download_file(Storage(**item))
 
     def retry_failed(self):
-        for key, item in self.get_failed_table().iter(limit = -1):
+        for item in self.get_failed_table().iter(limit = -1):
             now = time.time()
             if item.last_try_time is not None and (now - item.last_try_time) > RETRY_INTERVAL:
                 continue

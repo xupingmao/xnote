@@ -328,13 +328,13 @@
             $.post("/note/save", params, function (resp) {
                 if (resp.code == "success") {
                     window.SUBMIT_FORM = true;
-                    xnote.toast("保存文件成功");
+                    xnote.toast("保存成功");
                     window.location.href = "/note/view/" + fileId;
                 } else {
-                    xnote.alert("保存文件失败:" + resp.message);
+                    xnote.alert("保存失败:" + resp.message);
                 }
             }).fail(function (err) {
-                xnote.alert("保存文件失败:" + err);
+                xnote.alert("保存失败:" + err);
             })
         })
 

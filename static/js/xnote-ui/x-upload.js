@@ -63,7 +63,7 @@ xnote._initUploadEvent = function(uploader, fileSelector, successFn) {
 };
 
 /** 创建上传器 **/
-window.xnote.createUploader = function(fileSelector, chunked, successFn) {
+xnote.createUploader = function(fileSelector, chunked, successFn) {
     if (fileSelector == undefined) {
         fileSelector = '#filePicker';
     }
@@ -115,7 +115,7 @@ window.xnote.createUploader = function(fileSelector, chunked, successFn) {
 };
 
 // 把blob对象转换成文件上传到服务器
-window.xnote.uploadBlob = function(blob, prefix, successFn, errorFn) {
+xnote.uploadBlob = function(blob, prefix, successFn, errorFn) {
     var fd = new FormData();
     // 加载页，用户阻止用户交互
     var loadingIndex = createXnoteLoading();
@@ -138,18 +138,24 @@ window.xnote.uploadBlob = function(blob, prefix, successFn, errorFn) {
                 }
             } else {
                 console.error(xhr.statusText);
+                if (errorFn) {
+                    errorFn(xhr);
+                }
             }
         };
     };
 
-    xhr.onerror = function(e) {
+    xhr.onerror = function(error) {
         console.log(xhr.statusText);
         closeXnoteLoading(loadingIndex);
+        if (errorFn) {
+            errorFn(error)
+        }
     }
     xhr.send(fd);
 };
 
-window.xnote.requestUpload = function(fileSelector, chunked, successFn, errorFn) {
+xnote.requestUpload = function(fileSelector, chunked, successFn, errorFn) {
     if (fileSelector == undefined) {
         throw new Error("selector is undefined");
     }

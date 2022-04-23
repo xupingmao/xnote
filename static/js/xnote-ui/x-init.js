@@ -6,7 +6,7 @@
  * @filename x-init.js
  */
 
-/** 初始化全局对象 **/
+/** 初始化xnote全局对象 **/
 if (window.xnote === undefined) {
     // 全局对象
     var xnote = {};

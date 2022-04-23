@@ -60,7 +60,7 @@ class FileBuilder:
         target_mtime = os.stat(self.target_path).st_mtime
         for fpath in self.source_path_list:
             source_mtime = os.stat(fpath).st_mtime
-            if source_mtime >= target_mtime:
+            if source_mtime > target_mtime:
                 print("文件发生了修改:%s" % fpath)
                 self.do_build()
                 return

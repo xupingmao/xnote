@@ -1,8 +1,8 @@
-{% init special_groups = xutils.call("page.list_special_groups") %}
 {% init show_sidebar_group_entry = True %}
 {% init show_sidebar_note_brothers = False %}
 
 {% if show_sidebar_group_entry %}
+{% init special_groups = xutils.call("page.list_special_groups") %}
 <div class="card">
     {% for item in special_groups %}
         <a class="list-link" href="{{item.url}}">
@@ -23,7 +23,7 @@
 </div>
 {% end %}
 
-{% if show_sidebar_note_brothers %}
+{% if _has_login and show_sidebar_note_brothers and file.creator == _user_name %}
 <!-- TODO: 考虑无权限用户的视图 -->
 <div class="card">
     <div class="card-title">

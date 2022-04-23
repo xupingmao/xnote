@@ -27,6 +27,7 @@ __pycache__
 /static/wiki/
 /static/archive/
 /static/css/app.build.css
+/static/js/app.build.js
 /data/
 /testdata/
 /log/

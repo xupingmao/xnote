@@ -121,7 +121,7 @@ def format_date(date):
         return date
     return date.split(" ")[0].replace("-", "/")
 
-def get_root():
+def get_root(creator = None):
     root = Storage()
     root.name = "根目录"
     root.type = "group"
@@ -130,6 +130,7 @@ def get_root():
     root.parent_id = 0
     root.content = ""
     root.priority = 0
+    root.creator = creator
     build_note_info(root)
     root.url = "/note/group"
     return root
@@ -167,7 +168,6 @@ def get_note_tiny_table(user_name):
     return dbutil.get_table("note_tiny", user_name = user_name)
 
 def batch_query(id_list):
-    creator = xauth.current_name()
     result = dict()
     for id in id_list:
         note = dbutil.get("note_index:%s" % id)
@@ -177,7 +177,6 @@ def batch_query(id_list):
     return result
 
 def batch_query_list(id_list):
-    creator = xauth.current_name()
     result = []
     for id in id_list:
         note = dbutil.get("note_index:%s" % id)
@@ -361,11 +360,11 @@ def get_full_by_id(id):
     return dbutil.get("note_full:%s" % id)
 
 @xutils.timeit(name = "NoteDao.GetById:leveldb", logfile = True)
-def get_by_id(id, include_full = True):
+def get_by_id(id, include_full = True, creator = None):
     if id == "" or id is None:
         return None
     if id == 0 or id == "0":
-        return get_root()
+        return get_root(creator)
 
     note_index = dbutil.get("note_index:%s" % id)
 
@@ -392,7 +391,7 @@ def get_by_id(id, include_full = True):
     return note
 
 def get_by_id_creator(id, creator, db=None):
-    note = get_by_id(id)
+    note = get_by_id(id, creator=creator)
     if note and note.creator == creator:
         return note
     return None

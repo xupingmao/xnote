@@ -29,8 +29,6 @@ $(function (e) {
         $(".x-tab-box").each(function (index, ele) {
             var key = $(ele).attr("data-tab-key");
             var defaultValue = $(ele).attr("data-tab-default");
-            var tabStyle = $(ele).attr("data-tab-style");
-
             var value = getUrlParam(key);
             if ( xnote.isEmpty(value) ) {
                 value = defaultValue;

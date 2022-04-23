@@ -12,8 +12,10 @@ import xutils
 # cannot perform relative import
 try:
     import test_base
+    from test_base import login_test_user, logout_test_user
 except ImportError:
     from tests import test_base
+    from tests.test_base import login_test_user, logout_test_user
 
 import xauth
 
@@ -200,8 +202,12 @@ class TestMain(BaseTestCase):
         file = json_request("/note/view?id=%s&_format=json" % id).get("file")
         self.assertEqual(0, file["is_public"])
 
+        logout_test_user()
+        self.check_OK("/note/view/%s" % id)
+
         # clean up
         json_request("/note/remove?id=" + str(id))
+        login_test_user()
 
     def test_note_share_to(self):
         delete_note_for_test("xnote-share-test")
@@ -221,7 +227,7 @@ class TestMain(BaseTestCase):
 
     def test_link_share(self):
         delete_note_for_test("xnote-link-share-test")
-        note_id = create_note_for_test("xnote-link-share-test")
+        note_id = create_note_for_test(name = "xnote-link-share-test", type = "md")
         resp = json_request("/note/link_share", method = "POST", data = dict(id = note_id))
         self.assertEqual("success", resp["code"])
 

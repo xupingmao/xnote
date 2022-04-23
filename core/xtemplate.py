@@ -12,12 +12,9 @@
 - 插件模板，定义了插件的基类
 """
 import os
-import json
 import warnings
 import math
-import inspect
 import web
-import six
 import xconfig
 import xauth
 import xutils
@@ -103,6 +100,7 @@ class XnoteLoader(Loader):
     """定制Template Loader"""
     
     def resolve_path_old(self, name, parent_path=None):
+        """这是默认的按照相对路径处理模板路径"""
         if parent_path and not parent_path.startswith("<") and \
             not parent_path.startswith("/") and \
                 not name.startswith("/"):
@@ -285,12 +283,12 @@ def render_text(text, template_name = "<string>", **kw):
     """
     nkw = do_render_kw(kw)
 
-    # 热加载模式下str的id会变化
-    name = "template@%s.str" % hash(text)
+    # 使用hash不能保证唯一性
+    name = "template@%s.str" % id(text)
     _loader.init_template(name, text)
     return _loader.load(name).generate(**nkw)
 
-    
+
 def get_code(name):
     return _loader.load(name).code
 

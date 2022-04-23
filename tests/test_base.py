@@ -59,6 +59,12 @@ def init():
 
     return APP
 
+def logout_test_user():
+    xconfig.IS_TEST = False
+
+def login_test_user():
+    xconfig.IS_TEST = True
+
 def json_request(*args, **kw):
     global APP
     if "data" in kw:
