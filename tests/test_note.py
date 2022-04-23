@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2022/04/16 22:39:56
+# @modified 2022/04/23 10:54:57
 # @filename test_note.py
 
 import logging
@@ -218,6 +218,12 @@ class TestMain(BaseTestCase):
         
         logging.info("delete_share_resp:%s", delete_share_resp)
         self.assertEqual("success", delete_share_resp["code"])
+
+    def test_link_share(self):
+        delete_note_for_test("xnote-link-share-test")
+        note_id = create_note_for_test("xnote-link-share-test")
+        resp = json_request("/note/link_share", method = "POST", data = dict(id = note_id))
+        self.assertEqual("success", resp["code"])
 
     def test_note_tag(self):
         json_request("/note/remove?name=xnote-tag-test")

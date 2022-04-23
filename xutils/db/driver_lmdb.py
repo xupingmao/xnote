@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author mark
 # @since 2022/03/20 14:43:04
-# @modified 2022/03/20 23:31:24
+# @modified 2022/04/23 16:13:02
 # @filename driver_lmdb.py
 
 import lmdb
@@ -28,6 +28,9 @@ class LmdbKV:
         """
         if self.debug:
             logging.debug("Put: key(%s), value(%s)", key, value)
+
+        if len(key) > self.env.max_key_size():
+            raise Exception("key长度(%d)超过限制(%d)" % (len(key), self.env.max_key_size()))
 
         with self.env.begin(write = True) as tx:
             tx.put(key, value)

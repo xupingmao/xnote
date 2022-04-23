@@ -1,5 +1,4 @@
 # encoding=utf-8
-
 """xnote的数据库封装，基于键值对数据库（目前是基于leveldb，键值对功能比较简单，
 方便在不同引擎之间切换）
 
@@ -55,12 +54,12 @@ except ImportError:
     # Windows环境没有leveldb，需要使用leveldbpy的代理实现
     leveldb = None
 
-DEFAULT_BLOCK_CACHE_SIZE = 8 * (2<<20) # 16M
-DEFAULT_WRITE_BUFFER_SIZE = 2 * (2<<20) # 4M
-DEFAULT_CACHE_EXPIRE = 60 * 60 # 1小时
+DEFAULT_BLOCK_CACHE_SIZE = 8 * (2 << 20)  # 16M
+DEFAULT_WRITE_BUFFER_SIZE = 2 * (2 << 20)  # 4M
+DEFAULT_CACHE_EXPIRE = 60 * 60  # 1小时
 
-WRITE_LOCK    = threading.RLock()
-READ_LOCK     = threading.RLock()
+WRITE_LOCK = threading.RLock()
+READ_LOCK = threading.RLock()
 LAST_TIME_SEQ = -1
 
 # 注册的数据库表名，如果不注册，无法进行写操作
@@ -93,11 +92,12 @@ def print_debug_info(fmt, *args):
     new_args.append(fmt.format(*args))
     print(*new_args)
 
+
 class DBException(Exception):
     pass
 
-class WriteBatchProxy:
 
+class WriteBatchProxy:
     """批量操作代理，批量操作必须在同步块中执行（必须加锁）"""
 
     def __init__(self):
@@ -156,11 +156,9 @@ class WriteBatchProxy:
             print_debug_info("batch.delete key={}", key)
         print_debug_info("-----  batch.end  -----")
 
-
-    def commit(self, sync = False):
+    def commit(self, sync=False):
         self.log_debug_info()
         check_get_leveldb().Write(self, sync)
-
 
     def __enter__(self):
         return self
@@ -176,12 +174,14 @@ def config(**kw):
     if "write_only" in kw:
         WRITE_ONLY = kw["write_only"]
 
+
 def get_instance():
     if _leveldb is None:
         raise Exception("leveldb instance is None!")
     return _leveldb
 
-def create_db_instance(db_dir, block_cache_size = None, write_buffer_size = None):
+
+def create_db_instance(db_dir, block_cache_size=None, write_buffer_size=None):
     if block_cache_size is None:
         block_cache_size = DEFAULT_BLOCK_CACHE_SIZE
 
@@ -191,44 +191,50 @@ def create_db_instance(db_dir, block_cache_size = None, write_buffer_size = None
     logging.info("block_cache_size=%s", block_cache_size)
 
     if leveldb:
-        return leveldb.LevelDB(db_dir, block_cache_size = block_cache_size, 
-            write_buffer_size = write_buffer_size)
+        return leveldb.LevelDB(db_dir,
+                               block_cache_size=block_cache_size,
+                               write_buffer_size=write_buffer_size)
 
     if xutils.is_windows():
         import leveldbpy
-        return LevelDBProxy(db_dir, block_cache_size = block_cache_size, 
-            write_buffer_size = write_buffer_size)
+        return LevelDBProxy(db_dir,
+                            block_cache_size=block_cache_size,
+                            write_buffer_size=write_buffer_size)
 
     raise Exception("create_db_instance failed: not supported")
 
+
 @xutils.log_init_deco("leveldb")
-def init(db_dir, 
-        block_cache_size = None, 
-        write_buffer_size = None, 
-        db_instance = None, 
-        db_cache = None):
+def init(db_dir,
+         block_cache_size=None,
+         write_buffer_size=None,
+         db_instance=None,
+         db_cache=None):
     global _leveldb
     global _cache
 
     if db_instance != None:
         _leveldb = db_instance
     else:
-        _leveldb = create_db_instance(db_dir, 
-            block_cache_size = block_cache_size, 
-            write_buffer_size = write_buffer_size)
+        _leveldb = create_db_instance(db_dir,
+                                      block_cache_size=block_cache_size,
+                                      write_buffer_size=write_buffer_size)
 
     _cache = db_cache
     xutils.log("leveldb: %s" % _leveldb)
+
 
 def check_not_empty(value, message):
     if value == None or value == "":
         raise Exception(message)
 
-def get_write_lock(key = None):
+
+def get_write_lock(key=None):
     global WRITE_LOCK
     return WRITE_LOCK
 
-def timeseq(value = None):
+
+def timeseq(value=None):
     """生成一个时间序列
     @param {float|None} value 时间序列，单位是秒，可选
     @return {string}    20位的时间序列
@@ -255,18 +261,21 @@ def timeseq(value = None):
         LAST_TIME_SEQ = t
         return "%020d" % t
 
+
 def new_id(prefix):
     return "%s:%s" % (prefix, timeseq())
+
 
 def convert_object_to_json(obj):
     # ensure_ascii默认为True，会把非ascii码的字符转成\u1234的格式
     return json.dumps(obj, ensure_ascii=False)
 
-def convert_bytes_to_object(bytes, parse_json = True):
+
+def convert_bytes_to_object(bytes, parse_json=True):
     if bytes is None:
         return None
     str_value = bytes.decode("utf-8")
-    
+
     if not parse_json:
         return str_value
 
@@ -279,13 +288,16 @@ def convert_bytes_to_object(bytes, parse_json = True):
         obj = Storage(**obj)
     return obj
 
+
 def check_leveldb():
     if _leveldb is None:
         raise Exception("leveldb not found!")
 
+
 def check_write_state():
     if WRITE_ONLY:
         raise Exception("write_only mode!")
+
 
 def check_before_write(key):
     check_leveldb()
@@ -299,34 +311,42 @@ def check_before_write(key):
 def check_get_leveldb():
     return get_instance()
 
+
 def check_table_name(table_name):
     validate_str(table_name, "invalid table_name:{}", table_name)
     if table_name not in TABLE_INFO_DICT:
         raise DBException("table %r not registered!" % table_name)
 
+
 def get_table_info(table_name):
     global TABLE_INFO_DICT
     return TABLE_INFO_DICT.get(table_name)
+
 
 def validate_none(obj, msg, *argv):
     if obj != None:
         raise DBException(msg.format(*argv))
 
+
 def validate_obj(obj, msg, *argv):
     if obj is None:
         raise DBException(msg.format(*argv))
+
 
 def validate_str(obj, msg, *argv):
     if not is_str(obj):
         raise DBException(msg.format(*argv))
 
+
 def validate_list(obj, msg, *argv):
     if not isinstance(obj, list):
         raise DBException(msg.format(*argv))
 
+
 def validate_dict(obj, msg, *argv):
     if not isinstance(obj, dict):
         raise DBException(msg.format(*argv))
+
 
 class TableInfo:
 
@@ -336,7 +356,11 @@ class TableInfo:
         self.category = category
         self.check_user = False
 
-def register_table(table_name, description, category = "default", check_user = False):
+
+def register_table(table_name,
+                   description,
+                   category="default",
+                   check_user=False):
     # TODO 考虑过这个方法直接返回一个 LdbTable 实例
     # LdbTable可能针对同一个`table`会有不同的实例
     if not re.match(r"^[0-9a-z_]+$", table_name):
@@ -344,7 +368,11 @@ def register_table(table_name, description, category = "default", check_user = F
 
     register_table_inner(table_name, description, category, check_user)
 
-def register_table_inner(table_name, description, category = "default", check_user = False):
+
+def register_table_inner(table_name,
+                         description,
+                         category="default",
+                         check_user=False):
     if not re.match(r"^[0-9a-z_\$]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
@@ -356,6 +384,7 @@ def register_table_inner(table_name, description, category = "default", check_us
     info.check_user = check_user
 
     TABLE_INFO_DICT[table_name] = info
+
 
 def register_table_index(table_name, index_name):
     """注册表的索引"""
@@ -373,16 +402,20 @@ def register_table_index(table_name, index_name):
     description = "%s表索引" % table_name
     register_table_inner(index_table, description)
 
+
 def get_table_dict_copy():
     return TABLE_INFO_DICT.copy()
+
 
 def get_table_names():
     """获取表名称"""
     global TABLE_INFO_DICT
-    values = sorted(TABLE_INFO_DICT.values(), key = lambda x:(x.category,x.name))
-    return list(map(lambda x:x.name, values))
+    values = sorted(TABLE_INFO_DICT.values(),
+                    key=lambda x: (x.category, x.name))
+    return list(map(lambda x: x.name, values))
 
-def get(key, default_value = None):
+
+def get(key, default_value=None):
     check_leveldb()
     try:
         if key == "" or key == None:
@@ -397,25 +430,28 @@ def get(key, default_value = None):
     except KeyError:
         return default_value
 
-def put(key, obj_value, sync = False):
+
+def put(key, obj_value, sync=False):
     """往数据库中写入键值对
     @param {string} key 数据库主键
     @param {object} obj_value 值，会转换成JSON格式
     @param {boolean} sync 是否同步写入，默认为False
     """
     check_before_write(key)
-    
+
     key = key.encode("utf-8")
     # 注意json序列化有个问题，会把dict中数字开头的key转成字符串
     value = convert_object_to_json(obj_value)
     # print("Put %s = %s" % (key, value))
-    _leveldb.Put(key, value.encode("utf-8"), sync = sync)
+    _leveldb.Put(key, value.encode("utf-8"), sync=sync)
 
-def put_bytes(key, value, sync = False):
+
+def put_bytes(key, value, sync=False):
     check_before_write(key.decode("utf-8"))
-    _leveldb.Put(key, value, sync = sync)
+    _leveldb.Put(key, value, sync=sync)
 
-def insert(table_name, obj_value, sync = False):
+
+def insert(table_name, obj_value, sync=False):
     key = new_id(table_name)
     with get_write_lock(key):
         old_value = get(key)
@@ -424,23 +460,30 @@ def insert(table_name, obj_value, sync = False):
         put(key, obj_value, sync)
         return key
 
-def delete(key, sync = False):
+
+def delete(key, sync=False):
     check_leveldb()
     check_write_state()
 
     print_debug_info("Delete {}", key)
 
     key = key.encode("utf-8")
-    _leveldb.Delete(key, sync = sync)
+    _leveldb.Delete(key, sync=sync)
+
 
 def create_write_batch():
     return WriteBatchProxy()
 
-def commit_write_batch(batch, sync = False):
+
+def commit_write_batch(batch, sync=False):
     batch.commit(sync)
 
-def scan(key_from = None, key_to = None, func = None, reverse = False, 
-        parse_json = True):
+
+def scan(key_from=None,
+         key_to=None,
+         func=None,
+         reverse=False,
+         parse_json=True):
     """扫描数据库
     @param {string|bytes} key_from
     @param {string|bytes} key_to
@@ -455,8 +498,10 @@ def scan(key_from = None, key_to = None, func = None, reverse = False,
     if key_to != None and isinstance(key_to, str):
         key_to = key_to.encode("utf-8")
 
-    iterator = _leveldb.RangeIter(key_from, key_to, 
-        include_value = True, reverse = reverse)
+    iterator = _leveldb.RangeIter(key_from,
+                                  key_to,
+                                  include_value=True,
+                                  reverse=reverse)
 
     for key, value in iterator:
         key = key.decode("utf-8")
@@ -464,12 +509,13 @@ def scan(key_from = None, key_to = None, func = None, reverse = False,
         if not func(key, value):
             break
 
-def prefix_scan(prefix, func, reverse = False, parse_json = True):
+
+def prefix_scan(prefix, func, reverse=False, parse_json=True):
     check_leveldb()
     assert len(prefix) > 0
 
     key_from = None
-    key_to   = None
+    key_to = None
 
     if prefix[-1] != ':':
         prefix += ':'
@@ -479,15 +525,17 @@ def prefix_scan(prefix, func, reverse = False, parse_json = True):
     if reverse:
         # 反向查询
         key_from = prefix_bytes + b'\xff'
-        key_to   = prefix_bytes
+        key_to = prefix_bytes
     else:
         # 正向查询
         key_from = prefix_bytes
-        key_to   = None
-    
-    iterator = _leveldb.RangeIter(key_from, key_to, 
-        include_value = True, reverse = reverse, 
-        fill_cache = False)
+        key_to = None
+
+    iterator = _leveldb.RangeIter(key_from,
+                                  key_to,
+                                  include_value=True,
+                                  reverse=reverse,
+                                  fill_cache=False)
 
     offset = 0
     for key, value in iterator:
@@ -499,18 +547,20 @@ def prefix_scan(prefix, func, reverse = False, parse_json = True):
             break
         offset += 1
 
+
 def prefix_list(*args, **kw):
     return list(prefix_iter(*args, **kw))
 
-def prefix_iter(prefix, 
-        filter_func = None, 
-        offset = 0, 
-        limit = -1, 
-        reverse = False, 
-        include_key = False,
-        key_from = None,
-        map_func = None,
-        fill_cache = False):
+
+def prefix_iter(prefix,
+                filter_func=None,
+                offset=0,
+                limit=-1,
+                reverse=False,
+                include_key=False,
+                key_from=None,
+                map_func=None,
+                fill_cache=False):
     """通过前缀迭代查询
     @param {string} prefix 遍历前缀
     @param {function} filter_func 过滤函数
@@ -537,13 +587,12 @@ def prefix_iter(prefix,
         # 时序表的主键为 表名:用户名:时间序列 时间序列长度为20
         prefix += b'\xff'
 
-
     if key_from is None:
         key_from = prefix
     else:
         key_from = key_from.encode("utf-8")
 
-    # print("prefix: %s, origin_prefix: %s, reverse: %s" % 
+    # print("prefix: %s, origin_prefix: %s, reverse: %s" %
     #      (prefix, origin_prefix, reverse))
 
     if reverse:
@@ -551,14 +600,16 @@ def prefix_iter(prefix,
         key_to = prefix
     else:
         key_to = None
-    
-    iterator = _leveldb.RangeIter(key_from, key_to, 
-        include_value = True, reverse = reverse,
-        fill_cache = fill_cache)
 
-    position       = 0
+    iterator = _leveldb.RangeIter(key_from,
+                                  key_to,
+                                  include_value=True,
+                                  reverse=reverse,
+                                  fill_cache=fill_cache)
+
+    position = 0
     matched_offset = 0
-    result_size    = 0
+    result_size = 0
 
     for key, value in iterator:
         key = key.decode("utf-8")
@@ -570,7 +621,7 @@ def prefix_iter(prefix,
 
         if filter_func:
             is_match = filter_func(key, value)
-        
+
         if map_func:
             value = map_func(key, value)
             is_match = value != None
@@ -589,16 +640,15 @@ def prefix_iter(prefix,
         position += 1
 
 
-def count(key_from = None, key_to = None, filter_func = None):
+def count(key_from=None, key_to=None, filter_func=None):
     check_leveldb()
 
     if key_from:
         key_from = key_from.encode("utf-8")
     if key_to:
         key_to = key_to.encode("utf-8")
-    iterator = _leveldb.RangeIter(key_from, key_to, 
-        include_value = True)
-    
+    iterator = _leveldb.RangeIter(key_from, key_to, include_value=True)
+
     count = 0
     for key, value in iterator:
         key = key.decode("utf-8")
@@ -607,9 +657,14 @@ def count(key_from = None, key_to = None, filter_func = None):
             count += 1
     return count
 
-def prefix_count(prefix, filter_func = None, 
-        offset = None, limit = None, reverse = None, 
-        include_key = None, map_func = None):
+
+def prefix_count(prefix,
+                 filter_func=None,
+                 offset=None,
+                 limit=None,
+                 reverse=None,
+                 include_key=None,
+                 map_func=None):
     """通过前缀统计行数
     @param {string} prefix 数据前缀
     @param {function} filter_func 过滤函数
@@ -622,6 +677,7 @@ def prefix_count(prefix, filter_func = None,
         raise Exception("不允许同时设置filter_func和map_func")
 
     count = [0]
+
     def func(key, value):
         if not key.startswith(prefix):
             return False
@@ -637,11 +693,12 @@ def prefix_count(prefix, filter_func = None,
 
         count[0] += 1
         return True
-        
+
     prefix_scan(prefix, func)
     return count[0]
 
-def count_table(table_name, use_cache = False):
+
+def count_table(table_name, use_cache=False):
     assert table_name != None
     assert table_name != ""
 
@@ -649,34 +706,34 @@ def count_table(table_name, use_cache = False):
         table_name += ":"
 
     cache_key = "table_count:%s" % table_name
-    
+
     if use_cache and _cache != None:
         value = _cache.get(cache_key)
         if value != None:
-            logging.debug("count_table by cache, table_name:(%s), count:(%s)", 
-                table_name, value)
+            logging.debug("count_table by cache, table_name:(%s), count:(%s)",
+                          table_name, value)
             return value
 
     key_from = table_name.encode("utf-8")
-    key_to   = table_name.encode("utf-8") + b'\xff'
-    iterator = check_get_leveldb().RangeIter(key_from, key_to, 
-        include_value = False, 
-        fill_cache = False)
+    key_to = table_name.encode("utf-8") + b'\xff'
+    iterator = check_get_leveldb().RangeIter(key_from,
+                                             key_to,
+                                             include_value=False,
+                                             fill_cache=False)
 
     count = 0
     for key in iterator:
         count += 1
 
     if _cache != None:
-        _cache.put(cache_key, count, expire = DEFAULT_CACHE_EXPIRE)
+        _cache.put(cache_key, count, expire=DEFAULT_CACHE_EXPIRE)
     return count
 
 
 def count_all():
     """统计全部的KV数量"""
-    iterator = check_get_leveldb().RangeIter(
-        include_value = False, 
-        fill_cache = False)
+    iterator = check_get_leveldb().RangeIter(include_value=False,
+                                             fill_cache=False)
 
     count = 0
     for key in iterator:
@@ -685,7 +742,7 @@ def count_all():
 
 
 def _rename_table_no_lock(old_name, new_name):
-    for key, value in prefix_iter(old_name, include_key = True):
+    for key, value in prefix_iter(old_name, include_key=True):
         name, rest = key.split(":", 1)
         new_key = new_name + ":" + rest
         put(new_key, value)
@@ -697,10 +754,10 @@ def rename_table(old_name, new_name):
         with get_write_lock(new_name):
             _rename_table_no_lock(old_name, new_name)
 
+
 def run_test():
     pass
 
+
 if __name__ == "__main__":
     run_test()
-    
-    

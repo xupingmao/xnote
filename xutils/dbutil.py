@@ -15,7 +15,8 @@ def _get_table_no_lock(table_name):
         table = LdbTable(table_name)
     return table
 
-def get_table_old(table_name, type = "rdb"):
+
+def get_table_old(table_name, type="rdb"):
     """获取table对象
     @param {str} table_name 表名
     @return {LdbTable}
@@ -32,7 +33,8 @@ def get_table_old(table_name, type = "rdb"):
             LDB_TABLE_DICT[table_name] = table
     return table
 
-def get_table(table_name, type = "rdb", user_name = None):
+
+def get_table(table_name, type="rdb", user_name=None):
     """获取table对象
     @param {str} table_name 表名
     @return {LdbTable|LdbHashTable}
@@ -42,8 +44,8 @@ def get_table(table_name, type = "rdb", user_name = None):
     if type == "hash":
         return get_hash_table(table_name)
 
-    return LdbTable(table_name, user_name = user_name)
+    return LdbTable(table_name, user_name=user_name)
 
 
-def get_hash_table(table_name, user_name = None):
-    return LdbHashTable(table_name, user_name = user_name)
+def get_hash_table(table_name, user_name=None):
+    return LdbHashTable(table_name, user_name=user_name)
