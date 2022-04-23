@@ -533,6 +533,10 @@ li.menu-item:hover {
     margin: 0px;
 }
 
+.info.light {
+    background-color: #eee;
+}
+
 .success {
     padding: 5px;
     margin: 0px;

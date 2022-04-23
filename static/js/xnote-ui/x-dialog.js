@@ -37,7 +37,7 @@ function getDialogArea() {
     }
 }
 
-window.xnote.showIframeDialog = function (title, url) {
+xnote.showIframeDialog = function (title, url) {
     var area = getDialogArea();
     return layer.open({
         type: 2,
@@ -51,7 +51,7 @@ window.xnote.showIframeDialog = function (title, url) {
 }
 
 // 关闭对话框的入口方法
-window.xnote.closeDialog = function (flag) {
+xnote.closeDialog = function (flag) {
     if (flag === "last") {
         var lastId = xnote._dialogIdStack.pop();
         layer.close(lastId);
@@ -63,13 +63,13 @@ window.xnote.closeDialog = function (flag) {
     }
 }
 
-window.xnote.showDialogEx = function (options) {
+xnote.showDialogEx = function (options) {
     var dialogId = xnote.showDialogExInner(options);
     xnote._dialogIdStack.push(dialogId);
     return dialogId;
 }
 
-window.xnote.showDialogExInner = function (options) {
+xnote.showDialogExInner = function (options) {
     var area = getDialogArea();
     var title = options.title;
     var html  = options.html;
@@ -201,11 +201,24 @@ xnote.alert = function(message) {
     }
 };
 
-xnote.toast = function (message, time) {
+/**
+ * 展示Toast信息
+ * @param {string} message 展示信息
+ * @param {number} time 显示时间
+ * @param {function} callback 回调函数
+ */
+xnote.toast = function (message, time, callback) {
     if (layer && layer.msg) {
         layer.msg(message, {time: time});
     } else {
         myToast(message, time);
+    }
+
+    if (callback) {
+        if (time === undefined) {
+            time = 1000;
+        }
+        setTimeout(callback, time);
     }
 }
 

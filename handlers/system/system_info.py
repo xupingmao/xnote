@@ -23,10 +23,8 @@ except ImportError:
 def get_xnote_version():
     return xconfig.get_global_config("system.version")
 
-
 def get_mem_info():
     mem_used = 0
-    mem_total = 0
     result = mem_util.get_mem_info()
 
     mem_used = result.mem_used

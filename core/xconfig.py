@@ -31,12 +31,10 @@ TODO: 系统配置需要注册之后才能使用
 '''
 import os
 import time
-from collections import OrderedDict
 
 from xutils import textutil
 from xutils import fsutil
 from xutils.base import Storage
-from xutils.textutil import Properties
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
@@ -237,6 +235,7 @@ def init(boot_config_file = None):
     global ETC_DIR
     global PLUGIN_TEMPLATE
     global RUNTIME_ID
+    global FILE_EXT_PATH
 
     if boot_config_file != None:
         init_boot_config(boot_config_file)

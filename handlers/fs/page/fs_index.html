@@ -43,11 +43,28 @@ p {
         <span>索引目录</span>
     </div>
 
-    <form method="POST">
-        <textarea name="index_config" class="row" rows=10>{{"\n".join(index_dirs)}}</textarea>
-        <input type="hidden" name="action" value="config">
-        <button>更新索引目录</button>
-    </form>
+    <div class="info light">一行一个路径</div>
+    
+    <textarea name="index_config" class="row" rows=10>{{"\n".join(index_dirs)}}</textarea>
+    <input type="hidden" name="action" value="config">
+    <button class="update-index-dirs">更新索引目录</button>
 </div>
 
+<script type="text/javascript">
+    $(function () {
+        $("body").on("click", ".update-index-dirs", function (e) {
+            var index_config = $("[name=index_config]").val();
+            var params = {"index_config": index_config};
+            $.post("?action=config", params, function (e) {
+                xnote.toast("更新成功");
+                setTimeout(function () {
+                    window.location.reload();                    
+                }, 500);
+            }).fail(function (e) {
+                console.error("更新失败", e);
+                xnote.alert("更新失败");
+            });
+        });
+    });
+</script>
 {% end %}

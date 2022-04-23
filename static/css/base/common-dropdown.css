@@ -6,7 +6,6 @@
  * @filename common-dropdown.css
  */
 
-
 .x-dropdown, .dropdown {
     position: relative;
     display: inline-block;
@@ -32,11 +31,16 @@
     cursor: pointer;
 }
 
+/* 左对齐 */
 .x-dropdown.align-left > .dropdown-content {
     left: 0px;
     text-align: left;
 }
 
+/* 右对齐 */
+.x-dropdown.align-right > .dropdown-content {
+    left: -67px;
+}
 
 .dropdown-option {
     padding: 8px;

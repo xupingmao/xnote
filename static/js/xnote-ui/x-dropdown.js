@@ -5,11 +5,13 @@
 
 $(function () {
     // Dropdown 控件
-
     function toggleDropdown(e) {
         var target = e.target;
         var dropdownContent = $(target).next(".dropdown-content");
         dropdownContent.slideToggle("fast");
+        if (dropdownContent.offset().left < 0) {
+            dropdownContent.css("left", 0);
+        }
 
         $(".dropdown-content").each(function (index, element) {
             if (element != dropdownContent[0]) {

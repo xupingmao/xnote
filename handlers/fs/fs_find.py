@@ -58,19 +58,8 @@ def find_in_cache(key, maxsize=sys.maxsize):
     return plist
 
 def get_index_dirs():
-    return xauth.get_user_config_dict("admin").get("index_dirs", [])
-
-def update_index_config(index_config):
-    index_dirs = set()
-    config_list = index_config.split("\n")
-    for fpath in config_list:
-        fpath = fpath.strip()
-        if os.path.exists(fpath):
-            index_dirs.add(fpath)
-
-    config_dict = dict(index_dirs = list(index_dirs))
-    xauth.update_user_config_dict("admin", config_dict)
-
+    index_dirs = xauth.get_user_config("admin", "index_dirs")
+    return index_dirs.split("\n")
 
 class SearchHandler:
 
@@ -145,7 +134,7 @@ class IndexHandler:
 
         if action == "config":
             index_config = xutils.get_argument("index_config")
-            update_index_config(index_config)
+            xauth.update_user_config(xauth.current_name(), "index_dirs", index_config)
             index_dirs = get_index_dirs()
         
         index_size = _index_db.count()
