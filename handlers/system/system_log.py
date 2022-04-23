@@ -11,7 +11,6 @@ import xauth
 import xutils
 import xconfig
 import xmanager
-from xutils import History
 from xutils import logutil
 from xutils.imports import *
 from xtemplate import BasePlugin
@@ -47,6 +46,7 @@ OPTION_HTML = '''
     {% end %}
 
     {% if log_type == "mem" %}
+        {% init log_name = "" %}
         <span>日志名称</span>
         <select value="{{log_name}}" class="logger-name-select">
             {% for logger in mem_loggers %}
@@ -120,7 +120,7 @@ class LogHandler(BasePlugin):
             if logger.name == log_name:
                 return logger.text()
 
-        return ""
+        return "<empty>"
 
     def handle_file_log(self):
         type = xutils.get_argument("type", "tail")

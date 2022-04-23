@@ -347,6 +347,8 @@ class MemLogger:
         self.data.append(line)
         if len(self.data) > self.size:
             self.data.popleft()
+    
+    info = log
 
 
     def text(self):

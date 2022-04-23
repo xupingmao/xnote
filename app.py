@@ -194,6 +194,13 @@ def try_init_ldb():
 
 def init_autoreload():
 
+    def register_watch(autoreload_thread):
+        """监控文件夹及文件的变更"""
+        autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
+        autoreload_thread.watch_dir("static/js", recursive=True)
+        autoreload_thread.watch_dir("static/css", recursive=True)
+        autoreload_thread.watch_file("core/xtemplate.py")
+
     def reload_callback():
         code_builder.build()
         # 重新加载handlers目录下的所有模块
@@ -203,12 +210,11 @@ def init_autoreload():
             xmanager.restart()
 
         autoreload_thread.clear_watched_files()
-        autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
+        register_watch(autoreload_thread)
 
     # autoreload just reload models
     autoreload_thread = AutoReloadThread(reload_callback)
-    autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
-    autoreload_thread.watch_file("core/xtemplate.py")
+    register_watch(autoreload_thread)
     autoreload_thread.start()
 
 

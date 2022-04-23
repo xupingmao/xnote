@@ -108,6 +108,7 @@ layer.photos = function(options, loop, key){
   //一些动作
   dict.event = function(){
     
+    // layer默认的行为
     // dict.bigimgPic.hover(function(){
     //   dict.imgsee.show();
     // }, function(){
@@ -176,9 +177,9 @@ layer.photos = function(options, loop, key){
     if (options.hideBar) {
       return "";
     }
-    return '<div class="layui-layer-imgbar imgbar-top" style="display:none;">'
-      + '<span class="close-span">关闭</span>'
-      + '</div>';
+    var bar = $("<div>").addClass("layui-layer-imgbar").addClass("imgbar-top").hide();
+    bar.append($("<span>").addClass("close-span").text("关闭"));
+    return bar.prop("outerHTML");
   }
 
   function imgBarBottom() {
@@ -254,7 +255,6 @@ layer.photos = function(options, loop, key){
       success: function(layero, index){
         dict.bigimg = layero.find('.layui-layer-phimg');
         dict.bigimgPic = layero.find('.layui-layer-phimg img');
-        // dict.imgsee = layero.find('.layui-layer-imguide,.layui-layer-imgbar');
         dict.imgsee = layero.find(".layui-layer-imgbar");
 
         // 左右方向图标始终展示

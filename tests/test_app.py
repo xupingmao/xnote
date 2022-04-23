@@ -6,17 +6,13 @@ import sys
 import os
 sys.path.insert(1, "lib")
 sys.path.insert(1, "core")
-import unittest
-import json
-import web
-import six
-import xmanager
 import xutils
 import xtemplate
 import xconfig
 import xtables
 import xauth
 from xutils import u, dbutil
+from xutils import logutil
 
 # cannot perform relative import
 try:
@@ -344,3 +340,9 @@ class Main:
         admin_token = xauth.get_user_by_name("admin").token
         self.check_OK("/system/sync?p=home")
         self.check_OK("/system/sync?p=get_stat&token=" + admin_token)
+
+    def test_system_log(self):
+        logger = logutil.new_mem_logger("log_test")
+        logger.log("Hello,World")
+        self.check_OK("/system/log")
+        self.check_OK("/system/log?log_type=mem")
