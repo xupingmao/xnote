@@ -13,6 +13,8 @@ def main():
     format_code("xutils/dbutil.py")
     format_code("xutils/dbutil_base.py")
     format_code("xutils/fsutil.py")
+    format_code("handlers/note/dao.py")
+
 
 
 if __name__ == '__main__':

@@ -30,11 +30,23 @@
     <div class="card-title">
         <span>其他笔记</span>
     </div>
-    {% for item in xutils.call("note.list_by_parent", _user_name, file.parent_id) %}
-        <a class="list-item" href="{{item.url}}">
+    <div class="note-sidebar-contents">
+    {% for item in xutils.call("note.list_by_parent", _user_name, file.parent_id, orderby = "db") %}
+        <a class="list-item" href="{{item.url}}" 
+            {% if item.id == file_id %}
+                data-current=true
+            {% end %}>
             <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
             <span>{{item.name}}</span>
         </a>
     {% end %}
+    </div>
 </div>
+
+<script type="text/javascript">
+    $(function() {
+        $(".note-sidebar-contents>a[data-current=true]").showInScroll(-100);
+    });
+</script>
+
 {% end %}

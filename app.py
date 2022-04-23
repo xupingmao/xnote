@@ -18,11 +18,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from __future__ import print_function
+
+import os
+import sys
+import time
+import logging
+import argparse
+
+# insert after working dir
+sys.path.insert(1, "lib")
+sys.path.insert(1, "core")
+
 from autoreload import AutoReloadThread
 from xutils.lockutil import FileLock
 from xutils.mem_util import log_mem_info_deco
-from xutils import mem_util
-from xutils import *
+from xutils import dbutil
+from xutils import cacheutil
 import signal
 import xtemplate
 import xmanager
@@ -30,20 +41,7 @@ import xtables
 import xconfig
 import xutils
 import web
-import os
-import socket
-import sys
-import json
-import time
-import webbrowser
-import posixpath
-import socket
-import logging
-import traceback
-import argparse
-# insert after working dir
-sys.path.insert(1, "lib")
-sys.path.insert(1, "core")
+import builder
 
 FILE_LOCK = FileLock("pid.lock")
 
@@ -169,7 +167,6 @@ def try_init_ldb():
         # 默认使用leveldb启动
         if db_instance is None:
             try:
-                import leveldb
                 from xutils.db.driver_leveldb import LevelDBImpl
                 db_instance = LevelDBImpl(xconfig.DB_DIR, **leveldb_kw)
             except ImportError:
@@ -196,6 +193,7 @@ def try_init_ldb():
 def init_autoreload():
 
     def reload_callback():
+        builder.main()
         # 重新加载handlers目录下的所有模块
         if xconfig.get_global_config("system.fast_reload"):
             xmanager.reload()
@@ -237,6 +235,9 @@ def init_app_no_lock():
 
     # 处理初始化参数
     handle_args_and_init_config()
+
+    # 构建静态文件
+    builder.main()
 
     # 初始化数据库
     try_init_sqlite()
@@ -313,76 +314,6 @@ def main():
             sys.exit(1)
     finally:
         FILE_LOCK.release()
-
-
-class LogMiddleware:
-    """WSGI middleware for logging the status.
-
-    中间件的实现参考 web/httpservers.py
-    """
-
-    PROFILE_SET = set()
-
-    def __init__(self, app):
-        self.app = app
-        self.format = '%s - - [%s] "%s %s %s" - %s %s ms'
-
-        f = BytesIO()
-
-        class FakeSocket:
-
-            def makefile(self, *a):
-                return f
-
-        # take log_date_time_string method from BaseHTTPRequestHandler
-        self.log_date_time_string = BaseHTTPRequestHandler(
-            FakeSocket(), None, None).log_date_time_string
-
-    def invoke_app(self, environ, start_response):
-        start_time = time.time()
-
-        def xstart_response(status, response_headers, *args):
-            out = start_response(status, response_headers, *args)
-            self.log(status, environ, time.time() - start_time)
-            return out
-
-        return self.app(environ, xstart_response)
-
-    def __call__(self, environ, start_response):
-        path = environ.get('PATH_INFO', '_')
-        if path in LogMiddleware.PROFILE_SET:
-            vars = dict(f=self.invoke_app,
-                        environ=environ,
-                        start_response=start_response)
-            profile.runctx("r=f(environ, start_response)",
-                           globals(),
-                           vars,
-                           sort="time")
-            return vars["r"]
-        else:
-            return self.invoke_app(environ, start_response)
-
-    def log(self, status, environ, cost_time):
-        outfile = environ.get('wsgi.errors', web.debug)
-        req = environ.get('PATH_INFO', '_')
-        query_string = environ.get("QUERY_STRING", '')
-        if query_string != '':
-            req += '?' + query_string
-        protocol = environ.get('ACTUAL_SERVER_PROTOCOL', '-')
-        method = environ.get('REQUEST_METHOD', '-')
-        x_forwarded_for = environ.get("HTTP_X_FORWARDED_FOR")
-        if x_forwarded_for is not None:
-            host = x_forwarded_for.split(",")[0]
-        else:
-            host = "%s:%s" % (environ.get(
-                'REMOTE_ADDR', '-'), environ.get('REMOTE_PORT', '-'))
-
-        time = self.log_date_time_string()
-
-        msg = self.format % (host, time, protocol, method, req, status,
-                             int(1000 * cost_time))
-        print(utils.safestr(msg), file=outfile)
-
 
 if __name__ == '__main__':
     main()

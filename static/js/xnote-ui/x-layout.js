@@ -15,3 +15,14 @@ $.fn.autoHeight = function(){
     });
 };
 
+// 在滚动条中展示
+$.fn.showInScroll = function(offsetY) {
+    if (offsetY === undefined) {
+        offsetY = 0;
+    }
+
+    var parent = this.parent();
+    var topDiff = this.offset().top - parent.offset().top + offsetY;
+    parent.scrollTop(topDiff);
+};
+

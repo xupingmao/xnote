@@ -19,20 +19,13 @@ search_history:<user>:<timeseq>  = 用户维度的搜索历史
 note_public:<note_id>            = 公开的笔记索引
 """
 import time
-import math
-import re
-import six
-import web.db as db
 import os
 import xconfig
-import xtables
 import xutils
 import xauth
 import xmanager
-import copy
 import threading
 import logging 
-from collections import Counter
 from xutils import readfile, savetofile, sqlite3, Storage
 from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
 from xutils import attrget
@@ -981,6 +974,13 @@ def list_by_parent(creator, parent_id, offset = 0, limit = 1000,
 
     db = get_note_tiny_table(creator)
     notes = db.list(offset = 0, limit = limit, filter_func = list_note_func)
+
+    if orderby == "db":
+        note = get_by_id_creator(parent_id, creator)
+        if note == None:
+            raise Exception("笔记不存在:%s" % parent_id)
+        orderby = note.orderby
+
     sort_notes(notes, orderby)
     return notes[offset:offset+limit]
 

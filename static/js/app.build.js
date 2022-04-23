@@ -852,7 +852,7 @@ window.xnote.setExtFunc = function (funcName, func) {
  *   layer.js
  * @author xupingmao
  * @since 2017/10/21
- * @modified 2022/02/07 12:19:35
+ * @modified 2022/04/16 20:24:02
  */
 
 
@@ -866,6 +866,22 @@ xnote.table.adjustWidth = function(selector) {
         }
     });
 };
+
+// 追加CSS样式表
+xnote.appendCSS = function (cssText) {
+    // 居中的样式
+    var style = document.createElement("style");
+    style.type = "text/css";
+
+    if (style.styleSheet) {
+      // 兼容IE
+      style.styleSheet.cssText = styleText;  
+    } else {  
+      style.innerHTML = styleText;
+    } 
+
+    document.head.appendChild(style);
+}
 
 var XUI = function(window) {
     // 处理select标签选中情况
@@ -2179,6 +2195,17 @@ $.fn.autoHeight = function(){
             autoHeight(this);
         });
     });
+};
+
+// 在滚动条中展示
+$.fn.showInScroll = function(offsetY) {
+    if (offsetY === undefined) {
+        offsetY = 0;
+    }
+
+    var parent = this.parent();
+    var topDiff = this.offset().top - parent.offset().top + offsetY;
+    parent.scrollTop(topDiff);
 };
 
 /**
