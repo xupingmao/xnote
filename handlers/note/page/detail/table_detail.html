@@ -1,3 +1,16 @@
+{% extends base %}
+
+{% block head %}
+    <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
+    {% include note/component/view_css.html %}
+
+{% end %}
+
+
+{% block body_left %}
+    {% include note/component/editor/editor_default_vars.html %}
+
+
 <script src="/static/lib/jspreadsheet-ce-4.6.0/deps/jsuites.js"></script>
 <link rel="stylesheet" href="/static/lib/jspreadsheet-ce-4.6.0/deps/jsuites.css" type="text/css" />
 
@@ -81,7 +94,7 @@ $(function () {
     }
 
     var head = rows[0];
-    var data = rows.slice(1);
+    var data = rows.slice(1); // 删除head
     var columns = [];
     var colWidths = [];
 
@@ -106,7 +119,6 @@ $(function () {
     console.log("colWidths:", colWidths);
 
     var excel = $('#my').jexcel({
-        // csv: $("#content").val(),
         data: data,
         colHeaders: head,
         colWidths: colWidths,
@@ -145,7 +157,7 @@ $(function () {
 
         var params = {
             id:"{{file.id}}",
-            version: {{file.version}},
+            version: "{{file.version}}",
             content: JSON.stringify(jsonData)
         }
 
@@ -167,4 +179,40 @@ $(function () {
     });
 });
 </script>
-</html>
+
+
+{# 文章信息 #}
+{% include note/component/note_ext_info.html %}
+
+{# 评论功能 #}
+{% if file_type != "group" and show_comment %}
+    {% include note/page/comment.html %}
+{% end %}
+
+{# 分页 #}
+{% if show_pagination and "page" in globals() %}
+    <div class="card">
+        {% include mod_pagenation.html %}
+    </div>
+{% end %}
+
+{% include note/component/script/delete_script.html %}
+{% include note/component/script/rename_script.html %}
+
+<script type="text/javascript">
+
+$(function () {
+window.adjustTable();
+})
+</script>
+
+{% end %}
+
+
+{% block body_right %}
+<div class="desktop-only">
+    {% init show_sidebar_group_entry = False %}
+    {% init show_sidebar_note_brothers = True %}
+    {% include note/component/sidebar/note_sidebar.html %}
+</div>
+{% end %}

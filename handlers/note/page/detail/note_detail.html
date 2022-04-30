@@ -1,7 +1,6 @@
 {% extends base %}
 
 {% block head %}
-    <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
     <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
     <script type="text/javascript" src="/static/js/marked-ext.js"></script>
 
@@ -17,8 +16,6 @@
     <!-- comment 如果有新类型的文件，继续增加file_type即可，后台实现不用变更 -->
     {% if file_type in ("md", "text", "log", "plan") %}
         {% include note/component/editor/markdown.html %}
-    {% elif file_type == "csv" %}
-        {% include note/component/editor/table.html %}
     {% elif file_type == "gallery" %}
         {% include note/component/editor/gallery.html %}
     {% else %}

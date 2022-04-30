@@ -48,12 +48,10 @@ def list_note_types(user_name = None):
     note_stat = NOTE_DAO.get_note_stat(user_name)
 
     return [
-        # NoteLink("笔记本", "/note/group", "fa-folder", size = note_stat.group_count),
         NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
         NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
         NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
         NoteLink("表格", "/note/table", "fa-table", size = note_stat.table_count),
-        # NoteLink("日志", "/note/log", "fa-file-text", size = note_stat.log_count),
         DictEntryLink(size = note_stat.dict_count),
         NoteLink("评论", "/note/comment/mine", "fa-file-text", size = note_stat.comment_count),
         NoteLink("回收站", "/note/removed", "fa-trash", size = note_stat.removed_count),

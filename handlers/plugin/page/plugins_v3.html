@@ -2,16 +2,10 @@
 
 {% block body %}
 
-{% init header = "normal" %}
 {% init plugins_status = "done" %}
+{% include plugin/header/plugin_header_normal.html %}
 
-{% if header == "note" %}
-    {% include plugin/header/plugin_header_note.html %}
-{% else %}
-    {% include plugin/header/plugin_header_normal.html %}
-{% end %}
-
-<!-- plugins_v3.html -->
+<!-- plugins_v3.html 最新版本的 -->
 
 {% if plugins_status == "loading" %}
     <div class="card">

@@ -105,7 +105,6 @@ def view_or_edit_md_func(file, kw):
     kw.content = file.content
     kw.show_recommend = True
     kw.show_pagination = False
-    kw.show_comment_edit = (xconfig.get_user_config(file.creator, "show_comment_edit") == "true")
     kw.edit_token = textutil.create_uuid()
     
     if kw.op == "edit":
@@ -176,6 +175,7 @@ def view_list_func(note, kw):
 
 def view_table_func(note, kw):
     kw.show_aside = False
+    kw.template_name = "note/page/detail/table_detail.html"
 
 def view_form_func(note, kw):
     # 表单支持脚本处理，可以实现一些标准化的表单工具
@@ -195,6 +195,9 @@ VIEW_FUNC_DICT = {
     "post": view_html_func,
     "form": view_form_func,
 }
+
+def view_func_before(note, kw):
+    kw.show_comment_edit = (xconfig.get_user_config(note.creator, "show_comment_edit") == "true")
 
 def find_note_for_view0(token, id, name):
     if token != "":
@@ -245,8 +248,6 @@ class ViewHandler:
         name          = xutils.get_argument("name", "")
         page          = xutils.get_argument("page", 1, type=int)
         pagesize      = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
-        show_menu     = xutils.get_argument("show_menu", "true") != "false"
-        show_search   = xutils.get_argument("show_search", "true") != "false"
         orderby       = xutils.get_argument("orderby", "")
         is_iframe     = xutils.get_argument("is_iframe", "false")
         token         = xutils.get_argument("token", "")
@@ -282,16 +283,16 @@ class ViewHandler:
 
         pathlist = NOTE_DAO.list_path(file)
         can_edit = (file.creator == user_name) or (user_name == "admin")
-        role     = xauth.get_current_role()
 
         # 定义一些变量
         recent_created = []
         show_recommend = False
-        next_note      = None
-        prev_note      = None
 
         event_ctx = Storage(id = file.id, user_name = user_name)
         xmanager.fire("note.view", event_ctx)
+
+        # 通用的预处理
+        view_func_before(file, kw)
 
         view_func = VIEW_FUNC_DICT.get(file.type, view_or_edit_md_func)
         view_func(file, kw)

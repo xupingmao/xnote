@@ -29,8 +29,8 @@
 
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
-<div id="app" class="content card">
 
+<div class="card">
   <div class="note-header card-title">
     <span class="note-header-span">{{title}}</span>
 
@@ -51,9 +51,14 @@
         {% end %}
     </div>
   </div>
-  {% include note/component/note_path.html %}
+</div>
 
-  
+<div class="card">
+  {% include note/component/note_path.html %}
+</div>
+
+
+<div id="app" class="content card">
   <div class="note-timeline-body">
     <article v-if="itemList.length == 0">
       {% include common/text/empty_text.html %}

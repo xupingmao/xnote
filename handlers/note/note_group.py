@@ -47,6 +47,7 @@ class NoteCategory:
         self.size = 0
         self.show_next = True
         self.icon = "fa-folder"
+        self.badge_info = ""
 
 class PathNode(Storage):
 

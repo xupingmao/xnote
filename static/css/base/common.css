@@ -178,12 +178,13 @@ h3.marked-heading {
 }
 
 /* 菜单的链接样式 */
-.menu-link {
+.nav-item>a, .menu-link {
     color: white;
     padding: 3px;
+    text-decoration: none;
 }
 
-.menu-link:hover {
+.nav-item>a:hover, .menu-link:hover {
     /*color: white;*/
     /*background-color: #08c;*/
     /*text-decoration: none;*/

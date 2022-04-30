@@ -1,7 +1,7 @@
 {% init plugin_category_list = xutils.call("plugin.get_category_list") %}
 {% init plugin_category = "" %}
 
-<div class="card">
+<div class="card desktop-only">
     <div class="x-tab-box" data-tab-default="all" data-tab-key="category">
         {% for category_temp in plugin_category_list %}
             {% if category_temp.is_visible() %}

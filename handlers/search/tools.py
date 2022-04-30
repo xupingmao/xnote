@@ -18,16 +18,6 @@ from xutils import text_contains, Storage, u
 SearchResult = xutils.SearchResult
 url_pattern = re.compile(r"(http|https)://[^ ]+")
 
-def search_menu(files, name):
-    for category in xconfig.MENU_LIST:
-        if category.need_login and not xauth.has_login():
-            continue
-        if category.need_admin and not xauth.is_admin():
-            continue
-        for child in category.children:
-            if text_contains(u(child.name), u(name)):
-                files.append(Storage(name = '菜单 - ' + child.name, url = child.url))
-
 @xmanager.searchable(r"([^ ]+)")
 def search(ctx):
     # six.print_(xconfig)
@@ -64,7 +54,6 @@ def search(ctx):
         f.name = "二维码"
         f.url = "/tools/qrcode?content=" + name
         files.append(f)
-    search_menu(files, name)
 
     ctx.tools += files
 

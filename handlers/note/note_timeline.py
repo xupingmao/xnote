@@ -36,7 +36,7 @@ def get_parent_link(user_name, type, priority = 0):
     if type == "public":
         return None
     return None
-    # return PathLink(T("NoteIndex"), "/note/index")
+
 
 class SystemGroup(Storage):
     def __init__(self, name, url, priority = 1, icon = "fa fa-file-text-o"):
@@ -104,6 +104,9 @@ def build_date_result(rows, orderby = 'ctime', sticky_title = False, group_title
     project_notes  = []
 
     for row in rows:
+        if row.type == "group":
+            row.url = "/note/timeline?type=default&parent_id=%s" % row.id
+
         if sticky_title and row.priority != None and row.priority > 0:
             sticky_notes.append(row)
             continue
@@ -367,14 +370,12 @@ class BaseTimelineHandler:
         title         = NOTE_TYPE_DICT.get(type, u"最新笔记")
         title_link    = None
         note_priority = 0
-        search_title  = u"笔记"
         file          = NOTE_DAO.get_by_id(parent_id)
 
         xmanager.add_visit_log(user_name, "/note/%s" % self.note_type)
         
         if file != None:
             title = T("笔记列表")
-            search_title = file.name
             title_link = PathLink(file.name, file.url)
             note_priority = file.priority
 
@@ -509,7 +510,6 @@ class DateHandler:
             search_type   = "default")
 
 xutils.register_func("note.build_date_result", build_date_result)
-# xutils.register_func("url:/note/date", DateHandler)
 
 xurls = (
     r"/note/timeline/month", DateTimelineAjaxHandler,
@@ -517,22 +517,10 @@ xurls = (
 
     # 时光轴视图
     r"/note/timeline"       , TimelineHandler,
-    # r"/note/public"         , PublicTimelineHandler,
-    # r"/note/gallery"        , GalleryListHandler,
-    # r"/note/table"          , TableListHandler,
-    # r"/note/csv"            , TableListHandler,
-    # r"/note/document"       , DocumentListHandler,
-    # r"/note/html"           , HtmlListHandler,
-    # r"/note/md"             , MarkdownListHandler,
-    # r"/note/list"           , ListNoteHandler,
     r"/note/plan"           , PlanListHandler,
-    # r"/note/log"            , LogListHandler,
-    # r"/note/sticky"         , StickyHandler,
-    # r"/note/removed"        , RemovedHandler,
     r"/project/default"     , DefaultProjectHandler,
 
     # 日期视图
-    # r"/note/date"           , DateHandler,
     r"/note/monthly"        , DateHandler,
 )
 

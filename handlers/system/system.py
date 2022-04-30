@@ -2,27 +2,16 @@
 # Created by xupingmao on 2016/10
 # @modified 2022/02/26 11:27:37
 """System functions"""
-from io import StringIO
-import codecs
-import time
 import os
-import json
-import socket
 import os
-import sys
-import threading
 
 import xconfig
-import functools
-import autoreload
 import xtemplate
 import xutils
 import xauth
 import xmanager
 import xtables
 import web
-from xtemplate import BasePlugin
-from xutils import History
 from xutils import cacheutil
 from xutils import Storage
 from xtemplate import T
@@ -155,7 +144,6 @@ class ReloadHandler:
     @xauth.login_required("admin")
     def GET(self):
         # autoreload will load new handlers
-        import autoreload
         import web
 
         runtime_id = xutils.get_argument("runtime_id")

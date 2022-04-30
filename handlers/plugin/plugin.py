@@ -2,40 +2,26 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
 # @modified 2022/03/04 23:02:45
-from io import StringIO
+from unicodedata import category
 import xconfig
-import codecs
-import time
-import functools
 import os
-import json
-import socket
 import os
-import autoreload
 import xtemplate
 import xutils
 import xauth
 import xmanager
-import xtables
 import web
 import copy
 
 from xtemplate import BasePlugin
 from xtemplate import T
-from xutils import History
-from xutils import cacheutil
 from xutils import Storage
 from xutils import fsutil
 from xutils import logutil
 from xutils import textutil, SearchResult, dateutil, dbutil, u
 from xutils import attrget
 from xutils import mem_util
-
-try:
-    from ConfigParser import ConfigParser
-except ImportError:
-    from configparser import ConfigParser
-
+from xutils.imports import ConfigParser
 
 """xnote插件模块，由于插件的权限较大，开发权限只开放给管理员，普通用户可以使用
 
@@ -101,7 +87,9 @@ class PluginCategory:
         return xauth.current_role() in self.required_roles
 
 
-def define_plugin_category(code, name, url = None, 
+def define_plugin_category(code, 
+        name, 
+        url = None, 
         raise_duplication = True, 
         required_roles = None, 
         platforms = None, 
@@ -137,9 +125,9 @@ def get_category_url_by_code(code):
     return "/plugin_list?category=%s" % code
 
 def get_category_name_by_code(code):
-    for item in PLUGIN_CATEGORY_LIST:
-        if item.code == code:
-            return item.name
+    category = get_category_by_code(code)
+    if category != None:
+        return category.name
 
     # 如果没有定义，就返回code
     return code
@@ -779,6 +767,7 @@ class PluginListHandler:
 
         context = Storage()
         context.category = category
+        context.category_name = get_category_name_by_code(category)
         context.html_title = "插件"
         context.header = header
         context.show_back = show_back
@@ -792,7 +781,6 @@ class PluginListHandler:
 
         if xauth.is_admin():
             if key != "" and key != None:
-                recent  = []
                 plugins = search_plugins(key)
                 context.show_category = False
                 context.show_back = "true"
@@ -801,7 +789,6 @@ class PluginListHandler:
                 plugins  = list_plugins(category, orderby = orderby)
         else:
             # 普通用户插件访问
-            recent = []
             user_role = xauth.current_role()
             plugins = list_plugins(category)
             plugins = filter_plugins_by_role(plugins, user_role)
@@ -1030,6 +1017,7 @@ define_plugin_category("datetime", u"日期和时间", platforms = [], icon_clas
 define_plugin_category("work",     u"工作", platforms = ["desktop"], icon_class = "icon-work")
 define_plugin_category("index",    u"分类", url = "/plugin_category_list?category=index", icon_class = "fa fa-th-large")
 define_plugin_category("inner",    u"内置工具", platforms = [])
+define_plugin_category("money",    u"理财", platforms = ["desktop"])
 define_plugin_category("test",     u"测试", platforms = [])
 define_plugin_category("other",    u"其他", platforms = [])
 

@@ -99,12 +99,7 @@
             {% end %}
 
             {% comment 新的统一使用badge_info %}
-            {% if hasattr(item, "badge_info") and item.badge_info != None %}
-                <span class="book-size-span">{{item.badge_info}}</span>
-            {% else %}
-                {% comment 兼容老的展示逻辑 %}
-                {% include note/component/note_list_com_sub.html %}
-            {% end %}
+            <span class="book-size-span">{{item.badge_info}}</span>
 
             {% if item.show_next or show_next %}
                 <i class="fa fa-chevron-right"></i>

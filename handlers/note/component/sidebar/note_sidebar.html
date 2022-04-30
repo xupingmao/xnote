@@ -27,7 +27,7 @@
 <!-- TODO: 考虑无权限用户的视图 -->
 <div class="card">
     <div class="card-title">
-        <span>其他笔记</span>
+        <span>笔记本目录</span>
     </div>
     <div class="note-sidebar-contents">
     {% for item in xutils.call("note.list_by_parent", _user_name, file.parent_id, orderby = "db") %}
