@@ -7,9 +7,7 @@
 2、文件操作，比如读写文件，创建目录
 """
 
-import codecs
 import os
-import sys
 import platform
 import xutils
 import base64
@@ -91,8 +89,10 @@ def get_relative_path(path, parent):
     @param {str} parent 父级文件路径
     @return {str} 相对路径
     
-        >>> get_relative_path('/users/xxx/test/hello.html', '/users/xxx')
-        'test/hello.html'
+    >>> get_relative_path('/users/xxx/test/hello.html', '/users/xxx')
+    'test/hello.html'
+    >>> get_relative_path('/tmp/test.html', '/tmp/test.html')
+    ''
     """
     path1 = os.path.abspath(path)
     parent1 = os.path.abspath(parent)
@@ -104,7 +104,7 @@ def get_relative_path(path, parent):
     # 需要除去第一个/
     relative_path = path1[len(parent1):]
     relative_path = relative_path.replace("\\", "/")
-    if relative_path[0] == "/":
+    if relative_path.startswith("/"):
         relative_path = relative_path[1:]
     return relative_path
 

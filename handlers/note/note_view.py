@@ -2,9 +2,7 @@
 # @author xupingmao
 # @since 2016/12
 # @modified 2022/04/22 23:44:25
-import profile
 import math
-import re
 import web
 import os
 
@@ -17,10 +15,9 @@ import xmanager
 from web import HTTPError
 
 from xconfig import Storage
-from xutils import History
-from xutils import dbutil
 from xutils import fsutil
 from xutils import textutil
+from xutils import webutil
 from xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
 
@@ -56,13 +53,6 @@ def check_auth(file, user_name):
     
     raise web.seeother("/unauthorized")
 
-def handle_left_dir(kw, user_name, file, op):
-    is_iframe = xutils.get_argument("is_iframe")
-    dir_type = xutils.get_argument("dir_type")
-    tags = xutils.get_argument("tags")
-
-    if file.type in ("html", "csv"):
-        kw.show_aside = False
 
 def handle_note_recommend(kw, file, user_name):
     ctx = Storage(id=file.id, name = file.name, creator = file.creator, 
@@ -121,6 +111,9 @@ def view_or_edit_md_func(file, kw):
     if kw.op == "edit" and device == "mobile":
         # 强制使用移动端编辑器
         kw.template_name = "note/component/editor/markdown_edit.mobile.html"
+    
+    if kw.op == "edit" and webutil.is_mobile_client():
+        kw.show_nav = False
 
 def view_group_timeline_func(note, kw):
     raise web.found("/note/timeline?type=default&parent_id=%s" % note.id)
@@ -286,7 +279,6 @@ class ViewHandler:
 
         # 定义一些变量
         recent_created = []
-        show_recommend = False
 
         event_ctx = Storage(id = file.id, user_name = user_name)
         xmanager.fire("note.view", event_ctx)
@@ -297,10 +289,6 @@ class ViewHandler:
         view_func = VIEW_FUNC_DICT.get(file.type, view_or_edit_md_func)
         view_func(file, kw)
 
-        if show_recommend and user_name is not None:
-            # 推荐系统
-            handle_note_recommend(kw, file, user_name)
-        
         if op == "edit":
             kw.show_aside = False
             kw.show_search = False
@@ -315,9 +303,6 @@ class ViewHandler:
 
         kw.file = file
         kw.can_edit = can_edit
-
-        # 如果是页面，需要查出上级目录列表
-        handle_left_dir(kw, user_name, file, op)
         
         # 处理目录按钮的展示
         self.handle_contents_btn(kw)
@@ -415,21 +400,6 @@ class HistoryViewHandler:
         return dict(code = "success", data = content)
 
 
-class NoticeHandler:
-    """TODO 提醒的功能重新基于数据库来实现"""
-
-    @xauth.login_required()
-    def GET(self):
-        # 刷新提醒,上下文为空
-        user_name = xauth.current_name()
-        offset    = 0
-        limit     = 200
-        orderby   = "ctime_desc"
-
-        xmanager.fire("notice.update")
-        # files  = NOTE_DAO.list_by_type(user_name, "list", offset, limit, orderby)
-        return xtemplate.render("note/page/notice.html")
-
 class QueryHandler:
 
     @xauth.login_required("admin")
@@ -450,7 +420,6 @@ class GetDialogHandler:
         kw.file = file
 
     def get_share_group_dialog(self, kw):
-        user_name = xauth.current_name()
         note_id = xutils.get_argument("note_id")
         file    = NOTE_DAO.get_by_id(note_id)
         kw.file = file
@@ -460,7 +429,6 @@ class GetDialogHandler:
             kw.share_to_list = NOTE_DAO.list_share_by_note_id(file.id)
 
     def get_share_note_dialog(self, kw):
-        user_name = xauth.current_name()
         note_id = xutils.get_argument("note_id")
         file    = NOTE_DAO.get_by_id(note_id)
         kw.file = file
@@ -487,7 +455,6 @@ xurls = (
     r"/note/view/([\w\-]+)", ViewByIdHandler,
     r"/note/history"       , NoteHistoryHandler,
     r"/note/history_view"  , HistoryViewHandler,
-    r"/note/notice"        , NoticeHandler,
     r"/note/query/(\w+)"   , QueryHandler,
     r"/note/ajax/(.+)"     , GetDialogHandler,
     r"/file/mark"          , MarkHandler,

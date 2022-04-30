@@ -15,20 +15,19 @@
 <!-- POST会被GET参数覆盖 -->
 <form method="GET">
     <input type="text" name="count" class="hide" value="on">
+    <input type="text" name="path" class="hide" value="{{path}}">
     <table class="no-border-table">
         <tr>
-            <td>路径</td>
-            <td><textarea cols="100" name="path">{{path}}</textarea></td>
-        </tr>
-        <tr>
             <td>包含内容</td>
-            <td><textarea cols="100" name="filter_text">{{filter_text}}</textarea></td>
+            <td>
+                <textarea cols="100" name="filter_text">{{filter_text}}</textarea>
+            </td>
         </tr>
         <tr>
             <td>黑名单</td>
             <td>
-                <p style="color: red;">*匹配任意字符，比如lib/*, 一行一个规则</p>
-                <textarea name="blacklist" cols=100>{{blacklist}}</textarea>
+                <div class="input-help-text" style="color: red;">*匹配任意字符，比如lib/*, 一行一个规则</div>
+                <textarea name="blacklist" cols=100 autoheight>{{blacklist}}</textarea>
             </td>
         <tr>
             <td>类型</td>
@@ -47,7 +46,6 @@
         <tr>
             <td>行数排序</td>
             <td><input type="checkbox" name="lines_sort" default-value="{{lines_sort}}"/></td>
-
         </tr>
     </table>
     <button>统计</button>

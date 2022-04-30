@@ -55,7 +55,7 @@ def get_argument(key, default_value=None, type = None, strip=False):
         return default_value
     if type == bool:
         # bool函数对非空字符串都默认返回true，需要处理一下
-        value = value in ("true", "True", "yes", "Y", "on")
+        value = value.lower() in ("true", "yes", "y", "on")
         _input[key] = value
     elif type != None:
         value = type(value)
@@ -84,6 +84,9 @@ def get_client_platform(user_agent = None):
 
 
 def is_mobile_client(user_agent = None):
+    """通过UA判断是否是移动客户端
+    @param {str|None} user_agent 浏览器标识（可选）
+    """
     return get_client_platform(user_agent) == "mobile"
 
 

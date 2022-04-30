@@ -18,12 +18,12 @@ def update_version():
 		fp.write(version + "\n")
 
 
-def check_and_install_pkg(pkg, version = ""):
+def check_and_install_pkg(py_module, pip_version = ""):
 	try:
-		__import__(pkg)
+		__import__(py_module)
 	except ImportError:
-		print("准备安装:", pkg, version)
-		os.system("python3 -m pip install %s%s" % (pkg, version))
+		print("准备安装:", pip_version)
+		os.system("python3 -m pip install %s" % pip_version)
 
 def run_test(target = None):
 
@@ -31,7 +31,7 @@ def run_test(target = None):
 		os.system("python3 -m pytest tests/test_xutils_db.py --doctest-modules --cov xutils.db --capture no")
 		os.system("python3 -m coverage html")
 	else:
-		os.system("python3 -m pip install pytest==5.1.0")
+		check_and_install_pkg("pytest", "pytest==5.1.0")
 		os.system("python3 -m pip install pytest-cov==2.7.1")
 		os.system("python3 -m pip install python-coveralls==2.9.3")
 		os.system("python3 -m pip install coverage==4.5.4")

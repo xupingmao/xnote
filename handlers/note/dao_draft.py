@@ -22,14 +22,8 @@ def do_edit():
 """
 
 import time
-import logging
-
-import xauth
 import xutils
-import xmanager
-import xconfig
 from xutils import dbutil
-from xutils import dateutil
 from xutils import Storage
 
 NOTE_DAO = xutils.DAO("note")
@@ -57,6 +51,10 @@ def lock_for_edit(note_id, token):
     return token == lock_info.token
 
 def save_draft(note_id, content):
+    """
+    @param {string} note_id 笔记ID
+    @param {string} content 笔记内容
+    """
     assert isinstance(note_id, str)
     assert isinstance(content, str)
 

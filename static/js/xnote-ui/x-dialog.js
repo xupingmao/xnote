@@ -77,6 +77,7 @@ xnote.showDialogExInner = function (options) {
     var functions = options.functions;
     var anim = options.anim;
     var closeBtn = options.closeBtn;
+    var onOpenFn = options.onOpenFn;
 
     // 详细文档 https://www.layui.com/doc/modules/layer.html
     // @param {int} anim 动画的参数
@@ -93,36 +94,34 @@ xnote.showDialogExInner = function (options) {
         functions = [functions];
     }
 
-    if (buttons == undefined) {    
-        return layer.open({
-            type: 1,
-            title: title,
-            shadeClose: true,
-            closeBtn: closeBtn,
-            area: area,
-            content: html,
-            anim: anim,
-            // scrollbar是弹层本身的滚动条，不是整个页面的
-            scrollbar: false
-        });
-    } else {
-        return layer.open({
-            type: 1,
-            title: title,
-            shadeClose: true,
-            closeBtn: closeBtn,
-            area: area,
-            content: html,
-            scrollbar: false,
-            btn: buttons,
-            anim: anim,
-            yes: function (index, layero) {
-                console.log(index, layero);
-                layer.close(index);
-                functions[0](index, layero);
-            }
-        });
+    var params = {
+        type: 1,
+        title: title,
+        shadeClose: true,
+        closeBtn: closeBtn,
+        area: area,
+        content: html,
+        anim: anim,
+        // scrollbar是弹层本身的滚动条，不是整个页面的
+        scrollbar: false
     }
+
+    if (buttons !== undefined) {
+        params.btn = buttons
+        params.yes = function (index, layero) {
+            console.log(index, layero);
+            layer.close(index);
+            functions[0](index, layero);
+        }
+    }
+
+    var index = layer.open(params);
+
+    // 打开对话框的回调
+    if (onOpenFn) {
+        onOpenFn(index);
+    }
+    return index
 }
 
 xnote.showDialog = function(title, html, buttons, functions) {
@@ -143,19 +142,43 @@ xnote.showTextDialog = function(title, text, buttons, functions) {
     return xnote.showDialogEx(options);
 }
 
-xnote.showAjaxDialog = function(title, url, buttons, functions) {
-    $.get(url, function (resp) {
-        var options = {};
-        options.title = title;
-        options.buttons = buttons;
-        options.functions = functions;
+/**
+ * 打开ajax对话框
+ * @param {object} options 打开选项
+ */
+xnote.openAjaxDialogEx = function (options) {
+    $.get(options.url, function (resp) {
         options.html = resp;
-        var index = xnote.showDialogEx(options);
+        xnote.showDialogEx(options);
         // 刷新各种组件的默认值
         xnote.refresh();
     }).fail(function (error) {
         xnote.alert("调用接口失败，请重试");
-    })
+    });
+}
+
+/**
+ * 打开ajax对话框
+ * @param {string} title 对话框标题
+ * @param {string} url 对话框URL
+ * @param {list<string>} buttons 按钮名称
+ * @param {list<function>} functions 按钮对应的函数
+ * @param {function} onOpenFn 产生对话框的回调函数
+ */
+xnote.openAjaxDialog = function(title, url, buttons, functions, onOpenFn) {
+    var options = {};
+    options.title = title;
+    options.buttons = buttons;
+    options.functions = functions;
+    options.onOpenFn = onOpenFn;
+    options.url = url;
+    
+    return xnote.openAjaxDialogEx(options);
+}
+
+// 函数别名
+xnote.showAjaxDialog = function () {
+    return xnote.openAjaxDialog.apply(this, arguments);
 }
 
 // 询问函数，原生prompt的替代方案

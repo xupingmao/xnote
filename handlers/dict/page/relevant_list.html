@@ -1,0 +1,76 @@
+{# <!--
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-04-30 12:39:20
+@LastEditors  : xupingmao
+@LastEditTime : 2022-04-30 14:03:51
+@FilePath     : /xnote/handlers/dict/page/relevant_list.html
+--> #}
+
+{% extends base %}
+{% block body_top %}
+
+<div class="card">
+    <div class="card-title">
+        <span>相关词词库</span>
+        <div class="float-right">
+            {% include common/button/back_button.html %}
+        </div>
+    </div>
+</div>
+
+{% end %}
+
+{% block body_left %}
+
+{% init files = [] %}
+
+<div class="card">
+
+    <div class="grid-row note-list">
+        {% if len(files) == 0 %}
+            {% include common/text/empty_text.html %}
+        {% end %}
+
+        {% for item in files %}
+            <a class="dialog-link" href="{{item.url}}">
+                <div class="book-item">
+                    <span>{{item.name}}</span>
+                    <span class="dict-list-value">{{item.value}}</span>
+                    <span class="book-size">
+                        <i class="fa fa-chevron-right"></i>
+                    </span>
+                </div>
+            </a>
+        {% end %}
+    </div>
+
+</div>
+
+
+<!-- 分页 -->
+{% if "page" in globals() %}
+    <div class="card">
+        {% include mod_pagenation.html %}
+    </div>
+{% end %}
+
+{% end %}
+
+{% block body_right %}
+    <div class="list card">
+        <a class="list-item add-relevant-word">新增相关词</a>
+    </div>
+
+    <script type="text/javascript">
+    $(function () {
+        $(".add-relevant-word").click(function (e) {
+            xnote.openRelevantEditDialog("");
+        });
+    });
+
+    xnote.openRelevantEditDialog = function (key) {
+        xnote.openAjaxDialog("新增相关词", "/dict/relevant/edit_dialog?key=" + encodeURIComponent(key));
+    };
+    </script>
+{% end %}

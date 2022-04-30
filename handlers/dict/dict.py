@@ -10,6 +10,7 @@ import xconfig
 import xmanager
 import math
 from xutils import Storage, encode_uri_component
+from xutils.imports import is_str
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 
@@ -23,7 +24,7 @@ def escape_sqlite_text(text):
     return text
 
 def search_escape(text):
-    if not (isinstance(text, str) or isinstance(text, unicode)):
+    if not is_str(text):
         return text
     text = escape_sqlite_text(text)
     return "'%" + text + "%'"

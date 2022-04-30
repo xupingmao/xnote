@@ -1,0 +1,25 @@
+{# <!--
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-04-30 13:06:53
+@LastEditors  : xupingmao
+@LastEditTime : 2022-04-30 13:27:45
+@FilePath     : /xnote/handlers/dict/ajax/relevant_edit_dialog.html
+--> #}
+
+<div class="card">
+   
+    <input name="key" class="nav-search-input relevant-search-key" placeholder="搜索相关词" value="{{?key}}" />
+    <button class="nav-search-btn btn-default" onclick="xnote.onSearchRelevantKey()">
+        <i class="fa fa-search">
+        </i>
+    </button>
+
+</div>
+
+<script type="text/javascript">
+xnote.onSearchRelevantKey = function() {
+    var key = $(".relevant-search-key").val();
+    xnote.openRelevantEditDialog(key);
+}
+</script>

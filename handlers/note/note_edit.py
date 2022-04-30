@@ -365,6 +365,7 @@ def update_and_notify(file, update_kw):
 
     rowcount = NOTE_DAO.update(file.id, **update_kw)
     if rowcount > 0:
+        NOTE_DAO.save_draft(file.id, "") # 清空草稿
         fire_update_event(file)
     else:
         # 更新冲突了
@@ -380,8 +381,6 @@ class SaveAjaxHandler:
         type    = xutils.get_argument("type")
         version = xutils.get_argument("version", 0, type=int)
         edit_token = xutils.get_argument("edit_token", "")
-        name    = xauth.get_current_name()
-        where   = None
 
         try:
             file = check_get_note(id)
@@ -584,6 +583,7 @@ class TouchHandler:
 class DraftHandler:
     """保存草稿功能"""
 
+    @xauth.login_required()
     def POST(self):
         action = xutils.get_argument("action")
         note_id = xutils.get_argument("id")
@@ -605,7 +605,7 @@ class DraftHandler:
         if action == "steal_lock":
             NOTE_DAO.steal_edit_lock(note_id, token, time.time() + EDIT_LOCK_EXPIRE)
             draft_content = NOTE_DAO.get_draft(note_id)
-            if draft_content == None:
+            if draft_content == None or draft_content == "":
                 draft_content = note.content
             return dict(code = "success", data = draft_content)
 

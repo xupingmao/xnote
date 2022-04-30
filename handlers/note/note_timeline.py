@@ -6,10 +6,8 @@
 import re
 import xauth
 import xutils
-import xtables
 import xtemplate
 import time
-import xconfig
 import web
 from xutils import Storage, dateutil, textutil
 from xutils.textutil import split_words
