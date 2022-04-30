@@ -4,6 +4,7 @@
 # @modified 2022/04/05 21:15:18
 # @filename dbutil_hash.py
 
+from xutils.cacheutil import encode_key
 from xutils.dbutil_base import *
 from xutils.db.encode import encode_str, decode_str
 
@@ -84,5 +85,10 @@ class LdbHashTable:
         else:
             delete(row_key)
 
-    def count(self):
-        return count_table(self.prefix)
+    def count(self, prefix = None):
+        if prefix != None:
+            key_prefix = self.prefix + encode_key(prefix)
+        else:
+            key_prefix = self.prefix
+
+        return count_table(key_prefix)

@@ -10,9 +10,9 @@ import xtemplate
 from xtemplate import T
 from xutils import dbutil
 from xutils import format_size
+from .fs_helpers import get_index_db
 
 dbutil.register_table("fs_index", "文件索引")
-_index_db = dbutil.get_hash_table("fs_index")
 
 def get_grid_page(mode, kw):
     return xtemplate.render("fs/page/fs_grid.html", **kw)
@@ -25,11 +25,12 @@ def get_sidebar_page(mode, kw):
     return xtemplate.render("fs/page/fs_sidebar.html", **kw)
 
 def get_size_page(mode, kw):
+    db = get_index_db()
     filelist = kw.filelist
     for file in filelist:
         fpath = file.path
         fpath = os.path.abspath(fpath)
-        info = _index_db.get(fpath)
+        info = db.get(fpath)
         if info != None:
             file.fsize = info.fsize
             file.size = format_size(info.fsize)

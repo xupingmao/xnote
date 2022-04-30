@@ -19,7 +19,7 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 -----
 ## 项目地址
 - [github](https://github.com/xupingmao/xnote)
-- [码云](https://gitee.com/xupingmao/xnote)
+- [gitee](https://gitee.com/xupingmao/xnote)
 
 
 ## 安装运行

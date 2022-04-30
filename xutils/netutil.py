@@ -1,7 +1,18 @@
+# -*- coding:utf-8 -*-
 # encoding=utf-8
 # @modified 2021/11/28 19:47:17
 # decode: bytes -> str
 # encode: str -> bytes
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2021/11/28 19:47:17
+@LastEditors  : xupingmao
+@LastEditTime : 2022-04-30 18:10:35
+@FilePath     : /xnote/xutils/netutil.py
+"""
+
+from audioop import add
 import os
 import re
 import codecs
@@ -57,7 +68,7 @@ def get_http_url(url):
         url = "http://" + url
     return url.split("#")[0]
 
-def get_host(url):
+def get_host_by_url(url):
     """
         >>> get_host("http://www.baidu.com/index.html")
         'www.baidu.com'
@@ -67,6 +78,19 @@ def get_host(url):
     if m and m.groups():
         return m.groups()[0]
     return None
+
+def get_host(url):
+    return get_host_by_url(url)
+
+
+def get_local_ip_by_socket():
+    """使用UDP协议获取当前的局域网地址
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.connect(("128.0.0.1", 80)) # 随便一个有效的IP地址即可
+        host, port = s.getsockname()
+        return host
+
 
 class HttpResource:
 
@@ -114,11 +138,15 @@ class HttpResponse:
 def do_http(method, url, headers, data = None, charset = 'utf-8'):
     """使用低级API访问HTTP，可以任意设置header，data等
     """
-    addr = get_host(url)
+    addr = get_host_by_url(url)
+    if addr == None:
+        raise Exception("invalid url (%s)" % url)
+
     if url.startswith("https://"):
         conn = six.moves.http_client.HTTPSConnection(addr)
     else:
         conn = six.moves.http_client.HTTPConnection(addr)
+
     headers = headers or dict()
     if "User-Agent" not in headers:
         headers["User-Agent"] = USER_AGENT
@@ -267,5 +295,3 @@ def tcp_send(domain, port, content, timeout=1, on_recv_func=None):
     finally:
         conn.close()
     return b''.join(result)
-
-

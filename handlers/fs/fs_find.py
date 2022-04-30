@@ -4,20 +4,18 @@
 # @modified 2022/04/10 23:56:20
 import os
 import sys
-import glob
+
 import xutils
 import xauth
 import xtemplate
 import xconfig
-import xmanager
-import time
 from fnmatch import fnmatch
 from xutils import dbutil
 from xutils import Storage
-from .fs_index import build_fs_index
+
+from .fs_helpers import get_index_db
 
 dbutil.register_table("fs_index", "文件索引")
-_index_db = dbutil.get_hash_table("fs_index")
 
 FS = xutils.Module("fs")
 
@@ -26,17 +24,10 @@ def get_fpath_from_key(key):
     return key[left:]
 
 def clear_file_index():
-    for key, value in _index_db.iter(limit = -1):
+    index_db = get_index_db()
+    for key, value in index_db.iter(limit = -1):
         # key的格式为 fs_index:fpath
-        _index_db.delete(key)
-
-def update_file_index():
-    # 创建新的索引
-    build_fs_index(xconfig.DATA_DIR)
-
-    # 构建外部索引目录的索引
-    for dirname in get_index_dirs():
-        build_fs_index(dirname)
+        index_db.delete(key)
 
 def find_in_cache0(key):
     input_key = key.upper()
@@ -104,49 +95,6 @@ class SearchHandler:
 
         return xtemplate.render(tpl, **kw)
 
-class IndexHandler:
-    """文件索引管理"""
-
-    @xauth.login_required("admin")
-    def GET(self):
-        user_name = xauth.current_name()
-        xmanager.add_visit_log(user_name, "/fs_index")
-
-        tpl = "fs/page/fs_index.html"
-        index_size = _index_db.count()
-        return xtemplate.render(tpl, 
-            index_dirs = get_index_dirs(),
-            index_size = index_size)
-
-    @xauth.login_required("admin")
-    def POST(self):
-        tpl = "fs/page/fs_index.html"
-        index_dirs = get_index_dirs()
-        cost = 0
-
-        action = xutils.get_argument("action")
-        if action == "reindex":
-            t1 = time.time()
-            update_file_index()
-            t2 = time.time()
-            cost = (t2-t1)*1000
-
-
-        if action == "config":
-            index_config = xutils.get_argument("index_config")
-            xauth.update_user_config(xauth.current_name(), "index_dirs", index_config)
-            index_dirs = get_index_dirs()
-        
-        index_size = _index_db.count()
-        return xtemplate.render(tpl, 
-            index_dirs = index_dirs,
-            index_size = index_size,
-            action = action, 
-            cost = cost)
-
-xutils.register_func("fs.get_index_dirs", get_index_dirs)
-
 xurls = (
     r"/fs_find", SearchHandler,
-    r"/fs_index", IndexHandler,
 )

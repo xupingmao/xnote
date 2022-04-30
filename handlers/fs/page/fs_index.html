@@ -11,7 +11,9 @@ p {
 {% block body %}
 
 {% init action = "" %}
+{% init path = "" %}
 {% init index_size = 0 %}
+{% init show_index_dirs = True %}
 
 <div class="card">
     <div class="card-title">
@@ -27,17 +29,26 @@ p {
     <p>索引数量: {{index_size}}</p>
 
     {% if action == "reindex" %}
-    <p>重建索引耗时: {{"%.2f"%cost}}秒</p>
+        <p>重建索引耗时: {{"%.2f"%cost}}秒</p>
     {% end %}
     
     <div class="row">
         <form method="POST">
             <input type="hidden" name="action" value="reindex">
-            <button>重建索引</button>
+            {% if path != "" %}
+            <div class="row">
+                <label>文件路径</label>
+                <input type="path" name="path" value="{{path}}">
+            </div>
+            {% end %}
+            <div class="row">
+                <button>重建索引</button>
+            </div>
         </form>
     </div>
 </div>
 
+{% if show_index_dirs %}
 <div class="card">
     <div class="card-title">
         <span>索引目录</span>
@@ -49,6 +60,7 @@ p {
     <input type="hidden" name="action" value="config">
     <button class="update-index-dirs">更新索引目录</button>
 </div>
+{% end %}
 
 <script type="text/javascript">
     $(function () {

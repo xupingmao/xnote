@@ -37,7 +37,14 @@
                 <a class="dropdown-option" href="/fs/{{quoted_path}}?mode=grid">网格视图</a>
                 <a class="dropdown-option" href="javascript:openByNative()">本地浏览</a>
                 <a class="dropdown-option" href="javascript:openTerminal()">打开终端</a>
-                <a class="dropdown-option" href="/fs/{{quoted_path}}?mode=size">磁盘整理</a>
+            </div>
+        </div>
+
+        <div class="dropdown desktop-only">
+            <span class="dropdown-btn link btn">排序▾</span>
+            <div class="dropdown-content">
+                <a class="dropdown-option" href="/fs/{{quoted_path}}?mode=list">默认排序</a>
+                <a class="dropdown-option" href="/fs/{{quoted_path}}?mode=size">文件大小倒序</a>
             </div>
         </div>
 
@@ -49,6 +56,7 @@
                 <a class="dropdown-option" href="/code/lines?path={{xutils.quote(path)}}&recursive=on">代码统计</a>
                 <a class="dropdown-option" href="/fs/{{path}}?show_hidden_files=true">显示隐藏文件</a>
                 <a class="dropdown-option" id="addToBookmarkBtn">收藏</a>
+                <a class="dropdown-option" href="/fs_index?p=rebuild&path={{xutils.quote(path)}}" target="_blank">重建索引</a>
 
                 <!-- 移动端选项 -->
                 <a class="dropdown-option delete-btn mobile-only">删除</a>
