@@ -78,6 +78,7 @@ xnote.showDialogExInner = function (options) {
     var anim = options.anim;
     var closeBtn = options.closeBtn;
     var onOpenFn = options.onOpenFn;
+    var shadeClose = xnote.getOrDefault(options.shadeClose, true)
 
     // 详细文档 https://www.layui.com/doc/modules/layer.html
     // @param {int} anim 动画的参数
@@ -97,7 +98,7 @@ xnote.showDialogExInner = function (options) {
     var params = {
         type: 1,
         title: title,
-        shadeClose: true,
+        shadeClose: shadeClose,
         closeBtn: closeBtn,
         area: area,
         content: html,
@@ -147,8 +148,12 @@ xnote.showTextDialog = function(title, text, buttons, functions) {
  * @param {object} options 打开选项
  */
 xnote.openAjaxDialogEx = function (options) {
+    var respFilter = xnote.getOrDefault(options.respFilter, function (resp) {
+        return resp;
+    });
+
     $.get(options.url, function (resp) {
-        options.html = resp;
+        options.html = respFilter(resp);
         xnote.showDialogEx(options);
         // 刷新各种组件的默认值
         xnote.refresh();
@@ -163,14 +168,12 @@ xnote.openAjaxDialogEx = function (options) {
  * @param {string} url 对话框URL
  * @param {list<string>} buttons 按钮名称
  * @param {list<function>} functions 按钮对应的函数
- * @param {function} onOpenFn 产生对话框的回调函数
  */
-xnote.openAjaxDialog = function(title, url, buttons, functions, onOpenFn) {
+xnote.openAjaxDialog = function(title, url, buttons, functions) {
     var options = {};
     options.title = title;
     options.buttons = buttons;
     options.functions = functions;
-    options.onOpenFn = onOpenFn;
     options.url = url;
     
     return xnote.openAjaxDialogEx(options);
@@ -196,6 +199,7 @@ xnote.prompt = function(title, defaultValue, callback) {
             layer.close(index);
         })
     } else {
+        // 使用系统默认的prompt
         var result = prompt(title, defaultValue);
         callback(result);
     }

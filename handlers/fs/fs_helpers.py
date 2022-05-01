@@ -13,10 +13,10 @@ import xconfig
 import xauth
 import xconfig
 from xutils import dbutil
-from xutils import FileItem, u, Storage, fsutil
+from xutils import FileItem
 
+dbutil.register_table("fs_index", "文件索引")
 _index_db = dbutil.get_hash_table("fs_index")
-
 
 def get_index_db():
     return _index_db

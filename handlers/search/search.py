@@ -4,11 +4,6 @@
 # @modified 2022/04/16 18:03:13
 
 import re
-import os
-import sys
-import copy
-import json
-import base64 
 import time
 import math
 import six
@@ -18,9 +13,8 @@ import xconfig
 import xauth
 import xmanager
 import xtemplate
-import xtables
 from xutils import textutil, u
-from xutils import Queue, Storage
+from xutils import Storage
 from xutils import dateutil
 from xutils import mem_util
 from xtemplate import T
@@ -441,6 +435,7 @@ def do_reload_search(ctx = None):
     register_search_handler("note", placeholder = u"搜索笔记", action = "/search")
     register_search_handler("comment", placeholder = u"搜索评论")
     register_search_handler("default", placeholder = u"综合搜索", action = "/search")
+    register_search_handler("relevant_word", placeholder=u"搜索单词", action = "/dict/relevant/list")
 
 class SearchDialogAjaxHandler:
 

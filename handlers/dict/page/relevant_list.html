@@ -1,13 +1,28 @@
-{# <!--
+{#
+<!--
 @Author       : xupingmao
 @email        : 578749341@qq.com
 @Date         : 2022-04-30 12:39:20
 @LastEditors  : xupingmao
-@LastEditTime : 2022-04-30 14:03:51
+@LastEditTime : 2022-04-30 23:27:00
 @FilePath     : /xnote/handlers/dict/page/relevant_list.html
 --> #}
 
 {% extends base %}
+
+{% block head %}
+<style>
+    .word-info {
+        display: inline-block;
+        width: 100px;
+    }
+    .word-others {
+        margin-left: 10px;
+        display: inline;
+    }
+</style>
+{% end %}
+
 {% block body_top %}
 
 <div class="card">
@@ -23,25 +38,29 @@
 
 {% block body_left %}
 
-{% init files = [] %}
+{% init words = [] %}
 
 <div class="card">
 
-    <div class="grid-row note-list">
-        {% if len(files) == 0 %}
-            {% include common/text/empty_text.html %}
+    <div class="list">
+        {% if len(words) == 0 %}
+        {% include common/text/empty_text.html %}
         {% end %}
 
-        {% for item in files %}
-            <a class="dialog-link" href="{{item.url}}">
-                <div class="book-item">
-                    <span>{{item.name}}</span>
-                    <span class="dict-list-value">{{item.value}}</span>
-                    <span class="book-size">
-                        <i class="fa fa-chevron-right"></i>
-                    </span>
-                </div>
-            </a>
+        {% for item in words %}
+        <div class="list-item">
+            <span class="word-info">{{item.word}}</span>
+            <div class="word-others">
+                <span>相关单词</span>
+                {% for o in item.others %}
+                <span class="tag info">{{o}}</span>
+                {% end %}
+            </div>
+            <span class="book-size">
+                <button class="btn btn-danger delete-word-btn" data-word="{{item.word}}">删除</button>
+                <i class="fa fa-chevron-right"></i>
+            </span>
+        </div>
         {% end %}
     </div>
 
@@ -50,27 +69,70 @@
 
 <!-- 分页 -->
 {% if "page" in globals() %}
-    <div class="card">
-        {% include mod_pagenation.html %}
-    </div>
+<div class="card">
+    {% include mod_pagenation.html %}
+</div>
 {% end %}
 
 {% end %}
 
 {% block body_right %}
-    <div class="list card">
-        <a class="list-item add-relevant-word">新增相关词</a>
-    </div>
+<div class="list card">
+    <a class="list-item add-relevant-word">新增相关词</a>
+</div>
 
-    <script type="text/javascript">
+<script type="text/javascript">
     $(function () {
         $(".add-relevant-word").click(function (e) {
             xnote.openRelevantEditDialog("");
         });
+
+        $(".delete-word-btn").click(function (e) {
+            var word = $(e.target).attr("data-word");
+            xnote.confirm("确定要删除[" + word + "]吗?", function () {
+                $.post("/dict/relevant/delete", {word:word}, function (resp) {
+                    if (resp.code == "success") {
+                        xnote.toast("删除成功");
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 500);
+                    } else {
+                        xnote.alert("删除失败:" + resp.message);
+                    }
+                });
+            })
+        });
+
+        function getDialogURL(key) {
+            return "/dict/relevant/edit_dialog?key=" + encodeURIComponent(key);
+        }
+
+        xnote.openRelevantEditDialog = function (key) {
+            xnote.prompt("添加相关词", "", function (inputText) {
+                var params = {
+                    "words": inputText
+                };
+                $.post("/dict/relevant/add_words", params, function (resp) {
+                    if (resp.code == "success") {
+                        xnote.toast("添加成功");
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 500);
+                    } else {
+                        xnote.alert("添加失败:" + resp.message);
+                    }
+                });
+            });
+        };
+
+        xnote.updateRelevantEditDialog = function (key) {
+            var url = getDialogURL(key);
+            $.get(url, function (resp) {
+                $("relevant-edit-box").html(resp);
+            });
+        }
+
     });
 
-    xnote.openRelevantEditDialog = function (key) {
-        xnote.openAjaxDialog("新增相关词", "/dict/relevant/edit_dialog?key=" + encodeURIComponent(key));
-    };
-    </script>
+</script>
 {% end %}

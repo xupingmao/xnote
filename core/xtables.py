@@ -500,22 +500,6 @@ def init():
         xconfig.errors.append("sqlite3依赖丢失,部分功能不可用")
         return
 
-    # init_db_wrapper(xconfig.DB_FILE)
     init_db_wrapper(xconfig.DICT_FILE)
-    # init_db_wrapper(xconfig.RECORD_FILE)
-
-    # init_user_table()
-    # init_file_table()
-    # init_tag_table()
-    # init_note_content_table()
-    # init_note_history_table()
-
-    # init_schedule_table()
-    # init_message_table()
     init_dict_table()
-    # init_storage_table()
-    # init_collection_table()
-    # init_search_rule_table()
-    # 非核心结构记录各种日志数据
-    # init_record_table()
 

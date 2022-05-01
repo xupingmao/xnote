@@ -26,10 +26,11 @@
     </div>
 </div>
 
+{% if _is_admin %}
 <div class="settings-row">
     <div class="settings-key">{{T("相关词词库")}}</div>
     <div class="settings-value">
         <a class="btn btn-default" href="/dict/relevant/list">进入</a>
     </div>
 </div>
-
+{% end %}

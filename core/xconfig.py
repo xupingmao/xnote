@@ -352,14 +352,13 @@ def init_db_config():
 
     DB_DIR       = os.path.join(DATA_DIR, "db")
     DB_PATH      = os.path.join(DATA_DIR, "data.db")
-    DICT_FILE    = os.path.join(DATA_DIR, "dictionary.db")
     RECORD_FILE  = os.path.join(DATA_DIR, "record.db")
 
     makedirs(DB_DIR)
 
     sqlite_dir = os.path.join(DB_DIR, "sqlite")
     makedirs(sqlite_dir)
-
+    DICT_FILE    = os.path.join(sqlite_dir, "dictionary.db")
 
 def init_system_version():
     from xutils import fsutil

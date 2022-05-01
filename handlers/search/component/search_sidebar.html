@@ -3,10 +3,11 @@
 @email        : 578749341@qq.com
 @Date         : 2022-04-30 10:07:51
 @LastEditors  : xupingmao
-@LastEditTime : 2022-04-30 12:56:40
+@LastEditTime : 2022-05-01 12:47:31
 @FilePath     : /xnote/handlers/search/component/search_sidebar.html
 --> #}
 
+{% set-global relevant_words = xutils.call("dict_relevant.get_relevant_words", key) %}
 
 <div class="card">
     <div class="card-title">
@@ -17,8 +18,13 @@
     </div>
 
     <div class="list">
-        <div class="list-item">
-            开发中...
-        </div>
+        {% if len(relevant_words) == 0 %}
+            <a class="list-item" href="#">暂无相关搜索</a>
+        {% end %}
+        {% for word in relevant_words %}
+        <a class="list-item" href="/search?key={{quote(word)}}&search_type={{search_type}}">
+            {{word}}
+        </a>
+        {% end %}
     </div>
 </div>

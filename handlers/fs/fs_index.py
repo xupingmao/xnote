@@ -16,11 +16,8 @@ import xconfig
 import xmanager
 import xutils
 from xutils import Storage
-from xutils import dbutil
 
 from .fs_helpers import get_index_dirs, get_index_db
-
-dbutil.register_table("fs_index", "文件索引")
 
 def calc_dir_size(db, dirname):
     dirname = os.path.abspath(dirname)

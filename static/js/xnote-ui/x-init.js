@@ -41,3 +41,10 @@ xnote.isEmpty = function (value) {
 xnote.isNotEmpty = function (value) {
     return !xnote.isEmpty(value);
 };
+
+xnote.getOrDefault = function (value, defaultValue) {
+    if (value === undefined) {
+        return defaultValue;
+    }
+    return value;
+};

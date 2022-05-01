@@ -375,11 +375,6 @@ class TestMain(BaseTestCase):
     def test_stat(self):
         self.check_OK("/note/stat")
 
-    def test_dict(self):
-        json_request("/dict/edit/name", method = "POST", data = dict(name = "name", value = u"姓名".encode("utf-8")))
-        self.check_OK("/note/dict")
-        self.check_OK("/dict/search?key=name")
-
     def test_note_search(self):
         assert_json_request_success(self, u"/note/api/timeline?type=search&key=xnote中文")
         self.check_OK(u"/search?key=test中文&category=content")

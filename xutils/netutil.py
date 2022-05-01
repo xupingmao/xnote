@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/28 19:47:17
 @LastEditors  : xupingmao
-@LastEditTime : 2022-04-30 18:10:35
+@LastEditTime : 2022-05-01 12:51:33
 @FilePath     : /xnote/xutils/netutil.py
 """
 
@@ -59,6 +59,10 @@ def get_path(web_root, web_path):
 
 
 def get_http_home(host):
+    """
+    >>> get_http_home("www.xnote.com")
+    'http://www.xnote.com'
+    """
     if not host.startswith(("http://", "https://")):
         return "http://" + host
     return host
