@@ -4,28 +4,7 @@
 # @modified 2021/07/18 19:45:09
 # @filename test_search.py
 
-import sys
-import os
-sys.path.insert(1, "lib")
-sys.path.insert(1, "core")
-import unittest
-import json
-import web
-import six
-import xmanager
-import xutils
-import xtemplate
-import xconfig
-import xtables
-from xutils import u
-from xutils import dbutil
-from xutils import dateutil
-
-# cannot perform relative import
-try:
-    import test_base
-except ImportError:
-    from tests import test_base
+from . import test_base
 
 app          = test_base.init()
 json_request = test_base.json_request
@@ -46,3 +25,15 @@ class TestMain(BaseTestCase):
         result = json_request("/search?key=1%2B2&_format=json")
         value = result['files'][0]['raw']
         self.assertEqual("1+2=3", value)
+    
+    def test_search_note(self):
+        self.check_OK("/search?search_type=note&key=test")
+    
+    def test_search_dict(self):
+        self.check_OK("/search?search_type=dict&key=test")
+    
+    def test_search_task(self):
+        self.check_OK("/search?search_type=task&key=test")
+
+    def test_search_comment(self):
+        self.check_OK("/search?search_type=comment&key=test")

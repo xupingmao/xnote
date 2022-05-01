@@ -224,6 +224,7 @@ class TestMain(BaseTestCase):
         
         logging.info("delete_share_resp:%s", delete_share_resp)
         self.assertEqual("success", delete_share_resp["code"])
+        self.check_OK("/note/share_to_me")
 
     def test_link_share(self):
         delete_note_for_test("xnote-link-share-test")
