@@ -3,7 +3,6 @@
 # @since 2018/05/25 10:52:11
 # @modified 2022/04/11 23:05:34
 from collections import deque
-from xutils.base import Storage
 from xutils.dateutil import format_time
 
 class Counter:
@@ -311,6 +310,18 @@ def safe_list(item):
     if isinstance(item, set):
         return list(item)
     return []
+
+def iter_exists(func, iter_obj):
+    """判断迭代器中是否存在
+    >>> iter_exists(lambda x:x==1, [1,2,3])
+    True
+    >>> iter_exists(lambda x:x==1, [2,3])
+    False
+    """
+    for item in iter_obj:
+        if func(item):
+            return True
+    return False
 
 if __name__ == '__main__':
     import doctest

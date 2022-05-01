@@ -321,6 +321,12 @@ class MemLogger:
         for logger in MemLogger._instances:
             if logger.is_expired():
                 del logger
+    
+    @staticmethod
+    def list_loggers():
+        loggers = [item for item in MemLogger._instances]
+        loggers.sort(key = lambda x:x.name)
+        return loggers
 
     def is_expired(self):
         if self.ttl < 0:

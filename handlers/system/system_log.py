@@ -6,7 +6,6 @@ import os
 import time
 from collections import deque
 
-import xtemplate
 import xauth
 import xutils
 import xconfig
@@ -14,6 +13,7 @@ import xmanager
 from xutils import logutil
 from xutils.imports import *
 from xtemplate import BasePlugin
+from xutils.functions import iter_exists
 
 OPTION_HTML = '''
 <script src="/static/js/base/jq-ext.js"></script>
@@ -47,10 +47,16 @@ OPTION_HTML = '''
 
     {% if log_type == "mem" %}
         {% init log_name = "" %}
+        {% init log_not_found = False %}
+
         <span>日志名称</span>
         <select value="{{log_name}}" class="logger-name-select">
             {% for logger in mem_loggers %}
                 <option value="{{logger.name}}">{{logger.name}}</option>
+            {% end %}
+
+            {% if log_not_found and log_name != "" %}
+                <option value="{{log_name}}">{{log_name}}</option>
             {% end %}
         </select>
     {% end %}
@@ -67,18 +73,21 @@ $(function () {
 </script>
 '''
 
+
 def readlines(fpath):
     if not os.path.exists(fpath):
         return []
     with open(fpath, encoding="utf-8") as fp:
         return fp.readlines()
 
-def get_log_path(date, level = "INFO"):
-    month   = "-".join(date.split("-")[:2])
+
+def get_log_path(date, level="INFO"):
+    month = "-".join(date.split("-")[:2])
     dirname = os.path.join(xconfig.LOG_DIR, month)
-    fname   = "xnote.%s.%s.log" % (date, level)
+    fname = "xnote.%s.%s.log" % (date, level)
     return os.path.join(dirname, fname)
-    
+
+
 def read_tail_lines(fpath, lines):
     if not os.path.exists(fpath):
         return []
@@ -98,8 +107,8 @@ def read_tail_lines(fpath, lines):
 
 
 class LogHandler(BasePlugin):
-    
-    title    = 'xnote系统日志'
+
+    title = 'xnote系统日志'
     # description = "查看系统日志"
     show_category = False
     category = 'system'
@@ -116,9 +125,13 @@ class LogHandler(BasePlugin):
 
     def handle_mem_log(self):
         log_name = xutils.get_argument("log_name", "")
-        for logger in logutil.MemLogger._instances:
+        loggers = logutil.MemLogger.list_loggers()
+        for logger in loggers:
             if logger.name == log_name:
                 return logger.text()
+
+        if len(loggers) > 0 and log_name == "":
+            return loggers[0].text()
 
         return "<empty>"
 
@@ -134,9 +147,8 @@ class LogHandler(BasePlugin):
         if type == "head":
             return ''.join(readlines(fpath)[:100])
 
-        return xutils.readfile(fpath, limit = 1024 * 1024)
-    
-    
+        return xutils.readfile(fpath, limit=1024 * 1024)
+
     def handle(self, content):
         user_name = xauth.current_name()
         xmanager.add_visit_log(user_name, "/system/log")
@@ -154,32 +166,23 @@ class LogHandler(BasePlugin):
 
         return ""
 
-
     def render_options(self, date):
         log_type = xutils.get_argument("log_type", "file")
-        self.writehtml(OPTION_HTML, 
-            log_type = log_type,
-            mem_loggers = logutil.MemLogger._instances,
-            info_log_path = get_log_path(date),
-            warn_log_path = get_log_path(date, "WARN"),
-            error_log_path = get_log_path(date, "ERROR"),
-            trace_log_path = get_log_path(date, "TRACE"))
-        
+        log_name = xutils.get_argument("log_name", "")
+        loggers = logutil.MemLogger.list_loggers()
+        log_not_found = not iter_exists(lambda x: x.name == log_name, loggers)
 
-class HistoryHandler(object):
-    """docstring for HistoryHandler"""
+        self.writehtml(OPTION_HTML,
+                       log_type=log_type,
+                       mem_loggers=loggers,
+                       info_log_path=get_log_path(date),
+                       log_name=log_name,
+                       log_not_found=log_not_found,
+                       warn_log_path=get_log_path(date, "WARN"),
+                       error_log_path=get_log_path(date, "ERROR"),
+                       trace_log_path=get_log_path(date, "TRACE"))
 
-    @xauth.login_required("admin")
-    def GET(self):
-        xutils.get_argument("type", "")
-        items = []
-        if xconfig.search_history:
-            items = xconfig.search_history.recent(50);
-        return xtemplate.render("system/page/history.html", 
-            show_aside = False,
-            items = items)
 
 xurls = (
-    r"/system/history", HistoryHandler,
     r"/system/log", LogHandler,
 )

@@ -48,3 +48,7 @@ xnote.getOrDefault = function (value, defaultValue) {
     }
     return value;
 };
+
+xnote.execute = function (fn) {
+    fn();
+};

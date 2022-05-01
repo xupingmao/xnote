@@ -20,8 +20,11 @@ xnote.table.adjustWidth = function(selector) {
     });
 };
 
-// 追加CSS样式表
-xnote.appendCSS = function (cssText) {
+/**
+ * 追加CSS样式表
+ * @param {string} styleText 样式文本
+ */
+xnote.appendCSS = function (styleText) {
     // 居中的样式
     var style = document.createElement("style");
     style.type = "text/css";

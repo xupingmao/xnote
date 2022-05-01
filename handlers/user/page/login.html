@@ -2,25 +2,25 @@
 
 {% block head %}
 <style type="text/css">
-	.login-input {
-	  width: 100%;
-	  min-width: 200px;
+  .login-input {
+    width: 100%;
+    min-width: 200px;
     padding: 12px;
     border-radius: 0px;
     outline: none;
     margin-bottom: 5px;
     border: 1px solid #ccc;
- 	}
+  }
 
- 	.login-submit {
+  .login-submit {
     padding: 12px 24px;
- 		border-radius: 5px;
- 	}
-	
+    border-radius: 5px;
+  }
+
   .login-submit:hover {
     border-radius: 5px;
-	}
-  
+  }
+
   .input-header {
     padding-top: 3px;
     size: 14px;
@@ -51,7 +51,7 @@
     background-color: #fff;
     border-radius: 5px;
   }
-  
+
   .login-header {
     float: left;
     width: 100%;
@@ -85,7 +85,7 @@
       padding: 0px;
       background-color: transparent;
     }
-    
+
     .main-content {
       padding: 0px;
     }
@@ -118,22 +118,22 @@
 {% end %}
 
 {% block body %}
-    
+
 <div class="login-box">
   <div class="col-md-12 login-box-inner">
     <div class="login-header">登录Xnote</div>
-    
+
     {% if error != "" and error != None %}
-      <div class="col-md-12 error">{{error}}</div>
+    <div class="col-md-12 error">{{error}}</div>
     {% end %}
 
     <div class="login-body">
       <form id="loginForm" name="loginForm" method="POST">
-    		<input class="login-input" type="text" name="username" value="{{username}}" placeholder="账户名"/>
-    		<input class="login-input" type="password" name="password" value="{{password}}" placeholder="密码"/>
+        <input class="login-input" type="text" name="username" value="{{username}}" placeholder="账户名" />
+        <input class="login-input" type="password" name="password" value="{{password}}" placeholder="密码" />
         <input type="text" name="test" value="Test" class="hide">
-    		<button class="btn login-submit login-input" type="submit" value="Login" id="loginBtn">登录</button>
-    	</form>
+        <button class="btn login-submit login-input" type="submit" value="Login" id="loginBtn">登录</button>
+      </form>
     </div>
 
     <div class="login-footer">
@@ -143,25 +143,25 @@
 </div>
 
 <script type="text/javascript">
-$(function () {
-  function adjustLoginBody() {  
-    var bodyWidth = $(".login-body").width();
+  $(function () {
+    function adjustLoginBody() {
+      var winWidth = getWindowWidth();
 
-    console.log("bodyWidth=" + bodyWidth);
-    console.log("windowHeight=" + getWindowHeight());
+      if (winWidth < 1000) {
+        var height = $(".login-body").outerHeight();
+        $(".login-body").css("top", (getWindowHeight() - height) / 2);
+      } else {
+        var height = $(".login-box-inner").outerHeight();
+        $(".login-box").css("margin-top", (getWindowHeight() - height) / 2);
+      }
 
-    if (bodyWidth < 1000) {
-      var height = $(".login-body").outerHeight();
-      $(".login-body").css("top", (getWindowHeight() - height) / 2);
+      $(".mobile-search").hide();
+      $(".x-body").css("margin-top", 0);
     }
 
-    $(".mobile-search").hide();
-    $(".x-body").css("margin-top", 0);
-  }
-
-  adjustLoginBody();
-  window.onresize = adjustLoginBody;
-})
+    adjustLoginBody();
+    window.onresize = adjustLoginBody;
+  })
 </script>
 
 {% end %}
