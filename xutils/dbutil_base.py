@@ -29,10 +29,8 @@
 """
 # 先加载标准库
 from __future__ import print_function, with_statement
-import os
 import re
 import time
-import json
 import threading
 import logging
 
@@ -47,6 +45,7 @@ import xutils
 from xutils.base import Storage
 from xutils.imports import is_str
 from xutils import dateutil
+from xutils.db.encode import convert_bytes_to_object, convert_object_to_json
 
 try:
     import leveldb
@@ -264,30 +263,6 @@ def timeseq(value=None):
 
 def new_id(prefix):
     return "%s:%s" % (prefix, timeseq())
-
-
-def convert_object_to_json(obj):
-    # ensure_ascii默认为True，会把非ascii码的字符转成\u1234的格式
-    return json.dumps(obj, ensure_ascii=False)
-
-
-def convert_bytes_to_object(bytes, parse_json=True):
-    if bytes is None:
-        return None
-    str_value = bytes.decode("utf-8")
-
-    if not parse_json:
-        return str_value
-
-    try:
-        obj = json.loads(str_value)
-    except:
-        xutils.print_exc()
-        return str_value
-    if isinstance(obj, dict):
-        obj = Storage(**obj)
-    return obj
-
 
 def check_leveldb():
     if _leveldb is None:

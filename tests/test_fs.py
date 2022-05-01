@@ -3,31 +3,11 @@
 # @since 2020/11/29 14:45:21
 # @modified 2021/10/07 15:04:35
 
-import sys
-import os
-sys.path.insert(1, "lib")
-sys.path.insert(1, "core")
-import unittest
-import json
-import web
-import six
-import xmanager
-import xutils
-import xtemplate
 import xconfig
-import xtables
-from xutils import u, dbutil
+from .test_base import json_request, BaseTestCase
+from .test_base import init as init_app
 
-# cannot perform relative import
-try:
-    import test_base
-except ImportError:
-    from tests import test_base
-
-app          = test_base.init()
-json_request = test_base.json_request
-request_html = test_base.request_html
-BaseTestCase = test_base.BaseTestCase
+app = init_app()
 
 
 class TestMain(BaseTestCase):
@@ -39,3 +19,21 @@ class TestMain(BaseTestCase):
     def test_fs_tools(self):
         self.check_OK("/fs_tools")
         self.check_OK("/fs_bookmark")
+
+    def test_create_file(self):
+        path = xconfig.DATA_DIR
+        resp = json_request("/fs_api/add_file", method="POST",
+                            data=dict(path=path, filename="test_fs.txt"))
+        print(resp)
+        self.assertEqual("success", resp["code"])
+
+    def test_create_dir(self):
+        path = xconfig.DATA_DIR
+        resp = json_request("/fs_api/add_dir", method="POST",
+                            data=dict(path=path, filename="test_fs_dir"))
+        print(resp)
+        self.assertEqual("success", resp["code"])
+    
+    def test_code_preview(self):
+        self.check_OK("/code/preview?path=./README.md")
+

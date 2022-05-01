@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-01 12:52:24
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-01 13:04:26
+@LastEditTime : 2022-05-01 15:09:21
 @FilePath     : /xnote/tests/test_dict.py
 """
 
@@ -27,6 +27,9 @@ class TestMain(BaseTestCase):
 
         resp2 = json_request("/dict/relevant/list?_format=json", method = "GET")
         self.assertEqual(2, len(resp2["words"]))
+
+        resp2b = json_request("/dict/relevant/list?_format=json&key=test1")
+        self.assertEqual(1, len(resp2b["words"]))
 
         resp3 = json_request("/dict/relevant/delete", method = "POST", data = dict(word = "test1"))
         self.assertEqual("success", resp3["code"])

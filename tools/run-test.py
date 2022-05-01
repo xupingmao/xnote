@@ -12,7 +12,7 @@ def do_clean():
 
 def update_version():
 	print("更新版本号...")
-	version = "v2.8-dev-" + time.strftime("%Y.%m.%d")
+	version = "v2.9-dev-" + time.strftime("%Y.%m.%d")
 	print("版本号:", version)
 	with open("config/version.txt", "w+") as fp:
 		fp.write(version + "\n")

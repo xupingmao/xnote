@@ -4,32 +4,18 @@
 # @modified 2022/04/17 13:58:29
 # @filename test_xutils_db.py
 
-import sys
+from xutils import textutil
+from .a import *
 import os
 import threading
 import sqlite3
 import time
-
-sys.path.insert(1, "lib")
-sys.path.insert(1, "core")
-import unittest
-import json
-import web
-import six
-import xmanager
 import xutils
-import xtemplate
 import xconfig
-import xtables
-from xutils import u, dbutil
 
-# cannot perform relative import
-try:
-    import test_base
-except ImportError:
-    from tests import test_base
+from . import test_base
 
-app          = test_base.init()
+app = test_base.init()
 json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
@@ -49,8 +35,9 @@ class MockedWriteBatch:
         self._puts.pop(key, None)
         self._deletes.add(key)
 
+
 def run_range_test_from_None(test, db):
-    for key in db.RangeIter(include_value = False):
+    for key in db.RangeIter(include_value=False):
         db.Delete(key)
 
     db.Put(b"test5:1", b"value1")
@@ -59,37 +46,38 @@ def run_range_test_from_None(test, db):
     db.Put(b"test6:1", b"user1")
     db.Put(b"test6:2", b"user2")
 
-    data_list = list(db.RangeIter(key_to = b"test5:\xff"))
+    data_list = list(db.RangeIter(key_to=b"test5:\xff"))
 
     test.assertEqual(3, len(data_list))
     test.assertEqual((b"test5:1", b"value1"), data_list[0])
     test.assertEqual((b"test5:2", b"value2"), data_list[1])
     test.assertEqual((b"test5:5", b"value5"), data_list[2])
+
 
 def run_range_test(test, db):
-    data_list = list(db.RangeIter(key_from = b"test5:", 
-        key_to = b"test5:\xff", 
-        include_value = True))
+    data_list = list(db.RangeIter(key_from=b"test5:",
+                                  key_to=b"test5:\xff",
+                                  include_value=True))
 
     test.assertEqual(3, len(data_list))
     test.assertEqual((b"test5:1", b"value1"), data_list[0])
     test.assertEqual((b"test5:2", b"value2"), data_list[1])
     test.assertEqual((b"test5:5", b"value5"), data_list[2])
 
-    data_list = list(db.RangeIter(key_from = b"test6:", 
-        key_to = b"test6:\xff", 
-        include_value = True,
-        reverse = True))
+    data_list = list(db.RangeIter(key_from=b"test6:",
+                                  key_to=b"test6:\xff",
+                                  include_value=True,
+                                  reverse=True))
 
     test.assertEqual(2, len(data_list))
     test.assertEqual((b"test6:2", b"user2"), data_list[0])
     test.assertEqual((b"test6:1", b"user1"), data_list[1])
 
     # 只返回Key的
-    data_list = list(db.RangeIter(key_from = b"test6:", 
-        key_to = b"test6:\xff", 
-        include_value = False,
-        reverse = True))
+    data_list = list(db.RangeIter(key_from=b"test6:",
+                                  key_to=b"test6:\xff",
+                                  include_value=False,
+                                  reverse=True))
     test.assertEqual(2, len(data_list))
     test.assertEqual(b"test6:2", data_list[0])
     test.assertEqual(b"test6:1", data_list[1])
@@ -98,17 +86,19 @@ def run_range_test(test, db):
     all_list = list(db.RangeIter())
     test.assertEqual(5, len(all_list))
 
-    all_list_only_key = list(db.RangeIter(include_value = False))
+    all_list_only_key = list(db.RangeIter(include_value=False))
     test.assertEqual(5, len(all_list_only_key))
 
     db.Put(b"test8:1", b"value8_1")
 
     # 一个都不匹配的迭代
-    empty_iter_list = list(db.RangeIter(key_from = b"test7:", key_to=b"test7:\xff"))
+    empty_iter_list = list(db.RangeIter(
+        key_from=b"test7:", key_to=b"test7:\xff"))
     test.assertEqual(0, len(empty_iter_list))
 
+
 def run_test_db_engine(test, db):
-    for key in db.RangeIter(include_value = False):
+    for key in db.RangeIter(include_value=False):
         db.Delete(key)
 
     db.Put(b"key", b"value")
@@ -140,13 +130,14 @@ def run_snapshot_test(test, db):
     # TODO 快照测试
     pass
 
+
 class TestMain(BaseTestCase):
 
     def test_dbutil_lmdb(self):
         from xutils.db.driver_lmdb import LmdbKV
         db_dir = os.path.join(xconfig.DB_DIR, "lmdb")
         # 初始化一个5M的数据库
-        db = LmdbKV(db_dir, map_size = 1024 * 1024 * 5)
+        db = LmdbKV(db_dir, map_size=1024 * 1024 * 5)
         run_test_db_engine(self, db)
 
     def test_dbutil_sqlite(self):
@@ -154,7 +145,7 @@ class TestMain(BaseTestCase):
         db_file = os.path.join(xconfig.DB_DIR, "sqlite", "test.db")
         db = SqliteKV(db_file)
         run_test_db_engine(self, db)
-        
+
     def test_dbutil_leveldbpy(self):
         if not xutils.is_windows():
             return
@@ -163,7 +154,6 @@ class TestMain(BaseTestCase):
         db = LevelDBProxy(db_dir)
         run_test_db_engine(self, db)
         run_snapshot_test(self, db.CreateSnapshot())
-
 
     def test_dbutil_leveldb(self):
         if xutils.is_windows():
@@ -175,7 +165,6 @@ class TestMain(BaseTestCase):
         run_snapshot_test(self, db.CreateSnapshot())
 
     def triggle_database_locked(self):
-        test_self = self
         from xutils.db.driver_sqlite import db_execute
 
         dbfile = os.path.join(xconfig.DB_DIR, "sqlite", "conflict_test.db")
@@ -187,7 +176,8 @@ class TestMain(BaseTestCase):
         # WAL模式，并发度更高，可以允许1写多读，这种模式不会触发数据库锁
         # DELETE模式，写操作是排他的，读操作是共享的
         db_execute(con, "PRAGMA journal_mode = DELETE;")
-        db_execute(con, "CREATE TABLE IF NOT EXISTS `kv_store` (`key` blob primary key, value blob);")
+        db_execute(
+            con, "CREATE TABLE IF NOT EXISTS `kv_store` (`key` blob primary key, value blob);")
         con.close()
 
         class WriteThread(threading.Thread):
@@ -201,7 +191,8 @@ class TestMain(BaseTestCase):
                     cur.execute("COMMIT;")
                     for i in range(100):
                         cur.execute("begin;")
-                        cur.execute("INSERT INTO kv_store (key, value) VALUES (?,?)", ("key_%s" % i, "value"))
+                        cur.execute(
+                            "INSERT INTO kv_store (key, value) VALUES (?,?)", ("key_%s" % i, "value"))
                         cur.execute("COMMIT;")
                         print("写入(%d)中..." % i)
                 except:
@@ -242,5 +233,25 @@ class TestMain(BaseTestCase):
 
         for t in threads:
             t.join()
+    
+    def test_lmdb_large_key(self):
+        from xutils.db.driver_lmdb import LmdbEnhancedKV
+        db_dir = os.path.join(xconfig.DB_DIR, "lmdb")
+        # 初始化一个5M的数据库
+        db = LmdbEnhancedKV(db_dir, map_size=1024 * 1024 * 5)
 
+        prefix = textutil.random_string(1000)
+        key1 = (prefix + "_key1").encode("utf-8")
+        key2 = (prefix + "_key2").encode("utf-8")
+        value1 = b"1"
+        value2 = b"2"
+        db.Put(key1, value1)
+        db.Put(key2, value2)
+
+        value1b = db.Get(key1)
+        self.assertEqual(value1, value1b)
+
+        db.Delete(key1)
+        value1c = db.Get(key1)
+        self.assertEqual(None, value1c)
 

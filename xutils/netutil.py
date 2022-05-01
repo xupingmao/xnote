@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/28 19:47:17
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-01 12:51:33
+@LastEditTime : 2022-05-01 14:20:57
 @FilePath     : /xnote/xutils/netutil.py
 """
 
@@ -51,7 +51,7 @@ def splithost(url):
     return None, url
 
 def get_path(web_root, web_path):
-    if web_path[0] == "/":
+    if len(web_path) > 0 and web_path[0] == "/":
         web_path = web_path[1:]
     if os.name == "nt":
         web_path = web_path.replace("/", "\\")
@@ -62,7 +62,10 @@ def get_http_home(host):
     """
     >>> get_http_home("www.xnote.com")
     'http://www.xnote.com'
+    >>> get_http_home("https://www.xnote.com")
+    'https://www.xnote.com'
     """
+    assert host != None
     if not host.startswith(("http://", "https://")):
         return "http://" + host
     return host

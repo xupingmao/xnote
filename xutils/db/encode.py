@@ -4,6 +4,10 @@
 # @modified 2022/04/09 11:00:26
 # @filename encode.py
 
+import json
+import xutils
+from xutils import Storage
+
 MAX_INT = (1 << 63)-1
 
 def encode_int(int_val):
@@ -34,6 +38,11 @@ def encode_int(int_val):
         int_val = int_val | flag
     
     return "%016X" % int_val
+
+def encode_int8_to_bytes(int_val):
+    assert int_val >= 0
+    assert int_val <= 255
+    return bytes([int_val])
 
 def encode_float(value):
     """把浮点数编码成字符串
@@ -78,3 +87,33 @@ def encode_index_value(value):
     if isinstance(value, float):
         return encode_float(value)
     raise Exception("unknown index_type:%r" % type(value))
+
+def _encode_json(obj):
+    """基本类型不会拦截"""
+    if isinstance(obj, bytes):
+        return obj.decode("utf-8")
+    return obj
+
+def convert_object_to_json(obj):
+    # ensure_ascii默认为True，会把非ascii码的字符转成\u1234的格式
+    return json.dumps(obj, ensure_ascii=False, default=_encode_json)
+
+def convert_object_to_bytes(obj):
+    return convert_object_to_json(obj).encode("utf-8")
+
+def convert_bytes_to_object(bytes, parse_json=True):
+    if bytes is None:
+        return None
+    str_value = bytes.decode("utf-8")
+
+    if not parse_json:
+        return str_value
+
+    try:
+        obj = json.loads(str_value)
+    except:
+        xutils.print_exc()
+        return str_value
+    if isinstance(obj, dict):
+        obj = Storage(**obj)
+    return obj

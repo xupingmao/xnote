@@ -2,16 +2,12 @@
 # Created by xupingmao on 2017/05/23
 # @modified 2022/04/04 15:47:28
 
-import sys
 import os
-sys.path.insert(1, "lib")
-sys.path.insert(1, "core")
 import xutils
 import xtemplate
 import xconfig
 import xtables
 import xauth
-from xutils import u, dbutil
 from xutils import logutil
 
 # cannot perform relative import
