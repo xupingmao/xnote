@@ -30,10 +30,17 @@ def get_size_page(mode, kw):
     for file in filelist:
         fpath = file.path
         fpath = os.path.abspath(fpath)
-        info = db.get(fpath)
-        if info != None:
+        realpath = os.path.realpath(fpath)
+        info = db.get(realpath)
+        if info != None and hasattr(info, "fsize"):
             file.fsize = info.fsize
-            file.size = format_size(info.fsize)
+            size_str = format_size(info.fsize)
+            if os.path.islink(fpath):
+                file.size = "Link(%s)" % size_str
+            else:
+                file.size = size_str
+        else:
+            file.size = "Unknown"
 
     def key_func(file):
         if not isinstance(file.fsize, int):

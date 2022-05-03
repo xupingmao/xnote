@@ -40,9 +40,10 @@ def calc_size(db, fpath):
     print(fpath)
     
     if os.path.islink(fpath):
-        # 跳过软连接，避免死循环
-        return 0
-    
+        # 软链接要转为真实的路径，不然会死循环
+        realpath = os.path.realpath(fpath)
+        return calc_size(db, realpath)
+
     if os.path.isdir(fpath):
         return calc_dir_size(db, fpath)
     try:
