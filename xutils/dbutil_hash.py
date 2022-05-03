@@ -6,6 +6,7 @@
 
 from xutils.cacheutil import encode_key
 from xutils.dbutil_base import *
+from xutils import Storage
 from xutils.db.encode import encode_str, decode_str
 
 class LdbHashTable:

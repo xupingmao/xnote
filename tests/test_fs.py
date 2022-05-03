@@ -6,6 +6,7 @@
 import xconfig
 from .test_base import json_request, BaseTestCase
 from .test_base import init as init_app
+from handlers.fs.fs_index import build_fs_index
 
 app = init_app()
 
@@ -36,4 +37,8 @@ class TestMain(BaseTestCase):
     
     def test_code_preview(self):
         self.check_OK("/code/preview?path=./README.md")
+
+    def test_build_fs_index(self):
+        size = build_fs_index(xconfig.DATA_DIR)
+        self.assertTrue(size > 0)
 

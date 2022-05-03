@@ -3,7 +3,6 @@
 # @since 2021/02/12 23:04:00
 # @modified 2022/03/19 18:54:15
 import xutils
-import xtemplate
 import xauth
 from xutils import dbutil
 from xutils import Storage
@@ -212,5 +211,6 @@ class DbScanHandler(BasePlugin):
 
 xurls = (
     "/system/db_scan", DbScanHandler,
+    "/system/db_admin", DbScanHandler,
     "/system/leveldb_admin", DbScanHandler,
 )

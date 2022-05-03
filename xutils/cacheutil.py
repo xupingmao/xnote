@@ -3,6 +3,9 @@
 # @since 2018/06/07 22:10:11
 # @modified 2022/04/04 13:42:52
 """持久化操作已经禁用，请使用dbutil
+PS: 标准库 functools提供了缓存的方法， 参考 https://docs.python.org/zh-cn/3/library/functools.html
+
+
 缓存的实现，API列表如下
 
 * cache(key = None, prefix = None, expire = 600) 缓存装饰器，用于加速函数调用
@@ -35,10 +38,12 @@ _cache_dict = dict()
 _cache_queue = deque()
 STORAGE_DIR = None
 
+
 def encode_key(text):
     """编码key为文件名"""
     return text + ".json"
     # return base64.urlsafe_b64encode(text.encode("utf-8")).decode("utf-8") + ".pk"
+
 
 def decode_key(text):
     """解码文件名称为key值，暂时没有使用"""
@@ -59,12 +64,15 @@ def format_key(key):
             result.append(c)
     return "".join(result)
 
+
 def log_debug(msg):
     # print(msg)
     pass
 
+
 def log_error(msg):
     print(msg)
+
 
 class CacheObj:
     """缓存对象，包含缓存的key和value，有一个公共的缓存队列
@@ -75,17 +83,17 @@ class CacheObj:
     max_size = -1
     valid_key_pattern = re.compile(r"^[0-9a-zA-Z\[\]_\-\.\(\)\@\#,'\"\$ ]+$")
 
-    def __init__(self, key, value, expire = -1, type = "object", need_save = True):
+    def __init__(self, key, value, expire=-1, type="object", need_save=True):
         global _cache_dict
         global _cache_queue
 
         self.check_key_value(key, value)
 
-        self.key              = key
-        self.value            = value
-        self.expire           = expire
-        self.expire_time      = time.time() + expire
-        self.type             = type
+        self.key = key
+        self.value = value
+        self.expire = expire
+        self.expire_time = time.time() + expire
+        self.type = type
         self.is_force_expired = False
 
         if type == "zset" and not isinstance(value, OrderedDict):
@@ -141,19 +149,20 @@ class CacheObj:
         else:
             return self.value
 
-    def save(self, method_name = "save"):
+    def save(self, method_name="save"):
         _cache_dict[self.key] = self
         if self.is_temp():
             return
 
         # save to disk
-        raise Exception("cacheutil.%s to disk is no longer supprted, please use dbutil" % method_name)
+        raise Exception(
+            "cacheutil.%s to disk is no longer supprted, please use dbutil" % method_name)
 
         path = self._get_path(self.key)
-        obj = dict(key = self.key, 
-                type = self.type,
-                value = self.get_dump_value(), 
-                expire_time = self.expire_time)
+        obj = dict(key=self.key,
+                   type=self.type,
+                   value=self.get_dump_value(),
+                   expire_time=self.expire_time)
 
         encoded = json.dumps(obj)
         with open(path, "w") as fp:
@@ -187,6 +196,7 @@ class CacheObj:
         if os.path.exists(path):
             os.remove(path)
 
+
 def cache_deco(key=None, prefix=None, expire=600):
     """缓存的装饰器，会自动清理失效的缓存
     注意：不考虑持久化，如果有持久化需要使用db实现
@@ -208,7 +218,7 @@ def cache_deco(key=None, prefix=None, expire=600):
                 cache_key = "%s.%s%s" % (mod.__name__, funcname, args)
             else:
                 cache_key = "%s%s" % (prefix, args)
-            
+
             obj = get_cache_obj(cache_key)
             if obj is not None:
                 return obj.value
@@ -224,10 +234,12 @@ def cache_deco(key=None, prefix=None, expire=600):
         return handle
     return deco
 
+
 def cache(*args, **kw):
     return cache_deco(*args, **kw)
 
-def put(key, value = None, expire = -1):
+
+def put(key, value=None, expire=-1):
     """设置缓存的值
     @param {object} value value对象必须可以json序列化，如果value为None，会删除key对应的对象
     @param {integer} expire 失效时间，单位秒，如果小于等于0认为不失效，会持久化到文件
@@ -240,6 +252,7 @@ def put(key, value = None, expire = -1):
     CacheObj(key, value, expire)
     return True
 
+
 def get(key, default_value=None):
     """读取缓存对象
     @param {object} default_value 如果缓存对象不存在，返回default_value
@@ -250,7 +263,7 @@ def get(key, default_value=None):
     return obj.get_value()
 
 
-def delete(key = None, prefix = None, args = None):
+def delete(key=None, prefix=None, args=None):
     """使key对应的缓存失效，成功返回True
     del与python关键字冲突
     @param {string} key 缓存的key
@@ -263,6 +276,7 @@ def delete(key = None, prefix = None, args = None):
         return True
     return False
 
+
 def prefix_del(prefix):
     """使用前缀删除"""
     keys = []
@@ -274,11 +288,13 @@ def prefix_del(prefix):
         if obj != None:
             obj.clear()
 
+
 # 方法别名
 cache_get = get
 cache_put = put
 cache_del = delete
 set = put
+
 
 def get_cache_obj(key, default_value=None, type=None):
     if not is_str(key):
@@ -293,6 +309,7 @@ def get_cache_obj(key, default_value=None, type=None):
     obj.clear()
     return None
 
+
 def update_cache_by_key(key):
     """直接通过key来更新缓存，前提是缓存已经存在"""
     obj = _cache_dict.get(key)
@@ -301,14 +318,16 @@ def update_cache_by_key(key):
         args = obj.args
         obj.value = func(*args)
 
+
 def lpush(key, value):
     obj = get_cache_obj(key, type="list")
     if obj != None and obj.value != None:
         obj.value.insert(0, value)
         obj.save()
     else:
-        obj = CacheObj(key, [value], type = "list")
+        obj = CacheObj(key, [value], type="list")
         obj.save()
+
 
 def rpush(key, value):
     obj = get_cache_obj(key, type="list")
@@ -316,11 +335,12 @@ def rpush(key, value):
         obj.value.append(value)
         obj.save()
     else:
-        obj = CacheObj(key, [value], type = "list")
+        obj = CacheObj(key, [value], type="list")
         obj.save()
 
-def lrange(key, start = 0, stop = -1):
-    obj = get_cache_obj(key, type = "list")
+
+def lrange(key, start=0, stop=-1):
+    obj = get_cache_obj(key, type="list")
     if obj != None and obj.value != None:
         length = len(obj.value)
         if start < 0:
@@ -331,8 +351,9 @@ def lrange(key, start = 0, stop = -1):
     else:
         return []
 
-def ltrim(key, start = 0, stop = -1):
-    obj = get_cache_obj(key, type = "list")
+
+def ltrim(key, start=0, stop=-1):
+    obj = get_cache_obj(key, type="list")
     if obj != None and obj.value != None:
         length = len(obj.value)
         if start < 0:
@@ -344,8 +365,9 @@ def ltrim(key, start = 0, stop = -1):
     else:
         pass
 
+
 def lindex(key, index):
-    obj = get_cache_obj(key, type = "list")
+    obj = get_cache_obj(key, type="list")
     if obj != None and obj.value != None:
         length = len(obj.value)
         if index < 0:
@@ -355,6 +377,7 @@ def lindex(key, index):
         return obj.value[index]
     else:
         return None
+
 
 class SortedObject:
 
@@ -368,8 +391,9 @@ class SortedObject:
     def __cmp__(self, obj):
         return cmp(self.value, obj.value)
 
+
 def zadd(key, score, member):
-    ## TODO 双写两个列表
+    # TODO 双写两个列表
     obj = get_cache_obj(key, type="zset")
     if obj != None and obj.value != None:
         obj.value.pop(member, None)
@@ -380,6 +404,7 @@ def zadd(key, score, member):
         obj = CacheObj(key, OrderedDict(), type="zset")
         obj.value[member] = score
         obj.save()
+
 
 def zrange(key, start, stop):
     """zset分片，不同于Python，这里是左右包含，包含start，包含stop
@@ -394,10 +419,11 @@ def zrange(key, start, stop):
             stop = len(items)
         else:
             stop += 1
-        sorted_items = sorted(items, key = lambda x: x[1])
+        sorted_items = sorted(items, key=lambda x: x[1])
         sorted_keys = [k[0] for k in sorted_items]
         return sorted_keys[start: stop]
     return []
+
 
 def zcount(key):
     obj = get_cache_obj(key)
@@ -405,11 +431,13 @@ def zcount(key):
         return len(obj.value)
     return 0
 
+
 def zscore(key, member):
     obj = get_cache_obj(key)
     if obj != None:
         return obj.value.get(member, None)
     return None
+
 
 def zincrby(key, increment, member):
     """通过setdefault处理并发问题"""
@@ -422,10 +450,11 @@ def zincrby(key, increment, member):
         if obj.max_size > 0:
             # LRU置换
             while len(obj.value) > obj.max_size:
-                obj.value.popitem(last = False)
+                obj.value.popitem(last=False)
         obj.save()
     else:
         zadd(key, increment, member)
+
 
 def zrem(key, member):
     obj = get_cache_obj(key)
@@ -437,6 +466,7 @@ def zrem(key, member):
         return 0
     else:
         return 0
+
 
 def zremrangebyrank(key, start, stop):
     '''删除zset区间'''
@@ -452,11 +482,13 @@ def zremrangebyrank(key, start, stop):
     obj.save()
     return len(members)
 
+
 def zmaxsize(key, max_size):
     obj = get_cache_obj(key)
     if obj is None:
         return
     obj.max_size = max_size
+
 
 def hset(key, field, value, expire=-1):
     try:
@@ -466,12 +498,13 @@ def hset(key, field, value, expire=-1):
             obj.type = "hash"
             obj.save("hset")
         else:
-            obj = CacheObj(key, dict(), type = "hash", expire = expire)
+            obj = CacheObj(key, dict(), type="hash", expire=expire)
             obj.value[field] = value
             obj.save("hset")
     except:
         print_exc()
         return None
+
 
 def hget(key, field):
     try:
@@ -484,6 +517,7 @@ def hget(key, field):
         print_exc()
         return None
 
+
 def hdel(key, field):
     obj = get_cache_obj(key, type="hash")
     if obj != None and obj.value != None:
@@ -494,6 +528,7 @@ def hdel(key, field):
     else:
         return 0
 
+
 def hkeys(key, field):
     obj = get_cache_obj(key, type="hash")
     if obj != None and obj.value != None:
@@ -501,9 +536,11 @@ def hkeys(key, field):
     else:
         return list()
 
+
 def keys(pattern=None):
     """返回所有缓存的key列表"""
     return list(_cache_dict.keys())
+
 
 def print_exc():
     """打印系统异常堆栈"""
@@ -511,8 +548,10 @@ def print_exc():
     exc_info = traceback.format_exc()
     log_error(exc_info)
 
+
 def json_object_hook(dict_obj):
     return Storage(**dict_obj)
+
 
 def load_dump():
     dirname = STORAGE_DIR
@@ -527,23 +566,27 @@ def load_dump():
                 if pickled == b'':
                     continue
                 if fname.endswith(".json"):
-                    dict_obj = json.loads(pickled.decode("utf-8"), object_hook = json_object_hook)
+                    dict_obj = json.loads(pickled.decode(
+                        "utf-8"), object_hook=json_object_hook)
                 else:
                     dict_obj = pickle.loads(pickled)
                 # 持久化的都是不失效的数据
                 obj_type = dict_obj.get("type", "object")
-                obj = CacheObj(dict_obj["key"], dict_obj["value"], -1, type = obj_type, need_save = False)
+                obj = CacheObj(
+                    dict_obj["key"], dict_obj["value"], -1, type=obj_type, need_save=False)
                 if obj.is_temp():
                     os.remove(fpath)
         except:
             log_error("failed to load cache %s" % fname)
             print_exc()
 
+
 def clear_temp():
     for key in _cache_dict.copy():
         value = _cache_dict.get(key)
         if value != None and value.is_temp():
             value.clear()
+
 
 def init(storage_dir):
     global STORAGE_DIR

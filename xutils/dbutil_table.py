@@ -5,6 +5,7 @@
 # @filename dbutil_table.py
 
 from xutils.dbutil_base import *
+from xutils import Storage
 from six.moves.urllib.parse import quote
 from xutils.db.encode import encode_index_value
 

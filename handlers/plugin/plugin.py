@@ -2,7 +2,6 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
 # @modified 2022/03/04 23:02:45
-from unicodedata import category
 import xconfig
 import os
 import os
@@ -13,7 +12,6 @@ import xmanager
 import web
 import copy
 
-from xtemplate import BasePlugin
 from xtemplate import T
 from xutils import Storage
 from xutils import fsutil

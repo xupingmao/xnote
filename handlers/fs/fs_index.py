@@ -61,6 +61,7 @@ def build_fs_index(dirname):
     db = get_index_db()
     size = calc_size(db, dirname)
     logging.info("Total size:%s", size)
+    return size
 
 def update_file_index():
     # 创建新的索引

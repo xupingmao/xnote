@@ -42,7 +42,6 @@ except ImportError:
 
 # 加载第三方的库
 import xutils
-from xutils.base import Storage
 from xutils.imports import is_str
 from xutils import dateutil
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_json

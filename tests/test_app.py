@@ -159,8 +159,9 @@ class TestMain(BaseTestCase):
         value = data.get("config").get("value")
         self.assertEqual("hello", value)
 
-    def test_sys_db_scan(self):
+    def test_sys_db_tools(self):
         self.check_OK("/system/db_scan")
+        self.check_OK("/system/db_refresh")
 
     def test_user(self):
         self.check_OK("/system/user")

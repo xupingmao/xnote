@@ -11,27 +11,21 @@
 from __future__ import print_function
 import os
 import sys
-import gc
 import re
-import traceback
 import time
 import copy
-import json
-import profile
 import inspect
 import six
 import web
 import xconfig
-import xtemplate
-import xtables
 import xutils
 import xauth
 import threading
 from collections import deque
-from threading import Thread, Timer, current_thread
+from threading import Thread
 from xutils import Storage
 from xutils import logutil
-from xutils import Queue, tojson, MyStdout, cacheutil, u, dbutil, fsutil
+from xutils import tojson, MyStdout, cacheutil, u, dbutil, fsutil
 
 __version__      = "1.0"
 __author__       = "xupingmao (578749341@qq.com)"
@@ -217,7 +211,7 @@ class HandlerManager:
             __import__(name)
             if self.report_loading:
                 log("reimport " + name)
-        except Exception as e:
+        except Exception:
             xutils.print_exc()
         finally:
             pass

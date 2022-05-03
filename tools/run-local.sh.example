@@ -1,1 +1,1 @@
-python3 app.py --data data
+python3 sentinel.py app.py --config config/boot.default.properties

@@ -225,7 +225,7 @@ $(function () {
     $(".delete-btn").on("click", function () {
         var checked = $(".checkboxTd :checked");
         if (checked.length == 0) {
-            alert("请选择文件");
+            xnote.alert("请选择文件");
         } else if (checked.length > 1) {
             var pathlist = []
             $(".checkboxTd :checked").each(function (index, element) {
@@ -245,9 +245,9 @@ $(function () {
     $("#renameBtn").on("click", function () {
         var checked = $(".checkboxTd :checked");
         if (checked.length == 0) {
-            alert("请选择文件");
+            xnote.alert("请选择文件");
         } else if (checked.length > 1) {
-            alert("不支持批量重命名");
+            xnote.alert("不支持批量重命名");
         } else {
             var name = checked.attr("data-name");
             var path = checked.attr("data-path");
@@ -264,7 +264,7 @@ $(function () {
                             }
                     }).fail(function (resp) {
                         console.log(resp);
-                        alert("重命名失败");
+                        xnote.alert("重命名失败");
                     })
                 }
             });
@@ -275,7 +275,7 @@ $(function () {
     $("#cutBtn").on("click", function () {
         var checked = $(".checkboxTd :checked");
         if (checked.length == 0) {
-            alert("请选择文件");
+            xnote.alert("请选择文件");
         } else {
             var cutPathList = [];
             checked.each(function (index, element) {

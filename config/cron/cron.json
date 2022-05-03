@@ -42,5 +42,16 @@
         "sound":0,
         "webpage":0,
         "id":null
+    },
+    {
+        "name": "[系统]数据库定时任务",
+        "url": "/system/db_refresh",
+        "tm_wday": "*",
+        "tm_hour": "*",
+        "tm_min": "16",
+        "message": "",
+        "sound":0,
+        "webpage":0,
+        "id":null
     }
 ]

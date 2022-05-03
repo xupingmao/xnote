@@ -10,12 +10,13 @@ from __future__ import print_function
 import gc
 import sys
 import os
+import re
 import threading
 from collections import deque
 
 import six
 import web
-from xutils.imports import PY2
+from xutils.imports import PY2, getstatusoutput
 
 # 输出缓存区
 STDOUT_BUF_SIZE = 200
@@ -177,7 +178,6 @@ def _load_script_code_by_fpath(fpath):
 def _load_script_code(name, dirname = None):
     """加载脚本代码"""
     import xconfig
-    import xutils
     if dirname is None:
         # 必须实时获取dirname
         dirname = xconfig.SCRIPTS_DIR

@@ -11,7 +11,7 @@ import xmanager
 import xtables
 import xutils
 import xconfig
-from xutils import dbutil, Storage
+from xutils import dbutil
 
 SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
 
@@ -238,7 +238,6 @@ class RemoveHandler:
     @xauth.login_required("admin")
     def POST(self):
         id = xutils.get_argument("id")
-        # xtables.get_schedule_table().delete(where=dict(id=id))
         key = "schedule:%s" % id
         dbutil.delete(key)
         xmanager.load_tasks()
