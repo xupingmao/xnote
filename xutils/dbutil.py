@@ -28,7 +28,7 @@ def get_table_old(table_name, type="rdb"):
 
     table = LDB_TABLE_DICT.get(table_name)
     if table is None:
-        with READ_LOCK:
+        with get_write_lock():
             table = _get_table_no_lock(table_name)
             LDB_TABLE_DICT[table_name] = table
     return table

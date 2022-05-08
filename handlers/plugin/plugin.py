@@ -51,7 +51,8 @@ PLUGINS_STATUS = "loading"
 
 DEFAULT_PLUGIN_ICON_CLASS = "fa fa-cube"
 
-dbutil.register_table("plugin_visit_log", "插件访问日志")
+dbutil.register_table("plugin_visit_log", "插件访问日志", check_user = True)
+_log_db = dbutil.get_table("plugin_visit_log")
 
 def get_current_platform():
     return xtemplate.get_device_platform()
@@ -632,7 +633,7 @@ def add_visit_log(user_name, url, name = None, args = None):
     log.args = args
     log.time = dateutil.format_datetime()
 
-    dbutil.insert("plugin_visit_log:%s" % user_name, log)
+    _log_db.insert_by_user(user_name, log)
 
 def delete_visit_log(user_name, name, url):
     exist_log = find_visit_log(user_name, url)

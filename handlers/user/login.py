@@ -1,20 +1,18 @@
 # encoding=utf-8
 # @modified 2022/04/06 12:39:18
 import web
-import time
-import hashlib
 import xutils
 import xauth
 import xtemplate
-from xutils import dateutil, cacheutil, dbutil
+from xutils import cacheutil, dbutil
 from xutils import Storage
 from xutils import webutil
 
 RETRY_LIMIT = 3
 
-dbutil.register_table("record", "记录表")
-dbutil.register_table("user_op_log", "用户操作日志表")
-USER_LOG_TABLE = dbutil.get_table("user_op_log")
+dbutil.register_table("user_op_log", "用户操作日志表", check_user = True)
+
+_user_log_db = dbutil.get_table("user_op_log")
 
 def get_real_ip():
     return webutil.get_real_ip()
@@ -27,7 +25,7 @@ def save_login_info(name, value, error = None):
         if error != None:
             detail += ",登录失败:%s" % error
         login_log = Storage(type = "login", user_name = name, ip = real_ip, ctime = now, detail = detail)
-        USER_LOG_TABLE.insert_by_user(name, login_log)
+        _user_log_db.insert_by_user(name, login_log)
 
 def save_login_error_count(name, count):
     cacheutil.set("login.fail.count#%s" % name, count, 60)
@@ -69,7 +67,7 @@ class LoginHandler:
         target = xutils.get_argument("target", "")
         user = xauth.get_user_by_name(name)
         error = ""
-        
+
         if user == None:
             error = "用户名或密码错误"
             save_login_info(name, pswd, error)

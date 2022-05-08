@@ -6,9 +6,7 @@ from __future__ import print_function
 
 import xutils
 import xauth
-from xutils import dbutil
 from xutils import dateutil
-
 
 def print_debug_info(*args):
     new_args = [dateutil.format_time(), "[stats]"]

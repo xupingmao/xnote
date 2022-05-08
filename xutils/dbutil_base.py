@@ -56,8 +56,8 @@ DEFAULT_BLOCK_CACHE_SIZE = 8 * (2 << 20)  # 16M
 DEFAULT_WRITE_BUFFER_SIZE = 2 * (2 << 20)  # 4M
 DEFAULT_CACHE_EXPIRE = 60 * 60  # 1小时
 
-WRITE_LOCK = threading.RLock()
-READ_LOCK = threading.RLock()
+_write_lock = threading.RLock()
+_read_lock = threading.RLock()
 LAST_TIME_SEQ = -1
 
 # 注册的数据库表名，如果不注册，无法进行写操作
@@ -228,8 +228,9 @@ def check_not_empty(value, message):
 
 
 def get_write_lock(key=None):
-    global WRITE_LOCK
-    return WRITE_LOCK
+    """获取全局独占的写锁，可重入"""
+    global _write_lock
+    return _write_lock
 
 
 def timeseq(value=None):
@@ -262,6 +263,7 @@ def timeseq(value=None):
 
 def new_id(prefix):
     return "%s:%s" % (prefix, timeseq())
+
 
 def check_leveldb():
     if _leveldb is None:
@@ -425,16 +427,6 @@ def put_bytes(key, value, sync=False):
     _leveldb.Put(key, value, sync=sync)
 
 
-def insert(table_name, obj_value, sync=False):
-    key = new_id(table_name)
-    with get_write_lock(key):
-        old_value = get(key)
-        if old_value != None:
-            raise DBException("insert conflict")
-        put(key, obj_value, sync)
-        return key
-
-
 def delete(key, sync=False):
     check_leveldb()
     check_write_state()
@@ -447,6 +439,7 @@ def delete(key, sync=False):
 
 def create_write_batch():
     return WriteBatchProxy()
+
 
 def scan(key_from=None,
          key_to=None,

@@ -9,6 +9,9 @@ import xutils
 import xconfig
 from xutils import dbutil
 
+dbutil.register_table("record", "系统日志表")
+_db = dbutil.get_table("record")
+
 def save_ip(real_ip):
     if real_ip is not None:
         # 处理X-Forwarded-For
@@ -91,8 +94,9 @@ class LocationHandler:
     def POST(self):
         coords = xutils.get_argument("coords")
         if coords != "null":
-            dbutil.insert("record:location", dict(type="location", key=xauth.get_current_name(), cdate=xutils.format_date(), 
-                ctime=xutils.format_datetime(), value=coords))
+            data = dict(type="location", key=xauth.get_current_name(), cdate=xutils.format_date(), 
+                ctime=xutils.format_datetime(), value=coords)
+            _db.insert(data)
         return "{}"
 
 

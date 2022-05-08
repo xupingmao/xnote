@@ -4,24 +4,31 @@
 # @modified 2022/04/16 08:53:11
 # @filename dbutil_table.py
 
+import time
 from xutils.dbutil_base import *
 from xutils import Storage
-from six.moves.urllib.parse import quote
+from urllib.parse import quote
 from xutils.db.encode import encode_index_value
 
+register_table("_id", "系统ID表")
+MAX_ID_KEY = "_id:max_id"
+
 register_table("_index", "通用索引")
+
 
 def dict_del(dict, key):
     if key in dict:
         del dict[key]
 
+
 class TableValidator:
 
-    def __init__(self, table_name, has_user_name = False):
+    def __init__(self, table_name, has_user_name=False):
         pass
 
-    def validate_key(self, key, user_name = None):
+    def validate_key(self, key, user_name=None):
         pass
+
 
 class LdbTable:
     """基于leveldb的表，比较常见的是以下2种
@@ -38,15 +45,15 @@ class LdbTable:
         比较麻烦，要重新构建主键
     """
 
-    def __init__(self, table_name, user_name = None, 
-            key_name = "_key", id_name = "_id"):
+    def __init__(self, table_name, user_name=None,
+                 key_name="_key", id_name="_id"):
         global INDEX_INFO_DICT
         # 参数检查
         check_table_name(table_name)
 
         self.table_name = table_name
         self.key_name = key_name
-        self.id_name  = id_name
+        self.id_name = id_name
         self.prefix = table_name
         self.user_name = user_name
         self.index_names = INDEX_INFO_DICT.get(table_name) or set()
@@ -78,14 +85,14 @@ class LdbTable:
 
     def _get_id_from_obj(self, obj):
         key = self._get_key_from_obj(obj)
-        return key.rsplit(":",1)[-1]
+        return key.rsplit(":", 1)[-1]
 
     def _get_id_from_key(self, key):
-        return key.rsplit(":",1)[-1]
+        return key.rsplit(":", 1)[-1]
 
     def _format_value(self, key, value):
         if not isinstance(value, dict):
-            value = Storage(_raw = value)
+            value = Storage(_raw=value)
 
         value[self.key_name] = key
         return value
@@ -103,18 +110,40 @@ class LdbTable:
         dict_del(obj_copy, self.id_name)
         return obj_copy
 
-    def _get_id_value(self, id_type = "uuid", id_value = None):
+    def _create_increment_id(self, start_id = None):
+        if start_id != None:
+            assert start_id > 0
+
+        with get_write_lock():
+            last_id = get(MAX_ID_KEY)
+            if last_id is None:
+                if start_id != None:
+                    last_id = start_id - 1
+                else:
+                    last_id = int(time.time() * 1000)
+            else:
+                last_id += 1
+            put(MAX_ID_KEY, last_id)
+            return last_id
+
+    def _get_id_value(self, id_type="uuid", id_value=None):
         if id_type == "uuid":
             validate_none(id_value, "invalid id_value")
             return xutils.create_uuid()
-        elif id_type == "timeseq":
+
+        if id_type == "timeseq":
             validate_none(id_value, "invalid id_value")
             return timeseq()
-        elif id_value != None:
+
+        if id_type == "autoincrement":
+            validate_none(id_value, "invalid id_value")
+            return self._create_increment_id()
+
+        if id_value != None:
             validate_none(id_type, "invalid id_type")
             return id_value
-        else:
-            raise Exception("unknown id_type:%s" % id_type)
+
+        raise Exception("unknown id_type:%s" % id_type)
 
     def _check_before_delete(self, key):
         if not key.startswith(self.prefix):
@@ -126,7 +155,8 @@ class LdbTable:
 
     def _check_key(self, key):
         if not key.startswith(self.prefix):
-            raise Exception("invalid key:(%s), prefix:(%s)" % (key, self.prefix))
+            raise Exception("invalid key:(%s), prefix:(%s)" %
+                            (key, self.prefix))
 
     def _check_index_name(self, index_name):
         validate_str(index_name, "invalid index_name:%r" % index_name)
@@ -139,14 +169,14 @@ class LdbTable:
         if info.check_user:
             validate_str(user_name, "invalid user_name:{!r}", user_name)
 
-    def _get_prefix(self, user_name = None):
+    def _get_prefix(self, user_name=None):
         user_name = self.user_name or user_name
         if user_name is None:
             return self.table_name + ":"
         else:
             return self.table_name + ":" + user_name + ":"
 
-    def _get_index_prefix(self, index_name, user_name = None):
+    def _get_index_prefix(self, index_name, user_name=None):
         self._check_index_name(index_name)
         self._check_user_name(user_name)
 
@@ -160,23 +190,24 @@ class LdbTable:
         obj_key = self._get_key_from_obj(obj)
         return quote(obj_key)
 
-    def _update_index(self, old_obj, new_obj, batch, user_name = None, force_update = False):
+    def _update_index(self, old_obj, new_obj, batch, user_name=None, force_update=False):
         if len(self.index_names) == 0:
             return
 
         validate_obj(new_obj, "invalid new_obj")
 
         # 插入的时候old_obj为空
-        obj_id  = self._get_id_from_obj(new_obj)
+        obj_id = self._get_id_from_obj(new_obj)
         obj_key = self._get_key_from_obj(new_obj)
         validate_str(obj_id, "invalid obj_id")
         escaped_obj_id = self._escape_key(obj_id)
 
         for index_name in self.index_names:
-            index_prefix = self._get_index_prefix(index_name, user_name = user_name)
+            index_prefix = self._get_index_prefix(
+                index_name, user_name=user_name)
             old_value = None
             new_value = None
-            
+
             if old_obj != None:
                 old_value = old_obj.get(index_name)
 
@@ -187,8 +218,8 @@ class LdbTable:
             index_changed = (new_value != old_value)
 
             if not index_changed:
-                logging.debug("index value unchanged, index_name:(%s), value:(%s)", 
-                    index_name, old_value)
+                logging.debug("index value unchanged, index_name:(%s), value:(%s)",
+                              index_name, old_value)
                 if not force_update:
                     continue
                 # else: 强制更新
@@ -196,14 +227,16 @@ class LdbTable:
             # 只要有旧的记录，就要清空旧索引值
             if old_obj != None and index_changed:
                 old_value = encode_index_value(old_value)
-                batch.check_and_delete(index_prefix + ":" + old_value + ":" + escaped_obj_id)
+                batch.check_and_delete(
+                    index_prefix + ":" + old_value + ":" + escaped_obj_id)
 
             # 新的索引值始终更新
             new_value = encode_index_value(new_value)
-            batch.check_and_put(index_prefix + ":" + new_value + ":" + escaped_obj_id, obj_key)
+            batch.check_and_put(index_prefix + ":" +
+                                new_value + ":" + escaped_obj_id, obj_key)
 
-    def _delete_index(self, old_obj, batch, user_name = None):
-        obj_id  = self._get_id_from_obj(old_obj)
+    def _delete_index(self, old_obj, batch, user_name=None):
+        obj_id = self._get_id_from_obj(old_obj)
         escaped_obj_id = self._escape_key(obj_id)
 
         for index_name in self.index_names:
@@ -211,11 +244,12 @@ class LdbTable:
             if old_value is None:
                 continue
             old_value = encode_index_value(old_value)
-            index_prefix = self._get_index_prefix(index_name, user_name = user_name)
+            index_prefix = self._get_index_prefix(
+                index_name, user_name=user_name)
             index_key = index_prefix + ":" + old_value + ":" + escaped_obj_id
             batch.delete(index_key)
 
-    def _put_obj(self, key, obj, sync = False):
+    def _put_obj(self, key, obj, sync=False):
         # ~~写redo-log，启动的时候要先锁定检查redo-log，恢复异常关闭的数据~~
         # 不需要重新实现redo-log，直接用leveldb的批量处理功能即可
         # 使用leveldb的批量操作可以确保不会读到未提交的数据
@@ -228,18 +262,18 @@ class LdbTable:
             # 更新批量操作
             batch.commit(sync)
 
-    def is_valid_key(self, key = None, user_name = None):
+    def is_valid_key(self, key=None, user_name=None):
         if user_name is None:
             return key.startswith(self.prefix)
         else:
             return key.startswith(self.prefix + user_name)
 
-    def get_by_id(self, row_id, default_value = None):
+    def get_by_id(self, row_id, default_value=None):
         validate_str(row_id, "invalid row_id:{!r}", row_id)
         key = self.build_key(row_id)
         return self.get_by_key(key, default_value)
 
-    def get_by_key(self, key, default_value = None):
+    def get_by_key(self, key, default_value=None):
         if key == "":
             return None
         self._check_key(key)
@@ -249,24 +283,24 @@ class LdbTable:
 
         return self._format_value(key, value)
 
-    def insert(self, obj, id_type = "timeseq", id_value = None):
+    def insert(self, obj, id_type="timeseq", id_value=None):
         self._check_value(obj)
         id_value = self._get_id_value(id_type, id_value)
-        key  = self.build_key(id_value)
+        key = self.build_key(id_value)
 
         obj[self.key_name] = key
-        obj[self.id_name]  = id_value
+        obj[self.id_name] = id_value
 
         self._put_obj(key, obj)
         return key
 
-    def insert_by_user(self, user_name, obj, id_type = "timeseq"):
-        """不建议使用，建议初始化时设置user_name"""
+    def insert_by_user(self, user_name, obj, id_type="timeseq"):
+        """指定用户名插入数据"""
         validate_str(user_name, "invalid user_name")
         self._check_value(obj)
 
         id_value = self._get_id_value(id_type)
-        key  = self.build_key(user_name, id_value)
+        key = self.build_key(user_name, id_value)
         self._put_obj(key, obj)
         return key
 
@@ -281,7 +315,7 @@ class LdbTable:
 
         self._put_obj(obj_key, update_obj)
 
-    def update_by_id(self, id, obj, user_name = None):
+    def update_by_id(self, id, obj, user_name=None):
         """通过ID进行更新，如果key包含用户，必须有user_name(初始化定义或者传入参数)"""
         self._check_user_name(user_name)
         key = self.build_key(user_name, id)
@@ -291,11 +325,11 @@ class LdbTable:
         """直接通过`key`进行更新"""
         self._check_key(key)
         self._check_value(obj)
-        
+
         update_obj = self._convert_to_db_row(obj)
         self._put_obj(key, update_obj)
 
-    def rebuild_index(self, obj, user_name = None):
+    def rebuild_index(self, obj, user_name=None):
         self._check_value(obj)
         self._check_user_name(user_name)
 
@@ -304,9 +338,9 @@ class LdbTable:
         with get_write_lock(key):
             old_obj = get(key)
             self._format_value(key, obj)
-            self._update_index(old_obj, obj, batch, 
-                force_update = True, 
-                user_name = user_name)
+            self._update_index(old_obj, obj, batch,
+                               force_update=True,
+                               user_name=user_name)
             # 更新批量操作
             batch.commit()
 
@@ -323,7 +357,7 @@ class LdbTable:
         key = self.build_key(id)
         self.delete_by_key(key)
 
-    def delete_by_key(self, key, user_name = None):
+    def delete_by_key(self, key, user_name=None):
         validate_str(key, "delete_by_key: invalid key")
         self._check_before_delete(key)
         self._check_user_name(user_name)
@@ -340,9 +374,8 @@ class LdbTable:
             batch.delete(key)
             batch.commit()
 
-
-    def iter(self, offset = 0, limit = 20, reverse = False, key_from = None, 
-            filter_func = None, fill_cache = True):
+    def iter(self, offset=0, limit=20, reverse=False, key_from=None,
+             filter_func=None, fill_cache=True):
         """返回一个遍历的迭代器
         @param {int} offset 返回结果下标开始
         @param {int} limit  返回结果最大数量
@@ -356,9 +389,9 @@ class LdbTable:
         if key_from != None:
             key_from = self.build_key(key_from)
 
-        for key, value in prefix_iter(self.prefix, filter_func, offset, limit, 
-                reverse = reverse, include_key = True, key_from = key_from, 
-                fill_cache = fill_cache):
+        for key, value in prefix_iter(self.prefix, filter_func, offset, limit,
+                                      reverse=reverse, include_key=True, key_from=key_from,
+                                      fill_cache=fill_cache):
             yield self._format_value(key, value)
 
     def list(self, *args, **kw):
@@ -367,31 +400,31 @@ class LdbTable:
             result.append(value)
         return result
 
-    def get_first(self, filter_func = None):
+    def get_first(self, filter_func=None):
         """读取第一个满足条件的数据"""
-        result = self.list(limit = 1, filter_func = filter_func)
+        result = self.list(limit=1, filter_func=filter_func)
         if len(result) > 0:
             return result[0]
         else:
             return None
 
-    def get_last(self, filter_func = None):
+    def get_last(self, filter_func=None):
         """读取最后一个满足条件的数据"""
-        result = self.list(limit = 1, reverse = True, filter_func = filter_func)
+        result = self.list(limit=1, reverse=True, filter_func=filter_func)
         if len(result) > 0:
             return result[0]
         else:
             return None
 
-    def list_by_user(self, user_name, offset = 0, limit = 20, reverse = False):
-        tuple_list = prefix_list(self.prefix + user_name, None, 
-            offset, limit, reverse = reverse, include_key = True)
+    def list_by_user(self, user_name, offset=0, limit=20, reverse=False):
+        tuple_list = prefix_list(self.prefix + user_name, None,
+                                 offset, limit, reverse=reverse, include_key=True)
         return self._get_result_from_tuple_list(tuple_list)
 
-    def list_by_func(self, user_name, filter_func = None, 
-            offset = 0, limit = 20, reverse = False):
-        tuple_list = prefix_list(self.prefix + user_name, filter_func, 
-            offset, limit, reverse = reverse, include_key = True)
+    def list_by_func(self, user_name, filter_func=None,
+                     offset=0, limit=20, reverse=False):
+        tuple_list = prefix_list(self.prefix + user_name, filter_func,
+                                 offset, limit, reverse=reverse, include_key=True)
         return self._get_result_from_tuple_list(tuple_list)
 
     def create_index_map_func(self, filter_func):
@@ -408,7 +441,8 @@ class LdbTable:
             key_obj_id_temp = self._get_id_from_obj(obj)
             key_obj_id = quote(key_obj_id_temp)
             if obj_id != key_obj_id:
-                logging.warning("invalid obj_id:(%s), obj_id:(%s)", obj_id, key_obj_id)
+                logging.warning(
+                    "invalid obj_id:(%s), obj_id:(%s)", obj_id, key_obj_id)
                 return None
 
             # 用于调试
@@ -424,8 +458,7 @@ class LdbTable:
                 return None
         return map_func
 
-
-    def count_by_index(self, index_name, filter_func = None, index_value = None):
+    def count_by_index(self, index_name, filter_func=None, index_value=None):
         if index_value != None:
             index_value = encode_index_value(index_value)
             prefix = self._get_index_prefix(index_name) + ":" + index_value
@@ -433,11 +466,11 @@ class LdbTable:
             prefix = self._get_index_prefix(index_name)
 
         map_func = self.create_index_map_func(filter_func)
-        return prefix_count(prefix, map_func = map_func)
+        return prefix_count(prefix, map_func=map_func)
 
-    def list_by_index(self, index_name, filter_func = None, 
-            offset = 0, limit = 20, reverse = False, 
-            index_value = None, match_type = "prefix"):
+    def list_by_index(self, index_name, filter_func=None,
+                      offset=0, limit=20, reverse=False,
+                      index_value=None, match_type="prefix"):
         """通过索引查询结果列表
         @param {str}  index_name 索引名称
         @param {func} filter_func 过滤函数
@@ -452,24 +485,24 @@ class LdbTable:
             prefix = self._get_index_prefix(index_name)
 
         map_func = self.create_index_map_func(filter_func)
-        return list(prefix_iter(prefix, offset = offset, limit = limit, 
-            map_func = map_func,
-            reverse = reverse, include_key = False))
+        return list(prefix_iter(prefix, offset=offset, limit=limit,
+                                map_func=map_func,
+                                reverse=reverse, include_key=False))
 
-    def count(self, filter_func = None, user_name = None):
+    def count(self, filter_func=None, user_name=None):
         if filter_func is None:
-            prefix = self._get_prefix(user_name = user_name)
+            prefix = self._get_prefix(user_name=user_name)
             return count_table(prefix)
         else:
-            prefix = self._get_prefix(user_name = user_name)
+            prefix = self._get_prefix(user_name=user_name)
             return prefix_count(prefix, filter_func)
 
     def count_by_user(self, user_name):
-        return self.count(user_name = user_name)
+        return self.count(user_name=user_name)
 
     def count_by_func(self, user_name, filter_func):
         assert filter_func != None, "[count_by_func.assert] filter_func != None"
-        return self.count(user_name = user_name, filter_func = filter_func)
+        return self.count(user_name=user_name, filter_func=filter_func)
 
 
 class PrefixedDb(LdbTable):
@@ -485,7 +518,7 @@ class TableIndexRepair:
 
     def repair_index(self):
         db = self.db
-        for value in db.iter(limit = -1):
+        for value in db.iter(limit=-1):
             db.rebuild_index(value)
 
         for name in db.index_names:
@@ -502,24 +535,36 @@ class TableIndexRepair:
     def delete_invalid_index(self, name):
         db = self.db
         index_prefix = db._get_index_prefix(name)
-        for old_key, record_key in prefix_iter(index_prefix, include_key = True):
+        for old_key, record_key in prefix_iter(index_prefix, include_key=True):
             record = get(record_key)
             if record is None:
-                logging.debug("empty record, key:(%s), record_id:(%s)", 
-                    old_key, record_key)
+                logging.debug("empty record, key:(%s), record_id:(%s)",
+                              old_key, record_key)
                 self.do_delete(old_key)
                 continue
 
-            record_id   = db._get_id_from_key(record_key)
-            record_id   = db._escape_key(record_id)
+            record_id = db._get_id_from_key(record_key)
+            record_id = db._escape_key(record_id)
             index_value = getattr(record, name)
             index_value = encode_index_value(index_value)
             new_key = index_prefix + ":" + index_value + ":" + record_id
 
             if new_key != old_key:
-                logging.debug("index dismatch, key:(%s), record_id:(%s), correct_key:(%s)", 
-                    old_key, record_key, new_key)
+                logging.debug("index dismatch, key:(%s), record_id:(%s), correct_key:(%s)",
+                              old_key, record_key, new_key)
                 self.do_delete(old_key)
 
 
-
+def insert(table_name, obj_value, sync=False):
+    """往指定表里面插入一条新记录"""
+    db = LdbTable(table_name)
+    with get_write_lock(table_name):
+        for i in range(10):
+            new_id = db._create_increment_id(start_id = 1)
+            old_value = db.get_by_id(new_id)
+            if old_value != None:
+                logging.warning("id conflict, table:%s, id:%s", table_name, new_id)
+                continue
+            db.update_by_id(new_id, obj_value)
+            return new_id
+        raise DBException("insert conflict")
