@@ -4,7 +4,8 @@
 # @modified 2022/04/17 13:58:29
 # @filename test_xutils_db.py
 
-from xutils import textutil
+from web.utils import Storage
+from xutils import dbutil, textutil
 from .a import *
 import os
 import threading
@@ -19,7 +20,6 @@ app = test_base.init()
 json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
-
 
 class MockedWriteBatch:
 
@@ -277,3 +277,39 @@ class TestMain(BaseTestCase):
         # 逻辑视图：两个超长的key + 2个转换后的key
         data2 = list(db.RangeIter())
         self.assertEqual(4, len(data2))
+
+    def test_create_auto_increment_id(self):
+        dbutil.register_table("test", "测试数据库")
+        dbutil.register_table_index("test", "name")
+        dbutil.register_table_index("test", "age")
+
+        db = dbutil.get_table("test")
+        obj1 = Storage(name = "Ada", age = 20)
+        db.insert(obj1, id_type = "auto_increment")
+
+        obj2 = Storage(name = "Bob", age = 21)
+        db.insert(obj2, id_type = "auto_increment")
+
+        obj3 = Storage(name = "Cooper", age = 30)
+        db.insert(obj3, id_type = "auto_increment")
+
+        obj1_found = db.first_by_index("name", index_value = "Ada")
+        obj2_found = db.first_by_index("name", index_value = "Bob")
+        obj3_found = db.first_by_index("name", index_value = "Cooper")
+
+        print("obj1_found", obj1_found)
+        print("obj2_found", obj2_found)
+        print("obj3_found", obj3_found)
+
+        self.assertEqual(int(obj1_found._id) + 1, int(obj2_found._id))
+        self.assertEqual(int(obj2_found._id) + 1, int(obj3_found._id))
+
+        results = db.list_by_index("age", limit = 10)
+        self.assertEqual(3, len(results))
+        self.assertEqual(20, results[0].age)
+        self.assertEqual(21, results[1].age)
+        self.assertEqual(30, results[2].age)
+
+
+
+

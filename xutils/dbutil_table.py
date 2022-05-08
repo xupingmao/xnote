@@ -31,7 +31,7 @@ class TableValidator:
 
 
 class LdbTable:
-    """基于leveldb的表，比较常见的是以下2种
+    """基于leveldb的表, 比较常见的是以下2种
     * key = prefix:record_id           全局数据库
     * key = prefix:user_name:record_id 用户维度数据
 
@@ -79,6 +79,13 @@ class LdbTable:
     def build_key_no_prefix(self, *argv):
         return ":".join(filter(None, argv))
 
+    def _get_user_name(self, user_name):
+        if user_name != None:
+            assert (self.user_name == None or self.user_name ==
+                    user_name), "user_name dismatch with self.user_name"
+            return user_name
+        return self.user_name
+
     def _get_key_from_obj(self, obj):
         validate_dict(obj, "obj is not dict")
         return obj.get(self.key_name)
@@ -95,6 +102,7 @@ class LdbTable:
             value = Storage(_raw=value)
 
         value[self.key_name] = key
+        value[self.id_name] = key.rsplit(":", 1)[-1]
         return value
 
     def _get_result_from_tuple_list(self, tuple_list):
@@ -110,7 +118,7 @@ class LdbTable:
         dict_del(obj_copy, self.id_name)
         return obj_copy
 
-    def _create_increment_id(self, start_id = None):
+    def _create_increment_id(self, start_id=None):
         if start_id != None:
             assert start_id > 0
 
@@ -124,9 +132,9 @@ class LdbTable:
             else:
                 last_id += 1
             put(MAX_ID_KEY, last_id)
-            return last_id
+            return str(last_id)
 
-    def _get_id_value(self, id_type="uuid", id_value=None):
+    def _create_new_id(self, id_type="uuid", id_value=None):
         if id_type == "uuid":
             validate_none(id_value, "invalid id_value")
             return xutils.create_uuid()
@@ -135,7 +143,7 @@ class LdbTable:
             validate_none(id_value, "invalid id_value")
             return timeseq()
 
-        if id_type == "autoincrement":
+        if id_type == "auto_increment":
             validate_none(id_value, "invalid id_value")
             return self._create_increment_id()
 
@@ -268,9 +276,10 @@ class LdbTable:
         else:
             return key.startswith(self.prefix + user_name)
 
-    def get_by_id(self, row_id, default_value=None):
+    def get_by_id(self, row_id, default_value=None, user_name=None):
         validate_str(row_id, "invalid row_id:{!r}", row_id)
-        key = self.build_key(row_id)
+        self._check_user_name(user_name)
+        key = self.build_key(user_name, row_id)
         return self.get_by_key(key, default_value)
 
     def get_by_key(self, key, default_value=None):
@@ -285,7 +294,7 @@ class LdbTable:
 
     def insert(self, obj, id_type="timeseq", id_value=None):
         self._check_value(obj)
-        id_value = self._get_id_value(id_type, id_value)
+        id_value = self._create_new_id(id_type, id_value)
         key = self.build_key(id_value)
 
         obj[self.key_name] = key
@@ -299,7 +308,7 @@ class LdbTable:
         validate_str(user_name, "invalid user_name")
         self._check_value(obj)
 
-        id_value = self._get_id_value(id_type)
+        id_value = self._create_new_id(id_type)
         key = self.build_key(user_name, id_value)
         self._put_obj(key, obj)
         return key
@@ -432,7 +441,7 @@ class LdbTable:
             # 先判断实例是否存在
             obj = self.get_by_key(value)
             if obj is None:
-                # delete(key)
+                # 异步 delete(key)
                 logging.warning("invalid key:(%s)", key)
                 return None
 
@@ -478,6 +487,8 @@ class LdbTable:
         @param {int}  limit  返回记录限制
         @param {bool} reverse 是否逆向查询
         """
+        validate_str(index_name, "index_name can not be empty")
+
         if index_value != None:
             index_value = encode_index_value(index_value)
             prefix = self._get_index_prefix(index_name) + ":" + index_value
@@ -488,6 +499,13 @@ class LdbTable:
         return list(prefix_iter(prefix, offset=offset, limit=limit,
                                 map_func=map_func,
                                 reverse=reverse, include_key=False))
+
+    def first_by_index(self, *args, **kw):
+        kw["limit"] = 1
+        result = self.list_by_index(*args, **kw)
+        if len(result) > 0:
+            return result[0]
+        return None
 
     def count(self, filter_func=None, user_name=None):
         if filter_func is None:
@@ -560,10 +578,11 @@ def insert(table_name, obj_value, sync=False):
     db = LdbTable(table_name)
     with get_write_lock(table_name):
         for i in range(10):
-            new_id = db._create_increment_id(start_id = 1)
+            new_id = db._create_increment_id(start_id=1)
             old_value = db.get_by_id(new_id)
             if old_value != None:
-                logging.warning("id conflict, table:%s, id:%s", table_name, new_id)
+                logging.warning("id conflict, table:%s, id:%s",
+                                table_name, new_id)
                 continue
             db.update_by_id(new_id, obj_value)
             return new_id

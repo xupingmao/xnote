@@ -711,7 +711,6 @@ def _rename_table_no_lock(old_name, new_name):
 
 
 def rename_table(old_name, new_name):
-    # TODO 还没实现
     with get_write_lock(old_name):
         with get_write_lock(new_name):
             _rename_table_no_lock(old_name, new_name)

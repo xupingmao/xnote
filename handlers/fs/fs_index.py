@@ -19,13 +19,13 @@ from xutils import Storage
 
 from .fs_helpers import get_index_dirs, get_index_db
 
-def calc_dir_size(db, dirname):
+def calc_dir_size(db, dirname, depth=1000):
     dirname = os.path.abspath(dirname)
     size = 0
     try:
         for fname in os.listdir(dirname):
             fpath = os.path.join(dirname, fname)
-            size += calc_size(db, fpath)
+            size += calc_size(db, fpath, depth-1)
     except:
         # 无法读取目录
         xutils.print_exc()
@@ -35,17 +35,19 @@ def calc_dir_size(db, dirname):
     return size
 
 
-def calc_size(db, fpath):
+def calc_size(db, fpath, depth=1000):
+    if depth <= 0:
+        logging.error("too deep depth")
+        return 0
     fpath = os.path.abspath(fpath)
     print(fpath)
     
     if os.path.islink(fpath):
-        # 软链接要转为真实的路径，不然会死循环
-        realpath = os.path.realpath(fpath)
-        return calc_size(db, realpath)
+        # 软链接会导致循环引用,即使用真实的路径也不能解决这个问题
+        return 0
 
     if os.path.isdir(fpath):
-        return calc_dir_size(db, fpath)
+        return calc_dir_size(db, fpath, depth-1)
     try:
         st = os.stat(fpath)
         info = Storage(fsize = st.st_size)
