@@ -8,7 +8,6 @@
 
 import time
 import logging
-import xutils
 import xconfig
 
 from xutils import Storage
@@ -17,6 +16,7 @@ from xutils import dbutil
 from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .node_base import CONFIG
+from .system_sync_client import HttpClient
 
 
 def filter_result(result, offset):
@@ -30,6 +30,7 @@ def filter_result(result, offset):
 
     result.data = data
     return result
+
 
 class Follower(NodeManagerBase):
 
@@ -48,8 +49,7 @@ class Follower(NodeManagerBase):
     def get_client(self):
         leader_host = self.get_leader_url()
         leader_token = self.get_leader_token()
-        return xutils.call("system_sync.HttpClient", leader_host, 
-            leader_token, self.admin_token)
+        return HttpClient(leader_host, leader_token, self.admin_token)
 
     def ping_leader(self):
         now = time.time()
@@ -59,13 +59,13 @@ class Follower(NodeManagerBase):
             return
 
         port = xconfig.get_global_config("system.port")
-        
+
         fs_sync_offset = CONFIG.get("fs_sync_offset", "")
 
         leader_host = self.get_leader_url()
         if leader_host != None:
             client = self.get_client()
-            params = dict(port = port, fs_sync_offset = fs_sync_offset)
+            params = dict(port=port, fs_sync_offset=fs_sync_offset)
             result_obj = client.get_stat(params)
 
             self.update_ping_result(result_obj)
@@ -75,16 +75,16 @@ class Follower(NodeManagerBase):
             return result_obj
 
         return None
-    
+
     def update_ping_result(self, result0):
         if result0 is None:
-            logging.debug("PING主节点:返回None")
+            logging.error("PING主节点:返回None")
             return
 
         result = Storage(**result0)
         if result.code != "success":
             self.ping_error = result.message
-            logging.debug("PING主节点失败:%s", self.ping_error)
+            logging.error("PING主节点失败:%s", self.ping_error)
             return
 
         logging.debug("PING主节点成功")
@@ -115,7 +115,10 @@ class Follower(NodeManagerBase):
         return last_sync >= self.PING_INTERVAL
 
     def sync_files_from_leader(self):
-        self.ping_leader()
+        result = self.ping_leader()
+        if result == None:
+            logging.error("ping_leader结果为空")
+            return
 
         if not self.need_sync():
             # logging.debug("没到SYNC时间")
@@ -171,7 +174,7 @@ class Follower(NodeManagerBase):
         return "%.2f%%" % (count / self.fs_index_count * 100.0)
 
     def sync_for_home_page(self):
-        self.ping_leader()
+        return self.ping_leader() != None
 
     def get_fs_index_count(self):
         return self.fs_index_count
@@ -188,5 +191,5 @@ class Follower(NodeManagerBase):
         self.fs_sync_done_time = -1
 
         db = dbutil.get_hash_table("fs_sync_index_copy")
-        for key, value in db.iter(limit = -1):
+        for key, value in db.iter(limit=-1):
             db.delete(key)

@@ -226,7 +226,7 @@ class LdbTable:
             batch.put(key, self._convert_to_db_row(obj))
             self._update_index(old_obj, obj, batch)
             # 更新批量操作
-            commit_write_batch(batch)
+            batch.commit(batch)
 
     def is_valid_key(self, key = None, user_name = None):
         if user_name is None:
@@ -308,7 +308,7 @@ class LdbTable:
                 force_update = True, 
                 user_name = user_name)
             # 更新批量操作
-            commit_write_batch(batch)
+            batch.commit()
 
     def repair_index(self):
         repair = TableIndexRepair(self)

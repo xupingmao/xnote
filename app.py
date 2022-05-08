@@ -18,6 +18,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from __future__ import print_function
+from core.a import *
+import web
+import xutils
+import xconfig
+import xtables
+import xmanager
+import xtemplate
+import signal
+import threading
+from core import code_builder
+from xutils import cacheutil
+from xutils import dbutil
+from xutils.mem_util import log_mem_info_deco
+from xutils.lockutil import FileLock
+from autoreload import AutoReloadThread
 
 import os
 import sys
@@ -25,25 +40,6 @@ import time
 import logging
 import argparse
 
-# insert after working dir
-sys.path.insert(1, "lib")
-sys.path.insert(1, "core")
-
-from autoreload import AutoReloadThread
-from xutils.lockutil import FileLock
-from xutils.mem_util import log_mem_info_deco
-from xutils import dbutil
-from xutils import cacheutil
-from core import code_builder
-
-import threading
-import signal
-import xtemplate
-import xmanager
-import xtables
-import xconfig
-import xutils
-import web
 
 FILE_LOCK = FileLock("pid.lock")
 
@@ -322,6 +318,7 @@ def main():
             sys.exit(1)
     finally:
         FILE_LOCK.release()
+
 
 if __name__ == '__main__':
     main()

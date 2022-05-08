@@ -3,7 +3,6 @@
 # @since 2021/12/04 15:35:23
 # @modified 2022/01/23 23:57:56
 # @filename lockutil.py
-import logging
 import os
 import xutils
 
@@ -11,8 +10,6 @@ try:
 	import fcntl
 except ImportError:
 	fcntl = None
-
-import multiprocessing
 
 class UnixLock:
 	"""Unix环境的锁实现"""

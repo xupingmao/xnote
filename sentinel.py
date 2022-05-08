@@ -15,7 +15,6 @@ https://blog.csdn.net/halfclear/article/details/72783900
 
 import sys
 import os
-import subprocess
 
 def main():
 	args = sys.argv[1:]

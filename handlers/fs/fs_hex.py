@@ -1,21 +1,17 @@
 # -*- coding:utf-8 -*-
-# @author xupingmao <578749341@qq.com>
-# @since 2019/12/28 22:04:24
-# @modified 2021/08/07 16:30:56
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2019-01-10 00:21:16
+@LastEditors  : xupingmao
+@LastEditTime : 2022-05-04 22:50:22
+@FilePath     : /xnote/handlers/fs/fs_hex.py
+@Description  : 二进制查看工具
+"""
 
-# -*- coding:utf-8 -*-
-# @since 2019-01-10 00:21:16
 import os
-import re
 import math
-import time
-import web
-import xconfig
 import xutils
-import xauth
-import xmanager
-import xtables
-import xtemplate
 from xtemplate import BasePlugin
 
 HTML = """
@@ -49,11 +45,13 @@ HEX_DICT = {}
 for i in range(256):
     HEX_DICT[i] = '%02x ' % i
 
+
 def bytes_hex(bytes):
     out = ''
     for b in bytes:
         out += HEX_DICT[b]
     return out
+
 
 def bytes_chars(bytes):
     out = ''
@@ -65,6 +63,7 @@ def bytes_chars(bytes):
             out += '.'
     return out
 
+
 class Main(BasePlugin):
 
     show_title = False
@@ -74,32 +73,31 @@ class Main(BasePlugin):
     require_admin = True
     category = 'dir'
     editable = False
-    
+
     def handle(self, input):
         # 输入框的行数
         self.rows = 0
         self.show_pagenation = True
         self.page_max = 0
-        
+
         pagesize = 16 * 30
-        
-        path   = xutils.get_argument("path", "")
-        page   = xutils.get_argument("page", 1, type = int)
+
+        path = xutils.get_argument("path", "")
+        page = xutils.get_argument("page", 1, type=int)
         offset = max(page-1, 0) * pagesize
-        
+
         self.page_url = "?path=%s&page=" % path
-        
+
         if path == "":
             return
-        
-        path      = xutils.get_real_path(path)
-        hex_text  = ""
-        char_text = ""
-        
+
+        path = xutils.get_real_path(path)
+        hex_text = ""
+
         if not os.path.isfile(path):
             return "`%s` IS NOT A FILE!" % path
         else:
-            filesize = xutils.get_file_size(path, format = False)
+            filesize = xutils.get_file_size(path, format=False)
             line_fmt = "%05x"
             step = 16
             self.page_max = math.ceil(filesize / pagesize)
@@ -113,17 +111,18 @@ class Main(BasePlugin):
                     hex_text += line_fmt % (offset + i)
                     hex_text += padding + bytes_hex(bytes).ljust(step * 3)
                     hex_text += padding + bytes_chars(bytes) + '\n'
-            
-            self.writetemplate(HTML, 
-                path = path, 
-                hex_text = hex_text)
+
+            self.writetemplate(HTML,
+                               path=path,
+                               hex_text=hex_text)
 
     def on_init(self, context=None):
         # 插件初始化操作
         pass
-    
+
     def command(self):
         pass
+
 
 xurls = (
     r"/fs_hex", Main

@@ -234,19 +234,17 @@ class TestMain(BaseTestCase):
         for t in threads:
             t.join()
     
-    def test_lmdb_large_key(self):
-        from xutils.db.driver_lmdb import LmdbEnhancedKV
-        db_dir = os.path.join(xconfig.DB_DIR, "lmdb")
-        # 初始化一个5M的数据库
-        db = LmdbEnhancedKV(db_dir, map_size=1024 * 1024 * 5)
-
+    def do_test_lmdb_large_key(self, db):
         prefix = textutil.random_string(1000)
         key1 = (prefix + "_key1").encode("utf-8")
         key2 = (prefix + "_key2").encode("utf-8")
+        key3 = (prefix + "_key3").encode("utf-8")
         value1 = b"1"
         value2 = b"2"
+        value3 = b"3"
         db.Put(key1, value1)
         db.Put(key2, value2)
+        db.Put(key3, value3)
 
         value1b = db.Get(key1)
         self.assertEqual(value1, value1b)
@@ -255,3 +253,27 @@ class TestMain(BaseTestCase):
         value1c = db.Get(key1)
         self.assertEqual(None, value1c)
 
+    def test_lmdb_large_key1(self):
+        from xutils.db.driver_lmdb import LmdbEnhancedKV
+        db_dir = os.path.join(xconfig.DB_DIR, "lmdb")
+        # 初始化一个5M的数据库
+        db = LmdbEnhancedKV(db_dir, map_size=1024 * 1024 * 5)
+        self.do_test_lmdb_large_key(db)
+    
+    def test_lmdb_large_key2(self):
+        from xutils.db.driver_lmdb import LmdbEnhancedKV2
+        db_dir = os.path.join(xconfig.DB_DIR, "lmdb2")
+        # 初始化一个5M的数据库
+        db = LmdbEnhancedKV2(db_dir, map_size=1024 * 1024 * 5)
+        self.do_test_lmdb_large_key(db)
+
+        print("-" * 60)
+        print("Print Values")
+
+        # 物理视图：一个超长的key + 2个转换后的key
+        data = list(db.kv.RangeIter())
+        self.assertEqual(3, len(data))
+
+        # 逻辑视图：两个超长的key + 2个转换后的key
+        data2 = list(db.RangeIter())
+        self.assertEqual(4, len(data2))

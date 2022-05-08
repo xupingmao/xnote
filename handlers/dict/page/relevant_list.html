@@ -24,16 +24,15 @@
 {% end %}
 
 {% block body_top %}
-
 <div class="card">
     <div class="card-title">
         <span>相关词词库</span>
         <div class="float-right">
+            <a class="btn add-relevant-word">新增相关词</a>
             {% include common/button/back_button.html %}
         </div>
     </div>
 </div>
-
 {% end %}
 
 {% block body_left %}
@@ -77,9 +76,8 @@
 {% end %}
 
 {% block body_right %}
-<div class="list card">
-    <a class="list-item add-relevant-word">新增相关词</a>
-</div>
+
+{% include dict/component/dict_sidebar.html %}
 
 <script type="text/javascript">
     $(function () {

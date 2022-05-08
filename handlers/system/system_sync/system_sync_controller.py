@@ -28,11 +28,9 @@ import xmanager
 from xutils import webutil
 from xutils import Storage
 from xutils import dbutil
-from xutils import netutil
 from xutils import dateutil
 from xutils import textutil 
 
-from .node_base import NodeManagerBase, convert_follower_dict_to_list
 from .node_follower import Follower
 from .node_leader import Leader
 
@@ -249,6 +247,14 @@ class SyncHandler:
         data = FOLLOWER.ping_leader()
         return dict(code = "success", data = data)
 
+
+class LeaderHandler(SyncHandler):
+
+    def GET(self):
+        return self.handle_leader_action()
+
+    
+
 @xmanager.listen("sys.init")
 def init(ctx = None):
     LEADER.get_leader_token()
@@ -260,7 +266,11 @@ def on_ping_leader(ctx = None):
         return None
 
     try:
-        return FOLLOWER.ping_leader()
+        result = FOLLOWER.ping_leader()
+        if result == None:
+            logging.error("ping_leader result empty, wait 10 seconds ...")
+            time.sleep(10)
+        return result
     except:
         xutils.print_exc()
         logging.error("ping_leader failed, wait 60 seconds...")
@@ -284,5 +294,6 @@ def event_sync_files_from_leader(ctx = None):
 
 
 xurls = (
-    r"/system/sync", SyncHandler
+    r"/system/sync", SyncHandler,
+    r"/system/sync/leader", LeaderHandler
 )

@@ -1,0 +1,58 @@
+{% extends base %}
+
+{% block body %}
+
+	{% include test/component/example_nav.html %}
+
+{% init html1 = """
+<div class="x-dialog" id="dialog1">
+    <div class="card">
+        <p>第一行</p>
+        <p>第二行</p>
+        <textarea></textarea>
+    </div>
+</div>
+
+<button class="btn btn-default" id="dialog1Btn">打开对话框</button>
+<script>
+    $("#dialog1Btn").click(function () {
+        var html = $("#dialog1").html();
+        xnote.openDialog("标题", html, ["好的", "取消"], [function () {
+            xnote.alert("你确认了操作");
+        }]);
+    })
+</script>
+""" %}
+
+{% init html2 = """
+<button class="btn btn-default" id="alertBtn">alert</button>
+<button class="btn btn-default" id="toastBtn">toast</button>
+<button class="btn btn-default" id="promptBtn">prompt</button>
+
+<script>
+    $("#alertBtn").click(function () {
+        xnote.alert("alert测试!");
+    });
+    $("#toastBtn").click(function () {
+        xnote.toast("toast测试");
+    });
+    $("#promptBtn").click(function () {
+        xnote.prompt("prompt测试");
+    });
+</script>
+""" %}
+
+<div class="card">
+	<p>对话框自定义HTML</p>
+	<pre class="marked-code">{{html1}}</pre>
+	{% raw html1 %}
+</div>
+
+<div class="card">
+	<p>对话框自定义HTML</p>
+	<pre class="marked-code">{{html2}}</pre>
+	{% raw html2 %}
+</div>
+
+
+{% end %}

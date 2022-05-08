@@ -3,7 +3,6 @@
 # @since 2017
 # @modified 2021/07/31 14:27:13
 import os
-import uuid
 import web
 import xauth
 import xconfig
@@ -12,7 +11,7 @@ import xtemplate
 import xmanager
 import time
 import math
-from xutils import quote, fsutil
+from xutils import fsutil
 from xtemplate import T
 
 def get_link(filename, webpath):

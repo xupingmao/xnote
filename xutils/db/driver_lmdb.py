@@ -6,9 +6,16 @@
 
 import lmdb
 import logging
+import threading
+import pickle
+
+from xutils import textutil
 from xutils.base import Storage
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_bytes, encode_int8_to_bytes
 
+
+# 用于写操作的加锁，所以在多进程或者分布式环境中写操作是不安全的
+_lock = threading.RLock()
 
 class LmdbKV:
 
@@ -97,7 +104,7 @@ class LmdbKV:
 
     def RangeIter_reverse(self, key_from=None, key_to=None,
                           include_value=True):
-
+        """反向遍历数据"""
         with self.env.begin() as tx:
             with tx.cursor() as cur:
                 if key_to != None:
@@ -210,7 +217,112 @@ class LmdbEnhancedKV:
                 if value_obj.get("_key") == key_str:
                     return self.kv.Delete(tmp_key)
             return None
-        return self.kv.Delete(key)
+        return self.kv.Delete(key, sync)
 
     def RangeIter(self, *args, **kw):
         raise Exception("当前实现不支持按顺序遍历")
+
+
+class LmdbEnhancedKV2:
+
+    def __init__(self, *args, **kw):
+        self.kv = LmdbKV(*args, **kw)
+        self.max_key_size = self.kv.env.max_key_size()
+
+    def get_large_key_prefix(self, key):
+        return key[:self.max_key_size]
+
+    def create_new_key(self, key):
+        for i in range(10):
+            new_key = "_long_key:" + textutil.create_uuid()
+            new_key = new_key.encode("utf-8")
+            if self.kv.Get(new_key) == None:
+                return new_key
+        raise Exception("create_new_key: too many retries!")
+
+    def get_value_dict(self, prefix):
+        value = self.kv.Get(prefix)
+        if value is None:
+            return dict()
+        else:            
+            value_dict = convert_bytes_to_object(value)
+            result = dict()
+            for key in value_dict:
+                value = value_dict[key]
+                result[key.encode("utf-8")] = value.encode("utf-8")
+            return result
+
+    def save_value_dict(self, prefix, value_dict):
+        if len(value_dict) == 0:
+            self.kv.Delete(prefix)
+            return
+        data = dict()
+        for key in value_dict:
+            value = value_dict[key]
+            data[key.decode("utf-8")] = value.decode("utf-8")
+        self.kv.Put(prefix, convert_object_to_bytes(data))
+
+    def Get(self, key):
+        if len(key) >= self.max_key_size:
+            prefix = self.get_large_key_prefix(key)
+            value_dict = self.get_value_dict(prefix)
+            for fullkey in value_dict:
+                if fullkey == key:
+                    newkey = value_dict[fullkey]
+                    return self.kv.Get(newkey)
+
+        return self.kv.Get(key)
+
+    def Put(self, key, value, sync=False):
+        if len(key) >= self.max_key_size:
+            logging.warning("key长度(%d)超过限制(%d)", len(key), self.max_key_size)
+            prefix = self.get_large_key_prefix(key)
+            with _lock:
+                value_dict = self.get_value_dict(prefix)
+                new_key = value_dict.get(key)
+                if new_key != None:
+                    self.kv.Put(new_key, value, sync)
+                else:
+                    new_key = self.create_new_key(key)
+                    value_dict[key] = new_key
+                    self.kv.Put(new_key, value, sync)
+                    self.save_value_dict(prefix, value_dict)
+                    return
+        return self.kv.Put(key, value, sync)
+
+    def Delete(self, key, sync=False):
+        if len(key) >= self.max_key_size:
+            prefix = self.get_large_key_prefix(key)
+            with _lock:
+                value_dict = self.get_value_dict(prefix)
+                new_key = value_dict.get(key)
+                if new_key != None:
+                    self.kv.Delete(new_key, sync)
+                    del value_dict[key]
+                    self.save_value_dict(prefix, value_dict)
+                return
+        return self.kv.Delete(key, sync)
+
+    def RangeIter(self, *args, **kw):
+        include_value = kw.get("include_value", True)
+        if include_value:
+            for key, value in self.kv.RangeIter(*args, **kw):
+                if len(key) >= self.max_key_size:
+                    prefix = self.get_large_key_prefix(key)
+                    value_dict = self.get_value_dict(prefix)
+                    # 必须要保证key的迭代顺序
+                    for fullkey in sorted(value_dict.keys()):
+                        new_key = value_dict[fullkey]
+                        yield fullkey, self.kv.Get(new_key)
+                else:
+                    yield key, value
+        else:
+            for key in self.kv.RangeIter(*args, **kw):
+                if len(key) >= self.max_key_size:
+                    prefix = self.get_large_key_prefix(key)
+                    value_dict = self.get_value_dict(prefix)
+                    # 必须要保证key的迭代顺序
+                    for fullkey in sorted(value_dict.keys()):
+                        yield fullkey
+                else:
+                    yield key

@@ -71,7 +71,7 @@ class HttpClient:
 
         params["token"] = self.token
 
-        url = "{host}/system/sync?p=get_stat".format(host = self.host)
+        url = "{host}/system/sync/leader?p=get_stat".format(host = self.host)
         result = netutil.http_get(url, params = params)
         result_obj = textutil.parse_json(result, ignore_error = True)
         return result_obj    
@@ -80,7 +80,7 @@ class HttpClient:
         if self.check_failed():
             return
 
-        url = "{host}/system/sync?p=list_files&token={token}&offset={offset}".format(
+        url = "{host}/system/sync/leader?p=list_files&token={token}&offset={offset}".format(
             host = self.host, token = self.token, offset = quote(offset))
 
         content = netutil.http_get(url)
@@ -188,6 +188,4 @@ class HttpClient:
 
             logging.debug("正在重试:%s", item)
             self.download_file(item)
-
-xutils.register_func("system_sync.HttpClient", HttpClient)
 

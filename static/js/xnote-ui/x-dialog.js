@@ -63,14 +63,18 @@ xnote.closeDialog = function (flag) {
     }
 }
 
-xnote.showDialogEx = function (options) {
-    var dialogId = xnote.showDialogExInner(options);
+xnote.openDialogEx = function (options) {
+    var dialogId = xnote.openDialogExInner(options);
     xnote._dialogIdStack.push(dialogId);
     return dialogId;
 }
 
-xnote.showDialogExInner = function (options) {
-    var area = getDialogArea();
+xnote.showDialogEx = function () {
+    return xnote.openDialogEx.apply(this, arguments);
+}
+
+xnote.openDialogExInner = function (options) {
+    var area = options.area;
     var title = options.title;
     var html  = options.html;
     var buttons = options.buttons;
@@ -93,6 +97,10 @@ xnote.showDialogExInner = function (options) {
 
     if (!(functions instanceof Array)) {
         functions = [functions];
+    }
+
+    if (area === undefined) {
+        area = getDialogArea();
     }
 
     var params = {
@@ -125,13 +133,17 @@ xnote.showDialogExInner = function (options) {
     return index
 }
 
-xnote.showDialog = function(title, html, buttons, functions) {
+xnote.openDialog = function(title, html, buttons, functions) {
     var options = {};
     options.title = title;
     options.html  = html;
     options.buttons = buttons;
     options.functions = functions;
     return xnote.showDialogEx(options);
+}
+
+xnote.showDialog = function () {
+    return xnote.openDialog.apply(this, arguments);
 }
 
 xnote.showTextDialog = function(title, text, buttons, functions) {
