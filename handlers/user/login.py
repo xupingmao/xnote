@@ -37,32 +37,19 @@ class LoginHandler:
     def POST(self):
         name = xutils.get_argument("username", "")
         pswd = xutils.get_argument("password", "")
-        target = xutils.get_argument("target")
         error = ""
         count = cacheutil.get("login.fail.count#%s" % name, 0)
         name  = name.strip()
         pswd  = pswd.strip()
-        if count >= RETRY_LIMIT:
+
+        if name == "":
+            error = "请输入登录名"
+        elif pswd == "":
+            error = "请输入密码"
+        elif count >= RETRY_LIMIT:
             error = "重试次数过多"
         else:
-            user = xauth.get_user_by_name(name)
-            if user == None:
-                error = "用户名或密码错误"
-                save_login_info(name, pswd, error)
-                save_login_error_count(name, count + 1)
-            else:
-                if pswd == user["password"]:
-                    save_login_info(name, "success")
-                    
-                    xauth.login_user_by_name(name, login_ip = get_real_ip())
-
-                    if target is None:
-                        raise web.seeother("/")
-                    raise web.seeother(target)
-                else:
-                    error = "用户名或密码错误"
-                    save_login_info(name, pswd, error)
-                    save_login_error_count(name, count + 1)
+            error = self.do_login(name, pswd, count)
 
         return xtemplate.render("user/page/login.html", 
             show_aside = False,
@@ -78,6 +65,29 @@ class LoginHandler:
             password="",
             error="")
 
+    def do_login(self, name, pswd, count = 0):
+        target = xutils.get_argument("target", "")
+        user = xauth.get_user_by_name(name)
+        error = ""
+        
+        if user == None:
+            error = "用户名或密码错误"
+            save_login_info(name, pswd, error)
+            save_login_error_count(name, count + 1)
+        else:
+            if pswd == user["password"]:
+                save_login_info(name, "success")
+                
+                xauth.login_user_by_name(name, login_ip = get_real_ip())
+
+                if target == "":
+                    raise web.found("/")
+                raise web.found(target)
+            else:
+                error = "用户名或密码错误"
+                save_login_info(name, pswd, error)
+                save_login_error_count(name, count + 1)
+        return error
 
 xurls = (
     r"/login", LoginHandler

@@ -16,16 +16,6 @@ SCAN_HTML = """
     }
 </style>
 
-<div class="card">
-    <div class="card-title">
-        <span>数据库工具</span>
-
-        <div class="float-right">
-            {% include common/button/back_button.html %}
-        </div>
-    </div>
-</div>
-
 {% include system/component/db_nav.html %}
 
 <div class="card">
@@ -113,6 +103,45 @@ $(function () {
 });
 </script>
 
+"""
+
+META_HTML = """
+<style>
+    .key { width: 75%; }
+    .admin-stat-th { width: 25% }
+</style>
+
+{% include system/component/db_nav.html %}
+
+<div class="card admin-stat">
+    <div class="card-title"> 
+        <span>元数据</span>
+
+        <div class="float-right">
+            {% if hide_index != "true" %}
+                <a class="btn btn-default" href="?p={{p}}&hide_index=true&tab=meta">隐藏索引</a>
+            {% else %}
+                <a class="btn btn-default" href="?p={{p}}&hide_index=false&tab=meta">展示索引</a>
+            {% end %}
+        </div>
+    </div>
+    <table class="table">
+        <tr>
+            <th class="admin-stat-th">类别</th>
+            <th class="admin-stat-th">项目</th>
+            <th class="admin-stat-th">说明</th>
+            <th class="admin-stat-th">数量</th>
+        </tr>
+        {% for category, key, description, value in admin_stat_list %}
+            <tr>
+                <td>{{category}}</td>
+                <td><a href="/system/db_scan?prefix={{key}}&reverse=true">{{key}}</a></td>
+                <td>{{description}}</td>
+                <td>{{value}}</td>
+            </tr>
+        {% end %}
+    </table>
+</div>
 """
 
 def get_display_value(value):
@@ -205,7 +234,37 @@ class DbScanHandler(BasePlugin):
         kw.last_key = self.last_key
         kw.table_names = dbutil.get_table_names()
 
-        self.writetemplate(SCAN_HTML, **kw)
+        self.handle_admin_stat_list(kw)
+
+        html = self.get_html()
+        self.writetemplate(html, **kw)
+
+    def get_html(self):
+        p = xutils.get_argument("p", "")
+        if p == "meta":
+            return META_HTML
+        return SCAN_HTML
+
+    def handle_admin_stat_list(self, kw):
+        p = xutils.get_argument("p", "")
+        if p != "meta":
+            return
+        hide_index = xutils.get_argument("hide_index", "true")
+
+        admin_stat_list = []
+        if xauth.is_admin():
+            table_dict = dbutil.get_table_dict_copy()
+            table_values = sorted(table_dict.values(), key = lambda x:(x.category,x.name))
+            for table_info in table_values:
+                name = table_info.name
+                if hide_index == "true" and name.startswith("_index"):
+                    continue
+                admin_stat_list.append([table_info.category, 
+                    table_info.name, 
+                    table_info.description, 
+                    dbutil.count_table(name, use_cache = True)])
+        
+        kw.admin_stat_list = admin_stat_list
 
 
 

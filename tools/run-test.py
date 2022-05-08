@@ -26,18 +26,23 @@ def check_and_install_pkg(py_module, pip_version = ""):
 		os.system("python3 -m pip install %s" % pip_version)
 
 def run_test(target = None):
-
 	if target == "xutils_db":
 		os.system("python3 -m pytest tests/test_xutils_db.py --doctest-modules --cov xutils.db --capture no")
 		os.system("python3 -m coverage html")
-	else:
-		check_and_install_pkg("pytest", "pytest==5.1.0")
-		os.system("python3 -m pip install pytest-cov==2.7.1")
-		os.system("python3 -m pip install python-coveralls==2.9.3")
-		os.system("python3 -m pip install coverage==4.5.4")
-		os.system("python3 -m pip install lmdb")
-		os.system("python3 -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core")
+		return
+
+	if target == "app":
+		os.system("python3 -m pytest tests/test_app.py --doctest-modules --cov handlers --capture no")
 		os.system("python3 -m coverage html")
+		return
+	
+	check_and_install_pkg("pytest", "pytest==5.1.0")
+	os.system("python3 -m pip install pytest-cov==2.7.1")
+	os.system("python3 -m pip install python-coveralls==2.9.3")
+	os.system("python3 -m pip install coverage==4.5.4")
+	os.system("python3 -m pip install lmdb")
+	os.system("python3 -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core")
+	os.system("python3 -m coverage html")
 
 def main():
 	parser = argparse.ArgumentParser()

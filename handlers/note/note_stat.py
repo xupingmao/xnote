@@ -16,8 +16,6 @@ HTML = """
     .admin-stat-th { width: 25% }
 </style>
 
-{% include system/component/db_nav.html %}
-
 {% if stat_list != None %}
 <div class="card">
     <table class="table">
@@ -28,38 +26,6 @@ HTML = """
         {% for key, value in stat_list %}
             <tr>
                 <td>{{key}}</td>
-                <td>{{value}}</td>
-            </tr>
-        {% end %}
-    </table>
-</div>
-{% end %}
-
-{% if _is_admin %}
-<div class="card admin-stat">
-    <div class="card-title"> 
-        <span>全局统计</span>
-
-        <div class="float-right">
-            {% if hide_index != "true" %}
-                <a class="btn btn-default" href="?p={{p}}&hide_index=true&tab=meta">隐藏索引</a>
-            {% else %}
-                <a class="btn btn-default" href="?p={{p}}&hide_index=false&tab=meta">展示索引</a>
-            {% end %}
-        </div>
-    </div>
-    <table class="table">
-        <tr>
-            <th class="admin-stat-th">类别</th>
-            <th class="admin-stat-th">项目</th>
-            <th class="admin-stat-th">说明</th>
-            <th class="admin-stat-th">数量</th>
-        </tr>
-        {% for category, key, description, value in admin_stat_list %}
-            <tr>
-                <td>{{category}}</td>
-                <td><a href="/system/db_scan?prefix={{key}}&reverse=true">{{key}}</a></td>
-                <td>{{description}}</td>
                 <td>{{value}}</td>
             </tr>
         {% end %}

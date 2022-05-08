@@ -2,6 +2,7 @@
 # Created by xupingmao on 2017/05/23
 # @modified 2022/04/04 15:47:28
 
+from .a import *
 import os
 import xutils
 import xtemplate
@@ -9,22 +10,20 @@ import xconfig
 import xtables
 import xauth
 from xutils import logutil
+from . import test_base
+from .test_base import ResponseWrapper
 
-# cannot perform relative import
-try:
-    import test_base
-except ImportError:
-    from tests import test_base
-
-app          = test_base.init()
+app = test_base.init()
 json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
 SEARCH_DAO = xutils.DAO("search")
 
+
 def get_script_path(name):
     return os.path.join(xconfig.SCRIPTS_DIR, name)
+
 
 class TextPage(xtemplate.BaseTextPlugin):
 
@@ -36,6 +35,7 @@ class TextPage(xtemplate.BaseTextPlugin):
 
     def handle(self, input):
         return "test"
+
 
 class TestMain(BaseTestCase):
 
@@ -91,13 +91,15 @@ class TestMain(BaseTestCase):
     def test_fs_partial_content(self):
         fpath = os.path.join(xconfig.DATA_DIR, "test.txt")
         xutils.writefile(fpath, "test")
-        response = app.request("/data/test.txt", headers=dict(RANGE="bytes=1-100"))
+        response = app.request(
+            "/data/test.txt", headers=dict(RANGE="bytes=1-100"))
         self.assertEqual("206 Partial Content", response.status)
         self.assertEqual("bytes", response.headers["Accept-Ranges"])
         self.assertEqual(True, "Content-Range" in response.headers)
 
     def test_fs_find(self):
-        json_request("/fs_find", method="POST", data=dict(path="./data", find_key="java"))
+        json_request("/fs_find", method="POST",
+                     data=dict(path="./data", find_key="java"))
         self.check_OK("/fs_index")
         self.check_OK("/fs_index", method="POST", action="reindex")
 
@@ -151,7 +153,8 @@ class TestMain(BaseTestCase):
         self.check_200("/system/settings?category=search")
 
     def skip_test_sys_storage(self):
-        data = json_request("/system/storage?key=unit-test&_format=json", method="POST", data=dict(key="unit-test", value="hello"))
+        data = json_request("/system/storage?key=unit-test&_format=json",
+                            method="POST", data=dict(key="unit-test", value="hello"))
         value = data.get("config").get("value")
         self.assertEqual("hello", value)
 
@@ -189,21 +192,25 @@ class TestMain(BaseTestCase):
         self.check_200("/system/script_admin")
 
     def test_script_add_remove(self):
-        json_request("/system/script/save", method="POST", data=dict(name="xnote-unit-test.py", content="print(123)"))
+        json_request("/system/script/save", method="POST",
+                     data=dict(name="xnote-unit-test.py", content="print(123)"))
         out = xutils.exec_script("xnote-unit-test.py", False, False)
-        json_request("/system/script/delete?name=xnote-unit-test.py", method="POST")
+        json_request(
+            "/system/script/delete?name=xnote-unit-test.py", method="POST")
 
     def test_script_rename(self):
         path1 = get_script_path("unit-test-1.py")
         path2 = get_script_path("unit-test-2.py")
-        xutils.remove(path1, hard = True)
-        xutils.remove(path2, hard = True)
+        xutils.remove(path1, hard=True)
+        xutils.remove(path2, hard=True)
 
-        ret = json_request("/system/script/rename?oldname=unit-test-1.py&newname=unit-test-2.py", method="POST")
+        ret = json_request(
+            "/system/script/rename?oldname=unit-test-1.py&newname=unit-test-2.py", method="POST")
         self.assertEqual("fail", ret["code"])
 
         xutils.touch(path1)
-        ret = json_request("/system/script/rename?oldname=unit-test-1.py&newname=unit-test-2.py", method="POST")
+        ret = json_request(
+            "/system/script/rename?oldname=unit-test-1.py&newname=unit-test-2.py", method="POST")
         self.assertEqual("success", ret["code"])
 
     def test_report_time(self):
@@ -258,11 +265,12 @@ class TestMain(BaseTestCase):
         self.check_200("/code/view_source?path=./README.md")
 
     def test_view_source_update(self):
-        json_request("/code/view_source/update", method="POST", data=dict(path="./test.md", content="hello"))
+        json_request("/code/view_source/update", method="POST",
+                     data=dict(path="./test.md", content="hello"))
         content = xutils.readfile("./test.md")
         self.assertEqual("hello", content)
-        xutils.remove("./test.md", hard = True)
-        
+        xutils.remove("./test.md", hard=True)
+
     def test_markdown_preview(self):
         self.check_200("/code/preview?path=./README.md")
 
@@ -273,14 +281,14 @@ class TestMain(BaseTestCase):
         self.check_200("/system/crontab")
 
     def test_cron_add_url(self):
-        result = json_request("/system/crontab/add", method="POST", 
-            data=dict(url="test", tm_wday="*", tm_hour="*", tm_min="*"))
+        result = json_request("/system/crontab/add", method="POST",
+                              data=dict(url="test", tm_wday="*", tm_hour="*", tm_min="*"))
         sched_id = result["data"]["id"]
         self.check_OK("/system/crontab/remove?id={}".format(sched_id))
 
     def test_cron_add_script(self):
-        result = json_request("/system/crontab/add", method="POST", 
-            data=dict(script_url="script://test.py", tm_wday="1", tm_hour="*", tm_min="*"))
+        result = json_request("/system/crontab/add", method="POST",
+                              data=dict(script_url="script://test.py", tm_wday="1", tm_hour="*", tm_min="*"))
         sched_id = result["data"]["id"]
         self.check_OK("/system/crontab/remove?id={}".format(sched_id))
 
@@ -288,7 +296,7 @@ class TestMain(BaseTestCase):
         TextPage().render()
 
     def test_plugin(self):
-        code  = '''
+        code = '''
 # @api-level 2.8
 # @title Unit-Test-Plugin
 # @category test
@@ -343,3 +351,52 @@ class Main:
         logger.log("Hello,World")
         self.check_OK("/system/log")
         self.check_OK("/system/log?log_type=mem")
+
+    def test_login_success(self):
+        password = xauth.get_user_by_name("test").password
+        params = dict(
+            username="test",
+            password=password
+        )
+
+        resp = self.request_app("/login", method="POST", data=params)
+
+        print("resp:", resp)
+
+        respWrapper = ResponseWrapper(resp)
+
+        self.assertEqual("302 Found", resp.status)
+        self.assertEqual("/", respWrapper.get_header("Location"))
+
+    def test_login_param_error(self):
+        params = dict(
+            username="test",
+            _format="json",
+        )
+
+        resp = json_request("/login", method="POST", data=params)
+
+        self.assertEqual("请输入密码", resp["error"])
+
+
+    def test_login_password_error(self):
+        password = xauth.get_user_by_name("test").password
+        params = dict(
+            username="test",
+            password=password+"_error",
+            _format="json",
+        )
+        resp = json_request("/login", method="POST", data=params)
+        print("test_login_password_error", resp)
+        self.assertEqual("用户名或密码错误", resp["error"])
+
+    def test_login_user_not_found(self):
+        params = dict(
+            username="test_user_not_found",
+            password="_error",
+            _format="json",
+        )
+        resp = json_request("/login", method="POST", data=params)
+        print("test_login_user_not_found", resp)
+        self.assertEqual("用户名或密码错误", resp["error"])
+

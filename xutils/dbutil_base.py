@@ -448,11 +448,6 @@ def delete(key, sync=False):
 def create_write_batch():
     return WriteBatchProxy()
 
-
-def commit_write_batch(batch, sync=False):
-    batch.commit(sync)
-
-
 def scan(key_from=None,
          key_to=None,
          func=None,

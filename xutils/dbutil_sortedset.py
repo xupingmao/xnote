@@ -78,7 +78,7 @@ class LdbSortedSet:
             if old_score != score:
                 self.rank.delete(member, old_score, batch = batch)
                 self.rank.put(member, score, batch = batch)
-            commit_write_batch(batch)
+            batch.commit()
 
     def get(self, member):
         return self.member_dict.get(member)
@@ -90,7 +90,7 @@ class LdbSortedSet:
             if old_score != None:
                 self.member_dict.delete(member, batch = batch)
                 self.rank.delete(member, old_score, batch = batch)
-            commit_write_batch(batch)
+            batch.commit()
 
     def list_by_score(self, *args, **kw):
         result = []

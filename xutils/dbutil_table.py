@@ -215,7 +215,7 @@ class LdbTable:
             index_key = index_prefix + ":" + old_value + ":" + escaped_obj_id
             batch.delete(index_key)
 
-    def _put_obj(self, key, obj):
+    def _put_obj(self, key, obj, sync = False):
         # ~~写redo-log，启动的时候要先锁定检查redo-log，恢复异常关闭的数据~~
         # 不需要重新实现redo-log，直接用leveldb的批量处理功能即可
         # 使用leveldb的批量操作可以确保不会读到未提交的数据
@@ -226,7 +226,7 @@ class LdbTable:
             batch.put(key, self._convert_to_db_row(obj))
             self._update_index(old_obj, obj, batch)
             # 更新批量操作
-            batch.commit(batch)
+            batch.commit(sync)
 
     def is_valid_key(self, key = None, user_name = None):
         if user_name is None:
@@ -338,7 +338,7 @@ class LdbTable:
             self._delete_index(old_obj, batch)
             # 更新批量操作
             batch.delete(key)
-            commit_write_batch(batch)
+            batch.commit()
 
 
     def iter(self, offset = 0, limit = 20, reverse = False, key_from = None, 

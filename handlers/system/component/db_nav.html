@@ -1,6 +1,24 @@
+{# <!--
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-03-19 18:50:56
+@LastEditors  : xupingmao
+@LastEditTime : 2022-05-08 11:49:48
+@FilePath     : /xnote/handlers/system/component/db_nav.html
+@Description  : 描述
+--> #}
 <div class="card">
-    <div class="x-tab-box" data-tab-key="tab" data-tab-default="query">
-        <a class="tab-link x-tab" href="/system/leveldb_admin" data-tab-value="query">数据查询</a>
-        <a class="tab-link x-tab" href="/note/stat?p=system&tab=meta" data-tab-value="meta">元数据</a>
+    <div class="card-title">
+        <span>数据库工具</span>
+
+        <div class="float-right">
+            {% include common/button/back_button.html %}
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="x-tab-box" data-tab-key="p" data-tab-default="query">
+        <a class="tab-link x-tab" href="/system/db_admin?p=meta" data-tab-value="meta">元数据</a>
+        <a class="tab-link x-tab" href="/system/db_admin?p=query" data-tab-value="query">数据查询</a>
     </div>
 </div>

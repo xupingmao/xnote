@@ -1,4 +1,5 @@
 # encoding=utf-8
+from web.utils import Storage
 from .a import *
 import os
 import time
@@ -107,6 +108,9 @@ def remove_tmp_file(name):
 
 class BaseTestCase(unittest.TestCase):
 
+    def request_app(self, *args, **kw):
+        return APP.request(*args, **kw)
+
     def check_OK(self, *args, **kw):
         response = APP.request(*args, **kw)
         status = response.status
@@ -179,3 +183,17 @@ class BaseTestMain(unittest.TestCase):
             "/data/files/user/upload/%s/test_2.txt" % date, webpath)
         remove_tmp_file("test.txt")
         remove_tmp_file("test_1.txt")
+
+
+class ResponseWrapper:
+
+    def __init__(self, resp: web.Storage) -> None:
+        self.resp = resp
+    
+    def get_header(self, header: str):
+        header = header.lower()
+        headers = self.resp.header_items
+        for key, value in headers:
+            if key.lower() == header:
+                return value
+        return value
