@@ -9,6 +9,7 @@ import xtemplate
 import xconfig
 import xtables
 import xauth
+import xmanager
 from xutils import logutil
 from . import test_base
 from .test_base import ResponseWrapper
@@ -400,3 +401,5 @@ class Main:
         print("test_login_user_not_found", resp)
         self.assertEqual("用户名或密码错误", resp["error"])
 
+    def test_add_visit_log(self):
+        xmanager.add_visit_log(None, "/index")

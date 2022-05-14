@@ -51,6 +51,9 @@ class Follower(NodeManagerBase):
         leader_token = self.get_leader_token()
         return HttpClient(leader_host, leader_token, self.admin_token)
 
+    def get_node_id(self):
+        return xconfig.get_global_config("system.node_id", "unknown_node_id")
+
     def ping_leader(self):
         now = time.time()
         is_valid_time = now - self.last_ping_time >= self.PING_INTERVAL
@@ -65,7 +68,8 @@ class Follower(NodeManagerBase):
         leader_host = self.get_leader_url()
         if leader_host != None:
             client = self.get_client()
-            params = dict(port=port, fs_sync_offset=fs_sync_offset)
+            params = dict(port=port, fs_sync_offset=fs_sync_offset,
+                          node_id=self.get_node_id())
             result_obj = client.get_stat(params)
 
             self.update_ping_result(result_obj)

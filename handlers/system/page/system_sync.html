@@ -158,6 +158,7 @@
         {% for info in follower_list %}
             <div class="list-item">
                 <span class="info-tag">从节点</span>
+                <span>{{info.node_id}}</span>
                 <span>(<a href="{{info.http_url}}">{{info.http_url}}</a>)</span>
                 <div class="float-right">
                     <a class="btn btn-default view-ajax-btn" 

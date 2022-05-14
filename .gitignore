@@ -29,6 +29,7 @@ __pycache__
 /static/css/app.build.css
 /static/js/app.build.js
 /data/
+/data_follower/
 /testdata/
 /log/
 /tmp/
@@ -60,7 +61,7 @@ run-local.sh
 run-local.bat
 run-follower*
 tools/git-push.sh
-config/boot/boot.local.properties
+config/boot/boot.local.*
 config/boot/boot.winxp.properties
 
 

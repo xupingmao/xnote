@@ -29,7 +29,8 @@ from xutils import webutil
 from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil
-from xutils import textutil 
+from xutils import textutil
+from xutils import netutil 
 
 from .node_follower import Follower
 from .node_leader import Leader
@@ -89,6 +90,10 @@ class ConfigHandler:
         return dict(code = "success")
 
     def set_leader_host(self, host):
+        assert xutils.is_str(host), "host is not str"
+
+        if not netutil.is_http_url(host):
+            return dict(code = "400", message = "无效的URL地址(%s)" % host)
         CONFIG.put("leader.host", host)
         return dict(code = "success")
 

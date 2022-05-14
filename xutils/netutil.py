@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/28 19:47:17
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-01 14:20:57
+@LastEditTime : 2022-05-13 23:59:50
 @FilePath     : /xnote/xutils/netutil.py
 """
 
@@ -74,6 +74,15 @@ def get_http_url(url):
     if not url.startswith(("http://", "https://")):
         url = "http://" + url
     return url.split("#")[0]
+
+def is_http_url(url):
+    if not isinstance(url, str):
+        return False
+
+    if not url.startswith(("http://", "https://")):
+        return False
+    
+    return True
 
 def get_host_by_url(url):
     """

@@ -23,12 +23,13 @@ LOCK = threading.RLock()
 MAX_FOLLOWER_SIZE = 100
 EXPIRE_TIME = 60 * 60
 
+
 class FollwerInfo(Storage):
 
     def init(self):
         self.ping_time_ts = time.time()
 
-    def connect(self):
+    def update_connect_info(self):
         self.connected_time = dateutil.format_datetime()
         self.connected_time_ts = time.time()
 
@@ -36,24 +37,25 @@ class FollwerInfo(Storage):
         gap = time.time() - self.ping_time_ts
         return gap > EXPIRE_TIME
 
-    def ping(self):
+    def update_ping_info(self):
         self.ping_time = dateutil.format_datetime()
         self.ping_time_ts = time.time()
+
 
 class Leader(NodeManagerBase):
     FOLLOWER_DICT = dict()
 
-    def get_follower_info(self, url):
-        client_info = self.FOLLOWER_DICT.get(url)
+    def get_follower_info(self, client_id):
+        client_info = self.FOLLOWER_DICT.get(client_id)
         if client_info == None:
             client_info = FollwerInfo()
             client_info.init()
-            client_info.url = url
-            client_info.connect()
+            client_info.client_id = client_id
+            client_info.update_connect_info()
         return client_info
 
-    def check_follower_count(self, url):
-        if url not in self.FOLLOWER_DICT:
+    def check_follower_count(self, client_id):
+        if client_id not in self.FOLLOWER_DICT:
             return len(self.FOLLOWER_DICT) <= MAX_FOLLOWER_SIZE
         return True
 
@@ -105,20 +107,24 @@ class Leader(NodeManagerBase):
         result.admin_token = admin_token
         result.fs_index_count = fs_index_count
 
+        node_id = xutils.get_argument("node_id", "")
+
         client_ip = webutil.get_client_ip()
-        url = client_ip + ":" + port
+        client_key = client_ip + "/" + node_id
 
         with LOCK:
-            if not self.check_follower_count(url):
+            if not self.check_follower_count(client_key):
                 result.code = "403"
                 result.message = "Too many connects"
                 return result
 
-            follower = self.get_follower_info(url)
-            follower.ping()
+            follower = self.get_follower_info(client_key)
+            follower.update_ping_info()
             follower.fs_sync_offset = xutils.get_argument("fs_sync_offset", "")
             follower.fs_index_count = fs_index_count
             follower.admin_token = admin_token
+            follower.node_id = node_id
+            follower.url = "%s:%s" % (client_ip, port)
 
             self.update_follower_info(follower)
             self.remove_expired_followers()
@@ -126,4 +132,3 @@ class Leader(NodeManagerBase):
         result.follower_dict = self.get_follower_dict()
 
         return result
-

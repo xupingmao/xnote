@@ -622,6 +622,9 @@ def update_visit_log(log, name):
     dbutil.put(log.key, log)
 
 def add_visit_log(user_name, url, name = None, args = None):
+    if user_name == None:
+        user_name = "guest"
+        
     exist_log = find_visit_log(user_name, url)
     if exist_log != None:
         update_visit_log(exist_log, name)

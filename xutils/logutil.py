@@ -291,13 +291,11 @@ timeit  = timeit_deco
 profile = profile_deco
 
 
-def new_mem_logger(name, size = 200, ttl = 60*60):
-    with MemLogger._lock:
-        for logger in MemLogger._instances:
-            if logger.name == name:
-                return logger
+def get_mem_logger(*args, **kw):
+    return MemLogger.get_logger(*args, **kw)
 
-        return MemLogger(name, size, ttl)
+def new_mem_logger(*args, **kw):
+    return MemLogger.get_logger(*args, **kw)
 
 class MemLogger:
 
@@ -316,17 +314,27 @@ class MemLogger:
     def __del__(self):
         MemLogger._instances.remove(self)
 
-    @staticmethod
-    def clear_expired():
-        for logger in MemLogger._instances:
+    @classmethod
+    def clear_expired(cls):
+        for logger in cls._instances:
             if logger.is_expired():
                 del logger
     
-    @staticmethod
-    def list_loggers():
-        loggers = [item for item in MemLogger._instances]
+    @classmethod
+    def list_loggers(cls):
+        loggers = [item for item in cls._instances]
         loggers.sort(key = lambda x:x.name)
         return loggers
+    
+    @classmethod
+    def get_logger(cls, name, size = 200, ttl = 60*60):
+        """根据名称获取logger"""
+        with cls._lock:
+            for logger in cls._instances:
+                if logger.name == name:
+                    return logger
+
+        return MemLogger(name, size, ttl)
 
     def is_expired(self):
         if self.ttl < 0:

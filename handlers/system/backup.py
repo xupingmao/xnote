@@ -186,9 +186,12 @@ class DBBackup:
             fsutil.rmfile(db_backup_file, hard = True)
 
         # TODO 删除多余的备份文件
+    
+    def get_backup_logger(self):
+        return logutil.get_mem_logger("backup_db", size = 20, ttl = -1)
 
     def dump_db(self):
-        logger = logutil.new_mem_logger("backup_db", size = 20)
+        logger = self.get_backup_logger()
 
         total_count = dbutil.count_all()
         start_time = time.time()
@@ -232,12 +235,14 @@ class DBBackup:
         return count
 
     def execute(self):
+        logger = self.get_backup_logger()
+        got_lock = False
         try:
-            got_lock = False
             if _backup_lock.acquire(blocking = False):
+                got_lock = True
                 self.do_execute()
             else:
-                logging.warning("backup is busy")
+                logger.log("backup is busy")
                 return "backup is busy"
         finally:
             if got_lock:
