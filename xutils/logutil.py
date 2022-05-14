@@ -18,7 +18,7 @@ from xutils.imports import u
 
 _write_log_lock = threading.RLock()
 
-def format_time():
+def _format_time():
     ct = time.time()
     msecs = (ct - int(ct)) * 1000
 
@@ -38,7 +38,7 @@ class LogThread(threading.Thread):
 
     def put_task(self, func, *args, **kw):
         if len(self.task_queue) > self.MAX_TASK_QUEUE:
-            print(format_time(), "Too many log task")
+            print(_format_time(), "Too many log task")
             func(*args, **kw)
         else:
             self.task_queue.append([func, args, kw])
@@ -124,9 +124,9 @@ def log(fmt, show_logger = False, print_std = True, fpath = None, *argv):
         f_modname = f_back.f_globals.get("__name__")
         f_name    = f_code.co_name
         f_lineno  = f_back.f_lineno
-        message = "%s|%s.%s:%s %s" % (format_time(), f_modname, f_name, f_lineno, message)
+        message = "%s|%s.%s:%s %s" % (_format_time(), f_modname, f_name, f_lineno, message)
     else:
-        message = "%s|%s" % (format_time(), message)
+        message = "%s|%s" % (_format_time(), message)
 
     if print_std:
         print(message)
@@ -146,7 +146,7 @@ def _write_log_sync(level, metric, message, cost):
     user_name = xauth.current_name()
     if user_name is None:
         user_name = "-"
-    full_message = "%s|%s|%s|%s|%sms|%s" % (format_time(), level, user_name, metric, cost, message)
+    full_message = "%s|%s|%s|%s|%sms|%s" % (_format_time(), level, user_name, metric, cost, message)
     # print(full_message)
     # 同步写在SAE上面有巨大的性能损耗
     do_log_sync(fpath, full_message)
@@ -157,7 +157,7 @@ def _write_log(level, metric, message, cost):
     user_name = xauth.current_name()
     if user_name is None:
         user_name = "-"
-    full_message = "%s|%s|%s|%s|%sms|%s" % (format_time(), level, user_name, metric, cost, message)
+    full_message = "%s|%s|%s|%s|%sms|%s" % (_format_time(), level, user_name, metric, cost, message)
     # print(full_message)
     # 同步写在SAE上面有巨大的性能损耗
     log_async(fpath, full_message)
@@ -350,7 +350,7 @@ class MemLogger:
         func_name    = f_code.co_name
         func_lineno  = f_back.f_lineno
 
-        head = "%s|%s:%s" % (format_time(), func_name, func_lineno)
+        head = "%s|%s:%s" % (_format_time(), func_name, func_lineno)
         if len(args) > 0:
             body = message % args
         else:

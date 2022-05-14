@@ -70,7 +70,7 @@ def do_upgrade():
             log_info("creator is None, id:{!r}", note_id)
             continue
 
-        db.rebuild_index(value, user_name = value.creator)
+        db.rebuild_single_index(value, user_name = value.creator)
 
     do_upgrade_book()
 

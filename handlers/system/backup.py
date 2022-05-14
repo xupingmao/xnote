@@ -356,8 +356,8 @@ class BackupHandler:
         """触发备份事件"""
         p = xutils.get_argument("p", "")
 
-        if p == "home":
-            return xtemplate.render("system/page/backup.html", 
+        if p == "db_backup_home":
+            return xtemplate.render("system/page/db/db_backup.html", 
                 total = DBBackup.total(),
                 run_time = DBBackup.run_time(),
                 rest_time = DBBackup.rest_time(),

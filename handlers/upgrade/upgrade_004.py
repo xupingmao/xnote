@@ -23,7 +23,7 @@ def do_upgrade():
         if value.share_time is None:
             value.share_time = value.ctime
             db.update(value)
-        db.rebuild_index(value)
+        db.rebuild_single_index(value)
 
     mark_upgrade_done("upgrade_004.2")
 

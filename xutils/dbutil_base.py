@@ -1,4 +1,12 @@
 # encoding=utf-8
+###########################################################
+# @desc db utilties
+# @author xupingmao
+# @email 578749341@qq.com
+# @since 2015-11-02 20:09:44
+# @modified 2022/04/16 09:26:49
+###########################################################
+
 """xnote的数据库封装，基于键值对数据库（目前是基于leveldb，键值对功能比较简单，
 方便在不同引擎之间切换）
 
@@ -62,7 +70,7 @@ LAST_TIME_SEQ = -1
 
 # 注册的数据库表名，如果不注册，无法进行写操作
 TABLE_INFO_DICT = dict()
-# 表的索引信息
+# 表的索引信息 dict[str] -> set[str]
 INDEX_INFO_DICT = dict()
 
 # leveldb表的缓存
@@ -75,15 +83,6 @@ WRITE_ONLY = False
 _leveldb = None
 # 缓存对象（拥有put/get两个方法）
 _cache = None
-
-###########################################################
-# @desc db utilties
-# @author xupingmao
-# @email 578749341@qq.com
-# @since 2015-11-02 20:09:44
-# @modified 2022/04/16 09:26:49
-###########################################################
-
 
 def print_debug_info(fmt, *args):
     new_args = [dateutil.format_time(), "[dbutil]"]
@@ -374,7 +373,7 @@ def register_table_index(table_name, index_name):
     INDEX_INFO_DICT[table_name] = index_info
 
     # 注册索引表
-    index_table = "_index$%s$%s" % (table_name, index_name)
+    index_table = get_index_table_name(table_name, index_name)
     description = "%s表索引" % table_name
     register_table_inner(index_table, description)
 
@@ -390,6 +389,12 @@ def get_table_names():
                     key=lambda x: (x.category, x.name))
     return list(map(lambda x: x.name, values))
 
+def get_table_index_names(table_name):
+    validate_str(table_name, "invalid table_name")
+    return INDEX_INFO_DICT.get(table_name) or set()
+
+def get_index_table_name(table_name, index_name):
+    return "_index$%s$%s" % (table_name, index_name)
 
 def get(key, default_value=None):
     check_leveldb()

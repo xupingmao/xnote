@@ -9,15 +9,7 @@
 {% init rest_time = "-1" %}
 {% init progress = "0.0" %}
 
-<div class="card">
-    <div class="card-title">
-        <span>系统备份</span>
-        <div class="float-right">
-            {% include common/button/back_button.html %}
-        </div>
-    </div>
-</div>
-
+{% include system/component/db_nav.html %}
 
 <div class="card">
     <div class="settings-row btn-line-height">

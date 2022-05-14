@@ -22,12 +22,11 @@ import time
 import os
 import xconfig
 import xutils
-import xauth
 import xmanager
 import threading
 import logging 
-from xutils import readfile, savetofile, sqlite3, Storage
-from xutils import dateutil, cacheutil, Timer, dbutil, textutil, fsutil
+from xutils import Storage
+from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import attrget
 
 # 配置日志模块

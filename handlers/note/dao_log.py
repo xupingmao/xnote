@@ -14,14 +14,12 @@
 
 import xauth
 import xutils
-import xmanager
 import xconfig
-import logging
 from xutils import dbutil
 from xutils import dateutil
 from xutils import Storage
 
-dbutil.register_table("user_note_log", "用户笔记操作日志")
+dbutil.register_table("user_note_log", "用户笔记操作日志", check_user=True)
 dbutil.register_table_index("user_note_log", "visit_cnt")
 dbutil.register_table_index("user_note_log", "atime")
 dbutil.register_table_index("user_note_log", "mtime")

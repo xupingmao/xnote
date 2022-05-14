@@ -8,11 +8,10 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/28 19:47:17
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-13 23:59:50
+@LastEditTime : 2022-05-14 15:52:28
 @FilePath     : /xnote/xutils/netutil.py
 """
 
-from audioop import add
 import os
 import re
 import codecs
@@ -37,6 +36,13 @@ except ImportError:
 BUFSIZE = 1024 * 512
 
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36"
+
+_mock = None
+
+def set_net_mock(mock):
+    """设置单元测试mock"""
+    global _mock
+    _mock = mock
 
 def splithost(url):
     """
@@ -207,6 +213,11 @@ def _join_url_and_params(url, params):
 def http_get(url, charset=None, params = None):
     """Http的GET请求"""
     url = _join_url_and_params(url, params)
+
+    if _mock != None:
+        # 用于单元测试mock
+        return _mock.http_get(url, charset, params)
+
     if requests != None:
         return http_get_by_requests(url, charset)
     out = []
@@ -232,6 +243,9 @@ def http_post(url, body='', charset='utf-8'):
     :arg str body: POST请求体
     :arg str charset: 字符集，默认utf-8
     """
+    if _mock != None:
+        return _mock.http_post(url, body, charset)
+        
     status, headers, body = do_http("POST", url, None, body)
     return body
 

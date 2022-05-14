@@ -8,7 +8,7 @@ import time
 from xutils.dbutil_base import *
 from xutils import Storage
 from urllib.parse import quote
-from xutils.db.encode import encode_index_value
+from xutils.db.encode import decode_str, encode_index_value
 
 register_table("_id", "系统ID表")
 MAX_ID_KEY = "_id:max_id"
@@ -50,6 +50,8 @@ class LdbTable:
         global INDEX_INFO_DICT
         # 参数检查
         check_table_name(table_name)
+        table_info = get_table_info(table_name)
+        assert table_info != None
 
         self.table_name = table_name
         self.key_name = key_name
@@ -57,6 +59,7 @@ class LdbTable:
         self.prefix = table_name
         self.user_name = user_name
         self.index_names = INDEX_INFO_DICT.get(table_name) or set()
+        self._need_check_user = table_info.check_user
 
         if user_name != None:
             assert user_name != ""
@@ -173,8 +176,7 @@ class LdbTable:
 
     def _check_user_name(self, user_name):
         user_name = self.user_name or user_name
-        info = get_table_info(self.table_name)
-        if info.check_user:
+        if self._need_check_user:
             validate_str(user_name, "invalid user_name:{!r}", user_name)
 
     def _get_prefix(self, user_name=None):
@@ -192,7 +194,7 @@ class LdbTable:
         return self.build_key_no_prefix(index_prefix, self.user_name or user_name)
 
     def _escape_key(self, key):
-        return quote(key)
+        return encode_index_value(key)
 
     def _get_escaped_key_from_obj(self, obj):
         obj_key = self._get_key_from_obj(obj)
@@ -338,7 +340,7 @@ class LdbTable:
         update_obj = self._convert_to_db_row(obj)
         self._put_obj(key, update_obj)
 
-    def rebuild_index(self, obj, user_name=None):
+    def rebuild_single_index(self, obj, user_name=None):
         self._check_value(obj)
         self._check_user_name(user_name)
 
@@ -532,15 +534,29 @@ class TableIndexRepair:
     """表索引修复工具，不是标准功能，所以抽象到一个新的类里面"""
 
     def __init__(self, db):
+        assert isinstance(db, LdbTable)
         self.db = db
 
     def repair_index(self):
         db = self.db
-        for value in db.iter(limit=-1):
-            db.rebuild_index(value)
-
+        
+        # 先删除无效的索引，这样速度更快
         for name in db.index_names:
             self.delete_invalid_index(name)
+
+        for value in db.iter(limit=-1):
+            if db._need_check_user:
+                key = value._key
+                assert xutils.is_str(key)
+                try:
+                    table_name, user_name, id = key.split(":")
+                    user_name = decode_str(user_name)
+                except ValueError:
+                    logging.error("invalid record key: %s", key)
+                    continue
+                db.rebuild_single_index(value, user_name=user_name)
+            else:
+                db.rebuild_single_index(value)
 
     def do_delete(self, key):
         logging.info("Delete {%s}", key)
@@ -550,9 +566,10 @@ class TableIndexRepair:
             return
         delete(key)
 
-    def delete_invalid_index(self, name):
+    def delete_invalid_index(self, index_name):
         db = self.db
-        index_prefix = db._get_index_prefix(name)
+        index_prefix = "_index$%s$%s" % (db.table_name, index_name)
+
         for old_key, record_key in prefix_iter(index_prefix, include_key=True):
             record = get(record_key)
             if record is None:
@@ -561,11 +578,20 @@ class TableIndexRepair:
                 self.do_delete(old_key)
                 continue
 
-            record_id = db._get_id_from_key(record_key)
-            record_id = db._escape_key(record_id)
-            index_value = getattr(record, name)
-            index_value = encode_index_value(index_value)
-            new_key = index_prefix + ":" + index_value + ":" + record_id
+            user_name = None
+            index_value = getattr(record, index_name)
+            record_id   = db._get_id_from_key(record_key)
+
+            if db._need_check_user:
+                try:
+                    table_name, user_name, id = record_key.split(":")
+                    user_name = decode_str(user_name)
+                except:
+                    logging.error("invalid key: (%s)", record_key)
+                    continue
+
+            prefix = db._get_index_prefix(index_name, user_name)
+            new_key = db.build_key_no_prefix(prefix, encode_index_value(index_value), record_id)
 
             if new_key != old_key:
                 logging.debug("index dismatch, key:(%s), record_id:(%s), correct_key:(%s)",

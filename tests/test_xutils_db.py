@@ -4,15 +4,19 @@
 # @modified 2022/04/17 13:58:29
 # @filename test_xutils_db.py
 
-from web.utils import Storage
-from xutils import dbutil, textutil
 from .a import *
+from web.utils import Storage
+from xutils import dbutil
+from xutils import textutil
+from xutils import netutil
+
 import os
 import threading
 import sqlite3
 import time
 import xutils
 import xconfig
+import json
 
 from . import test_base
 
@@ -20,6 +24,7 @@ app = test_base.init()
 json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
+
 
 class MockedWriteBatch:
 
@@ -233,7 +238,7 @@ class TestMain(BaseTestCase):
 
         for t in threads:
             t.join()
-    
+
     def do_test_lmdb_large_key(self, db):
         prefix = textutil.random_string(1000)
         key1 = (prefix + "_key1").encode("utf-8")
@@ -259,7 +264,7 @@ class TestMain(BaseTestCase):
         # 初始化一个5M的数据库
         db = LmdbEnhancedKV(db_dir, map_size=1024 * 1024 * 5)
         self.do_test_lmdb_large_key(db)
-    
+
     def test_lmdb_large_key2(self):
         from xutils.db.driver_lmdb import LmdbEnhancedKV2
         db_dir = os.path.join(xconfig.DB_DIR, "lmdb2")
@@ -284,18 +289,18 @@ class TestMain(BaseTestCase):
         dbutil.register_table_index("test", "age")
 
         db = dbutil.get_table("test")
-        obj1 = Storage(name = "Ada", age = 20)
-        db.insert(obj1, id_type = "auto_increment")
+        obj1 = Storage(name="Ada", age=20)
+        db.insert(obj1, id_type="auto_increment")
 
-        obj2 = Storage(name = "Bob", age = 21)
-        db.insert(obj2, id_type = "auto_increment")
+        obj2 = Storage(name="Bob", age=21)
+        db.insert(obj2, id_type="auto_increment")
 
-        obj3 = Storage(name = "Cooper", age = 30)
-        db.insert(obj3, id_type = "auto_increment")
+        obj3 = Storage(name="Cooper", age=30)
+        db.insert(obj3, id_type="auto_increment")
 
-        obj1_found = db.first_by_index("name", index_value = "Ada")
-        obj2_found = db.first_by_index("name", index_value = "Bob")
-        obj3_found = db.first_by_index("name", index_value = "Cooper")
+        obj1_found = db.first_by_index("name", index_value="Ada")
+        obj2_found = db.first_by_index("name", index_value="Bob")
+        obj3_found = db.first_by_index("name", index_value="Cooper")
 
         print("obj1_found", obj1_found)
         print("obj2_found", obj2_found)
@@ -304,12 +309,85 @@ class TestMain(BaseTestCase):
         self.assertEqual(int(obj1_found._id) + 1, int(obj2_found._id))
         self.assertEqual(int(obj2_found._id) + 1, int(obj3_found._id))
 
-        results = db.list_by_index("age", limit = 10)
+        results = db.list_by_index("age", limit=10)
         self.assertEqual(3, len(results))
         self.assertEqual(20, results[0].age)
         self.assertEqual(21, results[1].age)
         self.assertEqual(30, results[2].age)
 
+    def test_db_shard(self):
+        from xutils.db.shard import ShardManager
 
+        url1 = "http://localhost:2222/db"
+        url2 = "http://localhost:2223/db"
+        url3 = "http://localhost:2224/db"
 
+        def Entry(key, value):
+            return dict(key=key, value=value)
 
+        class NetMock:
+
+            def http_post(self, url, body=None, charset="utf-8"):
+                params = Storage(**json.loads(body))
+
+                if url == url1:
+                    resp = self.http_post1(params)
+                if url == url2:
+                    resp = self.http_post2(params)
+                if url == url3:
+                    resp = self.http_post3(params)
+
+                return json.dumps(resp)
+
+            def http_post1(self, params):
+                if params.offset == 0:
+                    return dict(code=0, data=[Entry("a1", "value1"), Entry("b1", "value2")])
+                return dict(code=0, data=[])
+
+            def http_post2(self, params):
+                if params.offset == 0:
+                    return dict(code=0, data=[Entry("a2", "value1"), Entry("b2", "value2")])
+                return dict(code=0, data=[])
+
+            def http_post3(self, params):
+                if params.offset == 0:
+                    return dict(code=0, data=[Entry("a3", "value1"), Entry("b3", "value2")])
+                return dict(code=0, data=[])
+
+        netutil.set_net_mock(NetMock())
+
+        shard_manager = ShardManager()
+        shard_manager.set_debug(True)
+        shard_manager.add_shard(url1)
+        shard_manager.add_shard(url2)
+        shard_manager.add_shard(url3)
+
+        params = dict(age=20)
+        data = shard_manager.query_page(1, 10, params)
+
+        print("shard page(1,10) query result:", data)
+
+        self.assertEqual(6, len(data))
+        self.assertEqual("a1", data[0]["key"])
+        self.assertEqual("a2", data[1]["key"])
+        self.assertEqual("a3", data[2]["key"])
+        self.assertEqual("b1", data[3]["key"])
+        self.assertEqual("b2", data[4]["key"])
+        self.assertEqual("b3", data[5]["key"])
+
+        data = shard_manager.query_page(2, 3, params)
+
+        print("shard page(2,3) query result:", data)
+
+        self.assertEqual(3, len(data))
+        self.assertEqual("b1", data[0]["key"])
+        self.assertEqual("b2", data[1]["key"])
+        self.assertEqual("b3", data[2]["key"])
+
+    def test_db_index_page(self):
+        self.check_OK("/system/db_index")
+
+        result = json_request("/system/db_index", method="POST",
+                     data=dict(action="rebuild", table_name="note_tiny", index_name="name"))
+
+        self.assertEqual("success", result.get("code"))

@@ -1,0 +1,72 @@
+{#
+<!--
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-05-14 12:33:09
+@LastEditors  : xupingmao
+@LastEditTime : 2022-05-14 17:18:33
+@FilePath     : /xnote/handlers/system/page/db/db_index.html
+@Description  : 描述
+--> #}
+{% extends base %}
+
+{% block body %}
+{% include system/component/db_nav.html %}
+
+<div class="card">
+
+    <table class="table">
+        <tr>
+            <th>表名</th>
+            <th>索引</th>
+            <th>记录数</th>
+            <th>操作</th>
+        </tr>
+        {% for index in index_list %}
+        {% for i, index_name in enumerate(sorted(index.index_names)) %}
+        <tr>
+            {% if i == 0 %}
+            <td rowspan="{{len(index.index_names)}}">
+                <span><a
+                        href="/system/db_admin?prefix={{index.table_name}}&reverse=true">{{index.table_name}}</a></span>
+                <br />
+                <span>表记录数: {{count_table(index.table_name)}}</span>
+            </td>
+            {% end %}
+            <td><a
+                    href="/system/db_admin?prefix={{get_index_table_name(index.table_name, index_name)}}&reverse=true">{{index_name}}</a>
+            </td>
+            <td>
+                <span>索引数: {{count_index(index.table_name, index_name)}}</span>
+            </td>
+            <td>
+                <button class="btn-default rebuild-index-btn" data-table="{{index.table_name}}"
+                    data-index="index_name">重建索引</button>
+            </td>
+        </tr>
+        {% end %}
+        {% end %}
+    </table>
+</div>
+
+<script type="text/javascript">
+    xnote.table.adjustWidth(".table");
+    $(".rebuild-index-btn").click(function (e) {
+        xnote.confirm("确定要重建索引吗?", function (confirm) {
+            var params = {
+                table_name: $(e.target).attr("data-table"),
+                index_name: $(e.target).attr("data-index"),
+                action: "rebuild"
+            };
+            $.post("", params, function (resp) {
+                if (resp.code == "success") {
+                    window.location.reload();
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
+            xnote.toast("重建索引中...");
+        });
+    });
+</script>
+{% end %}
