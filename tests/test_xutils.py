@@ -390,14 +390,6 @@ class TestMain(unittest.TestCase):
         # 确认删除成功
         self.assertTrue(table.get_by_key(new_key) == None)
 
-    def test_dbutil_table_func(self):
-        import doctest
-        from xutils import dbutil_table
-        doctest.testmod(m=dbutil_table, verbose=True)
-
-        from xutils.db import encode
-        doctest.testmod(m=encode, verbose=True)
-
     def test_dbutil_ldb_table_user(self):
         dbutil.register_table("unit_test_user", "用户维度单元测试")
         table = dbutil.LdbTable("unit_test_user")

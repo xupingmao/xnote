@@ -21,15 +21,9 @@ class FreeLock:
         pass
 
 _write_lock = threading.RLock()
-_read_lock = FreeLock()
-
 
 def get_write_lock():
     return _write_lock
-
-def get_read_lock():
-    # TODO: 优化成读写锁
-    return _read_lock
 
 def db_execute(db, sql, *args):
     cursorobj = db.cursor()
@@ -141,16 +135,15 @@ class SqliteKV:
             self.rollback()
 
     def Get(self, key):
-        with get_read_lock():
-            cursor = self.cursor()
-            try:
-                r_iter = cursor.execute("SELECT value FROM kv_store WHERE `key` = ?;", (key,))
-                result = list(r_iter)
-                if len(result) > 0:
-                    return result[0][0]
-                return None
-            finally:
-                cursor.close()
+        cursor = self.cursor()
+        try:
+            r_iter = cursor.execute("SELECT value FROM kv_store WHERE `key` = ?;", (key,))
+            result = list(r_iter)
+            if len(result) > 0:
+                return result[0][0]
+            return None
+        finally:
+            cursor.close()
 
     def _exists(self, key):
         cursor = self.cursor()
@@ -185,7 +178,6 @@ class SqliteKV:
                 close_cursor(cursor, is_new)
 
     def Delete(self, key, sync = False, cursor = None):
-        arg_cursor = cursor
         if self.debug:
             logging.debug("Delete: key(%s)", key)
         
@@ -214,50 +206,49 @@ class SqliteKV:
         @param {bool} reverse        是否反向查询
         @param {bool} include_value  是否包含值
         """
-        with get_read_lock():
-            cur = self.cursor()
-            sql_builder = []
-            params = []
+        cur = self.cursor()
+        sql_builder = []
+        params = []
 
-            if include_value:
-                sql_builder.append("SELECT key, value FROM kv_store")
-            else:
-                # 只包含key
-                sql_builder.append("SELECT key FROM kv_store")
+        if include_value:
+            sql_builder.append("SELECT key, value FROM kv_store")
+        else:
+            # 只包含key
+            sql_builder.append("SELECT key FROM kv_store")
 
-            if key_from != None or key_to != None:
-                sql_builder.append("WHERE 1=1")
+        if key_from != None or key_to != None:
+            sql_builder.append("WHERE 1=1")
 
-            if key_from != None:
-                sql_builder.append("AND key >= ?")
-                params.append(key_from)
+        if key_from != None:
+            sql_builder.append("AND key >= ?")
+            params.append(key_from)
 
-            if key_to != None:
-                sql_builder.append("AND key <= ?")
-                params.append(key_to)
+        if key_to != None:
+            sql_builder.append("AND key <= ?")
+            params.append(key_to)
 
-            if reverse:
-                sql_builder.append("ORDER BY key DESC")
+        if reverse:
+            sql_builder.append("ORDER BY key DESC")
 
-            sql_builder.append(";")
+        sql_builder.append(";")
 
-            sql = " ".join(sql_builder)
+        sql = " ".join(sql_builder)
 
-            if self.debug:
-                logging.debug("SQL:%s (%s)", sql, params)
+        if self.debug:
+            logging.debug("SQL:%s (%s)", sql, params)
 
-            try:
-                # return cur.execute(sql, tuple(params))
-                for item in cur.execute(sql, tuple(params)):
-                    # logging.debug("include_value(%s), item:%s", include_value, item)
-                    if include_value:
-                        if item[1] == None:
-                            continue
-                        yield item
-                    else:
-                        yield item[0]
-            finally:
-                cur.close()
+        try:
+            # return cur.execute(sql, tuple(params))
+            for item in cur.execute(sql, tuple(params)):
+                # logging.debug("include_value(%s), item:%s", include_value, item)
+                if include_value:
+                    if item[1] == None:
+                        continue
+                    yield item
+                else:
+                    yield item[0]
+        finally:
+            cur.close()
 
 
     def CreateSnapshot(self):

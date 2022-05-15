@@ -8,7 +8,9 @@ import json
 import xutils
 from xutils import Storage
 
-MAX_INT = (1 << 63)-1
+INT64_MAX = (1 << 63)-1
+INT32_MAX = (1 << 31)-1
+INT16_MAX = (1 << 15)-1
 
 def encode_int(int_val):
     """把整型转换成字符串，比较性保持不变
@@ -22,23 +24,50 @@ def encode_int(int_val):
     True
     >>> encode_int(10**5) > encode_int(1)
     True
+    >>> encode_int(1 << 40) > encode_int(1 << 20)
+    True
+    >>> encode_int(-(1<<40)) < encode_int(1 << 20)
+    True
+    >>> encode_int(-(1<<40)) < encode_int(-(1<<20))
+    True
     """
     if not isinstance(int_val, int):
         raise Exception("encode_int: expect int but see: (%r)" % int_val)
-    if abs(int_val) > MAX_INT:
-        raise Exception("encode_int: int value must between [-%s, %s]" % (MAX_INT, MAX_INT))
+    if abs(int_val) > INT64_MAX:
+        raise Exception("encode_int: int value must between [-%s, %s]" % (INT64_MAX, INT64_MAX))
     
-    # 负数需要放在前面
-    # 使用64位二进制存储
-    # 第一位数字表示符号，1表示正数，0表示负数，其余63位可以用于存储数字
-    flag = 1 << 63
-    if int_val < 0:
-        int_val = MAX_INT + int_val
-    else:
-        int_val = int_val | flag
-    
-    return "%016X" % int_val
+    # 使用16进制文本表达，在可读性和存储空间之间折中。
+    # 第一位数字表示数字范围，负数需要放在前面
+    # 5: [-INT64_MAX, -INT32_MAX)
+    # 6: [-INT32_MAX, -INT16_MAX)
+    # 7: [-INT16_MAX, 0)
+    # 8: [0, INT16_MAX]
+    # 9: (INT16_MAX, INT32_MAX)
+    # A: (INT32_MAX, INT64_MAX]
 
+    ## int16
+    if 0 <= int_val <= INT16_MAX:
+        return "8%04X" % int_val
+    
+    if -INT16_MAX <= int_val < 0:
+        return "7%04X" % (int_val + INT16_MAX)
+    
+    ## int32
+    if 0 <= int_val <= INT32_MAX:
+        return "9%08X" % int_val
+    
+    if -INT32_MAX <= int_val < 0:
+        return "6%08X" % (int_val + INT32_MAX)
+
+    ## int64
+    if INT32_MAX < int_val <= INT64_MAX:
+        return "A%08X" % int_val
+    
+    if -INT64_MAX <= int_val < -INT32_MAX:
+        return "5%08X" % (int_val + INT64_MAX)
+
+    raise Exception("encode_int: invalid value(%d)" % int_val)
+    
 def encode_int8_to_bytes(int_val):
     assert int_val >= 0
     assert int_val <= 255

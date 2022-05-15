@@ -391,3 +391,11 @@ class TestMain(BaseTestCase):
                      data=dict(action="rebuild", table_name="note_tiny", index_name="name"))
 
         self.assertEqual("success", result.get("code"))
+
+    def test_dbutil_table_func(self):
+        import doctest
+        from xutils import dbutil_table
+        doctest.testmod(m=dbutil_table, verbose=True)
+
+        from xutils.db import encode
+        doctest.testmod(m=encode, verbose=True)
