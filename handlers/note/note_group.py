@@ -3,20 +3,17 @@
 # @modified 2022/04/22 23:30:02
 import math
 import time
-import os
 import copy
 import logging
 
 import web
 import xutils
 import xtemplate
-import xtables
 import xauth
 import xconfig
 import xmanager
 from xutils import Storage
-from xutils import cacheutil, dateutil, fsutil
-from xutils.dateutil import Timer
+from xutils import dateutil, fsutil
 from xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
 

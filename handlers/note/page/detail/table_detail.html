@@ -32,6 +32,17 @@
     margin-top: 5px;
     width: 100%;
 }
+
+{% if _user_config.note_table_width == "wide" %}
+{# 宽表格 #}
+.content-left {
+    width: 100%;
+}
+.content-right {
+    display: none;
+}
+{% end %}
+
 </style>
 
 {% set item = file %}

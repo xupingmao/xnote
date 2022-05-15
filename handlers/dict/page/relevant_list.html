@@ -23,7 +23,10 @@
 </style>
 {% end %}
 
-{% block body_top %}
+{% block body_left %}
+
+{% init words = [] %}
+
 <div class="card">
     <div class="card-title">
         <span>相关词词库</span>
@@ -33,11 +36,6 @@
         </div>
     </div>
 </div>
-{% end %}
-
-{% block body_left %}
-
-{% init words = [] %}
 
 <div class="card">
 

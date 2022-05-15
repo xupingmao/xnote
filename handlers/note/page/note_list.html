@@ -1,6 +1,10 @@
 {% extends base %}
 
-{% block body_top %}
+{% block body_left %}
+    
+    {% init notes = [] %}
+    {% init show_pagination = False %}
+
     {% init show_back = True %}
     {% init show_create_option = True %}
 
@@ -23,13 +27,6 @@
 
         {% include note/script/create_script.html %}
     </div>
-{% end %}
-
-
-{% block body_left %}
-    
-    {% init notes = [] %}
-    {% init show_pagination = False %}
 
     <div class="card">
         {% include note/component/note_path.html %}

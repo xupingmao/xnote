@@ -8,12 +8,6 @@
     <script type="text/javascript" src="/static/js/message/message.js"></script>
 
     <input class="default-content-input" type="hidden" value="{{default_content}}"/>
-
-    {% include message/component/message_title.html %}
-
-    <!-- 事件转换 -->
-    {% include message/component/message_event.html %}
-
 {% end %}
 
 {% block body_left %}
@@ -26,6 +20,12 @@
     {% init show_input_box = True %}
     {% init show_system_tag = True %}
     {% init show_keyword_info = False %}
+
+    
+    {% include message/component/message_title.html %}
+
+    <!-- 事件转换 -->
+    {% include message/component/message_event.html %}
 
     <!-- Tab页 -->
     {% if show_tab %}

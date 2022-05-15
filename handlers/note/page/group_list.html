@@ -1,7 +1,9 @@
 {% extends base/base2.html %}
 
-{% block body_top %}
+{% block body_left %}
+    {% init ext_groups = None %}
 
+    
     {% include note/component/view_css.html %}
 
     <div class="card">
@@ -18,11 +20,6 @@
 
         {% include note/script/create_script.html %}
     </div>
-{% end %}
-
-
-{% block body_left %}
-    {% init ext_groups = None %}
 
     <div class="card">
         <div class="x-tab-box" data-tab-default="active" data-tab-key="tab">
