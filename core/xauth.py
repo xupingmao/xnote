@@ -580,6 +580,11 @@ def init():
     _create_temp_user(BUILTIN_USER_DICT, "admin")
     _create_temp_user(BUILTIN_USER_DICT, "test")
 
+    # 检查配置项的有效性
+    for key in USER_CONFIG_PROP:
+        if "." in key:
+            raise Exception("无效的用户配置项:(%s),不能包含(.),请使用(_)" % key)
+
 xutils.register_func("user.get_config_dict", get_user_config_dict, "xauth")
 xutils.register_func("user.get_config",      get_user_config,      "xauth")
 

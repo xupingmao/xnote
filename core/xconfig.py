@@ -196,15 +196,6 @@ RUNTIME_ID = None
 # 退出的编码
 EXIT_CODE = 0
 
-
-# 默认的用户配置
-DEFAULT_USER_CONFIG = {
-    "HOME_PATH"   : "/note/group",
-    "PROJECT_PATH": "/note/timeline",
-    "LANG"        : "zh",
-}
-
-
 def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -318,7 +309,7 @@ def init_boot_config(fpath):
         check_part = textutil.remove_tail(key, ".type")
         if check_part.find(".") >= 0:
             raise Exception("非法的配置项:(%s), 不能包含(.)" % key)
-            
+
         value = config_dict[key]
         value_type = config_dict.get(key + ".type")
         
@@ -477,7 +468,7 @@ def get_user_config(user_name, config_key, default_value = None):
     """默认值参考DEFAULT_USER_CONFIG"""
     # 未启动，直接返回默认值
     if START_TIME is None:
-        return DEFAULT_USER_CONFIG.get(config_key)
+        return default_value
 
     import xauth
     return xauth.get_user_config(user_name, config_key)

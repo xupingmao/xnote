@@ -5,7 +5,6 @@
 import xconfig
 import xauth
 from xutils import Storage
-from xconfig import DEFAULT_USER_CONFIG
 
 ###### 获取指定用户信息
 def get_user_config(user_name, config_key):
