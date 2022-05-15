@@ -80,7 +80,7 @@ def on_search_message(ctx):
         search_result.append(item)
         # print(message)
 
-    show_message_detail = xconfig.get_user_config(ctx.user_name, "search.show_message_detail") 
+    show_message_detail = xconfig.get_user_config(ctx.user_name, "search_message_detail_show") 
     
     if show_message_detail == "false":
         search_result = []

@@ -238,6 +238,7 @@ def init(boot_config_file = None):
     global FILE_EXT_PATH
 
     if boot_config_file != None:
+        # 初始化启动配置
         init_boot_config(boot_config_file)
 
     path = get_global_config("system.data")
@@ -289,7 +290,7 @@ def init(boot_config_file = None):
     # 加载文件后缀配置
     load_file_type_config()
 
-    # 初始化系统配置
+    # 初始化系统版本配置
     init_system_version()
 
     from xutils import fsutil
@@ -314,6 +315,10 @@ def init_boot_config(fpath):
     config_dict.update(user_config)
 
     for key in config_dict:
+        check_part = textutil.remove_tail(key, ".type")
+        if check_part.find(".") >= 0:
+            raise Exception("非法的配置项:(%s), 不能包含(.)" % key)
+            
         value = config_dict[key]
         value_type = config_dict.get(key + ".type")
         

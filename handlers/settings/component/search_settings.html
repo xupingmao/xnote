@@ -9,7 +9,7 @@
 <div class="settings-row">
     <div class="settings-key">自动展开记事详情</div>
     <div class="settings-value">
-        <select name="search.show_message_detail" data-type="str" value="{{get_user_config('search.show_message_detail')}}">
+        <select name="search_message_detail_show" data-type="str" value="{{_user_config.search_message_detail_show}}">
             <option value="true">展开</option>
             <option value="false">不展开</option>
         </select>
@@ -19,7 +19,7 @@
 <div class="settings-row">
     <div class="settings-key">{{T("自动展开插件详情")}}</div>
     <div class="settings-value">
-        <select name="search.show_plugin_detail" data-type="str" value="{{get_user_config('search.show_plugin_detail')}}">
+        <select name="search_plugin_detail_show" data-type="str" value="{{_user_config.search_plugin_detail_show}}">
             <option value="true">展开</option>
             <option value="false">不展开</option>
         </select>

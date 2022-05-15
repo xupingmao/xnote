@@ -706,7 +706,7 @@ def on_search_plugins(ctx):
         more.show_more_link = True
         result_list.append(more)
 
-    if xconfig.get_user_config(user_name, "search.show_plugin_detail") == "true":
+    if xconfig.get_user_config(user_name, "search_plugin_detail_show") == "true":
         result_list += temp_result[:3]
 
     ctx.tools += result_list

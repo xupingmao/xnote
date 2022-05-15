@@ -56,7 +56,7 @@ FileItem.set_post_handler(file_post_handler)
 
 
 def get_index_dirs():
-    index_dirs = xauth.get_user_config("admin", "index_dirs")
+    index_dirs = xauth.get_user_config("admin", "fs_index_dirs")
     return index_dirs.split("\n")
 
 def get_file_thumbnail(fpath):

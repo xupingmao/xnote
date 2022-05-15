@@ -121,7 +121,7 @@ class IndexHandler:
     
     def do_config(self):
         index_config = xutils.get_argument("index_config")
-        xauth.update_user_config(xauth.current_name(), "index_dirs", index_config)
+        xauth.update_user_config(xauth.current_name(), "fs_index_dirs", index_config)
         return dict(code = "success")
 
     def do_rebuild_index(self):
