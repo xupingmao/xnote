@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-21 20:33:59
+@LastEditTime : 2022-05-21 20:42:40
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -33,7 +33,7 @@ class BinLog:
 
         last_key  = self.last_key()
         if last_key == None:
-            self.last_seq = 1
+            self.last_seq = 0
         else:
             self.last_seq = int(last_key)
     

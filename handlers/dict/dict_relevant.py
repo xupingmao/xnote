@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-04-30 11:52:17
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-01 12:46:44
+@LastEditTime : 2022-05-21 23:50:36
 @FilePath     : /xnote/handlers/dict/dict_relevant.py
 """
 
@@ -48,6 +48,7 @@ class AddWordsAjaxHandler:
         if words == "":
             return dict(code = "fail", message = "words不能为空")
         
+        words = words.lower()
         word_list = words.split()
         if len(word_list) <= 1:
             return dict(code = "fail", message = "至少需要两个单词")

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-01 11:22:35
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-01 13:07:51
+@LastEditTime : 2022-05-21 23:55:51
 @FilePath     : /xnote/handlers/dict/dao_relevant.py
 """
 import xutils
@@ -61,6 +61,7 @@ def list_words(page = 1, pagesize = 20, key = None):
     return _db.count(), result
 
 def get_relevant_words(word, exclude_self = True):
+    word = word.lower()
     words = _db.get(word)
     if words == None:
         return []

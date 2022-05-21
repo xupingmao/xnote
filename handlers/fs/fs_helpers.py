@@ -12,8 +12,10 @@ import xutils
 import xconfig
 import xauth
 import xconfig
+import os
 from xutils import dbutil
 from xutils import FileItem
+from xutils import format_size
 
 dbutil.register_table("fs_index", "文件索引")
 _index_db = dbutil.get_hash_table("fs_index")
@@ -73,6 +75,32 @@ def get_file_download_link(fpath):
     encode_path = xutils.encode_uri_component(fpath)
     download_link = "/fs/%s?type=blob" % encode_path
     return download_link
+
+
+def sort_files_by_size(filelist):
+    db = get_index_db()
+    for file in filelist:
+        fpath = file.path
+        fpath = os.path.abspath(fpath)
+        realpath = os.path.realpath(fpath)
+        info = db.get(realpath)
+        if info != None and hasattr(info, "fsize"):
+            file.fsize = info.fsize
+            size_str = format_size(info.fsize)
+            if os.path.islink(fpath):
+                file.size = "Link(%s)" % size_str
+            else:
+                file.size = size_str
+        else:
+            file.size = "Unknown"
+
+    def key_func(file):
+        if not isinstance(file.fsize, int):
+            return 0
+        return file.fsize
+
+    filelist.sort(key = key_func, reverse = True)
+
 
 xutils.register_func("fs.get_file_thumbnail", get_file_thumbnail)
 xutils.register_func("fs.get_file_download_link", get_file_download_link)

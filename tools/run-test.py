@@ -31,6 +31,11 @@ def run_test(target = None):
 		os.system("python3 -m coverage html")
 		return
 
+	if target == "fs":
+		os.system("python3 -m pytest tests/test_fs.py --doctest-modules --cov handlers.fs --cov handlers.system.db_index --capture no")
+		os.system("python3 -m coverage html")
+		return
+
 	if target == "app":
 		os.system("python3 -m pytest tests/test_app.py --doctest-modules --cov handlers --capture no")
 		os.system("python3 -m coverage html")

@@ -12,17 +12,16 @@ PS. 类似的功能可以参考 webdav
 """
 import os
 import mimetypes
-import time
 import web
 import xutils
 import xauth
 import xconfig
 import xtemplate
-import shutil
 import xmanager
 from xutils import FileItem, u, Storage, fsutil
 from xutils import dbutil
 from .fs_mode import get_fs_page_by_mode
+from .fs_helpers import sort_files_by_size
 
 def is_stared(path):
     return xconfig.has_config("STARED_DIRS", path)
@@ -100,6 +99,11 @@ def check_file_auth(path, user_name):
 def process_file_list(pathlist, parent = None):
     filelist = [FileItem(fpath, parent, merge = False) for fpath in pathlist]
     filelist.sort()
+
+    user_name = xauth.current_name()
+    fs_order = xauth.get_user_config(user_name, "fs_order")
+    if fs_order == "size":
+        sort_files_by_size(filelist)
     return filelist
 
 class FileSystemHandler:

@@ -279,6 +279,21 @@ $(function () {
         });
     });
 
+    $(".fs-sort-btn").click(function (e) {
+        var order = $(e.target).attr("data-order");
+        var params = {
+            "action": "sort",
+            "order": order,
+        };
+        $.post("/fs_api/config", params, function (resp) {
+            if (resp.code === "success") {
+                window.location.reload();
+            } else {
+                xnote.alert(resp.message);
+            }
+        });
+    });
+
     // do not adjust height in mobile
     if (isPc()) {
         adjustHeight(".file-list", 30);

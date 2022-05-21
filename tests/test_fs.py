@@ -2,8 +2,9 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2020/11/29 14:45:21
 # @modified 2021/10/07 15:04:35
-
+from .a import *
 import xconfig
+import xauth
 from .test_base import json_request, BaseTestCase
 from .test_base import init as init_app
 from handlers.fs.fs_index import build_fs_index
@@ -42,3 +43,15 @@ class TestMain(BaseTestCase):
         size = build_fs_index(xconfig.DATA_DIR)
         self.assertTrue(size > 0)
 
+    def test_config_fs_order(self):
+        resp = json_request("/fs_api/config", method = "POST", data = dict(action = "sort", order = "size"))
+        print(resp)
+        self.assertEqual("success", resp["code"])
+        
+        user_name = xauth.current_name()
+        self.assertEqual("size", xauth.get_user_config(user_name, "fs_order"))
+    
+    def test_fs_config_error(self):
+        resp = json_request("/fs_api/config", method = "POST", data = dict(action = "notfount", order = "size"))
+        print(resp)
+        self.assertEqual("error", resp["code"])
