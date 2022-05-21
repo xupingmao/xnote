@@ -8,9 +8,6 @@ import logging
 
 import xutils
 from xutils import dbutil
-from xutils import dateutil
-from xutils import logutil
-from handlers.upgrade.upgrade_main import log_info
 from handlers.upgrade.upgrade_main import is_upgrade_done
 from handlers.upgrade.upgrade_main import mark_upgrade_done
 
@@ -23,6 +20,7 @@ def do_upgrade():
         logging.info("upgrade_005 done")
         return
 
+    dbutil.register_table("note_share_from", "分享发送者关系表 <note_share_from:from_user:note_id>")
     db = dbutil.get_table("note_share_from")
     for value in db.iter(limit = -1):
         note_id = value.note_id

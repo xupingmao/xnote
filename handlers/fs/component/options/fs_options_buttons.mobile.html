@@ -1,0 +1,41 @@
+
+<div id="controlArea" class="col-md-12">
+    <div class="float-left">
+        <!-- 查看文件 -->
+        <input type="button" class="btn" value="{{T('全选')}}" id="selectAllBtn"/>
+        
+        <!-- 导入文件 -->
+        <input type="button" class="btn" value="上传" id="uploadFileBtn" >
+        <div class="dropdown">
+            <span class="dropdown-btn link btn">新建▾</span>
+            <div class="dropdown-content">
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_file">新建文件</a>
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_dir">新建文件夹</a>
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_plugin">新建插件</a>
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_form_plugin">新建表单插件</a>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <span class="dropdown-btn link btn">操作▾</span>
+            <div class="dropdown-content">
+                <!-- 管理文件 -->
+                <a id="renameBtn" class="dropdown-option" message="重命名为">重命名</a>
+                <a id="moveFilesBtn" class="dropdown-option">移动</a>
+                <a class="dropdown-option delete-btn danger">删除</a>
+            </div>
+        </div>
+        
+        <!-- 其他选项 -->
+        <div class="dropdown">
+            <span class="dropdown-btn link btn">更多▾</span>
+            <div class="dropdown-content">
+                <a class="dropdown-option" href="/code/search?path={{xutils.quote(path)}}&recursive=on">高级搜索</a>
+                <a class="dropdown-option" href="/code/lines?path={{xutils.quote(path)}}&recursive=on">代码统计</a>
+                <a class="dropdown-option" href="/fs/{{path}}?show_hidden_files=true">显示隐藏文件</a>
+                <a class="dropdown-option" id="addToBookmarkBtn">收藏</a>
+                <a class="dropdown-option" href="/fs_index?p=rebuild&path={{xutils.quote(path)}}" target="_blank">重建索引</a>
+            </div>
+        </div>
+    </div>
+</div>

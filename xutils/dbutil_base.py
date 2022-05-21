@@ -341,10 +341,10 @@ def register_table(table_name,
     if not re.match(r"^[0-9a-z_]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
-    register_table_inner(table_name, description, category, check_user)
+    _register_table_inner(table_name, description, category, check_user)
 
 
-def register_table_inner(table_name,
+def _register_table_inner(table_name,
                          description,
                          category="default",
                          check_user=False):
@@ -375,7 +375,7 @@ def register_table_index(table_name, index_name):
     # 注册索引表
     index_table = get_index_table_name(table_name, index_name)
     description = "%s表索引" % table_name
-    register_table_inner(index_table, description)
+    _register_table_inner(index_table, description)
 
 
 def get_table_dict_copy():

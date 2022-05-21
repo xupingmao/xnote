@@ -1,0 +1,58 @@
+
+<div id="controlArea" class="col-md-12">
+    <div class="float-left">
+        <!-- 查看文件 -->
+        <input type="button" class="btn" value="{{T('全选')}}" id="selectAllBtn"/>
+        
+        <!-- 导入文件 -->
+        <input type="button" class="btn" value="上传" id="uploadFileBtn" >
+        <div class="dropdown">
+            <span class="dropdown-btn link btn">新建▾</span>
+            <div class="dropdown-content">
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_file">新建文件</a>
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_dir">新建文件夹</a>
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_plugin">新建插件</a>
+                <a class="dropdown-option add-file-btn" data-api="/fs_api/add_form_plugin">新建表单插件</a>
+            </div>
+        </div>
+
+        <!-- 管理文件 -->
+        <input type="button" class="btn desktop-only-inline-block delete-btn" value="删除"/>
+        <input type="button" class="btn desktop-only-inline-block" value="重命名" id="renameBtn" message="重命名为">
+        <input type="button" class="btn" value="移动" id="moveFilesBtn"/>
+        
+        <!-- 视图选项 -->
+        <div class="dropdown">
+            <span class="dropdown-btn link btn">视图▾</span>
+            <div class="dropdown-content">
+                <a class="dropdown-option" href="/fs/{{quoted_path}}?mode=list">列表视图</a>
+                <a class="dropdown-option" href="/fs/{{quoted_path}}?mode=grid">网格视图</a>
+                <a class="dropdown-option" href="javascript:openByNative()">本地浏览</a>
+                <a class="dropdown-option" href="javascript:openTerminal()">打开终端</a>
+            </div>
+        </div>
+
+        <div class="dropdown desktop-only">
+            <span class="dropdown-btn link btn">排序▾</span>
+            <div class="dropdown-content">
+                <a class="dropdown-option" href="/fs/{{quoted_path}}?mode=list">默认排序</a>
+                <a class="dropdown-option" href="/fs/{{quoted_path}}?mode=size">文件大小倒序</a>
+            </div>
+        </div>
+
+        <!-- 其他选项 -->
+        <div class="dropdown">
+            <span class="dropdown-btn link btn">更多▾</span>
+            <div class="dropdown-content">
+                <a class="dropdown-option" href="/code/search?path={{xutils.quote(path)}}&recursive=on">高级搜索</a>
+                <a class="dropdown-option" href="/code/lines?path={{xutils.quote(path)}}&recursive=on">代码统计</a>
+                <a class="dropdown-option" href="/fs/{{path}}?show_hidden_files=true">显示隐藏文件</a>
+                <a class="dropdown-option" id="addToBookmarkBtn">收藏</a>
+                <a class="dropdown-option" href="/fs_index?p=rebuild&path={{xutils.quote(path)}}" target="_blank">重建索引</a>
+
+                <!-- 移动端选项 -->
+                <a class="dropdown-option delete-btn mobile-only">删除</a>
+            </div>
+        </div>
+    </div>
+</div>

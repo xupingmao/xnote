@@ -8,6 +8,7 @@ import json
 
 import xutils
 import xauth
+import xconfig
 from xutils import Storage
 from xutils import dbutil
 from xutils import logutil
@@ -18,9 +19,6 @@ def register_note_table(name, description, check_user = False):
     dbutil.register_table(name, description, "note", check_user = check_user)
 
 # 分享关系
-register_note_table("note_share_from", "分享发送者关系表 <note_share_from:from_user:note_id>")
-# register_note_table("note_share_to", "分享接受关系表 <note_share_to:to_user:note_id>")
-
 dbutil.register_table("note_share", "笔记分享", "note")
 dbutil.register_table_index("note_share", "note_id")
 dbutil.register_table_index("note_share", "to_user")

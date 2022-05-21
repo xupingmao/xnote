@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-14 14:53:37
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-14 16:58:31
+@LastEditTime : 2022-05-17 23:05:24
 @FilePath     : /xnote/xutils/db/shard.py
 @Description  : 数据库分片
 """
@@ -154,3 +154,12 @@ class ShardManager:
             if page == page_no:
                 return data
             page += 1
+    
+    def get_by_key(self, key):
+        raise NotImplementedError("待实现")
+    
+    def put_by_key(self, key, value):
+        raise NotImplementedError("待实现")
+    
+    def delete_by_key(self, key):
+        raise NotImplementedError("待实现")

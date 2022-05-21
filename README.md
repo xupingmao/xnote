@@ -6,10 +6,10 @@
 xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据管理功能。它主要有如下特性
 
 - 拥有丰富的数据管理能力，支持多种笔记格式以及文件管理功能
-- 自带工具箱，默认提供了大量常用的工具
+- 自带工具箱，默认提供了一些常用的工具
 - 提供扩展能力，用户可以编写各种插件满足自己的需求
 - 跨平台，支持Windows、Mac、Linux三大平台，可以在云服务上部署，也可以在本地运行
-- 多用户支持
+- 支持小规模的多用户，生产环境使用请谨慎
 
 以下是一些页面展示
 
@@ -18,20 +18,22 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 
 -----
 ## 项目地址
+
 - [github](https://github.com/xupingmao/xnote)
 - [gitee](https://gitee.com/xupingmao/xnote)
 
+如果使用过程中遇到问题，欢迎在项目主页提issue或者评论。
 
-## 安装运行
+## 安装&运行
+
+### 安装依赖环境
 - 安装python（建议Python3，Python2.7版本不再维护）
 - 安装依赖的软件包
     - Mac/Linux执行 ```python -m pip install -r config/requirements.txt```
     - Windows执行 `python -m pip install -r config/requirements.win.txt`
-- 启动服务器`python app.py`, 默认1234端口, 浏览器打开http://localhost:1234/ 无需额外配置，初始化的管理员账号是admin/123456
-- 可以直接部署在新浪云应用SAE上面
-- 如果安装老版本后更新启动失败参考 [数据库迁移](./docs/db_migrate.md)
 
-### 启动参数
+### 配置和启动
+
 
 默认的配置文件位于`config/boot/boot.default.properties`，具体的功能参考配置的注释
 
@@ -39,6 +41,17 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 # 指定自定义的配置文件
 python3 app.py --config config/boot/自定义名称.properties
 ```
+
+如果不修改端口号，启动之后在浏览器打开 http://localhost:1234/ 就可以使用了，初始化的管理员账号是admin，默认密码是 123456
+
+### 在云服务平台部署
+
+- 新浪SAE TODO
+- 百度BAE TODO
+
+### 兼容性问题
+
+如果安装老版本后更新启动失败参考 [数据库迁移](./docs/db_migrate.md) 或者查看Issue，如果问题还没解决可以提交新的Issue
 
 ## 主要功能
 

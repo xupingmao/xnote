@@ -10,15 +10,14 @@
 
 {% end %}
 
-{% block body_top %}
-    <div class="card">
-        {% include note/component/header/group_header.html %}
-    </div>
-{% end %}
-
 {% block body_left %}
 
     {% include note/component/editor/editor_default_vars.html %}
+
+    <div class="card">
+        {% include note/component/header/group_header.html %}
+    </div>
+
     {% include note/component/editor/view_group.html %}
     {% include note/component/note_ext_info.html %}
 

@@ -8,7 +8,6 @@
 
 import xutils
 from xutils import dbutil
-from xutils import dateutil
 from handlers.upgrade.upgrade_main import log_info, is_upgrade_done, mark_upgrade_done
 
 NOTE_DAO = xutils.DAO("note")
