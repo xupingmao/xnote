@@ -5,10 +5,11 @@
 # @filename dbutil_table.py
 
 import time
-from xutils.dbutil_base import *
-from xutils import Storage
 from urllib.parse import quote
+from xutils import Storage
+from xutils.db.dbutil_base import *
 from xutils.db.encode import decode_str, encode_index_value
+from xutils.db.binlog import BinLog
 
 register_table("_id", "系统ID表")
 MAX_ID_KEY = "_id:max_id"
@@ -60,6 +61,8 @@ class LdbTable:
         self.user_name = user_name
         self.index_names = INDEX_INFO_DICT.get(table_name) or set()
         self._need_check_user = table_info.check_user
+        self.binlog = BinLog.get_instance()
+        assert self.binlog != None
 
         if user_name != None:
             assert user_name != ""
@@ -269,6 +272,7 @@ class LdbTable:
             self._format_value(key, obj)
             batch.put(key, self._convert_to_db_row(obj))
             self._update_index(old_obj, obj, batch)
+            self.binlog.add_log("put", key, obj, batch = batch)
             # 更新批量操作
             batch.commit(sync)
 
@@ -383,6 +387,7 @@ class LdbTable:
             self._delete_index(old_obj, batch)
             # 更新批量操作
             batch.delete(key)
+            self.binlog.add_log("delete", key, old_obj, batch=batch)
             batch.commit()
 
     def iter(self, offset=0, limit=20, reverse=False, key_from=None,
@@ -481,7 +486,7 @@ class LdbTable:
 
     def list_by_index(self, index_name, filter_func=None,
                       offset=0, limit=20, reverse=False,
-                      index_value=None, match_type="prefix"):
+                      index_value=None):
         """通过索引查询结果列表
         @param {str}  index_name 索引名称
         @param {func} filter_func 过滤函数
@@ -491,9 +496,12 @@ class LdbTable:
         """
         validate_str(index_name, "index_name can not be empty")
 
-        if index_value != None:
+        if isinstance(index_value, dict):
+            # TODO: 参考 mongodb 的 {$gt: 20} 这种格式的
+            raise NotImplementedError("暂未实现")
+        elif index_value != None:
             index_value = encode_index_value(index_value)
-            prefix = self._get_index_prefix(index_name) + ":" + index_value
+            prefix = self._get_index_prefix(index_name) + ":" + index_value + ":"
         else:
             prefix = self._get_index_prefix(index_name)
 

@@ -201,8 +201,8 @@ class SqliteKV:
             reverse = False, include_value = True, 
             fill_cache = False):
         """返回区间迭代器
-        @param {str}  key_from       开始的key（包含） FirstKey
-        @param {str}  key_to         结束的key（包含） LastKey
+        @param {str}  key_from       开始的key（包含） FirstKey  MinKey
+        @param {str}  key_to         结束的key（包含） LastKey   MaxKey
         @param {bool} reverse        是否反向查询
         @param {bool} include_value  是否包含值
         """

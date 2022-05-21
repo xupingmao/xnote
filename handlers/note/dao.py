@@ -55,6 +55,7 @@ dbutil.register_table_index("note_public", "share_time")
 register_note_table("note_tiny", "用户维度的笔记索引 <table:user:id>", check_user = True)
 dbutil.register_table_index("note_tiny", "name")
 dbutil.register_table_index("note_tiny", "ctime")
+dbutil.register_table_user_attr("note_tiny", "creator")
 
 
 NOTE_DAO = xutils.DAO("note")
@@ -563,10 +564,7 @@ def remove_virtual_fields(note):
     del_dict_key(note, "create_date")
 
 def put_note_to_db(note_id, note):
-    priority = note.priority
-    mtime    = note.mtime
     creator  = note.creator
-    atime    = note.atime
 
     # 删除不需要持久化的数据
     remove_virtual_fields(note)
@@ -655,9 +653,6 @@ def update_note(note_id, **kw):
     size      = kw.get("size")
     token     = kw.get("token")
     visited_cnt = kw.get("visited_cnt")
-
-    old_parent_id = None
-    new_parent_id = None
 
     note = get_by_id(note_id)
     if note is None:

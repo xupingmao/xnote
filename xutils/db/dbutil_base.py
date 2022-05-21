@@ -65,7 +65,6 @@ DEFAULT_WRITE_BUFFER_SIZE = 2 * (2 << 20)  # 4M
 DEFAULT_CACHE_EXPIRE = 60 * 60  # 1小时
 
 _write_lock = threading.RLock()
-_read_lock = threading.RLock()
 LAST_TIME_SEQ = -1
 
 # 注册的数据库表名，如果不注册，无法进行写操作
@@ -330,6 +329,7 @@ class TableInfo:
         self.description = description
         self.category = category
         self.check_user = False
+        self.user_attr  = None
 
 
 def register_table(table_name,
@@ -377,6 +377,13 @@ def register_table_index(table_name, index_name):
     description = "%s表索引" % table_name
     _register_table_inner(index_table, description)
 
+def register_table_user_attr(table_name, user_attr):
+    """注册表用户的属性名"""
+    check_table_name(table_name)
+    table_info = get_table_info(table_name)
+    if table_info.user_attr != None:
+        logging.warning("user_attr已经设置了")
+    table_info.user_attr = user_attr
 
 def get_table_dict_copy():
     return TABLE_INFO_DICT.copy()
@@ -396,7 +403,10 @@ def get_table_index_names(table_name):
 def get_index_table_name(table_name, index_name):
     return "_index$%s$%s" % (table_name, index_name)
 
-def get(key, default_value=None):
+def get(*args, **kw):
+    return db_get(*args, **kw)
+
+def db_get(key, default_value=None):
     check_leveldb()
     try:
         if key == "" or key == None:
@@ -412,7 +422,7 @@ def get(key, default_value=None):
         return default_value
 
 
-def put(key, obj_value, sync=False):
+def db_put(key, obj_value, sync=False):
     """往数据库中写入键值对
     @param {string} key 数据库主键
     @param {object} obj_value 值，会转换成JSON格式
@@ -426,6 +436,8 @@ def put(key, obj_value, sync=False):
     # print("Put %s = %s" % (key, value))
     _leveldb.Put(key, value.encode("utf-8"), sync=sync)
 
+def put(*args, **kw):
+    return db_put(*args, **kw)
 
 def put_bytes(key, value, sync=False):
     check_before_write(key.decode("utf-8"))

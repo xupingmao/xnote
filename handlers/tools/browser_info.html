@@ -103,16 +103,17 @@
 </div>
 
 <script type="text/javascript">
-$("#userAgent").html(navigator.userAgent);
-$("#appName").html(navigator.appName);
-$("#appVersion").html(navigator.appVersion);
-$("#vendor").html(navigator.vendor);
-$("#screen").html(screen.width+"x"+screen.height);
-$("#innerSize").text(window.innerWidth + "x" + window.innerHeight);
-$("#clientSize").text(document.body.clientWidth + "x" + document.body.clientHeight);
-$("#checkGetUserMedia").html(navigator.getUserMedia ? "Support" : "Unsupport");
-$("#checkGeolocation").html(navigator.geolocation ? "Support" : "Unsupport");
-$(document).ready(function () {
+$(function () {
+    $("#userAgent").html(navigator.userAgent);
+    $("#appName").html(navigator.appName);
+    $("#appVersion").html(navigator.appVersion);
+    $("#vendor").html(navigator.vendor);
+    $("#screen").html(screen.width+"x"+screen.height);
+    $("#innerSize").text(window.innerWidth + "x" + window.innerHeight);
+    $("#clientSize").text(document.body.clientWidth + "x" + document.body.clientHeight);
+    $("#checkGetUserMedia").html(navigator.getUserMedia ? "Support" : "Unsupport");
+    $("#checkGeolocation").html(navigator.geolocation ? "Support" : "Unsupport");
+
     $(".check-item").each(function (index) {
         var typeName = $(this).attr("type-name");
         console.log(index + ":" + typeName);
@@ -120,7 +121,8 @@ $(document).ready(function () {
         if (typeof window[typeName]) {
             $(this).html(window[typeName].toString());
         }
-    })
+    });
+
     $(".check-support").each(function (index) {
         var typeName = $(this).attr("type-name");
         console.log(index + ":" + typeName);
@@ -130,7 +132,7 @@ $(document).ready(function () {
         } else {
             $(this).html("Unsupport");
         }
-    })
-})
+    });
+});
 </script>
 {% end %}

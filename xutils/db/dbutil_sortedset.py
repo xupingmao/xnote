@@ -11,8 +11,8 @@
 如果使用了LdbTable的索引功能，其实就不需要这个了
 """
 
-from xutils.dbutil_base import *
-from xutils.dbutil_hash import LdbHashTable
+from xutils.db.dbutil_base import *
+from xutils.db.dbutil_hash import LdbHashTable
 
 register_table("_rank", "排名表")
 

@@ -53,3 +53,19 @@ class DBInterface:
 
     def Write(self, batch_proxy, sync = False):
         raise NotImplementedError("Write")
+
+
+class DBLockInterface:
+
+    def Acquire(self, resource_id, timeout):
+        """返回token
+        @return {str} token
+        """
+        raise NotImplementedError("Acquire")
+    
+    def Release(self, resource_id, token):
+        raise NotImplementedError("Release")
+    
+    def Refresh(self, resource_id, token, refresh_time):
+        raise NotImplementedError("Refresh")
+    

@@ -12,6 +12,9 @@ INT64_MAX = (1 << 63)-1
 INT32_MAX = (1 << 31)-1
 INT16_MAX = (1 << 15)-1
 
+# 64位浮点数尾数的最大值
+FLOAT64_MANTISSA_MAX = (1 << 52) - 1
+
 def encode_int(int_val):
     """把整型转换成字符串，比较性保持不变
     >>> encode_int(10) > encode_int(1)
@@ -82,11 +85,14 @@ def encode_float(value):
     >>> encode_float(-0.5) > encode_float(-1.5)
     True
     """
+    if abs(value) > FLOAT64_MANTISSA_MAX:
+        raise Exception("float value must between [-%d,%d]" % (FLOAT64_MANTISSA_MAX, FLOAT64_MANTISSA_MAX))
+    
     if value < 0:
-        value += 10**20
-        return "A%020.10f" % value
+        value += FLOAT64_MANTISSA_MAX
+        return "A%016.10f" % value
     else:
-        return "B%020.10f" % value
+        return "B%016.10f" % value
 
 def encode_str(value):
     """编码字符串

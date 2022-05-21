@@ -3,10 +3,10 @@
 # @since 2021/12/04 15:36:42
 # @modified 2021/12/11 11:10:20
 # @filename dbutil.py
-from xutils.dbutil_base import *
-from xutils.dbutil_table import *
-from xutils.dbutil_hash import *
-from xutils.dbutil_sortedset import *
+from xutils.db.dbutil_base import *
+from xutils.db.dbutil_table import *
+from xutils.db.dbutil_hash import *
+from xutils.db.dbutil_sortedset import *
 
 
 def _get_table_no_lock(table_name):

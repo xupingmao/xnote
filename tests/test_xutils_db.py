@@ -9,6 +9,7 @@ from web.utils import Storage
 from xutils import dbutil
 from xutils import textutil
 from xutils import netutil
+from xutils.db.binlog import BinLog
 
 import os
 import threading
@@ -315,6 +316,9 @@ class TestMain(BaseTestCase):
         self.assertEqual(21, results[1].age)
         self.assertEqual(30, results[2].age)
 
+        binlog_count = dbutil.count_table("_binlog")
+        self.assertTrue(binlog_count > 0)
+
     def test_db_shard(self):
         from xutils.db.shard import ShardManager
 
@@ -394,8 +398,21 @@ class TestMain(BaseTestCase):
 
     def test_dbutil_table_func(self):
         import doctest
-        from xutils import dbutil_table
+        from xutils.db import dbutil_table
         doctest.testmod(m=dbutil_table, verbose=True)
 
         from xutils.db import encode
         doctest.testmod(m=encode, verbose=True)
+
+    def test_binlog_init(self):
+        binlog = BinLog()
+        binlog.add_log("test", "666")
+
+        self.assertTrue(binlog.last_seq > 0)
+        last_seq = binlog.last_seq
+
+        # 创建一个新的实例
+        binlog = BinLog()
+        self.assertEqual(last_seq, binlog.last_seq)
+        binlog.add_log("test", "666")
+        self.assertEqual(last_seq+1, binlog.last_seq)
