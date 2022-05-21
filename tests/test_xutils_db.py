@@ -405,14 +405,12 @@ class TestMain(BaseTestCase):
         doctest.testmod(m=encode, verbose=True)
 
     def test_binlog_init(self):
-        binlog = BinLog()
+        binlog = BinLog.get_instance()
         binlog.add_log("test", "666")
 
         self.assertTrue(binlog.last_seq > 0)
         last_seq = binlog.last_seq
 
-        # 创建一个新的实例
-        binlog = BinLog()
-        self.assertEqual(last_seq, binlog.last_seq)
+        self.assertEqual(last_seq, int(binlog.last_key()))
         binlog.add_log("test", "666")
         self.assertEqual(last_seq+1, binlog.last_seq)

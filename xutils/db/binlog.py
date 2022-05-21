@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-21 20:00:16
+@LastEditTime : 2022-05-21 20:33:59
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -13,6 +13,9 @@ from xutils import dbutil
 from xutils.db.dbutil_table import db_put, prefix_list
 
 import threading
+
+def _format_log_id(log_id):
+    return "%020d" % log_id
 
 class BinLog:
 
@@ -23,6 +26,11 @@ class BinLog:
 
     def __init__(self) -> None:
         """正常要使用单例模式使用"""
+        with self._lock:
+            if self._instance != None:
+                raise Exception("只能创建一个BinLog单例")
+            self._instance = self
+
         last_key  = self.last_key()
         if last_key == None:
             self.last_seq = 1
@@ -57,7 +65,7 @@ class BinLog:
     def add_log(self, optype, key, value = None, batch = None):
         with self._lock:
             self.last_seq += 1
-            binlog_id = "%020d" % self.last_seq
+            binlog_id = _format_log_id(self.last_seq)
             binlog_body = dict(optype = optype, key = key)
             self._put_log(binlog_id, binlog_body, batch=batch)
 
