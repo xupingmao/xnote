@@ -841,6 +841,8 @@ def unescape(s, unicode_snob=False):
 
 def escape_md(text):
     """Escapes markdown-sensitive characters within other markdown constructs."""
+    if text == None:
+        return ""
     return md_chars_matcher.sub(r"\\\1", text)
 
 def escape_md_section(text, snob=False):

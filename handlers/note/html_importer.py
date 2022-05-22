@@ -1,16 +1,14 @@
 # encoding=utf-8
 # created by xupingmao on 2017/04/22
 from __future__ import print_function
+import logging
 import os
-import web
 import time
 import xtemplate
 import xutils
 import xauth
 import xmanager
-import xtables
 import xconfig
-from threading import Timer
 from bs4 import BeautifulSoup
 from html2text import HTML2Text
 from xutils import netutil
@@ -24,9 +22,11 @@ def get_addr(src, host):
         return "http:" + src
     return src
 
+
 def readhttp(url):
     url = xutils.quote_unicode(url)
     return netutil.http_get(url)
+
 
 def get_addr_list(images, host=None):
     dest = set()
@@ -37,6 +37,7 @@ def get_addr_list(images, host=None):
             dest.add(src)
     return list(dest)
 
+
 def get_text_list(elements):
     dest = set()
     for ele in elements:
@@ -45,9 +46,11 @@ def get_text_list(elements):
             dest.add(text)
     return list(dest)
 
+
 def get_res_name(url):
     slash_pos = url.rfind("/")
     return url[slash_pos+1:]
+
 
 def download_res_list(reslist, dirname):
     dirname = os.path.join("./tmp", dirname)
@@ -62,8 +65,10 @@ def download_res_list(reslist, dirname):
         with open(path, "wb") as fp:
             fp.write(bytes)
 
+
 def isempty(str):
-    return str==None or len(str) == 0
+    return str == None or len(str) == 0
+
 
 def bs_get_text(result, element, blacklist=None):
     if blacklist is None:
@@ -72,7 +77,8 @@ def bs_get_text(result, element, blacklist=None):
         return
     result.append(element.get_text(recursive=False))
     for child in element.children:
-        get_text(result, child, blacklist)
+        bs_get_text(result, child, blacklist)
+
 
 def clean_whitespace(text):
     buf = xutils.StringIO()
@@ -88,6 +94,7 @@ def clean_whitespace(text):
     buf.seek(0)
     return buf.read()
 
+
 def save_to_archive_dir(name):
     dirname = os.path.join(xconfig.DATA_DIR, time.strftime("archive/%Y/%m/%d"))
     xutils.makedirs(dirname)
@@ -95,12 +102,14 @@ def save_to_archive_dir(name):
     xutils.savetofile(path, text)
     print("save file %s" % path)
 
+
 def get_html_title(soup):
     title = soup.title
     if title != None:
         return title.get_text()
 
-def import_from_html(html, baseurl = ""):
+
+def import_from_html(html, baseurl=""):
     soup = BeautifulSoup(html, "html.parser")
     element_list = soup.find_all(["script", "style"])
     for element in element_list:
@@ -108,26 +117,27 @@ def import_from_html(html, baseurl = ""):
     plain_text = soup.get_text(separator=" ")
     plain_text = clean_whitespace(plain_text)
 
-    images  = soup.find_all("img")
-    links   = soup.find_all("a")
-    csses   = soup.find_all("link")
+    images = soup.find_all("img")
+    links = soup.find_all("a")
+    csses = soup.find_all("link")
     scripts = soup.find_all("script")
-    title   = get_html_title(soup)
+    title = get_html_title(soup)
 
-    h = HTML2Text(baseurl = baseurl)
+    h = HTML2Text(baseurl=baseurl)
     text = "From %s\n\n" % baseurl + h.handle(html)
 
-    texts   = [text]
-    images  = get_addr_list(images)
+    texts = [text]
+    images = get_addr_list(images)
     scripts = get_addr_list(scripts)
 
-    return Storage(plain_text = plain_text, 
-            title = title,
-            links = links,
-            csses = csses,
-            scripts = scripts,
-            texts = texts
-        )
+    return Storage(plain_text=plain_text,
+                   title=title,
+                   links=links,
+                   csses=csses,
+                   scripts=scripts,
+                   texts=texts
+                   )
+
 
 class handler:
 
@@ -135,7 +145,7 @@ class handler:
 
     def GET(self):
         address = xutils.get_argument("url")
-        save    = xutils.get_argument("save")
+        save = xutils.get_argument("save")
         user_name = xauth.current_name()
 
         # 添加日志
@@ -143,16 +153,16 @@ class handler:
 
         if save != "" and save != None:
             return self.POST()
-        return xtemplate.render(self.template_path, 
-            show_aside = False,
-            address=address, url=address)
+        return xtemplate.render(self.template_path,
+                                show_aside=False,
+                                address=address, url=address)
 
     @xauth.login_required()
     def POST(self):
         try:
-            file     = xutils.get_argument("file", {})
-            address  = xutils.get_argument("url", "")
-            name     = xutils.get_argument("name", "")
+            file = xutils.get_argument("file", {})
+            address = xutils.get_argument("url", "")
+            name = xutils.get_argument("name", "")
             filename = ""
 
             if hasattr(file, "filename"):
@@ -161,36 +171,39 @@ class handler:
             if not isempty(address):
                 address = address.strip()
                 html = readhttp(address)
+                filename = address
             else:
                 # 读取文件
                 html = ""
                 for chunk in file.file:
                     html += chunk.decode("utf-8")
 
-            print("Read html, filename={}, length={}".format(filename, len(html)))
+            logging.info("import html, filename={}, length={}, type={}".format(filename, len(html), type(html)))
 
             result = import_from_html(html, address)
 
             if name != "" and name != None:
                 save_to_archive_dir(name)
 
-            return xtemplate.render(self.template_path,
-                show_aside    = False,
-                address       = address,
-                url           = address,
-                images        = result.images,
-                links         = result.links,
-                csses         = result.csses,
-                scripts       = result.scripts,
-                texts         = result.texts,
-                article_title = result.title,
-                plain_text    = result.plain_text)
+            kw = dict(
+                show_aside=False,
+                address=address,
+                url=address,
+                images=result.images,
+                links=result.links,
+                csses=result.csses,
+                scripts=result.scripts,
+                texts=result.texts,
+                article_title=result.title,
+                plain_text=result.plain_text
+            )
+
+            return xtemplate.render(self.template_path, **kw)
         except Exception as e:
             xutils.print_stacktrace()
             return xtemplate.render(self.template_path,
-                show_aside = False,
-                error = str(e))
+                                    show_aside=False,
+                                    error=str(e))
 
 
 xutils.register_func("note.import_from_html", import_from_html)
-

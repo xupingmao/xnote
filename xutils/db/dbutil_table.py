@@ -391,7 +391,7 @@ class LdbTable:
             batch.commit()
 
     def iter(self, offset=0, limit=20, reverse=False, key_from=None,
-             filter_func=None, fill_cache=True):
+             filter_func=None, fill_cache=True, user_name = None):
         """返回一个遍历的迭代器
         @param {int} offset 返回结果下标开始
         @param {int} limit  返回结果最大数量
@@ -404,8 +404,13 @@ class LdbTable:
 
         if key_from != None:
             key_from = self.build_key(key_from)
+        
+        if user_name != None:
+            prefix = self.table_name + ":" + user_name
+        else:
+            prefix = self.prefix
 
-        for key, value in prefix_iter(self.prefix, filter_func, offset, limit,
+        for key, value in prefix_iter(prefix, filter_func, offset, limit,
                                       reverse=reverse, include_key=True, key_from=key_from,
                                       fill_cache=fill_cache):
             yield self._format_value(key, value)

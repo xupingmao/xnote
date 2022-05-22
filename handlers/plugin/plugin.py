@@ -601,15 +601,14 @@ def list_recent_plugins():
     return links
 
 def list_visit_logs(user_name, offset = 0, limit = -1):
-    logs = dbutil.prefix_list("plugin_visit_log:%s" % user_name, 
-        offset = offset, limit = limit, reverse = True)
+    logs = _log_db.list(user_name = user_name, offset = offset, limit = limit, reverse = True)
     logs.sort(key = lambda x: x.time, reverse = True)
     return logs
 
 def find_visit_log(user_name, url):
-    for key, log in dbutil.prefix_iter("plugin_visit_log:%s" % user_name, include_key = True):
+    for log in _log_db.iter(user_name = user_name, limit = -1):
         if log.url == url:
-            log.key = key
+            log.key = log._key
             return log
     return None
 
@@ -641,7 +640,7 @@ def add_visit_log(user_name, url, name = None, args = None):
 def delete_visit_log(user_name, name, url):
     exist_log = find_visit_log(user_name, url)
     if exist_log != None:
-        dbutil.delete(exist_log.key)
+        _log_db.delete_by_key(exist_log.key, user_name)
 
 def load_plugin(name):
     user_name = xauth.current_name()
