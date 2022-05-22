@@ -3,13 +3,21 @@
 [![Build Status](https://travis-ci.org/xupingmao/xnote.svg?branch=master)](https://travis-ci.org/xupingmao/xnote)
 [![Coverage Status](https://coveralls.io/repos/github/xupingmao/xnote/badge.svg?branch=master)](https://coveralls.io/github/xupingmao/xnote?branch=master)
 
-xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据管理功能。它主要有如下特性
+xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据管理功能，致力于把个人从信息过载中解放出来。它主要有如下特性
 
 - 拥有丰富的数据管理能力，支持多种笔记格式以及文件管理功能
-- 自带工具箱，默认提供了一些常用的工具
-- 提供扩展能力，用户可以编写各种插件满足自己的需求
+- 默认提供了一些常用的工具，同时提供扩展能力，用户可以编写各种插件满足自己的需求
 - 跨平台，支持Windows、Mac、Linux三大平台，可以在云服务上部署，也可以在本地运行
+- 100%自由的数据控制权，可以运行在多种数据库环境中
 - 支持小规模的多用户，生产环境使用请谨慎
+
+目前，xnote不会重点投入以下方向
+- 大规模的多用户支持
+- 多用户协作功能
+
+因为上述功能大部分商业化产品都已经做的很好了，个人没有精力也没有必要支持相关的功能开发。
+
+如果你热爱技术爱折腾、需要多元的数据处理能力、希望完全掌控自己的文档数据，本产品将会是一个不错的尝试，欢迎试用反馈。
 
 以下是一些页面展示
 
