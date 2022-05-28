@@ -21,7 +21,6 @@ from .node_base import NodeManagerBase, convert_follower_dict_to_list
 from .node_base import CONFIG
 from .node_base import get_system_port
 
-LOCK = threading.RLock()
 MAX_FOLLOWER_SIZE = 100
 EXPIRE_TIME = 60 * 60
 
@@ -45,6 +44,8 @@ class FollwerInfo(Storage):
 
 
 class Leader(NodeManagerBase):
+
+    _lock = threading.RLock()
     FOLLOWER_DICT = dict()
     binlog = BinLog.get_instance()
 
@@ -129,21 +130,21 @@ class Leader(NodeManagerBase):
         node_id = xutils.get_argument("node_id", "")
 
         client_ip = webutil.get_client_ip()
-        client_key = client_ip + "/" + node_id
+        url = "{ip}:{port}#{node_id}".format(ip = client_ip, port = port, node_id = node_id)
 
-        with LOCK:
-            if not self.check_follower_count(client_key):
+        with self._lock:
+            if not self.check_follower_count(url):
                 result.code = "403"
                 result.message = "Too many connects"
                 return result
 
-            follower = self.get_follower_info(client_key)
+            follower = self.get_follower_info(url)
             follower.update_ping_info()
             follower.fs_sync_offset = xutils.get_argument("fs_sync_offset", "")
             follower.fs_index_count = fs_index_count
             follower.admin_token = admin_token
             follower.node_id = node_id
-            follower.url = "%s:%s" % (client_ip, port)
+            follower.url = url
 
             self.update_follower_info(follower)
             self.remove_expired_followers()

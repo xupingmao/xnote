@@ -455,7 +455,7 @@ class BasePlugin:
         self.css_style       = u("")
         self.option_links    = []
         
-    def add_option_link(name, url):
+    def add_option_link(self, name, url):
         self.option_links.append(dict(name=name, url = url))
 
     def write(self, text):

@@ -342,11 +342,6 @@ class Main:
         self.check_OK("/test/test_dbutil")
         self.check_OK("/test/test_dbutil?p=clear")
 
-    def test_system_sync(self):
-        admin_token = xauth.get_user_by_name("admin").token
-        self.check_OK("/system/sync?p=home")
-        self.check_OK("/system/sync?p=get_stat&token=" + admin_token)
-
     def test_system_log(self):
         logger = logutil.new_mem_logger("log_test")
         logger.log("Hello,World")

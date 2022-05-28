@@ -24,6 +24,7 @@ import xutils
 import xconfig
 import xtemplate
 import xmanager
+import web
 
 from xutils import webutil
 from xutils import Storage
@@ -176,7 +177,10 @@ class SyncHandler:
         token = xutils.get_argument("token", "")
         leader_token = LEADER.get_leader_token()
         if token != leader_token:
-            return dict(code="403", message="无权访问,TOKEN校验不通过")
+            error = dict(code="403", message="无权访问,TOKEN校验不通过")
+            status = "401 Unauthorized"
+            headers = {"Content-Type": "application/json"}
+            raise web.HTTPError(status, headers, textutil.tojson(error))
 
     @xauth.login_required("admin")
     def get_home_page(self):
