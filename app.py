@@ -181,7 +181,9 @@ def try_init_ldb():
         # 初始化leveldb数据库
         dbutil.init(xconfig.DB_DIR,
                     db_instance=db_instance,
-                    db_cache=cacheutil)
+                    db_cache=cacheutil,
+                    binlog=xconfig.get_global_config("system.binlog"),
+                    binlog_max_size=xconfig.get_global_config("system.binlog_max_size"))
     except:
         xutils.print_exc()
         logging.error("初始化数据库失败...")

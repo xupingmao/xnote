@@ -11,7 +11,7 @@ from xutils import webutil
 RETRY_LIMIT = 3
 
 dbutil.register_table("user_op_log", "用户操作日志表", check_user = True)
-
+dbutil.register_table_user_attr("user_op_log", "user_name")
 _user_log_db = dbutil.get_table("user_op_log")
 
 def get_real_ip():

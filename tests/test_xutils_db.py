@@ -26,6 +26,15 @@ json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
+dbutil.register_table("test", "测试数据库")
+dbutil.register_table_index("test", "name")
+dbutil.register_table_index("test", "age")
+
+dbutil.register_table("test_user_db", "测试数据库用户版", check_user=True)
+dbutil.register_table_user_attr("test_user_db", "user")
+
+BinLog.set_enabled(True)
+
 
 class MockedWriteBatch:
 
@@ -285,10 +294,6 @@ class TestMain(BaseTestCase):
         self.assertEqual(4, len(data2))
 
     def test_create_auto_increment_id(self):
-        dbutil.register_table("test", "测试数据库")
-        dbutil.register_table_index("test", "name")
-        dbutil.register_table_index("test", "age")
-
         db = dbutil.get_table("test")
         obj1 = Storage(name="Ada", age=20)
         db.insert(obj1, id_type="auto_increment")
@@ -392,7 +397,7 @@ class TestMain(BaseTestCase):
         self.check_OK("/system/db_index")
 
         result = json_request("/system/db_index", method="POST",
-                     data=dict(action="rebuild", table_name="note_tiny", index_name="name"))
+                              data=dict(action="rebuild", table_name="note_tiny", index_name="name"))
 
         self.assertEqual("success", result.get("code"))
 
@@ -414,3 +419,157 @@ class TestMain(BaseTestCase):
         self.assertEqual(last_seq, int(binlog.last_key()))
         binlog.add_log("test", "666")
         self.assertEqual(last_seq+1, binlog.last_seq)
+
+    def test_db_index_no_user(self):
+        dbutil.register_table("index_test", "索引测试")
+        dbutil.register_table_index("index_test", "age")
+        dbutil.register_table_index("index_test", "name")
+
+        obj1 = dict(name="Ada", age=20)
+        db = dbutil.get_table("index_test")
+        db.insert(obj1)
+
+        obj2 = dict(name="Bob", age=21)
+        db.insert(obj2)
+
+        result = db.list_by_index("age", index_value=20)
+        self.assertEqual(1, len(result))
+        self.assertEqual("Ada", result[0].name)
+
+        obj1["age"] = 25
+        db.update(obj1)
+
+        result = db.list_by_index("age", index_value=20)
+        self.assertEqual(0, len(result))
+
+        index_count = db.count_by_index("age")
+        self.assertEqual(2, index_count)
+
+        db.delete(obj1)
+
+        index_count = db.count_by_index("age")
+        self.assertEqual(1, index_count)
+
+    def test_record_lock(self):
+        print("test_record_lock")
+        from xutils.db.lock import RecordLock
+
+        lock1 = RecordLock("key")
+        lock2 = RecordLock("key")
+
+        lock1_result = lock1.acquire(50)
+        lock2_result = lock2.acquire(1)
+
+        self.assertTrue(lock1_result)
+        self.assertFalse(lock2_result)
+
+        del lock1
+        del lock2
+
+    def test_table_only_id(self):
+        db = dbutil.get_table("test")
+
+        for item in db.iter():
+            db.delete(item)
+
+        db.insert(dict(name="Ada", age=23))
+        db.insert(dict(name="Bob", age=22))
+
+        result = db.list(limit=-1)
+
+        print("result:", result)
+
+        self.assertTrue(len(result) > 0)
+
+        first = db.get_first()
+        self.assertEqual("Ada", first.name)
+
+        first_id = first._id
+        first2 = db.get_by_id(first_id)
+        self.assertEqual(first, first2)
+
+        last = db.get_last()
+        self.assertEqual("Bob", last.name)
+
+    def test_table_with_user(self):
+        db = dbutil.get_table("test_user_db")
+
+        for item in db.iter():
+            db.delete(item)
+
+        db.insert(dict(user="Ada", prop="key1", prop_value="222"))
+        db.insert(dict(user="Ada", prop="key2", prop_value="333"))
+        db.insert_by_user("Bob", dict(
+            user="Bob", prop="key3", prop_value="111"))
+        db.insert_by_user("Bob", dict(
+            user="Bob", prop="key4", prop_value="111"))
+
+        result1 = db.list(limit=-1, user_name="Ada")
+        result2 = db.list_by_func("Ada", limit=-1)
+
+        self.assertTrue(len(result1) > 0)
+        self.assertEqual(result1, result2)
+
+        first = db.get_first()
+        self.assertEqual("key1", first.prop)
+
+        last = db.get_last()
+        self.assertEqual("key4", last.prop)
+
+        # 通过key进行更新和查询
+        first.job = "painter"
+        db.update_by_key(first._key, first)
+        first = db.get_by_key(first._key)
+        self.assertEqual("painter", first.job)
+
+        # 通过ID更新和查询
+        first.job = "teacher"
+        db.update_by_id(first._id, first, user_name=first.user)
+        first = db.get_by_id(first._id, user_name=first.user)
+        self.assertEqual("teacher", first.job)
+
+    def test_dbutil_lock(self):
+        print("test_dbutil_lock")
+        from xutils.db.lock import RecordLock
+
+        print(RecordLock._lock_dict)
+
+        self.assertEqual(0, len(RecordLock._lock_dict))
+
+        lock1 = RecordLock("lock")
+        lock2 = RecordLock("lock")
+        self.assertTrue(lock1.acquire(timeout=1))
+        self.assertFalse(lock2.acquire(timeout=1))
+
+        lock1.release()
+        lock2.release()
+
+        print(RecordLock._lock_dict)
+
+        self.assertEqual(0, len(RecordLock._lock_dict))
+
+    def test_dbutil_lock_free(self):
+        print("test_dbutil_lock_free")
+        from xutils.db.lock import RecordLock
+        lock1 = RecordLock("lock#1")
+        lock2 = RecordLock("lock#2")
+
+        self.assertTrue(lock1.acquire())
+        self.assertTrue(lock2.acquire())
+
+        lock1.release()
+        lock2.release()
+
+    def test_dbutil_lock_with(self):
+        print("test_dbutil_lock_with")
+        from xutils.db.lock import RecordLock
+        lock1 = RecordLock("lock")
+        lock2 = RecordLock("lock")
+
+        with lock1:
+            print("test_dbutil_lock_with: lock1 required")
+            self.assertFalse(lock2.acquire(timeout=1))
+            print("test_dbutil_lock_with: lock2 try acquire failed")
+
+        lock1.release()
+        lock2.release()

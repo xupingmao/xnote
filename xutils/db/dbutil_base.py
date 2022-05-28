@@ -200,26 +200,6 @@ def create_db_instance(db_dir, block_cache_size=None, write_buffer_size=None):
     raise Exception("create_db_instance failed: not supported")
 
 
-@xutils.log_init_deco("leveldb")
-def init(db_dir,
-         block_cache_size=None,
-         write_buffer_size=None,
-         db_instance=None,
-         db_cache=None):
-    global _leveldb
-    global _cache
-
-    if db_instance != None:
-        _leveldb = db_instance
-    else:
-        _leveldb = create_db_instance(db_dir,
-                                      block_cache_size=block_cache_size,
-                                      write_buffer_size=write_buffer_size)
-
-    _cache = db_cache
-    xutils.log("leveldb: %s" % _leveldb)
-
-
 def check_not_empty(value, message):
     if value == None or value == "":
         raise Exception(message)
@@ -676,6 +656,13 @@ def prefix_count(prefix,
     prefix_scan(prefix, func)
     return count[0]
 
+def set_db_cache(cache):
+    global _cache
+    _cache = cache
+
+def set_db_instance(db_instance):
+    global _leveldb
+    _leveldb = db_instance
 
 def count_table(table_name, use_cache=False):
     assert table_name != None

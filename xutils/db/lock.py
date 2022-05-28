@@ -7,41 +7,62 @@
 import threading
 import uuid
 import time
+import logging
+
 
 class RecordLock:
     """行锁的实现"""
 
     _enter_lock = threading.RLock()
-    _lock_dict  = dict()
+    _lock_dict = dict()
 
-    def __init__(self, lock_key):
+    def __init__(self, lock_key, expire=-1):
         self.lock = None
         self.lock_key = lock_key
         self.token = uuid.uuid4().hex
+        self.expire = expire
+        self.got_lock_time = None
 
-    def acquire(self, timeout = -1):
+    def is_expired(self):
+        if self.expire < 0:
+            return False
+
+        assert self.got_lock_time != None
+        return (time.time() - self.got_lock_time) > self.expire
+
+    def acquire(self, timeout=-1):
         lock_key = self.lock_key
 
         wait_time_start = time.time()
-        with RecordLock._enter_lock:
-            while RecordLock._lock_dict.get(lock_key) != None:
-                # 当前锁被占用，等待锁释放
-                time.sleep(0.001)
-                if timeout > 0:
-                    wait_time = time.time() - wait_time_start
-                    if wait_time > timeout:
-                        return False
-            # 由于_enter_lock已经加锁了，_lock_dict里面不需要再使用锁
-            RecordLock._lock_dict[lock_key] = self.token
-        return True
+        while True:
+            with self._enter_lock:
+                lock = self._lock_dict.get(lock_key)
+                if lock == self:
+                    return True
+                if lock == None or lock.is_expired():
+                    self._lock_dict[lock_key] = self
+                    self.got_lock_time = time.time()
+                    return True
+                    
+                # print("lock required by ({lock_key}, {token}, {expire}) self.token:{self_token}".format(
+                #     lock_key=lock_key, token=lock.token, expire=lock.expire, self_token=self.token))
+
+            # 当前锁被占用，释放_enter_lock，等待后重新尝试获取锁
+            time.sleep(0.001)
+            if timeout > 0:
+                wait_time = time.time() - wait_time_start
+                if wait_time > timeout:
+                    return False
 
     def release(self):
-        with RecordLock._enter_lock:
-            cur_token = RecordLock._lock_dict[self.lock_key]
-            if self.token == cur_token:
-                del RecordLock._lock_dict[self.lock_key]
+        with self._enter_lock:
+            lock = self._lock_dict.get(self.lock_key)
+            if lock == None:
+                return
+            if self == lock:
+                del self._lock_dict[self.lock_key]
             else:
-                logging.error("lock has been taken by other(%s)", cur_token)
+                logging.error("lock has been taken by other(%s)", lock.token)
 
     def __enter__(self):
         self.acquire()
@@ -52,4 +73,3 @@ class RecordLock:
 
     def __del__(self):
         self.release()
-

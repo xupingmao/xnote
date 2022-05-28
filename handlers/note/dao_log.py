@@ -20,6 +20,7 @@ from xutils import dateutil
 from xutils import Storage
 
 dbutil.register_table("user_note_log", "用户笔记操作日志", check_user=True)
+dbutil.register_table_user_attr("user_note_log", "user")
 dbutil.register_table_index("user_note_log", "visit_cnt")
 dbutil.register_table_index("user_note_log", "atime")
 dbutil.register_table_index("user_note_log", "mtime")
@@ -56,6 +57,7 @@ def _update_log(user_name, note, increment = 1, insert_only = False):
         log.atime = note.atime
         log.mtime = note.mtime
         log.ctime = note.ctime
+        log.user = user_name
         db.insert(log, id_type = None, id_value = note_id)
     else:
         if insert_only:
@@ -67,6 +69,7 @@ def _update_log(user_name, note, increment = 1, insert_only = False):
         log.atime = note.atime
         log.mtime = note.mtime
         log.ctime = note.ctime
+        log.user = user_name
         db.update(log)
 
 def get_note_ids_from_logs(logs):
@@ -122,14 +125,11 @@ def list_recent_edit(user_name = None, offset = 0, limit = None, skip_deleted = 
     if limit is None:
         limit = xconfig.PAGE_SIZE
     
-    user = xauth.current_name()
-    if user is None:
-        user = "public"
+    if user_name is None:
+        user_name = "public"
 
     db = get_user_note_log_table(user_name)
     logs = db.list_by_index("mtime", offset = offset, limit = limit, reverse = True)
-    # note_ids = get_note_ids_from_logs(logs)
-    # notes = NOTE_DAO.batch_query_list(note_ids)
 
     result = []
     for log in logs:
