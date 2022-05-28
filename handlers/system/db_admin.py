@@ -40,8 +40,6 @@ SCAN_HTML = """
 
             <div class="float-right btn-line-height">
                 <a href="/fs_link/db">数据库目录</a>
-                <span>|</span>
-                <a href="/system/backup?p=home">备份管理</a>
             </div>
         </div>
     </form>

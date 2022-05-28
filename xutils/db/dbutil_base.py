@@ -315,19 +315,21 @@ class TableInfo:
 def register_table(table_name,
                    description,
                    category="default",
-                   check_user=False):
+                   check_user=False,
+                   user_attr=None):
     # TODO 考虑过这个方法直接返回一个 LdbTable 实例
     # LdbTable可能针对同一个`table`会有不同的实例
     if not re.match(r"^[0-9a-z_]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
-    _register_table_inner(table_name, description, category, check_user)
+    _register_table_inner(table_name, description, category, check_user, user_attr)
 
 
 def _register_table_inner(table_name,
                          description,
                          category="default",
-                         check_user=False):
+                         check_user=False,
+                         user_attr=None):
     if not re.match(r"^[0-9a-z_\$]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
@@ -337,6 +339,7 @@ def _register_table_inner(table_name,
 
     info = TableInfo(table_name, description, category)
     info.check_user = check_user
+    info.user_attr = user_attr
 
     TABLE_INFO_DICT[table_name] = info
 

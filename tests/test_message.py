@@ -53,7 +53,7 @@ class TextPage(xtemplate.BaseTextPlugin):
 
 class TestMain(BaseTestCase):
 
-    def test_message_create(self):
+    def test_message_create_and_update(self):
         # Py2: webpy会自动把str对象转成unicode对象，data参数传unicode反而会有问题
         response = json_request(
             "/message/save", method="POST", data=dict(content="Xnote-Unit-Test"))
@@ -63,6 +63,16 @@ class TestMain(BaseTestCase):
         self.assertEqual(u"Xnote-Unit-Test", data.get("content"))
         json_request("/message/touch", method="POST",
                      data=dict(id=data.get("id")))
+        
+        msg_id = data.get("id")
+
+        update_result = json_request("/message/save", method="POST", data=dict(id=msg_id, content="New Content"))
+        self.assertEqual("success", update_result["code"])
+
+        data = dbutil.get(msg_id)
+
+        self.assertEqual("New Content", data["content"])
+
         json_request("/message/delete", method="POST",
                      data=dict(id=data.get("id")))
 

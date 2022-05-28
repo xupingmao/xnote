@@ -15,6 +15,8 @@ from xutils import dateutil
 from xutils import textutil
 from xutils import Storage
 from xutils import webutil
+from xutils.db.binlog import BinLog
+
 from .node_base import NodeManagerBase, convert_follower_dict_to_list
 from .node_base import CONFIG
 from .node_base import get_system_port
@@ -44,6 +46,7 @@ class FollwerInfo(Storage):
 
 class Leader(NodeManagerBase):
     FOLLOWER_DICT = dict()
+    binlog = BinLog.get_instance()
 
     def get_follower_info(self, client_id):
         client_info = self.FOLLOWER_DICT.get(client_id)
@@ -81,6 +84,9 @@ class Leader(NodeManagerBase):
 
         return token
 
+    def get_node_id(self):
+        return xconfig.get("system.node_id")
+
     def get_ip_whitelist(self):
         return CONFIG.get("follower.whitelist", "")
 
@@ -90,11 +96,21 @@ class Leader(NodeManagerBase):
     def get_fs_index_count(self):
         return xutils.call("system_sync.count_index")
 
+    def get_system_version(self):
+        return xconfig.get_global_config("system.version")
+
     def remove_expired_followers(self):
         for key in self.FOLLOWER_DICT.copy():
             info = self.FOLLOWER_DICT[key]
             if info.is_expired():
                 del self.FOLLOWER_DICT[key]
+
+    def get_leader_info(self):
+        return dict(token=self.get_leader_token(),
+                    node_id=self.get_node_id(),
+                    fs_index_count=self.get_fs_index_count(),
+                    system_version=self.get_system_version(),
+                    binlog_last_seq=self.binlog.last_seq)
 
     def get_stat(self, port):
         admin_token = xauth.get_user_by_name("admin").token
@@ -103,7 +119,7 @@ class Leader(NodeManagerBase):
         result = Storage()
         result.code = "success"
         result.timestamp = int(time.time())
-        result.system_version = xconfig.get_global_config("system.version")
+        result.system_version = self.get_system_version()
         result.admin_token = admin_token
         result.fs_index_count = fs_index_count
 
@@ -130,5 +146,6 @@ class Leader(NodeManagerBase):
             self.remove_expired_followers()
 
         result.follower_dict = self.get_follower_dict()
+        result.leader = self.get_leader_info()
 
         return result

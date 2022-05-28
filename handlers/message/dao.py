@@ -5,16 +5,19 @@
 import xutils
 import xconfig
 import xmanager
-import xtables
 import re
-import random
 from xutils import dbutil, cacheutil, textutil, Storage, functions
 from xutils import dateutil
 from xutils.functions import del_dict_key
 from xtemplate import T
 
-dbutil.register_table("message", "短文本")
-dbutil.register_table("msg_search_history", "备忘搜索历史")
+dbutil.register_table("message", "短文本", check_user=True, user_attr="user")
+dbutil.register_table_index("message", "date")
+dbutil.register_table_index("message", "tag")
+
+dbutil.register_table("msg_search_history", "备忘搜索历史",
+                      check_user=True, user_attr="user")
+
 dbutil.register_table("msg_key", "备忘关键字/标签")
 dbutil.register_table("msg_task_idx", "待办索引")
 dbutil.register_table("msg_history", "备忘历史")
@@ -23,19 +26,22 @@ dbutil.register_table("user_stat", "用户数据统计")
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
 # 带日期创建的最大重试次数
 CREATE_MAX_RETRY = 20
-MOBILE_LENGTH    = 11
+MOBILE_LENGTH = 11
 VALID_TAG_SET = set(["task", "done", "log", "key", "date"])
 
 _keyword_db = dbutil.get_hash_table("msg_key")
+_msg_db = dbutil.get_table("message", type="rdb")
+
 
 class MessageDO(Storage):
 
-    id   = "主键"
-    tag  = "标签"
+    id = "主键"
+    tag = "标签"
     user = "用户名"
 
     def __init__(self):
         pass
+
 
 def check_before_create(kw):
     if "id" in kw:
@@ -56,10 +62,12 @@ def check_before_create(kw):
     if tag not in VALID_TAG_SET:
         raise Exception("message.dao.create: tag `%s` is invalid" % tag)
 
+
 def convert_to_task_idx_key(key):
     assert isinstance(key, str)
     prefix, user_name, timeseq = key.split(":")
     return "msg_task_idx:%s:%s" % (user_name, timeseq)
+
 
 def convert_to_task_index(kw):
     index = Storage()
@@ -67,6 +75,7 @@ def convert_to_task_index(kw):
     index.user = kw["user"]
     index.content = kw["content"]
     return index
+
 
 def build_task_index(kw):
     tag = kw["tag"]
@@ -80,8 +89,10 @@ def build_task_index(kw):
 def execute_after_create(kw):
     build_task_index(kw)
 
+
 def execute_after_update(kw):
     build_task_index(kw)
+
 
 def execute_after_delete(kw):
     build_task_index(kw)
@@ -91,6 +102,7 @@ def get_message_key(user_name, timestamp):
     assert user_name != None
     assert timestamp != None
     return "message:%s:%s" % (user_name, dbutil.timeseq(timestamp))
+
 
 def _create_message_with_date(kw):
     user_name = kw["user"]
@@ -104,9 +116,10 @@ def _create_message_with_date(kw):
         return _create_message_without_date(kw)
 
     timestamp = dateutil.parse_date_to_timestamp(date)
-    timestamp += 60 * 60 * 23 # 追加日志的开始时间默认为23点
+    timestamp += 60 * 60 * 23  # 追加日志的开始时间默认为23点
 
     kw["ctime0"] = old_ctime
+    kw["date"] = date
     # 调整类型为记事
     retry = 0
 
@@ -118,9 +131,9 @@ def _create_message_with_date(kw):
             key = get_message_key(user_name, timestamp)
             kw["ctime"] = dateutil.format_time(timestamp)
             kw["id"] = key
-            result = dbutil.get(key)
+            result = _msg_db.get_by_key(key)
             if result is None:
-                dbutil.put(key, kw)
+                _msg_db.update_by_key(key, kw)
                 execute_after_create(kw)
                 return key
             else:
@@ -128,17 +141,25 @@ def _create_message_with_date(kw):
 
             retry += 1
 
+
 def _create_message_without_date(kw):
     tag = kw['tag']
+    ctime = kw["ctime"]
+    kw['date'] = dateutil.format_date(ctime)
+
     if tag == 'key':
         key = "msg_key:%s:%s" % (kw['user'], dbutil.timeseq())
+        kw["id"] = key
+        dbutil.put(key, kw)
     else:
-        key = "message:%s:%s" % (kw['user'], dbutil.timeseq())
-    kw['id'] = key
-    dbutil.put(key, kw)
-
+        _msg_db.insert(kw)
+        key = kw["_key"]
+        kw["id"] = key
+        _msg_db.update(kw)
+    
     execute_after_create(kw)
     return key
+
 
 def create_message(**kw):
     """创建信息
@@ -157,10 +178,12 @@ def create_message(**kw):
     else:
         return _create_message_without_date(kw)
 
+
 def check_before_update(message):
     id = message['id']
     if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
         raise Exception("[msg.update] invalid message id:%s" % id)
+
 
 def fix_before_update(message):
     if message.tag is None:
@@ -173,24 +196,30 @@ def fix_before_update(message):
     del_dict_key(message, "html")
     del_dict_key(message, "tag_text")
 
+
 def update_message(message):
     check_before_update(message)
     fix_before_update(message)
-
-    id = message['id']
-    dbutil.put(id, message)
-
+    id = message["id"]
+    if id.startswith("message:"):
+        _msg_db.update(message)
+    else:
+        dbutil.put(id, message)
     execute_after_update(message)
+
 
 def add_message_history(message):
     id_str = message['id']
     prefix, user, timeseq = id_str.split(':')
-    new_id = 'msg_history:%s:%s:%s' % (user, timeseq, message.get('version', 0))
+    new_id = 'msg_history:%s:%s:%s' % (
+        user, timeseq, message.get('version', 0))
     dbutil.put(new_id, message)
+
 
 @xmanager.listen(["message.updated", "message.add", "message.remove"])
 def expire_message_cache(ctx):
     cacheutil.prefix_del("message.count")
+
 
 def get_words_from_key(key):
     words = []
@@ -200,10 +229,12 @@ def get_words_from_key(key):
         words.append(item.lower())
     return words
 
+
 def has_tag_fast(content):
     return content.find("#") >= 0 or content.find("@") >= 0
 
-def search_message(user_name, key, offset, limit, search_tags = None, no_tag = None):
+
+def search_message(user_name, key, offset, limit, search_tags=None, no_tag=None):
     words = get_words_from_key(key)
 
     def search_func_default(key, value):
@@ -227,41 +258,61 @@ def search_message(user_name, key, offset, limit, search_tags = None, no_tag = N
     else:
         search_func = search_func_default
 
-    chatlist = dbutil.prefix_list("message:%s" % user_name, search_func, offset, limit, reverse = True)
-    amount   = dbutil.prefix_count("message:%s" % user_name, search_func)
+    chatlist = dbutil.prefix_list(
+        "message:%s" % user_name, search_func, offset, limit, reverse=True)
+    amount = dbutil.prefix_count("message:%s" % user_name, search_func)
     return chatlist, amount
+
 
 def check_before_delete(id):
     if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
         raise Exception("[delete] invalid message id:%s" % id)
 
+
 def delete_message_by_id(id):
     check_before_delete(id)
+
     old = get_message_by_id(id)
+
+    if old == None:
+        return
     
-    dbutil.delete(id)
+    if id.startswith("message:"):
+        _msg_db.delete(old)
+    else:
+        dbutil.delete(id)
+
     xmanager.fire("message.remove", Storage(id=id))
+    execute_after_delete(old)
 
-    if old != None:
-        execute_after_delete(old)
 
-@xutils.timeit(name = "Kv.Message.Count", logfile = True)
+@xutils.timeit(name="Kv.Message.Count", logfile=True)
 def kv_count_message(user, status):
     def filter_func(k, v):
         return v.status == status
-    return dbutil.prefix_count("message:%s" % user, filter_func = filter_func)
+    return _msg_db.count(filter_func=filter_func, user_name=user)
+
 
 @xutils.cache(prefix="message.count.status", expire=60)
 def count_message(user, status):
     return kv_count_message(user, status)
 
-def get_message_by_id(id):
-    check_param_id(id)
-    return dbutil.get(id)
+
+def get_message_by_id(full_key):
+    check_param_id(full_key)
+    if full_key.startswith("message:"):
+        value = _msg_db.get_by_key(full_key)
+        if value != None:
+            value["id"] = full_key
+        return value
+    else:
+        return dbutil.get(full_key)
+
 
 def check_param_user(user_name):
     if user_name is None or user_name == "":
         raise Exception("[query] invalid user_name:%s" % user_name)
+
 
 def check_param_id(id):
     if id is None:
@@ -269,63 +320,76 @@ def check_param_id(id):
     if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
         raise Exception("param id invalid: %s" % id)
 
-@xutils.timeit(name = "kv.message.list", logfile = True, logargs = True)
+
+@xutils.timeit(name="kv.message.list", logfile=True, logargs=True)
 def list_message_page(user, status, offset, limit):
     def filter_func(key, value):
         if status is None:
             return value.user == user
         value.id = key
         return value.user == user and value.status == status
-    chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
-    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+    chatlist = _msg_db.list(filter_func=filter_func, offset=offset,
+                            limit=limit, reverse=True, user_name=user)
+
+    amount = _msg_db.count(filter_func=filter_func, user_name=user)
     return chatlist, amount
+
 
 def list_file_page(user, offset, limit):
     def filter_func(key, value):
         if value.content is None:
             return False
         return value.content.find("file://") >= 0
-    chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    chatlist = _msg_db.list(filter_func=filter_func, offset=offset,
+                            limit=limit, reverse=True, user_name=user)
     # TODO 后续可以用message_stat加速
-    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+    amount = _msg_db.count(filter_func=filter_func, user_name=user)
     return chatlist, amount
+
 
 def list_link_page(user, offset, limit):
     def filter_func(key, value):
         if value.content is None:
             return False
         return value.content.find("http://") >= 0 or value.content.find("https://") >= 0
-    chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    chatlist = dbutil.prefix_list(
+        "message:%s" % user, filter_func, offset, limit, reverse=True)
     # TODO 后续可以用message_stat加速
-    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+    amount = dbutil.prefix_count("message:%s" % user, filter_func)
     return chatlist, amount
 
-def list_book_page(user, offset, limit, key = None):
+
+def list_book_page(user, offset, limit, key=None):
     pattern = re.compile(r"《.+》")
+
     def filter_func(key, value):
         if value.content is None:
             return False
         return pattern.search(value.content)
 
-    msg_list = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    msg_list = dbutil.prefix_list(
+        "message:%s" % user, filter_func, offset, limit, reverse=True)
     # TODO 后续可以用message_stat加速
-    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+    amount = dbutil.prefix_count("message:%s" % user, filter_func)
     return msg_list, amount
 
-def list_people_page(user, offset, limit, key = None):
+
+def list_people_page(user, offset, limit, key=None):
     def filter_func(key, value):
         if value.content is None:
             return False
         return value.content.find("@") >= 0
 
-    msg_list = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    msg_list = dbutil.prefix_list(
+        "message:%s" % user, filter_func, offset, limit, reverse=True)
     # TODO 后续可以用message_stat加速
-    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+    amount = dbutil.prefix_count("message:%s" % user, filter_func)
     return msg_list, amount
 
 
-def list_phone_page(user, offset, limit, key = None):
+def list_phone_page(user, offset, limit, key=None):
     pattern = re.compile(r"([0-9]+)")
+
     def filter_func(key, value):
         if value.content is None:
             return False
@@ -335,19 +399,22 @@ def list_phone_page(user, offset, limit, key = None):
                 return True
         return False
 
-    msg_list = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+    msg_list = dbutil.prefix_list(
+        "message:%s" % user, filter_func, offset, limit, reverse=True)
     # TODO 后续可以用message_stat加速
-    amount   = dbutil.prefix_count("message:%s" % user, filter_func)
+    amount = dbutil.prefix_count("message:%s" % user, filter_func)
     return msg_list, amount
+
 
 def filter_todo_func(key, value):
     # 兼容老版本的数据
     return value.tag in ("task", "cron", "todo") or value.status == 0 or value.status == 50
 
+
 def get_filter_by_tag_func(tag):
     if tag in ("task", "todo"):
         return filter_todo_func
-        
+
     def filter_func(key, value):
         if tag is None or tag == "all":
             return True
@@ -356,14 +423,16 @@ def get_filter_by_tag_func(tag):
         return value.tag == tag
     return filter_func
 
-def list_key(user, offset, limit = -1):
+
+def list_key(user, offset, limit=-1):
     items = dbutil.prefix_list("msg_key:%s" % user)
-    items.sort(key = lambda x: x.mtime, reverse = True)
-    
+    items.sort(key=lambda x: x.mtime, reverse=True)
+
     if limit < 0:
         return items[offset:]
 
     return items[offset: offset+limit]
+
 
 def get_content_filter_func(tag, content):
     def filter_func(key, value):
@@ -371,6 +440,7 @@ def get_content_filter_func(tag, content):
             return value.content == content
         return value.tag == tag and value.content == content
     return filter_func
+
 
 def get_by_content(user, tag, content):
     if tag == "key":
@@ -381,20 +451,24 @@ def get_by_content(user, tag, content):
     else:
         return None
 
-def list_task(user, offset = 0, limit = xconfig.PAGE_SIZE):
+
+def list_task(user, offset=0, limit=xconfig.PAGE_SIZE):
     return list_by_tag(user, "task", offset, limit)
 
-def list_task_done(user, offset = 0, limit = xconfig.PAGE_SIZE):
+
+def list_task_done(user, offset=0, limit=xconfig.PAGE_SIZE):
     return list_by_tag(user, "done", offset, limit)
 
-def list_by_tag(user, tag, offset = 0, limit = xconfig.PAGE_SIZE):
+
+def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
     check_param_user(user)
 
     if tag == "key":
         chatlist = list_key(user, offset, limit)
     else:
         filter_func = get_filter_by_tag_func(tag)
-        chatlist = dbutil.prefix_list("message:%s" % user, filter_func, offset, limit, reverse = True)
+        chatlist = dbutil.prefix_list(
+            "message:%s" % user, filter_func, offset, limit, reverse=True)
 
     # 利用message_stat优化count查询
     if tag == "done":
@@ -414,7 +488,8 @@ def list_by_tag(user, tag, offset = 0, limit = xconfig.PAGE_SIZE):
         amount = 0
     return chatlist, amount
 
-def list_by_date(user, date, offset = 0, limit = xconfig.PAGE_SIZE):
+
+def list_by_date(user, date, offset=0, limit=xconfig.PAGE_SIZE):
     if date is None or date == "":
         return []
 
@@ -423,9 +498,11 @@ def list_by_date(user, date, offset = 0, limit = xconfig.PAGE_SIZE):
 
     amount = dbutil.prefix_count("message:%s" % user, list_by_date_func)
 
-    msg_list = dbutil.prefix_list("message:%s" % user, list_by_date_func, offset, limit, reverse = True)
+    msg_list = dbutil.prefix_list(
+        "message:%s" % user, list_by_date_func, offset, limit, reverse=True)
 
     return msg_list, amount
+
 
 def count_by_tag(user, tag):
     """内部方法"""
@@ -435,11 +512,13 @@ def count_by_tag(user, tag):
         return dbutil.count_table("message:%s" % user)
     return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
 
+
 def get_message_stat0(user):
     stat = dbutil.get("user_stat:%s:message" % user)
     if stat != None and stat.canceled_count is None:
         stat.canceled_count = 0
     return stat
+
 
 def get_message_stat(user):
     check_param_user(user)
@@ -449,37 +528,40 @@ def get_message_stat(user):
         return refresh_message_stat(user)
     return value
 
+
 def refresh_message_stat(user):
     # TODO 优化，只需要更新原来的tag和新的tag
     task_count = count_by_tag(user, "task")
-    log_count  = count_by_tag(user, "log")
+    log_count = count_by_tag(user, "log")
     done_count = count_by_tag(user, "done")
     cron_count = count_by_tag(user, "cron")
-    key_count  = count_by_tag(user, "key")
+    key_count = count_by_tag(user, "key")
     canceled_count = count_by_tag(user, "canceled")
-    stat       = get_message_stat0(user)
+    stat = get_message_stat0(user)
     if stat is None:
         stat = Storage()
 
     stat.task_count = task_count
-    stat.log_count  = log_count
+    stat.log_count = log_count
     stat.done_count = done_count
     stat.cron_count = cron_count
-    stat.key_count  = key_count
+    stat.key_count = key_count
     stat.canceled_count = canceled_count
     dbutil.put("user_stat:%s:message" % user, stat)
     return stat
 
-def add_search_history(user, search_key, cost_time = 0):
+
+def add_search_history(user, search_key, cost_time=0):
     key = "msg_search_history:%s:%s" % (user, dbutil.timeseq())
-    dbutil.put(key, Storage(key = search_key, cost_time = cost_time))
+    dbutil.put(key, Storage(key=search_key, cost_time=cost_time))
+
 
 class MessageTag(Storage):
 
-    def __init__(self, tag, size, priority = 0):
+    def __init__(self, tag, size, priority=0):
         self.type = type
         self.size = size
-        self.url  = "/message?tag=" + tag
+        self.url = "/message?tag=" + tag
         self.priority = priority
         self.show_next = True
         self.is_deleted = 0
@@ -497,15 +579,16 @@ class MessageTag(Storage):
             self.icon = "fa-calendar-check-o"
 
 
-def get_message_tag(user, tag, priority = 0):
-    msg_stat  = get_message_stat(user)
+def get_message_tag(user, tag, priority=0):
+    msg_stat = get_message_stat(user)
 
     if tag == "log":
-        return MessageTag(tag, msg_stat.log_count, priority = priority)
+        return MessageTag(tag, msg_stat.log_count, priority=priority)
     if tag == "task":
-        return MessageTag(tag, msg_stat.task_count, priority = priority)
+        return MessageTag(tag, msg_stat.task_count, priority=priority)
 
     raise Exception("unknown tag:%s" % tag)
+
 
 xutils.register_func("message.create", create_message)
 xutils.register_func("message.update", update_message)
@@ -533,4 +616,3 @@ xutils.register_func("message.get_message_stat", get_message_stat)
 xutils.register_func("message.refresh_message_stat", refresh_message_stat)
 xutils.register_func("message.add_search_history", add_search_history)
 xutils.register_func("message.add_history", add_message_history)
-

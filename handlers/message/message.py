@@ -10,21 +10,16 @@ key/keyword: 短消息关键字
 
 """
 import time
-import re
 import math
-import web
 import xutils
-import xtables
 import xauth
 import xconfig
 import xmanager
 import xtemplate
-from xutils import BaseRule, Storage, dbutil, textutil, functions, u, SearchResult
+from xutils import BaseRule, Storage, dbutil, functions, u, SearchResult
 from xutils import dateutil
 from xtemplate import T
-from xutils.textutil import escape_html, quote
-from xutils.functions import Counter, safe_list
-from handlers.message.message_model import MessageFolder
+from xutils.functions import safe_list
 from handlers.message.message_utils import (
     list_task_tags, 
     process_message, 
@@ -339,7 +334,7 @@ class ListAjaxHandler:
  
 def update_message_status(id, status):
     user_name = xauth.current_name()
-    data = dbutil.get(id)
+    data = MSG_DAO.get_by_id(id)
     if data and data.user == user_name:
         data.status = status
         data.mtime = xutils.format_datetime()
@@ -354,7 +349,7 @@ def update_message_status(id, status):
         return failure(message = "无操作权限")
 
 def update_message_content(id, user_name, content):
-    data = dbutil.get(id)
+    data = MSG_DAO.get_by_id(id)
     if data and data.user == user_name:
         # 先保存历史
         MSG_DAO.add_history(data)
@@ -382,7 +377,7 @@ def create_done_message(old_message):
 
 def update_message_tag(id, tag):
     user_name = xauth.current_name()
-    data = dbutil.get(id)
+    data = MSG_DAO.get_by_id(id)
     if data and data.user == user_name:
         # 修复status数据，全部采用tag
         if 'status' in data:
@@ -473,8 +468,13 @@ class DeleteAjaxHandler:
     def POST(self):
         id = xutils.get_argument("id")
         if id == "":
-            return
-        msg = MSG_DAO.get_by_id(id)
+            return failure(message = "id为空")
+        
+        try:
+            msg = MSG_DAO.get_by_id(id)
+        except:
+            return failure(message = "删除失败")
+
         if msg is None:
             return dict(code="fail", message="data not exists")
         
@@ -526,7 +526,9 @@ def create_message(user_name, tag, content, ip):
 
     MSG_DAO.refresh_message_stat(user_name)
 
-    after_message_create_or_update(MSG_DAO.get_by_id(id))
+    created_msg = MSG_DAO.get_by_id(id)
+    assert created_msg != None
+    after_message_create_or_update(created_msg)
     
     create_event = dict(id=id, user=user_name, content=content, ctime=ctime)
     xmanager.fire('message.add', create_event)

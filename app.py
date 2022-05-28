@@ -160,7 +160,8 @@ def try_init_ldb():
         if db_driver == "lmdb":
             from xutils.db.driver_lmdb import LmdbKV
             db_dir = os.path.join(xconfig.DB_DIR, "lmdb")
-            db_instance = LmdbKV(db_dir)
+            db_instance = LmdbKV(
+                db_dir, map_size=xconfig.get("system.lmdb_map_size"))
 
         # 默认使用leveldb启动
         if db_instance is None:

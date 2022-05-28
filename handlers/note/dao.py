@@ -24,22 +24,25 @@ import xconfig
 import xutils
 import xmanager
 import threading
-import logging 
+import logging
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import attrget
 
 # 配置日志模块
 logging.basicConfig(level=logging.DEBUG,
-    format='%(asctime)s|%(levelname)s|%(filename)s:%(lineno)d|%(message)s')
+                    format='%(asctime)s|%(levelname)s|%(filename)s:%(lineno)d|%(message)s')
 
-def register_note_table(name, description, check_user = False):
-    dbutil.register_table(name, description, "note", check_user = check_user)
+
+def register_note_table(name, description, check_user=False, user_attr=None):
+    dbutil.register_table(name, description, "note",
+                          check_user=check_user, user_attr=user_attr)
+
 
 register_note_table("note_full", "笔记完整信息 <note_full:note_id>")
 register_note_table("note_index", "笔记索引，不包含内容 <note_index:note_id>")
 register_note_table("note_skey", "用户维度的skey索引 <note_skey:user:skey>")
-register_note_table("notebook", "笔记分组", check_user = True)
+register_note_table("notebook", "笔记分组", check_user=True, user_attr="creator")
 register_note_table("token", "用于分享的令牌")
 register_note_table("note_history", "笔记的历史版本")
 register_note_table("note_tags", "笔记标签 <note_tags:user:note_id>")
@@ -52,81 +55,85 @@ dbutil.register_table_index("note_public", "hot_index")
 dbutil.register_table_index("note_public", "share_time")
 
 # 用户维度索引
-register_note_table("note_tiny", "用户维度的笔记索引 <table:user:id>", check_user = True)
+register_note_table("note_tiny", "用户维度的笔记索引 <table:user:id>",
+                    check_user=True, user_attr="creator")
 dbutil.register_table_index("note_tiny", "name")
 dbutil.register_table_index("note_tiny", "ctime")
-dbutil.register_table_user_attr("note_tiny", "creator")
 
 
 NOTE_DAO = xutils.DAO("note")
 
-DB_PATH         = xconfig.DB_PATH
-MAX_EDIT_LOG    = 500
-MAX_VIEW_LOG    = 500
+DB_PATH = xconfig.DB_PATH
+MAX_EDIT_LOG = 500
+MAX_VIEW_LOG = 500
 MAX_STICKY_SIZE = 1000
 MAX_SEARCH_SIZE = 1000
-MAX_LIST_SIZE   = 1000
+MAX_LIST_SIZE = 1000
 
 NOTE_ICON_DICT = {
-    "group"   : "fa-folder orange",
+    "group": "fa-folder orange",
 
-    "post"    : "fa-file-word-o", # 废弃
-    "html"    : "fa-file-word-o", # 废弃
-    "gallery" : "fa-photo",
-    "list"    : "fa-list",
-    "plan"    : "fa-calendar-check-o",
+    "post": "fa-file-word-o",  # 废弃
+    "html": "fa-file-word-o",  # 废弃
+    "gallery": "fa-photo",
+    "list": "fa-list",
+    "plan": "fa-calendar-check-o",
 
     # 表格类
-    "csv"     : "fa-table", # 废弃
-    "table"   : "fa-table", # 废弃
-    "form"    : "fa-table", # 开发中
+    "csv": "fa-table",  # 废弃
+    "table": "fa-table",  # 废弃
+    "form": "fa-table",  # 开发中
 }
 
 CREATE_LOCK = threading.RLock()
+
 
 class NoteSchema:
     """这个类主要是说明结构"""
 
     # 基本信息
-    id          = "主键ID"
-    name        = "笔记名称"
-    ctime       = "创建时间"
-    mtime       = "修改时间"
-    atime       = "访问时间"
-    type        = "类型"
-    category    = "所属分类"  # 一级图书分类
-    size        = "大小"
-    parent_id   = "父级节点ID"
-    content     = "纯文本内容"
-    data        = "富文本内容"
-    is_deleted  = "是否删除"
-    archived    = "是否归档"
+    id = "主键ID"
+    name = "笔记名称"
+    ctime = "创建时间"
+    mtime = "修改时间"
+    atime = "访问时间"
+    type = "类型"
+    category = "所属分类"  # 一级图书分类
+    size = "大小"
+    parent_id = "父级节点ID"
+    content = "纯文本内容"
+    data = "富文本内容"
+    is_deleted = "是否删除"
+    archived = "是否归档"
 
     # 权限控制
-    creator     = "创建者"
-    is_public   = "是否公开"
-    token       = "分享token"
-    
+    creator = "创建者"
+    is_public = "是否公开"
+    token = "分享token"
+
     # 统计信息
-    priority    = "优先级"
+    priority = "优先级"
     visited_cnt = "访问次数"
-    orderby     = "排序方式"
-    hot_index   = "热门指数"
+    orderby = "排序方式"
+    hot_index = "热门指数"
+
 
 def format_note_id(id):
     return str(id)
+
 
 def format_date(date):
     if date is None:
         return date
     return date.split(" ")[0].replace("-", "/")
 
-def get_root(creator = None):
+
+def get_root(creator=None):
     root = Storage()
     root.name = "根目录"
     root.type = "group"
     root.size = None
-    root.id   = 0
+    root.id = 0
     root.parent_id = 0
     root.content = ""
     root.priority = 0
@@ -135,12 +142,13 @@ def get_root(creator = None):
     root.url = "/note/group"
     return root
 
+
 def get_default_group():
     group = Storage()
     group.name = "默认分组"
     group.type = "group"
     group.size = None
-    group.id   = "default"
+    group.id = "default"
     group.parent_id = 0
     group.content = ""
     group.priority = 0
@@ -148,12 +156,13 @@ def get_default_group():
     group.url = "/note/default"
     return group
 
+
 def get_archived_group():
     group = Storage()
     group.name = "归档分组"
     group.type = "group"
     group.size = None
-    group.id   = "archived"
+    group.id = "archived"
     group.parent_id = 0
     group.content = ""
     group.priority = 0
@@ -161,11 +170,14 @@ def get_archived_group():
     group.url = "/note/archived"
     return group
 
+
 def get_note_public_table():
     return dbutil.get_table("note_public")
 
+
 def get_note_tiny_table(user_name):
-    return dbutil.get_table("note_tiny", user_name = user_name)
+    return dbutil.get_table("note_tiny", user_name=user_name)
+
 
 def batch_query(id_list):
     result = dict()
@@ -176,6 +188,7 @@ def batch_query(id_list):
             build_note_info(note)
     return result
 
+
 def batch_query_list(id_list):
     result = []
     for id in id_list:
@@ -185,28 +198,36 @@ def batch_query_list(id_list):
             result.append(note)
     return result
 
+
 def sort_by_name(notes):
-    notes.sort(key = lambda x: x.name)
+    notes.sort(key=lambda x: x.name)
+
 
 def sort_by_name_desc(notes):
-    notes.sort(key = lambda x: x.name, reverse = True)
+    notes.sort(key=lambda x: x.name, reverse=True)
+
 
 def sort_by_name_priority(notes):
     sort_by_name(notes)
     sort_by_priority(notes)
 
+
 def sort_by_mtime_desc(notes):
-    notes.sort(key = lambda x: x.mtime, reverse = True)
+    notes.sort(key=lambda x: x.mtime, reverse=True)
+
 
 def sort_by_ctime_desc(notes):
-    notes.sort(key = lambda x: x.ctime, reverse = True)
+    notes.sort(key=lambda x: x.ctime, reverse=True)
+
 
 def sort_by_atime_desc(notes):
-    notes.sort(key = lambda x: x.atime, reverse = True)
+    notes.sort(key=lambda x: x.atime, reverse=True)
+
 
 def sort_by_priority(notes):
     # 置顶笔记
-    notes.sort(key = lambda x: x.priority, reverse = True)
+    notes.sort(key=lambda x: x.priority, reverse=True)
+
 
 def sort_by_default(notes):
     # 先按照名称排序
@@ -217,6 +238,7 @@ def sort_by_default(notes):
 
     # 文件夹放在前面
     sort_by_type(notes)
+
 
 def sort_by_ctime_priority(notes):
     # 先按照名称排序
@@ -231,24 +253,30 @@ def sort_by_ctime_priority(notes):
 
 def sort_by_type(notes):
     # 文件夹放在前面
-    notes.sort(key = lambda x: 0 if x.type == "group" else 1)
+    notes.sort(key=lambda x: 0 if x.type == "group" else 1)
+
 
 def sort_by_type_mtime_desc(notes):
     sort_by_mtime_desc(notes)
     sort_by_type(notes)
 
+
 def sort_by_type_ctime_desc(notes):
     sort_by_ctime_desc(notes)
     sort_by_type(notes)
 
+
 def sort_by_dtime_desc(notes):
-    notes.sort(key = lambda x: x.dtime, reverse = True)
+    notes.sort(key=lambda x: x.dtime, reverse=True)
+
 
 def sort_by_dtime_asc(notes):
-    notes.sort(key = lambda x: x.dtime)
+    notes.sort(key=lambda x: x.dtime)
+
 
 def sort_by_hot_index(notes):
-    notes.sort(key = lambda x: x.hot_index or 0, reverse = True)
+    notes.sort(key=lambda x: x.hot_index or 0, reverse=True)
+
 
 SORT_FUNC_DICT = {
     "name": sort_by_name,
@@ -261,12 +289,13 @@ SORT_FUNC_DICT = {
     "type_mtime_desc": sort_by_type_mtime_desc,
     "type_ctime_desc": sort_by_type_ctime_desc,
     "dtime_desc": sort_by_dtime_desc,
-    "dtime_asc" : sort_by_dtime_asc,
-    "hot_index" : sort_by_hot_index,
+    "dtime_asc": sort_by_dtime_asc,
+    "hot_index": sort_by_hot_index,
     "default": sort_by_default,
 }
 
-def sort_notes(notes, orderby = "name"):
+
+def sort_notes(notes, orderby="name"):
     if orderby is None:
         orderby = "name"
 
@@ -274,11 +303,13 @@ def sort_notes(notes, orderby = "name"):
     build_note_list_info(notes, orderby)
     sort_func(notes)
 
-def build_note_list_info(notes, orderby = None):
+
+def build_note_list_info(notes, orderby=None):
     for note in notes:
         build_note_info(note, orderby)
 
-def build_note_info(note, orderby = None):
+
+def build_note_info(note, orderby=None):
     if note is None:
         return None
 
@@ -294,7 +325,7 @@ def build_note_info(note, orderby = None):
         note.data = ''
     # process icon
     note.icon = NOTE_ICON_DICT.get(note.type, "fa-file-text-o")
-    note.id   = str(note.id)
+    note.id = str(note.id)
 
     if note.type in ("list", "csv"):
         note.show_edit = False
@@ -329,12 +360,14 @@ def build_note_info(note, orderby = None):
 
     return note
 
-def convert_to_path_item(note):
-    return Storage(name = note.name, url = note.url, id = note.id, 
-        type = note.type, priority = note.priority, is_public = note.is_public)
 
-@xutils.timeit(name = "NoteDao.ListPath:leveldb", logfile = True)
-def list_path(file, limit = 5):
+def convert_to_path_item(note):
+    return Storage(name=note.name, url=note.url, id=note.id,
+                   type=note.type, priority=note.priority, is_public=note.is_public)
+
+
+@xutils.timeit(name="NoteDao.ListPath:leveldb", logfile=True)
+def list_path(file, limit=5):
     pathlist = []
     while file is not None:
         pathlist.insert(0, convert_to_path_item(file))
@@ -352,15 +385,17 @@ def list_path(file, limit = 5):
                 pathlist.insert(0, get_archived_group())
             pathlist.insert(0, convert_to_path_item(get_root()))
             break
-        
-        file = get_by_id(file.parent_id, include_full = False)
+
+        file = get_by_id(file.parent_id, include_full=False)
     return pathlist
+
 
 def get_full_by_id(id):
     return dbutil.get("note_full:%s" % id)
 
-@xutils.timeit(name = "NoteDao.GetById:leveldb", logfile = True)
-def get_by_id(id, include_full = True, creator = None):
+
+@xutils.timeit(name="NoteDao.GetById:leveldb", logfile=True)
+def get_by_id(id, include_full=True, creator=None):
     if id == "" or id is None:
         return None
     if id == 0 or id == "0":
@@ -381,14 +416,15 @@ def get_by_id(id, include_full = True, creator = None):
         note.name = note_index.name
         note.mtime = note_index.mtime
         note.atime = note_index.atime
-        note.size  = note_index.size
-        note.tags  = note_index.tags
+        note.size = note_index.size
+        note.tags = note_index.tags
         note.parent_id = note_index.parent_id
         note.visited_cnt = note_index.visited_cnt
         note.hot_index = note_index.hot_index
-    
+
     build_note_info(note)
     return note
+
 
 def get_by_id_creator(id, creator, db=None):
     note = get_by_id(id, creator=creator)
@@ -396,25 +432,29 @@ def get_by_id_creator(id, creator, db=None):
         return note
     return None
 
+
 def get_by_token(token):
     token_info = dbutil.get("token:%s" % token)
     if token_info != None and token_info.type == "note":
         return get_by_id(token_info.id)
     return None
 
+
 def get_by_user_skey(user_name, skey):
-    skey      = skey.replace("-", "_")
+    skey = skey.replace("-", "_")
     note_info = dbutil.get("note_skey:%s:%s" % (user_name, skey))
     if note_info != None:
         return get_by_id(note_info.note_id)
     else:
         return None
 
+
 def save_note_skey(note):
     if note.skey is None or note.skey == "":
         return
     key = "note_skey:%s:%s" % (note.creator, note.skey)
-    dbutil.put(key, Storage(note_id = note.id))
+    dbutil.put(key, Storage(note_id=note.id))
+
 
 def delete_note_skey(note):
     skey = note.skey
@@ -422,6 +462,7 @@ def delete_note_skey(note):
         return
     key = "note_skey:%s:%s" % (note.creator, note.skey)
     dbutil.delete(key)
+
 
 def get_or_create_note(skey, creator):
     """根据skey查询或者创建笔记
@@ -440,14 +481,14 @@ def get_or_create_note(skey, creator):
     # 检查笔记名称
     check_by_name(creator, skey)
 
-    note_dict           = Storage()
-    note_dict.name      = skey
-    note_dict.skey      = skey
-    note_dict.creator   = creator
-    note_dict.content   = ""
-    note_dict.data      = ""
-    note_dict.type      = "md"
-    note_dict.sub_type  = "log"
+    note_dict = Storage()
+    note_dict.name = skey
+    note_dict.skey = skey
+    note_dict.creator = creator
+    note_dict.content = ""
+    note_dict.data = ""
+    note_dict.type = "md"
+    note_dict.sub_type = "log"
     note_dict.parent_id = "0"
 
     note_id = create_note(note_dict)
@@ -455,17 +496,16 @@ def get_or_create_note(skey, creator):
     return get_by_id(note_id)
 
 
-
-def create_note_base(note_dict, date_str = None, note_id = None):
+def create_note_base(note_dict, date_str=None, note_id=None):
     """创建笔记的基础部分，无锁"""
     # 真实的创建时间
     ctime0 = dateutil.format_datetime()
-    note_dict["ctime0"]  = ctime0
-    note_dict["atime"]   = ctime0
-    note_dict["mtime"]   = ctime0
-    note_dict["ctime"]   = ctime0
+    note_dict["ctime0"] = ctime0
+    note_dict["atime"] = ctime0
+    note_dict["mtime"] = ctime0
+    note_dict["ctime"] = ctime0
     note_dict["version"] = 0
-    
+
     if note_id is not None:
         # 指定id创建笔记
         note_dict["id"] = note_id
@@ -504,10 +544,11 @@ def create_note_base(note_dict, date_str = None, note_id = None):
             else:
                 timestamp += 1
 
-def create_note(note_dict, date_str = None, note_id = None):
-    content   = note_dict["content"]
-    creator   = note_dict["creator"]
-    name      = note_dict.get("name")
+
+def create_note(note_dict, date_str=None, note_id=None):
+    content = note_dict["content"]
+    creator = note_dict["creator"]
+    name = note_dict.get("name")
 
     if "parent_id" not in note_dict:
         note_dict["parent_id"] = "0"
@@ -521,7 +562,7 @@ def create_note(note_dict, date_str = None, note_id = None):
         check_by_name(creator, name)
         # 创建笔记的基础信息
         note_id = create_note_base(note_dict, date_str, note_id)
-    
+
     # 更新分组下面页面的数量
     update_children_count(note_dict["parent_id"])
 
@@ -540,21 +581,25 @@ def create_note(note_dict, date_str = None, note_id = None):
     save_note_skey(note_dict)
 
     # 最后发送创建笔记成功的消息
-    xmanager.fire("note.add", dict(name=name, type=type, id = note_id))
+    xmanager.fire("note.add", dict(name=name, type=type, id=note_id))
 
     return note_id
 
+
 def create_token(type, id):
     uuid = textutil.generate_uuid()
-    token_info = Storage(type = type, id = id)
+    token_info = Storage(type=type, id=id)
     dbutil.put("token:%s" % uuid, token_info)
     return uuid
+
 
 def add_create_log(note):
     NOTE_DAO.add_create_log(note.creator, note)
 
+
 def add_visit_log(user_name, note):
     NOTE_DAO.add_visit_log(user_name, note)
+
 
 def remove_virtual_fields(note):
     del_dict_key(note, "path")
@@ -563,8 +608,9 @@ def remove_virtual_fields(note):
     del_dict_key(note, "show_edit")
     del_dict_key(note, "create_date")
 
+
 def put_note_to_db(note_id, note):
-    creator  = note.creator
+    creator = note.creator
 
     # 删除不需要持久化的数据
     remove_virtual_fields(note)
@@ -578,15 +624,18 @@ def put_note_to_db(note_id, note):
     # 增加编辑日志
     NOTE_DAO.add_edit_log(creator, note)
 
+
 def touch_note(note_id):
     note = get_by_id(note_id)
     if note != None:
         note.mtime = dateutil.format_datetime()
         update_index(note)
 
+
 def del_dict_key(dict, key):
     if key in dict:
         del dict[key]
+
 
 def convert_to_index(note):
     note_index = Storage(**note)
@@ -599,8 +648,9 @@ def convert_to_index(note):
     del_dict_key(note_index, 'content')
 
     note_index.parent_id = str(note_index.parent_id)
-    
+
     return note_index
+
 
 def update_index(note):
     """更新索引的时候也会更新用户维度的索引(note_tiny)"""
@@ -619,10 +669,12 @@ def update_index(note):
     note_tiny_db.update_by_id(note_id, note_index)
 
     if note.type == "group":
-        dbutil.put("notebook:%s:%s" % (note.creator, format_note_id(id)), note_index)
+        dbutil.put("notebook:%s:%s" %
+                   (note.creator, format_note_id(id)), note_index)
 
     if note.is_public != None:
         update_public_index(note)
+
 
 def update_public_index(note):
     db = get_note_public_table()
@@ -639,19 +691,20 @@ def update_note(note_id, **kw):
     # 这里只更新基本字段，移动笔记使用 move_note
 
     if "parent_id" in kw:
-        raise Exception("[note.dao.update_note] can not update `parent_id`, please use `note.dao.move_note`")
+        raise Exception(
+            "[note.dao.update_note] can not update `parent_id`, please use `note.dao.move_note`")
 
-    content   = kw.get('content')
-    data      = kw.get('data')
-    priority  = kw.get('priority')
-    name      = kw.get("name")
-    atime     = kw.get("atime")
+    content = kw.get('content')
+    data = kw.get('data')
+    priority = kw.get('priority')
+    name = kw.get("name")
+    atime = kw.get("atime")
     is_public = kw.get("is_public")
-    tags      = kw.get("tags")
-    orderby   = kw.get("orderby")
-    archived  = kw.get("archived")
-    size      = kw.get("size")
-    token     = kw.get("token")
+    tags = kw.get("tags")
+    orderby = kw.get("orderby")
+    archived = kw.get("archived")
+    size = kw.get("size")
+    token = kw.get("token")
     visited_cnt = kw.get("visited_cnt")
 
     note = get_by_id(note_id)
@@ -668,7 +721,7 @@ def update_note(note_id, **kw):
         note.name = name
     if atime:
         note.atime = atime
-    
+
     # 分享相关的更新
     if is_public != None:
         note.is_public = is_public
@@ -693,10 +746,10 @@ def update_note(note_id, **kw):
     if note.version is None:
         note.version = 1
 
-    old_version  = note.version
-    note.mtime   = xutils.format_time()
+    old_version = note.version
+    note.mtime = xutils.format_time()
     note.version += 1
-    
+
     # 只修改优先级
     if len(kw) == 1 and kw.get('priority') != None:
         note.version = old_version
@@ -707,18 +760,20 @@ def update_note(note_id, **kw):
     put_note_to_db(note_id, note)
     return 1
 
+
 def move_note(note, new_parent_id):
     old_parent_id = note.parent_id
     note.parent_id = new_parent_id
     # 没有更新内容，只需要更新索引数据
     update_index(note)
-    
+
     # 更新文件夹的容量
     update_children_count(old_parent_id)
     update_children_count(new_parent_id)
 
     # 更新新的parent更新时间
     touch_note(new_parent_id)
+
 
 def update0(note):
     """更新基本信息，比如name、mtime、content、items、priority等,不处理parent_id更新"""
@@ -728,35 +783,38 @@ def update0(note):
     # 更新各种字段
     current_time = xutils.format_datetime()
     note.version = current.version + 1
-    note.mtime   = current_time
-    note.atime   = current_time
+    note.mtime = current_time
+    note.atime = current_time
     put_note_to_db(note.id, note)
+
 
 def get_by_name(creator, name):
     if creator == None:
         raise Exception("get_by_name:creator is None")
-        
+
     def find_func(key, value):
         if value.is_deleted:
             return False
         return value.name == name
     db = get_note_tiny_table(creator)
-    result = db.list(offset = 0, limit = 1, filter_func = find_func)
+    result = db.list(offset=0, limit=1, filter_func=find_func)
     if len(result) > 0:
         note = result[0]
         return get_by_id(note.id)
     return None
+
 
 def check_by_name(creator, name):
     note_by_name = get_by_name(creator, name)
     if note_by_name != None:
         raise Exception("笔记【%s】已存在" % name)
 
+
 def visit_note(user_name, id):
     note = get_by_id(id)
     if note is None:
         return
-  
+
     note.atime = xutils.format_datetime()
     # 访问的总字数
     if note.visited_cnt is None:
@@ -772,11 +830,12 @@ def visit_note(user_name, id):
     update_index(note)
     add_visit_log(user_name, note)
 
+
 def delete_note_physically(creator, note_id):
     assert creator != None, "creator can not be null"
     assert note_id != None, "note_id can not be null"
 
-    full_key  = "note_full:%s" % note_id
+    full_key = "note_full:%s" % note_id
     index_key = "note_index:%s" % note_id
 
     dbutil.delete(full_key)
@@ -789,6 +848,7 @@ def delete_note_physically(creator, note_id):
 
     # 刷新数量
     refresh_note_stat_async(creator)
+
 
 def delete_note(id):
     note = get_by_id(id)
@@ -823,6 +883,7 @@ def delete_note(id):
     # 更新数量统计
     refresh_note_stat(note.creator)
 
+
 def update_children_count(parent_id, db=None):
     if parent_id is None or parent_id == "" or parent_id == 0:
         return
@@ -831,9 +892,9 @@ def update_children_count(parent_id, db=None):
     if note is None:
         return
 
-    creator        = note.creator
+    creator = note.creator
     children_count = count_by_parent(creator, parent_id)
-    note.size      = children_count
+    note.size = children_count
 
     update_index(note)
 
@@ -852,6 +913,7 @@ def fill_parent_name(files):
         else:
             item.parent_name = None
 
+
 def check_group_status(status):
     if status is None:
         return
@@ -859,11 +921,11 @@ def check_group_status(status):
         raise Exception("[check_group_status] invalid status: %s" % status)
 
 
-@xutils.timeit(name = "NoteDao.ListGroup:leveldb", logfile = True)
-def list_group(creator = None, orderby = "mtime_desc", 
-        skip_archived = False, 
-        status = "all", 
-        offset = 0, limit = None):
+@xutils.timeit(name="NoteDao.ListGroup:leveldb", logfile=True)
+def list_group(creator=None, orderby="mtime_desc",
+               skip_archived=False,
+               status="all",
+               offset=0, limit=None):
     """查询笔记本列表"""
     check_group_status(status)
 
@@ -874,7 +936,7 @@ def list_group(creator = None, orderby = "mtime_desc",
 
         if skip_archived and value.archived:
             return False
-        
+
         if status == "archived":
             return value.archived
 
@@ -889,17 +951,18 @@ def list_group(creator = None, orderby = "mtime_desc",
         return notes[offset:offset + limit]
     return notes
 
-def count_group(creator, status = None):
+
+def count_group(creator, status=None):
     check_group_status(status)
 
     if status is None:
         return dbutil.count_table("notebook:%s" % creator)
-    
-    return len(list_group(creator, status = status))
+
+    return len(list_group(creator, status=status))
 
 
-@xutils.timeit(name = "NoteDao.ListRootGroup:leveldb", logfile = True)
-def list_root_group(creator = None, orderby = "name"):
+@xutils.timeit(name="NoteDao.ListRootGroup:leveldb", logfile=True)
+def list_root_group(creator=None, orderby="name"):
     def list_root_group_func(key, value):
         return value.creator == creator and value.type == "group" and value.parent_id == 0 and value.is_deleted == 0
 
@@ -907,7 +970,8 @@ def list_root_group(creator = None, orderby = "name"):
     sort_notes(notes, orderby)
     return notes
 
-def list_default_notes(creator, offset = 0, limit = 1000, orderby = "mtime_desc"):
+
+def list_default_notes(creator, offset=0, limit=1000, orderby="mtime_desc"):
     # TODO 添加索引优化
     def list_default_func(key, value):
         if value.is_deleted:
@@ -920,7 +984,8 @@ def list_default_notes(creator, offset = 0, limit = 1000, orderby = "mtime_desc"
     sort_notes(notes, orderby)
     return notes[offset:offset+limit]
 
-def list_public(offset, limit, orderby = "ctime_desc"):
+
+def list_public(offset, limit, orderby="ctime_desc"):
     if orderby == "hot":
         index_name = "hot_index"
     else:
@@ -928,7 +993,7 @@ def list_public(offset, limit, orderby = "ctime_desc"):
 
     db = dbutil.get_table("note_public")
     notes = db.list_by_index(index_name,
-        offset = offset, limit = limit, reverse = True)
+                             offset=offset, limit=limit, reverse=True)
 
     build_note_list_info(notes)
     for note in notes:
@@ -943,15 +1008,17 @@ def count_public():
     db = get_note_public_table()
     return db.count()
 
-@xutils.timeit(name = "NoteDao.ListNote:leveldb", logfile = True, logargs=True)
-def list_by_parent(creator, parent_id, offset = 0, limit = 1000, 
-        orderby="name", skip_group = False, include_public = True):
+
+@xutils.timeit(name="NoteDao.ListNote:leveldb", logfile=True, logargs=True)
+def list_by_parent(creator, parent_id, offset=0, limit=1000,
+                   orderby="name", skip_group=False, include_public=True):
     """通过父级节点ID查询笔记列表"""
     if parent_id is None:
         raise Exception("list_by_parent: parent_id is None")
-        
+
     parent_id = str(parent_id)
     # TODO 添加索引优化
+
     def list_note_func(key, value):
         if value.is_deleted:
             return False
@@ -966,7 +1033,7 @@ def list_by_parent(creator, parent_id, offset = 0, limit = 1000,
             return value.creator == creator
 
     db = get_note_tiny_table(creator)
-    notes = db.list(offset = 0, limit = limit, filter_func = list_note_func)
+    notes = db.list(offset=0, limit=limit, filter_func=list_note_func)
 
     if orderby == "db":
         note = get_by_id_creator(parent_id, creator)
@@ -977,7 +1044,8 @@ def list_by_parent(creator, parent_id, offset = 0, limit = 1000,
     sort_notes(notes, orderby)
     return notes[offset:offset+limit]
 
-def list_by_date(field, creator, date, orderby = "ctime_desc"):
+
+def list_by_date(field, creator, date, orderby="ctime_desc"):
     user = creator
     if user is None:
         user = "public"
@@ -986,13 +1054,14 @@ def list_by_date(field, creator, date, orderby = "ctime_desc"):
         if value.is_deleted:
             return False
         return date in getattr(value, field)
-    
+
     files = dbutil.prefix_list("note_tiny:%s" % user, list_func)
     fill_parent_name(files)
     sort_notes(files, orderby)
     return files
 
-@xutils.timeit(name = "NoteDao.CountNote", logfile=True, logargs=True, logret=True)
+
+@xutils.timeit(name="NoteDao.CountNote", logfile=True, logargs=True, logret=True)
 def count_by_creator(creator):
     def count_func(key, value):
         if value.is_deleted:
@@ -1000,13 +1069,16 @@ def count_by_creator(creator):
         return value.creator == creator and type != 'group'
     return dbutil.prefix_count("note_tiny:%s" % creator, count_func)
 
+
 def count_user_note(creator):
     return count_by_creator(creator)
+
 
 def count_ungrouped(creator):
     return count_ungrouped(creator, 0)
 
-@xutils.timeit(name = "NoteDao.CountNoteByParent", logfile = True, logargs = True, logret = True)
+
+@xutils.timeit(name="NoteDao.CountNoteByParent", logfile=True, logargs=True, logret=True)
 def count_by_parent(creator, parent_id):
     """统计笔记数量
     @param {string} creator 创建者
@@ -1020,42 +1092,47 @@ def count_by_parent(creator, parent_id):
 
     return dbutil.prefix_count("note_tiny", list_note_func)
 
-@xutils.timeit(name = "NoteDao.CountDict", logfile = True, logargs = True, logret = True)
+
+@xutils.timeit(name="NoteDao.CountDict", logfile=True, logargs=True, logret=True)
 def count_dict(user_name):
     import xtables
     return xtables.get_dict_table().count()
 
-@xutils.timeit(name = "NoteDao.FindPrev", logfile = True)
+
+@xutils.timeit(name="NoteDao.FindPrev", logfile=True)
 def find_prev_note(note, user_name):
     parent_id = str(note.parent_id)
     note_name = note.name
+
     def find_prev_func(key, value):
         if value.is_deleted:
             return False
         return str(value.parent_id) == parent_id and value.name < note_name
     result = dbutil.prefix_list("note_tiny:%s" % user_name, find_prev_func)
-    result.sort(key = lambda x:x.name, reverse=True)
+    result.sort(key=lambda x: x.name, reverse=True)
     if len(result) > 0:
         return result[0]
     else:
         return None
 
 
-@xutils.timeit(name = "NoteDao.FindNext", logfile = True)
+@xutils.timeit(name="NoteDao.FindNext", logfile=True)
 def find_next_note(note, user_name):
     parent_id = str(note.parent_id)
     note_name = note.name
+
     def find_next_func(key, value):
         if value.is_deleted:
             return False
         return str(value.parent_id) == parent_id and value.name > note_name
     result = dbutil.prefix_list("note_tiny:%s" % user_name, find_next_func)
-    result.sort(key = lambda x:x.name)
+    result.sort(key=lambda x: x.name)
     # print([x.name for x in result])
     if len(result) > 0:
         return result[0]
     else:
         return None
+
 
 def add_history(id, version, note):
     if version is None:
@@ -1063,12 +1140,15 @@ def add_history(id, version, note):
     note['note_id'] = id
     dbutil.put("note_history:%s:%s" % (id, version), note)
 
+
 def list_history(note_id):
     history_list = dbutil.prefix_list("note_history:%s:" % note_id)
-    history_list = sorted(history_list, key = lambda x: x.mtime or "", reverse = True)
+    history_list = sorted(
+        history_list, key=lambda x: x.mtime or "", reverse=True)
     return history_list
 
-def delete_history(note_id, version = None):
+
+def delete_history(note_id, version=None):
     pass
 
 
@@ -1076,7 +1156,8 @@ def get_history(note_id, version):
     # note = table.select_first(where = dict(note_id = note_id, version = version))
     return dbutil.get("note_history:%s:%s" % (note_id, version))
 
-def search_name(words, creator = None, parent_id = None, orderby = "hot_index"):
+
+def search_name(words, creator=None, parent_id=None, orderby="hot_index"):
     assert isinstance(words, list)
 
     words = [word.lower() for word in words]
@@ -1094,8 +1175,8 @@ def search_name(words, creator = None, parent_id = None, orderby = "hot_index"):
 
     db = get_note_tiny_table(creator)
 
-    result = db.list(filter_func = search_func, 
-        offset = 0, limit = MAX_SEARCH_SIZE, fill_cache = False)
+    result = db.list(filter_func=search_func,
+                     offset=0, limit=MAX_SEARCH_SIZE, fill_cache=False)
 
     # 补全信息
     build_note_list_info(result)
@@ -1105,18 +1186,20 @@ def search_name(words, creator = None, parent_id = None, orderby = "hot_index"):
     sort_by_priority(result)
     return result
 
-def search_content(words, creator=None, orderby = "hot_index"):
+
+def search_content(words, creator=None, orderby="hot_index"):
     assert isinstance(words, list)
     words = [word.lower() for word in words]
+
     def search_func(key, value):
         if value.content is None:
             return False
         return (value.creator == creator or value.is_public) \
             and textutil.contains_all(value.content.lower(), words)
-    
-    result = dbutil.prefix_list("note_full", search_func, 0, MAX_SEARCH_SIZE, 
-        fill_cache = False)
-    
+
+    result = dbutil.prefix_list("note_full", search_func, 0, MAX_SEARCH_SIZE,
+                                fill_cache=False)
+
     # 补全信息
     build_note_list_info(result)
 
@@ -1124,19 +1207,23 @@ def search_content(words, creator=None, orderby = "hot_index"):
     sort_notes(result, orderby)
     return result
 
+
 def search_public(words):
     assert isinstance(words, list)
     words = [word.lower() for word in words]
+
     def search_public_func(key, value):
         if value.content is None:
             return False
         if not value.is_public:
             return False
         return textutil.contains_all(value.name.lower(), words)
-    result = dbutil.prefix_list("note_full", search_public_func, 0, MAX_SEARCH_SIZE)
+    result = dbutil.prefix_list(
+        "note_full", search_public_func, 0, MAX_SEARCH_SIZE)
     notes = [build_note_info(item) for item in result]
     sort_notes(notes)
     return notes
+
 
 def check_and_remove_broken_notes(notes, user_name):
     result = []
@@ -1157,26 +1244,31 @@ def check_and_remove_broken_notes(notes, user_name):
         refresh_note_stat(user_name)
     return result
 
+
 def count_removed(creator):
     def count_func(key, value):
         return value.is_deleted and value.creator == creator
     return dbutil.prefix_count("note_tiny:%s" % creator, count_func)
 
-def list_removed(creator, offset, limit, orderby = None):
+
+def list_removed(creator, offset, limit, orderby=None):
     def list_func(key, value):
         return value.is_deleted and value.creator == creator
 
     db = get_note_tiny_table(creator)
-    notes = db.list(filter_func = list_func, offset = offset, limit = MAX_LIST_SIZE)
+    notes = db.list(filter_func=list_func, offset=offset, limit=MAX_LIST_SIZE)
     notes = check_and_remove_broken_notes(notes, creator)
     sort_notes(notes, orderby)
     return notes[offset: offset + limit]
 
+
 def document_filter_func(key, value):
     return value.type in ("md", "text", "html", "post", "log", "plan") and value.is_deleted == 0
 
+
 def table_filter_func(key, value):
     return value.type in ("csv", "table") and value.is_deleted == 0
+
 
 def get_filter_func(type, default_filter_func):
     if type == "document" or type == "doc":
@@ -1185,7 +1277,8 @@ def get_filter_func(type, default_filter_func):
         return table_filter_func
     return default_filter_func
 
-def list_by_type(creator, type, offset, limit, orderby = "name", skip_archived = False):
+
+def list_by_type(creator, type, offset, limit, orderby="name", skip_archived=False):
     """按照类型查询笔记列表
     @param {str} creator 笔记作者
     @param {str|None} type  笔记类型
@@ -1196,7 +1289,7 @@ def list_by_type(creator, type, offset, limit, orderby = "name", skip_archived =
     """
 
     assert type != None, "note.dao.list_by_type: type is None"
-    
+
     def list_func(key, value):
         if skip_archived and value.archived:
             return False
@@ -1207,11 +1300,12 @@ def list_by_type(creator, type, offset, limit, orderby = "name", skip_archived =
     filter_func = get_filter_func(type, list_func)
 
     db = get_note_tiny_table(creator)
-    notes = db.list_by_index("ctime", filter_func = filter_func, offset = offset, 
-        limit = limit, reverse = True)
+    notes = db.list_by_index("ctime", filter_func=filter_func, offset=offset,
+                             limit=limit, reverse=True)
 
     sort_notes(notes, orderby)
     return notes
+
 
 def count_by_type(creator, type):
     def default_count_func(key, value):
@@ -1219,28 +1313,34 @@ def count_by_type(creator, type):
     filter_func = get_filter_func(type, default_count_func)
     return dbutil.prefix_count("note_tiny:%s" % creator, filter_func)
 
-def list_sticky(creator, offset = 0, limit = 1000, orderby = "ctime_desc"):
+
+def list_sticky(creator, offset=0, limit=1000, orderby="ctime_desc"):
     def list_func(key, value):
         return value.priority > 0 and value.creator == creator and value.is_deleted == 0
 
     db = get_note_tiny_table(creator)
 
-    notes = db.list(filter_func = list_func, offset = offset, limit = MAX_STICKY_SIZE)
-    sort_notes(notes, orderby = orderby)
+    notes = db.list(filter_func=list_func,
+                    offset=offset, limit=MAX_STICKY_SIZE)
+    sort_notes(notes, orderby=orderby)
     return notes[offset:offset+limit]
+
 
 def count_sticky(creator):
     def list_func(key, value):
         return value.priority > 0 and value.creator == creator and value.is_deleted == 0
     db = get_note_tiny_table(creator)
-    return db.count(filter_func = list_func)
+    return db.count(filter_func=list_func)
 
-def list_archived(creator, offset = 0, limit = 100):
+
+def list_archived(creator, offset=0, limit=100):
     def list_func(key, value):
         return value.archived and value.creator == creator and value.is_deleted == 0
-    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit)
+    notes = dbutil.prefix_list("note_tiny:%s" %
+                               creator, list_func, offset, limit)
     sort_notes(notes)
     return notes
+
 
 def get_tags(creator, note_id):
     key = "note_tags:%s:%s" % (creator, note_id)
@@ -1249,18 +1349,21 @@ def get_tags(creator, note_id):
         return attrget(note_tags, "tags")
     return None
 
+
 def update_tags(creator, note_id, tags):
     key = "note_tags:%s:%s" % (creator, note_id)
-    dbutil.put(key, Storage(note_id = note_id, tags = tags))
+    dbutil.put(key, Storage(note_id=note_id, tags=tags))
 
     note = get_by_id(note_id)
     if note != None:
         note.tags = tags
         update_index(note)
 
+
 def delete_tags(creator, note_id):
     key = "note_tags:%s:%s" % (creator, note_id)
     dbutil.delete(key)
+
 
 def list_by_tag(user, tagname):
     if user is None:
@@ -1270,7 +1373,7 @@ def list_by_tag(user, tagname):
         if value.tags is None:
             return False
         return tagname in value.tags
-    
+
     tags = dbutil.prefix_list("note_tags:%s" % user, list_func)
     files = []
     for tag in tags:
@@ -1280,11 +1383,13 @@ def list_by_tag(user, tagname):
     sort_notes(files)
     return files
 
+
 def list_tag(user):
     if user is None:
         user = "public"
 
     tags = dict()
+
     def list_func(key, value):
         if value.tags is None:
             return False
@@ -1292,38 +1397,46 @@ def list_tag(user):
             count = tags.get(tag, 0)
             count += 1
             tags[tag] = count
-    
+
     dbutil.prefix_count("note_tags:%s" % user, list_func)
-    
-    tag_list = [Storage(name = k, amount = tags[k]) for k in tags]
-    tag_list.sort(key = lambda x: -x.amount)
+
+    tag_list = [Storage(name=k, amount=tags[k]) for k in tags]
+    tag_list.sort(key=lambda x: -x.amount)
     return tag_list
 
+
 def list_by_func(creator, list_func, offset, limit):
-    notes = dbutil.prefix_list("note_tiny:%s" % creator, list_func, offset, limit, reverse = True)
+    notes = dbutil.prefix_list("note_tiny:%s" %
+                               creator, list_func, offset, limit, reverse=True)
     build_note_list_info(notes)
     return notes
 
-def add_search_history(user, search_key, category = "default", cost_time = 0):
-    key = "search_history:%s:%s" % (user, dbutil.timeseq())
-    dbutil.put(key, Storage(key = search_key, category = category, cost_time = cost_time))
 
-def list_search_history(user, limit = 1000, orderby = "time_desc"):
+def add_search_history(user, search_key, category="default", cost_time=0):
+    key = "search_history:%s:%s" % (user, dbutil.timeseq())
+    dbutil.put(key, Storage(key=search_key,
+               category=category, cost_time=cost_time))
+
+
+def list_search_history(user, limit=1000, orderby="time_desc"):
     if user is None or user == "":
         return []
-    return dbutil.prefix_list("search_history:%s" % user, reverse = True, limit = limit)
+    return dbutil.prefix_list("search_history:%s" % user, reverse=True, limit=limit)
+
 
 def clear_search_history(user_name):
     assert user_name != None
     assert user_name != ""
-    db = dbutil.get_list_table("search_history", user_name = user_name)
-    for item in db.iter(reverse = True, limit = -1):
+    db = dbutil.get_list_table("search_history", user_name=user_name)
+    for item in db.iter(reverse=True, limit=-1):
         db.delete(item)
+
 
 @xutils.async_func_deco()
 def refresh_note_stat_async(user_name):
     """异步刷新笔记统计"""
     refresh_note_stat(user_name)
+
 
 def refresh_note_stat(user_name):
     assert user_name != None, "[refresh_note_stat.assert] user_name != None"
@@ -1333,17 +1446,17 @@ def refresh_note_stat(user_name):
     if user_name is None:
         return stat
 
-    stat.total         = count_by_creator(user_name)
-    stat.group_count   = count_group(user_name)
-    stat.doc_count     = count_by_type(user_name, "doc")
+    stat.total = count_by_creator(user_name)
+    stat.group_count = count_group(user_name)
+    stat.doc_count = count_by_type(user_name, "doc")
     stat.gallery_count = count_by_type(user_name, "gallery")
-    stat.list_count    = count_by_type(user_name, "list")
-    stat.table_count   = count_by_type(user_name, "table")
-    stat.plan_count    = count_by_type(user_name, "plan")
-    stat.log_count     = count_by_type(user_name, "log")
-    stat.sticky_count  = count_sticky(user_name)
+    stat.list_count = count_by_type(user_name, "list")
+    stat.table_count = count_by_type(user_name, "table")
+    stat.plan_count = count_by_type(user_name, "plan")
+    stat.log_count = count_by_type(user_name, "log")
+    stat.sticky_count = count_sticky(user_name)
     stat.removed_count = count_removed(user_name)
-    stat.dict_count    = count_dict(user_name)
+    stat.dict_count = count_dict(user_name)
     stat.comment_count = NOTE_DAO.count_comment(user_name)
 
     dbutil.put("user_stat:%s:note" % user_name, stat)
@@ -1356,6 +1469,7 @@ def get_note_stat(user_name):
         stat = refresh_note_stat(user_name)
     return stat
 
+
 def get_gallery_path(note):
     import xconfig
     # 新的位置, 增加一级子目录（100个，二级子目录取决于文件系统，最少的255个，最多无上限，也就是最少2.5万个相册，对于一个用户应该够用了）
@@ -1364,12 +1478,14 @@ def get_gallery_path(note):
         second_dir = ("00" + note_id)[-2:]
     else:
         second_dir = note_id[-2:]
-    standard_dir = os.path.join(xconfig.UPLOAD_DIR, note.creator, "gallery", second_dir, note_id)
+    standard_dir = os.path.join(
+        xconfig.UPLOAD_DIR, note.creator, "gallery", second_dir, note_id)
     if os.path.exists(standard_dir):
         return standard_dir
     # TODO 归档的位置
     # 老的位置
-    fpath = os.path.join(xconfig.UPLOAD_DIR, note.creator, str(note.parent_id), note_id)
+    fpath = os.path.join(xconfig.UPLOAD_DIR, note.creator,
+                         str(note.parent_id), note_id)
     if os.path.exists(fpath):
         # 修复数据另外通过工具实现
         return fpath
@@ -1381,10 +1497,11 @@ def get_gallery_path(note):
 
 def get_virtual_group(user_name, name):
     if name == "ungrouped":
-        files = list_by_parent(user_name, 0, 0, 1000, skip_group = True, include_public = False)
+        files = list_by_parent(user_name, 0, 0, 1000,
+                               skip_group=True, include_public=False)
         group = Storage()
         group.name = "未分类笔记"
-        group.url  = "/note/default"
+        group.url = "/note/default"
         group.size = len(files)
         group.icon = "fa-folder"
         group.priority = 1
@@ -1392,9 +1509,11 @@ def get_virtual_group(user_name, name):
     else:
         raise Exception("[get_virtual_group] invalid name: %s" % name)
 
+
 def check_not_empty(value, method_name):
     if value == None or value == "":
         raise Exception("[%s] can not be empty" % method_name)
+
 
 # write functions
 xutils.register_func("note.create", create_note)
@@ -1408,7 +1527,7 @@ xutils.register_func("note.update_tags", update_tags)
 xutils.register_func("note.create_token", create_token)
 xutils.register_func("note.delete_physically", delete_note_physically)
 
-## 内部更新索引的接口，外部不要使用
+# 内部更新索引的接口，外部不要使用
 xutils.register_func("note.update_index", update_index)
 xutils.register_func("note.update_public_index", update_public_index)
 
@@ -1469,5 +1588,3 @@ xutils.register_func("note.clear_search_history", clear_search_history)
 xutils.register_func("note.get_note_stat", get_note_stat)
 xutils.register_func("note.get_gallery_path", get_gallery_path)
 xutils.register_func("note.refresh_note_stat_async", refresh_note_stat_async)
-
-

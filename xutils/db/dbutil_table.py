@@ -108,6 +108,11 @@ class LdbTable:
 
     def _get_id_from_key(self, key):
         return key.rsplit(":", 1)[-1]
+    
+    def _get_user_from_key(self, key):
+        parts = key.split(":")
+        assert len(parts) == 3
+        return parts[1]
 
     def _format_value(self, key, value):
         if not isinstance(value, dict):
@@ -115,6 +120,10 @@ class LdbTable:
 
         value[self.key_name] = key
         value[self.id_name] = self._get_id_from_key(key)
+        if self.user_attr != None:
+            user = value.get(self.user_attr)
+            if user == None:
+                value[self.user_attr] = self._get_user_from_key(key)
         return value
 
     def _convert_to_db_row(self, obj):
@@ -320,15 +329,14 @@ class LdbTable:
     def delete_by_key(self, key, user_name=None):
         validate_str(key, "delete_by_key: invalid key")
         self._check_before_delete(key)
-        self._check_user_name(user_name)
 
         old_obj = get(key)
         if old_obj is None:
             return
 
+        self._format_value(key, old_obj)
         with get_write_lock(key):
             batch = create_write_batch()
-            self._format_value(key, old_obj)
             self._delete_index(old_obj, batch)
             # 更新批量操作
             batch.delete(key)
@@ -349,7 +357,7 @@ class LdbTable:
 
         if key_from != None:
             key_from = self.build_key(key_from)
-
+        
         if user_name != None:
             prefix = self.table_name + ":" + user_name
         else:

@@ -7,7 +7,6 @@
 import lmdb
 import logging
 import threading
-import pickle
 
 from xutils import textutil
 from xutils.base import Storage
