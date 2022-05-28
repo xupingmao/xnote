@@ -156,7 +156,7 @@ def _create_message_without_date(kw):
         key = kw["_key"]
         kw["id"] = key
         _msg_db.update(kw)
-    
+
     execute_after_create(kw)
     return key
 
@@ -258,9 +258,9 @@ def search_message(user_name, key, offset, limit, search_tags=None, no_tag=None)
     else:
         search_func = search_func_default
 
-    chatlist = dbutil.prefix_list(
-        "message:%s" % user_name, search_func, offset, limit, reverse=True)
-    amount = dbutil.prefix_count("message:%s" % user_name, search_func)
+    chatlist = _msg_db.list(filter_func=search_func, offset=offset,
+                            limit=limit, reverse=True, user_name=user_name)
+    amount = _msg_db.count(filter_func=search_func, user_name=user_name)
     return chatlist, amount
 
 
@@ -276,7 +276,7 @@ def delete_message_by_id(id):
 
     if old == None:
         return
-    
+
     if id.startswith("message:"):
         _msg_db.delete(old)
     else:

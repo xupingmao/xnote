@@ -179,7 +179,7 @@ class ListAjaxHandler:
 
         page_max = get_page_max(amount, pagesize)
 
-        parser = MessageListParser(chatlist)
+        parser = MessageListParser(chatlist, tag = tag)
         parser.parse()
         chatlist = parser.get_message_list()
 
@@ -653,9 +653,6 @@ class MessageListHandler:
         if tag == "key":
             return self.get_log_tags_page()
 
-        if tag in SYSTEM_TAG_TUPLE:
-            return self.get_system_tag_page(tag)
-
         if tag == "task":
             return self.get_task_page()
 
@@ -815,8 +812,22 @@ class MessageListHandler:
     def get_log_page(self):
         key = xutils.get_argument("key", "")
         input_tag = xutils.get_argument("tag", "log")
+        p = xutils.get_argument("p", "")
         user_name = xauth.current_name()
         default_content = filter_key(key)
+
+        if p == "taglist":
+            return self.get_log_tags_page()
+        
+        if p == "date":
+            p2 = xutils.get_argument("p2", "")
+            if p2 == "detail":
+                date = xutils.get_argument("date", "")
+                return self.do_view_by_date(date)
+            return MessageListByDayHandler().GET()
+        
+        if p in SYSTEM_TAG_TUPLE:
+            return self.get_system_tag_page(p)
 
         kw = Storage(
             tag = input_tag,

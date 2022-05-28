@@ -18,7 +18,7 @@ NOTE_DAO  = xutils.DAO("note")
 def is_empty_dir(dirname):
     return len(os.listdir(dirname)) == 0
 
-def rm_expired_files(dirname, expired_time, depth=0):
+def rm_expired_files(dirname, expired_time, depth=0, hard=False):
     if not os.path.exists(dirname):
         xutils.error("DiskClean", "dirname `%s` not eixsts" % dirname)
         return
@@ -33,14 +33,14 @@ def rm_expired_files(dirname, expired_time, depth=0):
             xutils.info("DiskClean", "%s is a link" % fname)
             continue
         if os.path.isdir(fpath):
-            rm_expired_files(fpath, expired_time, depth+1)
+            rm_expired_files(fpath, expired_time, depth+1, hard=hard)
             if is_empty_dir(fpath):
                 xutils.rmfile(fpath)
         else:
             st = os.stat(fpath)
             if now - st.st_ctime >= expired_time:
                 xutils.info("DiskClean", "%s is expired" % fname)
-                xutils.rmfile(fpath)
+                xutils.rmfile(fpath, hard=hard)
 
 def rm_expired_notes(expired_time):
     for user_info in xauth.iter_user(limit = -1):
@@ -66,10 +66,16 @@ class handler:
 
     @xauth.login_required("admin")
     def GET(self):
-        rm_expired_files(xconfig.BACKUP_DIR, xconfig.BACKUP_EXPIRE)
-        rm_expired_files(xconfig.LOG_DIR, xconfig.LOG_EXPIRE)
+        # 数据库备份文件
+        db_expire_seconds = xconfig.get("system.db_backup_expire_days") * dateutil.SECONDS_PER_DAY
+        rm_expired_files(xconfig.BACKUP_DIR, db_expire_seconds, hard=True)
+        
+        # 日志文件
+        rm_expired_files(xconfig.LOG_DIR, xconfig.LOG_EXPIRE, hard=True)
+
+        # 回收站和临时文件
         rm_expired_files(xconfig.TRASH_DIR, xconfig.TRASH_EXPIRE)
-        rm_expired_files(xconfig.TMP_DIR, xconfig.TMP_EXPIRE)
+        rm_expired_files(xconfig.TMP_DIR, xconfig.TMP_EXPIRE, hard=True)
 
         # 删除回收站过期的笔记
         rm_expired_notes(xconfig.NOTE_REMOVED_EXPIRE)

@@ -30,7 +30,7 @@ from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil
 from xutils import textutil
-from xutils import netutil 
+from xutils import netutil
 
 from .node_follower import Follower
 from .node_leader import Leader
@@ -38,27 +38,33 @@ from .node_leader import Leader
 LOCK = threading.Lock()
 
 dbutil.register_table("cluster_config", "集群配置")
-CONFIG = dbutil.get_table("cluster_config", type = "hash")
+CONFIG = dbutil.get_table("cluster_config", type="hash")
+
 
 def get_system_role():
     return xconfig.get_global_config("system.node_role")
+
 
 def print_debug_info(*args):
     new_args = [dateutil.format_time(), "[system_sync]"]
     new_args += args
     print(*new_args)
 
+
 def convert_dict_to_text(dict):
-    return textutil.tojson(dict, format = True)
+    return textutil.tojson(dict, format=True)
+
 
 LEADER = Leader()
 FOLLOWER = Follower()
+
 
 def get_system_role_manager():
     if get_system_role() == "leader":
         return LEADER
     else:
         return FOLLOWER
+
 
 class ConfigHandler:
 
@@ -78,34 +84,36 @@ class ConfigHandler:
         if key == "trigger_sync":
             return self.trigger_sync()
 
-        return dict(code = "success")
+        return dict(code="success")
 
     def reset_offset(self):
         FOLLOWER.reset_sync()
-        return dict(code = "success")
+        return dict(code="success")
 
     def trigger_sync(self):
         FOLLOWER.ping_leader()
         FOLLOWER.sync_files_from_leader()
-        return dict(code = "success")
+        return dict(code="success")
 
     def set_leader_host(self, host):
         assert xutils.is_str(host), "host is not str"
 
         if not netutil.is_http_url(host):
-            return dict(code = "400", message = "无效的URL地址(%s)" % host)
+            return dict(code="400", message="无效的URL地址(%s)" % host)
         CONFIG.put("leader.host", host)
-        return dict(code = "success")
+        return dict(code="success")
 
     def set_leader_token(self, token):
         CONFIG.put("leader.token", token)
-        return dict(code = "success")
+        return dict(code="success")
+
 
 def get_leader_url():
     if get_system_role() == "leader":
         return "127.0.0.1"
 
     return CONFIG.get("leader.host")
+
 
 class SyncHandler:
 
@@ -162,13 +170,13 @@ class SyncHandler:
         if p == "list_recent":
             return self.list_recent()
 
-        return dict(code = "error", message = "未知的操作")
+        return dict(code="error", message="未知的操作")
 
     def check_token(self):
         token = xutils.get_argument("token", "")
         leader_token = LEADER.get_leader_token()
         if token != leader_token:
-            return dict(code = "403", message = "无权访问,TOKEN校验不通过")
+            return dict(code="403", message="无权访问,TOKEN校验不通过")
 
     @xauth.login_required("admin")
     def get_home_page(self):
@@ -179,17 +187,18 @@ class SyncHandler:
             role_manager.sync_for_home_page()
         except:
             xutils.print_exc()
-            
+
         kw.node_role = get_system_role()
         kw.leader_host = CONFIG.get("leader.host", "未设置")
-        kw.leader_token  = role_manager.get_leader_token()
-        kw.leader_url    = role_manager.get_leader_url()
+        kw.leader_token = role_manager.get_leader_token()
+        kw.leader_url = role_manager.get_leader_url()
+        kw.leader_node_id = role_manager.get_leader_node_id()
         kw.follower_list = role_manager.get_follower_list()
-        kw.ping_error    = role_manager.get_ping_error()
+        kw.ping_error = role_manager.get_ping_error()
         kw.fs_index_count = role_manager.get_fs_index_count()
-        
-        kw.whitelist     = LEADER.get_ip_whitelist()
-        kw.sync_process  = FOLLOWER.get_sync_process()
+
+        kw.whitelist = LEADER.get_ip_whitelist()
+        kw.sync_process = FOLLOWER.get_sync_process()
         kw.sync_failed_count = FOLLOWER.count_sync_failed()
 
         return xtemplate.render("system/page/system_sync.html", **kw)
@@ -202,14 +211,14 @@ class SyncHandler:
     @xauth.login_required("admin")
     def get_detail(self):
         type = xutils.get_argument("type")
-        key  = xutils.get_argument("key")
+        key = xutils.get_argument("key")
 
         if type == "follower":
             role_manager = get_system_role_manager()
             info = role_manager.get_follower_info_by_url(key)
-            return dict(code = "success", data = info, text = convert_dict_to_text(info))
+            return dict(code="success", data=info, text=convert_dict_to_text(info))
 
-        return dict(code = "500", message = "未知的类型")
+        return dict(code="500", message="未知的类型")
 
     def get_token():
         """通过临时令牌换取访问token"""
@@ -231,7 +240,7 @@ class SyncHandler:
         result = Storage()
         result.code = "success"
         result.sync_offset = offset
-        
+
         data = xutils.call("system_sync.list_files", offset)
         for item in data:
             result.sync_offset = item.ts
@@ -242,7 +251,7 @@ class SyncHandler:
     @xauth.login_required("admin")
     def do_build_index(self):
         xutils.call("system_sync.build_index")
-        return dict(code = "success")
+        return dict(code="success")
 
     def get_stat(self):
         port = xutils.get_argument("port", "")
@@ -250,7 +259,7 @@ class SyncHandler:
 
     def do_ping(self):
         data = FOLLOWER.ping_leader()
-        return dict(code = "success", data = data)
+        return dict(code="success", data=data)
 
 
 class LeaderHandler(SyncHandler):
@@ -258,14 +267,14 @@ class LeaderHandler(SyncHandler):
     def GET(self):
         return self.handle_leader_action()
 
-    
 
 @xmanager.listen("sys.init")
-def init(ctx = None):
+def init(ctx=None):
     LEADER.get_leader_token()
 
+
 @xmanager.listen("sync.step")
-def on_ping_leader(ctx = None):
+def on_ping_leader(ctx=None):
     role = get_system_role()
     if role == "leader":
         return None
@@ -281,8 +290,9 @@ def on_ping_leader(ctx = None):
         logging.error("ping_leader failed, wait 60 seconds...")
         time.sleep(60)
 
+
 @xmanager.listen("sync.step")
-def event_sync_files_from_leader(ctx = None):
+def event_sync_files_from_leader(ctx=None):
     role = get_system_role()
     if role == "leader":
         return None

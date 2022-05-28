@@ -39,6 +39,7 @@ class Follower(NodeManagerBase):
 
     def __init__(self):
         self.follower_list = []
+        self.leader_info = None
         self.ping_error = None
         self.admin_token = None
         self.last_ping_time = -1
@@ -53,6 +54,11 @@ class Follower(NodeManagerBase):
 
     def get_node_id(self):
         return xconfig.get_global_config("system.node_id", "unknown_node_id")
+    
+    def get_leader_node_id(self):
+        if self.leader_info != None:
+            return self.leader_info.get("node_id")
+        return "<unknown>"
 
     def ping_leader(self):
         now = time.time()
@@ -96,6 +102,7 @@ class Follower(NodeManagerBase):
         self.ping_error = None
         follower_dict = result.get("follower_dict", {})
         self.follower_list = convert_follower_dict_to_list(follower_dict)
+        self.leader_info = result.get("leader")
 
         if len(self.follower_list) > 0:
             item = self.follower_list[0]

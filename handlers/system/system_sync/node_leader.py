@@ -75,6 +75,9 @@ class Leader(NodeManagerBase):
 
     def get_leader_url(self):
         return "http://127.0.0.1:%s" % get_system_port()
+    
+    def get_leader_node_id(self):
+        return self.get_node_id()
 
     def get_leader_token(self):
         token = CONFIG.get("leader.token")

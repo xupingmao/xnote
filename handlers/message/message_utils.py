@@ -17,28 +17,35 @@ from handlers.message.message_model import MessageFolder, MessageTag
 
 MSG_DAO = xutils.DAO("message")
 TAG_TEXT_DICT = dict(
-    done = "完成",
-    cron = "定期",
-    task = "任务",
-    log  = "记事",
-    key  = "话题",
-    search = "话题",
+    done="完成",
+    cron="定期",
+    task="任务",
+    log="记事",
+    key="话题",
+    search="话题",
 )
 MAX_LIST_LIMIT = 1000
 
-def success():
-    return dict(success = True, code = "success")
 
-def failure(message, code = "fail"):
-    return dict(success = False, code = code, message = message)
+def success():
+    return dict(success=True, code="success")
+
+
+def failure(message, code="fail"):
+    return dict(success=False, code=code, message=message)
+
 
 def build_search_url(keyword):
     key = quote(keyword)
     return u"/message?category=message&key=%s" % key
 
-def build_search_html(content):
-    fmt = u'<a href="/message?key=%s">%s</a>'
-    return fmt % (xutils.encode_uri_component(content), xutils.html_escape(content))
+
+def build_search_html(content, search_tag="log"):
+    fmt = u'<a href="/message?tag={tag}&key={key}">{key_text}</a>'
+    return fmt.format(tag=search_tag,
+                      key=xutils.encode_uri_component(content),
+                      key_text=xutils.html_escape(content))
+
 
 def build_done_html(message):
     task = None
@@ -55,9 +62,10 @@ def build_done_html(message):
         done_time = message.mtime
         message.html += u("<br>------<br>完成于 %s") % done_time
 
+
 class TopicTranslator:
 
-    def __init__(self, tag = None):
+    def __init__(self, tag=None):
         self.tag = tag
 
     def mark(self, parser, key0):
@@ -72,17 +80,17 @@ class TopicTranslator:
         else:
             fmt = "<a class=\"link\" href=\"/message?key={quoted_key}\">{value}</a>"
 
-        return fmt.format(quoted_key=quoted_key, value=value, tag = self.tag)
+        return fmt.format(quoted_key=quoted_key, value=value, tag=self.tag)
 
 
-def mark_text(content, tag = "log"):
+def mark_text(content, tag="log"):
     import xconfig
     from xutils.text_parser import TextParser
     from xutils.text_parser import set_img_file_ext
     # 设置图片文集后缀
     set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
 
-    marker = TopicTranslator(tag = tag)
+    marker = TopicTranslator(tag=tag)
 
     parser = TextParser()
     parser.set_topic_translator(marker.mark)
@@ -91,13 +99,15 @@ def mark_text(content, tag = "log"):
     tokens = parser.parse(content)
     return "".join(tokens), parser.keywords
 
-def process_tag_message(message):
-    message.html = build_search_html(message.content)
+
+def process_tag_message(message, search_tag="log"):
+    message.html = build_search_html(message.content, search_tag)
 
     if message.amount is None:
         message.amount = 0
 
-def process_message(message):
+
+def process_message(message, search_tag="log"):
     if message.status == 0 or message.status == 50:
         # 兼容历史数据
         message.tag = "task"
@@ -114,7 +124,7 @@ def process_message(message):
         return message
 
     if message.tag == "key" or message.tag == "search":
-        process_tag_message(message)
+        process_tag_message(message, search_tag)
     else:
         html, keywords = mark_text(message.content, message.tag)
         message.html = html
@@ -138,6 +148,7 @@ def get_status_by_code(code):
         return 100
     return 0
 
+
 def format_count(count):
     if count is None:
         return "0"
@@ -150,20 +161,21 @@ def format_count(count):
     # 保持类型一致
     return str(count)
 
+
 def format_message_stat(stat):
     stat.task_count = format_count(stat.task_count)
     stat.done_count = format_count(stat.done_count)
     stat.cron_count = format_count(stat.cron_count)
-    stat.log_count  = format_count(stat.log_count)
+    stat.log_count = format_count(stat.log_count)
     stat.search_count = format_count(stat.search_count)
-    stat.key_count    = format_count(stat.key_count)
+    stat.key_count = format_count(stat.key_count)
     return stat
 
 
 def do_split_date(date):
-    year  = dateutil.get_current_year()
+    year = dateutil.get_current_year()
     month = dateutil.get_current_month()
-    day   = dateutil.get_current_mday()
+    day = dateutil.get_current_mday()
 
     if date == None or date == "":
         return year, month, day
@@ -177,6 +189,7 @@ def do_split_date(date):
         day = int(parts[2])
     return year, month, day
 
+
 class TagSorter:
 
     def __init__(self):
@@ -187,7 +200,7 @@ class TagSorter:
 
         if mtime is None:
             mtime = ""
-            
+
         if old_mtime is None:
             self.data[tag] = mtime
         else:
@@ -198,10 +211,10 @@ class TagSorter:
 
 
 def get_tags_from_message_list(
-        msg_list, 
-        input_tag = "", 
-        input_date = "", 
-        display_tag = None):
+        msg_list,
+        input_tag="",
+        input_date="",
+        display_tag=None):
 
     assert isinstance(msg_list, list)
     assert isinstance(input_tag, str)
@@ -212,7 +225,7 @@ def get_tags_from_message_list(
 
     for msg_item in msg_list:
         process_message(msg_item)
-        
+
         if msg_item.keywords is None:
             msg_item.keywords = set()
 
@@ -223,7 +236,6 @@ def get_tags_from_message_list(
             tag_counter.incr(tag)
             tag_sorter.update(tag, msg_item.mtime)
 
-            
     tag_list = []
     for tag_name in tag_counter.dict:
         amount = tag_counter.get_count(tag_name)
@@ -232,9 +244,11 @@ def get_tags_from_message_list(
         encoded_tag = textutil.encode_uri_component(tag_name)
 
         if input_date == "":
-            url = "/message?tag=%s&filterKey=%s&filterDate=%s" % (input_tag, encoded_tag, input_date)
+            url = "/message?tag=%s&filterKey=%s&filterDate=%s" % (
+                input_tag, encoded_tag, input_date)
         else:
-            url = "/message?tag=%s&date=%s&filterKey=%s" % (input_tag, input_date, encoded_tag)
+            url = "/message?tag=%s&date=%s&filterKey=%s" % (
+                input_tag, input_date, encoded_tag)
 
         if display_tag != None:
             url += "&displayTag=%s" % display_tag
@@ -245,14 +259,14 @@ def get_tags_from_message_list(
 
         mtime = tag_sorter.get_mtime(tag_name)
 
-        tag_item = MessageTag(name = tag_name, 
-            tag = input_tag, 
-            amount = amount, 
-            url = url, 
-            mtime = mtime)
+        tag_item = MessageTag(name=tag_name,
+                              tag=input_tag,
+                              amount=amount,
+                              url=url,
+                              mtime=mtime)
         tag_list.append(tag_item)
 
-    tag_list.sort(key = lambda x: x.amount, reverse = True)
+    tag_list.sort(key=lambda x: x.amount, reverse=True)
 
     return tag_list
 
@@ -266,11 +280,13 @@ def filter_default_content(content):
     else:
         return content + " "
 
+
 def is_system_tag(tag):
     assert isinstance(tag, str)
     return tag.startswith("$")
 
-def convert_message_list_to_day_folder(item_list, date, show_empty = False):
+
+def convert_message_list_to_day_folder(item_list, date, show_empty=False):
     result = []
     date_object = dateutil.parse_date_to_object(date)
     max_days = dateutil.get_days_of_month(date_object.year, date_object.month)
@@ -286,7 +302,7 @@ def convert_message_list_to_day_folder(item_list, date, show_empty = False):
         folder.date = temp_date
         folder.wday = dateutil.format_wday(temp_date)
         folder.item_list = []
-        folder.title = "{folder.date} {folder.wday}".format(folder = folder)
+        folder.title = "{folder.date} {folder.wday}".format(folder=folder)
         folder.css_class = ""
         if today == temp_date:
             folder.title += "【今天】"
@@ -297,11 +313,12 @@ def convert_message_list_to_day_folder(item_list, date, show_empty = False):
 
         if len(folder.item_list) == 0:
             folder.css_class = "gray-text"
-        
+
         if show_empty or len(folder.item_list) > 0:
             result.append(folder)
 
     return result
+
 
 def count_month_size(folder_list):
     result = 0
@@ -317,6 +334,7 @@ def get_length(item):
     else:
         return -1
 
+
 def filter_msg_list_by_key(msg_list, filter_key):
     result = []
 
@@ -330,6 +348,7 @@ def filter_msg_list_by_key(msg_list, filter_key):
 
     return result
 
+
 def filter_key(key):
     if key == None or key == "":
         return ""
@@ -341,7 +360,7 @@ def filter_key(key):
 
     if key[0] == '《' and key[-1] == '》':
         return key
-        
+
     return "#%s#" % key
 
 
@@ -364,8 +383,13 @@ def get_similar_key(key):
 
 class MessageListParser(object):
 
-    def __init__(self, chatlist):
+    def __init__(self, chatlist, tag="log"):
         self.chatlist = chatlist
+        self.tag = tag
+        self.search_tag = tag
+
+        if tag == "key":
+            self.search_tag = "log"
 
     def parse(self):
         self.do_process_message_list(self.chatlist)
@@ -373,13 +397,13 @@ class MessageListParser(object):
     def do_process_message_list(self, message_list):
         keywords = set()
         for message in message_list:
-            process_message(message)
+            process_message(message, search_tag=self.search_tag)
             if message.keywords != None:
                 keywords = message.keywords.union(keywords)
-        
+
         self.keywords = []
         for word in keywords:
-            keyword_info = Storage(name = word, url = build_search_url(word))
+            keyword_info = Storage(name=word, url=build_search_url(word))
             self.keywords.append(keyword_info)
 
     def get_message_list(self):
@@ -389,12 +413,12 @@ class MessageListParser(object):
         return self.keywords
 
 
-def sort_message_list(msg_list, orderby = ""):
+def sort_message_list(msg_list, orderby=""):
     if orderby == "":
         return
 
     if orderby == "visit":
-        msg_list.sort(key = lambda x: x.visit_cnt or 0, reverse = True)
+        msg_list.sort(key=lambda x: x.visit_cnt or 0, reverse=True)
         for item in msg_list:
             item.badge_info = "访问次数(%s)" % item.visit_cnt
 
@@ -405,17 +429,17 @@ def sort_message_list(msg_list, orderby = ""):
             if item.amount == None:
                 return 0
             return item.amount
-        msg_list.sort(key = lambda x:x.content)
-        msg_list.sort(key = amount_key_func, reverse = True)
+        msg_list.sort(key=lambda x: x.content)
+        msg_list.sort(key=amount_key_func, reverse=True)
         for item in msg_list:
             item.badge_info = "%s" % item.amount
         sort_keywords_by_marked(msg_list)
-    
+
     if orderby == "recent":
-        msg_list.sort(key = lambda x: x.mtime, reverse = True)
+        msg_list.sort(key=lambda x: x.mtime, reverse=True)
         for item in msg_list:
             item.badge_info = "%s" % xutils.format_date(item.mtime)
-        
+
 
 def sort_keywords_by_marked(msg_list):
     def key_func(item):
@@ -424,23 +448,26 @@ def sort_keywords_by_marked(msg_list):
         else:
             return 1
 
-    msg_list.sort(key = key_func)
+    msg_list.sort(key=key_func)
 
-def list_hot_tags(user_name, limit = 20):
+
+def list_hot_tags(user_name, limit=20):
     assert isinstance(user_name, str)
 
     msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
     sort_message_list(msg_list, "amount_desc")
     for msg in msg_list:
-        msg.url = "/message?key={key}&tag=log".format(key = quote(msg.content))
+        msg.url = "/message?key={key}&tag=log".format(key=quote(msg.content))
     return msg_list[:limit]
 
-def list_task_tags(user_name, limit = 20, offset = 0):
+
+def list_task_tags(user_name, limit=20, offset=0):
     assert isinstance(user_name, str)
 
-    msg_list, amount = MSG_DAO.list_task(user_name, offset = 0, limit = MAX_LIST_LIMIT)
-    return get_tags_from_message_list(msg_list, "task", display_tag = "taglist")
+    msg_list, amount = MSG_DAO.list_task(
+        user_name, offset=0, limit=MAX_LIST_LIMIT)
+    return get_tags_from_message_list(msg_list, "task", display_tag="taglist")
+
 
 xutils.register_func("message.list_hot_tags", list_hot_tags)
 xutils.register_func("message.filter_default_content", filter_default_content)
-

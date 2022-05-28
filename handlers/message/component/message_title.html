@@ -1,9 +1,21 @@
+{# <!--
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2021-10-01 18:27:00
+@LastEditors  : xupingmao
+@LastEditTime : 2022-05-28 17:05:17
+@FilePath     : /xnote/handlers/message/component/message_title.html
+@Description  : 描述
+--> #}
 {% init title = "随手记" %}
 {% init show_back_btn = False %}
 
 <div class="card">    
     <div class="card-title btn-line-height">
-        <span>{{title}}</span>
+        <span class="x-tab-box" data-tab-key="tag">
+            <a class="x-tab" href="/message?tag=task" data-tab-value="task">{{T("待办任务")}}</a>
+            <a class="x-tab" href="/message?tag=log" data-tab-value="log">{{T("随手记")}}</a>
+        </span>
         <div class="float-right">
             {% if HOME_PATH == "/message/log" and not show_back_btn %}
                 <a class="btn btn-default" href="/note/group">笔记</a>

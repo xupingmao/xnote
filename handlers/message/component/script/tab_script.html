@@ -16,10 +16,7 @@ $(function() {
     if (displayTag == "search") {
         displayTag = "log";
     }
-
-    $(".message-tab>.x-tab.active").removeClass("active")
-    $("[data-tab-value=" + displayTag + "]").addClass("active");
-
+    
     function onMessageUpdated() {
         $.get("/message/stat", function (resp) {
             $(".task-count").text(resp.task_count);

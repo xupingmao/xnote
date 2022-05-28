@@ -5,14 +5,14 @@
 {% init message_stat = xutils.call("message.get_current_message_stat") %}
 
 <!-- 桌面版菜单 -->
-<div class="card x-tab-box message-tab" data-tab-key="tag" data-tab-default="log">
+<div class="card x-tab-box message-tab" data-tab-key="p" data-tab-default="log">
     <a class="x-tab" data-tab-value="log" href="/message?tag=log">
         记事(<span class="log-count">{{message_stat.log_count}}</span>)
     </a>
-    <a class="x-tab" data-tab-value="key" href="/message?tag=key&orderby=amount_desc">
+    <a class="x-tab" data-tab-value="taglist" href="/message?tag=log&p=taglist&orderby=amount_desc&displayTag=tag">
         标签(<span class="key-count">{{message_stat.key_count}}</span>)
     </a>
-    <a class="x-tab" data-tab-value="date" href="/message/dairy?tag=date">日期</a>
+    <a class="x-tab" data-tab-value="date" href="/message/dairy?tag=log&p=date">日期</a>
 </div>
 
 {% include message/component/script/tab_script.html %}
