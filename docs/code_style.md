@@ -49,8 +49,8 @@ my_package # 带下划线的包名
     - TaskManager 任务管理器
     - NoteTaskManager 笔记任务管理器
 - 分层命名规则：
-    - 视图层（handlers）: 具体的功能，有状态，包括API和页面
-    - 核心层（core）: 基于功能抽象出来的通用能力，适用于WEB应用，有状态
+    - 视图层（handlers）: 具体的功能，有状态，包括API和页面，处理业务逻辑
+    - 核心层（core）: 基于功能抽象出来的通用能力，适用于WEB应用，有状态，只处理功能逻辑，不感知业务逻辑
     - 基础层（xutils/lib）: 非常基础并且通用的能力，适用于全部领域，基本无状态
 
 ## 3.1 manager和service的区别

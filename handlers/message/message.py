@@ -194,6 +194,7 @@ class ListAjaxHandler:
             pagesize = pagesize,
             current_user = xauth.current_name())
 
+
     def do_list_message(self, user_name, tag, offset, pagesize):
         key = xutils.get_argument("key", "")
         date = xutils.get_argument("date", "")
@@ -658,6 +659,9 @@ class MessageListHandler:
 
         if tag == "task_tags":
             return self.get_task_taglist_page()
+        
+        if tag == "search":
+            return SearchHandler().get_page()
 
         return self.get_log_page()
 
@@ -1025,6 +1029,28 @@ class MessageKeywordAjaxHandler:
 
         MSG_DAO.update(key_obj)
         return dict(code = "success")
+
+class SearchHandler:
+    """搜索逻辑处理"""
+
+    def get_page(self):
+        user_name = xauth.current_name()
+        key = xutils.get_argument("key", "")
+
+        kw = Storage()
+        kw.tag = "search"
+        kw.key = key
+        kw.keyword = key
+        kw.default_content = key
+        kw.side_tags = MSG_DAO.list_hot_tags(user_name, 20)
+
+        return xtemplate.render("message/page/message_search.html", **kw)
+    
+    def get_ajax(self):
+        return
+    
+    def search_items(self, user_name, key):
+        pass
 
 
 xutils.register_func("message.process_message", process_message)

@@ -2,6 +2,7 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
 # @modified 2022/04/11 23:29:47
+from audioop import reverse
 import xutils
 import xconfig
 import xmanager
@@ -467,8 +468,8 @@ def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
         chatlist = list_key(user, offset, limit)
     else:
         filter_func = get_filter_by_tag_func(tag)
-        chatlist = dbutil.prefix_list(
-            "message:%s" % user, filter_func, offset, limit, reverse=True)
+        chatlist = _msg_db.list(
+            filter_func=filter_func, offset=offset, limit=limit, reverse=True, user_name=user)
 
     # 利用message_stat优化count查询
     if tag == "done":

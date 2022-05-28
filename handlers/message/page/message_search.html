@@ -1,0 +1,116 @@
+{% extends base %}
+
+{% block body_top %}
+
+    {% init default_content = "" %}
+    {% init show_tab = True %}
+
+    <script type="text/javascript" src="/static/js/message/message.js"></script>
+
+    <input class="default-content-input" type="hidden" value="{{default_content}}"/>
+{% end %}
+
+{% block body_left %}
+
+    {% init message_tag = "" %}
+    {% init p = "" %}
+    <!-- Tab页 -->
+    {% init message_tab = "log" %}
+    {% init default_content = "" %}
+    
+    <div class="card">    
+        <div class="card-title btn-line-height">
+            {% if p == "task" or p == "done" %}
+                <span>搜索待办</span>
+            {% else %}
+                <span>搜索随手记</span>
+            {% end %}
+
+            <div class="float-right">
+                <a class="btn btn-default" href="/message?tag=log">随手记</a>
+                {% include common/button/back_button.html %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card x-tab-box" data-tab-key="p" data-tab-default="all">
+        <a class="x-tab" href="/message?tag=search&p=all&key={{quote(key)}}" data-tab-value="all">
+            全部
+        </a>
+    
+        <a class="x-tab" href="/message?tag=search&p=task&key={{quote(key)}}" data-tab-value="task">
+            待办
+        </a>
+        <a class="x-tab" href="/message?tag=search&p=log&key={{quote(key)}}" data-tab-value="log">
+            随手记
+        </a>
+        <a class="x-tab" href="/message?tag=search&p=done&key={{quote(key)}}" data-tab-value="done">
+            已完成
+        </a>
+    </div>
+
+    <!-- 事件转换 -->
+    {% include message/component/message_event.html %}
+
+    {% include message/component/message_input.html %}
+
+    {% include message/component/message_keyword_info.html %}
+
+    <!-- 内容区域 -->
+    {% include message/component/message_list.html %}
+
+    <script type="text/javascript">
+        $(function (e) {
+            function getParamTag() {
+                return "{{tag}}";
+            }
+
+            function getParamPage() {
+                var page = getUrlParam("page");
+                if (page == undefined) {
+                    return 1;
+                } else {
+                    return page;
+                }
+            }
+
+            function getParamKey() {
+                // getUrlParam 获取参数空格会被处理成`+`
+                // return getUrlParam("key", "");
+                return "{{key}}";
+            }
+
+            function onMessageRefresh() {
+                var params = getUrlParams();
+
+                params.tag  = getParamTag();
+                params.page = getParamPage();
+                params.key = getParamKey();
+
+                window.doRefreshMessageList(params);
+            }
+
+            function onMessageCreated() {
+                onMessageRefresh();
+            }
+
+            xnote.on("message.updated", onMessageRefresh);
+            xnote.on("message.created", onMessageCreated);
+
+            // 定义刷新消息列表函数
+            xnote.setExtFunc("message.refreshMessageList", onMessageRefresh);
+
+            // 触发更新事件
+            xnote.fire("message.updated");
+        })
+    </script>
+
+{% end %}
+
+
+{% block body_right %}
+    <div class="desktop-only">
+        {% include note/component/group_special_folder.html %}
+        {% include message/component/right/tags.html %}
+    </div>
+{% end %}
