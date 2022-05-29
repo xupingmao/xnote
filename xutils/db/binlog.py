@@ -4,12 +4,13 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-28 14:58:30
+@LastEditTime : 2022-05-29 21:52:25
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
 
 from xutils import dbutil
+from xutils.db.dbutil_base import count_table
 from xutils.db.dbutil_table import db_put, prefix_list
 
 import threading
@@ -56,6 +57,9 @@ class BinLog:
     def set_max_size(cls, max_size):
         cls._max_size = max_size
 
+    def get_size(self):
+        return count_table(self._table_name)
+
     def get_record_key(self, log_id):
         return self._table_name + ":" + log_id
 
@@ -84,3 +88,9 @@ class BinLog:
             binlog_id = _format_log_id(self.last_seq)
             binlog_body = dict(optype=optype, key=key)
             self._put_log(binlog_id, binlog_body, batch=batch)
+
+    def list(self, last_seq, limit, map_func=None):
+        """从last_seq开始查询limit个binlog"""
+        start_id = _format_log_id(last_seq)
+        key_from = self._table_name + ":" + start_id
+        return prefix_list(self._table_name, key_from=key_from, limit=limit, map_func=map_func)

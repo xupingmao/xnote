@@ -35,6 +35,8 @@ from xutils import netutil
 
 from .node_follower import Follower
 from .node_leader import Leader
+from . import system_sync_client
+from . import system_sync_indexer
 
 LOCK = threading.Lock()
 
@@ -145,42 +147,7 @@ class SyncHandler:
             xauth.check_login("admin")
             return FOLLOWER.sync_files_from_leader()
 
-        return self.handle_leader_action()
-
-    def handle_leader_action(self):
-        """主节点的提供的功能"""
-        p = xutils.get_argument("p", "")
-        error = self.check_token()
-        if error != None:
-            return error
-
-        # 没有token不允许继续
-
-        if p == "get_token":
-            return self.get_token()
-
-        if p == "refresh_token":
-            return self.refresh_token()
-
-        if p == "get_stat":
-            return self.get_stat()
-
-        if p == "list_files":
-            return self.list_files()
-
-        if p == "list_recent":
-            return self.list_recent()
-
-        return dict(code="error", message="未知的操作")
-
-    def check_token(self):
-        token = xutils.get_argument("token", "")
-        leader_token = LEADER.get_leader_token()
-        if token != leader_token:
-            error = dict(code="403", message="无权访问,TOKEN校验不通过")
-            status = "401 Unauthorized"
-            headers = {"Content-Type": "application/json"}
-            raise web.HTTPError(status, headers, textutil.tojson(error))
+        return LeaderHandler().handle_leader_action()
 
     @xauth.login_required("admin")
     def get_home_page(self):
@@ -224,6 +191,28 @@ class SyncHandler:
 
         return dict(code="500", message="未知的类型")
 
+    def list_recent(self):
+        result = Storage()
+        result.code = "success"
+        # TODO 读取filelist
+        return result
+
+    @xauth.login_required("admin")
+    def do_build_index(self):
+        xutils.call("system_sync.build_index")
+        return dict(code="success")
+
+    def do_ping(self):
+        data = FOLLOWER.ping_leader()
+        return dict(code="success", data=data)
+
+
+class LeaderHandler(SyncHandler):
+    """作为主节点提供的能力"""
+
+    def GET(self):
+        return self.handle_leader_action()
+
     def get_token():
         """通过临时令牌换取访问token"""
         pass
@@ -232,11 +221,18 @@ class SyncHandler:
         """刷新访问token"""
         pass
 
-    def list_recent(self):
-        result = Storage()
-        result.code = "success"
-        # TODO 读取filelist
-        return result
+    def check_token(self):
+        token = xutils.get_argument("token", "")
+        leader_token = LEADER.get_leader_token()
+        if token != leader_token:
+            error = dict(code="403", message="无权访问,TOKEN校验不通过")
+            status = "401 Unauthorized"
+            headers = {"Content-Type": "application/json"}
+            raise web.HTTPError(status, headers, textutil.tojson(error))
+
+    def get_stat(self):
+        port = xutils.get_argument("port", "")
+        return LEADER.get_stat(port)
 
     def list_files(self):
         """(主节点)读取文件列表"""
@@ -245,31 +241,50 @@ class SyncHandler:
         result.code = "success"
         result.sync_offset = offset
 
-        data = xutils.call("system_sync.list_files", offset)
+        data = system_sync_indexer.list_files(offset)
         for item in data:
             result.sync_offset = item.ts
 
         result.data = data
         return result
 
-    @xauth.login_required("admin")
-    def do_build_index(self):
-        xutils.call("system_sync.build_index")
-        return dict(code="success")
+    def handle_leader_action(self):
+        """主节点的提供的功能"""
+        p = xutils.get_argument("p", "")
+        error = self.check_token()
+        if error != None:
+            return error
 
-    def get_stat(self):
-        port = xutils.get_argument("port", "")
-        return LEADER.get_stat(port)
+        # 没有token不允许继续
 
-    def do_ping(self):
-        data = FOLLOWER.ping_leader()
-        return dict(code="success", data=data)
+        if p == "get_token":
+            return self.get_token()
 
+        if p == "refresh_token":
+            return self.refresh_token()
 
-class LeaderHandler(SyncHandler):
+        if p == "get_stat":
+            return self.get_stat()
 
-    def GET(self):
-        return self.handle_leader_action()
+        if p == "list_files":
+            return self.list_files()
+
+        if p == "list_binlog":
+            binlog_last_seq = xutils.get_argument("last_seq", 0, type=int)
+            limit = xutils.get_argument("limit", 20, type=int)
+            data = LEADER.list_binlog(binlog_last_seq, limit)
+            return dict(code="success", data=data)
+
+        if p == "list_db":
+            last_key = xutils.get_argument("last_key", "")
+            limit = xutils.get_argument("limit", 20, type=int)
+            data = LEADER.list_db(last_key, limit)
+            return dict(code="success", data=data)
+
+        if p == "list_recent":
+            return self.list_recent()
+
+        return dict(code="error", message="未知的操作")
 
 
 @xmanager.listen("sys.init")
@@ -296,9 +311,12 @@ def on_ping_leader(ctx=None):
 
 
 @xmanager.listen("sync.step")
-def event_sync_files_from_leader(ctx=None):
+def on_sync_files_from_leader(ctx=None):
     role = get_system_role()
     if role == "leader":
+        return None
+    
+    if xconfig.get("system.sync_files_from_leader") == False:
         return None
 
     try:
@@ -310,6 +328,45 @@ def event_sync_files_from_leader(ctx=None):
         xutils.print_exc()
         logging.error("sync_files_from_leader failed, wait 60 seconds...")
         time.sleep(60)
+
+
+@xmanager.listen("sync.step")
+def on_sync_db_from_leader(ctx=None):
+    role = get_system_role()
+    if role == "leader":
+        return None
+    
+    if xconfig.get("system.sync_db_from_leader") == False:
+        return None
+
+    try:
+        logging.debug("开始同步数据库")
+        logging.debug("-"*50)
+        FOLLOWER.sync_db_from_leader()
+        if FOLLOWER.get_db_sync_state() == "binlog":
+            time.sleep(10)
+    except:
+        xutils.print_exc()
+        logging.error("sync_db_from_leader failed, wait 60 seconds...")
+        time.sleep(60)
+
+
+@xmanager.listen("sync.step")
+def on_sync_step(ctx = None):
+    tm = time.localtime()
+    if tm.tm_sec != 0:
+        # logging.debug("未到检查索引时间")
+        return
+
+    if FOLLOWER.get_db_sync_state() == "full":
+        # 尽快完成数据库同步
+        return
+
+    logging.debug("检查文件同步索引...")
+    manager = system_sync_indexer.FileIndexCheckManager()
+    for i in range(10):
+        manager.step()
+    time.sleep(0.1)
 
 
 xurls = (

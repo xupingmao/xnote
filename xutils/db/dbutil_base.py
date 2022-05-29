@@ -83,6 +83,7 @@ _leveldb = None
 # 缓存对象（拥有put/get两个方法）
 _cache = None
 
+
 def print_debug_info(fmt, *args):
     new_args = [dateutil.format_time(), "[dbutil]"]
     new_args.append(fmt.format(*args))
@@ -253,13 +254,14 @@ def check_write_state():
         raise Exception("write_only mode!")
 
 
-def check_before_write(key):
+def check_before_write(key, check_table=True):
     check_leveldb()
     check_write_state()
     check_not_empty(key, "[dbutil.put] key can not be None")
 
-    table_name = key.split(":", 1)[0]
-    check_table_name(table_name)
+    if check_table:
+        table_name = key.split(":", 1)[0]
+        check_table_name(table_name)
 
 
 def check_get_leveldb():
@@ -309,7 +311,7 @@ class TableInfo:
         self.description = description
         self.category = category
         self.check_user = False
-        self.user_attr  = None
+        self.user_attr = None
 
 
 def register_table(table_name,
@@ -322,14 +324,15 @@ def register_table(table_name,
     if not re.match(r"^[0-9a-z_]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
-    _register_table_inner(table_name, description, category, check_user, user_attr)
+    _register_table_inner(table_name, description,
+                          category, check_user, user_attr)
 
 
 def _register_table_inner(table_name,
-                         description,
-                         category="default",
-                         check_user=False,
-                         user_attr=None):
+                          description,
+                          category="default",
+                          check_user=False,
+                          user_attr=None):
     if not re.match(r"^[0-9a-z_\$]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
@@ -360,6 +363,7 @@ def register_table_index(table_name, index_name):
     description = "%s表索引" % table_name
     _register_table_inner(index_table, description)
 
+
 def register_table_user_attr(table_name, user_attr):
     """注册表用户的属性名"""
     check_table_name(table_name)
@@ -367,6 +371,7 @@ def register_table_user_attr(table_name, user_attr):
     if table_info.user_attr != None:
         logging.warning("user_attr已经设置了")
     table_info.user_attr = user_attr
+
 
 def get_table_dict_copy():
     return TABLE_INFO_DICT.copy()
@@ -379,15 +384,19 @@ def get_table_names():
                     key=lambda x: (x.category, x.name))
     return list(map(lambda x: x.name, values))
 
+
 def get_table_index_names(table_name):
     validate_str(table_name, "invalid table_name")
     return INDEX_INFO_DICT.get(table_name) or set()
 
+
 def get_index_table_name(table_name, index_name):
     return "_index$%s$%s" % (table_name, index_name)
 
+
 def get(*args, **kw):
     return db_get(*args, **kw)
+
 
 def db_get(key, default_value=None):
     check_leveldb()
@@ -405,13 +414,13 @@ def db_get(key, default_value=None):
         return default_value
 
 
-def db_put(key, obj_value, sync=False):
+def db_put(key, obj_value, sync=False, check_table=True):
     """往数据库中写入键值对
     @param {string} key 数据库主键
     @param {object} obj_value 值，会转换成JSON格式
     @param {boolean} sync 是否同步写入，默认为False
     """
-    check_before_write(key)
+    check_before_write(key, check_table)
 
     key = key.encode("utf-8")
     # 注意json序列化有个问题，会把dict中数字开头的key转成字符串
@@ -419,8 +428,10 @@ def db_put(key, obj_value, sync=False):
     # print("Put %s = %s" % (key, value))
     _leveldb.Put(key, value.encode("utf-8"), sync=sync)
 
+
 def put(*args, **kw):
     return db_put(*args, **kw)
+
 
 def put_bytes(key, value, sync=False):
     check_before_write(key.decode("utf-8"))
@@ -522,11 +533,12 @@ def prefix_iter(prefix,
                 include_key=False,
                 key_from=None,
                 map_func=None,
-                fill_cache=False):
+                fill_cache=False,
+                scan_db=False):
     """通过前缀迭代查询
     @param {string} prefix 遍历前缀
-    @param {function} filter_func 过滤函数
-    @param {function} map_func 映射函数，如果返回不为空则认为匹配
+    @param {function} filter_func(str,object) 过滤函数
+    @param {function} map_func(str,object)    映射函数，如果返回不为空则认为匹配
     @param {int} offset 选择的开始下标，包含
     @param {int} limit  选择的数据行数
     @param {boolean} reverse 是否反向遍历
@@ -539,8 +551,12 @@ def prefix_iter(prefix,
     if filter_func != None and map_func != None:
         raise Exception("不允许同时设置filter_func和map_func")
 
-    if prefix[-1] != ':':
-        prefix += ':'
+    if scan_db == False:
+        assert len(prefix) > 0, "prefix不能为空"
+        if prefix[-1] != ':':
+            prefix += ':'
+    else:
+        assert prefix == "", "scan_db prefix必须为空"
 
     origin_prefix = prefix
     prefix = prefix.encode("utf-8")
@@ -659,13 +675,16 @@ def prefix_count(prefix,
     prefix_scan(prefix, func)
     return count[0]
 
+
 def set_db_cache(cache):
     global _cache
     _cache = cache
 
+
 def set_db_instance(db_instance):
     global _leveldb
     _leveldb = db_instance
+
 
 def count_table(table_name, use_cache=False):
     assert table_name != None

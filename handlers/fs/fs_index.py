@@ -39,12 +39,13 @@ def calc_size(db, fpath, depth=1000):
     if depth <= 0:
         logging.error("too deep depth")
         return 0
-    fpath = os.path.realpath(fpath)
-    print("fs_index path: %s" % fpath)
     
     if os.path.islink(fpath):
         # 软链接会导致循环引用,即使用真实的路径也不能解决这个问题
         return 0
+
+    fpath = os.path.realpath(fpath)
+    print("fs_index path: %s" % fpath)    
 
     if os.path.isdir(fpath):
         return calc_dir_size(db, fpath, depth-1)

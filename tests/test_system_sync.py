@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-28 23:58:17
+@LastEditTime : 2022-05-29 22:20:40
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
@@ -31,11 +31,62 @@ class LeaderNetMock:
 
     def http_get(self, url, charset=None, params=None):
         print("url:{url}, params:{params}".format(**locals()))
+
+        if "get_stat" in url:
+            return self.http_get_stat()
+
+        if "list_db" in url:
+            return self.http_list_db(url)
+
+        if "list_binlog" in url:
+            return self.http_list_binlog(url)
+
+        raise Exception("unsupported url:%s" % url)
+
+    def http_get_stat(self):
         result = dict(code="success",
                       leader=dict(
                           node_id="master",
                           fs_index_count=666,
                           binlog_last_seq=333))
+        return textutil.tojson(result)
+
+    def http_list_db(self, url):
+        from urllib.parse import urlparse, parse_qs, unquote
+
+        result = urlparse(url)
+        params = parse_qs(result.query)
+        last_key = params.get("last_key")
+
+        if last_key != None:
+            last_key = last_key[0]
+            last_key == unquote(last_key)
+
+        if last_key == "my_config:test:key2":
+            result = dict(code="success",
+                          data=dict(
+                              binlog_last_seq=2345,
+                              rows=[]
+                          ))
+        else:
+            result = dict(code="success",
+                          data=dict(
+                              binlog_last_seq=1234,
+                              rows=[
+                                  {
+                                      "key": "my_config:test:key1",
+                                      "value": "value1"
+                                  },
+                                  {
+                                      "key": "my_config:test:key2",
+                                      "value": "value2"
+                                  }
+                              ]))
+        return textutil.tojson(result)
+
+    def http_list_binlog(self, url):
+        result = dict(code="success", data=[dict(
+            key="my_table:1", value=dict(name="Ada", age=20), seq=2346, optype="put")])
         return textutil.tojson(result)
 
 
@@ -60,10 +111,38 @@ class TestSystem(BaseTestCase):
 
     def test_system_ping(self):
         netutil.set_net_mock(LeaderNetMock())
-        admin_token = xauth.get_user_by_name("admin").token
-        _config_db.put("leader.token", admin_token)
-        _config_db.put("leader.host", "http://127.0.0.1:3333")
-        resp = json_request("/system/sync?p=ping&token=" + admin_token)
-        print("ping resp:{resp}".format(resp=resp))
-        self.assertEqual("success", resp["code"])
-        self.assertIsNotNone(resp["data"])
+        try:
+            admin_token = xauth.get_user_by_name("admin").token
+            _config_db.put("leader.token", admin_token)
+            _config_db.put("leader.host", "http://127.0.0.1:3333")
+            resp = json_request("/system/sync?p=ping&token=" + admin_token)
+            print("ping resp:{resp}".format(resp=resp))
+            self.assertEqual("success", resp["code"])
+            self.assertIsNotNone(resp["data"])
+        finally:
+            netutil.set_net_mock(None)
+
+    def test_system_sync_db_from_leader(self):
+        netutil.set_net_mock(LeaderNetMock())
+
+        try:
+            from handlers.system.system_sync.system_sync_controller import FOLLOWER
+            admin_token = xauth.get_user_by_name("admin").token
+            _config_db.put("leader.token", admin_token)
+            _config_db.put("leader.host", "http://127.0.0.1:3333")
+
+            FOLLOWER._debug = True
+
+            FOLLOWER.sync_db_from_leader()
+
+            self.assertEqual(FOLLOWER.get_binlog_last_seq(), 1234)
+
+            FOLLOWER.sync_db_from_leader()
+            self.assertEqual(FOLLOWER.get_db_sync_state(), "binlog")
+            self.assertEqual(FOLLOWER.get_binlog_last_seq(), 1234)
+
+            # 同步binlog
+            FOLLOWER.sync_db_from_leader()
+            self.assertEqual(FOLLOWER.get_binlog_last_seq(), 2346)
+        finally:
+            netutil.set_net_mock(None)

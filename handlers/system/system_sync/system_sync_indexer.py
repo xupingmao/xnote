@@ -211,20 +211,6 @@ def count_index():
     manager = FileSyncIndexManager()
     return manager.count_index()
 
-@xmanager.listen("sync.step")
-def on_sync_step(ctx = None):
-
-    tm = time.localtime()
-    if tm.tm_sec != 0:
-        # logging.debug("未到检查索引时间")
-        return
-
-    logging.debug("检查文件同步索引...")
-    manager = FileIndexCheckManager()
-    for i in range(10):
-        manager.step()
-    time.sleep(0.1)
-
 xutils.register_func("system_sync.build_index", on_build_index)
 xutils.register_func("system_sync.list_files", list_files)
 xutils.register_func("system_sync.count_index", count_index)

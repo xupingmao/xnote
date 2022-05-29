@@ -6,7 +6,6 @@
 
 import threading
 import time
-
 import xauth
 import xconfig
 import xutils
@@ -15,6 +14,7 @@ from xutils import dateutil
 from xutils import textutil
 from xutils import Storage
 from xutils import webutil
+from xutils import dbutil
 from xutils.db.binlog import BinLog
 
 from .node_base import NodeManagerBase, convert_follower_dict_to_list
@@ -76,7 +76,7 @@ class Leader(NodeManagerBase):
 
     def get_leader_url(self):
         return "http://127.0.0.1:%s" % get_system_port()
-    
+
     def get_leader_node_id(self):
         return self.get_node_id()
 
@@ -130,7 +130,8 @@ class Leader(NodeManagerBase):
         node_id = xutils.get_argument("node_id", "")
 
         client_ip = webutil.get_client_ip()
-        url = "{ip}:{port}#{node_id}".format(ip = client_ip, port = port, node_id = node_id)
+        url = "{ip}:{port}#{node_id}".format(
+            ip=client_ip, port=port, node_id=node_id)
 
         with self._lock:
             if not self.check_follower_count(url):
@@ -153,3 +154,49 @@ class Leader(NodeManagerBase):
         result.leader = self.get_leader_info()
 
         return result
+
+    def skip_db_sync(self, key):
+        skipped_prefix_tuple = ("_binlog:", "_index$", "cluster_config:",
+                                "fs_index:", "fs_sync_index:", "fs_sync_index_copy:")
+        return key.startswith(skipped_prefix_tuple)
+
+    def list_binlog(self, last_seq, limit=20):
+        sync_diff = self.binlog.last_seq - last_seq
+        out_of_sync = sync_diff > self.binlog.get_size()
+
+        if last_seq <= 0 or last_seq > self.binlog.last_seq or out_of_sync:
+            return dict(code="sync_broken", message="同步中断，请重新同步")
+
+        def map_func(key, value):
+            if self.skip_db_sync(key):
+                return None
+            table_name, seq = key.split(":")
+            value["seq"] = int(seq)
+            return value
+
+        result = []
+        binlogs = self.binlog.list(last_seq, limit, map_func=map_func)
+        print("binlogs:", binlogs)
+
+        for log in binlogs:
+            key = log.key
+            log.value = dbutil.get(key)
+            result.append(log)
+
+        return result
+
+    def list_db(self, last_key, limit=20):
+        def filter_func(key, value):
+            if self.skip_db_sync(key):
+                return False
+            return True
+
+        result = []
+        for key, value in dbutil.prefix_list("", key_from=last_key,
+                                             limit=limit,
+                                             include_key=True,
+                                             scan_db=True,
+                                             filter_func=filter_func):
+            record = dict(key=key, value=value)
+            result.append(record)
+        return dict(binlog_last_seq=self.binlog.last_seq, rows=result)
