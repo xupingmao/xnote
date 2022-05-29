@@ -272,8 +272,7 @@ class LeaderHandler(SyncHandler):
         if p == "list_binlog":
             binlog_last_seq = xutils.get_argument("last_seq", 0, type=int)
             limit = xutils.get_argument("limit", 20, type=int)
-            data = LEADER.list_binlog(binlog_last_seq, limit)
-            return dict(code="success", data=data)
+            return LEADER.list_binlog(binlog_last_seq, limit)
 
         if p == "list_db":
             last_key = xutils.get_argument("last_key", "")

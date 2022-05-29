@@ -164,11 +164,12 @@ class Leader(NodeManagerBase):
         sync_diff = self.binlog.last_seq - last_seq
         out_of_sync = sync_diff > self.binlog.get_size()
 
-        if last_seq <= 0 or last_seq > self.binlog.last_seq or out_of_sync:
+        if (last_seq <= 0) or (last_seq > self.binlog.last_seq) or out_of_sync:
             return dict(code="sync_broken", message="同步中断，请重新同步")
 
         def map_func(key, value):
-            if self.skip_db_sync(key):
+            record_key = value.get("key")
+            if self.skip_db_sync(record_key):
                 return None
             table_name, seq = key.split(":")
             value["seq"] = int(seq)
@@ -183,7 +184,7 @@ class Leader(NodeManagerBase):
             log.value = dbutil.get(key)
             result.append(log)
 
-        return result
+        return dict(code="success", data=result)
 
     def list_db(self, last_key, limit=20):
         def filter_func(key, value):

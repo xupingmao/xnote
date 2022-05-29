@@ -238,7 +238,12 @@ class Follower(NodeManagerBase):
         url = "{host}/system/sync/leader?p=list_binlog&token={token}".format(
             host=leader_host, token=leader_token)
         result = netutil.http_get(url, params=params)
-        result_obj = textutil.parse_json(result)
+        try:
+            result_obj = textutil.parse_json(result)
+        except:
+            logging.error("解析json失败:%s", result)
+            return
+        
         code = result_obj.get("code")
 
         if code == "success":
@@ -257,13 +262,16 @@ class Follower(NodeManagerBase):
                     value = data.get("value")
                     assert key != None
                     dbutil.put(key, value, check_table=False)
-
-                if optype == "delete":
+                elif optype == "delete":
                     dbutil.delete(key)
+                else:
+                    logging.error("未知的optype:%s", optype)
 
                 max_seq = max(max_seq, seq)
             if max_seq != last_seq:
                 self.put_binlog_last_seq(max_seq)
+            else:
+                logging.info("已经保持同步")
         elif code == "sync_broken":
             logging.error("同步binlog异常, 重新全量同步...")
             self.put_binlog_last_seq(0)
@@ -282,9 +290,6 @@ class Follower(NodeManagerBase):
             print("\n\n_sync_db_full -------------\nresp:%s\n\n" % result)
 
         result_obj = textutil.parse_json(result)
-
-
-
         code = result_obj.get("code")
         if code == "success":
             data = result_obj.get("data")
