@@ -316,6 +316,10 @@ def on_sync_files_from_leader(ctx=None):
     
     if xconfig.get("system.sync_files_from_leader") == False:
         return None
+    
+    if FOLLOWER.is_at_full_sync():
+        # 优先等待db同步完
+        return None
 
     try:
         logging.debug("开始同步文件...")
