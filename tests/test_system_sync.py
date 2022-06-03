@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-29 22:20:40
+@LastEditTime : 2022-06-03 11:14:34
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
@@ -85,9 +85,24 @@ class LeaderNetMock:
         return textutil.tojson(result)
 
     def http_list_binlog(self, url):
-        result = dict(code="success", data=[dict(
-            key="my_table:1", value=dict(name="Ada", age=20), seq=2346, optype="put")])
-        return textutil.tojson(result)
+        return """
+        {
+            "code": "success",
+            "data": [
+                {
+                    "optype": "delete",
+                    "seq": 2345,
+                    "key": "my_table:2"
+                },
+                {
+                    "optype": "put",
+                    "seq": 2346,
+                    "key": "my_table:1",
+                    "value": {"name":"Ada", "age":20}
+                }
+            ]
+        }
+        """
 
 
 class TestSystem(BaseTestCase):
@@ -135,14 +150,34 @@ class TestSystem(BaseTestCase):
 
             FOLLOWER.sync_db_from_leader()
 
-            self.assertEqual(FOLLOWER.get_binlog_last_seq(), 1234)
+            db_syncer = FOLLOWER.db_syncer
+
+            self.assertEqual(db_syncer.get_binlog_last_seq(), 1234)
 
             FOLLOWER.sync_db_from_leader()
-            self.assertEqual(FOLLOWER.get_db_sync_state(), "binlog")
-            self.assertEqual(FOLLOWER.get_binlog_last_seq(), 1234)
+            self.assertEqual(db_syncer.get_db_sync_state(), "binlog")
+            self.assertEqual(db_syncer.get_binlog_last_seq(), 1234)
 
             # 同步binlog
             FOLLOWER.sync_db_from_leader()
-            self.assertEqual(FOLLOWER.get_binlog_last_seq(), 2346)
+            self.assertEqual(db_syncer.get_binlog_last_seq(), 2346)
         finally:
             netutil.set_net_mock(None)
+
+
+
+    def test_system_sync_db_broken(self):
+        from handlers.system.system_sync.system_sync_controller import FOLLOWER
+        admin_token = xauth.get_user_by_name("admin").token
+        _config_db.put("leader.token", admin_token)
+        _config_db.put("leader.host", "http://127.0.0.1:3333")
+
+        FOLLOWER._debug = True
+        FOLLOWER.db_syncer.put_db_sync_state("binlog")
+        result = """
+        {
+            "code": "sync_broken"
+        }
+        """
+        result_obj = textutil.parse_json(result)
+        FOLLOWER.db_syncer.sync_by_binlog(result_obj)
