@@ -341,8 +341,8 @@ def on_sync_db_from_leader(ctx=None):
         logging.debug("开始同步数据库")
         logging.debug("-"*50)
         FOLLOWER.sync_db_from_leader()
-        if FOLLOWER.is_sync_by_binlog():
-            logging.error("sync_db_from_leader by binlog, wait 10 seconds...")
+        if not FOLLOWER.is_at_full_sync():
+            logging.error("sync_db_from_leader not full_sync, wait 10 seconds...")
             time.sleep(10)
     except:
         xutils.print_exc()
@@ -357,7 +357,7 @@ def on_sync_step(ctx = None):
         # logging.debug("未到检查索引时间")
         return
 
-    if FOLLOWER.get_db_sync_state() == "full":
+    if FOLLOWER.is_at_full_sync():
         # 尽快完成数据库同步
         return
 

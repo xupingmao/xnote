@@ -267,8 +267,8 @@ class Follower(NodeManagerBase):
             last_key = self.db_syncer.get_db_last_key()
             self._sync_db_full(leader_host, leader_token, last_key)
     
-    def is_sync_by_binlog(self):
-        return self.db_syncer.get_db_sync_state() == "binlog"
+    def is_full_sync(self):
+        return self.db_syncer.get_db_sync_state() == "full"
 
 
 class DBSyncer:
