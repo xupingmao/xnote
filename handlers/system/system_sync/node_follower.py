@@ -14,6 +14,7 @@ from xutils import Storage
 from xutils import textutil
 from xutils import dbutil
 from xutils import netutil
+import xutils
 from xutils.db.binlog import BinLog
 from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
@@ -276,6 +277,12 @@ class DBSyncer:
     def __init__(self):
         self._binlog = BinLog.get_instance()
     
+    def get_table_by_key(self, key):
+        table_name = key.split(":")[0]
+        if dbutil.TableInfo.is_registered(table_name):
+            return dbutil.get_table(table_name)
+        return None
+    
     def get_binlog_last_seq(self):
         return CONFIG.get("follower_binlog_last_seq", 0)
 
@@ -299,11 +306,16 @@ class DBSyncer:
     def put_and_log(self, key, value):
         assert key != None
         assert value != None
-        table_name = key.split(":")[0]
-        if dbutil.TableInfo.is_registered(table_name) and isinstance(value, dict):
-            table = dbutil.get_table(table_name)
-            table.update_by_key(key, value)
-        else:
+        done = False
+        try:
+            table = self.get_table_by_key(key)
+            if table != None:
+                table.update_by_key(key, value)
+                done = True
+        except:
+            xutils.print_exc()
+        
+        if not done:
             batch = dbutil.create_write_batch()
             batch.put(key, value, check_table=False)
             self._binlog.add_log("put", key, value, batch = batch)
@@ -311,11 +323,16 @@ class DBSyncer:
     
     def delete_and_log(self, key):
         assert key != None
-        table_name = key.split(":")[0]
-        if dbutil.TableInfo.is_registered(table_name):
-            table = dbutil.get_table(table_name)
-            table.delete_by_key(key)
-        else:
+        done = False
+        try:
+            table = self.get_table_by_key(key)
+            if table != None:
+                table.delete_by_key(key)
+                done = True
+        except:
+            xutils.print_exc()
+
+        if not done:
             batch = dbutil.create_write_batch()
             batch.delete(key)
             self._binlog.add_log("delete", key, None, batch = batch)
