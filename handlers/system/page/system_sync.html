@@ -80,16 +80,18 @@
                     <!-- <i class="fa fa-chevron-right"></i> -->
                 </div>
             </div>
-
-            <div class="list-item">
-                <span>触发同步</span>
-                <div class="float-right">
-                    <a class="btn btn-default confirm-btn" 
-                        data-title="确认同步一次?"
-                        data-key="trigger_sync">同步一次</a>
-                    <!-- <i class="fa fa-chevron-right"></i> -->
+            
+            {% if False %}
+                <div class="list-item">
+                    <span>触发同步</span>
+                    <div class="float-right">
+                        <a class="btn btn-default confirm-btn" 
+                            data-title="确认同步一次?"
+                            data-key="trigger_sync">同步一次</a>
+                        <!-- <i class="fa fa-chevron-right"></i> -->
+                    </div>
                 </div>
-            </div>
+            {% end %}
         {% end %}
 
         {% if node_role == "leader" %}

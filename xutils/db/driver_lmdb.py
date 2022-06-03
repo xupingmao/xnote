@@ -155,74 +155,7 @@ class LmdbKV:
     def Stat(self):
         return self.env.stat()
 
-
 class LmdbEnhancedKV:
-
-    def __init__(self, *args, **kw):
-        self.kv = LmdbKV(*args, **kw)
-        self.max_key_size = self.kv.env.max_key_size() - 10
-
-    def get_large_key_prefix(self, key):
-        return key[:self.max_key_size] + b":"
-
-    def make_large_key(self, key):
-        prefix = self.get_large_key_prefix(key)
-        key_from = prefix
-        key_to = prefix + b"\xff"
-        index = 0
-
-        for exist_key, value in self.kv.RangeIter(key_from=key_from, key_to=key_to, include_value=True):
-            value_obj = convert_bytes_to_object(value)
-            if value_obj.get("_key") == key:
-                return exist_key, value_obj.get("_idx")
-            index = value_obj.get("_idx") + 1
-
-        # TODO 还要考虑排序的问题
-        return prefix + encode_int8_to_bytes(index), index
-
-    def Get(self, key):
-        if len(key) >= self.max_key_size:
-            prefix = self.get_large_key_prefix(key)
-            key_from = prefix
-            key_to = prefix + b"\xff"
-            key_str = key.decode("utf-8")
-
-            for tmp_key, value in self.kv.RangeIter(key_from=key_from, key_to=key_to, include_value=True):
-                value_obj = convert_bytes_to_object(value)
-                if value_obj.get("_key") == key_str:
-                    return value_obj.get("_value").encode("utf-8")
-            return None
-
-        return self.kv.Get(key)
-
-    def Put(self, key, value, sync=False):
-        if len(key) >= self.max_key_size:
-            logging.warning("key长度(%d)超过限制(%d)", len(key), self.max_key_size)
-            real_key, idx = self.make_large_key(key)
-            value_obj = Storage(_key=key, _value=value, _idx=idx)
-            value = convert_object_to_bytes(value_obj)
-            key = real_key
-
-        return self.kv.Put(key, value)
-
-    def Delete(self, key, sync=False):
-        if len(key) >= self.max_key_size:
-            prefix = self.get_large_key_prefix(key)
-            key_from = prefix
-            key_to = prefix + b"\xff"
-            key_str = key.decode("utf-8")
-            for tmp_key, value in self.kv.RangeIter(key_from=key_from, key_to=key_to, include_value=True):
-                value_obj = convert_bytes_to_object(value)
-                if value_obj.get("_key") == key_str:
-                    return self.kv.Delete(tmp_key)
-            return None
-        return self.kv.Delete(key, sync)
-
-    def RangeIter(self, *args, **kw):
-        raise Exception("当前实现不支持按顺序遍历")
-
-
-class LmdbEnhancedKV2:
 
     def __init__(self, *args, **kw):
         self.kv = LmdbKV(*args, **kw)

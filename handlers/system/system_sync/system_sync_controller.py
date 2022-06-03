@@ -301,7 +301,10 @@ def on_ping_leader(ctx=None):
         result = FOLLOWER.ping_leader()
         if result == None:
             logging.error("ping_leader result empty, wait 10 seconds ...")
+        
+        if FOLLOWER.is_token_active():
             time.sleep(10)
+            
         return result
     except:
         xutils.print_exc()

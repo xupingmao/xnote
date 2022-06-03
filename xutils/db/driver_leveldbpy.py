@@ -21,7 +21,8 @@ class LevelDBProxy:
             self._db = leveldbpy.DB(path.encode("utf-8"), 
                 create_if_missing = True, 
                 block_cache_size = block_cache_size,
-                max_open_files = max_open_files)
+                max_open_files = max_open_files,
+                write_buffer_size = write_buffer_size)
 
     def Get(self, key):
         return self._db.get(key)

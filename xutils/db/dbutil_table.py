@@ -64,9 +64,10 @@ class LdbTable:
         self.user_attr = None
         if table_info.check_user:
             if table_info.user_attr == None:
-                raise Exception("table({table_name}).user_attr can not be None".format(table_name=table_name))
+                raise Exception("table({table_name}).user_attr can not be None".format(
+                    table_name=table_name))
             self.user_attr = table_info.user_attr
-        
+
         self.binlog = BinLog.get_instance()
         assert self.binlog != None
 
@@ -84,14 +85,6 @@ class LdbTable:
         if self.prefix[-1] != ":":
             self.prefix += ":"
 
-    def define_index(self, index_key):
-        # validate_str(index_key, "index_key must be str")
-        # index_table = "_index$%s$%s" % (self.table_name, index_key)
-        # description = "%s表索引" % self.table_name
-        # register_table_inner(index_table, description)
-        # self.index_names.add(index_key)
-        raise Exception("deprecated: use register_table_index instead")
-
     def build_key(self, *argv):
         return self.prefix + self.build_key_no_prefix(*argv)
 
@@ -108,10 +101,10 @@ class LdbTable:
 
     def _get_id_from_key(self, key):
         return key.rsplit(":", 1)[-1]
-    
+
     def _get_user_from_key(self, key):
         parts = key.split(":")
-        assert len(parts) == 3
+        assert len(parts) == 3, parts
         return parts[1]
 
     def _format_value(self, key, value):
@@ -122,8 +115,9 @@ class LdbTable:
         value[self.id_name] = self._get_id_from_key(key)
         if self.user_attr != None:
             user = value.get(self.user_attr)
-            if user == None:
-                value[self.user_attr] = self._get_user_from_key(key)
+            parts = key.split(":")
+            if user == None and len(parts) == 3:
+                value[self.user_attr] = parts[1]
         return value
 
     def _convert_to_db_row(self, obj):
@@ -173,7 +167,7 @@ class LdbTable:
 
     def _check_value(self, obj):
         if not isinstance(obj, dict):
-            raise Exception("invalid obj:%r, expected dict" % type(obj))
+            raise Exception("invalid obj:%r, expected dict" % obj)
 
     def _check_key(self, key):
         if not key.startswith(self.prefix):
@@ -357,7 +351,7 @@ class LdbTable:
 
         if key_from != None:
             key_from = self.build_key(key_from)
-        
+
         if user_name != None:
             prefix = self.table_name + ":" + user_name
         else:

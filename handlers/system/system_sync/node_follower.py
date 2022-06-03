@@ -14,7 +14,7 @@ from xutils import Storage
 from xutils import textutil
 from xutils import dbutil
 from xutils import netutil
-import xutils
+from xutils.db.binlog import BinLog
 from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .node_base import CONFIG
@@ -50,6 +50,7 @@ class Follower(NodeManagerBase):
         # 同步完成的时间
         self.fs_sync_done_time = -1
         self._debug = False
+        self._binlog = BinLog.get_instance()
 
     def get_client(self):
         leader_host = self.get_leader_url()
@@ -66,11 +67,14 @@ class Follower(NodeManagerBase):
 
     def get_current_port(self):
         return xconfig.get_global_config("system.port")
+    
+    def is_token_active(self):
+        now = time.time()
+        is_valid_time = (now - self.last_ping_time) >= self.PING_INTERVAL
+        return self.admin_token != None and is_valid_time
 
     def ping_leader(self):
-        now = time.time()
-        is_valid_time = now - self.last_ping_time >= self.PING_INTERVAL
-        if self.admin_token != None and not is_valid_time:
+        if self.is_token_active():
             logging.debug("没到PING时间")
             return self.ping_result
 
@@ -207,6 +211,7 @@ class Follower(NodeManagerBase):
     def reset_sync(self):
         CONFIG.put("fs_sync_offset", "")
         CONFIG.put("db_sync_offset", "")
+        CONFIG.put("follower_db_sync_state", "full")
         self.fs_sync_done_time = -1
 
         db = dbutil.get_hash_table("fs_sync_index_copy")
@@ -231,6 +236,31 @@ class Follower(NodeManagerBase):
 
     def put_db_last_key(self, last_key):
         CONFIG.put("follower_db_last_key", last_key)
+    
+    def put_and_log(self, key, value):
+        assert key != None
+        assert value != None
+        table_name = key.split(":")[0]
+        if dbutil.TableInfo.is_registered(table_name) and isinstance(value, dict):
+            table = dbutil.get_table(table_name)
+            table.update_by_key(key, value)
+        else:
+            batch = dbutil.create_write_batch()
+            batch.put(key, value, check_table=False)
+            self._binlog.add_log("put", key, value, batch = batch)
+            batch.commit()
+    
+    def delete_and_log(self, key):
+        assert key != None
+        table_name = key.split(":")[0]
+        table = dbutil.get_table(table_name)
+        if table != None:
+            table.delete_by_key(key)
+        else:
+            batch = dbutil.create_write_batch()
+            batch.delete(key)
+            self._binlog.add_log("delete", key, None, batch = batch)
+            batch.commit()
 
     def _sync_db_by_binlog(self, leader_host, leader_token, last_seq):
         assert isinstance(last_seq, int)
@@ -260,10 +290,10 @@ class Follower(NodeManagerBase):
                 if optype == "put":
                     key = data.get("key")
                     value = data.get("value")
-                    assert key != None
-                    dbutil.put(key, value, check_table=False)
+                    self.put_and_log(key, value)
                 elif optype == "delete":
-                    dbutil.delete(key)
+                    key = data.get("key")
+                    self.delete_and_log(key)
                 else:
                     logging.error("未知的optype:%s", optype)
 
@@ -312,7 +342,8 @@ class Follower(NodeManagerBase):
                 assert value != None
                 if key == last_key:
                     continue
-                dbutil.put(key, value, check_table=False)
+                
+                self.put_and_log(key, value)
                 new_last_key = key
 
             if new_last_key == last_key:

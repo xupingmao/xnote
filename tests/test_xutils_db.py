@@ -111,6 +111,14 @@ def run_range_test(test, db):
         key_from=b"test7:", key_to=b"test7:\xff"))
     test.assertEqual(0, len(empty_iter_list))
 
+    data_list = list(db.RangeIter(include_value=False, reverse=True))
+    print("data_list:", data_list)
+    test.assertEqual(b"test8:1", data_list[0])
+
+    data_list = list(db.RangeIter(include_value=False, reverse=True, key_to=b"test6:3"))
+    print("data_list:", data_list)
+    test.assertEqual(b"test6:2", data_list[0])
+
 
 def run_test_db_engine(test, db):
     for key in db.RangeIter(include_value=False):
@@ -268,18 +276,11 @@ class TestMain(BaseTestCase):
         value1c = db.Get(key1)
         self.assertEqual(None, value1c)
 
-    def test_lmdb_large_key1(self):
-        from xutils.db.driver_lmdb import LmdbEnhancedKV
-        db_dir = os.path.join(xconfig.DB_DIR, "lmdb")
-        # 初始化一个5M的数据库
-        db = LmdbEnhancedKV(db_dir, map_size=1024 * 1024 * 5)
-        self.do_test_lmdb_large_key(db)
-
     def test_lmdb_large_key2(self):
-        from xutils.db.driver_lmdb import LmdbEnhancedKV2
+        from xutils.db.driver_lmdb import LmdbEnhancedKV
         db_dir = os.path.join(xconfig.DB_DIR, "lmdb2")
         # 初始化一个5M的数据库
-        db = LmdbEnhancedKV2(db_dir, map_size=1024 * 1024 * 5)
+        db = LmdbEnhancedKV(db_dir, map_size=1024 * 1024 * 5)
         self.do_test_lmdb_large_key(db)
 
         print("-" * 60)

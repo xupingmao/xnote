@@ -108,12 +108,12 @@ class WriteBatchProxy:
             return
         self.put(key, val)
 
-    def put(self, key, val):
+    def put(self, key, val, check_table=True):
         """put一个value
         @param {str} key
         @param {object} val
         """
-        check_before_write(key)
+        check_before_write(key, check_table)
 
         key_bytes = key.encode("utf-8")
         val_bytes = convert_object_to_json(val).encode("utf-8")
@@ -270,13 +270,12 @@ def check_get_leveldb():
 
 def check_table_name(table_name):
     validate_str(table_name, "invalid table_name:{}", table_name)
-    if table_name not in TABLE_INFO_DICT:
+    if not TableInfo.is_registered(table_name):
         raise DBException("table %r not registered!" % table_name)
 
 
 def get_table_info(table_name):
-    global TABLE_INFO_DICT
-    return TABLE_INFO_DICT.get(table_name)
+    return TableInfo.get_by_name(table_name)
 
 
 def validate_none(obj, msg, *argv):
@@ -305,6 +304,9 @@ def validate_dict(obj, msg, *argv):
 
 
 class TableInfo:
+    """表信息管理"""
+    
+    _info_dict = dict()
 
     def __init__(self, name, description, category):
         self.name = name
@@ -312,6 +314,32 @@ class TableInfo:
         self.category = category
         self.check_user = False
         self.user_attr = None
+
+    @classmethod
+    def register(cls, name, description, category):
+        if name in cls._info_dict:
+            return cls._info_dict[name]
+        table = TableInfo(name, description, category)
+        cls._info_dict[name] = table
+        return table
+
+    @classmethod
+    def is_registered(cls, name):
+        return name in cls._info_dict
+
+    @classmethod
+    def get_by_name(cls, name):
+        return cls._info_dict.get(name)
+
+    @classmethod
+    def get_dict_copy(cls):
+        return cls._info_dict.copy()
+
+    @classmethod
+    def get_table_names(cls):
+        values = sorted(cls._info_dict.values(),
+                        key=lambda x: (x.category, x.name))
+        return list(map(lambda x: x.name, values))
 
 
 def register_table(table_name,
@@ -336,15 +364,13 @@ def _register_table_inner(table_name,
     if not re.match(r"^[0-9a-z_\$]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
-    if table_name in TABLE_INFO_DICT:
+    if TableInfo.is_registered(table_name):
         # 已经注册了
         return
 
-    info = TableInfo(table_name, description, category)
+    info = TableInfo.register(table_name, description, category)
     info.check_user = check_user
     info.user_attr = user_attr
-
-    TABLE_INFO_DICT[table_name] = info
 
 
 def register_table_index(table_name, index_name):
@@ -374,15 +400,12 @@ def register_table_user_attr(table_name, user_attr):
 
 
 def get_table_dict_copy():
-    return TABLE_INFO_DICT.copy()
+    return TableInfo.get_dict_copy()
 
 
 def get_table_names():
     """获取表名称"""
-    global TABLE_INFO_DICT
-    values = sorted(TABLE_INFO_DICT.values(),
-                    key=lambda x: (x.category, x.name))
-    return list(map(lambda x: x.name, values))
+    return TableInfo.get_table_names()
 
 
 def get_table_index_names(table_name):
