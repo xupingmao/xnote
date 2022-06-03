@@ -162,7 +162,7 @@ class Leader(NodeManagerBase):
 
     def list_binlog(self, last_seq, limit=20):
         sync_diff = self.binlog.last_seq - last_seq
-        out_of_sync = sync_diff > self.binlog.get_size()
+        out_of_sync = sync_diff > self.binlog.count_size()
 
         if (last_seq <= 0) or (last_seq > self.binlog.last_seq) or out_of_sync:
             return dict(code="sync_broken", message="同步中断，请重新同步")

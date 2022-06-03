@@ -2,15 +2,13 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/28 01:01:33
 # @modified 2022/04/04 14:07:12
-import zipfile
 import os
-import re
 import time
 import xutils
 import xconfig
 import xauth
-from xutils import Storage
-from xutils import dateutil, fsutil, logutil
+from xutils import dateutil
+from xutils.db.binlog import BinLog
 
 MAX_DEPTH = 3
 NOTE_DAO  = xutils.DAO("note")
@@ -62,6 +60,10 @@ def rm_expired_notes(expired_time):
                 NOTE_DAO.delete(note.id)
                 print("note expired, id:{note.id},name:{note.name}".format(note = note))
 
+def rm_expired_binlog():
+    binlog = BinLog.get_instance()
+    binlog.delete_expired()
+
 class handler:
 
     @xauth.login_required("admin")
@@ -79,6 +81,11 @@ class handler:
 
         # 删除回收站过期的笔记
         rm_expired_notes(xconfig.NOTE_REMOVED_EXPIRE)
+
+        # 删除过期的binlog
+        rm_expired_binlog()
+
+        return "success"
 
 xurls = (
     r"/cron/diskclean", handler

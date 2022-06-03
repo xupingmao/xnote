@@ -417,7 +417,7 @@ class TestMain(BaseTestCase):
         self.assertTrue(binlog.last_seq > 0)
         last_seq = binlog.last_seq
 
-        self.assertEqual(last_seq, int(binlog.last_key()))
+        self.assertEqual(last_seq, int(binlog.get_last_key()))
         binlog.add_log("test", "666")
         self.assertEqual(last_seq+1, binlog.last_seq)
 
@@ -574,3 +574,15 @@ class TestMain(BaseTestCase):
 
         lock1.release()
         lock2.release()
+
+    def test_binlog_clear(self):
+        BinLog.set_max_size(10)
+
+        binlog = BinLog.get_instance()
+        
+        for i in range(20):
+            binlog.add_log("put", "test_binlog_clear", "test")
+        
+        binlog.delete_expired()
+
+        self.assertEqual(10, len(binlog.list(0, limit=20)))

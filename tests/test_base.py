@@ -39,7 +39,7 @@ def init():
 
     db_file = os.path.join(xconfig.DB_DIR, "sqlite", "test.db")
     db_instance = SqliteKV(db_file)
-    dbutil.init(xconfig.DB_DIR, db_instance=db_instance)
+    dbutil.init(xconfig.DB_DIR, db_instance=db_instance, binlog_max_size=1000)
 
     xutils.init(xconfig)
     xauth.init()

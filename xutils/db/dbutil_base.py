@@ -461,7 +461,7 @@ def put_bytes(key, value, sync=False):
     _leveldb.Put(key, value, sync=sync)
 
 
-def delete(key, sync=False):
+def db_delete(key, sync=False):
     check_leveldb()
     check_write_state()
 
@@ -470,6 +470,8 @@ def delete(key, sync=False):
     key = key.encode("utf-8")
     _leveldb.Delete(key, sync=sync)
 
+def delete(*args, **kw):
+    return db_delete(*args, **kw)
 
 def create_write_batch():
     return WriteBatchProxy()

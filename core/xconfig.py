@@ -302,21 +302,27 @@ def _parse_int(value):
         return 0
 
     value = value.lower()
+    if value[-2:] == "kb":
+        return int(value[:-2]) * 1024
+
+    if value[-2:] == "mb":
+        return int(value[:-2]) * 1024**2
+
+    if value[-2:] == "gb":
+        return int(value[:-2]) * 1024**3
+
+    if value[-2:] == "tb":
+        return int(value[:-2]) * 1024**4
+
+    if value[-2:] == "pb":
+        return int(value[:-2]) * 1024**5
+    
     if value[-1] == "k":
-        return int(value[:-1]) * 1024
-
+        return int(value[:-1]) * 1000
+    
     if value[-1] == "m":
-        return int(value[:-1]) * 1024**2
-
-    if value[-1] == "g":
-        return int(value[:-1]) * 1024**3
-
-    if value[-1] == "t":
-        return int(value[:-1]) * 1024**4
-
-    if value[-1] == "p":
-        return int(value[:-1]) * 1024**5
-        
+        return int(value[:-1]) * 1000**2
+    
     return int(value)
 
 
