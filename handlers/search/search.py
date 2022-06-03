@@ -104,7 +104,7 @@ class SearchContext:
 def fill_note_info(files):
     for file in files:
         if file.category == "note":
-            parent = NOTE_DAO.get_by_id(file.parent_id)
+            parent = NOTE_DAO.get_by_id(file.parent_id, file.creator)
             if parent is not None:
                 file.parent_name = parent.name
             file.show_move = True

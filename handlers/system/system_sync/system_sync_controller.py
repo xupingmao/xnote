@@ -297,15 +297,11 @@ def on_ping_leader(ctx=None):
     if role == "leader":
         return None
 
-    try:
-        result = FOLLOWER.ping_leader()
-        if result == None:
-            logging.error("ping_leader result empty, wait 10 seconds ...")
-        
+    try:        
         if FOLLOWER.is_token_active():
-            time.sleep(10)
+            return
             
-        return result
+        return FOLLOWER.ping_leader()
     except:
         xutils.print_exc()
         logging.error("ping_leader failed, wait 60 seconds...")
@@ -345,7 +341,8 @@ def on_sync_db_from_leader(ctx=None):
         logging.debug("开始同步数据库")
         logging.debug("-"*50)
         FOLLOWER.sync_db_from_leader()
-        if FOLLOWER.get_db_sync_state() == "binlog":
+        if FOLLOWER.is_sync_by_binlog():
+            logging.error("sync_db_from_leader by binlog, wait 10 seconds...")
             time.sleep(10)
     except:
         xutils.print_exc()

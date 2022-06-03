@@ -37,6 +37,7 @@ def filter_result(result, offset):
 class Follower(NodeManagerBase):
 
     # PING的时间间隔，单位是秒
+    # Leader侧的失效时间是1小时
     PING_INTERVAL = 600
 
     def __init__(self):
@@ -50,7 +51,6 @@ class Follower(NodeManagerBase):
         # 同步完成的时间
         self.fs_sync_done_time = -1
         self._debug = False
-        self._binlog = BinLog.get_instance()
         self.db_syncer = DBSyncer()
 
     def get_client(self):
@@ -71,12 +71,11 @@ class Follower(NodeManagerBase):
     
     def is_token_active(self):
         now = time.time()
-        is_valid_time = (now - self.last_ping_time) >= self.PING_INTERVAL
-        return self.admin_token != None and is_valid_time
+        is_active = (now - self.last_ping_time) < self.PING_INTERVAL
+        return self.admin_token != None and is_active
 
     def ping_leader(self):
         if self.is_token_active():
-            logging.debug("没到PING时间")
             return self.ping_result
 
         port = self.get_current_port()
@@ -91,9 +90,6 @@ class Follower(NodeManagerBase):
             result_obj = client.get_stat(params)
 
             self.update_ping_result(result_obj)
-
-            self.last_ping_time = time.time()
-
             return result_obj
 
         return None
@@ -116,6 +112,7 @@ class Follower(NodeManagerBase):
         follower_dict = result.get("follower_dict", {})
         self.follower_list = convert_follower_dict_to_list(follower_dict)
         self.leader_info = result.get("leader")
+        self.last_ping_time = time.time()
 
         if len(self.follower_list) > 0:
             item = self.follower_list[0]
@@ -269,6 +266,9 @@ class Follower(NodeManagerBase):
         else:
             last_key = self.db_syncer.get_db_last_key()
             self._sync_db_full(leader_host, leader_token, last_key)
+    
+    def is_sync_by_binlog(self):
+        return self.db_syncer.get_db_sync_state() == "binlog"
 
 
 class DBSyncer:

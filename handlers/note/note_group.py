@@ -167,7 +167,6 @@ class DefaultListHandler:
         offset    = (page-1) * pagesize
         files     = NOTE_DAO.list_default_notes(user_name, offset, pagesize)
         amount    = NOTE_DAO.count_by_parent(user_name, 0);
-        parent    = NOTE_DAO.get_root()
 
         return xtemplate.render("note/page/note_default.html",
             notes      = files,
@@ -203,7 +202,6 @@ class ShareListHandler:
         
         files     = self.list_notes(user_name, offset, limit)
         amount    = self.count_notes(user_name)
-        parent    = NOTE_DAO.get_root()
 
         xmanager.add_visit_log(user_name, "/note/%s" % self.share_type)
         page_url = "/note/{share_type}?tab={tab}&page=".format(

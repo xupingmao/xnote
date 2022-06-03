@@ -25,6 +25,7 @@ import xutils
 import xmanager
 import threading
 import logging
+import xauth
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import attrget
@@ -129,6 +130,10 @@ def format_date(date):
 
 
 def get_root(creator=None):
+    if creator == None:
+        creator = xauth.current_name()
+
+    assert creator != None
     root = Storage()
     root.name = "根目录"
     root.type = "group"
@@ -142,6 +147,8 @@ def get_root(creator=None):
     root.url = "/note/group"
     return root
 
+def is_root_id(id):
+    return id in (None, "", "0", 0)
 
 def get_default_group():
     group = Storage()
@@ -383,7 +390,7 @@ def list_path(file, limit=5):
                 pathlist.insert(0, get_default_group())
             elif file.archived:
                 pathlist.insert(0, get_archived_group())
-            pathlist.insert(0, convert_to_path_item(get_root()))
+            pathlist.insert(0, convert_to_path_item(get_root(file.creator)))
             break
 
         file = get_by_id(file.parent_id, include_full=False)
@@ -626,6 +633,9 @@ def put_note_to_db(note_id, note):
 
 
 def touch_note(note_id):
+    if is_root_id(note_id):
+        return
+
     note = get_by_id(note_id)
     if note != None:
         note.mtime = dateutil.format_datetime()
@@ -885,7 +895,7 @@ def delete_note(id):
 
 
 def update_children_count(parent_id, db=None):
-    if parent_id is None or parent_id == "" or parent_id == 0:
+    if is_root_id(parent_id):
         return
 
     note = get_by_id(parent_id)

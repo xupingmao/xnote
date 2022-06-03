@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-28 12:25:04
+@LastEditTime : 2022-06-03 11:52:39
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
 """
@@ -50,8 +50,8 @@ class TableIndex:
         if self.user_attr != None:
             user_name = obj.get(self.user_attr)
             if user_name == None:
-                raise Exception("({table_name}).{user_attr} is required".format(
-                    table_name=self.table_name, user_attr=self.user_attr))
+                raise Exception("({table_name}).{user_attr} is required, obj:{obj}".format(
+                    table_name=self.table_name, user_attr=self.user_attr, obj=obj))
             return user_name
         else:
             return None

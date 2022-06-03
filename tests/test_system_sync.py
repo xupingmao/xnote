@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-03 11:14:34
+@LastEditTime : 2022-06-03 11:39:36
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
@@ -181,3 +181,32 @@ class TestSystem(BaseTestCase):
         """
         result_obj = textutil.parse_json(result)
         FOLLOWER.db_syncer.sync_by_binlog(result_obj)
+    
+    def test_is_token_active(self):
+        from handlers.system.system_sync.system_sync_controller import FOLLOWER
+        result = """
+        {
+            "code": "success",
+            "timestamp": 1654227462,
+            "system_version": "v2.9-dev-2022.06.03",
+            "admin_token": "fake-token",
+            "fs_index_count": 10960,
+            "follower_dict": {
+                "127.0.0.1:2222#follower": {
+                    "ping_time_ts": 1654227411.8821118,
+                    "client_id": "127.0.0.1:2222#follower",
+                    "connected_time": "2022-06-03 11:20:16",
+                    "connected_time_ts": 1654226416.2453492,
+                    "ping_time": "2022-06-03 11:36:51",
+                    "fs_sync_offset": "00000001654174803260#/data/path/to/file.txt",
+                    "fs_index_count": 10960,
+                    "admin_token": "fake-token",
+                    "node_id": "follower",
+                    "url": "127.0.0.1:2222#follower"
+                }
+            }
+        }
+        """
+        result_obj = textutil.parse_json(result)
+        FOLLOWER.update_ping_result(result_obj)
+        self.assertTrue(FOLLOWER.is_token_active())
