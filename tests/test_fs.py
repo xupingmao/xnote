@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2020/11/29 14:45:21
-# @modified 2021/10/07 15:04:35
+# @modified 2022/06/03 14:33:36
 from .a import *
+import os
 import xconfig
 import xauth
 from .test_base import json_request, BaseTestCase
@@ -13,6 +14,12 @@ app = init_app()
 
 
 class TestMain(BaseTestCase):
+
+    def test_fs_view_mode(self):
+        cwd = os.getcwd()
+
+        self.check_OK("/fs/{cwd}".format(cwd=cwd))
+        self.check_OK("/fs/{cwd}?mode=grid".format(cwd=cwd))
 
     def test_fs_hex(self):
         self.check_OK("/fs/fs_hex")
