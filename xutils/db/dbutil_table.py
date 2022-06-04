@@ -69,7 +69,7 @@ class LdbTable:
             self.user_attr = table_info.user_attr
 
         self.binlog = BinLog.get_instance()
-        assert self.binlog != None
+        self.binlog_enabled = True
 
         indexes = []
         for index_name in self.index_names:
@@ -84,6 +84,9 @@ class LdbTable:
 
         if self.prefix[-1] != ":":
             self.prefix += ":"
+
+    def set_binlog_enabled(self, enabled=True):
+        self.binlog_enabled = enabled
 
     def _build_key(self, *argv):
         return self.prefix + self._build_key_no_prefix(*argv)
@@ -216,7 +219,8 @@ class LdbTable:
             self._format_value(key, obj)
             batch.put(key, self._convert_to_db_row(obj))
             self._update_index(old_obj, obj, batch)
-            self.binlog.add_log("put", key, obj, batch=batch)
+            if self.binlog_enabled:
+                self.binlog.add_log("put", key, obj, batch=batch)
             # 更新批量操作
             batch.commit(sync)
 
@@ -343,7 +347,8 @@ class LdbTable:
             self._delete_index(old_obj, batch)
             # 更新批量操作
             batch.delete(key)
-            self.binlog.add_log("delete", key, old_obj, batch=batch)
+            if self.binlog_enabled:
+                self.binlog.add_log("delete", key, old_obj, batch=batch)
             batch.commit()
 
     def iter(self, offset=0, limit=20, reverse=False, key_from=None,

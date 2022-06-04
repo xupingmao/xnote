@@ -20,6 +20,7 @@ from xutils import format_size
 dbutil.register_table("fs_index", "文件索引")
 dbutil.register_table_index("fs_index", "ftype")
 _index_db = dbutil.get_table("fs_index")
+_index_db.set_binlog_enabled(False)
 
 def get_index_db():
     return _index_db
