@@ -4,6 +4,7 @@ import os
 import shutil
 import time
 import argparse
+import sys
 
 def do_clean():
 	print("一些清理工作...")
@@ -45,6 +46,10 @@ def run_test(target = None):
 		os.system("python3 -m pytest tests/test_system_sync.py --doctest-modules --cov handlers.system.system_sync --capture no")
 		os.system("python3 -m coverage html")
 		return
+	
+	if target != "all":
+		print("未知的操作:", target)
+		sys.exit(1)
 	
 	check_and_install_pkg("pytest", "pytest==5.1.0")
 	os.system("python3 -m pip install pytest-cov==2.7.1")

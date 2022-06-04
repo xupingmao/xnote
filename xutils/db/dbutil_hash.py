@@ -10,7 +10,9 @@ from xutils.db.encode import encode_str, decode_str
 
 class LdbHashTable:
     """基于leveldb的哈希表结构
-    注: 其实LdbTable可以覆盖LdbHashTable的功能, 如果不考虑极致的性能, 建议使用LdbTable+索引的方式
+    注: LdbTable可以覆盖LdbHashTable的功能, 如果不考虑极致的性能, 建议使用LdbTable+索引的方式
+    put -> LdbTable.update_by_id
+    get -> LdbTable.get_by_id
     """
 
     def __init__(self, table_name, user_name = None, key_name = "_key"):

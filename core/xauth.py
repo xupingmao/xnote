@@ -20,7 +20,7 @@ import xutils
 import xmanager
 import warnings
 import time
-from xutils import ConfigParser, textutil, dbutil, fsutil
+from xutils import textutil, dbutil, fsutil
 from xutils import Storage
 from xutils import logutil
 from xutils import cacheutil
@@ -32,12 +32,12 @@ dbutil.register_table("user_config", "用户配置表")
 dbutil.register_table("session", "用户会话信息")
 dbutil.register_table("user_session_rel", "用户会话关系")
 
-USER_TABLE = dbutil.get_hash_table("user")
+# 用户表
+USER_TABLE = None
 
 # 用户配置
 # 通过init方法完成初始化
 BUILTIN_USER_DICT = None
-_USER_LIST       = None
 NAME_LENGTH_MIN  = 4
 PASSWORD_LEN_MIN = 6
 INVALID_NAMES    = fsutil.load_set_config("./config/user/invalid_names.list")
@@ -47,6 +47,8 @@ SESSION_EXPIRE   = 24 * 3600 * 7
 PRINT_DEBUG_LOG  = False
 
 def get_user_db():
+    global USER_TABLE
+    assert USER_TABLE != None
     return USER_TABLE
 
 def get_user_config_db(name):
@@ -576,10 +578,13 @@ def check_old_password(user_name, password):
 
 def init():
     global BUILTIN_USER_DICT
+    global USER_TABLE
+
     BUILTIN_USER_DICT = dict()
     _create_temp_user(BUILTIN_USER_DICT, "admin")
     _create_temp_user(BUILTIN_USER_DICT, "test")
 
+    USER_TABLE = dbutil.get_hash_table("user")
     # 检查配置项的有效性
     for key in USER_CONFIG_PROP:
         if "." in key:

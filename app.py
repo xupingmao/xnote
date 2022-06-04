@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import print_function
 from core.a import *
 import web
+import xauth
 import xutils
 import xconfig
 import xtables
@@ -253,6 +254,10 @@ def init_app_no_lock():
     # 初始化工具箱
     xutils.init(xconfig)
 
+    # 初始化权限系统
+    xauth.init()
+
+    # 初始化应用程序
     app = init_web_app()
 
     # 初始化自动加载功能

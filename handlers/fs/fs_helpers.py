@@ -18,7 +18,8 @@ from xutils import FileItem
 from xutils import format_size
 
 dbutil.register_table("fs_index", "文件索引")
-_index_db = dbutil.get_hash_table("fs_index")
+dbutil.register_table_index("fs_index", "ftype")
+_index_db = dbutil.get_table("fs_index")
 
 def get_index_db():
     return _index_db
@@ -83,7 +84,7 @@ def sort_files_by_size(filelist):
         fpath = file.path
         fpath = os.path.abspath(fpath)
         realpath = os.path.realpath(fpath)
-        info = db.get(realpath)
+        info = db.get_by_id(realpath)
         if info != None and hasattr(info, "fsize"):
             file.fsize = info.fsize
             size_str = format_size(info.fsize)

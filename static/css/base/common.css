@@ -182,6 +182,7 @@ h3.marked-heading {
     color: white;
     padding: 3px;
     text-decoration: none;
+    font-size: 14px;
 }
 
 .nav-item>a:hover, .menu-link:hover {

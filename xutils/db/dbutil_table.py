@@ -9,7 +9,7 @@ from urllib.parse import quote
 from xutils import Storage
 from xutils.db.dbutil_base import *
 from xutils.db.dbutil_table_index import TableIndex
-from xutils.db.encode import decode_str, encode_index_value
+from xutils.db.encode import decode_str, encode_index_value, encode_str
 from xutils.db.binlog import BinLog
 
 register_table("_id", "系统ID表")
@@ -59,7 +59,7 @@ class LdbTable:
         self.id_name = "_id"
         self.prefix = table_name
         self.user_name = user_name
-        self.index_names = INDEX_INFO_DICT.get(table_name) or set()
+        self.index_names = table_info.get_index_names()
         self._need_check_user = table_info.check_user
         self.user_attr = None
         if table_info.check_user:
@@ -100,7 +100,7 @@ class LdbTable:
         return key.rsplit(":", 1)[-1]
 
     def _get_id_from_key(self, key):
-        return key.rsplit(":", 1)[-1]
+        return decode_str(key.rsplit(":", 1)[-1])
 
     def _get_user_from_key(self, key):
         parts = key.split(":")
@@ -229,6 +229,7 @@ class LdbTable:
     def get_by_id(self, row_id, default_value=None, user_name=None):
         validate_str(row_id, "invalid row_id:{!r}", row_id)
         self._check_user_name(user_name)
+        row_id = encode_str(row_id)
         key = self.build_key(user_name, row_id)
         return self.get_by_key(key, default_value)
 
@@ -281,6 +282,8 @@ class LdbTable:
 
     def update_by_id(self, id, obj, user_name=None):
         """通过ID进行更新，如果key包含用户，必须有user_name(初始化定义或者传入参数)"""
+        assert xutils.is_str(id)
+        id = encode_str(id)
         self._check_user_name(user_name)
         key = self.build_key(user_name, id)
         self.update_by_key(key, obj)
@@ -467,13 +470,16 @@ class LdbTable:
             return result[0]
         return None
 
-    def count(self, filter_func=None, user_name=None):
+    def count(self, filter_func=None, user_name=None, id_prefix=None):
         if filter_func is None:
             prefix = self._get_prefix(user_name=user_name)
-            return count_table(prefix)
         else:
             prefix = self._get_prefix(user_name=user_name)
-            return prefix_count(prefix, filter_func)
+
+        if id_prefix != None:
+            prefix += encode_str(id_prefix)
+
+        return prefix_count(prefix, filter_func)
 
     def count_by_user(self, user_name):
         return self.count(user_name=user_name)

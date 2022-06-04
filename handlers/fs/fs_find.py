@@ -25,9 +25,9 @@ def get_fpath_from_key(key):
 
 def clear_file_index():
     index_db = get_index_db()
-    for key, value in index_db.iter(limit = -1):
+    for index_obj in index_db.iter(limit = -1):
         # key的格式为 fs_index:fpath
-        index_db.delete(key)
+        index_db.delete(index_obj)
 
 def find_in_cache0(key):
     input_key = key.upper()

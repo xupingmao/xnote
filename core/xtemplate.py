@@ -20,7 +20,7 @@ import xauth
 import xutils
 from tornado.template import Template, Loader
 from xutils import dateutil, quote, u
-from xutils import ConfigParser, tojson
+from xutils import tojson
 from xutils import Storage
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR

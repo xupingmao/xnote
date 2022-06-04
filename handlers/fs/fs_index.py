@@ -31,7 +31,7 @@ def calc_dir_size(db, dirname, depth=1000):
         xutils.print_exc()
 
     info = Storage(fsize = size)
-    db.put(dirname, info)
+    db.update_by_id(dirname, info)
     return size
 
 
@@ -52,12 +52,16 @@ def calc_size(db, fpath, depth=1000):
     try:
         st = os.stat(fpath)
         info = Storage(fsize = st.st_size)
-        db.put(fpath, info)
+        if xutils.is_text_file(fpath):
+            info.ftype = "text"
+        elif xutils.is_img_file(fpath):
+            info.ftype = "img"
+        db.update_by_id(fpath, info)
         return st.st_size
     except:
         xutils.print_exc()
         info = Storage(fsize = -1)
-        db.put(fpath, info)
+        db.update_by_id(fpath, info)
         return 0
 
 def build_fs_index(dirname):
@@ -88,7 +92,7 @@ class IndexHandler:
             return self.get_rebuild_page()
 
         tpl = "fs/page/fs_index.html"
-        index_size = get_index_db().count(prefix = path)
+        index_size = get_index_db().count(id_prefix = path)
         return xtemplate.render(tpl, 
             index_dirs = get_index_dirs(),
             index_size = index_size)
@@ -107,7 +111,7 @@ class IndexHandler:
         if action == "config":
             return self.do_config()
         
-        index_size = get_index_db().count(prefix = path)
+        index_size = get_index_db().count(id_prefix = path)
         return xtemplate.render(tpl, 
             index_dirs = index_dirs,
             index_size = index_size,
@@ -145,7 +149,7 @@ class IndexHandler:
         kw = Storage()
         kw.path = path
         kw.show_index_dirs = False
-        kw.index_size = db.count(prefix = path)
+        kw.index_size = db.count(id_prefix = path)
 
         return xtemplate.render("fs/page/fs_index.html", **kw)
 

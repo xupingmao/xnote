@@ -340,6 +340,12 @@ class TableInfo:
         values = sorted(cls._info_dict.values(),
                         key=lambda x: (x.category, x.name))
         return list(map(lambda x: x.name, values))
+    
+    def get_index_names(self):
+        index_names = INDEX_INFO_DICT.get(self.name)
+        if index_names == None:
+            return set()
+        return index_names
 
 
 def register_table(table_name,
@@ -373,7 +379,7 @@ def _register_table_inner(table_name,
     info.user_attr = user_attr
 
 
-def register_table_index(table_name, index_name):
+def register_table_index(table_name, index_name, comment=None):
     """注册表的索引"""
     validate_str(table_name, "invalid table_name")
     validate_str(index_name, "invalid index_name")

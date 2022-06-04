@@ -1,5 +1,4 @@
 # encoding=utf-8
-from web.utils import Storage
 from .a import *
 import os
 import time
@@ -59,6 +58,10 @@ def init():
 
     return APP
 
+APP = init()
+
+def get_test_file_path(path):
+    return os.path.join("./testdata", path)
 
 def logout_test_user():
     xconfig.IS_TEST = False
