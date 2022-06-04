@@ -7,8 +7,6 @@ import xutils
 import xtemplate
 import sys
 import inspect
-import web
-from xutils import Storage
 from xutils import textutil
 
 class ModuleInfo:
@@ -113,8 +111,9 @@ def getargspec(value):
 
 def do_class(functions, name, clz):
     doc = getattr(clz, "__doc__")
-    if doc:
-        functions.append(DocInfo(name, doc, "class"))
+    if doc == None:
+        doc = "None"
+    functions.append(DocInfo(name, doc, "class"))
     for attr in clz.__dict__:
         value = clz.__dict__[attr]
         if inspect.isroutine(value):

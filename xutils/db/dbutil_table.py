@@ -18,7 +18,7 @@ MAX_ID_KEY = "_id:max_id"
 register_table("_index", "通用索引")
 
 
-def dict_del(dict, key):
+def _dict_del(dict, key):
     if key in dict:
         del dict[key]
 
@@ -85,10 +85,10 @@ class LdbTable:
         if self.prefix[-1] != ":":
             self.prefix += ":"
 
-    def build_key(self, *argv):
-        return self.prefix + self.build_key_no_prefix(*argv)
+    def _build_key(self, *argv):
+        return self.prefix + self._build_key_no_prefix(*argv)
 
-    def build_key_no_prefix(self, *argv):
+    def _build_key_no_prefix(self, *argv):
         return ":".join(filter(None, argv))
 
     def _get_key_from_obj(self, obj):
@@ -122,8 +122,8 @@ class LdbTable:
 
     def _convert_to_db_row(self, obj):
         obj_copy = dict(**obj)
-        dict_del(obj_copy, self.key_name)
-        dict_del(obj_copy, self.id_name)
+        _dict_del(obj_copy, self.key_name)
+        _dict_del(obj_copy, self.id_name)
         return obj_copy
 
     def _create_increment_id(self, start_id=None):
@@ -196,7 +196,7 @@ class LdbTable:
         self._check_user_name(user_name)
 
         index_prefix = "_index$%s$%s" % (self.table_name, index_name)
-        return self.build_key_no_prefix(index_prefix, self.user_name or user_name)
+        return self._build_key_no_prefix(index_prefix, self.user_name or user_name)
 
     def _update_index(self, old_obj, new_obj, batch, force_update=False):
         for index in self.indexes:
@@ -230,7 +230,7 @@ class LdbTable:
         validate_str(row_id, "invalid row_id:{!r}", row_id)
         self._check_user_name(user_name)
         row_id = encode_str(row_id)
-        key = self.build_key(user_name, row_id)
+        key = self._build_key(user_name, row_id)
         return self.get_by_key(key, default_value)
 
     def get_by_key(self, key, default_value=None):
@@ -244,6 +244,10 @@ class LdbTable:
         return self._format_value(key, value)
 
     def insert(self, obj, id_type="timeseq", id_value=None):
+        """插入新数据
+        @param {object} obj 插入的对象
+        @param {string} id_type id类型
+        """
         self._check_value(obj)
         id_value = self._create_new_id(id_type, id_value)
 
@@ -251,7 +255,7 @@ class LdbTable:
         if self._need_check_user:
             user_name = obj.get(self.user_attr)
 
-        key = self.build_key(user_name, id_value)
+        key = self._build_key(user_name, id_value)
 
         obj[self.key_name] = key
         obj[self.id_name] = id_value
@@ -260,12 +264,14 @@ class LdbTable:
         return key
 
     def insert_by_user(self, user_name, obj, id_type="timeseq"):
-        """指定用户名插入数据"""
+        """@deprecated 定义user_attr之后使用insert即可满足
+        指定用户名插入数据
+        """
         validate_str(user_name, "invalid user_name")
         self._check_value(obj)
 
         id_value = self._create_new_id(id_type)
-        key = self.build_key(user_name, id_value)
+        key = self._build_key(user_name, id_value)
         self._put_obj(key, obj)
         return key
 
@@ -285,7 +291,7 @@ class LdbTable:
         assert xutils.is_str(id)
         id = encode_str(id)
         self._check_user_name(user_name)
-        key = self.build_key(user_name, id)
+        key = self._build_key(user_name, id)
         self.update_by_key(key, obj)
 
     def update_by_key(self, key, obj):
@@ -320,7 +326,7 @@ class LdbTable:
 
     def delete_by_id(self, id):
         validate_str(id, "delete_by_id: id is not str")
-        key = self.build_key(id)
+        key = self._build_key(id)
         self.delete_by_key(key)
 
     def delete_by_key(self, key, user_name=None):
@@ -353,7 +359,7 @@ class LdbTable:
             key_from = None
 
         if key_from != None:
-            key_from = self.build_key(key_from)
+            key_from = self._build_key(key_from)
 
         if user_name != None:
             prefix = self.table_name + ":" + user_name
@@ -555,7 +561,7 @@ class TableIndexRepair:
                     continue
 
             prefix = db._get_index_prefix(index_name, user_name)
-            new_key = db.build_key_no_prefix(
+            new_key = db._build_key_no_prefix(
                 prefix, encode_index_value(index_value), record_id)
 
             if new_key != old_key:
