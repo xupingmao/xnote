@@ -97,7 +97,7 @@ python3 app.py --config config/boot/自定义名称.properties
 - 插件可以通过`category`属性设置分类，显示在笔记、文件、系统等功能的选项入口中
 - 可以通过模板创建插件
 
-### 相关文档
+## 相关文档
 - [更新日志](./docs/changelog.md)
 - [系统架构](./docs/architecture.md)
 - [编码规范](./docs/code_style.md)

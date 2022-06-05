@@ -64,6 +64,8 @@ dbutil.register_table_index("note_tiny", "ctime")
 
 NOTE_DAO = xutils.DAO("note")
 
+_full_db = dbutil.get_table("note_full")
+
 DB_PATH = xconfig.DB_PATH
 MAX_EDIT_LOG = 500
 MAX_VIEW_LOG = 500
@@ -398,7 +400,7 @@ def list_path(file, limit=5):
 
 
 def get_full_by_id(id):
-    return dbutil.get("note_full:%s" % id)
+    return _full_db.get_by_id(id)
 
 
 @xutils.timeit(name="NoteDao.GetById:leveldb", logfile=True)
@@ -623,7 +625,7 @@ def put_note_to_db(note_id, note):
     remove_virtual_fields(note)
 
     # 保存到DB
-    dbutil.put("note_full:%s" % note_id, note)
+    _full_db.update_by_id(note_id, note)
 
     # 更新索引
     update_index(note)
@@ -845,10 +847,9 @@ def delete_note_physically(creator, note_id):
     assert creator != None, "creator can not be null"
     assert note_id != None, "note_id can not be null"
 
-    full_key = "note_full:%s" % note_id
     index_key = "note_index:%s" % note_id
 
-    dbutil.delete(full_key)
+    _full_db.delete_by_id(note_id)
     dbutil.delete(index_key)
 
     note_tiny_db = get_note_tiny_table(creator)
@@ -1207,8 +1208,7 @@ def search_content(words, creator=None, orderby="hot_index"):
         return (value.creator == creator or value.is_public) \
             and textutil.contains_all(value.content.lower(), words)
 
-    result = dbutil.prefix_list("note_full", search_func, 0, MAX_SEARCH_SIZE,
-                                fill_cache=False)
+    result = _full_db.list(filter_func = search_func, offset = 0, limit = MAX_SEARCH_SIZE)
 
     # 补全信息
     build_note_list_info(result)
@@ -1228,8 +1228,7 @@ def search_public(words):
         if not value.is_public:
             return False
         return textutil.contains_all(value.name.lower(), words)
-    result = dbutil.prefix_list(
-        "note_full", search_public_func, 0, MAX_SEARCH_SIZE)
+    result = _full_db.list(filter_func = search_public_func, offset = 0, limit = MAX_SEARCH_SIZE)
     notes = [build_note_info(item) for item in result]
     sort_notes(notes)
     return notes

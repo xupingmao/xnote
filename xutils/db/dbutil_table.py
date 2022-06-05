@@ -352,7 +352,7 @@ class LdbTable:
             batch.commit()
 
     def iter(self, offset=0, limit=20, reverse=False, key_from=None,
-             filter_func=None, fill_cache=True, user_name=None):
+             filter_func=None, fill_cache=False, user_name=None):
         """返回一个遍历的迭代器
         @param {int} offset 返回结果下标开始
         @param {int} limit  返回结果最大数量
