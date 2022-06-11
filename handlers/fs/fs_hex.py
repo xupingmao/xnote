@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2019-01-10 00:21:16
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-04 22:50:22
+@LastEditTime : 2022-06-12 00:29:25
 @FilePath     : /xnote/handlers/fs/fs_hex.py
 @Description  : 二进制查看工具
 """
@@ -12,6 +12,7 @@
 import os
 import math
 import xutils
+from xutils import Storage
 from xtemplate import BasePlugin
 
 HTML = """
@@ -20,22 +21,33 @@ HTML = """
     .hex-text {
         font-family: monospace;
     }
+{% if embed == "true" %}
+    body {
+        background-color: transparent;
+    }
+{% end %}
+
 </style>
 
-<div class="card">
-    <div class="card-title btn-line-height">
-        <span>二进制查看</span>
-        
-        <div class="float-right">
-            <a class="btn btn-default" href="/code/edit?path={{path}}">编辑本文</a>
-            {% include common/button/back_button.html %}
+{% if embed == "true" %}
+    <a class="btn btn-default" href="/code/edit?path={{path}}&embed={{embed}}">编辑本文</a>
+{% else %}
+    <div class="card">
+        <div class="card-title btn-line-height">
+            <span>二进制查看</span>
+            
+            <div class="float-right">
+                <a class="btn btn-default" href="/code/edit?path={{path}}&embed={{embed}}">编辑本文</a>
+                {% include common/button/back_button.html %}
+            </div>
         </div>
     </div>
-    
-</div>
+{% end %}
 
 <div class="card">
-    {% include mod_fs_path.html %}
+    {% if embed == "false" %}
+        {% include mod_fs_path.html %}
+    {% end %}
     <textarea class="row hex-text" rows=32>{{hex_text}}</textarea>
 </div>
 
@@ -85,8 +97,9 @@ class Main(BasePlugin):
         path = xutils.get_argument("path", "")
         page = xutils.get_argument("page", 1, type=int)
         offset = max(page-1, 0) * pagesize
+        embed = xutils.get_argument("embed", "false")
 
-        self.page_url = "?path=%s&page=" % path
+        self.page_url = "?path={path}&embed={embed}&page=".format(path=path, embed=embed)
 
         if path == "":
             return
@@ -112,9 +125,15 @@ class Main(BasePlugin):
                     hex_text += padding + bytes_hex(bytes).ljust(step * 3)
                     hex_text += padding + bytes_chars(bytes) + '\n'
 
-            self.writetemplate(HTML,
-                               path=path,
-                               hex_text=hex_text)
+            kw = Storage()
+            kw.path = path
+            kw.hex_text = hex_text
+            kw.embed = embed
+
+            if embed == "true":
+                self.show_nav = False
+
+            self.writetemplate(HTML,**kw)
 
     def on_init(self, context=None):
         # 插件初始化操作

@@ -37,10 +37,11 @@ class PreviewHandler:
         path = xutils.get_argument("path")
         path = xutils.get_real_path(path)
         if xutils.is_img_file(path):
-            return """<html><img style="width: 100%%;" src="/fs/%s"></html>""" % path
+            return """<html><img style="width: 100%%;" src="/fs/%s"></html>""" % xutils.quote(path)
         if xutils.is_text_file(path):
             raise web.seeother("/code/edit?path=%s&embed=true" % xutils.quote_unicode(path))
-        raise web.seeother("/fs_plugins?path=%s&embed=true" % xutils.quote_unicode(path))
+
+        raise web.seeother("/fs_hex?path=%s&embed=true" % xutils.quote_unicode(path))
 
 xurls = (
     r"/fs_sidebar", SidebarHandler,

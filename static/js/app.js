@@ -263,10 +263,17 @@ $(function () {
      * @param {string} selector 选择器
      * @param {number} bottom 距离窗口底部的距离
      */
-    window.adjustHeight = function (selector, bottom) {
+    window.adjustHeight = function (selector, bottom, options) {
       bottom = bottom || 0;
       var height = getWindowHeight() - $(selector).offset().top - bottom;
       $(selector).css("height", height).css("overflow", "auto");
+
+      if (options != undefined) {
+        if (options.overflow) {
+          $(selector).css("overflow", options.overflow);
+        }
+      }
+
       return height;
     }
 

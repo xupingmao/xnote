@@ -166,10 +166,12 @@
 
     $(function () {
         adjustHeight(".fs-left", 20);
-        adjustHeight(".fs-preview", 20);
+        adjustHeight(".fs-preview", 20, {overflow:"hidden"});
         $(".fs-file").click(function (e) {
             var path = $(e.target).attr("data-path");
-            $("#previewIframe").attr("src", "/fs_preview?path=" + path)
+            var previewURL = "/fs_preview?path=" + path;
+            window.location.hash = previewURL;
+            $("#previewIframe").attr("src", previewURL);
         })
     })
 </script>

@@ -9,8 +9,7 @@ import xauth
 import xutils
 import xtemplate
 import xconfig
-from tornado.escape import xhtml_escape
-from xutils import u, Storage, fsutil
+from xutils import Storage, fsutil
 
 def can_preview(path):
     name, ext = os.path.splitext(path)

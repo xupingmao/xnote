@@ -88,8 +88,7 @@
 {% init show_preview = False %}
 {% init embed = False %}
 
-<div class="card">
-
+<div class="card editor-title">
     <h3 class="card-title btn-line-height">
         <span>文本编辑</span>
         <div class="float-right">
@@ -151,6 +150,12 @@
 {# TODO 需要处理下搜索的高亮 #}
 
 <script type="text/javascript">
+    if (xnote.getUrlParam("embed") == "true") {
+        $("body").css("overflow-y", "hidden");
+        $(".editor-title").hide();
+    }
+
+
     $(function () {
         var editorHeight = adjustHeight("#editorArea", 50);
         $("#editorArea").css("overflow-y", "hidden");

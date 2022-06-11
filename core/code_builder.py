@@ -99,7 +99,6 @@ def build_utils_js():
         builder.append("./static/js/base/array.js")
         builder.append("./static/js/base/string.js")
         builder.append("./static/js/base/datetime.js")
-        builder.append("./static/js/base/url.js")
         builder.append("./static/js/base/misc.js")
         builder.append("./static/js/base/jq-ext.js")
 
@@ -123,6 +122,7 @@ def build_app_js():
         builder.append("./static/js/xnote-ui/x-tab.js")
         builder.append("./static/js/xnote-ui/x-layout.js")
         builder.append("./static/js/xnote-ui/x-template.js")
+        builder.append("./static/js/xnote-ui/x-url.js")
 
         # app.js
         builder.append("./static/js/app.js")
