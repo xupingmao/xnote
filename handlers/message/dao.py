@@ -236,6 +236,16 @@ def has_tag_fast(content):
 
 
 def search_message(user_name, key, offset, limit, search_tags=None, no_tag=None):
+    """搜索短信
+    @param {string} user_name 用户名
+    @param {string} key 要搜索的关键字
+    @param {int} offset 下标
+    @param {int} limit 返回结果最大限制
+    @param {list} search_tags 搜索的标签集合
+    @param {bool} no_tag 是否搜索无标签的
+    """
+    assert user_name != None and user_name != ""
+
     words = get_words_from_key(key)
 
     def search_func_default(key, value):

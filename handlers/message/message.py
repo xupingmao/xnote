@@ -41,6 +41,7 @@ from handlers.message.message_utils import (
 
 from .message_utils import sort_message_list
 from .message_utils import sort_keywords_by_marked
+from . import dao
 
 MSG_DAO       = xutils.DAO("message")
 # 消息处理规则
@@ -278,15 +279,22 @@ class ListAjaxHandler:
 
         input_search_tags = xutils.get_argument("searchTags", "")
         input_no_tag = xutils.get_argument("noTag", "false")
+        p = xutils.get_argument("p", "")
 
         if input_search_tags != "":
             search_tags = input_search_tags.split(",")
+        if p == "task":
+            search_tags = ["task"]
+        if p == "done":
+            search_tags = ["done"]
+        if p == "log":
+            search_tags = ["log"]
 
         if input_no_tag == "true":
             no_tag = True
 
         start_time = time.time()
-        chatlist, amount = MSG_DAO.search(user_name, key, offset, pagesize, search_tags, no_tag = no_tag)
+        chatlist, amount = dao.search_message(user_name, key, offset, pagesize, search_tags, no_tag = no_tag)
 
         # 搜索扩展
         xmanager.fire("message.search", SearchContext(key))
@@ -1043,6 +1051,7 @@ class SearchHandler:
         kw.keyword = key
         kw.default_content = key
         kw.side_tags = MSG_DAO.list_hot_tags(user_name, 20)
+        kw.create_tag = self.get_create_tag()
 
         return xtemplate.render("message/page/message_search.html", **kw)
     
@@ -1051,6 +1060,16 @@ class SearchHandler:
     
     def search_items(self, user_name, key):
         pass
+    
+    def get_create_tag(self):
+        p = xutils.get_argument("p", "")
+        if p == "task":
+            return "task"
+        
+        if p == "log":
+            return "log"
+
+        return "forbidden"
 
 
 xutils.register_func("message.process_message", process_message)

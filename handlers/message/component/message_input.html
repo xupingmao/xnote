@@ -6,6 +6,7 @@
 {% init show_attachment_btn = True %}
 {% init default_content = "" %}
 {% init filter_default_content = xutils.get_func_by_name("message.filter_default_content") %}
+{% init create_tag = tag %}
 
 <div class="message-input-box card">
     <textarea class="col-md-12 input-box" rows=3 autoHeight=true placeholder="{{message_placeholder}}">{{filter_default_content(default_content)}}</textarea>
@@ -52,7 +53,7 @@ $(function () {
     $(".create-btn").click(function () {
         var content = $(".input-box").val();
         var date = getUrlParam("date");
-        var params = {content:content, tag: "{{tag}}", date: date};
+        var params = {content:content, tag: "{{create_tag}}", date: date};
         $.post("/message/save", 
             params,
             function (respText) {

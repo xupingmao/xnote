@@ -73,14 +73,13 @@ class TopicTranslator:
         key = key.rstrip("")
         quoted_key = textutil.quote(key)
         value = textutil.escape_html(key0)
-        if self.tag == "done":
-            fmt = "<a class=\"link\" href=\"/message?key={quoted_key}&searchTags={tag}\">{value}</a>"
-        elif self.tag in ("task", "done"):
-            fmt = "<a class=\"link\" href=\"/message?tag={tag}&filterKey={quoted_key}\">{value}</a>"
-        else:
-            fmt = "<a class=\"link\" href=\"/message?key={quoted_key}\">{value}</a>"
+        p = "all"
+        if self.tag in ("task", "done", "log"):
+            p = self.tag
+        
+        fmt = "<a class=\"link\" href=\"/message?tag=search&key={quoted_key}&p={p}\">{value}</a>"
 
-        return fmt.format(quoted_key=quoted_key, value=value, tag=self.tag)
+        return fmt.format(quoted_key=quoted_key, value=value, p=p)
 
 
 def mark_text(content, tag="log"):
@@ -123,12 +122,9 @@ def process_message(message, search_tag="log"):
         message.content = ""
         return message
 
-    if message.tag == "key" or message.tag == "search":
-        process_tag_message(message, search_tag)
-    else:
-        html, keywords = mark_text(message.content, message.tag)
-        message.html = html
-        message.keywords = keywords
+    html, keywords = mark_text(message.content, message.tag)
+    message.html = html
+    message.keywords = keywords
 
     if message.tag == "done":
         build_done_html(message)
@@ -457,7 +453,7 @@ def list_hot_tags(user_name, limit=20):
     msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
     sort_message_list(msg_list, "amount_desc")
     for msg in msg_list:
-        msg.url = "/message?key={key}&tag=log".format(key=quote(msg.content))
+        msg.url = "/message?tag=search&key={key}".format(key=quote(msg.content))
     return msg_list[:limit]
 
 

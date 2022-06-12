@@ -20,8 +20,10 @@
     
     <div class="card">    
         <div class="card-title btn-line-height">
-            {% if p == "task" or p == "done" %}
+            {% if p == "task" %}
                 <span>搜索待办</span>
+            {% elif p == "done" %}
+                <span>搜索已完成</span>
             {% else %}
                 <span>搜索随手记</span>
             {% end %}
@@ -52,7 +54,9 @@
     <!-- 事件转换 -->
     {% include message/component/message_event.html %}
 
-    {% include message/component/message_input.html %}
+    {% if p in ("task", "log") %}
+        {% include message/component/message_input.html %}
+    {% end %}
 
     {% include message/component/message_keyword_info.html %}
 
