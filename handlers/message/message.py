@@ -459,11 +459,12 @@ class UpdateTagAjaxHandler:
         id = xutils.get_argument("id")
         tag = xutils.get_argument("tag")
         if id == "":
-            return
+            return failure(code = "404", message="id为空")
+            
         if tag in ("task", "cron", "log", "key", "done"):
             return update_message_tag(id, tag)
         else:
-            return failure(message="invalid tag")
+            return failure(message="invalid tag(%s)" % tag)
 
 
 class UpdateStatusAjaxHandler:

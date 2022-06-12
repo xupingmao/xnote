@@ -191,3 +191,22 @@ class TestMain(BaseTestCase):
         # 两条记录（第一个是汇总，第二个是实际数据）
         self.assertEqual(2, len(ctx.messages))
         self.assertEqual("Xnote-Unit-Test", ctx.messages[1].html)
+
+    def test_message_search_page(self):
+        self.check_OK("/message?tag=search&key=123")
+    
+    def test_message_keyword_mark(self):
+        response = json_request(
+            "/message/save", method="POST", data=dict(content="Xnote-Unit-Test #test#"))
+        self.assertEqual("success", response.get("code"))
+
+        result = json_request("/message/keyword", method="POST", data=dict(action="mark", keyword="#test#"))
+        self.assertEqual("success", result["code"])
+
+        from handlers.message.message import get_or_create_keyword
+
+        keyword = get_or_create_keyword(xauth.current_name(), "#test#", "127.0.0.1")
+        self.assertTrue(keyword.is_marked)
+
+    def test_message_calendar(self):
+        self.check_OK("/message/calendar")

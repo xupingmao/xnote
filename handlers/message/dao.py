@@ -2,7 +2,6 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2019/06/12 22:59:33
 # @modified 2022/04/11 23:29:47
-from audioop import reverse
 import xutils
 import xconfig
 import xmanager

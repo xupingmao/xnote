@@ -47,6 +47,11 @@ def run_test(target = None):
 		os.system("python3 -m coverage html")
 		return
 	
+	if target == "message":
+		os.system("python3 -m pytest tests/test_message.py --doctest-modules --cov handlers.message --capture no")
+		os.system("python3 -m coverage html")
+		return
+	
 	if target != "all":
 		print("未知的操作:", target)
 		sys.exit(1)

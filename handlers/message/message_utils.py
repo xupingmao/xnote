@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-12 16:43:59
+@LastEditTime : 2022-06-12 17:04:05
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -97,27 +97,9 @@ def mark_text(content, tag="log"):
 
     return "".join(tokens), keywords
 
-
-def process_tag_message(message, search_tag="log"):
-    message.html = build_search_html(message.content, search_tag)
-
-    if message.amount is None:
-        message.amount = 0
-
-
 def process_message(message, search_tag="log"):
     parser = MessageListParser([])
     return parser.process_message(message, search_tag)
-
-
-def get_status_by_code(code):
-    if code == "created":
-        return 0
-    if code == "suspended":
-        return 50
-    if code == "done":
-        return 100
-    return 0
 
 
 def format_count(count):
