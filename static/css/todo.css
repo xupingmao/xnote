@@ -1,5 +1,5 @@
 /**
- * description here
+ * 待办/随手记的样式
  * @author xupingmao
  * @since 2021/05/01 15:36:08
  * @modified 2022/04/11 21:27:08
@@ -14,6 +14,10 @@
 
 
 .todo-delete-btn {
+    color: red;
+}
+
+.todo-delete-btn:hover {
     color: red;
 }
 

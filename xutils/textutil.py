@@ -2,6 +2,17 @@
 # @author xupingmao
 # @since 2017/?/?
 # @modified 2022/04/16 18:18:24
+
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-04-17 17:04:15
+@LastEditors  : xupingmao
+@LastEditTime : 2022-06-12 13:24:16
+@FilePath     : /xnote/xutils/textutil.py
+@Description  : 文本处理工具
+"""
+
 import re
 import random
 import json
@@ -654,6 +665,7 @@ def split_words(search_key):
 
  
 def escape_html(text):
+    """html转义, 参考`lib/tornado/escape.py`"""
     # 必须先处理&
     text = text.replace("&", "&amp;")
     text = text.replace("<", "&lt;")

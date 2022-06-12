@@ -3,6 +3,17 @@
 # @since 2021/10/06 12:48:09
 # @modified 2022/04/16 17:40:40
 # @filename message_utils.py
+
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-05-28 20:04:59
+@LastEditors  : xupingmao
+@LastEditTime : 2022-06-12 13:24:46
+@FilePath     : /xnote/handlers/message/message_utils.py
+@Description  : 随手记工具
+"""
+
 import xutils
 import web
 from xtemplate import T
@@ -11,7 +22,6 @@ from xutils import dateutil
 from xutils import Storage
 from xutils import u
 from xutils.functions import Counter
-from xutils.textutil import escape_html
 from xutils.textutil import quote
 from handlers.message.message_model import MessageFolder, MessageTag
 
@@ -76,7 +86,7 @@ class TopicTranslator:
         p = "all"
         if self.tag in ("task", "done", "log"):
             p = self.tag
-        
+
         fmt = "<a class=\"link\" href=\"/message?tag=search&key={quoted_key}&p={p}\">{value}</a>"
 
         return fmt.format(quoted_key=quoted_key, value=value, p=p)
@@ -453,7 +463,8 @@ def list_hot_tags(user_name, limit=20):
     msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
     sort_message_list(msg_list, "amount_desc")
     for msg in msg_list:
-        msg.url = "/message?tag=search&key={key}".format(key=quote(msg.content))
+        msg.url = "/message?tag=search&key={key}".format(
+            key=quote(msg.content))
     return msg_list[:limit]
 
 

@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/28 19:47:17
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-14 15:52:28
+@LastEditTime : 2022-06-12 13:41:16
 @FilePath     : /xnote/xutils/netutil.py
 """
 
@@ -194,17 +194,21 @@ def http_get_by_requests(url, charset = None):
     resp = requests.get(url, headers = {"User-Agent": USER_AGENT})
     return resp.text
 
-def _join_url_and_params(url, params):
-    if params is None:
-        return url
-
+def build_query_string(params, *, skip_empty_value=False):
     temp = []
     for key in params:
         value = params[key]
-        # TODO quote value
+        if skip_empty_value and (value == None or value == ""):
+            continue
         temp.append("%s=%s" % (key, quote(value)))
 
-    query_string = "&".join(temp)
+    return "&".join(temp)
+
+def _join_url_and_params(url, params, *, skip_empty_value=False):
+    if params is None:
+        return url
+
+    query_string = build_query_string(params, skip_empty_value=skip_empty_value)
     if "?" in url:
         return url + "&" + query_string
     else:
