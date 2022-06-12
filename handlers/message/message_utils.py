@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-12 13:24:46
+@LastEditTime : 2022-06-12 16:43:59
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -51,26 +51,10 @@ def build_search_url(keyword):
 
 
 def build_search_html(content, search_tag="log"):
-    fmt = u'<a href="/message?tag={tag}&key={key}">{key_text}</a>'
+    fmt = u'<a href="/message?tag=search&p={tag}&key={key}">{key_text}</a>'
     return fmt.format(tag=search_tag,
                       key=xutils.encode_uri_component(content),
                       key_text=xutils.html_escape(content))
-
-
-def build_done_html(message):
-    task = None
-    done_time = message.done_time
-
-    if message.ref != None:
-        task = MSG_DAO.get_by_id(message.ref)
-
-    if task != None:
-        html, keywords = mark_text(task.content, "done")
-        message.html = u("完成任务:<blockquote>") + html + "</blockquote>"
-        message.keywords = keywords
-    elif done_time is None:
-        done_time = message.mtime
-        message.html += u("<br>------<br>完成于 %s") % done_time
 
 
 class TopicTranslator:
@@ -106,7 +90,12 @@ def mark_text(content, tag="log"):
     parser.set_search_translator(marker.mark)
 
     tokens = parser.parse(content)
-    return "".join(tokens), parser.keywords
+
+    keywords = parser.keywords
+    if keywords == None:
+        keywords = set()
+
+    return "".join(tokens), keywords
 
 
 def process_tag_message(message, search_tag="log"):
@@ -117,32 +106,8 @@ def process_tag_message(message, search_tag="log"):
 
 
 def process_message(message, search_tag="log"):
-    if message.status == 0 or message.status == 50:
-        # 兼容历史数据
-        message.tag = "task"
-    if message.status == 100:
-        message.tag = "done"
-
-    if message.tag == "cron":
-        message.tag = "task"
-
-    message.tag_text = TAG_TEXT_DICT.get(message.tag, message.tag)
-
-    if message.content is None:
-        message.content = ""
-        return message
-
-    html, keywords = mark_text(message.content, message.tag)
-    message.html = html
-    message.keywords = keywords
-
-    if message.tag == "done":
-        build_done_html(message)
-
-    if message.keywords is None:
-        message.keywords = set()
-
-    return message
+    parser = MessageListParser([])
+    return parser.process_message(message, search_tag)
 
 
 def get_status_by_code(code):
@@ -399,11 +364,62 @@ class MessageListParser(object):
 
     def parse(self):
         self.do_process_message_list(self.chatlist)
+    
+    def prehandle_message(self, message):
+        if message.status in (0, 50):
+            # 兼容历史数据
+            message.tag = "task"
+
+        if message.status == 100:
+            message.tag = "done"
+
+        if message.tag == "cron":
+            message.tag = "task"
+
+    def process_message(self, message, search_tag="log"):
+        self.prehandle_message(message)
+
+        message.tag_text = TAG_TEXT_DICT.get(message.tag, message.tag)
+
+        if message.content is None:
+            message.content = ""
+            return message
+
+        html, keywords = mark_text(message.content, message.tag)
+        message.html = html
+        message.keywords = keywords
+
+        if message.tag == "done":
+            self.build_done_html(message)
+        
+        if message.tag == "key":
+            self._build_keyword_html(message)
+
+        return message
+
+    def build_done_html(self, message):
+        task = None
+        done_time = message.done_time
+
+        if message.ref != None:
+            task = MSG_DAO.get_by_id(message.ref)
+
+        if task != None:
+            html, keywords = mark_text(task.content, "done")
+            message.html = u("完成任务:<blockquote>") + html + "</blockquote>"
+            message.keywords = keywords
+        elif done_time is None:
+            done_time = message.mtime
+            message.html += u("<br>------<br>完成于 %s") % done_time
+
+    def _build_keyword_html(self, message):
+        if len(message.keywords) == 0:
+            message.html = build_search_html(message.content)
 
     def do_process_message_list(self, message_list):
         keywords = set()
         for message in message_list:
-            process_message(message, search_tag=self.search_tag)
+            self.process_message(message, search_tag=self.search_tag)
             if message.keywords != None:
                 keywords = message.keywords.union(keywords)
 
@@ -419,33 +435,46 @@ class MessageListParser(object):
         return self.keywords
 
 
+class MessageKeyWordProcessor:
+    def __init__(self, msg_list):
+        assert isinstance(msg_list, list)
+        self.msg_list = msg_list
+
+    def sort(self, orderby=""):
+        msg_list = self.msg_list
+
+        if orderby == "":
+            return
+
+        if orderby == "visit":
+            msg_list.sort(key=lambda x: x.visit_cnt or 0, reverse=True)
+            for item in msg_list:
+                item.badge_info = "访问次数(%s)" % item.visit_cnt
+
+        if orderby == "amount_desc":
+            def amount_key_func(item):
+                if isinstance(item.amount, str):
+                    return 0
+                if item.amount == None:
+                    return 0
+                return item.amount
+            msg_list.sort(key=lambda x: x.content)
+            msg_list.sort(key=amount_key_func, reverse=True)
+            for item in msg_list:
+                item.badge_info = "%s" % item.amount
+            sort_keywords_by_marked(msg_list)
+
+        if orderby == "recent":
+            msg_list.sort(key=lambda x: x.mtime, reverse=True)
+            for item in msg_list:
+                item.badge_info = "%s" % xutils.format_date(item.mtime)
+    
+    def process(self):
+        pass
+
 def sort_message_list(msg_list, orderby=""):
-    if orderby == "":
-        return
-
-    if orderby == "visit":
-        msg_list.sort(key=lambda x: x.visit_cnt or 0, reverse=True)
-        for item in msg_list:
-            item.badge_info = "访问次数(%s)" % item.visit_cnt
-
-    if orderby == "amount_desc":
-        def amount_key_func(item):
-            if isinstance(item.amount, str):
-                return 0
-            if item.amount == None:
-                return 0
-            return item.amount
-        msg_list.sort(key=lambda x: x.content)
-        msg_list.sort(key=amount_key_func, reverse=True)
-        for item in msg_list:
-            item.badge_info = "%s" % item.amount
-        sort_keywords_by_marked(msg_list)
-
-    if orderby == "recent":
-        msg_list.sort(key=lambda x: x.mtime, reverse=True)
-        for item in msg_list:
-            item.badge_info = "%s" % xutils.format_date(item.mtime)
-
+    p = MessageKeyWordProcessor(msg_list)
+    p.sort(orderby)
 
 def sort_keywords_by_marked(msg_list):
     def key_func(item):

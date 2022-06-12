@@ -43,6 +43,7 @@ from handlers.message.message_utils import (
 from .message_utils import sort_message_list
 from .message_utils import sort_keywords_by_marked
 from . import dao
+from handlers.message import message_utils
 
 MSG_DAO = xutils.DAO("message")
 # 消息处理规则
@@ -355,7 +356,10 @@ class ListAjaxHandler:
         orderby = xutils.get_argument("orderby", "")
         msg_list, amount = MSG_DAO.list_by_tag(
             user_name, "key", 0, MAX_LIST_LIMIT)
-        sort_message_list(msg_list, orderby)
+        p = message_utils.MessageKeyWordProcessor(msg_list)
+        p.process()
+        p.sort(orderby)
+
         return msg_list[offset:offset+limit], len(msg_list)
 
 
@@ -1105,7 +1109,7 @@ class SearchHandler:
         kw.tag = "search"
         kw.key = key
         kw.keyword = key
-        kw.default_content = key
+        kw.default_content = message_utils.filter_key(key)
         kw.side_tags = MSG_DAO.list_hot_tags(user_name, 20)
         kw.create_tag = self.get_create_tag()
 
