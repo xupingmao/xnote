@@ -64,15 +64,17 @@ def on_search_message(ctx):
 
     key = ctx.key
     touch_key_by_content(ctx.user_name, 'key', key)
+    max_len = xconfig.SEARCH_SUMMARY_LEN
 
-    messages, count = MSG_DAO.search(ctx.user_name, key, 0, 3)
+    messages, count = dao.search_message(ctx.user_name, key, 0, 3)
     search_result = []
     for message in messages:
         item = SearchResult()
-        if message.content != None and len(message.content) > xconfig.SEARCH_SUMMARY_LEN:
-            message.content = message.content[:
-                                              xconfig.SEARCH_SUMMARY_LEN] + "......"
+        if message.content != None and len(message.content) > max_len:
+            message.content = message.content[:max_len] + "......"
         process_message(message)
+        item.tag_name = u("记事")
+        item.tag_class = "orange"
         item.name = u('记事 - ') + message.ctime
         item.html = message.html
         item.icon = "hide"
@@ -104,7 +106,7 @@ def get_current_message_stat():
 
 
 def update_keyword_amount(message, user_name, key):
-    msg_list, amount = MSG_DAO.search(user_name, key, 0, 1)
+    msg_list, amount = dao.search_message(user_name, key, 0, 1)
     message.amount = amount
     MSG_DAO.update(message)
     xutils.log("[message.refresh] user:%s,key:%s,amount:%s" %
@@ -310,7 +312,7 @@ class ListAjaxHandler:
 
         start_time = time.time()
         chatlist, amount = dao.search_message(
-            user_name, key, offset, pagesize, search_tags, no_tag=no_tag)
+            user_name, key, offset, pagesize, search_tags=search_tags, no_tag=no_tag)
 
         # 搜索扩展
         xmanager.fire("message.search", SearchContext(key))
@@ -460,7 +462,7 @@ class UpdateTagAjaxHandler:
         tag = xutils.get_argument("tag")
         if id == "":
             return failure(code = "404", message="id为空")
-            
+
         if tag in ("task", "cron", "log", "key", "done"):
             return update_message_tag(id, tag)
         else:
@@ -686,6 +688,7 @@ class MessageListHandler:
         user = xauth.current_name()
         key = xutils.get_argument("key", "")
         from_ = xutils.get_argument("from", "")
+        type_ = xutils.get_argument("type", "")
         show_tab = xutils.get_argument(
             "show_tab", default_value=True, type=bool)
         op = xutils.get_argument("op", "")
@@ -712,7 +715,7 @@ class MessageListHandler:
         if tag == "task_tags":
             return self.get_task_taglist_page()
 
-        if tag == "search":
+        if tag == "search" or type_ == "search":
             return SearchHandler().get_page()
 
         return self.get_log_page()

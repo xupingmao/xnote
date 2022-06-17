@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-12 17:04:05
+@LastEditTime : 2022-06-16 23:18:26
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -21,6 +21,7 @@ from xutils import textutil
 from xutils import dateutil
 from xutils import Storage
 from xutils import u
+from xutils import netutil
 from xutils.functions import Counter
 from xutils.textutil import quote
 from handlers.message.message_model import MessageFolder, MessageTag
@@ -96,6 +97,7 @@ def mark_text(content, tag="log"):
         keywords = set()
 
     return "".join(tokens), keywords
+
 
 def process_message(message, search_tag="log"):
     parser = MessageListParser([])
@@ -192,19 +194,15 @@ def get_tags_from_message_list(
     tag_list = []
     for tag_name in tag_counter.dict:
         amount = tag_counter.get_count(tag_name)
-        # url = "/message?searchTags=%s&key=%s" % (input_tag, textutil.encode_uri_component(tag_name))
 
-        encoded_tag = textutil.encode_uri_component(tag_name)
+        params = dict(
+            tag=input_tag,
+            filterDate=input_date,
+            filterKey=tag_name,
+            displayTag=display_tag
+        )
 
-        if input_date == "":
-            url = "/message?tag=%s&filterKey=%s&filterDate=%s" % (
-                input_tag, encoded_tag, input_date)
-        else:
-            url = "/message?tag=%s&date=%s&filterKey=%s" % (
-                input_tag, input_date, encoded_tag)
-
-        if display_tag != None:
-            url += "&displayTag=%s" % display_tag
+        url = "/message?" + netutil.build_query_string(params, skip_empty_value=True)
 
         if tag_name == "$no_tag":
             tag_name = "<无标签>"
@@ -346,7 +344,7 @@ class MessageListParser(object):
 
     def parse(self):
         self.do_process_message_list(self.chatlist)
-    
+
     def prehandle_message(self, message):
         if message.status in (0, 50):
             # 兼容历史数据
@@ -373,7 +371,7 @@ class MessageListParser(object):
 
         if message.tag == "done":
             self.build_done_html(message)
-        
+
         if message.tag == "key":
             self._build_keyword_html(message)
 
@@ -450,13 +448,15 @@ class MessageKeyWordProcessor:
             msg_list.sort(key=lambda x: x.mtime, reverse=True)
             for item in msg_list:
                 item.badge_info = "%s" % xutils.format_date(item.mtime)
-    
+
     def process(self):
         pass
+
 
 def sort_message_list(msg_list, orderby=""):
     p = MessageKeyWordProcessor(msg_list)
     p.sort(orderby)
+
 
 def sort_keywords_by_marked(msg_list):
     def key_func(item):

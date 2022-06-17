@@ -7,6 +7,7 @@
 
     <script type="text/javascript" src="/static/js/message/message.js"></script>
 
+    <input class="msg-search-key" type="hidden" value="{{key}}"/>
     <input class="default-content-input" type="hidden" value="{{default_content}}"/>
 {% end %}
 
@@ -79,7 +80,7 @@
             function getParamKey() {
                 // getUrlParam 获取参数空格会被处理成`+`
                 // return getUrlParam("key", "");
-                return "{{key}}";
+                return $(".msg-search-key").val();
             }
 
             function onMessageRefresh() {

@@ -386,8 +386,9 @@ def list_path(file, limit=5):
         if str(file.id) == "0":
             break
 
+        parent_id = str(file.parent_id)
         # 处理根目录
-        if str(file.parent_id) == "0":
+        if parent_id == "0":
             if file.type != "group":
                 pathlist.insert(0, get_default_group())
             elif file.archived:
@@ -395,11 +396,13 @@ def list_path(file, limit=5):
             pathlist.insert(0, convert_to_path_item(get_root(file.creator)))
             break
 
-        file = get_by_id(file.parent_id, include_full=False)
+        file = get_by_id(parent_id, include_full=False)
     return pathlist
 
 
 def get_full_by_id(id):
+    if isinstance(id, int):
+        id = str(id)
     return _full_db.get_by_id(id)
 
 

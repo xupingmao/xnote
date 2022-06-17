@@ -298,7 +298,7 @@ class SearchHandler:
         offset = ctx.offset
         limit  = ctx.limit
 
-        search_tags = set(["task", "done"])
+        search_tags = set(["task"])
         item_list, amount = MSG_DAO.search(user_name, key, offset, limit, search_tags = search_tags)
 
         for item in item_list:
@@ -311,6 +311,15 @@ class SearchHandler:
             item.name = prefix + item.ctime
             item.icon = "hide"
             item.url  = "#"
+        
+        # 统计已完成待办数量
+        temp, done_count = MSG_DAO.search(user_name, key, search_tags = set(["done"]), count_only=True)
+        if done_count > 0:
+            done_summary = Storage()
+            done_summary.icon = "hide"
+            done_summary.name = "已完成任务[%d]" % done_count
+            done_summary.url =  "/message?tag=search&p=done&key=%s" % xutils.quote(key)
+            item_list.insert(0, done_summary)
 
         return item_list, amount
 
