@@ -1,5 +1,6 @@
 {% extends base.html %}
-{% block body %}
+
+{% block body_left %}
 
 {% init title = T("线程列表") %}
 {% include system/component/thread_nav.html %}
@@ -51,4 +52,8 @@ $(function () {
 })
 </script>
 
+{% end %}
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
 {% end %}

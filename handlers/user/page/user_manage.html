@@ -16,7 +16,7 @@
 
 {% end %}
 
-{% block body %}
+{% block body_left %}
 
 <div class="card">
 
@@ -83,29 +83,5 @@
 </div>
 
 {% include user/component/user_script.html %}
-
-{% end %}
-
-{% block aside %}
-
-<div class="aside-item">
-    <div class="aside-title">
-        用户列表
-    </div>
-    <div class="aside-content">
-        {% for name in sorted(user_dict) %}
-            <li><a class="link" href="/system/user?name={{name}}">{{name}}</a></li>
-        {% end %}
-    </div>
-</div>
-
-<div class="aside-item">
-    <div class="aside-title">
-        操作
-    </div>
-    <div class="aside-content">
-        <li><a class="link" href="/system/user">添加用户</a></li>
-    </div>
-</div>
 
 {% end %}

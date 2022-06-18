@@ -1,0 +1,35 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-06-18 08:24:00
+@LastEditors  : xupingmao
+@LastEditTime : 2022-06-18 21:20:27
+@FilePath     : /xnote/handlers/system/component/admin_nav.html
+@Description  : 描述
+ #} -->
+{% set data_list = [
+    Storage(name = "系统信息", url = "/system/info"),
+    Storage(name = "用户管理", url = "/system/user/list"),
+    Storage(name = "定时任务", url = "/system/crontab"),
+    Storage(name = "系统注册表", url = "/system/event"),
+    Storage(name = "线程管理", url = "/system/thread_info"),
+    Storage(name = "系统日志", url = "/system/log"),
+    Storage(name = "数据库工具", url = "/system/db_admin?p=meta"),
+    Storage(name = "文件管理", url = "/fs_bookmark"),
+    Storage(name = "集群和同步管理", url = "/system/sync?p=home"),
+    Storage(name = "Shell终端", url = "/tools/shell"),
+    Storage(name = "开发者", url = "/system/develop"),
+] %}
+
+<div class="card list">
+
+    {% for item in data_list %}
+        <a class="list-link" href="{{item.url}}">
+            <span>{{item.name}}</span>
+            <div class="float-right">
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+    {% end %}
+
+</div>

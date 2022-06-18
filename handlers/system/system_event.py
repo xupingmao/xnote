@@ -3,9 +3,7 @@
 # @since 2019/05/18 09:44:13
 # @modified 2022/03/12 11:07:34
 
-import xutils
 import xmanager
-import xauth
 from xtemplate import BasePlugin
 from xutils import Storage
 
@@ -17,43 +15,58 @@ HTML = r"""
     }
 </style>
 
-<div class="card btn-line-height">
-    <span>系统一共注册{{event_handler_count}}个事件处理器</span>
-</div>
-
-{% for index, event_type in enumerate(event_type_list) %}
-    {% set temp_handler_list = handlers.get(event_type) %}
+<div class="content-left">
     <div class="card">
         <div class="card-title">
-            <a id="{{event_type}}">{{event_type}}</a>
-            <span>({{len(temp_handler_list)}})</span>
+            <span>事件注册器</span>
             <div class="float-right">
-                <button class="toggle-btn btn-default" data-index="{{index}}" data-toggle="折叠">展开</button>
+                {% include common/button/back_button.html %}
             </div>
         </div>
-        <div class="card-body event-body-{{index}}">
-        {% for temp_handler in temp_handler_list %}
-            <div class="list-item">{{temp_handler}}</div>
-        {% end %}
-        </div>
     </div>
-{% end %}
 
-<script>
-$(function () {
-    $(".toggle-btn").click(function () {
-        // 切换展示状态
-        var index = $(this).attr("data-index");
-        $(".event-body-" + index).toggle();
+    <div class="card btn-line-height">
+        <span>系统一共注册{{event_handler_count}}个事件处理器</span>
+    </div>
 
-        // 切换文本
-        var text = $(this).text();
-        var toggle = $(this).attr("data-toggle");
-        $(this).attr("data-toggle", text);
-        $(this).text(toggle);
-    }); 
-});
-</script>
+    {% for index, event_type in enumerate(event_type_list) %}
+        {% set temp_handler_list = handlers.get(event_type) %}
+        <div class="card">
+            <div class="card-title">
+                <a id="{{event_type}}">{{event_type}}</a>
+                <span>({{len(temp_handler_list)}})</span>
+                <div class="float-right">
+                    <button class="toggle-btn btn-default" data-index="{{index}}" data-toggle="折叠">展开</button>
+                </div>
+            </div>
+            <div class="card-body event-body-{{index}}">
+            {% for temp_handler in temp_handler_list %}
+                <div class="list-item">{{temp_handler}}</div>
+            {% end %}
+            </div>
+        </div>
+    {% end %}
+
+    <script>
+    $(function () {
+        $(".toggle-btn").click(function () {
+            // 切换展示状态
+            var index = $(this).attr("data-index");
+            $(".event-body-" + index).toggle();
+
+            // 切换文本
+            var text = $(this).text();
+            var toggle = $(this).attr("data-toggle");
+            $(this).attr("data-toggle", text);
+            $(this).text(toggle);
+        }); 
+    });
+    </script>
+</div>
+
+<div class="content-right">
+    {% include system/component/admin_nav.html %}
+</div>
 """
 
 class EventHandler(BasePlugin):
@@ -62,6 +75,7 @@ class EventHandler(BasePlugin):
     category = "system"
     editable = False
     show_category = False
+    show_title = False
     
     def handle(self, content):
         self.rows = 0

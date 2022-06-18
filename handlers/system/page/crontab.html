@@ -1,6 +1,6 @@
 {% extends base.html %}
 
-{% block body %}
+{% block body_left %}
 
 <div class="col-md-12 grid-card">
     <h3 class="card-title btn-line-height">
@@ -68,4 +68,8 @@
         }
     })
 </script>
+{% end %}
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
 {% end %}
