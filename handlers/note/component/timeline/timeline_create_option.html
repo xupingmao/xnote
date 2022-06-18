@@ -1,3 +1,12 @@
+{# <!--
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-02-11 22:35:52
+@LastEditors  : xupingmao
+@LastEditTime : 2022-06-18 08:42:31
+@FilePath     : /xnote/handlers/note/component/timeline/timeline_create_option.html
+@Description  : 描述
+--> #}
 {% init file = Storage(id = "0") %}
 {% init show_create = True %}
 {% init parent_id = 0 %}
@@ -16,4 +25,4 @@
     <a class="btn" href="/note/create?parent_id={{parent_id}}">新建笔记</a>
 {% end %}
 
-{% include note/script/create_script.html %}
+{% include note/component/script/create_script.html %}

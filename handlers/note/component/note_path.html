@@ -1,6 +1,4 @@
 {% init file = None %}
-{% init show_contents_btn = False %}
-
 {% if len(pathlist) > 0 %}
     <div class="btn-line-height pad-left-5">
     {% for i, item_local in enumerate(pathlist) %}
@@ -13,9 +11,6 @@
 
     <div class="float-right">
         {% if file != None %}
-            {% if show_contents_btn %}
-                <a class="btn btn-default note-contents-btn" data-parent="{{file.parent_id}}">目录</a>
-            {% end %}
             {% if _is_desktop %}
                 <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>
             {% end %}

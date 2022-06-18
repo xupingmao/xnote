@@ -237,6 +237,7 @@
             });
         });
 
+        // 显示目录弹窗
         $(".note-contents-btn").click(function (e) {
             var parentId = $(e.target).attr("data-parent");
             xnote.showAjaxDialog("选择笔记", "/note/" + parentId + "?dialog=true");
