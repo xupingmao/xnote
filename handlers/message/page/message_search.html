@@ -18,6 +18,7 @@
     <!-- Tab页 -->
     {% init message_tab = "log" %}
     {% init default_content = "" %}
+    {% init date = "" %}
     
     <div class="card">    
         <div class="card-title btn-line-height">
@@ -60,6 +61,13 @@
     {% end %}
 
     {% include message/component/message_keyword_info.html %}
+
+    {% if date != "" %}
+    <div class="card btn-line-height">
+        <span class="tag info">日期</span>
+        <span>{{date}}</span>
+    </div>
+    {% end %}
 
     <!-- 内容区域 -->
     {% include message/component/message_list.html %}

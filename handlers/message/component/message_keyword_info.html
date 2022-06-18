@@ -1,4 +1,6 @@
 {% init is_keyword_marked = False %}
+
+{% if keyword != "" %}
 <div class="card btn-line-height">
     <span class="info-tag">标签</span>
     <span class="keyword-span">{{keyword}}</span>
@@ -10,6 +12,7 @@
         {% end %}
     </div>
 </div>
+{% end %}
 
 <script type="text/javascript">
     $(function () {

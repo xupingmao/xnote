@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-16 23:18:26
+@LastEditTime : 2022-06-18 16:57:19
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -194,18 +194,25 @@ def get_tags_from_message_list(
     tag_list = []
     for tag_name in tag_counter.dict:
         amount = tag_counter.get_count(tag_name)
-
-        params = dict(
-            tag=input_tag,
-            filterDate=input_date,
-            filterKey=tag_name,
-            displayTag=display_tag
-        )
-
-        url = "/message?" + netutil.build_query_string(params, skip_empty_value=True)
+        no_tag = None
+        search_key = tag_name
 
         if tag_name == "$no_tag":
             tag_name = "<无标签>"
+            search_key = ""
+            no_tag = "true"
+
+        params = dict(
+            tag="search",
+            date=input_date,
+            key=search_key,
+            displayTag=display_tag,
+            noTag=no_tag,
+        )
+
+        url = "/message?" + \
+            netutil.build_query_string(params, skip_empty_value=True)
+
             # url = "/message?tag=search&searchTags=%s&noTag=true" % input_tag
 
         mtime = tag_sorter.get_mtime(tag_name)

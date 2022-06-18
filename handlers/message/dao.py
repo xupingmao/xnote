@@ -234,7 +234,7 @@ def has_tag_fast(content):
     return content.find("#") >= 0 or content.find("@") >= 0
 
 
-def search_message(user_name, key, offset = 0, limit = 20, *, search_tags=None, no_tag=None, count_only=False):
+def search_message(user_name, key, offset = 0, limit = 20, *, search_tags=None, no_tag=None, count_only=False, date=""):
     """搜索短信
     @param {string} user_name 用户名
     @param {string} key 要搜索的关键字
@@ -243,8 +243,10 @@ def search_message(user_name, key, offset = 0, limit = 20, *, search_tags=None, 
     @param {list} search_tags 搜索的标签集合
     @param {bool} no_tag 是否搜索无标签的
     @param {bool} count_only 只统计数量
+    @param {string} date 日期过滤条件
     """
     assert user_name != None and user_name != ""
+    assert date != None
 
     words = get_words_from_key(key)
 
@@ -253,16 +255,15 @@ def search_message(user_name, key, offset = 0, limit = 20, *, search_tags=None, 
             return False
         if no_tag is True and has_tag_fast(value.content):
             return False
+        value_date = dateutil.format_date(value.ctime)
+        if value_date == None or not value_date.startswith(date):
+            return False
         return textutil.contains_all(value.content.lower(), words)
 
     def search_func_with_tags(key, value):
-        if value.content is None:
-            return False
         if value.tag not in search_tags:
             return False
-        if no_tag is True and has_tag_fast(value.content):
-            return False
-        return textutil.contains_all(value.content.lower(), words)
+        return search_func_default(key, value)
 
     if search_tags != None:
         search_func = search_func_with_tags

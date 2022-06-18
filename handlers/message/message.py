@@ -40,7 +40,6 @@ from handlers.message.message_utils import (
     count_month_size,
 )
 
-from .message_utils import sort_message_list
 from .message_utils import sort_keywords_by_marked
 from . import dao
 from handlers.message import message_utils
@@ -266,16 +265,18 @@ class ListAjaxHandler:
             template_file = "message/ajax/message_ajax.html"
 
         params = dict(
-            tag = tag,
-            displayTag = display_tag,
-            key = key,
-            date = date,
-            filterKey = filter_key,
-            orderby = orderby,
-            p = p,
+            tag=tag,
+            displayTag=display_tag,
+            key=key,
+            date=date,
+            filterKey=filter_key,
+            orderby=orderby,
+            p=p,
         )
 
-        page_url = "?" + netutil.build_query_string(params=params, skip_empty_value=True) + "&page="
+        page_url = "?" + \
+            netutil.build_query_string(
+                params=params, skip_empty_value=True) + "&page="
 
         kw = Storage(
             show_todo_check=show_todo_check,
@@ -297,6 +298,7 @@ class ListAjaxHandler:
         input_search_tags = xutils.get_argument("searchTags", "")
         input_no_tag = xutils.get_argument("noTag", "false")
         p = xutils.get_argument("p", "")
+        date = xutils.get_argument("date", "")
 
         if input_search_tags != "":
             search_tags = input_search_tags.split(",")
@@ -310,22 +312,10 @@ class ListAjaxHandler:
         if input_no_tag == "true":
             no_tag = True
 
-        start_time = time.time()
-        chatlist, amount = dao.search_message(
-            user_name, key, offset, pagesize, search_tags=search_tags, no_tag=no_tag)
-
-        # 搜索扩展
-        xmanager.fire("message.search", SearchContext(key))
-
-        # 自动置顶
-        touch_key_by_content(user_name, "key", key)
-        touch_key_by_content(user_name, "key", get_similar_key(key))
-
-        cost_time = functions.second_to_ms(time.time() - start_time)
-
-        MSG_DAO.add_search_history(user_name, key, cost_time)
-
-        return chatlist, amount
+        searcher = SearchHandler()
+        return searcher.get_ajax_data(user_name=user_name, key=key, offset=offset,
+                                      limit=pagesize, search_tags=search_tags,
+                                      no_tag=no_tag, date=date)
 
     def do_list_task(self, user_name, offset, limit):
         p = xutils.get_argument("p", "")
@@ -461,7 +451,7 @@ class UpdateTagAjaxHandler:
         id = xutils.get_argument("id")
         tag = xutils.get_argument("tag")
         if id == "":
-            return failure(code = "404", message="id为空")
+            return failure(code="404", message="id为空")
 
         if tag in ("task", "cron", "log", "key", "done"):
             return update_message_tag(id, tag)
@@ -1119,8 +1109,25 @@ class SearchHandler:
 
         return xtemplate.render("message/page/message_search.html", **kw)
 
-    def get_ajax(self):
-        return
+    def get_ajax_data(self, *, user_name=None, key=None, offset=0,
+                      limit=20, search_tags=None, no_tag=False, date=""):
+        start_time = time.time()
+        chatlist, amount = dao.search_message(
+            user_name, key, offset, limit,
+            search_tags=search_tags, no_tag=no_tag, date=date)
+
+        # 搜索扩展
+        xmanager.fire("message.search", SearchContext(key))
+
+        # 自动置顶
+        touch_key_by_content(user_name, "key", key)
+        touch_key_by_content(user_name, "key", get_similar_key(key))
+
+        cost_time = functions.second_to_ms(time.time() - start_time)
+
+        MSG_DAO.add_search_history(user_name, key, cost_time)
+
+        return chatlist, amount
 
     def search_items(self, user_name, key):
         pass
