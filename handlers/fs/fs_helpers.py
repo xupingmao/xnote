@@ -16,6 +16,7 @@ import os
 from xutils import dbutil
 from xutils import FileItem
 from xutils import format_size
+from xutils import fsutil
 
 dbutil.register_table("fs_index", "文件索引")
 dbutil.register_table_index("fs_index", "ftype")
@@ -74,8 +75,13 @@ def get_file_thumbnail(fpath):
     return "/static/image/file2.png"
 
 def get_file_download_link(fpath):
-    encode_path = xutils.encode_uri_component(fpath)
-    download_link = "/fs/%s?type=blob" % encode_path
+    if fsutil.is_parent_dir(xconfig.DATA_DIR, fpath):
+        relative_path = fsutil.get_relative_path(fpath, xconfig.DATA_DIR)
+        fpath = relative_path
+        encoded_path = xutils.encode_uri_component(fpath)
+        return "/static/%s?type=blob" % encoded_path
+    encoded_path = xutils.encode_uri_component(fpath)
+    download_link = "/fs/%s?type=blob" % encoded_path
     return download_link
 
 
