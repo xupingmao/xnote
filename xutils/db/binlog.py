@@ -4,25 +4,22 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-03 14:07:49
+@LastEditTime : 2022-06-18 18:14:25
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
-
-from xutils import dbutil
 from xutils.db.dbutil_base import count_table, prefix_iter
-from xutils.db.dbutil_table import db_put, prefix_list, db_delete
+from xutils.db.dbutil_table import db_put, prefix_list, db_delete, register_table
 
 import threading
 
+register_table("_binlog", "数据同步的binlog")
 
 def _format_log_id(log_id):
     return "%020d" % log_id
 
 
 class BinLog:
-
-    dbutil.register_table("_binlog", "数据同步的binlog")
     _table_name = "_binlog"
     _lock = threading.RLock()
     _delete_lock = threading.RLock()
