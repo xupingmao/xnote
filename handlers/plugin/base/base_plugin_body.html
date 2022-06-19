@@ -1,0 +1,22 @@
+
+{# HTML输出 #}
+{% if html != None and html != "" %}
+    {% raw html %}
+{% end %}
+
+{# 文本输出放到后面 #}
+{% if output != None and output != "" %}
+<div class="card">
+    <textarea class="output-textarea">{{ output }}</textarea>
+</div>
+{% end %}
+
+{% if model.show_pagenation %}
+<div class="card">
+    {# 分页 #}
+    {% set page = model.page %}
+    {% set page_max = model.page_max %}
+    {% set page_url = model.page_url %}
+    {% include mod_pagenation.html %}
+</div>
+{% end %}

@@ -5,6 +5,7 @@
 import os
 import time
 from collections import deque
+from handlers.system.system_event import ASIDE_HTML
 
 import xauth
 import xutils
@@ -16,62 +17,68 @@ from xtemplate import BasePlugin
 from xutils.functions import iter_exists
 
 OPTION_HTML = '''
-<script src="/static/js/base/jq-ext.js"></script>
+<div class="content-left">
+    <script src="/static/js/base/jq-ext.js"></script>
 
-<div class="card">
-    <div class="x-tab-box row" data-tab-key="log_type" data-tab-default="file">
-        <a class="x-tab" data-tab-value="file">文件日志</a>
-        <a class="x-tab" data-tab-value="mem">内存日志</a>
+    <div class="card">
+        <div class="x-tab-box row" data-tab-key="log_type" data-tab-default="file">
+            <a class="x-tab" data-tab-value="file">文件日志</a>
+            <a class="x-tab" data-tab-value="mem">内存日志</a>
+        </div>
     </div>
+
+    <div class="card">
+        {% if log_type == "file" %}
+            <div class="x-tab-box btn-style dark row" data-tab-key="type" data-tab-default="tail">
+                <a class="x-tab" data-tab-value="tail">最新</a>
+                <a class="x-tab" data-tab-value="head">最早</a>
+                <a class="x-tab" data-tab-value="all">全部</a>
+            </div>
+
+            <div class="row">
+                <span>直接查看文件</span>
+                <a href="/code/edit?path={{info_log_path}}">INFO日志</a>
+                <span>|</span>
+                <a href="/code/edit?path={{warn_log_path}}">WARN日志</a>
+                <span>|</span>
+                <a href="/code/edit?path={{error_log_path}}">ERROR日志</a>
+                <span>|</span>
+                <a href="/code/edit?path={{trace_log_path}}">TRACE日志</a>
+            </div>
+        {% end %}
+
+        {% if log_type == "mem" %}
+            {% init log_name = "" %}
+            {% init log_not_found = False %}
+
+            <span>日志名称</span>
+            <select value="{{log_name}}" class="logger-name-select">
+                {% for logger in mem_loggers %}
+                    <option value="{{logger.name}}">{{logger.name}}</option>
+                {% end %}
+
+                {% if log_not_found and log_name != "" %}
+                    <option value="{{log_name}}">{{log_name}}</option>
+                {% end %}
+            </select>
+        {% end %}
+    </div>
+    <script>
+    $(function () {
+        $(".output-textarea").scrollBottom();
+        $(".logger-name-select").change(function (e) {
+            var oldHref = window.location.href;
+            var newHref = addUrlParam(oldHref, "log_name", $(e.target).val());
+            window.location.href = newHref;
+        });
+    })
+    </script>
 </div>
-
-<div class="card">
-    {% if log_type == "file" %}
-        <div class="x-tab-box btn-style dark row" data-tab-key="type" data-tab-default="tail">
-            <a class="x-tab" data-tab-value="tail">最新</a>
-            <a class="x-tab" data-tab-value="head">最早</a>
-            <a class="x-tab" data-tab-value="all">全部</a>
-        </div>
-
-        <div class="row">
-            <span>直接查看文件</span>
-            <a href="/code/edit?path={{info_log_path}}">INFO日志</a>
-            <span>|</span>
-            <a href="/code/edit?path={{warn_log_path}}">WARN日志</a>
-            <span>|</span>
-            <a href="/code/edit?path={{error_log_path}}">ERROR日志</a>
-            <span>|</span>
-            <a href="/code/edit?path={{trace_log_path}}">TRACE日志</a>
-        </div>
-    {% end %}
-
-    {% if log_type == "mem" %}
-        {% init log_name = "" %}
-        {% init log_not_found = False %}
-
-        <span>日志名称</span>
-        <select value="{{log_name}}" class="logger-name-select">
-            {% for logger in mem_loggers %}
-                <option value="{{logger.name}}">{{logger.name}}</option>
-            {% end %}
-
-            {% if log_not_found and log_name != "" %}
-                <option value="{{log_name}}">{{log_name}}</option>
-            {% end %}
-        </select>
-    {% end %}
-</div>
-<script>
-$(function () {
-    $(".output-textarea").scrollBottom();
-    $(".logger-name-select").change(function (e) {
-        var oldHref = window.location.href;
-        var newHref = addUrlParam(oldHref, "log_name", $(e.target).val());
-        window.location.href = newHref;
-    });
-})
-</script>
 '''
+
+ASIDE_HTML = """
+    {% include system/component/admin_nav.html %}
+"""
 
 
 def readlines(fpath):
@@ -111,6 +118,7 @@ class LogHandler(BasePlugin):
     title = 'xnote系统日志'
     # description = "查看系统日志"
     show_category = False
+    show_aside = True
     category = 'system'
     editable = False
     rows = 0
@@ -157,6 +165,7 @@ class LogHandler(BasePlugin):
         date = self.get_arg_date()
 
         self.render_options(date)
+        self.write_aside(ASIDE_HTML)
 
         if log_type == "mem":
             return self.handle_mem_log()

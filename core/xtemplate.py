@@ -400,7 +400,7 @@ class BasePlugin:
     show_nav    = True # 是否展示菜单
 
     # 插件的标题
-    show_title  = True
+    show_title  = True    
     title       = u"插件名称"
     description = ""
     
@@ -487,6 +487,10 @@ class BasePlugin:
         html = render_text(template, **kw)
         self.html += u(html.decode("utf-8"))
         return self.html
+    
+    def write_aside(self, template, **kw):
+        self.show_aside = True
+        self.aside_html = render_text(template, **kw)
 
     def ajax_response(self, template, **kw):
         warnings.warn("use response_ajax instead", DeprecationWarning)
@@ -558,9 +562,6 @@ class BasePlugin:
             if isinstance(output, (dict, list)):
                 return output
 
-            # 处理侧边栏显示
-            if self.aside_html != "" or len(self.option_links) > 0 or self.category:
-                self.show_aside = True
         except web.webapi.Redirect:
             # 跳转的异常
             pass

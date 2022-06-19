@@ -17,7 +17,7 @@
 
 {% end %}
 
-{% block body %}
+{% block body_left %}
 
 
 {% init code = "" %}
@@ -71,4 +71,9 @@ $(function () {
 
 </script>
 
+{% end %}
+
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
 {% end %}

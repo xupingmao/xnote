@@ -16,15 +16,6 @@ HTML = r"""
 </style>
 
 <div class="content-left">
-    <div class="card">
-        <div class="card-title">
-            <span>事件注册器</span>
-            <div class="float-right">
-                {% include common/button/back_button.html %}
-            </div>
-        </div>
-    </div>
-
     <div class="card btn-line-height">
         <span>系统一共注册{{event_handler_count}}个事件处理器</span>
     </div>
@@ -63,19 +54,21 @@ HTML = r"""
     });
     </script>
 </div>
+"""
 
-<div class="content-right">
-    {% include system/component/admin_nav.html %}
-</div>
+ASIDE_HTML = """
+{% include system/component/admin_nav.html %}
 """
 
 class EventHandler(BasePlugin):
     
     title = '系统事件'
+    title_style = "left"
     category = "system"
     editable = False
     show_category = False
-    show_title = False
+    show_title = True
+    show_aside = True
     
     def handle(self, content):
         self.rows = 0
@@ -93,6 +86,7 @@ class EventHandler(BasePlugin):
         kw.event_type_list = event_type_list
         kw.event_handler_count = count
         self.writehtml(HTML, **kw)
+        self.write_aside(ASIDE_HTML)
     
 xurls = (
     r"/system/event", EventHandler
