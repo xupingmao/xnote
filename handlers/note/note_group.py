@@ -264,7 +264,7 @@ class GroupListHandler:
     def handle_badge_info(self, notes, tab):
         if tab in ("active", "archived"):
             for note in notes:
-                note.badge_info = note.size
+                note.badge_info = note.children_count
 
     def sort_notes(self, notes, kw):
         tab = kw.tab
@@ -289,9 +289,9 @@ class GroupListHandler:
 
         if orderby == "size_desc":
             for note in notes:
-                note.badge_info = note.size
+                note.badge_info = note.children_count
 
-            notes.sort(key = lambda x:x.size, reverse = True)
+            notes.sort(key = lambda x:x.children_count or 0, reverse = True)
 
         if orderby == "ctime_desc":
             for note in notes:

@@ -361,7 +361,7 @@ class TestMain(BaseTestCase):
 
         json_request("/note/move?id=%s&parent_id=%s" % (id, parent_id))
         group_info = get_note_info(parent_id)
-        self.assertEqual(1, group_info.size)
+        self.assertEqual(1, group_info.children_count)
 
     def test_rename(self):
         delete_note_for_test("rename-test")

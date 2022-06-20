@@ -65,6 +65,7 @@ dbutil.register_table_index("note_tiny", "ctime")
 NOTE_DAO = xutils.DAO("note")
 
 _full_db = dbutil.get_table("note_full")
+_tiny_db = dbutil.get_table("note_tiny")
 
 DB_PATH = xconfig.DB_PATH
 MAX_EDIT_LOG = 500
@@ -410,7 +411,7 @@ def get_full_by_id(id):
 def get_by_id(id, include_full=True, creator=None):
     if id == "" or id is None:
         return None
-    if id == 0 or id == "0":
+    if str(id) == "0":
         return get_root(creator)
 
     note_index = dbutil.get("note_index:%s" % id)
@@ -433,6 +434,7 @@ def get_by_id(id, include_full=True, creator=None):
         note.parent_id = note_index.parent_id
         note.visited_cnt = note_index.visited_cnt
         note.hot_index = note_index.hot_index
+        note.children_count = note_index.children_count
 
     build_note_info(note)
     return note
@@ -907,8 +909,7 @@ def update_children_count(parent_id, db=None):
         return
 
     creator = note.creator
-    children_count = count_by_parent(creator, parent_id)
-    note.size = children_count
+    note.children_count = count_by_parent(creator, parent_id)
 
     update_index(note)
 
@@ -1099,12 +1100,13 @@ def count_by_parent(creator, parent_id):
     @param {string/number} parent_id 父级节点ID
     """
     # TODO 添加索引优化
+    parent_id_str = str(parent_id)
     def list_note_func(key, value):
         if value.is_deleted:
             return False
-        return (value.is_public or value.creator == creator) and str(value.parent_id) == str(parent_id)
+        return (value.is_public or value.creator == creator) and str(value.parent_id) == parent_id_str
 
-    return dbutil.prefix_count("note_tiny", list_note_func)
+    return _tiny_db.count(filter_func = list_note_func, user_name=creator)
 
 
 @xutils.timeit(name="NoteDao.CountDict", logfile=True, logargs=True, logret=True)
@@ -1515,6 +1517,7 @@ def get_virtual_group(user_name, name):
         group.name = "未分类笔记"
         group.url = "/note/default"
         group.size = len(files)
+        group.children_count = len(files)
         group.icon = "fa-folder"
         group.priority = 1
         return group
