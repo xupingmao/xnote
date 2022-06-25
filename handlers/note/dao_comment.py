@@ -19,6 +19,8 @@ register_note_table("note_comment", "笔记的评论")
 register_note_table("comment_index", "用户维度的评论索引")
 NOTE_DAO = xutils.DAO("note")
 
+_comment_db = dbutil.get_table("note_comment")
+
 def get_comment_table(note_id = None):
     return dbutil.get_table("note_comment", user_name = note_id)
 
@@ -73,9 +75,8 @@ def create_comment(comment):
 
     comment["timeseq"] = timeseq
     comment["ctime"]   = dateutil.format_time()
-
-    key = "note_comment:%s:%s" % (comment["note_id"], timeseq)
-    dbutil.put(key, comment)
+    
+    _comment_db.update_by_id(timeseq, comment, user_name = comment["note_id"])
 
     index_key = "comment_index:%s:%s" % (comment["user"], timeseq)
     comment_index = comment.copy()

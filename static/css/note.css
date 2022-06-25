@@ -294,6 +294,10 @@
     border: 1px solid #ccc;
 }
 
+.delete-comment-btn {
+    color: red;
+}
+
 .note-sidebar-contents {
     float: left;
     width: 100%;

@@ -22,6 +22,7 @@ from tornado.template import Template, Loader
 from xutils import dateutil, quote, u
 from xutils import tojson
 from xutils import Storage
+from xutils import textutil
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE    = dict(
@@ -209,7 +210,7 @@ def get_mobile_template(name):
 
     if name.endswith(".html"):
         # 检查文件是否存在
-        mobile_name = name[:-5] + ".mobile.html"
+        mobile_name = textutil.remove_tail(name, ".html") + ".mobile.html"
         fpath = os.path.join(TEMPLATE_DIR, mobile_name)
         if os.path.exists(fpath):
             _mobile_name_dict[name] = mobile_name

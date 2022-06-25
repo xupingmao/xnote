@@ -11,7 +11,10 @@ import logging
 
 
 class RecordLock:
-    """行锁的实现"""
+    """行锁的实现
+    TODO 基于数据库的持久化锁
+    TODO 后台进程为锁续期
+    """
 
     _enter_lock = threading.RLock()
     _lock_dict = dict()
@@ -65,8 +68,10 @@ class RecordLock:
                 logging.error("lock has been taken by other(%s)", lock.token)
 
     def __enter__(self):
-        self.acquire()
-        return self
+        lock = self.acquire()
+        if lock:
+            return self
+        raise Exception("get lock failed")
 
     def __exit__(self, type, value, traceback):
         self.release()

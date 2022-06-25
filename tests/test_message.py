@@ -206,6 +206,7 @@ class TestMain(BaseTestCase):
         from handlers.message.message import get_or_create_keyword
 
         keyword = get_or_create_keyword(xauth.current_name(), "#test#", "127.0.0.1")
+        print(keyword)
         self.assertTrue(keyword.is_marked)
 
     def test_message_calendar(self):

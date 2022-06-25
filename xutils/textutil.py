@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-04-17 17:04:15
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-12 13:24:16
+@LastEditTime : 2022-06-25 21:09:49
 @FilePath     : /xnote/xutils/textutil.py
 @Description  : 文本处理工具
 """
@@ -224,7 +224,9 @@ def remove_tail(text, tail):
         >>> remove_tail("person.age", "name")
         "person.age"
     """
-    if text is None or tail is None:
+    assert is_str(tail)
+    
+    if text is None:
         return text
 
     if not text.endswith(tail):

@@ -43,6 +43,7 @@ from handlers.message.message_utils import (
 from .message_utils import sort_keywords_by_marked
 from . import dao
 from handlers.message import message_utils
+from xutils.db.lock import RecordLock
 
 MSG_DAO = xutils.DAO("message")
 # 消息处理规则
@@ -593,10 +594,11 @@ def touch_key_by_content(user_name, tag, content):
 
 
 def get_or_create_keyword(user_name, content, ip):
-    item = MSG_DAO.get_by_content(user_name, "key", content)
-    if item != None:
-        return item
-    return create_message(user_name, "key", content, ip)
+    with RecordLock(user_name):
+        item = MSG_DAO.get_by_content(user_name, "key", content)
+        if item != None:
+            return item
+        return create_message(user_name, "key", content, ip)
 
 
 def apply_rules(user_name, id, tag, content):
@@ -1076,19 +1078,22 @@ class MessageKeywordAjaxHandler:
 
     def do_mark_or_unmark(self, keyword, action):
         user_name = xauth.current_name()
-        key_obj = MSG_DAO.get_by_content(user_name, "key", keyword)
+        
+        with RecordLock(user_name):
+            key_obj = MSG_DAO.get_by_content(user_name, "key", keyword)
 
-        if key_obj == None:
-            # 不存在，创建新的标签
-            ip = get_remote_ip()
-            key_obj = create_message(user_name, "key", keyword, ip)
+            if key_obj == None:
+                # 不存在，创建新的标签
+                ip = get_remote_ip()
+                key_obj = create_message(user_name, "key", keyword, ip)
 
-        if action == "unmark":
-            key_obj.is_marked = None
-        else:
-            key_obj.is_marked = True
+            if action == "unmark":
+                key_obj.is_marked = None
+            else:
+                key_obj.is_marked = True
 
-        MSG_DAO.update(key_obj)
+            MSG_DAO.update(key_obj)
+        
         return dict(code="success")
 
 
