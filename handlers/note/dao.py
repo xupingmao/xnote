@@ -150,8 +150,10 @@ def get_root(creator=None):
     root.url = "/note/group"
     return root
 
+
 def is_root_id(id):
     return id in (None, "", "0", 0)
+
 
 def get_default_group():
     group = Storage()
@@ -1101,12 +1103,13 @@ def count_by_parent(creator, parent_id):
     """
     # TODO 添加索引优化
     parent_id_str = str(parent_id)
+
     def list_note_func(key, value):
         if value.is_deleted:
             return False
         return (value.is_public or value.creator == creator) and str(value.parent_id) == parent_id_str
 
-    return _tiny_db.count(filter_func = list_note_func, user_name=creator)
+    return _tiny_db.count(filter_func=list_note_func, user_name=creator)
 
 
 @xutils.timeit(name="NoteDao.CountDict", logfile=True, logargs=True, logret=True)
@@ -1213,7 +1216,8 @@ def search_content(words, creator=None, orderby="hot_index"):
         return (value.creator == creator or value.is_public) \
             and textutil.contains_all(value.content.lower(), words)
 
-    result = _full_db.list(filter_func = search_func, offset = 0, limit = MAX_SEARCH_SIZE)
+    result = _full_db.list(filter_func=search_func,
+                           offset=0, limit=MAX_SEARCH_SIZE)
 
     # 补全信息
     build_note_list_info(result)
@@ -1233,7 +1237,8 @@ def search_public(words):
         if not value.is_public:
             return False
         return textutil.contains_all(value.name.lower(), words)
-    result = _full_db.list(filter_func = search_public_func, offset = 0, limit = MAX_SEARCH_SIZE)
+    result = _full_db.list(filter_func=search_public_func,
+                           offset=0, limit=MAX_SEARCH_SIZE)
     notes = [build_note_info(item) for item in result]
     sort_notes(notes)
     return notes
@@ -1350,8 +1355,8 @@ def count_sticky(creator):
 def list_archived(creator, offset=0, limit=100):
     def list_func(key, value):
         return value.archived and value.creator == creator and value.is_deleted == 0
-    notes = dbutil.prefix_list("note_tiny:%s" %
-                               creator, list_func, offset, limit)
+    notes = _tiny_db.list(
+        user_name=creator, filter_func=list_func, offset=offset, limit=limit)
     sort_notes(notes)
     return notes
 
@@ -1420,8 +1425,8 @@ def list_tag(user):
 
 
 def list_by_func(creator, list_func, offset, limit):
-    notes = dbutil.prefix_list("note_tiny:%s" %
-                               creator, list_func, offset, limit, reverse=True)
+    notes = _tiny_db.list(user_name=creator, filter_func=list_func,
+                          offset=offset, limit=limit, reverse=True)
     build_note_list_info(notes)
     return notes
 

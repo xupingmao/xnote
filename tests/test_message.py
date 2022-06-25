@@ -9,7 +9,7 @@ import xconfig
 import xauth
 
 from xutils import Storage
-from xutils import u, dbutil
+from xutils import dbutil
 from xutils import dateutil, dbutil
 
 # cannot perform relative import
