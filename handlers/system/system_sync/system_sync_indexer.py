@@ -22,6 +22,8 @@ from xutils import textutil
 
 dbutil.register_table("fs_sync_index", "文件同步索引信息")
 
+_fs_index_db = dbutil.get_hash_table("fs_sync_index")
+
 # 临时文件
 TEMP_FNAME_SET = set([".DS_Store", ".thumbnail", ".git"])
 
@@ -38,6 +40,32 @@ def convert_time_to_str(mtime):
 
 def is_temp_file(fname):
     return fname in TEMP_FNAME_SET
+
+def build_index_by_fpath(fpath):
+    if not os.path.isfile(fpath):
+        return
+
+    stat = os.stat(fpath)
+    mtime = stat.st_mtime
+    ts = convert_time_to_str(mtime)
+    web_path = fsutil.get_webpath(fpath)
+    key = ts + "#" + web_path
+    file_size = stat.st_size
+
+    old_info = _fs_index_db.get(key)
+    if old_info != None and old_info.ts == ts and old_info.size == file_size:
+        logging.debug("文件已处理:%s", fpath)
+        return
+
+    file_info = Storage()
+    file_info.mtime = mtime
+    file_info.fpath = fpath
+    file_info.web_path = web_path
+    file_info.ts = ts
+    file_info.size = file_size
+
+    _fs_index_db.put(key, file_info)
+    logging.debug("更新文件索引:%s", web_path)
 
 class FileSyncIndexManager:
 
@@ -65,27 +93,7 @@ class FileSyncIndexManager:
             return
 
         if os.path.isfile(fpath):
-            stat = os.stat(fpath)
-            mtime = stat.st_mtime
-            ts = convert_time_to_str(mtime)
-            web_path = fsutil.get_webpath(fpath)
-            key = ts + "#" + web_path
-            file_size = stat.st_size
-
-            old_info = db.get(key)
-            if old_info != None and old_info.ts == ts and old_info.size == file_size:
-                logging.debug("文件已处理:%s", fpath)
-                return
-
-            file_info = Storage()
-            file_info.mtime = mtime
-            file_info.fpath = fpath
-            file_info.web_path = web_path
-            file_info.ts = ts
-            file_info.size = file_size
-
-            db.put(key, file_info)
-            logging.debug("更新文件索引:%s", web_path)
+            build_index_by_fpath(fpath)
 
         if os.path.isdir(fpath):
             size = 0
@@ -202,6 +210,11 @@ def on_build_index(ctx = None):
 
     for i in range(10):
         manager.step()
+
+@xmanager.listen("fs.upload")
+def on_fs_upload(ctx = None):
+    filepath = ctx.fpath
+    build_index_by_fpath(filepath)
 
 def list_files(key_from = None):
     manager = FileSyncIndexManager()

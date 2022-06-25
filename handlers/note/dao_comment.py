@@ -57,7 +57,7 @@ def count_comments_by_user(*args, **kw):
     return handle_comments_by_user(dbutil.prefix_count, *args, **kw)
 
 def get_comment(comment_id):
-    value = dbutil.get(comment_id)
+    value = _comment_db.get_by_key(comment_id)
     if value != None:
         value.id = comment_id
     return value

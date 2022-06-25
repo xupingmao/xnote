@@ -14,11 +14,13 @@ import math
 from xutils import fsutil
 from xtemplate import T
 
+
 def get_link(filename, webpath):
     """返回Markdown的链接"""
     if xutils.is_img_file(filename):
         return "![%s](%s)" % (filename, webpath)
     return "[%s](%s)" % (filename, webpath)
+
 
 def get_safe_file_name(filename):
     """处理文件名中的特殊符号"""
@@ -26,7 +28,8 @@ def get_safe_file_name(filename):
         filename = filename.replace(c, "_")
     return filename
 
-def generate_filename(filename, prefix, ext = None):
+
+def generate_filename(filename, prefix, ext=None):
     if prefix:
         prefix = prefix + '.'
     else:
@@ -38,28 +41,35 @@ def generate_filename(filename, prefix, ext = None):
         filename += ext
     return prefix + filename
 
+
 def get_display_name(fpath, parent):
     path = xutils.get_relative_path(fpath, parent)
     return xutils.unquote(path)
+
 
 def get_webpath(fpath):
     rpath = xutils.get_relative_path(fpath, xconfig.DATA_DIR)
     return "/data/" + rpath
 
-def upload_link_by_month(year, month, delta = 0):
-    t_mon  = (month - 1 + delta) % 12 + 1
+
+def upload_link_by_month(year, month, delta=0):
+    t_mon = (month - 1 + delta) % 12 + 1
     t_year = year + math.floor((month-1+delta)/12)
     return "/fs_upload?year=%d&month=%02d" % (t_year, t_mon)
+
 
 def try_touch_note(note_id):
     if note_id != None and note_id != "":
         xutils.call("note.touch", note_id)
 
+
 def try_lock_file(fpath):
     return True
 
-### 业务上用到的函数
-def get_upload_file_path(user, filename, upload_dir = "files", replace_exists = False):
+# 业务上用到的函数
+
+
+def get_upload_file_path(user, filename, upload_dir="files", replace_exists=False):
     """生成上传文件名"""
     import xconfig
     if xconfig.USE_URLENCODE:
@@ -83,19 +93,21 @@ def get_upload_file_path(user, filename, upload_dir = "files", replace_exists = 
         # 使用下划线，括号会使marked.js解析图片url失败
         temp_filename = "{}_{}{}".format(name, fileindex, ext)
         newfilepath = os.path.join(dirname, temp_filename)
-        webpath = "/data/{}/{}/{}/{}".format(upload_dir, user, date, temp_filename)
+        webpath = "/data/{}/{}/{}/{}".format(upload_dir,
+                                             user, date, temp_filename)
         fileindex += 1
     return os.path.abspath(newfilepath), webpath
+
 
 class UploadHandler:
 
     @xauth.login_required()
     def POST(self):
-        file     = xutils.get_argument("file", {})
-        dirname  = xutils.get_argument("dirname")
-        prefix   = xutils.get_argument("prefix")
-        name     = xutils.get_argument("name")
-        note_id  = xutils.get_argument("note_id")
+        file = xutils.get_argument("file", {})
+        dirname = xutils.get_argument("dirname")
+        prefix = xutils.get_argument("prefix")
+        name = xutils.get_argument("name")
+        note_id = xutils.get_argument("note_id")
         user_name = xauth.current_name()
 
         if file.filename != None:
@@ -113,36 +125,39 @@ class UploadHandler:
                 # fout.write(x.file.file.read())
                 for chunk in file.file:
                     fout.write(chunk)
-            xmanager.fire("fs.upload", dict(user=user_name, path=filepath))
-        
+            xmanager.fire("fs.upload", dict(
+                user=user_name, path=filepath, fpath=filepath))
+
         try_touch_note(note_id)
-        return dict(code="success", webpath = webpath, link = get_link(filename, webpath))
+        return dict(code="success", webpath=webpath, link=get_link(filename, webpath))
 
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
-        
+
         xmanager.add_visit_log(user_name, "/fs_upload")
 
-        year  = xutils.get_argument("year", time.strftime("%Y"))
+        year = xutils.get_argument("year", time.strftime("%Y"))
         month = xutils.get_argument("month", time.strftime("%m"))
         if len(month) == 1:
             month = '0' + month
-        
-        dirname = os.path.join(xconfig.DATA_DIR, "files", user_name, "upload", year, month)
+
+        dirname = os.path.join(xconfig.DATA_DIR, "files",
+                               user_name, "upload", year, month)
         pathlist = fsutil.listdir_abs(dirname)
-        
-        return xtemplate.render("fs/page/fs_upload.html", 
-            show_aside = False,
-            html_title = T("文件"),
-            pathlist = pathlist, 
-            year = int(year),
-            month = int(month),
-            path = dirname, 
-            dirname = dirname,
-            get_webpath = get_webpath,
-            upload_link_by_month = upload_link_by_month,
-            get_display_name = get_display_name)
+
+        return xtemplate.render("fs/page/fs_upload.html",
+                                show_aside=False,
+                                html_title=T("文件"),
+                                pathlist=pathlist,
+                                year=int(year),
+                                month=int(month),
+                                path=dirname,
+                                dirname=dirname,
+                                get_webpath=get_webpath,
+                                upload_link_by_month=upload_link_by_month,
+                                get_display_name=get_display_name)
+
 
 class RangeUploadHandler:
 
@@ -158,8 +173,8 @@ class RangeUploadHandler:
                 with open(tmp_path, "rb") as tmp_fp:
                     fp.write(tmp_fp.read())
                 xutils.remove(tmp_path, True)
-            xmanager.fire("fs.upload", dict(user=user_name, path=dest_path))
-
+            xmanager.fire("fs.upload", dict(user=user_name,
+                          path=dest_path, fpath=dest_path))
 
     @xauth.login_required()
     def POST(self):
@@ -179,7 +194,7 @@ class RangeUploadHandler:
             return dict(code="fail", message="can not access parent directory")
 
         filename = None
-        webpath  = ""
+        webpath = ""
         origin_name = ""
 
         # print(web.ctx.env)
@@ -192,8 +207,9 @@ class RangeUploadHandler:
             filename = xutils.get_real_path(filename)
             if dirname == "auto":
                 filename = generate_filename(filename, prefix)
-                filepath, webpath = get_upload_file_path(user_name, filename, replace_exists=True)
-                dirname  = os.path.dirname(filepath)
+                filepath, webpath = get_upload_file_path(
+                    user_name, filename, replace_exists=True)
+                dirname = os.path.dirname(filepath)
                 filename = os.path.basename(filepath)
             else:
                 # TODO check permission.
@@ -205,7 +221,7 @@ class RangeUploadHandler:
             if os.path.exists(filepath):
                 # return dict(code = "fail", message = "文件已存在")
                 web.ctx.status = "500 Server Error"
-                return dict(code = "fail", message = "文件已存在")
+                return dict(code="fail", message="文件已存在")
 
             if part_file:
                 tmp_name = "%s_%d.part" % (filename, chunk)
@@ -225,7 +241,7 @@ class RangeUploadHandler:
                     fp.write(file_chunk)
         else:
             return dict(code="fail", message=u"请选择文件")
-        if part_file and chunk+1==chunks:
+        if part_file and chunk+1 == chunks:
             self.merge_files(dirname, filename, chunks)
 
         try_touch_note(note_id)
@@ -233,13 +249,14 @@ class RangeUploadHandler:
             xutils.call("note.touch", note_id)
         return dict(code="success", webpath=webpath, link=get_link(origin_name, webpath))
 
+
 class UploadSearchHandler:
 
     @xauth.login_required()
     def GET(self):
         key = xutils.get_argument("key")
         user_name = xauth.current_name()
-        user_dir  = os.path.join(xconfig.UPLOAD_DIR, user_name)
+        user_dir = os.path.join(xconfig.UPLOAD_DIR, user_name)
 
         find_key = "*" + key + "*"
         if find_key == "**":
@@ -247,16 +264,17 @@ class UploadSearchHandler:
         else:
             plist = sorted(xutils.search_path(user_dir, find_key, "file"))
 
-        return xtemplate.render("fs/page/fs_upload.html", 
-            show_aside = False,
-            html_title = T("文件"),
-            page = "search",
-            pathlist = plist, 
-            path = user_dir, 
-            dirname = user_dir,
-            get_webpath = get_webpath,
-            upload_link_by_month = upload_link_by_month,
-            get_display_name = get_display_name)
+        return xtemplate.render("fs/page/fs_upload.html",
+                                show_aside=False,
+                                html_title=T("文件"),
+                                page="search",
+                                pathlist=plist,
+                                path=user_dir,
+                                dirname=user_dir,
+                                get_webpath=get_webpath,
+                                upload_link_by_month=upload_link_by_month,
+                                get_display_name=get_display_name)
+
 
 class CheckHandler:
 
@@ -264,11 +282,12 @@ class CheckHandler:
     def GET(self):
         pass
 
+
 xutils.register_func("fs.get_upload_file_path", get_upload_file_path)
 
 xurls = (
     # 和文件系统的/fs/冲突了
-    r"/fs_upload", UploadHandler, 
+    r"/fs_upload", UploadHandler,
     r"/fs_upload/check", CheckHandler,
     r"/fs_upload/search", UploadSearchHandler,
     r"/fs_upload/range", RangeUploadHandler
