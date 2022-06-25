@@ -10,6 +10,7 @@ from xutils import dbutil
 from xutils import textutil
 from xutils import netutil
 from xutils.db.binlog import BinLog
+from xutils.db.dbutil_deque import DequeTable
 
 import os
 import threading
@@ -586,3 +587,56 @@ class TestMain(BaseTestCase):
         binlog.delete_expired()
 
         self.assertEqual(10, len(binlog.list(0, limit=20)))
+
+    def test_deque_1(self):
+        dbutil.register_table("deque_test", "deque测试")
+
+        q = DequeTable("deque_test", max_size=5)
+        q.append("v1")
+        q.append("v2")
+        q.append("v3")
+        q.append("v4")
+        
+        self.assertEqual(4, len(q))
+        batch = dbutil.create_write_batch()
+        q.append("v5", batch=batch)
+        batch.commit()
+
+        self.assertEqual(5, len(q))
+
+        # 读取队列的数据
+        value = q.popleft()
+        self.assertEqual(value, "v1")
+        self.assertEqual(4, len(q))
+
+        q.append("v6")
+        self.assertEqual(q.last(), "v6")
+        self.assertEqual(q.first(), "v2")
+        self.assertEqual(5, len(q))
+
+    def test_deque_2(self):
+        dbutil.register_table("deque_test_2", "deque测试")
+
+        q = DequeTable("deque_test_2", max_size=5)
+        q.appendleft("v1")
+        q.appendleft("v2")
+        q.appendleft("v3")
+        q.appendleft("v4")
+
+        self.assertEqual(4, len(q))
+
+        batch = dbutil.create_write_batch()
+        q.appendleft("v5", batch=batch)
+        batch.commit()
+
+        self.assertEqual(5, len(q))
+
+        # 读取队列的数据
+        value = q.pop()
+        self.assertEqual(value, "v1")
+        self.assertEqual(4, len(q))
+
+        q.appendleft("v6")
+        self.assertEqual(q.first(), "v6")
+        self.assertEqual(q.last(), "v2")
+        self.assertEqual(5, len(q))

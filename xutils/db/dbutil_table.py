@@ -16,6 +16,7 @@ register_table("_id", "系统ID表")
 MAX_ID_KEY = "_id:max_id"
 
 register_table("_index", "通用索引")
+register_table("_meta", "表元信息")
 
 
 def _dict_del(dict, key):

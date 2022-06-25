@@ -60,18 +60,13 @@ def init(db_dir,
          binlog=False,
          binlog_max_size=None):
 
-    if db_instance != None:
-        _leveldb = db_instance
-    else:
-        _leveldb = create_db_instance(db_dir,
-                                      block_cache_size=block_cache_size,
-                                      write_buffer_size=write_buffer_size)
+    assert db_instance != None
 
     set_db_cache(db_cache)
-    set_db_instance(_leveldb)
+    set_db_instance(db_instance)
 
     BinLog.set_enabled(binlog)
     BinLog.set_max_size(binlog_max_size)
 
-    xutils.log("leveldb: %s" % _leveldb)
+    xutils.log("leveldb: %s" % db_instance)
 
