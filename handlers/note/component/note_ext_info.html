@@ -1,9 +1,18 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-02-11 22:35:52
+@LastEditors  : xupingmao
+@LastEditTime : 2022-06-26 19:06:27
+@FilePath     : /xnote/handlers/note/component/note_ext_info.html
+@Description  : 描述
+ #} -->
 {# 文章信息 #}
 
 {% init show_ext_info   = True %}
 
 {% if show_ext_info %}
     <div class="card">
-        <div class="pad5">{{file.creator}} 创建于 {{file.cdate}} 更新于 {{file.mdate}}</div>
+        <div class="pad5">{{file.creator}} 创建于 {{file.create_date}} 更新于 {{file.update_date}}</div>
     </div>
 {% end %}
