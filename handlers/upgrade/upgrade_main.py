@@ -21,7 +21,6 @@ import xauth
 import logging
 from xutils import dbutil
 from xutils import dateutil
-from xutils import mem_util
 
 MAX_FILE_COUNT = 10
 dbutil.register_table("db_upgrade_log", "数据库升级日志")
@@ -36,6 +35,7 @@ def is_upgrade_done(op_flag):
 def mark_upgrade_done(op_flag):
     db = get_upgrade_log_table()
     db.put(op_flag, "1")
+
 
 def log_info(fmt, *args):
     print(dateutil.format_time(), "[upgrade]", fmt.format(*args))
@@ -61,6 +61,7 @@ def check_upgrade(ctx = None):
 
         if hasattr(mod, "do_upgrade"):
             logging.info("执行升级: %s", mod_name)
+            # 如果升级失败，直接跳过
             mod.do_upgrade()
 
     logging.info("check_upgrade done")

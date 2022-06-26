@@ -9,7 +9,7 @@ from urllib.parse import quote
 from xutils import Storage
 from xutils.db.dbutil_base import *
 from xutils.db.dbutil_table_index import TableIndex
-from xutils.db.encode import decode_str, encode_index_value, encode_str
+from xutils.db.encode import decode_str, encode_index_value, encode_str, clean_value_before_update
 from xutils.db.binlog import BinLog
 
 register_table("_id", "系统ID表")
@@ -17,11 +17,6 @@ MAX_ID_KEY = "_id:max_id"
 
 register_table("_index", "通用索引")
 register_table("_meta", "表元信息")
-
-
-def _dict_del(dict, key):
-    if key in dict:
-        del dict[key]
 
 
 class TableValidator:
@@ -49,7 +44,6 @@ class LdbTable:
     """
 
     def __init__(self, table_name, user_name=None):
-        global INDEX_INFO_DICT
         # 参数检查
         check_table_name(table_name)
         table_info = get_table_info(table_name)
@@ -71,13 +65,7 @@ class LdbTable:
 
         self.binlog = BinLog.get_instance()
         self.binlog_enabled = True
-
-        indexes = []
-        for index_name in self.index_names:
-            indexes.append(TableIndex(table_name, index_name, table_info.user_attr,
-                                      check_user=table_info.check_user))
-
-        self.indexes = indexes
+        self.indexes = self._build_indexes(table_info)
 
         if user_name != None:
             assert user_name != ""
@@ -85,6 +73,17 @@ class LdbTable:
 
         if self.prefix[-1] != ":":
             self.prefix += ":"
+    
+    def _build_indexes(self, table_info):
+        indexes = []
+        index_dict = IndexInfo.get_table_index_dict(self.table_name)
+        if index_dict != None:
+            for index_name in index_dict:
+                index_info = index_dict[index_name]
+                indexes.append(TableIndex(self.table_name, index_info.index_name, table_info.user_attr,
+                                        check_user=table_info.check_user,
+                                        index_type=index_info.index_type))
+        return indexes
 
     def set_binlog_enabled(self, enabled=True):
         self.binlog_enabled = enabled
@@ -126,8 +125,7 @@ class LdbTable:
 
     def _convert_to_db_row(self, obj):
         obj_copy = dict(**obj)
-        _dict_del(obj_copy, self.key_name)
-        _dict_del(obj_copy, self.id_name)
+        clean_value_before_update(obj_copy)
         return obj_copy
 
     def _create_increment_id(self, start_id=None):
@@ -407,10 +405,28 @@ class LdbTable:
         return self.list(offset=offset, limit=limit, reverse=reverse,
                          filter_func=filter_func, user_name=user_name)
 
-    def create_index_map_func(self, filter_func):
-        def map_func(key, value):
+    def create_index_map_func(self, filter_func, index_type="ref"):
+        def map_func_for_copy(key, value):
+            obj_key = value.get("key")
+            obj_value = value.get("value")
+            self._format_value(obj_key, obj_value)
+            if isinstance(obj_value, dict):
+                obj_value = Storage(**obj_value)
+
+            if filter_func is None:
+                return obj_value
+            else:
+                # 这里应该是使用obj参数来过滤
+                is_match = filter_func(obj_key, obj_value)
+                if is_match:
+                    return obj_value
+                return None
+    
+        def map_func_for_ref(key, value):
             # 先判断实例是否存在
+            # 普通的引用索引
             obj = self.get_by_key(value)
+        
             if obj is None:
                 # 异步 delete(key)
                 logging.warning("invalid key:(%s)", key)
@@ -436,16 +452,26 @@ class LdbTable:
                 if is_match:
                     return obj
                 return None
-        return map_func
+        
+        if index_type == "copy":
+            return map_func_for_copy
+        
+        return map_func_for_ref
+        
 
     def count_by_index(self, index_name, filter_func=None, index_value=None):
+        validate_str(index_name, "index_name can not be empty")
+        index_info = IndexInfo.get_table_index_info(self.table_name, index_name)
+        if index_info == None:
+            raise Exception("index not found: %s", index_name)
+
         if index_value != None:
             index_value = encode_index_value(index_value)
             prefix = self._get_index_prefix(index_name) + ":" + index_value
         else:
             prefix = self._get_index_prefix(index_name)
 
-        map_func = self.create_index_map_func(filter_func)
+        map_func = self.create_index_map_func(filter_func, index_type = index_info.index_type)
         return prefix_count(prefix, map_func=map_func)
 
     def list_by_index(self, index_name, filter_func=None,
@@ -459,6 +485,9 @@ class LdbTable:
         @param {bool} reverse 是否逆向查询
         """
         validate_str(index_name, "index_name can not be empty")
+        index_info = IndexInfo.get_table_index_info(self.table_name, index_name)
+        if index_info == None:
+            raise Exception("index not found: %s", index_name)
 
         if isinstance(index_value, dict):
             # TODO: 参考 mongodb 的 {$gt: 20} 这种格式的
@@ -470,7 +499,7 @@ class LdbTable:
         else:
             prefix = self._get_index_prefix(index_name)
 
-        map_func = self.create_index_map_func(filter_func)
+        map_func = self.create_index_map_func(filter_func, index_type = index_info.index_type)
         return list(prefix_iter(prefix, offset=offset, limit=limit,
                                 map_func=map_func,
                                 reverse=reverse, include_key=False))
@@ -499,6 +528,11 @@ class LdbTable:
     def count_by_func(self, user_name, filter_func):
         assert filter_func != None, "[count_by_func.assert] filter_func != None"
         return self.count(user_name=user_name, filter_func=filter_func)
+    
+    def drop_index(self, index_name):
+        for index in self.indexes:
+            if index.index_name == index_name:
+                index.drop()
 
 
 class PrefixedDb(LdbTable):

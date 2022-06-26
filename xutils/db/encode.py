@@ -152,3 +152,12 @@ def convert_bytes_to_object(bytes, parse_json=True):
     if isinstance(obj, dict):
         obj = Storage(**obj)
     return obj
+
+def _dict_del(dict, key):
+    if key in dict:
+        del dict[key]
+
+def clean_value_before_update(value):
+    if isinstance(value, dict):
+        _dict_del(value, "_id")
+        _dict_del(value, "_key")

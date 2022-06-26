@@ -14,6 +14,8 @@ from xutils import quote
 from xutils import textutil
 from xtemplate import T
 
+from .dao_comment import search_comment
+
 NOTE_DAO = DAO("note")
 
 def get_page_max(count):
@@ -118,11 +120,14 @@ class CommentListAjaxHandler:
             comments = NOTE_DAO.list_comments_by_user(user_name, 
                 date = list_date, offset = offset, 
                 limit = page_size)
-            page_max = get_page_max(count)
+        if list_type == "search":
+            comments = self.search_comments(user_name)
+            count = len(comments)
         else:
             comments  = NOTE_DAO.list_comments(note_id, offset = offset, limit = page_size)
             count = NOTE_DAO.count_comment_by_note(note_id)
-            page_max = get_page_max(count)
+        
+        page_max = get_page_max(count)
 
         # 处理评论列表
         process_comments(comments, show_note)
@@ -132,6 +137,12 @@ class CommentListAjaxHandler:
                 page = page, page_max = page_max, show_edit = show_edit)
         else:
             return comments
+    
+    def search_comments(self, user_name):
+        key = xutils.get_argument("key", "")
+        note_id = xutils.get_argument("note_id", "")
+        keywords = textutil.split_words(key)
+        return search_comment(user_name = user_name, keywords = keywords, limit=1000, note_id = note_id)
 
 class SaveCommentAjaxHandler:
 

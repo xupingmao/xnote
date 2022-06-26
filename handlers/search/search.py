@@ -445,6 +445,7 @@ def do_reload_search(ctx = None):
     register_search_handler("comment", placeholder = u"搜索评论")
     register_search_handler("default", placeholder = u"综合搜索", action = "/search")
     register_search_handler("relevant_word", placeholder=u"搜索单词", action = "/dict/relevant/list")
+    register_search_handler("checklist", placeholder=u"搜索清单列表", action="/note/checklist/search")
 
 class SearchDialogAjaxHandler:
 

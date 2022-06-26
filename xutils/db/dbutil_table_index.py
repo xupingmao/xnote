@@ -4,19 +4,22 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-03 11:52:39
+@LastEditTime : 2022-06-26 16:21:35
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
+                - [x] 引用索引
+                - [x] 聚集索引支持
+                - [] 联合索引支持
+                - [] 列表索引支持
 """
 
 import logging
-from xutils.db.encode import encode_index_value
-from xutils.db.dbutil_base import validate_obj, validate_str, validate_dict
-
+from xutils.db.encode import encode_index_value, clean_value_before_update
+from xutils.db.dbutil_base import db_delete, validate_obj, validate_str, validate_dict, prefix_iter
 
 class TableIndex:
 
-    def __init__(self, table_name=None, index_name=None, user_attr=None, check_user=False):
+    def __init__(self, table_name=None, index_name=None, user_attr=None, check_user=False,index_type="ref"):
         assert table_name != None
         assert index_name != None
 
@@ -26,6 +29,7 @@ class TableIndex:
         self.key_name = "_key"
         self.check_user = check_user
         self.prefix = "_index$%s$%s" % (self.table_name, index_name)
+        self.index_type = index_type
 
         if check_user and user_attr == None:
             raise Exception("user_attr没有注册, table_name:%s" % table_name)
@@ -80,8 +84,9 @@ class TableIndex:
 
         # 索引值是否变化
         index_changed = (new_value != old_value)
+        need_update = self.index_type == "copy" or index_changed
 
-        if not index_changed:
+        if not need_update:
             logging.debug("index value unchanged, index_name:(%s), value:(%s)",
                           index_name, old_value)
             if not force_update:
@@ -96,7 +101,15 @@ class TableIndex:
         # 新的索引值始终更新
         new_value = encode_index_value(new_value)
         new_index_key = index_prefix + ":" + new_value + ":" + escaped_obj_id
-        batch.check_and_put(new_index_key, obj_key)
+
+        if self.index_type == "copy":
+            clean_obj = dict(**new_obj)
+            clean_value_before_update(clean_obj)
+            index_value = dict(key = obj_key, value = clean_obj)
+            batch.check_and_put(new_index_key, index_value)
+        else:
+            # ref
+            batch.check_and_put(new_index_key, obj_key)
 
     def delete_index(self, old_obj, batch):
         assert old_obj != None
@@ -112,3 +125,7 @@ class TableIndex:
         index_prefix = self._get_prefix(user_name)
         index_key = index_prefix + ":" + old_value + ":" + escaped_obj_id
         batch.delete(index_key)
+    
+    def drop(self):
+        for key, value in prefix_iter(self.prefix, limit=-1, include_key=True):
+            db_delete(key)

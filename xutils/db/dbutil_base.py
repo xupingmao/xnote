@@ -342,10 +342,43 @@ class TableInfo:
         return list(map(lambda x: x.name, values))
     
     def get_index_names(self):
-        index_names = INDEX_INFO_DICT.get(self.name)
-        if index_names == None:
+        return IndexInfo.get_table_index_names(self.name)
+
+class IndexInfo:
+
+    _table_dict = dict() # dict[table_name] = dict[index_name]index_value
+
+    def __init__(self, table_name, index_name, index_type = "ref"):
+        self.table_name = table_name
+        self.index_name = index_name
+        self.index_type = index_type
+    
+    @classmethod
+    def register(cls, table_name, index_name, index_type):
+        info = IndexInfo(table_name, index_name, index_type)
+        index_dict = cls._table_dict.get(table_name)
+        if index_dict == None:
+            index_dict = dict()
+        index_dict[index_name] = info
+        cls._table_dict[table_name] = index_dict
+    
+    @classmethod
+    def get_table_index_names(cls, table_name):
+        index_dict = cls._table_dict.get(table_name)
+        if index_dict == None:
             return set()
-        return index_names
+        return index_dict.keys()
+
+    @classmethod
+    def get_table_index_info(cls, table_name, index_name):
+        index_dict = cls._table_dict.get(table_name)
+        if index_dict == None:
+            return None
+        return index_dict.get(index_name)
+    
+    @classmethod
+    def get_table_index_dict(cls, table_name):
+        return cls._table_dict.get(table_name)
 
 
 def register_table(table_name,
@@ -379,16 +412,16 @@ def _register_table_inner(table_name,
     info.user_attr = user_attr
 
 
-def register_table_index(table_name, index_name, comment=None):
+def register_table_index(table_name, index_name, comment=None, index_type="ref"):
     """注册表的索引"""
     validate_str(table_name, "invalid table_name")
     validate_str(index_name, "invalid index_name")
+    if index_type not in ("ref", "copy"):
+        raise Exception("invalid index_type:(%s)" % index_type)
+    
     check_table_name(table_name)
-    index_info = INDEX_INFO_DICT.get(table_name)
-    if index_info is None:
-        index_info = set()
-    index_info.add(index_name)
-    INDEX_INFO_DICT[table_name] = index_info
+
+    IndexInfo.register(table_name, index_name, index_type)
 
     # 注册索引表
     index_table = get_index_table_name(table_name, index_name)
@@ -415,8 +448,7 @@ def get_table_names():
 
 
 def get_table_index_names(table_name):
-    validate_str(table_name, "invalid table_name")
-    return INDEX_INFO_DICT.get(table_name) or set()
+    return IndexInfo.get_table_index_names(table_name)
 
 
 def get_index_table_name(table_name, index_name):

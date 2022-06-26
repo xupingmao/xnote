@@ -11,7 +11,8 @@
     {% include note/component/editor/editor_default_vars.html %}
 
     {% init show_tags = False %}
-    {% set globals()["show_comment"] = False %}
+    {% init show_checklist_search = False %}
+    {% set-global show_comment = False %}
 
     <div class="card">
         {% include note/component/view_header.html %}
@@ -25,6 +26,19 @@
     {% set-global comment_placeholder = T("请输入清单项...") %}
     {% set-global comment_empty_text = T("暂无清单项~") %}
     {% set-global show_comment_edit = True %}
+
+    <!-- 清单搜索的功能 -->
+    {% if show_checklist_search %}
+        <div class="card btn-line-height">
+            <span class="tag info">搜索</span>
+            <span>{{key}}</span>
+
+            <div class="float-right">
+                <a class="btn btn-default" href="{{file.url}}">重置搜索</a>
+                <a class="btn btn-default" href="/search?key={{quote(key)}}">全站搜索</a>
+            </div>
+        </div>
+    {% end %}
 
     <!-- 清单的底层就是直接复用的评论的能力 -->
     {% include note/page/comment.html %}

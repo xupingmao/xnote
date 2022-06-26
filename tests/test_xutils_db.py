@@ -5,7 +5,7 @@
 # @filename test_xutils_db.py
 
 from .a import *
-from web.utils import Storage
+from xutils import Storage
 from xutils import dbutil
 from xutils import textutil
 from xutils import netutil
@@ -425,18 +425,25 @@ class TestMain(BaseTestCase):
     def test_db_index_no_user(self):
         dbutil.register_table("index_test", "索引测试")
         dbutil.register_table_index("index_test", "age")
-        dbutil.register_table_index("index_test", "name")
+        dbutil.register_table_index("index_test", "name", index_type="copy")
 
-        obj1 = dict(name="Ada", age=20)
+        obj1 = Storage(name="Ada", age=20)
         db = dbutil.get_table("index_test")
         db.insert(obj1)
 
-        obj2 = dict(name="Bob", age=21)
+        obj2 = Storage(name="Bob", age=21)
         db.insert(obj2)
 
         result = db.list_by_index("age", index_value=20)
         self.assertEqual(1, len(result))
         self.assertEqual("Ada", result[0].name)
+
+        # 校验索引值是否正确
+        obj1_name_index = dbutil.db_get("_index$index_test$name:Ada:" + obj1._id)
+        self.assertEqual(obj1_name_index.key, "index_test:" + obj1._id)
+        self.assertEqual(obj1_name_index.value["name"], "Ada")
+        self.assertEqual(obj1_name_index.value["age"], 20)
+
 
         obj1["age"] = 25
         db.update(obj1)

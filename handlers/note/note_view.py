@@ -158,13 +158,15 @@ def view_group_detail_func(file, kw):
     else:
         kw.template_name = "note/page/detail/group_detail.html"
 
-def view_list_func(note, kw):
+def view_checklist_func(note, kw):
     kw.show_aside = False
     kw.show_pagination = False
     kw.show_comment_title = True
     kw.comment_title = T("清单项")
     kw.op = "view"
-    kw.template_name = "note/page/detail/list_detail.html"
+    kw.template_name = "note/page/detail/checklist_detail.html"
+    kw.search_type = "checklist"
+    kw.search_ext_dict = dict(note_id = note.id)
 
 def view_table_func(note, kw):
     kw.show_aside = False
@@ -181,7 +183,7 @@ VIEW_FUNC_DICT = {
     "text": view_or_edit_md_func,
     "memo": view_or_edit_md_func,
     "log" : view_or_edit_md_func,
-    "list": view_list_func,
+    "list": view_checklist_func,
     "csv" : view_table_func,
     "gallery": view_gallery_func,
     "html": view_html_func,
@@ -332,14 +334,6 @@ class PrintHandler:
         user_name = xauth.current_name()
         check_auth(file, user_name)
         return xtemplate.render("note/page/print.html", show_menu = False, note = file)
-
-def sqlite_escape(text):
-    if text is None:
-        return "NULL"
-    if not (isinstance(text, str)):
-        return repr(text)
-    text = text.replace("'", "''")
-    return "'" + text + "'"
 
 def result(success = True, msg=None):
     return {"success": success, "result": None, "msg": msg}
