@@ -103,7 +103,7 @@ def convert_to_html(comments, show_note = False, page = 1, page_max = 1, show_ed
 class CommentListAjaxHandler:
 
     def GET(self):
-        note_id   = xutils.get_argument("note_id")
+        note_id   = xutils.get_argument("note_id", "")
         list_type = xutils.get_argument("list_type")
         resp_type = xutils.get_argument("resp_type")
         list_date = xutils.get_argument("list_date")
@@ -120,10 +120,11 @@ class CommentListAjaxHandler:
             comments = NOTE_DAO.list_comments_by_user(user_name, 
                 date = list_date, offset = offset, 
                 limit = page_size)
-        if list_type == "search":
+        elif list_type == "search":
             comments = self.search_comments(user_name)
             count = len(comments)
         else:
+            assert note_id != None and note_id != ""
             comments  = NOTE_DAO.list_comments(note_id, offset = offset, limit = page_size)
             count = NOTE_DAO.count_comment_by_note(note_id)
         

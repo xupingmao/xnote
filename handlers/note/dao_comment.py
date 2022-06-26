@@ -34,7 +34,7 @@ def list_comments(note_id, offset=0, limit=100):
     return comments
 
 
-def handle_comments_by_user(handle_func, user_name, date=None, offset=0, limit=100):
+def handle_comments_by_user(handle_type, user_name, date=None, offset=0, limit=100):
     list_func = None
 
     if date is not None and date != "":
@@ -43,7 +43,7 @@ def handle_comments_by_user(handle_func, user_name, date=None, offset=0, limit=1
                 return False
             return value.ctime.startswith(date)
 
-    if handle_func == dbutil.prefix_count:
+    if handle_type == "count":
         return _comment_db.count_by_index("user", index_value=user_name, filter_func=list_func)
 
     return _comment_db.list_by_index("user", index_value=user_name, filter_func=list_func,
@@ -52,14 +52,14 @@ def handle_comments_by_user(handle_func, user_name, date=None, offset=0, limit=1
 
 def list_comments_by_user(*args, **kw):
     result = []
-    for value in handle_comments_by_user(dbutil.prefix_list, *args, **kw):
+    for value in handle_comments_by_user("list", *args, **kw):
         value["id"] = value._id
         result.append(value)
     return result
 
 
 def count_comments_by_user(*args, **kw):
-    return handle_comments_by_user(dbutil.prefix_count, *args, **kw)
+    return handle_comments_by_user("count", *args, **kw)
 
 
 def get_comment(comment_id):
