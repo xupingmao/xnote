@@ -10,6 +10,7 @@ import xconfig
 
 from xutils import dbutil
 from xutils import textutil
+from xutils import dateutil
 
 
 def register_note_table(name, description, user_attr=None):
@@ -77,6 +78,7 @@ def check_comment(comment):
 
 def create_comment(comment):
     check_comment(comment)
+    comment.ctime = dateutil.format_datetime()
 
     _comment_db.insert(comment)
 
@@ -87,6 +89,7 @@ def update_comment(comment):
     assert comment != None
     assert comment.user != None
     assert comment.note_id != None
+    comment.mtime = dateutil.format_datetime()
 
     _comment_db.update(comment)
 
