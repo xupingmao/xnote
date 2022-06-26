@@ -121,6 +121,18 @@
     cursor: pointer;
 }
 
+.btn.danger {
+    color: red;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.btn.danger:hover {
+    background-color: #ccc;
+    border-color: #000;
+}
+
 .btn.danger2 {
     color: red;
 }
