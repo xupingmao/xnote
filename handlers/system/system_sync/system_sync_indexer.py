@@ -86,7 +86,6 @@ class FileSyncIndexManager:
             self.init_file_queue()
             return
 
-        db = dbutil.get_table("fs_sync_index", type = "hash")
         fpath = self.data.popleft()
         if not os.path.exists(fpath):
             logging.error("文件不存在:%s", fpath)
@@ -105,12 +104,22 @@ class FileSyncIndexManager:
                 size += 1
 
             logging.debug("文件夹进队列 fpath:%s, size:%s", fpath, size)
+    
+
+    def build_full_index(self):
+        self.data.clear()
+        self.init_file_queue()
+        start_time = time.time()
+        while len(self.data) > 0:
+            self.step()
+        cost_time = time.time() - start_time
+        logging.info("构建索引耗时: %0.2fms", cost_time*1000)
 
     def list_files(self, key_from = None, offset = 0, limit = 20):
         result = []
         MAX_LIMIT = limit * 5
         # 这里故意没有用hash_table，是为了使用table的接口
-        db = dbutil.get_table("fs_sync_index")
+        db = _fs_index_db
 
         for value in db.iter(offset = offset, limit = MAX_LIMIT, key_from = key_from):
             fpath = value.fpath
@@ -200,20 +209,13 @@ class FileIndexCheckManager:
 
         FileIndexCheckManager.last_check_time = time.time()
 
-@xmanager.listen("cron.minute")
-def on_build_index(ctx = None):
-    if get_system_role() != "leader":
-        return
-
-    logging.debug("构建文件同步索引...")
-    manager = FileSyncIndexManager()
-
-    for i in range(10):
-        manager.step()
 
 @xmanager.listen("fs.upload")
 def on_fs_upload(ctx = None):
-    filepath = ctx.fpath
+    logging.debug("检测到文件上传信息:%s", ctx)
+    filepath = ctx.get("fpath")
+    if filepath == None:
+        return
     build_index_by_fpath(filepath)
 
 def list_files(key_from = None):
@@ -224,7 +226,6 @@ def count_index():
     manager = FileSyncIndexManager()
     return manager.count_index()
 
-xutils.register_func("system_sync.build_index", on_build_index)
 xutils.register_func("system_sync.list_files", list_files)
 xutils.register_func("system_sync.count_index", count_index)
 

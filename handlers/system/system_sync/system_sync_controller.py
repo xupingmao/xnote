@@ -141,6 +141,9 @@ class SyncHandler:
             return self.get_detail()
 
         if p == "build_index":
+            if not xconfig.get_global_config("system.build_fs_sync_index"):
+                return dict(code="403", message="文件同步索引未开启 [build_fs_sync_index]")
+
             return self.do_build_index()
 
         if p == "sync_files_from_leader":
@@ -208,7 +211,8 @@ class SyncHandler:
 
     @xauth.login_required("admin")
     def do_build_index(self):
-        xutils.call("system_sync.build_index")
+        manager = system_sync_indexer.FileSyncIndexManager()
+        manager.build_full_index()
         return dict(code="success")
 
     def do_ping(self):
@@ -371,25 +375,6 @@ def on_sync_db_from_leader(ctx=None):
         xutils.print_exc()
         logging.error("sync_db_from_leader failed, wait 60 seconds...")
         time.sleep(60)
-
-
-@xmanager.listen("sync.step")
-def on_sync_step(ctx = None):
-    tm = time.localtime()
-    if tm.tm_sec != 0:
-        # logging.debug("未到检查索引时间")
-        return
-
-    if FOLLOWER.is_at_full_sync():
-        # 尽快完成数据库同步
-        return
-
-    logging.debug("检查文件同步索引...")
-    manager = system_sync_indexer.FileIndexCheckManager()
-    for i in range(10):
-        manager.step()
-    time.sleep(0.1)
-
 
 xurls = (
     r"/system/sync", SyncHandler,

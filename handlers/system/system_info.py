@@ -56,6 +56,10 @@ class InfoHandler:
 
     @xauth.login_required("admin")
     def GET(self):
+        p = xutils.get_argument("p", "")
+        if p == "config_dict":
+            return xconfig.get_config_dict()
+
         items = [
             SystemInfoItem("Python版本", value = get_python_version()),
             SystemInfoItem("Xnote版本", value = get_xnote_version()),

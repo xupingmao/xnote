@@ -53,5 +53,16 @@
         "sound":0,
         "webpage":0,
         "id":null
+    },
+    {
+        "name": "[系统]重建文件索引",
+        "url": "/system/sync?p=build_index",
+        "tm_wday": "*",
+        "tm_hour": "1",
+        "tm_min": "16",
+        "message": "",
+        "sound":0,
+        "webpage":0,
+        "id":null
     }
 ]
