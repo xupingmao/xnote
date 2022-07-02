@@ -28,70 +28,7 @@
 <div class="card">
     <div class="list">
         {% if node_role == "follower" %}
-            <div class="list-item">
-                <span>主节点服务器(<a href="{{leader_host}}">{{leader_host}}</a>)</span>
-                <div class="float-right">
-                    <a class="btn btn-default config-btn" 
-                        data-title="设置主服务器"
-                        data-key="leader.host"
-                        data-default="{{leader_host}}">设置</a>
-                    <!-- <i class="fa fa-chevron-right"></i> -->
-                </div>
-            </div>
-
-            <div class="list-item">
-                <span>主服务器token</span>
-                <div class="float-right">
-                    <a class="btn btn-default config-btn" 
-                        data-title="设置主服务器token"
-                        data-key="leader.token"
-                        data-default="{{leader_token}}">设置</a>
-                    <!-- <i class="fa fa-chevron-right"></i> -->
-                </div>
-            </div>
-
-            <div class="list-item">
-                <span>主节点文件索引数</span>
-                <div class="float-right">
-                    <span>{{fs_index_count}}</span>
-                </div>
-            </div>
-
-            <div class="list-item">
-                <span>同步进度</span>
-                <div class="float-right">
-                    <span>{{sync_process}}</span>
-                </div>
-            </div>
-
-            <div class="list-item">
-                <span>同步失败</span>
-                <div class="float-right">
-                    <a href="/system/db_scan?prefix=fs_sync_index_failed&reverse=true">{{sync_failed_count}}</a>
-                </div>
-            </div>
-
-            <div class="list-item">
-                <span>重置当前位点</span>
-                <div class="float-right">
-                    <a class="btn btn-default confirm-btn" 
-                        data-title="确认重置当前位点?"
-                        data-key="reset_offset">重置</a>
-                    <!-- <i class="fa fa-chevron-right"></i> -->
-                </div>
-            </div>
-            
-            {% if False %}
-                <div class="list-item">
-                    <span>触发同步</span>
-                    <div class="float-right">
-                        <a class="btn btn-default confirm-btn" 
-                            data-title="确认同步一次?"
-                            data-key="trigger_sync">同步一次</a>
-                        <!-- <i class="fa fa-chevron-right"></i> -->
-                    </div>
-                </div>
-            {% end %}
+            {% include system/component/system_sync_follower_view.html %}
         {% end %}
 
         {% if node_role == "leader" %}
@@ -129,49 +66,7 @@
     </div>
 </div>
 
-
-<div class="card">
-    <div class="list">
-        <div class="list-item">
-            <span>集群信息</span>
-            <div class="float-right">
-                <a class="btn btn-default refresh-btn">刷新</a>
-            </div>
-        </div>
-        
-        {% if ping_error != None %}
-        <div class="list-item">
-            <span>错误信息</span>
-            <div class="float-right">
-                <span class="error">{{ping_error}}</span>
-            </div>
-        </div>
-        {% end %}
-
-        <div class="list-item">
-            <span class="task-tag">主节点</span>
-            <span>{{leader_node_id}}</span>
-            <span>(<a href="{{leader_url}}">{{leader_url}}</a>)</span>
-            <div class="float-right">
-                <!-- <a class="btn btn-default">查看</a> -->
-            </div>
-        </div>
-
-
-        {% for info in follower_list %}
-            <div class="list-item">
-                <span class="info-tag">从节点</span>
-                <span>{{info.node_id}}</span>
-                <span>(<a href="{{info.http_url}}">{{info.http_url}}</a>)</span>
-                <div class="float-right">
-                    <a class="btn btn-default view-ajax-btn" 
-                        data-type="follower" 
-                        data-key="{{info.http_url}}">查看</a>
-                </div>
-            </div>
-        {% end %}
-    </div>
-</div>
+{% include system/component/system_sync_cluster_info.html %}
 
 <script type="text/javascript">
 $(function () {

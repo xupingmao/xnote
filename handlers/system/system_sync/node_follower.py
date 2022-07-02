@@ -125,6 +125,11 @@ class Follower(NodeManagerBase):
 
     def get_leader_url(self):
         return CONFIG.get("leader.host")
+    
+    def get_leader_info(self):
+        if self.ping_result != None:
+            return self.ping_result.get("leader")
+        return None
 
     def get_ping_error(self):
         return self.ping_error
@@ -365,12 +370,15 @@ class DBSyncer:
                 continue
 
             optype = data.get("optype")
+            key = data.get("key")
+            value = data.get("value")
+            assert key != None
+            if value == None:
+                optype = "delete"
+
             if optype == "put":
-                key = data.get("key")
-                value = data.get("value")
                 self.put_and_log(key, value)
             elif optype == "delete":
-                key = data.get("key")
                 self.delete_and_log(key)
             else:
                 logging.error("未知的optype:%s", optype)

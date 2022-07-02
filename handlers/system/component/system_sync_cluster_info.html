@@ -1,0 +1,43 @@
+
+<div class="card">
+    <div class="list">
+        <div class="list-item">
+            <span>集群信息</span>
+            <div class="float-right">
+                <a class="btn btn-default refresh-btn">刷新</a>
+            </div>
+        </div>
+        
+        {% if ping_error != None %}
+        <div class="list-item">
+            <span>错误信息</span>
+            <div class="float-right">
+                <span class="error">{{ping_error}}</span>
+            </div>
+        </div>
+        {% end %}
+
+        <div class="list-item">
+            <span class="task-tag">主节点</span>
+            <span>{{leader_node_id}}</span>
+            <span>(<a href="{{leader_url}}">{{leader_url}}</a>)</span>
+            <div class="float-right">
+                <!-- <a class="btn btn-default">查看</a> -->
+            </div>
+        </div>
+
+
+        {% for info in follower_list %}
+            <div class="list-item">
+                <span class="info-tag">从节点</span>
+                <span>{{info.node_id}}</span>
+                <span>(<a href="{{info.http_url}}">{{info.http_url}}</a>)</span>
+                <div class="float-right">
+                    <a class="btn btn-default view-ajax-btn" 
+                        data-type="follower" 
+                        data-key="{{info.http_url}}">查看</a>
+                </div>
+            </div>
+        {% end %}
+    </div>
+</div>

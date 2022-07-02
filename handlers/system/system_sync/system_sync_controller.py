@@ -148,6 +148,12 @@ class SyncHandler:
             return FOLLOWER.sync_files_from_leader()
 
         return LeaderHandler().handle_leader_action()
+    
+    def get_leader_binlog_seq(self, role_manager):
+        leader_info = role_manager.get_leader_info()
+        if leader_info == None:
+            return -1
+        return leader_info.get("binlog_last_seq")
 
     @xauth.login_required("admin")
     def get_home_page(self):
@@ -164,6 +170,8 @@ class SyncHandler:
         kw.leader_token = role_manager.get_leader_token()
         kw.leader_url = role_manager.get_leader_url()
         kw.leader_node_id = role_manager.get_leader_node_id()
+        kw.leader_binlog_seq = self.get_leader_binlog_seq(role_manager)
+
         kw.follower_list = role_manager.get_follower_list()
         kw.ping_error = role_manager.get_ping_error()
         kw.fs_index_count = role_manager.get_fs_index_count()
@@ -171,6 +179,7 @@ class SyncHandler:
         kw.whitelist = LEADER.get_ip_whitelist()
         kw.sync_process = FOLLOWER.get_sync_process()
         kw.sync_failed_count = FOLLOWER.count_sync_failed()
+        kw.follower_binlog_seq = FOLLOWER.db_syncer.get_binlog_last_seq()
 
         return xtemplate.render("system/page/system_sync.html", **kw)
 
@@ -286,6 +295,16 @@ class LeaderHandler(SyncHandler):
         return dict(code="error", message="未知的操作")
 
 
+class FollowerHandler(SyncHandler):
+
+    @xauth.login_required("admin")
+    def GET(self):
+        p = xutils.get_argument("p", "")
+        if p == "get_leader_stat":
+            return FOLLOWER.get_leader_info()
+        
+        return dict(code="400", message="unknown op")
+
 @xmanager.listen("sys.init")
 def init(ctx=None):
     LEADER.get_leader_token()
@@ -374,5 +393,6 @@ def on_sync_step(ctx = None):
 
 xurls = (
     r"/system/sync", SyncHandler,
-    r"/system/sync/leader", LeaderHandler
+    r"/system/sync/leader", LeaderHandler,
+    r"/system/sync/follower", FollowerHandler,
 )

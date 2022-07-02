@@ -182,6 +182,9 @@ class Leader(NodeManagerBase):
         for log in binlogs:
             key = log.key
             log.value = dbutil.get(key)
+            if log.value == None:
+                log.optype = "delete"
+                
             result.append(log)
 
         return dict(code="success", data=result)
