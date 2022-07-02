@@ -5,14 +5,11 @@
 import xauth
 import xtemplate
 import xutils
-import os
-import re
 import sys
 import platform
 import xconfig
 from xutils import dateutil
 from xutils import fsutil
-from xutils import Storage
 from xutils import mem_util
 
 try:
