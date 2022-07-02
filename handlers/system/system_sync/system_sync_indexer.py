@@ -22,7 +22,7 @@ from xutils import textutil
 
 dbutil.register_table("fs_sync_index", "文件同步索引信息")
 
-_fs_index_db = dbutil.get_hash_table("fs_sync_index")
+_fs_index_db = dbutil.get_table("fs_sync_index")
 
 # 临时文件
 TEMP_FNAME_SET = set([".DS_Store", ".thumbnail", ".git"])
@@ -52,7 +52,7 @@ def build_index_by_fpath(fpath):
     key = ts + "#" + web_path
     file_size = stat.st_size
 
-    old_info = _fs_index_db.get(key)
+    old_info = _fs_index_db.get_by_id(key)
     if old_info != None and old_info.ts == ts and old_info.size == file_size:
         logging.debug("文件已处理:%s", fpath)
         return
@@ -64,7 +64,7 @@ def build_index_by_fpath(fpath):
     file_info.ts = ts
     file_info.size = file_size
 
-    _fs_index_db.put(key, file_info)
+    _fs_index_db.update_by_id(key, file_info)
     logging.debug("更新文件索引:%s", web_path)
 
 class FileSyncIndexManager:
@@ -118,7 +118,7 @@ class FileSyncIndexManager:
     def list_files(self, key_from = None, offset = 0, limit = 20):
         result = []
         MAX_LIMIT = limit * 5
-        # 这里故意没有用hash_table，是为了使用table的接口
+
         db = _fs_index_db
 
         for value in db.iter(offset = offset, limit = MAX_LIMIT, key_from = key_from):

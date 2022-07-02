@@ -4,18 +4,18 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-03 11:39:36
+@LastEditTime : 2022-07-02 11:16:24
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
 
 from .a import *
+import os
 import xauth
-from web.utils import Storage
-from xutils import dbutil
+from xutils import dbutil, fsutil
 from xutils import textutil
 from xutils import netutil
-from xutils.db.binlog import BinLog
+import xconfig
 
 from . import test_base
 
@@ -105,7 +105,7 @@ class LeaderNetMock:
         """
 
 
-class TestSystem(BaseTestCase):
+class TestSystemSync(BaseTestCase):
 
     def test_system_sync(self):
         admin_token = xauth.get_user_by_name("admin").token
@@ -210,3 +210,19 @@ class TestSystem(BaseTestCase):
         result_obj = textutil.parse_json(result)
         FOLLOWER.update_ping_result(result_obj)
         self.assertTrue(FOLLOWER.is_token_active())
+
+    def test_build_fs_sync_index(self):
+        self.check_OK("/system/sync?p=build_index")
+    
+    def test_list_files(self):
+        from handlers.system.system_sync import system_sync_indexer
+
+        testfile_1 = os.path.join(xconfig.UPLOAD_DIR, "fs_sync_test_01.txt")
+        testfile_2 = os.path.join(xconfig.UPLOAD_DIR, "fs_sync_test_02.txt")
+        fsutil.touch(testfile_1)
+        fsutil.touch(testfile_2)
+
+        manager = system_sync_indexer.FileSyncIndexManager()
+        manager.build_full_index()
+        result = manager.list_files(None)
+        self.assertTrue(len(result) > 0)

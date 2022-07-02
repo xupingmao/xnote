@@ -68,14 +68,15 @@
 
 ## 前端依赖
 
-- jquery 无须解释
+- jquery JS基础库
 - layer web弹层组件
-- marked(markdown解析器)
+- marked markdown解析器
 - qrcode 二维码生成器
 - csv.js 解析csv文件
 - jsdiff 文本对比
 - codemirror 代码编辑器
 - jexcel web表格
+- font-awesome 图标库
 
 ## 新模块开发
 
