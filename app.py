@@ -92,7 +92,7 @@ def handle_args_and_init_config():
     delay = int(args.delay)
     time.sleep(delay)
 
-    xconfig.MIN_THREADS = int(args.minthreads)
+    xconfig.MIN_THREADS = xconfig.get_system_config("min_threads")
     xconfig.INIT_SCRIPT = args.initScript
     web.config.minthreads = xconfig.MIN_THREADS
 

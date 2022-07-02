@@ -453,6 +453,8 @@ def get_global_config(name, default_value=None, type=None):
         return default_value
     return value
 
+def get_system_config(name, default_value=None):
+    return get_global_config("system." + name, default_value)
 
 def get(key, default_value=None):
     return get_global_config(key, default_value)
