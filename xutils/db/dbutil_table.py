@@ -327,9 +327,9 @@ class LdbTable:
         obj_key = self._get_key_from_obj(obj)
         self.delete_by_key(obj_key)
 
-    def delete_by_id(self, id):
+    def delete_by_id(self, id, user_name = None):
         validate_str(id, "delete_by_id: id is not str")
-        key = self._build_key(id)
+        key = self._build_key(user_name, id)
         self.delete_by_key(key)
 
     def delete_by_key(self, key, user_name=None):

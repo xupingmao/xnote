@@ -189,7 +189,7 @@ class DbScanHandler(BasePlugin):
 
         result = []
         need_reverse = parse_bool(reverse)
-        max_scan = 1000
+        max_scan = 10000
         self.scan_count = 0
         self.error = ""
         self.last_key = ""

@@ -126,6 +126,8 @@ def format_date(seconds=None, fmt = None):
         return time.strftime(fmt)
     elif is_str(seconds):
         date_str = seconds.split(" ")[0]
+        if fmt == "/":
+            date_str = date_str.replace("-", "/")
         return date_str
     else:
         st = time.localtime(seconds)

@@ -103,6 +103,10 @@
             {# 知识库 #}
             {% if file.category == "note" %}
                 <div class="item-ext-info">
+                    {% if file.priority is not None and file.priority > 0 %}
+                        <span class="tag orange-tag">置顶</span>
+                    {% end %}
+
                     {% if file.creator != None %}
                         <span class="tag lightgray">{{file.creator}}</span>
                     {% end %}
@@ -111,10 +115,6 @@
                         <span class="tag lightgray">
                             <a class="link" href="/note/view?id={{file.parent_id}}">{{file.parent_name}}</a>
                         </span>
-                    {% end %}
-
-                    {% if file.priority is not None and file.priority > 0 %}
-                        <span class="tag orange-tag">置顶</span>
                     {% end %}
 
                     {% if file.is_public %}

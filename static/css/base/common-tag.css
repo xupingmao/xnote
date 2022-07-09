@@ -107,3 +107,8 @@ a.tag:hover {
     background: rgb(13, 202, 240);
     color: #fff;
 }
+
+.tag.system {
+    background-color: #000;
+    color: white;
+}

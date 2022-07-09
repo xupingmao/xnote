@@ -66,6 +66,9 @@ NOTE_DAO = xutils.DAO("note")
 
 _full_db = dbutil.get_table("note_full")
 _tiny_db = dbutil.get_table("note_tiny")
+_stat_db = dbutil.get_table("user_stat")
+_index_db = dbutil.get_table("note_index")
+_book_db = dbutil.get_table("notebook")
 
 DB_PATH = xconfig.DB_PATH
 MAX_EDIT_LOG = 500
@@ -89,7 +92,7 @@ NOTE_ICON_DICT = {
     "form": "fa-table",  # 开发中
 }
 
-CREATE_LOCK = threading.RLock()
+_WRITE_LOCK = threading.RLock()
 
 
 class NoteSchema:
@@ -103,7 +106,8 @@ class NoteSchema:
     atime = "访问时间"
     type = "类型"
     category = "所属分类"  # 一级图书分类
-    size = "大小"
+    size = "内容大小"
+    children_count = "儿子节点数量"
     parent_id = "父级节点ID"
     content = "纯文本内容"
     data = "富文本内容"
@@ -369,6 +373,9 @@ def build_note_info(note, orderby=None):
 
     if note.badge_info is None:
         note.badge_info = note.create_date
+    
+    if note.type == "group" and note.children_count == None:
+        note.children_count = 0
 
     return note
 
@@ -466,7 +473,8 @@ def get_by_user_skey(user_name, skey):
 
 
 def save_note_skey(note):
-    if note.skey is None or note.skey == "":
+    skey = note.get("skey")
+    if skey is None or skey == "":
         return
     key = "note_skey:%s:%s" % (note.creator, note.skey)
     dbutil.put(key, Storage(note_id=note.id))
@@ -560,11 +568,15 @@ def create_note_base(note_dict, date_str=None, note_id=None):
             else:
                 timestamp += 1
 
+def is_not_empty(value):
+    return xutils.is_str(value) and value != ""
 
-def create_note(note_dict, date_str=None, note_id=None):
+def create_note(note_dict, date_str=None, note_id=None, check_name=True):
     content = note_dict["content"]
     creator = note_dict["creator"]
     name = note_dict.get("name")
+
+    assert is_not_empty(name), "笔记名称不能为空"
 
     if "parent_id" not in note_dict:
         note_dict["parent_id"] = "0"
@@ -573,9 +585,11 @@ def create_note(note_dict, date_str=None, note_id=None):
     if "data" not in note_dict:
         note_dict["data"] = ""
 
-    with CREATE_LOCK:
+    with dbutil.get_write_lock():
         # 检查名称是否冲突
-        check_by_name(creator, name)
+        if check_name:
+            check_by_name(creator, name)
+
         # 创建笔记的基础信息
         note_id = create_note_base(note_dict, date_str, note_id)
 
@@ -597,7 +611,9 @@ def create_note(note_dict, date_str=None, note_id=None):
     save_note_skey(note_dict)
 
     # 最后发送创建笔记成功的消息
-    xmanager.fire("note.add", dict(name=name, type=type, id=note_id))
+    create_msg = dict(name=name, type=type, id=note_id)
+    xmanager.fire("note.add", create_msg)
+    xmanager.fire("note.create", create_msg)
 
     return note_id
 
@@ -681,15 +697,14 @@ def update_index(note):
         return
 
     note_index = convert_to_index(note)
-    dbutil.put('note_index:%s' % id, note_index)
+    _index_db.update_by_id(note_id, note_index)
 
     # 更新用户维度的笔记索引
     note_tiny_db = get_note_tiny_table(note.creator)
     note_tiny_db.update_by_id(note_id, note_index)
 
     if note.type == "group":
-        dbutil.put("notebook:%s:%s" %
-                   (note.creator, format_note_id(id)), note_index)
+        _book_db.update_by_id(note_id, note_index, user_name = note.creator)
 
     if note.is_public != None:
         update_public_index(note)
@@ -781,8 +796,16 @@ def update_note(note_id, **kw):
 
 
 def move_note(note, new_parent_id):
+    assert new_parent_id != None
+    assert new_parent_id != 0
+    assert new_parent_id != ""
+
     old_parent_id = note.parent_id
     note.parent_id = new_parent_id
+
+    if old_parent_id == new_parent_id:
+        return
+
     # 没有更新内容，只需要更新索引数据
     update_index(note)
 
@@ -889,8 +912,7 @@ def delete_note(id):
     delete_tags(note.creator, id)
 
     # 删除笔记本
-    book_key = "notebook:%s:%s" % (note.creator, format_note_id(id))
-    dbutil.delete(book_key)
+    _book_db.delete_by_id(id, user_name = note.creator)
 
     # 删除skey索引
     delete_note_skey(note)
@@ -948,7 +970,7 @@ def list_group(creator=None, orderby="mtime_desc",
 
     # TODO 添加索引优化
     def list_group_func(key, value):
-        if value.type != "group" or value.is_deleted != 0:
+        if value.type != "group" or value.is_deleted:
             return False
 
         if skip_archived and value.archived:
@@ -961,8 +983,8 @@ def list_group(creator=None, orderby="mtime_desc",
             return not value.archived
 
         return True
-
-    notes = dbutil.prefix_list("notebook:%s" % creator, list_group_func)
+    
+    notes = _book_db.list(user_name = creator, filter_func = list_group_func, limit = 1000)
     sort_notes(notes, orderby)
     if limit is not None:
         return notes[offset:offset + limit]
@@ -973,7 +995,7 @@ def count_group(creator, status=None):
     check_group_status(status)
 
     if status is None:
-        return dbutil.count_table("notebook:%s" % creator)
+        return _book_db.count(user_name = creator)
 
     return len(list_group(creator, status=status))
 
@@ -1454,7 +1476,8 @@ def clear_search_history(user_name):
 @xutils.async_func_deco()
 def refresh_note_stat_async(user_name):
     """异步刷新笔记统计"""
-    refresh_note_stat(user_name)
+    with dbutil.get_write_lock():
+        refresh_note_stat(user_name)
 
 
 def refresh_note_stat(user_name):
@@ -1533,7 +1556,6 @@ def get_virtual_group(user_name, name):
 def check_not_empty(value, method_name):
     if value == None or value == "":
         raise Exception("[%s] can not be empty" % method_name)
-
 
 # write functions
 xutils.register_func("note.create", create_note)

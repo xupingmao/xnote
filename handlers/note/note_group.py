@@ -296,7 +296,7 @@ class GroupListHandler:
         if orderby == "ctime_desc":
             for note in notes:
                 note.ctime = note.ctime or ""
-                note.badge_info = dateutil.format_date(note.ctime)
+                note.badge_info = note.create_date
             notes.sort(key = lambda x:x.ctime, reverse = True)
 
         notes.sort(key = lambda x:x.priority, reverse = True)

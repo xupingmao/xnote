@@ -70,6 +70,10 @@
     {% end %}
 
     <a class="list-link" href="{{item.url}}">
+        {% if item.priority>0 %}
+            <span class="tag orange-tag">置顶</span>
+        {% end %}
+
         <!-- 标签 -->
         {% if hasattr(item, "action") and item.action != None %}
             <div class="row">
@@ -85,19 +89,19 @@
 
         <span>{{item.name}}</span>
 
-        {% if hasattr(item, "is_public") and item.is_public %}
-            <span class="info-tag">分享中</span>
-        {% end %}
-
         <div class="float-right">
-            {% if item.priority>0 %}
-                <span class="tag orange-tag">置顶</span>
+            {% if hasattr(item, "is_public") and item.is_public %}
+                <span class="info-tag">分享中</span>
             {% end %}
-
+            
             {% if item.is_deleted %}
                 <span class="tag gray" href="/note/removed">删除</span>
             {% end %}
-
+            
+            {% if hasattr(item, "is_default") and item.is_default %}
+                <span class="tag system">默认</span>
+            {% end %}
+            
             {% comment 新的统一使用badge_info %}
             <span class="book-size-span">{{item.badge_info}}</span>
 

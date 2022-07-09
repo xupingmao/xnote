@@ -20,11 +20,6 @@ class FreeLock:
         # print("__exit__", type, value, traceback)
         pass
 
-_write_lock = threading.RLock()
-
-def get_write_lock():
-    return _write_lock
-
 def db_execute(db, sql, *args):
     cursorobj = db.cursor()
     try:
@@ -75,11 +70,13 @@ class CursorWrapper:
             self.cursor.rollback()
 
 
-def close_cursor(cursor, is_new):
-    if is_new:
+def close_cursor(cursor, is_new_cursor):
+    if is_new_cursor:
         cursor.close()
 
 class SqliteKV:
+
+    _lock = threading.RLock()
 
     def __init__(self, db_file, snapshot = None, 
             block_cache_size = None, 
@@ -102,7 +99,7 @@ class SqliteKV:
         if self.db_holder.db == None:
             # db_holder是threadlocal对象，这里是线程安全的
             logging.info("init db")
-            with get_write_lock():
+            with self._lock:
                 self.db_holder.db = sqlite3.connect(self.db_file)
                 db_execute(self.db_holder.db, "PRAGMA journal_mode = WAL;") # WAL模式，并发度更高
                 # db_execute(self.db_holder.db, "PRAGMA journal_mode = DELETE;") # 默认模式
@@ -120,8 +117,8 @@ class SqliteKV:
         else:
             self.db_holder.db.commit()
 
-    def check_and_commit(self, is_new):
-        if is_new:
+    def check_and_commit(self, is_new_cursor):
+        if is_new_cursor:
             self.commit()
 
     def rollback(self):
@@ -163,7 +160,7 @@ class SqliteKV:
             is_new = True
             cursor = self.cursor()
 
-        with get_write_lock():
+        with self._lock:
             try:
                 if self._exists(key):
                     cursor.execute("UPDATE kv_store SET value = ? WHERE `key` = ?;", (value, key))
@@ -186,7 +183,7 @@ class SqliteKV:
             cursor = self.cursor()
             is_new = True
 
-        with get_write_lock():
+        with self._lock:
             try:
                 cursor.execute("DELETE FROM kv_store WHERE key = ?;", (key,))
                 self.check_and_commit(is_new)
@@ -260,7 +257,7 @@ class SqliteKV:
         if len(batch._puts) + len(batch._deletes) == 0:
             return
 
-        with get_write_lock():
+        with self._lock:
             cur = self.cursor()
             try:
                 cur.execute("begin;")
@@ -270,9 +267,9 @@ class SqliteKV:
 
                 for key in batch._deletes:
                     self.Delete(key, cursor = cur)
-                self.commit()
+                cur.execute("commit;")
             except Exception as e:
-                self.rollback()
+                cur.execute("rollback;")
                 raise e
             finally:
                 cur.close()

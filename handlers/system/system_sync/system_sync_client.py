@@ -36,6 +36,7 @@ class HttpClient:
         self.host = host
         self.token = token
         self.admin_token = admin_token
+        self.debug = True
 
     def get_table(self):
         return dbutil.get_hash_table("fs_sync_index_copy")
@@ -82,6 +83,9 @@ class HttpClient:
 
         url = "{host}/system/sync/leader?p=list_files&token={token}&offset={offset}".format(
             host = self.host, token = self.token, offset = quote(offset))
+        
+        if self.debug:
+            logging.info("sync_from_leader: %s", url)
 
         content = netutil.http_get(url)
         result = textutil.parse_json(content, ignore_error = True)

@@ -141,7 +141,7 @@ def view_group_detail_func(file, kw):
     files  = NOTE_DAO.list_by_parent(file.creator, file.id, 
         offset, pagesize, orderby)
 
-    amount             = file.size
+    amount             = file.size or 0
     kw.content         = file.content
     kw.show_search_div = True
     kw.show_add_file   = True
@@ -271,6 +271,9 @@ class ViewHandler:
             file = find_note_for_view(token, id, name)
 
         if file is None:
+            if id != "":
+                event = Storage(id = id, user_name = user_name)
+                xmanager.fire("note.notfound", event)
             raise web.notfound()
 
         if token == "":
@@ -411,6 +414,8 @@ class GetDialogHandler:
     def get_group_option_dialog(self, kw):
         note_id = xutils.get_argument("note_id")
         file    = NOTE_DAO.get_by_id(note_id)
+        if file != None and file.children_count == 0 and not file.is_default:
+            kw.show_delete_btn = True
         kw.file = file
 
     def get_share_group_dialog(self, kw):

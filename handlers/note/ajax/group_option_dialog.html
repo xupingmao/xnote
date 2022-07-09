@@ -2,6 +2,7 @@
 
 {% import markdown %}
 {% init share_to_list = [] %}
+{% init show_delete_btn = False %}
 
 <div class="card">
     <div class="list-item">
@@ -62,7 +63,7 @@
         </div>
     </div>
 
-    {% if file.size == 0 %}
+    {% if show_delete_btn %}
         <div class="list-item btn-line-height">
             <span>删除</span>
             <div class="float-right">
