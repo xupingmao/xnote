@@ -5,6 +5,7 @@
  * 对外接口:
  * 1. 展示对话框并且自适应设备
  *    xnote.showDialog(title, html, buttons = [], functions = [])
+ *    xnote.openDialog(title, html, buttons = [], functions = [])
  *    xnote.showDialogEx(options)
  * 
  * 2. 展示iframe页面
@@ -35,6 +36,17 @@ function getDialogArea() {
     } else {
         return ['600px', '80%'];
     }
+}
+
+xnote.getNewDialogId = function () {
+    var dialogId = xnote.state._dialogId;
+    if (dialogId === undefined) {
+        dialogId = 1;
+    } else {
+        dialogId++;
+    }
+    xnote.state._dialogId = dialogId;
+    return "_xnoteDialog" + dialogId;
 }
 
 xnote.showIframeDialog = function (title, url) {
@@ -82,7 +94,9 @@ xnote.openDialogExInner = function (options) {
     var anim = options.anim;
     var closeBtn = options.closeBtn;
     var onOpenFn = options.onOpenFn;
-    var shadeClose = xnote.getOrDefault(options.shadeClose, true)
+    var shadeClose = xnote.getOrDefault(options.shadeClose, true);
+    var template = options.template;
+    var defaultValues = options.defaultValues;
 
     // 详细文档 https://www.layui.com/doc/modules/layer.html
     // @param {int} anim 动画的参数
@@ -94,6 +108,24 @@ xnote.openDialogExInner = function (options) {
     // 4：从左翻滚
     // 5：渐显
     // 6：抖动出现
+
+    if (template !== undefined && html !== undefined) {
+        throw new Error("不能同时设置template和html选项");
+    }
+
+    var dialogId = "";
+
+    if (template !== undefined) {
+        var templateBody = $(template).html();
+        dialogId = xnote.getNewDialogId();
+
+        var ele = $("<div>").attr("id", dialogId).html(templateBody);
+        html = ele.prop("outerHTML");
+
+        if (defaultValues !== undefined) {
+            html = xnote.renderTemplate(html, defaultValues); 
+        }
+    }
 
     if (!(functions instanceof Array)) {
         functions = [functions];
@@ -120,7 +152,10 @@ xnote.openDialogExInner = function (options) {
         params.yes = function (index, layero) {
             console.log(index, layero);
             layer.close(index);
-            functions[0](index, layero);
+            var dialogInfo = {
+                id: dialogId
+            };
+            functions[0](index, layero, dialogInfo);
         }
     }
 

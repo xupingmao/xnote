@@ -24,7 +24,7 @@ label {
 </div>
 
 <div class="card">
-    <form method="POST" action="/note/create">
+    <form class="create-form">
         <div class="input-group-row">
             <label>{{T("标题")}}</label> 
             <input type="text" class="mid-text" name="name" value="{{name}}"/>
@@ -47,20 +47,18 @@ label {
             </select>
         </div>
 
-        {% if type != "group" %}
-            <div class="input-group-row">
-                <label>{{T("笔记本")}}</label>
-                <select name="parent_id" value="{{parent_id}}">
-                    {%for item in groups %}
-                        <option value="{{item.id}}">{{item.name}}</option>
-                    {% end %}
-                </select>
-            </div>
-        {% end %}
+        <div class="input-group-row group-select-box">
+            <label>{{T("笔记本")}}</label>
+            <select name="parent_id" value="{{parent_id}}">
+                {%for item in groups %}
+                    <option value="{{item.id}}">{{item.name}}</option>
+                {% end %}
+            </select>
+        </div>
 
         <div class="row top-offset-1">
             <label>&nbsp;</label>
-            <button class="mid-text">{{T("创建")}}</button>
+            <input type="button" class="mid-text create-btn" value="{{T("创建")}}">
         </div>
     </form>
 </div>
@@ -98,12 +96,43 @@ label {
     });
 
     $(function () {
-        $(".note-type-select").change(function (e) {
+        var groupSelectBox = $(".group-select-box");
+        var noteTypeSelect = $(".note-type-select");
+        var createBtn = $(".create-btn");
+        var createForm = $(".create-form");
+
+        function reloadPage(type) {
+            if (type == "group") {
+                groupSelectBox.hide();
+            } else {
+                groupSelectBox.show();
+            }
+        }
+
+        noteTypeSelect.change(function (e) {
             var oldHref = window.location.href;
             var selectedType = $(this).val();
-            var newHref = addUrlParam(oldHref, "type", selectedType);
-            window.location.href = newHref;
+            reloadPage(selectedType);
         });
+
+        createBtn.click(function (e) {
+            var params = createForm.formData();
+            params._format = "json";
+
+            $.post("/note/create", params, function (resp) {
+                console.log("create resp:", resp);
+
+                if (resp.code == "success") {
+                    window.location.href = resp.url;
+                } else {
+                    xnote.alert(resp.message);
+                }
+            }).fail(function (err) {
+                xnote.alert(err);
+            });
+        });
+
+        reloadPage(noteTypeSelect.val());
     })
 </script>
 

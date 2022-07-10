@@ -430,6 +430,8 @@ def create_user(name, password):
         db.put(name, user)
 
         xutils.trace("UserAdd", name)
+        event = Storage(user_name = name)
+        xmanager.fire("user.create", event)
 
         return dict(code = "success", message = "create success")
 

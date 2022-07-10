@@ -21,6 +21,11 @@
     .file-input {
         border: none;
     }
+
+    .confirm-dialog-body input, .confirm-dialog-body select {
+        width: 100%;
+    }
+
 </style>
 {% end %}
 
@@ -89,27 +94,61 @@
     </textarea>
 </div>
 
+<div class="confirm-dialog hide">
+    <div class="confirm-dialog-body card">
+        <div class="row input-group-row">
+            <label>笔记名称</label>
+            <input type="text" name="name" value="${name}">
+        </div>
+    
+        <div class="row top-offset-1 input-group-row">
+            <label>{{T("笔记本")}}</label>
+            <select name="parent_id">
+                {%for item in groups %}
+                    <option value="{{item.id}}">{{item.name}}</option>
+                {% end %}
+            </select>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript">
 $("#saveToDbBtn").on("click", function () {
     var articleTitle = $("#articleTitle").val();
-    layer.prompt({title: '输入资料名称', value: articleTitle}, function(pass, index){
-        layer.close(index);
-        // 保存文档
-        // var name = $("#savedName").val();
-        var name = pass;
-        var content = $("#content").val();
-        $.post("/note/add", 
-            {"_format": "json", "name": name, "content": content, "type": "md", "tags": "来自网络"}, 
-            function (responseText) {
-                console.log(responseText);
-                var data = responseText;
-                if (data.code == "success") {
-                    location.href = "/note/view?id=" + data.id;
-                } else {
-                    layer.alert(data.message);
-                }
-        })
-    });
+
+    var options = {
+        area: ["300px", "300px"],
+        title: "输入资料名称",
+        template: ".confirm-dialog",
+        defaultValues: {
+            name: articleTitle,
+        },
+        shadeClose: false,
+        buttons: ["确定", "取消"],
+        functions: function (index, layero, dialogInfo) {
+            var dialogId = dialogInfo.id;
+            var name = $("#" + dialogId).find("[name=name]").val();
+            var parentId = $("#" + dialogId).find("[name=parent_id]").val();
+            var content = $("#content").val();
+            var params = {"_format": "json", "name": name, "content": content, "type": "md", "tags": "来自网络"};
+
+            params.parent_id = parentId;
+
+            $.post("/note/create", 
+                params,
+                function (responseText) {
+                    console.log(responseText);
+                    var data = responseText;
+                    if (data.code == "success") {
+                        location.href = "/note/view?id=" + data.id;
+                    } else {
+                        layer.alert(data.message);
+                    }
+            });
+        }
+    }
+
+    xnote.openDialogEx(options);
 });
 
 $("#readText").click(function () {

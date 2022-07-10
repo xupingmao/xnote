@@ -4,17 +4,16 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-03 09:09:49
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-09 09:18:04
+@LastEditTime : 2022-07-09 22:52:06
 @FilePath     : /xnote/handlers/note/dao_book.py
 @Description  : 描述
 """
-import threading
+import xmanager
 from xutils import Storage
 from xutils import dateutil, dbutil
 from .dao import get_by_id, create_note, update_note, list_default_notes, move_note
 
 _db = dbutil.get_table("notebook")
-_lock = threading.RLock()
 
 def check_and_create_default_book(user_name):
     """检查并且创建默认笔记本"""
@@ -23,7 +22,7 @@ def check_and_create_default_book(user_name):
     def find_default_func(key, value):
         return value.is_default == True
     
-    with _lock:
+    with dbutil.get_write_lock():
         result = _db.list(filter_func = find_default_func, user_name = user_name)
         if len(result) == 0:
             default_book = Storage()
@@ -66,3 +65,9 @@ def fix_book_delete(id, user_name):
     book = _db.get_by_id(id, user_name=user_name)
     if note == None and book != None:
         _db.delete(book)
+
+
+@xmanager.listen("user.create")
+def on_create_user(event):
+    pass
+

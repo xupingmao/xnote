@@ -5,7 +5,6 @@ import xauth
 import xtemplate
 import xmanager
 import xutils
-import xconfig
 from xutils import textutil
 from xutils import Storage
 from xutils import dbutil

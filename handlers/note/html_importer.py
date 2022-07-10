@@ -4,6 +4,7 @@ from __future__ import print_function
 import logging
 import os
 import time
+from handlers.note.dao import NOTE_DAO
 import xtemplate
 import xutils
 import xauth
@@ -139,9 +140,15 @@ def import_from_html(html, baseurl=""):
                    )
 
 
-class handler:
+class ImportNoteHandler:
 
     template_path = "note/page/html_importer.html"
+
+    def get_kw(self):
+        user_name = xauth.current_name()
+        kw = Storage()
+        kw.groups = NOTE_DAO.list_group(user_name, orderby="name")
+        return kw
 
     def GET(self):
         address = xutils.get_argument("url")
@@ -153,9 +160,13 @@ class handler:
 
         if save != "" and save != None:
             return self.POST()
+
+        kw = self.get_kw()
+        kw.url = address
+        kw.address = address
+
         return xtemplate.render(self.template_path,
-                                show_aside=False,
-                                address=address, url=address)
+                                show_aside=False, **kw)
 
     @xauth.login_required()
     def POST(self):
@@ -178,32 +189,37 @@ class handler:
                 for chunk in file.file:
                     html += chunk.decode("utf-8")
 
-            logging.info("import html, filename={}, length={}, type={}".format(filename, len(html), type(html)))
+            logging.info("import html, filename={}, length={}, type={}".format(
+                filename, len(html), type(html)))
 
             result = import_from_html(html, address)
 
             if name != "" and name != None:
                 save_to_archive_dir(name)
 
-            kw = dict(
-                show_aside=False,
-                address=address,
-                url=address,
-                images=result.images,
-                links=result.links,
-                csses=result.csses,
-                scripts=result.scripts,
-                texts=result.texts,
-                article_title=result.title,
-                plain_text=result.plain_text
-            )
+            kw = self.get_kw()
+            kw.address = address
+            kw.url = address
+            kw.images = result.images
+            kw.links = result.links
+            kw.csses = result.csses
+            kw.scripts = result.scripts
+            kw.texts = result.texts
+            kw.article_title = result.title
+            kw.plain_text = result.plain_text
 
             return xtemplate.render(self.template_path, **kw)
         except Exception as e:
             xutils.print_stacktrace()
-            return xtemplate.render(self.template_path,
-                                    show_aside=False,
-                                    error=str(e))
+
+            kw = self.get_kw()
+            kw.error = str(e)
+
+            return xtemplate.render(self.template_path, **kw)
 
 
 xutils.register_func("note.import_from_html", import_from_html)
+
+xurls = (
+    r"/note/html_importer", ImportNoteHandler,
+)
