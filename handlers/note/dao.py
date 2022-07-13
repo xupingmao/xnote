@@ -78,7 +78,7 @@ MAX_SEARCH_SIZE = 1000
 MAX_LIST_SIZE = 1000
 
 NOTE_ICON_DICT = {
-    "group": "fa-folder orange",
+    "group": "fa-folder",
 
     "post": "fa-file-word-o",  # 废弃
     "html": "fa-file-word-o",  # 废弃
@@ -91,8 +91,6 @@ NOTE_ICON_DICT = {
     "table": "fa-table",  # 废弃
     "form": "fa-table",  # 开发中
 }
-
-_WRITE_LOCK = threading.RLock()
 
 
 class NoteSchema:
@@ -145,8 +143,8 @@ def get_root(creator=None):
     root.name = "根目录"
     root.type = "group"
     root.size = None
-    root.id = 0
-    root.parent_id = 0
+    root.id = "0"
+    root.parent_id = "0"
     root.content = ""
     root.priority = 0
     root.creator = creator
@@ -373,7 +371,7 @@ def build_note_info(note, orderby=None):
 
     if note.badge_info is None:
         note.badge_info = note.create_date
-    
+
     if note.type == "group" and note.children_count == None:
         note.children_count = 0
 
@@ -387,6 +385,8 @@ def convert_to_path_item(note):
 
 @xutils.timeit(name="NoteDao.ListPath:leveldb", logfile=True)
 def list_path(file, limit=5):
+    assert file != None
+    
     pathlist = []
     while file is not None:
         pathlist.insert(0, convert_to_path_item(file))
@@ -568,8 +568,10 @@ def create_note_base(note_dict, date_str=None, note_id=None):
             else:
                 timestamp += 1
 
+
 def is_not_empty(value):
     return xutils.is_str(value) and value != ""
+
 
 def create_note(note_dict, date_str=None, note_id=None, check_name=True):
     content = note_dict["content"]
@@ -704,7 +706,7 @@ def update_index(note):
     note_tiny_db.update_by_id(note_id, note_index)
 
     if note.type == "group":
-        _book_db.update_by_id(note_id, note_index, user_name = note.creator)
+        _book_db.update_by_id(note_id, note_index, user_name=note.creator)
 
     if note.is_public != None:
         update_public_index(note)
@@ -912,7 +914,7 @@ def delete_note(id):
     delete_tags(note.creator, id)
 
     # 删除笔记本
-    _book_db.delete_by_id(id, user_name = note.creator)
+    _book_db.delete_by_id(id, user_name=note.creator)
 
     # 删除skey索引
     delete_note_skey(note)
@@ -961,10 +963,13 @@ def check_group_status(status):
 
 
 @xutils.timeit(name="NoteDao.ListGroup:leveldb", logfile=True)
-def list_group(creator=None, orderby="mtime_desc",
+def list_group(creator=None,
+               orderby="mtime_desc",
                skip_archived=False,
                status="all",
-               offset=0, limit=None):
+               offset=0, limit=None,
+               *,
+               parent_id=None):
     """查询笔记本列表"""
     check_group_status(status)
 
@@ -975,16 +980,20 @@ def list_group(creator=None, orderby="mtime_desc",
 
         if skip_archived and value.archived:
             return False
+        
+        if parent_id != None and value.parent_id != parent_id:
+            return False
 
         if status == "archived":
             return value.archived
 
         if status == "active":
             return not value.archived
-
+        
         return True
-    
-    notes = _book_db.list(user_name = creator, filter_func = list_group_func, limit = 1000)
+
+    notes = _book_db.list(
+        user_name=creator, filter_func=list_group_func, limit=1000)
     sort_notes(notes, orderby)
     if limit is not None:
         return notes[offset:offset + limit]
@@ -995,7 +1004,7 @@ def count_group(creator, status=None):
     check_group_status(status)
 
     if status is None:
-        return _book_db.count(user_name = creator)
+        return _book_db.count(user_name=creator)
 
     return len(list_group(creator, status=status))
 
@@ -1556,6 +1565,7 @@ def get_virtual_group(user_name, name):
 def check_not_empty(value, method_name):
     if value == None or value == "":
         raise Exception("[%s] can not be empty" % method_name)
+
 
 # write functions
 xutils.register_func("note.create", create_note)

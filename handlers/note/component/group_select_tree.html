@@ -1,85 +1,77 @@
 <!-- 暂时没有使用了 @see group_select_tree -->
 <div class="note-group-select col-md-12 scroll-y">
     
-</div>
-
-<div class="move-link-tpl" style="display: none;">
-    <div class="book-item">
-        <a class="move-link" data-id="[[item.id]]" data-parent="[[item.parent_id]]">
-                <i class="fa [[item.icon]] fa-[[item.icon]] black"></i>                
-                <span>[[item.name]]</span>
-                <span class="black">([[item.size]])</span>
-        </a>
-        <button class="float-right do-move-btn" data-id="[[item.id]]">移到这里</button>
+    <div class="group-select-search">
+        <input id="groupSelectInput" type="text" class="nav-search-input" placeholder="搜索"/>
+        <button class="nav-search-btn btn-default">
+            <i class="fa fa-search"></i>
+        </button>
     </div>
-</div>
 
-<div class="move-parent-tpl" style="display: none;">
     <div class="book-item">
-        <a class="move-link" data-id="[[item.id]]">
-            <i class="fa fa-folder orange"></i>                
+        <a class="move-link" data-id="{{parent.parent_id}}">
+            <i class="fa fa-folder black"></i>                
             <span>上级目录</span>
         </a>
     </div>
+
+    {% for item in files %}
+        <div class="book-item">
+            <a class="move-link" data-id="{{item.id}}" data-parent="{{item.parent_id}}">
+                <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
+                <span>{{item.name}}</span>
+                <span class="black">({{item.size}})</span>
+            </a>
+            <button class="float-right do-move-btn" data-id="{{item.id}}" onclick="xnote.handleMoveTo(this)">移到这里</button>
+        </div>
+    {% end %}
+    
 </div>
 
-
-<script type="text/javascript">
-$(function () {
-    function buildFolderLink(item) {
-        var tpl = $(".move-link-tpl").html();
-        tpl = tpl.replace("[[item.name]]", item.name);
-        tpl = tpl.replace("[[item.icon]]", item.icon);
-        tpl = tpl.replace("[[item.size]]", item.size);
-        tpl = tpl.replace(/\[\[item\.id\]\]/gi, item.id);
-        tpl = tpl.replace("[[item.parent_id]]", item.parent_id);
-
-        return $(tpl);
-    }
-
-    function fetchGroupList(parentId) {
-        $.get("/note/api/group?id=" + parentId, function (resp) {
+<script>
+    xnote.handleMoveTo = function (target) {
+        var parentId = $(target).attr("data-id");
+        var params = { id: "{{id}}", parent_id: parentId};
+        $.post("/note/move", params, function (resp){
             console.log(resp);
-            $(".note-group-select").html("");
-
-            var tpl = $(".move-parent-tpl").html();
-            tpl = tpl.replace("[[item.id]]", resp.parent_id);
-            var element = $(tpl);
-            $(".note-group-select").append(element);
-
-            for (var i = 0; i < resp.data.length; i++) {
-                var item = resp.data[i];
-                // console.log(item);
-                var element = buildFolderLink(item);
-                $(".note-group-select").append(element);
+            if (resp.code == "success") {
+                window.location.reload();
+            } else {
+                xnote.alert(resp.message);
             }
         });
-    }
+    };
 
-    $("body").on("click", ".move-link", function (e) {
-        var id = $(this).attr("data-id");
-        fetchGroupList(id);
-    });
+    $("#groupSelectInput").unbind("keyup");
+    $("#groupSelectInput").keyup(function(event) {
+        /* Act on the event */
+        var searchKey = $(this).val();
+        $(".book-item").show();
 
-    $("body").on("click", ".do-move-btn", function (e) {
-        var parentId = $(this).attr("data-id");
-        var callbackFn = "{{callback}}";
-
-        // 使用callback函数
-        if (window[callbackFn]) {
-            window[callbackFn](parentId);
+        if (searchKey == "") {
             return;
         }
 
-        var selfId = "{{id}}";
-        $.post("/note/move", 
-          { id: selfId, parent_id: parentId}, 
-          function (resp){
-              console.log(resp);
-              window.location.reload();
-        });
+        $(".book-item").each(function (index, element) {
+            var noteName = $(element).find("a").text();
+            if (noteName.indexOf(searchKey) < 0) {
+                $(this).hide();
+            }
+        })
     });
 
-    fetchGroupList(0);
-})
+    $(".move-link").click(function(e) {
+        console.log("move-link clicked");
+        console.log(e.target);
+        var parentId = $(this).attr("data-id");
+        var params = {
+            "view": "tree",
+            "id": "{{id}}",
+            "parent_id": parentId,
+        };
+
+        $.get("/note/group/select", params, function(html) {
+            $(".note-group-select").parent().html(html);
+        });
+    });
 </script>

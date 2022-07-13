@@ -1,3 +1,4 @@
+{% include note/component/script/move_script.html %}
 
 <div class="card group-option-card">
     <div class="row">
@@ -16,6 +17,7 @@
     <div class="pad5 group-detail-btn-box">
         <a class="btn btn-default note-share-btn" data-id="{{file.id}}">分享</a>
         <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">批量管理</a>
+        <a class="btn btn-default" onclick="xnote.onMoveNoteClick(this);" data-id="{{file.id}}">移动</a>
     </div>
 </div>
 

@@ -7,6 +7,8 @@
 
 {% block body %}
 
+{% init show_note_path = True %}
+
 <div class="card note-list">
 
     <!-- header -->
@@ -26,18 +28,20 @@
     </div>
 </div>
 
+{% if show_note_path %}
 <div class="card">
     {% include note/component/note_path.html %}
 </div>
+{% end %}
 
-<div class="card">
+<div class="card">    
     {% for item in files %}
         <div class="book-item">
             {% if item.priority>0 %}
-                <i class="fa fa-thumb-tack black"></i>
+                <span class="tag orange">置顶</span>
             {% end %}
 
-            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>                
+            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
             <a class="link2" href="{{item.url}}">{{item.name}}</a>
             
             <span class="float-right">

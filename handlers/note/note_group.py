@@ -248,9 +248,11 @@ def get_ddc_category_list():
 class GroupListHandler:
 
     def load_group_list(self, user_name, status):
+        parent_id = xutils.get_argument("parent_id", "0")
+
         if status in ("active", "archived"):
             notes = NOTE_DAO.list_group(user_name, 
-                status = status, orderby = "default")
+                status = status, orderby = "default", parent_id = parent_id)
         else:
             notes = NOTE_DAO.list_smart_group(user_name)
 
@@ -377,9 +379,9 @@ def load_category(user_name, include_system = False):
     archived_groups = list(filter(lambda x: x.archived == True, data))
     normal_groups   = list(filter(lambda x: x not in sticky_groups and x not in archived_groups, data))
     groups_tuple = [
-        ("置顶项目", sticky_groups),
-        ("普通项目", normal_groups),
-        ("归档项目", archived_groups)
+        ("置顶", sticky_groups),
+        ("普通", normal_groups),
+        ("归档", archived_groups)
     ]
 
     if include_system:
@@ -411,15 +413,25 @@ class GroupSelectHandler:
         id = xutils.get_argument("id", "")
         callback = xutils.get_argument("callback")
         user_name = xauth.current_name()
-        
-        filetype = xutils.get_argument("filetype", "")
+        view = xutils.get_argument("view", "")
+        parent_id = xutils.get_argument("parent_id", "0")
+
         groups_tuple = load_category(xauth.current_name())
         web.header("Content-Type", "text/html; charset=utf-8")
-        files = NOTE_DAO.list_group(user_name)
-        return xtemplate.render("note/component/group_select.html", 
+        files = NOTE_DAO.list_group(user_name, orderby="default", parent_id = parent_id)
+
+        template = "note/component/group_select.html"
+        if view == "tree":
+            template = "note/component/group_select_tree.html"
+        
+        parent = NOTE_DAO.get_by_id_creator(parent_id, user_name)
+
+        return xtemplate.render(template, 
             id = id, 
             groups_tuple = groups_tuple,
             callback = callback,
+            parent_id = parent_id,
+            parent = parent,
             files = files)
 
 class CategoryHandler:
@@ -688,13 +700,13 @@ class ManagementHandler:
     def handle_root(self, kw):
         user_name = kw.user_name
         parent_note = NOTE_DAO.get_root()
-        notes = NOTE_DAO.list_group(user_name, orderby = "name", 
-            skip_archived = True)
+        notes = NOTE_DAO.list_group(user_name, orderby="default", skip_archived = True)
         parent = Storage(url = "/note/group", name = parent_note.name)
         
         kw.parent_note = parent_note
         kw.parent = parent
         kw.notes = notes
+        kw.show_note_path = False
 
     def handle_group(self, kw):
         parent_id = kw.parent_id
@@ -739,13 +751,11 @@ class ManagementHandler:
             self.handle_group(kw)
         
         parent_note = kw.parent_note
-        parent = kw.parent
         notes = kw.notes
         
         if parent_note is None:
             raise web.seeother("/unauthorized")
 
-        parent_name = parent_note.name
         if parent_note.type == "gallery":
             fpath = NOTE_DAO.get_gallery_path(parent_note)
             pathlist = fsutil.listdir_abs(fpath, False)
@@ -759,9 +769,7 @@ class ManagementHandler:
             pathlist = NOTE_DAO.list_path(parent_note),
             files = notes,
             show_path = True,
-            parent_id = parent_id,
-            current = current,
-            parent  = parent_note)
+            current = current, **kw)
 
 class NoteIndexHandler:
 

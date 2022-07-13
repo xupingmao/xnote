@@ -15,9 +15,7 @@ $(function () {
      * 简单的模板渲染，这里假设传进来的参数已经进行了html转义
      */
     function renderTemplate(templateText, object) {
-        return templateText.replace(/\$\{(.*?)\}/g, function (context, objKey) {
-            return object[objKey.trim()] || '';
-        });
+        return xnote.renderTemplate(templateText, object);
     }
 
     function moveFile(fpath, dirname, context) {

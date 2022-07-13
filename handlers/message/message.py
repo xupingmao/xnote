@@ -181,11 +181,8 @@ class ListAjaxHandler:
     def GET(self):
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         page = xutils.get_argument("page", 1, type=int)
-        key = xutils.get_argument("key", "")
         tag = xutils.get_argument("tag", "task")
         format = xutils.get_argument("format")
-        date = xutils.get_argument("date", "")
-
         offset = get_offset_from_page(page, pagesize)
 
         user_name = xauth.get_current_name()

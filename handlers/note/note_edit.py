@@ -4,15 +4,13 @@
 # @modified 2022/04/04 20:47:41
 
 """笔记编辑相关处理"""
-import os
+from handlers import message
 import web
 import time
 import xauth
 import xutils
 import xtemplate
-import xtables
 import xmanager
-import xconfig
 from xutils import Storage
 from xutils import dateutil
 from xutils import cacheutil
@@ -529,10 +527,21 @@ class MoveAjaxHandler:
         id        = xutils.get_argument("id", "")
         parent_id = xutils.get_argument("parent_id", "")
         file = NOTE_DAO.get_by_id_creator(id, xauth.current_name())
+        target_book = NOTE_DAO.get_by_id_creator(parent_id, xauth.current_name())
+
         if file is None:
             return dict(code="fail", message="笔记不存在")
+        
+        if target_book is None:
+            return dict(code="fail", message="目标笔记本不存在")
+        
         if str(id) == str(parent_id):
             return dict(code="fail", message="不能移动到自身目录")
+
+        pathlist = NOTE_DAO.list_path(target_book)
+        for item in pathlist:
+            if item.id == file.id:
+                return dict(code="fail", message="不能移动笔记本到自身的子笔记本中")
 
         NOTE_DAO.move(file, parent_id)
         return dict(code="success")

@@ -141,6 +141,10 @@ def view_group_detail_func(file, kw):
     files  = NOTE_DAO.list_by_parent(file.creator, file.id, 
         offset, pagesize, orderby)
 
+    for file in files:
+        if file.type == "group":
+            file.badge_info = file.children_count
+
     amount             = file.size or 0
     kw.content         = file.content
     kw.show_search_div = True
@@ -414,7 +418,7 @@ class GetDialogHandler:
     def get_group_option_dialog(self, kw):
         note_id = xutils.get_argument("note_id")
         file    = NOTE_DAO.get_by_id(note_id)
-        if file != None and file.children_count == 0 and not file.is_default:
+        if file != None and file.children_count == 0:
             kw.show_delete_btn = True
         kw.file = file
 
