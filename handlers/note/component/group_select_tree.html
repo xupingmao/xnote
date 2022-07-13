@@ -10,9 +10,19 @@
 
     <div class="book-item">
         <a class="move-link" data-id="{{parent.parent_id}}">
+            <span class="tag system">系统</span>
             <i class="fa fa-folder black"></i>                
             <span>上级目录</span>
         </a>
+    </div>
+
+    <div class="book-item">
+        <a class="move-link" data-id="0">
+            <span class="tag system">系统</span>
+            <i class="fa fa-folder black"></i>                
+            <span>根目录</span>
+        </a>
+        <button class="float-right do-move-btn" data-id="0" onclick="xnote.handleMoveTo(this)">移到这里</button>
     </div>
 
     {% for item in files %}
