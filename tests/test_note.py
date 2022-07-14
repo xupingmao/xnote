@@ -356,7 +356,7 @@ class TestMain(BaseTestCase):
         delete_note_for_test("move-test")
         delete_note_for_test("move-group-test")
 
-        id = create_note_for_test("group", "move-test")
+        id = create_note_for_test("md", "move-test")
         parent_id = create_note_for_test("group", "move-group-test")
 
         json_request("/note/move?id=%s&parent_id=%s" % (id, parent_id))
