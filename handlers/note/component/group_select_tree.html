@@ -49,7 +49,9 @@
             } else {
                 xnote.alert(resp.message);
             }
-        });
+        }).fail(function (err) {
+            xnote.alert("服务繁忙，请稍后重试");
+        })
     };
 
     $("#groupSelectInput").unbind("keyup");

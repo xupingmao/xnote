@@ -11,6 +11,7 @@ import xauth
 import xutils
 import xtemplate
 import xmanager
+import xconfig
 from xutils import Storage
 from xutils import dateutil
 from xutils import cacheutil
@@ -537,11 +538,21 @@ class MoveAjaxHandler:
         
         if str(id) == str(parent_id):
             return dict(code="fail", message="不能移动到自身目录")
+        
+        if target_book.type != "group":
+            return dict(code="fail", message="只能移动到笔记本中")
 
         pathlist = NOTE_DAO.list_path(target_book)
         for item in pathlist:
             if item.id == file.id:
                 return dict(code="fail", message="不能移动笔记本到自身的子笔记本中")
+        
+        if file.type == "group":
+            max_depth = xconfig.get_system_config("max_book_depth", 2)
+            # pathlist包含了根目录
+            depth = len(pathlist) - 1 + NOTE_DAO.get_depth(file)
+            if depth > max_depth:
+                return dict(code="fail", message="笔记本的层次不能超过%d, 当前层次:%d" % (max_depth, depth))
 
         NOTE_DAO.move(file, parent_id)
         return dict(code="success")

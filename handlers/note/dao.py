@@ -23,7 +23,6 @@ import os
 import xconfig
 import xutils
 import xmanager
-import threading
 import logging
 import xauth
 from xutils import Storage
@@ -372,11 +371,14 @@ def build_note_info(note, orderby=None):
     if note.badge_info is None:
         note.badge_info = note.create_date
 
-    if note.type == "group" and note.children_count == None:
-        note.children_count = 0
+    if note.type == "group":
+        _build_book_default_info(note)
 
     return note
 
+def _build_book_default_info(note):
+    if note.children_count == None:
+        note.children_count = 0
 
 def convert_to_path_item(note):
     return Storage(name=note.name, url=note.url, id=note.id,
@@ -1086,8 +1088,7 @@ def list_by_parent(creator, parent_id, offset=0, limit=1000,
         else:
             return value.creator == creator
 
-    db = get_note_tiny_table(creator)
-    notes = db.list(offset=0, limit=limit, filter_func=list_note_func)
+    notes = _tiny_db.list(offset=0, limit=limit, filter_func=list_note_func, user_name=creator)
 
     if orderby == "db":
         note = get_by_id_creator(parent_id, creator)
