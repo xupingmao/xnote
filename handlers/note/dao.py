@@ -935,8 +935,14 @@ def update_children_count(parent_id, db=None):
         return
 
     creator = note.creator
-    note.children_count = count_by_parent(creator, parent_id)
+    count = 0
+    for child in list_by_parent(creator, parent_id):
+        if child.type == "group":
+            count += child.children_count or 0
+        else:
+            count += 1
 
+    note.children_count = count
     update_index(note)
 
 

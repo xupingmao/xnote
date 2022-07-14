@@ -365,7 +365,6 @@ def load_note_index(user_name):
             NoteLink("置顶笔记", "/note/sticky", "fa-thumb-tack", size = note_stat.sticky_count),
             NoteLink("搜索历史", "/search", "fa-search", size = None),
             NoteLink("导入笔记", "/note/html_importer", "fa-internet-explorer"),
-            # NoteLink("日历视图", "/note/calendar", "fa-calendar"),
             NoteLink("时间视图", "/note/date", "fa-calendar"),
             NoteLink("数据统计", "/note/stat", "fa-bar-chart"),
             NoteLink("上传管理", "/fs_upload", "fa-upload"),
@@ -700,7 +699,7 @@ class ManagementHandler:
     def handle_root(self, kw):
         user_name = kw.user_name
         parent_note = NOTE_DAO.get_root()
-        notes = NOTE_DAO.list_group(user_name, orderby="default", skip_archived = True)
+        notes = NOTE_DAO.list_group(user_name, orderby="default", parent_id="0", skip_archived = True)
         parent = Storage(url = "/note/group", name = parent_note.name)
         
         kw.parent_note = parent_note

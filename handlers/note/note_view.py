@@ -141,9 +141,9 @@ def view_group_detail_func(file, kw):
     files  = NOTE_DAO.list_by_parent(file.creator, file.id, 
         offset, pagesize, orderby)
 
-    for file in files:
-        if file.type == "group":
-            file.badge_info = file.children_count
+    for child in files:
+        if child.type == "group":
+            child.badge_info = child.children_count
 
     amount             = file.size or 0
     kw.content         = file.content
