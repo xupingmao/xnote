@@ -979,7 +979,8 @@ def list_group(creator=None,
                offset=0, limit=1000,
                parent_id=None,
                category=None,
-               count_total=False):
+               count_total=False,
+               count_only=False):
     """查询笔记本列表"""
     assert creator != None
     check_group_status(status)
@@ -1008,6 +1009,9 @@ def list_group(creator=None,
             return not value.archived
         
         return True
+
+    if count_only:
+        return _book_db.count(user_name=creator, filter_func=list_group_func)
 
     notes = _book_db.list(
         user_name=creator, filter_func=list_group_func, limit=1000)

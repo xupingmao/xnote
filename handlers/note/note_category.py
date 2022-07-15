@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-15 22:58:53
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-15 23:50:07
+@LastEditTime : 2022-07-16 00:51:31
 @FilePath     : /xnote/handlers/note/note_category.py
 @Description  : 笔记本类型
 """
@@ -71,7 +71,7 @@ class CategoryUpdateAjaxHandler:
         name = xutils.get_argument("name", "")
 
         if name == "":
-            return dict(code="400", message="new_name不能为空")
+            return dict(code="400", message="name不能为空")
         
         user_name = xauth.current_name()
         cat_info = get_category_by_code(user_name, code)

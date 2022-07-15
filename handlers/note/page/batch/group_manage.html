@@ -7,6 +7,8 @@
 
 {% block body_left %}
 
+<script src="/static/js/note.js"></script>
+
 {% init show_note_path = True %}
 {% include note/component/script/create_script.html %}
 
@@ -22,16 +24,21 @@
     </div>
 </div>
 
-{% if show_category_edit %}
 <div class="card btn-line-height">
-    <span>类目：</span>
-    <span>{{category_name}}</span>
+    <span>类目</span>
+    <select class="switch-category" value="{{category}}">
+        {% for t_cat in category_list %}
+            <option value="{{t_cat.code}}">{{t_cat.name}} - (<span>{{t_cat.group_count}}</span>)</option>
+        {% end %}
+    </select>
+
+    {% if show_category_edit %}
     <div class="float-right">
         <button class="btn btn-default rename-cat-btn">重命名类目</button>
-        <button class="btn btn-default">添加笔记本</button>
+        <!-- <button class="btn btn-default">添加笔记本-TODO</button> -->
     </div>
+    {% end %}
 </div>
-{% end %}
 
 <div class="card">    
     {% if len(files) == 0 %}
@@ -48,6 +55,11 @@
             <a class="link2" href="{{item.url}}">{{item.name}}</a>
             
             <span class="float-right">
+                <select value="{{item.category}}" data-id="{{item.id}}" class="update-category">
+                    {% for t_cat in category_list %}
+                        <option value="{{t_cat.code}}">{{t_cat.name}}</option>
+                    {% end %}
+                </select>
                 <a class="item-option" data-id="{{item.id}}" data-name="{{item.name}}" 
                     onclick="renameNoteByAttr(this);" href="javascript:void(0);">重命名</a>
                 <input type="checkbox" data-id="{{item.id}}" data-name="{{item.name}}"/>
@@ -63,27 +75,35 @@
 {% include note/component/script/rename_script.html %}
 
 <script type="text/javascript">
-$(".rename-cat-btn").click(function(e) {
-    xnote.prompt("重命名类目", "{{category_name}}", function (newName) {
-        var params = {
-            code: "{{category_code}}",
-            name: newName
-        };
 
-        $.post("/api/note/category/update", params, function(resp) {
-            if (resp.code=="success") {
-                window.location.reload();
-            } else {
-                xnote.alert(resp.message);
-            }
-        })
+$(".rename-cat-btn").click(function(e) {
+    xnote.updateCategoryName({
+        code: "{{category_code}}",
+        oldName: "{{category_name}}",
     });
 })
+
+$(".update-category").change(function (e) {
+    var noteId = $(this).attr("data-id");
+    var newCat = $(this).val();
+    xnote.updateNoteCategory({
+        noteId: noteId,
+        value: newCat,
+        doRefresh: true,
+    });
+});
+
+$(".switch-category").change(function(e) {
+    var selected = $(this).val();
+    var url = window.location.href;
+    url = xnote.addUrlParam(url, "category", selected);
+    window.location.href = url;
+});
 </script>
 
 {% end %}
 
 
 {% block body_right %}
-    {% include note/component/sidebar/group_management_sidebar.html %}
+    {% include note/component/sidebar/group_manage_sidebar.html %}
 {% end %}

@@ -5,6 +5,7 @@
 
 """笔记编辑相关处理"""
 from handlers import message
+from handlers.note.dao_category import refresh_category_count
 import web
 import time
 import xauth
@@ -631,6 +632,39 @@ class DraftHandler:
 
         return dict(code = "biz.error", message = "未知的action:%s" % action)
 
+class UpdateAttrAjaxHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        id = xutils.get_argument("id", "")
+        key = xutils.get_argument("key", "")
+        value = xutils.get_argument("value", "")
+
+        if id == "":
+            return dict(code="400", message="id不能为空")
+
+        if key == "":
+            return dict(code="400", message="key不能为空")
+        
+        user_name = xauth.current_name()
+        note_info = NOTE_DAO.get_by_id_creator(id, user_name)
+
+        if note_info == None:
+            return dict(code="400", message="笔记不存在")
+        
+        if key in ("category"):
+            old_value = getattr(note_info, key)
+            setattr(note_info, key, value)
+            NOTE_DAO.update0(note_info)
+            if key == "category":
+                refresh_category_count(user_name, value)
+                refresh_category_count(user_name, old_value)
+            return dict(code="success")
+        else:
+            return dict(code="400", message="不支持的属性")
+
+
+
 xurls = (
     r"/note/add"         , CreateHandler,
     r"/note/create"      , CreateHandler,
@@ -639,6 +673,7 @@ xurls = (
     r"/note/update"      , UpdateHandler,
     r"/note/save"        , SaveAjaxHandler,
     r"/note/draft"       , DraftHandler,
+    r"/note/attribute/update", UpdateAttrAjaxHandler,
 
     r"/note/append"      , AppendAjaxHandler,
     r"/note/stick"       , StickHandler,

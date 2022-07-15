@@ -1,0 +1,33 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-07-16 00:45:37
+@LastEditors  : xupingmao
+@LastEditTime : 2022-07-16 15:41:30
+@FilePath     : /xnote/handlers/note/component/attribute/note_category.html
+@Description  : 描述
+ #} -->
+{% init category_list = xutils.call("note.list_category", _user_name) %}
+
+<div class="row">
+    <span class="btn-line-height">类目</span>
+    <div class="float-right">
+        <select class="category-select" data-id="{{file.id}}" value="{{file.category}}">
+            {% for t_cat in category_list %}
+                <option value="{{t_cat.code}}">{{t_cat.name}}</option>
+            {% end %}
+        </select>
+    </div>
+</div>
+
+<script>
+    $(".category-select").change(function (e) {
+        var noteId = $(this).attr("data-id");
+        var newCat = $(this).val();
+        xnote.updateNoteCategory({
+            noteId: noteId,
+            value: newCat,
+            doRefresh: true
+        });
+    });
+</script>

@@ -322,7 +322,7 @@ class GroupManageHandler:
         category_code = xutils.get_argument("category", "all")
 
         assert page > 0
-        limit = 20
+        limit = 50
         offset = (page-1) * limit
         
         user_name = kw.user_name
@@ -332,9 +332,9 @@ class GroupManageHandler:
         
         kw.parent_note = parent_note
         kw.notes = notes
-        kw.show_note_path = False
         kw.page_totalsize = total
-        kw.template = "note/page/batch/group_management.html"
+        kw.page_size = limit
+        kw.template = "note/page/batch/group_manage.html"
         kw.category_list = list_category(user_name)
 
         cat_info = get_category_by_code(user_name, category_code)
@@ -701,25 +701,6 @@ class ArchivedHandler:
 class ManagementHandler:
     """批量管理处理器"""
 
-    def handle_root(self, kw):
-        page = xutils.get_argument("page", 1, type=int)
-        orderby = xutils.get_argument("orderby", "default")
-        assert page > 0
-        limit = 20
-        offset = (page-1) * limit
-        
-        user_name = kw.user_name
-        parent_note = NOTE_DAO.get_root()
-        notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset, limit=limit, count_total=True)
-        parent = Storage(url = "/note/group", name = parent_note.name)
-        
-        kw.parent_note = parent_note
-        kw.parent = parent
-        kw.notes = notes
-        kw.show_note_path = False
-        kw.page_totalsize = total
-        kw.template = "note/page/batch/group_management.html"
-
     def handle_group(self, kw):
         parent_id = kw.parent_id
         user_name = kw.user_name
@@ -757,7 +738,7 @@ class ManagementHandler:
         kw.template = "note/page/batch/management.html"
 
         if parent_id == "0" or parent_id is None:
-            self.handle_root(kw)
+            raise web.found("/note/group/manage")
         elif parent_id == "default":
             self.handle_default(kw)
         else:
