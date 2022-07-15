@@ -978,10 +978,14 @@ def list_group(creator=None,
                *,
                offset=0, limit=1000,
                parent_id=None,
+               category=None,
                count_total=False):
     """查询笔记本列表"""
     assert creator != None
     check_group_status(status)
+
+    if category == "" or category == "all":
+        category = None
 
     # TODO 添加索引优化
     def list_group_func(key, value):
@@ -992,6 +996,9 @@ def list_group(creator=None,
             return False
         
         if parent_id != None and value.parent_id != parent_id:
+            return False
+        
+        if category != None and value.category != category:
             return False
 
         if status == "archived":

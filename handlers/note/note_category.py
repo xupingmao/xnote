@@ -4,10 +4,11 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-15 22:58:53
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-15 23:00:50
+@LastEditTime : 2022-07-15 23:50:07
 @FilePath     : /xnote/handlers/note/note_category.py
 @Description  : 笔记本类型
 """
+from handlers.note.dao_category import get_category_by_code, upsert_category
 import xauth
 import xtemplate
 import xutils
@@ -62,7 +63,30 @@ class CategoryHandler:
             parent_id = 0,
             files = files)
 
+class CategoryUpdateAjaxHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        code = xutils.get_argument("code", "")
+        name = xutils.get_argument("name", "")
+
+        if name == "":
+            return dict(code="400", message="new_name不能为空")
+        
+        user_name = xauth.current_name()
+        cat_info = get_category_by_code(user_name, code)
+        if cat_info == None:
+            return dict(code="400", message="无效的类目编码:%s" % code)
+            
+        cat_info.name = name
+
+        upsert_category(user_name, cat_info)
+
+        return dict(code="success")
+
 
 xurls = (
     r"/note/category", CategoryHandler,
+
+    r"/api/note/category/update", CategoryUpdateAjaxHandler,
 )

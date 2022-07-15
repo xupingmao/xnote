@@ -15,8 +15,7 @@ import xmanager
 from xutils import Storage
 from xutils import dateutil, fsutil
 from xtemplate import T
-from .constant import CREATE_BTN_TEXT_DICT
-
+from .dao_category import list_category, get_category_by_code
 
 VIEW_TPL   = "note/page/view.html"
 TYPES_NAME = "笔记索引"
@@ -320,22 +319,33 @@ class GroupManageHandler:
     def handle_root(self, kw):
         page = xutils.get_argument("page", 1, type=int)
         orderby = xutils.get_argument("orderby", "default")
+        category_code = xutils.get_argument("category", "all")
+
         assert page > 0
         limit = 20
         offset = (page-1) * limit
         
         user_name = kw.user_name
         parent_note = NOTE_DAO.get_root()
-        notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset, limit=limit, count_total=True)
+        notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset, 
+            limit=limit, category=category_code, count_total=True)
         
         kw.parent_note = parent_note
         kw.notes = notes
         kw.show_note_path = False
         kw.page_totalsize = total
         kw.template = "note/page/batch/group_management.html"
-        kw.category_list = [
-            Storage(code="all", name="全部")
-        ]
+        kw.category_list = list_category(user_name)
+
+        cat_info = get_category_by_code(user_name, category_code)
+        if cat_info != None:
+            kw.category_code = cat_info.code
+            kw.category_name = cat_info.name
+        else:
+            kw.category_code = "unknown"
+            kw.category_name = "未知"
+        
+        kw.show_category_edit = (category_code!="all")
 
     @xauth.login_required()
     def GET(self):

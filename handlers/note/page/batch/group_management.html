@@ -22,7 +22,22 @@
     </div>
 </div>
 
+{% if show_category_edit %}
+<div class="card btn-line-height">
+    <span>类目：</span>
+    <span>{{category_name}}</span>
+    <div class="float-right">
+        <button class="btn btn-default rename-cat-btn">重命名类目</button>
+        <button class="btn btn-default">添加笔记本</button>
+    </div>
+</div>
+{% end %}
+
 <div class="card">    
+    {% if len(files) == 0 %}
+        {% include common/text/empty_text.html %}
+    {% end %}
+    
     {% for item in files %}
         <div class="book-item">
             {% if item.priority>0 %}
@@ -48,58 +63,22 @@
 {% include note/component/script/rename_script.html %}
 
 <script type="text/javascript">
-$(function () {
-    $(".reverse-select-btn").click(function () {
-        $("input[type=checkbox]").each(function (index, element) {
-            var value = $(element).prop("checked");
-            $(element).prop("checked", !value);
-        });
-    });
+$(".rename-cat-btn").click(function(e) {
+    xnote.prompt("重命名类目", "{{category_name}}", function (newName) {
+        var params = {
+            code: "{{category_code}}",
+            name: newName
+        };
 
-    function doMoveTo(idList, selfId, parentId) {
-        $.post("/note/move", 
-          {id:selfId, parent_id: parentId}, 
-          function (resp){
-              console.log(resp);
-              // 不需要关心哪一个，只是用于计数
-              idList.pop();
-
-              if (idList.length == 0) {
+        $.post("/api/note/category/update", params, function(resp) {
+            if (resp.code=="success") {
                 window.location.reload();
-              }
-        });
-    }
-
-    /** 批量移动操作的回调, see /note/group/select **/
-    window.batchMoveNoteCallback = function (selectedId) {
-        var checked = $(":checked");
-        var idList = [];
-
-        checked.each(function (index, element) {
-            var selfId = $(element).attr("data-id");
-            idList.push(selfId);
-
-            doMoveTo(idList, selfId, selectedId);
-        });
-    };
-
-    $(".rename-btn").click(function(event) {
-        console.log("rename");
-        var checked = $(":checked");
-        if (checked.length == 0) {
-            alert("请选择笔记");
-            return;
-        }
-
-        if (checked.length != 1) {
-            alert("不支持批量重命名");
-            return;
-        }
-
-        renameNote(checked.attr("data-id"), checked.attr("data-name"));
+            } else {
+                xnote.alert(resp.message);
+            }
+        })
     });
-
-});
+})
 </script>
 
 {% end %}
