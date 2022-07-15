@@ -1,0 +1,110 @@
+{% extends base.html %}
+<!--
+@author xupingmao
+@since 2020/01/06
+@modified 2021/07/31 10:38:21
+-->
+
+{% block body_left %}
+
+{% init show_note_path = True %}
+{% include note/component/script/create_script.html %}
+
+<div class="card note-list">
+
+    <!-- header -->
+    <div class="row card-title btn-line-height">
+        <span>笔记本管理</span>
+        <div class="float-right">
+            <button class="btn btn-default" onclick="xnote.createNotebook()">新建笔记本</button>
+            {% include common/button/back_button.html %}
+        </div>
+    </div>
+</div>
+
+<div class="card">    
+    {% for item in files %}
+        <div class="book-item">
+            {% if item.priority>0 %}
+                <span class="tag orange">置顶</span>
+            {% end %}
+
+            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
+            <a class="link2" href="{{item.url}}">{{item.name}}</a>
+            
+            <span class="float-right">
+                <a class="item-option" data-id="{{item.id}}" data-name="{{item.name}}" 
+                    onclick="renameNoteByAttr(this);" href="javascript:void(0);">重命名</a>
+                <input type="checkbox" data-id="{{item.id}}" data-name="{{item.name}}"/>
+            </span>
+        </div>
+    {% end %}
+</div>
+
+<div class="card">
+    {% include common/pagination.html %}
+</div>
+
+{% include note/component/script/rename_script.html %}
+
+<script type="text/javascript">
+$(function () {
+    $(".reverse-select-btn").click(function () {
+        $("input[type=checkbox]").each(function (index, element) {
+            var value = $(element).prop("checked");
+            $(element).prop("checked", !value);
+        });
+    });
+
+    function doMoveTo(idList, selfId, parentId) {
+        $.post("/note/move", 
+          {id:selfId, parent_id: parentId}, 
+          function (resp){
+              console.log(resp);
+              // 不需要关心哪一个，只是用于计数
+              idList.pop();
+
+              if (idList.length == 0) {
+                window.location.reload();
+              }
+        });
+    }
+
+    /** 批量移动操作的回调, see /note/group/select **/
+    window.batchMoveNoteCallback = function (selectedId) {
+        var checked = $(":checked");
+        var idList = [];
+
+        checked.each(function (index, element) {
+            var selfId = $(element).attr("data-id");
+            idList.push(selfId);
+
+            doMoveTo(idList, selfId, selectedId);
+        });
+    };
+
+    $(".rename-btn").click(function(event) {
+        console.log("rename");
+        var checked = $(":checked");
+        if (checked.length == 0) {
+            alert("请选择笔记");
+            return;
+        }
+
+        if (checked.length != 1) {
+            alert("不支持批量重命名");
+            return;
+        }
+
+        renameNote(checked.attr("data-id"), checked.attr("data-name"));
+    });
+
+});
+</script>
+
+{% end %}
+
+
+{% block body_right %}
+    {% include note/component/sidebar/group_management_sidebar.html %}
+{% end %}

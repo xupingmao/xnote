@@ -22,7 +22,7 @@
             <i class="fa fa-folder black"></i>                
             <span>根目录</span>
         </a>
-        <button class="float-right do-move-btn" data-id="0" onclick="xnote.handleMoveTo(this)">移到这里</button>
+        <button class="float-right do-move-btn btn-default" data-id="0" onclick="xnote.handleMoveTo(this)">移到这里</button>
     </div>
 
     {% for item in files %}
@@ -32,7 +32,7 @@
                 <span>{{item.name}}</span>
                 <span class="black">({{item.children_count}})</span>
             </a>
-            <button class="float-right do-move-btn" data-id="{{item.id}}" onclick="xnote.handleMoveTo(this)">移到这里</button>
+            <button class="float-right do-move-btn btn-default" data-id="{{item.id}}" onclick="xnote.handleMoveTo(this)">移到这里</button>
         </div>
     {% end %}
     

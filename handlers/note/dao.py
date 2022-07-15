@@ -975,10 +975,12 @@ def list_group(creator=None,
                orderby="mtime_desc",
                skip_archived=False,
                status="all",
-               offset=0, limit=None,
                *,
-               parent_id=None):
+               offset=0, limit=1000,
+               parent_id=None,
+               count_total=False):
     """查询笔记本列表"""
+    assert creator != None
     check_group_status(status)
 
     # TODO 添加索引优化
@@ -1003,9 +1005,12 @@ def list_group(creator=None,
     notes = _book_db.list(
         user_name=creator, filter_func=list_group_func, limit=1000)
     sort_notes(notes, orderby)
-    if limit is not None:
-        return notes[offset:offset + limit]
-    return notes
+    result = notes[offset:offset + limit]
+    
+    if count_total:
+        return result, _book_db.count(user_name = creator, filter_func=list_group_func)
+    else:
+        return result
 
 
 def count_group(creator, status=None):

@@ -33,19 +33,6 @@ def SmartNote(name, url, icon = "fa-folder", size = None, size_attr = None):
     note.size_attr = size_attr
     return note
 
-class NoteCategory:
-
-    def __init__(self, code, name):
-        self.name = "%s-%s" % (code, name)
-        self.url  = "/note/group?category=" + code
-        self.icon = ""
-        self.priority = 0
-        self.is_deleted = 0
-        self.size = 0
-        self.show_next = True
-        self.icon = "fa-folder"
-        self.badge_info = ""
-
 class PathNode(Storage):
 
     def __init__(self, name, url, type="note"):
@@ -229,22 +216,6 @@ class ShareToMeListHandler(ShareListHandler):
     def list_notes(self, user_name, offset, limit):
         return NOTE_DAO.list_share_to(user_name, offset, limit, self.orderby)
 
-def get_ddc_category_list():
-    # TODO 配置化
-    # 主要参考的是：杜威十进制分类法和国际十进制分类法
-    category_list = []
-    category_list.append(NoteCategory("000", "计算机科学、资讯和总类"))
-    category_list.append(NoteCategory("100", "哲学和心理学"))
-    category_list.append(NoteCategory("200", "宗教"))
-    category_list.append(NoteCategory("300", "社会科学"))
-    category_list.append(NoteCategory("400", "语言"))
-    category_list.append(NoteCategory("500", "数学和自然科学"))
-    category_list.append(NoteCategory("600", "应用科学、医学、技术"))
-    category_list.append(NoteCategory("700", "艺术与休闲"))
-    category_list.append(NoteCategory("800", "文学"))
-    category_list.append(NoteCategory("900", "历史、地理和传记"))
-    return category_list
-
 class GroupListHandler:
 
     def load_group_list(self, user_name, status):
@@ -343,6 +314,47 @@ class GroupListHandler:
 
         return xtemplate.render("note/page/group_list.html", **kw)
 
+
+class GroupManageHandler:
+
+    def handle_root(self, kw):
+        page = xutils.get_argument("page", 1, type=int)
+        orderby = xutils.get_argument("orderby", "default")
+        assert page > 0
+        limit = 20
+        offset = (page-1) * limit
+        
+        user_name = kw.user_name
+        parent_note = NOTE_DAO.get_root()
+        notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset, limit=limit, count_total=True)
+        
+        kw.parent_note = parent_note
+        kw.notes = notes
+        kw.show_note_path = False
+        kw.page_totalsize = total
+        kw.template = "note/page/batch/group_management.html"
+        kw.category_list = [
+            Storage(code="all", name="全部")
+        ]
+
+    @xauth.login_required()
+    def GET(self):
+        parent_id = xutils.get_argument("parent_id", "0")
+        user_name = xauth.current_name()
+
+        xmanager.add_visit_log(user_name, "/note/group_list/edit")
+        kw = Storage(user_name = user_name, parent_id = parent_id)
+
+        self.handle_root(kw)
+        notes = kw.notes
+
+        current = Storage(url = "#", name = "整理")
+        return xtemplate.render(kw.template, 
+            files = notes,
+            current = current, **kw)
+
+
+
 def load_note_index(user_name):
     msg_stat  = MSG_DAO.get_message_stat(user_name)
     note_stat = NOTE_DAO.get_note_stat(user_name)
@@ -431,23 +443,6 @@ class GroupSelectHandler:
             callback = callback,
             parent_id = parent_id,
             parent = parent,
-            files = files)
-
-class CategoryHandler:
-
-    @xauth.login_required()
-    def GET(self):
-        files = get_ddc_category_list()
-        cat_type = xutils.get_argument("type", "ddc")
-
-        root = NOTE_DAO.get_root()
-        return xtemplate.render("note/page/category.html", 
-            file = root, 
-            title = u"杜威十进制分类法(DDC)",
-            pathlist = [root],
-            show_path_list = True,
-            show_size = True,
-            parent_id = 0,
             files = files)
 
 
@@ -697,15 +692,23 @@ class ManagementHandler:
     """批量管理处理器"""
 
     def handle_root(self, kw):
+        page = xutils.get_argument("page", 1, type=int)
+        orderby = xutils.get_argument("orderby", "default")
+        assert page > 0
+        limit = 20
+        offset = (page-1) * limit
+        
         user_name = kw.user_name
         parent_note = NOTE_DAO.get_root()
-        notes = NOTE_DAO.list_group(user_name, orderby="default", parent_id="0", skip_archived = True)
+        notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset, limit=limit, count_total=True)
         parent = Storage(url = "/note/group", name = parent_note.name)
         
         kw.parent_note = parent_note
         kw.parent = parent
         kw.notes = notes
         kw.show_note_path = False
+        kw.page_totalsize = total
+        kw.template = "note/page/batch/group_management.html"
 
     def handle_group(self, kw):
         parent_id = kw.parent_id
@@ -741,6 +744,7 @@ class ManagementHandler:
         xmanager.add_visit_log(user_name, "/note/management")
 
         kw = Storage(user_name = user_name, parent_id = parent_id)
+        kw.template = "note/page/batch/management.html"
 
         if parent_id == "0" or parent_id is None:
             self.handle_root(kw)
@@ -764,7 +768,7 @@ class ManagementHandler:
                 pathlist = pathlist)
 
         current = Storage(url = "#", name = "整理")
-        return xtemplate.render("note/page/batch/management.html", 
+        return xtemplate.render(kw.template, 
             pathlist = NOTE_DAO.list_path(parent_note),
             files = notes,
             show_path = True,
@@ -862,8 +866,8 @@ def on_reload(ctx):
 xurls = (
     r"/note/group"          , GroupListHandler,
     r"/note/group_list"     , GroupListHandler,
+    r"/note/group/manage"   , GroupManageHandler,
     r"/note/books"          , GroupListHandler,
-    r"/note/category"       , CategoryHandler,
     r"/note/default"        , DefaultListHandler,
     r"/note/ungrouped"      , DefaultListHandler,
     r"/note/archived"       , ArchivedHandler,

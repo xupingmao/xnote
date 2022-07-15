@@ -90,11 +90,7 @@
             {% if item.is_deleted %}
                 <span class="tag gray" href="/note/removed">删除</span>
             {% end %}
-            
-            {% if hasattr(item, "is_default") and item.is_default %}
-                <span class="tag system">默认</span>
-            {% end %}
-            
+
             {% comment 新的统一使用badge_info %}
             <span class="book-size-span">{{item.badge_info}}</span>
 

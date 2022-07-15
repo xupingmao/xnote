@@ -1,0 +1,19 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-07-15 22:43:15
+@LastEditors  : xupingmao
+@LastEditTime : 2022-07-15 23:03:47
+@FilePath     : /xnote/handlers/note/component/sidebar/group_management_sidebar.html
+@Description  : 描述
+#} -->
+
+{% init category_list = [] %}
+
+<div class="card">
+    <div class="list-box">
+        {% for t_cat in category_list %}
+            <a href="/note/group/manage?category={{t_cat.code}}" class="list-item">{{t_cat.name}}</a>
+        {% end %}
+    </div>
+</div>
