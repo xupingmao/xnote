@@ -326,7 +326,7 @@ class TestMain(BaseTestCase):
 
         self.check_OK("/note/%s" % id)
 
-    def test_gallery_management(self):
+    def test_gallery_manage(self):
         delete_note_for_test("gallery-test")
         id = create_note_for_test("gallery", "gallery-test")
         self.check_200_debug("/note/management?parent_id=%s" % id)

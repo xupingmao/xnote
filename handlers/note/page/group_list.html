@@ -25,7 +25,7 @@
             <a class="x-tab" data-tab-value="active">
                 活跃(<span class="task-count">{{active_count}}</span>)
             </a>
-            <a class="x-tab" data-tab-value="archived">
+            <a class="x-tab" data-tab-value="archived" href="/note/group_list?tab=archived">
                 归档(<span class="task-count">{{archived_count}}</span>)
             </a>
             <a class="x-tab" data-tab-value="smart" 
@@ -39,6 +39,30 @@
         {% if _user_config.show_sidebar == "false" or _is_mobile %}
             {% include note/component/group_special_folder.html %}
         {% end %}
+
+        {% if _is_mobile %}
+        <div class="card btn-line-height">
+            <span class="tag info">类目</span>
+            <span>{{category_info.name}}</span>
+
+            <div class="float-right">
+                <div class="dropdown">
+                    <span class="dropdown-btn btn btn-default">切换▾</span>
+                    <div class="dropdown-mask"></div>
+                    <div class="dropdown-content {%if _is_mobile%}mobile{% end %}">
+                        {% for t_cat in category_list %}
+                            <a class="dropdown-option" href="/note/group?category={{t_cat.code}}">
+                                <span>{{t_cat.name}}</span>
+                                <div class="float-right">
+                                    <span class="book-count-span">{{t_cat.group_count}}</span>
+                                </div>
+                            </a>
+                        {% end %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% end %}
     {% end %}
 
     <!-- 笔记本列表 -->
@@ -51,12 +75,18 @@
         {% include note/component/note_list_component.html %}
     {% end %}
 
+    <script>
+    $(".switch-category").change(function(e) {
+        var selected = $(this).val();
+        var url = window.location.href;
+        url = xnote.addUrlParam(url, "category", selected);
+        window.location.href = url;
+    });
+    </script>
+
 {% end %}
 
 {% block body_right %}
-    <div class="desktop-only">
-        {% include note/component/group_special_folder.html %}
-        {% include note/card/note_types.html %}
-    </div>
+    {% include note/component/sidebar/group_list_sidebar.html %}
 {% end %}
 

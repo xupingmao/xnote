@@ -43,6 +43,7 @@ LOCK = threading.RLock()
 _event_logger = logutil.new_mem_logger("xmanager.event")
 _async_logger = logutil.new_mem_logger("xmanager.async")
 _debug_logger = logutil.new_mem_logger("xmanager.debug")
+_error_logger = logutil.new_mem_logger("xmanager.error")
 
 def do_wrap_handler(pattern, handler_clz):
     # Python2中自定义类不是type类型
@@ -287,9 +288,10 @@ class HandlerManager:
                     self.resolve_module(mod, modname)
             except Exception as e:
                 self.failed_mods.append([filepath, e])
-                log("Fail to load module '%s'" % filepath)
-                log("Model traceback (most recent call last):")
-                xutils.print_exc()
+                _error_logger.log("Fail to load module %r" % filepath)
+                _error_logger.log("Model traceback (most recent call last):")
+                err_msg = xutils.print_exc()
+                _error_logger.log(err_msg)
 
         self.report_failed()
 

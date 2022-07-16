@@ -103,6 +103,10 @@ def get_client_ip():
     return get_real_ip()
 
 
+def get_request_url(host=False):
+    # TODO 待测试
+    return web.ctx.path + "?" + web.ctx.query
+
 
 class LogMiddleware:
     """WSGI middleware for logging the status.

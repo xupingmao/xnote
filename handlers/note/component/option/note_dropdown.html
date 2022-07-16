@@ -4,7 +4,7 @@
 {% if file != None and _user_name == file.creator and op == "view" %}
 
 {% if file.type == "gallery" %}
-    <a class="btn" href="/note/management?parent_id={{file.id}}">管理</a>
+    <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">管理文件</a>
 {% elif file.show_edit == False %}
     <!-- nothing here -->
 {% else %}
@@ -13,7 +13,8 @@
 
 <div class="dropdown">
     <span class="dropdown-btn btn btn-default">更多▾</span>
-    <div class="dropdown-content">
+    <div class="dropdown-mask"></div>
+    <div class="dropdown-content {%if _is_mobile%}mobile{% end %}">
         <a class="dropdown-option link" href="javascript:rename('{{item.id}}', '{{item.name}}')">重命名</a>
         
         <a class="dropdown-option link note-share-btn" data-id="{{item.id}}">分享</a>

@@ -4,11 +4,11 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-15 22:58:53
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-16 00:51:31
+@LastEditTime : 2022-07-16 20:59:07
 @FilePath     : /xnote/handlers/note/note_category.py
 @Description  : 笔记本类型
 """
-from handlers.note.dao_category import get_category_by_code, upsert_category
+from handlers.note.dao_category import get_category_by_code, refresh_category_count, upsert_category
 import xauth
 import xtemplate
 import xutils
@@ -81,6 +81,7 @@ class CategoryUpdateAjaxHandler:
         cat_info.name = name
 
         upsert_category(user_name, cat_info)
+        refresh_category_count(user_name, code)
 
         return dict(code="success")
 

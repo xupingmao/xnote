@@ -18,10 +18,6 @@
         <span>文档查看</span>
 
         <div class="float-right">
-            {% if file != None and file.id == 0 %}
-                <a href="/note/management?parent_id=0">整理</a>
-            {% end %}
-
             {% if group_type == "gallery" %}
                 <a class="btn" href="/note/add?type=gallery">创建相册</a>
             {% elif group_type == "list" %}

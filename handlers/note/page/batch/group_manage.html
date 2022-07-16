@@ -51,6 +51,14 @@
                 <span class="tag orange">置顶</span>
             {% end %}
 
+            {% if item.priority==0 %}
+                <span class="tag info">活跃</span>
+            {% end %}
+        
+            {% if item.priority<0 %}
+                <span class="tag system">归档</span>
+            {% end %}
+
             <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
             <a class="link2" href="{{item.url}}">{{item.name}}</a>
             
