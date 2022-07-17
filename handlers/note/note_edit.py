@@ -185,6 +185,9 @@ class CreateHandler:
             create_func = CREATE_FUNC_DICT.get(type, default_create_func)
             inserted_id = create_func(note, ctx)
 
+            new_note = NOTE_DAO.get_by_id_creator(inserted_id, creator)
+            self.after_create(new_note)
+
             if type == "group":
                 redirect_url = "/note/view?id=%s" % inserted_id
             else:
@@ -222,6 +225,11 @@ class CreateHandler:
 
     def GET(self):
         return self.POST('GET')
+    
+
+    def after_create(self, created_note):
+        if created_note.type == "group":
+            refresh_category_count(created_note.creator, created_note.category)
 
 
 class RemoveAjaxHandler:
@@ -252,10 +260,17 @@ class RemoveAjaxHandler:
                 return dict(code="fail", message="分组不为空")
 
         NOTE_DAO.delete(file.id)
+        
+        self.after_delete(file)
+
         return dict(code="success")
         
     def POST(self):
         return self.GET()
+    
+    def after_delete(self, note):
+        if note.type == "group":
+            refresh_category_count(note.creator, note.category)
 
 
 class RenameAjaxHandler:

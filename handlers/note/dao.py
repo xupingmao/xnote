@@ -588,6 +588,8 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
         note_dict["priority"] = 0
     if "data" not in note_dict:
         note_dict["data"] = ""
+    if "category" not in note_dict:
+        note_dict["category"] = "000"
 
     with dbutil.get_write_lock():
         # 检查名称是否冲突
