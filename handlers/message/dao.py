@@ -21,7 +21,6 @@ dbutil.register_table("msg_search_history", "备忘搜索历史",
 dbutil.register_table("msg_key", "备忘关键字/标签")
 dbutil.register_table("msg_task_idx", "待办索引")
 dbutil.register_table("msg_history", "备忘历史")
-dbutil.register_table("user_stat", "用户数据统计")
 
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
 # 带日期创建的最大重试次数

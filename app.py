@@ -26,6 +26,7 @@ import xconfig
 import xtables
 import xmanager
 import xtemplate
+import xtables_new
 import signal
 import threading
 from core import code_builder
@@ -250,6 +251,7 @@ def init_app_no_lock():
     # 初始化数据库
     try_init_sqlite()
     try_init_ldb()
+    xtables_new.init()
 
     # 初始化工具箱
     xutils.init(xconfig)

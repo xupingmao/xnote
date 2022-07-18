@@ -1,22 +1,19 @@
 # -*- coding:utf-8 -*-
-# @author xupingmao
-# @since 2021/12/27 23:34:03
-# @modified 2021/12/28 23:54:11
-# @filename xtables_new.py
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2021/12/27 23:34:03
+@LastEditors  : xupingmao
+@LastEditTime : 2022-07-18 22:29:57
+@FilePath     : /xnote/core/xtables_new.py
+@Description  : 描述
+"""
 
 import xutils
 from xutils import dbutil
 
-dbutil.register_table("dict", "词典")
 
-def get_global_dict_table():
-    db = dbutil.get_table("dict")
-    # id_value 是字典的 key
-    # content_zh 中文含义
-    # content_en 英文含义
-    return db
-
-
-@xutils.log_init_deco("xtables")
+@xutils.log_init_deco("xtables_new")
 def init():
-    pass
+    dbutil.register_table("dict", "词典")
+    dbutil.register_table("user_stat", "用户数据统计")

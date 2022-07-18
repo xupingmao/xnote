@@ -8,6 +8,7 @@ import xutils
 import xtables
 import xmanager
 import xtemplate
+import xtables_new
 import web
 import six
 import json
@@ -39,6 +40,7 @@ def init():
     db_file = os.path.join(xconfig.DB_DIR, "sqlite", "test.db")
     db_instance = SqliteKV(db_file)
     dbutil.init(xconfig.DB_DIR, db_instance=db_instance, binlog_max_size=1000)
+    xtables_new.init()
 
     xutils.init(xconfig)
     xauth.init()
