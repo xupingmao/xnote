@@ -3,7 +3,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-17 10:29:23
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-17 10:40:43
+@LastEditTime : 2022-07-23 16:54:59
 @FilePath     : /xnote/handlers/note/component/sidebar/group_list_sidebar.html
 @Description  : 描述
 #} -->
@@ -17,7 +17,7 @@
     <div class="card">
         <div class="list-box">
             {% for t_cat in category_list %}
-                <a href="/note/group_list?category={{t_cat.code}}" class="list-item">
+                <a href="/note/group_list?note_category={{t_cat.code}}" class="list-item">
                     <i class="fa fa-th-large"></i>
                     <span>{{t_cat.name}}</span>
                     <div class="float-right">

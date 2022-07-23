@@ -197,7 +197,7 @@ class GroupListHandler:
                                         status=status,
                                         orderby="default",
                                         parent_id=parent_id,
-                                        category=kw.category)
+                                        category=kw.note_category)
         else:
             notes = NOTE_DAO.list_smart_group(user_name)
 
@@ -257,7 +257,7 @@ class GroupListHandler:
             user_name, "group_list_order_by", "name_asc")
         logging.debug("orderby_default:%s", orderby_default)
 
-        category = xutils.get_argument("category", "all")
+        category = xutils.get_argument("note_category", "all")
         tab = xutils.get_argument("tab", "active")
         orderby = xutils.get_argument("orderby", orderby_default)
         user_name = xauth.current_name()
@@ -274,7 +274,7 @@ class GroupListHandler:
         kw.tab = tab
         kw.orderby = orderby
         kw.title = T("我的笔记本")
-        kw.category = category
+        kw.note_category = category
         kw.category_info = get_category_by_code(user_name, category)
 
         notes = self.load_group_list(user_name, tab, kw)
@@ -301,7 +301,7 @@ class GroupManageHandler:
     def handle_root(self, kw):
         page = xutils.get_argument("page", 1, type=int)
         orderby = xutils.get_argument("orderby", "default")
-        category_code = xutils.get_argument("category", "all")
+        category_code = xutils.get_argument("note_category", "all")
 
         assert page > 0
         limit = 50
@@ -316,7 +316,7 @@ class GroupManageHandler:
         kw.notes = notes
         kw.page_totalsize = total
         kw.page_size = limit
-        kw.page_url = "?category={category}&orderby={orderby}&page=".format(
+        kw.page_url = "?note_category={category}&orderby={orderby}&page=".format(
             category=category_code, orderby=orderby)
         kw.template = "note/page/batch/group_manage.html"
         kw.category_list = list_category(user_name)

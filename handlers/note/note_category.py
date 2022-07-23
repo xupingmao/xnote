@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-15 22:58:53
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-16 20:59:07
+@LastEditTime : 2022-07-23 16:53:24
 @FilePath     : /xnote/handlers/note/note_category.py
 @Description  : 笔记本类型
 """
@@ -20,7 +20,7 @@ class NoteCategory:
 
     def __init__(self, code, name):
         self.name = "%s-%s" % (code, name)
-        self.url  = "/note/group?category=" + code
+        self.url  = "/note/group?note_category=" + code
         self.icon = ""
         self.priority = 0
         self.is_deleted = 0

@@ -228,6 +228,8 @@ class CreateHandler:
     
 
     def after_create(self, created_note):
+        if created_note == None:
+            return
         if created_note.type == "group":
             refresh_category_count(created_note.creator, created_note.category)
 
