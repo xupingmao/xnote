@@ -4,15 +4,107 @@
  */
 (function (window) {
 
+    // 目录生成
+    function MarkedContents() {
+        this.id = 0;
+    }
+
+    MarkedContents.prototype.createNewId = function () {
+        this.id++;
+        return "heading-" + this.id;
+    }
+
+    MarkedContents.prototype.generateHtml = function (myRenderer) {
+        if (extOptions.hideMenu) {
+            return ""
+        }
+
+        console.log("contents.generateHtml start");
+
+        var menuText = "";
+        var menuList = [];
+        var minLevel = null;
+        var prevLevel = 1;
+
+        menuText += '<div class="marked-contents">';
+        menuText += '<span class="marked-contents-title">目录</span>';
+        menuText += "<ul>";
+
+        // 先把基础层级计算好
+        for (var i = 0; i < myRenderer.headings.length; i++) {
+            var heading = myRenderer.headings[i];
+            var text = heading.text;
+            var link = heading.link;
+            var level = heading.level;
+
+            if (minLevel === null) {
+                minLevel = level;
+            } else {
+                minLevel = Math.min(minLevel, level);
+            }
+
+            menuList.push([level, text, link]);
+        }
+
+        if (minLevel === null) {
+            minLevel = 1;
+        }
+
+        console.log("contents minLevel:", minLevel);
+
+        // 准备渲染目录
+        for (var i = 0; i < menuList.length; i++) {
+            var item = menuList[i];
+            var level = item[0];
+            var text = item[1];
+            var link = item[2];
+
+            // 调整层级
+            level = level - minLevel + 1;
+
+            if (level === prevLevel) {
+                menuText += buildMenuLink(text, link);
+            }
+
+            if (level > prevLevel) {
+                // 进入下一层
+                menuText += repeatElement("<ul>", level - prevLevel);
+                menuText += buildMenuLink(text, link);
+            }
+
+            if (level < prevLevel) {
+                // 退出下一层
+                menuText += repeatElement("</ul>", prevLevel - level);
+                menuText += buildMenuLink(text, link);
+            }
+
+            // 更新之前的层级
+            prevLevel = level;
+        }
+
+        menuText += repeatElement("</ul>", prevLevel);
+        menuText += "</ul>";
+        menuText += "</div>";
+
+        console.log("contents.generateHtml end");
+        return menuText;
+    }
+
+    // 全局变量
+    var globals = {
+        contents: new MarkedContents()
+    };
+
     // marked 初始化操作
     var myRenderer = new marked.Renderer();
+
     myRenderer.headings = [];
 
     marked.setOptions({
         renderer: myRenderer,
         highlight: highlight
     });
-    
+
     marked.showMenu = true;
     var oldParse = marked.parse;
 
@@ -26,15 +118,15 @@
 
     // 后面都是定义的函数和重写html生成
     function escape(html, encode) {
-      return html
-        .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+        return html
+            .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
-    function highlight_csv (code) {
+    function highlight_csv(code) {
         try {
             // var csv = new CSV(code);
             var rows = CSV.parse(code);
@@ -83,7 +175,7 @@
         }
         if (lang == "CSV") {
             return highlight_csv(code);
-        } else if (lang=="EXCEL") {
+        } else if (lang == "EXCEL") {
             code = code.replace(/\t/g, ",");
             // some \t may be replaced by four space
             code = code.replace(/ {4}/g, ',');
@@ -96,7 +188,6 @@
 
     function processCheckbox(text, clickable) {
         var result = {};
-        var disabledText = "";
         var disabled = false;
 
         if (clickable !== undefined) {
@@ -129,7 +220,7 @@
             }
 
             var element = $("<span>").html(content).addClass("xnote-todo");
-            
+
             if (regexPercent.test(content)) {
                 // 包含百分比的加上进行中的进度
                 element = element.addClass("doing");
@@ -162,8 +253,9 @@
     }
 
     myRenderer.heading = function (text, level, raw) {
-        var id = raw.replace(/ /g, '-');
-        this.headings.push({text:raw, link:id, level:level});
+        var id = globals.contents.createNewId();
+
+        this.headings.push({ text: raw, link: id, level: level });
         var checkboxResult = processCheckbox(text);
 
         return '<h'
@@ -171,7 +263,9 @@
             + ' id="'
             + this.options.headerPrefix
             + id
-            + '" class="marked-heading">'
+            + '" class="marked-heading"'
+            + ' "data-level"=' + level
+            + '>'
             + checkboxResult.checkbox
             + checkboxResult.text
             + '</h'
@@ -191,49 +285,49 @@
     // };
 
     // 重写img
-    myRenderer.image = function(href, title, text) {
-      var out = '<p class="marked-img"><img class="x-photo" src="' + href + '" alt="' + text + '" style="max-width:100%;"';
-      if (title) {
-        out += ' title="' + title + '"';
-      }
-      out += this.options.xhtml ? '/>' : '>';
-      out += '</p>'
-      return out;
+    myRenderer.image = function (href, title, text) {
+        var out = '<p class="marked-img"><img class="x-photo" src="' + href + '" alt="' + text + '" style="max-width:100%;"';
+        if (title) {
+            out += ' title="' + title + '"';
+        }
+        out += this.options.xhtml ? '/>' : '>';
+        out += '</p>'
+        return out;
     };
 
     // 重写code
-    myRenderer.code = function(code, lang, escaped) {
-      if (this.options.highlight) {
-        var out = this.options.highlight(code, lang);
-        if (out != null && out !== code) {
-          escaped = true;
-          code = out;
+    myRenderer.code = function (code, lang, escaped) {
+        if (this.options.highlight) {
+            var out = this.options.highlight(code, lang);
+            if (out != null && out !== code) {
+                escaped = true;
+                code = out;
+            }
         }
-      }
 
-      // 没有定义语言
-      if (!lang) {
-        return '<pre class="marked-code"><code>'
-          + (escaped ? code : escape(code, true))
-          + '\n</code></pre>';
-      }
+        // 没有定义语言
+        if (!lang) {
+            return '<pre class="marked-code"><code>'
+                + (escaped ? code : escape(code, true))
+                + '\n</code></pre>';
+        }
 
-      // csv
-      if ("csv" == lang.toLowerCase()) {
-        return '<div>' + code + '</div>';
-      }
+        // csv
+        if ("csv" == lang.toLowerCase()) {
+            return '<div>' + code + '</div>';
+        }
 
-      // 定义语言
-      return '<pre class="marked-code"><code class="'
-        + this.options.langPrefix
-        + escape(lang, true)
-        + '">'
-        + (escaped ? code : escape(code, true))
-        + '\n</code></pre>\n';
+        // 定义语言
+        return '<pre class="marked-code"><code class="'
+            + this.options.langPrefix
+            + escape(lang, true)
+            + '">'
+            + (escaped ? code : escape(code, true))
+            + '\n</code></pre>\n';
     };
 
     // 单行的code
-    myRenderer.codespan = function(text) {
+    myRenderer.codespan = function (text) {
         return '<code class="marked-codespan">' + text + '</code>';
     }
 
@@ -242,37 +336,37 @@
         return '<strong class="marked-strong"><a href="/s/' + text + '">' + text + '</a></strong>';
     }
 
-    myRenderer.table = function(header, body) {
-      return '<table class="table marked-table">\n'
-        + '<thead>\n'
-        + header
-        + '</thead>\n'
-        + '<tbody>\n'
-        + body
-        + '</tbody>\n'
-        + '</table>\n';
+    myRenderer.table = function (header, body) {
+        return '<table class="table marked-table">\n'
+            + '<thead>\n'
+            + header
+            + '</thead>\n'
+            + '<tbody>\n'
+            + body
+            + '</tbody>\n'
+            + '</table>\n';
     };
 
-    myRenderer.link = function(href, title, text) {
-      if (this.options.sanitize) {
-        try {
-          var prot = decodeURIComponent(unescape(href))
-            .replace(/[^\w:]/g, '')
-            .toLowerCase();
-        } catch (e) {
-          return '';
+    myRenderer.link = function (href, title, text) {
+        if (this.options.sanitize) {
+            try {
+                var prot = decodeURIComponent(unescape(href))
+                    .replace(/[^\w:]/g, '')
+                    .toLowerCase();
+            } catch (e) {
+                return '';
+            }
+            if (prot.indexOf('javascript:') === 0 || prot.indexOf('vbscript:') === 0) {
+                return '';
+            }
         }
-        if (prot.indexOf('javascript:') === 0 || prot.indexOf('vbscript:') === 0) {
-          return '';
+        var out = '<a target="_blank" href="' + href + '"';
+        // var out = '<a href="' + href + '" target="_blank" ';
+        if (title) {
+            out += ' title="' + title + '"';
         }
-      }
-      var out = '<a target="_blank" href="' + href + '"';
-      // var out = '<a href="' + href + '" target="_blank" ';
-      if (title) {
-        out += ' title="' + title + '"';
-      }
-      out += '>' + text + '</a>';
-      return out;
+        out += '>' + text + '</a>';
+        return out;
     };
 
     function buildMenuLink(text, link) {
@@ -296,68 +390,6 @@
         return text;
     }
 
-
-    function generateMenuHtml(myRenderer) {
-        if (extOptions.hideMenu) {
-            return ""
-        }
-
-        var menuText = "";
-        var itemNo = [];
-        var menuList = [];
-        var minLevel = 1;
-        var prevLevel = 1;
-
-        menuText += '<div class="marked-contents">';
-        menuText += '<span class="marked-contents-title">目录</span>';
-        menuText += "<ul>";
-
-        // 先把基础层级计算好
-        for (var i = 0; i < myRenderer.headings.length; i++) {
-            var heading = myRenderer.headings[i];
-            var text = heading.text;
-            var link = heading.link;
-            var level = heading.level;
-            minLevel = Math.min(minLevel, level);
-            menuList.push([level, text, link]);
-        }
-
-        // 准备渲染目录
-        for (var i = 0; i < menuList.length; i++) {
-            var item = menuList[i];
-            var level = item[0];
-            var text = item[1];
-            var link = item[2];
-
-            // 调整层级
-            level = level - minLevel + 1;
-
-            if (level === prevLevel) {
-                menuText += buildMenuLink(text, link);
-            }
-
-            if (level > prevLevel) {
-                // 进入下一层
-                menuText += repeatElement("<ul>", level - prevLevel);
-                menuText += buildMenuLink(text, link);
-            }
-
-            if (level < prevLevel) {
-                // 退出下一层
-                menuText += repeatElement("</ul>", prevLevel - level);
-                menuText += buildMenuLink(text, link);
-            }
-
-            // 更新之前的层级
-            prevLevel = level;
-        }
-
-        menuText += repeatElement("</ul>", prevLevel);
-        menuText += "</ul>";
-        menuText += "</div>";
-        return menuText;
-    }
-
     function adjustTableWidth() {
         xnote.table.adjustWidth(".marked-table");
     }
@@ -366,18 +398,16 @@
         if (!marked.showMenu) {
             return oldParse(text);
         }
-        
+
         myRenderer.headings = [];
         var outtext = oldParse(text);
-        if (myRenderer.headings.length==0) {
+        if (myRenderer.headings.length == 0) {
             return outtext;
         }
 
         // 处理目录
-        var menuHtml = generateMenuHtml(myRenderer);
-        
-        // 声明需要目录
-        console.log("generateMenuHtml");
+        var menuHtml = globals.contents.generateHtml(myRenderer);
+
         outtext = menuHtml + outtext;
 
         $(".menu-aside").show();
@@ -405,5 +435,6 @@
             }
         });
     };
+
 
 })(window);
