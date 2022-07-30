@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-03 09:09:49
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-30 19:55:18
+@LastEditTime : 2022-07-30 21:33:56
 @FilePath     : /xnote/handlers/note/dao_book.py
 @Description  : 描述
 """
@@ -84,7 +84,7 @@ def get_default_book_id(user_name):
     assert user_name != None, "user_name不能为空"
     first = _db.get_first(user_name = user_name)
     if first == None:
-        return check_and_create_default_book()
+        return check_and_create_default_book(user_name)
     return first.id
 
 class SmartGroupService:
