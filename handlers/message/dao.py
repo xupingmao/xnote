@@ -215,7 +215,7 @@ def add_message_history(message):
     dbutil.put(new_id, message)
 
 
-@xmanager.listen(["message.updated", "message.add", "message.remove"])
+@xmanager.listen(["message.update", "message.add", "message.remove"])
 def expire_message_cache(ctx):
     cacheutil.prefix_del("message.count")
 

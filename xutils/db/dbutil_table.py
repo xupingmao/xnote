@@ -384,9 +384,9 @@ class LdbTable:
             result.append(value)
         return result
 
-    def get_first(self, filter_func=None):
+    def get_first(self, filter_func=None, *, user_name=None):
         """读取第一个满足条件的数据"""
-        result = self.list(limit=1, filter_func=filter_func)
+        result = self.list(limit=1, filter_func=filter_func, user_name=user_name)
         if len(result) > 0:
             return result[0]
         else:

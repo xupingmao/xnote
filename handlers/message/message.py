@@ -366,6 +366,7 @@ def update_message_status(id, status):
         event = Storage(id=id, user=user_name,
                         status=status, content=data.content)
         xmanager.fire("message.updated", event)
+        xmanager.fire("message.update", event)
         return dict(code="success")
     else:
         return failure(message="无操作权限")

@@ -491,3 +491,7 @@ class TestMain(BaseTestCase):
         note_info = get_by_id(note_id)
         note_depth = get_note_depth(note_info)
         self.assertEqual(1, note_depth)
+    
+    def test_check_and_create_default_book(self):
+        from handlers.note.dao_book import check_and_create_default_book
+        check_and_create_default_book("test")

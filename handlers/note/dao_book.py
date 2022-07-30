@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-03 09:09:49
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-16 22:33:29
+@LastEditTime : 2022-07-30 19:55:18
 @FilePath     : /xnote/handlers/note/dao_book.py
 @Description  : 描述
 """
@@ -69,6 +69,8 @@ def check_and_create_default_book(user_name):
         
         for note in list_default_notes(user_name):
             move_note(note, default_book_id)
+    
+        return default_book_id
 
 
 def fix_book_delete(id, user_name):
@@ -77,6 +79,13 @@ def fix_book_delete(id, user_name):
     if note == None and book != None:
         _db.delete(book)
 
+
+def get_default_book_id(user_name):
+    assert user_name != None, "user_name不能为空"
+    first = _db.get_first(user_name = user_name)
+    if first == None:
+        return check_and_create_default_book()
+    return first.id
 
 class SmartGroupService:
 
@@ -130,4 +139,4 @@ def on_reload(ctx):
 
 xutils.register_func("note.count_smart_group", SmartGroupService.count_smart_group)
 xutils.register_func("note.list_smart_group", SmartGroupService.list_smart_group)
-
+xutils.register_func("note.get_default_book_id", get_default_book_id)
