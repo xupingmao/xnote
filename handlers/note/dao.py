@@ -837,8 +837,8 @@ def update0(note):
 
 
 def get_by_name(creator, name):
-    if creator == None:
-        raise Exception("get_by_name:creator is None")
+    assert creator != None, "get_by_name:creator is None"
+    assert name != None, "get_by_name: name is None"
 
     def find_func(key, value):
         if value.is_deleted:

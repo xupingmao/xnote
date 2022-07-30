@@ -47,7 +47,7 @@ def _update_log(user_name, note, increment = 1, insert_only = False):
 
     db = get_user_note_log_table(user_name)
 
-    log = db.get_by_id(note_id)
+    log = db.get_by_id(note_id, user_name=user_name)
     
     if log is None:
         log = Storage()
@@ -177,7 +177,7 @@ def add_edit_log(user_name, note):
 def add_create_log(user_name, note):
     return _update_log(user_name, note)
 
-def list_recent_events(user_name = None, offset = 0, limit = None):
+def list_recent_events(user_name = None, offset = 0, limit = xconfig.PAGE_SIZE):
     create_events = list_recent_created(user_name, offset, limit)
     edit_events = list_recent_edit(user_name, offset, limit)
     view_events = list_recent_viewed(user_name, offset, limit)

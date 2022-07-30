@@ -19,7 +19,7 @@ except ImportError:
 
 import xauth
 
-from handlers.note.dao import get_by_id, visit_note, get_by_user_skey
+from handlers.note.dao import get_by_id, get_by_name, visit_note, get_by_user_skey
 from xutils import Storage
 from xutils import textutil
 
@@ -30,11 +30,22 @@ BaseTestCase = test_base.BaseTestCase
 
 NOTE_DAO = xutils.DAO("note")
 
-def create_note_for_test(type, name):
+def get_default_group_id():
+    name = "default_group_id"
+    note = get_by_name(xauth.current_name(), name)
+    if note != None:
+        return note.id
+    return create_note_for_test("group", name)
+
+def create_note_for_test(type, name, *, content = ""):
     assert type != None, "type cannot be None"
     assert name != None, "name cannot be None"
 
     data = dict(name = name, type = type, content = "hello,world")
+
+    if type != "group":
+        data["parent_id"] = get_default_group_id()
+
     file = json_request("/note/add", 
         method = "POST",
         data = data)
@@ -59,8 +70,10 @@ class TestMain(BaseTestCase):
         self.check_200_debug("/note/recent_edit")
         delete_note_for_test("xnote-unit-test")
 
+        group_id = get_default_group_id()
         file = json_request("/note/add", method="POST", 
-            data=dict(name="xnote-unit-test", content="hello"))
+            data=dict(name="xnote-unit-test", content="hello", parent_id = group_id))
+
         id = file["id"]
         self.check_OK("/note/view?id=" + str(id))
         self.check_OK("/note/print?id=" + str(id))
@@ -83,7 +96,8 @@ class TestMain(BaseTestCase):
         self.check_OK("/note/create")
 
     def test_create_name_empty(self):
-        result = json_request("/note/create", method = "POST", data = dict(name = ""))
+        parent_id = get_default_group_id()
+        result = json_request("/note/create", method = "POST", data = dict(name = "", parent_id = parent_id))
         self.assertEqual(xutils.u('标题为空'), result['message'])
 
     def test_create_name_exits(self):
@@ -149,23 +163,28 @@ class TestMain(BaseTestCase):
         self.assertEqual("2014-01-01", result['data'][2]['title'])
 
     def test_note_editor_md(self):
+        group_id = get_default_group_id()
+
         json_request("/note/remove?name=xnote-md-test")
+        
         file = json_request("/note/add", method="POST",
-            data=dict(name="xnote-md-test", type="md", content="hello markdown"))
+            data=dict(name="xnote-md-test", type="md", content="hello markdown", parent_id = group_id))
+        
         id = file["id"]
         file = json_request("/note/view?id=%s&_format=json" % id).get("file")
         self.assertEqual("md", file["type"])
         self.assertEqual("hello markdown", file["content"])
         self.check_200("/note/edit?id=%s" % id)
         self.check_OK("/note/history?id=%s" % id)
+
         json_request("/note/history_view?id=%s&version=%s" % (file["id"], file["version"]))
         json_request("/note/remove?id=%s" % id)
 
     def test_note_editor_html(self):
         json_request("/note/remove?name=xnote-html-test")
-        file = json_request("/note/add", method="POST",
-            data=dict(name="xnote-html-test", type="html"))
-        id = file["id"]
+
+        id = create_note_for_test("html", "xnote-html-test", content = "test")
+
         self.assertTrue(id != "")
         print("id=%s" % id)
         json_request("/note/save", method="POST", data=dict(id=id, type="html", data="<p>hello</p>"))
@@ -191,9 +210,9 @@ class TestMain(BaseTestCase):
 
     def test_note_share(self):
         json_request("/note/remove?name=xnote-share-test")
-        file = json_request("/note/add", method="POST", 
-            data=dict(name="xnote-share-test", content="hello"))
-        id = file["id"]
+
+        id = create_note_for_test("md", "xnote-share-test", content = "hello")
+
         self.check_OK("/note/share?id=" + str(id))
         file = json_request("/note/view?id=%s&_format=json" % id).get("file")
         self.assertEqual(1, file["is_public"])
@@ -211,9 +230,8 @@ class TestMain(BaseTestCase):
 
     def test_note_share_to(self):
         delete_note_for_test("xnote-share-test")
-        note = json_request("/note/add", method="POST", 
-            data=dict(name="xnote-share-test", content="hello"))
-        id = note["id"]
+        id = create_note_for_test("md", "xnote-share-test", content = "hello")
+
         share_resp = json_request("/note/share", method="POST",
             data=dict(id=id, share_to="test2"))
         logging.info("share_resp:%s", share_resp)
@@ -234,10 +252,8 @@ class TestMain(BaseTestCase):
 
     def test_note_tag(self):
         json_request("/note/remove?name=xnote-tag-test")
-        note = json_request("/note/add", method="POST", 
-            data=dict(name="xnote-tag-test", content="hello"))
-        print("created note:", note)
-        id = note["id"]
+        id = create_note_for_test("md", "xnote-tag-test", content = "hello")
+        
         json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags="ABC DEF"))
         json_request("/note/tag/%s" % id)
         json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags=""))
@@ -247,9 +263,8 @@ class TestMain(BaseTestCase):
 
     def test_note_stick(self):
         json_request("/note/remove?name=xnote-share-test")
-        file = json_request("/note/add", method="POST", 
-            data=dict(name="xnote-share-test", content="hello"))
-        id = file["id"]
+
+        id = create_note_for_test("md", "xnote-share-test", content = "hello")
 
         self.check_OK("/note/stick?id=%s" % id)
         self.check_OK("/note/unstick?id=%s" % id)
@@ -464,3 +479,15 @@ class TestMain(BaseTestCase):
         self.assertFalse(r2)
 
 
+    def test_log_list_recent_events(self):
+        from handlers.note.dao_log import list_recent_events
+        events = list_recent_events("test")
+        self.assertTrue(len(events) > 0)
+    
+    def test_get_note_depth(self):
+        from handlers.note.dao import get_by_id
+        from handlers.note.dao_read import get_note_depth
+        note_id = create_note_for_test("group", "test-get-note-depth")
+        note_info = get_by_id(note_id)
+        note_depth = get_note_depth(note_info)
+        self.assertEqual(1, note_depth)

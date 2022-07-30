@@ -9,6 +9,7 @@ PS: 接口是以Leveldb的接口为模板定义的
 """
 
 class DBInterface:
+    """KV存储的数据库接口"""
 
     def __init__(self, *args, **kw):
         raise NotImplementedError("__init__")
@@ -56,6 +57,7 @@ class DBInterface:
 
 
 class DBLockInterface:
+    """基于数据库的锁的接口"""
 
     def Acquire(self, resource_id, timeout):
         """返回token
@@ -68,4 +70,4 @@ class DBLockInterface:
     
     def Refresh(self, resource_id, token, refresh_time):
         raise NotImplementedError("Refresh")
-    
+

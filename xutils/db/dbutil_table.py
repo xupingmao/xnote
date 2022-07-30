@@ -231,7 +231,10 @@ class LdbTable:
 
     def get_by_id(self, row_id, default_value=None, user_name=None):
         validate_str(row_id, "invalid row_id:{!r}", row_id)
-        self._check_user_name(user_name)
+
+        if self._need_check_user:
+            validate_str(user_name, "invalid user_name:{!r}", user_name)
+
         row_id = encode_str(row_id)
         key = self._build_key(user_name, row_id)
         return self.get_by_key(key, default_value)

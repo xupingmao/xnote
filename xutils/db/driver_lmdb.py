@@ -157,6 +157,11 @@ class LmdbKV:
 
 class LmdbEnhancedKV:
 
+    """Lmdb增强版，用于解决key长度限制的问题，之所以不重新编译是基于以下考虑
+    1. 直接在上层封装使用起来更方便
+    2. 超长key本身不是一个常见的案例，并且也不是好的设计
+    """
+
     def __init__(self, *args, **kw):
         self.kv = LmdbKV(*args, **kw)
         self.max_key_size = self.kv.env.max_key_size()

@@ -155,6 +155,7 @@ class CreateHandler:
         note.creator   = creator
         note.parent_id = str(parent_id)
         note.type      = type
+        note.type0 = type0 # 原始输入的type
         note.content   = content
         note.data      = ""
         note.size      = len(content)
@@ -174,13 +175,7 @@ class CreateHandler:
         ctx = Storage(method = method, date = date)
         
         try:
-            if type not in VALID_NOTE_TYPE_SET:
-                raise Exception(u"无效的类型: %s" % type0)
-
-            check_by_name = NOTE_DAO.get_by_name(note.creator, name)
-            if check_by_name != None:
-                message = u"笔记【%s】已存在" % name
-                raise Exception(message)
+            self.check_before_create(note)
 
             create_func = CREATE_FUNC_DICT.get(type, default_create_func)
             inserted_id = create_func(note, ctx)
@@ -226,6 +221,22 @@ class CreateHandler:
     def GET(self):
         return self.POST('GET')
     
+
+    def check_before_create(self, note):
+        type = note.type
+        if type not in VALID_NOTE_TYPE_SET:
+            raise Exception(u"无效的类型: %s" % note.type0)
+
+        name = note.name
+        check_by_name = NOTE_DAO.get_by_name(note.creator, name)
+        if check_by_name != None:
+            message = u"笔记【%s】已存在" % name
+            raise Exception(message)
+        
+        if note.type != "group":
+            if note.parent_id in ("", "0"):
+                message = u"请选择归属的笔记本"
+                raise Exception(message)
 
     def after_create(self, created_note):
         if created_note == None:
