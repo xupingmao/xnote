@@ -47,7 +47,7 @@ def _update_log(user_name, note, increment = 1, insert_only = False):
 
     db = get_user_note_log_table(user_name)
 
-    log = db.get_by_id(note_id)
+    log = db.get_by_id(note_id, user_name = user_name)
     
     if log is None:
         log = Storage()
