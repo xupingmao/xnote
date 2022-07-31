@@ -274,6 +274,8 @@ def init(boot_config_file=None):
     makedirs(STORAGE_DIR)
     makedirs(ETC_DIR)
     makedirs(LOG_DIR)
+    makedirs(BACKUP_DIR)
+    makedirs(os.path.join(BACKUP_DIR, "db"))
 
     # 二级目录
     makedirs(COMMANDS_DIR)

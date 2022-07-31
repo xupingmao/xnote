@@ -218,3 +218,94 @@ function initCodeMirror(selector, options) {
     window.formatMarkdownTable = formatTable;
     
 })();
+
+
+// markdown标题处理
+var MarkdownHeading = function() {
+    this.text = "";
+    this.headings = [];
+}
+
+MarkdownHeading.prototype.getParentLevelText = function(info) {
+    if (info.parent === null) {
+        return "";
+    }
+    return info.parent.levelText;
+}
+
+MarkdownHeading.prototype.getHeadingInfo = function (name, lineNo, prev) {
+    var start = 0;
+    var level = 0;
+    for (var i = 0; i < name.length; i++) {
+        if (name[i] === "#") {
+            level++;
+        }
+        if (name[i] === " " || name[i] === "#") {
+            start++;
+        } else {
+            break;
+        }
+    }
+
+    var levelText = "";
+    var lastIndex = 1;
+    var parent = null;
+
+    if (prev === null) {
+        levelText = "1."
+    } else {
+        if (level > prev.level) {
+            levelText = prev.levelText + "1.";
+            lastIndex = 1;
+            parent = prev;
+        } 
+
+        if (level === prev.level) {
+            lastIndex = prev.lastIndex+1;
+            levelText = this.getParentLevelText(prev) + lastIndex + ".";
+            parent = prev.parent;
+        }
+
+        if (level < prev.level) {
+            var brother = prev.parent;
+            if (brother !== null) {
+                lastIndex = brother.lastIndex+1;
+                levelText = this.getParentLevelText(brother) + lastIndex + ".";
+                parent = brother.parent;
+            } else {
+                lastIndex = 1;
+                levelText = "1.";
+            }
+        }
+    }
+
+    return {
+        name: name.substring(start),
+        lineNo: lineNo,
+        level: level,
+        levelText: levelText,
+        lastIndex: lastIndex,
+        parent: parent
+    }
+}
+
+MarkdownHeading.prototype.load = function(text) {
+    this.text = text;
+    this.headings = [];
+    var lines = text.split("\n");
+    var lineNo = 0;
+    var prev = null;
+    for (var i = 0; i < lines.length; i++) {
+        lineNo++;
+        var line = lines[i];
+        if (line[0] == "#") {
+            var info = this.getHeadingInfo(line, lineNo, prev);
+            this.headings.push(info);
+            prev = info;
+        }
+    }
+}
+
+MarkdownHeading.prototype.getHeadings = function() {
+    return this.headings
+}

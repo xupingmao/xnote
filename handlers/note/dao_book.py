@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-03 09:09:49
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-30 21:33:56
+@LastEditTime : 2022-07-31 20:18:47
 @FilePath     : /xnote/handlers/note/dao_book.py
 @Description  : 描述
 """
@@ -136,6 +136,9 @@ def on_create_user(event):
 @xmanager.listen("sys.reload")
 def on_reload(ctx):
     SmartGroupService.init()
+
+
+SmartGroupService.init()
 
 xutils.register_func("note.count_smart_group", SmartGroupService.count_smart_group)
 xutils.register_func("note.list_smart_group", SmartGroupService.list_smart_group)

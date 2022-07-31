@@ -1,0 +1,60 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-07-31 12:15:50
+@LastEditors  : xupingmao
+@LastEditTime : 2022-07-31 20:13:21
+@FilePath     : /xnote/handlers/note/component/sidebar/markdown_edit_sidebar.html
+@Description  : 描述
+ #} -->
+
+<style>
+    .sidebar-contents {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+</style>
+
+<div class="card">
+    <div class="card-title">
+        <span>目录</span>
+        <div class="sidebar-contents">
+
+        </div>
+    </div>
+</div>
+
+
+<script id="sidebar-content-template" type="text/html">
+    {{!each list }}
+    <a class="list-item" data-line="{{! $value.lineNo }}">
+        <span>{{! $value.levelText }}</span>
+        <span>{{! $value.name }}</span>
+    </a>
+    {{!/each }}
+</script>
+
+<script>
+$(function () {
+    function refreshContents() {
+        var content = $("#markdown-input").val();
+        var mdHeading = new MarkdownHeading();
+    
+        mdHeading.load(content);
+        console.log(mdHeading);
+    
+        var html = $("#sidebar-content-template").render({list: mdHeading.getHeadings()});
+        $(".sidebar-contents").html(html);
+    }
+
+    refreshContents();
+    xnote.on("editor.change", refreshContents);
+});
+
+$(".sidebar-contents").on("click", ".list-item", function (e) {
+    var lineNo = $(this).attr("data-line");
+    // xnote.editor.setCursor({line:lineNo-1, ch:0});
+    xnote.editor.setSelection({line:lineNo-1, ch:0}, {line:lineNo});
+});
+
+</script>

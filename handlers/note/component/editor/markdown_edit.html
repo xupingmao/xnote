@@ -15,7 +15,7 @@
     {% include note/component/css/edit_css.html %}
 {% end %} 
 
-{% block body %} 
+{% block body_left %} 
 
 {% init error = "" %} 
 {% init download_csv = False %}
@@ -177,6 +177,8 @@
             var options = { hideMenu: true };
             marked.parseAndRender(input, "#markdown-output-div", options);
             $("#markdown-output-div").height($("#editor").height());
+
+            xnote.fire("editor.change", {});
         }
 
         function autoSave(force) {
@@ -215,6 +217,8 @@
                     xnote.toast(resp.message)
                 };
             });
+
+            xnote.fire("editor.change", {});
         };
 
         function stealLockAndEdit() {
@@ -390,4 +394,9 @@
 </script>
 
 <!-- GROUPS: {{file.groups}} -->
+{% end %}
+
+
+{% block body_right %}
+    {% include note/component/sidebar/markdown_edit_sidebar.html %}
 {% end %}

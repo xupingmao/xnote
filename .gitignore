@@ -26,8 +26,12 @@ __pycache__
 /static/deprecated/
 /static/wiki/
 /static/archive/
+
+# 生成的文件
 /static/css/app.build.css
 /static/js/app.build.js
+/static/js/utils.build.js
+
 /data/
 /data_follower/
 /testdata/

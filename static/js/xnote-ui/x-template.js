@@ -28,3 +28,14 @@ xnote.renderTemplate = function(templateText, object) {
         return escapeHTML(value);
     });
 };
+
+/**
+ * 获取表单数据
+ */
+ $.fn.extend({
+    /** 渲染模板 **/
+    "render": function (data, options) {
+        var templateText = $(this).text();
+        return template.render(templateText, data, options);
+    },
+});
