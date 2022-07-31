@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao
 # @since 2021/12/29 23:48:27
-# @modified 2022/02/07 13:49:53
+# @modified 2022/07/31 21:00:41
 # @filename dao_log.py
 
 """笔记相关的访问日志有两个部分：
@@ -47,8 +47,8 @@ def _update_log(user_name, note, increment = 1, insert_only = False):
 
     db = get_user_note_log_table(user_name)
 
-    log = db.get_by_id(note_id, user_name=user_name)
-    
+    log = db.get_by_id(note_id, user_name = user_name)
+
     if log is None:
         log = Storage()
         log.note_id = note_id
