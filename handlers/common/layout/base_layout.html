@@ -73,7 +73,7 @@
     var winWidth = window.innerWidth;
     var marginLeft = (winWidth - contentWidth) / 2;
     // 设置最小的高度
-    var rootMinHeight = $(window).height() - 41;
+    var rootMinHeight = $(window).height() - 39;
 
     if (winWidth < contentWidth) {
       contentWidth = winWidth;
@@ -81,6 +81,7 @@
     }
 
     var styleText = ".x-center, .nav-container {"
+      + "float:left;"
       + "width:" + contentWidth + "px;"
       + "margin-left:" + marginLeft + "px;"
       + "}";
