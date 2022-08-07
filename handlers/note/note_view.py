@@ -302,6 +302,7 @@ class ViewHandler:
             kw.show_aside = False
             kw.show_search = False
             kw.show_comment = False
+            kw._show_footer = False
 
         if is_iframe == "true":
             kw.show_menu = False

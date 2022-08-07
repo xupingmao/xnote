@@ -3,13 +3,16 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-07 19:09:56
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-07 21:34:29
+@LastEditTime : 2022-08-07 21:46:17
 @FilePath     : /xnote/handlers/common/base_footer.html
 @Description  : 描述
  #} -->
 {% init _cost_time = -1 %}
 
-{% if show_nav %}
+{# 默认和导航保持一致 #}
+{% init _show_footer = show_nav %}
+
+{% if _show_footer %}
 <div class="footer">
     <div class="x-center pad10">
         <div>
