@@ -23,6 +23,7 @@ from xutils import dateutil, quote, u
 from xutils import tojson
 from xutils import Storage
 from xutils import textutil
+import x_trace
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE    = dict(
@@ -174,6 +175,7 @@ def render_before_kw(kw):
     kw["_nav_list"]     = get_nav_list()
     kw["_is_mobile"]    = is_mobile_device()
     kw["_is_desktop"]   = xutils.is_desktop_client()
+    kw["_cost_time"]    = x_trace.get_cost_time()
     kw["Storage"]       = Storage
     kw["xutils"]        = xutils
     kw["xconfig"]       = xconfig

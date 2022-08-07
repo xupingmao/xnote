@@ -3,9 +3,6 @@
  */
 $(function() {
 
-  // 设置最小的高度
-  $(".root").css("min-height", getWindowHeight());
-
   window.moveTo = function (selfId, parentId) {
       $.post("/note/move", 
           {id:selfId, parent_id: parentId}, 

@@ -23,25 +23,6 @@
 <link rel="stylesheet" href="/static/css/app.build.css"/>
 <link rel="stylesheet" href="/static/css/common-card.css"/>
 
-{# TODO 部分库支持amd模块化，是异步加载的
-<script type="text/javascript" src="/static/lib/requirejs/require-2.3.6.js"></script>
-<script type="text/javascript">
-window.xuser = "{{_user_name}}";
-window.PAGE_OPEN = "{{xconfig.PAGE_OPEN}}";
-window.SHOW_ASIDE = "{{show_aside}}";
-window.THEME = "{{THEME}}";
-
-require.config({
-  baseUrl: "/static/lib",
-  paths: {
-    "art-template": "art-template/template-web-4.13.2.js",
-    "marked": "marked/marked.js"
-  }
-});
-
-</script>
-#}
-
 <script type="text/javascript" src="/static/lib/jquery/jquery-1.12.4.min.js"></script>
 <!-- 弹层组件 -->
 <script type="text/javascript" src="/static/lib/layer/layer.js"></script>

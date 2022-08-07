@@ -1,7 +1,7 @@
 /** 
 * 获取窗口的宽度
 */
-function getWindowWidth() {
+xnote.getWindowWidth = function() {
     if (window.innerWidth) {
         return window.innerWidth;
     } else {
@@ -10,7 +10,10 @@ function getWindowWidth() {
     }
 }
 
-function getWindowHeight() {
+window.getWindowWidth = xnote.getWindowWidth;
+
+// 获取窗口的高度
+xnote.getWindowHeight = function() {
     if (window.innerHeight) {
         return window.innerHeight;
     } else {
@@ -18,6 +21,8 @@ function getWindowHeight() {
         return Math.min(document.body.clientWidth, document.documentElement.clientWidth);
     }
 }
+
+window.getWindowHeight = xnote.getWindowHeight
 
 /**
  * 判断是否是PC设备，要求width>=800 && height>=600

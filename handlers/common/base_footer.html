@@ -1,0 +1,24 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-08-07 19:09:56
+@LastEditors  : xupingmao
+@LastEditTime : 2022-08-07 21:17:00
+@FilePath     : /xnote/handlers/common/base_footer.html
+@Description  : 描述
+ #} -->
+{% init _cost_time = -1 %}
+
+{% if show_nav %}
+<div class="footer">
+    <div class="x-center">
+        <div>
+            <!-- left -->
+        </div>
+    
+        <div class="float-right">
+            请求处理耗时: {{"%.3fs" % _cost_time }}
+        </div>
+    </div>
+</div>
+{% end %}

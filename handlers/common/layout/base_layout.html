@@ -72,6 +72,8 @@
     var contentWidth = parseInt("{{CONTENT_WIDTH}}");
     var winWidth = window.innerWidth;
     var marginLeft = (winWidth - contentWidth) / 2;
+    // 设置最小的高度
+    var rootMinHeight = $(window).height() - 41;
 
     if (winWidth < contentWidth) {
       contentWidth = winWidth;
@@ -89,17 +91,11 @@
       styleText += ".desktop-only {display: none;}";
     }
 
-    // 居中的样式
-    var style = document.createElement("style");
-    style.type = "text/css";
-    if (style.styleSheet) {
-      // 兼容IE
-      style.styleSheet.cssText = styleText;  
-    } else {  
-      style.innerHTML = styleText;
-    } 
+    styleText += ".root{min-height:" + rootMinHeight + "px;}";
 
-    document.head.appendChild(style);
+    // 居中的样式
+    var style = $("<style>").attr("type", "text/css").html(styleText);
+    $("head").append(style);
 })();
 </script>
 

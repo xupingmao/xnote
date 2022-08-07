@@ -1,0 +1,27 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-08-07 19:22:34
+@LastEditors  : xupingmao
+@LastEditTime : 2022-08-07 19:22:56
+@FilePath     : /xnote/handlers/common/script/require_init.html
+@Description  : require初始化
+ #} -->
+
+{# TODO 部分库支持amd模块化，是异步加载的 #}
+
+<script type="text/javascript" src="/static/lib/requirejs/require-2.3.6.js"></script>
+<script type="text/javascript">
+window.xuser = "{{_user_name}}";
+window.PAGE_OPEN = "{{xconfig.PAGE_OPEN}}";
+window.SHOW_ASIDE = "{{show_aside}}";
+window.THEME = "{{THEME}}";
+
+require.config({
+    baseUrl: "/static/lib",
+    paths: {
+    "art-template": "art-template/template-web-4.13.2.js",
+    "marked": "marked/marked.js"
+    }
+});
+</script>
