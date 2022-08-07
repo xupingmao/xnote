@@ -40,8 +40,8 @@ USER_TABLE = None
 BUILTIN_USER_DICT = None
 NAME_LENGTH_MIN  = 4
 PASSWORD_LEN_MIN = 6
-INVALID_NAMES    = fsutil.load_set_config("./config/user/invalid_names.list")
-USER_CONFIG_PROP = fsutil.load_prop_config("./config/user/user_config.default.properties")
+INVALID_NAMES    = None
+USER_CONFIG_PROP = None
 MAX_SESSION_SIZE = 20
 SESSION_EXPIRE   = 24 * 3600 * 7
 PRINT_DEBUG_LOG  = False
@@ -581,6 +581,11 @@ def check_old_password(user_name, password):
 def init():
     global BUILTIN_USER_DICT
     global USER_TABLE
+    global INVALID_NAMES
+    global USER_CONFIG_PROP
+
+    INVALID_NAMES = fsutil.load_set_config("./config/user/invalid_names.list")
+    USER_CONFIG_PROP = fsutil.load_prop_config("./config/user/user_config.default.properties")
 
     BUILTIN_USER_DICT = dict()
     _create_temp_user(BUILTIN_USER_DICT, "admin")

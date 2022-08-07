@@ -44,6 +44,7 @@ import argparse
 
 
 FILE_LOCK = FileLock("pid.lock")
+DEFAULT_CONFIG_FILE = "./config/boot/boot.default.properties"
 
 # 配置日志模块
 logging.basicConfig(
@@ -65,10 +66,9 @@ def get_int_by_sys_arg(value):
     return int(value)
 
 
-def handle_args_and_init_config():
+def handle_args_and_init_config(boot_config_kw=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config",
-                        default="./config/boot/boot.default.properties")
+    parser.add_argument("--config", default=DEFAULT_CONFIG_FILE)
     parser.add_argument("--data", default="")
     parser.add_argument("--delay", default="0")
     parser.add_argument("--debug", default="yes")
@@ -87,7 +87,7 @@ def handle_args_and_init_config():
         sys.exit(1)
 
     # 处理Data目录，创建各种目录
-    xconfig.init(args.config)
+    xconfig.init(args.config, boot_config_kw=boot_config_kw)
 
     # 延迟加载，避免定时任务重复执行
     delay = int(args.delay)
@@ -238,12 +238,17 @@ def init_web_app():
     xmanager.init(app, var_env)
     return app
 
+def print_env_info():
+    cwd = os.getcwd()
+    print("当前工作目录:", os.path.abspath(cwd))
 
-def init_app_no_lock():
+def init_app_no_lock(boot_config_kw=None):
     global app
 
+    print_env_info()
+
     # 处理初始化参数
-    handle_args_and_init_config()
+    handle_args_and_init_config(boot_config_kw=boot_config_kw)
 
     # 构建静态文件
     code_builder.build()
@@ -309,14 +314,14 @@ def wait_thread_exit():
             return
 
 
-def main():
+def main(boot_config_kw=None):
     global app
     global FILE_LOCK
 
     try:
         if FILE_LOCK.acquire():
             # 初始化
-            init_app_no_lock()
+            init_app_no_lock(boot_config_kw=boot_config_kw)
             # 监听端口
             app.run()
             logging.info("服务器已关闭")

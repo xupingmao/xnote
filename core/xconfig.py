@@ -202,7 +202,7 @@ def makedirs(dirname):
         os.makedirs(dirname)
 
 
-def init(boot_config_file=None):
+def init(boot_config_file=None, boot_config_kw = None):
     """初始化系统配置项,启动时必须调用"""
     global DATA_PATH
     global DATA_DIR
@@ -232,7 +232,7 @@ def init(boot_config_file=None):
 
     if boot_config_file != None:
         # 初始化启动配置
-        init_boot_config(boot_config_file)
+        init_boot_config(boot_config_file, boot_config_kw=boot_config_kw)
 
     path = get_global_config("system.data")
     DATA_PATH = os.path.abspath(path)
@@ -328,15 +328,19 @@ def _parse_int(value):
     return int(value)
 
 
-def init_boot_config(fpath):
-    text = fsutil.readfile(fpath)
+def init_boot_config(fpath, boot_config_kw=None):
 
     # 读取默认的配置
     config_dict = load_default_boot_config()
 
-    # 使用用户配置覆盖
+
+    # 加载用户配置覆盖
+    text = fsutil.readfile(fpath)
     user_config = textutil.parse_config_text(text, 'dict')
+
     config_dict.update(user_config)
+    if boot_config_kw != None:
+        config_dict.update(boot_config_kw)
 
     for key in config_dict:
         check_part = textutil.remove_tail(key, ".type")
