@@ -47,7 +47,7 @@ $(function (e) {
                     return;
                 }
                 var tabValue = $(child).attr("data-tab-value");
-                $(child).attr("href", addUrlParam(window.location.href, key, tabValue))
+                $(child).attr("href", xnote.addUrlParam(window.location.href, key, tabValue))
             })
         });
     }
