@@ -44,6 +44,11 @@ def run_test(target = None):
 		os.system("python3 -m coverage html")
 		return
 	
+	if target == "note":
+		os.system("python3 -m pytest tests/test_note.py --doctest-modules --cov handlers --capture no")
+		os.system("python3 -m coverage html")
+		return
+	
 	if target == "system_sync":
 		os.system("python3 -m pytest tests/test_system_sync.py --doctest-modules --cov handlers.system.system_sync --capture no")
 		os.system("python3 -m coverage html")

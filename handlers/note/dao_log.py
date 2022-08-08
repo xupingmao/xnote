@@ -47,29 +47,30 @@ def _update_log(user_name, note, increment = 1, insert_only = False):
 
     db = get_user_note_log_table(user_name)
 
-    log = db.get_by_id(note_id, user_name = user_name)
-
-    if log is None:
-        log = Storage()
-        log.note_id = note_id
-        log.visit_cnt  = increment
-        log.atime = note.atime
-        log.mtime = note.mtime
-        log.ctime = note.ctime
-        log.user = user_name
-        db.insert(log, id_type = None, id_value = note_id)
-    else:
-        if insert_only:
-            log_debug("skip for insert_only mode, note_id:{!r}", note_id)
-            return
-        if log.visit_cnt is None:
-            log.visit_cnt = 1
-        log.visit_cnt += increment
-        log.atime = note.atime
-        log.mtime = note.mtime
-        log.ctime = note.ctime
-        log.user = user_name
-        db.update(log)
+    with dbutil.get_write_lock(user_name):
+        log = db.get_by_id(note_id, user_name = user_name)
+        
+        if log is None:
+            log = Storage()
+            log.note_id = note_id
+            log.visit_cnt  = increment
+            log.atime = note.atime
+            log.mtime = note.mtime
+            log.ctime = note.ctime
+            log.user = user_name
+            db.insert(log, id_type = None, id_value = note_id)
+        else:
+            if insert_only:
+                log_debug("skip for insert_only mode, note_id:{!r}", note_id)
+                return
+            if log.visit_cnt is None:
+                log.visit_cnt = 1
+            log.visit_cnt += increment
+            log.atime = note.atime
+            log.mtime = note.mtime
+            log.ctime = note.ctime
+            log.user = user_name
+            db.update(log)
 
 def get_note_ids_from_logs(logs):
     return list(map(lambda x:x.note_id, logs))
@@ -105,14 +106,17 @@ def list_hot(user_name, offset = 0, limit = 100):
         offset = offset, limit = limit, reverse = True)
 
     hot_dict = dict()
+    log_dict = dict()
     for log in logs:
         hot_dict[log.note_id] = log.visit_cnt
+        log_dict[log.note_id] = log
         
     note_ids = get_note_ids_from_logs(logs)
 
     notes = NOTE_DAO.batch_query_list(note_ids)
     for note in notes:
-        note.badge_info = hot_dict.get(note.id)
+        note.badge_info = str(hot_dict.get(note.id))
+        note.user_log = log_dict.get(note.id)
     return notes
 
 def list_most_visited(user_name, offset, limit):

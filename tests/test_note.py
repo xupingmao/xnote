@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2019/10/05 20:23:43
-# @modified 2022/04/23 10:54:57
+# @modified 2022/08/08 22:44:29
 # @filename test_note.py
 
 import logging
 import time
 import copy
+from handlers.note.dao_log import list_most_visited
 
 import xutils
 # cannot perform relative import
@@ -495,3 +496,22 @@ class TestMain(BaseTestCase):
     def test_check_and_create_default_book(self):
         from handlers.note.dao_book import check_and_create_default_book
         check_and_create_default_book("test")
+
+
+    def test_note_visit(self):
+        from handlers.note.dao import visit_note
+        from handlers.note.dao_log import list_most_visited
+
+        delete_note_for_test("visit-test")
+
+        note_id = create_note_for_test("md", "visit-test")
+
+        for i in range(100):
+            visit_note(xauth.current_name(), note_id)
+
+        recent_notes = list_most_visited(xauth.current_name(), 0, 20)
+
+        self.assertTrue(len(recent_notes) > 0)
+        self.assertEqual(recent_notes[0].badge_info, "102")
+
+

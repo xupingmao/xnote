@@ -17,7 +17,7 @@ MAX_ID_KEY = "_id:max_id"
 
 register_table("_index", "通用索引")
 register_table("_meta", "表元信息")
-
+register_table("_repair_error", "修复错误记录")
 
 class TableValidator:
 
@@ -90,7 +90,10 @@ class LdbTable:
 
     def _build_key(self, *argv):
         return self.prefix + self._build_key_no_prefix(*argv)
-
+    
+    def _build_key_with_user(self, id, user_name):
+        return self._build_key_no_prefix(self.table_name, user_name or self.user_name, id)
+    
     def _build_key_no_prefix(self, *argv):
         return ":".join(filter(None, argv))
 
@@ -236,7 +239,7 @@ class LdbTable:
             validate_str(user_name, "invalid user_name:{!r}", user_name)
 
         row_id = encode_str(row_id)
-        key = self._build_key(user_name, row_id)
+        key = self._build_key_with_user(row_id, user_name=user_name)
         return self.get_by_key(key, default_value)
 
     def get_by_key(self, key, default_value=None):
@@ -261,7 +264,7 @@ class LdbTable:
         if self._need_check_user:
             user_name = obj.get(self.user_attr)
 
-        key = self._build_key(user_name, id_value)
+        key = self._build_key_with_user(id_value, user_name=user_name)
 
         obj[self.key_name] = key
         obj[self.id_name] = id_value
@@ -277,7 +280,7 @@ class LdbTable:
         self._check_value(obj)
 
         id_value = self._create_new_id(id_type)
-        key = self._build_key(user_name, id_value)
+        key = self._build_key_with_user(id_value, user_name)
         self._put_obj(key, obj)
         return key
 
@@ -297,7 +300,7 @@ class LdbTable:
         assert xutils.is_str(id)
         id = encode_str(id)
         self._check_user_name(user_name)
-        key = self._build_key(user_name, id)
+        key = self._build_key_with_user(id, user_name)
         self.update_by_key(key, obj)
 
     def update_by_key(self, key, obj):
@@ -332,7 +335,7 @@ class LdbTable:
 
     def delete_by_id(self, id, user_name = None):
         validate_str(id, "delete_by_id: id is not str")
-        key = self._build_key(user_name, id)
+        key = self._build_key_with_user(id, user_name)
         self.delete_by_key(key)
 
     def delete_by_key(self, key, user_name=None):
@@ -549,6 +552,7 @@ class TableIndexRepair:
     def __init__(self, db):
         assert isinstance(db, LdbTable)
         self.db = db
+        self.repair_error_db = LdbTable("_repair_error")
 
     def repair_index(self):
         db = self.db
@@ -562,9 +566,17 @@ class TableIndexRepair:
                 key = value._key
                 assert xutils.is_str(key)
                 try:
+                    parts = key.split(":")
+                    if len(parts) != 3:
+                        logging.error("invalid key: %s", key)
+                        error_log = dict(key = key, value=value, type="record")
+                        self.repair_error_db.insert(error_log, id_type="auto_increment")
+                        db_delete(key)
+                        continue
                     table_name, user_name, id = key.split(":")
                     user_name = decode_str(user_name)
                 except ValueError:
+                    xutils.print_exc()
                     logging.error("invalid record key: %s", key)
                     continue
                 db.rebuild_single_index(value, user_name=user_name)
@@ -577,7 +589,7 @@ class TableIndexRepair:
         if not key.startswith("_index$"):
             logging.warning("Invalid index key:(%s)", key)
             return
-        delete(key)
+        db_delete(key)
 
     def delete_invalid_index(self, index_name):
         db = self.db
@@ -601,6 +613,9 @@ class TableIndexRepair:
                     user_name = decode_str(user_name)
                 except:
                     logging.error("invalid key: (%s)", record_key)
+                    error_log = dict(key = old_key, value = record_key, type="index")
+                    self.repair_error_db.insert(error_log, id_type="auto_increment")
+                    self.do_delete(old_key)
                     continue
 
             prefix = db._get_index_prefix(index_name, user_name)
