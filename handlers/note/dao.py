@@ -870,7 +870,7 @@ def visit_note(user_name, id):
     note.visited_cnt += 1
     note.visit_cnt = note.visited_cnt
 
-    # 访问热度
+    # 全局访问热度
     if note.hot_index is None:
         note.hot_index = 0
     note.hot_index += 1

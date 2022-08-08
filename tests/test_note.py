@@ -7,6 +7,7 @@
 import logging
 import time
 import copy
+from handlers.note.dao_log import list_most_visited
 
 import xutils
 # cannot perform relative import
@@ -462,5 +463,23 @@ class TestMain(BaseTestCase):
 
         r2 = NOTE_DAO.refresh_edit_lock(note_id, token2, time.time() + 60)
         self.assertFalse(r2)
+
+
+    def test_note_visit(self):
+        from handlers.note.dao import visit_note
+        from handlers.note.dao_log import list_most_visited
+
+        delete_note_for_test("visit-test")
+
+        note_id = create_note_for_test("md", "visit-test")
+
+        for i in range(100):
+            visit_note(xauth.current_name(), note_id)
+
+        recent_notes = list_most_visited(xauth.current_name(), 0, 20)
+
+        self.assertTrue(len(recent_notes) > 0)
+        self.assertEqual(recent_notes[0].badge_info, "102")
+
 
 
