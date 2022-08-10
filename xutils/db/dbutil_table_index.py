@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-26 16:21:35
+@LastEditTime : 2022-08-10 22:51:47
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -76,7 +76,8 @@ class TableIndex:
         old_value = None
         new_value = None
 
-        if old_obj != None:
+        if old_obj != None and isinstance(old_obj, dict):
+            # 旧的数据必须为dict类型
             old_value = old_obj.get(index_name)
 
         if new_obj != None:

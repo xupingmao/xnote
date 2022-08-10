@@ -217,7 +217,7 @@ class LdbTable:
         # 使用leveldb的批量操作可以确保不会读到未提交的数据
         batch = create_write_batch()
         with get_write_lock(key):
-            old_obj = get(key)
+            old_obj = db_get(key)
             self._format_value(key, obj)
             batch.put(key, self._convert_to_db_row(obj))
             self._update_index(old_obj, obj, batch)
