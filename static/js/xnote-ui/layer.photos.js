@@ -12,6 +12,11 @@ layer.photos = function(options, loop, key){
   var photos = type ? options.photos : {}, data = photos.data || [];
   var start = photos.start || 0;
   dict.imgIndex = (start|0) + 1;
+
+  // 状态
+  dict.state = {};
+  dict.state.rotate = 0; // 旋转角度
+  dict.state.img = null; // 图片资源
   
   options.img = options.img || 'img';
   // 是否是移动设备
@@ -104,9 +109,107 @@ layer.photos = function(options, loop, key){
       layer.photos(options, true, key);
     }, 200);
   }
+
+  // 重绘图片
+  dict.repaint = function(layero) {
+    console.log("layero", layero);
+    var img = dict.state.img;
+    var imgarea = [img.width, img.height];
+    var isRotate90 = dict.state.rotate == 90 || dict.state.rotate == 270;
+
+    if (isRotate90) {
+      imgarea = [img.height, img.width];
+    } 
+    
+    console.log("imgarea", imgarea);
+    var area = dict.calcArea(imgarea, options, true);
+    console.log("area", area);
+
+    var width = area[0];
+    var height = area[1];
+    var top = ($(window).height() - height) / 2;
+    var left = ($(window).width() - width) / 2;
+
+    var style = {
+      "width": width + "px",
+      "height": height + "px",
+      "left": left + "px",
+      "top": top + "px",
+    };
+
+    console.log("repaint style", style);
+
+    var imgLeft = 0;
+    var imgTop = 0;
+
+    if (isRotate90) {
+      // transform是在定位确认之后以元素中心旋转
+      // 所以旋转90的定位还是按照旋转之前的位置计算
+      imgLeft = (width-height)/2;
+      imgTop = (height-width)/2;
+    }
+
+    var imgCss = {
+      "width": "100%",
+      "left": 0,
+      "top": 0
+    };
+
+    if (isRotate90) {
+      imgCss = {
+        "width": height,
+        "left": imgLeft,
+        "top": imgTop
+      };
+    } 
+
+    // 渲染样式
+    layero.css(style);
+    layero.find(".layui-layer-content").css("height", height);
+    layero.find("img").css(imgCss);
+  }
+
+  // 计算图片大小
+  dict.calcArea = function (imgarea, options, returnNumber) {
+    var winarea;
+
+    if (options.isMobile) {
+      // 移动端不需要预留空间，直接填满屏幕即可
+      // 64是上下控制栏各32px
+      winarea = [$(window).width(), $(window).height()-64];
+    } else {
+      winarea = [$(window).width() - 100, $(window).height() - 100];
+    }
+    
+    //如果 实际图片的宽或者高比 屏幕大（那么进行缩放）
+    if(!options.full && (imgarea[0]>winarea[0]||imgarea[1]>winarea[1])){
+      var wh = [imgarea[0]/winarea[0],imgarea[1]/winarea[1]];//取宽度缩放比例、高度缩放比例
+      if(wh[0] > wh[1]){//取缩放比例最大的进行缩放
+        imgarea[0] = imgarea[0]/wh[0];
+        imgarea[1] = imgarea[1]/wh[0];
+      } else if(wh[0] < wh[1]){
+        imgarea[0] = imgarea[0]/wh[1];
+        imgarea[1] = imgarea[1]/wh[1];
+      }
+    }
+
+    // 图片太小了，进行放大
+    var minsize = 150;
+    if (imgarea[0] < minsize && imgarea[1] < minsize) {
+      var ratio = Math.min(minsize/imgarea[0], minsize/imgarea[1]);
+      imgarea[0] = imgarea[0]*ratio;
+      imgarea[1] = imgarea[1]*ratio;
+    }
+
+    if (returnNumber) {
+      return imgarea;
+    }
+    
+    return [imgarea[0]+'px', imgarea[1]+'px']; 
+  }
   
   //一些动作
-  dict.event = function(){
+  dict.event = function(layero){
     
     // layer默认的行为
     // dict.bigimgPic.hover(function(){
@@ -136,6 +239,14 @@ layer.photos = function(options, loop, key){
     dict.bigimg.find(".close-span").on("click", function(event) {
       layer.close(dict.index);
     });
+
+    dict.bigimg.find(".rotate-span").on("click", function(event) {
+      dict.state.rotate += 90;
+      dict.state.rotate %= 360;
+      dict.bigimg.find("img").css("transform", "rotate(" + dict.state.rotate + "deg)");
+      // 重新绘制弹窗
+      dict.repaint(layero);
+    })
     
     $(document).on('keyup', dict.keyup);
 
@@ -178,7 +289,15 @@ layer.photos = function(options, loop, key){
       return "";
     }
     var bar = $("<div>").addClass("layui-layer-imgbar").addClass("imgbar-top").hide();
-    bar.append($("<span>").addClass("close-span").text("关闭"));
+
+    // 旋转图片功能
+    bar.append($("<span>").addClass("rotate-span").addClass("clickable").text("旋转"));
+    bar.append("&nbsp;");
+
+    var rightBox = $("<div>").addClass("float-right");
+    rightBox.append($("<span>").addClass("close-span").addClass("clickable").text("关闭"));
+
+    bar.append(rightBox);
     return bar.prop("outerHTML");
   }
 
@@ -186,7 +305,7 @@ layer.photos = function(options, loop, key){
     if (options.hideBar) {
       return "";
     }
-    return '<div class="layui-layer-imgbar" style="display:'
+    return '<div class="layui-layer-imgbar imgbar-bottom" style="display:'
       + (key ? 'block' : '') 
       + '"><span class="layui-layer-imgtit"><a target="_blank" href="' 
       + data[start].src +  '">'+ (data[start].alt||'') 
@@ -194,43 +313,14 @@ layer.photos = function(options, loop, key){
   }
 
   loadImage(data[start].src, function(img){
+    // 存储图像资源
+    dict.state.img = img;
+
     layer.close(dict.loadi);
     dict.index = layer.open($.extend({
       type: 1,
       id: 'layui-layer-photos',
-      area: function(){
-        var imgarea = [img.width, img.height];
-        var winarea;
-
-        if (options.isMobile) {
-          // 移动端不需要预留空间，直接填满屏幕即可
-          winarea = [$(window).width(), $(window).height()];
-        } else {
-          winarea = [$(window).width() - 100, $(window).height() - 100];
-        }
-        
-        //如果 实际图片的宽或者高比 屏幕大（那么进行缩放）
-        if(!options.full && (imgarea[0]>winarea[0]||imgarea[1]>winarea[1])){
-          var wh = [imgarea[0]/winarea[0],imgarea[1]/winarea[1]];//取宽度缩放比例、高度缩放比例
-          if(wh[0] > wh[1]){//取缩放比例最大的进行缩放
-            imgarea[0] = imgarea[0]/wh[0];
-            imgarea[1] = imgarea[1]/wh[0];
-          } else if(wh[0] < wh[1]){
-            imgarea[0] = imgarea[0]/wh[1];
-            imgarea[1] = imgarea[1]/wh[1];
-          }
-        }
-
-        // 图片太小了，进行放大
-        var minsize = 150;
-        if (imgarea[0] < minsize && imgarea[1] < minsize) {
-          var ratio = Math.min(minsize/imgarea[0], minsize/imgarea[1]);
-          imgarea[0] = imgarea[0]*ratio;
-          imgarea[1] = imgarea[1]*ratio;
-        }
-        
-        return [imgarea[0]+'px', imgarea[1]+'px']; 
-      }(),
+      area: dict.calcArea([img.width, img.height], options),
       title: false,
       shade: 0.9,
       shadeClose: true,
@@ -261,7 +351,7 @@ layer.photos = function(options, loop, key){
         layero.find(".layui-layer-imgnext,.layui-layer-imgprev").
           css("position", "fixed").show();
         layero.find(".layui-layer-imguide").show();
-        layero.find(".layui-layer-imgbar").hide();
+        layero.find(".layui-layer-imgbar").show();
 
         dict.event(layero);
         options.tab && options.tab(data[start], layero);

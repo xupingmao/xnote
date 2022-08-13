@@ -9,14 +9,19 @@
 .layui-layer-imgbar.imgbar-top {
     bottom: unset;
     top: 0px;
-    text-align: right;
+    text-align: left;
     font-size: 14px;
     padding-right: 5px;
+    padding-left: 5px;
     background-color: rgba(0,0,0,0.8);
     z-index: 1;
+    position: fixed;
 }
 
-.layui-layer-imgbar.imgbar-top>.close-span {
+.layui-layer-imgbar.imgbar-bottom {
+    position: fixed;
+}
+
+.layui-layer-imgbar .clickable {
     cursor: pointer;
 }
-
