@@ -145,11 +145,12 @@ layer.photos = function(options, loop, key){
     if (isRotate90) {
       // transform是在定位确认之后以元素中心旋转
       // 所以旋转90的定位还是按照旋转之前的位置计算
-      imgLeft = (width-height)/2;
-      imgTop = (height-width)/2;
+      imgLeft = ($(window).width()-height)/2;
+      imgTop = ($(window).height()-width)/2;
     }
 
     var imgCss = {
+      "position": "relative",
       "width": "100%",
       "left": 0,
       "top": 0
@@ -157,11 +158,14 @@ layer.photos = function(options, loop, key){
 
     if (isRotate90) {
       imgCss = {
+        "position": "fixed",
         "width": height,
         "left": imgLeft,
         "top": imgTop
       };
-    } 
+    }
+
+    console.log("img css", imgCss);
 
     // 渲染样式
     layero.css(style);
