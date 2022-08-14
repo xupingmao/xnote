@@ -4,12 +4,11 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-14 12:31:02
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-14 17:39:32
+@LastEditTime : 2022-08-14 22:50:32
 @FilePath     : /xnote/handlers/system/db_index.py
 @Description  : 数据库索引管理
 """
 
-from handlers import message
 from web.utils import Storage
 import xauth
 import xtemplate
@@ -24,7 +23,7 @@ class TableIndex:
 
 def count_index(table_name, index_name):
     index_table_name = dbutil.get_index_table_name(table_name, index_name)
-    return dbutil.count_table(index_table_name)
+    return dbutil.count_table(index_table_name, use_cache=True)
 
 class IndexHandler:
 

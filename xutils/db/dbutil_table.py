@@ -17,6 +17,7 @@ MAX_ID_KEY = "_id:max_id"
 
 register_table("_index", "通用索引")
 register_table("_meta", "表元信息")
+register_table("_idx_version", "索引版本")
 register_table("_repair_error", "修复错误记录")
 
 
@@ -326,6 +327,17 @@ class LdbTable:
     def repair_index(self):
         repair = TableIndexRepair(self)
         repair.repair_index()
+    
+    def rebuild_index(self, version="v1"):
+        """重建索引"""
+        with get_write_lock():
+            idx_version_key = "_idx_version:%s" % self.table_name
+            current_version = db_get(idx_version_key)
+            if current_version == version:
+                logging.info("当前索引已经是最新版本, table=%s, version=%s" % (self.table_name, version))
+                return
+            self.repair_index()
+            db_put(idx_version_key, version)
 
     def delete(self, obj):
         obj_key = self._get_key_from_obj(obj)
@@ -555,7 +567,7 @@ class TableIndexRepair:
         assert isinstance(db, LdbTable)
         self.db = db
         self.repair_error_db = LdbTable("_repair_error")
-
+    
     def repair_index(self):
         db = self.db
 

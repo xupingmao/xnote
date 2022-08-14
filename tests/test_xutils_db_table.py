@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-14 17:17:50
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-14 17:33:09
+@LastEditTime : 2022-08-14 22:52:57
 @FilePath     : /xnote/tests/test_xutils_db_table.py
 @Description  : table测试
 """
@@ -14,18 +14,6 @@
 from .a import *
 from xutils import Storage
 from xutils import dbutil
-from xutils import textutil
-from xutils import netutil
-from xutils.db.binlog import BinLog
-from xutils.db.dbutil_deque import DequeTable
-
-import os
-import threading
-import sqlite3
-import time
-import xutils
-import xconfig
-import json
 
 from . import test_base
 
@@ -98,6 +86,7 @@ class TestMain(BaseTestCase):
 
     def test_table_with_user_in_param(self):
         db = dbutil.get_table("test_user_db")
+        db.rebuild_index("v1")
 
         for item in db.iter():
             db.delete(item)
