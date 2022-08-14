@@ -36,7 +36,7 @@ def get_filesystem_kw():
     kw["search_type"]   = "fs"
     kw["get_file_size"] = get_file_size
     kw["html_title"]    = "文件"
-    # kw["show_aside"]    = False
+    kw._show_footer = False
     return kw
 
 def get_parent_path(path):

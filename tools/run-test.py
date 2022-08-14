@@ -30,7 +30,7 @@ def check_and_install_pkg(py_module, pip_version = ""):
 
 def run_test(target = None):
 	if target == "xutils_db":
-		os.system("python3 -m pytest tests/test_xutils_db.py --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
+		os.system("python3 -m pytest tests/test_xutils_db.py tests/test_xutils_db_table.py --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
 		os.system("python3 -m coverage html")
 		return
 

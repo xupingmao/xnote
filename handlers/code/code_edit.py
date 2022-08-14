@@ -9,6 +9,7 @@ import xauth
 import xutils
 import xtemplate
 import xconfig
+import xmanager
 from xutils import Storage, fsutil
 
 def can_preview(path):
@@ -40,6 +41,11 @@ class ViewSourceHandler:
             path = os.path.join(xconfig.SCRIPTS_DIR, path)
         path = os.path.abspath(path)
         return xutils.get_real_path(path)
+    
+    def get_default_kw(self):
+        kw = Storage()
+        kw._show_footer = False
+        return kw
 
     @xauth.login_required("admin")
     def GET(self, path=""):
@@ -49,7 +55,7 @@ class ViewSourceHandler:
         type = xutils.get_argument("type", "")
         readonly = False
         
-        kw = Storage()
+        kw = self.get_default_kw()
         # 处理嵌入页面
         handle_embed(kw)
         # 处理参数
@@ -108,11 +114,16 @@ class UpdateHandler(object):
     def POST(self):
         path = xutils.get_argument("path", "")
         content = xutils.get_argument("content", "")
+        user_name = xauth.current_name()
+
         if content == "" or path == "":
             raise web.seeother("/fs/")
         else:
             content = content.replace("\r\n", "\n")
             xutils.savetofile(path, content)
+
+            # 发送通知刷新文件索引
+            xmanager.fire("fs.upload", dict(user=user_name, path=path, fpath=path))
             raise web.seeother("/code/edit?path=" + xutils.quote(path))
         
 

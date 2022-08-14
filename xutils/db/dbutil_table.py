@@ -19,14 +19,6 @@ register_table("_index", "通用索引")
 register_table("_meta", "表元信息")
 register_table("_repair_error", "修复错误记录")
 
-class TableValidator:
-
-    def __init__(self, table_name, has_user_name=False):
-        pass
-
-    def validate_key(self, key, user_name=None):
-        pass
-
 
 class LdbTable:
     """基于leveldb的表, 比较常见的是以下2种
@@ -276,6 +268,9 @@ class LdbTable:
         """@deprecated 定义user_attr之后使用insert即可满足
         指定用户名插入数据
         """
+        if self.user_name != None:
+            raise Exception("table实例已经设置了user_name, 不能使用该方法")
+
         validate_str(user_name, "invalid user_name")
         self._check_value(obj)
 
@@ -298,6 +293,9 @@ class LdbTable:
     def update_by_id(self, id, obj, user_name=None):
         """通过ID进行更新，如果key包含用户，必须有user_name(初始化定义或者传入参数)"""
         assert xutils.is_str(id)
+        if self.user_name != None and user_name != None:
+            raise Exception("table实例已经设置了user_name，不能再通过参数设置")
+
         id = encode_str(id)
         self._check_user_name(user_name)
         key = self._build_key_with_user(id, user_name)
@@ -341,6 +339,7 @@ class LdbTable:
     def delete_by_key(self, key, user_name=None):
         validate_str(key, "delete_by_key: invalid key")
         self._check_before_delete(key)
+        assert self.is_valid_key(key, user_name), "key校验失败"
 
         old_obj = get(key)
         if old_obj is None:
@@ -395,15 +394,18 @@ class LdbTable:
         else:
             return None
 
-    def get_last(self, filter_func=None):
+    def get_last(self, filter_func=None, *, user_name=None):
         """读取最后一个满足条件的数据"""
-        result = self.list(limit=1, reverse=True, filter_func=filter_func)
+        result = self.list(limit=1, reverse=True, filter_func=filter_func, user_name=user_name)
         if len(result) > 0:
             return result[0]
         else:
             return None
 
     def list_by_user(self, user_name, offset=0, limit=20, reverse=False):
+        if self.user_name != None:
+            raise Exception("table实例的user_name已经设置，不能使用该方法")
+
         return self.list(offset=offset, limit=limit, reverse=reverse, user_name=user_name)
 
     def list_by_func(self, user_name, filter_func=None,

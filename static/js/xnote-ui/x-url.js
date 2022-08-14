@@ -87,6 +87,7 @@ xnote.getUrlParams = function() {
 /**
  * 根据key获取url参数值 
  * @param {string} key
+ * @param {string} defaultValue 默认值
  */
 xnote.getUrlParam = function (key, defaultValue) {
     var paramValue = xnote.getUrlParams()[key];

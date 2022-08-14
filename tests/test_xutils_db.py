@@ -31,6 +31,8 @@ dbutil.register_table("test", "测试数据库")
 dbutil.register_table_index("test", "name")
 dbutil.register_table_index("test", "age")
 
+dbutil.register_table("test_user_db1", "测试数据库用户版v1")
+
 dbutil.register_table("test_user_db", "测试数据库用户版", check_user=True)
 dbutil.register_table_user_attr("test_user_db", "user")
 
@@ -499,43 +501,7 @@ class TestMain(BaseTestCase):
 
         last = db.get_last()
         self.assertEqual("Bob", last.name)
-
-    def test_table_with_user(self):
-        db = dbutil.get_table("test_user_db")
-
-        for item in db.iter():
-            db.delete(item)
-
-        db.insert(dict(user="Ada", prop="key1", prop_value="222"))
-        db.insert(dict(user="Ada", prop="key2", prop_value="333"))
-        db.insert_by_user("Bob", dict(
-            user="Bob", prop="key3", prop_value="111"))
-        db.insert_by_user("Bob", dict(
-            user="Bob", prop="key4", prop_value="111"))
-
-        result1 = db.list(limit=-1, user_name="Ada")
-        result2 = db.list_by_func("Ada", limit=-1)
-
-        self.assertTrue(len(result1) > 0)
-        self.assertEqual(result1, result2)
-
-        first = db.get_first()
-        self.assertEqual("key1", first.prop)
-
-        last = db.get_last()
-        self.assertEqual("key4", last.prop)
-
-        # 通过key进行更新和查询
-        first.job = "painter"
-        db.update_by_key(first._key, first)
-        first = db.get_by_key(first._key)
-        self.assertEqual("painter", first.job)
-
-        # 通过ID更新和查询
-        first.job = "teacher"
-        db.update_by_id(first._id, first, user_name=first.user)
-        first = db.get_by_id(first._id, user_name=first.user)
-        self.assertEqual("teacher", first.job)
+    
 
     def test_dbutil_lock(self):
         print("test_dbutil_lock")
