@@ -210,7 +210,7 @@ class FileIndexCheckManager:
         FileIndexCheckManager.last_check_time = time.time()
 
 
-@xmanager.listen("fs.upload")
+@xmanager.listen(["fs.upload", "fs.update"])
 def on_fs_upload(ctx = None):
     logging.debug("检测到文件上传信息:%s", ctx)
     filepath = ctx.get("fpath")

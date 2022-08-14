@@ -123,7 +123,7 @@ class UpdateHandler(object):
             xutils.savetofile(path, content)
 
             # 发送通知刷新文件索引
-            xmanager.fire("fs.upload", dict(user=user_name, path=path, fpath=path))
+            xmanager.fire("fs.update", dict(user=user_name, fpath=path))
             raise web.seeother("/code/edit?path=" + xutils.quote(path))
         
 
