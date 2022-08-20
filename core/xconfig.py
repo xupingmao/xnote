@@ -73,7 +73,7 @@ FORCE_HTTPS = False  # 强制 HTTPS
 
 # *** 样式设置 ***
 # BASE_TEMPLATE = "common/theme/sidebar.html"
-BASE_TEMPLATE = "base.html"
+BASE_TEMPLATE = "common/base.html"
 # 主题样式
 THEME = "standard"
 # 选项风格

@@ -15,14 +15,14 @@ from xutils import Storage, cacheutil
 from xutils.dateutil import Timer
 
 INDEX_HTML = """
-{% extends base.html %}
+{% extends base %}
 {% block body %}
     <h1 style="text-align:center;">Welcome to Xnote!</h1>
 {% end %}
 """
 
 UNAUTHORIZED_HTML = """
-{% extends base.html %}
+{% extends base %}
 {% block body %}
     <div class="card">
         <div class="card-title">
