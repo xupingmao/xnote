@@ -4,17 +4,24 @@
 # @modified 2022/04/16 08:53:11
 # @filename dbutil_table.py
 
-import time
 from urllib.parse import quote
 from xutils import Storage
 from xutils.db.dbutil_base import *
 from xutils.db.dbutil_table_index import TableIndex
-from xutils.db.encode import decode_str, encode_index_value, encode_str, clean_value_before_update
+from xutils.db.encode import (
+    decode_str, 
+    encode_index_value,
+    encode_str,
+    encode_id,
+    clean_value_before_update
+)
+
 from xutils.db.binlog import BinLog
 
 register_table("_id", "系统ID表")
 MAX_ID_KEY = "_id:max_id"
 
+register_table("_max_id", "最大ID")
 register_table("_index", "通用索引")
 register_table("_meta", "表元信息")
 register_table("_idx_version", "索引版本")
@@ -66,7 +73,7 @@ class LdbTable:
 
         if self.prefix[-1] != ":":
             self.prefix += ":"
-    
+
     def _build_indexes(self, table_info):
         indexes = []
         index_dict = IndexInfo.get_table_index_dict(self.table_name)
@@ -74,8 +81,8 @@ class LdbTable:
             for index_name in index_dict:
                 index_info = index_dict[index_name]
                 indexes.append(TableIndex(self.table_name, index_info.index_name, table_info.user_attr,
-                                        check_user=table_info.check_user,
-                                        index_type=index_info.index_type))
+                                          check_user=table_info.check_user,
+                                          index_type=index_info.index_type))
         return indexes
 
     def set_binlog_enabled(self, enabled=True):
@@ -83,10 +90,10 @@ class LdbTable:
 
     def _build_key(self, *argv):
         return self.prefix + self._build_key_no_prefix(*argv)
-    
+
     def _build_key_with_user(self, id, user_name):
         return self._build_key_no_prefix(self.table_name, user_name or self.user_name, id)
-    
+
     def _build_key_no_prefix(self, *argv):
         return ":".join(filter(None, argv))
 
@@ -128,17 +135,19 @@ class LdbTable:
         if start_id != None:
             assert start_id > 0
 
+        max_id_key = "_max_id:" + self.table_name
+
         with get_write_lock():
-            last_id = get(MAX_ID_KEY)
+            last_id = db_get(max_id_key)
             if last_id is None:
                 if start_id != None:
                     last_id = start_id - 1
                 else:
-                    last_id = int(time.time() * 1000)
+                    last_id = 1
             else:
                 last_id += 1
-            put(MAX_ID_KEY, last_id)
-            return str(last_id)
+            put(max_id_key, last_id)
+            return encode_id(last_id)
 
     def _create_new_id(self, id_type="uuid", id_value=None):
         if id_type == "uuid":
@@ -327,14 +336,15 @@ class LdbTable:
     def repair_index(self):
         repair = TableIndexRepair(self)
         repair.repair_index()
-    
+
     def rebuild_index(self, version="v1"):
-        """重建索引"""
+        """重建索引, 可以通过设置新的version值重新建立索引"""
         with get_write_lock():
             idx_version_key = "_idx_version:%s" % self.table_name
             current_version = db_get(idx_version_key)
             if current_version == version:
-                logging.info("当前索引已经是最新版本, table=%s, version=%s" % (self.table_name, version))
+                logging.info("当前索引已经是最新版本, table=%s, version=%s" %
+                             (self.table_name, version))
                 return
             self.repair_index()
             db_put(idx_version_key, version)
@@ -343,7 +353,7 @@ class LdbTable:
         obj_key = self._get_key_from_obj(obj)
         self.delete_by_key(obj_key)
 
-    def delete_by_id(self, id, user_name = None):
+    def delete_by_id(self, id, user_name=None):
         validate_str(id, "delete_by_id: id is not str")
         key = self._build_key_with_user(id, user_name)
         self.delete_by_key(key)
@@ -400,7 +410,8 @@ class LdbTable:
 
     def get_first(self, filter_func=None, *, user_name=None):
         """读取第一个满足条件的数据"""
-        result = self.list(limit=1, filter_func=filter_func, user_name=user_name)
+        result = self.list(limit=1, filter_func=filter_func,
+                           user_name=user_name)
         if len(result) > 0:
             return result[0]
         else:
@@ -408,7 +419,8 @@ class LdbTable:
 
     def get_last(self, filter_func=None, *, user_name=None):
         """读取最后一个满足条件的数据"""
-        result = self.list(limit=1, reverse=True, filter_func=filter_func, user_name=user_name)
+        result = self.list(limit=1, reverse=True,
+                           filter_func=filter_func, user_name=user_name)
         if len(result) > 0:
             return result[0]
         else:
@@ -441,12 +453,12 @@ class LdbTable:
                 if is_match:
                     return obj_value
                 return None
-    
+
         def map_func_for_ref(key, value):
             # 先判断实例是否存在
             # 普通的引用索引
             obj = self.get_by_key(value)
-        
+
             if obj is None:
                 # 异步 delete(key)
                 logging.warning("invalid key:(%s)", key)
@@ -472,16 +484,16 @@ class LdbTable:
                 if is_match:
                     return obj
                 return None
-        
+
         if index_type == "copy":
             return map_func_for_copy
-        
+
         return map_func_for_ref
-        
 
     def count_by_index(self, index_name, filter_func=None, index_value=None):
         validate_str(index_name, "index_name can not be empty")
-        index_info = IndexInfo.get_table_index_info(self.table_name, index_name)
+        index_info = IndexInfo.get_table_index_info(
+            self.table_name, index_name)
         if index_info == None:
             raise Exception("index not found: %s", index_name)
 
@@ -491,7 +503,8 @@ class LdbTable:
         else:
             prefix = self._get_index_prefix(index_name)
 
-        map_func = self.create_index_map_func(filter_func, index_type = index_info.index_type)
+        map_func = self.create_index_map_func(
+            filter_func, index_type=index_info.index_type)
         return prefix_count(prefix, map_func=map_func)
 
     def list_by_index(self, index_name, filter_func=None,
@@ -505,7 +518,8 @@ class LdbTable:
         @param {bool} reverse 是否逆向查询
         """
         validate_str(index_name, "index_name can not be empty")
-        index_info = IndexInfo.get_table_index_info(self.table_name, index_name)
+        index_info = IndexInfo.get_table_index_info(
+            self.table_name, index_name)
         if index_info == None:
             raise Exception("index not found: %s", index_name)
 
@@ -519,7 +533,8 @@ class LdbTable:
         else:
             prefix = self._get_index_prefix(index_name)
 
-        map_func = self.create_index_map_func(filter_func, index_type = index_info.index_type)
+        map_func = self.create_index_map_func(
+            filter_func, index_type=index_info.index_type)
         return list(prefix_iter(prefix, offset=offset, limit=limit,
                                 map_func=map_func,
                                 reverse=reverse, include_key=False))
@@ -548,7 +563,7 @@ class LdbTable:
     def count_by_func(self, user_name, filter_func):
         assert filter_func != None, "[count_by_func.assert] filter_func != None"
         return self.count(user_name=user_name, filter_func=filter_func)
-    
+
     def drop_index(self, index_name):
         for index in self.indexes:
             if index.index_name == index_name:
@@ -567,7 +582,7 @@ class TableIndexRepair:
         assert isinstance(db, LdbTable)
         self.db = db
         self.repair_error_db = LdbTable("_repair_error")
-    
+
     def repair_index(self):
         db = self.db
 
@@ -583,8 +598,9 @@ class TableIndexRepair:
                     parts = key.split(":")
                     if len(parts) != 3:
                         logging.error("invalid key: %s", key)
-                        error_log = dict(key = key, value=value, type="record")
-                        self.repair_error_db.insert(error_log, id_type="auto_increment")
+                        error_log = dict(key=key, value=value, type="record")
+                        self.repair_error_db.insert(
+                            error_log, id_type="auto_increment")
                         db_delete(key)
                         continue
                     table_name, user_name, id = key.split(":")
@@ -627,8 +643,10 @@ class TableIndexRepair:
                     user_name = decode_str(user_name)
                 except:
                     logging.error("invalid key: (%s)", record_key)
-                    error_log = dict(key = old_key, value = record_key, type="index")
-                    self.repair_error_db.insert(error_log, id_type="auto_increment")
+                    error_log = dict(
+                        key=old_key, value=record_key, type="index")
+                    self.repair_error_db.insert(
+                        error_log, id_type="auto_increment")
                     self.do_delete(old_key)
                     continue
 

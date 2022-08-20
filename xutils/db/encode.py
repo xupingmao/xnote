@@ -161,3 +161,34 @@ def clean_value_before_update(value):
     if isinstance(value, dict):
         _dict_del(value, "_id")
         _dict_del(value, "_key")
+
+def encode_id(id_value):
+    """对ID进行编码
+    >>> encode_id(100) > encode_id(50)
+    True
+    >>> encode_id(10**5+10) > encode_id(20)
+    True
+    """
+    assert isinstance(id_value, int)
+    assert id_value > 0
+    if id_value < 10**5:
+        return "A%05d" % id_value
+    
+    if id_value < 10**10:
+        return "B%010d" % id_value
+    
+    if id_value < 10**15:
+        return "C%015d" % id_value
+    
+    if id_value < 10**20:
+        return "D%020d" % id_value
+    
+    raise Exception("too large id value")
+
+def decode_id(id_str):
+    """对ID进行解码"""
+    assert isinstance(id_str, str)
+    assert len(id_str) > 1
+    
+    num_part = id_str[1:]
+    return int(num_part)

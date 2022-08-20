@@ -11,6 +11,7 @@ from xutils import textutil
 from xutils import netutil
 from xutils.db.binlog import BinLog
 from xutils.db.dbutil_deque import DequeTable
+from xutils.db.encode import decode_id
 
 import os
 import threading
@@ -316,8 +317,8 @@ class TestMain(BaseTestCase):
         print("obj2_found", obj2_found)
         print("obj3_found", obj3_found)
 
-        self.assertEqual(int(obj1_found._id) + 1, int(obj2_found._id))
-        self.assertEqual(int(obj2_found._id) + 1, int(obj3_found._id))
+        self.assertEqual(decode_id(obj1_found._id) + 1, decode_id(obj2_found._id))
+        self.assertEqual(decode_id(obj2_found._id) + 1, decode_id(obj3_found._id))
 
         results = db.list_by_index("age", limit=10)
         self.assertEqual(3, len(results))

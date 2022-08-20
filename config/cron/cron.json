@@ -36,11 +36,12 @@
         "name": "[系统]随手记后台刷新信息",
         "url": "/message/refresh",
         "tm_wday": "*",
-        "tm_hour": "*",
+        "tm_hour": "1",
         "tm_min": "29",
         "message": "",
         "sound":0,
         "webpage":0,
+        "comment": "有标记的可以异步实时刷新，这里只是做个兜底",
         "id":null
     },
     {

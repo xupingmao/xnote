@@ -19,29 +19,38 @@ SCAN_HTML = """
 {% include system/component/db_nav.html %}
 
 <div class="card">
-    <form class="row">
-        <div class="input-group">
-            <label>数据库表</label>
-            <select name="prefix" value="{{prefix}}">
-                <option value="">全部</option>
-                {% for key in table_names %}
-                    <option value="{{key}}">{{key}}</option>
-                {% end %}
-            </select>
-        </div>
+    <form>
+        <div class="row">
+            <div class="input-group">
+                <label>数据库表</label>
+                <select name="prefix" value="{{prefix}}">
+                    <option value="">全部</option>
+                    {% for key in table_names %}
+                        <option value="{{key}}">{{key}}</option>
+                    {% end %}
+                </select>
+            </div>
 
-        <div class="input-group">
-            <label>关键字</label>
-            <input name="db_key" value="{{db_key}}" type="text"/>
-        </div>
+            <div class="input-group">
+                <label>用户</label>
+                <input name="q_user_name" value="{{q_user_name}}" type="text"/>
+            </div>
 
-        <div class="input-group">
-            <button type="submit">查询</button>
-
-            <div class="float-right btn-line-height">
-                <a href="/fs_link/db">数据库目录</a>
+            <div class="input-group">
+                <label>关键字</label>
+                <input name="db_key" value="{{db_key}}" type="text"/>
             </div>
         </div>
+
+        <div class="row">
+            <div class="align-center">
+                <input type=checkbox name="reverse" {% if is_reverse %}checked{%end%} value=true><span>倒序</span>
+                <button type="submit">查询数据</button>
+                <a class="btn btn-default" href="?p=query">重置查询</a>
+            </div>
+        </div>
+
+
     </form>
 </div>
 
@@ -77,7 +86,7 @@ SCAN_HTML = """
 
 <div class="card">
     <div class="pad5 align-center">
-        <a href="?key_from={{quote(last_key)}}&prefix={{prefix}}&&db_key={{quote(db_key)}}&reverse={{reverse}}">下一页</a>
+        <a href="?key_from={{quote(last_key)}}&prefix={{prefix}}&&db_key={{quote(db_key)}}&reverse={{reverse}}&q_user_name={{q_user_name}}">下一页</a>
     </div>
 </div>
 
@@ -180,6 +189,7 @@ class DbScanHandler(BasePlugin):
     def handle(self, input):
         action = xutils.get_argument("action", "")
         db_key = xutils.get_argument("db_key", "")
+        q_user_name = xutils.get_argument("q_user_name", "")
         prefix = xutils.get_argument("prefix", "")
         reverse = xutils.get_argument("reverse", "")
         key_from = xutils.get_argument("key_from", "")
@@ -194,6 +204,10 @@ class DbScanHandler(BasePlugin):
         self.error = ""
         self.last_key = ""
 
+        real_prefix = prefix
+        if q_user_name != "":
+            real_prefix = prefix + ":" + q_user_name
+
         def func(key, value):
             # print("db_scan:", key, value)
             self.scan_count += 1
@@ -201,7 +215,7 @@ class DbScanHandler(BasePlugin):
                 self.error = "too many scan"
                 return False
 
-            if not key.startswith(prefix):
+            if not key.startswith(real_prefix):
                 return False
 
             if db_key in value:
@@ -212,8 +226,8 @@ class DbScanHandler(BasePlugin):
             
             return True
 
-        if key_from == "" and prefix != "":
-            key_from = prefix + ":"
+        if key_from == "" and real_prefix != "":
+            key_from = real_prefix + ":"
 
         if need_reverse:
             key_to = key_from.encode("utf8") + b'\xff'
@@ -231,6 +245,8 @@ class DbScanHandler(BasePlugin):
         kw.error = self.error
         kw.last_key = self.last_key
         kw.table_names = dbutil.get_table_names()
+        kw.q_user_name = q_user_name
+        kw.is_reverse = (reverse == "true")
 
         self.handle_admin_stat_list(kw)
 
