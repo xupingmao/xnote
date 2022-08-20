@@ -141,7 +141,7 @@ class LdbTable:
             last_id = db_get(max_id_key)
             if last_id is None:
                 if start_id != None:
-                    last_id = start_id - 1
+                    last_id = start_id
                 else:
                     last_id = 1
             else:
@@ -304,9 +304,15 @@ class LdbTable:
         """通过ID进行更新，如果key包含用户，必须有user_name(初始化定义或者传入参数)"""
         assert xutils.is_str(id)
         if self.user_name != None and user_name != None:
-            raise Exception("table实例已经设置了user_name，不能再通过参数设置")
+            raise DBException("table实例已经设置了user_name，不能再通过参数设置")
 
         id = encode_str(id)
+        
+        if self.user_attr != None:
+            user_name = obj.get(self.user_attr)
+            if user_name == None:
+                raise DBException("%s属性未设置" % self.user_attr)
+
         self._check_user_name(user_name)
         key = self._build_key_with_user(id, user_name)
         self.update_by_key(key, obj)

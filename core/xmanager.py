@@ -59,10 +59,7 @@ def do_wrap_handler(pattern, handler_clz):
                 return tojson(result)
             return result
         finally:
-            if start_time > 0:
-                cost_time = time.time() - start_time
-                # print("page load time: %s" % int(cost_time * 1000))
-
+            pass
 
     class WrappedHandler:
         """默认的handler装饰器
@@ -227,6 +224,10 @@ class HandlerManager:
         del sys.modules["xauth"]
         import xauth
         xauth.init()
+
+        del sys.modules["xtables_new"]
+        import xtables_new
+        xtables_new.init()
 
     def reload(self):
         """重启handlers目录下的所有的模块"""

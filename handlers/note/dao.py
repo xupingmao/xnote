@@ -27,7 +27,6 @@ import logging
 import xauth
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
-from xutils import attrget
 
 # 配置日志模块
 logging.basicConfig(level=logging.DEBUG,
@@ -45,7 +44,6 @@ register_note_table("note_skey", "用户维度的skey索引 <note_skey:user:skey
 register_note_table("notebook", "笔记分组", check_user=True, user_attr="creator")
 register_note_table("token", "用于分享的令牌")
 register_note_table("note_history", "笔记的历史版本")
-register_note_table("note_tags", "笔记标签 <note_tags:user:note_id>")
 
 dbutil.register_table("search_history", "搜索历史")
 
@@ -879,57 +877,6 @@ def visit_note(user_name, id):
     add_visit_log(user_name, note)
 
 
-def delete_note_physically(creator, note_id):
-    assert creator != None, "creator can not be null"
-    assert note_id != None, "note_id can not be null"
-
-    index_key = "note_index:%s" % note_id
-
-    _full_db.delete_by_id(note_id)
-    dbutil.delete(index_key)
-
-    note_tiny_db = get_note_tiny_table(creator)
-    note_tiny_db.delete_by_id(note_id)
-
-    delete_history(note_id)
-
-    # 刷新数量
-    refresh_note_stat_async(creator)
-
-
-def delete_note(id):
-    note = get_by_id(id)
-    if note is None:
-        return
-
-    if note.is_deleted != 0:
-        # 已经被删除了，执行物理删除
-        delete_note_physically(note.creator, note.id)
-        return
-
-    # 标记删除
-    note.mtime = xutils.format_datetime()
-    note.dtime = xutils.format_datetime()
-    note.is_deleted = 1
-    put_note_to_db(id, note)
-
-    # 更新数量
-    update_children_count(note.parent_id)
-    delete_tags(note.creator, id)
-
-    # 删除笔记本
-    _book_db.delete_by_id(id, user_name=note.creator)
-
-    # 删除skey索引
-    delete_note_skey(note)
-
-    # 删除访问日志
-    NOTE_DAO.delete_visit_log(note.creator, note.id)
-
-    # 更新数量统计
-    refresh_note_stat(note.creator)
-
-
 def update_children_count(parent_id, db=None):
     if is_root_id(parent_id):
         return
@@ -981,6 +928,7 @@ def list_group(creator=None,
                offset=0, limit=1000,
                parent_id=None,
                category=None,
+               tags=None,
                count_total=False,
                count_only=False):
     """查询笔记本列表"""
@@ -989,6 +937,10 @@ def list_group(creator=None,
 
     if category == "" or category == "all":
         category = None
+    
+    q_tags = tags
+    if tags != None and len(tags) == 0:
+        q_tags = None
 
     # TODO 添加索引优化
     def list_group_func(key, value):
@@ -1003,6 +955,12 @@ def list_group(creator=None,
         
         if category != None and value.category != category:
             return False
+        
+        if q_tags != None:
+            if not isinstance(value.tags, list):
+                return False
+            if not textutil.contains_any(value.tags, q_tags):
+                return False
 
         if status == "archived":
             return value.archived
@@ -1416,70 +1374,6 @@ def list_archived(creator, offset=0, limit=100):
     sort_notes(notes)
     return notes
 
-
-def get_tags(creator, note_id):
-    key = "note_tags:%s:%s" % (creator, note_id)
-    note_tags = dbutil.get(key)
-    if note_tags:
-        return attrget(note_tags, "tags")
-    return None
-
-
-def update_tags(creator, note_id, tags):
-    key = "note_tags:%s:%s" % (creator, note_id)
-    dbutil.put(key, Storage(note_id=note_id, tags=tags))
-
-    note = get_by_id(note_id)
-    if note != None:
-        note.tags = tags
-        update_index(note)
-
-
-def delete_tags(creator, note_id):
-    key = "note_tags:%s:%s" % (creator, note_id)
-    dbutil.delete(key)
-
-
-def list_by_tag(user, tagname):
-    if user is None:
-        user = "public"
-
-    def list_func(key, value):
-        if value.tags is None:
-            return False
-        return tagname in value.tags
-
-    tags = dbutil.prefix_list("note_tags:%s" % user, list_func)
-    files = []
-    for tag in tags:
-        note = get_by_id(tag.note_id)
-        if note != None:
-            files.append(note)
-    sort_notes(files)
-    return files
-
-
-def list_tag(user):
-    if user is None:
-        user = "public"
-
-    tags = dict()
-
-    def list_func(key, value):
-        if value.tags is None:
-            return False
-        for tag in value.tags:
-            count = tags.get(tag, 0)
-            count += 1
-            tags[tag] = count
-
-    dbutil.prefix_count("note_tags:%s" % user, list_func)
-
-    tag_list = [Storage(name=k, amount=tags[k]) for k in tags]
-    tag_list.sort(key=lambda x: -x.amount)
-    return tag_list
-
-
 def list_by_func(creator, list_func, offset, limit):
     notes = _tiny_db.list(user_name=creator, filter_func=list_func,
                           offset=offset, limit=limit, reverse=True)
@@ -1598,11 +1492,8 @@ xutils.register_func("note.update", update_note)
 xutils.register_func("note.update0", update0)
 xutils.register_func("note.move", move_note)
 xutils.register_func("note.visit",  visit_note)
-xutils.register_func("note.delete", delete_note)
 xutils.register_func("note.touch",  touch_note)
-xutils.register_func("note.update_tags", update_tags)
 xutils.register_func("note.create_token", create_token)
-xutils.register_func("note.delete_physically", delete_note_physically)
 
 # 内部更新索引的接口，外部不要使用
 xutils.register_func("note.update_index", update_index)
@@ -1615,7 +1506,6 @@ xutils.register_func("note.get_by_id", get_by_id)
 xutils.register_func("note.get_by_token", get_by_token)
 xutils.register_func("note.get_by_id_creator", get_by_id_creator)
 xutils.register_func("note.get_by_name", get_by_name)
-xutils.register_func("note.get_tags", get_tags)
 xutils.register_func("note.get_or_create", get_or_create_note)
 xutils.register_func("note.get_virtual_group", get_virtual_group)
 xutils.register_func("note.search_name", search_name)
@@ -1630,12 +1520,10 @@ xutils.register_func("note.list_default_notes", list_default_notes)
 xutils.register_func("note.list_root_group", list_root_group)
 xutils.register_func("note.list_by_parent", list_by_parent)
 xutils.register_func("note.list_by_date", list_by_date)
-xutils.register_func("note.list_by_tag", list_by_tag)
 xutils.register_func("note.list_by_type", list_by_type)
 xutils.register_func("note.list_removed", list_removed)
 xutils.register_func("note.list_sticky",  list_sticky)
 xutils.register_func("note.list_archived", list_archived)
-xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_public", list_public)
 xutils.register_func("note.list_by_func", list_by_func)
 

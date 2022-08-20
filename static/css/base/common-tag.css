@@ -53,7 +53,16 @@ a.tag:hover {
 
 .tag.lightgray {
     background-color: #eee;
-    color: black;
+    color: #08c;
+}
+
+.tag.lightgray:hover {
+    background-color: #eee;
+}
+
+.tag.lightgray.active {
+    background-color: #08c;
+    color: white;
 }
 
 

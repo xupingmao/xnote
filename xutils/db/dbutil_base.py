@@ -91,7 +91,10 @@ def print_debug_info(fmt, *args):
 
 
 class DBException(Exception):
-    pass
+
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
 
 
 class WriteBatchProxy:
@@ -410,6 +413,8 @@ def _register_table_inner(table_name,
     info = TableInfo.register(table_name, description, category)
     info.check_user = check_user
     info.user_attr = user_attr
+    if user_attr != None:
+        info.check_user = True
 
 
 def register_table_index(table_name, index_name, comment=None, index_type="ref"):
@@ -436,6 +441,7 @@ def register_table_user_attr(table_name, user_attr):
     if table_info.user_attr != None:
         logging.warning("user_attr已经设置了")
     table_info.user_attr = user_attr
+    table_info.check_user = True
 
 
 def get_table_dict_copy():

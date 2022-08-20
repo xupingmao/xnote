@@ -4,18 +4,19 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-14 17:17:50
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-14 22:52:57
+@LastEditTime : 2022-08-20 18:01:19
 @FilePath     : /xnote/tests/test_xutils_db_table.py
 @Description  : table测试
 """
 
-
-
 from .a import *
 from xutils import Storage
 from xutils import dbutil
+from xutils.db.encode import decode_id
 
 from . import test_base
+
+from xutils.dbutil import DBException
 
 app = test_base.init()
 json_request = test_base.json_request
@@ -83,6 +84,15 @@ class TestMain(BaseTestCase):
 
         self.assertIsNone(db1.get_by_id(first._id))
         self.assertEqual(1, db1.count())
+    
+    def test_table_with_user_update_error(self):
+        db = dbutil.get_table("test_user_db")
+        obj = Storage(name = "Ada")
+        try:
+            db.update_by_id("2222", obj)
+            self.fail()
+        except DBException as e:
+            self.assertEqual("user属性未设置", e.message)
 
     def test_table_with_user_in_param(self):
         db = dbutil.get_table("test_user_db")
@@ -124,3 +134,13 @@ class TestMain(BaseTestCase):
         first = db.get_by_id(first._id, user_name=first.user)
         self.assertEqual("teacher", first.job)
 
+    def test_insert(self):
+        obj = Storage(name = "Bob")
+        new_id = dbutil.insert("test", obj)
+        new_id_int = decode_id(new_id)
+        self.assertEqual(1, new_id_int)
+
+        obj2 = Storage(name = "Carl")
+        new_id2 = dbutil.insert("test", obj2)
+        new_id2_int = decode_id(new_id2)
+        self.assertEqual(2, new_id2_int)

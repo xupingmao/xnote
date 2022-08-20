@@ -3,7 +3,7 @@
 # @modified 2022/04/22 23:30:02
 import math
 import time
-import copy
+import json
 import logging
 from .dao_book import SmartGroupService
 
@@ -17,6 +17,7 @@ from xutils import Storage
 from xutils import dateutil, fsutil
 from xtemplate import T
 from .dao_category import list_category, get_category_by_code
+from . import dao_tag
 
 VIEW_TPL = "note/page/view.html"
 TYPES_NAME = "笔记索引"
@@ -302,6 +303,8 @@ class GroupManageHandler:
         page = xutils.get_argument("page", 1, type=int)
         orderby = xutils.get_argument("orderby", "default")
         category_code = xutils.get_argument("note_category", "all")
+        q_tags = xutils.get_argument("tags", "[]")
+        tags = json.loads(q_tags)
 
         assert page > 0
         limit = 50
@@ -310,7 +313,7 @@ class GroupManageHandler:
         user_name = kw.user_name
         parent_note = NOTE_DAO.get_root()
         notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset,
-                                           limit=limit, category=category_code, count_total=True)
+                                           limit=limit, category=category_code, count_total=True, tags=tags)
 
         kw.parent_note = parent_note
         kw.notes = notes
@@ -320,6 +323,7 @@ class GroupManageHandler:
             category=category_code, orderby=orderby)
         kw.template = "note/page/batch/group_manage.html"
         kw.category_list = list_category(user_name)
+        kw.q_tags = q_tags
 
         cat_info = get_category_by_code(user_name, category_code)
         if cat_info != None:
@@ -330,6 +334,7 @@ class GroupManageHandler:
             kw.category_name = "未知"
 
         kw.show_category_edit = (category_code != "all")
+        kw.note_tags = dao_tag.batch_get_tags_by_notes(kw.notes)
 
     @xauth.login_required()
     def GET(self):
@@ -340,12 +345,8 @@ class GroupManageHandler:
         kw = Storage(user_name=user_name, parent_id=parent_id)
 
         self.handle_root(kw)
-        notes = kw.notes
-
-        current = Storage(url="#", name="整理")
-        return xtemplate.render(kw.template,
-                                files=notes,
-                                current=current, **kw)
+        kw.current = Storage(url = "#", name="整理")
+        return xtemplate.render(kw.template, **kw)
 
 
 def load_note_index(user_name):
@@ -649,7 +650,7 @@ class RecentHandler:
         # 最近更新的
         notes = NOTE_DAO.list_recent_edit(creator, offset, limit)
         for note in notes:
-            note.badge_info = dateutil.format_date(note.mtime)
+            note.badge_info = dateutil.format_date(note.mtime, "/")
         return notes
 
     def get_html_title(self, orderby):
@@ -688,19 +689,21 @@ class RecentHandler:
         files = self.list_notes(creator, offset, limit, orderby)
         count = self.count_note(creator, orderby)
 
-        return xtemplate.render("note/page/note_recent.html",
-                                pathlist=type_node_path(html_title, ""),
-                                html_title=html_title,
-                                file_type="group",
-                                dir_type=dir_type,
-                                search_type="note",
-                                files=files,
-                                show_aside=False,
-                                show_size=False,
-                                page=page,
-                                show_next=False,
-                                page_max=math.ceil(count/xconfig.PAGE_SIZE),
-                                page_url="/note/recent?orderby=%s&page=" % orderby)
+        kw = Storage()
+        kw.pathlist = type_node_path(html_title, "")
+        kw.html_title = html_title
+        kw.file_type = "group"
+        kw.dir_type = dir_type
+        kw.search_type = "note"
+        kw.files = files
+        kw.show_aside = False
+        kw.show_side = False
+        kw.page = page
+        kw.show_next = False
+        kw.page_max = math.ceil(count/xconfig.PAGE_SIZE)
+        kw.page_url = "/note/recent?orderby=%s&page=" % orderby
+
+        return xtemplate.render("note/page/note_recent.html", **kw)
 
 
 class ArchivedHandler:

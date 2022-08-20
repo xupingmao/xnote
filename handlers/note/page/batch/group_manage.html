@@ -10,6 +10,7 @@
 <script src="/static/js/note.js"></script>
 
 {% init show_note_path = True %}
+{% init note_tags = dict() %}
 {% include note/component/script/create_script.html %}
 
 <div class="card note-list">
@@ -25,53 +26,90 @@
 </div>
 
 <div class="card btn-line-height">
-    <span>类目</span>
-    <select class="switch-category" value="{{category}}">
-        {% for t_cat in category_list %}
-            <option value="{{t_cat.code}}">{{t_cat.name}} - (<span>{{t_cat.group_count}}</span>)</option>
-        {% end %}
-    </select>
+    <div class="row">
+        <span>类目</span>
+        <select class="switch-category" value="{{category}}">
+            {% for t_cat in category_list %}
+                <option value="{{t_cat.code}}">{{t_cat.name}} - (<span>{{t_cat.group_count}}</span>)</option>
+            {% end %}
+        </select>
 
-    {% if show_category_edit %}
-    <div class="float-right">
-        <button class="btn btn-default rename-cat-btn">重命名类目</button>
-        <!-- <button class="btn btn-default">添加笔记本-TODO</button> -->
+        {% if show_category_edit %}
+        <div class="float-right">
+            <button class="btn btn-default rename-cat-btn">重命名类目</button>
+            <!-- <button class="btn btn-default">添加笔记本-TODO</button> -->
+        </div>
+        {% end %}
     </div>
-    {% end %}
 </div>
 
-<div class="card">    
-    {% if len(files) == 0 %}
+<div id="vueApp">
+    <div class="card btn-line-height">
+        <div class="row">
+            <span>标签</span>
+            <a v-for="tag in tagList" @click="onTagClick"
+                v-bind:class="{'tag':true, 'lightgray':true, 'meta':true, 'active': filterTags.indexOf(tag.tag_name)>=0 }">{{! tag.tag_name }}</a>
+        </div>
+
+        <div class="row">
+            <button class="create-tag-btn btn-default">创建新标签</button>
+            <button class="delete-tag-btn btn danger">删除标签</button>
+            <a class="btn btn-default" href="/note/group/manage">重置查询</a>
+        </div>
+    </div>
+
+    <div class="hide bind-tag-dialog">
+        <div class="card">
+            <a v-for="tag in tagList" class="tag lightgray for-dialog">
+                <span class="tag-id hide">{{! tag._id }}</span>
+                <span class="tag-name">{{! tag.tag_name }}</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    {% if len(notes) == 0 %}
         {% include common/text/empty_text.html %}
     {% end %}
     
-    {% for item in files %}
+    {% for item in notes %}
         <div class="book-item">
-            {% if item.priority>0 %}
-                <span class="tag orange">置顶</span>
-            {% end %}
+            <div class="row">
+                {% if item.priority>0 %}
+                    <span class="tag orange">置顶</span>
+                {% end %}
 
-            {% if item.priority==0 %}
-                <span class="tag info">活跃</span>
-            {% end %}
-        
-            {% if item.priority<0 %}
-                <span class="tag system">归档</span>
-            {% end %}
-
-            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
-            <a class="link2" href="{{item.url}}">{{item.name}}</a>
+                {% if item.priority==0 %}
+                    <span class="tag info">活跃</span>
+                {% end %}
             
-            <span class="float-right">
-                <select value="{{item.category}}" data-id="{{item.id}}" class="update-category">
-                    {% for t_cat in category_list %}
-                        <option value="{{t_cat.code}}">{{t_cat.name}}</option>
-                    {% end %}
-                </select>
-                <a class="item-option" data-id="{{item.id}}" data-name="{{item.name}}" 
-                    onclick="renameNoteByAttr(this);" href="javascript:void(0);">重命名</a>
-                <input type="checkbox" data-id="{{item.id}}" data-name="{{item.name}}"/>
-            </span>
+                {% if item.priority<0 %}
+                    <span class="tag system">归档</span>
+                {% end %}
+
+                <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
+                <a class="link2" href="{{item.url}}">{{item.name}}</a>
+                
+                <span class="float-right">
+                    <select value="{{item.category}}" data-id="{{item.id}}" class="update-category">
+                        {% for t_cat in category_list %}
+                            <option value="{{t_cat.code}}">{{t_cat.name}}</option>
+                        {% end %}
+                    </select>
+                    <a class="item-option" data-id="{{item.id}}" data-name="{{item.name}}" 
+                        onclick="renameNoteByAttr(this);" href="javascript:void(0);">重命名</a>
+                    <input type="checkbox" data-id="{{item.id}}" data-name="{{item.name}}"/>
+                </span>
+            </div>
+
+            <div class="row">
+                <span>标签</span>
+                {% for tag in note_tags.get(item.id, []) %}
+                    <a class="tag lightgray">{{tag}}</a>
+                {% end %}
+                <button class="btn btn-default bind-tag-btn" data-id="{{item.id}}">+标签</button>
+            </div>
         </div>
     {% end %}
 </div>
@@ -82,31 +120,135 @@
 
 {% include note/component/script/rename_script.html %}
 
+<script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
 <script type="text/javascript">
+(function() {
+    var app = new Vue({
+        el: "#vueApp",
+        data: {
+            tagList: [],
+            filterTags: []
+        },
+        methods: {
+            reloadTagList: function () {
+                var self = this;
+                self.filterTags = JSON.parse(xnote.getUrlParam("tags", "[]"));
+                console.log(self.filterTags);
 
-$(".rename-cat-btn").click(function(e) {
-    xnote.updateCategoryName({
-        code: "{{category_code}}",
-        oldName: "{{category_name}}",
+                $.get("/note/tag/list?tag_type=book", function (resp) {
+                    console.log("resp", resp);
+                    if (resp.code != "success") {
+                        xnote.alert(resp.message);
+                    } else {
+                        self.tagList = resp.data;
+                    }
+                });
+            },
+            onTagClick: function () {
+
+            }
+        }
     });
-})
 
-$(".update-category").change(function (e) {
-    var noteId = $(this).attr("data-id");
-    var newCat = $(this).val();
-    xnote.updateNoteCategory({
-        noteId: noteId,
-        value: newCat,
-        doRefresh: true,
+    app.reloadTagList();
+
+    $("body").on("click", ".tag", function(e) {
+        $(this).toggleClass("active");
+        if ($(this).hasClass("meta")) {
+            var filterTags = [];
+            $(".tag.active.meta").each(function(index, ele) {
+                filterTags.push($(ele).text());
+            });
+            location.href = xnote.addUrlParam(location.href, "tags", JSON.stringify(filterTags));
+        }
     });
-});
 
-$(".switch-category").change(function(e) {
-    var selected = $(this).val();
-    var url = window.location.href;
-    url = xnote.addUrlParam(url, "category", selected);
-    window.location.href = url;
-});
+    $(".update-category").change(function (e) {
+        var noteId = $(this).attr("data-id");
+        var newCat = $(this).val();
+        xnote.updateNoteCategory({
+            noteId: noteId,
+            value: newCat,
+            doRefresh: true,
+        });
+    });
+
+    $(".switch-category").change(function(e) {
+        var selected = $(this).val();
+        var url = window.location.href;
+        url = xnote.addUrlParam(url, "category", selected);
+        window.location.href = url;
+    });
+
+    $(".delete-tag-btn").click(function (e) {
+        var html = $(".bind-tag-dialog").html();
+        xnote.openDialog("添加标签", html, ["确定删除", "取消"], function () {
+            var selectedIdList = [];
+            $(".tag.for-dialog.active").each(function (index, ele) {
+                selectedIdList.push($(ele).find(".tag-id").text());
+            });
+            var deleteParams = {
+                tag_type: "book",
+                tag_ids: JSON.stringify(selectedIdList)
+            };
+            $.post("/note/tag/delete", deleteParams, function (resp) {
+                if (resp.code != "success") {
+                    xnote.alert(resp.message);
+                } else {
+                    xnote.toast("删除成功");
+                }
+                app.reloadTagList();
+            });
+        });
+    });
+
+    $(".bind-tag-btn").click(function (e) {
+        var html = $(".bind-tag-dialog").html();
+        var book_id = $(e.target).attr("data-id");
+
+        xnote.openDialog("添加标签", html, ["确定", "取消"], function () {
+            var selectedNames = [];
+            var selectedIdList = [];
+            $(".tag.for-dialog.active").each(function (index, ele) {
+                selectedNames.push($(ele).find(".tag-name").text());
+                selectedIdList.push($(ele).find(".tag-id").text());
+            });
+            
+            var bindParams = {
+                tag_type:"book",
+                book_id:book_id,
+                tag_names: JSON.stringify(selectedNames)
+            };
+
+            $.post("/note/tag/bind", bindParams, function (resp) {
+                if (resp.code != "success") {
+                    xnote.alert(resp.message);
+                } else {
+                    xnote.toast("添加标签成功");
+                }
+                location.reload();
+            })
+        });
+    });
+
+    $(".create-tag-btn").click(function (e) {
+        xnote.prompt("创建新标签", "", function (text) {
+            var params = {
+                tag_type: "book",
+                tag_name: text
+            };
+            $.post("/note/tag/create", params, function (resp) {
+                if (resp.code != "success") {
+                    xnote.alert(resp.message);
+                } else {
+                    xnote.toast("创建成功");
+                }
+                app.reloadTagList();
+            });
+        });
+    });
+})();
+
 </script>
 
 {% end %}

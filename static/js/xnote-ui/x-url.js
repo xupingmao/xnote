@@ -128,3 +128,4 @@ xnote.addUrlParam = function(url, key, value) {
 window.parseUrl = xnote.parseUrl
 window.getUrlParam = xnote.getUrlParam
 window.getUrlParams = xnote.getUrlParams
+window.addUrlParam = xnote.addUrlParam

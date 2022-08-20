@@ -92,7 +92,7 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
     notes = NOTE_DAO.batch_query_list(note_ids)
 
     for note in notes:
-        note.badge_info = dateutil.format_date(note.atime)
+        note.badge_info = dateutil.format_date(note.atime, "/")
 
     return notes
 
@@ -141,7 +141,7 @@ def list_recent_edit(user_name = None, offset = 0, limit = None, skip_deleted = 
         if note is None:
             continue
 
-        note.badge_info = dateutil.format_date(note.mtime)
+        note.badge_info = dateutil.format_date(note.mtime, "/")
         result.append(note)
 
     return result
@@ -161,7 +161,7 @@ def list_recent_created(user_name = None, offset = 0, limit = 10, skip_archived 
     notes = NOTE_DAO.batch_query_list(note_ids)
 
     for note in notes:
-        note.badge_info = dateutil.format_date(note.mtime)
+        note.badge_info = dateutil.format_date(note.mtime, "/")
 
     return notes
 

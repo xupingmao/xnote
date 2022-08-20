@@ -136,3 +136,22 @@
 .btn.danger2 {
     color: red;
 }
+
+
+.toolbar.homepage {
+    position: fixed;
+    right: 10px;
+    bottom: 20%;
+}
+
+.toolbar.homepage>.action {
+    width: 50px;
+    background-color: white;
+    cursor: pointer;
+    padding: 10px;
+    opacity: 0.5;
+}
+
+.toolbar.homepage>.action:hover {
+    opacity: 1.0;
+}
