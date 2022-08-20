@@ -118,6 +118,14 @@ def format_wday(date_str, fmt = None):
 
 
 def format_date(seconds=None, fmt = None):
+    """格式化日期
+    >>> format_date("2020-01-01 00:00:00", "/")
+    '2020/02/01'
+    >>> format_date(1000)
+    '1970-01-01'
+    >>> format_date(1000, "/")
+    '1970/01/01'
+    """
     arg_fmt = fmt
     if fmt is None:
         fmt = "%Y-%m-%d"
@@ -135,11 +143,17 @@ def format_date(seconds=None, fmt = None):
         return time.strftime(fmt, st)
 
 def format_mmdd(seconds=None):
+    """格式化月/日
+    >>> format_mmdd(0)
+    '01/01'
+    >>> format_mmdd("2020-12-02")
+    '12/02'
+    """
     if is_str(seconds):
         date_part = seconds.split(" ")[0]
         date_part = date_part.replace("-", "/")
         parts = date_part.split("/")
-        if len(parts) < 2:
+        if len(parts) != 3:
             return date_part
         return "%s/%s" % (parts[-2], parts[-1])
     else:
