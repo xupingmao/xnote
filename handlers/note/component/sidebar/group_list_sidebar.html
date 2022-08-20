@@ -3,13 +3,14 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-17 10:29:23
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-23 16:54:59
+@LastEditTime : 2022-08-20 23:18:09
 @FilePath     : /xnote/handlers/note/component/sidebar/group_list_sidebar.html
 @Description  : 描述
 #} -->
 
 {% if _is_desktop %}
     {% include note/component/group_special_folder.html %}
+    {% include note/card/note_types.html %}
 
     {% init category_list = [] %}
 

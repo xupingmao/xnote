@@ -190,6 +190,9 @@ class ShareToMeListHandler(ShareListHandler):
 
 class GroupListHandler:
 
+    def load_category(self, kw, user_name):
+        kw.category_list = list(filter(lambda x:x.group_count!=0, list_category(user_name)))
+
     def load_group_list(self, user_name, status, kw):
         parent_id = xutils.get_argument("parent_id", "0")
 
@@ -208,7 +211,7 @@ class GroupListHandler:
             if group.size > 0:
                 notes.insert(0, group)
 
-            kw.category_list = list(filter(lambda x:x.group_count!=0, list_category(user_name)))
+            # self.load_category(kw, user_name)
 
         return notes
 
@@ -304,6 +307,11 @@ class GroupListHandler:
 
 class GroupManageHandler:
 
+    def process_notes(self, notes):
+        for note in notes:
+            tags = note.tags or []
+            note.tags_json = json.dumps(tags)
+
     def handle_root(self, kw):
         page = xutils.get_argument("page", 1, type=int)
         orderby = xutils.get_argument("orderby", "default")
@@ -319,6 +327,8 @@ class GroupManageHandler:
         parent_note = NOTE_DAO.get_root()
         notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset,
                                            limit=limit, category=category_code, count_total=True, tags=q_tags)
+        
+        self.process_notes(notes)
 
         kw.parent_note = parent_note
         kw.notes = notes

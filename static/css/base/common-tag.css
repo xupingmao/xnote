@@ -12,19 +12,23 @@
     background-color: green;
     color: white;
     border-radius: 3px;
-    padding: 3px;
+    padding: 3px 5px;
     margin-right: 2px;
     word-break: keep-all;
+    display: inline-block;
 }
 
 
 a.tag {
     text-decoration: none;
     color: white;
+    word-break: keep-all;
+    word-wrap: unset;
+    display: inline-block;
+    line-height: 17px;
 }
 
 a.tag:hover {
-    background-color: initial;
     text-decoration: underline;
 }
 
@@ -128,6 +132,7 @@ a.tag:hover {
     padding: 2px 5px;
     margin-left: 2px;
     margin-right: 3px;
+    line-height: 19px;
 }
 
 .tag.lightblue {

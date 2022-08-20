@@ -112,7 +112,7 @@
                 {% for tag in note_tags.get(item.id, []) %}
                     <a class="tag lightgray">{{tag}}</a>
                 {% end %}
-                <button class="btn btn-default bind-tag-btn" data-id="{{item.id}}">+标签</button>
+                <button class="btn btn-default bind-tag-btn" data-id="{{item.id}}" data-tags="{{item.tags_json}}">+标签</button>
             </div>
         </div>
     {% end %}
@@ -131,7 +131,8 @@
         el: "#vueApp",
         data: {
             tagList: [],
-            filterTags: []
+            filterTags: [],
+            selectedTags: []
         },
         methods: {
             reloadTagList: function () {
@@ -188,6 +189,7 @@
     });
 
     $(".delete-tag-btn").click(function (e) {
+        app.selectedTags = [];
         var html = $(".bind-tag-dialog").html();
         xnote.openDialog("添加标签", html, ["确定删除", "取消"], function () {
             var selectedIdList = [];
@@ -210,15 +212,26 @@
     });
 
     $(".bind-tag-btn").click(function (e) {
+        var selectedTags = JSON.parse($(e.target).attr("data-tags"));
+
+        $(".tag.for-dialog").removeClass("active");
+        $(".tag.for-dialog").each(function (idx, ele) {
+            var tagName = $(ele).find(".tag-name").text();
+            if (selectedTags.indexOf(tagName) >= 0) {
+                $(ele).addClass("active");
+            }
+        });
+
         var html = $(".bind-tag-dialog").html();
         var book_id = $(e.target).attr("data-id");
 
         xnote.openDialog("添加标签", html, ["确定", "取消"], function () {
             var selectedNames = [];
-            var selectedIdList = [];
             $(".tag.for-dialog.active").each(function (index, ele) {
-                selectedNames.push($(ele).find(".tag-name").text());
-                selectedIdList.push($(ele).find(".tag-id").text());
+                var tagName = $(ele).find(".tag-name").text();
+                if (selectedNames.indexOf(tagName) < 0) {
+                    selectedNames.push(tagName);
+                }
             });
             
             var bindParams = {

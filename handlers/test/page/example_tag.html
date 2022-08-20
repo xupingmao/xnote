@@ -1,0 +1,45 @@
+{% extends base %}
+
+{% block body %}
+
+	{% include test/component/example_nav.html %}
+
+{% init html1 = """
+<div class="row top-offset-1">
+    <span>标签1</span>
+    <span class="tag">标签1</span>
+    <span class="tag info">tag2</span>
+    <span class="tag orange">tag2</span>
+    <span class="tag lightgray">tag2</span>
+    <span class="tag system">tag2</span>
+    <span class="tag system large">tag2</span>
+</div>
+""" %}
+
+{% init html2 = """
+<div class="row top-offset-1">
+    <span>标签1</span>
+    <a class="tag">默认标签</a>
+    <a class="tag info">info标签</a>
+    <a class="tag orange">橙色标签</a>
+    <a class="tag lightgray">浅灰色标签</a>
+    <a class="tag system">系统标签</a>
+    <a class="tag lightblue">浅蓝色标签</a>
+    <a class="tag large">大标签</a>
+</div>
+""" %}
+
+
+<div class="card">
+	<p>span标签</p>
+	<pre class="marked-code">{{html1}}</pre>
+	{% raw html1 %}
+</div>
+
+<div class="card">
+	<p>a标签</p>
+	<pre class="marked-code">{{html2}}</pre>
+	{% raw html2 %}
+</div>
+
+{% end %}
