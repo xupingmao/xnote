@@ -14,6 +14,7 @@
     border-radius: 3px;
     padding: 3px;
     margin-right: 2px;
+    word-break: keep-all;
 }
 
 
@@ -124,7 +125,7 @@ a.tag:hover {
 
 .tag.large {
     font-size: 14px;
-    padding: 5px;
+    padding: 2px 5px;
     margin-left: 2px;
     margin-right: 3px;
 }
