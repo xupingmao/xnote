@@ -121,3 +121,15 @@ a.tag:hover {
     background-color: #000;
     color: white;
 }
+
+.tag.large {
+    font-size: 14px;
+    padding: 5px;
+    margin-left: 2px;
+    margin-right: 3px;
+}
+
+.tag.lightblue {
+    color: #08c;
+    background-color: #ddf4ff;
+}

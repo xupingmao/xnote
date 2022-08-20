@@ -40,40 +40,12 @@
             {% include note/component/group_special_folder.html %}
         {% end %}
 
-        {% if _is_mobile %}
-        <div class="card btn-line-height">
-            <span class="tag info">类目</span>
-            <span>{{category_info.name}}</span>
-
-            <div class="float-right">
-                <div class="dropdown">
-                    <span class="dropdown-btn btn btn-default">切换▾</span>
-                    <div class="dropdown-mask"></div>
-                    <div class="dropdown-content {%if _is_mobile%}mobile{% end %}">
-                        {% for t_cat in category_list %}
-                            <a class="dropdown-option" href="/note/group?note_category={{t_cat.code}}">
-                                <span>{{t_cat.name}}</span>
-                                <div class="float-right">
-                                    <span class="book-count-span">{{t_cat.group_count}}</span>
-                                </div>
-                            </a>
-                        {% end %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% end %}
+        {% include note/component/group_tags.html %}
     {% end %}
 
     <!-- 笔记本列表 -->
     {% set files = groups %}
     {% include note/component/note_list_component.html %}
-
-    <!-- 二级笔记本列表 -->
-    {% if ext_groups != None %}
-        {% set files = ext_groups %}
-        {% include note/component/note_list_component.html %}
-    {% end %}
 
     <script>
     $(".switch-category").change(function(e) {

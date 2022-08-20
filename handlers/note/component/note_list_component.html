@@ -67,20 +67,16 @@
             <span class="tag orange-tag">置顶</span>
         {% end %}
 
-        <!-- 标签 -->
-        {% if hasattr(item, "action") and item.action != None %}
-            <div class="row">
-                <span class="gray-text small-font">{{ACTION_TEXT_MAP.get(item.action)}}</span>
-                <div class="float-right">
-                    <span class="book-size-span">{{format_date(item.action_time).replace('-', '/')}}</span>
-                </div>
-            </div>
-        {% end %}
-
         <!-- 图标和标题 -->
         <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
 
         <span>{{item.name}}</span>
+
+        {% if item.tags != None %}
+            {% for tag_name in item.tags %}
+                <span class="tag lightblue">{{tag_name}}</span>
+            {% end %}
+        {% end %}
 
         <div class="float-right">
             {% if hasattr(item, "is_public") and item.is_public %}
@@ -91,7 +87,7 @@
                 <span class="tag gray" href="/note/removed">删除</span>
             {% end %}
 
-            {% comment 新的统一使用badge_info %}
+            {% comment 新的角标统一使用badge_info %}
             <span class="book-size-span">{{item.badge_info}}</span>
 
             {% if item.show_next or show_next %}

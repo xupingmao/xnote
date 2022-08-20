@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-20 16:41:23
+@LastEditTime : 2022-08-20 20:36:07
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -15,6 +15,7 @@ from xutils import attrget, Storage
 from .dao import get_by_id, update_index, sort_notes
 
 tags_db = dbutil.get_table("note_tags")
+tag_meta_db = dbutil.get_table("note_tag_meta")
 
 def get_tags(creator, note_id):
     note_tags = tags_db.get_by_id(note_id, user_name = creator)
@@ -84,6 +85,12 @@ def list_tag(user):
     tag_list = [Storage(name=k, amount=tags[k]) for k in tags]
     tag_list.sort(key=lambda x: -x.amount)
     return tag_list
+
+def list_tag_meta(user_name, tag_type = None):
+    def list_tag_meta_func(key, value):
+        return value.tag_type == tag_type
+
+    return tag_meta_db.list(offset=0, limit = 1000, user_name=user_name, filter_func = list_tag_meta_func)
 
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_by_tag", list_by_tag)

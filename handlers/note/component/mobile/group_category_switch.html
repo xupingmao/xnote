@@ -1,0 +1,21 @@
+<div class="card btn-line-height">
+    <span class="tag info">类目</span>
+    <span>{{category_info.name}}</span>
+
+    <div class="float-right">
+        <div class="dropdown">
+            <span class="dropdown-btn btn btn-default">切换▾</span>
+            <div class="dropdown-mask"></div>
+            <div class="dropdown-content {%if _is_mobile%}mobile{% end %}">
+                {% for t_cat in category_list %}
+                    <a class="dropdown-option" href="/note/group?note_category={{t_cat.code}}">
+                        <span>{{t_cat.name}}</span>
+                        <div class="float-right">
+                            <span class="book-count-span">{{t_cat.group_count}}</span>
+                        </div>
+                    </a>
+                {% end %}
+            </div>
+        </div>
+    </div>
+</div>

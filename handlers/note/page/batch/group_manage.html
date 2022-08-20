@@ -47,20 +47,21 @@
     <div class="card btn-line-height">
         <div class="row">
             <span>标签</span>
+            <a href="?" class="tag lightgray large {% if len(q_tags) == 0 %}active{%end%}">全部</a>
             <a v-for="tag in tagList" @click="onTagClick"
-                v-bind:class="{'tag':true, 'lightgray':true, 'meta':true, 'active': filterTags.indexOf(tag.tag_name)>=0 }">{{! tag.tag_name }}</a>
+                v-bind:class="{'tag':true, 'lightgray':true, 'meta':true, 'large':true, 'active': filterTags.indexOf(tag.tag_name)>=0 }">{{! tag.tag_name }}</a>
         </div>
 
-        <div class="row">
+        <div class="row top-offset-1">
             <button class="create-tag-btn btn-default">创建新标签</button>
             <button class="delete-tag-btn btn danger">删除标签</button>
-            <a class="btn btn-default" href="/note/group/manage">重置查询</a>
+            <!-- <a class="btn btn-default" href="/note/group/manage">重置查询</a> -->
         </div>
     </div>
 
     <div class="hide bind-tag-dialog">
-        <div class="card">
-            <a v-for="tag in tagList" class="tag lightgray for-dialog">
+        <div class="card btn-line-height">
+            <a v-for="tag in tagList" class="tag lightgray for-dialog large">
                 <span class="tag-id hide">{{! tag._id }}</span>
                 <span class="tag-name">{{! tag.tag_name }}</span>
             </a>
@@ -92,11 +93,14 @@
                 <a class="link2" href="{{item.url}}">{{item.name}}</a>
                 
                 <span class="float-right">
+                    {% if not _is_mobile %}
                     <select value="{{item.category}}" data-id="{{item.id}}" class="update-category">
                         {% for t_cat in category_list %}
                             <option value="{{t_cat.code}}">{{t_cat.name}}</option>
                         {% end %}
                     </select>
+                    {% end %}
+
                     <a class="item-option" data-id="{{item.id}}" data-name="{{item.name}}" 
                         onclick="renameNoteByAttr(this);" href="javascript:void(0);">重命名</a>
                     <input type="checkbox" data-id="{{item.id}}" data-name="{{item.name}}"/>
@@ -155,10 +159,13 @@
     $("body").on("click", ".tag", function(e) {
         $(this).toggleClass("active");
         if ($(this).hasClass("meta")) {
-            var filterTags = [];
-            $(".tag.active.meta").each(function(index, ele) {
-                filterTags.push($(ele).text());
-            });
+            // var filterTags = [];
+            // $(".tag.active.meta").each(function(index, ele) {
+            //     filterTags.push($(ele).text());
+            // });
+
+            // 筛选模式使用单选更好
+            var filterTags = [$(this).text()];
             location.href = xnote.addUrlParam(location.href, "tags", JSON.stringify(filterTags));
         }
     });

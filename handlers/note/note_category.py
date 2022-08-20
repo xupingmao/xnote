@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-15 22:58:53
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-23 16:53:24
+@LastEditTime : 2022-08-20 21:15:19
 @FilePath     : /xnote/handlers/note/note_category.py
 @Description  : 笔记本类型
 """
@@ -28,6 +28,7 @@ class NoteCategory:
         self.show_next = True
         self.icon = "fa-folder"
         self.badge_info = ""
+        self.tags = None
 
 def get_ddc_category_list():
     # TODO 配置化

@@ -118,15 +118,16 @@ def format_wday(date_str, fmt = None):
 
 
 def format_date(seconds=None, fmt = None):
+    arg_fmt = fmt
     if fmt is None:
         fmt = "%Y-%m-%d"
-    if fmt == "/":
+    if arg_fmt == "/":
         fmt = "%Y/%m/%d"
     if seconds is None:
         return time.strftime(fmt)
     elif is_str(seconds):
         date_str = seconds.split(" ")[0]
-        if fmt == "/":
+        if arg_fmt == "/":
             date_str = date_str.replace("-", "/")
         return date_str
     else:

@@ -198,6 +198,7 @@ class GroupListHandler:
                                         status=status,
                                         orderby="default",
                                         parent_id=parent_id,
+                                        tags = kw.q_tags,
                                         category=kw.note_category)
         else:
             notes = NOTE_DAO.list_smart_group(user_name)
@@ -263,6 +264,8 @@ class GroupListHandler:
         orderby = xutils.get_argument("orderby", orderby_default)
         user_name = xauth.current_name()
         show_back = xutils.get_argument("show_back", type=bool)
+        q_tags_str = xutils.get_argument("tags", "[]")
+        q_tags = json.loads(q_tags_str)
 
         xmanager.add_visit_log(user_name, "/note/group")
 
@@ -277,6 +280,7 @@ class GroupListHandler:
         kw.title = T("我的笔记本")
         kw.note_category = category
         kw.category_info = get_category_by_code(user_name, category)
+        kw.q_tags = q_tags
 
         notes = self.load_group_list(user_name, tab, kw)
 
@@ -287,6 +291,7 @@ class GroupListHandler:
         kw.archived_count = NOTE_DAO.count_group(user_name, status="archived")
         kw.active_count = NOTE_DAO.count_group(user_name, status="active")
         kw.smart_count = SmartGroupService.count_smart_group()
+        kw.tag_meta_list = dao_tag.list_tag_meta(user_name, tag_type = "book")
 
         self.handle_badge_info(notes, tab=tab)
         self.sort_notes(notes, kw)
@@ -303,8 +308,8 @@ class GroupManageHandler:
         page = xutils.get_argument("page", 1, type=int)
         orderby = xutils.get_argument("orderby", "default")
         category_code = xutils.get_argument("note_category", "all")
-        q_tags = xutils.get_argument("tags", "[]")
-        tags = json.loads(q_tags)
+        q_tags_str = xutils.get_argument("tags", "[]")
+        q_tags = json.loads(q_tags_str)
 
         assert page > 0
         limit = 50
@@ -313,7 +318,7 @@ class GroupManageHandler:
         user_name = kw.user_name
         parent_note = NOTE_DAO.get_root()
         notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset,
-                                           limit=limit, category=category_code, count_total=True, tags=tags)
+                                           limit=limit, category=category_code, count_total=True, tags=q_tags)
 
         kw.parent_note = parent_note
         kw.notes = notes
