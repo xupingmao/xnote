@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-20 20:36:07
+@LastEditTime : 2022-08-21 14:24:50
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -23,6 +23,14 @@ def get_tags(creator, note_id):
         return attrget(note_tags, "tags")
     return None
 
+
+def get_tag_meta_by_name(user_name, tag_name, tag_type = "book"):
+    assert user_name != None
+    def find_by_name_func(key, value):
+        if not value.tag_type == tag_type:
+            return False
+        return value.tag_name == tag_name
+    return tag_meta_db.get_first(filter_func = find_by_name_func, user_name = user_name)
 
 def update_tags(creator, note_id, tags):
     tags_db.update_by_id(note_id, Storage(note_id=note_id, user=creator, tags=tags))

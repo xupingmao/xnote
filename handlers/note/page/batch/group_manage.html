@@ -13,6 +13,47 @@
 {% init note_tags = dict() %}
 {% include note/component/script/create_script.html %}
 
+<!-- 顶层控制区域的模板 -->
+<script type="text/template" id="tagTopTemplate">
+    <div class="card btn-line-height">
+        <div class="row">
+            <span>标签</span>
+            <a href="?" class="tag lightgray large {% if len(q_tags) == 0 %}active{%end%}">全部</a>
+            {{! each tagList tag }}
+                <a class="tag lightgray meta large {{!tag.active}}">{{! tag.tag_name }}</a>
+            {{!/each}}
+        </div>
+
+        <div class="row top-offset-1">
+            <button class="create-tag-btn btn-default">创建新标签</button>
+            <button class="delete-tag-btn btn danger">删除标签</button>
+        </div>
+    </div>
+</script>
+
+<!-- 删除标签的模板 -->
+<script type="text/template" id="deleteTagTemplate">
+    <div class="card btn-line-height">
+        {{! each tagList tag }}
+        <a class="tag lightgray for-dialog large delete" data-id="{{!tag._id}}">
+            {{! tag.tag_name }}
+        </a>
+        {{!/each}}
+    </div>
+</script>
+
+<!-- 绑定标签的模板 -->
+<script type="text/template" id="bindTagTemplate">
+    <div class="card btn-line-height">
+        {{! each tagList tag }}
+        <a class="tag lightgray for-dialog large bind {{! selectedNames.indexOf(tag.tag_name)>=0 ? "active":"" }}" 
+            data-id="{{!tag._id}}" data-name="{{!tag.tag_name}}">
+            {{! tag.tag_name }}
+        </a>
+        {{!/each}}
+    </div>
+</script>
+
 <div class="card note-list">
 
     <!-- header -->
@@ -43,31 +84,8 @@
     </div>
 </div>
 
-<div id="vueApp">
-    <div class="card btn-line-height">
-        <div class="row">
-            <span>标签</span>
-            <a href="?" class="tag lightgray large {% if len(q_tags) == 0 %}active{%end%}">全部</a>
-            <a v-for="tag in tagList" @click="onTagClick"
-                v-bind:class="{'tag':true, 'lightgray':true, 'meta':true, 'large':true, 'active': filterTags.indexOf(tag.tag_name)>=0 }">{{! tag.tag_name }}</a>
-        </div>
+<div class="tag-top"></div>
 
-        <div class="row top-offset-1">
-            <button class="create-tag-btn btn-default">创建新标签</button>
-            <button class="delete-tag-btn btn danger">删除标签</button>
-            <!-- <a class="btn btn-default" href="/note/group/manage">重置查询</a> -->
-        </div>
-    </div>
-
-    <div class="hide bind-tag-dialog">
-        <div class="card btn-line-height">
-            <a v-for="tag in tagList" class="tag lightgray for-dialog large">
-                <span class="tag-id hide">{{! tag._id }}</span>
-                <span class="tag-name">{{! tag.tag_name }}</span>
-            </a>
-        </div>
-    </div>
-</div>
 
 <div class="card">
     {% if len(notes) == 0 %}
@@ -124,51 +142,57 @@
 
 {% include note/component/script/rename_script.html %}
 
-<script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
 <script type="text/javascript">
 (function() {
-    var app = new Vue({
-        el: "#vueApp",
-        data: {
-            tagList: [],
-            filterTags: [],
-            selectedTags: []
-        },
-        methods: {
-            reloadTagList: function () {
-                var self = this;
-                self.filterTags = JSON.parse(xnote.getUrlParam("tags", "[]"));
-                console.log(self.filterTags);
+    var tagList = [];
 
-                $.get("/note/tag/list?tag_type=book", function (resp) {
-                    console.log("resp", resp);
-                    if (resp.code != "success") {
-                        xnote.alert(resp.message);
+    function renderTagTop(tagList) {
+        var html = $("#tagTopTemplate").render({
+            tagList: tagList,
+        });
+
+        $(".tag-top").html(html);
+    }
+
+    function refreshTagTop() {
+        var filterTags = JSON.parse(xnote.getUrlParam("tags", "[]"));
+
+        $.get("/note/tag/list?tag_type=book", function (resp) {
+            console.log("resp", resp);
+            if (resp.code != "success") {
+                xnote.alert(resp.message);
+            } else {
+                // self.tagList = resp.data;
+                tagList = resp.data;
+                for (var i=0; i < tagList.length; i++) {
+                    var item = tagList[i];
+                    if (filterTags.indexOf(item.tag_name)>=0) {
+                        item.active = "active";
                     } else {
-                        self.tagList = resp.data;
+                        item.active = "";
                     }
-                });
-            },
-            onTagClick: function () {
-
+                }
+                renderTagTop(tagList);
             }
-        }
-    });
+        });
+    };
 
-    app.reloadTagList();
+    refreshTagTop();
 
     $("body").on("click", ".tag", function(e) {
-        $(this).toggleClass("active");
-        if ($(this).hasClass("meta")) {
-            // var filterTags = [];
-            // $(".tag.active.meta").each(function(index, ele) {
-            //     filterTags.push($(ele).text());
-            // });
+        var me = $(this);
+        var tagName = me.text();
+        var tagId = me.attr("data-id");
 
+        me.toggleClass("active");
+
+        if (me.hasClass("meta")) {
+            // 筛选模式
             // 筛选模式使用单选更好
-            var filterTags = [$(this).text()];
+            var filterTags = [tagName];
             location.href = xnote.addUrlParam(location.href, "tags", JSON.stringify(filterTags));
         }
+
     });
 
     $(".update-category").change(function (e) {
@@ -188,56 +212,28 @@
         window.location.href = url;
     });
 
-    $(".delete-tag-btn").click(function (e) {
-        app.selectedTags = [];
-        var html = $(".bind-tag-dialog").html();
-        xnote.openDialog("添加标签", html, ["确定删除", "取消"], function () {
-            var selectedIdList = [];
-            $(".tag.for-dialog.active").each(function (index, ele) {
-                selectedIdList.push($(ele).find(".tag-id").text());
-            });
-            var deleteParams = {
-                tag_type: "book",
-                tag_ids: JSON.stringify(selectedIdList)
-            };
-            $.post("/note/tag/delete", deleteParams, function (resp) {
-                if (resp.code != "success") {
-                    xnote.alert(resp.message);
-                } else {
-                    xnote.toast("删除成功");
-                }
-                app.reloadTagList();
-            });
-        });
-    });
-
     $(".bind-tag-btn").click(function (e) {
-        var selectedTags = JSON.parse($(e.target).attr("data-tags"));
-
-        $(".tag.for-dialog").removeClass("active");
-        $(".tag.for-dialog").each(function (idx, ele) {
-            var tagName = $(ele).find(".tag-name").text();
-            if (selectedTags.indexOf(tagName) >= 0) {
-                $(ele).addClass("active");
-            }
+        var selectedNameList = JSON.parse($(e.target).attr("data-tags"));
+        var html = $("#bindTagTemplate").render({
+            tagList: tagList,
+            selectedNames: selectedNameList
         });
 
-        var html = $(".bind-tag-dialog").html();
         var book_id = $(e.target).attr("data-id");
+
+        console.log("bind-tag-dialog", html);
 
         xnote.openDialog("添加标签", html, ["确定", "取消"], function () {
             var selectedNames = [];
-            $(".tag.for-dialog.active").each(function (index, ele) {
-                var tagName = $(ele).find(".tag-name").text();
-                if (selectedNames.indexOf(tagName) < 0) {
-                    selectedNames.push(tagName);
-                }
+            $(".tag.bind.active").each(function (idx, ele) {
+                var tagName = $(ele).text().trim();
+                selectedNames.push(tagName);
             });
-            
+
             var bindParams = {
                 tag_type:"book",
                 book_id:book_id,
-                tag_names: JSON.stringify(selectedNames)
+                tag_names: JSON.stringify(selectedNames),
             };
 
             $.post("/note/tag/bind", bindParams, function (resp) {
@@ -247,11 +243,11 @@
                     xnote.toast("添加标签成功");
                 }
                 location.reload();
-            })
+            });
         });
     });
 
-    $(".create-tag-btn").click(function (e) {
+    $("body").on("click", ".create-tag-btn", function (e) {
         xnote.prompt("创建新标签", "", function (text) {
             var params = {
                 tag_type: "book",
@@ -263,10 +259,39 @@
                 } else {
                     xnote.toast("创建成功");
                 }
-                app.reloadTagList();
+                refreshTagTop();
             });
         });
     });
+
+    
+    $("body").on("click", ".delete-tag-btn", function (e) {
+        var html = $("#deleteTagTemplate").render({
+            tagList: tagList,
+        });
+
+        xnote.openDialog("删除标签", html, ["确定删除", "取消"], function () {
+            var tagIds = [];
+            $(".tag.delete.active").each(function (idx, ele) {
+                var tagId = $(ele).attr("data-id");
+                tagIds.push(tagId);
+            });
+
+            var deleteParams = {
+                tag_type: "book",
+                tag_ids: JSON.stringify(tagIds),
+            };
+            $.post("/note/tag/delete", deleteParams, function (resp) {
+                if (resp.code != "success") {
+                    xnote.alert(resp.message);
+                } else {
+                    xnote.toast("删除成功");
+                }
+                refreshTagTop();
+            });
+        });
+    });
+
 })();
 
 </script>

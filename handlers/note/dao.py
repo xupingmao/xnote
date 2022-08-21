@@ -929,6 +929,7 @@ def list_group(creator=None,
                parent_id=None,
                category=None,
                tags=None,
+               search_name=None,
                count_total=False,
                count_only=False):
     """查询笔记本列表"""
@@ -941,6 +942,13 @@ def list_group(creator=None,
     q_tags = tags
     if tags != None and len(tags) == 0:
         q_tags = None
+    
+    q_name = search_name
+    if q_name == "":
+        q_name = None
+    
+    if q_name != None:
+        q_name = q_name.lower()
 
     # TODO 添加索引优化
     def list_group_func(key, value):
@@ -960,6 +968,10 @@ def list_group(creator=None,
             if not isinstance(value.tags, list):
                 return False
             if not textutil.contains_any(value.tags, q_tags):
+                return False
+        
+        if q_name != None:
+            if q_name not in value.name.lower():
                 return False
 
         if status == "archived":

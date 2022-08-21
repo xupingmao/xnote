@@ -6,165 +6,229 @@
 
 {% block body %}
 
-<div id="app" class="top-offset-1">
-  {# `{{!` 用来转义 #}
-  <h2>{{! message }}</h2>
+{% init bind_html = """
+<a v-bind:href="url">Baidu</a>
+<a class="tag" v-bind:class="tagClass">Tag</a>
+<a class="tag" v-for="tag in tagList" v-bind:class="tag.tagClass">{{tag.name}}</a>
+""" %}
 
-  <h3>声明式渲染</h3>
-  {# title中间不能有`-` #}
-  <div v-bind:title="bindmessage">
-    鼠标悬停几秒钟查看此处动态绑定的提示信息！
-  </div>
+<script id="bindExampleHtml" type="text/example">
+{% raw bind_html %}
+</script>
 
-  <h3>条件与循环</h3>
-  <h4>v-if v-else-if v-else</h4>
-  <p v-if="seen">现在你看到我了</p>
-  <p v-else-if="Math.random() > 0.4"> Math.random() > 0.4 </p>
-  <p v-else>看不到我</p>
+<div id="app" class="card top-offset-1">
+        
+    <div class="contents">
+        <ul>
+            <li v-for="heading in headingList" v-bind:style="{'margin-left': heading.marginLeft }">
+                <a v-bind:href="heading.href">{{!heading.name}}</a>
+            </li>
+        </ul>
+    </div>
+    
+    <h2>声明式渲染</h3>
 
-  <h4>v-for</h4>
-  <p>v-for指自身元素重复</p>
-  <ol>
-    <li v-for="file in files">
-        {{! file }}
-    </li>
-  </ol>
+    {# `{{!` 用来转义 #}
+    <p>{{! message }}</p>
 
-  <ul>
-    <li v-for="(file, index) in files">
-        {{! index }} - {{! file }}
-    </li>
-  </ul>
+    {# title中间不能有`-` #}
+    <div v-bind:title="bindmessage">
+        鼠标悬停几秒钟查看此处动态绑定的提示信息！
+    </div>
 
- <ul>
-    <li v-for="(value, key, index) in person">
-        {{! index }} - {{! key}} = {{! value }}
-    </li>
-  </ul>
+    <h2>条件与循环</h2>
+    <h3>v-if v-else-if v-else</h3>
+    <p v-if="seen">现在你看到我了</p>
+    <p v-else-if="Math.random() > 0.4"> Math.random() > 0.4 </p>
+    <p v-else>看不到我</p>
 
-  <ul>
-    <span v-for="n in 10">{{! n }} , </span>
-  </ul>
+    <h3 id="heading-v-for">v-for</h3>
+    <p>v-for指自身元素重复</p>
+    <ol>
+        <li v-for="file in files">
+            {{! file }}
+        </li>
+    </ol>
 
-  <h3>处理用户输入</h3>
-  <h4>v-on</h4>
-  <button v-on:click="reverseMessage">逆转消息</button>
+    <ul>
+        <li v-for="(file, index) in files">
+            {{! index }} - {{! file }}
+        </li>
+    </ul>
 
-  <h4>v-model双向绑定</h4>
-  <input v-model="message"/>
+    <ul>
+        <li v-for="(value, key, index) in person">
+            {{! index }} - {{! key}} = {{! value }}
+        </li>
+    </ul>
 
-  <h3>其他模板语法</h3>
-  <h4>v-once</h4>
-  <span v-once>This will never change: {{!message}}</span>
+    <ul>
+        <span v-for="n in 10">{{! n }} , </span>
+    </ul>
 
-  <h4>v-html</h4>
-  <div v-html="rawHtml"></div>
+    <h2>处理用户输入</h2>
+    <h4>v-on</h4>
+    <button v-on:click="reverseMessage">逆转消息</button>
 
-  <h4>v-bind:id</h4>
+    <h4>v-model双向绑定</h4>
+    <input v-model="message" />
 
-  <h4>参数绑定</h4>
-  <a v-bind:href="url">Baidu</a>
+    <h2>其他模板语法</h2>
+    <h4>v-once</h4>
+    <span v-once>This will never change: {{!message}}</span>
 
-  <h4>JavaScript 表达式</h4>
-  <div> {{! message + " >>>" }} </div>
+    <h4>v-html</h4>
+    <div v-html="rawHtml"></div>
 
-  <h4>修饰符</h4>
-  <form v-on:submit.prevent="onSubmit">
-      <button>submit</button>
-  </form>
+    <h4 id="bindExample">v-bind动态绑定</h4>
 
-  <h4>过滤器</h4>
-  {{! message | toUpperCase }}
+    <h4>参数绑定</h4>
+    <pre class="marked-code" v-text="bindExampleHtml"></pre>
 
-  <h4>过滤器串联</h4>
-  {{! message | toUpperCase | length }}
+    <blockquote>效果</blockquote>
 
-  <h4>过滤器加参数</h4>
-  {{! message | appendStr('arg2', 'arg3') }}
+    <div class="row top-offset-1 bottom-offset-1">
+        {% raw bind_html %}
+    </div>
 
-  <h4>v-bind:href缩写:href</h4>
-  <a v-bind:href="url">Baidu</a>
-  <a :href="url">Baidu</a>
 
-  <h4>v-on:click缩写@click</h4>
-  <button @click="onShortClick">Click Me</button>
+    <h4>JavaScript 表达式</h4>
+    <div> {{! message + " >>>" }} </div>
 
-  <h4>onclick获取本元素</h4>
-  <button @click="onGetAttr($event)" role="test">Click Me</button>
+    <h4>修饰符</h4>
+    <form v-on:submit.prevent="onSubmit">
+        <button>submit</button>
+    </form>
+
+    <h4>过滤器</h4>
+    {{! message | toUpperCase }}
+
+    <h4>过滤器串联</h4>
+    {{! message | toUpperCase | length }}
+
+    <h4>过滤器加参数</h4>
+    {{! message | appendStr('arg2', 'arg3') }}
+
+    <h4>v-bind:href缩写:href</h4>
+    <a v-bind:href="url">Baidu</a>
+    <a :href="url">Baidu</a>
+
+    <h4>v-on:click缩写@click</h4>
+    <button @click="onShortClick">Click Me</button>
+
+    <h4>onclick获取本元素</h4>
+    <button @click="onGetAttr($event)" role="test">Click Me</button>
 
 </div>
 
 <script type="text/javascript">
-var app = new Vue({
-    el: "#app",
-    data: {
-        message: "Hello, Vue!",
-        files: ["file1", "file2"],
-        person: {
-            name:"Jhon",
-            age: 20,
+    var app = new Vue({
+        el: "#app",
+        data: {
+            headingList: [],
+            bindExampleHtml: $("#bindExampleHtml").html(),
+            message: "Hello, Vue!",
+            files: ["file1", "file2"],
+            person: {
+                name: "Jhon",
+                age: 20,
+            },
+            bindmessage: "页面加载于 " + new Date(),
+            seen: false,
+            rawHtml: "{{!message}}",
+            url: "https://www.baidu.com",
+            tagClass: "lightblue",
+            tagList: [
+                {
+                    name: "Tag1",
+                    tagClass: "info",
+                },
+                {
+                    name: "Tag2",
+                    tagClass: "gray",
+                }
+            ],
         },
-        bindmessage: "页面加载于 " + new Date(),
-        seen: false,
-        rawHtml: "{{!message}}",
-        url: "https://www.baidu.com",
-    },
-    methods: {
-        reverseMessage: function () {
-            this.message = this.message.split('').reverse().join('');
+        methods: {
+            reverseMessage: function () {
+                this.message = this.message.split('').reverse().join('');
+            },
+            onSubmit: function () {
+                alert("submit");
+            },
+            onShortClick: function () {
+                alert("Click缩写");
+            },
+            onGetAttr: function (event) {
+                var el = event.currentTarget;
+                alert("role:" + $(el).attr("role"));
+            }
         },
-        onSubmit: function () {
-            alert("submit");
+        filters: {
+            toUpperCase: function (value) {
+                if (!value) return ''
+                value = value.toString()
+                return value.toUpperCase();
+            },
+            length: function (value) {
+                if (!value) return 0;
+                return value.length;
+            },
+            appendStr: function (arg1, arg2, arg3) {
+                return arg1 + arg2 + arg3;
+            }
         },
-        onShortClick: function() {
-            alert("Click缩写");
+        // 生命周期
+        beforeCreated: function () {
+
         },
-        onGetAttr: function(event) {
-            var el = event.currentTarget;
-            alert("role:" + $(el).attr("role"));
+
+        created: function () {
+
+        },
+
+        beforeMount: function () {
+            // 编译完成 
+        },
+
+        mounted: function () {
+            // 模型加载完毕， 渲染之前
+        },
+
+        beforeDestroy: function () {
+
+        },
+
+        destroyed: function () {
+            //
         }
-    },
-    filters: {
-        toUpperCase: function (value) {
-            if (!value) return ''
-            value = value.toString()
-            return value.toUpperCase();
-        },
-        length: function (value) {
-            if (!value) return 0;
-            return value.length;
-        },
-        appendStr: function (arg1, arg2, arg3) {
-            return arg1 + arg2 + arg3;
-        }
-    },
-    // 生命周期
-    beforeCreated: function () {
+    });
 
-    },
+    app.files.push("pushed file");
 
-    created: function () {
+    (function() {
+        var minLevel = 10;
+        var elements = [];
 
-    },
+        $("h1,h2,h3,h4").each(function (idx, ele) {
+            $(ele).attr("id", "heading-" + idx);
+            var tagName = $(ele)[0].tagName.toUpperCase();
+            var level = parseInt(tagName.substring(1));
+            minLevel = Math.min(minLevel, level);
+        });
 
-    beforeMount: function () {
-        // 编译完成 
-    },
-
-    mounted: function () {
-        // 模型加载完毕， 渲染之前
-    },
-
-    beforeDestroy: function () {
-
-    },
-
-    destroyed: function () {
-        //
-    }
-})
-
-app.files.push("pushed file");
+        $("h1,h2,h3,h4").each(function (idx, ele) {
+            var tagName = $(ele)[0].tagName.toUpperCase();
+            var level = parseInt(tagName.substring(1));
+            var heading = {
+                id: $(ele).attr("id"),
+                name: $(ele).text(),
+                href: "#" + $(ele).attr("id"),
+                marginLeft: (level-minLevel) * 20 + "px",
+            }
+            app.headingList.push(heading);
+        });
+    })();
 
 </script>
 

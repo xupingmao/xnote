@@ -316,6 +316,7 @@ class GroupManageHandler:
         page = xutils.get_argument("page", 1, type=int)
         orderby = xutils.get_argument("orderby", "default")
         category_code = xutils.get_argument("note_category", "all")
+        q_key = xutils.get_argument("key", "")
         q_tags_str = xutils.get_argument("tags", "[]")
         q_tags = json.loads(q_tags_str)
 
@@ -325,8 +326,15 @@ class GroupManageHandler:
 
         user_name = kw.user_name
         parent_note = NOTE_DAO.get_root()
+
+        list_group_kw = Storage()
+        list_group_kw.tags = q_tags
+        list_group_kw.search_name = q_key
+        list_group_kw.count_total = True
+        list_group_kw.category = category_code
+
         notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset,
-                                           limit=limit, category=category_code, count_total=True, tags=q_tags)
+                                           limit=limit, **list_group_kw)
         
         self.process_notes(notes)
 
@@ -339,6 +347,8 @@ class GroupManageHandler:
         kw.template = "note/page/batch/group_manage.html"
         kw.category_list = list_category(user_name)
         kw.q_tags = q_tags
+        kw.q_key = q_key
+        kw.search_type = "group_manage"
 
         cat_info = get_category_by_code(user_name, category_code)
         if cat_info != None:

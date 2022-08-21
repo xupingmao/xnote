@@ -107,6 +107,10 @@ class CreateTagAjaxHandler:
             user=user_name,
         )
 
+        tag_meta = dao_tag.get_tag_meta_by_name(user_name, tag_name, tag_type="book")
+        if tag_meta != None:
+            return dict(code="500", message="标签已经存在,请重新输入")
+
         tag_db.insert(obj, id_type="auto_increment")
         return dict(code="success")
 

@@ -446,6 +446,7 @@ def do_reload_search(ctx = None):
     register_search_handler("default", placeholder = u"综合搜索", action = "/search")
     register_search_handler("relevant_word", placeholder=u"搜索单词", action = "/dict/relevant/list")
     register_search_handler("checklist", placeholder=u"搜索清单列表", action="/note/checklist/search")
+    register_search_handler("group_manage", placeholder=u"搜索笔记本", action="/note/group/manage")
 
 class SearchDialogAjaxHandler:
 
