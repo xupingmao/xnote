@@ -6,7 +6,6 @@
 """
 import zipfile
 import os
-import re
 import time
 import sys
 import logging
@@ -19,7 +18,7 @@ import xauth
 import xtemplate
 from xutils import Storage
 from xutils import dbutil
-from xutils import dateutil, fsutil, logutil
+from xutils import fsutil, logutil
 from xutils.db.driver_sqlite import SqliteKV
 
 config = xconfig
@@ -29,12 +28,7 @@ _dirname = "./"
 _zipname = "xnote.zip"
 _dest_path = os.path.join(_dirname, "static", _zipname)
 
-# 是否移除旧备份
-_remove_old = False
-_MAX_BACKUP_COUNT = 10
-# 10天备份一次
-_BACKUP_INTERVAL = 10 * 3600 * 24
-
+# 删除备份在 cron/diskclean 任务里面
 # 备份的锁
 _backup_lock = threading.RLock()
 
@@ -64,82 +58,10 @@ def zip_xnote(nameblacklist = [_zipname]):
 def zip_new_xnote():
     zip_xnote([_zipname, ".db", ".log", ".exe"])
 
-def get_info():
-    info = Storage()
-    info.path = _dest_path
-
-    if os.path.exists(_dest_path):
-        info.name = _zipname
-        info.path = _dest_path
-        st = os.stat(_dest_path)
-        info.mtime = dateutil.format_time(st.st_mtime)
-        info.size = fsutil.format_size(st.st_size)
-    else:
-        info.name = None
-        info.path = None
-        info.mtime = None
-        info.size = None
-    return info
-
-
-def backup_db():
-    now = time.strftime("%Y%m%d")
-    dbname = "data.{}.db".format(now)
-    dbpath = xconfig.DB_FILE
-    if not os.path.exists(dbpath):
-        return
-    backup_dir = xconfig.BACKUP_DIR
-    newdbpath = os.path.join(backup_dir, dbname)
-    fsutil.copy(dbpath, newdbpath)
-
-def chk_backup():
-    backup_dir = xconfig.BACKUP_DIR
-    xutils.makedirs(backup_dir)
-    files = os.listdir(backup_dir)
-    sorted_files = sorted(files)
-    logutil.info("sorted backup files: {}", sorted_files)
-
-    for fname in sorted_files:
-        path = os.path.join(backup_dir, fname)
-        ctime = os.stat(path).st_ctime
-        print("%s - %s" % (path, xutils.format_time(ctime)))
-
-    tm = time.localtime()
-    if tm.tm_wday != 5:
-        print("not the day, quit")
-        # 一周备份一次
-        return
-
-    if _remove_old and len(sorted_files) > _MAX_BACKUP_COUNT:
-        target = sorted_files[0]
-        target_path = os.path.join(backup_dir, target)
-        fsutil.remove(target_path)
-        logutil.warn("remove file {}", target_path)
-    if len(sorted_files) == 0:
-        backup_db()
-    else:
-        lastfile = sorted_files[-1]
-        p = re.compile(r"data\.(\d+)\.db")
-        m = p.match(lastfile)
-        if m:
-            data = m.groups()[0]
-            tm_time = time.strptime(data, "%Y%m%d")
-            seconds = time.mktime(tm_time)
-            now = time.time()
-            # backup every 10 days.
-            if now - seconds > _BACKUP_INTERVAL:
-                backup_db()
-        else:
-            # 先创建一个再删除
-            backup_db()
-            lastfile_path = os.path.join(backup_dir, lastfile)
-            fsutil.remove(lastfile_path)
-            logutil.warn("not valid db backup file, remove {}", lastfile_path)
-
 
 def chk_scripts_backup():
     dirname = xconfig.SCRIPTS_DIR
-    destfile = os.path.join(xconfig.BACKUP_DIR, time.strftime("scripts.%Y-%m.zip"))
+    destfile = os.path.join(xconfig.BACKUP_DIR, time.strftime("scripts.%Y-%m-%d.zip"))
     xutils.zip_dir(dirname, destfile)
 
 class DBBackup:
@@ -275,11 +197,6 @@ class DBBackup:
 
         return dict(count = count, cost_time = "%sms" % cost_time)
 
-def chk_db_backup_old():
-    dirname = xconfig.DB_DIR
-    destfile = os.path.join(xconfig.BACKUP_DIR, time.strftime("db.%Y-%m.zip"))
-    xutils.zip_dir(dirname, destfile)
-
 def chk_db_backup():
     backup = DBBackup()
     return backup.execute()
@@ -374,7 +291,6 @@ class BackupHandler:
             return import_db(path)
 
         # 备份所有的
-        chk_backup()
         chk_db_backup()
         chk_scripts_backup()
         return "OK"
