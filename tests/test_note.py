@@ -23,6 +23,7 @@ import xauth
 from handlers.note.dao import get_by_id, get_by_name, visit_note, get_by_user_skey
 from xutils import Storage
 from xutils import textutil
+from xutils import dbutil
 
 app          = test_base.init()
 json_request = test_base.json_request
@@ -261,6 +262,20 @@ class TestMain(BaseTestCase):
 
         # clean up
         json_request("/note/remove?id=%s" % id)
+    
+    def test_note_tag_meta_create(self):
+        tag_meta_dao = xutils.DAO("note_tag_meta")
+        create_params = dict(
+            tag_type = "book",
+            tag_name = "测试"
+        )
+        result = json_request("/note/tag/create", method="POST", data = create_params)
+        self.assertEqual("success", result["code"])
+
+        meta_info = tag_meta_dao.get_by_name(xauth.current_name(), "测试")
+        self.assertIsNotNone(meta_info)
+        self.assertEqual("测试", meta_info.tag_name)
+        self.assertEqual("book", meta_info.tag_type)
 
     def test_note_stick(self):
         json_request("/note/remove?name=xnote-share-test")

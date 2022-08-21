@@ -4,7 +4,7 @@
         <div class="row">
             <span>标签</span>
             <a href="?" class="tag lightgray large {% if len(q_tags) == 0 %}active{%end%}">全部</a>
-            <a v-for="tag in tagList" @click="onTagClick"
+            <a v-for="tag in tagList" @click="onTagClick(tag)"
                 class="test tag lightgray meta" 
                 v-bind:class="{'active': filterTags.indexOf(tag.tag_name)>=0 }">{{! tag.tag_name }}</a>
         </div>
@@ -53,7 +53,7 @@
                     }
                 });
             },
-            onTagClick: function () {
+            onTagClick: function (tag) {
 
             },
             update: function() {

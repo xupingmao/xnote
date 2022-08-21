@@ -4,11 +4,12 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-21 14:24:50
+@LastEditTime : 2022-08-21 23:13:22
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
 
+import json
 import xutils
 from xutils import dbutil
 from xutils import attrget, Storage
@@ -24,13 +25,25 @@ def get_tags(creator, note_id):
     return None
 
 
-def get_tag_meta_by_name(user_name, tag_name, tag_type = "book"):
-    assert user_name != None
-    def find_by_name_func(key, value):
+def get_tag_meta_by_name(user_name, tag_name, tag_type = "book", book_id = None):
+    result = list_tag_meta(user_name, limit = 1, tag_type = tag_type, book_id=book_id, tag_name=tag_name)
+    if len(result) > 0:
+        return result[0]
+    return None
+
+def list_tag_meta(user_name, *, limit = 1000, tag_type="book", tag_name=None, book_id = None):
+    if tag_type == "note":
+        assert book_id != None, "book_id不能为空"
+        
+    def list_tag_meta_func(key, value):
         if not value.tag_type == tag_type:
             return False
-        return value.tag_name == tag_name
-    return tag_meta_db.get_first(filter_func = find_by_name_func, user_name = user_name)
+        if tag_name != None and value.tag_name != tag_name:
+            return False
+        if book_id != None and value.book_id != book_id:
+            return False
+        return True
+    return tag_meta_db.list(limit = limit, filter_func = list_tag_meta_func, user_name = user_name)
 
 def update_tags(creator, note_id, tags):
     tags_db.update_by_id(note_id, Storage(note_id=note_id, user=creator, tags=tags))
@@ -72,6 +85,7 @@ def batch_get_tags_by_notes(notes):
             tags = tag_info.tags
 
         result[note.id] = tags
+        note.tags_json = json.dumps(tags)
     return result
 
 def list_tag(user):
@@ -94,13 +108,9 @@ def list_tag(user):
     tag_list.sort(key=lambda x: -x.amount)
     return tag_list
 
-def list_tag_meta(user_name, tag_type = None):
-    def list_tag_meta_func(key, value):
-        return value.tag_type == tag_type
-
-    return tag_meta_db.list(offset=0, limit = 1000, user_name=user_name, filter_func = list_tag_meta_func)
-
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_by_tag", list_by_tag)
 xutils.register_func("note.get_tags", get_tags)
 xutils.register_func("note.update_tags", update_tags)
+xutils.register_func("note_tag_meta.get_by_name", get_tag_meta_by_name)
+xutils.register_func("note_tag_meta.list", list_tag_meta)

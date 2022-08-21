@@ -18,7 +18,8 @@
 
 <div id="app" class="card top-offset-1">
         
-    <div class="contents">
+    <div class="marked-contents">
+        <span class="marked-contents-title">目录</span>
         <ul>
             <li v-for="heading in headingList" v-bind:style="{'margin-left': heading.marginLeft }">
                 <a v-bind:href="heading.href">{{!heading.name}}</a>
@@ -28,10 +29,12 @@
     
     <h2>声明式渲染</h3>
 
-    {# `{{!` 用来转义 #}
+    <!-- {# `{{!` 用来转义 #} -->
+
     <p>{{! message }}</p>
 
-    {# title中间不能有`-` #}
+    <!-- {# title中间不能有`-` #} -->
+
     <div v-bind:title="bindmessage">
         鼠标悬停几秒钟查看此处动态绑定的提示信息！
     </div>
@@ -119,6 +122,25 @@
     <h4>onclick获取本元素</h4>
     <button @click="onGetAttr($event)" role="test">Click Me</button>
 
+    <h2>vue+layer</h2>
+    <button @click="onShowLayerMsg">展示</button>
+    <div id="vueMsgDialog" v-show="showLayerMsg">
+        <div class="card">
+            <div class="row">
+                <span>{{!layerMsg}}</span>
+            </div>
+            <div class="row">
+                <span>{{!layerCounter}}</span>
+                <button @click="layerCounterInc">全局计数器+1</button>
+            </div>
+            <div class="row">
+                <div v-for="item in counterList">
+                    <span>{{!item.value}}</span>
+                    <button @click="layerCounterInc2(item)">局部计数器{{!item.name}}+1</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -148,6 +170,19 @@
                     tagClass: "gray",
                 }
             ],
+            layerMsg: "hello, vue-layer",
+            showLayerMsg: false,
+            layerCounter: 0,
+            counterList: [
+                {
+                    name: "计数器A",
+                    value: 0,
+                },
+                {
+                    name: "计数器B",
+                    value: 0,
+                },
+            ],
         },
         methods: {
             reverseMessage: function () {
@@ -162,7 +197,21 @@
             onGetAttr: function (event) {
                 var el = event.currentTarget;
                 alert("role:" + $(el).attr("role"));
-            }
+            },
+            onShowLayerMsg: function () {
+                // this.showLayerMsg = true;
+                layer.open({
+                    type: 1,
+                    title: "Hello",
+                    content: $("#vueMsgDialog"),
+                })
+            },
+            layerCounterInc: function() {
+                this.layerCounter++;
+            },
+            layerCounterInc2: function(item) {
+                item.value++;
+            },
         },
         filters: {
             toUpperCase: function (value) {

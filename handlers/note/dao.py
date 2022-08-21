@@ -1055,10 +1055,19 @@ def count_public():
 
 @xutils.timeit(name="NoteDao.ListNote:leveldb", logfile=True, logargs=True)
 def list_by_parent(creator, parent_id, offset=0, limit=1000,
-                   orderby="name", skip_group=False, include_public=True):
+                   orderby="name", 
+                   skip_group=False, 
+                   include_public=True,
+                   *, 
+                   tags = None):
     """通过父级节点ID查询笔记列表"""
     if parent_id is None:
         raise Exception("list_by_parent: parent_id is None")
+
+    # 只要一个标签匹配即可
+    q_tags = tags
+    if q_tags != None and len(q_tags) == 0:
+        q_tags = None
 
     parent_id = str(parent_id)
     # TODO 添加索引优化
@@ -1070,6 +1079,12 @@ def list_by_parent(creator, parent_id, offset=0, limit=1000,
             return False
         if str(value.parent_id) != parent_id:
             return False
+        
+        if q_tags != None:
+            if value.tags == None:
+                return False
+            if not textutil.contains_any(value.tags, q_tags):
+                return False
 
         if include_public:
             return (value.is_public or value.creator == creator)

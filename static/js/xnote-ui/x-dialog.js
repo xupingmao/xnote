@@ -168,6 +168,14 @@ xnote.openDialogExInner = function (options) {
     return index
 }
 
+/**
+ * 打开一个对话框
+ * @param {string} title 标题
+ * @param {string|DOM} html 文本或者DOM对象
+ * @param {array} buttons 按钮列表
+ * @param {array} functions 函数列表
+ * @returns 弹层的索引
+ */
 xnote.openDialog = function(title, html, buttons, functions) {
     var options = {};
     options.title = title;

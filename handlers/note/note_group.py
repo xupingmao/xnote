@@ -307,11 +307,6 @@ class GroupListHandler:
 
 class GroupManageHandler:
 
-    def process_notes(self, notes):
-        for note in notes:
-            tags = note.tags or []
-            note.tags_json = json.dumps(tags)
-
     def handle_root(self, kw):
         page = xutils.get_argument("page", 1, type=int)
         orderby = xutils.get_argument("orderby", "default")
@@ -336,8 +331,6 @@ class GroupManageHandler:
         notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset,
                                            limit=limit, **list_group_kw)
         
-        self.process_notes(notes)
-
         kw.parent_note = parent_note
         kw.notes = notes
         kw.page_totalsize = total
@@ -742,6 +735,9 @@ class ManagementHandler:
     """批量管理处理器"""
 
     def handle_group(self, kw):
+        q_tags_str = xutils.get_argument("tags", "[]")
+        q_tags = json.loads(q_tags_str)
+
         parent_id = kw.parent_id
         user_name = kw.user_name
 
@@ -750,11 +746,12 @@ class ManagementHandler:
             raise web.notfound()
 
         notes = NOTE_DAO.list_by_parent(user_name, parent_id,
-                                        0, 200, orderby=parent_note.orderby)
+                                        0, 200, orderby=parent_note.orderby, tags = q_tags)
 
         parent = Storage(url="/note/%s" % parent_id,
                          name=parent_note.name)
 
+        dao_tag.batch_get_tags_by_notes(notes)
         kw.parent_note = parent_note
         kw.parent = parent
         kw.notes = notes
@@ -772,7 +769,7 @@ class ManagementHandler:
         parent_id = xutils.get_argument("parent_id", "0")
         user_name = xauth.current_name()
 
-        xmanager.add_visit_log(user_name, "/note/management")
+        xmanager.add_visit_log(user_name, "/note/manage")
 
         kw = Storage(user_name=user_name, parent_id=parent_id)
         kw.template = "note/page/batch/note_manage.html"

@@ -96,18 +96,27 @@ class TagListHandler:
 
 class CreateTagAjaxHandler:
 
-    def create_book_tag(self, user_name):
+    def create_book_tag(self, user_name, tag_type):
         tag_name = xutils.get_argument("tag_name", "")
+        book_id = xutils.get_argument("book_id", "")
+
+        if book_id == "":
+            book_id = None
+
         if tag_name == "":
             return dict(code="400", message="tag_name不能为空,请重新输入")
+        
+        if tag_type == "note" and book_id == None:
+            return dict(code="400", message="book_id不能为空, 请重新输入")
 
         obj = dict(
-            tag_type="book",
+            tag_type=tag_type,
             tag_name=tag_name,
             user=user_name,
+            book_id=book_id,
         )
 
-        tag_meta = dao_tag.get_tag_meta_by_name(user_name, tag_name, tag_type="book")
+        tag_meta = dao_tag.get_tag_meta_by_name(user_name, tag_name, tag_type=tag_type, book_id=book_id)
         if tag_meta != None:
             return dict(code="500", message="标签已经存在,请重新输入")
 
@@ -118,8 +127,8 @@ class CreateTagAjaxHandler:
     def POST(self):
         tag_type = xutils.get_argument("tag_type")
         user_name = xauth.current_name()
-        if tag_type == "book":
-            return self.create_book_tag(user_name)
+        if tag_type in ("book", "note"):
+            return self.create_book_tag(user_name, tag_type)
 
         return dict(code="fail", message="无效的标签类型")
 
@@ -155,7 +164,11 @@ class TagListAjaxHandler:
         tag_type = xutils.get_argument("tag_type", "")
         user_name = xauth.current_name()
         if tag_type == "book":
-            data_list = tag_db.list(limit=1000, user_name=user_name)
+            data_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name)
+            return dict(code="success", data = data_list)
+        if tag_type == "note":
+            book_id = xutils.get_argument("book_id", "")
+            data_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name, tag_type="note", book_id=book_id)
             return dict(code="success", data = data_list)
 
         return dict(code="400", message="无效的tag_type")
@@ -179,13 +192,32 @@ class BindTagAjaxHandler:
         
         dao_tag.update_tags(user_name, book_id, tag_names)
         return dict(code="success")
+    
+    def bind_note_tag(self):
+        note_id = xutils.get_argument("note_id", "")
+        tag_names_str = xutils.get_argument("tag_names", "")
+
+        assert note_id != ""
         
+        user_name = xauth.current_name()
+        book_info = get_by_id_creator(note_id, user_name)
+        if book_info == None:
+            return dict(code="500", message="笔记不存在或者无权限")
+
+        tag_names = json.loads(tag_names_str)
+        if len(tag_names) == 0:
+            return dict(code="400", message="请选择标签")
+        
+        dao_tag.update_tags(user_name, note_id, tag_names)
+        return dict(code="success")
 
     @xauth.login_required()
     def POST(self):
         tag_type = xutils.get_argument("tag_type", "")
         if tag_type == "book":
             return self.bind_book_tag()
+        if tag_type == "note":
+            return self.bind_note_tag()
         return dict(code="400", message="无效的tag_type")
 
 xurls = (

@@ -1,4 +1,4 @@
-{% extends base.html %}
+{% extends base %}
 <!--
 @author xupingmao
 @since 2020/01/06
@@ -9,53 +9,261 @@
 
 {% init show_note_path = True %}
 
-<div class="card note-list">
+{% include common/script/load_vue.html %}
 
-    <!-- header -->
-    <div class="row card-title btn-line-height">
-        <span>批量操作</span>
-        <div class="float-right">
-            {% if parent_id != "0" %}
-                <button class="reverse-select-btn">反选</button>
-                <button class="move-btn" data-url="/note/group/select?callback=batchMoveNoteCallback">移动</button>
-                {% include common/button/back_button.html %}
-            {% else %}
-                <!-- 根目录 -->
-                <!-- <button class="btn btn-default batch-move-btn">移动</button> -->
-                {% include common/button/back_button.html %}
-            {% end %}
+<div id="vueApp">
+    <div class="card note-list">
+        <!-- header -->
+        <div class="row card-title btn-line-height">
+            <span>批量操作</span>
+            <div class="float-right">
+                {% if parent_id != "0" %}
+                    <button class="reverse-select-btn">反选</button>
+                    <button class="move-btn" data-url="/note/group/select?callback=batchMoveNoteCallback">移动</button>
+                    {% include common/button/back_button.html %}
+                {% else %}
+                    <!-- 根目录 -->
+                    <!-- <button class="btn btn-default batch-move-btn">移动</button> -->
+                    {% include common/button/back_button.html %}
+                {% end %}
+            </div>
         </div>
     </div>
-</div>
 
-{% if show_note_path %}
-<div class="card">
-    {% include note/component/note_path.html %}
-</div>
-{% end %}
-
-<div class="card">    
-    {% for item in files %}
-        <div class="book-item">
-            {% if item.priority>0 %}
-                <span class="tag orange">置顶</span>
-            {% end %}
-
-            <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
-            <a class="link2" href="{{item.url}}">{{item.name}}</a>
-            
-            <span class="float-right">
-                <a class="item-option" data-id="{{item.id}}" data-name="{{item.name}}" 
-                    onclick="renameNoteByAttr(this);" href="javascript:void(0);">重命名</a>
-                <input type="checkbox" data-id="{{item.id}}" data-name="{{item.name}}"/>
-            </span>
-        </div>
+    {% if show_note_path %}
+    <div class="card">
+        {% include note/component/note_path.html %}
+    </div>
     {% end %}
+
+    <div class="card btn-line-height">
+        <div class="row">
+            <span>标签</span>
+            <a href="?parent_id={{parent_id}}" class="tag lightgray large" v-bind:class="tagOfAll.active">全部</a>
+            <a v-for="tag in tagList" @click="onTagClick(tag)"
+                v-bind:href="tag.href" class="test tag lightgray meta large" 
+                v-bind:class="{'active': paramTags.indexOf(tag.tag_name)>=0 }">{{! tag.tag_name }}</a>
+        </div>
+
+        <div class="row top-offset-1">
+            <button class="create-tag-btn btn-default" @click="onCreateNewTag">创建新标签</button>
+            <button class="delete-tag-btn btn danger" @click="onDeleteTag">删除标签</button>
+        </div>
+    </div>
+
+    <div class="hide delete-tag-dialog">
+        <div class="card btn-line-height" :key="key">
+            <a v-for="tag in tagList" @click="onSelectDeleteTag(tag)"
+                class="test tag lightgray meta large" 
+                v-bind:class="tag.delete_class">{{! tag.tag_name }}</a>
+        </div>
+    </div>
+
+    <div class="hide bind-tag-dialog">
+        <div class="card btn-line-height" :key="key">
+            <a v-for="tag in tagList" @click="onSelectBindTag(tag)"
+                class="test tag lightgray meta large" 
+                v-bind:class="tag.bind_class">{{! tag.tag_name }}</a>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if len(files) == 0 %}
+            {% include common/text/empty_text.html %}
+        {% end %}
+
+        {% for item in files %}
+            <div class="book-item">
+                <div class="row">
+                    {% if item.priority>0 %}
+                        <span class="tag orange">置顶</span>
+                    {% end %}
+    
+                    <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
+                    <a class="link2" href="{{item.url}}">{{item.name}}</a>
+                    
+                    <span class="float-right">
+                        <a class="item-option" data-id="{{item.id}}" data-name="{{item.name}}" 
+                            onclick="renameNoteByAttr(this);" href="javascript:void(0);">重命名</a>
+                        <input type="checkbox" data-id="{{item.id}}" data-name="{{item.name}}"/>
+                    </span>
+                </div>
+                <div class="row">
+                    <span>标签</span>
+                    {% if item.tags != None %}
+                        {% for tag in item.tags %}
+                            <a class="tag lightgray">{{tag}}</a>
+                        {% end %}
+                    {% end %}
+                    <button class="btn-default" data-id="{{item.id}}" data-tags="{{item.tags_json}}" 
+                        @click="onBindTag($event)">+标签</button>
+                </div>
+            </div>
+        {% end %}
+    </div>
 </div>
 
 {% include note/component/script/rename_script.html %}
 
 <script type="text/javascript">
+var app = new Vue({
+    el: "#vueApp",
+    data: {
+        key: 1,
+        tagOfAll: {
+        },
+        tagList: [],
+        paramTags: [],
+    },
+    methods: {
+        update: function () {
+            this.key++;
+        }, 
+
+        reloadTags: function () {
+            var me = this;
+            me.paramTags = JSON.parse(xnote.getUrlParam("tags", "[]"));
+            if (me.paramTags.length==0) {
+                me.tagOfAll.active="active";
+            }
+
+            var params = {
+                "book_id": xnote.getUrlParam("parent_id"),
+                "tag_type": "note",
+            };
+            $.get("/note/tag/list", params, function (resp) {
+                if (resp.code == "success") {
+                    me.tagList = resp.data;
+                    for (var i = 0; i < me.tagList.length; i++) {
+                        var item = me.tagList[i];
+                        item.href = xnote.addUrlParam("?parent_id={{parent_id}}", "tags", JSON.stringify([item.tag_name]));
+                    }
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
+        },
+
+        resetTagClass: function() {
+            for (var i = 0; i < this.tagList.length; i++) {
+                var item = this.tagList[i];
+                item.delete_class = "";
+                item.bind_class = "";
+            }
+            this.update();
+        },
+
+        onCreateNewTag: function () {
+            var me = this;
+            xnote.prompt("创建标签", "", function (newTag) {
+                var createParams = {
+                    tag_type: "note",
+                    tag_name: newTag,
+                    book_id: "{{parent_id}}",
+                };
+                $.post("/note/tag/create", createParams, function (resp) {
+                    if (resp.code == "success") {
+                        me.reloadTags();
+                    } else {
+                        xnote.alert(resp.message);
+                    }
+                });
+            });
+        },
+
+        onDeleteTag: function () {
+            var me = this;
+
+            xnote.openDialog("删除标签", $(".delete-tag-dialog"), ["确定删除", "取消"], function () {
+                var deleteTagIds = [];
+                for (var i=0; i < me.tagList.length; i++) {
+                    var item = me.tagList[i];
+                    if (item.delete_class == "active") {
+                        deleteTagIds.push(item._id);
+                    }
+                    var deleteParams = {
+                        tag_type: "book",
+                        tag_ids: JSON.stringify(deleteTagIds),
+                    };
+                }
+                $.post("/note/tag/delete", deleteParams, function (resp) {
+                    if (resp.code != "success") {
+                        xnote.alert(resp.message);
+                    } else {
+                        xnote.toast("删除成功");
+                    }
+                    me.reloadTags();
+                });
+                
+            });
+        },
+
+        onSelectDeleteTag: function (tag) {
+            console.log("onSelectDeleteTag", tag);
+            this.resetTagClass();
+            if (tag.delete_class == "active") {
+                tag.delete_class = "";
+            } else {
+                tag.delete_class = "active";
+            }
+            this.update();
+        },
+
+        onSelectBindTag: function (tag) {
+            console.log("onSelectBindTag", tag);
+            
+            if (tag.bind_class == "active") {
+                tag.bind_class = "";
+            } else {
+                tag.bind_class = "active";
+            }
+            this.update();
+        },
+
+        onBindTag: function(event) {
+            var me = this;
+            console.log("onBindTag", event);
+
+            this.resetTagClass();
+            var note_id = $(event.target).attr("data-id");
+            var tags = JSON.parse($(event.target).attr("data-tags"));
+
+            for (var i = 0; i < me.tagList.length; i++) {
+                var item = me.tagList[i];
+                if (tags.indexOf(item.tag_name) >= 0) {
+                    item.bind_class = "active";
+                }
+            }
+            
+            xnote.openDialog("绑定标签", $(".bind-tag-dialog"), ["确定", "取消"], function () {
+                var bindTagNames = [];
+                for (var i=0; i < me.tagList.length; i++) {
+                    var item = me.tagList[i];
+                    if (item.bind_class == "active") {
+                        bindTagNames.push(item.tag_name);
+                    }
+                }
+
+                var bindParams = {
+                    tag_type: "note",
+                    note_id: note_id,
+                    tag_names: JSON.stringify(bindTagNames),
+                };
+                $.post("/note/tag/bind", bindParams, function (resp) {
+                    if (resp.code != "success") {
+                        xnote.alert(resp.message);
+                    } else {
+                        xnote.toast("绑定成功");
+                    }
+                    location.reload();
+                });
+            });
+        },
+    }
+});
+
+app.reloadTags();
+
 $(function () {
     $(".reverse-select-btn").click(function () {
         $("input[type=checkbox]").each(function (index, element) {

@@ -1,0 +1,15 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-08-21 18:03:26
+@LastEditors  : xupingmao
+@LastEditTime : 2022-08-21 18:05:16
+@FilePath     : /xnote/handlers/common/script/load_vue.html
+@Description  : 加载vue
+ #} -->
+{% init is_vue_loaded = False %}
+
+{% if not is_vue_loaded %}
+    <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
+    {% set-global is_vue_loaded = True %}
+{% end %}
