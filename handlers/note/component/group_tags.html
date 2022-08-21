@@ -3,7 +3,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 18:22:02
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-20 21:28:23
+@LastEditTime : 2022-08-21 23:38:43
 @FilePath     : /xnote/handlers/note/component/group_tags.html
 @Description  : 描述
  #} -->
@@ -12,18 +12,8 @@
         <span>标签</span>
         <a class="tag lightgray large {%if len(q_tags)==0 %}active{%end%}" href="?">全部</a>
         {% for tag in tag_meta_list %}
-            <a class="tag lightgray large meta {% if tag.tag_name in q_tags%}active{%end%}">{{tag.tag_name}}</a>
+            <a class="tag lightgray large meta {% if tag.tag_name in q_tags%}active{%end%}" 
+                href="/note/group?tag_name={{quote(tag.tag_name)}}">{{tag.tag_name}}</a>
         {% end %}
     </div>
 </div>
-
-<script>
-$("body").on("click", ".tag", function(e) {
-    $(this).toggleClass("active");
-    if ($(this).hasClass("meta")) {
-        // 筛选模式下用单选更好
-        var filterTags = [$(this).text()];
-        location.href = xnote.addUrlParam(location.href, "tags", JSON.stringify(filterTags));
-    }
-});
-</script>

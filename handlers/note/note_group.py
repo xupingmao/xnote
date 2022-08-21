@@ -267,8 +267,10 @@ class GroupListHandler:
         orderby = xutils.get_argument("orderby", orderby_default)
         user_name = xauth.current_name()
         show_back = xutils.get_argument("show_back", type=bool)
-        q_tags_str = xutils.get_argument("tags", "[]")
-        q_tags = json.loads(q_tags_str)
+        q_tag_name = xutils.get_argument("tag_name", "")
+        q_tags = []
+        if q_tag_name != "":
+            q_tags = [q_tag_name]
 
         xmanager.add_visit_log(user_name, "/note/group")
 
