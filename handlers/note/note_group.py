@@ -296,7 +296,7 @@ class GroupListHandler:
         kw.archived_count = NOTE_DAO.count_group(user_name, status="archived")
         kw.active_count = NOTE_DAO.count_group(user_name, status="active")
         kw.smart_count = SmartGroupService.count_smart_group()
-        kw.tag_meta_list = dao_tag.list_tag_meta(user_name, tag_type = "book")
+        kw.tag_meta_list = dao_tag.list_tag_meta(user_name, tag_type = "group")
 
         self.handle_badge_info(notes, tab=tab)
         self.sort_notes(notes, kw)

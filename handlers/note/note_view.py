@@ -20,6 +20,7 @@ from xutils import textutil
 from xutils import webutil
 from xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
+from . import dao_tag
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
@@ -127,6 +128,7 @@ def view_group_detail_func(file, kw):
     pagesize  = 1000
 
     dialog = xutils.get_argument("dialog", "false")
+    q_tag = xutils.get_argument("tag", "")
 
     if kw.op == "edit":
         # 编辑笔记本的简介
@@ -137,9 +139,13 @@ def view_group_detail_func(file, kw):
     if orderby == None or orderby == "":
         orderby = file.orderby
 
+    q_tags = None
+    if q_tag != "":
+        q_tags = [q_tag]
+    
     offset = max(page-1, 0) * pagesize
     files  = NOTE_DAO.list_by_parent(file.creator, file.id, 
-        offset, pagesize, orderby)
+        offset, pagesize, orderby, tags = q_tags)
 
     for child in files:
         if child.type == "group":
@@ -155,6 +161,8 @@ def view_group_detail_func(file, kw):
     kw.show_parent_link = False
     kw.page_max        = math.ceil(amount/pagesize)
     kw.parent_id  = file.id
+    kw.q_tag = q_tag
+    kw.tag_meta_list = dao_tag.list_tag_meta(user_name = user_name, book_id = file.id, tag_type = "note")
 
     if dialog == "true":
         # 对话框的样式

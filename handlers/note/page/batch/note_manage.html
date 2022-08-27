@@ -128,7 +128,7 @@ var app = new Vue({
             }
 
             var params = {
-                "book_id": xnote.getUrlParam("parent_id"),
+                "group_id": xnote.getUrlParam("parent_id"),
                 "tag_type": "note",
             };
             $.get("/note/tag/list", params, function (resp) {
@@ -159,7 +159,7 @@ var app = new Vue({
                 var createParams = {
                     tag_type: "note",
                     tag_name: newTag,
-                    book_id: "{{parent_id}}",
+                    group_id: "{{parent_id}}",
                 };
                 $.post("/note/tag/create", createParams, function (resp) {
                     if (resp.code == "success") {
@@ -182,7 +182,7 @@ var app = new Vue({
                         deleteTagIds.push(item._id);
                     }
                     var deleteParams = {
-                        tag_type: "book",
+                        tag_type: "group",
                         tag_ids: JSON.stringify(deleteTagIds),
                     };
                 }

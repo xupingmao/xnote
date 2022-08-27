@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-21 23:13:22
+@LastEditTime : 2022-08-27 19:56:48
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -25,22 +25,22 @@ def get_tags(creator, note_id):
     return None
 
 
-def get_tag_meta_by_name(user_name, tag_name, tag_type = "book", book_id = None):
-    result = list_tag_meta(user_name, limit = 1, tag_type = tag_type, book_id=book_id, tag_name=tag_name)
+def get_tag_meta_by_name(user_name, tag_name, tag_type = "group", group_id = None):
+    result = list_tag_meta(user_name, limit = 1, tag_type = tag_type, group_id=group_id, tag_name=tag_name)
     if len(result) > 0:
         return result[0]
     return None
 
-def list_tag_meta(user_name, *, limit = 1000, tag_type="book", tag_name=None, book_id = None):
+def list_tag_meta(user_name, *, limit = 1000, tag_type="group", tag_name=None, group_id = None):
     if tag_type == "note":
-        assert book_id != None, "book_id不能为空"
+        assert group_id != None, "group_id不能为空"
         
     def list_tag_meta_func(key, value):
         if not value.tag_type == tag_type:
             return False
         if tag_name != None and value.tag_name != tag_name:
             return False
-        if book_id != None and value.book_id != book_id:
+        if group_id != None and value.group_id != group_id:
             return False
         return True
     return tag_meta_db.list(limit = limit, filter_func = list_tag_meta_func, user_name = user_name)

@@ -157,7 +157,7 @@
     function refreshTagTop() {
         var filterTags = JSON.parse(xnote.getUrlParam("tags", "[]"));
 
-        $.get("/note/tag/list?tag_type=book", function (resp) {
+        $.get("/note/tag/list?tag_type=group", function (resp) {
             console.log("resp", resp);
             if (resp.code != "success") {
                 xnote.alert(resp.message);
@@ -219,7 +219,7 @@
             selectedNames: selectedNameList
         });
 
-        var book_id = $(e.target).attr("data-id");
+        var group_id = $(e.target).attr("data-id");
 
         console.log("bind-tag-dialog", html);
 
@@ -231,8 +231,8 @@
             });
 
             var bindParams = {
-                tag_type:"book",
-                book_id:book_id,
+                tag_type:"group",
+                group_id:group_id,
                 tag_names: JSON.stringify(selectedNames),
             };
 
@@ -250,7 +250,7 @@
     $("body").on("click", ".create-tag-btn", function (e) {
         xnote.prompt("创建新标签", "", function (text) {
             var params = {
-                tag_type: "book",
+                tag_type: "group",
                 tag_name: text
             };
             $.post("/note/tag/create", params, function (resp) {
@@ -278,7 +278,7 @@
             });
 
             var deleteParams = {
-                tag_type: "book",
+                tag_type: "group",
                 tag_ids: JSON.stringify(tagIds),
             };
             $.post("/note/tag/delete", deleteParams, function (resp) {

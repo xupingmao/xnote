@@ -1,0 +1,19 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-08-27 19:31:01
+@LastEditors  : xupingmao
+@LastEditTime : 2022-08-27 19:40:36
+@FilePath     : /xnote/handlers/note/component/filter/note_tag_filter.html
+@Description  : 描述
+ #} -->
+<div class="card btn-line-height">
+    <div class="row">
+        <span>标签</span>
+        <a class="tag lightgray large {%if q_tag=='' %}active{%end%}" href="?">全部</a>
+        {% for tag in tag_meta_list %}
+            <a class="tag lightgray large meta {% if tag.tag_name == q_tag %}active{%end%}" 
+                href="/note/{{note_id}}?tag={{quote(tag.tag_name)}}">{{tag.tag_name}}</a>
+        {% end %}
+    </div>
+</div>

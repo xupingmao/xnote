@@ -163,7 +163,7 @@ class CreateHandler:
         note.priority  = 0
         note.version   = 0
         note.is_deleted = 0
-        note.tags       = textutil.split_words(tags)
+        note.tags       = tags.split()
 
         if note.parent_id == "-1":
             note.archived = True
