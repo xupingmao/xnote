@@ -1,8 +1,13 @@
 # -*- coding:utf-8 -*-
-# @author xupingmao
-# @since 2021/11/29 22:48:26
-# @modified 2022/02/27 16:36:45
-# @filename system_sync_client.py
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2021/11/29 22:48:26
+@LastEditors  : xupingmao
+@LastEditTime : 2022-08-27 08:04:19
+@FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
+@Description  : 网络代理
+"""
 
 import os
 import time
@@ -185,6 +190,7 @@ class HttpClient:
             self.download_file(Storage(**item))
 
     def retry_failed(self):
+        """TODO 这个应该是调度层的"""
         for item in self.get_failed_table().iter(limit = -1):
             now = time.time()
             if item.last_try_time is not None and (now - item.last_try_time) > RETRY_INTERVAL:
@@ -193,3 +199,27 @@ class HttpClient:
             logging.debug("正在重试:%s", item)
             self.download_file(item)
 
+
+    def list_binlog(self, last_seq):
+        assert isinstance(last_seq, int)
+        params = dict(last_seq=str(last_seq))
+
+        leader_host = self.host
+        leader_token = self.token
+        url = "{host}/system/sync/leader?p=list_binlog&token={token}".format(
+            host=leader_host, token=leader_token)
+        
+        result = netutil.http_get(url, params=params)
+        try:
+            result_obj = textutil.parse_json(result)
+            return result_obj
+        except:
+            logging.error("解析json失败:%s", result)
+            raise Exception("解析JSON失败")
+    
+    def list_db(self, last_key):
+        leader_token = self.token
+        leader_host = self.host
+        params = dict(last_key=last_key, token=leader_token)
+        url = "{host}/system/sync/leader?p=list_db".format(host=leader_host)
+        return netutil.http_get(url, params=params)

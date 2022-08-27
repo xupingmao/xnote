@@ -18,12 +18,17 @@ class LdbHashTable:
     def __init__(self, table_name, user_name = None, key_name = "_key"):
         check_table_name(table_name)
 
+        table_info = get_table_info(table_name) # type: TableInfo
         self.table_name = table_name
         self.key_name = key_name
 
         self.prefix = table_name
         if user_name != None and user_name != "":
             self.prefix += ":" + user_name
+        
+        if table_info.check_user:
+            assert user_name != None
+            assert user_name != ""
 
         if self.prefix[-1] != ":":
             self.prefix += ":"

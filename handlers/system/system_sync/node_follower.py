@@ -13,13 +13,12 @@ import xconfig
 from xutils import Storage
 from xutils import textutil
 from xutils import dbutil
-from xutils import netutil
 import xutils
 from xutils.db.binlog import BinLog
 from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .node_base import CONFIG
-from .system_sync_client import HttpClient
+from .system_sync_proxy import HttpClient
 
 
 def filter_result(result, offset):
@@ -33,7 +32,6 @@ def filter_result(result, offset):
 
     result.data = data
     return result
-
 
 class Follower(NodeManagerBase):
 
@@ -78,7 +76,10 @@ class Follower(NodeManagerBase):
     def ping_leader(self):
         if self.is_token_active():
             return self.ping_result
+        
+        return self.do_ping_leader()
 
+    def do_ping_leader(self):
         port = self.get_current_port()
 
         fs_sync_offset = CONFIG.get("fs_sync_offset", "")
@@ -222,34 +223,6 @@ class Follower(NodeManagerBase):
         for key, value in db.iter(limit=-1):
             db.delete(key)
 
-    def _sync_db_by_binlog(self, leader_host, leader_token, last_seq):
-        assert isinstance(last_seq, int)
-        params = dict(last_seq=str(last_seq))
-        url = "{host}/system/sync/leader?p=list_binlog&token={token}".format(
-            host=leader_host, token=leader_token)
-        result = netutil.http_get(url, params=params)
-        try:
-            result_obj = textutil.parse_json(result)
-        except:
-            logging.error("解析json失败:%s", result)
-            return
-        message = self.db_syncer.sync_by_binlog(result_obj)
-        assert message in ("sync_by_full", None)
-        if message == "sync_by_full":
-            self._sync_db_full(leader_host, leader_token, "")
-
-    def _sync_db_full(self, leader_host, leader_token, last_key):
-        params = dict(last_key=last_key, token=leader_token)
-        url = "{host}/system/sync/leader?p=list_db".format(host=leader_host)
-        result = netutil.http_get(url, params=params)
-
-        if self._debug:
-            print("\n\n_sync_db_full -------------\nresp:%s\n\n" % result)
-
-        result_obj = textutil.parse_json(result)
-
-        self.db_syncer.sync_by_full(result_obj, last_key)
-
     def sync_db_from_leader(self):
         leader_host = self.get_leader_url()
         if leader_host == None:
@@ -264,14 +237,8 @@ class Follower(NodeManagerBase):
         if leader_token == "":
             logging.debug("leader_token为空")
             return
-
-        sync_state = self.db_syncer.get_db_sync_state()
-        if sync_state == "binlog":
-            last_seq = self.db_syncer.get_binlog_last_seq()
-            self._sync_db_by_binlog(leader_host, leader_token, last_seq)
-        else:
-            last_key = self.db_syncer.get_db_last_key()
-            self._sync_db_full(leader_host, leader_token, last_key)
+        
+        self.db_syncer.sync_db(self.get_client())
     
     def is_at_full_sync(self):
         return self.db_syncer.get_db_sync_state() == "full"
@@ -279,8 +246,11 @@ class Follower(NodeManagerBase):
 
 class DBSyncer:
 
-    def __init__(self):
+    MAX_LOOPS = 1000 # 最大循环次数
+
+    def __init__(self, debug = True):
         self._binlog = BinLog.get_instance()
+        self.debug = debug
     
     def get_table_by_key(self, key):
         table_name = key.split(":")[0]
@@ -342,20 +312,61 @@ class DBSyncer:
             batch.delete(key)
             self._binlog.add_log("delete", key, None, batch = batch)
             batch.commit()
-
-    def sync_by_binlog(self, result_obj):
-        code = result_obj.get("code")
-
-        if code == "success":
-            self.handle_binlog(result_obj)
-        elif code == "sync_broken":
-            logging.error("同步binlog异常, 重新全量同步...")
-            self.put_binlog_last_seq(0)
-            self.put_db_sync_state("full")
-            self.put_db_last_key("")
-            return "sync_by_full"
+    
+    def sync_db(self, proxy): # type: (HttpClient) -> any
+        sync_state = self.get_db_sync_state()
+        if sync_state == "binlog":
+            message = self.sync_by_binlog(proxy)
+            assert message in ("sync_by_full", None)
+            if message == "sync_by_full":
+                self._sync_db_full(proxy, "")
         else:
-            raise Exception("未知的code:%s" % code)
+            last_key = self.get_db_last_key()
+            self._sync_db_full(proxy, last_key)
+
+    def _sync_db_full(self, proxy, last_key):
+        # type: (HttpClient, str) -> None
+        result = proxy.list_db(last_key)
+
+        if self.debug:
+            print("\n\n_sync_db_full -------------\nresp:%s\n\n" % result)
+
+        result_obj = textutil.parse_json(result)
+
+        self.sync_by_full(result_obj, last_key)
+
+    def sync_by_binlog(self, proxy): # type: (HttpClient) -> any
+        has_next = True
+        loops = 0
+        last_seq = ""
+
+        while has_next:
+            loops += 1
+            if loops > self.MAX_LOOPS:
+                logging.error("too deep loops, last_seq=%s", last_seq)
+                raise Exception("too deep loops")
+
+            last_seq = self.get_binlog_last_seq()
+            result_obj = proxy.list_binlog(last_seq)
+            if self.debug:
+                print("list binlog result=%s" % result_obj)
+
+            code = result_obj.get("code")
+            data_list = result_obj.get("data")
+
+            if code == "success":
+                self.handle_binlog(result_obj)
+                has_next = len(data_list) > 1 # 请求的时候以最后一条记录开始的
+            elif code == "sync_broken":
+                logging.error("同步binlog异常, 重新全量同步...")
+                self.put_binlog_last_seq(0)
+                self.put_db_sync_state("full")
+                self.put_db_last_key("")
+                return "sync_by_full"
+            else:
+                raise Exception("未知的code:%s" % code)
+        
+        return None
 
 
     def handle_binlog(self, result_obj):

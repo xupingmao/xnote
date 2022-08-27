@@ -4,13 +4,15 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-02 11:16:24
+@LastEditTime : 2022-08-27 19:06:02
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
 
 from .a import *
 import os
+from urllib.parse import urlparse, parse_qs, unquote
+
 import xauth
 from xutils import dbutil, fsutil
 from xutils import textutil
@@ -18,19 +20,23 @@ from xutils import netutil
 import xconfig
 
 from . import test_base
+from handlers.system.system_sync.node_follower import DBSyncer
 
 app = test_base.init()
 json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
-_config_db = dbutil.get_table("cluster_config", type="hash")
+_config_db = dbutil.get_hash_table("cluster_config")
 
 
 class LeaderNetMock:
 
     def http_get(self, url, charset=None, params=None):
         print("url:{url}, params:{params}".format(**locals()))
+
+        if params != None:
+            url = netutil._join_url_and_params(url, params)
 
         if "get_stat" in url:
             return self.http_get_stat()
@@ -52,8 +58,6 @@ class LeaderNetMock:
         return textutil.tojson(result)
 
     def http_list_db(self, url):
-        from urllib.parse import urlparse, parse_qs, unquote
-
         result = urlparse(url)
         params = parse_qs(result.query)
         last_key = params.get("last_key")
@@ -85,6 +89,27 @@ class LeaderNetMock:
         return textutil.tojson(result)
 
     def http_list_binlog(self, url):
+        result = urlparse(url)
+        params = parse_qs(result.query)
+        last_seq = params.get("last_seq")[0]
+
+        print("[NetMock] last_seq=%s" % last_seq)
+
+        if last_seq == "2346":
+            return """
+            {
+                "code": "success",
+                "data": [
+                    {
+                        "optype": "put",
+                        "seq": 2346,
+                        "key": "my_table:1",
+                        "value": {"name":"Ada", "age":20}
+                    }
+                ]
+            }
+            """
+
         return """
         {
             "code": "success",
@@ -139,6 +164,7 @@ class TestSystemSync(BaseTestCase):
 
     def test_system_sync_db_from_leader(self):
         netutil.set_net_mock(LeaderNetMock())
+        DBSyncer.MAX_LOOPS = 5
 
         try:
             from handlers.system.system_sync.system_sync_controller import FOLLOWER
@@ -147,19 +173,20 @@ class TestSystemSync(BaseTestCase):
             _config_db.put("leader.host", "http://127.0.0.1:3333")
 
             FOLLOWER._debug = True
-
+            db_syncer = FOLLOWER.db_syncer
+            db_syncer.debug = True
+            db_syncer.put_db_sync_state("full")
+            
+            # 全量同步
+            FOLLOWER.sync_db_from_leader()
             FOLLOWER.sync_db_from_leader()
 
-            db_syncer = FOLLOWER.db_syncer
-
             self.assertEqual(db_syncer.get_binlog_last_seq(), 1234)
+            self.assertEqual(db_syncer.get_db_sync_state(), "binlog")
 
+            # 通过binlog同步
             FOLLOWER.sync_db_from_leader()
             self.assertEqual(db_syncer.get_db_sync_state(), "binlog")
-            self.assertEqual(db_syncer.get_binlog_last_seq(), 1234)
-
-            # 同步binlog
-            FOLLOWER.sync_db_from_leader()
             self.assertEqual(db_syncer.get_binlog_last_seq(), 2346)
         finally:
             netutil.set_net_mock(None)
@@ -172,15 +199,14 @@ class TestSystemSync(BaseTestCase):
         _config_db.put("leader.token", admin_token)
         _config_db.put("leader.host", "http://127.0.0.1:3333")
 
+        class MockedClient:
+            def list_binlog(self, last_seq):
+                return dict(code="sync_broken")
+
         FOLLOWER._debug = True
         FOLLOWER.db_syncer.put_db_sync_state("binlog")
-        result = """
-        {
-            "code": "sync_broken"
-        }
-        """
-        result_obj = textutil.parse_json(result)
-        FOLLOWER.db_syncer.sync_by_binlog(result_obj)
+        result = FOLLOWER.db_syncer.sync_by_binlog(MockedClient())
+        self.assertEqual(result, "sync_by_full")
     
     def test_is_token_active(self):
         from handlers.system.system_sync.system_sync_controller import FOLLOWER

@@ -47,7 +47,8 @@
 <div class="list-item">
     <span>binlog位点</span>
     <div class="float-right">
-        <span>{{follower_binlog_seq}}/{{leader_binlog_seq}}</span>
+        <span>{{follower_binlog_seq}}->{{leader_binlog_seq}}</span>
+        <span>(落后{{leader_binlog_seq-follower_binlog_seq}})</span>
     </div>
 </div>
 
