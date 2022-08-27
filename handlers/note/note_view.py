@@ -162,7 +162,7 @@ def view_group_detail_func(file, kw):
     kw.page_max        = math.ceil(amount/pagesize)
     kw.parent_id  = file.id
     kw.q_tag = q_tag
-    kw.tag_meta_list = dao_tag.list_tag_meta(user_name = user_name, book_id = file.id, tag_type = "note")
+    kw.tag_meta_list = dao_tag.list_tag_meta(user_name = user_name, group_id = file.id, tag_type = "note")
 
     if dialog == "true":
         # 对话框的样式

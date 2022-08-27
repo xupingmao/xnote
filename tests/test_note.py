@@ -266,7 +266,7 @@ class TestMain(BaseTestCase):
     def test_note_tag_meta_create(self):
         tag_meta_dao = xutils.DAO("note_tag_meta")
         create_params = dict(
-            tag_type = "book",
+            tag_type = "group",
             tag_name = "测试"
         )
         result = json_request("/note/tag/create", method="POST", data = create_params)
@@ -275,7 +275,7 @@ class TestMain(BaseTestCase):
         meta_info = tag_meta_dao.get_by_name(xauth.current_name(), "测试")
         self.assertIsNotNone(meta_info)
         self.assertEqual("测试", meta_info.tag_name)
-        self.assertEqual("book", meta_info.tag_type)
+        self.assertEqual("group", meta_info.tag_type)
 
     def test_note_stick(self):
         json_request("/note/remove?name=xnote-share-test")
