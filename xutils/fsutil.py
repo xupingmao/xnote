@@ -793,6 +793,8 @@ def backupfile(path, backup_dir=None, rename=False):
 def get_free_space(folder):
     """返回文件夹的可用空间
     参考来源: https://www.jb51.net/article/115604.htm
+
+    Python3.3 shutil模块新增了 disk_usage 方法，可以直接使用
     """
     if platform.system() == 'Windows':
         free_bytes = ctypes.c_ulonglong(0)
