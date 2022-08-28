@@ -48,7 +48,7 @@ class TestMain(BaseTestCase):
         self.check_OK("/code/preview?path=./README.md")
 
     def test_build_fs_index(self):
-        size = build_fs_index(xconfig.DATA_DIR)
+        size = build_fs_index(xconfig.DATA_DIR, sync=True)
         self.assertTrue(size > 0)
     
     def test_fs_index_manage_page(self):

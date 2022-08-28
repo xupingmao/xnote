@@ -2,12 +2,11 @@
 # Created by xupingmao on 2017/06/14
 # @modified 2021/04/24 21:33:47
 import os
-import six
 import xconfig
 import xutils
 import xauth
 import xmanager
-from xutils import SearchResult, u, textutil
+from xutils import SearchResult, textutil
 
 def search_scripts(name):
     words   = textutil.split_words(name)

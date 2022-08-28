@@ -346,6 +346,10 @@ class TableInfo:
     
     def get_index_names(self):
         return IndexInfo.get_table_index_names(self.name)
+    
+    def register_index(self, index_name, comment = None):
+        register_table_index(self.name, index_name, comment)
+        return self
 
 class IndexInfo:
 
@@ -388,13 +392,13 @@ def register_table(table_name,
                    description,
                    category="default",
                    check_user=False,
-                   user_attr=None):
+                   user_attr=None): # type: (...)->TableInfo
     # TODO 考虑过这个方法直接返回一个 LdbTable 实例
     # LdbTable可能针对同一个`table`会有不同的实例
     if not re.match(r"^[0-9a-z_]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
-    _register_table_inner(table_name, description,
+    return _register_table_inner(table_name, description,
                           category, check_user, user_attr)
 
 
@@ -406,15 +410,18 @@ def _register_table_inner(table_name,
     if not re.match(r"^[0-9a-z_\$]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
-    if TableInfo.is_registered(table_name):
-        # 已经注册了
-        return
+    old_table = TableInfo.get_by_name(table_name)
+    if old_table != None:
+        # 已经注册
+        return old_table
 
     info = TableInfo.register(table_name, description, category)
     info.check_user = check_user
     info.user_attr = user_attr
     if user_attr != None:
         info.check_user = True
+    
+    return info
 
 
 def register_table_index(table_name, index_name, comment=None, index_type="ref"):

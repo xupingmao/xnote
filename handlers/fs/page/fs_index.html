@@ -25,6 +25,7 @@ p {
     </div>
 </div>
 
+<div class="vueApp">
 <div class="card">
     <p>索引数量: {{index_size}}</p>
 
@@ -33,18 +34,16 @@ p {
     {% end %}
     
     <div class="row">
-        <form method="POST">
-            <input type="hidden" name="action" value="reindex">
-            {% if path != "" %}
-            <div class="row">
-                <label>文件路径</label>
-                <input type="path" name="path" value="{{path}}">
-            </div>
-            {% end %}
-            <div class="row">
-                <button>重建索引</button>
-            </div>
-        </form>
+        <input type="hidden" name="action" value="reindex">
+        {% if path != "" %}
+        <div class="row">
+            <label>文件路径</label>
+            <input type="path" name="path" value="{{path}}">
+        </div>
+        {% end %}
+        <div class="row">
+            <button class="rebuild-index-btn">重建索引</button>
+        </div>
     </div>
 </div>
 
@@ -62,21 +61,45 @@ p {
 </div>
 {% end %}
 
+</div>
+
 <script type="text/javascript">
-    $(function () {
-        $("body").on("click", ".update-index-dirs", function (e) {
-            var index_config = $("[name=index_config]").val();
-            var params = {"index_config": index_config};
-            $.post("?action=config", params, function (e) {
-                xnote.toast("更新成功");
-                setTimeout(function () {
-                    window.location.reload();                    
-                }, 500);
-            }).fail(function (e) {
-                console.error("更新失败", e);
-                xnote.alert("更新失败");
-            });
+
+$(".rebuild-index-btn").click(function () {
+    var rebuildParams = {
+        action: "reindex",
+        path: xnote.getUrlParam("path"),
+        is_ajax: true
+    };
+    $.post("/fs_index", rebuildParams, function (resp) {
+        if (resp.code == "success") {
+            xnote.toast("重建中...");
+        } else {
+            xnote.alert(resp.message);
+        }
+    }).fail(function (err) {
+        xnote.alert("重建失败，请稍后重试");
+    });
+});
+
+$(function () {
+    $("body").on("click", ".update-index-dirs", function (e) {
+        var index_config = $("[name=index_config]").val();
+        var params = {"index_config": index_config};
+        $.post("?action=config", params, function (e) {
+            xnote.toast("更新成功");
+            setTimeout(function () {
+                window.location.reload();                    
+            }, 500);
+        }).fail(function (e) {
+            console.error("更新失败", e);
+            xnote.alert("更新失败");
         });
     });
+
+    $(".rebuild-index-btn").click(function (e) {
+
+    });
+});
 </script>
 {% end %}

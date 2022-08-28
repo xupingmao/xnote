@@ -87,16 +87,16 @@ class SimpleLogger:
     def __init__(self, metric):
         self.metric = metric
 
-    def trace(message, cost=0):
+    def trace(self, message, cost=0):
         trace(self.metric, message, cost)
 
-    def info(message, cost=0):
+    def info(self, message, cost=0):
         info(self.metric, message, cost)
 
-    def warn(message, cost=0):
+    def warn(self, message, cost=0):
         warn(self.metric, message, cost)
 
-    def error(message, cost=0):
+    def error(self, message, cost=0):
         error(self.metric, message, cost)
 
 def get_logger(name):

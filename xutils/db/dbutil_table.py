@@ -196,7 +196,7 @@ class LdbTable:
         if user_name is None:
             return self.table_name + ":"
         else:
-            return self.table_name + ":" + user_name + ":"
+            return self.table_name + ":" + encode_str(user_name) + ":"
 
     def _get_index_prefix(self, index_name, user_name=None):
         self._check_index_name(index_name)
@@ -553,11 +553,7 @@ class LdbTable:
         return None
 
     def count(self, filter_func=None, user_name=None, id_prefix=None):
-        if filter_func is None:
-            prefix = self._get_prefix(user_name=user_name)
-        else:
-            prefix = self._get_prefix(user_name=user_name)
-
+        prefix = self._get_prefix(user_name=user_name)
         if id_prefix != None:
             prefix += encode_str(id_prefix)
 

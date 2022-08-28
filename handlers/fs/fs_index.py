@@ -9,6 +9,7 @@
 import logging
 import os
 import time
+import threading
 
 import xauth
 import xtemplate
@@ -19,56 +20,88 @@ from xutils import Storage
 
 from .fs_helpers import get_index_dirs, get_index_db
 
-def calc_dir_size(db, dirname, depth=1000):
-    dirname = os.path.abspath(dirname)
-    size = 0
-    try:
-        for fname in os.listdir(dirname):
-            fpath = os.path.join(dirname, fname)
-            size += calc_size(db, fpath, depth-1)
-    except:
-        # 无法读取目录
-        xutils.print_exc()
+class IndexBuilder:
 
-    info = Storage(fsize = size)
-    db.update_by_id(dirname, info)
-    return size
+    _lock = threading.RLock()
+    _is_building = False
+
+    def calc_dir_size(self, db, dirname, depth=1000):
+        dirname = os.path.abspath(dirname)
+        size = 0
+        try:
+            for fname in os.listdir(dirname):
+                fpath = os.path.join(dirname, fname)
+                size += self.calc_size(db, fpath, depth-1)
+        except:
+            # 无法读取目录
+            xutils.print_exc()
+
+        info = Storage(fsize = size, fpath = fpath)
+        db.update_by_id(dirname, info)
+        return size
 
 
-def calc_size(db, fpath, depth=1000):
-    if depth <= 0:
-        logging.error("too deep depth")
-        return 0
+    def calc_size(self, db, fpath, depth=1000): # type: (any, str, int) -> int
+        if depth <= 0:
+            logging.error("too deep depth")
+            return 0
+        
+        if os.path.islink(fpath):
+            # 软链接会导致循环引用,即使用真实的路径也不能解决这个问题
+            return 0
+
+        fpath = os.path.realpath(fpath)
+        print("fs_index path: %s" % fpath)    
+
+        if os.path.isdir(fpath):
+            return self.calc_dir_size(db, fpath, depth-1)
+        try:
+            st = os.stat(fpath)
+            info = Storage(fsize = st.st_size, fpath = fpath)
+            if xutils.is_text_file(fpath):
+                info.ftype = "text"
+            elif xutils.is_img_file(fpath):
+                info.ftype = "img"
+            db.update_by_id(fpath, info)
+            return st.st_size
+        except:
+            xutils.print_exc()
+            info = Storage(fsize = -1, fpath = fpath)
+            db.update_by_id(fpath, info)
+            return 0
+
+    @classmethod
+    def build_fs_index(cls, dirname, sync=False):
+        with cls._lock:
+            if cls._is_building:
+                raise Exception("正在构建索引，请稍后重试")
+            
+            if sync:
+                return cls.do_build_index(dirname)
+            else:
+                return cls.build_fs_index_async(dirname)
+
+    @classmethod
+    @xutils.async_func_deco()
+    def build_fs_index_async(cls, dirname):
+        return cls.do_build_index(dirname)
     
-    if os.path.islink(fpath):
-        # 软链接会导致循环引用,即使用真实的路径也不能解决这个问题
-        return 0
+    @classmethod
+    def do_build_index(cls, dirname):
+        cls._is_building = True
+        try:
+            builder = IndexBuilder()
+            db = get_index_db()
+            size = builder.calc_size(db, dirname)
+            logging.info("Total size:%s", size)
+            return size
+        finally:
+            cls._is_building = False
+        
 
-    fpath = os.path.realpath(fpath)
-    print("fs_index path: %s" % fpath)    
+def build_fs_index(dirname, sync=False):
+    return IndexBuilder.build_fs_index(dirname, sync)
 
-    if os.path.isdir(fpath):
-        return calc_dir_size(db, fpath, depth-1)
-    try:
-        st = os.stat(fpath)
-        info = Storage(fsize = st.st_size)
-        if xutils.is_text_file(fpath):
-            info.ftype = "text"
-        elif xutils.is_img_file(fpath):
-            info.ftype = "img"
-        db.update_by_id(fpath, info)
-        return st.st_size
-    except:
-        xutils.print_exc()
-        info = Storage(fsize = -1)
-        db.update_by_id(fpath, info)
-        return 0
-
-def build_fs_index(dirname):
-    db = get_index_db()
-    size = calc_size(db, dirname)
-    logging.info("Total size:%s", size)
-    return size
 
 def update_file_index():
     # 创建新的索引
@@ -99,24 +132,44 @@ class IndexHandler:
 
     @xauth.login_required("admin")
     def POST(self):
+        is_ajax = xutils.get_argument("is_ajax", False)
         tpl = "fs/page/fs_index.html"
         index_dirs = get_index_dirs()
         cost = 0
 
         action = xutils.get_argument("action")
         path = self.get_arg_path()
-        if action == "reindex":
-            cost = self.do_rebuild_index()
+        err = ""
 
-        if action == "config":
-            return self.do_config()
-        
-        index_size = get_index_db().count(id_prefix = path)
+        try:
+            if action == "reindex":
+                cost = self.do_rebuild_index()
+
+            if action == "config":
+                return self.do_config()
+            
+            index_size = get_index_db().count(id_prefix = path)
+        except Exception as e:
+            xutils.print_exc()
+            err = str(e)
+
+        if is_ajax:
+            if err != "":
+                return dict(code="500", message=err)
+            return dict(code="success", data = index_size)
+
         return xtemplate.render(tpl, 
             index_dirs = index_dirs,
             index_size = index_size,
             action = action, 
             cost = cost)
+    
+    def create_kw(self):
+        kw = Storage()
+        embed = xutils.get_argument("embed", "")
+        if embed == "true":
+            kw.show_nav = False
+        return kw
     
     def get_arg_path(self):
         path = xutils.get_argument("path", "")
@@ -146,7 +199,7 @@ class IndexHandler:
         path = self.get_arg_path()
         db = get_index_db()
 
-        kw = Storage()
+        kw = self.create_kw()
         kw.path = path
         kw.show_index_dirs = False
         kw.index_size = db.count(id_prefix = path)

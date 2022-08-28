@@ -17,13 +17,12 @@ from xutils import dbutil
 from xutils import FileItem
 from xutils import format_size
 from xutils import fsutil
+from xutils.dbutil import LdbTable
 
-dbutil.register_table("fs_index", "文件索引")
-dbutil.register_table_index("fs_index", "ftype")
 _index_db = dbutil.get_table("fs_index")
 _index_db.set_binlog_enabled(False)
 
-def get_index_db():
+def get_index_db(): # type: ()-> LdbTable
     return _index_db
 
 def file_post_handler(item):

@@ -32,6 +32,16 @@ def _get_default_by_type(default_value, type):
         return False
     return None
 
+def _detect_type(default_value, type):
+    """根据默认值+类型检测类型"""
+    if type != None:
+        return type
+    
+    if isinstance(default_value, bool):
+        return bool
+    
+    return None
+
 def get_argument(key, default_value=None, type = None, strip=False):
     """获取请求参数
     @param {string} key 请求的参数名
@@ -49,10 +59,15 @@ def get_argument(key, default_value=None, type = None, strip=False):
         _input = web.input()
         web.ctx[ctx_key] = _input
     value = _input.get(key)
+
     if value is None or value == "":
         default_value = _get_default_by_type(default_value, type)
         _input[key] = default_value
         return default_value
+    
+    # 检测参数类型
+    type = _detect_type(default_value, type)
+
     if type == bool:
         # bool函数对非空字符串都默认返回true，需要处理一下
         value = value.lower() in ("true", "yes", "y", "on")
@@ -60,8 +75,10 @@ def get_argument(key, default_value=None, type = None, strip=False):
     elif type != None:
         value = type(value)
         _input[key] = value
+    
     if strip and isinstance(value, str):
         value = value.strip()
+    
     return value
 
 def get_client_user_agent():

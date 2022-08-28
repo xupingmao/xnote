@@ -294,6 +294,10 @@ $(function () {
         });
     });
 
+    $(".rebuild-index-option").click(function (e) {
+        xnote.showIframeDialog("重建索引", "/fs_index?p=rebuild&path={{xutils.quote(path)}}&embed=true");
+    });
+
     // do not adjust height in mobile
     if (isPc()) {
         adjustHeight(".file-list", 30);
