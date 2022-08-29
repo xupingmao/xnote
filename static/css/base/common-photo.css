@@ -11,8 +11,8 @@
     top: 0px;
     text-align: left;
     font-size: 14px;
-    padding-right: 5px;
-    padding-left: 5px;
+    /* padding-right: 5px; */
+    /* padding-left: 5px; */
     background-color: rgba(0,0,0,0.8);
     z-index: 1;
     position: fixed;
@@ -24,4 +24,10 @@
 
 .layui-layer-imgbar .clickable {
     cursor: pointer;
+    padding: 5px;
+}
+
+.layui-layer-imgbar .clickable:hover {
+    background-color: #ccc;
+    color: black;
 }
