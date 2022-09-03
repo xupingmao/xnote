@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-18 18:14:25
+@LastEditTime : 2022-09-03 23:59:13
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -84,14 +84,14 @@ class BinLog:
         else:
             db_put(key, log_body)
 
-    def add_log(self, optype, key, value=None, batch=None):
+    def add_log(self, optype, key, value=None, batch=None, old_value=None):
         if not self._is_enabled:
             return
 
         with self._lock:
             self.last_seq += 1
             binlog_id = _format_log_id(self.last_seq)
-            binlog_body = dict(optype=optype, key=key)
+            binlog_body = dict(optype=optype, key=key, old_value=old_value)
             self._put_log(binlog_id, binlog_body, batch=batch)
 
     def list(self, last_seq, limit, map_func=None):
