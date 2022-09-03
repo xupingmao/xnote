@@ -31,6 +31,7 @@ _dest_path = os.path.join(_dirname, "static", _zipname)
 # 删除备份在 cron/diskclean 任务里面
 # 备份的锁
 _backup_lock = threading.RLock()
+_import_logger = logutil.new_mem_logger("import_db", size = 20)
 
 def zip_xnote(nameblacklist = [_zipname]):
     dirname = "./"
@@ -234,14 +235,16 @@ def import_db(db_file):
         else:
             logging.warning("import_db is busy")
             return "import_db is busy"
+    except:
+        exc_info = xutils.print_exc()
+        _import_logger.info(exc_info)
     finally:
         if got_lock:
             _backup_lock.release()
 
 def _import_db(db_file):
     count = 0
-    logger = logutil.new_mem_logger("import_db", size = 20)
-
+    logger = _import_logger
     db = sqlite3.connect(db_file)
     total_count = list(db.execute("SELECT COUNT(1) FROM kv_store"))[0][0]
 
@@ -251,18 +254,23 @@ def _import_db(db_file):
 
     sql = "SELECT key, value FROM kv_store ORDER BY key"
 
-    db_instance = dbutil.get_instance()
     start_time = time.time()
 
+    write_batch = dbutil.create_write_batch()
+
     for key, value in db.execute(sql):
-        db_instance.Put(key, value)
+        write_batch.put_bytes(key, value)
         count += 1
         if count % 100 == 0:
+            write_batch.commit()
+            write_batch = dbutil.create_write_batch()
             cost_time = time.time() - start_time
             progress = count/total_count*100.0
             qps = calc_qps(count, cost_time)
             logger.log("proceed:(%d), progress:(%.2f%%), qps:(%.2f)" % (count, progress, qps))
-        
+
+    write_batch.commit()
+
     logger.log("[done] records:%s", count)
     return "records:%s" % count
 

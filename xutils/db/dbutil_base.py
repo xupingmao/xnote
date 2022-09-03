@@ -53,6 +53,7 @@ import xutils
 from xutils.imports import is_str
 from xutils import dateutil
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_json
+from .driver_interface import DBInterface
 
 try:
     import leveldb
@@ -100,9 +101,13 @@ class DBException(Exception):
 class WriteBatchProxy:
     """批量操作代理，批量操作必须在同步块中执行（必须加锁）"""
 
-    def __init__(self):
+    def __init__(self, db_instance = None):
         self._puts = {}
         self._deletes = set()
+        if db_instance == None:
+            db_instance = get_instance()
+
+        self.db_instance = db_instance # type: DBInterface
 
     def check_and_put(self, key, val):
         old_val = get(key)
@@ -112,6 +117,7 @@ class WriteBatchProxy:
         self.put(key, val)
 
     def put(self, key, val, check_table=True):
+        # type: (str, object, bool) -> None
         """put一个value
         @param {str} key
         @param {object} val
@@ -125,6 +131,7 @@ class WriteBatchProxy:
         self._puts[key_bytes] = val_bytes
 
     def put_bytes(self, key, value):
+        # type: (bytes, bytes) -> None
         assert isinstance(key, bytes), key
         assert isinstance(value, bytes), value
 
@@ -139,13 +146,17 @@ class WriteBatchProxy:
         self.delete(key)
 
     def delete(self, key):
+        # type: (str) -> None
         key_bytes = key.encode("utf-8")
         self._puts.pop(key_bytes, None)
         self._deletes.add(key_bytes)
+    
+    def size(self):
+        return len(self._puts) + len(self._deletes)
 
     def log_debug_info(self):
         # 没有更新直接返回
-        if len(self._puts) + len(self._deletes) == 0:
+        if self.size() == 0:
             return
 
         print_debug_info("----- batch.begin -----")
@@ -158,7 +169,7 @@ class WriteBatchProxy:
 
     def commit(self, sync=False):
         self.log_debug_info()
-        check_get_leveldb().Write(self, sync)
+        self.db_instance.Write(self, sync)
 
     def __enter__(self):
         return self
@@ -524,8 +535,8 @@ def db_delete(key, sync=False):
 def delete(*args, **kw):
     return db_delete(*args, **kw)
 
-def create_write_batch():
-    return WriteBatchProxy()
+def create_write_batch(db_instance = None):
+    return WriteBatchProxy(db_instance=db_instance)
 
 
 def scan(key_from=None,

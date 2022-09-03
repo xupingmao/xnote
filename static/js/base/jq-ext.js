@@ -25,6 +25,9 @@ $.fn.extend({
 
     /* 滚动到底部 */
     "scrollBottom": function() {
+        if (this.length==0) {
+            return;
+        }
         var height = this[0].scrollHeight;
         $(this).scrollTop(height);
     }

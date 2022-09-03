@@ -166,6 +166,13 @@ class TestMain(BaseTestCase):
         # 初始化一个5M的数据库
         db = LmdbKV(db_dir, map_size=1024 * 1024 * 5)
         run_test_db_engine(self, db)
+    
+    def test_dbutil_lmdb_enhanced(self):
+        from xutils.db.driver_lmdb import LmdbEnhancedKV
+        db_dir = os.path.join(xconfig.DB_DIR, "lmdb")
+        # 初始化一个5M的数据库
+        db = LmdbEnhancedKV(db_dir, map_size=1024 * 1024 * 5)
+        run_test_db_engine(self, db)
 
     def test_dbutil_sqlite(self):
         from xutils.db.driver_sqlite import SqliteKV
@@ -290,13 +297,22 @@ class TestMain(BaseTestCase):
         print("-" * 60)
         print("Print Values")
 
-        # 物理视图：一个超长的key + 2个转换后的key
+        # 物理视图：一个超长的key
         data = list(db.kv.RangeIter())
-        self.assertEqual(3, len(data))
+        self.assertEqual(1, len(data))
 
-        # 逻辑视图：两个超长的key + 2个转换后的key
+        # 逻辑视图：两个超长的key
         data2 = list(db.RangeIter())
-        self.assertEqual(4, len(data2))
+        self.assertEqual(2, len(data2))
+
+        large_key = "test:" + textutil.random_string(1003)
+        batch = dbutil.create_write_batch(db_instance=db)
+        batch.put(large_key + "#1", dict(name="test1"))
+        batch.put(large_key + "#2", dict(name = "test2"))
+        batch.commit()
+
+        data3 = list(db.RangeIter())
+        self.assertEqual(3, len(data3))
 
     def test_create_auto_increment_id(self):
         db = dbutil.get_table("test")

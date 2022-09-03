@@ -291,10 +291,10 @@ timeit  = timeit_deco
 profile = profile_deco
 
 
-def get_mem_logger(*args, **kw):
+def get_mem_logger(*args, **kw): # type: (...) -> MemLogger
     return MemLogger.get_logger(*args, **kw)
 
-def new_mem_logger(*args, **kw):
+def new_mem_logger(*args, **kw): # type: (...) -> MemLogger
     return MemLogger.get_logger(*args, **kw)
 
 class MemLogger:

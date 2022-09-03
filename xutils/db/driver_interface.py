@@ -41,8 +41,8 @@ class DBInterface:
             include_value = True, 
             fill_cache = False):
         """返回区间迭代器
-        @param {bytes}  key_from       开始的key（包含）FirstKey
-        @param {bytes}  key_to         结束的key（包含）LastKey
+        @param {bytes}  key_from       开始的key（包含）FirstKey 字节顺序小的key
+        @param {bytes}  key_to         结束的key（包含）LastKey  字节顺序大的key
         @param {bool}   reverse        是否反向查询
         @param {bool}   include_value  是否包含值
         @param {bool}   fill_cache     是否填充缓存

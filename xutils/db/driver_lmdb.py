@@ -24,6 +24,7 @@ class LmdbKV:
         self.config_dict = config_dict
 
     def Get(self, key):
+        # type: (bytes) -> bytes
         """通过key读取Value
         @param {bytes} key
         @return {bytes|None} value
@@ -168,15 +169,8 @@ class LmdbEnhancedKV:
         self.max_key_size = self.kv.env.max_key_size()
 
     def get_large_key_prefix(self, key):
+        # type: (bytes)->bytes
         return key[:self.max_key_size]
-
-    def create_new_key(self, key):
-        for i in range(10):
-            new_key = "_long_key:" + textutil.create_uuid()
-            new_key = new_key.encode("utf-8")
-            if self.kv.Get(new_key) == None:
-                return new_key
-        raise Exception("create_new_key: too many retries!")
 
     def get_value_dict(self, prefix):
         value = self.kv.Get(prefix)
@@ -190,56 +184,55 @@ class LmdbEnhancedKV:
                 result[key.encode("utf-8")] = value.encode("utf-8")
             return result
 
-    def save_value_dict(self, prefix, value_dict):
+    def save_value_dict(self, tx, prefix, value_dict):
         if len(value_dict) == 0:
-            self.kv.Delete(prefix)
+            tx.delete(prefix)
             return
         data = dict()
         for key in value_dict:
             value = value_dict[key]
             data[key.decode("utf-8")] = value.decode("utf-8")
-        self.kv.Put(prefix, convert_object_to_bytes(data))
+        tx.put(prefix, convert_object_to_bytes(data))
 
     def Get(self, key):
         if len(key) >= self.max_key_size:
             prefix = self.get_large_key_prefix(key)
             value_dict = self.get_value_dict(prefix)
-            for fullkey in value_dict:
-                if fullkey == key:
-                    newkey = value_dict[fullkey]
-                    return self.kv.Get(newkey)
+            return value_dict.get(key)
 
         return self.kv.Get(key)
 
     def Put(self, key, value, sync=False):
+        with self.kv.env.begin(write=True) as tx:
+            return self.doPut(tx, key, value, sync)
+
+    def doPut(self, tx, key, value, sync=False): 
+        # type: (any, bytes, bytes, bool) -> any
         if len(key) >= self.max_key_size:
             logging.warning("key长度(%d)超过限制(%d)", len(key), self.max_key_size)
             prefix = self.get_large_key_prefix(key)
             with _lock:
                 value_dict = self.get_value_dict(prefix)
-                new_key = value_dict.get(key)
-                if new_key != None:
-                    self.kv.Put(new_key, value, sync)
-                else:
-                    new_key = self.create_new_key(key)
-                    value_dict[key] = new_key
-                    self.kv.Put(new_key, value, sync)
-                    self.save_value_dict(prefix, value_dict)
-                    return
-        return self.kv.Put(key, value, sync)
+                value_dict[key] = value
+                self.save_value_dict(tx, prefix, value_dict)
+                return
+        return tx.put(key, value)
 
-    def Delete(self, key, sync=False):
+    def doDelete(self, tx, key, sync=False):
+        # type: (any, bytes, bool) -> any
         if len(key) >= self.max_key_size:
             prefix = self.get_large_key_prefix(key)
             with _lock:
                 value_dict = self.get_value_dict(prefix)
-                new_key = value_dict.get(key)
-                if new_key != None:
-                    self.kv.Delete(new_key, sync)
+                if key in value_dict:
                     del value_dict[key]
-                    self.save_value_dict(prefix, value_dict)
+                self.save_value_dict(tx, prefix, value_dict)
                 return
-        return self.kv.Delete(key, sync)
+        return tx.delete(key)
+    
+    def Delete(self, key, sync=False):
+        with self.kv.env.begin(write=True) as tx:
+            return self.doDelete(tx, key, sync)
 
     def RangeIter(self, *args, **kw):
         include_value = kw.get("include_value", True)
@@ -264,3 +257,13 @@ class LmdbEnhancedKV:
                         yield fullkey
                 else:
                     yield key
+
+    def Write(self, batch_proxy, sync=False):
+        with self.kv.env.begin(write=True) as tx:
+            for key in batch_proxy._puts:
+                value = batch_proxy._puts[key]
+                self.doPut(tx, key, value)
+
+            for key in batch_proxy._deletes:
+                self.doDelete(tx, key, sync)
+
