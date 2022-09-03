@@ -81,11 +81,13 @@ class SqliteKV:
     def __init__(self, db_file, snapshot = None, 
             block_cache_size = None, 
             write_buffer_size = None,
+            config_dict = None,
             debug = True):
         """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
         self.db_file = db_file
         self.db_holder = Holder()
         self.debug = debug
+        self.config_dict = config_dict
 
         if snapshot != None:
             self._db = snapshot
@@ -99,9 +101,16 @@ class SqliteKV:
         if self.db_holder.db == None:
             # db_holder是threadlocal对象，这里是线程安全的
             logging.info("init db")
+            config_dict = self.config_dict
+
             with self._lock:
                 self.db_holder.db = sqlite3.connect(self.db_file)
-                db_execute(self.db_holder.db, "PRAGMA journal_mode = WAL;") # WAL模式，并发度更高
+
+                if config_dict != None and config_dict.sqlite_journal_mode == "WAL":
+                    db_execute(self.db_holder.db, "PRAGMA journal_mode = WAL;")
+                else:
+                    db_execute(self.db_holder.db, "PRAGMA journal_mode = DELETE;") # WAL模式，并发度更高
+                
                 # db_execute(self.db_holder.db, "PRAGMA journal_mode = DELETE;") # 默认模式
                 db_execute(self.db_holder.db, "CREATE TABLE IF NOT EXISTS `kv_store` (`key` blob primary key, value blob);")
 

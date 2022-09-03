@@ -18,9 +18,10 @@ _lock = threading.RLock()
 
 class LmdbKV:
 
-    def __init__(self, db_dir, debug=True, map_size=1024**3):
+    def __init__(self, db_dir, debug=True, map_size=1024**3, config_dict=None):
         self.env = lmdb.open(db_dir, map_size=map_size)
         self.debug = debug
+        self.config_dict = config_dict
 
     def Get(self, key):
         """通过key读取Value

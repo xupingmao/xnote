@@ -11,9 +11,10 @@ class LevelDBProxy:
     def __init__(self, path = None, snapshot = None, 
             max_open_files = 1000,
             block_cache_size = 8 * (2<<20), 
-            write_buffer_size = 2 * (2<<20)):
+            write_buffer_size = 2 * (2<<20),
+            config_dict = None):
         """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
-
+        self.config_dict = None
         if snapshot != None:
             self._db = snapshot
         else:

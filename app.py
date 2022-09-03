@@ -32,6 +32,7 @@ import threading
 from core import code_builder
 from xutils import cacheutil
 from xutils import dbutil
+from xutils import Storage
 from xutils.mem_util import log_mem_info_deco
 from xutils.lockutil import FileLock
 from autoreload import AutoReloadThread
@@ -153,7 +154,9 @@ def try_init_ldb():
         if db_driver == "sqlite":
             from xutils.db.driver_sqlite import SqliteKV
             db_file = os.path.join(xconfig.DB_DIR, "sqlite", "kv_store.db")
-            db_instance = SqliteKV(db_file)
+            config_dict = Storage()
+            config_dict.sqlite_journal_mode = xconfig.get_system_config("sqlite_journal_mode")
+            db_instance = SqliteKV(db_file, config_dict = config_dict)
 
         if db_driver == "leveldbpy":
             from xutils.db.driver_leveldbpy import LevelDBProxy

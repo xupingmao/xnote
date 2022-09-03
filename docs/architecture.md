@@ -71,12 +71,14 @@
 - jquery JS基础库
 - layer web弹层组件
 - marked markdown解析器
-- qrcode 二维码生成器
-- csv.js 解析csv文件
-- jsdiff 文本对比
 - codemirror 代码编辑器
 - jexcel web表格
 - font-awesome 图标库
+- art-template 模板引擎
+- vue2 MVVM框架
+- qrcode 二维码生成器
+- csv.js 解析csv文件
+- jsdiff 文本对比
 
 ## 新模块开发
 
