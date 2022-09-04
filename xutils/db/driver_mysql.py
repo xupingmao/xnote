@@ -6,7 +6,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-04 16:40:01
+@LastEditTime : 2022-09-04 20:40:25
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -122,7 +122,7 @@ class MySQLKv:
 
     def doPut(self, cursor, key, value):
         # type: (any,bytes,bytes) -> None
-        select_sql = "SELECT value FROM kv_store WHERE `key` = %s FOR UPDATE"
+        select_sql = "SELECT `key` FROM kv_store WHERE `key` = %s"
         insert_sql = "INSERT INTO kv_store (`key`, value) VALUES (%s, %s)"
         update_sql = "UPDATE kv_store SET value=%s WHERE `key` = %s"
         cursor.execute(select_sql, (key, ))
@@ -130,13 +130,33 @@ class MySQLKv:
         if found == None:
             if self.debug:
                 logging.debug("SQL:%s, params:%s", insert_sql, (key, value))
-
-            cursor.execute(insert_sql, (key, value))
+            try:
+                cursor.execute(insert_sql, (key, value))
+            except:
+                logging.info("key(%s) exists, try update", key)
+                cursor.execute(update_sql, (value, key))
         else:
             if self.debug:
                 logging.debug("SQL:%s, params:%s", update_sql, (key, value))
 
             cursor.execute(update_sql, (value, key))
+
+    def doPut_v2(self, cursor, key, value):
+        # type: (any,bytes,bytes) -> None
+        insert_sql = "INSERT INTO kv_store (`key`, value) VALUES (%s, %s)"
+        update_sql = "UPDATE kv_store SET value=%s WHERE `key` = %s"
+        # 插入失败后尝试更新,因为更新是一个频率更高的操作
+        if self.debug:
+            logging.debug("SQL:%s, params:%s", update_sql, (key, value))
+
+        cursor.execute(update_sql, (value, key))
+        if cursor.rowcount == 0:
+            logging.info("key not exists, insert new data")
+
+            if self.debug:
+                logging.debug("SQL:%s, params:%s", insert_sql, (key, value))
+
+            cursor.execute(insert_sql, (key, value))
 
     def Put(self, key, value, sync=False, cursor=None):
         # type: (bytes,bytes,bool,any) -> None
@@ -155,6 +175,7 @@ class MySQLKv:
             try:
                 self.doPut(cursor, key, value)
                 con.commit()
+
             finally:
                 cost_time = time.time() - start_time
                 if self.log_put_profile:
@@ -196,6 +217,8 @@ class MySQLKv:
         @param {bool}   include_value  是否包含值
         @param {bool}   fill_cache     是否填充缓存
         """
+
+        # TODO: 优化成轮询的短查询
         con = self.get_connection()
         with con:
             cursor = con.cursor(prepared=True)

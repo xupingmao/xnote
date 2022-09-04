@@ -149,7 +149,7 @@ def try_init_ldb():
                           max_open_files=max_open_files)
 
         db_instance = None
-        db_driver = xconfig.get_global_config("system.db_driver")
+        db_driver = xconfig.get_system_config("db_driver")
 
         if db_driver == "sqlite":
             from xutils.db.driver_sqlite import SqliteKV

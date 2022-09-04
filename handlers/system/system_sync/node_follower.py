@@ -407,6 +407,7 @@ class DBSyncer:
             data = result_obj.get("data")
             assert data != None, "data不能为空"
             if last_key == "":
+                # 这里需要保存一下位点，后面增量同步从这里开始
                 binlog_last_seq = data.get("binlog_last_seq")
                 assert isinstance(binlog_last_seq, int)
                 self.put_binlog_last_seq(binlog_last_seq)
