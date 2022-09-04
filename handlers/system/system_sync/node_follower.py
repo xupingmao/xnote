@@ -226,17 +226,18 @@ class Follower(NodeManagerBase):
     def sync_db_from_leader(self):
         leader_host = self.get_leader_url()
         if leader_host == None:
-            return
+            logging.debug("leader_host为空")
+            raise Exception("leader_host为空")
 
         ping_result = self.ping_leader()
         if ping_result == None:
-            logging.debug("ping_leader为空")
-            return
+            logging.debug("ping_leader结果为空")
+            raise Exception("ping_leader结果为空")
 
         leader_token = self.get_leader_token()
         if leader_token == "":
             logging.debug("leader_token为空")
-            return
+            raise Exception("leader_token为空")
         
         self.db_syncer.sync_db(self.get_client())
     

@@ -16,6 +16,7 @@ INT16_MAX = (1 << 15)-1
 FLOAT64_MANTISSA_MAX = (1 << 52) - 1
 
 def encode_int(int_val):
+    # type: (int) -> str
     """把整型转换成字符串，比较性保持不变
     >>> encode_int(10) > encode_int(1)
     True

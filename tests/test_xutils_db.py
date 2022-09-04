@@ -130,6 +130,11 @@ def run_test_db_engine(test, db):
 
     db.Put(b"key", b"value")
     test.assertEqual(b"value", db.Get(b"key"))
+
+    # 第二次测试Update
+    db.Put(b'key', b'value2')
+    test.assertEqual(b'value2', db.Get(b'key'))
+
     db.Delete(b"key")
     test.assertEqual(None, db.Get(b"key"))
 
@@ -197,6 +202,13 @@ class TestMain(BaseTestCase):
         db = LevelDBImpl(db_dir)
         run_test_db_engine(self, db)
         run_snapshot_test(self, db.CreateSnapshot())
+
+    def test_dbutil_mysql(self):
+        from xutils.db.driver_mysql import MySQLKv
+        db = MySQLKv(host="192.168.50.153", user="root", password="root", database="test2")
+        db.init()
+        run_test_db_engine(self, db)
+
 
     def triggle_database_locked(self):
         from xutils.db.driver_sqlite import db_execute

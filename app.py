@@ -167,6 +167,15 @@ def try_init_ldb():
             db_dir = os.path.join(xconfig.DB_DIR, "lmdb")
             map_size = xconfig.get_system_config("lmdb_map_size")
             db_instance = LmdbEnhancedKV(db_dir, map_size=map_size)
+        
+        if db_driver == "mysql":
+            from xutils.db.driver_mysql import MySQLKv
+            host = xconfig.get_system_config("mysql_host")
+            user = xconfig.get_system_config("mysql_user")
+            password = xconfig.get_system_config("mysql_password")
+            database = xconfig.get_system_config("mysql_database")
+            db_instance = MySQLKv(host = host, user = user, password = password, database = database)
+            db_instance.init()
 
         # 默认使用leveldb启动
         if db_instance is None:

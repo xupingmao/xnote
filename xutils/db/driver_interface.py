@@ -15,6 +15,7 @@ class DBInterface:
         raise NotImplementedError("__init__")
 
     def Get(self, key):
+        # type: (bytes) -> bytes
         """通过key读取Value
         @param {bytes} key
         @return {bytes|None} value
@@ -22,6 +23,7 @@ class DBInterface:
         raise NotImplementedError("Get")
 
     def Put(self, key, value, sync = False):
+        # type: (bytes,bytes,bool) -> None
         """写入Key-Value键值对
         @param {bytes} key
         @param {bytes} value
@@ -29,6 +31,7 @@ class DBInterface:
         raise NotImplementedError("Put")
 
     def Delete(self, key, sync = False):
+        # type: (bytes, bool) -> None
         """删除Key-Value键值对
         @param {bytes} key
         """
