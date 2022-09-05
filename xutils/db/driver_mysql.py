@@ -6,7 +6,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-04 20:40:25
+@LastEditTime : 2022-09-05 23:28:33
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -15,7 +15,6 @@ import logging
 import threading
 import time
 import mysql.connector
-
 
 class Holder(threading.local):
     db = None
@@ -28,19 +27,20 @@ class Holder(threading.local):
 class ConnectionWrapper:
 
     def __init__(self, db):
-        self.db = db # type: mysql.connector.MySQLConnection
-    
+        self.db = db  # type: mysql.connector.MySQLConnection
+
     def __enter__(self):
         return self.db
-    
-    def cursor(self, prepared = True):
-        return self.db.cursor(prepared = prepared)
-    
+
+    def cursor(self, prepared=True):
+        return self.db.cursor(prepared=prepared)
+
     def commit(self):
         return self.db.commit()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
+
 
 class MySQLKv:
 
@@ -58,16 +58,18 @@ class MySQLKv:
 
     def get_connection(self):
         # TODO 优化成连接池
-        db = mysql.connector.connect(host=self.db_host, port=self.db_port,
-                                     user=self.db_user, passwd=self.db_password,
-                                     database=self.db_database)
-        # if self.holder.db == None:
-        #     self.holder.db = pymysql.connect(host=self.db_host, port=self.db_port, user=self.db_user, password=self.db_password,
-        #                                      database=self.db_database)
+        # db = mysql.connector.connect(host=self.db_host, port=self.db_port,
+        #                              user=self.db_user, passwd=self.db_password,
+        #                              database=self.db_database)
+        if self.holder.db == None:
+            # self.holder.db = pymysql.connect(host=self.db_host, port=self.db_port, user=self.db_user, password=self.db_password,
+            #                                  database=self.db_database)
+            self.holder.db = mysql.connector.connect(host=self.db_host, port=self.db_port,
+                                                     user=self.db_user, passwd=self.db_password,
+                                                     database=self.db_database)
         # return self.holder.db
+        return ConnectionWrapper(self.holder.db)
 
-        return ConnectionWrapper(db)
-    
     def close_cursor(self, cursor):
         pass
 
@@ -175,7 +177,6 @@ class MySQLKv:
             try:
                 self.doPut(cursor, key, value)
                 con.commit()
-
             finally:
                 cost_time = time.time() - start_time
                 if self.log_put_profile:
@@ -218,13 +219,14 @@ class MySQLKv:
         @param {bool}   fill_cache     是否填充缓存
         """
 
-        # TODO: 优化成轮询的短查询
+        # 优化成轮询的短查询
         con = self.get_connection()
+        limit = 100
+
         with con:
             cursor = con.cursor(prepared=True)
             try:
                 sql_builder = []
-                params = []
 
                 if include_value:
                     sql_builder.append("SELECT `key`, value FROM kv_store")
@@ -237,32 +239,54 @@ class MySQLKv:
 
                 if key_from != None:
                     sql_builder.append("AND `key` >= %s")
-                    params.append(key_from)
 
                 if key_to != None:
                     sql_builder.append("AND `key` <= %s")
-                    params.append(key_to)
 
                 if reverse:
                     sql_builder.append("ORDER BY `key` DESC")
 
-                sql_builder.append(";")
+                sql_builder.append("LIMIT %d;" % (limit + 1))
 
                 sql = " ".join(sql_builder)
 
-                if self.debug:
-                    logging.debug("SQL:%s (%s)", sql, params)
 
-                cursor.execute(sql, tuple(params))
-                # return cur.execute(sql, tuple(params))
-                for item in cursor:
-                    # logging.debug("include_value(%s), item:%s", include_value, item)
-                    if include_value:
-                        if item[1] == None:
-                            continue
-                        yield self.mysql_to_py(item[0]), self.mysql_to_py(item[1])
+                has_next = True
+                while has_next:
+                    params = []
+                    if key_from != None:
+                        params.append(key_from)
+                    
+                    if key_to != None:
+                        params.append(key_to)
+
+                    if self.debug:
+                        logging.debug("SQL:%s (%s)", sql, params)
+
+                    cursor.execute(sql, tuple(params))
+                    # return cur.execute(sql, tuple(params))
+                    result = cursor.fetchall()
+
+                    for item in result[:limit]:
+                        # logging.debug("include_value(%s), item:%s", include_value, item)
+                        key = self.mysql_to_py(item[0])
+
+                        if include_value:
+                            if item[1] == None:
+                                continue
+                            yield key, self.mysql_to_py(item[1])
+                        else:
+                            yield key
+                    
+                    if len(result) <= limit:
+                        break
+                    
+                    last_key = self.mysql_to_py(item[-1][0])
+                    if reverse:
+                        key_to = last_key
                     else:
-                        yield self.mysql_to_py(item[0])
+                        key_from = last_key
+
             finally:
                 self.close_cursor(cursor)
 
@@ -272,7 +296,7 @@ class MySQLKv:
     def Write(self, batch, sync=False):
         con = self.get_connection()
         with con:
-            cursor = con.cursor(prepared = False)
+            cursor = con.cursor(prepared=False)
             try:
                 cursor.execute("begin;")
                 for key in batch._puts:

@@ -176,6 +176,7 @@ def try_init_ldb():
             database = xconfig.get_system_config("mysql_database")
             db_instance = MySQLKv(host = host, user = user, password = password, database = database)
             db_instance.init()
+            logging.info("use mysql as db engine")
 
         # 默认使用leveldb启动
         if db_instance is None:
