@@ -1,12 +1,12 @@
 # -*- coding:utf-8 -*-
 """
-开发中...
+MySQL驱动
 
 @Author       : xupingmao
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-05 23:28:33
+@LastEditTime : 2022-09-10 14:13:13
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -23,6 +23,10 @@ class Holder(threading.local):
         if self.db != None:
             self.db.close()
 
+class SqlLoggerInterface:
+
+    def append(self, sql):
+        pass
 
 class ConnectionWrapper:
 
@@ -46,7 +50,7 @@ class MySQLKv:
 
     holder = Holder()
 
-    def __init__(self, *, host=None, port=3306, user=None, password=None, database=None):
+    def __init__(self, *, host=None, port=3306, user=None, password=None, database=None, sql_logger=None):
         self.db_host = host
         self.db_user = user
         self.db_port = port
@@ -55,6 +59,7 @@ class MySQLKv:
         self.debug = True
         self.log_get_profile = True
         self.log_put_profile = True
+        self.sql_logger = sql_logger # type: SqlLoggerInterface
 
     def get_connection(self):
         # TODO 优化成连接池
@@ -120,6 +125,10 @@ class MySQLKv:
                 cost_time = time.time() - start_time
                 if self.log_get_profile:
                     logging.debug("GET (%s) cost %.2fms", key, cost_time*1000)
+                
+                if self.sql_logger != None:
+                    self.sql_logger.append(sql)
+
                 self.close_cursor(cursor)
 
     def doPut(self, cursor, key, value):
@@ -264,6 +273,9 @@ class MySQLKv:
                         logging.debug("SQL:%s (%s)", sql, params)
 
                     cursor.execute(sql, tuple(params))
+                    if self.sql_logger:
+                        self.sql_logger.append(sql)
+                        
                     # return cur.execute(sql, tuple(params))
                     result = cursor.fetchall()
 
