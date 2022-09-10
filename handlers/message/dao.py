@@ -29,8 +29,8 @@ MOBILE_LENGTH = 11
 VALID_TAG_SET = set(["task", "done", "log", "key", "date"])
 
 _keyword_db = dbutil.get_hash_table("msg_key")
-_msg_db = dbutil.get_table("message", type="rdb")
-
+_msg_db = dbutil.get_table("message")
+_msg_stat_cache = cacheutil.PrefixedCache("msgStat:")
 
 class MessageDO(Storage):
 
@@ -529,17 +529,25 @@ def count_by_tag(user, tag):
 
 def get_message_stat0(user):
     stat = dbutil.get("user_stat:%s:message" % user)
-    if stat != None and stat.canceled_count is None:
-        stat.canceled_count = 0
+    if stat != None:
+        if stat.canceled_count is None:
+            stat.canceled_count = 0
     return stat
 
 
 def get_message_stat(user):
     check_param_user(user)
 
-    value = get_message_stat0(user)
+    value = _msg_stat_cache.get(user)
+    print("[get_message_stat] cacheValue=", value)
+    
+    if value == None:
+        value = get_message_stat0(user)
+        _msg_stat_cache.put(user, value)
+    
     if value is None:
         return refresh_message_stat(user)
+    
     return value
 
 
@@ -562,6 +570,9 @@ def refresh_message_stat(user):
     stat.key_count = key_count
     stat.canceled_count = canceled_count
     dbutil.put("user_stat:%s:message" % user, stat)
+
+    _msg_stat_cache.delete(user)
+
     return stat
 
 

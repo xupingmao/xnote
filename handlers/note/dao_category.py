@@ -4,14 +4,14 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-15 23:08:49
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-30 21:30:01
+@LastEditTime : 2022-09-10 23:18:13
 @FilePath     : /xnote/handlers/note/dao_category.py
 @Description  : 描述
 """
 
 from xutils import Storage, dateutil
 from xutils import fsutil
-from xutils import dbutil
+from xutils import dbutil, cacheutil
 import xutils
 
 from .dao import list_group
@@ -21,7 +21,7 @@ dbutil.register_table("note_category", "笔记类目", category="note",
 
 _db = dbutil.get_table("note_category")
 _cat_config = fsutil.load_prop_config("config/note/category.properties")
-
+_cat_cache = cacheutil.PrefixedCache("note_category:")
 
 def upsert_category(user_name, category):
     assert user_name != None
@@ -33,12 +33,18 @@ def upsert_category(user_name, category):
     if category._id == None:
         category.ctime = dateutil.format_datetime()
 
-    return _db.update_by_id(category.code, category, user_name=user_name)
+    result = _db.update_by_id(category.code, category, user_name=user_name)
+    _cat_cache.delete(user_name)
+    return result
 
 
 def list_category(user_name):
     assert user_name != None
     assert isinstance(user_name, str)
+
+    result = _cat_cache.get(user_name)
+    if result != None:
+        return result
 
     cat_dict = dict()
     for key in _cat_config:
@@ -55,6 +61,8 @@ def list_category(user_name):
     for key in sorted(cat_dict.keys()):
         item = cat_dict.get(key)
         result.append(item)
+    
+    _cat_cache.put(user_name, result)
     return result
 
 

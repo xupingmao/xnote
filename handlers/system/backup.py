@@ -255,13 +255,13 @@ def _import_db(db_file):
     sql = "SELECT key, value FROM kv_store ORDER BY key"
 
     start_time = time.time()
+    batch_size = 100
 
     write_batch = dbutil.create_write_batch()
-
     for key, value in db.execute(sql):
         write_batch.put_bytes(key, value)
         count += 1
-        if count % 100 == 0:
+        if count % batch_size == 0:
             write_batch.commit()
             write_batch = dbutil.create_write_batch()
             cost_time = time.time() - start_time

@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-10 14:13:13
+@LastEditTime : 2022-09-10 22:57:21
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -15,6 +15,8 @@ import logging
 import threading
 import time
 import mysql.connector
+
+from xutils.base import Storage
 
 
 class Holder(threading.local):
@@ -53,12 +55,13 @@ class MySQLKv:
 
     holder = Holder()
 
-    def __init__(self, *, host=None, port=3306, user=None, password=None, database=None, sql_logger=None):
+    def __init__(self, *, host=None, port=3306, user=None, password=None, database=None, pool_size = 0, sql_logger=None):
         self.db_host = host
         self.db_user = user
         self.db_port = port
         self.db_password = password
         self.db_database = database
+        self.db_pool_size = pool_size
         self.db_auth_plugin = "mysql_native_password"
 
         self.debug = True
@@ -75,12 +78,15 @@ class MySQLKv:
         # self.holder.db = pymysql.connect(host=self.db_host, port=self.db_port, user=self.db_user, password=self.db_password,
         #                                  database=self.db_database)
 
-        con = mysql.connector.connect(host=self.db_host, port=self.db_port,
-                                      user=self.db_user,
-                                      passwd=self.db_password,
-                                      database=self.db_database,
-                                      auth_plugin=self.db_auth_plugin,
-                                      pool_size=20)
+        kw = Storage()
+        kw.port = self.db_port
+        kw.user = self.db_user
+        kw.passwd = self.db_password
+        kw.database = self.db_database
+        if self.db_pool_size > 0:
+            kw.pool_size = self.db_pool_size
+
+        con = mysql.connector.connect(host=self.db_host, **kw)
         # return self.holder.db
         return ConnectionWrapper(con)
 

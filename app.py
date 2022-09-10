@@ -176,9 +176,19 @@ def try_init_ldb():
             user = xconfig.get_system_config("mysql_user")
             password = xconfig.get_system_config("mysql_password")
             database = xconfig.get_system_config("mysql_database")
+            mysql_cloud_type = xconfig.get_system_config("mysql_cloud_type")
+            pool_size = xconfig.get_system_config("mysql_pool_size")
+
+            if mysql_cloud_type == "sae":
+                host = os.environ["MYSQL_HOST"]
+                user = os.environ["MYSQL_USER"]
+                password = os.environ["MYSQL_PASS"]
+                database = os.environ["MYSQL_DB"]
+
             sql_logger = x_trace.SqlLogger()
             db_instance = MySQLKv(host=host, user=user, password=password,
-                                  database=database, sql_logger=sql_logger)
+                                  database=database, sql_logger=sql_logger, 
+                                  pool_size=pool_size)
             db_instance.init()
             logging.info("use mysql as db engine")
 

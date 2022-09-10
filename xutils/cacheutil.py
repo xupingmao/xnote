@@ -33,6 +33,7 @@ PS: 标准库 functools提供了缓存的方法， 参考 https://docs.python.or
 """
 import threading
 from collections import OrderedDict, deque
+from unittest import result
 from xutils.imports import *
 
 _cache_dict = dict()
@@ -85,41 +86,51 @@ class Cache:
         self.max_size = max_size
         self.lock = threading.RLock(0)
 
+    def _fix_storage(self, obj):
+        if isinstance(obj, dict):
+            return Storage(**obj)
+        if isinstance(obj, list):
+            for index, item in enumerate(obj):
+                if isinstance(item, dict):
+                    obj[index] = Storage(**item)
+            return obj
+        return obj
+
     def get(self, key):
         assert isinstance(key, str), key
         value = self.dict.get(key)
         if value != None:
             if self.is_alive(key):
                 self.dict.move_to_end(key, last=False) # 移动到最前面
-                return value
+                obj = json.loads(value)
+                return self._fix_storage(obj)
             else:
                 self.delete(key)
         return None
 
-    def put(self, key, value, expire=-1):
+    def put(self, key, value, expire=60*5):
+        assert expire > 0
         with self.lock:
-            self.dict[key] = value
+            self.dict[key] = json.dumps(value) # 转成json，要保证能够序列化
             self.dict.move_to_end(key, last=False) # 移动到最前面
-            if expire > 0:
-                self.expire_dict[key] = time.time() + expire
+            self.expire_dict[key] = time.time() + expire
             
             if self.max_size > 0:
                 self.check_size_and_clear()
 
     def is_alive(self, key):
-        value = self.expire_dict.get(key, -1)
-        if value < 0:
-            return True
+        value = self.expire_dict.get(key, 60*5)
         return value > time.time()
     
     def delete(self, key):
-        if key in self.dict:
-            del self.dict[key]
-        if key in self.expire_dict:
-            del self.expire_dict[key]
+        with self.lock:
+            if key in self.dict:
+                del self.dict[key]
+            if key in self.expire_dict:
+                del self.expire_dict[key]
 
     def check_size_and_clear(self):
-        # TODO 清理失效的
+        # TODO 清理失效的缓存
         if self.max_size <= 0:
             return
 
@@ -142,7 +153,7 @@ class DummyCache:
     def delete(self, key):
         pass
 
-_global_cache = Cache()
+_global_cache = Cache(max_size=1000)
 
 class PrefixedCache:
 
@@ -152,7 +163,7 @@ class PrefixedCache:
     def get(self, key):
         return _global_cache.get(self.prefix + key)
     
-    def put(self, key, value, expire=600):
+    def put(self, key, value, expire=60*5):
         return _global_cache.put(self.prefix+key, value, expire)
     
     def delete(self, key):

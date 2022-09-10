@@ -35,6 +35,7 @@
 <div class="card">
     {% include mod_fs_path.html %}
     <form>
+        <input type="hidden" name="path" value="{{path}}">
         <textarea id="editor" name="sql" style="width:100%;">{{sql}}</textarea>
         <button>Run</button>
         <a class="btn btn-default" href="?path={{path}}&action=show_tables">展示表</a>
