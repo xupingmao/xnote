@@ -34,8 +34,8 @@ dbutil.register_table("user_session_rel", "用户会话关系")
 
 
 session_db = dbutil.get_hash_table("session")
-session_cache = cacheutil.Cache(max_size=500)
-user_cache = cacheutil.Cache(max_size=500)
+session_cache = cacheutil.PrefixedCache(prefix="session:")
+user_cache = cacheutil.PrefixedCache(prefix="user:")
 
 # 用户表
 USER_TABLE = None

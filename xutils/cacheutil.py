@@ -17,7 +17,7 @@ PS: 标准库 functools提供了缓存的方法， 参考 https://docs.python.or
 1. 读取时检查失效
 2. 生成新的缓存时从队列中取出多个缓存进行检查
 
-持久化策略
+~~持久化策略~~
 1. 初始化的时候从文件中读取，运行过程中直接从内存读取
 2. 创建或者更新的时候持久化到文件
 3. TODO 考虑持久化时的并发控制
@@ -74,7 +74,10 @@ def log_debug(msg):
 def log_error(msg):
     print(msg)
 
+
+
 class Cache:
+    """缓存实现,一般情况下不要直接用它,优先使用 PrefixedCache, 这样便于迁移到Redis之类的分布式缓存"""
 
     def __init__(self, max_size = -1):
         self.dict = OrderedDict()
@@ -83,8 +86,6 @@ class Cache:
         self.lock = threading.RLock(0)
 
     def get(self, key):
-        if key is None:
-            return None
         assert isinstance(key, str), key
         value = self.dict.get(key)
         if value != None:
@@ -127,7 +128,7 @@ class Cache:
             self.delete(key)
 
 class DummyCache:
-    """用于禁用缓存，兼容缓存的API"""
+    """用于禁用缓存, 兼容缓存的API"""
 
     def __init__(self, max_size=-1):
         pass
@@ -141,6 +142,21 @@ class DummyCache:
     def delete(self, key):
         pass
 
+_global_cache = Cache()
+
+class PrefixedCache:
+
+    def __init__(self, prefix=""):
+        self.prefix = prefix
+    
+    def get(self, key):
+        return _global_cache.get(self.prefix + key)
+    
+    def put(self, key, value, expire=600):
+        return _global_cache.put(self.prefix+key, value, expire)
+    
+    def delete(self, key):
+        return _global_cache.delete(self.prefix + key)
 
 class CacheObj:
     """缓存对象，包含缓存的key和value，有一个公共的缓存队列
@@ -226,15 +242,6 @@ class CacheObj:
         raise Exception(
             "cacheutil.%s to disk is no longer supprted, please use dbutil" % method_name)
 
-        path = self._get_path(self.key)
-        obj = dict(key=self.key,
-                   type=self.type,
-                   value=self.get_dump_value(),
-                   expire_time=self.expire_time)
-
-        encoded = json.dumps(obj)
-        with open(path, "w") as fp:
-            fp.write(encoded)
 
     def is_alive(self):
         if self.is_force_expired:

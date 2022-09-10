@@ -43,6 +43,11 @@ class TestXutilCache(BaseTestCase):
         value = c.get("a")
         self.assertIsNone(value)
 
+    def test_prefixed_cache(self):
+        c = cacheutil.PrefixedCache("p:")
+        c.put("a", 10, expire=600)
+        self.assertEqual(cacheutil._global_cache.get("p:a"), 10)
+
 
     def test_cache(self):
         self.assertEqual(9227465, fib(35))
