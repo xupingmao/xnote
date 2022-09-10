@@ -32,8 +32,8 @@ PS: 标准库 functools提供了缓存的方法， 参考 https://docs.python.or
 * TODO: 可以使用 BitCask 存储模型实现
 """
 import threading
+import random
 from collections import OrderedDict, deque
-from unittest import result
 from xutils.imports import *
 
 _cache_dict = dict()
@@ -96,7 +96,7 @@ class Cache:
             return obj
         return obj
 
-    def get(self, key):
+    def get(self, key, default_value=None):
         assert isinstance(key, str), key
         value = self.dict.get(key)
         if value != None:
@@ -106,14 +106,14 @@ class Cache:
                 return self._fix_storage(obj)
             else:
                 self.delete(key)
-        return None
+        return default_value
 
-    def put(self, key, value, expire=60*5):
+    def put(self, key, value, expire=60*5, random_range=60*5):
         assert expire > 0
         with self.lock:
             self.dict[key] = json.dumps(value) # 转成json，要保证能够序列化
             self.dict.move_to_end(key, last=False) # 移动到最前面
-            self.expire_dict[key] = time.time() + expire
+            self.expire_dict[key] = time.time() + expire + random.randint(0, random_range)
             
             if self.max_size > 0:
                 self.check_size_and_clear()
@@ -160,8 +160,8 @@ class PrefixedCache:
     def __init__(self, prefix=""):
         self.prefix = prefix
     
-    def get(self, key):
-        return _global_cache.get(self.prefix + key)
+    def get(self, key, default_value=None):
+        return _global_cache.get(self.prefix + key, default_value=default_value)
     
     def put(self, key, value, expire=60*5):
         return _global_cache.put(self.prefix+key, value, expire)

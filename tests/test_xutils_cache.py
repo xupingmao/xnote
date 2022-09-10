@@ -36,7 +36,7 @@ class TestXutilCache(BaseTestCase):
     def test_expire(self):
         c = cacheutil.Cache(max_size=2)
 
-        c.put("a", 1, expire=1)
+        c.put("a", 1, expire=1, random_range=0)
         value = c.get("a")
         self.assertEqual(1, value)
         time.sleep(2)
