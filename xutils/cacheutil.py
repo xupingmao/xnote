@@ -31,6 +31,7 @@ PS: 标准库 functools提供了缓存的方法， 参考 https://docs.python.or
 * 参考redis的API
 * TODO: 可以使用 BitCask 存储模型实现
 """
+import threading
 from collections import OrderedDict, deque
 from xutils.imports import *
 
@@ -72,6 +73,73 @@ def log_debug(msg):
 
 def log_error(msg):
     print(msg)
+
+class Cache:
+
+    def __init__(self, max_size = -1):
+        self.dict = OrderedDict()
+        self.expire_dict = dict()
+        self.max_size = max_size
+        self.lock = threading.RLock(0)
+
+    def get(self, key):
+        if key is None:
+            return None
+        assert isinstance(key, str), key
+        value = self.dict.get(key)
+        if value != None:
+            if self.is_alive(key):
+                self.dict.move_to_end(key, last=False) # 移动到最前面
+                return value
+            else:
+                self.delete(key)
+        return None
+
+    def put(self, key, value, expire=-1):
+        with self.lock:
+            self.dict[key] = value
+            self.dict.move_to_end(key, last=False) # 移动到最前面
+            if expire > 0:
+                self.expire_dict[key] = time.time() + expire
+            
+            if self.max_size > 0:
+                self.check_size_and_clear()
+
+    def is_alive(self, key):
+        value = self.expire_dict.get(key, -1)
+        if value < 0:
+            return True
+        return value > time.time()
+    
+    def delete(self, key):
+        if key in self.dict:
+            del self.dict[key]
+        if key in self.expire_dict:
+            del self.expire_dict[key]
+
+    def check_size_and_clear(self):
+        # TODO 清理失效的
+        if self.max_size <= 0:
+            return
+
+        while len(self.dict) > self.max_size:
+            key, value = self.dict.popitem(last=True) # 弹出第一个
+            self.delete(key)
+
+class DummyCache:
+    """用于禁用缓存，兼容缓存的API"""
+
+    def __init__(self, max_size=-1):
+        pass
+
+    def get(self, key):
+        return None
+    
+    def put(self, key, value, expire=-1):
+        pass
+
+    def delete(self, key):
+        pass
 
 
 class CacheObj:

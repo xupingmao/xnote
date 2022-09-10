@@ -27,6 +27,7 @@ import xtables
 import xmanager
 import xtemplate
 import xtables_new
+import x_trace
 import signal
 import threading
 from core import code_builder
@@ -155,8 +156,9 @@ def try_init_ldb():
             from xutils.db.driver_sqlite import SqliteKV
             db_file = os.path.join(xconfig.DB_DIR, "sqlite", "kv_store.db")
             config_dict = Storage()
-            config_dict.sqlite_journal_mode = xconfig.get_system_config("sqlite_journal_mode")
-            db_instance = SqliteKV(db_file, config_dict = config_dict)
+            config_dict.sqlite_journal_mode = xconfig.get_system_config(
+                "sqlite_journal_mode")
+            db_instance = SqliteKV(db_file, config_dict=config_dict)
 
         if db_driver == "leveldbpy":
             from xutils.db.driver_leveldbpy import LevelDBProxy
@@ -167,14 +169,16 @@ def try_init_ldb():
             db_dir = os.path.join(xconfig.DB_DIR, "lmdb")
             map_size = xconfig.get_system_config("lmdb_map_size")
             db_instance = LmdbEnhancedKV(db_dir, map_size=map_size)
-        
+
         if db_driver == "mysql":
             from xutils.db.driver_mysql import MySQLKv
             host = xconfig.get_system_config("mysql_host")
             user = xconfig.get_system_config("mysql_user")
             password = xconfig.get_system_config("mysql_password")
             database = xconfig.get_system_config("mysql_database")
-            db_instance = MySQLKv(host = host, user = user, password = password, database = database)
+            sql_logger = x_trace.SqlLogger()
+            db_instance = MySQLKv(host=host, user=user, password=password,
+                                  database=database, sql_logger=sql_logger)
             db_instance.init()
             logging.info("use mysql as db engine")
 
@@ -251,9 +255,11 @@ def init_web_app():
     xmanager.init(app, var_env)
     return app
 
+
 def print_env_info():
     cwd = os.getcwd()
     print("当前工作目录:", os.path.abspath(cwd))
+
 
 def init_app_no_lock(boot_config_kw=None):
     global app

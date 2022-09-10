@@ -318,6 +318,8 @@ def on_ping_leader(ctx=None):
     role = get_system_role()
     if role == "leader":
         return None
+    
+    # TODO 优化ping的时间
 
     try:        
         if FOLLOWER.is_token_active():
@@ -360,7 +362,7 @@ def on_sync_db_from_leader(ctx=None):
     if role == "leader":
         return None
     
-    if xconfig.get("system.sync_db_from_leader") == False:
+    if xconfig.get_system_config("sync_db_from_leader") == False:
         return None
 
     try:

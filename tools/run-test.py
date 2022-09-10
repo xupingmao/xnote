@@ -33,6 +33,11 @@ def run_test(target = None):
 		os.system("python3 -m pytest tests/test_xutils_db.py tests/test_xutils_db_table.py --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
 		os.system("python3 -m coverage html")
 		return
+	
+	if target == "xutils_cache":
+		os.system("python3 -m pytest tests/test_xutils_cache.py --doctest-modules --cov xutils.cacheutil --capture no")
+		os.system("python3 -m coverage html")
+		return
 
 	if target == "fs":
 		os.system("python3 -m pytest tests/test_fs.py --doctest-modules --cov handlers.fs --cov handlers.fs --capture no")

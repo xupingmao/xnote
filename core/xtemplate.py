@@ -186,6 +186,7 @@ def render_before_kw(kw):
     kw["FONT_SCALE"]    = xconfig.get_user_config(user_name, "FONT_SCALE")
     kw["HOME_PATH"]     = xconfig.get_user_config(user_name, "HOME_PATH")
     kw["THEME"]         = xconfig.get_user_config(user_name, "THEME")
+    kw["_debug_info"]   = x_trace.get_debug_info()
 
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
@@ -255,7 +256,7 @@ def render_search(kw):
         kw["search_tag"] = handler.tag
 
 def do_render_kw(kw):
-    nkw = {}
+    nkw = dict()
     # 预处理
     render_before_kw(nkw)
 

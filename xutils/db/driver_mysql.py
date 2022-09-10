@@ -16,6 +16,7 @@ import threading
 import time
 import mysql.connector
 
+
 class Holder(threading.local):
     db = None
 
@@ -23,10 +24,12 @@ class Holder(threading.local):
         if self.db != None:
             self.db.close()
 
+
 class SqlLoggerInterface:
 
     def append(self, sql):
         pass
+
 
 class ConnectionWrapper:
 
@@ -43,7 +46,7 @@ class ConnectionWrapper:
         return self.db.commit()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
+        self.db.close()
 
 
 class MySQLKv:
@@ -56,24 +59,30 @@ class MySQLKv:
         self.db_port = port
         self.db_password = password
         self.db_database = database
+        self.db_auth_plugin = "mysql_native_password"
+
         self.debug = True
         self.log_get_profile = True
         self.log_put_profile = True
-        self.sql_logger = sql_logger # type: SqlLoggerInterface
+        self.sql_logger = sql_logger  # type: SqlLoggerInterface
 
     def get_connection(self):
         # TODO 优化成连接池
         # db = mysql.connector.connect(host=self.db_host, port=self.db_port,
         #                              user=self.db_user, passwd=self.db_password,
         #                              database=self.db_database)
-        if self.holder.db == None:
-            # self.holder.db = pymysql.connect(host=self.db_host, port=self.db_port, user=self.db_user, password=self.db_password,
-            #                                  database=self.db_database)
-            self.holder.db = mysql.connector.connect(host=self.db_host, port=self.db_port,
-                                                     user=self.db_user, passwd=self.db_password,
-                                                     database=self.db_database)
+        # if self.holder.db == None:
+        # self.holder.db = pymysql.connect(host=self.db_host, port=self.db_port, user=self.db_user, password=self.db_password,
+        #                                  database=self.db_database)
+
+        con = mysql.connector.connect(host=self.db_host, port=self.db_port,
+                                      user=self.db_user,
+                                      passwd=self.db_password,
+                                      database=self.db_database,
+                                      auth_plugin=self.db_auth_plugin,
+                                      pool_size=20)
         # return self.holder.db
-        return ConnectionWrapper(self.holder.db)
+        return ConnectionWrapper(con)
 
     def close_cursor(self, cursor):
         pass
@@ -125,9 +134,9 @@ class MySQLKv:
                 cost_time = time.time() - start_time
                 if self.log_get_profile:
                     logging.debug("GET (%s) cost %.2fms", key, cost_time*1000)
-                
+
                 if self.sql_logger != None:
-                    self.sql_logger.append(sql)
+                    self.sql_logger.append(sql % key)
 
                 self.close_cursor(cursor)
 
@@ -259,13 +268,12 @@ class MySQLKv:
 
                 sql = " ".join(sql_builder)
 
-
                 has_next = True
                 while has_next:
                     params = []
                     if key_from != None:
                         params.append(key_from)
-                    
+
                     if key_to != None:
                         params.append(key_to)
 
@@ -274,8 +282,8 @@ class MySQLKv:
 
                     cursor.execute(sql, tuple(params))
                     if self.sql_logger:
-                        self.sql_logger.append(sql)
-                        
+                        self.sql_logger.append(sql % tuple(params))
+
                     # return cur.execute(sql, tuple(params))
                     result = cursor.fetchall()
 
@@ -289,10 +297,10 @@ class MySQLKv:
                             yield key, self.mysql_to_py(item[1])
                         else:
                             yield key
-                    
+
                     if len(result) <= limit:
                         break
-                    
+
                     last_key = self.mysql_to_py(item[-1][0])
                     if reverse:
                         key_to = last_key

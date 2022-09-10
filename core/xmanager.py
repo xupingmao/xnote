@@ -21,12 +21,12 @@ import xconfig
 import xutils
 import xauth
 import threading
+import x_trace
 from collections import deque
 from threading import Thread
 from xutils import Storage
 from xutils import logutil
 from xutils import tojson, MyStdout, cacheutil, u, dbutil, fsutil
-from x_trace import start_trace
 
 __version__      = "1.0"
 __author__       = "xupingmao (578749341@qq.com)"
@@ -78,7 +78,7 @@ def do_wrap_handler(pattern, handler_clz):
             self.pattern = pattern
 
         def GET(self, *args):
-            start_trace()
+            x_trace.start_trace()
             start_time = time.time()
             WrappedHandler.visited_count += 1.0
             threading.current_thread().handler_class = self.target
@@ -536,7 +536,7 @@ class SyncTaskThread(Thread):
     def run(self):
         while True:
             fire("sync.step")
-            time.sleep(0.1)
+            time.sleep(3)
 
 class WorkerThread(Thread):
     """执行任务队列的线程，内部有一个队列，所有线程共享"""

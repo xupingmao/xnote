@@ -32,8 +32,15 @@ dbutil.register_table("user_config", "用户配置表")
 dbutil.register_table("session", "用户会话信息")
 dbutil.register_table("user_session_rel", "用户会话关系")
 
+
+session_db = dbutil.get_hash_table("session")
+session_cache = cacheutil.Cache(max_size=500)
+user_cache = cacheutil.Cache(max_size=500)
+
 # 用户表
 USER_TABLE = None
+
+DEFAULT_CACHE_EXPIRE = 60 * 5
 
 # 用户配置
 # 通过init方法完成初始化
@@ -139,16 +146,24 @@ def create_uuid():
     return uuid.uuid4().hex
 
 def get_valid_session_by_id(sid):
-    session_info = dbutil.get("session:%s" % sid)
+    if sid == None:
+        return None
+    session_info = session_cache.get(sid)
+    if session_info == None:
+        session_info = session_db.get(sid)
+        session_cache.put(sid, session_info, expire = DEFAULT_CACHE_EXPIRE)
+
     if session_info is None:
         return None
 
     if session_info.user_name is None:
-        dbutil.delete("session:%s" % sid)
+        session_db.delete(sid)
+        session_cache.delete(sid)
         return None
 
     if time.time() > session_info.expire_time:
-        dbutil.delete("session:%s" % sid)
+        session_db.delete(sid)
+        session_cache.delete(sid)
         return None
 
     return session_info
@@ -202,14 +217,15 @@ def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = None):
         login_time  = time.time(),
         login_ip = login_ip,
         expire_time = time.time() + expires)
-    dbutil.put("session:%s" % session_id, session_info)
 
+    session_db.put(session_id, session_info)
     print("session_info:", session_info)
+
     return session_id
 
 def delete_user_session_by_id(sid):
     # 登录的时候会自动清理无效的sid关系
-    dbutil.delete("session:%s" % sid)
+    session_db.delete(sid)
 
 def _get_user_from_db(name):
     db = get_user_db()
@@ -222,9 +238,13 @@ def _get_builtin_user(name):
 def find_by_name(name):
     if name is None:
         return None
-
-    user = _get_user_from_db(name)
+    
+    user = user_cache.get(name)
+    if user == None:
+        user = _get_user_from_db(name)
+    
     if user != None:
+        user_cache.put(name, user, expire=DEFAULT_CACHE_EXPIRE)
         return user
     return _get_builtin_user(name)
 
@@ -322,6 +342,8 @@ def get_session_id_from_cookie():
 
 def get_user_from_cookie():
     session_id = get_session_id_from_cookie()
+    if session_id == None:
+        return None
     session_info = get_valid_session_by_id(session_id)
 
     if session_info is None:
@@ -338,9 +360,11 @@ def get_current_user():
     user = get_user_from_token()
     if user != None:
         return user
+
     if not hasattr(web.ctx, "env"):
         # 尚未完成初始化
         return None
+
     return get_user_from_cookie()
 
 def current_user():
@@ -464,6 +488,7 @@ def update_user(name, user):
 
     db = get_user_db()
     db.put(name, mem_user)
+    user_cache.delete(name)
 
     xutils.trace("UserUpdate", mem_user)
 
@@ -475,6 +500,7 @@ def delete_user(name):
         return
     name = name.lower()
     dbutil.delete("user:%s" % name)
+    user_cache.delete(name)
     
 
 def has_login_by_cookie(name = None):
