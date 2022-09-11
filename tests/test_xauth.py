@@ -64,7 +64,7 @@ class TestXauth(BaseTestCase):
         # 创建并且查询
         xauth.create_user_session("admin")
         result = xauth.list_user_session_detail("admin")
-        self.assertTrue(len(result) == 1)
+        self.assertEqual(1, len(result))
 
     def test_update_user(self):
         result = xauth.create_user("u123456", "123456")

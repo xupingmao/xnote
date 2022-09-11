@@ -193,3 +193,23 @@ def decode_id(id_str):
     
     num_part = id_str[1:]
     return int(num_part)
+
+def convert_bytes_to_dict(data_bytes):
+    # type: (bytes) -> dict[bytes, bytes]
+    if data_bytes is None:
+        return dict()
+    else:            
+        value_dict = convert_bytes_to_object(data_bytes)
+        result = dict()
+        for key in value_dict:
+            value = value_dict[key]
+            result[key.encode("utf-8")] = value.encode("utf-8")
+        return result
+
+def convert_bytes_dict_to_bytes(bytes_dict):
+    # type: (dict[bytes, bytes]) -> bytes
+    data = dict()
+    for key in bytes_dict:
+        value = bytes_dict[key]
+        data[key.decode("utf-8")] = value.decode("utf-8")
+    return convert_object_to_bytes(data)

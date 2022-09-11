@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-10 22:57:21
+@LastEditTime : 2022-09-11 20:23:26
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -17,6 +17,7 @@ import time
 import mysql.connector
 
 from xutils.base import Storage
+from . import encode
 
 
 class Holder(threading.local):
@@ -51,9 +52,10 @@ class ConnectionWrapper:
         self.db.close()
 
 
-class MySQLKv:
+class MySQLKV:
 
     holder = Holder()
+    lock = threading.RLock()
 
     def __init__(self, *, host=None, port=3306, user=None, password=None, database=None, pool_size = 0, sql_logger=None):
         self.db_host = host
@@ -63,6 +65,7 @@ class MySQLKv:
         self.db_database = database
         self.db_pool_size = pool_size
         self.db_auth_plugin = "mysql_native_password"
+        self.max_key_len = 200
 
         self.debug = True
         self.log_get_profile = True
@@ -120,7 +123,7 @@ class MySQLKv:
                 self.close_cursor(cursor)
             logging.info("mysql connection: %s", con)
 
-    def Get(self, key):
+    def doGet(self, key):
         # type: (bytes) -> bytes
         """通过key读取Value
         @param {bytes} key
@@ -128,6 +131,7 @@ class MySQLKv:
         """
         start_time = time.time()
         con = self.get_connection()
+
         with con:
             cursor = con.cursor(prepared=True)
             try:
@@ -146,8 +150,20 @@ class MySQLKv:
 
                 self.close_cursor(cursor)
 
+    def Get(self, key):
+        if len(key) >= self.max_key_len:
+            short_key = key[:self.max_key_len]
+            data_bytes = self.doGet(short_key)
+            data_dict = encode.convert_bytes_to_dict(data_bytes)
+            return data_dict.get(key)
+        else:
+            return self.doGet(key)
+
     def doPut(self, cursor, key, value):
         # type: (any,bytes,bytes) -> None
+        assert cursor != None
+        assert len(key) <= self.max_key_len
+        
         select_sql = "SELECT `key` FROM kv_store WHERE `key` = %s"
         insert_sql = "INSERT INTO kv_store (`key`, value) VALUES (%s, %s)"
         update_sql = "UPDATE kv_store SET value=%s WHERE `key` = %s"
@@ -167,22 +183,16 @@ class MySQLKv:
 
             cursor.execute(update_sql, (value, key))
 
-    def doPut_v2(self, cursor, key, value):
-        # type: (any,bytes,bytes) -> None
-        insert_sql = "INSERT INTO kv_store (`key`, value) VALUES (%s, %s)"
-        update_sql = "UPDATE kv_store SET value=%s WHERE `key` = %s"
-        # 插入失败后尝试更新,因为更新是一个频率更高的操作
-        if self.debug:
-            logging.debug("SQL:%s, params:%s", update_sql, (key, value))
-
-        cursor.execute(update_sql, (value, key))
-        if cursor.rowcount == 0:
-            logging.info("key not exists, insert new data")
-
-            if self.debug:
-                logging.debug("SQL:%s, params:%s", insert_sql, (key, value))
-
-            cursor.execute(insert_sql, (key, value))
+    def doPutLong(self, cursor, key, value):
+        if len(key) >= self.max_key_len:
+            short_key = key[:self.max_key_len]
+            with self.lock:
+                data_bytes = self.doGet(short_key)
+                data_dict = encode.convert_bytes_to_dict(data_bytes)
+                data_dict[key] = value
+                self.doPut(cursor, short_key, encode.convert_bytes_dict_to_bytes(data_dict))
+        else:
+            return self.doPut(cursor, key, value)
 
     def Put(self, key, value, sync=False, cursor=None):
         # type: (bytes,bytes,bool,any) -> None
@@ -190,16 +200,17 @@ class MySQLKv:
         @param {bytes} key
         @param {bytes} value
         """
+
         start_time = time.time()
 
         if cursor != None:
-            return self.doPut(cursor, key, value)
+            return self.doPutLong(cursor, key, value)
 
         con = self.get_connection()
         with con:
             cursor = con.cursor(prepared=True)
             try:
-                self.doPut(cursor, key, value)
+                self.doPutLong(cursor, key, value)
                 con.commit()
             finally:
                 cost_time = time.time() - start_time
@@ -207,31 +218,53 @@ class MySQLKv:
                     logging.debug("Put (%s) cost %.2fms", key, cost_time*1000)
                 self.close_cursor(cursor)
 
-    def Delete(self, key, sync=False, cursor=None):
+    def doDeleteRaw(self, key, sync=False, cursor=None):
         # type: (bytes, bool, any) -> None
         """删除Key-Value键值对
         @param {bytes} key
         """
+        assert len(key) <= self.max_key_len
+
         sql = "DELETE FROM kv_store WHERE `key` = %s;"
         if self.debug:
             logging.debug("SQL:%s, params:%s", sql, (key, ))
 
-        if cursor != None:
-            cursor.execute(sql, (key, ))
-            return
+        cursor.execute(sql, (key, ))
+    
+    def doDeleteLongNoLock(self, key, cursor):
+        short_key = key[:self.max_key_len]
+        data_bytes = self.doGet(short_key)
+        data_dict = encode.convert_bytes_to_dict(data_bytes)
+        if key in data_dict:
+            del data_dict[key]
+            
+        if len(data_dict) == 0:
+            self.doDeleteRaw(short_key, cursor = cursor)
+        else:
+            self.doPut(cursor, short_key, encode.convert_bytes_dict_to_bytes(data_dict))
 
+    def doDelete(self, key, sync=False, cursor=None):
+        assert cursor != None
+
+        if len(key) >= self.max_key_len:
+            with self.lock:
+                self.doDeleteLongNoLock(key, cursor)
+        else:
+            return self.doDeleteRaw(key, sync, cursor)
+
+    def Delete(self, key, sync=False):
         con = self.get_connection()
         with con:
             cursor = con.cursor(prepared=True)
             try:
-                cursor.execute(sql, (key, ))
-                con.commit()
+                self.doDelete(key, cursor=cursor)
             finally:
-                self.close_cursor(cursor)
-
-    def RangeIter(self,
+                self.close_cursor(cursor)    
+    
+    def RangeIterRaw(self,
                   key_from=None,
                   key_to=None,
+                  *,
                   reverse=False,
                   include_value=True,
                   fill_cache=False):
@@ -307,7 +340,7 @@ class MySQLKv:
                     if len(result) <= limit:
                         break
 
-                    last_key = self.mysql_to_py(item[-1][0])
+                    last_key = self.mysql_to_py(result[-1][0])
                     if reverse:
                         key_to = last_key
                     else:
@@ -315,6 +348,30 @@ class MySQLKv:
 
             finally:
                 self.close_cursor(cursor)
+
+    def RangeIter(self, *args, **kw):
+        include_value = kw.get("include_value", True)
+        reverse = kw.get("reverse", False)
+
+        if include_value:
+            for key, value_bytes in self.RangeIterRaw(*args, **kw):
+                if len(key) >= self.max_key_len:
+                    value_dict = encode.convert_bytes_to_dict(value_bytes)
+                    for key in sorted(value_dict.keys(), reverse=reverse):
+                        value = value_dict[key]
+                        yield key, value
+                else:
+                    yield key, value_bytes
+        else:
+            for key in self.RangeIterRaw(*args, **kw):
+                if len(key) >= self.max_key_len:
+                    value_bytes = self.doGet(key)
+                    value_dict = encode.convert_bytes_to_dict(value_bytes)
+                    # 必须要保证key的迭代顺序
+                    for fullkey in sorted(value_dict.keys(), reverse=reverse):
+                        yield fullkey
+                else:
+                    yield key
 
     def CreateSnapshot(self):
         raise NotImplementedError("CreateSnapshot")
@@ -330,7 +387,7 @@ class MySQLKv:
                     self.Put(key, value, cursor=cursor)
 
                 for key in batch._deletes:
-                    self.Delete(key, cursor=cursor)
+                    self.doDelete(key, cursor=cursor)
                 cursor.execute("commit;")
             finally:
                 self.close_cursor(cursor)

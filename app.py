@@ -171,7 +171,7 @@ def try_init_ldb():
             db_instance = LmdbEnhancedKV(db_dir, map_size=map_size)
 
         if db_driver == "mysql":
-            from xutils.db.driver_mysql import MySQLKv
+            from xutils.db.driver_mysql import MySQLKV
             host = xconfig.get_system_config("mysql_host")
             user = xconfig.get_system_config("mysql_user")
             password = xconfig.get_system_config("mysql_password")
@@ -186,7 +186,7 @@ def try_init_ldb():
                 database = os.environ["MYSQL_DB"]
 
             sql_logger = x_trace.SqlLogger()
-            db_instance = MySQLKv(host=host, user=user, password=password,
+            db_instance = MySQLKV(host=host, user=user, password=password,
                                   database=database, sql_logger=sql_logger, 
                                   pool_size=pool_size)
             db_instance.init()

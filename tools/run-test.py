@@ -64,6 +64,11 @@ def run_test(target = None):
 		os.system("python3 -m coverage html")
 		return
 	
+	if target == "xauth":
+		os.system("python3 -m pytest tests/test_xauth.py --doctest-modules --cov core.xauth --capture no")
+		os.system("python3 -m coverage html")
+		return
+
 	if target != "all":
 		print("未知的操作:", target)
 		sys.exit(1)

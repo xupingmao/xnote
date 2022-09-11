@@ -10,7 +10,7 @@ import threading
 
 from xutils import textutil
 from xutils.base import Storage
-from xutils.db.encode import convert_bytes_to_object, convert_object_to_bytes, encode_int8_to_bytes
+from xutils.db.encode import convert_bytes_dict_to_bytes, convert_bytes_to_dict, convert_bytes_to_object, convert_object_to_bytes, encode_int8_to_bytes
 
 
 # 用于写操作的加锁，所以在多进程或者分布式环境中写操作是不安全的
@@ -172,27 +172,19 @@ class LmdbEnhancedKV:
         # type: (bytes)->bytes
         return key[:self.max_key_size]
 
-    def get_value_dict(self, prefix):
-        value = self.kv.Get(prefix)
-        if value is None:
-            return dict()
-        else:            
-            value_dict = convert_bytes_to_object(value)
-            result = dict()
-            for key in value_dict:
-                value = value_dict[key]
-                result[key.encode("utf-8")] = value.encode("utf-8")
-            return result
+    def get_value_dict(self, prefix, tx=None):
+        if tx != None:
+            value = tx.get(prefix)
+        else:
+            value = self.kv.Get(prefix)
+        return convert_bytes_to_dict(value)
 
     def save_value_dict(self, tx, prefix, value_dict):
         if len(value_dict) == 0:
             tx.delete(prefix)
             return
-        data = dict()
-        for key in value_dict:
-            value = value_dict[key]
-            data[key.decode("utf-8")] = value.decode("utf-8")
-        tx.put(prefix, convert_object_to_bytes(data))
+        data_bytes = convert_bytes_dict_to_bytes(value_dict)
+        tx.put(prefix, data_bytes)
 
     def Get(self, key):
         if len(key) >= self.max_key_size:
@@ -212,7 +204,7 @@ class LmdbEnhancedKV:
             logging.warning("key长度(%d)超过限制(%d)", len(key), self.max_key_size)
             prefix = self.get_large_key_prefix(key)
             with _lock:
-                value_dict = self.get_value_dict(prefix)
+                value_dict = self.get_value_dict(prefix, tx=tx)
                 value_dict[key] = value
                 self.save_value_dict(tx, prefix, value_dict)
                 return
@@ -223,7 +215,7 @@ class LmdbEnhancedKV:
         if len(key) >= self.max_key_size:
             prefix = self.get_large_key_prefix(key)
             with _lock:
-                value_dict = self.get_value_dict(prefix)
+                value_dict = self.get_value_dict(prefix, tx=tx)
                 if key in value_dict:
                     del value_dict[key]
                 self.save_value_dict(tx, prefix, value_dict)
@@ -233,27 +225,29 @@ class LmdbEnhancedKV:
     def Delete(self, key, sync=False):
         with self.kv.env.begin(write=True) as tx:
             return self.doDelete(tx, key, sync)
+    
+    def RangeIterRaw(self, *args, **kw):
+        yield from self.kv.RangeIter(*args, **kw)
 
     def RangeIter(self, *args, **kw):
         include_value = kw.get("include_value", True)
+        reverse = kw.get("reverse", False)
+
         if include_value:
             for key, value in self.kv.RangeIter(*args, **kw):
                 if len(key) >= self.max_key_size:
-                    prefix = self.get_large_key_prefix(key)
-                    value_dict = self.get_value_dict(prefix)
+                    value_dict = self.get_value_dict(key)
                     # 必须要保证key的迭代顺序
-                    for fullkey in sorted(value_dict.keys()):
-                        new_key = value_dict[fullkey]
-                        yield fullkey, self.kv.Get(new_key)
+                    for fullkey in sorted(value_dict.keys(), reverse=reverse):
+                        yield fullkey, value_dict[fullkey]
                 else:
                     yield key, value
         else:
             for key in self.kv.RangeIter(*args, **kw):
                 if len(key) >= self.max_key_size:
-                    prefix = self.get_large_key_prefix(key)
-                    value_dict = self.get_value_dict(prefix)
+                    value_dict = self.get_value_dict(key)
                     # 必须要保证key的迭代顺序
-                    for fullkey in sorted(value_dict.keys()):
+                    for fullkey in sorted(value_dict.keys(), reverse=reverse):
                         yield fullkey
                 else:
                     yield key

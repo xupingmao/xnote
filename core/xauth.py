@@ -219,6 +219,8 @@ def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = None):
         expire_time = time.time() + expires)
 
     session_db.put(session_id, session_info)
+    session_cache.delete(session_id)
+    
     print("session_info:", session_info)
 
     return session_id

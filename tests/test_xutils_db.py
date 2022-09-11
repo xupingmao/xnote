@@ -58,6 +58,7 @@ class MockedWriteBatch:
 def run_range_test_from_None(test, db):
     for key in db.RangeIter(include_value=False):
         db.Delete(key)
+        print("Delete", key, db)
 
     db.Put(b"test5:1", b"value1")
     db.Put(b"test5:5", b"value5")
@@ -103,6 +104,7 @@ def run_range_test(test, db):
 
     # 统计所有的数量
     all_list = list(db.RangeIter())
+    print("[all_list]", all_list, db)
     test.assertEqual(5, len(all_list))
 
     all_list_only_key = list(db.RangeIter(include_value=False))
@@ -119,7 +121,8 @@ def run_range_test(test, db):
     print("data_list:", data_list)
     test.assertEqual(b"test8:1", data_list[0])
 
-    data_list = list(db.RangeIter(include_value=False, reverse=True, key_to=b"test6:3"))
+    data_list = list(db.RangeIter(include_value=False,
+                     reverse=True, key_to=b"test6:3"))
     print("data_list:", data_list)
     test.assertEqual(b"test6:2", data_list[0])
 
@@ -127,6 +130,7 @@ def run_range_test(test, db):
 def run_test_db_engine(test, db):
     for key in db.RangeIter(include_value=False):
         db.Delete(key)
+        print("Delete", key, db)
 
     db.Put(b"key", b"value")
     test.assertEqual(b"value", db.Get(b"key"))
@@ -171,7 +175,7 @@ class TestMain(BaseTestCase):
         # 初始化一个5M的数据库
         db = LmdbKV(db_dir, map_size=1024 * 1024 * 5)
         run_test_db_engine(self, db)
-    
+
     def test_dbutil_lmdb_enhanced(self):
         from xutils.db.driver_lmdb import LmdbEnhancedKV
         db_dir = os.path.join(xconfig.DB_DIR, "lmdb")
@@ -204,11 +208,12 @@ class TestMain(BaseTestCase):
         run_snapshot_test(self, db.CreateSnapshot())
 
     def test_dbutil_mysql(self):
-        from xutils.db.driver_mysql import MySQLKv
-        db = MySQLKv(host="192.168.50.153", user="root", password="root", database="test2")
+        from xutils.db.driver_mysql import MySQLKV
+        db = MySQLKV(host="192.168.50.153", user="root",
+                     password="root", database="test2")
         db.init()
         run_test_db_engine(self, db)
-
+        self.do_test_lmdb_large_key(db)
 
     def triggle_database_locked(self):
         from xutils.db.driver_sqlite import db_execute
@@ -281,6 +286,10 @@ class TestMain(BaseTestCase):
             t.join()
 
     def do_test_lmdb_large_key(self, db):
+        # 先清理数据
+        for key in db.RangeIter(include_value=False):
+            db.Delete(key)
+
         prefix = textutil.random_string(1000)
         key1 = (prefix + "_key1").encode("utf-8")
         key2 = (prefix + "_key2").encode("utf-8")
@@ -299,32 +308,38 @@ class TestMain(BaseTestCase):
         value1c = db.Get(key1)
         self.assertEqual(None, value1c)
 
-    def test_lmdb_large_key2(self):
-        from xutils.db.driver_lmdb import LmdbEnhancedKV
-        db_dir = os.path.join(xconfig.DB_DIR, "lmdb2")
-        # 初始化一个5M的数据库
-        db = LmdbEnhancedKV(db_dir, map_size=1024 * 1024 * 5)
-        self.do_test_lmdb_large_key(db)
-
         print("-" * 60)
         print("Print Values")
 
         # 物理视图：一个超长的key
-        data = list(db.kv.RangeIter())
+        data = list(db.RangeIterRaw())
         self.assertEqual(1, len(data))
 
         # 逻辑视图：两个超长的key
         data2 = list(db.RangeIter())
         self.assertEqual(2, len(data2))
 
+        # 插入两个新的超长key
         large_key = "test:" + textutil.random_string(1003)
         batch = dbutil.create_write_batch(db_instance=db)
         batch.put(large_key + "#1", dict(name="test1"))
-        batch.put(large_key + "#2", dict(name = "test2"))
+        batch.put(large_key + "#2", dict(name="test2"))
         batch.commit()
 
-        data3 = list(db.RangeIter())
-        self.assertEqual(3, len(data3))
+        # 逻辑视图: 4个超长的key
+        data = list(db.RangeIter())
+        print("[RangeIter]", db, data)
+        self.assertEqual(4, len(data))
+
+        # 物理视图: 2个超长key
+        self.assertEqual(2, len(list(db.RangeIterRaw())))
+
+    def test_lmdb_large_key2(self):
+        from xutils.db.driver_lmdb import LmdbEnhancedKV
+        db_dir = os.path.join(xconfig.DB_DIR, "lmdb2")
+        # 初始化一个5M的数据库
+        db = LmdbEnhancedKV(db_dir, map_size=1024 * 1024 * 5)
+        self.do_test_lmdb_large_key(db)
 
     def test_create_auto_increment_id(self):
         db = dbutil.get_table("test")
@@ -345,8 +360,10 @@ class TestMain(BaseTestCase):
         print("obj2_found", obj2_found)
         print("obj3_found", obj3_found)
 
-        self.assertEqual(decode_id(obj1_found._id) + 1, decode_id(obj2_found._id))
-        self.assertEqual(decode_id(obj2_found._id) + 1, decode_id(obj3_found._id))
+        self.assertEqual(decode_id(obj1_found._id) +
+                         1, decode_id(obj2_found._id))
+        self.assertEqual(decode_id(obj2_found._id) +
+                         1, decode_id(obj3_found._id))
 
         results = db.list_by_index("age", limit=10)
         self.assertEqual(3, len(results))
@@ -470,11 +487,11 @@ class TestMain(BaseTestCase):
         self.assertEqual("Ada", result[0].name)
 
         # 校验索引值是否正确
-        obj1_name_index = dbutil.db_get("_index$index_test$name:Ada:" + obj1._id)
+        obj1_name_index = dbutil.db_get(
+            "_index$index_test$name:Ada:" + obj1._id)
         self.assertEqual(obj1_name_index.key, "index_test:" + obj1._id)
         self.assertEqual(obj1_name_index.value["name"], "Ada")
         self.assertEqual(obj1_name_index.value["age"], 20)
-
 
         obj1["age"] = 25
         db.update(obj1)
@@ -530,7 +547,6 @@ class TestMain(BaseTestCase):
 
         last = db.get_last()
         self.assertEqual("Bob", last.name)
-    
 
     def test_dbutil_lock(self):
         print("test_dbutil_lock")
@@ -582,10 +598,10 @@ class TestMain(BaseTestCase):
         BinLog.set_max_size(10)
 
         binlog = BinLog.get_instance()
-        
+
         for i in range(20):
             binlog.add_log("put", "test_binlog_clear", "test")
-        
+
         binlog.delete_expired()
 
         self.assertEqual(10, len(binlog.list(0, limit=20)))
@@ -598,7 +614,7 @@ class TestMain(BaseTestCase):
         q.append("v2")
         q.append("v3")
         q.append("v4")
-        
+
         self.assertEqual(4, len(q))
         batch = dbutil.create_write_batch()
         q.append("v5", batch=batch)
