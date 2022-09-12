@@ -1,0 +1,48 @@
+{
+    "python.analysis.extraPaths": [
+        "./core",
+        "./lib",
+    ],
+    "fileheader.configObj": {
+        "autoAdd": true, // 检测文件没有头部注释，自动添加文件头部注释
+        "autoAddLine": 20, // 文件超过多少行数 不再自动添加头部注释
+        "wideSame": true, // 头部注释等宽设置
+        "wideNum": 13, // 头部注释字段长度 默认为13
+        "atSymbol": [
+            "@",
+            "@"
+        ], // 所有文件的头部注释和函数注释的默认值
+        "atSymbolObj": {}, //  更改单独语言/文件的@
+        "beforeAnnotation": {
+            "py": "# -*- coding:utf-8 -*-"
+        },
+        "filePathColon": "/", // 默认值： mac: / window是: \
+        "language": {
+            "python": {
+                "head": "\"\"\"",
+                "middle": "@",
+                "end": "\"\"\"",
+            },
+            "html": {
+                "head": "<!-- {#",
+                "middle": "@",
+                "end": " #} -->",
+            }
+        }
+    },
+    "fileheader.customMade": {
+        "Author": "xupingmao",
+        "email": "578749341@qq.com",
+        "Date": "Do not edit", // 文件创建时间(不变)
+        "LastEditors": "xupingmao", // 文件最后编辑者
+        "LastEditTime": "Do not edit", // 文件最后编辑时间
+        "FilePath": "Do not edit", // 文件在项目中的相对路径 自动更新
+        "Description": "描述"
+    },
+    // 函数注释
+    "fileheader.cursorMode": {
+        "description": "", // 函数注释生成之后，光标移动到这里
+        "param": "", // param 开启函数参数自动提取 需要将光标放在函数行或者函数上方的空白行
+        "return": "",
+    }
+}

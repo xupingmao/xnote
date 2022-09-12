@@ -49,7 +49,6 @@ tools.md
 /.idea/
 /handlers/experiment/
 **/.cache/
-.vscode/
 .pytest_cache/
 /testdir/
 /中文/

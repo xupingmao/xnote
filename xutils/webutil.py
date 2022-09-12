@@ -40,6 +40,9 @@ def _detect_type(default_value, type):
     if isinstance(default_value, bool):
         return bool
     
+    if isinstance(default_value, int):
+        return int
+    
     return None
 
 def get_argument(key, default_value=None, type = None, strip=False):

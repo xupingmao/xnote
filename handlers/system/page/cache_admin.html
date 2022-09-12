@@ -1,0 +1,87 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-09-12 20:43:45
+@LastEditors  : xupingmao
+@LastEditTime : 2022-09-12 21:22:52
+@FilePath     : /xnote/handlers/system/page/cache_admin.html
+@Description  : 描述
+ #} -->
+{% extends base %}
+
+{% block body %}
+
+<style>
+    .cache-table th {
+        width: 25%;
+    }
+    .cache-table td {
+        text-overflow: ellipsis;
+        max-height: 50px;
+    }
+</style>
+
+<div class="col-md-12 grid-card">
+    <h3 class="card-title btn-line-height">
+        <span>缓存信息</span>
+        <div class="float-right">
+            <!-- 不推荐脚本+配置来创建定时任务，直接通过插件来设置
+            <input class="dialog-btn" type="button" value="新增任务" dialog-url="/system/crontab/edit" />
+            -->
+            <button class="btn-default" onclick="javascript:history.back()">返回</button>
+        </div>
+    </h3>
+</div>
+
+<div class="card btn-line-height">
+    <span>缓存总数: {{cache_count}}</span>
+    <span>缓存总数: {{cache_size}}</span>
+</div>
+
+<div class="card">
+    <table class="table cache-table">
+        <tr>
+            <th>Key</th>
+            <th>Value</th>
+            <th>Expire</th>
+            <th>操作</th>
+        </tr>
+        {% for item in cache_list %}
+            <tr>
+                <td>{{item.key}}</td>
+                <td>
+                    <span>{{item.value_short}}</span>
+                    {% if item.value != item.value_short %}
+                        <br/><a class="toggle-text" data-close=true data-full="{{item.value}}" data-short="{{item.value_short}}">展开</a>
+                    {% end %}
+                </td>
+                <td>{{item.expire}}</td>
+                <td></td>
+            </tr>
+        {% end %}
+    </table>
+</div>
+
+<div class="card">
+    {% include common/pagination.html %}
+</div>
+
+<script>
+$(function () {
+    $(".toggle-text").click(function () {
+        var isClose = $(this).attr("data-close") === "true";
+        var newText = "";
+
+        if (isClose) {
+            newText = $(this).attr("data-full");
+        } else {
+            newText = $(this).attr("data-short");
+        }
+        console.log(newText);
+        $(this).attr("data-close", !isClose);
+        $(this).parent().find("span").text(newText);
+    })
+})
+</script>
+
+{% end %}

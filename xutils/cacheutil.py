@@ -107,6 +107,9 @@ class Cache:
             else:
                 self.delete(key)
         return default_value
+    
+    def get_raw(self, key):
+        return self.dict.get(key)
 
     def put(self, key, value, expire=60*5, random_range=60*5):
         assert expire > 0
@@ -137,6 +140,12 @@ class Cache:
         while len(self.dict) > self.max_size:
             key, value = self.dict.popitem(last=True) # 弹出第一个
             self.delete(key)
+    
+    def get_expire(self, key):
+        return self.expire_dict.get(key)
+
+    def keys(self):
+        return self.dict.keys()
 
 class DummyCache:
     """用于禁用缓存, 兼容缓存的API"""
@@ -168,6 +177,9 @@ class PrefixedCache:
     
     def delete(self, key):
         return _global_cache.delete(self.prefix + key)
+
+def get_global_cache():
+    return _global_cache
 
 class CacheObj:
     """缓存对象，包含缓存的key和value，有一个公共的缓存队列
