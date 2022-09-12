@@ -101,11 +101,10 @@ def handle_args_and_init_config(boot_config_kw=None):
 
     xconfig.USE_CACHE_SEARCH = get_bool_by_sys_arg(args.useCacheSearch)
     xconfig.USE_URLENCODE = get_bool_by_sys_arg(args.useUrlencode)
-    xconfig.DEV_MODE = get_bool_by_sys_arg(args.devMode)
     xconfig.IS_TEST = get_bool_by_sys_arg(args.test)
-    # 调试配置
-    xconfig.DEBUG = get_bool_by_sys_arg(args.debug)
-    web.config.debug = xconfig.DEBUG
+    
+    if xconfig.DEBUG:
+        web.config.debug = xconfig.DEBUG
 
     start_time = xutils.format_datetime()
     xconfig.set_global_config("start_time", start_time)

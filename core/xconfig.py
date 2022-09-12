@@ -176,8 +176,6 @@ hashset = set
 # 剪切板
 FS_CLIP = []
 
-# 通知公告
-_notice_list = []
 # 搜索历史
 search_history = None
 # 笔记访问历史
@@ -359,9 +357,15 @@ def init_boot_config(fpath, boot_config_kw=None):
 
     global PORT
     global FORCE_HTTPS
+    global DEBUG
+    global DEV_MODE
 
-    PORT = get_global_config("system.port")
-    FORCE_HTTPS = get_global_config("system.force_https")
+    PORT = get_system_config("port")
+    FORCE_HTTPS = get_system_config("force_https")
+    DEBUG = get_system_config("debug")
+
+    if DEBUG:
+        DEV_MODE = True
 
 
 def init_http_port():
@@ -481,8 +485,6 @@ def set_global_config(name, value):
 
 def get_config():
     raise Exception("deprecated: use xconfig.get_config_dict")
-    return _config
-
 
 def get_config_dict():
     return _config

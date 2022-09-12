@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-12 09:39:34
+@LastEditTime : 2022-09-12 09:50:44
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -180,7 +180,7 @@ class MySQLKV:
                 logging.debug("SQL:%s, params:%s", update_sql, (key, value))
             
             if self.sql_logger:
-                self.sql_logger.append(update_sql % (key, "-"))
+                self.sql_logger.append(update_sql % ("-", key))
 
             cursor.execute(update_sql, (value, key))
 
@@ -219,6 +219,9 @@ class MySQLKV:
         sql = "DELETE FROM kv_store WHERE `key` = %s;"
         if self.debug:
             logging.debug("SQL:%s, params:%s", sql, (key, ))
+        
+        if self.sql_logger:
+            self.sql_logger.append(sql % (key,))
 
         cursor.execute(sql, (key, ))
 
@@ -292,10 +295,11 @@ class MySQLKV:
 
                     if self.debug:
                         logging.debug("SQL:%s (%s)", sql, params)
-
-                    cursor.execute(sql, tuple(params))
+                    
                     if self.sql_logger:
                         self.sql_logger.append(sql % tuple(params))
+
+                    cursor.execute(sql, tuple(params))
 
                     # return cur.execute(sql, tuple(params))
                     result = cursor.fetchall()

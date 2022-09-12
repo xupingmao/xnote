@@ -26,10 +26,10 @@ from xutils import textutil
 import x_trace
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
-NAMESPACE    = dict(
-    format_date = dateutil.format_date,
-    format_time = dateutil.format_time,
-    quote       = quote
+NAMESPACE = dict(
+    format_date=dateutil.format_date,
+    format_time=dateutil.format_time,
+    quote=quote
 )
 
 _lang_dict = dict()
@@ -39,6 +39,8 @@ NAV_LIST = []
 
 SEARCH_DAO = xutils.DAO("search")
 PLUGIN_DAO = xutils.DAO("plugin")
+
+
 def load_languages():
     """加载系统语言配置"""
     global _lang_dict
@@ -49,15 +51,16 @@ def load_languages():
         name, ext = os.path.splitext(fname)
         if ext != ".properties":
             continue
-        fpath   = os.path.join(dirname, fname)
+        fpath = os.path.join(dirname, fname)
         content = xutils.readfile(fpath)
-        config  = xutils.parse_config_text(content, ret_type = 'dict')
+        config = xutils.parse_config_text(content, ret_type='dict')
         _lang_dict[name] = config
+
 
 class NavItem(Storage):
 
     field_text = "导航文字"
-    field_url  = "导航URL"
+    field_url = "导航URL"
 
     def check_platform(self):
         if self.desktop_only:
@@ -76,19 +79,29 @@ class NavItem(Storage):
 
         return self.check_platform()
 
+
 def load_nav_list():
     global NAV_LIST
     NAV_LIST = []
-    NAV_LIST.append(NavItem(text = "首页", need_login = True,  require_admin = False, url = "/note/index"))
-    NAV_LIST.append(NavItem(text = "动态", need_login = True,  require_admin = False, url = "/note/recent?orderby=view"))
-    NAV_LIST.append(NavItem(text = "分享", need_login = False, require_admin = False, url = "/note/public"))
-    NAV_LIST.append(NavItem(text = "插件", need_login = True,  require_admin = False, desktop_only = True, url = "/plugin_list"))
-    NAV_LIST.append(NavItem(text = "文件", need_login = True,  require_admin = True , desktop_only = True, url = "/fs_bookmark"))
-    NAV_LIST.append(NavItem(text = "设置", need_login = True,  require_admin = False, url = "/system/settings"))
-    NAV_LIST.append(NavItem(text = "后台", need_login = True, require_admin = True, desktop_only = True, url = "/system/admin"))
-    NAV_LIST.append(NavItem(text = "登录", need_logout = True, require_admin = False, url = "/login"))
+    NAV_LIST.append(NavItem(text="首页", need_login=True,
+                    require_admin=False, url="/note/index"))
+    NAV_LIST.append(NavItem(text="动态", need_login=True,
+                    require_admin=False, url="/note/recent?orderby=view"))
+    NAV_LIST.append(NavItem(text="分享", need_login=False,
+                    require_admin=False, url="/note/public"))
+    NAV_LIST.append(NavItem(text="插件", need_login=True,
+                    require_admin=False, desktop_only=True, url="/plugin_list"))
+    NAV_LIST.append(NavItem(text="文件", need_login=True,
+                    require_admin=True, desktop_only=True, url="/fs_bookmark"))
+    NAV_LIST.append(NavItem(text="设置", need_login=True,
+                    require_admin=False, url="/system/settings"))
+    NAV_LIST.append(NavItem(text="后台", need_login=True,
+                    require_admin=True, desktop_only=True, url="/system/admin"))
+    NAV_LIST.append(NavItem(text="登录", need_logout=True,
+                    require_admin=False, url="/login"))
 
-def T(text, lang = None):
+
+def T(text, lang=None):
     if lang is None:
         lang = xconfig.get_current_user_config("LANG")
 
@@ -98,9 +111,10 @@ def T(text, lang = None):
     else:
         return mapping.get(text, text)
 
+
 class XnoteLoader(Loader):
     """定制Template Loader"""
-    
+
     def resolve_path_old(self, name, parent_path=None):
         """这是默认的按照相对路径处理模板路径"""
         if parent_path and not parent_path.startswith("<") and \
@@ -129,7 +143,7 @@ class XnoteLoader(Loader):
 
     def _create_template(self, name):
         if name.endswith(".str"):
-            return Template(name, name = name, loader = self)
+            return Template(name, name=name, loader=self)
         path = os.path.join(self.root, name)
         with open(path, "rb") as f:
             template = Template(f.read(), name=name, loader=self)
@@ -138,12 +152,15 @@ class XnoteLoader(Loader):
     def init_template(self, name, text):
         self.templates[name] = Template(text, name=name, loader=self)
 
+
 def set_loader_namespace(namespace):
     """ set basic namespace """
     _loader.namespace = namespace
 
+
 def get_user_agent():
     return xutils.get_client_user_agent()
+
 
 @xutils.cache(prefix="message.count", expire=360)
 def get_message_count(user):
@@ -156,37 +173,38 @@ def get_message_count(user):
         xutils.print_exc()
         return 0
 
+
 def get_nav_list():
     return NAV_LIST
 
+
 def render_before_kw(kw):
     """模板引擎预处理过程"""
-    user_name           = xauth.current_name() or ""
-    user_role           = xauth.current_role() or ""
+    user_name = xauth.current_name() or ""
+    user_role = xauth.current_role() or ""
 
-    kw["math"]          = math
-    kw["_is_admin"]     = xauth.is_admin()
-    kw["_has_login"]    = xauth.has_login()
-    kw["_user_name"]    = user_name
-    kw["_user_role"]    = user_role
-    kw["_user_agent"]   = get_user_agent()
+    kw["math"] = math
+    kw["_is_admin"] = xauth.is_admin()
+    kw["_has_login"] = xauth.has_login()
+    kw["_user_name"] = user_name
+    kw["_user_role"] = user_role
+    kw["_user_agent"] = get_user_agent()
     # 用于渲染其他组件
-    kw["_render"]       = render
-    kw["_nav_list"]     = get_nav_list()
-    kw["_is_mobile"]    = is_mobile_device()
-    kw["_is_desktop"]   = xutils.is_desktop_client()
-    kw["_cost_time"]    = x_trace.get_cost_time()
-    kw["Storage"]       = Storage
-    kw["xutils"]        = xutils
-    kw["xconfig"]       = xconfig
-    kw["T"]             = T
+    kw["_render"] = render
+    kw["_nav_list"] = get_nav_list()
+    kw["_is_mobile"] = is_mobile_device()
+    kw["_is_desktop"] = xutils.is_desktop_client()
+    kw["Storage"] = Storage
+    kw["xutils"] = xutils
+    kw["xconfig"] = xconfig
+    kw["T"] = T
 
     # 用户配置
-    kw["_user_config"]  = xconfig.get_user_config_dict(user_name)
-    kw["FONT_SCALE"]    = xconfig.get_user_config(user_name, "FONT_SCALE")
-    kw["HOME_PATH"]     = xconfig.get_user_config(user_name, "HOME_PATH")
-    kw["THEME"]         = xconfig.get_user_config(user_name, "THEME")
-    kw["_debug_info"]   = x_trace.get_debug_info()
+    kw["_user_config"] = xconfig.get_user_config_dict(user_name)
+    kw["FONT_SCALE"] = xconfig.get_user_config(user_name, "FONT_SCALE")
+    kw["HOME_PATH"] = xconfig.get_user_config(user_name, "HOME_PATH")
+    kw["THEME"] = xconfig.get_user_config(user_name, "THEME")
+    kw["_debug_info"] = x_trace.get_debug_info()
 
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
@@ -199,9 +217,13 @@ def render_before_kw(kw):
     if _input is not None:
         kw.update(_input)
 
+
 def render_after_kw(kw):
     """后置渲染，可以覆盖前面的数据"""
     render_search(kw)
+
+    kw["_cost_time"] = x_trace.get_cost_time()
+
 
 def get_mobile_template(name):
     global _mobile_name_dict
@@ -221,8 +243,10 @@ def get_mobile_template(name):
     _mobile_name_dict[name] = name
     return name
 
-def is_mobile_device(user_agent = None):
+
+def is_mobile_device(user_agent=None):
     return xutils.is_mobile_client(user_agent)
+
 
 def get_device_platform():
     platform = web.ctx.get("xnote_platform")
@@ -233,8 +257,10 @@ def get_device_platform():
     web.ctx.xnote_platform = platform
     return platform
 
+
 def do_get_device_platform():
     return xutils.get_client_platform()
+
 
 def render_by_ua(name, **kw):
     if is_mobile_device():
@@ -242,6 +268,7 @@ def render_by_ua(name, **kw):
         mobile_name = get_mobile_template(name)
         return render(mobile_name, **kw)
     return render(name, **kw)
+
 
 def render_search(kw):
     # 已经定义了搜索行为
@@ -254,6 +281,7 @@ def render_search(kw):
         kw["search_action"] = handler.action
         kw["search_placeholder"] = handler.placeholder
         kw["search_tag"] = handler.tag
+
 
 def do_render_kw(kw):
     nkw = dict()
@@ -268,7 +296,8 @@ def do_render_kw(kw):
 
     return nkw
 
-@xutils.timeit_deco(name = "Template.Render", logfile = True)
+
+@xutils.timeit_deco(name="Template.Render", logfile=True)
 def render(template_name, **kw):
     # 处理上下文渲染
     nkw = do_render_kw(kw)
@@ -281,7 +310,8 @@ def render(template_name, **kw):
             return tojson(nkw)
     return _loader.load(template_name).generate(**nkw)
 
-def render_text(text, template_name = "<string>", **kw):
+
+def render_text(text, template_name="<string>", **kw):
     """使用模板引擎渲染文本信息,使用缓存
     TODO 控制缓存大小，使用FIFO或者LRU淘汰
     """
@@ -301,9 +331,10 @@ def get_templates():
     """获取所有模板的浅拷贝"""
     return _loader.templates.copy()
 
+
 def _do_init():
     global _loader
-    _loader = XnoteLoader(TEMPLATE_DIR, namespace = NAMESPACE)
+    _loader = XnoteLoader(TEMPLATE_DIR, namespace=NAMESPACE)
     _loader.reset()
 
     # 加载语言
@@ -311,13 +342,16 @@ def _do_init():
     # 加载菜单
     load_nav_list()
 
-@xutils.log_init_deco("xtemplate.reload")    
+
+@xutils.log_init_deco("xtemplate.reload")
 def reload():
     """reload template manager"""
     _do_init()
 
+
 def init():
     _do_init()
+
 
 class Panel:
 
@@ -334,29 +368,36 @@ class Panel:
         html += '</div>'
         return html
 
+
 class Input:
     """输入文本框"""
+
     def __init__(self, label, name, value):
         self.label = label
         self.name = name
         self.value = value
 
     def render(self):
-        html  = '<div class="x-plugin-input">'
-        html +=   '<label class="x-plugin-input-label">%s</label>' % self.label
-        html +=   '<input class="x-plugin-input-text" name="%s" value="%s">' % (self.name, self.value)
+        html = '<div class="x-plugin-input">'
+        html += '<label class="x-plugin-input-label">%s</label>' % self.label
+        html += '<input class="x-plugin-input-text" name="%s" value="%s">' % (
+            self.name, self.value)
         html += '</div>'
         return html
+
 
 class Textarea:
 
     def __init__(self, label, name, value):
         pass
 
+
 class TabLink:
     """tab页链接"""
+
     def __init__(self):
         pass
+
 
 class SubmitButton:
     """提交按钮"""
@@ -364,23 +405,27 @@ class SubmitButton:
     def __init__(self, label):
         pass
 
+
 class ActionButton:
     """查询后的操作行为按钮，比如删除、刷新等"""
 
-    def __init__(self, label, action, context = None):
+    def __init__(self, label, action, context=None):
         pass
+
 
 class ConfirmButton:
     """确认按钮"""
 
-    def __init__(self, label, action, context = None):
+    def __init__(self, label, action, context=None):
         pass
+
 
 class PromptButton:
     """询问输入按钮"""
 
-    def __init__(self, label, action, context = None):
+    def __init__(self, label, action, context=None):
         pass
+
 
 class DataTable:
     """数据表格"""
@@ -392,22 +437,24 @@ class DataTable:
         """
         pass
 
+
 class TextResponse:
 
     def __init__(self, text):
         self.text = text
 
+
 class BasePlugin:
     """插件的基类"""
 
-    api_level   = 0.0  # 插件的API版本 用于处理各种兼容性问题
-    show_nav    = True # 是否展示菜单
+    api_level = 0.0  # 插件的API版本 用于处理各种兼容性问题
+    show_nav = True  # 是否展示菜单
 
     # 插件的标题
-    show_title  = True    
-    title       = u"插件名称"
+    show_title = True
+    title = u"插件名称"
     description = ""
-    
+
     # {权限配置}
     # 默认需要管理员权限访问
     require_admin = True
@@ -424,9 +471,9 @@ class BasePlugin:
     aside_html = u("")
 
     # {搜索配置}
-    show_search        = True
-    search_type        = "default"
-    search_action      = "/search"
+    show_search = True
+    search_type = "default"
+    search_action = "/search"
     search_placeholder = None
 
     # {插件路径} 系统自动填充
@@ -434,33 +481,32 @@ class BasePlugin:
 
     # {输入配置}
     placeholder = u("")
-    btn_text    = T("处理")
-    editable    = True    
+    btn_text = T("处理")
+    editable = True
     # 输入框的行数
-    rows        = 20  
-    CONTENT_WIDTH = 1000 # 内容的宽度
-    
+    rows = 20
+    CONTENT_WIDTH = 1000  # 内容的宽度
+
     # 分页配置
     show_pagenation = False
-    page_url        = "?page="
-    page            = 1 # 当前分页，需要扩展方设置
-    page_max        = 1 # 最大分页，需要扩展方设置
-
+    page_url = "?page="
+    page = 1  # 当前分页，需要扩展方设置
+    page_max = 1  # 最大分页，需要扩展方设置
 
     # 插件模板路径
     html_template_path = "plugin/base/base_plugin.html"
 
-    def __init__(self):  
+    def __init__(self):
         # 提交请求的方法
-        self.method          = "POST"
-        self.output          = u("")
-        self.html            = u("")
-        self.html_header     = None
-        self.css_style       = u("")
-        self.option_links    = []
-        
+        self.method = "POST"
+        self.output = u("")
+        self.html = u("")
+        self.html_header = None
+        self.css_style = u("")
+        self.option_links = []
+
     def add_option_link(self, name, url):
-        self.option_links.append(dict(name=name, url = url))
+        self.option_links.append(dict(name=name, url=url))
 
     def write(self, text):
         self.output += u(text)
@@ -491,7 +537,7 @@ class BasePlugin:
         html = render_text(template, **kw)
         self.html += u(html.decode("utf-8"))
         return self.html
-    
+
     def write_aside(self, template, **kw):
         self.show_aside = True
         self.aside_html = render_text(template, **kw)
@@ -540,19 +586,19 @@ class BasePlugin:
         if self.require_admin:
             xauth.check_login("admin")
 
-
     def render(self):
         """图形界面入口,实际的调用入口请查看`plugins.py`文件"""
-        
+
         # 访问检查
         self.check_access()
-        
-        input  = self.get_input()
-        error  = u("")
+
+        input = self.get_input()
+        error = u("")
         output = u("")
         try:
             self.page = self.get_page()
-            self.category_name = PLUGIN_DAO.get_category_name_by_code(self.category)
+            self.category_name = PLUGIN_DAO.get_category_name_by_code(
+                self.category)
             output = self.handle(input) or u("")
             if self.get_format() == "text":
                 web.header("Content-Type", "text/plain; charset:utf-8")
@@ -580,7 +626,6 @@ class BasePlugin:
         kw.script_name = globals().get("script_name")
         kw.output = self.output + output
 
-
         return render(self.html_template_path, **kw)
 
     def convert_attr_to_kw(self):
@@ -588,13 +633,13 @@ class BasePlugin:
         kw.model = self
         kw.fpath = self.fpath
         kw.description = self.description
-        kw.html_title  = self.title
-        kw.title  = self.title
+        kw.html_title = self.title
+        kw.title = self.title
         kw.method = self.method
-        kw.rows   = self.rows
+        kw.rows = self.rows
         kw.html = self.html
         kw.css_style = self.css_style
-        kw.show_nav  = self.show_nav
+        kw.show_nav = self.show_nav
         kw.show_aside = self.show_aside
         kw.show_search = self.show_search
         kw.search_action = self.search_action
@@ -636,7 +681,8 @@ class BasePlugin:
     def POST(self):
         return self.render()
 
-BaseTextPage   = BasePlugin
+
+BaseTextPage = BasePlugin
 BaseTextPlugin = BasePlugin
 
 
@@ -651,5 +697,3 @@ class BaseFormPlugin(BasePlugin):
 class PluginBase(BasePlugin):
     """这种命名规则更好一些 [领域-组成部分]"""
     pass
-
-
