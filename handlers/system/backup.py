@@ -262,14 +262,14 @@ def _import_db(db_file):
         write_batch.put_bytes(key, value)
         count += 1
         if count % batch_size == 0:
-            write_batch.commit()
+            write_batch.commit(retries=5)
             write_batch = dbutil.create_write_batch()
             cost_time = time.time() - start_time
             progress = count/total_count*100.0
             qps = calc_qps(count, cost_time)
             logger.log("proceed:(%d), progress:(%.2f%%), qps:(%.2f)" % (count, progress, qps))
 
-    write_batch.commit()
+    write_batch.commit(retries=5)
 
     logger.log("[done] records:%s", count)
     return "records:%s" % count

@@ -211,8 +211,12 @@ class TestMain(BaseTestCase):
         from xutils.db.driver_mysql import MySQLKV
         db = MySQLKV(host="192.168.50.153", user="root",
                      password="root", database="test2")
-        db.init()
         run_test_db_engine(self, db)
+
+    def test_dbutil_mysql_enhanced(self):
+        from xutils.db.driver_mysql import EnhancedMySQLKV
+        db = EnhancedMySQLKV(host="192.168.50.153", user="root",
+                     password="root", database="test3")
         self.do_test_lmdb_large_key(db)
 
     def triggle_database_locked(self):

@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-11 20:23:26
+@LastEditTime : 2022-09-12 09:39:34
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -65,12 +65,12 @@ class MySQLKV:
         self.db_database = database
         self.db_pool_size = pool_size
         self.db_auth_plugin = "mysql_native_password"
-        self.max_key_len = 200
 
         self.debug = True
         self.log_get_profile = True
         self.log_put_profile = True
         self.sql_logger = sql_logger  # type: SqlLoggerInterface
+        self.init()
 
     def get_connection(self):
         # TODO 优化成连接池
@@ -112,10 +112,11 @@ class MySQLKV:
             cursor = con.cursor()
             try:
                 # tinyblob 最大长度 255
+                # KEY索引长度并不对key的长度做限制，只是索引最多使用200字节
                 cursor.execute("""CREATE TABLE IF NOT EXISTS `kv_store` (
                     `key` blob not null comment '键值对key', 
                     value blob comment '键值对value',
-                    PRIMARY KEY (`key`(255))
+                    PRIMARY KEY (`key`(200))
                 ) COMMENT '键值对存储';
                 """)
                 con.commit()
@@ -151,18 +152,11 @@ class MySQLKV:
                 self.close_cursor(cursor)
 
     def Get(self, key):
-        if len(key) >= self.max_key_len:
-            short_key = key[:self.max_key_len]
-            data_bytes = self.doGet(short_key)
-            data_dict = encode.convert_bytes_to_dict(data_bytes)
-            return data_dict.get(key)
-        else:
-            return self.doGet(key)
+        return self.doGet(key)
 
-    def doPut(self, cursor, key, value):
+    def doPutRaw(self, key, value, cursor=None):
         # type: (any,bytes,bytes) -> None
         assert cursor != None
-        assert len(key) <= self.max_key_len
         
         select_sql = "SELECT `key` FROM kv_store WHERE `key` = %s"
         insert_sql = "INSERT INTO kv_store (`key`, value) VALUES (%s, %s)"
@@ -172,6 +166,10 @@ class MySQLKV:
         if found == None:
             if self.debug:
                 logging.debug("SQL:%s, params:%s", insert_sql, (key, value))
+            
+            if self.sql_logger:
+                self.sql_logger.append(insert_sql % (key, "-"))
+
             try:
                 cursor.execute(insert_sql, (key, value))
             except:
@@ -180,19 +178,14 @@ class MySQLKV:
         else:
             if self.debug:
                 logging.debug("SQL:%s, params:%s", update_sql, (key, value))
+            
+            if self.sql_logger:
+                self.sql_logger.append(update_sql % (key, "-"))
 
             cursor.execute(update_sql, (value, key))
 
-    def doPutLong(self, cursor, key, value):
-        if len(key) >= self.max_key_len:
-            short_key = key[:self.max_key_len]
-            with self.lock:
-                data_bytes = self.doGet(short_key)
-                data_dict = encode.convert_bytes_to_dict(data_bytes)
-                data_dict[key] = value
-                self.doPut(cursor, short_key, encode.convert_bytes_dict_to_bytes(data_dict))
-        else:
-            return self.doPut(cursor, key, value)
+    def doPut(self, key, value, cursor=None):
+        return self.doPutRaw(key, value, cursor=cursor)
 
     def Put(self, key, value, sync=False, cursor=None):
         # type: (bytes,bytes,bool,any) -> None
@@ -204,13 +197,13 @@ class MySQLKV:
         start_time = time.time()
 
         if cursor != None:
-            return self.doPutLong(cursor, key, value)
+            return self.doPut(key, value, cursor=cursor)
 
         con = self.get_connection()
         with con:
             cursor = con.cursor(prepared=True)
             try:
-                self.doPutLong(cursor, key, value)
+                self.doPut(key, value, cursor=cursor)
                 con.commit()
             finally:
                 cost_time = time.time() - start_time
@@ -223,34 +216,15 @@ class MySQLKV:
         """删除Key-Value键值对
         @param {bytes} key
         """
-        assert len(key) <= self.max_key_len
-
         sql = "DELETE FROM kv_store WHERE `key` = %s;"
         if self.debug:
             logging.debug("SQL:%s, params:%s", sql, (key, ))
 
         cursor.execute(sql, (key, ))
-    
-    def doDeleteLongNoLock(self, key, cursor):
-        short_key = key[:self.max_key_len]
-        data_bytes = self.doGet(short_key)
-        data_dict = encode.convert_bytes_to_dict(data_bytes)
-        if key in data_dict:
-            del data_dict[key]
-            
-        if len(data_dict) == 0:
-            self.doDeleteRaw(short_key, cursor = cursor)
-        else:
-            self.doPut(cursor, short_key, encode.convert_bytes_dict_to_bytes(data_dict))
 
     def doDelete(self, key, sync=False, cursor=None):
         assert cursor != None
-
-        if len(key) >= self.max_key_len:
-            with self.lock:
-                self.doDeleteLongNoLock(key, cursor)
-        else:
-            return self.doDeleteRaw(key, sync, cursor)
+        return self.doDeleteRaw(key, sync, cursor)
 
     def Delete(self, key, sync=False):
         con = self.get_connection()
@@ -350,6 +324,39 @@ class MySQLKV:
                 self.close_cursor(cursor)
 
     def RangeIter(self, *args, **kw):
+        yield from self.RangeIterRaw(*args, **kw)
+
+    def CreateSnapshot(self):
+        raise NotImplementedError("CreateSnapshot")
+
+    def Write(self, batch, sync=False):
+        con = self.get_connection()
+        with con:
+            cursor = con.cursor(prepared=False)
+            try:
+                cursor.execute("begin;")
+                for key in batch._puts:
+                    value = batch._puts[key]
+                    self.Put(key, value, cursor=cursor)
+
+                for key in batch._deletes:
+                    self.doDelete(key, cursor=cursor)
+                cursor.execute("commit;")
+            finally:
+                self.close_cursor(cursor)
+
+
+class EnhancedMySQLKV(MySQLKV):
+
+    def init(self):
+        super().init()
+        self.max_key_len = 200
+
+    def doPutRaw(self, key, value, cursor=None):
+        assert len(key) <= self.max_key_len
+        return super().doPutRaw(key, value, cursor)
+
+    def RangeIter(self, *args, **kw):
         include_value = kw.get("include_value", True)
         reverse = kw.get("reverse", False)
 
@@ -372,22 +379,45 @@ class MySQLKV:
                         yield fullkey
                 else:
                     yield key
+    
+    def doDeleteLongNoLock(self, key, cursor):
+        short_key = key[:self.max_key_len]
+        data_bytes = self.doGet(short_key)
+        data_dict = encode.convert_bytes_to_dict(data_bytes)
+        if key in data_dict:
+            del data_dict[key]
+            
+        if len(data_dict) == 0:
+            self.doDeleteRaw(short_key, cursor = cursor)
+        else:
+            self.doPutRaw(short_key, encode.convert_bytes_dict_to_bytes(data_dict), cursor)
 
-    def CreateSnapshot(self):
-        raise NotImplementedError("CreateSnapshot")
+    def doDelete(self, key, sync=False, cursor=None):
+        assert cursor != None
 
-    def Write(self, batch, sync=False):
-        con = self.get_connection()
-        with con:
-            cursor = con.cursor(prepared=False)
-            try:
-                cursor.execute("begin;")
-                for key in batch._puts:
-                    value = batch._puts[key]
-                    self.Put(key, value, cursor=cursor)
+        if len(key) >= self.max_key_len:
+            with self.lock:
+                self.doDeleteLongNoLock(key, cursor)
+        else:
+            return self.doDeleteRaw(key, sync, cursor)
+    
+    def doPut(self, key, value, cursor=None):
+        if len(key) >= self.max_key_len:
+            short_key = key[:self.max_key_len]
+            with self.lock:
+                data_bytes = self.doGet(short_key)
+                data_dict = encode.convert_bytes_to_dict(data_bytes)
+                data_dict[key] = value
+                self.doPutRaw(short_key, encode.convert_bytes_dict_to_bytes(data_dict), cursor)
+        else:
+            return self.doPutRaw(key, value, cursor)
+    
 
-                for key in batch._deletes:
-                    self.doDelete(key, cursor=cursor)
-                cursor.execute("commit;")
-            finally:
-                self.close_cursor(cursor)
+    def Get(self, key):
+        if len(key) >= self.max_key_len:
+            short_key = key[:self.max_key_len]
+            data_bytes = self.doGet(short_key)
+            data_dict = encode.convert_bytes_to_dict(data_bytes)
+            return data_dict.get(key)
+        else:
+            return self.doGet(key)

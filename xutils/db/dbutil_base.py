@@ -167,10 +167,17 @@ class WriteBatchProxy:
             print_debug_info("batch.delete key={}", key)
         print_debug_info("-----  batch.end  -----")
 
-    def commit(self, sync=False):
+    def commit(self, sync=False, retries = 0):
         self.log_debug_info()
-        self.db_instance.Write(self, sync)
-
+        while retries >= 0:
+            try:
+                self.db_instance.Write(self, sync)
+                return
+            except:
+                xutils.print_exc()
+                time.sleep(0.2)
+                retries-=1
+    
     def __enter__(self):
         return self
 
