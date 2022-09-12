@@ -140,6 +140,9 @@ class TestMain(BaseTestCase):
         self.check_200("/system/clipboard-monitor")
         # self.check_200("/system/pydoc")
 
+    def test_system_cache_page(self):
+        self.check_200("/system/cache")
+
     def test_sys_info(self):
         self.check_OK("/system/info")
 
