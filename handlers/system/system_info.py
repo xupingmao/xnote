@@ -57,12 +57,16 @@ class InfoHandler:
         if p == "config_dict":
             return xconfig.get_config_dict()
 
+        mem_info = mem_util.get_mem_info()
+        sys_mem_info = "%s/%s" % (mem_info.sys_mem_used, mem_info.sys_mem_total)
+
         items = [
             SystemInfoItem("Python版本", value = get_python_version()),
             SystemInfoItem("Xnote版本", value = get_xnote_version()),
-            SystemInfoItem("内存信息", value = get_mem_info()),
+            SystemInfoItem("应用内存使用量", value = mem_info.mem_used),
+            SystemInfoItem("系统内存使用量", value = sys_mem_info),
             SystemInfoItem("磁盘可用容量", get_free_data_space()),
-            SystemInfoItem("数据库驱动", xconfig.get_global_config("system.db_driver")),
+            SystemInfoItem("数据库驱动", xconfig.get_system_config("db_driver")),
             SystemInfoItem("sqlite版本", sqlite3.sqlite_version if sqlite3 != None else ''),
             SystemInfoItem("CPU型号", platform.processor()),
             SystemInfoItem("操作系统", platform.system()),

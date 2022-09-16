@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-09-12 20:41:26
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-12 21:30:23
+@LastEditTime : 2022-09-16 22:31:39
 @FilePath     : /xnote/handlers/system/cache_admin.py
 @Description  : 缓存管理
 """
@@ -63,6 +63,22 @@ class CacheHandler:
         pass
 
 
+class CacheAjaxHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        key = xutils.get_argument("key", "")
+        value = xutils.get_argument("value", "")
+        cacheutil.put(key, value)
+        return dict(code = "success")
+
+    @xauth.login_required("admin")
+    def GET(self):
+        key = xutils.get_argument("key", "")
+        return dict(code = "success", data = cacheutil.get(key))
+
+
 xurls = (
     r"/system/cache", CacheHandler,
+    r"/system/cache/detail", CacheAjaxHandler,
 )

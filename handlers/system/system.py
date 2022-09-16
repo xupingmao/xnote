@@ -1,10 +1,8 @@
-# -*- coding:utf-8 -*-  
+# -*- coding:utf-8 -*-
 # Created by xupingmao on 2016/10
 # @modified 2022/02/26 11:27:37
 """System functions"""
 import os
-import os
-
 import xconfig
 import xtemplate
 import xutils
@@ -12,24 +10,28 @@ import xauth
 import xmanager
 import xtables
 import web
-from xutils import cacheutil
 from xutils import Storage
-from xtemplate import T
 
-def link(name, url, user = None, icon = "cube"):
-    return Storage(name = name, url = url, link = url, user = user, icon = icon)
 
-def admin_link(name, url, icon = "cube"):
+def link(name, url, user=None, icon="cube"):
+    return Storage(name=name, url=url, link=url, user=user, icon=icon)
+
+
+def admin_link(name, url, icon="cube"):
     return link(name, url, "admin", icon)
 
-def user_link(name, url, icon = "cube"):
-    return Storage(name = name, url = url, link = url, user = None, is_user = True, icon = icon)
 
-def guest_link(name, url, icon = "cube"):
-    return Storage(name = name, url = url, link = url, user = None, is_guest = True, icon = icon)
+def user_link(name, url, icon="cube"):
+    return Storage(name=name, url=url, link=url, user=None, is_user=True, icon=icon)
 
-def public_link(name, url, icon = "cube"):
-    return Storage(name = name, url = url, link = url, user = None, is_public = True, icon = icon)
+
+def guest_link(name, url, icon="cube"):
+    return Storage(name=name, url=url, link=url, user=None, is_guest=True, icon=icon)
+
+
+def public_link(name, url, icon="cube"):
+    return Storage(name=name, url=url, link=url, user=None, is_public=True, icon=icon)
+
 
 SYS_TOOLS = [
     user_link("设置",   "/system/settings", "cog"),
@@ -45,11 +47,12 @@ SYS_TOOLS = [
     admin_link("Menu_Log",    "/system/log"),
     admin_link("Menu_Refresh",  "/system/reload", "refresh"),
     admin_link("Menu_Modules",  "/system/modules_info"),
-    admin_link("Menu_Configure", "/code/edit?type=script&path=" + str(xconfig.INIT_SCRIPT)),
+    admin_link("Menu_Configure", "/code/edit?type=script&path=" +
+               str(xconfig.INIT_SCRIPT)),
     admin_link("Menu_CSS", "/code/edit?type=script&path=user.css"),
     admin_link("Menu_Plugin",   "/plugins_list", "cogs"),
     admin_link("Shell",    "/tools/shell", "terminal")
-] 
+]
 
 NOTE_TOOLS = [
     user_link("搜索历史", "/search", "history"),
@@ -70,7 +73,7 @@ NOTE_TOOLS = [
     user_link("上传管理", "/fs_upload", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),
     user_link("笔记索引", "/note/index", "th-large"),
-] 
+]
 
 DATA_TOOLS = [
     admin_link("数据迁移",  "/system/db_migrate", "database"),
@@ -80,9 +83,9 @@ DATA_TOOLS = [
 
 # 所有功能配置
 xconfig.MENU_LIST = [
-    Storage(name = "System", children = SYS_TOOLS, need_login = True),
-    Storage(name = "Note", children = NOTE_TOOLS, need_login = True),
-    Storage(name = "数据管理", children = DATA_TOOLS, need_login = True),
+    Storage(name="System", children=SYS_TOOLS, need_login=True),
+    Storage(name="Note", children=NOTE_TOOLS, need_login=True),
+    Storage(name="数据管理", children=DATA_TOOLS, need_login=True),
 ]
 
 xconfig.NOTE_OPTIONS = [
@@ -94,14 +97,14 @@ xconfig.NOTE_OPTIONS = [
     link("Tag List", "/note/taglist"),
 ]
 
+
 @xutils.cache(expire=60)
 def get_tools_config(user):
-    db  = xtables.get_storage_table()
+    db = xtables.get_storage_table()
     user_config = db.select_first(where=dict(key="tools", user=user))
     return user_config
 
 
-                
 class IndexHandler:
 
     def GET(self):
@@ -122,22 +125,25 @@ class IndexHandler:
             if len(children) == 0:
                 continue
             children = list(filter(filter_link_func, children))
-            menu_list.append(Storage(name = category.name, children = children))
+            menu_list.append(Storage(name=category.name, children=children))
 
-        return xtemplate.render("system/page/system.html",
-            html_title       = "系统",
-            Storage          = Storage,
-            os               = os,
-            user             = xauth.get_current_user(),
-            menu_list = menu_list,
-            customized_items = []
-        )
+        kw = Storage()
+        kw.Storage = Storage
+        kw.os = os
+        kw.user = xauth.get_current_user()
+        kw.menu_list = menu_list
+        kw.customized_items = []
+        kw.html_title="系统"
+
+        return xtemplate.render("system/page/system.html", **kw)
+
 
 class AdminHandler:
 
     @xauth.login_required("admin")
     def GET(self):
         return xtemplate.render("system/page/system_admin.html")
+
 
 class ReloadHandler:
 
@@ -152,10 +158,11 @@ class ReloadHandler:
             xmanager.restart()
             raise web.seeother("/system/index")
         else:
-            return dict(code = "success", status = "running")
+            return dict(code="success", status="running")
 
     def POST(self):
         return self.GET()
+
 
 class UserCssHandler:
 
@@ -169,35 +176,23 @@ class UserCssHandler:
 
         if not os.path.exists(path):
             return b''
-        
+
         etag = '"%s"' % os.path.getmtime(path)
         client_etag = environ.get('HTTP_IF_NONE_MATCH')
         web.header("Etag", etag)
         if etag == client_etag:
             web.ctx.status = "304 Not Modified"
-            return b'' # 其实webpy已经通过yield空bytes来避免None
+            return b''  # 其实webpy已经通过yield空bytes来避免None
         return xutils.readfile(path)
         # return xconfig.get("USER_CSS", "")
+
 
 class UserJsHandler:
 
     def GET(self):
         web.header("Content-Type", "application/javascript")
         return xconfig.get("USRE_JS", "")
-        
-class CacheHandler:
 
-    @xauth.login_required("admin")
-    def POST(self):
-        key = xutils.get_argument("key", "")
-        value = xutils.get_argument("value", "")
-        cacheutil.set(key, value)
-        return dict(code = "success")
-
-    @xauth.login_required("admin")
-    def GET(self):
-        key = xutils.get_argument("key", "")
-        return dict(code = "success", data = cacheutil.get(key))
 
 xurls = (
     r"/system/sys",   IndexHandler,
@@ -207,5 +202,4 @@ xurls = (
     r"/system/reload", ReloadHandler,
     r"/system/user\.css", UserCssHandler,
     r"/system/user\.js", UserJsHandler,
-    r"/system/cache", CacheHandler
 )

@@ -3,7 +3,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-09-12 20:43:45
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-12 21:22:52
+@LastEditTime : 2022-09-16 21:46:08
 @FilePath     : /xnote/handlers/system/page/cache_admin.html
 @Description  : 描述
  #} -->
@@ -71,14 +71,18 @@ $(function () {
     $(".toggle-text").click(function () {
         var isClose = $(this).attr("data-close") === "true";
         var newText = "";
+        var linkText = "";
 
         if (isClose) {
             newText = $(this).attr("data-full");
+            linkText = "收起";
         } else {
             newText = $(this).attr("data-short");
+            linkText = "展开";
         }
         console.log(newText);
         $(this).attr("data-close", !isClose);
+        $(this).text(linkText);
         $(this).parent().find("span").text(newText);
     })
 })

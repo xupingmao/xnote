@@ -365,8 +365,8 @@ class TableInfo:
     def get_index_names(self):
         return IndexInfo.get_table_index_names(self.name)
     
-    def register_index(self, index_name, comment = None):
-        register_table_index(self.name, index_name, comment)
+    def register_index(self, index_name, comment = None, index_type = "ref"):
+        register_table_index(self.name, index_name, comment, index_type = index_type)
         return self
 
 class IndexInfo:
