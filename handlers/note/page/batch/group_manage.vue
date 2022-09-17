@@ -1,4 +1,4 @@
-<!-- vue和layer弹层组件协作不太顺利，单独使用art-template模板引擎了，后面可以使用vue的弹层组件 -->
+<!-- layer可以和vue一起使用,要使用layer的element选择模式 -->
 <div id="vueApp">
     <div class="card btn-line-height">
         <div class="row">

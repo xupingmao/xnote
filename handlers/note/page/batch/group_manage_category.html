@@ -1,0 +1,18 @@
+
+<div class="card btn-line-height">
+    <div class="row">
+        <span>类目</span>
+        <select class="switch-category" value="{{category}}">
+            {% for t_cat in category_list %}
+                <option value="{{t_cat.code}}">{{t_cat.name}} - (<span>{{t_cat.group_count}}</span>)</option>
+            {% end %}
+        </select>
+
+        {% if show_category_edit %}
+        <div class="float-right">
+            <button class="btn btn-default rename-cat-btn">重命名类目</button>
+            <!-- <button class="btn btn-default">添加笔记本-TODO</button> -->
+        </div>
+        {% end %}
+    </div>
+</div>
