@@ -26,14 +26,7 @@ from xutils import logutil
 from xutils import cacheutil
 from xutils.functions import listremove
 
-
-dbutil.register_table("user", "用户信息表")
-dbutil.register_table("user_config", "用户配置表")
-dbutil.register_table("session", "用户会话信息")
-dbutil.register_table("user_session_rel", "用户会话关系")
-
-
-session_db = dbutil.get_hash_table("session")
+session_db = None
 session_cache = cacheutil.PrefixedCache(prefix="session:")
 user_cache = cacheutil.PrefixedCache(prefix="user:")
 
@@ -611,6 +604,9 @@ def init():
     global USER_TABLE
     global INVALID_NAMES
     global USER_CONFIG_PROP
+    global session_db
+
+    session_db = dbutil.get_hash_table("session")
 
     INVALID_NAMES = fsutil.load_set_config("./config/user/invalid_names.list")
     USER_CONFIG_PROP = fsutil.load_prop_config("./config/user/user_config.default.properties")

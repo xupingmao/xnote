@@ -258,6 +258,7 @@ def http_download_by_requests(url, destpath):
     with open(destpath, "wb") as fp:
         for chunk in resp.iter_content(chunk_size = BUFSIZE):
             fp.write(chunk)
+    return resp.headers
 
 def http_download(address, destpath = None, dirname = None):
     if dirname is not None:

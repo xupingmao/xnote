@@ -90,6 +90,9 @@ class TextParserBase(object):
 
         # 循环分析
         self.profile_dict = dict()
+    
+    def escape(self, text):
+        return escape_html(text)
 
     def current(self):
         """当前的字符，如果越界了，返回None"""
@@ -148,7 +151,7 @@ class TextParserBase(object):
     def save_str_token(self):
         if self.str_token != "":
             token = self.str_token
-            token = escape_html(token)
+            token = self.escape(token)
             self.tokens.append(token)
         self.str_token = ""
 
@@ -165,7 +168,7 @@ class TextParserBase(object):
             self.i = end
         return found
 
-    def read_till_any(self, any_char_list, start_index = None):
+    def read_till_target_char(self, any_char_list, start_index = None):
         """包含目标{any_char_list},读取后索引{i}位于any之后的字符"""
         if start_index is None:
             start_index = self.i
@@ -206,6 +209,22 @@ class TextParserBase(object):
 
     def read_rest(self):
         return self.read_till_index(self.max_index)
+
+    def read_till_target(self, target):
+        """返回值包含target，索引{i}移动到target之后"""
+        end = self.text.find(target, self.i+1)
+        if end < 0:
+            key = self.text[self.i:]
+            self.i = self.max_index
+        else:
+            key = self.text[self.i:end+1]
+            # 包含 target
+            self.i = end + len(target)
+        return key
+    
+    def append_token(self, token):
+        self.save_str_token()
+        self.tokens.append(token)
 
     def profile(self, name):
         if not self.debug_flag:
@@ -254,18 +273,6 @@ class TextParser(TextParserBase):
 
     def record_keyword(self, keyword):
         self.keywords.add(keyword)
-
-    def read_till_target(self, target):
-        """返回值包含target，索引{i}移动到target之后"""
-        end = self.text.find(target, self.i+1)
-        if end < 0:
-            key = self.text[self.i:]
-            self.i = self.max_index
-        else:
-            key = self.text[self.i:end+1]
-            # 包含 target
-            self.i = end + len(target)
-        return key
 
     def build_search_link(self, keyword):
         if self.search_translator != None:

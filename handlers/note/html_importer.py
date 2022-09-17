@@ -4,6 +4,7 @@ from __future__ import print_function
 import logging
 import os
 import time
+
 from handlers.note.dao import NOTE_DAO
 import xtemplate
 import xutils
@@ -14,7 +15,12 @@ from bs4 import BeautifulSoup
 from html2text import HTML2Text
 from xutils import netutil
 from xutils import Storage
-
+from xutils import dbutil
+from xutils import fsutil
+from xutils import textutil
+from xutils.text_parser import TextParserBase
+from . import dao
+from . import dao_edit
 
 def get_addr(src, host):
     if src is None:
@@ -218,8 +224,126 @@ class ImportNoteHandler:
             return xtemplate.render(self.template_path, **kw)
 
 
+class MarkdownImageParser(TextParserBase):
+
+    def escape(self, text):
+        return text
+    
+    def get_ext_by_content_type(self, content_type):
+        if content_type == "image/png":
+            return ".png"
+        
+        if content_type == "image/jpg":
+            return ".jpg"
+        
+        if content_type == "image/jpeg":
+            return ".jpeg"
+
+        if content_type == "image/gif":
+            return ".gif"
+        
+        if content_type == "image/webp":
+            return ".webp"
+        
+        return None
+
+
+    def handle_image(self, url, user_name):
+        # TODO 注意越权问题 host不能是内部地址
+        # 1. host不能是内网地址
+		# 2. 防止缓存数据过大拖垮服务器
+
+        url = url.replace("\r", "")
+        url = url.replace("\n", "")
+
+        if url.startswith("/"):
+            # 已经是本地地址
+            return url
+
+        fs_map_db = dbutil.get_hash_table("fs_map")
+        map_info = fs_map_db.get(url)
+        if map_info != None and isinstance(map_info, dict):
+            return map_info.webpath
+
+        upload_dir = xconfig.get_upload_dir(user_name)
+        date_dir = time.strftime("%Y/%m")
+        filename = textutil.create_uuid()
+        destpath = os.path.join(upload_dir, date_dir, filename)
+        dirname = os.path.join(upload_dir, date_dir)
+        xutils.makedirs(dirname)
+
+        resp_headers = netutil.http_download(url, destpath=destpath)
+        content_type = ""
+        if resp_headers != None:
+            content_type = resp_headers["Content-Type"]
+            ext = self.get_ext_by_content_type(content_type)
+            if ext != None:
+                filename_new = filename + ext
+                os.rename(os.path.join(dirname, filename), os.path.join(dirname, filename_new))
+                filename = filename_new
+        
+        webpath = "/data/files/%s/upload/%s/%s" % (user_name, date_dir, filename)
+        fs_map_db.put(url, dict(webpath = webpath, content_type = content_type, version = 1))
+        return webpath
+
+    
+    def parse(self, text, user_name):
+        self.init(text)
+
+        c = self.current()
+        while c != None:
+            if self.startswith("!["):
+                name_part = self.read_till_target("]")
+                self.append_token(name_part)
+
+                if self.current() != "(":
+                    self.stash_char(c)
+                    continue
+                else:
+                    href_part = self.read_till_target(")")
+                    url = href_part[1:-1]
+                    new_href = self.handle_image(url, user_name)
+                    self.append_token("(" + new_href + ")")
+            if self.startswith("```"):
+                code_part = self.read_till_target("```")
+                self.append_token(code_part)
+            else:
+                self.stash_char(c)
+                self.read_next()
+
+            c = self.current()
+        
+        self.save_str_token()
+        return "".join(self.tokens)
+
+
+
+
+class CacheExternalHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        user_name = xauth.current_name()
+        note_id = xutils.get_argument("note_id", "")
+        note = dao.get_by_id_creator(note_id, user_name)
+        if note == None:
+            return dict(code="fail", message="笔记不存在")
+        if note.type != "md":
+            return dict(code="fail", message="文档类型不是markdown,暂时无法处理")
+        
+        md_content = note.content
+        parser = MarkdownImageParser()
+        md_content_new = parser.parse(md_content, note.creator)
+
+        dao_edit.update_content(note, md_content_new)
+
+        return dict(code="success", message="更新成功")
+
+
+
 xutils.register_func("note.import_from_html", import_from_html)
 
 xurls = (
     r"/note/html_importer", ImportNoteHandler,
+    r"/note/cache_external", CacheExternalHandler,
 )

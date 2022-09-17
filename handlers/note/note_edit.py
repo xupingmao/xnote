@@ -4,7 +4,6 @@
 # @modified 2022/04/04 20:47:41
 
 """笔记编辑相关处理"""
-from handlers import message
 from handlers.note.dao_category import refresh_category_count
 import web
 import time

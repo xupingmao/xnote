@@ -274,6 +274,7 @@ def init(boot_config_file=None, boot_config_kw = None):
     makedirs(LOG_DIR)
     makedirs(BACKUP_DIR)
     makedirs(os.path.join(BACKUP_DIR, "db"))
+    makedirs(os.path.join(DATA_DIR, "cache"))
 
     # 二级目录
     makedirs(COMMANDS_DIR)
@@ -576,6 +577,9 @@ def get_system_dir(name):
 
     if name == "archive":
         return os.path.join(DATA_DIR, "archive")
+    
+    if name == "cache":
+        return os.path.join(DATA_DIR, "cache")
 
     raise Exception("未知的系统目录:" + name)
 
@@ -585,7 +589,7 @@ def get_upload_dir(username):
         raise Exception("username is None")
 
     upload_dir_root = get_system_dir("files")
-    return os.path.join(upload_dir_root, username)
+    return os.path.join(upload_dir_root, username, "upload")
 
 
 def get_backup_dir(name=None):

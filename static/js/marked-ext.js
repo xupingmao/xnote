@@ -286,7 +286,11 @@
 
     // 重写img
     myRenderer.image = function (href, title, text) {
-        var out = '<p class="marked-img"><img class="x-photo" src="' + href + '" alt="' + text + '" style="max-width:100%;"';
+        var imgSrc = href;
+        // if (href && /^https?/.test(href)) {
+        //     imgSrc = "/fs_cache/image?url=" + encodeURIComponent(href);
+        // }
+        var out = '<p class="marked-img"><img class="x-photo" src="' + imgSrc + '" alt="' + text + '" style="max-width:100%;"';
         if (title) {
             out += ' title="' + title + '"';
         }

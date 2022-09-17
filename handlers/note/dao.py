@@ -34,7 +34,7 @@ logging.basicConfig(level=logging.DEBUG,
 
 
 def register_note_table(name, description, check_user=False, user_attr=None):
-    dbutil.register_table(name, description, "note",
+    dbutil.register_table(name, description, category = "note",
                           check_user=check_user, user_attr=user_attr)
 
 
@@ -423,7 +423,7 @@ def get_by_id(id, include_full=True, creator=None):
     if str(id) == "0":
         return get_root(creator)
 
-    note_index = dbutil.get("note_index:%s" % id)
+    note_index = _index_db.get_by_id(id)
 
     if not include_full and note_index != None:
         build_note_info(note_index)

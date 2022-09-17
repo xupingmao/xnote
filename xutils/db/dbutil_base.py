@@ -408,6 +408,7 @@ class IndexInfo:
 
 def register_table(table_name,
                    description,
+                   *,
                    category="default",
                    check_user=False,
                    user_attr=None): # type: (...)->TableInfo

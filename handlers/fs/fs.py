@@ -248,7 +248,7 @@ class FileSystemHandler:
         else:
             return self.read_all(path, blocksize)
 
-    def read_file(self, path):
+    def read_file(self, path, content_type=None):
         # 强制缓存
         if not xconfig.DEBUG:
             web.header("Cache-Control", "max-age=3600")
@@ -258,7 +258,10 @@ class FileSystemHandler:
         client_etag = environ.get('HTTP_IF_NONE_MATCH')
         web.header("Etag", etag)
 
-        self.handle_content_type(path)
+        if content_type != None:
+            web.header("Content-Type", content_type)
+        else:
+            self.handle_content_type(path)
         # self.handle_content_encoding(ext)
 
         if etag == client_etag:
@@ -276,7 +279,7 @@ class FileSystemHandler:
                     return self.read_thumbnail(path, blocksize)
                 return self.read_all(path, blocksize)            
 
-    def handle_get(self, path):
+    def handle_get(self, path, content_type=None):
         # TODO SAE上有编码错误
         # print("Load Path:", path)
         if path == "":
@@ -284,7 +287,7 @@ class FileSystemHandler:
         if os.path.isdir(path):
             return self.list_directory(path)
         elif os.path.isfile(path):
-            return self.read_file(path)
+            return self.read_file(path, content_type=content_type)
         else:
             # return "Not Readable %s" % path
             return self.not_readable(path)

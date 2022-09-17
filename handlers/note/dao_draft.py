@@ -27,9 +27,6 @@ from xutils import dbutil
 from xutils import Storage
 
 NOTE_DAO = xutils.DAO("note")
-dbutil.register_table("note_draft", "笔记草稿", "note")
-dbutil.register_table("note_lock", "笔记编辑锁", "note")
-
 
 def get_note_draft_db():
     return dbutil.get_hash_table("note_draft")

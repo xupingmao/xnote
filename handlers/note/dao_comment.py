@@ -14,7 +14,7 @@ from xutils import dateutil
 
 
 def register_note_table(name, description, user_attr=None):
-    dbutil.register_table(name, description, "note", user_attr=user_attr)
+    dbutil.register_table(name, description, category="note", user_attr=user_attr)
 
 
 register_note_table("comment", "评论模型")

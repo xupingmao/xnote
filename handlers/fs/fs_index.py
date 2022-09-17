@@ -36,7 +36,7 @@ class IndexBuilder:
             # 无法读取目录
             xutils.print_exc()
 
-        info = Storage(fsize = size, fpath = fpath)
+        info = Storage(fsize = size, fpath = dirname)
         db.update_by_id(dirname, info)
         return size
 

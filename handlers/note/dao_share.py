@@ -18,11 +18,6 @@ from .dao import sort_notes, batch_query_list
 def register_note_table(name, description, check_user = False):
     dbutil.register_table(name, description, "note", check_user = check_user)
 
-# 分享关系
-dbutil.register_table("note_share", "笔记分享", "note")
-dbutil.register_table_index("note_share", "note_id")
-dbutil.register_table_index("note_share", "to_user")
-
 def get_share_db():
     return dbutil.get_table("note_share")
 
