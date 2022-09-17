@@ -22,6 +22,7 @@ from xutils.text_parser import TextParserBase
 from . import dao
 from . import dao_edit
 
+
 def get_addr(src, host):
     if src is None:
         return None
@@ -228,30 +229,29 @@ class MarkdownImageParser(TextParserBase):
 
     def escape(self, text):
         return text
-    
+
     def get_ext_by_content_type(self, content_type):
         if content_type == "image/png":
             return ".png"
-        
+
         if content_type == "image/jpg":
             return ".jpg"
-        
+
         if content_type == "image/jpeg":
             return ".jpeg"
 
         if content_type == "image/gif":
             return ".gif"
-        
+
         if content_type == "image/webp":
             return ".webp"
-        
-        return None
 
+        return None
 
     def handle_image(self, url, user_name):
         # TODO 注意越权问题 host不能是内部地址
         # 1. host不能是内网地址
-		# 2. 防止缓存数据过大拖垮服务器
+        # 2. 防止缓存数据过大拖垮服务器
 
         url = url.replace("\r", "")
         url = url.replace("\n", "")
@@ -273,20 +273,25 @@ class MarkdownImageParser(TextParserBase):
         xutils.makedirs(dirname)
 
         resp_headers = netutil.http_download(url, destpath=destpath)
+        xmanager.fire("fs.upload", dict(
+            user=user_name, path=destpath, fpath=destpath))
+
         content_type = ""
         if resp_headers != None:
             content_type = resp_headers["Content-Type"]
             ext = self.get_ext_by_content_type(content_type)
             if ext != None:
                 filename_new = filename + ext
-                os.rename(os.path.join(dirname, filename), os.path.join(dirname, filename_new))
+                os.rename(os.path.join(dirname, filename),
+                          os.path.join(dirname, filename_new))
                 filename = filename_new
-        
-        webpath = "/data/files/%s/upload/%s/%s" % (user_name, date_dir, filename)
-        fs_map_db.put(url, dict(webpath = webpath, content_type = content_type, version = 1))
+
+        webpath = "/data/files/%s/upload/%s/%s" % (
+            user_name, date_dir, filename)
+        fs_map_db.put(url, dict(webpath=webpath,
+                      content_type=content_type, version=1))
         return webpath
 
-    
     def parse(self, text, user_name):
         self.init(text)
 
@@ -312,11 +317,9 @@ class MarkdownImageParser(TextParserBase):
                 self.read_next()
 
             c = self.current()
-        
+
         self.save_str_token()
         return "".join(self.tokens)
-
-
 
 
 class CacheExternalHandler:
@@ -330,7 +333,7 @@ class CacheExternalHandler:
             return dict(code="fail", message="笔记不存在")
         if note.type != "md":
             return dict(code="fail", message="文档类型不是markdown,暂时无法处理")
-        
+
         md_content = note.content
         parser = MarkdownImageParser()
         md_content_new = parser.parse(md_content, note.creator)
@@ -338,7 +341,6 @@ class CacheExternalHandler:
         dao_edit.update_content(note, md_content_new)
 
         return dict(code="success", message="更新成功")
-
 
 
 xutils.register_func("note.import_from_html", import_from_html)
