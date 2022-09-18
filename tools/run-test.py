@@ -28,7 +28,10 @@ def check_and_install_pkg(py_module, pip_version = ""):
 		print("准备安装:", pip_version)
 		os.system("python3 -m pip install %s" % pip_version)
 
-def run_test(target = None):
+def run_test(args):
+	target = args.target
+	os.environ["skip_mysql_test"] = str(args.skip_mysql_test)
+
 	if target == "xutils_db":
 		os.system("python3 -m pytest tests/test_xutils_db.py tests/test_xutils_db_table.py --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
 		os.system("python3 -m coverage html")
@@ -84,13 +87,14 @@ def run_test(target = None):
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("target", default="all", nargs="?")
+	parser.add_argument("--skip_mysql_test", action="store_true")
 	args = parser.parse_args()
 
 	do_clean()
 
 	update_version()
 
-	run_test(args.target)
+	run_test(args)
 
 	# do_clean()
 

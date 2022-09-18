@@ -36,6 +36,7 @@ xnote.renderTemplate = function(templateText, object) {
     /** 渲染模板 **/
     "render": function (data, options) {
         var templateText = $(this).text();
+        // 使用art-template模板渲染
         return template.render(templateText, data, options);
     },
 });

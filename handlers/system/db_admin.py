@@ -46,7 +46,7 @@ SCAN_HTML = """
             <div class="align-center">
                 <input type=checkbox name="reverse" {% if is_reverse %}checked{%end%} value=true><span>倒序</span>
                 <button type="submit">查询数据</button>
-                <a class="btn btn-default" href="?p=query">重置查询</a>
+                <a class="btn btn-default" href="?p=query&prefix={{prefix}}">重置查询</a>
             </div>
         </div>
 

@@ -209,12 +209,22 @@ class TestMain(BaseTestCase):
 
     def test_dbutil_mysql(self):
         from xutils.db.driver_mysql import MySQLKV
+        skip_mysql_test = os.environ.get("skip_mysql_test")
+        if skip_mysql_test == "True":
+            print("skip mysql test")
+            return
+
         db = MySQLKV(host="192.168.50.153", user="root",
                      password="root", database="test2")
         run_test_db_engine(self, db)
 
     def test_dbutil_mysql_enhanced(self):
         from xutils.db.driver_mysql import EnhancedMySQLKV
+        skip_mysql_test = os.environ.get("skip_mysql_test")
+        if skip_mysql_test == "True":
+            print("skip mysql test")
+            return
+
         db = EnhancedMySQLKV(host="192.168.50.153", user="root",
                      password="root", database="test3")
         self.do_test_lmdb_large_key(db)

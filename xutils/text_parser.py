@@ -55,7 +55,7 @@ def escape_html(text):
 class TextParserBase(object):
 
     """文本解析工具, 有这些规则
-    - 下标默认从0开始
+    - 下标默认从0开始(也就是默认读取第一个字符)
     - read_till_XXX 指从当前字符读取到目标字符，读完后下标{i}位于目标字符之后的一个字符
     - read_before_XXX 从当前字符读取到目标字符之前的一个字符，读完后下标{i}位于目标字符
 
@@ -168,14 +168,14 @@ class TextParserBase(object):
             self.i = end
         return found
 
-    def read_till_target_char(self, any_char_list, start_index = None):
-        """包含目标{any_char_list},读取后索引{i}位于any之后的字符"""
+    def read_till_target_char(self, char_list, start_index = None):
+        """包含目标{char_list},读取后索引{i}位于any之后的字符"""
         if start_index is None:
             start_index = self.i
 
         for i in range(start_index, self.max_index+1):
             c = self.text[i]
-            if c in any_char_list:
+            if c in char_list:
                 self.i = i + 1
                 return self.text[start_index:i]
         # 没找到，下标移动到最后

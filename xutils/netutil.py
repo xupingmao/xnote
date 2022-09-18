@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/28 19:47:17
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-12 13:41:16
+@LastEditTime : 2022-09-18 12:31:03
 @FilePath     : /xnote/xutils/netutil.py
 """
 
@@ -17,6 +17,9 @@ import re
 import codecs
 import six
 import socket
+import io
+import gzip
+
 from xutils.imports import try_decode, quote
 
 # TODO fix SSLV3_ALERT_HANDSHAKE_FAILURE on MacOS
@@ -258,7 +261,7 @@ def http_download_by_requests(url, destpath):
     with open(destpath, "wb") as fp:
         for chunk in resp.iter_content(chunk_size = BUFSIZE):
             fp.write(chunk)
-    return resp.headers
+    return resp.headers # headers是key大小写不敏感的dict
 
 def http_download(address, destpath = None, dirname = None):
     if dirname is not None:
@@ -330,3 +333,25 @@ def tcp_send(domain, port, content, timeout=1, on_recv_func=None):
     finally:
         conn.close()
     return b''.join(result)
+
+
+def get_file_ext_by_content_type(content_type):
+        if content_type == "image/png":
+            return ".png"
+
+        if content_type == "image/jpg":
+            return ".jpg"
+
+        if content_type == "image/jpeg":
+            return ".jpeg"
+
+        if content_type == "image/gif":
+            return ".gif"
+
+        if content_type == "image/webp":
+            return ".webp"
+
+        if content_type == "image/svg+xml":
+            return ".svg"
+
+        return None

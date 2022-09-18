@@ -339,12 +339,7 @@
                 }
             }).fail(function (err) {
                 xnote.alert("保存失败:" + err);
-            })
-        })
-
-        $("#mainFrame").on("submit", function (e) {
-            console.log(e);
-            window.SUBMIT_FORM = true;
+            });
         });
 
         // 退出确认的询问
@@ -386,7 +381,7 @@
 
             // 强制执行一次
             autoSave(true);
-        }
+        };
 
         onPageLoad();
     });

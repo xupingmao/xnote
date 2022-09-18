@@ -3,17 +3,10 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-31 12:15:50
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-31 20:29:35
+@LastEditTime : 2022-09-18 17:04:45
 @FilePath     : /xnote/handlers/note/component/sidebar/markdown_edit_sidebar.html
 @Description  : 描述
  #} -->
-
-<style>
-    .sidebar-contents {
-        max-height: 500px;
-        overflow-y: auto;
-    }
-</style>
 
 <div class="card">
     <div class="card-title">
@@ -27,7 +20,7 @@
 
 <script id="sidebar-content-template" type="text/html">
     {{!each list }}
-    <a class="list-item" data-line="{{! $value.lineNo }}">
+    <a class="list-item level-{{!$value.level}}" data-line="{{! $value.lineNo }}">
         <span>{{! $value.levelText }}</span>
         <span>{{! $value.name }}</span>
     </a>

@@ -231,22 +231,7 @@ class MarkdownImageParser(TextParserBase):
         return text
 
     def get_ext_by_content_type(self, content_type):
-        if content_type == "image/png":
-            return ".png"
-
-        if content_type == "image/jpg":
-            return ".jpg"
-
-        if content_type == "image/jpeg":
-            return ".jpeg"
-
-        if content_type == "image/gif":
-            return ".gif"
-
-        if content_type == "image/webp":
-            return ".webp"
-
-        return None
+        return netutil.get_file_ext_by_content_type(content_type)
 
     def handle_image(self, url, user_name):
         # TODO 注意越权问题 host不能是内部地址
