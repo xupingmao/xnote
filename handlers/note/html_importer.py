@@ -253,13 +253,13 @@ class MarkdownImageParser(TextParserBase):
         upload_dir = xconfig.get_upload_dir(user_name)
         date_dir = time.strftime("%Y/%m")
         filename = textutil.create_uuid()
-        destpath = os.path.join(upload_dir, date_dir, filename)
+        fpath = os.path.join(upload_dir, date_dir, filename)
         dirname = os.path.join(upload_dir, date_dir)
         xutils.makedirs(dirname)
 
-        resp_headers = netutil.http_download(url, destpath=destpath)
+        resp_headers = netutil.http_download(url, destpath=fpath)
         xmanager.fire("fs.upload", dict(
-            user=user_name, path=destpath, fpath=destpath))
+            user=user_name, path=fpath, fpath=fpath))
 
         content_type = ""
         if resp_headers != None:
@@ -270,6 +270,9 @@ class MarkdownImageParser(TextParserBase):
                 os.rename(os.path.join(dirname, filename),
                           os.path.join(dirname, filename_new))
                 filename = filename_new
+
+                fpath = os.path.join(dirname, filename)
+                xmanager.fire("fs.upload", dict(user=user_name, path=fpath, fpath=fpath))
 
         webpath = "/data/files/%s/upload/%s/%s" % (
             user_name, date_dir, filename)

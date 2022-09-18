@@ -83,13 +83,17 @@ $(function () {
         var params = {
             note_id: "{{file.id}}"
         };
+        var loadIndex = layer.load(2);
+
         $.post("/note/cache_external", params, function (resp) {
+            layer.close(loadIndex);
             if (resp.code == "success") {
                 window.location.reload();
             } else {
                 xnote.alert(resp.message);
             }
         }).fail(function (err) {
+            layer.close(loadIndex);
             xnote.alert("调用接口失败: " + err);
         })
     });
