@@ -10,24 +10,30 @@ from xutils import webutil
 
 RETRY_LIMIT = 3
 
-dbutil.register_table("user_op_log", "用户操作日志表", check_user = True, user_attr="user_name")
+dbutil.register_table("user_op_log", "用户操作日志表",
+                      check_user=True, user_attr="user_name")
 _user_log_db = dbutil.get_table("user_op_log")
+
 
 def get_real_ip():
     return webutil.get_real_ip()
 
-def save_login_info(name, value, error = None):
+
+def save_login_info(name, value, error=None):
     if name != "":
         real_ip = get_real_ip()
         now = xutils.format_datetime()
         detail = "登录IP: %s" % real_ip
         if error != None:
             detail += ",登录失败:%s" % error
-        login_log = Storage(type = "login", user_name = name, ip = real_ip, ctime = now, detail = detail)
+        login_log = Storage(type="login", user_name=name,
+                            ip=real_ip, ctime=now, detail=detail)
         _user_log_db.insert_by_user(name, login_log)
+
 
 def save_login_error_count(name, count):
     cacheutil.set("login.fail.count#%s" % name, count, 60)
+
 
 class LoginHandler:
 
@@ -36,8 +42,8 @@ class LoginHandler:
         pswd = xutils.get_argument("password", "")
         error = ""
         count = cacheutil.get("login.fail.count#%s" % name, 0)
-        name  = name.strip()
-        pswd  = pswd.strip()
+        name = name.strip()
+        pswd = pswd.strip()
 
         if name == "":
             error = "请输入登录名"
@@ -48,21 +54,21 @@ class LoginHandler:
         else:
             error = self.do_login(name, pswd, count)
 
-        return xtemplate.render("user/page/login.html", 
-            show_aside = False,
-            username   = name, 
-            password   = pswd,
-            error      = error)
-
+        return xtemplate.render("user/page/login.html",
+                                show_aside=False,
+                                username=name,
+                                password=pswd,
+                                error=error)
 
     def GET(self):
         return xtemplate.render("user/page/login.html",
-            show_aside=False,
-            username="",
-            password="",
-            error="")
+                                show_aside=False,
+                                show_nav=False,
+                                username="",
+                                password="",
+                                error="")
 
-    def do_login(self, name, pswd, count = 0):
+    def do_login(self, name, pswd, count=0):
         target = xutils.get_argument("target", "")
         user = xauth.get_user_by_name(name)
         error = ""
@@ -74,8 +80,8 @@ class LoginHandler:
         else:
             if pswd == user["password"]:
                 save_login_info(name, "success")
-                
-                xauth.login_user_by_name(name, login_ip = get_real_ip())
+
+                xauth.login_user_by_name(name, login_ip=get_real_ip())
 
                 if target == "":
                     raise web.found("/")
@@ -85,6 +91,7 @@ class LoginHandler:
                 save_login_info(name, pswd, error)
                 save_login_error_count(name, count + 1)
         return error
+
 
 xurls = (
     r"/login", LoginHandler

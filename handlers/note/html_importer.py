@@ -312,7 +312,7 @@ class MarkdownImageParser(TextParserBase):
 
 class CacheExternalHandler:
 
-    @xauth.login_required()
+    @xauth.login_required("admin")
     def POST(self):
         user_name = xauth.current_name()
         note_id = xutils.get_argument("note_id", "")

@@ -37,7 +37,9 @@
 
         <a class="dropdown-option link" href="/note/history?id={{file_id}}">{{T("历史")}}</a>
         <a class="dropdown-option link" href="/note/print?id={{file.id}}" target="_blank">打印</a>
-        <a class="dropdown-option cache-external-option link">缓存外部资源</a>
+        {% if _is_admin %}
+            <a class="dropdown-option cache-external-option link">缓存外部资源</a>
+        {% end %}
         <a class="dropdown-option-red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>
     </div>
 </div>
