@@ -86,7 +86,7 @@ class TextHandler:
 
         txt_info.current_offset = offset
         _db.put(user_name, txt_info, sub_key = path)
-        with open(path, encoding=txt_info.encoding) as fp:
+        with open(path, encoding=txt_info.encoding, errors="ignore") as fp:
             fp.seek(offset)
             page_data = fp.read(txt_info.pagesize)
             return dict(code="success", data=page_data)
