@@ -24,6 +24,7 @@ def init():
     # 网络文件映射到本地文件
     dbutil.register_table("fs_map", "文件映射")
     dbutil.register_table("fs_ctype", "缓存的Content-Type")
+    dbutil.register_table("txt_info", "txt文件信息")
 
     # 用户信息
     dbutil.register_table("user", "用户信息表")

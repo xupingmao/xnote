@@ -210,6 +210,27 @@ class FileIndexCheckManager:
 
         FileIndexCheckManager.last_check_time = time.time()
 
+@xmanager.listen("fs.rename")
+def on_fs_rename(event = None):
+    user = event.get("user")
+    fpath = event.get("path")
+    old_path = event.get("old_path")
+    if fpath == None:
+        return
+
+    log_data = Storage()
+    log_data = Storage()
+    log_data.fpath = fpath
+    log_data.user = user
+    log_data.web_path = fsutil.get_webpath(fpath)
+    stat = os.stat(fpath)
+    log_data.mtime = stat.st_mtime
+
+    old_value = Storage()
+    old_value.fpath = old_path
+
+    _binlog.add_log("file_rename", fpath, log_data, old_value = old_value, record_value=True)
+
 
 @xmanager.listen(["fs.upload", "fs.update"])
 def on_fs_upload(ctx = None):

@@ -40,10 +40,13 @@ class LdbHashTable:
     def _check_value(self, obj):
         pass
 
-    def build_key(self, key):
-        return self.prefix + encode_str(key)
+    def build_key(self, key, sub_key=None):
+        p = self.prefix + encode_str(key)
+        if sub_key != None:
+            p += ":" + encode_str(sub_key)
+        return p
 
-    def put(self, key, value, batch = None):
+    def put(self, key, value, batch = None, *, sub_key=None):
         """通过key来设置value，这个key是hash的key，不是ldb的key
         @param {string} key hash的key
         @param {object} value hash的value
@@ -51,19 +54,19 @@ class LdbHashTable:
         self._check_key(key)
         self._check_value(value)
 
-        row_key = self.build_key(key)
+        row_key = self.build_key(key, sub_key=sub_key)
         
         if batch != None:
             batch.put(row_key, value)
         else:
             put(row_key, value)
 
-    def get(self, key, default_value = None):
+    def get(self, key, default_value = None, sub_key = None):
         """通过key来查询value，这个key是hash的key，不是ldb的key
         @param {string} key hash的key
         @param {object} default_value 如果值不存在，返回默认值
         """
-        row_key = self.build_key(key)
+        row_key = self.build_key(key, sub_key=sub_key)
         return get(row_key, default_value)
 
     def iter(self, offset = 0, limit = 20, reverse = False, filter_func = None):

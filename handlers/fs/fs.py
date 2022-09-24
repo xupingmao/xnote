@@ -549,12 +549,6 @@ class EditHandler:
 
         raise web.found("/fs_hex?path=%s" % encoded_fpath)
 
-class TextHandler:
-
-    @xauth.login_required("admin")
-    def GET(self):
-        return xtemplate.render("fs/page/fs_text.html")
-
 
 class Bookmark:
 
@@ -644,7 +638,6 @@ xutils.register_func("fs.process_file_list", process_file_list)
 xurls = (
     r"/fs_edit",   EditHandler,
     r"/fs_view",   ViewHandler,
-    r"/fs_text",   TextHandler,
     r"/fs_link/(.*)", LinkHandler,
     r"/fs_recent", RecentHandler,
     r"/fs_tools",  ToolListHandler,

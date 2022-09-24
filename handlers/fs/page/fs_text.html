@@ -3,81 +3,14 @@
 <!-- 
 @since 2017/12/02
 @modified 2021/02/13 20:56:18
+@version 2.0.0
 -->
 
 {% block head %}
-<style type="text/css">
-
-.char {
-    font-size: 12px;
-    width: 14px;
-    height: 14px;
-    float: left;
-    display: block;
-}
-
-.reader-header {
-    position: fixed;
-    top: 0px;
-    height: 30px;
-    width: 100%;
-    background-color: #ccc;
-}
-
-.reader-content {
-    padding-bottom: 30px;
-    padding-left: 5px;
-    padding-right: 5px;
-    overflow: auto;
-}
-
-.reader-footer {
-    position: fixed;
-    bottom: 0px;
-    height: 35px;
-    background-color: white;
-    border-top: 1px solid #ccc;
-    left: 0px;
-    right: 0px;
-}
-
-#progress {
-    position: absolute;
-    top: 6px;
-    left: 50%;
-    margin-left: -30px;
-    width: 60px;
-    text-align: center;
-}
-
-.backward {
-    position: absolute;
-    left: 5px;
-}
-
-.forward {
-    position: absolute;
-    right: 5px;
-}
-
-.read {
-    position: fixed;
-    right: 50px;
-    bottom: 50px;
-    width: 50px;
-    height: 50px;
-    line-height: 50px;
-    text-align: center;
-    background-color: #ccc;
-    cursor: pointer;
-    border-radius: 5px;
-    opacity: 0.8;
-}
-
-.read:hover {
-    opacity: 1.0;
-}
-
+<style>
+    .contents-item .current {
+        color: red;
+    }
 </style>
 {% end %}
 
@@ -86,124 +19,168 @@
 
 <div class="card">
     {% init fs_title = "文本阅读" %}
-    {% include fs/component/fs_title.html %}
+    <h3 class="card-title btn-line-height">
+        <span>{{fs_title}}</span>
+        
+        <div class="float-right">
+            <a class="btn btn-default contents-btn">目录</a>
+            {% include common/button/back_button.html %}
+        </div>
+    </h3>
+</div>
 
+<div class="card">
     <!-- header -->
     {% include mod_fs_path.html %}
 
-    <!-- body -->
-    <div class="col-md-12 card reader-content scrollbar" id="content"></div>
+    <!-- 目录 -->
+    <div class="book-contents">
+    </div>
+
+    <!-- 文本内容 -->
+    <div class="book-text"></div>
 
     <!-- footer -->
-    <div class="reader-footer">
-        <button class="backward">上一页</button>
-        <span id="progress"></span>
-        <button class="forward">下一页</button>
+    <div class="reader-footer align-center">
+        <button class="backward-btn">上一页</button>
+        <button class="contents-btn">目录</button>
+        <button class="forward-btn">下一页</button>
     </div>
 </div>
-<!-- 阅读悬浮按钮 -->
-<span class="read">阅读</span>
 
+<script type="text/template" id="book-contents-tpl">
+{{!each contents item}}
+    <div class="contents-item">
+        <a data-offset="{{!item.offset}}" data-page="{{!$index+1}}" 
+            {{!if currentOffset == item.offset }}
+            class="current"
+            {{!/if}}
+            class="contents-link">[{{!$index+1}}] {{! item.title }}</a>
+    </div>
+{{!/each}}
+</script>
 
 <script type="text/javascript">
 $(function () {
-    var path = getUrlParams().path;
-    var _from = getUrlParams().from;
-    var autoForward = false;
-    var readLength = 1000;
+    var path = xnote.getUrlParam("path");
+    var params = {
+        method: "contents",
+        path: path
+    };
+    var state = {
+        currentPage: 1,
+        offsetMap: {},
+    };
 
-    function updateContentView() {
-        var contentTop = $(".reader-content").offset().top;
-        var footerTop  = $(".reader-footer").offset().top;
-        var minHeight  = footerTop - contentTop;
-        $(".reader-content").css("height", minHeight);
+    function hideContents() {
+        $(".book-contents").hide();
+        $(".book-text").show();
     }
 
-    // 调整底部
-    function updateFooter() {    
-        var mainContentLeft = $(".main-content").offset().left;
-        var mainContentWidth = $(".main-content").outerWidth();
-        $(".reader-footer")
-            .css("left", mainContentLeft)
-            .css("width", mainContentWidth);
+    function showContents() {
+        $(".book-contents").show();
+        $(".book-text").hide();
+        readContents();
     }
 
-    // 悬浮按钮
-    function updateFloatingButton() {
-        var mainContentWidth = $(".main-content").outerWidth();
-        var mainContentLeft = $(".main-content").offset().left;
-        $(".read").css("left", mainContentLeft + mainContentWidth - 100);
+    function escapeText(text) {
+        text = text.replace(/\</gi, "&lt;");
+        text = text.replace(/\>/gi, "&gt;");
+        text = text.replace(/ /gi, "&nbsp;");
+        text = text.replace(/\n/gi, "<br>");
+        return text
     }
 
-    $("#backLink").attr("href", _from);
+    function readPage(page) {
+        var offset = state.offsetMap[page];
+        if (offset == undefined) {
+            xnote.alert("没有更多内容了!");
+            return;
+        }
+        var params = {
+            method: "read_page",
+            offset: offset,
+            path: xnote.getUrlParam("path"),
+        };
+        $.get("/fs_text", params, function (resp) {
+            if (resp.code != "success") {
+                xnote.alert(resp.message);
+            } else {
+                var text = resp.data;
+                text = escapeText(text);
+                $(".book-text").html(text);
+                hideContents();
+                state.currentPage = page - 0;
+                // 滚动到顶部
+                window.scroll(0, 0);
+            }
+        });
+    }
 
-    function readbook(direction, read) {
-        $.get("/api/readbook", {path: path, read: "false", direction: direction, length: readLength}, function (resp) {
-            var text = resp.data;
-            // 显示阅读内容
-            text = text.replace(/\</gi, "&lt;");
-            text = text.replace(/\>/gi, "&gt;");
-            text = text.replace(/ /gi, "&nbsp;");
-            text = text.replace(/\n/gi, "<br>");
-            $(".reader-content").html(text);
-            $("#progress").text((resp.current/resp.size*100).toFixed(2) + "%");
-            $(window).scrollTop(0);
-            // 先前进，再读这一章节
-            if (read == "true") {
-                // read 永远是当前章节
-                $.get("/api/readbook", {path: path, read: "true", direction: "current", length: readLength}, function (resp) {
-                    if (autoForward) {
-                        setTimeout(function () {
-                            readbook("forward", read);
-                        })
-                    }
+    // 读取目录
+    function readContents() {
+        $.get("/fs_text", params, function (resp) {
+            console.log(resp);
+            if (resp.code != "success") {
+                xnote.alert(resp.message);
+            } else {
+                var bookmark = resp.data;
+                var html = $("#book-contents-tpl").renderTemplate({
+                    contents: bookmark.contents,
+                    currentOffset: bookmark.current_offset,
                 });
-            } 
-        })
+
+                var contents = bookmark.contents;
+                // console.log("html", html);
+                for (var i = 0; i < contents.length; i++) {
+                    var item = contents[i];
+                    state.offsetMap[i+1] = item.offset;
+                }
+
+                $(".book-contents").html(html);
+            }
+        });
     }
-    $(".read").click(function () {
-        autoForward = true;
-        readbook("current", "true");
+
+    // 点击目录链接
+    $("body").on("click", ".contents-link", function (e) {
+        readPage($(e.target).attr("data-page"));
     });
 
-    function readForward() {
-        autoForward = false;
-        readbook("forward", "false");
-    }
+    // 点击目录
+    $(".contents-btn").click(function (e) {
+        showContents();
+    })
 
-    function readBackward() {
-        autoForward = false;
-        readbook("backward", "false");
-    }
+    // 点击下一页
+    $(".forward-btn").click(function (e) {
+        readPage(state.currentPage+1);
+    });
 
-    $(".forward").click(readForward);
-    $(".backward").click(readBackward);
+    // 点击上一页
+    $(".backward-btn").click(function (e) {
+        if (state.currentPage == 1) {
+            xnote.alert("已经是第一页了!");
+            return;
+        }
+        readPage(state.currentPage-1);
+    });
 
-    readbook("current", "false");
-
+    // 快捷键
     $(window).on("keyup", function (event) {
         var keyCode = event.keyCode;
         console.log(keyCode);
         switch (keyCode) {
           // shift
           case 16: return;
-          case 39: readForward(); break;
-          case 37: readBackward(); break;
+          case 39: readPage(state.currentPage+1); break;
+          case 37: readPage(state.currentPage-1); break;
+          case 27: showContents(); break; // ESC
         }
     });
 
-    function updateView() {
-        console.log("updateView:");
-        updateContentView();
-        updateFooter();
-        updateFloatingButton();
-    }
-
-    // 更新视图
-    updateView();
-    $(window).on("resize", function (event) {
-        updateView();
-    });
+    // 初始化
+    showContents();
 });
 </script>
 

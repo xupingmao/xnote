@@ -1,0 +1,211 @@
+{% extends base %}
+
+<!-- 
+@since 2017/12/02
+@modified 2021/02/13 20:56:18
+@version 1.0.0
+-->
+
+{% block head %}
+<style type="text/css">
+
+.char {
+    font-size: 12px;
+    width: 14px;
+    height: 14px;
+    float: left;
+    display: block;
+}
+
+.reader-header {
+    position: fixed;
+    top: 0px;
+    height: 30px;
+    width: 100%;
+    background-color: #ccc;
+}
+
+.reader-content {
+    padding-bottom: 30px;
+    padding-left: 5px;
+    padding-right: 5px;
+    overflow: auto;
+}
+
+.reader-footer {
+    position: fixed;
+    bottom: 0px;
+    height: 35px;
+    background-color: white;
+    border-top: 1px solid #ccc;
+    left: 0px;
+    right: 0px;
+}
+
+#progress {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    margin-left: -30px;
+    width: 60px;
+    text-align: center;
+}
+
+.backward {
+    position: absolute;
+    left: 5px;
+}
+
+.forward {
+    position: absolute;
+    right: 5px;
+}
+
+.read {
+    position: fixed;
+    right: 50px;
+    bottom: 50px;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    background-color: #ccc;
+    cursor: pointer;
+    border-radius: 5px;
+    opacity: 0.8;
+}
+
+.read:hover {
+    opacity: 1.0;
+}
+
+</style>
+{% end %}
+
+{% block body %}
+{% set path = xutils.get_argument("path") %}
+
+<div class="card">
+    {% init fs_title = "文本阅读" %}
+    {% include fs/component/fs_title.html %}
+
+    <!-- header -->
+    {% include mod_fs_path.html %}
+
+    <!-- body -->
+    <div class="col-md-12 card reader-content scrollbar" id="content"></div>
+
+    <!-- footer -->
+    <div class="reader-footer">
+        <button class="backward">上一页</button>
+        <span id="progress"></span>
+        <button class="forward">下一页</button>
+    </div>
+</div>
+<!-- 阅读悬浮按钮 -->
+<span class="read">阅读</span>
+
+
+<script type="text/javascript">
+$(function () {
+    var path = getUrlParams().path;
+    var _from = getUrlParams().from;
+    var autoForward = false;
+    var readLength = 1000;
+
+    function updateContentView() {
+        var contentTop = $(".reader-content").offset().top;
+        var footerTop  = $(".reader-footer").offset().top;
+        var minHeight  = footerTop - contentTop;
+        $(".reader-content").css("height", minHeight);
+    }
+
+    // 调整底部
+    function updateFooter() {    
+        var mainContentLeft = $(".main-content").offset().left;
+        var mainContentWidth = $(".main-content").outerWidth();
+        $(".reader-footer")
+            .css("left", mainContentLeft)
+            .css("width", mainContentWidth);
+    }
+
+    // 悬浮按钮
+    function updateFloatingButton() {
+        var mainContentWidth = $(".main-content").outerWidth();
+        var mainContentLeft = $(".main-content").offset().left;
+        $(".read").css("left", mainContentLeft + mainContentWidth - 100);
+    }
+
+    $("#backLink").attr("href", _from);
+
+    function readbook(direction, read) {
+        $.get("/api/readbook", {path: path, read: "false", direction: direction, length: readLength}, function (resp) {
+            var text = resp.data;
+            // 显示阅读内容
+            text = text.replace(/\</gi, "&lt;");
+            text = text.replace(/\>/gi, "&gt;");
+            text = text.replace(/ /gi, "&nbsp;");
+            text = text.replace(/\n/gi, "<br>");
+            $(".reader-content").html(text);
+            $("#progress").text((resp.current/resp.size*100).toFixed(2) + "%");
+            $(window).scrollTop(0);
+            // 先前进，再读这一章节
+            if (read == "true") {
+                // read 永远是当前章节
+                $.get("/api/readbook", {path: path, read: "true", direction: "current", length: readLength}, function (resp) {
+                    if (autoForward) {
+                        setTimeout(function () {
+                            readbook("forward", read);
+                        })
+                    }
+                });
+            } 
+        })
+    }
+    $(".read").click(function () {
+        autoForward = true;
+        readbook("current", "true");
+    });
+
+    function readForward() {
+        autoForward = false;
+        readbook("forward", "false");
+    }
+
+    function readBackward() {
+        autoForward = false;
+        readbook("backward", "false");
+    }
+
+    $(".forward").click(readForward);
+    $(".backward").click(readBackward);
+
+    readbook("current", "false");
+
+    $(window).on("keyup", function (event) {
+        var keyCode = event.keyCode;
+        console.log(keyCode);
+        switch (keyCode) {
+          // shift
+          case 16: return;
+          case 39: readForward(); break;
+          case 37: readBackward(); break;
+        }
+    });
+
+    function updateView() {
+        console.log("updateView:");
+        updateContentView();
+        updateFooter();
+        updateFloatingButton();
+    }
+
+    // 更新视图
+    updateView();
+    $(window).on("resize", function (event) {
+        updateView();
+    });
+});
+</script>
+
+{% end %}

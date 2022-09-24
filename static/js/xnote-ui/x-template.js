@@ -29,14 +29,20 @@ xnote.renderTemplate = function(templateText, object) {
     });
 };
 
-/**
- * 获取表单数据
- */
- $.fn.extend({
-    /** 渲染模板 **/
-    "render": function (data, options) {
+(function() {
+    function jqRenderTemplate(data, options) {
         var templateText = $(this).text();
         // 使用art-template模板渲染
         return template.render(templateText, data, options);
-    },
-});
+    }
+
+    /**
+     * 获取表单数据
+     */
+    $.fn.extend({
+        /** 渲染模板 **/
+        "render": jqRenderTemplate,
+        "renderTemplate": jqRenderTemplate,
+    });
+})();
+
