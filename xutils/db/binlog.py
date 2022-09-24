@@ -84,7 +84,7 @@ class BinLog:
         else:
             db_put(key, log_body)
 
-    def add_log(self, optype, key, value=None, batch=None, old_value=None):
+    def add_log(self, optype, key, value=None, batch=None, old_value=None, *, record_value=False):
         if not self._is_enabled:
             return
 
@@ -92,6 +92,8 @@ class BinLog:
             self.last_seq += 1
             binlog_id = _format_log_id(self.last_seq)
             binlog_body = dict(optype=optype, key=key, old_value=old_value)
+            if record_value:
+                binlog_body["value"] = value
             self._put_log(binlog_id, binlog_body, batch=batch)
 
     def list(self, last_seq, limit, map_func=None):

@@ -777,7 +777,6 @@ def get_webpath(fpath):
     rpath = get_relative_path(fpath, xconfig.DATA_DIR)
     return "/data/" + rpath
 
-
 def backupfile(path, backup_dir=None, rename=False):
     if os.path.exists(path):
         if backup_dir is None:

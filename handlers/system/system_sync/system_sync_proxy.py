@@ -136,12 +136,11 @@ class HttpClient:
 
         if not self.check_disk_space():
             logging.error("磁盘容量不足，跳过")
-            return
+            raise Exception("磁盘容量不足")
 
         fpath = item.fpath
         web_path = item.web_path
         mtime = item.mtime
-
 
         # 先保存失败记录，成功后再删除
         self.upsert_retry_task(item)

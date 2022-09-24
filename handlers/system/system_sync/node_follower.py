@@ -50,12 +50,16 @@ class Follower(NodeManagerBase):
         # 同步完成的时间
         self.fs_sync_done_time = -1
         self._debug = False
-        self.db_syncer = DBSyncer()
+        self.file_syncer = FileSyncer()
+        self.db_syncer = DBSyncer(file_syncer = self.file_syncer)
 
-    def get_client(self):
+    def create_http_client(self):
         leader_host = self.get_leader_url()
         leader_token = self.get_leader_token()
         return HttpClient(leader_host, leader_token, self.admin_token)
+
+    def get_client(self):
+        return self.create_http_client()
 
     def get_node_id(self):
         return xconfig.get_global_config("system.node_id", "unknown_node_id")
@@ -245,13 +249,29 @@ class Follower(NodeManagerBase):
         return self.db_syncer.get_db_sync_state() == "full"
 
 
+class FileSyncer:
+    """文件同步器"""
+    def __init__(self, http_client = None):
+        self.http_client = http_client # type: HttpClient
+
+    def handle_file_binlog(self, key, value):
+        if value == None:
+            logging.warning("value is None, key=%s", key)
+            return
+        self.sync_file(value)
+    
+    def sync_file(self, item):
+        self.http_client.download_file(item)
+
+
 class DBSyncer:
 
     MAX_LOOPS = 1000 # 最大循环次数
 
-    def __init__(self, debug = True):
+    def __init__(self, *, debug = True, file_syncer = None):
         self._binlog = BinLog.get_instance()
         self.debug = debug
+        self.file_syncer = file_syncer # type: FileSyncer
     
     def get_table_by_key(self, key):
         table_name = key.split(":")[0]
@@ -315,6 +335,7 @@ class DBSyncer:
             batch.commit()
     
     def sync_db(self, proxy): # type: (HttpClient) -> any
+        self.file_syncer.http_client = proxy
         sync_state = self.get_db_sync_state()
         if sync_state == "binlog":
             message = self.sync_by_binlog(proxy)
@@ -392,6 +413,8 @@ class DBSyncer:
                 self.put_and_log(key, value)
             elif optype == "delete":
                 self.delete_and_log(key)
+            elif optype == "file_upload":
+                self.file_syncer.handle_file_binlog(key, value)
             else:
                 logging.error("未知的optype:%s", optype)
 

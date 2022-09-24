@@ -23,6 +23,7 @@ from xutils import textutil
 dbutil.register_table("fs_sync_index", "文件同步索引信息")
 
 _fs_index_db = dbutil.get_table("fs_sync_index")
+_binlog = dbutil.BinLog.get_instance()
 
 # 临时文件
 TEMP_FNAME_SET = set([".DS_Store", ".thumbnail", ".git"])
@@ -217,6 +218,14 @@ def on_fs_upload(ctx = None):
     if filepath == None:
         return
     build_index_by_fpath(filepath)
+
+    log_data = Storage()
+    log_data.fpath = filepath
+    log_data.user = ctx.get("user")
+    log_data.web_path = fsutil.get_webpath(filepath)
+    stat = os.stat(filepath)
+    log_data.mtime = stat.st_mtime
+    _binlog.add_log("file_upload", filepath, log_data, record_value=True)
 
 def list_files(key_from = None):
     manager = FileSyncIndexManager()
