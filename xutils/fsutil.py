@@ -25,7 +25,12 @@ from xutils.base import Storage
 from fnmatch import fnmatch
 from six.moves.configparser import ConfigParser
 
-ENCODING_TUPLE = ("utf-8", "gbk", "mbcs", "latin_1")
+# mbcs泛指通过2字节来编码的字符编码
+# https://zhuanlan.zhihu.com/p/453675608
+# GBK兼容GB2312
+# GB18030兼容GB2312 基本兼容GBK
+# 支持的编码参考 encodings 包
+ENCODING_TUPLE = ("utf-8", "gbk", "gb18030", "mbcs", "latin_1")
 
 # 配置文件最大大小
 CONFIG_FILE_MAX_SIZE = 1024 * 1024
@@ -113,7 +118,9 @@ def detect_encoding(fpath, raise_error=True):
     for encoding in ENCODING_TUPLE:
         try:
             with open(fpath, encoding=encoding) as fp:
-                fp.read(1024)
+                # 探测100K数据
+                for i in range(100):
+                    fp.read(1024)
                 return encoding
         except Exception as e:
             last_err = e
