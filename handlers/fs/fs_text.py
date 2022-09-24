@@ -43,7 +43,10 @@ class TextHandler:
         pagesize = 5000
         total_size = 0
 
-        with open(fpath, encoding=encoding) as fp:
+        if encoding == None:
+            return dict(code="500", message="未知的文件编码")
+
+        with open(fpath, encoding=encoding, errors="ignore") as fp:
             while True:
                 page_info = Storage()
                 page_info.offset = fp.tell()
