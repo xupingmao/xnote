@@ -13,7 +13,7 @@ RETRY_LIMIT = 3
 dbutil.register_table("user_op_log", "用户操作日志表",
                       check_user=True, user_attr="user_name")
 _user_log_db = dbutil.get_table("user_op_log")
-
+_login_failed_count = cacheutil.PrefixedCache("login_failed_count:")
 
 def get_real_ip():
     return webutil.get_real_ip()
@@ -32,7 +32,7 @@ def save_login_info(name, value, error=None):
 
 
 def save_login_error_count(name, count):
-    cacheutil.set("login.fail.count#%s" % name, count, 60)
+    _login_failed_count.put(name, count, 60)
 
 
 class LoginHandler:
@@ -41,7 +41,7 @@ class LoginHandler:
         name = xutils.get_argument("username", "")
         pswd = xutils.get_argument("password", "")
         error = ""
-        count = cacheutil.get("login.fail.count#%s" % name, 0)
+        count = _login_failed_count.get(name, 0)
         name = name.strip()
         pswd = pswd.strip()
 
