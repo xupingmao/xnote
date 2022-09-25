@@ -103,7 +103,7 @@ FS_OPTIONS = []
 ##################################
 # 存储目录配置项
 ##################################
-# 处理器目录
+# 请求处理器目录
 HANDLERS_DIR = "handlers"
 # 工具目录
 TOOLS_DIR = "handlers/tools"
@@ -124,6 +124,9 @@ SCRIPTS_DIR = os.path.join(DATA_DIR, "scripts")
 DB_DIR = os.path.join(DATA_DIR, "db")
 CONFIG_DIR = os.path.join(DATA_DIR, "config")
 BACKUP_DIR = os.path.join(DATA_DIR, "backup")
+BACKUP_DB_DIR = os.path.join(BACKUP_DIR, "db")
+CACHE_DIR = os.path.join(DATA_DIR, "cache")
+
 # 备份失效时间
 BACKUP_EXPIRE = 24 * 3600 * 365
 # 回收站清理时间
@@ -199,6 +202,10 @@ def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
+def make_data_dir(dirname):
+    abspath = os.path.join(DATA_DIR, dirname)
+    makedirs(abspath)
+    return abspath
 
 def init(boot_config_file=None, boot_config_kw = None):
     """初始化系统配置项,启动时必须调用"""
@@ -209,6 +216,7 @@ def init(boot_config_file=None, boot_config_kw = None):
     global DICT_FILE
     global RECORD_FILE
     global BACKUP_DIR
+    global BACKUP_DB_DIR
     global UPLOAD_DIR
     global APP_DIR
     global TMP_DIR
@@ -227,12 +235,13 @@ def init(boot_config_file=None, boot_config_kw = None):
     global PLUGIN_TEMPLATE
     global RUNTIME_ID
     global FILE_EXT_PATH
+    global CACHE_DIR
 
     if boot_config_file != None:
         # 初始化启动配置
         init_boot_config(boot_config_file, boot_config_kw=boot_config_kw)
 
-    path = get_global_config("system.data")
+    path = get_system_config("data")
     DATA_PATH = os.path.abspath(path)
     DATA_DIR = os.path.abspath(path)
 
@@ -243,15 +252,21 @@ def init(boot_config_file=None, boot_config_kw = None):
     init_db_config()
 
     # 备份数据地址
-    BACKUP_DIR = os.path.join(DATA_DIR, "backup")
+    BACKUP_DIR = make_data_dir("backup")
+    BACKUP_DB_DIR = make_data_dir("backup/db")
+
     # APP地址
-    UPLOAD_DIR = os.path.join(DATA_DIR, "files")
-    APP_DIR = os.path.join(DATA_DIR, "app")
-    TMP_DIR = os.path.join(DATA_DIR, "tmp")
+    UPLOAD_DIR = make_data_dir("files")
+    APP_DIR = make_data_dir("app")
+    TMP_DIR = make_data_dir("tmp")
+    CACHE_DIR = make_data_dir("cache")
+
     # 脚本的地址
-    SCRIPTS_DIR = os.path.join(DATA_DIR,    "scripts")
-    COMMANDS_DIR = os.path.join(SCRIPTS_DIR, "commands")
-    PLUGINS_DIR = os.path.join(SCRIPTS_DIR, "plugins")
+    SCRIPTS_DIR  = make_data_dir("scripts")
+    COMMANDS_DIR = make_data_dir("scripts/commands")
+    PLUGINS_DIR  = make_data_dir("scripts/plugins")
+
+
     CODE_ZIP = os.path.join(DATA_DIR, "code.zip")
     DATA_ZIP = os.path.join(DATA_DIR, "data.zip")
     TRASH_DIR = os.path.join(DATA_DIR, "trash")
@@ -272,9 +287,6 @@ def init(boot_config_file=None, boot_config_kw = None):
     makedirs(STORAGE_DIR)
     makedirs(ETC_DIR)
     makedirs(LOG_DIR)
-    makedirs(BACKUP_DIR)
-    makedirs(os.path.join(BACKUP_DIR, "db"))
-    makedirs(os.path.join(DATA_DIR, "cache"))
 
     # 二级目录
     makedirs(COMMANDS_DIR)
@@ -598,3 +610,9 @@ def get_backup_dir(name=None):
 
     assert isinstance(name, str)
     return os.path.join(BACKUP_DIR, name)
+
+def get_system_files():
+    return hashset([
+        BACKUP_DB_DIR,
+    ])
+

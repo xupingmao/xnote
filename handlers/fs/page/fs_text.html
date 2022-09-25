@@ -52,10 +52,9 @@
 {{!each contents item}}
     <div class="contents-item">
         <a data-offset="{{!item.offset}}" data-page="{{!$index+1}}" 
-            {{!if currentOffset == item.offset }}
-            class="current"
-            {{!/if}}
-            class="contents-link">[{{!$index+1}}] {{! item.title }}</a>
+            class="contents-link {{!if currentOffset == item.offset }}current{{!/if}}">
+            [{{!$index+1}}] {{! item.title }}
+        </a>
     </div>
 {{!/each}}
 </script>

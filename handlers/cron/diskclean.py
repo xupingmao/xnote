@@ -27,6 +27,9 @@ def rm_expired_files(dirname, expired_time, depth=0, hard=False):
     now = time.time()
     for fname in os.listdir(dirname):
         fpath = os.path.join(dirname, fname)
+        fpath = os.path.abspath(fpath)
+        if fpath in xconfig.get_system_files():
+            continue
         if os.path.islink(fpath):
             xutils.info("DiskClean", "%s is a link" % fname)
             continue
