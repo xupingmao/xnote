@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-07 21:06:22
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-12 09:57:41
+@LastEditTime : 2022-09-25 23:33:31
 @FilePath     : /xnote/core/x_trace.py
 @Description  : 统计相关的
 """
@@ -15,8 +15,9 @@ from xutils import Storage
 
 class TraceInfo(threading.local):
 
-    start_time = time.time()
-    sql_logs = []
+    def __init__(self):
+        self.start_time = time.time()
+        self.sql_logs = []
 
 _trace_info = TraceInfo()
 

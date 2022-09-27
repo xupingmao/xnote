@@ -27,6 +27,7 @@ import logging
 import xauth
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
+from xutils import cacheutil
 
 # 配置日志模块
 logging.basicConfig(level=logging.DEBUG,
@@ -73,6 +74,7 @@ MAX_VIEW_LOG = 500
 MAX_STICKY_SIZE = 1000
 MAX_SEARCH_SIZE = 1000
 MAX_LIST_SIZE = 1000
+_cache = cacheutil.PrefixedCache("note:")
 
 NOTE_ICON_DICT = {
     "group": "fa-folder",
@@ -986,11 +988,13 @@ def list_group(creator=None,
         return _book_db.count(user_name=creator, filter_func=list_group_func)
 
     notes = _book_db.list(
-        user_name=creator, filter_func=list_group_func, limit=1000)
+        user_name=creator, filter_func=list_group_func, limit=limit)
     sort_notes(notes, orderby)
     result = notes[offset:offset + limit]
     
     if count_total:
+        if len(notes) < limit:
+            return result, len(notes)
         return result, _book_db.count(user_name = creator, filter_func=list_group_func)
     else:
         return result
@@ -998,7 +1002,16 @@ def list_group(creator=None,
 
 def count_group(creator, status=None):
     check_group_status(status)
+    key = "%s#%s" % (creator, status)
+    value = _cache.get(key)
+    if value != None:
+        return value
+    
+    value = count_group_by_db(creator, status)
+    _cache.put(key, value, 60)
+    return value
 
+def count_group_by_db(creator, status=None):
     if status is None:
         return _book_db.count(user_name=creator)
 

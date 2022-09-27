@@ -38,8 +38,8 @@ class DBInterface:
         raise NotImplementedError("Delete")
 
     def RangeIter(self, 
-            key_from = None, 
-            key_to = None, 
+            key_from = None, # type: bytes
+            key_to = None,  # type: bytes
             reverse = False,
             include_value = True, 
             fill_cache = False):

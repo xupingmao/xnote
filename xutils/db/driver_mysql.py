@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-12 10:46:12
+@LastEditTime : 2022-09-27 23:56:12
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -148,7 +148,8 @@ class MySQLKV:
                     logging.debug("GET (%s) cost %.2fms", key, cost_time*1000)
 
                 if self.sql_logger != None:
-                    self.sql_logger.append(sql % key)
+                    log_info = sql % key + " [%.2fms]" % (cost_time*1000)
+                    self.sql_logger.append(log_info)
 
                 self.close_cursor(cursor)
 
@@ -159,6 +160,7 @@ class MySQLKV:
         # type: (any,bytes,bytes) -> None
         assert cursor != None
         
+        start_time = time.time()
         select_sql = "SELECT `key` FROM kv_store WHERE `key` = %s"
         insert_sql = "INSERT INTO kv_store (`key`, value) VALUES (%s, %s)"
         update_sql = "UPDATE kv_store SET value=%s WHERE `key` = %s"
@@ -169,7 +171,9 @@ class MySQLKV:
                 logging.debug("SQL:%s, params:%s", insert_sql, (key, value))
             
             if self.sql_logger:
-                self.sql_logger.append(insert_sql % (key, "-"))
+                cost_time = time.time() - start_time
+                log_info = insert_sql % (key, "-") + " [%.2fms]" % (cost_time*1000)
+                self.sql_logger.append(log_info)
 
             try:
                 cursor.execute(insert_sql, (key, value))
@@ -181,7 +185,9 @@ class MySQLKV:
                 logging.debug("SQL:%s, params:%s", update_sql, (key, value))
             
             if self.sql_logger:
-                self.sql_logger.append(update_sql % ("-", key))
+                cost_time = time.time() - start_time
+                log_info = update_sql % ("-", key) + " [%.2fms]" % (cost_time*1000)
+                self.sql_logger.append(log_info)
 
             cursor.execute(update_sql, (value, key))
 
@@ -297,13 +303,14 @@ class MySQLKV:
                     if self.debug:
                         logging.debug("SQL:%s (%s)", sql, params)
                     
-                    if self.sql_logger:
-                        self.sql_logger.append(sql % tuple(params))
-
+                    time_before_execute = time.time()
                     cursor.execute(sql, tuple(params))
-
-                    # return cur.execute(sql, tuple(params))
                     result = cursor.fetchall()
+
+                    if self.sql_logger:
+                        cost_time = time.time() - time_before_execute
+                        log_info = sql % tuple(params) + " [%.2fms]" % (cost_time*1000)
+                        self.sql_logger.append(log_info)
 
                     for item in result[:limit]:
                         # logging.debug("include_value(%s), item:%s", include_value, item)

@@ -144,9 +144,12 @@ def get_valid_session_by_id(sid):
     session_info = session_cache.get(sid)
     if session_info == None:
         session_info = session_db.get(sid)
-        session_cache.put(sid, session_info, expire = DEFAULT_CACHE_EXPIRE)
+        if session_info == None:
+            session_cache.put_empty(sid)
+        else:
+            session_cache.put(sid, session_info, expire = DEFAULT_CACHE_EXPIRE)
 
-    if session_info is None:
+    if session_info == None or session_cache.is_empty(session_info):
         return None
 
     if session_info.user_name is None:

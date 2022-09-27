@@ -175,6 +175,13 @@ class PrefixedCache:
     def put(self, key, value, expire=60*5):
         return _global_cache.put(self.prefix+key, value, expire)
     
+    def put_empty(self, key, expire=5):
+        """针对空值的特殊处理"""
+        return _global_cache.put(self.prefix+key, "$empty", expire)
+    
+    def is_empty(self, value):
+        return value == "$empty"
+    
     def delete(self, key):
         return _global_cache.delete(self.prefix + key)
 

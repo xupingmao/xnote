@@ -18,20 +18,16 @@ register_table("_rank", "排名表")
 
 class RankTable:
 
-    def __init__(self, table_name, user_name = None):
+    def __init__(self, table_name):
         check_table_name(table_name)
         self.table_name = table_name
 
         self.prefix = "_rank:" + table_name
-        if user_name != None and user_name != "":
-            self.prefix += ":" + user_name
-
         if self.prefix[-1] != ":":
             self.prefix += ":"
 
     def _format_score(self, score):
-        if score is None:
-            return "$"
+        assert score != None
         if isinstance(score, int):
             return "%020d" % score
         if isinstance(score, str):
@@ -40,7 +36,7 @@ class RankTable:
 
     def put(self, member, score, batch = None):
         score_str = self._format_score(score)
-        key = self.prefix + str(score) + ":" + member
+        key = self.prefix + score_str + ":" + member
 
         if batch != None:
             batch.put(key, member)
@@ -49,7 +45,7 @@ class RankTable:
 
     def delete(self, member, score, batch = None):
         score_str = self._format_score(score)
-        key = self.prefix + str(score) + ":" + member
+        key = self.prefix + score_str + ":" + member
 
         if batch != None:
             batch.delete(key)
@@ -63,20 +59,23 @@ class RankTable:
 
 class LdbSortedSet:
 
-    def __init__(self, table_name, user_name = None, key_name = "_key"):
+    def __init__(self, table_name, key_name = "_key"):
         # key-value的映射
-        self.member_dict = LdbHashTable(table_name, user_name)
+        self.member_dict = LdbHashTable(table_name)
         # score的排名
-        self.rank = RankTable(table_name, user_name)
+        self.rank = RankTable(table_name)
 
     def put(self, member, score):
         """设置成员分值"""
+        assert isinstance(score, int)
+
         with get_write_lock(member):
             batch = create_write_batch()
             old_score = self.member_dict.get(member)
             self.member_dict.put(member, score, batch = batch)
             if old_score != score:
-                self.rank.delete(member, old_score, batch = batch)
+                if old_score != None:
+                    self.rank.delete(member, old_score, batch = batch)
                 self.rank.put(member, score, batch = batch)
             batch.commit()
 

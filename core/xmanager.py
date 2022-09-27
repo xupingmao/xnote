@@ -88,6 +88,7 @@ def do_wrap_handler(pattern, handler_clz):
             
         def POST(self, *args):
             """常用于提交HTML FORM表单、新增资源等"""
+            x_trace.start_trace()
             WrappedHandler.visited_count += 1.0
             threading.current_thread().handler_class = self.target
             result = wrap_result(self.target.POST(*args))

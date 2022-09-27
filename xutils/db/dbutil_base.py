@@ -80,7 +80,7 @@ LDB_TABLE_DICT = dict()
 WRITE_ONLY = False
 
 # leveldb的全局实例
-_leveldb = None
+_leveldb = None # type: DBInterface
 # 缓存对象（拥有put/get两个方法）
 _cache = None
 
@@ -620,10 +620,10 @@ def prefix_list(*args, **kw):
     return list(prefix_iter(*args, **kw))
 
 
-def prefix_iter(prefix,
-                filter_func=None,
-                offset=0,
-                limit=-1,
+def prefix_iter(prefix, # type: str
+                filter_func=None, # type: function
+                offset=0, # type: int
+                limit=-1, # type: int
                 reverse=False,
                 include_key=False,
                 key_from=None,
@@ -638,6 +638,7 @@ def prefix_iter(prefix,
     @param {int} limit  选择的数据行数
     @param {boolean} reverse 是否反向遍历
     @param {boolean} include_key 返回的数据是否包含key，默认只有value
+    @param {boolean} scan_db 是否扫描整个数据库
     """
     check_leveldb()
     if key_from != None and reverse == True:
