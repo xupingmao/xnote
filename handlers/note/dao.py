@@ -420,7 +420,8 @@ def get_full_by_id(id):
 def get_by_id(id, include_full=True, creator=None):
     if id == "" or id is None:
         return None
-    if str(id) == "0":
+    id = str(id)
+    if id == "0":
         return get_root(creator)
 
     note_index = _index_db.get_by_id(id)
