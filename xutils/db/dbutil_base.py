@@ -83,6 +83,7 @@ WRITE_ONLY = False
 _leveldb = None # type: DBInterface
 # 缓存对象（拥有put/get两个方法）
 _cache = None
+_driver_name = None
 
 
 def print_debug_info(fmt, *args):
@@ -781,6 +782,9 @@ def set_db_instance(db_instance):
     global _leveldb
     _leveldb = db_instance
 
+def get_db_instance():
+    global _leveldb
+    return _leveldb
 
 def count_table(table_name, use_cache=False):
     assert table_name != None
@@ -841,6 +845,12 @@ def rename_table(old_name, new_name):
 def run_test():
     pass
 
+def set_driver_name(driver_name):
+    global _driver_name
+    _driver_name = driver_name
+
+def get_driver_name():
+    return _driver_name
 
 if __name__ == "__main__":
     run_test()

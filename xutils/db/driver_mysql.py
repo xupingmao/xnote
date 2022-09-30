@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-30 23:09:19
+@LastEditTime : 2022-09-30 23:13:22
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -72,6 +72,7 @@ class MySQLKV:
         self.sql_logger = sql_logger  # type: SqlLoggerInterface
         self.scan_limit = 200 # 扫描的分页大小
         self.init()
+        RdbSortedSet.init_class(db_instance=self)
 
     def get_connection(self):
         # TODO 优化成连接池

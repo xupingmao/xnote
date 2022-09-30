@@ -4,6 +4,7 @@
 # @modified 2022/04/17 13:58:29
 # @filename test_xutils_db.py
 
+from xutils.db.dbutil_sortedset import SortedSet
 from .a import *
 from xutils import Storage
 from xutils import dbutil
@@ -695,6 +696,8 @@ class TestMain(BaseTestCase):
 
     def test_dbutil_sortedset(self):
         from xutils.db.driver_mysql import MySQLKV
+        from xutils.db.dbutil_sortedset import SortedSet
+
         skip_mysql_test = os.environ.get("skip_mysql_test")
         if skip_mysql_test == "True":
             print("skip mysql test")
@@ -702,9 +705,8 @@ class TestMain(BaseTestCase):
 
         db = MySQLKV(host="192.168.50.153", user="root",
                      password="root", database="test2")
-        from xutils.db.driver_mysql import RdbSortedSet
-        RdbSortedSet.init_class(db_instance=db)
-        db = RdbSortedSet("sorted_set_test")
+        dbutil.set_driver_name("mysql")
+        db = SortedSet("sorted_set_test")
 
         db.put("a", 10.5)
         db.put("b", 20.6)

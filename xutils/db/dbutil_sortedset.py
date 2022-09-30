@@ -96,3 +96,10 @@ class LdbSortedSet:
             item = (member, self.get(member))
             result.append(item)
         return result
+
+
+def SortedSet(table_name):
+    if get_driver_name() == "mysql":
+        from xutils.db.driver_mysql import RdbSortedSet
+        return RdbSortedSet(table_name)
+    return LdbSortedSet(table_name)

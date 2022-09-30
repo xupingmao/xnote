@@ -207,6 +207,7 @@ def try_init_ldb():
                     logging.error("启动失败,请安装leveldb依赖")
                     sys.exit(1)
 
+        dbutil.set_driver_name(db_driver)
         # 初始化leveldb数据库
         dbutil.init(xconfig.DB_DIR,
                     db_instance=db_instance,
