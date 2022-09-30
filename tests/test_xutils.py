@@ -389,25 +389,6 @@ class TestMain(unittest.TestCase):
 
         self.assertEqual(0, db.count())
 
-    def test_dbutil_sortedset(self):
-        dbutil.register_table("sortedset_test", "sortedset测试")
-        db = dbutil.LdbSortedSet("sortedset_test")
-
-        db.put("a", 10)
-        db.put("b", 20)
-
-        value = db.get("a")
-        self.assertEqual(10, value)
-
-        result = db.list_by_score()
-        self.assertEqual(2, len(result))
-        self.assertEqual(10, result[0][1])
-
-        db.put("a", 30)
-        result = db.list_by_score()
-        self.assertEqual(2, len(result))
-        self.assertEqual(20, result[0][1])
-
     def test_b64encode(self):
         text_input = "测试1234"
         text_output = xutils.b64encode(text_input)

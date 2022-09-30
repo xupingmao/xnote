@@ -672,3 +672,51 @@ class TestMain(BaseTestCase):
         self.assertEqual(q.first(), "v6")
         self.assertEqual(q.last(), "v2")
         self.assertEqual(5, len(q))
+
+
+    def test_dbutil_sortedset(self):
+        dbutil.register_table("sortedset_test", "sortedset测试")
+        db = dbutil.LdbSortedSet("sortedset_test")
+
+        db.put("a", 10.5)
+        db.put("b", 20.6)
+
+        value = db.get("a")
+        self.assertEqual(10.5, value)
+
+        result = db.list_by_score()
+        self.assertEqual(2, len(result))
+        self.assertEqual(10.5, result[0][1])
+
+        db.put("a", 30.0)
+        result = db.list_by_score()
+        self.assertEqual(2, len(result))
+        self.assertEqual(20.6, result[0][1])
+
+    def test_dbutil_sortedset(self):
+        from xutils.db.driver_mysql import MySQLKV
+        skip_mysql_test = os.environ.get("skip_mysql_test")
+        if skip_mysql_test == "True":
+            print("skip mysql test")
+            return
+
+        db = MySQLKV(host="192.168.50.153", user="root",
+                     password="root", database="test2")
+        from xutils.db.driver_mysql import RdbSortedSet
+        RdbSortedSet.init_class(db_instance=db)
+        db = RdbSortedSet("sorted_set_test")
+
+        db.put("a", 10.5)
+        db.put("b", 20.6)
+
+        value = db.get("a")
+        self.assertEqual(10.5, value)
+
+        result = db.list_by_score()
+        self.assertEqual(2, len(result))
+        self.assertEqual(10.5, result[0][1])
+
+        db.put("a", 30.0)
+        result = db.list_by_score()
+        self.assertEqual(2, len(result))
+        self.assertEqual(20.6, result[0][1])

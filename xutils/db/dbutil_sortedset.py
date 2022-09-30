@@ -11,6 +11,7 @@
 如果使用了LdbTable的索引功能，其实就不需要这个了
 """
 
+import struct
 from xutils.db.dbutil_base import *
 from xutils.db.dbutil_hash import LdbHashTable
 
@@ -27,12 +28,10 @@ class RankTable:
             self.prefix += ":"
 
     def _format_score(self, score):
-        assert score != None
-        if isinstance(score, int):
-            return "%020d" % score
-        if isinstance(score, str):
-            return "%020s" % score
-        raise Exception("_format_score: unsupported score (%r)" % score)
+        # type: (float)->bytes
+        assert isinstance(score, float)
+        buf = struct.pack(">d", score)
+        return buf.hex()
 
     def put(self, member, score, batch = None):
         score_str = self._format_score(score)
@@ -41,7 +40,7 @@ class RankTable:
         if batch != None:
             batch.put(key, member)
         else:
-            put(key, member)
+            db_put(key, member)
 
     def delete(self, member, score, batch = None):
         score_str = self._format_score(score)
@@ -50,7 +49,7 @@ class RankTable:
         if batch != None:
             batch.delete(key)
         else:
-            delete(key)
+            db_delete(key)
 
     def list(self, offset = 0, limit = 10, reverse = False):
         return prefix_list(self.prefix, offset = offset, 
@@ -67,7 +66,7 @@ class LdbSortedSet:
 
     def put(self, member, score):
         """设置成员分值"""
-        assert isinstance(score, int)
+        assert isinstance(score, float)
 
         with get_write_lock(member):
             batch = create_write_batch()
@@ -97,4 +96,3 @@ class LdbSortedSet:
             item = (member, self.get(member))
             result.append(item)
         return result
-

@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-27 23:56:12
+@LastEditTime : 2022-09-30 23:09:19
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -114,11 +114,21 @@ class MySQLKV:
             try:
                 # tinyblob 最大长度 255
                 # KEY索引长度并不对key的长度做限制，只是索引最多使用200字节
+                # 一个CHAR占用3个字节，索引最多用1000个字节
                 cursor.execute("""CREATE TABLE IF NOT EXISTS `kv_store` (
                     `key` blob not null comment '键值对key', 
                     value blob comment '键值对value',
                     PRIMARY KEY (`key`(200))
                 ) COMMENT '键值对存储';
+                """)
+                cursor.execute("""CREATE TABLE IF NOT EXISTS `zset` (
+                    `key` varchar(512) not null comment '键值对key',
+                    `member` varchar(512) not null comment '成员',
+                    `score` decimal(40,20) not null comment '分数',
+                    `version` int not null comment '版本',
+                    PRIMARY KEY (`key`(100), `member`(100)) ,
+                    KEY idx_score(`score`)
+                ) COMMENT '有序集合';
                 """)
                 con.commit()
             finally:
@@ -433,3 +443,63 @@ class EnhancedMySQLKV(MySQLKV):
             return data_dict.get(key)
         else:
             return self.doGet(key)
+
+
+class RdbSortedSet:
+
+    db_instance = None # type: MySQLKV
+
+    @classmethod
+    def init_class(cls, db_instance=None):
+        cls.db_instance = db_instance
+    
+    def __init__(self, table_name=None):
+        self.table_name = table_name
+    
+    def mysql_to_str(self, value):
+        return bytes(value).decode("utf-8")
+    
+    def mysql_to_float(self, value):
+        return float(value)
+
+    def put(self, member, score, prefix=""):
+        assert isinstance(score, float)
+
+        key = self.table_name + prefix
+        with self.db_instance.get_connection() as con:
+            cursor = con.cursor(prepared=True)
+            params = (score, key, member)
+            cursor.execute("UPDATE zset SET `score`=%s, version=version+1 WHERE `key`=%s AND member=%s", params)
+            if cursor.rowcount == 0:
+                cursor.execute("INSERT INTO zset (score, `key`, member) VALUES(%s,%s,%s)", params)
+
+    def get(self, member, prefix=""):
+        key = self.table_name + prefix
+        with self.db_instance.get_connection() as con:
+            cursor = con.cursor(prepared=True)
+            sql = "SELECT score FROM zset WHERE `key`=%s AND member=%s LIMIT 1"
+            cursor.execute(sql, (key, member))
+            for item in cursor.fetchall():
+                return self.mysql_to_float(item[0])
+            return None
+
+    def list_by_score(self, offset=0, limit=20,*, reverse=False, prefix=""):
+        sql = "SELECT member, score FROM zset WHERE `key` = %s"
+        if reverse:
+            sql += " ORDER BY score DESC"
+        else:
+            sql += " ORDER BY score ASC"
+        
+        key = self.table_name + prefix
+        sql += " LIMIT %s OFFSET %s" % (limit, offset)
+        with self.db_instance.get_connection() as con:
+            cursor = con.cursor(prepared=True)
+            cursor.execute(sql, (key, ))
+            result = []
+            for item in cursor.fetchall():
+                member = self.mysql_to_str(item[0])
+                score = self.mysql_to_float(item[1])
+                result.append((member, score))
+        
+        return result
+
