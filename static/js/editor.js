@@ -295,13 +295,26 @@ MarkdownHeading.prototype.load = function(text) {
     var lines = text.split("\n");
     var lineNo = 0;
     var prev = null;
+    var isInCode = false;
+    var codeTag = "```";
+
     for (var i = 0; i < lines.length; i++) {
         lineNo++;
         var line = lines[i];
-        if (line[0] == "#") {
-            var info = this.getHeadingInfo(line, lineNo, prev);
-            this.headings.push(info);
-            prev = info;
+        if (isInCode) {
+            // 代码块内部，简单处理下
+            if (line.indexOf(codeTag)>=0) {
+                isInCode = false;
+            }
+        } else {
+            if (line[0] == "#") {
+                var info = this.getHeadingInfo(line, lineNo, prev);
+                this.headings.push(info);
+                prev = info;
+            }
+            if (line.indexOf(codeTag)>=0) {
+                isInCode = true;
+            }
         }
     }
 }
