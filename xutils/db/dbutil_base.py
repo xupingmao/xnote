@@ -80,7 +80,7 @@ LDB_TABLE_DICT = dict()
 WRITE_ONLY = False
 
 # leveldb的全局实例
-_leveldb = None # type: DBInterface
+_leveldb = None  # type: DBInterface
 # 缓存对象（拥有put/get两个方法）
 _cache = None
 _driver_name = None
@@ -102,13 +102,13 @@ class DBException(Exception):
 class WriteBatchProxy:
     """批量操作代理，批量操作必须在同步块中执行（必须加锁）"""
 
-    def __init__(self, db_instance = None):
+    def __init__(self, db_instance=None):
         self._puts = {}
         self._deletes = set()
         if db_instance == None:
             db_instance = get_instance()
 
-        self.db_instance = db_instance # type: DBInterface
+        self.db_instance = db_instance  # type: DBInterface
 
     def check_and_put(self, key, val):
         old_val = get(key)
@@ -151,7 +151,7 @@ class WriteBatchProxy:
         key_bytes = key.encode("utf-8")
         self._puts.pop(key_bytes, None)
         self._deletes.add(key_bytes)
-    
+
     def size(self):
         return len(self._puts) + len(self._deletes)
 
@@ -168,7 +168,7 @@ class WriteBatchProxy:
             print_debug_info("batch.delete key={}", key)
         print_debug_info("-----  batch.end  -----")
 
-    def commit(self, sync=False, retries = 0):
+    def commit(self, sync=False, retries=0):
         self.log_debug_info()
         while retries >= 0:
             try:
@@ -177,8 +177,8 @@ class WriteBatchProxy:
             except:
                 xutils.print_exc()
                 time.sleep(0.2)
-                retries-=1
-    
+                retries -= 1
+
     def __enter__(self):
         return self
 
@@ -327,7 +327,7 @@ def validate_dict(obj, msg, *argv):
 
 class TableInfo:
     """表信息管理"""
-    
+
     _info_dict = dict()
 
     def __init__(self, name, description, category):
@@ -362,23 +362,25 @@ class TableInfo:
         values = sorted(cls._info_dict.values(),
                         key=lambda x: (x.category, x.name))
         return list(map(lambda x: x.name, values))
-    
+
     def get_index_names(self):
         return IndexInfo.get_table_index_names(self.name)
-    
-    def register_index(self, index_name, comment = None, index_type = "ref"):
-        register_table_index(self.name, index_name, comment, index_type = index_type)
+
+    def register_index(self, index_name, comment=None, index_type="ref"):
+        register_table_index(self.name, index_name,
+                             comment, index_type=index_type)
         return self
+
 
 class IndexInfo:
 
-    _table_dict = dict() # dict[table_name] = dict[index_name]index_value
+    _table_dict = dict()  # dict[table_name] = dict[index_name]index_value
 
-    def __init__(self, table_name, index_name, index_type = "ref"):
+    def __init__(self, table_name, index_name, index_type="ref"):
         self.table_name = table_name
         self.index_name = index_name
         self.index_type = index_type
-    
+
     @classmethod
     def register(cls, table_name, index_name, index_type):
         info = IndexInfo(table_name, index_name, index_type)
@@ -387,7 +389,7 @@ class IndexInfo:
             index_dict = dict()
         index_dict[index_name] = info
         cls._table_dict[table_name] = index_dict
-    
+
     @classmethod
     def get_table_index_names(cls, table_name):
         index_dict = cls._table_dict.get(table_name)
@@ -401,7 +403,7 @@ class IndexInfo:
         if index_dict == None:
             return None
         return index_dict.get(index_name)
-    
+
     @classmethod
     def get_table_index_dict(cls, table_name):
         return cls._table_dict.get(table_name)
@@ -412,14 +414,14 @@ def register_table(table_name,
                    *,
                    category="default",
                    check_user=False,
-                   user_attr=None): # type: (...)->TableInfo
+                   user_attr=None):  # type: (...)->TableInfo
     # TODO 考虑过这个方法直接返回一个 LdbTable 实例
     # LdbTable可能针对同一个`table`会有不同的实例
     if not re.match(r"^[0-9a-z_]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
     return _register_table_inner(table_name, description,
-                          category, check_user, user_attr)
+                                 category, check_user, user_attr)
 
 
 def _register_table_inner(table_name,
@@ -440,7 +442,7 @@ def _register_table_inner(table_name,
     info.user_attr = user_attr
     if user_attr != None:
         info.check_user = True
-    
+
     return info
 
 
@@ -450,7 +452,7 @@ def register_table_index(table_name, index_name, comment=None, index_type="ref")
     validate_str(index_name, "invalid index_name")
     if index_type not in ("ref", "copy"):
         raise Exception("invalid index_type:(%s)" % index_type)
-    
+
     check_table_name(table_name)
 
     IndexInfo.register(table_name, index_name, index_type)
@@ -507,12 +509,13 @@ def db_get(key, default_value=None):
     except KeyError:
         return default_value
 
+
 def _db_batch_get_mysql(key_list, default_value=None):
     # type: (list[str], any) -> dict[str, any]
     key_bytes_list = []
     for key in key_list:
         key_bytes_list.append(key.encode("utf-8"))
-    
+
     batch_result = _leveldb.BatchGet(key_bytes_list)
     result = dict()
     for key in batch_result:
@@ -522,6 +525,7 @@ def _db_batch_get_mysql(key_list, default_value=None):
             object = default_value
         result[key.decode("utf-8")] = object
     return result
+
 
 def db_batch_get(key_list, default_value=None):
     # type: (list[str], any) -> dict[str, any]
@@ -534,6 +538,7 @@ def db_batch_get(key_list, default_value=None):
         for key in key_list:
             batch_result[key] = db_get(key, default_value)
         return batch_result
+
 
 def db_put(key, obj_value, sync=False, check_table=True):
     """往数据库中写入键值对
@@ -568,10 +573,12 @@ def db_delete(key, sync=False):
     key = key.encode("utf-8")
     _leveldb.Delete(key, sync=sync)
 
+
 def delete(*args, **kw):
     return db_delete(*args, **kw)
 
-def create_write_batch(db_instance = None):
+
+def create_write_batch(db_instance=None):
     return WriteBatchProxy(db_instance=db_instance)
 
 
@@ -648,10 +655,10 @@ def prefix_list(*args, **kw):
     return list(prefix_iter(*args, **kw))
 
 
-def prefix_iter(prefix, # type: str
-                filter_func=None, # type: function
-                offset=0, # type: int
-                limit=-1, # type: int
+def prefix_iter(prefix,  # type: str
+                filter_func=None,  # type: function
+                offset=0,  # type: int
+                limit=-1,  # type: int
                 reverse=False,
                 include_key=False,
                 key_from=None,
@@ -809,9 +816,11 @@ def set_db_instance(db_instance):
     global _leveldb
     _leveldb = db_instance
 
+
 def get_db_instance():
     global _leveldb
     return _leveldb
+
 
 def count_table(table_name, use_cache=False):
     assert table_name != None
@@ -831,14 +840,15 @@ def count_table(table_name, use_cache=False):
 
     key_from = table_name.encode("utf-8")
     key_to = table_name.encode("utf-8") + b'\xff'
-    iterator = check_get_leveldb().RangeIter(key_from,
-                                             key_to,
-                                             include_value=False,
-                                             fill_cache=False)
+    if _driver_name == "mysql":
+        count = _leveldb.Count(key_from, key_to)
+    else:
+        iterator = check_get_leveldb().RangeIter(
+            key_from, key_to, include_value=False, fill_cache=False)
 
-    count = 0
-    for key in iterator:
-        count += 1
+        count = 0
+        for key in iterator:
+            count += 1
 
     if _cache != None:
         _cache.put(cache_key, count, expire=DEFAULT_CACHE_EXPIRE)
@@ -872,12 +882,15 @@ def rename_table(old_name, new_name):
 def run_test():
     pass
 
+
 def set_driver_name(driver_name):
     global _driver_name
     _driver_name = driver_name
 
+
 def get_driver_name():
     return _driver_name
+
 
 if __name__ == "__main__":
     run_test()

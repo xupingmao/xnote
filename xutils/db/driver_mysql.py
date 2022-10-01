@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-01 14:01:35
+@LastEditTime : 2022-10-01 21:10:27
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -58,7 +58,7 @@ class MySQLKV:
     holder = Holder()
     lock = threading.RLock()
 
-    def __init__(self, *, host=None, port=3306, user=None, password=None, database=None, pool_size = 0, sql_logger=None):
+    def __init__(self, *, host=None, port=3306, user=None, password=None, database=None, pool_size=0, sql_logger=None):
         self.db_host = host
         self.db_user = user
         self.db_port = port
@@ -71,7 +71,7 @@ class MySQLKV:
         self.log_get_profile = True
         self.log_put_profile = True
         self.sql_logger = sql_logger  # type: SqlLoggerInterface
-        self.scan_limit = 200 # 扫描的分页大小
+        self.scan_limit = 200  # 扫描的分页大小
         self.init()
         RdbSortedSet.init_class(db_instance=self)
 
@@ -192,7 +192,8 @@ class MySQLKV:
             finally:
                 cost_time = time.time() - start_time
                 if self.log_get_profile:
-                    logging.debug("BatchGet (%s) cost %.2fms", key_list, cost_time*1000)
+                    logging.debug("BatchGet (%s) cost %.2fms",
+                                  key_list, cost_time*1000)
 
                 if self.sql_logger != None:
                     log_info = sql + " [%.2fms]" % (cost_time*1000)
@@ -203,7 +204,7 @@ class MySQLKV:
     def doPutRaw(self, key, value, cursor=None):
         # type: (any,bytes,bytes) -> None
         assert cursor != None
-        
+
         start_time = time.time()
         select_sql = "SELECT `key` FROM kv_store WHERE `key` = %s"
         insert_sql = "INSERT INTO kv_store (`key`, value) VALUES (%s, %s)"
@@ -213,10 +214,11 @@ class MySQLKV:
         if found == None:
             if self.debug:
                 logging.debug("SQL:%s, params:%s", insert_sql, (key, value))
-            
+
             if self.sql_logger:
                 cost_time = time.time() - start_time
-                log_info = insert_sql % (key, "-") + " [%.2fms]" % (cost_time*1000)
+                log_info = insert_sql % (key, "-") + \
+                    " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
 
             try:
@@ -227,10 +229,11 @@ class MySQLKV:
         else:
             if self.debug:
                 logging.debug("SQL:%s, params:%s", update_sql, (key, value))
-            
+
             if self.sql_logger:
                 cost_time = time.time() - start_time
-                log_info = update_sql % ("-", key) + " [%.2fms]" % (cost_time*1000)
+                log_info = update_sql % ("-", key) + \
+                    " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
 
             cursor.execute(update_sql, (value, key))
@@ -270,7 +273,7 @@ class MySQLKV:
         sql = "DELETE FROM kv_store WHERE `key` = %s;"
         if self.debug:
             logging.debug("SQL:%s, params:%s", sql, (key, ))
-        
+
         if self.sql_logger:
             self.sql_logger.append(sql % (key,))
 
@@ -287,15 +290,15 @@ class MySQLKV:
             try:
                 self.doDelete(key, cursor=cursor)
             finally:
-                self.close_cursor(cursor)    
-    
+                self.close_cursor(cursor)
+
     def RangeIterRaw(self,
-                  key_from=None,
-                  key_to=None,
-                  *,
-                  reverse=False,
-                  include_value=True,
-                  fill_cache=False):
+                     key_from=None,
+                     key_to=None,
+                     *,
+                     reverse=False,
+                     include_value=True,
+                     fill_cache=False):
         """返回区间迭代器
         @param {bytes}  key_from       开始的key（包含）FirstKey
         @param {bytes}  key_to         结束的key（包含）LastKey
@@ -346,14 +349,15 @@ class MySQLKV:
 
                     if self.debug:
                         logging.debug("SQL:%s (%s)", sql, params)
-                    
+
                     time_before_execute = time.time()
                     cursor.execute(sql, tuple(params))
                     result = cursor.fetchall()
 
                     if self.sql_logger:
                         cost_time = time.time() - time_before_execute
-                        log_info = sql % tuple(params) + " [%.2fms]" % (cost_time*1000)
+                        log_info = sql % tuple(
+                            params) + " [%.2fms]" % (cost_time*1000)
                         self.sql_logger.append(log_info)
 
                     for item in result[:limit]:
@@ -401,6 +405,32 @@ class MySQLKV:
             finally:
                 self.close_cursor(cursor)
 
+    def Count(self, key_from=b'', key_to=b'\xff'):
+        sql = "SELECT COUNT(*) FROM kv_store WHERE `key` >= %s AND `key` <= %s"
+        params = (key_from, key_to)
+
+        start_time = time.time()
+        con = self.get_connection()
+        with con:
+            cursor = con.cursor()
+            try:
+                cursor.execute(sql, params)
+                for row in cursor.fetchall():
+                    return self.mysql_to_py(row[0])
+                return 0
+            finally:
+                self.close_cursor(cursor)
+                if self.debug:
+                    logging.debug("SQL:%s, params:%s", sql, params)
+
+                if self.sql_logger:
+                    cost_time = time.time() - start_time
+                    log_info = sql % params + \
+                        " [%.2fms]" % (cost_time*1000)
+                    self.sql_logger.append(log_info)
+
+
+
 
 class EnhancedMySQLKV(MySQLKV):
 
@@ -435,18 +465,19 @@ class EnhancedMySQLKV(MySQLKV):
                         yield fullkey
                 else:
                     yield key
-    
+
     def doDeleteLongNoLock(self, key, cursor):
         short_key = key[:self.max_key_len]
         data_bytes = self.doGet(short_key)
         data_dict = encode.convert_bytes_to_dict(data_bytes)
         if key in data_dict:
             del data_dict[key]
-            
+
         if len(data_dict) == 0:
-            self.doDeleteRaw(short_key, cursor = cursor)
+            self.doDeleteRaw(short_key, cursor=cursor)
         else:
-            self.doPutRaw(short_key, encode.convert_bytes_dict_to_bytes(data_dict), cursor)
+            self.doPutRaw(
+                short_key, encode.convert_bytes_dict_to_bytes(data_dict), cursor)
 
     def doDelete(self, key, sync=False, cursor=None):
         assert cursor != None
@@ -456,7 +487,7 @@ class EnhancedMySQLKV(MySQLKV):
                 self.doDeleteLongNoLock(key, cursor)
         else:
             return self.doDeleteRaw(key, sync, cursor)
-    
+
     def doPut(self, key, value, cursor=None):
         if len(key) >= self.max_key_len:
             short_key = key[:self.max_key_len]
@@ -464,10 +495,10 @@ class EnhancedMySQLKV(MySQLKV):
                 data_bytes = self.doGet(short_key)
                 data_dict = encode.convert_bytes_to_dict(data_bytes)
                 data_dict[key] = value
-                self.doPutRaw(short_key, encode.convert_bytes_dict_to_bytes(data_dict), cursor)
+                self.doPutRaw(
+                    short_key, encode.convert_bytes_dict_to_bytes(data_dict), cursor)
         else:
             return self.doPutRaw(key, value, cursor)
-    
 
     def Get(self, key):
         if len(key) >= self.max_key_len:
@@ -481,18 +512,18 @@ class EnhancedMySQLKV(MySQLKV):
 
 class RdbSortedSet:
 
-    db_instance = None # type: MySQLKV
+    db_instance = None  # type: MySQLKV
 
     @classmethod
     def init_class(cls, db_instance=None):
         cls.db_instance = db_instance
-    
+
     def __init__(self, table_name=None):
         self.table_name = table_name
-    
+
     def mysql_to_str(self, value):
         return bytes(value).decode("utf-8")
-    
+
     def mysql_to_float(self, value):
         return float(value)
 
@@ -503,9 +534,11 @@ class RdbSortedSet:
         with self.db_instance.get_connection() as con:
             cursor = con.cursor(prepared=True)
             params = (score, key, member)
-            cursor.execute("UPDATE zset SET `score`=%s, version=version+1 WHERE `key`=%s AND member=%s", params)
+            cursor.execute(
+                "UPDATE zset SET `score`=%s, version=version+1 WHERE `key`=%s AND member=%s", params)
             if cursor.rowcount == 0:
-                cursor.execute("INSERT INTO zset (score, `key`, member) VALUES(%s,%s,%s)", params)
+                cursor.execute(
+                    "INSERT INTO zset (score, `key`, member) VALUES(%s,%s,%s)", params)
 
     def get(self, member, prefix=""):
         key = self.table_name + prefix
@@ -517,13 +550,13 @@ class RdbSortedSet:
                 return self.mysql_to_float(item[0])
             return None
 
-    def list_by_score(self, offset=0, limit=20,*, reverse=False, prefix=""):
+    def list_by_score(self, offset=0, limit=20, *, reverse=False, prefix=""):
         sql = "SELECT member, score FROM zset WHERE `key` = %s"
         if reverse:
             sql += " ORDER BY score DESC"
         else:
             sql += " ORDER BY score ASC"
-        
+
         key = self.table_name + prefix
         sql += " LIMIT %s OFFSET %s" % (limit, offset)
         with self.db_instance.get_connection() as con:
@@ -534,6 +567,5 @@ class RdbSortedSet:
                 member = self.mysql_to_str(item[0])
                 score = self.mysql_to_float(item[1])
                 result.append((member, score))
-        
-        return result
 
+        return result
