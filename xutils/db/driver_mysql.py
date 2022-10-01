@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-30 23:13:22
+@LastEditTime : 2022-10-01 14:01:35
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -15,6 +15,7 @@ import logging
 import threading
 import time
 import mysql.connector
+from mysql.connector.conversion import MySQLConverter
 
 from xutils.base import Storage
 from . import encode
@@ -166,6 +167,38 @@ class MySQLKV:
 
     def Get(self, key):
         return self.doGet(key)
+
+    def BatchGet(self, key_list):
+        # type: (list[bytes]) -> dict[bytes, bytes]
+        if len(key_list) == 0:
+            return {}
+
+        start_time = time.time()
+        con = self.get_connection()
+        with con:
+            cursor = con.cursor(prepared=True)
+            try:
+                result = dict()
+                sql = "SELECT `key`, value FROM kv_store WHERE `key` IN (%s)"
+                # mysql.connector不支持传入列表,需要自己处理下
+                sql_args = ["%s" for i in key_list]
+                sql = sql % ",".join(sql_args)
+                cursor.execute(sql, key_list)
+                for item in cursor:
+                    key = self.mysql_to_py(item[0])
+                    value = self.mysql_to_py(item[1])
+                    result[key] = value
+                return result
+            finally:
+                cost_time = time.time() - start_time
+                if self.log_get_profile:
+                    logging.debug("BatchGet (%s) cost %.2fms", key_list, cost_time*1000)
+
+                if self.sql_logger != None:
+                    log_info = sql + " [%.2fms]" % (cost_time*1000)
+                    self.sql_logger.append(log_info)
+
+                self.close_cursor(cursor)
 
     def doPutRaw(self, key, value, cursor=None):
         # type: (any,bytes,bytes) -> None

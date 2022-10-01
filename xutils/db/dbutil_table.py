@@ -4,6 +4,7 @@
 # @modified 2022/04/16 08:53:11
 # @filename dbutil_table.py
 
+from logging.config import valid_ident
 from urllib.parse import quote
 from xutils import Storage
 from xutils.db.dbutil_base import *
@@ -243,6 +244,28 @@ class LdbTable:
         row_id = encode_str(row_id)
         key = self._build_key_with_user(row_id, user_name=user_name)
         return self.get_by_key(key, default_value)
+    
+    def batch_get_by_id(self, row_id_list, default_value=None, user_name=None):
+        for row_id in row_id_list:
+            validate_str(row_id, "invalid row_id:{!r}", row_id)
+            if self._need_check_user:
+                validate_str(user_name, "invalid user_name:{!r}", user_name)
+        
+        key_list = []
+        key_id_dict = {}
+        for row_id in row_id_list:
+            q_row_id = encode_str(row_id)
+            key = self._build_key_with_user(q_row_id, user_name=user_name)
+            key_list.append(key)
+            key_id_dict[key] = row_id
+        
+        result = dict()
+        key_result = self.batch_get_by_key(key_list, default_value=default_value)
+        for key in key_result:
+            object = key_result.get(key)
+            id = key_id_dict.get(key)
+            result[id] = object
+        return result
 
     def get_by_key(self, key, default_value=None):
         if key == "":
@@ -253,6 +276,20 @@ class LdbTable:
             return None
 
         return self._format_value(key, value)
+
+    def batch_get_by_key(self, key_list, default_value=None):
+        for key in key_list:
+            self._check_key(key)
+        
+        batch_result = db_batch_get(key_list, default_value)
+        for key in batch_result:
+            value = batch_result.get(key)
+            if value is None:
+                batch_result[key] = None
+                continue
+            batch_result[key] = self._format_value(key, value)
+        
+        return batch_result
 
     def insert(self, obj, id_type="timeseq", id_value=None):
         """插入新数据

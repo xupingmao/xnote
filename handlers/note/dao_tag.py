@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-27 19:56:48
+@LastEditTime : 2022-10-01 14:21:14
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -78,8 +78,18 @@ def list_by_tag(user, tagname):
 
 def batch_get_tags_by_notes(notes):
     result = dict()
+    if len(notes) == 0:
+        return result
+
+    id_list = []
     for note in notes:
-        tag_info = tags_db.get_by_id(note.id, user_name = note.creator)
+        id_list.append(note.id)
+    
+    creator = notes[0].creator
+    tags_dict = tags_db.batch_get_by_id(id_list, user_name = creator)
+    
+    for note in notes:
+        tag_info = tags_dict.get(note.id)
         tags = []
         if tag_info != None and tag_info.tags != None:
             tags = tag_info.tags

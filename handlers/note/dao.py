@@ -204,8 +204,9 @@ def batch_query(id_list):
 
 def batch_query_list(id_list):
     result = []
-    for id in id_list:
-        note = dbutil.get("note_index:%s" % id)
+    batch_result = _index_db.batch_get_by_id(id_list)
+    for id in batch_result:
+        note = batch_result.get(id)
         if note:
             build_note_info(note)
             result.append(note)

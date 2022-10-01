@@ -507,6 +507,33 @@ def db_get(key, default_value=None):
     except KeyError:
         return default_value
 
+def _db_batch_get_mysql(key_list, default_value=None):
+    # type: (list[str], any) -> dict[str, any]
+    key_bytes_list = []
+    for key in key_list:
+        key_bytes_list.append(key.encode("utf-8"))
+    
+    batch_result = _leveldb.BatchGet(key_bytes_list)
+    result = dict()
+    for key in batch_result:
+        value = batch_result.get(key)
+        object = convert_bytes_to_object(value)
+        if object is None:
+            object = default_value
+        result[key.decode("utf-8")] = object
+    return result
+
+def db_batch_get(key_list, default_value=None):
+    # type: (list[str], any) -> dict[str, any]
+    """批量查询"""
+    check_leveldb()
+    if _driver_name == "mysql":
+        return _db_batch_get_mysql(key_list, default_value)
+    else:
+        batch_result = dict()
+        for key in key_list:
+            batch_result[key] = db_get(key, default_value)
+        return batch_result
 
 def db_put(key, obj_value, sync=False, check_table=True):
     """往数据库中写入键值对

@@ -135,9 +135,12 @@ def list_recent_edit(user_name = None, offset = 0, limit = None, skip_deleted = 
     logs = db.list_by_index("mtime", offset = offset, limit = limit, reverse = True)
 
     result = []
+    id_list = []
     for log in logs:
-        note_id = log.note_id
-        note = NOTE_DAO.get_by_id(note_id)
+        id_list.append(log.note_id)
+    
+    note_list = NOTE_DAO.batch_query_list(id_list)
+    for note in note_list:
         if note is None:
             continue
 
