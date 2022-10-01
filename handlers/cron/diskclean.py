@@ -16,6 +16,9 @@ NOTE_DAO  = xutils.DAO("note")
 def is_empty_dir(dirname):
     return len(os.listdir(dirname)) == 0
 
+def is_system_dir(dirname):
+    return dirname in xconfig.get_system_files()
+
 def rm_expired_files(dirname, expired_time, depth=0, hard=False):
     if not os.path.exists(dirname):
         xutils.error("DiskClean", "dirname `%s` not eixsts" % dirname)
@@ -28,14 +31,12 @@ def rm_expired_files(dirname, expired_time, depth=0, hard=False):
     for fname in os.listdir(dirname):
         fpath = os.path.join(dirname, fname)
         fpath = os.path.abspath(fpath)
-        if fpath in xconfig.get_system_files():
-            continue
         if os.path.islink(fpath):
             xutils.info("DiskClean", "%s is a link" % fname)
             continue
         if os.path.isdir(fpath):
             rm_expired_files(fpath, expired_time, depth+1, hard=hard)
-            if is_empty_dir(fpath):
+            if is_empty_dir(fpath) and not is_system_dir(fpath):
                 xutils.rmfile(fpath)
         else:
             st = os.stat(fpath)
