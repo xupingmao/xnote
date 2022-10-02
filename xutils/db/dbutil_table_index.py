@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-10 22:51:47
+@LastEditTime : 2022-10-02 08:41:45
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -14,8 +14,9 @@
 """
 
 import logging
-from xutils.db.encode import encode_index_value, clean_value_before_update
-from xutils.db.dbutil_base import db_delete, validate_obj, validate_str, validate_dict, prefix_iter
+import xutils
+from xutils.db.encode import encode_index_value, clean_value_before_update, decode_str
+from xutils.db.dbutil_base import db_delete, db_get, validate_obj, validate_str, validate_dict, prefix_iter
 
 class TableIndex:
 
@@ -130,3 +131,89 @@ class TableIndex:
     def drop(self):
         for key, value in prefix_iter(self.prefix, limit=-1, include_key=True):
             db_delete(key)
+
+
+
+class TableIndexRepair:
+    """表索引修复工具，不是标准功能，所以抽象到一个新的类里面"""
+
+    def __init__(self, db, error_db):
+        self.db = db
+        self.repair_error_db = error_db
+
+    def repair_index(self):
+        db = self.db
+
+        # 先删除无效的索引，这样速度更快
+        for name in db.index_names:
+            self.delete_invalid_index(name)
+
+        for value in db.iter(limit=-1):
+            if db._need_check_user:
+                key = value._key
+                assert xutils.is_str(key)
+                try:
+                    parts = key.split(":")
+                    if len(parts) != 3:
+                        logging.error("invalid key: %s", key)
+                        error_log = dict(key=key, value=value, type="record")
+                        self.repair_error_db.insert(
+                            error_log, id_type="auto_increment")
+                        db_delete(key)
+                        continue
+                    table_name, user_name, id = key.split(":")
+                    user_name = decode_str(user_name)
+                except ValueError:
+                    xutils.print_exc()
+                    logging.error("invalid record key: %s", key)
+                    continue
+                db.rebuild_single_index(value, user_name=user_name)
+            else:
+                db.rebuild_single_index(value)
+
+    def do_delete(self, key):
+        logging.info("Delete {%s}", key)
+
+        if not key.startswith("_index$"):
+            logging.warning("Invalid index key:(%s)", key)
+            return
+        db_delete(key)
+
+    def delete_invalid_index(self, index_name):
+        db = self.db
+        index_prefix = "_index$%s$%s" % (db.table_name, index_name)
+
+        for old_key, record_key in prefix_iter(index_prefix, include_key=True):
+            record = db_get(record_key)
+            if record is None:
+                logging.debug("empty record, key:(%s), record_id:(%s)",
+                              old_key, record_key)
+                self.do_delete(old_key)
+                continue
+
+            user_name = None
+            index_value = getattr(record, index_name)
+            record_id = db._get_id_from_key(record_key)
+
+            if db._need_check_user:
+                try:
+                    table_name, user_name, id = record_key.split(":")
+                    user_name = decode_str(user_name)
+                except:
+                    logging.error("invalid key: (%s)", record_key)
+                    error_log = dict(
+                        key=old_key, value=record_key, type="index")
+                    self.repair_error_db.insert(
+                        error_log, id_type="auto_increment")
+                    self.do_delete(old_key)
+                    continue
+
+            prefix = db._get_index_prefix(index_name, user_name)
+            new_key = db._build_key_no_prefix(
+                prefix, encode_index_value(index_value), record_id)
+
+            if new_key != old_key:
+                logging.debug("index dismatch, key:(%s), record_id:(%s), correct_key:(%s)",
+                              old_key, record_key, new_key)
+                self.do_delete(old_key)
+

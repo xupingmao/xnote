@@ -35,12 +35,11 @@ logging.basicConfig(level=logging.DEBUG,
 
 
 def register_note_table(name, description, check_user=False, user_attr=None):
-    dbutil.register_table(name, description, category = "note",
+    dbutil.register_table(name, description, category="note",
                           check_user=check_user, user_attr=user_attr)
 
 
 register_note_table("note_full", "笔记完整信息 <note_full:note_id>")
-register_note_table("note_index", "笔记索引，不包含内容 <note_index:note_id>")
 register_note_table("note_skey", "用户维度的skey索引 <note_skey:user:skey>")
 register_note_table("notebook", "笔记分组", check_user=True, user_attr="creator")
 register_note_table("token", "用于分享的令牌")
@@ -52,13 +51,6 @@ dbutil.register_table("search_history", "搜索历史")
 register_note_table("note_public", "公共笔记索引")
 dbutil.register_table_index("note_public", "hot_index")
 dbutil.register_table_index("note_public", "share_time")
-
-# 用户维度索引
-register_note_table("note_tiny", "用户维度的笔记索引 <table:user:id>",
-                    check_user=True, user_attr="creator")
-dbutil.register_table_index("note_tiny", "name")
-dbutil.register_table_index("note_tiny", "ctime")
-
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -377,9 +369,11 @@ def build_note_info(note, orderby=None):
 
     return note
 
+
 def _build_book_default_info(note):
     if note.children_count == None:
         note.children_count = 0
+
 
 def convert_to_path_item(note):
     return Storage(name=note.name, url=note.url, id=note.id,
@@ -389,7 +383,7 @@ def convert_to_path_item(note):
 @xutils.timeit(name="NoteDao.ListPath:leveldb", logfile=True)
 def list_path(file, limit=5):
     assert file != None
-    
+
     pathlist = []
     while file is not None:
         pathlist.insert(0, convert_to_path_item(file))
@@ -942,15 +936,15 @@ def list_group(creator=None,
 
     if category == "" or category == "all":
         category = None
-    
+
     q_tags = tags
     if tags != None and len(tags) == 0:
         q_tags = None
-    
+
     q_name = search_name
     if q_name == "":
         q_name = None
-    
+
     if q_name != None:
         q_name = q_name.lower()
 
@@ -961,19 +955,19 @@ def list_group(creator=None,
 
         if skip_archived and value.archived:
             return False
-        
+
         if parent_id != None and value.parent_id != parent_id:
             return False
-        
+
         if category != None and value.category != category:
             return False
-        
+
         if q_tags != None:
             if not isinstance(value.tags, list):
                 return False
             if not textutil.contains_any(value.tags, q_tags):
                 return False
-        
+
         if q_name != None:
             if q_name not in value.name.lower():
                 return False
@@ -983,7 +977,7 @@ def list_group(creator=None,
 
         if status == "active":
             return not value.archived
-        
+
         return True
 
     if count_only:
@@ -993,11 +987,11 @@ def list_group(creator=None,
         user_name=creator, filter_func=list_group_func, limit=limit)
     sort_notes(notes, orderby)
     result = notes[offset:offset + limit]
-    
+
     if count_total:
         if len(notes) < limit:
             return result, len(notes)
-        return result, _book_db.count(user_name = creator, filter_func=list_group_func)
+        return result, _book_db.count(user_name=creator, filter_func=list_group_func)
     else:
         return result
 
@@ -1008,10 +1002,11 @@ def count_group(creator, status=None):
     value = _cache.get(key)
     if value != None:
         return value
-    
+
     value = count_group_by_db(creator, status)
     _cache.put(key, value, 60)
     return value
+
 
 def count_group_by_db(creator, status=None):
     if status is None:
@@ -1070,11 +1065,11 @@ def count_public():
 
 @xutils.timeit(name="NoteDao.ListNote:leveldb", logfile=True, logargs=True)
 def list_by_parent(creator, parent_id, offset=0, limit=1000,
-                   orderby="name", 
-                   skip_group=False, 
+                   orderby="name",
+                   skip_group=False,
                    include_public=True,
-                   *, 
-                   tags = None):
+                   *,
+                   tags=None):
     """通过父级节点ID查询笔记列表"""
     if parent_id is None:
         raise Exception("list_by_parent: parent_id is None")
@@ -1094,7 +1089,7 @@ def list_by_parent(creator, parent_id, offset=0, limit=1000,
             return False
         if str(value.parent_id) != parent_id:
             return False
-        
+
         if q_tags != None:
             if value.tags == None:
                 return False
@@ -1106,7 +1101,8 @@ def list_by_parent(creator, parent_id, offset=0, limit=1000,
         else:
             return value.creator == creator
 
-    notes = _tiny_db.list(offset=0, limit=limit, filter_func=list_note_func, user_name=creator)
+    notes = _tiny_db.list_by_index("parent_id", index_value=parent_id,
+                                   offset=0, limit=limit, filter_func=list_note_func, user_name=creator)
 
     if orderby == "db":
         note = get_by_id_creator(parent_id, creator)
@@ -1309,7 +1305,7 @@ def check_and_remove_broken_notes(notes, user_name):
             result.append(note)
         else:
             logging.error("node=%s", note)
-            delete_note(note.id)
+            NOTE_DAO.delete_note(note.id)
             # 如果note_index被删除，delete_note也无法删除它，所以需要再删除一下
             db = get_note_tiny_table(note.creator)
             db.delete(note)
@@ -1416,6 +1412,7 @@ def list_archived(creator, offset=0, limit=100):
     sort_notes(notes)
     return notes
 
+
 def list_by_func(creator, list_func, offset, limit):
     notes = _tiny_db.list(user_name=creator, filter_func=list_func,
                           offset=offset, limit=limit, reverse=True)
@@ -1450,6 +1447,7 @@ def refresh_note_stat_async(user_name):
         refresh_note_stat(user_name)
 
 
+@xutils.timeit_deco(name="NOTE_DAO:refresh_note_stat")
 def refresh_note_stat(user_name):
     assert user_name != None, "[refresh_note_stat.assert] user_name != None"
 

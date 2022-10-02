@@ -29,9 +29,9 @@ json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
-dbutil.register_table("test", "测试数据库")
-dbutil.register_table_index("test", "name")
-dbutil.register_table_index("test", "age")
+db = dbutil.register_table("test", "测试数据库")
+db.register_index("name")
+db.register_index("age")
 
 dbutil.register_table("test_user_db1", "测试数据库用户版v1")
 
@@ -391,6 +391,7 @@ class TestMain(BaseTestCase):
         self.assertEqual(20, results[0].age)
         self.assertEqual(21, results[1].age)
         self.assertEqual(30, results[2].age)
+        self.assertEqual(1, db.count_by_index("name", index_value="Ada"))
 
         binlog_count = dbutil.count_table("_binlog")
         self.assertTrue(binlog_count > 0)

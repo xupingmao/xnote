@@ -40,7 +40,7 @@ from . import system_sync_indexer
 LOCK = threading.Lock()
 
 dbutil.register_table("cluster_config", "集群配置")
-CONFIG = dbutil.get_table("cluster_config", type="hash")
+CONFIG = dbutil.get_hash_table("cluster_config")
 
 
 def get_system_role():

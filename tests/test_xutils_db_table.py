@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-14 17:17:50
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-20 18:01:19
+@LastEditTime : 2022-10-02 10:53:29
 @FilePath     : /xnote/tests/test_xutils_db_table.py
 @Description  : table测试
 """

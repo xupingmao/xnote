@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-01 21:23:19
+@LastEditTime : 2022-10-02 09:36:50
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -17,7 +17,6 @@ import time
 import mysql.connector
 
 from xutils.base import Storage
-from . import encode
 
 
 class Holder(threading.local):
@@ -321,17 +320,11 @@ class MySQLKV:
                     # 只包含key
                     sql_builder.append("SELECT `key` FROM kv_store")
 
-                if key_from != None or key_to != None:
-                    sql_builder.append("WHERE 1=1")
-
-                if key_from != None:
-                    sql_builder.append("AND `key` >= %s")
-
-                if key_to != None:
-                    sql_builder.append("AND `key` <= %s")
-
+                sql_builder.append("WHERE `key` >= %s AND `key` <= %s")
                 if reverse:
                     sql_builder.append("ORDER BY `key` DESC")
+                else:
+                    sql_builder.append("ORDER BY `key` ASC")
 
                 sql_builder.append("LIMIT %d;" % (limit + 1))
 
@@ -342,9 +335,13 @@ class MySQLKV:
                     params = []
                     if key_from != None:
                         params.append(key_from)
+                    else:
+                        params.append(b'')
 
                     if key_to != None:
                         params.append(key_to)
+                    else:
+                        params.append(b'\xff')
 
                     if self.debug:
                         logging.debug("SQL:%s (%s)", sql, params)

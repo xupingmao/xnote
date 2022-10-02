@@ -6,7 +6,7 @@
 from urllib.parse import quote
 from xutils import Storage
 from xutils.db.dbutil_base import *
-from xutils.db.dbutil_table_index import TableIndex
+from xutils.db.dbutil_table_index import TableIndex, TableIndexRepair
 from xutils.db.encode import (
     decode_str,
     encode_index_value,
@@ -64,7 +64,7 @@ class LdbTable:
 
         self.binlog = BinLog.get_instance()
         self.binlog_enabled = True
-        self.indexes = self._build_indexes(table_info)
+        self.indexes = self._build_indexes(table_info) # type: list[TableIndex]
 
         if user_name != None:
             assert user_name != ""
@@ -377,7 +377,7 @@ class LdbTable:
             batch.commit()
 
     def repair_index(self):
-        repair = TableIndexRepair(self)
+        repair = TableIndexRepair(self, LdbTable("_repair_error"))
         repair.repair_index()
 
     def rebuild_index(self, version="v1"):
@@ -498,7 +498,8 @@ class LdbTable:
                     is_match = filter_func(obj_key, obj_value)
                 
                 if is_match:
-                    return result.append((key, obj_value))
+                    result.append((key, obj_value))
+
             return result
 
         def map_func_for_ref(batch_list):
@@ -564,8 +565,8 @@ class LdbTable:
         return prefix_count_batch(prefix, map_func=map_func)
 
     def list_by_index(self, index_name, filter_func=None,
-                      offset=0, limit=20, reverse=False,
-                      index_value=None):
+                      offset=0, limit=20, *, reverse=False,
+                      index_value=None, user_name=None):
         """通过索引查询结果列表
         @param {str}  index_name 索引名称
         @param {func} filter_func 过滤函数
@@ -585,9 +586,9 @@ class LdbTable:
         elif index_value != None:
             index_value = encode_index_value(index_value)
             prefix = self._get_index_prefix(
-                index_name) + ":" + index_value + ":"
+                index_name, user_name=user_name) + ":" + index_value + ":"
         else:
-            prefix = self._get_index_prefix(index_name)
+            prefix = self._get_index_prefix(index_name, user_name=user_name)
 
         map_func = self.create_index_map_func(
             filter_func, index_type=index_info.index_type)
@@ -625,91 +626,6 @@ class LdbTable:
 class PrefixedDb(LdbTable):
     """plyvel中叫做prefixed_db"""
     pass
-
-
-class TableIndexRepair:
-    """表索引修复工具，不是标准功能，所以抽象到一个新的类里面"""
-
-    def __init__(self, db):
-        assert isinstance(db, LdbTable)
-        self.db = db
-        self.repair_error_db = LdbTable("_repair_error")
-
-    def repair_index(self):
-        db = self.db
-
-        # 先删除无效的索引，这样速度更快
-        for name in db.index_names:
-            self.delete_invalid_index(name)
-
-        for value in db.iter(limit=-1):
-            if db._need_check_user:
-                key = value._key
-                assert xutils.is_str(key)
-                try:
-                    parts = key.split(":")
-                    if len(parts) != 3:
-                        logging.error("invalid key: %s", key)
-                        error_log = dict(key=key, value=value, type="record")
-                        self.repair_error_db.insert(
-                            error_log, id_type="auto_increment")
-                        db_delete(key)
-                        continue
-                    table_name, user_name, id = key.split(":")
-                    user_name = decode_str(user_name)
-                except ValueError:
-                    xutils.print_exc()
-                    logging.error("invalid record key: %s", key)
-                    continue
-                db.rebuild_single_index(value, user_name=user_name)
-            else:
-                db.rebuild_single_index(value)
-
-    def do_delete(self, key):
-        logging.info("Delete {%s}", key)
-
-        if not key.startswith("_index$"):
-            logging.warning("Invalid index key:(%s)", key)
-            return
-        db_delete(key)
-
-    def delete_invalid_index(self, index_name):
-        db = self.db
-        index_prefix = "_index$%s$%s" % (db.table_name, index_name)
-
-        for old_key, record_key in prefix_iter(index_prefix, include_key=True):
-            record = get(record_key)
-            if record is None:
-                logging.debug("empty record, key:(%s), record_id:(%s)",
-                              old_key, record_key)
-                self.do_delete(old_key)
-                continue
-
-            user_name = None
-            index_value = getattr(record, index_name)
-            record_id = db._get_id_from_key(record_key)
-
-            if db._need_check_user:
-                try:
-                    table_name, user_name, id = record_key.split(":")
-                    user_name = decode_str(user_name)
-                except:
-                    logging.error("invalid key: (%s)", record_key)
-                    error_log = dict(
-                        key=old_key, value=record_key, type="index")
-                    self.repair_error_db.insert(
-                        error_log, id_type="auto_increment")
-                    self.do_delete(old_key)
-                    continue
-
-            prefix = db._get_index_prefix(index_name, user_name)
-            new_key = db._build_key_no_prefix(
-                prefix, encode_index_value(index_value), record_id)
-
-            if new_key != old_key:
-                logging.debug("index dismatch, key:(%s), record_id:(%s), correct_key:(%s)",
-                              old_key, record_key, new_key)
-                self.do_delete(old_key)
 
 
 def insert(table_name, obj_value, sync=False):
@@ -777,7 +693,6 @@ def prefix_iter_batch(prefix,  # type: str
                             reverse=reverse,
                             fill_cache=fill_cache)
 
-    position = 0
     matched_offset = 0
     result_size = 0
     batch_size = 20
@@ -797,12 +712,11 @@ def prefix_iter_batch(prefix,  # type: str
                     for key, value in map_func(batch_list):
                         yield key, value
                     batch_list = []
-                else:
-                    continue
 
         if len(batch_list) > 0:
-            for key, value in map_func(batch_list):
-                yield key, value
+            assert map_func != None
+            for key, obj in map_func(batch_list):
+                yield key, obj
 
     for key, obj in do_iter():
         if matched_offset >= offset:
@@ -815,7 +729,6 @@ def prefix_iter_batch(prefix,  # type: str
 
         if limit > 0 and result_size >= limit:
             break
-        position += 1
 
 def prefix_count_batch(*args, **kw):
     count = 0

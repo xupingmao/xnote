@@ -18,6 +18,7 @@ from xutils import dateutil, fsutil
 from xtemplate import T
 from .dao_category import list_category, get_category_by_code
 from . import dao_tag
+from . import dao
 
 VIEW_TPL = "note/page/view.html"
 TYPES_NAME = "笔记索引"
@@ -191,18 +192,19 @@ class ShareToMeListHandler(ShareListHandler):
 class GroupListHandler:
 
     def load_category(self, kw, user_name):
-        kw.category_list = list(filter(lambda x:x.group_count!=0, list_category(user_name)))
+        kw.category_list = list(
+            filter(lambda x: x.group_count != 0, list_category(user_name)))
 
     def load_group_list(self, user_name, status, kw):
         parent_id = xutils.get_argument("parent_id", "0")
 
         if status in ("active", "archived"):
-            notes = NOTE_DAO.list_group(user_name,
-                                        status=status,
-                                        orderby="default",
-                                        parent_id=parent_id,
-                                        tags = kw.q_tags,
-                                        category=kw.note_category)
+            notes = dao.list_group(user_name,
+                                   status=status,
+                                   orderby="default",
+                                   parent_id=parent_id,
+                                   tags=kw.q_tags,
+                                   category=kw.note_category)
         else:
             notes = NOTE_DAO.list_smart_group(user_name)
 
@@ -293,10 +295,10 @@ class GroupListHandler:
         kw.groups = notes
         kw.parent_id = 0
         kw.show_back = show_back
-        kw.archived_count = NOTE_DAO.count_group(user_name, status="archived")
-        kw.active_count = NOTE_DAO.count_group(user_name, status="active")
+        kw.archived_count = dao.count_group(user_name, status="archived")
+        kw.active_count = dao.count_group(user_name, status="active")
         kw.smart_count = SmartGroupService.count_smart_group()
-        kw.tag_meta_list = dao_tag.list_tag_meta(user_name, tag_type = "group")
+        kw.tag_meta_list = dao_tag.list_tag_meta(user_name, tag_type="group")
 
         self.handle_badge_info(notes, tab=tab)
         self.sort_notes(notes, kw)
@@ -332,7 +334,7 @@ class GroupManageHandler:
 
         notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset,
                                            limit=limit, **list_group_kw)
-        
+
         kw.parent_note = parent_note
         kw.notes = notes
         kw.page_totalsize = total
@@ -365,7 +367,7 @@ class GroupManageHandler:
         kw = Storage(user_name=user_name, parent_id=parent_id)
 
         self.handle_root(kw)
-        kw.current = Storage(url = "#", name="整理")
+        kw.current = Storage(url="#", name="整理")
         return xtemplate.render(kw.template, **kw)
 
 
@@ -748,7 +750,7 @@ class ManagementHandler:
             raise web.notfound()
 
         notes = NOTE_DAO.list_by_parent(user_name, parent_id,
-                                        0, 200, orderby=parent_note.orderby, tags = q_tags)
+                                        0, 200, orderby=parent_note.orderby, tags=q_tags)
 
         parent = Storage(url="/note/%s" % parent_id,
                          name=parent_note.name)

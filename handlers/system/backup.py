@@ -130,6 +130,11 @@ class DBBackup:
                 # 可能是bytearray
                 key = bytes(key)
                 value = bytes(value)
+                
+                if key.startswith(b"_index$"):
+                    # 索引不需要备份
+                    continue
+
                 batch.put_bytes(key, value)
                 count += 1
                 # 更新进度

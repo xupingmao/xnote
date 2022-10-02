@@ -34,16 +34,12 @@ def get_table_old(table_name, type="rdb"):
     return table
 
 
-def get_table(table_name, type="rdb", user_name=None):
+def get_table(table_name, user_name=None):
     """获取table对象
     @param {str} table_name 表名
-    @return {LdbTable|LdbHashTable}
+    @return {LdbTable}
     """
     check_table_name(table_name)
-
-    if type == "hash":
-        return get_hash_table(table_name)
-
     return LdbTable(table_name, user_name=user_name)
 
 
