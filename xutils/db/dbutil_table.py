@@ -3,14 +3,12 @@
 # @since 2021/12/04 21:22:40
 # @modified 2022/04/16 08:53:11
 # @filename dbutil_table.py
-
-from logging.config import valid_ident
 from urllib.parse import quote
 from xutils import Storage
 from xutils.db.dbutil_base import *
 from xutils.db.dbutil_table_index import TableIndex
 from xutils.db.encode import (
-    decode_str, 
+    decode_str,
     encode_index_value,
     encode_str,
     encode_id,
@@ -225,7 +223,8 @@ class LdbTable:
             batch.put(key, self._convert_to_db_row(obj))
             self._update_index(old_obj, obj, batch)
             if self.binlog_enabled:
-                self.binlog.add_log("put", key, obj, batch=batch, old_value=old_obj)
+                self.binlog.add_log(
+                    "put", key, obj, batch=batch, old_value=old_obj)
             # 更新批量操作
             batch.commit(sync)
 
@@ -244,13 +243,13 @@ class LdbTable:
         row_id = encode_str(row_id)
         key = self._build_key_with_user(row_id, user_name=user_name)
         return self.get_by_key(key, default_value)
-    
+
     def batch_get_by_id(self, row_id_list, default_value=None, user_name=None):
         for row_id in row_id_list:
             validate_str(row_id, "invalid row_id:{!r}", row_id)
             if self._need_check_user:
                 validate_str(user_name, "invalid user_name:{!r}", user_name)
-        
+
         key_list = []
         key_id_dict = {}
         for row_id in row_id_list:
@@ -258,9 +257,10 @@ class LdbTable:
             key = self._build_key_with_user(q_row_id, user_name=user_name)
             key_list.append(key)
             key_id_dict[key] = row_id
-        
+
         result = dict()
-        key_result = self.batch_get_by_key(key_list, default_value=default_value)
+        key_result = self.batch_get_by_key(
+            key_list, default_value=default_value)
         for key in key_result:
             object = key_result.get(key)
             id = key_id_dict.get(key)
@@ -280,7 +280,7 @@ class LdbTable:
     def batch_get_by_key(self, key_list, default_value=None):
         for key in key_list:
             self._check_key(key)
-        
+
         batch_result = db_batch_get(key_list, default_value)
         for key in batch_result:
             value = batch_result.get(key)
@@ -288,7 +288,7 @@ class LdbTable:
                 batch_result[key] = None
                 continue
             batch_result[key] = self._format_value(key, value)
-        
+
         return batch_result
 
     def insert(self, obj, id_type="timeseq", id_value=None):
@@ -344,7 +344,7 @@ class LdbTable:
             raise DBException("table实例已经设置了user_name，不能再通过参数设置")
 
         id = encode_str(id)
-        
+
         if self.user_attr != None:
             user_name = obj.get(self.user_attr)
             if user_name == None:
@@ -417,7 +417,8 @@ class LdbTable:
             # 更新批量操作
             batch.delete(key)
             if self.binlog_enabled:
-                self.binlog.add_log("delete", key, old_obj, batch=batch, old_value=old_obj)
+                self.binlog.add_log("delete", key, old_obj,
+                                    batch=batch, old_value=old_obj)
             batch.commit()
 
     def iter(self, offset=0, limit=20, reverse=False, key_from=None,
@@ -481,52 +482,64 @@ class LdbTable:
                          filter_func=filter_func, user_name=user_name)
 
     def create_index_map_func(self, filter_func, index_type="ref"):
-        def map_func_for_copy(key, value):
-            obj_key = value.get("key")
-            obj_value = value.get("value")
-            self._format_value(obj_key, obj_value)
-            if isinstance(obj_value, dict):
-                obj_value = Storage(**obj_value)
+        def map_func_for_copy(batch_list):
+            result = []
+            for key, value in batch_list:
+                obj_key = value.get("key")
+                obj_value = value.get("value")
+                self._format_value(obj_key, obj_value)
+                if isinstance(obj_value, dict):
+                    obj_value = Storage(**obj_value)
 
-            if filter_func is None:
-                return obj_value
-            else:
                 # 这里应该是使用obj参数来过滤
-                is_match = filter_func(obj_key, obj_value)
+                if filter_func == None:
+                    is_match = True
+                else:
+                    is_match = filter_func(obj_key, obj_value)
+                
                 if is_match:
-                    return obj_value
-                return None
+                    return result.append((key, obj_value))
+            return result
 
-        def map_func_for_ref(key, value):
+        def map_func_for_ref(batch_list):
             # 先判断实例是否存在
             # 普通的引用索引
-            obj = self.get_by_key(value)
+            result = []
+            key_list = []
+            obj_dict = {}
+            for key, ref_key in batch_list:
+                key_list.append(ref_key)
 
-            if obj is None:
-                # 异步 delete(key)
-                logging.warning("invalid key:(%s)", key)
-                return None
+            obj_dict = self.batch_get_by_key(key_list)
 
-            # 检查key是否匹配
-            obj_id = key.rsplit(":", 1)[-1]
-            key_obj_id_temp = self._get_id_from_obj(obj)
-            key_obj_id = quote(key_obj_id_temp)
-            if obj_id != key_obj_id:
-                logging.warning(
-                    "invalid obj_id:(%s), obj_id:(%s)", obj_id, key_obj_id)
-                return None
+            for key, ref_key in batch_list:
+                obj = obj_dict.get(ref_key)
 
-            # 用于调试
-            # setattr(obj, "_idx_key", key)
+                if obj is None:
+                    # 异步 delete(key)
+                    logging.warning("invalid key:(%s)", key)
+                    continue
 
-            if filter_func is None:
-                return obj
-            else:
+                # 检查key是否匹配
+                obj_id = key.rsplit(":", 1)[-1]
+                key_obj_id_temp = self._get_id_from_obj(obj)
+                key_obj_id = quote(key_obj_id_temp)
+                if obj_id != key_obj_id:
+                    logging.warning(
+                        "invalid obj_id:(%s), obj_id:(%s)", obj_id, key_obj_id)
+                    continue
+
+                # 用于调试
+                # setattr(obj, "_idx_key", key)
                 # 这里应该是使用obj参数来过滤
-                is_match = filter_func(key, obj)
+                if filter_func == None:
+                    is_match = True
+                else:
+                    is_match = filter_func(key, obj)
+                
                 if is_match:
-                    return obj
-                return None
+                    result.append((key, obj))
+            return result
 
         if index_type == "copy":
             return map_func_for_copy
@@ -548,7 +561,7 @@ class LdbTable:
 
         map_func = self.create_index_map_func(
             filter_func, index_type=index_info.index_type)
-        return prefix_count(prefix, map_func=map_func)
+        return prefix_count_batch(prefix, map_func=map_func)
 
     def list_by_index(self, index_name, filter_func=None,
                       offset=0, limit=20, reverse=False,
@@ -578,9 +591,9 @@ class LdbTable:
 
         map_func = self.create_index_map_func(
             filter_func, index_type=index_info.index_type)
-        return list(prefix_iter(prefix, offset=offset, limit=limit,
-                                map_func=map_func,
-                                reverse=reverse, include_key=False))
+        return list(prefix_iter_batch(prefix, offset=offset, limit=limit,
+                                      map_func=map_func,
+                                      reverse=reverse, include_key=False))
 
     def first_by_index(self, *args, **kw):
         kw["limit"] = 1
@@ -713,3 +726,100 @@ def insert(table_name, obj_value, sync=False):
             db.update_by_id(new_id, obj_value)
             return new_id
         raise DBException("insert conflict")
+
+
+def prefix_iter_batch(prefix,  # type: str
+                      offset=0,  # type: int
+                      limit=-1,  # type: int
+                      reverse=False,
+                      include_key=False,
+                      key_from=None,
+                      map_func=None,
+                      fill_cache=False):
+    """通过前缀迭代查询
+    @param {string} prefix 遍历前缀
+    @param {function} filter_func(str,object) 过滤函数
+    @param {function} map_func(str,object)    映射函数，如果返回不为空则认为匹配
+    @param {int} offset 选择的开始下标，包含
+    @param {int} limit  选择的数据行数
+    @param {boolean} reverse 是否反向遍历
+    @param {boolean} include_key 返回的数据是否包含key，默认只有value
+    """
+    db = check_get_leveldb()
+
+    if key_from != None and reverse == True:
+        raise Exception("不允许反向遍历时设置key_from")
+
+    origin_prefix = prefix
+    prefix = prefix.encode("utf-8")
+
+    if reverse:
+        # 时序表的主键为 表名:用户名:时间序列 时间序列长度为20
+        prefix += b'\xff'
+
+    if key_from is None:
+        key_from = prefix
+    else:
+        key_from = key_from.encode("utf-8")
+
+    # print("prefix: %s, origin_prefix: %s, reverse: %s" %
+    #      (prefix, origin_prefix, reverse))
+
+    if reverse:
+        key_from = None
+        key_to = prefix
+    else:
+        key_to = None
+
+    iterator = db.RangeIter(key_from,
+                            key_to,
+                            include_value=True,
+                            reverse=reverse,
+                            fill_cache=fill_cache)
+
+    position = 0
+    matched_offset = 0
+    result_size = 0
+    batch_size = 20
+
+    def do_iter():
+        batch_list = []
+        for key, value in iterator:
+            key = key.decode("utf-8")
+            if not key.startswith(origin_prefix):
+                break
+            obj = convert_bytes_to_object(value)
+            if map_func == None:
+                yield key, obj
+            else:
+                batch_list.append((key, obj))
+                if len(batch_list) >= batch_size:
+                    for key, value in map_func(batch_list):
+                        yield key, value
+                    batch_list = []
+                else:
+                    continue
+
+        if len(batch_list) > 0:
+            for key, value in map_func(batch_list):
+                yield key, value
+
+    for key, obj in do_iter():
+        if matched_offset >= offset:
+            result_size += 1
+            if include_key:
+                yield key, obj
+            else:
+                yield obj
+        matched_offset += 1
+
+        if limit > 0 and result_size >= limit:
+            break
+        position += 1
+
+def prefix_count_batch(*args, **kw):
+    count = 0
+    kw["include_key"] = False
+    for obj in prefix_iter_batch(*args, **kw):
+        count+=1
+    return count

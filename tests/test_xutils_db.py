@@ -220,7 +220,7 @@ class TestMain(BaseTestCase):
         run_test_db_engine(self, db)
 
     def test_dbutil_mysql_enhanced(self):
-        from xutils.db.driver_mysql import EnhancedMySQLKV
+        from xutils.db.driver_mysql_enhance import EnhancedMySQLKV
         skip_mysql_test = os.environ.get("skip_mysql_test")
         if skip_mysql_test == "True":
             print("skip mysql test")
@@ -370,10 +370,16 @@ class TestMain(BaseTestCase):
         obj1_found = db.first_by_index("name", index_value="Ada")
         obj2_found = db.first_by_index("name", index_value="Bob")
         obj3_found = db.first_by_index("name", index_value="Cooper")
+        obj4_found = db.first_by_index("name", index_value="Other")
 
         print("obj1_found", obj1_found)
         print("obj2_found", obj2_found)
         print("obj3_found", obj3_found)
+
+        self.assertIsNotNone(obj1_found)
+        self.assertIsNotNone(obj2_found)
+        self.assertIsNotNone(obj3_found)
+        self.assertIsNone(obj4_found)
 
         self.assertEqual(decode_id(obj1_found._id) +
                          1, decode_id(obj2_found._id))
