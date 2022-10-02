@@ -667,13 +667,14 @@ def prefix_iter(prefix,  # type: str
                 scan_db=False):
     """通过前缀迭代查询
     @param {string} prefix 遍历前缀
-    @param {function} filter_func(str,object) 过滤函数
-    @param {function} map_func(str,object)    映射函数，如果返回不为空则认为匹配
+    @param {function} filter_func(str, object) 过滤函数
+    @param {function} map_func(str, object)    映射函数，如果返回不为空则认为匹配
     @param {int} offset 选择的开始下标，包含
     @param {int} limit  选择的数据行数
     @param {boolean} reverse 是否反向遍历
     @param {boolean} include_key 返回的数据是否包含key，默认只有value
     @param {boolean} scan_db 是否扫描整个数据库
+    @param {string} key_from 开始的key
     """
     check_leveldb()
     if key_from != None and reverse == True:
@@ -689,26 +690,25 @@ def prefix_iter(prefix,  # type: str
     else:
         assert prefix == "", "scan_db prefix必须为空"
 
-    origin_prefix = prefix
     prefix_bytes = prefix.encode("utf-8")
     if key_from == None:
-        key_from = prefix_bytes
+        key_from_bytes = prefix_bytes
+    else:
+        key_from_bytes = key_from.encode("utf-8")
+
     key_to = prefix_bytes + b'\xff'
 
-    iterator = _leveldb.RangeIter(key_from,
-                                  key_to,
-                                  include_value=True,
-                                  reverse=reverse,
-                                  fill_cache=fill_cache)
+    iterator = _leveldb.RangeIter(
+        key_from_bytes, key_to, include_value=True, reverse=reverse, fill_cache=fill_cache)
 
     position = 0
     matched_offset = 0
     result_size = 0
 
-    for key, value in iterator:
-        if not key.startswith(prefix_bytes):
+    for key_bytes, value in iterator:
+        if not key_bytes.startswith(prefix_bytes):
             break
-        key = key.decode("utf-8")
+        key = key_bytes.decode("utf-8")
         value = convert_bytes_to_object(value)
 
         is_match = True
