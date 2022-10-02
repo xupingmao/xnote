@@ -61,8 +61,6 @@ _index_db = dbutil.get_table("note_index")
 _book_db = dbutil.get_table("notebook")
 
 DB_PATH = xconfig.DB_PATH
-MAX_EDIT_LOG = 500
-MAX_VIEW_LOG = 500
 MAX_STICKY_SIZE = 1000
 MAX_SEARCH_SIZE = 1000
 MAX_LIST_SIZE = 1000
@@ -745,7 +743,7 @@ def update_note(note_id, **kw):
 
     note = get_by_id(note_id)
     if note is None:
-        return 0
+        raise Exception("笔记不存在,id=%s" % note_id)
 
     if content:
         note.content = content
@@ -1319,7 +1317,8 @@ def check_and_remove_broken_notes(notes, user_name):
 def count_removed(creator):
     def count_func(key, value):
         return value.is_deleted and value.creator == creator
-    return dbutil.prefix_count("note_tiny:%s" % creator, count_func)
+    db = get_note_tiny_table(creator)
+    return db.count(filter_func = count_func)
 
 
 def list_removed(creator, offset, limit, orderby=None):

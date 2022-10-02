@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-02 10:05:59
+@LastEditTime : 2022-10-02 14:00:09
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 描述
 """
@@ -59,6 +59,10 @@ def init():
     db.register_index("note_id", "笔记ID")
     db.register_index("to_user", "分享的目标用户")
 
+    # 统计数据
+    db = dbutil.register_table("plugin_visit_log", "插件访问日志", user_attr="user", check_user = True)
+    db.register_index("url", "页面URL")
+
     # 重建索引(系统会根据索引版本增量构建)
     build_index_async()
 
@@ -67,3 +71,4 @@ def init():
 def build_index_async():
     dbutil.get_table("note_index").rebuild_index("v2")
     dbutil.get_table("note_tiny").rebuild_index("v2")
+    dbutil.get_table("plugin_visit_log").rebuild_index("v1")

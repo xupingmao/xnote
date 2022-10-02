@@ -701,7 +701,7 @@ class TestMain(BaseTestCase):
         self.assertEqual(2, len(result))
         self.assertEqual(20.6, result[0][1])
 
-    def test_dbutil_sortedset(self):
+    def test_dbutil_sortedset_mysql(self):
         from xutils.db.driver_mysql import MySQLKV
         from xutils.db.dbutil_sortedset import SortedSet
 
@@ -729,3 +729,29 @@ class TestMain(BaseTestCase):
         result = db.list_by_score()
         self.assertEqual(2, len(result))
         self.assertEqual(20.6, result[0][1])
+    
+    def test_range_iter_mysql(self):
+        from xutils.db.driver_mysql import MySQLKV
+
+        skip_mysql_test = os.environ.get("skip_mysql_test")
+        if skip_mysql_test == "True":
+            print("skip mysql test")
+            return
+
+        engine = MySQLKV(host="192.168.50.153", user="root",
+                     password="root", database="test2")
+        engine.scan_limit = 10
+
+        dbutil.set_driver_name("mysql")
+        dbutil.register_table("range_test", "range test")
+        db = dbutil.get_table("range_test")
+
+        for i in range(50):
+            id = "%03d" % (i+1)
+            db.update_by_id(id, dict(name = "test"))
+        
+        self.assertEqual(50, db.count())
+        result = db.list(offset=0,limit=30)
+        self.assertEqual(30, len(result))
+        self.assertEqual("030", result[-1]._id)
+

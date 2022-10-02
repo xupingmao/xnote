@@ -51,9 +51,6 @@ PLUGINS_STATUS = "loading"
 
 DEFAULT_PLUGIN_ICON_CLASS = "fa fa-cube"
 
-dbutil.register_table("plugin_visit_log", "插件访问日志", check_user = True)
-dbutil.register_table_user_attr("plugin_visit_log", "user")
-
 _log_db = dbutil.get_table("plugin_visit_log")
 
 def get_current_platform():
@@ -608,6 +605,10 @@ def list_visit_logs(user_name, offset = 0, limit = -1):
     return logs
 
 def find_visit_log(user_name, url):
+    log = _log_db.first_by_index("url", index_value = url, user_name=user_name)
+    if log != None:
+        return log
+
     for log in _log_db.iter(user_name = user_name, limit = -1):
         if log.url == url:
             log.key = log._key

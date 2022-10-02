@@ -690,25 +690,10 @@ def prefix_iter(prefix,  # type: str
         assert prefix == "", "scan_db prefix必须为空"
 
     origin_prefix = prefix
-    prefix = prefix.encode("utf-8")
-
-    if reverse:
-        # 时序表的主键为 表名:用户名:时间序列 时间序列长度为20
-        prefix += b'\xff'
-
-    if key_from is None:
-        key_from = prefix
-    else:
-        key_from = key_from.encode("utf-8")
-
-    # print("prefix: %s, origin_prefix: %s, reverse: %s" %
-    #      (prefix, origin_prefix, reverse))
-
-    if reverse:
-        key_from = None
-        key_to = prefix
-    else:
-        key_to = None
+    prefix_bytes = prefix.encode("utf-8")
+    if key_from == None:
+        key_from = prefix_bytes
+    key_to = prefix_bytes + b'\xff'
 
     iterator = _leveldb.RangeIter(key_from,
                                   key_to,
@@ -721,9 +706,9 @@ def prefix_iter(prefix,  # type: str
     result_size = 0
 
     for key, value in iterator:
-        key = key.decode("utf-8")
-        if not key.startswith(origin_prefix):
+        if not key.startswith(prefix_bytes):
             break
+        key = key.decode("utf-8")
         value = convert_bytes_to_object(value)
 
         is_match = True

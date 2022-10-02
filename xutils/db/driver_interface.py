@@ -50,6 +50,7 @@ class DBInterface:
         @param {bool}   include_value  是否包含值
         @param {bool}   fill_cache     是否填充缓存
         """
+        assert key_from <= key_to
         raise NotImplementedError("RangeIter")
 
     def CreateSnapshot(self):

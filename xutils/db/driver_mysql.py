@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-02 09:36:50
+@LastEditTime : 2022-10-02 14:58:41
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -327,7 +327,6 @@ class MySQLKV:
                     sql_builder.append("ORDER BY `key` ASC")
 
                 sql_builder.append("LIMIT %d;" % (limit + 1))
-
                 sql = " ".join(sql_builder)
 
                 has_next = True
