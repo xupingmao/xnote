@@ -76,6 +76,11 @@ function textarea_current_line_pos(textarea) {
     return [indexLeft, indexRight];
 }
 
+/**
+ * 返回当前行
+ * @param {textarea} textarea对象
+ * @return {string} 当前行的文本
+ */
 function textarea_current_line(textarea) {
     var textValue = textarea.value;
     var pos = textarea_current_line_pos(textarea);

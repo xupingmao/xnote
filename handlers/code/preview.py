@@ -17,9 +17,7 @@ HIDE_EXT_LIST = [
 
 def check_resource(path):
     if xutils.is_img_file(path):
-        pathlist = path.split("/")
-        pathlist = map(lambda name: xutils.quote(name), pathlist)
-        uri = "/fs//" + "/".join(pathlist)
+        uri = "/fs_get?fpath=%s" % xutils.b64encode(path)
         # print(uri)
         raise web.seeother(uri)
     return False

@@ -91,9 +91,8 @@ $(function () {
         xnote.requestUpload("#uploadFileInput", false, function (resp) {
             console.log(resp);
             var fileLink = resp.link;
-            var oldContent = getContent();
-            var newContent = oldContent + "\n" + fileLink + "\n";
-            $("#markdown-input").val(newContent);
+            var editor = getEditor();
+            textarea_insert(editor, fileLink);
         });
     });
 

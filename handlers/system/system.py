@@ -191,6 +191,8 @@ class UserJsHandler:
         return xconfig.get("USRE_JS", "")
 
 
+xutils.register_func("url:/system/index", IndexHandler)
+
 xurls = (
     r"/system/sys",   IndexHandler,
     r"/system/index", IndexHandler,
