@@ -14,7 +14,7 @@ from xutils.db.encode import (
     encode_id,
     clean_value_before_update
 )
-
+from xutils.db.dbutil_id_gen import IdGenerator
 from xutils.db.binlog import BinLog
 
 register_table("_id", "系统ID表")
@@ -56,6 +56,8 @@ class LdbTable:
         self.index_names = table_info.get_index_names()
         self._need_check_user = table_info.check_user
         self.user_attr = None
+        self.id_gen = IdGenerator(self.table_name)
+
         if table_info.check_user:
             if table_info.user_attr == None:
                 raise Exception("table({table_name}).user_attr can not be None".format(
@@ -131,42 +133,8 @@ class LdbTable:
         clean_value_before_update(obj_copy)
         return obj_copy
 
-    def _create_increment_id(self, start_id=None):
-        if start_id != None:
-            assert start_id > 0
-
-        max_id_key = "_max_id:" + self.table_name
-
-        with get_write_lock():
-            last_id = db_get(max_id_key)
-            if last_id is None:
-                if start_id != None:
-                    last_id = start_id
-                else:
-                    last_id = 1
-            else:
-                last_id += 1
-            put(max_id_key, last_id)
-            return encode_id(last_id)
-
     def _create_new_id(self, id_type="uuid", id_value=None):
-        if id_type == "uuid":
-            validate_none(id_value, "invalid id_value")
-            return xutils.create_uuid()
-
-        if id_type == "timeseq":
-            validate_none(id_value, "invalid id_value")
-            return timeseq()
-
-        if id_type == "auto_increment":
-            validate_none(id_value, "invalid id_value")
-            return self._create_increment_id()
-
-        if id_value != None:
-            validate_none(id_type, "invalid id_type")
-            return id_value
-
-        raise Exception("unknown id_type:%s" % id_type)
+        return self.id_gen.create_new_id(id_type, id_value)
 
     def _check_before_delete(self, key):
         if not key.startswith(self.prefix):
@@ -197,13 +165,6 @@ class LdbTable:
             return self.table_name + ":"
         else:
             return self.table_name + ":" + encode_str(user_name) + ":"
-
-    def _get_index_prefix(self, index_name, user_name=None):
-        self._check_index_name(index_name)
-        self._check_user_name(user_name)
-
-        index_prefix = "_index$%s$%s" % (self.table_name, index_name)
-        return self._build_key_no_prefix(index_prefix, self.user_name or user_name)
 
     def _update_index(self, old_obj, new_obj, batch, force_update=False):
         for index in self.indexes:
@@ -298,7 +259,7 @@ class LdbTable:
         @param {string} id_type id类型
         """
         self._check_value(obj)
-        id_value = self._create_new_id(id_type, id_value)
+        id_value = self.id_gen.create_new_id(id_type, id_value)
 
         user_name = None
         if self._need_check_user:
@@ -547,24 +508,44 @@ class LdbTable:
             return map_func_for_copy
 
         return map_func_for_ref
+    
+    
+    def _get_index_prefix(self, index_name, user_name=None):
+        self._check_index_name(index_name)
+        self._check_user_name(user_name)
 
-    def count_by_index(self, index_name, filter_func=None, index_value=None):
+        index_prefix = "_index$%s$%s" % (self.table_name, index_name)
+        return self._build_key_no_prefix(index_prefix, self.user_name or user_name)
+
+    def _get_index_prefix_by_value(self, index_name, index_value, user_name=None):
+        if isinstance(index_value, dict):
+            assert len(index_value) == 1, "只能设置1个属性"
+            if index_value.get("$prefix") != None:
+                prefix_value = index_value.get("$prefix")
+                prefix_value_encoded = encode_index_value(prefix_value)
+                return self._get_index_prefix(index_name, user_name=user_name) + ":" + prefix_value_encoded
+            # TODO: 参考 mongodb 的 {$gt: 20} 这种格式的
+            raise NotImplementedError("暂未实现")
+        elif index_value != None:
+            index_value = encode_index_value(index_value)
+            return self._get_index_prefix(
+                index_name, user_name=user_name) + ":" + index_value + ":"
+        else:
+            return self._get_index_prefix(index_name, user_name=user_name) + ":"
+
+
+    def count_by_index(self, index_name, filter_func=None, index_value=None, user_name=None):
         validate_str(index_name, "index_name can not be empty")
         index_info = IndexInfo.get_table_index_info(
             self.table_name, index_name)
         if index_info == None:
             raise Exception("index not found: %s", index_name)
 
-        if index_value != None:
-            index_value = encode_index_value(index_value)
-            prefix = self._get_index_prefix(index_name) + ":" + index_value
-        else:
-            prefix = self._get_index_prefix(index_name)
-
+        prefix = self._get_index_prefix_by_value(index_name, index_value, user_name=user_name)
         map_func = self.create_index_map_func(
             filter_func, index_type=index_info.index_type)
         return prefix_count_batch(prefix, map_func=map_func)
-
+    
     def list_by_index(self, index_name, filter_func=None,
                       offset=0, limit=20, *, reverse=False,
                       index_value=None, user_name=None):
@@ -581,16 +562,7 @@ class LdbTable:
         if index_info == None:
             raise Exception("index not found: %s", index_name)
 
-        if isinstance(index_value, dict):
-            # TODO: 参考 mongodb 的 {$gt: 20} 这种格式的
-            raise NotImplementedError("暂未实现")
-        elif index_value != None:
-            index_value = encode_index_value(index_value)
-            prefix = self._get_index_prefix(
-                index_name, user_name=user_name) + ":" + index_value + ":"
-        else:
-            prefix = self._get_index_prefix(index_name, user_name=user_name)
-
+        prefix = self._get_index_prefix_by_value(index_name, index_value, user_name=user_name)
         map_func = self.create_index_map_func(
             filter_func, index_type=index_info.index_type)
         return list(prefix_iter_batch(prefix, offset=offset, limit=limit,
@@ -634,7 +606,7 @@ def insert(table_name, obj_value, sync=False):
     db = LdbTable(table_name)
     with get_write_lock(table_name):
         for i in range(10):
-            new_id = db._create_increment_id(start_id=1)
+            new_id = db.id_gen.create_increment_id(start_id=1)
             old_value = db.get_by_id(new_id)
             if old_value != None:
                 logging.warning("id conflict, table:%s, id:%s",
