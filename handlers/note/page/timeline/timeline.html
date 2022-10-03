@@ -53,9 +53,11 @@
   </div>
 </div>
 
+{% if len(pathlist) > 0 %}
 <div class="card">
   {% include note/component/note_path.html %}
 </div>
+{% end %}
 
 
 <div id="app" class="content card">

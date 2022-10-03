@@ -36,7 +36,6 @@ def public_link(name, url, icon="cube"):
 SYS_TOOLS = [
     user_link("设置",   "/system/settings", "cog"),
     public_link("关于", "/code/wiki/README.md", "info-circle"),
-    user_link("退出", "/logout", "sign-out"),
     guest_link("登录", "/login", "sign-in"),
     admin_link("文件",       "/fs_list", "file"),
     admin_link("脚本",    "/fs_link/scripts"),
@@ -47,44 +46,42 @@ SYS_TOOLS = [
     admin_link("Menu_Log",    "/system/log"),
     admin_link("Menu_Refresh",  "/system/reload", "refresh"),
     admin_link("Menu_Modules",  "/system/modules_info"),
-    admin_link("Menu_Configure", "/code/edit?type=script&path=" +
-               str(xconfig.INIT_SCRIPT)),
     admin_link("Menu_CSS", "/code/edit?type=script&path=user.css"),
     admin_link("Menu_Plugin",   "/plugins_list", "cogs"),
-    admin_link("Shell",    "/tools/shell", "terminal")
+    admin_link("Shell",    "/tools/shell", "terminal"),
+    admin_link("集群管理", "/system/sync?p=home"),
+    user_link("退出", "/logout", "sign-out"),
 ]
 
 NOTE_TOOLS = [
-    user_link("搜索历史", "/search", "history"),
+    user_link("笔记本", "/note/group", "book"),
+    user_link("待办",  "/message?tag=task", "calendar-check-o"),
 
     # 笔记
-    user_link("最近更新",      "/note/recent_edit", "folder"),
-    user_link("最近创建",      "/note/recent_created", "folder"),
-    user_link("最近查看",       "/note/recent_viewed", "folder"),
-    user_link("根目录", "/note/group", "folder"),
-    user_link("书架", "/note/category", "book"),
+    user_link("最近更新",      "/note/recent?orderby=update", "folder"),
+    user_link("最近创建",      "/note/recent?orderby=create", "folder"),
+    user_link("最近查看",       "/note/recent?orderby=view", "folder"),
+    user_link("常用笔记", "/note/recent?orderby=myhot", "heart"),
     user_link("标签列表", "/note/taglist", "tags"),
-    user_link("时光轴", "/note/timeline"),
+    user_link("时光轴", "/note/timeline?type=all"),
     user_link("词典", "/note/dict"),
-
-    # 提醒
-    user_link("待办",  "/message?tag=task", "calendar-check-o"),
-    user_link("日历", "/message/calendar", "calendar"),
+    user_link("搜索历史", "/search", "history"),
+    # user_link("日历", "/message/calendar", "calendar"),
     user_link("上传管理", "/fs_upload", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),
-    user_link("笔记索引", "/note/index", "th-large"),
+    # user_link("笔记索引", "/note/index", "th-large"),
 ]
 
 DATA_TOOLS = [
-    admin_link("数据迁移",  "/system/db_migrate", "database"),
-    admin_link("SQLite", "/tools/sql", "database"),
-    admin_link("leveldb", "/system/db_scan", "database")
+    admin_link("SQLite", "/system/sqlite", "database"),
+    admin_link("leveldb", "/system/db_scan", "database"),
+    admin_link("Cache", "/system/cache", "database"),
 ]
 
 # 所有功能配置
 xconfig.MENU_LIST = [
-    Storage(name="System", children=SYS_TOOLS, need_login=True),
     Storage(name="Note", children=NOTE_TOOLS, need_login=True),
+    Storage(name="System", children=SYS_TOOLS, need_login=True),
     Storage(name="数据管理", children=DATA_TOOLS, need_login=True),
 ]
 
@@ -133,9 +130,9 @@ class IndexHandler:
         kw.user = xauth.get_current_user()
         kw.menu_list = menu_list
         kw.customized_items = []
-        kw.html_title="系统"
+        kw.html_title = "系统"
 
-        return xtemplate.render("system/page/system.html", **kw)
+        return xtemplate.render("system/page/system_index.html", **kw)
 
 
 class AdminHandler:

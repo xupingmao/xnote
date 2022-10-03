@@ -19,10 +19,15 @@
             padding: 5px;
         }
         .item {
-            width: 160px;
-            height: 25px;
-            line-height: 25px;
             float: left;
+            display: block;
+            text-align: center;
+            padding: 10px;
+            color: black;
+            width: 100px;
+        }
+        .item:hover {
+            background-color: #ccc;
         }
 
         @media screen and (max-width: 700px) {
@@ -44,6 +49,13 @@
             margin: 5px 0px;
         }
 
+        .app-icon {
+            line-height: 40px;
+            font-size: 40px;
+            text-align: center;
+            padding: 10px;
+        }
+
     </style>
 {% end %}
 
@@ -56,10 +68,12 @@
             <div class="grid-title">{{T(category_temp.name)}}</div>
             <div class="col-md-12">
                 {% for link in category_temp.children %}
-                    <div class="item">
-                        <i class="fa fa-{{link.icon}}"></i>
-                        <a href="{{link.url}}">{{T(link.name)}}</a>
-                    </div>
+                    <a class="item" href="{{link.url}}">
+                        <div class="app-icon">
+                            <i class="fa fa-{{link.icon}}"></i>
+                        </div>
+                        <span>{{T(link.name)}}</span>
+                    </a>
                 {% end %}
             </div>
         </div>
@@ -77,9 +91,9 @@
         </div>
         <div class="col-md-12">
             {% for link in customized_items %}
-            <div class="item">
-                <a href="{{link.url}}">{{T(link.name)}}</a>
-            </div>
+                <a href="{{link.url}}">    
+                    <span>{{T(link.name)}}</span>
+                </a>
             {% end %}
         </div>
     </div>

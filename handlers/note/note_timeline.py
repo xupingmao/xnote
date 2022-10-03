@@ -382,6 +382,7 @@ class BaseTimelineHandler:
 
         if parent_link != None:
             pathlist.append(parent_link)
+        
         if title_link != None:
             pathlist.append(title_link)
 
