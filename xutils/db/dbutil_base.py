@@ -45,7 +45,7 @@ import logging
 try:
     import sqlite3
 except ImportError:
-    # 部分运行时环境可能没有sqlite3
+    # 部分运行时环境可能没有sqlite3 比如Jython
     sqlite3 = None
 
 # 加载第三方的库
@@ -601,54 +601,15 @@ def scan(key_from=None,
     if key_to != None and isinstance(key_to, str):
         key_to = key_to.encode("utf-8")
 
-    iterator = _leveldb.RangeIter(key_from,
-                                  key_to,
-                                  include_value=True,
-                                  reverse=reverse)
+    iterator = _leveldb.RangeIter(
+        key_from, key_to,
+        include_value=True, reverse=reverse)
 
     for key, value in iterator:
         key = key.decode("utf-8")
         value = convert_bytes_to_object(value, parse_json)
         if not func(key, value):
             break
-
-
-def prefix_scan(prefix, func, reverse=False, parse_json=True):
-    check_leveldb()
-    assert len(prefix) > 0
-
-    key_from = None
-    key_to = None
-
-    if prefix[-1] != ':':
-        prefix += ':'
-
-    prefix_bytes = prefix.encode("utf-8")
-
-    if reverse:
-        # 反向查询
-        key_from = prefix_bytes + b'\xff'
-        key_to = prefix_bytes
-    else:
-        # 正向查询
-        key_from = prefix_bytes
-        key_to = None
-
-    iterator = _leveldb.RangeIter(key_from,
-                                  key_to,
-                                  include_value=True,
-                                  reverse=reverse,
-                                  fill_cache=False)
-
-    offset = 0
-    for key, value in iterator:
-        key = key.decode("utf-8")
-        if not key.startswith(prefix):
-            break
-        value = convert_bytes_to_object(value, parse_json)
-        if not func(key, value):
-            break
-        offset += 1
 
 
 def prefix_list(*args, **kw):
@@ -756,13 +717,7 @@ def count(key_from=None, key_to=None, filter_func=None):
     return count
 
 
-def prefix_count(prefix,
-                 filter_func=None,
-                 offset=None,
-                 limit=None,
-                 reverse=None,
-                 include_key=None,
-                 map_func=None):
+def prefix_count(*args, **kw):
     """通过前缀统计行数
     @param {string} prefix 数据前缀
     @param {function} filter_func 过滤函数
@@ -771,29 +726,11 @@ def prefix_count(prefix,
     @param {object} reverse 无意义参数，为了方便调用
     @param {object} include_key 无意义参数，为了方便调用
     """
-    if filter_func != None and map_func != None:
-        raise Exception("不允许同时设置filter_func和map_func")
-
-    count = [0]
-
-    def func(key, value):
-        if not key.startswith(prefix):
-            return False
-        if filter_func != None:
-            if filter_func(key, value):
-                count[0] += 1
-            return True
-
-        if map_func != None:
-            if map_func(key, value) != None:
-                count[0] += 1
-            return True
-
-        count[0] += 1
-        return True
-
-    prefix_scan(prefix, func)
-    return count[0]
+    count = 0
+    kw["include_key"] = False
+    for value in prefix_iter(*args, **kw):
+        count += 1
+    return count
 
 
 def set_db_cache(cache):
@@ -846,8 +783,8 @@ def count_table(table_name, use_cache=False):
 
 def count_all():
     """统计全部的KV数量"""
-    iterator = check_get_leveldb().RangeIter(include_value=False,
-                                             fill_cache=False)
+    iterator = check_get_leveldb().RangeIter(
+        include_value=False, fill_cache=False)
 
     count = 0
     for key in iterator:
