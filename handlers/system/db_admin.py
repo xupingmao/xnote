@@ -7,6 +7,7 @@ import xauth
 from xutils import dbutil
 from xutils import Storage
 from xtemplate import BasePlugin
+from xutils import textutil
 
 SCAN_HTML = """
 <style>
@@ -44,12 +45,11 @@ SCAN_HTML = """
 
         <div class="row">
             <div class="align-center">
-                <input type=checkbox name="reverse" {% if is_reverse %}checked{%end%} value=true><span>倒序</span>
-                <button type="submit">查询数据</button>
-                <a class="btn btn-default" href="?p=query&prefix={{prefix}}">重置查询</a>
+                <input type=checkbox name="reverse" {% if is_reverse %}checked{%end%}><span>倒序</span>
+                <input type="button" class="do-search-btn" value="查询数据">
+                <a class="btn btn-default" href="?p=query&prefix={{prefix}}&reverse=true">重置查询</a>
             </div>
         </div>
-
 
     </form>
 </div>
@@ -62,6 +62,23 @@ SCAN_HTML = """
     </div>
 {% end %}
 
+<div class="result-rows">
+    <!-- 搜索结果 -->
+</div>
+
+<div class="card hide">
+    <div class="pad5 align-center">
+        <a href="?key_from={{quote(last_key)}}&prefix={{prefix}}&&db_key={{quote(db_key)}}&q_user_name={{q_user_name}}">下一页</a>
+    </div>
+</div>
+
+<!-- 模板 -->
+<script type="text/template" id="result-rows-template">
+<div class="card btn-line-height">
+    <span>扫描行数: {{!scanned}}</span>
+    <span>匹配行数: {{!result.length}}</span>
+</div>
+
 <div class="card">
     <table class="table">
         <tr>
@@ -69,29 +86,27 @@ SCAN_HTML = """
             <th>值</th>
             <th><div class="float-right">操作</div></th>
         </tr>
-        {% for key, value in result %}
+        {{! each result item }}
             <tr>
-                <td style="width:20%">{{key}}</td>
-                <td style="width:60%">{{get_display_value(value)}}</td>
+                <td style="width:20%">{{!item.key}}</td>
+                <td style="width:60%">{{!item.valueShort}}</td>
                 <td style="width:20%">
                     <div class="float-right">
-                        <button class="btn btn-default view-btn" data-key="{{key}}" data-value="{{value}}">查看</button>
-                        <button class="btn btn-danger delete-btn" data-key="{{key}}">删除</button>
+                        <button class="btn btn-default view-btn" data-key="{{!item.key}}" 
+                            data-value="{{!item.value}}">查看</button>
+                        <button class="btn btn-danger delete-btn" data-key="{{!item.key}}">删除</button>
                     </div>
                 </td>
             </tr>
-        {% end %}
+        {{!/each }}
     </table>
 </div>
-
-<div class="card">
-    <div class="pad5 align-center">
-        <a href="?key_from={{quote(last_key)}}&prefix={{prefix}}&&db_key={{quote(db_key)}}&reverse={{reverse}}&q_user_name={{q_user_name}}">下一页</a>
-    </div>
-</div>
+</script>
 
 <script>
 $(function () {
+    var globalVersion = 0;
+
     $(".delete-btn").click(function (e) {
         var key = $(this).attr("data-key");
         xnote.confirm("准备删除【" + key + "】，请确认", function (confirmed) {
@@ -102,11 +117,75 @@ $(function () {
         });
     }); 
 
-    $(".view-btn").click(function (e) {
+    $("body").on("click", ".view-btn", function (e) {
         var value = $(this).attr("data-value");
         var text = $("<textarea>").text(value).addClass("value-detail");
         xnote.showDialog("数据详情", text.prop("outerHTML"));
     }); 
+
+    $(".do-search-btn").click(function (e) {
+        globalVersion++;
+        doSearch("", [], 0, globalVersion);        
+    });
+
+    // 初始化
+    doSearch("", [], 0, globalVersion);
+
+    function doSearch(cursor, result, scanned, version) {
+        if (version != globalVersion) {
+            return;
+        }
+        var maxResultCount = 100;
+        var prefix = $("[name=prefix]").val();
+        var reverse = $("[name=reverse]").prop("checked");
+        var keyword = $("[name=db_key]").val();
+        var userName = $("[name=q_user_name]").val();
+        var params = {
+            action: "search",
+            keyword: keyword,
+            reverse: reverse,
+            cursor: cursor,
+            prefix: prefix,
+            q_user_name: userName,
+        };
+
+        $.get("", params, function (resp) {
+            console.log("search result", resp);
+            if (resp.code != "success") {
+                xnote.alert(resp.message);
+            } else {
+                scanned += resp.scanned;
+                for (var i = 0; i < resp.data.length; i++) {
+                    var item = resp.data[i];
+                    if (item.value.length>100) {
+                        item.valueShort = item.value.substring(0,97) + "...";
+                    } else {
+                        item.valueShort = item.value;
+                    }
+                    result.push(item);
+                }
+                var hasTooManyResult = result.length > maxResultCount;
+                if (hasTooManyResult) {
+                    result = result.slice(0, maxResultCount);
+                }
+
+                var html = $("#result-rows-template").renderTemplate({
+                    result: result,
+                    scanned: scanned,
+                });
+                $(".result-rows").html(html);
+                if (hasTooManyResult) {
+                    xnote.toast("结果过多，只展示前面" + maxResultCount + "条记录");
+                    return;
+                }
+
+                var hasNext = resp.has_next;
+                if (hasNext) {
+                    doSearch(resp.next_cursor, result, scanned, version);
+                }
+            }
+        });
+    }
 });
 </script>
 
@@ -151,6 +230,7 @@ META_HTML = """
 </div>
 """
 
+
 def get_display_value(value):
     if value is None:
         return value
@@ -159,8 +239,10 @@ def get_display_value(value):
         return value[:100] + "..."
     return value
 
+
 def parse_bool(value):
     return value == "true"
+
 
 class DbScanHandler(BasePlugin):
 
@@ -184,8 +266,56 @@ class DbScanHandler(BasePlugin):
     def do_delete(self):
         key = xutils.get_argument("key", "")
         dbutil.delete(key)
-        return dict(code = "success")
-    
+        return dict(code="success")
+
+    @xauth.login_required("admin")
+    def do_search(self):
+        prefix = xutils.get_argument("prefix", "")
+        cursor = xutils.get_argument("cursor", "")
+        keyword = xutils.get_argument("keyword", "")
+        reverse = xutils.get_argument("reverse", False, type=bool)
+        q_user_name = xutils.get_argument("q_user_name", "")
+        result = []
+
+        if q_user_name != "":
+            prefix = prefix + ":" + q_user_name
+        
+        if prefix != "" and prefix[-1] != ":":
+            prefix += ":"
+
+        limit = 200
+        if reverse:
+            key_from = None
+            key_to = cursor
+        else:
+            key_from = cursor
+            key_to = None
+
+        if key_from == "":
+            key_from = None
+        if key_to == "":
+            key_to = None
+
+        scanned = 0
+        next_cursor = ""
+        keywords = textutil.split_words(keyword)
+
+        for key, value in dbutil.prefix_iter(
+                prefix, key_from=key_from, key_to=key_to, include_key=True, limit=limit+1,
+                parse_json=False, reverse=reverse, scan_db=True):
+            if scanned < limit and (textutil.contains_all(key, keywords) or textutil.contains_all(value, keywords)):
+                item = Storage(key=key, value=value)
+                result.append(item)
+            scanned += 1
+            next_cursor = key
+
+        has_next = False
+        if scanned > limit:
+            scanned = limit
+            has_next = True
+
+        return dict(code="success", data=result, has_next=has_next, next_cursor=next_cursor, scanned=scanned)
+
     def handle(self, input):
         action = xutils.get_argument("action", "")
         db_key = xutils.get_argument("db_key", "")
@@ -196,6 +326,9 @@ class DbScanHandler(BasePlugin):
 
         if action == "delete":
             return self.do_delete()
+
+        if action == "search":
+            return self.do_search()
 
         result = []
         need_reverse = parse_bool(reverse)
@@ -223,7 +356,7 @@ class DbScanHandler(BasePlugin):
                 result.append((key, value))
                 if len(result) > 30:
                     return False
-            
+
             return True
 
         if key_from == "" and real_prefix != "":
@@ -231,9 +364,11 @@ class DbScanHandler(BasePlugin):
 
         if need_reverse:
             key_to = key_from.encode("utf8") + b'\xff'
-            dbutil.scan(key_to = key_to, func = func, reverse = True, parse_json = False)
+            dbutil.scan(key_to=key_to, func=func,
+                        reverse=True, parse_json=False)
         else:
-            dbutil.scan(key_from = key_from, func = func, reverse = False, parse_json = False)
+            dbutil.scan(key_from=key_from, func=func,
+                        reverse=False, parse_json=False)
 
         kw = Storage()
         kw.result = result
@@ -268,18 +403,18 @@ class DbScanHandler(BasePlugin):
         admin_stat_list = []
         if xauth.is_admin():
             table_dict = dbutil.get_table_dict_copy()
-            table_values = sorted(table_dict.values(), key = lambda x:(x.category,x.name))
+            table_values = sorted(table_dict.values(),
+                                  key=lambda x: (x.category, x.name))
             for table_info in table_values:
                 name = table_info.name
                 if hide_index == "true" and name.startswith("_index"):
                     continue
-                admin_stat_list.append([table_info.category, 
-                    table_info.name, 
-                    table_info.description, 
-                    dbutil.count_table(name, use_cache = True)])
-        
-        kw.admin_stat_list = admin_stat_list
+                admin_stat_list.append([table_info.category,
+                                        table_info.name,
+                                        table_info.description,
+                                        dbutil.count_table(name, use_cache=True)])
 
+        kw.admin_stat_list = admin_stat_list
 
 
 xurls = (

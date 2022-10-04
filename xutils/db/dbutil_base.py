@@ -661,10 +661,9 @@ def prefix_iter(prefix,  # type: str
                 limit=-1,  # type: int
                 reverse=False,
                 include_key=False,
-                key_from=None,
-                map_func=None,
-                fill_cache=False,
-                scan_db=False):
+                *,
+                key_from=None, key_to=None, map_func=None,
+                fill_cache=False, parse_json=True, scan_db=False):
     """通过前缀迭代查询
     @param {string} prefix 遍历前缀
     @param {function} filter_func(str, object) 过滤函数
@@ -677,8 +676,6 @@ def prefix_iter(prefix,  # type: str
     @param {string} key_from 开始的key
     """
     check_leveldb()
-    if key_from != None and reverse == True:
-        raise Exception("不允许反向遍历时设置key_from")
 
     if filter_func != None and map_func != None:
         raise Exception("不允许同时设置filter_func和map_func")
@@ -687,8 +684,6 @@ def prefix_iter(prefix,  # type: str
         assert len(prefix) > 0, "prefix不能为空"
         if prefix[-1] != ':':
             prefix += ':'
-    else:
-        assert prefix == "", "scan_db prefix必须为空"
 
     prefix_bytes = prefix.encode("utf-8")
     if key_from == None:
@@ -696,20 +691,29 @@ def prefix_iter(prefix,  # type: str
     else:
         key_from_bytes = key_from.encode("utf-8")
 
-    key_to = prefix_bytes + b'\xff'
+    if key_to == None:
+        key_to_bytes = prefix_bytes + b'\xff'
+    else:
+        key_to_bytes = key_to.encode("utf-8")
 
     iterator = _leveldb.RangeIter(
-        key_from_bytes, key_to, include_value=True, reverse=reverse, fill_cache=fill_cache)
+        key_from_bytes, key_to_bytes, include_value=True,
+        reverse=reverse, fill_cache=fill_cache)
 
     position = 0
     matched_offset = 0
     result_size = 0
 
+    if parse_json:
+        convert_value_func = convert_bytes_to_object
+    else:
+        def convert_value_func(x): return x.decode("utf-8")
+
     for key_bytes, value in iterator:
         if not key_bytes.startswith(prefix_bytes):
             break
         key = key_bytes.decode("utf-8")
-        value = convert_bytes_to_object(value)
+        value = convert_value_func(value)
 
         is_match = True
 
