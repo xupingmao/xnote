@@ -78,6 +78,7 @@
             <!-- <input type="checkbox" class="icon-check" v-if="file.type == 'gallery'"/> -->
             <i class="fa" v-bind:class="file.icon"></i>
             <a v-bind:href="file.url">{{!file.name}}</a>
+            <span v-if="file.is_public == 1" class="tag info">分享</span>
             <span v-if="file.type=='group' || file.type=='system'" class="float-right gray-text">{{!file.size}}</span>
           </p>
           <p class="brief"><span class="text-green"></span></p>

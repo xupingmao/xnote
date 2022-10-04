@@ -344,15 +344,14 @@ class LdbTable:
 
     def rebuild_index(self, version="v1"):
         """重建索引, 可以通过设置新的version值重新建立索引"""
-        with get_write_lock():
-            idx_version_key = "_idx_version:%s" % self.table_name
-            current_version = db_get(idx_version_key)
-            if current_version == version:
-                logging.info("当前索引已经是最新版本, table=%s, version=%s" %
-                             (self.table_name, version))
-                return
-            self.repair_index()
-            db_put(idx_version_key, version)
+        idx_version_key = "_idx_version:%s" % self.table_name
+        current_version = db_get(idx_version_key)
+        if current_version == version:
+            logging.info("当前索引已经是最新版本, table=%s, version=%s" %
+                            (self.table_name, version))
+            return
+        self.repair_index()
+        db_put(idx_version_key, version)
 
     def delete(self, obj):
         obj_key = self._get_key_from_obj(obj)

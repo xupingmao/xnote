@@ -227,11 +227,19 @@ class ImportNoteHandler:
 
 class MarkdownImageParser(TextParserBase):
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.check_only = False
+        self._has_external_image = False
+
     def escape(self, text):
         return text
 
     def get_ext_by_content_type(self, content_type):
         return netutil.get_file_ext_by_content_type(content_type)
+    
+    def has_external_image(self):
+        return self._has_external_image
 
     def handle_image(self, url, user_name):
         # TODO 注意越权问题 host不能是内部地址
@@ -243,6 +251,11 @@ class MarkdownImageParser(TextParserBase):
 
         if url.startswith("/"):
             # 已经是本地地址
+            return url
+        
+        if self.check_only:
+            # 仅校验，不处理
+            self._has_external_image = True
             return url
 
         fs_map_db = dbutil.get_hash_table("fs_map")
@@ -330,8 +343,18 @@ class CacheExternalHandler:
 
         return dict(code="success", message="更新成功")
 
+def has_external_image(note):
+    # type: (dict) -> bool
+    """判断是否有外部图片资源"""
+    if note == None:
+        return False
+    p = MarkdownImageParser()
+    p.check_only = True
+    p.parse(note.content, user_name = note.creator)
+    return p.has_external_image()
 
 xutils.register_func("note.import_from_html", import_from_html)
+xutils.register_func("note.has_external_image", has_external_image)
 
 xurls = (
     r"/note/html_importer", ImportNoteHandler,

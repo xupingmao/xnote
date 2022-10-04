@@ -72,6 +72,10 @@
 
         <span>{{item.name}}</span>
 
+        {% if hasattr(item, "is_public") and item.is_public %}
+            <span class="info-tag">分享中</span>
+        {% end %}
+
         {% if item.tags != None %}
             {% for tag_name in item.tags %}
                 <span class="tag lightblue">{{tag_name}}</span>
@@ -79,10 +83,6 @@
         {% end %}
 
         <div class="float-right">
-            {% if hasattr(item, "is_public") and item.is_public %}
-                <span class="info-tag">分享中</span>
-            {% end %}
-            
             {% if item.is_deleted %}
                 <span class="tag gray" href="/note/removed">删除</span>
             {% end %}
