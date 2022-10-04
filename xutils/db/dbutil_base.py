@@ -328,7 +328,7 @@ def validate_dict(obj, msg, *argv):
 class TableInfo:
     """表信息管理"""
 
-    _info_dict = dict()
+    _info_dict = dict() # type: dict[str, TableInfo]
 
     def __init__(self, name, description, category):
         self.name = name
@@ -374,7 +374,7 @@ class TableInfo:
 
 class IndexInfo:
 
-    _table_dict = dict()  # dict[table_name] = dict[index_name]index_value
+    _table_dict = dict()  # type: dict[str, dict[str, IndexInfo]]
 
     def __init__(self, table_name, index_name, index_type="ref"):
         self.table_name = table_name
