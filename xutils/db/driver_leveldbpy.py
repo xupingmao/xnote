@@ -6,40 +6,39 @@
 
 import leveldbpy
 
+
 class LevelDBProxy:
 
-    def __init__(self, path = None, snapshot = None, 
-            max_open_files = 1000,
-            block_cache_size = 8 * (2<<20), 
-            write_buffer_size = 2 * (2<<20),
-            config_dict = None):
+    def __init__(self, path=None, snapshot=None,
+                 max_open_files=1000,
+                 block_cache_size=8 * (2 << 20),
+                 write_buffer_size=2 * (2 << 20),
+                 config_dict=None):
         """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
         self.config_dict = None
         if snapshot != None:
             self._db = snapshot
         else:
             assert path != None
-            self._db = leveldbpy.DB(path.encode("utf-8"), 
-                create_if_missing = True, 
-                block_cache_size = block_cache_size,
-                max_open_files = max_open_files,
-                write_buffer_size = write_buffer_size)
+            self._db = leveldbpy.DB(
+                path.encode("utf-8"),
+                create_if_missing=True,
+                block_cache_size=block_cache_size,
+                max_open_files=max_open_files,
+                write_buffer_size=write_buffer_size)
 
     def Get(self, key):
         return self._db.get(key)
 
-    def Put(self, key, value, sync = False):
-        return self._db.put(key, value, sync = sync)
+    def Put(self, key, value, sync=False):
+        return self._db.put(key, value, sync=sync)
 
-    def Delete(self, key, sync = False):
-        return self._db.delete(key, sync = sync)
+    def Delete(self, key, sync=False):
+        return self._db.delete(key, sync=sync)
 
-    def RangeIter_reverse(self, iterator, key_from = None, key_to = None):
-        if key_to:
-            iterator.seek(key_to)     # cur >= key_to
-            if not iterator.valid():  # 如果没有匹配的，移动到尾部
-                iterator.seekLast()
-        else:
+    def RangeIter_reverse(self, iterator, key_from=None, key_to=None):
+        iterator.seek(key_to)     # cur >= key_to
+        if not iterator.valid():  # 如果没有匹配的，移动到尾部
             iterator.seekLast()
 
         def try_seek_prev():
@@ -57,7 +56,7 @@ class LevelDBProxy:
             # 一个匹配的都没有，直接返回
             return
 
-        if key_to != None and iterator.key() > key_to:
+        if iterator.key() > key_to:
             # cur > key_to: 需要 seek prev
             try_seek_prev()
 
@@ -66,7 +65,7 @@ class LevelDBProxy:
                 if not iterator.valid():
                     return
 
-                if key_from != None and iterator.key() < key_from:
+                if iterator.key() < key_from:
                     return
 
                 if iterator._keys_only:
@@ -78,34 +77,38 @@ class LevelDBProxy:
             except StopIteration:
                 return
 
-    def RangeIter(self, 
-            key_from = None, 
-            key_to = None, 
-            reverse = False, 
-            include_value = True, 
-            fill_cache = False):
+    def RangeIter(self,
+                  key_from=None,
+                  key_to=None,
+                  reverse=False,
+                  include_value=True,
+                  fill_cache=False):
         """返回区间迭代器
-        @param {str}  key_from       开始的key（包含）
-        @param {str}  key_to         结束的key（包含）
+        @param {bytes}  key_from       开始的key（包含）
+        @param {bytes}  key_to         结束的key（包含）
         @param {bool} reverse        是否反向查询
         @param {bool} include_value  是否包含值
         """
+        # assert key_from <= key_to
         if include_value:
             keys_only = False
         else:
             keys_only = True
 
-        iterator = self._db.iterator(keys_only = keys_only)
+        if key_from == None:
+            key_from = b''
+
+        if key_to == None:
+            key_to = b'\xff'
+
+        iterator = self._db.iterator(keys_only=keys_only)
 
         if reverse:
             for item in self.RangeIter_reverse(iterator, key_from, key_to):
                 yield item
             return
 
-        if key_from:
-            iterator.seek(key_from)
-        else:
-            iterator.seekFirst()
+        iterator.seek(key_from)
 
         while True:
             if not iterator.valid():
@@ -113,10 +116,10 @@ class LevelDBProxy:
                 return
             key = iterator.key()
             # print(key, key_to)
-            if key_to and key > key_to:
+            if key > key_to:
                 # raise StopIteration()
                 return
-            
+
             if include_value:
                 yield iterator.key(), iterator.value()
             else:
@@ -128,9 +131,9 @@ class LevelDBProxy:
                 return
 
     def CreateSnapshot(self):
-        return LevelDBProxy(snapshot = self._db.snapshot())
+        return LevelDBProxy(snapshot=self._db.snapshot())
 
-    def Write(self, batch_proxy, sync = False):
+    def Write(self, batch_proxy, sync=False):
         """执行批量操作"""
         batch = leveldbpy.WriteBatch()
         for key in batch_proxy._puts:
@@ -139,4 +142,3 @@ class LevelDBProxy:
         for key in batch_proxy._deletes:
             batch.delete(key)
         return self._db.write(batch, sync)
-
