@@ -107,12 +107,12 @@ SCAN_HTML = """
 $(function () {
     var globalVersion = 0;
 
-    $(".delete-btn").click(function (e) {
+    $("body").on("click", ".delete-btn", function (e) {
         var key = $(this).attr("data-key");
         xnote.confirm("准备删除【" + key + "】，请确认", function (confirmed) {
             var params = {key: key};
             $.post("?action=delete", params, function (resp) {
-                window.location.reload();
+                search();
             });
         });
     }); 
@@ -124,13 +124,16 @@ $(function () {
     }); 
 
     $(".do-search-btn").click(function (e) {
-        globalVersion++;
-        doSearch("", [], 0, globalVersion);        
+        search();    
     });
 
-    // 初始化
-    doSearch("", [], 0, globalVersion);
+    // 搜索接口
+    function search() {
+        globalVersion++;
+        doSearch("", [], 0, globalVersion);
+    }
 
+    // 执行搜索
     function doSearch(cursor, result, scanned, version) {
         if (version != globalVersion) {
             return;
@@ -185,7 +188,10 @@ $(function () {
                 }
             }
         });
-    }
+    };
+
+    // 初始化
+    search();
 });
 </script>
 

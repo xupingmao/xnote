@@ -11,7 +11,6 @@ from xutils.db.encode import (
     decode_str,
     encode_index_value,
     encode_str,
-    encode_id,
     clean_value_before_update
 )
 from xutils.db.dbutil_id_gen import IdGenerator
@@ -233,7 +232,7 @@ class LdbTable:
         if key == "":
             return None
         self._check_key(key)
-        value = get(key, default_value)
+        value = db_get(key, default_value)
         if value is None:
             return None
 
