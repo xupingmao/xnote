@@ -221,6 +221,8 @@ class Follower(NodeManagerBase):
         CONFIG.put("fs_sync_offset", "")
         CONFIG.put("db_sync_offset", "")
         CONFIG.put("follower_db_sync_state", "full")
+        CONFIG.delete("follower_binlog_last_seq")
+        CONFIG.delete("follower_db_last_key")
         self.fs_sync_done_time = -1
 
         db = dbutil.get_hash_table("fs_sync_index_copy")
@@ -267,6 +269,7 @@ class FileSyncer:
 class DBSyncer:
 
     MAX_LOOPS = 1000 # 最大循环次数
+    FULL_SYNC_MAX_LOOPS = 10000 # 全量同步最大循环次数
 
     def __init__(self, *, debug = True, file_syncer = None):
         self._binlog = BinLog.get_instance()
@@ -292,8 +295,8 @@ class DBSyncer:
         assert state in ("full", "binlog")
         CONFIG.put("follower_db_sync_state", state)
     
-
     def get_db_last_key(self):
+        # 全量同步使用，按照key进行遍历
         return CONFIG.get("follower_db_last_key", "")
 
     def put_db_last_key(self, last_key):
@@ -338,24 +341,31 @@ class DBSyncer:
         self.file_syncer.http_client = proxy
         sync_state = self.get_db_sync_state()
         if sync_state == "binlog":
-            message = self.sync_by_binlog(proxy)
-            assert message in ("sync_by_full", None)
-            if message == "sync_by_full":
-                self._sync_db_full(proxy, "")
+            # 增量同步
+            self.sync_by_binlog(proxy)
         else:
-            last_key = self.get_db_last_key()
-            self._sync_db_full(proxy, last_key)
+            # 全量同步
+            self.sync_db_full(proxy)
 
-    def _sync_db_full(self, proxy, last_key):
+    def sync_db_full(self, proxy):
+        steps = 0
+        while steps < self.FULL_SYNC_MAX_LOOPS:
+            last_key = self.get_db_last_key()
+            count = self._sync_db_full_step(proxy, last_key)
+            if count == 0:
+                break
+            steps+=1
+
+    def _sync_db_full_step(self, proxy, last_key):
         # type: (HttpClient, str) -> None
         result = proxy.list_db(last_key)
 
         if self.debug:
-            print("\n\n_sync_db_full -------------\nresp:%s\n\n" % result)
+            logging.debug("-------------\nresp:%s\n\n", result)
 
         result_obj = textutil.parse_json(result)
 
-        self.sync_by_full(result_obj, last_key)
+        return self._sync_db_full_step_work(result_obj, last_key)
 
     def sync_by_binlog(self, proxy): # type: (HttpClient) -> any
         has_next = True
@@ -371,7 +381,7 @@ class DBSyncer:
             last_seq = self.get_binlog_last_seq()
             result_obj = proxy.list_binlog(last_seq)
             if self.debug:
-                print("list binlog result=%s" % result_obj)
+                logging.debug("list binlog result=%s" % result_obj)
 
             code = result_obj.get("code")
             data_list = result_obj.get("data")
@@ -384,6 +394,7 @@ class DBSyncer:
                 self.put_binlog_last_seq(0)
                 self.put_db_sync_state("full")
                 self.put_db_last_key("")
+                self.sync_db_full(proxy)
                 return "sync_by_full"
             else:
                 raise Exception("未知的code:%s" % code)
@@ -424,35 +435,40 @@ class DBSyncer:
         else:
             logging.info("已经保持同步")
 
-    def sync_by_full(self, result_obj, last_key):
+    def _sync_db_full_step_work(self, result_obj, last_key):
+        # type: (dict, str) -> int
         code = result_obj.get("code")
-        if code == "success":
-            data = result_obj.get("data")
-            assert data != None, "data不能为空"
-            if last_key == "":
-                # 这里需要保存一下位点，后面增量同步从这里开始
-                binlog_last_seq = data.get("binlog_last_seq")
-                assert isinstance(binlog_last_seq, int)
-                self.put_binlog_last_seq(binlog_last_seq)
+        count = 0
+        assert code == "success"
+        data = result_obj.get("data")
+        assert data != None, "data不能为空"
+        if last_key == "":
+            # 这里需要保存一下位点，后面增量同步从这里开始
+            binlog_last_seq = data.get("binlog_last_seq")
+            assert isinstance(binlog_last_seq, int)
+            self.put_binlog_last_seq(binlog_last_seq)
 
-            rows = data.get("rows")
-            if not isinstance(rows, list):
-                logging.error("resp:%s", result_obj)
-                raise Exception("data.rows必须为list,当前类型(%s)" % type(rows))
+        rows = data.get("rows")
+        if not isinstance(rows, list):
+            logging.error("resp:%s", result_obj)
+            raise Exception("data.rows必须为list,当前类型(%s)" % type(rows))
 
-            new_last_key = last_key
-            for row in rows:
-                key = row.get("key")
-                value = row.get("value")
-                assert key != None
-                assert value != None
-                if key == last_key:
-                    continue
-                
-                self.put_and_log(key, value)
-                new_last_key = key
+        new_last_key = last_key
+        for row in rows:
+            key = row.get("key")
+            value = row.get("value")
+            assert key != None
+            assert value != None
+            if key == last_key:
+                continue
+            
+            self.put_and_log(key, value)
+            new_last_key = key
+            count += 1
 
-            if new_last_key == last_key:
-                self.put_db_sync_state("binlog")
-            else:
-                self.put_db_last_key(new_last_key)
+        if new_last_key == last_key:
+            self.put_db_sync_state("binlog")
+        else:
+            self.put_db_last_key(new_last_key)
+        
+        return count

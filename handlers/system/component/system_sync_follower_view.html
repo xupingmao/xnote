@@ -38,6 +38,22 @@
 </div>
 
 <div class="list-item">
+    <span>DB同步状态</span>
+    <div class="float-right">
+        {{follower_db_sync_state}}
+    </div>
+</div>
+
+{% if follower_db_sync_state == "full" %}
+<div class="list-item">
+    <span>全量同步当前key</span>
+    <div class="float-right">
+        {{follower_db_last_key}}
+    </div>
+</div>
+{% end %}
+
+<div class="list-item">
     <span>同步失败</span>
     <div class="float-right">
         <a href="/system/db_scan?prefix=fs_sync_index_failed&reverse=true">{{sync_failed_count}}</a>

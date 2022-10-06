@@ -182,6 +182,8 @@ class SyncHandler:
         kw.sync_process = FOLLOWER.get_sync_process()
         kw.sync_failed_count = FOLLOWER.count_sync_failed()
         kw.follower_binlog_seq = FOLLOWER.db_syncer.get_binlog_last_seq()
+        kw.follower_db_sync_state = FOLLOWER.db_syncer.get_db_sync_state()
+        kw.follower_db_last_key = FOLLOWER.db_syncer.get_db_last_key()
 
         return xtemplate.render("system/page/system_sync.html", **kw)
 
@@ -369,9 +371,8 @@ def on_sync_db_from_leader(ctx=None):
         logging.debug("开始同步数据库")
         logging.debug("-"*50)
         FOLLOWER.sync_db_from_leader()
-        if not FOLLOWER.is_at_full_sync():
-            logging.error("sync_db_from_leader not full_sync, wait 10 seconds...")
-            time.sleep(10)
+        logging.error("sync_db_from_leader not full_sync, wait 10 seconds...")
+        time.sleep(10)
     except:
         xutils.print_exc()
         logging.error("sync_db_from_leader failed, wait 60 seconds...")

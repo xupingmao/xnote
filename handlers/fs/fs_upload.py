@@ -31,7 +31,7 @@ def get_safe_file_name(filename):
 
 def generate_filename(filename, prefix, ext=None):
     if prefix:
-        prefix = prefix + '.'
+        prefix = prefix + '_'
     else:
         prefix = ''
     if filename is None:

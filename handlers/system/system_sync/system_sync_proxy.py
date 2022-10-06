@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-27 08:04:19
+@LastEditTime : 2022-10-06 10:54:52
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -217,6 +217,7 @@ class HttpClient:
             raise Exception("解析JSON失败")
     
     def list_db(self, last_key):
+        # type: (str) -> str
         leader_token = self.token
         leader_host = self.host
         params = dict(last_key=last_key, token=leader_token)

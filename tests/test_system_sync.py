@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-27 19:06:02
+@LastEditTime : 2022-10-06 10:56:42
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
@@ -162,7 +162,7 @@ class TestSystemSync(BaseTestCase):
         finally:
             netutil.set_net_mock(None)
 
-    def test_system_sync_db_from_leader(self):
+    def test_system_sync_db_full(self):
         netutil.set_net_mock(LeaderNetMock())
         DBSyncer.MAX_LOOPS = 5
 
@@ -179,18 +179,35 @@ class TestSystemSync(BaseTestCase):
             
             # 全量同步
             FOLLOWER.sync_db_from_leader()
-            FOLLOWER.sync_db_from_leader()
 
-            self.assertEqual(db_syncer.get_binlog_last_seq(), 1234)
             self.assertEqual(db_syncer.get_db_sync_state(), "binlog")
+            self.assertEqual(db_syncer.get_binlog_last_seq(), 1234) # 全量同步不会更新 last_seq
+        finally:
+            netutil.set_net_mock(None)
 
-            # 通过binlog同步
+    def test_system_sync_db_binlog(self):
+        netutil.set_net_mock(LeaderNetMock())
+        DBSyncer.MAX_LOOPS = 5
+
+        try:
+            from handlers.system.system_sync.system_sync_controller import FOLLOWER
+            admin_token = xauth.get_user_by_name("admin").token
+            _config_db.put("leader.token", admin_token)
+            _config_db.put("leader.host", "http://127.0.0.1:3333")
+
+            FOLLOWER._debug = True
+            db_syncer = FOLLOWER.db_syncer
+            db_syncer.debug = True
+            db_syncer.put_db_sync_state("binlog")
+            db_syncer.put_binlog_last_seq(1234)
+            
+            # 增量同步
             FOLLOWER.sync_db_from_leader()
+
             self.assertEqual(db_syncer.get_db_sync_state(), "binlog")
             self.assertEqual(db_syncer.get_binlog_last_seq(), 2346)
         finally:
             netutil.set_net_mock(None)
-
 
 
     def test_system_sync_db_broken(self):
@@ -202,11 +219,22 @@ class TestSystemSync(BaseTestCase):
         class MockedClient:
             def list_binlog(self, last_seq):
                 return dict(code="sync_broken")
+            
+            def list_db(self, last_key=""):
+                return """{
+                    "code": "success",
+                    "data": {
+                        "binlog_last_seq": 1234,
+                        "rows": []
+                    }
+                }
+                """
 
         FOLLOWER._debug = True
         FOLLOWER.db_syncer.put_db_sync_state("binlog")
         result = FOLLOWER.db_syncer.sync_by_binlog(MockedClient())
         self.assertEqual(result, "sync_by_full")
+        self.assertEqual(1234, FOLLOWER.db_syncer.get_binlog_last_seq())
     
     def test_is_token_active(self):
         from handlers.system.system_sync.system_sync_controller import FOLLOWER
