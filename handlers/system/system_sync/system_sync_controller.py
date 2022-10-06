@@ -351,7 +351,6 @@ def on_sync_files_from_leader(ctx=None):
         logging.debug("开始同步文件...")
         logging.debug("-" * 50)
         FOLLOWER.sync_files_from_leader()
-        time.sleep(10)
     except:
         xutils.print_exc()
         logging.error("sync_files_from_leader failed, wait 60 seconds...")
@@ -371,8 +370,6 @@ def on_sync_db_from_leader(ctx=None):
         logging.debug("开始同步数据库")
         logging.debug("-"*50)
         FOLLOWER.sync_db_from_leader()
-        logging.error("sync_db_from_leader not full_sync, wait 10 seconds...")
-        time.sleep(10)
     except:
         xutils.print_exc()
         logging.error("sync_db_from_leader failed, wait 60 seconds...")
