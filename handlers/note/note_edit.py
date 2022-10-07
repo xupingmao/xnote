@@ -19,6 +19,7 @@ from xutils import dbutil
 from xutils import textutil
 from xtemplate import T
 from .constant import *
+from . import dao_delete
 NOTE_DAO = xutils.DAO("note")
 
 DEFAULT_CREATE_TEMPLATE = "note/page/create.html"
@@ -285,6 +286,43 @@ class RemoveAjaxHandler:
             refresh_category_count(note.creator, note.category)
 
 
+class RecoverAjaxHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id", "")
+        name = xutils.get_argument("name", "")
+        file = None
+
+        if id != "" and id != None:
+            file = NOTE_DAO.get_by_id(id)
+        elif name != "":
+            file = NOTE_DAO.get_by_name(xauth.current_name(), name)
+        else:
+            return dict(code="fail", message="id,name至少一个不为空")
+
+        if file is None:
+            return dict(code="fail", message="笔记不存在")
+
+        creator = xauth.current_name()
+        if not xauth.is_admin() and file.creator != creator:
+            return dict(code="fail", message="没有恢复权限")
+
+        dao_delete.recover_note(id)
+        
+        self.after_recover(file)
+
+        return dict(code="success")
+        
+    def POST(self):
+        return self.GET()
+    
+    def after_recover(self, note):
+        if note.type == "group":
+            refresh_category_count(note.creator, note.category)
+
+
+
 class RenameAjaxHandler:
 
     @xauth.login_required()
@@ -315,6 +353,7 @@ class RenameAjaxHandler:
     def GET(self):
         return self.POST()
     
+
 class NoteShareHandler:
 
     @xauth.login_required()
@@ -697,6 +736,7 @@ xurls = (
     r"/note/create"      , CreateHandler,
     r"/note/remove"      , RemoveAjaxHandler,
     r"/note/rename"      , RenameAjaxHandler,
+    r"/note/recover"     , RecoverAjaxHandler,
     r"/note/update"      , UpdateHandler,
     r"/note/save"        , SaveAjaxHandler,
     r"/note/draft"       , DraftHandler,

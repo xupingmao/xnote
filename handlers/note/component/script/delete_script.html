@@ -21,6 +21,22 @@ function remove(id, name, parentId) {
 
 // 注册API模块
 xnote.registerApiModule("note")
-xnote.api.note.remove = remove
+xnote.api.note.remove = remove;
+
+// 恢复笔记
+xnote.api.note.recover = function (noteId, callbackFn) {
+    var params = {
+        id: noteId
+    };
+    $.post("/note/recover", params, function (resp) {
+        if (resp.code == "success") {
+            callbackFn();
+        } else {
+            xnote.alert("恢复失败:" + resp.message);
+        }
+    }).fail(function (err) {
+        xnote.alert("网络错误，请稍后重试");
+    })
+}
     
 </script>

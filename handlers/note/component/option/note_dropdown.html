@@ -40,7 +40,12 @@
         {% if _is_admin and xutils.call("note.has_external_image", file) %}
             <a class="dropdown-option cache-external-option link">缓存外部资源</a>
         {% end %}
-        <a class="dropdown-option-red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>
+
+        {% if item.is_deleted %}
+            <a class="dropdown-option-red recover-option" data-id="{{item.id}}">恢复笔记</a>
+        {% else %}
+            <a class="dropdown-option-red" href="javascript:remove('{{item.id}}', '{{item.name}}', '{{item.parent_id}}')">删除</a>
+        {% end %}
     </div>
 </div>
 {% end %}
@@ -99,6 +104,14 @@ $(function () {
             xnote.alert("调用接口失败: " + err);
         })
     });
+
+    // 恢复笔记
+    $(".recover-option").click(function (e) {
+        var noteId = $(e.target).attr("data-id");
+        xnote.api.note.recover(noteId, function() {
+            window.location.href();
+        });
+    })
 })
 </script>
 

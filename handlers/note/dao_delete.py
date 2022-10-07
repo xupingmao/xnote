@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 16:53:16
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-20 16:59:56
+@LastEditTime : 2022-10-07 13:48:38
 @FilePath     : /xnote/handlers/note/dao_delete.py
 @Description  : 删除的处理
 """
@@ -13,6 +13,7 @@ import xutils
 from xutils import dbutil
 from .dao import (
     delete_history,
+    add_history,
     delete_note_skey,
     get_by_id,
     update_children_count,
@@ -21,7 +22,6 @@ from .dao import (
     refresh_note_stat,
     refresh_note_stat_async,
     get_note_tiny_table,
-    delete_history,
     NOTE_DAO,
     _full_db,
     _book_db
@@ -76,6 +76,29 @@ def delete_note(id):
     # 删除访问日志
     NOTE_DAO.delete_visit_log(note.creator, note.id)
 
+    # 更新数量统计
+    refresh_note_stat(note.creator)
+
+def recover_note(id):
+    """恢复删除的笔记"""
+    note = get_by_id(id)
+    if note is None:
+        return
+    
+    if note.is_deleted == 0:
+        return
+    
+    note.mtime = xutils.format_datetime()
+    note.is_deleted = 0
+    note.version = note.version + 1
+    
+    # 记录变更日志
+    add_history(id, note.version, note)
+    # 更新数据
+    put_note_to_db(id, note)
+    
+    # 更新数量
+    update_children_count(note.parent_id)
     # 更新数量统计
     refresh_note_stat(note.creator)
 

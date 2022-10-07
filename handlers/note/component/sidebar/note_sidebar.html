@@ -35,6 +35,7 @@
             {% if item.id == file_id %}
                 data-current=true
             {% end %}>
+            {% if item.priority>0 %}<span class="tag orange">置顶</span>{% end %}
             <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
             <span>{{item.name}}</span>
         </a>

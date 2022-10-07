@@ -94,6 +94,14 @@ class TestMain(BaseTestCase):
             data=dict(id=id, content="new-content"))
         json_request("/note/remove?id=" + str(id))
 
+        note_info = get_by_id(id)
+        self.assertEqual(note_info.is_deleted, 1)
+
+        # 恢复笔记
+        json_request("/note/recover", method="POST", data=dict(id=id))
+        note_info = get_by_id(id)
+        self.assertEqual(note_info.is_deleted, 0)
+
     def test_create_page(self):
         self.check_OK("/note/create")
 
