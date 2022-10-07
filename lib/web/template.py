@@ -56,7 +56,10 @@ if PY2:
     class MutableMapping(object, DictMixin):
         pass
 else:
-    from collections import MutableMapping
+    try:
+        from _collections_abc import MutableMapping
+    except ImportError:
+        from collections import MutableMapping
 
 def splitline(text):
     r"""
