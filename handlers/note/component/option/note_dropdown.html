@@ -109,7 +109,7 @@ $(function () {
     $(".recover-option").click(function (e) {
         var noteId = $(e.target).attr("data-id");
         xnote.api.note.recover(noteId, function() {
-            window.location.href();
+            window.location.reload();
         });
     })
 })
