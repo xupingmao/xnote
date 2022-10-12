@@ -60,9 +60,8 @@ gitpush.sh
 id_rsa*
 
 # 脚本
-run-local.sh
-run-local.bat
 run-local*.bat
+run-local*.sh
 run-follower*
 tools/git-push.sh
 config/boot/boot.local.*

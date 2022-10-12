@@ -25,6 +25,9 @@ def count_index(table_name, index_name):
     index_table_name = dbutil.get_index_table_name(table_name, index_name)
     return dbutil.count_table(index_table_name, use_cache=True)
 
+def count_table(table_name):
+    return dbutil.count_table(table_name, use_cache=True)
+
 class IndexHandler:
 
     @xauth.login_required("admin")
@@ -39,7 +42,7 @@ class IndexHandler:
         kw = Storage()
         kw.index_list = index_list
         kw.count_index = count_index
-        kw.count_table = dbutil.count_table
+        kw.count_table = count_table
         kw.get_index_table_name = dbutil.get_index_table_name
 
         return xtemplate.render("system/page/db/db_index.html", **kw)
