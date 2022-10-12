@@ -144,6 +144,9 @@ class TableIndexRepair:
     def repair_index(self):
         db = self.db
 
+        if len(db.index_names) == 0:
+            return
+
         # 先删除无效的索引，这样速度更快
         for name in db.index_names:
             self.delete_invalid_index(name)
