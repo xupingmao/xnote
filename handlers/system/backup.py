@@ -276,7 +276,17 @@ def _import_db(db_file):
 
     write_batch.commit(retries=5)
 
-    logger.log("[done] records:%s", count)
+    logger.log("import record done records:%s", count)
+    for table_name in dbutil.get_table_names():
+        logger.log("repair index for (%s)", table_name)
+        try:
+            dbutil.get_table(table_name).repair_index()
+            logger.log("repair index done for (%s)", table_name)
+        except:
+            xutils.print_exc()
+            logger.log("repair index failed for (%s)", table_name)
+
+    logger.log("import done!")
     return "records:%s" % count
 
 class BackupHandler:
