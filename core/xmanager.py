@@ -784,7 +784,7 @@ def fire(event_type, ctx=None):
 def listen(event_type_list, is_async = True, description = None):
     """事件监听器注解"""
 
-    # 同步任务有专门的线程执行
+    # 同步任务使用专门的线程执行
     if event_type_list == "sync.step":
         is_async = False
 

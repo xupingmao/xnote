@@ -23,6 +23,7 @@ from xutils import dateutil
 from xutils import fsutil
 from xutils import dbutil
 from xutils.imports import quote
+from xutils.mem_util import log_mem_info_deco
 
 RETRY_INTERVAL = 60
 MAX_KEY_SIZE = 511
@@ -198,7 +199,11 @@ class HttpClient:
             logging.debug("正在重试:%s", item)
             self.download_file(item)
 
+    @log_mem_info_deco("proxy.http_get")
+    def http_get(self, url, params=None):
+        return netutil.http_get(url, params=params)
 
+    @log_mem_info_deco("proxy.list_binlog")
     def list_binlog(self, last_seq):
         assert isinstance(last_seq, int)
         params = dict(last_seq=str(last_seq))
@@ -208,7 +213,7 @@ class HttpClient:
         url = "{host}/system/sync/leader?p=list_binlog&token={token}".format(
             host=leader_host, token=leader_token)
         
-        result = netutil.http_get(url, params=params)
+        result = self.http_get(url, params=params)
         try:
             result_obj = textutil.parse_json(result)
             return result_obj

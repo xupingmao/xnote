@@ -36,6 +36,7 @@ from xutils import netutil
 from .node_follower import Follower
 from .node_leader import Leader
 from . import system_sync_indexer
+from xutils.mem_util import log_mem_info_deco
 
 LOCK = threading.Lock()
 
@@ -314,8 +315,8 @@ class FollowerHandler(SyncHandler):
 def init(ctx=None):
     LEADER.get_leader_token()
 
-
 @xmanager.listen("sync.step")
+# @log_mem_info_deco("on_ping_leader")
 def on_ping_leader(ctx=None):
     role = get_system_role()
     if role == "leader":
@@ -335,6 +336,7 @@ def on_ping_leader(ctx=None):
 
 
 @xmanager.listen("sync.step")
+# @log_mem_info_deco("on_sync_files_from_leader")
 def on_sync_files_from_leader(ctx=None):
     role = get_system_role()
     if role == "leader":
@@ -358,6 +360,7 @@ def on_sync_files_from_leader(ctx=None):
 
 
 @xmanager.listen("sync.step")
+# @log_mem_info_deco("on_sync_db_from_leader")
 def on_sync_db_from_leader(ctx=None):
     role = get_system_role()
     if role == "leader":

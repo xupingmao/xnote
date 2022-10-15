@@ -21,6 +21,7 @@ import io
 import gzip
 
 from xutils.imports import try_decode, quote
+from xutils.base import print_exc
 
 # TODO fix SSLV3_ALERT_HANDSHAKE_FAILURE on MacOS
 try:
@@ -231,18 +232,26 @@ def http_get(url, charset=None, params = None):
     bufsize = BUFSIZE
     readsize = 0
 
-    stream = urlopen(url)
-    chunk = stream.read(bufsize)
-    while chunk:
-        out.append(chunk)
-        readsize += len(chunk)
-        chunk = stream.read(bufsize)
-    print("get %s bytes" % readsize)
-    bytes = b''.join(out)
-    if charset:
-        return codecs.decode(bytes, charset)
-    else:
-        return try_decode(bytes)
+    # FIXME windows环境下有内存泄漏 安装requests可以解决这个问题
+    conn = urlopen(url)
+    try:
+        chunk = conn.read(bufsize)
+        while chunk:
+            out.append(chunk)
+            readsize += len(chunk)
+            chunk = conn.read(bufsize)
+        print("get %s bytes" % readsize)
+        bytes = b''.join(out)
+        if charset:
+            return codecs.decode(bytes, charset)
+        else:
+            return try_decode(bytes)
+    finally:
+        try:
+            conn.fp._sock.recv = None
+        except:
+            print_exc()
+        conn.close()
 
 def http_post(url, body='', charset='utf-8'):
     """HTTP的POST请求

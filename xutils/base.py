@@ -3,6 +3,8 @@
 # @since 2020/11/28 23:23:13
 # @modified 2022/04/16 22:47:23
 import copy
+import sys
+import traceback
 
 class Storage(dict):
     """
@@ -56,3 +58,14 @@ class Storage(dict):
     def __repr__(self):     
         return '<MyStorage ' + dict.__repr__(self) + '>'
 
+
+
+def print_exc():
+    """打印系统异常堆栈"""
+    ex_type, ex, tb = sys.exc_info()
+    exc_info = traceback.format_exc()
+    print(exc_info)
+    return exc_info
+
+def print_stacktrace():
+    print_exc()

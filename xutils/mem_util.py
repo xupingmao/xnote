@@ -17,6 +17,8 @@ except ImportError:
 import xutils
 from xutils.base import Storage
 
+_ignored_name_set = set()
+_ignored_group_set = set()
 
 def get_mem_info_by_psutil():
     p                 = psutil.Process(pid=os.getpid())
@@ -45,10 +47,21 @@ def get_mem_info():
         result = Storage(mem_used = "-1", sys_mem_used = "-1", sys_mem_total = "-1")
     return result
 
-def log_mem_info_deco(name, log_args = False):
+def ignore_log_mem_info_deco(name=None, group=None):
+    if name != None:
+        _ignored_name_set.add(name)
+    if group != None:
+        _ignored_group_set.add(group)
+
+def log_mem_info_deco(name, log_args = False, group = "default"):
     """打印内存日志的装饰器"""
-    
+
     def deco(func):
+        if name in _ignored_name_set:
+            return func
+        if group in _ignored_group_set:
+            return func 
+
         def handle(*args, **kw):
             args0 = ""
             

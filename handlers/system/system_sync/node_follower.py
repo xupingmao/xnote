@@ -19,6 +19,7 @@ from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .node_base import CONFIG
 from .system_sync_proxy import HttpClient
+from xutils.mem_util import log_mem_info_deco
 
 
 def filter_result(result, offset):
@@ -337,6 +338,7 @@ class DBSyncer:
             self._binlog.add_log("delete", key, None, batch = batch)
             batch.commit()
     
+    @log_mem_info_deco("follower.sync_db")
     def sync_db(self, proxy): # type: (HttpClient) -> any
         self.file_syncer.http_client = proxy
         sync_state = self.get_db_sync_state()
@@ -367,6 +369,7 @@ class DBSyncer:
 
         return self._sync_db_full_step_work(result_obj, last_key)
 
+    @log_mem_info_deco("sync_by_binlog")
     def sync_by_binlog(self, proxy): # type: (HttpClient) -> any
         has_next = True
         loops = 0
@@ -380,6 +383,7 @@ class DBSyncer:
 
             last_seq = self.get_binlog_last_seq()
             result_obj = proxy.list_binlog(last_seq)
+            
             if self.debug:
                 logging.debug("list binlog result=%s" % result_obj)
 
@@ -401,7 +405,7 @@ class DBSyncer:
         
         return None
 
-
+    @log_mem_info_deco("sync_by_binlog_step")
     def sync_by_binlog_step(self, result_obj):
         last_seq = self.get_binlog_last_seq()
         max_seq = last_seq

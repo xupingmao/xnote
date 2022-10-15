@@ -9,7 +9,8 @@
 import sqlite3
 import threading
 import logging
-
+import xutils
+from xutils.mem_util import log_mem_info_deco
 
 class FreeLock:
 
@@ -43,40 +44,12 @@ def db_execute(db, sql, *args):
 
 
 class Holder(threading.local):
-    db = None
+    def __init__(self):
+        self.db = None
 
     def __del__(self):
         if self.db != None:
             self.db.close()
-
-
-class CursorWrapper:
-
-    def __init__(self, db, cursor=None):
-        if cursor is None:
-            self.cursor = db.cursor()
-            self.is_new = True
-        else:
-            self.cursor = cursor
-            self.is_new = False
-
-    def close(self):
-        if self.is_new:
-            self.cursor.close()
-
-    def commit(self):
-        if self.is_new:
-            self.cursor.commit()
-
-    def rollback(self):
-        if self.is_new:
-            self.cursor.rollback()
-
-
-def close_cursor(cursor, is_new_cursor):
-    if is_new_cursor:
-        cursor.close()
-
 
 class SqliteKV:
 
@@ -108,7 +81,8 @@ class SqliteKV:
             config_dict = self.config_dict
 
             with self._lock:
-                self.db_holder.db = sqlite3.connect(self.db_file)
+                # 设置 isolation_level=None 开启自动提交
+                self.db_holder.db = sqlite3.connect(self.db_file, isolation_level=None)
 
                 if config_dict != None and config_dict.sqlite_journal_mode == "WAL":
                     db_execute(self.db_holder.db, "PRAGMA journal_mode = WAL;")
@@ -128,14 +102,11 @@ class SqliteKV:
         return db.cursor()
 
     def commit(self):
+        """PEP 249要求 Python 数据库驱动程序默认以手动提交模式运行"""
         if self._db != None:
             self._db.commit()
         else:
             self.db_holder.db.commit()
-
-    def check_and_commit(self, is_new_cursor):
-        if is_new_cursor:
-            self.commit()
 
     def rollback(self):
         if self._db != None:
@@ -143,75 +114,75 @@ class SqliteKV:
         else:
             self.db_holder.db.rollback()
 
-    def check_and_rollback(self, is_new):
-        if is_new:
-            self.rollback()
-
+    @log_mem_info_deco("db.Get")
     def Get(self, key):
         cursor = self.cursor()
         try:
-            r_iter = cursor.execute(
-                "SELECT value FROM kv_store WHERE `key` = ?;", (key,))
+            sql = "SELECT value FROM kv_store WHERE `key` = ?;"
+            r_iter = cursor.execute(sql, (key,))
             result = list(r_iter)
+            if self.debug:
+                logging.info("SQL:%s, key:%s, rows:%s", sql, key, len(result))
             if len(result) > 0:
                 return result[0][0]
             return None
         finally:
             cursor.close()
 
-    def _exists(self, key):
-        cursor = self.cursor()
-        r_iter = cursor.execute(
-            "SELECT `key` FROM kv_store WHERE `key` = ?;", (key,))
-        result = list(r_iter)
+    def _exists(self, key, cursor=None):
+        assert cursor != None
+        sql = "SELECT `key` FROM kv_store WHERE `key` = ?;"
+        cursor.execute(sql, (key,))
+        result = cursor.fetchall()
+        if self.debug:
+            logging.info("SQL:%s, key:%s, rows:%s", sql, key, len(result))
+
         return len(result) > 0
 
-    def Put(self, key, value, sync=False, cursor=None):
+    def Put(self, key, value, sync=False):
+        cursor = self.cursor()
+        try:
+            return self.doPut(key, value, sync, cursor=cursor)
+        finally:
+            cursor.close()
+
+    def doPut(self, key, value, sync=False, cursor=None):
+        assert cursor != None
         if self.debug:
             logging.debug("Put: key(%s), value(%s)", key, value)
 
         if value is None:
-            return self.Delete(key, cursor=cursor)
-
-        is_new = False
-        if cursor == None:
-            is_new = True
-            cursor = self.cursor()
+            return self.doDelete(key, cursor=cursor)
 
         with self._lock:
             try:
-                if self._exists(key):
+                if self._exists(key, cursor=cursor):
                     cursor.execute(
                         "UPDATE kv_store SET value = ? WHERE `key` = ?;", (value, key))
                 else:
                     cursor.execute(
                         "INSERT INTO kv_store (`key`, value) VALUES (?,?);", (key, value))
 
-                self.check_and_commit(is_new)
             except Exception as e:
-                self.check_and_rollback(is_new)
                 raise e
-            finally:
-                close_cursor(cursor, is_new)
 
-    def Delete(self, key, sync=False, cursor=None):
+    def Delete(self, key, sync=False):
+        cursor = self.cursor()
+        try:
+            return self.doDelete(key, sync, cursor=cursor)
+        finally:
+            cursor.close()
+
+    def doDelete(self, key, sync=False, cursor=None):
+        assert cursor != None
         if self.debug:
             logging.debug("Delete: key(%s)", key)
-
-        is_new = False
-        if cursor == None:
-            cursor = self.cursor()
-            is_new = True
 
         with self._lock:
             try:
                 cursor.execute("DELETE FROM kv_store WHERE key = ?;", (key,))
-                self.check_and_commit(is_new)
             except Exception as e:
-                self.check_and_rollback(is_new)
                 raise e
-            finally:
-                close_cursor(cursor, is_new)
 
     def RangeIter(self, *args, **kw):
         yield from self.RangeIterNoLock(*args, **kw)
@@ -255,7 +226,7 @@ class SqliteKV:
 
             cur = self.cursor()
             try:
-                cur = cur.execute(sql, tuple(params))
+                cur.execute(sql, tuple(params))
                 result = cur.fetchall()
             finally:
                 cur.close()
@@ -339,6 +310,7 @@ class SqliteKV:
     def CreateSnapshot(self):
         return self
 
+    @log_mem_info_deco("db.Write")
     def Write(self, batch, sync=False):
         """执行批量操作"""
         # return self._db.write(batch, sync)
@@ -351,11 +323,13 @@ class SqliteKV:
                 cur.execute("begin;")
                 for key in batch._puts:
                     value = batch._puts[key]
-                    self.Put(key, value, cursor=cur)
+                    self.doPut(key, value, cursor=cur)
 
                 for key in batch._deletes:
-                    self.Delete(key, cursor=cur)
+                    self.doDelete(key, cursor=cur)
+
                 cur.execute("commit;")
+                self.commit()
             except Exception as e:
                 cur.execute("rollback;")
                 raise e

@@ -35,7 +35,7 @@ from xutils.cacheutil import cache, cache_get, cache_put, cache_del
 from xutils.functions import History, MemTable, listremove
 
 # TODO xutils是最基础的库，后续会移除对xconfig的依赖，xutils会提供配置的函数出去在上层进行配置
-from xutils.base import Storage
+from xutils.base import Storage, print_exc, print_stacktrace
 from xutils.logutil import *
 from xutils.webutil import *
 from xutils.exeutil import *
@@ -60,16 +60,6 @@ wday_map = {
     "6": "周六",
     "7": "周日"
 }
-
-def print_exc():
-    """打印系统异常堆栈"""
-    ex_type, ex, tb = sys.exc_info()
-    exc_info = traceback.format_exc()
-    print(exc_info)
-    return exc_info
-
-def print_stacktrace():
-    print_exc()
 
 def print_table_row(row, max_length):
     for item in row:
