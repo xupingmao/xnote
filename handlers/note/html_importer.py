@@ -11,7 +11,10 @@ import xutils
 import xauth
 import xmanager
 import xconfig
-from bs4 import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    BeautifulSoup = None
 from html2text import HTML2Text
 from xutils import netutil
 from xutils import Storage
