@@ -1227,6 +1227,7 @@ def get_history(note_id, version):
 
 
 def search_name(words, creator=None, parent_id=None, orderby="hot_index"):
+    # TODO 搜索排序使用索引
     assert isinstance(words, list)
 
     words = [word.lower() for word in words]
@@ -1257,6 +1258,7 @@ def search_name(words, creator=None, parent_id=None, orderby="hot_index"):
 
 
 def search_content(words, creator=None, orderby="hot_index"):
+    # TODO 全文搜索排序使用索引
     assert isinstance(words, list)
     words = [word.lower() for word in words]
 

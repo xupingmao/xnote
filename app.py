@@ -34,6 +34,7 @@ from core import code_builder
 from xutils import cacheutil
 from xutils import dbutil
 from xutils import Storage
+from xutils import mem_util
 from xutils.mem_util import log_mem_info_deco
 from xutils.lockutil import FileLock
 from autoreload import AutoReloadThread
@@ -270,6 +271,9 @@ def print_env_info():
     cwd = os.getcwd()
     print("当前工作目录:", os.path.abspath(cwd))
 
+def init_debug():
+    mem_util.ignore_log_mem_info_deco("db.Get")
+    mem_util.ignore_log_mem_info_deco("sync_by_binlog_step")
 
 def init_app_no_lock(boot_config_kw=None):
     global app
@@ -281,6 +285,9 @@ def init_app_no_lock(boot_config_kw=None):
 
     # 构建静态文件
     code_builder.build()
+
+    # 初始化debug信息
+    init_debug()
 
     # 初始化数据库
     try_init_sqlite()
