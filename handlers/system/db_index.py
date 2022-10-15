@@ -61,7 +61,6 @@ class IndexHandler:
         try:
             db.repair_index()
         except:
-            xutils.print_exc()
             return dict(code = "fail", message = "重建索引异常")
             
         return dict(code = "success")

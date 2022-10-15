@@ -16,7 +16,16 @@
 import logging
 import xutils
 from xutils.db.encode import encode_index_value, clean_value_before_update, decode_str
-from xutils.db.dbutil_base import db_delete, db_get, validate_obj, validate_str, validate_dict, prefix_iter
+from xutils.db.dbutil_base import (
+    db_delete, 
+    db_get, 
+    validate_obj, 
+    validate_str, 
+    validate_dict, 
+    prefix_iter, 
+    delete_index_count_cache,
+    IndexInfo,
+)
 
 class TableIndex:
 
@@ -29,7 +38,7 @@ class TableIndex:
         self.table_name = table_name
         self.key_name = "_key"
         self.check_user = check_user
-        self.prefix = "_index$%s$%s" % (self.table_name, index_name)
+        self.prefix = IndexInfo.get_index_prefix(self.table_name, index_name)
         self.index_type = index_type
 
         if check_user and user_attr == None:
@@ -142,6 +151,15 @@ class TableIndexRepair:
         self.repair_error_db = error_db
 
     def repair_index(self):
+        try:
+            self.do_repair_index()
+        except:
+            err_msg = xutils.print_exc()
+            error_log = dict(err_msg=err_msg, type="exception")
+            self.repair_error_db.insert(
+                error_log, id_type="auto_increment")
+
+    def do_repair_index(self):
         db = self.db
 
         if len(db.index_names) == 0:
@@ -173,6 +191,10 @@ class TableIndexRepair:
                 db.rebuild_single_index(value, user_name=user_name)
             else:
                 db.rebuild_single_index(value)
+        
+        # 清理count缓存
+        for name in db.index_names:
+            delete_index_count_cache(db.table_name, name)
 
     def do_delete(self, key):
         logging.info("Delete {%s}", key)

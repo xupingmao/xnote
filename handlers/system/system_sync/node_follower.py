@@ -387,7 +387,7 @@ class DBSyncer:
             data_list = result_obj.get("data")
 
             if code == "success":
-                self.handle_binlog(result_obj)
+                self.sync_by_binlog_step(result_obj)
                 has_next = len(data_list) > 1 # 请求的时候以最后一条记录开始的
             elif code == "sync_broken":
                 logging.error("同步binlog异常, 重新全量同步...")
@@ -402,7 +402,7 @@ class DBSyncer:
         return None
 
 
-    def handle_binlog(self, result_obj):
+    def sync_by_binlog_step(self, result_obj):
         last_seq = self.get_binlog_last_seq()
         max_seq = last_seq
         data_list = result_obj.get("data")
@@ -466,7 +466,7 @@ class DBSyncer:
             new_last_key = key
             count += 1
 
-        if new_last_key == last_key:
+        if count == 0:
             self.put_db_sync_state("binlog")
         else:
             self.put_db_last_key(new_last_key)

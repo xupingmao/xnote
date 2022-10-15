@@ -82,8 +82,8 @@ WRITE_ONLY = False
 # leveldb的全局实例
 _leveldb = None  # type: DBInterface
 # 缓存对象（拥有put/get两个方法）
-_cache = None
-_driver_name = None
+_cache = None # type: xutils.cacheutil.Cache
+_driver_name = None 
 
 
 def print_debug_info(fmt, *args):
@@ -407,6 +407,10 @@ class IndexInfo:
     @classmethod
     def get_table_index_dict(cls, table_name):
         return cls._table_dict.get(table_name)
+    
+    @classmethod
+    def get_index_prefix(cls, table_name, index_name):
+        return "_index$%s$%s" % (table_name, index_name)
 
 
 def register_table(table_name,
@@ -746,6 +750,21 @@ def set_db_instance(db_instance):
 def get_db_instance():
     global _leveldb
     return _leveldb
+
+def delete_table_count_cache(table_name):
+    if _cache == None:
+        return
+
+    cache_key = "table_count:%s:" % table_name
+    _cache.delete(cache_key)
+
+def delete_index_count_cache(table_name, index_name):
+    if _cache == None:
+        return
+
+    index_prefix = IndexInfo.get_index_prefix(table_name, index_name)
+    cache_key = "table_count:%s:" % index_prefix
+    _cache.delete(cache_key)
 
 
 def count_table(table_name, use_cache=False):
