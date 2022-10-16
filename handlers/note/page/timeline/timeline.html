@@ -26,6 +26,8 @@
 {% init type = "ctime" %}
 {% init base_path = "/note/timeline" %}
 {% init key = "" %}
+{% init show_recent_btn = False %}
+{% init show_back_btn = False %}
 
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
@@ -40,10 +42,18 @@
           {% include note/component/timeline/timeline_create_option.html %}
         {% end %}
 
+        {% if show_recent_btn %}
+          <a href="/note/timeline/recent" class="btn btn-default">最新笔记</a>
+        {% end %}
+
         {% if type == "default" %}
           {% include note/component/option/group_option.html %}
         {% elif type == "public" %}
           {% include note/component/share_dialog.html %}
+        {% end %}
+
+        {% if show_back_btn %}
+          {% include common/button/back_button.html %}
         {% end %}
     </div>
   </div>

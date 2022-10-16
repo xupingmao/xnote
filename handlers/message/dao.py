@@ -32,6 +32,7 @@ _keyword_db = dbutil.get_hash_table("msg_key")
 _msg_db = dbutil.get_table("message")
 _msg_stat_cache = cacheutil.PrefixedCache("msgStat:")
 
+
 class MessageDO(Storage):
 
     id = "主键"
@@ -233,7 +234,7 @@ def has_tag_fast(content):
     return content.find("#") >= 0 or content.find("@") >= 0
 
 
-def search_message(user_name, key, offset = 0, limit = 20, *, search_tags=None, no_tag=None, count_only=False, date=""):
+def search_message(user_name, key, offset=0, limit=20, *, search_tags=None, no_tag=None, count_only=False, date=""):
     """搜索短信
     @param {string} user_name 用户名
     @param {string} key 要搜索的关键字
@@ -481,8 +482,13 @@ def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
         chatlist = list_key(user, offset, limit)
     else:
         filter_func = get_filter_by_tag_func(tag)
-        chatlist = _msg_db.list(
-            filter_func=filter_func, offset=offset, limit=limit, reverse=True, user_name=user)
+        if tag == "task":
+            chatlist = _msg_db.list_by_index(
+                "tag", index_value=tag, filter_func=filter_func, 
+                offset=offset, limit=limit, reverse=True, user_name=user)
+        else:
+            chatlist = _msg_db.list(
+                filter_func=filter_func, offset=offset, limit=limit, reverse=True, user_name=user)
 
     # 利用message_stat优化count查询
     if tag == "done":
@@ -540,14 +546,14 @@ def get_message_stat(user):
 
     value = _msg_stat_cache.get(user)
     print("[get_message_stat] cacheValue=", value)
-    
+
     if value == None:
         value = get_message_stat0(user)
         _msg_stat_cache.put(user, value)
-    
+
     if value is None:
         return refresh_message_stat(user)
-    
+
     return value
 
 

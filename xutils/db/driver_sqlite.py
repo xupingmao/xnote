@@ -9,7 +9,6 @@
 import sqlite3
 import threading
 import logging
-import xutils
 from xutils.mem_util import log_mem_info_deco
 
 class FreeLock:

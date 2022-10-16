@@ -204,6 +204,8 @@ class DBBackup:
         return dict(count = count, cost_time = "%sms" % cost_time)
 
 def chk_db_backup():
+    if not xconfig.get_system_config("db_backup"):
+        return
     backup = DBBackup()
     return backup.execute()
 

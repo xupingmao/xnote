@@ -273,6 +273,7 @@ def print_env_info():
 
 def init_debug():
     mem_util.ignore_log_mem_info_deco("db.Get")
+    mem_util.ignore_log_mem_info_deco("db.Write")
     mem_util.ignore_log_mem_info_deco("sync_by_binlog_step")
 
 def init_app_no_lock(boot_config_kw=None):
