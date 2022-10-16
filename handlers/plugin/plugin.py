@@ -468,6 +468,7 @@ INNER_TOOLS = [
     note_plugin("标签列表", "/note/taglist", "fa-tags"),
     note_plugin("常用笔记", "/note/recent?orderby=hot", "fa-file-text-o"),
     note_plugin("词典", "/note/dict", "icon-dict"),
+    note_plugin("时光轴", "/note/timeline", "fa-clock-o"),
 
     # 文件工具
     file_plugin("文件索引", "/fs_index"),

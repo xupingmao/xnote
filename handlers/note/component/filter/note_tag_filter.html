@@ -3,10 +3,12 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-27 19:31:01
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-27 19:40:36
+@LastEditTime : 2022-10-16 12:12:27
 @FilePath     : /xnote/handlers/note/component/filter/note_tag_filter.html
 @Description  : 描述
  #} -->
+
+{% if len(tag_meta_list) > 0 %}
 <div class="card btn-line-height">
     <div class="row">
         <span>标签</span>
@@ -17,3 +19,4 @@
         {% end %}
     </div>
 </div>
+{% end %}

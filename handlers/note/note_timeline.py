@@ -10,6 +10,7 @@ import xtemplate
 import time
 import web
 from xutils import Storage, dateutil, textutil
+from xutils import webutil
 from xutils.textutil import split_words
 from xtemplate import T
 from .constant import *
@@ -370,7 +371,7 @@ class BaseTimelineHandler:
         note_priority = 0
         file          = NOTE_DAO.get_by_id(parent_id)
 
-        xmanager.add_visit_log(user_name, "/note/%s" % self.note_type)
+        xmanager.add_visit_log(user_name, webutil.get_request_path())
         
         if file != None:
             title = T("笔记列表")

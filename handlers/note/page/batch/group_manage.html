@@ -66,10 +66,7 @@
     </div>
 </div>
 
-{% comment include note/page/batch/group_manage_category.html %}
-
 <div class="tag-top"></div>
-
 
 <div class="card">
     {% if len(notes) == 0 %}
@@ -95,14 +92,6 @@
                 <a class="link2" href="{{item.url}}">{{item.name}}</a>
                 
                 <span class="float-right">
-                    {% if not _is_mobile %}
-                    <select value="{{item.category}}" data-id="{{item.id}}" class="update-category">
-                        {% for t_cat in category_list %}
-                            <option value="{{t_cat.code}}">{{t_cat.name}}</option>
-                        {% end %}
-                    </select>
-                    {% end %}
-
                     <a class="item-option" data-id="{{item.id}}" data-name="{{item.name}}" 
                         onclick="renameNoteByAttr(this);" href="javascript:void(0);">重命名</a>
                     <input type="checkbox" data-id="{{item.id}}" data-name="{{item.name}}"/>

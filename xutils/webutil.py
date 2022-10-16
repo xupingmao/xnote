@@ -127,6 +127,8 @@ def get_request_url(host=False):
     # TODO 待测试
     return web.ctx.path + "?" + web.ctx.query
 
+def get_request_path():
+    return web.ctx.path
 
 class LogMiddleware:
     """WSGI middleware for logging the status.
