@@ -39,11 +39,13 @@ def get_default_group_id():
         return note.id
     return create_note_for_test("group", name)
 
-def create_note_for_test(type, name, *, content = ""):
+def create_note_for_test(type, name, *, content = "", tags=None):
     assert type != None, "type cannot be None"
     assert name != None, "name cannot be None"
+    if tags != None:
+        assert isinstance(tags, str), "tags must be str"
 
-    data = dict(name = name, type = type, content = "hello,world")
+    data = dict(name = name, type = type, content = "hello,world", tags=tags)
 
     if type != "group":
         data["parent_id"] = get_default_group_id()
@@ -262,11 +264,10 @@ class TestMain(BaseTestCase):
 
     def test_note_tag(self):
         json_request("/note/remove?name=xnote-tag-test")
-        id = create_note_for_test("md", "xnote-tag-test", content = "hello")
-        
-        json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags="ABC DEF"))
-        json_request("/note/tag/%s" % id)
-        json_request("/note/tag/update", method="POST", data=dict(file_id=id, tags=""))
+        id = create_note_for_test("md", "xnote-tag-test", content = "hello", tags="ABC DEF")
+
+        note_info = NOTE_DAO.get_by_id(id)
+        self.assertEqual(note_info.tags, ["ABC", "DEF"])
 
         # clean up
         json_request("/note/remove?id=%s" % id)

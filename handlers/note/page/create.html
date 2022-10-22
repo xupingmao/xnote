@@ -57,12 +57,25 @@ label {
             </select>
         </div>
 
+        <div class="tag-box"></div>
+
         <div class="row top-offset-1">
             <label>&nbsp;</label>
             <input type="button" class="mid-text create-btn" value="{{T("创建")}}">
         </div>
     </form>
 </div>
+
+<script type="text/template" id="tag-template">
+{{! if tagList.length > 0 }}
+    <div class="input-group-row">
+        <label>标签</label>
+        {{! each tagList tag }}
+            <a class="tag lightgray large">{{! tag.tag_name }}</a>
+        {{!/each}}
+    </div>
+{{!/if}}
+</script>
 
 <script type="text/javascript" src="/static/lib/layDate-v5.0.9/laydate.js"></script>
 <script type="text/javascript">
@@ -102,23 +115,54 @@ label {
         var createBtn = $(".create-btn");
         var createForm = $(".create-form");
 
+        function reloadTags() {
+            var groupId = $("[name=parent_id]").val();
+            var params = {
+                "tag_type": "note",
+                "group_id": groupId
+            }
+            $.get("/note/tag/list", params, function (resp) {
+                if (resp.code != "success") {
+                    xnote.alert(resp.message);
+                } else {
+                    var html = $("#tag-template").render({
+                        tagList: resp.data
+                    });
+                    $(".tag-box").html(html);
+                }
+            })
+        }
+
         function reloadPage(type) {
+            var oldHref = window.location.href;
+            var selectedType = noteTypeSelect.val();
             if (type == "group") {
                 groupSelectBox.hide();
             } else {
                 groupSelectBox.show();
             }
+            reloadTags();
+        }
+
+        function getTagsText() {
+            var tagList = [];
+            $(".tag-box").find(".tag.active").each(function (index, ele) {
+                tagList.push($(ele).text());
+            });
+            return tagList.join(" ");
         }
 
         noteTypeSelect.change(function (e) {
-            var oldHref = window.location.href;
-            var selectedType = $(this).val();
-            reloadPage(selectedType);
+            reloadPage();
+        });
+        groupSelectBox.change(function (e) {
+            reloadPage();
         });
 
         createBtn.click(function (e) {
             var params = createForm.formData();
             params._format = "json";
+            params.tags = getTagsText();
 
             $.post("/note/create", params, function (resp) {
                 console.log("create resp:", resp);
@@ -133,7 +177,11 @@ label {
             });
         });
 
-        reloadPage(noteTypeSelect.val());
+        $("body").on("click", ".tag", function (e) {
+            $(e.target).toggleClass("active");
+        });
+
+        reloadPage();
     })
 </script>
 

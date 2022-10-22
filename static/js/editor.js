@@ -303,6 +303,7 @@ MarkdownHeading.prototype.load = function(text) {
         var line = lines[i];
         if (isInCode) {
             // 代码块内部，简单处理下
+            // FIXME 处理同一行有多个```的情况
             if (line.indexOf(codeTag)>=0) {
                 isInCode = false;
             }

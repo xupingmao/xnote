@@ -207,13 +207,13 @@ def insert_task_project(rows, user_name):
 
 def list_project_func(context):
     offset = context['offset']
-    limit = context['limit']
     user_name = context['user_name']
-    orderby = context['orderby']
+    parent_id = context['parent_id']
+
     if offset > 0:
         rows = []
     else:
-        rows = NOTE_DAO.list_group(user_name, orderby="name")
+        rows = NOTE_DAO.list_group(user_name, parent_id=parent_id, orderby="name")
         # 处理默认项目
         insert_default_project(rows, user_name)
         # 处理备忘录
@@ -221,6 +221,19 @@ def list_project_func(context):
 
     return build_date_result(rows, 'mtime', sticky_title=True, group_title=True, archived_title=True)
 
+def list_root_func(context):
+    offset = context['offset']
+    user_name = context['user_name']
+    if offset > 0:
+        rows = []
+    else:
+        rows = NOTE_DAO.list_group(user_name, parent_id="0")
+        # 处理默认项目
+        insert_default_project(rows, user_name)
+        # 处理备忘录
+        insert_task_project(rows, user_name)
+
+    return build_date_result(rows, 'mtime', sticky_title=True, group_title=True, archived_title=True)
 
 def list_public_func(context):
     offset = context['offset']
@@ -309,7 +322,7 @@ def list_root_notes_func(context):
 
 
 LIST_FUNC_DICT = {
-    'root': list_project_func,
+    'root': list_root_func,
     'group': list_project_func,
     'public': list_public_func,
     'sticky': list_sticky_func,
@@ -340,14 +353,24 @@ class TimelineAjaxHandler:
         offset = xutils.get_argument("offset", 0, type=int)
         limit = xutils.get_argument("limit", 20, type=int)
         type = xutils.get_argument("type", "root")
-        parent_id = xutils.get_argument("parent_id", None, type=str)
+        parent_id = xutils.get_argument("parent_id", "0", type=str)
         search_key = xutils.get_argument("key", None, type=str)
         orderby = xutils.get_argument("orderby", "mtime_desc", type=str)
         search_tag = xutils.get_argument("search_tag", None, type=str)
         user_name = xauth.current_name()
 
+        kw = Storage()
+        kw.offset = offset
+        kw.limit = limit
+        kw.type = type
+        kw.parent_id = parent_id
+        kw.search_key = search_key
+        kw.orderby = orderby
+        kw.search_tag = search_tag
+        kw.user_name = user_name
+
         list_func = LIST_FUNC_DICT.get(type, default_list_func)
-        return list_func(locals())
+        return list_func(kw)
 
 
 class DateTimelineAjaxHandler:
@@ -389,7 +412,7 @@ class BaseTimelineHandler:
 
     def do_get(self):
         type = xutils.get_argument("type", self.note_type)
-        parent_id = xutils.get_argument("parent_id", "")
+        parent_id = xutils.get_argument("parent_id", "0")
         key = xutils.get_argument("key", "")
         title = u"最新笔记"
 
@@ -447,8 +470,8 @@ class TimelineHandler(BaseTimelineHandler):
     note_type = "group"
 
     def before_get(self):
-        parent_id = xutils.get_argument("parent_id", "")
-        if parent_id == "":
+        parent_id = xutils.get_argument("parent_id", "0")
+        if parent_id == "0":
             self.show_recent_btn = True
 
 
