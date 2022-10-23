@@ -1038,6 +1038,14 @@ li.menu-item:hover {
 }
 
 
+.light-bottom-border {
+    border-bottom: 1px solid #eee;
+}
+
+select.no-border {
+    border: none;
+}
+
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 1000px) {
     /** mobile **/

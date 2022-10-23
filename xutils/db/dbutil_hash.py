@@ -32,6 +32,11 @@ class LdbHashTable:
 
         if self.prefix[-1] != ":":
             self.prefix += ":"
+    
+    def with_user(self, user_name):
+        assert user_name != ""
+        assert user_name != None
+        return LdbHashTable(self.table_name, user_name = user_name)
 
     def _check_key(self, key):
         if not isinstance(key, str):
@@ -103,7 +108,15 @@ class LdbHashTable:
 
         return count_table(key_prefix)
     
+    def first(self):
+        # type: () -> tuple[str, any]
+        records = self.list(limit=1)
+        if len(records) > 0:
+            return records[0]
+        return None, None
+    
     def last(self):
+        # type: () -> tuple[str, any]
         records = self.list(limit = 1, reverse = True)
         if len(records) > 0:
             return records[0]

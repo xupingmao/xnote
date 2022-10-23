@@ -22,12 +22,6 @@
     {% include note/page/detail/group_detail_body.html %}
     {% include note/component/note_ext_info.html %}
 
-    {# 分页 #}
-    {% if show_pagination and "page" in globals() %}
-        <div class="card">
-            {% include mod_pagenation.html %}
-        </div>
-    {% end %}
 {% end %}
 
 {% block body_right %}

@@ -24,8 +24,6 @@ MSG_DAO  = xutils.DAO("message")
 DICT_DAO = xutils.DAO("dict")
 
 config = xconfig
-_RULES = []
-
 SEARCH_TYPE_DICT = dict()
 
 
@@ -56,20 +54,6 @@ class BaseRule:
         self.pattern = pattern
         self.func    = func
         self.scope   = scope
-
-def add_rule(pattern, func_str):
-    global _RULES
-    try:
-        mod, func_name = func_str.rsplit('.', 1)
-        # mod = __import__(mod, None, None, [''])
-        mod = six._import_module("handlers.search." + mod)
-        func = getattr(mod, func_name)
-        func.modfunc = func_str
-        rule = BaseRule(r"^%s\Z" % u(pattern), func)
-        rule.func_str = func_str
-        _RULES.append(rule)
-    except Exception as e:
-        xutils.print_exc()
 
 class SearchContext:
 
@@ -169,29 +153,6 @@ def build_search_context(user_name, category, key):
 
     return ctx
 
-
-def apply_search_rules(ctx, key):
-    files = []
-    for rule in _RULES:
-        pattern = rule.pattern
-        func = rule.func
-        # re.match内部已经实现了缓存
-        m = re.match(pattern, key)
-        if m:
-            try:
-                logger = mem_util.MemLogger("rule:%r:%r" % (pattern, rule.func_str))
-
-                start_time0 = time.time()
-                results     = func(ctx, *m.groups())
-                cost_time0  = time.time() - start_time0
-                xutils.trace("SearchHandler", func.modfunc, int(cost_time0*1000))
-                if results is not None:
-                    files += results
-                logger.done()
-            except Exception as e:
-                xutils.print_exc()
-    return files
-
 class SearchHandler:
 
     def do_search(self, page_ctx, key, offset, limit):
@@ -222,7 +183,7 @@ class SearchHandler:
 
         logger.info("after fire search")
 
-        ctx.files = apply_search_rules(ctx, key)
+        ctx.files = RuleManager.apply(ctx, key)
 
         logger.info("after apply_search_rules")
 
@@ -341,7 +302,7 @@ class SearchHandler:
 
     def GET(self, path_key = None):
         """search files by name and content"""
-        load_rules()
+        RuleManager.load_rules()
         key         = xutils.get_argument("key", "")
         title       = xutils.get_argument("title", "")
         category    = xutils.get_argument("category", "default")
@@ -384,6 +345,7 @@ class SearchHistoryHandler:
     def GET(self):
         user_name = xauth.current_name()
         xmanager.add_visit_log(user_name, "/search/history")
+        NOTE_DAO.expire_search_history(user_name)
         return xtemplate.render("search/page/search_history.html", 
             show_aside = False,
             recent = list_search_history(user_name),
@@ -401,18 +363,61 @@ class SearchHistoryHandler:
 
         return dict(code = "500", message = "无效的操作")
 
+class RuleManager:
+    """搜索规则管理器"""
 
-rules_loaded = False
-def load_rules():
-    global rules_loaded
-    if rules_loaded:
-        return
-    add_rule(r"([^ ]*)",  "api.search")
-    add_rule(r"静音(.*)", "mute.search")
-    add_rule(r"mute(.*)", "mute.search")
-    add_rule(r"取消静音",  "mute.cancel")
-    add_rule(r"(.*)", "note.search")
-    rules_loaded = True
+    is_loaded = False
+    _RULES = []
+
+    @classmethod
+    def add_rule(cls, pattern, func_str):
+        try:
+            mod, func_name = func_str.rsplit('.', 1)
+            # mod = __import__(mod, None, None, [''])
+            mod = six._import_module("handlers.search." + mod)
+            func = getattr(mod, func_name)
+            func.modfunc = func_str
+            rule = BaseRule(r"^%s\Z" % u(pattern), func)
+            rule.func_str = func_str
+            cls._RULES.append(rule)
+        except Exception as e:
+            xutils.print_exc()
+
+    @classmethod
+    def load_rules(cls):
+        if cls.is_loaded:
+            return
+
+        cls.add_rule(r"([^ ]*)",  "api.search")
+        cls.add_rule(r"静音(.*)", "mute.search")
+        cls.add_rule(r"mute(.*)", "mute.search")
+        cls.add_rule(r"取消静音",  "mute.cancel")
+        cls.add_rule(r"(.*)", "note.search")
+        cls.is_loaded = True
+
+    @classmethod
+    def apply(cls, ctx, key):
+        files = []
+        for rule in cls._RULES:
+            pattern = rule.pattern
+            func = rule.func
+            # re.match内部已经实现了缓存
+            m = re.match(pattern, key)
+            if m:
+                try:
+                    logger = mem_util.MemLogger("rule:%r:%r" % (pattern, rule.func_str))
+
+                    start_time0 = time.time()
+                    results     = func(ctx, *m.groups())
+                    cost_time0  = time.time() - start_time0
+                    xutils.trace("SearchHandler", func.modfunc, int(cost_time0*1000))
+                    if results is not None:
+                        files += results
+                    logger.done()
+                except Exception as e:
+                    xutils.print_exc()
+        return files
+
 
 class RulesHandler:
 

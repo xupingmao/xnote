@@ -59,6 +59,7 @@ _tiny_db = dbutil.get_table("note_tiny")
 _stat_db = dbutil.get_table("user_stat")
 _index_db = dbutil.get_table("note_index")
 _book_db = dbutil.get_table("notebook")
+_search_history_db = dbutil.get_hash_table("search_history")
 
 DB_PATH = xconfig.DB_PATH
 MAX_STICKY_SIZE = 1000
@@ -1320,7 +1321,7 @@ def count_removed(creator):
     def count_func(key, value):
         return value.is_deleted and value.creator == creator
     db = get_note_tiny_table(creator)
-    return db.count(filter_func = count_func)
+    return db.count(filter_func=count_func)
 
 
 def list_removed(creator, offset, limit, orderby=None):
@@ -1422,24 +1423,37 @@ def list_by_func(creator, list_func, offset, limit):
 
 
 def add_search_history(user, search_key, category="default", cost_time=0):
-    key = "search_history:%s:%s" % (user, dbutil.timeseq())
-    dbutil.put(key, Storage(key=search_key,
-               category=category, cost_time=cost_time))
+    id = dbutil.timeseq()
+    _search_history_db.put(user, value=Storage(
+        key=search_key, category=category, cost_time=cost_time), sub_key=id)
 
 
 def list_search_history(user, limit=1000, orderby="time_desc"):
     if user is None or user == "":
         return []
-    return dbutil.prefix_list("search_history:%s" % user, reverse=True, limit=limit)
+    result = []
+    for key, value in _search_history_db.with_user(user).iter(limit = limit):
+        result.append(value)
+    return result
 
 
 def clear_search_history(user_name):
     assert user_name != None
     assert user_name != ""
-    db = dbutil.get_list_table("search_history", user_name=user_name)
+    db = _search_history_db.with_user(user_name)
     for item in db.iter(reverse=True, limit=-1):
         db.delete(item)
 
+def expire_search_history(user_name, limit=1000):
+    db = _search_history_db.with_user(user_name)
+    count = db.count()
+
+    if count > limit:
+        with dbutil.get_write_lock(user_name):
+            for i in range(count-limit):
+                key, value = db.first()
+                if key != None:
+                    db.delete(key=key)
 
 @xutils.async_func_deco()
 def refresh_note_stat_async(user_name):
@@ -1589,6 +1603,7 @@ xutils.register_func("note.get_history", get_history)
 xutils.register_func("note.add_search_history", add_search_history)
 xutils.register_func("note.list_search_history", list_search_history)
 xutils.register_func("note.clear_search_history", clear_search_history)
+xutils.register_func("note.expire_search_history", expire_search_history)
 
 # stat
 xutils.register_func("note.get_note_stat", get_note_stat)
