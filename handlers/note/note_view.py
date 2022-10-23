@@ -205,6 +205,9 @@ VIEW_FUNC_DICT = {
 
 def view_func_before(note, kw):
     kw.show_comment_edit = (xconfig.get_user_config(note.creator, "show_comment_edit") == "true")
+    if note.tags == None:
+        note.tags = []
+    note.tags_json = xutils.tojson(note.tags)
 
 def find_note_for_view0(token, id, name):
     if token != "":

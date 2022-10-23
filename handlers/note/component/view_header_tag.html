@@ -1,16 +1,21 @@
 {% init file = None %}
 
-<!-- 
-{% if file != None %}
-    <a class="btn btn-default" href="/note/touch?id={{file.id}}">在看</a>
+<span>标签</span>
+{% for tag_name in file.tags %}
+    <a class="tag lightgray large" href="/note/{{file.parent_id}}?tag={{quote(tag_name)}}">{{tag_name}}</a>
 {% end %}
- -->
 
+<div class="float-right">
+    <button class="btn btn-default tag-edit-btn">编辑</button>
+</div>
+
+
+<div class="hide">
 <!-- 这个功能使用频率太低了 -->
 {% if file != None %}
 
     {% if file.priority == 1 %}
-        <a class="btn btn-default" href="/note/sticky">置顶</a>
+        <a class="tag system" href="/note/sticky">置顶</a>
     {% end %}
 
     {% if file.type == "list" %}
@@ -34,7 +39,7 @@
     {% end %}
 
     {% if file.type in ("md", "text", "plan") %}
-        <a class="btn btn-default" href="/note/document">文档</a>
+        <a class="tag system" href="/note/document">文档</a>
     {% end %}
 
     {% if file.is_public %}
@@ -42,4 +47,28 @@
     {% end %}
 
 {% end %}
+</div>
 
+{% include note/component/script/tag_script.html %}
+
+<input type="hidden" id="noteTagJson" value="{{file.tags_json}}"/>
+
+<script type="text/javascript">
+$(".tag-edit-btn").click(function () {
+    var listParams = {
+        tag_type:"note",
+        group_id:"{{file.parent_id}}",
+    };
+
+    $.get("/note/tag/list", listParams, function (resp) {
+        var tagsJson = $("#noteTagJson").val();
+        var cmd = {
+            tagType: "note",
+            currentTags: JSON.parse(tagsJson),
+            noteId: "{{file.id}}",
+        };
+        cmd.tagList = resp.data;
+        xnote.api.note.bindTag(cmd);
+    })
+});
+</script>

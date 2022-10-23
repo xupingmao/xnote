@@ -449,6 +449,8 @@ class BaseTimelineHandler:
         kw.show_aside = False
         kw.show_recent_btn = self.show_recent_btn
         kw.show_back_btn = self.show_back_btn
+        if parent_id == "0":
+            kw.show_rename_btn = False
         kw.type = type
         kw.file = file
         kw.title = title

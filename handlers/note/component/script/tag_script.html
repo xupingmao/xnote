@@ -1,0 +1,62 @@
+
+<!-- 绑定标签的模板 -->
+<script type="text/template" id="bindTagTemplate">
+    <div class="card btn-line-height">
+        {{! each tagList tag }}
+        <a class="tag lightgray for-dialog large bind {{! selectedNames.indexOf(tag.tag_name)>=0 ? "active":"" }}" 
+            data-id="{{!tag._id}}" data-name="{{!tag.tag_name}}">
+            {{! tag.tag_name }}
+        </a>
+        {{!/each}}
+    </div>
+</script>
+
+<script type="text/javascript">
+
+xnote.api.note.bindTag = function (cmd) {
+    var currentTags = cmd.currentTags;
+    var tagList = cmd.tagList;
+    var targetId = cmd.targetId;
+    
+    if (cmd.tagType != "group" && cmd.tagType != "note") {
+        throw new TypeError("无效的tagType");
+    }
+
+    var html = $("#bindTagTemplate").render({
+        tagList: tagList,
+        selectedNames: currentTags
+    });
+
+    console.log("bind-tag-dialog", html);
+
+    xnote.openDialog("添加标签", html, ["确定", "取消"], function () {
+        var selectedNames = [];
+        $(".tag.bind.active").each(function (idx, ele) {
+            var tagName = $(ele).text().trim();
+            selectedNames.push(tagName);
+        });
+
+        var bindParams = {
+            tag_type: cmd.tagType,
+            group_id: cmd.groupId,
+            note_id: cmd.noteId,
+            tag_names: JSON.stringify(selectedNames),
+        };
+
+        $.post("/note/tag/bind", bindParams, function (resp) {
+            if (resp.code != "success") {
+                xnote.alert(resp.message);
+            } else {
+                xnote.toast("添加标签成功");
+            }
+            location.reload();
+        });
+    });
+}
+
+$("body").on("click", ".tag", function(e) {
+    $(e.target).toggleClass("active");
+});
+
+
+</script>

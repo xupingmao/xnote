@@ -12,6 +12,10 @@
     {% include note/component/note_path.html %}
 </div>
 
+<div class="card btn-line-height">
+    {% include note/component/view_header_tag.html %}
+</div>
+
 <div class="card col-md-12">
     {% if file.content == "" %}
         {% include common/text/empty_text.html %}
