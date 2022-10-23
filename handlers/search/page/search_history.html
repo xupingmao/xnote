@@ -7,6 +7,8 @@
 
 {% block body %}
 
+{% init hot_logs = [] %}
+
     <div class="card">
         <div class="card-title">
             <span>搜索历史</span>
@@ -23,8 +25,18 @@
             {% include common/text/empty_text.html %}
         {% end %}
 
-        {% for value in recent %}
-            <a class="tag-span" href="/search?key={{quote(value)}}">{{value}}</a>
+        {% if len(hot_logs) > 0 %}
+            <h3 class="card-title">最近常搜</h3>
+            {% for value, count in hot_logs %}
+                <a class="tag-span" href="/search?key={{quote(value)}}">{{value}}({{count}})</a>
+            {% end %}
+        {% end %}
+
+        {% if len(recent) > 0 %}
+            <h3 class="card-title">最近搜索</h3>
+            {% for value in recent %}
+                <a class="tag-span" href="/search?key={{quote(value)}}">{{value}}</a>
+            {% end %}
         {% end %}
 
         {% if len(recent) > 0 %}
