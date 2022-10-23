@@ -3,7 +3,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-13 20:18:28
 @LastEditors  : xupingmao
-@LastEditTime : 2022-07-15 22:33:25
+@LastEditTime : 2022-10-23 10:25:23
 @FilePath     : /xnote/handlers/note/component/sort/note_sort_tab.html
 @Description  : 描述
  #} -->
@@ -11,9 +11,12 @@
 
 {% init orderby = "name_asc" %}
 
-<div class="x-tab-box" data-tab-default="{{orderby}}" data-tab-key="orderby">
-    <a class="x-tab" data-tab-value="name_asc">默认排序</a>
-    <a class="x-tab" data-tab-value="hot_desc">热度优先</a>
-    <a class="x-tab" data-tab-value="size_desc">数量优先</a>
-    <a class="x-tab" data-tab-value="ctime_desc">最近创建</a>
+<div class="row btn-line-height">
+    <span class="float-left">排序</span>
+    <div class="x-tab-box float-left" data-tab-default="{{orderby}}" data-tab-key="orderby" style="padding-left:5px">
+        <a class="x-tab tag lightgray large" data-tab-value="name_asc">名称</a>
+        <a class="x-tab tag lightgray large" data-tab-value="hot_desc">热门</a>
+        <a class="x-tab tag lightgray large" data-tab-value="size_desc">数量</a>
+        <a class="x-tab tag lightgray large" data-tab-value="ctime_desc">最新</a>
+    </div>
 </div>
