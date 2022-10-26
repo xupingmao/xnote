@@ -243,6 +243,13 @@ class MarkdownImageParser(TextParserBase):
     
     def has_external_image(self):
         return self._has_external_image
+    
+    def download(self, url, fpath):
+        try:
+            return netutil.http_download(url, destpath=fpath)
+        except Exception as e:
+            logging.error("download (%s) failed", url)
+            raise e
 
     def handle_image(self, url, user_name):
         # TODO 注意越权问题 host不能是内部地址
@@ -256,11 +263,18 @@ class MarkdownImageParser(TextParserBase):
             # 已经是本地地址
             return url
         
+        if url.startswith("data:"):
+            # 数据编码
+            return url
+        
         if self.check_only:
             # 仅校验，不处理
             self._has_external_image = True
             return url
-
+        
+        if url.strip() == "":
+            return url
+        
         fs_map_db = dbutil.get_hash_table("fs_map")
         map_info = fs_map_db.get(url)
         if map_info != None and isinstance(map_info, dict):
@@ -273,7 +287,7 @@ class MarkdownImageParser(TextParserBase):
         dirname = os.path.join(upload_dir, date_dir)
         xutils.makedirs(dirname)
 
-        resp_headers = netutil.http_download(url, destpath=fpath)
+        resp_headers = self.download(url, fpath)
         xmanager.fire("fs.upload", dict(
             user=user_name, path=fpath, fpath=fpath))
 
