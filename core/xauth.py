@@ -30,6 +30,9 @@ session_db = None
 session_cache = cacheutil.PrefixedCache(prefix="session:")
 user_cache = cacheutil.PrefixedCache(prefix="user:")
 
+dbutil.register_table("user_session_rel", "用户会话关系")
+user_session_rel_db = dbutil.get_hash_table("user_session_rel")
+
 # 用户表
 USER_TABLE = None
 
@@ -165,7 +168,7 @@ def get_valid_session_by_id(sid):
     return session_info
 
 def list_user_session_id(user_name):
-    session_id_list = dbutil.get("user_session_rel:%s" % user_name)
+    session_id_list = user_session_rel_db.get(user_name)
     if session_id_list is None:
         return []
 
@@ -204,7 +207,7 @@ def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = None):
 
     # 保存用户和会话关系
     session_id_list.append(session_id)
-    dbutil.put("user_session_rel:%s" % user_name, session_id_list)
+    user_session_rel_db.put(user_name, session_id_list)
 
     # 保存会话信息
     session_info = Storage(user_name = user_name, 

@@ -341,17 +341,43 @@ class SearchHandler:
 
 class SearchHistoryHandler:
 
+    def fetch_recent_logs(self, raw_history_list):
+        history_list = []
+        for item in raw_history_list:
+            if item.key is None:
+                continue
+            if item.key not in history_list:
+                history_list.append(item.key)
+        return history_list
+    
+    def fetch_hot_logs(self, raw_history_list, top_count = 10):
+        count_dict = dict()
+
+        for item in raw_history_list:
+            count = count_dict.get(item.key, 0)
+            count+=1
+            count_dict[item.key] = count
+        
+        sorted_items = sorted(count_dict.items(), key = lambda x:x[1], reverse=True)
+        return sorted_items[0:top_count]
+
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name()
         xmanager.add_visit_log(user_name, "/search/history")
         NOTE_DAO.expire_search_history(user_name)
-        return xtemplate.render("search/page/search_history.html", 
-            show_aside = False,
-            recent = list_search_history(user_name),
-            html_title = "Search",
-            files = [],
-            search_tpye = "note")
+
+        raw_history_list = NOTE_DAO.list_search_history(user_name)
+
+        kw = Storage()
+        kw.show_aside = False
+        kw.files = []
+        kw.html_title = "Search"
+        kw.recent = self.fetch_recent_logs(raw_history_list)
+        kw.hot_logs = self.fetch_hot_logs(raw_history_list)
+        kw.search_type = "note"
+
+        return xtemplate.render("search/page/search_history.html", **kw)
 
     @xauth.login_required()
     def POST(self):

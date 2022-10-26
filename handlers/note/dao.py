@@ -1432,7 +1432,7 @@ def list_search_history(user, limit=1000, orderby="time_desc"):
     if user is None or user == "":
         return []
     result = []
-    for key, value in _search_history_db.with_user(user).iter(limit = limit):
+    for key, value in _search_history_db.with_user(user).iter(limit = limit, reverse=True):
         result.append(value)
     return result
 
