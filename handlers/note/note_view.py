@@ -136,6 +136,9 @@ def view_group_detail_func(file, kw):
         kw.template_name = "note/component/editor/markdown_edit.html"
         return
     
+    if orderby != "" and orderby != file.orderby:
+        NOTE_DAO.update(file.id, orderby = orderby)
+    
     if orderby == None or orderby == "":
         orderby = file.orderby
 
@@ -164,6 +167,7 @@ def view_group_detail_func(file, kw):
     kw.q_tag = q_tag
     kw.tag_meta_list = dao_tag.list_tag_meta(user_name = user_name, group_id = file.id, tag_type = "note")
     kw.show_orderby = True
+    kw.orderby = orderby
 
     if dialog == "true":
         # 对话框的样式
@@ -259,7 +263,7 @@ class ViewHandler:
         name          = xutils.get_argument("name", "")
         page          = xutils.get_argument("page", 1, type=int)
         pagesize      = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
-        orderby       = xutils.get_argument("orderby", "name_asc")
+        orderby       = xutils.get_argument("orderby", "")
         is_iframe     = xutils.get_argument("is_iframe", "false")
         token         = xutils.get_argument("token", "")
         user_name     = xauth.current_name()

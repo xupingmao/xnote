@@ -739,6 +739,7 @@ def update_public_index(note):
 
 def update_note(note_id, **kw):
     # 这里只更新基本字段，移动笔记使用 move_note
+    logging.info("update_note, note_id=%s, kw=%s", note_id, kw)
 
     if "parent_id" in kw:
         raise Exception(
