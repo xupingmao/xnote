@@ -206,6 +206,7 @@ def batch_query_list(id_list):
 
 def sort_by_name(notes):
     notes.sort(key=lambda x: x.name)
+    sort_by_priority(notes)
 
 
 def sort_by_name_desc(notes):
@@ -223,6 +224,7 @@ def sort_by_mtime_desc(notes):
 
 def sort_by_ctime_desc(notes):
     notes.sort(key=lambda x: x.ctime, reverse=True)
+    sort_by_priority(notes)
 
 
 def sort_by_atime_desc(notes):
@@ -281,10 +283,21 @@ def sort_by_dtime_asc(notes):
 
 def sort_by_hot_index(notes):
     notes.sort(key=lambda x: x.hot_index or 0, reverse=True)
+    sort_by_priority(notes)
 
+    for note in notes:
+        note.badge_info = "热度(%d)" % note.hot_index
+
+def sort_by_size_desc(notes):
+    notes.sort(key=lambda x:x.size or 0, reverse=True)
+    sort_by_priority(notes)
+    
+    for note in notes:
+        note.badge_info = "%s" % note.size
 
 SORT_FUNC_DICT = {
     "name": sort_by_name,
+    "name_asc": sort_by_name,
     "name_desc": sort_by_name_desc,
     "name_priority": sort_by_name_priority,
     "mtime_desc": sort_by_mtime_desc,
@@ -296,6 +309,8 @@ SORT_FUNC_DICT = {
     "dtime_desc": sort_by_dtime_desc,
     "dtime_asc": sort_by_dtime_asc,
     "hot_index": sort_by_hot_index,
+    "hot_desc": sort_by_hot_index,
+    "size_desc": sort_by_size_desc,
     "default": sort_by_default,
 }
 

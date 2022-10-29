@@ -1,0 +1,19 @@
+
+<div class="card">
+    <div class="x-tab-box" data-tab-default="active" data-tab-key="tab">
+        <a class="x-tab" data-tab-value="active">
+            活跃(<span class="task-count">{{active_count}}</span>)
+        </a>
+        <a class="x-tab" data-tab-value="archived" href="/note/group_list?tab=archived">
+            归档(<span class="task-count">{{archived_count}}</span>)
+        </a>
+        <a class="x-tab" data-tab-value="smart" 
+            href="/note/group_list?show_note_types=false&tab=smart">
+            智能(<span class="task-count">{{smart_count}}</span>)
+        </a>
+    </div>
+</div>
+
+{% if tab == "active" %}
+    {% include note/component/filter/group_tag_filter.html %}
+{% end %}

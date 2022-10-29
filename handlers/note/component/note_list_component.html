@@ -36,19 +36,8 @@
 {% end %}
 
 {% if show_orderby and len(files) > 0 %}
-    <div class="card-title hide">
-        <span>笔记列表</span>
-        <div class="float-right">
-            <select>
-                <option>名称</option>
-                <option>热度</option>
-                <option>数量</option>
-            </select>
-        </div>
-    </div>
-
+    <!-- 排序功能 -->
     {% include note/component/sort/note_sort_tab.html %}
-
 {% end %}
 
 {% for item in files %}
