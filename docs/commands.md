@@ -6,11 +6,11 @@
 
 举个例子，我们可以通过文件插件实现`listdir`命令，它是不需要进行确认的，点击之后就立即打印出文件信息。
 
-![listdir命令](https://gitee.com/xupingmao/xnote/raw/master/screenshots/command_listdir.png)
+![listdir命令](./screenshots/command_listdir.png)
 
 第二个例子是需要进行二次确认的，比如删除文件夹命令，点击扩展按钮时系统会打印出将要被删除的文件，但是不会立即删除，这个时候系统会询问是否执行，点击【确认执行】的按钮，系统将会删除所有的文件
 
-![listdir命令](https://gitee.com/xupingmao/xnote/raw/master/screenshots/command_rmfolder.png)
+![listdir命令](./screenshots/command_rmfolder.png)
 
 
 # 脚本的编写

@@ -21,7 +21,7 @@
 # @category 文件
 # @title 插件名称
 # @description 插件描述
-# @required_role admin
+# @permitted-role admin  # 对admin用户开放
 import os
 import re
 import math
@@ -31,7 +31,6 @@ import xconfig
 import xutils
 import xauth
 import xmanager
-import xtables
 import xtemplate
 from xtemplate import BasePlugin
 
@@ -41,12 +40,8 @@ HTML = """
 """
 
 class Main(BasePlugin):
+    rows = 0 # 设置为0，不展示输入框
 
-    title    = "Hello_World"
-    category = "system"
-    # 设置为0，不展示输入框
-    rows     = 0
-    
     def handle(self, input):
         self.writehtml(HTML)
 

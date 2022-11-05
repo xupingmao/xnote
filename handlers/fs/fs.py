@@ -280,8 +280,6 @@ class FileSystemHandler:
                 return self.read_all(path, blocksize)            
 
     def handle_get(self, path, content_type=None):
-        # TODO SAE上有编码错误
-        # print("Load Path:", path)
         if path == "":
             return self.list_root()
         if os.path.isdir(path):
@@ -323,6 +321,19 @@ class DownloadHandler(FileSystemHandler):
 
 class GetFileHandler(FileSystemHandler):
     pass
+
+class DocFileHandler:
+
+    fs_handler = FileSystemHandler()
+
+    def GET(self):
+        fpath = xutils.get_argument("fpath", "")
+        if fpath == "":
+            raise web.notfound()
+        if ".." in fpath:
+            raise web.badrequest()
+        fpath = os.path.join("./docs", fpath)
+        return self.fs_handler.handle_get(fpath)
 
 class StaticFileHandler(FileSystemHandler):
     allowed_prefix = ["static", "img", "app", "files", "tmp", "scripts"]
@@ -661,6 +672,7 @@ xurls = (
     r"/data/(.*)", StaticFileHandler,
     r"/(app/.*)", StaticFileHandler,
     r"/(tmp/.*)", StaticFileHandler,
+    r"/fs_doc", DocFileHandler,
 )
 
 

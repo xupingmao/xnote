@@ -8,6 +8,7 @@ import xconfig
 import xauth
 from xtemplate import render
 from xutils import Storage
+from xutils import fsutil
 
 WIKI_PATH = "./"
 
@@ -17,8 +18,11 @@ HIDE_EXT_LIST = [
 
 def check_resource(path):
     if xutils.is_img_file(path):
+        if fsutil.is_parent_dir("./docs", path):
+            relative_path = fsutil.get_relative_path(path, "./docs")
+            raise web.seeother("/fs_doc?fpath=%s" % xutils.encode_uri_component(relative_path))
+
         uri = "/fs_get?fpath=%s" % xutils.b64encode(path)
-        # print(uri)
         raise web.seeother(uri)
     return False
 

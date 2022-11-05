@@ -2,7 +2,7 @@
 
 ### 层次架构
 
-![架构图](https://gitee.com/xupingmao/xnote/raw/master/screenshots/architecture_2.png)
+![架构图](./screenshots/architecture_2.png)
 
 
 ### 程序目录结构
