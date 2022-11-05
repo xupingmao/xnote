@@ -156,13 +156,11 @@ def get_valid_session_by_id(sid):
         return None
 
     if session_info.user_name is None:
-        session_db.delete(sid)
-        session_cache.delete(sid)
+        delete_user_session_by_id(sid)
         return None
 
     if time.time() > session_info.expire_time:
-        session_db.delete(sid)
-        session_cache.delete(sid)
+        delete_user_session_by_id(sid)
         return None
 
     return session_info
@@ -227,6 +225,7 @@ def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = None):
 def delete_user_session_by_id(sid):
     # 登录的时候会自动清理无效的sid关系
     session_db.delete(sid)
+    session_cache.delete(sid)
 
 def _get_user_from_db(name):
     db = get_user_db()

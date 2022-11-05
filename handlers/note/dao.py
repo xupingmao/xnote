@@ -1439,6 +1439,11 @@ def list_by_func(creator, list_func, offset, limit):
 
 
 def add_search_history(user, search_key, category="default", cost_time=0):
+    if user == None:
+        user = "public"
+    
+    expire_search_history(user)
+    
     id = dbutil.timeseq()
     _search_history_db.put(user, value=Storage(
         key=search_key, category=category, cost_time=cost_time), sub_key=id)
