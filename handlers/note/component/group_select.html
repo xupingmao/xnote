@@ -10,6 +10,10 @@
 
 <div class="note-group-select col-md-12 scroll-y">
     {% for category, groups in groups_tuple %}
+        {% if len(groups) == 0 %}
+            {% continue %}
+        {% end %}
+
         <h3 class="group-select-header">{{category}}</h3>
 
         {% for item in groups %}
@@ -18,7 +22,7 @@
                 <a class="link" href="javascript:{{callback}}('{{item.id}}', '{{id}}')">
                     {{item.name}}
                 </a>
-                <span class="group-select-size">{{item.size}}</span>
+                <span class="group-select-size">{{item.children_count}}</span>
             </p>
         {% end %}
     {% end %}
