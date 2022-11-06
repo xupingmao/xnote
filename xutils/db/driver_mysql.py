@@ -56,7 +56,8 @@ class MySQLKV:
     holder = Holder()
     lock = threading.RLock()
 
-    def __init__(self, *, host=None, port=3306, user=None, password=None, database=None, pool_size=0, sql_logger=None):
+    def __init__(self, *, host=None, port=3306, user=None,
+                 password=None, database=None, pool_size=0, sql_logger=None):
         self.db_host = host
         self.db_user = user
         self.db_port = port
@@ -95,7 +96,7 @@ class MySQLKV:
         return ConnectionWrapper(con)
 
     def close_cursor(self, cursor):
-        pass
+        cursor.close()
 
     def mysql_to_py(self, obj):
         if isinstance(obj, bytearray):

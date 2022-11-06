@@ -10,6 +10,11 @@ import threading
 import json
 from collections import deque
 
+try:
+    import cProfile as pf
+except ImportError:
+    import profile as pf
+
 # 非标准库
 import xutils
 from xutils import fsutil

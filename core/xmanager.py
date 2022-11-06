@@ -820,9 +820,9 @@ def searchable(pattern = r".*", description = None, event_type = "search"):
 def find_plugins(category, orderby=None):
     return xutils.call("plugin.find_plugins", category, orderby=orderby)
 
+@logutil.async_func_deco()
 def add_visit_log(user_name, url):
     return xutils.call("plugin.add_visit_log", user_name, url)
-
 
 def restart():
     _manager.app.stop()

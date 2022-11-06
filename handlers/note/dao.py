@@ -1546,7 +1546,7 @@ def get_gallery_path(note):
 
 def get_virtual_group(user_name, name):
     if name == "ungrouped":
-        files = list_by_parent(user_name, 0, 0, 1000,
+        files = list_by_parent(user_name, parent_id = "0", offset = 0, limit = 1000,
                                skip_group=True, include_public=False)
         group = Storage()
         group.name = "未分类笔记"

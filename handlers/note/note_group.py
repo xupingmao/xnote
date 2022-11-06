@@ -5,6 +5,10 @@ import math
 import time
 import json
 import logging
+try:
+    import cProfile as profile
+except ImportError:
+    import profile
 from .dao_book import SmartGroupService
 
 import web
@@ -257,8 +261,20 @@ class GroupListHandler:
 
         notes.sort(key=lambda x: x.priority, reverse=True)
 
-    @xauth.login_required()
     def GET(self):
+        flag = xutils.get_argument("profile", "false")
+        if flag == "true":
+            p = profile.Profile()
+            r = [0]
+            stats = p.runctx("r[0] = self.do_get()", globals(), locals())
+            # 排序字段 stdname/calls/time/cumulative
+            stats.print_stats(sort = "cumulative")
+            return r[0]
+        else:
+            return self.do_get()
+
+    @xauth.login_required()
+    def do_get(self):
         user_name = xauth.current_name()
         orderby_default = xconfig.get_user_config(
             user_name, "group_list_order_by", "name_asc")
