@@ -904,6 +904,7 @@ xurls = (
     r"/note/recent_(viewed)", RecentHandler,
     r"/note/group/select", GroupSelectHandler,
     r"/note/management", ManagementHandler,
+    r"/note/manage", ManagementHandler,
     r"/note/public", ShareListHandler,
     r"/note/document", DocumentListHandler,
     r"/note/gallery", GalleryListHandler,

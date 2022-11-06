@@ -52,3 +52,13 @@ xnote.getOrDefault = function (value, defaultValue) {
 xnote.execute = function (fn) {
     fn();
 };
+
+
+xnote.validate = {
+    "notUndefined": function (obj, errMsg) {
+        if (obj === undefined) {
+            xnote.alert(errMsg);
+            throw new Error(errMsg);
+        }
+    }
+};

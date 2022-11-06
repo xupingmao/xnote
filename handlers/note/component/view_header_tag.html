@@ -1,6 +1,10 @@
 {% init file = None %}
 
 <span>标签</span>
+{% if len(file.tags) == 0 %}
+    <span>(无)</span>
+{% end %}
+
 {% for tag_name in file.tags %}
     <a class="tag lightgray large" href="/note/{{file.parent_id}}?tag={{quote(tag_name)}}">{{tag_name}}</a>
 {% end %}
@@ -66,8 +70,10 @@ $(".tag-edit-btn").click(function () {
             tagType: "note",
             currentTags: JSON.parse(tagsJson),
             noteId: "{{file.id}}",
+            manageLink: "/note/manage?parent_id={{file.parent_id}}",
         };
         cmd.tagList = resp.data;
+        // 调用绑定标签组件
         xnote.api.note.bindTag(cmd);
     })
 });

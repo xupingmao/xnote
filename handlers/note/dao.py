@@ -211,6 +211,7 @@ def sort_by_name(notes):
 
 def sort_by_name_desc(notes):
     notes.sort(key=lambda x: x.name, reverse=True)
+    sort_by_priority(notes)
 
 
 def sort_by_name_priority(notes):
@@ -354,7 +355,7 @@ def build_note_info(note, orderby=None):
         note.visited_cnt = 0
 
     if note.orderby is None:
-        note.orderby = "ctime_priority"
+        note.orderby = "ctime_desc"
 
     if note.category is None:
         note.category = "000"
@@ -1445,8 +1446,10 @@ def add_search_history(user, search_key, category="default", cost_time=0):
     expire_search_history(user)
     
     id = dbutil.timeseq()
-    _search_history_db.put(user, value=Storage(
-        key=search_key, category=category, cost_time=cost_time), sub_key=id)
+    value = Storage(key=search_key, category=category, cost_time=cost_time)
+    
+    db = _search_history_db.with_user(user)
+    db.put(id, value=value)
 
 
 def list_search_history(user, limit=1000, orderby="time_desc"):

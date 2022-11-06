@@ -141,6 +141,9 @@ def view_group_detail_func(file, kw):
     
     if orderby == None or orderby == "":
         orderby = file.orderby
+    
+    if orderby == None or orderby == "":
+        orderby = "ctime_desc"
 
     q_tags = None
     if q_tag != "":

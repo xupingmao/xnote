@@ -215,7 +215,7 @@ class MySQLKV:
 
             if self.sql_logger:
                 cost_time = time.time() - start_time
-                log_info = insert_sql % (key, "-") + \
+                log_info = insert_sql % (key, "?") + \
                     " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
 
@@ -230,7 +230,7 @@ class MySQLKV:
 
             if self.sql_logger:
                 cost_time = time.time() - start_time
-                log_info = update_sql % ("-", key) + \
+                log_info = update_sql % ("?", key) + \
                     " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
 

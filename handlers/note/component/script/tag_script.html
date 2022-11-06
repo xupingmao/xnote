@@ -8,6 +8,12 @@
             {{! tag.tag_name }}
         </a>
         {{!/each}}
+
+        {{! if tagList.length == 0 }}
+            <span>暂无标签</span>
+        {{!/if}}
+
+        <a href="{{! manageLink }}">管理标签</a>
     </div>
 </script>
 
@@ -24,7 +30,8 @@ xnote.api.note.bindTag = function (cmd) {
 
     var html = $("#bindTagTemplate").render({
         tagList: tagList,
-        selectedNames: currentTags
+        selectedNames: currentTags,
+        manageLink: cmd.manageLink
     });
 
     console.log("bind-tag-dialog", html);
@@ -50,7 +57,10 @@ xnote.api.note.bindTag = function (cmd) {
                 xnote.toast("添加标签成功");
             }
             location.reload();
-        });
+        }).fail(function (err) {
+            console.error(err);
+            xnote.alert("系统繁忙，请稍后重试");
+        })
     });
 }
 

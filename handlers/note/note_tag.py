@@ -189,9 +189,6 @@ class BindTagAjaxHandler:
             return dict(code="500", message="笔记不存在或者无权限")
 
         tag_names = json.loads(tag_names_str)
-        if len(tag_names) == 0:
-            return dict(code="400", message="请选择标签")
-        
         dao_tag.update_tags(user_name, group_id, tag_names)
         return dict(code="success")
     
@@ -207,9 +204,6 @@ class BindTagAjaxHandler:
             return dict(code="500", message="笔记不存在或者无权限")
 
         tag_names = json.loads(tag_names_str)
-        if len(tag_names) == 0:
-            return dict(code="400", message="请选择标签")
-        
         dao_tag.update_tags(user_name, note_id, tag_names)
         return dict(code="success")
 
