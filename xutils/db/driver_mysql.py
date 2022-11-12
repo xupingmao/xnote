@@ -34,9 +34,13 @@ class SqlLoggerInterface:
 
 
 class ConnectionWrapper:
+    # 保持1小时
+    TTL = 3600
 
     def __init__(self, db):
+        self.start_time = time.time()
         self.db = db  # type: mysql.connector.MySQLConnection
+        self.is_closed = False
 
     def __enter__(self):
         return self.db
@@ -46,8 +50,16 @@ class ConnectionWrapper:
 
     def commit(self):
         return self.db.commit()
+    
+    def is_valid(self):
+        return self.is_closed == False and time.time() - self.start_time < self.TTL
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        # self.db.close()
+        pass
+    
+    def __del__(self):
+        self.is_closed = True
         self.db.close()
 
 
@@ -75,13 +87,10 @@ class MySQLKV:
         RdbSortedSet.init_class(db_instance=self)
 
     def get_connection(self):
-        # TODO 优化成连接池
-        # db = mysql.connector.connect(host=self.db_host, port=self.db_port,
-        #                              user=self.db_user, passwd=self.db_password,
-        #                              database=self.db_database)
-        # if self.holder.db == None:
-        # self.holder.db = pymysql.connect(host=self.db_host, port=self.db_port, user=self.db_user, password=self.db_password,
-        #                                  database=self.db_database)
+        # 如果不缓存起来, 每次connect和close都会产生网络请求
+        db = self.holder.db
+        if db != None and db.is_valid():
+            return db
 
         kw = Storage()
         kw.port = self.db_port
@@ -89,11 +98,13 @@ class MySQLKV:
         kw.passwd = self.db_password
         kw.database = self.db_database
         if self.db_pool_size > 0:
+            # 使用MySQL连接池
             kw.pool_size = self.db_pool_size
 
         con = mysql.connector.connect(host=self.db_host, **kw)
         # return self.holder.db
-        return ConnectionWrapper(con)
+        self.holder.db = ConnectionWrapper(con)
+        return self.holder.db
 
     def close_cursor(self, cursor):
         cursor.close()
@@ -150,7 +161,7 @@ class MySQLKV:
             try:
                 sql = "SELECT value FROM kv_store WHERE `key`=%s"
                 cursor.execute(sql, (key, ))
-                for result in cursor:
+                for result in cursor.fetchall():
                     return self.mysql_to_py(result[0])
                 return None
             finally:
@@ -183,7 +194,7 @@ class MySQLKV:
                 sql_args = ["%s" for i in key_list]
                 sql = sql % ",".join(sql_args)
                 cursor.execute(sql, key_list)
-                for item in cursor:
+                for item in cursor.fetchall():
                     key = self.mysql_to_py(item[0])
                     value = self.mysql_to_py(item[1])
                     result[key] = value
@@ -200,8 +211,8 @@ class MySQLKV:
 
                 self.close_cursor(cursor)
 
-    def doPutRaw(self, key, value, cursor=None):
-        # type: (any,bytes,bytes) -> None
+    def doPut(self, key, value, cursor=None):
+        # type: (bytes,bytes,any) -> None
         assert cursor != None
 
         start_time = time.time()
@@ -209,8 +220,8 @@ class MySQLKV:
         insert_sql = "INSERT INTO kv_store (`key`, value) VALUES (%s, %s)"
         update_sql = "UPDATE kv_store SET value=%s WHERE `key` = %s"
         cursor.execute(select_sql, (key, ))
-        found = cursor.fetchone()
-        if found == None:
+        result = cursor.fetchall()
+        if len(result) == 0:
             if self.debug:
                 logging.debug("SQL:%s, params:%s", insert_sql, (key, value))
 
@@ -236,9 +247,6 @@ class MySQLKV:
                 self.sql_logger.append(log_info)
 
             cursor.execute(update_sql, (value, key))
-
-    def doPut(self, key, value, cursor=None):
-        return self.doPutRaw(key, value, cursor=cursor)
 
     def Put(self, key, value, sync=False, cursor=None):
         # type: (bytes,bytes,bool,any) -> None

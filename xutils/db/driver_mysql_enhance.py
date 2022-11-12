@@ -20,7 +20,7 @@ class EnhancedMySQLKV(MySQLKV):
 
     def doPutRaw(self, key, value, cursor=None):
         assert len(key) <= self.max_key_len
-        return super().doPutRaw(key, value, cursor)
+        return super().doPut(key, value, cursor)
 
     def RangeIter(self, *args, **kw):
         include_value = kw.get("include_value", True)
