@@ -102,7 +102,9 @@ xnote.createUploader = function(fileSelector, chunked, successFn) {
         // 文件上传域的name
         fileVal: "file",
         // 不开启并发
-        threads: 1
+        threads: 1,
+        // 是否保留header信息
+        preserveHeaders: true,
         // 默认压缩是开启的
         // compress: {}
     });

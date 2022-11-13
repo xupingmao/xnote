@@ -33,6 +33,20 @@ xnote.registerApiModule = function (name) {
     }
 };
 
+/**
+ * 注册API
+ * @param {string} apiName API名称
+ * @param {function} fn 函数
+ */
+xnote.registerApi = function (apiName, fn) {
+    if (xnote.api[apiName] === undefined) {
+        xnote.api[apiName] = fn;
+    } else {
+        var errMessage = "api is registered: " + apiName;
+        console.error(errMessage);
+        xnote.alert(errMessage);
+    }
+}
 
 xnote.isEmpty = function (value) {
     return value === undefined || value === null || value === "";

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "exif-js": "^2.3.0"
+  }
+}

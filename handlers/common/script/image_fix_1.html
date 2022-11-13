@@ -1,0 +1,47 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-11-13 15:18:59
+@LastEditors  : xupingmao
+@LastEditTime : 2022-11-13 16:12:35
+@FilePath     : /xnote/handlers/common/script/image_fix_1.html
+@Description  : 描述
+ #} -->
+
+<!-- 不开启压缩的时候，能正常展示，开启压缩后方向会出问题 -->
+<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
+<input type="file" class="hide" id="imageFixPicker">
+<script type="text/javascript">
+    xnote.registerApi("image.fix", function () {
+        // 初始化uploader的时候会修复方向
+        var uploader = WebUploader.create({
+        // 选完文件后，是否自动上传。
+        auto: true,
+
+        // 文件接收服务端。
+        server: '/fs_upload/range',
+
+        // 选择文件的按钮。可选。
+        // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+        pick: '#imageFixPicker',
+
+        // 需要分片
+        chunked: true,
+        // 默认5M
+        // chunkSize: 1024 * 1024 * 5,
+        chunkSize: 1024 * 1024 * 5,
+        // 重试次数
+        chunkRetry: 10,
+        // 文件上传域的name
+        fileVal: "file",
+        // 不开启并发
+        threads: 1,
+        // 关闭压缩选项
+        compress: false
+        });
+    });
+
+    $(function() {
+        xnote.api["image.fix"]();
+    });
+</script>

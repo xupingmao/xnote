@@ -1,0 +1,109 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-11-13 12:17:32
+@LastEditors  : xupingmao
+@LastEditTime : 2022-11-13 16:10:35
+@FilePath     : /xnote/handlers/common/script/image_fix_2.html
+@Description  : 图片修复 webuploader.js 已经解决了方向的问题，引入组件即可
+ #} -->
+<script src="/static/lib/exif-js/exif.js"></script>
+<script type="text/javascript">
+    // 注册API
+    xnote.registerApi("image.fix", function () {
+        console.log("fix image");
+        function correctImage(imageSrc, orientation, callback) {
+            var image = new Image()
+            image.src = imageSrc;
+            image.onload = function () {
+                var canvas = document.createElement('canvas');
+                canvas.width = image.width;
+                canvas.height = image.height;
+                var context = canvas.getContext('2d');
+
+                switch (orientation) {
+                    // TODO 还有更多的方向要调整
+                    case 3:
+                        console.log("rotate 180deg");
+                        // rotate可以理解画图片的时候旋转画布，展示的时候按照正常的画布方向展示
+                        context.rotate(180 * Math.PI / 180);
+                        context.drawImage(image, -image.width, -image.height, image.width, image.height);
+                        break;
+                    case 6:
+                        console.log("rotate -90deg");
+                        canvas.width = image.height;
+                        canvas.height = image.width;
+                        // rotate可以理解画图片的时候旋转画布，展示的时候按照正常的画布方向展示
+                        context.rotate(-90 * Math.PI / 180);
+                        context.drawImage(image, -image.width, 0, image.width, image.height);
+                        break;
+                    default:
+                        // 不需要处理
+                        callback();
+                        return;
+                }
+                try {
+                    var dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+                    callback(dataUrl);
+                } catch (e) {
+                    callback();
+                    console.log('Save image error.');
+                }
+            }
+        }
+
+        // 修复图片元素
+        function fixImage(element) {
+            if (element.hasAttribute("fixed")) {
+                return;
+            }
+            EXIF.getData(element, function () {
+                // exif方向
+                // https://magnushoff.com/articles/jpeg-orientation/#:~:text=JPEG%20Orientation%201%20The%20EXIF%20orientation%20tag%20JPEG,3%20Other%20failure%20modes%20...%204%20Acknowledgements%20
+                var metaData = EXIF.getAllTags(this);
+                console.log("img", element, "tags", metaData);
+                if (metaData !== undefined && metaData.Orientation !== undefined && metaData.Orientation !== 1) {
+                    // 有旋转的，使用canvas重绘
+                    correctImage(element.src, metaData.Orientation, function (url) {
+                        if (element.hasAttribute("fixed")) {
+                            return;
+                        }
+
+                        if (url !== undefined) {
+                            console.log("correct", url.substring(0, 50) + "...");
+                            element.src = url;
+                        }
+
+                        element.setAttribute("fixed", true);
+                        $(element).show();
+                    });
+                } else {
+                    $(element).show();
+                }
+            });
+        }
+
+        $(".x-photo").each(function (index, element) {
+            if ($(element).hasClass("no-fix")) {
+                return;
+            }
+            // 先隐藏照片，防止闪烁
+            $(element).hide();
+            // 防止异常导致没处理图片不展示
+            setTimeout(function () {
+                $(element).show();
+            }, 500);
+
+            if (element.complete) {
+                fixImage(element);
+            }
+            $(element).on("load", function () {
+                fixImage(element);
+            });
+        });
+    });
+
+    $(function () {
+        xnote.api["image.fix"]();
+    })
+</script>
