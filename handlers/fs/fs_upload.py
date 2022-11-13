@@ -13,6 +13,14 @@ import time
 import math
 from xutils import fsutil
 from xtemplate import T
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
+
+
+# 完整的元信息参考文档 https://zhuanlan.zhihu.com/p/366726838
+TAG_ORIENTATION = 0x112
 
 
 def get_link(filename, webpath):
@@ -65,6 +73,38 @@ def try_touch_note(note_id):
 
 def try_lock_file(fpath):
     return True
+
+
+def try_fix_orientation(fpath):
+    fix_orientation = xutils.get_argument("fix_orientation", "")
+    # print("fix_orientation", fix_orientation)
+    if fix_orientation != "true":
+        return
+
+    if Image == None:
+        # 没有安装PIL
+        return
+
+    name, ext = os.path.splitext(fpath)
+    if ext.lower() not in (".jpg", ".jpeg"):
+        return
+
+    tmp_path = fsutil.tmp_path(xutils.create_uuid())
+    os.rename(fpath, tmp_path)
+
+    with Image.open(tmp_path) as img:
+        exif = img.getexif()
+        print("exif", exif)
+        orientation = exif[TAG_ORIENTATION]
+
+        if orientation in (3, 6):
+            print("fix orientation")
+            img_new = img.copy()
+            exif_new = img_new.getexif()
+            exif_new[TAG_ORIENTATION] = 1
+            img_new.save(fpath)
+            img_new.close()
+            os.remove(tmp_path)
 
 # 业务上用到的函数
 
@@ -128,7 +168,9 @@ class UploadHandler:
             xmanager.fire("fs.upload", dict(
                 user=user_name, path=filepath, fpath=filepath))
 
-        try_touch_note(note_id)
+            try_fix_orientation(filepath)
+            try_touch_note(note_id)
+
         return dict(code="success", webpath=webpath, link=get_link(filename, webpath))
 
     @xauth.login_required()
@@ -196,8 +238,7 @@ class RangeUploadHandler:
         filename = None
         webpath = ""
         origin_name = ""
-
-        # print(web.ctx.env)
+        filepath = ""
 
         if hasattr(file, "filename"):
             origin_name = file.filename
@@ -244,7 +285,9 @@ class RangeUploadHandler:
         if part_file and chunk+1 == chunks:
             self.merge_files(dirname, filename, chunks)
 
+        try_fix_orientation(filepath)
         try_touch_note(note_id)
+
         if note_id != None and note_id != "":
             xutils.call("note.touch", note_id)
         return dict(code="success", webpath=webpath, link=get_link(origin_name, webpath))

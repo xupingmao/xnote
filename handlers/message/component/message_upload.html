@@ -9,9 +9,14 @@
         });
 
         // 上传文件
-        xnote.createUploader("#filePicker", false, function (resp) {
-            console.log("文件上传成功", resp);
-            xnote.fire("message.upload", "file://" + resp.webpath);
+        xnote.createUploaderEx({
+            fileSelector: "#filePicker",
+            chunked: false,
+            successFn: function (resp) {
+                console.log("文件上传成功", resp);
+                xnote.fire("message.upload", "file://" + resp.webpath);
+            },
+            fixOrientation: true
         });
 
         // 通过剪切板上传

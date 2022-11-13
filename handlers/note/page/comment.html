@@ -1,15 +1,15 @@
 {% init comment_class = "" %}
 {% init file = Storage() %}
-{% init show_comment_title  = True %}
+{% init show_comment_title = True %}
 {% init show_comment_create = True %}
-{% init show_comment_note   = False %}
-{% init show_comment_edit   = False %}
+{% init show_comment_note = False %}
+{% init show_comment_edit = False %}
 {% init comment_title = "评论" %}
-{% init comment_list_type   = "note_id" %}
-{% init comment_list_date   = "" %}
-{% init comment_btn_text    = "评论" %}
+{% init comment_list_type = "note_id" %}
+{% init comment_list_date = "" %}
+{% init comment_btn_text = "评论" %}
 {% init comment_placeholder = "请输入评论..." %}
-{% init comment_empty_text  = "暂无评论~" %}
+{% init comment_empty_text = "暂无评论~" %}
 {% init comment_source_class = "" %}
 
 <style type="text/css">
@@ -22,25 +22,23 @@
 <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
 
 {% if _has_login and show_comment_create %}
-    <div class="card {{comment_class}}">
-        {% if show_comment_title %}
-        <div class="card-title">
-            <span>{{comment_title}}</span>
-        </div>
-        {% end %}
-
-        <div class="col-md-12">
-            <textarea id="commentText" 
-                autoHeight=true
-                class="col-md-12 no-outline" 
-                placeholder="{{comment_placeholder}}"></textarea>
-
-            <div id="commentFileUploader" class="hide"></div>
-            <input type="file" id="commentFilePicker" class="hide" multiple/>
-            <input type="button" id="commentFilePickerBtn" class="btn btn-default" value="添加附件"/>
-            <button class="btn" id="saveCommentBtn">{{comment_btn_text}}</button>
-        </div>
+<div class="card {{comment_class}}">
+    {% if show_comment_title %}
+    <div class="card-title">
+        <span>{{comment_title}}</span>
     </div>
+    {% end %}
+
+    <div class="col-md-12">
+        <textarea id="commentText" autoHeight=true class="col-md-12 no-outline"
+            placeholder="{{comment_placeholder}}"></textarea>
+
+        <div id="commentFileUploader" class="hide"></div>
+        <input type="file" id="commentFilePicker" class="hide" multiple />
+        <input type="button" id="commentFilePickerBtn" class="btn btn-default" value="添加附件" />
+        <button class="btn" id="saveCommentBtn">{{comment_btn_text}}</button>
+    </div>
+</div>
 {% end %}
 
 <div class="card">
@@ -50,101 +48,110 @@
 </div>
 
 <script type="text/javascript">
-$(function () {
-    var loadIndex = 0;
-    var editIndex = 0;
+    $(function () {
+        var loadIndex = 0;
+        var editIndex = 0;
 
-    function refreshComments() {
-        var page = getUrlParam("page", 1);
-        var list_param = {
-            note_id: "{{file.id}}",
-            list_type: "{{comment_list_type}}",
-            list_date: "{{comment_list_date}}",
-            show_note: "{{show_comment_note}}",
-            show_edit: "{{show_comment_edit}}",
-            key: getUrlParam("key"),
-            resp_type: "html",
-            page: page
-        };
+        function refreshComments() {
+            var page = getUrlParam("page", 1);
+            var list_param = {
+                note_id: "{{file.id}}",
+                list_type: "{{comment_list_type}}",
+                list_date: "{{comment_list_date}}",
+                show_note: "{{show_comment_note}}",
+                show_edit: "{{show_comment_edit}}",
+                key: getUrlParam("key"),
+                resp_type: "html",
+                page: page
+            };
 
-        $.get("/note/comments", list_param, function (resp) {
-            $("#comments").html(resp);
-        }).fail(function (resp) {
-            console.log("请求失败", resp);
-        });
-    }
+            $.get("/note/comments", list_param, function (resp) {
+                $("#comments").html(resp);
+            }).fail(function (resp) {
+                console.log("请求失败", resp);
+            });
+        }
 
-    function appendToInputText (line) {
-        // body...
-        var oldTextValue = $("#commentText").val();
-        $("#commentText").val(oldTextValue + "\n" + line);
-    }
-
-    // 自动调整高度
-    $('textarea[autoHeight]').autoHeight();
-
-    refreshComments();
-
-    $("#saveCommentBtn").click(function () {
-        var comment = {
-            note_id: "{{file.id}}",
-            content: $("#commentText").val()
-        };
-        $.post("/note/comment/save", comment, function (resp) {
-            console.log(resp);
-            if (resp.code == "success") {
-                $("#commentText").val("");
-                refreshComments();
-            } else {
-                xnote.alert(resp.message);
+        function appendToInputText(line) {
+            // body...
+            var oldTextValue = $("#commentText").val();
+            if (oldTextValue != "") {
+                oldTextValue += "\n";
             }
-        });
-    });
+            $("#commentText").val(oldTextValue + line);
+        }
 
-    $("#comments").on("click", ".delete-comment-btn", function () {
-        var id = $(this).attr("data-id");
-        var content = $(this).attr("data-content");
-        xnote.confirm("确定删除`" + content + "`?", function (conf) {
-            if (conf) {
-                $.post("/note/comment/delete", {comment_id: id}, function (resp) {
+        // 自动调整高度
+        $('textarea[autoHeight]').autoHeight();
+
+        refreshComments();
+
+        $("#saveCommentBtn").click(function () {
+            var comment = {
+                note_id: "{{file.id}}",
+                content: $("#commentText").val()
+            };
+            $.post("/note/comment/save", comment, function (resp) {
+                console.log(resp);
+                if (resp.code == "success") {
+                    $("#commentText").val("");
                     refreshComments();
-                });
-            }
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
         });
-    });
 
-    $("#comments").on("click", ".edit-comment-btn", function () {
-        var id = $(this).attr("data-id");
-        $.get("/note/comment?p=edit&comment_id=" + id, function (resp) {
-            editIndex = xnote.showDialog("编辑", resp);
+        $("#comments").on("click", ".delete-comment-btn", function () {
+            var id = $(this).attr("data-id");
+            var content = $(this).attr("data-content");
+            xnote.confirm("确定删除`" + content + "`?", function (conf) {
+                if (conf) {
+                    $.post("/note/comment/delete", { comment_id: id }, function (resp) {
+                        refreshComments();
+                    });
+                }
+            });
         });
-    });
 
-    // 触发文件上传操作
-    $("#commentFilePickerBtn").on("click", function (event) {
-        console.log("select file button click");
-        $("#commentFilePicker").click();
-    });
-
-    // 上传文件
-    xnote.createUploader("#commentFilePicker", false, function (resp) {
-        console.log("文件上传成功", resp);
-        var link = "file://" + resp.webpath;
-        appendToInputText(link);
-    });
-
-    // 通过剪切板上传
-    $("#commentText").on("paste", function (e) {
-        xnote.requestUploadByClip(e, "msg", function (respJson) {
-            console.log(respJson);
-            var link = "file://" + respJson.webpath;
-            appendToInputText(link);
+        $("#comments").on("click", ".edit-comment-btn", function () {
+            var id = $(this).attr("data-id");
+            $.get("/note/comment?p=edit&comment_id=" + id, function (resp) {
+                editIndex = xnote.showDialog("编辑", resp);
+            });
         });
-    });
 
-    xnote.on("comment.refresh", refreshComments);
-    xnote.on("comment.closeEditDialog", function () {
-        layer.close(editIndex);
+        // 触发文件上传操作
+        $("#commentFilePickerBtn").on("click", function (event) {
+            console.log("select file button click");
+            $("#commentFilePicker").click();
+        });
+
+
+        // 上传文件
+        xnote.createUploaderEx({
+            fileSelector: "#commentFilePicker",
+            chunked: false,
+            successFn: function (resp) {
+                console.log("文件上传成功", resp);
+                var link = "file://" + resp.webpath;
+                appendToInputText(link);
+            },
+            fixOrientation: true
+        });
+
+        // 通过剪切板上传
+        $("#commentText").on("paste", function (e) {
+            xnote.requestUploadByClip(e, "msg", function (respJson) {
+                console.log(respJson);
+                var link = "file://" + respJson.webpath;
+                appendToInputText(link);
+            });
+        });
+
+        xnote.on("comment.refresh", refreshComments);
+        xnote.on("comment.closeEditDialog", function () {
+            layer.close(editIndex);
+        })
     })
-})
 </script>

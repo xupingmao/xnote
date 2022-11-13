@@ -3,7 +3,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-11-13 12:17:32
 @LastEditors  : xupingmao
-@LastEditTime : 2022-11-13 16:10:35
+@LastEditTime : 2022-11-13 19:11:03
 @FilePath     : /xnote/handlers/common/script/image_fix_2.html
 @Description  : 图片修复 webuploader.js 已经解决了方向的问题，引入组件即可
  #} -->
@@ -11,9 +11,13 @@
 <script type="text/javascript">
     // 注册API
     xnote.registerApi("image.fix", function () {
+        if (CSS.supports("image-orientation", "from-image")) {
+            console.log("browser support image-orientation");
+            return;
+        }
         console.log("fix image");
         function correctImage(imageSrc, orientation, callback) {
-            var image = new Image()
+            var image = new Image();
             image.src = imageSrc;
             image.onload = function () {
                 var canvas = document.createElement('canvas');

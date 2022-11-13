@@ -62,8 +62,28 @@ xnote._initUploadEvent = function(uploader, fileSelector, successFn) {
     });
 };
 
-/** 创建上传器 **/
 xnote.createUploader = function(fileSelector, chunked, successFn) {
+    var req = {
+        fileSelector: fileSelector,
+        chunked: chunked,
+        successFn: successFn,
+        fixOrientation: true
+    }
+
+    if (chunked) {
+        req.fixOrientation = false;
+    }
+    return xnote.createUploaderEx(req);
+}
+
+/** 创建上传器 **/
+xnote.createUploaderEx = function(req) {
+    var fileSelector = req.fileSelector;
+    var chunked = req.chunked;
+    var successFn = req.successFn;
+    var fixOrientation = req.fixOrientation;
+
+
     if (fileSelector == undefined) {
         fileSelector = '#filePicker';
     }
@@ -107,6 +127,10 @@ xnote.createUploader = function(fileSelector, chunked, successFn) {
         preserveHeaders: true,
         // 默认压缩是开启的
         // compress: {}
+    });
+
+    uploader.on('uploadBeforeSend', function(object, data, headers) {
+        data.fix_orientation = fixOrientation;
     });
 
     if (successFn) {
@@ -178,7 +202,7 @@ xnote.requestUpload = function(fileSelector, chunked, successFn, errorFn) {
 
     uploader.on('uploadBeforeSend', function(object, data, headers) {
         data.dirname = "auto";
-    })
+    });
 
     // 文件上传成功，给item添加成功class, 用样式标记上传成功。
     uploader.on('uploadSuccess', function(file, resp) {
