@@ -18,6 +18,7 @@ from xconfig import Storage
 from xutils import fsutil
 from xutils import textutil
 from xutils import webutil
+from xutils import dbutil
 from xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
 from . import dao_tag
@@ -29,7 +30,8 @@ NOTE_DAO = xutils.DAO("note")
 def visit_by_id(ctx):
     note_id   = ctx.id
     user_name = ctx.user_name
-    NOTE_DAO.visit(user_name, note_id)
+    with dbutil.get_write_lock(user_name):
+        NOTE_DAO.visit(user_name, note_id)
 
 def check_auth(file, user_name):
     if user_name == "admin":

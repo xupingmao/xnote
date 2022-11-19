@@ -221,7 +221,7 @@ function initCodeMirror(selector, options) {
 
 
 // markdown标题处理
-var MarkdownHeading = function() {
+function MarkdownHeading() {
     this.text = "";
     this.headings = [];
 }

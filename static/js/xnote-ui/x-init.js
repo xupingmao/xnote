@@ -74,5 +74,11 @@ xnote.validate = {
             xnote.alert(errMsg);
             throw new Error(errMsg);
         }
+    },
+    "isFunction": function (obj, errMsg) {
+        if (typeof obj !== 'function') {
+            xnote.alert(errMsg);
+            throw new Error(errMsg);
+        }
     }
 };

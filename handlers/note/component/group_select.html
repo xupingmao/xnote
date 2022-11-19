@@ -20,7 +20,7 @@
             <p class="group-select-row">
                 <i class="fa {{item.icon}}"></i>
                 <a class="link" href="javascript:{{callback}}('{{item.id}}', '{{id}}')">
-                    {{item.name}}
+                    {{item.path or item.name}}
                 </a>
                 <span class="group-select-size">{{item.children_count}}</span>
             </p>

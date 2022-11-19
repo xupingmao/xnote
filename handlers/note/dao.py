@@ -25,6 +25,7 @@ import xutils
 import xmanager
 import logging
 import xauth
+import pdb
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import cacheutil
@@ -457,6 +458,7 @@ def get_by_id(id, include_full=True, creator=None):
         note.visited_cnt = note_index.visited_cnt
         note.hot_index = note_index.hot_index
         note.children_count = note_index.children_count
+        note.path = note_index.path
 
     build_note_info(note)
     return note
@@ -651,7 +653,6 @@ def add_visit_log(user_name, note):
 
 
 def remove_virtual_fields(note):
-    del_dict_key(note, "path")
     del_dict_key(note, "url")
     del_dict_key(note, "icon")
     del_dict_key(note, "show_edit")
@@ -660,6 +661,8 @@ def remove_virtual_fields(note):
 
 def put_note_to_db(note_id, note):
     creator = note.creator
+    # 增加编辑日志
+    NOTE_DAO.add_edit_log(creator, note)
 
     # 删除不需要持久化的数据
     remove_virtual_fields(note)
@@ -669,10 +672,6 @@ def put_note_to_db(note_id, note):
 
     # 更新索引
     update_index(note)
-
-    # 增加编辑日志
-    NOTE_DAO.add_edit_log(creator, note)
-
 
 def touch_note(note_id):
     if is_root_id(note_id):
@@ -709,10 +708,10 @@ def update_index(note):
     id = note['id']
     note_id = format_note_id(id)
 
-    if note_id == "0":
+    if is_root_id(id):
         # 根目录，不需要更新
         return
-
+        
     note_index = convert_to_index(note)
     _index_db.update_by_id(note_id, note_index)
 
@@ -814,22 +813,28 @@ def update_note(note_id, **kw):
 
 
 def move_note(note, new_parent_id):
-    assert new_parent_id != None
-    assert new_parent_id != 0
-    assert new_parent_id != ""
+    assert isinstance(new_parent_id, str)
+    assert len(new_parent_id) > 0
 
     old_parent_id = note.parent_id
     note.parent_id = new_parent_id
 
     if old_parent_id == new_parent_id:
         return
-
+    
+    new_parent = get_by_id(new_parent_id)
+    
+    if new_parent != None:
+        parent_path = new_parent.path or new_parent.name
+        assert parent_path != None
+        note.path = parent_path + " - " + note.name
+    
     # 没有更新内容，只需要更新索引数据
     update_index(note)
 
     # 更新文件夹的容量
     update_children_count(old_parent_id)
-    update_children_count(new_parent_id)
+    update_children_count(new_parent_id, parent_note=new_parent)
 
     # 更新新的parent更新时间
     touch_note(new_parent_id)
@@ -887,19 +892,21 @@ def visit_note(user_name, id):
         note.hot_index = 0
     note.hot_index += 1
 
-    update_index(note)
     add_visit_log(user_name, note)
+    update_index(note)
 
 
-def update_children_count(parent_id, db=None):
+def update_children_count(parent_id, db=None, parent_note=None):
     if is_root_id(parent_id):
         return
 
-    note = get_by_id(parent_id)
-    if note is None:
+    if parent_note == None:
+        parent_note = get_by_id(parent_id)
+    
+    if parent_note is None:
         return
 
-    creator = note.creator
+    creator = parent_note.creator
     count = 0
     for child in list_by_parent(creator, parent_id):
         if child.type == "group":
@@ -907,8 +914,8 @@ def update_children_count(parent_id, db=None):
         else:
             count += 1
 
-    note.children_count = count
-    update_index(note)
+    parent_note.children_count = count
+    update_index(parent_note)
 
 
 def fill_parent_name(files):

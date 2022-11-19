@@ -1,4 +1,5 @@
 {% init file = None %}
+{% init can_edit = False %}
 
 <span>标签</span>
 {% if len(file.tags) == 0 %}
@@ -10,7 +11,9 @@
 {% end %}
 
 <div class="float-right">
-    <button class="btn btn-default tag-edit-btn">编辑</button>
+    {% if can_edit %}
+        <button class="btn btn-default tag-edit-btn">编辑</button>
+    {% end %}
 </div>
 
 

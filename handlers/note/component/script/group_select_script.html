@@ -1,0 +1,133 @@
+<!-- 移动单个笔记 -->
+
+<style>
+    .group-select-box {
+        line-height: initial;
+        font-weight: normal;
+    }
+</style>
+
+<script type="text/template" id="group-select-tpl">
+    <div class="note-group-select col-md-12 scroll-y">
+        {{! if hasNoMatch }}
+            <p class="align-center">没有匹配项,请重新输入关键字</p>
+        {{!/if}}
+
+        {{! each groups group }}
+            {{! if group.isVisible() }}
+                <h3 class="group-select-header">{{!group.title}}</h3>    
+                {{! each group.children item }}
+                    <p class="group-select-row">
+                        <i class="fa {{!item.icon}}"></i>
+                        <a class="link" data-id="{{!item.id}}">
+                            {{!item.path || item.name}}
+                        </a>
+                        <span class="group-select-size">{{!item.children_count}}</span>
+                    </p>
+                {{!/each}}
+            {{!/if}}
+        {{!/each}}
+    </div>    
+</script>
+
+<div class="group-select-box hide">
+    <div class="group-select-search">
+        <input id="groupSelectInput" type="text" class="nav-search-input" placeholder="搜索项目"/>
+        <button class="nav-search-btn btn-default">
+            <i class="fa fa-search"></i>
+        </button>
+    </div>
+    <div class="group-select-data"></div>
+</div>
+
+<script type="text/javascript">
+    // 移动笔记
+    xnote.api["note.move.dialog"] = function (req) {
+        var noteId = req.noteId;
+        var respData;
+
+        xnote.validate.isFunction(req.callback, "参数callback无效");
+
+        function bindEvent() {
+            $(".group-select-box").on("keyup", ".nav-search-input", function (event) {
+                /* Act on the event */
+                // console.log("event", event);
+                var searchKey = $(this).val().toLowerCase();
+
+                var newData = [];
+
+                for (var i = 0; i < respData.length; i++) {
+                    var item = respData[i];
+                    if (item.name.toLowerCase().indexOf(searchKey) >= 0) {
+                        newData.push(item);
+                    }
+                }
+                renderData(newData);
+            });
+
+            $(".group-select-box").on("click", ".link", function (event) {
+                var dataId = $(event.target).attr("data-id");
+                req.callback(dataId);
+            })
+        }
+
+        function Section() {
+            this.children = [];
+            this.title = "title";
+        }
+
+        Section.prototype.add = function (item) {
+            this.children.push(item);
+        }
+
+        Section.prototype.isVisible = function () {
+            return this.children.length > 0;
+        }
+
+        // 渲染数据
+        function renderData(data) {
+            var first = new Section(), second = new Section(), last = new Section();
+            for (var i = 0; i < data.length; i++) {
+                var item = data[i];
+                if (item.priority >= 1) {
+                    first.add(item);
+                } else if (item.priority < 0) {
+                    last.add(item);
+                } else {
+                    second.add(item);
+                }
+            }
+
+            first.title = "置顶";
+            second.title = "笔记本";
+            last.title = "归档";
+
+            var groups = [first, second, last];
+            var hasNoMatch = (data.length===0);
+
+            var html = $("#group-select-tpl").renderTemplate({
+                groups: groups,
+                noteId: noteId,
+                hasNoMatch: hasNoMatch
+            });
+            $(".group-select-data").html(html);
+        }
+
+        $.get("/note/api/group?list_type=all", function (resp) {
+            if (resp.code != "success") {
+                xnote.alert(resp.message);
+                return;
+            }
+
+            respData = resp.data;
+            xnote.showDialog("移动笔记", $(".group-select-box"));
+            // 绑定事件
+            bindEvent();
+            // 渲染数据
+            renderData(respData);
+        }).fail(function (err) {
+            xnote.alert("请求接口失败:" + err);
+        });
+    };
+
+</script>

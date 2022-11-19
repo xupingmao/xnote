@@ -49,7 +49,7 @@ xnote.toggleDropdown = function (target) {
         }
     } else {
         dropdownContent.slideToggle("fast");
-        if (dropdownContent.offset().left < 0) {
+        if (dropdownContent.offset() && dropdownContent.offset().left < 0) {
             dropdownContent.css("left", 0);
         }
 

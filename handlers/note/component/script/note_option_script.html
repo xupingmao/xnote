@@ -6,6 +6,8 @@
     </div>
 </div>
 
+{% include note/component/script/group_select_script.html %}
+
 
 <script type="text/javascript">
     // 移动笔记的回调函数
@@ -241,6 +243,23 @@
         $(".note-contents-btn").click(function (e) {
             var parentId = $(e.target).attr("data-parent");
             xnote.showAjaxDialog("选择笔记", "/note/" + parentId + "?dialog=true");
+        });
+
+        // 移动笔记
+        $(".move-btn").click(function (e) {
+            var req = {};
+            req.callback = function (parentId) {
+                if (parentId === undefined || parentId == "") {
+                    xnote.alert("parentId is undefined");
+                    return;
+                }
+                var noteId = "{{file.id}}";
+                $.post("/note/move", { id: noteId, parent_id: parentId }, function (resp) {
+                    console.log(resp);
+                    window.location.reload();
+                });
+            };
+            xnote.api["note.move.dialog"](req);
         });
     })
 </script>

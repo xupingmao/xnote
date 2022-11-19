@@ -73,6 +73,7 @@ xnote.createUploader = function(fileSelector, chunked, successFn) {
     if (chunked) {
         req.fixOrientation = false;
     }
+
     return xnote.createUploaderEx(req);
 }
 
@@ -130,6 +131,7 @@ xnote.createUploaderEx = function(req) {
     });
 
     uploader.on('uploadBeforeSend', function(object, data, headers) {
+        // web-uploader在上传文件的时候会自动进行旋转，但是不处理extif
         data.fix_orientation = fixOrientation;
     });
 

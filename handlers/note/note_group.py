@@ -268,7 +268,7 @@ class GroupListHandler:
             r = [0]
             stats = p.runctx("r[0] = self.do_get()", globals(), locals())
             # 排序字段 stdname/calls/time/cumulative
-            stats.print_stats(sort = "cumulative")
+            stats.print_stats(sort="cumulative")
             return r[0]
         else:
             return self.do_get()
@@ -473,15 +473,21 @@ class GroupSelectHandler:
         user_name = xauth.current_name()
         view = xutils.get_argument("view", "")
         parent_id = xutils.get_argument("parent_id", "0")
+        q_parent_id = None
 
         groups_tuple = load_category(xauth.current_name())
         web.header("Content-Type", "text/html; charset=utf-8")
-        files = NOTE_DAO.list_group(
-            user_name, orderby="default", parent_id=parent_id)
 
         template = "note/component/group_select.html"
         if view == "tree":
             template = "note/component/group_select_tree.html"
+            q_parent_id = parent_id
+        else:
+            # view == flat
+            q_parent_id = None
+
+        files = NOTE_DAO.list_group(
+            user_name, orderby="default", parent_id=q_parent_id)
 
         parent = NOTE_DAO.get_by_id_creator(parent_id, user_name)
 

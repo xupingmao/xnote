@@ -3,7 +3,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-31 12:15:50
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-18 17:04:45
+@LastEditTime : 2022-11-19 14:48:26
 @FilePath     : /xnote/handlers/note/component/sidebar/markdown_edit_sidebar.html
 @Description  : 描述
  #} -->
@@ -17,11 +17,9 @@
     </div>
 </div>
 
-
 <script id="sidebar-content-template" type="text/html">
     {{!each list }}
     <a class="list-item level-{{!$value.level}}" data-line="{{! $value.lineNo }}">
-        <span>{{! $value.levelText }}</span>
         <span>{{! $value.name }}</span>
     </a>
     {{!/each }}

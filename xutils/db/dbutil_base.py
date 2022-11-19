@@ -229,6 +229,7 @@ def check_not_empty(value, message):
 
 
 def get_write_lock(key=None):
+    # type: (str|None) -> threading.RLock
     """获取全局独占的写锁，可重入"""
     global _write_lock
     return _write_lock

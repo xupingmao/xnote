@@ -337,4 +337,8 @@
     padding-left: 65px;
 }
 
+.sidebar-contents {
+    font-weight: normal;
+}
+
 /** markdown编辑的侧边菜单样式 END **/

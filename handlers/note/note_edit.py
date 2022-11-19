@@ -594,8 +594,9 @@ class MoveAjaxHandler:
     def GET(self):
         id        = xutils.get_argument("id", "")
         parent_id = xutils.get_argument("parent_id", "")
-        file = NOTE_DAO.get_by_id_creator(id, xauth.current_name())
-        target_book = NOTE_DAO.get_by_id_creator(parent_id, xauth.current_name())
+        user_name = xauth.current_name()
+        file = NOTE_DAO.get_by_id_creator(id, user_name)
+        target_book = NOTE_DAO.get_by_id_creator(parent_id, user_name)
 
         if file is None:
             return dict(code="fail", message="笔记不存在")
@@ -621,7 +622,8 @@ class MoveAjaxHandler:
             if depth > max_depth:
                 return dict(code="fail", message="笔记本的层次不能超过%d, 当前层次:%d" % (max_depth, depth))
 
-        NOTE_DAO.move(file, parent_id)
+        with dbutil.get_write_lock(user_name):
+            NOTE_DAO.move(file, parent_id)
         return dict(code="success")
 
     def POST(self):

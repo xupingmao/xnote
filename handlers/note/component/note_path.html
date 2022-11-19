@@ -13,7 +13,7 @@
 
     <div class="float-right">
         {% if file != None %}
-            {% if _is_desktop and show_rename_btn %}
+            {% if _has_login and _is_desktop and show_rename_btn %}
                 <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>
             {% end %}
         {% end %}
