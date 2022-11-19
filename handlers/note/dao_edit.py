@@ -3,6 +3,7 @@ import xutils
 from xutils import Storage
 from . import dao
 from . import dao_draft
+from .dao_api import NoteDao
 
 def update_content(note, new_content, clear_draft = True):
     kw = Storage()
@@ -24,5 +25,5 @@ def update_content(note, new_content, clear_draft = True):
         dao_draft.save_draft(note.id, "")
 
 
-
+NoteDao.update_content = update_content
 

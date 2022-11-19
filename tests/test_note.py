@@ -7,8 +7,7 @@
 import logging
 import time
 import copy
-from handlers.note.dao_log import list_most_visited
-
+import pdb
 import xutils
 # cannot perform relative import
 try:
@@ -23,7 +22,6 @@ import xauth
 from handlers.note.dao import get_by_id, get_by_name, visit_note, get_by_user_skey
 from xutils import Storage
 from xutils import textutil
-from xutils import dbutil
 
 app          = test_base.init()
 json_request = test_base.json_request
@@ -31,6 +29,8 @@ request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
 NOTE_DAO = xutils.DAO("note")
+
+from handlers.note.dao_api import NoteDao
 
 def get_default_group_id():
     name = "default_group_id"
@@ -94,7 +94,15 @@ class TestMain(BaseTestCase):
         # 普通更新
         json_request("/note/save", method="POST",
             data=dict(id=id, content="new-content"))
+        
+        note_info = NoteDao.get_by_id(id)
+        self.assertEqual(note_info.content, "new-content")
         json_request("/note/remove?id=" + str(id))
+
+        # 第二次更新 使用新的api
+        NoteDao.update_content(note_info, "new-content-2")
+        note_info = NoteDao.get_by_id(id)
+        self.assertEqual(note_info.content, "new-content-2")
 
         note_info = get_by_id(id)
         self.assertEqual(note_info.is_deleted, 1)

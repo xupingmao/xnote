@@ -11,7 +11,7 @@ import xconfig
 from xutils import dbutil
 from xutils import textutil
 from xutils import dateutil
-
+from .dao_api import NoteDao
 
 def register_note_table(name, description, user_attr=None):
     dbutil.register_table(name, description, category="note", user_attr=user_attr)
@@ -157,3 +157,5 @@ xutils.register_func("note.list_comments_by_user", list_comments_by_user)
 xutils.register_func("note.count_comment", count_comment)
 xutils.register_func("note.count_comment_by_user", count_comments_by_user)
 xutils.register_func("note.count_comment_by_note", count_comment_by_note)
+
+NoteDao.count_comment = count_comment

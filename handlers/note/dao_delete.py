@@ -4,13 +4,14 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 16:53:16
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-07 13:48:38
+@LastEditTime : 2022-11-19 15:57:14
 @FilePath     : /xnote/handlers/note/dao_delete.py
 @Description  : 删除的处理
 """
 
 import xutils
 from xutils import dbutil
+from .dao_api import NoteDao
 from .dao import (
     delete_history,
     add_history,
@@ -74,7 +75,7 @@ def delete_note(id):
     delete_note_skey(note)
 
     # 删除访问日志
-    NOTE_DAO.delete_visit_log(note.creator, note.id)
+    NoteDao.delete_visit_log(note.creator, note.id)
 
     # 更新数量统计
     refresh_note_stat(note.creator)

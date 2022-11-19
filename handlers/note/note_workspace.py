@@ -7,7 +7,6 @@ import xauth
 import xtemplate
 import xutils
 import xconfig
-from xutils import dateutil
 from xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
@@ -48,6 +47,7 @@ def list_note_types(user_name = None):
     note_stat = NOTE_DAO.get_note_stat(user_name)
 
     return [
+        NoteLink("标签", "/note/taglist", "fa-tags", size=note_stat.tag_count),
         NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
         NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
         NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),

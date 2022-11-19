@@ -18,6 +18,7 @@ import xconfig
 from xutils import dbutil
 from xutils import dateutil
 from xutils import Storage
+from .dao_api import NoteDao
 
 dbutil.register_table("user_note_log", "用户笔记操作日志", check_user=True, user_attr="user")
 dbutil.register_table_index("user_note_log", "visit_cnt")
@@ -223,3 +224,4 @@ xutils.register_func("note.add_create_log", add_create_log)
 xutils.register_func("note.delete_visit_log", delete_visit_log)
 xutils.register_func("note._update_log", _update_log)
 
+NoteDao.delete_visit_log = delete_visit_log

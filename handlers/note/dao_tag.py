@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-01 14:21:14
+@LastEditTime : 2022-11-19 15:18:51
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -14,6 +14,7 @@ import xutils
 from xutils import dbutil
 from xutils import attrget, Storage
 from .dao import get_by_id, update_index, sort_notes
+from .dao_api import NoteDao
 
 tags_db = dbutil.get_table("note_tags")
 tag_meta_db = dbutil.get_table("note_tag_meta")
@@ -44,6 +45,9 @@ def list_tag_meta(user_name, *, limit = 1000, tag_type="group", tag_name=None, g
             return False
         return True
     return tag_meta_db.list(limit = limit, filter_func = list_tag_meta_func, user_name = user_name)
+
+def count_tag(user_name):
+    return tag_meta_db.count_by_user(user_name=user_name)
 
 def update_tags(creator, note_id, tags):
     tags_db.update_by_id(note_id, Storage(note_id=note_id, user=creator, tags=tags))
@@ -124,3 +128,5 @@ xutils.register_func("note.get_tags", get_tags)
 xutils.register_func("note.update_tags", update_tags)
 xutils.register_func("note_tag_meta.get_by_name", get_tag_meta_by_name)
 xutils.register_func("note_tag_meta.list", list_tag_meta)
+
+NoteDao.count_tag = count_tag

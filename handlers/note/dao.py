@@ -29,6 +29,7 @@ import pdb
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import cacheutil
+from .dao_api import NoteDao
 
 # 配置日志模块
 logging.basicConfig(level=logging.DEBUG,
@@ -462,7 +463,6 @@ def get_by_id(id, include_full=True, creator=None):
 
     build_note_info(note)
     return note
-
 
 def get_by_id_creator(id, creator, db=None):
     note = get_by_id(id, creator=creator)
@@ -1513,7 +1513,8 @@ def refresh_note_stat(user_name):
     stat.sticky_count = count_sticky(user_name)
     stat.removed_count = count_removed(user_name)
     stat.dict_count = count_dict(user_name)
-    stat.comment_count = NOTE_DAO.count_comment(user_name)
+    stat.comment_count = NoteDao.count_comment(user_name)
+    stat.tag_count = NoteDao.count_tag(user_name)
 
     dbutil.put("user_stat:%s:note" % user_name, stat)
     return stat
@@ -1640,3 +1641,5 @@ xutils.register_func("note.expire_search_history", expire_search_history)
 xutils.register_func("note.get_note_stat", get_note_stat)
 xutils.register_func("note.get_gallery_path", get_gallery_path)
 xutils.register_func("note.refresh_note_stat_async", refresh_note_stat_async)
+
+NoteDao.get_by_id = get_by_id

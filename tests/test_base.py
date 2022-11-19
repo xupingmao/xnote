@@ -14,6 +14,7 @@ import six
 import json
 import xauth
 from xutils import dbutil
+from xutils import cacheutil
 from handlers.fs.fs_upload import get_upload_file_path
 from xutils.db.driver_sqlite import SqliteKV
 
@@ -44,7 +45,7 @@ def init():
 
     xutils.init(xconfig)
     xauth.init()
-    xutils.cacheutil.init(xconfig.STORAGE_DIR)
+    cacheutil.init(xconfig.STORAGE_DIR)
 
     APP = web.application(list(), var_env, autoreload=False)
     last_mapping = (r"/tools/(.*)", "handlers.tools.tools.handler")
@@ -60,10 +61,13 @@ def init():
 
     return APP
 
+
 APP = init()
+
 
 def get_test_file_path(path):
     return os.path.join("./testdata", path)
+
 
 def logout_test_user():
     xconfig.IS_TEST = False
@@ -194,11 +198,11 @@ class ResponseWrapper:
 
     def __init__(self, resp: web.Storage) -> None:
         self.resp = resp
-    
+
     def get_header(self, header: str):
         header = header.lower()
         headers = self.resp.header_items
         for key, value in headers:
             if key.lower() == header:
                 return value
-        return value
+        return None

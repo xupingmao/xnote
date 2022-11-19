@@ -24,7 +24,7 @@ from xutils import textutil
 from xutils.text_parser import TextParserBase
 from . import dao
 from . import dao_edit
-
+from .dao_api import NoteDao
 
 def get_addr(src, host):
     if src is None:
@@ -356,7 +356,7 @@ class CacheExternalHandler:
         parser = MarkdownImageParser()
         md_content_new = parser.parse(md_content, note.creator)
 
-        dao_edit.update_content(note, md_content_new)
+        NoteDao.update_content(note, md_content_new)
 
         return dict(code="success", message="更新成功")
 
