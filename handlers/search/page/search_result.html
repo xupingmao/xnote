@@ -59,7 +59,7 @@
                 {% end %}
 
                 {% if file.show_move == True %}
-                    <a class="item-option move-btn" data-url="/note/group/select?id={{file.id}}&filetype=xml">移动</a>
+                    <a class="item-option move-btn" data-id="{{file.id}}">移动</a>
                 {% end %}
 
                 {# 插件 #}
@@ -136,6 +136,7 @@
     {% end %}
 </div>
 
+{% include note/component/script/group_select_script.html %}
 {% include search/component/search_pagination.html %}
 
 <script>
@@ -149,6 +150,24 @@
                 $("#executeResult").text(JSON.stringify(obj.data));
             }
         });
+    });
+
+    // 移动笔记
+    $(".move-btn").click(function (e) {
+        var req = {};
+        var noteId = $(e.target).attr("data-id");
+
+        req.callback = function (parentId) {
+            if (parentId === undefined || parentId == "") {
+                xnote.alert("parentId is undefined");
+                return;
+            }
+            $.post("/note/move", { id: noteId, parent_id: parentId }, function (resp) {
+                console.log(resp);
+                window.location.reload();
+            });
+        };
+        xnote.api["note.move.dialog"](req);
     });
 </script>
 

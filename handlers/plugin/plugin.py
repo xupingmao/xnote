@@ -648,25 +648,6 @@ def delete_visit_log(user_name, name, url):
     if exist_log != None:
         _log_db.delete_by_key(exist_log.key, user_name)
 
-def load_plugin(name):
-    user_name = xauth.current_name()
-    context   = xconfig.PLUGINS_DICT.get(name)
-
-    # DEBUG模式下始终重新加载插件
-    if xconfig.DEBUG or context is None or context.debug is True:
-        fpath = os.path.join(xconfig.PLUGINS_DIR, name)
-        fpath = xutils.get_real_path(fpath)
-        if not os.path.exists(fpath):
-            return None
-        # 发现了新的插件，重新加载一下
-        plugin = load_plugin_file(fpath)
-        if plugin:
-            return plugin
-        else:
-            return None
-    else:
-        return context
-
 @xmanager.searchable()
 def on_search_plugins(ctx):
     if not xauth.is_admin():
@@ -906,6 +887,24 @@ class PluginGridHandler:
 
 class LoadPluginHandler:
 
+    def resolve_force_reload(self):
+        reload = xutils.get_argument("_reload", "")
+        return xconfig.DEBUG and reload == "true"
+
+    def load_plugin(self, name, force_reload=False):
+        context   = xconfig.PLUGINS_DICT.get(name)
+
+        if context == None or force_reload:
+            fpath = os.path.join(xconfig.PLUGINS_DIR, name)
+            fpath = xutils.get_real_path(fpath)
+            if not os.path.exists(fpath):
+                return None
+            # 发现了新的插件，重新加载一下
+            return load_plugin_file(fpath)
+        else:
+            return context
+
+
     def GET(self, name = ""):
         user_name = xauth.current_name()
         name      = xutils.unquote(name)
@@ -914,7 +913,8 @@ class LoadPluginHandler:
             name += ".py"
         try:
             url = "/plugin/" + name
-            plugin = load_plugin(name)
+            force_reload = self.resolve_force_reload()
+            plugin = self.load_plugin(name, force_reload)
             if plugin != None:
                 # 访问日志
                 add_visit_log(user_name, url)

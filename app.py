@@ -213,8 +213,8 @@ def try_init_ldb():
         dbutil.init(xconfig.DB_DIR,
                     db_instance=db_instance,
                     db_cache=cacheutil._global_cache,
-                    binlog=xconfig.get_global_config("system.binlog"),
-                    binlog_max_size=xconfig.get_global_config("system.binlog_max_size"))
+                    binlog=xconfig.get_system_config("binlog"),
+                    binlog_max_size=xconfig.get_system_config("binlog_max_size"))
     except:
         xutils.print_exc()
         logging.error("初始化数据库失败...")
@@ -233,7 +233,7 @@ def init_autoreload():
     def reload_callback():
         code_builder.build()
         # 重新加载handlers目录下的所有模块
-        if xconfig.get_global_config("system.fast_reload"):
+        if xconfig.get_system_config("fast_reload"):
             xmanager.reload()
         else:
             xmanager.restart()
@@ -249,7 +249,7 @@ def init_autoreload():
 
 def init_cluster():
     # 初始化集群配置
-    if xconfig.get_global_config("system.node_role") == "follower":
+    if xconfig.get_system_config("node_role") == "follower":
         logging.info("当前系统以从节点身份运行")
 
 
