@@ -94,8 +94,8 @@ def try_fix_orientation(fpath):
 
     with Image.open(tmp_path) as img:
         exif = img.getexif()
-        print("exif", exif)
-        orientation = exif[TAG_ORIENTATION]
+        # print("exif", exif)
+        orientation = exif.get(TAG_ORIENTATION)
 
         if orientation in (3, 6):
             print("fix orientation")
@@ -105,6 +105,9 @@ def try_fix_orientation(fpath):
             img_new.save(fpath)
             img_new.close()
             os.remove(tmp_path)
+        else:
+            # 重新命名回去
+            os.rename(tmp_path, fpath)
 
 # 业务上用到的函数
 

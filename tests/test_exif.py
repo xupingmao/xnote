@@ -24,8 +24,8 @@ from PIL import Image
 from PIL import ExifTags
 
 # Pillow 文档 https://pillow.readthedocs.io/en/stable/
-fpath = r"D:\projects\xnote\data\files\admin\upload\2022\11\微信图片_20221113143920_5.jpg"
-fpath_new = r"D:\projects\xnote\data\files\admin\upload\2022\11\微信图片_20221113143920_5_fixed.jpg"
+fpath = r"/Users/xupingmao/Downloads/mmexport1668347065669.jpg"
+fpath_new = fpath + "_fixed.jpg"
 
 tag_orientation = 0x112
 Image.init()
@@ -39,7 +39,7 @@ def do_fix():
     with Image.open(fpath) as img:
         exif = img.getexif()
         print(exif)
-        orientation = exif[tag_orientation]
+        orientation = exif.get(tag_orientation)
         print("orientation", orientation)
 
         if orientation == 3:
@@ -50,3 +50,4 @@ def do_fix():
             img_new.show()
             img_new.close()
 
+do_fix()
