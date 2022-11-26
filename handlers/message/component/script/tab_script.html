@@ -16,6 +16,10 @@ $(function() {
     if (displayTag == "search") {
         displayTag = "log";
     }
+
+    if (displayTag == "key") {
+        $(".x-tab[data-tab-value=taglist]").addClass("active");
+    }
     
     function onMessageUpdated() {
         $.get("/message/stat", function (resp) {
