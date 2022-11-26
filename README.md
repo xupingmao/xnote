@@ -24,7 +24,7 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 
 以下是一些页面展示
 
-![笔记](./docs/screenshots/xnote_v2.8_home.png)
+![笔记](./docs/screenshots/xnote_v2.9.2_home.png)
 
 
 
@@ -59,7 +59,7 @@ python3 app.py --config config/boot/自定义名称.properties
 ### 在云服务平台部署
 
 - 新浪SAE TODO
-- 百度BAE TODO
+- [CentOS - 百度BAE](https://blog.csdn.net/u011320646/article/details/126334377) 
 
 ### 兼容性问题
 
