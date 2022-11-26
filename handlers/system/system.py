@@ -11,6 +11,7 @@ import xmanager
 import xtables
 import web
 from xutils import Storage
+from xutils import webutil
 
 
 def link(name, url, user=None, icon="cube"):
@@ -139,6 +140,8 @@ class AdminHandler:
 
     @xauth.login_required("admin")
     def GET(self):
+        if webutil.is_desktop_client():
+            raise web.found("/system/info")
         return xtemplate.render("system/page/system_admin.html")
 
 

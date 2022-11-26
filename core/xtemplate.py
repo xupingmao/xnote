@@ -86,7 +86,7 @@ def load_nav_list():
     NAV_LIST.append(NavItem(text="首页", need_login=True,
                     require_admin=False, url="/note/index"))
     NAV_LIST.append(NavItem(text="动态", need_login=True,
-                    require_admin=False, url="/note/recent?orderby=view"))
+                    require_admin=False, url="/note/recent?orderby=update"))
     NAV_LIST.append(NavItem(text="分享", need_login=False,
                     require_admin=False, url="/note/public"))
     NAV_LIST.append(NavItem(text="插件", need_login=True,

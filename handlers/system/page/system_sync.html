@@ -1,6 +1,6 @@
 {% extends base.html %}
 
-{% block body %}
+{% block body_left %}
 
 {% import web %}
 
@@ -132,4 +132,8 @@ $(function () {
     });
 });
 </script>
+{% end %}
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
 {% end %}
