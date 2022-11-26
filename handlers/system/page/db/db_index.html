@@ -39,10 +39,12 @@
             <td>
                 <span>索引数: {{count_index(index.table_name, index_name)}}</span>
             </td>
-            <td>
+            {% if i == 0 %}
+            <td rowspan="{{len(index.index_names)}}">
                 <button class="btn-default rebuild-index-btn" data-table="{{index.table_name}}"
                     data-index="index_name">重建索引</button>
             </td>
+            {% end %}
         </tr>
         {% end %}
         {% end %}

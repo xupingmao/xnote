@@ -70,6 +70,7 @@ config/boot/*.local.properties
 
 # 锁文件
 pid.lock
+start-cmd.bat
 
 # npm模块
 /static/lib/node_modules/

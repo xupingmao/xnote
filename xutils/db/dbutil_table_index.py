@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-02 08:41:45
+@LastEditTime : 2022-11-26 19:13:10
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -203,13 +203,26 @@ class TableIndexRepair:
             logging.warning("Invalid index key:(%s)", key)
             return
         db_delete(key)
+    
+    def get_record_attr(self, record, key):
+        if isinstance(record, dict):
+            return record.get(key)
+        return getattr(record, key)
 
     def delete_invalid_index(self, index_name):
         db = self.db
         index_prefix = "_index$%s$%s" % (db.table_name, index_name)
 
-        for old_key, record_key in prefix_iter(index_prefix, include_key=True):
-            record = db_get(record_key)
+        for old_key, index_object in prefix_iter(index_prefix, include_key=True):
+            if isinstance(index_object, dict):
+                # copy
+                record = index_object.get("value")
+                record_key = index_object.get("key")
+            else:
+                # ref
+                record_key = index_object
+                record = db_get(record_key)
+                
             if record is None:
                 logging.debug("empty record, key:(%s), record_id:(%s)",
                               old_key, record_key)
@@ -217,7 +230,7 @@ class TableIndexRepair:
                 continue
 
             user_name = None
-            index_value = getattr(record, index_name)
+            index_value = self.get_record_attr(record, index_name)
             record_id = db._get_id_from_key(record_key)
 
             if db._need_check_user:

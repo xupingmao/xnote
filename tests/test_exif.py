@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-11-13 16:19:54
 @LastEditors  : xupingmao
-@LastEditTime : 2022-11-13 21:23:34
+@LastEditTime : 2022-11-26 20:30:06
 @FilePath     : /xnote/tests/test_exif.py
 @Description  : 描述
 """
@@ -50,4 +50,4 @@ def do_fix():
             img_new.show()
             img_new.close()
 
-do_fix()
+# do_fix()

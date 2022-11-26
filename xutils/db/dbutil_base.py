@@ -506,6 +506,10 @@ def db_get(key, default_value=None):
     try:
         if key == "" or key == None:
             return None
+        
+        if not isinstance(key, str):
+            # print("key=%r", key)
+            raise TypeError("expect str but see %r" % type(key))
 
         key = key.encode("utf-8")
         value = _leveldb.Get(key)
