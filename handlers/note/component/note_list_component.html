@@ -15,6 +15,7 @@
     "edit": "更新了笔记"
 } %}
 {% init get_date_by_type = xutils.get_func_by_name("note.get_date_by_type") %}
+{% init sticky_position = "left" %} 
 
 {% if False %}
     <a class="dialog-link" href="/note/{{file.parent_id}}">
@@ -52,7 +53,7 @@
     {% end %}
 
     <a class="list-link" href="{{item.url}}">
-        {% if item.priority>0 %}
+        {% if sticky_position == "left" and item.priority>0 %}
             <span class="tag orange-tag">置顶</span>
         {% end %}
 
@@ -63,6 +64,10 @@
 
         {% if hasattr(item, "is_public") and item.is_public %}
             <span class="info-tag">分享中</span>
+        {% end %}
+
+        {% if sticky_position == "right" and item.priority>0 %}
+            <span class="tag orange-tag">置顶</span>
         {% end %}
 
         {% if item.tags != None %}

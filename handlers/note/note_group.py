@@ -746,6 +746,7 @@ class RecentHandler:
         kw.show_next = False
         kw.page_max = math.ceil(count/xconfig.PAGE_SIZE)
         kw.page_url = "/note/recent?orderby=%s&page=" % orderby
+        kw.sticky_position = "right"
 
         return xtemplate.render("note/page/note_recent.html", **kw)
 
