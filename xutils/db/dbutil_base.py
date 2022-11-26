@@ -352,6 +352,7 @@ class TableInfo:
 
     @classmethod
     def get_by_name(cls, name):
+        # type: (str) -> TableInfo | None
         return cls._info_dict.get(name)
 
     @classmethod
@@ -472,6 +473,7 @@ def register_table_user_attr(table_name, user_attr):
     """注册表用户的属性名"""
     check_table_name(table_name)
     table_info = get_table_info(table_name)
+    assert table_info != None
     if table_info.user_attr != None:
         logging.warning("user_attr已经设置了")
     table_info.user_attr = user_attr
