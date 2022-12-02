@@ -236,6 +236,10 @@ META_HTML = """
 </div>
 """
 
+ASIDE_HTML = """
+{% include system/component/admin_nav.html %}
+"""
+
 
 def get_display_value(value):
     if value is None:
@@ -265,7 +269,6 @@ class DbScanHandler(BasePlugin):
     editable = False
     show_search = False
     show_title = False
-
     rows = 0
 
     @xauth.login_required("admin")
@@ -393,6 +396,7 @@ class DbScanHandler(BasePlugin):
 
         html = self.get_html()
         self.writetemplate(html, **kw)
+        self.write_aside(ASIDE_HTML)
 
     def get_html(self):
         p = xutils.get_argument("p", "")

@@ -10,7 +10,7 @@
 --> #}
 {% extends base %}
 
-{% block body %}
+{% block body_left %}
 {% include system/component/db_nav.html %}
 
 <div class="card">
@@ -71,4 +71,8 @@
         });
     });
 </script>
+{% end %}
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
 {% end %}
