@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-11-19 15:16:04
 @LastEditors  : xupingmao
-@LastEditTime : 2022-11-19 16:08:07
+@LastEditTime : 2022-12-04 21:00:38
 @FilePath     : /xnote/handlers/note/dao_api.py
 @Description  : 接口定义
 """
@@ -33,9 +33,19 @@ class NoteDao:
         # type: (str, str) -> None
         """删除访问日志"""
         raise NotImplementedError()
+    
+    @staticmethod
+    def delete_note(id):
+        # type: (str) -> None
+        """删除笔记"""
+        raise NotImplementedError()
 
     @staticmethod
     def update_content(note, new_content, clear_draft = True):
         # type: (dict, str, bool) -> None
         """更新笔记内容"""
+        raise NotImplementedError()
+    
+    @staticmethod
+    def get_root(creator=None):
         raise NotImplementedError()

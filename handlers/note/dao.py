@@ -176,7 +176,6 @@ def get_archived_group():
     group.url = "/note/archived"
     return group
 
-
 def get_note_public_table():
     return dbutil.get_table("note_public")
 
@@ -1330,7 +1329,7 @@ def check_and_remove_broken_notes(notes, user_name):
             result.append(note)
         else:
             logging.error("node=%s", note)
-            NOTE_DAO.delete_note(note.id)
+            NoteDao.delete_note(note.id)
             # 如果note_index被删除，delete_note也无法删除它，所以需要再删除一下
             db = get_note_tiny_table(note.creator)
             db.delete(note)
@@ -1643,3 +1642,4 @@ xutils.register_func("note.get_gallery_path", get_gallery_path)
 xutils.register_func("note.refresh_note_stat_async", refresh_note_stat_async)
 
 NoteDao.get_by_id = get_by_id
+NoteDao.get_root = get_root

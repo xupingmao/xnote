@@ -145,6 +145,7 @@ class ShareListHandler:
         orderby = xutils.get_argument("tab", "ctime_desc")
         notes = NOTE_DAO.list_public(offset, limit, orderby)
         for note in notes:
+            note.url = "/note/view/public?id=%s" % note.id
             if orderby == "hot":
                 note.badge_info = note.hot_index
             else:

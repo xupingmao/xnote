@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 16:53:16
 @LastEditors  : xupingmao
-@LastEditTime : 2022-11-19 15:57:14
+@LastEditTime : 2022-12-04 20:59:22
 @FilePath     : /xnote/handlers/note/dao_delete.py
 @Description  : 删除的处理
 """
@@ -105,3 +105,6 @@ def recover_note(id):
 
 xutils.register_func("note.delete", delete_note)
 xutils.register_func("note.delete_physically", delete_note_physically)
+
+
+NoteDao.delete_note = delete_note

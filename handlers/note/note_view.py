@@ -22,6 +22,7 @@ from xutils import dbutil
 from xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
 from . import dao_tag
+from .dao_api import NoteDao
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
@@ -260,9 +261,18 @@ class ViewHandler:
         can_edit = kw.can_edit
         is_valid_type = (file.type != "group") and (file.parent_id != "0")
         kw.show_contents_btn = is_valid_type and can_edit
+    
+    def handle_pathlist(self, file, is_public_page):
+        if is_public_page:
+            root = Storage()
+            root.url = "/note/public"
+            root.name = "根目录"
+            return [root, file]
+        else:
+            return NOTE_DAO.list_path(file)
 
     @xutils.timeit(name = "Note.View", logfile = True)
-    def GET(self, op, id = None):
+    def GET(self, op, id = None, is_public_page = False):
         if id is None:
             id = xutils.get_argument("id", "")
         name          = xutils.get_argument("name", "")
@@ -282,6 +292,7 @@ class ViewHandler:
         kw.orderby     = orderby
         kw.pagesize    = pagesize
         kw.page_url    = "/note/view?id=%s&orderby=%s&page=" % (id, orderby)
+        kw.is_public_page = is_public_page
 
         if id == "0":
             raise web.found("/")
@@ -304,7 +315,8 @@ class ViewHandler:
         if token == "":
             check_auth(file, user_name)
 
-        pathlist = NOTE_DAO.list_path(file)
+        pathlist = self.handle_pathlist(file, is_public_page)
+
         can_edit = (file.creator == user_name) or (user_name == "admin")
 
         # 定义一些变量
@@ -439,14 +451,14 @@ class GetDialogHandler:
 
     def get_group_option_dialog(self, kw):
         note_id = xutils.get_argument("note_id")
-        file    = NOTE_DAO.get_by_id(note_id)
+        file    = NoteDao.get_by_id(note_id)
         if file != None and file.children_count == 0:
             kw.show_delete_btn = True
         kw.file = file
 
     def get_share_group_dialog(self, kw):
         note_id = xutils.get_argument("note_id")
-        file    = NOTE_DAO.get_by_id(note_id)
+        file    = NoteDao.get_by_id(note_id)
         kw.file = file
         kw.share_to_list = []
 
@@ -455,7 +467,7 @@ class GetDialogHandler:
 
     def get_share_note_dialog(self, kw):
         note_id = xutils.get_argument("note_id")
-        file    = NOTE_DAO.get_by_id(note_id)
+        file    = NoteDao.get_by_id(note_id)
         kw.file = file
 
     @xauth.login_required()
@@ -473,10 +485,20 @@ class GetDialogHandler:
 
         return xtemplate.render("note/ajax/%s.html" % name, **kw)
 
+
+class ViewPublicHandler:
+    """查看公开的笔记"""
+    
+    def GET(self):
+        id = xutils.get_argument("id", "")
+        return ViewHandler().GET("view", id, is_public_page=True)
+
+
 xurls = (
     r"/note/(edit|view)"   , ViewHandler,
     r"/note/print"         , PrintHandler,
     r"/note/(\d+)"         , ViewByIdHandler,
+    r"/note/view/public", ViewPublicHandler,
     r"/note/view/([\w\-]+)", ViewByIdHandler,
     r"/note/history"       , NoteHistoryHandler,
     r"/note/history_view"  , HistoryViewHandler,
