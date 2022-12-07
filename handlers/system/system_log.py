@@ -17,7 +17,7 @@ from xtemplate import BasePlugin
 from xutils.functions import iter_exists
 
 OPTION_HTML = '''
-<div class="content-left">
+<div class="row">
     <script src="/static/js/base/jq-ext.js"></script>
 
     <div class="card">

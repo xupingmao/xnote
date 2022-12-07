@@ -1,0 +1,18 @@
+{% set data_list = [
+    Storage(name = "基本设置", url = "/system/settings"),
+    Storage(name = "账号设置", url = "/user/info"),
+    Storage(name = "搜索设置", url = "/system/settings?category=search"),
+] %}
+
+<div class="card list">
+
+    {% for item in data_list %}
+        <a class="list-link" href="{{item.url}}">
+            <span>{{item.name}}</span>
+            <div class="float-right">
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+    {% end %}
+
+</div>

@@ -45,7 +45,7 @@
 }
 
 /** 移动端样式放在最后 **/
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 800px) {
     /** mobile **/
     .content-left {
         width: 100%;

@@ -920,7 +920,6 @@ li.menu-item:hover {
     min-height: 20px;
     padding: 10px;
     background-color: #fff;
-    margin-left: calc(50% - 500px);
 }
 
 .aside {
@@ -1047,7 +1046,7 @@ select.no-border {
 }
 
 /** 移动端样式放在最后 **/
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 800px) {
     /** mobile **/
 
     .root {

@@ -15,7 +15,7 @@ HTML = r"""
     }
 </style>
 
-<div class="content-left">
+<div class="row">
     <div class="card btn-line-height">
         <span>系统一共注册{{event_handler_count}}个事件处理器</span>
     </div>

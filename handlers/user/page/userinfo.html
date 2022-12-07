@@ -1,6 +1,6 @@
 {% extends base.html %}
 
-{% block body %}
+{% block body_left %}
 
 <div class="card">
     <div class="grid-title">
@@ -54,4 +54,8 @@ $(function () {
 });
 </script>
 
+{% end %}
+
+{% block body_right %}
+    {% include settings/component/settings_nav.html %}
 {% end %}

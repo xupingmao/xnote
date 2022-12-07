@@ -39,7 +39,7 @@
 
 {% end %}
 
-{% block body %}
+{% block body_left %}
     
     {% init page = "upload" %}
 
@@ -117,4 +117,9 @@
         <div class="aside-content">
         </div>
     </div>
+{% end %}
+
+
+{% block body_right %}
+    {% include note/component/sidebar/group_manage_sidebar.html %}
 {% end %}

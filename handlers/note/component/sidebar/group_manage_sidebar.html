@@ -8,21 +8,25 @@
 @Description  : 描述
 #} -->
 
-{% init category_list = [] %}
-
 <div class="card">
-    <div class="list-box">
-        {% for t_cat in category_list %}
-            <a href="/note/group/manage?note_category={{t_cat.code}}" class="list-item">
-                <span>{{t_cat.name}}</span>
-                <div class="float-right">
-                    <span>{{t_cat.group_count}}</span>
-                </div>
-            </a>
-        {% end %}
-    </div>
-</div>
-
-<div class="card">
-    <a class="list-item" href="/note/category">杜威十进制分类法</a>
+    <a class="list-link" href="/note/group/manage">
+        <span>笔记本管理</span>
+        <div class="float-right">
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </a>
+    
+    <a class="list-link" href="/fs_upload">
+        <span>上传管理</span>
+        <div class="float-right">
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </a>
+        
+    <a class="list-link" href="/note/category">
+        <span>杜威十进制分类法</span>
+        <div class="float-right">
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </a>
 </div>

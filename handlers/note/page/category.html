@@ -9,7 +9,7 @@
  #}-->
 {% extends base %}
 
-{% block body %}
+{% block body_left %}
     <div class="card">
         <div class="grid-title">
             <span class="path-link">{{title}}</span>
@@ -21,4 +21,8 @@
 
     {% include note/component/script/create_script.html %}
     {% include note/component/note_list_component.html %}
+{% end %}
+
+{% block body_right %}
+    {% include note/component/sidebar/group_manage_sidebar.html %}
 {% end %}

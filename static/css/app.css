@@ -102,7 +102,7 @@
     padding-right: 10px;
 }
 
-@media screen and (max-width: 950px) {
+@media screen and (max-width: 800px) {
     /** mobile **/
     #dropArea {
         font-size: 24px;

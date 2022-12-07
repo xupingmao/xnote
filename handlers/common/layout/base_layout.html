@@ -78,7 +78,15 @@
   (function () {
     function loadStyle() {
       var contentWidth = parseInt("{{CONTENT_WIDTH}}");
-      var winWidth = window.innerWidth;
+      var winWidth = $(window).width();
+      var leftWidth = 700;
+      var rightWidth = 300;
+
+      // Pad设备
+      if (winWidth>=800 && winWidth<1000) {
+        contentWidth = winWidth - 20;
+      }
+
       var marginLeft = (winWidth - contentWidth) / 2;
       // 设置最小的高度
       var rootMinHeight = $(window).height() - 39;
@@ -100,7 +108,16 @@
         styleText += ".desktop-only {display: none;}";
       }
 
-      styleText += ".root{min-height:" + rootMinHeight + "px;}";
+      styleText += ".main-content { width:" + contentWidth + "px; margin-left:" + marginLeft + "px;}";
+      styleText += ".root{ min-height:" + rootMinHeight + "px;}";
+
+      if (contentWidth>=800) {
+        styleText += ".content-left { width:70%; }";
+        styleText += ".content-right { width:30%; }";
+      } else {
+        styleText += ".content-left { width: 100%; }";
+        styleText += ".content-right { display: none; }";
+      }
 
       // 居中的样式
       $("#layout-css").html(styleText);

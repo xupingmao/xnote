@@ -42,6 +42,8 @@ def list_category(user_name):
     assert user_name != None
     assert isinstance(user_name, str)
 
+    return []
+
     result = _cat_cache.get(user_name)
     if result != None:
         return result
