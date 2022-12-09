@@ -30,15 +30,6 @@
     {% set files = groups %}
     {% include note/component/note_list_component.html %}
 
-    <script>
-    $(".switch-category").change(function(e) {
-        var selected = $(this).val();
-        var url = window.location.href;
-        url = xnote.addUrlParam(url, "category", selected);
-        window.location.href = url;
-    });
-    </script>
-
 {% end %}
 
 {% block body_right %}

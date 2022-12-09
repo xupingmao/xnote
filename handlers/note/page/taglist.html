@@ -8,7 +8,7 @@
 </style>
 {% end %}
 
-{% block body %}
+{% block body_left %}
 <div class="grid-card">
     <div class="grid-title btn-line-height">
         {{T("Tag List")}}
@@ -36,3 +36,9 @@
 {% block aside %}
     {% include note/component/mod_aside.html %}
 {% end %}
+
+
+{% block body_right %}
+    {% include note/component/sidebar/group_list_sidebar.html %}
+{% end %}
+
