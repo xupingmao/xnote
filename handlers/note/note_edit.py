@@ -20,6 +20,8 @@ from xutils import textutil
 from xtemplate import T
 from .constant import *
 from . import dao_delete
+from .dao_api import NoteDao
+
 NOTE_DAO = xutils.DAO("note")
 
 DEFAULT_CREATE_TEMPLATE = "note/page/create.html"
@@ -47,7 +49,7 @@ def fire_update_event(note_old):
     """
     @param {note} note_old 旧版本的笔记
     """
-    note = NOTE_DAO.get_by_id(note_old.id)
+    note = NoteDao.get_by_id(note_old.id)
     if note is None:
         return
     event_body = dict(id=note.id, 
@@ -65,14 +67,13 @@ def fire_rename_event(note):
 def create_log_func(note, ctx):
     method   = ctx.method
     date_str = ctx.date
-    name     = note.name
-
+    
     if method != "POST":
         # GET请求直接返回
         return
 
     if date_str is None or date_str == "":
-        date_str  = time.strftime("%Y-%m-%d")
+        date_str = time.strftime("%Y-%m-%d")
     note.name = u"日志:" + date_str + dateutil.convert_date_to_wday(date_str)
     return NOTE_DAO.create(note, date_str)
 
@@ -426,7 +427,7 @@ def update_and_notify(file, update_kw):
             raise NoteException("conflict", "当前笔记正在被其他设备编辑")
 
     # 先记录变更历史
-    NOTE_DAO.add_history(file.id, update_kw.get("version"), update_kw)
+    NoteDao.add_history(file.id, update_kw.get("version"), update_kw)
 
     # 执行变更
     rowcount = NOTE_DAO.update(file.id, **update_kw)
@@ -489,8 +490,14 @@ class UpdateHandler:
 
     @xauth.login_required()
     def POST(self):
+        try:
+            return self.do_post()
+        except NoteException as e:
+            return dict(code = "fail", message = e.message)
+    
+    def do_post(self):
         is_public = xutils.get_argument("public", "")
-        id        = xutils.get_argument("id")
+        id        = xutils.get_argument("id", "")
         content   = xutils.get_argument("content", "")
         version   = xutils.get_argument("version", 0, type=int)
         file_type = xutils.get_argument("type")
@@ -500,28 +507,35 @@ class UpdateHandler:
 
         file = None
 
-        try:
+        assert isinstance(id, str)
+        assert isinstance(version, int)
+        assert isinstance(content, str)
+
+        with dbutil.get_write_lock(id):
             file = check_get_note(id)
+            if version != file.version:
+                raise NoteException("fail", "笔记已经被修改，请刷新后重试")
 
             # 理论上一个人是不能改另一个用户的存档，但是可以拷贝成自己的
             # 所以权限只能是创建者而不是修改者
-            update_kw = dict(content=content, 
-                    type = file_type, 
-                    size = len(content),
-                    version = version,
-                    edit_token = edit_token)
+            file_new = Storage(**file)
+            file_new.content = content
+            file_new.type = file_type
+            file_new.size = len(content)
+            file_new.version = version + 1
+            file_new.edit_token = edit_token
+            file_new.mtime = dateutil.format_datetime()
 
             if name != "" and name != None:
-                update_kw["name"] = name
+                file_new["name"] = name
             # 更新并且发出消息
-            update_and_notify(file, update_kw)
+            update_and_notify(file, file_new)
 
             if resp_type == "json":
                 return dict(code = "success")
 
             raise web.seeother(file.url)
-        except NoteException as e:
-            return dict(code = "fail", message = e.message)
+
 
 class StickHandler:
 
@@ -652,7 +666,7 @@ class AppendAjaxHandler:
         note_id = xutils.get_argument("note_id")
         content = xutils.get_argument("content")
         version = xutils.get_argument("version", 1, type = int)
-        note = NOTE_DAO.get_by_id(note_id)
+        note = NoteDao.get_by_id(note_id)
 
         if note == None:
             return dict(code = "404", message = "note not found")

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-11-19 15:16:04
 @LastEditors  : xupingmao
-@LastEditTime : 2022-12-10 15:42:45
+@LastEditTime : 2022-12-10 21:48:07
 @FilePath     : /xnote/handlers/note/dao_api.py
 @Description  : 接口定义
 """
@@ -49,6 +49,11 @@ class NoteDao:
     def update_content(note, new_content, clear_draft = True):
         # type: (dict, str, bool) -> None
         """更新笔记内容"""
+        raise NotImplementedError()
+    
+    @staticmethod
+    def add_history(note_id, version, new_note):
+        """保存笔记修改历史"""
         raise NotImplementedError()
     
     @staticmethod
