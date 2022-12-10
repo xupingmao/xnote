@@ -39,15 +39,6 @@ def update_note_cache(ctx):
     type = ctx.get("type", "")
     cacheutil.prefix_del("[%s]note" % xauth.get_current_name())
 
-@xmanager.listen("note.updated")
-def record_history(ctx):
-    id      = ctx.get("id")
-    content = ctx.get("content")
-    version = ctx.get("version")
-    mtime   = ctx.get("mtime")
-    name    = ctx.get("name")
-    NOTE_DAO.add_history(id, version, ctx)
-
 def get_heading_by_type(type):
     title = u"创建" + NOTE_TYPE_DICT.get(type, u"笔记")
     return T(title)
@@ -331,6 +322,8 @@ class RenameAjaxHandler:
         name = xutils.get_argument("name")
         if name == "" or name is None:
             return dict(code="fail", message="名称为空")
+        
+        assert isinstance(id, str), "无效的ID"
 
         old = NOTE_DAO.get_by_id(id)
         if old is None:
@@ -343,11 +336,13 @@ class RenameAjaxHandler:
         if file is not None:
             return dict(code="fail", message="%r已存在" % name)
 
-        NOTE_DAO.update(id, name=name)
+        with dbutil.get_write_lock(id):
+            new_file = Storage(**old)
+            new_file.name = name
 
-        fire_update_event(old)
+            update_and_notify(old, new_file)
+
         fire_rename_event(old)
-
         return dict(code="success")
 
     def GET(self):
@@ -423,12 +418,17 @@ def check_get_note(id):
     return note
 
 def update_and_notify(file, update_kw):
+    """更新内容并且广播消息"""
     edit_token = update_kw.get("edit_token", "")
     if edit_token != None and edit_token != "":
         # 这里只加一个0秒的锁，相当于更新完之后锁就释放了
         if not NOTE_DAO.refresh_edit_lock(file.id, edit_token, time.time()):
             raise NoteException("conflict", "当前笔记正在被其他设备编辑")
 
+    # 先记录变更历史
+    NOTE_DAO.add_history(file.id, update_kw.get("version"), update_kw)
+
+    # 执行变更
     rowcount = NOTE_DAO.update(file.id, **update_kw)
     if rowcount > 0:
         NOTE_DAO.save_draft(file.id, "") # 清空草稿
@@ -441,37 +441,49 @@ class SaveAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
+        try:
+            return self.do_post()
+        except NoteException as e:
+            return dict(code = "fail", message = e.message)
+
+    
+    def do_post(self):
         content = xutils.get_argument("content", "")
         data    = xutils.get_argument("data", "")
-        id      = xutils.get_argument("id")
+        id      = xutils.get_argument("id", "")
         type    = xutils.get_argument("type")
         version = xutils.get_argument("version", 0, type=int)
         edit_token = xutils.get_argument("edit_token", "")
 
-        try:
+        assert isinstance(version, int)
+        assert isinstance(content, str)
+        assert isinstance(id, str)
+        assert isinstance(data, str)
+
+        with dbutil.get_write_lock(id):
             file = check_get_note(id)
-            kw = dict(size = len(content), 
-                mtime = xutils.format_datetime(), 
-                version = version + 1,
-                edit_token = edit_token)
+            new_file = Storage(**file)
+            new_file.size = len(content)
+            new_file.mtime = xutils.format_datetime()
+            new_file.version = version+1
+            new_file.edit_token = edit_token
 
             if type == "html":
-                kw["data"]    = data
-                kw["content"] = data
+                new_file.data    = data
+                new_file.content = data
                 if xutils.bs4 is not None:
                     soup          = xutils.bs4.BeautifulSoup(data, "html.parser")
                     content       = soup.get_text(separator=" ")
-                    kw["content"] = content
-                kw["size"] = len(content)
+                    new_file.content = content
+                new_file.size = len(content)
             else:
-                kw["content"] = content
-                kw['data']    = ''
-                kw["size"]    = len(content)
+                new_file.content = content
+                new_file.data = ''
+                new_file.size = len(content)
 
-            update_and_notify(file, kw)
+            update_and_notify(file, new_file)
             return dict(code = "success")
-        except NoteException as e:
-            return dict(code = "fail", message = e.message)
+
 
 class UpdateHandler:
 

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-02 14:00:09
+@LastEditTime : 2022-12-10 16:57:57
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 描述
 """
@@ -17,6 +17,7 @@ from xutils import dbutil
 def init():
     # 使用NoSQL风格的数据库接口
     # 数据库索引保证最终一致，不保证强一致
+    dbutil.register_table("sys_log", "系统日志")
     dbutil.register_table("dict", "词典")
 
     # 文件相关
@@ -53,6 +54,10 @@ def init():
     db.register_index("name")
     db.register_index("ctime")
     db.register_index("parent_id")
+
+    # 笔记修改历史
+    dbutil.register_table("note_history_index", "笔记历史索引", category="note")
+    dbutil.register_table("search_history", "搜索历史")
 
     # 分享关系
     db = dbutil.register_table("note_share", "笔记分享", category="note")

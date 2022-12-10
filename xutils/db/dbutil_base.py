@@ -66,7 +66,6 @@ DEFAULT_WRITE_BUFFER_SIZE = 2 * (2 << 20)  # 4M
 DEFAULT_CACHE_EXPIRE = 60 * 60  # 1小时
 
 _write_lock = threading.RLock()
-LAST_TIME_SEQ = -1
 
 # 注册的数据库表名，如果不注册，无法进行写操作
 TABLE_INFO_DICT = dict()
@@ -234,33 +233,51 @@ def get_write_lock(key=None):
     global _write_lock
     return _write_lock
 
+class TimeSeqId:
+
+    LAST_TIME_SEQ = -1
+
+    @classmethod
+    def create(cls, value):
+        """生成一个时间序列
+        @param {float|None} value 时间序列，单位是秒，可选
+        @return {string}    20位的时间序列
+        """
+        return cls.create_v0(value)
+
+    @classmethod
+    def create_v0(cls, value):
+        if value != None:
+            error_msg = "expect <class 'float'> but see %r" % type(value)
+            assert isinstance(value, float), error_msg
+
+            value = int(value * 1000)
+            ts = "%020d" % value
+        else:
+            t = int(time.time() * 1000)
+            # 加锁防止并发生成一样的值
+            # 注意这里的锁是单个进程级别的,后续可以考虑分布式锁,在时间戳后面增加机器的编号用于防止重复
+            with get_write_lock("time_seq"):
+                if t == cls.LAST_TIME_SEQ:
+                    # 等于上次生成的值，说明太快了，sleep一下进行控速
+                    # print("too fast, sleep 0.001")
+                    # 如果不sleep，下次还可能会重复
+                    time.sleep(0.001)
+                    t = int(time.time() * 1000)
+                cls.LAST_TIME_SEQ = t
+                ts = "%020d" % t
+        
+        assert len(ts) == 20
+        assert ts[0] == "0" # 其他数字用于扩展操作
+        return ts
+
 
 def timeseq(value=None):
     """生成一个时间序列
     @param {float|None} value 时间序列，单位是秒，可选
     @return {string}    20位的时间序列
     """
-    global LAST_TIME_SEQ
-
-    if value != None:
-        error_msg = "expect <class 'float'> but see %r" % type(value)
-        assert isinstance(value, float), error_msg
-
-        value = int(value * 1000)
-        return "%020d" % value
-
-    t = int(time.time() * 1000)
-    # 加锁防止并发生成一样的值
-    # 注意这里的锁是单个进程级别的
-    with get_write_lock():
-        if t == LAST_TIME_SEQ:
-            # 等于上次生成的值，说明太快了，sleep一下进行控速
-            # print("too fast, sleep 0.001")
-            # 如果不sleep，下次还可能会重复
-            time.sleep(0.001)
-            t = int(time.time() * 1000)
-        LAST_TIME_SEQ = t
-        return "%020d" % t
+    return TimeSeqId.create(value)
 
 
 def new_id(prefix):

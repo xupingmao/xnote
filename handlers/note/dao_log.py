@@ -90,7 +90,7 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
 
     note_ids = get_note_ids_from_logs(logs)
 
-    notes = NOTE_DAO.batch_query_list(note_ids)
+    notes = NoteDao.batch_query_list(note_ids)
 
     for note in notes:
         note.badge_info = dateutil.format_date(note.atime, "/")

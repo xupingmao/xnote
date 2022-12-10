@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-11-19 15:16:04
 @LastEditors  : xupingmao
-@LastEditTime : 2022-12-04 21:00:38
+@LastEditTime : 2022-12-10 15:42:45
 @FilePath     : /xnote/handlers/note/dao_api.py
 @Description  : 接口定义
 """
@@ -14,6 +14,11 @@ class NoteDao:
     @staticmethod
     def get_by_id(id, include_full=True, creator=None):
         """通过ID查询笔记信息"""
+        raise NotImplementedError()
+    
+    @staticmethod
+    def batch_query_list(id_list):
+        """通过ID列表批量查询笔记"""
         raise NotImplementedError()
 
     @staticmethod

@@ -21,9 +21,11 @@ import xauth
 import logging
 from xutils import dbutil
 from xutils import dateutil
+from xutils import Storage
 
 MAX_FILE_COUNT = 10
 dbutil.register_table("db_upgrade_log", "数据库升级日志")
+sys_log_db = dbutil.get_table("sys_log")
 
 def get_upgrade_log_table():
     return dbutil.get_hash_table("db_upgrade_log")
@@ -74,7 +76,15 @@ class UpgradeHandler:
             check_upgrade()
             return "success"
         except:
-            return xutils.print_exc()
+            err_msg = xutils.print_exc()
+            
+            err_log = Storage()
+            err_log.time = dateutil.format_datetime()
+            err_log.msg = err_msg
+            err_log.level = "ERROR"
+            err_log.biz_type = "upgrade"
+
+            sys_log_db.insert(err_log)
 
 xutils.register_func("upgrade.is_upgrade_done", is_upgrade_done)
 xutils.register_func("upgrade.mark_upgrade_done", mark_upgrade_done)

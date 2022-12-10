@@ -47,8 +47,6 @@ register_note_table("notebook", "笔记分组", check_user=True, user_attr="crea
 register_note_table("token", "用于分享的令牌")
 register_note_table("note_history", "笔记的历史版本")
 
-dbutil.register_table("search_history", "搜索历史")
-
 # 公开分享的笔记索引
 register_note_table("note_public", "公共笔记索引")
 dbutil.register_table_index("note_public", "hot_index")
@@ -62,6 +60,9 @@ _stat_db = dbutil.get_table("user_stat")
 _index_db = dbutil.get_table("note_index")
 _book_db = dbutil.get_table("notebook")
 _search_history_db = dbutil.get_hash_table("search_history")
+
+_note_history_db = dbutil.get_hash_table("note_history")
+_note_history_index_db = dbutil.get_hash_table("note_history_index")
 
 DB_PATH = xconfig.DB_PATH
 MAX_STICKY_SIZE = 1000
@@ -740,10 +741,7 @@ def update_note(note_id, **kw):
     # 这里只更新基本字段，移动笔记使用 move_note
     logging.info("update_note, note_id=%s, kw=%s", note_id, kw)
 
-    if "parent_id" in kw:
-        raise Exception(
-            "[note.dao.update_note] can not update `parent_id`, please use `note.dao.move_note`")
-
+    parent_id = kw.get("parent_id")
     content = kw.get('content')
     data = kw.get('data')
     priority = kw.get('priority')
@@ -760,6 +758,10 @@ def update_note(note_id, **kw):
     note = get_by_id(note_id)
     if note is None:
         raise Exception("笔记不存在,id=%s" % note_id)
+    
+    if parent_id != None and parent_id != note.parent_id:
+        raise Exception(
+            "[note.dao.update_note] can not update `parent_id`, please use `note.dao.move_note`")
 
     if content:
         note.content = content
@@ -1227,19 +1229,35 @@ def find_next_note(note, user_name):
         return None
 
 
-def add_history(id, version, note):
+def add_history_index(id, version, new_note):
+    brief = Storage()
+    brief.note_id = id
+    brief.name = new_note.get("name")
+    brief.version = version
+    brief.mtime = new_note.get("mtime")
+
+    version_str = str(version)
+    _note_history_index_db.with_user(id).put(version_str, brief)
+
+def add_history(id, version, new_note):
+    """version是新的版本"""
     if version is None:
         return
-    note['note_id'] = id
-    dbutil.put("note_history:%s:%s" % (id, version), note)
+    
+    # 先记录索引
+    add_history_index(id, version, new_note)
 
+    version_str = str(version)
+    note_copy = dict(**new_note)
+    note_copy['note_id'] = id
+    _note_history_db.with_user(id).put(version_str, note_copy)
 
 def list_history(note_id):
-    history_list = dbutil.prefix_list("note_history:%s:" % note_id)
+    result_list = _note_history_index_db.with_user(note_id).list()
+    history_list = [y for x,y in result_list]
     history_list = sorted(
         history_list, key=lambda x: x.mtime or "", reverse=True)
     return history_list
-
 
 def delete_history(note_id, version=None):
     pass
@@ -1643,3 +1661,4 @@ xutils.register_func("note.refresh_note_stat_async", refresh_note_stat_async)
 
 NoteDao.get_by_id = get_by_id
 NoteDao.get_root = get_root
+NoteDao.batch_query_list = batch_query_list
