@@ -429,9 +429,9 @@ class HistoryViewHandler:
         note = NOTE_DAO.get_by_id_creator(note_id, creator)
         content = ""
         if note != None:
-            note = xutils.call("note.get_history", note_id, version)
-            if note != None:
-                content = note.content
+            history = xutils.call("note.get_history", note_id, version)
+            if history != None:
+                content = history.content
         return dict(code = "success", data = content)
 
 

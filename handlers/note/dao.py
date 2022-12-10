@@ -1239,20 +1239,20 @@ def add_history_index(id, version, new_note):
     version_str = str(version)
     _note_history_index_db.with_user(id).put(version_str, brief)
 
-def add_history(id, version, new_note):
+def add_history(note_id, version, new_note):
     """version是新的版本"""
-    if version is None:
-        return
-    
+    assert version != None
+
     # 先记录索引
-    add_history_index(id, version, new_note)
+    add_history_index(note_id, version, new_note)
 
     version_str = str(version)
     note_copy = dict(**new_note)
-    note_copy['note_id'] = id
-    _note_history_db.with_user(id).put(version_str, note_copy)
+    note_copy['note_id'] = note_id
+    _note_history_db.with_user(note_id).put(version_str, note_copy)
 
 def list_history(note_id):
+    """获取笔记历史的列表"""
     result_list = _note_history_index_db.with_user(note_id).list()
     history_list = [y for x,y in result_list]
     history_list = sorted(
@@ -1264,8 +1264,10 @@ def delete_history(note_id, version=None):
 
 
 def get_history(note_id, version):
-    # note = table.select_first(where = dict(note_id = note_id, version = version))
-    return dbutil.get("note_history:%s:%s" % (note_id, version))
+    """获取笔记历史的详情"""
+    note_id = str(note_id)
+    version_str = str(version)
+    return _note_history_db.with_user(note_id).get(version_str)
 
 
 def search_name(words, creator=None, parent_id=None, orderby="hot_index"):

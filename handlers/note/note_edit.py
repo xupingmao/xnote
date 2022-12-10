@@ -67,7 +67,7 @@ def fire_rename_event(note):
 def create_log_func(note, ctx):
     method   = ctx.method
     date_str = ctx.date
-    
+
     if method != "POST":
         # GET请求直接返回
         return
@@ -326,7 +326,7 @@ class RenameAjaxHandler:
         
         assert isinstance(id, str), "无效的ID"
 
-        old = NOTE_DAO.get_by_id(id)
+        old = NoteDao.get_by_id(id)
         if old is None:
             return dict(code="fail", message="笔记不存在")
 
@@ -340,6 +340,7 @@ class RenameAjaxHandler:
         with dbutil.get_write_lock(id):
             new_file = Storage(**old)
             new_file.name = name
+            new_file.mtime = dateutil.format_datetime()
 
             update_and_notify(old, new_file)
 
@@ -408,7 +409,7 @@ def check_get_note(id):
     if id == "" or id == 0:
         raise NoteException("400", "笔记ID为空")
 
-    note = NOTE_DAO.get_by_id(id)
+    note = NoteDao.get_by_id(id)
 
     if note is None:
         raise NoteException("404", "笔记不存在")

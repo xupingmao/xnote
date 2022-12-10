@@ -15,9 +15,6 @@ from xutils import logutil
 
 from .dao import sort_notes, batch_query_list
 
-def register_note_table(name, description, check_user = False):
-    dbutil.register_table(name, description, "note", check_user = check_user)
-
 def get_share_db():
     return dbutil.get_table("note_share")
 

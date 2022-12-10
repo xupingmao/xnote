@@ -4,12 +4,14 @@
 @email        : 578749341@qq.com
 @Date         : 2022-11-19 15:16:04
 @LastEditors  : xupingmao
-@LastEditTime : 2022-12-10 21:48:07
+@LastEditTime : 2022-12-10 22:01:17
 @FilePath     : /xnote/handlers/note/dao_api.py
-@Description  : 接口定义
+@Description  : DAO接口定义
 """
 
 class NoteDao:
+
+    """笔记的DAO接口"""
 
     @staticmethod
     def get_by_id(id, include_full=True, creator=None):

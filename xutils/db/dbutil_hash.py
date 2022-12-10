@@ -21,6 +21,7 @@ class LdbHashTable:
         table_info = get_table_info(table_name) # type: TableInfo
         self.table_name = table_name
         self.key_name = key_name
+        self.user_name = user_name
 
         self.prefix = table_name
         if user_name != None and user_name != "":
@@ -36,6 +37,8 @@ class LdbHashTable:
     def with_user(self, user_name):
         assert user_name != ""
         assert user_name != None
+        assert self.user_name == None
+
         return LdbHashTable(self.table_name, user_name = user_name)
 
     def _check_key(self, key):

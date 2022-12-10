@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-02 14:58:41
+@LastEditTime : 2022-12-10 23:28:34
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -15,6 +15,7 @@ import logging
 import threading
 import time
 import mysql.connector
+from collections import deque
 
 from xutils.base import Storage
 
@@ -34,13 +35,14 @@ class SqlLoggerInterface:
 
 
 class ConnectionWrapper:
-    # 保持1小时
-    TTL = 3600
 
-    def __init__(self, db):
+    TTL = 60 # 60秒有效期
+
+    def __init__(self, db, pool):
         self.start_time = time.time()
         self.db = db  # type: mysql.connector.MySQLConnection
         self.is_closed = False
+        self.pool = pool
 
     def __enter__(self):
         return self.db
@@ -51,16 +53,23 @@ class ConnectionWrapper:
     def commit(self):
         return self.db.commit()
     
+    def is_expired(self):
+        return time.time() - self.start_time > self.TTL
+    
     def is_valid(self):
-        return self.is_closed == False and time.time() - self.start_time < self.TTL
+        return self.is_closed == False and not self.is_expired()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        # self.db.close()
-        pass
-    
-    def __del__(self):
+        self.pool.append(self)
+
+    def close(self):
+        if self.is_closed:
+            return
         self.is_closed = True
         self.db.close()
+    
+    def __del__(self):
+        self.close()        
 
 
 class MySQLKV:
@@ -69,7 +78,8 @@ class MySQLKV:
     lock = threading.RLock()
 
     def __init__(self, *, host=None, port=3306, user=None,
-                 password=None, database=None, pool_size=0, sql_logger=None):
+                 password=None, database=None, pool_size=5, sql_logger=None):
+        assert pool_size > 0
         self.db_host = host
         self.db_user = user
         self.db_port = port
@@ -83,15 +93,47 @@ class MySQLKV:
         self.log_put_profile = True
         self.sql_logger = sql_logger  # type: SqlLoggerInterface
         self.scan_limit = 200  # 扫描的分页大小
+        self.pool = deque()
+        self.pool_size = 0
+        self.debug_pool = True
+
         self.init()
         RdbSortedSet.init_class(db_instance=self)
 
     def get_connection(self):
         # 如果不缓存起来, 每次connect和close都会产生网络请求
-        db = self.holder.db
-        if db != None and db.is_valid():
-            return db
+        wait_con = True
+        while wait_con:
+            with self.lock:
+                if len(self.pool)>0:
+                    db = self.pool.popleft()
+                    if db.is_valid():
+                        if self.debug_pool:
+                            logging.debug("复用连接:%s", db.db)
+                        return db
+                    else:
+                        self.pool_size-=1
+                        if self.debug_pool:
+                            logging.debug("释放连接:%s", db.db)
+                        del db
+                
+                if self.pool_size >= self.db_pool_size:
+                    if self.debug_pool:
+                        logging.debug("连接已满，等待中...")
+                    # 线程池满
+                    time.sleep(0.001)
+                    continue
 
+                con = self.do_get_connection()
+                db = ConnectionWrapper(con, self.pool)
+
+                if self.debug_pool:
+                    logging.debug("创建新连接:%s", db.db)
+
+                self.pool_size += 1
+                return db
+
+    def do_get_connection(self):
         kw = Storage()
         kw.port = self.db_port
         kw.user = self.db_user
@@ -100,11 +142,7 @@ class MySQLKV:
         if self.db_pool_size > 0:
             # 使用MySQL连接池
             kw.pool_size = self.db_pool_size
-
-        con = mysql.connector.connect(host=self.db_host, **kw)
-        # return self.holder.db
-        self.holder.db = ConnectionWrapper(con)
-        return self.holder.db
+        return mysql.connector.connect(host=self.db_host, **kw)
 
     def close_cursor(self, cursor):
         cursor.close()
